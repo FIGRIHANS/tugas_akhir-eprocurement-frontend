@@ -1,12 +1,12 @@
-import { Instance as PopperInstance, createPopper, Placement, VirtualElement } from '@popperjs/core';
+import type { Instance as PopperInstance, createPopper, Placement, VirtualElement } from '@popperjs/core';
 import KTDom from '../../helpers/dom';
 import KTUtils from '../../helpers/utils';
 import KTData from '../../helpers/data';
 import KTEventHandler from '../../helpers/event-handler';
 import KTComponent from '../component';
-import { KTMenuConfigInterface, KTMenuInterface } from './types';
-import { KTMenuItemToggleType, KTMenuItemTriggerType } from './types';
-import { KTOptionType } from '../../types';
+import type { KTMenuConfigInterface, KTMenuInterface } from './types';
+import type { KTMenuItemToggleType, KTMenuItemTriggerType } from './types';
+import type { KTOptionType } from '../../types';
 import { KT_ACCESSIBILITY_KEYS } from '../constants';
 import { KTDropdown } from '../dropdown';
 declare global {
@@ -557,16 +557,16 @@ export class KTMenu extends KTComponent implements KTMenuInterface {
 		let placement = this._getOption('dropdownPlacement') as Placement;
 		if (this._getItemOption(itemElement, 'placement')) {
 			placement = this._getItemOption(itemElement, 'placement') as Placement;
-		}		
+		}
 		if (isRtl && this._getItemOption(itemElement, 'placementRtl')) {
 			placement = this._getItemOption(itemElement, 'placementRtl') as Placement;
-		} 
+		}
 
 		// Offset
 		let offsetValue = this._getOption('dropdownOffset');
 		if (this._getItemOption(itemElement, 'offset')) {
 			offsetValue = this._getItemOption(itemElement, 'offset') as Placement;
-		}		
+		}
 		if (isRtl && this._getItemOption(itemElement, 'offsetRtl')) {
 			offsetValue = this._getItemOption(itemElement, 'offsetRtl') as Placement;
 		}

@@ -1,492 +1,520 @@
-import { Instance as PopperInstance, createPopper, Placement, VirtualElement } from '@popperjs/core';
-import KTDom from '../../helpers/dom';
-import KTData from '../../helpers/data';
-import KTEventHandler from '../../helpers/event-handler';
-import KTComponent from '../component';
-import { KTDropdownConfigInterface, KTDropdownInterface } from './types';
-import { KTMenu } from '../menu';
+import type {
+  Instance as PopperInstance,
+  createPopper,
+  Placement,
+  VirtualElement,
+} from '@popperjs/core'
+import KTDom from '../../helpers/dom'
+import KTData from '../../helpers/data'
+import KTEventHandler from '../../helpers/event-handler'
+import KTComponent from '../component'
+import type { KTDropdownConfigInterface, KTDropdownInterface } from './types'
+import { KTMenu } from '../menu'
 
 declare global {
-	interface Window {
-		KT_DROPDOWN_INITIALIZED: boolean;
-	}
+  interface Window {
+    KT_DROPDOWN_INITIALIZED: boolean
+  }
 }
 
 export class KTDropdown extends KTComponent implements KTDropdownInterface {
-	protected override _name: string = 'dropdown';
-	protected override _defaultConfig: KTDropdownConfigInterface = {
-		zindex: 105,
-		hoverTimeout: 200,
-		placement: 'bottom-start',
-		placementRtl: 'bottom-end',
-		permanent: false,
-		dismiss: false,
-		trigger: 'click',
-		attach: '',
-		offset: '0px, 5px',
-		offsetRtl: '0px, 5px',
-		hiddenClass: 'hidden'
-	};
-	protected override _config: KTDropdownConfigInterface = this._defaultConfig;
-	protected _disabled: boolean = false;
-	protected _toggleElement: HTMLElement;
-	protected _contentElement: HTMLElement;
-	protected _isTransitioning: boolean = false;
-	protected _isOpen: boolean = false;
+  protected override _name: string = 'dropdown'
+  protected override _defaultConfig: KTDropdownConfigInterface = {
+    zindex: 105,
+    hoverTimeout: 200,
+    placement: 'bottom-start',
+    placementRtl: 'bottom-end',
+    permanent: false,
+    dismiss: false,
+    trigger: 'click',
+    attach: '',
+    offset: '0px, 5px',
+    offsetRtl: '0px, 5px',
+    hiddenClass: 'hidden',
+  }
+  protected override _config: KTDropdownConfigInterface = this._defaultConfig
+  protected _disabled: boolean = false
+  protected _toggleElement: HTMLElement
+  protected _contentElement: HTMLElement
+  protected _isTransitioning: boolean = false
+  protected _isOpen: boolean = false
 
-	constructor(element: HTMLElement, config?: KTDropdownConfigInterface) {
-		super();
+  constructor(element: HTMLElement, config?: KTDropdownConfigInterface) {
+    super()
 
-		if (KTData.has(element as HTMLElement, this._name)) return;
+    if (KTData.has(element as HTMLElement, this._name)) return
 
-		this._init(element);
-		this._buildConfig(config);
+    this._init(element)
+    this._buildConfig(config)
 
-		this._toggleElement = this._element.querySelector('.dropdown-toggle, [data-dropdown-toggle]');
-		if (!this._toggleElement) return;
-		this._contentElement = this._element.querySelector('.dropdown-content, [data-dropdown-content]');
-		if (!this._contentElement) return;
+    this._toggleElement = this._element.querySelector('.dropdown-toggle, [data-dropdown-toggle]')
+    if (!this._toggleElement) return
+    this._contentElement = this._element.querySelector('.dropdown-content, [data-dropdown-content]')
+    if (!this._contentElement) return
 
-		KTData.set(this._contentElement, 'dropdownElement', this._element);
-	}
+    KTData.set(this._contentElement, 'dropdownElement', this._element)
+  }
 
-	protected _click(event: Event): void {
-		event.preventDefault();
-		event.stopPropagation();
+  protected _click(event: Event): void {
+    event.preventDefault()
+    event.stopPropagation()
 
-		if (this._disabled === true) {
-			return;
-		}
-
-		if (this._getOption('trigger') !== 'click') {
-			return;
-		}
-
-		this._toggle();
-	}
-
-	protected _mouseover(): void {
-		if (this._disabled === true) {
-			return;
-		}
-
-		if (this._getOption('trigger') !== 'hover') {
-			return;
-		}
-
-		if (KTData.get(this._element, 'hover') === '1') {
-			clearTimeout(KTData.get(this._element, 'timeout') as number);
-			KTData.remove(this._element, 'hover');
-			KTData.remove(this._element, 'timeout');
-		}
-
-		this._show();
-	}
-
-	protected _mouseout(): void {
-		if (this._disabled === true) {
-			return;
-		}
-
-		if (this._getOption('trigger') !== 'hover') {
-			return;
-		}
-
-		const timeout = setTimeout(() => {
-			if (KTData.get(this._element, 'hover') === '1') {
-				this._hide();
-			}
-		}, parseInt(this._getOption('hoverTimeout') as string));
-
-		KTData.set(this._element, 'hover', '1');
-		KTData.set(this._element, 'timeout', timeout);
-	}
-
-	protected _toggle(): void {
-		if (this._isOpen) {
-			this._hide();
-		} else {
-			this._show();
-		}
-	}
-
-	protected _show(): void {
-		if (this._isOpen || this._isTransitioning) {
-      return;
+    if (this._disabled === true) {
+      return
     }
 
-		const payload = { cancel: false };
-		this._fireEvent('show', payload);
-		this._dispatchEvent('show', payload);
-		if (payload.cancel === true) {
-			return;
-		}
-
-		// Hide all currently shown dropdowns except current one
-		KTDropdown.hide();
-		KTMenu.hide(this._element);
-
-		let zIndex: number = parseInt(this._getOption('zindex') as string);
-		const parentZindex: number = KTDom.getHighestZindex(this._element);
-
-		if (parentZindex !== null && parentZindex >= zIndex) {
-			zIndex = parentZindex + 1;
-		}
-		if (zIndex > 0) {
-			this._contentElement.style.zIndex = zIndex.toString();
-		}
-
-		this._contentElement.style.display = 'block';
-		this._contentElement.style.opacity = '0';
-		KTDom.reflow(this._contentElement);
-		this._contentElement.style.opacity = '1';
-
-		this._contentElement.classList.remove(this._getOption('hiddenClass') as string);
-		this._toggleElement.classList.add('active');
-		this._contentElement.classList.add('open');
-		this._element.classList.add('open');
-
-		this._initPopper();
-
-		KTDom.transitionEnd(this._contentElement, () => {
-      this._isTransitioning = false;
-      this._isOpen = true;
-
-      this._fireEvent('shown');
-      this._dispatchEvent('shown');
-    });
-	}
-
-	protected _hide(): void {
-		if (this._isOpen === false || this._isTransitioning) {
-      return;
+    if (this._getOption('trigger') !== 'click') {
+      return
     }
 
-		const payload = { cancel: false };
-		this._fireEvent('hide', payload);
-		this._dispatchEvent('hide', payload);
-		if (payload.cancel === true) {
-			return;
-		}
+    this._toggle()
+  }
 
-		this._contentElement.style.opacity = '1';
-		KTDom.reflow(this._contentElement);
-		this._contentElement.style.opacity = '0';
-		this._contentElement.classList.remove('open');
-		this._toggleElement.classList.remove('active');
-		this._element.classList.remove('open');
+  protected _mouseover(): void {
+    if (this._disabled === true) {
+      return
+    }
 
-		KTDom.transitionEnd(this._contentElement, () => {
-      this._isTransitioning = false;
-      this._isOpen = false;
+    if (this._getOption('trigger') !== 'hover') {
+      return
+    }
 
-			this._contentElement.classList.add(this._getOption('hiddenClass') as string);
-			this._contentElement.style.display = '';
-			this._contentElement.style.zIndex = '';
+    if (KTData.get(this._element, 'hover') === '1') {
+      clearTimeout(KTData.get(this._element, 'timeout') as number)
+      KTData.remove(this._element, 'hover')
+      KTData.remove(this._element, 'timeout')
+    }
 
-			// Destroy popper(new)
-			this._destroyPopper();
+    this._show()
+  }
 
-			// Handle dropdown hidden event
-      this._fireEvent('hidden');
-      this._dispatchEvent('hidden');
-    });
-	}
+  protected _mouseout(): void {
+    if (this._disabled === true) {
+      return
+    }
 
-	protected _initPopper(): void {
-		const isRtl = KTDom.isRTL();
-		// Setup popper instance
-		let reference: HTMLElement;
-		const attach = this._getOption('attach') as string;
+    if (this._getOption('trigger') !== 'hover') {
+      return
+    }
 
-		if (attach) {
-			if (attach === 'parent') {
-				reference = this._toggleElement.parentNode as HTMLElement;
-			} else {
-				reference = document.querySelector(attach) as HTMLElement;
-			}
-		} else {
-			reference = this._toggleElement;
-		}
+    const timeout = setTimeout(
+      () => {
+        if (KTData.get(this._element, 'hover') === '1') {
+          this._hide()
+        }
+      },
+      parseInt(this._getOption('hoverTimeout') as string),
+    )
 
-		if (reference) {
-			const popper = createPopper(reference as Element | VirtualElement, this._contentElement, this._getPopperConfig());
-			KTData.set(this._element, 'popper', popper);
-		}
-	}
+    KTData.set(this._element, 'hover', '1')
+    KTData.set(this._element, 'timeout', timeout)
+  }
 
-	protected _destroyPopper(): void {
-		if (KTData.has(this._element, 'popper')) {
-			(KTData.get(this._element, 'popper') as PopperInstance).destroy();
-			KTData.remove(this._element, 'popper');
-		}
-	}
+  protected _toggle(): void {
+    if (this._isOpen) {
+      this._hide()
+    } else {
+      this._show()
+    }
+  }
 
-	protected __isOpen(): boolean {
-		return this._element.classList.contains('open') && this._contentElement.classList.contains('open');
-	}
+  protected _show(): void {
+    if (this._isOpen || this._isTransitioning) {
+      return
+    }
 
-	protected _getPopperConfig(): object {
-		const isRtl = KTDom.isRTL();
+    const payload = { cancel: false }
+    this._fireEvent('show', payload)
+    this._dispatchEvent('show', payload)
+    if (payload.cancel === true) {
+      return
+    }
 
-		// Placement
-		let placement = this._getOption('placement') as Placement;
-		if (isRtl && this._getOption('placementRtl')) {
-			placement = this._getOption('placementRtl') as Placement;
-		} 
+    // Hide all currently shown dropdowns except current one
+    KTDropdown.hide()
+    KTMenu.hide(this._element)
 
-		// Offset
-		let offsetValue = this._getOption('offset');
-		if (isRtl && this._getOption('offsetRtl')) {
-			offsetValue = this._getOption('offsetRtl') as Placement;
-		}
-		const offset = offsetValue ? offsetValue.toString().split(',').map(value => parseInt(value.trim(), 10)) : [0, 0];
+    let zIndex: number = parseInt(this._getOption('zindex') as string)
+    const parentZindex: number = KTDom.getHighestZindex(this._element)
 
-		// Strategy
-		const strategy = this._getOption('overflow') === true ? 'absolute' : 'fixed';
-		const altAxis = this._getOption('flip') !== false ? true : false;
-		const popperConfig = {
-			placement: placement,
-			strategy: strategy,
-			modifiers: [
-				{
-					name: 'offset',
-					options: {
-						offset: offset
-					}
-				},
-				{
-					name: 'preventOverflow',
-					options: {
-						altAxis: altAxis
-					}
-				},
-				{
-					name: 'flip',
-					options: {
-						flipVariations: false
-					}
-				}
-			]
-		};
+    if (parentZindex !== null && parentZindex >= zIndex) {
+      zIndex = parentZindex + 1
+    }
+    if (zIndex > 0) {
+      this._contentElement.style.zIndex = zIndex.toString()
+    }
 
-		return popperConfig;
-	}
+    this._contentElement.style.display = 'block'
+    this._contentElement.style.opacity = '0'
+    KTDom.reflow(this._contentElement)
+    this._contentElement.style.opacity = '1'
 
-	protected _getToggleElement(): HTMLElement {
-		return this._toggleElement;
-	}
+    this._contentElement.classList.remove(this._getOption('hiddenClass') as string)
+    this._toggleElement.classList.add('active')
+    this._contentElement.classList.add('open')
+    this._element.classList.add('open')
 
-	protected _getContentElement(): HTMLElement {
-		return this._contentElement;
-	}
+    this._initPopper()
 
-	// General Methods
-	public click(event: Event): void {
-		this._click(event);
-	}
+    KTDom.transitionEnd(this._contentElement, () => {
+      this._isTransitioning = false
+      this._isOpen = true
 
-	public mouseover(): void {
-		this._mouseover();
-	}
+      this._fireEvent('shown')
+      this._dispatchEvent('shown')
+    })
+  }
 
-	public mouseout(): void {
-		this._mouseout();
-	}
+  protected _hide(): void {
+    if (this._isOpen === false || this._isTransitioning) {
+      return
+    }
 
-	public show(): void {
-		return this._show();
-	}
+    const payload = { cancel: false }
+    this._fireEvent('hide', payload)
+    this._dispatchEvent('hide', payload)
+    if (payload.cancel === true) {
+      return
+    }
 
-	public hide(): void {
-		this._hide();
-	}
+    this._contentElement.style.opacity = '1'
+    KTDom.reflow(this._contentElement)
+    this._contentElement.style.opacity = '0'
+    this._contentElement.classList.remove('open')
+    this._toggleElement.classList.remove('active')
+    this._element.classList.remove('open')
 
-	public toggle(): void {
-		this._toggle();
-	}
+    KTDom.transitionEnd(this._contentElement, () => {
+      this._isTransitioning = false
+      this._isOpen = false
 
-	public getToggleElement(): HTMLElement {
-		return this._toggleElement;
-	}
+      this._contentElement.classList.add(this._getOption('hiddenClass') as string)
+      this._contentElement.style.display = ''
+      this._contentElement.style.zIndex = ''
 
-	public getContentElement(): HTMLElement {
-		return this._contentElement;
-	}
+      // Destroy popper(new)
+      this._destroyPopper()
 
-	public isPermanent(): boolean {
-		return this._getOption('permanent') as boolean;
-	}
+      // Handle dropdown hidden event
+      this._fireEvent('hidden')
+      this._dispatchEvent('hidden')
+    })
+  }
 
-	public disable(): void {
-		this._disabled = true;
-	}
+  protected _initPopper(): void {
+    const isRtl = KTDom.isRTL()
+    // Setup popper instance
+    let reference: HTMLElement
+    const attach = this._getOption('attach') as string
 
-	public enable(): void {
-		this._disabled = false;
-	}
+    if (attach) {
+      if (attach === 'parent') {
+        reference = this._toggleElement.parentNode as HTMLElement
+      } else {
+        reference = document.querySelector(attach) as HTMLElement
+      }
+    } else {
+      reference = this._toggleElement
+    }
 
-	public isOpen(): boolean {
-		return this._isOpen;
-	}
+    if (reference) {
+      const popper = createPopper(
+        reference as Element | VirtualElement,
+        this._contentElement,
+        this._getPopperConfig(),
+      )
+      KTData.set(this._element, 'popper', popper)
+    }
+  }
 
-	// Statics methods
-	public static getElement(reference: HTMLElement): HTMLElement {
-		if (reference.hasAttribute('data-dropdown')) return reference;
+  protected _destroyPopper(): void {
+    if (KTData.has(this._element, 'popper')) {
+      ;(KTData.get(this._element, 'popper') as PopperInstance).destroy()
+      KTData.remove(this._element, 'popper')
+    }
+  }
 
-		const findElement = reference.closest('[data-dropdown]') as HTMLElement;
-		if (findElement) return findElement;
+  protected __isOpen(): boolean {
+    return (
+      this._element.classList.contains('open') && this._contentElement.classList.contains('open')
+    )
+  }
 
-		if ((reference.classList.contains('dropdown-content') || reference.hasAttribute("data-dropdown-content")) && KTData.has(reference, 'dropdownElement')) {
-			return KTData.get(reference, 'dropdownElement') as HTMLElement;
-		}
+  protected _getPopperConfig(): object {
+    const isRtl = KTDom.isRTL()
 
-		return null;
-	}
+    // Placement
+    let placement = this._getOption('placement') as Placement
+    if (isRtl && this._getOption('placementRtl')) {
+      placement = this._getOption('placementRtl') as Placement
+    }
 
-	public static getInstance(element: HTMLElement): KTDropdown {
-		element = this.getElement(element);
+    // Offset
+    let offsetValue = this._getOption('offset')
+    if (isRtl && this._getOption('offsetRtl')) {
+      offsetValue = this._getOption('offsetRtl') as Placement
+    }
+    const offset = offsetValue
+      ? offsetValue
+          .toString()
+          .split(',')
+          .map((value) => parseInt(value.trim(), 10))
+      : [0, 0]
 
-		if (!element) return null;
+    // Strategy
+    const strategy = this._getOption('overflow') === true ? 'absolute' : 'fixed'
+    const altAxis = this._getOption('flip') !== false ? true : false
+    const popperConfig = {
+      placement: placement,
+      strategy: strategy,
+      modifiers: [
+        {
+          name: 'offset',
+          options: {
+            offset: offset,
+          },
+        },
+        {
+          name: 'preventOverflow',
+          options: {
+            altAxis: altAxis,
+          },
+        },
+        {
+          name: 'flip',
+          options: {
+            flipVariations: false,
+          },
+        },
+      ],
+    }
 
-		if (KTData.has(element, 'dropdown')) {
-			return KTData.get(element, 'dropdown') as KTDropdown;
-		}
+    return popperConfig
+  }
 
-		if (element.getAttribute('data-dropdown') === "true") {
-			return new KTDropdown(element);
-		}
+  protected _getToggleElement(): HTMLElement {
+    return this._toggleElement
+  }
 
-		return null;
-	}
+  protected _getContentElement(): HTMLElement {
+    return this._contentElement
+  }
 
-	public static getOrCreateInstance(element: HTMLElement, config?: KTDropdownConfigInterface): KTDropdown {
-		return this.getInstance(element) || new KTDropdown(element, config);
-	}
+  // General Methods
+  public click(event: Event): void {
+    this._click(event)
+  }
 
-	public static update(): void {
-		document.querySelectorAll('.open[data-dropdown]').forEach((item) => {
-			if (KTData.has(item as HTMLElement, 'popper')) {
-				(KTData.get(item as HTMLElement, 'popper') as PopperInstance).forceUpdate();
-			}
-		});
-	}
+  public mouseover(): void {
+    this._mouseover()
+  }
 
-	public static hide(skipElement?: HTMLElement): void {
-		document.querySelectorAll('.open[data-dropdown]').forEach((item) => {
-			if (skipElement && (skipElement === item || item.contains(skipElement))) return;
+  public mouseout(): void {
+    this._mouseout()
+  }
 
-			const dropdown = KTDropdown.getInstance(item as HTMLElement);
-			if (dropdown) dropdown.hide();
-		});
-	}
+  public show(): void {
+    return this._show()
+  }
 
-	public static handleClickAway() {
-		document.addEventListener('click', (event: Event) => {
-			document.querySelectorAll('.open[data-dropdown]').forEach((element) => {
-				const dropdown = KTDropdown.getInstance(element as HTMLElement);
+  public hide(): void {
+    this._hide()
+  }
 
-				if (dropdown && dropdown.isPermanent() === false) {
-					const contentElement = dropdown.getContentElement();
+  public toggle(): void {
+    this._toggle()
+  }
 
-					if (element === event.target || element.contains(event.target as HTMLElement)) {
-						return;
-					}
+  public getToggleElement(): HTMLElement {
+    return this._toggleElement
+  }
 
-					if (contentElement && (contentElement === event.target || contentElement.contains(event.target as HTMLElement))) {
-						return;
-					}
+  public getContentElement(): HTMLElement {
+    return this._contentElement
+  }
 
-					dropdown.hide();
-				}
-			});
-		});
-	}
+  public isPermanent(): boolean {
+    return this._getOption('permanent') as boolean
+  }
 
-	public static handleKeyboard() {
+  public disable(): void {
+    this._disabled = true
+  }
 
-	}
+  public enable(): void {
+    this._disabled = false
+  }
 
-	public static handleMouseover() {
-		KTEventHandler.on(
-			document.body,
-			'.dropdown-toggle, [data-dropdown-toggle]',
-			'mouseover',
-			(event: Event, target: HTMLElement) => {
-				const dropdown = KTDropdown.getInstance(target);
+  public isOpen(): boolean {
+    return this._isOpen
+  }
 
-				if (dropdown !== null && dropdown.getOption('trigger') === 'hover') {
-					return dropdown.mouseover();
-				}
-			}
-		);
-	}
+  // Statics methods
+  public static getElement(reference: HTMLElement): HTMLElement {
+    if (reference.hasAttribute('data-dropdown')) return reference
 
-	public static handleMouseout() {
-		KTEventHandler.on(
-			document.body,
-			'.dropdown-toggle, [data-dropdown-toggle]',
-			'mouseout',
-			(event: Event, target: HTMLElement) => {
-				const dropdown = KTDropdown.getInstance(target);
+    const findElement = reference.closest('[data-dropdown]') as HTMLElement
+    if (findElement) return findElement
 
-				if (dropdown !== null && dropdown.getOption('trigger') === 'hover') {
-					return dropdown.mouseout();
-				}
-			}
-		);
-	}
+    if (
+      (reference.classList.contains('dropdown-content') ||
+        reference.hasAttribute('data-dropdown-content')) &&
+      KTData.has(reference, 'dropdownElement')
+    ) {
+      return KTData.get(reference, 'dropdownElement') as HTMLElement
+    }
 
-	public static handleClick() {
-		KTEventHandler.on(
-			document.body,
-			'.dropdown-toggle, [data-dropdown-toggle]',
-			'click',
-			(event: Event, target: HTMLElement) => {
-				const dropdown = KTDropdown.getInstance(target);
-				if (dropdown) {
-					return dropdown.click(event);
-				}
-			}
-		);
-	}
+    return null
+  }
 
-	public static handleDismiss() {
-		KTEventHandler.on(
-			document.body,
-			'[data-dropdown-dismiss]',
-			'click',
-			(event: Event, target: HTMLElement) => {
-				const dropdown = KTDropdown.getInstance(target);
-				if (dropdown) {
-					return dropdown.hide();
-				}
-			}
-		);
-	}
+  public static getInstance(element: HTMLElement): KTDropdown {
+    element = this.getElement(element)
 
-	public static initHandlers(): void {
-		this.handleClickAway();
-		this.handleKeyboard();
-		this.handleMouseover();
-		this.handleMouseout();
-		this.handleClick();
-		this.handleDismiss();
-	}
+    if (!element) return null
 
-	public static createInstances(): void {
-		const elements = document.querySelectorAll('[data-dropdown]:not([data-dropdown=false])');
-		elements.forEach((element) => {
-			new KTDropdown(element as HTMLElement);
-		});
-	}
+    if (KTData.has(element, 'dropdown')) {
+      return KTData.get(element, 'dropdown') as KTDropdown
+    }
 
-	public static init(): void {
-		KTDropdown.createInstances();
+    if (element.getAttribute('data-dropdown') === 'true') {
+      return new KTDropdown(element)
+    }
 
-		if (window.KT_DROPDOWN_INITIALIZED !== true) {
-			KTDropdown.initHandlers();
-			window.KT_DROPDOWN_INITIALIZED = true;
-		}
-	}
+    return null
+  }
+
+  public static getOrCreateInstance(
+    element: HTMLElement,
+    config?: KTDropdownConfigInterface,
+  ): KTDropdown {
+    return this.getInstance(element) || new KTDropdown(element, config)
+  }
+
+  public static update(): void {
+    document.querySelectorAll('.open[data-dropdown]').forEach((item) => {
+      if (KTData.has(item as HTMLElement, 'popper')) {
+        ;(KTData.get(item as HTMLElement, 'popper') as PopperInstance).forceUpdate()
+      }
+    })
+  }
+
+  public static hide(skipElement?: HTMLElement): void {
+    document.querySelectorAll('.open[data-dropdown]').forEach((item) => {
+      if (skipElement && (skipElement === item || item.contains(skipElement))) return
+
+      const dropdown = KTDropdown.getInstance(item as HTMLElement)
+      if (dropdown) dropdown.hide()
+    })
+  }
+
+  public static handleClickAway() {
+    document.addEventListener('click', (event: Event) => {
+      document.querySelectorAll('.open[data-dropdown]').forEach((element) => {
+        const dropdown = KTDropdown.getInstance(element as HTMLElement)
+
+        if (dropdown && dropdown.isPermanent() === false) {
+          const contentElement = dropdown.getContentElement()
+
+          if (element === event.target || element.contains(event.target as HTMLElement)) {
+            return
+          }
+
+          if (
+            contentElement &&
+            (contentElement === event.target ||
+              contentElement.contains(event.target as HTMLElement))
+          ) {
+            return
+          }
+
+          dropdown.hide()
+        }
+      })
+    })
+  }
+
+  public static handleKeyboard() {}
+
+  public static handleMouseover() {
+    KTEventHandler.on(
+      document.body,
+      '.dropdown-toggle, [data-dropdown-toggle]',
+      'mouseover',
+      (event: Event, target: HTMLElement) => {
+        const dropdown = KTDropdown.getInstance(target)
+
+        if (dropdown !== null && dropdown.getOption('trigger') === 'hover') {
+          return dropdown.mouseover()
+        }
+      },
+    )
+  }
+
+  public static handleMouseout() {
+    KTEventHandler.on(
+      document.body,
+      '.dropdown-toggle, [data-dropdown-toggle]',
+      'mouseout',
+      (event: Event, target: HTMLElement) => {
+        const dropdown = KTDropdown.getInstance(target)
+
+        if (dropdown !== null && dropdown.getOption('trigger') === 'hover') {
+          return dropdown.mouseout()
+        }
+      },
+    )
+  }
+
+  public static handleClick() {
+    KTEventHandler.on(
+      document.body,
+      '.dropdown-toggle, [data-dropdown-toggle]',
+      'click',
+      (event: Event, target: HTMLElement) => {
+        const dropdown = KTDropdown.getInstance(target)
+        if (dropdown) {
+          return dropdown.click(event)
+        }
+      },
+    )
+  }
+
+  public static handleDismiss() {
+    KTEventHandler.on(
+      document.body,
+      '[data-dropdown-dismiss]',
+      'click',
+      (event: Event, target: HTMLElement) => {
+        const dropdown = KTDropdown.getInstance(target)
+        if (dropdown) {
+          return dropdown.hide()
+        }
+      },
+    )
+  }
+
+  public static initHandlers(): void {
+    this.handleClickAway()
+    this.handleKeyboard()
+    this.handleMouseover()
+    this.handleMouseout()
+    this.handleClick()
+    this.handleDismiss()
+  }
+
+  public static createInstances(): void {
+    const elements = document.querySelectorAll('[data-dropdown]:not([data-dropdown=false])')
+    elements.forEach((element) => {
+      new KTDropdown(element as HTMLElement)
+    })
+  }
+
+  public static init(): void {
+    KTDropdown.createInstances()
+
+    if (window.KT_DROPDOWN_INITIALIZED !== true) {
+      KTDropdown.initHandlers()
+      window.KT_DROPDOWN_INITIALIZED = true
+    }
+  }
 }

@@ -1,272 +1,280 @@
-/* eslint-disable max-len */
 /* eslint-disable require-jsdoc */
 
-import KTData from '../../helpers/data';
-import KTDom from '../../helpers/dom';
-import KTUtils from '../../helpers/utils';
-import KTComponent from '../component';
-import { KTScrollableInterface, KTScrollableConfigInterface } from './types';
+import KTData from '../../helpers/data'
+import KTDom from '../../helpers/dom'
+import KTUtils from '../../helpers/utils'
+import KTComponent from '../component'
+import type { KTScrollableInterface, KTScrollableConfigInterface } from './types'
 
 declare global {
   interface Window {
-    KT_SCROLL_INITIALIZED: boolean;
+    KT_SCROLL_INITIALIZED: boolean
   }
 }
 
 export class KTScrollable extends KTComponent implements KTScrollableInterface {
-  protected override _name: string = 'scrollable';
+  protected override _name: string = 'scrollable'
   protected override _defaultConfig: KTScrollableConfigInterface = {
     save: true,
     dependencies: '',
     wrappers: '',
-    offset: ''
-  };
-  protected override _config: KTScrollableConfigInterface = this._defaultConfig;
-  protected _elementId: string | null = null;
+    offset: '',
+  }
+  protected override _config: KTScrollableConfigInterface = this._defaultConfig
+  protected _elementId: string | null = null
 
   constructor(element: HTMLElement, config?: KTScrollableConfigInterface) {
-    super();
+    super()
 
-    if (KTData.has(element as HTMLElement, this._name)) return;
+    if (KTData.has(element as HTMLElement, this._name)) return
 
-    this._init(element);
-    this._buildConfig(config);
+    this._init(element)
+    this._buildConfig(config)
 
-    if (!this._element) return;
-    this._elementId = this._element.getAttribute('id');
-    this._handlers();
-    this._update();
+    if (!this._element) return
+    this._elementId = this._element.getAttribute('id')
+    this._handlers()
+    this._update()
   }
 
   protected _handlers(): void {
-    if (!this._element) return;
+    if (!this._element) return
     this._element.addEventListener('scroll', () => {
-      if (!this._element) return;
-      localStorage.setItem(`${this._elementId}st`, this._element.scrollTop.toString());
-    });
+      if (!this._element) return
+      localStorage.setItem(`${this._elementId}st`, this._element.scrollTop.toString())
+    })
   }
 
   protected _update(): void {
-    this._setupHeight();
-    this._setupState();
+    this._setupHeight()
+    this._setupState()
   }
 
   protected _setupHeight(): void {
-    if (!this._element) return;
-    
-    const heightType = this._getHeightType();
-    const height = this._getHeight();
+    if (!this._element) return
+
+    const heightType = this._getHeightType()
+    const height = this._getHeight()
 
     // Set height
     if (height && height != '0' && height.length > 0) {
-      this._element.style.setProperty(heightType, height);
+      this._element.style.setProperty(heightType, height)
     } else {
-      this._element.style.setProperty(heightType, '');
+      this._element.style.setProperty(heightType, '')
     }
   }
 
   protected _setupState(): void {
-    if (!this._element) return;
-    const stateEnabled = this._getOption('state') === true;
-    const elementIdExists = Boolean(this._elementId);
+    if (!this._element) return
+    const stateEnabled = this._getOption('state') === true
+    const elementIdExists = Boolean(this._elementId)
 
     if (stateEnabled && elementIdExists) {
-      const storedPosition = localStorage.getItem(this._elementId + 'st');
+      const storedPosition = localStorage.getItem(this._elementId + 'st')
 
       if (storedPosition) {
-        const pos = parseInt(storedPosition);
+        const pos = parseInt(storedPosition)
 
         if (pos > 0) {
           this._element.scroll({
             top: pos,
-            behavior: 'instant'
-          });
+            behavior: 'instant',
+          })
         }
       }
     }
   }
 
   protected _getHeight(): string {
-    const height = this._getHeightOption();
+    const height = this._getHeightOption()
 
     if (height !== null && typeof height === 'string' && height.toLowerCase() === 'auto') {
-      return this._getAutoHeight();
+      return this._getAutoHeight()
     } else if (height) {
-      return parseInt(height).toString() + 'px';
+      return parseInt(height).toString() + 'px'
     } else {
-      return '0';
+      return '0'
     }
   }
 
   protected _getAutoHeight(): string {
-    if (!this._element) return '';
-    let height = KTDom.getViewPort().height;
-    const dependencies = this._getOption('dependencies') as string;
-    const wrappers = this._getOption('wrappers') as string;
-    const offset = this._getOption('offset') as string;
-    height -= this._getElementSpacing(this._element);
+    if (!this._element) return ''
+    let height = KTDom.getViewPort().height
+    const dependencies = this._getOption('dependencies') as string
+    const wrappers = this._getOption('wrappers') as string
+    const offset = this._getOption('offset') as string
+    height -= this._getElementSpacing(this._element)
 
     if (dependencies && dependencies.length > 0) {
-      const elements = document.querySelectorAll(dependencies);
+      const elements = document.querySelectorAll(dependencies)
       elements.forEach((element) => {
         if (KTDom.getCssProp(element as HTMLElement, 'display') === 'none') {
-          return;
+          return
         }
-        height -= this._getElementHeight(element as HTMLElement);        
-      });
+        height -= this._getElementHeight(element as HTMLElement)
+      })
     }
 
     if (wrappers && wrappers.length > 0) {
-      const elements = document.querySelectorAll(wrappers);
+      const elements = document.querySelectorAll(wrappers)
       elements.forEach((element) => {
         if (KTDom.getCssProp(element as HTMLElement, 'display') === 'none') {
-          return;
+          return
         }
-        height -= this._getElementSpacing(element as HTMLElement);
-      });
+        height -= this._getElementSpacing(element as HTMLElement)
+      })
     }
 
     if (offset && offset.length > 0) {
-      height -= parseInt(offset);
+      height -= parseInt(offset)
     }
 
-    return height.toString() + 'px';
+    return height.toString() + 'px'
   }
 
   protected _getElementHeight(element: HTMLElement): number {
-    let height = 0;
+    let height = 0
 
     if (!element) {
-      return height;
+      return height
     }
 
-    const computedStyle = window.getComputedStyle(element);
+    const computedStyle = window.getComputedStyle(element)
     if (computedStyle.height) {
-      height += parseInt(computedStyle.height);
+      height += parseInt(computedStyle.height)
     }
     if (computedStyle.marginTop) {
-      height += parseInt(computedStyle.marginTop);
+      height += parseInt(computedStyle.marginTop)
     }
     if (computedStyle.marginBottom) {
-      height += parseInt(computedStyle.marginBottom);
-    } 
+      height += parseInt(computedStyle.marginBottom)
+    }
     if (computedStyle.borderTopWidth) {
-      height += parseInt(computedStyle.borderTopWidth);
+      height += parseInt(computedStyle.borderTopWidth)
     }
     if (computedStyle.borderBottomWidth) {
-      height += parseInt(computedStyle.borderBottomWidth);
+      height += parseInt(computedStyle.borderBottomWidth)
     }
 
-    return height;
+    return height
   }
 
   protected _getElementSpacing(element: HTMLElement): number {
-    let spacing: number = 0;
+    let spacing: number = 0
 
     if (!element) {
-      return spacing;
+      return spacing
     }
 
-    const computedStyle = window.getComputedStyle(element);
+    const computedStyle = window.getComputedStyle(element)
     if (computedStyle.marginTop) {
-      spacing += parseInt(computedStyle.marginTop);
+      spacing += parseInt(computedStyle.marginTop)
     }
     if (computedStyle.marginBottom) {
-      spacing += parseInt(computedStyle.marginBottom);
+      spacing += parseInt(computedStyle.marginBottom)
     }
     if (computedStyle.paddingTop) {
-      spacing += parseInt(computedStyle.paddingTop);
+      spacing += parseInt(computedStyle.paddingTop)
     }
     if (computedStyle.paddingBottom) {
-      spacing += parseInt(computedStyle.paddingBottom);
-    } 
+      spacing += parseInt(computedStyle.paddingBottom)
+    }
     if (computedStyle.borderTopWidth) {
-      spacing += parseInt(computedStyle.borderTopWidth);
+      spacing += parseInt(computedStyle.borderTopWidth)
     }
     if (computedStyle.borderBottomWidth) {
-      spacing += parseInt(computedStyle.borderBottomWidth);
+      spacing += parseInt(computedStyle.borderBottomWidth)
     }
 
-    return spacing;
+    return spacing
   }
 
   protected _getHeightType(): string {
     if (this._getOption('minHeight')) {
-      return 'min-height';
-    } if (this._getOption('maxHeight')) {
-      return 'max-height';
+      return 'min-height'
+    }
+    if (this._getOption('maxHeight')) {
+      return 'max-height'
     } else {
-      return 'height';
+      return 'height'
     }
   }
 
   protected _getHeightOption(): string {
-    const heightType = this._getHeightType();
+    const heightType = this._getHeightType()
 
     if (heightType == 'min-height') {
-      return this._getOption('minHeight') as string;
-    } if (heightType == 'max-height') {
-      return this._getOption('maxHeight') as string;
+      return this._getOption('minHeight') as string
+    }
+    if (heightType == 'max-height') {
+      return this._getOption('maxHeight') as string
     } else {
-      return this._getOption('height') as string;
+      return this._getOption('height') as string
     }
   }
 
   public update(): void {
-    return this._update();
+    return this._update()
   }
 
   public getHeight(): string {
-    return this._getHeight();
+    return this._getHeight()
   }
 
   public static getInstance(element: HTMLElement): KTScrollable {
-    if (!element) return null;
+    if (!element) return null
 
-		if (KTData.has(element, 'scrollable')) {
-			return KTData.get(element, 'scrollable') as KTScrollable;
-		}
+    if (KTData.has(element, 'scrollable')) {
+      return KTData.get(element, 'scrollable') as KTScrollable
+    }
 
-		if (element.getAttribute('data-scrollable') === "true") {
-			return new KTScrollable(element);
-		}
+    if (element.getAttribute('data-scrollable') === 'true') {
+      return new KTScrollable(element)
+    }
 
-    return null;
+    return null
   }
 
-  public static getOrCreateInstance(element: HTMLElement, config?: KTScrollableConfigInterface): KTScrollable {
-    return this.getInstance(element) || new KTScrollable(element, config);
+  public static getOrCreateInstance(
+    element: HTMLElement,
+    config?: KTScrollableConfigInterface,
+  ): KTScrollable {
+    return this.getInstance(element) || new KTScrollable(element, config)
   }
 
   public static createInstances(): void {
-    const elements = document.querySelectorAll('[data-scrollable="true"]');
+    const elements = document.querySelectorAll('[data-scrollable="true"]')
 
     elements.forEach((element) => {
-      new KTScrollable(element as HTMLElement);
-    });
+      new KTScrollable(element as HTMLElement)
+    })
   }
 
   public static handleResize(): void {
     window.addEventListener('resize', () => {
-      let timer;
+      let timer
 
-      KTUtils.throttle(timer, function () {
-        // Locate and update scrollable instances on window resize
-        const elements = document.querySelectorAll('[data-scrollable]');
-        elements.forEach((element) => {
-          KTScrollable.getInstance(element as HTMLElement)?.update();
-        });
-      }, 200);
-    });
+      KTUtils.throttle(
+        timer,
+        function () {
+          // Locate and update scrollable instances on window resize
+          const elements = document.querySelectorAll('[data-scrollable]')
+          elements.forEach((element) => {
+            KTScrollable.getInstance(element as HTMLElement)?.update()
+          })
+        },
+        200,
+      )
+    })
   }
 
   public static init(): void {
-    KTScrollable.createInstances();
+    KTScrollable.createInstances()
 
     if (window.KT_SCROLL_INITIALIZED !== true) {
-      KTScrollable.handleResize();
+      KTScrollable.handleResize()
 
-      window.KT_SCROLL_INITIALIZED = true;
+      window.KT_SCROLL_INITIALIZED = true
     }
   }
 }

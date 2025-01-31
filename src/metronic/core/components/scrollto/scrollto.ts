@@ -1,103 +1,105 @@
-/* eslint-disable max-len */
 /* eslint-disable require-jsdoc */
 
-import KTData from '../../helpers/data';
-import KTDom from '../../helpers/dom';
-import KTComponent from '../component';
-import { KTScrolltoInterface, KTScrolltoConfigInterface } from './types';
+import KTData from '../../helpers/data'
+import KTDom from '../../helpers/dom'
+import KTComponent from '../component'
+import type { KTScrolltoInterface, KTScrolltoConfigInterface } from './types'
 
 export class KTScrollto extends KTComponent implements KTScrolltoInterface {
-  protected override _name: string = 'scrollto';
+  protected override _name: string = 'scrollto'
   protected override _defaultConfig: KTScrolltoConfigInterface = {
     smooth: true,
     parent: 'body',
     target: '',
     offset: 0,
-  };
-  protected override _config: KTScrolltoConfigInterface = this._defaultConfig;
-  protected _targetElement: HTMLElement;
+  }
+  protected override _config: KTScrolltoConfigInterface = this._defaultConfig
+  protected _targetElement: HTMLElement
 
   constructor(element: HTMLElement, config?: KTScrolltoConfigInterface) {
-    super();
+    super()
 
-    if (KTData.has(element as HTMLElement, this._name)) return;
+    if (KTData.has(element as HTMLElement, this._name)) return
 
-    this._init(element);
-    this._buildConfig(config);
+    this._init(element)
+    this._buildConfig(config)
 
-    if (!this._element) return;
+    if (!this._element) return
 
-    this._targetElement = this._getTargetElement();
+    this._targetElement = this._getTargetElement()
 
     if (!this._targetElement) {
-      return;
+      return
     }
 
-    this._handlers();
+    this._handlers()
   }
 
   private _getTargetElement(): HTMLElement | null {
-    return (      
+    return (
       KTDom.getElement(this._element.getAttribute('data-scrollto') as string) ||
       KTDom.getElement(this._getOption('target') as string)
-    );
+    )
   }
 
   protected _handlers(): void {
-    if (!this._element) return;
+    if (!this._element) return
 
     this._element.addEventListener('click', (event: Event) => {
-      event.preventDefault();
-      this._scroll();
-    });
+      event.preventDefault()
+      this._scroll()
+    })
   }
 
   protected _scroll(): void {
-    const pos = this._targetElement.offsetTop + parseInt(this._getOption('offset') as string);
+    const pos = this._targetElement.offsetTop + parseInt(this._getOption('offset') as string)
 
-    let parent: HTMLElement | Window = KTDom.getElement(this._getOption('parent') as string);
-    
+    let parent: HTMLElement | Window = KTDom.getElement(this._getOption('parent') as string)
+
     if (!parent || parent === document.body) {
-      parent = window;
+      parent = window
     }
 
     parent.scrollTo({
       top: pos,
       behavior: (this._getOption('smooth') as boolean) ? 'smooth' : 'instant',
-    });
+    })
   }
 
   public scroll(): void {
-    this._scroll();
+    this._scroll()
   }
 
   public static getInstance(element: HTMLElement): KTScrollto {
-    if (!element) return null;
+    if (!element) return null
 
-		if (KTData.has(element, 'scrollto')) {
-			return KTData.get(element, 'scrollto') as KTScrollto;
-		}
+    if (KTData.has(element, 'scrollto')) {
+      return KTData.get(element, 'scrollto') as KTScrollto
+    }
 
-		if (element.getAttribute('data-scrollto') !== "false") {
-			return new KTScrollto(element);
-		}
+    if (element.getAttribute('data-scrollto') !== 'false') {
+      return new KTScrollto(element)
+    }
 
-    return null;
+    return null
   }
 
-  public static getOrCreateInstance(element: HTMLElement, config?: KTScrolltoConfigInterface): KTScrollto {
-    return this.getInstance(element) || new KTScrollto(element, config);
+  public static getOrCreateInstance(
+    element: HTMLElement,
+    config?: KTScrolltoConfigInterface,
+  ): KTScrollto {
+    return this.getInstance(element) || new KTScrollto(element, config)
   }
 
   public static createInstances(): void {
-    const elements = document.querySelectorAll('[data-scrollto]:not([data-scrollto="false"])');
-    
+    const elements = document.querySelectorAll('[data-scrollto]:not([data-scrollto="false"])')
+
     elements.forEach((element) => {
-      new KTScrollto(element as HTMLElement);
-    });
+      new KTScrollto(element as HTMLElement)
+    })
   }
 
   public static init(): void {
-    KTScrollto.createInstances();
+    KTScrollto.createInstances()
   }
-};
+}
