@@ -3450,7 +3450,15 @@ vue-eslint-parser@^9.4.3:
     lodash "^4.17.21"
     semver "^7.3.6"
 
-vue-router@^4.5.0:
+vue-middleware@^1.0.0-alpha.7:
+  version "1.0.0-alpha.7"
+  resolved "https://registry.yarnpkg.com/vue-middleware/-/vue-middleware-1.0.0-alpha.7.tgz#92bbb942aa6bd2f048888e855a7f1d0966d65026"
+  integrity sha512-0zs7pCr2wljI7P66lZERuVDzRRdL36HfY8Y93v5PhPZ9QHabeu3wTKcuZkOqurShqTmWyveu8r/0ojSye8Vihg==
+  dependencies:
+    vue "^3.4.26"
+    vue-router "^4.3.2"
+
+vue-router@^4.3.2, vue-router@^4.5.0:
   version "4.5.0"
   resolved "https://registry.yarnpkg.com/vue-router/-/vue-router-4.5.0.tgz#58fc5fe374e10b6018f910328f756c3dae081f14"
   integrity sha512-HDuk+PuH5monfNuY+ct49mNmkCRK4xJAV9Ts4z9UFc4rzdDnxQLyCMGGc8pKhZhHTVzfanpNwB/lwqevcBwI4w==
@@ -3465,7 +3473,7 @@ vue-tsc@^2.2.0:
     "@volar/typescript" "~2.4.11"
     "@vue/language-core" "2.2.0"
 
-vue@^3.5.13:
+vue@^3.4.26, vue@^3.5.13:
   version "3.5.13"
   resolved "https://registry.yarnpkg.com/vue/-/vue-3.5.13.tgz#9f760a1a982b09c0c04a867903fc339c9f29ec0a"
   integrity sha512-wmeiSMxkZCSc+PM2w2VRsOYAZC8GdipNFRTsLSfodVqI9mbejKeXEGr8SckuLnrQPGe3oJN5c3K0vpoU9q/wCQ==
