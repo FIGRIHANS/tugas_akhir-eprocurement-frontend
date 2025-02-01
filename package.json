@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
+    "axios": "^1.7.9",
     "pinia": "^2.3.1",
     "vue": "^3.5.13",
     "vue-middleware": "^1.0.0-alpha.7",
