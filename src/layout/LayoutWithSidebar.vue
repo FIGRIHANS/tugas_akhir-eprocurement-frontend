@@ -2,9 +2,7 @@
   <LNavbar />
   <LSidebar />
 
-  <p>Layout With Sidebar</p>
-
-  <main>
+  <main class="ml-[280px] py-4 px-6">
     <RouterView />
   </main>
 </template>

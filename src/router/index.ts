@@ -30,6 +30,17 @@ const router = createRouter({
       component: LayoutWithSidebar,
       children: [...vendor],
     },
+
+    // Empty State
+    {
+      path: '/:pathMatch(.*)*',
+      redirect: '/error/404'
+    },
+    {
+      path: '/error/:code?',
+      name: 'error',
+      component: () => import('@/views/EmptyState.vue'),
+    },
   ],
 })
 
