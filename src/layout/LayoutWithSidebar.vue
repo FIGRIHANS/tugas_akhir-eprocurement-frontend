@@ -9,7 +9,7 @@
 
 <script setup lang="ts">
 import LNavbar from '@/components/layout/navbar/LNavbar.vue'
-import LSidebar from '@/components/layout/LSidebar.vue'
+import LSidebar from '@/components/layout/sidebar/LSidebar.vue'
 
 import { RouterView } from 'vue-router'
 </script>

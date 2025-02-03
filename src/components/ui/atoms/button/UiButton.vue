@@ -16,7 +16,7 @@ const props = withDefaults(defineProps<IButtonProps>(), {
 
 const classes = computed(() => {
   return [
-    'btn',
+    'btn', 
     `btn-${props.variant}`,
     `btn-${props.size}`,
     {

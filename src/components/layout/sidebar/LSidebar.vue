@@ -125,15 +125,9 @@
 </template>
 
 <script lang="ts" setup>
-import UiLogo from '../ui/atoms/logo/UiLogo.vue'
+import UiLogo from '@/components/ui/atoms/logo/UiLogo.vue'
 </script>
 
-<style scoped>
-.menu-default .menu-link {
-  @apply py-[12px] mb-2.5;
-}
-
-.menu-icon i {
-  @apply text-[20px] mr-3;
-}
+<style lang="scss" scoped>
+@use './styles/sidebar.scss';
 </style>

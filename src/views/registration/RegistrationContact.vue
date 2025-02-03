@@ -1,5 +1,5 @@
 <template>
   <div>
-    <h1>Registration Contract</h1>
+    <h1>Registration Contact</h1>
   </div>
 </template>

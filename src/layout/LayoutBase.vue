@@ -1,8 +1,6 @@
 <template>
   <LNavbar />
 
-  <p>Layout Base</p>
-
   <main>
     <RouterView />
   </main>

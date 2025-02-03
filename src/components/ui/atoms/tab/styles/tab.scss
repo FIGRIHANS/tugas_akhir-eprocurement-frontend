@@ -1,0 +1,23 @@
+.tabs {
+  .tab {
+    &__numbering {
+      @apply bg-gray-700 rounded-full text-white w-5 h-5 flex items-center justify-center text-[8px];
+    }
+
+    &.disabled {
+      @apply text-gray-400 cursor-default;
+
+      .tab__numbering {
+        @apply bg-gray-400 ;
+      }
+    }
+
+    &.active {
+      @apply text-primary;
+
+      .tab__numbering {
+        @apply bg-primary;
+      }
+    }
+  }
+}
