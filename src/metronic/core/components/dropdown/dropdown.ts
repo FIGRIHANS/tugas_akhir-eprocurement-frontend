@@ -1,9 +1,5 @@
-import type {
-  Instance as PopperInstance,
-  createPopper,
-  Placement,
-  VirtualElement,
-} from '@popperjs/core'
+import { createPopper } from '@popperjs/core'
+import type { Instance as PopperInstance, Placement, VirtualElement } from '@popperjs/core'
 import KTDom from '../../helpers/dom'
 import KTData from '../../helpers/data'
 import KTEventHandler from '../../helpers/event-handler'
