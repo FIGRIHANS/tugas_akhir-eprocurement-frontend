@@ -1,8 +1,8 @@
 <template>
   <aside class="w-[280px] bg-white border border-gray-200 border-t-0 h-full -mt-[80px] fixed">
-    <div class="h-[80px] flex items-center mb-5 px-[25px]">
+    <div class="h-[80px] flex items-center mb-5 px-[40px]">
       <RouterLink to="/">
-        <img src="/logo.png" alt="DataSea Logo" class="w-[143.38px] h-[31px]" />
+        <UiLogo />
       </RouterLink>
     </div>
 
@@ -123,6 +123,10 @@
     </div>
   </aside>
 </template>
+
+<script lang="ts" setup>
+import UiLogo from '../ui/atoms/logo/UiLogo.vue'
+</script>
 
 <style scoped>
 .menu-default .menu-link {

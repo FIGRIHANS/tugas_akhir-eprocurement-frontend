@@ -1,5 +1,5 @@
 <template>
-  <LNavbar />
+  <LNavbar full />
   <LSidebar />
 
   <main class="ml-[280px] py-4 px-6">
@@ -8,8 +8,8 @@
 </template>
 
 <script setup lang="ts">
-import LNavbar from '@/components/layout/LayoutNavbar.vue'
-import LSidebar from '@/components/layout/LayoutSidebar.vue'
+import LNavbar from '@/components/layout/navbar/LNavbar.vue'
+import LSidebar from '@/components/layout/LSidebar.vue'
 
 import { RouterView } from 'vue-router'
 </script>
