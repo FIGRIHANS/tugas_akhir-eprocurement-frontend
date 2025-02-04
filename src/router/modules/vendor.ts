@@ -10,4 +10,3 @@ export default [
     component: () => import('@/views/vendor/VendorBlacklist.vue'),
   },
 ]
- 

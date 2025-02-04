@@ -1,0 +1,112 @@
+export interface ISidebarMenu {
+  id: string;
+  title: string;
+  icon: string;
+  to?: string;
+  child: IChildSidebarMenu[];
+}
+
+export interface IChildSidebarMenu {
+  id: string;
+  title: string;
+  to?: string;
+}
+
+export default [
+  {
+    id: 'dashboard',
+    title: 'Beranda',
+    icon: 'element-11',
+    to: '/',
+    child: []
+  },
+  {
+    id: 'tender',
+    title: 'Proses Tender',
+    icon: 'rocket',
+    child: [
+      {
+        id: 'tender-1',
+        title: 'Tender 1'
+      }
+    ]
+  },
+  {
+    id: 'vendor-management',
+    title: 'Vendor Management',
+    icon: 'users',
+    child: [
+      {
+        id: 'vendor-master',
+        title: 'Vendor Master',
+        to: '/vendor-master'
+      },
+      {
+        id: 'vendor-blacklist',
+        title: 'Vendor Blacklist',
+        to: '/vendor-blacklist'
+      }
+    ]
+  },
+  {
+    id: 'e-procurement-report',
+    title: 'Laporan e-Procurement',
+    icon: 'printer',
+    child: [
+      {
+        id: 'e-procurement-report-1',
+        title: 'E Procuremen Report 1'
+      }
+    ]
+  },
+  {
+    id: 'requisition-master',
+    title: 'Master Requisition',
+    icon: 'data',
+    child: [
+      {
+        id: 'requisition-master-1',
+        title: 'Requisition Master 1'
+      }
+    ]
+  },
+  {
+    id: 'monitoring',
+    title: 'Monitoring',
+    icon: 'chart-line-star',
+    child: [
+      {
+        id: 'monitoring-1',
+        title: 'Monitoring 1'
+      }
+    ]
+  },
+  {
+    id: 'approval',
+    title: 'Approval',
+    icon: 'shield-tick',
+    child: [
+      {
+        id: 'approval-1',
+        title: 'Approval 1'
+      }
+    ]
+  },
+  {
+    id: 'e-catalog',
+    title: 'Lihat e-Catalog',
+    icon: 'menu',
+    child: []
+  },
+  {
+    id: 'procurement-master',
+    title: 'Master Procurement',
+    icon: 'data',
+    child: [
+      {
+        id: 'procurement-master-1',
+        title: 'Procutement Master 1'
+      }
+    ]
+  },
+]

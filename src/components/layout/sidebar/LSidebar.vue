@@ -10,112 +10,28 @@
       class="menu menu-default flex flex-col border-0 rounded-lg w-full py-0 px-1.5"
       data-menu="true"
     >
-      <div class="menu-item">
-        <RouterLink class="menu-link" to="/">
-          <span class="menu-icon">
-            <i class="ki-duotone ki-element-11"></i>
-          </span>
-          <span class="menu-title"> Beranda </span>
-        </RouterLink>
-      </div>
-
       <div
+        v-for="menu in sidebarMenu"
+        :key="menu.id"
         class="menu-item"
         data-menu-item-placement=""
         data-menu-item-toggle="accordion"
         data-menu-item-trigger="click"
       >
-        <a class="menu-link" href="#">
+        <a class="menu-link" href="#" @click.prevent="redirectTo(menu.to)">
           <span class="menu-icon">
-            <i class="ki-duotone ki-rocket"> </i>
+            <i class="ki-duotone" :class="`ki-${menu.icon}`"> </i>
           </span>
-          <span class="menu-title"> Proses Tender </span>
-          <span class="menu-arrow">
+          <span class="menu-title"> {{ menu.title }} </span>
+          <span v-if="menu.child.length > 0" class="menu-arrow">
             <i class="ki-outline ki-plus menu-item-show:hidden"> </i>
             <i class="ki-outline ki-minus hidden menu-item-show:block"> </i>
           </span>
         </a>
-        <div class="menu-accordion">
-          <div class="menu-item">
-            <a class="menu-link" href="#">
-              <span class="menu-title"> Submenu item 1 </span>
-            </a>
-          </div>
-          <div class="menu-item">
-            <a class="menu-link" href="#">
-              <span class="menu-title"> Submenu item 2 </span>
-            </a>
-          </div>
-          <div class="menu-item">
-            <a class="menu-link" href="#">
-              <span class="menu-title"> Submenu item 3 </span>
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <div
-        class="menu-item"
-        data-menu-item-placement=""
-        data-menu-item-toggle="accordion"
-        data-menu-item-trigger="click"
-      >
-        <a class="menu-link" href="#">
-          <span class="menu-icon">
-            <i class="ki-duotone ki-users"> </i>
-          </span>
-          <span class="menu-title"> Vendor Management </span>
-          <span class="menu-arrow">
-            <i class="ki-outline ki-plus menu-item-show:hidden"> </i>
-            <i class="ki-outline ki-minus hidden menu-item-show:block"> </i>
-          </span>
-        </a>
-        <div class="menu-accordion">
-          <div class="menu-item">
-            <RouterLink class="menu-link" to="/vendor-master">
-              <span class="menu-title"> Vendor Master </span>
-            </RouterLink>
-          </div>
-          <div class="menu-item">
-            <a class="menu-link" href="#">
-              <span class="menu-title"> Vendor Blacklist </span>
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <div
-        v-for="i in 5"
-        :key="i"
-        class="menu-item"
-        data-menu-item-placement=""
-        data-menu-item-toggle="accordion"
-        data-menu-item-trigger="click"
-      >
-        <a class="menu-link" href="#">
-          <span class="menu-icon">
-            <i class="ki-duotone ki-rocket"> </i>
-          </span>
-          <span class="menu-title"> Accordion submenu </span>
-          <span class="menu-arrow">
-            <i class="ki-outline ki-plus menu-item-show:hidden"> </i>
-            <i class="ki-outline ki-minus hidden menu-item-show:block"> </i>
-          </span>
-        </a>
-        <div class="menu-accordion">
-          <div class="menu-item">
-            <a class="menu-link" href="#">
-              <span class="menu-title"> Submenu item 1 </span>
-            </a>
-          </div>
-          <div class="menu-item">
-            <a class="menu-link" href="#">
-              <span class="menu-title"> Submenu item 2 </span>
-            </a>
-          </div>
-          <div class="menu-item">
-            <a class="menu-link" href="#">
-              <span class="menu-title"> Submenu item 3 </span>
+        <div v-if="menu.child.length > 0" class="menu-accordion">
+          <div v-for="subMenu in menu.child" :key="subMenu.id" class="menu-item">
+            <a class="menu-link" href="#" @click.prevent="redirectTo(subMenu.to)">
+              <span class="menu-title">{{ subMenu.title }}</span>
             </a>
           </div>
         </div>
@@ -125,7 +41,18 @@
 </template>
 
 <script lang="ts" setup>
+import sidebarMenu from '@/static/sidebar'
+import { useRouter } from 'vue-router'
+
 import UiLogo from '@/components/ui/atoms/logo/UiLogo.vue'
+
+const router = useRouter()
+
+const redirectTo = (path?: string) => {
+  if (path) {
+    router.push(path)
+  }
+}
 </script>
 
 <style lang="scss" scoped>
