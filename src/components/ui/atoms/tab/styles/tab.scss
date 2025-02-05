@@ -12,8 +12,8 @@
       }
     }
 
-    &.active {
-      @apply text-primary;
+    &.active, &.visited {
+      @apply text-primary font-bold;
 
       .tab__numbering {
         @apply bg-primary;

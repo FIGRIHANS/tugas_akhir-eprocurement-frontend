@@ -3,6 +3,7 @@ export interface ITabProps {
   items: ITabItem[]
   itemClass?: string
   numbering?: boolean
+  step?: boolean
 }
 
 export interface ITabItem {

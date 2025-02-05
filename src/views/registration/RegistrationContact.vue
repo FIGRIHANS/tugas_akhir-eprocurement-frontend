@@ -1,6 +1,5 @@
 <template>
-  <div>
+  <div class="flex flex-col gap-[24px] mb-[24px]">
     <h1>Registration Contact</h1>
-    <button class="btn btn-primary">BUtton</button>
   </div>
 </template>

@@ -3,12 +3,14 @@
     <button
       v-for="(item, index) in items"
       :key="item.value"
-      :class="[itemClasees(item), itemClass]"
+      :class="[itemClasees(item, index), itemClass]"
       @click="onItemClick(item)"
     >
-      <span v-if="numbering" class="tab__numbering">
-        {{ index + 1 }}
-      </span>
+      <template v-if="numbering">
+        <div class="tab__numbering">
+          {{ index + 1 }}
+        </div>
+      </template>
 
       {{ item.label }}
     </button>
@@ -16,6 +18,7 @@
 </template>
 
 <script lang="ts" setup>
+import { computed } from 'vue'
 import type { ITabProps, ITabItem } from './types/tab'
 
 const props = withDefaults(defineProps<ITabProps>(), {
@@ -23,15 +26,25 @@ const props = withDefaults(defineProps<ITabProps>(), {
   numbering: false,
 })
 
-const itemClasees = (item: ITabItem) => {
+const position = computed(() => {
+  return props.items.findIndex((item) => item.value === props.modelValue)
+})
+
+
+const itemClasees = (item: ITabItem, tabIndex: number) => {
   return [
     'tab',
     item.itemClass,
     {
       active: item.value === props.modelValue,
       disabled: item.disabled,
+      visited: isVisited(tabIndex)
     },
   ]
+}
+
+const isVisited = (tabIndex: number) => {
+  return props.step && tabIndex < position.value
 }
 
 const onItemClick = (item: ITabItem) => {
