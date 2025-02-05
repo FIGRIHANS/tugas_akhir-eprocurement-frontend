@@ -39,9 +39,9 @@ const tab = reactive({
       itemClass: 'font-bold',
       disabled: false,
     },
-    { label: 'Contact', value: 'registration__contact', disabled: false },
-    { label: 'Document & Legal', value: 'registration__document-and-legal', disabled: false },
-    { label: 'Payment Detail', value: 'registration__payment-detail', disabled: false },
+    { label: 'Contact', value: 'registration__contact', disabled: true },
+    { label: 'Document & Legal', value: 'registration__document-and-legal', disabled: true },
+    { label: 'Payment Detail', value: 'registration__payment-detail', disabled: true },
   ],
 })
 

@@ -17,7 +17,7 @@ export default [
     id: 'dashboard',
     title: 'Beranda',
     icon: 'element-11',
-    to: '/',
+    to: '/dashboard',
     child: []
   },
   {

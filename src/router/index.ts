@@ -20,15 +20,22 @@ const router = createRouter({
         ...registration,
         {
           path: '/',
-          name: 'home',
-          component: () => import('@/views/DashboardView.vue'),
+          name: 'landing-page',
+          component: () => import('@/views/LandingPage.vue'),
         },
       ],
     },
     {
       path: '/',
       component: LayoutWithSidebar,
-      children: [...vendor],
+      children: [
+        ...vendor,
+        {
+          path: '/dashboard',
+          name: 'dashboard',
+          component: () => import('@/views/DashboardView.vue'),
+        },
+      ],
     },
 
     // Empty State
