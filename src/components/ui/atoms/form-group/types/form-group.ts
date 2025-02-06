@@ -1,4 +1,5 @@
 export interface IFormGroupProps {
-  title: string
+  title?: string
   hideBorder?: boolean
+  grid?: number
 }

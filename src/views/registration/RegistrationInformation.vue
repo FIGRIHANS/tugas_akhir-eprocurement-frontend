@@ -1,33 +1,32 @@
 <template>
   <div class="flex flex-col gap-[24px] mb-[24px]">
-    <UiFormGroup title="Nama Perusahaan">
-      <div class="grid grid-cols-3 gap-[24px]">
-        <UiInput label="Nama Perusahaan" placeholder="Masukkan Nama Perusahaan" />
-        <UiInput label="Group Perusahaan" placeholder="Masukkan Group Perusahaan" />
-        <UiInput label="Tanggal Berdiri" placeholder="Pilih Tanggal" />
-      </div>
+    <UiFormGroup title="Nama Perusahaan" :grid="3">
+      <UiInput label="Nama Perusahaan" placeholder="Masukkan Nama Perusahaan" />
+      <UiInput label="Group Perusahaan" placeholder="Masukkan Group Perusahaan" />
+      <UiInput label="Tanggal Berdiri" placeholder="Pilih Tanggal" />
     </UiFormGroup>
 
-    <UiFormGroup title="Lokasi Kantor Pusat">
-      <div class="grid grid-cols-4 gap-[24px]">
-        <UiSelect label="Negara" placeholder="Pilih Negara" />
-        <UiSelect label="Provinsi" placeholder="Pilih Provinsi" />
-        <UiSelect label="Kabupaten/Kota" placeholder="Pilih Kabupaten/Kota" />
-        <UiSelect label="Kecamatan" placeholder="Pilih Kecamatan" />
-      </div>
+    <UiFormGroup title="Lokasi Kantor Pusat" :grid="4">
+      <UiSelect label="Negara" placeholder="Pilih Negara" />
+      <UiSelect label="Provinsi" placeholder="Pilih Provinsi" />
+      <UiSelect label="Kabupaten/Kota" placeholder="Pilih Kabupaten/Kota" />
+      <UiSelect label="Kecamatan" placeholder="Pilih Kecamatan" />
     </UiFormGroup>
 
     <UiFormGroup title="Lokasi Perusahaan">
-      <div class="grid grid-cols-4 gap-[24px]">
+      <UiCheckbox label="Lokasi perusahaan sama dengan kantor pusat" />
+
+      <UiFormGroup :grid="4" hide-border>
         <UiSelect label="Negara" placeholder="Pilih Negara" />
         <UiSelect label="Provinsi" placeholder="Pilih Provinsi" />
         <UiSelect label="Kabupaten/Kota" placeholder="Pilih Kabupaten/Kota" />
         <UiSelect label="Kecamatan" placeholder="Pilih Kecamatan" />
-      </div>
-      <div class="grid grid-cols-4 gap-[24px]">
+      </UiFormGroup>
+
+      <UiFormGroup :grid="4" hide-border>
         <UiInput label="Kode Pos" placeholder="Masukkan Kode Pos" />
         <UiInput class="col-span-3" label="Alamat Lengkap" placeholder="Masukkan Alamat Lengkap" />
-      </div>
+      </UiFormGroup>
     </UiFormGroup>
 
     <UiFormGroup title="Bidang Usaha & Bisnis Unit" hide-border>
@@ -75,6 +74,7 @@
             Tambah
           </UiButton>
         </div>
+
         <div class="card min-w-full">
           <div class="card-table">
             <table class="table table-border align-middle text-gray-700 font-medium text-sm">
@@ -104,4 +104,5 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
+import UiCheckbox from '@/components/ui/atoms/checkbox/UiCheckbox.vue'
 </script>
