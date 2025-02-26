@@ -3,4 +3,6 @@ export interface ISelectProps {
   placeholder?: string
   readonly?: boolean
   disabled?: boolean
+  labelStyle?: 'default' | 'row' | 'column'
+  rowAlign?: 'center' | 'start'
 }
