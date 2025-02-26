@@ -11,7 +11,7 @@
       Daftar
       <UiIcon variant="duotone" name="menu" />
     </UiButton>
-    <UiButton variant="primary" size="lg">
+    <UiButton variant="primary" size="lg" @click="router.push('/login')">
       Masuk
       <UiIcon variant="duotone" name="entrance-left" />
     </UiButton>

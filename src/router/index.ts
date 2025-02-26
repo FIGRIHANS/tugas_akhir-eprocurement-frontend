@@ -29,14 +29,7 @@ const router = createRouter({
     {
       path: '/',
       component: LayoutWithSidebar,
-      children: [
-        ...vendor,
-        {
-          path: '/dashboard',
-          name: 'dashboard',
-          component: () => import('@/views/DashboardView.vue'),
-        },
-      ],
+      children: [...vendor],
       meta: {
         middleware: 'auth',
       },

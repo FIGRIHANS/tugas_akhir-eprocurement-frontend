@@ -6,7 +6,7 @@
         :class="{ full: isFull }"
       >
         <div class="logo">
-          <RouterLink to="/dashboard">
+          <RouterLink to="/">
             <UiLogo />
           </RouterLink>
         </div>
