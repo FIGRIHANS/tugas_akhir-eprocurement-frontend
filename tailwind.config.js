@@ -496,7 +496,7 @@ module.exports = {
           },
           lg: {
             height: '3rem',
-            px: '1.25rem',
+            px: '1rem',
             py: '0.75rem',
             gap: '0.5rem',
             fontSize: theme('fontSize.sm')[0],
