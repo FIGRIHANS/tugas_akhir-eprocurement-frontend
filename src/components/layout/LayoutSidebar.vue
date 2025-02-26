@@ -120,6 +120,41 @@
           </div>
         </div>
       </div>
+
+      <div
+        class="menu-item"
+        data-menu-item-placement=""
+        data-menu-item-toggle="accordion"
+        data-menu-item-trigger="click"
+      >
+        <a class="menu-link" href="#">
+          <span class="menu-icon">
+            <i class="ki-filled ki-bill"> </i>
+          </span>
+          <span class="menu-title"> Invoice </span>
+          <span class="menu-arrow">
+            <i class="ki-outline ki-plus menu-item-show:hidden"> </i>
+            <i class="ki-outline ki-minus hidden menu-item-show:block"> </i>
+          </span>
+        </a>
+        <div class="menu-accordion">
+          <div class="menu-item">
+            <a class="menu-link" href="#">
+              <span class="menu-title"> E-invoice </span>
+            </a>
+          </div>
+          <div class="menu-item">
+            <a class="menu-link" href="#">
+              <span class="menu-title"> Verifikasi Invoice </span>
+            </a>
+          </div>
+          <div class="menu-item">
+            <a class="menu-link" href="#">
+              <span class="menu-title"> Schedule Payment </span>
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
   </aside>
 </template>
