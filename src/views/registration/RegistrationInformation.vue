@@ -206,18 +206,10 @@ const isSameAsHq = ref<boolean>(false)
 const countryList = computed(() => vendorMasterDataStore.countryList)
 
 const checkSameAsHq = () => {
-  const { negara, provinsi, kabupatenKota, kecamatan } = information.value.lokasiKantorPusat
-
   if (!isSameAsHq.value) {
-    registrationVendorStore.information = {
-      ...registrationVendorStore.information,
-      lokasiPerusahaan: {
-        ...registrationVendorStore.information.lokasiPerusahaan,
-        negara,
-        provinsi,
-        kabupatenKota,
-        kecamatan,
-      },
+    registrationVendorStore.information.lokasiPerusahaan = {
+      ...registrationVendorStore.information.lokasiPerusahaan,
+      ...information.value.lokasiKantorPusat,
     }
   }
 }
@@ -230,22 +222,16 @@ const addBusinessUnit = () => {
   console.log('business unit', information.value.bisnisUnit.selected)
 }
 
-watch(information.value, () => {
-  const { negara, provinsi, kabupatenKota, kecamatan } = information.value.lokasiKantorPusat
-
-  if (isSameAsHq.value) {
-    registrationVendorStore.information = {
-      ...registrationVendorStore.information,
-      lokasiPerusahaan: {
-        ...registrationVendorStore.information.lokasiPerusahaan,
-        negara,
-        provinsi,
-        kabupatenKota,
-        kecamatan,
-      },
+watch(
+  () => isSameAsHq.value && information.value.lokasiKantorPusat,
+  () => {
+    registrationVendorStore.information.lokasiPerusahaan = {
+      ...registrationVendorStore.information.lokasiPerusahaan,
+      ...information.value.lokasiKantorPusat,
     }
-  }
-})
+  },
+  { deep: true },
+)
 
 onMounted(async () => {
   vendorMasterDataStore.getVendorCountries()
