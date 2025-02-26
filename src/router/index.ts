@@ -21,29 +21,29 @@ const router = createRouter({
         ...registration,
         {
           path: '/',
-          name: 'home',
-          component: () => import('@/views/DashboardView.vue'),
+          name: 'landing-page',
+          component: () => import('@/views/LandingPage.vue'),
         },
       ],
     },
     {
       path: '/',
       component: LayoutWithSidebar,
-      meta: {
-        middleware: 'auth'
-      },
       children: [...vendor],
+      meta: {
+        middleware: 'auth',
+      },
     },
     {
       path: '/login',
       name: 'login',
-      component: () => import('@/views/LoginView.vue')
+      component: () => import('@/views/LoginView.vue'),
     },
 
     // Empty State
     {
       path: '/:pathMatch(.*)*',
-      redirect: '/error/404'
+      redirect: '/error/404',
     },
     {
       path: '/error/:code?',
