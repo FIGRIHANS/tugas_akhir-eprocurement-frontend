@@ -16,6 +16,9 @@ const router = createRouter({
     {
       path: '/',
       component: LayoutBase,
+      meta: {
+        middleware: 'auth'
+      },
       children: [
         ...registration,
         {
@@ -28,7 +31,15 @@ const router = createRouter({
     {
       path: '/',
       component: LayoutWithSidebar,
+      meta: {
+        middleware: 'auth'
+      },
       children: [...vendor],
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: () => import('@/views/LoginView.vue')
     },
 
     // Empty State
