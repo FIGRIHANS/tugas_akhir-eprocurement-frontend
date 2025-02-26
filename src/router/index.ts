@@ -9,6 +9,7 @@ import LayoutWithSidebar from '@/layout/LayoutWithSidebar.vue'
 /** Route Modules */
 import vendor from './modules/vendor'
 import registration from './modules/registration'
+// import invoice from './modules/invoice'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -36,12 +37,20 @@ const router = createRouter({
           component: () => import('@/views/DashboardView.vue'),
         },
       ],
+      meta: {
+        middleware: 'auth',
+      },
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: () => import('@/views/LoginView.vue'),
     },
 
     // Empty State
     {
       path: '/:pathMatch(.*)*',
-      redirect: '/error/404'
+      redirect: '/error/404',
     },
     {
       path: '/error/:code?',
