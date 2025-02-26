@@ -18,15 +18,17 @@
                 <label class="font-normal text-[13px]">Password</label>
                 <a href="#" class="text-primary text-[13px]">Forgot Password?</a>
                </div>
-               <div class="input mt-[8px]" data-toggle-password="true">
-                <input v-model="password" placeholder="Enter Password" type="password"/>
-                <div class="btn btn-icon" data-toggle-password-trigger="true">
-                  <i class="ki-outline ki-eye toggle-password-active:hidden">
-                  </i>
-                  <i class="ki-outline ki-eye-slash hidden toggle-password-active:block">
-                  </i>
+               <div class="input max-w-72">
+                <input
+                  v-model="password"
+                  placeholder="Password" 
+                  :type="showPassword ? 'text' : 'password'"
+                />
+                <div class="btn btn-icon" @click="togglePassword">
+                  <i class="ki-outline ki-eye" :class="{ 'hidden': showPassword }"></i>
+                  <i class="ki-outline ki-eye-slash" :class="{ 'hidden': !showPassword }"></i>
                 </div>
-              </div>
+               </div>
              </div>
   
              <!-- remember -->
@@ -39,10 +41,10 @@
   
             <!-- button footer -->
              <div class="flex flex-col gap-[8px]">
-              <button class="btn btn-primary w-full justify-center" @click="goLogin">
+              <button class="btn btn-primary w-full justify-center" :disabled="isLoading" @click="goLogin">
                 Sign In
               </button>
-              <button v-if="!isAdmin" class="btn btn-secondary w-full justify-center" @click="goRegister">
+              <button v-if="!isAdmin" class="btn btn-secondary w-full justify-center" :disabled="isLoading" @click="goRegister">
                 Register
               </button>
              </div>
@@ -69,22 +71,50 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useLoginStore } from '@/stores/views/login'
+import { type ApiResponseData, type ApiResponseDataResult } from '@/core/type/api'
 import loginView from '@/assets/svg/LoginImage.vue'
 import logoTelkomsel from '@/assets/svg/LogoTekomsel.vue'
+import moment from 'moment'
 
+const login = useLoginStore()
 const router = useRouter()
 const email = ref<string>('')
 const password = ref<string>('')
 const rememberMe = ref<boolean>(false)
 const isAdmin = ref<boolean>(false)
+const isLoading = ref<boolean>(false)
+const showPassword = ref<boolean>(false)
 
 const goLogin = () => {
-  // localStorage.setItem('token_datasea', '1')
-  router.push({
-    name: 'home'
-  })
+  isLoading.value = true
+  if (!email.value && !password.value) return isLoading.value = false
+  saveAccount()
+  login.callLogin(email.value, password.value)
+    .then((response: ApiResponseData<string>) => {
+      if (response.statusCode === 200) {
+        setToken(response.result)
+        router.push({
+          name: 'home'
+        })
+      }
+    })
+    .finally(() => {
+      isLoading.value = false
+    })
+}
+
+const setToken = (result: ApiResponseDataResult<string>) => {
+  const expired = moment().add(7, 'days').toDate().toUTCString()
+  document.cookie = `token_dts=${'bearer ' + result.content}; path=/; expires=${expired}; Secure; SameSite=Strict`
+}
+
+const saveAccount = () => {
+  if (rememberMe.value) {
+    localStorage.setItem('account_dts', `username=${email.value}; password=${password.value}`)
+  }
 }
 
 const goRegister = () => {
@@ -92,4 +122,20 @@ const goRegister = () => {
     name: 'registration'
   })
 }
+
+const togglePassword = () => {
+  showPassword.value = !showPassword.value
+}
+
+onMounted(() => {
+  const savedAccount = localStorage.getItem('account_dts') || ''
+  
+  const account = savedAccount.split('; ')
+  for (const item of account) {
+    const [key, value] = item.split('=')
+    console.log(key)
+    if (key === 'username') email.value = value
+    if (key === 'password') password.value = value
+  }
+})
 </script>
