@@ -12,7 +12,7 @@ import registration from './modules/registration'
 import invoice from './modules/invoice'
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(),
   routes: [
     {
       path: '/',
@@ -29,11 +29,10 @@ const router = createRouter({
     {
       path: '/',
       component: LayoutWithSidebar,
-      children: [...vendor],
+      children: [...vendor, ...invoice],
       meta: {
         middleware: 'auth',
-      },
-      children: [...vendor, ...invoice],
+      }
     },
     {
       path: '/login',

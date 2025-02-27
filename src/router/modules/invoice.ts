@@ -8,7 +8,20 @@ export default [
       {
         path: 'list',
         name: 'invoice-list',
-        component: () => import('@/components/views/invoice/InvoiceList.vue'),
+        component: () => import('@/views/invoice/InvoiceWrapper/InvoiceList.vue'),
+      },
+    ],
+  },
+  {
+    path: '/invoice/add',
+    name: 'invoiceAdd',
+    redirect: { name: 'invoice-add' },
+    component: () => import('@/views/invoice/InvoiceAddWrapper.vue'),
+    children: [
+      {
+        path: 'list',
+        name: 'invoice-add',
+        component: () => import('@/views/invoice/InvoiceAddWrapper/InvoiceData.vue'),
       },
     ],
   },
