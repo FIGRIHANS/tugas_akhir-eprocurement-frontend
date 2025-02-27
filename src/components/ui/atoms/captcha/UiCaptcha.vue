@@ -13,7 +13,7 @@
       type="text"
       class="input"
       placeholder="Input catcha"
-      @input="checkIsMatch()"
+      @input="emits('update:modelValue', captchaValue === captchaImage)"
     />
   </div>
 </template>
@@ -21,15 +21,10 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 
-const emits = defineEmits<{
-  isMatch: [value: boolean]
-}>()
+defineProps(['modelValue'])
+const emits = defineEmits(['update:modelValue'])
 const captchaImage = ref('')
 const captchaValue = ref('')
-
-const checkIsMatch = () => {
-  emits('isMatch', captchaValue.value === captchaImage.value)
-}
 
 const generateCaptcha = () => {
   captchaImage.value = ''
@@ -40,7 +35,7 @@ const generateCaptcha = () => {
     captchaImage.value += randomChar.charAt(Math.random() * randomChar.length)
   }
 
-  checkIsMatch()
+  emits('update:modelValue', false)
 }
 
 onMounted(() => {
