@@ -3,7 +3,7 @@
     :class="[
       'relative',
       {
-        'flex items-baseline flex-wrap lg:flex-nowrap gap-2.5': row,
+        'flex items-center flex-wrap lg:flex-nowrap gap-2.5': row,
       },
     ]"
   >

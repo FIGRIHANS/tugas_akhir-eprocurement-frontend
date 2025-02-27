@@ -51,5 +51,16 @@ export const useRegistrationVendorStore = defineStore('registrationVendor', () =
     },
   })
 
-  return { information, contact }
+  const paymentDetail = ref({
+    namaBank: '',
+    noRekening: '',
+    namaPemilikAkun: '',
+    perbedaanRekening: '',
+    mataUang: '',
+    halamanPertama: '',
+    negara: '',
+    alamatBank: '',
+  })
+
+  return { information, contact, paymentDetail }
 })
