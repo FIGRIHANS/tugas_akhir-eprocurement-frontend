@@ -32,5 +32,24 @@ export const useRegistrationVendorStore = defineStore('registrationVendor', () =
     },
   })
 
-  return { information }
+  const contact = ref({
+    account: {
+      username: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      website: '',
+      noTel: '',
+      noFax: '',
+    },
+    contactPerson: {
+      fullName: '',
+      noTel: '',
+      email: '',
+      partOf: '',
+      list: [],
+    },
+  })
+
+  return { information, contact }
 })

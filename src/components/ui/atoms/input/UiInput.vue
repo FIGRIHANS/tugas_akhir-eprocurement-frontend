@@ -3,18 +3,17 @@
     :class="[
       'relative',
       {
-        'flex flex-row gap-6 items-center': labelStyle === 'row',
-        'items-start': labelStyle === 'row' && rowAlign === 'start',
+        'flex items-baseline flex-wrap lg:flex-nowrap gap-2.5': row,
       },
     ]"
   >
     <label
-      v-if="label && labelStyle === 'default'"
+      v-if="label && !row"
       class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px]"
     >
       {{ label }}
     </label>
-    <label v-else-if="label && labelStyle !== 'default'" class="text-gray-800 w-2/5">
+    <label v-else-if="label && row" class="form-label max-w-32">
       {{ label }}
     </label>
     <input
@@ -36,7 +35,7 @@ withDefaults(defineProps<IInputProps>(), {
   placeholder: '',
   readonly: false,
   disabled: false,
-  labelStyle: 'default',
+  row: false,
 })
 
 const model = defineModel()

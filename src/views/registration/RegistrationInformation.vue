@@ -5,19 +5,19 @@
         v-model="information.perusahaan.namaPerusahaan"
         label="Nama Perusahaan"
         placeholder="Masukkan Nama Perusahaan"
-        label-style="row"
+        row
       />
       <UiInput
         v-model="information.perusahaan.groupPerusahaan"
         label="Group Perusahaan"
         placeholder="Masukkan Group Perusahaan"
-        label-style="row"
+        row
       />
       <UiInput
         v-model="information.perusahaan.tanggalBerdiri"
         label="Tanggal Berdiri"
         placeholder="Pilih Tanggal"
-        label-style="row"
+        row
       />
     </UiFormGroup>
 
@@ -26,28 +26,28 @@
         v-model="information.lokasiKantorPusat.negara"
         label="Negara"
         placeholder="Pilih Negara"
-        label-style="row"
+        row
       />
       <UiSelect
         v-model="information.lokasiKantorPusat.provinsi"
         label="Provinsi"
         placeholder="Pilih Provinsi"
         :disabled="!information.lokasiKantorPusat.negara"
-        label-style="row"
+        row
       />
       <UiSelect
         v-model="information.lokasiKantorPusat.kabupatenKota"
         label="Kabupaten / Kota"
         placeholder="Pilih Kabupaten / Kota"
         :disabled="!information.lokasiKantorPusat.provinsi"
-        label-style="row"
+        row
       />
       <UiSelect
         v-model="information.lokasiKantorPusat.kecamatan"
         label="Kecamatan"
         placeholder="Pilih Kecamatan"
         :disabled="!information.lokasiKantorPusat.kabupatenKota"
-        label-style="row"
+        row
       />
     </UiFormGroup>
 
@@ -66,28 +66,28 @@
           label="Negara"
           placeholder="Pilih Negara"
           :disabled="isSameAsHq"
-          label-style="row"
+          row
         />
         <UiSelect
           v-model="information.lokasiPerusahaan.provinsi"
           label="Provinsi"
           placeholder="Pilih Provinsi"
           :disabled="isSameAsHq || !information.lokasiPerusahaan.negara"
-          label-style="row"
+          row
         />
         <UiSelect
           v-model="information.lokasiPerusahaan.kabupatenKota"
-          label="Kabupaten/Kota"
-          placeholder="Pilih Kabupaten/Kota"
+          label="Kabupaten / Kota"
+          placeholder="Pilih Kabupaten / Kota"
           :disabled="isSameAsHq || !information.lokasiPerusahaan.provinsi"
-          label-style="row"
+          row
         />
         <UiSelect
           v-model="information.lokasiPerusahaan.kecamatan"
           label="Kecamatan"
           placeholder="Pilih Kecamatan"
           :disabled="isSameAsHq || !information.lokasiPerusahaan.kabupatenKota"
-          label-style="row"
+          row
         />
       </UiFormGroup>
 
@@ -96,26 +96,23 @@
           v-model="information.lokasiPerusahaan.kodePos"
           label="Kode Pos"
           placeholder="Masukkan Kode Pos"
-          label-style="row"
+          row
         />
         <UiInput
           v-model="information.lokasiPerusahaan.alamatLengkap"
           label="Alamat Lengkap"
           placeholder="Masukkan Alamat Lengkap"
-          label-style="row"
+          row
         />
       </UiFormGroup>
     </UiFormGroup>
 
     <UiFormGroup title="Bidang Usaha & Bisnis Unit" body-class="px-4" hide-border>
       <div class="flex flex-row gap-4 items-end">
-        <UiSelect
-          v-model="information.bidangUsaha.selected"
-          class="w-full"
-          label="Bidang Usaha"
-          placeholder="Pilih"
-          label-style="column"
-        />
+        <div class="flex flex-col gap-2.5 w-full">
+          <label class="form-label"> Bidang Usaha </label>
+          <UiSelect v-model="information.bidangUsaha.selected" class="w-full" placeholder="Pilih" />
+        </div>
         <UiButton class="grow-0 w-fit" outline @click="addBusinessField">
           <UiIcon name="plus-circle" variant="duotone" />
           Tambah
@@ -131,7 +128,13 @@
                 <th class="w-10">Action</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody v-if="information.bidangUsaha.list.length === 0">
+              <tr>
+                <td class="text-center">No Data</td>
+                <td></td>
+              </tr>
+            </tbody>
+            <tbody v-else>
               <tr v-for="i in 4" :key="i">
                 <td class="flex flex-col">
                   <span class="font-semibold">Aktivitas teknologi dan aplikasi</span>
@@ -149,13 +152,10 @@
       </div>
 
       <div class="flex flex-row gap-4 items-end">
-        <UiSelect
-          v-model="information.bisnisUnit.selected"
-          class="w-full"
-          label="Bisnis Unit"
-          placeholder="Pilih"
-          label-style="column"
-        />
+        <div class="flex flex-col gap-2.5 w-full">
+          <label class="form-label"> Bisnis Unit </label>
+          <UiSelect v-model="information.bisnisUnit.selected" class="w-full" placeholder="Pilih" />
+        </div>
         <UiButton class="grow-0 w-fit" outline @click="addBusinessUnit">
           <UiIcon name="plus-circle" variant="duotone" />
           Tambah
@@ -171,10 +171,23 @@
                 <th class="w-10">Action</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody v-if="information.bisnisUnit.list.length === 0">
               <tr>
-                <td>No Data</td>
+                <td class="text-center">No Data</td>
                 <td></td>
+              </tr>
+            </tbody>
+            <tbody v-else>
+              <tr v-for="i in 4" :key="i">
+                <td class="flex flex-col">
+                  <span class="font-semibold">Aktivitas teknologi dan aplikasi</span>
+                  <span>09234</span>
+                </td>
+                <td>
+                  <UiButton variant="danger" outline icon>
+                    <UiIcon variant="duotone" name="cross-circle" />
+                  </UiButton>
+                </td>
               </tr>
             </tbody>
           </table>
