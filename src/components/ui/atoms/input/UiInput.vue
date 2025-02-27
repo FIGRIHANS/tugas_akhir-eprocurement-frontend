@@ -3,7 +3,7 @@
     :class="[
       'relative',
       {
-        'grid grid-cols-2 gap-6 items-center': labelStyle === 'row',
+        'flex flex-row gap-6 items-center': labelStyle === 'row',
         'items-start': labelStyle === 'row' && rowAlign === 'start',
       },
     ]"
@@ -14,7 +14,7 @@
     >
       {{ label }}
     </label>
-    <label v-else-if="label && labelStyle !== 'default'" class="text-gray-800">
+    <label v-else-if="label && labelStyle !== 'default'" class="text-gray-800 w-2/5">
       {{ label }}
     </label>
     <input
