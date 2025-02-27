@@ -13,7 +13,7 @@
     >
       {{ label }}
     </label>
-    <label v-else-if="label && row" class="form-label max-w-32">
+    <label v-else-if="label && row" class="form-label w-2/5">
       {{ label }}
     </label>
     <input
