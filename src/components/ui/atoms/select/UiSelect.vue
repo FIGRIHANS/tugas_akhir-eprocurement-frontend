@@ -21,7 +21,9 @@
       <option selected disabled hidden value="">
         {{ placeholder }}
       </option>
-      <option value="1">Option 1</option>
+      <option v-for="option in options" :key="option[valueKey]" :value="option[valueKey]">
+        {{ option[textKey] }}
+      </option>
       <option value="2">Option 2</option>
       <option value="3">Option 3</option>
     </select>
@@ -37,6 +39,8 @@ withDefaults(defineProps<ISelectProps>(), {
   readonly: false,
   disabled: false,
   row: false,
+  valueKey: 'value',
+  textKey: 'text',
 })
 
 const model = defineModel({ default: '' })

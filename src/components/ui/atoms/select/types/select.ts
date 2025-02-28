@@ -4,4 +4,7 @@ export interface ISelectProps {
   readonly?: boolean
   disabled?: boolean
   row?: boolean
+  options: { [key: string]: any }[]
+  valueKey?: string
+  textKey?: string
 }
