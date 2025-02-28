@@ -131,8 +131,8 @@
           <UiIcon variant="duotone" name="information" class="text-4xl" />
 
           <div class="flex flex-col gap-1">
-            <span class="font-semibold text-lg text-primary">Perhatian</span>
-            <p class="font-medium">
+            <span class="font-semibold text-primary">Perhatian</span>
+            <p class="font-medium text-sm">
               Vendor yang berminat mengikuti tender cukup satu kali registerasi dan pastikan data
               yang anda inputkan valid. Data calon vendor yang tidak bisa dipertanggung jawabkan
               dapat dikenakan sanksi oleh PT Datasea

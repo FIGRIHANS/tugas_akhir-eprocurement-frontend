@@ -1,6 +1,13 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 
+const documentAndLegalFields = {
+  noIzin: '',
+  tanggalMulai: '',
+  tanggalSelesai: '',
+  dokumen: '',
+}
+
 export const useRegistrationVendorStore = defineStore('registrationVendor', () => {
   const information = ref({
     perusahaan: {
@@ -51,6 +58,30 @@ export const useRegistrationVendorStore = defineStore('registrationVendor', () =
     },
   })
 
+  const documentAndLegal = ref({
+    bagian: '',
+    fields: {
+      nib: {
+        ...documentAndLegalFields,
+      },
+      npwp: {
+        ...documentAndLegalFields,
+      },
+      sppkp: {
+        ...documentAndLegalFields,
+      },
+      spfp: {
+        ...documentAndLegalFields,
+      },
+      suratNonPkp: {
+        ...documentAndLegalFields,
+      },
+      paktaIntegritas: {
+        ...documentAndLegalFields,
+      },
+    },
+  })
+
   const paymentDetail = ref({
     namaBank: '',
     noRekening: '',
@@ -62,5 +93,5 @@ export const useRegistrationVendorStore = defineStore('registrationVendor', () =
     alamatBank: '',
   })
 
-  return { information, contact, paymentDetail }
+  return { information, contact, documentAndLegal, paymentDetail }
 })
