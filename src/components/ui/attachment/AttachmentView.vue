@@ -13,5 +13,5 @@
 </template>
 
 <script lang="ts" setup>
-import iconPDF from './AttachmentView/iconPDF.vue'
+import iconPDF from '../../icons/iconPDF.vue'
 </script>

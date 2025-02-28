@@ -2,7 +2,7 @@
   <div class="file-upload">
     <input type="file" ref="fileInput" accept=".pdf" @change="handleFileUpload" class="hidden" />
 
-    <div class="flex items-center" @click="triggerFileInput">
+    <div class="flex items-center" :class="{ 'border-danger': error }" @click="triggerFileInput">
       <div class="upload__left">
         <IconUpload />
       </div>
@@ -16,6 +16,10 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import IconUpload from './PdfUpload/IconUpload.vue'
+
+defineProps<{
+  error?: boolean
+}>()
 
 const emits = defineEmits(['setFile'])
 

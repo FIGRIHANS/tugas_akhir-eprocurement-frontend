@@ -3,7 +3,7 @@
     <VueDatePicker v-model="date" class="w-full">
       <template #dp-input="{ value }">
         <div class="input relative">
-          <input placeholder="Select" type="text" :value="value" readonly class="min-w-[0px]"/>
+          <input placeholder="Select" :value="value" readonly class="min-w-[0px]" :class="{ 'border-danger': error }"/>
           <button class="btn btn-icon">
             <i class="ki-filled ki-calendar"></i>
           </button>
@@ -19,6 +19,7 @@ import { ref, watch } from 'vue'
 
 const props = defineProps<{
   modelValue: string
+  error?: boolean
 }>()
 
 const emits = defineEmits(['update:modelValue'])

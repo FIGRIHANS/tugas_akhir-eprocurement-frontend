@@ -4,13 +4,13 @@
       <i class="ki-duotone ki-document text-gray-600 text-xl"></i>
       <span class="font-medium">General Data</span>
     </div>
-    <div class="py-[8px] px-[16px]">
+    <div v-if="form" class="py-[8px] px-[16px]">
       <!-- Select Company -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
         <label class="form-label max-w-32">
           Select Company
         </label>
-        <select class="select">
+        <select v-model="form.companyId" class="select" :class="{ 'border-danger': form.companyIdError }">
           <option value="1">
             Option 1
           </option>
@@ -27,7 +27,7 @@
         <label class="form-label max-w-32">
           Select Vendor
         </label>
-        <select class="select">
+        <select v-model="form.vendorId" class="select" :class="{ 'border-danger': form.vendorIdError }">
           <option value="1">
             Option 1
           </option>
@@ -44,29 +44,36 @@
         <label class="form-label max-w-32">
           Bill To Company
         </label>
-        <input class="input" placeholder="" type="text"/>
+        <input v-model="form.billToCompany" class="input" placeholder="" :class="{ 'border-danger': form.billToCompanyError }"/>
       </div>
       <!-- Bill To Vendor -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
         <label class="form-label max-w-32">
           Bill To Vendor
         </label>
-        <input class="input" placeholder="" type="text"/>
+        <input v-model="form.billToVendor" class="input" placeholder="" :class="{ 'border-danger': form.billToVendorError }"/>
       </div>
       <!-- Vendor Tax ID -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
         <label class="form-label max-w-32">
           Vendor Tax ID
         </label>
-        <input class="input" placeholder="" type="text"/>
+        <input v-model="form.vendorTaxId" class="input" placeholder="" :class="{ 'border-danger': form.vendorTaxIdError }"/>
       </div>
       <!-- Address -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
         <label class="form-label max-w-32">
           Address
         </label>
-        <textarea class="textarea" placeholder="" rows="6"></textarea>
+        <textarea v-model="form.address" class="textarea" placeholder="" rows="6" :class="{ 'border-danger': form.addressError }"></textarea>
       </div>
     </div>
   </div>
 </template>
+
+<script lang="ts" setup>
+import { inject } from 'vue'
+import type { formTypes } from '../../types/invoiceAddWrapper'
+
+const form = inject<formTypes>('form')
+</script>

@@ -3,7 +3,7 @@
     <div class="card-header flex justify-between items-center gap-[10px] py-[16px] px-[20px]">
       <span class="font-semibold text-base">Invoice Calculation</span>
       <div class="flex items-center gap-[10px]">
-        <button class="btn btn-outline btn-primary">
+        <button class="btn btn-outline btn-primary" data-modal-toggle="#calculation_log_modal">
           Log
           <i class="ki-duotone ki-burger-menu"></i>
         </button>
@@ -29,12 +29,15 @@
         </div>
       </div>
     </div>
+    <ModalLog />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, defineAsyncComponent } from 'vue'
 import type { listType } from '../../types/invoiceCalculation'
+
+const ModalLog = defineAsyncComponent(() => import('./InvoiceCalculation/ModalLog.vue'))
 
 const listCalculation = ref<listType[]>([
   {
