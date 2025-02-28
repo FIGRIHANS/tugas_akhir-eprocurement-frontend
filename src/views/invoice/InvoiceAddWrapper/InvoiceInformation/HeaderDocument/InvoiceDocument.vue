@@ -3,70 +3,19 @@
     <div>
     <p class="mb-[16px] font-semibold text-base">Invoice Header</p>
     <div>
-      <!-- Invoice Document -->
-      <div class="flex items-center flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
+      <div v-for="(item, index) in list" :key="index" class="flex items-center flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
         <label class="form-label max-w-32">
-          Invoice Document
+          {{ item.title }}
         </label>
-        <pdfUpload v-if="!form.invoiceDocument" :error="form.invoiceDocumentError" @setFile="setFile($event, 'invoiceDocument')" />
-        <div v-else class="flex justify-between items-center gap-[8px] flex-1">
-          <AttachmentView />
-          <span class="border-b border-dashed border-primary text-primary cursor-pointer text-xs font-medium">Edit</span>
-        </div>
-      </div>
-      <!-- Faktur Pajak -->
-      <div class="flex items-center flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-        <label class="form-label max-w-32">
-          Faktur Pajak
-        </label>
-        <pdfUpload v-if="!form.tax" :error="form.taxError" @setFile="setFile($event, 'tax')" />
-        <div v-else class="flex justify-between items-center gap-[8px] flex-1">
-          <AttachmentView />
-          <span class="border-b border-dashed border-primary text-primary cursor-pointer text-xs font-medium">Edit</span>
-        </div>
-      </div>
-      <!-- BAST -->
-      <div class="flex items-center flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-        <label class="form-label max-w-32">
-          BAST
-        </label>
-        <pdfUpload v-if="!form.bast" :error="form.bastError" @setFile="setFile($event, 'bast')" />
-        <div v-else class="flex justify-between items-center gap-[8px] flex-1">
-          <AttachmentView />
-          <span class="border-b border-dashed border-primary text-primary cursor-pointer text-xs font-medium">Edit</span>
-        </div>
-      </div>
-      <!-- Reference Document -->
-      <div class="flex items-center flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-        <label class="form-label max-w-32">
-          Reference Document
-        </label>
-        <pdfUpload v-if="!form.referenceDocument" :error="form.referenceDocumentError" @setFile="setFile($event, 'referenceDocument')" />
-        <div v-else class="flex justify-between items-center gap-[8px] flex-1">
-          <AttachmentView />
-          <span class="border-b border-dashed border-primary text-primary cursor-pointer text-xs font-medium">Edit</span>
-        </div>
-      </div>
-      <!-- Bukti Potong -->
-      <div class="flex items-center flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-        <label class="form-label max-w-32">
-          Bukti Potong
-        </label>
-        <pdfUpload v-if="!form.buktiPotong" :error="form.buktiPotongError" @setFile="setFile($event, 'buktiPotong')" />
-        <div v-else class="flex justify-between items-center gap-[8px] flex-1">
-          <AttachmentView />
-          <span class="border-b border-dashed border-primary text-primary cursor-pointer text-xs font-medium">Edit</span>
-        </div>
-      </div>
-      <!-- Other Document -->
-      <div class="flex items-center flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-        <label class="form-label max-w-32">
-          Other Document
-        </label>
-        <pdfUpload v-if="!form.otherDocument" :error="form.otherDocumentError" @setFile="setFile($event, 'otherDocument')" />
-        <div v-else class="flex justify-between items-center gap-[8px] flex-1">
-          <AttachmentView />
-          <span class="border-b border-dashed border-primary text-primary cursor-pointer text-xs font-medium">Edit</span>
+        <pdfUpload
+          ref="pdfUploadRef"
+          v-show="!form[item.varName as keyof typeof form]"
+          :error="!!form[item.varErrorName  as keyof documentFormTypes]"
+          @setFile="setFile($event, item.varName as keyof documentFormTypes)" 
+        />
+        <div v-if="form[item.varName as keyof typeof form]" class="flex justify-between items-center gap-[8px] flex-1">
+          <AttachmentView :fileData="typeof form[item.varName as keyof documentFormTypes] === 'object' ? form[item.varName as keyof documentFormTypes] as File : null" />
+          <span class="border-b border-dashed border-primary text-primary cursor-pointer text-xs font-medium" @click="changeFile(index)">Edit</span>
         </div>
       </div>
     </div>
@@ -75,8 +24,8 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, inject, watch } from 'vue'
-import type { documentFormTypes } from '../../../types/invoiceDocument'
+import { ref, reactive, inject, watch } from 'vue'
+import type { documentFormTypes, listFormTypes } from '../../../types/invoiceDocument'
 import type { formTypes } from '../../../types/invoiceAddWrapper'
 import pdfUpload from '@/components/ui/pdfUpload/pdfUpload.vue'
 import AttachmentView from '@/components/ui/attachment/AttachmentView.vue'
@@ -90,10 +39,48 @@ const form = reactive<documentFormTypes>({
   otherDocument: null
 })
 
+const list = ref<listFormTypes[]>([
+  {
+    title: 'Invoice Document',
+    varName: 'invoiceDocument',
+    varErrorName: 'invoiceDocumentError'
+  },
+  {
+    title: 'Faktur Pajak',
+    varName: 'tax',
+    varErrorName: 'taxError'
+  },
+  {
+    title: 'BAST',
+    varName: 'bast',
+    varErrorName: 'bastError'
+  },
+  {
+    title: 'Reference Document',
+    varName: 'referenceDocument',
+    varErrorName: 'referenceDocumentError'
+  },
+  {
+    title: 'Bukti Potong',
+    varName: 'buktiPotong',
+    varErrorName: 'buktiPotongError'
+  },
+  {
+    title: 'Other Document',
+    varName: 'otherDocument',
+    varErrorName: 'otherDocumentError'
+  }
+])
+
 const formInject = inject<formTypes>('form')
+const pdfUploadRef = ref<HTMLElement>()
 
 const setFile = (file: File, name: keyof documentFormTypes) => {
   form[name] = file
+}
+
+const changeFile = (index: number) => {
+  pdfUploadRef.value[index].triggerFileInput()
 }
 
 watch(
@@ -110,6 +97,24 @@ watch(
   },
   {
     deep: true
+  }
+)
+
+watch(
+  () => formInject,
+  () => {
+    if (formInject) {
+      form.invoiceDocument = formInject.invoiceDocument
+      form.tax = formInject.tax
+      form.bast = formInject.bast
+      form.referenceDocument = formInject.referenceDocument
+      form.buktiPotong = formInject.buktiPotong
+      form.otherDocument = formInject.otherDocument
+    }
+  },
+  {
+    deep: true,
+    immediate: true
   }
 )
 </script>

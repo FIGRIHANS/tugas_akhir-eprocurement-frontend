@@ -12,3 +12,9 @@ export interface documentFormTypes {
   otherDocument: File | null
   otherDocumentError?: boolean
 }
+
+export interface listFormTypes {
+  title: string
+  varName: string
+  varErrorName: string
+}
