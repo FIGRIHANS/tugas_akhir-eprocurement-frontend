@@ -14,8 +14,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, defineExpose } from 'vue'
 import IconUpload from './PdfUpload/IconUpload.vue'
+import moment from 'moment'
 
 defineProps<{
   error?: boolean
@@ -37,8 +38,15 @@ const handleFileUpload = (event: Event) => {
 
   if (file.size > 2 * 1024 * 1024) return
 
-  emits('setFile', file)
+  emits('setFile', new File([file], file.name, {
+    type: file.type,
+    lastModified: moment().valueOf()
+  }))
 }
+
+defineExpose({
+  triggerFileInput
+})
 </script>
 
 <style lang="scss" scoped>

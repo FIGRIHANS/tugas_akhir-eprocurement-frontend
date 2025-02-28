@@ -2,7 +2,7 @@
   <div>
     <p class="mb-[16px] font-semibold text-base">Invoice Header</p>
     <div v-if="form" class="flex gap-[24px]">
-      <diV class="flex-1">
+      <div class="flex-1">
         <!-- Invoice No -->
         <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
           <label class="form-label max-w-32">
@@ -62,8 +62,8 @@
           </label>
           <input v-model="form.paymentTerm" class="input" placeholder="" :class="{ 'border-danger': form.paymentTermError }"/>
         </div>
-      </diV>
-      <diV class="flex-1">
+      </div>
+      <div class="flex-1">
         <!-- Invoice No -->
         <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
           <label class="form-label max-w-32">
@@ -123,7 +123,7 @@
           </label>
           <input class="input" placeholder=""/>
         </div>
-      </diV>
+      </div>
     </div>
   </div>
 </template>
