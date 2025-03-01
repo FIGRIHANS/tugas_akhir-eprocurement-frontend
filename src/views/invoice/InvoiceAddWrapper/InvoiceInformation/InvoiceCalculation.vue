@@ -1,7 +1,7 @@
 <template>
-  <div class="card flex-auto">
+  <div class="card flex-1">
     <div class="card-header flex justify-between items-center gap-[10px] py-[16px] px-[20px]">
-      <span class="font-semibold text-base">Invoice Calculation</span>
+      <span class="font-semibold text-base whitespace-nowrap">Invoice Calculation</span>
       <div class="flex items-center gap-[10px]">
         <button class="btn btn-outline btn-primary" data-modal-toggle="#calculation_log_modal">
           Log

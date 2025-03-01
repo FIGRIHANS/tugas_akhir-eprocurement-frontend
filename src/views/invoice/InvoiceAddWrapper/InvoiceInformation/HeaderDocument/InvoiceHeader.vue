@@ -4,28 +4,28 @@
     <div v-if="form" class="flex gap-[24px]">
       <div class="flex-1">
         <!-- Invoice No -->
-        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
+        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
           <label class="form-label max-w-32">
             Invoice No
           </label>
           <input v-model="form.invoiceNo" class="input" placeholder="" :class="{ 'border-danger': form.invoiceNoError }"/>
         </div>
         <!-- No Faktur Pajak -->
-        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
+        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
           <label class="form-label max-w-32">
             No Faktur Pajak
           </label>
           <input v-model="form.taxInvoiceNumber" class="input" placeholder="" :class="{ 'border-danger': form.taxInvoiceNumberError }"/>
         </div>
         <!-- Tanggal Faktur -->
-        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
+        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
           <label class="form-label max-w-32">
             Tanggal Faktur
           </label>
           <DatePicker v-model="form.taxDate" :error="form.taxDateError" />
         </div>
         <!-- Tax Calculation -->
-        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
+        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
           <label class="form-label max-w-32">
             Tax Calculation
           </label>
@@ -42,21 +42,21 @@
           </select>
         </div>
         <!-- Tax Code -->
-        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
+        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
           <label class="form-label max-w-32">
             Tax Code
           </label>
           <input v-model="form.taxCode" class="input" placeholder="" :class="{ 'border-danger': form.taxCodeError }"/>
         </div>
         <!-- WHT Code -->
-        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
+        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
           <label class="form-label max-w-32">
             WHT Code
           </label>
           <input v-model="form.whtCode" class="input" placeholder="" :class="{ 'border-danger': form.whtCodeError }"/>
         </div>
         <!-- Payment Term -->
-        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
+        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
           <label class="form-label max-w-32">
             Payment Term
           </label>
@@ -65,28 +65,28 @@
       </div>
       <div class="flex-1">
         <!-- Invoice No -->
-        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
+        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
           <label class="form-label max-w-32">
             Invoice No
           </label>
           <input class="input" placeholder=""/>
         </div>
         <!-- No Faktur Pajak -->
-        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
+        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
           <label class="form-label max-w-32">
             No Faktur Pajak
           </label>
           <input class="input" placeholder=""/>
         </div>
         <!-- Tanggal Faktur -->
-        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
+        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
           <label class="form-label max-w-32">
             Tanggal Faktur
           </label>
           <DatePicker v-model="date" />
         </div>
         <!-- Tax Calculation -->
-        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
+        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
           <label class="form-label max-w-32">
             Tax Calculation
           </label>
@@ -103,21 +103,21 @@
           </select>
         </div>
         <!-- Tax Code -->
-        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
+        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
           <label class="form-label max-w-32">
             Tax Code
           </label>
           <input class="input" placeholder=""/>
         </div>
         <!-- WHT Code -->
-        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
+        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
           <label class="form-label max-w-32">
             WHT Code
           </label>
           <input class="input" placeholder=""/>
         </div>
         <!-- Payment Term -->
-        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
+        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
           <label class="form-label max-w-32">
             Payment Term
           </label>
