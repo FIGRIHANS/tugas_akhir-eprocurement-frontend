@@ -2,7 +2,7 @@
   <div>
     <div>
     <p class="mb-[16px] font-semibold text-base">Invoice Header</p>
-    <div>
+    <div class="flex flex-col gap-[10px]">
       <div v-for="(item, index) in list" :key="index" class="flex items-center flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
         <label class="form-label max-w-32">
           {{ item.title }}
