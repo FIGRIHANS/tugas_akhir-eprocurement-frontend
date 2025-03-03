@@ -3,21 +3,66 @@ import { defineStore } from 'pinia'
 import vendorApi from '@/core/utils/vendorApi'
 
 import type { ApiResponse } from '@/core/type/api'
-import type { CountriesType } from './types/vendor-master-data'
+import type { CityListType, CountryListType, DistrictListType } from './types/vendor-master-data'
 
 const baseUrl = '/public/vendor/registration'
 
 export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
-  const countryList = ref<CountriesType[]>([])
+  const countryList = ref<CountryListType>([])
+  const cityList = ref<CityListType>([])
+  const districtList = ref<DistrictListType>([])
 
-  const getVendorCountries = async () => {
-    if (countryList.value.length === 0) {
-      const response: ApiResponse<CountriesType[]> = await vendorApi.get(`${baseUrl}/countries`)
+  const getVendorCountries = async (countryName?: string) => {
+    const response: ApiResponse<CountryListType> = await vendorApi.get(`${baseUrl}/countries`, {
+      params: {
+        countryName,
+      },
+    })
 
-      console.log(response.data.result)
+    countryList.value = response.data.result.content
 
-      countryList.value = response.data.result.content
-    }
+    return response.data.result
   }
-  return { countryList, getVendorCountries }
+
+  const getVendorStates = async () => {
+    const response: ApiResponse = await vendorApi.get(`${baseUrl}/states`)
+
+    return response.data.result
+  }
+
+  const getVendorCities = async (provinceId?: number, cityName?: string) => {
+    const response: ApiResponse<CityListType> = await vendorApi.get(`${baseUrl}/cities`, {
+      params: {
+        provinceId,
+        cityName,
+      },
+    })
+
+    cityList.value = response.data.result.content
+
+    return response.data.result
+  }
+
+  const getVendorDistricts = async (cityId?: number, districtName?: string) => {
+    const response: ApiResponse<DistrictListType> = await vendorApi.get(`${baseUrl}/districts`, {
+      params: {
+        cityId,
+        districtName,
+      },
+    })
+
+    districtList.value = response.data.result.content
+
+    return response.data.result
+  }
+
+  return {
+    countryList,
+    cityList,
+    districtList,
+    getVendorCountries,
+    getVendorStates,
+    getVendorCities,
+    getVendorDistricts,
+  }
 })

@@ -18,14 +18,12 @@
     </label>
 
     <select v-model="model" class="select" :readonly="readonly" :disabled="disabled">
-      <option selected disabled hidden value="">
+      <option selected disabled hidden :value="typeof model === 'number' ? 0 : ''">
         {{ placeholder }}
       </option>
       <option v-for="option in options" :key="option[valueKey]" :value="option[valueKey]">
         {{ option[textKey] }}
       </option>
-      <option value="2">Option 2</option>
-      <option value="3">Option 3</option>
     </select>
   </div>
 </template>
@@ -43,5 +41,5 @@ withDefaults(defineProps<ISelectProps>(), {
   textKey: 'text',
 })
 
-const model = defineModel({ default: '' })
+const model = defineModel<string | number>({ default: '' })
 </script>

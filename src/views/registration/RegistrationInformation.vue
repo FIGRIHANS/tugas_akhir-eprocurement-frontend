@@ -26,6 +26,9 @@
         v-model="information.lokasiKantorPusat.negara"
         label="Negara"
         placeholder="Pilih Negara"
+        :options="countryList"
+        value-key="countryID"
+        text-key="countryName"
         row
       />
       <UiSelect
@@ -35,18 +38,25 @@
         :disabled="!information.lokasiKantorPusat.negara"
         row
       />
+      <!-- :disabled="!information.lokasiKantorPusat.provinsi" -->
       <UiSelect
         v-model="information.lokasiKantorPusat.kabupatenKota"
         label="Kabupaten / Kota"
         placeholder="Pilih Kabupaten / Kota"
-        :disabled="!information.lokasiKantorPusat.provinsi"
+        :options="cityListHq"
+        value-key="cityID"
+        text-key="cityName"
         row
+        @update:model-value="getDistrictList('hq')"
       />
       <UiSelect
         v-model="information.lokasiKantorPusat.kecamatan"
         label="Kecamatan"
         placeholder="Pilih Kecamatan"
         :disabled="!information.lokasiKantorPusat.kabupatenKota"
+        :options="districtListHq"
+        value-key="districtID"
+        text-key="districtName"
         row
       />
     </UiFormGroup>
@@ -66,6 +76,9 @@
           label="Negara"
           placeholder="Pilih Negara"
           :disabled="isSameAsHq"
+          :options="countryList"
+          value-key="countryID"
+          text-key="countryName"
           row
         />
         <UiSelect
@@ -75,18 +88,25 @@
           :disabled="isSameAsHq || !information.lokasiPerusahaan.negara"
           row
         />
+        <!-- :disabled="isSameAsHq || !information.lokasiPerusahaan.provinsi" -->
         <UiSelect
           v-model="information.lokasiPerusahaan.kabupatenKota"
           label="Kabupaten / Kota"
           placeholder="Pilih Kabupaten / Kota"
-          :disabled="isSameAsHq || !information.lokasiPerusahaan.provinsi"
+          :options="cityListCompany"
+          value-key="cityID"
+          text-key="cityName"
           row
+          @update:model-value="getDistrictList('company')"
         />
         <UiSelect
           v-model="information.lokasiPerusahaan.kecamatan"
           label="Kecamatan"
           placeholder="Pilih Kecamatan"
           :disabled="isSameAsHq || !information.lokasiPerusahaan.kabupatenKota"
+          :options="districtListCompany"
+          value-key="districtID"
+          text-key="districtName"
           row
         />
       </UiFormGroup>
@@ -203,6 +223,8 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRegistrationVendorStore } from '@/stores/views/registration'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
 
+import type { CityListType, DistrictListType } from '@/stores/master-data/types/vendor-master-data'
+
 import UiFormGroup from '@/components/ui/atoms/form-group/UiFormGroup.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
@@ -217,6 +239,12 @@ const information = computed(() => registrationVendorStore.information)
 const isSameAsHq = ref<boolean>(false)
 
 const countryList = computed(() => vendorMasterDataStore.countryList)
+
+const cityListHq = ref<CityListType>([])
+const districtListHq = ref<DistrictListType>([])
+
+const cityListCompany = ref<CityListType>([])
+const districtListCompany = ref<DistrictListType>([])
 
 const checkSameAsHq = () => {
   if (!isSameAsHq.value) {
@@ -235,9 +263,37 @@ const addBusinessUnit = () => {
   console.log('business unit', information.value.bisnisUnit.selected)
 }
 
+const getCityList = async (type: 'hq' | 'company') => {
+  const { lokasiKantorPusat, lokasiPerusahaan } = information.value
+  const response = await vendorMasterDataStore.getVendorCities()
+  // Number(type === 'hq' ? lokasiKantorPusat.kabupatenKota : lokasiPerusahaan.kabupatenKota),
+
+  if (type === 'hq') {
+    cityListHq.value = response.content
+  } else {
+    cityListCompany.value = response.content
+  }
+}
+
+const getDistrictList = async (type: 'hq' | 'company') => {
+  const { lokasiKantorPusat, lokasiPerusahaan } = information.value
+  const response = await vendorMasterDataStore.getVendorDistricts(
+    Number(type === 'hq' ? lokasiKantorPusat.kabupatenKota : lokasiPerusahaan.kabupatenKota),
+  )
+
+  if (type === 'hq') {
+    districtListHq.value = response.content
+  } else {
+    districtListCompany.value = response.content
+  }
+}
+
 watch(
   () => isSameAsHq.value && information.value.lokasiKantorPusat,
   () => {
+    cityListCompany.value = cityListHq.value
+    districtListCompany.value = districtListHq.value
+
     registrationVendorStore.information.lokasiPerusahaan = {
       ...registrationVendorStore.information.lokasiPerusahaan,
       ...information.value.lokasiKantorPusat,
@@ -247,6 +303,8 @@ watch(
 )
 
 onMounted(async () => {
-  vendorMasterDataStore.getVendorCountries()
+  await vendorMasterDataStore.getVendorCountries()
+  await getCityList('hq')
+  await getCityList('company')
 })
 </script>
