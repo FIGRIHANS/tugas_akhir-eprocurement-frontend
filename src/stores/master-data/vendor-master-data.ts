@@ -1,17 +1,22 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import api from '@/core/utils/api'
+import vendorApi from '@/core/utils/vendorApi'
+
+import type { ApiResponse } from '@/core/type/api'
+import type { CountriesType } from './types/vendor-master-data'
 
 const baseUrl = '/public/vendor/registration'
 
 export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
-  const countryList = ref([])
+  const countryList = ref<CountriesType[]>([])
 
   const getVendorCountries = async () => {
     if (countryList.value.length === 0) {
-      const response = await api.get(`${baseUrl}/countries`)
+      const response: ApiResponse<CountriesType[]> = await vendorApi.get(`${baseUrl}/countries`)
 
-      console.log(response.data)
+      console.log(response.data.result)
+
+      countryList.value = response.data.result.content
     }
   }
   return { countryList, getVendorCountries }
