@@ -53,8 +53,8 @@ export const useRegistrationVendorStore = defineStore('registrationVendor', () =
       fullName: '',
       noTel: '',
       email: '',
-      partOf: '',
-      list: [],
+      position: 0,
+      list: [] as { fullName: string; noTel: string; email: string; position: number }[],
     },
   })
 

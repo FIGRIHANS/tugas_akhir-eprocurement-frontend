@@ -3,7 +3,12 @@ import { defineStore } from 'pinia'
 import vendorApi from '@/core/utils/vendorApi'
 
 import type { ApiResponse } from '@/core/type/api'
-import type { CityListType, CountryListType, DistrictListType } from './types/vendor-master-data'
+import type {
+  CityListType,
+  CountryListType,
+  DistrictListType,
+  PositionListType,
+} from './types/vendor-master-data'
 
 const baseUrl = '/public/vendor/registration'
 
@@ -11,6 +16,7 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
   const countryList = ref<CountryListType>([])
   const cityList = ref<CityListType>([])
   const districtList = ref<DistrictListType>([])
+  const posistionList = ref<PositionListType>([])
 
   const getVendorCountries = async (countryName?: string) => {
     const response: ApiResponse<CountryListType> = await vendorApi.get(`${baseUrl}/countries`, {
@@ -56,13 +62,27 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
     return response.data.result
   }
 
+  const getVendorPosition = async (positionName?: string) => {
+    const response: ApiResponse<PositionListType> = await vendorApi.get(`${baseUrl}/getJabatan`, {
+      params: {
+        positionName,
+      },
+    })
+
+    posistionList.value = response.data.result.content
+
+    return response.data.result
+  }
+
   return {
     countryList,
     cityList,
     districtList,
+    posistionList,
     getVendorCountries,
     getVendorStates,
     getVendorCities,
     getVendorDistricts,
+    getVendorPosition,
   }
 })

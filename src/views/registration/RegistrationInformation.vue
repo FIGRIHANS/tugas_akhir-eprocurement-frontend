@@ -38,11 +38,11 @@
         :disabled="!information.lokasiKantorPusat.negara"
         row
       />
-      <!-- :disabled="!information.lokasiKantorPusat.provinsi" -->
       <UiSelect
         v-model="information.lokasiKantorPusat.kabupatenKota"
         label="Kabupaten / Kota"
         placeholder="Pilih Kabupaten / Kota"
+        :disabled="!information.lokasiKantorPusat.provinsi"
         :options="cityListHq"
         value-key="cityID"
         text-key="cityName"
@@ -88,11 +88,11 @@
           :disabled="isSameAsHq || !information.lokasiPerusahaan.negara"
           row
         />
-        <!-- :disabled="isSameAsHq || !information.lokasiPerusahaan.provinsi" -->
         <UiSelect
           v-model="information.lokasiPerusahaan.kabupatenKota"
           label="Kabupaten / Kota"
           placeholder="Pilih Kabupaten / Kota"
+          :disabled="isSameAsHq || !information.lokasiPerusahaan.provinsi"
           :options="cityListCompany"
           value-key="cityID"
           text-key="cityName"

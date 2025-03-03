@@ -56,10 +56,18 @@
           placeholder="Masukkan email"
           row
         />
-        <UiSelect v-model="contact.contactPerson.partOf" label="Bagian" placeholder="Pilih" row />
+        <UiSelect
+          v-model="contact.contactPerson.position"
+          label="Bagian"
+          placeholder="Pilih"
+          :options="positionList"
+          value-key="positionTypeId"
+          text-key="positionName"
+          row
+        />
       </UiFormGroup>
 
-      <UiButton class="w-fit justify-self-end mx-4" outline>
+      <UiButton class="w-fit justify-self-end mx-4" outline @click="addContactPerson">
         <UiIcon variant="duotone" name="plus-circle" />
         Tambah
       </UiButton>
@@ -87,13 +95,13 @@
             </tr>
           </tbody>
           <tbody v-else>
-            <tr v-for="i in 4" :key="i">
-              <td>Name lengkap</td>
-              <td>No tel</td>
-              <td>Email</td>
-              <td>Bagian</td>
+            <tr v-for="(contactPerson, index) in contact.contactPerson.list" :key="index">
+              <td>{{ contactPerson.fullName }}</td>
+              <td>{{ contactPerson.noTel }}</td>
+              <td>{{ contactPerson.email }}</td>
+              <td>{{ displayPosition(contactPerson.position) }}</td>
               <td>
-                <UiButton variant="danger" outline icon>
+                <UiButton variant="danger" outline icon @click="deleteContactPerson(index)">
                   <UiIcon variant="duotone" name="cross-circle" />
                 </UiButton>
               </td>
@@ -106,9 +114,10 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 
 import { useRegistrationVendorStore } from '@/stores/views/registration'
+import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
 
 import UiFormGroup from '@/components/ui/atoms/form-group/UiFormGroup.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
@@ -117,5 +126,38 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 
 const registrationVendorStore = useRegistrationVendorStore()
+const vendorMasterDataStore = useVendorMasterDataStore()
+
 const contact = computed(() => registrationVendorStore.contact)
+const positionList = computed(() => vendorMasterDataStore.posistionList)
+
+const addContactPerson = () => {
+  const { list, ...clearObject } = contact.value.contactPerson
+
+  const isObjectHasEmpty = Object.values(clearObject).some((value) => !value)
+
+  if (!isObjectHasEmpty) {
+    registrationVendorStore.contact.contactPerson.list.push(clearObject)
+
+    registrationVendorStore.contact.contactPerson = {
+      ...registrationVendorStore.contact.contactPerson,
+      fullName: '',
+      noTel: '',
+      email: '',
+      position: 0,
+    }
+  }
+}
+
+const deleteContactPerson = (index: number) => {
+  registrationVendorStore.contact.contactPerson.list.splice(index, 1)
+}
+
+const displayPosition = (value: number) => {
+  return positionList.value.find((item) => item.positionTypeId === value)?.positionName
+}
+
+onMounted(async () => {
+  await vendorMasterDataStore.getVendorPosition()
+})
 </script>

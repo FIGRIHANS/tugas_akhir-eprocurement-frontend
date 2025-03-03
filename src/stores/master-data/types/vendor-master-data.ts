@@ -14,3 +14,8 @@ export type DistrictListType = {
   districtName: string
   cityID: number
 }[]
+
+export type PositionListType = {
+  positionTypeId: number
+  positionName: string
+}[]
