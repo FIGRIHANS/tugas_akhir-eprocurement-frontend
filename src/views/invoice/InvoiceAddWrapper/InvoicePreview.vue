@@ -1,19 +1,21 @@
 <template>
-  <div class="flex gap-[24px]">
-    <div class="flex flex-col gap-[24px] py-[16px] grow">
-      <InvoiceView />
-      <hr class="border-gray-300" />
-      <InvoicePoGrView />
-      <hr class="border-gray-300" />
-      <AdditionalCostView />
-      <hr class="border-gray-300" />
-      <InvoiceCalculationView />
+  <div class="flex flex-col gap-[24px]">
+    <div class="flex flex-1 gap-[24px]">
+      <div class="flex flex-col gap-[24px] grow">
+        <InvoiceView />
+        <hr class="border-gray-300" />
+        <BankKeyView />
+      </div>
+      <div class="flex flex-col gap-[20px] p-[30px] bg-gray-100 rounded-xl h-full flex-1">
+        <GeneralDataView />
+      </div>
     </div>
-    <div class="flex flex-col gap-[20px] p-[30px] bg-gray-100 rounded-xl h-full flex-1">
-      <GeneralDataView />
-      <hr class="border-gray-300" />
-      <BankKeyView />
-    </div>
+    <hr class="border-gray-300" />
+    <InvoiceCalculationView />
+    <hr class="border-gray-300" />
+    <InvoicePoGrView />
+    <hr class="border-gray-300" />
+    <AdditionalCostView />
   </div>
 </template>
 

@@ -4,16 +4,12 @@ import type { itemsCostType } from './additionalCost'
 
 export interface formTypes extends documentFormTypes {
   // Invoice Data
-  companyId: string
-  companyIdError?: boolean
   vendorId: string
   vendorIdError?: boolean
-  billToCompany: string
-  billToCompanyError?: boolean
-  billToVendor: string
-  billToVendorError?: boolean
-  vendorTaxId: string
-  vendorTaxIdError?: boolean
+  businessField: string
+  businessFieldError?: boolean
+  subBusinessField: string
+  subBusinessFieldError?: boolean
   address: string
   addressError?: boolean
   bankKeyId: string

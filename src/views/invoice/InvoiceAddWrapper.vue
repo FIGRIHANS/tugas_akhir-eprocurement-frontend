@@ -2,8 +2,8 @@
   <div>
     <Breadcrumb title="Add Invoice" :routes="routes" />
     <StepperStatus />
-    <TabInvoice :active-tab="tabNow" @change-tab="setTab" />
-    <div class="p-[24px]">
+    <TabInvoice :active-tab="tabNow" @change-tab="setTab" class="-mx-[24px]" />
+    <div>
       <Transition mode="out-in">
         <component :is="contentComponent" />
       </Transition>
@@ -61,11 +61,9 @@ const routes = ref<routeTypes[]>([
 ])
 
 const form = reactive<formTypes>({
-  companyId: '',
   vendorId: '',
-  billToCompany: '',
-  billToVendor: '',
-  vendorTaxId: '',
+  businessField: '',
+  subBusinessField: '',
   address: '',
   bankKeyId: '',
   bankNameId: '',
@@ -82,9 +80,7 @@ const form = reactive<formTypes>({
   paymentTerm: '',
   invoiceDocument: null,
   tax: null,
-  bast: null,
   referenceDocument: null,
-  buktiPotong: null,
   otherDocument: null,
   invoicePoGr: [],
   additionalCost: []
@@ -101,11 +97,9 @@ const contentComponent = computed(() => {
 })
 
 const checkInvoiceData = () => {
-  form.companyIdError = useCheckEmpty(form.companyId).isError
   form.vendorIdError = useCheckEmpty(form.vendorId).isError
-  form.billToCompanyError = useCheckEmpty(form.billToCompany).isError
-  form.billToVendorError = useCheckEmpty(form.billToVendor).isError
-  form.vendorTaxIdError = useCheckEmpty(form.vendorTaxId).isError
+  form.businessFieldError = useCheckEmpty(form.businessField).isError
+  form.subBusinessFieldError = useCheckEmpty(form.subBusinessField).isError
   form.addressError = useCheckEmpty(form.address).isError
 
   form.bankKeyIdError = useCheckEmpty(form.bankKeyId).isError
@@ -116,11 +110,9 @@ const checkInvoiceData = () => {
   form.bankAddressError = useCheckEmpty(form.bankAddress).isError
 
   if (
-    form.companyIdError ||
     form.vendorIdError ||
-    form.billToCompanyError ||
-    form.billToVendorError ||
-    form.vendorTaxIdError ||
+    form.businessFieldError ||
+    form.subBusinessFieldError ||
     form.addressError ||
     form.bankKeyIdError ||
     form.bankNameIdError ||
@@ -145,9 +137,7 @@ const checkInvoiceInformation = () => {
 
   form.invoiceDocumentError = form.invoiceDocument === null
   form.taxError = form.tax === null
-  form.bastError = form.bast === null
   form.referenceDocumentError = form.referenceDocument === null
-  form.buktiPotongError = form.buktiPotong === null
   form.otherDocumentError = form.otherDocument === null
 
   if (
@@ -160,9 +150,7 @@ const checkInvoiceInformation = () => {
     form.paymentTermError ||
     form.invoiceDocumentError ||
     form.taxError ||
-    form.bastError ||
     form.referenceDocumentError ||
-    form.buktiPotongError ||
     form.otherDocumentError
   ) return false
   else return true

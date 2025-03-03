@@ -1,29 +1,23 @@
 <template>
-  <div v-if="form" class="flex flex-col gap-[20px]">
-    <p class="text-base font-semibold">General Data</p>
-    <div>
-      <p class="text-xs font-normal text-gray-700">Company</p>
-      <p class="text-sm font-medium">{{ form.companyId || '-' }}</p>
-    </div>
-    <div>
-      <p class="text-xs font-normal text-gray-700">Vendor</p>
-      <p class="text-sm font-medium">{{ form.vendorId || '-' }}</p>
-    </div>
-    <div>
-      <p class="text-xs font-normal text-gray-700">Bill To Company</p>
-      <p class="text-sm font-medium">{{ form.billToCompany || '-' }}</p>
-    </div>
-    <div>
-      <p class="text-xs font-normal text-gray-700">Bill To Vendor</p>
-      <p class="text-sm font-medium">{{ form.billToVendor || '-' }}</p>
-    </div>
-    <div>
-      <p class="text-xs font-normal text-gray-700">Vendor Tax ID</p>
-      <p class="text-sm font-medium">{{ form.vendorTaxId || '-' }}</p>
-    </div>
-    <div>
-      <p class="text-xs font-normal text-gray-700">Address</p>
-      <p class="text-sm font-medium">{{ form.address || '-' }}</p>
+  <div v-if="form">
+    <p class="text-base font-semibold mb-[20px]">General Data</p>
+    <div class="flex flex-col gap-[30px]">
+      <div>
+        <p class="text-xs font-normal text-gray-700">Vendor</p>
+        <p class="text-sm font-medium">{{ form.vendorId || '-' }}</p>
+      </div>
+      <div>
+        <p class="text-xs font-normal text-gray-700">Bidang Usaha</p>
+        <p class="text-sm font-medium">{{ form.businessField || '-' }}</p>
+      </div>
+      <div>
+        <p class="text-xs font-normal text-gray-700">Sub Bidang Usaha</p>
+        <p class="text-sm font-medium">{{ form.subBusinessField || '-' }}</p>
+      </div>
+      <div>
+        <p class="text-xs font-normal text-gray-700">Address</p>
+        <p class="text-sm font-medium">{{ form.address || '-' }}</p>
+      </div>
     </div>
   </div>
 </template>

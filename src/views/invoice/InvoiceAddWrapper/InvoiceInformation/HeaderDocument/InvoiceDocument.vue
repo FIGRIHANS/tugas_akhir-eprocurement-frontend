@@ -1,9 +1,8 @@
 <template>
-  <div>
-    <div>
+  <div class="px-[14px]">
     <p class="mb-[16px] font-semibold text-base">Invoice Header</p>
-    <div class="flex flex-col gap-[10px]">
-      <div v-for="(item, index) in list" :key="index" class="flex items-center flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
+    <div class="flex flex-col gap-[46px]">
+      <div v-for="(item, index) in list" :key="index" class="flex items-center flex-wrap lg:flex-nowrap gap-2.5">
         <label class="form-label max-w-32">
           {{ item.title }}
         </label>
@@ -20,7 +19,6 @@
       </div>
     </div>
   </div>
-  </div>
 </template>
 
 <script lang="ts" setup>
@@ -33,9 +31,7 @@ import AttachmentView from '@/components/ui/attachment/AttachmentView.vue'
 const form = reactive<documentFormTypes>({
   invoiceDocument: null,
   tax: null,
-  bast: null,
   referenceDocument: null,
-  buktiPotong: null,
   otherDocument: null
 })
 
@@ -51,19 +47,9 @@ const list = ref<listFormTypes[]>([
     varErrorName: 'taxError'
   },
   {
-    title: 'BAST',
-    varName: 'bast',
-    varErrorName: 'bastError'
-  },
-  {
     title: 'Reference Document',
     varName: 'referenceDocument',
     varErrorName: 'referenceDocumentError'
-  },
-  {
-    title: 'Bukti Potong',
-    varName: 'buktiPotong',
-    varErrorName: 'buktiPotongError'
   },
   {
     title: 'Other Document',
@@ -89,9 +75,7 @@ watch(
     if (formInject) {
       formInject.invoiceDocument = form.invoiceDocument
       formInject.tax = form.tax
-      formInject.bast = form.bast
       formInject.referenceDocument = form.referenceDocument
-      formInject.buktiPotong = form.buktiPotong
       formInject.otherDocument = form.otherDocument
     }
   },
@@ -106,9 +90,7 @@ watch(
     if (formInject) {
       form.invoiceDocument = formInject.invoiceDocument
       form.tax = formInject.tax
-      form.bast = formInject.bast
       form.referenceDocument = formInject.referenceDocument
-      form.buktiPotong = formInject.buktiPotong
       form.otherDocument = formInject.otherDocument
     }
   },

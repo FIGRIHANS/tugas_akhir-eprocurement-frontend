@@ -5,27 +5,10 @@
       <span class="font-medium">General Data</span>
     </div>
     <div v-if="form" class="py-[8px] px-[16px]">
-      <!-- Select Company -->
+      <!-- Nama Vendor -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
         <label class="form-label max-w-32">
-          Select Company
-        </label>
-        <select v-model="form.companyId" class="select" :class="{ 'border-danger': form.companyIdError }">
-          <option value="1">
-            Option 1
-          </option>
-          <option value="2">
-            Option 2
-          </option>
-          <option value="3">
-            Option 3
-          </option>
-        </select>
-      </div>
-      <!-- Select Vendor -->
-      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-        <label class="form-label max-w-32">
-          Select Vendor
+          Nama Vendor
         </label>
         <select v-model="form.vendorId" class="select" :class="{ 'border-danger': form.vendorIdError }">
           <option value="1">
@@ -39,31 +22,24 @@
           </option>
         </select>
       </div>
-      <!-- Bill To Company -->
+      <!-- Bidang Usaha -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
         <label class="form-label max-w-32">
-          Bill To Company
+          Bidang Usaha
         </label>
-        <input v-model="form.billToCompany" class="input" placeholder="" :class="{ 'border-danger': form.billToCompanyError }"/>
+        <input v-model="form.businessField" class="input" placeholder="" :class="{ 'border-danger': form.businessFieldError }"/>
       </div>
-      <!-- Bill To Vendor -->
+      <!-- Sub Bidang  Usaha -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
         <label class="form-label max-w-32">
-          Bill To Vendor
+          Sub Bidang  Usaha
         </label>
-        <input v-model="form.billToVendor" class="input" placeholder="" :class="{ 'border-danger': form.billToVendorError }"/>
+        <input v-model="form.subBusinessField" class="input" placeholder="" :class="{ 'border-danger': form.subBusinessFieldError }"/>
       </div>
-      <!-- Vendor Tax ID -->
+      <!-- Alamat -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
         <label class="form-label max-w-32">
-          Vendor Tax ID
-        </label>
-        <input v-model="form.vendorTaxId" class="input" placeholder="" :class="{ 'border-danger': form.vendorTaxIdError }"/>
-      </div>
-      <!-- Address -->
-      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-        <label class="form-label max-w-32">
-          Address
+          Alamat
         </label>
         <textarea v-model="form.address" class="textarea" placeholder="" rows="6" :class="{ 'border-danger': form.addressError }"></textarea>
       </div>

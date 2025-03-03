@@ -5,7 +5,7 @@
       <div
         v-for="(item, index) in listCalculation"
         :key="index"
-        class="border-b border-gray-200 py-[24px] px-[20px] text-xs flex"
+        class="border-b border-gray-200 py-[14px] px-[16px] text-xs flex"
         :class="index === listCalculation.length - 1 ? 'calculation__last-field' : ''"
       >
         <div class="flex-1">{{ item.name }}</div>
@@ -26,32 +26,32 @@ const listCalculation = ref<listType[]>([
   {
     name: 'Subtotal',
     amount: '0',
-    currency: ''
+    currency: 'USD'
   },
   {
     name: 'VAT Amount',
     amount: '0',
-    currency: ''
+    currency: 'USD'
   },
   {
     name: 'WHT AMount',
     amount: '0',
-    currency: ''
+    currency: 'USD'
   },
   {
     name: 'Additional Cost',
     amount: '0',
-    currency: ''
+    currency: 'USD'
   },
   {
     name: 'Total Gross Amount',
     amount: '0',
-    currency: ''
+    currency: 'USD'
   },
   {
     name: 'Total Net Amount',
     amount: '0',
-    currency: ''
+    currency: 'USD'
   },
   {
     name: 'Amount Due',
