@@ -14,11 +14,11 @@
         placeholder="Masukkan Group Perusahaan"
         row
       />
-      <UiInput
+      <DatePicker
         v-model="information.perusahaan.tanggalBerdiri"
         label="Tanggal Berdiri"
         placeholder="Pilih Tanggal"
-        row
+        format="MM/dd/yyyy"
         required
       />
     </UiFormGroup>
@@ -216,6 +216,7 @@ import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiCheckbox from '@/components/ui/atoms/checkbox/UiCheckbox.vue'
+import DatePicker from '@/components/datePicker/DatePicker.vue'
 
 const registrationVendorStore = useRegistrationVendorStore()
 const vendorMasterDataStore = useVendorMasterDataStore()
