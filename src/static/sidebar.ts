@@ -109,4 +109,28 @@ export default [
       }
     ]
   },
+  {
+    id: 'e-invoice',
+    title: 'Invoice',
+    icon: 'bill',
+    child: [
+      {
+        id: 'invoice-list',
+        title: 'E-invoice',
+        to: '/invoice'
+      },
+      {
+        id: 'invoice-verification',
+        title: 'Invoice Verification',
+      },
+      {
+        id: 'invoice-approval',
+        title: 'Invoice Approval',
+      },
+      {
+        id: 'schedule-payment',
+        title: 'Schedule Payment',
+      },
+    ]
+  },
 ]

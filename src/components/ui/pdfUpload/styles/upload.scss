@@ -1,0 +1,23 @@
+.upload {
+  &__left {
+    border: 1px solid #107EFF;
+    background-color: rgba(0, 106, 230, 0.2);
+    padding: 8px;
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+    width: 30px;
+    height: 30px;
+  }
+
+  &__right {
+    border: 1px solid rgba(0, 106, 230, 0.2);
+    background-color: #EFF6FF;
+    font-size: 11px;
+    height: 30px;
+    width: 212px;
+    padding: 5px 0 5px 10px;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+    color: #006AE6;
+  }
+}

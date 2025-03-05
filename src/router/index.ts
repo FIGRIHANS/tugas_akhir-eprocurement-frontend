@@ -9,10 +9,10 @@ import LayoutWithSidebar from '@/layout/LayoutWithSidebar.vue'
 /** Route Modules */
 import vendor from './modules/vendor'
 import registration from './modules/registration'
-// import invoice from './modules/invoice'
+import invoice from './modules/invoice'
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(),
   routes: [
     {
       path: '/',
@@ -29,10 +29,10 @@ const router = createRouter({
     {
       path: '/',
       component: LayoutWithSidebar,
-      children: [...vendor],
+      children: [...vendor, ...invoice],
       meta: {
         middleware: 'auth',
-      },
+      }
     },
     {
       path: '/login',
