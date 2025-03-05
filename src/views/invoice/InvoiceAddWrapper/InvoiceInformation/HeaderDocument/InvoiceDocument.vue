@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, inject, watch } from 'vue'
+import { ref, reactive, inject, watch, toRef } from 'vue'
 import type { documentFormTypes, listFormTypes } from '../../../types/invoiceDocument'
 import type { formTypes } from '../../../types/invoiceAddWrapper'
 import pdfUpload from '@/components/ui/pdfUpload/pdfUpload.vue'
@@ -59,10 +59,11 @@ const list = ref<listFormTypes[]>([
 ])
 
 const formInject = inject<formTypes>('form')
-const pdfUploadRef = ref<HTMLElement>()
+const pdfUploadRef = ref()
 
 const setFile = (file: File, name: keyof documentFormTypes) => {
-  form[name] = file
+  const reftProperty = toRef(form, name)
+  reftProperty.value = file
 }
 
 const changeFile = (index: number) => {
