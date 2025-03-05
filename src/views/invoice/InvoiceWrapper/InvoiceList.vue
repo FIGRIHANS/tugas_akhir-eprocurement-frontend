@@ -1,10 +1,7 @@
 <template>
   <div class="border border-gray-200 rounded-xl p-[24px]">
     <div class="flex justify-between gap-[8px]">
-      <div class="input w-[250px]">
-        <i class="ki-outline ki-magnifier"></i>
-        <input v-model="search" placeholder="Cari Invoice" type="text"/>
-      </div>
+      <UiInputSearch v-model="search" placeholder="Cari Invoice" class="w-[250px]" />
       <button class="btn btn-primary" @click="goAdd">
         <i class="ki-duotone ki-plus-circle"></i>
         Add Invoice
@@ -57,6 +54,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import type { listTypes } from '../types/invoiceList'
 import LPagination from '@/components/pagination/LPagination.vue'
+import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 
 const router = useRouter()
 const search = ref<string>('')

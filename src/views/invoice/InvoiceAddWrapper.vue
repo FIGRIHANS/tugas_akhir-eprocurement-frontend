@@ -1,7 +1,7 @@
 <template>
   <div>
     <Breadcrumb title="Add Invoice" :routes="routes" />
-    <StepperStatus />
+    <StepperStatus active-name="Submission" />
     <TabInvoice :active-tab="tabNow" @change-tab="setTab" class="-mx-[24px]" />
     <div>
       <Transition mode="out-in">
@@ -35,7 +35,7 @@ import { useRouter } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import type { formTypes } from './types/invoiceAddWrapper'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
-import StepperStatus from './InvoiceAddWrapper/StepperStatus.vue'
+import StepperStatus from '../../components/stepperStatus/StepperStatus.vue'
 import TabInvoice from './InvoiceAddWrapper/TabInvoice.vue'
 import iconPDF from '@/components/icons/iconPDF.vue'
 import { KTModal } from '@/metronic/core'

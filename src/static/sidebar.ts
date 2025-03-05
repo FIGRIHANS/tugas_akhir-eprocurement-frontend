@@ -126,6 +126,7 @@ export default [
       {
         id: 'invoice-approval',
         title: 'Invoice Approval',
+        to: '/invoice/approval'
       },
       {
         id: 'schedule-payment',

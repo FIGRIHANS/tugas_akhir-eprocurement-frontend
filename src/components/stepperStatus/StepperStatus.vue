@@ -28,13 +28,38 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import type { listStepTypes } from './types/stepperStatus'
 
-const steps = ref([
+const props = defineProps<{
+  activeName: string
+}>()
+
+const steps = ref<listStepTypes[]>([
   { label: 'Invoice Submission', icon: 'ki-duotone ki-document', active: true },
   { label: 'Invoice Verification', icon: 'ki-duotone ki-shield-tick', active: false },
   { label: 'Invoice Approval', icon: 'ki-duotone ki-double-check-circle', active: false },
   { label: 'Invoice Posting', icon: 'ki-duotone ki-paper-plane', active: false },
   { label: 'Payment Status', icon: 'ki-duotone ki-two-credit-cart', active: false }
 ])
+
+watch(
+  () => props.activeName,
+  () => {
+    for (const item of steps.value) {
+      const splitName = item.label.split(' ')
+      if (splitName[1].toLowerCase() === props.activeName.toLowerCase()) {
+        const getIndex = steps.value.findIndex((subItem) => subItem.label === item.label)
+        if (getIndex !== -1) {
+          for (let index = 0; index <= getIndex; index++) {
+            steps.value[index].active = true
+          }
+        }
+      }
+    }
+  },
+  {
+    immediate: true
+  }
+)
 </script>
