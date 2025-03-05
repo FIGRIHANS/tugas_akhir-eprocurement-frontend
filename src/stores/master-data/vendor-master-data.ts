@@ -14,6 +14,7 @@ const baseUrl = '/public/vendor/registration'
 
 export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
   const countryList = ref<CountryListType>([])
+  const stateList = ref([])
   const cityList = ref<CityListType>([])
   const districtList = ref<DistrictListType>([])
   const posistionList = ref<PositionListType>([])
@@ -31,7 +32,13 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
   }
 
   const getVendorStates = async () => {
-    const response: ApiResponse = await vendorApi.get(`${baseUrl}/states`)
+    const response: ApiResponse = await vendorApi.get(`${baseUrl}/states`, {
+      // params: {
+      //   countryName,
+      // },
+    })
+
+    stateList.value = response.data.result.content
 
     return response.data.result
   }
@@ -76,6 +83,7 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
 
   return {
     countryList,
+    stateList,
     cityList,
     districtList,
     posistionList,

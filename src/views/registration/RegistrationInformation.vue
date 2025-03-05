@@ -242,11 +242,7 @@ const checkSameAsHq = () => {
 }
 
 const addBusinessField = () => {
-  console.log('business field', information.value.bidangUsaha.selected)
-}
-
-const addBusinessUnit = () => {
-  console.log('business unit', information.value.bisnisUnit.selected)
+  console.log('business field', information.value.bidangUsaha.bidangUsaha)
 }
 
 const getCityList = async (type: 'hq' | 'company') => {
@@ -290,5 +286,6 @@ watch(
 
 onMounted(async () => {
   await vendorMasterDataStore.getVendorCountries()
+  // await vendorMasterDataStore.getVendorStates()
 })
 </script>
