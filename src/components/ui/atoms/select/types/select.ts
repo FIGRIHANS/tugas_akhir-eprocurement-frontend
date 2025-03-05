@@ -7,4 +7,5 @@ export interface ISelectProps {
   options: { [key: string]: any }[]
   valueKey?: string
   textKey?: string
+  required?: boolean
 }

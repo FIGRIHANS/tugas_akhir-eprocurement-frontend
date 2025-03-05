@@ -13,8 +13,13 @@
     >
       {{ label }}
     </label>
-    <label v-else-if="label && row" class="form-label w-2/5">
+    <label
+      v-else-if="label && row"
+      class="form-label w-2/5"
+      :class="{ 'flex items-center gap-1': required }"
+    >
       {{ label }}
+      <span v-if="required" class="text-danger"> * </span>
     </label>
     <input
       v-model="model"
@@ -36,6 +41,7 @@ withDefaults(defineProps<IInputProps>(), {
   readonly: false,
   disabled: false,
   row: false,
+  required: false,
 })
 
 const model = defineModel()

@@ -4,4 +4,5 @@ export interface IInputProps {
   readonly?: boolean
   disabled?: boolean
   row?: boolean
+  required?: boolean
 }

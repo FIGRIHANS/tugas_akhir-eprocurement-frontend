@@ -30,11 +30,8 @@ export const useRegistrationVendorStore = defineStore('registrationVendor', () =
       alamatLengkap: '',
     },
     bidangUsaha: {
-      selected: '',
-      list: [],
-    },
-    bisnisUnit: {
-      selected: '',
+      bidangUsaha: '',
+      subBidangUsaha: '',
       list: [],
     },
   })
