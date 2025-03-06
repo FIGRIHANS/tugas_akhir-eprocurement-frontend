@@ -1,3 +1,3 @@
 <template>
-  <h1>Vendor Master Page</h1>
+  <h1>tes Vendor Master Page</h1>
 </template>
