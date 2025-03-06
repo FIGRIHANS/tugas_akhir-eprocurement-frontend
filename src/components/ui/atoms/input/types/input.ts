@@ -5,4 +5,5 @@ export interface IInputProps {
   disabled?: boolean
   row?: boolean
   required?: boolean
+  error?: boolean
 }

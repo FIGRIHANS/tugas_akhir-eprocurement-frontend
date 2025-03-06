@@ -6,14 +6,8 @@
     </label>
     <VueDatePicker v-model="date" :format="format" :preview-format="format" class="w-full">
       <template #dp-input="{ value }">
-        <div class="input relative">
-          <input
-            :placeholder="placeholder"
-            :value="value"
-            readonly
-            class="min-w-[0px]"
-            :class="{ 'border-danger': error }"
-          />
+        <div class="input relative" :class="{ 'border-danger': error }">
+          <input :placeholder="placeholder" :value="value" readonly class="min-w-[0px]" />
           <button class="btn btn-icon">
             <i class="ki-filled ki-calendar"></i>
           </button>

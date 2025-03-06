@@ -8,4 +8,5 @@ export interface ISelectProps {
   valueKey?: string
   textKey?: string
   required?: boolean
+  error?: boolean
 }

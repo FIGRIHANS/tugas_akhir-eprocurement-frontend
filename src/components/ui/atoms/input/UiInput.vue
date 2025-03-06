@@ -24,6 +24,7 @@
     <input
       v-model="model"
       class="input"
+      :class="{ 'border-danger': error }"
       :placeholder="placeholder"
       :readonly="readonly"
       :disabled="disabled"
@@ -42,6 +43,7 @@ withDefaults(defineProps<IInputProps>(), {
   disabled: false,
   row: false,
   required: false,
+  error: false,
 })
 
 const model = defineModel()

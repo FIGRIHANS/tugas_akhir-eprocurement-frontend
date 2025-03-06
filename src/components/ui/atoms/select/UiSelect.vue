@@ -22,7 +22,13 @@
       <span v-if="required" class="text-danger"> * </span>
     </label>
 
-    <select v-model="model" class="select" :readonly="readonly" :disabled="disabled">
+    <select
+      v-model="model"
+      class="select"
+      :class="{ 'border-danger': error }"
+      :readonly="readonly"
+      :disabled="disabled"
+    >
       <option selected disabled hidden :value="typeof model === 'number' ? 0 : ''">
         {{ placeholder }}
       </option>
@@ -36,6 +42,7 @@
 <script lang="ts" setup>
 import { defineModel } from 'vue'
 import type { ISelectProps } from './types/select'
+import { errorMessages } from 'vue/compiler-sfc'
 
 withDefaults(defineProps<ISelectProps>(), {
   placeholder: '',
@@ -44,6 +51,7 @@ withDefaults(defineProps<ISelectProps>(), {
   row: false,
   valueKey: 'value',
   textKey: 'text',
+  error: false,
 })
 
 const model = defineModel<string | number>({ default: '' })
