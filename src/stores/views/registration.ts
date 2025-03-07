@@ -1,5 +1,10 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
+import type {
+  PaymentDetailType,
+  RegisContactType,
+  RegisInformationType,
+} from './types/registration'
 
 const documentAndLegalFields = {
   noIzin: '',
@@ -9,7 +14,7 @@ const documentAndLegalFields = {
 }
 
 export const useRegistrationVendorStore = defineStore('registrationVendor', () => {
-  const information = ref({
+  const information = ref<RegisInformationType>({
     perusahaan: {
       namaPerusahaan: '',
       groupPerusahaan: '',
@@ -20,6 +25,8 @@ export const useRegistrationVendorStore = defineStore('registrationVendor', () =
       provinsi: 0,
       kabupatenKota: 0,
       kecamatan: 0,
+      kodePos: '',
+      alamatLengkap: '',
     },
     lokasiPerusahaan: {
       negara: 0,
@@ -36,7 +43,7 @@ export const useRegistrationVendorStore = defineStore('registrationVendor', () =
     },
   })
 
-  const contact = ref({
+  const contact = ref<RegisContactType>({
     account: {
       username: '',
       email: '',
@@ -44,7 +51,6 @@ export const useRegistrationVendorStore = defineStore('registrationVendor', () =
       confirmPassword: '',
       website: '',
       noTel: '',
-      noFax: '',
     },
     contactPerson: {
       fullName: '',
@@ -56,7 +62,7 @@ export const useRegistrationVendorStore = defineStore('registrationVendor', () =
   })
 
   const documentAndLegal = ref({
-    bagian: '',
+    kategori: '',
     fields: {
       nib: {
         ...documentAndLegalFields,
@@ -79,15 +85,19 @@ export const useRegistrationVendorStore = defineStore('registrationVendor', () =
     },
   })
 
-  const paymentDetail = ref({
-    namaBank: '',
+  const paymentDetail = ref<PaymentDetailType>({
     noRekening: '',
     namaPemilikAkun: '',
-    perbedaanRekening: '',
-    mataUang: '',
-    halamanPertama: '',
-    negara: '',
+    perbedaanRekening: new Blob(),
+    halamanPertama: new Blob(),
+    mataUang: 0,
+    bankKey: '',
+    namaBank: '',
+    cabangBank: '',
+    swiftCode: '',
     alamatBank: '',
+    isNotSameAsCompany: false,
+    bankNotRegistered: false,
   })
 
   return { information, contact, documentAndLegal, paymentDetail }
