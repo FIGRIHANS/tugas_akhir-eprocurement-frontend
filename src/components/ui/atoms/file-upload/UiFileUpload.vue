@@ -8,12 +8,12 @@
       <div class="input-group w-full">
         <span
           class="btn btn-input bg-primary-clarity border rounded-r-none border-primary"
-          :class="{ 'flex items-center gap-1': required }"
+          :class="{ 'flex items-center gap-1': required, 'border-danger': error }"
           ><i class="ki-filled ki-cloud-add !text-primary"> </i
         ></span>
         <span
           class="input select-none !text-primary bg-primary-light border-primary hover:border-primary"
-          :class="{ 'flex items-center gap-1': required }"
+          :class="{ 'flex items-center gap-1': required, 'border-danger': error }"
           :title="selectedFile"
         >
           {{ truncateSelectedFile }}
@@ -41,6 +41,7 @@ const props = withDefaults(defineProps<IFileUploadProps>(), {
   placeholder: '',
   disabled: false,
   required: false,
+  error: false,
 })
 const emits = defineEmits(['addedFile'])
 

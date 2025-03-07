@@ -21,10 +21,11 @@
       {{ label }}
       <span v-if="required" class="text-danger"> * </span>
     </label>
-    <div class="input-group w-full" :class="{ 'border-danger': error }">
+    <div class="input-group w-full">
       <select
         v-model="countryCode"
         class="select rounded-r-none w-1/4"
+        :class="{ 'border-danger': error }"
         :readonly="readonly"
         :disabled="disabled"
       >
@@ -36,6 +37,7 @@
       <input
         v-model="noTel"
         class="input border-l-0 rounded-l-none"
+        :class="{ 'border-danger': error }"
         :placeholder="placeholder"
         :readonly="readonly"
         :disabled="disabled"

@@ -7,4 +7,5 @@ export interface IFileUploadProps {
   textLength?: number
   maxSize?: number
   required?: boolean
+  error?: boolean
 }
