@@ -1,16 +1,19 @@
 <template>
   <div :class="{ 'flex items-center flex-wrap lg:flex-nowrap gap-2.5': label }">
-    <label class="form-label w-2/5">
-      {{ label }}
+    <label class="form-label w-2/5" :class="{ 'flex items-center gap-1': required }">
+      {{ label }} <span v-if="required" class="text-danger"> * </span>
     </label>
 
     <label :for="name" class="w-full">
       <div class="input-group w-full">
-        <span class="btn btn-input bg-primary-clarity border rounded-r-none border-primary"
+        <span
+          class="btn btn-input bg-primary-clarity border rounded-r-none border-primary"
+          :class="{ 'flex items-center gap-1': required }"
           ><i class="ki-filled ki-cloud-add !text-primary"> </i
         ></span>
         <span
           class="input select-none !text-primary bg-primary-light border-primary hover:border-primary"
+          :class="{ 'flex items-center gap-1': required }"
           :title="selectedFile"
         >
           {{ truncateSelectedFile }}
@@ -37,6 +40,7 @@ const props = withDefaults(defineProps<IFileUploadProps>(), {
   name: 'upload-file',
   placeholder: '',
   disabled: false,
+  required: false,
 })
 const emits = defineEmits(['addedFile'])
 
