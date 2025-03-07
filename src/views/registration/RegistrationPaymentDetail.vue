@@ -7,12 +7,13 @@
         </div>
 
         <div class="card-body flex flex-col gap-6">
-          <UiSelect v-model="paymentDetail.namaBank" label="Nama Bank" placeholder="Pilih" row />
           <UiInput
             v-model="paymentDetail.noRekening"
             label="No Rekening"
             placeholder="Masukkan no rekening"
             row
+            required
+            :error="paymentDetail.noRekeningError"
           />
 
           <div class="flex flex-col gap-6">
@@ -21,37 +22,98 @@
               label="Nama Pemilik Akun"
               placeholder="Nama lengkap sesuai buku tabungan"
               row
+              required
+              :error="paymentDetail.namaPemilikAkunError"
             />
 
             <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5">
               <div class="w-2/5"></div>
               <UiCheckbox
-                v-model="isSameAsCompany"
-                label="Nama pemilik rekening sama dengan nama perusahaan"
+                v-model="paymentDetail.isNotSameAsCompany"
+                label="Nama pemilik rekening berbeda dengan nama perusahaan"
               />
             </div>
           </div>
 
           <UiFileUpload
-            v-if="isSameAsCompany"
+            v-if="paymentDetail.isNotSameAsCompany"
             label="Pernyataan Perbedaan Rekening"
             placeholder="Pilih"
             acceptedFiles=".pdf"
             @addedFile="(file) => uploadFile(file, 'different account')"
+            required
+            :error="paymentDetail.perbedaanRekeningError"
           />
-          <UiSelect v-model="paymentDetail.mataUang" label="Mata Uang" placeholder="Pilih" row />
           <UiFileUpload
+            v-if="paymentDetail.isNotSameAsCompany"
             label="Halaman Pertama Buku Tabungan"
             placeholder="Pilih"
             acceptedFiles=".pdf"
             @addedFile="(file) => uploadFile(file, 'first page')"
+            required
+            :error="paymentDetail.halamanPertamaError"
           />
-          <UiSelect v-model="paymentDetail.negara" label="Negara" placeholder="Pilih" row />
+          <UiSelect
+            v-model="paymentDetail.mataUang"
+            label="Mata Uang"
+            placeholder="Pilih"
+            row
+            required
+            :error="paymentDetail.mataUangError"
+          />
+          <div class="flex flex-col gap-6">
+            <UiSelect
+              v-model="paymentDetail.bankKey"
+              label="Bank Key"
+              placeholder="Pilih"
+              row
+              :options="bankList"
+              valueKey="bankCode"
+              textKey="bankName"
+              :required="!paymentDetail.bankNotRegistered"
+              :disabled="paymentDetail.bankNotRegistered"
+              :error="paymentDetail.bankKeyError"
+            />
+
+            <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5">
+              <div class="w-2/5"></div>
+              <UiCheckbox v-model="paymentDetail.bankNotRegistered" label="Bank belum terdaftar" />
+            </div>
+          </div>
+          <UiInput
+            v-if="paymentDetail.bankNotRegistered"
+            v-model="paymentDetail.namaBank"
+            label="Nama Bank"
+            placeholder="Nama Bank"
+            row
+            required
+            :error="paymentDetail.namaBankError"
+          />
+          <UiInput
+            v-if="paymentDetail.bankNotRegistered"
+            v-model="paymentDetail.cabangBank"
+            label="Cabang Bank"
+            placeholder="Cabang Bank"
+            row
+            required
+            :error="paymentDetail.cabangBankError"
+          />
+          <UiInput
+            v-if="paymentDetail.bankNotRegistered"
+            v-model="paymentDetail.swiftCode"
+            label="SwiftCode"
+            placeholder="SwiftCode"
+            row
+            required
+            :error="paymentDetail.swiftCodeError"
+          />
           <UiInput
             v-model="paymentDetail.alamatBank"
             label="Alamat Bank"
             placeholder="Jl. ABC..."
             row
+            required
+            :error="paymentDetail.alamatBankError"
           />
         </div>
       </div>
@@ -145,9 +207,10 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 import { useRegistrationVendorStore } from '@/stores/views/registration'
+import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
 
 import UiCheckbox from '@/components/ui/atoms/checkbox/UiCheckbox.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
@@ -157,16 +220,26 @@ import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiCaptcha from '@/components/ui/atoms/captcha/UiCaptcha.vue'
 
 const registrationVendorStore = useRegistrationVendorStore()
+const vendorMasterDataStore = useVendorMasterDataStore()
 
 const paymentDetail = computed(() => registrationVendorStore.paymentDetail)
-const isSameAsCompany = ref<boolean>(false)
 const isCaptchaMatch = ref<boolean>(false)
+
+const bankList = computed(() => vendorMasterDataStore.bankList)
 
 const uploadFile = async (file: Blob, type: 'different account' | 'first page') => {
   try {
-    console.log('file', file)
+    if (type === 'different account') {
+      registrationVendorStore.paymentDetail.perbedaanRekening = file
+    } else {
+      registrationVendorStore.paymentDetail.halamanPertama = file
+    }
   } catch (error) {
     console.error(error)
   }
 }
+
+onMounted(async () => {
+  await vendorMasterDataStore.getVendorBanks()
+})
 </script>

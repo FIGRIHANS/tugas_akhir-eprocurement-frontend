@@ -19,3 +19,9 @@ export type PositionListType = {
   positionTypeId: number
   positionName: string
 }[]
+
+export type BankListType = {
+  bankCountryCode: string
+  bankCode: string
+  bankName: string
+}[]

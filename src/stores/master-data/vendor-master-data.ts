@@ -4,6 +4,7 @@ import vendorApi from '@/core/utils/vendorApi'
 
 import type { ApiResponse } from '@/core/type/api'
 import type {
+  BankListType,
   CityListType,
   CountryListType,
   DistrictListType,
@@ -18,6 +19,7 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
   const cityList = ref<CityListType>([])
   const districtList = ref<DistrictListType>([])
   const posistionList = ref<PositionListType>([])
+  const bankList = ref<BankListType>([])
 
   const getVendorCountries = async (countryName?: string) => {
     const response: ApiResponse<CountryListType> = await vendorApi.get(`${baseUrl}/countries`, {
@@ -81,16 +83,31 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
     return response.data.result
   }
 
+  const getVendorBanks = async (bankCode?: string, bankName?: string) => {
+    const response: ApiResponse<BankListType> = await vendorApi.get(`${baseUrl}/getBankList`, {
+      params: {
+        bankCode,
+        bankName,
+      },
+    })
+
+    bankList.value = response.data.result.content
+
+    return response.data.result
+  }
+
   return {
     countryList,
     stateList,
     cityList,
     districtList,
     posistionList,
+    bankList,
     getVendorCountries,
     getVendorStates,
     getVendorCities,
     getVendorDistricts,
     getVendorPosition,
+    getVendorBanks,
   }
 })
