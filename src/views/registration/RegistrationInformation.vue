@@ -7,6 +7,7 @@
         placeholder="Masukkan Nama Perusahaan"
         row
         required
+        :error="information.perusahaan.namaPerusahaanError"
       />
       <UiInput
         v-model="information.perusahaan.groupPerusahaan"
@@ -20,6 +21,7 @@
         placeholder="Pilih Tanggal"
         format="MM/dd/yyyy"
         required
+        :error="information.perusahaan.tanggalBerdiriError"
       />
     </UiFormGroup>
 
@@ -33,6 +35,7 @@
         text-key="countryName"
         row
         required
+        :error="information.lokasiKantorPusat.negaraError"
       />
       <UiSelect
         v-model="information.lokasiKantorPusat.provinsi"
@@ -41,6 +44,7 @@
         :disabled="!information.lokasiKantorPusat.negara"
         row
         required
+        :error="information.lokasiKantorPusat.provinsiError"
       />
       <UiSelect
         v-model="information.lokasiKantorPusat.kabupatenKota"
@@ -52,6 +56,7 @@
         text-key="cityName"
         row
         required
+        :error="information.lokasiKantorPusat.kabupatenKotaError"
         @update:model-value="getDistrictList('hq')"
       />
       <UiSelect
@@ -64,6 +69,23 @@
         text-key="districtName"
         row
         required
+        :error="information.lokasiKantorPusat.kecamatanError"
+      />
+      <UiInput
+        v-model="information.lokasiKantorPusat.kodePos"
+        label="Kode Pos"
+        placeholder="Masukkan Kode Pos"
+        row
+        required
+        :error="information.lokasiKantorPusat.kodePosError"
+      />
+      <UiTextarea
+        v-model="information.lokasiKantorPusat.alamatLengkap"
+        label="Alamat Lengkap"
+        placeholder="Masukkan Alamat Lengkap"
+        row
+        required
+        :error="information.lokasiKantorPusat.alamatLengkapError"
       />
     </UiFormGroup>
 
@@ -87,6 +109,7 @@
           text-key="countryName"
           row
           required
+          :error="information.lokasiPerusahaan.negaraError"
         />
         <UiSelect
           v-model="information.lokasiPerusahaan.provinsi"
@@ -95,6 +118,7 @@
           :disabled="isSameAsHq || !information.lokasiPerusahaan.negara"
           row
           required
+          :error="information.lokasiPerusahaan.provinsiError"
         />
         <UiSelect
           v-model="information.lokasiPerusahaan.kabupatenKota"
@@ -106,6 +130,7 @@
           text-key="cityName"
           row
           required
+          :error="information.lokasiPerusahaan.kabupatenKotaError"
           @update:model-value="getDistrictList('company')"
         />
         <UiSelect
@@ -118,23 +143,25 @@
           text-key="districtName"
           row
           required
+          :error="information.lokasiPerusahaan.kecamatanError"
         />
-      </UiFormGroup>
-
-      <UiFormGroup hide-border>
         <UiInput
           v-model="information.lokasiPerusahaan.kodePos"
           label="Kode Pos"
           placeholder="Masukkan Kode Pos"
           row
           required
+          :disabled="isSameAsHq"
+          :error="information.lokasiPerusahaan.kodePosError"
         />
-        <UiInput
+        <UiTextarea
           v-model="information.lokasiPerusahaan.alamatLengkap"
           label="Alamat Lengkap"
           placeholder="Masukkan Alamat Lengkap"
           row
           required
+          :disabled="isSameAsHq"
+          :error="information.lokasiPerusahaan.alamatLengkapError"
         />
       </UiFormGroup>
     </UiFormGroup>
@@ -149,6 +176,7 @@
             v-model="information.bidangUsaha.bidangUsaha"
             class="w-full"
             placeholder="Pilih"
+            :error="information.bidangUsaha.bidangUsahaError"
           />
         </div>
         <div class="flex flex-col gap-2.5 w-full">
@@ -159,6 +187,7 @@
             v-model="information.bidangUsaha.subBidangUsaha"
             class="w-full"
             placeholder="Pilih"
+            :error="information.bidangUsaha.subBidangUsahaError"
           />
         </div>
         <UiButton class="grow-0 w-fit" outline @click="addBusinessField">
@@ -217,6 +246,7 @@ import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiCheckbox from '@/components/ui/atoms/checkbox/UiCheckbox.vue'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
+import UiTextarea from '@/components/ui/atoms/textarea/UiTextarea.vue'
 
 const registrationVendorStore = useRegistrationVendorStore()
 const vendorMasterDataStore = useVendorMasterDataStore()
@@ -235,14 +265,27 @@ const districtListCompany = ref<DistrictListType>([])
 const checkSameAsHq = () => {
   if (!isSameAsHq.value) {
     registrationVendorStore.information.lokasiPerusahaan = {
-      ...registrationVendorStore.information.lokasiPerusahaan,
       ...information.value.lokasiKantorPusat,
     }
   }
 }
 
 const addBusinessField = () => {
-  console.log('business field', information.value.bidangUsaha.bidangUsaha)
+  const { bidangUsaha, subBidangUsaha } = information.value.bidangUsaha
+  if (bidangUsaha && subBidangUsaha) {
+    registrationVendorStore.information.bidangUsaha = {
+      ...registrationVendorStore.information.bidangUsaha,
+      bidangUsahaError: false,
+      subBidangUsahaError: false,
+    }
+    console.log('business field', information.value.bidangUsaha.bidangUsaha)
+  } else {
+    registrationVendorStore.information.bidangUsaha = {
+      ...registrationVendorStore.information.bidangUsaha,
+      bidangUsahaError: bidangUsaha === '',
+      subBidangUsahaError: subBidangUsaha === '',
+    }
+  }
 }
 
 const getCityList = async (type: 'hq' | 'company') => {
@@ -277,7 +320,6 @@ watch(
     districtListCompany.value = districtListHq.value
 
     registrationVendorStore.information.lokasiPerusahaan = {
-      ...registrationVendorStore.information.lokasiPerusahaan,
       ...information.value.lokasiKantorPusat,
     }
   },
