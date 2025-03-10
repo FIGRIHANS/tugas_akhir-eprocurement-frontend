@@ -1,6 +1,9 @@
 <template>
   <div v-if="form" class="flex flex-col gap-[24px]">
-    <p class="text-lg font-semibold m-[0px]">Invoice PO & GR Item</p>
+    <diV class="flex items-center justify-between gap-[8px]">
+      <p class="text-lg font-semibold m-[0px]">Invoice PO & GR Item</p>
+      <input v-if="form.status === 2" v-model="form.invoicePoGrCheck" class="checkbox" type="checkbox"/>
+    </diV>
     <div class="po__table">
       <table class="table table-xs table-border">
         <thead>
@@ -10,8 +13,7 @@
               :key="index"
               class="po__column"
               :class="{
-                'po__column--desc': item.toLowerCase() === 'description',
-                'po__column--aux': item.toLowerCase() === 'auxiliary part id',
+                'po__column--po-sap-number': item.toLowerCase() === 'PO Number SAP'.toLowerCase(),
                 'po__column--medium': setMediumColumn(item)
               }"
             >
@@ -22,17 +24,25 @@
         <tbody>
           <tr v-for="(item, index) in form.invoicePoGr" :key="index" class="po__items">
             <td>{{ item.line }}</td>
+            <td>{{ item.grNumber }}</td>
+            <td>{{ item.poNumber }}</td>
+            <td>{{ item.poSapNumber }}</td>
+            <td>{{ item.itemName }}</td>
             <td>{{ item.quantity }}</td>
             <td>{{ item.uom }}</td>
-            <td>{{ item.price }}</td>
-            <td>{{ item.part }}</td>
-            <td>{{ item.auxiliaryPartId }}</td>
-            <td>{{ item.description }}</td>
-            <td>{{ item.subTotal }}</td>
-            <td>{{ item.taxCode }}</td>
-            <td>{{ item.vatAmount }}</td>
-            <td>{{ item.wht }}</td>
-            <td>{{ item.whtAmount }}</td>
+            <td>{{ item.costPerUnit }}</td>
+            <td>{{ item.totalCost }}</td>
+            <td>{{ item.deliveryDate }}</td>
+            <td>{{ item.billable }}</td>
+            <td>{{ item.dp }}</td>
+            <td>{{ item.dpValue }}</td>
+            <td>{{ item.whtType }}</td>
+            <td>{{ item.whtCode }}</td>
+            <td>{{ item.dpp }}</td>
+            <td>{{ item.whtValue }}</td>
+            <td>{{ item.vat }}</td>
+            <td>{{ item.otherDpp }}</td>
+            <td>{{ item.amount }}</td>
           </tr>
         </tbody>
       </table>
@@ -48,32 +58,41 @@ const form = inject<formTypes>('form')
 
 const columns = ref([
   'Line',
-  'Quantity',
-  'UOM',
-  'Price',
-  'Part',
-  'Auxiliary Part ID',
-  'Description',
-  'Subtotal',
-  'Tax Code',
-  'VAT Amount',
-  'WHT',
-  'WHT Amount'
+  'No GR',
+  'No PO',
+  'PO Number SAP',
+  'Item',
+  'QTY',
+  'UoM',
+  'Cost Per Unit',
+  'Total Cost',
+  'Delivery Date',
+  'Billable',
+  'DP%',
+  'DP Value',
+  'WHT Type',
+  'WHT Code',
+  'DPP',
+  'WHT Value',
+  'VAT',
+  'DPP Lain - Lain',
+  'Amount'
 ])
 
 const setMediumColumn = (name: string) => {
-  switch (name.toLowerCase()) {
-    case 'price':
-      return true
-    case 'vat amount':
-      return true
-    case 'tax code':
-      return true
-    case 'wht amount':
-      return true
-    default:
-      return false
-  }
+  const list = [
+    'Item',
+    'Cost Per Unit',
+    'Delivery Date',
+    'WHT Type',
+    'WHT Code',
+    'WHT Value',
+    'DPP Lain - Lain'
+  ]
+
+  const check = list.findIndex((item) => item.toLowerCase() === name.toLowerCase())
+  if (check !== -1) return true
+  return false
 }
 </script>
 

@@ -18,6 +18,11 @@ export default [
     component: () => import('@/views/invoice/InvoiceAddWrapper.vue')
   },
   {
+    path: '/invoice/verification',
+    name: 'invoiceVerification',
+    component: () => import('@/views/invoiceVerification/InvoiceVerification.vue')
+  },
+  {
     path: '/invoice/approval',
     name: 'invoiceApproval',
     component: () => import('@/views/invoiceApproval/InvoiceApproval.vue')

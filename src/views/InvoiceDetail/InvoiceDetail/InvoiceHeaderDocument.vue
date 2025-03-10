@@ -1,6 +1,6 @@
 <template>
-  <div class="card">
-    <div class="card-header py-[13px]">
+  <div v-if="form" class="card">
+    <div class="card-header py-[13px] flex items-center justify-between gap-[8px]">
       <div class="tabs" data-tabs="true">
         <button class="tab p-[8px]" :class="{ 'active': tabNow === 'header' }" @click="setTab('header')">
           Invoice Header
@@ -8,7 +8,8 @@
         <button class="tab p-[8px]" :class="{ 'active': tabNow === 'document' }" @click="setTab('document')">
           Invoice Document
         </button>
-    </div>
+      </div>
+      <input v-if="form.status === 2" v-model="form.invoiceHeaderDocumentCheck" class="checkbox" type="checkbox"/>
     </div>
     <div class="card-body max-h-[299px]" :class="{ 'document': tabNow === 'document' }">
       <Transition mode="out-in">
@@ -19,11 +20,13 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, defineAsyncComponent, type Component } from 'vue'
+import { ref, computed, defineAsyncComponent, inject, type Component } from 'vue'
+import type { formTypes } from '../types/invoiceDetail'
 
 const InvoiceHeader = defineAsyncComponent(() => import('./InvoiceHeaderDocument/InvoiceHeader.vue'))
 const InvoiceDocument = defineAsyncComponent(() => import('./InvoiceHeaderDocument/InvoiceDocument.vue'))
 
+const form = inject<formTypes>('form')
 const tabNow = ref<string>('header')
 
 const contentComponent = computed(() => {
