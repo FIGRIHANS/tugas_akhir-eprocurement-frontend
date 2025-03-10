@@ -1,9 +1,10 @@
 <template>
-  <div class="card">
-    <div class="card-header py-[17px]">
+  <div v-if="form" class="card">
+    <div class="card-header py-[17px] flex items-center justify-between gap-[8px]">
       <h3 class="card-title text-base font-semibold">General Data</h3>
+      <input v-if="form.status === 2" v-model="form.generalDataCheck" class="checkbox" type="checkbox"/>
     </div>
-    <div v-if="form" class="card-body flex flex-col gap-[20px]">
+    <div class="card-body flex flex-col gap-[20px]">
       <div class="flex items-center justify-between gap-[10px]">
         <p class="font-normal text-sm text-gray-600">Company</p>
         <p class="font-normal text-sm">{{ form.companyId }}</p>

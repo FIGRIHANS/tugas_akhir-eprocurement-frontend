@@ -27,4 +27,13 @@ export interface formTypes extends documentFormTypes {
   paymentTerm: string
   invoicePoGr: itemsPoGrType[]
   additionalCost: itemsCostType[]
+
+  // verification validation
+  status: number
+  generalDataCheck?: boolean
+  bankKeyCheck?: boolean
+  invoiceHeaderDocumentCheck?: boolean
+  invoiceCalculationCheck?: boolean
+  invoicePoGrCheck?: boolean
+  additionalCostCheck?: boolean
 }
