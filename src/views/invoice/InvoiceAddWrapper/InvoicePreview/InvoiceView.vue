@@ -3,32 +3,48 @@
     <p class="text-lg font-semibold m-[0px]">{{ form.invoiceNo || '-' }}</p>
     <div class="flex items-center justify-between">
       <div class="flex-1">
-        <p class="text-xs font-normal text-gray-700">No Faktur Pajak</p>
-        <p class="text-sm font-medium">{{ form.taxInvoiceNumber || '-' }}</p>
+        <p class="text-xs font-normal text-gray-700">No Invoice Supplier</p>
+        <p class="text-sm font-medium">{{ form.supplierInvoiceNumber || '-' }}</p>
       </div>
       <div class="flex-1">
-        <p class="text-xs font-normal text-gray-700">Tanggal Faktur</p>
-        <p class="text-sm font-medium whitespace-nowrap">{{ form.taxDate ? moment(form.taxDate).format('MMM DD, YYYY') : '-' }}</p>
+        <p class="text-xs font-normal text-gray-700">Tanggal Invoice</p>
+        <p class="text-sm font-medium whitespace-nowrap">{{ form.invoiceDate ? moment(form.invoiceDate).format('DD/MM/YYYY') : '-' }}</p>
       </div>
     </div>
     <div class="flex items-center justify-between">
       <div class="flex-1">
-        <p class="text-xs font-normal text-gray-700">Tax Calculation</p>
-        <p class="text-sm font-medium">{{ form.taxCalculationId || '-' }}</p>
+        <p class="text-xs font-normal text-gray-700">No Faktur Pajak</p>
+        <p class="text-sm font-medium">{{ form.taxNumber || '-' }}</p>
       </div>
+      <div class="flex-1">
+        <p class="text-xs font-normal text-gray-700">Tanggal Faktur Pajak</p>
+        <p class="text-sm font-medium whitespace-nowrap">{{ form.taxDate ? moment(form.taxDate).format('DD/MM/YYYY') : '-' }}</p>
+      </div>
+    </div>
+    <div class="flex items-center justify-between">
       <div class="flex-1">
         <p class="text-xs font-normal text-gray-700">Tax Code</p>
-        <p class="text-sm font-medium whitespace-nowrap">{{ form.taxCode || '-' }}</p>
+        <p class="text-sm font-medium">{{ form.taxCode || '-' }}</p>
+      </div>
+      <div class="flex-1">
+        <p class="text-xs font-normal text-gray-700">WHT Code</p>
+        <p class="text-sm font-medium whitespace-nowrap">{{ form.whtCode || '-' }}</p>
       </div>
     </div>
     <div class="flex items-center justify-between">
       <div class="flex-1">
-        <p class="text-xs font-normal text-gray-700">WHT Code</p>
-        <p class="text-sm font-medium">{{ form.whtCode || '-' }}</p>
-      </div>
-      <div class="flex-1">
         <p class="text-xs font-normal text-gray-700">Payment Term</p>
-        <p class="text-sm font-medium whitespace-nowrap">{{ form.paymentTerm || '-' }}</p>
+        <p class="text-sm font-medium">{{ form.paymentTerm || '-' }}</p>
+      </div>
+      <div class="flex-1 flex items-center gap-[8px]">
+        <label class="form-label flex items-center gap-2.5 w-fit">
+          <input v-model="form.invoiceDp" class="checkbox" name="checkInvoiceDp" type="checkbox" disabled/>
+          <span class="text-gray-500">Invoice DP</span>
+        </label>
+        <label class="form-label flex items-center gap-2.5 w-fit">
+          <input v-model="form.withDp" class="checkbox" name="checkWithDp" type="checkbox" disabled/>
+          <span class="text-gray-500">With Dp</span>
+        </label>
       </div>
     </div>
   </div>

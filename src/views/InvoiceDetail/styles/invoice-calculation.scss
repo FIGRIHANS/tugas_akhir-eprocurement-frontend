@@ -2,6 +2,8 @@
   &__last-field {
     background-color: #EFF6FF;
     color: #006AE6;
+    border-bottom-right-radius: 12px;
+    border-bottom-left-radius: 12px;
     @apply font-bold;
   }
 }

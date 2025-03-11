@@ -25,21 +25,21 @@
         <tbody>
           <tr v-for="(item, index) in form.additionalCost" :key="index" class="cost__items">
             <td>{{ item.line }}</td>
-            <td>{{ item.type }}</td>
-            <td>{{ item.glCode }}</td>
-            <td>{{ item.costCenter }}</td>
-            <td>{{ item.quantity }}</td>
-            <td>{{ item.uom }}</td>
-            <td>{{ item.costPerUnit }}</td>
-            <td>{{ item.totalCost }}</td>
-            <td>{{ item.pphType }}</td>
-            <td>{{ item.pphCode }}</td>
-            <td>{{ item.dpp }}</td>
-            <td>{{ item.pphValue }}</td>
-            <td>{{ item.vat }}</td>
-            <td>{{ item.otherDpp }}</td>
-            <td>{{ item.amount }}</td>
-            <td>{{ item.remark }}</td>
+            <td>{{ item.type || '-' }}</td>
+            <td>{{ item.glCode || '-' }}</td>
+            <td>{{ item.costCenter || '-' }}</td>
+            <td>{{ item.quantity || '-' }}</td>
+            <td>{{ item.uom || '-' }}</td>
+            <td>{{ item.costPerUnit || '-' }}</td>
+            <td>{{ item.totalCost || '-' }}</td>
+            <td>{{ item.pphType || '-' }}</td>
+            <td>{{ item.pphCode || '-' }}</td>
+            <td>{{ item.dpp || '-' }}</td>
+            <td>{{ item.pphValue || '-' }}</td>
+            <td>{{ item.vat || '-' }}</td>
+            <td>{{ item.otherDpp || '-' }}</td>
+            <td>{{ item.amount || '-' }}</td>
+            <td>{{ item.remark || '-' }}</td>
           </tr>
         </tbody>
       </table>

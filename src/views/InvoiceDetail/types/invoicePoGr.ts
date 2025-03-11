@@ -8,6 +8,7 @@ export interface itemsPoGrType {
   uom: string
   costPerUnit: string
   totalCost: string
+  installmentCost: string
   deliveryDate: string
   billable: string
   dp: string

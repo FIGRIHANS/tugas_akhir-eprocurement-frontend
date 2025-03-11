@@ -24,25 +24,26 @@
         <tbody>
           <tr v-for="(item, index) in form.invoicePoGr" :key="index" class="po__items">
             <td>{{ item.line }}</td>
-            <td>{{ item.grNumber }}</td>
-            <td>{{ item.poNumber }}</td>
-            <td>{{ item.poSapNumber }}</td>
-            <td>{{ item.itemName }}</td>
-            <td>{{ item.quantity }}</td>
-            <td>{{ item.uom }}</td>
-            <td>{{ item.costPerUnit }}</td>
-            <td>{{ item.totalCost }}</td>
-            <td>{{ item.deliveryDate }}</td>
-            <td>{{ item.billable }}</td>
-            <td>{{ item.dp }}</td>
-            <td>{{ item.dpValue }}</td>
-            <td>{{ item.whtType }}</td>
-            <td>{{ item.whtCode }}</td>
-            <td>{{ item.dpp }}</td>
-            <td>{{ item.whtValue }}</td>
-            <td>{{ item.vat }}</td>
-            <td>{{ item.otherDpp }}</td>
-            <td>{{ item.amount }}</td>
+            <td>{{ item.grNumber || '-' }}</td>
+            <td>{{ item.poNumber || '-' }}</td>
+            <td>{{ item.poSapNumber || '-' }}</td>
+            <td>{{ item.itemName || '-' }}</td>
+            <td>{{ item.quantity || '-' }}</td>
+            <td>{{ item.uom || '-' }}</td>
+            <td>{{ item.costPerUnit || '-' }}</td>
+            <td>{{ item.totalCost || '-' }}</td>
+            <td v-if="form.invoiceDp">{{ item.installmentCost || '-' }}</td>
+            <td>{{ item.deliveryDate || '-' }}</td>
+            <td>{{ item.billable || '-' }}</td>
+            <td>{{ item.dp || '-' }}</td>
+            <td>{{ item.dpValue || '-' }}</td>
+            <td>{{ item.whtType || '-' }}</td>
+            <td>{{ item.whtCode || '-' }}</td>
+            <td>{{ item.dpp || '-' }}</td>
+            <td>{{ item.whtValue || '-' }}</td>
+            <td>{{ item.vat || '-' }}</td>
+            <td>{{ item.otherDpp || '-' }}</td>
+            <td>{{ item.amount || '-' }}</td>
           </tr>
         </tbody>
       </table>
@@ -51,33 +52,13 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, inject } from 'vue'
+import { ref, inject, onMounted } from 'vue'
 import type { formTypes } from '../types/invoiceDetail'
+import { defaultColumn, invoiceDpColumn } from '@/static/invoicePoGr'
 
 const form = inject<formTypes>('form')
 
-const columns = ref([
-  'Line',
-  'No GR',
-  'No PO',
-  'PO Number SAP',
-  'Item',
-  'QTY',
-  'UoM',
-  'Cost Per Unit',
-  'Total Cost',
-  'Delivery Date',
-  'Billable',
-  'DP%',
-  'DP Value',
-  'WHT Type',
-  'WHT Code',
-  'DPP',
-  'WHT Value',
-  'VAT',
-  'DPP Lain - Lain',
-  'Amount'
-])
+const columns = ref<string[]>([])
 
 const setMediumColumn = (name: string) => {
   const list = [
@@ -94,6 +75,14 @@ const setMediumColumn = (name: string) => {
   if (check !== -1) return true
   return false
 }
+
+onMounted(() => {
+  if (form?.invoiceDp) {
+    columns.value = ['Line', ...invoiceDpColumn]
+  } else {
+    columns.value = ['Line', ...defaultColumn]
+  }
+})
 </script>
 
 <style lang="scss" scoped>

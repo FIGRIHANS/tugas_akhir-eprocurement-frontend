@@ -1,7 +1,7 @@
 <template>
   <div v-if="form" class="flex flex-col gap-[24px]">
     <p class="text-lg font-semibold m-[0px]">Additional Cost</p>
-    <div>
+    <div class="invoice__table">
       <table class="table table-xs table-border">
         <thead>
           <tr>
@@ -12,17 +12,22 @@
         </thead>
         <tbody>
           <tr v-for="(item, index) in form.additionalCost" :key="index">
-            <td>{{ item.line }}</td>
-            <td>{{ item.quantity }}</td>
-            <td>{{ item.uom }}</td>
-            <td>{{ item.amount }}</td>
-            <td>{{ item.costType }}</td>
-            <td>{{ item.description }}</td>
-            <td>{{ item.subTotal }}</td>
-            <td>{{ item.taxCode }}</td>
-            <td>{{ item.vatAmount }}</td>
-            <td>{{ item.wht }}</td>
-            <td>{{ item.whtAmount }}</td>
+            <td>{{ index + 1 }}</td>
+            <td>{{ item.type || '-' }}</td>
+            <td>{{ item.gl || '-' }}</td>
+            <td>{{ item.costCenter || '-' }}</td>
+            <td>{{ item.quantity || '-' }}</td>
+            <td>{{ item.uom || '-' }}</td>
+            <td>{{ item.costPerUnit || '-' }}</td>
+            <td>{{ item.totalCost || '-' }}</td>
+            <td>{{ item.pphType || '-' }}</td>
+            <td>{{ item.pphCode || '-' }}</td>
+            <td>{{ item.dpp || '-' }}</td>
+            <td>{{ item.pphValue || '-' }}</td>
+            <td>{{ item.vat || '-' }}</td>
+            <td>{{ item.otherDpp || '-' }}</td>
+            <td>{{ item.amount || '-' }}</td>
+            <td>{{ item.remark || '-'}}</td>
           </tr>
         </tbody>
       </table>
@@ -38,15 +43,20 @@ const form = inject<formTypes>('form')
 
 const columns = ref([
   'Line',
-  'Quantity',
-  'UOM',
+  'Jenis',
+  'GL',
+  'Cost Center',
+  'QTY',
+  'UoM',
+  'Cost Per Unit',
+  'Total Cost',
+  'Tipe PPH',
+  'Kode PPH',
+  'DPP',
+  'Nilai PPH',
+  'VAT',
+  'DPP Lain - Lain',
   'Amount',
-  'Cost Type',
-  'Description',
-  'Subtotal',
-  'Tax Code',
-  'VAT Amount',
-  'WHT',
-  'WHT Amount'
+  'Remark'
 ])
 </script>

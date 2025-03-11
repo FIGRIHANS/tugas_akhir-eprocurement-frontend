@@ -1,6 +1,6 @@
 <template>
   <div v-if="form" class="flex flex-col gap-[24px]">
-    <p class="text-lg font-semibold m-[0px]">Payment Information</p>
+    <p class="text-lg font-semibold m-[0px]">Bank Key</p>
     <div class="flex items-center justify-between">
       <div class="flex-1">
         <p class="text-xs font-normal text-gray-700">Bank Key</p>

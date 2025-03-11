@@ -19,12 +19,15 @@ export interface formTypes extends documentFormTypes {
 
   // Invoice Information
   invoiceNo: string
-  taxInvoiceNumber: string
+  supplierInvoiceNumber: string
+  invoiceDate: string
+  taxNumber: string
   taxDate: string
-  taxCalculationId: string
   taxCode: string
   whtCode: string
   paymentTerm: string
+  invoiceDp: boolean
+  withDp: boolean
   invoicePoGr: itemsPoGrType[]
   additionalCost: itemsCostType[]
 
