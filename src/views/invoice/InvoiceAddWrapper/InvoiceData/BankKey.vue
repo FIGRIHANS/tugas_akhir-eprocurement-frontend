@@ -27,45 +27,35 @@
         <label class="form-label max-w-32">
           Bank Name
         </label>
-        <select v-model="form.bankNameId" class="select" :class="{ 'border-danger': form.bankNameIdError }">
-          <option value="1">
-            Option 1
-          </option>
-          <option value="2">
-            Option 2
-          </option>
-          <option value="3">
-            Option 3
-          </option>
-        </select>
+        <input v-model="form.bankNameId" class="input" placeholder="" disabled/>
       </div>
       <!-- Beneficiary Name -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
         <label class="form-label max-w-32">
           Beneficiary Name
         </label>
-        <input v-model="form.beneficiaryName" class="input" placeholder="" :class="{ 'border-danger': form.beneficiaryNameError }"/>
+        <input v-model="form.beneficiaryName" class="input" placeholder="" disabled/>
       </div>
       <!-- Bank Account Number -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
         <label class="form-label max-w-32">
           Bank Account Number
         </label>
-        <input v-model="form.bankAccountNumber" class="input" placeholder="" :class="{ 'border-danger': form.bankAccountNumberError }"/>
+        <input v-model="form.bankAccountNumber" class="input" placeholder="" disabled/>
       </div>
       <!-- SWIFT Code -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
         <label class="form-label max-w-32">
           SWIFT Code
         </label>
-        <input v-model="form.swiftCode" class="input" placeholder="" :class="{ 'border-danger': form.swiftCodeError }"/>
+        <input v-model="form.swiftCode" class="input" placeholder="" disabled/>
       </div>
       <!-- Bank Address -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
         <label class="form-label max-w-32">
           Bank Address
         </label>
-        <textarea v-model="form.bankAddress" class="textarea" placeholder="" rows="6" :class="{ 'border-danger': form.bankAddressError }"></textarea>
+        <textarea v-model="form.bankAddress" class="textarea" placeholder="" rows="6" disabled></textarea>
       </div>
     </div>
   </div>

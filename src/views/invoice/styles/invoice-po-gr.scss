@@ -17,16 +17,11 @@
   }
 
   &__field-base {
-    min-width: 130px;
+    min-width: 150px;
     @apply px-[20px] !important;
     @apply py-[13px] !important;
     
-    &--description {
-      @extend .pogr__field-base;
-      min-width: 300px;
-    }
-    
-    &--auxiliary {
+    &--po-sap {
       @extend .pogr__field-base;
       min-width: 200px;
     }

@@ -72,12 +72,15 @@ const form = reactive<formTypes>({
   swiftCode: '',
   bankAddress: '',
   invoiceNo: '',
-  taxInvoiceNumber: '',
+  supplierInvoiceNumber: '',
+  invoiceDate: '',
+  taxNumber: '',
   taxDate: '',
-  taxCalculationId: '',
   taxCode: '',
   whtCode: '',
   paymentTerm: '',
+  invoiceDp: false,
+  withDp: false,
   invoiceDocument: null,
   tax: null,
   referenceDocument: null,
@@ -98,42 +101,24 @@ const contentComponent = computed(() => {
 
 const checkInvoiceData = () => {
   form.vendorIdError = useCheckEmpty(form.vendorId).isError
-  form.businessFieldError = useCheckEmpty(form.businessField).isError
-  form.subBusinessFieldError = useCheckEmpty(form.subBusinessField).isError
-  form.addressError = useCheckEmpty(form.address).isError
-
   form.bankKeyIdError = useCheckEmpty(form.bankKeyId).isError
-  form.bankNameIdError = useCheckEmpty(form.bankNameId).isError
-  form.beneficiaryNameError = useCheckEmpty(form.beneficiaryName).isError
-  form.bankAccountNumberError = useCheckEmpty(form.bankAccountNumber).isError
-  form.swiftCodeError = useCheckEmpty(form.swiftCode).isError
-  form.bankAddressError = useCheckEmpty(form.bankAddress).isError
 
   if (
     form.vendorIdError ||
-    form.businessFieldError ||
-    form.subBusinessFieldError ||
-    form.addressError ||
-    form.bankKeyIdError ||
-    form.bankNameIdError ||
-    form.beneficiaryNameError ||
-    form.bankAccountNumberError ||
-    form.swiftCodeError ||
-    form.bankAddressError
+    form.bankKeyIdError
   ) return false
   else return true
 }
 
 const checkInvoiceInformation = () => {
-  form.invoiceNoError = useCheckEmpty(form.invoiceNo).isError
-  form.taxInvoiceNumberError = useCheckEmpty(form.taxInvoiceNumber).isError
+  form.supplierInvoiceNumberError = useCheckEmpty(form.supplierInvoiceNumber).isError
+  form.invoiceDateError = useCheckEmpty(form.invoiceDate).isError
+  form.taxNumberError = useCheckEmpty(form.taxNumber).isError
   form.taxDateError = useCheckEmpty(form.taxDate).isError
-  form.taxCalculationIdError = useCheckEmpty(form.taxCalculationId).isError
   form.taxCodeError = useCheckEmpty(form.taxCode).isError
   form.whtCodeError = useCheckEmpty(form.whtCode).isError
   form.paymentTermError = useCheckEmpty(form.paymentTerm).isError
   form.invoicePoGrError = form.invoicePoGr.length === 0
-  form.additionalCostError = form.additionalCost.length === 0
 
   form.invoiceDocumentError = form.invoiceDocument === null
   form.taxError = form.tax === null
@@ -141,10 +126,10 @@ const checkInvoiceInformation = () => {
   form.otherDocumentError = form.otherDocument === null
 
   if (
-    form.invoiceNoError ||
-    form.taxInvoiceNumberError ||
+    form.supplierInvoiceNumberError ||
+    form.invoiceDateError ||
+    form.taxNumberError ||
     form.taxDateError ||
-    form.taxCalculationIdError ||
     form.taxCodeError ||
     form.whtCodeError ||
     form.paymentTermError ||

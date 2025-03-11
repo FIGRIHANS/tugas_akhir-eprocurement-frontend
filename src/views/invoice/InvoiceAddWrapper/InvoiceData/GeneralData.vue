@@ -27,21 +27,21 @@
         <label class="form-label max-w-32">
           Bidang Usaha
         </label>
-        <input v-model="form.businessField" class="input" placeholder="" :class="{ 'border-danger': form.businessFieldError }"/>
+        <input v-model="form.businessField" class="input" placeholder="" disabled/>
       </div>
       <!-- Sub Bidang  Usaha -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
         <label class="form-label max-w-32">
           Sub Bidang  Usaha
         </label>
-        <input v-model="form.subBusinessField" class="input" placeholder="" :class="{ 'border-danger': form.subBusinessFieldError }"/>
+        <input v-model="form.subBusinessField" class="input" placeholder="" disabled/>
       </div>
       <!-- Alamat -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
         <label class="form-label max-w-32">
           Alamat
         </label>
-        <textarea v-model="form.address" class="textarea" placeholder="" rows="6" :class="{ 'border-danger': form.addressError }"></textarea>
+        <textarea v-model="form.address" class="textarea" placeholder="" rows="6" disabled></textarea>
       </div>
     </div>
   </div>
