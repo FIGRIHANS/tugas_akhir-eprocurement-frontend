@@ -7,41 +7,36 @@ export interface formTypes extends documentFormTypes {
   vendorId: string
   vendorIdError?: boolean
   businessField: string
-  businessFieldError?: boolean
   subBusinessField: string
-  subBusinessFieldError?: boolean
   address: string
-  addressError?: boolean
   bankKeyId: string
   bankKeyIdError?: boolean
   bankNameId: string
-  bankNameIdError?: boolean
   beneficiaryName: string
-  beneficiaryNameError?: boolean
   bankAccountNumber: string
-  bankAccountNumberError?: boolean
   swiftCode: string
-  swiftCodeError?: boolean
   bankAddress: string
-  bankAddressError?: boolean
 
   // Invoice Information
   invoiceNo: string
-  invoiceNoError?: boolean
-  taxInvoiceNumber: string
-  taxInvoiceNumberError?: boolean
+  supplierInvoiceNumber: string
+  supplierInvoiceNumberError?: boolean
+  invoiceDate: string
+  invoiceDateError?: boolean
+  taxNumber: string
+  taxNumberError?: boolean
   taxDate: string
   taxDateError?: boolean
-  taxCalculationId: string
-  taxCalculationIdError?: boolean
   taxCode: string
   taxCodeError?: boolean
   whtCode: string
   whtCodeError?: boolean
   paymentTerm: string
   paymentTermError?: boolean
+  invoiceDp: boolean
+  withDp: boolean
+
   invoicePoGr: itemsPoGrType[]
   invoicePoGrError?: boolean
   additionalCost: itemsCostType[]
-  additionalCostError?: boolean
 }

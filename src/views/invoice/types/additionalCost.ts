@@ -1,13 +1,18 @@
 export interface itemsCostType {
-  line: string
+  type: string
+  gl: string
+  costCenter: string
   quantity: string
   uom: string
+  costPerUnit: string
+  totalCost: string
+  pphType: string
+  pphCode: string
+  dpp: string
+  pphValue: string
+  vat: string
+  otherDpp: string
   amount: string
-  costType: string
-  subTotal: string
-  taxCode: string
-  vatAmount: string
-  wht: string
-  whtAmount: string
-  description: string
+  remark: string
+  isEdit: boolean
 }

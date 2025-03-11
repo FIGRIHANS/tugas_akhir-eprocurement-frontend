@@ -1,5 +1,5 @@
 <template>
-  <div class="card flex-auto">
+  <div class="card flex-1">
     <div class="card-header py-[8px] px-[20px]">
       <div class="border rounded-lg border-gray-300 p-[4px] flex items-center gap-[4px]">
         <button
