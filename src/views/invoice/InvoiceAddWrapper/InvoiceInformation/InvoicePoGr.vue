@@ -171,57 +171,11 @@ import { ref, inject, watch, onMounted, nextTick, onUnmounted } from 'vue'
 import type { formTypes } from '../../types/invoiceAddWrapper'
 import type { itemsPoGrType } from '../../types/invoicePoGr'
 import { KTDropdown } from '@/metronic/core'
+import { defaultColumn, invoiceDpColumn } from '@/static/invoicePoGr'
 
 const dropdownGr = ref<(HTMLElement | null)[]>([])
 const dropdownGrInstance = ref<(KTDropdown | null)[]>([])
 const columns = ref<string[]>([])
-
-const defaultColumn = ref<string[]>([
-  'Action',
-  'No GR',
-  'No PO',
-  'PO Number SAP',
-  'Item',
-  'QTY',
-  'UoM',
-  'Cost Per Unit',
-  'Total Cost',
-  'Delivery Date',
-  'Billable',
-  'DP%',
-  'DP Value',
-  'WHT Type',
-  'WHT Code',
-  'DPP',
-  'WHT Value',
-  'VAT',
-  'DPP Lain - Lain',
-  'Amount'
-])
-
-const invoiceDpColumn = ref<string[]>([
-  'Action',
-  'No GR',
-  'No PO',
-  'PO Number SAP',
-  'Item',
-  'QTY',
-  'UoM',
-  'Cost Per Unit',
-  'Total Cost',
-  'Termin Cicilan',
-  'Delivery Date',
-  'Billable',
-  'DP%',
-  'DP Value',
-  'WHT Type',
-  'WHT Code',
-  'DPP',
-  'WHT Value',
-  'VAT',
-  'DPP Lain - Lain',
-  'Amount'
-])
 
 const form = inject<formTypes>('form')
 
@@ -290,9 +244,9 @@ watch(
   () => form?.invoiceDp,
   () => {
     if (form?.invoiceDp) {
-      columns.value = invoiceDpColumn.value
+      columns.value = ['Action', ...invoiceDpColumn]
     } else {
-      columns.value = defaultColumn.value
+      columns.value = ['Action', ...defaultColumn]
     }
   }
 )
@@ -315,7 +269,7 @@ watch(
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
-  columns.value = defaultColumn.value
+  columns.value = ['Action', ...defaultColumn]
 })
 
 onUnmounted(() => {
