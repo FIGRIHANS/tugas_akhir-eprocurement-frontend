@@ -5,8 +5,6 @@ type LokasiKantor = {
   provinsiError?: boolean
   kabupatenKota: number
   kabupatenKotaError?: boolean
-  kecamatan: number
-  kecamatanError?: boolean
   kodePos: string
   kodePosError?: boolean
   alamatLengkap: string

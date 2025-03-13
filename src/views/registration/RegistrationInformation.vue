@@ -36,15 +36,20 @@
         row
         required
         :error="information.lokasiKantorPusat.negaraError"
+        @update:model-value="getStateList('hq')"
       />
       <UiSelect
         v-model="information.lokasiKantorPusat.provinsi"
         label="Provinsi"
         placeholder="Pilih Provinsi"
         :disabled="!information.lokasiKantorPusat.negara"
+        :options="provinceListHq"
+        value-key="provinceID"
+        text-key="provinceName"
         row
         required
         :error="information.lokasiKantorPusat.provinsiError"
+        @update:model-value="getCityList('hq')"
       />
       <UiSelect
         v-model="information.lokasiKantorPusat.kabupatenKota"
@@ -57,19 +62,6 @@
         row
         required
         :error="information.lokasiKantorPusat.kabupatenKotaError"
-        @update:model-value="getDistrictList('hq')"
-      />
-      <UiSelect
-        v-model="information.lokasiKantorPusat.kecamatan"
-        label="Kecamatan"
-        placeholder="Pilih Kecamatan"
-        :disabled="!information.lokasiKantorPusat.kabupatenKota"
-        :options="districtListHq"
-        value-key="districtID"
-        text-key="districtName"
-        row
-        required
-        :error="information.lokasiKantorPusat.kecamatanError"
       />
       <UiInput
         v-model="information.lokasiKantorPusat.kodePos"
@@ -110,6 +102,7 @@
           row
           required
           :error="information.lokasiPerusahaan.negaraError"
+          @update:model-value="getStateList('company')"
         />
         <UiSelect
           v-model="information.lokasiPerusahaan.provinsi"
@@ -118,7 +111,11 @@
           :disabled="isSameAsHq || !information.lokasiPerusahaan.negara"
           row
           required
+          :options="provinceListCompany"
+          value-key="provinceID"
+          text-key="provinceName"
           :error="information.lokasiPerusahaan.provinsiError"
+          @update:model-value="getCityList('company')"
         />
         <UiSelect
           v-model="information.lokasiPerusahaan.kabupatenKota"
@@ -131,19 +128,6 @@
           row
           required
           :error="information.lokasiPerusahaan.kabupatenKotaError"
-          @update:model-value="getDistrictList('company')"
-        />
-        <UiSelect
-          v-model="information.lokasiPerusahaan.kecamatan"
-          label="Kecamatan"
-          placeholder="Pilih Kecamatan"
-          :disabled="isSameAsHq || !information.lokasiPerusahaan.kabupatenKota"
-          :options="districtListCompany"
-          value-key="districtID"
-          text-key="districtName"
-          row
-          required
-          :error="information.lokasiPerusahaan.kecamatanError"
         />
         <UiInput
           v-model="information.lokasiPerusahaan.kodePos"
@@ -177,6 +161,9 @@
             class="w-full"
             placeholder="Pilih"
             :error="information.bidangUsaha.bidangUsahaError"
+            :options="businessFieldList"
+            value-key="businessFieldID"
+            text-key="businessFieldName"
           />
         </div>
         <div class="flex flex-col gap-2.5 w-full">
@@ -237,7 +224,11 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRegistrationVendorStore } from '@/stores/views/registration'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
 
-import type { CityListType, DistrictListType } from '@/stores/master-data/types/vendor-master-data'
+import type {
+  CityListType,
+  DistrictListType,
+  ProvinceListType,
+} from '@/stores/master-data/types/vendor-master-data'
 
 import UiFormGroup from '@/components/ui/atoms/form-group/UiFormGroup.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
@@ -255,12 +246,13 @@ const information = computed(() => registrationVendorStore.information)
 const isSameAsHq = ref<boolean>(false)
 
 const countryList = computed(() => vendorMasterDataStore.countryList)
+const businessFieldList = computed(() => vendorMasterDataStore.businessFieldList)
 
+const provinceListHq = ref<ProvinceListType>([])
 const cityListHq = ref<CityListType>([])
-const districtListHq = ref<DistrictListType>([])
 
+const provinceListCompany = ref<ProvinceListType>([])
 const cityListCompany = ref<CityListType>([])
-const districtListCompany = ref<DistrictListType>([])
 
 const checkSameAsHq = () => {
   if (!isSameAsHq.value) {
@@ -288,36 +280,43 @@ const addBusinessField = () => {
   }
 }
 
-const getCityList = async (type: 'hq' | 'company') => {
+const getStateList = async (type: 'hq' | 'company') => {
   const { lokasiKantorPusat, lokasiPerusahaan } = information.value
-  const response = await vendorMasterDataStore.getVendorCities()
-  // Number(type === 'hq' ? lokasiKantorPusat.kabupatenKota : lokasiPerusahaan.kabupatenKota),
-
-  if (type === 'hq') {
-    cityListHq.value = response.content
-  } else {
-    cityListCompany.value = response.content
-  }
-}
-
-const getDistrictList = async (type: 'hq' | 'company') => {
-  const { lokasiKantorPusat, lokasiPerusahaan } = information.value
-  const response = await vendorMasterDataStore.getVendorDistricts(
-    Number(type === 'hq' ? lokasiKantorPusat.kabupatenKota : lokasiPerusahaan.kabupatenKota),
+  const response = await vendorMasterDataStore.getVendorProvince(
+    Number(type === 'hq' ? lokasiKantorPusat.negara : lokasiPerusahaan.negara),
   )
 
   if (type === 'hq') {
-    districtListHq.value = response.content
+    provinceListHq.value = response.content
+    registrationVendorStore.information.lokasiKantorPusat.provinsi = 0
+    registrationVendorStore.information.lokasiKantorPusat.kabupatenKota = 0
   } else {
-    districtListCompany.value = response.content
+    provinceListCompany.value = response.content
+    registrationVendorStore.information.lokasiPerusahaan.provinsi = 0
+    registrationVendorStore.information.lokasiPerusahaan.kabupatenKota = 0
+  }
+}
+
+const getCityList = async (type: 'hq' | 'company') => {
+  const { lokasiKantorPusat, lokasiPerusahaan } = information.value
+  const response = await vendorMasterDataStore.getVendorCities(
+    Number(type === 'hq' ? lokasiKantorPusat.provinsi : lokasiPerusahaan.provinsi),
+  )
+
+  if (type === 'hq') {
+    cityListHq.value = response.content
+    registrationVendorStore.information.lokasiKantorPusat.kabupatenKota = 0
+  } else {
+    cityListCompany.value = response.content
+    registrationVendorStore.information.lokasiPerusahaan.kabupatenKota = 0
   }
 }
 
 watch(
   () => isSameAsHq.value && information.value.lokasiKantorPusat,
   () => {
+    provinceListCompany.value = provinceListHq.value
     cityListCompany.value = cityListHq.value
-    districtListCompany.value = districtListHq.value
 
     registrationVendorStore.information.lokasiPerusahaan = {
       ...information.value.lokasiKantorPusat,
@@ -328,6 +327,6 @@ watch(
 
 onMounted(async () => {
   await vendorMasterDataStore.getVendorCountries()
-  // await vendorMasterDataStore.getVendorStates()
+  await vendorMasterDataStore.getVendorBusinessFields()
 })
 </script>

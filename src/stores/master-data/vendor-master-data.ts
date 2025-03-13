@@ -5,21 +5,24 @@ import vendorApi from '@/core/utils/vendorApi'
 import type { ApiResponse } from '@/core/type/api'
 import type {
   BankListType,
+  BusinessFieldListType,
   CityListType,
   CountryListType,
   DistrictListType,
   PositionListType,
+  ProvinceListType,
 } from './types/vendor-master-data'
 
 const baseUrl = '/public/vendor/registration'
 
 export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
   const countryList = ref<CountryListType>([])
-  const stateList = ref([])
+  const provinceList = ref<ProvinceListType>([])
   const cityList = ref<CityListType>([])
   const districtList = ref<DistrictListType>([])
   const posistionList = ref<PositionListType>([])
   const bankList = ref<BankListType>([])
+  const businessFieldList = ref<BusinessFieldListType>([])
 
   const getVendorCountries = async (countryName?: string) => {
     const response: ApiResponse<CountryListType> = await vendorApi.get(`${baseUrl}/countries`, {
@@ -33,14 +36,15 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
     return response.data.result
   }
 
-  const getVendorStates = async () => {
-    const response: ApiResponse = await vendorApi.get(`${baseUrl}/states`, {
-      // params: {
-      //   countryName,
-      // },
+  const getVendorProvince = async (countryId?: number, provinceName?: string) => {
+    const response: ApiResponse<ProvinceListType> = await vendorApi.get(`${baseUrl}/province`, {
+      params: {
+        countryId,
+        provinceName,
+      },
     })
 
-    stateList.value = response.data.result.content
+    provinceList.value = response.data.result.content
 
     return response.data.result
   }
@@ -96,18 +100,35 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
     return response.data.result
   }
 
+  const getVendorBusinessFields = async (businessFieldName?: string) => {
+    const response: ApiResponse<BusinessFieldListType> = await vendorApi.get(
+      `${baseUrl}/business-field`,
+      {
+        params: {
+          businessFieldName,
+        },
+      },
+    )
+
+    businessFieldList.value = response.data.result.content
+
+    return response.data.result
+  }
+
   return {
     countryList,
-    stateList,
+    provinceList,
     cityList,
     districtList,
     posistionList,
     bankList,
+    businessFieldList,
     getVendorCountries,
-    getVendorStates,
+    getVendorProvince,
     getVendorCities,
     getVendorDistricts,
     getVendorPosition,
     getVendorBanks,
+    getVendorBusinessFields,
   }
 })

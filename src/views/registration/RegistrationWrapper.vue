@@ -19,18 +19,15 @@
         </Transition>
       </RouterView>
 
-      <div class="flex justify-between mb-[24px]">
-        <UiButton outline>Save As Draft <UiIcon name="bookmark" variant="duotone" /></UiButton>
-        <div class="flex gap-4">
-          <UiButton v-if="showPrevious" outline @click="previous()">
-            <UiIcon name="black-left" />
-            Kembali
-          </UiButton>
-          <UiButton @click="next()">
-            {{ tab.active === 'registration__payment-detail' ? 'Registration' : 'Lanjut' }}
-            <UiIcon name="black-right" />
-          </UiButton>
-        </div>
+      <div class="flex justify-end gap-4 w-full mb-[24px]">
+        <UiButton v-if="showPrevious" outline @click="previous()">
+          <UiIcon name="black-left" />
+          Kembali
+        </UiButton>
+        <UiButton @click="next()">
+          {{ tab.active === 'registration__payment-detail' ? 'Registration' : 'Lanjut' }}
+          <UiIcon name="black-right" />
+        </UiButton>
       </div>
     </div>
   </div>

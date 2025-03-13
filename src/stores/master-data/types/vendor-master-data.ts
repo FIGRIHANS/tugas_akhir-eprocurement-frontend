@@ -3,6 +3,12 @@ export type CountryListType = {
   countryName: string
 }[]
 
+export type ProvinceListType = {
+  provinceID: number
+  provinceName: string
+  countryID: number
+}[]
+
 export type CityListType = {
   cityID: number
   cityName: string
@@ -24,4 +30,9 @@ export type BankListType = {
   bankCountryCode: string
   bankCode: string
   bankName: string
+}[]
+
+export type BusinessFieldListType = {
+  businessFieldID: number
+  businessFieldName: string
 }[]
