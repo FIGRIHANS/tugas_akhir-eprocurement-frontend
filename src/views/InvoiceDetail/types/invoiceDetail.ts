@@ -25,7 +25,7 @@ export interface formTypes extends documentFormTypes {
   taxDate: string
   taxCode: string
   whtCode: string
-  paymentTerm: string
+  paymentDate: string
   invoiceDp: boolean
   withDp: boolean
   invoicePoGr: itemsPoGrType[]

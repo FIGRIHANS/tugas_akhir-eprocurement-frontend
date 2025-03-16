@@ -13,7 +13,7 @@
       <InvoiceCalculation class="flex-1" />
     </div>
     <InvoicePoGr class="mt-[24px]" />
-    <AdditionalCost class="mt-[24px]" />
+    <AdditionalCost v-if="!form.invoiceDp && !form.withDp" class="mt-[24px]" />
     <div v-if="form.status === 2" class="flex items-center justify-end gap-[10px] py-[8px] px-[30px] mt-[24px]">
       <button class="btn btn-outline btn-danger" @click="openReject">
         <i class="ki-duotone ki-cross-circle"></i>
@@ -78,7 +78,7 @@ const form = ref<formTypes>({
   taxDate: '12/12/2024',
   taxCode: 'V1',
   whtCode: 'W2',
-  paymentTerm: 'Z045',
+  paymentDate: '12/12/2024',
   invoiceDp: false,
   withDp: false,
   invoicePoGr: [

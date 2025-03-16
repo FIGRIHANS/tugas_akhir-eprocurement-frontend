@@ -29,8 +29,8 @@
       <p class="font-normal text-sm">{{ form.whtCode }}</p>
     </div>
     <div class="flex items-center justify-between gap-[10px]">
-      <p class="font-normal text-sm text-gray-600">Payment Term</p>
-      <p class="font-normal text-sm">{{ form.paymentTerm }}</p>
+      <p class="font-normal text-sm text-gray-600">Estimated Schedule Payment</p>
+      <p class="font-normal text-sm">{{ form.paymentDate }}</p>
     </div>
     <div class="flex items-center gap-[8px]">
       <label class="form-label flex items-center gap-2.5">

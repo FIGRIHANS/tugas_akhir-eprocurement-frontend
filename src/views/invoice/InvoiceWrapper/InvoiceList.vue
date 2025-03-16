@@ -2,10 +2,24 @@
   <div class="border border-gray-200 rounded-xl p-[24px]">
     <div class="flex justify-between gap-[8px]">
       <UiInputSearch v-model="search" placeholder="Cari Invoice" class="w-[250px]" />
-      <button class="btn btn-primary" @click="goAdd">
-        <i class="ki-duotone ki-plus-circle"></i>
-        Add Invoice
-      </button>
+      <div class="dropdown" data-dropdown="true" data-dropdown-trigger="click">
+        <button class="dropdown-toggle btn btn-primary">
+          <i class="ki-duotone ki-plus-circle"></i>
+          Add Invoice
+        </button>
+        <div class="dropdown-content w-full max-w-56 p-[10px]">
+          <div class="flex flex-col gap-[4px]">
+            <button class="btn btn-clear btn-light w-full" @click="goAdd(true)">
+              <i class="ki-duotone ki-file-added"></i>
+              Invoice PO
+            </button>
+            <button class="btn btn-clear btn-light w-full" @click="goAdd(false)">
+              <i class="ki-duotone ki-file-deleted"></i>
+              Invoice Non PO
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="overflow-x-auto list__table mt-[24px]">
@@ -89,9 +103,12 @@ const list = ref<listTypes[]>([
   }
 ])
 
-const goAdd = () => {
+const goAdd = (isPo: boolean) => {
   router.push({
-    name: 'invoiceAdd'
+    name: 'invoiceAdd',
+    query: {
+      type: isPo ? 'po' : 'nonpo'
+    }
   })
 }
 

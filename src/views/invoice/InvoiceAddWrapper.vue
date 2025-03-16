@@ -78,7 +78,7 @@ const form = reactive<formTypes>({
   taxDate: '',
   taxCode: '',
   whtCode: '',
-  paymentTerm: '',
+  paymentDate: '',
   invoiceDp: false,
   withDp: false,
   invoiceDocument: null,
@@ -117,7 +117,7 @@ const checkInvoiceInformation = () => {
   form.taxDateError = useCheckEmpty(form.taxDate).isError
   form.taxCodeError = useCheckEmpty(form.taxCode).isError
   form.whtCodeError = useCheckEmpty(form.whtCode).isError
-  form.paymentTermError = useCheckEmpty(form.paymentTerm).isError
+  form.paymentDateError = useCheckEmpty(form.paymentDate).isError
   form.invoicePoGrError = form.invoicePoGr.length === 0
 
   form.invoiceDocumentError = form.invoiceDocument === null
@@ -132,7 +132,7 @@ const checkInvoiceInformation = () => {
     form.taxDateError ||
     form.taxCodeError ||
     form.whtCodeError ||
-    form.paymentTermError ||
+    form.paymentDateError ||
     form.invoiceDocumentError ||
     form.taxError ||
     form.referenceDocumentError ||
