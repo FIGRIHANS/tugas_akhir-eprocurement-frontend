@@ -1,35 +1,119 @@
 <script setup lang="ts">
+import DatePicker from '@/components/datePicker/DatePicker.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
+import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
+import UiInput from '@/components/ui/atoms/input/UiInput.vue'
+import { reactive } from 'vue'
+import LPagination from '@/components/pagination/LPagination.vue'
+
+const formData = reactive({
+  status: '',
+  category: '',
+  businessLicense: '',
+  registrationDateStart: '',
+  registrationDateEnd: '',
+  businessLicenseExpired: '',
+})
 </script>
 
 <template>
-  <div class="card">
-    <div class="card-body">
-      <div class="flex items-center justify-between">
-        <UiInputSearch model-value="" placeholder="Cari vendor" />
-        <div class="flex items-center space-x-3">
-          <div
-            class="dropdown"
-            data-dropdown="true"
-            data-dropdown-trigger="click"
-            data-dropdown-placement="bottom-end"
-          >
-            <UiButton class="dropdown-toggle">
-              <UiIcon variant="outline" name="filter" />
-              <span>Filter</span>
-            </UiButton>
-            <div class="dropdown-content w-full max-w-56 p-4">
-              <div>tes</div>
+  <div class="card card-grid">
+    <div class="card-header">
+      <!-- header -->
+      <UiInputSearch model-value="" placeholder="Cari vendor" />
+      <div class="flex items-center space-x-3">
+        <div
+          class="dropdown"
+          data-dropdown="true"
+          data-dropdown-trigger="click"
+          data-dropdown-placement="bottom-end"
+        >
+          <UiButton class="dropdown-toggle">
+            <UiIcon variant="outline" name="filter" />
+            <span>Filter</span>
+          </UiButton>
+          <div class="dropdown-content w-full max-w-60 p-4 space-y-5">
+            <h1 class="text-lg font-semibold text-gray-700 mb-5">Filter</h1>
+            <UiSelect label="Status" placeholder="Pilih" v-model="formData.status">
+              <option>Select Status</option>
+            </UiSelect>
+            <UiSelect label="Kategori" placeholder="Pilih">
+              <option>Select Status</option>
+            </UiSelect>
+            <UiSelect label="Izin Usaha" placeholder="Pilih">
+              <option>Select Status</option>
+            </UiSelect>
+            <div class="relative">
+              <label
+                class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px] z-5"
+              >
+                Tanggal Pendaftaran Awal
+              </label>
+              <DatePicker model-value="" />
+            </div>
+            <div class="relative">
+              <label
+                class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px] z-5"
+              >
+                Tanggal Pendaftaran Akhir
+              </label>
+              <DatePicker model-value="" />
+            </div>
+            <UiInput label="Izin Usaha Expired" />
+            <div class="flex items-center space-x-3">
+              <UiButton :outline="true" class="flex-1">
+                <UiIcon variant="filled" name="arrows-circle" />
+                Reset
+              </UiButton>
+              <UiButton class="flex-1">
+                <UiIcon variant="filled" name="check-circle" />
+                Terapkan
+              </UiButton>
             </div>
           </div>
-          <UiButton :outline="true">
-            <UiIcon variant="filled" name="printer" />
-            Export Data Vendor
-          </UiButton>
         </div>
+        <UiButton :outline="true">
+          <UiIcon variant="filled" name="printer" />
+          Export Data Vendor
+        </UiButton>
       </div>
+      <!-- end of header -->
+    </div>
+    <div class="card-table scrollable-x-auto">
+      <table class="table align-middle text-gray-700">
+        <thead class="border-b-2 border-b-primary">
+          <th></th>
+          <th class="min-w-fit">Nama Perusahaan</th>
+          <th class="min-w-fit">Status</th>
+          <th class="min-w-fit">Kategori Vendor</th>
+          <th class="min-w-fit">Tanggal Pendaftaran</th>
+          <th class="min-w-fit">Tanggal Permintaan Verifikasi</th>
+          <th class="min-w-fit">Tanggal Verifikasi</th>
+          <th class="min-w-fit">Kode E-Procurement Vendor</th>
+          <th class="min-w-fit">Kode Vendor</th>
+        </thead>
+        <tbody>
+          <tr>
+            <td>-</td>
+            <td>-</td>
+            <td>-</td>
+            <td>-</td>
+            <td>-</td>
+            <td>-</td>
+            <td>-</td>
+            <td>-</td>
+            <td>-</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div
+      class="card-footer justify-center md:justify-between flex-col md:flex-row gap-3 text-gray-600 text-2sm font-medium"
+    >
+      <div>Tampilkan 10 data dari total data 7575</div>
+      <LPagination :total-items="30" :current-page="1" :page-size="10" />
     </div>
   </div>
 </template>
