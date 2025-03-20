@@ -6,6 +6,8 @@ import type { ApiResponse } from '@/core/type/api'
 import type {
   BankListType,
   BusinessFieldListType,
+  BusinessFieldReducerType,
+  BusinessFieldResponse,
   CityListType,
   CountryListType,
   DistrictListType,
@@ -101,7 +103,7 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
   }
 
   const getVendorBusinessFields = async (businessFieldName?: string) => {
-    const response: ApiResponse<BusinessFieldListType> = await vendorApi.get(
+    const response: ApiResponse<BusinessFieldResponse> = await vendorApi.get(
       `${baseUrl}/business-field`,
       {
         params: {
@@ -110,9 +112,25 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
       },
     )
 
-    businessFieldList.value = response.data.result.content
+    const formatedResponse: BusinessFieldListType = Object.values(
+      response.data.result.content.reduce(
+        (
+          acc: Record<number, BusinessFieldReducerType>,
+          { businessFieldID, businessFieldName, subBusinessFieldID, subBusinessFieldName },
+        ) => {
+          if (!acc[businessFieldID]) {
+            acc[businessFieldID] = { businessFieldID, businessFieldName, subBusiness: [] }
+          }
+          acc[businessFieldID].subBusiness.push({ subBusinessFieldID, subBusinessFieldName })
+          return acc as Record<number, BusinessFieldReducerType>
+        },
+        {},
+      ),
+    )
 
-    return response.data.result
+    businessFieldList.value = formatedResponse
+
+    return formatedResponse
   }
 
   return {

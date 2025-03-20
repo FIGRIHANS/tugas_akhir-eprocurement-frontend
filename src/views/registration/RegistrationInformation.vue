@@ -164,6 +164,7 @@
             :options="businessFieldList"
             value-key="businessFieldID"
             text-key="businessFieldName"
+            @update:model-value="getSubBusinessList"
           />
         </div>
         <div class="flex flex-col gap-2.5 w-full">
@@ -175,6 +176,9 @@
             class="w-full"
             placeholder="Pilih"
             :error="information.bidangUsaha.subBidangUsahaError"
+            :options="subBusinessFieldList"
+            value-key="subBusinessFieldID"
+            text-key="subBusinessFieldName"
           />
         </div>
         <UiButton class="grow-0 w-fit" outline @click="addBusinessField">
@@ -199,13 +203,13 @@
               </tr>
             </tbody>
             <tbody v-else>
-              <tr v-for="i in 4" :key="i">
+              <tr v-for="(list, index) in information.bidangUsaha.list" :key="index">
                 <td class="flex flex-col">
-                  <span class="font-semibold">Aktivitas teknologi dan aplikasi</span>
-                  <span>09234</span>
+                  <span class="font-bold">{{ list.bidangUsahaName }}</span>
+                  <span class="text-xs text-gray-700">{{ list.subBidangUsahaName }}</span>
                 </td>
                 <td>
-                  <UiButton variant="danger" outline icon>
+                  <UiButton variant="danger" outline icon @click="deleteBidangUsaha(index)">
                     <UiIcon variant="duotone" name="cross-circle" />
                   </UiButton>
                 </td>
@@ -226,8 +230,8 @@ import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-dat
 
 import type {
   CityListType,
-  DistrictListType,
   ProvinceListType,
+  SubBusinessType,
 } from '@/stores/master-data/types/vendor-master-data'
 
 import UiFormGroup from '@/components/ui/atoms/form-group/UiFormGroup.vue'
@@ -247,6 +251,7 @@ const isSameAsHq = ref<boolean>(false)
 
 const countryList = computed(() => vendorMasterDataStore.countryList)
 const businessFieldList = computed(() => vendorMasterDataStore.businessFieldList)
+const subBusinessFieldList = ref<SubBusinessType[]>([])
 
 const provinceListHq = ref<ProvinceListType>([])
 const cityListHq = ref<CityListType>([])
@@ -258,24 +263,6 @@ const checkSameAsHq = () => {
   if (!isSameAsHq.value) {
     registrationVendorStore.information.lokasiPerusahaan = {
       ...information.value.lokasiKantorPusat,
-    }
-  }
-}
-
-const addBusinessField = () => {
-  const { bidangUsaha, subBidangUsaha } = information.value.bidangUsaha
-  if (bidangUsaha && subBidangUsaha) {
-    registrationVendorStore.information.bidangUsaha = {
-      ...registrationVendorStore.information.bidangUsaha,
-      bidangUsahaError: false,
-      subBidangUsahaError: false,
-    }
-    console.log('business field', information.value.bidangUsaha.bidangUsaha)
-  } else {
-    registrationVendorStore.information.bidangUsaha = {
-      ...registrationVendorStore.information.bidangUsaha,
-      bidangUsahaError: bidangUsaha === '',
-      subBidangUsahaError: subBidangUsaha === '',
     }
   }
 }
@@ -310,6 +297,55 @@ const getCityList = async (type: 'hq' | 'company') => {
     cityListCompany.value = response.content
     registrationVendorStore.information.lokasiPerusahaan.kabupatenKota = 0
   }
+}
+
+const getSubBusinessList = () => {
+  registrationVendorStore.information.bidangUsaha.subBidangUsaha = 0
+
+  const searchSubBusiness = businessFieldList.value.find(
+    (item) => item.businessFieldID === information.value.bidangUsaha.bidangUsaha,
+  )
+
+  subBusinessFieldList.value = searchSubBusiness!.subBusiness
+}
+
+const addBusinessField = () => {
+  const { bidangUsaha, subBidangUsaha } = information.value.bidangUsaha
+  if (bidangUsaha && subBidangUsaha) {
+    registrationVendorStore.information.bidangUsaha = {
+      ...registrationVendorStore.information.bidangUsaha,
+      bidangUsahaError: false,
+      subBidangUsahaError: false,
+    }
+
+    const searchBusiness = businessFieldList.value.find(
+      (item) => item.businessFieldID === bidangUsaha,
+    )
+
+    const searchSubBusiness = searchBusiness?.subBusiness.find(
+      (item) => item.subBusinessFieldID === subBidangUsaha,
+    )
+
+    registrationVendorStore.information.bidangUsaha.list.push({
+      bidangUsaha,
+      bidangUsahaName: searchBusiness!.businessFieldName,
+      subBidangUsaha,
+      subBidangUsahaName: searchSubBusiness!.subBusinessFieldName,
+    })
+
+    registrationVendorStore.information.bidangUsaha.bidangUsaha = 0
+    registrationVendorStore.information.bidangUsaha.subBidangUsaha = 0
+  } else {
+    registrationVendorStore.information.bidangUsaha = {
+      ...registrationVendorStore.information.bidangUsaha,
+      bidangUsahaError: bidangUsaha === 0,
+      subBidangUsahaError: subBidangUsaha === 0,
+    }
+  }
+}
+
+const deleteBidangUsaha = (index: number) => {
+  registrationVendorStore.information.bidangUsaha.list.splice(index, 1)
 }
 
 watch(

@@ -1,6 +1,9 @@
 export type CountryListType = {
   countryID: number
+  currencyId: number
+  countryCode: string
   countryName: string
+  countryPhonePrefix: string
 }[]
 
 export type ProvinceListType = {
@@ -32,7 +35,22 @@ export type BankListType = {
   bankName: string
 }[]
 
-export type BusinessFieldListType = {
+export type BusinessType = {
   businessFieldID: number
   businessFieldName: string
-}[]
+}
+
+export type SubBusinessType = {
+  subBusinessFieldID: number
+  subBusinessFieldName: string
+}
+
+export type BusinessFieldListType = (BusinessType & {
+  subBusiness: SubBusinessType[]
+})[]
+
+export type BusinessFieldReducerType = BusinessType & {
+  subBusiness: SubBusinessType[]
+}
+
+export type BusinessFieldResponse = (BusinessType & SubBusinessType)[]

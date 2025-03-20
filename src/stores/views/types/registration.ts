@@ -11,6 +11,11 @@ type LokasiKantor = {
   alamatLengkapError?: boolean
 }
 
+type BidangUsaha = {
+  bidangUsaha: number
+  subBidangUsaha: number
+}
+
 export type RegisInformationType = {
   perusahaan: {
     namaPerusahaan: string
@@ -21,15 +26,13 @@ export type RegisInformationType = {
   }
   lokasiKantorPusat: LokasiKantor
   lokasiPerusahaan: LokasiKantor
-  bidangUsaha: {
-    bidangUsaha: string
+  bidangUsaha: BidangUsaha & {
     bidangUsahaError?: boolean
-    subBidangUsaha: string
     subBidangUsahaError?: boolean
-    list: {
-      bidangUsaha: string
-      subBidangUsaha: string
-    }[]
+    list: (BidangUsaha & {
+      bidangUsahaName: string
+      subBidangUsahaName: string
+    })[]
   }
 }
 
