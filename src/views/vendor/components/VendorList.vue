@@ -8,14 +8,17 @@ import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import { reactive } from 'vue'
 import LPagination from '@/components/pagination/LPagination.vue'
 
-const formData = reactive({
-  status: '',
-  category: '',
-  businessLicense: '',
-  registrationDateStart: '',
-  registrationDateEnd: '',
-  businessLicenseExpired: '',
+const filters = reactive({
+  izinUsahaExp: '',
 })
+
+const handleFilter = () => {
+  console.log('filtering filtering filtering')
+}
+
+const handleReset = () => {
+  filters.izinUsahaExp = ''
+}
 </script>
 
 <template>
@@ -23,62 +26,64 @@ const formData = reactive({
     <div class="card-header">
       <!-- header -->
       <UiInputSearch model-value="" placeholder="Cari vendor" />
-      <div class="flex items-center space-x-3">
-        <div
-          class="dropdown"
-          data-dropdown="true"
-          data-dropdown-trigger="click"
-          data-dropdown-placement="bottom-end"
-        >
-          <UiButton class="dropdown-toggle">
-            <UiIcon variant="outline" name="filter" />
-            <span>Filter</span>
-          </UiButton>
-          <div class="dropdown-content w-full max-w-60 p-4 space-y-5">
-            <h1 class="text-lg font-semibold text-gray-700 mb-5">Filter</h1>
-            <UiSelect label="Status" placeholder="Pilih" v-model="formData.status">
-              <option>Select Status</option>
-            </UiSelect>
-            <UiSelect label="Kategori" placeholder="Pilih">
-              <option>Select Status</option>
-            </UiSelect>
-            <UiSelect label="Izin Usaha" placeholder="Pilih">
-              <option>Select Status</option>
-            </UiSelect>
-            <div class="relative">
-              <label
-                class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px] z-5"
-              >
-                Tanggal Pendaftaran Awal
-              </label>
-              <DatePicker model-value="" />
-            </div>
-            <div class="relative">
-              <label
-                class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px] z-5"
-              >
-                Tanggal Pendaftaran Akhir
-              </label>
-              <DatePicker model-value="" />
-            </div>
-            <UiInput label="Izin Usaha Expired" />
-            <div class="flex items-center space-x-3">
-              <UiButton :outline="true" class="flex-1">
-                <UiIcon variant="filled" name="arrows-circle" />
-                Reset
-              </UiButton>
-              <UiButton class="flex-1">
-                <UiIcon variant="filled" name="check-circle" />
-                Terapkan
-              </UiButton>
+      <form @submit.prevent="handleFilter">
+        <div class="flex items-center space-x-3">
+          <div
+            class="dropdown"
+            data-dropdown="true"
+            data-dropdown-trigger="click"
+            data-dropdown-placement="bottom-end"
+          >
+            <UiButton class="dropdown-toggle">
+              <UiIcon variant="outline" name="filter" />
+              <span>Filter</span>
+            </UiButton>
+            <div class="dropdown-content w-full max-w-60 p-4 space-y-5">
+              <h1 class="text-lg font-semibold text-gray-700 mb-5">Filter</h1>
+              <UiSelect label="Status" placeholder="Pilih">
+                <option>Select Status</option>
+              </UiSelect>
+              <UiSelect label="Kategori" placeholder="Pilih">
+                <option>Select Status</option>
+              </UiSelect>
+              <UiSelect label="Izin Usaha" placeholder="Pilih">
+                <option>Select Status</option>
+              </UiSelect>
+              <div class="relative">
+                <label
+                  class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px] z-5"
+                >
+                  Tanggal Pendaftaran Awal
+                </label>
+                <DatePicker model-value="" />
+              </div>
+              <div class="relative">
+                <label
+                  class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px] z-5"
+                >
+                  Tanggal Pendaftaran Akhir
+                </label>
+                <DatePicker model-value="" />
+              </div>
+              <UiInput label="Izin Usaha Expired" v-model="filters.izinUsahaExp" />
+              <div class="flex items-center space-x-3">
+                <UiButton :outline="true" class="flex-1" type="reset" @click="handleReset">
+                  <UiIcon variant="filled" name="arrows-circle" />
+                  Reset
+                </UiButton>
+                <UiButton class="flex-1">
+                  <UiIcon variant="filled" name="check-circle" />
+                  Terapkan
+                </UiButton>
+              </div>
             </div>
           </div>
+          <UiButton :outline="true">
+            <UiIcon variant="filled" name="printer" />
+            Export Data Vendor
+          </UiButton>
         </div>
-        <UiButton :outline="true">
-          <UiIcon variant="filled" name="printer" />
-          Export Data Vendor
-        </UiButton>
-      </div>
+      </form>
       <!-- end of header -->
     </div>
     <div class="card-table scrollable-x-auto">
