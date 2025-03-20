@@ -84,19 +84,66 @@ const formData = reactive({
     <div class="card-table scrollable-x-auto">
       <table class="table align-middle text-gray-700">
         <thead class="border-b-2 border-b-primary">
-          <th></th>
-          <th class="min-w-fit">Nama Perusahaan</th>
-          <th class="min-w-fit">Status</th>
-          <th class="min-w-fit">Kategori Vendor</th>
-          <th class="min-w-fit">Tanggal Pendaftaran</th>
-          <th class="min-w-fit">Tanggal Permintaan Verifikasi</th>
-          <th class="min-w-fit">Tanggal Verifikasi</th>
-          <th class="min-w-fit">Kode E-Procurement Vendor</th>
-          <th class="min-w-fit">Kode Vendor</th>
+          <tr>
+            <th></th>
+            <th class="min-w-fit">Nama Perusahaan</th>
+            <th class="min-w-fit">Status</th>
+            <th class="min-w-fit">Kategori Vendor</th>
+            <th class="min-w-fit">Tanggal Pendaftaran</th>
+            <th class="min-w-fit">Tanggal Permintaan Verifikasi</th>
+            <th class="min-w-fit">Tanggal Verifikasi</th>
+            <th class="min-w-fit">Kode E-Procurement Vendor</th>
+            <th class="min-w-fit">Kode Vendor</th>
+          </tr>
         </thead>
         <tbody>
           <tr>
-            <td>-</td>
+            <td class="flex items-center gap-5">
+              <div class="dropdown" data-dropdown="true" data-dropdown-trigger="click">
+                <UiButton :outline="true" :icon="true" variant="secondary" class="dropdown-toggle">
+                  <UiIcon variant="outline" name="dots-vertical" />
+                </UiButton>
+                <div class="dropdown-content w-full max-w-60 space-y-5">
+                  <ul class="menu menu-default flex flex-col gap-2">
+                    <li class="menu-item">
+                      <a class="menu-link" href="#">
+                        <span class="menu-icon">
+                          <UiIcon variant="filled" name="eye" />
+                        </span>
+                        <span class="menu-title"> Detail Vendor </span>
+                      </a>
+                    </li>
+                    <li class="menu-item">
+                      <a class="menu-link" href="#">
+                        <span class="menu-icon">
+                          <UiIcon variant="filled" name="data" />
+                        </span>
+                        <span class="menu-title"> Detail Verifikasi </span>
+                      </a>
+                    </li>
+                    <div class="border-b border-b-gray-200"></div>
+                    <li class="menu-item">
+                      <a class="menu-link" href="#">
+                        <span class="menu-icon">
+                          <UiIcon variant="filled" name="cross-circle" class="!text-red-600" />
+                        </span>
+                        <span class="menu-title !text-red-600"> Blacklist </span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <label class="switch">
+                <input
+                  name="check"
+                  type="checkbox"
+                  value="1"
+                  class="switch-on:checked:!bg-success"
+                />
+                <span class="switch-label"> Not Active </span>
+              </label>
+            </td>
             <td>-</td>
             <td>-</td>
             <td>-</td>
