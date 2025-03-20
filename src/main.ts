@@ -16,7 +16,7 @@ const app = createApp(App)
 
 app.use(createPinia())
 app.use(router)
-// app.use(middleware)
+app.use(middleware)
 app.use(VueApexCharts);
 app.component('VueDatePicker', VueDatePicker)
 
