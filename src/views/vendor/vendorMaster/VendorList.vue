@@ -7,17 +7,23 @@ import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import { reactive } from 'vue'
 import LPagination from '@/components/pagination/LPagination.vue'
+import { useRoute, useRouter } from 'vue-router'
+
+const router = useRouter()
+const route = useRoute()
+// const vendorData = reactive([])
 
 const filters = reactive({
   izinUsahaExp: '',
 })
 
 const handleFilter = () => {
-  console.log('filtering filtering filtering')
+  router.push({ query: { ...filters } })
 }
 
 const handleReset = () => {
   filters.izinUsahaExp = ''
+  router.replace({ path: route.path, query: {} })
 }
 </script>
 
