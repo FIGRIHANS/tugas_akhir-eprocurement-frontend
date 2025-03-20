@@ -108,7 +108,7 @@ const formData = reactive({
                     <li class="menu-item">
                       <a class="menu-link" href="#">
                         <span class="menu-icon">
-                          <UiIcon variant="filled" name="eye" />
+                          <UiIcon variant="duotone" name="eye" />
                         </span>
                         <span class="menu-title"> Detail Vendor </span>
                       </a>
@@ -116,7 +116,7 @@ const formData = reactive({
                     <li class="menu-item">
                       <a class="menu-link" href="#">
                         <span class="menu-icon">
-                          <UiIcon variant="filled" name="data" />
+                          <UiIcon variant="duotone" name="data" />
                         </span>
                         <span class="menu-title"> Detail Verifikasi </span>
                       </a>
@@ -125,7 +125,7 @@ const formData = reactive({
                     <li class="menu-item">
                       <a class="menu-link" href="#">
                         <span class="menu-icon">
-                          <UiIcon variant="filled" name="cross-circle" class="!text-red-600" />
+                          <UiIcon variant="duotone" name="cross-circle" class="!text-red-600" />
                         </span>
                         <span class="menu-title !text-red-600"> Blacklist </span>
                       </a>
