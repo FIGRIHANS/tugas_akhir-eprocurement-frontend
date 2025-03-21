@@ -1,20 +1,40 @@
 <script setup lang="ts">
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import LPagination from '@/components/pagination/LPagination.vue'
-import FilterButton from './components/FilterButton.vue'
+import FilterDropdown from './components/FilterDropdown.vue'
 import VendorMenu from './components/VendorMenu.vue'
 import StatusToggle from './components/StatusToggle.vue'
+import { useRoute, type LocationQueryValue } from 'vue-router'
+import FilterButton from './components/FilterButton.vue'
+import { ref, watch } from 'vue'
+
+const route = useRoute()
+const filters = ref<{ key: string; value: LocationQueryValue | LocationQueryValue[] }[]>([])
+
+watch(
+  () => route.query,
+  (query) => {
+    filters.value = Object.entries(query)
+      .filter(([key]) => key !== 'page')
+      .map(([key, value]) => ({ key, value }))
+  },
+  { immediate: true, deep: true },
+)
 </script>
 
 <template>
-  <div class="card card-grid">
+  <div class="card">
     <div class="card-header">
       <!-- header -->
       <UiInputSearch model-value="" placeholder="Cari vendor" />
-      <FilterButton />
+      <FilterDropdown />
       <!-- end of header -->
     </div>
-    <div class="card-table scrollable-x-auto">
+    <div class="card-body scrollable-x-auto">
+      <div v-if="filters.length > 0" class="flex gap-3 flex-wrap mb-3 items-center">
+        <h3 class="font-semibold text-lg">Filter</h3>
+        <FilterButton v-for="filter in filters" :filter="filter" :key="filter.key" />
+      </div>
       <table class="table align-middle text-gray-700">
         <thead class="border-b-2 border-b-primary">
           <tr>
