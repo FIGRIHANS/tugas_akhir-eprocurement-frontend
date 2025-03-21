@@ -4,23 +4,38 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
-import { reactive } from 'vue'
-import { useRouter } from 'vue-router'
+import { reactive, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 const router = useRouter()
+const route = useRoute()
 
 const filters = reactive({
-  izinUsahaExp: '',
+  status: route.query.status,
+  kategori: route.query.kategori,
+  izinUsaha: route.query.izinUsaha,
+  tglPendaftaranAwal: route.query.tglPendaftaranAwal,
+  tglPendaftaranAkhir: route.query.tglPendaftaranAkhir,
+  izinUsahaExp: route.query.izinUsahaExp,
 })
 
 const handleFilter = () => {
-  router.push({ query: { ...filters } })
+  const query = Object.fromEntries(Object.entries(filters).filter(([, value]) => value))
+  router.push({ query })
 }
 
 const handleReset = () => {
   filters.izinUsahaExp = ''
   router.replace({ query: {} })
 }
+
+watch(
+  () => route.query,
+  (query) => {
+    filters.izinUsahaExp = query.izinUsahaExp
+  },
+  { immediate: true },
+)
 </script>
 <template>
   <form @submit.prevent="handleFilter">
