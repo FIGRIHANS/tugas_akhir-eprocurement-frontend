@@ -11,12 +11,12 @@ const router = useRouter()
 const route = useRoute()
 
 const filters = reactive({
-  status: route.query.status,
-  kategori: route.query.kategori,
-  izinUsaha: route.query.izinUsaha,
-  tglPendaftaranAwal: route.query.tglPendaftaranAwal,
-  tglPendaftaranAkhir: route.query.tglPendaftaranAkhir,
-  izinUsahaExp: route.query.izinUsahaExp,
+  status: '',
+  kategori: '',
+  izinUsaha: '',
+  tglPendaftaranAwal: '',
+  tglPendaftaranAkhir: '',
+  izinUsahaExp: '',
 })
 
 const handleFilter = () => {
@@ -25,14 +25,18 @@ const handleFilter = () => {
 }
 
 const handleReset = () => {
-  filters.izinUsahaExp = ''
+  Object.keys(filters).forEach((key) => {
+    filters[key as keyof typeof filters] = ''
+  })
   router.replace({ query: {} })
 }
 
 watch(
   () => route.query,
   (query) => {
-    filters.izinUsahaExp = query.izinUsahaExp
+    Object.keys(filters).forEach((key) => {
+      filters[key as keyof typeof filters] = query[key]?.toString() || ''
+    })
   },
   { immediate: true },
 )
@@ -67,7 +71,10 @@ watch(
             >
               Tanggal Pendaftaran Awal
             </label>
-            <DatePicker model-value="" />
+            <DatePicker
+              :model-value="filters.tglPendaftaranAwal"
+              @update:model-value="filters.tglPendaftaranAwal = $event.toString()"
+            />
           </div>
           <div class="relative">
             <label
@@ -75,7 +82,10 @@ watch(
             >
               Tanggal Pendaftaran Akhir
             </label>
-            <DatePicker model-value="" />
+            <DatePicker
+              :model-value="filters.tglPendaftaranAkhir"
+              @update:model-value="filters.tglPendaftaranAkhir = $event.toString()"
+            />
           </div>
           <UiInput label="Izin Usaha Expired" v-model="filters.izinUsahaExp" />
           <div class="flex items-center space-x-3">
