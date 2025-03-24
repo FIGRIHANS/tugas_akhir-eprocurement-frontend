@@ -23,15 +23,25 @@
     </label>
     <div class="input-group w-full">
       <select
-        v-model="countryCode"
-        class="select rounded-r-none w-1/4"
+        v-model="countryPhonePrefix"
+        class="select rounded-r-none w-1/3"
         :class="{ 'border-danger': error }"
         :readonly="readonly"
         :disabled="disabled"
       >
-        <option selected disabled hidden value="">kode</option>
-        <option v-for="option in options" :key="option[valueKey]" :value="option[valueKey]">
-          {{ option[textKey] }}
+        <!-- <option hidden :value="countryPhonePrefix">
+          {{ countryPhonePrefix ? `+${countryPhonePrefix}` : 'code' }}
+        </option> -->
+        <option
+          v-for="option in countryList"
+          :key="option.countryID"
+          :value="option.countryPhonePrefix"
+        >
+          {{
+            countryPhonePrefix === option.countryPhonePrefix
+              ? `+${countryPhonePrefix}`
+              : `${option.countryName} (+${option.countryPhonePrefix})`
+          }}
         </option>
       </select>
       <input
@@ -48,8 +58,10 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineModel, ref, watch } from 'vue'
+import { computed, defineModel, ref, watch, onMounted, type ModelRef } from 'vue'
 import type { IInputTelProps } from './types/input-tel'
+
+import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
 
 withDefaults(defineProps<IInputTelProps>(), {
   placeholder: '',
@@ -58,16 +70,40 @@ withDefaults(defineProps<IInputTelProps>(), {
   row: false,
   required: false,
   error: false,
-  valueKey: 'value',
-  textKey: 'text',
 })
+const model = defineModel()
+const vendorMasterDataStore = useVendorMasterDataStore()
 
-const countryCode = ref('')
+const countryPhonePrefix = ref('')
 const noTel = ref('')
 
-const model = defineModel()
+const countryList = computed(() => vendorMasterDataStore.countryList)
 
-watch([countryCode, noTel], () => {
-  model.value = countryCode.value + noTel.value
+watch([countryPhonePrefix, noTel], () => {
+  if (noTel.value) {
+    model.value = `+${countryPhonePrefix.value} ${noTel.value}`
+  } else {
+    model.value = ''
+  }
+})
+
+watch(model, (newModel) => {
+  if (newModel) {
+    const splitNoTel = newModel?.split(' ')
+    const splitPhonePrefix = splitNoTel?.[0]?.split('+')
+
+    countryPhonePrefix.value = splitPhonePrefix[1]
+    noTel.value = splitNoTel[1]
+  } else {
+    noTel.value = ''
+  }
+})
+
+onMounted(async () => {
+  if (countryList.value.length === 0) {
+    await vendorMasterDataStore.getVendorCountries()
+  }
+
+  countryPhonePrefix.value = '62'
 })
 </script>

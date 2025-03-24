@@ -1,6 +1,6 @@
 <template>
-  <div class="grid grid-cols-2 gap-12 mb-[24px]">
-    <UiFormGroup title="Account" body-class="px-4" hide-border>
+  <div class="flex flex-col gap-12 mb-[24px]">
+    <UiFormGroup title="Account" :grid="2" body-class="px-4" hide-border>
       <UiInput
         v-model="contact.account.username"
         label="Username"
@@ -63,15 +63,13 @@
         row
         required
         :error="contact.account.noTelError"
-        :options="[
-          { value: '+62', text: '+62' },
-          { value: '+80', text: '+80' },
-        ]"
       />
     </UiFormGroup>
 
+    <hr class="col-span-2 border-t-gray-200" />
+
     <UiFormGroup hide-border>
-      <UiFormGroup title="Contact Person" body-class="px-4" hide-border>
+      <UiFormGroup title="Contact Person" :grid="2" body-class="px-4" hide-border>
         <UiInput
           v-model="contact.contactPerson.fullName"
           label="Nama Lengkap"
@@ -87,10 +85,6 @@
           row
           required
           :error="contact.contactPerson.noTelError"
-          :options="[
-            { value: '+62', text: '+62' },
-            { value: '+80', text: '+80' },
-          ]"
         />
         <UiInput
           v-model="contact.contactPerson.email"
@@ -114,48 +108,53 @@
       </UiFormGroup>
 
       <UiButton class="w-fit justify-self-end mx-4" outline @click="addContactPerson">
-        <UiIcon variant="duotone" name="plus-circle" />
-        Tambah
+        <UiIcon variant="duotone" :name="isEdit ? 'file-added' : 'plus-circle'" />
+        {{ isEdit ? 'Simpan' : 'Tambah' }}
       </UiButton>
-    </UiFormGroup>
 
-    <div class="card min-w-full col-span-2">
-      <div class="card-table">
-        <table class="table table-auto table-border align-middle text-gray-700 font-medium text-sm">
-          <thead>
-            <tr>
-              <th>Nama Lengkap</th>
-              <th>No Telephone</th>
-              <th>Email</th>
-              <th>Bagian</th>
-              <th class="w-10">Action</th>
-            </tr>
-          </thead>
-          <tbody v-if="contact.contactPerson.list.length === 0">
-            <tr>
-              <td class="text-center">No Data</td>
-              <td class="text-center">No Data</td>
-              <td class="text-center">No Data</td>
-              <td class="text-center">No Data</td>
-              <td></td>
-            </tr>
-          </tbody>
-          <tbody v-else>
-            <tr v-for="(contactPerson, index) in contact.contactPerson.list" :key="index">
-              <td>{{ contactPerson.fullName }}</td>
-              <td>{{ contactPerson.noTel }}</td>
-              <td>{{ contactPerson.email }}</td>
-              <td>{{ displayPosition(contactPerson.position) }}</td>
-              <td>
-                <UiButton variant="danger" outline icon @click="deleteContactPerson(index)">
-                  <UiIcon variant="duotone" name="cross-circle" />
-                </UiButton>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="card min-w-full">
+        <div class="card-table">
+          <table
+            class="table table-auto table-border align-middle text-gray-700 font-medium text-sm"
+          >
+            <thead>
+              <tr>
+                <th>Nama Lengkap</th>
+                <th>No Telephone</th>
+                <th>Email</th>
+                <th>Bagian</th>
+                <th class="w-10">Action</th>
+              </tr>
+            </thead>
+            <tbody v-if="contact.contactPerson.list.length === 0">
+              <tr>
+                <td class="text-center">No Data</td>
+                <td class="text-center">No Data</td>
+                <td class="text-center">No Data</td>
+                <td class="text-center">No Data</td>
+                <td></td>
+              </tr>
+            </tbody>
+            <tbody v-else>
+              <tr v-for="(contactPerson, index) in contact.contactPerson.list" :key="index">
+                <td>{{ contactPerson.fullName }}</td>
+                <td>{{ contactPerson.noTel }}</td>
+                <td>{{ contactPerson.email }}</td>
+                <td>{{ displayPosition(contactPerson.position) }}</td>
+                <td class="flex flex-row items-center gap-4">
+                  <UiButton variant="primary" outline icon @click="editContactPerson(index)">
+                    <UiIcon variant="duotone" name="notepad-edit" />
+                  </UiButton>
+                  <UiButton variant="danger" outline icon @click="deleteContactPerson(index)">
+                    <UiIcon variant="duotone" name="cross-circle" />
+                  </UiButton>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+    </UiFormGroup>
   </div>
 </template>
 
@@ -171,6 +170,9 @@ import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiInputTel from '@/components/ui/atoms/input-telephone/UiInputTel.vue'
+
+const isEdit = ref<boolean>(false)
+const editIndex = ref<number | null>(null)
 
 const registrationVendorStore = useRegistrationVendorStore()
 const vendorMasterDataStore = useVendorMasterDataStore()
@@ -215,7 +217,18 @@ const addContactPerson = () => {
       positionError: clearObject.position === 0,
     }
   } else {
-    registrationVendorStore.contact.contactPerson.list.push(clearObject)
+    if (isEdit.value) {
+      registrationVendorStore.contact.contactPerson.list.splice(
+        Number(editIndex.value),
+        1,
+        clearObject,
+      )
+
+      isEdit.value = false
+      editIndex.value = null
+    } else {
+      registrationVendorStore.contact.contactPerson.list.push(clearObject)
+    }
 
     registrationVendorStore.contact.contactPerson = {
       ...registrationVendorStore.contact.contactPerson,
@@ -228,6 +241,15 @@ const addContactPerson = () => {
       position: 0,
       positionError: false,
     }
+  }
+}
+
+const editContactPerson = (index: number) => {
+  isEdit.value = true
+  editIndex.value = index
+  registrationVendorStore.contact.contactPerson = {
+    ...registrationVendorStore.contact.contactPerson,
+    ...registrationVendorStore.contact.contactPerson.list[index],
   }
 }
 
