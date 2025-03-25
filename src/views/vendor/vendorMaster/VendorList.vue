@@ -16,6 +16,7 @@ watch(
   (query) => {
     filters.value = Object.entries(query)
       .filter(([key]) => key !== 'page')
+      .filter(([key]) => key !== 'search')
       .map(([key, value]) => ({ key, value }))
   },
   { immediate: true, deep: true },
