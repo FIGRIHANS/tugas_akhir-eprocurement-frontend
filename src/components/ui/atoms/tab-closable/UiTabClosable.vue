@@ -47,7 +47,19 @@ const filteredTabs = computed(() =>
       >
         <UiIcon name="dots-vertical" />
       </UiButton>
-      <div class="dropdown-content w-full max-w-56" data-dropdown-dismiss="true">
+      <div class="dropdown-content w-full max-w-fit">
+        <div class="flex items-center justify-between p-4 pb-0">
+          <h3 class="text-lg font-semibold">Open</h3>
+          <UiButton
+            variant="light"
+            :icon="true"
+            class="btn-clear"
+            data-dropdown-dismiss="true"
+            size="sm"
+          >
+            <UiIcon class="text-xl" name="cross" variant="outline" />
+          </UiButton>
+        </div>
         <div class="menu menu-default flex flex-col w-full">
           <div
             v-for="tab in filteredTabs"
@@ -55,7 +67,7 @@ const filteredTabs = computed(() =>
             class="menu-item"
             @click="$emit('addTab', tab.id)"
           >
-            <div class="menu-link gap-2">
+            <div class="menu-link gap-2" data-dropdown-dismiss="true">
               <span class="menu-title">{{ tab.label }}</span>
               <UiIcon
                 v-if="tab.isVerified"
