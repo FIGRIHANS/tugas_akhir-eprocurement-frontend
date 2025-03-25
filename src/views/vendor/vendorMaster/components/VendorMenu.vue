@@ -12,7 +12,7 @@ defineProps<{ id: string | number }>()
     <div class="dropdown-content w-full max-w-60 space-y-5">
       <ul class="menu menu-default flex flex-col gap-2">
         <li class="menu-item">
-          <RouterLink class="menu-link" :to="`/vendor/${id}`">
+          <RouterLink class="menu-link" :to="`/vendor-master/${id}/verification`">
             <span class="menu-icon">
               <UiIcon variant="duotone" name="eye" />
             </span>

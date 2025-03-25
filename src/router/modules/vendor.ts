@@ -23,6 +23,11 @@ export default [
     ]
   },
   {
+    path:'/vendor-master/:id/verification',
+    name:'verification',
+    component: ()=> import('@/views/vendor/vendorMaster/VendorDetail.vue')
+  },
+  {
     path: '/vendor-blacklist',
     name: 'vendor-blacklist',
     component: () => import('@/views/vendor/VendorBlacklist.vue'),
