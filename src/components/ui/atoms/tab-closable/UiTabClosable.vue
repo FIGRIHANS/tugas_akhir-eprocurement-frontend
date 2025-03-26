@@ -13,7 +13,7 @@ const filteredTabs = computed(() =>
 )
 </script>
 <template>
-  <div class="flex items-center gap-3">
+  <div class="flex items-center gap-3 mb-5 overflow-x-auto">
     <div class="tabs">
       <div
         v-for="openedTab in openedTabs"
@@ -21,7 +21,7 @@ const filteredTabs = computed(() =>
         class="tab !py-0"
         :class="{ active: openedTab.id === currentTab }"
       >
-        <button @click="currentTab = openedTab.id" class="py-4">
+        <button @click="currentTab = openedTab.id" class="py-4 text-nowrap">
           {{ openedTab.label }}
         </button>
 
