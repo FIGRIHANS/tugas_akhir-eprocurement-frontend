@@ -38,7 +38,9 @@ const closeTab = (id: string) => {
 }
 
 const addTab = (id: string) => {
+  if (openedTabs.value.some((tab) => tab.id === id)) return
   openedTabs.value.push(tabs.find((tab) => tab.id === id)!)
+  currentTab.value = id
 }
 
 watch(currentTab, () => {
@@ -47,7 +49,6 @@ watch(currentTab, () => {
 
 onMounted(() => {
   addTab(route.name as string)
-  currentTab.value = route.name as string
 })
 </script>
 <template>

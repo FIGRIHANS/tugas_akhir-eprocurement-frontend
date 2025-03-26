@@ -39,6 +39,11 @@ export default [
         component: ()=> import('@/views/vendor/vendorMaster/vendorDetail/VendorAdministrasi.vue')
       },
       {
+        path:'data-izin-usaha',
+        name:'data-izin-usaha',
+        component: ()=> import('@/views/vendor/vendorMaster/vendorDetail/VendorIzinUsaha.vue')
+      },
+      {
         path:'data-informasi-pembayaran',
         name:'data-informasi-pembayaran',
         component: ()=> import('@/views/vendor/vendorMaster/vendorDetail/VendorInformasiPembayaran.vue')
