@@ -25,7 +25,50 @@ export default [
   {
     path:'/vendor-master/:id/verification',
     name:'verification',
-    component: ()=> import('@/views/vendor/vendorMaster/VendorDetail.vue')
+    component: ()=> import('@/views/vendor/vendorMaster/vendorDetail/VendorDetail.vue'),
+    redirect:{name:'summary-information'},
+    children:[
+      {
+        path:'summary-information',
+        name:'summary-information',
+        component: ()=> import('@/views/vendor/vendorMaster/vendorDetail/VendorSummary.vue')
+      },
+      {
+        path:'data-administrasi',
+        name:'data-administrasi',
+        component: ()=> import('@/views/vendor/vendorMaster/vendorDetail/VendorAdministrasi.vue')
+      },
+      {
+        path:'data-informasi-pembayaran',
+        name:'data-informasi-pembayaran',
+        component: ()=> import('@/views/vendor/vendorMaster/vendorDetail/VendorInformasiPembayaran.vue')
+      },
+      {
+        path:'data-akta-pendirian',
+        name:'data-akta-pendirian',
+        component: ()=> import('@/views/vendor/vendorMaster/vendorDetail/VendorAktaPendirian.vue')
+      },
+      {
+        path:'data-perlengkapan',
+        name:'data-perlengkapan',
+        component: ()=> import('@/views/vendor/vendorMaster/vendorDetail/VendorPerlengkapan.vue')
+      },
+      {
+        path:'data-pengalaman',
+        name:'data-pengalaman',
+        component: ()=> import('@/views/vendor/vendorMaster/vendorDetail/VendorPengalaman.vue')
+      },
+      {
+        path:'data-tenaga-ahli',
+        name:'data-tenaga-ahli',
+        component: ()=> import('@/views/vendor/vendorMaster/vendorDetail/VendorTenagaAhli.vue')
+      },
+      {
+        path:'dokumen-lainnya',
+        name:'dokumen-lainnya',
+        component: ()=> import('@/views/vendor/vendorMaster/vendorDetail/VendorDokumenLainnya.vue')
+      },
+    ]
   },
   {
     path: '/vendor-blacklist',

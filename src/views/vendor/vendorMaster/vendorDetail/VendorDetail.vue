@@ -2,7 +2,11 @@
 import BreadcrumbView from '@/components/BreadcrumbView.vue'
 import type { ITabClosable } from '@/components/ui/atoms/tab-closable/types/tabClosable'
 import UiTabClosable from '@/components/ui/atoms/tab-closable/UiTabClosable.vue'
-import { ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
+import { RouterView, useRoute, useRouter } from 'vue-router'
+
+const router = useRouter()
+const route = useRoute()
 
 const tabs: ITabClosable[] = [
   { id: 'summary-information', label: 'Summary Information' },
@@ -36,6 +40,15 @@ const closeTab = (id: string) => {
 const addTab = (id: string) => {
   openedTabs.value.push(tabs.find((tab) => tab.id === id)!)
 }
+
+watch(currentTab, () => {
+  router.push({ name: currentTab.value })
+})
+
+onMounted(() => {
+  addTab(route.name as string)
+  currentTab.value = route.name as string
+})
 </script>
 <template>
   <BreadcrumbView
@@ -52,4 +65,7 @@ const addTab = (id: string) => {
     @close-tab="closeTab"
     @add-tab="addTab"
   />
+  <RouterView v-slot="{ Component }">
+    <component :is="Component" />
+  </RouterView>
 </template>
