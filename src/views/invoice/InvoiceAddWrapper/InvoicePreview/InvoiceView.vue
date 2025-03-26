@@ -33,8 +33,8 @@
     </div>
     <div class="flex items-center justify-between">
       <div class="flex-1">
-        <p class="text-xs font-normal text-gray-700">Payment Term</p>
-        <p class="text-sm font-medium">{{ form.paymentTerm || '-' }}</p>
+        <p class="text-xs font-normal text-gray-700">Estimated Schedule Payment</p>
+        <p class="text-sm font-medium">{{ form.paymentDate || '-' }}</p>
       </div>
       <div class="flex-1 flex items-center gap-[8px]">
         <label class="form-label flex items-center gap-2.5 w-fit">

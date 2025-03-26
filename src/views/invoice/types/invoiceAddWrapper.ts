@@ -31,8 +31,8 @@ export interface formTypes extends documentFormTypes {
   taxCodeError?: boolean
   whtCode: string
   whtCodeError?: boolean
-  paymentTerm: string
-  paymentTermError?: boolean
+  paymentDate: string
+  paymentDateError?: boolean
   invoiceDp: boolean
   withDp: boolean
 

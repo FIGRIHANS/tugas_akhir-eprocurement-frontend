@@ -34,7 +34,7 @@
             </td>
             <td>
               <input v-if="editAll(item)" v-model="item.grNumber" class="input w-[150px]" placeholder="" disabled/>
-              <div v-else id="invoice-gr-dropdown" ref="dropdownGr" class="dropdown">
+              <div v-else :id="`invoice-gr-dropdown-${index}`" :ref="(el) => { dropdownGr[index] = el as HTMLElement }" class="dropdown">
                 <div class="input">
                   <input
                     v-model="item.grNumber"
@@ -45,7 +45,7 @@
                   />
                   <i class="ki-outline ki-magnifier"></i>
                 </div>
-                <div class="dropdown-content w-full max-w-56">
+                <div :id="`invoice-gr-items-${index}`" class="dropdown-content w-full max-w-56">
                   <div class="flex flex-col">
                     <div
                       class="border-b p-4 cursor-pointer hover:bg-primary hover:text-white"
@@ -173,7 +173,7 @@ import type { itemsPoGrType } from '../../types/invoicePoGr'
 import { KTDropdown } from '@/metronic/core'
 import { defaultColumn, invoiceDpColumn } from '@/static/invoicePoGr'
 
-const dropdownGr = ref<(HTMLElement | null)[]>([])
+const dropdownGr = ref<HTMLElement[]>([])
 const dropdownGrInstance = ref<(KTDropdown | null)[]>([])
 const columns = ref<string[]>([])
 
@@ -253,9 +253,14 @@ watch(
 
 watch(
   () => dropdownGr.value,
-  (newValue) => {
+  () => {
     nextTick(() => {
-      newValue.forEach((el, index) => {
+      dropdownGrInstance.value.forEach((instance) => {
+        if (instance) {
+          instance.dispose()
+        }
+      })
+      dropdownGr.value.forEach((el, index) => {
         if (el) {
           dropdownGrInstance.value[index] = KTDropdown.getInstance(el) || new KTDropdown(el)
         }
@@ -263,7 +268,8 @@ watch(
     })
   },
   {
-    deep: true
+    deep: true,
+    immediate: true
   }
 )
 

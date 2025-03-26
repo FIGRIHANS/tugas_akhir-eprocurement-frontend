@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col gap-[24px]">
+  <div v-if="form" class="flex flex-col gap-[24px]">
     <div class="flex flex-1 gap-[24px]">
       <div class="flex flex-col gap-[24px] grow">
         <InvoiceView />
@@ -15,12 +15,13 @@
     <hr class="border-gray-300" />
     <InvoicePoGrView />
     <hr class="border-gray-300" />
-    <AdditionalCostView />
+    <AdditionalCostView v-if="!form.invoiceDp && !form.withDp" />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { defineAsyncComponent } from 'vue'
+import { inject, defineAsyncComponent } from 'vue'
+import type { formTypes } from '../types/invoiceAddWrapper'
 
 const InvoiceView = defineAsyncComponent(() => import('./InvoicePreview/InvoiceView.vue'))
 const InvoicePoGrView = defineAsyncComponent(() => import('./InvoicePreview/InvoicePoGrView.vue'))
@@ -28,6 +29,8 @@ const AdditionalCostView = defineAsyncComponent(() => import('./InvoicePreview/A
 const InvoiceCalculationView = defineAsyncComponent(() => import('./InvoicePreview/InvoiceCalculationView.vue'))
 const GeneralDataView = defineAsyncComponent(() => import('./InvoicePreview/GeneralDataView.vue'))
 const BankKeyView = defineAsyncComponent(() => import('./InvoicePreview/BankKeyView.vue'))
+
+const form = inject<formTypes>('form')
 </script>
 
 <style lang="scss" scoped>

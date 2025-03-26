@@ -3,9 +3,14 @@ export interface listTypes {
   status: 1,
   grNumber: string
   poNumber: string
-  invoiceType: string
   invoiceCategory: string
   invoiceDate: string
   vendorName: string
   amountDue: string
+}
+
+export interface filterListTypes {
+  status: string
+  category: string
+  date: string
 }

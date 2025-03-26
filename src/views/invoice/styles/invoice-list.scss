@@ -1,20 +1,22 @@
-.list {
-  &__table {
-    &::-webkit-scrollbar {
-      width: 10px;
-      height: 10px;
-      background: transparent;
+:deep() {
+  .list {
+    &__table {
+      &::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+        background: transparent;
+      }
+      
+      &::-webkit-scrollbar-thumb {
+        width: 10px;
+        height: 10px;
+        border-radius: 15px;
+        background-color: #DBDFE9;
+      }
     }
-    
-    &::-webkit-scrollbar-thumb {
-      width: 10px;
-      height: 10px;
-      border-radius: 15px;
-      background-color: #DBDFE9;
+  
+    &__long {
+      min-width: 200px;
     }
-  }
-
-  &__long {
-    min-width: 200px;
   }
 }

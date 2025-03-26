@@ -71,22 +71,12 @@
           </option>
         </select>
       </div>
-      <!-- Payment Term -->
+      <!-- Estimated Schedule Payment  -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label max-w-32">
-          Payment Term
+          Estimated Schedule Payment
         </label>
-        <select v-model="form.taxCode" class="select" :class="{ 'border-danger': form.taxCodeError }">
-          <option value="1">
-            Option 1
-          </option>
-          <option value="2">
-            Option 2
-          </option>
-          <option value="3">
-            Option 3
-          </option>
-        </select>
+        <DatePicker v-model="form.paymentDate" :error="form.paymentDateError" />
       </div>
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <div class="w-[128px]"></div>
