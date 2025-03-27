@@ -10,8 +10,8 @@ const router = useRouter()
   <div class="space-y-5">
     <VendorAdministrasiCard />
     <div class="flex justify-end gap-3">
-      <UiButton :outline="true">
-        <UiIcon name="black-left" variant="duotone" @click="router.go(-1)" />
+      <UiButton :outline="true" @click="router.go(-1)">
+        <UiIcon name="black-left" variant="duotone" />
         Back</UiButton
       >
       <UiButton><UiIcon name="check-squared" variant="duotone" />Verify</UiButton>
