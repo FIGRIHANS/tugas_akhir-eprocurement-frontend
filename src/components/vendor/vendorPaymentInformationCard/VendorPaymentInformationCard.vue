@@ -21,7 +21,9 @@
           </tr>
           <tr>
             <td class="text-sm text-gray-600 font-medium">Halaman Pertama Buku Tabungan</td>
-            <td class="text-sm font-bold text-gray-800">-</td>
+            <td class="text-sm font-bold text-gray-800">
+              <span class="underline decoration-dashed text-primary font-medium">See Detail</span>
+            </td>
           </tr>
           <tr>
             <td class="text-sm text-gray-600 font-medium">Mata Uang</td>
