@@ -1,4 +1,7 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import UiButton from '@/components/ui/atoms/button/UiButton.vue'
+import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
+</script>
 <template>
   <div class="card">
     <div class="card-header">
@@ -38,7 +41,12 @@
             </tr>
             <tr>
               <td class="text-sm text-gray-600 font-medium w-[182px]">Berkas NPWP</td>
-              <td class="text-sm font-bold text-gray-800">-</td>
+              <td class="text-sm font-bold text-gray-800">
+                <UiButton :outline="true" size="sm">
+                  <UiIcon name="cloud-download" variant="duotone" />
+                  <span>Download Dokumen NPWP</span>
+                </UiButton>
+              </td>
             </tr>
           </tbody>
         </table>

@@ -23,6 +23,7 @@ const tabs: ITabClosable[] = [
   { id: 'data-tenaga-ahli', label: 'Data Tenaga Ahli', isClosable: true },
   { id: 'dokumen-lainnya', label: 'Dokumen Lainnya', isClosable: true },
 ]
+
 const openedTabs = ref<ITabClosable[]>([
   { id: 'summary-information', label: 'Summary Information' },
 ])
