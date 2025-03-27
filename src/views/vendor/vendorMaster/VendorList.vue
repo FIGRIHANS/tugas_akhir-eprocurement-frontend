@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import LPagination from '@/components/pagination/LPagination.vue'
-import FilterDropdown from './components/FilterDropdown.vue'
-import VendorMenu from './components/VendorMenu.vue'
-import StatusToggle from './components/StatusToggle.vue'
-import { useRoute, type LocationQueryValue } from 'vue-router'
-import FilterButton from './components/FilterButton.vue'
+import FilterDropdown from '@/components/vendor/FilterDropdown.vue'
+import VendorMenu from '@/components/vendor/VendorMenu.vue'
+import StatusToggle from '@/components/vendor/StatusToggle.vue'
+import { useRoute } from 'vue-router'
+import FilterButton from '@/components/vendor/filterButton/FilterButton.vue'
 import { ref, watch } from 'vue'
+import type { IFilterButton } from '@/components/vendor/filterButton/types/filterButton'
 
 const route = useRoute()
-const filters = ref<{ key: string; value: LocationQueryValue | LocationQueryValue[] }[]>([])
+const filters = ref<IFilterButton[]>([])
 
 watch(
   () => route.query,
