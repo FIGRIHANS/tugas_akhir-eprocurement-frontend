@@ -1,6 +1,6 @@
 <template>
   <div class="file-upload">
-    <input type="file" ref="fileInput" accept=".pdf" @change="handleFileUpload" class="hidden" />
+    <input type="file" ref="fileInput" accept=".pdf" @change="handleFileUpload" class="hidden" :disabled="disabled" />
 
     <div class="flex items-center" :class="{ 'border-danger': error }" @click="triggerFileInput">
       <div class="upload__left">
@@ -20,6 +20,7 @@ import moment from 'moment'
 
 defineProps<{
   error?: boolean
+  disabled?: boolean
 }>()
 
 const emits = defineEmits(['setFile'])

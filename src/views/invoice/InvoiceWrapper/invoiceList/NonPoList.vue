@@ -27,9 +27,9 @@
               Proses Verifikasi
             </span>
           </td>
-          <td>{{ item.grNumber }}</td>
-          <td>{{ item.poNumber }}</td>
-          <td>{{ item.invoiceCategory }}</td>
+          <td>{{ item.activity }}</td>
+          <td>{{ item.companyCode }}</td>
+          <td>{{ item.department }}</td>
           <td>{{ item.invoiceDate }}</td>
           <td>{{ item.vendorName }}</td>
           <td>{{ item.amountDue }}</td>
@@ -47,7 +47,7 @@
 
 <script lang="ts" setup>
 import { ref, reactive, defineAsyncComponent } from 'vue'
-import type { listTypes, filterListTypes } from '../../types/invoiceList'
+import type { listNonPoTypes, filterListTypes } from '../../types/invoiceList'
 import LPagination from '@/components/pagination/LPagination.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 
@@ -68,21 +68,21 @@ const columns = ref([
   '',
   'No Invoice',
   'Status',
-  'No GR',
-  'No PO',
-  'Invoice Category',
+  'Activity',
+  'Company Code',
+  'Department',
   'Invoice Date',
   'Vendor Name',
   'Amount Due'
 ])
 
-const list = ref<listTypes[]>([
+const list = ref<listNonPoTypes[]>([
   {
     invoiceNumber: 'INV238744',
     status: 1,
-    grNumber: '5000000054',
-    poNumber: '1110052253',
-    invoiceCategory: 'With DP',
+    activity: 'ACT001',
+    companyCode: 'GNJR',
+    department: 'Finance',
     invoiceDate: '15 Okt 2024',
     vendorName: 'PT Pharmacy',
     amountDue: '2365456'
