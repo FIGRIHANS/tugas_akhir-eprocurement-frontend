@@ -5,17 +5,13 @@ import VendorPaymentInformationCard from '@/components/vendor/vendorPaymentInfor
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
-
-const handleBack = () => {
-  router.go(-1)
-}
 </script>
 
 <template>
   <div class="space-y-5">
     <VendorPaymentInformationCard />
     <div class="flex justify-end gap-3">
-      <UiButton :outline="true" @click="handleBack">
+      <UiButton :outline="true" @click="router.go(-1)">
         <UiIcon name="black-left" variant="duotone" />
         <span> Back </span>
       </UiButton>
