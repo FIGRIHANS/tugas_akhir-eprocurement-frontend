@@ -11,7 +11,7 @@ const router = useRouter()
   <div class="space-y-5">
     <div class="card">
       <div class="card-header">
-        <div class="card-title">Peralatan</div>
+        <div class="card-title">Tenaga Ahli</div>
       </div>
       <div class="card-table scrollable-x-auto">
         <table class="table align-middle table-border">
