@@ -41,14 +41,14 @@ watch(
         <thead class="border-b-2 border-b-primary">
           <tr>
             <th></th>
-            <th class="min-w-fit">Nama Perusahaan</th>
-            <th class="min-w-fit">Status</th>
-            <th class="min-w-fit">Kategori Vendor</th>
-            <th class="min-w-fit">Tanggal Pendaftaran</th>
-            <th class="min-w-fit">Tanggal Permintaan Verifikasi</th>
-            <th class="min-w-fit">Tanggal Verifikasi</th>
-            <th class="min-w-fit">Kode E-Procurement Vendor</th>
-            <th class="min-w-fit">Kode Vendor</th>
+            <th class="text-nowrap">Nama Perusahaan</th>
+            <th class="text-nowrap">Status</th>
+            <th class="text-nowrap">Kategori Vendor</th>
+            <th class="text-nowrap">Tanggal Pendaftaran</th>
+            <th class="text-nowrap">Tanggal Permintaan Verifikasi</th>
+            <th class="text-nowrap">Tanggal Verifikasi</th>
+            <th class="text-nowrap">Kode E-Procurement Vendor</th>
+            <th class="text-nowrap">Kode Vendor</th>
           </tr>
         </thead>
         <tbody>
