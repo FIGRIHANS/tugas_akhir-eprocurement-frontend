@@ -34,13 +34,6 @@
           </option>
         </select>
       </div>
-      <!-- Company Code Description -->
-      <div v-if="checkNonPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-        <label class="form-label max-w-32">
-          Company Code Description
-        </label>
-        <input v-model="form.companyCodeDescription" class="input" placeholder="" :disabled="form.status !== 0" :class="{ 'border-danger': form.companyCodeDescriptionError }"/>
-      </div>
       <!-- No Supplier Invoice -->
       <div v-if="checkPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label max-w-32">

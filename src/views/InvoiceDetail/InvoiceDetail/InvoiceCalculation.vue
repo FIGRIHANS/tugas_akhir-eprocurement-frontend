@@ -20,49 +20,36 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, inject } from 'vue'
+import { ref, onMounted, inject } from 'vue'
 import type { listTypes } from '../types/invoiceCalculation'
 import type { formTypes } from '../types/invoiceDetail'
 
 const form = inject<formTypes>('form')
 
-const listCalculation = ref<listTypes[]>([
-  {
-    name: 'Subtotal',
-    amount: '0',
-    currency: 'USD'
-  },
-  {
-    name: 'VAT Amount',
-    amount: '0',
-    currency: 'USD'
-  },
-  {
-    name: 'WHT AMount',
-    amount: '0',
-    currency: 'USD'
-  },
-  {
-    name: 'Additional Cost',
-    amount: '0',
-    currency: 'USD'
-  },
-  {
-    name: 'Total Gross Amount',
-    amount: '0',
-    currency: 'USD'
-  },
-  {
-    name: 'Total Net Amount',
-    amount: '0',
-    currency: 'USD'
-  },
-  {
-    name: 'Amount Due',
-    amount: '0',
-    currency: 'USD'
-  }
+const listName = ref<string[]>([
+  'Subtotal',
+  'VAT Amount',
+  'WHT AMount',
+  'Additional Cost',
+  'Total Gross Amount',
+  'Total Net Amount',
+  'Amount Due'
 ])
+
+const listCalculation = ref<listTypes[]>([])
+
+onMounted(() => {
+  for (const item of listName.value) {
+    if ((form?.invoiceType === 'nonpo' && item !== 'Additional Cost') || form?.invoiceType === 'po') {
+      const data = {
+        name: item,
+        amount: '0',
+        currency: 'USD'
+      }
+      listCalculation.value.push(data)
+    }
+  }
+})
 </script>
 
 <style lang="scss" scoped>

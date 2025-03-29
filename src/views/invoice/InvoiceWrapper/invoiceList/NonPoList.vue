@@ -17,7 +17,7 @@
       <tbody>
         <tr v-for="(item, index) in list" :key="index">
           <td>
-            <button class="btn btn-outline btn-icon btn-primary">
+            <button class="btn btn-outline btn-icon btn-primary" @click="goView">
               <i class="ki-filled ki-eye"></i>
             </button>
           </td>
@@ -47,12 +47,14 @@
 
 <script lang="ts" setup>
 import { ref, reactive, defineAsyncComponent } from 'vue'
+import { useRouter } from 'vue-router'
 import type { listNonPoTypes, filterListTypes } from '../../types/invoiceList'
 import LPagination from '@/components/pagination/LPagination.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 
 const FilterList = defineAsyncComponent(() => import('./FilterList.vue'))
 
+const router = useRouter()
 const search = ref<string>('')
 const currentPage = ref<number>(1)
 const pageSize = ref<number>(10)
@@ -91,5 +93,14 @@ const list = ref<listNonPoTypes[]>([
 
 const setPage = (value: number) => {
   currentPage.value = value
+}
+
+const goView = () => {
+  router.push({
+    name: 'invoiceAdd',
+    query: {
+      type: 'nonpo'
+    }
+  })
 }
 </script>

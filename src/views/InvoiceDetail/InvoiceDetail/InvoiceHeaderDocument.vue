@@ -11,7 +11,7 @@
       </div>
       <input v-if="form.status === 2" v-model="form.invoiceHeaderDocumentCheck" class="checkbox" type="checkbox"/>
     </div>
-    <div class="card-body max-h-[390px]" :class="{ 'document': tabNow === 'document' }">
+    <div class="card-body" :class="{ 'document': tabNow === 'document' }">
       <Transition mode="out-in">
         <component :is="contentComponent" />
       </Transition>

@@ -78,7 +78,6 @@ const form = reactive<formTypes>({
   vendorId: '',
   businessField: '',
   subBusinessField: '',
-  invoiceCategory: '',
   address: '',
   bankKeyId: '',
   bankNameId: '',
@@ -88,7 +87,6 @@ const form = reactive<formTypes>({
   bankAddress: '',
   invoiceNo: '',
   companyCode: '',
-  companyCodeDescription: '',
   supplierInvoiceNumber: '',
   invoiceDate: '',
   taxNumber: '',
@@ -106,7 +104,7 @@ const form = reactive<formTypes>({
   invoicePoGr: [],
   invoiceItem: [],
   additionalCost: [],
-  status: 1
+  status: 0
 })
 
 const contentComponent = computed(() => {

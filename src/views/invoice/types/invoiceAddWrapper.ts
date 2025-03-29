@@ -13,8 +13,6 @@ export interface formTypes extends documentFormTypes {
   businessFieldError?: boolean
   subBusinessField: string
   subBusinessFieldError?: boolean
-  invoiceCategory: string
-  invoiceCategoryError?: boolean
   address: string
 
   isNotRegisteredBank?: boolean
@@ -35,8 +33,6 @@ export interface formTypes extends documentFormTypes {
   invoiceNo: string
   companyCode: string
   companyCodeError?: boolean
-  companyCodeDescription: string
-  companyCodeDescriptionError?: boolean
   supplierInvoiceNumber: string
   supplierInvoiceNumberError?: boolean
   invoiceDate: string
