@@ -1,9 +1,9 @@
 <template>
   <div v-if="form" class="flex flex-col gap-[24px]">
-    <diV class="flex items-center justify-between gap-[8px]">
+    <div class="flex items-center justify-between gap-[8px]">
       <p class="text-lg font-semibold m-[0px]">Invoice PO & GR Item</p>
       <input v-if="form.status === 2" v-model="form.invoicePoGrCheck" class="checkbox" type="checkbox"/>
-    </diV>
+    </div>
     <div class="po__table">
       <table class="table table-xs table-border">
         <thead>

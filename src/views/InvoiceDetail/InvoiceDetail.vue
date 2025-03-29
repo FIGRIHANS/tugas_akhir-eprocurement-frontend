@@ -12,8 +12,9 @@
       <InvoiceHeaderDocument class="flex-1" />
       <InvoiceCalculation class="flex-1" />
     </div>
-    <InvoicePoGr class="mt-[24px]" />
-    <AdditionalCost v-if="!form.invoiceDp && !form.withDp" class="mt-[24px]" />
+    <InvoicePoGr v-if="checkPo()" class="mt-[24px]" />
+    <InvoiceItem v-if="checkNonPo()" class="mt-[24px]" />
+    <AdditionalCost v-if="!form.invoiceDp && !form.withDp && checkPo()" class="mt-[24px]" />
     <div v-if="form.status === 2" class="flex items-center justify-end gap-[10px] py-[8px] px-[30px] mt-[24px]">
       <button class="btn btn-outline btn-danger" @click="openReject">
         <i class="ki-duotone ki-cross-circle"></i>
@@ -42,6 +43,7 @@ const BankKey = defineAsyncComponent(() => import('./InvoiceDetail/BankKey.vue')
 const InvoiceHeaderDocument = defineAsyncComponent(() => import('./InvoiceDetail/InvoiceHeaderDocument.vue'))
 const InvoiceCalculation = defineAsyncComponent(() => import('./InvoiceDetail/InvoiceCalculation.vue'))
 const InvoicePoGr = defineAsyncComponent(() => import('./InvoiceDetail/InvoicePoGr.vue'))
+const InvoiceItem = defineAsyncComponent(() => import('./InvoiceDetail/InvoiceItem.vue'))
 const AdditionalCost = defineAsyncComponent(() => import('./InvoiceDetail/AdditionalCost.vue'))
 const RejectVerification = defineAsyncComponent(() => import('./InvoiceDetail/RejectVerification.vue'))
 
@@ -59,12 +61,12 @@ const routes = ref<routeTypes[]>([
 ])
 
 const form = ref<formTypes>({
-  companyId: 'PT Arya Noble',
+  name: 'PT Arya Noble',
   vendorId: 'PT Pharmacy',
   businessField: 'asd',
   subBusinessField: 'asd',
   address: 'Jl. Anumerta no 23 Jakarta Barat',
-  vendorTaxId: '23747623',
+  isNotRegisteredBank: false,
   bankKeyId: 'BNI1',
   bankNameId: 'BNI',
   beneficiaryName: 'PT Pharmacy',
@@ -72,6 +74,7 @@ const form = ref<formTypes>({
   swiftCode: 'BNI123',
   bankAddress: 'Jl.Maharaya no 24 Jakarta Barat',
   invoiceNo: 'INV0000123',
+  companyCode: 'code',
   supplierInvoiceNumber: 'INV/01/PK/2025053',
   invoiceDate: '12/12/2024',
   taxNumber: '2365456',
@@ -79,6 +82,7 @@ const form = ref<formTypes>({
   taxCode: 'V1',
   whtCode: 'W2',
   paymentDate: '12/12/2024',
+  department: 'test',
   invoiceDp: false,
   withDp: false,
   invoicePoGr: [
@@ -106,6 +110,7 @@ const form = ref<formTypes>({
       amount: '1.000.000'
     }
   ],
+  invoiceItem: [],
   additionalCost: [
     {
       line: '1',
@@ -130,13 +135,22 @@ const form = ref<formTypes>({
   tax: null,
   referenceDocument: null,
   otherDocument: null,
-  status: 2
+  status: 2,
+  invoiceType: 'nonpo'
 })
 
 const openReject = () => {
   const idModal = document.querySelector('#reject_Verification_modal')
   const modal = KTModal.getInstance(idModal as HTMLElement)
   modal.show()
+}
+
+const checkPo = () => {
+  return form.value.invoiceType === 'po'
+}
+
+const checkNonPo = () => {
+  return form.value.invoiceType === 'nonpo'
 }
 
 const checkVerif = () => {

@@ -3,25 +3,38 @@
     <Breadcrumb title="Add Invoice" :routes="routes" />
     <StepperStatus active-name="Submission" />
     <TabInvoice :active-tab="tabNow" @change-tab="setTab" class="-mx-[24px]" />
+    <div v-if="form.status !== 0" class="status__box--approved -mt-5 -mx-[24px]">
+      <i class="ki-outline ki-shield-tick text-primary text-[36px]"></i>
+      <div>
+        <p class="text-[15px] font-semibold mb-[4px]">Successfully Submitted</p>
+        <p class="text-[13px] font-medium text-gray-700">
+          The invoice has been successfully submitted. You can now download the invoice PDF for your records.
+        </p>
+      </div>
+    </div>
     <div>
       <Transition mode="out-in">
         <component :is="contentComponent" />
       </Transition>
-      <div class="flex justify-between items-center gap-[8px] mt-[24px]">
-        <div class="flex items-center gap-[16px]">
-          <button v-if="tabNow === 'preview'" class="btn btn-outline btn-primary">
-            Save as PDF
-            <iconPDF />
-          </button>
-          <button class="btn btn-outline btn-primary">
-            Save as Draft
-            <i class="ki-duotone ki-bookmark"></i>
-          </button>
-        </div>
+      <div v-if="form.status === 0" class="flex justify-between items-center gap-[8px] mt-[24px]">
+        <button class="btn btn-outline btn-primary">
+          Save as Draft
+          <i class="ki-duotone ki-bookmark"></i>
+        </button>
         <button class="btn btn-primary" @click="goNext">
           {{ tabNow !== 'preview' ? 'Lanjut' : 'Submit' }}
           <i v-if="tabNow !== 'preview'" class="ki-duotone ki-black-right"></i>
           <i v-else class="ki-duotone ki-paper-plane"></i>
+        </button>
+      </div>
+      <div v-else class="flex justify-end items-center mt-[24px]">
+        <button v-if="tabNow !== 'preview'" class="btn btn-primary" @click="goNext">
+          Lanjut
+          <i class="ki-duotone ki-black-right"></i>
+        </button>
+        <button v-if="tabNow === 'preview'" class="btn btn-primary">
+          Save as PDF
+          <iconPDF />
         </button>
       </div>
     </div>
@@ -61,6 +74,7 @@ const routes = ref<routeTypes[]>([
 ])
 
 const form = reactive<formTypes>({
+  name: '',
   vendorId: '',
   businessField: '',
   subBusinessField: '',
@@ -72,6 +86,7 @@ const form = reactive<formTypes>({
   swiftCode: '',
   bankAddress: '',
   invoiceNo: '',
+  companyCode: '',
   supplierInvoiceNumber: '',
   invoiceDate: '',
   taxNumber: '',
@@ -79,6 +94,7 @@ const form = reactive<formTypes>({
   taxCode: '',
   whtCode: '',
   paymentDate: '',
+  department: '',
   invoiceDp: false,
   withDp: false,
   invoiceDocument: null,
@@ -86,7 +102,9 @@ const form = reactive<formTypes>({
   referenceDocument: null,
   otherDocument: null,
   invoicePoGr: [],
-  additionalCost: []
+  invoiceItem: [],
+  additionalCost: [],
+  status: 0
 })
 
 const contentComponent = computed(() => {
@@ -148,12 +166,14 @@ const setTab = (value: string) => {
 const goNext = () => {
   const list = ['data', 'information', 'preview']
   if (tabNow.value !== 'preview') {
-    if (tabNow.value === 'data') {
-      const check = checkInvoiceData()
-      if (!check) return
-    } else {
-      const check = checkInvoiceInformation()
-      if (!check) return
+    if (form.status === 0) {
+      if (tabNow.value === 'data') {
+        const check = checkInvoiceData()
+        if (!check) return
+      } else {
+        const check = checkInvoiceInformation()
+        if (!check) return
+      }
     }
     const checkIndex = list.findIndex((item) => item === tabNow.value)
     if (checkIndex !== -1) {
@@ -175,3 +195,7 @@ const goNext = () => {
 
 provide('form', form)
 </script>
+
+<style lang="scss" scoped>
+@use './styles/invoice-submission.scss';
+</style>
