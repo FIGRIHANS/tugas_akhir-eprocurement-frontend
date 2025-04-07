@@ -1,11 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import type { IModalProps } from './types/modal'
 
 defineProps<IModalProps>()
 const emit = defineEmits(['close'])
-
-const modalRef = ref<HTMLElement>()
 
 const handleClose = (e: Event) => {
   if (e.target === e.currentTarget) {
@@ -15,9 +12,8 @@ const handleClose = (e: Event) => {
 </script>
 <template>
   <div
-    ref="modalRef"
     class="modal modal-backdrop open block z-10"
-    v-show="open"
+    v-if="open"
     data-modal="true"
     @click="handleClose"
   >
