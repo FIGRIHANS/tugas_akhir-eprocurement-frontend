@@ -1,7 +1,11 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { IModalProps } from './types/modal'
 
-defineProps<IModalProps>()
+const props = withDefaults(defineProps<IModalProps>(), {
+  title: 'Modal',
+  size: 'md',
+})
 const emit = defineEmits(['close'])
 
 const handleClose = (e: Event) => {
@@ -9,6 +13,17 @@ const handleClose = (e: Event) => {
     emit('close')
   }
 }
+
+const classes = computed(() => [
+  'modal-content',
+  'modal-center-y',
+  {
+    'max-w-[400px]': props.size === 'sm',
+    'md:max-w-[600px]': props.size === 'md',
+    'lg:max-w-[800px]': props.size === 'lg',
+    'w-full': props.size === 'full',
+  },
+])
 </script>
 <template>
   <div
@@ -17,7 +32,7 @@ const handleClose = (e: Event) => {
     data-modal="true"
     @click="handleClose"
   >
-    <div class="modal-content modal-center-y max-w-[600px]">
+    <div :class="classes">
       <div class="modal-header">
         <h3 class="modal-title">{{ title ?? 'Modal' }}</h3>
         <button
