@@ -6,7 +6,7 @@ defineProps<IVendorVerificationProps>()
 defineEmits(['close'])
 </script>
 <template>
-  <UiModal :open="open" title="Verification detail" @close="$emit('close')">
+  <UiModal :open="open" title="Detail Verification Vendor" @close="$emit('close')">
     <h3 class="text-center text-lg">Vendor: PT Agung sejahtera</h3>
     <div class="modal-table scrollable-auto">
       <table class="table align-middle">
