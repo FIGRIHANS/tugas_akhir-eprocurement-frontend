@@ -8,7 +8,7 @@ const router = useRouter()
 </script>
 <template>
   <div class="space-y-5">
-    <VendorAdministrasiCard />
+    <VendorAdministrasiCard :allow-export="true" />
     <div class="flex justify-end gap-3">
       <UiButton :outline="true" @click="router.go(-1)">
         <UiIcon name="black-left" variant="duotone" />

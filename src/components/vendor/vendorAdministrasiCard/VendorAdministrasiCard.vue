@@ -1,11 +1,20 @@
 <script setup lang="ts">
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
+import type { IVendorAdministrasiCardProps } from './types/vendorAdministrasiCard'
+
+withDefaults(defineProps<IVendorAdministrasiCardProps>(), {
+  allowExport: false,
+})
 </script>
 <template>
   <div class="card">
     <div class="card-header">
       <div class="card-title">Administrasi</div>
+      <UiButton :outline="true" v-if="allowExport">
+        <UiIcon name="printer" variant="duotone" />
+        <span>Export Data</span>
+      </UiButton>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
       <div class="card-table border">
