@@ -12,9 +12,12 @@ const router = useRouter()
     <div class="flex justify-end gap-3">
       <UiButton :outline="true" @click="router.go(-1)">
         <UiIcon name="black-left" variant="duotone" />
-        Back</UiButton
-      >
-      <UiButton><UiIcon name="check-squared" variant="duotone" />Verify</UiButton>
+        <span> Back </span>
+      </UiButton>
+      <UiButton>
+        <UiIcon name="check-squared" variant="duotone" />
+        <span> Verify </span>
+      </UiButton>
     </div>
   </div>
 </template>
