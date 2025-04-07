@@ -3,9 +3,11 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import { ref } from 'vue'
 import VendorVerificationModal from './verificationModal/VendorVerificationModal.vue'
+import VendorBlacklistModal from './vendorBlacklistModal/VendorBlacklistModal.vue'
 
 defineProps<{ id: string | number }>()
 const verificationModalOpen = ref<boolean>(false)
+const blacklistModalOpen = ref<boolean>(false)
 </script>
 <template>
   <div class="dropdown" data-dropdown="true" data-dropdown-trigger="click">
@@ -32,12 +34,12 @@ const verificationModalOpen = ref<boolean>(false)
         </li>
         <div class="border-b border-b-gray-200"></div>
         <li class="menu-item">
-          <a class="menu-link" href="#">
+          <button class="menu-link" @click="blacklistModalOpen = true">
             <span class="menu-icon">
               <UiIcon variant="duotone" name="cross-circle" class="!text-red-600" />
             </span>
             <span class="menu-title !text-red-600"> Blacklist </span>
-          </a>
+          </button>
         </li>
       </ul>
     </div>
@@ -48,4 +50,5 @@ const verificationModalOpen = ref<boolean>(false)
     :open="verificationModalOpen"
     @close="verificationModalOpen = false"
   />
+  <VendorBlacklistModal :id="1" :open="blacklistModalOpen" @close="blacklistModalOpen = false" />
 </template>
