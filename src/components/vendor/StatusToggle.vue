@@ -1,9 +1,22 @@
 <script setup lang="ts">
-defineProps<{ id: string | number }>()
+import { ref } from 'vue'
+import VendorActiveModal from './VendorActiveModal/VendorActiveModal.vue'
+
+defineProps<{ id: string | number; status: boolean }>()
+const modal = ref(false)
 </script>
 <template>
   <label class="switch">
-    <input name="check" type="checkbox" value="1" class="switch-on:checked:!bg-success" />
-    <span class="switch-label"> Not Active </span>
+    <input
+      name="check"
+      type="checkbox"
+      :checked="status"
+      class="switch-on:checked:!bg-success"
+      @click="modal = true"
+      readonly
+    />
+    <span class="switch-label text-nowrap">{{ status ? 'Active' : 'Not Active' }}</span>
   </label>
+
+  <VendorActiveModal :open="modal" :id="id" nama-vendor="Apalah daya" @close="modal = !modal" />
 </template>

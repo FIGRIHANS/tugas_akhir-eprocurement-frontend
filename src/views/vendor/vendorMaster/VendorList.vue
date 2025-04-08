@@ -56,7 +56,7 @@ watch(
             <tr>
               <td class="flex items-center gap-5">
                 <VendorMenu :id="1" />
-                <StatusToggle :id="1" />
+                <StatusToggle :id="1" :status="true" />
               </td>
               <td>-</td>
               <td>-</td>
