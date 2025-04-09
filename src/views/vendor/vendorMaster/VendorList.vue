@@ -4,24 +4,7 @@ import LPagination from '@/components/pagination/LPagination.vue'
 import FilterDropdown from '@/components/vendor/FilterDropdown.vue'
 import VendorMenu from '@/components/vendor/VendorMenu.vue'
 import StatusToggle from '@/components/vendor/StatusToggle.vue'
-import { useRoute } from 'vue-router'
 import FilterButton from '@/components/vendor/filterButton/FilterButton.vue'
-import { ref, watch } from 'vue'
-import type { IFilterButton } from '@/components/vendor/filterButton/types/filterButton'
-
-const route = useRoute()
-const filters = ref<IFilterButton[]>([])
-
-watch(
-  () => route.query,
-  (query) => {
-    filters.value = Object.entries(query)
-      .filter(([key]) => key !== 'page')
-      .filter(([key]) => key !== 'search')
-      .map(([key, value]) => ({ key, value }))
-  },
-  { immediate: true, deep: true },
-)
 </script>
 
 <template>
@@ -34,10 +17,7 @@ watch(
         <!-- end of header -->
       </div>
       <div class="card-body scrollable-x-auto">
-        <div v-if="filters.length > 0" class="flex gap-3 flex-wrap mb-3 items-center">
-          <h3 class="font-semibold text-lg">Filter</h3>
-          <FilterButton v-for="filter in filters" :filter="filter" :key="filter.key" />
-        </div>
+        <FilterButton />
         <table class="table align-middle text-gray-700">
           <thead class="border-b-2 border-b-primary">
             <tr>
