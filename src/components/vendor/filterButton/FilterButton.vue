@@ -24,8 +24,7 @@ const handleRemoveFilter = (key: string, value?: LocationQueryValue) => {
   const query = { ...route.query }
 
   if (Array.isArray(query[key])) {
-    const newKey = query[key].filter((current) => current !== value)
-    query[key] = newKey
+    query[key] = query[key].filter((current) => current !== value)
   } else {
     delete query[key]
   }
