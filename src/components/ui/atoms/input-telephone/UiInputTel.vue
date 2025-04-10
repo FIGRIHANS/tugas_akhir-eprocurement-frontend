@@ -22,16 +22,41 @@
       <span v-if="required" class="text-danger"> * </span>
     </label>
     <div class="input-group w-full">
-      <select
+      <div class="dropdown flex-col relative">
+        <button
+          class="dropdown-toggle btn btn-light w-32 justify-between flex"
+          @click="() => (dropdownOpen = !dropdownOpen)"
+        >
+          {{ `+${countryPhonePrefix}` }}
+          <i class="ki-outline !text-sm" :class="dropdownOpen ? 'ki-up' : 'ki-down'"> </i>
+        </button>
+        <div
+          v-if="dropdownOpen"
+          class="dropdown-content flex scrollable-y h-60 w-72 absolute top-12 z-10"
+        >
+          <div
+            v-for="option in countryList"
+            :key="option.countryID"
+            class="p-2 text-sm cursor-pointer hover:bg-primary-light"
+            :class="
+              countryPhonePrefix === option.countryPhonePrefix ? 'bg-primary hover:bg-primary' : ''
+            "
+            @click="selectPhonePrefix(option.countryPhonePrefix)"
+          >
+            {{ `${option.countryName} (+${option.countryPhonePrefix})` }}
+          </div>
+        </div>
+      </div>
+      <!-- <select
         v-model="countryPhonePrefix"
         class="select rounded-r-none w-1/3"
         :class="{ 'border-danger': error }"
         :readonly="readonly"
         :disabled="disabled"
       >
-        <!-- <option hidden :value="countryPhonePrefix">
+        <option hidden :value="countryPhonePrefix">
           {{ countryPhonePrefix ? `+${countryPhonePrefix}` : 'code' }}
-        </option> -->
+        </option>
         <option
           v-for="option in countryList"
           :key="option.countryID"
@@ -43,7 +68,7 @@
               : `${option.countryName} (+${option.countryPhonePrefix})`
           }}
         </option>
-      </select>
+      </select> -->
       <input
         v-model="noTel"
         class="input border-l-0 rounded-l-none"
@@ -74,10 +99,16 @@ withDefaults(defineProps<IInputTelProps>(), {
 const model = defineModel()
 const vendorMasterDataStore = useVendorMasterDataStore()
 
+const dropdownOpen = ref<boolean>(false)
 const countryPhonePrefix = ref('')
 const noTel = ref('')
 
 const countryList = computed(() => vendorMasterDataStore.countryList)
+
+const selectPhonePrefix = (phonePrefix: string) => {
+  countryPhonePrefix.value = phonePrefix
+  dropdownOpen.value = false
+}
 
 watch([countryPhonePrefix, noTel], () => {
   if (noTel.value) {
