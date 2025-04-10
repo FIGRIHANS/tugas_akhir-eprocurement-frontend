@@ -86,8 +86,9 @@ export const useRegistrationVendorStore = defineStore('registrationVendor', () =
   const paymentDetail = ref<PaymentDetailType>({
     noRekening: '',
     namaPemilikAkun: '',
-    perbedaanRekening: new Blob(),
-    halamanPertama: new Blob(),
+    perbedaanRekening: '',
+    halamanPertama: '',
+    suratPernyataan: '',
     mataUang: 0,
     bankKey: '',
     namaBank: '',

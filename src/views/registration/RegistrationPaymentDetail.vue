@@ -34,7 +34,6 @@
               />
             </div>
           </div>
-
           <UiFileUpload
             v-if="paymentDetail.isNotSameAsCompany"
             label="Pernyataan Perbedaan Rekening"
@@ -53,12 +52,22 @@
             required
             :error="paymentDetail.halamanPertamaError"
           />
+          <UiFileUpload
+            label="Surat pernyataan rekening bank"
+            placeholder="Pilih"
+            acceptedFiles=".pdf"
+            required
+            hint-text="*Informasi surat pernyataan harus ada KOP surat dan tanda tangan direktur"
+            @addedFile="(file) => uploadFile(file, 'statement letter')"
+            :error="paymentDetail.suratPernyataanError"
+          />
           <UiSelect
             v-model="paymentDetail.mataUang"
             label="Mata Uang"
             placeholder="Pilih"
             row
             required
+            :options="currencyList"
             :error="paymentDetail.mataUangError"
           />
           <div class="flex flex-col gap-6">
@@ -219,6 +228,9 @@ import UiFileUpload from '@/components/ui/atoms/file-upload/UiFileUpload.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiCaptcha from '@/components/ui/atoms/captcha/UiCaptcha.vue'
 
+import type { ApiResponse } from '@/core/type/api'
+import type { UploadFileResponse } from '@/stores/master-data/types/vendor-master-data'
+
 const registrationVendorStore = useRegistrationVendorStore()
 const vendorMasterDataStore = useVendorMasterDataStore()
 
@@ -226,13 +238,35 @@ const paymentDetail = computed(() => registrationVendorStore.paymentDetail)
 const isCaptchaMatch = ref<boolean>(false)
 
 const bankList = computed(() => vendorMasterDataStore.bankList)
+const currencyList = computed(() =>
+  vendorMasterDataStore.currencyList.map((item) => ({
+    value: item.currencyCode,
+    text: `${item.currencyName} (${item.currencyCode})`,
+  })),
+)
 
-const uploadFile = async (file: Blob, type: 'different account' | 'first page') => {
+const uploadFile = async (
+  file: File,
+  type: 'different account' | 'first page' | 'statement letter',
+) => {
   try {
+    const response = await vendorMasterDataStore.uploadFile({
+      FormFile: file,
+      Actioner: 'anonym',
+      FolderName: 'registration',
+      FileName: file.name,
+    })
+
     if (type === 'different account') {
-      registrationVendorStore.paymentDetail.perbedaanRekening = file
-    } else {
-      registrationVendorStore.paymentDetail.halamanPertama = file
+      registrationVendorStore.paymentDetail.perbedaanRekening = response.url
+    }
+
+    if (type === 'first page') {
+      registrationVendorStore.paymentDetail.halamanPertama = response.url
+    }
+
+    if (type === 'statement letter') {
+      registrationVendorStore.paymentDetail.suratPernyataan = response.url
     }
   } catch (error) {
     console.error(error)
@@ -241,5 +275,6 @@ const uploadFile = async (file: Blob, type: 'different account' | 'first page') 
 
 onMounted(async () => {
   await vendorMasterDataStore.getVendorBanks()
+  await vendorMasterDataStore.getVendorCurrency()
 })
 </script>

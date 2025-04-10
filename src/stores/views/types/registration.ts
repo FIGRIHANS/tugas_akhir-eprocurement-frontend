@@ -71,10 +71,12 @@ export type PaymentDetailType = {
   noRekeningError?: boolean
   namaPemilikAkun: string
   namaPemilikAkunError?: boolean
-  perbedaanRekening: Blob
+  perbedaanRekening: string
   perbedaanRekeningError?: boolean
-  halamanPertama: Blob
+  halamanPertama: string
   halamanPertamaError?: boolean
+  suratPernyataan: string
+  suratPernyataanError?: boolean
   mataUang: number
   mataUangError?: boolean
   bankKey: string
