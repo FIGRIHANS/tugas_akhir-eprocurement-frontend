@@ -33,6 +33,13 @@ export type BankListType = {
   bankCountryCode: string
   bankCode: string
   bankName: string
+  bankSwiftCode: string
+  partnerBankType: string
+  bankAddress: string
+  bankCity: string
+  branch: string
+  logIntegration: string
+  biCode: string
 }[]
 
 export type BusinessType = {
@@ -54,3 +61,14 @@ export type BusinessFieldReducerType = BusinessType & {
 }
 
 export type BusinessFieldResponse = (BusinessType & SubBusinessType)[]
+
+export type CurrencyListType = {
+  currencyCode: string
+  currencyName: string
+}[]
+
+export type UploadFileResponse = {
+  name: string
+  url: string
+  urlWithToken: string
+}

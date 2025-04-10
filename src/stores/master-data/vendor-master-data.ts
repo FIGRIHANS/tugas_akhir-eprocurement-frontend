@@ -10,9 +10,11 @@ import type {
   BusinessFieldResponse,
   CityListType,
   CountryListType,
+  CurrencyListType,
   DistrictListType,
   PositionListType,
   ProvinceListType,
+  UploadFileResponse,
 } from './types/vendor-master-data'
 
 const baseUrl = '/public/vendor/registration'
@@ -25,6 +27,7 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
   const posistionList = ref<PositionListType>([])
   const bankList = ref<BankListType>([])
   const businessFieldList = ref<BusinessFieldListType>([])
+  const currencyList = ref<CurrencyListType>([])
 
   const getVendorCountries = async (countryName?: string) => {
     const response: ApiResponse<CountryListType> = await vendorApi.get(`${baseUrl}/countries`, {
@@ -90,7 +93,7 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
   }
 
   const getVendorBanks = async (bankCode?: string, bankName?: string) => {
-    const response: ApiResponse<BankListType> = await vendorApi.get(`${baseUrl}/getBankList`, {
+    const response: ApiResponse<BankListType> = await vendorApi.get(`${baseUrl}/getbank`, {
       params: {
         bankCode,
         bankName,
@@ -133,6 +136,47 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
     return formatedResponse
   }
 
+  const getVendorCurrency = async (currencyCode?: string, currencyName?: string) => {
+    const response: ApiResponse<CurrencyListType> = await vendorApi.get(
+      `${baseUrl}/currency/list`,
+      {
+        params: {
+          currencyCode,
+          currencyName,
+        },
+      },
+    )
+
+    currencyList.value = response.data.result.content
+
+    return response.data.result
+  }
+
+  const uploadFile = async ({
+    FormFile,
+    Actioner,
+    FolderName,
+    FileName,
+  }: {
+    FormFile: File
+    Actioner: string
+    FolderName: string
+    FileName: string
+  }) => {
+    const formData = new FormData()
+    formData.append('FormFile', FormFile)
+    formData.append('Actioner', Actioner)
+    formData.append('FolderName', FolderName)
+    formData.append('FileName', FileName)
+
+    const response: ApiResponse<UploadFileResponse> = await vendorApi.post(
+      '/api/file/upload',
+      formData,
+    )
+
+    return response.data.result.content
+  }
+
   return {
     countryList,
     provinceList,
@@ -141,6 +185,7 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
     posistionList,
     bankList,
     businessFieldList,
+    currencyList,
     getVendorCountries,
     getVendorProvince,
     getVendorCities,
@@ -148,5 +193,7 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
     getVendorPosition,
     getVendorBanks,
     getVendorBusinessFields,
+    getVendorCurrency,
+    uploadFile,
   }
 })
