@@ -6,7 +6,4 @@ export interface IInputTelProps {
   row?: boolean
   required?: boolean
   error?: boolean
-  options: { [key: string]: any }[]
-  valueKey?: string
-  textKey?: string
 }

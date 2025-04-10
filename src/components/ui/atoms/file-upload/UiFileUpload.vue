@@ -4,7 +4,7 @@
       {{ label }} <span v-if="required" class="text-danger"> * </span>
     </label>
 
-    <label :for="name" class="w-full">
+    <label :for="name" class="w-full flex flex-col">
       <div class="input-group w-full">
         <span
           class="btn btn-input bg-primary-clarity border rounded-r-none border-primary"
@@ -19,6 +19,7 @@
           {{ truncateSelectedFile }}
         </span>
       </div>
+      <span v-if="hintText" class="text-xs text-danger"> {{ hintText }} </span>
     </label>
     <input
       :id="name"
@@ -42,6 +43,7 @@ const props = withDefaults(defineProps<IFileUploadProps>(), {
   disabled: false,
   required: false,
   error: false,
+  hintText: '',
 })
 const emits = defineEmits(['addedFile'])
 
