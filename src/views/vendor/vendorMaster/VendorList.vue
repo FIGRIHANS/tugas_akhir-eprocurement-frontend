@@ -35,7 +35,21 @@ import FilterButton from '@/components/vendor/filterButton/FilterButton.vue'
           <tbody>
             <tr>
               <td class="flex items-center gap-5">
-                <VendorMenu :id="1" />
+                <VendorMenu :id="1" :key="1" />
+                <StatusToggle :id="1" :status="true" />
+              </td>
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td class="flex items-center gap-5">
+                <VendorMenu :id="2" :key="2" />
                 <StatusToggle :id="1" :status="true" />
               </td>
               <td>-</td>
