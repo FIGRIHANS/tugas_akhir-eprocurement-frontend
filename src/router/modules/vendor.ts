@@ -81,4 +81,9 @@ export default [
     component: () => import('@/views/vendor/VendorBlacklist.vue'),
 
   },
+  {
+    path:'/vendor-approval',
+    name:'vendor-approval',
+    component: ()=> import('@/views/vendor/vendorApproval/VendorApproval.vue'),
+  }
 ]
