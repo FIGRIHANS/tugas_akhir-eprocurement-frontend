@@ -31,13 +31,13 @@ watch(
 </script>
 <template>
   <FilterDropdown :filters="filters">
-    <UiSelect label="Status" placeholder="Pilih">
+    <UiSelect label="Status" placeholder="Pilih" v-model="filters.status">
       <option value="PKP">PKP</option>
     </UiSelect>
-    <UiSelect label="Kategori" placeholder="Pilih">
+    <UiSelect label="Kategori" placeholder="Pilih" v-model="filters.kategori">
       <option value="on process">On Process</option>
     </UiSelect>
-    <UiSelect label="Izin Usaha" placeholder="Pilih">
+    <UiSelect label="Izin Usaha" placeholder="Pilih" v-model="filters.izinUsaha">
       <option value="1">Izin usaha</option>
     </UiSelect>
     <DatePicker
