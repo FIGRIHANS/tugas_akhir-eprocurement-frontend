@@ -106,10 +106,6 @@ watch(
           </div>
         </div>
       </div>
-      <UiButton :outline="true">
-        <UiIcon variant="filled" name="printer" />
-        Export Data Vendor
-      </UiButton>
     </div>
   </form>
 </template>
