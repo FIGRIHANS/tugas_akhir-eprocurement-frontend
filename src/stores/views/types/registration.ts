@@ -66,6 +66,25 @@ export type RegisContactType = {
   }
 }
 
+type DocumentFieldType = {
+  licenseNo: string
+  issuedDate: string
+  expiredDate: string
+  uploadUrl: string
+}
+
+export type DocumentAndLegalType = {
+  kategori: number
+  fields: (DocumentFieldType & {
+    licenseId: number
+    licenseNoError?: boolean
+    issuedDateError?: boolean
+    expiredDateError?: boolean
+    uploadUrlError?: boolean
+  })[]
+  anotherDocuments: DocumentFieldType[]
+}
+
 export type PaymentDetailType = {
   noRekening: string
   noRekeningError?: boolean

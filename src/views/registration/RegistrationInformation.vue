@@ -19,7 +19,7 @@
         v-model="information.perusahaan.tanggalBerdiri"
         label="Tanggal Berdiri"
         placeholder="Pilih Tanggal"
-        format="MM/dd/yyyy"
+        format="dd/MM/yyyy"
         required
         :error="information.perusahaan.tanggalBerdiriError"
       />

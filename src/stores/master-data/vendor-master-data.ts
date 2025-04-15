@@ -9,6 +9,8 @@ import type {
   BusinessFieldReducerType,
   BusinessFieldResponse,
   CityListType,
+  CompanyCategoryType,
+  CompanyLicenseType,
   CountryListType,
   CurrencyListType,
   DistrictListType,
@@ -28,6 +30,8 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
   const bankList = ref<BankListType>([])
   const businessFieldList = ref<BusinessFieldListType>([])
   const currencyList = ref<CurrencyListType>([])
+  const companyCategoryList = ref<CompanyCategoryType>([])
+  const companyLicense = ref<CompanyLicenseType>([])
 
   const getVendorCountries = async (countryName?: string) => {
     const response: ApiResponse<CountryListType> = await vendorApi.get(`${baseUrl}/countries`, {
@@ -152,6 +156,36 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
     return response.data.result
   }
 
+  const getVendorCompanyCategory = async (companyCategoryName?: string) => {
+    const response: ApiResponse<CompanyCategoryType> = await vendorApi.get(
+      `${baseUrl}/company-category`,
+      {
+        params: {
+          companyCategoryName,
+        },
+      },
+    )
+
+    companyCategoryList.value = response.data.result.content
+
+    return response.data.result
+  }
+
+  const getVendorCompanyLicense = async (companyId: number) => {
+    const response: ApiResponse<CompanyLicenseType> = await vendorApi.get(
+      `${baseUrl}/company-license`,
+      {
+        params: {
+          companyId,
+        },
+      },
+    )
+
+    companyLicense.value = response.data.result.content
+
+    return response.data.result
+  }
+
   const uploadFile = async ({
     FormFile,
     Actioner,
@@ -186,6 +220,8 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
     bankList,
     businessFieldList,
     currencyList,
+    companyCategoryList,
+    companyLicense,
     getVendorCountries,
     getVendorProvince,
     getVendorCities,
@@ -194,6 +230,8 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
     getVendorBanks,
     getVendorBusinessFields,
     getVendorCurrency,
+    getVendorCompanyCategory,
+    getVendorCompanyLicense,
     uploadFile,
   }
 })

@@ -1,17 +1,11 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import type {
+  DocumentAndLegalType,
   PaymentDetailType,
   RegisContactType,
   RegisInformationType,
 } from './types/registration'
-
-const documentAndLegalFields = {
-  noIzin: '',
-  tanggalMulai: '',
-  tanggalSelesai: '',
-  dokumen: '',
-}
 
 export const useRegistrationVendorStore = defineStore('registrationVendor', () => {
   const information = ref<RegisInformationType>({
@@ -59,28 +53,17 @@ export const useRegistrationVendorStore = defineStore('registrationVendor', () =
     },
   })
 
-  const documentAndLegal = ref({
-    kategori: '',
-    fields: {
-      nib: {
-        ...documentAndLegalFields,
-      },
-      npwp: {
-        ...documentAndLegalFields,
-      },
-      sppkp: {
-        ...documentAndLegalFields,
-      },
-      spfp: {
-        ...documentAndLegalFields,
-      },
-      suratNonPkp: {
-        ...documentAndLegalFields,
-      },
-      paktaIntegritas: {
-        ...documentAndLegalFields,
-      },
-    },
+  const requiredDocumentFields = ref<Record<number, number[]>>({
+    1: [17, 12, 10],
+    2: [17, 16],
+    3: [12],
+    4: [20],
+  })
+
+  const documentAndLegal = ref<DocumentAndLegalType>({
+    kategori: 0,
+    fields: [],
+    anotherDocuments: [],
   })
 
   const paymentDetail = ref<PaymentDetailType>({
@@ -99,5 +82,5 @@ export const useRegistrationVendorStore = defineStore('registrationVendor', () =
     bankNotRegistered: false,
   })
 
-  return { information, contact, documentAndLegal, paymentDetail }
+  return { information, contact, requiredDocumentFields, documentAndLegal, paymentDetail }
 })

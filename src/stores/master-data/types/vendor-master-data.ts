@@ -67,6 +67,18 @@ export type CurrencyListType = {
   currencyName: string
 }[]
 
+export type CompanyCategoryType = {
+  companyCategoryId: number
+  companyCategoryName: string
+}[]
+
+export type CompanyLicenseType = {
+  id: number
+  companyCategoryId: number
+  licenseId: number
+  licenseName: string
+}[]
+
 export type UploadFileResponse = {
   name: string
   url: string
