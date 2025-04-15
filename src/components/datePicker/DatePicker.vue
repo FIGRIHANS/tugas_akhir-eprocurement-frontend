@@ -3,7 +3,9 @@
     <VueDatePicker v-model="date" class="w-full">
       <template #dp-input="{ value }">
         <div class="input relative">
-          <div class="absolute top-0 left-0 -mt-2 ml-2 bg-white px-1 text-gray-500">
+          <div
+            :class="['absolute top-0 left-0 -mt-2 ml-2 bg-white px-1 text-gray-500', labelClass]"
+          >
             {{ label ?? 'Date' }}
           </div>
           <input
@@ -31,6 +33,7 @@ const props = defineProps<{
   error?: boolean
   label?: string
   placeholder?: string
+  labelClass?: string
 }>()
 
 const emits = defineEmits(['update:modelValue'])
