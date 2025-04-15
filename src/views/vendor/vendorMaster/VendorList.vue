@@ -5,6 +5,8 @@ import FilterDropdown from '@/components/vendor/FilterDropdown.vue'
 import VendorMenu from '@/components/vendor/VendorMenu.vue'
 import StatusToggle from '@/components/vendor/StatusToggle.vue'
 import FilterButton from '@/components/vendor/filterButton/FilterButton.vue'
+import UiButton from '@/components/ui/atoms/button/UiButton.vue'
+import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 </script>
 
 <template>
@@ -13,7 +15,14 @@ import FilterButton from '@/components/vendor/filterButton/FilterButton.vue'
       <div class="card-header">
         <!-- header -->
         <UiInputSearch model-value="" placeholder="Cari vendor" />
-        <FilterDropdown />
+        <div class="flex gap-3">
+          <FilterDropdown />
+          <UiButton :outline="true">
+            <UiIcon variant="filled" name="printer" />
+            Export Data Vendor
+          </UiButton>
+        </div>
+
         <!-- end of header -->
       </div>
       <div class="card-body scrollable-x-auto">
