@@ -2,6 +2,7 @@ import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import type {
   DocumentAndLegalType,
+  PaymentDetailFlaggingType,
   PaymentDetailType,
   RegisContactType,
   RegisInformationType,
@@ -78,9 +79,21 @@ export const useRegistrationVendorStore = defineStore('registrationVendor', () =
     cabangBank: '',
     swiftCode: '',
     alamatBank: '',
-    isNotSameAsCompany: false,
-    bankNotRegistered: false,
   })
 
-  return { information, contact, requiredDocumentFields, documentAndLegal, paymentDetail }
+  const paymentDetailFlagging = ref<PaymentDetailFlaggingType>({
+    isNotSameAsCompany: false,
+    bankNotRegistered: false,
+    acceptTermCondition: false,
+    captcha: false,
+  })
+
+  return {
+    information,
+    contact,
+    requiredDocumentFields,
+    documentAndLegal,
+    paymentDetail,
+    paymentDetailFlagging,
+  }
 })

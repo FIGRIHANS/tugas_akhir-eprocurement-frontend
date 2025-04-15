@@ -108,6 +108,11 @@ export type PaymentDetailType = {
   swiftCodeError?: boolean
   alamatBank: string
   alamatBankError?: boolean
+}
+
+export type PaymentDetailFlaggingType = {
   isNotSameAsCompany: boolean
   bankNotRegistered: boolean
+  acceptTermCondition: boolean
+  captcha: boolean
 }

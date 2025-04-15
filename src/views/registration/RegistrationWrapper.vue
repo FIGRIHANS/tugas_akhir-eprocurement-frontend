@@ -24,7 +24,10 @@
           <UiIcon name="black-left" />
           Kembali
         </UiButton>
-        <UiButton @click="next()">
+        <UiButton
+          @click="next()"
+          :disabled="tab.active === 'registration__payment-detail' ? !disabledRegistration : false"
+        >
           {{ tab.active === 'registration__payment-detail' ? 'Registration' : 'Lanjut' }}
           <UiIcon name="black-right" />
         </UiButton>
@@ -68,6 +71,12 @@ const showPrevious = computed(() => {
   return tabPosition.value > 0
 })
 
+const disabledRegistration = computed(() => {
+  const regis = registrationVendorStore.paymentDetailFlagging
+
+  return regis.acceptTermCondition && regis.captcha
+})
+
 onMounted(() => {
   tab.active = route.name as string
 })
@@ -80,27 +89,14 @@ const checkFieldNotEmpty = () => {
   let fields = {
     information: {
       perusahaan: ['namaPerusahaan', 'tanggalBerdiri'],
-      lokasiKantorPusat: [
-        'negara',
-        'provinsi',
-        'kabupatenKota',
-        'kecamatan',
-        'kodePos',
-        'alamatLengkap',
-      ],
-      lokasiPerusahaan: [
-        'negara',
-        'provinsi',
-        'kabupatenKota',
-        'kecamatan',
-        'kodePos',
-        'alamatLengkap',
-      ],
+      lokasiKantorPusat: ['negara', 'provinsi', 'kabupatenKota', 'kodePos', 'alamatLengkap'],
+      lokasiPerusahaan: ['negara', 'provinsi', 'kabupatenKota', 'kodePos', 'alamatLengkap'],
     },
     contact: {
       account: ['username', 'email', 'password', 'confirmPassword', 'noTel'],
     },
-    payment: ['noRekening', 'namaPemilikAkun', 'alamatBank'],
+    document: ['licenseNo', 'issuedDate', 'expiredDate', 'uploadUrl'],
+    payment: ['noRekening', 'namaPemilikAkun', 'suratPernyataan', 'mataUang', 'alamatBank'],
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -155,16 +151,30 @@ const checkFieldNotEmpty = () => {
       )
 
     case 'registration__document-and-legal':
-      return true
+      const checkingField = registrationVendorStore.documentAndLegal.fields.map(
+        (item) => !Object.values(item).some((value) => value === true),
+      )
+      registrationVendorStore.documentAndLegal.fields =
+        registrationVendorStore.documentAndLegal.fields.map((item, index) => ({
+          ...item,
+          ...(registrationVendorStore.requiredDocumentFields[
+            registrationVendorStore.documentAndLegal.kategori
+          ].includes(item.licenseId) &&
+            checkErrors(registrationVendorStore.documentAndLegal.fields[index], fields.document)),
+        }))
+
+      console.log(checkingField)
+
+      return checkingField.some((value) => value === true)
 
     case 'registration__payment-detail':
       const section = registrationVendorStore.paymentDetail
 
-      if (registrationVendorStore.paymentDetail.isNotSameAsCompany) {
+      if (registrationVendorStore.paymentDetailFlagging.isNotSameAsCompany) {
         fields.payment.push('perbedaanRekening', 'halamanPertama')
       }
 
-      if (registrationVendorStore.paymentDetail.bankNotRegistered) {
+      if (registrationVendorStore.paymentDetailFlagging.bankNotRegistered) {
         fields.payment.push('namaBank', 'cabangBank', 'swiftCode')
       } else {
         fields.payment.push('bankKey')
@@ -175,12 +185,12 @@ const checkFieldNotEmpty = () => {
         ...checkErrors(section, fields.payment),
       }
 
-      if (!section.isNotSameAsCompany) {
+      if (!registrationVendorStore.paymentDetailFlagging.isNotSameAsCompany) {
         registrationVendorStore.paymentDetail.perbedaanRekeningError = false
         registrationVendorStore.paymentDetail.halamanPertamaError = false
       }
 
-      if (section.bankNotRegistered) {
+      if (registrationVendorStore.paymentDetailFlagging.bankNotRegistered) {
         registrationVendorStore.paymentDetail.bankKeyError = false
       } else {
         registrationVendorStore.paymentDetail.namaBankError = false
@@ -206,12 +216,14 @@ const next = () => {
 
   console.log(checkFieldNotEmpty())
 
-  if (index >= tab.items.length) return
-
-  // if (checkFieldNotEmpty()) {
-  tab.active = tab.items[index].value
-  router.push({ name: tab.items[index].value })
-  // }
+  if (checkFieldNotEmpty()) {
+    if (index >= tab.items.length) {
+      console.log('end')
+    } else {
+      tab.active = tab.items[index].value
+      router.push({ name: tab.items[index].value })
+    }
+  }
 }
 
 /**SECTION - Navbar utils */

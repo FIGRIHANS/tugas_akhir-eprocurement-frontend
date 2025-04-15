@@ -29,13 +29,13 @@
             <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5">
               <div class="w-2/5"></div>
               <UiCheckbox
-                v-model="paymentDetail.isNotSameAsCompany"
+                v-model="paymentDetailFlagging.isNotSameAsCompany"
                 label="Nama pemilik rekening berbeda dengan nama perusahaan"
               />
             </div>
           </div>
           <UiFileUpload
-            v-if="paymentDetail.isNotSameAsCompany"
+            v-if="paymentDetailFlagging.isNotSameAsCompany"
             label="Pernyataan Perbedaan Rekening"
             placeholder="Pilih"
             acceptedFiles=".pdf"
@@ -44,7 +44,7 @@
             :error="paymentDetail.perbedaanRekeningError"
           />
           <UiFileUpload
-            v-if="paymentDetail.isNotSameAsCompany"
+            v-if="paymentDetailFlagging.isNotSameAsCompany"
             label="Halaman Pertama Buku Tabungan"
             placeholder="Pilih"
             acceptedFiles=".pdf"
@@ -79,18 +79,21 @@
               :options="bankList"
               valueKey="bankCode"
               textKey="bankName"
-              :required="!paymentDetail.bankNotRegistered"
-              :disabled="paymentDetail.bankNotRegistered"
+              :required="!paymentDetailFlagging.bankNotRegistered"
+              :disabled="paymentDetailFlagging.bankNotRegistered"
               :error="paymentDetail.bankKeyError"
             />
 
             <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5">
               <div class="w-2/5"></div>
-              <UiCheckbox v-model="paymentDetail.bankNotRegistered" label="Bank belum terdaftar" />
+              <UiCheckbox
+                v-model="paymentDetailFlagging.bankNotRegistered"
+                label="Bank belum terdaftar"
+              />
             </div>
           </div>
           <UiInput
-            v-if="paymentDetail.bankNotRegistered"
+            v-if="paymentDetailFlagging.bankNotRegistered"
             v-model="paymentDetail.namaBank"
             label="Nama Bank"
             placeholder="Nama Bank"
@@ -99,7 +102,7 @@
             :error="paymentDetail.namaBankError"
           />
           <UiInput
-            v-if="paymentDetail.bankNotRegistered"
+            v-if="paymentDetailFlagging.bankNotRegistered"
             v-model="paymentDetail.cabangBank"
             label="Cabang Bank"
             placeholder="Cabang Bank"
@@ -108,7 +111,7 @@
             :error="paymentDetail.cabangBankError"
           />
           <UiInput
-            v-if="paymentDetail.bankNotRegistered"
+            v-if="paymentDetailFlagging.bankNotRegistered"
             v-model="paymentDetail.swiftCode"
             label="SwiftCode"
             placeholder="SwiftCode"
@@ -188,12 +191,13 @@
       </div>
 
       <UiCheckbox
+        v-model="paymentDetailFlagging.acceptTermCondition"
         label="Baca dan setuju terhadap syarat dan ketentuan tender - eProcurement PT Datesea"
       />
 
       <div class="card w-fit justify-center">
         <div class="card-body px-5">
-          <UiCaptcha v-model="isCaptchaMatch" />
+          <UiCaptcha v-model="paymentDetailFlagging.captcha" />
         </div>
       </div>
 
@@ -228,14 +232,11 @@ import UiFileUpload from '@/components/ui/atoms/file-upload/UiFileUpload.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiCaptcha from '@/components/ui/atoms/captcha/UiCaptcha.vue'
 
-import type { ApiResponse } from '@/core/type/api'
-import type { UploadFileResponse } from '@/stores/master-data/types/vendor-master-data'
-
 const registrationVendorStore = useRegistrationVendorStore()
 const vendorMasterDataStore = useVendorMasterDataStore()
 
 const paymentDetail = computed(() => registrationVendorStore.paymentDetail)
-const isCaptchaMatch = ref<boolean>(false)
+const paymentDetailFlagging = computed(() => registrationVendorStore.paymentDetailFlagging)
 
 const bankList = computed(() => vendorMasterDataStore.bankList)
 const currencyList = computed(() =>

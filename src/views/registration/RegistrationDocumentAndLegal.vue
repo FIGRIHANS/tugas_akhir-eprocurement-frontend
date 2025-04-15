@@ -70,7 +70,6 @@
                 />
               </td>
               <td class="align-top">
-                {{ documentAndLegal.fields[index]?.uploadUrlError }}
                 <UiFileUpload
                   :name="item.licenseName"
                   :text-length="18"

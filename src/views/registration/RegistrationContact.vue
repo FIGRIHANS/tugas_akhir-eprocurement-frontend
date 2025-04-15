@@ -38,7 +38,7 @@
           Ulangi Password
           <span class="text-danger"> * </span>
         </label>
-        <div class="input" :class="{ 'border-danger': contact.account.confirmPasswordError }">
+        <div class="input" :class="{ '!border-danger': contact.account.confirmPasswordError }">
           <input
             v-model="contact.account.confirmPassword"
             placeholder="Ulangi Password"
