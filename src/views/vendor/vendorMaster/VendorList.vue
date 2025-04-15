@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import LPagination from '@/components/pagination/LPagination.vue'
-import FilterDropdown from '@/components/vendor/FilterDropdown.vue'
+import FilterDropdown from '@/components/vendor/FilterDropdownList.vue'
 import VendorMenu from '@/components/vendor/VendorMenu.vue'
 import StatusToggle from '@/components/vendor/StatusToggle.vue'
 import FilterButton from '@/components/vendor/filterButton/FilterButton.vue'
