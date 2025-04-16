@@ -66,24 +66,6 @@
           </option>
         </select>
       </div>
-      <!-- Invoice Category -->
-      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-        <label class="form-label max-w-32">
-          Invoice Category
-        </label>
-        <input v-if="form.status !== 0" v-model="form.invoiceCategory" class="input" placeholder="" disabled />
-        <select v-else v-model="form.invoiceCategory" class="select" :class="{ 'border-danger': form.invoiceCategoryError }">
-          <option value="1">
-            Option 1
-          </option>
-          <option value="2">
-            Option 2
-          </option>
-          <option value="3">
-            Option 3
-          </option>
-        </select>
-      </div>
       <!-- Address -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
         <label class="form-label max-w-32">
