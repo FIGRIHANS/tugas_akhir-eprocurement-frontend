@@ -9,9 +9,10 @@ import { useRoute, useRouter } from 'vue-router'
 import FilterButton from '@/components/vendor/filterButton/FilterButton.vue'
 import FilterDropdownApproval from '@/components/vendor/FilterDropdownApproval.vue'
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-//@ts-expect-error
 import { debounce } from 'lodash'
+import ApproveButton from '@/components/vendor/approval/ApproveButton.vue'
+import RejectButton from '@/components/vendor/approval/RejectButton.vue'
+import ApprovalVerifikasi from '@/components/vendor/approval/ApprovalVerifikasi.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -79,18 +80,14 @@ watch(
           <tr>
             <td>
               <div class="flex gap-5">
-                <UiButton size="sm" :icon="true">
-                  <UiIcon name="check-circle" variant="duotone" />
-                </UiButton>
-                <UiButton size="sm" :icon="true" variant="danger" :outline="true">
-                  <UiIcon name="cross-circle" variant="duotone" />
-                </UiButton>
-                <UiButton size="sm" :icon="true" variant="primary" :outline="true">
-                  <UiIcon name="data" variant="duotone" />
-                </UiButton>
-                <UiButton size="sm" :icon="true" variant="primary" :outline="true">
-                  <UiIcon name="eye" variant="duotone" />
-                </UiButton>
+                <ApproveButton :id="1" nama="PT Agung Sejahtera" />
+                <RejectButton :id="1" nama="PT Agung Sejahtera" />
+                <ApprovalVerifikasi :id="1" nama="PT Agung Sejahtera" />
+                <RouterLink :to="`/vendor-master/${1}/verification`">
+                  <UiButton size="sm" :icon="true" variant="primary" :outline="true">
+                    <UiIcon name="eye" variant="duotone" />
+                  </UiButton>
+                </RouterLink>
               </div>
             </td>
             <td>-</td>

@@ -17,7 +17,7 @@ const classes = computed(() => [
   'modal-content',
   'modal-center-y',
   {
-    'max-w-[400px]': props.size === 'sm',
+    'max-w-[500px]': props.size === 'sm',
     'md:max-w-[600px]': props.size === 'md',
     'lg:max-w-[800px]': props.size === 'lg',
     'w-full': props.size === 'full',

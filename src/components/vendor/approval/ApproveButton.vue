@@ -1,0 +1,45 @@
+<script setup lang="ts">
+import UiModal from '@/components/modal/UiModal.vue'
+import UiButton from '@/components/ui/atoms/button/UiButton.vue'
+import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
+import { ref } from 'vue'
+import questionImg from '@/assets/question-alt.svg'
+import successImg from '@/assets/success.svg'
+
+defineProps<{ id: string | number; nama: string }>()
+const modal = ref(false)
+const successModal = ref(false)
+
+const handleApprove = () => {
+  modal.value = false
+  successModal.value = true
+}
+</script>
+<template>
+  <UiButton size="sm" :icon="true" @click="modal = !modal">
+    <UiIcon name="check-circle" variant="duotone" />
+  </UiButton>
+
+  <UiModal v-model="modal" size="sm">
+    <img :src="questionImg" alt="confirmation" class="mx-auto w-[126px] h-auto mb-5" />
+    <p class="text-center text-lg font-medium">Apakah anda yakin akan melakukan approval?</p>
+    <div class="flex gap-3 mt-5">
+      <UiButton class="flex-1 justify-center" :outline="true" @click="modal = !modal">
+        <UiIcon name="black-left-line" variant="duotone" />
+        <span>Cancel</span>
+      </UiButton>
+      <UiButton class="flex-1 justify-center" @click="handleApprove">
+        <UiIcon name="check-circle" variant="duotone" />
+        <span>Approve</span>
+      </UiButton>
+    </div>
+  </UiModal>
+
+  <UiModal v-model="successModal" size="sm">
+    <img :src="successImg" alt="confirmation" class="mx-auto w-[202px] h-auto mb-5" />
+    <h3 class="text-center text-lg font-medium">Vendor {{ nama }} successfully approved</h3>
+    <p class="text-center text-base text-gray-600 mb-5">
+      The Vendor has been successfully approved.
+    </p>
+  </UiModal>
+</template>
