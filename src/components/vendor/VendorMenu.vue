@@ -45,10 +45,6 @@ const blacklistModalOpen = ref<boolean>(false)
     </div>
   </div>
 
-  <VendorVerificationModal
-    :id="1"
-    :open="verificationModalOpen"
-    @close="verificationModalOpen = false"
-  />
-  <VendorBlacklistModal :id="1" :open="blacklistModalOpen" @close="blacklistModalOpen = false" />
+  <VendorVerificationModal :id="1" v-model="verificationModalOpen" />
+  <VendorBlacklistModal :id="1" v-model="blacklistModalOpen" />
 </template>

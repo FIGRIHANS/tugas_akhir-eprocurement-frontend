@@ -8,8 +8,7 @@ import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
 
 defineProps<IVendorBlacklistModalProps>()
-defineEmits(['close'])
-
+const open = defineModel()
 const period = ref<string>('')
 const file = ref<File>()
 const reason = ref<string>('')
@@ -21,7 +20,7 @@ const handleSubmit = () => {
 }
 </script>
 <template>
-  <UiModal :open="open" @close="$emit('close')" title="Blacklist Vendor" size="sm">
+  <UiModal v-model="open" title="Blacklist Vendor" size="sm">
     <form action="" class="space-y-4" @submit.prevent="handleSubmit">
       <div class="relative">
         <label for="period" class="absolute top-0 left-0 -mt-2 ml-2 bg-white px-1 text-gray-500"
@@ -73,12 +72,7 @@ const handleSubmit = () => {
 
       <UiTextArea label="Reason" :model-value="reason" placeholder="Enter reason" />
       <div class="flex gap-3">
-        <UiButton
-          class="flex-1 justify-center"
-          :outline="true"
-          type="button"
-          @click="$emit('close')"
-        >
+        <UiButton class="flex-1 justify-center" :outline="true" type="button" @click="open = !open">
           <UiIcon name="black-left-line" variant="duotone" />
           <span>Cancel</span>
         </UiButton>
