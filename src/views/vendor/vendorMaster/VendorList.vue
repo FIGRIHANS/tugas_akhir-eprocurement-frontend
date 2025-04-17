@@ -7,6 +7,50 @@ import StatusToggle from '@/components/vendor/StatusToggle.vue'
 import FilterButton from '@/components/vendor/filterButton/FilterButton.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
+import { useVendorStore } from '@/stores/vendor/vendor'
+import { ref, watch } from 'vue'
+import { debounce } from 'lodash'
+import { useRoute, useRouter } from 'vue-router'
+
+const route = useRoute()
+const router = useRouter()
+
+const vendor = useVendorStore()
+
+const search = ref('')
+const currentPage = ref(1)
+
+const handleSearch = debounce((value) => {
+  const query = { ...route.query }
+  if (!value) {
+    delete query.search
+    router.push({ query })
+    return
+  }
+
+  router.push({ query: { ...query, search: value } })
+}, 500)
+
+const handlePageChange = (page: number) => {
+  const query = { ...route.query, page }
+  router.push({ query })
+}
+
+watch(search, handleSearch)
+
+watch(
+  () => route.query,
+  (query) => {
+    search.value = (query.search as string) || ''
+    currentPage.value = Number(query.page) || 1
+
+    vendor.getVendors()
+  },
+  {
+    immediate: true,
+    deep: true,
+  },
+)
 </script>
 
 <template>
@@ -14,7 +58,7 @@ import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
     <div class="card">
       <div class="card-header">
         <!-- header -->
-        <UiInputSearch model-value="" placeholder="Cari vendor" />
+        <UiInputSearch v-model="search" placeholder="Cari vendor" />
         <div class="flex gap-3">
           <FilterDropdown />
           <UiButton :outline="true">
@@ -42,33 +86,31 @@ import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td class="flex items-center gap-5">
-                <VendorMenu :id="1" :key="1" />
-                <StatusToggle :id="1" :status="true" />
+            <tr v-if="vendor.loading">
+              <td colspan="8">
+                <div
+                  class="mx-auto w-6 h-6 border-3 border-blue-500 border-t-transparent rounded-full animate-spin"
+                ></div>
               </td>
-              <td>-</td>
-              <td>-</td>
-              <td>-</td>
-              <td>-</td>
-              <td>-</td>
-              <td>-</td>
-              <td>-</td>
-              <td>-</td>
             </tr>
-            <tr>
+            <tr
+              v-else
+              v-for="vendor in vendor.vendorList"
+              :key="vendor.id"
+              class="font-normal text-sm"
+            >
               <td class="flex items-center gap-5">
-                <VendorMenu :id="2" :key="2" />
-                <StatusToggle :id="1" :status="true" />
+                <VendorMenu :id="vendor.id" />
+                <StatusToggle :id="vendor.id" :status="true" />
               </td>
+              <td class="text-nowrap">{{ vendor.vendorName }}</td>
               <td>-</td>
-              <td>-</td>
-              <td>-</td>
-              <td>-</td>
-              <td>-</td>
-              <td>-</td>
-              <td>-</td>
-              <td>-</td>
+              <td>{{ vendor.companyCategoryName }}</td>
+              <td>{{ vendor.createdUTCDate }}</td>
+              <td>{{ vendor.createdUTCDate }}</td>
+              <td>{{ vendor.createdUTCDate }}</td>
+              <td>{{ vendor.userId }}</td>
+              <td>{{ vendor.vendorId }}</td>
             </tr>
           </tbody>
         </table>
@@ -77,7 +119,12 @@ import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
         class="card-footer justify-center md:justify-between flex-col md:flex-row gap-3 text-gray-600 text-2sm font-medium"
       >
         <div>Tampilkan 10 data dari total data 7575</div>
-        <LPagination :total-items="30" :current-page="1" :page-size="10" />
+        <LPagination
+          :total-items="30"
+          :current-page="currentPage"
+          :page-size="10"
+          @page-change="handlePageChange"
+        />
       </div>
     </div>
   </div>
