@@ -1,8 +1,8 @@
 <template>
   <div class="pagination">
     <!-- Tombol Prev -->
-    <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="btn">
-      <UiIcon name="black-left" variant="outline" />
+    <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="btn btn-light">
+      <UiIcon name="left" variant="outline" />
     </button>
 
     <!-- Nomor Halaman -->
@@ -11,14 +11,21 @@
       :key="page"
       @click="goToPage(page)"
       class="btn"
-      :class="{ active: currentPage === page }"
+      :class="{
+        '!btn-primary !text-white': currentPage === page,
+        '!btn-light': currentPage !== page,
+      }"
     >
       {{ page }}
     </button>
 
     <!-- Tombol Next -->
-    <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages" class="btn">
-      <UiIcon name="black-right" variant="outline" />
+    <button
+      @click="goToPage(currentPage + 1)"
+      :disabled="currentPage === totalPages"
+      class="btn btn-light"
+    >
+      <UiIcon name="right" variant="outline" />
     </button>
   </div>
 </template>
