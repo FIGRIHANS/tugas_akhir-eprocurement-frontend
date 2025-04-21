@@ -1,44 +1,45 @@
 <script lang="ts" setup>
 import DatePicker from '@/components/datePicker/DatePicker.vue'
-import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
-import { reactive, watch } from 'vue'
+import { onMounted, reactive, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import FilterDropdown from './filterDropdown/FilterDropdown.vue'
+import { useReferenceStore } from '@/stores/vendor/reference'
+
+const reference = useReferenceStore()
 
 const route = useRoute()
 
 const filters = reactive({
-  status: '',
-  kategori: '',
-  izinUsaha: '',
+  ApprovalStatusName: '',
+  CompanyCategoryName: '',
   tglPendaftaranAwal: '',
   tglPendaftaranAkhir: '',
-  izinUsahaExp: '',
 })
 
 watch(
   () => route.query,
   (query) => {
-    filters.status = (query.status as string) || ''
-    filters.kategori = (query.kategori as string) || ''
-    filters.izinUsaha = (query.izinUsaha as string) || ''
-    filters.izinUsahaExp = (query.izinUsahaExp as string) || ''
+    filters.ApprovalStatusName = (query.ApprovalStatusName as string) || ''
+    filters.CompanyCategoryName = (query.CompanyCategoryName as string) || ''
     filters.tglPendaftaranAwal = (query.tglPendaftaranAwal as string) || ''
     filters.tglPendaftaranAkhir = (query.tglPendaftaranAkhir as string) || ''
   },
 )
+
+onMounted(() => {
+  reference.getReference('APPROVAL_STATUS')
+})
 </script>
 <template>
   <FilterDropdown :filters="filters">
-    <UiSelect label="Status" placeholder="Pilih" v-model="filters.status">
+    <UiSelect label="Status" placeholder="Pilih" v-model="filters.ApprovalStatusName">
+      <option v-for="status in reference.referenceList" :key="status.value" :value="status.value">
+        {{ status.value }}
+      </option>
+    </UiSelect>
+    <UiSelect label="Categori" placeholder="Pilih" v-model="filters.CompanyCategoryName">
       <option value="PKP">PKP</option>
-    </UiSelect>
-    <UiSelect label="Kategori" placeholder="Pilih" v-model="filters.kategori">
-      <option value="on process">On Process</option>
-    </UiSelect>
-    <UiSelect label="Izin Usaha" placeholder="Pilih" v-model="filters.izinUsaha">
-      <option value="1">Izin usaha</option>
     </UiSelect>
     <DatePicker
       label="Tanggal Pendaftaran Awal"
@@ -50,6 +51,5 @@ watch(
       label-class="text-[11px]"
       v-model="filters.tglPendaftaranAkhir"
     />
-    <UiInput label="Izin Usaha Expired" v-model="filters.izinUsahaExp" />
   </FilterDropdown>
 </template>

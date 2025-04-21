@@ -5,7 +5,6 @@ import { useRouter, type LocationQueryRaw } from 'vue-router'
 import type { IFilterDropdownProps } from './types/filterDropdown'
 
 const router = useRouter()
-defineEmits(['reset'])
 const { filters } = defineProps<IFilterDropdownProps>()
 
 const handleFilter = () => {
@@ -13,6 +12,10 @@ const handleFilter = () => {
     Object.entries(filters).filter(([, value]) => value != null && value !== ''),
   )
   router.replace({ query: newFilters as LocationQueryRaw })
+}
+
+const handleReset = () => {
+  router.replace({ query: {} })
 }
 </script>
 <template>
@@ -36,7 +39,7 @@ const handleFilter = () => {
               :outline="true"
               class="flex-1"
               type="reset"
-              @click="$emit('reset')"
+              @click="handleReset"
               data-dropdown-dismiss="true"
             >
               <UiIcon variant="filled" name="arrows-circle" />
