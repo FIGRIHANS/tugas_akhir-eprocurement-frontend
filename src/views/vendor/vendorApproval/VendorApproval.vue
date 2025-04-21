@@ -13,9 +13,11 @@ import { debounce } from 'lodash'
 import ApproveButton from '@/components/vendor/approval/ApproveButton.vue'
 import RejectButton from '@/components/vendor/approval/RejectButton.vue'
 import ApprovalVerifikasi from '@/components/vendor/approval/ApprovalVerifikasi.vue'
+import { useApprovalStore } from '@/stores/vendor/approval'
 
 const route = useRoute()
 const router = useRouter()
+const approval = useApprovalStore()
 
 const search = ref('')
 const currentPage = ref(1)
@@ -26,7 +28,7 @@ const handlePageChange = (page: number) => {
 }
 
 const handleSearch = debounce((value: string) => {
-  const query = { ...route.query, search: value }
+  const query = { ...route.query, searchQuery: value }
   router.push({ query })
 }, 500)
 
@@ -38,10 +40,13 @@ watch(
   () => route.query,
   (query) => {
     currentPage.value = Number(query.page) || 1
-    search.value = (query.search as string) || ''
+    search.value = (query.searchQuery as string) || ''
+
+    approval.getApproval(route.query)
   },
   {
     immediate: true,
+    deep: true,
   },
 )
 </script>
@@ -77,36 +82,59 @@ watch(
           </tr>
         </thead>
         <tbody>
-          <tr>
+          <!-- show loading -->
+          <tr v-if="approval.loading">
+            <td colspan="8">
+              <div
+                class="mx-auto w-6 h-6 border-3 border-blue-500 border-t-transparent rounded-full animate-spin"
+              ></div>
+            </td>
+          </tr>
+
+          <!-- show error -->
+          <tr v-else-if="approval.error">
+            <td colspan="8">
+              {{ approval.error }}
+            </td>
+          </tr>
+
+          <!-- show message if there are no data -->
+          <tr v-else-if="!approval.data.items.length">
+            <td colspan="8" class="text-center">No data</td>
+          </tr>
+
+          <tr v-for="item in approval.data.items" :key="item.vendorId" class="font-normal text-sm">
             <td>
               <div class="flex gap-5">
-                <ApproveButton :id="1" nama="PT Agung Sejahtera" />
-                <RejectButton :id="1" nama="PT Agung Sejahtera" />
-                <ApprovalVerifikasi :id="1" nama="PT Agung Sejahtera" />
-                <RouterLink :to="`/vendor-master/${1}/verification`">
+                <ApproveButton :id="item.vendorId" :nama="item.vendorName" />
+                <RejectButton :id="item.vendorId" :nama="item.vendorName" />
+                <ApprovalVerifikasi :id="item.vendorId" :nama="item.vendorName" />
+                <RouterLink :to="`/vendor-master/${item.vendorId}/verification`">
                   <UiButton size="sm" :icon="true" variant="primary" :outline="true">
                     <UiIcon name="eye" variant="duotone" />
                   </UiButton>
                 </RouterLink>
               </div>
             </td>
-            <td>-</td>
-            <td>-</td>
-            <td>-</td>
-            <td>-</td>
-            <td>-</td>
-            <td>-</td>
-            <td>-</td>
+            <td class="text-nowrap">{{ item.vendorName }}</td>
+            <td class="text-nowrap">{{ item.addressCompanyInfo }}</td>
+            <td class="text-nowrap">{{ item.companyCategoryName }}</td>
+            <td class="text-nowrap">{{ item.activedUTCDate }}</td>
+            <td class="text-nowrap">{{ item.sendApprovalDate }}</td>
+            <td class="text-nowrap">{{ item.approvalStatusName }}</td>
+            <td class="text-nowrap">{{ item.approvalTypeName }}</td>
           </tr>
         </tbody>
       </table>
     </div>
     <div class="card-footer">
-      <div>Tampilkan 10 data dari total data 10</div>
+      <div>
+        Tampilkan {{ approval.data.pageSize }} data dari total data {{ approval.data.total }}
+      </div>
       <LPagination
         :current-page="currentPage"
-        :page-size="10"
-        :total-items="100"
+        :page-size="approval.data.pageSize"
+        :total-items="approval.data.total"
         @page-change="handlePageChange"
       />
     </div>
