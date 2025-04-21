@@ -97,7 +97,7 @@ const goLogin = () => {
       if (response.statusCode === 200) {
         setToken(response.result)
         router.push({
-          path: '/'
+          path: '/dashboard'
         })
       }
     })
