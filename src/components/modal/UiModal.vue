@@ -25,7 +25,7 @@ const classes = computed(() => [
 ])
 </script>
 <template>
-  <div v-if="open">
+  <div v-if="open" class="fixed inset-0 z-50">
     <div class="modal block open z-50" data-modal="true" @click="handleClose">
       <div :class="classes">
         <div class="modal-header">
