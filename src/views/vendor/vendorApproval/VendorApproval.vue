@@ -14,6 +14,7 @@ import ApproveButton from '@/components/vendor/approval/ApproveButton.vue'
 import RejectButton from '@/components/vendor/approval/RejectButton.vue'
 import ApprovalVerifikasi from '@/components/vendor/approval/ApprovalVerifikasi.vue'
 import { useApprovalStore } from '@/stores/vendor/approval'
+import { formatDate } from '@/core/utils/format'
 
 const route = useRoute()
 const router = useRouter()
@@ -124,8 +125,8 @@ watch(
             <td class="text-nowrap">{{ item.vendorName }}</td>
             <td class="text-nowrap">{{ item.addressCompanyInfo }}</td>
             <td class="text-nowrap">{{ item.companyCategoryName }}</td>
-            <td class="text-nowrap">{{ item.activedUTCDate }}</td>
-            <td class="text-nowrap">{{ item.sendApprovalDate }}</td>
+            <td class="text-nowrap">{{ formatDate(new Date(item.activedUTCDate)) }}</td>
+            <td class="text-nowrap">{{ formatDate(new Date(item.sendApprovalDate as string)) }}</td>
             <td class="text-nowrap">{{ item.approvalStatusName }}</td>
             <td class="text-nowrap">{{ item.approvalTypeName }}</td>
           </tr>

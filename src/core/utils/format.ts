@@ -21,3 +21,7 @@ export function mysqlFormat(dateRef: Ref<Date | null>) {
     return `${y}-${m}-${d}`
   })
 }
+
+export const formatDate = (date: Date) => {
+  return new Intl.DateTimeFormat('id', { dateStyle: 'long' }).format(date)
+}
