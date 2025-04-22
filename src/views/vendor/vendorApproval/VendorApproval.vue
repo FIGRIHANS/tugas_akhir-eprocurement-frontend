@@ -103,7 +103,12 @@ watch(
             <td colspan="8" class="text-center">No data</td>
           </tr>
 
-          <tr v-for="item in approval.data.items" :key="item.vendorId" class="font-normal text-sm">
+          <tr
+            v-else
+            v-for="item in approval.data.items"
+            :key="item.vendorId"
+            class="font-normal text-sm"
+          >
             <td>
               <div class="flex gap-5">
                 <ApproveButton :id="item.vendorId" :nama="item.vendorName" />
