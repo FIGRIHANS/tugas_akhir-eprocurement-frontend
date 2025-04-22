@@ -115,7 +115,7 @@ watch(
                 <ApproveButton :id="item.vendorId" :nama="item.vendorName" />
                 <RejectButton :id="item.vendorId" :nama="item.vendorName" />
                 <ApprovalVerifikasi :id="item.vendorId" :nama="item.vendorName" />
-                <RouterLink :to="`/vendor-master/${item.vendorId}/verification`">
+                <RouterLink :to="`/vendor-approval/${item.vendorId}/detail`">
                   <UiButton size="sm" :icon="true" variant="primary" :outline="true">
                     <UiIcon name="eye" variant="duotone" />
                   </UiButton>
