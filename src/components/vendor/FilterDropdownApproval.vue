@@ -33,7 +33,9 @@ watch(
     filters.ApprovalStatusName = (query.ApprovalStatusName as string) || ''
     filters.CompanyCategoryName = (query.CompanyCategoryName as string) || ''
     filters.BusinessFieldName = (query.BusinessFieldName as string) || ''
-    filters.SendApprovalDate = (query.SendApprovalDate as string) || ''
+    approvalDate.value = (query.SendApprovalDate as string)
+      ? new Date(query.SendApprovalDate as string)
+      : null
   },
 )
 

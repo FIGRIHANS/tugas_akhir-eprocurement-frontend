@@ -14,10 +14,10 @@ export function mysqlFormat(dateRef: Ref<Date | null>) {
     const y = rawDate.getFullYear()
     const m = pad(rawDate.getMonth() + 1)
     const d = pad(rawDate.getDate())
-    const h = pad(rawDate.getHours())
-    const min = pad(rawDate.getMinutes())
-    const s = pad(rawDate.getSeconds())
+    // const h = pad(rawDate.getHours())
+    // const min = pad(rawDate.getMinutes())
+    // const s = pad(rawDate.getSeconds())
 
-    return `${y}-${m}-${d} ${h}:${min}:${s}`
+    return `${y}-${m}-${d}`
   })
 }
