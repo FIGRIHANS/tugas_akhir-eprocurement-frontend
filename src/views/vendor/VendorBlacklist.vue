@@ -7,9 +7,42 @@ import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import UiTab from '@/components/ui/atoms/tab/UiTab.vue'
 import FilterButton from '@/components/vendor/filterButton/FilterButton.vue'
 import FilterDropdownBlacklist from '@/components/vendor/FilterDropdownBlacklist.vue'
-import { ref } from 'vue'
+import { formatDate } from '@/core/utils/format'
+import { useBlacklistStore } from '@/stores/vendor/blacklist'
+import { debounce } from 'lodash'
+import { ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+
+const route = useRoute()
+const router = useRouter()
+const blacklistStore = useBlacklistStore()
+
 const currentTab = ref('vendor-blacklist')
 const search = ref('')
+const page = ref(1)
+
+const handleSearch = debounce((value: string) => {
+  const query = { ...route.query, searchQuery: value }
+  router.push({ query })
+}, 500)
+
+watch(search, (newSearch) => {
+  handleSearch(newSearch)
+})
+
+watch(
+  () => route.query,
+  (query) => {
+    page.value = Number(query.page) || 1
+    search.value = (query.searchQuery as string) || ''
+
+    blacklistStore.getBlacklist(route.query)
+  },
+  {
+    immediate: true,
+    deep: true,
+  },
+)
 </script>
 
 <template>
@@ -23,7 +56,7 @@ const search = ref('')
   />
   <div class="card">
     <div class="card-header">
-      <UiInputSearch placeholder="Cari Vendor" :model-value="search" />
+      <UiInputSearch placeholder="Cari Vendor" v-model="search" />
       <FilterDropdownBlacklist />
     </div>
     <div class="card-body">
@@ -44,35 +77,67 @@ const search = ref('')
           </tr>
         </thead>
         <tbody>
-          <tr class="text-nowrap">
+          <!-- show loading -->
+          <tr v-if="blacklistStore.loading">
+            <td colspan="7">
+              <div
+                class="mx-auto w-6 h-6 border-3 border-blue-500 border-t-transparent rounded-full animate-spin"
+              ></div>
+            </td>
+          </tr>
+
+          <!-- show error -->
+          <tr v-else-if="blacklistStore.error">
+            <td colspan="7">
+              {{ blacklistStore.error }}
+            </td>
+          </tr>
+
+          <!-- show message if there are no data -->
+          <tr v-else-if="!blacklistStore.blacklist.items.length">
+            <td colspan="7" class="text-center">No data</td>
+          </tr>
+          <tr
+            v-else
+            v-for="item in blacklistStore.blacklist.items"
+            :key="item.vendorId"
+            class="text-nowrap"
+          >
             <td>
               <UiButton :outline="true" :icon="true" size="sm">
                 <UiIcon name="check-circle" variant="duotone" />
               </UiButton>
             </td>
-            <td>PT. Agung Sejahtera</td>
-            <td>-</td>
-            <td>15 Okt 2024</td>
-            <td>15 Okt 2024</td>
-            <td>Karena tidak kompeten</td>
+            <td>{{ item.vendorName }}</td>
+            <td>{{ item.masaBlacklist }}</td>
+            <td>{{ formatDate(new Date(item.startDate)) }}</td>
+            <td>{{ formatDate(new Date(item.endDate)) }}</td>
+            <td>{{ item.blacklistDescription }}</td>
             <td>
               <div class="flex items-center gap-2">
                 <UiButton :outline="true" :icon="true" size="sm">
                   <UiIcon name="document" variant="duotone" />
                 </UiButton>
-                <span>Dokumen.docx</span>
+                <span>{{ item.docUrl }}</span>
               </div>
             </td>
             <td>
-              <UiButton :outline="true" variant="danger" size="sm"> Blacklist </UiButton>
+              <UiButton :outline="true" variant="danger" size="sm"> {{ item.status }} </UiButton>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
     <div class="card-footer">
-      <div>Tampilkan 10 data dari total data 7575</div>
-      <LPagination :current-page="1" :page-size="10" :total-items="50" />
+      <div>
+        Tampilkan {{ blacklistStore.blacklist.pageSize }} data dari total data
+        {{ blacklistStore.blacklist.total }}
+      </div>
+      <LPagination
+        :current-page="page"
+        :page-size="blacklistStore.blacklist.pageSize"
+        :total-items="blacklistStore.blacklist.total"
+      />
     </div>
   </div>
 </template>
