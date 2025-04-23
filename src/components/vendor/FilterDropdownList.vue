@@ -1,55 +1,92 @@
 <script lang="ts" setup>
-import DatePicker from '@/components/datePicker/DatePicker.vue'
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
-import { onMounted, reactive, watch } from 'vue'
+import { onMounted, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import FilterDropdown from './filterDropdown/FilterDropdown.vue'
-import { useReferenceStore } from '@/stores/vendor/reference'
-
-const reference = useReferenceStore()
+import { useVendorCategoryStore } from '@/stores/vendor/category'
+import { mysqlFormat } from '@/core/utils/format'
 
 const route = useRoute()
+const categories = useVendorCategoryStore()
+
+const startDate = ref<Date | null>(null)
+const endDate = ref<Date | null>(null)
 
 const filters = reactive({
   ApprovalStatusName: '',
-  CompanyCategoryName: '',
-  tglPendaftaranAwal: '',
-  tglPendaftaranAkhir: '',
+  categoryId: '',
+  startDate: mysqlFormat(startDate),
+  endDate: mysqlFormat(endDate),
 })
 
 watch(
   () => route.query,
   (query) => {
     filters.ApprovalStatusName = (query.ApprovalStatusName as string) || ''
-    filters.CompanyCategoryName = (query.CompanyCategoryName as string) || ''
-    filters.tglPendaftaranAwal = (query.tglPendaftaranAwal as string) || ''
-    filters.tglPendaftaranAkhir = (query.tglPendaftaranAkhir as string) || ''
+    filters.categoryId = (query.CompanyCategoryName as string) || ''
+    startDate.value = new Date(query.startDate as string) ?? null
+    endDate.value = new Date(query.endDate as string) ?? null
   },
 )
 
-onMounted(() => {
-  reference.getReference('APPROVAL_STATUS')
-})
+onMounted(categories.getCategories)
 </script>
 <template>
   <FilterDropdown :filters="filters">
     <UiSelect label="Status" placeholder="Pilih" v-model="filters.ApprovalStatusName">
-      <option v-for="status in reference.referenceList" :key="status.value" :value="status.value">
-        {{ status.value }}
+      <option>Pilih</option>
+    </UiSelect>
+    <UiSelect label="Categori" placeholder="Pilih" v-model="filters.categoryId">
+      <option
+        v-for="category in categories.categories"
+        :key="category.companyCategoryId"
+        :value="category.companyCategoryId"
+      >
+        {{ category.companyCategoryName }}
       </option>
     </UiSelect>
-    <UiSelect label="Categori" placeholder="Pilih" v-model="filters.CompanyCategoryName">
-      <option value="PKP">PKP</option>
-    </UiSelect>
-    <DatePicker
-      label="Tanggal Pendaftaran Awal"
-      label-class="text-[11px]"
-      v-model="filters.tglPendaftaranAwal"
-    />
-    <DatePicker
-      label="Tanggal Pendaftaran Akhir"
-      label-class="text-[11px]"
-      v-model="filters.tglPendaftaranAkhir"
-    />
+    <div class="min-w-[0px] w-full">
+      <VueDatePicker v-model="startDate" class="w-full">
+        <template #dp-input="{ value }">
+          <div class="input relative">
+            <div
+              :class="[
+                'absolute top-0 left-0 -mt-2 ml-2 bg-white px-1 text-gray-500 text-[11px] font-normal',
+              ]"
+            >
+              Tanggal Pendaftaran Awal
+            </div>
+            <input :placeholder="'Select'" :value="value" readonly class="min-w-[0px]" />
+            <button class="btn btn-icon" type="button">
+              <i class="ki-filled ki-calendar"></i>
+            </button>
+          </div>
+        </template>
+      </VueDatePicker>
+    </div>
+
+    <div class="min-w-[0px] w-full">
+      <VueDatePicker v-model="endDate" class="w-full">
+        <template #dp-input="{ value }">
+          <div class="input relative">
+            <div
+              :class="[
+                'absolute top-0 left-0 -mt-2 ml-2 bg-white px-1 text-gray-500 text-[11px] font-normal',
+              ]"
+            >
+              Tanggal Pendaftaran Akhir
+            </div>
+            <input :placeholder="'Select'" :value="value" readonly class="min-w-[0px]" />
+            <button class="btn btn-icon" type="button">
+              <i class="ki-filled ki-calendar"></i>
+            </button>
+          </div>
+        </template>
+      </VueDatePicker>
+    </div>
   </FilterDropdown>
 </template>
+
+<style lang="scss" scoped>
+@use '@/components/datePicker/styles/datepicker.scss';
+</style>
