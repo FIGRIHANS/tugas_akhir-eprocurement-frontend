@@ -1,88 +1,51 @@
 <script lang="ts" setup>
-import UiButton from '@/components/ui/atoms/button/UiButton.vue'
-import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
-import { reactive, watch } from 'vue'
-import { useRoute, useRouter, type LocationQueryValue } from 'vue-router'
+import { useBlacklistPeriodStore } from '@/stores/vendor/reference'
+import { onMounted, reactive, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import FilterDropdown from './filterDropdown/FilterDropdown.vue'
+import UiIcon from '../ui/atoms/icon/UiIcon.vue'
 
-const router = useRouter()
 const route = useRoute()
 
-const periods = [
-  { label: 'Sementara', value: 'Sementara' },
-  { label: 'Selamanya', value: 'Selamanya' },
-  { label: 'Semuanya', value: 'Semuanya' },
-]
+const blacklistPeriod = useBlacklistPeriodStore()
 
-const filters: { tipe: Array<string> | string | LocationQueryValue[] } = reactive({
-  tipe: [],
+const filters = reactive({
+  MasaBlacklist: '',
 })
-
-const handleFilter = () => {
-  const query = Object.fromEntries(Object.entries(filters).filter(([, value]) => value))
-  router.push({ query })
-}
-
-const handleReset = () => {
-  filters.tipe = []
-  router.replace({ query: {} })
-}
 
 watch(
   () => route.query,
   (query) => {
-    if (query.tipe) {
-      filters.tipe = Array.isArray(query.tipe) ? [...query.tipe] : [query.tipe]
-    } else {
-      filters.tipe = []
-    }
+    filters.MasaBlacklist = (query.MasaBlacklist as string) || ''
   },
   { immediate: true },
 )
+
+onMounted(blacklistPeriod.getPeriod)
 </script>
 <template>
-  <form @submit.prevent="handleFilter">
-    <div class="flex items-center space-x-3">
-      <div
-        class="dropdown"
-        data-dropdown="true"
-        data-dropdown-trigger="click"
-        data-dropdown-placement="bottom-end"
-      >
-        <UiButton class="dropdown-toggle">
-          <UiIcon variant="outline" name="filter" />
-          <span>Filter</span>
-        </UiButton>
-        <div class="dropdown-content w-full max-w-60 p-4 space-y-5">
-          <h1 class="text-lg font-semibold text-gray-700 mb-5">Filter</h1>
-          <template v-for="period in periods" :key="period">
-            <label class="form-label flex items-center gap-2.5">
-              <input
-                class="checkbox"
-                type="checkbox"
-                :value="period.value"
-                v-model="filters.tipe"
-              />
-              {{ period.label }}
-            </label>
-          </template>
-          <div class="flex items-center space-x-3">
-            <UiButton
-              :outline="true"
-              class="flex-1"
-              type="reset"
-              @click="handleReset"
-              data-dropdown-dismiss="true"
-            >
-              <UiIcon variant="filled" name="arrows-circle" />
-              Reset
-            </UiButton>
-            <UiButton class="flex-1" data-dropdown-dismiss="true">
-              <UiIcon variant="filled" name="check-circle" />
-              Terapkan
-            </UiButton>
-          </div>
+  <FilterDropdown :filters="filters">
+    <template v-for="period in blacklistPeriod.period" :key="period">
+      <label class="form-label flex items-center gap-2.5">
+        <input
+          class="peer"
+          name="masa-blacklist"
+          type="radio"
+          :value="period.value"
+          v-model="filters.MasaBlacklist"
+          hidden
+        />
+        <div
+          class="h-6 w-6 flex items-center justify-center peer-checked:bg-primary rounded-md text-white border border-primary"
+        >
+          <UiIcon
+            name="check"
+            variant="duotone"
+            :class="{ hidden: filters.MasaBlacklist !== period.value }"
+          />
         </div>
-      </div>
-    </div>
-  </form>
+        <span class="font-medium">{{ period.value }}</span>
+      </label>
+    </template>
+  </FilterDropdown>
 </template>

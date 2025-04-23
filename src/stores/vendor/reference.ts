@@ -70,7 +70,7 @@ export const useBlacklistPeriodStore = defineStore('blacklistPeriod', () => {
     error.value = ''
 
     try {
-      period.value = await getReference('APPROVAL_TYPE')
+      period.value = await getReference('BLACKLIST')
     } catch (err) {
       if (err instanceof Error) {
         error.value = err.message
