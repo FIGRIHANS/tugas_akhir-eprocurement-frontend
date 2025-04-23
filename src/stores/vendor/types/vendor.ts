@@ -27,3 +27,25 @@ export interface IVendorContent {
   page: number
   pageSize: number
 }
+
+export interface IAdministration {
+  vendorId: number
+  userId: number
+  userName: string
+  vendorName: string
+  companyCategoryId: number
+  companyCategoryName: string
+  groupCompany: string
+  npwp: string
+  npwpUrl: string
+  vendorPhone: string
+  vendorEmail: string
+  vendorWebsite: string
+  businessFieldName: string | null
+  businessUnitName: string
+  addressCompanyDetail: string
+  stateName: string
+  cityName: string
+  currencyLabel: string
+  currencySymbol: string
+}

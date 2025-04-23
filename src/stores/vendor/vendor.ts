@@ -1,7 +1,7 @@
 import vendorAPI from '@/core/utils/vendorAPI'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { IVendorContent } from './types/vendor'
+import type { IAdministration, IVendorContent } from './types/vendor'
 import type { ApiResponse } from '@/core/type/api'
 
 export const useVendorStore = defineStore('vendor', () => {
@@ -41,4 +41,37 @@ export const useVendorStore = defineStore('vendor', () => {
   }
 
   return { vendors, loading, error, getVendors }
+})
+
+export const useVendorAdministrationStore = defineStore('vendor-administration', () => {
+  const loading = ref(false)
+  const error = ref<string | null>(null)
+  const data = ref<IAdministration[]>([])
+
+  const getData = async (vendorId: string) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const response: ApiResponse<IAdministration[]> = await vendorAPI.get(
+        '/public/vendor/registration/administration',
+        {
+          params: { vendorId },
+        },
+      )
+      console.log(response.data)
+
+      data.value = response.data.result.content
+    } catch (err) {
+      if (err instanceof Error) {
+        error.value = err.message
+      } else {
+        error.value = 'Failed to get data'
+      }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  return { data, loading, error, getData }
 })
