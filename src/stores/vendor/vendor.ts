@@ -7,7 +7,12 @@ import type { ApiResponse } from '@/core/type/api'
 export const useVendorStore = defineStore('vendor', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
-  const vendorList = ref<IVendorContent>()
+  const vendors = ref<IVendorContent>({
+    items: [],
+    total: 0,
+    page: 1,
+    pageSize: 0,
+  })
 
   const getVendors = async (params: unknown) => {
     loading.value = true
@@ -15,10 +20,15 @@ export const useVendorStore = defineStore('vendor', () => {
 
     try {
       const response: ApiResponse<IVendorContent> = await vendorAPI.get(
-        '/public/verifiedvendor/approval/vendor-list',
+        '/public/vendor/registration/getvendor',
         { params },
       )
-      vendorList.value = response.data.result.content
+
+      if (response.data.statusCode === 200) {
+        vendors.value = response.data.result.content
+      } else {
+        error.value = response.data.result.message
+      }
     } catch (err: unknown) {
       if (err instanceof Error) {
         error.value = err.message
@@ -30,5 +40,5 @@ export const useVendorStore = defineStore('vendor', () => {
     }
   }
 
-  return { vendorList, loading, error, getVendors }
+  return { vendors, loading, error, getVendors }
 })

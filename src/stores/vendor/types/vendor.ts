@@ -1,19 +1,29 @@
 export interface IVendorList {
-  vendorId: string
+  id: number
+  vendorId: number
+  userId: number
   vendorName: string
-  addressCompanyInfo: string
+  companyCategoryId: number
   companyCategoryName: string
-  activedUTCDate: string
-  sendApprovalDate: null | string
-  approvalStatus: null | string
-  approvalStatusName: null | string
-  approvalTypeName: null | string
-  businessFieldName: null | string
+  vendorEmail: string
+  vendorPhone: string
+  vendorWebsite: string
+  npwp: string
+  npwpUrl: string
+  foundedDate: string
+  companyScale: string | null
+  verificationRemark: string
+  licenses: {
+    licenseName: string
+    expiredUTCDate: string | null
+  }[]
+  createdBy: string
+  createdUTCDate: string
 }
 
 export interface IVendorContent {
   items: IVendorList[]
-  total: number,
+  total: number
   page: number
-  pageSize:number
+  pageSize: number
 }
