@@ -58,15 +58,17 @@
               <td class="align-top">
                 <DatePicker
                   v-model="documentAndLegal.fields[index].issuedDate"
-                  format="dd/MM/yyyy"
+                  format="dd MM yyyy"
                   :error="documentAndLegal.fields[index]?.issuedDateError"
+                  @update:modelValue="changeFormatDate(index, 'default', 'issued')"
                 />
               </td>
               <td class="align-top">
                 <DatePicker
                   v-model="documentAndLegal.fields[index].expiredDate"
-                  format="dd/MM/yyyy"
+                  format="dd MM yyyy"
                   :error="documentAndLegal.fields[index]?.expiredDateError"
+                  @update:modelValue="changeFormatDate(index, 'default', 'expired')"
                 />
               </td>
               <td class="align-top">
@@ -176,13 +178,15 @@
                 <td class="align-top">
                   <DatePicker
                     v-model="documentAndLegal.anotherDocuments[index].issuedDate"
-                    format="dd/MM/yyyy"
+                    format="dd MM yyyy"
+                    @update:modelValue="changeFormatDate(index, 'other doc', 'issued')"
                   />
                 </td>
                 <td class="align-top">
                   <DatePicker
                     v-model="documentAndLegal.anotherDocuments[index].expiredDate"
-                    format="dd/MM/yyyy"
+                    format="dd MM yyyy"
+                    @update:modelValue="changeFormatDate(index, 'other doc', 'expired')"
                   />
                 </td>
                 <td class="align-top">
@@ -240,6 +244,7 @@ type ListDocumentType = {
 }
 
 import { computed, onMounted, ref, watch } from 'vue'
+import moment from 'moment'
 
 import { useRegistrationVendorStore } from '@/stores/views/registration'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
@@ -262,6 +267,19 @@ const tableItems = computed(() => vendorMasterDataStore.companyLicense)
 
 const fileList = ref<ListDocumentType[]>([])
 const fileOtherDocumentList = ref<ListDocumentType[]>([])
+
+const changeFormatDate = (
+  index: number,
+  type: 'default' | 'other doc',
+  field: 'issued' | 'expired',
+) => {
+  const documentKey = type === 'default' ? 'fields' : 'anotherDocuments'
+  const fieldKey = field === 'issued' ? 'issuedDate' : 'expiredDate'
+
+  registrationVendorStore.documentAndLegal[documentKey][index][fieldKey] = moment(
+    registrationVendorStore.documentAndLegal[documentKey][index][fieldKey],
+  ).format('YYYY-MM-DD')
+}
 
 const uploadFile = (file: File, index: number, type: 'default' | 'other doc') => {
   if (type === 'default') {

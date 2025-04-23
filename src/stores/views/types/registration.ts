@@ -1,46 +1,49 @@
 type LokasiKantor = {
-  negara: number
-  negaraError?: boolean
-  provinsi: number
-  provinsiError?: boolean
-  kabupatenKota: number
-  kabupatenKotaError?: boolean
-  kodePos: string
-  kodePosError?: boolean
-  alamatLengkap: string
-  alamatLengkapError?: boolean
+  countryId: number
+  country: string
+  countryError?: boolean
+  stateId: number
+  state: string
+  stateError?: boolean
+  cityId: number
+  city: string
+  cityError?: boolean
+  postalCode: string
+  postalCodeError?: boolean
+  addressDetail: string
+  addressDetailError?: boolean
 }
 
 type BidangUsaha = {
-  bidangUsaha: number
-  subBidangUsaha: number
+  businessFieldId: number
+  subBusinessFieldId: number
 }
 
 export type RegisInformationType = {
-  perusahaan: {
-    namaPerusahaan: string
-    namaPerusahaanError?: boolean
-    groupPerusahaan: string
-    tanggalBerdiri: string
-    tanggalBerdiriError?: boolean
+  vendor: {
+    vendorName: string
+    vendorNameError?: boolean
+    groupCompany: string
+    foundedDate: string
+    foundedDateError?: boolean
   }
-  lokasiKantorPusat: LokasiKantor
-  lokasiPerusahaan: LokasiKantor
-  bidangUsaha: BidangUsaha & {
-    bidangUsahaError?: boolean
-    subBidangUsahaError?: boolean
+  companyLocation: LokasiKantor
+  vendorLocation: LokasiKantor
+  vendorCommodities: BidangUsaha & {
+    businessFieldError?: boolean
+    subBusinessFieldError?: boolean
     list: (BidangUsaha & {
-      bidangUsahaName: string
-      subBidangUsahaName: string
+      businessFieldName: string
+      subBusinessFieldName: string
     })[]
   }
 }
 
 type ContactPersonType = {
-  fullName: string
-  noTel: string
-  email: string
-  position: number
+  contactName: string
+  contactPhone: string
+  contactEmail: string
+  positionTypeId: number
 }
 
 export type RegisContactType = {
@@ -54,13 +57,13 @@ export type RegisContactType = {
     confirmPassword: string
     confirmPasswordError?: boolean
     website: string
-    noTel: string
-    noTelError?: boolean
+    phone: string
+    phoneError?: boolean
   }
   contactPerson: ContactPersonType & {
-    fullNameError?: boolean
-    noTelError?: boolean
-    emailError?: boolean
+    contactNameError?: boolean
+    contactPhoneError?: boolean
+    contactEmailError?: boolean
     positionError?: boolean
     list: ContactPersonType[]
   }

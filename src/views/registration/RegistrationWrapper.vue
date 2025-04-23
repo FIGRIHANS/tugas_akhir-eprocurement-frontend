@@ -86,14 +86,16 @@ const changeTab = (value: string) => {
 }
 
 const checkFieldNotEmpty = () => {
-  let fields = {
+  const locationFields = ['countryId', 'stateId', 'cityId', 'postalCode', 'addressDetail']
+
+  const fields = {
     information: {
-      perusahaan: ['namaPerusahaan', 'tanggalBerdiri'],
-      lokasiKantorPusat: ['negara', 'provinsi', 'kabupatenKota', 'kodePos', 'alamatLengkap'],
-      lokasiPerusahaan: ['negara', 'provinsi', 'kabupatenKota', 'kodePos', 'alamatLengkap'],
+      vendor: ['vendorName', 'foundedDate'],
+      companyLocation: locationFields,
+      vendorLocation: locationFields,
     },
     contact: {
-      account: ['username', 'email', 'password', 'confirmPassword', 'noTel'],
+      account: ['username', 'email', 'password', 'confirmPassword', 'phone'],
     },
     document: ['licenseNo', 'issuedDate', 'expiredDate', 'uploadUrl'],
     payment: ['noRekening', 'namaPemilikAkun', 'suratPernyataan', 'mataUang', 'alamatBank'],
@@ -113,11 +115,12 @@ const checkFieldNotEmpty = () => {
         }
       })
 
-      const hasBidangUsahaItems = registrationVendorStore.information.bidangUsaha.list.length > 0
-      registrationVendorStore.information.bidangUsaha = {
-        ...registrationVendorStore.information.bidangUsaha,
-        bidangUsahaError: !hasBidangUsahaItems,
-        subBidangUsahaError: !hasBidangUsahaItems,
+      const hasBidangUsahaItems =
+        registrationVendorStore.information.vendorCommodities.list.length > 0
+      registrationVendorStore.information.vendorCommodities = {
+        ...registrationVendorStore.information.vendorCommodities,
+        businessFieldError: !hasBidangUsahaItems,
+        subBusinessFieldError: !hasBidangUsahaItems,
       }
 
       return (
@@ -138,9 +141,9 @@ const checkFieldNotEmpty = () => {
       const hasContactPersons = registrationVendorStore.contact.contactPerson.list.length > 0
       registrationVendorStore.contact.contactPerson = {
         ...registrationVendorStore.contact.contactPerson,
-        fullNameError: !hasContactPersons,
-        noTelError: !hasContactPersons,
-        emailError: !hasContactPersons,
+        contactNameError: !hasContactPersons,
+        contactPhoneError: !hasContactPersons,
+        contactEmailError: !hasContactPersons,
         positionError: !hasContactPersons,
       }
 
@@ -162,8 +165,6 @@ const checkFieldNotEmpty = () => {
           ].includes(item.licenseId) &&
             checkErrors(registrationVendorStore.documentAndLegal.fields[index], fields.document)),
         }))
-
-      console.log(checkingField)
 
       return checkingField.some((value) => value === true)
 
@@ -202,6 +203,17 @@ const checkFieldNotEmpty = () => {
   }
 }
 
+const removeErrorFields = <T extends Record<string, any>>(obj: T): T =>
+  Array.isArray(obj)
+    ? (obj.map(removeErrorFields) as any)
+    : typeof obj === 'object' && obj !== null
+      ? (Object.fromEntries(
+          Object.entries(obj)
+            .filter(([key]) => !key.endsWith('Error'))
+            .map(([key, value]) => [key, removeErrorFields(value)]),
+        ) as T)
+      : obj
+
 const previous = () => {
   const index = tabPosition.value - 1
 
@@ -214,8 +226,34 @@ const previous = () => {
 const next = () => {
   const index = tabPosition.value + 1
 
-  console.log(checkFieldNotEmpty())
+  const information = registrationVendorStore.information
+  const contact = registrationVendorStore.contact
+  const documentAndLegal = registrationVendorStore.documentAndLegal
 
+  const payload = {
+    account: {
+      userName: contact.account.username,
+      email: contact.account.email,
+      password: contact.account.password,
+    },
+    vendor: {
+      ...removeErrorFields(information.vendor),
+      categoryId: 0,
+      vendorEmail: contact.account.email,
+      vendorPhone: contact.account.phone,
+      vendorWebsite: contact.account.website,
+    },
+    companyLocation: removeErrorFields(information.companyLocation),
+    vendorLocation: removeErrorFields(information.vendorLocation),
+    vendorCommodities: information.vendorCommodities.list.map((item) => ({
+      subBusinessFieldId: item.subBusinessFieldId,
+    })),
+    vendorResponsibleContacts: contact.contactPerson.list,
+    vendorLicenses: removeErrorFields(documentAndLegal.fields),
+    otherDocuments: removeErrorFields(documentAndLegal.anotherDocuments),
+  }
+
+  console.log(payload)
   if (checkFieldNotEmpty()) {
     if (index >= tab.items.length) {
       console.log('end')

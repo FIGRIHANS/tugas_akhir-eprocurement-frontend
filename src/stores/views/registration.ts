@@ -10,28 +10,34 @@ import type {
 
 export const useRegistrationVendorStore = defineStore('registrationVendor', () => {
   const information = ref<RegisInformationType>({
-    perusahaan: {
-      namaPerusahaan: '',
-      groupPerusahaan: '',
-      tanggalBerdiri: '',
+    vendor: {
+      vendorName: '',
+      groupCompany: '',
+      foundedDate: '',
     },
-    lokasiKantorPusat: {
-      negara: 0,
-      provinsi: 0,
-      kabupatenKota: 0,
-      kodePos: '',
-      alamatLengkap: '',
+    companyLocation: {
+      countryId: 0,
+      country: '',
+      stateId: 0,
+      state: '',
+      cityId: 0,
+      city: '',
+      postalCode: '',
+      addressDetail: '',
     },
-    lokasiPerusahaan: {
-      negara: 0,
-      provinsi: 0,
-      kabupatenKota: 0,
-      kodePos: '',
-      alamatLengkap: '',
+    vendorLocation: {
+      countryId: 0,
+      country: '',
+      stateId: 0,
+      state: '',
+      cityId: 0,
+      city: '',
+      postalCode: '',
+      addressDetail: '',
     },
-    bidangUsaha: {
-      bidangUsaha: 0,
-      subBidangUsaha: 0,
+    vendorCommodities: {
+      businessFieldId: 0,
+      subBusinessFieldId: 0,
       list: [],
     },
   })
@@ -43,13 +49,13 @@ export const useRegistrationVendorStore = defineStore('registrationVendor', () =
       password: '',
       confirmPassword: '',
       website: '',
-      noTel: '',
+      phone: '',
     },
     contactPerson: {
-      fullName: '',
-      noTel: '',
-      email: '',
-      position: 0,
+      contactName: '',
+      contactPhone: '',
+      contactEmail: '',
+      positionTypeId: 0,
       list: [],
     },
   })

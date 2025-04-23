@@ -57,12 +57,12 @@
         row
       />
       <UiInputTel
-        v-model="contact.account.noTel"
+        v-model="contact.account.phone"
         label="No Telephone"
         placeholder="Masukkan no telephone"
         row
         required
-        :error="contact.account.noTelError"
+        :error="contact.account.phoneError"
       />
     </UiFormGroup>
 
@@ -71,31 +71,31 @@
     <UiFormGroup hide-border>
       <UiFormGroup title="Contact Person" :grid="2" body-class="px-4" hide-border>
         <UiInput
-          v-model="contact.contactPerson.fullName"
+          v-model="contact.contactPerson.contactName"
           label="Nama Lengkap"
           placeholder="Masukkan nama lengkap"
           row
           required
-          :error="contact.contactPerson.fullNameError"
+          :error="contact.contactPerson.contactNameError"
         />
         <UiInputTel
-          v-model="contact.contactPerson.noTel"
+          v-model="contact.contactPerson.contactPhone"
           label="No Telephone"
           placeholder="Masukkan no telephone"
           row
           required
-          :error="contact.contactPerson.noTelError"
+          :error="contact.contactPerson.contactPhoneError"
         />
         <UiInput
-          v-model="contact.contactPerson.email"
+          v-model="contact.contactPerson.contactEmail"
           label="Email"
           placeholder="Masukkan email"
           row
           required
-          :error="contact.contactPerson.emailError"
+          :error="contact.contactPerson.contactEmailError"
         />
         <UiSelect
-          v-model="contact.contactPerson.position"
+          v-model="contact.contactPerson.positionTypeId"
           label="Bagian"
           placeholder="Pilih"
           :options="positionList"
@@ -137,10 +137,10 @@
             </tbody>
             <tbody v-else>
               <tr v-for="(contactPerson, index) in contact.contactPerson.list" :key="index">
-                <td>{{ contactPerson.fullName }}</td>
-                <td>{{ contactPerson.noTel }}</td>
-                <td>{{ contactPerson.email }}</td>
-                <td>{{ displayPosition(contactPerson.position) }}</td>
+                <td>{{ contactPerson.contactName }}</td>
+                <td>{{ contactPerson.contactPhone }}</td>
+                <td>{{ contactPerson.contactEmail }}</td>
+                <td>{{ displayPosition(contactPerson.positionTypeId) }}</td>
                 <td class="flex flex-row items-center gap-4">
                   <UiButton variant="primary" outline icon @click="editContactPerson(index)">
                     <UiIcon variant="duotone" name="notepad-edit" />
@@ -203,18 +203,24 @@ const checkConfirmPassword = () => {
 }
 
 const addContactPerson = () => {
-  const { list, fullNameError, noTelError, emailError, positionError, ...clearObject } =
-    contact.value.contactPerson
+  const {
+    list,
+    contactNameError,
+    contactPhoneError,
+    contactEmailError,
+    positionError,
+    ...clearObject
+  } = contact.value.contactPerson
 
   const isObjectHasEmpty = Object.values(clearObject).some((value) => !value)
 
   if (isObjectHasEmpty) {
     registrationVendorStore.contact.contactPerson = {
       ...registrationVendorStore.contact.contactPerson,
-      fullNameError: clearObject.fullName === '',
-      noTelError: clearObject.noTel === '',
-      emailError: clearObject.email === '',
-      positionError: clearObject.position === 0,
+      contactNameError: clearObject.contactName === '',
+      contactPhoneError: clearObject.contactPhone === '',
+      contactEmailError: clearObject.contactEmail === '',
+      positionError: clearObject.positionTypeId === 0,
     }
   } else {
     if (isEdit.value) {
@@ -232,13 +238,13 @@ const addContactPerson = () => {
 
     registrationVendorStore.contact.contactPerson = {
       ...registrationVendorStore.contact.contactPerson,
-      fullName: '',
-      fullNameError: false,
-      noTel: '',
-      noTelError: false,
-      email: '',
-      emailError: false,
-      position: 0,
+      contactName: '',
+      contactNameError: false,
+      contactPhone: '',
+      contactPhoneError: false,
+      contactEmail: '',
+      contactEmailError: false,
+      positionTypeId: 0,
       positionError: false,
     }
   }
