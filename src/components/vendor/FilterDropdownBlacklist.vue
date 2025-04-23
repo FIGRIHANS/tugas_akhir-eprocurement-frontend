@@ -36,7 +36,7 @@ onMounted(blacklistPeriod.getPeriod)
           hidden
         />
         <div
-          class="h-6 w-6 flex items-center justify-center peer-checked:bg-primary rounded-md text-white border border-primary"
+          class="h-6 w-6 flex items-center justify-center peer-checked:bg-primary rounded-md text-white border border-gray-300 peer-checked:border-primary text-lg"
         >
           <UiIcon
             name="check"
