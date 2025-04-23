@@ -3,15 +3,15 @@ import { onMounted, reactive, ref, watch } from 'vue'
 import FilterDropdown from './filterDropdown/FilterDropdown.vue'
 import UiSelect from '../ui/atoms/select/UiSelect.vue'
 import { useRoute } from 'vue-router'
-import { useReferenceStore } from '@/stores/vendor/reference'
+import { useApprovalStatusStore, useApprovalTypeStore } from '@/stores/vendor/reference'
 import { useVendorCategoryStore } from '@/stores/vendor/category'
 import { useBusinessFieldStore } from '@/stores/vendor/businessField'
 import { mysqlFormat } from '@/core/utils/format'
 
 const route = useRoute()
 
-const statusRef = useReferenceStore()
-const approvalRef = useReferenceStore()
+const statusRef = useApprovalStatusStore()
+const approvalRef = useApprovalTypeStore()
 const categoryRef = useVendorCategoryStore()
 const businessFields = useBusinessFieldStore()
 
@@ -43,8 +43,8 @@ watch(
 )
 
 onMounted(() => {
-  statusRef.getReference('APPROVAL_STATUS')
-  approvalRef.getReference('APPROVAL_TYPE')
+  statusRef.getStatus()
+  approvalRef.getType()
   categoryRef.getCategories()
   businessFields.getBusinessFields()
 })
@@ -53,7 +53,7 @@ onMounted(() => {
   <FilterDropdown :filters="filters">
     <!-- status -->
     <UiSelect label="Status" placeholder="Pilih Status" v-model="filters.ApprovalStatusName">
-      <option v-for="status in statusRef.referenceList" :key="status.code" :value="status.value">
+      <option v-for="status in statusRef.approvalStatus" :key="status.code" :value="status.value">
         {{ status.value }}
       </option>
     </UiSelect>
@@ -91,7 +91,7 @@ onMounted(() => {
 
     <!-- izin usaha -->
     <UiSelect label="Jenis Approval" placeholder="Pilih" v-model="filters.ApprovalTypeName">
-      <option v-for="item in approvalRef.referenceList" :key="item.value" :value="item.value">
+      <option v-for="item in approvalRef.approvalType" :key="item.value" :value="item.value">
         {{ item.value }}
       </option>
     </UiSelect>
