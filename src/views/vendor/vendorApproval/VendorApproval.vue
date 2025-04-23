@@ -29,8 +29,15 @@ const handlePageChange = (page: number) => {
 }
 
 const handleSearch = debounce((value: string) => {
-  const query = { ...route.query, searchQuery: value }
-  router.push({ query })
+  const query = { ...route.query }
+  delete query.page
+
+  if (!value) {
+    delete query.searchQuery
+    router.push({ query })
+    return
+  }
+  router.push({ query: { ...query, searchQuery: value } })
 }, 500)
 
 watch(search, (newSearch) => {
