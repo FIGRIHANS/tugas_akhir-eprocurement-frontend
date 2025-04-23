@@ -16,6 +16,7 @@ import type {
   DistrictListType,
   PositionListType,
   ProvinceListType,
+  TermConditionType,
   UploadFileResponse,
 } from './types/vendor-master-data'
 
@@ -32,6 +33,7 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
   const currencyList = ref<CurrencyListType>([])
   const companyCategoryList = ref<CompanyCategoryType>([])
   const companyLicense = ref<CompanyLicenseType>([])
+  const termCondition = ref<TermConditionType>()
 
   const getVendorCountries = async (countryName?: string) => {
     const response: ApiResponse<CountryListType> = await vendorApi.get(`${baseUrl}/countries`, {
@@ -186,6 +188,16 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
     return response.data.result
   }
 
+  const getVendorTermCondition = async () => {
+    const response: ApiResponse<TermConditionType> = await vendorApi.get(
+      `${baseUrl}/term-condition`,
+    )
+
+    termCondition.value = response.data.result.content
+
+    return response.data.result
+  }
+
   const uploadFile = async ({
     FormFile,
     Actioner,
@@ -222,6 +234,7 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
     currencyList,
     companyCategoryList,
     companyLicense,
+    termCondition,
     getVendorCountries,
     getVendorProvince,
     getVendorCities,
@@ -232,6 +245,7 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
     getVendorCurrency,
     getVendorCompanyCategory,
     getVendorCompanyLicense,
+    getVendorTermCondition,
     uploadFile,
   }
 })

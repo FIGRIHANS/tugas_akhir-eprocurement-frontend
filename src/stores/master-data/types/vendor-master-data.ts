@@ -79,6 +79,10 @@ export type CompanyLicenseType = {
   licenseName: string
 }[]
 
+export type TermConditionType = {
+  termCondition: string
+}
+
 export type UploadFileResponse = {
   name: string
   url: string

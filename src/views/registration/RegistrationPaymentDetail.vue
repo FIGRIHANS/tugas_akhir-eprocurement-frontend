@@ -131,63 +131,107 @@
       </div>
 
       <div class="card bg-gray-100">
-        <div class="card-body flex flex-col gap-4 scrollable h-[635px] py-0 my-4 pr-4 mr-2">
-          <h3 class="card-title">Syarat dan Ketentuan</h3>
-
-          <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer eget nibh pulvinar,
-            commodo tellus non, molestie orci. Cras ac euismod diam. Integer ornare ipsum dolor, sed
-            euismod diam sagittis a. Praesent dapibus vestibulum massa, id sollicitudin leo iaculis
-            eu. Nunc blandit, quam eget sodales faucibus, quam erat lobortis orci, quis rhoncus sem
-            est id tortor. Vestibulum tempor velit non nibh fringilla, volutpat tristique ex
-            pulvinar. Morbi lacinia purus placerat sapien posuere, a convallis leo dictum. Vivamus
-            tristique massa ut porttitor interdum. Aliquam finibus ante ac justo tincidunt auctor.
-            Duis nec elit libero. Sed eget diam eget velit posuere elementum. Vivamus finibus libero
-            quis dapibus ultrices.
+        <!-- <div class="card-body flex flex-col gap-4 scrollable h-[635px] py-0 my-4 pr-4 mr-2">
+          <h2 class="card-title">Mohon Diperhatikan!</h2>
+          <p class="font-medium">
+            Syarat dan Ketentuan dalam Sistem E-Procurement PT Arya Noble untuk Vendor
           </p>
-
-          <p>
-            Vestibulum non quam a velit volutpat laoreet ut sed metus. Quisque quis blandit libero,
-            et efficitur justo. Fusce sagittis libero non lacus laoreet, ac hendrerit lorem
-            elementum. Aliquam consequat nisl odio, vel rhoncus sapien rutrum ac. Donec ut tempus
-            tellus, ac consectetur enim. Sed mollis, nisl quis luctus lobortis, est orci facilisis
-            sapien, vulputate dignissim elit libero vel massa. Vestibulum imperdiet elit ut ornare
-            mollis. Integer a mauris urna. Donec cursus urna vitae nulla posuere, et tempor mauris
-            elementum. Nullam libero magna, imperdiet a molestie convallis, posuere ut neque.
-          </p>
-
-          <p>
-            Aliquam diam tellus, fringilla et convallis eu, viverra sit amet mauris. Nam a aliquam
-            nisi. Cras finibus accumsan lacus, at fermentum magna lobortis sed. Curabitur dui urna,
-            auctor vel pretium in, euismod eget justo. In diam neque, convallis non tristique ac,
-            placerat vel libero. Aliquam lacinia justo sit amet laoreet elementum. Sed dignissim,
-            nulla eget posuere varius, nunc lorem dignissim sapien, non tempor diam ante eu quam.
-          </p>
-
-          <p>
-            Duis maximus, felis non consectetur vulputate, dolor lacus scelerisque risus, sed
-            finibus lectus nulla eu erat. Etiam interdum at nunc nec feugiat. Donec sagittis magna
-            turpis, id maximus velit pulvinar sit amet. Sed dapibus facilisis lobortis. Donec ac
-            luctus dolor. Suspendisse gravida aliquet diam, sed vehicula tortor pretium at. Donec
-            convallis magna eget nibh viverra vehicula. Phasellus efficitur euismod massa, eget
-            gravida ligula convallis id. Curabitur sollicitudin id tortor a luctus. Etiam ipsum
-            urna, rhoncus non lectus sed, scelerisque facilisis ligula. Quisque rutrum, nunc nec
-            semper viverra, purus dolor mattis dui, sit amet placerat nisi libero in augue. Mauris
-            egestas, velit vel tincidunt ornare, nibh justo bibendum felis, dapibus semper lectus
-            tellus sit amet metus. Vestibulum egestas eros eu aliquam ultricies.
-          </p>
-
-          <p>
-            Pellentesque dictum euismod nulla a posuere. Mauris ullamcorper dolor ante. Sed in
-            ligula eget tortor aliquet dapibus et eleifend nibh. Donec a accumsan metus, eget
-            pharetra ligula. Nullam fermentum turpis eget velit rhoncus vestibulum. Integer rutrum
-            arcu quis condimentum varius. Donec aliquam hendrerit quam vel scelerisque. Nunc vel
-            orci aliquet, gravida ex nec, dapibus nunc. Nullam gravida tellus ut ante tempus
-            tristique. Etiam interdum molestie eros, ac semper ipsum. Duis et tellus dictum, tempus
-            dui vel, viverra diam. Maecenas a metus nec velit luctus volutpat. Donec luctus, ligula
-            ac sagittis lobortis, leo est egestas eros, sit amet blandit tellus ipsum vitae turpis.
-          </p>
-        </div>
+          <p>Dengan ini:</p>
+          <ol class="list-decimal pl-4">
+            <li>
+              Mengajukan permohonan keikutsertaan untuk menjadi penyedia barang/jasa dalam sistem
+              E-Procurement PT Arya Noble yang selanjutnya dalam surat pernyataan ini disebut
+              sebagai vendor.
+            </li>
+            <li>
+              Bersedia memberikan segala dokumen dan informasi yang benar, masih berlaku, dan sah
+              secara hukum dari Perusahaan. Bilamana dikemudian hari ditemukan bahwa dokumen dan
+              informasi yang kami berikan tidak benar dan tidak sah, maka kami bersedia dikenakan
+              sanksi moral dan sanksi administrasi, dikeluarkan dari “Daftar Vendor” dalam sistem
+              E-Procurement PT Arya Noble, serta dituntut ganti rugi dan/atau pidana sesuai dengan
+              ketentuan dan peraturan perundang-undangan yang berlaku.
+            </li>
+            <li>
+              Bersedia mematuhi dan melaksanakan persyaratan, ketentuan, prosedur maupun instruksi
+              yang berlaku bagi vendor.
+            </li>
+            <li>Mengakui integritas proses E-Procurement PT Arya Noble.</li>
+            <li>
+              Bersedia berpartisipasi atau turut serta dalam proses tender yang dilaksanakan melalui
+              sistem E-Procurement PT Arya Noble.
+            </li>
+            <li>
+              Menyetujui bahwa user ID dan password yang diperoleh merupakan representasi vendor
+              atas segala aktivitas dalam sistem E-Procurement PT Arya Noble.
+            </li>
+            <li>
+              Sebagai vendor bertanggung jawab untuk menjaga kerahasiaan user ID dan password, serta
+              bertanggung jawab penuh untuk semua aktivitas yang dilakukan dengan menggunakan user
+              ID dan password yang dimaksud.
+            </li>
+            <li>
+              Membebaskan PT Arya Noble beserta para stafnya dari:
+              <ul class="list-disc pl-4">
+                <li>Setiap penyalahgunaan user ID dan password dari vendor.</li>
+                <li>
+                  Setiap kerusakan dan/atau kerugian baik langsung maupun tidak langsung, namun
+                  tidak terbatas pada kehilangan keuntungan, kegunaan data, atau kerugian
+                  non-material yang ditimbulkan oleh:
+                  <ul class="list-disc pl-4">
+                    <li>Penggunaan atau ketidakmampuan menggunakan sistem.</li>
+                    <li>Penggunaan akses yang tidak sah maupun pengiriman data.</li>
+                    <li>Pernyataan atau tindakan dari pihak ketiga dalam sistem.</li>
+                    <li>Hal-hal yang berhubungan dengan sistem.</li>
+                  </ul>
+                </li>
+                <li>
+                  Setiap tuntutan dari pihak ketiga sehubungan dengan proses e-procurement dan atau
+                  keterangan/dokumen yang dimasukkan oleh vendor ke dalam sistem atau melalui
+                  sistem.
+                </li>
+                <li>
+                  Setiap penggunaan dan/atau penyambungan sistem di luar ketentuan oleh vendor.
+                </li>
+                <li>
+                  Setiap pelanggaran atas Syarat dan Ketentuan serta instruksi-instruksi dari PT
+                  Arya Noble atau pelanggaran terhadap hak-hak pihak lain.
+                </li>
+                <li>
+                  Kegagalan pelaksanaan sistem E-Procurement yang disebabkan oleh keadaan kahar
+                  (force majeure) yaitu sesuatu yang di luar kekuasaan PT Arya Noble dan termasuk
+                  juga namun tidak terbatas pada bencana alam, pemogokan, huru-hara, perang,
+                  penyakit menular, peraturan-peraturan pemerintah yang diterapkan setelah kejadian,
+                  kebakaran, kegagalan/kerusakan saluran telekomunikasi, ketiadaan tenaga listrik,
+                  gempa bumi, atau kejadian-kejadian malapetaka lainnya.
+                </li>
+              </ul>
+            </li>
+            <li>
+              Bersedia terikat dan menghargai seluruh proses yang berjalan beserta dokumen yang
+              sudah diserahkan selama kegiatan E-Procurement.
+            </li>
+            <li>
+              Bersedia untuk tidak membuka, mengeluarkan maupun memberikan setiap informasi dan data
+              kepada pihak ketiga, dan/atau penggunaannya dengan cara bagaimanapun oleh vendor baik
+              langsung maupun tidak langsung terhadap setiap informasi dan data yang berhubungan
+              dengan kegiatan E-Procurement PT Arya Noble.
+            </li>
+            <li>
+              Vendor sebagai pemilik user ID dan password mengakui bahwa pengiriman data/penawaran
+              yang dilakukan melalui sistem E-Procurement PT Arya Noble merupakan proses yang sah
+              secara hukum.
+            </li>
+            <li>
+              Mengakui bahwa data dan/atau catatan-catatan yang valid dan sah untuk dasar evaluasi
+              proses tender adalah data dan/atau catatan-catatan yang terekam (recorded) di dalam
+              server sistem E-Procurement PT Arya Noble.
+            </li>
+          </ol>
+        </div> -->
+        <div
+          class="term-condition card-body flex flex-col gap-4 scrollable h-[635px] py-0 my-4 pr-4 mr-2"
+          v-html="termCondition?.termCondition"
+        ></div>
       </div>
 
       <UiCheckbox
@@ -238,6 +282,7 @@ const vendorMasterDataStore = useVendorMasterDataStore()
 const paymentDetail = computed(() => registrationVendorStore.paymentDetail)
 const paymentDetailFlagging = computed(() => registrationVendorStore.paymentDetailFlagging)
 
+const termCondition = computed(() => vendorMasterDataStore.termCondition)
 const bankList = computed(() => vendorMasterDataStore.bankList)
 const currencyList = computed(() =>
   vendorMasterDataStore.currencyList.map((item) => ({
@@ -275,6 +320,7 @@ const uploadFile = async (
 }
 
 onMounted(async () => {
+  await vendorMasterDataStore.getVendorTermCondition()
   await vendorMasterDataStore.getVendorBanks()
   await vendorMasterDataStore.getVendorCurrency()
 })
