@@ -36,16 +36,16 @@ watch(
     </div>
     <div
       v-if="administrasiStore.loading"
-      class="flex items-center justify-center text-xl text-primary"
+      class="flex items-center justify-center text-xl text-primary py-5"
     >
       <UiIcon name="abstract-33" variant="duotone" class="animate-spin" />
     </div>
-    <div v-else-if="administrasiStore.error" class="flex items-center justify-center">
+    <div v-else-if="administrasiStore.error" class="flex items-center justify-center py-5">
       <span class="text-sm text-red-500 font-medium">
         {{ administrasiStore.error }}
       </span>
     </div>
-    <div v-else-if="!administrasiStore.data.length" class="flex items-center justify-center">
+    <div v-else-if="!administrasiStore.data.length" class="flex items-center justify-center py-5">
       <span class="text-sm font-medium"> Oops! Data tidak ditemukan </span>
     </div>
     <template v-else>

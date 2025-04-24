@@ -21,19 +21,19 @@ watch(
       <div class="card-title">Payment Information</div>
     </div>
     <div class="card-body">
-      <div v-if="paymentStore.loading" class="flex items-center justify-center">
+      <div v-if="paymentStore.loading" class="flex items-center justify-center py-5">
         <span class="text-xl text-primary">
           <UiIcon name="abstract-33" variant="duotone" class="animate-spin" />
         </span>
       </div>
 
-      <div v-else-if="paymentStore.error" class="flex items-center justify-center">
+      <div v-else-if="paymentStore.error" class="flex items-center justify-center py-5">
         <span class="text-red-500 font-medium">
           {{ paymentStore.error }}
         </span>
       </div>
 
-      <div v-else-if="!paymentStore.data.length" class="flex items-center justify-center">
+      <div v-else-if="!paymentStore.data.length" class="flex items-center justify-center py-5">
         <span class="text-gray-700 font-medium"> Oops! Data tidak ditemukan </span>
       </div>
 
