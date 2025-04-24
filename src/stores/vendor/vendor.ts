@@ -1,7 +1,7 @@
 import vendorAPI from '@/core/utils/vendorAPI'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { IAdministration, ILicense, IVendorContent } from './types/vendor'
+import type { IAdministration, ILicense, IPayment, IVendorContent } from './types/vendor'
 import type { ApiResponse } from '@/core/type/api'
 
 export const useVendorStore = defineStore('vendor', () => {
@@ -111,4 +111,39 @@ export const useVendorIzinUsahaStore = defineStore('vendor-izin-usaha', () => {
   return { data, loading, error, getData }
 })
 
-export const useVendorPaymentStore = defineStore('vendor-payment', () => {})
+export const useVendorPaymentStore = defineStore('vendor-payment', () => {
+  const loading = ref(false)
+  const error = ref<string | null>(null)
+  const data = ref<IPayment[]>([])
+
+  const getData = async (vendorId: string) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const response: ApiResponse<IPayment[]> = await vendorAPI.get(
+        '/public/verifiedvendor/getbanklist',
+        {
+          params: { vendorId },
+        },
+      )
+
+      if (response.data.statusCode === 200) {
+        data.value = response.data.result.content
+      } else {
+        error.value = response.data.result.message
+        loading.value = false
+      }
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        error.value = err.message
+      } else {
+        error.value = 'Failed to get data'
+      }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  return { data, loading, error, getData }
+})

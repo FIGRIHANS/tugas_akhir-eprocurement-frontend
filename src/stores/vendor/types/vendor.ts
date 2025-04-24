@@ -73,3 +73,36 @@ export interface ILicense {
   licenseName: string
   isNominal: boolean
 }
+
+export interface IPayment {
+  id: number
+  vendorId: number
+  accountNo: string
+  accountName: string
+  bankId: number
+  currencyId: string
+  urlDoc: string
+  isTemporary: null | string
+  action: null | string
+  bankAddress: string
+  countryId: number
+  isTransfer: boolean
+  changeRequestId: null | string
+  isActive: null | string
+  bankCountryCode: string
+  bankCode: string
+  bankName: string
+  bankSwiftCode: string
+  partnerBankType: string
+  bankBankAddress: string
+  bankCity: string
+  branch: string
+  bankLogIntegration: string
+  bankDateIntegration: string
+  biCode: string
+  currencySymbol: string
+  currencyLabel: string
+  countryCode: string
+  countryName: string
+  countryPhonePrefix: string
+}
