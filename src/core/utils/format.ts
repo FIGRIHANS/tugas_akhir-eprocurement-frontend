@@ -25,3 +25,10 @@ export function mysqlFormat(dateRef: Ref<Date | null>) {
 export const formatDate = (date: Date) => {
   return new Intl.DateTimeFormat('id', { dateStyle: 'long' }).format(date)
 }
+
+export const formattoMySQL = (date: Date) => {
+  const y = date.getFullYear()
+  const m = pad(date.getMonth() + 1)
+  const d = pad(date.getDate())
+  return `${y}-${m}-${d}`
+}

@@ -1,40 +1,47 @@
 <script lang="ts" setup>
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
-import { onMounted, reactive, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import FilterDropdown from './filterDropdown/FilterDropdown.vue'
 import { useVendorCategoryStore } from '@/stores/vendor/category'
-import { mysqlFormat } from '@/core/utils/format'
+import { useApprovalStatusStore } from '@/stores/vendor/reference'
+import { formattoMySQL } from '@/core/utils/format'
 
 const route = useRoute()
 const categories = useVendorCategoryStore()
+const verifStatus = useApprovalStatusStore()
 
 const startDate = ref<Date | null>(null)
 const endDate = ref<Date | null>(null)
 
 const filters = reactive({
-  ApprovalStatusName: '',
+  status: '',
   categoryId: '',
-  startDate: mysqlFormat(startDate),
-  endDate: mysqlFormat(endDate),
+  startDate: computed(() => (startDate.value ? formattoMySQL(startDate.value) : '')),
+  endDate: computed(() => (endDate.value ? formattoMySQL(endDate.value) : '')),
 })
 
 watch(
   () => route.query,
   (query) => {
-    filters.ApprovalStatusName = (query.ApprovalStatusName as string) || ''
+    filters.status = (query.status as string) || ''
     filters.categoryId = (query.CompanyCategoryName as string) || ''
-    startDate.value = new Date(query.startDate as string) ?? null
-    endDate.value = new Date(query.endDate as string) ?? null
+    startDate.value = query.startDate ? new Date(query.startDate as string) : null
+    endDate.value = query.endDate ? new Date(query.endDate as string) : null
   },
 )
 
-onMounted(categories.getCategories)
+onMounted(() => {
+  categories.getCategories()
+  verifStatus.getStatus()
+})
 </script>
 <template>
   <FilterDropdown :filters="filters">
-    <UiSelect label="Status" placeholder="Pilih" v-model="filters.ApprovalStatusName">
-      <option>Pilih</option>
+    <UiSelect label="Status" placeholder="Pilih" v-model="filters.status">
+      <option v-for="item in verifStatus.approvalStatus" :key="item.code" :value="item.value">
+        {{ item.value }}
+      </option>
     </UiSelect>
     <UiSelect label="Categori" placeholder="Pilih" v-model="filters.categoryId">
       <option

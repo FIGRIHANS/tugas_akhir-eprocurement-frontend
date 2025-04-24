@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import FilterDropdown from './filterDropdown/FilterDropdown.vue'
 import UiSelect from '../ui/atoms/select/UiSelect.vue'
 import { useRoute } from 'vue-router'
 import { useApprovalStatusStore, useApprovalTypeStore } from '@/stores/vendor/reference'
 import { useVendorCategoryStore } from '@/stores/vendor/category'
 import { useBusinessFieldStore } from '@/stores/vendor/businessField'
-import { mysqlFormat } from '@/core/utils/format'
+import { formattoMySQL } from '@/core/utils/format'
 
 const route = useRoute()
 
@@ -20,7 +20,7 @@ const filters = reactive({
   ApprovalStatusName: '',
   CompanyCategoryName: '',
   // BusinessFieldName: '',
-  SendApprovalDate: mysqlFormat(approvalDate),
+  SendApprovalDate: computed(() => (approvalDate.value ? formattoMySQL(approvalDate.value) : '')),
   ApprovalTypeName: '',
 })
 
