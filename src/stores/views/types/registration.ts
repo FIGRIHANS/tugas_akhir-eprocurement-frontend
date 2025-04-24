@@ -89,28 +89,28 @@ export type DocumentAndLegalType = {
 }
 
 export type PaymentDetailType = {
-  noRekening: string
-  noRekeningError?: boolean
-  namaPemilikAkun: string
-  namaPemilikAkunError?: boolean
+  accountNo: string
+  accountNoError?: boolean
+  accountName: string
+  accountNameError?: boolean
   perbedaanRekening: string
   perbedaanRekeningError?: boolean
   halamanPertama: string
   halamanPertamaError?: boolean
   suratPernyataan: string
   suratPernyataanError?: boolean
-  mataUang: number
-  mataUangError?: boolean
-  bankKey: string
-  bankKeyError?: boolean
-  namaBank: string
-  namaBankError?: boolean
-  cabangBank: string
-  cabangBankError?: boolean
+  currencyId: number
+  currencyIdError?: boolean
+  bankId: string
+  bankIdError?: boolean
+  bankName: string
+  bankNameError?: boolean
+  branch: string
+  branchError?: boolean
   swiftCode: string
   swiftCodeError?: boolean
-  alamatBank: string
-  alamatBankError?: boolean
+  bankAddress: string
+  bankAddressError?: boolean
 }
 
 export type PaymentDetailFlaggingType = {

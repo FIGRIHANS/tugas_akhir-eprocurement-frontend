@@ -349,8 +349,8 @@ const checkIsRequired = (licenseId: number) => {
   )
 }
 
-onMounted(async () => {
-  await vendorMasterDataStore.getVendorCompanyCategory()
+onMounted(() => {
+  vendorMasterDataStore.getVendorCompanyCategory()
 })
 
 watch(

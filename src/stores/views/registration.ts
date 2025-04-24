@@ -74,17 +74,17 @@ export const useRegistrationVendorStore = defineStore('registrationVendor', () =
   })
 
   const paymentDetail = ref<PaymentDetailType>({
-    noRekening: '',
-    namaPemilikAkun: '',
+    accountNo: '',
+    accountName: '',
     perbedaanRekening: '',
     halamanPertama: '',
     suratPernyataan: '',
-    mataUang: 0,
-    bankKey: '',
-    namaBank: '',
-    cabangBank: '',
+    currencyId: 0,
+    bankId: '',
+    bankName: '',
+    branch: '',
     swiftCode: '',
-    alamatBank: '',
+    bankAddress: '',
   })
 
   const paymentDetailFlagging = ref<PaymentDetailFlaggingType>({

@@ -267,7 +267,7 @@ const displayPosition = (value: number) => {
   return positionList.value.find((item) => item.positionTypeId === value)?.positionName
 }
 
-onMounted(async () => {
-  await vendorMasterDataStore.getVendorPosition()
+onMounted(() => {
+  vendorMasterDataStore.getVendorPosition()
 })
 </script>

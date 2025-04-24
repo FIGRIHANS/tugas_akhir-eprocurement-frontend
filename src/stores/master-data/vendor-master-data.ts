@@ -173,12 +173,12 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
     return response.data.result
   }
 
-  const getVendorCompanyLicense = async (companyId: number) => {
+  const getVendorCompanyLicense = async (categoryId: number) => {
     const response: ApiResponse<CompanyLicenseType> = await vendorApi.get(
       `${baseUrl}/company-license`,
       {
         params: {
-          companyId,
+          categoryId,
         },
       },
     )

@@ -98,7 +98,7 @@ const checkFieldNotEmpty = () => {
       account: ['username', 'email', 'password', 'confirmPassword', 'phone'],
     },
     document: ['licenseNo', 'issuedDate', 'expiredDate', 'uploadUrl'],
-    payment: ['noRekening', 'namaPemilikAkun', 'suratPernyataan', 'mataUang', 'alamatBank'],
+    payment: ['accountNo', 'accountName', 'suratPernyataan', 'currencyId', 'bankAddress'],
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -176,9 +176,9 @@ const checkFieldNotEmpty = () => {
       }
 
       if (registrationVendorStore.paymentDetailFlagging.bankNotRegistered) {
-        fields.payment.push('namaBank', 'cabangBank', 'swiftCode')
+        fields.payment.push('bankName', 'branch', 'swiftCode')
       } else {
-        fields.payment.push('bankKey')
+        fields.payment.push('bankId')
       }
 
       registrationVendorStore.paymentDetail = {
@@ -192,10 +192,10 @@ const checkFieldNotEmpty = () => {
       }
 
       if (registrationVendorStore.paymentDetailFlagging.bankNotRegistered) {
-        registrationVendorStore.paymentDetail.bankKeyError = false
+        registrationVendorStore.paymentDetail.bankIdError = false
       } else {
-        registrationVendorStore.paymentDetail.namaBankError = false
-        registrationVendorStore.paymentDetail.cabangBankError = false
+        registrationVendorStore.paymentDetail.bankNameError = false
+        registrationVendorStore.paymentDetail.branchError = false
         registrationVendorStore.paymentDetail.swiftCodeError = false
       }
 
@@ -229,6 +229,8 @@ const next = () => {
   const information = registrationVendorStore.information
   const contact = registrationVendorStore.contact
   const documentAndLegal = registrationVendorStore.documentAndLegal
+  const paymentDetail = registrationVendorStore.paymentDetail
+  const isBankNotRegistered = registrationVendorStore.paymentDetailFlagging.bankNotRegistered
 
   const payload = {
     account: {
@@ -251,6 +253,21 @@ const next = () => {
     vendorResponsibleContacts: contact.contactPerson.list,
     vendorLicenses: removeErrorFields(documentAndLegal.fields),
     otherDocuments: removeErrorFields(documentAndLegal.anotherDocuments),
+    bankDetailDto: {
+      bankName: isBankNotRegistered ? paymentDetail.bankName : '',
+      branch: isBankNotRegistered ? paymentDetail.branch : '',
+      swiftCode: isBankNotRegistered ? paymentDetail.swiftCode : '',
+      address: isBankNotRegistered ? paymentDetail.bankAddress : '',
+    },
+    vendorBankDetail: {
+      accountNo: paymentDetail.accountNo,
+      accountName: paymentDetail.accountName,
+      bankId: paymentDetail.bankId,
+      currencyId: paymentDetail.currencyId,
+      urlDoc: paymentDetail.suratPernyataan,
+      bankAddress: paymentDetail.bankAddress,
+      countryId: 0,
+    },
   }
 
   console.log(payload)

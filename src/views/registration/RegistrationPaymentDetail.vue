@@ -8,22 +8,22 @@
 
         <div class="card-body flex flex-col gap-6">
           <UiInput
-            v-model="paymentDetail.noRekening"
+            v-model="paymentDetail.accountNo"
             label="No Rekening"
             placeholder="Masukkan no rekening"
             row
             required
-            :error="paymentDetail.noRekeningError"
+            :error="paymentDetail.accountNoError"
           />
 
           <div class="flex flex-col gap-6">
             <UiInput
-              v-model="paymentDetail.namaPemilikAkun"
+              v-model="paymentDetail.accountName"
               label="Nama Pemilik Akun"
               placeholder="Nama lengkap sesuai buku tabungan"
               row
               required
-              :error="paymentDetail.namaPemilikAkunError"
+              :error="paymentDetail.accountNameError"
             />
 
             <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5">
@@ -62,17 +62,17 @@
             :error="paymentDetail.suratPernyataanError"
           />
           <UiSelect
-            v-model="paymentDetail.mataUang"
+            v-model="paymentDetail.currencyId"
             label="Mata Uang"
             placeholder="Pilih"
             row
             required
             :options="currencyList"
-            :error="paymentDetail.mataUangError"
+            :error="paymentDetail.currencyIdError"
           />
           <div class="flex flex-col gap-6">
             <UiSelect
-              v-model="paymentDetail.bankKey"
+              v-model="paymentDetail.bankId"
               label="Bank Key"
               placeholder="Pilih"
               row
@@ -81,7 +81,7 @@
               textKey="bankName"
               :required="!paymentDetailFlagging.bankNotRegistered"
               :disabled="paymentDetailFlagging.bankNotRegistered"
-              :error="paymentDetail.bankKeyError"
+              :error="paymentDetail.bankIdError"
             />
 
             <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5">
@@ -94,21 +94,21 @@
           </div>
           <UiInput
             v-if="paymentDetailFlagging.bankNotRegistered"
-            v-model="paymentDetail.namaBank"
+            v-model="paymentDetail.bankName"
             label="Nama Bank"
             placeholder="Nama Bank"
             row
             required
-            :error="paymentDetail.namaBankError"
+            :error="paymentDetail.bankNameError"
           />
           <UiInput
             v-if="paymentDetailFlagging.bankNotRegistered"
-            v-model="paymentDetail.cabangBank"
+            v-model="paymentDetail.branch"
             label="Cabang Bank"
             placeholder="Cabang Bank"
             row
             required
-            :error="paymentDetail.cabangBankError"
+            :error="paymentDetail.branchError"
           />
           <UiInput
             v-if="paymentDetailFlagging.bankNotRegistered"
@@ -120,12 +120,12 @@
             :error="paymentDetail.swiftCodeError"
           />
           <UiInput
-            v-model="paymentDetail.alamatBank"
+            v-model="paymentDetail.bankAddress"
             label="Alamat Bank"
             placeholder="Jl. ABC..."
             row
             required
-            :error="paymentDetail.alamatBankError"
+            :error="paymentDetail.bankAddressError"
           />
         </div>
       </div>
@@ -313,6 +313,8 @@ const uploadFile = async (
 
     if (type === 'statement letter') {
       registrationVendorStore.paymentDetail.suratPernyataan = response.url
+      console.log(response)
+      console.log(registrationVendorStore.paymentDetail.suratPernyataan)
     }
   } catch (error) {
     console.error(error)
