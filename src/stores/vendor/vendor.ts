@@ -75,3 +75,20 @@ export const useVendorAdministrationStore = defineStore('vendor-administration',
 
   return { data, loading, error, getData }
 })
+
+export const useVendorIzinUsahaStore = defineStore('vendor-izin-usaha', () => {
+  const loading = ref(false)
+  const error = ref<string | null>(null)
+  const data = ref<IAdministration[]>([])
+
+  const getData = async (vendorId: string) => {
+    const response = await vendorAPI.get('/public/vendor/registration/license', {
+      params: { vendorId },
+    })
+    console.log(response.data)
+  }
+
+  return { data, loading, error, getData }
+})
+
+export const useVendorPaymentStore = defineStore('vendor-payment', () => {})

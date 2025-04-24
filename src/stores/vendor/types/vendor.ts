@@ -11,11 +11,19 @@ export interface IVendorList {
   npwp: string
   npwpUrl: string
   foundedDate: string
-  companyScale: string | null
+  companyScale: null | string
   verificationRemark: string
+  approvalStatus: string
+  isActive: boolean
+  isVerified: number
+  activedUTCDate: string
+  verifiedUTCDate: string
+  verifiedSendUTCDate: null | string
+  verifiedRejectedUTCDate: string
+  sendApprovalDate: string | null
   licenses: {
     licenseName: string
-    expiredUTCDate: string | null
+    expiredUTCDate: null | string
   }[]
   createdBy: string
   createdUTCDate: string

@@ -121,15 +121,27 @@ watch(
               <td>
                 <div class="flex items-center gap-3">
                   <VendorMenu :id="vendor.vendorId" />
-                  <StatusToggle :id="vendor.vendorId" :status="true" />
+                  <StatusToggle :id="vendor.vendorId" :status="vendor.isActive" />
                 </div>
               </td>
               <td class="text-nowrap">{{ vendor.vendorName }}</td>
-              <td>-</td>
+              <td>
+                <UiButton
+                  v-if="Boolean(vendor.isVerified)"
+                  :outline="true"
+                  size="sm"
+                  variant="success"
+                >
+                  Terverifikasi
+                </UiButton>
+                <UiButton v-else :outline="true" size="sm" variant="warning">
+                  <span class="text-nowrap">Proses Verifikasi</span>
+                </UiButton>
+              </td>
               <td>{{ vendor.companyCategoryName }}</td>
               <td>{{ formatDate(new Date(vendor.createdUTCDate)) }}</td>
-              <td>-</td>
-              <td>-</td>
+              <td>{{ formatDate(new Date(vendor.verifiedSendUTCDate as string)) }}</td>
+              <td>{{ formatDate(new Date(vendor.verifiedUTCDate)) }}</td>
               <td>
                 <div v-for="(license, index) in vendor.licenses" :key="license.licenseName">
                   {{ index + 1 }}. {{ license.licenseName }} :
