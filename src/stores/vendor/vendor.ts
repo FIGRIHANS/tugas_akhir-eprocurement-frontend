@@ -1,7 +1,7 @@
 import vendorAPI from '@/core/utils/vendorAPI'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { IAdministration, IVendorContent } from './types/vendor'
+import type { IAdministration, ILicense, IVendorContent } from './types/vendor'
 import type { ApiResponse } from '@/core/type/api'
 
 export const useVendorStore = defineStore('vendor', () => {
@@ -59,7 +59,6 @@ export const useVendorAdministrationStore = defineStore('vendor-administration',
           params: { vendorId },
         },
       )
-      console.log(response.data)
 
       data.value = response.data.result.content
     } catch (err) {
@@ -79,13 +78,34 @@ export const useVendorAdministrationStore = defineStore('vendor-administration',
 export const useVendorIzinUsahaStore = defineStore('vendor-izin-usaha', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
-  const data = ref<IAdministration[]>([])
+  const data = ref<ILicense[]>([])
 
   const getData = async (vendorId: string) => {
-    const response = await vendorAPI.get('/public/vendor/registration/license', {
-      params: { vendorId },
-    })
-    console.log(response.data)
+    loading.value = true
+    error.value = null
+    try {
+      const response: ApiResponse<ILicense[]> = await vendorAPI.get(
+        '/public/vendor/registration/license',
+        {
+          params: { vendorId },
+        },
+      )
+
+      if (response.data.statusCode === 200) {
+        data.value = response.data.result.content
+      } else {
+        error.value = response.data.result.message
+        loading.value = false
+      }
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        error.value = err.message
+      } else {
+        error.value = 'Failed to get data'
+      }
+    } finally {
+      loading.value = false
+    }
   }
 
   return { data, loading, error, getData }

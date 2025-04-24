@@ -57,3 +57,19 @@ export interface IAdministration {
   currencyLabel: string
   currencySymbol: string
 }
+
+export interface ILicense {
+  vendorId: number
+  licenseId: number
+  licenseNo: string
+  issuedUTCDate: null | string
+  expiredUTCDate: null | string
+  issuedBy: null | string
+  issuedLocation: null | string
+  documentUrl: string
+  remark: null | string
+  action: null | string
+  isTemporary: null | string
+  licenseName: string
+  isNominal: boolean
+}
