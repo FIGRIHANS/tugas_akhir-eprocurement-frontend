@@ -34,8 +34,11 @@ watch(
         <span>Export Data</span>
       </UiButton>
     </div>
-    <div v-if="administrasiStore.loading" class="flex items-center justify-center">
-      <UiIcon name="spinner" variant="duotone" class="animate-spin" />
+    <div
+      v-if="administrasiStore.loading"
+      class="flex items-center justify-center text-xl text-primary"
+    >
+      <UiIcon name="abstract-33" variant="duotone" class="animate-spin" />
     </div>
     <template v-else>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
