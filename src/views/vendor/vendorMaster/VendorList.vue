@@ -37,9 +37,11 @@ const handlePageChange = (page: number) => {
   router.replace({ query })
 }
 
-const isExpired = (date: Date) => {
+const isExpired = (date: null | string) => {
+  if (!date) return '-'
   const now = new Date()
-  if (date < now) return 'Expired'
+  const expiredDate = new Date(date)
+  if (expiredDate < now) return 'Expired'
   return 'Masih Berlaku'
 }
 
@@ -139,13 +141,27 @@ watch(
                 </UiButton>
               </td>
               <td>{{ vendor.companyCategoryName }}</td>
-              <td>{{ formatDate(new Date(vendor.createdUTCDate)) }}</td>
-              <td>{{ formatDate(new Date(vendor.verifiedSendUTCDate as string)) }}</td>
-              <td>{{ formatDate(new Date(vendor.verifiedUTCDate)) }}</td>
               <td>
-                <div v-for="(license, index) in vendor.licenses" :key="license.licenseName">
+                {{ vendor.createdUTCDate ? formatDate(new Date(vendor.createdUTCDate)) : '-' }}
+              </td>
+              <td>
+                {{
+                  vendor.verifiedSendUTCDate
+                    ? formatDate(new Date(vendor.verifiedSendUTCDate as string))
+                    : '-'
+                }}
+              </td>
+              <td>
+                {{ vendor.verifiedUTCDate ? formatDate(new Date(vendor.verifiedUTCDate)) : '-' }}
+              </td>
+              <td>
+                <div
+                  v-for="(license, index) in vendor.licenses"
+                  :key="license.licenseName"
+                  class="text-nowrap"
+                >
                   {{ index + 1 }}. {{ license.licenseName }} :
-                  {{ isExpired(new Date(license.expiredUTCDate as string)) }}
+                  {{ isExpired(license.expiredUTCDate) }}
                 </div>
               </td>
               <td>{{ vendor.vendorId }}</td>
