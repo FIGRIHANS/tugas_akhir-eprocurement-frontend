@@ -40,6 +40,14 @@ watch(
     >
       <UiIcon name="abstract-33" variant="duotone" class="animate-spin" />
     </div>
+    <div v-else-if="administrasiStore.error" class="flex items-center justify-center">
+      <span class="text-sm text-red-500 font-medium">
+        {{ administrasiStore.error }}
+      </span>
+    </div>
+    <div v-else-if="!administrasiStore.data.length" class="flex items-center justify-center">
+      <span class="text-sm font-medium"> Oops! Data tidak ditemukan </span>
+    </div>
     <template v-else>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div class="card-table border">
