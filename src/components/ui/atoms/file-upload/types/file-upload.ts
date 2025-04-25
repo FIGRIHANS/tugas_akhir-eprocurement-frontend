@@ -1,5 +1,5 @@
 export interface IFileUploadProps {
-  name?: string
+  name: string
   label?: string
   placeholder?: string
   disabled?: boolean

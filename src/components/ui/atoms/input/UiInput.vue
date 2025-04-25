@@ -28,7 +28,7 @@
       :placeholder="placeholder"
       :readonly="readonly"
       :disabled="disabled"
-      type="text"
+      :type="type"
     />
   </div>
 </template>
@@ -44,6 +44,7 @@ withDefaults(defineProps<IInputProps>(), {
   row: false,
   required: false,
   error: false,
+  type: 'text',
 })
 
 const model = defineModel()

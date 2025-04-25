@@ -38,7 +38,6 @@ import { computed, ref } from 'vue'
 import type { IFileUploadProps } from './types/file-upload'
 
 const props = withDefaults(defineProps<IFileUploadProps>(), {
-  name: 'upload-file',
   placeholder: '',
   disabled: false,
   required: false,
