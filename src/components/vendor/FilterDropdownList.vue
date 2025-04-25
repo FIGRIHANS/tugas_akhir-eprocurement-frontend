@@ -4,12 +4,12 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import FilterDropdown from './filterDropdown/FilterDropdown.vue'
 import { useVendorCategoryStore } from '@/stores/vendor/category'
-import { useApprovalStatusStore } from '@/stores/vendor/reference'
+import { useApprovalTypeStore } from '@/stores/vendor/reference'
 import { formattoMySQL } from '@/core/utils/format'
 
 const route = useRoute()
 const categories = useVendorCategoryStore()
-const verifStatus = useApprovalStatusStore()
+const verifStatus = useApprovalTypeStore()
 
 const startDate = ref<Date | null>(null)
 const endDate = ref<Date | null>(null)
@@ -33,13 +33,13 @@ watch(
 
 onMounted(() => {
   categories.getCategories()
-  verifStatus.getStatus()
+  verifStatus.getType()
 })
 </script>
 <template>
   <FilterDropdown :filters="filters">
     <UiSelect label="Status" placeholder="Pilih" v-model="filters.status">
-      <option v-for="item in verifStatus.approvalStatus" :key="item.code" :value="item.value">
+      <option v-for="item in verifStatus.approvalType" :key="item.code" :value="item.code">
         {{ item.value }}
       </option>
     </UiSelect>

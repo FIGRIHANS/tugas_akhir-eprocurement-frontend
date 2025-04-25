@@ -136,8 +136,8 @@ watch(
                 >
                   Terverifikasi
                 </UiButton>
-                <UiButton v-else :outline="true" size="sm" variant="warning">
-                  <span class="text-nowrap">Proses Verifikasi</span>
+                <UiButton v-else :outline="true" size="sm" variant="secondary">
+                  <span class="text-nowrap">Belum Verifikasi</span>
                 </UiButton>
               </td>
               <td>{{ vendor.companyCategoryName }}</td>
