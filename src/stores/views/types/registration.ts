@@ -93,10 +93,10 @@ export type PaymentDetailType = {
   accountNoError?: boolean
   accountName: string
   accountNameError?: boolean
-  perbedaanRekening: string
-  perbedaanRekeningError?: boolean
-  halamanPertama: string
-  halamanPertamaError?: boolean
+  urlAccountDifferences: string
+  urlAccountDifferencesError?: boolean
+  urlFirstPage: string
+  urlFirstPageError?: boolean
   suratPernyataan: string
   suratPernyataanError?: boolean
   currencyId: number

@@ -52,6 +52,13 @@ const route = useRoute()
 const router = useRouter()
 
 const registrationVendorStore = useRegistrationVendorStore()
+const information = computed(() => registrationVendorStore.information)
+const contact = computed(() => registrationVendorStore.contact)
+const documentAndLegal = computed(() => registrationVendorStore.documentAndLegal)
+const paymentDetail = computed(() => registrationVendorStore.paymentDetail)
+const isBankNotRegistered = computed(
+  () => registrationVendorStore.paymentDetailFlagging.bankNotRegistered,
+)
 
 const tab = reactive({
   active: 'registration__information',
@@ -172,7 +179,7 @@ const checkFieldNotEmpty = () => {
       const section = registrationVendorStore.paymentDetail
 
       if (registrationVendorStore.paymentDetailFlagging.isNotSameAsCompany) {
-        fields.payment.push('perbedaanRekening', 'halamanPertama')
+        fields.payment.push('urlAccountDifferences', 'urlFirstPage')
       }
 
       if (registrationVendorStore.paymentDetailFlagging.bankNotRegistered) {
@@ -187,16 +194,28 @@ const checkFieldNotEmpty = () => {
       }
 
       if (!registrationVendorStore.paymentDetailFlagging.isNotSameAsCompany) {
-        registrationVendorStore.paymentDetail.perbedaanRekeningError = false
-        registrationVendorStore.paymentDetail.halamanPertamaError = false
+        registrationVendorStore.paymentDetail = {
+          ...registrationVendorStore.paymentDetail,
+          urlAccountDifferences: '',
+          urlAccountDifferencesError: false,
+          urlFirstPage: '',
+          urlFirstPageError: false,
+        }
       }
 
       if (registrationVendorStore.paymentDetailFlagging.bankNotRegistered) {
+        registrationVendorStore.paymentDetail.bankId = ''
         registrationVendorStore.paymentDetail.bankIdError = false
       } else {
-        registrationVendorStore.paymentDetail.bankNameError = false
-        registrationVendorStore.paymentDetail.branchError = false
-        registrationVendorStore.paymentDetail.swiftCodeError = false
+        registrationVendorStore.paymentDetail = {
+          ...registrationVendorStore.paymentDetail,
+          bankName: '',
+          bankNameError: false,
+          branch: '',
+          branchError: false,
+          swiftCode: '',
+          swiftCodeError: false,
+        }
       }
 
       return !Object.values(registrationVendorStore.paymentDetail).some((value) => value === true)
@@ -226,52 +245,49 @@ const previous = () => {
 const next = () => {
   const index = tabPosition.value + 1
 
-  const information = registrationVendorStore.information
-  const contact = registrationVendorStore.contact
-  const documentAndLegal = registrationVendorStore.documentAndLegal
-  const paymentDetail = registrationVendorStore.paymentDetail
-  const isBankNotRegistered = registrationVendorStore.paymentDetailFlagging.bankNotRegistered
-
-  const payload = {
-    account: {
-      userName: contact.account.username,
-      email: contact.account.email,
-      password: contact.account.password,
-    },
-    vendor: {
-      ...removeErrorFields(information.vendor),
-      categoryId: 0,
-      vendorEmail: contact.account.email,
-      vendorPhone: contact.account.phone,
-      vendorWebsite: contact.account.website,
-    },
-    companyLocation: removeErrorFields(information.companyLocation),
-    vendorLocation: removeErrorFields(information.vendorLocation),
-    vendorCommodities: information.vendorCommodities.list.map((item) => ({
-      subBusinessFieldId: item.subBusinessFieldId,
-    })),
-    vendorResponsibleContacts: contact.contactPerson.list,
-    vendorLicenses: removeErrorFields(documentAndLegal.fields),
-    otherDocuments: removeErrorFields(documentAndLegal.anotherDocuments),
-    bankDetailDto: {
-      bankName: isBankNotRegistered ? paymentDetail.bankName : '',
-      branch: isBankNotRegistered ? paymentDetail.branch : '',
-      swiftCode: isBankNotRegistered ? paymentDetail.swiftCode : '',
-      address: isBankNotRegistered ? paymentDetail.bankAddress : '',
-    },
-    vendorBankDetail: {
-      accountNo: paymentDetail.accountNo,
-      accountName: paymentDetail.accountName,
-      bankId: paymentDetail.bankId,
-      currencyId: paymentDetail.currencyId,
-      urlDoc: paymentDetail.suratPernyataan,
-      bankAddress: paymentDetail.bankAddress,
-      countryId: 0,
-    },
-  }
-
-  console.log(payload)
   if (checkFieldNotEmpty()) {
+    const payload = {
+      account: {
+        userName: contact.value.account.username,
+        email: contact.value.account.email,
+        password: contact.value.account.password,
+      },
+      vendor: {
+        ...removeErrorFields(information.value.vendor),
+        categoryId: 0,
+        vendorEmail: contact.value.account.email,
+        vendorPhone: contact.value.account.phone,
+        vendorWebsite: contact.value.account.website,
+      },
+      companyLocation: removeErrorFields(information.value.companyLocation),
+      vendorLocation: removeErrorFields(information.value.vendorLocation),
+      vendorCommodities: information.value.vendorCommodities.list.map((item) => ({
+        subBusinessFieldId: item.subBusinessFieldId,
+      })),
+      vendorResponsibleContacts: contact.value.contactPerson.list,
+      vendorLicenses: removeErrorFields(documentAndLegal.value.fields),
+      otherDocuments: removeErrorFields(documentAndLegal.value.anotherDocuments),
+      bankDetailDto: {
+        bankName: isBankNotRegistered.value ? paymentDetail.value.bankName : '',
+        branch: isBankNotRegistered.value ? paymentDetail.value.branch : '',
+        swiftCode: isBankNotRegistered.value ? paymentDetail.value.swiftCode : '',
+        address: isBankNotRegistered.value ? paymentDetail.value.bankAddress : '',
+      },
+      vendorBankDetail: {
+        accountNo: paymentDetail.value.accountNo,
+        accountName: paymentDetail.value.accountName,
+        bankId: paymentDetail.value.bankId,
+        currencyId: paymentDetail.value.currencyId,
+        urlAccountDifferences: paymentDetail.value.urlAccountDifferences,
+        urlFirstPage: paymentDetail.value.urlFirstPage,
+        urlDoc: paymentDetail.value.suratPernyataan,
+        bankAddress: paymentDetail.value.bankAddress,
+        countryId: 0,
+      },
+    }
+
+    console.log(payload)
+
     if (index >= tab.items.length) {
       console.log('end')
     } else {

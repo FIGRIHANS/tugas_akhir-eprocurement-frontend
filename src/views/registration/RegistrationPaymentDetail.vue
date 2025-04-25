@@ -11,6 +11,7 @@
             v-model="paymentDetail.accountNo"
             label="No Rekening"
             placeholder="Masukkan no rekening"
+            type="number"
             row
             required
             :error="paymentDetail.accountNoError"
@@ -36,23 +37,26 @@
           </div>
           <UiFileUpload
             v-if="paymentDetailFlagging.isNotSameAsCompany"
+            name="Pernyataan Perbedaan Rekening"
             label="Pernyataan Perbedaan Rekening"
             placeholder="Pilih"
             acceptedFiles=".pdf"
             @addedFile="(file) => uploadFile(file, 'different account')"
             required
-            :error="paymentDetail.perbedaanRekeningError"
+            :error="paymentDetail.urlAccountDifferencesError"
           />
           <UiFileUpload
             v-if="paymentDetailFlagging.isNotSameAsCompany"
+            name="Halaman Pertama Buku Tabungan"
             label="Halaman Pertama Buku Tabungan"
             placeholder="Pilih"
             acceptedFiles=".pdf"
             @addedFile="(file) => uploadFile(file, 'first page')"
             required
-            :error="paymentDetail.halamanPertamaError"
+            :error="paymentDetail.urlFirstPageError"
           />
           <UiFileUpload
+            name="Surat pernyataan rekening bank"
             label="Surat pernyataan rekening bank"
             placeholder="Pilih"
             acceptedFiles=".pdf"
@@ -304,17 +308,15 @@ const uploadFile = async (
     })
 
     if (type === 'different account') {
-      registrationVendorStore.paymentDetail.perbedaanRekening = response.url
+      registrationVendorStore.paymentDetail.urlAccountDifferences = response.url
     }
 
     if (type === 'first page') {
-      registrationVendorStore.paymentDetail.halamanPertama = response.url
+      registrationVendorStore.paymentDetail.urlFirstPage = response.url
     }
 
     if (type === 'statement letter') {
       registrationVendorStore.paymentDetail.suratPernyataan = response.url
-      console.log(response)
-      console.log(registrationVendorStore.paymentDetail.suratPernyataan)
     }
   } catch (error) {
     console.error(error)
