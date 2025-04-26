@@ -12,6 +12,7 @@ import { ref, watch } from 'vue'
 import { debounce } from 'lodash'
 import { useRoute, useRouter } from 'vue-router'
 import { formatDate } from '@/core/utils/format'
+import UiLoading from '@/components/UiLoading.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -94,10 +95,8 @@ watch(
           <tbody>
             <!-- show loading -->
             <tr v-if="vendor.loading">
-              <td colspan="8">
-                <div
-                  class="mx-auto w-6 h-6 border-3 border-blue-500 border-t-transparent rounded-full animate-spin"
-                ></div>
+              <td colspan="8" class="text-center">
+                <UiLoading size="md" />
               </td>
             </tr>
 

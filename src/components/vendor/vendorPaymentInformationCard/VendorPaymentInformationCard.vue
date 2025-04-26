@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
+import UiLoading from '@/components/UiLoading.vue'
 import { useVendorPaymentStore } from '@/stores/vendor/vendor'
 import { watch } from 'vue'
 import { useRoute } from 'vue-router'
@@ -22,9 +22,7 @@ watch(
     </div>
     <div class="card-body">
       <div v-if="paymentStore.loading" class="flex items-center justify-center py-5">
-        <span class="text-xl text-primary">
-          <UiIcon name="abstract-33" variant="duotone" class="animate-spin" />
-        </span>
+        <UiLoading size="md" />
       </div>
 
       <div v-else-if="paymentStore.error" class="flex items-center justify-center py-5">

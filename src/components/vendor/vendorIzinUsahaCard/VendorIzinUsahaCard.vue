@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
+import UiLoading from '@/components/UiLoading.vue'
 import { formatDate } from '@/core/utils/format'
 import { useVendorIzinUsahaStore } from '@/stores/vendor/vendor'
 import { watch } from 'vue'
@@ -34,9 +34,7 @@ watch(
         <tbody>
           <tr v-if="izinUsahaStore.loading">
             <td colspan="5" class="text-center">
-              <span class="text-xl text-primary">
-                <UiIcon name="abstract-33" variant="duotone" class="mx-auto animate-spin" />
-              </span>
+              <UiLoading size="md" />
             </td>
           </tr>
           <tr v-else-if="izinUsahaStore.error">

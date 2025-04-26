@@ -5,6 +5,7 @@ import type { IVendorAdministrasiCardProps } from './types/vendorAdministrasiCar
 import { useVendorAdministrationStore } from '@/stores/vendor/vendor'
 import { watch } from 'vue'
 import { useRoute } from 'vue-router'
+import UiLoading from '@/components/UiLoading.vue'
 
 const administrasiStore = useVendorAdministrationStore()
 const route = useRoute()
@@ -38,7 +39,7 @@ watch(
       v-if="administrasiStore.loading"
       class="flex items-center justify-center text-xl text-primary py-5"
     >
-      <UiIcon name="abstract-33" variant="duotone" class="animate-spin" />
+      <UiLoading size="md" />
     </div>
     <div v-else-if="administrasiStore.error" class="flex items-center justify-center py-5">
       <span class="text-sm text-red-500 font-medium">
