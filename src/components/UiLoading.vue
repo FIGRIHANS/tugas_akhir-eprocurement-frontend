@@ -15,14 +15,9 @@ const sizeClasses = {
 }
 </script>
 <template>
-  <span class="relative">
-    <div
-      class="absolute inset-0 border-blue-200 rounded-full border-2"
-      :class="sizeClasses[size]"
-    ></div>
-    <div
-      class="absolute inset-0 border-transparent border-2 border-t-blue-400 rounded-full animate-spin"
-      :class="sizeClasses[size]"
-    ></div>
+  <span
+    class="border-blue-200 rounded-full border-2 border-t-primary animate-spin inline-block"
+    :class="sizeClasses[size]"
+  >
   </span>
 </template>
