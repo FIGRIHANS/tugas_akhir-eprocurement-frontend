@@ -2,13 +2,15 @@
 import BreadcrumbView from '@/components/BreadcrumbView.vue'
 import type { ITabClosable } from '@/components/ui/atoms/tab-closable/types/tabClosable'
 import UiTabClosable from '@/components/ui/atoms/tab-closable/UiTabClosable.vue'
+import { useVendorStore } from '@/stores/vendor/vendor'
 import { onMounted, ref, watch } from 'vue'
 import { RouterView, useRoute, useRouter } from 'vue-router'
 
 const router = useRouter()
 const route = useRoute()
+const vendorStore = useVendorStore()
 
-const tabs: ITabClosable[] = [
+const tabs = ref<ITabClosable[]>([
   { id: 'summary-information', label: 'Summary Information' },
   { id: 'data-administrasi', label: 'Data Administrasi', isClosable: true },
   { id: 'data-izin-usaha', label: 'Data Izin Usaha', isClosable: true },
@@ -17,12 +19,7 @@ const tabs: ITabClosable[] = [
     label: 'Data Informasi Pembayaran',
     isClosable: true,
   },
-  { id: 'data-akta-pendirian', label: 'Data Akta Pendirian', isClosable: true },
-  { id: 'data-perlengkapan', label: 'Data Perlengkapan', isClosable: true },
-  { id: 'data-pengalaman', label: 'Data Pengalaman', isClosable: true },
-  { id: 'data-tenaga-ahli', label: 'Data Tenaga Ahli', isClosable: true },
-  { id: 'dokumen-lainnya', label: 'Dokumen Lainnya', isClosable: true },
-]
+])
 
 const openedTabs = ref<ITabClosable[]>([
   { id: 'summary-information', label: 'Summary Information' },
@@ -41,7 +38,7 @@ const closeTab = (id: string) => {
 const addTab = (id: string) => {
   currentTab.value = id
   if (openedTabs.value.some((tab) => tab.id === id)) return
-  openedTabs.value.push(tabs.find((tab) => tab.id === id)!)
+  openedTabs.value.push(tabs.value.find((tab) => tab.id === id)!)
 }
 
 watch(currentTab, () => {
@@ -52,6 +49,31 @@ watch(
   () => route.name,
   () => {
     addTab(route.name as string)
+  },
+  { immediate: true },
+)
+
+watch(
+  () => route.params.id,
+  (id) => {
+    vendorStore.getVendors({ vendorId: id })
+  },
+  { immediate: true },
+)
+
+watch(
+  () => vendorStore.vendors,
+  (vendor) => {
+    if (vendor.items.length && vendor.items[0].approvalStatusId === 1) {
+      tabs.value = [
+        ...tabs.value,
+        { id: 'data-akta-pendirian', label: 'Data Akta Pendirian', isClosable: true },
+        { id: 'data-perlengkapan', label: 'Data Perlengkapan', isClosable: true },
+        { id: 'data-pengalaman', label: 'Data Pengalaman', isClosable: true },
+        { id: 'data-tenaga-ahli', label: 'Data Tenaga Ahli', isClosable: true },
+        { id: 'dokumen-lainnya', label: 'Dokumen Lainnya', isClosable: true },
+      ]
+    }
   },
 )
 

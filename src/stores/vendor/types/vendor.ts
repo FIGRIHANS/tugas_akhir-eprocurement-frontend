@@ -14,6 +14,7 @@ export interface IVendorList {
   companyScale: null | string
   verificationRemark: string
   approvalStatus: string
+  approvalStatusId: number
   isActive: boolean
   isVerified: number
   activedUTCDate: string
