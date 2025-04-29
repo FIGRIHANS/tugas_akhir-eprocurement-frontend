@@ -22,7 +22,7 @@
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { useCheckToken } from '@/composables/token'
+// import { useCheckToken } from '@/composables/token'
 
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
@@ -32,7 +32,7 @@ const router = useRouter()
 const isLoggedin = ref(false)
 
 onMounted(() => {
-  const token = useCheckToken()
-  if (token) isLoggedin.value = true
+  // const token = useCheckToken()
+  // if (token) isLoggedin.value = true
 })
 </script>
