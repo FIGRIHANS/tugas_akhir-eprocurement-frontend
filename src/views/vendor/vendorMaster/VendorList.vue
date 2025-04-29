@@ -20,7 +20,7 @@ const router = useRouter()
 const vendor = useVendorStore()
 
 const search = ref('')
-const currentPage = ref(1)
+// const currentPage = ref(1)
 
 const handleSearch = debounce((value) => {
   const query = { ...route.query }
@@ -52,7 +52,7 @@ watch(
   () => route.query,
   (query) => {
     search.value = (query.SearchQuery as string) || ''
-    currentPage.value = Number(query.page) || 1
+    // currentPage.value = Number(query.page) || 1
 
     vendor.getVendors(query)
   },
@@ -177,7 +177,7 @@ watch(
         </div>
         <LPagination
           :total-items="Number(vendor.vendors.total)"
-          :current-page="Number(currentPage)"
+          :current-page="Number(vendor.vendors.page)"
           :page-size="Number(vendor.vendors.pageSize)"
           @page-change="handlePageChange"
         />

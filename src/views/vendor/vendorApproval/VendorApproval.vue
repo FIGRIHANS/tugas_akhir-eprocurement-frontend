@@ -21,7 +21,7 @@ const router = useRouter()
 const approval = useApprovalStore()
 
 const search = ref('')
-const currentPage = ref(1)
+// const currentPage = ref(1)
 
 const handlePageChange = (page: number) => {
   const query = { ...route.query, page }
@@ -47,7 +47,7 @@ watch(search, (newSearch) => {
 watch(
   () => route.query,
   (query) => {
-    currentPage.value = Number(query.page) || 1
+    // currentPage.value = Number(query.page) || 1
     search.value = (query.searchQuery as string) || ''
 
     approval.getApproval(route.query)
@@ -145,7 +145,7 @@ watch(
         Tampilkan {{ approval.data.pageSize }} data dari total data {{ approval.data.total }}
       </div>
       <LPagination
-        :current-page="currentPage"
+        :current-page="approval.data.page"
         :page-size="approval.data.pageSize"
         :total-items="approval.data.total"
         @page-change="handlePageChange"
