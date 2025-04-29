@@ -107,3 +107,13 @@ export interface IPayment {
   countryName: string
   countryPhonePrefix: string
 }
+
+export interface IPostBlacklist {
+  VendorId?: number
+  BlacklistDescription?: string
+  DocUrl?: string
+  BlacklistTypeID?: number
+  StartDate?: string
+  EndDate?: string
+  CreatedBy?: string
+}

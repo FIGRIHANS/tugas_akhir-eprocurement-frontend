@@ -1,7 +1,13 @@
 import vendorAPI from '@/core/utils/vendorAPI'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { IAdministration, ILicense, IPayment, IVendorContent } from './types/vendor'
+import type {
+  IAdministration,
+  ILicense,
+  IPayment,
+  IPostBlacklist,
+  IVendorContent,
+} from './types/vendor'
 import type { ApiResponse } from '@/core/type/api'
 
 export const useVendorStore = defineStore('vendor', () => {
@@ -40,7 +46,28 @@ export const useVendorStore = defineStore('vendor', () => {
     }
   }
 
-  return { vendors, loading, error, getVendors }
+  const blacklistVendor = async (params: IPostBlacklist) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const response: ApiResponse = await vendorAPI.post('verifiedvendor/blacklist/vendor', {
+        params,
+      })
+
+      if (response.data.statusCode !== 200) {
+        error.value = response.data.result.message
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        error.value = err.message
+      } else {
+        error.value = 'Failed to blacklist vendor'
+      }
+    }
+  }
+
+  return { vendors, loading, error, getVendors, blacklistVendor }
 })
 
 export const useVendorAdministrationStore = defineStore('vendor-administration', () => {
