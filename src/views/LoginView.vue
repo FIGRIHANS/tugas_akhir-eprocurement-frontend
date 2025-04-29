@@ -97,7 +97,7 @@ const goLogin = () => {
       if (response.statusCode === 200) {
         setToken(response.result)
         router.push({
-          path: '/'
+          path: '/dashboard'
         })
       }
     })
@@ -133,9 +133,9 @@ onMounted(() => {
   const account = savedAccount.split('; ')
   for (const item of account) {
     const [key, value] = item.split('=')
-    console.log(key)
     if (key === 'username') email.value = value
     if (key === 'password') password.value = value
   }
+  if (email.value && password.value) rememberMe.value = true
 })
 </script>

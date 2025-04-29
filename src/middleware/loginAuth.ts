@@ -8,9 +8,9 @@ import { useCheckToken } from '@/composables/token'
 export default (context: MiddlewareContext) => {
   const token = useCheckToken()
 
-  if (!token) {
+  if (token) {
     context.router.push({
-      name: 'login'
+      name: 'dashboard'
     })
   }
 }
