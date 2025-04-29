@@ -61,10 +61,10 @@ export const useRegistrationVendorStore = defineStore('registrationVendor', () =
   })
 
   const requiredDocumentFields = ref<Record<number, number[]>>({
-    1: [17, 12, 10],
-    2: [17, 16],
-    3: [12],
-    4: [20],
+    1: [17, 12, 10, 23, 25],
+    2: [17, 16, 26, 25],
+    3: [12, 26, 27, 25],
+    4: [20, 23, 25],
   })
 
   const documentAndLegal = ref<DocumentAndLegalType>({

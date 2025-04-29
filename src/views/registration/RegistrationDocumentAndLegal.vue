@@ -150,11 +150,7 @@
               <tr>
                 <th>{{ selectedCategory === 4 ? 'Document Name' : 'Nama Dokumen' }}</th>
                 <th class="w-56">
-                  {{
-                    selectedCategory === 4
-                      ? 'License No. / Description'
-                      : 'No Izin Usaha / Keterangan'
-                  }}
+                  {{ selectedCategory === 4 ? 'Description' : 'Keterangan' }}
                 </th>
                 <th class="w-56">
                   {{ selectedCategory === 4 ? 'Valid (Start Date)' : 'Berlaku (Tanggal Mulai)' }}
