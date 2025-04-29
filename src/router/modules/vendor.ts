@@ -80,7 +80,20 @@ export default [
   {
     path: '/vendor-blacklist',
     name: 'vendor-blacklist',
-    component: () => import('@/views/vendor/VendorBlacklist.vue'),
+    component: () => import('@/views/vendor/vendorBlacklist/VendorBlacklistWrapper.vue'),
+    redirect: { name: 'vendor-pending-blacklist' },
+    children: [
+      {
+        path: 'pending',
+        name: 'vendor-pending-blacklist',
+        component: () => import('@/views/vendor/vendorBlacklist/VendorPendingBlacklist.vue'),
+      },
+      {
+        path: 'list',
+        name: 'vendor-blacklist-list',
+        component: () => import('@/views/vendor/vendorBlacklist/VendorBlacklist.vue'),
+      },
+    ],
   },
   {
     path: '/vendor-approval',

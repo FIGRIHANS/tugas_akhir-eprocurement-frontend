@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import BreadcrumbView from '@/components/BreadcrumbView.vue'
 import LPagination from '@/components/pagination/LPagination.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
-import UiTab from '@/components/ui/atoms/tab/UiTab.vue'
 import FilterButton from '@/components/vendor/filterButton/FilterButton.vue'
 import FilterDropdownBlacklist from '@/components/vendor/FilterDropdownBlacklist.vue'
 import { formatDate } from '@/core/utils/format'
@@ -17,7 +15,6 @@ const route = useRoute()
 const router = useRouter()
 const blacklistStore = useBlacklistStore()
 
-const currentTab = ref('vendor-blacklist')
 const search = ref('')
 const page = ref(1)
 
@@ -53,14 +50,6 @@ watch(
 </script>
 
 <template>
-  <BreadcrumbView
-    title="Vendor Blacklist"
-    :routes="[{ name: 'Vendor blacklist', to: '/vendor-blacklist' }]"
-  />
-  <UiTab
-    :items="[{ label: 'Blacklist Vendor', value: 'vendor-blacklist' }]"
-    :model-value="currentTab"
-  />
   <div class="card">
     <div class="card-header">
       <UiInputSearch placeholder="Cari Vendor" v-model="search" />
