@@ -22,8 +22,8 @@ export function mysqlFormat(dateRef: Ref<Date | null>) {
   })
 }
 
-export const formatDate = (date: Date) => {
-  return new Intl.DateTimeFormat('id', { dateStyle: 'long' }).format(date)
+export const formatDate = (date: Date, local: string = 'id') => {
+  return new Intl.DateTimeFormat(local, { dateStyle: 'long' }).format(date)
 }
 
 export const formattoMySQL = (date: Date) => {

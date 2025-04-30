@@ -38,14 +38,6 @@ const handlePageChange = (page: number) => {
   router.replace({ query })
 }
 
-const isExpired = (date: null | string) => {
-  if (!date) return '-'
-  const now = new Date()
-  const expiredDate = new Date(date)
-  if (expiredDate < now) return 'Expired'
-  return 'Masih Berlaku'
-}
-
 watch(search, handleSearch)
 
 watch(
@@ -82,14 +74,14 @@ watch(
           <thead class="border-b-2 border-b-primary">
             <tr>
               <th></th>
-              <th class="text-nowrap">Nama Perusahaan</th>
+              <th class="text-nowrap">Company Name</th>
               <th class="text-nowrap">Status</th>
-              <th class="text-nowrap">Kategori Vendor</th>
-              <th class="text-nowrap">Tanggal Pendaftaran</th>
-              <th class="text-nowrap">Tanggal Permintaan Verifikasi</th>
-              <th class="text-nowrap">Tanggal Verifikasi</th>
-              <th class="text-nowrap">Status Izin Usaha</th>
-              <th class="text-nowrap">Kode Vendor</th>
+              <th class="text-nowrap">Vendor Category</th>
+              <th class="text-nowrap">Registration Date</th>
+              <th class="text-nowrap">Verification Request Date</th>
+              <th class="text-nowrap">Verification Date</th>
+              <th class="text-nowrap">Bussiness License Status</th>
+              <th class="text-nowrap">Vendor Code</th>
             </tr>
           </thead>
           <tbody>
@@ -133,15 +125,17 @@ watch(
                   size="sm"
                   variant="success"
                 >
-                  Terverifikasi
+                  Verified
                 </UiButton>
                 <UiButton v-else :outline="true" size="sm" variant="secondary">
-                  <span class="text-nowrap">Belum Verifikasi</span>
+                  <span class="text-nowrap">Not Verified</span>
                 </UiButton>
               </td>
               <td>{{ vendor.companyCategoryName }}</td>
               <td>
-                {{ vendor.createdUTCDate ? formatDate(new Date(vendor.createdUTCDate)) : '-' }}
+                {{
+                  vendor.createdUTCDate ? formatDate(new Date(vendor.createdUTCDate), 'en-US') : '-'
+                }}
               </td>
               <td>
                 {{
@@ -151,7 +145,11 @@ watch(
                 }}
               </td>
               <td>
-                {{ vendor.verifiedUTCDate ? formatDate(new Date(vendor.verifiedUTCDate)) : '-' }}
+                {{
+                  vendor.verifiedUTCDate
+                    ? formatDate(new Date(vendor.verifiedUTCDate), 'en-US')
+                    : '-'
+                }}
               </td>
               <td>
                 <div
@@ -160,7 +158,11 @@ watch(
                   class="text-nowrap"
                 >
                   {{ index + 1 }}. {{ license.licenseName }} :
-                  {{ isExpired(license.expiredUTCDate) }}
+                  {{
+                    license.expiredUTCDate
+                      ? formatDate(new Date(license.expiredUTCDate), 'en-US')
+                      : '-'
+                  }}
                 </div>
               </td>
               <td>{{ vendor.vendorId }}</td>
