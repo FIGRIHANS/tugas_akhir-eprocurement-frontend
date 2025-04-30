@@ -2,20 +2,33 @@
 import UiModal from '@/components/modal/UiModal.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
-import UiTextArea from '@/components/ui/atoms/text-area/UiTextArea.vue'
 import VendorAdministrasiCard from '@/components/vendor/vendorAdministrasiCard/VendorAdministrasiCard.vue'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import successImg from '@/assets/success.svg'
+import { useVendorStore } from '@/stores/vendor/vendor'
 
 const router = useRouter()
 const modalReject = ref(false)
-const modalSuccess = ref(false)
+const modalRejectSuccess = ref(false)
+const modalVerify = ref(false)
+const modalVerifySuccess = ref(false)
 const reason = ref('')
+const notes = ref('')
+
+const vendorStore = useVendorStore()
+
+const handleVerify = () => {
+  vendorStore.isAdministrationVerified = true
+  modalVerify.value = false
+  modalVerifySuccess.value = true
+}
 
 const handleReject = () => {
+  // call api here
+
   modalReject.value = false
-  modalSuccess.value = true
+  modalRejectSuccess.value = true
 }
 </script>
 <template>
@@ -31,16 +44,23 @@ const handleReject = () => {
         <UiIcon name="cross-circle" variant="duotone" />
         <span> Reject </span>
       </UiButton>
-      <UiButton>
+      <UiButton @click="modalVerify = true" :disabled="vendorStore.isAdministrationVerified">
         <UiIcon name="check-squared" variant="duotone" />
         <span> Verify </span>
       </UiButton>
     </div>
   </div>
 
-  <UiModal v-model="modalReject" title="Reject Data Administrasi" size="sm">
+  <UiModal v-if="modalReject" v-model="modalReject" title="Reject Data Administrasi" size="sm">
     <form @submit.prevent="handleReject">
-      <UiTextArea label="Reason" v-model="reason" />
+      <div class="relative mb-3">
+        <label
+          for="reason"
+          class="absolute bg-white top-0 left-0 ml-2 -mt-2 text-sm text-gray-600 px-1"
+          >Reason <span class="text-danger">*</span></label
+        >
+        <textarea id="reason" class="textarea" rows="6" v-model="reason" required></textarea>
+      </div>
       <div class="flex gap-3">
         <UiButton
           class="flex-1 justify-center"
@@ -59,9 +79,43 @@ const handleReject = () => {
     </form>
   </UiModal>
 
-  <UiModal v-model="modalSuccess" size="sm">
+  <UiModal v-if="modalVerify" v-model="modalVerify" title="Verify Data Administrasi" size="sm">
+    <form @submit.prevent="handleVerify">
+      <div class="relative mb-3">
+        <label
+          for="notes"
+          class="absolute bg-white top-0 left-0 ml-2 -mt-2 text-sm text-gray-600 px-1"
+          >Notes</label
+        >
+        <textarea id="notes" class="textarea" rows="6" v-model="notes"></textarea>
+      </div>
+      <div class="flex gap-3">
+        <UiButton
+          class="flex-1 justify-center"
+          :outline="true"
+          type="button"
+          @click="modalVerify = !modalVerify"
+        >
+          <UiIcon name="black-left-line" variant="duotone" />
+          <span>Cancel</span>
+        </UiButton>
+        <UiButton class="flex-1 justify-center" variant="primary">
+          <UiIcon name="check-circle" variant="duotone" />
+          <span>Verify</span>
+        </UiButton>
+      </div>
+    </form>
+  </UiModal>
+
+  <UiModal v-if="modalRejectSuccess" v-model="modalRejectSuccess" size="sm">
     <img :src="successImg" alt="success" class="mx-auto mb-3" />
     <h3 class="font-medium text-lg text-gray-800 text-center">Data Administrasi Rejected</h3>
     <p class="text-gray-600 text-center mb-3">Data Administrasi has been successfully Rejected</p>
+  </UiModal>
+
+  <UiModal v-if="modalVerifySuccess" v-model="modalVerifySuccess" size="sm">
+    <img :src="successImg" alt="success" class="mx-auto mb-3" />
+    <h3 class="font-medium text-lg text-gray-800 text-center">Data Administrasi Verified</h3>
+    <p class="text-gray-600 text-center mb-3">Data Administrasi has been successfully verified</p>
   </UiModal>
 </template>

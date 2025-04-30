@@ -4,6 +4,9 @@ import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import VendorAdministrasiCard from '@/components/vendor/vendorAdministrasiCard/VendorAdministrasiCard.vue'
 import VendorIzinUsahaCard from '@/components/vendor/vendorIzinUsahaCard/VendorIzinUsahaCard.vue'
 import VendorPaymentInformationCard from '@/components/vendor/vendorPaymentInformationCard/VendorPaymentInformationCard.vue'
+import { useVendorStore } from '@/stores/vendor/vendor'
+
+const vendorStore = useVendorStore()
 </script>
 <template>
   <div class="space-y-5">
@@ -17,7 +20,14 @@ import VendorPaymentInformationCard from '@/components/vendor/vendorPaymentInfor
     <VendorPaymentInformationCard />
 
     <div class="flex justify-end">
-      <UiButton>
+      <UiButton
+        :disabled="
+          !vendorStore.isAdministrationVerified ||
+          !vendorStore.isLicenseVerified ||
+          !vendorStore.isBankVerified
+        "
+        variant="primary"
+      >
         <UiIcon name="paper-plane" />
         Send Approval
       </UiButton>

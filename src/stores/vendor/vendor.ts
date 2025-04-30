@@ -19,6 +19,9 @@ export const useVendorStore = defineStore('vendor', () => {
     page: 1,
     pageSize: 0,
   })
+  const isAdministrationVerified = ref(false)
+  const isLicenseVerified = ref(false)
+  const isBankVerified = ref(false)
 
   const getVendors = async (params: unknown) => {
     loading.value = true
@@ -67,7 +70,16 @@ export const useVendorStore = defineStore('vendor', () => {
     }
   }
 
-  return { vendors, loading, error, getVendors, blacklistVendor }
+  return {
+    vendors,
+    loading,
+    error,
+    getVendors,
+    blacklistVendor,
+    isAdministrationVerified,
+    isLicenseVerified,
+    isBankVerified,
+  }
 })
 
 export const useVendorAdministrationStore = defineStore('vendor-administration', () => {

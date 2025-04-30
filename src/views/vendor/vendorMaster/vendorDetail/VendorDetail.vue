@@ -11,9 +11,20 @@ const route = useRoute()
 const vendorStore = useVendorStore()
 
 const tabs = ref<ITabClosable[]>([
-  { id: 'summary-information', label: 'Summary Information' },
-  { id: 'data-administrasi', label: 'Data Administrasi', isClosable: true },
-  { id: 'data-izin-usaha', label: 'Data Izin Usaha', isClosable: true },
+  {
+    id: 'summary-information',
+    label: 'Summary Information',
+  },
+  {
+    id: 'data-administrasi',
+    label: 'Data Administrasi',
+    isClosable: true,
+  },
+  {
+    id: 'data-izin-usaha',
+    label: 'Data Izin Usaha',
+    isClosable: true,
+  },
   {
     id: 'data-informasi-pembayaran',
     label: 'Data Informasi Pembayaran',
@@ -75,6 +86,22 @@ watch(
       ]
     }
   },
+)
+
+watch(
+  vendorStore,
+  (store) => {
+    if (store.isAdministrationVerified) {
+      tabs.value[1].isVerified = true
+    }
+    if (store.isLicenseVerified) {
+      tabs.value[2].isVerified = true
+    }
+    if (store.isBankVerified) {
+      tabs.value[3].isVerified = true
+    }
+  },
+  { immediate: true },
 )
 
 onMounted(() => {
