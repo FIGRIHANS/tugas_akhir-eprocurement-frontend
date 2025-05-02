@@ -1,52 +1,89 @@
 <script setup lang="ts">
 import UiModal from '@/components/modal/UiModal.vue'
 import type { IVendorBlacklistModalProps } from './types/vendorBlacklistModal'
-import UiTextArea from '@/components/ui/atoms/text-area/UiTextArea.vue'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
-import DatePicker from '@/components/datePicker/DatePicker.vue'
+import { useBlacklistPeriodStore } from '@/stores/vendor/reference'
+import { useVendorUploadStore } from '@/stores/vendor/upload'
+
+const periodStore = useBlacklistPeriodStore()
+const uploadStore = useVendorUploadStore()
 
 defineProps<IVendorBlacklistModalProps>()
 const open = defineModel()
 const period = ref<string>('')
 const file = ref<File>()
 const reason = ref<string>('')
-const tglMulai = ref('')
-const tglSelesai = ref('')
+const tglMulai = ref<Date>()
+const tglSelesai = ref<Date>()
+
+const handleUpload = async () => {
+  const formData = new FormData()
+  formData.append('FormFile', file.value as File)
+  formData.append('Actioner', '')
+  formData.append('FolderName', '')
+  formData.append('FileName', file.value?.name as string)
+
+  const upload = await uploadStore.upload(formData)
+  console.log(upload)
+}
 
 const handleSubmit = () => {
   console.log(file.value)
 }
+
+onMounted(periodStore.getPeriod)
 </script>
 <template>
   <UiModal v-model="open" title="Blacklist Vendor" size="sm">
     <form action="" class="space-y-4" @submit.prevent="handleSubmit">
       <div class="relative">
-        <label for="period" class="absolute top-0 left-0 -mt-2 ml-2 bg-white px-1 text-gray-500"
-          >Period</label
-        >
+        <label for="period" class="absolute top-0 left-0 -mt-2 ml-2 bg-white px-1 text-gray-500">
+          Period
+        </label>
         <select id="period" v-model="period" class="select">
-          <option disabled value="">Pilih periode</option>
-          <option value="permanent">Permanent</option>
-          <option value="temporary">Temporary</option>
+          <option disabled value="">Select period</option>
+          <option v-for="item in periodStore.period" :key="item.code" :value="item.code">
+            {{ item.value }}
+          </option>
         </select>
       </div>
       <div v-if="period === `temporary`" class="flex gap-3 max-w-full">
-        <DatePicker
-          v-model="tglMulai"
-          :error="false"
-          class="flex-1"
-          placeholder="Start Date"
-          label="Start Date"
-        />
-        <DatePicker
-          v-model="tglSelesai"
-          :error="false"
-          class="flex-1"
-          placeholder="End Date"
-          label="End Date"
-        />
+        <VueDatePicker v-model="tglMulai" class="w-full">
+          <template #dp-input="{ value }">
+            <div class="input relative">
+              <div
+                :class="[
+                  'absolute top-0 left-0 -mt-2 ml-2 bg-white px-1 text-gray-500 text-[11px] font-normal',
+                ]"
+              >
+                Start Date
+              </div>
+              <input :placeholder="'Select'" :value="value" readonly class="min-w-[0px]" />
+              <button class="btn btn-icon" type="button">
+                <i class="ki-filled ki-calendar"></i>
+              </button>
+            </div>
+          </template>
+        </VueDatePicker>
+        <VueDatePicker v-model="tglSelesai" class="w-full">
+          <template #dp-input="{ value }">
+            <div class="input relative">
+              <div
+                :class="[
+                  'absolute top-0 left-0 -mt-2 ml-2 bg-white px-1 text-gray-500 text-[11px] font-normal',
+                ]"
+              >
+                End Date
+              </div>
+              <input :placeholder="'Select'" :value="value" readonly class="min-w-[0px]" />
+              <button class="btn btn-icon" type="button">
+                <i class="ki-filled ki-calendar"></i>
+              </button>
+            </div>
+          </template>
+        </VueDatePicker>
       </div>
       <div class="flex rounded-md overflow-hidden border border-primary">
         <label
@@ -65,12 +102,17 @@ const handleSubmit = () => {
         <button
           type="button"
           class="h-10 bg-primary text-white flex items-center justify-center px-3 border border-primary"
+          @click="handleUpload"
         >
           Upload file
         </button>
       </div>
-
-      <UiTextArea label="Reason" :model-value="reason" placeholder="Enter reason" />
+      <div class="relative">
+        <label for="reason" class="absolute -mt-2 ml-2 px-1 text-gray-500 bg-white">
+          Reason <span class="text-danger">*</span>
+        </label>
+        <textarea id="reason" v-model="reason" class="textarea textarea-lg" rows="6"></textarea>
+      </div>
       <div class="flex gap-3">
         <UiButton class="flex-1 justify-center" :outline="true" type="button" @click="open = !open">
           <UiIcon name="black-left-line" variant="duotone" />
@@ -84,3 +126,7 @@ const handleSubmit = () => {
     </form>
   </UiModal>
 </template>
+
+<style lang="scss" scoped>
+@use '@/components/datePicker/styles/datepicker.scss';
+</style>
