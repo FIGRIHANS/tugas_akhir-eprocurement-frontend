@@ -1,12 +1,12 @@
 <template>
   <div class="flex flex-col gap-[16px]">
     <p class="text-base font-semibold">Additional Cost</p>
-    <button class="btn btn-outline btn-primary w-fit" @click="addNew">
+    <button v-if="form?.status === 0" class="btn btn-outline btn-primary w-fit" @click="addNew">
       <i class="ki-duotone ki-plus-circle"></i>
       Add Additional Cost
     </button>
     <div v-if="form" class="overflow-x-auto cost__table">
-      <table class="table table-xs table-border" :class="{ 'border-danger': form.additionalCostError }">
+      <table class="table table-xs table-border">
         <thead>
           <tr>
             <th
@@ -23,20 +23,18 @@
         </thead>
         <tbody>
           <tr v-for="(item, index) in form.additionalCost" :key="index" class="cost__field-items">
-            <td>
-              <input v-model="item.line" class="input" placeholder="" type="text"/>
+            <td class="flex items-center justify-around gap-[8px]">
+              <button v-if="form.status === 0" class="btn btn-icon btn-primary" @click="item.isEdit = !item.isEdit">
+                <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>
+                <i v-else class="ki-duotone ki-check-circle"></i>
+              </button>
+              <button v-if="form.status === 0" class="btn btn-icon btn-outline btn-danger">
+                <i class="ki-duotone ki-cross-circle"></i>
+              </button>
             </td>
             <td>
-              <input v-model="item.quantity" class="input" placeholder="" type="text"/>
-            </td>
-            <td>
-              <input v-model="item.uom" class="input" placeholder="" type="text"/>
-            </td>
-            <td>
-              <input v-model="item.amount" class="input" placeholder="" type="text"/>
-            </td>
-            <td>
-              <select v-model="item.costType" class="select" placeholder="">
+              <input v-if="!item.isEdit" v-model="item.type" class="input" placeholder="" disabled/>
+              <select v-else v-model="item.type" class="select" placeholder="">
                 <option value="1">
                   Option 1
                 </option>
@@ -49,22 +47,79 @@
               </select>
             </td>
             <td>
-              <input v-model="item.description" class="input" placeholder="" type="text"/>
+              <input v-model="item.gl" class="input" placeholder="" :disabled="!item.isEdit"/>
             </td>
             <td>
-              <input v-model="item.subTotal" class="input" placeholder="" type="text"/>
+              <input v-if="!item.isEdit" v-model="item.costCenter" class="input" placeholder="" disabled/>
+              <select v-else v-model="item.costCenter" class="select" placeholder="">
+                <option value="1">
+                  Option 1
+                </option>
+                <option value="2">
+                  Option 2
+                </option>
+                <option value="3">
+                  Option 3
+                </option>
+              </select>
             </td>
             <td>
-              <input v-model="item.taxCode" class="input" placeholder="" type="text"/>
+              <input v-model="item.quantity" class="input" placeholder="" :disabled="!item.isEdit"/>
             </td>
             <td>
-              <input v-model="item.vatAmount" class="input" placeholder="" type="text"/>
+              <input v-model="item.uom" class="input" placeholder="" :disabled="!item.isEdit"/>
             </td>
             <td>
-              <input v-model="item.wht" class="input" placeholder="" type="text"/>
+              <input v-model="item.costPerUnit" class="input" placeholder="" :disabled="!item.isEdit"/>
             </td>
             <td>
-              <input v-model="item.whtAmount" class="input" placeholder="" type="text"/>
+              <input v-model="item.totalCost" class="input" placeholder="" :disabled="!item.isEdit"/>
+            </td>
+            <td>
+              <input v-if="!item.isEdit" v-model="item.pphType" class="input" placeholder="" disabled/>
+              <select v-else v-model="item.pphType" class="select" placeholder="">
+                <option value="1">
+                  Option 1
+                </option>
+                <option value="2">
+                  Option 2
+                </option>
+                <option value="3">
+                  Option 3
+                </option>
+              </select>
+            </td>
+            <td>
+              <input v-model="item.pphCode" class="input" placeholder="" disabled/>
+            </td>
+            <td>
+              <input v-model="item.dpp" class="input" placeholder="" :disabled="!item.isEdit"/>
+            </td>
+            <td>
+              <input v-model="item.pphValue" class="input" placeholder="" disabled/>
+            </td>
+            <td>
+              <input v-if="!item.isEdit" v-model="item.vat" class="input" placeholder="" disabled/>
+              <select v-else v-model="item.vat" class="select" placeholder="">
+                <option value="1">
+                  Option 1
+                </option>
+                <option value="2">
+                  Option 2
+                </option>
+                <option value="3">
+                  Option 3
+                </option>
+              </select>
+            </td>
+            <td>
+              <input v-model="item.otherDpp" class="input" placeholder="" :disabled="!item.isEdit"/>
+            </td>
+            <td>
+              <input v-model="item.amount" class="input" placeholder="" disabled/>
+            </td>
+            <td>
+              <input v-model="item.remark" class="input" placeholder="" :disabled="!item.isEdit"/>
             </td>
           </tr>
         </tbody>
@@ -78,17 +133,22 @@ import { ref, inject } from 'vue'
 import type { formTypes } from '../../types/invoiceAddWrapper'
 
 const columns = ref([
-  'Line',
-  'Quantity',
-  'UOM',
+  'Action',
+  'Jenis',
+  'GL',
+  'Cost Center',
+  'QTY',
+  'UoM',
+  'Cost Per Unit',
+  'Total Cost',
+  'Tipe PPH',
+  'Kode PPH',
+  'DPP',
+  'Nilai PPH',
+  'VAT',
+  'DPP Lain - Lain',
   'Amount',
-  'Cost Type',
-  'Description',
-  'Subtotal',
-  'Tax Code',
-  'VAT Amount',
-  'WHT',
-  'WHT Amount'
+  'Remark'
 ])
 
 const form = inject<formTypes>('form')
@@ -96,17 +156,22 @@ const form = inject<formTypes>('form')
 const addNew = () => {
   if (form) {
     const data = {
-      line: '',
+      type: '',
+      gl: '',
+      costCenter: '',
       quantity: '',
       uom: '',
+      costPerUnit: '',
+      totalCost: '',
+      pphType: '',
+      pphCode: '',
+      dpp: '',
+      pphValue: '',
+      vat: '',
+      otherDpp: '',
       amount: '',
-      costType: '',
-      subTotal: '',
-      taxCode: '',
-      vatAmount: '',
-      wht: '',
-      whtAmount: '',
-      description: ''
+      remark: '',
+      isEdit: false
     }
     form.additionalCost.push(data)
   }

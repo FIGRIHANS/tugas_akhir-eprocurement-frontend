@@ -6,8 +6,15 @@
     </label>
     <VueDatePicker v-model="date" :format="format" :preview-format="format" class="w-full">
       <template #dp-input="{ value }">
-        <div class="input relative" :class="{ 'border-danger': error }">
-          <input :placeholder="placeholder" :value="value" readonly class="min-w-[0px]" />
+        <div class="input relative">
+          <input
+            placeholder="Select"
+            :value="value"
+            readonly
+            class="min-w-[0px]"
+            :disabled="disabled"
+            :class="{ 'border-danger': error }"
+          />
           <button class="btn btn-icon">
             <i class="ki-filled ki-calendar"></i>
           </button>
@@ -28,6 +35,7 @@ const props = defineProps<{
   required?: boolean
   placeholder?: string
   format?: string
+  disabled?: boolean
 }>()
 
 const emits = defineEmits(['update:modelValue'])

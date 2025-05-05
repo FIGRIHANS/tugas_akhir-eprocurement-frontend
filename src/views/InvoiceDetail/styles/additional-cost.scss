@@ -1,0 +1,48 @@
+.cost {
+  &__table {
+    overflow-x: auto;
+    padding-bottom: 4px;
+
+    &::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+      background: transparent;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      width: 10px;
+      height: 10px;
+      border-radius: 15px;
+      background-color: #DBDFE9;
+    }
+  }
+
+  &__column {
+    padding: 13px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    min-width: 100px;
+
+    &--medium {
+      @extend .cost__column;
+      min-width: 130px;
+    }
+
+    &--type {
+      @extend .cost__column;
+      min-width: 200px;
+    }
+
+    &--desc {
+      @extend .cost__column;
+      min-width: 250px;
+    }
+  }
+
+  &__items {
+    td {
+      padding: 16px 20px;
+      font-size: 13px;
+    }
+  }
+}

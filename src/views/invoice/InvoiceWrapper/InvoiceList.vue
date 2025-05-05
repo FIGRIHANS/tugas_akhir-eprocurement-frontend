@@ -1,104 +1,70 @@
 <template>
-  <div class="border border-gray-200 rounded-xl p-[24px]">
-    <div class="flex justify-between gap-[8px]">
-      <div class="input w-[250px]">
-        <i class="ki-outline ki-magnifier"></i>
-        <input v-model="search" placeholder="Cari Invoice" type="text"/>
-      </div>
-      <button class="btn btn-primary" @click="goAdd">
-        <i class="ki-duotone ki-plus-circle"></i>
-        Add Invoice
+  <div class="p-[24px]">
+    <div class="tabs mb-5">
+      <button class="tab px-[10px]" :class="{ 'active': tabNow === 'po' }" @click="setTab('po')">
+        PO
       </button>
-    </div>
-
-    <div class="overflow-x-auto list__table mt-[24px]">
-      <table class="table align-middle text-gray-700 font-medium text-sm">
-      <thead>
-        <tr>
-          <th v-for="(item, index) in columns" :key="index" :class="index !== 0 ? 'list__long' : ''">
-            {{ item }}
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(item, index) in list" :key="index">
-          <td>
-            <button class="btn btn-outline btn-primary">
-              <i class="ki-filled ki-eye"></i>
+      <button class="tab" :class="{ 'active': tabNow === 'nonPo' }" @click="setTab('nonPo')">
+        Non PO
+      </button>
+      
+      <div class="dropdown ml-auto" data-dropdown="true" data-dropdown-trigger="click">
+        <button class="dropdown-toggle btn btn-primary">
+          <i class="ki-duotone ki-plus-circle"></i>
+          Add Invoice
+        </button>
+        <div class="dropdown-content w-full max-w-56 p-[10px]">
+          <div class="flex flex-col gap-[4px]">
+            <button class="btn btn-clear btn-light w-full" @click="goAdd(true)">
+              <i class="ki-duotone ki-file-added"></i>
+              Invoice PO
             </button>
-          </td>
-          <td>{{ item.invoiceNumber }}</td>
-          <td>
-            <span class="badge badge-outline badge-warning">
-              Proses Verifikasi
-            </span>
-          </td>
-          <td>{{ item.grNumber }}</td>
-          <td>{{ item.poNumber }}</td>
-          <td>{{ item.invoiceType }}</td>
-          <td>{{ item.invoiceCategory }}</td>
-          <td>{{ item.invoiceDate }}</td>
-          <td>{{ item.vendorName }}</td>
-          <td>{{ item.amountDue }}</td>
-        </tr>
-      </tbody>
-      </table>
+            <button class="btn btn-clear btn-light w-full" @click="goAdd(false)">
+              <i class="ki-duotone ki-file-deleted"></i>
+              Invoice Non PO
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
-
-    <div class="flex items-center justify-between mt-[24px]">
-      <p class="m-0">Tampilkan 10 data dari total data 100</p>
-      <LPagination :totalItems="totalItem" :pageSize="pageSize" :currentPage="currentPage" @pageChange="setPage" />
+    <div class="mt-[24px]">
+      <Transition mode="out-in">
+        <component :is="contentComponent" />
+      </Transition>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, computed, defineAsyncComponent, type Component } from 'vue'
 import { useRouter } from 'vue-router'
-import type { listTypes } from '../types/invoiceList'
-import LPagination from '@/components/pagination/LPagination.vue'
+
+const PoList = defineAsyncComponent(() => import('./invoiceList/PoList.vue'))
+const NonPoList = defineAsyncComponent(() => import('./invoiceList/NonPoList.vue'))
 
 const router = useRouter()
-const search = ref<string>('')
-const currentPage = ref<number>(1)
-const pageSize = ref<number>(10)
-const totalItem = ref<number>(100)
+const tabNow = ref<string>('po')
 
-const columns = ref([
-  '',
-  'No Invoice',
-  'Status',
-  'No GR',
-  'No PO',
-  'Tipe Invoice',
-  'Kategori Invoice',
-  'Tanggal Invoice',
-  'Nama Vendor',
-  'Amount Due'
-])
+const contentComponent = computed(() => {
+  const components = {
+    po: PoList,
+    nonPo: NonPoList
+  } as { [key: string]: Component }
 
-const list = ref<listTypes[]>([
-  {
-    invoiceNumber: 'INV238744',
-    status: 1,
-    grNumber: '5000000054',
-    poNumber: '1110052253',
-    invoiceType: 'PO',
-    invoiceCategory: 'With DP',
-    invoiceDate: '15 Okt 2024',
-    vendorName: 'PT Pharmacy',
-    amountDue: '2365456'
-  }
-])
+  return components[tabNow.value]
+})
 
-const goAdd = () => {
-  router.push({
-    name: 'invoiceAdd'
-  })
+const setTab = (name: string) => {
+  tabNow.value = name
 }
 
-const setPage = (value: number) => {
-  currentPage.value = value
+const goAdd = (isPo: boolean) => {
+  router.push({
+    name: 'invoiceAdd',
+    query: {
+      type: isPo ? 'po' : 'nonpo'
+    }
+  })
 }
 </script>
 

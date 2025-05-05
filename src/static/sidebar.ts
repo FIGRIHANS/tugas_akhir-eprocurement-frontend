@@ -122,10 +122,12 @@ export default [
       {
         id: 'invoice-verification',
         title: 'Invoice Verification',
+        to: '/invoice/verification'
       },
       {
         id: 'invoice-approval',
         title: 'Invoice Approval',
+        to: '/invoice/approval'
       },
       {
         id: 'schedule-payment',

@@ -1,9 +1,12 @@
 import type { documentFormTypes } from './invoiceDocument'
 import type { itemsPoGrType } from './invoicePoGr'
 import type { itemsCostType } from './additionalCost'
+import type { invoiceItemTypes } from './invoiceItem'
 
 export interface formTypes extends documentFormTypes {
   // Invoice Data
+  name: string
+  nameError?: boolean
   vendorId: string
   vendorIdError?: boolean
   businessField: string
@@ -11,37 +14,48 @@ export interface formTypes extends documentFormTypes {
   subBusinessField: string
   subBusinessFieldError?: boolean
   address: string
-  addressError?: boolean
+
+  isNotRegisteredBank?: boolean
   bankKeyId: string
   bankKeyIdError?: boolean
   bankNameId: string
-  bankNameIdError?: boolean
   beneficiaryName: string
-  beneficiaryNameError?: boolean
   bankAccountNumber: string
-  bankAccountNumberError?: boolean
   swiftCode: string
-  swiftCodeError?: boolean
   bankAddress: string
-  bankAddressError?: boolean
+  accountName?: string
+  npwpNumber?: string
+  bankNameNew?: string
+  bankAccountNumberNew?: string
+  bankAddressNew?: string
 
   // Invoice Information
   invoiceNo: string
-  invoiceNoError?: boolean
-  taxInvoiceNumber: string
-  taxInvoiceNumberError?: boolean
+  companyCode: string
+  companyCodeError?: boolean
+  supplierInvoiceNumber: string
+  supplierInvoiceNumberError?: boolean
+  invoiceDate: string
+  invoiceDateError?: boolean
+  taxNumber: string
+  taxNumberError?: boolean
   taxDate: string
   taxDateError?: boolean
-  taxCalculationId: string
-  taxCalculationIdError?: boolean
   taxCode: string
   taxCodeError?: boolean
   whtCode: string
   whtCodeError?: boolean
-  paymentTerm: string
-  paymentTermError?: boolean
+  paymentDate: string
+  paymentDateError?: boolean
+  department: string
+  departmentError?: boolean
+  invoiceDp: boolean
+  withDp: boolean
+
   invoicePoGr: itemsPoGrType[]
   invoicePoGrError?: boolean
   additionalCost: itemsCostType[]
-  additionalCostError?: boolean
+  invoiceItem: invoiceItemTypes[]
+
+  status: number
 }

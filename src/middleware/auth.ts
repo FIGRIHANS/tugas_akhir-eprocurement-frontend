@@ -1,17 +1,12 @@
 import type { MiddlewareContext } from 'vue-middleware'
+import { useCheckToken } from '@/composables/token'
 
 /**
  * Guest middleware
  * @param { app, router, from, to, redirect, abort, guard }: MiddlewareContext
  */
 export default (context: MiddlewareContext) => {
-  let token = ''
-
-  const cookies = document.cookie.split('; ')
-  for (const cookie of cookies) {
-    const [key, value] = cookie.split('=')
-    if (key === 'token_dts') token = decodeURIComponent(value)
-  }
+  const token = useCheckToken()
 
   if (!token) {
     context.router.push({

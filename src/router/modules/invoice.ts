@@ -15,14 +15,21 @@ export default [
   {
     path: '/invoice/add',
     name: 'invoiceAdd',
-    redirect: { name: 'invoice-add' },
-    component: () => import('@/views/invoice/InvoiceAddWrapper.vue'),
-    children: [
-      {
-        path: 'list',
-        name: 'invoice-add',
-        component: () => import('@/views/invoice/InvoiceAddWrapper/InvoiceData.vue'),
-      },
-    ],
+    component: () => import('@/views/invoice/InvoiceAddWrapper.vue')
+  },
+  {
+    path: '/invoice/verification',
+    name: 'invoiceVerification',
+    component: () => import('@/views/invoiceVerification/InvoiceVerification.vue')
+  },
+  {
+    path: '/invoice/approval',
+    name: 'invoiceApproval',
+    component: () => import('@/views/invoiceApproval/InvoiceApproval.vue')
+  },
+  {
+    path: '/invoice/detail',
+    name: 'invoiceDetail',
+    component: () => import('@/views/InvoiceDetail/InvoiceDetail.vue')
   },
 ]
