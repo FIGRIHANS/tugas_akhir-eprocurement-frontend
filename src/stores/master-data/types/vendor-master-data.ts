@@ -88,3 +88,82 @@ export type UploadFileResponse = {
   url: string
   urlWithToken: string
 }
+
+export type VendorRegistrationPayloadType = {
+  account: {
+    userName: string
+    email: string
+    password: string
+  }
+  vendor: {
+    vendorName: string
+    groupCompany: string
+    foundedDate: string
+    categoryId: number
+    vendorEmail: string
+    vendorPhone: string
+    vendorWebsite: string
+  }
+  companyLocation: {
+    countryId: number
+    country: string
+    stateId: number
+    state: string
+    cityId: number
+    city: string
+    postalCode: string
+    addressDetail: string
+  }
+  vendorLocation: {
+    countryId: number
+    country: string
+    stateId: number
+    state: string
+    cityId: number
+    city: string
+    postalCode: string
+    addressDetail: string
+  }
+  vendorCommodities: {
+    subBusinessFieldId: number
+  }[]
+  vendorResponsibleContacts: {
+    contactName: string
+    contactPhone: string
+    contactEmail: string
+    positionTypeId: number
+  }[]
+  vendorLicenses: {
+    licenseId: number
+    licenseNo: string
+    description: string
+    issuedDate: string
+    expiredDate: string
+    uploadUrl: string
+  }[]
+  otherDocuments: {
+    documentName: string
+    documentNo: string
+    description: string
+    issuedDate: string
+    expiredDate: string
+    uploadUrl: string
+  }[]
+  bankDetailDto: {
+    bankName: string
+    branch: string
+    swiftCode: string
+    address: string
+  }
+  vendorBankDetail: {
+    accountNo: string
+    accountName: string
+    bankId: string
+    currencyId: number
+    urlAccountDifferences: string
+    urlFirstPage: string
+    urlDoc: string
+    bankAddress: string
+    countryId: 0
+  }
+}

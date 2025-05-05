@@ -169,7 +169,7 @@
               <tr v-for="(document, index) in documentAndLegal.anotherDocuments" :key="index">
                 <td>{{ selectedCategory === 4 ? 'Other Document' : 'Dokumen Lainnya' }}</td>
                 <td class="align-top">
-                  <UiInput v-model="documentAndLegal.anotherDocuments[index].licenseNo" />
+                  <UiInput v-model="documentAndLegal.anotherDocuments[index].documentNo" />
                 </td>
                 <td class="align-top">
                   <DatePicker
@@ -294,6 +294,10 @@ const uploadFile = (file: File, index: number, type: 'default' | 'other doc') =>
 const addFile = async (index: number, type: 'default' | 'other doc') => {
   try {
     if (type === 'default') {
+      console.log(fileList.value)
+      console.log(index)
+      console.log(fileList.value[index])
+
       fileList.value[index].status = 'loading'
 
       const response = await vendorMasterDataStore.uploadFile({
@@ -330,7 +334,9 @@ const addFile = async (index: number, type: 'default' | 'other doc') => {
 const addAnotherDocument = () => {
   if (registrationVendorStore.documentAndLegal.anotherDocuments.length !== 5) {
     registrationVendorStore.documentAndLegal.anotherDocuments.push({
-      licenseNo: '',
+      documentName: 'Dokumen Lainnya',
+      documentNo: '',
+      description: '',
       issuedDate: '',
       expiredDate: '',
       uploadUrl: '',
@@ -359,6 +365,7 @@ watch(
       registrationVendorStore.documentAndLegal.fields = tableItems.value.map((item) => ({
         licenseId: item.licenseId,
         licenseNo: '',
+        description: '',
         issuedDate: '',
         expiredDate: '',
         uploadUrl: '',
@@ -372,7 +379,10 @@ watch(
         }),
       }))
 
-      fileList.value = []
+      fileList.value = registrationVendorStore.documentAndLegal.fields.map(() => ({
+        file: new File([''], 'placeholder.txt'),
+        status: 'notUpload',
+      }))
     }
   },
 )

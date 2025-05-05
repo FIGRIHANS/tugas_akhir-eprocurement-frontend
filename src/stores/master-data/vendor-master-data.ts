@@ -18,6 +18,7 @@ import type {
   ProvinceListType,
   TermConditionType,
   UploadFileResponse,
+  VendorRegistrationPayloadType,
 } from './types/vendor-master-data'
 
 const baseUrl = '/public/vendor/registration'
@@ -223,6 +224,14 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
     return response.data.result.content
   }
 
+  const postVendorRegistration = async (payload: VendorRegistrationPayloadType) => {
+    const response: ApiResponse = await vendorApi.post(`${baseUrl}/create`, {
+      ...payload,
+    })
+
+    return response.data.result
+  }
+
   return {
     countryList,
     provinceList,
@@ -247,5 +256,6 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
     getVendorCompanyLicense,
     getVendorTermCondition,
     uploadFile,
+    postVendorRegistration,
   }
 })

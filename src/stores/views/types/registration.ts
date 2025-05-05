@@ -70,7 +70,7 @@ export type RegisContactType = {
 }
 
 type DocumentFieldType = {
-  licenseNo: string
+  description: string
   issuedDate: string
   expiredDate: string
   uploadUrl: string
@@ -80,12 +80,16 @@ export type DocumentAndLegalType = {
   kategori: number
   fields: (DocumentFieldType & {
     licenseId: number
+    licenseNo: string
     licenseNoError?: boolean
     issuedDateError?: boolean
     expiredDateError?: boolean
     uploadUrlError?: boolean
   })[]
-  anotherDocuments: DocumentFieldType[]
+  anotherDocuments: (DocumentFieldType & {
+    documentName: string
+    documentNo: string
+  })[]
 }
 
 export type PaymentDetailType = {

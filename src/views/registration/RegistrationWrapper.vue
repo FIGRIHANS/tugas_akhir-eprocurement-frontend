@@ -43,6 +43,8 @@ import { computed, onBeforeMount, onMounted, onUnmounted, reactive } from 'vue'
 import { useCheckEmpty } from '@/composables/validation'
 
 import { useRegistrationVendorStore } from '@/stores/views/registration'
+import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
+import type { VendorRegistrationPayloadType } from '@/stores/master-data/types/vendor-master-data'
 
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiTab from '@/components/ui/atoms/tab/UiTab.vue'
@@ -52,6 +54,8 @@ const route = useRoute()
 const router = useRouter()
 
 const registrationVendorStore = useRegistrationVendorStore()
+const vendorMasterDataStore = useVendorMasterDataStore()
+
 const information = computed(() => registrationVendorStore.information)
 const contact = computed(() => registrationVendorStore.contact)
 const documentAndLegal = computed(() => registrationVendorStore.documentAndLegal)
@@ -246,50 +250,49 @@ const next = () => {
   const index = tabPosition.value + 1
 
   if (checkFieldNotEmpty()) {
-    const payload = {
-      account: {
-        userName: contact.value.account.username,
-        email: contact.value.account.email,
-        password: contact.value.account.password,
-      },
-      vendor: {
-        ...removeErrorFields(information.value.vendor),
-        categoryId: 0,
-        vendorEmail: contact.value.account.email,
-        vendorPhone: contact.value.account.phone,
-        vendorWebsite: contact.value.account.website,
-      },
-      companyLocation: removeErrorFields(information.value.companyLocation),
-      vendorLocation: removeErrorFields(information.value.vendorLocation),
-      vendorCommodities: information.value.vendorCommodities.list.map((item) => ({
-        subBusinessFieldId: item.subBusinessFieldId,
-      })),
-      vendorResponsibleContacts: contact.value.contactPerson.list,
-      vendorLicenses: removeErrorFields(documentAndLegal.value.fields),
-      otherDocuments: removeErrorFields(documentAndLegal.value.anotherDocuments),
-      bankDetailDto: {
-        bankName: isBankNotRegistered.value ? paymentDetail.value.bankName : '',
-        branch: isBankNotRegistered.value ? paymentDetail.value.branch : '',
-        swiftCode: isBankNotRegistered.value ? paymentDetail.value.swiftCode : '',
-        address: isBankNotRegistered.value ? paymentDetail.value.bankAddress : '',
-      },
-      vendorBankDetail: {
-        accountNo: paymentDetail.value.accountNo,
-        accountName: paymentDetail.value.accountName,
-        bankId: paymentDetail.value.bankId,
-        currencyId: paymentDetail.value.currencyId,
-        urlAccountDifferences: paymentDetail.value.urlAccountDifferences,
-        urlFirstPage: paymentDetail.value.urlFirstPage,
-        urlDoc: paymentDetail.value.suratPernyataan,
-        bankAddress: paymentDetail.value.bankAddress,
-        countryId: 0,
-      },
-    }
-
-    console.log(payload)
-
     if (index >= tab.items.length) {
-      console.log('end')
+      const payload: VendorRegistrationPayloadType = {
+        account: {
+          userName: contact.value.account.username,
+          email: contact.value.account.email,
+          password: contact.value.account.password,
+        },
+        vendor: {
+          ...removeErrorFields(information.value.vendor),
+          categoryId: 0,
+          vendorEmail: contact.value.account.email,
+          vendorPhone: contact.value.account.phone,
+          vendorWebsite: contact.value.account.website,
+        },
+        companyLocation: removeErrorFields(information.value.companyLocation),
+        vendorLocation: removeErrorFields(information.value.vendorLocation),
+        vendorCommodities: information.value.vendorCommodities.list.map((item) => ({
+          subBusinessFieldId: item.subBusinessFieldId,
+        })),
+        vendorResponsibleContacts: contact.value.contactPerson.list,
+        vendorLicenses: removeErrorFields(documentAndLegal.value.fields),
+        otherDocuments: removeErrorFields(documentAndLegal.value.anotherDocuments),
+        bankDetailDto: {
+          bankName: isBankNotRegistered.value ? paymentDetail.value.bankName : '',
+          branch: isBankNotRegistered.value ? paymentDetail.value.branch : '',
+          swiftCode: isBankNotRegistered.value ? paymentDetail.value.swiftCode : '',
+          address: isBankNotRegistered.value ? paymentDetail.value.bankAddress : '',
+        },
+        vendorBankDetail: {
+          accountNo: paymentDetail.value.accountNo,
+          accountName: paymentDetail.value.accountName,
+          bankId: paymentDetail.value.bankId,
+          currencyId: paymentDetail.value.currencyId,
+          urlAccountDifferences: paymentDetail.value.urlAccountDifferences,
+          urlFirstPage: paymentDetail.value.urlFirstPage,
+          urlDoc: paymentDetail.value.suratPernyataan,
+          bankAddress: paymentDetail.value.bankAddress,
+          countryId: 0,
+        },
+      }
+
+      vendorMasterDataStore.postVendorRegistration(payload)
+      // console.log(payload)
     } else {
       tab.active = tab.items[index].value
       router.push({ name: tab.items[index].value })
