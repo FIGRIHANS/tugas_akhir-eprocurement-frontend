@@ -42,7 +42,6 @@
 <script lang="ts" setup>
 import { defineModel } from 'vue'
 import type { ISelectProps } from './types/select'
-import { errorMessages } from 'vue/compiler-sfc'
 
 withDefaults(defineProps<ISelectProps>(), {
   placeholder: '',
