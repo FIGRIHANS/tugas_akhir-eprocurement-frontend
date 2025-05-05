@@ -4,10 +4,13 @@ import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import { ref } from 'vue'
 import VendorVerificationModal from './verificationModal/VendorVerificationModal.vue'
 import VendorBlacklistModal from './vendorBlacklistModal/VendorBlacklistModal.vue'
+import UiModal from '../modal/UiModal.vue'
+import successImg from '@/assets/success.svg'
 
 defineProps<{ id: string | number }>()
 const verificationModalOpen = ref<boolean>(false)
 const blacklistModalOpen = ref<boolean>(false)
+const blacklistSuccessOpen = ref<boolean>(false)
 </script>
 <template>
   <div class="dropdown" data-dropdown="true" data-dropdown-trigger="click">
@@ -46,5 +49,18 @@ const blacklistModalOpen = ref<boolean>(false)
   </div>
 
   <VendorVerificationModal :id="1" v-model="verificationModalOpen" v-if="verificationModalOpen" />
-  <VendorBlacklistModal :id="1" v-model="blacklistModalOpen" v-if="blacklistModalOpen" />
+  <VendorBlacklistModal
+    :id="1"
+    v-model:open="blacklistModalOpen"
+    v-model:success="blacklistSuccessOpen"
+    v-if="blacklistModalOpen"
+  />
+
+  <UiModal v-if="blacklistSuccessOpen" v-model="blacklistSuccessOpen" size="sm">
+    <img :src="successImg" alt="success" class="mx-auto mb-3" />
+    <h3 class="font-medium text-lg text-gray-800 text-center">Vendor Successfully Blacklisted</h3>
+    <p class="text-gray-600 text-center mb-3">
+      The vendor has been added to the blacklist and is no longer active in the system.
+    </p>
+  </UiModal>
 </template>

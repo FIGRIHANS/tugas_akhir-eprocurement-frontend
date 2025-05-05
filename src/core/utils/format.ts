@@ -30,5 +30,8 @@ export const formattoMySQL = (date: Date) => {
   const y = date.getFullYear()
   const m = pad(date.getMonth() + 1)
   const d = pad(date.getDate())
-  return `${y}-${m}-${d}`
+  const h = pad(date.getHours())
+  const min = pad(date.getMinutes())
+  const s = pad(date.getSeconds())
+  return `${y}-${m}-${d} ${h}:${min}:${s}`
 }

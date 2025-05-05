@@ -7,12 +7,18 @@ import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import { useBlacklistPeriodStore } from '@/stores/vendor/reference'
 import { useVendorUploadStore, type IUploadResponse } from '@/stores/vendor/upload'
 import UiLoading from '@/components/UiLoading.vue'
+import { useVendorStore } from '@/stores/vendor/vendor'
+import { formattoMySQL } from '@/core/utils/format'
+import axios from 'axios'
+import { isArray } from 'lodash'
 
 const periodStore = useBlacklistPeriodStore()
 const uploadStore = useVendorUploadStore()
+const vendorStore = useVendorStore()
 
-defineProps<IVendorBlacklistModalProps>()
-const open = defineModel()
+const props = defineProps<IVendorBlacklistModalProps>()
+const open = defineModel('open')
+const modalSuccess = defineModel('success')
 const period = ref<string>('')
 const file = ref<File>()
 const reason = ref<string>('')
@@ -20,6 +26,9 @@ const tglMulai = ref<Date>()
 const tglSelesai = ref<Date>()
 const uploadedFile = ref<IUploadResponse>()
 const inputError = ref<string[]>([])
+
+const loading = ref<boolean>(false)
+const error = ref<unknown>(null)
 
 const handleUpload = async () => {
   const formData = new FormData()
@@ -31,14 +40,14 @@ const handleUpload = async () => {
   uploadedFile.value = await uploadStore.upload(formData)
 }
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
   inputError.value = []
 
   if (!period.value) {
     inputError.value.push('period')
   }
 
-  if (period.value === 'temporary') {
+  if (period.value === '0') {
     if (!tglMulai.value) {
       inputError.value.push('tglMulai')
     }
@@ -49,6 +58,36 @@ const handleSubmit = () => {
 
   if (!reason.value) {
     inputError.value.push('reason')
+  }
+
+  if (inputError.value.length) {
+    return
+  }
+
+  try {
+    loading.value = true
+    error.value = null
+
+    await vendorStore.blacklistVendor({
+      VendorId: Number(props.id),
+      BlacklistDescription: reason.value,
+      BlacklistTypeID: Number(period.value),
+      CreatedBy: 'admin',
+      DocUrl: uploadedFile.value?.url,
+      EndDate: tglSelesai.value ? formattoMySQL(tglSelesai.value as Date) : '',
+      StartDate: tglMulai.value ? formattoMySQL(tglMulai.value as Date) : '',
+    })
+
+    modalSuccess.value = true
+    open.value = false
+  } catch (err) {
+    if (err instanceof Error) {
+      if (axios.isAxiosError(err)) {
+        error.value = err.response?.data.result.content
+      }
+    }
+  } finally {
+    loading.value = false
   }
 }
 
@@ -85,7 +124,9 @@ onMounted(periodStore.getPeriod)
                 <i class="ki-filled ki-calendar"></i>
               </button>
             </div>
-            <span v-if="inputError.includes('tglMulai')">Start Date is Required</span>
+            <span class="text-xs text-red-500" v-if="inputError.includes('tglMulai')">
+              Start Date is Required
+            </span>
           </template>
         </VueDatePicker>
         <VueDatePicker v-model="tglSelesai" class="w-full">
@@ -103,8 +144,10 @@ onMounted(periodStore.getPeriod)
                 <i class="ki-filled ki-calendar"></i>
               </button>
             </div>
+            <span class="text-xs text-red-500" v-if="inputError.includes('tglSelesai')">
+              End Date is Required
+            </span>
           </template>
-          <span v-if="inputError.includes('tglSelesai')">End Date is Required</span>
         </VueDatePicker>
       </div>
       <div class="flex rounded-md overflow-hidden border border-primary">
@@ -147,14 +190,22 @@ onMounted(periodStore.getPeriod)
         ></textarea>
         <span v-if="inputError.includes('reason')">Reason is Required</span>
       </div>
+      <div class="bg-red-100 border border-red-200 px-2 py-3 rounded-lg text-danger" v-if="error">
+        <ul v-if="isArray(error)">
+          <li v-for="err in error" :key="err">{{ err }}</li>
+        </ul>
+      </div>
       <div class="flex gap-3">
         <UiButton class="flex-1 justify-center" :outline="true" type="button" @click="open = !open">
           <UiIcon name="black-left-line" variant="duotone" />
           <span>Cancel</span>
         </UiButton>
-        <UiButton class="flex-1 justify-center" variant="danger">
-          <UiIcon name="cross-circle" variant="duotone" />
-          <span>Blacklist</span>
+        <UiButton class="flex-1 justify-center" variant="danger" :disabled="loading">
+          <span v-if="loading">Progress</span>
+          <template v-else>
+            <UiIcon name="cross-circle" variant="duotone" />
+            <span>Blacklist</span>
+          </template>
         </UiButton>
       </div>
     </form>

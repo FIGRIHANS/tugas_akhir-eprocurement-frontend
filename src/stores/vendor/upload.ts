@@ -1,5 +1,6 @@
 import type { ApiResponse } from '@/core/type/api'
 import vendorAPI from '@/core/utils/vendorAPI'
+import axios from 'axios'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
@@ -23,10 +24,16 @@ export const useVendorUploadStore = defineStore('vendor-upload', () => {
           headers: { 'Content-Type': 'multipart/form-data' },
         },
       )
+      if (response.data.statusCode !== 200) {
+        error.value = response.data.result.message
+        return
+      }
       return response.data.result.content
     } catch (err) {
       if (err instanceof Error) {
-        error.value = err.message
+        if (axios.isAxiosError(err)) {
+          error.value = err.response?.data.result.content
+        }
       }
     } finally {
       loading.value = false
