@@ -1,13 +1,13 @@
 type LokasiKantor = {
   countryId: number
   country: string
-  countryError?: boolean
+  countryIdError?: boolean
   stateId: number
   state: string
-  stateError?: boolean
+  stateIdError?: boolean
   cityId: number
   city: string
-  cityError?: boolean
+  cityIdError?: boolean
   postalCode: string
   postalCodeError?: boolean
   addressDetail: string

@@ -36,7 +36,7 @@
         text-key="countryName"
         row
         required
-        :error="information.companyLocation.countryError"
+        :error="information.companyLocation.countryIdError"
         @update:model-value="selectCountry('hq')"
       />
       <UiSelect
@@ -49,7 +49,7 @@
         text-key="provinceName"
         row
         required
-        :error="information.companyLocation.stateError"
+        :error="information.companyLocation.stateIdError"
         @update:model-value="selectProvince('hq')"
       />
       <UiSelect
@@ -62,7 +62,7 @@
         text-key="cityName"
         row
         required
-        :error="information.companyLocation.cityError"
+        :error="information.companyLocation.cityIdError"
         @update:model-value="selectCity('hq')"
       />
       <UiInput
@@ -103,7 +103,7 @@
           text-key="countryName"
           row
           required
-          :error="information.vendorLocation.countryError"
+          :error="information.vendorLocation.countryIdError"
           @update:model-value="selectCountry('company')"
         />
         <UiSelect
@@ -116,7 +116,7 @@
           :options="provinceListCompany"
           value-key="provinceID"
           text-key="provinceName"
-          :error="information.vendorLocation.stateError"
+          :error="information.vendorLocation.stateIdError"
           @update:model-value="selectProvince('company')"
         />
         <UiSelect
@@ -129,7 +129,7 @@
           text-key="cityName"
           row
           required
-          :error="information.vendorLocation.cityError"
+          :error="information.vendorLocation.cityIdError"
           @update:model-value="selectCity('company')"
         />
         <UiInput

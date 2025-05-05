@@ -165,9 +165,6 @@ const checkFieldNotEmpty = () => {
       )
 
     case 'registration__document-and-legal':
-      const checkingField = registrationVendorStore.documentAndLegal.fields.map(
-        (item) => !Object.values(item).some((value) => value === true),
-      )
       registrationVendorStore.documentAndLegal.fields =
         registrationVendorStore.documentAndLegal.fields.map((item, index) => ({
           ...item,
@@ -177,7 +174,14 @@ const checkFieldNotEmpty = () => {
             checkErrors(registrationVendorStore.documentAndLegal.fields[index], fields.document)),
         }))
 
-      return checkingField.some((value) => value === true)
+      const checkingField = registrationVendorStore.documentAndLegal.fields.map((item) =>
+        Object.values(item).some((value) => value === true),
+      )
+
+      console.log(checkingField)
+      console.log(registrationVendorStore.documentAndLegal.fields)
+
+      return !checkingField.some((value) => value === true)
 
     case 'registration__payment-detail':
       const section = registrationVendorStore.paymentDetail

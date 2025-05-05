@@ -16,24 +16,24 @@
         <table class="table table-border align-middle text-gray-700 font-medium text-sm">
           <thead>
             <tr>
-              <th>{{ selectedCategory === 4 ? 'Business Permit' : 'Izin Usaha' }}</th>
-              <th class="w-56">
+              <th class="w-32">{{ selectedCategory === 4 ? 'Business Permit' : 'Izin Usaha' }}</th>
+              <th>
                 {{
                   selectedCategory === 4
                     ? 'License No. / Description'
                     : 'No Izin Usaha / Keterangan'
                 }}
               </th>
-              <th class="w-56">
+              <th>
                 {{ selectedCategory === 4 ? 'Valid (Start Date)' : 'Berlaku (Tanggal Mulai)' }}
               </th>
-              <th class="w-56">
+              <th>
                 {{
                   selectedCategory === 4 ? 'Valid (Completion Date)' : 'Berlaku (Tanggal Selesai)'
                 }}
               </th>
-              <th class="w-56">{{ selectedCategory === 4 ? 'Document' : 'Dokumen' }}</th>
-              <th class="w-10">Action</th>
+              <th>{{ selectedCategory === 4 ? 'Document' : 'Dokumen' }}</th>
+              <th>Action</th>
             </tr>
           </thead>
 
@@ -61,6 +61,7 @@
                   format="dd MM yyyy"
                   :error="documentAndLegal.fields[index]?.issuedDateError"
                   @update:modelValue="changeFormatDate(index, 'default', 'issued')"
+                  class="!w-48"
                 />
               </td>
               <td class="align-top">
@@ -69,6 +70,7 @@
                   format="dd MM yyyy"
                   :error="documentAndLegal.fields[index]?.expiredDateError"
                   @update:modelValue="changeFormatDate(index, 'default', 'expired')"
+                  class="!w-48"
                 />
               </td>
               <td class="align-top">
@@ -77,7 +79,7 @@
                   :text-length="18"
                   :max-size="16000000"
                   accepted-files=".jpg,.jpeg.,.png,.pdf,application/zip"
-                  class="w-56"
+                  class="w-48"
                   :error="documentAndLegal.fields[index]?.uploadUrlError"
                   @addedFile="(file) => uploadFile(file, index, 'default')"
                 />
@@ -148,20 +150,22 @@
           <table class="table table-border align-middle text-gray-700 font-medium text-sm">
             <thead>
               <tr>
-                <th>{{ selectedCategory === 4 ? 'Document Name' : 'Nama Dokumen' }}</th>
-                <th class="w-56">
+                <th class="w-32">
+                  {{ selectedCategory === 4 ? 'Document Name' : 'Nama Dokumen' }}
+                </th>
+                <th>
                   {{ selectedCategory === 4 ? 'Description' : 'Keterangan' }}
                 </th>
-                <th class="w-56">
+                <th>
                   {{ selectedCategory === 4 ? 'Valid (Start Date)' : 'Berlaku (Tanggal Mulai)' }}
                 </th>
-                <th class="w-56">
+                <th>
                   {{
                     selectedCategory === 4 ? 'Valid (Completion Date)' : 'Berlaku (Tanggal Selesai)'
                   }}
                 </th>
-                <th class="w-56">{{ selectedCategory === 4 ? 'Document' : 'Dokumen' }}</th>
-                <th class="w-10">Action</th>
+                <th>{{ selectedCategory === 4 ? 'Document' : 'Dokumen' }}</th>
+                <th>Action</th>
               </tr>
             </thead>
 
@@ -176,6 +180,7 @@
                     v-model="documentAndLegal.anotherDocuments[index].issuedDate"
                     format="dd MM yyyy"
                     @update:modelValue="changeFormatDate(index, 'other doc', 'issued')"
+                    class="!w-48"
                   />
                 </td>
                 <td class="align-top">
@@ -183,6 +188,7 @@
                     v-model="documentAndLegal.anotherDocuments[index].expiredDate"
                     format="dd MM yyyy"
                     @update:modelValue="changeFormatDate(index, 'other doc', 'expired')"
+                    class="!w-48"
                   />
                 </td>
                 <td class="align-top">
@@ -191,7 +197,7 @@
                     :text-length="18"
                     :max-size="16000000"
                     accepted-files=".jpg,.jpeg.,.png,.pdf,application/zip"
-                    class="w-56"
+                    class="w-48"
                     @addedFile="(file) => uploadFile(file, index, 'other doc')"
                   />
                   <span class="text-danger text-[10px]"
