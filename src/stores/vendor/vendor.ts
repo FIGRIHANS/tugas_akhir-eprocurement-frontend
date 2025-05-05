@@ -7,8 +7,10 @@ import type {
   IPayment,
   IPostBlacklist,
   IVendorContent,
+  IVerifyLegal,
 } from './types/vendor'
 import type { ApiResponse } from '@/core/type/api'
+import axios from 'axios'
 
 export const useVendorStore = defineStore('vendor', () => {
   const loading = ref(false)
@@ -50,22 +52,32 @@ export const useVendorStore = defineStore('vendor', () => {
   }
 
   const blacklistVendor = async (params: IPostBlacklist) => {
+    const response: ApiResponse = await vendorAPI.post(
+      '/public/verifiedvendor/blacklist/vendor',
+      {},
+      {
+        params,
+      },
+    )
+
+    return response.data
+  }
+
+  const verifyLegal = async (params: IVerifyLegal) => {
     loading.value = true
     error.value = null
-
     try {
-      const response: ApiResponse = await vendorAPI.post('verifiedvendor/blacklist/vendor', {
-        params,
-      })
-
-      if (response.data.statusCode !== 200) {
-        error.value = response.data.result.message
-      }
-    } catch (err) {
+      const response: ApiResponse = await vendorAPI.post(
+        '/public/verifiedvendor/verify/license/vendor',
+        {},
+        { params },
+      )
+      return response.data
+    } catch (err: unknown) {
       if (err instanceof Error) {
-        error.value = err.message
-      } else {
-        error.value = 'Failed to blacklist vendor'
+        if (axios.isAxiosError(err)) {
+          error.value = err.response?.data.result.message
+        }
       }
     }
   }
@@ -74,11 +86,12 @@ export const useVendorStore = defineStore('vendor', () => {
     vendors,
     loading,
     error,
-    getVendors,
-    blacklistVendor,
     isAdministrationVerified,
     isLicenseVerified,
     isBankVerified,
+    getVendors,
+    blacklistVendor,
+    verifyLegal,
   }
 })
 

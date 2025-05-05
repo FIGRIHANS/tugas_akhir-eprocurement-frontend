@@ -117,3 +117,15 @@ export interface IPostBlacklist {
   EndDate?: string
   CreatedBy?: string
 }
+
+export interface IVerifyLegal {
+  VendorId?: number
+  LicenseId?: number
+  IsVerified?: boolean
+  VerifiedNote?: string
+  IsReject?: boolean
+  reason?: string
+  Position?: string
+  CreatedBy?: string
+  VerificatorName?: string
+}
