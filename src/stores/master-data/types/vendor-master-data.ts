@@ -89,6 +89,24 @@ export type UploadFileResponse = {
   urlWithToken: string
 }
 
+type LocationType = {
+  countryId: number
+  country: string
+  stateId: number
+  state: string
+  cityId: number
+  city: string
+  postalCode: string
+  addressDetail: string
+}
+
+type DocumentType = {
+  description: string
+  issuedDate: string | null
+  expiredDate: string | null
+  uploadUrl: string
+}
+
 export type VendorRegistrationPayloadType = {
   account: {
     userName: string
@@ -104,26 +122,8 @@ export type VendorRegistrationPayloadType = {
     vendorPhone: string
     vendorWebsite: string
   }
-  companyLocation: {
-    countryId: number
-    country: string
-    stateId: number
-    state: string
-    cityId: number
-    city: string
-    postalCode: string
-    addressDetail: string
-  }
-  vendorLocation: {
-    countryId: number
-    country: string
-    stateId: number
-    state: string
-    cityId: number
-    city: string
-    postalCode: string
-    addressDetail: string
-  }
+  companyLocation: LocationType
+  vendorLocation: LocationType
   vendorCommodities: {
     subBusinessFieldId: number
   }[]
@@ -133,22 +133,14 @@ export type VendorRegistrationPayloadType = {
     contactEmail: string
     positionTypeId: number
   }[]
-  vendorLicenses: {
+  vendorLicenses: (DocumentType & {
     licenseId: number
     licenseNo: string
-    description: string
-    issuedDate: string
-    expiredDate: string
-    uploadUrl: string
-  }[]
-  otherDocuments: {
+  })[]
+  otherDocuments: (DocumentType & {
     documentName: string
     documentNo: string
-    description: string
-    issuedDate: string
-    expiredDate: string
-    uploadUrl: string
-  }[]
+  })[]
   bankDetailDto: {
     bankName: string
     branch: string
