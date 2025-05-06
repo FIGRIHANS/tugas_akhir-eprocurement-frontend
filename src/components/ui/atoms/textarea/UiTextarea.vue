@@ -3,7 +3,7 @@
     :class="[
       'relative',
       {
-        'flex items-center flex-wrap lg:flex-nowrap gap-2.5': row,
+        'flex items-baseline flex-wrap lg:flex-nowrap gap-2.5': row,
       },
     ]"
   >
@@ -21,37 +21,30 @@
       {{ label }}
       <span v-if="required" class="text-danger"> * </span>
     </label>
-
-    <select
+    <textarea
       v-model="model"
-      class="select"
+      class="textarea"
       :class="{ 'border-danger': error }"
+      :placeholder="placeholder"
       :readonly="readonly"
       :disabled="disabled"
-    >
-      <option selected disabled hidden :value="typeof model === 'number' ? 0 : ''">
-        {{ placeholder }}
-      </option>
-      <option v-for="option in options" :key="option[valueKey]" :value="option[valueKey]">
-        {{ option[textKey] }}
-      </option>
-    </select>
+      rows="4"
+    ></textarea>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { defineModel } from 'vue'
-import type { ISelectProps } from './types/select'
+import type { ITextareaProps } from './types/textarea'
 
-withDefaults(defineProps<ISelectProps>(), {
+withDefaults(defineProps<ITextareaProps>(), {
   placeholder: '',
   readonly: false,
   disabled: false,
   row: false,
-  valueKey: 'value',
-  textKey: 'text',
+  required: false,
   error: false,
 })
 
-const model = defineModel<string | number>({ default: '' })
+const model = defineModel<string | number | readonly string[] | null | undefined>()
 </script>

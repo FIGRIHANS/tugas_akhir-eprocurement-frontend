@@ -1,4 +1,4 @@
-export interface IInputProps {
+export interface IInputTelProps {
   label?: string
   placeholder?: string
   readonly?: boolean
@@ -6,5 +6,4 @@ export interface IInputProps {
   row?: boolean
   required?: boolean
   error?: boolean
-  type?: 'text' | 'number'
 }
