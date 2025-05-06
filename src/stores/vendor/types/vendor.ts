@@ -119,13 +119,23 @@ export interface IPostBlacklist {
 }
 
 export interface IVerifyLegal {
-  VendorId?: number
-  LicenseId?: number
-  IsVerified?: boolean
-  VerifiedNote?: string
-  IsReject?: boolean
-  reason?: string
-  Position?: string
-  CreatedBy?: string
-  VerificatorName?: string
+  vendorId?: number
+  dataCategoryId?: number
+  isVerified?: boolean
+  verifiedNote?: string
+  isReject?: boolean
+  rejectedNote?: string
+  position?: string
+  createdBy?: string
+  verificatorName?: string
+}
+
+export interface IVerificationDetailData {
+  vendorId: number
+  verificatorName: string
+  position: string
+  createdDate: string
+  verificationType: string
+  status: string
+  keterangan: string
 }

@@ -7,6 +7,7 @@ import type {
   IPayment,
   IPostBlacklist,
   IVendorContent,
+  IVerificationDetailData,
   IVerifyLegal,
 } from './types/vendor'
 import type { ApiResponse } from '@/core/type/api'
@@ -63,23 +64,9 @@ export const useVendorStore = defineStore('vendor', () => {
     return response.data
   }
 
-  const verifyLegal = async (params: IVerifyLegal) => {
-    loading.value = true
-    error.value = null
-    try {
-      const response: ApiResponse = await vendorAPI.post(
-        '/public/verifiedvendor/verify/license/vendor',
-        {},
-        { params },
-      )
-      return response.data
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        if (axios.isAxiosError(err)) {
-          error.value = err.response?.data.result.message
-        }
-      }
-    }
+  const verifyLegal = async (body: IVerifyLegal) => {
+    const response: ApiResponse = await vendorAPI.post('/public/verifiedvendor/verify/vendor', body)
+    return response.data
   }
 
   return {
@@ -203,17 +190,27 @@ export const useVendorPaymentStore = defineStore('vendor-payment', () => {
 export const useVerificationDetailStore = defineStore('verification-detail', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
-  const data = ref()
+  const data = ref<IVerificationDetailData[]>([])
 
   const getData = async (vendorId: number) => {
     loading.value = true
     error.value = null
 
-    const response: ApiResponse = await vendorAPI.get(
-      '/public/verifiedvendor/verify/vendor-detail',
-      { params: { vendorId } },
-    )
-    console.log(response.data)
+    try {
+      const response: ApiResponse<IVerificationDetailData[]> = await vendorAPI.get(
+        '/public/verifiedvendor/verify/vendor-detail',
+        { params: { vendorId } },
+      )
+      data.value = response.data.result.content
+    } catch (err) {
+      if (err instanceof Error) {
+        if (axios.isAxiosError(err)) {
+          error.value = err.response?.data.result.message
+        }
+      }
+    } finally {
+      loading.value = false
+    }
   }
 
   return { loading, error, data, getData }

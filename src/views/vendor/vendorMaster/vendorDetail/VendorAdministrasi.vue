@@ -4,31 +4,88 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import VendorAdministrasiCard from '@/components/vendor/vendorAdministrasiCard/VendorAdministrasiCard.vue'
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import successImg from '@/assets/success.svg'
 import { useVendorStore } from '@/stores/vendor/vendor'
+import axios from 'axios'
 
 const router = useRouter()
+const route = useRoute()
 const modalReject = ref(false)
 const modalRejectSuccess = ref(false)
 const modalVerify = ref(false)
 const modalVerifySuccess = ref(false)
 const reason = ref('')
 const notes = ref('')
+const inputError = ref<string[]>([])
+const loading = ref(false)
+const error = ref('')
 
 const vendorStore = useVendorStore()
 
-const handleVerify = () => {
-  vendorStore.isAdministrationVerified = true
-  modalVerify.value = false
-  modalVerifySuccess.value = true
+const handleVerify = async () => {
+  loading.value = true
+  error.value = ''
+
+  try {
+    await vendorStore.verifyLegal({
+      vendorId: Number(route.params.id),
+      isVerified: true,
+      verifiedNote: notes.value,
+      isReject: false,
+      rejectedNote: reason.value,
+      dataCategoryId: 1,
+      position: 'Admin',
+      verificatorName: 'Susi Susanti',
+    })
+
+    modalVerify.value = false
+    modalVerifySuccess.value = true
+  } catch (err) {
+    if (err instanceof Error) {
+      if (axios.isAxiosError(err)) {
+        error.value = err.response?.data.result.message
+      }
+    }
+  } finally {
+    loading.value = false
+  }
 }
 
-const handleReject = () => {
+const handleReject = async () => {
   // call api here
 
-  modalReject.value = false
-  modalRejectSuccess.value = true
+  if (!reason.value) {
+    inputError.value.push('reason')
+    return
+  }
+
+  loading.value = true
+  error.value = ''
+
+  try {
+    await vendorStore.verifyLegal({
+      vendorId: Number(route.params.id),
+      isVerified: false,
+      verifiedNote: '',
+      isReject: true,
+      rejectedNote: reason.value,
+      dataCategoryId: 1,
+      position: 'Admin',
+      verificatorName: 'Susi Susanti',
+    })
+
+    modalReject.value = false
+    modalRejectSuccess.value = true
+  } catch (err) {
+    if (err instanceof Error) {
+      if (axios.isAxiosError(err)) {
+        error.value = err.response?.data.result.message
+      }
+    }
+  } finally {
+    loading.value = false
+  }
 }
 </script>
 <template>
@@ -44,7 +101,7 @@ const handleReject = () => {
         <UiIcon name="cross-circle" variant="duotone" />
         <span> Reject </span>
       </UiButton>
-      <UiButton @click="modalVerify = true" :disabled="vendorStore.isAdministrationVerified">
+      <UiButton @click="modalVerify = true">
         <UiIcon name="check-squared" variant="duotone" />
         <span> Verify </span>
       </UiButton>
@@ -61,6 +118,9 @@ const handleReject = () => {
         >
         <textarea id="reason" class="textarea" rows="6" v-model="reason" required></textarea>
       </div>
+      <span v-if="inputError.includes('reason')" class="text-xs text-danger">
+        Reason is required
+      </span>
       <div class="flex gap-3">
         <UiButton
           class="flex-1 justify-center"
@@ -71,9 +131,12 @@ const handleReject = () => {
           <UiIcon name="black-left-line" variant="duotone" />
           <span>Cancel</span>
         </UiButton>
-        <UiButton class="flex-1 justify-center" variant="danger">
-          <UiIcon name="cross-circle" variant="duotone" />
-          <span>Reject</span>
+        <UiButton class="flex-1 justify-center" variant="danger" :disabled="loading">
+          <span v-if="loading"> Progress </span>
+          <template v-else>
+            <UiIcon name="cross-circle" variant="duotone" />
+            <span>Reject</span>
+          </template>
         </UiButton>
       </div>
     </form>
@@ -99,9 +162,12 @@ const handleReject = () => {
           <UiIcon name="black-left-line" variant="duotone" />
           <span>Cancel</span>
         </UiButton>
-        <UiButton class="flex-1 justify-center" variant="primary">
-          <UiIcon name="check-circle" variant="duotone" />
-          <span>Verify</span>
+        <UiButton class="flex-1 justify-center" variant="primary" :disabled="loading">
+          <span v-if="loading"> Progress </span>
+          <template v-else>
+            <UiIcon name="check-circle" variant="duotone" />
+            <span>Verify</span>
+          </template>
         </UiButton>
       </div>
     </form>
