@@ -7,7 +7,7 @@ import VendorBlacklistModal from './vendorBlacklistModal/VendorBlacklistModal.vu
 import UiModal from '../modal/UiModal.vue'
 import successImg from '@/assets/success.svg'
 
-defineProps<{ id: string | number }>()
+defineProps<{ id: string | number; name: string }>()
 const verificationModalOpen = ref<boolean>(false)
 const blacklistModalOpen = ref<boolean>(false)
 const blacklistSuccessOpen = ref<boolean>(false)
@@ -48,7 +48,12 @@ const blacklistSuccessOpen = ref<boolean>(false)
     </div>
   </div>
 
-  <VendorVerificationModal :id="id" v-model="verificationModalOpen" v-if="verificationModalOpen" />
+  <VendorVerificationModal
+    :id="id"
+    :name="name"
+    v-model="verificationModalOpen"
+    v-if="verificationModalOpen"
+  />
   <VendorBlacklistModal
     :id="id"
     v-model:open="blacklistModalOpen"

@@ -113,7 +113,7 @@ watch(
             >
               <td>
                 <div class="flex items-center gap-3">
-                  <VendorMenu :id="vendor.vendorId" />
+                  <VendorMenu :id="vendor.vendorId" :name="vendor.vendorName" />
                   <StatusToggle :id="vendor.vendorId" :status="vendor.isActive" />
                 </div>
               </td>
