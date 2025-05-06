@@ -64,30 +64,10 @@
               </select>
             </td>
             <td>
-              <input v-if="!item.isEdit" v-model="item.activity" class="input" placeholder="" disabled/>
-              <select v-else v-model="item.activity" class="select" placeholder="">
-                <option value="1">
-                  Option 1
-                </option>
-                <option value="2">
-                  Option 2
-                </option>
-                <option value="3">
-                  Option 3
-                </option>
-              </select>
-            </td>
-            <td>
               <input v-if="!item.isEdit" v-model="item.taxCode" class="input" placeholder="" disabled/>
               <select v-else v-model="item.taxCode" class="select" placeholder="">
-                <option value="1">
-                  Option 1
-                </option>
-                <option value="2">
-                  Option 2
-                </option>
-                <option value="3">
-                  Option 3
+                <option v-for="(option, index) in listTaxCalculation" :key="index" :value="option.id">
+                  {{ option.id }}
                 </option>
               </select>
             </td>
@@ -164,9 +144,11 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, inject } from 'vue'
+import { ref, computed, inject } from 'vue'
 import type { formTypes } from '../../types/invoiceAddWrapper'
+import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 
+const invoiceApi = useInvoiceSubmissionStore()
 const columns = ref([
   'Action',
   'Activity / Expense',
@@ -183,6 +165,8 @@ const columns = ref([
 ])
 
 const form = inject<formTypes>('form')
+
+const listTaxCalculation = computed(() => invoiceApi.taxCalculationList)
 
 const addNew = () => {
   if (form) {

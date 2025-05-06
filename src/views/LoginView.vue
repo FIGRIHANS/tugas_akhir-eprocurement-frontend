@@ -96,6 +96,7 @@ const goLogin = () => {
     .then((response: ApiResponseData<string>) => {
       if (response.statusCode === 200) {
         setToken(response.result)
+        login.callUser(email.value)
         router.push({
           path: '/dashboard'
         })
@@ -108,7 +109,7 @@ const goLogin = () => {
 
 const setToken = (result: ApiResponseDataResult<string>) => {
   const expired = moment().add(7, 'days').toDate().toUTCString()
-  document.cookie = `token_dts=${'bearer ' + result.content}; path=/; expires=${expired}; Secure; SameSite=Strict`
+  document.cookie = `token_dts=${'Bearer ' + result.content}; path=/; expires=${expired}; Secure; SameSite=Strict`
 }
 
 const saveAccount = () => {

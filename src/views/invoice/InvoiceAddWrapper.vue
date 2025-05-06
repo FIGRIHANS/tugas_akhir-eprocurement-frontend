@@ -53,7 +53,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, computed, provide, type Component, defineAsyncComponent } from 'vue'
+import { ref, reactive, computed, onMounted, provide, type Component, defineAsyncComponent } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import type { formTypes } from './types/invoiceAddWrapper'
@@ -63,12 +63,14 @@ import TabInvoice from './InvoiceAddWrapper/TabInvoice.vue'
 import iconPDF from '@/components/icons/iconPDF.vue'
 import { KTModal } from '@/metronic/core'
 import { useCheckEmpty } from '@/composables/validation'
+import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 
 const InvoiceData = defineAsyncComponent(() => import('./InvoiceAddWrapper/InvoiceData.vue'))
 const InvoiceInformation = defineAsyncComponent(() => import('./InvoiceAddWrapper/InvoiceInformation.vue'))
 const InvoicePreview = defineAsyncComponent(() => import('./InvoiceAddWrapper/InvoicePreview.vue'))
 const ModalSuccess = defineAsyncComponent(() => import('./InvoiceAddWrapper/InvoicePreview/ModalSuccess.vue'))
 
+const invoiceApi = useInvoiceSubmissionStore()
 const router = useRouter()
 const route = useRoute()
 const tabNow = ref<string>('data')
@@ -203,6 +205,10 @@ const goNext = () => {
     }, 1000)
   }
 }
+
+onMounted(() => {
+  invoiceApi.getTaxCalculation()
+})
 
 provide('form', form)
 </script>

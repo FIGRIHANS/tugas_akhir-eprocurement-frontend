@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import vendorApi from '@/core/utils/vendorApi'
+import invoiceApi from '@/core/utils/invoiceApi'
 import type { ApiResponse } from '@/core/type/api'
 
 import type {
@@ -17,7 +17,7 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
   const taxCalculationList = ref<TaxCalculationTypes[]>([])
 
   const getSubmissionStatus = async () => {
-    const response: ApiResponse<SubmissionStatusTypes[]> = await vendorApi.get(`/lookup/invoice/submission/status`)
+    const response: ApiResponse<SubmissionStatusTypes[]> = await invoiceApi.get(`/lookup/invoice/submission/status`)
 
     submissionStatus.value = response.data.result.content
 
@@ -25,7 +25,7 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
   }
 
   const getDocumentType = async () => {
-    const response: ApiResponse<DocumentTypes[]> = await vendorApi.get(`/lookup/document-type`)
+    const response: ApiResponse<DocumentTypes[]> = await invoiceApi.get(`/lookup/document-type`)
   
     documentTypeList.value = response.data.result.content
   
@@ -33,7 +33,7 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
   }
 
   const getTaxCalculation = async () => {
-    const response: ApiResponse<TaxCalculationTypes[]> = await vendorApi.get(`/lookup/tax-calculation`)
+    const response: ApiResponse<TaxCalculationTypes[]> = await invoiceApi.get(`/lookup/tax-calculation`)
   
     taxCalculationList.value = response.data.result.content
   
@@ -41,13 +41,13 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
   }
 
   const postSubmissionInitiate = async (data: ParamsSubmissionInitiateTypes) => {
-    const response: ApiResponse<TaxCalculationTypes[]> = await vendorApi.post(`/invoice/submission/initiate`, data)
+    const response: ApiResponse<TaxCalculationTypes[]> = await invoiceApi.post(`/invoice/submission/initiate`, data)
 
     return response.data.result
   }
 
   const postSubmission = async (data: ParamsSubmissionTypes) => {
-    const response: ApiResponse<TaxCalculationTypes[]> = await vendorApi.post(`/invoice/submission/initiate`, data)
+    const response: ApiResponse<TaxCalculationTypes[]> = await invoiceApi.post(`/invoice/submission/initiate`, data)
 
     return response.data.result
   }
