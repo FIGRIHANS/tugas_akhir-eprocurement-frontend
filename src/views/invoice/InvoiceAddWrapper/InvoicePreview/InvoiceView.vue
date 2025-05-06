@@ -3,42 +3,38 @@
     <p class="text-lg font-semibold m-[0px]">{{ form.invoiceNo || '-' }}</p>
     <div class="flex flex-wrap items-center gap-[20px]">
       <div class="w-[calc(50%-10px)]">
-        <p class="text-xs font-normal text-gray-700">No Invoice Supplier</p>
-        <p class="text-sm font-medium">{{ form.supplierInvoiceNumber || '-' }}</p>
+        <p class="text-xs font-normal text-gray-700">Company Code</p>
+        <p class="text-sm font-medium">{{ form.companyCode || '-' }}</p>
+      </div>
+      <div class="w-[calc(50%-10px)]">
+        <p class="text-xs font-normal text-gray-700">No Invoice Vendor</p>
+        <p class="text-sm font-medium">{{ form.invoiceNoVendor || '-' }}</p>
       </div>
       <div class="w-[calc(50%-10px)]">
         <p class="text-xs font-normal text-gray-700">Invoice Date</p>
         <p class="text-sm font-medium whitespace-nowrap">{{ form.invoiceDate ? moment(form.invoiceDate).format('DD/MM/YYYY') : '-' }}</p>
-      </div>
-      <div v-if="checkNonPo()" class="w-[calc(50%-10px)]">
-        <p class="text-xs font-normal text-gray-700">Company Code</p>
-        <p class="text-sm font-medium">{{ form.companyCode || '-' }}</p>
       </div>
       <div class="w-[calc(50%-10px)]">
         <p class="text-xs font-normal text-gray-700">No Tax Invoice</p>
         <p class="text-sm font-medium">{{ form.taxNumber || '-' }}</p>
       </div>
       <div class="w-[calc(50%-10px)]">
-        <p class="text-xs font-normal text-gray-700">Tax Invoice Date</p>
-        <p class="text-sm font-medium whitespace-nowrap">{{ form.taxDate ? moment(form.taxDate).format('DD/MM/YYYY') : '-' }}</p>
+        <p class="text-xs font-normal text-gray-700">Currency</p>
+        <p class="text-sm font-medium">{{ form.currency || '-' }}</p>
+      </div>
+      <div v-if="form.withDp" class="w-[calc(50%-10px)]">
+        <p class="text-xs font-normal text-gray-700">Remaining DP Amount</p>
+        <p class="text-sm font-medium">{{ form.remainingDpAmount || '-' }}</p>
+      </div>
+      <div v-if="form.withDp" class="w-[calc(50%-10px)]">
+        <p class="text-xs font-normal text-gray-700">DP Amount Deduction</p>
+        <p class="text-sm font-medium">{{ form.dpAmountDeduction || '-' }}</p>
       </div>
       <div class="w-[calc(50%-10px)]">
-        <p class="text-xs font-normal text-gray-700">Tax Code</p>
-        <p class="text-sm font-medium">{{ form.taxCode || '-' }}</p>
+        <p class="text-xs font-normal text-gray-700">Description</p>
+        <p class="text-sm font-medium">{{ form.description || '-' }}</p>
       </div>
-      <div class="w-[calc(50%-10px)]">
-        <p class="text-xs font-normal text-gray-700">WHT Code</p>
-        <p class="text-sm font-medium whitespace-nowrap">{{ form.whtCode || '-' }}</p>
-      </div>
-      <div class="w-[calc(50%-10px)]">
-        <p class="text-xs font-normal text-gray-700">Estimated Schedule Payment</p>
-        <p class="text-sm font-medium">{{ form.paymentDate || '-' }}</p>
-      </div>
-      <div v-if="checkNonPo()" class="w-[calc(50%-10px)]">
-        <p class="text-xs font-normal text-gray-700">Department</p>
-        <p class="text-sm font-medium">{{ form.department || '-' }}</p>
-      </div>
-      <div v-if="checkPo()" class="w-[calc(50%-10px)] flex items-center gap-[8px]">
+      <div v-if="checkPo() && !checkPoPib()" class="w-[calc(50%-10px)] flex items-center gap-[8px]">
         <label class="form-label flex items-center gap-2.5 w-fit">
           <input v-model="form.invoiceDp" class="checkbox" name="checkInvoiceDp" type="checkbox" disabled/>
           <span class="text-gray-500">Invoice DP</span>
@@ -66,8 +62,8 @@ const checkPo = () => {
   return typeForm.value === 'po'
 }
 
-const checkNonPo = () => {
-  return typeForm.value === 'nonpo'
+const checkPoPib = () => {
+  return form?.invoiceType === 'pib'
 }
 
 onMounted(() => {

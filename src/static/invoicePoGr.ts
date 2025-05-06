@@ -1,44 +1,64 @@
 export const defaultColumn = [
-  'No GR',
-  'No PO',
-  'PO Number SAP',
-  'Item',
-  'QTY',
-  'UoM',
-  'Cost Per Unit',
-  'Total Cost',
-  'Delivery Date',
-  'Billable',
-  'DP%',
-  'DP Value',
+  'PO Number',
+  'PO Item',
+  'GR Document No.',
+  'GR Document Item.',
+  'GR Document Date',
+  'Tax Code',
+  'Item Amount',
+  'Quantity',
+  'Unit',
+  'Item Text',
+  'Condition Type',
   'WHT Type',
   'WHT Code',
-  'DPP',
-  'WHT Value',
-  'VAT',
-  'DPP Lain - Lain',
-  'Amount'
+  'WHT Base Amount',
+  'Category',
+  'Total Net Amount'
 ]
 
 export const invoiceDpColumn = [
-  'No GR',
-  'No PO',
-  'PO Number SAP',
-  'Item',
-  'QTY',
-  'UoM',
-  'Cost Per Unit',
-  'Total Cost',
-  'Termin Cicilan',
-  'Delivery Date',
-  'Billable',
-  'DP%',
-  'DP Value',
+  'PO Number',
+  'Tax Code',
+  'Amount Invoice',
+  'VAT Amount',
   'WHT Type',
   'WHT Code',
-  'DPP',
-  'WHT Value',
-  'VAT',
-  'DPP Lain - Lain',
-  'Amount'
+  'WHT Base Amount',
+  'Category'
+]
+
+export const PoPibColumn = [
+  'PO Number',
+  'PO Item',
+  'Tax Code',
+  'Item Amount',
+  'Quantity',
+  'Unit',
+  'Item Text',
+  'Category',
+  'Total Net Amount'
+]
+
+export const searchDefaultColumn = [
+  'PO Number',
+  'GR Number',
+  'QTY',
+  'Unit',
+  'Item',
+  'Item Amount'
+]
+
+export const searchInvoiceDpColumn = [
+  'PO Number',
+  'Amount Invoice',
+  'Description'
+]
+
+export const searchPoPibColumn = [
+  'PO Number',
+  'QTY',
+  'Unit',
+  'Item',
+  'Item Amount'
 ]

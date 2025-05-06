@@ -33,8 +33,8 @@
               </button>
             </td>
             <td>
-              <input v-if="!item.isEdit" v-model="item.type" class="input" placeholder="" disabled/>
-              <select v-else v-model="item.type" class="select" placeholder="">
+              <input v-if="!item.isEdit" v-model="item.activity" class="input" placeholder="" disabled/>
+              <select v-else v-model="item.activity" class="select" placeholder="">
                 <option value="1">
                   Option 1
                 </option>
@@ -47,7 +47,49 @@
               </select>
             </td>
             <td>
-              <input v-model="item.gl" class="input" placeholder="" :disabled="!item.isEdit"/>
+              <input v-model="item.itemAmount" class="input" placeholder="" :disabled="!item.isEdit"/>
+            </td>
+            <td>
+              <input v-if="!item.isEdit" v-model="item.debitCredit" class="input" placeholder="" disabled/>
+              <select v-else v-model="item.debitCredit" class="select" placeholder="">
+                <option value="1">
+                  Option 1
+                </option>
+                <option value="2">
+                  Option 2
+                </option>
+                <option value="3">
+                  Option 3
+                </option>
+              </select>
+            </td>
+            <td>
+              <input v-if="!item.isEdit" v-model="item.activity" class="input" placeholder="" disabled/>
+              <select v-else v-model="item.activity" class="select" placeholder="">
+                <option value="1">
+                  Option 1
+                </option>
+                <option value="2">
+                  Option 2
+                </option>
+                <option value="3">
+                  Option 3
+                </option>
+              </select>
+            </td>
+            <td>
+              <input v-if="!item.isEdit" v-model="item.taxCode" class="input" placeholder="" disabled/>
+              <select v-else v-model="item.taxCode" class="select" placeholder="">
+                <option value="1">
+                  Option 1
+                </option>
+                <option value="2">
+                  Option 2
+                </option>
+                <option value="3">
+                  Option 3
+                </option>
+              </select>
             </td>
             <td>
               <input v-if="!item.isEdit" v-model="item.costCenter" class="input" placeholder="" disabled/>
@@ -64,20 +106,8 @@
               </select>
             </td>
             <td>
-              <input v-model="item.quantity" class="input" placeholder="" :disabled="!item.isEdit"/>
-            </td>
-            <td>
-              <input v-model="item.uom" class="input" placeholder="" :disabled="!item.isEdit"/>
-            </td>
-            <td>
-              <input v-model="item.costPerUnit" class="input" placeholder="" :disabled="!item.isEdit"/>
-            </td>
-            <td>
-              <input v-model="item.totalCost" class="input" placeholder="" :disabled="!item.isEdit"/>
-            </td>
-            <td>
-              <input v-if="!item.isEdit" v-model="item.pphType" class="input" placeholder="" disabled/>
-              <select v-else v-model="item.pphType" class="select" placeholder="">
+              <input v-if="!item.isEdit" v-model="item.profitCenter" class="input" placeholder="" disabled/>
+              <select v-else v-model="item.profitCenter" class="select" placeholder="">
                 <option value="1">
                   Option 1
                 </option>
@@ -90,17 +120,11 @@
               </select>
             </td>
             <td>
-              <input v-model="item.pphCode" class="input" placeholder="" disabled/>
+              <input v-model="item.assignment" class="input" placeholder="" :disabled="!item.isEdit"/>
             </td>
             <td>
-              <input v-model="item.dpp" class="input" placeholder="" :disabled="!item.isEdit"/>
-            </td>
-            <td>
-              <input v-model="item.pphValue" class="input" placeholder="" disabled/>
-            </td>
-            <td>
-              <input v-if="!item.isEdit" v-model="item.vat" class="input" placeholder="" disabled/>
-              <select v-else v-model="item.vat" class="select" placeholder="">
+              <input v-if="!item.isEdit" v-model="item.whtType" class="input" placeholder="" disabled/>
+              <select v-else v-model="item.whtType" class="select" placeholder="">
                 <option value="1">
                   Option 1
                 </option>
@@ -113,13 +137,24 @@
               </select>
             </td>
             <td>
-              <input v-model="item.otherDpp" class="input" placeholder="" :disabled="!item.isEdit"/>
+              <input v-if="!item.isEdit" v-model="item.whtCode" class="input" placeholder="" disabled/>
+              <select v-else v-model="item.whtCode" class="select" placeholder="">
+                <option value="1">
+                  Option 1
+                </option>
+                <option value="2">
+                  Option 2
+                </option>
+                <option value="3">
+                  Option 3
+                </option>
+              </select>
             </td>
             <td>
-              <input v-model="item.amount" class="input" placeholder="" disabled/>
+              <input v-model="item.whtBaseAmount" class="input" placeholder="" :disabled="!item.isEdit"/>
             </td>
             <td>
-              <input v-model="item.remark" class="input" placeholder="" :disabled="!item.isEdit"/>
+              <input v-model="item.amount" class="input" placeholder="" :disabled="!item.isEdit"/>
             </td>
           </tr>
         </tbody>
@@ -134,21 +169,17 @@ import type { formTypes } from '../../types/invoiceAddWrapper'
 
 const columns = ref([
   'Action',
-  'Jenis',
-  'GL',
+  'Activity / Expense',
+  'Item Amount',
+  'Debit/Credit',
+  'Tax Code',
   'Cost Center',
-  'QTY',
-  'UoM',
-  'Cost Per Unit',
-  'Total Cost',
-  'Tipe PPH',
-  'Kode PPH',
-  'DPP',
-  'Nilai PPH',
-  'VAT',
-  'DPP Lain - Lain',
-  'Amount',
-  'Remark'
+  'Profit Center',
+  'Assignment',
+  'WHT Type',
+  'WHT Code',
+  'WHT Base Amount',
+  'Amount'
 ])
 
 const form = inject<formTypes>('form')
@@ -156,21 +187,17 @@ const form = inject<formTypes>('form')
 const addNew = () => {
   if (form) {
     const data = {
-      type: '',
-      gl: '',
+      activity: '',
+      itemAmount: '',
+      debitCredit: '',
+      taxCode: '',
       costCenter: '',
-      quantity: '',
-      uom: '',
-      costPerUnit: '',
-      totalCost: '',
-      pphType: '',
-      pphCode: '',
-      dpp: '',
-      pphValue: '',
-      vat: '',
-      otherDpp: '',
+      profitCenter: '',
+      assignment: '',
+      whtType: '',
+      whtCode: '',
+      whtBaseAmount: '',
       amount: '',
-      remark: '',
       isEdit: false
     }
     form.additionalCost.push(data)

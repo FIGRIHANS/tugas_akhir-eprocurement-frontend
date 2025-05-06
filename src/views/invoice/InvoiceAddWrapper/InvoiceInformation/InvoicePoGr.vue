@@ -1,9 +1,9 @@
 <template>
   <div id="table-invoice-po-gr" class="flex flex-col gap-[16px]">
     <p class="text-base font-semibold">Invoice PO & GR Item</p>
-    <button v-if="form?.status === 0" class="btn btn-outline btn-primary w-fit" @click="addNew">
-      <i class="ki-duotone ki-plus-circle"></i>
-      Add PO & GR
+    <button v-if="form?.status === 0" class="btn btn-outline btn-primary w-fit" @click="openAddItem">
+      <i class="ki-filled ki-magnifier"></i>
+      Search
     </button>
     <div v-if="form" class="overflow-x-auto pogr__table">
       <table class="table table-xs table-border" :class="{ 'border-danger': form?.invoicePoGrError }">
@@ -14,7 +14,7 @@
               :key="index"
               class="pogr__field-base"
               :class="{
-                'pogr__field-base--po-sap': item.toLowerCase() === 'po number sap'
+                'pogr__field-base--po-item': item.toLowerCase() === 'item text'
               }"
             >
               {{ item }}
@@ -24,262 +24,78 @@
         <tbody>
           <tr v-for="(item, index) in form.invoicePoGr" :key="index" class="pogr__field-items">
             <td class="flex items-center justify-around gap-[8px]">
-              <button v-if="form.status === 0" class="btn btn-icon btn-primary" @click="item.isEdit = !item.isEdit">
-                <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>
-                <i v-else class="ki-duotone ki-check-circle"></i>
-              </button>
               <button v-if="form.status === 0" class="btn btn-icon btn-outline btn-danger">
                 <i class="ki-duotone ki-cross-circle"></i>
               </button>
             </td>
-            <td>
-              <input v-if="editAll(item)" v-model="item.grNumber" class="input w-[150px]" placeholder="" disabled/>
-              <div v-else :id="`invoice-gr-dropdown-${index}`" :ref="(el) => { dropdownGr[index] = el as HTMLElement }" class="dropdown">
-                <div class="input">
-                  <input
-                    v-model="item.grNumber"
-                    placeholder="Search No GR"
-                    class="dropdown-toggle w-[100px]"
-                    @click="handleInput(index, item.grNumber)"
-                    @input="handleInput(index, item.grNumber)"
-                  />
-                  <i class="ki-outline ki-magnifier"></i>
-                </div>
-                <div :id="`invoice-gr-items-${index}`" class="dropdown-content w-full max-w-56">
-                  <div class="flex flex-col">
-                    <div
-                      class="border-b p-4 cursor-pointer hover:bg-primary hover:text-white"
-                      @click="selectItem(index)"
-                    >
-                      Option 1
-                    </div>
-                    <div
-                      class="border-b p-4 cursor-pointer hover:bg-primary hover:text-white"
-                      @click="selectItem(index)"
-                    >
-                      Option 2
-                    </div>
-                    <div
-                      class="border-b p-4 cursor-pointer hover:bg-primary hover:text-white"
-                      @click="selectItem(index)"
-                    >
-                      Option 3
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </td>
-            <td>
-              <input v-model="item.poNumber" class="input" placeholder="" :disabled="editAll(item)"/>
-            </td>
-            <td>
-              <input v-model="item.poSapNumber" class="input" placeholder="" :disabled="editInvoiceDp(item)"/>
-            </td>
-            <td>
-              <input v-if="editAll(item)" v-model="item.poSapNumber" class="input" placeholder="" disabled/>
-              <select v-else v-model="item.item" class="select">
-                <option value="1">
-                  Option 1
-                </option>
-                <option value="2">
-                  Option 2
-                </option>
-                <option value="3">
-                  Option 3
-                </option>
-              </select>
-            </td>
-            <td>
-              <input v-model="item.quantity" class="input" placeholder="" :disabled="editInvoiceDp(item)"/>
-            </td>
-            <td>
-              <input v-model="item.uom" class="input" placeholder="" :disabled="editInvoiceDp(item)"/>
-            </td>
-            <td>
-              <input v-model="item.costPerUnit" class="input" placeholder="" :disabled="editInvoiceDp(item)"/>
-            </td>
-            <td>
-              <input v-model="item.totalCost" class="input" placeholder="" :disabled="editInvoiceDp(item)"/>
-            </td>
-            <td v-if="form?.invoiceDp">
-              <input v-if="editAll(item)" v-model="item.installmentCost" class="input" placeholder="" disabled/>
-              <select v-else v-model="item.installmentCost" class="select">
-                <option value="1">
-                  Option 1
-                </option>
-                <option value="2">
-                  Option 2
-                </option>
-                <option value="3">
-                  Option 3
-                </option>
-              </select>
-            </td>
-            <td>
-              <input v-model="item.deliveryDate" class="input" placeholder="" :disabled="editAll(item)"/>
-            </td>
-            <td>
-              <input v-model="item.billable" class="input" placeholder="" :disabled="editInvoiceDp(item)"/>
-            </td>
-            <td>
-              <input v-model="item.dpPercent" class="input" placeholder="" :disabled="editInvoiceDpWithDp(item)"/>
-            </td>
-            <td>
-              <input v-model="item.dpValue" class="input" placeholder="" :disabled="editInvoiceDpWithDp(item)"/>
-            </td>
-            <td>
-              <input v-model="item.whtType" class="input" placeholder="" disabled/>
-            </td>
-            <td>
-              <input v-model="item.whtCode" class="input" placeholder="" disabled/>
-            </td>
-            <td>
-              <input v-model="item.dpp" class="input" placeholder="" :disabled="editAll(item)"/>
-            </td>
-            <td>
-              <input v-model="item.whtValue" class="input" placeholder="" disabled/>
-            </td>
-            <td>
-              <input v-if="editAll(item)" v-model="item.whtValue" class="input" placeholder="" disabled/>
-              <select v-else v-model="item.vat" class="select">
-                <option value="1">
-                  Option 1
-                </option>
-                <option value="2">
-                  Option 2
-                </option>
-                <option value="3">
-                  Option 3
-                </option>
-              </select>
-            </td>
-            <td>
-              <input v-model="item.otherDpp" class="input" placeholder="" :disabled="editAll"/>
-            </td>
-            <td>
-              <input v-model="item.amount" class="input" placeholder="" disabled/>
-            </td>
+            <td>{{ item.poNumber }}</td>
+            <td v-if="!checkInvoiceDp()">{{ item.poItem }}</td>
+            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.GrDocumentNo }}</td>
+            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.GrDocumentItem }}</td>
+            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.GrDocumentDate }}</td>
+            <td v-if="!checkInvoiceDp()">{{ item.taxCode }}</td>
+            <td v-if="!checkInvoiceDp()">{{ item.itemAmount }}</td>
+            <td v-if="!checkInvoiceDp()">{{ item.quantity }}</td>
+            <td v-if="!checkInvoiceDp()">{{ item.unit }}</td>
+            <td v-if="!checkInvoiceDp()">{{ item.itemText }}</td>
+            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.conditionType }}</td>
+            <td v-if="checkInvoiceDp()">{{ item.amountInvoice }}</td>
+            <td v-if="checkInvoiceDp()">{{ item.vatAmount }}</td>
+            <td>{{ item.whtType }}</td>
+            <td>{{ item.whtCode }}</td>
+            <td>{{ item.whtBaseAmount }}</td>
+            <td>{{ item.category }}</td>
+            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.totalNetAmount }}</td>
           </tr>
         </tbody>
       </table>
     </div>
+    <SearchPoGr :is-invoice-dp="form?.invoiceDp" :is-po-pib="form?.invoiceType === 'pib'" />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, inject, watch, onMounted, nextTick, onUnmounted } from 'vue'
+import { ref, inject, watch, onMounted } from 'vue'
 import type { formTypes } from '../../types/invoiceAddWrapper'
-import type { itemsPoGrType } from '../../types/invoicePoGr'
-import { KTDropdown } from '@/metronic/core'
-import { defaultColumn, invoiceDpColumn } from '@/static/invoicePoGr'
-
-const dropdownGr = ref<HTMLElement[]>([])
-const dropdownGrInstance = ref<(KTDropdown | null)[]>([])
-const columns = ref<string[]>([])
+import { KTModal } from '@/metronic/core'
+import { defaultColumn, invoiceDpColumn, PoPibColumn } from '@/static/invoicePoGr'
+import SearchPoGr from './InvoicePoGr/SearchPoGr.vue'
 
 const form = inject<formTypes>('form')
+const columns = ref<string[]>([])
 
-const addNew = () => {
-  if (form) {
-    const data = {
-      grNumber: '',
-      poNumber: '',
-      poSapNumber: '',
-      item: '',
-      quantity: '',
-      uom: '',
-      costPerUnit: '',
-      totalCost: '',
-      installmentCost: '',
-      deliveryDate: '',
-      billable: '',
-      dpPercent: '',
-      dpValue: '',
-      whtType: '',
-      whtCode: '',
-      dpp: '',
-      whtValue: '',
-      vat: '',
-      otherDpp: '',
-      amount: '',
-      isEdit: false
-    }
-    form.invoicePoGr.push(data)
-  }
+const openAddItem = () => {
+  const idModal = document.querySelector('#add_po_gr_item_modal')
+  const modal = KTModal.getInstance(idModal as HTMLElement)
+  modal.show()
 }
 
-const editAll = (item: itemsPoGrType) => {
-  return !item.isEdit
+const checkInvoiceDp = () => {
+  return form?.invoiceDp
 }
 
-const editInvoiceDp = (item: itemsPoGrType) => {
-  return !item.isEdit && !form?.invoiceDp
+const checkPoPib = () => {
+  return form?.invoiceType === 'pib'
 }
 
-const editInvoiceDpWithDp = (item: itemsPoGrType) => {
-  return !item.isEdit && !form?.invoiceDp && !form?.withDp
-}
-
-const handleInput = (index: number, value: string) => {
-  if (value.length >= 4) {
-    dropdownGrInstance.value[index]?.show()
-  } else {
-    dropdownGrInstance.value[index]?.hide()
-  }
-}
-
-const selectItem = (index: number) => {
-  dropdownGrInstance.value[index]?.hide()
-}
-
-const handleClickOutside = (event: MouseEvent) => {
-  dropdownGr.value.forEach((el, index) => {
-    if (el && !el.contains(event.target as Node)) {
-      dropdownGrInstance.value[index]?.hide()
-    }
-  })
+const setColumn = () => {
+  if (form?.invoiceType === 'pib') columns.value = ['Action', ...PoPibColumn]
+  else if (form?.invoiceDp) columns.value = ['Action', ...invoiceDpColumn]
+  else columns.value = ['Action', ...defaultColumn]
 }
 
 watch(
-  () => form?.invoiceDp,
+  () => [form?.invoiceDp, form?.invoiceType],
   () => {
-    if (form?.invoiceDp) {
-      columns.value = ['Action', ...invoiceDpColumn]
-    } else {
-      columns.value = ['Action', ...defaultColumn]
-    }
-  }
-)
-
-watch(
-  () => dropdownGr.value,
-  () => {
-    nextTick(() => {
-      dropdownGrInstance.value.forEach((instance) => {
-        if (instance) {
-          instance.dispose()
-        }
-      })
-      dropdownGr.value.forEach((el, index) => {
-        if (el) {
-          dropdownGrInstance.value[index] = KTDropdown.getInstance(el) || new KTDropdown(el)
-        }
-      })
-    })
+    setColumn()
   },
   {
-    deep: true,
     immediate: true
   }
 )
 
 onMounted(() => {
-  document.addEventListener('click', handleClickOutside)
-  columns.value = ['Action', ...defaultColumn]
-})
-
-onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside)
+  setColumn()
 })
 </script>
 

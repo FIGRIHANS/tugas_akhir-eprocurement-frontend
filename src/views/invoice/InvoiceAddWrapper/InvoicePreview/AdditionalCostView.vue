@@ -5,7 +5,14 @@
       <table class="table table-xs table-border">
         <thead>
           <tr>
-            <th v-for="(item, index) in columns" :key="index" class="table-head">
+            <th
+              v-for="(item, index) in columns"
+              :key="index"
+              :class="{
+                'invoice__field-base--line': item.toLowerCase() === 'line'
+              }"
+              class="invoice__field-base"
+            >
               {{ item }}
             </th>
           </tr>
@@ -13,21 +20,17 @@
         <tbody>
           <tr v-for="(item, index) in form.additionalCost" :key="index">
             <td>{{ index + 1 }}</td>
-            <td>{{ item.type || '-' }}</td>
-            <td>{{ item.gl || '-' }}</td>
+            <td>{{ item.activity || '-' }}</td>
+            <td>{{ item.itemAmount || '-' }}</td>
+            <td>{{ item.debitCredit || '-' }}</td>
+            <td>{{ item.taxCode || '-' }}</td>
             <td>{{ item.costCenter || '-' }}</td>
-            <td>{{ item.quantity || '-' }}</td>
-            <td>{{ item.uom || '-' }}</td>
-            <td>{{ item.costPerUnit || '-' }}</td>
-            <td>{{ item.totalCost || '-' }}</td>
-            <td>{{ item.pphType || '-' }}</td>
-            <td>{{ item.pphCode || '-' }}</td>
-            <td>{{ item.dpp || '-' }}</td>
-            <td>{{ item.pphValue || '-' }}</td>
-            <td>{{ item.vat || '-' }}</td>
-            <td>{{ item.otherDpp || '-' }}</td>
+            <td>{{ item.profitCenter || '-' }}</td>
+            <td>{{ item.assignment || '-' }}</td>
+            <td>{{ item.whtType || '-' }}</td>
+            <td>{{ item.whtCode || '-' }}</td>
+            <td>{{ item.whtBaseAmount || '-' }}</td>
             <td>{{ item.amount || '-' }}</td>
-            <td>{{ item.remark || '-'}}</td>
           </tr>
         </tbody>
       </table>
@@ -43,20 +46,16 @@ const form = inject<formTypes>('form')
 
 const columns = ref([
   'Line',
-  'Jenis',
-  'GL',
+  'Activity / Expense',
+  'Item Amount',
+  'Debit/Credit',
+  'Tax Code',
   'Cost Center',
-  'QTY',
-  'UoM',
-  'Cost Per Unit',
-  'Total Cost',
-  'Tipe PPH',
-  'Kode PPH',
-  'DPP',
-  'Nilai PPH',
-  'VAT',
-  'DPP Lain - Lain',
-  'Amount',
-  'Remark'
+  'Profit Center',
+  'Assignment',
+  'WHT Type',
+  'WHT Code',
+  'WHT Base Amount',
+  'Amount'
 ])
 </script>

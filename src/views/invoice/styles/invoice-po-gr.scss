@@ -21,7 +21,7 @@
     @apply px-[20px] !important;
     @apply py-[13px] !important;
     
-    &--po-sap {
+    &--po-item {
       @extend .pogr__field-base;
       min-width: 200px;
     }
