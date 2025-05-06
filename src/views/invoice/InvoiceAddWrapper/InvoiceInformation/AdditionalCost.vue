@@ -28,7 +28,7 @@
                 <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>
                 <i v-else class="ki-duotone ki-check-circle"></i>
               </button>
-              <button v-if="form.status === 0" class="btn btn-icon btn-outline btn-danger">
+              <button v-if="form.status === 0" class="btn btn-icon btn-outline btn-danger" @click="deleteItem(index)">
                 <i class="ki-duotone ki-cross-circle"></i>
               </button>
             </td>
@@ -202,6 +202,10 @@ const addNew = () => {
     }
     form.additionalCost.push(data)
   }
+}
+
+const deleteItem = (index: number) => {
+  form?.additionalCost.splice(index, 1)
 }
 </script>
 

@@ -5,7 +5,14 @@
       <table class="table table-xs table-border">
         <thead>
           <tr>
-            <th v-for="(item, index) in columns" :key="index" class="table-head">
+            <th
+              v-for="(item, index) in columns"
+              :key="index"
+              :class="{
+                'invoice__field-base--line': item.toLowerCase() === 'line'
+              }"
+              class="invoice__field-base"
+            >
               {{ item }}
             </th>
           </tr>

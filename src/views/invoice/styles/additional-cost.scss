@@ -18,6 +18,7 @@
 
   &__field-base {
     min-width: 130px;
+    white-space: nowrap;
     @apply px-[20px] !important;
     @apply py-[13px] !important;
     

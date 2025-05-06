@@ -24,7 +24,7 @@
         <tbody>
           <tr v-for="(item, index) in form.invoicePoGr" :key="index" class="pogr__field-items">
             <td class="flex items-center justify-around gap-[8px]">
-              <button v-if="form.status === 0" class="btn btn-icon btn-outline btn-danger">
+              <button v-if="form.status === 0" class="btn btn-icon btn-outline btn-danger" @click="deleteItem(index)">
                 <i class="ki-duotone ki-cross-circle"></i>
               </button>
             </td>
@@ -76,6 +76,12 @@ const checkInvoiceDp = () => {
 
 const checkPoPib = () => {
   return form?.invoiceType === 'pib'
+}
+
+const deleteItem = (index: number) => {
+  if (form) {
+    form.invoicePoGr.splice(index, 1)
+  }
 }
 
 const setColumn = () => {
