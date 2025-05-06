@@ -300,8 +300,7 @@ const next = () => {
         },
       }
 
-      // vendorMasterDataStore.postVendorRegistration(payload)
-      console.log(payload)
+      vendorMasterDataStore.postVendorRegistration(payload)
     } else {
       tab.active = tab.items[index].value
       router.push({ name: tab.items[index].value })
