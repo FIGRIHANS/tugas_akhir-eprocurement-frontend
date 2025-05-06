@@ -1,9 +1,16 @@
 <script setup lang="ts">
 import UiModal from '@/components/modal/UiModal.vue'
+import { useVerificationDetailStore } from '@/stores/vendor/vendor'
+import { onMounted } from 'vue'
 
-defineProps<{ id: string | number }>()
+const verificationStore = useVerificationDetailStore()
+const props = defineProps<{ id: string | number }>()
 const open = defineModel()
 defineEmits(['close'])
+
+onMounted(() => {
+  verificationStore.getData(props.id as number)
+})
 </script>
 <template>
   <UiModal v-model="open" title="Approval Verifikasi Vendor" size="lg">

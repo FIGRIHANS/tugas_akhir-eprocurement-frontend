@@ -48,9 +48,9 @@ const blacklistSuccessOpen = ref<boolean>(false)
     </div>
   </div>
 
-  <VendorVerificationModal :id="1" v-model="verificationModalOpen" v-if="verificationModalOpen" />
+  <VendorVerificationModal :id="id" v-model="verificationModalOpen" v-if="verificationModalOpen" />
   <VendorBlacklistModal
-    :id="1"
+    :id="id"
     v-model:open="blacklistModalOpen"
     v-model:success="blacklistSuccessOpen"
     v-if="blacklistModalOpen"

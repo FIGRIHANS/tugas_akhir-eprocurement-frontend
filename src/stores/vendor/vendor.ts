@@ -199,3 +199,22 @@ export const useVendorPaymentStore = defineStore('vendor-payment', () => {
 
   return { data, loading, error, getData }
 })
+
+export const useVerificationDetailStore = defineStore('verification-detail', () => {
+  const loading = ref(false)
+  const error = ref<string | null>(null)
+  const data = ref()
+
+  const getData = async (vendorId: number) => {
+    loading.value = true
+    error.value = null
+
+    const response: ApiResponse = await vendorAPI.get(
+      '/public/verifiedvendor/verify/vendor-detail',
+      { params: { vendorId } },
+    )
+    console.log(response.data)
+  }
+
+  return { loading, error, data, getData }
+})
