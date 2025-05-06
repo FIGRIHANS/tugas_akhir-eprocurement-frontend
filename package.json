@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && copy staticwebapp.config.json dist\\",
+    "build": "vite build",
     "preview": "vite preview",
     "build-check": "run-p type-check \"build-only {@}\" --",
     "type-check": "vue-tsc --build",
