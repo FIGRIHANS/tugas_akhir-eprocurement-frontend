@@ -6,8 +6,9 @@
         <div>
           <h1 class="font-semibold text-2xl mb-3">What Is Vendor Management ?</h1>
           <p class="text-gray-600 text-sm">
-            Explore exciting collaboration opportunities with our blog. We're open to partnerships,
-            guest posts, and more. Join us to share your insights and grow your audience.
+            A system or software used by companies to manage suppliers or vendors efficiently. This
+            system helps in the process of selecting, contracting, monitoring performance, and
+            paying vendors.
           </p>
         </div>
       </div>
@@ -15,7 +16,7 @@
 
     <div class="card bg-[#F9F9F933]">
       <div class="card-body">
-        <h1 class="text-xl font-semibold mb-5">How to create vendor management?</h1>
+        <h1 class="text-xl font-semibold mb-5">Vendor Management Information Detail</h1>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           <div class="card" v-for="data in vmData" :key="data.title">
             <div class="card-body space-y-3">
@@ -62,56 +63,59 @@ import informationImg from '@/assets/svg/information.svg'
 const vmData = [
   {
     icon: 'user-square',
-    title: 'User Cards',
-    description: 'A Broad Perspective on Our Comprehensive Security Features and Policies.',
+    title: 'Vendor Registration',
+    description: 'Easily create and submit your vendor data to start the registration process.',
   },
   {
     icon: 'subtitle',
-    title: 'User Base',
-    description: 'A Broad Perspective on Our Comprehensive Security Features and Policies.',
+    title: 'Vendor List',
+    description:
+      'This menu lets you view detailed vendor information after completing registration.',
   },
   {
     icon: 'subtitle',
-    title: 'Cooperators',
-    description: 'A Broad Perspective on Our Comprehensive Security Features and Policies.',
+    title: 'Vendor Verification',
+    description:
+      'This page explains the verification process after the vendor completes registration.',
   },
   {
     icon: 'subtitle',
-    title: 'Community Engagement',
-    description: 'A Broad Perspective on Our Comprehensive Security Features and Policies.',
+    title: 'Vendor Approval',
+    description: 'Vendor Approval',
   },
   {
     icon: 'subtitle',
-    title: 'Donatiors',
-    description: 'A Broad Perspective on Our Comprehensive Security Features and Policies.',
+    title: 'Vendor Change Data',
+    description:
+      'Vendors can edit and add data such as Deed of Establishment, Experience, and other information.',
   },
 ]
 
 const stepAct = [
   {
-    icon: 'share',
-    title: 'Posted a new article <a>Top 10 Tech Trends</a>',
-    date: 'Today, 9:00 AM',
+    icon: 'people',
+    title: 'Vendor Registration',
+    date: '3 weeks ago, 4:07 PM',
+  },
+  {
+    icon: 'verify',
+    title: 'Vendor verification',
+    date: '5 days ago, 4:07 PM ',
+  },
+  {
+    icon: 'check-circle',
+    title: 'Vendor Approval',
+    date: '3 days ago, 4:07 PM',
   },
   {
     icon: 'entrance-left',
-    title: 'I had the privilege of interviewing an industry expert for an upcoming blog post ',
+    title: 'Login Vendor',
+    date: '2 days ago, 4:07 PM',
+  },
+  {
+    icon: 'files',
+    title: 'Vendor completes the data',
     date: 'Today, 9:00 AM',
-  },
-  {
-    icon: 'share',
-    title: "I couldn't resist sharing a sneak peek of our upcoming content",
-    date: '5 days ago, 4:07 PM',
-  },
-  {
-    icon: 'coffee',
-    title: 'Reaching the milestone of 10,000 followers on the blog was a dream come true',
-    date: '5 days ago, 4:07 PM',
-  },
-  {
-    icon: 'rocket',
-    title: "We recently celebrated the blog's 1-year anniversary",
-    date: '3 weeks ago, 4:07 PM',
   },
 ]
 </script>
