@@ -15,6 +15,7 @@ import RejectButton from '@/components/vendor/approval/RejectButton.vue'
 import ApprovalVerifikasi from '@/components/vendor/approval/ApprovalVerifikasi.vue'
 import { useApprovalStore } from '@/stores/vendor/approval'
 import { formatDate } from '@/core/utils/format'
+import UiLoading from '@/components/UiLoading.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -92,10 +93,8 @@ watch(
         <tbody>
           <!-- show loading -->
           <tr v-if="approval.loading">
-            <td colspan="8">
-              <div
-                class="mx-auto w-6 h-6 border-3 border-blue-500 border-t-transparent rounded-full animate-spin"
-              ></div>
+            <td colspan="8" class="text-center">
+              <UiLoading size="md" />
             </td>
           </tr>
 
@@ -132,8 +131,14 @@ watch(
             <td class="text-nowrap">{{ item.vendorName }}</td>
             <td class="text-nowrap">{{ item.addressCompanyInfo }}</td>
             <td class="text-nowrap">{{ item.companyCategoryName }}</td>
-            <td class="text-nowrap">{{ formatDate(new Date(item.activedUTCDate)) }}</td>
-            <td class="text-nowrap">{{ formatDate(new Date(item.sendApprovalDate as string)) }}</td>
+            <td class="text-nowrap">
+              {{ item.activedUTCDate ? formatDate(new Date(item.activedUTCDate)) : '-' }}
+            </td>
+            <td class="text-nowrap">
+              {{
+                item.sendApprovalDate ? formatDate(new Date(item.sendApprovalDate as string)) : '-'
+              }}
+            </td>
             <td class="text-nowrap">{{ item.approvalStatusName }}</td>
             <td class="text-nowrap">{{ item.approvalTypeName }}</td>
           </tr>
