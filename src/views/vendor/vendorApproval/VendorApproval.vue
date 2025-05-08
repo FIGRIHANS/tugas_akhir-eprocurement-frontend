@@ -118,8 +118,16 @@ watch(
           >
             <td>
               <div class="flex gap-5">
-                <ApproveButton :id="item.vendorId" :nama="item.vendorName" />
-                <RejectButton :id="item.vendorId" :nama="item.vendorName" />
+                <div v-if="item.approvalStatus == '1'">
+                  <UiButton>
+                    <UiIcon name="paper-plane" variant="duotone" />
+                    <span class="text-nowrap">Send to SAP</span>
+                  </UiButton>
+                </div>
+                <template v-else>
+                  <ApproveButton :id="item.vendorId" :nama="item.vendorName" />
+                  <RejectButton :id="item.vendorId" :nama="item.vendorName" />
+                </template>
                 <ApprovalVerifikasi :id="item.vendorId" :nama="item.vendorName" />
                 <RouterLink :to="`/vendor-approval/${item.vendorId}/detail`">
                   <UiButton size="sm" :icon="true" variant="primary" :outline="true">
