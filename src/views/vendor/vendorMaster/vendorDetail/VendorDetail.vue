@@ -2,13 +2,14 @@
 import BreadcrumbView from '@/components/BreadcrumbView.vue'
 import type { ITabClosable } from '@/components/ui/atoms/tab-closable/types/tabClosable'
 import UiTabClosable from '@/components/ui/atoms/tab-closable/UiTabClosable.vue'
-import { useVendorStore } from '@/stores/vendor/vendor'
-import { onMounted, ref, watch } from 'vue'
+import { useVendorStore, useVerificationDetailStore } from '@/stores/vendor/vendor'
+import { ref, watch } from 'vue'
 import { RouterView, useRoute, useRouter } from 'vue-router'
 
 const router = useRouter()
 const route = useRoute()
 const vendorStore = useVendorStore()
+const verificationStore = useVerificationDetailStore()
 
 const tabs = ref<ITabClosable[]>([
   {
@@ -58,16 +59,12 @@ watch(currentTab, () => {
 
 watch(
   () => route.name,
-  () => {
-    addTab(route.name as string)
-  },
-  { immediate: true },
-)
+  (name) => {
+    addTab(name as string)
 
-watch(
-  () => route.params.id,
-  (id) => {
-    vendorStore.getVendors({ vendorId: id })
+    if (name === 'summary-information') {
+      verificationStore.getData(Number(route.params.id))
+    }
   },
   { immediate: true },
 )
@@ -89,24 +86,33 @@ watch(
 )
 
 watch(
-  vendorStore,
-  (store) => {
-    if (store.isAdministrationVerified) {
+  () => verificationStore.data,
+  (data) => {
+    if (
+      data.some(
+        (item) => item.verificationType === 'Administration approval' && item.status === 'Approved',
+      )
+    ) {
       tabs.value[1].isVerified = true
     }
-    if (store.isLicenseVerified) {
+
+    if (
+      data.some(
+        (item) => item.verificationType === 'Izin usaha approval' && item.status === 'Approved',
+      )
+    ) {
       tabs.value[2].isVerified = true
     }
-    if (store.isBankVerified) {
+
+    if (
+      data.some(
+        (item) => item.verificationType === 'Payment approval' && item.status === 'Approved',
+      )
+    ) {
       tabs.value[3].isVerified = true
     }
   },
-  { immediate: true },
 )
-
-onMounted(() => {
-  addTab(route.name as string)
-})
 </script>
 <template>
   <BreadcrumbView
