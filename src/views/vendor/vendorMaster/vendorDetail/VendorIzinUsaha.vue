@@ -119,6 +119,11 @@ const handleReject = async () => {
         >
         <textarea id="reason" class="textarea" rows="6" v-model="reason" required></textarea>
       </div>
+      <div v-if="inputError.includes('reason')" class="text-xs text-danger">Reason is required</div>
+      <div class="my-3 text-danger text-xs italic">
+        * Rejecting this section will automatically reject all other submitted data from the vendor.
+        Do you wish to proceed?
+      </div>
       <div class="flex gap-3">
         <UiButton
           class="flex-1 justify-center"
@@ -150,6 +155,10 @@ const handleReject = async () => {
         >
         <textarea id="notes" class="textarea" rows="6" v-model="notes"></textarea>
       </div>
+      <span class="my-3 text-danger text-xs italic">
+        * Rejecting this section will automatically reject all other submitted data from the vendor.
+        Do you wish to proceed?
+      </span>
       <div class="flex gap-3">
         <UiButton
           class="flex-1 justify-center"

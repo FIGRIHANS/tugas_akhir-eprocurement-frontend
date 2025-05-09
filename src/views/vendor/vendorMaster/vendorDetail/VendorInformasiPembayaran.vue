@@ -21,6 +21,7 @@ const error = ref('')
 const reason = ref('')
 const notes = ref('')
 const vendorStore = useVendorStore()
+const inputError = ref<string[]>([])
 
 const handleVerify = async () => {
   loading.value = true
@@ -52,6 +53,11 @@ const handleVerify = async () => {
 }
 
 const handleReject = async () => {
+  if (!reason.value) {
+    inputError.value.push('reason')
+    return
+  }
+
   loading.value = true
   error.value = ''
 
@@ -111,6 +117,11 @@ const handleReject = async () => {
           >Reason <span class="text-danger">*</span></label
         >
         <textarea id="reason" class="textarea" rows="6" v-model="reason" required></textarea>
+      </div>
+      <div v-if="inputError.includes('reason')" class="text-xs text-danger">Reason is required</div>
+      <div class="my-3 text-danger text-xs italic">
+        * Rejecting this section will automatically reject all other submitted data from the vendor.
+        Do you wish to proceed?
       </div>
       <div class="flex gap-3">
         <UiButton
