@@ -125,7 +125,6 @@ const form = ref<formTypes>({
       isEdit: false
     }
   ],
-  invoiceItem: [],
   additionalCost: [
     {
       line: '1',
