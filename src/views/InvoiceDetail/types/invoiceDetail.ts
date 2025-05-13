@@ -1,7 +1,6 @@
 import type { documentFormTypes } from './invoiceDocument'
 import type { itemsPoGrType } from './invoicePoGr'
 import type { itemsCostType } from './additionalCost'
-import type { invoiceItemTypes } from './invoiceItem'
 
 export interface formTypes extends documentFormTypes {
   // Invoice Data
@@ -42,7 +41,6 @@ export interface formTypes extends documentFormTypes {
   invoiceDp: boolean
   withDp: boolean
   invoicePoGr: itemsPoGrType[]
-  invoiceItem: invoiceItemTypes[]
   additionalCost: itemsCostType[]
 
   // verification validation
