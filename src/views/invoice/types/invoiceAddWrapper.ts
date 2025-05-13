@@ -5,14 +5,12 @@ import type { invoiceItemTypes } from './invoiceItem'
 
 export interface formTypes extends documentFormTypes {
   // Invoice Data
-  name: string
-  nameError?: boolean
+  invoiceType: string
+  invoiceTypeError?: boolean
   vendorId: string
   vendorIdError?: boolean
   businessField: string
-  businessFieldError?: boolean
   subBusinessField: string
-  subBusinessFieldError?: boolean
   address: string
 
   isNotRegisteredBank?: boolean
@@ -30,27 +28,40 @@ export interface formTypes extends documentFormTypes {
   bankAddressNew?: string
 
   // Invoice Information
-  invoiceNo: string
   companyCode: string
   companyCodeError?: boolean
-  supplierInvoiceNumber: string
-  supplierInvoiceNumberError?: boolean
+  invoiceNo: string
+  invoiceNoVendor: string
+  invoiceNoVendorError?: boolean
+  // supplierInvoiceNumber: string
+  // supplierInvoiceNumberError?: boolean
   invoiceDate: string
   invoiceDateError?: boolean
   taxNumber: string
   taxNumberError?: boolean
-  taxDate: string
-  taxDateError?: boolean
-  taxCode: string
-  taxCodeError?: boolean
-  whtCode: string
-  whtCodeError?: boolean
-  paymentDate: string
-  paymentDateError?: boolean
-  department: string
-  departmentError?: boolean
+  // taxDate: string
+  // taxDateError?: boolean
+  // taxCode: string
+  // taxCodeError?: boolean
+  // whtCode: string
+  // whtCodeError?: boolean
+  // paymentDate: string
+  // paymentDateError?: boolean
+  // department: string
+  // departmentError?: boolean
   invoiceDp: boolean
   withDp: boolean
+  amountInvoice: string
+  amountInvoiceError?: boolean
+  taxNoInvoice: string
+  taxNoInvoiceError?: boolean
+  remainingDpAmount: string
+  dpAmountDeduction: string
+  dpAmountDeductionError?: boolean
+  currency: string
+  currencyError?: boolean
+  description: string
+  descriptionError?: boolean
 
   invoicePoGr: itemsPoGrType[]
   invoicePoGrError?: boolean

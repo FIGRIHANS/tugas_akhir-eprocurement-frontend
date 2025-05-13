@@ -1,8 +1,8 @@
 <template>
   <div v-if="form" class="flex flex-col gap-[24px]">
-    <div class="flex items-center justify-between gap-[8px]">
+    <div class="flex items-center gap-[24px]">
       <p class="text-lg font-semibold m-[0px]">Invoice PO & GR Item</p>
-      <input v-if="form.status === 2" v-model="form.invoicePoGrCheck" class="checkbox" type="checkbox"/>
+      <input v-model="form.invoicePoGrCheck" class="checkbox" type="checkbox"/>
     </div>
     <div class="po__table">
       <table class="table table-xs table-border">
@@ -13,8 +13,7 @@
               :key="index"
               class="po__column"
               :class="{
-                'po__column--po-sap-number': item.toLowerCase() === 'PO Number SAP'.toLowerCase(),
-                'po__column--medium': setMediumColumn(item)
+                'po__column--line': item.toLowerCase() === 'Line'.toLowerCase()
               }"
             >
               {{ item }}
@@ -24,26 +23,24 @@
         <tbody>
           <tr v-for="(item, index) in form.invoicePoGr" :key="index" class="po__items">
             <td>{{ item.line }}</td>
-            <td>{{ item.grNumber || '-' }}</td>
             <td>{{ item.poNumber || '-' }}</td>
-            <td>{{ item.poSapNumber || '-' }}</td>
-            <td>{{ item.itemName || '-' }}</td>
-            <td>{{ item.quantity || '-' }}</td>
-            <td>{{ item.uom || '-' }}</td>
-            <td>{{ item.costPerUnit || '-' }}</td>
-            <td>{{ item.totalCost || '-' }}</td>
-            <td v-if="form.invoiceDp">{{ item.installmentCost || '-' }}</td>
-            <td>{{ item.deliveryDate || '-' }}</td>
-            <td>{{ item.billable || '-' }}</td>
-            <td>{{ item.dp || '-' }}</td>
-            <td>{{ item.dpValue || '-' }}</td>
+            <td v-if="!checkInvoiceDp()">{{ item.poItem || '-' }}</td>
+            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.GrDocumentNo || '-' }}</td>
+            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.GrDocumentItem || '-' }}</td>
+            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.GrDocumentDate || '-' }}</td>
+            <td v-if="!checkInvoiceDp()">{{ item.taxCode || '-' }}</td>
+            <td v-if="!checkInvoiceDp()">{{ item.itemAmount || '-' }}</td>
+            <td v-if="!checkInvoiceDp()">{{ item.quantity || '-' }}</td>
+            <td v-if="!checkInvoiceDp()">{{ item.unit || '-' }}</td>
+            <td v-if="!checkInvoiceDp()">{{ item.itemText || '-' }}</td>
+            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.conditionType || '-' }}</td>
+            <td v-if="checkInvoiceDp()">{{ item.amountInvoice || '-' }}</td>
+            <td v-if="checkInvoiceDp()">{{ item.vatAmount || '-' }}</td>
             <td>{{ item.whtType || '-' }}</td>
             <td>{{ item.whtCode || '-' }}</td>
-            <td>{{ item.dpp || '-' }}</td>
-            <td>{{ item.whtValue || '-' }}</td>
-            <td>{{ item.vat || '-' }}</td>
-            <td>{{ item.otherDpp || '-' }}</td>
-            <td>{{ item.amount || '-' }}</td>
+            <td>{{ item.whtBaseAmount || '-' }}</td>
+            <td>{{ item.category || '-' }}</td>
+            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.totalNetAmount || '-' }}</td>
           </tr>
         </tbody>
       </table>
@@ -52,36 +49,39 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, inject, onMounted } from 'vue'
+import { ref, watch, inject, onMounted } from 'vue'
 import type { formTypes } from '../types/invoiceDetail'
-import { defaultColumn, invoiceDpColumn } from '@/static/invoicePoGr'
+import { defaultColumn, invoiceDpColumn, PoPibColumn } from '@/static/invoicePoGr'
 
 const form = inject<formTypes>('form')
-
 const columns = ref<string[]>([])
 
-const setMediumColumn = (name: string) => {
-  const list = [
-    'Item',
-    'Cost Per Unit',
-    'Delivery Date',
-    'WHT Type',
-    'WHT Code',
-    'WHT Value',
-    'DPP Lain - Lain'
-  ]
-
-  const check = list.findIndex((item) => item.toLowerCase() === name.toLowerCase())
-  if (check !== -1) return true
-  return false
+const checkInvoiceDp = () => {
+  return form?.invoiceDp
 }
 
-onMounted(() => {
-  if (form?.invoiceDp) {
-    columns.value = ['Line', ...invoiceDpColumn]
-  } else {
-    columns.value = ['Line', ...defaultColumn]
+const checkPoPib = () => {
+  return form?.invoiceType === 'pib'
+}
+
+const setColumn = () => {
+  if (form?.invoiceType === 'pib') columns.value = ['Line', ...PoPibColumn]
+  else if (form?.invoiceDp) columns.value = ['Line', ...invoiceDpColumn]
+  else columns.value = ['Line', ...defaultColumn]
+}
+
+watch(
+  () => [form?.invoiceDp, form?.invoiceType],
+  () => {
+    setColumn()
+  },
+  {
+    immediate: true
   }
+)
+
+onMounted(() => {
+  setColumn()
 })
 </script>
 

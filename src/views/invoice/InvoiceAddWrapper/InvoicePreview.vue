@@ -6,7 +6,7 @@
         <hr class="border-gray-300" />
         <InvoiceCalculationView />
       </div>
-      <div class="flex flex-col gap-[20px] p-[24px] bg-gray-100 rounded-xl h-full flex-1">
+      <div class="flex flex-col gap-[20px] p-[24px] bg-gray-100 rounded-xl flex-1">
         <GeneralDataView />
         <hr class="border-gray-300" />
         <BankKeyView />

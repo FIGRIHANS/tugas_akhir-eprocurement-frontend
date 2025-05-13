@@ -1,0 +1,18 @@
+.status {
+  width: 100%;
+
+  &__box {
+    border: 1px solid black;
+    border-radius: 8px;
+    padding: 17px 14px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    &--approved {
+      @extend .status__box;
+      border-color: rgba(27, 132, 255, 0.2);
+      background-color: #EFF6FF;
+    }
+  }
+}

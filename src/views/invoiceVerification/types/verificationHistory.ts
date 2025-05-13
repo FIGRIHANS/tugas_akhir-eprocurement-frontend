@@ -5,5 +5,9 @@ export interface listItemTypes {
   grNumber: string
   poNumber: string
   invoiceType: string
-  amountDue: string
+  companyCode: string
+  baseAmount: string
+  vatAmount: string
+  whtAmount: string
+  totalNetAmount: string
 }

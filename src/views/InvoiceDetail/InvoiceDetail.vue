@@ -8,22 +8,33 @@
       <GeneralData class="flex-1" />
       <BankKey class="flex-1" />
     </div>
-    <div class="flex gap-[24px] mt-[24px]">
+    <div class="flex gap-[24px] mt-[24px] max-h-[457px]">
       <InvoiceHeaderDocument class="flex-1" />
       <InvoiceCalculation class="flex-1" />
     </div>
     <InvoicePoGr v-if="checkPo()" class="mt-[24px]" />
-    <InvoiceItem v-if="checkNonPo()" class="mt-[24px]" />
     <AdditionalCost v-if="!form.invoiceDp && !form.withDp && checkPo()" class="mt-[24px]" />
-    <div v-if="form.status === 2" class="flex items-center justify-end gap-[10px] py-[8px] px-[30px] mt-[24px]">
-      <button class="btn btn-outline btn-danger" @click="openReject">
-        <i class="ki-duotone ki-cross-circle"></i>
-        Reject
-      </button>
-      <button class="btn btn-primary" @click="goVerif">
-        <i class="ki-duotone ki-check-circle"></i>
-        Verify
-      </button>
+    <div v-if="form.status === 2" class="flex items-center justify-between gap-[8px] mt-[24px]">
+      <div class="flex items-center gap-[10px]">
+        <button class="btn btn-outline btn-primary">
+          <i class="ki-filled ki-black-left"></i>
+          Back
+        </button>
+        <button class="btn btn-primary" @click="goToEdit">
+          <i class="ki-duotone ki-pencil"></i>
+          Edit
+        </button>
+      </div>
+      <div class="flex items-center justify-end gap-[10px]">
+        <button class="btn btn-outline btn-danger" @click="openReject">
+          <i class="ki-duotone ki-cross-circle"></i>
+          Reject
+        </button>
+        <button class="btn btn-primary" @click="goVerif">
+          <i class="ki-duotone ki-check-circle"></i>
+          Verify
+        </button>
+      </div>
     </div>
     <RejectVerification />
   </div>
@@ -31,6 +42,7 @@
 
 <script lang="ts" setup>
 import { ref, provide, defineAsyncComponent, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import type { formTypes } from './types/invoiceDetail'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import { KTModal } from '@/metronic/core'
@@ -43,11 +55,11 @@ const BankKey = defineAsyncComponent(() => import('./InvoiceDetail/BankKey.vue')
 const InvoiceHeaderDocument = defineAsyncComponent(() => import('./InvoiceDetail/InvoiceHeaderDocument.vue'))
 const InvoiceCalculation = defineAsyncComponent(() => import('./InvoiceDetail/InvoiceCalculation.vue'))
 const InvoicePoGr = defineAsyncComponent(() => import('./InvoiceDetail/InvoicePoGr.vue'))
-const InvoiceItem = defineAsyncComponent(() => import('./InvoiceDetail/InvoiceItem.vue'))
 const AdditionalCost = defineAsyncComponent(() => import('./InvoiceDetail/AdditionalCost.vue'))
 const RejectVerification = defineAsyncComponent(() => import('./InvoiceDetail/RejectVerification.vue'))
 
 const activeStep = ref<string>('')
+const router = useRouter()
 
 const routes = ref<routeTypes[]>([
   {
@@ -61,7 +73,7 @@ const routes = ref<routeTypes[]>([
 ])
 
 const form = ref<formTypes>({
-  name: 'PT Arya Noble',
+  invoiceType: 'po',
   vendorId: 'PT Pharmacy',
   businessField: 'asd',
   subBusinessField: 'asd',
@@ -73,71 +85,76 @@ const form = ref<formTypes>({
   bankAccountNumber: '1276387264',
   swiftCode: 'BNI123',
   bankAddress: 'Jl.Maharaya no 24 Jakarta Barat',
+  invoiceDate: '12/12/2024',
+  postingDate: '-',
   invoiceNo: 'INV0000123',
   companyCode: 'code',
-  supplierInvoiceNumber: 'INV/01/PK/2025053',
-  invoiceDate: '12/12/2024',
-  taxNumber: '2365456',
-  taxDate: '12/12/2024',
-  taxCode: 'V1',
-  whtCode: 'W2',
-  paymentDate: '12/12/2024',
-  department: 'test',
+  invoicingParty: 'INV/01/PK/2025053',
+  estimatedPaymentDate: '2365456',
+  taxNumberInvoice: '12/12/2024',
+  invoiceNumberVendor: 'V1',
+  paymentMethod: 'W2',
+  assignment: '12/12/2024',
+  transferNews: 'test',
+  currency: 'test',
+  npwpReporting: 'test',
+  description: 'test',
   invoiceDp: false,
   withDp: false,
   invoicePoGr: [
     {
       line: '1',
-      grNumber: 'GR00123',
       poNumber: 'PO220521000001',
-      poSapNumber: '1110021976',
-      itemName: 'BOTOL ESK CG 50ML',
-      quantity: '15',
-      uom: 'PCS',
-      costPerUnit: '99.998',
-      totalCost: '1.499.970,00',
-      installmentCost: '-',
-      deliveryDate: '20 Juni 2024',
-      billable: '1.499.970,00',
-      dp: '-',
-      dpValue: '-',
+      poItem: 'BOTOL ESK CG 50ML',
+      GrDocumentNo: '15',
+      GrDocumentItem: 'PCS',
+      GrDocumentDate: '99.998',
+      taxCode: '1.499.970,00',
+      itemAmount: '-',
+      quantity: '20 Juni 2024',
+      unit: '1.499.970,00',
+      itemText: '-',
+      conditionType: '-',
       whtType: 'Wajib Pajak',
       whtCode: '-',
-      dpp: '1.000.000',
-      whtValue: '0',
-      vat: 'V2',
-      otherDpp: '-',
-      amount: '1.000.000'
+      whtBaseAmount: '1.000.000',
+      category: '0',
+      amountInvoice: 'V2',
+      vatAmount: '-',
+      totalNetAmount: '1.000.000',
+      isEdit: false
     }
   ],
   invoiceItem: [],
   additionalCost: [
     {
       line: '1',
-      type: 'Demurrage Cost',
-      glCode: 'GR00123',
-      costCenter: '-',
-      quantity: '15',
-      uom: 'PCS',
-      costPerUnit: '99.998',
-      totalCost: '1.499.970,00',
-      pphType: 'Wajib Pajak',
-      pphCode: '-',
-      dpp: '1.000.000',
-      pphValue: '0',
-      vat: 'V2',
-      otherDpp: '-',
-      amount: '1.000.000',
-      remark: 'Perlu ada detail'
+      activity: 'Demurrage Cost',
+      itemAmount: 'GR00123',
+      debitCredit: '15',
+      taxCode: 'PCS',
+      costCenter: '99.998',
+      profitCenter: '1.499.970,00',
+      assignment: 'Wajib Pajak',
+      whtType: '-',
+      whtCode: '1.000.000',
+      whtBaseAmount: 'V2',
+      amount: '-',
+      isEdit: false
     }
   ],
   invoiceDocument: null,
   tax: null,
   referenceDocument: null,
   otherDocument: null,
-  status: 2,
-  invoiceType: 'nonpo'
+  status: 2
 })
+
+const goToEdit = () => {
+  router.push({
+    name: 'invoiceDetailEdit'
+  })
+}
 
 const openReject = () => {
   const idModal = document.querySelector('#reject_Verification_modal')
@@ -147,10 +164,6 @@ const openReject = () => {
 
 const checkPo = () => {
   return form.value.invoiceType === 'po'
-}
-
-const checkNonPo = () => {
-  return form.value.invoiceType === 'nonpo'
 }
 
 const checkVerif = () => {

@@ -21,15 +21,25 @@
           Save as Draft
           <i class="ki-duotone ki-bookmark"></i>
         </button>
-        <button class="btn btn-primary" @click="goNext">
-          {{ tabNow !== 'preview' ? 'Lanjut' : 'Submit' }}
-          <i v-if="tabNow !== 'preview'" class="ki-duotone ki-black-right"></i>
-          <i v-else class="ki-duotone ki-paper-plane"></i>
-        </button>
+        <div class="flex items-center justify-end gap-[8px]">
+          <button v-if="tabNow !== 'data'" class="btn btn-outline btn-primary" @click="goBack">
+            <i class="ki-filled ki-arrow-left"></i>
+            Back
+          </button>
+          <button class="btn btn-primary" @click="goNext">
+            {{ tabNow !== 'preview' ? 'Lanjut' : 'Submit' }}
+            <i v-if="tabNow !== 'preview'" class="ki-duotone ki-black-right"></i>
+            <i v-else class="ki-duotone ki-paper-plane"></i>
+          </button>
+        </div>
       </div>
       <div v-else class="flex justify-end items-center mt-[24px]">
+        <button v-if="tabNow !== 'preview'" class="btn btn-outline btn-primary" @click="goBack">
+          <i class="ki-filled ki-arrow-left"></i>
+          Back
+        </button>
         <button v-if="tabNow !== 'preview'" class="btn btn-primary" @click="goNext">
-          Lanjut
+          Next
           <i class="ki-duotone ki-black-right"></i>
         </button>
         <button v-if="tabNow === 'preview'" class="btn btn-primary">
@@ -43,23 +53,26 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, computed, provide, type Component, defineAsyncComponent } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive, computed, onMounted, provide, type Component, defineAsyncComponent } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import type { formTypes } from './types/invoiceAddWrapper'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import StepperStatus from '../../components/stepperStatus/StepperStatus.vue'
-import TabInvoice from './InvoiceAddWrapper/TabInvoice.vue'
+import TabInvoice from '@/components/invoice/TabInvoice.vue'
 import iconPDF from '@/components/icons/iconPDF.vue'
 import { KTModal } from '@/metronic/core'
 import { useCheckEmpty } from '@/composables/validation'
+import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 
 const InvoiceData = defineAsyncComponent(() => import('./InvoiceAddWrapper/InvoiceData.vue'))
 const InvoiceInformation = defineAsyncComponent(() => import('./InvoiceAddWrapper/InvoiceInformation.vue'))
 const InvoicePreview = defineAsyncComponent(() => import('./InvoiceAddWrapper/InvoicePreview.vue'))
 const ModalSuccess = defineAsyncComponent(() => import('./InvoiceAddWrapper/InvoicePreview/ModalSuccess.vue'))
 
+const invoiceApi = useInvoiceSubmissionStore()
 const router = useRouter()
+const route = useRoute()
 const tabNow = ref<string>('data')
 
 const routes = ref<routeTypes[]>([
@@ -74,7 +87,7 @@ const routes = ref<routeTypes[]>([
 ])
 
 const form = reactive<formTypes>({
-  name: '',
+  invoiceType: '',
   vendorId: '',
   businessField: '',
   subBusinessField: '',
@@ -87,16 +100,17 @@ const form = reactive<formTypes>({
   bankAddress: '',
   invoiceNo: '',
   companyCode: '',
-  supplierInvoiceNumber: '',
+  invoiceNoVendor: '',
   invoiceDate: '',
   taxNumber: '',
-  taxDate: '',
-  taxCode: '',
-  whtCode: '',
-  paymentDate: '',
-  department: '',
   invoiceDp: false,
   withDp: false,
+  amountInvoice: '',
+  taxNoInvoice: '',
+  remainingDpAmount: '',
+  dpAmountDeduction: '',
+  currency: '',
+  description: '',
   invoiceDocument: null,
   tax: null,
   referenceDocument: null,
@@ -120,22 +134,19 @@ const contentComponent = computed(() => {
 const checkInvoiceData = () => {
   form.vendorIdError = useCheckEmpty(form.vendorId).isError
   form.bankKeyIdError = useCheckEmpty(form.bankKeyId).isError
+  if (route.query.path === 'po') form.invoiceTypeError = useCheckEmpty(form.invoiceType).isError
 
   if (
     form.vendorIdError ||
-    form.bankKeyIdError
+    form.bankKeyIdError ||
+    form.invoiceTypeError
   ) return false
   else return true
 }
 
 const checkInvoiceInformation = () => {
-  form.supplierInvoiceNumberError = useCheckEmpty(form.supplierInvoiceNumber).isError
   form.invoiceDateError = useCheckEmpty(form.invoiceDate).isError
   form.taxNumberError = useCheckEmpty(form.taxNumber).isError
-  form.taxDateError = useCheckEmpty(form.taxDate).isError
-  form.taxCodeError = useCheckEmpty(form.taxCode).isError
-  form.whtCodeError = useCheckEmpty(form.whtCode).isError
-  form.paymentDateError = useCheckEmpty(form.paymentDate).isError
   form.invoicePoGrError = form.invoicePoGr.length === 0
 
   form.invoiceDocumentError = form.invoiceDocument === null
@@ -144,13 +155,8 @@ const checkInvoiceInformation = () => {
   form.otherDocumentError = form.otherDocument === null
 
   if (
-    form.supplierInvoiceNumberError ||
     form.invoiceDateError ||
     form.taxNumberError ||
-    form.taxDateError ||
-    form.taxCodeError ||
-    form.whtCodeError ||
-    form.paymentDateError ||
     form.invoiceDocumentError ||
     form.taxError ||
     form.referenceDocumentError ||
@@ -161,6 +167,13 @@ const checkInvoiceInformation = () => {
 
 const setTab = (value: string) => {
   tabNow.value = value
+}
+const goBack = () => {
+  const list = ['data', 'information', 'preview']
+  const checkIndex = list.findIndex((item) => item === tabNow.value)
+  if (checkIndex !== -1) {
+    tabNow.value = list[checkIndex - 1]
+  }
 }
 
 const goNext = () => {
@@ -192,6 +205,10 @@ const goNext = () => {
     }, 1000)
   }
 }
+
+onMounted(() => {
+  invoiceApi.getTaxCalculation()
+})
 
 provide('form', form)
 </script>

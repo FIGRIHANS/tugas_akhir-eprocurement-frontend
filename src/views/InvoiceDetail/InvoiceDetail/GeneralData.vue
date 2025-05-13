@@ -2,16 +2,16 @@
   <div v-if="form" class="card">
     <div class="card-header py-[17px] flex items-center justify-between gap-[8px]">
       <h3 class="card-title text-base font-semibold">General Data</h3>
-      <input v-if="form.status === 2" v-model="form.generalDataCheck" class="checkbox" type="checkbox"/>
+      <input v-model="form.generalDataCheck" class="checkbox" type="checkbox"/>
     </div>
     <div class="card-body flex flex-col gap-[20px]">
       <div v-if="checkPo()" class="flex items-center justify-between gap-[10px]">
+        <p class="font-normal text-sm text-gray-600">Invoice Type</p>
+        <p class="font-normal text-sm">{{ form.invoiceType }}</p>
+      </div>
+      <div class="flex items-center justify-between gap-[10px]">
         <p class="font-normal text-sm text-gray-600">Vendor Name</p>
         <p class="font-normal text-sm">{{ form.vendorId }}</p>
-      </div>
-      <div v-if="checkNonPo()" class="flex items-center justify-between gap-[10px]">
-        <p class="font-normal text-sm text-gray-600">Name</p>
-        <p class="font-normal text-sm">{{ form.name }}</p>
       </div>
       <div class="flex items-center justify-between gap-[10px]">
         <p class="font-normal text-sm text-gray-600">Business Field</p>
@@ -37,9 +37,5 @@ const form = inject<formTypes>('form')
 
 const checkPo = () => {
   return form?.invoiceType === 'po'
-}
-
-const checkNonPo = () => {
-  return form?.invoiceType === 'nonpo'
 }
 </script>

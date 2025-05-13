@@ -15,4 +15,5 @@ export interface invoiceItemTypes {
   otherDpp: string
   amount: string
   invoiceDueDate: string
+  isEdit: boolean
 }

@@ -21,21 +21,12 @@
     padding: 13px 20px;
     font-size: 13px;
     font-weight: 500;
-    min-width: 100px;
+    min-width: 150px;
+    white-space: nowrap;
 
-    &--medium {
+    &--line {
       @extend .cost__column;
-      min-width: 130px;
-    }
-
-    &--type {
-      @extend .cost__column;
-      min-width: 200px;
-    }
-
-    &--desc {
-      @extend .cost__column;
-      min-width: 250px;
+      min-width: 80px;
     }
   }
 

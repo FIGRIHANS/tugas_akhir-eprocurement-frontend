@@ -24,15 +24,18 @@
           <td>{{ item.invoiceNumber }}</td>
           <td>
             <span class="badge badge-outline badge-warning">
-              Proses Verifikasi
+              Under Verification
             </span>
           </td>
-          <td>{{ item.grNumber }}</td>
           <td>{{ item.poNumber }}</td>
+          <td>{{ item.grNumber }}</td>
+          <td>{{ item.companyCode }}</td>
           <td>{{ item.invoiceCategory }}</td>
           <td>{{ item.invoiceDate }}</td>
           <td>{{ item.vendorName }}</td>
-          <td>{{ item.amountDue }}</td>
+          <td>{{ item.totalGrossAmount }}</td>
+          <td>{{ item.totalNetAmount }}</td>
+          <td>{{ item.estimatedPaymentDate }}</td>
         </tr>
       </tbody>
       </table>
@@ -70,24 +73,30 @@ const columns = ref([
   '',
   'No Invoice',
   'Status',
-  'No GR',
   'No PO',
-  'Invoice Category',
+  'No GR',
+  'Company Code',
+  'Invoice PO Type',
   'Invoice Date',
   'Vendor Name',
-  'Amount Due'
+  'Total Gross Amount',
+  'Total Net Amount',
+  'Estimated Payment Date'
 ])
 
 const list = ref<listTypes[]>([
   {
     invoiceNumber: 'INV238744',
     status: 1,
-    grNumber: '5000000054',
     poNumber: '1110052253',
+    grNumber: '5000000054',
+    companyCode: 'DELA',
     invoiceCategory: 'With DP',
     invoiceDate: '15 Okt 2024',
     vendorName: 'PT Pharmacy',
-    amountDue: '2365456'
+    totalGrossAmount: '100000',
+    totalNetAmount: '2365456',
+    estimatedPaymentDate: '30 November 2024'
   }
 ])
 

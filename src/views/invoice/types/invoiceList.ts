@@ -3,21 +3,26 @@ export interface listTypes {
   status: number,
   grNumber: string
   poNumber: string
+  companyCode: string
   invoiceCategory: string
   invoiceDate: string
   vendorName: string
-  amountDue: string
+  totalGrossAmount: string
+  totalNetAmount: string
+  estimatedPaymentDate: string
 }
 
 export interface listNonPoTypes {
   invoiceNumber: string
-  status: number,
-  activity: string
+  status: number
+  poNumber: string
+  grNumber: string
   companyCode: string
-  department: string
   invoiceDate: string
   vendorName: string
-  amountDue: string
+  totalGrossAmount: string
+  totalNetAmount: string
+  estimatedPaymentDate: string
 }
 
 export interface filterListTypes {

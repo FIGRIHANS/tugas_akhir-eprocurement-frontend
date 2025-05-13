@@ -9,6 +9,7 @@
       v-model="textValue"
       :placeholder="placeholder"
       :disabled="disabled"
+      :class="{ 'border-danger': error }"
       class="w-full h-32 p-3 pt-6 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
     ></textarea>
   </div>
@@ -22,6 +23,7 @@ const props = defineProps<{
   label: string
   placeholder?: string
   disabled?: boolean
+  error?: boolean
 }>()
 
 const emits = defineEmits(['update:modelValue'])

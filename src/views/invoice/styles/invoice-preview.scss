@@ -27,6 +27,18 @@
         background-color: #DBDFE9;
       }
     }
+
+    &__field-base {
+      min-width: 150px;
+      white-space: nowrap;
+      @apply px-[20px] !important;
+      @apply py-[13px] !important;
+
+      &--line {
+        @extend .invoice__field-base;
+        min-width: 80px;
+      }
+    }
   }
 
   .table-head {

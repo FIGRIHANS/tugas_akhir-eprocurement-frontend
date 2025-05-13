@@ -21,16 +21,12 @@
     padding: 13px 20px;
     font-size: 13px;
     font-weight: 500;
-    min-width: 100px;
+    min-width: 150px;
+    white-space: nowrap;
 
-    &--po-sap-number {
+    &--line {
       @extend .po__column;
-      min-width: 150px;
-    }
-
-    &--medium {
-      @extend .po__column;
-      min-width: 130px;
+      min-width: 80px;
     }
   }
 

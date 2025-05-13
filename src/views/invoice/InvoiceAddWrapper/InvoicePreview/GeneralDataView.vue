@@ -3,12 +3,12 @@
     <p class="text-base font-semibold mb-[20px]">General Data</p>
     <div class="flex flex-col gap-[20px]">
       <div v-if="checkPo()">
+        <p class="text-xs font-normal text-gray-700">Invoice Type</p>
+        <p class="text-sm font-medium">{{ form.invoiceType || '-' }}</p>
+      </div>
+      <div>
         <p class="text-xs font-normal text-gray-700">Vendor</p>
         <p class="text-sm font-medium">{{ form.vendorId || '-' }}</p>
-      </div>
-      <div v-if="checkNonPo()">
-        <p class="text-xs font-normal text-gray-700">Name</p>
-        <p class="text-sm font-medium">{{ form.name || '-' }}</p>
       </div>
       <div>
         <p class="text-xs font-normal text-gray-700">Business Field</p>
@@ -39,9 +39,9 @@ const checkPo = () => {
   return typeForm.value === 'po'
 }
 
-const checkNonPo = () => {
-  return typeForm.value === 'nonpo'
-}
+// const checkNonPo = () => {
+//   return typeForm.value === 'nonpo'
+// }
 
 onMounted(() => {
   typeForm.value = route.query.type?.toString().toLowerCase() || 'po'

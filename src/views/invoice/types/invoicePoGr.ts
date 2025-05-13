@@ -1,23 +1,22 @@
 export interface itemsPoGrType {
-  grNumber: string
   poNumber: string
-  poSapNumber: string
-  item: string
+  poItem: string
+  GrDocumentNo: string
+  GrDocumentItem: string
+  GrDocumentDate: string
+  taxCode: string
+  itemAmount: string
   quantity: string
-  uom: string
-  costPerUnit: string
-  totalCost: string
-  installmentCost: string
-  deliveryDate: string
-  billable: string
-  dpPercent: string
-  dpValue: string
+  unit: string
+  itemText: string
+  conditionType: string
   whtType: string
   whtCode: string
-  dpp: string
-  whtValue: string
-  vat: string
-  otherDpp: string
-  amount: string
-  isEdit: boolean
+  whtBaseAmount: string
+  category: string
+
+  amountInvoice: string
+  vatAmount: string
+  
+  totalNetAmount: string
 }

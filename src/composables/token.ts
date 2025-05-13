@@ -9,3 +9,14 @@ export const useCheckToken = () => {
 
   return token
 }
+
+export const getToken = () => {
+  const value = `; ${document.cookie}`
+  const parts = value.split(`; token_dts=`)
+  if (parts.length === 2) {
+    const token = parts.pop()
+    return token ? token.split(';').shift() : undefined
+  } else {
+    return ''
+  }
+}

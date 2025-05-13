@@ -22,7 +22,21 @@
           </select>
         </div>
         <div class="relative">
-          <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white">Category</label>
+          <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white">Company Code</label>
+          <select class="select" name="select">
+            <option value="1">
+              Option 1
+            </option>
+            <option value="2">
+              Option 2
+            </option>
+            <option value="3">
+              Option 3
+            </option>
+          </select>
+        </div>
+        <div class="relative">
+          <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white">Invoice PO Type</label>
           <select class="select" name="select">
             <option value="1">
               Option 1

@@ -1,8 +1,8 @@
 <template>
-  <div v-if="form" class="card h-full">
+  <div v-if="form" class="card">
     <div class="card-header py-[17px] flex items-center justify-between gap-[8px]">
       <h3 class="card-title text-base font-semibold">Invoice Calculation</h3>
-      <input v-if="form.status === 2" v-model="form.invoiceCalculationCheck" class="checkbox" type="checkbox"/>
+      <input v-model="form.invoiceCalculationCheck" class="checkbox" type="checkbox"/>
     </div>
     <div class="card-body flex flex-col p-0">
       <div
@@ -11,9 +11,9 @@
         class="flex"
         :class="index === listCalculation.length - 1 ? 'calculation__last-field' : ''"
       >
-        <p class="flex-1 py-[15px] px-[20px] text-xs">{{ item.name }}</p>
-        <p class="flex-1 py-[15px] px-[20px] text-xs">{{ item.amount }}</p>
-        <p class="flex-1 py-[15px] px-[20px] text-xs">{{ item.currency }}</p>
+        <p class="flex-1 py-[25px] px-[20px] text-xs">{{ item.name }}</p>
+        <p class="flex-1 py-[25px] px-[20px] text-xs">{{ item.amount }}</p>
+        <p class="flex-1 py-[25px] px-[20px] text-xs">{{ item.currency }}</p>
       </div>
     </div>
   </div>
@@ -32,8 +32,7 @@ const listName = ref<string[]>([
   'WHT AMount',
   'Additional Cost',
   'Total Gross Amount',
-  'Total Net Amount',
-  'Amount Due'
+  'Total Net Amount'
 ])
 
 const listCalculation = ref<listTypes[]>([])
