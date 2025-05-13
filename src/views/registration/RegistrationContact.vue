@@ -9,14 +9,6 @@
         required
         :error="contact.account.usernameError"
       />
-      <UiInput
-        v-model="contact.account.email"
-        label="Email"
-        placeholder="Masukkan Email"
-        row
-        required
-        :error="contact.account.emailError"
-      />
       <div class="flex items-center flex-wrap lg:flex-nowrap gap-2.5">
         <label class="form-label w-2/5 flex items-center gap-1">
           Password
@@ -33,6 +25,14 @@
           </div>
         </div>
       </div>
+      <UiInput
+        v-model="contact.account.email"
+        label="Email"
+        placeholder="Masukkan Email"
+        row
+        required
+        :error="contact.account.emailError"
+      />
       <div class="flex items-center flex-wrap lg:flex-nowrap gap-2.5">
         <label class="form-label w-2/5 flex items-center gap-1">
           Ulangi Password
@@ -50,12 +50,6 @@
           </div>
         </div>
       </div>
-      <UiInput
-        v-model="contact.account.website"
-        label="Website"
-        placeholder="Masukkan website"
-        row
-      />
       <UiInputTel
         v-model="contact.account.phone"
         label="No Telephone"
@@ -63,6 +57,12 @@
         row
         required
         :error="contact.account.phoneError"
+      />
+      <UiInput
+        v-model="contact.account.website"
+        label="Website"
+        placeholder="Masukkan website"
+        row
       />
     </UiFormGroup>
 
@@ -72,19 +72,11 @@
       <UiFormGroup title="Contact Person" :grid="2" body-class="px-4" hide-border>
         <UiInput
           v-model="contact.contactPerson.contactName"
-          label="Nama Lengkap"
+          label="Nama"
           placeholder="Masukkan nama lengkap"
           row
           required
           :error="contact.contactPerson.contactNameError"
-        />
-        <UiInputTel
-          v-model="contact.contactPerson.contactPhone"
-          label="No Telephone"
-          placeholder="Masukkan no telephone"
-          row
-          required
-          :error="contact.contactPerson.contactPhoneError"
         />
         <UiInput
           v-model="contact.contactPerson.contactEmail"
@@ -93,6 +85,14 @@
           row
           required
           :error="contact.contactPerson.contactEmailError"
+        />
+        <UiInputTel
+          v-model="contact.contactPerson.contactPhone"
+          label="No Telephone"
+          placeholder="Masukkan no telephone"
+          row
+          required
+          :error="contact.contactPerson.contactPhoneError"
         />
         <UiSelect
           v-model="contact.contactPerson.positionTypeId"

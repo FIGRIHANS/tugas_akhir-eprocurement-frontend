@@ -178,9 +178,6 @@ const checkFieldNotEmpty = () => {
         Object.values(item).some((value) => value === true),
       )
 
-      console.log(checkingField)
-      console.log(registrationVendorStore.documentAndLegal.fields)
-
       return !checkingField.some((value) => value === true)
 
     case 'registration__payment-detail':
@@ -274,8 +271,16 @@ const next = () => {
           subBusinessFieldId: item.subBusinessFieldId,
         })),
         vendorResponsibleContacts: contact.value.contactPerson.list,
-        vendorLicenses: removeErrorFields(documentAndLegal.value.fields),
-        otherDocuments: removeErrorFields(documentAndLegal.value.anotherDocuments),
+        vendorLicenses: removeErrorFields(documentAndLegal.value.fields).map((item) => ({
+          ...item,
+          issuedDate: item.issuedDate === '' ? null : item.issuedDate,
+          expiredDate: item.expiredDate === '' ? null : item.expiredDate,
+        })),
+        otherDocuments: removeErrorFields(documentAndLegal.value.anotherDocuments).map((item) => ({
+          ...item,
+          issuedDate: item.issuedDate === '' ? null : item.issuedDate,
+          expiredDate: item.expiredDate === '' ? null : item.expiredDate,
+        })),
         bankDetailDto: {
           bankName: isBankNotRegistered.value ? paymentDetail.value.bankName : '',
           branch: isBankNotRegistered.value ? paymentDetail.value.branch : '',
@@ -296,7 +301,6 @@ const next = () => {
       }
 
       vendorMasterDataStore.postVendorRegistration(payload)
-      // console.log(payload)
     } else {
       tab.active = tab.items[index].value
       router.push({ name: tab.items[index].value })
