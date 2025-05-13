@@ -1,39 +1,46 @@
 <template>
   <div class="border border-gray-200 rounded-xl p-[24px]">
-    <UiInputSearch v-model="search" placeholder="Cari Invoice" class="w-[250px]" />
+    <div class="flex justify-between gap-[8px]">
+      <UiInputSearch v-model="search" placeholder="Cari Invoice" class="w-[250px]" />
+      <FilterList />
+    </div>
     <div class="mt-[24px]">
-      <table class="table align-middle text-gray-700 rounded-xl font-medium text-sm">
-        <thead>
-          <tr>
-            <th v-for="(item, index) in columns" class="pending__column" :key="index">{{ item }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(item, index) in list" :key="index">
-            <td>
-              <button class="btn btn-outline btn-primary btn-icon" @click="openDetailInvoice">
-                <i class="ki-duotone ki-eye"></i>
-              </button>
-            </td>
-            <td>
-              <button class="btn btn-outline btn-primary btn-icon" @click="openDetailVerification">
-                <i class="ki-duotone ki-data"></i>
-              </button>
-            </td>
-            <td>{{ item.invoiceNumber }}</td>
-            <td>
-              <span class="badge badge-outline badge-info">
-                Ready To Verify
-              </span>
-            </td>
-            <td>{{ item.vendorName }}</td>
-            <td>{{ item.grNumber }}</td>
-            <td>{{ item.poNumber }}</td>
-            <td>{{ item.invoiceType }}</td>
-            <td>{{ item.amountDue }}</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="pending__table overflow-x-auto">
+        <table class="table align-middle text-gray-700 rounded-xl font-medium text-sm">
+          <thead>
+            <tr>
+              <th v-for="(item, index) in columns" class="pending__column" :key="index">{{ item }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(item, index) in list" :key="index">
+              <td class="flex justify-between items-center gap-[8px]">
+                <button class="btn btn-outline btn-primary btn-icon" @click="openDetailInvoice">
+                  <i class="ki-duotone ki-eye"></i>
+                </button>
+                <button class="btn btn-outline btn-primary btn-icon" @click="openDetailVerification">
+                  <i class="ki-duotone ki-data"></i>
+                </button>
+              </td>
+              <td>{{ item.invoiceNumber }}</td>
+              <td>
+                <span class="badge badge-outline badge-info">
+                  Ready To Verify
+                </span>
+              </td>
+              <td>{{ item.vendorName }}</td>
+              <td>{{ item.grNumber }}</td>
+              <td>{{ item.poNumber }}</td>
+              <td>{{ item.invoiceType }}</td>
+              <td>{{ item.companyCode }}</td>
+              <td>{{ item.baseAmount }}</td>
+              <td>{{ item.vatAmount }}</td>
+              <td>{{ item.whtAmount }}</td>
+              <td>{{ item.totalNetAmount }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <div class="flex items-center justify-between mt-[24px]">
         <p class="m-0">Tampilkan 10 data dari total data 100</p>
         <LPagination :totalItems="totalItem" :pageSize="pageSize" :currentPage="currentPage" @pageChange="setPage" />
@@ -52,6 +59,7 @@ import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import { KTModal } from '@/metronic/core'
 
 const DetailVerificationModal = defineAsyncComponent(() => import('./DetailVerificationModal.vue'))
+const FilterList = defineAsyncComponent(() => import('./FilterList.vue'))
 
 const router = useRouter()
 const search = ref<string>('')
@@ -61,14 +69,17 @@ const totalItem = ref<number>(100)
 
 const columns = ref<string[]>([
   '',
-  '',
   'No Invoice',
   'Status',
-  'Nama Vendor',
-  'No GR',
+  'Vendor Name',
   'No PO',
-  'Tipe Invoice',
-  'Amount Due'
+  'No GR',
+  'Invoice Type',
+  'Company Code',
+  'Base Amount',
+  'VAT Ammount',
+  'WHT Amount',
+  'Total Net Amount'
 ])
 
 const list = ref<listItemTypes[]>([
@@ -78,7 +89,11 @@ const list = ref<listItemTypes[]>([
     grNumber: '5000000054',
     poNumber: '1110052253',
     invoiceType: 'PT Pharmacy',
-    amountDue: '2365456'
+    companyCode: 'DELA',
+    baseAmount: '100000',
+    vatAmount: '11000',
+    whtAmount: '2000',
+    totalNetAmount: '109000'
   },
   {
     invoiceNumber: 'INV0000123',
@@ -86,7 +101,11 @@ const list = ref<listItemTypes[]>([
     grNumber: '5000000054',
     poNumber: '1110052253',
     invoiceType: 'PT Pharmacy',
-    amountDue: '2365456'
+    companyCode: 'DELA',
+    baseAmount: '100000',
+    vatAmount: '11000',
+    whtAmount: '2000',
+    totalNetAmount: '109000'
   }
 ])
 

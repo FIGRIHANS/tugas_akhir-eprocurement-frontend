@@ -5,7 +5,7 @@ import type { invoiceItemTypes } from './invoiceItem'
 
 export interface formTypes extends documentFormTypes {
   // Invoice Data
-  name: string
+  invoiceType: string
   vendorId: string
   businessField: string
   subBusinessField: string
@@ -25,16 +25,20 @@ export interface formTypes extends documentFormTypes {
   bankAddressNew?: string
 
   // Invoice Information
+  invoiceDate: string
+  postingDate: string
   invoiceNo: string
   companyCode: string
-  supplierInvoiceNumber: string
-  invoiceDate: string
-  taxNumber: string
-  taxDate: string
-  taxCode: string
-  whtCode: string
-  paymentDate: string
-  department: string
+  invoicingParty: string
+  estimatedPaymentDate: string
+  taxNumberInvoice: string
+  invoiceNumberVendor: string
+  paymentMethod: string
+  assignment: string
+  transferNews: string
+  currency: string
+  npwpReporting: string
+  description: string
   invoiceDp: boolean
   withDp: boolean
   invoicePoGr: itemsPoGrType[]
@@ -50,7 +54,4 @@ export interface formTypes extends documentFormTypes {
   invoicePoGrCheck?: boolean
   invoiceItemCheck?: boolean
   additionalCostCheck?: boolean
-
-  // other
-  invoiceType: string
 }

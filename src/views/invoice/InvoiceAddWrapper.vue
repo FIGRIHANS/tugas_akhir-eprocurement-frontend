@@ -39,7 +39,7 @@
           Back
         </button>
         <button v-if="tabNow !== 'preview'" class="btn btn-primary" @click="goNext">
-          Lanjut
+          Next
           <i class="ki-duotone ki-black-right"></i>
         </button>
         <button v-if="tabNow === 'preview'" class="btn btn-primary">
@@ -59,7 +59,7 @@ import { type routeTypes } from '@/core/type/components/breadcrumb'
 import type { formTypes } from './types/invoiceAddWrapper'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import StepperStatus from '../../components/stepperStatus/StepperStatus.vue'
-import TabInvoice from './InvoiceAddWrapper/TabInvoice.vue'
+import TabInvoice from '@/components/invoice/TabInvoice.vue'
 import iconPDF from '@/components/icons/iconPDF.vue'
 import { KTModal } from '@/metronic/core'
 import { useCheckEmpty } from '@/composables/validation'

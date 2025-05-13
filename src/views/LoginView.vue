@@ -63,7 +63,7 @@
     <!-- right -->
     <div class="flex-1">
       <div class="rounded-xl bg-primary-light h-full flex flex-col justify-between items-center gap-[8px]">
-        <logoTelkomsel class="mt-[30px]" />
+        <logoLogin class="mt-[30px]" />
         <loginView />
       </div>
     </div>
@@ -76,7 +76,7 @@ import { useRouter } from 'vue-router'
 import { useLoginStore } from '@/stores/views/login'
 import { type ApiResponseData, type ApiResponseDataResult } from '@/core/type/api'
 import loginView from '@/assets/svg/LoginImage.vue'
-import logoTelkomsel from '@/assets/svg/LogoTekomsel.vue'
+import logoLogin from '@/assets/svg/LogoLogin.vue'
 import moment from 'moment'
 
 const login = useLoginStore()

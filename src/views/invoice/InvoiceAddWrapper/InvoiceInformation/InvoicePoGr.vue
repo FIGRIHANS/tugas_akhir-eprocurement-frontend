@@ -33,7 +33,7 @@
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.GrDocumentNo }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.GrDocumentItem }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.GrDocumentDate }}</td>
-            <td v-if="!checkInvoiceDp()">{{ item.taxCode }}</td>
+            <td>{{ item.taxCode }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.itemAmount }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.quantity }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.unit }}</td>

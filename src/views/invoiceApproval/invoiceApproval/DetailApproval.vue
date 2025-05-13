@@ -38,7 +38,7 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import type { listItemTypes } from '../../types/detailApproval'
+import type { listItemTypes } from '../types/detailApproval'
 
 const columns = ref<string[]>([
   'Nama Approver',
@@ -92,5 +92,5 @@ const badgeTitle = (status: number) => {
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/detail-approval.scss';
+@use '../styles/detail-approval.scss';
 </style>

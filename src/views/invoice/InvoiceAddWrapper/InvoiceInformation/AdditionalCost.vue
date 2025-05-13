@@ -33,7 +33,7 @@
               </button>
             </td>
             <td>
-              <input v-if="!item.isEdit" v-model="item.activity" class="input" placeholder="" disabled/>
+              <span v-if="!item.isEdit">{{ item.activity }}</span>
               <select v-else v-model="item.activity" class="select" placeholder="">
                 <option value="1">
                   Option 1
@@ -47,10 +47,11 @@
               </select>
             </td>
             <td>
-              <input v-model="item.itemAmount" class="input" placeholder="" :disabled="!item.isEdit"/>
+              <span v-if="!item.isEdit">{{ item.itemAmount }}</span>
+              <input v-else v-model="item.itemAmount" class="input" placeholder=""/>
             </td>
             <td>
-              <input v-if="!item.isEdit" v-model="item.debitCredit" class="input" placeholder="" disabled/>
+              <span v-if="!item.isEdit">{{ item.debitCredit }}</span>
               <select v-else v-model="item.debitCredit" class="select" placeholder="">
                 <option value="1">
                   Option 1
@@ -64,7 +65,7 @@
               </select>
             </td>
             <td>
-              <input v-if="!item.isEdit" v-model="item.taxCode" class="input" placeholder="" disabled/>
+              <span v-if="!item.isEdit">{{ item.taxCode }}</span>
               <select v-else v-model="item.taxCode" class="select" placeholder="">
                 <option v-for="(option, index) in listTaxCalculation" :key="index" :value="option.id">
                   {{ option.id }}
@@ -72,7 +73,7 @@
               </select>
             </td>
             <td>
-              <input v-if="!item.isEdit" v-model="item.costCenter" class="input" placeholder="" disabled/>
+              <span v-if="!item.isEdit">{{ item.costCenter }}</span>
               <select v-else v-model="item.costCenter" class="select" placeholder="">
                 <option value="1">
                   Option 1
@@ -86,7 +87,7 @@
               </select>
             </td>
             <td>
-              <input v-if="!item.isEdit" v-model="item.profitCenter" class="input" placeholder="" disabled/>
+              <span v-if="!item.isEdit">{{ item.profitCenter }}</span>
               <select v-else v-model="item.profitCenter" class="select" placeholder="">
                 <option value="1">
                   Option 1
@@ -100,7 +101,8 @@
               </select>
             </td>
             <td>
-              <input v-model="item.assignment" class="input" placeholder="" :disabled="!item.isEdit"/>
+              <span v-if="!item.isEdit">{{ item.assignment }}</span>
+              <input v-else v-model="item.assignment" class="input" placeholder=""/>
             </td>
             <td>
               <input v-if="!item.isEdit" v-model="item.whtType" class="input" placeholder="" disabled/>
@@ -117,7 +119,7 @@
               </select>
             </td>
             <td>
-              <input v-if="!item.isEdit" v-model="item.whtCode" class="input" placeholder="" disabled/>
+              <span v-if="!item.isEdit">{{ item.whtCode }}</span>
               <select v-else v-model="item.whtCode" class="select" placeholder="">
                 <option value="1">
                   Option 1
@@ -131,10 +133,12 @@
               </select>
             </td>
             <td>
-              <input v-model="item.whtBaseAmount" class="input" placeholder="" :disabled="!item.isEdit"/>
+              <span v-if="!item.isEdit">{{ item.whtBaseAmount }}</span>
+              <input v-else v-model="item.whtBaseAmount" class="input" placeholder=""/>
             </td>
             <td>
-              <input v-model="item.amount" class="input" placeholder="" :disabled="!item.isEdit"/>
+              <span v-if="!item.isEdit">{{ item.amount }}</span>
+              <input v-else v-model="item.amount" class="input" placeholder=""/>
             </td>
           </tr>
         </tbody>

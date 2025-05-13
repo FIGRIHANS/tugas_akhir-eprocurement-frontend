@@ -23,18 +23,15 @@
         </div>
       </div>
     </div>
-    <ModalLog />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, watch, defineAsyncComponent, inject } from 'vue'
+import { ref, onMounted, watch, inject } from 'vue'
 import { useRoute } from 'vue-router'
 import type { listType } from '../../types/invoiceCalculation'
 import type { formTypes } from '../../types/invoiceAddWrapper'
 import { defaultField, dpField } from '@/static/invoiceCalculation'
-
-const ModalLog = defineAsyncComponent(() => import('./InvoiceCalculation/ModalLog.vue'))
 
 const route = useRoute()
 const form = inject<formTypes>('form')

@@ -3,7 +3,7 @@
     <div class="modal-content max-w-[500px] modal-center-y">
       <div class="modal-header">
         <h3 class="modal-title text-lg font-semibold">
-          Return Invoice INV0000123 to User 
+          Return Invoice to User 
         </h3>
       </div>
       <div class="modal-body flex flex-col justify-center items-center gap-[30px] p-[16px]">
@@ -13,7 +13,7 @@
             <i class="ki-duotone ki-black-left-line"></i>
             Cancel
           </button>
-          <button class="btn btn-warning btn-lg w-full justify-center" @click="goApprove">
+          <button class="btn btn-warning btn-lg w-full justify-center bg-orange-500 hover:bg-orange-600" @click="goApprove">
             <i class="ki-duotone ki-arrows-loop"></i>
             Return
           </button>

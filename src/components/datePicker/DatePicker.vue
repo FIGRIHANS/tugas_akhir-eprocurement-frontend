@@ -1,6 +1,6 @@
 <template>
   <div class="min-w-[0px] w-full flex items-center flex-wrap lg:flex-nowrap gap-2.5">
-    <label class="form-label flex items-center gap-1 w-2/5">
+    <label v-if="label" class="form-label flex items-center gap-1 w-2/5">
       {{ label }}
       <span v-if="required" class="text-danger"> * </span>
     </label>

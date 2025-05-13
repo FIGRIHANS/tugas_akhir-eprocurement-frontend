@@ -1,8 +1,25 @@
 .pending {
+  &__table {
+    &::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+      background: transparent;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      width: 10px;
+      height: 10px;
+      border-radius: 15px;
+      background-color: #DBDFE9;
+    }
+  }
+
   &__column {
+    min-width: 150px;
     padding: 17px 20px !important;
     color: #4B5675;
     font-size: 16px;
     font-weight: 600;
+    white-space: nowrap;
   }
 }
