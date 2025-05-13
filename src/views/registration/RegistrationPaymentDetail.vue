@@ -11,7 +11,6 @@
             v-model="paymentDetail.accountNo"
             label="No Rekening"
             placeholder="Masukkan no rekening"
-            type="number"
             row
             required
             :error="paymentDetail.accountNoError"
@@ -135,103 +134,6 @@
       </div>
 
       <div class="card bg-gray-100">
-        <!-- <div class="card-body flex flex-col gap-4 scrollable h-[635px] py-0 my-4 pr-4 mr-2">
-          <h2 class="card-title">Mohon Diperhatikan!</h2>
-          <p class="font-medium">
-            Syarat dan Ketentuan dalam Sistem E-Procurement PT Arya Noble untuk Vendor
-          </p>
-          <p>Dengan ini:</p>
-          <ol class="list-decimal pl-4">
-            <li>
-              Mengajukan permohonan keikutsertaan untuk menjadi penyedia barang/jasa dalam sistem
-              E-Procurement PT Arya Noble yang selanjutnya dalam surat pernyataan ini disebut
-              sebagai vendor.
-            </li>
-            <li>
-              Bersedia memberikan segala dokumen dan informasi yang benar, masih berlaku, dan sah
-              secara hukum dari Perusahaan. Bilamana dikemudian hari ditemukan bahwa dokumen dan
-              informasi yang kami berikan tidak benar dan tidak sah, maka kami bersedia dikenakan
-              sanksi moral dan sanksi administrasi, dikeluarkan dari “Daftar Vendor” dalam sistem
-              E-Procurement PT Arya Noble, serta dituntut ganti rugi dan/atau pidana sesuai dengan
-              ketentuan dan peraturan perundang-undangan yang berlaku.
-            </li>
-            <li>
-              Bersedia mematuhi dan melaksanakan persyaratan, ketentuan, prosedur maupun instruksi
-              yang berlaku bagi vendor.
-            </li>
-            <li>Mengakui integritas proses E-Procurement PT Arya Noble.</li>
-            <li>
-              Bersedia berpartisipasi atau turut serta dalam proses tender yang dilaksanakan melalui
-              sistem E-Procurement PT Arya Noble.
-            </li>
-            <li>
-              Menyetujui bahwa user ID dan password yang diperoleh merupakan representasi vendor
-              atas segala aktivitas dalam sistem E-Procurement PT Arya Noble.
-            </li>
-            <li>
-              Sebagai vendor bertanggung jawab untuk menjaga kerahasiaan user ID dan password, serta
-              bertanggung jawab penuh untuk semua aktivitas yang dilakukan dengan menggunakan user
-              ID dan password yang dimaksud.
-            </li>
-            <li>
-              Membebaskan PT Arya Noble beserta para stafnya dari:
-              <ul class="list-disc pl-4">
-                <li>Setiap penyalahgunaan user ID dan password dari vendor.</li>
-                <li>
-                  Setiap kerusakan dan/atau kerugian baik langsung maupun tidak langsung, namun
-                  tidak terbatas pada kehilangan keuntungan, kegunaan data, atau kerugian
-                  non-material yang ditimbulkan oleh:
-                  <ul class="list-disc pl-4">
-                    <li>Penggunaan atau ketidakmampuan menggunakan sistem.</li>
-                    <li>Penggunaan akses yang tidak sah maupun pengiriman data.</li>
-                    <li>Pernyataan atau tindakan dari pihak ketiga dalam sistem.</li>
-                    <li>Hal-hal yang berhubungan dengan sistem.</li>
-                  </ul>
-                </li>
-                <li>
-                  Setiap tuntutan dari pihak ketiga sehubungan dengan proses e-procurement dan atau
-                  keterangan/dokumen yang dimasukkan oleh vendor ke dalam sistem atau melalui
-                  sistem.
-                </li>
-                <li>
-                  Setiap penggunaan dan/atau penyambungan sistem di luar ketentuan oleh vendor.
-                </li>
-                <li>
-                  Setiap pelanggaran atas Syarat dan Ketentuan serta instruksi-instruksi dari PT
-                  Arya Noble atau pelanggaran terhadap hak-hak pihak lain.
-                </li>
-                <li>
-                  Kegagalan pelaksanaan sistem E-Procurement yang disebabkan oleh keadaan kahar
-                  (force majeure) yaitu sesuatu yang di luar kekuasaan PT Arya Noble dan termasuk
-                  juga namun tidak terbatas pada bencana alam, pemogokan, huru-hara, perang,
-                  penyakit menular, peraturan-peraturan pemerintah yang diterapkan setelah kejadian,
-                  kebakaran, kegagalan/kerusakan saluran telekomunikasi, ketiadaan tenaga listrik,
-                  gempa bumi, atau kejadian-kejadian malapetaka lainnya.
-                </li>
-              </ul>
-            </li>
-            <li>
-              Bersedia terikat dan menghargai seluruh proses yang berjalan beserta dokumen yang
-              sudah diserahkan selama kegiatan E-Procurement.
-            </li>
-            <li>
-              Bersedia untuk tidak membuka, mengeluarkan maupun memberikan setiap informasi dan data
-              kepada pihak ketiga, dan/atau penggunaannya dengan cara bagaimanapun oleh vendor baik
-              langsung maupun tidak langsung terhadap setiap informasi dan data yang berhubungan
-              dengan kegiatan E-Procurement PT Arya Noble.
-            </li>
-            <li>
-              Vendor sebagai pemilik user ID dan password mengakui bahwa pengiriman data/penawaran
-              yang dilakukan melalui sistem E-Procurement PT Arya Noble merupakan proses yang sah
-              secara hukum.
-            </li>
-            <li>
-              Mengakui bahwa data dan/atau catatan-catatan yang valid dan sah untuk dasar evaluasi
-              proses tender adalah data dan/atau catatan-catatan yang terekam (recorded) di dalam
-              server sistem E-Procurement PT Arya Noble.
-            </li>
-          </ol>
-        </div> -->
         <div
           class="term-condition card-body flex flex-col gap-4 scrollable h-[635px] py-0 my-4 pr-4 mr-2"
           v-html="termCondition?.termCondition"
@@ -240,7 +142,7 @@
 
       <UiCheckbox
         v-model="paymentDetailFlagging.acceptTermCondition"
-        label="Baca dan setuju terhadap syarat dan ketentuan tender - eProcurement PT Datesea"
+        label="Baca dan setuju terhadap syarat dan ketentuan tender - eProcurement PT Arya Noble"
       />
 
       <div class="card w-fit justify-center">
@@ -258,7 +160,7 @@
             <p class="font-medium text-sm">
               Vendor yang berminat mengikuti tender cukup satu kali registerasi dan pastikan data
               yang anda inputkan valid. Data calon vendor yang tidak bisa dipertanggung jawabkan
-              dapat dikenakan sanksi oleh PT Datasea
+              dapat dikenakan sanksi oleh PT Arya Noble
             </p>
           </div>
         </div>
