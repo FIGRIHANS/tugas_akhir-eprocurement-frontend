@@ -7,11 +7,11 @@
   </div>
 
   <template v-else>
-    <UiButton outline variant="primary" size="lg" @click="router.push('/registration')">
+    <UiButton outline variant="dark" size="lg" @click="router.push('/registration')">
       Daftar
       <UiIcon variant="duotone" name="menu" />
     </UiButton>
-    <UiButton variant="primary" size="lg" @click="router.push('/login')">
+    <UiButton variant="dark" size="lg" @click="router.push('/login')">
       Masuk
       <UiIcon variant="duotone" name="entrance-left" />
     </UiButton>
