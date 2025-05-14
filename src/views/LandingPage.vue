@@ -46,4 +46,105 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
       <HeroImage class="w-full h-auto" />
     </div>
   </section>
+
+  <section id="advantages" class="py-20">
+    <div class="max-w-[1440px] lg:px-[40px] px-5">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div>
+          <span class="rounded-full py-1 px-3 bg-gray-200 text-base text-gray-900">
+            Our Advantages
+          </span>
+          <h1 class="font-semibold text-4xl text-[#283841] mt-4">Tender Process</h1>
+        </div>
+        <div class="text-base font-normal text-[#656565] self-end">
+          Every step—from registration to tender selection—is designed to be transparent, efficient,
+          and easy to use.
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="card bg-secondary shadow-none">
+          <div class="card-body p-4 space-y-4">
+            <div class="inline-flex items-center gap-4">
+              <div class="bg-gray-200 rounded-lg p-2">
+                <svg
+                  width="30"
+                  height="31"
+                  viewBox="0 0 30 31"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M15 2C22.4558 2 28.5 8.04416 28.5 15.5C28.5 22.9558 22.4558 29 15 29C7.54416 29 1.5 22.9558 1.5 15.5C1.5 8.04416 7.54416 2 15 2ZM15 4C8.64873 4 3.5 9.14873 3.5 15.5C3.5 21.8513 8.64873 27 15 27C21.3513 27 26.5 21.8513 26.5 15.5C26.5 9.14873 21.3513 4 15 4ZM15 9.8125C17.8414 9.8125 20.6218 11.2169 22.6318 13.9033L22.7568 14.085C23.2988 14.9493 23.2988 16.0507 22.7568 16.915L22.6318 17.0967C20.6218 19.7831 17.8414 21.1875 15 21.1875C12.1586 21.1875 9.37821 19.7831 7.36816 17.0967C6.6599 16.1501 6.6599 14.8499 7.36816 13.9033C9.37821 11.2169 12.1586 9.8125 15 9.8125ZM15 11.8125C12.8508 11.8125 10.6408 12.8682 8.96973 15.1016C8.79298 15.3378 8.79298 15.6622 8.96973 15.8984C10.6408 18.1318 12.8508 19.1875 15 19.1875C17.1492 19.1875 19.3592 18.1318 21.0303 15.8984L21.0889 15.8066C21.1885 15.6148 21.1885 15.3852 21.0889 15.1934L21.0303 15.1016C19.3592 12.8682 17.1492 11.8125 15 11.8125ZM15 13C16.3807 13 17.5 14.1193 17.5 15.5C17.5 16.8807 16.3807 18 15 18C13.6193 18 12.5 16.8807 12.5 15.5C12.5 15.3589 12.5117 15.2206 12.5342 15.0859C12.5531 14.9724 12.7109 14.9551 12.7842 15.0439C13.0134 15.3225 13.3611 15.5 13.75 15.5C14.4404 15.5 15 14.9404 15 14.25C15 13.8611 14.8225 13.5134 14.5439 13.2842C14.4551 13.2109 14.4724 13.0531 14.5859 13.0342C14.7206 13.0117 14.8589 13 15 13Z"
+                    fill="#071437"
+                  />
+                </svg>
+              </div>
+              <span class="text-xl text-gray-900 font-semibold"> Transparent </span>
+            </div>
+            <div class="font-light text-gray-800 text-lg">
+              Enhances transparency in the registration and tender submission process.
+            </div>
+          </div>
+        </div>
+
+        <div class="card bg-secondary shadow-none">
+          <div class="card-body p-4 space-y-4">
+            <div class="inline-flex items-center gap-4">
+              <div class="bg-gray-200 rounded-lg p-2">
+                <svg
+                  width="30"
+                  height="31"
+                  viewBox="0 0 30 31"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M6.2 16.4L16.25 3L15 13H23C23.824 13 24.2944 13.9408 23.8 14.6L13.75 28L15 18H7C6.17595 18 5.70557 17.0592 6.2 16.4Z"
+                    stroke="#071437"
+                    stroke-width="2"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </div>
+              <span class="text-xl text-gray-900 font-semibold"> Efficient </span>
+            </div>
+            <div class="font-light text-gray-800 text-lg">
+              Improves data accuracy while minimizing the risk of human error during the tender
+              process.
+            </div>
+          </div>
+        </div>
+
+        <div class="card bg-secondary shadow-none">
+          <div class="card-body p-4 space-y-4">
+            <div class="inline-flex items-center gap-4">
+              <div class="bg-gray-200 rounded-lg p-2">
+                <svg
+                  width="30"
+                  height="31"
+                  viewBox="0 0 30 31"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M10.625 13L13.75 16.125L20 9.875M8.75 3H21.25C23.3211 3 25 4.67893 25 6.75V28L16.9875 22.9922C15.7715 22.2322 14.2285 22.2322 13.0125 22.9922L5 28V6.75C5 4.67893 6.67893 3 8.75 3Z"
+                    stroke="#071437"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </div>
+              <span class="text-xl font-semibold text-gray-900"> User-Friendly </span>
+            </div>
+            <div class="font-light text-gray-800 text-lg">
+              Simplifies the tender process through an intuitive, user-friendly application
+              accessible anytime, anywhere from your computer.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 </template>
