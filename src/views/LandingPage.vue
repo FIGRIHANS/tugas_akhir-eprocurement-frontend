@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import HeroImage from '@/assets/svg/HeroImage.vue'
+import LogoAN from '@/assets/svg/LogoAN.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 </script>
 
@@ -47,8 +48,8 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
     </div>
   </section>
 
-  <section id="advantages" class="py-20">
-    <div class="max-w-[1440px] lg:px-[40px] px-5">
+  <section id="advantages" class="py-16">
+    <div class="max-w-[1440px] lg:px-[40px] px-5 mx-auto">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div>
           <span class="rounded-full py-1 px-3 bg-gray-200 text-base text-gray-900">
@@ -142,6 +143,35 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
               Simplifies the tender process through an intuitive, user-friendly application
               accessible anytime, anywhere from your computer.
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="about" class="py-16">
+    <div class="max-w-[1440px] lg:px-[40px] px-5 mx-auto">
+      <div class="mb-6">
+        <span class="rounded-full py-1 px-3 bg-gray-200 text-base text-gray-900"> About Us </span>
+        <h1 class="font-semibold text-4xl text-[#283841] mt-4">About Us</h1>
+      </div>
+      <div class="flex flex-col lg:flex-row gap-6 lg:items-center">
+        <LogoAN class="w-full" />
+        <div class="col-span-2 card bg-secondary shadow-none">
+          <div class="card-body p-4">
+            <p class="font-light text-lg text-gray-800">
+              We recognize that vendors play a vital role in the operations and long-term
+              sustainability of Arya Noble’s business. Together with our partners, we support Arya
+              Noble’s production chain across various levels and sectors. That is why we promote
+              business transactions that deliver optimal added value through standardized, fair, and
+              high-quality tender processes.
+            </p>
+            <p class="font-light text-lg text-gray-800">
+              Our e-Procurement system facilitates the electronic tendering of goods and services
+              through a web-based application. The system covers the entire tendering process,
+              including vendor registration, pre-qualification, tender execution (for goods and
+              services), and contract management.
+            </p>
           </div>
         </div>
       </div>
