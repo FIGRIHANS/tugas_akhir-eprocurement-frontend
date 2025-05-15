@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { IApproval } from './types/approval'
 import type { ApiResponse } from '@/core/type/api'
-import vendorAPI from '@/core/utils/vendorAPI'
+import vendorAPI from '@/core/utils/vendorApi'
 
 export const useApprovalStore = defineStore('approval', () => {
   const loading = ref(false)

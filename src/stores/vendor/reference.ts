@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { IReferenceList } from './types/reference'
-import vendorAPI from '@/core/utils/vendorAPI'
+import vendorAPI from '@/core/utils/vendorApi'
 import type { ApiResponse } from '@/core/type/api'
 
 const getReference = async (

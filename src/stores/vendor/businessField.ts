@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { IBusinessFields } from './types/businessField'
 import type { ApiResponse } from '@/core/type/api'
-import vendorAPI from '@/core/utils/vendorAPI'
+import vendorAPI from '@/core/utils/vendorApi'
 
 export const useBusinessFieldStore = defineStore('businessField', () => {
   const loading = ref(false)

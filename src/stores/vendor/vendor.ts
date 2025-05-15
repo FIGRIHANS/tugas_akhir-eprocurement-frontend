@@ -1,4 +1,4 @@
-import vendorAPI from '@/core/utils/vendorAPI'
+import vendorAPI from '@/core/utils/vendorApi'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type {

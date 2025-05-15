@@ -2,7 +2,7 @@ import type { ApiResponse } from '@/core/type/api'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { ICategory } from './types/category'
-import vendorAPI from '@/core/utils/vendorAPI'
+import vendorAPI from '@/core/utils/vendorApi'
 
 export const useVendorCategoryStore = defineStore('vendorCategory', () => {
   const loading = ref(false)

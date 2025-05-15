@@ -1,5 +1,5 @@
 import type { ApiResponse } from '@/core/type/api'
-import vendorAPI from '@/core/utils/vendorAPI'
+import vendorAPI from '@/core/utils/vendorApi'
 import axios from 'axios'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
