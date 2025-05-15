@@ -123,6 +123,7 @@ export default [
       {
         id: 'invoice-verification',
         title: 'Invoice Verification',
+        to: '/invoice/verification'
       },
       {
         id: 'invoice-approval',

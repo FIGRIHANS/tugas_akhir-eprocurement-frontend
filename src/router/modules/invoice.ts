@@ -18,6 +18,11 @@ export default [
     component: () => import('@/views/invoice/InvoiceAddWrapper.vue')
   },
   {
+    path: '/invoice/verification',
+    name: 'invoiceVerification',
+    component: () => import('@/views/invoiceVerification/InvoiceVerification.vue')
+  },
+  {
     path: '/invoice/approval',
     name: 'invoiceApproval',
     component: () => import('@/views/invoiceApproval/InvoiceApproval.vue')
@@ -26,5 +31,10 @@ export default [
     path: '/invoice/detail',
     name: 'invoiceDetail',
     component: () => import('@/views/InvoiceDetail/InvoiceDetail.vue')
+  },
+  {
+    path: '/invoice/detail/edit',
+    name: 'invoiceDetailEdit',
+    component: () => import('@/views/invoiceDetailEdit/InvoiceDetailEdit.vue')
   },
 ]

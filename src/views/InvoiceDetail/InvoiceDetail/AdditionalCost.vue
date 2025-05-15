@@ -1,6 +1,9 @@
 <template>
   <div v-if="form" class="flex flex-col gap-[24px]">
-    <p class="text-lg font-semibold m-[0px]">Additional Cost</p>
+    <div class="flex items-center gap-[24px]">
+      <p class="text-lg font-semibold m-[0px]">Additional Cost</p>
+      <input v-model="form.additionalCostCheck" class="checkbox" type="checkbox"/>
+    </div>
     <div class="cost__table">
       <table class="table table-xs table-border">
         <thead>
@@ -10,8 +13,7 @@
               :key="index"
               class="cost__column"
               :class="{
-                'cost__column--desc': item.toLowerCase() === 'description',
-                'cost__column--medium': setMediumColumn(item)
+                'cost__column--line': item.toLowerCase() === 'Line'.toLowerCase()
               }"
             >
               {{ item }}
@@ -21,16 +23,17 @@
         <tbody>
           <tr v-for="(item, index) in form.additionalCost" :key="index" class="cost__items">
             <td>{{ item.line }}</td>
-            <td>{{ item.quantity }}</td>
-            <td>{{ item.uom }}</td>
-            <td>{{ item.amount }}</td>
-            <td>{{ item.costType }}</td>
-            <td>{{ item.description }}</td>
-            <td>{{ item.subTotal }}</td>
-            <td>{{ item.taxCode }}</td>
-            <td>{{ item.vatAmount }}</td>
-            <td>{{ item.wht }}</td>
-            <td>{{ item.whtAmount }}</td>
+            <td>{{ item.activity || '-' }}</td>
+            <td>{{ item.itemAmount || '-' }}</td>
+            <td>{{ item.debitCredit || '-' }}</td>
+            <td>{{ item.taxCode || '-' }}</td>
+            <td>{{ item.costCenter || '-' }}</td>
+            <td>{{ item.profitCenter || '-' }}</td>
+            <td>{{ item.assignment || '-' }}</td>
+            <td>{{ item.whtType || '-' }}</td>
+            <td>{{ item.whtCode || '-' }}</td>
+            <td>{{ item.whtBaseAmount || '-' }}</td>
+            <td>{{ item.amount || '-' }}</td>
           </tr>
         </tbody>
       </table>
@@ -46,34 +49,18 @@ const form = inject<formTypes>('form')
 
 const columns = ref([
   'Line',
-  'Quantity',
-  'UOM',
-  'Amount',
-  'Cost Type',
-  'Description',
-  'Subtotal',
+  'Activity / Expense',
+  'Item Amount',
+  'Debit/Credit',
   'Tax Code',
-  'VAT Amount',
-  'WHT',
-  'WHT Amount'
+  'Cost Center',
+  'Profit Center',
+  'Assignment',
+  'WHT Type',
+  'WHT Code',
+  'WHT Base Amount',
+  'Amount'
 ])
-
-const setMediumColumn = (name: string) => {
-  switch (name.toLowerCase()) {
-    case 'amount':
-      return true
-    case 'cost type':
-      return true
-    case 'vat amount':
-      return true
-    case 'tax code':
-      return true
-    case 'wht amount':
-      return true
-    default:
-      return false
-  }
-}
 </script>
 
 <style lang="scss" scoped>

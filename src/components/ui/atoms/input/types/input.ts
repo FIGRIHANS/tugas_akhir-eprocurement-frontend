@@ -3,4 +3,8 @@ export interface IInputProps {
   placeholder?: string
   readonly?: boolean
   disabled?: boolean
+  row?: boolean
+  required?: boolean
+  error?: boolean
+  type?: 'text' | 'number'
 }

@@ -1,79 +1,44 @@
 <template>
-  <div class="flex-1">
-    <div class="border-b border-gray-200 gap-[8px] p-[10px] flex items-center">
-      <i class="ki-duotone ki-bank text-gray-600 text-xl"></i>
-      <span class="font-medium">Payment Information</span>
+  <div class="card flex-1">
+    <div class="card-header px-[16px] py-[22px]">
+      <div class="flex gap-4 mb-5 flex-1 border rounded-lg p-[4px]" data-tabs="true">
+        <button
+          class="btn btn-primary btn-clear flex-1 justify-center"
+          :class="{ 'active': tabNow === 'payment' }"
+          :disabled="isDisabled"
+          @click="tabNow = 'payment'"
+        > Payment Information </button>
+        <button
+          class="btn btn-primary btn-clear flex-1 justify-center"
+          :class="{ 'active': tabNow === 'alternative' }"
+          :disabled="isDisabled"
+          @click="tabNow = 'alternative'"
+        > Alternative Payment </button>
+      </div>
     </div>
-    <div v-if="form" class="py-[8px] px-[16px]">
-      <!-- Bank Key -->
-      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-        <label class="form-label max-w-32">
-          Bank Key
-        </label>
-        <select v-model="form.bankKeyId" class="select" :class="{ 'border-danger': form.bankKeyIdError }">
-          <option value="1">
-            Option 1
-          </option>
-          <option value="2">
-            Option 2
-          </option>
-          <option value="3">
-            Option 3
-          </option>
-        </select>
-      </div>
-      <!-- Bank Name -->
-      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-        <label class="form-label max-w-32">
-          Bank Name
-        </label>
-        <select v-model="form.bankNameId" class="select" :class="{ 'border-danger': form.bankNameIdError }">
-          <option value="1">
-            Option 1
-          </option>
-          <option value="2">
-            Option 2
-          </option>
-          <option value="3">
-            Option 3
-          </option>
-        </select>
-      </div>
-      <!-- Beneficiary Name -->
-      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-        <label class="form-label max-w-32">
-          Beneficiary Name
-        </label>
-        <input v-model="form.beneficiaryName" class="input" placeholder="" :class="{ 'border-danger': form.beneficiaryNameError }"/>
-      </div>
-      <!-- Bank Account Number -->
-      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-        <label class="form-label max-w-32">
-          Bank Account Number
-        </label>
-        <input v-model="form.bankAccountNumber" class="input" placeholder="" :class="{ 'border-danger': form.bankAccountNumberError }"/>
-      </div>
-      <!-- SWIFT Code -->
-      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-        <label class="form-label max-w-32">
-          SWIFT Code
-        </label>
-        <input v-model="form.swiftCode" class="input" placeholder="" :class="{ 'border-danger': form.swiftCodeError }"/>
-      </div>
-      <!-- Bank Address -->
-      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-        <label class="form-label max-w-32">
-          Bank Address
-        </label>
-        <textarea v-model="form.bankAddress" class="textarea" placeholder="" rows="6" :class="{ 'border-danger': form.bankAddressError }"></textarea>
-      </div>
+    <div class="py-[8px] px-[50px]">
+      <Transition mode="out-in">
+        <component :is="contentComponent" />
+      </Transition>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { inject } from 'vue'
-import type { formTypes } from '../../types/invoiceAddWrapper'
+import { ref, computed, defineAsyncComponent, type Component } from 'vue'
 
-const form = inject<formTypes>('form')
+const PaymentInformation = defineAsyncComponent(() => import('./BankKey/PaymentInformation.vue'))
+const AlternativePayment = defineAsyncComponent(() => import('./BankKey/AlternativePayment.vue'))
+
+const tabNow = ref<string>('payment')
+const isDisabled = ref<boolean>(true)
+
+const contentComponent = computed(() => {
+  const components = {
+    payment: PaymentInformation,
+    alternative: AlternativePayment
+  } as { [key: string]: Component }
+
+  return components[tabNow.value]
+})
 </script>

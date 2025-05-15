@@ -1,6 +1,9 @@
 <template>
   <div v-if="form" class="flex flex-col gap-[24px]">
-    <p class="text-lg font-semibold m-[0px]">Invoice PO & GR Item</p>
+    <div class="flex items-center gap-[24px]">
+      <p class="text-lg font-semibold m-[0px]">Invoice PO & GR Item</p>
+      <input v-model="form.invoicePoGrCheck" class="checkbox" type="checkbox"/>
+    </div>
     <div class="po__table">
       <table class="table table-xs table-border">
         <thead>
@@ -10,9 +13,7 @@
               :key="index"
               class="po__column"
               :class="{
-                'po__column--desc': item.toLowerCase() === 'description',
-                'po__column--aux': item.toLowerCase() === 'auxiliary part id',
-                'po__column--medium': setMediumColumn(item)
+                'po__column--line': item.toLowerCase() === 'Line'.toLowerCase()
               }"
             >
               {{ item }}
@@ -22,17 +23,24 @@
         <tbody>
           <tr v-for="(item, index) in form.invoicePoGr" :key="index" class="po__items">
             <td>{{ item.line }}</td>
-            <td>{{ item.quantity }}</td>
-            <td>{{ item.uom }}</td>
-            <td>{{ item.price }}</td>
-            <td>{{ item.part }}</td>
-            <td>{{ item.auxiliaryPartId }}</td>
-            <td>{{ item.description }}</td>
-            <td>{{ item.subTotal }}</td>
-            <td>{{ item.taxCode }}</td>
-            <td>{{ item.vatAmount }}</td>
-            <td>{{ item.wht }}</td>
-            <td>{{ item.whtAmount }}</td>
+            <td>{{ item.poNumber || '-' }}</td>
+            <td v-if="!checkInvoiceDp()">{{ item.poItem || '-' }}</td>
+            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.GrDocumentNo || '-' }}</td>
+            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.GrDocumentItem || '-' }}</td>
+            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.GrDocumentDate || '-' }}</td>
+            <td v-if="!checkInvoiceDp()">{{ item.taxCode || '-' }}</td>
+            <td v-if="!checkInvoiceDp()">{{ item.itemAmount || '-' }}</td>
+            <td v-if="!checkInvoiceDp()">{{ item.quantity || '-' }}</td>
+            <td v-if="!checkInvoiceDp()">{{ item.unit || '-' }}</td>
+            <td v-if="!checkInvoiceDp()">{{ item.itemText || '-' }}</td>
+            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.conditionType || '-' }}</td>
+            <td v-if="checkInvoiceDp()">{{ item.amountInvoice || '-' }}</td>
+            <td v-if="checkInvoiceDp()">{{ item.vatAmount || '-' }}</td>
+            <td>{{ item.whtType || '-' }}</td>
+            <td>{{ item.whtCode || '-' }}</td>
+            <td>{{ item.whtBaseAmount || '-' }}</td>
+            <td>{{ item.category || '-' }}</td>
+            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.totalNetAmount || '-' }}</td>
           </tr>
         </tbody>
       </table>
@@ -41,40 +49,40 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, inject } from 'vue'
+import { ref, watch, inject, onMounted } from 'vue'
 import type { formTypes } from '../types/invoiceDetail'
+import { defaultColumn, invoiceDpColumn, PoPibColumn } from '@/static/invoicePoGr'
 
 const form = inject<formTypes>('form')
+const columns = ref<string[]>([])
 
-const columns = ref([
-  'Line',
-  'Quantity',
-  'UOM',
-  'Price',
-  'Part',
-  'Auxiliary Part ID',
-  'Description',
-  'Subtotal',
-  'Tax Code',
-  'VAT Amount',
-  'WHT',
-  'WHT Amount'
-])
-
-const setMediumColumn = (name: string) => {
-  switch (name.toLowerCase()) {
-    case 'price':
-      return true
-    case 'vat amount':
-      return true
-    case 'tax code':
-      return true
-    case 'wht amount':
-      return true
-    default:
-      return false
-  }
+const checkInvoiceDp = () => {
+  return form?.invoiceDp
 }
+
+const checkPoPib = () => {
+  return form?.invoiceType === 'pib'
+}
+
+const setColumn = () => {
+  if (form?.invoiceType === 'pib') columns.value = ['Line', ...PoPibColumn]
+  else if (form?.invoiceDp) columns.value = ['Line', ...invoiceDpColumn]
+  else columns.value = ['Line', ...defaultColumn]
+}
+
+watch(
+  () => [form?.invoiceDp, form?.invoiceType],
+  () => {
+    setColumn()
+  },
+  {
+    immediate: true
+  }
+)
+
+onMounted(() => {
+  setColumn()
+})
 </script>
 
 <style lang="scss" scoped>

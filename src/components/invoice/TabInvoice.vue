@@ -7,8 +7,8 @@
     <button class="tab pl-[4px]" :class="activeTab === 'information' ? 'active' : ''" @click="setTab('information')">
       Invoice Information
     </button>
-    <i class="ki-duotone ki-right"></i>
-    <button class="tab pl-[4px]" :class="activeTab === 'preview' ? 'active' : ''" @click="setTab('preview')">
+    <i v-if="withPreview" class="ki-duotone ki-right"></i>
+    <button v-if="withPreview" class="tab pl-[4px]" :class="activeTab === 'preview' ? 'active' : ''" @click="setTab('preview')">
       Invoice Preview
     </button>
   </div>
@@ -17,9 +17,15 @@
 <script lang="ts" setup>
 /* eslint-disable no-undef */
 
-defineProps<{
-  activeTab: string
-}>()
+withDefaults(
+  defineProps<{
+    activeTab: string
+    withPreview?: boolean
+  }>(),
+  {
+    withPreview: true
+  }
+)
 
 const emits = defineEmits(['changeTab'])
 

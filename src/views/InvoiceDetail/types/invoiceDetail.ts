@@ -4,27 +4,52 @@ import type { itemsCostType } from './additionalCost'
 
 export interface formTypes extends documentFormTypes {
   // Invoice Data
-  companyId: string
+  invoiceType: string
   vendorId: string
   businessField: string
   subBusinessField: string
   address: string
-  vendorTaxId: string
+
+  isNotRegisteredBank?: boolean
   bankKeyId: string
   bankNameId: string
   beneficiaryName: string
   bankAccountNumber: string
   swiftCode: string
   bankAddress: string
+  accountName?: string
+  npwpNumber?: string
+  bankNameNew?: string
+  bankAccountNumberNew?: string
+  bankAddressNew?: string
 
   // Invoice Information
+  invoiceDate: string
+  postingDate: string
   invoiceNo: string
-  taxInvoiceNumber: string
-  taxDate: string
-  taxCalculationId: string
-  taxCode: string
-  whtCode: string
-  paymentTerm: string
+  companyCode: string
+  invoicingParty: string
+  estimatedPaymentDate: string
+  taxNumberInvoice: string
+  invoiceNumberVendor: string
+  paymentMethod: string
+  assignment: string
+  transferNews: string
+  currency: string
+  npwpReporting: string
+  description: string
+  invoiceDp: boolean
+  withDp: boolean
   invoicePoGr: itemsPoGrType[]
   additionalCost: itemsCostType[]
+
+  // verification validation
+  status: number
+  generalDataCheck?: boolean
+  bankKeyCheck?: boolean
+  invoiceHeaderDocumentCheck?: boolean
+  invoiceCalculationCheck?: boolean
+  invoicePoGrCheck?: boolean
+  invoiceItemCheck?: boolean
+  additionalCostCheck?: boolean
 }

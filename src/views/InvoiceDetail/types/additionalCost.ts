@@ -1,13 +1,15 @@
 export interface itemsCostType {
   line: string
-  quantity: string
-  uom: string
-  amount: string
-  costType: string
-  subTotal: string
+  activity: string
+  itemAmount: string
+  debitCredit: string
   taxCode: string
-  vatAmount: string
-  wht: string
-  whtAmount: string
-  description: string
+  costCenter: string
+  profitCenter: string
+  assignment: string
+  whtType: string
+  whtCode: string
+  whtBaseAmount: string
+  amount: string
+  isEdit: boolean
 }

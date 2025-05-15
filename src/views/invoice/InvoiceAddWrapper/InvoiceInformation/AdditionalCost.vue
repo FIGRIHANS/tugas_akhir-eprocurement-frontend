@@ -1,12 +1,12 @@
 <template>
   <div class="flex flex-col gap-[16px]">
     <p class="text-base font-semibold">Additional Cost</p>
-    <button class="btn btn-outline btn-primary w-fit" @click="addNew">
+    <button v-if="form?.status === 0" class="btn btn-outline btn-primary w-fit" @click="addNew">
       <i class="ki-duotone ki-plus-circle"></i>
       Add Additional Cost
     </button>
     <div v-if="form" class="overflow-x-auto cost__table">
-      <table class="table table-xs table-border" :class="{ 'border-danger': form.additionalCostError }">
+      <table class="table table-xs table-border">
         <thead>
           <tr>
             <th
@@ -23,20 +23,18 @@
         </thead>
         <tbody>
           <tr v-for="(item, index) in form.additionalCost" :key="index" class="cost__field-items">
-            <td>
-              <input v-model="item.line" class="input" placeholder="" type="text"/>
+            <td class="flex items-center justify-around gap-[8px]">
+              <button v-if="form.status === 0" class="btn btn-icon btn-primary" @click="item.isEdit = !item.isEdit">
+                <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>
+                <i v-else class="ki-duotone ki-check-circle"></i>
+              </button>
+              <button v-if="form.status === 0" class="btn btn-icon btn-outline btn-danger" @click="deleteItem(index)">
+                <i class="ki-duotone ki-cross-circle"></i>
+              </button>
             </td>
             <td>
-              <input v-model="item.quantity" class="input" placeholder="" type="text"/>
-            </td>
-            <td>
-              <input v-model="item.uom" class="input" placeholder="" type="text"/>
-            </td>
-            <td>
-              <input v-model="item.amount" class="input" placeholder="" type="text"/>
-            </td>
-            <td>
-              <select v-model="item.costType" class="select" placeholder="">
+              <span v-if="!item.isEdit">{{ item.activity }}</span>
+              <select v-else v-model="item.activity" class="select" placeholder="">
                 <option value="1">
                   Option 1
                 </option>
@@ -49,22 +47,98 @@
               </select>
             </td>
             <td>
-              <input v-model="item.description" class="input" placeholder="" type="text"/>
+              <span v-if="!item.isEdit">{{ item.itemAmount }}</span>
+              <input v-else v-model="item.itemAmount" class="input" placeholder=""/>
             </td>
             <td>
-              <input v-model="item.subTotal" class="input" placeholder="" type="text"/>
+              <span v-if="!item.isEdit">{{ item.debitCredit }}</span>
+              <select v-else v-model="item.debitCredit" class="select" placeholder="">
+                <option value="1">
+                  Option 1
+                </option>
+                <option value="2">
+                  Option 2
+                </option>
+                <option value="3">
+                  Option 3
+                </option>
+              </select>
             </td>
             <td>
-              <input v-model="item.taxCode" class="input" placeholder="" type="text"/>
+              <span v-if="!item.isEdit">{{ item.taxCode }}</span>
+              <select v-else v-model="item.taxCode" class="select" placeholder="">
+                <option v-for="(option, index) in listTaxCalculation" :key="index" :value="option.id">
+                  {{ option.id }}
+                </option>
+              </select>
             </td>
             <td>
-              <input v-model="item.vatAmount" class="input" placeholder="" type="text"/>
+              <span v-if="!item.isEdit">{{ item.costCenter }}</span>
+              <select v-else v-model="item.costCenter" class="select" placeholder="">
+                <option value="1">
+                  Option 1
+                </option>
+                <option value="2">
+                  Option 2
+                </option>
+                <option value="3">
+                  Option 3
+                </option>
+              </select>
             </td>
             <td>
-              <input v-model="item.wht" class="input" placeholder="" type="text"/>
+              <span v-if="!item.isEdit">{{ item.profitCenter }}</span>
+              <select v-else v-model="item.profitCenter" class="select" placeholder="">
+                <option value="1">
+                  Option 1
+                </option>
+                <option value="2">
+                  Option 2
+                </option>
+                <option value="3">
+                  Option 3
+                </option>
+              </select>
             </td>
             <td>
-              <input v-model="item.whtAmount" class="input" placeholder="" type="text"/>
+              <span v-if="!item.isEdit">{{ item.assignment }}</span>
+              <input v-else v-model="item.assignment" class="input" placeholder=""/>
+            </td>
+            <td>
+              <input v-if="!item.isEdit" v-model="item.whtType" class="input" placeholder="" disabled/>
+              <select v-else v-model="item.whtType" class="select" placeholder="">
+                <option value="1">
+                  Option 1
+                </option>
+                <option value="2">
+                  Option 2
+                </option>
+                <option value="3">
+                  Option 3
+                </option>
+              </select>
+            </td>
+            <td>
+              <span v-if="!item.isEdit">{{ item.whtCode }}</span>
+              <select v-else v-model="item.whtCode" class="select" placeholder="">
+                <option value="1">
+                  Option 1
+                </option>
+                <option value="2">
+                  Option 2
+                </option>
+                <option value="3">
+                  Option 3
+                </option>
+              </select>
+            </td>
+            <td>
+              <span v-if="!item.isEdit">{{ item.whtBaseAmount }}</span>
+              <input v-else v-model="item.whtBaseAmount" class="input" placeholder=""/>
+            </td>
+            <td>
+              <span v-if="!item.isEdit">{{ item.amount }}</span>
+              <input v-else v-model="item.amount" class="input" placeholder=""/>
             </td>
           </tr>
         </tbody>
@@ -74,42 +148,52 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, inject } from 'vue'
+import { ref, computed, inject } from 'vue'
 import type { formTypes } from '../../types/invoiceAddWrapper'
+import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 
+const invoiceApi = useInvoiceSubmissionStore()
 const columns = ref([
-  'Line',
-  'Quantity',
-  'UOM',
-  'Amount',
-  'Cost Type',
-  'Description',
-  'Subtotal',
+  'Action',
+  'Activity / Expense',
+  'Item Amount',
+  'Debit/Credit',
   'Tax Code',
-  'VAT Amount',
-  'WHT',
-  'WHT Amount'
+  'Cost Center',
+  'Profit Center',
+  'Assignment',
+  'WHT Type',
+  'WHT Code',
+  'WHT Base Amount',
+  'Amount'
 ])
 
 const form = inject<formTypes>('form')
 
+const listTaxCalculation = computed(() => invoiceApi.taxCalculationList)
+
 const addNew = () => {
   if (form) {
     const data = {
-      line: '',
-      quantity: '',
-      uom: '',
-      amount: '',
-      costType: '',
-      subTotal: '',
+      activity: '',
+      itemAmount: '',
+      debitCredit: '',
       taxCode: '',
-      vatAmount: '',
-      wht: '',
-      whtAmount: '',
-      description: ''
+      costCenter: '',
+      profitCenter: '',
+      assignment: '',
+      whtType: '',
+      whtCode: '',
+      whtBaseAmount: '',
+      amount: '',
+      isEdit: false
     }
     form.additionalCost.push(data)
   }
+}
+
+const deleteItem = (index: number) => {
+  form?.additionalCost.splice(index, 1)
 }
 </script>
 

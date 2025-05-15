@@ -1,11 +1,32 @@
 export interface listTypes {
   invoiceNumber: string
-  status: 1,
+  status: number,
   grNumber: string
   poNumber: string
-  invoiceType: string
+  companyCode: string
   invoiceCategory: string
   invoiceDate: string
   vendorName: string
-  amountDue: string
+  totalGrossAmount: string
+  totalNetAmount: string
+  estimatedPaymentDate: string
+}
+
+export interface listNonPoTypes {
+  invoiceNumber: string
+  status: number
+  poNumber: string
+  grNumber: string
+  companyCode: string
+  invoiceDate: string
+  vendorName: string
+  totalGrossAmount: string
+  totalNetAmount: string
+  estimatedPaymentDate: string
+}
+
+export interface filterListTypes {
+  status: string
+  category: string
+  date: string
 }

@@ -1,13 +1,19 @@
 <template>
   <div class="min-w-[0px] w-full flex items-center flex-wrap lg:flex-nowrap gap-2.5">
-    <label class="form-label flex items-center gap-1 w-2/5">
+    <label v-if="label" class="form-label flex items-center gap-1 w-2/5">
       {{ label }}
       <span v-if="required" class="text-danger"> * </span>
     </label>
     <VueDatePicker v-model="date" :format="format" :preview-format="format" class="w-full">
       <template #dp-input="{ value }">
         <div class="input relative" :class="{ 'border-danger': error }">
-          <input :placeholder="placeholder" :value="value" readonly class="min-w-[0px]" />
+          <input
+            placeholder="Select"
+            :value="value"
+            readonly
+            class="min-w-[0px]"
+            :disabled="disabled"
+          />
           <button class="btn btn-icon">
             <i class="ki-filled ki-calendar"></i>
           </button>
@@ -28,6 +34,7 @@ const props = defineProps<{
   required?: boolean
   placeholder?: string
   format?: string
+  disabled?: boolean
 }>()
 
 const emits = defineEmits(['update:modelValue'])

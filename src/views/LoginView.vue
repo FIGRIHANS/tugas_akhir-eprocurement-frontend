@@ -63,7 +63,7 @@
     <!-- right -->
     <div class="flex-1">
       <div class="rounded-xl bg-primary-light h-full flex flex-col justify-between items-center gap-[8px]">
-        <logoTelkomsel class="mt-[30px]" />
+        <logoLogin class="mt-[30px]" />
         <loginView />
       </div>
     </div>
@@ -76,7 +76,7 @@ import { useRouter } from 'vue-router'
 import { useLoginStore } from '@/stores/views/login'
 import { type ApiResponseData, type ApiResponseDataResult } from '@/core/type/api'
 import loginView from '@/assets/svg/LoginImage.vue'
-import logoTelkomsel from '@/assets/svg/LogoTekomsel.vue'
+import logoLogin from '@/assets/svg/LogoLogin.vue'
 import moment from 'moment'
 
 const login = useLoginStore()
@@ -96,8 +96,9 @@ const goLogin = () => {
     .then((response: ApiResponseData<string>) => {
       if (response.statusCode === 200) {
         setToken(response.result)
+        login.callUser(email.value)
         router.push({
-          path: '/'
+          path: '/dashboard'
         })
       }
     })
@@ -108,7 +109,7 @@ const goLogin = () => {
 
 const setToken = (result: ApiResponseDataResult<string>) => {
   const expired = moment().add(7, 'days').toDate().toUTCString()
-  document.cookie = `token_dts=${'bearer ' + result.content}; path=/; expires=${expired}; Secure; SameSite=Strict`
+  document.cookie = `token_dts=${'Bearer ' + result.content}; path=/; expires=${expired}; Secure; SameSite=Strict`
 }
 
 const saveAccount = () => {
@@ -133,9 +134,9 @@ onMounted(() => {
   const account = savedAccount.split('; ')
   for (const item of account) {
     const [key, value] = item.split('=')
-    console.log(key)
     if (key === 'username') email.value = value
     if (key === 'password') password.value = value
   }
+  if (email.value && password.value) rememberMe.value = true
 })
 </script>

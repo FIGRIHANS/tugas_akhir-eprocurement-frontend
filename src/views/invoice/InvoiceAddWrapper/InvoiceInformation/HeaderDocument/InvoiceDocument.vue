@@ -10,11 +10,12 @@
           ref="pdfUploadRef"
           v-show="!form[item.varName as keyof typeof form]"
           :error="!!form[item.varErrorName  as keyof documentFormTypes]"
+          :disabled="formInject?.status !== 0"
           @setFile="setFile($event, item.varName as keyof documentFormTypes)" 
         />
         <div v-if="form[item.varName as keyof typeof form]" class="flex justify-between items-center gap-[8px] flex-1">
           <AttachmentView :fileData="typeof form[item.varName as keyof documentFormTypes] === 'object' ? form[item.varName as keyof documentFormTypes] as File : null" />
-          <span class="border-b border-dashed border-primary text-primary cursor-pointer text-xs font-medium" @click="changeFile(index)">Edit</span>
+          <span v-if="formInject?.status === 0" class="border-b border-dashed border-primary text-primary cursor-pointer text-xs font-medium" @click="changeFile(index)">Edit</span>
         </div>
       </div>
     </div>
