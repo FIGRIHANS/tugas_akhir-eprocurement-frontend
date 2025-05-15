@@ -8,13 +8,13 @@
 
   <template v-else>
     <UiButton outline variant="dark" size="lg" @click="router.push('/registration')">
-      Daftar
+      Register
       <UiIcon variant="duotone" name="menu" />
     </UiButton>
-    <UiButton variant="dark" size="lg" @click="router.push('/login')">
-      Masuk
+    <button class="btn btn-lg btn-dark" @click="router.push('/login')">
+      Sign In
       <UiIcon variant="duotone" name="entrance-left" />
-    </UiButton>
+    </button>
   </template>
 </template>
 
