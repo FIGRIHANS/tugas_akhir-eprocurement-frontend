@@ -36,7 +36,6 @@
 <script lang="ts" setup>
 import { defineModel } from 'vue'
 import type { IInputProps } from './types/input'
-const model = defineModel()
 
 withDefaults(defineProps<IInputProps>(), {
   placeholder: '',
