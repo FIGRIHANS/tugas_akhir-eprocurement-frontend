@@ -1,7 +1,7 @@
-import axios from 'axios'
+import axios from "axios";
 
-const vendorApi = axios.create({
+const vendorAPI = axios.create({
   baseURL: import.meta.env.VITE_API_VENDOR_BASE_URL,
 })
 
-export default vendorApi
+export default vendorAPI
