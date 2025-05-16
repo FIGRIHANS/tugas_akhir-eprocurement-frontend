@@ -43,6 +43,7 @@
 import { defineModel } from 'vue'
 import type { ISelectProps } from './types/select'
 
+const model = defineModel()
 withDefaults(defineProps<ISelectProps>(), {
   placeholder: '',
   readonly: false,

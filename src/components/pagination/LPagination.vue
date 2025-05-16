@@ -1,12 +1,8 @@
 <template>
-  <div class="flex items-center space-x-2">
+  <div class="pagination">
     <!-- Tombol Prev -->
-    <button
-      @click="goToPage(currentPage - 1)"
-      :disabled="currentPage === 1"
-      class="px-3 py-1 rounded border border-gray-300 text-gray-600 disabled:opacity-50 hover:bg-blue-600 hover:text-white"
-    >
-      &lt;
+    <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="btn btn-light">
+      <UiIcon name="left" variant="outline" />
     </button>
 
     <!-- Nomor Halaman -->
@@ -14,10 +10,11 @@
       v-for="page in visiblePages"
       :key="page"
       @click="goToPage(page)"
-      :class="[
-        'px-3 py-1 rounded border border-gray-300 hover:bg-blue-600 hover:text-white',
-        page === currentPage ? 'bg-blue-500 text-white' : 'text-gray-600'
-      ]"
+      class="btn"
+      :class="{
+        '!btn-primary !text-white': currentPage === page,
+        '!btn-light': currentPage !== page,
+      }"
     >
       {{ page }}
     </button>
@@ -26,9 +23,9 @@
     <button
       @click="goToPage(currentPage + 1)"
       :disabled="currentPage === totalPages"
-      class="px-3 py-1 rounded border border-gray-300 text-gray-600 disabled:opacity-50 hover:bg-blue-600 hover:text-white"
+      class="btn btn-light"
     >
-      &gt;
+      <UiIcon name="right" variant="outline" />
     </button>
   </div>
 </template>
@@ -36,6 +33,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { paginationPropsTypes } from './types/pagination'
+import UiIcon from '../ui/atoms/icon/UiIcon.vue'
 
 const props = defineProps<paginationPropsTypes>()
 const emit = defineEmits(['pageChange'])
@@ -48,7 +46,7 @@ const goToPage = (page: number) => {
   if (page >= 1 && page <= totalPages.value) {
     emit('pageChange', page)
   }
-};
+}
 
 // Hitung halaman yang akan ditampilkan
 const visiblePages = computed(() => {
@@ -66,5 +64,5 @@ const visiblePages = computed(() => {
   }
 
   return pages
-});
+})
 </script>

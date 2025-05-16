@@ -87,8 +87,9 @@ export default [
     icon: 'shield-tick',
     child: [
       {
-        id: 'approval-1',
-        title: 'Approval 1'
+        id: 'vendor-approval',
+        title: 'Approval Verifikasi Vendor',
+        to:'/vendor-approval'
       }
     ]
   },

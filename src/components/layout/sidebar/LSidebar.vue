@@ -1,5 +1,7 @@
 <template>
-  <aside class="w-[280px] bg-white border border-gray-200 border-t-0 h-full -mt-[80px] fixed">
+  <aside
+    class="w-[280px] bg-white border border-gray-200 border-t-0 h-full -mt-[80px] fixed scrollable-y-auto"
+  >
     <div class="h-[80px] flex items-center mb-5 px-[40px]">
       <RouterLink to="/dashboard">
         <UiLogo />
