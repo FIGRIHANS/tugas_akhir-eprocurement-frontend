@@ -1,5 +1,5 @@
 <template>
-  <a href="#" class="px-2.5 py-1.5 flex items-center gap-1.5 text-primary">
+  <!-- <a href="#" class="px-2.5 py-1.5 flex items-center gap-1.5 text-primary">
     <i class="ki-duotone ki-calendar text-[20px]"> </i>
     {{ today }}
   </a>
@@ -7,7 +7,7 @@
     <i class="ki-duotone ki-book-open text-[20px]"> </i>
     Download Manual Book
   </a>
-  <a href="#" class="px-2.5 py-1.5"><i class="ki-outline ki-notification text-[20px]"> </i></a>
+  <a href="#" class="px-2.5 py-1.5"><i class="ki-outline ki-notification text-[20px]"> </i></a> -->
 
   <div class="menu menu-default p-0" data-menu="true">
     <div
@@ -33,7 +33,7 @@
         <div class="menu-item">
           <a class="menu-link" href="#">
             <span class="menu-icon">
-              <i class="ki-outline ki-coffee"> </i>
+              <IconEN />
             </span>
             <span class="menu-title"> English (EN) </span>
           </a>
@@ -46,6 +46,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import moment, { type Moment } from 'moment'
+import IconEN from '@/components/icons/IconEN.vue'
 
 /**TODO - Add isLoggedIn condit */
 
