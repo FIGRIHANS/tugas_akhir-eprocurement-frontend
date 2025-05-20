@@ -78,7 +78,6 @@ export const useRegistrationVendorStore = defineStore('registrationVendor', () =
     accountName: '',
     urlAccountDifferences: '',
     urlFirstPage: '',
-    suratPernyataan: '',
     currencyId: 0,
     bankId: '',
     bankName: '',

@@ -54,16 +54,6 @@
             required
             :error="paymentDetail.urlFirstPageError"
           />
-          <UiFileUpload
-            name="Surat pernyataan rekening bank"
-            label="Surat pernyataan rekening bank"
-            placeholder="Pilih"
-            acceptedFiles=".pdf"
-            required
-            hint-text="*Informasi surat pernyataan harus ada KOP surat dan tanda tangan direktur"
-            @addedFile="(file) => uploadFile(file, 'statement letter')"
-            :error="paymentDetail.suratPernyataanError"
-          />
           <UiSelect
             v-model="paymentDetail.currencyId"
             label="Mata Uang"
@@ -197,10 +187,7 @@ const currencyList = computed(() =>
   })),
 )
 
-const uploadFile = async (
-  file: File,
-  type: 'different account' | 'first page' | 'statement letter',
-) => {
+const uploadFile = async (file: File, type: 'different account' | 'first page') => {
   try {
     const response = await vendorMasterDataStore.uploadFile({
       FormFile: file,
@@ -215,10 +202,6 @@ const uploadFile = async (
 
     if (type === 'first page') {
       registrationVendorStore.paymentDetail.urlFirstPage = response.url
-    }
-
-    if (type === 'statement letter') {
-      registrationVendorStore.paymentDetail.suratPernyataan = response.url
     }
   } catch (error) {
     console.error(error)

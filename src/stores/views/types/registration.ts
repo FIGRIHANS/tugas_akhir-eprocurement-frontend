@@ -101,8 +101,6 @@ export type PaymentDetailType = {
   urlAccountDifferencesError?: boolean
   urlFirstPage: string
   urlFirstPageError?: boolean
-  suratPernyataan: string
-  suratPernyataanError?: boolean
   currencyId: number
   currencyIdError?: boolean
   bankId: string

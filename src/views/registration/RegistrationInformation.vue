@@ -8,6 +8,13 @@
         row
         required
         :error="information.vendor.vendorNameError"
+        @update:model-value="
+          (value) => {
+            registrationVendorStore.contact.account.username = value
+              .replace(/[\s-]/g, '_')
+              .toLowerCase()
+          }
+        "
       />
       <UiInput
         v-model="information.vendor.groupCompany"
@@ -26,7 +33,7 @@
       />
     </UiFormGroup>
 
-    <UiFormGroup title="Lokasi Kantor Pusat" body-class="px-4" hide-border>
+    <UiFormGroup title="Lokasi Perusahaan" body-class="px-4" hide-border>
       <UiSelect
         v-model="information.companyLocation.countryId"
         label="Negara"
@@ -71,6 +78,7 @@
         placeholder="Masukkan Kode Pos"
         row
         required
+        type="number"
         :error="information.companyLocation.postalCodeError"
       />
       <UiTextarea
@@ -85,7 +93,7 @@
 
     <hr class="col-span-2 border-t-gray-200" />
 
-    <UiFormGroup title="Lokasi Perusahaan" body-class="px-4" hide-border>
+    <UiFormGroup title="Lokasi Kantor Pusat" body-class="px-4" hide-border>
       <UiCheckbox
         v-model="isSameAsHq"
         label="Lokasi perusahaan sama dengan kantor pusat"
@@ -113,7 +121,7 @@
           :disabled="isSameAsHq || !information.vendorLocation.countryId"
           row
           required
-          :options="provinceListCompany"
+          :options="provinceListVendor"
           value-key="provinceID"
           text-key="provinceName"
           :error="information.vendorLocation.stateIdError"
@@ -124,7 +132,7 @@
           label="Kabupaten / Kota"
           placeholder="Pilih Kabupaten / Kota"
           :disabled="isSameAsHq || !information.vendorLocation.stateId"
-          :options="cityListCompany"
+          :options="cityListVendor"
           value-key="cityID"
           text-key="cityName"
           row
@@ -138,6 +146,7 @@
           placeholder="Masukkan Kode Pos"
           row
           required
+          type="number"
           :disabled="isSameAsHq"
           :error="information.vendorLocation.postalCodeError"
         />
@@ -153,7 +162,7 @@
       </UiFormGroup>
     </UiFormGroup>
 
-    <UiFormGroup title="Bidang Usaha & Bisnis Unit" body-class="px-4" hide-border>
+    <UiFormGroup title="Bidang Usaha" body-class="px-4" hide-border>
       <div class="flex flex-row gap-4 items-end">
         <div class="flex flex-col gap-2.5 w-full">
           <label class="form-label flex items-center gap-1">
@@ -385,8 +394,8 @@ const deleteVendorCommodities = (index: number) => {
 watch(
   () => isSameAsHq.value && information.value.companyLocation,
   () => {
-    provinceListCompany.value = provinceListCompany.value
-    cityListCompany.value = cityListCompany.value
+    provinceListVendor.value = provinceListCompany.value
+    cityListVendor.value = cityListCompany.value
 
     registrationVendorStore.information.vendorLocation = {
       ...information.value.companyLocation,

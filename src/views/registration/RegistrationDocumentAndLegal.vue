@@ -117,7 +117,7 @@
       </div>
     </div>
 
-    <div v-if="documentAndLegal.kategori" class="flex flex-col gap-[24px]">
+    <div v-if="true" class="flex flex-col gap-[24px]">
       <hr class="border-gray-300" />
 
       <div class="flex flex-row items-center gap-2">
@@ -150,7 +150,7 @@
           <table class="table table-border align-middle text-gray-700 font-medium text-sm">
             <thead>
               <tr>
-                <th class="w-32">
+                <th>
                   {{ selectedCategory === 4 ? 'Document Name' : 'Nama Dokumen' }}
                 </th>
                 <th>
@@ -169,9 +169,11 @@
               </tr>
             </thead>
 
-            <tbody v-if="documentAndLegal.kategori">
-              <tr v-for="(document, index) in documentAndLegal.anotherDocuments" :key="index">
-                <td>{{ selectedCategory === 4 ? 'Other Document' : 'Dokumen Lainnya' }}</td>
+            <tbody>
+              <tr v-for="(_, index) in documentAndLegal.anotherDocuments" :key="index">
+                <td class="align-top">
+                  <UiInput v-model="documentAndLegal.anotherDocuments[index].documentName" />
+                </td>
                 <td class="align-top">
                   <UiInput v-model="documentAndLegal.anotherDocuments[index].documentNo" />
                 </td>
@@ -299,11 +301,7 @@ const uploadFile = (file: File, index: number, type: 'default' | 'other doc') =>
 
 const addFile = async (index: number, type: 'default' | 'other doc') => {
   try {
-    if (type === 'default') {
-      console.log(fileList.value)
-      console.log(index)
-      console.log(fileList.value[index])
-
+    if (type === 'default' && fileList.value[index]?.file.name !== 'placeholder.txt') {
       fileList.value[index].status = 'loading'
 
       const response = await vendorMasterDataStore.uploadFile({
@@ -314,7 +312,10 @@ const addFile = async (index: number, type: 'default' | 'other doc') => {
       })
 
       registrationVendorStore.documentAndLegal.fields[index].uploadUrl = response.url
-    } else {
+    } else if (
+      type === 'other doc' &&
+      fileOtherDocumentList.value[index]?.file.name !== 'placeholder.txt'
+    ) {
       fileOtherDocumentList.value[index].status = 'loading'
 
       const response = await vendorMasterDataStore.uploadFile({
@@ -329,9 +330,12 @@ const addFile = async (index: number, type: 'default' | 'other doc') => {
   } catch (error) {
     console.error(error)
   } finally {
-    if (type === 'default') {
+    if (type === 'default' && fileList.value[index]?.file.name !== 'placeholder.txt') {
       fileList.value[index].status = 'success'
-    } else {
+    } else if (
+      type === 'other doc' &&
+      fileOtherDocumentList.value[index]?.file.name !== 'placeholder.txt'
+    ) {
       fileOtherDocumentList.value[index].status = 'success'
     }
   }
@@ -340,7 +344,7 @@ const addFile = async (index: number, type: 'default' | 'other doc') => {
 const addAnotherDocument = () => {
   if (registrationVendorStore.documentAndLegal.anotherDocuments.length !== 5) {
     registrationVendorStore.documentAndLegal.anotherDocuments.push({
-      documentName: 'Dokumen Lainnya',
+      documentName: '',
       documentNo: '',
       description: '',
       issuedDate: '',
