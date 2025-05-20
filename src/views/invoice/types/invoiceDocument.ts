@@ -1,11 +1,11 @@
 export interface documentFormTypes {
-  invoiceDocument: File | null
+  invoiceDocument: responseFileTypes | null
   invoiceDocumentError?: boolean
-  tax: File | null
+  tax: responseFileTypes | null
   taxError?: boolean
-  referenceDocument: File | null
+  referenceDocument: responseFileTypes | null
   referenceDocumentError?: boolean
-  otherDocument: File | null
+  otherDocument: responseFileTypes | null
   otherDocumentError?: boolean
 }
 
@@ -13,4 +13,10 @@ export interface listFormTypes {
   title: string
   varName: string
   varErrorName: string
+}
+
+export interface responseFileTypes {
+  name: string
+  url: string
+  urlWithToken: string
 }

@@ -37,6 +37,8 @@ export interface formTypes extends documentFormTypes {
   invoiceNumber: string
   companyCode: string
   companyCodeError?: boolean
+  invoicingParty: string
+  invoicingPartyError?: boolean
   estimatedPaymentDate: string
   estimatedPaymentDateError?: boolean
   taxNumberInvoice: string

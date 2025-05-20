@@ -54,6 +54,13 @@
           </option>
         </select>
       </div>
+      <!-- Invoicing Party -->
+      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          Invoicing Party
+        </label>
+        <input v-model="form.invoicingParty" class="input" placeholder="" :class="{ 'border-danger': form.invoicingPartyError }" />
+      </div>
       <!-- Estimated Payment Date * -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
@@ -121,7 +128,7 @@
         <label class="form-label">
           NPWP Reporting
         </label>
-        <DatePicker v-model="form.npwpReporting" :error="form.npwpReportingError" class="flex" />
+        <input v-model="form.npwpReporting" class="input" placeholder="" :class="{ 'border-danger': form.npwpReportingError }" />
       </div>
       <!-- Description -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
