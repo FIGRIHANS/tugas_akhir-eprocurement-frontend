@@ -306,8 +306,8 @@ const addFile = async (index: number, type: 'default' | 'other doc') => {
 
       const response = await vendorMasterDataStore.uploadFile({
         FormFile: fileList.value[index].file,
-        Actioner: 'anonym',
-        FolderName: 'registration',
+        Actioner: registrationVendorStore.contact.account.username ?? 'anon',
+        FolderName: `registration/${registrationVendorStore.information.vendor.vendorName}`,
         FileName: fileList.value[index].file.name,
       })
 
