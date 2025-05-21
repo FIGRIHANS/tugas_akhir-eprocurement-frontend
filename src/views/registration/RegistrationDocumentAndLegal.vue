@@ -117,7 +117,7 @@
       </div>
     </div>
 
-    <div v-if="true" class="flex flex-col gap-[24px]">
+    <div v-if="documentAndLegal.kategori" class="flex flex-col gap-[24px]">
       <hr class="border-gray-300" />
 
       <div class="flex flex-row items-center gap-2">
