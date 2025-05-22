@@ -176,10 +176,7 @@ watch(
       <div
         class="card-footer justify-center md:justify-between flex-col md:flex-row gap-3 text-gray-600 text-2sm font-medium"
       >
-        <div>
-          Tampilkan {{ vendor.vendors.pageSize }} data dari total data
-          {{ vendor.vendors.total }}
-        </div>
+        <div>Showing {{ vendor.vendors.pageSize }} of {{ vendor.vendors.total }} entries</div>
         <LPagination
           :total-items="Number(vendor.vendors.total)"
           :current-page="Number(vendor.vendors.page)"
