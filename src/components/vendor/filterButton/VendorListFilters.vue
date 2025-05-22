@@ -1,7 +1,7 @@
 <template>
-  <div class="flex overflow-x-auto gap-3 mb-5 items-center" v-if="filters.length">
+  <div class="flex overflow-x-auto gap-3 mb-5 items-center" v-if="filteredFilters.length">
     <div class="font-medium text-lg text-gray-800">Filter</div>
-    <div class="btn btn-light btn-sm" v-for="(filter, index) in filters" :key="index">
+    <div class="btn btn-light btn-sm" v-for="(filter, index) in filteredFilters" :key="index">
       <span class="text-gray-500">{{ filtersKey.find((f) => f.item === filter.key)?.value }}</span>
       <span class="font-semibold">
         <template v-if="filter.key === 'statusId'">
@@ -34,7 +34,7 @@ import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import { formatDate } from '@/core/utils/format'
 import { useVendorCategoryStore } from '@/stores/vendor/category'
 import { useApprovalTypeStore } from '@/stores/vendor/reference'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter, type LocationQueryValue } from 'vue-router'
 
 const router = useRouter()
@@ -49,6 +49,10 @@ const filtersKey: { item: string; value: string }[] = [
 ]
 
 const filters = ref<{ key: string; value: LocationQueryValue | LocationQueryValue[] }[]>([])
+
+const filteredFilters = computed(() =>
+  filters.value.filter((filter) => filter.key !== 'page' && filter.key !== 'SearchQuery'),
+)
 
 const handleRemoveFilter = (key: string) => {
   const query = { ...route.query }
