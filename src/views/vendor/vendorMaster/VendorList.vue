@@ -81,6 +81,7 @@ watch(
               <th class="text-nowrap">Verification Request Date</th>
               <th class="text-nowrap">Verification Date</th>
               <th class="text-nowrap">Bussiness License Status</th>
+              <th class="text-nowrap">E-Procurement Vendor Code</th>
               <th class="text-nowrap">Vendor Code</th>
             </tr>
           </thead>
@@ -140,7 +141,7 @@ watch(
               <td>
                 {{
                   vendor.verifiedSendUTCDate
-                    ? formatDate(new Date(vendor.verifiedSendUTCDate as string))
+                    ? formatDate(new Date(vendor.verifiedSendUTCDate as string), 'en-US')
                     : '-'
                 }}
               </td>
@@ -165,6 +166,7 @@ watch(
                   }}
                 </div>
               </td>
+              <td>-</td>
               <td>{{ vendor.vendorId }}</td>
             </tr>
           </tbody>
