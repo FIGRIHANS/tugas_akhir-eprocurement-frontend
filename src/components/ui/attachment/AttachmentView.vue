@@ -3,6 +3,9 @@
     <iconPDF />
     <div v-if="fileData">
       <p class="text-sm font-medium mb-[4px]">{{ fileName() }}</p>
+      <div class="text-xs font-normal m-[0px] flex gap-[5px] items-center">
+        <span>{{ Number(Number(fileData.fileSize) / (1024 * 1024)).toFixed(2) }} MB</span>
+      </div>
     </div>
   </div>
 </template>

@@ -38,8 +38,7 @@ export interface formTypes extends documentFormTypes {
   currency: string
   npwpReporting: string
   description: string
-  invoiceDp: boolean
-  withDp: boolean
+  invoiceDp: string
   invoicePoGr: itemsPoGrType[]
   additionalCost: itemsCostType[]
 

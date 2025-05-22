@@ -26,32 +26,43 @@
             Search
           </button>
         </div>
-        <div>
+        <div class="overflow-x-auto pogr__table">
           <table class="table table-border text-sm" data-datatable-table="true">
             <thead>
               <tr>
-                <th class="w-[120px]">
-                  <input class="checkbox checkbox-sm" data-datatable-check="true" type="checkbox"/>
+                <th class="pogr__field-base--po-select">
+                  <input v-model="selectAll" class="checkbox checkbox-sm" data-datatable-check="true" type="checkbox"/>
                   Select All
                 </th>
-                <th v-for="(item, index) in listColumn" :key="index">
+                <th
+                  v-for="(item, index) in listColumn"
+                  :key="index"
+                  class="pogr__field-base"
+                  :class="{
+                    'pogr__field-base--po-item': item.toLowerCase() === 'item text'
+                  }"
+                >
                   {{ item }}
                 </th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(item, index) in listItem" :key="index">
+              <tr v-for="(item, index) in listPoGrItem" :key="index" class="pogr__field-items">
                 <td>
-                  <input v-model="item.active" class="checkbox checkbox-sm" data-datatable-row-check="true" type="checkbox"/>
+                  <input v-model="item.isActive" class="checkbox checkbox-sm" data-datatable-row-check="true" type="checkbox"/>
                 </td>
-                <td>{{ item.poNumber }}</td>
-                <td v-if="!props.isInvoiceDp && !props.isPoPib">{{ item.grNumber }}</td>
-                <td v-if="!props.isInvoiceDp">{{ item.qty }}</td>
-                <td v-if="!props.isInvoiceDp">{{ item.unit }}</td>
-                <td v-if="!props.isInvoiceDp">{{ item.item }}</td>
-                <td v-if="!props.isInvoiceDp">{{ item.itemAmount }}</td>
-                <td v-if="props.isInvoiceDp">{{ item.amountInvoice }}</td>
-                <td v-if="props.isInvoiceDp">{{ item.description }}</td>
+                <td>{{ item.poNo }}</td>
+                <td>{{ item.poItem }}</td>
+                <td>{{ item.grDocumentNo }}</td>
+                <td>{{ item.grDocumentItem }}</td>
+                <td>{{ item.grDocumentDate }}</td>
+                <td>{{ item.itemAmount }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.uom }}</td>
+                <td>{{ item.materialDescription }}</td>
+                <td>{{ item.conditionType }}</td>
+                <td>{{ item.taxCode }}</td>
+                <td>{{ item.department }}</td>
               </tr>
             </tbody>
           </table>
@@ -60,7 +71,7 @@
           <button class="btn btn-outline btn-primary" @click="cancelModal">
             Cancel
           </button>
-          <button class="btn btn-primary">
+          <button class="btn btn-primary" @click="goAdd">
             Add
           </button>
         </div>
@@ -70,67 +81,52 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { KTModal } from '@/metronic/core'
 import { searchDefaultColumn, searchInvoiceDpColumn, searchPoPibColumn } from '@/static/invoicePoGr'
+import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
+import type { PoGrSearchTypes } from '../../../types/invoicePoGr'
 
 const props = defineProps<{
-  isInvoiceDp?: boolean
+  isInvoiceDp?: string
   isPoPib?: boolean
 }>()
 
+const emits = defineEmits(['setItem'])
+
+const invoiceApi = useInvoiceSubmissionStore()
 const search = ref<string>('')
 const listColumn = ref<string[]>([])
+const listPoGrItem = ref<PoGrSearchTypes[]>([])
+const selectAll = ref<boolean>(false)
 
-const listItem = ref([
-  {
-    id: 1,
-    active: false,
-    poNumber: '1100000001',
-    grNumber: '1900000001',
-    qty: 2,
-    unit: 'Pcs',
-    item: 'BOTOL ESK CG 50ML',
-    itemAmount: '2.000.000',
-    amountInvoice: '2.000.000',
-    description: 'abc'
-  },
-  {
-    id: 2,
-    active: false,
-    poNumber: '1100000001',
-    grNumber: '1900000001',
-    qty: 2,
-    unit: 'Pcs',
-    item: 'BOTOL ESK CG 50ML',
-    itemAmount: '2.000.000',
-    amountInvoice: '2.000.000',
-    description: 'abc'
-  },
-  {
-    id: 3,
-    active: false,
-    poNumber: '1100000001',
-    grNumber: '1900000001',
-    qty: 2,
-    unit: 'Pcs',
-    item: 'BOTOL ESK CG 50ML',
-    itemAmount: '2.000.000',
-    amountInvoice: '2.000.000',
-    description: 'abc'
-  }
-])
+const listItem = computed(() => {
+  return invoiceApi.poGrList.map((item) => ({
+    ...item,
+    isActive: false
+  }))
+})
 
-const cancelModal = () => {
+const hideModal = () => {
   const idModal = document.querySelector('#add_po_gr_item_modal')
   const modal = KTModal.getInstance(idModal as HTMLElement)
   modal.hide()
 }
 
+const cancelModal = () => {
+  hideModal()
+}
+
+const goAdd = () => {
+  const filterActive = listItem.value.filter((item) => item.isActive)
+  emits('setItem', filterActive)
+  hideModal()
+}
+
 watch(
   () => [props.isInvoiceDp, props.isPoPib],
   () => {
-    if (props.isInvoiceDp) listColumn.value = [...searchInvoiceDpColumn]
+    if (props.isInvoiceDp === 'IDP') listColumn.value = [...searchInvoiceDpColumn]
     else if (props.isPoPib) listColumn.value = [...searchPoPibColumn]
     else listColumn.value = [...searchDefaultColumn]
   },
@@ -138,4 +134,32 @@ watch(
     immediate: true
   }
 )
+
+watch(
+  () => search.value,
+  () => {
+    if (!search.value) listPoGrItem.value = listItem.value
+    else {
+      listPoGrItem.value = listItem.value.filter((item) => item.poNo.toLowerCase() === search.value.toLowerCase())
+    }
+  },
+  {
+    immediate: true
+  }
+)
+
+watch(
+  () => selectAll.value,
+  () => {
+    for (const item of listPoGrItem.value) {
+      item.isActive = !item.isActive
+    }
+  }
+)
+
+onMounted(() => {
+  invoiceApi.getPoGr().then(() => {
+    listPoGrItem.value = listItem.value
+  })
+})
 </script>

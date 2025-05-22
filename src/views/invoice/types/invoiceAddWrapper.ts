@@ -7,6 +7,7 @@ export interface formTypes extends documentFormTypes {
   // Invoice Data
   invoiceType: string
   invoiceTypeError?: boolean
+  invoiceTypeName: string
   vendorId: string
   vendorIdError?: boolean
   businessField: string
@@ -30,27 +31,16 @@ export interface formTypes extends documentFormTypes {
   // Invoice Information
   companyCode: string
   companyCodeError?: boolean
+  companyName: string
   invoiceNo: string
   invoiceNoVendor: string
   invoiceNoVendorError?: boolean
-  // supplierInvoiceNumber: string
-  // supplierInvoiceNumberError?: boolean
   invoiceDate: string
   invoiceDateError?: boolean
   taxNumber: string
   taxNumberError?: boolean
-  // taxDate: string
-  // taxDateError?: boolean
-  // taxCode: string
-  // taxCodeError?: boolean
-  // whtCode: string
-  // whtCodeError?: boolean
-  // paymentDate: string
-  // paymentDateError?: boolean
-  // department: string
-  // departmentError?: boolean
-  invoiceDp: boolean
-  withDp: boolean
+  invoiceDp: string
+  invoiceDpError?: boolean
   amountInvoice: string
   amountInvoiceError?: boolean
   taxNoInvoice: string

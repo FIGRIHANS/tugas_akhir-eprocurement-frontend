@@ -18,7 +18,7 @@ import type {
   ProvinceListType,
   TermConditionType,
   UploadFileResponse,
-  VendorRegistrationPayloadType,
+  VendorRegistrationPayloadType
 } from './types/vendor-master-data'
 
 const baseUrl = '/public/vendor/registration'
@@ -256,6 +256,6 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
     getVendorCompanyLicense,
     getVendorTermCondition,
     uploadFile,
-    postVendorRegistration,
+    postVendorRegistration
   }
 })

@@ -16,7 +16,7 @@
     <InvoicePoGrView v-if="checkPo()" />
     <InvoiceItemView v-if="checkNonPo()" />
     <hr class="border-gray-300" />
-    <AdditionalCostView v-if="!form.invoiceDp && !form.withDp && !checkNonPo()" />
+    <AdditionalCostView v-if="form.invoiceDp === 'NON' && !checkNonPo()" />
   </div>
 </template>
 

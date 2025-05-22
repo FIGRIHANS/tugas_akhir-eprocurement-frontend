@@ -15,9 +15,6 @@
           <tbody>
             <tr v-for="(item, index) in list" :key="index">
               <td class="w-[200px] flex justify-between items-center gap-[4px]">
-                <button class="btn btn-outline btn-icon btn-warning" @click="openReturn">
-                  <i class="ki-duotone ki-arrows-loop"></i>
-                </button>
                 <button class="btn btn-outline btn-icon btn-primary" @click="openDetailInvoice">
                   <i class="ki-duotone ki-eye"></i>
                 </button>
@@ -51,7 +48,7 @@
     </div>
     <ModalSuccessApproval />
     <ModalDetailApproval />
-    <ModalReturnInvoice />
+    <!-- <ModalReturnInvoice /> -->
   </div>
 </template>
 
@@ -67,7 +64,7 @@ import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 const ModalSuccessApproval = defineAsyncComponent(() => import('./pendingApproval/SuccessApproval.vue'))
 const ModalDetailApproval = defineAsyncComponent(() => import('./DetailApproval.vue'))
 // const ModalRejectApproval = defineAsyncComponent(() => import('./pendingApproval/RejectApproval.vue'))
-const ModalReturnInvoice = defineAsyncComponent(() => import('./pendingApproval/ReturnInvoice.vue'))
+// const ModalReturnInvoice = defineAsyncComponent(() => import('./pendingApproval/ReturnInvoice.vue'))
 const FilterList = defineAsyncComponent(() => import('./FilterList.vue'))
 
 const router = useRouter()
@@ -133,12 +130,6 @@ const setPage = (value: number) => {
 
 const openDetailApproval = () => {
   const idModal = document.querySelector('#detail_approval_modal')
-  const modal = KTModal.getInstance(idModal as HTMLElement)
-  modal.show()
-}
-
-const openReturn = () => {
-  const idModal = document.querySelector('#return_approval_modal')
   const modal = KTModal.getInstance(idModal as HTMLElement)
   modal.show()
 }

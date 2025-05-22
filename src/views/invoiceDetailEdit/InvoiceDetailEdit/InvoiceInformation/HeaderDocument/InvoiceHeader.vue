@@ -2,18 +2,19 @@
   <div>
     <p class="mb-[16px] font-semibold text-base">Invoice Header</p>
     <div v-if="form">
+      <!-- Invoice Type -->
+      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          Invoice Type
+        </label>
+        <input v-model="form.invoiceType" class="input" placeholder="" disabled />
+      </div>
+      <!-- DP Option -->
       <div v-if="checkPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-        <div class="flex-1"></div>
-        <div v-if="form.invoiceType !== 'pib'" class="flex items-center gap-[8px] flex-1">
-          <label class="form-label flex items-center gap-2.5">
-            <input v-model="form.invoiceDp" class="checkbox" name="checkInvoiceDp" type="checkbox" disabled/>
-            Invoice DP
-          </label>
-          <label class="form-label flex items-center gap-2.5">
-            <input v-model="form.withDp" class="checkbox" name="checkWithDp" type="checkbox" disabled/>
-            With Dp
-          </label>
-        </div>
+        <label class="form-label">
+          DP Option
+        </label>
+        <input v-model="form.invoiceDp" class="input" placeholder="" disabled />
       </div>
       <!-- Invoice Date -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">

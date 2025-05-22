@@ -5,6 +5,7 @@
       <div v-for="(item, index) in list" :key="index" class="flex items-center flex-wrap lg:flex-nowrap gap-2.5">
         <label class="form-label max-w-32">
           {{ item.title }}
+          <span v-if="index === 0" class="text-red-500 ml-[4px]">*</span>
         </label>
         <pdfUpload
           ref="pdfUploadRef"
@@ -43,7 +44,7 @@ const list = ref<listFormTypes[]>([
     varErrorName: 'invoiceDocumentError'
   },
   {
-    title: 'Faktur Pajak',
+    title: 'Tax Document',
     varName: 'tax',
     varErrorName: 'taxError'
   },

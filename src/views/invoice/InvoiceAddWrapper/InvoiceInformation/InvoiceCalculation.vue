@@ -46,7 +46,7 @@ const setCalculation = () => {
       const data = {
         name: item,
         amount: '0',
-        currency: 'USD'
+        currency: form?.currency || ''
       }
       listCalculation.value.push(data)
     }
@@ -54,9 +54,9 @@ const setCalculation = () => {
 }
 
 watch(
-  () => [form?.invoiceDp, form?.withDp],
+  () => [form?.invoiceDp],
   () => {
-    if (form?.invoiceDp || form?.withDp) {
+    if (form?.invoiceDp !== 'NON') {
       listName.value = [...dpField]
     } else {
       listName.value = [...defaultField]

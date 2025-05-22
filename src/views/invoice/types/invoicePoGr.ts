@@ -1,22 +1,41 @@
 export interface itemsPoGrType {
-  poNumber: string
-  poItem: string
-  GrDocumentNo: string
-  GrDocumentItem: string
-  GrDocumentDate: string
+  poNo: string
+  poItem: number
+  grDocumentNo: string
+  grDocumentItem: number
+  grDocumentDate: string
   taxCode: string
-  itemAmount: string
-  quantity: string
-  unit: string
-  itemText: string
+  itemAmount: number
+  quantity: number
+  uom: string
+  material: string
+  materialDescription: string
+  currency: string
   conditionType: string
-  whtType: string
-  whtCode: string
-  whtBaseAmount: string
-  category: string
+  postingDate: string
+  enteredOn: string
+  purchasingOrg: string
+  department: string
+  isEdit?: boolean
+}
 
-  amountInvoice: string
-  vatAmount: string
-  
-  totalNetAmount: string
+export interface PoGrSearchTypes {
+  poNo: string
+  poItem: number
+  grDocumentNo: string
+  grDocumentItem: number
+  grDocumentDate: string
+  taxCode: string
+  itemAmount: number
+  quantity: number
+  uom: string
+  material: string
+  materialDescription: string
+  currency: string
+  conditionType: string
+  postingDate: string
+  enteredOn: string
+  purchasingOrg: string
+  department: string
+  isActive?: boolean
 }

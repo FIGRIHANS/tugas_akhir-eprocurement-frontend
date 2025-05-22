@@ -19,4 +19,5 @@ export interface responseFileTypes {
   name: string
   url: string
   urlWithToken: string
+  fileSize: string
 }

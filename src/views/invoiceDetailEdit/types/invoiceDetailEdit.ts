@@ -57,8 +57,7 @@ export interface formTypes extends documentFormTypes {
   npwpReportingError?: boolean
   description: string
   descriptionError?: boolean
-  invoiceDp: boolean
-  withDp: boolean
+  invoiceDp: string
 
   invoicePoGr: itemsPoGrType[]
   invoicePoGrError?: boolean

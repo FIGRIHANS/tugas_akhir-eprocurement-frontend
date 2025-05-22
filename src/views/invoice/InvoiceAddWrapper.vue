@@ -64,6 +64,10 @@ import iconPDF from '@/components/icons/iconPDF.vue'
 import { KTModal } from '@/metronic/core'
 import { useCheckEmpty } from '@/composables/validation'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
+import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
+import type { ParamsSubmissionTypes } from '@/stores/views/invoice/types/submission'
+import { useLoginStore } from '@/stores/views/login'
+import moment from 'moment'
 
 const InvoiceData = defineAsyncComponent(() => import('./InvoiceAddWrapper/InvoiceData.vue'))
 const InvoiceInformation = defineAsyncComponent(() => import('./InvoiceAddWrapper/InvoiceInformation.vue'))
@@ -71,6 +75,8 @@ const InvoicePreview = defineAsyncComponent(() => import('./InvoiceAddWrapper/In
 const ModalSuccess = defineAsyncComponent(() => import('./InvoiceAddWrapper/InvoicePreview/ModalSuccess.vue'))
 
 const invoiceApi = useInvoiceSubmissionStore()
+const invoiceMasterApi = useInvoiceMasterDataStore()
+const loginApi = useLoginStore()
 const router = useRouter()
 const route = useRoute()
 const tabNow = ref<string>('data')
@@ -88,6 +94,7 @@ const routes = ref<routeTypes[]>([
 
 const form = reactive<formTypes>({
   invoiceType: '',
+  invoiceTypeName: '',
   vendorId: '',
   businessField: '',
   subBusinessField: '',
@@ -100,16 +107,16 @@ const form = reactive<formTypes>({
   bankAddress: '',
   invoiceNo: '',
   companyCode: '',
+  companyName: '',
   invoiceNoVendor: '',
   invoiceDate: '',
   taxNumber: '',
-  invoiceDp: false,
-  withDp: false,
+  invoiceDp: 'NON',
   amountInvoice: '',
   taxNoInvoice: '',
   remainingDpAmount: '',
   dpAmountDeduction: '',
-  currency: '',
+  currency: 'IDR',
   description: '',
   invoiceDocument: null,
   tax: null,
@@ -131,6 +138,8 @@ const contentComponent = computed(() => {
   return components[tabNow.value]
 })
 
+const listDocumentType = computed(() => invoiceMasterApi.documentType)
+
 const checkInvoiceData = () => {
   form.vendorIdError = useCheckEmpty(form.vendorId).isError
   form.bankKeyIdError = useCheckEmpty(form.bankKeyId).isError
@@ -145,22 +154,22 @@ const checkInvoiceData = () => {
 }
 
 const checkInvoiceInformation = () => {
+  form.companyCodeError = useCheckEmpty(form.companyCode).isError
+  form.invoiceNoVendorError = useCheckEmpty(form.invoiceNoVendor).isError
   form.invoiceDateError = useCheckEmpty(form.invoiceDate).isError
-  form.taxNumberError = useCheckEmpty(form.taxNumber).isError
+  form.taxNoInvoiceError = useCheckEmpty(form.taxNoInvoice).isError
+  form.descriptionError = useCheckEmpty(form.description).isError
+  form.invoiceDocumentError = form.invoiceDocument === null
   form.invoicePoGrError = form.invoicePoGr.length === 0
 
-  form.invoiceDocumentError = form.invoiceDocument === null
-  form.taxError = form.tax === null
-  form.referenceDocumentError = form.referenceDocument === null
-  form.otherDocumentError = form.otherDocument === null
-
   if (
+    form.companyCodeError ||
+    form.invoiceNoVendorError ||
     form.invoiceDateError ||
-    form.taxNumberError ||
+    form.taxNoInvoiceError ||
+    form.descriptionError ||
     form.invoiceDocumentError ||
-    form.taxError ||
-    form.referenceDocumentError ||
-    form.otherDocumentError
+    form.invoicePoGrError
   ) return false
   else return true
 }
@@ -175,6 +184,119 @@ const goBack = () => {
     tabNow.value = list[checkIndex - 1]
   }
 }
+
+const mapDocument = () => {
+  const document = []
+  const libDocument = [
+    'invoiceDocument',
+    'tax',
+    'referenceDocument',
+    'otherDocument'
+  ]
+  for (const [index, item] of libDocument.entries()) {
+    if (form[item as keyof typeof form]) {
+      document.push({
+        documentType: listDocumentType.value[index].id,
+        documentName: form.invoiceDocument?.name,
+        documentUrl: form.invoiceDocument?.url,
+        documentSize: Number(form.invoiceDocument?.fileSize)
+      })
+    }
+  }
+  return document
+}
+
+const mapPoGr = () => {
+  const poGr = []
+  for (const item of form.invoicePoGr) {
+    poGr.push({
+      poNo: item.poNo,
+      poItem: Number(item.poItem),
+      grDocumentNo: item.grDocumentNo,
+      grDocumentItem: Number(item.grDocumentItem),
+      grDocumentDate: moment(item.grDocumentDate).toISOString(),
+      taxCode: item.taxCode,
+      itemAmount: Number(item.itemAmount),
+      quantity: Number(item.quantity),
+      uom: item.uom,
+      itemText: item.materialDescription,
+      conditionType: item.conditionType,
+      whtType: '-',
+      whtCode: '-',
+      whtBaseAmount: 0,
+      whtAmount: 0,
+      department: item.department
+    })
+  }
+  return poGr
+}
+
+const mapAdditionalCost = () => {
+  const cost = []
+  for (const item of form.additionalCost) {
+    cost.push({
+      activityExpense: item.activity,
+      itemAmount: Number(item.itemAmount),
+      debitCredit: item.debitCredit,
+      taxCode: item.taxCode,
+      costCenter: item.costCenter,
+      profitCenter: item.profitCenter,
+      assignment: item.assignment,
+      whtType: item.whtType,
+      whtCode: item.whtCode,
+      whtBaseAmount: Number(item.whtBaseAmount)
+    })
+  }
+  return cost
+}
+
+const mapDataPost = () => {
+  const data = {
+    header: {
+      invoiceUId: '00000000-0000-0000-0000-000000000000',
+      invoiceTypeCode: Number(form.invoiceType),
+      invoiceTypeName: form.invoiceTypeName,
+      invoiceDPCode: Number(form.invoiceType),
+      invoiceDPName: form.invoiceTypeName,
+      companyCode: form.companyCode,
+      companyName: form.companyName,
+      invoiceNo: form.invoiceNo,
+      vendorInvoiceNo: form.invoiceNoVendor,
+      invoiceDate: moment(form.invoiceDate).toISOString(),
+      invoiceTaxNo: form.taxNoInvoice,
+      currCode: form.currency,
+      notes: form.description,
+      statusCode: 1,
+      statusName: 'Waiting to Verify'
+    },
+    vendor: {
+      vendorId: Number(form.vendorId),
+      vendorName: form.vendorId,
+      vendorBusinessUnit: form.businessField,
+      vendorSubBusinessUnit: form.subBusinessField,
+      vendorAddress: form.address
+    },
+    payment: {
+      bankKey: form.bankKeyId,
+      bankName: form.bankNameId,
+      beneficiaryName: form.beneficiaryName,
+      bankAccountNo: form.bankAccountNumber
+    },
+    documents: mapDocument(),
+    calculation: {
+      subtotal: 0,
+      vatAmount: 0,
+      whtAmount: 0,
+      additionalCost: 0,
+      totalGrossAmount: 0,
+      totalNetAmount: 0,
+    },
+    pogr: mapPoGr(),
+    additionalCosts: mapAdditionalCost()
+  } as ParamsSubmissionTypes
+
+  return data
+} 
 
 const goNext = () => {
   const list = ['data', 'information', 'preview']
@@ -193,21 +315,33 @@ const goNext = () => {
       tabNow.value = list[checkIndex + 1]
     }
   } else {
-    const idModal = document.querySelector('#success_invoice_modal')
-    const modal = KTModal.getInstance(idModal as HTMLElement)
-    modal.show()
-
-    setTimeout(() => {
-      modal.hide()
-      router.push({
-        name: 'invoice-list'
-      })
-    }, 1000)
+    // console.log(mapDataPost())
+    invoiceApi.postSubmission(mapDataPost()).then(() => {
+      const idModal = document.querySelector('#success_invoice_modal')
+      const modal = KTModal.getInstance(idModal as HTMLElement)
+      modal.show()
+  
+      setTimeout(() => {
+        modal.hide()
+        router.push({
+          name: 'invoice-list'
+        })
+      }, 1000)
+    })
+    .catch((error) => {
+      console.error(error)
+    })
   }
 }
 
 onMounted(() => {
   invoiceApi.getTaxCalculation()
+  invoiceMasterApi.getInvoicePoType()
+  invoiceMasterApi.getDocumentTypes()
+  invoiceMasterApi.getVendorList()
+  if (loginApi.isVendor) {
+    form.invoiceType = '1'
+  }
 })
 
 provide('form', form)
