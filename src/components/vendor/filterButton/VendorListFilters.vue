@@ -8,24 +8,26 @@
           {{ verifStatus.approvalType.find((type) => type.code === filter.value)?.value }}
         </template>
 
-        <template v-if="filter.key === 'categoryId'">
+        <template v-else-if="filter.key === 'categoryId'">
           {{
             categories.categories.find((item) => item.companyCategoryId.toString() === filter.value)
               ?.companyCategoryName
           }}
         </template>
 
-        {{
-          filter.key === 'startDate' || filter.key === 'endDate'
-            ? formatDate(new Date(filter.value as string), 'en-US')
-            : filter.value
-        }}
+        <template v-else>
+          {{
+            filter.key === 'startDate' || filter.key === 'endDate'
+              ? formatDate(new Date(filter.value as string), 'en-US')
+              : filter.value
+          }}
+        </template>
       </span>
       <UiIcon name="cross" @click="handleRemoveFilter(filter.key)" />
     </div>
-    <UiButton variant="light" size="sm" class="btn-clear" @click="handleResetFilter"
-      >Reset Filter</UiButton
-    >
+    <UiButton variant="light" size="sm" class="btn-clear" @click="handleResetFilter">
+      Reset Filter
+    </UiButton>
   </div>
 </template>
 <script lang="ts" setup>
@@ -62,7 +64,12 @@ const handleRemoveFilter = (key: string) => {
 }
 
 const handleResetFilter = () => {
-  router.push({ query: {} })
+  const query = { ...route.query }
+  filters.value.forEach((filter) => {
+    delete query[filter.key]
+  })
+
+  router.push({ query })
 }
 
 watch(
