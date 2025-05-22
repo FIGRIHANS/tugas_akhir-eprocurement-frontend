@@ -109,7 +109,7 @@ const checkFieldNotEmpty = () => {
       account: ['username', 'email', 'password', 'confirmPassword', 'phone'],
     },
     document: ['licenseNo', 'issuedDate', 'expiredDate', 'uploadUrl'],
-    payment: ['accountNo', 'accountName', 'suratPernyataan', 'currencyId', 'bankAddress'],
+    payment: ['accountNo', 'accountName', 'currencyId', 'bankAddress'],
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -265,8 +265,14 @@ const next = () => {
           vendorPhone: contact.value.account.phone,
           vendorWebsite: contact.value.account.website,
         },
-        companyLocation: removeErrorFields(information.value.companyLocation),
-        vendorLocation: removeErrorFields(information.value.vendorLocation),
+        companyLocation: {
+          ...removeErrorFields(information.value.companyLocation),
+          postalCode: String(information.value.companyLocation.postalCode),
+        },
+        vendorLocation: {
+          ...removeErrorFields(information.value.vendorLocation),
+          postalCode: String(information.value.vendorLocation.postalCode),
+        },
         vendorCommodities: information.value.vendorCommodities.list.map((item) => ({
           subBusinessFieldId: item.subBusinessFieldId,
         })),
@@ -294,7 +300,6 @@ const next = () => {
           currencyId: paymentDetail.value.currencyId,
           urlAccountDifferences: paymentDetail.value.urlAccountDifferences,
           urlFirstPage: paymentDetail.value.urlFirstPage,
-          urlDoc: paymentDetail.value.suratPernyataan,
           bankAddress: paymentDetail.value.bankAddress,
           countryId: 0,
         },

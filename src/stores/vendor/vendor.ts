@@ -1,0 +1,217 @@
+import vendorAPI from '@/core/utils/vendorApi'
+import { defineStore } from 'pinia'
+import { ref } from 'vue'
+import type {
+  IAdministration,
+  ILicense,
+  IPayment,
+  IPostBlacklist,
+  IVendorContent,
+  IVerificationDetailData,
+  IVerifyLegal,
+} from './types/vendor'
+import type { ApiResponse } from '@/core/type/api'
+import axios from 'axios'
+
+export const useVendorStore = defineStore('vendor', () => {
+  const loading = ref(false)
+  const error = ref<string | null>(null)
+  const vendors = ref<IVendorContent>({
+    items: [],
+    total: 0,
+    page: 1,
+    pageSize: 0,
+  })
+  const isAdministrationVerified = ref(false)
+  const isLicenseVerified = ref(false)
+  const isBankVerified = ref(false)
+
+  const getVendors = async (params: unknown) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const response: ApiResponse<IVendorContent> = await vendorAPI.get(
+        '/public/vendor/registration/getvendor',
+        { params },
+      )
+
+      if (response.data.statusCode === 200) {
+        vendors.value = response.data.result.content
+      } else {
+        error.value = response.data.result.message
+      }
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        error.value = err.message
+      } else {
+        error.value = 'Failed to get data'
+      }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const blacklistVendor = async (params: IPostBlacklist) => {
+    const response: ApiResponse = await vendorAPI.post(
+      '/public/verifiedvendor/blacklist/vendor',
+      {},
+      {
+        params,
+      },
+    )
+
+    return response.data
+  }
+
+  const verifyLegal = async (body: IVerifyLegal) => {
+    const response: ApiResponse = await vendorAPI.post('/public/verifiedvendor/verify/vendor', body)
+    return response.data
+  }
+
+  return {
+    vendors,
+    loading,
+    error,
+    isAdministrationVerified,
+    isLicenseVerified,
+    isBankVerified,
+    getVendors,
+    blacklistVendor,
+    verifyLegal,
+  }
+})
+
+export const useVendorAdministrationStore = defineStore('vendor-administration', () => {
+  const loading = ref(false)
+  const error = ref<string | null>(null)
+  const data = ref<IAdministration[]>([])
+
+  const getData = async (vendorId: string) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const response: ApiResponse<IAdministration[]> = await vendorAPI.get(
+        '/public/vendor/registration/administration',
+        {
+          params: { vendorId },
+        },
+      )
+
+      data.value = response.data.result.content
+    } catch (err) {
+      if (err instanceof Error) {
+        error.value = err.message
+      } else {
+        error.value = 'Failed to get data'
+      }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  return { data, loading, error, getData }
+})
+
+export const useVendorIzinUsahaStore = defineStore('vendor-izin-usaha', () => {
+  const loading = ref(false)
+  const error = ref<string | null>(null)
+  const data = ref<ILicense[]>([])
+
+  const getData = async (vendorId: string) => {
+    loading.value = true
+    error.value = null
+    try {
+      const response: ApiResponse<ILicense[]> = await vendorAPI.get(
+        '/public/vendor/registration/license',
+        {
+          params: { vendorId },
+        },
+      )
+
+      if (response.data.statusCode === 200) {
+        data.value = response.data.result.content
+      } else {
+        error.value = response.data.result.message
+        loading.value = false
+      }
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        error.value = err.message
+      } else {
+        error.value = 'Failed to get data'
+      }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  return { data, loading, error, getData }
+})
+
+export const useVendorPaymentStore = defineStore('vendor-payment', () => {
+  const loading = ref(false)
+  const error = ref<string | null>(null)
+  const data = ref<IPayment[]>([])
+
+  const getData = async (vendorId: string) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const response: ApiResponse<IPayment[]> = await vendorAPI.get(
+        '/public/verifiedvendor/getbanklist',
+        {
+          params: { vendorId },
+        },
+      )
+
+      if (response.data.statusCode === 200) {
+        data.value = response.data.result.content
+      } else {
+        error.value = response.data.result.message
+        loading.value = false
+      }
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        error.value = err.message
+      } else {
+        error.value = 'Failed to get data'
+      }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  return { data, loading, error, getData }
+})
+
+export const useVerificationDetailStore = defineStore('verification-detail', () => {
+  const loading = ref(false)
+  const error = ref<string | null>(null)
+  const data = ref<IVerificationDetailData[]>([])
+
+  const getData = async (vendorId: number) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const response: ApiResponse<IVerificationDetailData[]> = await vendorAPI.get(
+        '/public/verifiedvendor/verify/vendor-detail',
+        { params: { vendorId } },
+      )
+      data.value = response.data.result.content
+    } catch (err) {
+      if (err instanceof Error) {
+        if (axios.isAxiosError(err)) {
+          error.value = err.response?.data.result.message
+        }
+      }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  return { loading, error, data, getData }
+})
