@@ -96,7 +96,7 @@ withDefaults(defineProps<IInputTelProps>(), {
   required: false,
   error: false,
 })
-const model = defineModel()
+const model = defineModel<string>()
 const vendorMasterDataStore = useVendorMasterDataStore()
 
 const dropdownOpen = ref<boolean>(false)

@@ -109,7 +109,7 @@ const checkFieldNotEmpty = () => {
       account: ['username', 'email', 'password', 'confirmPassword', 'phone'],
     },
     document: ['licenseNo', 'issuedDate', 'expiredDate', 'uploadUrl'],
-    payment: ['accountNo', 'accountName', 'suratPernyataan', 'currencyId', 'bankAddress'],
+    payment: ['accountNo', 'accountName', 'currencyId', 'bankAddress'],
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -294,7 +294,6 @@ const next = () => {
           currencyId: paymentDetail.value.currencyId,
           urlAccountDifferences: paymentDetail.value.urlAccountDifferences,
           urlFirstPage: paymentDetail.value.urlFirstPage,
-          urlDoc: paymentDetail.value.suratPernyataan,
           bankAddress: paymentDetail.value.bankAddress,
           countryId: 0,
         },
