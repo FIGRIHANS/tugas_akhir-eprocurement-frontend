@@ -5,57 +5,18 @@
       <span class="font-medium">General Data</span>
     </div>
     <div v-if="form" class="card-body py-[8px] px-[50px]">
-      <!-- Invoice Type -->
-      <div v-if="checkPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-        <label class="form-label max-w-32">
-          Invoice Type
-          <span class="text-red-500 ml-[4px]">*</span>
-        </label>
-        <input v-if="form.status !== 0" v-model="form.invoiceType" class="input" placeholder="" disabled />
-        <select v-else v-model="form.invoiceType" class="select" :class="{ 'border-danger': form.invoiceTypeError }">
-          <option value="po">
-            PO
-          </option>
-          <option value="pib">
-            PO - PIB
-          </option>
-          <option value="cc">
-            PO - CC
-          </option>
-        </select>
-      </div>
       <!-- Vendor Name -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
         <label class="form-label max-w-32">
           Vendor Name
-          <span class="text-red-500 ml-[4px]">*</span>
+          <span v-if="form.status === 0 && !loginApi.isVendor" class="text-red-500 ml-[4px]">*</span>
         </label>
-        <input v-if="form.status !== 0" v-model="form.vendorId" class="input" placeholder="" disabled />
+        <input v-if="form.status !== 0 || loginApi.isVendor" v-model="form.vendorId" class="input" placeholder="" disabled />
         <select v-else v-model="form.vendorId" class="select" :class="{ 'border-danger': form.vendorIdError }">
-          <option value="1">
-            Option 1
-          </option>
-          <option value="2">
-            Option 2
-          </option>
-          <option value="3">
-            Option 3
+          <option v-for="item of vendorList" :key="item.vendorId" :value="item.vendorId">
+            {{ item.vendorName }}
           </option>
         </select>
-      </div>
-      <!-- Business Field -->
-      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-        <label class="form-label max-w-32">
-          Business Field
-        </label>
-        <input v-model="form.businessField" class="input" placeholder="" disabled/>
-      </div>
-      <!-- Sub Business Field -->
-      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-        <label class="form-label max-w-32">
-          Sub Business Field
-        </label>
-        <input v-model="form.subBusinessField" class="input" placeholder="" disabled/>
       </div>
       <!-- Address -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
@@ -69,21 +30,31 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, inject } from 'vue'
+import { ref, computed, onMounted, watch, inject } from 'vue'
 import { useRoute } from 'vue-router'
 import type { formTypes } from '../../types/invoiceAddWrapper'
+import { useLoginStore } from '@/stores/views/login'
+import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 
+const loginApi = useLoginStore()
+const invoiceMasterApi = useInvoiceMasterDataStore()
 const form = inject<formTypes>('form')
 const route = useRoute()
 const typeForm = ref<string>('')
 
-const checkPo = () => {
-  return typeForm.value === 'po'
-}
+const vendorList = computed(() => invoiceMasterApi.vendorList)
 
-// const checkNonPo = () => {
-//   return typeForm.value === 'nonpo'
-// }
+watch(
+  () => form?.vendorId,
+  () => {
+    if (form) {
+      const getIndex = vendorList.value.findIndex((item) => item.vendorId === Number(form.vendorId))
+      if (getIndex !== -1) {
+        form.address = vendorList.value[getIndex].address
+      }
+    }
+  }
+)
 
 onMounted(() => {
   typeForm.value = route.query.type?.toString().toLowerCase() || 'po'

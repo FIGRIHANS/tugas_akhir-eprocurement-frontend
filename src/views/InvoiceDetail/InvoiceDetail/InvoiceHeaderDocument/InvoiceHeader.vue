@@ -1,14 +1,12 @@
 <template>
   <div v-if="form" class="flex flex-col gap-[20px]">
-    <div v-if="checkPo() && !checkPoPib()" class="flex items-center gap-[8px]">
-      <label class="form-label flex items-center gap-2.5">
-        <input v-model="form.invoiceDp" class="checkbox" name="checkInvoiceDp" type="checkbox" disabled/>
-        <span class="text-gray-500">Invoice DP</span>
-      </label>
-      <label class="form-label flex items-center gap-2.5">
-        <input v-model="form.withDp" class="checkbox" name="checkWithDp" type="checkbox" disabled/>
-        <span class="text-gray-500">With Dp</span>
-      </label>
+    <div class="flex items-center justify-between gap-[10px]">
+      <p class="font-normal text-sm text-gray-600">Invoice Type</p>
+      <p class="font-normal text-sm">{{ form.invoiceType || '-' }}</p>
+    </div>
+    <div v-if="checkPo() && !checkPoPib()" class="flex items-center justify-between gap-[10px]">
+      <p class="font-normal text-sm text-gray-600">DP Option</p>
+      <p class="font-normal text-sm">{{ form.invoiceDp || '-' }}</p>
     </div>
     <div class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Invoice Date</p>
@@ -80,6 +78,6 @@ const checkPo = () => {
 }
 
 const checkPoPib = () => {
-  return form?.invoiceType === 'pib'
+  return form?.invoiceType === '2'
 }
 </script>

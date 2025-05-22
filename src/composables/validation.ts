@@ -1,4 +1,4 @@
-export const useCheckEmpty = (value: string | number | null | undefined) => {
+export const useCheckEmpty = (value: string | number | Date | null | undefined) => {
   const valueField = value
   let status = true
   let isError = false

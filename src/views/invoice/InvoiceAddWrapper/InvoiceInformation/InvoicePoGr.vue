@@ -22,35 +22,47 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(item, index) in form.invoicePoGr" :key="index" class="pogr__field-items">
-            <td class="flex items-center justify-around gap-[8px]">
-              <button v-if="form.status === 0" class="btn btn-icon btn-outline btn-danger" @click="deleteItem(index)">
-                <i class="ki-duotone ki-cross-circle"></i>
-              </button>
-            </td>
-            <td>{{ item.poNumber }}</td>
-            <td v-if="!checkInvoiceDp()">{{ item.poItem }}</td>
-            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.GrDocumentNo }}</td>
-            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.GrDocumentItem }}</td>
-            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.GrDocumentDate }}</td>
-            <td>{{ item.taxCode }}</td>
-            <td v-if="!checkInvoiceDp()">{{ item.itemAmount }}</td>
-            <td v-if="!checkInvoiceDp()">{{ item.quantity }}</td>
-            <td v-if="!checkInvoiceDp()">{{ item.unit }}</td>
-            <td v-if="!checkInvoiceDp()">{{ item.itemText }}</td>
-            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.conditionType }}</td>
-            <td v-if="checkInvoiceDp()">{{ item.amountInvoice }}</td>
-            <td v-if="checkInvoiceDp()">{{ item.vatAmount }}</td>
-            <td>{{ item.whtType }}</td>
-            <td>{{ item.whtCode }}</td>
-            <td>{{ item.whtBaseAmount }}</td>
-            <td>{{ item.category }}</td>
-            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.totalNetAmount }}</td>
+          <tr v-if="form.invoicePoGr.length === 0">
+            <td colspan="11" class="text-center text-[13px]">No Data Available</td>
           </tr>
+          <template v-else>
+            <tr v-for="(item, index) in form.invoicePoGr" :key="index" class="pogr__field-items">
+              <td class="flex items-center justify-around gap-[8px]">
+                <button v-if="form.status === 0 || checkInvoiceDp()" class="btn btn-icon btn-primary" @click="item.isEdit = !item.isEdit">
+                  <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>
+                  <i v-else class="ki-duotone ki-check-circle"></i>
+                </button>
+                <button v-if="form.status === 0" class="btn btn-icon btn-outline btn-danger" @click="deleteItem(index)">
+                  <i class="ki-duotone ki-cross-circle"></i>
+                </button>
+              </td>
+              <td>{{ item.poNo }}</td>
+              <td v-if="!checkInvoiceDp()">{{ item.poItem }}</td>
+              <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentNo }}</td>
+              <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentItem }}</td>
+              <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentDate }}</td>
+              <td>{{ item.taxCode }}</td>
+              <td v-if="!checkInvoiceDp()">{{ item.itemAmount }}</td>
+              <td v-if="!checkInvoiceDp()">
+                <span v-if="!item.isEdit">{{ item.quantity }}</span>
+                <input v-else v-model="item.quantity" class="input" placeholder="" type="text"/>
+              </td>
+              <td v-if="!checkInvoiceDp()">{{ item.uom }}</td>
+              <td v-if="!checkInvoiceDp()">{{ item.materialDescription }}</td>
+              <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.conditionType }}</td>
+              <!-- <td v-if="checkInvoiceDp()">{{ item.amountInvoice }}</td> -->
+              <!-- <td v-if="checkInvoiceDp()">{{ item.vatAmount }}</td> -->
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+              <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.department }}</td>
+            </tr>
+          </template>
         </tbody>
       </table>
     </div>
-    <SearchPoGr :is-invoice-dp="form?.invoiceDp" :is-po-pib="form?.invoiceType === 'pib'" />
+    <SearchPoGr :is-invoice-dp="form?.invoiceDp" :is-po-pib="form?.invoiceType === 'pib'" @setItem="setItemPoGr" />
   </div>
 </template>
 
@@ -60,6 +72,7 @@ import type { formTypes } from '../../types/invoiceAddWrapper'
 import { KTModal } from '@/metronic/core'
 import { defaultColumn, invoiceDpColumn, PoPibColumn } from '@/static/invoicePoGr'
 import SearchPoGr from './InvoicePoGr/SearchPoGr.vue'
+import type { PoGrSearchTypes, itemsPoGrType } from '../../types/invoicePoGr'
 
 const form = inject<formTypes>('form')
 const columns = ref<string[]>([])
@@ -71,7 +84,7 @@ const openAddItem = () => {
 }
 
 const checkInvoiceDp = () => {
-  return form?.invoiceDp
+  return form?.invoiceDp === 'IDP'
 }
 
 const checkPoPib = () => {
@@ -86,8 +99,35 @@ const deleteItem = (index: number) => {
 
 const setColumn = () => {
   if (form?.invoiceType === 'pib') columns.value = ['Action', ...PoPibColumn]
-  else if (form?.invoiceDp) columns.value = ['Action', ...invoiceDpColumn]
+  else if (form?.invoiceDp === 'IDP') columns.value = ['Action', ...invoiceDpColumn]
   else columns.value = ['Action', ...defaultColumn]
+}
+
+const setItemPoGr = (items: PoGrSearchTypes[]) => {
+  for (const item of items) {
+    const data = {
+      poNo: item.poNo,
+      poItem: item.poItem,
+      grDocumentNo: item.grDocumentNo,
+      grDocumentItem: item.grDocumentItem,
+      grDocumentDate: item.grDocumentDate,
+      taxCode: item.taxCode,
+      itemAmount: item.itemAmount,
+      quantity: item.quantity,
+      uom: item.uom,
+      material: item.material,
+      materialDescription: item.materialDescription,
+      currency: item.currency,
+      conditionType: item.conditionType,
+      postingDate: item.postingDate,
+      enteredOn: item.enteredOn,
+      purchasingOrg: item.purchasingOrg,
+      department: item.department,
+      isEdit: false
+    } as itemsPoGrType
+
+    form?.invoicePoGr.push(data)
+  }
 }
 
 watch(

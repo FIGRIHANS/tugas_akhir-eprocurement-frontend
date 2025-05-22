@@ -4,8 +4,8 @@
       <div class="modal-body p-[40px] flex flex-col gap-[30px] items-center">
         <ModalSuccessLogo />
         <div class="text-center font-inter">
-          <p class="text-lg font-medium">Invoice Successfully Submitted</p>
-          <p class="text-[13px] font-normal">The invoice you sent is currently under review. Further information will be provided via notification.</p>
+          <p class="text-lg font-medium">Invoice Has Been Rejected</p>
+          <p class="text-[13px] font-normal">The invoice has been rejected successfully.</p>
         </div>
       </div>
     </div>

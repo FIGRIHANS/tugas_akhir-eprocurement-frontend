@@ -7,14 +7,15 @@ import type {
   SubmissionStatusTypes,
   DocumentTypes,
   TaxCalculationTypes,
-  ParamsSubmissionInitiateTypes,
-  ParamsSubmissionTypes
+  ParamsSubmissionTypes,
+  PoGrItemTypes
 } from './types/submission'
 
 export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => {
   const submissionStatus = ref<SubmissionStatusTypes[]>([])
   const documentTypeList = ref<DocumentTypes[]>([])
   const taxCalculationList = ref<TaxCalculationTypes[]>([])
+  const poGrList = ref<PoGrItemTypes[]>([])
 
   const getSubmissionStatus = async () => {
     const response: ApiResponse<SubmissionStatusTypes[]> = await invoiceApi.get(`/lookup/invoice/submission/status`)
@@ -40,14 +41,16 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
     return response.data.result
   }
 
-  const postSubmissionInitiate = async (data: ParamsSubmissionInitiateTypes) => {
-    const response: ApiResponse<TaxCalculationTypes[]> = await invoiceApi.post(`/invoice/submission/initiate`, data)
-
+  const getPoGr = async () => {
+    const response: ApiResponse<PoGrItemTypes[]> = await invoiceApi.get(`/invoice/po-gr`)
+  
+    poGrList.value = response.data.result.content
+  
     return response.data.result
   }
 
   const postSubmission = async (data: ParamsSubmissionTypes) => {
-    const response: ApiResponse<TaxCalculationTypes[]> = await invoiceApi.post(`/invoice/submission/initiate`, data)
+    const response: ApiResponse<void> = await invoiceApi.post(`/invoice/submission`, data)
 
     return response.data.result
   }
@@ -56,10 +59,11 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
     submissionStatus,
     documentTypeList,
     taxCalculationList,
+    poGrList,
     getSubmissionStatus,
     getDocumentType,
     getTaxCalculation,
-    postSubmissionInitiate,
+    getPoGr,
     postSubmission
   }
 })

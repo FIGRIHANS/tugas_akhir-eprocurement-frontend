@@ -13,7 +13,7 @@
             <i class="ki-duotone ki-black-left-line"></i>
             Cancel
           </button>
-          <button class="btn btn-danger btn-lg w-full justify-center" @click="goApprove">
+          <button class="btn btn-danger btn-lg w-full justify-center" @click="goReject">
             <i class="ki-duotone ki-cross-circle"></i>
             Reject
           </button>
@@ -31,7 +31,7 @@ const emits = defineEmits(['reject'])
 
 const reason = ref<string>('')
 
-const goApprove = () => {
+const goReject = () => {
   emits('reject')
 }
 </script>
