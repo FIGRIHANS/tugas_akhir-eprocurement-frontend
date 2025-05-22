@@ -116,7 +116,11 @@ watch(
               <td>
                 <div class="flex items-center gap-3">
                   <VendorMenu :id="vendor.vendorId" :name="vendor.vendorName" />
-                  <StatusToggle :id="vendor.vendorId" :status="vendor.isActive" />
+                  <StatusToggle
+                    :id="vendor.vendorId"
+                    :name="vendor.vendorName"
+                    :status="vendor.isActive"
+                  />
                 </div>
               </td>
               <td class="text-nowrap">{{ vendor.vendorName }}</td>
