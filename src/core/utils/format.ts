@@ -26,12 +26,17 @@ export const formatDate = (date: Date, local: string = 'id') => {
   return new Intl.DateTimeFormat(local, { dateStyle: 'long' }).format(date)
 }
 
-export const formattoMySQL = (date: Date) => {
+export const formattoMySQL = (date: Date, withTime: boolean = true) => {
   const y = date.getFullYear()
   const m = pad(date.getMonth() + 1)
   const d = pad(date.getDate())
-  const h = pad(date.getHours())
-  const min = pad(date.getMinutes())
-  const s = pad(date.getSeconds())
-  return `${y}-${m}-${d} ${h}:${min}:${s}`
+
+  if (withTime) {
+    const h = pad(date.getHours())
+    const min = pad(date.getMinutes())
+    const s = pad(date.getSeconds())
+    return `${y}-${m}-${d} ${h}:${min}:${s}`
+  }
+
+  return `${y}-${m}-${d}`
 }

@@ -4,7 +4,6 @@ import LPagination from '@/components/pagination/LPagination.vue'
 import FilterDropdown from '@/components/vendor/FilterDropdownList.vue'
 import VendorMenu from '@/components/vendor/VendorMenu.vue'
 import StatusToggle from '@/components/vendor/StatusToggle.vue'
-import FilterButton from '@/components/vendor/filterButton/FilterButton.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import { useVendorStore } from '@/stores/vendor/vendor'
@@ -13,6 +12,7 @@ import { debounce } from 'lodash'
 import { useRoute, useRouter } from 'vue-router'
 import { formatDate } from '@/core/utils/format'
 import UiLoading from '@/components/UiLoading.vue'
+import VendorListFilters from '@/components/vendor/filterButton/VendorListFilters.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -69,7 +69,8 @@ watch(
         </div>
       </div>
       <div class="card-body scrollable-x-auto">
-        <FilterButton />
+        <!-- <FilterButton /> -->
+        <VendorListFilters />
         <table class="table align-middle text-gray-700">
           <thead class="border-b-2 border-b-primary">
             <tr>

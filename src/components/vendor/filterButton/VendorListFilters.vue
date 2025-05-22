@@ -1,0 +1,71 @@
+<template>
+  <div class="flex overflow-x-auto gap-3 mb-5 items-center" v-if="filters.length">
+    <div class="font-medium text-lg text-gray-800">Filter</div>
+    <div class="btn btn-light btn-sm" v-for="(filter, index) in filters" :key="index">
+      <span class="text-gray-500">{{ filtersKey.find((f) => f.item === filter.key)?.value }}</span>
+      <span class="font-semibold">
+        <template v-if="filter.key === 'statusId'">
+          {{ verifStatus.approvalType.find((type) => type.code === filter.value)?.value }}
+        </template>
+
+        <template v-if="filter.key === 'categoryId'">
+          {{
+            categories.categories.find((item) => item.companyCategoryId.toString() === filter.value)
+              ?.companyCategoryName
+          }}
+        </template>
+
+        {{
+          filter.key === 'startDate' || filter.key === 'endDate'
+            ? formatDate(new Date(filter.value as string), 'en-US')
+            : filter.value
+        }}
+      </span>
+      <UiIcon name="cross" @click="handleRemoveFilter(filter.key)" />
+    </div>
+    <UiButton variant="light" size="sm" class="btn-clear" @click="handleResetFilter"
+      >Reset Filter</UiButton
+    >
+  </div>
+</template>
+<script lang="ts" setup>
+import UiButton from '@/components/ui/atoms/button/UiButton.vue'
+import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
+import { formatDate } from '@/core/utils/format'
+import { useVendorCategoryStore } from '@/stores/vendor/category'
+import { useApprovalTypeStore } from '@/stores/vendor/reference'
+import { ref, watch } from 'vue'
+import { useRoute, useRouter, type LocationQueryValue } from 'vue-router'
+
+const router = useRouter()
+const route = useRoute()
+const categories = useVendorCategoryStore()
+const verifStatus = useApprovalTypeStore()
+const filtersKey: { item: string; value: string }[] = [
+  { item: 'statusId', value: 'Status' },
+  { item: 'categoryId', value: 'Category' },
+  { item: 'startDate', value: 'Registration Start Date' },
+  { item: 'endDate', value: 'Registration End Date' },
+]
+
+const filters = ref<{ key: string; value: LocationQueryValue | LocationQueryValue[] }[]>([])
+
+const handleRemoveFilter = (key: string) => {
+  const query = { ...route.query }
+  delete query[key]
+
+  router.push({ query })
+}
+
+const handleResetFilter = () => {
+  router.push({ query: {} })
+}
+
+watch(
+  () => route.query,
+  (query) => {
+    filters.value = Object.entries(query).map(([key, value]) => ({ key, value }))
+  },
+  { immediate: true, deep: true },
+)
+</script>
