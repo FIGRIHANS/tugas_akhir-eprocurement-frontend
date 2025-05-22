@@ -22,7 +22,7 @@ watch(
       <div class="card-title">Business Licenses</div>
     </div>
     <div class="card-table">
-      <table class="table align-middle">
+      <table class="table align-middle table-border">
         <thead>
           <tr>
             <th>License Type</th>

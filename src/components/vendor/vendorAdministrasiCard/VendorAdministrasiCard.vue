@@ -29,7 +29,7 @@ watch(
 <template>
   <div class="card">
     <div class="card-header">
-      <div class="card-title">Administrasi</div>
+      <div class="card-title">Administration</div>
       <UiButton :outline="true" v-if="allowExport">
         <UiIcon name="printer" variant="duotone" />
         <span>Export Data</span>
@@ -47,7 +47,7 @@ watch(
       </span>
     </div>
     <div v-else-if="!administrasiStore.data.length" class="flex items-center justify-center py-5">
-      <span class="text-sm font-medium"> Oops! Data tidak ditemukan </span>
+      <span class="text-sm font-medium"> Oops! No data </span>
     </div>
     <template v-else>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -61,19 +61,19 @@ watch(
                 </td>
               </tr>
               <tr>
-                <td class="text-sm text-gray-600 font-medium w-[182px]">Email User</td>
+                <td class="text-sm text-gray-600 font-medium w-[182px]">User Email</td>
                 <td class="text-sm font-bold text-gray-700">
                   {{ administrasiStore.data[0].vendorEmail }}
                 </td>
               </tr>
               <tr>
-                <td class="text-sm text-gray-600 font-medium w-[182px]">Nama Perusahaan</td>
+                <td class="text-sm text-gray-600 font-medium w-[182px]">Company Name</td>
                 <td class="text-sm font-bold text-gray-700">
                   {{ administrasiStore.data[0].vendorName }}
                 </td>
               </tr>
               <tr>
-                <td class="text-sm text-gray-600 font-medium w-[182px]">Kategori Perusahaan</td>
+                <td class="text-sm text-gray-600 font-medium w-[182px]">Company Category</td>
                 <td class="text-sm font-bold text-gray-700">
                   {{ administrasiStore.data[0].companyCategoryName }}
                 </td>
@@ -85,24 +85,24 @@ watch(
                 </td>
               </tr>
               <tr>
-                <td class="text-sm text-gray-600 font-medium w-[182px]">Grup Perusahaan</td>
+                <td class="text-sm text-gray-600 font-medium w-[182px]">Company Group</td>
                 <td class="text-sm font-bold text-gray-700">
                   {{ administrasiStore.data[0].groupCompany }}
                 </td>
               </tr>
               <tr>
-                <td class="text-sm text-gray-600 font-medium w-[182px]">Nomor NPWP</td>
+                <td class="text-sm text-gray-600 font-medium w-[182px]">NPWP Number</td>
                 <td class="text-sm font-bold text-gray-700">
                   {{ administrasiStore.data[0].npwp }}
                 </td>
               </tr>
               <tr>
-                <td class="text-sm text-gray-600 font-medium w-[182px]">Berkas NPWP</td>
+                <td class="text-sm text-gray-600 font-medium w-[182px]">NPWP Document</td>
                 <td class="text-sm font-bold text-gray-700">
                   <a :href="`${baseUrl}/${administrasiStore.data[0].npwpUrl}`" target="_blank">
                     <UiButton :outline="true" size="sm">
                       <UiIcon name="cloud-download" variant="duotone" />
-                      <span>Download Dokumen NPWP</span>
+                      <span>Download NPWP Document</span>
                     </UiButton>
                   </a>
                 </td>
@@ -114,29 +114,31 @@ watch(
           <table class="table align-middle">
             <tbody>
               <tr>
-                <td class="text-sm text-gray-600 font-medium w-[182px]">Provinsi</td>
+                <td class="text-sm text-gray-600 font-medium w-[182px]">Country</td>
+                <td class="text-sm font-bold text-gray-700">
+                  {{ '-' }}
+                </td>
+              </tr>
+              <tr>
+                <td class="text-sm text-gray-600 font-medium w-[182px]">Province</td>
                 <td class="text-sm font-bold text-gray-700">
                   {{ administrasiStore.data[0].stateName }}
                 </td>
               </tr>
               <tr>
-                <td class="text-sm text-gray-600 font-medium w-[182px]">Kota</td>
+                <td class="text-sm text-gray-600 font-medium w-[182px]">Regency/City</td>
                 <td class="text-sm font-bold text-gray-700">
                   {{ administrasiStore.data[0].cityName }}
                 </td>
               </tr>
               <tr>
-                <td class="text-sm text-gray-600 font-medium w-[182px]">Telepon</td>
+                <td class="text-sm text-gray-600 font-medium w-[182px]">Telephone</td>
                 <td class="text-sm font-bold text-gray-700">
                   {{ administrasiStore.data[0].vendorPhone }}
                 </td>
               </tr>
               <tr>
-                <td class="text-sm text-gray-600 font-medium w-[182px]">Fax</td>
-                <td class="text-sm font-bold text-gray-700">-</td>
-              </tr>
-              <tr>
-                <td class="text-sm text-gray-600 font-medium w-[182px]">Email Vendor</td>
+                <td class="text-sm text-gray-600 font-medium w-[182px]">Vendor Email</td>
                 <td class="text-sm font-bold text-gray-700">
                   {{ administrasiStore.data[0].vendorEmail }}
                 </td>
@@ -148,15 +150,15 @@ watch(
                 </td>
               </tr>
               <tr>
-                <td class="text-sm text-gray-600 font-medium w-[182px]">Preferensi Mata Uang</td>
+                <td class="text-sm text-gray-600 font-medium w-[182px]">Currency Preference</td>
                 <td class="text-sm font-bold text-gray-700">
                   {{ administrasiStore.data[0].currencyLabel }}
                 </td>
               </tr>
               <tr>
-                <td class="text-sm text-gray-600 font-medium w-[182px]">Bidang Usaha</td>
+                <td class="text-sm text-gray-600 font-medium w-[182px]">Company Address</td>
                 <td class="text-sm font-bold text-gray-700">
-                  {{ administrasiStore.data[0].businessFieldName }}
+                  {{ administrasiStore.data[0].addressCompanyDetail }}
                 </td>
               </tr>
             </tbody>
@@ -167,9 +169,17 @@ watch(
         <table class="table align-middle">
           <tbody>
             <tr>
-              <td class="text-sm text-gray-600 font-medium w-[182px]">Alamat Perusahaan</td>
+              <td class="text-sm text-gray-600 font-medium w-[182px]">Business Fields</td>
               <td class="text-sm font-bold text-gray-700">
-                {{ administrasiStore.data[0].addressCompanyDetail }}
+                <ul>
+                  <li
+                    v-for="(bf, index) in administrasiStore.data[0].businessFieldName?.split(',')"
+                    :key="bf"
+                  >
+                    {{ index + 1 }}.
+                    {{ administrasiStore.data[0].businessFieldName }}
+                  </li>
+                </ul>
               </td>
             </tr>
           </tbody>
