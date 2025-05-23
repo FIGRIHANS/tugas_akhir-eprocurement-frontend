@@ -150,18 +150,28 @@ const checkFieldNotEmpty = () => {
       })
 
       const hasContactPersons = registrationVendorStore.contact.contactPerson.list.length > 0
+      const contactPersonHasFinance = registrationVendorStore.contact.contactPerson.list.some(
+        (item) => item.positionTypeId === 1,
+      )
+      const contactPersonHasMarketing = registrationVendorStore.contact.contactPerson.list.some(
+        (item) => item.positionTypeId === 2,
+      )
+
+      const contactPersonValid =
+        hasContactPersons && contactPersonHasFinance && contactPersonHasMarketing
+
       registrationVendorStore.contact.contactPerson = {
         ...registrationVendorStore.contact.contactPerson,
-        contactNameError: !hasContactPersons,
-        contactPhoneError: !hasContactPersons,
-        contactEmailError: !hasContactPersons,
-        positionError: !hasContactPersons,
+        contactNameError: !contactPersonValid,
+        contactPhoneError: !contactPersonValid,
+        contactEmailError: !contactPersonValid,
+        positionError: !contactPersonValid,
       }
 
       return (
         !Object.values(registrationVendorStore.contact)
           .flatMap((section) => Object.values(section))
-          .some((value) => value === true) && hasContactPersons
+          .some((value) => value === true) && contactPersonValid
       )
 
     case 'registration__document-and-legal':
