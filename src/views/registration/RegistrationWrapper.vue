@@ -209,11 +209,13 @@ const checkFieldNotEmpty = () => {
       }
 
       if (registrationVendorStore.paymentDetailFlagging.bankNotRegistered) {
-        registrationVendorStore.paymentDetail.bankId = ''
+        registrationVendorStore.paymentDetail.bankId = 0
         registrationVendorStore.paymentDetail.bankIdError = false
       } else {
         registrationVendorStore.paymentDetail = {
           ...registrationVendorStore.paymentDetail,
+          bankKey: '',
+          bankKeyError: false,
           bankName: '',
           bankNameError: false,
           branch: '',
@@ -288,6 +290,7 @@ const next = () => {
           expiredDate: item.expiredDate === '' ? null : item.expiredDate,
         })),
         bankDetailDto: {
+          bankKey: isBankNotRegistered.value ? paymentDetail.value.bankKey : '',
           bankName: isBankNotRegistered.value ? paymentDetail.value.bankName : '',
           branch: isBankNotRegistered.value ? paymentDetail.value.branch : '',
           swiftCode: isBankNotRegistered.value ? paymentDetail.value.swiftCode : '',
@@ -296,7 +299,7 @@ const next = () => {
         vendorBankDetail: {
           accountNo: paymentDetail.value.accountNo,
           accountName: paymentDetail.value.accountName,
-          bankId: paymentDetail.value.bankId,
+          bankId: isBankNotRegistered.value ? 0 : paymentDetail.value.bankId,
           currencyId: paymentDetail.value.currencyId,
           urlAccountDifferences: paymentDetail.value.urlAccountDifferences,
           urlFirstPage: paymentDetail.value.urlFirstPage,

@@ -70,8 +70,8 @@
               placeholder="Pilih"
               row
               :options="bankList"
-              valueKey="bankCode"
-              textKey="bankName"
+              valueKey="id"
+              textKey="textLabel"
               :required="!paymentDetailFlagging.bankNotRegistered"
               :disabled="paymentDetailFlagging.bankNotRegistered"
               :error="paymentDetail.bankIdError"
@@ -85,6 +85,16 @@
               />
             </div>
           </div>
+          <UiInput
+            v-if="paymentDetailFlagging.bankNotRegistered"
+            v-model="paymentDetail.bankKey"
+            label="Bank Key"
+            placeholder="AMBV0"
+            row
+            required
+            hint-text="*5 uppercase alphanumeric characters (e.g., AMBV0), must match official bank and unique."
+            :error="paymentDetail.bankKeyError"
+          />
           <UiInput
             v-if="paymentDetailFlagging.bankNotRegistered"
             v-model="paymentDetail.bankName"
@@ -179,7 +189,12 @@ const paymentDetail = computed(() => registrationVendorStore.paymentDetail)
 const paymentDetailFlagging = computed(() => registrationVendorStore.paymentDetailFlagging)
 
 const termCondition = computed(() => vendorMasterDataStore.termCondition)
-const bankList = computed(() => vendorMasterDataStore.bankList)
+const bankList = computed(() =>
+  vendorMasterDataStore.bankList.map((item) => ({
+    ...item,
+    textLabel: `${item.bankCode} - ${item.bankName}`,
+  })),
+)
 const currencyList = computed(() =>
   vendorMasterDataStore.currencyList.map((item) => ({
     value: item.currencyCode,

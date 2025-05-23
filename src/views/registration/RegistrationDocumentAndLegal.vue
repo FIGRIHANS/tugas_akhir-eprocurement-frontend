@@ -48,9 +48,6 @@
                   v-model="documentAndLegal.fields[index].licenseNo"
                   :error="documentAndLegal.fields[index]?.licenseNoError"
                 />
-                <span v-if="item.licenseId === 17" class="text-danger text-[10px]"
-                  >*Jika no NIB berlaku selamanya silahkan isi tanggal selesai 01/01/9999</span
-                >
                 <span v-if="item.licenseId === 12" class="text-danger text-[10px]"
                   >*Batas upload NPWP sebanyak 3 kali</span
                 >
