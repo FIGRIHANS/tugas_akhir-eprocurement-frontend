@@ -30,6 +30,7 @@ export type PositionListType = {
 }[]
 
 export type BankListType = {
+  id: number
   bankCountryCode: string
   bankCode: string
   bankName: string
@@ -142,6 +143,7 @@ export type VendorRegistrationPayloadType = {
     documentNo: string
   })[]
   bankDetailDto: {
+    bankKey: string
     bankName: string
     branch: string
     swiftCode: string
@@ -150,7 +152,7 @@ export type VendorRegistrationPayloadType = {
   vendorBankDetail: {
     accountNo: string
     accountName: string
-    bankId: string
+    bankId: number
     currencyId: number
     urlAccountDifferences: string
     urlFirstPage: string

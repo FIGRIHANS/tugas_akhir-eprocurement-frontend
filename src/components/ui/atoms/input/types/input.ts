@@ -7,4 +7,5 @@ export interface IInputProps {
   required?: boolean
   error?: boolean
   type?: 'text' | 'number'
+  hintText?: string
 }
