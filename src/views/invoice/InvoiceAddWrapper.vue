@@ -139,6 +139,7 @@ const contentComponent = computed(() => {
 })
 
 const listDocumentType = computed(() => invoiceMasterApi.documentType)
+const vendorList = computed(() => invoiceMasterApi.vendorList)
 
 const checkInvoiceData = () => {
   form.vendorIdError = useCheckEmpty(form.vendorId).isError
@@ -250,6 +251,11 @@ const mapAdditionalCost = () => {
   return cost
 }
 
+const getVendorName = () => {
+  const getIndex = vendorList.value.findIndex((item) => item.vendorId === Number(form?.vendorId))
+  if (getIndex !== -1) return vendorList.value[getIndex].vendorName
+}
+
 const mapDataPost = () => {
   const data = {
     header: {
@@ -271,7 +277,7 @@ const mapDataPost = () => {
     },
     vendor: {
       vendorId: Number(form.vendorId),
-      vendorName: form.vendorId,
+      vendorName: getVendorName(),
       vendorBusinessUnit: form.businessField,
       vendorSubBusinessUnit: form.subBusinessField,
       vendorAddress: form.address
