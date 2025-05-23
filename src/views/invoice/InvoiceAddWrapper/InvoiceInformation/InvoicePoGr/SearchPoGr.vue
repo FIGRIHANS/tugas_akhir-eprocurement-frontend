@@ -107,7 +107,17 @@ const listItem = computed(() => {
   }))
 })
 
+const resetActive = () => {
+  for (const item of listPoGrItem.value) {
+    item.isActive = false
+  }
+  for (const item of listItem.value) {
+    item.isActive = false
+  }
+}
+
 const hideModal = () => {
+  resetActive()
   const idModal = document.querySelector('#add_po_gr_item_modal')
   const modal = KTModal.getInstance(idModal as HTMLElement)
   modal.hide()

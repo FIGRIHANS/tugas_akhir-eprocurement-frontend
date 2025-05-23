@@ -42,7 +42,7 @@
               <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentItem }}</td>
               <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentDate }}</td>
               <td>{{ item.taxCode }}</td>
-              <td v-if="!checkInvoiceDp()">{{ item.itemAmount }}</td>
+              <td v-if="!checkInvoiceDp()">{{ useFormatIdr(item.itemAmount) }}</td>
               <td v-if="!checkInvoiceDp()">
                 <span v-if="!item.isEdit">{{ item.quantity }}</span>
                 <input v-else v-model="item.quantity" class="input" placeholder="" type="text"/>
@@ -73,6 +73,7 @@ import { KTModal } from '@/metronic/core'
 import { defaultColumn, invoiceDpColumn, PoPibColumn } from '@/static/invoicePoGr'
 import SearchPoGr from './InvoicePoGr/SearchPoGr.vue'
 import type { PoGrSearchTypes, itemsPoGrType } from '../../types/invoicePoGr'
+import { useFormatIdr } from '@/composables/currency'
 
 const form = inject<formTypes>('form')
 const columns = ref<string[]>([])

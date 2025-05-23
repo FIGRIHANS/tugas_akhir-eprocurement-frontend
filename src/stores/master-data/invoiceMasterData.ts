@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import vendorApi from '@/core/utils/vendorApi'
-import vendorManagementApi from '@/core/utils/vendorManagementApi'
+import generalApi from '@/core/utils/generalApi'
 
 import type { ApiResponse } from '@/core/type/api'
 import type {
@@ -10,7 +10,9 @@ import type {
   CompanyCodeTypes,
   DpTypes,
   DocumentTypes,
-  VendorTypes
+  VendorTypes,
+  ActivityTypes,
+  TaxCodeTypes
 } from './types/invoiceMasterData'
 
 export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => {
@@ -20,9 +22,11 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
   const dpType = ref<DpTypes[]>([])
   const documentType = ref<DocumentTypes[]>([])
   const vendorList = ref<VendorTypes[]>([])
+  const activityList = ref<ActivityTypes[]>([])
+  const taxList = ref<TaxCodeTypes[]>([])
 
   const getInvoicePoType = async () => {
-    const response: ApiResponse<InvoicePoTypes[]> = await vendorApi.get(
+    const response: ApiResponse<InvoicePoTypes[]> = await generalApi.get(
       `/lookup/invoice-po-type`,
     )
 
@@ -33,7 +37,7 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
 
   const getCurrency = async (searchText?: string) => {
     const url = searchText ? `/lookup/currency?searchText=${searchText}` : `/lookup/currency`
-    const response: ApiResponse<CurrencyTypes[]> = await vendorApi.get(url)
+    const response: ApiResponse<CurrencyTypes[]> = await generalApi.get(url)
 
     currency.value = response.data.result.content
 
@@ -42,7 +46,7 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
 
   const getCompanyCode = async (searchText?: string) => {
     const url = searchText ? `/lookup/company-code?searchText=${searchText}` : `/lookup/company-code`
-    const response: ApiResponse<CompanyCodeTypes[]> = await vendorApi.get(url)
+    const response: ApiResponse<CompanyCodeTypes[]> = await generalApi.get(url)
 
     companyCode.value = response.data.result.content
 
@@ -50,7 +54,7 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
   }
 
   const getDpTypes = async () => {
-    const response: ApiResponse<DpTypes[]> = await vendorApi.get(
+    const response: ApiResponse<DpTypes[]> = await generalApi.get(
       `/lookup/dp-type`,
     )
 
@@ -60,7 +64,7 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
   }
 
   const getDocumentTypes = async () => {
-    const response: ApiResponse<DocumentTypes[]> = await vendorApi.get(
+    const response: ApiResponse<DocumentTypes[]> = await generalApi.get(
       `/lookup/document-type`,
     )
 
@@ -70,11 +74,29 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
   }
 
   const getVendorList = async () => {
-    const response: ApiResponse<VendorTypes[]> = await vendorManagementApi.get(
+    const response: ApiResponse<VendorTypes[]> = await vendorApi.get(
       `/public/verifiedvendor/lookup/vendor-list`,
     )
 
     vendorList.value = response.data.result.content
+
+    return response.data.result
+  }
+
+  const getActivity = async (searchText?: string) => {
+    const url = searchText ? `/lookup/activity?searchText=${searchText}` : `/lookup/activity`
+    const response: ApiResponse<ActivityTypes[]> = await generalApi.get(url)
+
+    activityList.value = response.data.result.content
+
+    return response.data.result
+  }
+
+  const getTaxCode = async (searchText?: string) => {
+    const url = searchText ? `/lookup/tax-code?searchText=${searchText}` : `/lookup/tax-code`
+    const response: ApiResponse<TaxCodeTypes[]> = await generalApi.get(url)
+
+    taxList.value = response.data.result.content
 
     return response.data.result
   }
@@ -86,11 +108,15 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
     dpType,
     documentType,
     vendorList,
+    activityList,
+    taxList,
     getInvoicePoType,
     getCurrency,
     getCompanyCode,
     getDpTypes,
     getDocumentTypes,
-    getVendorList
+    getVendorList,
+    getActivity,
+    getTaxCode
   }
 })

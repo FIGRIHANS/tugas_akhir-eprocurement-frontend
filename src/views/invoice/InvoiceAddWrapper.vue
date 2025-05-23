@@ -17,16 +17,16 @@
         <component :is="contentComponent" />
       </Transition>
       <div v-if="form.status === 0" class="flex justify-between items-center gap-[8px] mt-[24px]">
-        <button class="btn btn-outline btn-primary">
+        <button class="btn btn-outline btn-primary" :disabled="isSubmit">
           Save as Draft
           <i class="ki-duotone ki-bookmark"></i>
         </button>
         <div class="flex items-center justify-end gap-[8px]">
-          <button v-if="tabNow !== 'data'" class="btn btn-outline btn-primary" @click="goBack">
+          <button v-if="tabNow !== 'data'" class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goBack">
             <i class="ki-filled ki-arrow-left"></i>
             Back
           </button>
-          <button class="btn btn-primary" @click="goNext">
+          <button class="btn btn-primary" :disabled="isSubmit" @click="goNext">
             {{ tabNow !== 'preview' ? 'Lanjut' : 'Submit' }}
             <i v-if="tabNow !== 'preview'" class="ki-duotone ki-black-right"></i>
             <i v-else class="ki-duotone ki-paper-plane"></i>
@@ -34,15 +34,15 @@
         </div>
       </div>
       <div v-else class="flex justify-end items-center mt-[24px]">
-        <button v-if="tabNow !== 'preview'" class="btn btn-outline btn-primary" @click="goBack">
+        <button v-if="tabNow !== 'preview'" class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goBack">
           <i class="ki-filled ki-arrow-left"></i>
           Back
         </button>
-        <button v-if="tabNow !== 'preview'" class="btn btn-primary" @click="goNext">
+        <button v-if="tabNow !== 'preview'" class="btn btn-primary" :disabled="isSubmit" @click="goNext">
           Next
           <i class="ki-duotone ki-black-right"></i>
         </button>
-        <button v-if="tabNow === 'preview'" class="btn btn-primary">
+        <button v-if="tabNow === 'preview'" class="btn btn-primary" :disabled="isSubmit">
           Save as PDF
           <iconPDF />
         </button>
@@ -80,6 +80,7 @@ const loginApi = useLoginStore()
 const router = useRouter()
 const route = useRoute()
 const tabNow = ref<string>('data')
+const isSubmit = ref<boolean>(false)
 
 const routes = ref<routeTypes[]>([
   {
@@ -122,6 +123,12 @@ const form = reactive<formTypes>({
   tax: null,
   referenceDocument: null,
   otherDocument: null,
+  subtotal: 0,
+  vatAmount: 0,
+  whtAmount: 0,
+  additionalCostCalc: 0,
+  totalGrossAmount: 0,
+  totalNetAmount: 0,
   invoicePoGr: [],
   invoiceItem: [],
   additionalCost: [],
@@ -154,6 +161,38 @@ const checkInvoiceData = () => {
   else return true
 }
 
+const checkActiveEditPoGr = () => {
+  let status = false
+  for (const item of form.invoicePoGr) {
+    if (status) return
+    if (item.isEdit) status = true
+  }
+  return status
+}
+
+const checkActiveEditAdditional = () => {
+  let status = false
+  for (const item of form.additionalCost) {
+    if (status) return
+    if (item.isEdit) status = true
+  }
+  return status
+}
+
+const checkFieldAdditional = () => {
+  let status = false
+  for (const item of form.additionalCost) {
+    if (status) return
+    if (
+      !item.activity ||
+      !item.itemAmount ||
+      !item.debitCredit ||
+      !item.taxCode
+    ) status = true
+  }
+  return status
+}
+
 const checkInvoiceInformation = () => {
   form.companyCodeError = useCheckEmpty(form.companyCode).isError
   form.invoiceNoVendorError = useCheckEmpty(form.invoiceNoVendor).isError
@@ -161,7 +200,8 @@ const checkInvoiceInformation = () => {
   form.taxNoInvoiceError = useCheckEmpty(form.taxNoInvoice).isError
   form.descriptionError = useCheckEmpty(form.description).isError
   form.invoiceDocumentError = form.invoiceDocument === null
-  form.invoicePoGrError = form.invoicePoGr.length === 0
+  form.invoicePoGrError = form.invoicePoGr.length === 0 || checkActiveEditPoGr()
+  form.additionalCostError = checkActiveEditAdditional() || checkFieldAdditional()
 
   if (
     form.companyCodeError ||
@@ -170,7 +210,8 @@ const checkInvoiceInformation = () => {
     form.taxNoInvoiceError ||
     form.descriptionError ||
     form.invoiceDocumentError ||
-    form.invoicePoGrError
+    form.invoicePoGrError || 
+    form.additionalCostError
   ) return false
   else return true
 }
@@ -197,7 +238,7 @@ const mapDocument = () => {
   for (const [index, item] of libDocument.entries()) {
     if (form[item as keyof typeof form]) {
       document.push({
-        documentType: listDocumentType.value[index].id,
+        documentType: Number(listDocumentType.value[index].code),
         documentName: form.invoiceDocument?.name,
         documentUrl: form.invoiceDocument?.url,
         documentSize: Number(form.invoiceDocument?.fileSize)
@@ -267,9 +308,9 @@ const mapDataPost = () => {
       companyCode: form.companyCode,
       companyName: form.companyName,
       invoiceNo: form.invoiceNo,
-      vendorInvoiceNo: form.invoiceNoVendor,
+      documentNo: form.invoiceNoVendor,
       invoiceDate: moment(form.invoiceDate).toISOString(),
-      invoiceTaxNo: form.taxNoInvoice,
+      taxNo: form.taxNoInvoice,
       currCode: form.currency,
       notes: form.description,
       statusCode: 1,
@@ -278,8 +319,6 @@ const mapDataPost = () => {
     vendor: {
       vendorId: Number(form.vendorId),
       vendorName: getVendorName(),
-      vendorBusinessUnit: form.businessField,
-      vendorSubBusinessUnit: form.subBusinessField,
       vendorAddress: form.address
     },
     payment: {
@@ -290,12 +329,12 @@ const mapDataPost = () => {
     },
     documents: mapDocument(),
     calculation: {
-      subtotal: 0,
-      vatAmount: 0,
-      whtAmount: 0,
-      additionalCost: 0,
-      totalGrossAmount: 0,
-      totalNetAmount: 0,
+      subtotal: form.subtotal,
+      vatAmount: form.vatAmount,
+      whtAmount: form.whtAmount,
+      additionalCost: form.additionalCostCalc,
+      totalGrossAmount: form.totalGrossAmount,
+      totalNetAmount: form.totalNetAmount,
     },
     pogr: mapPoGr(),
     additionalCosts: mapAdditionalCost()
@@ -321,7 +360,7 @@ const goNext = () => {
       tabNow.value = list[checkIndex + 1]
     }
   } else {
-    // console.log(mapDataPost())
+    isSubmit.value = true
     invoiceApi.postSubmission(mapDataPost()).then(() => {
       const idModal = document.querySelector('#success_invoice_modal')
       const modal = KTModal.getInstance(idModal as HTMLElement)
@@ -337,11 +376,14 @@ const goNext = () => {
     .catch((error) => {
       console.error(error)
     })
+    .finally(() => {
+      isSubmit.value = false
+    })
   }
 }
 
 onMounted(() => {
-  invoiceApi.getTaxCalculation()
+  invoiceMasterApi.getTaxCode()
   invoiceMasterApi.getInvoicePoType()
   invoiceMasterApi.getDocumentTypes()
   invoiceMasterApi.getVendorList()

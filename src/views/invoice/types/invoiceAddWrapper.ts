@@ -53,9 +53,18 @@ export interface formTypes extends documentFormTypes {
   description: string
   descriptionError?: boolean
 
+  //invoice calculation
+  subtotal: number
+  vatAmount: number
+  whtAmount: number
+  additionalCostCalc: number
+  totalGrossAmount: number
+  totalNetAmount: number
+
   invoicePoGr: itemsPoGrType[]
   invoicePoGrError?: boolean
   additionalCost: itemsCostType[]
+  additionalCostError?: boolean
   invoiceItem: invoiceItemTypes[]
 
   status: number

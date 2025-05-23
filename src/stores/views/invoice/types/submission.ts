@@ -32,9 +32,9 @@ interface ParamsSubmissionHeader {
   companyCode: string
   companyName: string
   invoiceNo: string
-  vendorInvoiceNo: string
+  documentNo: string
   invoiceDate: string
-  invoiceTaxNo: string
+  taxNo: string
   currCode: string
   notes: string
   statusCode: number
@@ -57,7 +57,7 @@ interface ParamsSubmissionPayment {
 }
 
 interface ParamsSubmissionDocument {
-  documentType: string
+  documentType: number
   documentName: string
   documentUrl: string
   documentSize: number
