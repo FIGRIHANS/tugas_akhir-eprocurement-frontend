@@ -7,13 +7,19 @@ import VendorBlacklistModal from './vendorBlacklistModal/VendorBlacklistModal.vu
 import UiModal from '../modal/UiModal.vue'
 import successImg from '@/assets/success.svg'
 import NotifyVendorModal from './notifyVendorModal/NotifyVendorModal.vue'
+import { useRouter } from 'vue-router'
 
 defineProps<{ id: string | number; name: string }>()
+const router = useRouter()
 const verificationModalOpen = ref<boolean>(false)
 const blacklistModalOpen = ref<boolean>(false)
 const blacklistSuccessOpen = ref<boolean>(false)
 const notifyVendorModalOpen = ref<boolean>(false)
 const notifyVendorSuccessModalOpen = ref<boolean>(false)
+
+const handleSuccess = () => {
+  router.replace({ name: 'vendor-list' })
+}
 </script>
 <template>
   <div class="dropdown" data-dropdown="true" data-dropdown-trigger="click">
@@ -78,14 +84,24 @@ const notifyVendorSuccessModalOpen = ref<boolean>(false)
     v-if="notifyVendorModalOpen"
   />
 
-  <UiModal v-if="blacklistSuccessOpen" v-model="blacklistSuccessOpen" size="sm">
+  <UiModal
+    v-if="blacklistSuccessOpen"
+    v-model="blacklistSuccessOpen"
+    size="sm"
+    @update:model-value="handleSuccess"
+  >
     <img :src="successImg" alt="success" class="mx-auto mb-3" />
     <h3 class="font-medium text-lg text-gray-800 text-center">Vendor Successfully Blacklisted</h3>
     <p class="text-gray-600 text-center mb-3">
       The vendor has been added to the blacklist and is no longer active in the system.
     </p>
   </UiModal>
-  <UiModal v-if="notifyVendorSuccessModalOpen" v-model="notifyVendorSuccessModalOpen" size="sm">
+  <UiModal
+    v-if="notifyVendorSuccessModalOpen"
+    v-model="notifyVendorSuccessModalOpen"
+    size="sm"
+    @update:model-value="handleSuccess"
+  >
     <img :src="successImg" alt="success" class="mx-auto mb-3" />
     <h3 class="font-medium text-lg text-gray-800 text-center">Vendor Successfully Notified</h3>
     <p class="text-gray-600 text-center mb-3">
