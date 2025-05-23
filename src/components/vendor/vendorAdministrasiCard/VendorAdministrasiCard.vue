@@ -116,7 +116,7 @@ watch(
               <tr>
                 <td class="text-sm text-gray-600 font-medium w-[182px]">Country</td>
                 <td class="text-sm font-bold text-gray-700">
-                  {{ '-' }}
+                  {{ administrasiStore.data[0].countryName }}
                 </td>
               </tr>
               <tr>
