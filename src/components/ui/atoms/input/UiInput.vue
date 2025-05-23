@@ -21,15 +21,18 @@
       {{ label }}
       <span v-if="required" class="text-danger"> * </span>
     </label>
-    <input
-      v-model="model"
-      class="input"
-      :class="{ 'border-danger': error }"
-      :placeholder="placeholder"
-      :readonly="readonly"
-      :disabled="disabled"
-      :type="type"
-    />
+    <div class="flex flex-col w-full gap-1">
+      <input
+        v-model="model"
+        class="input"
+        :class="{ 'border-danger': error }"
+        :placeholder="placeholder"
+        :readonly="readonly"
+        :disabled="disabled"
+        :type="type"
+      />
+      <span v-if="hintText" class="form-hint !text-danger">{{ hintText }}</span>
+    </div>
   </div>
 </template>
 

@@ -103,8 +103,10 @@ export type PaymentDetailType = {
   urlFirstPageError?: boolean
   currencyId: number
   currencyIdError?: boolean
-  bankId: string
+  bankId: number
   bankIdError?: boolean
+  bankKey: string
+  bankKeyError?: boolean
   bankName: string
   bankNameError?: boolean
   branch: string

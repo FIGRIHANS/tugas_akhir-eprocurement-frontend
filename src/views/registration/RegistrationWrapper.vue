@@ -150,18 +150,28 @@ const checkFieldNotEmpty = () => {
       })
 
       const hasContactPersons = registrationVendorStore.contact.contactPerson.list.length > 0
+      const contactPersonHasFinance = registrationVendorStore.contact.contactPerson.list.some(
+        (item) => item.positionTypeId === 1,
+      )
+      const contactPersonHasMarketing = registrationVendorStore.contact.contactPerson.list.some(
+        (item) => item.positionTypeId === 2,
+      )
+
+      const contactPersonValid =
+        hasContactPersons && contactPersonHasFinance && contactPersonHasMarketing
+
       registrationVendorStore.contact.contactPerson = {
         ...registrationVendorStore.contact.contactPerson,
-        contactNameError: !hasContactPersons,
-        contactPhoneError: !hasContactPersons,
-        contactEmailError: !hasContactPersons,
-        positionError: !hasContactPersons,
+        contactNameError: !contactPersonValid,
+        contactPhoneError: !contactPersonValid,
+        contactEmailError: !contactPersonValid,
+        positionError: !contactPersonValid,
       }
 
       return (
         !Object.values(registrationVendorStore.contact)
           .flatMap((section) => Object.values(section))
-          .some((value) => value === true) && hasContactPersons
+          .some((value) => value === true) && contactPersonValid
       )
 
     case 'registration__document-and-legal':
@@ -209,11 +219,13 @@ const checkFieldNotEmpty = () => {
       }
 
       if (registrationVendorStore.paymentDetailFlagging.bankNotRegistered) {
-        registrationVendorStore.paymentDetail.bankId = ''
+        registrationVendorStore.paymentDetail.bankId = 0
         registrationVendorStore.paymentDetail.bankIdError = false
       } else {
         registrationVendorStore.paymentDetail = {
           ...registrationVendorStore.paymentDetail,
+          bankKey: '',
+          bankKeyError: false,
           bankName: '',
           bankNameError: false,
           branch: '',
@@ -288,6 +300,7 @@ const next = () => {
           expiredDate: item.expiredDate === '' ? null : item.expiredDate,
         })),
         bankDetailDto: {
+          bankKey: isBankNotRegistered.value ? paymentDetail.value.bankKey : '',
           bankName: isBankNotRegistered.value ? paymentDetail.value.bankName : '',
           branch: isBankNotRegistered.value ? paymentDetail.value.branch : '',
           swiftCode: isBankNotRegistered.value ? paymentDetail.value.swiftCode : '',
@@ -296,7 +309,7 @@ const next = () => {
         vendorBankDetail: {
           accountNo: paymentDetail.value.accountNo,
           accountName: paymentDetail.value.accountName,
-          bankId: paymentDetail.value.bankId,
+          bankId: isBankNotRegistered.value ? 0 : paymentDetail.value.bankId,
           currencyId: paymentDetail.value.currencyId,
           urlAccountDifferences: paymentDetail.value.urlAccountDifferences,
           urlFirstPage: paymentDetail.value.urlFirstPage,
