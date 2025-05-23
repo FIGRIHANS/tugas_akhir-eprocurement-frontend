@@ -57,14 +57,11 @@
               <td>
                 <span v-if="!item.isEdit">{{ item.debitCredit || '-' }}</span>
                 <select v-else v-model="item.debitCredit" class="select" placeholder="">
-                  <option value="1">
-                    Option 1
+                  <option value="D">
+                    Debit
                   </option>
-                  <option value="2">
-                    Option 2
-                  </option>
-                  <option value="3">
-                    Option 3
+                  <option value="K">
+                    Credit
                   </option>
                 </select>
               </td>
