@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiLoading from '@/components/UiLoading.vue'
 import { formatDate } from '@/core/utils/format'
 import { useVendorIzinUsahaStore } from '@/stores/vendor/vendor'
@@ -18,17 +19,17 @@ watch(
 <template>
   <div class="card card-grid">
     <div class="card-header">
-      <div class="card-title">Data Izin Usaha</div>
+      <div class="card-title">Business Licenses</div>
     </div>
     <div class="card-table">
-      <table class="table align-middle">
+      <table class="table align-middle table-border">
         <thead>
           <tr>
-            <th>Jenis Izin Usaha</th>
-            <th>No. Izin Usaha</th>
-            <th>Tanggal Mulai Berlaku</th>
-            <th>Tanggal Selesai</th>
-            <th>Instansi Penerbit</th>
+            <th>License Type</th>
+            <th>License Number</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Document</th>
           </tr>
         </thead>
         <tbody>
@@ -42,6 +43,9 @@ watch(
               {{ izinUsahaStore.error }}
             </td>
           </tr>
+          <tr v-else-if="!izinUsahaStore.data.length">
+            <td colspan="5" class="text-center">No data</td>
+          </tr>
           <tr v-else v-for="item in izinUsahaStore.data" :key="item.licenseId">
             <td>{{ item.licenseName }}</td>
             <td>{{ item.licenseNo }}</td>
@@ -51,7 +55,16 @@ watch(
             <td>
               {{ item.expiredUTCDate ? formatDate(new Date(item.expiredUTCDate as string)) : '-' }}
             </td>
-            <td>{{ item.issuedBy ?? '-' }}</td>
+            <td>
+              <a
+                :href="item.documentUrl"
+                target="_blank"
+                class="btn btn-primary btn-outline btn-sm"
+              >
+                <UiIcon name="cloud-download" variant="duotone" />
+                <span>Download Document</span>
+              </a>
+            </td>
           </tr>
         </tbody>
       </table>

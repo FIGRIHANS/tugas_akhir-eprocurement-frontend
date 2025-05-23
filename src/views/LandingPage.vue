@@ -36,19 +36,6 @@ const year = moment().format('YYYY')
 
   <section id="advantages" class="py-16">
     <div class="max-w-[1440px] lg:px-[40px] px-5 mx-auto">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <div>
-          <span class="rounded-full py-1 px-3 bg-gray-200 text-base text-gray-900">
-            Our Advantages
-          </span>
-          <h1 class="font-semibold text-4xl text-[#283841] mt-4">Tender Process</h1>
-        </div>
-        <div class="text-base font-normal text-[#656565] self-end">
-          Every step—from registration to tender selection—is designed to be transparent, efficient,
-          and easy to use.
-        </div>
-      </div>
-
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="card bg-secondary shadow-none">
           <div class="card-body p-4 space-y-4">
@@ -59,7 +46,7 @@ const year = moment().format('YYYY')
               <span class="text-xl text-gray-900 font-semibold"> Transparent </span>
             </div>
             <div class="font-light text-gray-800 text-lg">
-              Enhances transparency in the registration and tender submission process.
+              Enhances transparency in the registration and invoice submission process.
             </div>
           </div>
         </div>
@@ -73,7 +60,7 @@ const year = moment().format('YYYY')
               <span class="text-xl text-gray-900 font-semibold"> Efficient </span>
             </div>
             <div class="font-light text-gray-800 text-lg">
-              Improves data accuracy while minimizing the risk of human error during the tender
+              Improves data accuracy while minimizing the risk of human error during the invoice
               process.
             </div>
           </div>
@@ -88,7 +75,7 @@ const year = moment().format('YYYY')
               <span class="text-xl font-semibold text-gray-900"> User-Friendly </span>
             </div>
             <div class="font-light text-gray-800 text-lg">
-              Simplifies the tender process through an intuitive, user-friendly application
+              Simplifies the invoice process through an intuitive, user-friendly application
               accessible anytime, anywhere from your computer.
             </div>
           </div>
@@ -108,17 +95,14 @@ const year = moment().format('YYYY')
         <div class="col-span-2 card bg-secondary shadow-none">
           <div class="card-body p-4">
             <p class="font-light text-lg text-gray-800">
-              We recognize that vendors play a vital role in the operations and long-term
-              sustainability of Arya Noble’s business. Together with our partners, we support Arya
-              Noble’s production chain across various levels and sectors. That is why we promote
-              business transactions that deliver optimal added value through standardized, fair, and
-              high-quality tender processes.
+              At Arya Noble, we believe that strong partnerships with vendors are key to our
+              operational excellence and sustainable growth. To support this, we implement a
+              standardized and transparent Vendor Management System (VMS) that simplifies vendor
+              registration and ensures efficient pre-qualification.
             </p>
             <p class="font-light text-lg text-gray-800">
-              Our e-Procurement system facilitates the electronic tendering of goods and services
-              through a web-based application. The system covers the entire tendering process,
-              including vendor registration, pre-qualification, tender execution (for goods and
-              services), and contract management.
+              Through our digital invoice management process, we ensure every transaction is smooth,
+              accurate, and high-quality delivering real value for both parties.
             </p>
           </div>
         </div>

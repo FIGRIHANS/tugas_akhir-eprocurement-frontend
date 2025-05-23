@@ -81,7 +81,8 @@ const vmData = [
   {
     icon: 'subtitle',
     title: 'Vendor Approval',
-    description: 'Vendor Approval',
+    description:
+      'On the Approval page, approvers can approve the data that has been previously verified.',
   },
   {
     icon: 'subtitle',

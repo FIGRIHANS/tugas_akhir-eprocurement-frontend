@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiLoading from '@/components/UiLoading.vue'
 import { useVendorPaymentStore } from '@/stores/vendor/vendor'
 import { watch } from 'vue'
@@ -32,53 +33,43 @@ watch(
       </div>
 
       <div v-else-if="!paymentStore.data.length" class="flex items-center justify-center py-5">
-        <span class="text-gray-700 font-medium"> Oops! Data tidak ditemukan </span>
+        <span class="text-gray-700 font-medium"> Oops! No Data </span>
       </div>
 
       <table class="table align-middle" v-else>
         <tbody>
           <tr>
-            <td class="text-sm text-gray-600 font-medium">Account Number</td>
+            <td class="text-sm text-gray-600 font-medium">Account No.</td>
             <td class="text-sm font-bold text-gray-700">{{ paymentStore.data[0].accountNo }}</td>
           </tr>
           <tr>
-            <td class="text-sm text-gray-600 font-medium">Pemilik Akun</td>
+            <td class="text-sm text-gray-600 font-medium">Account Holder Name</td>
             <td class="text-sm font-bold text-gray-700">{{ paymentStore.data[0].accountName }}</td>
           </tr>
           <tr>
-            <td class="text-sm text-gray-600 font-medium">Surat Pembayaran Perbedaan Rekening</td>
-            <td class="text-sm font-bold text-gray-700">-</td>
+            <td class="text-sm text-gray-600 font-medium"></td>
+            <td class="text-sm font-bold text-gray-500">
+              <input type="checkbox" class="checkbox checkbox-sm" disabled /> Holder's name is
+              different from the company name.
+            </td>
           </tr>
           <tr>
-            <td class="text-sm text-gray-600 font-medium">Halaman Pertama Buku Tabungan</td>
+            <td class="text-sm text-gray-600 font-medium">Bank Account Declaration Letter</td>
             <td class="text-sm font-bold text-gray-700">
               <a
                 :href="`${baseUrl}/${paymentStore.data[0].urlDoc}`"
                 target="_blank"
-                class="underline decoration-dashed text-primary font-medium"
+                class="btn btn-primary btn-outline btn-sm"
               >
-                See Detail
+                <UiIcon name="cloud-download" variant="duotone" />
+                <span>Download Bank Account Declaration Letter</span>
               </a>
             </td>
           </tr>
           <tr>
-            <td class="text-sm text-gray-600 font-medium">Mata Uang</td>
+            <td class="text-sm text-gray-600 font-medium">Currency</td>
             <td class="text-sm font-bold text-gray-700">
               {{ paymentStore.data[0].currencySymbol }}
-            </td>
-          </tr>
-          <tr>
-            <td class="text-sm text-gray-600 font-medium">Nama Bank</td>
-            <td class="text-sm font-bold text-gray-700">{{ paymentStore.data[0].bankName }}</td>
-          </tr>
-          <tr>
-            <td class="text-sm text-gray-600 font-medium">Alamat Bank</td>
-            <td class="text-sm font-bold text-gray-700">{{ paymentStore.data[0].bankAddress }}</td>
-          </tr>
-          <tr>
-            <td class="text-sm text-gray-600 font-medium">Negara</td>
-            <td class="text-sm font-bold text-gray-700">
-              {{ paymentStore.data[0].countryName }}
             </td>
           </tr>
           <tr>
@@ -86,14 +77,14 @@ watch(
             <td class="text-sm font-bold text-gray-700">{{ paymentStore.data[0].bankCode }}</td>
           </tr>
           <tr>
-            <td class="text-sm text-gray-600 font-medium">BI Code</td>
-            <td class="text-sm font-bold text-gray-700">{{ paymentStore.data[0].biCode }}</td>
+            <td class="text-sm text-gray-600 font-medium"></td>
+            <td class="text-sm font-bold text-gray-500">
+              <input type="checkbox" class="checkbox checkbox-sm" disabled /> Bank not Registered
+            </td>
           </tr>
           <tr>
-            <td class="text-sm text-gray-600 font-medium">Swift Code</td>
-            <td class="text-sm font-bold text-gray-700">
-              {{ paymentStore.data[0].bankSwiftCode }}
-            </td>
+            <td class="text-sm text-gray-600 font-medium">Bank Address</td>
+            <td class="text-sm font-bold text-gray-700">{{ paymentStore.data[0].bankAddress }}</td>
           </tr>
         </tbody>
       </table>

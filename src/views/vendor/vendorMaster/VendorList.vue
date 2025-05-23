@@ -4,7 +4,6 @@ import LPagination from '@/components/pagination/LPagination.vue'
 import FilterDropdown from '@/components/vendor/FilterDropdownList.vue'
 import VendorMenu from '@/components/vendor/VendorMenu.vue'
 import StatusToggle from '@/components/vendor/StatusToggle.vue'
-import FilterButton from '@/components/vendor/filterButton/FilterButton.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import { useVendorStore } from '@/stores/vendor/vendor'
@@ -13,6 +12,7 @@ import { debounce } from 'lodash'
 import { useRoute, useRouter } from 'vue-router'
 import { formatDate } from '@/core/utils/format'
 import UiLoading from '@/components/UiLoading.vue'
+import VendorListFilters from '@/components/vendor/filterButton/VendorListFilters.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -69,7 +69,8 @@ watch(
         </div>
       </div>
       <div class="card-body scrollable-x-auto">
-        <FilterButton />
+        <!-- <FilterButton /> -->
+        <VendorListFilters />
         <table class="table align-middle text-gray-700">
           <thead class="border-b-2 border-b-primary">
             <tr>
@@ -80,7 +81,8 @@ watch(
               <th class="text-nowrap">Registration Date</th>
               <th class="text-nowrap">Verification Request Date</th>
               <th class="text-nowrap">Verification Date</th>
-              <th class="text-nowrap">Bussiness License Status</th>
+              <th class="text-nowrap">Business License Status</th>
+              <th class="text-nowrap">E-Procurement Vendor Code</th>
               <th class="text-nowrap">Vendor Code</th>
             </tr>
           </thead>
@@ -114,7 +116,11 @@ watch(
               <td>
                 <div class="flex items-center gap-3">
                   <VendorMenu :id="vendor.vendorId" :name="vendor.vendorName" />
-                  <StatusToggle :id="vendor.vendorId" :status="vendor.isActive" />
+                  <StatusToggle
+                    :id="vendor.vendorId"
+                    :name="vendor.vendorName"
+                    :status="vendor.isActive"
+                  />
                 </div>
               </td>
               <td class="text-nowrap">{{ vendor.vendorName }}</td>
@@ -140,7 +146,7 @@ watch(
               <td>
                 {{
                   vendor.verifiedSendUTCDate
-                    ? formatDate(new Date(vendor.verifiedSendUTCDate as string))
+                    ? formatDate(new Date(vendor.verifiedSendUTCDate as string), 'en-US')
                     : '-'
                 }}
               </td>
@@ -165,6 +171,7 @@ watch(
                   }}
                 </div>
               </td>
+              <td>{{ vendor.vendorCode }}</td>
               <td>{{ vendor.vendorId }}</td>
             </tr>
           </tbody>
@@ -173,10 +180,7 @@ watch(
       <div
         class="card-footer justify-center md:justify-between flex-col md:flex-row gap-3 text-gray-600 text-2sm font-medium"
       >
-        <div>
-          Tampilkan {{ vendor.vendors.pageSize }} data dari total data
-          {{ vendor.vendors.total }}
-        </div>
+        <div>Showing {{ vendor.vendors.pageSize }} of {{ vendor.vendors.total }} entries</div>
         <LPagination
           :total-items="Number(vendor.vendors.total)"
           :current-page="Number(vendor.vendors.page)"

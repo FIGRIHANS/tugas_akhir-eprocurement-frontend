@@ -15,17 +15,31 @@ const startDate = ref<Date | null>(null)
 const endDate = ref<Date | null>(null)
 
 const filters = reactive({
-  status: '',
+  statusId: '',
   categoryId: '',
-  startDate: computed(() => (startDate.value ? formattoMySQL(startDate.value) : '')),
-  endDate: computed(() => (endDate.value ? formattoMySQL(endDate.value) : '')),
+  startDate: computed(() => (startDate.value ? formattoMySQL(startDate.value, false) : '')),
+  endDate: computed(() => (endDate.value ? formattoMySQL(endDate.value, false) : '')),
 })
+
+const statusOptions = computed(() => {
+  return verifStatus.approvalType.map((item) => ({
+    text: item.value,
+    value: item.code,
+  }))
+})
+
+const categoryOptions = computed(() =>
+  categories.categories.map((item) => ({
+    text: item.companyCategoryName,
+    value: item.companyCategoryId,
+  })),
+)
 
 watch(
   () => route.query,
   (query) => {
-    filters.status = (query.status as string) || ''
-    filters.categoryId = (query.CompanyCategoryName as string) || ''
+    filters.statusId = (query.statusId as string) || ''
+    filters.categoryId = (query.categoryId as string) || ''
     startDate.value = query.startDate ? new Date(query.startDate as string) : null
     endDate.value = query.endDate ? new Date(query.endDate as string) : null
   },
@@ -38,20 +52,20 @@ onMounted(() => {
 </script>
 <template>
   <FilterDropdown :filters="filters">
-    <UiSelect label="Status" placeholder="Pilih" v-model="filters.status">
-      <option v-for="item in verifStatus.approvalType" :key="item.code" :value="item.code">
-        {{ item.value }}
-      </option>
-    </UiSelect>
-    <UiSelect label="Categori" placeholder="Pilih" v-model="filters.categoryId">
-      <option
-        v-for="category in categories.categories"
-        :key="category.companyCategoryId"
-        :value="category.companyCategoryId"
-      >
-        {{ category.companyCategoryName }}
-      </option>
-    </UiSelect>
+    <UiSelect
+      label="Status"
+      placeholder="Pilih"
+      v-model="filters.statusId"
+      :options="statusOptions"
+    />
+
+    <UiSelect
+      label="Category"
+      placeholder="Pilih"
+      v-model="filters.categoryId"
+      :options="categoryOptions"
+    />
+
     <div class="min-w-[0px] w-full">
       <VueDatePicker v-model="startDate" class="w-full">
         <template #dp-input="{ value }">
@@ -61,7 +75,7 @@ onMounted(() => {
                 'absolute top-0 left-0 -mt-2 ml-2 bg-white px-1 text-gray-500 text-[11px] font-normal',
               ]"
             >
-              Tanggal Pendaftaran Awal
+              Registration Start Date
             </div>
             <input :placeholder="'Select'" :value="value" readonly class="min-w-[0px]" />
             <button class="btn btn-icon" type="button">
@@ -81,7 +95,7 @@ onMounted(() => {
                 'absolute top-0 left-0 -mt-2 ml-2 bg-white px-1 text-gray-500 text-[11px] font-normal',
               ]"
             >
-              Tanggal Pendaftaran Akhir
+              Registration End Date
             </div>
             <input :placeholder="'Select'" :value="value" readonly class="min-w-[0px]" />
             <button class="btn btn-icon" type="button">
