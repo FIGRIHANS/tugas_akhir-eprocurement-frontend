@@ -38,6 +38,16 @@
         @extend .invoice__field-base;
         min-width: 80px;
       }
+
+      &--activity {
+        @extend .invoice__field-base;
+        min-width: 200px;
+      }
+
+      &--item-amount {
+        @extend .invoice__field-base;
+        min-width: 200px;
+      }
     }
   }
 

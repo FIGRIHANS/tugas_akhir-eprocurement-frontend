@@ -19,8 +19,8 @@ export type DpTypes = {
 }
 
 export type DocumentTypes = {
-  id: string
-  text: string
+  code: string
+  name: string
 }
 
 export type VendorTypes = {
@@ -40,4 +40,14 @@ export type PaymentTypes = {
   bankName: string
   beneficiaryName: string
   accountNumber: string
+}
+
+export type ActivityTypes = {
+  code: string
+  name: string
+}
+
+export type TaxCodeTypes = {
+  code: string
+  name: string
 }
