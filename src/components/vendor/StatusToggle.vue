@@ -6,7 +6,9 @@ import UiIcon from '../ui/atoms/icon/UiIcon.vue'
 import successImg from '@/assets/success.svg'
 import { useVendorStore } from '@/stores/vendor/vendor'
 import axios from 'axios'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 // store
 const vendorStore = useVendorStore()
 
@@ -53,6 +55,10 @@ const handleCancel = () => {
 const handleChange = () => {
   modalDeactive.value = true
   isChecked.value = !isChecked.value
+}
+
+const handleSuccess = () => {
+  router.replace({ name: 'vendor-list' })
 }
 
 onMounted(() => {
@@ -119,7 +125,7 @@ onMounted(() => {
   </UiModal>
 
   <!-- success modal -->
-  <UiModal v-if="modalSuccess" v-model="modalSuccess" size="sm">
+  <UiModal v-if="modalSuccess" v-model="modalSuccess" size="sm" @update:model-value="handleSuccess">
     <img :src="successImg" alt="success" class="mx-auto mb-3" />
     <h3 class="font-medium text-lg text-gray-800 text-center">Vendor Successfully Deactivated</h3>
     <p class="text-gray-600 text-center mb-3">Vendor has been successfully Deactivated!.</p>
