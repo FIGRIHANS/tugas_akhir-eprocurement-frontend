@@ -7,11 +7,7 @@ import { RouterView, useRoute, useRouter } from 'vue-router'
 const route = useRoute()
 const router = useRouter()
 
-const tabs = [
-  { label: 'Information', value: 'information' },
-  { label: 'Dashboard', value: 'dashboard' },
-  { label: 'Vendor List', value: 'vendor-list' },
-]
+const tabs = [{ label: 'Vendor List', value: 'vendor-list' }]
 
 const currentTab = ref('information')
 

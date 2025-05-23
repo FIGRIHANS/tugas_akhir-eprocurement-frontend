@@ -69,6 +69,11 @@ export const useVendorStore = defineStore('vendor', () => {
     return response.data
   }
 
+  const deactiveVendor = async (payload: { vendorId: number; reason: string }) => {
+    const response: ApiResponse = await vendorAPI.post('/public/verifiedvendor/inactive', payload)
+    return response.data
+  }
+
   return {
     vendors,
     loading,
@@ -79,6 +84,7 @@ export const useVendorStore = defineStore('vendor', () => {
     getVendors,
     blacklistVendor,
     verifyLegal,
+    deactiveVendor,
   }
 })
 

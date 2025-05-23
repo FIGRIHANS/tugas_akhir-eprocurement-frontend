@@ -1,5 +1,6 @@
 export interface IVendorList {
   id: number
+  vendorCode: string
   vendorId: number
   userId: number
   vendorName: string
@@ -44,6 +45,7 @@ export interface IAdministration {
   vendorName: string
   companyCategoryId: number
   companyCategoryName: string
+  countryName: string
   groupCompany: string
   npwp: string
   npwpUrl: string

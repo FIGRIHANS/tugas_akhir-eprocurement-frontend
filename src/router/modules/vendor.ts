@@ -3,7 +3,7 @@ export default [
     path: '/vendor-master',
     name: 'vendor-master',
     component: () => import('@/views/vendor/vendorMaster/VendorMaster.vue'),
-    redirect: { name: 'information' },
+    redirect: { name: 'vendor-list' },
     children: [
       {
         path: 'information',
