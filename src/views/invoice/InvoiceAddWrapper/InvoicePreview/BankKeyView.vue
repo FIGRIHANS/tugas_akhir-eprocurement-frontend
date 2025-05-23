@@ -4,7 +4,7 @@
     <div v-if="!form.isNotRegisteredBank" class="flex flex-col gap-[20px]">
       <div>
         <p class="text-xs font-normal text-gray-700">Bank Key</p>
-        <p class="text-sm font-medium">{{ form.bankKeyId || '-' }}</p>
+        <p class="text-sm font-medium">{{ getBankKey() || '-' }}</p>
       </div>
       <div>
         <p class="text-xs font-normal text-gray-700">Bank Name</p>
@@ -23,8 +23,21 @@
 </template>
 
 <script lang="ts" setup>
-import { inject } from 'vue'
+import { computed, inject } from 'vue'
 import type { formTypes } from '../../types/invoiceAddWrapper'
+import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 
+const invoiceMasterApi = useInvoiceMasterDataStore()
 const form = inject<formTypes>('form')
+
+const vendorList = computed(() => invoiceMasterApi.vendorList)
+
+const getBankKey = () => {
+  const getIndex = vendorList.value.findIndex((item) => item.vendorId === Number(form?.vendorId))
+  if (getIndex !== -1) {
+    const bankList = vendorList.value[getIndex].payment
+    const getIndexBank = bankList.findIndex((item) => item.bankId === Number(form?.bankKeyId))
+    if (getIndexBank !== -1) return bankList[getIndexBank].bankKey
+  }
+}
 </script>

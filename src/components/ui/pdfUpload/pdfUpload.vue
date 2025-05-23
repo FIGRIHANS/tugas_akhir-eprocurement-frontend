@@ -16,7 +16,7 @@
 <script lang="ts" setup>
 import { ref, defineExpose } from 'vue'
 import IconUpload from './PdfUpload/IconUpload.vue'
-import moment from 'moment'
+import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
 
 defineProps<{
   error?: boolean
@@ -26,12 +26,13 @@ defineProps<{
 const emits = defineEmits(['setFile'])
 
 const fileInput = ref<HTMLInputElement | null>(null)
+const vendorMasterDataStore = useVendorMasterDataStore()
 
 const triggerFileInput = () => {
   fileInput.value?.click()
 }
 
-const handleFileUpload = (event: Event) => {
+const handleFileUpload = async (event: Event) => {
   const target = event.target as HTMLInputElement
   if (!target.files || target.files.length === 0) return
 
@@ -39,10 +40,23 @@ const handleFileUpload = (event: Event) => {
 
   if (file.size > 2 * 1024 * 1024) return
 
-  emits('setFile', new File([file], file.name, {
-    type: file.type,
-    lastModified: moment().valueOf()
-  }))
+  try {
+    const response = await vendorMasterDataStore.uploadFile({
+      FormFile: file,
+      Actioner: 'anonym',
+      FolderName: 'invoice',
+      FileName: file.name,
+    })
+
+    emits('setFile', {
+      name: response.name,
+      url: response.url,
+      urlWithToken: response.urlWithToken,
+      fileSize: file.size
+    })
+  } catch {
+
+  }
 }
 
 defineExpose({
