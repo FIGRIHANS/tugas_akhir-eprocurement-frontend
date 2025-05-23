@@ -4,6 +4,11 @@ import UiModal from '../modal/UiModal.vue'
 import UiButton from '../ui/atoms/button/UiButton.vue'
 import UiIcon from '../ui/atoms/icon/UiIcon.vue'
 import successImg from '@/assets/success.svg'
+import { useVendorStore } from '@/stores/vendor/vendor'
+import axios from 'axios'
+
+// store
+const vendorStore = useVendorStore()
 
 const props = defineProps<{ id: string | number; status: boolean; name: string }>()
 const modalDeactive = ref(false)
@@ -14,14 +19,30 @@ const reason = ref<string>('')
 const isChecked = ref<boolean>(props.status)
 const inputError = ref<string[]>([])
 const loading = ref<boolean>(false)
+const error = ref<string>('')
 
 const handleSubmit = async () => {
   if (!reason.value) {
     inputError.value.push('reason')
     return
   }
-  modalDeactive.value = false
-  modalSuccess.value = true
+
+  loading.value = true
+  error.value = ''
+  try {
+    await vendorStore.deactiveVendor({ vendorId: Number(props.id), reason: reason.value })
+    isChecked.value = false
+    modalDeactive.value = false
+    modalSuccess.value = true
+  } catch (err) {
+    if (err instanceof Error) {
+      if (axios.isAxiosError(err)) {
+        error.value = err.response?.data.result.message || 'Failed to deactive vendor'
+      }
+    }
+  } finally {
+    loading.value = false
+  }
 }
 
 const handleCancel = () => {
@@ -58,7 +79,7 @@ onMounted(() => {
     :title="`Deactive Vendor ${name}`"
     size="sm"
   >
-    <form @submit.prevent="handleSubmit" class="space-y-4">
+    <form action="" @submit.prevent="handleSubmit" class="space-y-4">
       <div class="relative">
         <label
           for="reason"
@@ -77,6 +98,9 @@ onMounted(() => {
         <span v-if="inputError.includes('reason')" class="text-danger text-sm font-medium">
           Reason is Required
         </span>
+      </div>
+      <div class="card bg-danger-clarity shadow-none" v-if="error">
+        <div class="card-body p-3 text-danger">{{ error }}</div>
       </div>
       <div class="flex gap-3">
         <UiButton class="flex-1 justify-center" :outline="true" type="button" @click="handleCancel">
