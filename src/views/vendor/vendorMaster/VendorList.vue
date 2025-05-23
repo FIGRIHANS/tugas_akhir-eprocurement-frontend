@@ -81,7 +81,7 @@ watch(
               <th class="text-nowrap">Registration Date</th>
               <th class="text-nowrap">Verification Request Date</th>
               <th class="text-nowrap">Verification Date</th>
-              <th class="text-nowrap">Bussiness License Status</th>
+              <th class="text-nowrap">Business License Status</th>
               <th class="text-nowrap">E-Procurement Vendor Code</th>
               <th class="text-nowrap">Vendor Code</th>
             </tr>
@@ -171,7 +171,7 @@ watch(
                   }}
                 </div>
               </td>
-              <td>-</td>
+              <td>{{ vendor.vendorCode }}</td>
               <td>{{ vendor.vendorId }}</td>
             </tr>
           </tbody>
