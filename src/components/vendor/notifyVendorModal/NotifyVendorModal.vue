@@ -20,6 +20,9 @@
           >Remarks is Required</span
         >
       </div>
+      <div class="text-danger text-sm italic">
+        * Clicking "Notify Vendor" will automatically send an email to the vendor with your remarks.
+      </div>
       <div class="flex gap-3">
         <UiButton
           class="flex-1 justify-center"
