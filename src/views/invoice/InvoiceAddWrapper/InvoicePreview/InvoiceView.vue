@@ -6,7 +6,7 @@
         <p class="text-xs font-normal text-gray-700">Invoice Type</p>
         <p class="text-sm font-medium">{{ getInvoiceTypeName() || '-' }}</p>
       </div>
-      <div v-if="checkPo() && !checkPoPib()" class="w-[calc(50%-10px)]">
+      <div class="w-[calc(50%-10px)]">
         <p class="text-xs font-normal text-gray-700">DP Option</p>
         <p class="text-sm font-medium">{{ getDpName() || '-' }}</p>
       </div>
@@ -62,15 +62,16 @@ const dpTypeList = computed(() => invoiceMasterApi.dpType)
 const listInvoiceTypePo = computed(() => invoiceMasterApi.invoicePoType)
 const companyCodeList = computed(() => invoiceMasterApi.companyCode)
 
-const checkPo = () => {
-  return typeForm.value === 'po'
-}
+// const checkPo = () => {
+//   return typeForm.value === 'po'
+// }
 
-const checkPoPib = () => {
-  return form?.invoiceType === '2'
-}
+// const checkPoPib = () => {
+//   return form?.invoiceType === '2'
+// }
 
 const getDpName = () => {
+  if (route.query.type === 'po-view') return 'Without DP'
   const getIndex = dpTypeList.value.findIndex((item) => item.code === form?.invoiceDp)
   if (getIndex !== -1) return dpTypeList.value[getIndex].name
 }

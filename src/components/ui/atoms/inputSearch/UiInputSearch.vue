@@ -2,7 +2,7 @@
   <div>
     <div class="input">
       <i class="ki-outline ki-magnifier"></i>
-      <input v-model="search" :placeholder="placeholder"/>
+      <input v-model="search" :placeholder="placeholder" @keypress="(event) => emits('keypress', event)"/>
     </div>
   </div>
 </template>
@@ -15,7 +15,7 @@ const props = defineProps<{
   placeholder?: string
 }>()
 
-const emits = defineEmits(['update:modelValue'])
+const emits = defineEmits(['update:modelValue', 'keypress'])
 
 const search = ref<string>('')
 

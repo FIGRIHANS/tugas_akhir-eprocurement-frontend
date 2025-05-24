@@ -27,6 +27,7 @@ export interface listNonPoTypes {
 
 export interface filterListTypes {
   status: string
-  category: string
   date: string
+  companyCode: string
+  invoiceType: string
 }

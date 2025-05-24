@@ -8,7 +8,9 @@ import type {
   DocumentTypes,
   TaxCalculationTypes,
   ParamsSubmissionTypes,
-  PoGrItemTypes
+  PoGrItemTypes,
+  ListPoTypes,
+  QueryParamsListPoTypes
 } from './types/submission'
 
 export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => {
@@ -16,6 +18,8 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
   const documentTypeList = ref<DocumentTypes[]>([])
   const taxCalculationList = ref<TaxCalculationTypes[]>([])
   const poGrList = ref<PoGrItemTypes[]>([])
+  const listPo = ref<ListPoTypes[]>([])
+  const detailPo = ref<ParamsSubmissionTypes>()
 
   const getSubmissionStatus = async () => {
     const response: ApiResponse<SubmissionStatusTypes[]> = await invoiceApi.get(`/lookup/invoice/submission/status`)
@@ -49,6 +53,31 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
     return response.data.result
   }
 
+  const getListPo = async (data: QueryParamsListPoTypes) => {
+    console.log(data)
+    const query = {
+      statusCode: Number(data.statusCode) || null,
+      companyCode: data.companyCode || null,
+      invoiceTypeCode: Number(data.invoiceTypeCode) || null,
+      invoiceDate: data.invoiceDate || null,
+      searchText: data.searchText || null
+    }
+    console.log(query)
+    const response: ApiResponse<ListPoTypes[]> = await invoiceApi.get(`/invoice/submission`, { params: query })
+  
+    listPo.value = response.data.result.content
+  
+    return response.data.result
+  }
+
+  const getPoDetail = async (uid: string) => {
+    const response: ApiResponse<ParamsSubmissionTypes> = await invoiceApi.get(`/invoice/submission/${uid}`)
+  
+    detailPo.value = response.data.result.content
+  
+    return response.data.result
+  }
+
   const postSubmission = async (data: ParamsSubmissionTypes) => {
     const response: ApiResponse<void> = await invoiceApi.post(`/invoice/submission`, data)
 
@@ -60,10 +89,14 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
     documentTypeList,
     taxCalculationList,
     poGrList,
+    listPo,
+    detailPo,
     getSubmissionStatus,
     getDocumentType,
     getTaxCalculation,
     getPoGr,
-    postSubmission
+    postSubmission,
+    getListPo,
+    getPoDetail
   }
 })
