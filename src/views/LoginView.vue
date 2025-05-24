@@ -96,7 +96,7 @@ const goLogin = () => {
     .then((response: ApiResponseData<string>) => {
       if (response.statusCode === 200) {
         setToken(response.result)
-        login.callUser(email.value)
+        // login.callUser(email.value)
         router.push({
           path: '/dashboard'
         })
