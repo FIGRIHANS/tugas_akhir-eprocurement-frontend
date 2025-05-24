@@ -60,8 +60,7 @@ const columns = ref([
   'Assignment',
   'WHT Type',
   'WHT Code',
-  'WHT Base Amount',
-  'Amount'
+  'WHT Base Amount'
 ])
 
 const getActivityName = (code: string) => {

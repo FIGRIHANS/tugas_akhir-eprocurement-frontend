@@ -36,12 +36,14 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, defineAsyncComponent, type Component } from 'vue'
+import { ref, computed, onMounted, defineAsyncComponent, type Component } from 'vue'
 import { useRouter } from 'vue-router'
+import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 
 const PoList = defineAsyncComponent(() => import('./invoiceList/PoList.vue'))
 const NonPoList = defineAsyncComponent(() => import('./invoiceList/NonPoList.vue'))
 
+const invoiceMasterApi = useInvoiceMasterDataStore()
 const router = useRouter()
 const tabNow = ref<string>('po')
 
@@ -66,6 +68,11 @@ const goAdd = (isPo: boolean) => {
     }
   })
 }
+
+onMounted(() => {
+  invoiceMasterApi.getInvoicePoType()
+  invoiceMasterApi.getCompanyCode()
+})
 </script>
 
 <style lang="scss" scoped>

@@ -124,3 +124,30 @@ export interface PoGrItemTypes {
   purchasingOrg: string
   department: string
 }
+
+export interface ListPoTypes {
+  invoiceUId: string
+  invoiceTypeCode: number
+  invoiceTypeName: string
+  invoiceDPCode: number
+  invoiceDPName: string
+  companyCode: string
+  companyName: string
+  invoiceNo: string
+  invoiceDate: string
+  statusCode: string
+  statusName: string
+  poNo: string
+  grDocumentNo: string
+  estimatePaymentDate: string
+  totalGrossAmount: number
+  totalNetAmount: number
+}
+
+export interface QueryParamsListPoTypes {
+  statusCode?: number | null
+  companyCode?: string | null
+  invoiceTypeCode?: number | null
+  invoiceDate?: string | null
+  searchText?: string | null
+}

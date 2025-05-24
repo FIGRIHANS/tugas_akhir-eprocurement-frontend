@@ -10,8 +10,8 @@
       >
         <div class="flex-1">{{ item.name }}</div>
         <div class="flex-1 flex items-center justify-center">
-          <span class="flex-1">{{ item.amount }}</span>
-          <span>{{ item.currency }}</span>
+          <div class="flex-1">{{ useFormatIdr(item.amount) }}</div>
+          <div>{{ item.currency }}</div>
         </div>
       </div>
     </div>
@@ -24,6 +24,7 @@ import { useRoute } from 'vue-router'
 import type { listType } from '../../types/invoiceCalculation'
 import type { formTypes } from '../..//types/invoiceAddWrapper'
 import { defaultField, dpField } from '@/static/invoiceCalculation'
+import { useFormatIdr } from '@/composables/currency'
 
 const route = useRoute()
 const form = inject<formTypes>('form')
@@ -31,14 +32,28 @@ const typeForm = ref<string>('')
 const listName = ref<string[]>([])
 const listCalculation = ref<listType[]>([])
 
+const setCount = (name: string) => {
+  const list = {
+    'subtotal': form?.subtotal,
+    'vat amount': form?.vatAmount,
+    'wht amount': form?.whtAmount,
+    'additional cost': form?.additionalCostCalc,
+    'total gross amount': form?.totalGrossAmount,
+    'total net amount': form?.totalNetAmount
+  } as { [key: string]: number }
+
+  return list[name.toLowerCase()]
+}
+
 const setCalculation = () => {
   listCalculation.value = []
   for (const item of listName.value) {
-    if ((typeForm.value === 'nonpo' && item !== 'Additional Cost') || typeForm.value === 'po') {
+    if ((typeForm.value === 'nonpo' && item !== 'Additional Cost') || typeForm.value === 'po' || typeForm.value === 'po-view') {
+      const amount = setCount(item)
       const data = {
         name: item,
-        amount: '0',
-        currency: 'USD'
+        amount: amount.toString(),
+        currency: form?.currency || ''
       }
       listCalculation.value.push(data)
     }
@@ -46,9 +61,9 @@ const setCalculation = () => {
 }
 
 watch(
-  () => [form?.invoiceDp, form?.withDp],
+  () => [form?.invoiceDp],
   () => {
-    if (form?.invoiceDp || form?.withDp) {
+    if (form?.invoiceDp !== 'NON') {
       listName.value = [...dpField]
     } else {
       listName.value = [...defaultField]

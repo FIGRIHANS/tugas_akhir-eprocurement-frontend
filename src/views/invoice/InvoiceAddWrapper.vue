@@ -16,37 +16,39 @@
       <Transition mode="out-in">
         <component :is="contentComponent" />
       </Transition>
-      <div v-if="form.status === 0" class="flex justify-between items-center gap-[8px] mt-[24px]">
-        <button class="btn btn-outline btn-primary" :disabled="isSubmit">
-          Save as Draft
-          <i class="ki-duotone ki-bookmark"></i>
-        </button>
-        <div class="flex items-center justify-end gap-[8px]">
-          <button v-if="tabNow !== 'data'" class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goBack">
+      <template v-if="!checkInvoiceView()">
+        <div v-if="form.status === 0" class="flex justify-between items-center gap-[8px] mt-[24px]">
+          <button class="btn btn-outline btn-primary" :disabled="isSubmit">
+            Save as Draft
+            <i class="ki-duotone ki-bookmark"></i>
+          </button>
+          <div class="flex items-center justify-end gap-[8px]">
+            <button v-if="tabNow !== 'data'" class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goBack">
+              <i class="ki-filled ki-arrow-left"></i>
+              Back
+            </button>
+            <button class="btn btn-primary" :disabled="isSubmit" @click="goNext">
+              {{ tabNow !== 'preview' ? 'Lanjut' : 'Submit' }}
+              <i v-if="tabNow !== 'preview'" class="ki-duotone ki-black-right"></i>
+              <i v-else class="ki-duotone ki-paper-plane"></i>
+            </button>
+          </div>
+        </div>
+        <div v-else class="flex justify-end items-center mt-[24px]">
+          <button v-if="tabNow !== 'preview'" class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goBack">
             <i class="ki-filled ki-arrow-left"></i>
             Back
           </button>
-          <button class="btn btn-primary" :disabled="isSubmit" @click="goNext">
-            {{ tabNow !== 'preview' ? 'Lanjut' : 'Submit' }}
-            <i v-if="tabNow !== 'preview'" class="ki-duotone ki-black-right"></i>
-            <i v-else class="ki-duotone ki-paper-plane"></i>
+          <button v-if="tabNow !== 'preview'" class="btn btn-primary" :disabled="isSubmit" @click="goNext">
+            Next
+            <i class="ki-duotone ki-black-right"></i>
+          </button>
+          <button v-if="tabNow === 'preview'" class="btn btn-primary" :disabled="isSubmit">
+            Save as PDF
+            <iconPDF />
           </button>
         </div>
-      </div>
-      <div v-else class="flex justify-end items-center mt-[24px]">
-        <button v-if="tabNow !== 'preview'" class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goBack">
-          <i class="ki-filled ki-arrow-left"></i>
-          Back
-        </button>
-        <button v-if="tabNow !== 'preview'" class="btn btn-primary" :disabled="isSubmit" @click="goNext">
-          Next
-          <i class="ki-duotone ki-black-right"></i>
-        </button>
-        <button v-if="tabNow === 'preview'" class="btn btn-primary" :disabled="isSubmit">
-          Save as PDF
-          <iconPDF />
-        </button>
-      </div>
+      </template>
     </div>
     <ModalSuccess />
   </div>
@@ -147,6 +149,10 @@ const contentComponent = computed(() => {
 
 const listDocumentType = computed(() => invoiceMasterApi.documentType)
 const vendorList = computed(() => invoiceMasterApi.vendorList)
+
+const checkInvoiceView = () => {
+  return route.query.type === 'po-view'
+}
 
 const checkInvoiceData = () => {
   form.vendorIdError = useCheckEmpty(form.vendorId).isError
@@ -389,6 +395,10 @@ onMounted(() => {
   invoiceMasterApi.getVendorList()
   if (loginApi.isVendor) {
     form.invoiceType = '1'
+  }
+
+  if (route.query.type === 'po-view') {
+    tabNow.value = 'preview'
   }
 })
 

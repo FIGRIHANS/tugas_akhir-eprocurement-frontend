@@ -16,6 +16,10 @@ export interface itemsPoGrType {
   enteredOn: string
   purchasingOrg: string
   department: string
+  whtType?: string
+  whtCode?: string
+  whtBaseAmount?: number
+  whtAmount?: number
   isEdit?: boolean
 }
 
