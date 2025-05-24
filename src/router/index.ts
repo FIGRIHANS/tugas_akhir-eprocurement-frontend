@@ -7,7 +7,6 @@ import LayoutBase from '@/layout/LayoutBase.vue'
 import LayoutWithSidebar from '@/layout/LayoutWithSidebar.vue'
 
 /** Route Modules */
-import dashboard from './modules/dashboard'
 import vendor from './modules/vendor'
 import registration from './modules/registration'
 import invoice from './modules/invoice'
@@ -30,7 +29,7 @@ const router = createRouter({
     {
       path: '/',
       component: LayoutWithSidebar,
-      children: [...dashboard, ...vendor, ...invoice],
+      children: [...vendor, ...invoice],
       meta: {
         middleware: 'auth',
       }
