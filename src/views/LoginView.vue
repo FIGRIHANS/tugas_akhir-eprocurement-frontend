@@ -98,7 +98,7 @@ const goLogin = () => {
         setToken(response.result)
         // login.callUser(email.value)
         router.push({
-          path: '/dashboard'
+          name: 'dashboard'
         })
       }
     })
