@@ -42,12 +42,12 @@ const handleReset = () => {
               @click="handleReset"
               data-dropdown-dismiss="true"
             >
-              <UiIcon variant="filled" name="arrows-circle" />
+              <UiIcon variant="duotone" name="arrows-circle" />
               Reset
             </UiButton>
             <UiButton class="flex-1" data-dropdown-dismiss="true">
-              <UiIcon variant="filled" name="check-circle" />
-              Terapkan
+              <UiIcon variant="outline" name="check-circle" />
+              Apply
             </UiButton>
           </div>
         </div>
