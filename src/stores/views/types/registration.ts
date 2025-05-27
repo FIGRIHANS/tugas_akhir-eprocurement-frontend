@@ -76,6 +76,11 @@ type DocumentFieldType = {
   uploadUrl: string
 }
 
+export type ListDocumentType = {
+  file: File
+  status: 'notUpload' | 'loading' | 'success'
+}
+
 export type DocumentAndLegalType = {
   kategori: number
   fields: (DocumentFieldType & {

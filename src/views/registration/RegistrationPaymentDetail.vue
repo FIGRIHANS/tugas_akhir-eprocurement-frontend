@@ -170,7 +170,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted } from 'vue'
 
 import { useRegistrationVendorStore } from '@/stores/views/registration'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
@@ -192,7 +192,7 @@ const termCondition = computed(() => vendorMasterDataStore.termCondition)
 const bankList = computed(() =>
   vendorMasterDataStore.bankList.map((item) => ({
     ...item,
-    textLabel: `${item.bankCode} - ${item.bankName}`,
+    textLabel: `${item.bankKey} - ${item.bankNameAccount}`,
   })),
 )
 const currencyList = computed(() =>

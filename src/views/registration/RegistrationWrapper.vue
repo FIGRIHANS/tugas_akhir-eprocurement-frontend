@@ -40,7 +40,9 @@
 import { useRoute, useRouter } from 'vue-router'
 import { useNavbarUtilsStore } from '@/stores/navbar'
 import { computed, onBeforeMount, onMounted, onUnmounted, reactive } from 'vue'
+
 import { useCheckEmpty } from '@/composables/validation'
+import { formatDatePayload } from '@/composables/date-format'
 
 import { useRegistrationVendorStore } from '@/stores/views/registration'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
@@ -276,6 +278,7 @@ const next = () => {
           vendorEmail: contact.value.account.email,
           vendorPhone: contact.value.account.phone,
           vendorWebsite: contact.value.account.website,
+          foundedDate: formatDatePayload(information.value.vendor.foundedDate),
         },
         companyLocation: {
           ...removeErrorFields(information.value.companyLocation),
@@ -291,13 +294,13 @@ const next = () => {
         vendorResponsibleContacts: contact.value.contactPerson.list,
         vendorLicenses: removeErrorFields(documentAndLegal.value.fields).map((item) => ({
           ...item,
-          issuedDate: item.issuedDate === '' ? null : item.issuedDate,
-          expiredDate: item.expiredDate === '' ? null : item.expiredDate,
+          issuedDate: item.issuedDate === '' ? null : formatDatePayload(item.issuedDate),
+          expiredDate: item.expiredDate === '' ? null : formatDatePayload(item.expiredDate),
         })),
         otherDocuments: removeErrorFields(documentAndLegal.value.anotherDocuments).map((item) => ({
           ...item,
-          issuedDate: item.issuedDate === '' ? null : item.issuedDate,
-          expiredDate: item.expiredDate === '' ? null : item.expiredDate,
+          issuedDate: item.issuedDate === '' ? null : formatDatePayload(item.issuedDate),
+          expiredDate: item.expiredDate === '' ? null : formatDatePayload(item.expiredDate),
         })),
         bankDetailDto: {
           bankKey: isBankNotRegistered.value ? paymentDetail.value.bankKey : '',

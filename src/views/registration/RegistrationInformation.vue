@@ -29,7 +29,6 @@
         format="dd MM yyyy"
         required
         :error="information.vendor.foundedDateError"
-        @update:modelValue="changeFormatDate"
       />
     </UiFormGroup>
 
@@ -236,7 +235,6 @@
 
 <script lang="ts" setup>
 import { computed, onMounted, ref, watch } from 'vue'
-import moment from 'moment'
 
 import { useRegistrationVendorStore } from '@/stores/views/registration'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
@@ -271,12 +269,6 @@ const cityListCompany = ref<CityListType>([])
 
 const provinceListVendor = ref<ProvinceListType>([])
 const cityListVendor = ref<CityListType>([])
-
-const changeFormatDate = () => {
-  registrationVendorStore.information.vendor.foundedDate = moment(
-    information.value.vendor.foundedDate,
-  ).format('YYYY-MM-DD')
-}
 
 const checkSameAsHq = () => {
   if (!isSameAsHq.value) {
@@ -404,8 +396,31 @@ watch(
   { deep: true },
 )
 
-onMounted(() => {
+onMounted(async () => {
   vendorMasterDataStore.getVendorCountries()
   vendorMasterDataStore.getVendorBusinessFields()
+
+  const { countryId: vedorCountryId, stateId: vendorStateId } = information.value.vendorLocation
+  const { countryId: companyCountryId, stateId: companyStateId } = information.value.companyLocation
+
+  if (vedorCountryId) {
+    const response = await vendorMasterDataStore.getVendorProvince(vedorCountryId)
+    provinceListVendor.value = response.content
+  }
+
+  if (vendorStateId) {
+    const response = await vendorMasterDataStore.getVendorCities(vendorStateId)
+    cityListVendor.value = response.content
+  }
+
+  if (companyCountryId) {
+    const response = await vendorMasterDataStore.getVendorProvince(companyCountryId)
+    provinceListCompany.value = response.content
+  }
+
+  if (companyStateId) {
+    const response = await vendorMasterDataStore.getVendorCities(companyStateId)
+    cityListCompany.value = response.content
+  }
 })
 </script>

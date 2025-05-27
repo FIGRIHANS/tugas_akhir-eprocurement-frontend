@@ -32,15 +32,12 @@ export type PositionListType = {
 export type BankListType = {
   id: number
   bankCountryCode: string
-  bankCode: string
-  bankName: string
-  bankSwiftCode: string
-  partnerBankType: string
-  bankAddress: string
-  bankCity: string
-  branch: string
-  logIntegration: string
-  biCode: string
+  bankKey: string
+  bankNameAccount: string
+  street: string
+  swiftCode: string
+  addressNumber: number
+  bankBranch: string | null
 }[]
 
 export type BusinessType = {

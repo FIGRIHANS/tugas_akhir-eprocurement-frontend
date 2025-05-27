@@ -2,6 +2,7 @@ import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import type {
   DocumentAndLegalType,
+  ListDocumentType,
   PaymentDetailFlaggingType,
   PaymentDetailType,
   RegisContactType,
@@ -73,6 +74,9 @@ export const useRegistrationVendorStore = defineStore('registrationVendor', () =
     anotherDocuments: [],
   })
 
+  const fileList = ref<ListDocumentType[]>([])
+  const fileOtherDocumentList = ref<ListDocumentType[]>([])
+
   const paymentDetail = ref<PaymentDetailType>({
     accountNo: '',
     accountName: '',
@@ -99,6 +103,8 @@ export const useRegistrationVendorStore = defineStore('registrationVendor', () =
     contact,
     requiredDocumentFields,
     documentAndLegal,
+    fileList,
+    fileOtherDocumentList,
     paymentDetail,
     paymentDetailFlagging,
   }

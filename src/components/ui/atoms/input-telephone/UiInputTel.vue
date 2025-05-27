@@ -47,28 +47,6 @@
           </div>
         </div>
       </div>
-      <!-- <select
-        v-model="countryPhonePrefix"
-        class="select rounded-r-none w-1/3"
-        :class="{ 'border-danger': error }"
-        :readonly="readonly"
-        :disabled="disabled"
-      >
-        <option hidden :value="countryPhonePrefix">
-          {{ countryPhonePrefix ? `+${countryPhonePrefix}` : 'code' }}
-        </option>
-        <option
-          v-for="option in countryList"
-          :key="option.countryID"
-          :value="option.countryPhonePrefix"
-        >
-          {{
-            countryPhonePrefix === option.countryPhonePrefix
-              ? `+${countryPhonePrefix}`
-              : `${option.countryName} (+${option.countryPhonePrefix})`
-          }}
-        </option>
-      </select> -->
       <input
         v-model="noTel"
         class="input border-l-0 rounded-l-none"
@@ -110,23 +88,29 @@ const selectPhonePrefix = (phonePrefix: string) => {
   dropdownOpen.value = false
 }
 
+watch(
+  () => model.value,
+  (newModel) => {
+    if (newModel) {
+      const splitNoTel = newModel?.split(' ')
+      const splitPhonePrefix = splitNoTel?.[0]?.split('+')
+
+      countryPhonePrefix.value = splitPhonePrefix[1]
+      noTel.value = splitNoTel[1]
+    } else {
+      noTel.value = ''
+    }
+  },
+  {
+    immediate: true,
+  },
+)
+
 watch([countryPhonePrefix, noTel], () => {
   if (noTel.value) {
     model.value = `+${countryPhonePrefix.value} ${noTel.value}`
   } else {
     model.value = ''
-  }
-})
-
-watch(model, (newModel) => {
-  if (newModel) {
-    const splitNoTel = newModel?.split(' ')
-    const splitPhonePrefix = splitNoTel?.[0]?.split('+')
-
-    countryPhonePrefix.value = splitPhonePrefix[1]
-    noTel.value = splitNoTel[1]
-  } else {
-    noTel.value = ''
   }
 })
 
