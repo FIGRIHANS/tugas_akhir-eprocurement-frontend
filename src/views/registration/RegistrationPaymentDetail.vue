@@ -70,7 +70,7 @@
               placeholder="Pilih"
               row
               :options="bankList"
-              valueKey="id"
+              valueKey="bankKey"
               textKey="textLabel"
               :required="!paymentDetailFlagging.bankNotRegistered"
               :disabled="paymentDetailFlagging.bankNotRegistered"
@@ -174,6 +174,7 @@ import { computed, onMounted } from 'vue'
 
 import { useRegistrationVendorStore } from '@/stores/views/registration'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
+import { useUploadStore } from '@/stores/general/upload'
 
 import UiCheckbox from '@/components/ui/atoms/checkbox/UiCheckbox.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
@@ -184,6 +185,7 @@ import UiCaptcha from '@/components/ui/atoms/captcha/UiCaptcha.vue'
 
 const registrationVendorStore = useRegistrationVendorStore()
 const vendorMasterDataStore = useVendorMasterDataStore()
+const uploadStore = useUploadStore()
 
 const paymentDetail = computed(() => registrationVendorStore.paymentDetail)
 const paymentDetailFlagging = computed(() => registrationVendorStore.paymentDetailFlagging)
@@ -204,19 +206,14 @@ const currencyList = computed(() =>
 
 const uploadFile = async (file: File, type: 'different account' | 'first page') => {
   try {
-    const response = await vendorMasterDataStore.uploadFile({
-      FormFile: file,
-      Actioner: registrationVendorStore.contact.account.username ?? 'anon',
-      FolderName: `registration/${registrationVendorStore.information.vendor.vendorName}`,
-      FileName: file.name,
-    })
+    const response = await uploadStore.uploadFile(file, 0)
 
     if (type === 'different account') {
-      registrationVendorStore.paymentDetail.urlAccountDifferences = response.url
+      registrationVendorStore.paymentDetail.urlAccountDifferences = response.path
     }
 
     if (type === 'first page') {
-      registrationVendorStore.paymentDetail.urlFirstPage = response.url
+      registrationVendorStore.paymentDetail.urlFirstPage = response.path
     }
   } catch (error) {
     console.error(error)

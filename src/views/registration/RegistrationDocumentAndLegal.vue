@@ -71,7 +71,7 @@
               <td class="align-top">
                 <UiFileUpload
                   :name="item.licenseName"
-                  :text-length="18"
+                  :text-length="15"
                   :max-size="16000000"
                   :placeholder="
                     fileList[index].file.name !== 'placeholder.txt' ? fileList[index].file.name : ''
@@ -243,14 +243,11 @@
 </template>
 
 <script lang="ts" setup>
-type ListDocumentType = {
-  file: File
-  status: 'notUpload' | 'loading' | 'success'
-}
-
 import { computed, onMounted, ref, watch } from 'vue'
+
 import { useRegistrationVendorStore } from '@/stores/views/registration'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
+import { useUploadStore } from '@/stores/general/upload'
 
 import UiFormGroup from '@/components/ui/atoms/form-group/UiFormGroup.vue'
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
@@ -262,6 +259,7 @@ import DatePicker from '@/components/datePicker/DatePicker.vue'
 
 const registrationVendorStore = useRegistrationVendorStore()
 const vendorMasterDataStore = useVendorMasterDataStore()
+const uploadStore = useUploadStore()
 
 const documentAndLegal = computed(() => registrationVendorStore.documentAndLegal)
 const companyCategoryList = computed(() => vendorMasterDataStore.companyCategoryList)
@@ -294,34 +292,22 @@ const addFile = async (index: number, type: 'default' | 'other doc') => {
     if (typeDefault) {
       registrationVendorStore.fileList[index].status = 'loading'
 
-      const response = await vendorMasterDataStore.uploadFile({
-        FormFile: fileList.value[index].file,
-        Actioner: registrationVendorStore.contact.account.username ?? 'anon',
-        FolderName: `registration/${registrationVendorStore.information.vendor.vendorName}`,
-        FileName: fileList.value[index].file.name,
-      })
+      const response = await uploadStore.uploadFile(fileList.value[index].file, 0)
 
-      registrationVendorStore.documentAndLegal.fields[index].uploadUrl = response.url
+      registrationVendorStore.documentAndLegal.fields[index].uploadUrl = response.path
+
+      registrationVendorStore.fileList[index].status = 'success'
     } else if (typeOther) {
       registrationVendorStore.fileOtherDocumentList[index].status = 'loading'
 
-      const response = await vendorMasterDataStore.uploadFile({
-        FormFile: fileOtherDocumentList.value[index].file,
-        Actioner: 'anonym',
-        FolderName: 'registration',
-        FileName: fileOtherDocumentList.value[index].file.name,
-      })
+      const response = await uploadStore.uploadFile(fileOtherDocumentList.value[index].file, 0)
 
-      registrationVendorStore.documentAndLegal.anotherDocuments[index].uploadUrl = response.url
+      registrationVendorStore.documentAndLegal.anotherDocuments[index].uploadUrl = response.path
+
+      registrationVendorStore.fileOtherDocumentList[index].status = 'success'
     }
   } catch (error) {
     console.error(error)
-  } finally {
-    if (typeDefault) {
-      registrationVendorStore.fileList[index].status = 'success'
-    } else if (typeOther) {
-      registrationVendorStore.fileOtherDocumentList[index].status = 'success'
-    }
   }
 }
 

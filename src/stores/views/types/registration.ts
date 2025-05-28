@@ -106,9 +106,9 @@ export type PaymentDetailType = {
   urlAccountDifferencesError?: boolean
   urlFirstPage: string
   urlFirstPageError?: boolean
-  currencyId: number
+  currencyId: string
   currencyIdError?: boolean
-  bankId: number
+  bankId: string
   bankIdError?: boolean
   bankKey: string
   bankKeyError?: boolean

@@ -49,7 +49,7 @@ const emits = defineEmits(['addedFile'])
 const selectedFile = ref(props.placeholder)
 
 const truncateSelectedFile = computed(() => {
-  if (props.textLength && selectedFile.value !== props.placeholder) {
+  if (props.textLength && selectedFile.value) {
     return selectedFile.value.substring(0, props.textLength) + '...'
   }
 

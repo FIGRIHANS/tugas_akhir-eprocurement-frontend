@@ -34,12 +34,22 @@
       </div>
     </div>
   </div>
+
+  <ModalConfirmation
+    :open="registrationError"
+    id="registration-error"
+    type="danger"
+    title="Vendor Registration Failed"
+    text="Yout registration could not be submitted. Please check the required data and try again"
+    noCancel
+    :cancel="() => (registrationError = false)"
+  />
 </template>
 
 <script lang="ts" setup>
 import { useRoute, useRouter } from 'vue-router'
 import { useNavbarUtilsStore } from '@/stores/navbar'
-import { computed, onBeforeMount, onMounted, onUnmounted, reactive } from 'vue'
+import { computed, onBeforeMount, onMounted, onUnmounted, reactive, ref } from 'vue'
 
 import { useCheckEmpty } from '@/composables/validation'
 import { formatDatePayload } from '@/composables/date-format'
@@ -51,9 +61,12 @@ import type { VendorRegistrationPayloadType } from '@/stores/master-data/types/v
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiTab from '@/components/ui/atoms/tab/UiTab.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
+import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 
 const route = useRoute()
 const router = useRouter()
+
+const registrationError = ref<boolean>(false)
 
 const registrationVendorStore = useRegistrationVendorStore()
 const vendorMasterDataStore = useVendorMasterDataStore()
@@ -221,7 +234,7 @@ const checkFieldNotEmpty = () => {
       }
 
       if (registrationVendorStore.paymentDetailFlagging.bankNotRegistered) {
-        registrationVendorStore.paymentDetail.bankId = 0
+        registrationVendorStore.paymentDetail.bankId = ''
         registrationVendorStore.paymentDetail.bankIdError = false
       } else {
         registrationVendorStore.paymentDetail = {
@@ -252,6 +265,76 @@ const removeErrorFields = <T extends Record<string, any>>(obj: T): T =>
         ) as T)
       : obj
 
+const submitData = async () => {
+  try {
+    const payload: VendorRegistrationPayloadType = {
+      account: {
+        userName: contact.value.account.username,
+        email: contact.value.account.email,
+        password: contact.value.account.password,
+      },
+      vendor: {
+        ...removeErrorFields(information.value.vendor),
+        categoryId: 0,
+        vendorEmail: contact.value.account.email,
+        vendorPhone: contact.value.account.phone,
+        vendorWebsite: contact.value.account.website,
+        foundedDate: formatDatePayload(information.value.vendor.foundedDate),
+      },
+      companyLocation: {
+        ...removeErrorFields(information.value.companyLocation),
+        postalCode: String(information.value.companyLocation.postalCode),
+        districtId: 0,
+        district: '',
+      },
+      vendorLocation: {
+        ...removeErrorFields(information.value.vendorLocation),
+        postalCode: String(information.value.vendorLocation.postalCode),
+        districtId: 0,
+        district: '',
+      },
+      vendorCommodities: information.value.vendorCommodities.list.map((item) => ({
+        subBusinessFieldId: item.subBusinessFieldId,
+      })),
+      vendorResponsibleContacts: contact.value.contactPerson.list,
+      vendorLicenses: removeErrorFields(documentAndLegal.value.fields).map((item) => ({
+        ...item,
+        issuedDate: item.issuedDate === '' ? null : formatDatePayload(item.issuedDate),
+        expiredDate: item.expiredDate === '' ? null : formatDatePayload(item.expiredDate),
+      })),
+      otherDocuments: removeErrorFields(documentAndLegal.value.anotherDocuments).map((item) => ({
+        ...item,
+        issuedDate: item.issuedDate === '' ? null : formatDatePayload(item.issuedDate),
+        expiredDate: item.expiredDate === '' ? null : formatDatePayload(item.expiredDate),
+      })),
+      bankDetailDto: {
+        bankKey: isBankNotRegistered.value ? paymentDetail.value.bankKey : '',
+        bankName: isBankNotRegistered.value ? paymentDetail.value.bankName : '',
+        branch: isBankNotRegistered.value ? paymentDetail.value.branch : '',
+        swiftCode: isBankNotRegistered.value ? paymentDetail.value.swiftCode : '',
+        address: isBankNotRegistered.value ? paymentDetail.value.bankAddress : '',
+      },
+      vendorBankDetail: {
+        accountNo: paymentDetail.value.accountNo,
+        accountName: paymentDetail.value.accountName,
+        BankKey: isBankNotRegistered.value ? '' : paymentDetail.value.bankId,
+        CurrencySymbol: paymentDetail.value.currencyId,
+        urlDoc: '',
+        urlAccountDifferences: paymentDetail.value.urlAccountDifferences,
+        urlFirstPage: paymentDetail.value.urlFirstPage,
+        bankAddress: paymentDetail.value.bankAddress,
+        countryId: 0,
+      },
+    }
+
+    await vendorMasterDataStore.postVendorRegistration(payload)
+  } catch (error) {
+    registrationError.value = true
+
+    console.error(error)
+  }
+}
+
 const previous = () => {
   const index = tabPosition.value - 1
 
@@ -261,67 +344,12 @@ const previous = () => {
   router.push({ name: tab.items[index].value })
 }
 
-const next = () => {
+const next = async () => {
   const index = tabPosition.value + 1
 
   if (checkFieldNotEmpty()) {
     if (index >= tab.items.length) {
-      const payload: VendorRegistrationPayloadType = {
-        account: {
-          userName: contact.value.account.username,
-          email: contact.value.account.email,
-          password: contact.value.account.password,
-        },
-        vendor: {
-          ...removeErrorFields(information.value.vendor),
-          categoryId: 0,
-          vendorEmail: contact.value.account.email,
-          vendorPhone: contact.value.account.phone,
-          vendorWebsite: contact.value.account.website,
-          foundedDate: formatDatePayload(information.value.vendor.foundedDate),
-        },
-        companyLocation: {
-          ...removeErrorFields(information.value.companyLocation),
-          postalCode: String(information.value.companyLocation.postalCode),
-        },
-        vendorLocation: {
-          ...removeErrorFields(information.value.vendorLocation),
-          postalCode: String(information.value.vendorLocation.postalCode),
-        },
-        vendorCommodities: information.value.vendorCommodities.list.map((item) => ({
-          subBusinessFieldId: item.subBusinessFieldId,
-        })),
-        vendorResponsibleContacts: contact.value.contactPerson.list,
-        vendorLicenses: removeErrorFields(documentAndLegal.value.fields).map((item) => ({
-          ...item,
-          issuedDate: item.issuedDate === '' ? null : formatDatePayload(item.issuedDate),
-          expiredDate: item.expiredDate === '' ? null : formatDatePayload(item.expiredDate),
-        })),
-        otherDocuments: removeErrorFields(documentAndLegal.value.anotherDocuments).map((item) => ({
-          ...item,
-          issuedDate: item.issuedDate === '' ? null : formatDatePayload(item.issuedDate),
-          expiredDate: item.expiredDate === '' ? null : formatDatePayload(item.expiredDate),
-        })),
-        bankDetailDto: {
-          bankKey: isBankNotRegistered.value ? paymentDetail.value.bankKey : '',
-          bankName: isBankNotRegistered.value ? paymentDetail.value.bankName : '',
-          branch: isBankNotRegistered.value ? paymentDetail.value.branch : '',
-          swiftCode: isBankNotRegistered.value ? paymentDetail.value.swiftCode : '',
-          address: isBankNotRegistered.value ? paymentDetail.value.bankAddress : '',
-        },
-        vendorBankDetail: {
-          accountNo: paymentDetail.value.accountNo,
-          accountName: paymentDetail.value.accountName,
-          bankId: isBankNotRegistered.value ? 0 : paymentDetail.value.bankId,
-          currencyId: paymentDetail.value.currencyId,
-          urlAccountDifferences: paymentDetail.value.urlAccountDifferences,
-          urlFirstPage: paymentDetail.value.urlFirstPage,
-          bankAddress: paymentDetail.value.bankAddress,
-          countryId: 0,
-        },
-      }
-
-      vendorMasterDataStore.postVendorRegistration(payload)
+      await submitData()
     } else {
       tab.active = tab.items[index].value
       router.push({ name: tab.items[index].value })
