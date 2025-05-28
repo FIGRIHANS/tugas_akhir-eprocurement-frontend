@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import UiModal from '@/components/modal/UiModal.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import VendorAdministrasiCard from '@/components/vendor/vendorAdministrasiCard/VendorAdministrasiCard.vue'
@@ -8,12 +9,16 @@ import { useVendorStore, useVerificationDetailStore } from '@/stores/vendor/vend
 import axios from 'axios'
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import successImg from '@/assets/success.svg'
 
 const vendorStore = useVendorStore()
 const verificationStore = useVerificationDetailStore()
+
 const route = useRoute()
 const loading = ref(false)
 const error = ref('')
+
+const modalVerifySuccess = ref(false)
 
 const isReady = computed(() => {
   const data = verificationStore.data
@@ -55,6 +60,7 @@ const handleSendToApproval = async () => {
       createdBy: 'admin',
       position: 'admin',
     })
+    modalVerifySuccess.value = true
   } catch (err) {
     if (err instanceof Error) {
       if (axios.isAxiosError(err)) {
@@ -64,6 +70,10 @@ const handleSendToApproval = async () => {
   } finally {
     loading.value = false
   }
+}
+
+const handleModalClose = () => {
+  verificationStore.getData(Number(route.params.id))
 }
 </script>
 <template>
@@ -90,5 +100,16 @@ const handleSendToApproval = async () => {
         </template>
       </UiButton>
     </div>
+
+    <UiModal
+      v-if="modalVerifySuccess"
+      v-model="modalVerifySuccess"
+      size="sm"
+      @update:model-value="handleModalClose"
+    >
+      <img :src="successImg" alt="success" class="mx-auto mb-3" />
+      <h3 class="font-medium text-lg text-gray-800 text-center">Vendor Verified</h3>
+      <p class="text-gray-600 text-center mb-3">Vendor has been successfully verified</p>
+    </UiModal>
   </div>
 </template>
