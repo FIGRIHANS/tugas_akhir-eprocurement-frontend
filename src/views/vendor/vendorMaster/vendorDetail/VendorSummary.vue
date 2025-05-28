@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import UiModal from '@/components/modal/UiModal.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import VendorAdministrasiCard from '@/components/vendor/vendorAdministrasiCard/VendorAdministrasiCard.vue'
@@ -6,14 +7,18 @@ import VendorIzinUsahaCard from '@/components/vendor/vendorIzinUsahaCard/VendorI
 import VendorPaymentInformationCard from '@/components/vendor/vendorPaymentInformationCard/VendorPaymentInformationCard.vue'
 import { useVendorStore, useVerificationDetailStore } from '@/stores/vendor/vendor'
 import axios from 'axios'
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import successImg from '@/assets/success.svg'
 
 const vendorStore = useVendorStore()
 const verificationStore = useVerificationDetailStore()
+
 const route = useRoute()
 const loading = ref(false)
 const error = ref('')
+
+const modalVerifySuccess = ref(false)
 
 const isReady = computed(() => {
   const data = verificationStore.data
@@ -33,6 +38,12 @@ const isReady = computed(() => {
   return false
 })
 
+const isVerified = computed(() =>
+  verificationStore.data.some(
+    (item) => item.verificationType === 'Vendor approval' && item.status === 'Approved',
+  ),
+)
+
 const handleSendToApproval = async () => {
   loading.value = true
   error.value = ''
@@ -49,6 +60,7 @@ const handleSendToApproval = async () => {
       createdBy: 'admin',
       position: 'admin',
     })
+    modalVerifySuccess.value = true
   } catch (err) {
     if (err instanceof Error) {
       if (axios.isAxiosError(err)) {
@@ -60,9 +72,9 @@ const handleSendToApproval = async () => {
   }
 }
 
-onMounted(() => {
+const handleModalClose = () => {
   verificationStore.getData(Number(route.params.id))
-})
+}
 </script>
 <template>
   <div class="space-y-5">
@@ -77,7 +89,7 @@ onMounted(() => {
 
     <div class="flex justify-end">
       <UiButton
-        :disabled="!isReady || verificationStore.loading || loading"
+        :disabled="!isReady || verificationStore.loading || loading || isVerified"
         variant="primary"
         @click="handleSendToApproval"
       >
@@ -88,5 +100,16 @@ onMounted(() => {
         </template>
       </UiButton>
     </div>
+
+    <UiModal
+      v-if="modalVerifySuccess"
+      v-model="modalVerifySuccess"
+      size="sm"
+      @update:model-value="handleModalClose"
+    >
+      <img :src="successImg" alt="success" class="mx-auto mb-3" />
+      <h3 class="font-medium text-lg text-gray-800 text-center">Vendor Verified</h3>
+      <p class="text-gray-600 text-center mb-3">Vendor has been successfully verified</p>
+    </UiModal>
   </div>
 </template>
