@@ -2,11 +2,11 @@
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import VendorIzinUsahaCard from '@/components/vendor/vendorIzinUsahaCard/VendorIzinUsahaCard.vue'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import successImg from '@/assets/success.svg'
 import UiModal from '@/components/modal/UiModal.vue'
-import { useVendorStore } from '@/stores/vendor/vendor'
+import { useVendorStore, useVerificationDetailStore } from '@/stores/vendor/vendor'
 import axios from 'axios'
 
 const router = useRouter()
@@ -22,6 +22,11 @@ const error = ref('')
 const inputError = ref<string[]>([])
 
 const vendorStore = useVendorStore()
+const vendorVerifStore = useVerificationDetailStore()
+
+const isDisabled = computed(() =>
+  vendorVerifStore.data.some((item) => item.verificationType === 'Izin usaha approval'),
+)
 
 const handleVerify = async () => {
   loading.value = true
@@ -87,6 +92,9 @@ const handleReject = async () => {
     loading.value = false
   }
 }
+const handleModalClose = () => {
+  vendorVerifStore.getData(Number(route.params.id))
+}
 </script>
 
 <template>
@@ -98,11 +106,17 @@ const handleReject = async () => {
         <span> Back </span>
       </UiButton>
 
-      <UiButton :outline="true" variant="danger" class="ml-auto" @click="modalReject = true">
+      <UiButton
+        :outline="true"
+        variant="danger"
+        class="ml-auto"
+        @click="modalReject = true"
+        :disabled="isDisabled"
+      >
         <UiIcon name="cross-circle" variant="duotone" />
         <span> Reject </span>
       </UiButton>
-      <UiButton @click="modalVerify = true">
+      <UiButton @click="modalVerify = true" :disabled="isDisabled">
         <UiIcon name="check-squared" variant="duotone" />
         <span> Verify </span>
       </UiButton>
@@ -177,13 +191,13 @@ const handleReject = async () => {
     </form>
   </UiModal>
 
-  <UiModal v-model="modalRejectSuccess" size="sm">
+  <UiModal v-model="modalRejectSuccess" size="sm" @update:model-value="handleModalClose">
     <img :src="successImg" alt="success" class="mx-auto mb-3" />
     <h3 class="font-medium text-lg text-gray-800 text-center">Data Izin Usaha Rejected</h3>
     <p class="text-gray-600 text-center mb-3">Data Izin Usaha has been successfully Rejected</p>
   </UiModal>
 
-  <UiModal v-model="modalVerifySuccess" size="sm">
+  <UiModal v-model="modalVerifySuccess" size="sm" @update:model-value="handleModalClose">
     <img :src="successImg" alt="success" class="mx-auto mb-3" />
     <h3 class="font-medium text-lg text-gray-800 text-center">Data Izin Usaha verified</h3>
     <p class="text-gray-600 text-center mb-3">Data Izin Usaha has been successfully verified</p>

@@ -6,7 +6,7 @@ import VendorIzinUsahaCard from '@/components/vendor/vendorIzinUsahaCard/VendorI
 import VendorPaymentInformationCard from '@/components/vendor/vendorPaymentInformationCard/VendorPaymentInformationCard.vue'
 import { useVendorStore, useVerificationDetailStore } from '@/stores/vendor/vendor'
 import axios from 'axios'
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 
 const vendorStore = useVendorStore()
@@ -32,6 +32,12 @@ const isReady = computed(() => {
 
   return false
 })
+
+const isVerified = computed(() =>
+  verificationStore.data.some(
+    (item) => item.verificationType === 'Vendor approval' && item.status === 'Approved',
+  ),
+)
 
 const handleSendToApproval = async () => {
   loading.value = true
@@ -59,10 +65,6 @@ const handleSendToApproval = async () => {
     loading.value = false
   }
 }
-
-onMounted(() => {
-  verificationStore.getData(Number(route.params.id))
-})
 </script>
 <template>
   <div class="space-y-5">
@@ -77,7 +79,7 @@ onMounted(() => {
 
     <div class="flex justify-end">
       <UiButton
-        :disabled="!isReady || verificationStore.loading || loading"
+        :disabled="!isReady || verificationStore.loading || loading || isVerified"
         variant="primary"
         @click="handleSendToApproval"
       >

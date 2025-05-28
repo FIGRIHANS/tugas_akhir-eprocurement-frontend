@@ -79,12 +79,6 @@ watch(
                 </td>
               </tr>
               <tr>
-                <td class="text-sm text-gray-600 font-medium w-[182px]">Bisnis Unit</td>
-                <td class="text-sm font-bold text-gray-700">
-                  {{ administrasiStore.data[0].businessUnitName }}
-                </td>
-              </tr>
-              <tr>
                 <td class="text-sm text-gray-600 font-medium w-[182px]">Company Group</td>
                 <td class="text-sm font-bold text-gray-700">
                   {{ administrasiStore.data[0].groupCompany }}
