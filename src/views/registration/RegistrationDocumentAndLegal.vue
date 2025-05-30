@@ -192,7 +192,7 @@
                 <td class="align-top">
                   <UiFileUpload
                     :name="`${index}`"
-                    :text-length="18"
+                    :text-length="15"
                     :max-size="16000000"
                     :placeholder="
                       fileOtherDocumentList[index]?.file.name !== 'placeholder.txt'

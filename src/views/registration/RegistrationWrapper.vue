@@ -29,20 +29,40 @@
           :disabled="tab.active === 'registration__payment-detail' ? !disabledRegistration : false"
         >
           {{ tab.active === 'registration__payment-detail' ? 'Registration' : 'Lanjut' }}
-          <UiIcon name="black-right" />
+          <UiIcon
+            :name="isLoading ? 'loading' : 'black-right'"
+            :class="{ 'animate-spin': isLoading }"
+          />
         </UiButton>
       </div>
     </div>
   </div>
 
   <ModalConfirmation
-    :open="registrationError"
+    :open="modalTrigger.error"
     id="registration-error"
     type="danger"
     title="Vendor Registration Failed"
     text="Yout registration could not be submitted. Please check the required data and try again"
-    noCancel
-    :cancel="() => (registrationError = false)"
+    no-submit
+    static
+    :cancel="() => (modalTrigger.error = false)"
+  />
+  <ModalConfirmation
+    :open="modalTrigger.success"
+    id="registration-success"
+    type="success"
+    title="Vendor Registration Submitted"
+    text="Yout registration has been successfully submitted to the e-Procurement system."
+    no-cancel
+    static
+    submit-button-text="Ok"
+    :submit="
+      () => {
+        modalTrigger.success = false
+        router.push('/')
+      }
+    "
   />
 </template>
 
@@ -66,7 +86,11 @@ import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 const route = useRoute()
 const router = useRouter()
 
-const registrationError = ref<boolean>(false)
+const modalTrigger = ref({
+  error: false,
+  success: false,
+})
+const isLoading = ref<boolean>(false)
 
 const registrationVendorStore = useRegistrationVendorStore()
 const vendorMasterDataStore = useVendorMasterDataStore()
@@ -100,7 +124,7 @@ const showPrevious = computed(() => {
 const disabledRegistration = computed(() => {
   const regis = registrationVendorStore.paymentDetailFlagging
 
-  return regis.acceptTermCondition && regis.captcha
+  return regis.acceptTermCondition && regis.captcha && !isLoading.value
 })
 
 onMounted(() => {
@@ -267,6 +291,8 @@ const removeErrorFields = <T extends Record<string, any>>(obj: T): T =>
 
 const submitData = async () => {
   try {
+    isLoading.value = true
+
     const payload: VendorRegistrationPayloadType = {
       account: {
         userName: contact.value.account.username,
@@ -275,7 +301,7 @@ const submitData = async () => {
       },
       vendor: {
         ...removeErrorFields(information.value.vendor),
-        categoryId: 0,
+        categoryId: documentAndLegal.value.kategori,
         vendorEmail: contact.value.account.email,
         vendorPhone: contact.value.account.phone,
         vendorWebsite: contact.value.account.website,
@@ -328,10 +354,13 @@ const submitData = async () => {
     }
 
     await vendorMasterDataStore.postVendorRegistration(payload)
-  } catch (error) {
-    registrationError.value = true
 
+    modalTrigger.value.success = true
+  } catch (error) {
+    modalTrigger.value.error = true
     console.error(error)
+  } finally {
+    isLoading.value = false
   }
 }
 
