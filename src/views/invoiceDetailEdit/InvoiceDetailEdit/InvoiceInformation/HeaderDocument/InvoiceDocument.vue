@@ -14,7 +14,7 @@
           @setFile="setFile($event, item.varName as keyof documentFormTypes)" 
         />
         <div v-if="form[item.varName as keyof typeof form]" class="flex justify-between items-center gap-[8px] flex-1">
-          <AttachmentView :fileData="typeof form[item.varName as keyof documentFormTypes] === 'object' ? form[item.varName as keyof documentFormTypes] as File : null" />
+          <AttachmentView :fileData="typeof form[item.varName as keyof documentFormTypes] === 'object' ? form[item.varName as keyof documentFormTypes] as attachmentFileTypes : null" />
           <span v-if="formInject?.status === 0" class="border-b border-dashed border-primary text-primary cursor-pointer text-xs font-medium" @click="changeFile(index)">Edit</span>
         </div>
       </div>
@@ -24,7 +24,7 @@
 
 <script lang="ts" setup>
 import { ref, reactive, inject, watch, toRef } from 'vue'
-import type { documentFormTypes, listFormTypes } from '../../../types/invoiceDocument'
+import type { documentFormTypes, attachmentFileTypes, listFormTypes } from '../../../types/invoiceDocument'
 import type { formTypes } from '../../../types/invoiceDetailEdit'
 import pdfUpload from '@/components/ui/pdfUpload/pdfUpload.vue'
 import AttachmentView from '@/components/ui/attachment/AttachmentView.vue'
@@ -62,7 +62,7 @@ const list = ref<listFormTypes[]>([
 const formInject = inject<formTypes>('form')
 const pdfUploadRef = ref()
 
-const setFile = (file: File, name: keyof documentFormTypes) => {
+const setFile = (file: attachmentFileTypes, name: keyof documentFormTypes) => {
   const reftProperty = toRef(form, name)
   reftProperty.value = file
 }

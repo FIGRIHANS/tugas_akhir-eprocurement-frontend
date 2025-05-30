@@ -251,7 +251,7 @@ const mapDocument = () => {
       document.push({
         documentType: Number(listDocumentType.value[index].code),
         documentName: form.invoiceDocument?.name,
-        documentUrl: form.invoiceDocument?.url,
+        documentUrl: form.invoiceDocument?.path,
         documentSize: Number(form.invoiceDocument?.fileSize)
       })
     }
