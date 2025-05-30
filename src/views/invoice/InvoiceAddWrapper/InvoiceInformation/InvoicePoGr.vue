@@ -1,10 +1,15 @@
 <template>
   <div id="table-invoice-po-gr" class="flex flex-col gap-[16px]">
     <p class="text-base font-semibold">Invoice PO & GR Item</p>
-    <button v-if="form?.status === 0" class="btn btn-outline btn-primary w-fit" @click="openAddItem">
-      <i class="ki-filled ki-magnifier"></i>
-      Search
-    </button>
+    <div class="relative max-w-[250px]">
+      <label class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px]">
+        Search By PO Number
+      </label>
+      <div class="input">
+        <input v-model="search" placeholder="" @keypress="openAddItem"/>
+        <i class="ki-outline ki-magnifier"></i>
+      </div>
+    </div>
     <div v-if="form" class="overflow-x-auto pogr__table">
       <table class="table table-xs table-border" :class="{ 'border-danger': form?.invoicePoGrError }">
         <thead>
@@ -55,7 +60,7 @@
         </tbody>
       </table>
     </div>
-    <SearchPoGr :is-invoice-dp="form?.invoiceDp" :is-po-pib="form?.invoiceType === 'pib'" @setItem="setItemPoGr" />
+    <SearchPoGr :is-invoice-dp="form?.invoiceDp" :is-po-pib="form?.invoiceType === 'pib'" :search="search" @setItem="setItemPoGr" />
   </div>
 </template>
 
@@ -70,11 +75,14 @@ import { useFormatIdr } from '@/composables/currency'
 
 const form = inject<formTypes>('form')
 const columns = ref<string[]>([])
+const search = ref<string>('')
 
-const openAddItem = () => {
-  const idModal = document.querySelector('#add_po_gr_item_modal')
-  const modal = KTModal.getInstance(idModal as HTMLElement)
-  modal.show()
+const openAddItem = (event: KeyboardEvent) => {
+  if (event.key === 'Enter') {
+    const idModal = document.querySelector('#add_po_gr_item_modal')
+    const modal = KTModal.getInstance(idModal as HTMLElement)
+    modal.show()
+  }
 }
 
 const checkInvoiceDp = () => {

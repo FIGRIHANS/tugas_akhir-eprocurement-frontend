@@ -1,10 +1,14 @@
+import { useLoginStore } from '@/stores/views/login'
+
 export const useCheckToken = () => {
+  const loginApi = useLoginStore()
   let token = ''
 
   const cookies = document.cookie.split('; ')
   for (const cookie of cookies) {
     const [key, value] = cookie.split('=')
     if (key === 'token_dts') token = decodeURIComponent(value)
+    if (key === 'isAdmin') loginApi.isVendor = !Boolean(value)
   }
 
   return token

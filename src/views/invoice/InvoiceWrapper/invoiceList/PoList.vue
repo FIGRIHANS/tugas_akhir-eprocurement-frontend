@@ -99,7 +99,6 @@ const setListPo = () => {
       result.push(item)
     }
   }
-  console.log(result)
   list.value = result
 }
 

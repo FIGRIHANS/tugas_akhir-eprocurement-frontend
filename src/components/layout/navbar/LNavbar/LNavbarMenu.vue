@@ -1,5 +1,5 @@
 <template>
-  <!-- <a href="#" class="px-2.5 py-1.5 flex items-center gap-1.5 text-primary">
+  <a href="#" class="px-2.5 py-1.5 flex items-center gap-1.5 text-primary">
     <i class="ki-duotone ki-calendar text-[20px]"> </i>
     {{ today }}
   </a>
@@ -7,7 +7,7 @@
     <i class="ki-duotone ki-book-open text-[20px]"> </i>
     Download Manual Book
   </a>
-  <a href="#" class="px-2.5 py-1.5"><i class="ki-outline ki-notification text-[20px]"> </i></a> -->
+  <a href="#" class="px-2.5 py-1.5"><i class="ki-outline ki-notification text-[20px]"> </i></a>
 
   <div class="menu menu-default p-0" data-menu="true">
     <div
@@ -45,7 +45,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import moment, { type Moment } from 'moment'
+import moment from 'moment'
 import IconEN from '@/components/icons/IconEN.vue'
 
 /**TODO - Add isLoggedIn condit */
@@ -53,7 +53,7 @@ import IconEN from '@/components/icons/IconEN.vue'
 /**
  * SECTION: Timer
  */
-const momentRef = ref<Moment>(moment())
+const momentRef = ref<string>(moment())
 const timeInterval = ref()
 
 onMounted(() => {
@@ -65,8 +65,8 @@ const updateTime = () => {
 }
 
 const today = computed(() => {
-  const now = momentRef.value.format('MMM D, YYYY | HH:mm:ss')
-  const timezone = momentRef.value.format('Z').substring(0, 3)
+  const now = moment(momentRef.value).format('MMM D, YYYY | HH:mm:ss')
+  const timezone = moment(momentRef.value).format('Z').substring(0, 3)
 
   return `${now} GMT${timezone}`
 })

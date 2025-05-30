@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="isLoggedin"
+     v-if="route.name !== 'landing-page'"
     class="size-10 rounded-full inline-flex items-center justify-center text-[11px] font-semibold border border-primary-clarity bg-primary text-white"
   >
     Aa
@@ -19,20 +19,11 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
-
-// import { useCheckToken } from '@/composables/token'
+import { useRouter, useRoute } from 'vue-router'
 
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 
 const router = useRouter()
-
-const isLoggedin = ref(false)
-
-onMounted(() => {
-  // const token = useCheckToken()
-  // if (token) isLoggedin.value = true
-})
+const route = useRoute()
 </script>

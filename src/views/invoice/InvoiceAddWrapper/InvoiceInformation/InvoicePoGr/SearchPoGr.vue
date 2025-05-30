@@ -11,21 +11,6 @@
         </button>
       </div>
       <div class="modal-body py-[16px] px-[16px] flex flex-col gap-[20px]">
-        <div class="flex items-center justify-end gap-[8px]">
-          <div class="relative">
-            <label class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px]">
-              Search By PO Number
-            </label>
-            <div class="input">
-              <input v-model="search" placeholder=""/>
-              <i class="ki-outline ki-magnifier"></i>
-            </div>
-          </div>
-          <button class="btn btn-outline btn-primary">
-            <i class="ki-filled ki-magnifier"></i>
-            Search
-          </button>
-        </div>
         <div class="overflow-x-auto pogr__table">
           <table class="table table-border text-sm" data-datatable-table="true">
             <thead>
@@ -56,7 +41,7 @@
                 <td>{{ item.grDocumentNo }}</td>
                 <td>{{ item.grDocumentItem }}</td>
                 <td>{{ item.grDocumentDate }}</td>
-                <td>{{ item.itemAmount }}</td>
+                <td class="text-right">{{ useFormatIdr(item.itemAmount) }}</td>
                 <td>{{ item.quantity }}</td>
                 <td>{{ item.uom }}</td>
                 <td>{{ item.materialDescription }}</td>
@@ -86,16 +71,17 @@ import { KTModal } from '@/metronic/core'
 import { searchDefaultColumn, searchInvoiceDpColumn, searchPoPibColumn } from '@/static/invoicePoGr'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import type { PoGrSearchTypes } from '../../../types/invoicePoGr'
+import { useFormatIdr } from '@/composables/currency'
 
 const props = defineProps<{
   isInvoiceDp?: string
   isPoPib?: boolean
+  search: string
 }>()
 
 const emits = defineEmits(['setItem'])
 
 const invoiceApi = useInvoiceSubmissionStore()
-const search = ref<string>('')
 const listColumn = ref<string[]>([])
 const listPoGrItem = ref<PoGrSearchTypes[]>([])
 const selectAll = ref<boolean>(false)
@@ -146,12 +132,9 @@ watch(
 )
 
 watch(
-  () => search.value,
+  () => props.search,
   () => {
-    if (!search.value) listPoGrItem.value = listItem.value
-    else {
-      listPoGrItem.value = listItem.value.filter((item) => item.poNo.toLowerCase() === search.value.toLowerCase())
-    }
+    listPoGrItem.value = listItem.value.filter((item) => item.poNo.toLowerCase() === props.search.toLowerCase())
   },
   {
     immediate: true

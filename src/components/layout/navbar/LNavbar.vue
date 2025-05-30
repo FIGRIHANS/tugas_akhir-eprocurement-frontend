@@ -12,7 +12,7 @@
         </div>
 
         <div class="flex items-center gap-3.5">
-          <LNavbarMenu />
+          <LNavbarMenu v-if="route.name !== 'landing-page'" />
           <LNavbarProfile />
         </div>
       </nav>
@@ -22,6 +22,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import type { INavbarProps } from './types/navbar'
 import { useNavbarUtilsStore } from '@/stores/navbar'
 
@@ -30,12 +31,14 @@ import LNavbarMenu from './LNavbar/LNavbarMenu.vue'
 import LNavbarProfile from './LNavbar/LNavbarProfile.vue'
 
 /**Atoms components */
-import UiLogo from '@/components/ui/atoms/logo/UiLogo.vue'
+// import UiLogo from '@/components/ui/atoms/logo/UiLogo.vue'
 import LogoAN from '@/assets/svg/LogoAN.vue'
 
 const props = withDefaults(defineProps<INavbarProps>(), {
   full: false,
 })
+
+const route = useRoute()
 
 /**SECTION - Navbar utils */
 const navbarUtils = useNavbarUtilsStore()

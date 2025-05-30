@@ -93,8 +93,8 @@ const saveAccount = () => {
 }
 
 const setToken = (result: ApiResponseDataResult<string>) => {
-  const expired = moment().add(7, 'days').toDate().toUTCString()
-  document.cookie = `token_dts=${'Bearer ' + result.content}; path=/; expires=${expired}; Secure; SameSite=Strict`
+  const expired = moment().add(2, 'hours').toDate().toUTCString()
+  document.cookie = `token_dts=${'Bearer ' + result.content}; isAdmin=${!checkVendor()} path=/; expires=${expired}; Secure; SameSite=Strict`
 }
 
 const goLogin = () => {
