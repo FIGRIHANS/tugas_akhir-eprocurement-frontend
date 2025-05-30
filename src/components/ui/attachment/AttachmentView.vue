@@ -17,12 +17,12 @@ const props = defineProps<{
 
 const fileName = () => {
   if (props.fileData?.name) return props.fileData.name
-  else {
-    if (props.fileData) {
-      const splitUrl = props.fileData.url.split('/')
-      const getName = splitUrl[splitUrl.length - 1].split('.')
-      return getName[0]
-    }
-  }
+  // else {
+  //   if (props.fileData) {
+  //     const splitUrl = props.fileData.url.split('/')
+  //     const getName = splitUrl[splitUrl.length - 1].split('.')
+  //     return getName[0]
+  //   }
+  // }
 }
 </script>

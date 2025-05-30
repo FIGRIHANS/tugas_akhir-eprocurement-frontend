@@ -16,7 +16,7 @@
 <script lang="ts" setup>
 import { ref, defineExpose } from 'vue'
 import IconUpload from './PdfUpload/IconUpload.vue'
-import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
+import { useUploadStore } from '@/stores/general/upload'
 
 defineProps<{
   error?: boolean
@@ -25,8 +25,8 @@ defineProps<{
 
 const emits = defineEmits(['setFile'])
 
+const uploadApi = useUploadStore()
 const fileInput = ref<HTMLInputElement | null>(null)
-const vendorMasterDataStore = useVendorMasterDataStore()
 
 const triggerFileInput = () => {
   fileInput.value?.click()
@@ -41,17 +41,11 @@ const handleFileUpload = async (event: Event) => {
   if (file.size > 2 * 1024 * 1024) return
 
   try {
-    const response = await vendorMasterDataStore.uploadFile({
-      FormFile: file,
-      Actioner: 'anonym',
-      FolderName: 'invoice',
-      FileName: file.name,
-    })
+    const response = await uploadApi.uploadFile(file, 0)
 
     emits('setFile', {
       name: response.name,
-      url: response.url,
-      urlWithToken: response.urlWithToken,
+      path: response.path,
       fileSize: file.size
     })
   } catch {

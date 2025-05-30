@@ -91,14 +91,15 @@ const columns = ref([
 const poList = computed(() => invoiceApi.listPo)
 
 const setListPo = () => {
-  const result = poList.value.map((item, index) => {
+  const result: ListPoTypes[] = []
+  for (const [index, item] of poList.value.entries()) {
     const start = currentPage.value * pageSize.value - pageSize.value
     const end = currentPage.value * pageSize.value - 1
     if (index >= start && index <= end) {
-      return item
+      result.push(item)
     }
-  }) as ListPoTypes[]
-
+  }
+  console.log(result)
   list.value = result
 }
 
@@ -124,6 +125,8 @@ const callList = () => {
     invoiceTypeCode: Number(filterForm.invoiceType),
     invoiceDate: filterForm.date,
     searchText: search.value
+  }).finally(() => {
+    setListPo()
   })
 }
 
@@ -143,6 +146,5 @@ const goSearch = (event: KeyboardEvent) => {
 
 onMounted(() => {
   callList()
-  setListPo()
 })
 </script>

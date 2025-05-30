@@ -17,7 +17,6 @@ export interface listFormTypes {
 
 export interface responseFileTypes {
   name: string
-  url: string
-  urlWithToken: string
+  path: string
   fileSize: string
 }

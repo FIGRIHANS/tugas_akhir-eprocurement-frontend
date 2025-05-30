@@ -25,7 +25,7 @@
 
 <script lang="ts" setup>
 import { ref, reactive, inject, watch, toRef } from 'vue'
-import type { documentFormTypes, listFormTypes, responseFileTypes } from '../../../types/invoiceDocument'
+import type { documentFormTypes, responseFileTypes, listFormTypes } from '../../../types/invoiceDocument'
 import type { formTypes } from '../../../types/invoiceAddWrapper'
 import pdfUpload from '@/components/ui/pdfUpload/pdfUpload.vue'
 import AttachmentView from '@/components/ui/attachment/AttachmentView.vue'
