@@ -32,15 +32,12 @@ export type PositionListType = {
 export type BankListType = {
   id: number
   bankCountryCode: string
-  bankCode: string
-  bankName: string
-  bankSwiftCode: string
-  partnerBankType: string
-  bankAddress: string
-  bankCity: string
-  branch: string
-  logIntegration: string
-  biCode: string
+  bankKey: string
+  bankNameAccount: string
+  street: string
+  swiftCode: string
+  addressNumber: number
+  bankBranch: string | null
 }[]
 
 export type BusinessType = {
@@ -64,6 +61,7 @@ export type BusinessFieldReducerType = BusinessType & {
 export type BusinessFieldResponse = (BusinessType & SubBusinessType)[]
 
 export type CurrencyListType = {
+  currencyId: number
   currencyCode: string
   currencyName: string
 }[]
@@ -97,6 +95,8 @@ type LocationType = {
   state: string
   cityId: number
   city: string
+  districtId: number
+  district: string
   postalCode: string
   addressDetail: string
 }
@@ -152,8 +152,9 @@ export type VendorRegistrationPayloadType = {
   vendorBankDetail: {
     accountNo: string
     accountName: string
-    bankId: number
-    currencyId: number
+    BankKey: string
+    CurrencySymbol: string
+    urlDoc: string
     urlAccountDifferences: string
     urlFirstPage: string
     bankAddress: string

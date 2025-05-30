@@ -57,7 +57,6 @@
                   v-model="documentAndLegal.fields[index].issuedDate"
                   format="dd MM yyyy"
                   :error="documentAndLegal.fields[index]?.issuedDateError"
-                  @update:modelValue="changeFormatDate(index, 'default', 'issued')"
                   class="!w-48"
                 />
               </td>
@@ -66,15 +65,17 @@
                   v-model="documentAndLegal.fields[index].expiredDate"
                   format="dd MM yyyy"
                   :error="documentAndLegal.fields[index]?.expiredDateError"
-                  @update:modelValue="changeFormatDate(index, 'default', 'expired')"
                   class="!w-48"
                 />
               </td>
               <td class="align-top">
                 <UiFileUpload
                   :name="item.licenseName"
-                  :text-length="18"
+                  :text-length="15"
                   :max-size="16000000"
+                  :placeholder="
+                    fileList[index].file.name !== 'placeholder.txt' ? fileList[index].file.name : ''
+                  "
                   accepted-files=".jpg,.jpeg.,.png,.pdf,application/zip"
                   class="w-48"
                   :error="documentAndLegal.fields[index]?.uploadUrlError"
@@ -178,7 +179,6 @@
                   <DatePicker
                     v-model="documentAndLegal.anotherDocuments[index].issuedDate"
                     format="dd MM yyyy"
-                    @update:modelValue="changeFormatDate(index, 'other doc', 'issued')"
                     class="!w-48"
                   />
                 </td>
@@ -186,15 +186,19 @@
                   <DatePicker
                     v-model="documentAndLegal.anotherDocuments[index].expiredDate"
                     format="dd MM yyyy"
-                    @update:modelValue="changeFormatDate(index, 'other doc', 'expired')"
                     class="!w-48"
                   />
                 </td>
                 <td class="align-top">
                   <UiFileUpload
                     :name="`${index}`"
-                    :text-length="18"
+                    :text-length="15"
                     :max-size="16000000"
+                    :placeholder="
+                      fileOtherDocumentList[index]?.file.name !== 'placeholder.txt'
+                        ? fileOtherDocumentList[index]?.file.name
+                        : ''
+                    "
                     accepted-files=".jpg,.jpeg.,.png,.pdf,application/zip"
                     class="w-48"
                     @addedFile="(file) => uploadFile(file, index, 'other doc')"
@@ -239,16 +243,11 @@
 </template>
 
 <script lang="ts" setup>
-type ListDocumentType = {
-  file: File
-  status: 'notUpload' | 'loading' | 'success'
-}
-
 import { computed, onMounted, ref, watch } from 'vue'
-import moment from 'moment'
 
 import { useRegistrationVendorStore } from '@/stores/views/registration'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
+import { useUploadStore } from '@/stores/general/upload'
 
 import UiFormGroup from '@/components/ui/atoms/form-group/UiFormGroup.vue'
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
@@ -260,31 +259,19 @@ import DatePicker from '@/components/datePicker/DatePicker.vue'
 
 const registrationVendorStore = useRegistrationVendorStore()
 const vendorMasterDataStore = useVendorMasterDataStore()
+const uploadStore = useUploadStore()
 
 const documentAndLegal = computed(() => registrationVendorStore.documentAndLegal)
 const companyCategoryList = computed(() => vendorMasterDataStore.companyCategoryList)
 const selectedCategory = ref<number>(registrationVendorStore.documentAndLegal.kategori)
 const tableItems = computed(() => vendorMasterDataStore.companyLicense)
 
-const fileList = ref<ListDocumentType[]>([])
-const fileOtherDocumentList = ref<ListDocumentType[]>([])
-
-const changeFormatDate = (
-  index: number,
-  type: 'default' | 'other doc',
-  field: 'issued' | 'expired',
-) => {
-  const documentKey = type === 'default' ? 'fields' : 'anotherDocuments'
-  const fieldKey = field === 'issued' ? 'issuedDate' : 'expiredDate'
-
-  registrationVendorStore.documentAndLegal[documentKey][index][fieldKey] = moment(
-    registrationVendorStore.documentAndLegal[documentKey][index][fieldKey],
-  ).format('YYYY-MM-DD')
-}
+const fileList = computed(() => registrationVendorStore.fileList)
+const fileOtherDocumentList = computed(() => registrationVendorStore.fileOtherDocumentList)
 
 const uploadFile = (file: File, index: number, type: 'default' | 'other doc') => {
   if (type === 'default') {
-    fileList.value.splice(index, 1, {
+    registrationVendorStore.fileList.splice(index, 1, {
       file,
       status: 'notUpload',
     })
@@ -297,44 +284,30 @@ const uploadFile = (file: File, index: number, type: 'default' | 'other doc') =>
 }
 
 const addFile = async (index: number, type: 'default' | 'other doc') => {
+  const typeDefault = type === 'default' && fileList.value[index]?.file.name !== 'placeholder.txt'
+  const typeOther =
+    type === 'other doc' && fileOtherDocumentList.value[index]?.file.name !== 'placeholder.txt'
+
   try {
-    if (type === 'default' && fileList.value[index]?.file.name !== 'placeholder.txt') {
-      fileList.value[index].status = 'loading'
+    if (typeDefault) {
+      registrationVendorStore.fileList[index].status = 'loading'
 
-      const response = await vendorMasterDataStore.uploadFile({
-        FormFile: fileList.value[index].file,
-        Actioner: registrationVendorStore.contact.account.username ?? 'anon',
-        FolderName: `registration/${registrationVendorStore.information.vendor.vendorName}`,
-        FileName: fileList.value[index].file.name,
-      })
+      const response = await uploadStore.uploadFile(fileList.value[index].file, 0)
 
-      registrationVendorStore.documentAndLegal.fields[index].uploadUrl = response.url
-    } else if (
-      type === 'other doc' &&
-      fileOtherDocumentList.value[index]?.file.name !== 'placeholder.txt'
-    ) {
-      fileOtherDocumentList.value[index].status = 'loading'
+      registrationVendorStore.documentAndLegal.fields[index].uploadUrl = response.path
 
-      const response = await vendorMasterDataStore.uploadFile({
-        FormFile: fileOtherDocumentList.value[index].file,
-        Actioner: 'anonym',
-        FolderName: 'registration',
-        FileName: fileOtherDocumentList.value[index].file.name,
-      })
+      registrationVendorStore.fileList[index].status = 'success'
+    } else if (typeOther) {
+      registrationVendorStore.fileOtherDocumentList[index].status = 'loading'
 
-      registrationVendorStore.documentAndLegal.anotherDocuments[index].uploadUrl = response.url
+      const response = await uploadStore.uploadFile(fileOtherDocumentList.value[index].file, 0)
+
+      registrationVendorStore.documentAndLegal.anotherDocuments[index].uploadUrl = response.path
+
+      registrationVendorStore.fileOtherDocumentList[index].status = 'success'
     }
   } catch (error) {
     console.error(error)
-  } finally {
-    if (type === 'default' && fileList.value[index]?.file.name !== 'placeholder.txt') {
-      fileList.value[index].status = 'success'
-    } else if (
-      type === 'other doc' &&
-      fileOtherDocumentList.value[index]?.file.name !== 'placeholder.txt'
-    ) {
-      fileOtherDocumentList.value[index].status = 'success'
-    }
   }
 }
 
@@ -386,10 +359,12 @@ watch(
         }),
       }))
 
-      fileList.value = registrationVendorStore.documentAndLegal.fields.map(() => ({
-        file: new File([''], 'placeholder.txt'),
-        status: 'notUpload',
-      }))
+      registrationVendorStore.fileList = registrationVendorStore.documentAndLegal.fields.map(
+        () => ({
+          file: new File([''], 'placeholder.txt'),
+          status: 'notUpload',
+        }),
+      )
     }
   },
 )

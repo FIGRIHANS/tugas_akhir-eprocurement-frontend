@@ -7,6 +7,7 @@
         placeholder="Masukkan Username"
         row
         required
+        disabled
         :error="contact.account.usernameError"
       />
       <div class="flex items-center flex-wrap lg:flex-nowrap gap-2.5">
