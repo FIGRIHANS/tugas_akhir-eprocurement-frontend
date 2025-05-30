@@ -3,12 +3,14 @@ import UiModal from '@/components/modal/UiModal.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import VendorPaymentInformationCard from '@/components/vendor/vendorPaymentInformationCard/VendorPaymentInformationCard.vue'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import successImg from '@/assets/success.svg'
-import { useVendorStore } from '@/stores/vendor/vendor'
+import { useVendorStore, useVerificationDetailStore } from '@/stores/vendor/vendor'
 import axios from 'axios'
 
+const vendorStore = useVendorStore()
+const vendorVerifStore = useVerificationDetailStore()
 const router = useRouter()
 const route = useRoute()
 const modalReject = ref(false)
@@ -20,8 +22,11 @@ const error = ref('')
 
 const reason = ref('')
 const notes = ref('')
-const vendorStore = useVendorStore()
 const inputError = ref<string[]>([])
+
+const isDisabled = computed(() =>
+  vendorVerifStore.data.some((item) => item.verificationType === 'Payment approval'),
+)
 
 const handleVerify = async () => {
   loading.value = true
@@ -86,6 +91,10 @@ const handleReject = async () => {
     loading.value = false
   }
 }
+
+const handleModalClose = () => {
+  vendorVerifStore.getData(Number(route.params.id))
+}
 </script>
 
 <template>
@@ -97,11 +106,17 @@ const handleReject = async () => {
         <span> Back </span>
       </UiButton>
 
-      <UiButton :outline="true" variant="danger" class="ml-auto" @click="modalReject = true">
+      <UiButton
+        :outline="true"
+        variant="danger"
+        class="ml-auto"
+        @click="modalReject = true"
+        :disabled="isDisabled"
+      >
         <UiIcon name="cross-circle" variant="duotone" />
         <span> Reject </span>
       </UiButton>
-      <UiButton :disabled="vendorStore.isBankVerified" @click="modalVerify = true">
+      <UiButton :disabled="isDisabled" @click="modalVerify = true">
         <UiIcon name="check-squared" variant="duotone" />
         <span> Verify </span>
       </UiButton>
@@ -180,7 +195,7 @@ const handleReject = async () => {
     </form>
   </UiModal>
 
-  <UiModal v-model="modalRejectSuccess" size="sm">
+  <UiModal v-model="modalRejectSuccess" size="sm" @update:model-value="handleModalClose">
     <img :src="successImg" alt="success" class="mx-auto mb-3" />
     <h3 class="font-medium text-lg text-gray-800 text-center">Data Informasi Pembayran Rejected</h3>
     <p class="text-gray-600 text-center mb-3">
@@ -188,7 +203,7 @@ const handleReject = async () => {
     </p>
   </UiModal>
 
-  <UiModal v-model="modalVerifySuccess" size="sm">
+  <UiModal v-model="modalVerifySuccess" size="sm" @update:model-value="handleModalClose">
     <img :src="successImg" alt="success" class="mx-auto mb-3" />
     <h3 class="font-medium text-lg text-gray-800 text-center">
       Data Informasi Pembayaran verified

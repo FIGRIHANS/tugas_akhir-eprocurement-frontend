@@ -25,12 +25,12 @@ const search = ref('')
 const handleSearch = debounce((value) => {
   const query = { ...route.query }
   if (!value) {
-    delete query.SearchQuery
+    delete query.searchAny
     router.replace({ query: { ...query, page: 1 } })
     return
   }
 
-  router.replace({ query: { ...query, SearchQuery: value, page: 1 } })
+  router.replace({ query: { ...query, searchAny: value, page: 1 } })
 }, 500)
 
 const handlePageChange = (page: number) => {
@@ -43,7 +43,7 @@ watch(search, handleSearch)
 watch(
   () => route.query,
   (query) => {
-    search.value = (query.SearchQuery as string) || ''
+    search.value = (query.searchAny as string) || ''
     // currentPage.value = Number(query.page) || 1
 
     vendor.getVendors(query)

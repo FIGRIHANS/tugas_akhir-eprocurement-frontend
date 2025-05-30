@@ -33,7 +33,7 @@ const handleSuccess = () => {
             <span class="menu-icon">
               <UiIcon variant="duotone" name="eye" />
             </span>
-            <span class="menu-title"> Detail Vendor </span>
+            <span class="menu-title"> Vendor Detail </span>
           </RouterLink>
         </li>
         <li class="menu-item">
@@ -41,7 +41,7 @@ const handleSuccess = () => {
             <span class="menu-icon">
               <UiIcon variant="duotone" name="data" />
             </span>
-            <span class="menu-title"> Detail Verifikasi </span>
+            <span class="menu-title"> Verification Detail </span>
           </button>
         </li>
         <div class="border-b border-b-gray-200"></div>

@@ -18,17 +18,17 @@ const tabs = ref<ITabClosable[]>([
   },
   {
     id: 'data-administrasi',
-    label: 'Data Administrasi',
+    label: 'Administrative Data',
     isClosable: true,
   },
   {
     id: 'data-izin-usaha',
-    label: 'Data Izin Usaha',
+    label: 'Business License Data',
     isClosable: true,
   },
   {
     id: 'data-informasi-pembayaran',
-    label: 'Data Informasi Pembayaran',
+    label: 'Payment Information Data',
     isClosable: true,
   },
 ])
@@ -58,15 +58,12 @@ watch(currentTab, () => {
 })
 
 watch(
-  () => route.name,
-  (name) => {
-    addTab(name as string)
-
-    if (name === 'summary-information') {
-      verificationStore.getData(Number(route.params.id))
-    }
+  () => route,
+  (route) => {
+    addTab(route.name as string)
+    verificationStore.getData(Number(route.params.id))
   },
-  { immediate: true },
+  { immediate: true, deep: true },
 )
 
 watch(
@@ -75,11 +72,11 @@ watch(
     if (vendor.items.length && vendor.items[0].approvalStatusId === 1) {
       tabs.value = [
         ...tabs.value,
-        { id: 'data-akta-pendirian', label: 'Data Akta Pendirian', isClosable: true },
-        { id: 'data-perlengkapan', label: 'Data Perlengkapan', isClosable: true },
-        { id: 'data-pengalaman', label: 'Data Pengalaman', isClosable: true },
-        { id: 'data-tenaga-ahli', label: 'Data Tenaga Ahli', isClosable: true },
-        { id: 'dokumen-lainnya', label: 'Dokumen Lainnya', isClosable: true },
+        { id: 'data-akta-pendirian', label: 'Deed of Establishment Data', isClosable: true },
+        { id: 'data-perlengkapan', label: 'Equipment Data', isClosable: true },
+        { id: 'data-pengalaman', label: 'Experience Data', isClosable: true },
+        { id: 'data-tenaga-ahli', label: 'Expert Personnel Data', isClosable: true },
+        { id: 'dokumen-lainnya', label: 'Other Documents', isClosable: true },
       ]
     }
   },
