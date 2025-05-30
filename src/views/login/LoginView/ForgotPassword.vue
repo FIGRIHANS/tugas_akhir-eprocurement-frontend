@@ -19,5 +19,5 @@ const loginApi = useLoginStore()
 </script>
 
 <style lang="scss" scoped>
-@import '../style/forgot-password.scss';
+@use '../style/forgot-password.scss';
 </style>
