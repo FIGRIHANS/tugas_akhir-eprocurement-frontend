@@ -6,6 +6,8 @@ import userApi from '@/core/utils/userApi'
 export const useLoginStore = defineStore('login', () => {
   const selectedLogin = ref<string>('')
   const isVendor = ref<boolean>(false)
+  const isSendForgot = ref<boolean>(false)
+  const isSendNewPassword = ref<boolean>(true)
 
   const callLogin = async (username: string, password: string) => {
     const response = await api.post('/auth/sign-in', {
@@ -25,6 +27,8 @@ export const useLoginStore = defineStore('login', () => {
   return {
     selectedLogin,
     isVendor,
+    isSendForgot,
+    isSendNewPassword,
     callLogin,
     callUser
   }
