@@ -28,7 +28,7 @@
 import { ref, watch } from 'vue'
 
 const props = defineProps<{
-  modelValue: string
+  modelValue: Date | string | null
   error?: boolean
   label?: string
   required?: boolean
@@ -39,12 +39,15 @@ const props = defineProps<{
 
 const emits = defineEmits(['update:modelValue'])
 
-const date = ref<string>('')
+const date = ref<Date | string | null>('')
 
 watch(
   () => props.modelValue,
   () => {
     date.value = props.modelValue
+  },
+  {
+    immediate: true,
   },
 )
 

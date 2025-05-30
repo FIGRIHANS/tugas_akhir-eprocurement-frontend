@@ -76,6 +76,11 @@ type DocumentFieldType = {
   uploadUrl: string
 }
 
+export type ListDocumentType = {
+  file: File
+  status: 'notUpload' | 'loading' | 'success'
+}
+
 export type DocumentAndLegalType = {
   kategori: number
   fields: (DocumentFieldType & {
@@ -101,9 +106,9 @@ export type PaymentDetailType = {
   urlAccountDifferencesError?: boolean
   urlFirstPage: string
   urlFirstPageError?: boolean
-  currencyId: number
+  currencyId: string
   currencyIdError?: boolean
-  bankId: number
+  bankId: string
   bankIdError?: boolean
   bankKey: string
   bankKeyError?: boolean
