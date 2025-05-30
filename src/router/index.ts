@@ -7,6 +7,7 @@ import LayoutBase from '@/layout/LayoutBase.vue'
 import LayoutWithSidebar from '@/layout/LayoutWithSidebar.vue'
 
 /** Route Modules */
+import login from './modules/login'
 import vendor from './modules/vendor'
 import registration from './modules/registration'
 import invoice from './modules/invoice'
@@ -14,6 +15,7 @@ import invoice from './modules/invoice'
 const router = createRouter({
   history: createWebHistory(),
   routes: [
+    ...login,
     {
       path: '/',
       component: LayoutBase,
@@ -34,14 +36,6 @@ const router = createRouter({
         middleware: 'auth',
       }
     },
-    {
-      path: '/login',
-      name: 'login',
-      meta: {
-        middleware: 'loginAuth',
-      },
-      component: () => import('@/views/login/LoginView.vue'),
-    },
 
     // Empty State
     {
@@ -52,7 +46,7 @@ const router = createRouter({
       path: '/error/:code?',
       name: 'error',
       component: () => import('@/views/EmptyState.vue'),
-    },
+    }
   ],
 })
 

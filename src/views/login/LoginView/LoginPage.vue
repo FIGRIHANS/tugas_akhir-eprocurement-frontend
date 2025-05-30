@@ -1,5 +1,5 @@
 <template>
-  <div class="w-[343px] border border-grey-200 rounded-xl p-[40px] h-fit">
+  <div class="max-w-[343px] border border-grey-200 rounded-xl p-[40px] h-fit">
     <p class="m-0 text-center text-lg font-medium">
       Sign in
       <span v-if="!checkVendor()"> admin</span>
@@ -8,14 +8,14 @@
       <!-- input email -->
       <div>
         <label class="font-normal text-[13px]">Email</label>
-        <input v-model="email" class="input mt-[8px]" placeholder="email@email.com" type="text" />
+        <input v-model="email" class="input mt-[8px]" placeholder="email@email.com" type="email" />
       </div>
 
       <!-- input password -->
       <div>
         <div class="flex justify-between gap-[8px]">
           <label class="font-normal text-[13px]">Password</label>
-          <a v-if="checkVendor()" href="#" class="text-primary text-[13px]">Forgot Password?</a>
+          <a v-if="checkVendor()" href="#" class="text-primary text-[13px]" @click="goToForgot">Forgot Password?</a>
         </div>
         <div class="input max-w-72">
           <input
@@ -80,6 +80,10 @@ const goRegister = () => {
   router.push({
     name: 'registration'
   })
+}
+
+const goToForgot = () => {
+  loginApi.selectedLogin = 'forgot'
 }
 
 const saveAccount = () => {
