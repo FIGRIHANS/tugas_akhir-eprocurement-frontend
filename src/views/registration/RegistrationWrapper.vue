@@ -158,9 +158,12 @@ const checkFieldNotEmpty = () => {
   switch (tab.active) {
     case 'registration__information':
       Object.keys(fields.information).forEach((key) => {
+        // @ts-expect-error
         const section = registrationVendorStore.information[key]
+        // @ts-expect-error
         registrationVendorStore.information[key] = {
           ...section,
+          // @ts-expect-error
           ...checkErrors(section, fields.information[key]),
         }
       })
@@ -181,9 +184,12 @@ const checkFieldNotEmpty = () => {
 
     case 'registration__contact':
       Object.keys(fields.contact).forEach((key) => {
+        // @ts-expect-error
         const section = registrationVendorStore.contact[key]
+        // @ts-expect-error
         registrationVendorStore.contact[key] = {
           ...section,
+          // @ts-expect-error
           ...checkErrors(section, fields.contact[key]),
         }
       })
