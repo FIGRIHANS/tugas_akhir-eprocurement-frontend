@@ -41,7 +41,7 @@
     </div>
 
     <div class="flex items-center justify-between mt-[24px]">
-      <p class="m-0">Tampilkan 10 data dari total data 100</p>
+      <p class="m-0 text-sm">Tampilkan 10 data dari total data 100</p>
       <LPagination :totalItems="totalItem" :pageSize="pageSize" :currentPage="currentPage" @pageChange="setPage" />
     </div>
   </div>
