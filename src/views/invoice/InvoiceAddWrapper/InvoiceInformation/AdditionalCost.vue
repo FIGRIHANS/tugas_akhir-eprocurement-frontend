@@ -48,7 +48,7 @@
               </td>
               <td>
                 <span v-if="!item.isEdit">{{ useFormatIdr(item.itemAmount) || '-' }}</span>
-                <input v-else v-model="item.itemAmount" class="input" placeholder=""/>
+                <input v-else v-model="item.itemAmount" class="input" type="number" placeholder=""/>
               </td>
               <td>
                 <span v-if="!item.isEdit">{{ getDebitCreditName(item.debitCredit) || '-' }}</span>

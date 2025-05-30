@@ -4,6 +4,7 @@ import api from '@/core/utils/api'
 import userApi from '@/core/utils/userApi'
 
 export const useLoginStore = defineStore('login', () => {
+  const selectedLogin = ref<string>('')
   const isVendor = ref<boolean>(false)
 
   const callLogin = async (username: string, password: string) => {
@@ -21,5 +22,10 @@ export const useLoginStore = defineStore('login', () => {
     return response.data
   }
 
-  return { isVendor, callLogin, callUser }
+  return {
+    selectedLogin,
+    isVendor,
+    callLogin,
+    callUser
+  }
 })

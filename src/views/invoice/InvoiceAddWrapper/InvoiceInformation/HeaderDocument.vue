@@ -22,7 +22,7 @@
         </button>
       </div>
     </div>
-    <div class="card-body py-[8px] px-[16px]">
+    <div class="card-body py-[8px] px-[16px] max-h-[380px] overflow-y-auto scroll mr-[16px]">
       <Transition mode="out-in">
         <component :is="contentComponent" />
       </Transition>

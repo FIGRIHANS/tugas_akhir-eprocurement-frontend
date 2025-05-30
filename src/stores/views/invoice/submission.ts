@@ -1,8 +1,9 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import invoiceApi from '@/core/utils/invoiceApi'
-import type { ApiResponse } from '@/core/type/api'
+import moment from 'moment'
 
+import type { ApiResponse } from '@/core/type/api'
 import type {
   SubmissionStatusTypes,
   DocumentTypes,
@@ -54,7 +55,6 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
   }
 
   const getListPo = async (data: QueryParamsListPoTypes) => {
-    console.log(data)
     const query = {
       statusCode: Number(data.statusCode) || null,
       companyCode: data.companyCode || null,
@@ -62,12 +62,11 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
       invoiceDate: data.invoiceDate || null,
       searchText: data.searchText || null
     }
-    console.log(query)
     const response: ApiResponse<ListPoTypes[]> = await invoiceApi.get(`/invoice/submission`, { params: query })
   
-    listPo.value = response.data.result.content
+    listPo.value = response.data.result.content.sort((a, b) => moment(b.invoiceDate).valueOf() - moment(a.invoiceDate).valueOf())
   
-    return response.data.result
+    return response.data.result.content
   }
 
   const getPoDetail = async (uid: string) => {

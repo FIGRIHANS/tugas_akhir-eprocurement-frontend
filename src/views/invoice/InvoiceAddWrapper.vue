@@ -23,7 +23,7 @@
             <i class="ki-duotone ki-bookmark"></i>
           </button>
           <div class="flex items-center justify-end gap-[8px]">
-            <button v-if="tabNow !== 'data'" class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goBack">
+            <button class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goBack">
               <i class="ki-filled ki-arrow-left"></i>
               Back
             </button>
@@ -228,7 +228,12 @@ const setTab = (value: string) => {
 const goBack = () => {
   const list = ['data', 'information', 'preview']
   const checkIndex = list.findIndex((item) => item === tabNow.value)
-  if (checkIndex !== -1) {
+  if (checkIndex === 0) {
+    router.push({
+      name: 'invoice'
+    })
+  }
+  if (checkIndex !== -1 && checkIndex !== 0) {
     tabNow.value = list[checkIndex - 1]
   }
 }

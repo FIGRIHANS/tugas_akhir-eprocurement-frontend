@@ -40,7 +40,7 @@ const router = createRouter({
       meta: {
         middleware: 'loginAuth',
       },
-      component: () => import('@/views/LoginView.vue'),
+      component: () => import('@/views/login/LoginView.vue'),
     },
 
     // Empty State
