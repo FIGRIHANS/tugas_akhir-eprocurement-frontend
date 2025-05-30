@@ -42,8 +42,8 @@
             <td>
               <span v-if="!item.isEdit">{{ item.taxCode }}</span>
               <select v-else v-model="item.taxCode" class="select" placeholder="">
-                <option v-for="(option, index) in listTaxCalculation" :key="index" :value="option.id">
-                  {{ option.id }}
+                <option v-for="(option, index) in listTaxCalculation" :key="index" :value="option.code">
+                  {{ option.code }}
                 </option>
               </select>
             </td>
@@ -108,13 +108,13 @@
 import { ref, computed, inject, watch, onMounted } from 'vue'
 import type { formTypes } from '../../types/invoiceDetailEdit'
 import { defaultColumn, invoiceDpColumn, PoPibColumn } from '@/static/invoicePoGr'
-import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
+import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 
-const invoiceApi = useInvoiceSubmissionStore()
+const invoiceMasterApi = useInvoiceMasterDataStore()
 const form = inject<formTypes>('form')
 const columns = ref<string[]>([])
 
-const listTaxCalculation = computed(() => invoiceApi.taxCalculationList)
+const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
 
 const checkInvoiceDp = () => {
   return form?.invoiceDp

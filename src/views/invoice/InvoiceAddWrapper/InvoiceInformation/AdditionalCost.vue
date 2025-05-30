@@ -6,7 +6,7 @@
       Add Additional Cost
     </button>
     <div v-if="form" class="overflow-x-auto cost__table">
-      <table class="table table-xs table-border">
+      <table class="table table-xs table-border" :class="{ 'border-danger': form?.additionalCostError }">
         <thead>
           <tr>
             <th
@@ -14,6 +14,8 @@
               :key="index"
               class="cost__field-base"
               :class="{
+                'cost__field-base--activity': item.toLowerCase() === 'activity / expense',
+                'cost__field-base--item-amount': item.toLowerCase() === 'item amount',
                 'cost__field-base--description': item.toLowerCase() === 'description'
               }"
             >
@@ -37,25 +39,19 @@
                 </button>
               </td>
               <td>
-                <span v-if="!item.isEdit">{{ item.activity || '-' }}</span>
+                <span v-if="!item.isEdit">{{ getActivityName(item.activity) || '-' }}</span>
                 <select v-else v-model="item.activity" class="select" placeholder="">
-                  <option value="1">
-                    Option 1
-                  </option>
-                  <option value="2">
-                    Option 2
-                  </option>
-                  <option value="3">
-                    Option 3
+                  <option v-for="item of listActivity" :key="item.code" :value="item.code">
+                    {{ item.name }}
                   </option>
                 </select>
               </td>
               <td>
-                <span v-if="!item.isEdit">{{ item.itemAmount || '-' }}</span>
-                <input v-else v-model="item.itemAmount" class="input" placeholder=""/>
+                <span v-if="!item.isEdit">{{ useFormatIdr(item.itemAmount) || '-' }}</span>
+                <input v-else v-model="item.itemAmount" class="input" type="number" placeholder=""/>
               </td>
               <td>
-                <span v-if="!item.isEdit">{{ item.debitCredit || '-' }}</span>
+                <span v-if="!item.isEdit">{{ getDebitCreditName(item.debitCredit) || '-' }}</span>
                 <select v-else v-model="item.debitCredit" class="select" placeholder="">
                   <option value="D">
                     Debit
@@ -68,8 +64,8 @@
               <td>
                 <span v-if="!item.isEdit">{{ item.taxCode || '-' }}</span>
                 <select v-else v-model="item.taxCode" class="select" placeholder="">
-                  <option v-for="(option, index) in listTaxCalculation" :key="index" :value="option.id">
-                    {{ option.id }}
+                  <option v-for="(option, index) in listTaxCalculation" :key="index" :value="option.code">
+                    {{ option.code }}
                   </option>
                 </select>
               </td>
@@ -102,9 +98,10 @@
 <script lang="ts" setup>
 import { ref, computed, inject } from 'vue'
 import type { formTypes } from '../../types/invoiceAddWrapper'
-import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
+import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
+import { useFormatIdr } from '@/composables/currency'
 
-const invoiceApi = useInvoiceSubmissionStore()
+const invoiceMasterApi = useInvoiceMasterDataStore()
 const columns = ref([
   'Action',
   'Activity / Expense',
@@ -121,7 +118,8 @@ const columns = ref([
 
 const form = inject<formTypes>('form')
 
-const listTaxCalculation = computed(() => invoiceApi.taxCalculationList)
+const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
+const listActivity = computed(() => invoiceMasterApi.activityList)
 
 const addNew = () => {
   if (form) {
@@ -146,6 +144,17 @@ const addNew = () => {
 const deleteItem = (index: number) => {
   form?.additionalCost.splice(index, 1)
 }
+
+const getActivityName = (code: string) => {
+  const getIndex = listActivity.value.findIndex((item) => item.code === code)
+  if (getIndex !== -1) return listActivity.value[getIndex].name
+}
+
+const getDebitCreditName = (code: string) => {
+  if (code === 'K') return 'Credit'
+  else if (code === 'D') return 'Debit'
+  else return '-'
+} 
 </script>
 
 <style lang="scss" scoped>

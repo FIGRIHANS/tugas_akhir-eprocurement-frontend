@@ -24,19 +24,19 @@
             <td v-if="!checkInvoiceDp()">{{ item.poItem }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentNo }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentItem }}</td>
-            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentDate }}</td>
+            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ moment(item.grDocumentDate).format('DD MMMM YYYY') }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.taxCode }}</td>
-            <td v-if="!checkInvoiceDp()">{{ item.itemAmount }}</td>
-            <td v-if="!checkInvoiceDp()">{{ item.quantity }}</td>
+            <td v-if="!checkInvoiceDp()">{{ useFormatIdr(item.itemAmount) }}</td>
+            <td v-if="!checkInvoiceDp()">{{ useFormatIdr(item.quantity) }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.uom }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.materialDescription }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.conditionType }}</td>
             <!-- <td v-if="checkInvoiceDp()">{{ item.amountInvoice }}</td>
             <td v-if="checkInvoiceDp()">{{ item.vatAmount }}</td> -->
-            <td>-</td>
-            <td>-</td>
-            <td>-</td>
-            <td>-</td>
+            <td>{{ item.whtType || '-' }}</td>
+            <td>{{ item.whtCode || '-' }}</td>
+            <td>{{ useFormatIdr(item.whtBaseAmount?.toString() || '') || 0 }}</td>
+            <td>{{ useFormatIdr(item.whtAmount?.toString() || '') || 0 }}</td>
             <td>{{ item.department }}</td>
           </tr>
         </tbody>
@@ -49,6 +49,8 @@
 import { ref, inject, watch, onMounted } from 'vue'
 import type { formTypes } from '../../types/invoiceAddWrapper'
 import { defaultColumn, invoiceDpColumn, PoPibColumn } from '@/static/invoicePoGr'
+import { useFormatIdr } from '@/composables/currency'
+import moment from 'moment'
 
 const form = inject<formTypes>('form')
 const columns = ref<string[]>([])

@@ -53,7 +53,7 @@ const filtersKey: { item: string; value: string }[] = [
 const filters = ref<{ key: string; value: LocationQueryValue | LocationQueryValue[] }[]>([])
 
 const filteredFilters = computed(() =>
-  filters.value.filter((filter) => filter.key !== 'page' && filter.key !== 'SearchQuery'),
+  filters.value.filter((filter) => filter.key !== 'page' && filter.key !== 'searchAny'),
 )
 
 const handleRemoveFilter = (key: string) => {

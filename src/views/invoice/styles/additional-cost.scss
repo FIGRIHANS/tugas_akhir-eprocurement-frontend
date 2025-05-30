@@ -22,6 +22,16 @@
     @apply px-[20px] !important;
     @apply py-[13px] !important;
     
+    &--activity {
+      @extend .cost__field-base;
+      min-width: 200px;
+    }
+    
+    &--item-amount {
+      @extend .cost__field-base;
+      min-width: 200px;
+    }
+    
     &--description {
       @extend .cost__field-base;
       min-width: 300px;

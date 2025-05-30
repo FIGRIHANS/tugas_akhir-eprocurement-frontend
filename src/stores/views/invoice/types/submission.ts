@@ -32,9 +32,9 @@ interface ParamsSubmissionHeader {
   companyCode: string
   companyName: string
   invoiceNo: string
-  vendorInvoiceNo: string
+  documentNo: string
   invoiceDate: string
-  invoiceTaxNo: string
+  taxNo: string
   currCode: string
   notes: string
   statusCode: number
@@ -57,7 +57,7 @@ interface ParamsSubmissionPayment {
 }
 
 interface ParamsSubmissionDocument {
-  documentType: string
+  documentType: number
   documentName: string
   documentUrl: string
   documentSize: number
@@ -123,4 +123,31 @@ export interface PoGrItemTypes {
   enteredOn: string
   purchasingOrg: string
   department: string
+}
+
+export interface ListPoTypes {
+  invoiceUId: string
+  invoiceTypeCode: number
+  invoiceTypeName: string
+  invoiceDPCode: number
+  invoiceDPName: string
+  companyCode: string
+  companyName: string
+  invoiceNo: string
+  invoiceDate: string
+  statusCode: string
+  statusName: string
+  poNo: string
+  grDocumentNo: string
+  estimatePaymentDate: string
+  totalGrossAmount: number
+  totalNetAmount: number
+}
+
+export interface QueryParamsListPoTypes {
+  statusCode?: number | null
+  companyCode?: string | null
+  invoiceTypeCode?: number | null
+  invoiceDate?: string | null
+  searchText?: string | null
 }

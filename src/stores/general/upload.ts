@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import generalAPI from '@/core/utils/generalApi'
+import generalApi from '@/core/utils/generalApi'
 
 import type { ApiResponse } from '@/core/type/api'
 import type { UploadFileResponse } from './types/upload'
@@ -10,8 +10,8 @@ export const useUploadStore = defineStore('upload', () => {
     formData.append('FormFile', FormFile)
     formData.append('Actioner', String(Actioner))
 
-    const response: ApiResponse<UploadFileResponse> = await generalAPI.post(
-      '/file/upload',
+    const response: ApiResponse<UploadFileResponse> = await generalApi.post(
+      '/api/file/upload',
       formData,
     )
 

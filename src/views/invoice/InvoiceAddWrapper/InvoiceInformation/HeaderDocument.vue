@@ -22,7 +22,7 @@
         </button>
       </div>
     </div>
-    <div class="card-body py-[8px] px-[16px]">
+    <div class="card-body py-[8px] px-[16px] max-h-[380px] overflow-y-auto scroll mr-[16px]">
       <Transition mode="out-in">
         <component :is="contentComponent" />
       </Transition>
@@ -31,10 +31,12 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, type Component } from 'vue'
+import { ref, computed, watch, inject, type Component } from 'vue'
+import type { formTypes } from '../../types/invoiceAddWrapper'
 import InvoiceHeader from './HeaderDocument/InvoiceHeader.vue'
 import InvoiceDocument from './HeaderDocument/InvoiceDocument.vue'
 
+const form = inject<formTypes>('form')
 const invoiceTypeTab = ref<string>('header')
 
 const contentComponent = computed(() => {
@@ -49,4 +51,19 @@ const contentComponent = computed(() => {
 const setTab = (type: string) => {
   invoiceTypeTab.value = type
 }
+
+watch(
+  () => form,
+  () => {
+    if (form) {
+      const headerError = form.companyCodeError || form.invoiceNoVendorError || form.invoiceDateError || form.taxNoInvoiceError || form.descriptionError
+      if (!headerError && form.invoiceDocumentError) {
+        invoiceTypeTab.value = 'document'
+      }
+    }
+  },
+  {
+    deep: true
+  }
+)
 </script>

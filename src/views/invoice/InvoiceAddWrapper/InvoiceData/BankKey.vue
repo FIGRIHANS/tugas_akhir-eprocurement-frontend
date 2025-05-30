@@ -14,7 +14,7 @@
         <input v-if="form.status !== 0" v-model="form.bankKeyId" class="input" placeholder="" disabled />
         <select v-else v-model="form.bankKeyId" class="select" :class="{ 'border-danger': form.bankKeyIdError }">
           <option v-for="item of bankList" :key="item.bankId" :value="item.bankId">
-            {{ item.bankKey }}
+            {{ item.bankKey + ' - ' + item.accountNumber }}
           </option>
         </select>
       </div>

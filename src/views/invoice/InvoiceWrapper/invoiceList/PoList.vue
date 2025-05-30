@@ -1,8 +1,8 @@
 <template>
   <div class="border border-gray-200 rounded-xl p-[24px]">
     <div class="flex justify-between gap-[8px]">
-      <UiInputSearch v-model="search" placeholder="Cari Invoice" class="w-[250px]" />
-      <FilterList :data="filterForm" />
+      <UiInputSearch v-model="search" placeholder="Cari Invoice" class="w-[250px]" @keypress="goSearch" />
+      <FilterList :data="filterForm" @setData="setDataFilter" />
     </div>
 
     <div class="overflow-x-auto list__table mt-[24px]">
@@ -15,58 +15,61 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(item, index) in list" :key="index">
+        <tr v-for="(item, index) in poList" :key="index">
           <td>
-            <button class="btn btn-outline btn-icon btn-primary" @click="goView">
+            <button class="btn btn-outline btn-icon btn-primary" @click="goView(item.invoiceUId)">
               <i class="ki-filled ki-eye"></i>
             </button>
           </td>
-          <td>{{ item.invoiceNumber }}</td>
+          <td>{{ item.invoiceNo }}</td>
           <td>
             <span class="badge badge-outline badge-warning">
               Under Verification
             </span>
           </td>
-          <td>{{ item.poNumber }}</td>
-          <td>{{ item.grNumber }}</td>
+          <td>{{ item.poNo }}</td>
+          <td>{{ item.grDocumentNo }}</td>
           <td>{{ item.companyCode }}</td>
-          <td>{{ item.invoiceCategory }}</td>
-          <td>{{ item.invoiceDate }}</td>
-          <td>{{ item.vendorName }}</td>
-          <td>{{ item.totalGrossAmount }}</td>
-          <td>{{ item.totalNetAmount }}</td>
-          <td>{{ item.estimatedPaymentDate }}</td>
+          <td>{{ item.invoiceTypeName }}</td>
+          <td>{{ moment(item.invoiceDate).format('DD MMMM YYYY') }}</td>
+          <td>{{ useFormatIdr(item.totalGrossAmount) }}</td>
+          <td>{{ useFormatIdr(item.totalNetAmount) }}</td>
+          <td>{{ item.estimatePaymentDate }}</td>
         </tr>
       </tbody>
       </table>
     </div>
 
     <div class="flex items-center justify-between mt-[24px]">
-      <p class="m-0">Tampilkan 10 data dari total data 100</p>
-      <LPagination :totalItems="totalItem" :pageSize="pageSize" :currentPage="currentPage" @pageChange="setPage" />
+      <p class="m-0">Tampilkan {{ poList.length > 10 ? 10 : poList.length }} data dari total data {{ poList.length }}</p>
+      <LPagination :totalItems="poList.length" :pageSize="pageSize" :currentPage="currentPage" @pageChange="setPage" />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, defineAsyncComponent } from 'vue'
+import { ref, reactive, computed, onMounted, defineAsyncComponent } from 'vue'
 import { useRouter } from 'vue-router'
-import type { listTypes, filterListTypes } from '../../types/invoiceList'
+import type { filterListTypes } from '../../types/invoiceList'
 import LPagination from '@/components/pagination/LPagination.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
+import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
+import { useFormatIdr } from '@/composables/currency'
+import moment from 'moment'
 
 const FilterList = defineAsyncComponent(() => import('./FilterList.vue'))
 
+const invoiceApi = useInvoiceSubmissionStore()
 const router = useRouter()
 const search = ref<string>('')
 const currentPage = ref<number>(1)
 const pageSize = ref<number>(10)
-const totalItem = ref<number>(100)
 
 const filterForm = reactive<filterListTypes>({
   status: '',
-  category: '',
-  date: ''
+  date: '',
+  companyCode: '',
+  invoiceType: ''
 })
 
 const columns = ref([
@@ -78,38 +81,52 @@ const columns = ref([
   'Company Code',
   'Invoice PO Type',
   'Invoice Date',
-  'Vendor Name',
   'Total Gross Amount',
   'Total Net Amount',
   'Estimated Payment Date'
 ])
 
-const list = ref<listTypes[]>([
-  {
-    invoiceNumber: 'INV238744',
-    status: 1,
-    poNumber: '1110052253',
-    grNumber: '5000000054',
-    companyCode: 'DELA',
-    invoiceCategory: 'With DP',
-    invoiceDate: '15 Okt 2024',
-    vendorName: 'PT Pharmacy',
-    totalGrossAmount: '100000',
-    totalNetAmount: '2365456',
-    estimatedPaymentDate: '30 November 2024'
-  }
-])
+const poList = computed(() => invoiceApi.listPo)
 
 const setPage = (value: number) => {
   currentPage.value = value
 }
 
-const goView = () => {
+const goView = (invoiceUId: string) => {
   router.push({
     name: 'invoiceAdd',
     query: {
-      type: 'po'
+      type: 'po-view',
+      invoice: invoiceUId
     }
   })
 }
+
+const callList = () => {
+  invoiceApi.getListPo({
+    statusCode: Number(filterForm.status),
+    companyCode: filterForm.companyCode,
+    invoiceTypeCode: Number(filterForm.invoiceType),
+    invoiceDate: filterForm.date,
+    searchText: search.value
+  })
+}
+
+const setDataFilter = (data: filterListTypes) => {
+  filterForm.status = data.status
+  filterForm.date = data.date
+  filterForm.companyCode = data.companyCode
+  filterForm.invoiceType = data.invoiceType
+  callList()
+}
+
+const goSearch = (event: KeyboardEvent) => {
+  if (event.key === 'Enter') {
+    callList()
+  }
+}
+
+onMounted(() => {
+  callList()
+})
 </script>

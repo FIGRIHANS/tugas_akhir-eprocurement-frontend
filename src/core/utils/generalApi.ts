@@ -1,7 +1,7 @@
 import axios from 'axios'
 
-const generalAPI = axios.create({
-  baseURL: import.meta.env.VITE_API_GENERAL_URL,
+const generalApi = axios.create({
+  baseURL: import.meta.env.VITE_API_GENERAL_BASE_URL,
 })
 
-export default generalAPI
+export default generalApi
