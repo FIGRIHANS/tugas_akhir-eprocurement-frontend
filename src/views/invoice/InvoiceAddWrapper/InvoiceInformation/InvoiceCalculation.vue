@@ -13,7 +13,7 @@
           <div
             v-for="(item, index) in listCalculation"
             :key="index"
-            class="border-b border-gray-200 py-[40px] px-[20px] text-xs flex"
+            class="border-b border-gray-200 py-[22px] px-[20px] text-xs flex"
             :class="index === listCalculation.length - 1 ? 'calculation__last-field' : ''"
           >
             <div class="flex-1">{{ item.name }}</div>

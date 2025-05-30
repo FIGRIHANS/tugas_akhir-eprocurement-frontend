@@ -28,10 +28,6 @@
           <template v-else>
             <tr v-for="(item, index) in form.invoicePoGr" :key="index" class="pogr__field-items">
               <td class="flex items-center justify-around gap-[8px]">
-                <button v-if="form.status === 0 || checkInvoiceDp()" class="btn btn-icon btn-primary" @click="item.isEdit = !item.isEdit">
-                  <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>
-                  <i v-else class="ki-duotone ki-check-circle"></i>
-                </button>
                 <button v-if="form.status === 0" class="btn btn-icon btn-outline btn-danger" @click="deleteItem(index)">
                   <i class="ki-duotone ki-cross-circle"></i>
                 </button>
@@ -43,10 +39,7 @@
               <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentDate }}</td>
               <td>{{ item.taxCode }}</td>
               <td v-if="!checkInvoiceDp()">{{ useFormatIdr(item.itemAmount) }}</td>
-              <td v-if="!checkInvoiceDp()">
-                <span v-if="!item.isEdit">{{ item.quantity }}</span>
-                <input v-else v-model="item.quantity" class="input" placeholder="" type="text"/>
-              </td>
+              <td v-if="!checkInvoiceDp()">{{ item.quantity }}</td>
               <td v-if="!checkInvoiceDp()">{{ item.uom }}</td>
               <td v-if="!checkInvoiceDp()">{{ item.materialDescription }}</td>
               <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.conditionType }}</td>

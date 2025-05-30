@@ -41,8 +41,8 @@
     </div>
 
     <div class="flex items-center justify-between mt-[24px]">
-      <p class="m-0">Tampilkan 10 data dari total data 100</p>
-      <LPagination :totalItems="totalItem" :pageSize="pageSize" :currentPage="currentPage" @pageChange="setPage" />
+      <p class="m-0">Tampilkan {{ poList.length > 10 ? 10 : poList.length }} data dari total data {{ poList.length }}</p>
+      <LPagination :totalItems="poList.length" :pageSize="pageSize" :currentPage="currentPage" @pageChange="setPage" />
     </div>
   </div>
 </template>
@@ -64,7 +64,6 @@ const router = useRouter()
 const search = ref<string>('')
 const currentPage = ref<number>(1)
 const pageSize = ref<number>(10)
-const totalItem = ref<number>(100)
 
 const filterForm = reactive<filterListTypes>({
   status: '',

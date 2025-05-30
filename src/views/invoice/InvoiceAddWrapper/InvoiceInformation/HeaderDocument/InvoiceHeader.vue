@@ -62,7 +62,7 @@
           Invoice Date
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
-        <DatePicker v-model="form.invoiceDate" format="yyyyMMdd" :error="form.invoiceDateError" :disabled="form.status !== 0" class="flex" />
+        <DatePicker v-model="form.invoiceDate" format="yyyyMMdd" :error="form.invoiceDateError" :disabled="form.status !== 0" class="w-full -ml-[15px]" />
       </div>
       <!-- Tax Document No. * -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
