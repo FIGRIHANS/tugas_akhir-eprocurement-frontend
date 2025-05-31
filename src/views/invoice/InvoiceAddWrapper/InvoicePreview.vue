@@ -65,10 +65,10 @@ const setData = () => {
     form.bankAccountNumber = detail?.payment.bankAccountNo || ''
     form.invoiceDp = detail?.header.invoiceDPCode.toString() || ''
     form.companyCode = detail?.header.companyCode || ''
-    form.invoiceNoVendor = detail?.header.invoiceNo.toString() || ''
+    form.invoiceNoVendor = detail?.header.documentNo.toString() || ''
     form.invoiceNo = detail?.header.invoiceNo.toString() || ''
     form.invoiceDate = detail?.header.invoiceDate || ''
-    form.taxNumber = detail?.header.taxNo || ''
+    form.taxNoInvoice = detail?.header.taxNo || ''
     form.currency = detail?.header.currCode || ''
     form.description = detail?.header.notes || ''
     form.subtotal = detail?.calculation.subtotal || 0
@@ -76,6 +76,8 @@ const setData = () => {
     form.additionalCostCalc = detail?.calculation.additionalCost || 0
     form.totalGrossAmount = detail?.calculation.totalGrossAmount || 0
     form.totalNetAmount = detail?.calculation.totalNetAmount || 0
+    form.status = detail?.header.statusCode || 0
+    form.invoicePoGr = []
     for (const item of detail?.pogr || []) {
       const data = {
         poNo: item.poNo,
@@ -103,6 +105,7 @@ const setData = () => {
       } as itemsPoGrType
       form.invoicePoGr.push(data)
     }
+    form.additionalCost = []
     for (const item of detail?.additionalCosts || []) {
       const data = {
         activity: item.activityExpense,

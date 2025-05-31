@@ -118,8 +118,9 @@ const goView = (invoiceUId: string) => {
 }
 
 const callList = () => {
+  list.value = []
   invoiceApi.getListPo({
-    statusCode: Number(filterForm.status),
+    statusCode: filterForm.status === '0' || filterForm.status ? Number(filterForm.status) : null,
     companyCode: filterForm.companyCode,
     invoiceTypeCode: Number(filterForm.invoiceType),
     invoiceDate: filterForm.date,

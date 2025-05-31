@@ -15,7 +15,7 @@
         <p class="text-sm font-medium">{{ getCompanyName() || '-' }}</p>
       </div>
       <div class="w-[calc(50%-10px)]">
-        <p class="text-xs font-normal text-gray-700">No Invoice Vendor</p>
+        <p class="text-xs font-normal text-gray-700">Invoice Document No.</p>
         <p class="text-sm font-medium">{{ form.invoiceNoVendor || '-' }}</p>
       </div>
       <div class="w-[calc(50%-10px)]">
@@ -23,8 +23,8 @@
         <p class="text-sm font-medium whitespace-nowrap">{{ form.invoiceDate ? moment(form.invoiceDate).format('YYYYMMDD') : '-' }}</p>
       </div>
       <div class="w-[calc(50%-10px)]">
-        <p class="text-xs font-normal text-gray-700">No Tax Invoice</p>
-        <p class="text-sm font-medium">{{ form.taxNumber || '-' }}</p>
+        <p class="text-xs font-normal text-gray-700">Tax Document No.</p>
+        <p class="text-sm font-medium">{{ form.taxNoInvoice || '-' }}</p>
       </div>
       <div class="w-[calc(50%-10px)]">
         <p class="text-xs font-normal text-gray-700">Currency</p>
