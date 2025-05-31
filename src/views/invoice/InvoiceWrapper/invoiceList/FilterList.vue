@@ -9,7 +9,10 @@
       <div class="flex flex-col gap-[24px] py-[16px]">
         <div class="relative">
           <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white">Status</label>
-          <select class="select" name="select">
+          <select v-model="status" class="select" name="select">
+            <option value="0">
+              Draft
+            </option>
             <option value="1">
               Waiting to Verify
             </option>

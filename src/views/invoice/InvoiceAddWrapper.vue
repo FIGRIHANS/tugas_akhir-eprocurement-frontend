@@ -3,7 +3,7 @@
     <Breadcrumb title="Add Invoice" :routes="routes" />
     <StepperStatus active-name="Submission" />
     <TabInvoice :active-tab="tabNow" @change-tab="setTab" class="-mx-[24px]" />
-    <div v-if="form.status !== 0" class="status__box--approved -mt-5 -mx-[24px]">
+    <!-- <div v-if="form.status !== 0" class="status__box--approved -mt-5 -mx-[24px]">
       <i class="ki-outline ki-shield-tick text-primary text-[36px]"></i>
       <div>
         <p class="text-[15px] font-semibold mb-[4px]">Successfully Submitted</p>
@@ -11,14 +11,14 @@
           The invoice has been successfully submitted. You can now download the invoice PDF for your records.
         </p>
       </div>
-    </div>
+    </div> -->
     <div>
       <Transition mode="out-in">
         <component :is="contentComponent" />
       </Transition>
       <template v-if="!checkInvoiceView()">
         <div v-if="form.status === 0" class="flex justify-between items-center gap-[8px] mt-[24px]">
-          <button class="btn btn-outline btn-primary" :disabled="isSubmit">
+          <button class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goSaveDraft">
             Save as Draft
             <i class="ki-duotone ki-bookmark"></i>
           </button>
@@ -149,6 +149,7 @@ const contentComponent = computed(() => {
 
 const listDocumentType = computed(() => invoiceMasterApi.documentType)
 const vendorList = computed(() => invoiceMasterApi.vendorList)
+const invoiceDpList = computed(() => invoiceMasterApi.dpType)
 
 const checkInvoiceView = () => {
   return route.query.type === 'po-view'
@@ -308,14 +309,19 @@ const getVendorName = () => {
   if (getIndex !== -1) return vendorList.value[getIndex].vendorName
 }
 
+const getDpName = () => {
+  const getIndex = invoiceDpList.value.findIndex((item) => item.code === form?.invoiceDp)
+  if (getIndex !== -1) return invoiceDpList.value[getIndex].name
+}
+
 const mapDataPost = () => {
   const data = {
     header: {
       invoiceUId: '00000000-0000-0000-0000-000000000000',
       invoiceTypeCode: Number(form.invoiceType),
       invoiceTypeName: form.invoiceTypeName,
-      invoiceDPCode: Number(form.invoiceType),
-      invoiceDPName: form.invoiceTypeName,
+      invoiceDPCode: Number(form.invoiceDp),
+      invoiceDPName: getDpName(),
       companyCode: form.companyCode,
       companyName: form.companyName,
       invoiceNo: form.invoiceNo,
@@ -391,6 +397,31 @@ const goNext = () => {
       isSubmit.value = false
     })
   }
+}
+
+const goSaveDraft = () => {
+  const data = mapDataPost()
+  data.header.statusCode = 0
+  data.header.statusName = 'Draft'
+  isSubmit.value = true
+  invoiceApi.postSubmission(data).then(() => {
+    const idModal = document.querySelector('#success_invoice_modal')
+    const modal = KTModal.getInstance(idModal as HTMLElement)
+    modal.show()
+
+    setTimeout(() => {
+      modal.hide()
+      router.push({
+        name: 'invoice-list'
+      })
+    }, 1000)
+  })
+  .catch((error) => {
+    console.error(error)
+  })
+  .finally(() => {
+    isSubmit.value = false
+  })
 }
 
 onMounted(() => {

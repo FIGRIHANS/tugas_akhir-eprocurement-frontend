@@ -55,14 +55,19 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
   }
 
   const getListPo = async (data: QueryParamsListPoTypes) => {
+    listPo.value = []
     const query = {
-      statusCode: Number(data.statusCode) || null,
       companyCode: data.companyCode || null,
       invoiceTypeCode: Number(data.invoiceTypeCode) || null,
       invoiceDate: data.invoiceDate || null,
       searchText: data.searchText || null
     }
-    const response: ApiResponse<ListPoTypes[]> = await invoiceApi.get(`/invoice/submission`, { params: query })
+    const response: ApiResponse<ListPoTypes[]> = await invoiceApi.get(`/invoice/submission`, {
+      params: {
+        ...(data.statusCode !== null ? { statuscode: Number(data.statusCode) } : {}),
+        ...query
+      }
+    })
   
     listPo.value = response.data.result.content.sort((a, b) => moment(b.invoiceDate).valueOf() - moment(a.invoiceDate).valueOf())
   
