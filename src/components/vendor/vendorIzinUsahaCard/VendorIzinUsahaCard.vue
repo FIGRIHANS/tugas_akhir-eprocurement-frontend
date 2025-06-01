@@ -1,13 +1,39 @@
 <script setup lang="ts">
+import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiLoading from '@/components/UiLoading.vue'
 import { formatDate } from '@/core/utils/format'
+import { useVendorUploadStore } from '@/stores/vendor/upload'
 import { useVendorIzinUsahaStore } from '@/stores/vendor/vendor'
-import { watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 const izinUsahaStore = useVendorIzinUsahaStore()
+const uploadStore = useVendorUploadStore()
+
 const route = useRoute()
+
+const loading = ref<boolean>(false)
+const error = ref<string>('')
+
+const download = async (path: string) => {
+  loading.value = true
+  error.value = ''
+
+  try {
+    const file = await uploadStore.preview(path)
+    console.log(file)
+    const link = URL.createObjectURL(file)
+    window.open(link, '_blank')
+    setTimeout(() => URL.revokeObjectURL(link), 1000)
+  } catch (err) {
+    console.error(err)
+    alert('Failed to download document. Please try again later.')
+  } finally {
+    loading.value = false
+  }
+}
+
 watch(
   () => route.params.id,
   (id) => {
@@ -56,14 +82,15 @@ watch(
               {{ item.expiredUTCDate ? formatDate(new Date(item.expiredUTCDate as string)) : '-' }}
             </td>
             <td>
-              <a
-                :href="item.documentUrl"
-                target="_blank"
-                class="btn btn-primary btn-outline btn-sm"
+              <UiButton
+                :disabled="loading"
+                :outline="true"
+                size="sm"
+                @click="download(item.documentUrl)"
               >
                 <UiIcon name="cloud-download" variant="duotone" />
                 <span>Download Document</span>
-              </a>
+              </UiButton>
             </td>
           </tr>
         </tbody>

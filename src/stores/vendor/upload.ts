@@ -1,4 +1,5 @@
 import type { ApiResponse } from '@/core/type/api'
+import generalApi from '@/core/utils/generalApi'
 import vendorAPI from '@/core/utils/vendorApi'
 import axios from 'axios'
 import { defineStore } from 'pinia'
@@ -39,5 +40,14 @@ export const useVendorUploadStore = defineStore('vendor-upload', () => {
       loading.value = false
     }
   }
-  return { upload, loading, error }
+
+  const preview = async (path: string) => {
+    const response = await generalApi.get('/api/file/preview', {
+      params: { fullFilePath: path },
+      responseType: 'blob',
+    })
+    return response.data
+  }
+
+  return { upload, preview, loading, error }
 })

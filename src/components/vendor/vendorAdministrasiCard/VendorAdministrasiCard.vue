@@ -3,18 +3,39 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import type { IVendorAdministrasiCardProps } from './types/vendorAdministrasiCard'
 import { useVendorAdministrationStore } from '@/stores/vendor/vendor'
-import { watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import UiLoading from '@/components/UiLoading.vue'
+import { useVendorUploadStore } from '@/stores/vendor/upload'
 
 const administrasiStore = useVendorAdministrationStore()
+const uploadStore = useVendorUploadStore()
 const route = useRoute()
+
+const loading = ref<boolean>(false)
+const error = ref<string>('')
 
 withDefaults(defineProps<IVendorAdministrasiCardProps>(), {
   allowExport: false,
 })
 
-const baseUrl = import.meta.env.VITE_API_VENDOR_BASE_URL
+const download = async (path: string) => {
+  loading.value = true
+  error.value = ''
+
+  try {
+    const file = await uploadStore.preview(path)
+    console.log(file)
+    const link = URL.createObjectURL(file)
+    window.open(link, '_blank')
+    setTimeout(() => URL.revokeObjectURL(link), 1000)
+  } catch (err) {
+    console.error(err)
+    alert('Failed to download document. Please try again later.')
+  } finally {
+    loading.value = false
+  }
+}
 
 watch(
   () => route.params.id,
@@ -93,12 +114,20 @@ watch(
               <tr>
                 <td class="text-sm text-gray-600 font-medium w-[182px]">NPWP Document</td>
                 <td class="text-sm font-bold text-gray-700">
-                  <a :href="`${baseUrl}/${administrasiStore.data[0].npwpUrl}`" target="_blank">
-                    <UiButton :outline="true" size="sm">
+                  <UiButton
+                    :outline="true"
+                    size="sm"
+                    @click="download(administrasiStore.data[0].npwpUrl)"
+                    :disabled="loading"
+                  >
+                    <span v-if="loading">
+                      <UiLoading />
+                    </span>
+                    <template v-else>
                       <UiIcon name="cloud-download" variant="duotone" />
                       <span>Download NPWP Document</span>
-                    </UiButton>
-                  </a>
+                    </template>
+                  </UiButton>
                 </td>
               </tr>
             </tbody>
