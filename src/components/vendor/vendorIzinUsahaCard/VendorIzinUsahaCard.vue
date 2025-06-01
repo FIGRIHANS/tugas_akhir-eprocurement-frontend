@@ -22,7 +22,6 @@ const download = async (path: string) => {
 
   try {
     const file = await uploadStore.preview(path)
-    console.log(file)
     const link = URL.createObjectURL(file)
     window.open(link, '_blank')
     setTimeout(() => URL.revokeObjectURL(link), 1000)
