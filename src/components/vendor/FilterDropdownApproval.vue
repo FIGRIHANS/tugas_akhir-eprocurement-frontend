@@ -5,40 +5,58 @@ import UiSelect from '../ui/atoms/select/UiSelect.vue'
 import { useRoute } from 'vue-router'
 import { useApprovalStatusStore, useApprovalTypeStore } from '@/stores/vendor/reference'
 import { useVendorCategoryStore } from '@/stores/vendor/category'
-import { useBusinessFieldStore } from '@/stores/vendor/businessField'
-import { formattoMySQL } from '@/core/utils/format'
+import moment from 'moment'
 
 const route = useRoute()
 
 const statusRef = useApprovalStatusStore()
 const approvalRef = useApprovalTypeStore()
 const categoryRef = useVendorCategoryStore()
-const businessFields = useBusinessFieldStore()
 
 const approvalDate = ref<Date | null>(null)
 const filters = reactive({
   ApprovalStatusName: '',
   CompanyCategoryName: '',
-  // BusinessFieldName: '',
-  SendApprovalDate: computed(() => (approvalDate.value ? formattoMySQL(approvalDate.value) : '')),
+  SendApprovalDate: computed(() =>
+    approvalDate.value ? moment(approvalDate.value).format('YYYY-MM-DD') : '',
+  ),
   ApprovalTypeName: '',
 })
 
-// const bsnField = computed(() => {
-//   const field = businessFields.businessFields.map((item) => item.businessFieldName)
-//   return [...new Set(field)]
-// })
+const statusOptions = computed(() =>
+  statusRef.approvalStatus.map((item) => ({
+    text: item.value,
+    value: item.value,
+  })),
+)
+
+const categoryOptions = computed(() =>
+  categoryRef.categories.map((item) => ({
+    text: item.companyCategoryName,
+    value: item.companyCategoryName,
+  })),
+)
+
+const approvalTypeOptions = computed(() =>
+  approvalRef.approvalType.map((item) => ({
+    text: item.value,
+    value: item.value,
+  })),
+)
 
 watch(
   () => route.query,
   (query) => {
     filters.ApprovalStatusName = (query.ApprovalStatusName as string) || ''
     filters.CompanyCategoryName = (query.CompanyCategoryName as string) || ''
-    // filters.BusinessFieldName = (query.BusinessFieldName as string) || ''
     approvalDate.value = (query.SendApprovalDate as string)
       ? new Date(query.SendApprovalDate as string)
       : null
     filters.ApprovalTypeName = (query.ApprovalTypeName as string) || ''
+  },
+  {
+    immediate: true,
+    deep: true,
   },
 )
 
@@ -46,28 +64,25 @@ onMounted(() => {
   statusRef.getStatus()
   approvalRef.getType()
   categoryRef.getCategories()
-  businessFields.getBusinessFields()
 })
 </script>
 <template>
   <FilterDropdown :filters="filters">
     <!-- status -->
-    <UiSelect label="Status" placeholder="Pilih Status" v-model="filters.ApprovalStatusName">
-      <option v-for="status in statusRef.approvalStatus" :key="status.code" :value="status.value">
-        {{ status.value }}
-      </option>
-    </UiSelect>
+    <UiSelect
+      label="Status"
+      placeholder="select"
+      v-model="filters.ApprovalStatusName"
+      :options="statusOptions"
+    />
 
     <!-- category -->
-    <UiSelect label="Category" placeholder="Pilih" v-model="filters.CompanyCategoryName">
-      <option
-        v-for="category in categoryRef.categories"
-        :key="category.companyCategoryId"
-        :value="category.companyCategoryName"
-      >
-        {{ category.companyCategoryName }}
-      </option>
-    </UiSelect>
+    <UiSelect
+      label="Category"
+      placeholder="Select"
+      v-model="filters.CompanyCategoryName"
+      :options="categoryOptions"
+    />
 
     <div class="min-w-[0px] w-full">
       <VueDatePicker v-model="approvalDate" class="w-full">
@@ -78,7 +93,7 @@ onMounted(() => {
                 'absolute top-0 left-0 -mt-2 ml-2 bg-white px-1 text-gray-500 text-[11px] font-normal',
               ]"
             >
-              Tanggal Approval Verifikasi Dikirim
+              Approval Date Sent
             </div>
             <input :placeholder="'Select'" :value="value" readonly class="min-w-[0px]" />
             <button class="btn btn-icon">
@@ -90,11 +105,12 @@ onMounted(() => {
     </div>
 
     <!-- izin usaha -->
-    <UiSelect label="Jenis Approval" placeholder="Pilih" v-model="filters.ApprovalTypeName">
-      <option v-for="item in approvalRef.approvalType" :key="item.value" :value="item.value">
-        {{ item.value }}
-      </option>
-    </UiSelect>
+    <UiSelect
+      label="Approval Type"
+      placeholder="Select"
+      v-model="filters.ApprovalTypeName"
+      :options="approvalTypeOptions"
+    />
   </FilterDropdown>
 </template>
 

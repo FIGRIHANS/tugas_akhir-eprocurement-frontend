@@ -6,7 +6,6 @@ import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import FilterButton from '@/components/vendor/filterButton/FilterButton.vue'
 import FilterDropdownApproval from '@/components/vendor/FilterDropdownApproval.vue'
 
 import { debounce } from 'lodash'
@@ -14,15 +13,15 @@ import ApproveButton from '@/components/vendor/approval/ApproveButton.vue'
 import RejectButton from '@/components/vendor/approval/RejectButton.vue'
 import ApprovalVerifikasi from '@/components/vendor/approval/ApprovalVerifikasi.vue'
 import { useApprovalStore } from '@/stores/vendor/approval'
-import { formatDate } from '@/core/utils/format'
 import UiLoading from '@/components/UiLoading.vue'
+import moment from 'moment'
+import VendorApprovalFilters from '@/components/vendor/filterButton/VendorApprovalFilters.vue'
 
 const route = useRoute()
 const router = useRouter()
 const approval = useApprovalStore()
 
 const search = ref('')
-// const currentPage = ref(1)
 
 const handlePageChange = (page: number) => {
   const query = { ...route.query, page }
@@ -48,7 +47,6 @@ watch(search, (newSearch) => {
 watch(
   () => route.query,
   (query) => {
-    // currentPage.value = Number(query.page) || 1
     search.value = (query.searchQuery as string) || ''
 
     approval.getApproval(route.query)
@@ -66,7 +64,7 @@ watch(
   />
   <div class="card">
     <div class="card-header">
-      <UiInputSearch v-model="search" placeholder="Cari vendor" />
+      <UiInputSearch v-model="search" placeholder="Search vendor" />
       <div class="flex gap-3">
         <FilterDropdownApproval />
         <UiButton :outline="true">
@@ -76,18 +74,18 @@ watch(
       </div>
     </div>
     <div class="card-body scrollable-x-auto">
-      <FilterButton />
+      <VendorApprovalFilters />
       <table class="table align-middle">
         <thead>
           <tr class="text-nowrap">
             <th>Action</th>
-            <th>Nama Perusahaan</th>
-            <th>Alamat Vendor</th>
-            <th>Kategori Vendor</th>
-            <th>Tanggal Aktivasi</th>
-            <th>Tanggal Approval Verifikasi Dikirim</th>
+            <th>Company Name</th>
+            <th>Vendor Address</th>
+            <th>Vendor Category</th>
+            <th>Activation Date</th>
+            <th>Approval Date Sent</th>
             <th>Status</th>
-            <th>Jenis Approval</th>
+            <th>Approval Type</th>
           </tr>
         </thead>
         <tbody>
@@ -118,7 +116,7 @@ watch(
           >
             <td>
               <div class="flex gap-5">
-                <div v-if="item.approvalStatus == '1'">
+                <div v-if="item.approvalStatus === '1'">
                   <UiButton>
                     <UiIcon name="paper-plane" variant="duotone" />
                     <span class="text-nowrap">Send to SAP</span>
@@ -140,12 +138,10 @@ watch(
             <td class="text-nowrap">{{ item.addressCompanyInfo }}</td>
             <td class="text-nowrap">{{ item.companyCategoryName }}</td>
             <td class="text-nowrap">
-              {{ item.activedUTCDate ? formatDate(new Date(item.activedUTCDate)) : '-' }}
+              {{ item.activedUTCDate ? moment(item.activedUTCDate).format('LL') : '-' }}
             </td>
             <td class="text-nowrap">
-              {{
-                item.sendApprovalDate ? formatDate(new Date(item.sendApprovalDate as string)) : '-'
-              }}
+              {{ item.sendApprovalDate ? moment(item.sendApprovalDate).format('LL') : '-' }}
             </td>
             <td class="text-nowrap">{{ item.approvalStatusName }}</td>
             <td class="text-nowrap">{{ item.approvalTypeName }}</td>
@@ -154,9 +150,7 @@ watch(
       </table>
     </div>
     <div class="card-footer">
-      <div>
-        Tampilkan {{ approval.data.pageSize }} data dari total data {{ approval.data.total }}
-      </div>
+      <div>Showing {{ approval.data.pageSize }} of {{ approval.data.total }} entries</div>
       <LPagination
         :current-page="approval.data.page"
         :page-size="approval.data.pageSize"

@@ -83,16 +83,16 @@ export interface IPayment {
   accountNo: string
   accountName: string
   bankId: number
-  currencyId: string
+  currencyId: number
   urlDoc: string
-  isTemporary: null | string
+  isTemporary: null | boolean
   action: null | string
   bankAddress: string
   countryId: number
   isTransfer: boolean
-  changeRequestId: null | string
-  isActive: null | string
-  bankCountryCode: string
+  changeRequestId: null | number
+  isActive: boolean
+  bankCountryCode: null | string
   bankCode: string
   bankName: string
   bankSwiftCode: string
@@ -105,9 +105,9 @@ export interface IPayment {
   biCode: string
   currencySymbol: string
   currencyLabel: string
-  countryCode: string
-  countryName: string
-  countryPhonePrefix: string
+  countryCode: null | string
+  countryName: null | string
+  countryPhonePrefix: null | string
 }
 
 export interface IPostBlacklist {
