@@ -6,9 +6,15 @@
     </p>
     <div class="mt-[30px] flex flex-col gap-[20px]">
       <!-- input email -->
-      <div>
+      <div v-if="!checkVendor()">
         <label class="font-normal text-[13px]">Email</label>
         <input v-model="email" class="input mt-[8px]" placeholder="email@email.com" type="email" />
+      </div>
+
+      <!-- input username -->
+      <div v-else>
+        <label class="font-normal text-[13px]">Username</label>
+        <input v-model="username" class="input mt-[8px]" placeholder="Username" type="text" />
       </div>
 
       <!-- input password -->
@@ -61,6 +67,7 @@ import type { ApiResponseData, ApiResponseDataResult } from '@/core/type/api'
 const loginApi = useLoginStore()
 const router = useRouter()
 const email = ref<string>('')
+const username = ref<string>('')
 const password = ref<string>('')
 const rememberMe = ref<boolean>(false)
 const showPassword = ref<boolean>(false)
@@ -88,7 +95,11 @@ const goToForgot = () => {
 
 const saveAccount = () => {
   if (rememberMe.value) {
-    localStorage.setItem('account_dts', `username=${email.value}; password=${password.value}`)
+    if (checkVendor()) {
+      localStorage.setItem('account_dts_vendor', `username=${username.value}; password=${password.value}`)
+    } else {
+      localStorage.setItem('account_dts', `username=${email.value}; password=${password.value}`)
+    }
   }
 }
 
@@ -101,7 +112,8 @@ const goLogin = () => {
   isLoading.value = true
   if (!email.value && !password.value) return isLoading.value = false
   saveAccount()
-  loginApi.callLogin(email.value, password.value)
+  const emailUsername = checkVendor() ? username.value : email.value
+  loginApi.callLogin(emailUsername, password.value)
     .then((response: ApiResponseData<string>) => {
       if (response.statusCode === 200) {
         loginApi.isVendor = checkVendor()
@@ -117,15 +129,40 @@ const goLogin = () => {
     })
 }
 
-onMounted(() => {
-  const savedAccount = localStorage.getItem('account_dts') || ''
-  
-  const account = savedAccount.split('; ')
+const getUsernameEmailPassword = (itemLocalStorage: string) => {
+  let username = ''
+  let email = ''
+  let password = ''
+
+  const account = itemLocalStorage.split('; ')
   for (const item of account) {
     const [key, value] = item.split('=')
-    if (key === 'username') email.value = value
-    if (key === 'password') password.value = value
+    if (key === 'username') {
+      if (checkVendor()) {
+        username = value
+      } else {
+        email = value
+      }
+    }
+    if (key === 'password') password = value
   }
+
+  return {
+    username,
+    email,
+    password
+  }
+}
+
+onMounted(() => {
+  const savedAccount = localStorage.getItem('account_dts') || ''
+  const savedAccountVendor = localStorage.getItem('account_dts_vendor') || ''
+  
+  const result = getUsernameEmailPassword(checkVendor() ? savedAccountVendor : savedAccount)
+  username.value = result.username
+  email.value = result.email
+  password.value = result.password
+  
   if (email.value && password.value) rememberMe.value = true
 })
 </script>
