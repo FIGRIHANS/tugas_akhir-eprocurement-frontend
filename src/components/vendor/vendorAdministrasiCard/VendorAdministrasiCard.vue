@@ -199,7 +199,7 @@ watch(
                     :key="bf"
                   >
                     {{ index + 1 }}.
-                    {{ administrasiStore.data[0].businessFieldName }}
+                    {{ bf }}
                   </li>
                 </ul>
               </td>
