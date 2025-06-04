@@ -1,41 +1,101 @@
 <template>
   <div class="card flex-1">
-    <div class="card-header px-[16px] py-[22px]">
-      <div class="flex gap-4 mb-5 flex-1 border rounded-lg p-[4px]" data-tabs="true">
-        <button
-          class="btn btn-primary btn-clear flex-1 justify-center"
-          :class="{ 'active': tabNow === 'payment' }"
-          @click="tabNow = 'payment'"
-        > Payment Information </button>
-        <button
-          class="btn btn-primary btn-clear flex-1 justify-center"
-          :class="{ 'active': tabNow === 'alternative' }"
-          @click="tabNow = 'alternative'"
-        > Alternative Payment </button>
-      </div>
+    <div class="card-header justify-start gap-[8px] px-[16px] py-[22px]">
+      <i class="ki-duotone ki-bill text-gray-600 text-xl"></i>
+      <span class="font-medium">Payment Information</span>
     </div>
-    <div class="py-[8px] px-[50px]">
-      <Transition mode="out-in">
-        <component :is="contentComponent" />
-      </Transition>
+    <div v-if="form" class="card-body py-[8px] px-[50px]">
+      <!-- Bank Key -->
+      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
+        <label class="form-label max-w-32">
+          Bank Key
+          <span class="text-red-500 ml-[4px]">*</span>
+        </label>
+        <select v-model="form.bankKeyId" class="select" :class="{ 'border-danger': form.bankKeyIdError }">
+          <option v-for="item of bankList" :key="item.bankId" :value="item.bankId">
+            {{ item.bankKey + ' - ' + item.accountNumber }}
+          </option>
+        </select>
+      </div>
+      <!-- Bank Account Number -->
+      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
+        <label class="form-label max-w-32">
+          Bank Account Number
+        </label>
+        <input v-model="form.bankAccountNumber" class="input" placeholder="" disabled/>
+      </div>
+      <!-- Bank Name -->
+      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
+        <label class="form-label max-w-32">
+          Bank Name
+        </label>
+        <input v-model="form.bankNameId" class="input" placeholder="" disabled/>
+      </div>
+      <!-- Beneficiary Name -->
+      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
+        <label class="form-label max-w-32">
+          Beneficiary Name
+        </label>
+        <input v-model="form.beneficiaryName" class="input" placeholder="" disabled/>
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, defineAsyncComponent, type Component } from 'vue'
+import { ref, computed, onMounted, watch, inject } from 'vue'
+import type { formTypes } from '../../types/invoiceDetailEdit'
+import type { PaymentTypes } from '@/stores/master-data/types/invoiceMasterData'
+import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 
-const PaymentInformation = defineAsyncComponent(() => import('./BankKey/PaymentInformation.vue'))
-const AlternativePayment = defineAsyncComponent(() => import('./BankKey/AlternativePayment.vue'))
+const invoiceMasterApi = useInvoiceMasterDataStore()
+const form = inject<formTypes>('form')
+const bankList = ref<PaymentTypes[]>([])
 
-const tabNow = ref<string>('payment')
+const vendorList = computed(() => invoiceMasterApi.vendorList)
 
-const contentComponent = computed(() => {
-  const components = {
-    payment: PaymentInformation,
-    alternative: AlternativePayment
-  } as { [key: string]: Component }
+const checkBank = () => {
+  if (form) {
+    const getIndex = vendorList.value.findIndex((item) => item.vendorId === Number(form?.vendorId))
+    if (getIndex !== -1) {
+      bankList.value = vendorList.value[getIndex].payment
+      if (bankList.value.length === 1) {
+        form.bankKeyId = bankList.value[0].bankId.toString()
+        form.bankNameId = bankList.value[0].bankName
+        form.beneficiaryName = bankList.value[0].beneficiaryName
+        form.bankAccountNumber = bankList.value[0].accountNumber
+      } else {
+        form.bankKeyId = ''
+        form.bankNameId = ''
+        form.beneficiaryName = ''
+        form.bankAccountNumber = ''
+      }
+    }
+  }
+}
 
-  return components[tabNow.value]
+watch(
+  () => form?.vendorId,
+  () => {
+    checkBank()
+  }
+)
+
+watch(
+  () => form?.bankKeyId,
+  () => {
+    if (form) {
+      const getIndex = bankList.value.findIndex((item) => item.bankId === Number(form.bankKeyId))
+      if (getIndex !== -1) {
+        form.bankNameId = bankList.value[getIndex].bankName
+        form.beneficiaryName = bankList.value[getIndex].beneficiaryName
+        form.bankAccountNumber = bankList.value[getIndex].accountNumber
+      }
+    }
+  }
+)
+
+onMounted(() => {
+  checkBank()
 })
 </script>

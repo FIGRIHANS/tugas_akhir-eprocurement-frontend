@@ -12,6 +12,7 @@ export interface formTypes extends documentFormTypes {
   address: string
 
   bankKeyId: string
+  bankKeyIdError?: boolean
   bankNameId: string
   beneficiaryName: string
   bankAccountNumber: string

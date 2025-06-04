@@ -1,15 +1,21 @@
 import { useLoginStore } from '@/stores/views/login'
 
+const getParamCookie = () => {
+  const cookies = document.cookie.split('; ').find((row) => row.startsWith('session_data='))
+  if (cookies) {
+    const cookieValue = cookies.split("=").slice(1).join("=")
+    const params = new URLSearchParams(cookieValue)
+    return params
+  }
+}
+
 export const useCheckToken = () => {
   const loginApi = useLoginStore()
   let token = ''
 
-  const cookies = document.cookie.split('; ')
-  for (const cookie of cookies) {
-    const [key, value] = cookie.split('=')
-    if (key === 'token_dts') token = decodeURIComponent(value)
-    if (key === 'isAdmin') loginApi.isVendor = !Boolean(value)
-  }
+  const paramCookie = getParamCookie()
+  token = paramCookie?.get('token_dts') || ''
+  loginApi.isVendor = Boolean(paramCookie?.get('isAdmin'))
 
   return token
 }
@@ -23,4 +29,9 @@ export const getToken = () => {
   } else {
     return ''
   }
+}
+
+export const useGetUsername = () => {
+  const paramCookie = getParamCookie()
+  return paramCookie?.get('username')
 }

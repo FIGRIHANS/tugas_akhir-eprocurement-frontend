@@ -20,52 +20,35 @@
         <tbody>
           <tr v-for="(item, index) in form.invoicePoGr" :key="index" class="pogr__field-items">
             <td class="flex items-center justify-around gap-[8px]">
-              <button v-if="form.status === 0" class="btn btn-icon btn-primary" @click="item.isEdit = !item.isEdit">
+              <button v-if="form.status === 0" class="btn btn-outline btn-icon btn-primary" @click="goEdit(item)">
                 <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>
                 <i v-else class="ki-duotone ki-check-circle"></i>
               </button>
-              <button v-if="form.status === 0" class="btn btn-icon btn-outline btn-danger" @click="deleteItem(index)">
+              <button v-if="item.isEdit" class="btn btn-icon btn-outline btn-danger" @click="resetItem(item)">
                 <i class="ki-duotone ki-cross-circle"></i>
               </button>
             </td>
-            <td>
-              <div v-if="checkInvoiceDp()">
-                <span v-if="!item.isEdit">{{ item.poNumber }}</span>
-                <input v-else v-model="item.poNumber" class="input" placeholder=""/>
-              </div>
-              <span v-else>{{ item.poNumber }}</span>
-            </td>
+            <td>{{ item.poNumber }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.poItem }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.GrDocumentNo }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.GrDocumentItem }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.GrDocumentDate }}</td>
+            <td v-if="!checkInvoiceDp()">{{ item.itemAmount }}</td>
+            <td v-if="!checkInvoiceDp()">{{ item.quantity }}</td>
+            <td v-if="!checkInvoiceDp()">{{ item.unit }}</td>
+            <td v-if="!checkInvoiceDp()">{{ item.itemText }}</td>
+            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.conditionType }}</td>
             <td>
               <span v-if="!item.isEdit">{{ item.taxCode }}</span>
-              <select v-else v-model="item.taxCode" class="select" placeholder="">
+              <select v-else v-model="formEdit.taxCode" class="select" placeholder="">
                 <option v-for="(option, index) in listTaxCalculation" :key="index" :value="option.code">
                   {{ option.code }}
                 </option>
               </select>
             </td>
-            <td v-if="!checkInvoiceDp()">
-              <span v-if="!item.isEdit">{{ item.itemAmount }}</span>
-              <input v-else v-model="item.itemAmount" class="input" placeholder=""/>
-            </td>
-            <td v-if="!checkInvoiceDp()">{{ item.quantity }}</td>
-            <td v-if="!checkInvoiceDp()">{{ item.unit }}</td>
-            <td v-if="!checkInvoiceDp()">{{ item.itemText }}</td>
-            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.conditionType }}</td>
-            <td v-if="checkInvoiceDp()">
-              <span v-if="!item.isEdit">{{ item.amountInvoice }}</span>
-              <input v-else v-model="item.amountInvoice" class="input" placeholder=""/>
-            </td>
-            <td v-if="checkInvoiceDp()">
-              <span v-if="!item.isEdit">{{ item.vatAmount }}</span>
-              <input v-else v-model="item.vatAmount" class="input" placeholder=""/>
-            </td>
             <td>
               <span v-if="!item.isEdit">{{ item.whtType }}</span>
-              <select v-else v-model="item.whtType" class="select" placeholder="">
+              <select v-else v-model="formEdit.whtType" class="select" placeholder="">
                 <option value="1">
                   Option 1
                 </option>
@@ -79,7 +62,7 @@
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.whtCode }}</span>
-              <select v-else v-model="item.whtCode" class="select" placeholder="">
+              <select v-else v-model="formEdit.whtCode" class="select" placeholder="">
                 <option value="1">
                   Option 1
                 </option>
@@ -92,11 +75,14 @@
               </select>
             </td>
             <td>
-              <span v-if="!item.isEdit">{{ item.whtBaseAmount }}</span>
-              <input v-else v-model="item.whtBaseAmount" class="input" placeholder=""/>
+              <span v-if="!item.isEdit">{{ useFormatIdr(item.whtBaseAmount) }}</span>
+              <input v-else v-model="formEdit.whtBaseAmount" class="input" type="number" placeholder=""/>
             </td>
-            <td>{{ item.category }}</td>
-            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.totalNetAmount }}</td>
+            <td>
+              <span v-if="!item.isEdit">{{ useFormatIdr(item.whtAmount) }}</span>
+              <input v-else v-model="formEdit.whtAmount" class="input" type="number" placeholder=""/>
+            </td>
+            <td>{{ item.department }}</td>
           </tr>
         </tbody>
       </table>
@@ -105,34 +91,69 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, inject, watch, onMounted } from 'vue'
+import { ref, reactive, computed, inject, watch, onMounted } from 'vue'
 import type { formTypes } from '../../types/invoiceDetailEdit'
 import { defaultColumn, invoiceDpColumn, PoPibColumn } from '@/static/invoicePoGr'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
+import { useFormatIdr } from '@/composables/currency'
+import type { itemsPoGrType } from '../../types/invoicePoGr'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const form = inject<formTypes>('form')
 const columns = ref<string[]>([])
+const formEdit = reactive({
+  taxCode: '',
+  whtType: '',
+  whtCode: '',
+  whtBaseAmount: '',
+  whtAmount: ''
+})
 
 const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
 
 const checkInvoiceDp = () => {
-  return form?.invoiceDp
+  return form?.invoiceDp === 'IDP'
 }
 
 const checkPoPib = () => {
   return form?.invoiceType === 'pib'
 }
 
-const deleteItem = (index: number) => {
-  if (form) {
-    form.invoicePoGr.splice(index, 1)
+const resetFormEdit = () => {
+  formEdit.taxCode = ''
+  formEdit.whtType = ''
+  formEdit.whtCode = ''
+  formEdit.whtBaseAmount = ''
+  formEdit.whtAmount = ''
+}
+
+const goEdit = (item: itemsPoGrType) => {
+  item.isEdit = !item.isEdit
+
+  if (item.isEdit) {
+    formEdit.taxCode = item.taxCode
+    formEdit.whtType = item.whtType
+    formEdit.whtCode = item.whtCode
+    formEdit.whtBaseAmount = item.whtBaseAmount
+    formEdit.whtAmount = item.whtAmount
+  } else {
+    item.taxCode = formEdit.taxCode
+    item.whtType = formEdit.whtType
+    item.whtCode = formEdit.whtCode
+    item.whtBaseAmount = formEdit.whtBaseAmount
+    item.whtAmount = formEdit.whtAmount
+    resetFormEdit()
   }
+}
+
+const resetItem = (item: itemsPoGrType) => {
+  item.isEdit = !item.isEdit
+  resetFormEdit()
 }
 
 const setColumn = () => {
   if (form?.invoiceType === 'pib') columns.value = ['Action', ...PoPibColumn]
-  else if (form?.invoiceDp) columns.value = ['Action', ...invoiceDpColumn]
+  else if (form?.invoiceDp === 'IDP') columns.value = ['Action', ...invoiceDpColumn]
   else columns.value = ['Action', ...defaultColumn]
 }
 

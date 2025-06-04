@@ -13,11 +13,11 @@ export interface itemsPoGrType {
   whtType: string
   whtCode: string
   whtBaseAmount: string
-  category: string
+  whtAmount: string
+  department: string
 
   amountInvoice: string
   vatAmount: string
   
-  totalNetAmount: string
   isEdit?: boolean
 }

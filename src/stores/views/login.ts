@@ -1,13 +1,16 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
+import type { ResponseUser } from './types/login'
 import api from '@/core/utils/api'
 import userApi from '@/core/utils/userApi'
+import vendorApi from '@/core/utils/vendorApi'
 
 export const useLoginStore = defineStore('login', () => {
   const selectedLogin = ref<string>('')
+  const userData = ref<ResponseUser>()
   const isVendor = ref<boolean>(false)
   const isSendForgot = ref<boolean>(false)
-  const isSendNewPassword = ref<boolean>(true)
+  const isSendNewPassword = ref<boolean>(false)
 
   const callLogin = async (username: string, password: string) => {
     const response = await api.post('/auth/sign-in', {
@@ -18,8 +21,22 @@ export const useLoginStore = defineStore('login', () => {
     return response.data
   }
 
+  const callLoginVendor = async (username: string, password: string) => {
+    const response = await vendorApi.post('/public/vendor/login', {
+      request: {
+        username: username,
+        email: '',
+        password: password,
+      }
+    })
+
+    return response.data
+  }
+
   const callUser = async (username: string) => {
     const response = await userApi.get(`/user?userName=${username}`)
+
+    userData.value = response.data.result.content
 
     return response.data
   }
@@ -30,6 +47,7 @@ export const useLoginStore = defineStore('login', () => {
     isSendForgot,
     isSendNewPassword,
     callLogin,
-    callUser
+    callUser,
+    callLoginVendor
   }
 })
