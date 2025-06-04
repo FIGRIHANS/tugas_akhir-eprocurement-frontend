@@ -288,11 +288,13 @@ const removeErrorFields = <T extends Record<string, any>>(obj: T): T =>
   Array.isArray(obj)
     ? (obj.map(removeErrorFields) as any)
     : typeof obj === 'object' && obj !== null
-      ? (Object.fromEntries(
-          Object.entries(obj)
-            .filter(([key]) => !key.endsWith('Error'))
-            .map(([key, value]) => [key, removeErrorFields(value)]),
-        ) as T)
+      ? obj instanceof Date
+        ? obj
+        : (Object.fromEntries(
+            Object.entries(obj)
+              .filter(([key]) => !key.endsWith('Error'))
+              .map(([key, value]) => [key, removeErrorFields(value)]),
+          ) as T)
       : obj
 
 const submitData = async () => {
@@ -360,7 +362,6 @@ const submitData = async () => {
     }
 
     await vendorMasterDataStore.postVendorRegistration(payload)
-
     modalTrigger.value.success = true
   } catch (error) {
     modalTrigger.value.error = true
