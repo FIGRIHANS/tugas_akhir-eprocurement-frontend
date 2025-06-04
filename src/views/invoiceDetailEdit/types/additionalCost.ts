@@ -9,6 +9,5 @@ export interface itemsCostType {
   whtType: string
   whtCode: string
   whtBaseAmount: string
-  amount: string
   isEdit: boolean
 }

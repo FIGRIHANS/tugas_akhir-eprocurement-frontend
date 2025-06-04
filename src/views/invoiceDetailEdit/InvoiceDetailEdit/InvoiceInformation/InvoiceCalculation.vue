@@ -17,8 +17,8 @@
             :class="index === listCalculation.length - 1 ? 'calculation__last-field' : ''"
           >
             <div class="flex-1">{{ item.name }}</div>
-            <div class="flex-1">{{ item.amount }}</div>
-            <div>{{ item.currency }}</div>
+            <div class="flex-1">{{ useFormatIdr(item.amount) }}</div>
+            <div>{{ form?.currency }}</div>
           </div>
         </div>
       </div>
@@ -32,6 +32,7 @@ import { useRoute } from 'vue-router'
 import type { listType } from '../../types/invoiceCalculation'
 import type { formTypes } from '../../types/invoiceDetailEdit'
 import { defaultField, dpField } from '@/static/invoiceCalculation'
+import { useFormatIdr } from '@/composables/currency'
 
 const route = useRoute()
 const form = inject<formTypes>('form')
@@ -43,20 +44,22 @@ const setCalculation = () => {
   listCalculation.value = []
   for (const item of listName.value) {
     if ((typeForm.value === 'nonpo' && item !== 'Additional Cost') || typeForm.value === 'po') {
+      // const amount = setCount(item)
       const data = {
         name: item,
         amount: '0',
-        currency: 'USD'
+        currency: form?.currency || ''
       }
       listCalculation.value.push(data)
+      // setToForm(item, amount)
     }
   }
 }
 
 watch(
-  () => [form?.invoiceDp, form?.withDp],
+  () => [form?.invoiceDp],
   () => {
-    if (form?.invoiceDp || form?.withDp) {
+    if (form?.invoiceDp !== 'NON') {
       listName.value = [...dpField]
     } else {
       listName.value = [...defaultField]

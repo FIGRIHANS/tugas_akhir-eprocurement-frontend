@@ -7,7 +7,7 @@
       <Transition mode="out-in">
         <component :is="contentComponent" />
       </Transition>
-      <div class="flex justify-end items-center mt-[24px]">
+      <div class="flex justify-end items-center mt-[24px] gap-[8px]">
         <button class="btn btn-outline btn-primary" @click="goBack">
           <i class="ki-filled ki-arrow-left"></i>
           Back
@@ -35,12 +35,13 @@ import Breadcrumb from '@/components/BreadcrumbView.vue'
 import StepperStatus from '../../components/stepperStatus/StepperStatus.vue'
 import TabInvoice from '@/components/invoice/TabInvoice.vue'
 import { useCheckEmpty } from '@/composables/validation'
-import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
+import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
+import moment from 'moment'
 
 const InvoiceData = defineAsyncComponent(() => import('./InvoiceDetailEdit/InvoiceData.vue'))
 const InvoiceInformation = defineAsyncComponent(() => import('./InvoiceDetailEdit/InvoiceInformation.vue'))
 
-const invoiceApi = useInvoiceSubmissionStore()
+const invoiceMasterApi = useInvoiceMasterDataStore()
 const router = useRouter()
 const activeStep = ref<string>('')
 const tabNow = ref<string>('data')
@@ -57,7 +58,7 @@ const routes = ref<routeTypes[]>([
 ])
 
 const form = reactive<formTypes>({
-  invoiceType: '',
+  invoiceType: '1',
   vendorId: '',
   businessField: '',
   subBusinessField: '',
@@ -80,20 +81,20 @@ const form = reactive<formTypes>({
   ktpNumber: '',
   email: '',
   invoiceDate: '',
-  postingDate: '',
+  postingDate: moment().format('YYYYMMDD'),
   invoiceNumber: '',
   companyCode: '',
+  invoicingParty: '',
   estimatedPaymentDate: '',
   taxNumberInvoice: '',
   invoiceNumberVendor: '',
   paymentMethod: '',
   assignment: '',
   transferNews: '',
-  currency: '',
+  currency: 'IDR',
   npwpReporting: '',
   description: '',
-  invoiceDp: true,
-  withDp: false,
+  invoiceDp: 'NON',
   invoiceDocument: null,
   tax: null,
   referenceDocument: null,
@@ -113,16 +114,30 @@ const form = reactive<formTypes>({
       conditionType: 'fa',
       whtType: '23',
       whtCode: 'r23',
-      whtBaseAmount: 'r4',
-      category: 'fw',
+      whtBaseAmount: '0',
+      whtAmount: '0',
+      department: 'fw',
       amountInvoice: 'vf',
       vatAmount: 'vs',
-      totalNetAmount: 'bfg',
       isEdit: false
     }
   ],
   invoiceItem: [],
-  additionalCost: [],
+  additionalCost: [
+    {
+      activity: 'asd',
+      itemAmount: 'asd',
+      debitCredit: 'asd',
+      taxCode: 'asd',
+      costCenter: 'asd',
+      profitCenter: 'asd',
+      assignment: 'asd',
+      whtType: 'asd',
+      whtCode: 'asd',
+      whtBaseAmount: 'asd',
+      isEdit: false
+    }
+  ],
   status: 0
 })
 
@@ -136,19 +151,8 @@ const contentComponent = computed(() => {
 })
 
 const checkInvoiceData = () => {
-  if (
-    form.nameBank ||
-    form.postalCode ||
-    form.street || 
-    form.city ||
-    form.country ||
-    form.bankAccount ||
-    form.bankNumber ||
-    form.bankCountry ||
-    form.npwpNumber ||
-    form.ktpNumber ||
-    form.email
-  ) return false
+  return true
+  // if (!form.bankKeyId) return false
 }
 
 const checkInvoiceInformation = () => {
@@ -205,7 +209,11 @@ const goNext = () => {
 }
 
 onMounted(() => {
-  invoiceApi.getTaxCalculation()
+  invoiceMasterApi.getTaxCode()
+  invoiceMasterApi.getInvoicePoType()
+  invoiceMasterApi.getDpTypes()
+  invoiceMasterApi.getVendorList()
+  invoiceMasterApi.getCurrency()
   if (form.status === 2) {
     activeStep.value = 'Verification'
   } else {

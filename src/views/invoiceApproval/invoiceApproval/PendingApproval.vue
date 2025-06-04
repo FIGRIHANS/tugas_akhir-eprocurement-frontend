@@ -14,7 +14,7 @@
           </thead>
           <tbody>
             <tr v-for="(item, index) in list" :key="index">
-              <td class="w-[200px] flex justify-between items-center gap-[4px]">
+              <td class="max-w-[200px] flex justify-between items-center gap-[4px]">
                 <button class="btn btn-outline btn-icon btn-primary" @click="openDetailInvoice">
                   <i class="ki-duotone ki-eye"></i>
                 </button>

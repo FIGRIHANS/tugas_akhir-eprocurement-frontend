@@ -15,8 +15,8 @@
           <tbody>
             <tr v-for="(item, index) in list" :key="index">
               <td class="flex justify-between items-center gap-[8px]">
-                <button class="btn btn-outline btn-primary btn-icon" @click="openDetailInvoice">
-                  <i class="ki-duotone ki-eye"></i>
+                <button class="btn btn-primary btn-icon" @click="openDetailInvoice">
+                  <i class="ki-filled ki-eye"></i>
                 </button>
                 <button class="btn btn-outline btn-primary btn-icon" @click="openDetailVerification">
                   <i class="ki-duotone ki-data"></i>
@@ -40,6 +40,20 @@
             </tr>
           </tbody>
         </table>
+      </div>
+      <div class="flex items-center gap-[16px] mt-[24px]">
+        <div class="flex items-center">
+          <div class="bg-primary rounded-md p-[7px] w-[40px] h-[40px] flex items-center justify-center">
+            <i class="ki-filled ki-eye text-white text-[24px]"></i>
+          </div>
+          <p class="ml-[8px]">: View Detail invoice</p>
+        </div>
+        <div class="flex items-center">
+          <div class="bg-primary-light border border-primary-clarity rounded-md p-[7px] w-[40px] h-[40px] flex items-center justify-center">
+            <i class="ki-duotone ki-data text-primary text-[24px]"></i>
+          </div>
+          <p class="ml-[8px]">: Verification  Detail Invoice</p>
+        </div>
       </div>
       <div class="flex items-center justify-between mt-[24px]">
         <p class="m-0">Tampilkan 10 data dari total data 100</p>

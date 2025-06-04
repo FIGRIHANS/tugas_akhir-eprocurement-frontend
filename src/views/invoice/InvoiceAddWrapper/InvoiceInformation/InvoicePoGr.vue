@@ -79,6 +79,15 @@ const search = ref<string>('')
 
 const openAddItem = (event: KeyboardEvent) => {
   if (event.key === 'Enter') {
+    if (form) {
+      if (!form.vendorId  || !form.companyCode) {
+        form.companyCodeError = true
+        return
+      } else {
+        form.companyCodeError = false
+      }
+    }
+    if (search.value.length !== 10) return
     const idModal = document.querySelector('#add_po_gr_item_modal')
     const modal = KTModal.getInstance(idModal as HTMLElement)
     modal.show()
