@@ -1,12 +1,13 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
+import type { ResponseUser } from './types/login'
 import api from '@/core/utils/api'
 import userApi from '@/core/utils/userApi'
 import vendorApi from '@/core/utils/vendorApi'
 
 export const useLoginStore = defineStore('login', () => {
   const selectedLogin = ref<string>('')
-  const userData = ref()
+  const userData = ref<ResponseUser>()
   const isVendor = ref<boolean>(false)
   const isSendForgot = ref<boolean>(false)
   const isSendNewPassword = ref<boolean>(false)
