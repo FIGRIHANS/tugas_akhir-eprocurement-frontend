@@ -105,14 +105,14 @@ const saveAccount = () => {
 
 const setToken = (result: ApiResponseDataResult<string>) => {
   const expired = moment().add(2, 'hours').toDate().toUTCString()
-  document.cookie = `token_dts=${'Bearer ' + result.content}; isAdmin=${!checkVendor()} path=/; expires=${expired}; Secure; SameSite=Strict`
+  const getUsernameEmail = checkVendor() ? username.value : email.value
+  document.cookie = `session_data=token_dts=${'Bearer ' + result.content}&isAdmin=${!checkVendor()}&username=${getUsernameEmail}; path=/; expires=${expired}; Secure; SameSite=Strict`
 }
 
 const nextStepLogin = (response: ApiResponseData<string>) => {
   if (response.statusCode === 200) {
     loginApi.isVendor = checkVendor()
     setToken(response.result)
-    // login.callUser(email.value)
     router.push({
       name: 'dashboard'
     })

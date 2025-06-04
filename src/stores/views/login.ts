@@ -6,9 +6,10 @@ import vendorApi from '@/core/utils/vendorApi'
 
 export const useLoginStore = defineStore('login', () => {
   const selectedLogin = ref<string>('')
+  const userData = ref()
   const isVendor = ref<boolean>(false)
   const isSendForgot = ref<boolean>(false)
-  const isSendNewPassword = ref<boolean>(true)
+  const isSendNewPassword = ref<boolean>(false)
 
   const callLogin = async (username: string, password: string) => {
     const response = await api.post('/auth/sign-in', {
@@ -33,6 +34,8 @@ export const useLoginStore = defineStore('login', () => {
 
   const callUser = async (username: string) => {
     const response = await userApi.get(`/user?userName=${username}`)
+
+    userData.value = response.data.result.content
 
     return response.data
   }
