@@ -24,7 +24,7 @@ export type RegisInformationType = {
     vendorName: string
     vendorNameError?: boolean
     groupCompany: string
-    foundedDate: string
+    foundedDate: Date | string
     foundedDateError?: boolean
   }
   companyLocation: LokasiKantor
@@ -71,8 +71,8 @@ export type RegisContactType = {
 
 type DocumentFieldType = {
   description: string
-  issuedDate: string
-  expiredDate: string
+  issuedDate: Date | string
+  expiredDate: Date | string
   uploadUrl: string
 }
 

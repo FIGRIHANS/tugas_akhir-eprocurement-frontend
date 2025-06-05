@@ -13,12 +13,16 @@ import { useRoute, useRouter } from 'vue-router'
 import { formatDate } from '@/core/utils/format'
 import UiLoading from '@/components/UiLoading.vue'
 import VendorListFilters from '@/components/vendor/filterButton/VendorListFilters.vue'
+import { getToken } from '@/composables/token'
 
 const route = useRoute()
 const router = useRouter()
 
 const vendor = useVendorStore()
-
+const token = getToken()
+const credentialToken = token?.split(' ')[1].split('.')[1]
+const credential = JSON.parse(atob(credentialToken as string))
+console.log('credential', credential)
 const search = ref('')
 // const currentPage = ref(1)
 
@@ -59,7 +63,7 @@ watch(
   <div>
     <div class="card">
       <div class="card-header">
-        <UiInputSearch v-model="search" placeholder="Cari vendor" />
+        <UiInputSearch v-model="search" placeholder="Search vendor" />
         <div class="flex gap-3">
           <FilterDropdown />
           <UiButton :outline="true">
@@ -125,17 +129,13 @@ watch(
               </td>
               <td class="text-nowrap">{{ vendor.vendorName }}</td>
               <td>
-                <UiButton
-                  v-if="Boolean(vendor.isVerified)"
-                  :outline="true"
-                  size="sm"
-                  variant="success"
+                <span
+                  class="badge badge-outline"
+                  :class="{
+                    'badge-success': vendor.isVerified,
+                  }"
+                  >{{ vendor.isVerified ? 'Verified' : 'Unverified' }}</span
                 >
-                  Verified
-                </UiButton>
-                <UiButton v-else :outline="true" size="sm" variant="secondary">
-                  <span class="text-nowrap">Not Verified</span>
-                </UiButton>
               </td>
               <td>{{ vendor.companyCategoryName }}</td>
               <td>
