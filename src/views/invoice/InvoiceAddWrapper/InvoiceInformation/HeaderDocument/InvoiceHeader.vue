@@ -8,12 +8,13 @@
           Invoice Type
           <span v-if="form.status === 0 && !loginApi.isVendor" class="text-red-500 ml-[4px]">*</span>
         </label>
-        <input v-if="form.status !== 0 || loginApi.isVendor" v-model="form.invoiceType" class="input" placeholder="" disabled />
+        <input v-model="form.invoiceTypeName" class="input" placeholder="" disabled />
+        <!-- <input v-if="form.status !== 0 || loginApi.isVendor" v-model="form.invoiceType" class="input" placeholder="" disabled />
         <select v-else v-model="form.invoiceType" class="select" :class="{ 'border-danger': form.invoiceTypeError }">
           <option v-for="item of listInvoiceTypePo" :key="item.code" :value="item.code">
             {{ item.name }}
           </option>
-        </select>
+        </select> -->
       </div>
       <!-- DP Option -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">

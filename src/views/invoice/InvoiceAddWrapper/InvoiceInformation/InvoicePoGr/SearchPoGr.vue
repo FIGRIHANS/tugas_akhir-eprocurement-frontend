@@ -32,23 +32,28 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(item, index) in listPoGrItem" :key="index" class="pogr__field-items">
-                <td>
-                  <input v-model="item.isActive" class="checkbox checkbox-sm" data-datatable-row-check="true" type="checkbox"/>
-                </td>
-                <td>{{ item.poNo }}</td>
-                <td>{{ item.poItem }}</td>
-                <td>{{ item.grDocumentNo }}</td>
-                <td>{{ item.grDocumentItem }}</td>
-                <td>{{ item.grDocumentDate }}</td>
-                <td class="text-right">{{ useFormatIdr(item.itemAmount) }}</td>
-                <td>{{ item.quantity }}</td>
-                <td>{{ item.uom }}</td>
-                <td>{{ item.materialDescription }}</td>
-                <td>{{ item.conditionType }}</td>
-                <td>{{ item.taxCode }}</td>
-                <td>{{ item.department }}</td>
+              <tr v-if="listPoGrItem.length === 0">
+                <td colspan="11" class="text-center text-[13px]">No Data Available</td>
               </tr>
+              <template v-else>
+                <tr v-for="(item, index) in listPoGrItem" :key="index" class="pogr__field-items">
+                  <td>
+                    <input v-model="item.isActive" class="checkbox checkbox-sm" data-datatable-row-check="true" type="checkbox"/>
+                  </td>
+                  <td>{{ item.poNo }}</td>
+                  <td>{{ item.poItem }}</td>
+                  <td>{{ item.grDocumentNo }}</td>
+                  <td>{{ item.grDocumentItem }}</td>
+                  <td>{{ item.grDocumentDate }}</td>
+                  <td class="text-right">{{ useFormatIdr(item.itemAmount) }}</td>
+                  <td>{{ item.quantity }}</td>
+                  <td>{{ item.uom }}</td>
+                  <td>{{ item.materialDescription }}</td>
+                  <td>{{ item.conditionType }}</td>
+                  <td>{{ item.taxCode }}</td>
+                  <td>{{ item.department }}</td>
+                </tr>
+              </template>
             </tbody>
           </table>
         </div>

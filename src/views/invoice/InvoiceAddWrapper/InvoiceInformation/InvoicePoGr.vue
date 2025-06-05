@@ -1,14 +1,22 @@
 <template>
   <div id="table-invoice-po-gr" class="flex flex-col gap-[16px]">
     <p class="text-base font-semibold">Invoice PO & GR Item</p>
-    <div class="relative max-w-[250px]">
-      <label class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px]">
-        Search By PO Number
-      </label>
-      <div class="input">
-        <input v-model="search" placeholder="" @keypress="openAddItem"/>
-        <i class="ki-outline ki-magnifier"></i>
+    <div>
+      <div class="flex items-center gap-[10px]">
+        <div class="relative max-w-[250px]">
+          <label class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px]">
+            Search By PO Number
+          </label>
+          <div class="input">
+            <input v-model="search" placeholder="" @keypress="searchEnter"/>
+            <i class="ki-outline ki-magnifier"></i>
+          </div>
+        </div>
+        <button class="btn btn-outline btn-primary" @click="openAddItem">
+          Search
+        </button>
       </div>
+      <p v-if="searchError" class="text-danger text-[9px]">*PO Number must be exactly 10 characters long</p>
     </div>
     <div v-if="form" class="overflow-x-auto pogr__table">
       <table class="table table-xs table-border" :class="{ 'border-danger': form?.invoicePoGrError }">
@@ -76,22 +84,29 @@ import { useFormatIdr } from '@/composables/currency'
 const form = inject<formTypes>('form')
 const columns = ref<string[]>([])
 const search = ref<string>('')
+const searchError = ref<boolean>(false)
 
-const openAddItem = (event: KeyboardEvent) => {
+const searchEnter = (event: KeyboardEvent) => {
   if (event.key === 'Enter') {
-    if (form) {
-      if (!form.vendorId  || !form.companyCode) {
-        form.companyCodeError = true
-        return
-      } else {
-        form.companyCodeError = false
-      }
-    }
-    if (search.value.length !== 10) return
-    const idModal = document.querySelector('#add_po_gr_item_modal')
-    const modal = KTModal.getInstance(idModal as HTMLElement)
-    modal.show()
+    openAddItem()
   }
+}
+
+const openAddItem = () => {
+  if (search.value.length !== 10) return searchError.value = true
+  else searchError.value = false
+  if (form) {
+    if (!form.vendorId  || !form.companyCode) {
+      form.companyCodeError = true
+      return
+    } else {
+      form.companyCodeError = false
+    }
+  }
+  if (search.value.length !== 10) return
+  const idModal = document.querySelector('#add_po_gr_item_modal')
+  const modal = KTModal.getInstance(idModal as HTMLElement)
+  modal.show()
 }
 
 const checkInvoiceDp = () => {

@@ -119,23 +119,32 @@ const countSubtotal = () => {
 const countVatAmount = () => {
   if (!form) return
   let totalPo = 0
-  let totalAdd = 0
+  let totalAddDebit = 0
+  let totalAddCredit = 0
   for (const item of form.invoicePoGr) {
     const percentTax = getPercentTax(item.taxCode) || 0
     totalPo = totalPo + (percentTax * item.itemAmount * item.quantity)
   }
   for (const item of form.additionalCost) {
     const percentTax = getPercentTax(item.taxCode) || 0
-    totalAdd = totalAdd + (percentTax * Number(item.itemAmount))
+    if (item.debitCredit === 'D') {
+      totalAddDebit = totalAddDebit + (percentTax * Number(item.itemAmount))
+    } else {
+      totalAddCredit = totalAddCredit + (percentTax * Number(item.itemAmount))
+    }
   }
-  return totalPo + totalAdd
+  return totalPo + totalAddDebit - totalAddCredit
 }
 
 const countAdditionalCost = () => {
   if (!form) return
   let total = 0
   for (const item of form.additionalCost) {
-    total = total + Number(item.itemAmount)
+    if (item.debitCredit === 'D') {
+      total = total + Number(item.itemAmount)
+    } else {
+      total = total - Number(item.itemAmount)
+    }
   }
   return total
 }
@@ -150,16 +159,21 @@ const countTotalGrossAmount = () => {
 const countWhtAmount = () => {
   if (!form) return
   let totalPo = 0
-  let totalAdd = 0
+  let totalAddDebit = 0
+  let totalAddCredit = 0
   for (const item of form.invoicePoGr) {
     const percentTax = 0
     totalPo = totalPo + (percentTax * item.itemAmount * item.quantity)
   }
   for (const item of form.additionalCost) {
     const percentTax = 0
-    totalAdd = totalAdd + (percentTax * Number(item.itemAmount))
+    if (item.debitCredit === 'D') {
+      totalAddDebit = totalAddDebit + (percentTax * Number(item.itemAmount))
+    } else {
+      totalAddCredit = totalAddCredit + (percentTax * Number(item.itemAmount))
+    }
   }
-  return totalPo + totalAdd
+  return totalPo + totalAddDebit - totalAddCredit
 }
 
 const countTotalNetAmount = () => {
@@ -173,7 +187,7 @@ const countTotalNetAmount = () => {
 watch(
   () => [form?.invoiceDp],
   () => {
-    if (form?.invoiceDp !== 'NON') {
+    if (form?.invoiceDp !== '1') {
       listName.value = [...dpField]
     } else {
       listName.value = [...defaultField]

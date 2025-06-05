@@ -13,7 +13,7 @@
       <InvoiceCalculation class="flex-1" />
     </div>
     <InvoicePoGr v-if="checkPo()" class="mt-[24px]" />
-    <AdditionalCost v-if="form.invoiceDp === 'NON' && checkPo()" class="mt-[24px]" />
+    <AdditionalCost v-if="form.invoiceDp === '1' && checkPo()" class="mt-[24px]" />
     <div v-if="form.status === 2" class="flex items-center justify-between gap-[8px] mt-[24px]">
       <div class="flex items-center gap-[10px]">
         <button class="btn btn-outline btn-primary">
@@ -99,7 +99,7 @@ const form = ref<formTypes>({
   currency: 'test',
   npwpReporting: 'test',
   description: 'test',
-  invoiceDp: 'NON',
+  invoiceDp: '1',
   invoicePoGr: [
     {
       line: '1',
