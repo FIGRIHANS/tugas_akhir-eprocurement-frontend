@@ -23,6 +23,8 @@ const modalVerifySuccess = ref(false)
 const isReady = computed(() => {
   const data = verificationStore.data
 
+  if (!data) return false
+
   if (
     data.some(
       (item) => item.verificationType === 'Administration approval' && item.status === 'Approved',
