@@ -25,7 +25,9 @@ const loading = ref(false)
 const error = ref('')
 
 const isDisabled = computed(() =>
-  vendorVerifStore.data.some((item) => item.verificationType === 'Administration approval'),
+  vendorVerifStore.data
+    ? vendorVerifStore.data.some((item) => item.verificationType === 'Administration approval')
+    : false,
 )
 
 const handleVerify = async () => {

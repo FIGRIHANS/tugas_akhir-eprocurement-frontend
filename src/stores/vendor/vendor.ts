@@ -91,19 +91,25 @@ export const useVendorStore = defineStore('vendor', () => {
 export const useVendorAdministrationStore = defineStore('vendor-administration', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
-  const data = ref<IAdministration[]>([])
+  const data = ref<IAdministration>()
 
   const getData = async (vendorId: string) => {
     loading.value = true
     error.value = null
 
     try {
-      const response: ApiResponse<IAdministration[]> = await vendorAPI.get(
+      const response: ApiResponse<IAdministration> = await vendorAPI.get(
         '/public/vendor/registration/administration',
         {
           params: { vendorId },
         },
       )
+
+      if (response.data.statusCode !== 200) {
+        error.value = response.data.result.message
+        loading.value = false
+        return
+      }
 
       data.value = response.data.result.content
     } catch (err) {
