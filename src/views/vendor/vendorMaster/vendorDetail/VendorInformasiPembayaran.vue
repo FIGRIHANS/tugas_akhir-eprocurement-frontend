@@ -25,7 +25,9 @@ const notes = ref('')
 const inputError = ref<string[]>([])
 
 const isDisabled = computed(() =>
-  vendorVerifStore.data.some((item) => item.verificationType === 'Payment approval'),
+  vendorVerifStore.data
+    ? vendorVerifStore.data.some((item) => item.verificationType === 'Payment approval')
+    : false,
 )
 
 const handleVerify = async () => {

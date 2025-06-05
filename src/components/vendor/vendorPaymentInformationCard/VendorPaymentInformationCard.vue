@@ -72,18 +72,23 @@ watch(
           <tr>
             <td class="text-sm text-gray-600 font-medium"></td>
             <td class="text-sm font-bold text-gray-500">
-              <input type="checkbox" class="checkbox checkbox-sm" disabled /> Holder's name is
-              different from the company name.
+              <input
+                type="checkbox"
+                class="checkbox checkbox-sm mr-1"
+                :checked="paymentStore.data[0].isHolderNameDifferent"
+                disabled
+              />
+              Holder's name is different from the company name.
             </td>
           </tr>
           <tr>
             <td class="text-sm text-gray-600 font-medium">Bank Account Declaration Letter</td>
             <td class="text-sm font-bold text-gray-700">
               <UiButton
-                :disabled="loading || !paymentStore.data[0].urlDoc"
+                :disabled="loading || !paymentStore.data[0].urlBankAccountDeclaration"
                 :outline="true"
                 size="sm"
-                @click="download(paymentStore.data[0].urlDoc)"
+                @click="download(paymentStore.data[0].urlBankAccountDeclaration as string)"
               >
                 <UiIcon name="cloud-download" variant="duotone" />
                 <span>Download Bank Account Declaration Letter</span>
@@ -103,7 +108,13 @@ watch(
           <tr>
             <td class="text-sm text-gray-600 font-medium"></td>
             <td class="text-sm font-bold text-gray-500">
-              <input type="checkbox" class="checkbox checkbox-sm" disabled /> Bank not Registered
+              <input
+                type="checkbox"
+                class="checkbox checkbox-sm mr-1"
+                :checked="!paymentStore.data[0].isBankRegistered"
+                disabled
+              />
+              Bank not Registered
             </td>
           </tr>
           <tr>
