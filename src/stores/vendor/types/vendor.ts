@@ -108,6 +108,11 @@ export interface IPayment {
   countryCode: null | string
   countryName: null | string
   countryPhonePrefix: null | string
+  urlFirstPage: string
+  urlAccountDifferences: string
+  urlBankAccountDeclaration: null | string
+  isBankRegistered: boolean
+  isHolderNameDifferent: boolean
 }
 
 export interface IPostBlacklist {

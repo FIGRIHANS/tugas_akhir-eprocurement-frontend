@@ -66,7 +66,7 @@ watch(
         {{ administrasiStore.error }}
       </span>
     </div>
-    <div v-else-if="!administrasiStore.data.length" class="flex items-center justify-center py-5">
+    <div v-else-if="!administrasiStore.data" class="flex items-center justify-center py-5">
       <span class="text-sm font-medium"> Oops! No data </span>
     </div>
     <template v-else>
@@ -77,37 +77,37 @@ watch(
               <tr>
                 <td class="text-sm text-gray-600 font-medium w-[182px]">Username</td>
                 <td class="text-sm font-bold text-gray-700">
-                  {{ administrasiStore.data[0].userName }}
+                  {{ administrasiStore.data.userName }}
                 </td>
               </tr>
               <tr>
                 <td class="text-sm text-gray-600 font-medium w-[182px]">User Email</td>
                 <td class="text-sm font-bold text-gray-700">
-                  {{ administrasiStore.data[0].vendorEmail }}
+                  {{ administrasiStore.data.vendorEmail }}
                 </td>
               </tr>
               <tr>
                 <td class="text-sm text-gray-600 font-medium w-[182px]">Company Name</td>
                 <td class="text-sm font-bold text-gray-700">
-                  {{ administrasiStore.data[0].vendorName }}
+                  {{ administrasiStore.data.vendorName }}
                 </td>
               </tr>
               <tr>
                 <td class="text-sm text-gray-600 font-medium w-[182px]">Company Category</td>
                 <td class="text-sm font-bold text-gray-700">
-                  {{ administrasiStore.data[0].companyCategoryName }}
+                  {{ administrasiStore.data.companyCategoryName }}
                 </td>
               </tr>
               <tr>
                 <td class="text-sm text-gray-600 font-medium w-[182px]">Company Group</td>
                 <td class="text-sm font-bold text-gray-700">
-                  {{ administrasiStore.data[0].groupCompany }}
+                  {{ administrasiStore.data.groupCompany }}
                 </td>
               </tr>
               <tr>
                 <td class="text-sm text-gray-600 font-medium w-[182px]">NPWP Number</td>
                 <td class="text-sm font-bold text-gray-700">
-                  {{ administrasiStore.data[0].npwp }}
+                  {{ administrasiStore.data.npwp }}
                 </td>
               </tr>
               <tr>
@@ -116,7 +116,7 @@ watch(
                   <UiButton
                     :outline="true"
                     size="sm"
-                    @click="download(administrasiStore.data[0].npwpUrl)"
+                    @click="download(administrasiStore.data.npwpUrl)"
                     :disabled="loading"
                   >
                     <span v-if="loading">
@@ -138,49 +138,49 @@ watch(
               <tr>
                 <td class="text-sm text-gray-600 font-medium w-[182px]">Country</td>
                 <td class="text-sm font-bold text-gray-700">
-                  {{ administrasiStore.data[0].countryName }}
+                  {{ administrasiStore.data.countryName }}
                 </td>
               </tr>
               <tr>
                 <td class="text-sm text-gray-600 font-medium w-[182px]">Province</td>
                 <td class="text-sm font-bold text-gray-700">
-                  {{ administrasiStore.data[0].stateName }}
+                  {{ administrasiStore.data.stateName }}
                 </td>
               </tr>
               <tr>
                 <td class="text-sm text-gray-600 font-medium w-[182px]">Regency/City</td>
                 <td class="text-sm font-bold text-gray-700">
-                  {{ administrasiStore.data[0].cityName }}
+                  {{ administrasiStore.data.cityName }}
                 </td>
               </tr>
               <tr>
                 <td class="text-sm text-gray-600 font-medium w-[182px]">Telephone</td>
                 <td class="text-sm font-bold text-gray-700">
-                  {{ administrasiStore.data[0].vendorPhone }}
+                  {{ administrasiStore.data.vendorPhone }}
                 </td>
               </tr>
               <tr>
                 <td class="text-sm text-gray-600 font-medium w-[182px]">Vendor Email</td>
                 <td class="text-sm font-bold text-gray-700">
-                  {{ administrasiStore.data[0].vendorEmail }}
+                  {{ administrasiStore.data.vendorEmail }}
                 </td>
               </tr>
               <tr>
                 <td class="text-sm text-gray-600 font-medium w-[182px]">Website</td>
                 <td class="text-sm font-bold text-gray-700">
-                  {{ administrasiStore.data[0].vendorWebsite }}
+                  {{ administrasiStore.data.vendorWebsite }}
                 </td>
               </tr>
               <tr>
                 <td class="text-sm text-gray-600 font-medium w-[182px]">Currency Preference</td>
                 <td class="text-sm font-bold text-gray-700">
-                  {{ administrasiStore.data[0].currencyLabel }}
+                  {{ administrasiStore.data.currencyLabel }}
                 </td>
               </tr>
               <tr>
                 <td class="text-sm text-gray-600 font-medium w-[182px]">Company Address</td>
                 <td class="text-sm font-bold text-gray-700">
-                  {{ administrasiStore.data[0].addressCompanyDetail }}
+                  {{ administrasiStore.data.addressCompanyDetail }}
                 </td>
               </tr>
             </tbody>
@@ -195,7 +195,7 @@ watch(
               <td class="text-sm font-bold text-gray-700">
                 <ul>
                   <li
-                    v-for="(bf, index) in administrasiStore.data[0].businessFieldName?.split(',')"
+                    v-for="(bf, index) in administrasiStore.data.businessFieldName?.split(',')"
                     :key="bf"
                   >
                     {{ index + 1 }}.

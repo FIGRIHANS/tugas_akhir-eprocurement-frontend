@@ -25,7 +25,9 @@ const vendorStore = useVendorStore()
 const vendorVerifStore = useVerificationDetailStore()
 
 const isDisabled = computed(() =>
-  vendorVerifStore.data.some((item) => item.verificationType === 'Izin usaha approval'),
+  vendorVerifStore.data
+    ? vendorVerifStore.data.some((item) => item.verificationType === 'Izin usaha approval')
+    : false,
 )
 
 const handleVerify = async () => {

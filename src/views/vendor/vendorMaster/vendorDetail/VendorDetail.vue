@@ -85,28 +85,31 @@ watch(
 watch(
   () => verificationStore.data,
   (data) => {
-    if (
-      data.some(
-        (item) => item.verificationType === 'Administration approval' && item.status === 'Approved',
-      )
-    ) {
-      tabs.value[1].isVerified = true
-    }
+    if (data) {
+      if (
+        data?.some(
+          (item) =>
+            item.verificationType === 'Administration approval' && item.status === 'Approved',
+        )
+      ) {
+        tabs.value[1].isVerified = true
+      }
 
-    if (
-      data.some(
-        (item) => item.verificationType === 'Izin usaha approval' && item.status === 'Approved',
-      )
-    ) {
-      tabs.value[2].isVerified = true
-    }
+      if (
+        data?.some(
+          (item) => item.verificationType === 'Izin usaha approval' && item.status === 'Approved',
+        )
+      ) {
+        tabs.value[2].isVerified = true
+      }
 
-    if (
-      data.some(
-        (item) => item.verificationType === 'Payment approval' && item.status === 'Approved',
-      )
-    ) {
-      tabs.value[3].isVerified = true
+      if (
+        data?.some(
+          (item) => item.verificationType === 'Payment approval' && item.status === 'Approved',
+        )
+      ) {
+        tabs.value[3].isVerified = true
+      }
     }
   },
 )
