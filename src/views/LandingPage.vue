@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import HeroImage from '@/assets/svg/HeroImage.vue'
 import LogoAN from '@/assets/svg/LogoAN.vue'
 import IconEfficient from '@/components/icons/IconEfficient.vue'
 import IconEye from '@/components/icons/IconEye.vue'
@@ -16,12 +15,12 @@ const year = moment().format('YYYY')
 
 <template>
   <section id="hero" class="bg-gray-200 py-[111px] flex flex-col items-center">
-    <div class="max-w-[1440px] grid grid-cols-1 md:grid-cols-2 gap-6 lg:px-[40px] px-5">
-      <div class="flex flex-col justify-center">
+    <div class="max-w-[1440px] grid grid-cols-1 md:grid-cols-3 gap-6 lg:px-[40px] px-5">
+      <div class="flex flex-col justify-center md:col-span-2 md:pr-20">
         <h1 class="text-[40px] font-bold text-gray-700 mb-4 lg:w-3/4">
           Empowering Sustainable Partnerships Through Reliable Procurement Processes
         </h1>
-        <p class="text-lg font-light text-gray-800 mb-8">
+        <p class="text-lg font-light text-gray-800 mb-8 md:w-3/4">
           We support long-term business sustainability through transparent, standardized, and
           value-oriented e-Procurement designed to deliver mutual benefits for all stakeholders.
         </p>
@@ -30,7 +29,7 @@ const year = moment().format('YYYY')
           <IconPDF />
         </UiButton>
       </div>
-      <HeroImage class="w-full h-auto" />
+      <LogoAN class="w-full h-auto" />
     </div>
   </section>
 
