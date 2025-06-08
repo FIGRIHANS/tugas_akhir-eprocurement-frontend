@@ -125,11 +125,13 @@ watch(
               <td class="text-nowrap">{{ vendor.vendorName }}</td>
               <td>
                 <span
-                  class="badge badge-outline"
+                  class="badge badge-outline text-nowrap"
                   :class="{
-                    'badge-success': vendor.isVerified,
+                    'badge-success': vendor.approvalStatusId === 1,
+                    'badge-danger': vendor.approvalStatusId === 2,
+                    'badge-warning': vendor.approvalStatusId === 3,
                   }"
-                  >{{ vendor.isVerified ? 'Verified' : 'Unverified' }}</span
+                  >{{ vendor.approvalStatus || 'Not Verified' }}</span
                 >
               </td>
               <td>{{ vendor.companyCategoryName }}</td>
