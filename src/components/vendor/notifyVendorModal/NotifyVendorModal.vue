@@ -48,15 +48,29 @@
 import UiModal from '@/components/modal/UiModal.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
+import { useNotifEmailStore } from '@/stores/vendor/email'
+import axios from 'axios'
 import { ref } from 'vue'
+
+type Props = {
+  vendorName: string
+  vendorEmail: string
+}
+
+// stores
+const emailStore = useNotifEmailStore()
 
 // models
 const modalOpen = defineModel('open')
 const modalSuccessOpen = defineModel('success')
 
+// props
+const props = defineProps<Props>()
+
 // refs
 const remarks = ref<string>('')
 const loading = ref<boolean>(false)
+const error = ref<string>('')
 const inputError = ref<string[]>([])
 
 // functions
@@ -66,7 +80,38 @@ const handleSubmit = async () => {
     return
   }
 
-  modalOpen.value = false
-  modalSuccessOpen.value = true
+  loading.value = true
+  inputError.value = []
+  error.value = ''
+
+  try {
+    const response = await emailStore.send({
+      recepientName: props.vendorName,
+      message: remarks.value,
+      recepients: {
+        emailTo: props.vendorEmail,
+        emailCc: '',
+        emailBcc: '',
+      },
+    })
+
+    if (response.result.isError) {
+      error.value = response.result.message
+      return
+    }
+
+    modalOpen.value = false
+    modalSuccessOpen.value = true
+  } catch (err) {
+    if (err instanceof Error) {
+      if (axios.isAxiosError(err)) {
+        error.value = err.response?.data.result.message
+      }
+    } else {
+      error.value = 'Failed to send email. Please try again later.'
+    }
+  } finally {
+    loading.value = false
+  }
 }
 </script>

@@ -9,7 +9,7 @@ import successImg from '@/assets/success.svg'
 import NotifyVendorModal from './notifyVendorModal/NotifyVendorModal.vue'
 import { useRouter } from 'vue-router'
 
-defineProps<{ id: string | number; name: string }>()
+defineProps<{ id: string | number; name: string; email: string }>()
 const router = useRouter()
 const verificationModalOpen = ref<boolean>(false)
 const blacklistModalOpen = ref<boolean>(false)
@@ -82,6 +82,8 @@ const handleSuccess = () => {
     v-model:open="notifyVendorModalOpen"
     v-model:success="notifyVendorSuccessModalOpen"
     v-if="notifyVendorModalOpen"
+    :vendor-name="name"
+    :vendor-email="email"
   />
 
   <UiModal
