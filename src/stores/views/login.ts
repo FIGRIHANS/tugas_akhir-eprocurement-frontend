@@ -27,7 +27,7 @@ export const useLoginStore = defineStore('login', () => {
         username: username,
         email: '',
         password: password,
-      }
+      },
     })
 
     return response.data
@@ -48,6 +48,7 @@ export const useLoginStore = defineStore('login', () => {
     isSendNewPassword,
     callLogin,
     callUser,
-    callLoginVendor
+    callLoginVendor,
+    userData,
   }
 })

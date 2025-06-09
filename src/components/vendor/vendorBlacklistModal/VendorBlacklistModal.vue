@@ -5,16 +5,19 @@ import { onMounted, ref } from 'vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import { useBlacklistPeriodStore } from '@/stores/vendor/reference'
-import { useVendorUploadStore, type IUploadResponse } from '@/stores/vendor/upload'
+import { useVendorUploadStore } from '@/stores/vendor/upload'
 import UiLoading from '@/components/UiLoading.vue'
 import { useVendorStore } from '@/stores/vendor/vendor'
 import { formattoMySQL } from '@/core/utils/format'
 import axios from 'axios'
 import { isArray } from 'lodash'
+import { useLoginStore } from '@/stores/views/login'
+import type { UploadFileResponse } from '@/stores/general/types/upload'
 
 const periodStore = useBlacklistPeriodStore()
 const uploadStore = useVendorUploadStore()
 const vendorStore = useVendorStore()
+const userStore = useLoginStore()
 
 const props = defineProps<IVendorBlacklistModalProps>()
 const open = defineModel('open')
@@ -24,7 +27,7 @@ const file = ref<File>()
 const reason = ref<string>('')
 const tglMulai = ref<Date>()
 const tglSelesai = ref<Date>()
-const uploadedFile = ref<IUploadResponse>()
+const uploadedFile = ref<UploadFileResponse>()
 const inputError = ref<string[]>([])
 
 const loading = ref<boolean>(false)
@@ -33,9 +36,7 @@ const error = ref<unknown>(null)
 const handleUpload = async () => {
   const formData = new FormData()
   formData.append('FormFile', file.value as File)
-  formData.append('Actioner', '')
-  formData.append('FolderName', '')
-  formData.append('FileName', file.value?.name as string)
+  formData.append('Actioner', userStore.userData?.profile.profileId.toString() || '0')
 
   uploadedFile.value = await uploadStore.upload(formData)
 }
@@ -73,7 +74,7 @@ const handleSubmit = async () => {
       BlacklistDescription: reason.value,
       BlacklistTypeID: Number(period.value),
       CreatedBy: 'admin',
-      DocUrl: uploadedFile.value?.url,
+      DocUrl: uploadedFile.value?.path,
       EndDate: tglSelesai.value ? formattoMySQL(tglSelesai.value as Date) : '',
       StartDate: tglMulai.value ? formattoMySQL(tglMulai.value as Date) : '',
     })

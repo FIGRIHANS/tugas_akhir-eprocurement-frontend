@@ -84,6 +84,7 @@ onMounted(() => {
     v-model="modalDeactive"
     :title="`Deactive Vendor ${name}`"
     size="sm"
+    @update:model-value="handleCancel"
   >
     <form action="" @submit.prevent="handleSubmit" class="space-y-4">
       <div class="relative">
