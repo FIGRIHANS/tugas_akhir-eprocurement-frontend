@@ -98,6 +98,10 @@ const handleReject = async () => {
 const handleModalClose = () => {
   vendorVerifStore.getData(Number(route.params.id))
 }
+
+const handleRejectSuccess = () => {
+  router.replace({ name: 'vendor-list' })
+}
 </script>
 <template>
   <div class="space-y-5">
@@ -198,7 +202,7 @@ const handleModalClose = () => {
     v-if="modalRejectSuccess"
     v-model="modalRejectSuccess"
     size="sm"
-    @update:model-value="handleModalClose"
+    @update:model-value="handleRejectSuccess"
   >
     <img :src="successImg" alt="success" class="mx-auto mb-3" />
     <h3 class="font-medium text-lg text-gray-800 text-center">Data Administrasi Rejected</h3>
