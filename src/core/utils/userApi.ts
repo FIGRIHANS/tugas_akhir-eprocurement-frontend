@@ -8,6 +8,7 @@ const userApi = axios.create({
 userApi.interceptors.request.use(
   (config) => {
     const token = getToken()
+    console.log(token)
     if (token) config.headers.Authorization = token
     return config
   }

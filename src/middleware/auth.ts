@@ -1,6 +1,7 @@
 import type { MiddlewareContext } from 'vue-middleware'
 import { useCheckToken, useGetUsername } from '@/composables/token'
 import { useLoginStore } from '@/stores/views/login'
+import { isEmpty } from 'lodash'
 
 /**
  * Guest middleware
@@ -14,7 +15,9 @@ export default (context: MiddlewareContext) => {
     })
   } else {
     const loginApi = useLoginStore()
-    const getUsername = useGetUsername() || ''
-    loginApi.callUser(getUsername)
+    if (isEmpty(loginApi.userData)) {
+      const getUsername = useGetUsername() || ''
+      loginApi.callUser(getUsername)
+    }
   }
 }

@@ -2,7 +2,7 @@
   <div class="modal" data-modal="true" id="detail_verification_modal">
     <div class="modal-content max-w-[821px] modal-center-y">
       <div class="modal-header">
-        <h3 class="modal-title text-lg font-semibold text-gray-700">Detail Verification Invoice</h3>
+        <h3 class="modal-title text-lg font-semibold text-gray-700">Verification Detail Invoice</h3>
         <button class="btn btn-xs btn-icon btn-light btn-clear" data-modal-dismiss="true">
           <i class="ki-duotone ki-cross"></i>
         </button>
@@ -18,16 +18,16 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(item, index) in list" :key="index" class="text-sm font-normal">
-              <td>{{ item.approverName }}</td>
-              <td>{{ item.job }}</td>
-              <td>{{ item.approvalDate }}</td>
+            <tr v-for="(item, index) in list?.workflow" :key="index" class="text-sm font-normal">
+              <td>{{ index + 1 }}</td>
+              <td>{{ item.profileName }}</td>
+              <td>{{ item.actionerDate ? moment(item.actionerDate).format('DD MMMM YYYY HH:mm:ss') : '-' }}</td>
               <td>
-                <span class="badge badge-outline" :class="badgeColor(item.status)">
-                  {{ badgeTitle(item.status) }}
+                <span class="badge badge-outline" :class="badgeColor(item.stateCode)">
+                  {{ badgeTitle(item.stateCode) }}
                 </span>
               </td>
-              <td class="text-right">{{ item.description || '-' }}</td>
+              <td class="text-right">{{ item.actionerNotes || '-' }}</td>
             </tr>
           </tbody>
         </table>
@@ -37,58 +37,55 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
-import type { listItemTypes } from '../types/detailVerification'
+import { ref, computed, onMounted } from 'vue'
+import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
+import { KTModal } from '@/metronic/core'
+import moment from 'moment'
+
+const emits = defineEmits(['loadDetail', 'setClearId'])
+
+const invoiceApi = useInvoiceSubmissionStore()
 
 const columns = ref<string[]>([
-  'Nama Approver',
-  'Jabatan',
-  'Tanggal Approval',
+  'No.',
+  'Department',
+  'Verification Date',
   'Status',
-  'Keterangan'
+  'Description'
 ])
 
-const list = ref<listItemTypes[]>([
-  {
-    approverName: 'Susanti',
-    job: 'Finance',
-    approvalDate: '3 Maret 2021 17:30:26',
-    status: 1,
-    description: ''
-  },
-  {
-    approverName: 'Susanti',
-    job: 'Finance',
-    approvalDate: '3 Maret 2021 17:30:26',
-    status: 2,
-    description: 'tidak sesuai'
-  },
-  {
-    approverName: 'Susanti',
-    job: 'Finance',
-    approvalDate: '3 Maret 2021 17:30:26',
-    status: 3,
-    description: ''
-  }
-])
+const list = computed(() => invoiceApi.detailPo)
 
 const badgeColor = (status: number) => {
   const list = {
-    1: 'badge-success',
-    2: 'badge-danger',
-    3: 'badge-info'
+    4: 'badge-success',
+    5: 'badge-danger',
+    1: 'badge-info'
   } as { [key: number]: string }
   return list[status]
 }
 
 const badgeTitle = (status: number) => {
   const list = {
-    1: 'Approved',
-    2: 'Rejected',
-    3: 'Pending Approval'
+    4: 'Approved',
+    5: 'Rejected',
+    1: 'Pending Approval'
   } as { [key: number]: string }
   return list[status]
 }
+
+onMounted(() => {
+  const idModal = document.querySelector('#detail_verification_modal')
+  const modal = KTModal.getInstance(idModal as HTMLElement)
+
+  modal.on('show', () => {
+    emits('loadDetail')
+  })
+
+  modal.on('hide', () => {
+    emits('setClearId')
+  })
+})
 </script>
 
 <style lang="scss" scoped>

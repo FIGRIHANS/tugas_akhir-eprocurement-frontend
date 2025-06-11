@@ -1,18 +1,3 @@
-export interface DocumentTypes {
-  id: string
-  text: string
-}
-
-export interface TaxCalculationTypes {
-  id: string
-  text: string
-}
-
-export interface SubmissionStatusTypes {
-  id: string
-  text: string
-}
-
 export interface ParamsSubmissionTypes {
   header: ParamsSubmissionHeader
   vendor: ParamsSubmissionVendor
@@ -21,7 +6,6 @@ export interface ParamsSubmissionTypes {
   calculation: ParamsSubmissionCalculation
   pogr: ParamsSubmissionItem[]
   additionalCosts: ParamsSubmissionCost[]
-  workflow: ParamsSubmissionWorkflow[]
 }
 
 interface ParamsSubmissionHeader {
@@ -40,13 +24,19 @@ interface ParamsSubmissionHeader {
   notes: string
   statusCode: number
   statusName: string
+  postingDate: string
+  invoicingParty: string
+  estimatedPaymentDate: string
+  paymentMethodCode: string
+  paymentMethodName: string
+  assigment: string
+  transferNews: string
+  npwpReporting: string
 }
 
 interface ParamsSubmissionVendor {
   vendorId: number
   vendorName: string
-  vendorBusinessUnit: string
-  vendorSubBusinessUnit: string
   vendorAddress: string
 }
 
@@ -79,9 +69,9 @@ interface ParamsSubmissionItem {
   grDocumentNo: string
   grDocumentItem: number
   grDocumentDate: string
-  taxCode: string
   itemAmount: number
   quantity: number
+  taxCode: string
   uom: string
   itemText: string
   conditionType: string
@@ -103,20 +93,6 @@ interface ParamsSubmissionCost {
   whtType: string
   whtCode: string
   whtBaseAmount: number
-  amount: number
-}
-
-interface ParamsSubmissionWorkflow {
-  actioner: string
-  actionerDate: string
-  actionerName: string
-  actionerNotes: string
-  id: number
-  profileId: number
-  profileName: string
-  stateCode: number
-  stateName: string
-  step: number
 }
 
 export interface PoGrItemTypes {
@@ -141,21 +117,26 @@ export interface PoGrItemTypes {
 
 export interface ListPoTypes {
   invoiceUId: string
-  invoiceTypeCode: number
-  invoiceTypeName: string
-  invoiceDPCode: number
-  invoiceDPName: string
-  companyCode: string
-  companyName: string
   invoiceNo: string
-  invoiceDate: string
-  statusCode: string
+  statusCode: number
   statusName: string
   poNo: string
   grDocumentNo: string
-  estimatePaymentDate: string
-  totalGrossAmount: number
+  invoiceTypeCode: number
+  invoiceTypeName: string
+  companyCode: string
+  companyName: string
+  costCenterCode: string
+  costCenterName: string
+  whtBaseAmount: number
+  vatAmount: number
+  whtAmount: number
   totalNetAmount: number
+  taxNo: string
+  documentNo: string
+  estimatePaymentDate: string
+  invoiceDate: string
+  notes: string
 }
 
 export interface QueryParamsListPoTypes {

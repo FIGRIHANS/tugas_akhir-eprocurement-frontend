@@ -11,15 +11,17 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, defineAsyncComponent, type Component } from 'vue'
-import { type routeTypes } from '@/core/type/components/breadcrumb'
+import { ref, computed, onMounted, defineAsyncComponent, type Component } from 'vue'
+import type { routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import StepperStatus from '../../components/stepperStatus/StepperStatus.vue'
 import TabInvoice from './InvoiceVerification/TabInvoice.vue'
+import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 
 const PendingVerification = defineAsyncComponent(() => import('./InvoiceVerification/PendingVerification.vue'))
 const VerificationHistory = defineAsyncComponent(() => import('./InvoiceVerification/VerificationHistory.vue'))
 
+const invoiceMasterApi = useInvoiceMasterDataStore()
 const tabNow = ref<string>('pending')
 
 const routes = ref<routeTypes[]>([
@@ -41,4 +43,9 @@ const contentComponent = computed(() => {
 const setTab = (value: string) => {
   tabNow.value = value
 }
+
+onMounted(() => {
+  invoiceMasterApi.getInvoicePoType()
+  invoiceMasterApi.getCompanyCode()
+})
 </script>

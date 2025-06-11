@@ -23,24 +23,24 @@
         <tbody>
           <tr v-for="(item, index) in form.invoicePoGr" :key="index" class="po__items">
             <td>{{ item.line }}</td>
-            <td>{{ item.poNumber || '-' }}</td>
+            <td>{{ item.poNo || '-' }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.poItem || '-' }}</td>
-            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.GrDocumentNo || '-' }}</td>
-            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.GrDocumentItem || '-' }}</td>
-            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.GrDocumentDate || '-' }}</td>
-            <td v-if="!checkInvoiceDp()">{{ item.taxCode || '-' }}</td>
-            <td v-if="!checkInvoiceDp()">{{ item.itemAmount || '-' }}</td>
-            <td v-if="!checkInvoiceDp()">{{ item.quantity || '-' }}</td>
-            <td v-if="!checkInvoiceDp()">{{ item.unit || '-' }}</td>
+            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentNo || '-' }}</td>
+            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentItem || '-' }}</td>
+            <td v-if="!checkInvoiceDp() && !checkPoPib()">
+              {{ moment(item.grDocumentDate).format('DD MMMM YYYY') || '-' }}
+            </td>
+            <td v-if="!checkInvoiceDp()">{{ useFormatIdr(item.itemAmount) || '-' }}</td>
+            <td v-if="!checkInvoiceDp()">{{ useFormatIdr(item.quantity) || '-' }}</td>
+            <td v-if="!checkInvoiceDp()">{{ item.uom || '-' }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.itemText || '-' }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.conditionType || '-' }}</td>
-            <td v-if="checkInvoiceDp()">{{ item.amountInvoice || '-' }}</td>
-            <td v-if="checkInvoiceDp()">{{ item.vatAmount || '-' }}</td>
+            <td>{{ item.taxCode || '-' }}</td>
             <td>{{ item.whtType || '-' }}</td>
             <td>{{ item.whtCode || '-' }}</td>
-            <td>{{ item.whtBaseAmount || '-' }}</td>
-            <td>{{ item.category || '-' }}</td>
-            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.totalNetAmount || '-' }}</td>
+            <td>{{ useFormatIdr(item.whtBaseAmount) || '-' }}</td>
+            <td>{{ useFormatIdr(item.whtAmount) || '-' }}</td>
+            <td>{{ item.department || '-' }}</td>
           </tr>
         </tbody>
       </table>
@@ -51,27 +51,30 @@
 <script lang="ts" setup>
 import { ref, watch, inject, onMounted } from 'vue'
 import type { formTypes } from '../types/invoiceDetail'
-import { defaultColumn, invoiceDpColumn, PoPibColumn } from '@/static/invoicePoGr'
+import { defaultColumn } from '@/static/invoicePoGr'
+import moment from 'moment'
+import { useFormatIdr } from '@/composables/currency'
 
 const form = inject<formTypes>('form')
 const columns = ref<string[]>([])
 
 const checkInvoiceDp = () => {
-  return form?.invoiceDp
+  return form?.invoiceDPCode === 9011
 }
 
 const checkPoPib = () => {
-  return form?.invoiceType === 'pib'
+  return false
 }
 
 const setColumn = () => {
-  if (form?.invoiceType === 'pib') columns.value = ['Line', ...PoPibColumn]
-  else if (form?.invoiceDp) columns.value = ['Line', ...invoiceDpColumn]
-  else columns.value = ['Line', ...defaultColumn]
+  // if (false) columns.value = ['Line', ...PoPibColumn]
+  // else if (form?.invoiceDPCode !== 9011) columns.value = ['Line', ...invoiceDpColumn]
+  // else columns.value = ['Line', ...defaultColumn]
+  columns.value = ['Line', ...defaultColumn]
 }
 
 watch(
-  () => [form?.invoiceDp, form?.invoiceType],
+  () => [form?.invoiceDPCode, form?.invoiceTypeCode],
   () => {
     setColumn()
   },

@@ -10,3 +10,9 @@ export interface listItemTypes {
   whtAmount: string
   totalNetAmount: string
 }
+
+export interface filterListTypes {
+  date: string
+  companyCode: string
+  invoiceType: string
+}
