@@ -12,6 +12,9 @@ import type {
 } from './types/vendor'
 import type { ApiResponse } from '@/core/type/api'
 import axios from 'axios'
+import { useLoginStore } from '../views/login'
+
+const userStore = useLoginStore()
 
 export const useVendorStore = defineStore('vendor', () => {
   const loading = ref(false)
@@ -26,14 +29,14 @@ export const useVendorStore = defineStore('vendor', () => {
   const isLicenseVerified = ref(false)
   const isBankVerified = ref(false)
 
-  const getVendors = async (params: unknown) => {
+  const getVendors = async (params: Record<string, unknown>) => {
     loading.value = true
     error.value = null
 
     try {
       const response: ApiResponse<IVendorContent> = await vendorAPI.get(
         '/public/vendor/registration/getvendor',
-        { params },
+        { params: { ...params, employeeId: userStore.userData?.profile.employeeId || '' } },
       )
 
       if (response.data.statusCode === 200) {
