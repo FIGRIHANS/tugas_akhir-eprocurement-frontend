@@ -8,9 +8,12 @@ import { useRoute, useRouter } from 'vue-router'
 import successImg from '@/assets/success.svg'
 import { useVendorStore, useVerificationDetailStore } from '@/stores/vendor/vendor'
 import axios from 'axios'
+import { useLoginStore } from '@/stores/views/login'
 
 const vendorStore = useVendorStore()
 const vendorVerifStore = useVerificationDetailStore()
+const userStore = useLoginStore()
+
 const router = useRouter()
 const route = useRoute()
 const modalReject = ref(false)
@@ -42,9 +45,9 @@ const handleVerify = async () => {
       verifiedNote: notes.value,
       isReject: false,
       rejectedNote: '',
-      createdBy: '',
-      verificatorName: 'Susi Susanti',
-      position: 'Admin',
+      createdBy: userStore.userData?.profile.employeeName,
+      position: userStore.userData?.profile.positionName,
+      verificatorName: userStore.userData?.profile.employeeName,
     })
     modalVerify.value = false
     modalVerifySuccess.value = true
@@ -76,9 +79,9 @@ const handleReject = async () => {
       verifiedNote: '',
       isReject: true,
       rejectedNote: reason.value,
-      createdBy: '',
-      verificatorName: 'Susi Susanti',
-      position: 'Admin',
+      createdBy: userStore.userData?.profile.employeeName,
+      position: userStore.userData?.profile.positionName,
+      verificatorName: userStore.userData?.profile.employeeName,
     })
 
     modalReject.value = false
