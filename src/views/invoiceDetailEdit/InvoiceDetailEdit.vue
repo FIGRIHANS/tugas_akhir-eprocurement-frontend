@@ -94,7 +94,7 @@ const form = reactive<formTypes>({
   currency: 'IDR',
   npwpReporting: '',
   description: '',
-  invoiceDp: 'NON',
+  invoiceDp: '1',
   invoiceDocument: null,
   tax: null,
   referenceDocument: null,

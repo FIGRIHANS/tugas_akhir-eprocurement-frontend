@@ -63,7 +63,7 @@ const setCalculation = () => {
 watch(
   () => [form?.invoiceDp],
   () => {
-    if (form?.invoiceDp !== 'NON') {
+    if (form?.invoiceDp !== '1') {
       listName.value = [...dpField]
     } else {
       listName.value = [...defaultField]

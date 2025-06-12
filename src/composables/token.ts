@@ -15,7 +15,7 @@ export const useCheckToken = () => {
 
   const paramCookie = getParamCookie()
   token = paramCookie?.get('token_dts') || ''
-  loginApi.isVendor = Boolean(paramCookie?.get('isAdmin'))
+  loginApi.isVendor = !Boolean(paramCookie?.get('isAdmin'))
 
   return token
 }
