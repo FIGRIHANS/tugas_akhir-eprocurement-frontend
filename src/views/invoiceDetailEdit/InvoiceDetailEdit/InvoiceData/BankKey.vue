@@ -11,7 +11,7 @@
           Bank Key
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
-        <select v-model="form.bankKeyId" class="select" :class="{ 'border-danger': form.bankKeyIdError }">
+        <select v-model="form.bankKey" class="select" :class="{ 'border-danger': form.bankKeyIdError }">
           <option v-for="item of bankList" :key="item.bankId" :value="item.bankId">
             {{ item.bankKey + ' - ' + item.accountNumber }}
           </option>
@@ -22,14 +22,14 @@
         <label class="form-label max-w-32">
           Bank Account Number
         </label>
-        <input v-model="form.bankAccountNumber" class="input" placeholder="" disabled/>
+        <input v-model="form.bankAccountNo" class="input" placeholder="" disabled/>
       </div>
       <!-- Bank Name -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
         <label class="form-label max-w-32">
           Bank Name
         </label>
-        <input v-model="form.bankNameId" class="input" placeholder="" disabled/>
+        <input v-model="form.bankName" class="input" placeholder="" disabled/>
       </div>
       <!-- Beneficiary Name -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
@@ -43,59 +43,59 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, watch, inject } from 'vue'
+import { ref, computed, watch, inject, type Ref } from 'vue'
 import type { formTypes } from '../../types/invoiceDetailEdit'
 import type { PaymentTypes } from '@/stores/master-data/types/invoiceMasterData'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
-const form = inject<formTypes>('form')
+const form = inject<Ref<formTypes>>('form')
 const bankList = ref<PaymentTypes[]>([])
 
 const vendorList = computed(() => invoiceMasterApi.vendorList)
 
 const checkBank = () => {
   if (form) {
-    const getIndex = vendorList.value.findIndex((item) => item.vendorId === Number(form?.vendorId))
+    const getIndex = vendorList.value.findIndex((item) => item.vendorId === form.value.vendorId)
     if (getIndex !== -1) {
       bankList.value = vendorList.value[getIndex].payment
       if (bankList.value.length === 1) {
-        form.bankKeyId = bankList.value[0].bankId.toString()
-        form.bankNameId = bankList.value[0].bankName
-        form.beneficiaryName = bankList.value[0].beneficiaryName
-        form.bankAccountNumber = bankList.value[0].accountNumber
+        form.value.bankKey = bankList.value[0].bankId.toString()
+        form.value.bankName = bankList.value[0].bankName
+        form.value.beneficiaryName = bankList.value[0].beneficiaryName
+        form.value.bankAccountNo = bankList.value[0].accountNumber
       } else {
-        form.bankKeyId = ''
-        form.bankNameId = ''
-        form.beneficiaryName = ''
-        form.bankAccountNumber = ''
+        form.value.bankKey = ''
+        form.value.bankName = ''
+        form.value.beneficiaryName = ''
+        form.value.bankAccountNo = ''
       }
     }
   }
 }
 
 watch(
-  () => form?.vendorId,
+  () => form?.value,
   () => {
     checkBank()
+  },
+  {
+    deep: true,
+    immediate: true
   }
 )
 
 watch(
-  () => form?.bankKeyId,
+  () => form?.value.bankKey,
   () => {
     if (form) {
-      const getIndex = bankList.value.findIndex((item) => item.bankId === Number(form.bankKeyId))
+      const getIndex = bankList.value.findIndex((item) => item.bankId === Number(form.value.bankKey))
       if (getIndex !== -1) {
-        form.bankNameId = bankList.value[getIndex].bankName
-        form.beneficiaryName = bankList.value[getIndex].beneficiaryName
-        form.bankAccountNumber = bankList.value[getIndex].accountNumber
+        form.value.bankName = bankList.value[getIndex].bankName
+        form.value.beneficiaryName = bankList.value[getIndex].beneficiaryName
+        form.value.bankAccountNo = bankList.value[getIndex].accountNumber
       }
     }
   }
 )
-
-onMounted(() => {
-  checkBank()
-})
 </script>

@@ -1,5 +1,4 @@
 export interface itemsPoGrType {
-  line: string
   poNo: string
   poItem: number
   grDocumentNo: string
@@ -16,5 +15,4 @@ export interface itemsPoGrType {
   whtBaseAmount: number
   whtAmount: number
   department: string
-  isEdit: boolean
 }

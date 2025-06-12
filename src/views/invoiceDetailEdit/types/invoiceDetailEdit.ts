@@ -1,69 +1,61 @@
 import type { documentFormTypes } from './invoiceDocument'
 import type { itemsPoGrType } from './invoicePoGr'
 import type { itemsCostType } from './additionalCost'
-import type { invoiceItemTypes } from './invoiceItem'
 
 export interface formTypes extends documentFormTypes {
-  // Invoice Data
-  invoiceType: string
-  vendorId: string
-  businessField: string
-  subBusinessField: string
-  address: string
-
-  bankKeyId: string
-  bankKeyIdError?: boolean
-  bankNameId: string
-  beneficiaryName: string
-  bankAccountNumber: string
-  swiftCode: string
-  bankAddress: string
-  nameBank: string
-  postalCode: string
-  street: string
-  city: string
-  country: string
-  bankAccount: string
-  bankNumber: string
-  bankCountry: string
-  npwpNumber: string
-  ktpNumber: string
-  email: string
-
-  // Invoice Information
+  invoiceUId: string
+  invoiceTypeCode: number
+  invoiceTypeName: string
+  invoiceDPCode: number
+  invoiceDPName: string
+  companyCode: string
+  companyName: string
+  invoiceNo: string
+  documentNo: string
+  documentNoError?: boolean
   invoiceDate: string
   invoiceDateError?: boolean
+  taxNo: string
+  taxNoError?: boolean
+  currCode: string
+  currCodeError?: boolean
+  notes: string
+  statusCode: number
+  statusName: string
   postingDate: string
   postingDateError?: boolean
-  invoiceNumber: string
-  companyCode: string
-  companyCodeError?: boolean
   invoicingParty: string
   invoicingPartyError?: boolean
   estimatedPaymentDate: string
   estimatedPaymentDateError?: boolean
-  taxNumberInvoice: string
-  taxNumberInvoiceError?: boolean
-  invoiceNumberVendor: string
-  invoiceNumberVendorError?: boolean
-  paymentMethod: string
+  paymentMethodCode: string
+  paymentMethodName: string
   paymentMethodError?: boolean
-  assignment: string
+  assigment: string
   assignmentError?: boolean
   transferNews: string
   transferNewsError?: boolean
-  currency: string
-  currencyError?: boolean
   npwpReporting: string
   npwpReportingError?: boolean
-  description: string
-  descriptionError?: boolean
-  invoiceDp: string
+
+  bankKey: string
+  bankKeyIdError?: boolean
+  bankName: string
+  beneficiaryName: string
+  bankAccountNo: string
+
+  vendorId: number
+  vendorName: string
+  vendorAddress: string
+
+  subtotal: number
+  vatAmount: number
+  whtAmount: number
+  additionalCost: number
+  totalGrossAmount: number
+  totalNetAmount: number
 
   invoicePoGr: itemsPoGrType[]
   invoicePoGrError?: boolean
-  additionalCost: itemsCostType[]
-  invoiceItem: invoiceItemTypes[]
-
-  status: number
+  additionalCosts: itemsCostType[]
 }

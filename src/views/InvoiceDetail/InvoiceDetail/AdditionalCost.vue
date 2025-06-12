@@ -22,7 +22,7 @@
         </thead>
         <tbody>
           <tr v-for="(item, index) in form.additionalCosts" :key="index" class="cost__items">
-            <td>{{ item.line }}</td>
+            <td>{{ index + 1 }}</td>
             <td>{{ item.activityExpense || '-' }}</td>
             <td>{{ item.itemAmount || '-' }}</td>
             <td>{{ item.debitCredit || '-' }}</td>

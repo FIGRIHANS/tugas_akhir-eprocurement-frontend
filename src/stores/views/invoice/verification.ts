@@ -7,12 +7,15 @@ import type { ApiResponse } from '@/core/type/api'
 import type {
   ParamsSubmissionTypes,
   ListPoTypes,
-  QueryParamsListPoTypes
+  QueryParamsListPoTypes,
+  DetailInvoiceEditTypes
 } from './types/verification'
 
 export const useInvoiceVerificationStore = defineStore('invoiceVerification', () => {
   const listPo = ref<ListPoTypes[]>([])
   const detailInvoice = ref<ParamsSubmissionTypes>()
+  const isFromEdit = ref<boolean>(false)
+  const detailInvoiceEdit = ref<DetailInvoiceEditTypes>()
 
   const getListPo = async (data: QueryParamsListPoTypes) => {
     listPo.value = []
@@ -22,7 +25,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
       invoiceDate: data.invoiceDate || null,
       searchText: data.searchText || null
     }
-    const response: ApiResponse<ListPoTypes[]> = await invoiceApi.get(`/invoice/verify`, {
+    const response: ApiResponse<ListPoTypes[]> = await invoiceApi.get(`/invoice/approval`, {
       params: {
         ...(data.statusCode !== null ? { statuscode: Number(data.statusCode) } : {}),
         ...query
@@ -35,7 +38,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
   }
 
   const getInvoiceDetail = async (uid: string) => {
-    const response: ApiResponse<ParamsSubmissionTypes> = await invoiceApi.get(`/invoice/verify/${uid}`)
+    const response: ApiResponse<ParamsSubmissionTypes> = await invoiceApi.get(`/invoice/approval/${uid}`)
   
     detailInvoice.value = response.data.result.content
   
@@ -43,7 +46,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
   }
 
   const postSubmission = async (data: ParamsSubmissionTypes) => {
-    const response: ApiResponse<void> = await invoiceApi.post(`/invoice/verify`, data)
+    const response: ApiResponse<void> = await invoiceApi.post(`/invoice/approval`, data)
 
     return response.data.result
   }
@@ -51,6 +54,8 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
   return {
     listPo,
     detailInvoice,
+    isFromEdit,
+    detailInvoiceEdit,
     postSubmission,
     getListPo,
     getInvoiceDetail

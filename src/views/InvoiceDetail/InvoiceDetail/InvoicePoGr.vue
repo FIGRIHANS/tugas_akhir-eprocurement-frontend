@@ -22,7 +22,7 @@
         </thead>
         <tbody>
           <tr v-for="(item, index) in form.invoicePoGr" :key="index" class="po__items">
-            <td>{{ item.line }}</td>
+            <td>{{ index + 1 }}</td>
             <td>{{ item.poNo || '-' }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.poItem || '-' }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentNo || '-' }}</td>

@@ -1,5 +1,4 @@
 export interface itemsCostType {
-  line: string
   activityExpense: string
   itemAmount: number
   debitCredit: string
@@ -10,5 +9,4 @@ export interface itemsCostType {
   whtType: string
   whtCode: string
   whtBaseAmount: number
-  isEdit: boolean
 }

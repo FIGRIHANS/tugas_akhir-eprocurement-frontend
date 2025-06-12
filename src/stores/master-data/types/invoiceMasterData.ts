@@ -51,3 +51,28 @@ export type TaxCodeTypes = {
   code: string
   name: string
 }
+
+export type PaymentMethodTypes = {
+  code: string
+  name: string
+}
+
+export type ProfitCenterTypes = {
+  code: string
+  name: string
+}
+
+export type WhtTypes = {
+  code: string
+  name: string
+}
+
+export type WhtCodeTypes = {
+  code: string
+  name: string
+}
+
+export type CostCenterTypes = {
+  code: string
+  name: string
+}

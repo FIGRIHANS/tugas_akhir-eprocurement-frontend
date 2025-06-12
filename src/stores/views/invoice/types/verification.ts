@@ -146,3 +146,92 @@ export interface QueryParamsListPoTypes {
   invoiceDate?: string | null
   searchText?: string | null
 }
+
+export interface documentDetailTypes {
+  documentType: number
+  documentName: string
+  documentUrl: string
+  documentSize: number
+}
+
+export interface itemsCostType {
+  activityExpense: string
+  itemAmount: number
+  debitCredit: string
+  taxCode: string
+  costCenter: string
+  profitCenter: string
+  assignment: string
+  whtType: string
+  whtCode: string
+  whtBaseAmount: number
+}
+
+export interface itemsPoGrType {
+  poNo: string
+  poItem: number
+  grDocumentNo: string
+  grDocumentItem: number
+  grDocumentDate: string
+  itemAmount: number
+  quantity: number
+  taxCode: string
+  uom: string
+  itemText: string
+  conditionType: string
+  whtType: string
+  whtCode: string
+  whtBaseAmount: number
+  whtAmount: number
+  department: string
+}
+
+export interface DetailInvoiceEditTypes {
+  invoiceUId: string
+  invoiceTypeCode: number
+  invoiceTypeName: string
+  invoiceDPCode: number
+  invoiceDPName: string
+  companyCode: string
+  companyName: string
+  invoiceNo: string
+  documentNo: string
+  invoiceDate: string
+  taxNo: string
+  currCode: string
+  notes: string
+  statusCode: number
+  statusName: string
+  postingDate: string
+  invoicingParty: string
+  estimatedPaymentDate: string
+  paymentMethodCode: string
+  paymentMethodName: string
+  assigment: string
+  transferNews: string
+  npwpReporting: string
+
+  bankKey: string
+  bankName: string
+  beneficiaryName: string
+  bankAccountNo: string
+
+  vendorId: number
+  vendorName: string
+  vendorAddress: string
+
+  subtotal: number
+  vatAmount: number
+  whtAmount: number
+  additionalCost: number
+  totalGrossAmount: number
+  totalNetAmount: number
+
+  invoicePoGr: itemsPoGrType[]
+  additionalCosts: itemsCostType[]
+
+  invoiceDocument: documentDetailTypes | null
+  tax: documentDetailTypes | null
+  referenceDocument: documentDetailTypes | null
+  otherDocument: documentDetailTypes | null
+}

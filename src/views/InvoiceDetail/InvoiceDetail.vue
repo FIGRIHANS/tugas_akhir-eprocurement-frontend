@@ -125,7 +125,11 @@ const form = ref<formTypes>({
 
 const goToEdit = () => {
   router.push({
-    name: 'invoiceDetailEdit'
+    name: 'invoiceDetailEdit',
+    query : {
+      id: route.query.id,
+      type: route.query.type
+    }
   })
 }
 
@@ -181,19 +185,15 @@ const setDataDefault = () => {
   let reference = {} as documentDetailTypes
   let other = {} as documentDetailTypes
 
-  for (const [index, item] of data?.pogr.entries() || []) {
+  for (const item of data?.pogr || []) {
     resultPoGr.push({
-      ...item,
-      line: (index + 1).toString(),
-      isEdit: false
+      ...item
     })
   }
 
-  for (const [index, item] of data?.additionalCosts.entries() || []) {
+  for (const item of data?.additionalCosts || []) {
     resultAdditional.push({
-      ...item,
-      line: (index + 1).toString(),
-      isEdit: false
+      ...item
     })
   }
 
@@ -260,6 +260,54 @@ const setDataDefault = () => {
   }
 }
 
+const setDataEdit = () => {
+  const data = verificationApi.detailInvoiceEdit
+  form.value = {
+    invoiceUId: data?.invoiceUId || '',
+    invoiceTypeCode: data?.invoiceTypeCode || 0,
+    invoiceTypeName: data?.invoiceTypeName || '',
+    invoiceDPCode: data?.invoiceDPCode || 0,
+    invoiceDPName: data?.invoiceDPName || '',
+    companyCode: data?.companyCode || '',
+    companyName: data?.companyName || '',
+    invoiceNo: data?.invoiceNo || '',
+    documentNo: data?.documentNo || '',
+    invoiceDate: data?.invoiceDate || '',
+    taxNo: data?.taxNo || '',
+    currCode: data?.currCode || '',
+    notes: data?.notes || '',
+    statusCode: data?.statusCode || 0,
+    statusName: data?.statusName || '',
+    postingDate: data?.postingDate || '',
+    invoicingParty: data?.invoicingParty || '',
+    estimatedPaymentDate: data?.estimatedPaymentDate || '',
+    paymentMethodCode: data?.paymentMethodCode || '',
+    paymentMethodName: data?.paymentMethodName || '',
+    assigment: data?.assigment || '',
+    transferNews: data?.transferNews || '',
+    npwpReporting: data?.npwpReporting || '',
+    bankKey: data?.bankKey || '',
+    bankName: data?.bankName || '',
+    beneficiaryName: data?.beneficiaryName || '',
+    bankAccountNo: data?.bankAccountNo || '',
+    vendorId: data?.vendorId || 0,
+    vendorName: data?.vendorName || '',
+    vendorAddress: data?.vendorAddress || '',
+    subtotal: data?.subtotal || 0,
+    vatAmount: data?.vatAmount || 0,
+    whtAmount: data?.whtAmount || 0,
+    additionalCost: data?.additionalCost || 0,
+    totalGrossAmount: data?.totalGrossAmount || 0,
+    totalNetAmount: data?.totalNetAmount || 0,
+    invoicePoGr: data?.invoicePoGr || [],
+    additionalCosts: data?.additionalCosts || [],
+    invoiceDocument: data?.invoiceDocument || null,
+    tax: data?.tax || null,
+    referenceDocument: data?.referenceDocument || null,
+    otherDocument: data?.otherDocument || null
+  }
+}
+
 onMounted(() => {
   if (route.query.type === '1') {
     activeStep.value = 'Verification'
@@ -287,7 +335,11 @@ onMounted(() => {
     ]
   }
   verificationApi.getInvoiceDetail(route.query.id?.toString() || '').then(() => {
-    setDataDefault()
+    if (verificationApi.isFromEdit) {
+      setDataEdit()
+    } else {
+      setDataDefault()
+    }
   })
 })
 

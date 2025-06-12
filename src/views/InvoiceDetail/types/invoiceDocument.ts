@@ -12,6 +12,11 @@ export interface documentDetailTypes {
   documentSize: number
 }
 
+export interface documentViewTypes {
+  name: string
+  path: string
+}
+
 export interface listFormTypes {
   title: string
   varName: string

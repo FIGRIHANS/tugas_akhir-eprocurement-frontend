@@ -22,9 +22,9 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(item, index) in form.additionalCost" :key="index" class="cost__field-items">
+          <tr v-for="(item, index) in form.additionalCosts" :key="index" class="cost__field-items">
             <td class="flex items-center justify-around gap-[8px]">
-              <button v-if="form.status === 0" class="btn btn-outline btn-icon btn-primary" @click="goEdit(item)">
+              <button class="btn btn-outline btn-icon btn-primary" @click="goEdit(item)">
                 <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>
                 <i v-else class="ki-duotone ki-check-circle"></i>
               </button>
@@ -33,8 +33,8 @@
               </button>
             </td>
             <td>
-              <span v-if="!item.isEdit">{{ item.activity }}</span>
-              <select v-else v-model="formEdit.activity" class="select" placeholder="">
+              <span v-if="!item.isEdit">{{ item.activityExpense }}</span>
+              <select v-else v-model="formEdit.activityExpense" class="select" placeholder="">
                 <option v-for="item of listActivity" :key="item.code" :value="item.code">
                   {{ item.name }}
                 </option>
@@ -66,28 +66,16 @@
             <td>
               <span v-if="!item.isEdit">{{ item.costCenter }}</span>
               <select v-else v-model="formEdit.costCenter" class="select" placeholder="">
-                <option value="1">
-                  Option 1
-                </option>
-                <option value="2">
-                  Option 2
-                </option>
-                <option value="3">
-                  Option 3
+                <option v-for="item of costCenterList" :key="item.code" :value="item.code">
+                  {{ item.name }}
                 </option>
               </select>
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.profitCenter }}</span>
               <select v-else v-model="formEdit.profitCenter" class="select" placeholder="">
-                <option value="1">
-                  Option 1
-                </option>
-                <option value="2">
-                  Option 2
-                </option>
-                <option value="3">
-                  Option 3
+                <option v-for="item of profitCenter" :key="item.code" :value="item.code">
+                  {{ item.name }}
                 </option>
               </select>
             </td>
@@ -97,29 +85,17 @@
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.whtType }}</span>
-              <select v-else v-model="formEdit.whtType" class="select" placeholder="">
-                <option value="1">
-                  Option 1
-                </option>
-                <option value="2">
-                  Option 2
-                </option>
-                <option value="3">
-                  Option 3
+              <select v-else v-model="formEdit.whtType" class="select" placeholder="" @change="callWhtCode(item)">
+                <option v-for="item of whtTypeList" :key="item.code" :value="item.code">
+                  {{ item.name }}
                 </option>
               </select>
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.whtCode }}</span>
               <select v-else v-model="formEdit.whtCode" class="select" placeholder="">
-                <option value="1">
-                  Option 1
-                </option>
-                <option value="2">
-                  Option 2
-                </option>
-                <option value="3">
-                  Option 3
+                <option v-for="sub of item.whtCodeList" :key="sub.code" :value="sub.code">
+                  {{ sub.name }}
                 </option>
               </select>
             </td>
@@ -135,13 +111,13 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, computed, inject } from 'vue'
+import { ref, reactive, computed, inject, type Ref } from 'vue'
 import type { formTypes } from '../../types/invoiceDetailEdit'
 import type { itemsCostType } from '../../types/additionalCost'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
-const form = inject<formTypes>('form')
+const form = inject<Ref<formTypes>>('form')
 const columns = ref([
   'Action',
   'Activity / Expense',
@@ -156,8 +132,8 @@ const columns = ref([
   'WHT Base Amount'
 ])
 const formEdit = reactive({
-  activity: '',
-  itemAmount: '',
+  activityExpense: '',
+  itemAmount: 0,
   debitCredit: '',
   taxCode: '',
   costCenter: '',
@@ -165,17 +141,21 @@ const formEdit = reactive({
   assignment: '',
   whtType: '',
   whtCode: '',
-  whtBaseAmount: ''
+  whtBaseAmount: 0
 })
 
 const listActivity = computed(() => invoiceMasterApi.activityList)
 const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
+const costCenterList = computed(() => invoiceMasterApi.costCenterList)
+const profitCenter = computed(() => invoiceMasterApi.profilCenterList)
+const whtTypeList = computed(() => invoiceMasterApi.whtTypeList)
+const whtCodeList = computed(() => invoiceMasterApi.whtCodeList)
 
 const addNew = () => {
   if (form) {
     const data = {
-      activity: '',
-      itemAmount: '',
+      activityExpense: '',
+      itemAmount: 0,
       debitCredit: '',
       taxCode: '',
       costCenter: '',
@@ -183,17 +163,16 @@ const addNew = () => {
       assignment: '',
       whtType: '',
       whtCode: '',
-      whtBaseAmount: '',
-      amount: '',
+      whtBaseAmount: 0,
       isEdit: false
     }
-    form.additionalCost.push(data)
+    form.value.additionalCosts.push(data)
   }
 }
 
 const resetFormEdit = () => {
-  formEdit.activity = ''
-  formEdit.itemAmount = ''
+  formEdit.activityExpense = ''
+  formEdit.itemAmount = 0
   formEdit.debitCredit = ''
   formEdit.taxCode = ''
   formEdit.costCenter = ''
@@ -201,14 +180,14 @@ const resetFormEdit = () => {
   formEdit.assignment = ''
   formEdit.whtType = ''
   formEdit.whtCode = ''
-  formEdit.whtBaseAmount = ''
+  formEdit.whtBaseAmount = 0
 }
 
 const goEdit = (item: itemsCostType) => {
   item.isEdit = !item.isEdit
 
   if (item.isEdit) {
-    formEdit.activity = item.activity
+    formEdit.activityExpense = item.activityExpense
     formEdit.itemAmount = item.itemAmount
     formEdit.debitCredit = item.debitCredit
     formEdit.taxCode = item.taxCode
@@ -219,7 +198,7 @@ const goEdit = (item: itemsCostType) => {
     formEdit.whtCode = item.whtCode
     formEdit.whtBaseAmount = item.whtBaseAmount
   } else {
-    item.activity = formEdit.activity
+    item.activityExpense = formEdit.activityExpense
     item.itemAmount = formEdit.itemAmount
     item.debitCredit = formEdit.debitCredit
     item.taxCode = formEdit.taxCode
@@ -236,6 +215,13 @@ const goEdit = (item: itemsCostType) => {
 const resetItem = (item: itemsCostType) => {
   item.isEdit = !item.isEdit
   resetFormEdit()
+}
+
+const callWhtCode = (data: itemsCostType) => {
+  formEdit.whtCode = ''
+  invoiceMasterApi.getWhtCode(formEdit.whtType).then(() => {
+    data.whtCodeList = whtCodeList.value
+  })
 }
 </script>
 
