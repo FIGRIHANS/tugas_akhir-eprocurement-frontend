@@ -48,7 +48,7 @@ const currentTab = ref<string>('summary-information')
 </script>
 
 <template>
-  <BreadcrumbView title="Vendor Master" :routes="bcRoutes" />
+  <BreadcrumbView title="Vendor Verfication" :routes="bcRoutes" />
   <UiTabClosable :tabs="tabsItem" v-model="currentTab" />
 
   <SummaryInformation v-if="currentTab === 'summary-information'" />
