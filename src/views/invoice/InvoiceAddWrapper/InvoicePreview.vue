@@ -130,7 +130,7 @@ onMounted(() => {
 
   if (route.query.type === 'po-view') {
     invoiceMasterApi.getDpTypes()
-    invoiceMasterApi.getActivity()
+    invoiceMasterApi.getActivity(form?.companyCode || '')
     invoiceMasterApi.getCompanyCode()
     invoiceApi.getPoDetail(route.query.invoice?.toString() || '').then(() => {
       setData()

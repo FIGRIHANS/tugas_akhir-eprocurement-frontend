@@ -21,6 +21,7 @@ export interface ParamsSubmissionTypes {
   calculation: ParamsSubmissionCalculation
   pogr: ParamsSubmissionItem[]
   additionalCosts: ParamsSubmissionCost[]
+  workflow: ParamsSubmissionWorkflow[]
 }
 
 interface ParamsSubmissionHeader {
@@ -103,6 +104,19 @@ interface ParamsSubmissionCost {
   whtCode: string
   whtBaseAmount: number
   amount: number
+}
+
+interface ParamsSubmissionWorkflow {
+  actioner: string
+  actionerDate: string
+  actionerName: string
+  actionerNotes: string
+  id: number
+  profileId: number
+  profileName: string
+  stateCode: number
+  stateName: string
+  step: number
 }
 
 export interface PoGrItemTypes {

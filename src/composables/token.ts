@@ -21,14 +21,8 @@ export const useCheckToken = () => {
 }
 
 export const getToken = () => {
-  const value = `; ${document.cookie}`
-  const parts = value.split(`; token_dts=`)
-  if (parts.length === 2) {
-    const token = parts.pop()
-    return token ? token.split(';').shift() : undefined
-  } else {
-    return ''
-  }
+  const paramCookie = getParamCookie()
+  return paramCookie?.get('token_dts') || ''
 }
 
 export const useGetUsername = () => {

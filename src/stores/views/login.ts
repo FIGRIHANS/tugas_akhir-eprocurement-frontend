@@ -46,6 +46,7 @@ export const useLoginStore = defineStore('login', () => {
     isVendor,
     isSendForgot,
     isSendNewPassword,
+    userData,
     callLogin,
     callUser,
     callLoginVendor,

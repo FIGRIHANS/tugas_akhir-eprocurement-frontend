@@ -51,3 +51,31 @@ export type TaxCodeTypes = {
   code: string
   name: string
 }
+
+export type PaymentMethodTypes = {
+  code: string
+  name: string
+}
+
+export type ProfitCenterTypes = {
+  code: string
+  name: string
+}
+
+export type WhtTypes = {
+  code: string
+  name: string
+}
+
+export type WhtCodeTypes = {
+  whtCode: string
+  description: string
+  tarif: number
+  wTaxFormula: string
+  isNPWP: boolean
+}
+
+export type CostCenterTypes = {
+  code: string
+  name: string
+}

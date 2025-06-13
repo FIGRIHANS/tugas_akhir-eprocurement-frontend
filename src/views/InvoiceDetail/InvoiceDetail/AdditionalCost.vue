@@ -21,9 +21,9 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(item, index) in form.additionalCost" :key="index" class="cost__items">
-            <td>{{ item.line }}</td>
-            <td>{{ item.activity || '-' }}</td>
+          <tr v-for="(item, index) in form.additionalCosts" :key="index" class="cost__items">
+            <td>{{ index + 1 }}</td>
+            <td>{{ item.activityExpense || '-' }}</td>
             <td>{{ item.itemAmount || '-' }}</td>
             <td>{{ item.debitCredit || '-' }}</td>
             <td>{{ item.taxCode || '-' }}</td>
@@ -33,7 +33,6 @@
             <td>{{ item.whtType || '-' }}</td>
             <td>{{ item.whtCode || '-' }}</td>
             <td>{{ item.whtBaseAmount || '-' }}</td>
-            <td>{{ item.amount || '-' }}</td>
           </tr>
         </tbody>
       </table>
@@ -58,8 +57,7 @@ const columns = ref([
   'Assignment',
   'WHT Type',
   'WHT Code',
-  'WHT Base Amount',
-  'Amount'
+  'WHT Base Amount'
 ])
 </script>
 

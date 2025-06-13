@@ -3,47 +3,49 @@ import type { itemsPoGrType } from './invoicePoGr'
 import type { itemsCostType } from './additionalCost'
 
 export interface formTypes extends documentFormTypes {
-  // Invoice Data
-  invoiceType: string
-  vendorId: string
-  businessField: string
-  subBusinessField: string
-  address: string
-
-  isNotRegisteredBank?: boolean
-  bankKeyId: string
-  bankNameId: string
-  beneficiaryName: string
-  bankAccountNumber: string
-  swiftCode: string
-  bankAddress: string
-  accountName?: string
-  npwpNumber?: string
-  bankNameNew?: string
-  bankAccountNumberNew?: string
-  bankAddressNew?: string
-
-  // Invoice Information
-  invoiceDate: string
-  postingDate: string
-  invoiceNo: string
+  invoiceUId: string
+  invoiceTypeCode: number
+  invoiceTypeName: string
+  invoiceDPCode: number
+  invoiceDPName: string
   companyCode: string
+  companyName: string
+  invoiceNo: string
+  documentNo: string
+  invoiceDate: string
+  taxNo: string
+  currCode: string
+  notes: string
+  statusCode: number
+  statusName: string
+  postingDate: string
   invoicingParty: string
   estimatedPaymentDate: string
-  taxNumberInvoice: string
-  invoiceNumberVendor: string
-  paymentMethod: string
-  assignment: string
+  paymentMethodCode: string
+  paymentMethodName: string
+  assigment: string
   transferNews: string
-  currency: string
   npwpReporting: string
-  description: string
-  invoiceDp: string
-  invoicePoGr: itemsPoGrType[]
-  additionalCost: itemsCostType[]
 
-  // verification validation
-  status: number
+  bankKey: string
+  bankName: string
+  beneficiaryName: string
+  bankAccountNo: string
+
+  vendorId: number
+  vendorName: string
+  vendorAddress: string
+
+  subtotal: number
+  vatAmount: number
+  whtAmount: number
+  additionalCost: number
+  totalGrossAmount: number
+  totalNetAmount: number
+
+  invoicePoGr: itemsPoGrType[]
+  additionalCosts: itemsCostType[]
+
   generalDataCheck?: boolean
   bankKeyCheck?: boolean
   invoiceHeaderDocumentCheck?: boolean
