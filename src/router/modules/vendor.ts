@@ -1,84 +1,36 @@
 export default [
   {
-    path: '/vendor-master',
+    path: '/vendor/master',
     name: 'vendor-master',
     component: () => import('@/views/vendor/vendorMaster/VendorMaster.vue'),
-    redirect: { name: 'vendor-list' },
-    children: [
-      {
-        path: 'information',
-        name: 'information',
-        component: () => import('@/views/vendor/vendorMaster/VendorInformation.vue'),
-      },
-      {
-        path: 'list',
-        name: 'vendor-list',
-        component: () => import('@/views/vendor/vendorMaster/VendorList.vue'),
-      },
-      {
-        path: 'dashboard',
-        name: 'dashboard',
-        component: () => import('@/views/vendor/vendorMaster/VendorDashboard.vue'),
-      },
-    ],
   },
   {
-    path: '/vendor-master/:id/verification',
-    name: 'verification',
-    component: () => import('@/views/vendor/vendorMaster/vendorDetail/VendorDetail.vue'),
-    redirect: { name: 'summary-information' },
-    children: [
-      {
-        path: 'summary-information',
-        name: 'summary-information',
-        component: () => import('@/views/vendor/vendorMaster/vendorDetail/VendorSummary.vue'),
-      },
-      {
-        path: 'data-administrasi',
-        name: 'data-administrasi',
-        component: () => import('@/views/vendor/vendorMaster/vendorDetail/VendorAdministrasi.vue'),
-      },
-      {
-        path: 'data-izin-usaha',
-        name: 'data-izin-usaha',
-        component: () => import('@/views/vendor/vendorMaster/vendorDetail/VendorIzinUsaha.vue'),
-      },
-      {
-        path: 'data-informasi-pembayaran',
-        name: 'data-informasi-pembayaran',
-        component: () =>
-          import('@/views/vendor/vendorMaster/vendorDetail/VendorInformasiPembayaran.vue'),
-      },
-      {
-        path: 'data-akta-pendirian',
-        name: 'data-akta-pendirian',
-        component: () => import('@/views/vendor/vendorMaster/vendorDetail/VendorAktaPendirian.vue'),
-      },
-      {
-        path: 'data-perlengkapan',
-        name: 'data-perlengkapan',
-        component: () => import('@/views/vendor/vendorMaster/vendorDetail/VendorPerlengkapan.vue'),
-      },
-      {
-        path: 'data-pengalaman',
-        name: 'data-pengalaman',
-        component: () => import('@/views/vendor/vendorMaster/vendorDetail/VendorPengalaman.vue'),
-      },
-      {
-        path: 'data-tenaga-ahli',
-        name: 'data-tenaga-ahli',
-        component: () => import('@/views/vendor/vendorMaster/vendorDetail/VendorTenagaAhli.vue'),
-      },
-      {
-        path: 'dokumen-lainnya',
-        name: 'dokumen-lainnya',
-        component: () =>
-          import('@/views/vendor/vendorMaster/vendorDetail/VendorDokumenLainnya.vue'),
-      },
-    ],
+    path: '/vendor/master/:id',
+    name: 'vendor-master-detail',
+    component: () => import('@/views/vendor/vendorMaster/VendorMasterDetail.vue'),
   },
   {
-    path: '/vendor-blacklist',
+    path: '/vendor/verification',
+    name: 'vendor-verification',
+    component: () => import('@/views/vendor/vendorVerification/VendorVerification.vue'),
+  },
+  {
+    path: '/vendor/verification/:id',
+    name: 'vendor-verification-detail',
+    component: () => import('@/views/vendor/vendorDetail/VendorDetail.vue'),
+  },
+  {
+    path: '/vendor/approval',
+    name: 'vendor-approval',
+    component: () => import('@/views/vendor/vendorVerification/VendorVerification.vue'),
+  },
+  {
+    path: '/vendor/approval/:id',
+    name: 'vendor-approval-detail',
+    component: () => import('@/views/vendor/vendorDetail/VendorDetail.vue'),
+  },
+  {
+    path: '/vendor/blacklist',
     name: 'vendor-blacklist',
     component: () => import('@/views/vendor/vendorBlacklist/VendorBlacklistWrapper.vue'),
     redirect: { name: 'vendor-pending-blacklist' },
@@ -94,15 +46,5 @@ export default [
         component: () => import('@/views/vendor/vendorBlacklist/VendorBlacklist.vue'),
       },
     ],
-  },
-  {
-    path: '/vendor-approval',
-    name: 'vendor-approval',
-    component: () => import('@/views/vendor/vendorApproval/VendorApproval.vue'),
-  },
-  {
-    path: '/vendor-approval/:id/detail',
-    name: 'vendor-approval-detail',
-    component: () => import('@/views/vendor/vendorApproval/VendorApprovalDetail.vue'),
   },
 ]

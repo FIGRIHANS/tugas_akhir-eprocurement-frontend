@@ -1,15 +1,15 @@
 export interface ISidebarMenu {
-  id: string;
-  title: string;
-  icon: string;
-  to?: string;
-  child: IChildSidebarMenu[];
+  id: string
+  title: string
+  icon: string
+  to?: string
+  child: IChildSidebarMenu[]
 }
 
 export interface IChildSidebarMenu {
-  id: string;
-  title: string;
-  to?: string;
+  id: string
+  title: string
+  to?: string
 }
 
 export default [
@@ -18,7 +18,7 @@ export default [
     title: 'Beranda',
     icon: 'element-11',
     to: '/dashboard',
-    child: []
+    child: [],
   },
   {
     id: 'tender',
@@ -27,9 +27,9 @@ export default [
     child: [
       {
         id: 'tender-1',
-        title: 'Tender 1'
-      }
-    ]
+        title: 'Tender 1',
+      },
+    ],
   },
   {
     id: 'vendor-management',
@@ -39,14 +39,24 @@ export default [
       {
         id: 'vendor-master',
         title: 'Vendor Master',
-        to: '/vendor-master'
+        to: '/vendor/master',
+      },
+      {
+        id: 'vendor-verification',
+        title: 'Vendor Verification',
+        to: '/vendor/verification',
+      },
+      {
+        id: 'vendor-approval',
+        title: 'Vendor Approval',
+        to: '/vendor/approval',
       },
       {
         id: 'vendor-blacklist',
         title: 'Vendor Blacklist',
-        to: '/vendor-blacklist'
-      }
-    ]
+        to: '/vendor/blacklist',
+      },
+    ],
   },
   {
     id: 'e-procurement-report',
@@ -55,9 +65,9 @@ export default [
     child: [
       {
         id: 'e-procurement-report-1',
-        title: 'E Procuremen Report 1'
-      }
-    ]
+        title: 'E Procuremen Report 1',
+      },
+    ],
   },
   {
     id: 'requisition-master',
@@ -66,9 +76,9 @@ export default [
     child: [
       {
         id: 'requisition-master-1',
-        title: 'Requisition Master 1'
-      }
-    ]
+        title: 'Requisition Master 1',
+      },
+    ],
   },
   {
     id: 'monitoring',
@@ -77,9 +87,9 @@ export default [
     child: [
       {
         id: 'monitoring-1',
-        title: 'Monitoring 1'
-      }
-    ]
+        title: 'Monitoring 1',
+      },
+    ],
   },
   {
     id: 'approval',
@@ -89,15 +99,15 @@ export default [
       {
         id: 'vendor-approval',
         title: 'Approval Verifikasi Vendor',
-        to:'/vendor-approval'
-      }
-    ]
+        to: '/vendor-approval',
+      },
+    ],
   },
   {
     id: 'e-catalog',
     title: 'Lihat e-Catalog',
     icon: 'menu',
-    child: []
+    child: [],
   },
   {
     id: 'procurement-master',
@@ -106,9 +116,9 @@ export default [
     child: [
       {
         id: 'procurement-master-1',
-        title: 'Procutement Master 1'
-      }
-    ]
+        title: 'Procutement Master 1',
+      },
+    ],
   },
   {
     id: 'e-invoice',
@@ -118,22 +128,22 @@ export default [
       {
         id: 'invoice-list',
         title: 'E-invoice',
-        to: '/invoice'
+        to: '/invoice',
       },
       {
         id: 'invoice-verification',
         title: 'Invoice Verification',
-        to: '/invoice/verification'
+        to: '/invoice/verification',
       },
       {
         id: 'invoice-approval',
         title: 'Invoice Approval',
-        to: '/invoice/approval'
+        to: '/invoice/approval',
       },
       {
         id: 'schedule-payment',
         title: 'Schedule Payment',
       },
-    ]
+    ],
   },
 ]
