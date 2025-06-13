@@ -8,7 +8,8 @@ import type {
   ParamsSubmissionTypes,
   ListPoTypes,
   QueryParamsListPoTypes,
-  DetailInvoiceEditTypes
+  DetailInvoiceEditTypes,
+  PostVerificationTypes
 } from './types/verification'
 
 export const useInvoiceVerificationStore = defineStore('invoiceVerification', () => {
@@ -45,7 +46,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     return response.data.result
   }
 
-  const postSubmission = async (data: ParamsSubmissionTypes) => {
+  const postSubmission = async (data: PostVerificationTypes) => {
     const response: ApiResponse<void> = await invoiceApi.post(`/invoice/approval`, data)
 
     return response.data.result

@@ -68,8 +68,11 @@ export type WhtTypes = {
 }
 
 export type WhtCodeTypes = {
-  code: string
-  name: string
+  whtCode: string
+  description: string
+  tarif: number
+  wTaxFormula: string
+  isNPWP: boolean
 }
 
 export type CostCenterTypes = {

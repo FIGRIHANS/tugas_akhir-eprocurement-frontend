@@ -37,6 +37,8 @@
       </div>
     </div>
     <RejectVerification />
+    <SuccessVerifModal />
+    <SuccessRejectModal />
   </div>
 </template>
 
@@ -52,6 +54,7 @@ import { KTModal } from '@/metronic/core'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import StepperStatus from '../../components/stepperStatus/StepperStatus.vue'
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
+import type { PostVerificationTypes } from '@/stores/views/invoice/types/verification'
 
 const StatusInvoice = defineAsyncComponent(() => import('./InvoiceDetail/StatusInvoice.vue'))
 const GeneralData = defineAsyncComponent(() => import('./InvoiceDetail/GeneralData.vue'))
@@ -61,6 +64,8 @@ const InvoiceCalculation = defineAsyncComponent(() => import('./InvoiceDetail/In
 const InvoicePoGr = defineAsyncComponent(() => import('./InvoiceDetail/InvoicePoGr.vue'))
 const AdditionalCost = defineAsyncComponent(() => import('./InvoiceDetail/AdditionalCost.vue'))
 const RejectVerification = defineAsyncComponent(() => import('./InvoiceDetail/RejectVerification.vue'))
+const SuccessVerifModal = defineAsyncComponent(() => import('./InvoiceDetail/SuccessVerifModal.vue'))
+const SuccessRejectModal = defineAsyncComponent(() => import('./InvoiceDetail/SuccessRejectModal.vue'))
 
 const activeStep = ref<string>('')
 const router = useRouter()
@@ -158,10 +163,111 @@ const checkVerif = () => {
   return true
 }
 
+const mapPoGr = () => {
+  const poGr = []
+  for (const item of form.value.invoicePoGr) {
+    poGr.push({
+      poNo: item.poNo,
+      poItem: Number(item.poItem),
+      grDocumentNo: item.grDocumentNo,
+      itemAmount: Number(item.itemAmount),
+      quantity: Number(item.quantity),
+      taxCode: item.taxCode,
+      whtType: item.whtType,
+      whtCode: item.whtCode,
+      whtBaseAmount: item.whtBaseAmount,
+      whtAmount: item.whtAmount
+    })
+  }
+  return poGr
+}
+
+const mapAdditionalCost = () => {
+  const cost = []
+  for (const item of form.value.additionalCosts) {
+    cost.push({
+      activityExpense: item.activityExpense,
+      itemAmount: Number(item.itemAmount),
+      debitCredit: item.debitCredit,
+      taxCode: item.taxCode,
+      costCenter: item.costCenter,
+      profitCenter: item.profitCenter,
+      assignment: item.assignment,
+      whtType: item.whtType,
+      whtCode: item.whtCode,
+      whtBaseAmount: Number(item.whtBaseAmount)
+    })
+  }
+  return cost
+}
+
+const mapDataVerif = () => {
+  const invoiceDoc = form.value.invoiceDocument || {}
+  const taxDoc = form.value.tax || {}
+  const referenceDoc = form.value.referenceDocument || {}
+  const otherDoc = form.value.otherDocument || {}
+  const data = {
+    statusCode: 3,
+    statusName: 'Verified',
+    statusNotes: '',
+    header: {
+      invoiceUId: form.value.invoiceUId,
+      documentNo: form.value.documentNo,
+      invoiceDate: form.value.invoiceDate,
+      taxNo: form.value.taxNo,
+      currCode: form.value.currCode,
+      notes: form.value.notes,
+      postingDate: form.value.postingDate,
+      invoicingParty: form.value.invoicingParty,
+      estimatedPaymentDate: form.value.estimatedPaymentDate,
+      paymentMethodCode: form.value.paymentMethodCode,
+      paymentMethodName: form.value.paymentMethodName,
+      assigment: form.value.assigment,
+      transferNews: form.value.transferNews,
+      npwpReporting: form.value.npwpReporting
+    },
+    payment: {
+      bankKey: form.value.bankKey,
+      bankName: form.value.bankName,
+      beneficiaryName: form.value.beneficiaryName,
+      bankAccountNo: form.value.bankAccountNo
+    },
+    calculation: {
+      subtotal: form.value.subtotal,
+      vatAmount: form.value.vatAmount,
+      whtAmount: form.value.whtAmount,
+      additionalCost: form.value.additionalCost,
+      totalGrossAmount: form.value.totalGrossAmount,
+      totalNetAmount: form.value.totalNetAmount
+    },
+    documents: [
+      invoiceDoc,
+      taxDoc,
+      referenceDoc,
+      otherDoc
+    ],
+    pogr: mapPoGr(),
+    additionalCosts: mapAdditionalCost()
+  } as PostVerificationTypes
+
+  return data
+}
+
 const goVerif = () => {
   const status = checkVerif()
 
   if (!status) return
+  verificationApi.postSubmission(mapDataVerif()).then(() => {
+    const idModal = document.querySelector('#success_verif_modal')
+    const modal = KTModal.getInstance(idModal as HTMLElement)
+    modal.show()
+    setTimeout(() => {
+      modal.hide()
+      router.push({
+        name: 'invoiceVerification'
+      })
+    }, 1000)
+  })
 }
 
 const goBack = () => {

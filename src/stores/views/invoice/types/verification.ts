@@ -8,6 +8,48 @@ export interface ParamsSubmissionTypes {
   additionalCosts: ParamsSubmissionCost[]
 }
 
+export interface PostVerificationTypes {
+  statusCode: number
+  statusName: string
+  statusNotes: string
+  header: ParamsVerificationHeaderTypes
+  payment: ParamsSubmissionPayment
+  documents: ParamsSubmissionDocument[]
+  calculation: ParamsSubmissionCalculation
+  pogr: ParamsVerificationItemTypes[]
+  additionalCosts: ParamsSubmissionCost[]
+}
+
+interface ParamsVerificationHeaderTypes {
+  invoiceUId: string
+  documentNo: string
+  invoiceDate: string
+  taxNo: string
+  currCode: string
+  notes: string
+  postingDate: string
+  invoicingParty: string
+  estimatedPaymentDate: string
+  paymentMethodCode: string
+  paymentMethodName: string
+  assigment: string
+  transferNews: string
+  npwpReporting: string
+}
+
+interface ParamsVerificationItemTypes {
+  poNo: string
+  poItem: number
+  grDocumentNo: string
+  itemAmount: number
+  quantity: number
+  taxCode: string
+  whtType: string
+  whtCode: string
+  whtBaseAmount: number
+  whtAmount: number
+}
+
 interface ParamsSubmissionHeader {
   invoiceUId: string
   invoiceTypeCode: number

@@ -16,7 +16,7 @@
           Next
           <i class="ki-duotone ki-black-right"></i>
         </button>
-        <button v-if="tabNow === 'information'" class="btn btn-primary">
+        <button v-if="tabNow === 'information'" class="btn btn-primary" @click="goNext">
           Save
           <i class="ki-duotone ki-bookmark"></i>
         </button>
@@ -41,6 +41,7 @@ import { useCheckEmpty } from '@/composables/validation'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 import moment from 'moment'
+import { isEmpty } from 'lodash'
 
 const InvoiceData = defineAsyncComponent(() => import('./InvoiceDetailEdit/InvoiceData.vue'))
 const InvoiceInformation = defineAsyncComponent(() => import('./InvoiceDetailEdit/InvoiceInformation.vue'))
@@ -128,10 +129,14 @@ const checkInvoiceInformation = () => {
   form.value.postingDateError = useCheckEmpty(form.value.postingDate).isError
   form.value.estimatedPaymentDateError = useCheckEmpty(form.value.estimatedPaymentDate).isError
   form.value.paymentMethodError = useCheckEmpty(form.value.paymentMethodCode).isError
-  form.value.assignmentError = useCheckEmpty(form.value.assigment).isError
+  form.value.transferNewsError = useCheckEmpty(form.value.transferNews).isError
 
   if (
-    form.value.invoiceDateError
+    form.value.invoiceDateError ||
+    form.value.estimatedPaymentDateError ||
+    form.value.paymentMethodError ||
+    form.value.assignmentError ||
+    form.value.transferNewsError
   ) return false
   else return true
 }
@@ -141,9 +146,19 @@ const setTab = (value: string) => {
 }
 const goBack = () => {
   const list = ['data', 'information']
-  const checkIndex = list.findIndex((item) => item === tabNow.value)
-  if (checkIndex !== -1) {
-    tabNow.value = list[checkIndex - 1]
+  if (tabNow.value === 'data') {
+    router.push({
+      name: 'invoiceDetail',
+      query: {
+        id: route.query.id,
+        type: route.query.type
+      }
+    })
+  } else {
+    const checkIndex = list.findIndex((item) => item === tabNow.value)
+    if (checkIndex !== -1) {
+      tabNow.value = list[checkIndex - 1]
+    }
   }
 }
 
@@ -162,25 +177,27 @@ const goNext = () => {
     verificationApi.isFromEdit = true
     verificationApi.detailInvoiceEdit = {
       ...form.value,
-      invoiceDocument: form.value.invoiceDocument ? {
+      postingDate: moment(form.value.postingDate).toISOString(),
+      estimatedPaymentDate: moment(form.value.estimatedPaymentDate).toISOString(),
+      invoiceDocument: !isEmpty(form.value.invoiceDocument) ? {
         documentType: 1,
         documentName: form.value.invoiceDocument.name || '',
         documentUrl: form.value.invoiceDocument.path,
         documentSize: Number(form.value.invoiceDocument.fileSize)
       } : null,
-      tax: form.value.tax ? {
+      tax: !isEmpty(form.value.tax) ? {
         documentType: 2,
         documentName: form.value.tax.name || '',
         documentUrl: form.value.tax.path,
         documentSize: Number(form.value.tax.fileSize)
       } : null,
-      referenceDocument: form.value.referenceDocument ? {
+      referenceDocument: !isEmpty(form.value.referenceDocument) ? {
         documentType: 3,
         documentName: form.value.referenceDocument.name || '',
         documentUrl: form.value.referenceDocument.path,
         documentSize: Number(form.value.referenceDocument.fileSize)
       } : null,
-      otherDocument: form.value.otherDocument ? {
+      otherDocument: !isEmpty(form.value.otherDocument) ? {
         documentType: 4,
         documentName: form.value.otherDocument.name || '',
         documentUrl: form.value.otherDocument.path,

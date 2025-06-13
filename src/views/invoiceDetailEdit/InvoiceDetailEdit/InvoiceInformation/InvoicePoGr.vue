@@ -57,8 +57,8 @@
             <td>
               <span v-if="!item.isEdit">{{ item.whtCode }}</span>
               <select v-else v-model="formEdit.whtCode" class="select" placeholder="">
-                <option v-for="sub of item.whtCodeList" :key="sub.code" :value="sub.code">
-                  {{ sub.name }}
+                <option v-for="sub of item.whtCodeList" :key="sub.whtCode" :value="sub.whtCode">
+                  {{ sub.whtCode }}
                 </option>
               </select>
             </td>

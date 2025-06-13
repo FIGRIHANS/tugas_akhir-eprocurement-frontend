@@ -20,6 +20,7 @@
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Invoice Date
+          <span class="text-red-500 ml-[4px]">*</span>
         </label>
         <DatePicker v-model="form.invoiceDate" :error="form.invoiceDateError" class="w-full -ml-[15px]" />
       </div>
@@ -71,6 +72,7 @@
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           No Invoice Vendor
+          <span class="text-red-500 ml-[4px]">*</span>
         </label>
         <input v-model="form.documentNo" class="input" placeholder="" :class="{ 'border-danger': form.documentNoError }" />
       </div>
@@ -90,7 +92,6 @@
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Assignment
-          <span class="text-red-500 ml-[4px]">*</span>
         </label>
         <input v-model="form.assigment" class="input" placeholder="" :class="{ 'border-danger': form.assignmentError }" />
       </div>
@@ -98,6 +99,7 @@
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Transfer News
+          <span class="text-red-500 ml-[4px]">*</span>
         </label>
         <input v-model="form.transferNews" class="input" placeholder="" :class="{ 'border-danger': form.transferNewsError }" />
       </div>
@@ -117,12 +119,13 @@
         <label class="form-label">
           NPWP Reporting
         </label>
-        <input v-model="form.npwpReporting" class="input" placeholder="" :class="{ 'border-danger': form.npwpReportingError }" />
+        <input v-model="form.npwpReporting" class="input" placeholder="" :class="{ 'border-danger': form.npwpReportingError }" :disabled="userData?.profile.profileId === 3002" />
       </div>
       <!-- Description -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Description
+          <span class="text-red-500 ml-[4px]">*</span>
         </label>
         <textarea
           v-model="form.notes"
@@ -140,8 +143,10 @@ import { useRoute } from 'vue-router'
 import type { formTypes } from '../../../types/invoiceDetailEdit'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
+import { useLoginStore } from '@/stores/views/login'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
+const invoiceLoginApi = useLoginStore()
 const form = inject<Ref<formTypes>>('form')
 const route = useRoute()
 const typeForm = ref<string>('')
@@ -150,6 +155,7 @@ const dpTypeList = computed(() => invoiceMasterApi.dpType)
 const listInvoiceTypePo = computed(() => invoiceMasterApi.invoicePoType)
 const currencyList = computed(() => invoiceMasterApi.currency)
 const paymentMethodList = computed(() => invoiceMasterApi.paymentMethodList)
+const userData = computed(() => invoiceLoginApi.userData)
 
 const getDpName = () => {
   if (route.query.type === 'po-view') return 'Without DP'

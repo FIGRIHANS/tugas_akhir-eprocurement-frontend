@@ -75,6 +75,16 @@ const checkBank = () => {
 }
 
 watch(
+  () => vendorList.value,
+  () => {
+    checkBank()
+  },
+  {
+    deep: true
+  }
+)
+
+watch(
   () => form?.value,
   () => {
     checkBank()

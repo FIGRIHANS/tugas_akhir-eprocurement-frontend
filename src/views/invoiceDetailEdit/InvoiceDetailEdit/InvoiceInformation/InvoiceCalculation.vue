@@ -44,6 +44,7 @@ const listCalculation = ref<listType[]>([])
 
 
 const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
+const whtCodeList = computed(() => invoiceMasterApi.whtCodeList)
 
 const setCount = (name: string) => {
   const list = {
@@ -106,6 +107,13 @@ const getPercentTax = (code: string) => {
   }
 }
 
+const getPercentWht = (code: string) => {
+  const getIndex = whtCodeList.value.findIndex((item) => item.whtCode === code)
+  if (getIndex !== -1) {
+    return whtCodeList.value[getIndex].tarif
+  }
+}
+
 const countSubtotal = () => {
   if (!form) return
   let total = 0
@@ -161,11 +169,11 @@ const countWhtAmount = () => {
   let totalAddDebit = 0
   let totalAddCredit = 0
   for (const item of form.value.invoicePoGr) {
-    const percentTax = 0
+    const percentTax = getPercentWht(item.whtCode) || 0
     totalPo = totalPo + (percentTax * item.itemAmount * item.quantity)
   }
   for (const item of form.value.additionalCosts) {
-    const percentTax = 0
+    const percentTax = getPercentWht(item.whtCode) || 0
     if (item.debitCredit === 'D') {
       totalAddDebit = totalAddDebit + (percentTax * Number(item.itemAmount))
     } else {
