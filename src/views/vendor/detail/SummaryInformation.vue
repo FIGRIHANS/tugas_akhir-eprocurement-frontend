@@ -10,6 +10,7 @@ import { useVendorStore } from '@/stores/vendor/vendor'
 import { useLoginStore } from '@/stores/views/login'
 import axios from 'axios'
 import successImg from '@/assets/success.svg'
+import UiModal from '@/components/modal/UiModal.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -112,11 +113,11 @@ const handleReject = async () => {
       </UiButton>
 
       <div v-if="route.name === 'vendor-verification-detail'" class="space-x-3">
-        <UiButton :outline="true" variant="danger" class="ml-auto">
+        <UiButton :outline="true" variant="danger" class="ml-auto" @click="modalReject = true">
           <UiIcon name="cross-circle" variant="duotone" />
           <span> Reject </span>
         </UiButton>
-        <UiButton>
+        <UiButton @click="modalVerify = true">
           <UiIcon name="check-squared" variant="duotone" />
           <span> Verify </span>
         </UiButton>
@@ -200,8 +201,8 @@ const handleReject = async () => {
     @update:model-value="$router.go(-1)"
   >
     <img :src="successImg" alt="success" class="mx-auto mb-3" />
-    <h3 class="font-medium text-lg text-gray-800 text-center">Data Administrasi Rejected</h3>
-    <p class="text-gray-600 text-center mb-3">Data Administrasi has been successfully Rejected</p>
+    <h3 class="font-medium text-lg text-gray-800 text-center">Vendor Data Rejected</h3>
+    <p class="text-gray-600 text-center mb-3">Vendor Data has been successfully rejected.</p>
   </UiModal>
 
   <UiModal
@@ -211,7 +212,9 @@ const handleReject = async () => {
     @update:model-value="$router.go(-1)"
   >
     <img :src="successImg" alt="success" class="mx-auto mb-3" />
-    <h3 class="font-medium text-lg text-gray-800 text-center">Data Administrasi Verified</h3>
-    <p class="text-gray-600 text-center mb-3">Data Administrasi has been successfully verified</p>
+    <h3 class="font-medium text-lg text-gray-800 text-center">Vendor Verification Completed</h3>
+    <p class="text-gray-600 text-center mb-3">
+      All vendor data has been successfully verified and is ready for approval.
+    </p>
   </UiModal>
 </template>
