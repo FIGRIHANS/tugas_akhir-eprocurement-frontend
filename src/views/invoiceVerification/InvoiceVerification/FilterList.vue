@@ -24,6 +24,20 @@
           </select>
         </div>
         <div class="relative">
+          <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white">Status</label>
+          <select v-model="invoiceType" class="select" name="select">
+            <option value="1">
+              Waiting for Verify
+            </option>
+            <option value="3">
+              Verified
+            </option>
+            <option value="5">
+              Rejected
+            </option>
+          </select>
+        </div>
+        <div class="relative">
           <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white z-[1]">Invoice Date</label>
           <DatePicker v-model="date" />
         </div>
@@ -55,6 +69,7 @@ const props = defineProps<{
 const emits = defineEmits(['setData'])
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
+const status = ref<number | null>(null)
 const date = ref<string>('')
 const companyCode = ref<string>('')
 const invoiceType = ref<string>('')
@@ -70,6 +85,7 @@ const resetFilter = () => {
 
 const goFilter = () => {
   const data = {
+    status: status.value,
     date: date.value,
     companyCode: companyCode.value,
     invoiceType: invoiceType.value
@@ -80,6 +96,7 @@ const goFilter = () => {
 watch(
   () => props.data,
   () => {
+    status.value = props.data.status
     date.value = props.data.date
     companyCode.value = props.data.companyCode
     invoiceType.value = props.data.invoiceType

@@ -24,8 +24,8 @@
               </td>
               <td>{{ item.invoiceNo || '-' }}</td>
               <td>
-                <span class="badge badge-outline badge-info">
-                  Ready To Verify
+                <span class="badge badge-outline" :class="colorBadge(item.statusCode)">
+                  {{ item.statusName }}
                 </span>
               </td>
               <td>{{ item.poNo || '-' }}</td>
@@ -95,6 +95,7 @@ const list = ref<ListPoTypes[]>([])
 const viewDetailId = ref<string>('')
 
 const filterForm = reactive<filterListTypes>({
+  status: null,
   date: '',
   companyCode: '',
   invoiceType: ''
@@ -121,6 +122,15 @@ const columns = ref<string[]>([
 ])
 
 const verifList = computed(() => verificationApi.listPo)
+
+const colorBadge = (statusCode: number) => {
+  const list = {
+    1: 'badge-info',
+    5: 'badge-danger',
+    3: 'badge-success'
+  } as { [key: number]: string }
+  return list[statusCode]
+}
 
 const setPage = (value: number) => {
   currentPage.value = value
@@ -165,7 +175,7 @@ const setList = () => {
 const callList = () => {
   list.value = []
   verificationApi.getListPo({
-    statusCode: 1,
+    statusCode: filterForm.status,
     companyCode: filterForm.companyCode,
     invoiceTypeCode: Number(filterForm.invoiceType),
     invoiceDate: filterForm.date,

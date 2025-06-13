@@ -12,6 +12,7 @@ export interface listItemTypes {
 }
 
 export interface filterListTypes {
+  status: number | null
   date: string
   companyCode: string
   invoiceType: string
