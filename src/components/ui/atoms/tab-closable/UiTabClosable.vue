@@ -1,42 +1,49 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import UiButton from '../button/UiButton.vue'
 import UiIcon from '../icon/UiIcon.vue'
-import type { ITabClosableProps } from './types/tabClosable'
+import { type ITabClosable, type ITabClosableProps } from './types/tabClosable'
 
 const props = defineProps<ITabClosableProps>()
 defineEmits(['closeTab', 'addTab'])
-const currentTab = defineModel('currentTab')
+const currentTab = defineModel()
 
+const openedTabs = ref<ITabClosable[]>([...props.tabs.filter((tab) => !tab.isClosable)])
 const filteredTabs = computed(() =>
-  props.tabs.filter((tab) => !props.openedTabs.map((opened) => opened.id).includes(tab.id)),
+  props.tabs.filter((tab) => !openedTabs.value.some((opened) => opened.id === tab.id)),
 )
+
+const handleOpen = (tab: ITabClosable) => {
+  openedTabs.value = [...openedTabs.value, tab]
+  currentTab.value = tab.id
+}
+
+const handleClose = (id: string) => {
+  openedTabs.value = openedTabs.value.filter((current) => current.id !== id)
+  currentTab.value = openedTabs.value[openedTabs.value.length - 1].id
+}
 </script>
 <template>
   <div class="flex items-center gap-3 mb-5 overflow-x-auto">
     <div class="tabs">
       <div
-        v-for="openedTab in openedTabs"
-        :key="openedTab.id"
+        v-for="tab in openedTabs"
+        :key="tab.id"
         class="tab !py-0"
-        :class="{ active: openedTab.id === currentTab }"
+        :class="{ active: tab.id === currentTab }"
       >
-        <button @click="currentTab = openedTab.id" class="py-4 text-nowrap">
-          {{ openedTab.label }}
+        <button @click="currentTab = tab.id" class="py-4 text-nowrap">
+          {{ tab.label }}
         </button>
 
-        <UiIcon
-          v-if="openedTab.isVerified"
-          variant="duotone"
-          name="check-circle"
-          class="!text-success"
-        />
+        <UiIcon v-if="tab.isVerified" variant="duotone" name="check-circle" class="!text-success" />
 
-        <button v-if="openedTab.isClosable" @click="$emit('closeTab', openedTab.id)">
+        <button v-if="tab.isClosable" @click="handleClose(tab.id)">
           <UiIcon name="cross-circle" variant="duotone" class="text-primary" />
         </button>
       </div>
     </div>
+
     <div class="dropdown" data-dropdown="true" data-dropdown-trigger="click">
       <UiButton
         :outline="true"
@@ -61,12 +68,7 @@ const filteredTabs = computed(() =>
           </UiButton>
         </div>
         <div class="menu menu-default flex flex-col w-full">
-          <div
-            v-for="tab in filteredTabs"
-            :key="tab.id"
-            class="menu-item"
-            @click="$emit('addTab', tab.id)"
-          >
+          <div v-for="tab in filteredTabs" :key="tab.id" class="menu-item" @click="handleOpen(tab)">
             <div class="menu-link gap-2" data-dropdown-dismiss="true">
               <span class="menu-title">{{ tab.label }}</span>
               <UiIcon
@@ -77,6 +79,7 @@ const filteredTabs = computed(() =>
               />
             </div>
           </div>
+          <div v-if="!filteredTabs.length" class="text-gray-500 px-4">No tabs</div>
         </div>
       </div>
     </div>
