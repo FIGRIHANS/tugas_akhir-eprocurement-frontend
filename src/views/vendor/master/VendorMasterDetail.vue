@@ -5,10 +5,10 @@ import UiTabClosable from '@/components/ui/atoms/tab-closable/UiTabClosable.vue'
 import type { routeTypes } from '@/core/type/components/breadcrumb'
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
-import SummaryInformation from '../vendorDetail/SummaryInformation.vue'
-import AdministrativeData from '../vendorDetail/AdministrativeData.vue'
-import BusinessLicense from '../vendorDetail/BusinessLicense.vue'
-import PaymentInformation from '../vendorDetail/PaymentInformation.vue'
+import SummaryInformation from '../detail/SummaryInformation.vue'
+import AdministrativeData from '../detail/AdministrativeData.vue'
+import BusinessLicense from '../detail/BusinessLicense.vue'
+import PaymentInformation from '../detail/PaymentInformation.vue'
 
 const route = useRoute()
 

@@ -1,36 +1,33 @@
 <script lang="ts" setup>
-import UiModal from '@/components/modal/UiModal.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
-import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import successImg from '@/assets/success.svg'
-import { useVendorStore, useVerificationDetailStore } from '@/stores/vendor/vendor'
-import axios from 'axios'
-import { useLoginStore } from '@/stores/views/login'
 import AdministrativeCard from '@/components/vendor/cards/AdministrativeCard.vue'
+import LicenseCard from '@/components/vendor/cards/LicenseCard.vue'
+import PaymentCard from '@/components/vendor/cards/PaymentCard.vue'
+import { ref } from 'vue'
+import { useVendorStore } from '@/stores/vendor/vendor'
+import { useLoginStore } from '@/stores/views/login'
+import axios from 'axios'
+import successImg from '@/assets/success.svg'
+
+const route = useRoute()
+const router = useRouter()
 
 const vendorStore = useVendorStore()
-const vendorVerifStore = useVerificationDetailStore()
 const userStore = useLoginStore()
 
-const router = useRouter()
-const route = useRoute()
-const modalReject = ref(false)
-const modalRejectSuccess = ref(false)
-const modalVerify = ref(false)
-const modalVerifySuccess = ref(false)
-const reason = ref('')
-const notes = ref('')
-const inputError = ref<string[]>([])
-const loading = ref(false)
-const error = ref('')
+const modalReject = ref<boolean>(false)
+const modalRejectSuccess = ref<boolean>(false)
+const modalVerify = ref<boolean>(false)
+const modalVerifySuccess = ref<boolean>(false)
 
-const isDisabled = computed(() =>
-  vendorVerifStore.data
-    ? vendorVerifStore.data.some((item) => item.verificationType === 'Administration approval')
-    : false,
-)
+const reason = ref<string>('')
+const notes = ref<string>('')
+const inputError = ref<string[]>([])
+
+const loading = ref<boolean>(false)
+const error = ref<string | null>(null)
 
 const handleVerify = async () => {
   loading.value = true
@@ -42,8 +39,7 @@ const handleVerify = async () => {
       isVerified: true,
       verifiedNote: notes.value,
       isReject: false,
-      rejectedNote: reason.value,
-      dataCategoryId: 1,
+      rejectedNote: '',
       position: userStore.userData?.profile.positionName,
       verificatorName: userStore.userData?.profile.employeeName,
     })
@@ -97,38 +93,34 @@ const handleReject = async () => {
     loading.value = false
   }
 }
-
-const handleModalClose = () => {
-  vendorVerifStore.getData(Number(route.params.id))
-}
-
-const handleRejectSuccess = () => {
-  router.replace({ name: 'vendor-list' })
-}
 </script>
 <template>
   <div class="space-y-5">
-    <AdministrativeCard :allow-export="true" />
-    <div class="flex gap-3">
+    <!-- Card administrasi -->
+    <AdministrativeCard />
+
+    <!-- card data izin usaha -->
+    <LicenseCard />
+
+    <!-- card payment information -->
+    <PaymentCard />
+
+    <div class="flex justify-between">
       <UiButton :outline="true" @click="router.go(-1)">
         <UiIcon name="black-left" variant="duotone" />
         <span> Back </span>
       </UiButton>
 
-      <UiButton
-        :outline="true"
-        variant="danger"
-        class="ml-auto"
-        @click="modalReject = true"
-        :disabled="isDisabled"
-      >
-        <UiIcon name="cross-circle" variant="duotone" />
-        <span> Reject </span>
-      </UiButton>
-      <UiButton @click="modalVerify = true" :disabled="isDisabled">
-        <UiIcon name="check-squared" variant="duotone" />
-        <span> Verify </span>
-      </UiButton>
+      <div v-if="route.name === 'vendor-verification-detail'" class="space-x-3">
+        <UiButton :outline="true" variant="danger" class="ml-auto">
+          <UiIcon name="cross-circle" variant="duotone" />
+          <span> Reject </span>
+        </UiButton>
+        <UiButton>
+          <UiIcon name="check-squared" variant="duotone" />
+          <span> Verify </span>
+        </UiButton>
+      </div>
     </div>
   </div>
 
@@ -205,7 +197,7 @@ const handleRejectSuccess = () => {
     v-if="modalRejectSuccess"
     v-model="modalRejectSuccess"
     size="sm"
-    @update:model-value="handleRejectSuccess"
+    @update:model-value="$router.go(-1)"
   >
     <img :src="successImg" alt="success" class="mx-auto mb-3" />
     <h3 class="font-medium text-lg text-gray-800 text-center">Data Administrasi Rejected</h3>
@@ -216,7 +208,7 @@ const handleRejectSuccess = () => {
     v-if="modalVerifySuccess"
     v-model="modalVerifySuccess"
     size="sm"
-    @update:model-value="handleModalClose"
+    @update:model-value="$router.go(-1)"
   >
     <img :src="successImg" alt="success" class="mx-auto mb-3" />
     <h3 class="font-medium text-lg text-gray-800 text-center">Data Administrasi Verified</h3>
