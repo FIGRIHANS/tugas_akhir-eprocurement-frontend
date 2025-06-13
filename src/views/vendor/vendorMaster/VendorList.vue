@@ -7,6 +7,7 @@ import StatusToggle from '@/components/vendor/StatusToggle.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import { useVendorStore } from '@/stores/vendor/vendor'
+import { useVerificationStatus } from '@/stores/vendor/reference'
 import { ref, watch } from 'vue'
 import { debounce } from 'lodash'
 import { useRoute, useRouter } from 'vue-router'
@@ -18,8 +19,12 @@ const route = useRoute()
 const router = useRouter()
 
 const vendor = useVendorStore()
+const verificationStatusStore = useVerificationStatus()
 const search = ref('')
 // const currentPage = ref(1)
+const getStatus = (status: string) => {
+  return verificationStatusStore.data.find((item) => item.code === status)?.value
+}
 
 const handleSearch = debounce((value) => {
   const query = { ...route.query }
@@ -113,7 +118,10 @@ watch(
               class="font-normal text-sm"
             >
               <td>
-                <div class="flex items-center gap-3">
+                <span v-if="vendor.isVerified === 2" class="text-gray-600"
+                  >No Action Available</span
+                >
+                <div class="flex items-center gap-3" v-else>
                   <VendorMenu
                     :id="vendor.vendorId"
                     :name="vendor.vendorName"
@@ -131,11 +139,10 @@ watch(
                 <span
                   class="badge badge-outline text-nowrap"
                   :class="{
-                    'badge-success': vendor.approvalStatusId === 1,
-                    'badge-danger': vendor.approvalStatusId === 2,
-                    'badge-warning': vendor.approvalStatusId === 3,
+                    'badge-success': vendor.isVerified === 1,
+                    'badge-danger': vendor.isVerified === 2,
                   }"
-                  >{{ vendor.approvalStatus || 'Not Verified' }}</span
+                  >{{ getStatus(vendor.isVerified?.toString()) || 'Waiting to Verify' }}</span
                 >
               </td>
               <td>{{ vendor.companyCategoryName }}</td>
