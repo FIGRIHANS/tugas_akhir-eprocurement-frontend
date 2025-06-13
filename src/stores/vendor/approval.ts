@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { IApproval } from './types/approval'
+import type { IApproval, IApprovalRejectBody } from './types/approval'
 import type { ApiResponse } from '@/core/type/api'
 import vendorAPI from '@/core/utils/vendorApi'
 
@@ -35,5 +35,10 @@ export const useApprovalStore = defineStore('approval', () => {
     }
   }
 
-  return { loading, error, data, getApproval }
+  const rejectApproval = async (body: IApprovalRejectBody) => {
+    const response: ApiResponse = await vendorAPI.post('/public/verifiedvendor/rejected', body)
+    return response.data
+  }
+
+  return { loading, error, data, getApproval, rejectApproval }
 })

@@ -8,9 +8,11 @@ import { useRoute, useRouter } from 'vue-router'
 import successImg from '@/assets/success.svg'
 import { useVendorStore, useVerificationDetailStore } from '@/stores/vendor/vendor'
 import axios from 'axios'
+import { useLoginStore } from '@/stores/views/login'
 
 const vendorStore = useVendorStore()
 const vendorVerifStore = useVerificationDetailStore()
+const userStore = useLoginStore()
 
 const router = useRouter()
 const route = useRoute()
@@ -25,7 +27,9 @@ const loading = ref(false)
 const error = ref('')
 
 const isDisabled = computed(() =>
-  vendorVerifStore.data.some((item) => item.verificationType === 'Administration approval'),
+  vendorVerifStore.data
+    ? vendorVerifStore.data.some((item) => item.verificationType === 'Administration approval')
+    : false,
 )
 
 const handleVerify = async () => {
@@ -40,8 +44,8 @@ const handleVerify = async () => {
       isReject: false,
       rejectedNote: reason.value,
       dataCategoryId: 1,
-      position: 'Admin',
-      verificatorName: 'Susi Susanti',
+      position: userStore.userData?.profile.positionName,
+      verificatorName: userStore.userData?.profile.employeeName,
     })
 
     modalVerify.value = false
@@ -76,8 +80,9 @@ const handleReject = async () => {
       isReject: true,
       rejectedNote: reason.value,
       dataCategoryId: 1,
-      position: 'Admin',
-      verificatorName: 'Susi Susanti',
+      createdBy: userStore.userData?.profile.employeeName,
+      position: userStore.userData?.profile.positionName,
+      verificatorName: userStore.userData?.profile.employeeName,
     })
 
     modalReject.value = false
@@ -95,6 +100,10 @@ const handleReject = async () => {
 
 const handleModalClose = () => {
   vendorVerifStore.getData(Number(route.params.id))
+}
+
+const handleRejectSuccess = () => {
+  router.replace({ name: 'vendor-list' })
 }
 </script>
 <template>
@@ -196,7 +205,7 @@ const handleModalClose = () => {
     v-if="modalRejectSuccess"
     v-model="modalRejectSuccess"
     size="sm"
-    @update:model-value="handleModalClose"
+    @update:model-value="handleRejectSuccess"
   >
     <img :src="successImg" alt="success" class="mx-auto mb-3" />
     <h3 class="font-medium text-lg text-gray-800 text-center">Data Administrasi Rejected</h3>

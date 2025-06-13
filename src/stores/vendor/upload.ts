@@ -1,9 +1,9 @@
 import type { ApiResponse } from '@/core/type/api'
 import generalApi from '@/core/utils/generalApi'
-import vendorAPI from '@/core/utils/vendorApi'
 import axios from 'axios'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import type { UploadFileResponse } from '../general/types/upload'
 
 export interface IUploadResponse {
   name: string
@@ -18,7 +18,7 @@ export const useVendorUploadStore = defineStore('vendor-upload', () => {
     loading.value = true
     error.value = null
     try {
-      const response: ApiResponse<IUploadResponse> = await vendorAPI.post(
+      const response: ApiResponse<UploadFileResponse> = await generalApi.post(
         '/api/file/upload',
         formData,
         {

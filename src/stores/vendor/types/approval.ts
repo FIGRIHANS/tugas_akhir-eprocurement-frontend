@@ -17,3 +17,9 @@ export interface IApproval {
   page: number
   pageSize: number
 }
+
+export interface IApprovalRejectBody {
+  vendorId: number
+  reason: string
+  employeeId: string
+}

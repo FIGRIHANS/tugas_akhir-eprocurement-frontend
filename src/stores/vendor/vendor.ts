@@ -12,6 +12,9 @@ import type {
 } from './types/vendor'
 import type { ApiResponse } from '@/core/type/api'
 import axios from 'axios'
+import { useLoginStore } from '../views/login'
+
+const userStore = useLoginStore()
 
 export const useVendorStore = defineStore('vendor', () => {
   const loading = ref(false)
@@ -26,14 +29,14 @@ export const useVendorStore = defineStore('vendor', () => {
   const isLicenseVerified = ref(false)
   const isBankVerified = ref(false)
 
-  const getVendors = async (params: unknown) => {
+  const getVendors = async (params: Record<string, unknown>) => {
     loading.value = true
     error.value = null
 
     try {
       const response: ApiResponse<IVendorContent> = await vendorAPI.get(
         '/public/vendor/registration/getvendor',
-        { params },
+        { params: { ...params, employeeId: userStore.userData?.profile.employeeId || '' } },
       )
 
       if (response.data.statusCode === 200) {
@@ -69,8 +72,21 @@ export const useVendorStore = defineStore('vendor', () => {
     return response.data
   }
 
-  const deactiveVendor = async (payload: { vendorId: number; reason: string }) => {
+  const deactiveVendor = async (payload: {
+    vendorId: number
+    reason: string
+    employeeId: string
+  }) => {
     const response: ApiResponse = await vendorAPI.post('/public/verifiedvendor/inactive', payload)
+    return response.data
+  }
+
+  const activateVendor = async (payload: {
+    vendorId: number
+    reason: string
+    employeeId: string
+  }) => {
+    const response: ApiResponse = await vendorAPI.post('/public/verifiedvendor/activate', payload)
     return response.data
   }
 
@@ -85,25 +101,32 @@ export const useVendorStore = defineStore('vendor', () => {
     blacklistVendor,
     verifyLegal,
     deactiveVendor,
+    activateVendor,
   }
 })
 
 export const useVendorAdministrationStore = defineStore('vendor-administration', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
-  const data = ref<IAdministration[]>([])
+  const data = ref<IAdministration>()
 
   const getData = async (vendorId: string) => {
     loading.value = true
     error.value = null
 
     try {
-      const response: ApiResponse<IAdministration[]> = await vendorAPI.get(
+      const response: ApiResponse<IAdministration> = await vendorAPI.get(
         '/public/vendor/registration/administration',
         {
           params: { vendorId },
         },
       )
+
+      if (response.data.statusCode !== 200) {
+        error.value = response.data.result.message
+        loading.value = false
+        return
+      }
 
       data.value = response.data.result.content
     } catch (err) {

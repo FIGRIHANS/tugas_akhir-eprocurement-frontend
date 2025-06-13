@@ -13,16 +13,11 @@ import { useRoute, useRouter } from 'vue-router'
 import { formatDate } from '@/core/utils/format'
 import UiLoading from '@/components/UiLoading.vue'
 import VendorListFilters from '@/components/vendor/filterButton/VendorListFilters.vue'
-import { getToken } from '@/composables/token'
 
 const route = useRoute()
 const router = useRouter()
 
 const vendor = useVendorStore()
-const token = getToken()
-const credentialToken = token?.split(' ')[1].split('.')[1]
-const credential = JSON.parse(atob(credentialToken as string))
-console.log('credential', credential)
 const search = ref('')
 // const currentPage = ref(1)
 
@@ -119,7 +114,11 @@ watch(
             >
               <td>
                 <div class="flex items-center gap-3">
-                  <VendorMenu :id="vendor.vendorId" :name="vendor.vendorName" />
+                  <VendorMenu
+                    :id="vendor.vendorId"
+                    :name="vendor.vendorName"
+                    :email="vendor.vendorEmail"
+                  />
                   <StatusToggle
                     :id="vendor.vendorId"
                     :name="vendor.vendorName"
@@ -130,11 +129,13 @@ watch(
               <td class="text-nowrap">{{ vendor.vendorName }}</td>
               <td>
                 <span
-                  class="badge badge-outline"
+                  class="badge badge-outline text-nowrap"
                   :class="{
-                    'badge-success': vendor.isVerified,
+                    'badge-success': vendor.approvalStatusId === 1,
+                    'badge-danger': vendor.approvalStatusId === 2,
+                    'badge-warning': vendor.approvalStatusId === 3,
                   }"
-                  >{{ vendor.isVerified ? 'Verified' : 'Unverified' }}</span
+                  >{{ vendor.approvalStatus || 'Not Verified' }}</span
                 >
               </td>
               <td>{{ vendor.companyCategoryName }}</td>
