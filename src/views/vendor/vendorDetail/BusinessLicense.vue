@@ -1,18 +1,14 @@
-<script lang="ts" setup>
-import UiModal from '@/components/modal/UiModal.vue'
+<script setup lang="ts">
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
-import VendorAdministrasiCard from '@/components/vendor/vendorAdministrasiCard/VendorAdministrasiCard.vue'
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import successImg from '@/assets/success.svg'
+import UiModal from '@/components/modal/UiModal.vue'
 import { useVendorStore, useVerificationDetailStore } from '@/stores/vendor/vendor'
 import axios from 'axios'
 import { useLoginStore } from '@/stores/views/login'
-
-const vendorStore = useVendorStore()
-const vendorVerifStore = useVerificationDetailStore()
-const userStore = useLoginStore()
+import LicenseCard from '@/components/vendor/cards/LicenseCard.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -22,13 +18,17 @@ const modalVerify = ref(false)
 const modalVerifySuccess = ref(false)
 const reason = ref('')
 const notes = ref('')
-const inputError = ref<string[]>([])
 const loading = ref(false)
 const error = ref('')
+const inputError = ref<string[]>([])
+
+const vendorStore = useVendorStore()
+const vendorVerifStore = useVerificationDetailStore()
+const userStore = useLoginStore()
 
 const isDisabled = computed(() =>
   vendorVerifStore.data
-    ? vendorVerifStore.data.some((item) => item.verificationType === 'Administration approval')
+    ? vendorVerifStore.data.some((item) => item.verificationType === 'Izin usaha approval')
     : false,
 )
 
@@ -39,11 +39,12 @@ const handleVerify = async () => {
   try {
     await vendorStore.verifyLegal({
       vendorId: Number(route.params.id),
+      dataCategoryId: 2,
       isVerified: true,
       verifiedNote: notes.value,
       isReject: false,
-      rejectedNote: reason.value,
-      dataCategoryId: 1,
+      rejectedNote: '',
+      createdBy: userStore.userData?.profile.employeeName,
       position: userStore.userData?.profile.positionName,
       verificatorName: userStore.userData?.profile.employeeName,
     })
@@ -62,8 +63,6 @@ const handleVerify = async () => {
 }
 
 const handleReject = async () => {
-  // call api here
-
   if (!reason.value) {
     inputError.value.push('reason')
     return
@@ -75,11 +74,11 @@ const handleReject = async () => {
   try {
     await vendorStore.verifyLegal({
       vendorId: Number(route.params.id),
+      dataCategoryId: 2,
       isVerified: false,
       verifiedNote: '',
       isReject: true,
       rejectedNote: reason.value,
-      dataCategoryId: 1,
       createdBy: userStore.userData?.profile.employeeName,
       position: userStore.userData?.profile.positionName,
       verificatorName: userStore.userData?.profile.employeeName,
@@ -97,7 +96,6 @@ const handleReject = async () => {
     loading.value = false
   }
 }
-
 const handleModalClose = () => {
   vendorVerifStore.getData(Number(route.params.id))
 }
@@ -106,9 +104,10 @@ const handleRejectSuccess = () => {
   router.replace({ name: 'vendor-list' })
 }
 </script>
+
 <template>
   <div class="space-y-5">
-    <VendorAdministrasiCard :allow-export="true" />
+    <LicenseCard />
     <div class="flex gap-3">
       <UiButton :outline="true" @click="router.go(-1)">
         <UiIcon name="black-left" variant="duotone" />
@@ -132,7 +131,7 @@ const handleRejectSuccess = () => {
     </div>
   </div>
 
-  <UiModal v-if="modalReject" v-model="modalReject" title="Reject Data Administrasi" size="sm">
+  <UiModal v-model="modalReject" title="Reject Data Izin Usaha" size="sm">
     <form @submit.prevent="handleReject">
       <div class="relative mb-3">
         <label
@@ -143,12 +142,10 @@ const handleRejectSuccess = () => {
         <textarea id="reason" class="textarea" rows="6" v-model="reason" required></textarea>
       </div>
       <div v-if="inputError.includes('reason')" class="text-xs text-danger">Reason is required</div>
-
       <div class="my-3 text-danger text-xs italic">
         * Rejecting this section will automatically reject all other submitted data from the vendor.
         Do you wish to proceed?
       </div>
-
       <div class="flex gap-3">
         <UiButton
           class="flex-1 justify-center"
@@ -160,7 +157,7 @@ const handleRejectSuccess = () => {
           <span>Cancel</span>
         </UiButton>
         <UiButton class="flex-1 justify-center" variant="danger" :disabled="loading">
-          <span v-if="loading"> Progress </span>
+          <span v-if="loading">Progress</span>
           <template v-else>
             <UiIcon name="cross-circle" variant="duotone" />
             <span>Reject</span>
@@ -180,6 +177,7 @@ const handleRejectSuccess = () => {
         >
         <textarea id="notes" class="textarea" rows="6" v-model="notes"></textarea>
       </div>
+
       <div class="flex gap-3">
         <UiButton
           class="flex-1 justify-center"
@@ -191,7 +189,7 @@ const handleRejectSuccess = () => {
           <span>Cancel</span>
         </UiButton>
         <UiButton class="flex-1 justify-center" variant="primary" :disabled="loading">
-          <span v-if="loading"> Progress </span>
+          <span v-if="loading">Progress</span>
           <template v-else>
             <UiIcon name="check-circle" variant="duotone" />
             <span>Verify</span>
@@ -201,25 +199,15 @@ const handleRejectSuccess = () => {
     </form>
   </UiModal>
 
-  <UiModal
-    v-if="modalRejectSuccess"
-    v-model="modalRejectSuccess"
-    size="sm"
-    @update:model-value="handleRejectSuccess"
-  >
+  <UiModal v-model="modalRejectSuccess" size="sm" @update:model-value="handleRejectSuccess">
     <img :src="successImg" alt="success" class="mx-auto mb-3" />
-    <h3 class="font-medium text-lg text-gray-800 text-center">Data Administrasi Rejected</h3>
-    <p class="text-gray-600 text-center mb-3">Data Administrasi has been successfully Rejected</p>
+    <h3 class="font-medium text-lg text-gray-800 text-center">Data Izin Usaha Rejected</h3>
+    <p class="text-gray-600 text-center mb-3">Data Izin Usaha has been successfully Rejected</p>
   </UiModal>
 
-  <UiModal
-    v-if="modalVerifySuccess"
-    v-model="modalVerifySuccess"
-    size="sm"
-    @update:model-value="handleModalClose"
-  >
+  <UiModal v-model="modalVerifySuccess" size="sm" @update:model-value="handleModalClose">
     <img :src="successImg" alt="success" class="mx-auto mb-3" />
-    <h3 class="font-medium text-lg text-gray-800 text-center">Data Administrasi Verified</h3>
-    <p class="text-gray-600 text-center mb-3">Data Administrasi has been successfully verified</p>
+    <h3 class="font-medium text-lg text-gray-800 text-center">Data Izin Usaha verified</h3>
+    <p class="text-gray-600 text-center mb-3">Data Izin Usaha has been successfully verified</p>
   </UiModal>
 </template>

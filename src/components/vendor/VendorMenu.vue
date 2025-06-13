@@ -29,7 +29,7 @@ const handleSuccess = () => {
     <div class="dropdown-content w-full max-w-60 space-y-5">
       <ul class="menu menu-default flex flex-col gap-2" data-dropdown-dismiss="true">
         <li class="menu-item">
-          <RouterLink class="menu-link" :to="`/vendor-master/${id}/verification`">
+          <RouterLink class="menu-link" :to="`/vendor/master/${id}`">
             <span class="menu-icon">
               <UiIcon variant="duotone" name="eye" />
             </span>

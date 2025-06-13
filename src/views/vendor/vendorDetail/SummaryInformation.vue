@@ -2,14 +2,14 @@
 import UiModal from '@/components/modal/UiModal.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
-import VendorAdministrasiCard from '@/components/vendor/vendorAdministrasiCard/VendorAdministrasiCard.vue'
-import VendorIzinUsahaCard from '@/components/vendor/vendorIzinUsahaCard/VendorIzinUsahaCard.vue'
-import VendorPaymentInformationCard from '@/components/vendor/vendorPaymentInformationCard/VendorPaymentInformationCard.vue'
 import { useVendorStore, useVerificationDetailStore } from '@/stores/vendor/vendor'
 import axios from 'axios'
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import successImg from '@/assets/success.svg'
+import AdministrativeCard from '@/components/vendor/cards/AdministrativeCard.vue'
+import LicenseCard from '@/components/vendor/cards/LicenseCard.vue'
+import PaymentCard from '@/components/vendor/cards/PaymentCard.vue'
 
 const vendorStore = useVendorStore()
 const verificationStore = useVerificationDetailStore()
@@ -81,13 +81,13 @@ const handleModalClose = () => {
 <template>
   <div class="space-y-5">
     <!-- Card administrasi -->
-    <VendorAdministrasiCard />
+    <AdministrativeCard />
 
     <!-- card data izin usaha -->
-    <VendorIzinUsahaCard />
+    <LicenseCard />
 
     <!-- card payment information -->
-    <VendorPaymentInformationCard />
+    <PaymentCard />
 
     <div class="flex justify-end">
       <UiButton
