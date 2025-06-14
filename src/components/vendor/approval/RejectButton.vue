@@ -86,9 +86,12 @@ const handleReject = async () => {
           <UiIcon name="black-left-line" variant="duotone" />
           <span>Cancel</span>
         </UiButton>
-        <UiButton class="flex-1 justify-center" variant="danger">
-          <UiIcon name="cross-circle" variant="duotone" />
-          <span>Reject</span>
+        <UiButton class="flex-1 justify-center" variant="danger" :disabled="loading">
+          <span v-if="loading">Progress</span>
+          <template v-else>
+            <UiIcon name="cross-circle" variant="duotone" />
+            <span>Reject</span>
+          </template>
         </UiButton>
       </div>
     </form>

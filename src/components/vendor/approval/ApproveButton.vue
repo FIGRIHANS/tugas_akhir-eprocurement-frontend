@@ -21,7 +21,7 @@ const inputError = ref<string[]>([])
 const loading = ref<boolean>(false)
 const error = ref<string | null>(null)
 
-const handleApprove = () => {
+const handleApprove = async () => {
   if (!reason.value) {
     inputError.value = [...inputError.value, 'reason']
     return
@@ -83,9 +83,12 @@ const handleApprove = () => {
           <UiIcon name="black-left-line" variant="duotone" />
           <span>Cancel</span>
         </UiButton>
-        <UiButton class="flex-1 justify-center" @click="handleApprove">
-          <UiIcon name="check-circle" variant="duotone" />
-          <span>Approve</span>
+        <UiButton class="flex-1 justify-center" @click="handleApprove" :disabled="loading">
+          <span v-if="loading">Progress</span>
+          <template v-else>
+            <UiIcon name="check-circle" variant="duotone" />
+            <span>Approve</span>
+          </template>
         </UiButton>
       </div>
     </form>

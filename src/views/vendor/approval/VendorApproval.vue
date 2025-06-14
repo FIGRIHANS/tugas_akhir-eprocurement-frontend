@@ -16,6 +16,7 @@ import { useApprovalStore } from '@/stores/vendor/approval'
 import UiLoading from '@/components/UiLoading.vue'
 import moment from 'moment'
 import VendorApprovalFilters from '@/components/vendor/filterButton/VendorApprovalFilters.vue'
+import SAPButton from '@/components/vendor/approval/SAPButton.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -123,10 +124,7 @@ watch(
                 </div>
                 <template v-else>
                   <div v-if="Number(item.approvalStatus) === 1">
-                    <UiButton>
-                      <UiIcon name="paper-plane" variant="duotone" />
-                      <span class="text-nowrap">Send to SAP</span>
-                    </UiButton>
+                    <SAPButton />
                   </div>
                   <template v-if="!Number(item.approvalStatus)">
                     <ApproveButton :id="item.vendorId" :nama="item.vendorName" />
