@@ -35,6 +35,7 @@ const handleApprove = () => {
       vendorId: props.id as string,
       approvalStatus: 1, //for approved
       approvalBy: userStore.userData?.profile.employeeId.toString() || '',
+      reason: reason.value,
     })
 
     if (response.result.isError) {

@@ -34,6 +34,7 @@ const handleReject = async () => {
       vendorId: props.id as string,
       approvalStatus: 0,
       approvalBy: userStore.userData?.profile.employeeId.toString() || '',
+      reason: reason.value,
     })
 
     if (response.result.isError) {
