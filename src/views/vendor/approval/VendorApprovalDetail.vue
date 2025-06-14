@@ -3,9 +3,9 @@ import BreadcrumbView from '@/components/BreadcrumbView.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiTab from '@/components/ui/atoms/tab/UiTab.vue'
-import VendorAdministrasiCard from '@/components/vendor/vendorAdministrasiCard/VendorAdministrasiCard.vue'
-import VendorIzinUsahaCard from '@/components/vendor/vendorIzinUsahaCard/VendorIzinUsahaCard.vue'
-import VendorPaymentInformationCard from '@/components/vendor/vendorPaymentInformationCard/VendorPaymentInformationCard.vue'
+import AdministrativeCard from '@/components/vendor/cards/AdministrativeCard.vue'
+import LicenseCard from '@/components/vendor/cards/LicenseCard.vue'
+import PaymentCard from '@/components/vendor/cards/PaymentCard.vue'
 </script>
 <template>
   <BreadcrumbView
@@ -16,14 +16,14 @@ import VendorPaymentInformationCard from '@/components/vendor/vendorPaymentInfor
     ]"
   />
   <UiTab
-    :items="[{ label: 'Detail Informasi Vendor', value: 'detail' }]"
+    :items="[{ label: 'Detail Information Vendor ', value: 'detail' }]"
     model-value=""
     item-class="text-primary"
   />
   <div class="space-y-5">
-    <VendorAdministrasiCard />
-    <VendorIzinUsahaCard />
-    <VendorPaymentInformationCard />
+    <AdministrativeCard />
+    <LicenseCard />
+    <PaymentCard />
     <div class="flex justify-end">
       <UiButton :outline="true" @click="$router.back()">
         <UiIcon name="black-left" variant="duotone" />

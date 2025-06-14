@@ -19,9 +19,10 @@ import VendorApprovalFilters from '@/components/vendor/filterButton/VendorApprov
 
 const route = useRoute()
 const router = useRouter()
+
 const approval = useApprovalStore()
 
-const search = ref('')
+const search = ref<string>('')
 
 const handlePageChange = (page: number) => {
   const query = { ...route.query, page }
@@ -59,8 +60,8 @@ watch(
 </script>
 <template>
   <BreadcrumbView
-    :routes="[{ name: 'Vendor Approval', to: '/vendor-approval' }]"
-    title="Approval Verifikasi Vendor"
+    :routes="[{ name: 'Vendor Approval', to: '/vendor/approval' }]"
+    title="Vendor Approval"
   />
   <div class="card">
     <div class="card-header">
@@ -80,6 +81,7 @@ watch(
           <tr class="text-nowrap">
             <th>Action</th>
             <th>Company Name</th>
+            <th>Status</th>
             <th>Vendor Address</th>
             <th>Vendor Category</th>
             <th>Activation Date</th>
@@ -116,25 +118,42 @@ watch(
           >
             <td>
               <div class="flex gap-5">
-                <div v-if="item.approvalStatus === '1'">
-                  <UiButton>
-                    <UiIcon name="paper-plane" variant="duotone" />
-                    <span class="text-nowrap">Send to SAP</span>
-                  </UiButton>
+                <div v-if="Number(item.approvalStatus) === 2" class="text-gray-600">
+                  No Action Available
                 </div>
                 <template v-else>
-                  <ApproveButton :id="item.vendorId" :nama="item.vendorName" />
-                  <RejectButton :id="item.vendorId" :nama="item.vendorName" />
+                  <div v-if="Number(item.approvalStatus) === 1">
+                    <UiButton>
+                      <UiIcon name="paper-plane" variant="duotone" />
+                      <span class="text-nowrap">Send to SAP</span>
+                    </UiButton>
+                  </div>
+                  <template v-if="!Number(item.approvalStatus)">
+                    <ApproveButton :id="item.vendorId" :nama="item.vendorName" />
+                    <RejectButton :id="item.vendorId" :nama="item.vendorName" />
+                  </template>
+                  <ApprovalVerifikasi :id="item.vendorId" :nama="item.vendorName" />
+                  <RouterLink :to="`/vendor/approval/${item.vendorId}`">
+                    <UiButton size="sm" :icon="true" variant="primary" :outline="true">
+                      <UiIcon name="eye" variant="duotone" />
+                    </UiButton>
+                  </RouterLink>
                 </template>
-                <ApprovalVerifikasi :id="item.vendorId" :nama="item.vendorName" />
-                <RouterLink :to="`/vendor-approval/${item.vendorId}/detail`">
-                  <UiButton size="sm" :icon="true" variant="primary" :outline="true">
-                    <UiIcon name="eye" variant="duotone" />
-                  </UiButton>
-                </RouterLink>
               </div>
             </td>
             <td class="text-nowrap">{{ item.vendorName }}</td>
+            <td class="text-nowrap">
+              <span
+                class="badge badge-outline"
+                :class="{
+                  'badge-success': Number(item.approvalStatus) === 1,
+                  'badge-danger': Number(item.approvalStatus) === 2,
+                  'badge-primary': Number(item.approvalStatus) === 3,
+                }"
+              >
+                {{ item.approvalStatusName }}
+              </span>
+            </td>
             <td class="text-nowrap">{{ item.addressCompanyInfo }}</td>
             <td class="text-nowrap">{{ item.companyCategoryName }}</td>
             <td class="text-nowrap">
