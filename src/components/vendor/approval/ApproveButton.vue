@@ -35,7 +35,7 @@ const handleApprove = async () => {
       vendorId: props.id as string,
       approvalStatus: 1, //for approved
       approvalBy: userStore.userData?.profile.employeeId.toString() || '',
-      reason: reason.value,
+      approvalNote: reason.value,
     })
 
     if (response.result.isError) {
@@ -62,7 +62,7 @@ const handleApprove = async () => {
   </UiButton>
 
   <UiModal v-model="modal" size="sm" title="Vendor Approval">
-    <form @submit.prevent="">
+    <form @submit.prevent="handleApprove">
       <div class="relative">
         <label for="reason" class="block absolute -mt-2 ml-2 text-gray-500 bg-white px-1">
           Reason <span class="text-danger">*</span>
@@ -83,7 +83,7 @@ const handleApprove = async () => {
           <UiIcon name="black-left-line" variant="duotone" />
           <span>Cancel</span>
         </UiButton>
-        <UiButton class="flex-1 justify-center" @click="handleApprove" :disabled="loading">
+        <UiButton class="flex-1 justify-center" :disabled="loading">
           <span v-if="loading">Progress</span>
           <template v-else>
             <UiIcon name="check-circle" variant="duotone" />
