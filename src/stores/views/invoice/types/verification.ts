@@ -277,3 +277,8 @@ export interface DetailInvoiceEditTypes {
   referenceDocument: documentDetailTypes | null
   otherDocument: documentDetailTypes | null
 }
+
+export interface ParamsRejectTypes {
+  invoiceUId: string
+  notes: string
+}

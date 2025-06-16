@@ -3,7 +3,7 @@
     <Breadcrumb title="Detail Invoice" :routes="routes" />
     <StepperStatus :active-name="activeStep" />
     <hr class="-mx-[24px] mb-[24px]" />
-    <StatusInvoice class="mb-[24px]" />
+    <StatusInvoice :statusCode="form.statusCode" class="mb-[24px]" />
     <div class="flex gap-[24px]">
       <GeneralData class="flex-1" />
       <BankKey class="flex-1" />
@@ -20,12 +20,12 @@
           <i class="ki-filled ki-black-left"></i>
           Back
         </button>
-        <button class="btn btn-primary" @click="goToEdit">
+        <button v-if="checkStatusCode()" class="btn btn-primary" @click="goToEdit">
           <i class="ki-duotone ki-pencil"></i>
           Edit
         </button>
       </div>
-      <div class="flex items-center justify-end gap-[10px]">
+      <div v-if="checkStatusCode()" class="flex items-center justify-end gap-[10px]">
         <button class="btn btn-outline btn-danger" @click="openReject">
           <i class="ki-duotone ki-cross-circle"></i>
           Reject
@@ -36,7 +36,7 @@
         </button>
       </div>
     </div>
-    <RejectVerification />
+    <RejectVerification @reject="goReject" />
     <SuccessVerifModal />
     <SuccessRejectModal />
   </div>
@@ -128,6 +128,20 @@ const form = ref<formTypes>({
   otherDocument: null
 })
 
+const detailInvoice = computed(() => verificationApi.detailInvoice)
+
+const checkStatusCode = () => {
+  let status = true
+  switch (form.value.statusCode) {
+    case 5:
+    case 7:
+      status = false
+      break
+  }
+
+  return status
+}
+
 const goToEdit = () => {
   router.push({
     name: 'invoiceDetailEdit',
@@ -137,8 +151,6 @@ const goToEdit = () => {
     }
   })
 }
-
-const detailInvoice = computed(() => verificationApi.detailInvoice)
 
 const openReject = () => {
   const idModal = document.querySelector('#reject_Verification_modal')
@@ -267,6 +279,27 @@ const goVerif = () => {
         name: 'invoiceVerification'
       })
     }, 1000)
+  })
+}
+
+const goReject = (reason: string) => {
+  verificationApi.isRejectLoading = true
+  verificationApi.postReject({
+    invoiceUId: form.value.invoiceUId,
+    notes: reason
+  }).then(() => {
+    const idModal = document.querySelector('#success_reject_modal')
+    const modal = KTModal.getInstance(idModal as HTMLElement)
+    modal.show()
+    setTimeout(() => {
+      modal.hide()
+      router.push({
+        name: 'invoiceVerification'
+      })
+    }, 1000)
+  })
+  .finally(() => {
+    verificationApi.isRejectLoading = false
   })
 }
 

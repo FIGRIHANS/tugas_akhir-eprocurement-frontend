@@ -61,8 +61,8 @@
         </div>
       </div>
       <div class="flex items-center justify-between mt-[24px]">
-      <p class="m-0 text-sm">Tampilkan {{ list.length > 10 ? 10 : list.length }} data dari total data {{ list.length }}</p>
-        <LPagination :totalItems="list.length" :pageSize="pageSize" :currentPage="currentPage" @pageChange="setPage" />
+      <p class="m-0 text-sm">Tampilkan {{ pageSize * currentPage > verifList.length ? verifList.length : pageSize * currentPage }} data dari total data {{ verifList.length }}</p>
+        <LPagination :totalItems="verifList.length" :pageSize="pageSize" :currentPage="currentPage" @pageChange="setPage" />
       </div>
     </div>
     <DetailVerificationModal :detailId="viewDetailId" @loadDetail="loadData" @setClearId="viewDetailId = ''"/>
