@@ -73,7 +73,7 @@ const handleSubmit = async () => {
       VendorId: Number(props.id),
       BlacklistDescription: reason.value,
       BlacklistTypeID: Number(period.value),
-      CreatedBy: 'admin',
+      CreatedBy: userStore.userData?.profile.employeeId.toString(),
       DocUrl: uploadedFile.value?.path,
       EndDate: tglSelesai.value ? formattoMySQL(tglSelesai.value as Date) : '',
       StartDate: tglMulai.value ? formattoMySQL(tglMulai.value as Date) : '',

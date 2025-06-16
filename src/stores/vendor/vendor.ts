@@ -36,7 +36,7 @@ export const useVendorStore = defineStore('vendor', () => {
     try {
       const response: ApiResponse<IVendorContent> = await vendorAPI.get(
         '/public/vendor/registration/getvendor',
-        { params: { ...params, employeeId: userStore.userData?.profile.employeeId || '' } },
+        { params: { ...params, employeeId: userStore.userData?.profile.employeeId } },
       )
 
       if (response.data.statusCode === 200) {

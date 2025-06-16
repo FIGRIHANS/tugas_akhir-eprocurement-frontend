@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
-import type { IVendorAdministrasiCardProps } from './types/vendorAdministrasiCard'
 import { useVendorAdministrationStore } from '@/stores/vendor/vendor'
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import UiLoading from '@/components/UiLoading.vue'
 import { useVendorUploadStore } from '@/stores/vendor/upload'
+
+type Props = {
+  allowExport?: boolean
+}
 
 const administrasiStore = useVendorAdministrationStore()
 const uploadStore = useVendorUploadStore()
@@ -15,7 +18,7 @@ const route = useRoute()
 const loading = ref<boolean>(false)
 const error = ref<string>('')
 
-withDefaults(defineProps<IVendorAdministrasiCardProps>(), {
+withDefaults(defineProps<Props>(), {
   allowExport: false,
 })
 

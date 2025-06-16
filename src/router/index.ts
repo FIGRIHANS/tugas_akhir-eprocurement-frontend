@@ -11,6 +11,7 @@ import login from './modules/login'
 import vendor from './modules/vendor'
 import registration from './modules/registration'
 import invoice from './modules/invoice'
+import dashboard from './modules/dashboard'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -31,10 +32,10 @@ const router = createRouter({
     {
       path: '/',
       component: LayoutWithSidebar,
-      children: [...vendor, ...invoice],
+      children: [...vendor, ...invoice, ...dashboard],
       meta: {
         middleware: 'auth',
-      }
+      },
     },
 
     // Empty State
@@ -46,7 +47,7 @@ const router = createRouter({
       path: '/error/:code?',
       name: 'error',
       component: () => import('@/views/EmptyState.vue'),
-    }
+    },
   ],
 })
 
