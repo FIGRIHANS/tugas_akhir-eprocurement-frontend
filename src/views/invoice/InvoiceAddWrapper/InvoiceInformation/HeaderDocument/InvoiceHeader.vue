@@ -86,14 +86,14 @@
         </select>
       </div>
       <!-- Remaining DP Amount -->
-      <div v-if="form.invoiceDp === 'WDP'" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div v-if="form.invoiceDp === '9011'" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Remaining DP Amount
         </label>
         <input v-model="form.remainingDpAmount" class="input" placeholder="" disabled/>
       </div>
       <!-- DP Amount Deduction -->
-      <div v-if="form.invoiceDp === 'WDP'" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div v-if="form.invoiceDp === '9011'" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           DP Amount Deduction
         </label>

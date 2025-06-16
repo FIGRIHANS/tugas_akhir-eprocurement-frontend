@@ -187,7 +187,7 @@ const countTotalNetAmount = () => {
 watch(
   () => [form?.invoiceDp],
   () => {
-    if (form?.invoiceDp !== '1') {
+    if (form?.invoiceDp !== '9011') {
       listName.value = [...dpField]
     } else {
       listName.value = [...defaultField]

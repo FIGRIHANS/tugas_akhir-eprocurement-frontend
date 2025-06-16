@@ -4,13 +4,17 @@
       class="absolute -top-[10px] left-3 text-gray-500 text-sm bg-white px-1"
     >
       {{ label }}
+      <span v-if="required" class="text-red-500">*</span>
     </label>
     <textarea
       v-model="textValue"
       :placeholder="placeholder"
       :disabled="disabled"
-      :class="{ 'border-danger': error }"
-      class="w-full h-32 p-3 pt-6 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+      :class="{
+        'border-danger': error,
+        'border-gray-300': !error
+      }"
+      class="w-full h-32 p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
     ></textarea>
   </div>
 </template>
@@ -24,6 +28,7 @@ const props = defineProps<{
   placeholder?: string
   disabled?: boolean
   error?: boolean
+  required?: boolean
 }>()
 
 const emits = defineEmits(['update:modelValue'])
