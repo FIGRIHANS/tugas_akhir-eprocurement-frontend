@@ -14,18 +14,18 @@
     </div>
     <InvoicePoGr v-if="checkPo()" class="mt-[24px]" />
     <AdditionalCost v-if="form.invoiceDPCode === 9011 && checkPo()" class="mt-[24px]" />
-    <div v-if="checkStatusCode()" class="flex items-center justify-between gap-[8px] mt-[24px]">
+    <div class="flex items-center justify-between gap-[8px] mt-[24px]">
       <div class="flex items-center gap-[10px]">
         <button class="btn btn-outline btn-primary" @click="goBack">
           <i class="ki-filled ki-black-left"></i>
           Back
         </button>
-        <button class="btn btn-primary" @click="goToEdit">
+        <button v-if="checkStatusCode()" class="btn btn-primary" @click="goToEdit">
           <i class="ki-duotone ki-pencil"></i>
           Edit
         </button>
       </div>
-      <div class="flex items-center justify-end gap-[10px]">
+      <div v-if="checkStatusCode()" class="flex items-center justify-end gap-[10px]">
         <button class="btn btn-outline btn-danger" @click="openReject">
           <i class="ki-duotone ki-cross-circle"></i>
           Reject
