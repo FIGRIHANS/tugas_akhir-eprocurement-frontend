@@ -32,7 +32,7 @@
         </button>
         <button class="btn btn-primary" @click="goVerif">
           <i class="ki-duotone ki-check-circle"></i>
-          Verify
+          {{ route.query.type === '1' ? 'Verify' : 'Approve' }}
         </button>
       </div>
     </div>
@@ -51,6 +51,7 @@ import type { itemsCostType } from './types/additionalCost'
 import type { documentDetailTypes } from './types/invoiceDocument'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import { KTModal } from '@/metronic/core'
+import { useCheckEmpty } from '@/composables/validation'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import StepperStatus from '../../components/stepperStatus/StepperStatus.vue'
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
@@ -162,8 +163,32 @@ const checkPo = () => {
   return form.value.invoiceTypeCode === 901
 }
 
+const checkVerifHeader = () => {
+  const invoiceDateError = useCheckEmpty(form.value.invoiceDate).isError
+  const postingDateError = useCheckEmpty(form.value.postingDate).isError
+  const estimatedPaymentDateError = useCheckEmpty(form.value.estimatedPaymentDate).isError
+  const documentNoError = useCheckEmpty(form.value.documentNo).isError
+  const paymentMethodError = useCheckEmpty(form.value.paymentMethodCode).isError
+  const transferNewsError = useCheckEmpty(form.value.transferNews).isError
+  const notesError = useCheckEmpty(form.value.notes).isError
+
+  if (
+    invoiceDateError ||
+    postingDateError ||
+    estimatedPaymentDateError ||
+    documentNoError ||
+    paymentMethodError ||
+    transferNewsError ||
+    notesError
+  ) return false
+  return true
+}
+
 const checkVerif = () => {
+  let status = true
   const data = form.value
+  status = checkVerifHeader()
+
   if (
     !data.bankKeyCheck ||
     !data.generalDataCheck ||
@@ -171,8 +196,9 @@ const checkVerif = () => {
     !data.invoiceCalculationCheck ||
     !data.invoicePoGrCheck ||
     !data.additionalCostCheck 
-  ) return false
-  return true
+  ) status = false
+
+  return status
 }
 
 const mapPoGr = () => {
@@ -219,8 +245,8 @@ const mapDataVerif = () => {
   const referenceDoc = form.value.referenceDocument || {}
   const otherDoc = form.value.otherDocument || {}
   const data = {
-    statusCode: 3,
-    statusName: 'Verified',
+    statusCode: route.query.type === '1'? 3 : 4,
+    statusName: route.query.type === '1'? 'Verified' : 'Approved',
     statusNotes: '',
     header: {
       invoiceUId: form.value.invoiceUId,
@@ -270,6 +296,7 @@ const goVerif = () => {
 
   if (!status) return
   verificationApi.postSubmission(mapDataVerif()).then(() => {
+    verificationApi.resetDetailInvoiceEdit()
     const idModal = document.querySelector('#success_verif_modal')
     const modal = KTModal.getInstance(idModal as HTMLElement)
     modal.show()

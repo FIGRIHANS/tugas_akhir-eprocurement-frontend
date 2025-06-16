@@ -9,29 +9,31 @@
       <div class="flex flex-col gap-[24px] py-[16px]">
         <div class="relative">
           <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white">Company Code</label>
-          <select class="select" name="select">
-            <option value="1">
-              Option 1
-            </option>
-            <option value="2">
-              Option 2
-            </option>
-            <option value="3">
-              Option 3
+          <select v-model="companyCode" class="select" name="select">
+            <option v-for="item of companyCodeList" :key="item.code" :value="item.code">
+              {{ item.name }}
             </option>
           </select>
         </div>
         <div class="relative">
           <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white">Invoice Type</label>
-          <select class="select" name="select">
-            <option value="1">
-              Option 1
+          <select v-model="invoiceType" class="select" name="select">
+            <option v-for="item of invoiceTypeList" :key="item.code" :value="item.code">
+              {{ item.name }}
             </option>
-            <option value="2">
-              Option 2
+          </select>
+        </div>
+        <div class="relative">
+          <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white">Status</label>
+          <select v-model="invoiceType" class="select" name="select">
+            <option value="1">
+              Waiting for Verify
             </option>
             <option value="3">
-              Option 3
+              Verified
+            </option>
+            <option value="5">
+              Rejected
             </option>
           </select>
         </div>
@@ -41,11 +43,11 @@
         </div>
       </div>
       <div class="flex align-center justify-between gap-[16px]">
-        <button class="btn btn-outline btn-primary btn-lg">
+        <button class="btn btn-outline btn-primary btn-lg" @click="resetFilter">
           <i class="ki-duotone ki-arrows-circle"></i>
           Reset
         </button>
-        <button class="btn btn-primary btn-lg">
+        <button class="btn btn-primary btn-lg" data-dropdown-dismiss="true" @click="goFilter">
           <i class="ki-filled ki-check-circle"></i>
           Apply
         </button>
@@ -55,41 +57,53 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch } from 'vue'
-// import type { listItemTypes } from '../types/pendingVerification'
+import { ref, computed, watch } from 'vue'
+import type { filterListTypes } from '../types/pendingApproval'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
+import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 
-// const props = defineProps<{
-//   data: listItemTypes
-// }>()
+const props = defineProps<{
+  data: filterListTypes
+}>()
 
 const emits = defineEmits(['setData'])
 
+const invoiceMasterApi = useInvoiceMasterDataStore()
+const status = ref<number | null>(null)
+const date = ref<string>('')
 const companyCode = ref<string>('')
 const invoiceType = ref<string>('')
-const date = ref<string>('')
 
-// watch(
-//   () => props.data,
-//   () => {
-//     companyCode.value = props.data.companyCode
-//     invoiceType.value = props.data.invoiceType
-//   },
-//   {
-//     deep: true,
-//     immediate: true
-//   }
-// )
+const companyCodeList = computed(() => invoiceMasterApi.companyCode)
+const invoiceTypeList = computed(() => invoiceMasterApi.invoicePoType)
+
+const resetFilter = () => {
+  date.value = ''
+  companyCode.value = ''
+  invoiceType.value = ''
+}
+
+const goFilter = () => {
+  const data = {
+    status: status.value,
+    date: date.value,
+    companyCode: companyCode.value,
+    invoiceType: invoiceType.value
+  }
+  emits('setData', data)
+}
 
 watch(
-  () => [companyCode.value, invoiceType.value, date.value],
+  () => props.data,
   () => {
-    const data = {
-      status: companyCode.value,
-      category: invoiceType.value,
-      date: date.value
-    }
-    emits('setData', data)
+    status.value = props.data.status
+    date.value = props.data.date
+    companyCode.value = props.data.companyCode
+    invoiceType.value = props.data.invoiceType
+  },
+  {
+    deep: true,
+    immediate: true
   }
 )
 </script>
