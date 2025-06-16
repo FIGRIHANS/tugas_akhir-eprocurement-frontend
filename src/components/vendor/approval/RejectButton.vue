@@ -32,7 +32,7 @@ const handleReject = async () => {
   try {
     const response = await approvalStore.approve({
       vendorId: props.id as string,
-      approvalStatus: 0,
+      approvalStatus: 2,
       approvalBy: userStore.userData?.profile.employeeId.toString() || '',
       approvalNote: reason.value,
     })
