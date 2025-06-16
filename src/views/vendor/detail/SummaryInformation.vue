@@ -76,7 +76,6 @@ const handleReject = async () => {
       verifiedNote: '',
       isReject: true,
       rejectedNote: reason.value,
-      dataCategoryId: 1,
       createdBy: userStore.userData?.profile.employeeName,
       position: userStore.userData?.profile.positionName,
       verificatorName: userStore.userData?.profile.employeeName,
