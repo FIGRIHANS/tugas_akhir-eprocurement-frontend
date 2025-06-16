@@ -87,7 +87,6 @@ watch(
             <th>Vendor Category</th>
             <th>Activation Date</th>
             <th>Approval Date Sent</th>
-            <th>Status</th>
             <th>Approval Type</th>
           </tr>
         </thead>
@@ -152,7 +151,9 @@ watch(
                 {{ item.approvalStatusName }}
               </span>
             </td>
-            <td class="text-nowrap">{{ item.addressCompanyInfo }}</td>
+            <td>
+              <div class="w-[500px]">{{ item.addressCompanyInfo }}</div>
+            </td>
             <td class="text-nowrap">{{ item.companyCategoryName }}</td>
             <td class="text-nowrap">
               {{ item.activedUTCDate ? moment(item.activedUTCDate).format('LL') : '-' }}
@@ -160,7 +161,6 @@ watch(
             <td class="text-nowrap">
               {{ item.sendApprovalDate ? moment(item.sendApprovalDate).format('LL') : '-' }}
             </td>
-            <td class="text-nowrap">{{ item.approvalStatusName }}</td>
             <td class="text-nowrap">{{ item.approvalTypeName }}</td>
           </tr>
         </tbody>

@@ -13,7 +13,7 @@ const modal = ref(false)
     <UiIcon name="data" variant="duotone" />
   </UiButton>
 
-  <UiModal title="Approval Verifikasi Vendor" v-model="modal" size="lg">
+  <UiModal title="Vendor Verification Approval" v-model="modal" size="lg">
     <h3 class="font-semibold text-lg text-gray-800 text-center mb-5">{{ nama }}</h3>
     <div class="scrollable-x-auto">
       <table class="table align-middle">
