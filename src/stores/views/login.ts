@@ -49,7 +49,6 @@ export const useLoginStore = defineStore('login', () => {
     userData,
     callLogin,
     callUser,
-    callLoginVendor,
-    userData,
+    callLoginVendor
   }
 })

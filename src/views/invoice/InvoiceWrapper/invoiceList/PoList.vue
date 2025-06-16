@@ -41,7 +41,7 @@
     </div>
 
     <div class="flex items-center justify-between mt-[24px]">
-      <p class="m-0 text-sm">Tampilkan {{ poList.length > 10 ? 10 : poList.length }} data dari total data {{ poList.length }}</p>
+      <p class="m-0 text-sm">Tampilkan {{ pageSize * currentPage > poList.length ? poList.length : pageSize * currentPage }} data dari total data {{ poList.length }}</p>
       <LPagination :totalItems="poList.length" :pageSize="pageSize" :currentPage="currentPage" @pageChange="setPage" />
     </div>
   </div>

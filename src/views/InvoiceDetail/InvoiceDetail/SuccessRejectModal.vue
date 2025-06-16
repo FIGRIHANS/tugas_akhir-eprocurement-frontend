@@ -1,5 +1,5 @@
 <template>
-  <div class="modal" data-modal="true" id="success_invoice_modal">
+  <div class="modal" data-modal="true" id="success_reject_modal">
     <div class="modal-content modal-center-y max-w-[500px]">
       <div class="modal-body p-[40px] flex flex-col gap-[30px] items-center">
         <ModalSuccessLogo />

@@ -9,7 +9,8 @@ import type {
   ListPoTypes,
   QueryParamsListPoTypes,
   DetailInvoiceEditTypes,
-  PostVerificationTypes
+  PostVerificationTypes,
+  ParamsRejectTypes
 } from './types/verification'
 
 export const useInvoiceVerificationStore = defineStore('invoiceVerification', () => {
@@ -17,6 +18,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
   const detailInvoice = ref<ParamsSubmissionTypes>()
   const isFromEdit = ref<boolean>(false)
   const detailInvoiceEdit = ref<DetailInvoiceEditTypes>()
+  const isRejectLoading = ref<boolean>(false)
 
   const getListPo = async (data: QueryParamsListPoTypes) => {
     listPo.value = []
@@ -52,13 +54,21 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     return response.data.result
   }
 
+  const postReject = async (data: ParamsRejectTypes) => {
+    const response: ApiResponse<void> = await invoiceApi.post(`/invoice/reject`, data)
+
+    return response.data.result
+  }
+
   return {
     listPo,
     detailInvoice,
     isFromEdit,
     detailInvoiceEdit,
+    isRejectLoading,
     postSubmission,
     getListPo,
-    getInvoiceDetail
+    getInvoiceDetail,
+    postReject
   }
 })
