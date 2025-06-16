@@ -3,16 +3,12 @@ import UiModal from '@/components/modal/UiModal.vue'
 import UiLoading from '@/components/UiLoading.vue'
 import { useVerificationDetailStore } from '@/stores/vendor/vendor'
 import moment from 'moment'
-import { computed, onMounted } from 'vue'
+import { onMounted } from 'vue'
 
 const verificationStore = useVerificationDetailStore()
 const props = defineProps<{ id: string | number; name: string }>()
 const open = defineModel()
 defineEmits(['close'])
-
-const filteredVerif = computed(() =>
-  verificationStore.data.filter((item) => item.verificationType === 'Vendor approval'),
-)
 
 onMounted(() => {
   verificationStore.getData(props.id as number)
@@ -47,7 +43,7 @@ onMounted(() => {
               <td colspan="7" class="text-center">No data</td>
             </tr>
 
-            <tr v-else v-for="(item, index) in filteredVerif" :key="index">
+            <tr v-else v-for="(item, index) in verificationStore.data" :key="index">
               <td>{{ index + 1 }}</td>
               <td>{{ item.verificatorName }}</td>
               <td>{{ item.position }}</td>
@@ -58,7 +54,7 @@ onMounted(() => {
                 <span
                   class="badge badge-outline"
                   :class="{
-                    'badge-success': item.status === 'Approved',
+                    'badge-success': item.status === 'Verified',
                     'badge-danger': item.status === 'Rejected',
                   }"
                 >
