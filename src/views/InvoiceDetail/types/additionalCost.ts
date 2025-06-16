@@ -1,7 +1,6 @@
 export interface itemsCostType {
-  line: string
-  activity: string
-  itemAmount: string
+  activityExpense: string
+  itemAmount: number
   debitCredit: string
   taxCode: string
   costCenter: string
@@ -9,7 +8,5 @@ export interface itemsCostType {
   assignment: string
   whtType: string
   whtCode: string
-  whtBaseAmount: string
-  amount: string
-  isEdit: boolean
+  whtBaseAmount: number
 }

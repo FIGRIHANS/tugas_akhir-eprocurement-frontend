@@ -1,15 +1,15 @@
 export interface documentFormTypes {
-  invoiceDocument: attachmentFileTypes | null
+  invoiceDocument: documentDetailTypes | null
   invoiceDocumentError?: boolean
-  tax: attachmentFileTypes | null
+  tax: documentDetailTypes | null
   taxError?: boolean
-  referenceDocument: attachmentFileTypes | null
+  referenceDocument: documentDetailTypes | null
   referenceDocumentError?: boolean
-  otherDocument: attachmentFileTypes | null
+  otherDocument: documentDetailTypes | null
   otherDocumentError?: boolean
 }
 
-export interface attachmentFileTypes {
+export interface documentDetailTypes {
   name?: string
   path: string
   fileSize: string

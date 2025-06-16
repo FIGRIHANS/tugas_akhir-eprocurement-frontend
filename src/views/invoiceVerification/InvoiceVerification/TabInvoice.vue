@@ -1,10 +1,7 @@
 <template>
   <div class="tabs mb-5 text-gray-500">
-    <button class="tab pl-[4px]" :class="activeTab === 'pending' ? 'active' : ''" @click="setTab('pending')">
-      Pending Verification
-    </button>
-    <button class="tab pl-[4px]" :class="activeTab === 'verification' ? 'active' : ''" @click="setTab('verification')">
-      Verification History
+    <button class="tab pl-[4px]" :class="activeTab === 'list' ? 'active' : ''" @click="setTab('list')">
+      List Verification
     </button>
   </div>
 </template>

@@ -10,12 +10,11 @@
           ref="pdfUploadRef"
           v-show="!form[item.varName as keyof typeof form]"
           :error="!!form[item.varErrorName  as keyof documentFormTypes]"
-          :disabled="formInject?.status !== 0"
           @setFile="setFile($event, item.varName as keyof documentFormTypes)" 
         />
         <div v-if="form[item.varName as keyof typeof form]" class="flex justify-between items-center gap-[8px] flex-1">
-          <AttachmentView :fileData="typeof form[item.varName as keyof documentFormTypes] === 'object' ? form[item.varName as keyof documentFormTypes] as attachmentFileTypes : null" />
-          <span v-if="formInject?.status === 0" class="border-b border-dashed border-primary text-primary cursor-pointer text-xs font-medium" @click="changeFile(index)">Edit</span>
+          <AttachmentView :fileData="typeof form[item.varName as keyof documentFormTypes] === 'object' ? form[item.varName as keyof documentFormTypes] as documentDetailTypes : null" />
+          <span class="border-b border-dashed border-primary text-primary cursor-pointer text-xs font-medium" @click="changeFile(index)">Edit</span>
         </div>
       </div>
     </div>
@@ -23,11 +22,12 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, inject, watch, toRef } from 'vue'
-import type { documentFormTypes, attachmentFileTypes, listFormTypes } from '../../../types/invoiceDocument'
+import { ref, reactive, inject, watch, toRef, type Ref } from 'vue'
+import type { documentFormTypes, documentDetailTypes, listFormTypes } from '../../../types/invoiceDocument'
 import type { formTypes } from '../../../types/invoiceDetailEdit'
 import pdfUpload from '@/components/ui/pdfUpload/pdfUpload.vue'
 import AttachmentView from '@/components/ui/attachment/AttachmentView.vue'
+import { isEmpty } from 'lodash'
 
 const form = reactive<documentFormTypes>({
   invoiceDocument: null,
@@ -59,10 +59,10 @@ const list = ref<listFormTypes[]>([
   }
 ])
 
-const formInject = inject<formTypes>('form')
+const formInject = inject<Ref<formTypes>>('form')
 const pdfUploadRef = ref()
 
-const setFile = (file: attachmentFileTypes, name: keyof documentFormTypes) => {
+const setFile = (file: documentDetailTypes, name: keyof documentFormTypes) => {
   const reftProperty = toRef(form, name)
   reftProperty.value = file
 }
@@ -75,10 +75,10 @@ watch(
   () => form,
   () => {
     if (formInject) {
-      formInject.invoiceDocument = form.invoiceDocument
-      formInject.tax = form.tax
-      formInject.referenceDocument = form.referenceDocument
-      formInject.otherDocument = form.otherDocument
+      formInject.value.invoiceDocument = form.invoiceDocument
+      formInject.value.tax = form.tax
+      formInject.value.referenceDocument = form.referenceDocument
+      formInject.value.otherDocument = form.otherDocument
     }
   },
   {
@@ -90,10 +90,10 @@ watch(
   () => formInject,
   () => {
     if (formInject) {
-      form.invoiceDocument = formInject.invoiceDocument
-      form.tax = formInject.tax
-      form.referenceDocument = formInject.referenceDocument
-      form.otherDocument = formInject.otherDocument
+      form.invoiceDocument = isEmpty(formInject.value.invoiceDocument) ? null : formInject.value.invoiceDocument
+      form.tax = isEmpty(formInject.value.tax) ? null : formInject.value.tax
+      form.referenceDocument = isEmpty(formInject.value.referenceDocument) ? null : formInject.value.referenceDocument
+      form.otherDocument = isEmpty(formInject.value.otherDocument) ? null : formInject.value.otherDocument
     }
   },
   {

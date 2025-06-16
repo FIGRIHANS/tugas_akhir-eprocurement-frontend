@@ -37,7 +37,7 @@ const checkNonPo = () => {
 
 onMounted(() => {
   typeForm.value = route.query.type?.toString().toLowerCase() || 'po'
-  invoiceMasterApi.getActivity()
+  invoiceMasterApi.getActivity(form?.companyCode || '')
 })
 </script>
 

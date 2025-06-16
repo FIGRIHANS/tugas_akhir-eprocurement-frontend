@@ -10,13 +10,13 @@
     </div>
     <div class="flex gap-[24px] mt-[24px] max-h-[457px]">
       <InvoiceHeaderDocument class="flex-1" />
-      <InvoiceCalculation class="flex-1" />
+      <InvoiceCalculation class="flex-1" :formInvoice="form" />
     </div>
     <InvoicePoGr v-if="checkPo()" class="mt-[24px]" />
-    <AdditionalCost v-if="form.invoiceDp === '1' && checkPo()" class="mt-[24px]" />
-    <div v-if="form.status === 2" class="flex items-center justify-between gap-[8px] mt-[24px]">
+    <AdditionalCost v-if="form.invoiceDPCode === 9011 && checkPo()" class="mt-[24px]" />
+    <div class="flex items-center justify-between gap-[8px] mt-[24px]">
       <div class="flex items-center gap-[10px]">
-        <button class="btn btn-outline btn-primary">
+        <button class="btn btn-outline btn-primary" @click="goBack">
           <i class="ki-filled ki-black-left"></i>
           Back
         </button>
@@ -37,17 +37,24 @@
       </div>
     </div>
     <RejectVerification />
+    <SuccessVerifModal />
+    <SuccessRejectModal />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, provide, defineAsyncComponent, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, provide, defineAsyncComponent, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import type { formTypes } from './types/invoiceDetail'
+import type { itemsPoGrType } from './types/invoicePoGr'
+import type { itemsCostType } from './types/additionalCost'
+import type { documentDetailTypes } from './types/invoiceDocument'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import { KTModal } from '@/metronic/core'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import StepperStatus from '../../components/stepperStatus/StepperStatus.vue'
+import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
+import type { PostVerificationTypes } from '@/stores/views/invoice/types/verification'
 
 const StatusInvoice = defineAsyncComponent(() => import('./InvoiceDetail/StatusInvoice.vue'))
 const GeneralData = defineAsyncComponent(() => import('./InvoiceDetail/GeneralData.vue'))
@@ -57,9 +64,13 @@ const InvoiceCalculation = defineAsyncComponent(() => import('./InvoiceDetail/In
 const InvoicePoGr = defineAsyncComponent(() => import('./InvoiceDetail/InvoicePoGr.vue'))
 const AdditionalCost = defineAsyncComponent(() => import('./InvoiceDetail/AdditionalCost.vue'))
 const RejectVerification = defineAsyncComponent(() => import('./InvoiceDetail/RejectVerification.vue'))
+const SuccessVerifModal = defineAsyncComponent(() => import('./InvoiceDetail/SuccessVerifModal.vue'))
+const SuccessRejectModal = defineAsyncComponent(() => import('./InvoiceDetail/SuccessRejectModal.vue'))
 
 const activeStep = ref<string>('')
 const router = useRouter()
+const route = useRoute()
+const verificationApi = useInvoiceVerificationStore()
 
 const routes = ref<routeTypes[]>([
   {
@@ -73,86 +84,61 @@ const routes = ref<routeTypes[]>([
 ])
 
 const form = ref<formTypes>({
-  invoiceType: 'po',
-  vendorId: 'PT Pharmacy',
-  businessField: 'asd',
-  subBusinessField: 'asd',
-  address: 'Jl. Anumerta no 23 Jakarta Barat',
-  isNotRegisteredBank: false,
-  bankKeyId: 'BNI1',
-  bankNameId: 'BNI',
-  beneficiaryName: 'PT Pharmacy',
-  bankAccountNumber: '1276387264',
-  swiftCode: 'BNI123',
-  bankAddress: 'Jl.Maharaya no 24 Jakarta Barat',
-  invoiceDate: '12/12/2024',
-  postingDate: '-',
-  invoiceNo: 'INV0000123',
-  companyCode: 'code',
-  invoicingParty: 'INV/01/PK/2025053',
-  estimatedPaymentDate: '2365456',
-  taxNumberInvoice: '12/12/2024',
-  invoiceNumberVendor: 'V1',
-  paymentMethod: 'W2',
-  assignment: '12/12/2024',
-  transferNews: 'test',
-  currency: 'test',
-  npwpReporting: 'test',
-  description: 'test',
-  invoiceDp: '1',
-  invoicePoGr: [
-    {
-      line: '1',
-      poNumber: 'PO220521000001',
-      poItem: 'BOTOL ESK CG 50ML',
-      GrDocumentNo: '15',
-      GrDocumentItem: 'PCS',
-      GrDocumentDate: '99.998',
-      taxCode: '1.499.970,00',
-      itemAmount: '-',
-      quantity: '20 Juni 2024',
-      unit: '1.499.970,00',
-      itemText: '-',
-      conditionType: '-',
-      whtType: 'Wajib Pajak',
-      whtCode: '-',
-      whtBaseAmount: '1.000.000',
-      category: '0',
-      amountInvoice: 'V2',
-      vatAmount: '-',
-      totalNetAmount: '1.000.000',
-      isEdit: false
-    }
-  ],
-  additionalCost: [
-    {
-      line: '1',
-      activity: 'Demurrage Cost',
-      itemAmount: 'GR00123',
-      debitCredit: '15',
-      taxCode: 'PCS',
-      costCenter: '99.998',
-      profitCenter: '1.499.970,00',
-      assignment: 'Wajib Pajak',
-      whtType: '-',
-      whtCode: '1.000.000',
-      whtBaseAmount: 'V2',
-      amount: '-',
-      isEdit: false
-    }
-  ],
+  invoiceUId: '',
+  invoiceTypeCode: 0,
+  invoiceTypeName: '',
+  invoiceDPCode: 0,
+  invoiceDPName: '',
+  companyCode: '',
+  companyName: '',
+  invoiceNo: '',
+  documentNo: '',
+  invoiceDate: '',
+  taxNo: '',
+  currCode: '',
+  notes: '',
+  statusCode: 0,
+  statusName: '',
+  postingDate: '',
+  invoicingParty: '',
+  estimatedPaymentDate: '',
+  paymentMethodCode: '',
+  paymentMethodName: '',
+  assigment: '',
+  transferNews: '',
+  npwpReporting: '',
+  bankKey: '',
+  bankName: '',
+  beneficiaryName: '',
+  bankAccountNo: '',
+  vendorId: 0,
+  vendorName: '',
+  vendorAddress: '',
+  subtotal: 0,
+  vatAmount: 0,
+  whtAmount: 0,
+  additionalCost: 0,
+  totalGrossAmount: 0,
+  totalNetAmount: 0,
+  invoicePoGr: [],
+  additionalCosts: [],
   invoiceDocument: null,
   tax: null,
   referenceDocument: null,
-  otherDocument: null,
-  status: 2
+  otherDocument: null
 })
 
 const goToEdit = () => {
   router.push({
-    name: 'invoiceDetailEdit'
+    name: 'invoiceDetailEdit',
+    query : {
+      id: route.query.id,
+      type: route.query.type
+    }
   })
 }
+
+const detailInvoice = computed(() => verificationApi.detailInvoice)
 
 const openReject = () => {
   const idModal = document.querySelector('#reject_Verification_modal')
@@ -161,7 +147,7 @@ const openReject = () => {
 }
 
 const checkPo = () => {
-  return form.value.invoiceType === 'po'
+  return form.value.invoiceTypeCode === 901
 }
 
 const checkVerif = () => {
@@ -177,14 +163,259 @@ const checkVerif = () => {
   return true
 }
 
+const mapPoGr = () => {
+  const poGr = []
+  for (const item of form.value.invoicePoGr) {
+    poGr.push({
+      poNo: item.poNo,
+      poItem: Number(item.poItem),
+      grDocumentNo: item.grDocumentNo,
+      itemAmount: Number(item.itemAmount),
+      quantity: Number(item.quantity),
+      taxCode: item.taxCode,
+      whtType: item.whtType,
+      whtCode: item.whtCode,
+      whtBaseAmount: item.whtBaseAmount,
+      whtAmount: item.whtAmount
+    })
+  }
+  return poGr
+}
+
+const mapAdditionalCost = () => {
+  const cost = []
+  for (const item of form.value.additionalCosts) {
+    cost.push({
+      activityExpense: item.activityExpense,
+      itemAmount: Number(item.itemAmount),
+      debitCredit: item.debitCredit,
+      taxCode: item.taxCode,
+      costCenter: item.costCenter,
+      profitCenter: item.profitCenter,
+      assignment: item.assignment,
+      whtType: item.whtType,
+      whtCode: item.whtCode,
+      whtBaseAmount: Number(item.whtBaseAmount)
+    })
+  }
+  return cost
+}
+
+const mapDataVerif = () => {
+  const invoiceDoc = form.value.invoiceDocument || {}
+  const taxDoc = form.value.tax || {}
+  const referenceDoc = form.value.referenceDocument || {}
+  const otherDoc = form.value.otherDocument || {}
+  const data = {
+    statusCode: 3,
+    statusName: 'Verified',
+    statusNotes: '',
+    header: {
+      invoiceUId: form.value.invoiceUId,
+      documentNo: form.value.documentNo,
+      invoiceDate: form.value.invoiceDate,
+      taxNo: form.value.taxNo,
+      currCode: form.value.currCode,
+      notes: form.value.notes,
+      postingDate: form.value.postingDate,
+      invoicingParty: form.value.invoicingParty,
+      estimatedPaymentDate: form.value.estimatedPaymentDate,
+      paymentMethodCode: form.value.paymentMethodCode,
+      paymentMethodName: form.value.paymentMethodName,
+      assigment: form.value.assigment,
+      transferNews: form.value.transferNews,
+      npwpReporting: form.value.npwpReporting
+    },
+    payment: {
+      bankKey: form.value.bankKey,
+      bankName: form.value.bankName,
+      beneficiaryName: form.value.beneficiaryName,
+      bankAccountNo: form.value.bankAccountNo
+    },
+    calculation: {
+      subtotal: form.value.subtotal,
+      vatAmount: form.value.vatAmount,
+      whtAmount: form.value.whtAmount,
+      additionalCost: form.value.additionalCost,
+      totalGrossAmount: form.value.totalGrossAmount,
+      totalNetAmount: form.value.totalNetAmount
+    },
+    documents: [
+      invoiceDoc,
+      taxDoc,
+      referenceDoc,
+      otherDoc
+    ],
+    pogr: mapPoGr(),
+    additionalCosts: mapAdditionalCost()
+  } as PostVerificationTypes
+
+  return data
+}
+
 const goVerif = () => {
   const status = checkVerif()
 
   if (!status) return
+  verificationApi.postSubmission(mapDataVerif()).then(() => {
+    const idModal = document.querySelector('#success_verif_modal')
+    const modal = KTModal.getInstance(idModal as HTMLElement)
+    modal.show()
+    setTimeout(() => {
+      modal.hide()
+      router.push({
+        name: 'invoiceVerification'
+      })
+    }, 1000)
+  })
+}
+
+const goBack = () => {
+  if (route.query.type === '1') {
+    router.push({
+      name: 'invoiceVerification'
+    })
+  } else {
+    router.push({
+      name: 'invoiceApproval'
+    })
+  }
+}
+
+const setDataDefault = () => {
+  const data = detailInvoice.value
+  const resultPoGr: itemsPoGrType[] = []
+  const resultAdditional: itemsCostType[] = []
+  let invoice = {} as documentDetailTypes
+  let tax = {} as documentDetailTypes
+  let reference = {} as documentDetailTypes
+  let other = {} as documentDetailTypes
+
+  for (const item of data?.pogr || []) {
+    resultPoGr.push({
+      ...item
+    })
+  }
+
+  for (const item of data?.additionalCosts || []) {
+    resultAdditional.push({
+      ...item
+    })
+  }
+
+  for (const item of data?.documents || []) {
+    switch (item.documentType) {
+      case 1:
+        invoice = item
+        break
+      case 2:
+        tax = item
+        break
+      case 3:
+        reference = item
+        break
+      case 4:
+        other = item
+        break
+    }
+  }
+
+  form.value = {
+    invoiceUId: data?.header.invoiceUId || '',
+    invoiceTypeCode: data?.header.invoiceTypeCode || 0,
+    invoiceTypeName: data?.header.invoiceTypeName || '',
+    invoiceDPCode: data?.header.invoiceDPCode || 0,
+    invoiceDPName: data?.header.invoiceDPName || '',
+    companyCode: data?.header.companyCode || '',
+    companyName: data?.header.companyName || '',
+    invoiceNo: data?.header.invoiceNo || '',
+    documentNo: data?.header.documentNo || '',
+    invoiceDate: data?.header.invoiceDate || '',
+    taxNo: data?.header.taxNo || '',
+    currCode: data?.header.currCode || '',
+    notes: data?.header.notes || '',
+    statusCode: data?.header.statusCode || 0,
+    statusName: data?.header.statusName || '',
+    postingDate: data?.header.postingDate || '',
+    invoicingParty: data?.header.invoicingParty || '',
+    estimatedPaymentDate: data?.header.estimatedPaymentDate || '',
+    paymentMethodCode: data?.header.paymentMethodCode || '',
+    paymentMethodName: data?.header.paymentMethodName || '',
+    assigment: data?.header.assigment || '',
+    transferNews: data?.header.transferNews || '',
+    npwpReporting: data?.header.npwpReporting || '',
+    bankKey: data?.payment.bankKey || '',
+    bankName: data?.payment.bankName || '',
+    beneficiaryName: data?.payment.beneficiaryName || '',
+    bankAccountNo: data?.payment.bankAccountNo || '',
+    vendorId: data?.vendor.vendorId || 0,
+    vendorName: data?.vendor.vendorName || '',
+    vendorAddress: data?.vendor.vendorAddress || '',
+    subtotal: data?.calculation.subtotal || 0,
+    vatAmount: data?.calculation.vatAmount || 0,
+    whtAmount: data?.calculation.whtAmount || 0,
+    additionalCost: data?.calculation.additionalCost || 0,
+    totalGrossAmount: data?.calculation.totalGrossAmount || 0,
+    totalNetAmount: data?.calculation.totalNetAmount || 0,
+    invoicePoGr: resultPoGr,
+    additionalCosts: resultAdditional,
+    invoiceDocument: invoice,
+    tax: tax,
+    referenceDocument: reference,
+    otherDocument: other
+  }
+}
+
+const setDataEdit = () => {
+  const data = verificationApi.detailInvoiceEdit
+  form.value = {
+    invoiceUId: data?.invoiceUId || '',
+    invoiceTypeCode: data?.invoiceTypeCode || 0,
+    invoiceTypeName: data?.invoiceTypeName || '',
+    invoiceDPCode: data?.invoiceDPCode || 0,
+    invoiceDPName: data?.invoiceDPName || '',
+    companyCode: data?.companyCode || '',
+    companyName: data?.companyName || '',
+    invoiceNo: data?.invoiceNo || '',
+    documentNo: data?.documentNo || '',
+    invoiceDate: data?.invoiceDate || '',
+    taxNo: data?.taxNo || '',
+    currCode: data?.currCode || '',
+    notes: data?.notes || '',
+    statusCode: data?.statusCode || 0,
+    statusName: data?.statusName || '',
+    postingDate: data?.postingDate || '',
+    invoicingParty: data?.invoicingParty || '',
+    estimatedPaymentDate: data?.estimatedPaymentDate || '',
+    paymentMethodCode: data?.paymentMethodCode || '',
+    paymentMethodName: data?.paymentMethodName || '',
+    assigment: data?.assigment || '',
+    transferNews: data?.transferNews || '',
+    npwpReporting: data?.npwpReporting || '',
+    bankKey: data?.bankKey || '',
+    bankName: data?.bankName || '',
+    beneficiaryName: data?.beneficiaryName || '',
+    bankAccountNo: data?.bankAccountNo || '',
+    vendorId: data?.vendorId || 0,
+    vendorName: data?.vendorName || '',
+    vendorAddress: data?.vendorAddress || '',
+    subtotal: data?.subtotal || 0,
+    vatAmount: data?.vatAmount || 0,
+    whtAmount: data?.whtAmount || 0,
+    additionalCost: data?.additionalCost || 0,
+    totalGrossAmount: data?.totalGrossAmount || 0,
+    totalNetAmount: data?.totalNetAmount || 0,
+    invoicePoGr: data?.invoicePoGr || [],
+    additionalCosts: data?.additionalCosts || [],
+    invoiceDocument: data?.invoiceDocument || null,
+    tax: data?.tax || null,
+    referenceDocument: data?.referenceDocument || null,
+    otherDocument: data?.otherDocument || null
+  }
 }
 
 onMounted(() => {
-  if (form.value.status === 2) {
+  if (route.query.type === '1') {
     activeStep.value = 'Verification'
     routes.value = [
       {
@@ -209,7 +440,14 @@ onMounted(() => {
       }
     ]
   }
+  verificationApi.getInvoiceDetail(route.query.id?.toString() || '').then(() => {
+    if (verificationApi.isFromEdit) {
+      setDataEdit()
+    } else {
+      setDataDefault()
+    }
+  })
 })
 
-provide('form', form.value)
+provide('form', form)
 </script>

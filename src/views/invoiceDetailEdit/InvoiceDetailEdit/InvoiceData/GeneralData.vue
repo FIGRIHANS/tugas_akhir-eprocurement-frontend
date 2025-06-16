@@ -10,14 +10,14 @@
         <label class="form-label max-w-32">
           Vendor Name
         </label>
-        <input v-model="form.vendorId" class="input" placeholder="" disabled />
+        <input v-model="form.vendorName" class="input" placeholder="" disabled />
       </div>
       <!-- Address -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
         <label class="form-label max-w-32">
           Address
         </label>
-        <textarea v-model="form.address" class="textarea" placeholder="" rows="6" disabled></textarea>
+        <textarea v-model="form.vendorAddress" class="textarea" placeholder="" rows="6" disabled></textarea>
       </div>
     </div>
   </div>

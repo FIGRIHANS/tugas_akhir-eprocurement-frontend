@@ -1,23 +1,21 @@
+import type { WhtCodeTypes } from '@/stores/master-data/types/invoiceMasterData' 
 export interface itemsPoGrType {
-  poNumber: string
-  poItem: string
-  GrDocumentNo: string
-  GrDocumentItem: string
-  GrDocumentDate: string
+  poNo: string
+  poItem: number
+  grDocumentNo: string
+  grDocumentItem: number
+  grDocumentDate: string
+  itemAmount: number
+  quantity: number
   taxCode: string
-  itemAmount: string
-  quantity: string
-  unit: string
+  uom: string
   itemText: string
   conditionType: string
   whtType: string
   whtCode: string
-  whtBaseAmount: string
-  whtAmount: string
+  whtBaseAmount: number
+  whtAmount: number
   department: string
-
-  amountInvoice: string
-  vatAmount: string
-  
-  isEdit?: boolean
+  whtCodeList?: WhtCodeTypes[]
+  isEdit: boolean
 }

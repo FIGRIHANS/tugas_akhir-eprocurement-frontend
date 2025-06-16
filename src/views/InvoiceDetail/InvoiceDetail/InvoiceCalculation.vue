@@ -20,35 +20,75 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, inject } from 'vue'
+import { ref, watch, inject } from 'vue'
 import type { listTypes } from '../types/invoiceCalculation'
 import type { formTypes } from '../types/invoiceDetail'
+import { useFormatIdr } from '@/composables/currency'
+
+const props = defineProps<{
+  formInvoice: formTypes
+}>()
 
 const form = inject<formTypes>('form')
 
 const listName = ref<string[]>([
   'Subtotal',
   'VAT Amount',
-  'WHT AMount',
   'Additional Cost',
   'Total Gross Amount',
+  'WHT Amount',
   'Total Net Amount'
 ])
 
 const listCalculation = ref<listTypes[]>([])
 
-onMounted(() => {
-  for (const item of listName.value) {
-    if ((form?.invoiceType === 'nonpo' && item !== 'Additional Cost') || form?.invoiceType === 'po') {
-      const data = {
-        name: item,
-        amount: '0',
-        currency: 'USD'
-      }
-      listCalculation.value.push(data)
-    }
+const setValue = (key: string) => {
+  let result = 0
+  switch (key.toLowerCase()) {
+    case 'subtotal':
+      result = props.formInvoice.subtotal
+      break
+    case 'vat amount':
+      result = props.formInvoice.vatAmount
+      break
+    case 'additional cost':
+      result = props.formInvoice.additionalCost
+      break
+    case 'total gross amount':
+      result = props.formInvoice.totalGrossAmount
+      break
+    case 'wht amount':
+      result = props.formInvoice.whtAmount
+      break
+    case 'total net amount':
+      result = props.formInvoice.totalNetAmount
+      break
   }
-})
+  return result
+}
+
+const setCalculation = () => {
+  listCalculation.value = []
+  for (const item of listName.value) {
+    const data = {
+      name: item,
+      amount: useFormatIdr(setValue(item) || 0),
+      currency: props.formInvoice.currCode || ''
+    }
+    listCalculation.value.push(data)
+  }
+}
+
+watch(
+  () => props.formInvoice,
+  () => {
+    setCalculation()
+  },
+  {
+    deep: true,
+    immediate: true
+  }
+)
 </script>
 
 <style lang="scss" scoped>

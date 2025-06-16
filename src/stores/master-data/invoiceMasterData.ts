@@ -12,7 +12,12 @@ import type {
   DocumentTypes,
   VendorTypes,
   ActivityTypes,
-  TaxCodeTypes
+  TaxCodeTypes,
+  PaymentMethodTypes,
+  ProfitCenterTypes,
+  WhtTypes,
+  WhtCodeTypes,
+  CostCenterTypes
 } from './types/invoiceMasterData'
 
 export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => {
@@ -24,6 +29,11 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
   const vendorList = ref<VendorTypes[]>([])
   const activityList = ref<ActivityTypes[]>([])
   const taxList = ref<TaxCodeTypes[]>([])
+  const paymentMethodList = ref<PaymentMethodTypes[]>([])
+  const profilCenterList = ref<ProfitCenterTypes[]>([])
+  const whtTypeList = ref<WhtTypes[]>([])
+  const whtCodeList = ref<WhtCodeTypes[]>([])
+  const costCenterList = ref<CostCenterTypes[]>([])
 
   const getInvoicePoType = async () => {
     const response: ApiResponse<InvoicePoTypes[]> = await generalApi.get(
@@ -83,8 +93,8 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
     return response.data.result
   }
 
-  const getActivity = async (searchText?: string) => {
-    const url = searchText ? `/lookup/activity?searchText=${searchText}` : `/lookup/activity`
+  const getActivity = async (companyCode: string, searchText?: string) => {
+    const url = searchText ? `/lookup/activity?companyCode=${companyCode}&searchText=${searchText}` : `/lookup/activity?companyCode=${companyCode}`
     const response: ApiResponse<ActivityTypes[]> = await generalApi.get(url)
 
     activityList.value = response.data.result.content
@@ -101,6 +111,56 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
     return response.data.result
   }
 
+  const getPaymentMethod = async (searchText?: string) => {
+    const url = searchText ? `/lookup/payment-method?searchText=${searchText}` : `/lookup/payment-method`
+    const response: ApiResponse<PaymentMethodTypes[]> = await generalApi.get(url)
+
+    paymentMethodList.value = response.data.result.content
+
+    return response.data.result
+  }
+
+  const getProfitCenter = async (searchText?: string) => {
+    const url = searchText ? `/lookup/profit-center?searchText=${searchText}` : `/lookup/profit-center`
+    const response: ApiResponse<ProfitCenterTypes[]> = await generalApi.get(url)
+
+    profilCenterList.value = response.data.result.content
+
+    return response.data.result
+  }
+
+  const getWhtType = async (searchText?: string) => {
+    const url = searchText ? `/lookup/wht-type?searchText=${searchText}` : `/lookup/wht-type`
+    const response: ApiResponse<WhtTypes[]> = await generalApi.get(url)
+
+    whtTypeList.value = response.data.result.content
+
+    return response.data.result
+  }
+
+  const getWhtCode = async (whtType: string, searchText?: string) => {
+    const url = searchText ? `/lookup/wht-code?whtType=${whtType}&searchText=${searchText}` : `/lookup/wht-code?whtType=${whtType}`
+    const response: ApiResponse<WhtCodeTypes[]> = await generalApi.get(url)
+
+    whtCodeList.value = response.data.result.content
+
+    return response.data.result
+  }
+
+  const getCostCenter = async (companyCode: string, profitCenter?: string, searchText?: string) => {
+    const url = `/lookup/cost-center`
+    const params = {
+      companyCode,
+      ...(profitCenter !== undefined && profitCenter !== '' && { profitCenter }),
+      ...(searchText !== undefined && searchText !== '' && { searchText })
+    }
+    const response: ApiResponse<CostCenterTypes[]> = await generalApi.get(url, { params })
+
+    costCenterList.value = response.data.result.content
+
+    return response.data.result
+  }
+
   return {
     invoicePoType,
     currency,
@@ -110,6 +170,11 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
     vendorList,
     activityList,
     taxList,
+    paymentMethodList,
+    profilCenterList,
+    whtTypeList,
+    whtCodeList,
+    costCenterList,
     getInvoicePoType,
     getCurrency,
     getCompanyCode,
@@ -117,6 +182,11 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
     getDocumentTypes,
     getVendorList,
     getActivity,
-    getTaxCode
+    getTaxCode,
+    getPaymentMethod,
+    getProfitCenter,
+    getWhtType,
+    getWhtCode,
+    getCostCenter
   }
 })

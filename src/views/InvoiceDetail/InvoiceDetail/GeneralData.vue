@@ -5,25 +5,13 @@
       <input v-model="form.generalDataCheck" class="checkbox" type="checkbox"/>
     </div>
     <div class="card-body flex flex-col gap-[20px]">
-      <div v-if="checkPo()" class="flex items-center justify-between gap-[10px]">
-        <p class="font-normal text-sm text-gray-600">Invoice Type</p>
-        <p class="font-normal text-sm">{{ form.invoiceType }}</p>
-      </div>
       <div class="flex items-center justify-between gap-[10px]">
         <p class="font-normal text-sm text-gray-600">Vendor Name</p>
-        <p class="font-normal text-sm">{{ form.vendorId }}</p>
-      </div>
-      <div class="flex items-center justify-between gap-[10px]">
-        <p class="font-normal text-sm text-gray-600">Business Field</p>
-        <p class="font-normal text-sm">{{ form.businessField }}</p>
-      </div>
-      <div class="flex items-center justify-between gap-[10px]">
-        <p class="font-normal text-sm text-gray-600">Sub Business Field</p>
-        <p class="font-normal text-sm">{{ form.subBusinessField }}</p>
+        <p class="font-normal text-sm">{{ form.vendorName || '-' }}</p>
       </div>
       <div class="flex items-center justify-between gap-[10px]">
         <p class="font-normal text-sm text-gray-600">Address</p>
-        <p class="font-normal text-sm">{{ form.address }}</p>
+        <p class="font-normal text-sm">{{ form.vendorAddress || '-' }}</p>
       </div>
     </div>
   </div>
@@ -34,8 +22,4 @@ import { inject } from 'vue'
 import type { formTypes } from '../types/invoiceDetail'
 
 const form = inject<formTypes>('form')
-
-const checkPo = () => {
-  return form?.invoiceType === 'po'
-}
 </script>

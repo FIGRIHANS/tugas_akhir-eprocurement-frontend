@@ -5,26 +5,28 @@
       <InvoiceCalculation />
     </div>
     <InvoicePoGr v-if="checkPo()" class="mt-[24px]" />
-    <AdditionalCost v-if="form.invoiceDp === '1' && !checkNonPo()" class="mt-[24px]" />
+    <AdditionalCost v-if="form.invoiceDPCode === 9011 && !checkNonPo()" class="mt-[24px]" />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, inject, defineAsyncComponent } from 'vue'
+import { ref, onMounted, inject, defineAsyncComponent, type Ref } from 'vue'
 import { useRoute } from 'vue-router'
 import type { formTypes } from '../types/invoiceDetailEdit'
+import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 
 const HeaderDocument = defineAsyncComponent(() => import('./InvoiceInformation/HeaderDocument.vue'))
 const InvoiceCalculation = defineAsyncComponent(() => import('./InvoiceInformation/InvoiceCalculation.vue'))
 const InvoicePoGr = defineAsyncComponent(() => import('./InvoiceInformation/InvoicePoGr.vue'))
 const AdditionalCost = defineAsyncComponent(() => import('./InvoiceInformation/AdditionalCost.vue'))
 
-const form = inject<formTypes>('form')
+const invoiceMasterApi = useInvoiceMasterDataStore()
+const form = inject<Ref<formTypes>>('form')
 const route = useRoute()
 const typeForm = ref<string>('')
 
 const checkPo = () => {
-  return typeForm.value === 'po'
+  return form?.value.invoiceTypeCode === 901
 }
 
 const checkNonPo = () => {
@@ -33,6 +35,11 @@ const checkNonPo = () => {
 
 onMounted(() => {
   typeForm.value = route.query.type?.toString().toLowerCase() || 'po'
+  invoiceMasterApi.getPaymentMethod()
+  invoiceMasterApi.getProfitCenter()
+  invoiceMasterApi.getWhtType()
+  invoiceMasterApi.getCostCenter(form?.value.companyCode || '')
+  invoiceMasterApi.getActivity(form?.value.companyCode || '')
 })
 </script>
 

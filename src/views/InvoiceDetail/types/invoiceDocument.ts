@@ -1,8 +1,20 @@
 export interface documentFormTypes {
-  invoiceDocument: File | null
-  tax: File | null
-  referenceDocument: File | null
-  otherDocument: File | null
+  invoiceDocument: documentDetailTypes | null
+  tax: documentDetailTypes | null
+  referenceDocument: documentDetailTypes | null
+  otherDocument: documentDetailTypes | null
+}
+
+export interface documentDetailTypes {
+  documentType: number
+  documentName: string
+  documentUrl: string
+  documentSize: number
+}
+
+export interface documentViewTypes {
+  name: string
+  path: string
 }
 
 export interface listFormTypes {
