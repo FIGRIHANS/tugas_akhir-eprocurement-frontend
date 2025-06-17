@@ -35,6 +35,8 @@
             <td v-if="!checkInvoiceDp()">{{ item.uom || '-' }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.itemText || '-' }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.conditionType || '-' }}</td>
+            <td>{{ item.conditionTypeDesc || '-' }}</td>
+            <td>{{ item.qcStatus || '-' }}</td>
             <td>{{ item.taxCode || '-' }}</td>
             <td>{{ item.whtType || '-' }}</td>
             <td>{{ item.whtCode || '-' }}</td>
@@ -63,7 +65,7 @@ const checkInvoiceDp = () => {
 }
 
 const checkPoPib = () => {
-  return false
+  return form?.invoiceTypeCode === 902
 }
 
 const setColumn = () => {

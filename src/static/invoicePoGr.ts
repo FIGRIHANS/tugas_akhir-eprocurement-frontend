@@ -9,6 +9,8 @@ export const defaultColumn = [
   'Unit',
   'Item Text',
   'Condition Type',
+  'Condition Type Description',
+  'QC Status',
   'Tax Code',
   'WHT Type',
   'WHT Code',
@@ -51,6 +53,8 @@ export const searchDefaultColumn = [
   'Unit',
   'Item Text',
   'Condition Type',
+  'Condition Type Description',
+  'QC Status',
   'Tax Code',
   'Department'
 ]

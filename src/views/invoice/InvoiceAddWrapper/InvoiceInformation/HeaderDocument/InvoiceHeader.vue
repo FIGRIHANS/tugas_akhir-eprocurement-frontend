@@ -170,6 +170,13 @@ watch(
   }
 )
 
+watch(
+  () => form?.companyCode,
+  () => {
+    invoiceMasterApi.getActivity(form?.companyCode || '')
+  }
+)
+
 onMounted(() => {
   typeForm.value = route.query.type?.toString().toLowerCase() || 'po'
   invoiceMasterApi.getCurrency()

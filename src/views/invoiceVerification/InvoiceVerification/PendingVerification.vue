@@ -14,7 +14,7 @@
           </thead>
           <tbody>
             <tr v-for="(item, index) in list" :key="index">
-              <td class="flex justify-between items-center gap-[8px]">
+              <td class="flex justify-between items-center gap-[24px]">
                 <button class="btn btn-outline btn-primary btn-icon" @click="openDetailInvoice(item.invoiceUId)">
                   <i class="ki-filled ki-eye"></i>
                 </button>
@@ -186,6 +186,7 @@ const callList = () => {
 }
 
 const setDataFilter = (data: filterListTypes) => {
+  filterForm.status = data.status
   filterForm.date = data.date
   filterForm.companyCode = data.companyCode
   filterForm.invoiceType = data.invoiceType

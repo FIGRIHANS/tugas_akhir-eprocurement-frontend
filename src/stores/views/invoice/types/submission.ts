@@ -85,6 +85,8 @@ interface ParamsSubmissionItem {
   uom: string
   itemText: string
   conditionType: string
+  conditionTypeDesc: string
+  qcStatus: string
   whtType: string
   whtCode: string
   whtBaseAmount: number
@@ -133,6 +135,8 @@ export interface PoGrItemTypes {
   materialDescription: string
   currency: string
   conditionType: string
+  conditionTypeDesc: string
+  qcStatus: string
   postingDate: string
   enteredOn: string
   purchasingOrg: string

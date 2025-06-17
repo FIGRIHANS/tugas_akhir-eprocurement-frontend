@@ -96,7 +96,7 @@ const routes = ref<routeTypes[]>([
 ])
 
 const form = reactive<formTypes>({
-  invoiceType: '1',
+  invoiceType: '901',
   invoiceTypeName: 'Invoice PO',
   vendorId: '',
   businessField: '',
@@ -114,7 +114,7 @@ const form = reactive<formTypes>({
   invoiceNoVendor: '',
   invoiceDate: '',
   taxNumber: '',
-  invoiceDp: '1',
+  invoiceDp: '9011',
   amountInvoice: '',
   taxNoInvoice: '',
   remainingDpAmount: '',
@@ -275,6 +275,8 @@ const mapPoGr = () => {
       uom: item.uom,
       itemText: item.materialDescription,
       conditionType: item.conditionType,
+      conditionTypeDesc: item.conditionTypeDesc,
+      qcStatus: item.qcStatus,
       whtType: '-',
       whtCode: '-',
       whtBaseAmount: 0,

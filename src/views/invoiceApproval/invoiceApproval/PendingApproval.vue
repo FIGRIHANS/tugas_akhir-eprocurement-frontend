@@ -14,7 +14,7 @@
           </thead>
           <tbody>
             <tr v-for="(item, index) in list" :key="index">
-              <td class="max-w-[200px] flex justify-between items-center gap-[4px]">
+              <td class="max-w-[400px] flex justify-between items-center gap-[24px]">
                 <button v-if="item.statusCode === 4" class="btn btn-primary whitespace-nowrap" @click="openSuccesSap">
                   <i class="ki-duotone ki-paper-plane"></i>
                   Send to SAP
@@ -204,6 +204,7 @@ const callList = () => {
 }
 
 const setDataFilter = (data: filterListTypes) => {
+  filterForm.status = data.status
   filterForm.date = data.date
   filterForm.companyCode = data.companyCode
   filterForm.invoiceType = data.invoiceType
