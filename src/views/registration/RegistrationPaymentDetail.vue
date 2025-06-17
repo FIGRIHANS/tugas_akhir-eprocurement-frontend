@@ -75,6 +75,7 @@
               :required="!paymentDetailFlagging.bankNotRegistered"
               :disabled="paymentDetailFlagging.bankNotRegistered"
               :error="paymentDetail.bankIdError"
+              @update:model-value="(val) => checkBankCountry(String(val))"
             />
 
             <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5">
@@ -94,6 +95,19 @@
             required
             hint-text="*5 uppercase alphanumeric characters (e.g., AMBV0), must match official bank and unique."
             :error="paymentDetail.bankKeyError"
+          />
+          <UiSelect
+            v-if="paymentDetailFlagging.bankNotRegistered"
+            v-model="paymentDetail.countryId"
+            label="Bank Country"
+            placeholder="Pilih"
+            row
+            :options="countryList"
+            valueKey="countryCode"
+            textKey="countryName"
+            :required="!paymentDetailFlagging.bankNotRegistered"
+            :disabled="paymentDetailFlagging.bankNotRegistered"
+            :error="paymentDetail.countryIdError"
           />
           <UiInput
             v-if="paymentDetailFlagging.bankNotRegistered"
@@ -170,7 +184,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted } from 'vue'
+import { computed, onBeforeMount, onMounted } from 'vue'
 
 import { useRegistrationVendorStore } from '@/stores/views/registration'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
@@ -203,6 +217,7 @@ const currencyList = computed(() =>
     text: `${item.currencyName} (${item.currencyCode})`,
   })),
 )
+const countryList = computed(() => vendorMasterDataStore.countryList)
 
 const uploadFile = async (file: File, type: 'different account' | 'first page') => {
   try {
@@ -220,9 +235,18 @@ const uploadFile = async (file: File, type: 'different account' | 'first page') 
   }
 }
 
-onMounted(async () => {
-  await vendorMasterDataStore.getVendorTermCondition()
-  await vendorMasterDataStore.getVendorBanks()
-  await vendorMasterDataStore.getVendorCurrency()
+const checkBankCountry = (value: string) => {
+  registrationVendorStore.paymentDetail.countryId = bankList.value.find(
+    (item) => item.bankKey === value,
+  )!.bankCountryCode
+}
+
+onBeforeMount(() => {})
+
+onMounted(() => {
+  vendorMasterDataStore.getVendorTermCondition()
+  vendorMasterDataStore.getVendorBanks()
+  vendorMasterDataStore.getVendorCurrency()
+  vendorMasterDataStore.getVendorCountries()
 })
 </script>
