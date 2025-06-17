@@ -163,7 +163,9 @@ watch(
       </table>
     </div>
     <div class="card-footer">
-      <div>Showing {{ approval.data.pageSize }} of {{ approval.data.total }} entries</div>
+      <div class="text-sm text-gray-800">
+        Showing {{ approval.data.pageSize }} of {{ approval.data.total }} entries
+      </div>
       <LPagination
         :current-page="approval.data.page"
         :page-size="approval.data.pageSize"

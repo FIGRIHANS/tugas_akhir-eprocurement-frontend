@@ -200,7 +200,7 @@ watch(
       </table>
     </div>
     <div
-      class="card-footer justify-center md:justify-between flex-col md:flex-row gap-3 text-gray-600 text-2sm font-medium"
+      class="card-footer justify-center md:justify-between flex-col md:flex-row gap-3 text-gray-800 text-sm font-medium"
     >
       <div>Showing {{ vendor.vendors.pageSize }} of {{ vendor.vendors.total }} entries</div>
       <LPagination
