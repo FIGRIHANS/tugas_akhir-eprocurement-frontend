@@ -243,7 +243,7 @@ const checkFieldNotEmpty = () => {
       }
 
       if (registrationVendorStore.paymentDetailFlagging.bankNotRegistered) {
-        fields.payment.push('bankName', 'branch', 'swiftCode')
+        fields.payment.push('bankKey', 'countryId', 'bankName', 'branch', 'swiftCode')
       } else {
         fields.payment.push('bankId')
       }
@@ -271,6 +271,7 @@ const checkFieldNotEmpty = () => {
           ...registrationVendorStore.paymentDetail,
           bankKey: '',
           bankKeyError: false,
+          countryIdError: false,
           bankName: '',
           bankNameError: false,
           branch: '',
@@ -357,7 +358,7 @@ const submitData = async () => {
         urlAccountDifferences: paymentDetail.value.urlAccountDifferences,
         urlFirstPage: paymentDetail.value.urlFirstPage,
         bankAddress: paymentDetail.value.bankAddress,
-        countryId: 0,
+        countryId: paymentDetail.value.countryId,
       },
     }
 
