@@ -102,8 +102,6 @@
             placeholder="Pilih"
             row
             :options="countryList"
-            valueKey="countryCode"
-            textKey="countryName"
             required
             :error="paymentDetail.bankCountryCodeError"
           />
@@ -215,7 +213,12 @@ const currencyList = computed(() =>
     text: `${item.currencyName} (${item.currencyCode})`,
   })),
 )
-const countryList = computed(() => vendorMasterDataStore.countryList)
+const countryList = computed(() =>
+  vendorMasterDataStore.countryList.map((item) => ({
+    value: item.countryCode,
+    text: `${item.countryCode} - ${item.countryName}`,
+  })),
+)
 
 const uploadFile = async (file: File, type: 'different account' | 'first page') => {
   try {
