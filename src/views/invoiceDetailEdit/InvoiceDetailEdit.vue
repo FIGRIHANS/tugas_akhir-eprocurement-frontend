@@ -259,7 +259,7 @@ const mapDocument = (data: documentDetailTypesStore | null) => {
   return {
     name: data.documentName,
     path: data.documentUrl,
-    fileSize: data.documentSize.toString()
+    fileSize: data.documentSize ? data.documentSize.toString() : '0'
   }
 }
 
@@ -338,7 +338,7 @@ const setDataDefault = () => {
     const data = {
       name: item.documentName,
       path: item.documentUrl,
-      fileSize: item.documentSize.toString()
+      fileSize: item.documentSize ? item.documentSize.toString() : '0'
     } as documentDetailTypes
     switch (item.documentType) {
       case 1:

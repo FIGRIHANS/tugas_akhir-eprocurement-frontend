@@ -16,21 +16,21 @@
     <AdditionalCost v-if="form.invoiceDPCode === 9011 && checkPo()" class="mt-[24px]" />
     <div class="flex items-center justify-between gap-[8px] mt-[24px]">
       <div class="flex items-center gap-[10px]">
-        <button class="btn btn-outline btn-primary" @click="goBack">
+        <button class="btn btn-outline btn-primary" :disabled="isLoading" @click="goBack">
           <i class="ki-filled ki-black-left"></i>
           Back
         </button>
-        <button v-if="checkStatusCode()" class="btn btn-primary" @click="goToEdit">
+        <button v-if="checkStatusCode()" class="btn btn-primary" :disabled="isLoading" @click="goToEdit">
           <i class="ki-duotone ki-pencil"></i>
           Edit
         </button>
       </div>
       <div v-if="checkStatusCode()" class="flex items-center justify-end gap-[10px]">
-        <button class="btn btn-outline btn-danger" @click="openReject">
+        <button class="btn btn-outline btn-danger" :disabled="isLoading" @click="openReject">
           <i class="ki-duotone ki-cross-circle"></i>
           Reject
         </button>
-        <button class="btn btn-primary" @click="goVerif">
+        <button class="btn btn-primary" :disabled="isLoading" @click="goVerif">
           <i class="ki-duotone ki-check-circle"></i>
           {{ route.query.type === '1' ? 'Verify' : 'Approve' }}
         </button>
@@ -56,6 +56,7 @@ import Breadcrumb from '@/components/BreadcrumbView.vue'
 import StepperStatus from '../../components/stepperStatus/StepperStatus.vue'
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 import type { PostVerificationTypes } from '@/stores/views/invoice/types/verification'
+import { isEmpty } from 'lodash'
 
 const StatusInvoice = defineAsyncComponent(() => import('./InvoiceDetail/StatusInvoice.vue'))
 const GeneralData = defineAsyncComponent(() => import('./InvoiceDetail/GeneralData.vue'))
@@ -72,6 +73,7 @@ const activeStep = ref<string>('')
 const router = useRouter()
 const route = useRoute()
 const verificationApi = useInvoiceVerificationStore()
+const isLoading = ref<boolean>(false)
 
 const routes = ref<routeTypes[]>([
   {
@@ -244,6 +246,11 @@ const mapDataVerif = () => {
   const taxDoc = form.value.tax || {}
   const referenceDoc = form.value.referenceDocument || {}
   const otherDoc = form.value.otherDocument || {}
+  const documents = []
+  if (!isEmpty(invoiceDoc)) documents.push(invoiceDoc)
+  if (!isEmpty(taxDoc)) documents.push(taxDoc)
+  if (!isEmpty(referenceDoc)) documents.push(referenceDoc)
+  if (!isEmpty(otherDoc)) documents.push(otherDoc)
   const data = {
     statusCode: route.query.type === '1'? 3 : 4,
     statusName: route.query.type === '1'? 'Verified' : 'Approved',
@@ -278,12 +285,7 @@ const mapDataVerif = () => {
       totalGrossAmount: form.value.totalGrossAmount,
       totalNetAmount: form.value.totalNetAmount
     },
-    documents: [
-      invoiceDoc,
-      taxDoc,
-      referenceDoc,
-      otherDoc
-    ],
+    documents,
     pogr: mapPoGr(),
     additionalCosts: mapAdditionalCost()
   } as PostVerificationTypes
@@ -295,6 +297,7 @@ const goVerif = () => {
   const status = checkVerif()
 
   if (!status) return
+  isLoading.value = true
   verificationApi.postSubmission(mapDataVerif()).then(() => {
     verificationApi.resetDetailInvoiceEdit()
     const idModal = document.querySelector('#success_verif_modal')
@@ -306,6 +309,8 @@ const goVerif = () => {
         name: 'invoiceVerification'
       })
     }, 1000)
+  }).finally(() => {
+    isLoading.value = false
   })
 }
 

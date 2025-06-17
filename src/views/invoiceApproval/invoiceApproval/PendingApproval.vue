@@ -193,7 +193,7 @@ const setList = () => {
 const callList = () => {
   list.value = []
   verificationApi.getListPo({
-    statusCode: filterForm.status,
+    statusCode: filterForm.status || 2,
     companyCode: filterForm.companyCode,
     invoiceTypeCode: Number(filterForm.invoiceType),
     invoiceDate: filterForm.date,

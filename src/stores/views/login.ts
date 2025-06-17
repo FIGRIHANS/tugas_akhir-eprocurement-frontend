@@ -12,6 +12,10 @@ export const useLoginStore = defineStore('login', () => {
   const isSendForgot = ref<boolean>(false)
   const isSendNewPassword = ref<boolean>(false)
 
+  const clearUserData = () => {
+    userData.value = {} as ResponseUser
+  }
+
   const callLogin = async (username: string, password: string) => {
     const response = await api.post('/auth/sign-in', {
       userName: username,
@@ -47,6 +51,7 @@ export const useLoginStore = defineStore('login', () => {
     isSendForgot,
     isSendNewPassword,
     userData,
+    clearUserData,
     callLogin,
     callUser,
     callLoginVendor
