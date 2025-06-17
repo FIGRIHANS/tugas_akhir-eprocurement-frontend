@@ -7,7 +7,7 @@ import LicenseCard from '@/components/vendor/cards/LicenseCard.vue'
 <template>
   <div class="space-y-5">
     <LicenseCard />
-    <div class="flex gap-3">
+    <div class="flex gap-3 justify-end">
       <UiButton :outline="true" @click="$router.go(-1)">
         <UiIcon name="black-left" variant="duotone" />
         <span> Back </span>

@@ -4,8 +4,6 @@ import LPagination from '@/components/pagination/LPagination.vue'
 import FilterDropdown from '@/components/vendor/FilterDropdownList.vue'
 import VendorMenu from '@/components/vendor/VendorMenu.vue'
 import StatusToggle from '@/components/vendor/StatusToggle.vue'
-import UiButton from '@/components/ui/atoms/button/UiButton.vue'
-import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import { useVendorStore } from '@/stores/vendor/vendor'
 import { useVerificationStatus } from '@/stores/vendor/reference'
 import { ref, watch } from 'vue'
@@ -66,17 +64,13 @@ watch(
     :routes="[{ name: 'Vendor Master', to: '/vendor-master' }]"
   />
   <div class="card">
-    <div class="card-header">
+    <div class="card-header p-6">
       <UiInputSearch v-model="search" placeholder="Search vendor" />
       <div class="flex gap-3">
         <FilterDropdown />
-        <UiButton :outline="true">
-          <UiIcon variant="filled" name="printer" />
-          Export Data Vendor
-        </UiButton>
       </div>
     </div>
-    <div class="card-body scrollable-x-auto">
+    <div class="card-body scrollable-x-auto p-6">
       <!-- <FilterButton /> -->
       <VendorListFilters />
       <table class="table align-middle text-gray-700">
@@ -186,7 +180,7 @@ watch(
       </table>
     </div>
     <div
-      class="card-footer justify-center md:justify-between flex-col md:flex-row gap-3 text-gray-600 text-2sm font-medium"
+      class="card-footer justify-center md:justify-between flex-col md:flex-row gap-3 text-gray-800 text-sm font-medium"
     >
       <div>Showing {{ vendor.vendors.pageSize }} of {{ vendor.vendors.total }} entries</div>
       <LPagination
