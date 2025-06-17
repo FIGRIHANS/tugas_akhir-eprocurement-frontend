@@ -65,17 +65,13 @@ watch(
     title="Vendor Approval"
   />
   <div class="card">
-    <div class="card-header">
+    <div class="card-header p-6">
       <UiInputSearch v-model="search" placeholder="Search vendor" />
       <div class="flex gap-3">
         <FilterDropdownApproval />
-        <UiButton :outline="true">
-          <UiIcon name="printer" variant="duotone" />
-          <span>Export Data Vendor</span>
-        </UiButton>
       </div>
     </div>
-    <div class="card-body scrollable-x-auto">
+    <div class="card-body scrollable-x-auto p-6">
       <VendorApprovalFilters />
       <table class="table align-middle">
         <thead>

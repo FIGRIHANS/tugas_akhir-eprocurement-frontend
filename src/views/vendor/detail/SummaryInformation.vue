@@ -5,8 +5,8 @@ import { useRoute, useRouter } from 'vue-router'
 import AdministrativeCard from '@/components/vendor/cards/AdministrativeCard.vue'
 import LicenseCard from '@/components/vendor/cards/LicenseCard.vue'
 import PaymentCard from '@/components/vendor/cards/PaymentCard.vue'
-import { ref } from 'vue'
-import { useVendorStore } from '@/stores/vendor/vendor'
+import { computed, onMounted, ref } from 'vue'
+import { useVendorStore, useVerificationDetailStore } from '@/stores/vendor/vendor'
 import { useLoginStore } from '@/stores/views/login'
 import axios from 'axios'
 import successImg from '@/assets/success.svg'
@@ -17,6 +17,7 @@ const router = useRouter()
 
 const vendorStore = useVendorStore()
 const userStore = useLoginStore()
+const verifStore = useVerificationDetailStore()
 
 const modalReject = ref<boolean>(false)
 const modalRejectSuccess = ref<boolean>(false)
@@ -29,6 +30,14 @@ const inputError = ref<string[]>([])
 
 const loading = ref<boolean>(false)
 const error = ref<string | null>(null)
+
+const isVerified = computed(() =>
+  verifStore.data.some(
+    (data) =>
+      data.position === userStore.userData?.profile.positionName &&
+      data.verificatorName === userStore.userData.profile.employeeName,
+  ),
+)
 
 const handleVerify = async () => {
   loading.value = true
@@ -93,6 +102,12 @@ const handleReject = async () => {
     loading.value = false
   }
 }
+
+onMounted(() => {
+  verifStore.getData(Number(route.params.id))
+})
+
+console.log(verifStore.data)
 </script>
 <template>
   <div class="space-y-5">
@@ -105,18 +120,27 @@ const handleReject = async () => {
     <!-- card payment information -->
     <PaymentCard />
 
-    <div class="flex justify-between">
+    <div class="flex justify-end space-x-3">
       <UiButton :outline="true" @click="router.go(-1)">
         <UiIcon name="black-left" variant="duotone" />
         <span> Back </span>
       </UiButton>
 
-      <div v-if="route.name === 'vendor-verification-detail'" class="space-x-3">
-        <UiButton :outline="true" variant="danger" class="ml-auto" @click="modalReject = true">
+      <div
+        v-if="route.name === 'vendor-verification-detail'"
+        class="space-x-3 flex-1 flex justify-end"
+      >
+        <UiButton
+          :outline="true"
+          variant="danger"
+          class="ml-auto"
+          @click="modalReject = true"
+          :disabled="isVerified"
+        >
           <UiIcon name="cross-circle" variant="duotone" />
           <span> Reject </span>
         </UiButton>
-        <UiButton @click="modalVerify = true">
+        <UiButton @click="modalVerify = true" :disabled="isVerified">
           <UiIcon name="check-squared" variant="duotone" />
           <span> Verify </span>
         </UiButton>

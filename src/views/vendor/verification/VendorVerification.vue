@@ -6,13 +6,14 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import { useVendorStore } from '@/stores/vendor/vendor'
 import { useVerificationStatus } from '@/stores/vendor/reference'
-import { ref, watch } from 'vue'
+import { reactive, ref, watch } from 'vue'
 import { debounce } from 'lodash'
 import { useRoute, useRouter } from 'vue-router'
 import { formatDate } from '@/core/utils/format'
 import UiLoading from '@/components/UiLoading.vue'
 import VendorListFilters from '@/components/vendor/filterButton/VendorListFilters.vue'
 import BreadcrumbView from '@/components/BreadcrumbView.vue'
+import VendorVerificationModal from '@/components/vendor/verificationModal/VendorVerificationModal.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -20,6 +21,18 @@ const router = useRouter()
 const vendor = useVendorStore()
 const verificationStatusStore = useVerificationStatus()
 const search = ref('')
+const verifDetail = reactive({
+  modal: false,
+  id: 0,
+  name: '',
+})
+
+const handleVerifDetail = (id: number, name: string) => {
+  verifDetail.id = id
+  verifDetail.name = name
+  verifDetail.modal = true
+}
+
 // const currentPage = ref(1)
 const getStatus = (status: string) => {
   return verificationStatusStore.data.find((item) => item.code === status)?.value
@@ -64,17 +77,13 @@ watch(
     :routes="[{ name: 'Vendor Verification', to: '/vendor/verification' }]"
   />
   <div class="card">
-    <div class="card-header">
+    <div class="card-header p-6">
       <UiInputSearch v-model="search" placeholder="Search vendor" />
       <div class="flex gap-3">
         <FilterDropdown />
-        <UiButton :outline="true">
-          <UiIcon variant="filled" name="printer" />
-          Export Data Vendor
-        </UiButton>
       </div>
     </div>
-    <div class="card-body scrollable-x-auto">
+    <div class="card-body scrollable-x-auto p-6">
       <!-- <FilterButton /> -->
       <VendorListFilters />
       <table class="table align-middle text-gray-700">
@@ -131,7 +140,12 @@ watch(
                 >
                   <UiIcon name="eye" />
                 </UiButton>
-                <UiButton :icon="true" :outline="true" size="sm">
+                <UiButton
+                  :icon="true"
+                  :outline="true"
+                  size="sm"
+                  @click="handleVerifDetail(vendor.id, vendor.vendorName)"
+                >
                   <UiIcon name="data" variant="duotone" />
                 </UiButton>
               </div>
@@ -197,4 +211,10 @@ watch(
       />
     </div>
   </div>
+  <VendorVerificationModal
+    v-if="verifDetail.modal"
+    v-model="verifDetail.modal"
+    :id="verifDetail.id"
+    :name="verifDetail.name"
+  />
 </template>
