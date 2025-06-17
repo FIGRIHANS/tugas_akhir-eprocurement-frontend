@@ -7,9 +7,12 @@ import successImg from '@/assets/success.svg'
 import { useApprovalStore } from '@/stores/vendor/approval'
 import { useLoginStore } from '@/stores/views/login'
 import axios from 'axios'
+import { useRouter } from 'vue-router'
 
 const approvalStore = useApprovalStore()
 const userStore = useLoginStore()
+
+const router = useRouter()
 
 const props = defineProps<{ id: string | number; nama: string }>()
 const modal = ref(false)
@@ -31,17 +34,12 @@ const handleApprove = async () => {
   error.value = null
   // call api here
   try {
-    const response = await approvalStore.approve({
+    await approvalStore.approve({
       vendorId: props.id as string,
       approvalStatus: 1, //for approved
       approvalBy: userStore.userData?.profile.employeeId.toString() as string,
       approvalNote: reason.value,
     })
-
-    if (response.result.isError) {
-      error.value = response.result.message
-      return
-    }
 
     modal.value = false
     successModal.value = true
@@ -54,6 +52,11 @@ const handleApprove = async () => {
   } finally {
     loading.value = false
   }
+}
+
+const handleSuccess = () => {
+  approvalStore.getApproval({})
+  router.replace('/vendor/approval')
 }
 </script>
 <template>
@@ -94,11 +97,7 @@ const handleApprove = async () => {
     </form>
   </UiModal>
 
-  <UiModal
-    v-model="successModal"
-    size="sm"
-    @update:model-value="$router.replace({ name: $route.name })"
-  >
+  <UiModal v-model="successModal" size="sm" @update:model-value="handleSuccess">
     <img :src="successImg" alt="confirmation" class="mx-auto w-[202px] h-auto mb-5" />
     <h3 class="text-center text-lg font-medium">Vendor {{ nama }} successfully approved</h3>
     <p class="text-center text-base text-gray-600 mb-5">

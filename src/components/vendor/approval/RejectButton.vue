@@ -7,10 +7,14 @@ import UiModal from '@/components/modal/UiModal.vue'
 import { useApprovalStore } from '@/stores/vendor/approval'
 import { useLoginStore } from '@/stores/views/login'
 import axios from 'axios'
+import { useRoute, useRouter } from 'vue-router'
 
 const props = defineProps<{ id: string | number; nama: string }>()
 const approvalStore = useApprovalStore()
 const userStore = useLoginStore()
+
+const router = useRouter()
+const route = useRoute()
 
 const modalReject = ref(false)
 const modalSuccess = ref(false)
@@ -30,17 +34,12 @@ const handleReject = async () => {
   error.value = null
 
   try {
-    const response = await approvalStore.approve({
+    await approvalStore.approve({
       vendorId: props.id as string,
       approvalStatus: 2,
       approvalBy: userStore.userData?.profile.employeeId.toString() as string,
       approvalNote: reason.value,
     })
-
-    if (response.result.isError) {
-      error.value = response.result.message
-      return
-    }
 
     modalReject.value = false
     modalSuccess.value = true
@@ -53,6 +52,11 @@ const handleReject = async () => {
   } finally {
     loading.value = false
   }
+}
+
+const handleSuccess = () => {
+  approvalStore.getApproval({})
+  router.replace(route.fullPath)
 }
 </script>
 <template>
@@ -97,11 +101,7 @@ const handleReject = async () => {
     </form>
   </UiModal>
 
-  <UiModal
-    v-model="modalSuccess"
-    size="sm"
-    @update:model-value="$router.replace({ name: $route.name })"
-  >
+  <UiModal v-model="modalSuccess" size="sm" @update:model-value="handleSuccess">
     <img :src="successImg" alt="success" class="mx-auto mb-3" />
     <h3 class="font-medium text-lg text-gray-800 text-center">Vendor Rejected</h3>
     <p class="text-gray-600 text-center mb-3">Vendor has been successfully Rejected</p>
