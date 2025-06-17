@@ -20,6 +20,7 @@ export interface formTypes extends documentFormTypes {
   currCode: string
   currCodeError?: boolean
   notes: string
+  notesError?: boolean
   statusCode: number
   statusName: string
   postingDate: string

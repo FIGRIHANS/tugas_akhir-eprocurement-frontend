@@ -46,8 +46,8 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
     return response.data.result
   }
 
-  const getPoGr = async () => {
-    const response: ApiResponse<PoGrItemTypes[]> = await invoiceApi.get(`/invoice/po-gr`)
+  const getPoGr = async (poNumber: string, companyCode: string, vendorCode: string) => {
+    const response: ApiResponse<PoGrItemTypes[]> = await invoiceApi.get(`/invoice/po-gr?poNumber=${poNumber}&companyCode=${companyCode}&vendorCode=${vendorCode}`)
   
     poGrList.value = response.data.result.content
   

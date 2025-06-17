@@ -14,7 +14,6 @@
 import { ref, onMounted, inject, defineAsyncComponent } from 'vue'
 import { useRoute } from 'vue-router'
 import type { formTypes } from '../types/invoiceAddWrapper'
-import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 
 const HeaderDocument = defineAsyncComponent(() => import('./InvoiceInformation/HeaderDocument.vue'))
 const InvoiceCalculation = defineAsyncComponent(() => import('./InvoiceInformation/InvoiceCalculation.vue'))
@@ -22,7 +21,6 @@ const InvoicePoGr = defineAsyncComponent(() => import('./InvoiceInformation/Invo
 const InvoiceItem = defineAsyncComponent(() => import('./InvoiceInformation/InvoiceItem.vue'))
 const AdditionalCost = defineAsyncComponent(() => import('./InvoiceInformation/AdditionalCost.vue'))
 
-const invoiceMasterApi = useInvoiceMasterDataStore()
 const form = inject<formTypes>('form')
 const route = useRoute()
 const typeForm = ref<string>('')
@@ -37,7 +35,6 @@ const checkNonPo = () => {
 
 onMounted(() => {
   typeForm.value = route.query.type?.toString().toLowerCase() || 'po'
-  invoiceMasterApi.getActivity(form?.companyCode || '')
 })
 </script>
 

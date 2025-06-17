@@ -12,6 +12,8 @@ export interface itemsPoGrType {
   materialDescription: string
   currency: string
   conditionType: string
+  conditionTypeDesc: string
+  qcStatus: string
   postingDate: string
   enteredOn: string
   purchasingOrg: string
@@ -37,6 +39,8 @@ export interface PoGrSearchTypes {
   materialDescription: string
   currency: string
   conditionType: string
+  conditionTypeDesc: string
+  qcStatus: string
   postingDate: string
   enteredOn: string
   purchasingOrg: string

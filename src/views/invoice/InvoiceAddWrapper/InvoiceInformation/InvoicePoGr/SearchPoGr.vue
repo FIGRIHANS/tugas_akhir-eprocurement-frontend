@@ -32,11 +32,11 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-if="listPoGrItem.length === 0">
+              <tr v-if="listItem.length === 0">
                 <td colspan="11" class="text-center text-[13px]">No Data Available</td>
               </tr>
               <template v-else>
-                <tr v-for="(item, index) in listPoGrItem" :key="index" class="pogr__field-items">
+                <tr v-for="(item, index) in listItem" :key="index" class="pogr__field-items">
                   <td>
                     <input v-model="item.isActive" class="checkbox checkbox-sm" data-datatable-row-check="true" type="checkbox"/>
                   </td>
@@ -50,6 +50,8 @@
                   <td>{{ item.uom }}</td>
                   <td>{{ item.materialDescription }}</td>
                   <td>{{ item.conditionType }}</td>
+                  <td>{{ item.conditionTypeDesc }}</td>
+                  <td>{{ item.qcStatus }}</td>
                   <td>{{ item.taxCode }}</td>
                   <td>{{ item.department }}</td>
                 </tr>
@@ -71,24 +73,21 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { KTModal } from '@/metronic/core'
 import { searchDefaultColumn, searchInvoiceDpColumn, searchPoPibColumn } from '@/static/invoicePoGr'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
-import type { PoGrSearchTypes } from '../../../types/invoicePoGr'
 import { useFormatIdr } from '@/composables/currency'
 
 const props = defineProps<{
   isInvoiceDp?: string
   isPoPib?: boolean
-  search: string
 }>()
 
 const emits = defineEmits(['setItem'])
 
 const invoiceApi = useInvoiceSubmissionStore()
 const listColumn = ref<string[]>([])
-const listPoGrItem = ref<PoGrSearchTypes[]>([])
 const selectAll = ref<boolean>(false)
 
 const listItem = computed(() => {
@@ -99,9 +98,6 @@ const listItem = computed(() => {
 })
 
 const resetActive = () => {
-  for (const item of listPoGrItem.value) {
-    item.isActive = false
-  }
   for (const item of listItem.value) {
     item.isActive = false
   }
@@ -137,27 +133,11 @@ watch(
 )
 
 watch(
-  () => props.search,
-  () => {
-    listPoGrItem.value = listItem.value.filter((item) => item.poNo.toLowerCase() === props.search.toLowerCase())
-  },
-  {
-    immediate: true
-  }
-)
-
-watch(
   () => selectAll.value,
   () => {
-    for (const item of listPoGrItem.value) {
+    for (const item of listItem.value) {
       item.isActive = !item.isActive
     }
   }
 )
-
-onMounted(() => {
-  invoiceApi.getPoGr().then(() => {
-    listPoGrItem.value = listItem.value
-  })
-})
 </script>

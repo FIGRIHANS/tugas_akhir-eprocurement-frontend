@@ -42,6 +42,7 @@ import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterDat
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 import moment from 'moment'
 import { isEmpty } from 'lodash'
+import type { documentDetailTypes as documentDetailTypesStore } from '@/stores/views/invoice/types/verification'
 
 const InvoiceData = defineAsyncComponent(() => import('./InvoiceDetailEdit/InvoiceData.vue'))
 const InvoiceInformation = defineAsyncComponent(() => import('./InvoiceDetailEdit/InvoiceInformation.vue'))
@@ -126,19 +127,32 @@ const checkInvoiceData = () => {
 }
 
 const checkInvoiceInformation = () => {
+  let status = true
+  form.value.invoiceDateError = useCheckEmpty(form.value.invoiceDate).isError
   form.value.postingDateError = useCheckEmpty(form.value.postingDate).isError
   form.value.estimatedPaymentDateError = useCheckEmpty(form.value.estimatedPaymentDate).isError
+  form.value.documentNoError = useCheckEmpty(form.value.documentNo).isError
   form.value.paymentMethodError = useCheckEmpty(form.value.paymentMethodCode).isError
   form.value.transferNewsError = useCheckEmpty(form.value.transferNews).isError
+  form.value.notesError = useCheckEmpty(form.value.notes).isError
 
   if (
     form.value.invoiceDateError ||
+    form.value.postingDateError ||
     form.value.estimatedPaymentDateError ||
+    form.value.documentNoError ||
     form.value.paymentMethodError ||
-    form.value.assignmentError ||
-    form.value.transferNewsError
-  ) return false
-  else return true
+    form.value.transferNewsError ||
+    form.value.notesError
+  ) status = false
+
+  for (const item of form.value.additionalCosts) {
+    if (!item.activityExpense || !item.itemAmount || !item.debitCredit) {
+      status = false
+    }
+  }
+
+  return status
 }
 
 const setTab = (value: string) => {
@@ -214,6 +228,89 @@ const goNext = () => {
   }
 }
 
+const mapDataEditPoGr = () => {
+  const result = [] as itemsPoGrType[]
+  if (verificationApi.detailInvoiceEdit) {
+    for (const item of verificationApi.detailInvoiceEdit.invoicePoGr) {
+      result.push({
+        ...item,
+        isEdit: false
+      })
+    }
+  }
+  return result
+}
+
+const mapDataEditAdditional = () => {
+  const result = [] as itemsCostType[]
+  if (verificationApi.detailInvoiceEdit) {
+    for (const item of verificationApi.detailInvoiceEdit.additionalCosts) {
+      result.push({
+        ...item,
+        isEdit: false
+      })
+    }
+  }
+  return result
+}
+
+const mapDocument = (data: documentDetailTypesStore | null) => {
+  if (!data) return null
+  return {
+    name: data.documentName,
+    path: data.documentUrl,
+    fileSize: data.documentSize ? data.documentSize.toString() : '0'
+  }
+}
+
+const setDataEdit = () => {
+  const data = verificationApi.detailInvoiceEdit
+  form.value = {
+    invoiceUId: data?.invoiceUId || '',
+    invoiceTypeCode: data?.invoiceTypeCode || 0,
+    invoiceTypeName: data?.invoiceTypeName || '',
+    invoiceDPCode: data?.invoiceDPCode || 0,
+    invoiceDPName: data?.invoiceDPName || '',
+    companyCode: data?.companyCode || '',
+    companyName: data?.companyName || '',
+    invoiceNo: data?.invoiceNo || '',
+    documentNo: data?.documentNo || '',
+    invoiceDate: data?.invoiceDate || '',
+    taxNo: data?.taxNo || '',
+    currCode: data?.currCode || '',
+    notes: data?.notes || '',
+    statusCode: data?.statusCode || 0,
+    statusName: data?.statusName || '',
+    postingDate: data?.postingDate || '',
+    invoicingParty: data?.invoicingParty || '',
+    estimatedPaymentDate: data?.estimatedPaymentDate || '',
+    paymentMethodCode: data?.paymentMethodCode || '',
+    paymentMethodName: data?.paymentMethodName || '',
+    assigment: data?.assigment || '',
+    transferNews: data?.transferNews || '',
+    npwpReporting: data?.npwpReporting || '',
+    bankKey: data?.bankKey || '',
+    bankName: data?.bankName || '',
+    beneficiaryName: data?.beneficiaryName || '',
+    bankAccountNo: data?.bankAccountNo || '',
+    vendorId: data?.vendorId || 0,
+    vendorName: data?.vendorName || '',
+    vendorAddress: data?.vendorAddress || '',
+    subtotal: data?.subtotal || 0,
+    vatAmount: data?.vatAmount || 0,
+    whtAmount: data?.whtAmount || 0,
+    additionalCost: data?.additionalCost || 0,
+    totalGrossAmount: data?.totalGrossAmount || 0,
+    totalNetAmount: data?.totalNetAmount || 0,
+    invoicePoGr: mapDataEditPoGr(),
+    additionalCosts: mapDataEditAdditional(),
+    invoiceDocument: mapDocument(data?.invoiceDocument || null),
+    tax: mapDocument(data?.tax || null),
+    referenceDocument: mapDocument(data?.referenceDocument || null),
+    otherDocument: mapDocument(data?.otherDocument || null)
+  }
+}
+
 const setDataDefault = () => {
   const data = detailInvoice.value
   const resultPoGr: itemsPoGrType[] = []
@@ -241,7 +338,7 @@ const setDataDefault = () => {
     const data = {
       name: item.documentName,
       path: item.documentUrl,
-      fileSize: item.documentSize.toString()
+      fileSize: item.documentSize ? item.documentSize.toString() : '0'
     } as documentDetailTypes
     switch (item.documentType) {
       case 1:
@@ -317,7 +414,11 @@ onMounted(() => {
     activeStep.value = 'Approval'
   }
   verificationApi.getInvoiceDetail(route.query.id?.toString() || '').then(() => {
-    setDataDefault()
+    if (verificationApi.isFromEdit) {
+      setDataEdit()
+    } else {
+      setDataDefault()
+    }
   })
 })
 

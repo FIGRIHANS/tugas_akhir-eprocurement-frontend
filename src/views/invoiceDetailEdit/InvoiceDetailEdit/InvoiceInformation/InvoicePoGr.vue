@@ -38,6 +38,8 @@
             <td v-if="!checkInvoiceDp()">{{ item.uom }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.itemText }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.conditionType }}</td>
+            <td v-if="!checkInvoiceDp()">{{ item.conditionTypeDesc }}</td>
+            <td v-if="!checkInvoiceDp()">{{ item.qcStatus }}</td>
             <td>
               <span v-if="!item.isEdit">{{ item.taxCode }}</span>
               <select v-else v-model="formEdit.taxCode" class="select" placeholder="">

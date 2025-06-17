@@ -14,8 +14,8 @@
           </thead>
           <tbody>
             <tr v-for="(item, index) in list" :key="index">
-              <td class="flex justify-between items-center gap-[8px]">
-                <button class="btn btn-primary btn-icon" @click="openDetailInvoice(item.invoiceUId)">
+              <td class="flex justify-between items-center gap-[24px]">
+                <button class="btn btn-outline btn-primary btn-icon" @click="openDetailInvoice(item.invoiceUId)">
                   <i class="ki-filled ki-eye"></i>
                 </button>
                 <button class="btn btn-outline btn-primary btn-icon" @click="openDetailVerification(item.invoiceUId)">
@@ -61,7 +61,7 @@
         </div>
       </div>
       <div class="flex items-center justify-between mt-[24px]">
-      <p class="m-0 text-sm">Tampilkan {{ pageSize * currentPage > verifList.length ? verifList.length : pageSize * currentPage }} data dari total data {{ verifList.length }}</p>
+        <p class="m-0 text-sm">Tampilkan {{ pageSize * currentPage > verifList.length ? verifList.length : pageSize * currentPage }} data dari total data {{ verifList.length }}</p>
         <LPagination :totalItems="verifList.length" :pageSize="pageSize" :currentPage="currentPage" @pageChange="setPage" />
       </div>
     </div>
@@ -175,7 +175,7 @@ const setList = () => {
 const callList = () => {
   list.value = []
   verificationApi.getListPo({
-    statusCode: filterForm.status,
+    statusCode: filterForm.status || 1,
     companyCode: filterForm.companyCode,
     invoiceTypeCode: Number(filterForm.invoiceType),
     invoiceDate: filterForm.date,
@@ -186,6 +186,7 @@ const callList = () => {
 }
 
 const setDataFilter = (data: filterListTypes) => {
+  filterForm.status = data.status
   filterForm.date = data.date
   filterForm.companyCode = data.companyCode
   filterForm.invoiceType = data.invoiceType

@@ -9,7 +9,7 @@
       </div>
       <div class="modal-body p-[0px] pb-[16px]">
         <div class="border border-gray-200 text-center text-lg font-semibold text-gray-700">
-          No Invoice : INV0000123
+          No Invoice : {{ props.detailId }}
         </div>
         <table class="table align-middle text-gray-700 font-medium text-sm">
           <thead>
@@ -41,6 +41,10 @@ import { ref, computed, onMounted } from 'vue'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { KTModal } from '@/metronic/core'
 import moment from 'moment'
+
+const props = defineProps<{
+  detailId: string
+}>()
 
 const emits = defineEmits(['loadDetail', 'setClearId'])
 
