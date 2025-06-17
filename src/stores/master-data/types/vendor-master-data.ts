@@ -143,6 +143,7 @@ export type VendorRegistrationPayloadType = {
     documentNo: string
   })[]
   bankDetailDto: {
+    bankCountryCode: string
     bankKey: string
     bankName: string
     branch: string

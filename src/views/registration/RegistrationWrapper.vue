@@ -243,7 +243,7 @@ const checkFieldNotEmpty = () => {
       }
 
       if (registrationVendorStore.paymentDetailFlagging.bankNotRegistered) {
-        fields.payment.push('bankKey', 'countryId', 'bankName', 'branch', 'swiftCode')
+        fields.payment.push('bankKey', 'bankCountryCode', 'bankName', 'branch', 'swiftCode')
       } else {
         fields.payment.push('bankId')
       }
@@ -271,7 +271,7 @@ const checkFieldNotEmpty = () => {
           ...registrationVendorStore.paymentDetail,
           bankKey: '',
           bankKeyError: false,
-          countryIdError: false,
+          bankCountryCodeError: false,
           bankName: '',
           bankNameError: false,
           branch: '',
@@ -343,6 +343,7 @@ const submitData = async () => {
         expiredDate: item.expiredDate === '' ? null : formatDatePayload(item.expiredDate),
       })),
       bankDetailDto: {
+        bankCountryCode: isBankNotRegistered.value ? paymentDetail.value.bankCountryCode : '',
         bankKey: isBankNotRegistered.value ? paymentDetail.value.bankKey : '',
         bankName: isBankNotRegistered.value ? paymentDetail.value.bankName : '',
         branch: isBankNotRegistered.value ? paymentDetail.value.branch : '',
@@ -358,7 +359,7 @@ const submitData = async () => {
         urlAccountDifferences: paymentDetail.value.urlAccountDifferences,
         urlFirstPage: paymentDetail.value.urlFirstPage,
         bankAddress: paymentDetail.value.bankAddress,
-        countryId: paymentDetail.value.countryId,
+        countryId: 'ID',
       },
     }
 
