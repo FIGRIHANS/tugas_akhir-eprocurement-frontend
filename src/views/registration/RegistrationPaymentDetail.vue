@@ -75,7 +75,6 @@
               :required="!paymentDetailFlagging.bankNotRegistered"
               :disabled="paymentDetailFlagging.bankNotRegistered"
               :error="paymentDetail.bankIdError"
-              @update:model-value="(val) => checkBankCountry(String(val))"
             />
 
             <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5">
@@ -98,7 +97,7 @@
           />
           <UiSelect
             v-if="paymentDetailFlagging.bankNotRegistered"
-            v-model="paymentDetail.countryId"
+            v-model="paymentDetail.bankCountryCode"
             label="Bank Country"
             placeholder="Pilih"
             row
@@ -106,7 +105,7 @@
             valueKey="countryCode"
             textKey="countryName"
             required
-            :error="paymentDetail.countryIdError"
+            :error="paymentDetail.bankCountryCodeError"
           />
           <UiInput
             v-if="paymentDetailFlagging.bankNotRegistered"
@@ -232,12 +231,6 @@ const uploadFile = async (file: File, type: 'different account' | 'first page') 
   } catch (error) {
     console.error(error)
   }
-}
-
-const checkBankCountry = (value: string) => {
-  registrationVendorStore.paymentDetail.countryId = bankList.value.find(
-    (item) => item.bankKey === value,
-  )!.bankCountryCode
 }
 
 onBeforeMount(() => {})

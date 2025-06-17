@@ -85,7 +85,7 @@ export const useRegistrationVendorStore = defineStore('registrationVendor', () =
     currencyId: '',
     bankId: '',
     bankKey: '',
-    countryId: '',
+    bankCountryCode: '',
     bankName: '',
     branch: '',
     swiftCode: '',
