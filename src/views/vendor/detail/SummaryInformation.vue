@@ -1,36 +1,42 @@
-<script setup lang="ts">
-import UiModal from '@/components/modal/UiModal.vue'
+<script lang="ts" setup>
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
-import VendorPaymentInformationCard from '@/components/vendor/vendorPaymentInformationCard/VendorPaymentInformationCard.vue'
-import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import successImg from '@/assets/success.svg'
+import AdministrativeCard from '@/components/vendor/cards/AdministrativeCard.vue'
+import LicenseCard from '@/components/vendor/cards/LicenseCard.vue'
+import PaymentCard from '@/components/vendor/cards/PaymentCard.vue'
+import { computed, onMounted, ref } from 'vue'
 import { useVendorStore, useVerificationDetailStore } from '@/stores/vendor/vendor'
-import axios from 'axios'
 import { useLoginStore } from '@/stores/views/login'
+import axios from 'axios'
+import successImg from '@/assets/success.svg'
+import UiModal from '@/components/modal/UiModal.vue'
+
+const route = useRoute()
+const router = useRouter()
 
 const vendorStore = useVendorStore()
-const vendorVerifStore = useVerificationDetailStore()
 const userStore = useLoginStore()
+const verifStore = useVerificationDetailStore()
 
-const router = useRouter()
-const route = useRoute()
-const modalReject = ref(false)
-const modalRejectSuccess = ref(false)
-const modalVerify = ref(false)
-const modalVerifySuccess = ref(false)
-const loading = ref(false)
-const error = ref('')
+const modalReject = ref<boolean>(false)
+const modalRejectSuccess = ref<boolean>(false)
+const modalVerify = ref<boolean>(false)
+const modalVerifySuccess = ref<boolean>(false)
 
-const reason = ref('')
-const notes = ref('')
+const reason = ref<string>('')
+const notes = ref<string>('')
 const inputError = ref<string[]>([])
 
-const isDisabled = computed(() =>
-  vendorVerifStore.data
-    ? vendorVerifStore.data.some((item) => item.verificationType === 'Payment approval')
-    : false,
+const loading = ref<boolean>(false)
+const error = ref<string | null>(null)
+
+const isVerified = computed(() =>
+  verifStore.data.some(
+    (data) =>
+      data.position === userStore.userData?.profile.positionName &&
+      data.verificatorName === userStore.userData.profile.employeeName,
+  ),
 )
 
 const handleVerify = async () => {
@@ -40,15 +46,14 @@ const handleVerify = async () => {
   try {
     await vendorStore.verifyLegal({
       vendorId: Number(route.params.id),
-      dataCategoryId: 3,
       isVerified: true,
       verifiedNote: notes.value,
       isReject: false,
       rejectedNote: '',
-      createdBy: userStore.userData?.profile.employeeName,
       position: userStore.userData?.profile.positionName,
       verificatorName: userStore.userData?.profile.employeeName,
     })
+
     modalVerify.value = false
     modalVerifySuccess.value = true
   } catch (err) {
@@ -63,6 +68,8 @@ const handleVerify = async () => {
 }
 
 const handleReject = async () => {
+  // call api here
+
   if (!reason.value) {
     inputError.value.push('reason')
     return
@@ -74,7 +81,6 @@ const handleReject = async () => {
   try {
     await vendorStore.verifyLegal({
       vendorId: Number(route.params.id),
-      dataCategoryId: 3,
       isVerified: false,
       verifiedNote: '',
       isReject: true,
@@ -97,42 +103,52 @@ const handleReject = async () => {
   }
 }
 
-const handleModalClose = () => {
-  vendorVerifStore.getData(Number(route.params.id))
-}
+onMounted(() => {
+  verifStore.getData(Number(route.params.id))
+})
 
-const handleRejectSuccess = () => {
-  router.replace({ name: 'vendor-list' })
-}
+console.log(verifStore.data)
 </script>
-
 <template>
   <div class="space-y-5">
-    <VendorPaymentInformationCard />
-    <div class="flex gap-3">
+    <!-- Card administrasi -->
+    <AdministrativeCard />
+
+    <!-- card data izin usaha -->
+    <LicenseCard />
+
+    <!-- card payment information -->
+    <PaymentCard />
+
+    <div class="flex justify-end space-x-3">
       <UiButton :outline="true" @click="router.go(-1)">
         <UiIcon name="black-left" variant="duotone" />
         <span> Back </span>
       </UiButton>
 
-      <UiButton
-        :outline="true"
-        variant="danger"
-        class="ml-auto"
-        @click="modalReject = true"
-        :disabled="isDisabled"
+      <div
+        v-if="route.name === 'vendor-verification-detail'"
+        class="space-x-3 flex-1 flex justify-end"
       >
-        <UiIcon name="cross-circle" variant="duotone" />
-        <span> Reject </span>
-      </UiButton>
-      <UiButton :disabled="isDisabled" @click="modalVerify = true">
-        <UiIcon name="check-squared" variant="duotone" />
-        <span> Verify </span>
-      </UiButton>
+        <UiButton
+          :outline="true"
+          variant="danger"
+          class="ml-auto"
+          @click="modalReject = true"
+          :disabled="isVerified"
+        >
+          <UiIcon name="cross-circle" variant="duotone" />
+          <span> Reject </span>
+        </UiButton>
+        <UiButton @click="modalVerify = true" :disabled="isVerified">
+          <UiIcon name="check-squared" variant="duotone" />
+          <span> Verify </span>
+        </UiButton>
+      </div>
     </div>
   </div>
 
-  <UiModal v-model="modalReject" title="Reject Data Informasi Pembayaran" size="sm">
+  <UiModal v-if="modalReject" v-model="modalReject" title="Reject Data Administrasi" size="sm">
     <form @submit.prevent="handleReject">
       <div class="relative mb-3">
         <label
@@ -143,10 +159,12 @@ const handleRejectSuccess = () => {
         <textarea id="reason" class="textarea" rows="6" v-model="reason" required></textarea>
       </div>
       <div v-if="inputError.includes('reason')" class="text-xs text-danger">Reason is required</div>
+
       <div class="my-3 text-danger text-xs italic">
         * Rejecting this section will automatically reject all other submitted data from the vendor.
         Do you wish to proceed?
       </div>
+
       <div class="flex gap-3">
         <UiButton
           class="flex-1 justify-center"
@@ -158,7 +176,7 @@ const handleRejectSuccess = () => {
           <span>Cancel</span>
         </UiButton>
         <UiButton class="flex-1 justify-center" variant="danger" :disabled="loading">
-          <span v-if="loading">Progress</span>
+          <span v-if="loading"> Progress </span>
           <template v-else>
             <UiIcon name="cross-circle" variant="duotone" />
             <span>Reject</span>
@@ -168,12 +186,7 @@ const handleRejectSuccess = () => {
     </form>
   </UiModal>
 
-  <UiModal
-    v-if="modalVerify"
-    v-model="modalVerify"
-    title="Verify Data Informasi Pembayaran"
-    size="sm"
-  >
+  <UiModal v-if="modalVerify" v-model="modalVerify" title="Verify Data Administrasi" size="sm">
     <form @submit.prevent="handleVerify">
       <div class="relative mb-3">
         <label
@@ -194,7 +207,7 @@ const handleRejectSuccess = () => {
           <span>Cancel</span>
         </UiButton>
         <UiButton class="flex-1 justify-center" variant="primary" :disabled="loading">
-          <span v-if="loading">Progress</span>
+          <span v-if="loading"> Progress </span>
           <template v-else>
             <UiIcon name="check-circle" variant="duotone" />
             <span>Verify</span>
@@ -204,21 +217,27 @@ const handleRejectSuccess = () => {
     </form>
   </UiModal>
 
-  <UiModal v-model="modalRejectSuccess" size="sm" @update:model-value="handleRejectSuccess">
+  <UiModal
+    v-if="modalRejectSuccess"
+    v-model="modalRejectSuccess"
+    size="sm"
+    @update:model-value="$router.go(-1)"
+  >
     <img :src="successImg" alt="success" class="mx-auto mb-3" />
-    <h3 class="font-medium text-lg text-gray-800 text-center">Data Informasi Pembayran Rejected</h3>
-    <p class="text-gray-600 text-center mb-3">
-      Data Informasi Pembayaran has been successfully Rejected
-    </p>
+    <h3 class="font-medium text-lg text-gray-800 text-center">Vendor Data Rejected</h3>
+    <p class="text-gray-600 text-center mb-3">Vendor Data has been successfully rejected.</p>
   </UiModal>
 
-  <UiModal v-model="modalVerifySuccess" size="sm" @update:model-value="handleModalClose">
+  <UiModal
+    v-if="modalVerifySuccess"
+    v-model="modalVerifySuccess"
+    size="sm"
+    @update:model-value="$router.go(-1)"
+  >
     <img :src="successImg" alt="success" class="mx-auto mb-3" />
-    <h3 class="font-medium text-lg text-gray-800 text-center">
-      Data Informasi Pembayaran verified
-    </h3>
+    <h3 class="font-medium text-lg text-gray-800 text-center">Vendor Verification Completed</h3>
     <p class="text-gray-600 text-center mb-3">
-      Data Informasi Pembayaran has been successfully verified
+      All vendor data has been successfully verified and is ready for approval.
     </p>
   </UiModal>
 </template>

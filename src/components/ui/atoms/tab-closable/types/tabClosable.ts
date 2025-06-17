@@ -1,5 +1,4 @@
 export interface ITabClosableProps {
-  openedTabs: ITabClosable[]
   tabs: ITabClosable[]
 }
 export interface ITabClosable {

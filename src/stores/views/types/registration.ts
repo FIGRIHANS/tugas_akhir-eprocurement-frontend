@@ -112,6 +112,8 @@ export type PaymentDetailType = {
   bankIdError?: boolean
   bankKey: string
   bankKeyError?: boolean
+  countryId: string
+  countryIdError?: boolean
   bankName: string
   bankNameError?: boolean
   branch: string

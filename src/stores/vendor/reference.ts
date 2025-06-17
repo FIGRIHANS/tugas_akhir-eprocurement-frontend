@@ -3,9 +3,10 @@ import { ref } from 'vue'
 import type { IReferenceList } from './types/reference'
 import vendorAPI from '@/core/utils/vendorApi'
 import type { ApiResponse } from '@/core/type/api'
+import axios from 'axios'
 
 const getReference = async (
-  type: 'BLACKLIST' | 'APPROVAL_STATUS' | 'APPROVAL_TYPE' | 'BLACKLIST_TYPE',
+  type: 'BLACKLIST' | 'APPROVAL_STATUS' | 'APPROVAL_TYPE' | 'BLACKLIST_TYPE' | 'VERIFY_STATUS',
 ) => {
   const response: ApiResponse<IReferenceList[]> = await vendorAPI.get(
     '/public/vendor/registration/reference',
@@ -13,6 +14,29 @@ const getReference = async (
   )
   return response.data.result.content
 }
+
+export const useVerificationStatus = defineStore('verificationStatus', () => {
+  const loading = ref<boolean>(false)
+  const error = ref<string | null>(null)
+  const data = ref<IReferenceList[]>([])
+
+  const get = async () => {
+    loading.value = true
+    error.value = null
+
+    try {
+      data.value = await getReference('VERIFY_STATUS')
+    } catch (err) {
+      if (err instanceof Error) {
+        if (axios.isAxiosError(err)) {
+          error.value = err.response?.data.result.message || 'Failed to get data'
+        }
+      }
+    }
+  }
+
+  return { data, get }
+})
 
 export const useApprovalStatusStore = defineStore('approvalStatus', () => {
   const loading = ref(false)

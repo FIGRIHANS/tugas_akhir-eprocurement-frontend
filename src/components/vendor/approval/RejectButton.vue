@@ -13,8 +13,8 @@ const props = defineProps<{ id: string | number; nama: string }>()
 const approvalStore = useApprovalStore()
 const userStore = useLoginStore()
 
-const route = useRoute()
 const router = useRouter()
+const route = useRoute()
 
 const modalReject = ref(false)
 const modalSuccess = ref(false)
@@ -34,16 +34,12 @@ const handleReject = async () => {
   error.value = null
 
   try {
-    const response = await approvalStore.rejectApproval({
-      vendorId: Number(props.id),
-      reason: reason.value,
-      employeeId: (userStore.userData?.profile.employeeId.toString() as string) || '',
+    await approvalStore.approve({
+      vendorId: props.id as string,
+      approvalStatus: 2,
+      approvalBy: userStore.userData?.profile.employeeId.toString() as string,
+      approvalNote: reason.value,
     })
-
-    if (response.result.isError) {
-      error.value = response.result.message
-      return
-    }
 
     modalReject.value = false
     modalSuccess.value = true
@@ -59,7 +55,8 @@ const handleReject = async () => {
 }
 
 const handleSuccess = () => {
-  router.replace({ name: route.name })
+  approvalStore.getApproval({})
+  router.replace(route.fullPath)
 }
 </script>
 <template>
@@ -93,9 +90,12 @@ const handleSuccess = () => {
           <UiIcon name="black-left-line" variant="duotone" />
           <span>Cancel</span>
         </UiButton>
-        <UiButton class="flex-1 justify-center" variant="danger">
-          <UiIcon name="cross-circle" variant="duotone" />
-          <span>Reject</span>
+        <UiButton class="flex-1 justify-center" variant="danger" :disabled="loading">
+          <span v-if="loading">Progress</span>
+          <template v-else>
+            <UiIcon name="cross-circle" variant="duotone" />
+            <span>Reject</span>
+          </template>
         </UiButton>
       </div>
     </form>

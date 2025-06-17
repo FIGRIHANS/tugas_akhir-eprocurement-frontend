@@ -16,12 +16,14 @@ import { useApprovalStore } from '@/stores/vendor/approval'
 import UiLoading from '@/components/UiLoading.vue'
 import moment from 'moment'
 import VendorApprovalFilters from '@/components/vendor/filterButton/VendorApprovalFilters.vue'
+import SAPButton from '@/components/vendor/approval/SAPButton.vue'
 
 const route = useRoute()
 const router = useRouter()
+
 const approval = useApprovalStore()
 
-const search = ref('')
+const search = ref<string>('')
 
 const handlePageChange = (page: number) => {
   const query = { ...route.query, page }
@@ -59,32 +61,28 @@ watch(
 </script>
 <template>
   <BreadcrumbView
-    :routes="[{ name: 'Vendor Approval', to: '/vendor-approval' }]"
-    title="Approval Verifikasi Vendor"
+    :routes="[{ name: 'Vendor Approval', to: '/vendor/approval' }]"
+    title="Vendor Approval"
   />
   <div class="card">
-    <div class="card-header">
+    <div class="card-header p-6">
       <UiInputSearch v-model="search" placeholder="Search vendor" />
       <div class="flex gap-3">
         <FilterDropdownApproval />
-        <UiButton :outline="true">
-          <UiIcon name="printer" variant="duotone" />
-          <span>Export Data Vendor</span>
-        </UiButton>
       </div>
     </div>
-    <div class="card-body scrollable-x-auto">
+    <div class="card-body scrollable-x-auto p-6">
       <VendorApprovalFilters />
       <table class="table align-middle">
         <thead>
           <tr class="text-nowrap">
             <th>Action</th>
             <th>Company Name</th>
+            <th>Status</th>
             <th>Vendor Address</th>
             <th>Vendor Category</th>
             <th>Activation Date</th>
             <th>Approval Date Sent</th>
-            <th>Status</th>
             <th>Approval Type</th>
           </tr>
         </thead>
@@ -116,26 +114,42 @@ watch(
           >
             <td>
               <div class="flex gap-5">
-                <div v-if="item.approvalStatus === '1'">
-                  <UiButton>
-                    <UiIcon name="paper-plane" variant="duotone" />
-                    <span class="text-nowrap">Send to SAP</span>
-                  </UiButton>
+                <div v-if="Number(item.approvalStatus) === 2" class="text-gray-600">
+                  No Action Available
                 </div>
                 <template v-else>
-                  <ApproveButton :id="item.vendorId" :nama="item.vendorName" />
-                  <RejectButton :id="item.vendorId" :nama="item.vendorName" />
+                  <div v-if="Number(item.approvalStatus) === 1">
+                    <SAPButton />
+                  </div>
+                  <template v-if="!Number(item.approvalStatus)">
+                    <ApproveButton :id="item.vendorId" :nama="item.vendorName" />
+                    <RejectButton :id="item.vendorId" :nama="item.vendorName" />
+                  </template>
+                  <ApprovalVerifikasi :id="item.vendorId" :nama="item.vendorName" />
+                  <RouterLink :to="`/vendor/approval/${item.vendorId}`">
+                    <UiButton size="sm" :icon="true" variant="primary" :outline="true">
+                      <UiIcon name="eye" variant="duotone" />
+                    </UiButton>
+                  </RouterLink>
                 </template>
-                <ApprovalVerifikasi :id="item.vendorId" :nama="item.vendorName" />
-                <RouterLink :to="`/vendor-approval/${item.vendorId}/detail`">
-                  <UiButton size="sm" :icon="true" variant="primary" :outline="true">
-                    <UiIcon name="eye" variant="duotone" />
-                  </UiButton>
-                </RouterLink>
               </div>
             </td>
             <td class="text-nowrap">{{ item.vendorName }}</td>
-            <td class="text-nowrap">{{ item.addressCompanyInfo }}</td>
+            <td class="text-nowrap">
+              <span
+                class="badge badge-outline"
+                :class="{
+                  'badge-success': Number(item.approvalStatus) === 1,
+                  'badge-danger': Number(item.approvalStatus) === 2,
+                  'badge-primary': Number(item.approvalStatus) === 3,
+                }"
+              >
+                {{ item.approvalStatusName }}
+              </span>
+            </td>
+            <td>
+              <div class="w-[500px]">{{ item.addressCompanyInfo }}</div>
+            </td>
             <td class="text-nowrap">{{ item.companyCategoryName }}</td>
             <td class="text-nowrap">
               {{ item.activedUTCDate ? moment(item.activedUTCDate).format('LL') : '-' }}
@@ -143,14 +157,15 @@ watch(
             <td class="text-nowrap">
               {{ item.sendApprovalDate ? moment(item.sendApprovalDate).format('LL') : '-' }}
             </td>
-            <td class="text-nowrap">{{ item.approvalStatusName }}</td>
             <td class="text-nowrap">{{ item.approvalTypeName }}</td>
           </tr>
         </tbody>
       </table>
     </div>
     <div class="card-footer">
-      <div>Showing {{ approval.data.pageSize }} of {{ approval.data.total }} entries</div>
+      <div class="text-sm text-gray-800">
+        Showing {{ approval.data.pageSize }} of {{ approval.data.total }} entries
+      </div>
       <LPagination
         :current-page="approval.data.page"
         :page-size="approval.data.pageSize"

@@ -40,7 +40,7 @@ const handleSubmit = async () => {
     await vendorStore.deactiveVendor({
       vendorId: Number(props.id),
       reason: reason.value,
-      employeeId: (userStore.userData?.profile.employeeId.toString() as string) || '',
+      employeeId: userStore.userData?.profile.employeeId.toString() as string,
     })
     isChecked.value = false
     modalDeactive.value = false
@@ -63,7 +63,7 @@ const handleSubmitActivate = async () => {
     const response = await vendorStore.activateVendor({
       vendorId: Number(props.id),
       reason: '',
-      employeeId: (userStore.userData?.profile.employeeId.toString() as string) || '',
+      employeeId: userStore.userData?.profile.employeeId.toString() as string,
     })
 
     if (response.result.isError) {
