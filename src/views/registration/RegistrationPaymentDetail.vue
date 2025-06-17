@@ -105,8 +105,7 @@
             :options="countryList"
             valueKey="countryCode"
             textKey="countryName"
-            :required="!paymentDetailFlagging.bankNotRegistered"
-            :disabled="paymentDetailFlagging.bankNotRegistered"
+            required
             :error="paymentDetail.countryIdError"
           />
           <UiInput
