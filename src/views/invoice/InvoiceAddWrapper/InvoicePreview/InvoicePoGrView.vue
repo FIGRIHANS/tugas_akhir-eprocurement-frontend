@@ -25,14 +25,14 @@
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentNo }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentItem }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ moment(item.grDocumentDate).format('DD MMMM YYYY') }}</td>
-            <td v-if="!checkInvoiceDp()">{{ item.taxCode }}</td>
             <td v-if="!checkInvoiceDp()">{{ useFormatIdr(item.itemAmount) }}</td>
             <td v-if="!checkInvoiceDp()">{{ useFormatIdr(item.quantity) }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.uom }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.materialDescription }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.conditionType }}</td>
-            <!-- <td v-if="checkInvoiceDp()">{{ item.amountInvoice }}</td>
-            <td v-if="checkInvoiceDp()">{{ item.vatAmount }}</td> -->
+            <td>{{ item.conditionTypeDesc || '-' }}</td>
+            <td>{{ item.qcStatus || '-' }}</td>
+            <td>{{ item.taxCode || '-' }}</td>
             <td>{{ item.whtType || '-' }}</td>
             <td>{{ item.whtCode || '-' }}</td>
             <td>{{ useFormatIdr(item.whtBaseAmount?.toString() || '') || 0 }}</td>

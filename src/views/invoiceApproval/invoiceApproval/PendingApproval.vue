@@ -15,7 +15,7 @@
           <tbody>
             <tr v-for="(item, index) in list" :key="index">
               <td class="max-w-[400px] flex justify-between items-center gap-[24px]">
-                <button v-if="item.statusCode === 4" class="btn btn-primary whitespace-nowrap" @click="openSuccesSap">
+                <button v-if="item.statusCode === 4" class="btn btn-primary whitespace-nowrap" :disabled="isLoadingSap" @click="sendToSap(item.invoiceUId)">
                   <i class="ki-duotone ki-paper-plane"></i>
                   Send to SAP
                 </button>
@@ -56,9 +56,8 @@
       </div>
     </div>
     <SuccessSendToSap />
-    <ModalSuccessApproval />
+    <FailedSendToSap />
     <ModalDetailApproval :detailId="viewDetailId" @loadDetail="loadData" @setClearId="viewDetailId = ''" />
-    <!-- <ModalReturnInvoice /> -->
   </div>
 </template>
 
@@ -75,13 +74,10 @@ import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { useFormatIdr } from '@/composables/currency'
 import moment from 'moment'
 
-// const ModalConfirmApproval = defineAsyncComponent(() => import('./pendingApproval/ConfirmationApproval.vue'))
-const ModalSuccessApproval = defineAsyncComponent(() => import('./pendingApproval/SuccessApproval.vue'))
 const ModalDetailApproval = defineAsyncComponent(() => import('./DetailApproval.vue'))
-// const ModalRejectApproval = defineAsyncComponent(() => import('./pendingApproval/RejectApproval.vue'))
-// const ModalReturnInvoice = defineAsyncComponent(() => import('./pendingApproval/ReturnInvoice.vue'))
 const FilterList = defineAsyncComponent(() => import('./FilterList.vue'))
 const SuccessSendToSap = defineAsyncComponent(() => import('./pendingApproval/SuccessSendToSap.vue'))
+const FailedSendToSap = defineAsyncComponent(() => import('./pendingApproval/FailedSendToSap.vue'))
 
 const invoiceApi = useInvoiceSubmissionStore()
 const verificationApi = useInvoiceVerificationStore()
@@ -91,9 +87,10 @@ const currentPage = ref<number>(1)
 const pageSize = ref<number>(10)
 const list = ref<ListPoTypes[]>([])
 const viewDetailId = ref<string>('')
+const isLoadingSap = ref<boolean>(false)
 
 const filterForm = reactive<filterListTypes>({
-  status: null,
+  status: 2,
   date: '',
   companyCode: '',
   invoiceType: ''
@@ -133,27 +130,6 @@ const colorBadge = (statusCode: number) => {
 const setPage = (value: number) => {
   currentPage.value = value
 }
-
-// const getModalConfirm = () => {
-//   const idModal = document.querySelector('#confirm_approval_modal')
-//   return KTModal.getInstance(idModal as HTMLElement)
-// }
-
-// const getModalSuccess = () => {
-//   const idModal = document.querySelector('#success_approval_modal')
-//   return KTModal.getInstance(idModal as HTMLElement)
-// }
-
-// const openSuccessApproval = () => {
-//   const modalConfirm = getModalConfirm()
-//   modalConfirm.hide()
-//   const modalSuccess = getModalSuccess()
-//   modalSuccess.show()
-
-//   setTimeout(() => {
-//     modalSuccess.hide()
-//   }, 1500)
-// }
 
 const goSearch = (event: KeyboardEvent) => {
   if (event.key === 'Enter') {
@@ -215,8 +191,32 @@ const loadData = () => {
   invoiceApi.getPoDetail(viewDetailId.value)
 }
 
+const sendToSap = (invoiceUId: string) => {
+  isLoadingSap.value = true
+  verificationApi.postSap(invoiceUId).then((statusCode: number) => {
+    if (statusCode === 200) {
+      openSuccesSap()
+    } else {
+      openFailedSap()
+    }
+  })
+  .finally(() => {
+    isLoadingSap.value = false
+  })
+}
+
 const openSuccesSap = () => {
   const idModal = document.querySelector('#success_send_sap_modal')
+  const modal = KTModal.getInstance(idModal as HTMLElement)
+  modal.show()
+
+  setTimeout(() => {
+    modal.hide()
+  }, 1500)
+}
+
+const openFailedSap = () => {
+  const idModal = document.querySelector('#failed_send_sap_modal')
   const modal = KTModal.getInstance(idModal as HTMLElement)
   modal.show()
 
