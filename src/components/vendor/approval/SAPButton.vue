@@ -30,7 +30,9 @@ const handleSend = async () => {
   } catch (err) {
     if (err instanceof Error) {
       if (axios.isAxiosError(err)) {
-        error.value = err.response?.data.result.message || 'Failed to send Vendor Information'
+        error.value =
+          err.response?.data.result.message ||
+          'Vendor Data could not be sent to SAP due to a system error or invalid data.'
         modalError.value = true
       }
     }
