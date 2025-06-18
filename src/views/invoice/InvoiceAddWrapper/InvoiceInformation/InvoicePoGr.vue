@@ -8,7 +8,7 @@
             Search By PO Number
           </label>
           <div class="input">
-            <input v-model="search" placeholder="" @keypress="searchEnter"/>
+            <input v-model="search" placeholder="" type="number" @keypress="searchEnter"/>
             <i class="ki-outline ki-magnifier"></i>
           </div>
         </div>
@@ -85,7 +85,7 @@ import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 const invoiceApi = useInvoiceSubmissionStore()
 const form = inject<formTypes>('form')
 const columns = ref<string[]>([])
-const search = ref<string>('')
+const search = ref<number | null>(null)
 const searchError = ref<boolean>(false)
 
 const searchEnter = (event: KeyboardEvent) => {
@@ -95,21 +95,23 @@ const searchEnter = (event: KeyboardEvent) => {
 }
 
 const openAddItem = () => {
-  if (search.value.length !== 10) return searchError.value = true
-  else searchError.value = false
-  if (form) {
-    if (!form.vendorId  || !form.companyCode) {
-      form.companyCodeError = true
-      return
-    } else {
-      form.companyCodeError = false
+  if (search.value) {
+    if (search.value.toString().length !== 10) return searchError.value = true
+    else searchError.value = false
+    if (form) {
+      if (!form.vendorId  || !form.companyCode) {
+        form.companyCodeError = true
+        return
+      } else {
+        form.companyCodeError = false
+      }
     }
+    if (search.value.toString().length !== 10) return
+    invoiceApi.getPoGr(search.value.toString(), form?.companyCode || '', '1000000055')
+    const idModal = document.querySelector('#add_po_gr_item_modal')
+    const modal = KTModal.getInstance(idModal as HTMLElement)
+    modal.show()
   }
-  if (search.value.length !== 10) return
-  invoiceApi.getPoGr(search.value, form?.companyCode || '', '1000000055')
-  const idModal = document.querySelector('#add_po_gr_item_modal')
-  const modal = KTModal.getInstance(idModal as HTMLElement)
-  modal.show()
 }
 
 const checkInvoiceDp = () => {

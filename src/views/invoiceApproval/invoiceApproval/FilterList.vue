@@ -35,6 +35,9 @@
             <option value="5">
               Rejected
             </option>
+            <option value="7">
+              Sent to SAP
+            </option>
           </select>
         </div>
         <div class="relative">

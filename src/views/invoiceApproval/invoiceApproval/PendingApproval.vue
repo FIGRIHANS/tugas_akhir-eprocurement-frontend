@@ -122,7 +122,8 @@ const colorBadge = (statusCode: number) => {
   const list = {
     2: 'badge-info',
     5: 'badge-danger',
-    4: 'badge-success'
+    4: 'badge-success',
+    7: 'badge-primary'
   } as { [key: number]: string }
   return list[statusCode]
 }
@@ -196,6 +197,7 @@ const sendToSap = (invoiceUId: string) => {
   verificationApi.postSap(invoiceUId).then((statusCode: number) => {
     if (statusCode === 200) {
       openSuccesSap()
+      callList()
     } else {
       openFailedSap()
     }
