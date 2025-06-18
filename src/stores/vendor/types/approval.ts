@@ -24,3 +24,7 @@ export interface IApprove {
   approvalBy: string
   approvalNote: string
 }
+
+export interface ISendSAPBody {
+  vendorId: number
+}

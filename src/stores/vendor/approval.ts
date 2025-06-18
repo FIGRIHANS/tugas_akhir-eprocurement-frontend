@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { IApproval, IApprove } from './types/approval'
+import type { IApproval, IApprove, ISendSAPBody } from './types/approval'
 import type { ApiResponse } from '@/core/type/api'
 import vendorAPI from '@/core/utils/vendorApi'
 
@@ -44,5 +44,10 @@ export const useApprovalStore = defineStore('approval', () => {
     return response.data
   }
 
-  return { loading, error, data, getApproval, approve }
+  const sendSAP = async (body: ISendSAPBody) => {
+    const response: ApiResponse = await vendorAPI.post('/public/verifiedvendor/sent-sap', body)
+    return response.data
+  }
+
+  return { loading, error, data, getApproval, approve, sendSAP }
 })

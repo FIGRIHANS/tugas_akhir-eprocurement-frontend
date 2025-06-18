@@ -3,9 +3,20 @@ import LogoSAP from '@/assets/svg/LogoSAP.vue'
 import UiModal from '@/components/modal/UiModal.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
+import { useApprovalStore } from '@/stores/vendor/approval'
+import axios from 'axios'
 import { ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+
+const router = useRouter()
+const route = useRoute()
+
+const approvalStore = useApprovalStore()
+
+const props = defineProps<{ id: number }>()
 
 const modalSuccess = ref<boolean>(false)
+const modalError = ref<boolean>(false)
 const loading = ref<boolean>(false)
 const error = ref<string | null>(null)
 
@@ -13,10 +24,24 @@ const handleSend = async () => {
   loading.value = true
   error.value = null
 
-  setTimeout(() => {
-    loading.value = false
+  try {
+    await approvalStore.sendSAP({ vendorId: props.id })
     modalSuccess.value = true
-  }, 2000)
+  } catch (err) {
+    if (err instanceof Error) {
+      if (axios.isAxiosError(err)) {
+        error.value = err.response?.data.result.message || 'Failed to send Vendor Information'
+        modalError.value = true
+      }
+    }
+  } finally {
+    loading.value = false
+  }
+}
+
+const handleClose = () => {
+  router.replace(route.fullPath)
+  approvalStore.getApproval({})
 }
 </script>
 
@@ -29,15 +54,21 @@ const handleSend = async () => {
     </template>
   </UiButton>
 
-  <UiModal
-    v-model="modalSuccess"
-    size="sm"
-    @update:model-value="$router.replace({ name: $route.name })"
-  >
+  <UiModal v-model="modalSuccess" size="sm" @update:model-value="handleClose">
     <LogoSAP class="mx-auto mb-5" />
     <h3 class="text-center text-lg font-medium">Vendor Successfully Send to SAP</h3>
     <p class="text-center text-base text-gray-600 mb-5">
       Vendor information has been submitted to SAP.
+    </p>
+  </UiModal>
+
+  <UiModal v-model="modalError" size="sm">
+    <div class="text-center mb-6">
+      <UiIcon name="cross-circle" variant="duotone" class="text-[150px] text-danger text-center" />
+    </div>
+    <h3 class="text-center text-lg font-medium">Failed to Send to SAP</h3>
+    <p class="text-center text-base text-gray-600 mb-5">
+      {{ error }}
     </p>
   </UiModal>
 </template>
