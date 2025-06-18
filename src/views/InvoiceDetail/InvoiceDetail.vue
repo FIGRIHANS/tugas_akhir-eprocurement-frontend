@@ -136,6 +136,7 @@ const detailInvoice = computed(() => verificationApi.detailInvoice)
 const checkStatusCode = () => {
   let status = true
   switch (form.value.statusCode) {
+    case 4:
     case 5:
     case 7:
       status = false
