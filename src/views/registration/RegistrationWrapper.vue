@@ -359,7 +359,7 @@ const submitData = async () => {
         urlAccountDifferences: paymentDetail.value.urlAccountDifferences,
         urlFirstPage: paymentDetail.value.urlFirstPage,
         bankAddress: paymentDetail.value.bankAddress,
-        countryId: 'ID',
+        countryId: 0,
       },
     }
 
