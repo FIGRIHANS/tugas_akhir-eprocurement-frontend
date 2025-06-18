@@ -5,7 +5,7 @@ import AdministrativeCard from '@/components/vendor/cards/AdministrativeCard.vue
 </script>
 <template>
   <div class="space-y-5">
-    <AdministrativeCard :allow-export="true" />
+    <AdministrativeCard />
     <div class="flex gap-3 justify-end">
       <UiButton :outline="true" @click="$router.go(-1)">
         <UiIcon name="black-left" variant="duotone" />

@@ -7,20 +7,12 @@ import { useRoute } from 'vue-router'
 import UiLoading from '@/components/UiLoading.vue'
 import { useVendorUploadStore } from '@/stores/vendor/upload'
 
-type Props = {
-  allowExport?: boolean
-}
-
 const administrasiStore = useVendorAdministrationStore()
 const uploadStore = useVendorUploadStore()
 const route = useRoute()
 
 const loading = ref<boolean>(false)
 const error = ref<string>('')
-
-withDefaults(defineProps<Props>(), {
-  allowExport: false,
-})
 
 const download = async (path: string) => {
   loading.value = true
@@ -53,10 +45,6 @@ watch(
   <div class="card">
     <div class="card-header">
       <div class="card-title">Administration</div>
-      <UiButton :outline="true" v-if="allowExport">
-        <UiIcon name="printer" variant="duotone" />
-        <span>Export Data</span>
-      </UiButton>
     </div>
     <div
       v-if="administrasiStore.loading"
