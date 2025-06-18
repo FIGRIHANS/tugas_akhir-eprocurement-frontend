@@ -159,6 +159,6 @@ export type VendorRegistrationPayloadType = {
     urlAccountDifferences: string
     urlFirstPage: string
     bankAddress: string
-    countryId: string
+    countryId: number
   }
 }
