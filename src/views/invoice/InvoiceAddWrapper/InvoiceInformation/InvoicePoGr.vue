@@ -50,7 +50,6 @@
               <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentNo }}</td>
               <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentItem }}</td>
               <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentDate }}</td>
-              <td>{{ item.taxCode }}</td>
               <td v-if="!checkInvoiceDp()">{{ useFormatIdr(item.itemAmount) }}</td>
               <td v-if="!checkInvoiceDp()">{{ item.quantity }}</td>
               <td v-if="!checkInvoiceDp()">{{ item.uom }}</td>
@@ -58,6 +57,7 @@
               <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.conditionType }}</td>
               <td v-if="!checkInvoiceDp()">{{ item.conditionTypeDesc || '-' }}</td>
               <td v-if="!checkInvoiceDp()">{{ item.qcStatus || '-' }}</td>
+              <td>{{ item.taxCode || '-' }}</td>
               <td>-</td>
               <td>-</td>
               <td>-</td>

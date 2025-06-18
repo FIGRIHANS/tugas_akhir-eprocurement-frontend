@@ -107,6 +107,12 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     return response.data.result
   }
 
+  const postSap = async (invoiceUId: string) => {
+    const response: ApiResponse<void> = await invoiceApi.post(`/invoice/sap/${invoiceUId}`)
+
+    return response.data.statusCode
+  }
+
   return {
     listPo,
     detailInvoice,
@@ -117,6 +123,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     postSubmission,
     getListPo,
     getInvoiceDetail,
-    postReject
+    postReject,
+    postSap
   }
 })

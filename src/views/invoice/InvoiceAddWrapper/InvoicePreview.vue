@@ -93,6 +93,8 @@ const setData = () => {
         materialDescription: item.itemText,
         currency: 'IDR',
         conditionType: item.conditionType,
+        conditionTypeDesc: item.conditionTypeDesc,
+        qcStatus: item.qcStatus,
         postingDate: '',
         enteredOn: '',
         purchasingOrg: '',

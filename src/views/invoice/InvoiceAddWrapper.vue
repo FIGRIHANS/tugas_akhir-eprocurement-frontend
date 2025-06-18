@@ -204,7 +204,6 @@ const checkInvoiceInformation = () => {
   form.companyCodeError = useCheckEmpty(form.companyCode).isError
   form.invoiceNoVendorError = useCheckEmpty(form.invoiceNoVendor).isError
   form.invoiceDateError = useCheckEmpty(form.invoiceDate).isError
-  form.taxNoInvoiceError = useCheckEmpty(form.taxNoInvoice).isError
   form.descriptionError = useCheckEmpty(form.description).isError
   form.invoiceDocumentError = form.invoiceDocument === null
   form.invoicePoGrError = form.invoicePoGr.length === 0 || checkActiveEditPoGr()
@@ -214,7 +213,6 @@ const checkInvoiceInformation = () => {
     form.companyCodeError ||
     form.invoiceNoVendorError ||
     form.invoiceDateError ||
-    form.taxNoInvoiceError ||
     form.descriptionError ||
     form.invoiceDocumentError ||
     form.invoicePoGrError || 

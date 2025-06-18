@@ -9,18 +9,25 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, defineAsyncComponent } from 'vue'
+import { ref, onMounted, defineAsyncComponent } from 'vue'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import StepperStatus from '../../components/stepperStatus/StepperStatus.vue'
 import TabInvoice from './invoiceApproval/TabInvoice.vue'
+import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 
 const PendingApproval = defineAsyncComponent(() => import('./invoiceApproval/PendingApproval.vue'))
 
+const invoiceMasterApi = useInvoiceMasterDataStore()
 const routes = ref<routeTypes[]>([
   {
     name: 'Invoice Approval',
     to: '/invoice/approval'
   }
 ])
+
+onMounted(() => {
+  invoiceMasterApi.getInvoicePoType()
+  invoiceMasterApi.getCompanyCode()
+})
 </script>

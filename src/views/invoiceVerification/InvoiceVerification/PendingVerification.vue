@@ -95,7 +95,7 @@ const list = ref<ListPoTypes[]>([])
 const viewDetailId = ref<string>('')
 
 const filterForm = reactive<filterListTypes>({
-  status: null,
+  status: 1,
   date: '',
   companyCode: '',
   invoiceType: ''

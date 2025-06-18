@@ -307,7 +307,7 @@ const goVerif = () => {
     setTimeout(() => {
       modal.hide()
       router.push({
-        name: 'invoiceVerification'
+        name: route.query.type === '1' ? 'invoiceVerification' : 'invoiceApproval'
       })
     }, 1000)
   }).finally(() => {
@@ -327,7 +327,7 @@ const goReject = (reason: string) => {
     setTimeout(() => {
       modal.hide()
       router.push({
-        name: 'invoiceVerification'
+        name: route.query.type === '1' ? 'invoiceVerification' : 'invoiceApproval'
       })
     }, 1000)
   })
