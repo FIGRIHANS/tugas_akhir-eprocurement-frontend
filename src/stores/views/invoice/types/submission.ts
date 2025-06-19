@@ -153,13 +153,14 @@ export interface ListPoTypes {
   companyName: string
   invoiceNo: string
   invoiceDate: string
-  statusCode: string
+  statusCode: number
   statusName: string
   poNo: string
   grDocumentNo: string
   estimatePaymentDate: string
   totalGrossAmount: number
   totalNetAmount: number
+  vendorName: string
 }
 
 export interface QueryParamsListPoTypes {

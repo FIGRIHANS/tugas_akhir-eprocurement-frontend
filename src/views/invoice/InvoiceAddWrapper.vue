@@ -70,6 +70,8 @@ import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterDat
 import type { ParamsSubmissionTypes } from '@/stores/views/invoice/types/submission'
 import { useLoginStore } from '@/stores/views/login'
 import moment from 'moment'
+import type { itemsPoGrType } from './types/invoicePoGr'
+import type { itemsCostType } from './types/additionalCost'
 
 const InvoiceData = defineAsyncComponent(() => import('./InvoiceAddWrapper/InvoiceData.vue'))
 const InvoiceInformation = defineAsyncComponent(() => import('./InvoiceAddWrapper/InvoiceInformation.vue'))
@@ -150,6 +152,7 @@ const contentComponent = computed(() => {
 const listDocumentType = computed(() => invoiceMasterApi.documentType)
 const vendorList = computed(() => invoiceMasterApi.vendorList)
 const invoiceDpList = computed(() => invoiceMasterApi.dpType)
+const detailPo = computed(() => invoiceApi.detailPo)
 
 const checkInvoiceView = () => {
   return route.query.type === 'po-view'
@@ -424,6 +427,113 @@ const goSaveDraft = () => {
   })
 }
 
+const setData = () => {
+  const detail = detailPo.value
+  if (form) {
+    form.invoiceType = detail?.header.invoiceTypeCode.toString() || ''
+    form.vendorId = detail?.vendor.vendorId.toString() || ''
+    form.address = detail?.vendor.vendorAddress || ''
+    form.bankKeyId = detail?.payment.bankKey || ''
+    form.bankNameId = detail?.payment.bankName || ''
+    form.beneficiaryName = detail?.payment.beneficiaryName || ''
+    form.bankAccountNumber = detail?.payment.bankAccountNo || ''
+    form.invoiceDp = detail?.header.invoiceDPCode.toString() || ''
+    form.companyCode = detail?.header.companyCode || ''
+    form.invoiceNoVendor = detail?.header.documentNo.toString() || ''
+    form.invoiceNo = detail?.header.invoiceNo.toString() || ''
+    form.invoiceDate = detail?.header.invoiceDate || ''
+    form.taxNoInvoice = detail?.header.taxNo || ''
+    form.currency = detail?.header.currCode || ''
+    form.description = detail?.header.notes || ''
+    form.subtotal = detail?.calculation.subtotal || 0
+    form.vatAmount = detail?.calculation.vatAmount || 0
+    form.additionalCostCalc = detail?.calculation.additionalCost || 0
+    form.totalGrossAmount = detail?.calculation.totalGrossAmount || 0
+    form.totalNetAmount = detail?.calculation.totalNetAmount || 0
+    form.status = detail?.header.statusCode || 0
+    form.invoicePoGr = []
+    for (const item of detail?.pogr || []) {
+      const data = {
+        poNo: item.poNo,
+        poItem: item.poItem,
+        grDocumentNo: item.grDocumentNo,
+        grDocumentItem: item.grDocumentItem,
+        grDocumentDate: item.grDocumentDate,
+        taxCode: item.taxCode,
+        itemAmount: item.itemAmount,
+        quantity: item.quantity,
+        uom: item.uom,
+        material: '',
+        materialDescription: item.itemText,
+        currency: 'IDR',
+        conditionType: item.conditionType,
+        conditionTypeDesc: item.conditionTypeDesc,
+        qcStatus: item.qcStatus,
+        postingDate: '',
+        enteredOn: '',
+        purchasingOrg: '',
+        department: item.department,
+        whtType: item.whtType,
+        whtCode: item.whtCode,
+        whtBaseAmount: item.whtBaseAmount,
+        whtAmount: item.whtAmount,
+        isEdit: false
+      } as itemsPoGrType
+      form.invoicePoGr.push(data)
+    }
+    form.additionalCost = []
+    for (const item of detail?.additionalCosts || []) {
+      const data = {
+        activity: item.activityExpense,
+        itemAmount: item.itemAmount.toString(),
+        debitCredit: item.debitCredit,
+        taxCode: item.taxCode,
+        costCenter: item.costCenter,
+        profitCenter: item.profitCenter,
+        assignment: item.assignment,
+        whtType: item.whtType,
+        whtCode: item.whtCode,
+        whtBaseAmount: item.whtBaseAmount.toString(),
+        isEdit: false
+      } as itemsCostType
+      form.additionalCost.push(data)
+    }
+
+    for (const doc of detail?.documents || []) {
+      switch (doc.documentType) {
+        case 1:
+          form.invoiceDocument = {
+            name: doc.documentName,
+            fileSize: doc.documentSize.toString() || '0',
+            path: doc.documentUrl
+          }
+          break
+        case 2:
+          form.tax = {
+            name: doc.documentName,
+            fileSize: doc.documentSize.toString() || '0',
+            path: doc.documentUrl
+          }
+          break
+        case 3:
+          form.referenceDocument = {
+            name: doc.documentName,
+            fileSize: doc.documentSize.toString() || '0',
+            path: doc.documentUrl
+          }
+          break
+        case 4:
+          form.otherDocument = {
+            name: doc.documentName,
+            fileSize: doc.documentSize.toString() || '0',
+            path: doc.documentUrl
+          }
+          break
+      }
+    }
+  }
+}
+
 onMounted(() => {
   invoiceMasterApi.getTaxCode()
   invoiceMasterApi.getInvoicePoType()
@@ -435,6 +545,13 @@ onMounted(() => {
 
   if (route.query.type === 'po-view') {
     tabNow.value = 'preview'
+  }
+
+  if (route.query.type === 'po-view' || route.query.invoice) {
+    
+    invoiceApi.getPoDetail(route.query.invoice?.toString() || '').then(() => {
+      setData()
+    })
   }
 })
 
