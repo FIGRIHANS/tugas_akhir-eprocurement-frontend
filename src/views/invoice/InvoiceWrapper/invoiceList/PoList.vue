@@ -17,18 +17,19 @@
       <tbody>
         <tr v-for="(item, index) in list" :key="index">
           <td>
-            <button class="btn btn-outline btn-icon btn-primary" @click="goView(item.invoiceUId)">
+            <button class="btn btn-outline btn-icon btn-primary" @click="goView(item)">
               <i class="ki-filled ki-eye"></i>
             </button>
           </td>
           <td>{{ item.invoiceNo }}</td>
           <td>
-            <span class="badge badge-outline badge-warning">
-              Under Verification
+            <span class="badge badge-outline" :class="colorBadge(item.statusCode)">
+              {{ item.statusName }}
             </span>
           </td>
-          <td>{{ item.poNo }}</td>
-          <td>{{ item.grDocumentNo }}</td>
+          <!-- <td>{{ item.poNo }}</td>
+          <td>{{ item.grDocumentNo }}</td> -->
+          <td>{{ item.vendorName }}</td>
           <td>{{ item.companyCode }}</td>
           <td>{{ item.invoiceTypeName }}</td>
           <td>{{ moment(item.invoiceDate).format('DD MMMM YYYY') }}</td>
@@ -68,7 +69,7 @@ const pageSize = ref<number>(10)
 const list = ref<ListPoTypes[]>([])
 
 const filterForm = reactive<filterListTypes>({
-  status: '',
+  status: '1',
   date: '',
   companyCode: '',
   invoiceType: ''
@@ -78,8 +79,8 @@ const columns = ref([
   '',
   'No Invoice',
   'Status',
-  'No PO',
-  'No GR',
+  // 'No PO',
+  // 'No GR',
   'Company Code',
   'Invoice PO Type',
   'Invoice Date',
@@ -89,6 +90,14 @@ const columns = ref([
 ])
 
 const poList = computed(() => invoiceApi.listPo)
+
+const colorBadge = (statusCode: number) => {
+  const list = {
+    0: 'badge-primary',
+    1: 'badge-warning'
+  } as { [key: number]: string }
+  return list[statusCode]
+}
 
 const setListPo = () => {
   const result: ListPoTypes[] = []
@@ -107,20 +116,30 @@ const setPage = (value: number) => {
   setListPo()
 }
 
-const goView = (invoiceUId: string) => {
-  router.push({
-    name: 'invoiceAdd',
-    query: {
-      type: 'po-view',
-      invoice: invoiceUId
-    }
-  })
+const goView = (data: ListPoTypes) => {
+  if (data.statusCode === 0) {
+    router.push({
+      name: 'invoiceAdd',
+      query: {
+        type: 'po',
+        invoice: data.invoiceUId
+      }
+    })
+  } else {
+    router.push({
+      name: 'invoiceAdd',
+      query: {
+        type: 'po-view',
+        invoice: data.invoiceUId
+      }
+    })
+  }
 }
 
 const callList = () => {
   list.value = []
   invoiceApi.getListPo({
-    statusCode: filterForm.status === '0' || filterForm.status ? Number(filterForm.status) : null,
+    statusCode: filterForm.status === '0' || filterForm.status ? Number(filterForm.status) : 1,
     companyCode: filterForm.companyCode,
     invoiceTypeCode: Number(filterForm.invoiceType),
     invoiceDate: filterForm.date,
