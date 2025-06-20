@@ -43,7 +43,7 @@
     id="registration-error"
     type="danger"
     title="Vendor Registration Failed"
-    text="Yout registration could not be submitted. Please check the required data and try again"
+    text="Your registration could not be submitted. Please check the required data and try again"
     no-submit
     static
     :cancel="() => (modalTrigger.error = false)"
@@ -53,7 +53,7 @@
     id="registration-success"
     type="success"
     title="Vendor Registration Submitted"
-    text="Yout registration has been successfully submitted to the e-Procurement system."
+    text="Your registration has been successfully submitted to the e-Procurement system."
     no-cancel
     static
     submit-button-text="Ok"

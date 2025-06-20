@@ -4,7 +4,14 @@
       {{ label }}
       <span v-if="required" class="text-danger"> * </span>
     </label>
-    <VueDatePicker v-model="date" :enable-time="false" :format="format" :preview-format="format" class="w-full">
+    <VueDatePicker
+      v-model="date"
+      :enable-time="false"
+      :format="format"
+      :preview-format="format"
+      :min-date="minDate"
+      class="w-full"
+    >
       <template #dp-input="{ value }">
         <div class="input relative" :class="{ 'border-danger': error }">
           <input
@@ -35,6 +42,7 @@ const props = defineProps<{
   placeholder?: string
   format?: string
   disabled?: boolean
+  minDate?: Date | string
 }>()
 
 const emits = defineEmits(['update:modelValue'])

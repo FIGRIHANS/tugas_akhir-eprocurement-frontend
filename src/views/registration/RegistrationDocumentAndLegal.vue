@@ -47,6 +47,7 @@
                 <UiInput
                   v-model="documentAndLegal.fields[index].licenseNo"
                   :error="documentAndLegal.fields[index]?.licenseNoError"
+                  :max-length="[12].includes(item.licenseId) ? 16 : 9999"
                 />
                 <span v-if="item.licenseId === 12" class="text-danger text-[10px]"
                   >*Batas upload NPWP sebanyak 3 kali</span
@@ -80,6 +81,7 @@
                   class="w-48"
                   :error="documentAndLegal.fields[index]?.uploadUrlError"
                   @addedFile="(file) => uploadFile(file, index, 'default')"
+                  @upload-failed="(val) => (modalUploadFailed = val)"
                 />
                 <span class="text-danger text-[10px]">*jpg, jpeg, png, pdf, zip / max : 16 MB</span>
               </td>
@@ -114,8 +116,8 @@
         </table>
       </div>
     </div>
-
-    <div v-if="documentAndLegal.kategori" class="flex flex-col gap-[24px]">
+    <!-- v-if="documentAndLegal.kategori" -->
+    <div class="flex flex-col gap-[24px]">
       <hr class="border-gray-300" />
 
       <div class="flex flex-row items-center gap-2">
@@ -187,6 +189,8 @@
                     v-model="documentAndLegal.anotherDocuments[index].expiredDate"
                     format="dd MM yyyy"
                     class="!w-48"
+                    :disabled="!!!documentAndLegal.anotherDocuments[index].issuedDate"
+                    :min-date="documentAndLegal.anotherDocuments[index].issuedDate"
                   />
                 </td>
                 <td class="align-top">
@@ -202,12 +206,13 @@
                     accepted-files=".jpg,.jpeg.,.png,.pdf,application/zip"
                     class="w-48"
                     @addedFile="(file) => uploadFile(file, index, 'other doc')"
+                    @upload-failed="(val) => (modalUploadFailed = val)"
                   />
                   <span class="text-danger text-[10px]"
                     >*jpg, jpeg, png, pdf, zip / max : 16 MB</span
                   >
                 </td>
-                <td>
+                <td class="flex flex-row items-center gap-2">
                   <div
                     v-if="fileOtherDocumentList?.[index]?.status === 'loading'"
                     class="rounded-full border-2 size-8 border-primary border-t-primary-light animate-spin text-xs"
@@ -218,8 +223,22 @@
                     variant="filled"
                     class="text-success text-4xl"
                   />
-                  <UiButton v-else icon outline @click="addFile(index, 'other doc')">
+                  <UiButton
+                    v-if="!['loading', 'success'].includes(fileOtherDocumentList?.[index]?.status)"
+                    icon
+                    outline
+                    @click="addFile(index, 'other doc')"
+                  >
                     <i class="ki-filled ki-exit-up"></i>
+                  </UiButton>
+                  <UiButton
+                    v-if="!['loading', 'success'].includes(fileOtherDocumentList?.[index]?.status)"
+                    variant="danger"
+                    icon
+                    outline
+                    @click="deleteFile(index)"
+                  >
+                    <i class="ki-filled ki-cross-circle"></i>
                   </UiButton>
                 </td>
               </tr>
@@ -240,6 +259,17 @@
       </div>
     </div>
   </div>
+
+  <ModalConfirmation
+    :open="modalUploadFailed"
+    id="upload-error"
+    type="danger"
+    title="Upload Failed"
+    text="File size exceeds the maximum limit of 16 MB. Please choose a smaller file."
+    no-submit
+    static
+    :cancel="() => (modalUploadFailed = false)"
+  />
 </template>
 
 <script lang="ts" setup>
@@ -256,6 +286,7 @@ import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import UiFileUpload from '@/components/ui/atoms/file-upload/UiFileUpload.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
+import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 
 const registrationVendorStore = useRegistrationVendorStore()
 const vendorMasterDataStore = useVendorMasterDataStore()
@@ -269,6 +300,8 @@ const tableItems = computed(() => vendorMasterDataStore.companyLicense)
 const fileList = computed(() => registrationVendorStore.fileList)
 const fileOtherDocumentList = computed(() => registrationVendorStore.fileOtherDocumentList)
 
+const modalUploadFailed = ref<boolean>(false)
+
 const uploadFile = (file: File, index: number, type: 'default' | 'other doc') => {
   if (type === 'default') {
     registrationVendorStore.fileList.splice(index, 1, {
@@ -281,6 +314,10 @@ const uploadFile = (file: File, index: number, type: 'default' | 'other doc') =>
       status: 'notUpload',
     })
   }
+}
+
+const deleteFile = (index: number) => {
+  registrationVendorStore.documentAndLegal.anotherDocuments.splice(index, 1)
 }
 
 const addFile = async (index: number, type: 'default' | 'other doc') => {
