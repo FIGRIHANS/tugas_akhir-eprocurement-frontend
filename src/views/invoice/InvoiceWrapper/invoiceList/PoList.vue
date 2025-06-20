@@ -7,37 +7,66 @@
 
     <div class="overflow-x-auto list__table mt-[24px]">
       <table class="table align-middle text-gray-700 font-medium text-sm">
-      <thead>
-        <tr>
-          <th v-for="(item, index) in columns" :key="index" :class="index !== 0 ? 'list__long' : ''">
-            {{ item }}
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(item, index) in list" :key="index">
-          <td>
-            <button class="btn btn-outline btn-icon btn-primary" @click="goView(item)">
-              <i class="ki-filled ki-eye"></i>
-            </button>
-          </td>
-          <td>{{ item.invoiceNo }}</td>
-          <td>
-            <span class="badge badge-outline" :class="colorBadge(item.statusCode)">
-              {{ item.statusName }}
-            </span>
-          </td>
-          <!-- <td>{{ item.poNo }}</td>
-          <td>{{ item.grDocumentNo }}</td> -->
-          <td>{{ item.vendorName }}</td>
-          <td>{{ item.companyCode }}</td>
-          <td>{{ item.invoiceTypeName }}</td>
-          <td>{{ moment(item.invoiceDate).format('DD MMMM YYYY') }}</td>
-          <td>{{ useFormatIdr(item.totalGrossAmount) }}</td>
-          <td>{{ useFormatIdr(item.totalNetAmount) }}</td>
-          <td>{{ item.estimatePaymentDate }}</td>
-        </tr>
-      </tbody>
+        <thead>
+          <tr>
+            <th v-for="(item, index) in columns" :key="index" :class="index !== 0 ? 'list__long' : ''">
+              {{ item }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <template v-for="(parent, index) in list" :key="index">
+            <tr>
+              <td class="flex items-center gap-[24px]">
+                <button class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]" @click="goView(parent)">
+                  <i class="ki-filled ki-eye !text-lg"></i>
+                </button>
+                <button class="btn btn-icon btn-primary w-[21px] h-[21px]" @click="parent.isOpenChild = !parent.isOpenChild">
+                  <i v-if="!parent.isOpenChild" class="ki-filled ki-right !text-[9px]"></i>
+                  <i v-else class="ki-filled ki-down !text-[9px]"></i>
+                </button>
+              </td>
+              <td>{{ parent.invoiceNo }}</td>
+              <td>
+                <span class="badge badge-outline" :class="colorBadge(parent.statusCode)">
+                  {{ parent.statusName }}
+                </span>
+              </td>
+              <td>{{ parent.vendorName }}</td>
+              <td>{{ parent.companyCode }}</td>
+              <td>{{ parent.invoiceTypeName }}</td>
+              <td>{{ moment(parent.invoiceDate).format('DD MMMM YYYY') }}</td>
+              <td>{{ useFormatIdr(parent.totalGrossAmount) }}</td>
+              <td>{{ useFormatIdr(parent.totalNetAmount) }}</td>
+              <td>{{ parent.estimatePaymentDate }}</td>
+            </tr>
+            <tr v-show="parent.isOpenChild">
+              <td></td>
+              <td colspan="5" class="!pt-[0px]">
+                <table class="table table-bordered table-sm mb-0">
+                  <thead>
+                    <tr class="border-b">
+                      <th v-for="(item, index) in columnsChild" :key="index">
+                        {{ item }}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <template v-for="(sub, index) in parent.pOs" :key="index">
+                      <tr>
+                        <td>{{ sub.poNo || '-' }}</td>
+                        <td>{{ sub.grDocumentNo || '-' }}</td>
+                        <td>{{ sub.itemText || '-' }}</td>
+                        <td>{{ useFormatIdr(sub.itemAmount) || '-' }}</td>
+                        <td>{{ sub.quantity || '-' }}</td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+          </template>
+        </tbody>
       </table>
     </div>
 
@@ -79,14 +108,21 @@ const columns = ref([
   '',
   'No Invoice',
   'Status',
-  // 'No PO',
-  // 'No GR',
+  'Vendor Name',
   'Company Code',
   'Invoice PO Type',
   'Invoice Date',
   'Total Gross Amount',
   'Total Net Amount',
   'Estimated Payment Date'
+])
+
+const columnsChild = ref([
+  'No PO',
+  'No GR',
+  'Item Description',
+  'Item Amount',
+  'Quantity'
 ])
 
 const poList = computed(() => invoiceApi.listPo)

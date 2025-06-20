@@ -106,8 +106,6 @@ const handleReject = async () => {
 onMounted(() => {
   verifStore.getData(Number(route.params.id))
 })
-
-console.log(verifStore.data)
 </script>
 <template>
   <div class="space-y-5">
