@@ -161,7 +161,18 @@ export interface ListPoTypes {
   totalGrossAmount: number
   totalNetAmount: number
   vendorName: string
+  pOs: PoChildTypes[]
+  isOpenChild: boolean
 }
+
+export interface PoChildTypes {
+  grDocumentNo: string
+  invoiceUId: string
+  itemAmount: number
+  itemText: string
+  poNo: string
+  quantity: number
+} 
 
 export interface QueryParamsListPoTypes {
   statusCode?: number | null
