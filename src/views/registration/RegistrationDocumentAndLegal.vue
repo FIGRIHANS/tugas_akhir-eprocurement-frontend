@@ -47,6 +47,7 @@
                 <UiInput
                   v-model="documentAndLegal.fields[index].licenseNo"
                   :error="documentAndLegal.fields[index]?.licenseNoError"
+                  :max-length="[12].includes(item.licenseId) ? 16 : 9999"
                 />
                 <span v-if="item.licenseId === 12" class="text-danger text-[10px]"
                   >*Batas upload NPWP sebanyak 3 kali</span
@@ -80,6 +81,7 @@
                   class="w-48"
                   :error="documentAndLegal.fields[index]?.uploadUrlError"
                   @addedFile="(file) => uploadFile(file, index, 'default')"
+                  @upload-failed="(val) => (modalUploadFailed = val)"
                 />
                 <span class="text-danger text-[10px]">*jpg, jpeg, png, pdf, zip / max : 16 MB</span>
               </td>
@@ -202,6 +204,7 @@
                     accepted-files=".jpg,.jpeg.,.png,.pdf,application/zip"
                     class="w-48"
                     @addedFile="(file) => uploadFile(file, index, 'other doc')"
+                    @upload-failed="(val) => (modalUploadFailed = val)"
                   />
                   <span class="text-danger text-[10px]"
                     >*jpg, jpeg, png, pdf, zip / max : 16 MB</span
@@ -240,6 +243,17 @@
       </div>
     </div>
   </div>
+
+  <ModalConfirmation
+    :open="modalUploadFailed"
+    id="upload-error"
+    type="danger"
+    title="Upload Failed"
+    text="File size exceeds the maximum limit of 16 MB. Please choose a smaller file."
+    no-submit
+    static
+    :cancel="() => (modalUploadFailed = false)"
+  />
 </template>
 
 <script lang="ts" setup>
@@ -256,6 +270,7 @@ import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import UiFileUpload from '@/components/ui/atoms/file-upload/UiFileUpload.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
+import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 
 const registrationVendorStore = useRegistrationVendorStore()
 const vendorMasterDataStore = useVendorMasterDataStore()
@@ -268,6 +283,8 @@ const tableItems = computed(() => vendorMasterDataStore.companyLicense)
 
 const fileList = computed(() => registrationVendorStore.fileList)
 const fileOtherDocumentList = computed(() => registrationVendorStore.fileOtherDocumentList)
+
+const modalUploadFailed = ref<boolean>(false)
 
 const uploadFile = (file: File, index: number, type: 'default' | 'other doc') => {
   if (type === 'default') {

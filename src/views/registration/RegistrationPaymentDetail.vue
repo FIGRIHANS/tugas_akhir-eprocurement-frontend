@@ -40,9 +40,11 @@
             label="Pernyataan Perbedaan Rekening"
             placeholder="Pilih"
             acceptedFiles=".pdf"
+            :max-size="16000000"
             @addedFile="(file) => uploadFile(file, 'different account')"
             required
             :error="paymentDetail.urlAccountDifferencesError"
+            @upload-failed="(val) => (modalUploadFailed = val)"
           />
           <UiFileUpload
             v-if="paymentDetailFlagging.isNotSameAsCompany"
@@ -50,9 +52,11 @@
             label="Halaman Pertama Buku Tabungan"
             placeholder="Pilih"
             acceptedFiles=".pdf"
+            :max-size="16000000"
             @addedFile="(file) => uploadFile(file, 'first page')"
             required
             :error="paymentDetail.urlFirstPageError"
+            @upload-failed="(val) => (modalUploadFailed = val)"
           />
           <UiSelect
             v-model="paymentDetail.currencyId"
@@ -177,10 +181,21 @@
       </div>
     </div>
   </div>
+
+  <ModalConfirmation
+    :open="modalUploadFailed"
+    id="upload-error"
+    type="danger"
+    title="Upload Failed"
+    text="File size exceeds the maximum limit of 16 MB. Please choose a smaller file."
+    no-submit
+    static
+    :cancel="() => (modalUploadFailed = false)"
+  />
 </template>
 
 <script lang="ts" setup>
-import { computed, onBeforeMount, onMounted } from 'vue'
+import { computed, onBeforeMount, onMounted, ref } from 'vue'
 
 import { useRegistrationVendorStore } from '@/stores/views/registration'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
@@ -192,6 +207,7 @@ import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import UiFileUpload from '@/components/ui/atoms/file-upload/UiFileUpload.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiCaptcha from '@/components/ui/atoms/captcha/UiCaptcha.vue'
+import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 
 const registrationVendorStore = useRegistrationVendorStore()
 const vendorMasterDataStore = useVendorMasterDataStore()
@@ -199,6 +215,7 @@ const uploadStore = useUploadStore()
 
 const paymentDetail = computed(() => registrationVendorStore.paymentDetail)
 const paymentDetailFlagging = computed(() => registrationVendorStore.paymentDetailFlagging)
+const modalUploadFailed = ref<boolean>(false)
 
 const termCondition = computed(() => vendorMasterDataStore.termCondition)
 const bankList = computed(() =>

@@ -8,4 +8,5 @@ export interface IInputProps {
   error?: boolean
   type?: 'text' | 'number'
   hintText?: string
+  maxLength?: number
 }
