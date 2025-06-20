@@ -116,8 +116,8 @@
         </table>
       </div>
     </div>
-
-    <div v-if="documentAndLegal.kategori" class="flex flex-col gap-[24px]">
+    <!-- v-if="documentAndLegal.kategori" -->
+    <div class="flex flex-col gap-[24px]">
       <hr class="border-gray-300" />
 
       <div class="flex flex-row items-center gap-2">
@@ -189,6 +189,8 @@
                     v-model="documentAndLegal.anotherDocuments[index].expiredDate"
                     format="dd MM yyyy"
                     class="!w-48"
+                    :disabled="!!!documentAndLegal.anotherDocuments[index].issuedDate"
+                    :min-date="documentAndLegal.anotherDocuments[index].issuedDate"
                   />
                 </td>
                 <td class="align-top">
@@ -210,7 +212,7 @@
                     >*jpg, jpeg, png, pdf, zip / max : 16 MB</span
                   >
                 </td>
-                <td>
+                <td class="flex flex-row items-center gap-2">
                   <div
                     v-if="fileOtherDocumentList?.[index]?.status === 'loading'"
                     class="rounded-full border-2 size-8 border-primary border-t-primary-light animate-spin text-xs"
@@ -221,8 +223,22 @@
                     variant="filled"
                     class="text-success text-4xl"
                   />
-                  <UiButton v-else icon outline @click="addFile(index, 'other doc')">
+                  <UiButton
+                    v-if="!['loading', 'success'].includes(fileOtherDocumentList?.[index]?.status)"
+                    icon
+                    outline
+                    @click="addFile(index, 'other doc')"
+                  >
                     <i class="ki-filled ki-exit-up"></i>
+                  </UiButton>
+                  <UiButton
+                    v-if="!['loading', 'success'].includes(fileOtherDocumentList?.[index]?.status)"
+                    variant="danger"
+                    icon
+                    outline
+                    @click="deleteFile(index)"
+                  >
+                    <i class="ki-filled ki-cross-circle"></i>
                   </UiButton>
                 </td>
               </tr>
@@ -298,6 +314,10 @@ const uploadFile = (file: File, index: number, type: 'default' | 'other doc') =>
       status: 'notUpload',
     })
   }
+}
+
+const deleteFile = (index: number) => {
+  registrationVendorStore.documentAndLegal.anotherDocuments.splice(index, 1)
 }
 
 const addFile = async (index: number, type: 'default' | 'other doc') => {
