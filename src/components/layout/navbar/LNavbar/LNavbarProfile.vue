@@ -11,7 +11,8 @@
     <div class="dropdown-content w-full max-w-56 p-4">
       <div class="menu menu-default flex flex-col w-full">
         <div class="menu-item">
-          <a class="menu-link" href="#" @click="logout">
+          <p class="mb-[14px]">Hi, {{ userData?.profile.employeeName }}</p>
+          <a class="menu-link !px-[5px] !mx-[0px]" href="#" @click="logout">
             <span class="menu-title">
               Log Out
             </span>
@@ -34,6 +35,7 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useLoginStore } from '@/stores/views/login'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
@@ -42,6 +44,8 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 const loginApi = useLoginStore()
 const router = useRouter()
 const route = useRoute()
+
+const userData = computed(() => loginApi.userData)
 
 const logout = () => {
   loginApi.clearUserData()
