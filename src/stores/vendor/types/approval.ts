@@ -21,7 +21,8 @@ export interface IApproval {
 export interface IApprove {
   vendorId: string
   approvalStatus: number
-  approvalBy: string
+  approvalById: string
+  approvalByName: string
   approvalNote: string
 }
 
