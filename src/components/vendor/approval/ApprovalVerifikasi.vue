@@ -75,7 +75,7 @@ onMounted(() => {
           <tr v-else v-for="(item, index) in approvalStore.matrixData" :key="index">
             <td>{{ index + 1 }}</td>
             <td>{{ item.approvalByName }}</td>
-            <td></td>
+            <td>{{ item.approvalByPosition }}</td>
             <td>{{ moment(item.createdUtcDate).format('LLL') }}</td>
             <td>-</td>
             <td>

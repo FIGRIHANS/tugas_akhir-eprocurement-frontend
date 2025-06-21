@@ -23,6 +23,7 @@ export interface IApprove {
   approvalStatus: number
   approvalById: string
   approvalByName: string
+  approvalByPosition: string
   approvalNote: string
 }
 
@@ -41,6 +42,7 @@ export interface IMatrixResponse {
   approvalName: string
   approvalById: string
   approvalByName: string
+  approvalByPosition: string
   approvalNote: string
   createdUtcDate: string
 }
