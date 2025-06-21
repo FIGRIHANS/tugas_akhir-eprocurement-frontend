@@ -62,7 +62,11 @@ export const useApprovalStore = defineStore('approval', () => {
       { params },
     )
 
-    matrixData.value = response.data.result.content
+    if (!response.data.result.isError) {
+      matrixData.value = response.data.result.content
+    }
+
+    return response.data
   }
 
   return { loading, error, data, getApproval, approve, sendSAP, getMatrix, matrixData }

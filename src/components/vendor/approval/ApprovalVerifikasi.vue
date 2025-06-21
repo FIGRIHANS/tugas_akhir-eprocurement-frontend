@@ -5,7 +5,7 @@ import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiLoading from '@/components/UiLoading.vue'
 import { useApprovalStore } from '@/stores/vendor/approval'
 import moment from 'moment'
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 
 const props = defineProps<{ id: string | number; nama: string }>()
 const modal = ref(false)
@@ -20,9 +20,14 @@ const getMatrix = async () => {
   error.value = null
 
   try {
-    await approvalStore.getMatrix({
+    const response = await approvalStore.getMatrix({
       vendorId: Number(props.id),
     })
+
+    if (response.result.isError) {
+      error.value = response.result.message ?? 'Unknown error occurred'
+      return
+    }
   } catch (err) {
     error.value = 'Failed to load approval matrix'
     console.error(err)
@@ -31,12 +36,13 @@ const getMatrix = async () => {
   }
 }
 
-onMounted(() => {
+const handleClick = () => {
+  modal.value = !modal.value
   getMatrix()
-})
+}
 </script>
 <template>
-  <UiButton size="sm" :icon="true" variant="primary" :outline="true" @click="modal = !modal">
+  <UiButton size="sm" :icon="true" variant="primary" :outline="true" @click="handleClick">
     <UiIcon name="data" variant="duotone" />
   </UiButton>
 
@@ -62,13 +68,13 @@ onMounted(() => {
             </td>
           </tr>
 
-          <tr v-if="error">
+          <tr v-else-if="error">
             <td colspan="7" class="text-center text-red-500">
               {{ error }}
             </td>
           </tr>
 
-          <tr v-if="!approvalStore.matrixData.length">
+          <tr v-else-if="!approvalStore.matrixData.length">
             <td colspan="7" class="text-center">No data found.</td>
           </tr>
 

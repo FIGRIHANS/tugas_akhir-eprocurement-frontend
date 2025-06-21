@@ -31,7 +31,7 @@ const handleSend = async () => {
     if (err instanceof Error) {
       if (axios.isAxiosError(err)) {
         error.value =
-          err.response?.data.result.message ||
+          err.response?.data.result?.message ??
           'Vendor Data could not be sent to SAP due to a system error or invalid data.'
         modalError.value = true
       }
