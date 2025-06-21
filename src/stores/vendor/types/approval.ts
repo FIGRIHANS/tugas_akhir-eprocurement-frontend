@@ -29,3 +29,18 @@ export interface IApprove {
 export interface ISendSAPBody {
   vendorId: number
 }
+
+export interface IMatrixBody {
+  vendorId: number
+}
+
+export interface IMatrixResponse {
+  id: number
+  vendorId: number
+  approvalStatus: number
+  approvalName: string
+  approvalById: string
+  approvalByName: string
+  approvalNote: string
+  createdUtcDate: string
+}

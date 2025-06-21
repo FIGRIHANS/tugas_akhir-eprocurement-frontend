@@ -1,6 +1,12 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { IApproval, IApprove, ISendSAPBody } from './types/approval'
+import type {
+  IApproval,
+  IApprove,
+  IMatrixBody,
+  IMatrixResponse,
+  ISendSAPBody,
+} from './types/approval'
 import type { ApiResponse } from '@/core/type/api'
 import vendorAPI from '@/core/utils/vendorApi'
 
@@ -13,6 +19,7 @@ export const useApprovalStore = defineStore('approval', () => {
     page: 0,
     pageSize: 0,
   })
+  const matrixData = ref<IMatrixResponse[]>([])
 
   const getApproval = async (params: unknown) => {
     loading.value = true
@@ -49,5 +56,14 @@ export const useApprovalStore = defineStore('approval', () => {
     return response.data
   }
 
-  return { loading, error, data, getApproval, approve, sendSAP }
+  const getMatrix = async (params: IMatrixBody) => {
+    const response: ApiResponse<IMatrixResponse[]> = await vendorAPI.get(
+      '/public/verifiedvendor/approval/vendor-detail',
+      { params },
+    )
+
+    matrixData.value = response.data.result.content
+  }
+
+  return { loading, error, data, getApproval, approve, sendSAP, getMatrix, matrixData }
 })
