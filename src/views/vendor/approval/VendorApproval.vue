@@ -119,7 +119,7 @@ watch(
                 </div>
                 <template v-else>
                   <div v-if="Number(item.approvalStatus) === 1">
-                    <SAPButton />
+                    <SAPButton :id="Number(item.vendorId)" />
                   </div>
                   <template v-if="!Number(item.approvalStatus)">
                     <ApproveButton :id="item.vendorId" :nama="item.vendorName" />
