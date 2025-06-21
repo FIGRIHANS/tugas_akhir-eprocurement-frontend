@@ -28,7 +28,7 @@
                 <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>
                 <i v-else class="ki-duotone ki-check-circle"></i>
               </button>
-              <button v-if="item.isEdit" class="btn btn-icon btn-outline btn-danger" @click="resetItem(item)">
+              <button class="btn btn-icon btn-outline btn-danger" @click="resetItem(item, index)">
                 <i class="ki-duotone ki-cross-circle"></i>
               </button>
             </td>
@@ -212,9 +212,13 @@ const goEdit = (item: itemsCostType) => {
   }
 }
 
-const resetItem = (item: itemsCostType) => {
-  item.isEdit = !item.isEdit
-  resetFormEdit()
+const resetItem = (item: itemsCostType, index: number) => {
+  if (item.isEdit) {
+    item.isEdit = !item.isEdit
+    resetFormEdit()
+  } else {
+    form?.value.additionalCosts.splice(index, 1)
+  }
 }
 
 const callWhtCode = (data: itemsCostType) => {

@@ -16,23 +16,23 @@
     <AdditionalCost v-if="form.invoiceDPCode === 9011 && checkPo()" class="mt-[24px]" />
     <div class="flex items-center justify-between gap-[8px] mt-[24px]">
       <div class="flex items-center gap-[10px]">
-        <button class="btn btn-outline btn-primary" @click="goBack">
+        <button class="btn btn-outline btn-primary" :disabled="isLoading" @click="goBack">
           <i class="ki-filled ki-black-left"></i>
           Back
         </button>
-        <button v-if="checkStatusCode()" class="btn btn-primary" @click="goToEdit">
+        <button v-if="checkStatusCode()" class="btn btn-primary" :disabled="isLoading" @click="goToEdit">
           <i class="ki-duotone ki-pencil"></i>
           Edit
         </button>
       </div>
       <div v-if="checkStatusCode()" class="flex items-center justify-end gap-[10px]">
-        <button class="btn btn-outline btn-danger" @click="openReject">
+        <button class="btn btn-outline btn-danger" :disabled="isLoading" @click="openReject">
           <i class="ki-duotone ki-cross-circle"></i>
           Reject
         </button>
-        <button class="btn btn-primary" @click="goVerif">
+        <button class="btn btn-primary" :disabled="isLoading" @click="goVerif">
           <i class="ki-duotone ki-check-circle"></i>
-          Verify
+          {{ route.query.type === '1' ? 'Verify' : 'Approve' }}
         </button>
       </div>
     </div>
@@ -51,10 +51,12 @@ import type { itemsCostType } from './types/additionalCost'
 import type { documentDetailTypes } from './types/invoiceDocument'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import { KTModal } from '@/metronic/core'
+import { useCheckEmpty } from '@/composables/validation'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import StepperStatus from '../../components/stepperStatus/StepperStatus.vue'
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 import type { PostVerificationTypes } from '@/stores/views/invoice/types/verification'
+import { isEmpty } from 'lodash'
 
 const StatusInvoice = defineAsyncComponent(() => import('./InvoiceDetail/StatusInvoice.vue'))
 const GeneralData = defineAsyncComponent(() => import('./InvoiceDetail/GeneralData.vue'))
@@ -71,6 +73,7 @@ const activeStep = ref<string>('')
 const router = useRouter()
 const route = useRoute()
 const verificationApi = useInvoiceVerificationStore()
+const isLoading = ref<boolean>(false)
 
 const routes = ref<routeTypes[]>([
   {
@@ -133,6 +136,7 @@ const detailInvoice = computed(() => verificationApi.detailInvoice)
 const checkStatusCode = () => {
   let status = true
   switch (form.value.statusCode) {
+    case 4:
     case 5:
     case 7:
       status = false
@@ -162,8 +166,32 @@ const checkPo = () => {
   return form.value.invoiceTypeCode === 901
 }
 
+const checkVerifHeader = () => {
+  const invoiceDateError = useCheckEmpty(form.value.invoiceDate).isError
+  const postingDateError = useCheckEmpty(form.value.postingDate).isError
+  const estimatedPaymentDateError = useCheckEmpty(form.value.estimatedPaymentDate).isError
+  const documentNoError = useCheckEmpty(form.value.documentNo).isError
+  const paymentMethodError = useCheckEmpty(form.value.paymentMethodCode).isError
+  const transferNewsError = useCheckEmpty(form.value.transferNews).isError
+  const notesError = useCheckEmpty(form.value.notes).isError
+
+  if (
+    invoiceDateError ||
+    postingDateError ||
+    estimatedPaymentDateError ||
+    documentNoError ||
+    paymentMethodError ||
+    transferNewsError ||
+    notesError
+  ) return false
+  return true
+}
+
 const checkVerif = () => {
+  let status = true
   const data = form.value
+  status = checkVerifHeader()
+
   if (
     !data.bankKeyCheck ||
     !data.generalDataCheck ||
@@ -171,8 +199,9 @@ const checkVerif = () => {
     !data.invoiceCalculationCheck ||
     !data.invoicePoGrCheck ||
     !data.additionalCostCheck 
-  ) return false
-  return true
+  ) status = false
+
+  return status
 }
 
 const mapPoGr = () => {
@@ -218,9 +247,14 @@ const mapDataVerif = () => {
   const taxDoc = form.value.tax || {}
   const referenceDoc = form.value.referenceDocument || {}
   const otherDoc = form.value.otherDocument || {}
+  const documents = []
+  if (!isEmpty(invoiceDoc)) documents.push(invoiceDoc)
+  if (!isEmpty(taxDoc)) documents.push(taxDoc)
+  if (!isEmpty(referenceDoc)) documents.push(referenceDoc)
+  if (!isEmpty(otherDoc)) documents.push(otherDoc)
   const data = {
-    statusCode: 3,
-    statusName: 'Verified',
+    statusCode: route.query.type === '1'? 3 : 4,
+    statusName: route.query.type === '1'? 'Verified' : 'Approved',
     statusNotes: '',
     header: {
       invoiceUId: form.value.invoiceUId,
@@ -252,12 +286,7 @@ const mapDataVerif = () => {
       totalGrossAmount: form.value.totalGrossAmount,
       totalNetAmount: form.value.totalNetAmount
     },
-    documents: [
-      invoiceDoc,
-      taxDoc,
-      referenceDoc,
-      otherDoc
-    ],
+    documents,
     pogr: mapPoGr(),
     additionalCosts: mapAdditionalCost()
   } as PostVerificationTypes
@@ -269,16 +298,20 @@ const goVerif = () => {
   const status = checkVerif()
 
   if (!status) return
+  isLoading.value = true
   verificationApi.postSubmission(mapDataVerif()).then(() => {
+    verificationApi.resetDetailInvoiceEdit()
     const idModal = document.querySelector('#success_verif_modal')
     const modal = KTModal.getInstance(idModal as HTMLElement)
     modal.show()
     setTimeout(() => {
       modal.hide()
       router.push({
-        name: 'invoiceVerification'
+        name: route.query.type === '1' ? 'invoiceVerification' : 'invoiceApproval'
       })
     }, 1000)
+  }).finally(() => {
+    isLoading.value = false
   })
 }
 
@@ -294,7 +327,7 @@ const goReject = (reason: string) => {
     setTimeout(() => {
       modal.hide()
       router.push({
-        name: 'invoiceVerification'
+        name: route.query.type === '1' ? 'invoiceVerification' : 'invoiceApproval'
       })
     }, 1000)
   })

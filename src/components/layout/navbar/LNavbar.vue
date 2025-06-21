@@ -13,7 +13,7 @@
 
         <div class="flex items-center gap-3.5">
           <LNavbarMenu v-if="route.name !== 'landing-page'" />
-          <LNavbarProfile />
+          <LNavbarProfile v-if="!route.name?.toString().includes('registration')" />
         </div>
       </nav>
     </div>

@@ -40,9 +40,11 @@
             label="Pernyataan Perbedaan Rekening"
             placeholder="Pilih"
             acceptedFiles=".pdf"
+            :max-size="16000000"
             @addedFile="(file) => uploadFile(file, 'different account')"
             required
             :error="paymentDetail.urlAccountDifferencesError"
+            @upload-failed="(val) => (modalUploadFailed = val)"
           />
           <UiFileUpload
             v-if="paymentDetailFlagging.isNotSameAsCompany"
@@ -50,9 +52,11 @@
             label="Halaman Pertama Buku Tabungan"
             placeholder="Pilih"
             acceptedFiles=".pdf"
+            :max-size="16000000"
             @addedFile="(file) => uploadFile(file, 'first page')"
             required
             :error="paymentDetail.urlFirstPageError"
+            @upload-failed="(val) => (modalUploadFailed = val)"
           />
           <UiSelect
             v-model="paymentDetail.currencyId"
@@ -75,7 +79,6 @@
               :required="!paymentDetailFlagging.bankNotRegistered"
               :disabled="paymentDetailFlagging.bankNotRegistered"
               :error="paymentDetail.bankIdError"
-              @update:model-value="(val) => checkBankCountry(String(val))"
             />
 
             <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5">
@@ -98,15 +101,13 @@
           />
           <UiSelect
             v-if="paymentDetailFlagging.bankNotRegistered"
-            v-model="paymentDetail.countryId"
+            v-model="paymentDetail.bankCountryCode"
             label="Bank Country"
             placeholder="Pilih"
             row
             :options="countryList"
-            valueKey="countryCode"
-            textKey="countryName"
             required
-            :error="paymentDetail.countryIdError"
+            :error="paymentDetail.bankCountryCodeError"
           />
           <UiInput
             v-if="paymentDetailFlagging.bankNotRegistered"
@@ -180,10 +181,21 @@
       </div>
     </div>
   </div>
+
+  <ModalConfirmation
+    :open="modalUploadFailed"
+    id="upload-error"
+    type="danger"
+    title="Upload Failed"
+    text="File size exceeds the maximum limit of 16 MB. Please choose a smaller file."
+    no-submit
+    static
+    :cancel="() => (modalUploadFailed = false)"
+  />
 </template>
 
 <script lang="ts" setup>
-import { computed, onBeforeMount, onMounted } from 'vue'
+import { computed, onBeforeMount, onMounted, ref } from 'vue'
 
 import { useRegistrationVendorStore } from '@/stores/views/registration'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
@@ -195,6 +207,7 @@ import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import UiFileUpload from '@/components/ui/atoms/file-upload/UiFileUpload.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiCaptcha from '@/components/ui/atoms/captcha/UiCaptcha.vue'
+import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 
 const registrationVendorStore = useRegistrationVendorStore()
 const vendorMasterDataStore = useVendorMasterDataStore()
@@ -202,6 +215,7 @@ const uploadStore = useUploadStore()
 
 const paymentDetail = computed(() => registrationVendorStore.paymentDetail)
 const paymentDetailFlagging = computed(() => registrationVendorStore.paymentDetailFlagging)
+const modalUploadFailed = ref<boolean>(false)
 
 const termCondition = computed(() => vendorMasterDataStore.termCondition)
 const bankList = computed(() =>
@@ -216,7 +230,12 @@ const currencyList = computed(() =>
     text: `${item.currencyName} (${item.currencyCode})`,
   })),
 )
-const countryList = computed(() => vendorMasterDataStore.countryList)
+const countryList = computed(() =>
+  vendorMasterDataStore.countryList.map((item) => ({
+    value: item.countryCode,
+    text: `${item.countryCode} - ${item.countryName}`,
+  })),
+)
 
 const uploadFile = async (file: File, type: 'different account' | 'first page') => {
   try {
@@ -232,12 +251,6 @@ const uploadFile = async (file: File, type: 'different account' | 'first page') 
   } catch (error) {
     console.error(error)
   }
-}
-
-const checkBankCountry = (value: string) => {
-  registrationVendorStore.paymentDetail.countryId = bankList.value.find(
-    (item) => item.bankKey === value,
-  )!.bankCountryCode
 }
 
 onBeforeMount(() => {})

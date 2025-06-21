@@ -117,6 +117,8 @@ interface ParamsSubmissionItem {
   uom: string
   itemText: string
   conditionType: string
+  conditionTypeDesc: string
+  qcStatus: string
   whtType: string
   whtCode: string
   whtBaseAmount: number
@@ -221,6 +223,8 @@ export interface itemsPoGrType {
   uom: string
   itemText: string
   conditionType: string
+  conditionTypeDesc: string
+  qcStatus: string
   whtType: string
   whtCode: string
   whtBaseAmount: number

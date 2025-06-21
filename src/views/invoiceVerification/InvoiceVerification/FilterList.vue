@@ -25,7 +25,7 @@
         </div>
         <div class="relative">
           <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white">Status</label>
-          <select v-model="invoiceType" class="select" name="select">
+          <select v-model="status" class="select" name="select">
             <option value="1">
               Waiting for Verify
             </option>

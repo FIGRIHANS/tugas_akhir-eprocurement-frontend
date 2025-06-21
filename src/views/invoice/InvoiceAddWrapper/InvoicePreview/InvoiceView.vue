@@ -30,11 +30,11 @@
         <p class="text-xs font-normal text-gray-700">Currency</p>
         <p class="text-sm font-medium">{{ form.currency || '-' }}</p>
       </div>
-      <div v-if="form.invoiceDp === '9011'" class="w-[calc(50%-10px)]">
+      <div v-if="form.invoiceDp === '9013'" class="w-[calc(50%-10px)]">
         <p class="text-xs font-normal text-gray-700">Remaining DP Amount</p>
         <p class="text-sm font-medium">{{ form.remainingDpAmount || '-' }}</p>
       </div>
-      <div v-if="form.invoiceDp === '9011'" class="w-[calc(50%-10px)]">
+      <div v-if="form.invoiceDp === '9013'" class="w-[calc(50%-10px)]">
         <p class="text-xs font-normal text-gray-700">DP Amount Deduction</p>
         <p class="text-sm font-medium">{{ form.dpAmountDeduction || '-' }}</p>
       </div>

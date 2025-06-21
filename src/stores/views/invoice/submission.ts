@@ -46,8 +46,8 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
     return response.data.result
   }
 
-  const getPoGr = async () => {
-    const response: ApiResponse<PoGrItemTypes[]> = await invoiceApi.get(`/invoice/po-gr`)
+  const getPoGr = async (poNumber: string, companyCode: string, vendorCode: string) => {
+    const response: ApiResponse<PoGrItemTypes[]> = await invoiceApi.get(`/invoice/po-gr?poNumber=${poNumber}&companyCode=${companyCode}&vendorCode=${vendorCode}`)
   
     poGrList.value = response.data.result.content
   
@@ -68,10 +68,17 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
         ...query
       }
     })
+
+    const newList = response.data.result.content.map((item) => {
+      return {
+        ...item,
+        isOpenChild: false
+      }
+    })
   
-    listPo.value = response.data.result.content.sort((a, b) => moment(b.invoiceDate).valueOf() - moment(a.invoiceDate).valueOf())
+    listPo.value = newList.sort((a, b) => moment(b.invoiceDate).valueOf() - moment(a.invoiceDate).valueOf())
   
-    return response.data.result.content
+    return newList
   }
 
   const getPoDetail = async (uid: string) => {

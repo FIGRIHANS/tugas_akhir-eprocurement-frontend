@@ -44,7 +44,7 @@ const props = withDefaults(defineProps<IFileUploadProps>(), {
   error: false,
   hintText: '',
 })
-const emits = defineEmits(['addedFile'])
+const emits = defineEmits(['addedFile', 'uploadFailed'])
 
 const selectedFile = ref(props.placeholder)
 
@@ -64,6 +64,8 @@ const uploadFile = (event: Event) => {
   if (filesUploaded.files && filesUploaded.files?.length > 0 && isBelowMaxSize) {
     selectedFile.value = filesUploaded.files[0].name
     emits('addedFile', filesUploaded.files[0])
+  } else {
+    emits('uploadFailed', true)
   }
 }
 </script>

@@ -8,7 +8,7 @@
             Search By PO Number
           </label>
           <div class="input">
-            <input v-model="search" placeholder="" @keypress="searchEnter"/>
+            <input v-model="search" placeholder="" type="number" @keypress="searchEnter"/>
             <i class="ki-outline ki-magnifier"></i>
           </div>
         </div>
@@ -50,14 +50,14 @@
               <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentNo }}</td>
               <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentItem }}</td>
               <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentDate }}</td>
-              <td>{{ item.taxCode }}</td>
               <td v-if="!checkInvoiceDp()">{{ useFormatIdr(item.itemAmount) }}</td>
               <td v-if="!checkInvoiceDp()">{{ item.quantity }}</td>
               <td v-if="!checkInvoiceDp()">{{ item.uom }}</td>
               <td v-if="!checkInvoiceDp()">{{ item.materialDescription }}</td>
               <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.conditionType }}</td>
-              <!-- <td v-if="checkInvoiceDp()">{{ item.amountInvoice }}</td> -->
-              <!-- <td v-if="checkInvoiceDp()">{{ item.vatAmount }}</td> -->
+              <td v-if="!checkInvoiceDp()">{{ item.conditionTypeDesc || '-' }}</td>
+              <td v-if="!checkInvoiceDp()">{{ item.qcStatus || '-' }}</td>
+              <td>{{ item.taxCode || '-' }}</td>
               <td>-</td>
               <td>-</td>
               <td>-</td>
@@ -68,7 +68,7 @@
         </tbody>
       </table>
     </div>
-    <SearchPoGr :is-invoice-dp="form?.invoiceDp" :is-po-pib="form?.invoiceType === 'pib'" :search="search" @setItem="setItemPoGr" />
+    <SearchPoGr :is-invoice-dp="form?.invoiceDp" :is-po-pib="form?.invoiceType === 'pib'" @setItem="setItemPoGr" />
   </div>
 </template>
 
@@ -80,10 +80,12 @@ import { defaultColumn, invoiceDpColumn, PoPibColumn } from '@/static/invoicePoG
 import SearchPoGr from './InvoicePoGr/SearchPoGr.vue'
 import type { PoGrSearchTypes, itemsPoGrType } from '../../types/invoicePoGr'
 import { useFormatIdr } from '@/composables/currency'
+import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 
+const invoiceApi = useInvoiceSubmissionStore()
 const form = inject<formTypes>('form')
 const columns = ref<string[]>([])
-const search = ref<string>('')
+const search = ref<number | null>(null)
 const searchError = ref<boolean>(false)
 
 const searchEnter = (event: KeyboardEvent) => {
@@ -93,28 +95,31 @@ const searchEnter = (event: KeyboardEvent) => {
 }
 
 const openAddItem = () => {
-  if (search.value.length !== 10) return searchError.value = true
-  else searchError.value = false
-  if (form) {
-    if (!form.vendorId  || !form.companyCode) {
-      form.companyCodeError = true
-      return
-    } else {
-      form.companyCodeError = false
+  if (search.value) {
+    if (search.value.toString().length !== 10) return searchError.value = true
+    else searchError.value = false
+    if (form) {
+      if (!form.vendorId  || !form.companyCode) {
+        form.companyCodeError = true
+        return
+      } else {
+        form.companyCodeError = false
+      }
     }
+    if (search.value.toString().length !== 10) return
+    invoiceApi.getPoGr(search.value.toString(), form?.companyCode || '', '1000000055')
+    const idModal = document.querySelector('#add_po_gr_item_modal')
+    const modal = KTModal.getInstance(idModal as HTMLElement)
+    modal.show()
   }
-  if (search.value.length !== 10) return
-  const idModal = document.querySelector('#add_po_gr_item_modal')
-  const modal = KTModal.getInstance(idModal as HTMLElement)
-  modal.show()
 }
 
 const checkInvoiceDp = () => {
-  return form?.invoiceDp === 'IDP'
+  return form?.invoiceDp === '9012'
 }
 
 const checkPoPib = () => {
-  return form?.invoiceType === 'pib'
+  return form?.invoiceType === '902'
 }
 
 const deleteItem = (index: number) => {
@@ -124,8 +129,8 @@ const deleteItem = (index: number) => {
 }
 
 const setColumn = () => {
-  if (form?.invoiceType === 'pib') columns.value = ['Action', ...PoPibColumn]
-  else if (form?.invoiceDp === 'IDP') columns.value = ['Action', ...invoiceDpColumn]
+  if (form?.invoiceType === '902') columns.value = ['Action', ...PoPibColumn]
+  else if (form?.invoiceDp === '9012') columns.value = ['Action', ...invoiceDpColumn]
   else columns.value = ['Action', ...defaultColumn]
 }
 
@@ -145,6 +150,8 @@ const setItemPoGr = (items: PoGrSearchTypes[]) => {
       materialDescription: item.materialDescription,
       currency: item.currency,
       conditionType: item.conditionType,
+      conditionTypeDesc: item.conditionTypeDesc,
+      qcStatus: item.qcStatus,
       postingDate: item.postingDate,
       enteredOn: item.enteredOn,
       purchasingOrg: item.purchasingOrg,

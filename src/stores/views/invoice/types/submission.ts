@@ -85,6 +85,8 @@ interface ParamsSubmissionItem {
   uom: string
   itemText: string
   conditionType: string
+  conditionTypeDesc: string
+  qcStatus: string
   whtType: string
   whtCode: string
   whtBaseAmount: number
@@ -133,6 +135,8 @@ export interface PoGrItemTypes {
   materialDescription: string
   currency: string
   conditionType: string
+  conditionTypeDesc: string
+  qcStatus: string
   postingDate: string
   enteredOn: string
   purchasingOrg: string
@@ -149,14 +153,26 @@ export interface ListPoTypes {
   companyName: string
   invoiceNo: string
   invoiceDate: string
-  statusCode: string
+  statusCode: number
   statusName: string
   poNo: string
   grDocumentNo: string
   estimatePaymentDate: string
   totalGrossAmount: number
   totalNetAmount: number
+  vendorName: string
+  pOs: PoChildTypes[]
+  isOpenChild: boolean
 }
+
+export interface PoChildTypes {
+  grDocumentNo: string
+  invoiceUId: string
+  itemAmount: number
+  itemText: string
+  poNo: string
+  quantity: number
+} 
 
 export interface QueryParamsListPoTypes {
   statusCode?: number | null

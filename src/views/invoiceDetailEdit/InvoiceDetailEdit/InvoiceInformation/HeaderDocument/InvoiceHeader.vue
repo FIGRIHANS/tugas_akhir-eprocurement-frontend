@@ -131,6 +131,7 @@
           v-model="form.notes"
           class="textarea"
           placeholder=""
+          :class="{ 'border-danger': form.notesError }"
         ></textarea>
       </div>
     </div>
@@ -138,7 +139,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, inject, type Ref } from 'vue'
+import { ref, computed, watch, onMounted, inject, type Ref } from 'vue'
 import { useRoute } from 'vue-router'
 import type { formTypes } from '../../../types/invoiceDetailEdit'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
@@ -171,6 +172,19 @@ const getInvoiceTypeName = () => {
 // const checkPo = () => {
 //   return typeForm.value === 'po'
 // }
+
+watch(
+  () => form,
+  () => {
+    if (form?.value.paymentMethodCode) {
+      const getIndex = paymentMethodList.value.findIndex((item) => item.code === form.value.paymentMethodCode)
+      if (getIndex !== -1) form.value.paymentMethodName = paymentMethodList.value[getIndex].name
+    }
+  },
+  {
+    deep: true
+  }
+)
 
 onMounted(() => {
   typeForm.value = route.query.type?.toString().toLowerCase() || 'po'

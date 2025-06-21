@@ -20,6 +20,53 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
   const detailInvoiceEdit = ref<DetailInvoiceEditTypes>()
   const isRejectLoading = ref<boolean>(false)
 
+  const resetDetailInvoiceEdit = () => {
+    detailInvoiceEdit.value = {
+      invoiceUId: '',
+      invoiceTypeCode: 0,
+      invoiceTypeName: '',
+      invoiceDPCode: 0,
+      invoiceDPName: '',
+      companyCode: '',
+      companyName: '',
+      invoiceNo: '',
+      documentNo: '',
+      invoiceDate: '',
+      taxNo: '',
+      currCode: '',
+      notes: '',
+      statusCode: 0,
+      statusName: '',
+      postingDate: '',
+      invoicingParty: '',
+      estimatedPaymentDate: '',
+      paymentMethodCode: '',
+      paymentMethodName: '',
+      assigment: '',
+      transferNews: '',
+      npwpReporting: '',
+      bankKey: '',
+      bankName: '',
+      beneficiaryName: '',
+      bankAccountNo: '',
+      vendorId: 0,
+      vendorName: '',
+      vendorAddress: '',
+      subtotal: 0,
+      vatAmount: 0,
+      whtAmount: 0,
+      additionalCost: 0,
+      totalGrossAmount: 0,
+      totalNetAmount: 0,
+      invoicePoGr: [],
+      additionalCosts: [],
+      invoiceDocument: null,
+      tax: null,
+      referenceDocument: null,
+      otherDocument: null
+    }
+  }
+
   const getListPo = async (data: QueryParamsListPoTypes) => {
     listPo.value = []
     const query = {
@@ -60,15 +107,23 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     return response.data.result
   }
 
+  const postSap = async (invoiceUId: string) => {
+    const response: ApiResponse<void> = await invoiceApi.post(`/invoice/sap/${invoiceUId}`)
+
+    return response.data.statusCode
+  }
+
   return {
     listPo,
     detailInvoice,
     isFromEdit,
     detailInvoiceEdit,
     isRejectLoading,
+    resetDetailInvoiceEdit,
     postSubmission,
     getListPo,
     getInvoiceDetail,
-    postReject
+    postReject,
+    postSap
   }
 })

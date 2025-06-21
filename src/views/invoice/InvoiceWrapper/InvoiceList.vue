@@ -2,10 +2,7 @@
   <div class="p-[24px]">
     <div class="tabs mb-5">
       <button class="tab px-[10px]" :class="{ 'active': tabNow === 'po' }" @click="setTab('po')">
-        PO
-      </button>
-      <button class="tab" :class="{ 'active': tabNow === 'nonPo' }" @click="setTab('nonPo')">
-        Non PO
+        Invoice PO
       </button>
       
       <div class="dropdown ml-auto" data-dropdown="true" data-dropdown-trigger="click">
@@ -28,33 +25,21 @@
       </div>
     </div>
     <div class="mt-[24px]">
-      <Transition mode="out-in">
-        <component :is="contentComponent" />
-      </Transition>
+      <PoList />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, defineAsyncComponent, type Component } from 'vue'
+import { ref, onMounted, defineAsyncComponent } from 'vue'
 import { useRouter } from 'vue-router'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 
 const PoList = defineAsyncComponent(() => import('./invoiceList/PoList.vue'))
-const NonPoList = defineAsyncComponent(() => import('./invoiceList/NonPoList.vue'))
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const router = useRouter()
 const tabNow = ref<string>('po')
-
-const contentComponent = computed(() => {
-  const components = {
-    po: PoList,
-    nonPo: NonPoList
-  } as { [key: string]: Component }
-
-  return components[tabNow.value]
-})
 
 const setTab = (name: string) => {
   tabNow.value = name
