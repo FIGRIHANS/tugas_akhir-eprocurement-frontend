@@ -57,7 +57,7 @@
     </div>
     <SuccessSendToSap />
     <FailedSendToSap />
-    <ModalDetailApproval :detailId="viewDetailId" @loadDetail="loadData" @setClearId="viewDetailId = ''" />
+    <ModalDetailApproval @loadDetail="loadData" @setClearId="viewDetailId = ''" />
   </div>
 </template>
 

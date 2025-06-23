@@ -9,7 +9,7 @@
       </div>
       <div class="modal-body p-[0px] pb-[16px]">
         <div class="border border-gray-200 text-center text-lg font-semibold text-gray-700">
-          No Invoice : {{ props.detailId }}
+          No Invoice : {{ list?.header.invoiceNo }}
         </div>
         <table class="table align-middle text-gray-700 font-medium text-sm">
           <thead>
@@ -21,10 +21,11 @@
             <tr v-for="(item, index) in list?.workflow" :key="index" class="text-sm font-normal">
               <td>{{ index + 1 }}</td>
               <td>{{ item.profileName }}</td>
-              <td>{{ item.actionerDate ? moment(item.actionerDate).format('DD MMMM YYYY HH:mm:ss') : '-' }}</td>
+              <td>{{ item.actionerDate && item.actioner !== 0 ? moment(item.actionerDate).format('DD MMMM YYYY HH:mm:ss') : '-' }}</td>
               <td>
-                <span class="badge badge-outline" :class="badgeColor(item.stateCode)">
-                  {{ badgeTitle(item.stateCode) }}
+                <span v-if="item.stateCode === 99">-</span>
+                <span v-else class="badge badge-outline" :class="badgeColor(item.stateCode)">
+                  {{ item.stateName }}
                 </span>
               </td>
               <td class="text-right">{{ item.actionerNotes || '-' }}</td>
@@ -42,10 +43,6 @@ import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { KTModal } from '@/metronic/core'
 import moment from 'moment'
 
-const props = defineProps<{
-  detailId: string
-}>()
-
 const emits = defineEmits(['loadDetail', 'setClearId'])
 
 const invoiceApi = useInvoiceSubmissionStore()
@@ -62,18 +59,9 @@ const list = computed(() => invoiceApi.detailPo)
 
 const badgeColor = (status: number) => {
   const list = {
-    4: 'badge-success',
+    1: 'badge-info',
     5: 'badge-danger',
-    1: 'badge-info'
-  } as { [key: number]: string }
-  return list[status]
-}
-
-const badgeTitle = (status: number) => {
-  const list = {
-    4: 'Approved',
-    5: 'Rejected',
-    1: 'Pending Approval'
+    3: 'badge-success'
   } as { [key: number]: string }
   return list[status]
 }

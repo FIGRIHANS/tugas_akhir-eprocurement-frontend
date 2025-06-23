@@ -109,7 +109,7 @@ interface ParamsSubmissionCost {
 }
 
 interface ParamsSubmissionWorkflow {
-  actioner: string
+  actioner: number
   actionerDate: string
   actionerName: string
   actionerNotes: string
