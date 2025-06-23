@@ -46,7 +46,7 @@ const handleClick = () => {
     <UiIcon name="data" variant="duotone" />
   </UiButton>
 
-  <UiModal title="Vendor Verification Approval" v-model="modal" size="lg">
+  <UiModal title="Vendor Verification Approval" v-model="modal" size="xl">
     <h3 class="font-semibold text-lg text-gray-800 text-center mb-5">{{ nama }}</h3>
     <div class="scrollable-x-auto">
       <table class="table align-middle">
@@ -78,7 +78,12 @@ const handleClick = () => {
             <td colspan="7" class="text-center">No data found.</td>
           </tr>
 
-          <tr v-else v-for="(item, index) in approvalStore.matrixData" :key="index">
+          <tr
+            v-else
+            v-for="(item, index) in approvalStore.matrixData"
+            :key="index"
+            class="text-nowrap"
+          >
             <td>{{ index + 1 }}</td>
             <td>{{ item.approvalByName }}</td>
             <td>{{ item.approvalByPosition }}</td>
@@ -96,7 +101,7 @@ const handleClick = () => {
                 {{ item.approvalName }}
               </span>
             </td>
-            <td>Oke sesuai dengan SOP</td>
+            <td>{{ item.approvalNote }}</td>
           </tr>
         </tbody>
       </table>
