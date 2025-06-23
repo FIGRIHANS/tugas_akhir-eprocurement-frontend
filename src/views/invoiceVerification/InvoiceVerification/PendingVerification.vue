@@ -65,7 +65,7 @@
         <LPagination :totalItems="verifList.length" :pageSize="pageSize" :currentPage="currentPage" @pageChange="setPage" />
       </div>
     </div>
-    <DetailVerificationModal :detailId="viewDetailId" @loadDetail="loadData" @setClearId="viewDetailId = ''"/>
+    <DetailVerificationModal @loadDetail="loadData" @setClearId="viewDetailId = ''"/>
   </div>
 </template>
 
