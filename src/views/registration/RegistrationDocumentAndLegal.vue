@@ -47,7 +47,7 @@
                 <UiInput
                   v-model="documentAndLegal.fields[index].licenseNo"
                   :error="documentAndLegal.fields[index]?.licenseNoError"
-                  :max-length="[12].includes(item.licenseId) ? 16 : 9999"
+                  :max-length="[12, 27].includes(item.licenseId) ? 16 : 9999"
                 />
                 <span v-if="item.licenseId === 12" class="text-danger text-[10px]"
                   >*Batas upload NPWP sebanyak 3 kali</span
