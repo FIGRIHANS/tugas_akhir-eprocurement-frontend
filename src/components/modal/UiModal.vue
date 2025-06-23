@@ -20,6 +20,7 @@ const classes = computed(() => [
     'max-w-[500px]': props.size === 'sm',
     'md:max-w-[600px]': props.size === 'md',
     'lg:max-w-[800px]': props.size === 'lg',
+    'lg:max-w-[900px]': props.size === 'xl',
     'w-full': props.size === 'full',
   },
 ])
