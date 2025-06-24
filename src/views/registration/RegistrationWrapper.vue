@@ -14,9 +14,7 @@
   <div class="flex justify-center">
     <div class="w-[1440px] xl:px-[150px] sm:px-[40px]">
       <RouterView v-slot="{ Component }">
-        <Transition mode="out-in">
-          <component :is="Component" />
-        </Transition>
+        <component :is="Component" />
       </RouterView>
 
       <div class="flex justify-end gap-4 w-full mb-[24px]">
