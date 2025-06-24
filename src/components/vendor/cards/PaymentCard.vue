@@ -82,16 +82,31 @@ watch(
             </td>
           </tr>
           <tr>
-            <td class="text-sm text-gray-600 font-medium">Bank Account Declaration Letter</td>
+            <td class="text-sm text-gray-600 font-medium">Account Discrepancy Statement</td>
             <td class="text-sm font-bold text-gray-700">
               <UiButton
-                :disabled="loading || !paymentStore.data[0].urlBankAccountDeclaration"
+                :disabled="loading || !paymentStore.data[0].urlAccountDifferences"
                 :outline="true"
                 size="sm"
-                @click="download(paymentStore.data[0].urlBankAccountDeclaration as string)"
+                @click="download(paymentStore.data[0].urlAccountDifferences as string)"
               >
                 <UiIcon name="cloud-download" variant="duotone" />
-                <span>Download Bank Account Declaration Letter</span>
+                <span>Download Account Discrepancy Statement</span>
+              </UiButton>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="text-sm text-gray-600 font-medium">Accouunt Cover</td>
+            <td class="text-sm font-bold text-gray-700">
+              <UiButton
+                :disabled="loading || !paymentStore.data[0].urlFirstPage"
+                :outline="true"
+                size="sm"
+                @click="download(paymentStore.data[0].urlFirstPage as string)"
+              >
+                <UiIcon name="cloud-download" variant="duotone" />
+                <span>Download Accouunt Cover </span>
               </UiButton>
             </td>
           </tr>
@@ -115,6 +130,30 @@ watch(
                 disabled
               />
               Bank not Registered
+            </td>
+          </tr>
+          <tr>
+            <td class="text-sm text-gray-600 font-medium">Bank Country</td>
+            <td class="text-sm font-bold text-gray-700">
+              {{ paymentStore.data[0].countryName ?? '-' }}
+            </td>
+          </tr>
+          <tr>
+            <td class="text-sm text-gray-600 font-medium">Bank Name</td>
+            <td class="text-sm font-bold text-gray-700">
+              {{ paymentStore.data[0].bankName ?? '-' }}
+            </td>
+          </tr>
+          <tr>
+            <td class="text-sm text-gray-600 font-medium">Bank Branch</td>
+            <td class="text-sm font-bold text-gray-700">
+              {{ paymentStore.data[0].branch ?? '-' }}
+            </td>
+          </tr>
+          <tr>
+            <td class="text-sm text-gray-600 font-medium">Swift Code</td>
+            <td class="text-sm font-bold text-gray-700">
+              {{ paymentStore.data[0].bankSwiftCode ?? '-' }}
             </td>
           </tr>
           <tr>
