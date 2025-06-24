@@ -26,12 +26,10 @@ export const useLoginStore = defineStore('login', () => {
   }
 
   const callLoginVendor = async (username: string, password: string) => {
-    const response = await vendorApi.post('/public/vendor/login', {
-      request: {
-        username: username,
-        email: '',
-        password: password,
-      },
+    const response = await vendorApi.post('/public/vendor/sign-in', {
+      username: username,
+      email: '',
+      password: password,
     })
 
     return response.data
