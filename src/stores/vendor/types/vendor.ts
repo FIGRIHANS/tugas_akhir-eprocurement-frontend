@@ -85,14 +85,14 @@ export interface IPayment {
   bankId: number
   currencyId: number
   urlDoc: string
-  isTemporary: null | boolean
+  isTemporary: null | string
   action: null | string
   bankAddress: string
   countryId: number
   isTransfer: boolean
   changeRequestId: null | number
   isActive: boolean
-  bankCountryCode: null | string
+  bankCountryCode: string
   bankCode: string
   bankName: string
   bankSwiftCode: string
