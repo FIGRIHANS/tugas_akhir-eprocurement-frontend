@@ -10,11 +10,20 @@
         <div class="relative">
           <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white">Status</label>
           <select v-model="status" class="select" name="select">
+            <option value="1">
+              Waiting to Verify
+            </option>
             <option value="0">
               Draft
             </option>
-            <option value="1">
-              Waiting to Verify
+            <option value="2">
+              Waiting for Approval
+            </option>
+            <option value="4">
+              Approved
+            </option>
+            <option value="5">
+              Rejected
             </option>
           </select>
         </div>
