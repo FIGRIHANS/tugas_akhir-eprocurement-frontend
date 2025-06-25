@@ -3,7 +3,6 @@ import { defineStore } from 'pinia'
 import type { ResponseUser } from './types/login'
 import api from '@/core/utils/api'
 import userApi from '@/core/utils/userApi'
-import vendorApi from '@/core/utils/vendorApi'
 
 export const useLoginStore = defineStore('login', () => {
   const selectedLogin = ref<string>('')
@@ -26,10 +25,9 @@ export const useLoginStore = defineStore('login', () => {
   }
 
   const callLoginVendor = async (username: string, password: string) => {
-    const response = await vendorApi.post('/public/vendor/sign-in', {
-      username: username,
-      email: '',
-      password: password,
+    const response = await api.post('/auth/vendor/sign-in', {
+      userName: username,
+      userPassword: password
     })
 
     return response.data

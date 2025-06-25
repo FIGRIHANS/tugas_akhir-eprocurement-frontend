@@ -67,6 +67,8 @@
                   format="dd MM yyyy"
                   :error="documentAndLegal.fields[index]?.expiredDateError"
                   class="!w-48"
+                  :disabled="documentAndLegal.fields[index]?.issuedDate ? false : true"
+                  :min-date="documentAndLegal.fields[index]?.issuedDate"
                 />
               </td>
               <td class="align-top">
@@ -116,8 +118,8 @@
         </table>
       </div>
     </div>
-    <!-- v-if="documentAndLegal.kategori" -->
-    <div class="flex flex-col gap-[24px]">
+
+    <div v-if="documentAndLegal.kategori" class="flex flex-col gap-[24px]">
       <hr class="border-gray-300" />
 
       <div class="flex flex-row items-center gap-2">
@@ -189,8 +191,8 @@
                     v-model="documentAndLegal.anotherDocuments[index].expiredDate"
                     format="dd MM yyyy"
                     class="!w-48"
-                    :disabled="!!!documentAndLegal.anotherDocuments[index].issuedDate"
-                    :min-date="documentAndLegal.anotherDocuments[index].issuedDate"
+                    :disabled="documentAndLegal.anotherDocuments[index]?.issuedDate ? false : true"
+                    :min-date="documentAndLegal.anotherDocuments[index]?.issuedDate"
                   />
                 </td>
                 <td class="align-top">
@@ -262,7 +264,7 @@
 
   <ModalConfirmation
     :open="modalUploadFailed"
-    id="upload-error"
+    id="doc-legal-upload-error"
     type="danger"
     title="Upload Failed"
     text="File size exceeds the maximum limit of 16 MB. Please choose a smaller file."
@@ -299,7 +301,6 @@ const tableItems = computed(() => vendorMasterDataStore.companyLicense)
 
 const fileList = computed(() => registrationVendorStore.fileList)
 const fileOtherDocumentList = computed(() => registrationVendorStore.fileOtherDocumentList)
-
 const modalUploadFailed = ref<boolean>(false)
 
 const uploadFile = (file: File, index: number, type: 'default' | 'other doc') => {
