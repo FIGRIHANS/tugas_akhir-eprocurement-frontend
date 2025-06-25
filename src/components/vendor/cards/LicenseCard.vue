@@ -3,9 +3,10 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiLoading from '@/components/UiLoading.vue'
 import { formatDate } from '@/core/utils/format'
+import { type ILicense } from '@/stores/vendor/types/vendor'
 import { useVendorUploadStore } from '@/stores/vendor/upload'
 import { useVendorIzinUsahaStore } from '@/stores/vendor/vendor'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 const izinUsahaStore = useVendorIzinUsahaStore()
@@ -33,6 +34,15 @@ const download = async (path: string) => {
   }
 }
 
+const sortedLicenses = computed<ILicense[]>(() => {
+  return izinUsahaStore.data.slice().sort((a, b) => {
+    if (a.seq && b.seq) {
+      return a.seq - b.seq
+    }
+    return 0
+  })
+})
+
 watch(
   () => route.params.id,
   (id) => {
@@ -46,10 +56,10 @@ watch(
     <div class="card-header">
       <div class="card-title">Business Licenses</div>
     </div>
-    <div class="card-table">
+    <div class="card-table scrollable-x-auto">
       <table class="table align-middle table-border">
         <thead>
-          <tr>
+          <tr class="text-nowrap">
             <th>License Type</th>
             <th>License Number</th>
             <th>Start Date</th>
@@ -57,7 +67,7 @@ watch(
             <th>Document</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody class="text-nowrap">
           <tr v-if="izinUsahaStore.loading">
             <td colspan="5" class="text-center">
               <UiLoading size="md" />
@@ -71,14 +81,20 @@ watch(
           <tr v-else-if="!izinUsahaStore.data.length">
             <td colspan="5" class="text-center">No data</td>
           </tr>
-          <tr v-else v-for="item in izinUsahaStore.data" :key="item.licenseId">
+          <tr v-else v-for="item in sortedLicenses" :key="item.licenseId">
             <td>{{ item.licenseName }}</td>
             <td>{{ item.licenseNo }}</td>
             <td>
-              {{ item.issuedUTCDate ? formatDate(new Date(item.issuedUTCDate as string)) : '-' }}
+              {{
+                item.issuedUTCDate ? formatDate(new Date(item.issuedUTCDate as string), 'us') : '-'
+              }}
             </td>
             <td>
-              {{ item.expiredUTCDate ? formatDate(new Date(item.expiredUTCDate as string)) : '-' }}
+              {{
+                item.expiredUTCDate
+                  ? formatDate(new Date(item.expiredUTCDate as string), 'us')
+                  : '-'
+              }}
             </td>
             <td>
               <UiButton

@@ -65,16 +65,17 @@ export interface ILicense {
   vendorId: number
   licenseId: number
   licenseNo: string
-  issuedUTCDate: null | string
-  expiredUTCDate: null | string
-  issuedBy: null | string
-  issuedLocation: null | string
+  issuedUTCDate: string
+  expiredUTCDate: string
+  issuedBy: string | null
+  issuedLocation: string | null
   documentUrl: string
-  remark: null | string
-  action: null | string
-  isTemporary: null | string
+  remark: string
+  action: string | null
+  isTemporary: string | null
   licenseName: string
-  isNominal: boolean
+  seq: number
+  companyCategoryId: number
 }
 
 export interface IPayment {

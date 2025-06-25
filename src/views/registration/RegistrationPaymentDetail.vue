@@ -184,7 +184,7 @@
 
   <ModalConfirmation
     :open="modalUploadFailed"
-    id="upload-error"
+    id="payment-upload-error"
     type="danger"
     title="Upload Failed"
     text="File size exceeds the maximum limit of 16 MB. Please choose a smaller file."
@@ -195,7 +195,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onBeforeMount, onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 import { useRegistrationVendorStore } from '@/stores/views/registration'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
@@ -252,8 +252,6 @@ const uploadFile = async (file: File, type: 'different account' | 'first page') 
     console.error(error)
   }
 }
-
-onBeforeMount(() => {})
 
 onMounted(() => {
   vendorMasterDataStore.getVendorTermCondition()
