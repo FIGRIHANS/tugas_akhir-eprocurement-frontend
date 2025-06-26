@@ -17,7 +17,7 @@ export default [
     id: 'dashboard',
     title: 'Beranda',
     icon: 'element-11',
-    to: '/dashboard',
+    to: 'dashboard',
     child: [],
   },
   {
@@ -39,22 +39,22 @@ export default [
       {
         id: 'vendor-master',
         title: 'Vendor Master',
-        to: '/vendor/master',
+        to: 'vendor-master',
       },
       {
         id: 'vendor-verification',
         title: 'Vendor Verification',
-        to: '/vendor/verification',
+        to: 'vendor-verification',
       },
       {
         id: 'vendor-approval',
         title: 'Vendor Approval',
-        to: '/vendor/approval',
+        to: 'vendor-approval',
       },
       {
         id: 'vendor-blacklist',
         title: 'Vendor Blacklist',
-        to: '/vendor/blacklist',
+        to: 'vendor-blacklist',
       },
     ],
   },
@@ -99,7 +99,7 @@ export default [
       {
         id: 'vendor-approval',
         title: 'Approval Verifikasi Vendor',
-        to: '/vendor-approval',
+        to: 'vendor-approval',
       },
     ],
   },
@@ -128,17 +128,17 @@ export default [
       {
         id: 'invoice-list',
         title: 'E-invoice',
-        to: '/invoice',
+        to: 'invoice',
       },
       {
         id: 'invoice-verification',
         title: 'Invoice Verification',
-        to: '/invoice/verification',
+        to: 'invoiceVerification',
       },
       {
         id: 'invoice-approval',
         title: 'Invoice Approval',
-        to: '/invoice/approval',
+        to: 'invoiceApproval',
       },
       {
         id: 'schedule-payment',

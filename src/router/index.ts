@@ -14,7 +14,7 @@ import invoice from './modules/invoice'
 import dashboard from './modules/dashboard'
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory('/eprocurement/'),
   routes: [
     ...login,
     {

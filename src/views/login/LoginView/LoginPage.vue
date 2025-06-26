@@ -106,7 +106,7 @@ const saveAccount = () => {
 const setToken = (result: ApiResponseDataResult<string>) => {
   const expired = moment().add(2, 'hours').utc().format('ddd, DD MMM YYYY HH:mm:ss') + ' GMT'
   const getUsernameEmail = checkVendor() ? username.value : email.value
-  document.cookie = `session_data=token_dts=${'Bearer ' + result.content}&isAdmin=${!checkVendor()}&username=${getUsernameEmail}; path=/; expires=${expired}; Secure; SameSite=Strict`
+  document.cookie = `session_data=token_dts=${'Bearer ' + result.content}&isAdmin=${!checkVendor()}&username=${getUsernameEmail}; path=/; expires=${expired}; SameSite=Strict`
 }
 
 const nextStepLogin = (response: ApiResponseData<string>) => {
