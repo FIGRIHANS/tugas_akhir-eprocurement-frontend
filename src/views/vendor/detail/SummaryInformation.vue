@@ -40,6 +40,11 @@ const isVerified = computed(() =>
 )
 
 const handleVerify = async () => {
+  if (!notes.value) {
+    inputError.value.push('notes')
+    return
+  }
+
   loading.value = true
   error.value = ''
 
@@ -146,14 +151,15 @@ onMounted(() => {
     </div>
   </div>
 
-  <UiModal v-if="modalReject" v-model="modalReject" title="Reject Data Administrasi" size="sm">
+  <UiModal v-if="modalReject" v-model="modalReject" title="Reject Vendor" size="sm">
     <form @submit.prevent="handleReject">
       <div class="relative mb-3">
         <label
           for="reason"
           class="absolute bg-white top-0 left-0 ml-2 -mt-2 text-sm text-gray-600 px-1"
-          >Reason <span class="text-danger">*</span></label
         >
+          Reason <span class="text-danger">*</span>
+        </label>
         <textarea id="reason" class="textarea" rows="6" v-model="reason" required></textarea>
       </div>
       <div v-if="inputError.includes('reason')" class="text-xs text-danger">Reason is required</div>
@@ -184,15 +190,17 @@ onMounted(() => {
     </form>
   </UiModal>
 
-  <UiModal v-if="modalVerify" v-model="modalVerify" title="Verify Data Administrasi" size="sm">
+  <UiModal v-if="modalVerify" v-model="modalVerify" title="Verify Vendor" size="sm">
     <form @submit.prevent="handleVerify">
       <div class="relative mb-3">
         <label
           for="notes"
           class="absolute bg-white top-0 left-0 ml-2 -mt-2 text-sm text-gray-600 px-1"
-          >Notes</label
         >
+          Notes <span class="text-danger">*</span>
+        </label>
         <textarea id="notes" class="textarea" rows="6" v-model="notes"></textarea>
+        <div v-if="inputError.includes('notes')" class="text-xs text-danger">Notes is required</div>
       </div>
       <div class="flex gap-3">
         <UiButton
