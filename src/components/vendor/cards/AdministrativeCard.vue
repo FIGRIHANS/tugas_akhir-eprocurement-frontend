@@ -183,14 +183,14 @@ watch(
           <tbody>
             <tr>
               <td class="text-sm text-gray-600 font-medium w-[182px]">Business Fields</td>
-              <td class="text-sm font-bold text-gray-700">
+              <td class="text-sm text-gray-700">
                 <ul>
                   <li
                     v-for="(bf, index) in administrasiStore.data.businessFieldName?.split(',')"
                     :key="bf"
                   >
-                    {{ index + 1 }}.
-                    {{ bf }}
+                    <strong> {{ index + 1 }}. {{ bf.split('(')[0].trim() }}, </strong>
+                    <span>{{ bf.split('(')[1].trim().replace(')', '') }}</span>
                   </li>
                 </ul>
               </td>

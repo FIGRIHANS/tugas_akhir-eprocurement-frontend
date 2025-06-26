@@ -30,6 +30,12 @@ export const useApprovalStore = defineStore('approval', () => {
         '/public/verifiedvendor/approval/vendor-list',
         { params },
       )
+
+      if (response.data.result.isError) {
+        error.value = response.data.result.message
+        return
+      }
+
       data.value = response.data.result.content
     } catch (err: unknown) {
       if (err instanceof Error) {
