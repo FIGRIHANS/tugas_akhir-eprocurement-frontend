@@ -3,14 +3,13 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import FilterDropdown from './filterDropdown/FilterDropdown.vue'
 import UiSelect from '../ui/atoms/select/UiSelect.vue'
 import { useRoute } from 'vue-router'
-import { useApprovalStatusStore, useApprovalTypeStore } from '@/stores/vendor/reference'
+import { useApprovalStatusStore } from '@/stores/vendor/reference'
 import { useVendorCategoryStore } from '@/stores/vendor/category'
 import moment from 'moment'
 
 const route = useRoute()
 
 const statusRef = useApprovalStatusStore()
-const approvalRef = useApprovalTypeStore()
 const categoryRef = useVendorCategoryStore()
 
 const approvalDate = ref<Date | null>(null)
@@ -20,7 +19,6 @@ const filters = reactive({
   SendApprovalDate: computed(() =>
     approvalDate.value ? moment(approvalDate.value).format('YYYY-MM-DD') : '',
   ),
-  ApprovalTypeName: '',
 })
 
 const statusOptions = computed(() =>
@@ -37,13 +35,6 @@ const categoryOptions = computed(() =>
   })),
 )
 
-const approvalTypeOptions = computed(() =>
-  approvalRef.approvalType.map((item) => ({
-    text: item.value,
-    value: item.value,
-  })),
-)
-
 watch(
   () => route.query,
   (query) => {
@@ -52,7 +43,6 @@ watch(
     approvalDate.value = (query.SendApprovalDate as string)
       ? new Date(query.SendApprovalDate as string)
       : null
-    filters.ApprovalTypeName = (query.ApprovalTypeName as string) || ''
   },
   {
     immediate: true,
@@ -62,7 +52,6 @@ watch(
 
 onMounted(() => {
   statusRef.getStatus()
-  approvalRef.getType()
   categoryRef.getCategories()
 })
 </script>
@@ -103,14 +92,6 @@ onMounted(() => {
         </template>
       </VueDatePicker>
     </div>
-
-    <!-- izin usaha -->
-    <UiSelect
-      label="Approval Type"
-      placeholder="Select"
-      v-model="filters.ApprovalTypeName"
-      :options="approvalTypeOptions"
-    />
   </FilterDropdown>
 </template>
 
