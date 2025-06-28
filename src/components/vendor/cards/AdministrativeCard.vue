@@ -189,8 +189,8 @@ watch(
                     v-for="(bf, index) in administrasiStore.data.businessFieldName?.split(',')"
                     :key="bf"
                   >
-                    <strong> {{ index + 1 }}. {{ bf.split('(')[0].trim() }}, </strong>
-                    <span>{{ bf.split('(')[1].trim().replace(')', '') }}</span>
+                    <strong> {{ index + 1 }}. {{ bf.split('(')[0]?.trim() ?? bf }}, </strong>
+                    <span>{{ bf.split('(')[1]?.trim()?.replace(')', '') ?? '' }}</span>
                   </li>
                 </ul>
               </td>
