@@ -164,7 +164,7 @@ export default [
       {
         id: 'Master Role',
         title: 'Master Role',
-        // to: '/user-management/master-role',
+        to: 'user-management-master-role',
       },
       {
         id: 'Report User Authorization',

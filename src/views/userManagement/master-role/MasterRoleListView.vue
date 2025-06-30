@@ -9,36 +9,36 @@ import { ref } from 'vue'
 
 const search = ref('')
 
-const modalProfile = ref(false)
+const modalRole = ref(false)
 
 const handleCancel = () => {
-  modalProfile.value = false
+  modalRole.value = false
 }
 
 const handleOpenModal = () => {
-  modalProfile.value = true
+  modalRole.value = true
 }
 </script>
 
 <template>
   <div>
     <BreadcrumbView
-      title="Master Profile"
+      title="Master Role"
       :routes="[
         { name: 'User Management', to: '/user-management/user' },
-        { name: 'Master Profile', to: '#' },
+        { name: 'Master Role', to: '#' },
       ]"
     />
 
     <div class="card">
       <div class="card-header">
         <div class="flex w-full justify-between items-center">
-          <h2 class="text-lg font-bold text-slate-800">Master Profile</h2>
+          <h2 class="text-lg font-bold text-slate-800">Master Role</h2>
           <div class="flex gap-2">
             <UiInputSearch v-model="search" placeholder="Search Profile" />
             <UiButton variant="primary" @click="handleOpenModal">
               <UiIcon variant="duotone" name="plus" />
-              Add Profile</UiButton
+              Add Role</UiButton
             >
           </div>
         </div>
@@ -48,8 +48,8 @@ const handleOpenModal = () => {
           <thead class="">
             <tr>
               <th></th>
-              <th class="text-nowrap">Profile ID</th>
-              <th class="text-nowrap">Profile Name</th>
+              <th class="text-nowrap">Role ID</th>
+              <th class="text-nowrap">Role Name</th>
               <th class="text-nowrap">Created Date</th>
             </tr>
           </thead>
@@ -100,7 +100,7 @@ const handleOpenModal = () => {
                             </defs>
                           </svg>
 
-                          Edit Profile
+                          Edit Role
                         </UiButton>
                         <UiButton
                           variant="light"
@@ -126,7 +126,7 @@ const handleOpenModal = () => {
                             />
                           </svg>
 
-                          Delete Profile
+                          Delete Role
                         </UiButton>
                       </div>
                     </div>
@@ -144,13 +144,13 @@ const handleOpenModal = () => {
 
     <!-- Modal form -->
     <UiModal
-      title="Add New Profile"
-      v-model="modalProfile"
-      v-if="modalProfile"
+      title="Add New Role"
+      v-model="modalRole"
+      v-if="modalRole"
       @update:model-value="handleCancel"
       size="sm"
     >
-      <UiInput label="Profile Name" placeholder="Enter profile name" row required />
+      <UiInput label="Role Name" placeholder="Enter Role name" row required />
       <div class="mt-4 w-full gap-2 justify-end items-center flex">
         <UiButton outline>Cancel</UiButton>
         <UiButton variant="primary">Save</UiButton>

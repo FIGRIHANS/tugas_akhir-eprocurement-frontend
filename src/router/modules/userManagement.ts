@@ -42,4 +42,9 @@ export default [
     name: 'user-management-master-profile',
     component: () => import('@/views/userManagement/master-profile/MasterProfileListView.vue'),
   },
+  {
+    path: '/user-management/master-role',
+    name: 'user-management-master-role',
+    component: () => import('@/views/userManagement/master-role/MasterRoleListView.vue'),
+  },
 ]
