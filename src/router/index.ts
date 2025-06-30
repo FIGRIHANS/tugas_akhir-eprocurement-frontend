@@ -12,7 +12,7 @@ import vendor from './modules/vendor'
 import registration from './modules/registration'
 import invoice from './modules/invoice'
 import dashboard from './modules/dashboard'
-import userManagement from './modules/user-management'
+import userManagement from './modules/userManagement'
 
 const router = createRouter({
   history: createWebHistory(),

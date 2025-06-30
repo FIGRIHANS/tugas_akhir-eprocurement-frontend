@@ -154,22 +154,22 @@ export default [
       {
         id: 'List User',
         title: 'List User',
-        to: '/user-management/user',
+        to: 'user-management-user-list',
       },
       {
         id: 'Master Profile',
         title: 'Master Profile',
-        to: '/user-management/master-profile',
+        // to: '/user-management/master-profile',
       },
       {
         id: 'Master Role',
         title: 'Master Role',
-        to: '/user-management/master-role',
+        // to: '/user-management/master-role',
       },
       {
         id: 'Report User Authorization',
         title: 'Report User Authorization',
-        to: '/user-management/report-user-authorization',
+        // to: '/user-management/report-user-authorization',
       },
     ],
   },
