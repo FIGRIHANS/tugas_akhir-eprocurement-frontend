@@ -159,7 +159,7 @@ export default [
       {
         id: 'Master Profile',
         title: 'Master Profile',
-        // to: '/user-management/master-profile',
+        to: 'user-management-master-profile',
       },
       {
         id: 'Master Role',
