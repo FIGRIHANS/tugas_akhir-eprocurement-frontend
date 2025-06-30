@@ -56,7 +56,6 @@ const handleClick = () => {
             <th>Approver Name</th>
             <th>Position</th>
             <th>Approval Date</th>
-            <th>Approval Type</th>
             <th>Status</th>
             <th>Description</th>
           </tr>
@@ -88,7 +87,6 @@ const handleClick = () => {
             <td>{{ item.approvalByName }}</td>
             <td>{{ item.approvalByPosition }}</td>
             <td>{{ moment(item.createdUtcDate).format('LLL') }}</td>
-            <td>-</td>
             <td>
               <span
                 class="badge badge-outline"
