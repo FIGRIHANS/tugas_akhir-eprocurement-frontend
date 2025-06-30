@@ -52,7 +52,9 @@ const router = useRouter()
 
 const redirectTo = (path?: string) => {
   if (path) {
-    router.push(path)
+    router.push({
+      name: path
+    })
   }
 }
 </script>

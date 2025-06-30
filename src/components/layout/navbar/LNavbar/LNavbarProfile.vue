@@ -23,11 +23,15 @@
   </div>
 
   <template v-else>
-    <UiButton outline variant="dark" size="lg" @click="router.push('/registration')">
+    <UiButton outline variant="dark" size="lg" @click="router.push({
+      name: 'registration'
+    })">
       Register
       <UiIcon variant="duotone" name="menu" />
     </UiButton>
-    <button class="btn btn-lg btn-dark" @click="router.push('/login')">
+    <button class="btn btn-lg btn-dark" @click="router.push({
+      name: 'login'
+    })">
       Sign In
       <UiIcon variant="duotone" name="entrance-left" />
     </button>
