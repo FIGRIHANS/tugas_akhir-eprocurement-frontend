@@ -136,7 +136,10 @@ watch(
                 <UiButton
                   :icon="true"
                   size="sm"
-                  @click="$router.push(`/eprocurement/vendor/verification/${vendor.id}`)"
+                  @click="$router.push({
+                    name: 'vendor-master-detail',
+                    params: { id: vendor.id }
+                  })"
                 >
                   <UiIcon name="eye" />
                 </UiButton>

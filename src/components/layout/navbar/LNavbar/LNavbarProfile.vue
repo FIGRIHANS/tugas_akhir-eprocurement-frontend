@@ -53,6 +53,6 @@ const userData = computed(() => loginApi.userData)
 
 const logout = () => {
   loginApi.clearUserData()
-  document.cookie = `session_data=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; Secure; SameSite=Strict`
+  document.cookie = `session_data=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Strict`
 }
 </script>
