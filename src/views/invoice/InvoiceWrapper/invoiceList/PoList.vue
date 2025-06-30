@@ -130,7 +130,10 @@ const poList = computed(() => invoiceApi.listPo)
 const colorBadge = (statusCode: number) => {
   const list = {
     0: 'badge-primary',
-    1: 'badge-warning'
+    1: 'badge-warning',
+    2: 'badge-info',
+    4: 'badge-success',
+    5: 'badge-danger'
   } as { [key: number]: string }
   return list[statusCode]
 }
@@ -153,7 +156,7 @@ const setPage = (value: number) => {
 }
 
 const goView = (data: ListPoTypes) => {
-  if (data.statusCode === 0) {
+  if (data.statusCode === 0 || data.statusCode === 5) {
     router.push({
       name: 'invoiceAdd',
       query: {
