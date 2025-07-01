@@ -169,7 +169,7 @@ export default [
       {
         id: 'Report User Authorization',
         title: 'Report User Authorization',
-        // to: '/user-management/report-user-authorization',
+        to: 'user-management-report-authorization',
       },
     ],
   },

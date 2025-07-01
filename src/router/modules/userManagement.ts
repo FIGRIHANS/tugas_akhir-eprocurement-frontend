@@ -47,4 +47,25 @@ export default [
     name: 'user-management-master-role',
     component: () => import('@/views/userManagement/master-role/MasterRoleListView.vue'),
   },
+  {
+    path: '/user-management/report-authorization',
+    name: 'user-management-report-authorization',
+    component: () =>
+      import('@/views/userManagement/report-user-authorization/ReportUserAuthorizationWrapper.vue'),
+    redirect: { name: 'report-authorization-profile' },
+    children: [
+      {
+        path: 'profile',
+        name: 'report-authorization-profile',
+        component: () =>
+          import('@/views/userManagement/report-user-authorization/ReportProfileView.vue'),
+      },
+      {
+        path: 'role',
+        name: 'report-authorization-role',
+        component: () =>
+          import('@/views/userManagement/report-user-authorization/ReportRoleView.vue'),
+      },
+    ],
+  },
 ]
