@@ -1,19 +1,19 @@
 <template>
   <div class="flex items-center justify-center pb-[24px]">
-    <div 
-      v-for="(step, index) in steps" 
+    <div
+      v-for="(step, index) in steps"
       :key="index"
        class="text-center"
     >
       <div class="flex items-center mb-[8px]">
-        <div 
-          class="flex items-center justify-center w-10 h-10 rounded-full border-2" 
+        <div
+          class="flex items-center justify-center w-10 h-10 rounded-full border-2"
           :class="step.active ? 'bg-blue-500 text-white border-blue-500' : 'bg-gray-200 text-gray-500 border-gray-300'">
           <i :class="step.icon"></i>
         </div>
-        <div 
-          v-if="index < steps.length - 1" 
-          class="w-[120px] h-[5px]" 
+        <div
+          v-if="index < steps.length - 1"
+          class="w-[120px] h-[5px]"
           :class="steps[index + 1].active ? 'bg-blue-500' : 'bg-gray-300'">
         </div>
       </div>
