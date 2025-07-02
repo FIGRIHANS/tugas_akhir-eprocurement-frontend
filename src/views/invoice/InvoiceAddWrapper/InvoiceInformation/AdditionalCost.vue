@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col gap-[16px]">
     <p class="text-base font-semibold">Additional Cost</p>
-    <button v-if="form?.status === 0" class="btn btn-outline btn-primary w-fit" @click="addNew">
+    <button v-if="form?.status === 0 || form?.status === 5" class="btn btn-outline btn-primary w-fit" @click="addNew">
       <i class="ki-duotone ki-plus-circle"></i>
       Add Additional Cost
     </button>
