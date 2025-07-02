@@ -143,20 +143,18 @@ watch(
             </td>
             <td>{{ vendor.companyCategoryName }}</td>
             <td>
-              {{
-                vendor.createdUTCDate ? formatDate(new Date(vendor.createdUTCDate), 'en-US') : '-'
-              }}
+              {{ vendor.createdUTCDate ? formatDate(new Date(vendor.createdUTCDate), 'us') : '-' }}
             </td>
             <td>
               {{
                 vendor.verifiedSendUTCDate
-                  ? formatDate(new Date(vendor.verifiedSendUTCDate as string), 'en-US')
+                  ? formatDate(new Date(vendor.verifiedSendUTCDate as string), 'us')
                   : '-'
               }}
             </td>
             <td>
               {{
-                vendor.verifiedUTCDate ? formatDate(new Date(vendor.verifiedUTCDate), 'en-US') : '-'
+                vendor.verifiedUTCDate ? formatDate(new Date(vendor.verifiedUTCDate), 'us') : '-'
               }}
             </td>
             <td>
@@ -167,9 +165,7 @@ watch(
               >
                 {{ index + 1 }}. {{ license.licenseName }} :
                 {{
-                  license.expiredUTCDate
-                    ? formatDate(new Date(license.expiredUTCDate), 'en-US')
-                    : '-'
+                  license.expiredUTCDate ? formatDate(new Date(license.expiredUTCDate), 'us') : '-'
                 }}
               </div>
             </td>
