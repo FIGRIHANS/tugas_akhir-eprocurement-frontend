@@ -30,11 +30,11 @@
           <template v-else>
             <tr v-for="(item, index) in form.additionalCost" :key="index" class="cost__field-items">
               <td class="flex items-center justify-around gap-[8px]">
-                <button v-if="form.status === 0" class="btn btn-icon btn-primary" @click="item.isEdit = !item.isEdit">
+                <button v-if="form.status === 0 || form.status === 5" class="btn btn-icon btn-primary" @click="item.isEdit = !item.isEdit">
                   <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>
                   <i v-else class="ki-duotone ki-check-circle"></i>
                 </button>
-                <button v-if="form.status === 0" class="btn btn-icon btn-outline btn-danger" @click="deleteItem(index)">
+                <button v-if="form.status === 0 || form.status === 5" class="btn btn-icon btn-outline btn-danger" @click="deleteItem(index)">
                   <i class="ki-duotone ki-cross-circle"></i>
                 </button>
               </td>

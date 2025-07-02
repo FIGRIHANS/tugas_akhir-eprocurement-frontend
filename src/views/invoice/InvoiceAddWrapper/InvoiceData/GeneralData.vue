@@ -9,9 +9,9 @@
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
         <label class="form-label max-w-32">
           Vendor Name
-          <span v-if="form.status === 0 && !loginApi.isVendor" class="text-red-500 ml-[4px]">*</span>
+          <span v-if="(form.status === 0 || form.status === 5) && !loginApi.isVendor" class="text-red-500 ml-[4px]">*</span>
         </label>
-        <input v-if="form.status !== 0 || loginApi.isVendor" v-model="form.vendorId" class="input" placeholder="" disabled />
+        <input v-if="(form.status !== 0 && form.status !== 5) || loginApi.isVendor" v-model="form.vendorId" class="input" placeholder="" disabled />
         <select v-else v-model="form.vendorId" class="select" :class="{ 'border-danger': form.vendorIdError }">
           <option v-for="item of vendorList" :key="item.vendorId" :value="item.vendorId">
             {{ item.vendorName }}
