@@ -146,4 +146,31 @@ export default [
       },
     ],
   },
+  {
+    id: 'userManagement',
+    title: 'User Management',
+    icon: 'user',
+    child: [
+      {
+        id: 'List User',
+        title: 'List User',
+        to: 'user-management-user-list',
+      },
+      {
+        id: 'Master Profile',
+        title: 'Master Profile',
+        to: 'user-management-master-profile',
+      },
+      {
+        id: 'Master Role',
+        title: 'Master Role',
+        to: 'user-management-master-role',
+      },
+      {
+        id: 'Report User Authorization',
+        title: 'Report User Authorization',
+        to: 'user-management-report-authorization',
+      },
+    ],
+  },
 ]
