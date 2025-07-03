@@ -1,6 +1,6 @@
 import vendorAPI from '@/core/utils/vendorApi'
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import type {
   IAdministration,
   ILicense,
@@ -28,6 +28,7 @@ export const useVendorStore = defineStore('vendor', () => {
   const isAdministrationVerified = ref(false)
   const isLicenseVerified = ref(false)
   const isBankVerified = ref(false)
+  const userData = computed(() => userStore.userData)
 
   const getVendors = async (params: Record<string, unknown>) => {
     loading.value = true
@@ -35,8 +36,8 @@ export const useVendorStore = defineStore('vendor', () => {
 
     try {
       const response: ApiResponse<IVendorContent> = await vendorAPI.get(
-        '/public/vendor/registration/getvendor',
-        { params: { ...params, employeeId: userStore.userData?.profile.employeeId } },
+        `/public/vendor/registration/getvendor?employeeId=${userData.value?.profile.employeeId}`,
+        { params },
       )
 
       if (response.data.statusCode === 200) {

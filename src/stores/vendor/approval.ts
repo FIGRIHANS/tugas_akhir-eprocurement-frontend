@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import type {
   IApproval,
   IApprove,
@@ -9,6 +9,9 @@ import type {
 } from './types/approval'
 import type { ApiResponse } from '@/core/type/api'
 import vendorAPI from '@/core/utils/vendorApi'
+import { useLoginStore } from '../views/login'
+
+const userStore = useLoginStore()
 
 export const useApprovalStore = defineStore('approval', () => {
   const loading = ref(false)
@@ -20,6 +23,7 @@ export const useApprovalStore = defineStore('approval', () => {
     pageSize: 0,
   })
   const matrixData = ref<IMatrixResponse[]>([])
+  const userData = computed(() => userStore.userData)
 
   const getApproval = async (params: unknown) => {
     loading.value = true
@@ -27,7 +31,7 @@ export const useApprovalStore = defineStore('approval', () => {
 
     try {
       const response: ApiResponse<IApproval> = await vendorAPI.get(
-        '/public/verifiedvendor/approval/vendor-list',
+        `/public/verifiedvendor/approval/vendor-list?EmployeeId=${userData.value?.profile.employeeId}`,
         { params },
       )
 
