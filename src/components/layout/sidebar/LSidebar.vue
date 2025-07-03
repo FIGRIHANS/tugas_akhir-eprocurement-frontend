@@ -4,7 +4,7 @@
   >
     <div class="h-[80px] flex items-center mb-5 px-[40px]">
       <RouterLink to="/dashboard">
-        <UiLogo />
+        <LogoAN />
       </RouterLink>
     </div>
 
@@ -46,7 +46,7 @@
 import sidebarMenu from '@/static/sidebar'
 import { useRouter } from 'vue-router'
 
-import UiLogo from '@/components/ui/atoms/logo/UiLogo.vue'
+import LogoAN from '@/assets/svg/LogoAN.vue'
 
 const router = useRouter()
 
