@@ -160,28 +160,37 @@ export interface PoGrItemTypes {
 }
 
 export interface ListPoTypes {
-  invoiceUId: string
-  invoiceNo: string
-  statusCode: number
-  statusName: string
-  poNo: string
-  grDocumentNo: string
-  invoiceTypeCode: number
-  invoiceTypeName: string
   companyCode: string
   companyName: string
-  costCenterCode: string
-  costCenterName: string
-  whtBaseAmount: number
-  vatAmount: number
-  whtAmount: number
-  totalNetAmount: number
-  taxNo: string
   documentNo: string
   estimatePaymentDate: string
   invoiceDate: string
+  invoiceNo: string
+  invoiceTypeCode: number
+  invoiceTypeName: string
+  invoiceUId: string
   notes: string
+  pOs: PoChildTypes[]
+  statusCode: number
+  statusName: string
+  taxNo: string
+  totalNetAmount: number
+  vatAmount: number
+  whtAmount: number
+  whtBaseAmount: number
+  costCenterCode: string
+  costCenterName: string
+  isOpenChild: boolean
 }
+
+export interface PoChildTypes {
+  grDocumentNo: string
+  invoiceUId: string
+  itemAmount: number
+  itemText: string
+  poNo: string
+  quantity: number
+} 
 
 export interface QueryParamsListPoTypes {
   statusCode?: number | null
