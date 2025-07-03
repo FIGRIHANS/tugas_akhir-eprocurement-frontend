@@ -7,12 +7,13 @@ import successImg from '@/assets/success.svg'
 import { useApprovalStore } from '@/stores/vendor/approval'
 import { useLoginStore } from '@/stores/views/login'
 import axios from 'axios'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 const approvalStore = useApprovalStore()
 const userStore = useLoginStore()
 
 const router = useRouter()
+const route = useRoute()
 
 const props = defineProps<{ id: string | number; nama: string }>()
 const modal = ref(false)
@@ -58,7 +59,7 @@ const handleApprove = async () => {
 
 const handleSuccess = () => {
   approvalStore.getApproval({})
-  router.replace('/vendor/approval')
+  router.replace({ name: route.name })
 }
 </script>
 <template>

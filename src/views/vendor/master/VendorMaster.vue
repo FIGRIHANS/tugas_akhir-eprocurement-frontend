@@ -61,7 +61,7 @@ watch(
 <template>
   <BreadcrumbView
     title="Vendor Master"
-    :routes="[{ name: 'Vendor Master', to: '/vendor-master' }]"
+    :routes="[{ name: 'Vendor Master', to: '/vendor/master' }]"
   />
   <div class="card">
     <div class="card-header p-6">

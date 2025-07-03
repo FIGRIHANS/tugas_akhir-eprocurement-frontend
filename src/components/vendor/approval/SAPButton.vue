@@ -42,7 +42,7 @@ const handleSend = async () => {
 }
 
 const handleClose = () => {
-  router.replace(route.fullPath)
+  router.replace({ name: route.name })
   approvalStore.getApproval({})
 }
 </script>
