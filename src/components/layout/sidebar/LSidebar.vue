@@ -4,7 +4,7 @@
   >
     <div class="h-[80px] flex items-center mb-5 px-[40px]">
       <RouterLink to="/dashboard">
-        <LogoAN />
+        <LogoAN class="w-[83px] h-[46px]" />
       </RouterLink>
     </div>
 
