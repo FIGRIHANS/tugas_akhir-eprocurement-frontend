@@ -20,17 +20,17 @@ export default [
     to: 'dashboard',
     child: [],
   },
-  {
-    id: 'tender',
-    title: 'Proses Tender',
-    icon: 'rocket',
-    child: [
-      {
-        id: 'tender-1',
-        title: 'Tender 1',
-      },
-    ],
-  },
+  // {
+  //   id: 'tender',
+  //   title: 'Proses Tender',
+  //   icon: 'rocket',
+  //   child: [
+  //     {
+  //       id: 'tender-1',
+  //       title: 'Tender 1',
+  //     },
+  //   ],
+  // },
   {
     id: 'vendor-management',
     title: 'Vendor Management',
@@ -58,68 +58,68 @@ export default [
       },
     ],
   },
-  {
-    id: 'e-procurement-report',
-    title: 'Laporan e-Procurement',
-    icon: 'printer',
-    child: [
-      {
-        id: 'e-procurement-report-1',
-        title: 'E Procuremen Report 1',
-      },
-    ],
-  },
-  {
-    id: 'requisition-master',
-    title: 'Master Requisition',
-    icon: 'data',
-    child: [
-      {
-        id: 'requisition-master-1',
-        title: 'Requisition Master 1',
-      },
-    ],
-  },
-  {
-    id: 'monitoring',
-    title: 'Monitoring',
-    icon: 'chart-line-star',
-    child: [
-      {
-        id: 'monitoring-1',
-        title: 'Monitoring 1',
-      },
-    ],
-  },
-  {
-    id: 'approval',
-    title: 'Approval',
-    icon: 'shield-tick',
-    child: [
-      {
-        id: 'vendor-approval',
-        title: 'Approval Verifikasi Vendor',
-        to: 'vendor-approval',
-      },
-    ],
-  },
-  {
-    id: 'e-catalog',
-    title: 'Lihat e-Catalog',
-    icon: 'menu',
-    child: [],
-  },
-  {
-    id: 'procurement-master',
-    title: 'Master Procurement',
-    icon: 'data',
-    child: [
-      {
-        id: 'procurement-master-1',
-        title: 'Procutement Master 1',
-      },
-    ],
-  },
+  // {
+  //   id: 'e-procurement-report',
+  //   title: 'Laporan e-Procurement',
+  //   icon: 'printer',
+  //   child: [
+  //     {
+  //       id: 'e-procurement-report-1',
+  //       title: 'E Procuremen Report 1',
+  //     },
+  //   ],
+  // },
+  // {
+  //   id: 'requisition-master',
+  //   title: 'Master Requisition',
+  //   icon: 'data',
+  //   child: [
+  //     {
+  //       id: 'requisition-master-1',
+  //       title: 'Requisition Master 1',
+  //     },
+  //   ],
+  // },
+  // {
+  //   id: 'monitoring',
+  //   title: 'Monitoring',
+  //   icon: 'chart-line-star',
+  //   child: [
+  //     {
+  //       id: 'monitoring-1',
+  //       title: 'Monitoring 1',
+  //     },
+  //   ],
+  // },
+  // {
+  //   id: 'approval',
+  //   title: 'Approval',
+  //   icon: 'shield-tick',
+  //   child: [
+  //     {
+  //       id: 'vendor-approval',
+  //       title: 'Approval Verifikasi Vendor',
+  //       to: 'vendor-approval',
+  //     },
+  //   ],
+  // },
+  // {
+  //   id: 'e-catalog',
+  //   title: 'Lihat e-Catalog',
+  //   icon: 'menu',
+  //   child: [],
+  // },
+  // {
+  //   id: 'procurement-master',
+  //   title: 'Master Procurement',
+  //   icon: 'data',
+  //   child: [
+  //     {
+  //       id: 'procurement-master-1',
+  //       title: 'Procutement Master 1',
+  //     },
+  //   ],
+  // },
   {
     id: 'e-invoice',
     title: 'Invoice',
@@ -140,10 +140,10 @@ export default [
         title: 'Invoice Approval',
         to: 'invoiceApproval',
       },
-      {
-        id: 'schedule-payment',
-        title: 'Schedule Payment',
-      },
+      // {
+      //   id: 'schedule-payment',
+      //   title: 'Schedule Payment',
+      // },
     ],
   },
   {
