@@ -13,40 +13,69 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(item, index) in list" :key="index">
-              <td class="max-w-[400px] flex justify-between items-center gap-[24px]">
-                <button v-if="item.statusCode === 4" class="btn btn-primary whitespace-nowrap" :disabled="isLoadingSap" @click="sendToSap(item.invoiceUId)">
-                  <i class="ki-duotone ki-paper-plane"></i>
-                  Send to SAP
-                </button>
-                <button class="btn btn-outline btn-icon btn-primary" @click="openDetailInvoice(item.invoiceUId)">
-                  <i class="ki-duotone ki-eye"></i>
-                </button>
-                <button class="btn btn-outline btn-icon btn-primary" @click="openDetailApproval(item.invoiceUId)">
-                  <i class="ki-duotone ki-data"></i>
-                </button>
-              </td>
-              <td>{{ item.invoiceNo || '-' }}</td>
-              <td>
-                <span class="badge badge-outline" :class="colorBadge(item.statusCode)">
-                  {{ item.statusName }}
-                </span>
-              </td>
-              <td>{{ item.poNo || '-' }}</td>
-              <td>{{ item.grDocumentNo || '-' }}</td>
-              <td>{{ item.invoiceTypeName || '-' }}</td>
-              <td>{{ item.companyCode || '-' }}</td>
-              <td>{{ item.costCenterName || '-' }}</td>
-              <td>{{ useFormatIdr(item.whtBaseAmount) || '-' }}</td>
-              <td>{{ useFormatIdr(item.vatAmount) || '-' }}</td>
-              <td>{{ useFormatIdr(item.whtAmount) || '-' }}</td>
-              <td>{{ useFormatIdr(item.totalNetAmount) || '-' }}</td>
-              <td>{{ item.taxNo || '-' }}</td>
-              <td>{{ item.documentNo || '-' }}</td>
-              <td>{{ item.estimatePaymentDate ? moment(item.estimatePaymentDate).format('YYYYMMDD') : '-' }}</td>
-              <td>{{ item.invoiceDate ? moment(item.invoiceDate).format('YYYYMMDD') : '-' }}</td>
-              <td>{{ item.notes || '-' }}</td>
-            </tr>
+            <template v-for="(parent, index) in list" :key="index">
+              <tr>
+                <td class="max-w-[400px] flex justify-between items-center gap-[24px]">
+                  <button v-if="parent.statusCode === 4" class="btn btn-primary whitespace-nowrap w-[32px] h-[32px]" :disabled="isLoadingSap" @click="sendToSap(parent.invoiceUId)">
+                    <i class="ki-duotone ki-paper-plane !text-lg"></i>
+                    Send to SAP
+                  </button>
+                  <button class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]" @click="openDetailInvoice(parent.invoiceUId)">
+                    <i class="ki-duotone ki-eye !text-lg"></i>
+                  </button>
+                  <button class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]" @click="openDetailApproval(parent.invoiceUId)">
+                    <i class="ki-duotone ki-data !text-lg"></i>
+                  </button>
+                  <button class="btn btn-icon btn-primary w-[21px] h-[21px]" @click="parent.isOpenChild = !parent.isOpenChild">
+                    <i v-if="!parent.isOpenChild" class="ki-filled ki-right !text-[9px]"></i>
+                    <i v-else class="ki-filled ki-down !text-[9px]"></i>
+                  </button>
+                </td>
+                <td>{{ parent.invoiceNo || '-' }}</td>
+                <td>
+                  <span class="badge badge-outline" :class="colorBadge(parent.statusCode)">
+                    {{ parent.statusName }}
+                  </span>
+                </td>
+                <td>{{ parent.invoiceTypeName || '-' }}</td>
+                <td>{{ parent.companyCode || '-' }}</td>
+                <td>{{ parent.costCenterName || '-' }}</td>
+                <td>{{ useFormatIdr(parent.whtBaseAmount) || '-' }}</td>
+                <td>{{ useFormatIdr(parent.vatAmount) || '-' }}</td>
+                <td>{{ useFormatIdr(parent.whtAmount) || '-' }}</td>
+                <td>{{ useFormatIdr(parent.totalNetAmount) || '-' }}</td>
+                <td>{{ parent.taxNo || '-' }}</td>
+                <td>{{ parent.documentNo || '-' }}</td>
+                <td>{{ parent.estimatePaymentDate ? moment(parent.estimatePaymentDate).format('YYYYMMDD') : '-' }}</td>
+                <td>{{ parent.invoiceDate ? moment(parent.invoiceDate).format('YYYYMMDD') : '-' }}</td>
+                <td>{{ parent.notes || '-' }}</td>
+              </tr>
+              <tr v-show="parent.isOpenChild">
+                <td></td>
+                <td colspan="5" class="!pt-[0px]">
+                  <table class="table table-bordered table-sm mb-0">
+                    <thead>
+                      <tr class="border-b">
+                        <th v-for="(item, index) in columnsChild" :key="index">
+                          {{ item }}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <template v-for="(sub, index) in parent.pOs" :key="index">
+                        <tr>
+                          <td>{{ sub.poNo || '-' }}</td>
+                          <td>{{ sub.grDocumentNo || '-' }}</td>
+                          <td>{{ sub.itemText || '-' }}</td>
+                          <td>{{ useFormatIdr(sub.itemAmount) || '-' }}</td>
+                          <td>{{ sub.quantity || '-' }}</td>
+                        </tr>
+                      </template>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            </template>
           </tbody>
         </table>
       </div>
@@ -100,8 +129,6 @@ const columns = ref<string[]>([
   '',
   'No Invoice',
   'Status',
-  'No PO',
-  'No GR',
   'Invoice Type',
   'Company Code',
   'Department',
@@ -109,11 +136,19 @@ const columns = ref<string[]>([
   'VAT Ammount',
   'WHT Amount',
   'Total Net Amount',
-  'Tax Document No.',
+  'No Tax Invoice',
   'Invoice Vendor No.',
   'Estimated Payment Date',
   'Invoice Submission Date',
   'Description'
+])
+
+const columnsChild = ref([
+  'No PO',
+  'No GR',
+  'Item Description',
+  'Item Amount',
+  'Quantity'
 ])
 
 const verifList = computed(() => verificationApi.listPo)
