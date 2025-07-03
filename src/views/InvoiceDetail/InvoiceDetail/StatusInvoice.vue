@@ -1,7 +1,7 @@
 <template>
   <div class="status">
     <!-- verified -->
-    <div v-if="props.statusCode === 3 && route.query.type === '1'" class="status__box--approved">
+    <div v-if="(props.statusCode === 2 && route.query.type === '1') || props.statusCode === 3" class="status__box--approved">
       <i class="ki-outline ki-shield-tick text-primary text-[36px]"></i>
       <div>
         <p class="text-[15px] font-semibold mb-[4px]">Successfully Verified</p>
