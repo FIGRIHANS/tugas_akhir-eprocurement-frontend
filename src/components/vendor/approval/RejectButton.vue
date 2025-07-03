@@ -58,7 +58,7 @@ const handleReject = async () => {
 
 const handleSuccess = () => {
   approvalStore.getApproval({})
-  router.replace(route.fullPath)
+  router.replace({ name: route.name })
 }
 </script>
 <template>
