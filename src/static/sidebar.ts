@@ -140,10 +140,10 @@ export default [
         title: 'Invoice Approval',
         to: 'invoiceApproval',
       },
-      {
-        id: 'schedule-payment',
-        title: 'Schedule Payment',
-      },
+      // {
+      //   id: 'schedule-payment',
+      //   title: 'Schedule Payment',
+      // },
     ],
   },
   {

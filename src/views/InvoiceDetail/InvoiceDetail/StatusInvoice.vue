@@ -1,7 +1,7 @@
 <template>
   <div class="status">
     <!-- verified -->
-    <div v-if="props.statusCode === 3" class="status__box--approved">
+    <div v-if="props.statusCode === 3 && route.query.type === '1'" class="status__box--approved">
       <i class="ki-outline ki-shield-tick text-primary text-[36px]"></i>
       <div>
         <p class="text-[15px] font-semibold mb-[4px]">Successfully Verified</p>
@@ -52,6 +52,7 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
+import { useRoute } from 'vue-router'
 import UiTextArea from '@/components/ui/atoms/text-area/UiTextArea.vue'
 import SapLogo from './StatusInvoice/SapLogo.vue'
 
@@ -59,6 +60,7 @@ const props = defineProps<{
   statusCode: number
 }>()
 
+const route = useRoute()
 const status = ref<string>('sap')
 const reason = ref<string>('Invoice telah ditolak karena terdapat ketidaksesuaian dalam data yang dikirimkan. Beberapa kemungkinan penyebabnya termasuk perbedaan antara nomor invoice dan PO, kesalahan perhitungan pajak, dokumen pendukung yang tidak lengkap, atau perbedaan jumlah tagihan dengan barang yang diterima. Silakan tinjau alasan penolakan, lakukan koreksi yang diperlukan, dan ajukan kembali invoice untuk diproses lebih lanjut. ')
 </script>
