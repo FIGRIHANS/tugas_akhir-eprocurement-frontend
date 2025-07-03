@@ -143,7 +143,7 @@ const checkStatusCode = () => {
       break
   }
 
-  if (form.value.statusCode === 3 && route.query.type === '1') status = false
+  if (form.value.statusCode === 2 && route.query.type === '1') status = false
 
   return status
 }
