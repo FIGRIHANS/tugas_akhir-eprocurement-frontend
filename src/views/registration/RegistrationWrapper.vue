@@ -58,7 +58,7 @@
     :submit="
       () => {
         modalTrigger.success = false
-        router.push('/eprocurement/')
+        router.push({ name: 'landing-page' })
       }
     "
   />
