@@ -58,7 +58,7 @@
     :submit="
       () => {
         modalTrigger.success = false
-        router.push('/')
+        router.push({ name: 'landing-page' })
       }
     "
   />
