@@ -62,7 +62,7 @@ const redirectTo = (path?: string) => {
 }
 
 const filteredSidebarMenu = computed(() => {
-  if (userStore.userData?.profile.vendorCode) {
+  if (userStore.userData?.profile?.vendorCode) {
     return sidebarMenu.filter(
       (menu) => menu.id !== 'vendor-management' && menu.id !== 'userManagement',
     )
