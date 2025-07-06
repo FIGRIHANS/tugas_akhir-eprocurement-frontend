@@ -83,7 +83,6 @@ watch(
             <th>Vendor Category</th>
             <th>Activation Date</th>
             <th>Approval Date Sent</th>
-            <th>Approval Type</th>
           </tr>
         </thead>
         <tbody>
@@ -157,7 +156,6 @@ watch(
             <td class="text-nowrap">
               {{ item.sendApprovalDate ? moment(item.sendApprovalDate).format('LL') : '-' }}
             </td>
-            <td class="text-nowrap">{{ item.approvalTypeName }}</td>
           </tr>
         </tbody>
       </table>
