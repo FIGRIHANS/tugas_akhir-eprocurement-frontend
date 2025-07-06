@@ -125,11 +125,21 @@ watch(
                     <RejectButton :id="item.vendorId" :nama="item.vendorName" />
                   </template>
                   <ApprovalVerifikasi :id="item.vendorId" :nama="item.vendorName" />
-                  <RouterLink :to="`/vendor/approval/${item.vendorId}`">
-                    <UiButton size="sm" :icon="true" variant="primary" :outline="true">
-                      <UiIcon name="eye" variant="duotone" />
-                    </UiButton>
-                  </RouterLink>
+                  <UiButton
+                    size="sm"
+                    :icon="true"
+                    variant="primary"
+                    :outline="true"
+                    @click="
+                      $router.push({
+                        name: 'vendor-approval-detail',
+                        params: { id: item.vendorId },
+                        query: { status: item.approvalStatus },
+                      })
+                    "
+                  >
+                    <UiIcon name="eye" variant="duotone" />
+                  </UiButton>
                 </template>
               </div>
             </td>
