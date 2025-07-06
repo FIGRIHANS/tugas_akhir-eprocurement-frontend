@@ -13,7 +13,7 @@
       data-menu="true"
     >
       <div
-        v-for="menu in sidebarMenu"
+        v-for="menu in filteredSidebarMenu"
         :key="menu.id"
         class="menu-item"
         data-menu-item-placement=""
@@ -47,16 +47,29 @@ import sidebarMenu from '@/static/sidebar'
 import { useRouter } from 'vue-router'
 
 import LogoAN from '@/assets/svg/LogoAN.vue'
+import { computed } from 'vue'
+import { useLoginStore } from '@/stores/views/login'
 
 const router = useRouter()
+const userStore = useLoginStore()
 
 const redirectTo = (path?: string) => {
   if (path) {
     router.push({
-      name: path
+      name: path,
     })
   }
 }
+
+const filteredSidebarMenu = computed(() => {
+  if (userStore.userData?.profile.vendorCode) {
+    return sidebarMenu.filter(
+      (menu) => menu.id !== 'vendor-management' && menu.id !== 'userManagement',
+    )
+  }
+
+  return sidebarMenu
+})
 </script>
 
 <style lang="scss" scoped>
