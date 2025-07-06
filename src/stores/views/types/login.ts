@@ -15,6 +15,8 @@ interface ProfileUser {
   costCenter: string
   profileId: number
   profileName: string
+  vendorCode: number
+  vendorName: string
 }
 
 interface RoleAuthUser {

@@ -36,7 +36,7 @@ onMounted(() => {
   />
   <div class="space-y-5">
     <div
-      v-if="approvalStore.matrixData.some((data) => data.approvalStatus === 1)"
+      v-if="Number(route.query.status) === 1"
       class="rounded-lg border border-blue-200 bg-blue-50 p-4 flex items-center gap-4"
     >
       <LogoApproved />
@@ -49,7 +49,7 @@ onMounted(() => {
     </div>
 
     <div
-      v-if="approvalStore.matrixData.some((data) => data.approvalStatus === 3)"
+      v-if="Number(route.query.status) === 3"
       class="rounded-lg border border-blue-200 bg-blue-50 p-4 flex items-center gap-4"
     >
       <LogoSAP class="w-16 h-auto" />
