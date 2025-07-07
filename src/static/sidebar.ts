@@ -20,6 +20,13 @@ export default [
     to: 'dashboard',
     child: [],
   },
+  {
+    id: 'company-information',
+    title: 'Company Information',
+    icon: 'user',
+    to: 'company-information',
+    child: [],
+  },
   // {
   //   id: 'tender',
   //   title: 'Proses Tender',
