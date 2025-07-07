@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import vendorApi from '@/core/utils/vendorApi'
+import vendorAPI from '@/core/utils/vendorAPI'
 
 import type { ApiResponse } from '@/core/type/api'
 import type {
@@ -18,7 +18,7 @@ import type {
   ProvinceListType,
   TermConditionType,
   UploadFileResponse,
-  VendorRegistrationPayloadType
+  VendorRegistrationPayloadType,
 } from './types/vendor-master-data'
 
 const baseUrl = '/public/vendor/registration'
@@ -37,7 +37,7 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
   const termCondition = ref<TermConditionType>()
 
   const getVendorCountries = async (countryName?: string) => {
-    const response: ApiResponse<CountryListType> = await vendorApi.get(`${baseUrl}/countries`, {
+    const response: ApiResponse<CountryListType> = await vendorAPI.get(`${baseUrl}/countries`, {
       params: {
         countryName,
       },
@@ -49,7 +49,7 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
   }
 
   const getVendorProvince = async (countryId?: number, provinceName?: string) => {
-    const response: ApiResponse<ProvinceListType> = await vendorApi.get(`${baseUrl}/province`, {
+    const response: ApiResponse<ProvinceListType> = await vendorAPI.get(`${baseUrl}/province`, {
       params: {
         countryId,
         provinceName,
@@ -62,7 +62,7 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
   }
 
   const getVendorCities = async (provinceId?: number, cityName?: string) => {
-    const response: ApiResponse<CityListType> = await vendorApi.get(`${baseUrl}/cities`, {
+    const response: ApiResponse<CityListType> = await vendorAPI.get(`${baseUrl}/cities`, {
       params: {
         provinceId,
         cityName,
@@ -75,7 +75,7 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
   }
 
   const getVendorDistricts = async (cityId?: number, districtName?: string) => {
-    const response: ApiResponse<DistrictListType> = await vendorApi.get(`${baseUrl}/districts`, {
+    const response: ApiResponse<DistrictListType> = await vendorAPI.get(`${baseUrl}/districts`, {
       params: {
         cityId,
         districtName,
@@ -88,7 +88,7 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
   }
 
   const getVendorPosition = async (positionName?: string) => {
-    const response: ApiResponse<PositionListType> = await vendorApi.get(`${baseUrl}/getJabatan`, {
+    const response: ApiResponse<PositionListType> = await vendorAPI.get(`${baseUrl}/getJabatan`, {
       params: {
         positionName,
       },
@@ -99,11 +99,12 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
     return response.data.result
   }
 
-  const getVendorBanks = async (bankCode?: string, bankName?: string) => {
-    const response: ApiResponse<BankListType> = await vendorApi.get(`${baseUrl}/getbank`, {
+  const getVendorBanks = async (bankCode?: string, bankName?: string, bankCountryCode?: string) => {
+    const response: ApiResponse<BankListType> = await vendorAPI.get(`${baseUrl}/getbank`, {
       params: {
         bankCode,
         bankName,
+        bankCountryCode,
       },
     })
 
@@ -113,7 +114,7 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
   }
 
   const getVendorBusinessFields = async (businessFieldName?: string) => {
-    const response: ApiResponse<BusinessFieldResponse> = await vendorApi.get(
+    const response: ApiResponse<BusinessFieldResponse> = await vendorAPI.get(
       `${baseUrl}/business-field`,
       {
         params: {
@@ -144,7 +145,7 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
   }
 
   const getVendorCurrency = async (currencyCode?: string, currencyName?: string) => {
-    const response: ApiResponse<CurrencyListType> = await vendorApi.get(
+    const response: ApiResponse<CurrencyListType> = await vendorAPI.get(
       `${baseUrl}/currency/list`,
       {
         params: {
@@ -160,7 +161,7 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
   }
 
   const getVendorCompanyCategory = async (companyCategoryName?: string) => {
-    const response: ApiResponse<CompanyCategoryType> = await vendorApi.get(
+    const response: ApiResponse<CompanyCategoryType> = await vendorAPI.get(
       `${baseUrl}/company-category`,
       {
         params: {
@@ -175,7 +176,7 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
   }
 
   const getVendorCompanyLicense = async (categoryId: number) => {
-    const response: ApiResponse<CompanyLicenseType> = await vendorApi.get(
+    const response: ApiResponse<CompanyLicenseType> = await vendorAPI.get(
       `${baseUrl}/company-license`,
       {
         params: {
@@ -190,7 +191,7 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
   }
 
   const getVendorTermCondition = async () => {
-    const response: ApiResponse<TermConditionType> = await vendorApi.get(
+    const response: ApiResponse<TermConditionType> = await vendorAPI.get(
       `${baseUrl}/term-condition`,
     )
 
@@ -216,7 +217,7 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
     formData.append('FolderName', FolderName)
     formData.append('FileName', FileName)
 
-    const response: ApiResponse<UploadFileResponse> = await vendorApi.post(
+    const response: ApiResponse<UploadFileResponse> = await vendorAPI.post(
       '/api/file/upload',
       formData,
     )
@@ -225,7 +226,7 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
   }
 
   const postVendorRegistration = async (payload: VendorRegistrationPayloadType) => {
-    const response: ApiResponse = await vendorApi.post(`${baseUrl}/create`, {
+    const response: ApiResponse = await vendorAPI.post(`${baseUrl}/create`, {
       ...payload,
     })
 
@@ -256,6 +257,6 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
     getVendorCompanyLicense,
     getVendorTermCondition,
     uploadFile,
-    postVendorRegistration
+    postVendorRegistration,
   }
 })
