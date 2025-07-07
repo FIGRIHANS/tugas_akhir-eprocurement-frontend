@@ -6,47 +6,80 @@ import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import { useUserProfileStore } from '@/stores/user-management/profile'
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, reactive, ref, watch } from 'vue'
+import type { IProfile } from '@/stores/user-management/types/profile' // Import interface for type hinting
 
 const search = ref('')
 const userProfile = useUserProfileStore()
 
 const modalProfile = ref(false)
-const newProfileName = ref('') // New ref for the profile name input
+
+const profilePayload = reactive<{
+  profileId: number
+  profileName: string
+  isActive: boolean
+}>({
+  profileId: 0,
+  profileName: '',
+  isActive: true,
+})
 
 const handleCancel = () => {
   modalProfile.value = false
-  newProfileName.value = '' // Clear the input when canceling
+  // Reset the payload when canceling or closing the modal
+  profilePayload.profileId = 0
+  profilePayload.profileName = ''
+  profilePayload.isActive = true
 }
 
-const handleOpenModal = () => {
-  newProfileName.value = '' // Clear input when opening for add
+const handleOpenModal = (profile?: IProfile) => {
+  if (profile) {
+    // If a profile is passed, it means we're editing
+    profilePayload.profileId = profile.profileId
+    profilePayload.profileName = profile.profileName
+    profilePayload.isActive = profile.isActive
+  } else {
+    // Otherwise, we're adding a new one, reset to default
+    profilePayload.profileId = 0
+    profilePayload.profileName = ''
+    profilePayload.isActive = true
+  }
   modalProfile.value = true
 }
 
 const handleSaveProfile = async () => {
-  if (!newProfileName.value.trim()) {
+  if (!profilePayload.profileName.trim()) {
     alert('Profile name cannot be empty!')
     return
   }
   try {
-    await userProfile.addProfile(newProfileName.value.trim())
+    // The postUserProfile in store will handle add/edit based on profileId
+    await userProfile.postUserProfile(profilePayload)
     handleCancel()
-    alert('Profile added successfully!')
-    // Refresh the list after adding a new profile
+    alert(
+      profilePayload.profileId === 0
+        ? 'Profile added successfully!'
+        : 'Profile updated successfully!',
+    )
+    // Refresh the list after adding/updating
     await userProfile.getUserProfiles({ profileName: search.value })
   } catch (error) {
-    console.error('Failed to add profile:', error)
-    alert('Failed to add profile. Please try again.')
+    console.error('Failed to save profile:', error)
+    alert('Failed to save profile. Please try again.')
   }
 }
 
-const handleDeleteProfile = async (profileId: number, profileName: string) => {
-  if (confirm(`Are you sure you want to delete profile "${profileName}"?`)) {
+const handleDeleteProfile = async (profile: IProfile) => {
+  if (confirm(`Are you sure you want to delete profile "${profile.profileName}"?`)) {
     try {
-      await userProfile.deleteProfile(profileId)
+      // Call deleteProfile from the store which now uses postUserProfile internally
+      await userProfile.postUserProfile({
+        profileId: profile.profileId,
+        profileName: profile.profileName,
+        isActive: false, // Assuming we mark it as inactive instead of deleting
+      })
       alert('Profile deleted successfully!')
-      // Refresh the list after deleting a profile
+      // Refresh the list after deleting
       await userProfile.getUserProfiles({ profileName: search.value })
     } catch (error) {
       console.error('Failed to delete profile:', error)
@@ -63,7 +96,7 @@ watch(search, (newSearch) => {
 // mounted
 onMounted(() => {
   userProfile.getUserProfiles({
-    profileId: 3001,
+    profileId: 0,
   }) // Fetch all profiles initially
 })
 </script>
@@ -84,7 +117,7 @@ onMounted(() => {
           <h2 class="text-lg font-bold text-slate-800">Master Profile</h2>
           <div class="flex gap-2">
             <UiInputSearch v-model="search" placeholder="Search Profile" />
-            <UiButton variant="primary" @click="handleOpenModal">
+            <UiButton variant="primary" @click="handleOpenModal()">
               <UiIcon variant="duotone" name="plus" />
               Add Profile</UiButton
             >
@@ -130,7 +163,13 @@ onMounted(() => {
                     </UiButton>
                     <div class="dropdown-content w-auto p-4 space-y-5">
                       <div class="flex flex-col space-y-2">
-                        <UiButton variant="light" class="border-none" :outline="true" size="md">
+                        <UiButton
+                          variant="light"
+                          class="border-none"
+                          :outline="true"
+                          size="md"
+                          @click="handleOpenModal(profile)"
+                        >
                           <svg
                             width="18"
                             height="18"
@@ -162,7 +201,7 @@ onMounted(() => {
                           class="border-none text-red-500 hover:text-red-600"
                           :outline="true"
                           size="md"
-                          @click="handleDeleteProfile(profile.profileId, profile.profileName)"
+                          @click="handleDeleteProfile(profile)"
                         >
                           <svg
                             width="18"
@@ -204,7 +243,7 @@ onMounted(() => {
     </div>
 
     <UiModal
-      title="Add New Profile"
+      :title="profilePayload.profileId === 0 ? 'Add New Profile' : 'Edit Profile'"
       v-model="modalProfile"
       v-if="modalProfile"
       @update:model-value="handleCancel"
@@ -215,7 +254,7 @@ onMounted(() => {
         placeholder="Enter profile name"
         row
         required
-        v-model="newProfileName"
+        v-model="profilePayload.profileName"
       />
       <div class="mt-4 w-full gap-2 justify-end items-center flex">
         <UiButton outline @click="handleCancel">Cancel</UiButton>
