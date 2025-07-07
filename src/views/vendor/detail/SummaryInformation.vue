@@ -31,12 +31,8 @@ const inputError = ref<string[]>([])
 const loading = ref<boolean>(false)
 const error = ref<string | null>(null)
 
-const isVerified = computed(() =>
-  verifStore.data.some(
-    (data) =>
-      data.position === userStore.userData?.profile.positionName &&
-      data.verificatorName === userStore.userData.profile.employeeName,
-  ),
+const isVerified = computed(
+  () => verifStore.data[verifStore.data.length - 1]?.status === 'Verified',
 )
 
 const handleVerify = async () => {
@@ -64,7 +60,7 @@ const handleVerify = async () => {
   } catch (err) {
     if (err instanceof Error) {
       if (axios.isAxiosError(err)) {
-        error.value = err.response?.data.result.message
+        error.value = err.response?.data.result.message ?? 'Failed to verify vendor'
       }
     }
   } finally {
@@ -100,7 +96,7 @@ const handleReject = async () => {
   } catch (err) {
     if (err instanceof Error) {
       if (axios.isAxiosError(err)) {
-        error.value = err.response?.data.result.message
+        error.value = err.response?.data.result.message ?? 'Failed to reject vendor'
       }
     }
   } finally {

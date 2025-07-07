@@ -83,7 +83,6 @@ watch(
             <th>Vendor Category</th>
             <th>Activation Date</th>
             <th>Approval Date Sent</th>
-            <th>Approval Type</th>
           </tr>
         </thead>
         <tbody>
@@ -126,11 +125,21 @@ watch(
                     <RejectButton :id="item.vendorId" :nama="item.vendorName" />
                   </template>
                   <ApprovalVerifikasi :id="item.vendorId" :nama="item.vendorName" />
-                  <RouterLink :to="`/vendor/approval/${item.vendorId}`">
-                    <UiButton size="sm" :icon="true" variant="primary" :outline="true">
-                      <UiIcon name="eye" variant="duotone" />
-                    </UiButton>
-                  </RouterLink>
+                  <UiButton
+                    size="sm"
+                    :icon="true"
+                    variant="primary"
+                    :outline="true"
+                    @click="
+                      $router.push({
+                        name: 'vendor-approval-detail',
+                        params: { id: item.vendorId },
+                        query: { status: item.approvalStatus },
+                      })
+                    "
+                  >
+                    <UiIcon name="eye" variant="duotone" />
+                  </UiButton>
                 </template>
               </div>
             </td>
@@ -157,7 +166,6 @@ watch(
             <td class="text-nowrap">
               {{ item.sendApprovalDate ? moment(item.sendApprovalDate).format('LL') : '-' }}
             </td>
-            <td class="text-nowrap">{{ item.approvalTypeName }}</td>
           </tr>
         </tbody>
       </table>

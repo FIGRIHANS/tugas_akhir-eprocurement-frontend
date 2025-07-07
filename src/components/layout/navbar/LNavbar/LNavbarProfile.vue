@@ -1,5 +1,10 @@
 <template>
-  <div v-if="route.name !== 'landing-page'" class="dropdown" data-dropdown="true" data-dropdown-trigger="click">
+  <div
+    v-if="route.name !== 'landing-page'"
+    class="dropdown"
+    data-dropdown="true"
+    data-dropdown-trigger="click"
+  >
     <!-- <div class="size-10 rounded-full inline-flex items-center justify-center text-[11px] font-semibold border border-primary-clarity bg-primary text-white">
       Aa
     </div> -->
@@ -11,11 +16,9 @@
     <div class="dropdown-content w-full max-w-56 p-4">
       <div class="menu menu-default flex flex-col w-full">
         <div class="menu-item">
-          <p class="mb-[14px]">Hi, {{ userData?.profile.employeeName }}</p>
+          <p class="mb-[14px]">Hi, {{ userData?.profile?.employeeName ?? 'User' }}</p>
           <a class="menu-link !px-[5px] !mx-[0px]" href="#" @click="logout">
-            <span class="menu-title">
-              Log Out
-            </span>
+            <span class="menu-title"> Log Out </span>
           </a>
         </div>
       </div>
@@ -23,15 +26,27 @@
   </div>
 
   <template v-else>
-    <UiButton outline variant="dark" size="lg" @click="router.push({
-      name: 'registration'
-    })">
+    <UiButton
+      outline
+      variant="dark"
+      size="lg"
+      @click="
+        router.push({
+          name: 'registration',
+        })
+      "
+    >
       Register
       <UiIcon variant="duotone" name="menu" />
     </UiButton>
-    <button class="btn btn-lg btn-dark" @click="router.push({
-      name: 'login'
-    })">
+    <button
+      class="btn btn-lg btn-dark"
+      @click="
+        router.push({
+          name: 'login',
+        })
+      "
+    >
       Sign In
       <UiIcon variant="duotone" name="entrance-left" />
     </button>

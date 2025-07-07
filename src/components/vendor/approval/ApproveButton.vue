@@ -49,7 +49,7 @@ const handleApprove = async () => {
   } catch (err) {
     if (err instanceof Error) {
       if (axios.isAxiosError(err)) {
-        error.value = err.response?.data.result.message
+        error.value = err.response?.data.result.message ?? 'Failed to approve vendor'
       }
     }
   } finally {

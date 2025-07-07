@@ -21,35 +21,46 @@
       <div>
         <div class="flex justify-between gap-[8px]">
           <label class="font-normal text-[13px]">Password</label>
-          <a v-if="checkVendor()" href="#" class="text-primary text-[13px]" @click="goToForgot">Forgot Password?</a>
+          <a v-if="checkVendor()" href="#" class="text-primary text-[13px]" @click="goToForgot"
+            >Forgot Password?</a
+          >
         </div>
         <div class="input max-w-72">
           <input
             v-model="password"
-            placeholder="Password" 
+            placeholder="Password"
             :type="showPassword ? 'text' : 'password'"
           />
           <div class="btn btn-icon" @click="togglePassword">
-            <i class="ki-outline ki-eye" :class="{ 'hidden': showPassword }"></i>
-            <i class="ki-outline ki-eye-slash" :class="{ 'hidden': !showPassword }"></i>
+            <i class="ki-outline ki-eye" :class="{ hidden: showPassword }"></i>
+            <i class="ki-outline ki-eye-slash" :class="{ hidden: !showPassword }"></i>
           </div>
         </div>
       </div>
 
       <!-- remember -->
-        <div class="flex flex-col items-start gap-[4px]">
-          <label class="form-label flex items-center gap-2.5">
-            <input v-model="rememberMe" class="checkbox" name="check" type="checkbox" value="1"/>
-            Remember me
-          </label>
-        </div>
+      <div class="flex flex-col items-start gap-[4px]">
+        <label class="form-label flex items-center gap-2.5">
+          <input v-model="rememberMe" class="checkbox" name="check" type="checkbox" value="1" />
+          Remember me
+        </label>
+      </div>
 
       <!-- button footer -->
       <div class="flex flex-col gap-[8px]">
-        <button class="btn btn-primary w-full justify-center" :disabled="isLoading" @click="goLogin">
+        <button
+          class="btn btn-primary w-full justify-center"
+          :disabled="isLoading"
+          @click="goLogin"
+        >
           Sign In
         </button>
-        <button v-if="checkVendor()" class="btn btn-secondary w-full justify-center" :disabled="isLoading" @click="goRegister">
+        <button
+          v-if="checkVendor()"
+          class="btn btn-secondary w-full justify-center"
+          :disabled="isLoading"
+          @click="goRegister"
+        >
           Register
         </button>
       </div>
@@ -85,7 +96,7 @@ const togglePassword = () => {
 
 const goRegister = () => {
   router.push({
-    name: 'registration'
+    name: 'registration',
   })
 }
 
@@ -96,7 +107,10 @@ const goToForgot = () => {
 const saveAccount = () => {
   if (rememberMe.value) {
     if (checkVendor()) {
-      localStorage.setItem('account_dts_vendor', `username=${username.value}; password=${password.value}`)
+      localStorage.setItem(
+        'account_dts_vendor',
+        `username=${username.value}; password=${password.value}`,
+      )
     } else {
       localStorage.setItem('account_dts', `username=${email.value}; password=${password.value}`)
     }
@@ -113,18 +127,19 @@ const nextStepLogin = (response: ApiResponseData<string>) => {
   if (response.statusCode === 200) {
     loginApi.isVendor = checkVendor()
     setToken(response.result)
-    router.push({
-      name: 'dashboard'
+    router.replace({
+      name: 'dashboard',
     })
   }
 }
 
 const goLogin = () => {
   isLoading.value = true
-  if (!email.value && !password.value) return isLoading.value = false
+  if (!email.value && !password.value) return (isLoading.value = false)
   saveAccount()
   if (checkVendor()) {
-    loginApi.callLoginVendor(username.value, password.value)
+    loginApi
+      .callLoginVendor(username.value, password.value)
       .then((response: ApiResponseData<string>) => {
         nextStepLogin(response)
       })
@@ -132,7 +147,8 @@ const goLogin = () => {
         isLoading.value = false
       })
   } else {
-    loginApi.callLogin(email.value, password.value)
+    loginApi
+      .callLogin(email.value, password.value)
       .then((response: ApiResponseData<string>) => {
         nextStepLogin(response)
       })
@@ -163,19 +179,19 @@ const getUsernameEmailPassword = (itemLocalStorage: string) => {
   return {
     username,
     email,
-    password
+    password,
   }
 }
 
 onMounted(() => {
   const savedAccount = localStorage.getItem('account_dts') || ''
   const savedAccountVendor = localStorage.getItem('account_dts_vendor') || ''
-  
+
   const result = getUsernameEmailPassword(checkVendor() ? savedAccountVendor : savedAccount)
   username.value = result.username
   email.value = result.email
   password.value = result.password
-  
+
   if (email.value && password.value) rememberMe.value = true
 })
 </script>
