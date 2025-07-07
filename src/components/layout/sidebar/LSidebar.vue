@@ -68,7 +68,7 @@ const filteredSidebarMenu = computed(() => {
     )
   }
 
-  return sidebarMenu
+  return sidebarMenu.filter((menu) => menu.id !== 'company-information')
 })
 </script>
 
