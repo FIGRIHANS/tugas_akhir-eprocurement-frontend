@@ -5,19 +5,67 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
-import { ref } from 'vue'
+import { useUserProfileStore } from '@/stores/user-management/profile'
+import { onMounted, ref, watch } from 'vue'
 
 const search = ref('')
+const userProfile = useUserProfileStore()
 
 const modalProfile = ref(false)
+const newProfileName = ref('') // New ref for the profile name input
 
 const handleCancel = () => {
   modalProfile.value = false
+  newProfileName.value = '' // Clear the input when canceling
 }
 
 const handleOpenModal = () => {
+  newProfileName.value = '' // Clear input when opening for add
   modalProfile.value = true
 }
+
+const handleSaveProfile = async () => {
+  if (!newProfileName.value.trim()) {
+    alert('Profile name cannot be empty!')
+    return
+  }
+  try {
+    await userProfile.addProfile(newProfileName.value.trim())
+    handleCancel()
+    alert('Profile added successfully!')
+    // Refresh the list after adding a new profile
+    await userProfile.getUserProfiles({ profileName: search.value })
+  } catch (error) {
+    console.error('Failed to add profile:', error)
+    alert('Failed to add profile. Please try again.')
+  }
+}
+
+const handleDeleteProfile = async (profileId: number, profileName: string) => {
+  if (confirm(`Are you sure you want to delete profile "${profileName}"?`)) {
+    try {
+      await userProfile.deleteProfile(profileId)
+      alert('Profile deleted successfully!')
+      // Refresh the list after deleting a profile
+      await userProfile.getUserProfiles({ profileName: search.value })
+    } catch (error) {
+      console.error('Failed to delete profile:', error)
+      alert('Failed to delete profile. Please try again.')
+    }
+  }
+}
+
+// Watch for changes in the search input and fetch profiles
+watch(search, (newSearch) => {
+  userProfile.getUserProfiles({ profileName: newSearch })
+})
+
+// mounted
+onMounted(() => {
+  userProfile.getUserProfiles({
+    profileId: 3001,
+  }) // Fetch all profiles initially
+})
 </script>
 
 <template>
@@ -44,17 +92,25 @@ const handleOpenModal = () => {
         </div>
       </div>
       <div class="card-body">
-        <table class="table align-middle text-gray-700">
+        <div v-if="userProfile.loading" class="text-center py-4">Loading profiles...</div>
+        <div v-else-if="userProfile.error" class="text-center py-4 text-red-500">
+          {{ userProfile.error }}
+        </div>
+        <table
+          v-else-if="userProfile.profiles.items.length > 0"
+          class="table align-middle text-gray-700"
+        >
           <thead class="">
             <tr>
               <th></th>
               <th class="text-nowrap">Profile ID</th>
               <th class="text-nowrap">Profile Name</th>
               <th class="text-nowrap">Created Date</th>
+              <th class="text-nowrap">Is Active</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
+            <tr v-for="profile in userProfile.profiles.items" :key="profile.profileId">
               <td>
                 <div class="flex items-center space-x-3">
                   <div
@@ -99,7 +155,6 @@ const handleOpenModal = () => {
                               </clipPath>
                             </defs>
                           </svg>
-
                           Edit Profile
                         </UiButton>
                         <UiButton
@@ -107,6 +162,7 @@ const handleOpenModal = () => {
                           class="border-none text-red-500 hover:text-red-600"
                           :outline="true"
                           size="md"
+                          @click="handleDeleteProfile(profile.profileId, profile.profileName)"
                         >
                           <svg
                             width="18"
@@ -125,7 +181,6 @@ const handleOpenModal = () => {
                               fill="#F8285A"
                             />
                           </svg>
-
                           Delete Profile
                         </UiButton>
                       </div>
@@ -133,16 +188,21 @@ const handleOpenModal = () => {
                   </div>
                 </div>
               </td>
-              <td>7372572</td>
-              <td>Sales Manager</td>
-              <td>Fri 19 Jun, 2020 09:35 am</td>
+              <td>{{ profile.profileId }}</td>
+              <td>{{ profile.profileName }}</td>
+              <td>{{ new Date(profile.createdUtcDate).toLocaleString() }}</td>
+              <td>
+                <span :class="profile.isActive ? 'text-green-500' : 'text-red-500'">
+                  {{ profile.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
             </tr>
           </tbody>
         </table>
+        <div v-else class="text-center py-4">No profiles found.</div>
       </div>
     </div>
 
-    <!-- Modal form -->
     <UiModal
       title="Add New Profile"
       v-model="modalProfile"
@@ -150,10 +210,16 @@ const handleOpenModal = () => {
       @update:model-value="handleCancel"
       size="sm"
     >
-      <UiInput label="Profile Name" placeholder="Enter profile name" row required />
+      <UiInput
+        label="Profile Name"
+        placeholder="Enter profile name"
+        row
+        required
+        v-model="newProfileName"
+      />
       <div class="mt-4 w-full gap-2 justify-end items-center flex">
-        <UiButton outline>Cancel</UiButton>
-        <UiButton variant="primary">Save</UiButton>
+        <UiButton outline @click="handleCancel">Cancel</UiButton>
+        <UiButton variant="primary" @click="handleSaveProfile">Save</UiButton>
       </div>
     </UiModal>
   </div>
