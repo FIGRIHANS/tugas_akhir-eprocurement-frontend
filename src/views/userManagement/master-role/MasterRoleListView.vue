@@ -5,56 +5,140 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
-import { ref } from 'vue'
+import { useUserRoleStore } from '@/stores/user-management/role'
+import type { IRole } from '@/stores/user-management/types/role'
+import { onMounted, reactive, ref, watch } from 'vue'
 
 const search = ref('')
 
-const modalRole = ref(false)
+const userRole = useUserRoleStore()
+
+const modalProfile = ref(false)
+
+const rolePayload = reactive<{
+  roleId: number
+  roleName: string
+  isActive: boolean
+}>({
+  roleId: 0,
+  roleName: '',
+  isActive: true,
+})
 
 const handleCancel = () => {
-  modalRole.value = false
+  modalProfile.value = false
+  rolePayload.roleId = 0
+  rolePayload.roleName = ''
+  rolePayload.isActive = true
 }
 
-const handleOpenModal = () => {
-  modalRole.value = true
+const handleOpenModal = (profile?: IRole) => {
+  if (profile) {
+    rolePayload.roleId = profile.roleId
+    rolePayload.roleName = profile.roleName
+    rolePayload.isActive = profile.isActive
+  } else {
+    rolePayload.roleId = 0
+    rolePayload.roleName = ''
+    rolePayload.isActive = true
+  }
+  modalProfile.value = true
 }
+
+const handleSaveProfile = async () => {
+  if (!rolePayload.roleName.trim()) {
+    alert('Role name cannot be empty!')
+    return
+  }
+  try {
+    await userRole.postUserRole(rolePayload)
+    handleCancel()
+    alert(
+      rolePayload.roleId === 0
+        ? 'Role added successfully!'
+        : 'Role updated successfully!',
+    )
+    await userRole.getUserRoles({ roleName: search.value })
+  } catch (error) {
+    console.error('Failed to save profile:', error)
+    alert('Failed to save profile. Please try again.')
+  }
+}
+
+const handleDeleteProfile = async (role: IRole) => {
+  if (confirm(`Are you sure you want to delete role "${role.roleName}"?`)) {
+    try {
+      await userRole.postUserRole({
+        roleId: role.roleId,
+        roleName: role.roleName,
+        isActive: false,
+      })
+      alert('Profile deleted successfully!')
+      // Refresh the list after deleting
+      await userRole.getUserRoles({ roleName: search.value })
+    } catch (error) {
+      console.error('Failed to delete profile:', error)
+      alert('Failed to delete profile. Please try again.')
+    }
+  }
+}
+
+// Watch for changes in the search input and fetch profiles
+watch(search, (newSearch) => {
+  userRole.getUserRoles({ roleName: newSearch })
+})
+
+// mounted
+onMounted(() => {
+  userRole.getUserRoles({
+    roleId: 0,
+  }) // Fetch all profiles initially
+})
 </script>
 
 <template>
   <div>
     <BreadcrumbView
-      title="Master Role"
+      title="Master Profile"
       :routes="[
         { name: 'User Management', to: '/user-management/user' },
-        { name: 'Master Role', to: '#' },
+        { name: 'Master Profile', to: '#' },
       ]"
     />
 
     <div class="card">
       <div class="card-header">
         <div class="flex w-full justify-between items-center">
-          <h2 class="text-lg font-bold text-slate-800">Master Role</h2>
+          <h2 class="text-lg font-bold text-slate-800">Master Profile</h2>
           <div class="flex gap-2">
             <UiInputSearch v-model="search" placeholder="Search Profile" />
-            <UiButton variant="primary" @click="handleOpenModal">
+            <UiButton variant="primary" @click="handleOpenModal()">
               <UiIcon variant="duotone" name="plus" />
-              Add Role</UiButton
+              Add Profile</UiButton
             >
           </div>
         </div>
       </div>
       <div class="card-body">
-        <table class="table align-middle text-gray-700">
+        <div v-if="userRole.loading" class="text-center py-4">Loading profiles...</div>
+        <div v-else-if="userRole.error" class="text-center py-4 text-red-500">
+          {{ userRole.error }}
+        </div>
+        <table
+          v-else-if="userRole.roles.items.length > 0"
+          class="table align-middle text-gray-700"
+        >
           <thead class="">
             <tr>
               <th></th>
-              <th class="text-nowrap">Role ID</th>
-              <th class="text-nowrap">Role Name</th>
+              <th class="text-nowrap">Profile ID</th>
+              <th class="text-nowrap">Profile Name</th>
               <th class="text-nowrap">Created Date</th>
+              <th class="text-nowrap">Is Active</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
+            <tr v-for="profile in userRole.roles.items" :key="profile.roleId">
               <td>
                 <div class="flex items-center space-x-3">
                   <div
@@ -74,7 +158,13 @@ const handleOpenModal = () => {
                     </UiButton>
                     <div class="dropdown-content w-auto p-4 space-y-5">
                       <div class="flex flex-col space-y-2">
-                        <UiButton variant="light" class="border-none" :outline="true" size="md">
+                        <UiButton
+                          variant="light"
+                          class="border-none"
+                          :outline="true"
+                          size="md"
+                          @click="handleOpenModal(profile)"
+                        >
                           <svg
                             width="18"
                             height="18"
@@ -99,14 +189,14 @@ const handleOpenModal = () => {
                               </clipPath>
                             </defs>
                           </svg>
-
-                          Edit Role
+                          Edit Profile
                         </UiButton>
                         <UiButton
                           variant="light"
                           class="border-none text-red-500 hover:text-red-600"
                           :outline="true"
                           size="md"
+                          @click="handleDeleteProfile(profile)"
                         >
                           <svg
                             width="18"
@@ -125,35 +215,45 @@ const handleOpenModal = () => {
                               fill="#F8285A"
                             />
                           </svg>
-
-                          Delete Role
+                          Delete Profile
                         </UiButton>
                       </div>
                     </div>
                   </div>
                 </div>
               </td>
-              <td>7372572</td>
-              <td>Sales Manager</td>
-              <td>Fri 19 Jun, 2020 09:35 am</td>
+              <td>{{ profile.roleId }}</td>
+              <td>{{ profile.roleName }}</td>
+              <td>{{ new Date(profile.createdUtcDate).toLocaleString() }}</td>
+              <td>
+                <span :class="profile.isActive ? 'text-green-500' : 'text-red-500'">
+                  {{ profile.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
             </tr>
           </tbody>
         </table>
+        <div v-else class="text-center py-4">No profiles found.</div>
       </div>
     </div>
 
-    <!-- Modal form -->
     <UiModal
-      title="Add New Role"
-      v-model="modalRole"
-      v-if="modalRole"
+      :title="rolePayload.roleId === 0 ? 'Add New Profile' : 'Edit Profile'"
+      v-model="modalProfile"
+      v-if="modalProfile"
       @update:model-value="handleCancel"
       size="sm"
     >
-      <UiInput label="Role Name" placeholder="Enter Role name" row required />
+      <UiInput
+        label="Profile Name"
+        placeholder="Enter profile name"
+        row
+        required
+        v-model="rolePayload.roleName"
+      />
       <div class="mt-4 w-full gap-2 justify-end items-center flex">
-        <UiButton outline>Cancel</UiButton>
-        <UiButton variant="primary">Save</UiButton>
+        <UiButton outline @click="handleCancel">Cancel</UiButton>
+        <UiButton variant="primary" @click="handleSaveProfile">Save</UiButton>
       </div>
     </UiModal>
   </div>
