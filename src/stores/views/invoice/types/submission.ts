@@ -47,6 +47,7 @@ interface ParamsSubmissionVendor {
   vendorName: string
   vendorBusinessUnit: string
   vendorSubBusinessUnit: string
+  npwp: string
   vendorAddress: string
 }
 

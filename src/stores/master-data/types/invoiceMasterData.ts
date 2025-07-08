@@ -30,6 +30,7 @@ export type VendorTypes = {
   businessFieldName: string
   subBusinessFieldId: number
   subBusinessFieldName: string
+  npwp: string
   address: string
   payment: PaymentTypes[]
 }
