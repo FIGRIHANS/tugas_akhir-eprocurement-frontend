@@ -7,7 +7,7 @@ import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import { useUserRoleStore } from '@/stores/user-management/role'
 import type { IRole } from '@/stores/user-management/types/role'
-import { onMounted, reactive, ref, watch } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 
 const search = ref('')
 
@@ -53,15 +53,9 @@ const handleSaveProfile = async () => {
   try {
     await userRole.postUserRole(rolePayload)
     handleCancel()
-    alert(
-      rolePayload.roleId === 0
-        ? 'Role added successfully!'
-        : 'Role updated successfully!',
-    )
-    await userRole.getUserRoles({ roleName: search.value })
+    await userRole.getAllUserRoles()
   } catch (error) {
     console.error('Failed to save profile:', error)
-    alert('Failed to save profile. Please try again.')
   }
 }
 
@@ -73,43 +67,33 @@ const handleDeleteProfile = async (role: IRole) => {
         roleName: role.roleName,
         isActive: false,
       })
-      alert('Profile deleted successfully!')
-      // Refresh the list after deleting
-      await userRole.getUserRoles({ roleName: search.value })
+      await userRole.getAllUserRoles()
     } catch (error) {
       console.error('Failed to delete profile:', error)
-      alert('Failed to delete profile. Please try again.')
     }
   }
 }
 
-// Watch for changes in the search input and fetch profiles
-watch(search, (newSearch) => {
-  userRole.getUserRoles({ roleName: newSearch })
-})
-
 // mounted
 onMounted(() => {
-  userRole.getUserRoles({
-    roleId: 0,
-  }) // Fetch all profiles initially
+  userRole.getAllUserRoles()
 })
 </script>
 
 <template>
   <div>
     <BreadcrumbView
-      title="Master Profile"
+      title="Role Master"
       :routes="[
         { name: 'User Management', to: '/user-management/user' },
-        { name: 'Master Profile', to: '#' },
+        { name: 'Master Role', to: '#' },
       ]"
     />
 
     <div class="card">
       <div class="card-header">
         <div class="flex w-full justify-between items-center">
-          <h2 class="text-lg font-bold text-slate-800">Master Profile</h2>
+          <h2 class="text-lg font-bold text-slate-800">Master Role</h2>
           <div class="flex gap-2">
             <UiInputSearch v-model="search" placeholder="Search Profile" />
             <UiButton variant="primary" @click="handleOpenModal()">
@@ -124,17 +108,13 @@ onMounted(() => {
         <div v-else-if="userRole.error" class="text-center py-4 text-red-500">
           {{ userRole.error }}
         </div>
-        <table
-          v-else-if="userRole.roles.items.length > 0"
-          class="table align-middle text-gray-700"
-        >
+        <table v-else-if="userRole.roles.items.length > 0" class="table align-middle text-gray-700">
           <thead class="">
             <tr>
               <th></th>
-              <th class="text-nowrap">Profile ID</th>
-              <th class="text-nowrap">Profile Name</th>
+              <th class="text-nowrap">Role ID</th>
+              <th class="text-nowrap">Role Name</th>
               <th class="text-nowrap">Created Date</th>
-              <th class="text-nowrap">Is Active</th>
             </tr>
           </thead>
           <tbody>
@@ -225,11 +205,6 @@ onMounted(() => {
               <td>{{ profile.roleId }}</td>
               <td>{{ profile.roleName }}</td>
               <td>{{ new Date(profile.createdUtcDate).toLocaleString() }}</td>
-              <td>
-                <span :class="profile.isActive ? 'text-green-500' : 'text-red-500'">
-                  {{ profile.isActive ? 'Active' : 'Inactive' }}
-                </span>
-              </td>
             </tr>
           </tbody>
         </table>

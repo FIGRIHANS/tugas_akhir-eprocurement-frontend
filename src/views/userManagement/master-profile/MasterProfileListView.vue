@@ -7,7 +7,7 @@ import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import { useUserProfileStore } from '@/stores/user-management/profile'
 import { onMounted, reactive, ref } from 'vue'
-import type { IProfile } from '@/stores/user-management/types/profile' // Import interface for type hinting
+import type { IProfile } from '@/stores/user-management/types/profile'
 
 const search = ref('')
 const userProfile = useUserProfileStore()
@@ -26,7 +26,6 @@ const profilePayload = reactive<{
 
 const handleCancel = () => {
   modalProfile.value = false
-  // Reset the payload when canceling or closing the modal
   profilePayload.profileId = 0
   profilePayload.profileName = ''
   profilePayload.isActive = true
@@ -34,12 +33,10 @@ const handleCancel = () => {
 
 const handleOpenModal = (profile?: IProfile) => {
   if (profile) {
-    // If a profile is passed, it means we're editing
     profilePayload.profileId = profile.profileId
     profilePayload.profileName = profile.profileName
     profilePayload.isActive = profile.isActive
   } else {
-    // Otherwise, we're adding a new one, reset to default
     profilePayload.profileId = 0
     profilePayload.profileName = ''
     profilePayload.isActive = true
@@ -53,7 +50,6 @@ const handleSaveProfile = async () => {
     return
   }
   try {
-    // The postUserProfile in store will handle add/edit based on profileId
     await userProfile.postUserProfile(profilePayload)
     handleCancel()
     alert(
@@ -61,29 +57,23 @@ const handleSaveProfile = async () => {
         ? 'Profile added successfully!'
         : 'Profile updated successfully!',
     )
-    // Refresh the list after adding/updating
     await userProfile.getAllUserProfiles()
   } catch (error) {
     console.error('Failed to save profile:', error)
-    alert('Failed to save profile. Please try again.')
   }
 }
 
 const handleDeleteProfile = async (profile: IProfile) => {
   if (confirm(`Are you sure you want to delete profile "${profile.profileName}"?`)) {
     try {
-      // Call deleteProfile from the store which now uses postUserProfile internally
       await userProfile.postUserProfile({
         profileId: profile.profileId,
         profileName: profile.profileName,
-        isActive: false, // Assuming we mark it as inactive instead of deleting
+        isActive: false,
       })
-      alert('Profile deleted successfully!')
-      // Refresh the list after deleting
       await userProfile.getAllUserProfiles()
     } catch (error) {
       console.error('Failed to delete profile:', error)
-      alert('Failed to delete profile. Please try again.')
     }
   }
 }
@@ -136,7 +126,6 @@ onMounted(() => {
               <th class="text-nowrap">Profile ID</th>
               <th class="text-nowrap">Profile Name</th>
               <th class="text-nowrap">Created Date</th>
-              <th class="text-nowrap">Is Active</th>
             </tr>
           </thead>
           <tbody>
@@ -227,11 +216,6 @@ onMounted(() => {
               <td>{{ profile.profileId }}</td>
               <td>{{ profile.profileName }}</td>
               <td>{{ new Date(profile.createdUtcDate).toLocaleString() }}</td>
-              <td>
-                <span :class="profile.isActive ? 'text-green-500' : 'text-red-500'">
-                  {{ profile.isActive ? 'Active' : 'Inactive' }}
-                </span>
-              </td>
             </tr>
           </tbody>
         </table>

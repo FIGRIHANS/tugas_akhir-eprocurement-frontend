@@ -4,7 +4,7 @@ import userApi from '@/core/utils/userApi'
 import type { ApiResponse } from '@/core/type/api'
 import type { IRole } from './types/role'
 
-interface RoleData {
+interface ProfileData {
   items: IRole[]
   total: number
   page: number
@@ -14,38 +14,52 @@ interface RoleData {
 export const useUserRoleStore = defineStore('userRole', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
-  const roles = ref<RoleData>({
+  const roles = ref<ProfileData>({
     items: [],
     total: 0,
     page: 0,
     pageSize: 0,
   })
 
-  /**
-   * Fetches user profile(s) from the API.
-   * @param body The request body, typically containing filter/pagination info or a specific profile ID.
-   * Using `unknown` is flexible but consider a more specific type if possible (e.g., `{ roleId?: number, page?: number, roleName?: string }`).
-   */
-  const getUserRoles = async (
-    body: { roleId?: number; roleName?: string; page?: number } = {},
-  ) => {
+  const getAllUserRoles = async () => {
     loading.value = true
     error.value = null
 
     try {
-      const response: ApiResponse<RoleData> = await userApi.post('/role', body)
+      const response: ApiResponse<IRole[]> = await userApi.post('/role/getall') // Ubah ApiResponse type
 
       if (response.data.result.isError) {
         error.value = response.data.result.message || 'An unknown error occurred.'
         return
       }
 
-      profiles.value = response.data.result.content
+      if (response.data.result.content && Array.isArray(response.data.result.content)) {
+        roles.value = {
+          items: response.data.result.content,
+          total: response.data.result.content.length,
+          page: 1,
+          pageSize: response.data.result.content.length,
+        }
+      } else {
+        roles.value = {
+          items: [],
+          total: 0,
+          page: 0,
+          pageSize: 0,
+        }
+        error.value = 'API response content is malformed or missing expected array of profiles.'
+      }
     } catch (err: unknown) {
       if (err instanceof Error) {
         error.value = err.message
       } else {
-        error.value = 'Failed to fetch user roles.'
+        error.value = 'Failed to fetch all user profiles.'
+      }
+      roles.value = {
+        items: [],
+        total: 0,
+        page: 0,
+        pageSize: 0,
       }
       throw err
     } finally {
@@ -53,10 +67,54 @@ export const useUserRoleStore = defineStore('userRole', () => {
     }
   }
 
-  /**
-   * Adds a new profile to the system.
-   * @param roleName The name of the new profile to add.
-   */
+  const getUserRole= async (
+    body: { profileId?: number; profileName?: string; page?: number } = {},
+  ) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const response: ApiResponse<IRole[]> = await userApi.post('/role', body)
+
+      if (response.data.result.isError) {
+        error.value = response.data.result.message || 'An unknown error occurred.'
+        return
+      }
+
+      if (response.data.result.content && Array.isArray(response.data.result.content)) {
+        roles.value = {
+          items: response.data.result.content,
+          total: response.data.result.content.length,
+          page: body.page || 1,
+          pageSize: response.data.result.content.length,
+        }
+      } else {
+        roles.value = {
+          items: [],
+          total: 0,
+          page: 0,
+          pageSize: 0,
+        }
+        error.value = 'API response content is malformed or missing expected array of profiles.'
+      }
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        error.value = err.message
+      } else {
+        error.value = 'Failed to fetch user profiles.'
+      }
+      roles.value = {
+        items: [],
+        total: 0,
+        page: 0,
+        pageSize: 0,
+      }
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
   const postUserRole = async (body: {
     roleId: number
     roleName: string
@@ -87,11 +145,12 @@ export const useUserRoleStore = defineStore('userRole', () => {
   }
 
   return {
+    roles,
     loading,
     error,
-    profiles,
 
-    getUserRoles,
+    getAllUserRoles,
+    getUserRole,
     postUserRole,
   }
 })

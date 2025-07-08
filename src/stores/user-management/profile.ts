@@ -21,43 +21,41 @@ export const useUserProfileStore = defineStore('userProfile', () => {
     pageSize: 0,
   })
 
-  // In Pinia Store (user-management/profile.ts)
-
+  // Dalam useUserProfileStore
   const getAllUserProfiles = async () => {
     loading.value = true
     error.value = null
 
     try {
-      const response: ApiResponse<ProfileData> = await userApi.post('/profile/getall')
+      const response: ApiResponse<IProfile[]> = await userApi.post('/profile/getall') // Ubah ApiResponse type
 
       if (response.data.result.isError) {
         error.value = response.data.result.message || 'An unknown error occurred.'
         return
       }
 
-      // --- CRITICAL CHANGE HERE ---
-      // Ensure content and its 'items' property exist and are of the correct type
-      if (response.data.result.content) {
-        profiles.value = response.data.result.content
-
+      if (response.data.result.content && Array.isArray(response.data.result.content)) {
+        profiles.value = {
+          items: response.data.result.content, // Ambil array dari content
+          total: response.data.result.content.length, // Anda bisa menghitung total dari panjang array
+          page: 1, // Asumsi halaman pertama jika tidak ada informasi pagination dari API
+          pageSize: response.data.result.content.length, // Asumsi semua data dimuat dalam satu halaman
+        }
       } else {
-        // If the structure is unexpected, set profiles to a default valid state
         profiles.value = {
           items: [],
           total: 0,
           page: 0,
           pageSize: 0,
         }
-        error.value = 'API response content is malformed or missing "items".'
+        error.value = 'API response content is malformed or missing expected array of profiles.'
       }
-      // --- END CRITICAL CHANGE ---
     } catch (err: unknown) {
       if (err instanceof Error) {
         error.value = err.message
       } else {
         error.value = 'Failed to fetch all user profiles.'
       }
-      // Set profiles to a safe, empty state on error as well
       profiles.value = {
         items: [],
         total: 0,
@@ -70,7 +68,6 @@ export const useUserProfileStore = defineStore('userProfile', () => {
     }
   }
 
-  // Apply similar logic to getUserProfiles if it's also fetching data that feeds into profiles.value
   const getUserProfiles = async (
     body: { profileId?: number; profileName?: string; page?: number } = {},
   ) => {
@@ -78,16 +75,21 @@ export const useUserProfileStore = defineStore('userProfile', () => {
     error.value = null
 
     try {
-      const response: ApiResponse<ProfileData> = await userApi.post('/profile', body)
+      const response: ApiResponse<IProfile[]> = await userApi.post('/profile', body) // Ubah ApiResponse type
 
       if (response.data.result.isError) {
         error.value = response.data.result.message || 'An unknown error occurred.'
         return
       }
 
-      // --- CRITICAL CHANGE HERE ---
-      if (response.data.result.content && Array.isArray(response.data.result.content.items)) {
-        profiles.value = response.data.result.content
+      // Periksa apakah content adalah array, lalu bentuk objek ProfileData
+      if (response.data.result.content && Array.isArray(response.data.result.content)) {
+        profiles.value = {
+          items: response.data.result.content,
+          total: response.data.result.content.length,
+          page: body.page || 1, // Gunakan page dari body request jika ada, default ke 1
+          pageSize: response.data.result.content.length, // Atau sesuai ukuran halaman yang Anda inginkan
+        }
       } else {
         profiles.value = {
           items: [],
@@ -95,9 +97,8 @@ export const useUserProfileStore = defineStore('userProfile', () => {
           page: 0,
           pageSize: 0,
         }
-        error.value = 'API response content is malformed or missing "items".'
+        error.value = 'API response content is malformed or missing expected array of profiles.'
       }
-      // --- END CRITICAL CHANGE ---
     } catch (err: unknown) {
       if (err instanceof Error) {
         error.value = err.message
@@ -116,10 +117,6 @@ export const useUserProfileStore = defineStore('userProfile', () => {
     }
   }
 
-  /**
-   * Adds a new profile to the system.
-   * @param profileName The name of the new profile to add.
-   */
   const postUserProfile = async (body: {
     profileId: number
     profileName: string
@@ -150,9 +147,9 @@ export const useUserProfileStore = defineStore('userProfile', () => {
   }
 
   return {
+    profiles,
     loading,
     error,
-    profiles,
 
     getAllUserProfiles,
     getUserProfiles,
