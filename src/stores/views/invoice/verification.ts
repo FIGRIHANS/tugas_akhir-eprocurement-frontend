@@ -51,6 +51,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
       bankAccountNo: '',
       vendorId: 0,
       vendorName: '',
+      npwp: '',
       vendorAddress: '',
       subtotal: 0,
       vatAmount: 0,

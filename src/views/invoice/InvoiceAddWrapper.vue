@@ -99,8 +99,7 @@ const form = reactive<formTypes>({
   invoiceType: '901',
   invoiceTypeName: 'Invoice PO',
   vendorId: '',
-  businessField: '',
-  subBusinessField: '',
+  npwp: '',
   address: '',
   bankKeyId: '',
   bankNameId: '',
@@ -337,6 +336,7 @@ const mapDataPost = () => {
     vendor: {
       vendorId: Number(form.vendorId),
       vendorName: getVendorName(),
+      npwp: form.npwp,
       vendorAddress: form.address
     },
     payment: {
@@ -430,6 +430,7 @@ const setData = () => {
   if (form) {
     form.invoiceType = detail?.header.invoiceTypeCode.toString() || ''
     form.vendorId = detail?.vendor.vendorId.toString() || ''
+    form.npwp = detail?.vendor.npwp || ''
     form.address = detail?.vendor.vendorAddress || ''
     form.bankKeyId = detail?.payment.bankKey || ''
     form.bankNameId = detail?.payment.bankName || ''
