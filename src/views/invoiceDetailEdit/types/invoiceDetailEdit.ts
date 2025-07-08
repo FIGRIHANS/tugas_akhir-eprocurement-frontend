@@ -47,6 +47,7 @@ export interface formTypes extends documentFormTypes {
 
   vendorId: number
   vendorName: string
+  npwp: string
   vendorAddress: string
 
   subtotal: number

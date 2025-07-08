@@ -2,7 +2,7 @@
   <div v-if="form" class="flex flex-col gap-[24px]">
     <div class="flex items-center gap-[24px]">
       <p class="text-lg font-semibold m-[0px]">Additional Cost</p>
-      <input v-model="form.additionalCostCheck" class="checkbox" type="checkbox"/>
+      <input v-if="isNeedCheck" v-model="form.additionalCostCheck" class="checkbox" type="checkbox"/>
     </div>
     <div class="cost__table">
       <table class="table table-xs table-border">
@@ -43,6 +43,10 @@
 <script lang="ts" setup>
 import { ref, inject } from 'vue'
 import type { formTypes } from '../types/invoiceDetail'
+
+defineProps<{
+  isNeedCheck: boolean
+}>()
 
 const form = inject<formTypes>('form')
 

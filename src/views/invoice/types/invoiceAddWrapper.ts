@@ -10,8 +10,7 @@ export interface formTypes extends documentFormTypes {
   invoiceTypeName: string
   vendorId: string
   vendorIdError?: boolean
-  businessField: string
-  subBusinessField: string
+  npwp: string
   address: string
 
   isNotRegisteredBank?: boolean

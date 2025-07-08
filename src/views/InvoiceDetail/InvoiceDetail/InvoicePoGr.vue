@@ -2,7 +2,7 @@
   <div v-if="form" class="flex flex-col gap-[24px]">
     <div class="flex items-center gap-[24px]">
       <p class="text-lg font-semibold m-[0px]">Invoice PO & GR Item</p>
-      <input v-model="form.invoicePoGrCheck" class="checkbox" type="checkbox"/>
+      <input v-if="isNeedCheck" v-model="form.invoicePoGrCheck" class="checkbox" type="checkbox"/>
     </div>
     <div class="po__table">
       <table class="table table-xs table-border">
@@ -56,6 +56,10 @@ import type { formTypes } from '../types/invoiceDetail'
 import { defaultColumn } from '@/static/invoicePoGr'
 import moment from 'moment'
 import { useFormatIdr } from '@/composables/currency'
+
+defineProps<{
+  isNeedCheck: boolean
+}>()
 
 const form = inject<formTypes>('form')
 const columns = ref<string[]>([])

@@ -18,6 +18,13 @@
           </option>
         </select>
       </div>
+      <!-- NPWP -->
+      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
+        <label class="form-label max-w-32">
+          NPWP
+        </label>
+        <input v-model="form.npwp" class="input" placeholder="" disabled/>
+      </div>
       <!-- Address -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
         <label class="form-label max-w-32">
@@ -51,6 +58,7 @@ watch(
       const getIndex = vendorList.value.findIndex((item) => item.vendorId === Number(form.vendorId))
       if (getIndex !== -1) {
         form.address = vendorList.value[getIndex].address
+        form.npwp = vendorList.value[getIndex].npwp
       }
     }
   }
