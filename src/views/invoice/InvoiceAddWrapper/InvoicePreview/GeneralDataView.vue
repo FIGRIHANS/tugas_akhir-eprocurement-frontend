@@ -7,6 +7,10 @@
         <p class="text-sm font-medium">{{ getVendorName() || '-' }}</p>
       </div>
       <div>
+        <p class="text-xs font-normal text-gray-700">NPWP</p>
+        <p class="text-sm font-medium">{{ form.npwp || '-' }}</p>
+      </div>
+      <div>
         <p class="text-xs font-normal text-gray-700">Address</p>
         <p class="text-sm font-medium">{{ form.address || '-' }}</p>
       </div>

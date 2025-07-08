@@ -12,6 +12,13 @@
         </label>
         <input v-model="form.vendorName" class="input" placeholder="" disabled />
       </div>
+      <!-- NPWP -->
+      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
+        <label class="form-label max-w-32">
+          NPWP
+        </label>
+        <input v-model="form.npwp" class="input" placeholder="" disabled/>
+      </div>
       <!-- Address -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
         <label class="form-label max-w-32">

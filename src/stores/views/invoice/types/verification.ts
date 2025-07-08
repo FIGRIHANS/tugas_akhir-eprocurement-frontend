@@ -79,6 +79,7 @@ interface ParamsSubmissionHeader {
 interface ParamsSubmissionVendor {
   vendorId: number
   vendorName: string
+  npwp: string
   vendorAddress: string
 }
 
@@ -273,6 +274,7 @@ export interface DetailInvoiceEditTypes {
 
   vendorId: number
   vendorName: string
+  npwp: string
   vendorAddress: string
 
   subtotal: number
