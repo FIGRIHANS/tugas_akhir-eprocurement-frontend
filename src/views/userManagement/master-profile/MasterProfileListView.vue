@@ -6,7 +6,7 @@ import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import { useUserProfileStore } from '@/stores/user-management/profile'
-import { onMounted, reactive, ref, watch } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import type { IProfile } from '@/stores/user-management/types/profile' // Import interface for type hinting
 
 const search = ref('')
@@ -62,7 +62,7 @@ const handleSaveProfile = async () => {
         : 'Profile updated successfully!',
     )
     // Refresh the list after adding/updating
-    await userProfile.getUserProfiles({ profileName: search.value })
+    await userProfile.getAllUserProfiles()
   } catch (error) {
     console.error('Failed to save profile:', error)
     alert('Failed to save profile. Please try again.')
@@ -80,7 +80,7 @@ const handleDeleteProfile = async (profile: IProfile) => {
       })
       alert('Profile deleted successfully!')
       // Refresh the list after deleting
-      await userProfile.getUserProfiles({ profileName: search.value })
+      await userProfile.getAllUserProfiles()
     } catch (error) {
       console.error('Failed to delete profile:', error)
       alert('Failed to delete profile. Please try again.')
@@ -88,16 +88,9 @@ const handleDeleteProfile = async (profile: IProfile) => {
   }
 }
 
-// Watch for changes in the search input and fetch profiles
-watch(search, (newSearch) => {
-  userProfile.getUserProfiles({ profileName: newSearch })
-})
-
 // mounted
 onMounted(() => {
-  userProfile.getUserProfiles({
-    profileId: 0,
-  }) // Fetch all profiles initially
+  userProfile.getAllUserProfiles()
 })
 </script>
 
@@ -130,7 +123,11 @@ onMounted(() => {
           {{ userProfile.error }}
         </div>
         <table
-          v-else-if="userProfile.profiles.items.length > 0"
+          v-else-if="
+            userProfile.profiles &&
+            userProfile.profiles.items &&
+            userProfile.profiles.items.length > 0
+          "
           class="table align-middle text-gray-700"
         >
           <thead class="">
@@ -143,7 +140,7 @@ onMounted(() => {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="profile in userProfile.profiles.items" :key="profile.profileId">
+            <tr v-for="profile in userProfile?.profiles?.items" :key="profile.profileId">
               <td>
                 <div class="flex items-center space-x-3">
                   <div

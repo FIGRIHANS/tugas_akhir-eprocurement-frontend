@@ -21,11 +21,56 @@ export const useUserProfileStore = defineStore('userProfile', () => {
     pageSize: 0,
   })
 
-  /**
-   * Fetches user profile(s) from the API.
-   * @param body The request body, typically containing filter/pagination info or a specific profile ID.
-   * Using `unknown` is flexible but consider a more specific type if possible (e.g., `{ profileId?: number, page?: number, profileName?: string }`).
-   */
+  // In Pinia Store (user-management/profile.ts)
+
+  const getAllUserProfiles = async () => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const response: ApiResponse<ProfileData> = await userApi.post('/profile/getall')
+
+      if (response.data.result.isError) {
+        error.value = response.data.result.message || 'An unknown error occurred.'
+        return
+      }
+
+      // --- CRITICAL CHANGE HERE ---
+      // Ensure content and its 'items' property exist and are of the correct type
+      if (response.data.result.content) {
+        profiles.value = response.data.result.content
+
+      } else {
+        // If the structure is unexpected, set profiles to a default valid state
+        profiles.value = {
+          items: [],
+          total: 0,
+          page: 0,
+          pageSize: 0,
+        }
+        error.value = 'API response content is malformed or missing "items".'
+      }
+      // --- END CRITICAL CHANGE ---
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        error.value = err.message
+      } else {
+        error.value = 'Failed to fetch all user profiles.'
+      }
+      // Set profiles to a safe, empty state on error as well
+      profiles.value = {
+        items: [],
+        total: 0,
+        page: 0,
+        pageSize: 0,
+      }
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // Apply similar logic to getUserProfiles if it's also fetching data that feeds into profiles.value
   const getUserProfiles = async (
     body: { profileId?: number; profileName?: string; page?: number } = {},
   ) => {
@@ -40,12 +85,30 @@ export const useUserProfileStore = defineStore('userProfile', () => {
         return
       }
 
-      profiles.value = response.data.result.content
+      // --- CRITICAL CHANGE HERE ---
+      if (response.data.result.content && Array.isArray(response.data.result.content.items)) {
+        profiles.value = response.data.result.content
+      } else {
+        profiles.value = {
+          items: [],
+          total: 0,
+          page: 0,
+          pageSize: 0,
+        }
+        error.value = 'API response content is malformed or missing "items".'
+      }
+      // --- END CRITICAL CHANGE ---
     } catch (err: unknown) {
       if (err instanceof Error) {
         error.value = err.message
       } else {
         error.value = 'Failed to fetch user profiles.'
+      }
+      profiles.value = {
+        items: [],
+        total: 0,
+        page: 0,
+        pageSize: 0,
       }
       throw err
     } finally {
@@ -91,6 +154,7 @@ export const useUserProfileStore = defineStore('userProfile', () => {
     error,
     profiles,
 
+    getAllUserProfiles,
     getUserProfiles,
     postUserProfile,
   }
