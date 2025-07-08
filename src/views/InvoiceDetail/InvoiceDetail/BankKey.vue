@@ -2,7 +2,7 @@
   <div v-if="form" class="card">
     <div class="card-header py-[17px] flex items-center justify-between gap-[8px]">
       <h3 class="card-title text-base font-semibold">Payment Information</h3>
-      <input v-model="form.bankKeyCheck" class="checkbox" type="checkbox"/>
+      <input v-if="isNeedCheck" v-model="form.bankKeyCheck" class="checkbox" type="checkbox"/>
     </div>
     <div class="card-body">
       <div class="flex flex-col gap-[20px]">
@@ -30,6 +30,10 @@
 <script lang="ts" setup>
 import { inject } from 'vue'
 import type { formTypes } from '../types/invoiceDetail'
+
+defineProps<{
+  isNeedCheck: boolean
+}>()
 
 const form = inject<formTypes>('form')
 
