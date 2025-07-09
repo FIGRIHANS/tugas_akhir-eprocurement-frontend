@@ -16,7 +16,14 @@
     <div class="dropdown-content w-full max-w-56 p-4">
       <div class="menu menu-default flex flex-col w-full">
         <div class="menu-item">
-          <p class="mb-[14px]">Hi, {{ userData?.profile?.employeeName ?? 'User' }}</p>
+          <p class="mb-[14px]">
+            Hi,
+            {{
+              userData?.profile.employeeName
+                ? userData.profile.employeeName
+                : userData?.profile.vendorName
+            }}
+          </p>
           <a class="menu-link !px-[5px] !mx-[0px]" href="#" @click="logout">
             <span class="menu-title"> Log Out </span>
           </a>
