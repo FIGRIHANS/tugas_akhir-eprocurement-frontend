@@ -1,7 +1,6 @@
 <template>
   <div>
     <Breadcrumb title="Invoice Verification" :routes="routes" />
-    <StepperStatus active-name="Verification" />
     <hr class="-mx-[24px] mb-[24px]" />
     <TabInvoice :active-tab="tabNow" @change-tab="setTab" />
     <PendingVerification />
@@ -12,7 +11,6 @@
 import { ref, onMounted, defineAsyncComponent } from 'vue'
 import type { routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
-import StepperStatus from '../../components/stepperStatus/StepperStatus.vue'
 import TabInvoice from './InvoiceVerification/TabInvoice.vue'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 
