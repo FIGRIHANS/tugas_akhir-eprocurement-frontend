@@ -6,6 +6,7 @@ export interface ParamsSubmissionTypes {
   calculation: ParamsSubmissionCalculation
   pogr: ParamsSubmissionItem[]
   additionalCosts: ParamsSubmissionCost[]
+  workflow: ParamsSubmissionWorkflow[]
 }
 
 export interface PostVerificationTypes {
@@ -104,6 +105,19 @@ interface ParamsSubmissionCalculation {
   additionalCost: number
   totalGrossAmount: number
   totalNetAmount: number
+}
+
+interface ParamsSubmissionWorkflow {
+  actioner: number
+  actionerDate: string
+  actionerName: string
+  actionerNotes: string
+  id: number
+  profileId: number
+  profileName: string
+  stateCode: number
+  stateName: string
+  step: number
 }
 
 interface ParamsSubmissionItem {
