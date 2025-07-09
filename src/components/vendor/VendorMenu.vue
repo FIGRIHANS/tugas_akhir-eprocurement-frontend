@@ -8,7 +8,7 @@ import UiModal from '../modal/UiModal.vue'
 import successImg from '@/assets/success.svg'
 import { useRouter } from 'vue-router'
 
-defineProps<{ id: string | number; name: string; email: string }>()
+defineProps<{ id: string | number; name: string; email: string; status: number }>()
 const router = useRouter()
 const verificationModalOpen = ref<boolean>(false)
 const blacklistModalOpen = ref<boolean>(false)
@@ -43,11 +43,30 @@ const handleSuccess = () => {
         </li>
         <div class="border-b border-b-gray-200"></div>
         <li class="menu-item">
-          <button class="menu-link" @click="blacklistModalOpen = true">
+          <button
+            class="menu-link disabled:cursor-not-allowed"
+            @click="blacklistModalOpen = true"
+            :disabled="status === 2"
+          >
             <span class="menu-icon">
-              <UiIcon variant="duotone" name="cross-circle" class="!text-red-600" />
+              <UiIcon
+                variant="duotone"
+                name="cross-circle"
+                :class="{
+                  '!text-red-600': status !== 2,
+                  '!text-gray-600': status === 2,
+                }"
+              />
             </span>
-            <span class="menu-title !text-red-600"> Blacklist </span>
+            <span
+              class="menu-title"
+              :class="{
+                '!text-red-600': status !== 2,
+                '!text-gray-600': status === 2,
+              }"
+            >
+              Blacklist
+            </span>
           </button>
         </li>
       </ul>

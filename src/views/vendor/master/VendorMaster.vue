@@ -121,6 +121,7 @@ watch(
                   :id="vendor.vendorId"
                   :name="vendor.vendorName"
                   :email="vendor.vendorEmail"
+                  :status="vendor.isVerified"
                 />
                 <StatusToggle
                   :id="vendor.vendorId"
