@@ -67,7 +67,7 @@ onMounted(() => {
       <LogoRejected class="w-[34px]" />
       <div>
         <h2 class="font-semibold text-base text-gray-800">Rejected</h2>
-        <p class="font-medium text-2sm text-gray-600">
+        <p class="font-medium text-2sm text-red-500">
           The vendor has been reviewed and rejected based on the evaluation criteria
         </p>
       </div>
