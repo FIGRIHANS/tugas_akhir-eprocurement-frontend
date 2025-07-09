@@ -96,6 +96,7 @@ const routes = ref<routeTypes[]>([
 ])
 
 const form = reactive<formTypes>({
+  invoiceUId: '',
   invoiceType: '901',
   invoiceTypeName: 'Invoice PO',
   vendorId: '',
@@ -133,7 +134,7 @@ const form = reactive<formTypes>({
   invoicePoGr: [],
   invoiceItem: [],
   additionalCost: [],
-  status: 0
+  status: -1
 })
 
 const contentComponent = computed(() => {
@@ -317,7 +318,7 @@ const getDpName = () => {
 const mapDataPost = () => {
   const data = {
     header: {
-      invoiceUId: '00000000-0000-0000-0000-000000000000',
+      invoiceUId: form.status === 0 ? form.invoiceUId :'00000000-0000-0000-0000-000000000000',
       invoiceTypeCode: Number(form.invoiceType),
       invoiceTypeName: form.invoiceTypeName,
       invoiceDPCode: Number(form.invoiceDp),
@@ -427,31 +428,32 @@ const goSaveDraft = () => {
 
 const setData = () => {
   const detail = detailPo.value
-  if (form) {
-    form.invoiceType = detail?.header.invoiceTypeCode.toString() || ''
-    form.vendorId = detail?.vendor.vendorId.toString() || ''
-    form.npwp = detail?.vendor.npwp || ''
-    form.address = detail?.vendor.vendorAddress || ''
-    form.bankKeyId = detail?.payment.bankKey || ''
-    form.bankNameId = detail?.payment.bankName || ''
-    form.beneficiaryName = detail?.payment.beneficiaryName || ''
-    form.bankAccountNumber = detail?.payment.bankAccountNo || ''
-    form.invoiceDp = detail?.header.invoiceDPCode.toString() || ''
-    form.companyCode = detail?.header.companyCode || ''
-    form.invoiceNoVendor = detail?.header.documentNo.toString() || ''
-    form.invoiceNo = detail?.header.invoiceNo.toString() || ''
-    form.invoiceDate = detail?.header.invoiceDate || ''
-    form.taxNoInvoice = detail?.header.taxNo || ''
-    form.currency = detail?.header.currCode || ''
-    form.description = detail?.header.notes || ''
-    form.subtotal = detail?.calculation.subtotal || 0
-    form.vatAmount = detail?.calculation.vatAmount || 0
-    form.additionalCostCalc = detail?.calculation.additionalCost || 0
-    form.totalGrossAmount = detail?.calculation.totalGrossAmount || 0
-    form.totalNetAmount = detail?.calculation.totalNetAmount || 0
-    form.status = detail?.header.statusCode || -1
+  if (form && detail) {
+    form.status = detail.header.statusCode
+    form.invoiceUId = detail.header.invoiceUId
+    form.invoiceType = detail.header.invoiceTypeCode ? detail.header.invoiceTypeCode.toString() : ''
+    form.vendorId = detail.vendor.vendorId ? detail.vendor.vendorId.toString() : ''
+    form.npwp = detail.vendor.npwp
+    form.address = detail.vendor.vendorAddress
+    form.bankKeyId = detail.payment.bankKey
+    form.bankNameId = detail.payment.bankName
+    form.beneficiaryName = detail.payment.beneficiaryName
+    form.bankAccountNumber = detail.payment.bankAccountNo
+    form.invoiceDp = detail.header.invoiceDPCode ? detail.header.invoiceDPCode.toString() : ''
+    form.companyCode = detail.header.companyCode
+    form.invoiceNoVendor = detail.header.documentNo ? detail.header.documentNo.toString() : ''
+    form.invoiceNo = detail.header.invoiceNo ? detail.header.invoiceNo.toString() : ''
+    form.invoiceDate = detail.header.invoiceDate
+    form.taxNoInvoice = detail.header.taxNo
+    form.currency = detail.header.currCode
+    form.description = detail.header.notes
+    form.subtotal = detail.calculation.subtotal
+    form.vatAmount = detail.calculation.vatAmount
+    form.additionalCostCalc = detail.calculation.additionalCost
+    form.totalGrossAmount = detail.calculation.totalGrossAmount
+    form.totalNetAmount = detail.calculation.totalNetAmount
     form.invoicePoGr = []
-    for (const item of detail?.pogr || []) {
+    for (const item of detail.pogr) {
       const data = {
         poNo: item.poNo,
         poItem: item.poItem,
@@ -481,7 +483,7 @@ const setData = () => {
       form.invoicePoGr.push(data)
     }
     form.additionalCost = []
-    for (const item of detail?.additionalCosts || []) {
+    for (const item of detail.additionalCosts) {
       const data = {
         activity: item.activityExpense,
         itemAmount: item.itemAmount.toString(),
@@ -498,33 +500,33 @@ const setData = () => {
       form.additionalCost.push(data)
     }
 
-    for (const doc of detail?.documents || []) {
+    for (const doc of detail.documents) {
       switch (doc.documentType) {
         case 1:
           form.invoiceDocument = {
             name: doc.documentName,
-            fileSize: doc.documentSize.toString() || '0',
+            fileSize: doc.documentSize.toString(),
             path: doc.documentUrl
           }
           break
         case 2:
           form.tax = {
             name: doc.documentName,
-            fileSize: doc.documentSize.toString() || '0',
+            fileSize: doc.documentSize.toString(),
             path: doc.documentUrl
           }
           break
         case 3:
           form.referenceDocument = {
             name: doc.documentName,
-            fileSize: doc.documentSize.toString() || '0',
+            fileSize: doc.documentSize.toString(),
             path: doc.documentUrl
           }
           break
         case 4:
           form.otherDocument = {
             name: doc.documentName,
-            fileSize: doc.documentSize.toString() || '0',
+            fileSize: doc.documentSize.toString(),
             path: doc.documentUrl
           }
           break

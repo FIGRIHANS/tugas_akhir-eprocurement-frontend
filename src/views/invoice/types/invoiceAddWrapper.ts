@@ -5,6 +5,7 @@ import type { invoiceItemTypes } from './invoiceItem'
 
 export interface formTypes extends documentFormTypes {
   // Invoice Data
+  invoiceUId: string
   invoiceType: string
   invoiceTypeError?: boolean
   invoiceTypeName: string

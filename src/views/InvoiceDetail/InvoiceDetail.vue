@@ -149,8 +149,7 @@ const checkStatusCode = () => {
 
   if (form.value.statusCode === 2 && route.query.type === '1') status = false
 
-  status = checkWorkflow() || true
-
+  status = checkWorkflow()
   return status
 }
 
@@ -162,6 +161,7 @@ const checkWorkflow = () => {
 
   if (checkIndex !== -1) {
     if (getWf[checkIndex].stateCode === 3) return false
+    else return true
   } else return true
 }
 
