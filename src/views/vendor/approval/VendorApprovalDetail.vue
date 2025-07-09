@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import LogoApproved from '@/assets/svg/LogoApproved.vue'
+import LogoRejected from '@/assets/svg/LogoRejected.vue'
 import LogoSAP from '@/assets/svg/LogoSAP.vue'
 import BreadcrumbView from '@/components/BreadcrumbView.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
@@ -56,6 +57,19 @@ onMounted(() => {
       <div>
         <h2 class="font-semibold text-base text-gray-800">Successfully Send to SAP</h2>
         <p class="font-medium text-2sm text-gray-600">Vendor has been successfully send to SAP.</p>
+      </div>
+    </div>
+
+    <div
+      v-if="Number(route.query.status) === 2"
+      class="rounded-lg border border-red-500 bg-red-50 p-4 flex items-center gap-4"
+    >
+      <LogoRejected class="w-[34px]" />
+      <div>
+        <h2 class="font-semibold text-base text-gray-800">Rejected</h2>
+        <p class="font-medium text-2sm text-gray-600">
+          The vendor has been reviewed and rejected based on the evaluation criteria
+        </p>
       </div>
     </div>
     <AdministrativeCard />
