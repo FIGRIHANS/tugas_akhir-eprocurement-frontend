@@ -5,19 +5,83 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
-import { ref } from 'vue'
+import { useUserProfileStore } from '@/stores/user-management/profile'
+import { onMounted, reactive, ref } from 'vue'
+import type { IProfile } from '@/stores/user-management/types/profile'
 
 const search = ref('')
+const userProfile = useUserProfileStore()
 
 const modalProfile = ref(false)
 
+const profilePayload = reactive<{
+  profileId: number
+  profileName: string
+  isActive: boolean
+}>({
+  profileId: 0,
+  profileName: '',
+  isActive: true,
+})
+
 const handleCancel = () => {
   modalProfile.value = false
+  profilePayload.profileId = 0
+  profilePayload.profileName = ''
+  profilePayload.isActive = true
 }
 
-const handleOpenModal = () => {
+const handleOpenModal = (profile?: IProfile) => {
+  if (profile) {
+    profilePayload.profileId = profile.profileId
+    profilePayload.profileName = profile.profileName
+    profilePayload.isActive = profile.isActive
+  } else {
+    profilePayload.profileId = 0
+    profilePayload.profileName = ''
+    profilePayload.isActive = true
+  }
   modalProfile.value = true
 }
+
+const handleSaveProfile = async () => {
+  if (!profilePayload.profileName.trim()) {
+    alert('Profile name cannot be empty!')
+    return
+  }
+  try {
+    await userProfile.postUserProfile(profilePayload)
+    handleCancel()
+    alert(
+      profilePayload.profileId === 0
+        ? 'Profile added successfully!'
+        : 'Profile updated successfully!',
+    )
+    await userProfile.getAllUserProfiles()
+  } catch (error) {
+    console.error('Failed to save profile:', error)
+  }
+}
+
+const handleDeleteProfile = async (profile: IProfile) => {
+  if (confirm(`Are you sure you want to delete profile "${profile.profileName}"?`)) {
+    try {
+      await userProfile.postUserProfile({
+        profileId: profile.profileId,
+        profileName: profile.profileName,
+        isActive: false,
+      })
+      await userProfile.getAllUserProfiles()
+    } catch (error) {
+      console.error('Failed to delete profile:', error)
+    }
+  }
+}
+
+// mounted
+onMounted(() => {
+  userProfile.getAllUserProfiles()
+})
 </script>
 
 <template>
@@ -36,7 +100,7 @@ const handleOpenModal = () => {
           <h2 class="text-lg font-bold text-slate-800">Master Profile</h2>
           <div class="flex gap-2">
             <UiInputSearch v-model="search" placeholder="Search Profile" />
-            <UiButton variant="primary" @click="handleOpenModal">
+            <UiButton variant="primary" @click="handleOpenModal()">
               <UiIcon variant="duotone" name="plus" />
               Add Profile</UiButton
             >
@@ -44,7 +108,18 @@ const handleOpenModal = () => {
         </div>
       </div>
       <div class="card-body">
-        <table class="table align-middle text-gray-700">
+        <div v-if="userProfile.loading" class="text-center py-4">Loading profiles...</div>
+        <div v-else-if="userProfile.error" class="text-center py-4 text-red-500">
+          {{ userProfile.error }}
+        </div>
+        <table
+          v-else-if="
+            userProfile.profiles &&
+            userProfile.profiles.items &&
+            userProfile.profiles.items.length > 0
+          "
+          class="table align-middle text-gray-700"
+        >
           <thead class="">
             <tr>
               <th></th>
@@ -54,7 +129,7 @@ const handleOpenModal = () => {
             </tr>
           </thead>
           <tbody>
-            <tr>
+            <tr v-for="profile in userProfile?.profiles?.items" :key="profile.profileId">
               <td>
                 <div class="flex items-center space-x-3">
                   <div
@@ -74,7 +149,13 @@ const handleOpenModal = () => {
                     </UiButton>
                     <div class="dropdown-content w-auto p-4 space-y-5">
                       <div class="flex flex-col space-y-2">
-                        <UiButton variant="light" class="border-none" :outline="true" size="md">
+                        <UiButton
+                          variant="light"
+                          class="border-none"
+                          :outline="true"
+                          size="md"
+                          @click="handleOpenModal(profile)"
+                        >
                           <svg
                             width="18"
                             height="18"
@@ -99,7 +180,6 @@ const handleOpenModal = () => {
                               </clipPath>
                             </defs>
                           </svg>
-
                           Edit Profile
                         </UiButton>
                         <UiButton
@@ -107,6 +187,7 @@ const handleOpenModal = () => {
                           class="border-none text-red-500 hover:text-red-600"
                           :outline="true"
                           size="md"
+                          @click="handleDeleteProfile(profile)"
                         >
                           <svg
                             width="18"
@@ -125,7 +206,6 @@ const handleOpenModal = () => {
                               fill="#F8285A"
                             />
                           </svg>
-
                           Delete Profile
                         </UiButton>
                       </div>
@@ -133,27 +213,33 @@ const handleOpenModal = () => {
                   </div>
                 </div>
               </td>
-              <td>7372572</td>
-              <td>Sales Manager</td>
-              <td>Fri 19 Jun, 2020 09:35 am</td>
+              <td>{{ profile.profileId }}</td>
+              <td>{{ profile.profileName }}</td>
+              <td>{{ new Date(profile.createdUtcDate).toLocaleString() }}</td>
             </tr>
           </tbody>
         </table>
+        <div v-else class="text-center py-4">No profiles found.</div>
       </div>
     </div>
 
-    <!-- Modal form -->
     <UiModal
-      title="Add New Profile"
+      :title="profilePayload.profileId === 0 ? 'Add New Profile' : 'Edit Profile'"
       v-model="modalProfile"
       v-if="modalProfile"
       @update:model-value="handleCancel"
       size="sm"
     >
-      <UiInput label="Profile Name" placeholder="Enter profile name" row required />
+      <UiInput
+        label="Profile Name"
+        placeholder="Enter profile name"
+        row
+        required
+        v-model="profilePayload.profileName"
+      />
       <div class="mt-4 w-full gap-2 justify-end items-center flex">
-        <UiButton outline>Cancel</UiButton>
-        <UiButton variant="primary">Save</UiButton>
+        <UiButton outline @click="handleCancel">Cancel</UiButton>
+        <UiButton variant="primary" @click="handleSaveProfile">Save</UiButton>
       </div>
     </UiModal>
   </div>

@@ -449,7 +449,7 @@ const setData = () => {
     form.additionalCostCalc = detail?.calculation.additionalCost || 0
     form.totalGrossAmount = detail?.calculation.totalGrossAmount || 0
     form.totalNetAmount = detail?.calculation.totalNetAmount || 0
-    form.status = detail?.header.statusCode || 0
+    form.status = detail?.header.statusCode || -1
     form.invoicePoGr = []
     for (const item of detail?.pogr || []) {
       const data = {

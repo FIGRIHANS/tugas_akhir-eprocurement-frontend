@@ -55,6 +55,7 @@ import { useCheckEmpty } from '@/composables/validation'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import StepperStatus from '../../components/stepperStatus/StepperStatus.vue'
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
+import { useLoginStore } from '@/stores/views/login'
 import type { PostVerificationTypes } from '@/stores/views/invoice/types/verification'
 import { isEmpty } from 'lodash'
 
@@ -73,6 +74,7 @@ const activeStep = ref<string>('')
 const router = useRouter()
 const route = useRoute()
 const verificationApi = useInvoiceVerificationStore()
+const loginApi = useLoginStore()
 const isLoading = ref<boolean>(false)
 
 const routes = ref<routeTypes[]>([
@@ -133,6 +135,7 @@ const form = ref<formTypes>({
 })
 
 const detailInvoice = computed(() => verificationApi.detailInvoice)
+const userData = computed(() => loginApi.userData)
 
 const checkStatusCode = () => {
   let status = true
@@ -146,7 +149,20 @@ const checkStatusCode = () => {
 
   if (form.value.statusCode === 2 && route.query.type === '1') status = false
 
+  status = checkWorkflow() || true
+
   return status
+}
+
+const checkWorkflow = () => {
+  const getWf = detailInvoice.value?.workflow || []
+  const getProfileId = userData.value?.profile.profileId
+
+  const checkIndex = getWf?.findIndex((item) => item.profileId === getProfileId)
+
+  if (checkIndex !== -1) {
+    if (getWf[checkIndex].stateCode === 3) return false
+  } else return true
 }
 
 const goToEdit = () => {
@@ -516,6 +532,19 @@ onMounted(() => {
       setDataEdit()
     } else {
       setDataDefault()
+    }
+    switch (detailInvoice.value?.header.statusCode) {
+      case 1:
+      case 3:
+        activeStep.value = 'Verification'
+        break
+      case 2:
+      case 4:
+        activeStep.value = 'Approval'
+        break
+      case 7:
+        activeStep.value = 'Posting'
+        break
     }
   })
 })
