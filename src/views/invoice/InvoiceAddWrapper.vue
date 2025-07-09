@@ -317,7 +317,7 @@ const getDpName = () => {
 const mapDataPost = () => {
   const data = {
     header: {
-      invoiceUId: '00000000-0000-0000-0000-000000000000',
+      invoiceUId: form.status === 0 ? form.invoiceNo : '00000000-0000-0000-0000-000000000000',
       invoiceTypeCode: Number(form.invoiceType),
       invoiceTypeName: form.invoiceTypeName,
       invoiceDPCode: Number(form.invoiceDp),
@@ -449,7 +449,7 @@ const setData = () => {
     form.additionalCostCalc = detail?.calculation.additionalCost || 0
     form.totalGrossAmount = detail?.calculation.totalGrossAmount || 0
     form.totalNetAmount = detail?.calculation.totalNetAmount || 0
-    form.status = detail?.header.statusCode || 0
+    form.status = detail?.header.statusCode || -1
     form.invoicePoGr = []
     for (const item of detail?.pogr || []) {
       const data = {
