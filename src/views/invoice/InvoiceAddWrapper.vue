@@ -16,7 +16,7 @@
       <Transition mode="out-in">
         <component :is="contentComponent" />
       </Transition>
-      <div v-if="(form.status === 0 || form.status === 5) && !checkInvoiceView()" class="flex justify-between items-center gap-[8px] mt-[24px]">
+      <div v-if="(form.status === 0 || form.status === -1 || form.status === 5) && !checkInvoiceView()" class="flex justify-between items-center gap-[8px] mt-[24px]">
         <button class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goSaveDraft">
           Save as Draft
           <i class="ki-duotone ki-bookmark"></i>
@@ -364,7 +364,7 @@ const mapDataPost = () => {
 const goNext = () => {
   const list = ['data', 'information', 'preview']
   if (tabNow.value !== 'preview') {
-    if (form.status === 0 || form.status === 5) {
+    if (form.status === 0 || form.status === -1 || form.status === 5) {
       if (tabNow.value === 'data') {
         const check = checkInvoiceData()
         if (!check) return
