@@ -317,7 +317,7 @@ const getDpName = () => {
 const mapDataPost = () => {
   const data = {
     header: {
-      invoiceUId: form.status === 0 ? form.invoiceNo : '00000000-0000-0000-0000-000000000000',
+      invoiceUId: '00000000-0000-0000-0000-000000000000',
       invoiceTypeCode: Number(form.invoiceType),
       invoiceTypeName: form.invoiceTypeName,
       invoiceDPCode: Number(form.invoiceDp),
