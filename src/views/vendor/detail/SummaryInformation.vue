@@ -35,6 +35,8 @@ const isVerified = computed(
   () => verifStore.data[verifStore.data.length - 1]?.status === 'Verified',
 )
 
+const isRejected = computed(() => verifStore.data[verifStore.data.length - 1]?.status === 'Reject')
+
 const handleVerify = async () => {
   if (!notes.value) {
     inputError.value.push('notes')
@@ -126,7 +128,7 @@ onMounted(() => {
       </UiButton>
 
       <div
-        v-if="route.name === 'vendor-verification-detail'"
+        v-if="route.name === 'vendor-verification-detail' && !isRejected"
         class="space-x-3 flex-1 flex justify-end"
       >
         <UiButton
