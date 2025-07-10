@@ -8,10 +8,12 @@ import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import { useUserRoleStore } from '@/stores/user-management/role'
 import type { IRole } from '@/stores/user-management/types/role'
 import { computed, onMounted, reactive, ref } from 'vue'
+import successImg from '@/assets/success.svg'
 
 const search = ref('')
 const userRoleStore = useUserRoleStore()
 const isModalOpen = ref(false)
+const showModalSuccess = ref(false)
 
 const rolePayload = reactive<{
   roleId: number
@@ -92,7 +94,8 @@ const saveRole = async () => {
   try {
     await userRoleStore.postUserRole(rolePayload)
     closeRoleModal()
-    alert(rolePayload.roleId === 0 ? 'Role added successfully!' : 'Role updated successfully!')
+    // alert(rolePayload.roleId === 0 ? 'Role added successfully!' : 'Role updated successfully!')
+    showModalSuccess.value = true
     await userRoleStore.getAllUserRoles()
   } catch (error: unknown) {
     console.error('Failed to save role:', error)
@@ -219,7 +222,6 @@ onMounted(() => {
         <div v-else class="text-center py-4">No roles found.</div>
       </div>
     </div>
-
     <UiModal
       :title="modalTitle"
       v-model="isModalOpen"
@@ -244,6 +246,16 @@ onMounted(() => {
         </UiButton>
       </div>
     </UiModal>
+
+    <!-- Modal success message -->
+    <UiModal v-model="showModalSuccess" size="sm" @update:model-value="!showModalSuccess">
+      <img :src="successImg" alt="success" class="mx-auto mb-3" />
+      <h3 class="font-medium text-lg text-gray-800 text-center">
+        Role successfully {{ rolePayload.roleId === 0 ? 'Created' : 'Updated' }}
+      </h3>
+    </UiModal>
+
+    <!-- Modal delete confirm -->
   </div>
 </template>
 
