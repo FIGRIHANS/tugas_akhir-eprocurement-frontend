@@ -76,7 +76,7 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
       }
     })
   
-    listPo.value = newList.sort((a, b) => moment(b.invoiceDate).valueOf() - moment(a.invoiceDate).valueOf())
+    listPo.value = newList.sort((a, b) => moment(b.createdUtcDate).valueOf() - moment(a.createdUtcDate).valueOf())
   
     return newList
   }

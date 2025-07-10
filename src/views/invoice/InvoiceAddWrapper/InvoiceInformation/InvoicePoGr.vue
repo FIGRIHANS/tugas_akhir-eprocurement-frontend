@@ -107,7 +107,7 @@ const openAddItem = () => {
       }
     }
     if (search.value.toString().length !== 10) return
-    invoiceApi.getPoGr(search.value.toString(), form?.companyCode || '', '1000000055')
+    invoiceApi.getPoGr(search.value.toString(), form?.companyCode || '', form?.vendorId || '')
     const idModal = document.querySelector('#add_po_gr_item_modal')
     const modal = KTModal.getInstance(idModal as HTMLElement)
     modal.show()
