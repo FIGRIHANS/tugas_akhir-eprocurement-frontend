@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import UiModal from '@/components/modal/UiModal.vue'
 import UiLoading from '@/components/UiLoading.vue'
+import { formatDateTime } from '@/composables/date-format'
 import { useVerificationDetailStore } from '@/stores/vendor/vendor'
-import moment from 'moment'
 import { onMounted } from 'vue'
 
 const verificationStore = useVerificationDetailStore()
@@ -47,15 +47,13 @@ onMounted(() => {
               <td>{{ index + 1 }}</td>
               <td>{{ item.verificatorName }}</td>
               <td>{{ item.position }}</td>
-              <td>
-                {{ moment(item.createdDate).format('LLL') }}
-              </td>
+              <td>{{ formatDateTime(item.createdDate) }}</td>
               <td>
                 <span
                   class="badge badge-outline"
                   :class="{
                     'badge-success': item.status === 'Verified',
-                    'badge-danger': item.status === 'Rejected',
+                    'badge-danger': item.status === 'Reject',
                   }"
                 >
                   {{ item.status }}
