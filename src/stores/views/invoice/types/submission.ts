@@ -131,7 +131,8 @@ export interface PoGrItemTypes {
   taxCode: string
   itemAmount: number
   quantity: number
-  uom: string
+  unit: string
+  itemText: string
   material: string
   materialDescription: string
   currency: string
@@ -164,6 +165,7 @@ export interface ListPoTypes {
   vendorName: string
   pOs: PoChildTypes[]
   isOpenChild: boolean
+  createdUtcDate: string
 }
 
 export interface PoChildTypes {

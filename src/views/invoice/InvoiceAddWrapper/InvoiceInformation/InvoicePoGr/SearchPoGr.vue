@@ -47,8 +47,8 @@
                   <td>{{ item.grDocumentDate }}</td>
                   <td class="text-right">{{ useFormatIdr(item.itemAmount) }}</td>
                   <td>{{ item.quantity }}</td>
-                  <td>{{ item.uom }}</td>
-                  <td>{{ item.materialDescription }}</td>
+                  <td>{{ item.unit }}</td>
+                  <td>{{ item.itemText }}</td>
                   <td>{{ item.conditionType }}</td>
                   <td>{{ item.conditionTypeDesc }}</td>
                   <td>{{ item.qcStatus }}</td>
