@@ -55,7 +55,7 @@ watch(
   () => form?.vendorId,
   () => {
     if (form) {
-      const getIndex = vendorList.value.findIndex((item) => item.vendorId === Number(form.vendorId))
+      const getIndex = vendorList.value.findIndex((item) => item.vendorCode === form.vendorId)
       if (getIndex !== -1) {
         form.address = vendorList.value[getIndex].address
         form.npwp = vendorList.value[getIndex].npwp
