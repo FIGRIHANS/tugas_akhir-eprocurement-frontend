@@ -13,7 +13,7 @@
         </label>
         <input v-if="(form.status !== 0 && form.status !== -1 && form.status !== 5) || loginApi.isVendor" v-model="form.vendorId" class="input" placeholder="" disabled />
         <select v-else v-model="form.vendorId" class="select" :class="{ 'border-danger': form.vendorIdError }">
-          <option v-for="item of vendorList" :key="item.vendorId" :value="item.vendorId">
+          <option v-for="item of vendorList" :key="item.vendorId" :value="item.vendorCode">
             {{ item.vendorName }}
           </option>
         </select>
