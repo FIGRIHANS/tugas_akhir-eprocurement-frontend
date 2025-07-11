@@ -38,7 +38,7 @@
               <td>{{ moment(parent.invoiceDate).format('DD MMMM YYYY') }}</td>
               <td>{{ useFormatIdr(parent.totalGrossAmount) }}</td>
               <td>{{ useFormatIdr(parent.totalNetAmount) }}</td>
-              <td>{{ moment(parent.estimatePaymentDate).format('DD MMMM YYYY') }}</td>
+              <td>{{ parent.estimatePaymentDate ? moment(parent.estimatePaymentDate).format('DD MMMM YYYY') : '-' }}</td>
             </tr>
             <tr v-show="parent.isOpenChild">
               <td></td>
