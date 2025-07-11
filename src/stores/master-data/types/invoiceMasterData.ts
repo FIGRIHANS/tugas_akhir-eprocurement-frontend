@@ -25,11 +25,13 @@ export type DocumentTypes = {
 
 export type VendorTypes = {
   vendorId: number
+  vendorCode: string
   vendorName: string
   businessFieldId: number
   businessFieldName: string
   subBusinessFieldId: number
   subBusinessFieldName: string
+  npwp: string
   address: string
   payment: PaymentTypes[]
 }

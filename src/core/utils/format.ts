@@ -23,7 +23,9 @@ export function mysqlFormat(dateRef: Ref<Date | null>) {
 }
 
 export const formatDate = (date: Date, local: 'us' | 'id' = 'id') => {
-  return new Intl.DateTimeFormat(local, { dateStyle: 'long' }).format(date)
+  return new Intl.DateTimeFormat(local, { dateStyle: 'long', timeZone: 'Asia/Jakarta' }).format(
+    date,
+  )
 }
 
 export const formattoMySQL = (date: Date, withTime: boolean = true) => {

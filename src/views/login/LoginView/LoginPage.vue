@@ -8,13 +8,13 @@
       <!-- input email -->
       <div v-if="!checkVendor()">
         <label class="font-normal text-[13px]">Email</label>
-        <input v-model="email" class="input mt-[8px]" placeholder="email@email.com" type="email" />
+        <input v-model="email" class="input mt-[8px]" placeholder="email@email.com" type="email" :class="{ 'border-danger': isError }" />
       </div>
 
       <!-- input username -->
       <div v-else>
         <label class="font-normal text-[13px]">Username</label>
-        <input v-model="username" class="input mt-[8px]" placeholder="Username" type="text" />
+        <input v-model="username" class="input mt-[8px]" placeholder="Username" type="text" :class="{ 'border-danger': isError }" />
       </div>
 
       <!-- input password -->
@@ -83,6 +83,7 @@ const password = ref<string>('')
 const rememberMe = ref<boolean>(false)
 const showPassword = ref<boolean>(false)
 const isLoading = ref<boolean>(false)
+const isError = ref<boolean>(false)
 
 const selectedLogin = computed(() => loginApi.selectedLogin)
 
@@ -141,7 +142,11 @@ const goLogin = () => {
     loginApi
       .callLoginVendor(username.value, password.value)
       .then((response: ApiResponseData<string>) => {
-        nextStepLogin(response)
+        if (response.statusCode === 200) {
+          nextStepLogin(response)
+        } else {
+          isError.value = true
+        }
       })
       .finally(() => {
         isLoading.value = false

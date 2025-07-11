@@ -111,7 +111,7 @@ const countSubtotal = () => {
   if (!form) return
   let total = 0
   for (const item of form.invoicePoGr) {
-    total = total + (item.itemAmount * item.quantity)
+    total = total + item.itemAmount
   }
   return total
 }

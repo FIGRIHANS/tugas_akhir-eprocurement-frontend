@@ -5,13 +5,13 @@ import type { invoiceItemTypes } from './invoiceItem'
 
 export interface formTypes extends documentFormTypes {
   // Invoice Data
+  invoiceUId: string
   invoiceType: string
   invoiceTypeError?: boolean
   invoiceTypeName: string
   vendorId: string
   vendorIdError?: boolean
-  businessField: string
-  subBusinessField: string
+  npwp: string
   address: string
 
   isNotRegisteredBank?: boolean

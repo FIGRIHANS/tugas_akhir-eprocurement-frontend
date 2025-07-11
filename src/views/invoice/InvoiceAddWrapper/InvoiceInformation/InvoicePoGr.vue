@@ -41,7 +41,7 @@
           <template v-else>
             <tr v-for="(item, index) in form.invoicePoGr" :key="index" class="pogr__field-items">
               <td class="flex items-center justify-around gap-[8px]">
-                <button v-if="form.status === 0 || form.status === 5" class="btn btn-icon btn-outline btn-danger" @click="deleteItem(index)">
+                <button v-if="form.status === 0 || form.status === -1 || form.status === 5" class="btn btn-icon btn-outline btn-danger" @click="deleteItem(index)">
                   <i class="ki-duotone ki-cross-circle"></i>
                 </button>
               </td>
@@ -107,7 +107,7 @@ const openAddItem = () => {
       }
     }
     if (search.value.toString().length !== 10) return
-    invoiceApi.getPoGr(search.value.toString(), form?.companyCode || '', '1000000055')
+    invoiceApi.getPoGr(search.value.toString(), form?.companyCode || '', form?.vendorId || '')
     const idModal = document.querySelector('#add_po_gr_item_modal')
     const modal = KTModal.getInstance(idModal as HTMLElement)
     modal.show()

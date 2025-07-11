@@ -14,9 +14,9 @@ import RejectButton from '@/components/vendor/approval/RejectButton.vue'
 import ApprovalVerifikasi from '@/components/vendor/approval/ApprovalVerifikasi.vue'
 import { useApprovalStore } from '@/stores/vendor/approval'
 import UiLoading from '@/components/UiLoading.vue'
-import moment from 'moment'
 import VendorApprovalFilters from '@/components/vendor/filterButton/VendorApprovalFilters.vue'
 import SAPButton from '@/components/vendor/approval/SAPButton.vue'
+import { formatDate } from '@/composables/date-format'
 
 const route = useRoute()
 const router = useRouter()
@@ -113,34 +113,29 @@ watch(
           >
             <td>
               <div class="flex gap-5">
-                <div v-if="Number(item.approvalStatus) === 2" class="text-gray-600">
-                  No Action Available
+                <div v-if="Number(item.approvalStatus) === 1">
+                  <SAPButton :id="Number(item.vendorId)" />
                 </div>
-                <template v-else>
-                  <div v-if="Number(item.approvalStatus) === 1">
-                    <SAPButton :id="Number(item.vendorId)" />
-                  </div>
-                  <template v-if="!Number(item.approvalStatus)">
-                    <ApproveButton :id="item.vendorId" :nama="item.vendorName" />
-                    <RejectButton :id="item.vendorId" :nama="item.vendorName" />
-                  </template>
-                  <ApprovalVerifikasi :id="item.vendorId" :nama="item.vendorName" />
-                  <UiButton
-                    size="sm"
-                    :icon="true"
-                    variant="primary"
-                    :outline="true"
-                    @click="
-                      $router.push({
-                        name: 'vendor-approval-detail',
-                        params: { id: item.vendorId },
-                        query: { status: item.approvalStatus },
-                      })
-                    "
-                  >
-                    <UiIcon name="eye" variant="duotone" />
-                  </UiButton>
+                <template v-if="!Number(item.approvalStatus)">
+                  <ApproveButton :id="item.vendorId" :nama="item.vendorName" />
+                  <RejectButton :id="item.vendorId" :nama="item.vendorName" />
                 </template>
+                <ApprovalVerifikasi :id="item.vendorId" :nama="item.vendorName" />
+                <UiButton
+                  size="sm"
+                  :icon="true"
+                  variant="primary"
+                  :outline="true"
+                  @click="
+                    $router.push({
+                      name: 'vendor-approval-detail',
+                      params: { id: item.vendorId },
+                      query: { status: item.approvalStatus },
+                    })
+                  "
+                >
+                  <UiIcon name="eye" variant="duotone" />
+                </UiButton>
               </div>
             </td>
             <td class="text-nowrap">{{ item.vendorName }}</td>
@@ -157,15 +152,11 @@ watch(
               </span>
             </td>
             <td>
-              <div class="w-[500px]">{{ item.addressCompanyInfo }}</div>
+              <div class="min-w-[400px]">{{ item.addressCompanyInfo }}</div>
             </td>
             <td class="text-nowrap">{{ item.companyCategoryName }}</td>
-            <td class="text-nowrap">
-              {{ item.activedUTCDate ? moment(item.activedUTCDate).format('LL') : '-' }}
-            </td>
-            <td class="text-nowrap">
-              {{ item.sendApprovalDate ? moment(item.sendApprovalDate).format('LL') : '-' }}
-            </td>
+            <td class="text-nowrap">{{ formatDate(item.activedUTCDate) }}</td>
+            <td class="text-nowrap">{{ formatDate(item.sendApprovalDate!) }}</td>
           </tr>
         </tbody>
       </table>

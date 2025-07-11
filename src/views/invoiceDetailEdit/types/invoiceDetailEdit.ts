@@ -45,8 +45,9 @@ export interface formTypes extends documentFormTypes {
   beneficiaryName: string
   bankAccountNo: string
 
-  vendorId: number
+  vendorId: string
   vendorName: string
+  npwp: string
   vendorAddress: string
 
   subtotal: number

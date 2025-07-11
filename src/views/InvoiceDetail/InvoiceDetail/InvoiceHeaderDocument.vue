@@ -9,7 +9,7 @@
           Invoice Document
         </button>
       </div>
-      <input v-model="form.invoiceHeaderDocumentCheck" class="checkbox" type="checkbox"/>
+      <input v-if="isNeedCheck" v-model="form.invoiceHeaderDocumentCheck" class="checkbox" type="checkbox"/>
     </div>
     <div class="card-body overflow-y-scroll invoice-header" :class="{ 'document': tabNow === 'document' }">
       <Transition mode="out-in">
@@ -25,6 +25,10 @@ import type { formTypes } from '../types/invoiceDetail'
 
 const InvoiceHeader = defineAsyncComponent(() => import('./InvoiceHeaderDocument/InvoiceHeader.vue'))
 const InvoiceDocument = defineAsyncComponent(() => import('./InvoiceHeaderDocument/InvoiceDocument.vue'))
+
+defineProps<{
+  isNeedCheck: boolean
+}>()
 
 const form = inject<formTypes>('form')
 const tabNow = ref<string>('header')

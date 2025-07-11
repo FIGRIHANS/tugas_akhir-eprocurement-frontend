@@ -7,6 +7,10 @@
         <p class="text-sm font-medium">{{ getVendorName() || '-' }}</p>
       </div>
       <div>
+        <p class="text-xs font-normal text-gray-700">NPWP</p>
+        <p class="text-sm font-medium">{{ form.npwp || '-' }}</p>
+      </div>
+      <div>
         <p class="text-xs font-normal text-gray-700">Address</p>
         <p class="text-sm font-medium">{{ form.address || '-' }}</p>
       </div>
@@ -28,7 +32,7 @@ const typeForm = ref<string>('')
 const vendorList = computed(() => invoiceMasterApi.vendorList)
 
 const getVendorName = () => {
-  const getIndex = vendorList.value.findIndex((item) => item.vendorId === Number(form?.vendorId))
+  const getIndex = vendorList.value.findIndex((item) => item.vendorCode === form?.vendorId)
   if (getIndex !== -1) return vendorList.value[getIndex].vendorName
 }
 

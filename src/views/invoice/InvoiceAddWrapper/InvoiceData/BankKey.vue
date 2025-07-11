@@ -11,7 +11,7 @@
           Bank Key
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
-        <input v-if="form.status !== 0 && form.status !== 5" v-model="form.bankKeyId" class="input" placeholder="" disabled />
+        <input v-if="form.status !== 0 && form.status !== -1 && form.status !== 5" v-model="form.bankKeyId" class="input" placeholder="" disabled />
         <select v-else v-model="form.bankKeyId" class="select" :class="{ 'border-danger': form.bankKeyIdError }">
           <option v-for="item of bankList" :key="item.bankId" :value="item.bankId">
             {{ item.bankKey + ' - ' + item.accountNumber }}
@@ -57,7 +57,7 @@ const vendorList = computed(() => invoiceMasterApi.vendorList)
 
 const checkBank = () => {
   if (form) {
-    const getIndex = vendorList.value.findIndex((item) => item.vendorId === Number(form?.vendorId))
+    const getIndex = vendorList.value.findIndex((item) => item.vendorCode === form?.vendorId)
     if (getIndex !== -1) {
       bankList.value = vendorList.value[getIndex].payment
       if (bankList.value.length === 1) {

@@ -5,15 +5,15 @@
     <hr class="-mx-[24px] mb-[24px]" />
     <StatusInvoice :statusCode="form.statusCode" class="mb-[24px]" />
     <div class="flex gap-[24px]">
-      <GeneralData class="flex-1" />
-      <BankKey class="flex-1" />
+      <GeneralData :isNeedCheck="checkStatusCode()" class="flex-1" />
+      <BankKey :isNeedCheck="checkStatusCode()" class="flex-1" />
     </div>
     <div class="flex gap-[24px] mt-[24px] max-h-[457px]">
-      <InvoiceHeaderDocument class="flex-1" />
-      <InvoiceCalculation class="flex-1" :formInvoice="form" />
+      <InvoiceHeaderDocument :isNeedCheck="checkStatusCode()" class="flex-1" />
+      <InvoiceCalculation :isNeedCheck="checkStatusCode()" class="flex-1" :formInvoice="form" />
     </div>
-    <InvoicePoGr v-if="checkPo()" class="mt-[24px]" />
-    <AdditionalCost v-if="form.invoiceDPCode === 9011 && checkPo()" class="mt-[24px]" />
+    <InvoicePoGr v-if="checkPo()" :isNeedCheck="checkStatusCode()" class="mt-[24px]" />
+    <AdditionalCost v-if="form.invoiceDPCode === 9011 && checkPo()" :isNeedCheck="checkStatusCode()" class="mt-[24px]" />
     <div class="flex items-center justify-between gap-[8px] mt-[24px]">
       <div class="flex items-center gap-[10px]">
         <button class="btn btn-outline btn-primary" :disabled="isLoading" @click="goBack">
@@ -55,6 +55,7 @@ import { useCheckEmpty } from '@/composables/validation'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import StepperStatus from '../../components/stepperStatus/StepperStatus.vue'
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
+import { useLoginStore } from '@/stores/views/login'
 import type { PostVerificationTypes } from '@/stores/views/invoice/types/verification'
 import { isEmpty } from 'lodash'
 
@@ -73,6 +74,7 @@ const activeStep = ref<string>('')
 const router = useRouter()
 const route = useRoute()
 const verificationApi = useInvoiceVerificationStore()
+const loginApi = useLoginStore()
 const isLoading = ref<boolean>(false)
 
 const routes = ref<routeTypes[]>([
@@ -116,6 +118,7 @@ const form = ref<formTypes>({
   bankAccountNo: '',
   vendorId: 0,
   vendorName: '',
+  npwp: '',
   vendorAddress: '',
   subtotal: 0,
   vatAmount: 0,
@@ -132,6 +135,7 @@ const form = ref<formTypes>({
 })
 
 const detailInvoice = computed(() => verificationApi.detailInvoice)
+const userData = computed(() => loginApi.userData)
 
 const checkStatusCode = () => {
   let status = true
@@ -145,7 +149,20 @@ const checkStatusCode = () => {
 
   if (form.value.statusCode === 2 && route.query.type === '1') status = false
 
+  status = checkWorkflow()
   return status
+}
+
+const checkWorkflow = () => {
+  const getWf = detailInvoice.value?.workflow || []
+  const getProfileId = userData.value?.profile.profileId
+
+  const checkIndex = getWf?.findIndex((item) => item.profileId === getProfileId)
+
+  if (checkIndex !== -1) {
+    if (getWf[checkIndex].stateCode === 3) return false
+    else return true
+  } else return true
 }
 
 const goToEdit = () => {
@@ -418,6 +435,7 @@ const setDataDefault = () => {
     bankAccountNo: data?.payment.bankAccountNo || '',
     vendorId: data?.vendor.vendorId || 0,
     vendorName: data?.vendor.vendorName || '',
+    npwp: data?.vendor.npwp || '',
     vendorAddress: data?.vendor.vendorAddress || '',
     subtotal: data?.calculation.subtotal || 0,
     vatAmount: data?.calculation.vatAmount || 0,
@@ -466,6 +484,7 @@ const setDataEdit = () => {
     bankAccountNo: data?.bankAccountNo || '',
     vendorId: data?.vendorId || 0,
     vendorName: data?.vendorName || '',
+    npwp: data?.npwp || '',
     vendorAddress: data?.vendorAddress || '',
     subtotal: data?.subtotal || 0,
     vatAmount: data?.vatAmount || 0,
@@ -513,6 +532,19 @@ onMounted(() => {
       setDataEdit()
     } else {
       setDataDefault()
+    }
+    switch (detailInvoice.value?.header.statusCode) {
+      case 1:
+      case 3:
+        activeStep.value = 'Verification'
+        break
+      case 2:
+      case 4:
+        activeStep.value = 'Approval'
+        break
+      case 7:
+        activeStep.value = 'Posting'
+        break
     }
   })
 })

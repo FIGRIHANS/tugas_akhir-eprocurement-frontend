@@ -6,6 +6,7 @@ export interface ParamsSubmissionTypes {
   calculation: ParamsSubmissionCalculation
   pogr: ParamsSubmissionItem[]
   additionalCosts: ParamsSubmissionCost[]
+  workflow: ParamsSubmissionWorkflow[]
 }
 
 export interface PostVerificationTypes {
@@ -77,8 +78,9 @@ interface ParamsSubmissionHeader {
 }
 
 interface ParamsSubmissionVendor {
-  vendorId: number
+  vendorId: string
   vendorName: string
+  npwp: string
   vendorAddress: string
 }
 
@@ -103,6 +105,19 @@ interface ParamsSubmissionCalculation {
   additionalCost: number
   totalGrossAmount: number
   totalNetAmount: number
+}
+
+interface ParamsSubmissionWorkflow {
+  actioner: number
+  actionerDate: string
+  actionerName: string
+  actionerNotes: string
+  id: number
+  profileId: number
+  profileName: string
+  stateCode: number
+  stateName: string
+  step: number
 }
 
 interface ParamsSubmissionItem {
@@ -271,8 +286,9 @@ export interface DetailInvoiceEditTypes {
   beneficiaryName: string
   bankAccountNo: string
 
-  vendorId: number
+  vendorId: string
   vendorName: string
+  npwp: string
   vendorAddress: string
 
   subtotal: number
