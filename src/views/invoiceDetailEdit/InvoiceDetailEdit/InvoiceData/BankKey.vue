@@ -56,7 +56,7 @@ const vendorList = computed(() => invoiceMasterApi.vendorList)
 
 const checkBank = () => {
   if (form) {
-    const getIndex = vendorList.value.findIndex((item) => item.vendorId === form.value.vendorId)
+    const getIndex = vendorList.value.findIndex((item) => item.vendorCode === form.value.vendorId)
     if (getIndex !== -1) {
       bankList.value = vendorList.value[getIndex].payment
       if (bankList.value.length === 1) {

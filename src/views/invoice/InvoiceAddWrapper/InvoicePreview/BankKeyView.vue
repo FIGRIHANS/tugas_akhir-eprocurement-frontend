@@ -33,7 +33,7 @@ const form = inject<formTypes>('form')
 const vendorList = computed(() => invoiceMasterApi.vendorList)
 
 const getBankKey = () => {
-  const getIndex = vendorList.value.findIndex((item) => item.vendorId === Number(form?.vendorId))
+  const getIndex = vendorList.value.findIndex((item) => item.vendorCode === form?.vendorId)
   if (getIndex !== -1) {
     const bankList = vendorList.value[getIndex].payment
     const getIndexBank = bankList.findIndex((item) => item.bankId === Number(form?.bankKeyId))
