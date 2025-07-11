@@ -78,7 +78,7 @@ interface ParamsSubmissionHeader {
 }
 
 interface ParamsSubmissionVendor {
-  vendorId: number
+  vendorId: string
   vendorName: string
   npwp: string
   vendorAddress: string
@@ -286,7 +286,7 @@ export interface DetailInvoiceEditTypes {
   beneficiaryName: string
   bankAccountNo: string
 
-  vendorId: number
+  vendorId: string
   vendorName: string
   npwp: string
   vendorAddress: string
