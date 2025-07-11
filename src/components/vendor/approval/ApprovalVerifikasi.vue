@@ -3,8 +3,8 @@ import UiModal from '@/components/modal/UiModal.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiLoading from '@/components/UiLoading.vue'
+import { formatDateTime } from '@/composables/date-format'
 import { useApprovalStore } from '@/stores/vendor/approval'
-import moment from 'moment'
 import { ref } from 'vue'
 
 const props = defineProps<{ id: string | number; nama: string }>()
@@ -86,7 +86,7 @@ const handleClick = () => {
             <td>{{ index + 1 }}</td>
             <td>{{ item.approvalByName }}</td>
             <td>{{ item.approvalByPosition }}</td>
-            <td>{{ moment(item.createdUtcDate).format('LLL') }}</td>
+            <td>{{ formatDateTime(item.createdUtcDate) }}</td>
             <td>
               <span
                 class="badge badge-outline"

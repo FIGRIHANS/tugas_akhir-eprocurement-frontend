@@ -9,10 +9,10 @@ import { useVerificationStatus } from '@/stores/vendor/reference'
 import { ref, watch } from 'vue'
 import { debounce } from 'lodash'
 import { useRoute, useRouter } from 'vue-router'
-import { formatDate } from '@/core/utils/format'
 import UiLoading from '@/components/UiLoading.vue'
 import VendorListFilters from '@/components/vendor/filterButton/VendorListFilters.vue'
 import BreadcrumbView from '@/components/BreadcrumbView.vue'
+import { formatDate } from '@/composables/date-format'
 
 const route = useRoute()
 const router = useRouter()
@@ -116,12 +116,12 @@ watch(
             class="font-normal text-sm"
           >
             <td>
-              <span v-if="vendor.isVerified === 2" class="text-gray-600">No Action Available</span>
-              <div class="flex items-center gap-3" v-else>
+              <div class="flex items-center gap-3">
                 <VendorMenu
                   :id="vendor.vendorId"
                   :name="vendor.vendorName"
                   :email="vendor.vendorEmail"
+                  :status="vendor.isVerified"
                 />
                 <StatusToggle
                   :id="vendor.vendorId"
@@ -138,25 +138,14 @@ watch(
                   'badge-success': vendor.isVerified === 1,
                   'badge-danger': vendor.isVerified === 2,
                 }"
-                >{{ getStatus(vendor.isVerified?.toString()) || 'Waiting to Verify' }}</span
               >
+                {{ getStatus(vendor.isVerified?.toString()) || 'Waiting to Verify' }}
+              </span>
             </td>
             <td>{{ vendor.companyCategoryName }}</td>
-            <td>
-              {{ vendor.createdUTCDate ? formatDate(new Date(vendor.createdUTCDate), 'us') : '-' }}
-            </td>
-            <td>
-              {{
-                vendor.verifiedSendUTCDate
-                  ? formatDate(new Date(vendor.verifiedSendUTCDate as string), 'us')
-                  : '-'
-              }}
-            </td>
-            <td>
-              {{
-                vendor.verifiedUTCDate ? formatDate(new Date(vendor.verifiedUTCDate), 'us') : '-'
-              }}
-            </td>
+            <td>{{ formatDate(vendor.createdUTCDate) }}</td>
+            <td>{{ formatDate(vendor.verifiedSendUTCDate!) }}</td>
+            <td>{{ formatDate(vendor.verifiedUTCDate) }}</td>
             <td>
               <div
                 v-for="(license, index) in vendor.licenses"
@@ -164,9 +153,7 @@ watch(
                 class="text-nowrap"
               >
                 {{ index + 1 }}. {{ license.licenseName }} :
-                {{
-                  license.expiredUTCDate ? formatDate(new Date(license.expiredUTCDate), 'us') : '-'
-                }}
+                {{ formatDate(license.expiredUTCDate!) }}
               </div>
             </td>
             <td>{{ vendor.vendorCode }}</td>
