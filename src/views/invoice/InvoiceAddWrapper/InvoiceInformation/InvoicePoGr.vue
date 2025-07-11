@@ -53,7 +53,7 @@
               <td v-if="!checkInvoiceDp()">{{ useFormatIdr(item.itemAmount) }}</td>
               <td v-if="!checkInvoiceDp()">{{ item.quantity }}</td>
               <td v-if="!checkInvoiceDp()">{{ item.uom }}</td>
-              <td v-if="!checkInvoiceDp()">{{ item.materialDescription }}</td>
+              <td v-if="!checkInvoiceDp()">{{ item.itemText }}</td>
               <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.conditionType }}</td>
               <td v-if="!checkInvoiceDp()">{{ item.conditionTypeDesc || '-' }}</td>
               <td v-if="!checkInvoiceDp()">{{ item.qcStatus || '-' }}</td>
@@ -145,9 +145,8 @@ const setItemPoGr = (items: PoGrSearchTypes[]) => {
       taxCode: item.taxCode,
       itemAmount: item.itemAmount,
       quantity: item.quantity,
-      uom: item.uom,
-      material: item.material,
-      materialDescription: item.materialDescription,
+      uom: item.unit,
+      itemText: item.itemText,
       currency: item.currency,
       conditionType: item.conditionType,
       conditionTypeDesc: item.conditionTypeDesc,
