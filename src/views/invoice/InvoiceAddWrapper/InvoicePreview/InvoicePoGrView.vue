@@ -25,10 +25,10 @@
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentNo }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentItem }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ moment(item.grDocumentDate).format('DD MMMM YYYY') }}</td>
-            <td v-if="!checkInvoiceDp()">{{ useFormatIdr(item.itemAmount) }}</td>
+            <td v-if="!checkInvoiceDp()">{{ useFormatIdr(form.currency === item.currencyLC ? item.itemAmountLC : item.itemAmountTC) }}</td>
             <td v-if="!checkInvoiceDp()">{{ useFormatIdr(item.quantity) }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.uom }}</td>
-            <td v-if="!checkInvoiceDp()">{{ item.materialDescription }}</td>
+            <td v-if="!checkInvoiceDp()">{{ item.itemText }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.conditionType }}</td>
             <td>{{ item.conditionTypeDesc || '-' }}</td>
             <td>{{ item.qcStatus || '-' }}</td>

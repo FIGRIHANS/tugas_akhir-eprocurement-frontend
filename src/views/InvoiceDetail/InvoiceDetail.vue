@@ -37,7 +37,7 @@
       </div>
     </div>
     <RejectVerification @reject="goReject" />
-    <SuccessVerifModal />
+    <SuccessVerifModal :statusCode="detailInvoice?.header.statusCode || -1" />
     <SuccessRejectModal />
   </div>
 </template>
@@ -116,7 +116,7 @@ const form = ref<formTypes>({
   bankName: '',
   beneficiaryName: '',
   bankAccountNo: '',
-  vendorId: 0,
+  vendorId: '',
   vendorName: '',
   npwp: '',
   vendorAddress: '',
@@ -217,7 +217,7 @@ const checkVerif = () => {
     !data.invoiceHeaderDocumentCheck ||
     !data.invoiceCalculationCheck ||
     !data.invoicePoGrCheck ||
-    !data.additionalCostCheck 
+    !data.additionalCostCheck
   ) status = false
 
   return status
@@ -433,7 +433,7 @@ const setDataDefault = () => {
     bankName: data?.payment.bankName || '',
     beneficiaryName: data?.payment.beneficiaryName || '',
     bankAccountNo: data?.payment.bankAccountNo || '',
-    vendorId: data?.vendor.vendorId || 0,
+    vendorId: data?.vendor.vendorId || '',
     vendorName: data?.vendor.vendorName || '',
     npwp: data?.vendor.npwp || '',
     vendorAddress: data?.vendor.vendorAddress || '',
@@ -482,7 +482,7 @@ const setDataEdit = () => {
     bankName: data?.bankName || '',
     beneficiaryName: data?.beneficiaryName || '',
     bankAccountNo: data?.bankAccountNo || '',
-    vendorId: data?.vendorId || 0,
+    vendorId: data?.vendorId || '',
     vendorName: data?.vendorName || '',
     npwp: data?.npwp || '',
     vendorAddress: data?.vendorAddress || '',
