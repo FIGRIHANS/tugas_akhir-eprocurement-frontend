@@ -12,23 +12,27 @@ export interface IVendorList {
   npwp: string
   npwpUrl: string
   foundedDate: string
-  companyScale: null | string
-  verificationRemark: string
-  approvalStatus: string
-  approvalStatusId: number
+  companyScale: string | null
+  verificationRemark: string | null
+  approvalStatusId: string | null
+  approvalStatus: string | null
   isActive: boolean
   isVerified: number
-  activedUTCDate: string
-  verifiedUTCDate: string
-  verifiedSendUTCDate: null | string
-  verifiedRejectedUTCDate: string
+  activedUTCDate: string | null
+  verifiedUTCDate: string | null
+  verifiedSendUTCDate: string
+  verifiedRejectedUTCDate: string | null
   sendApprovalDate: string | null
+  isSpecificIndustry: number
   licenses: {
+    vendorId: number
     licenseName: string
-    expiredUTCDate: null | string
+    expiredUTCDate: string
+    seq: number
   }[]
   createdBy: string
   createdUTCDate: string
+  modifiedUTCDate: string
 }
 
 export interface IVendorContent {
