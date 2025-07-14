@@ -21,13 +21,20 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-if="filteredavailableRoles.length === 0">
+              <tr v-if="userRoleStore.loading">
+                <td colspan="2" class="text-center text-gray-500 py-4">Loading roles...</td>
+              </tr>
+              <tr v-else-if="userRoleStore.error">
+                <td colspan="2" class="text-center text-red-500 py-4">{{ userRoleStore.error }}</td>
+              </tr>
+              <tr v-else-if="filteredAvailableRoles.length === 0">
                 <td colspan="2" class="text-center text-gray-500 py-4">
                   No available role objects.
                 </td>
               </tr>
               <tr
-                v-for="auth in filteredavailableRoles"
+                v-else
+                v-for="auth in filteredAvailableRoles"
                 :key="auth.code"
                 @click="toggleAvailableSelection(auth.code)"
                 class="cursor-pointer hover:bg-gray-50"
@@ -45,7 +52,7 @@
         <UiButton
           variant="primary"
           @click="addSelectedAuths"
-          :disabled="selectedavailableRoles.length === 0"
+          :disabled="selectedAvailableRoles.length === 0"
         >
           <svg
             width="24"
@@ -122,27 +129,49 @@
 <script setup lang="ts">
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
-import { ref, reactive, computed, watch, inject, type Ref } from 'vue'
+import { ref, reactive, computed, watch, inject, onMounted, type Ref } from 'vue'
+// Import the provided store
+import { useUserRoleStore } from '@/stores/user-management/role' // Updated import path
 
+// Define the interface for AuthObject, assuming IRole from the store is compatible (contains code and name)
 interface AuthObject {
   code: string
   name: string
 }
 
-const availableRoles = ref<AuthObject[]>([
-  { code: 'ID: 17001', name: 'Architect' },
-  { code: 'ID: 17002', name: 'Newspaper reporter' },
-  { code: 'ID: 17003', name: 'Medarbeider' },
-  { code: 'ID: 17004', name: 'Security Guard' },
-  { code: 'ID: 17005', name: 'Engineer' },
-  { code: 'ID: 17006', name: 'Teacher' },
-])
+// Initialize the store
+const userRoleStore = useUserRoleStore()
 
-const assignedAuths = reactive<AuthObject[]>([])
+// Local state for assigned roles (since the store only fetches all roles, we manage assigned state locally)
+const assignedAuths = ref<AuthObject[]>([])
 
+// Reactive state for selection tracking and errors
 const searchCodeKeyword = ref('')
+const selectedAvailableRoles = ref<string[]>([])
+const selectedAssignedAuths = ref<string[]>([])
+const errors = reactive({
+  assignedAuths: '',
+})
 
-const filteredavailableRoles = computed(() => {
+// Computed property for available roles
+const availableRoles = computed<AuthObject[]>(() => {
+  // Get all roles from the store
+  const allStoreRoles = userRoleStore.roles.items
+
+  // Get codes of locally assigned roles
+  const assignedCodes = new Set(assignedAuths.value.map(r => r.code))
+
+  // Filter the store roles to show only those that are not in assignedAuths
+  // We map the IRole structure from the store to AuthObject structure used in the component template.
+  return allStoreRoles.filter(role => !assignedCodes.has(role.roleId)).map(role => ({
+    // Assuming IRole has roleId and roleName properties that map to code and name.
+    code: role.roleId ? role.roleId.toString() : 'N/A', // Adjust based on actual IRole structure
+    name: role.roleName || 'N/A' // Adjust based on actual IRole structure
+  }));
+});
+
+// Filter available roles based on search keyword
+const filteredAvailableRoles = computed(() => {
   if (!searchCodeKeyword.value) {
     return availableRoles.value
   }
@@ -154,15 +183,15 @@ const filteredavailableRoles = computed(() => {
   )
 })
 
-const selectedavailableRoles = ref<string[]>([])
-const selectedAssignedAuths = ref<string[]>([])
+console.log(filteredAvailableRoles)
 
+// Selection management functions (unchanged)
 const toggleAvailableSelection = (code: string) => {
-  const index = selectedavailableRoles.value.indexOf(code)
+  const index = selectedAvailableRoles.value.indexOf(code)
   if (index === -1) {
-    selectedavailableRoles.value.push(code)
+    selectedAvailableRoles.value.push(code)
   } else {
-    selectedavailableRoles.value.splice(index, 1)
+    selectedAvailableRoles.value.splice(index, 1)
   }
 }
 
@@ -176,62 +205,49 @@ const toggleAssignedSelection = (code: string) => {
 }
 
 const isAvailableSelected = (code: string) => {
-  return selectedavailableRoles.value.includes(code)
+  return selectedAvailableRoles.value.includes(code)
 }
 
 const isAssignedSelected = (code: string) => {
   return selectedAssignedAuths.value.includes(code)
 }
 
+// Action functions (Add/Remove roles)
 const addSelectedAuths = () => {
+  // Find the AuthObject items that correspond to the selected codes in the available list
   const itemsToAdd = availableRoles.value.filter((auth) =>
-    selectedavailableRoles.value.includes(auth.code),
+    selectedAvailableRoles.value.includes(auth.code),
   )
 
+  // Add items to the local assignedAuths state
   itemsToAdd.forEach((item) => {
-    if (!assignedAuths.some((auth) => auth.code === item.code)) {
-      assignedAuths.push(item)
+    if (!assignedAuths.value.some((auth) => auth.code === item.code)) {
+      assignedAuths.value.push(item)
     }
   })
 
-  availableRoles.value = availableRoles.value.filter(
-    (auth) => !selectedavailableRoles.value.includes(auth.code),
-  )
-
-  selectedavailableRoles.value = []
+  // Clear selection
+  selectedAvailableRoles.value = []
 }
 
 const removeSelectedAuths = () => {
-  const itemsToRemove = assignedAuths.filter((auth) =>
-    selectedAssignedAuths.value.includes(auth.code),
+  const codesToRemove = selectedAssignedAuths.value
+
+  // Filter the assignedAuths state to remove selected items
+  assignedAuths.value = assignedAuths.value.filter(
+    (auth) => !codesToRemove.includes(auth.code)
   )
 
-  itemsToRemove.forEach((item) => {
-    if (!availableRoles.value.some((auth) => auth.code === item.code)) {
-      availableRoles.value.push(item)
-    }
-  })
-
-  const currentAssignedAuths = [...assignedAuths]
-  assignedAuths.splice(
-    0,
-    assignedAuths.length,
-    ...currentAssignedAuths.filter((auth) => !selectedAssignedAuths.value.includes(auth.code)),
-  )
-  availableRoles.value.sort((a, b) => a.code.localeCompare(b.code))
-
+  // Clear selection
   selectedAssignedAuths.value = []
 }
 
-const errors = reactive({
-  assignedAuths: '',
-})
-
+// Validation and data passing (Injects and Watch)
 const validateForm = () => {
   let isValid = true
   errors.assignedAuths = ''
 
-  if (assignedAuths.length === 0) {
+  if (assignedAuths.value.length === 0) {
     errors.assignedAuths = 'Please select at least one role.'
     isValid = false
   }
@@ -244,23 +260,31 @@ const allFormData = inject<Record<string, any>>('allFormData')
 
 const emit = defineEmits(['validation-result'])
 
+// Watch for validation trigger from parent component
 watch(validationTrigger, (newVal, oldVal) => {
   if (newVal !== oldVal) {
     const isValid = validateForm()
+    const formData = { selectedAuthObjects: assignedAuths.value.map((auth) => auth.code) }
+
+    // Update form data in injected object
     if (allFormData) {
-      allFormData['role-step'] = {
-        selectedAuthObjects: assignedAuths.map((auth) => auth.code),
-      }
+      allFormData['role-step'] = formData
     }
-    emit('validation-result', {
-      isValid: isValid,
-      formData: { selectedAuthObjects: assignedAuths.map((auth) => auth.code) },
-    })
+
+    // Emit validation result and form data
+    emit('validation-result', { isValid: isValid, formData: formData })
   }
+})
+
+// Data fetching on mount
+onMounted(async () => {
+  // Fetch all roles using the provided store action
+  await userRoleStore.getAllUserRoles()
 })
 </script>
 
 <style scoped>
+/* Scoped styles */
 .card {
   background-color: white;
   border-radius: 0.5rem;
