@@ -216,7 +216,7 @@ const checkInvoiceInformation = () => {
     form.invoiceDateError ||
     form.descriptionError ||
     form.invoiceDocumentError ||
-    form.invoicePoGrError || 
+    form.invoicePoGrError ||
     form.additionalCostError
   ) return false
   else return true
@@ -269,10 +269,10 @@ const mapPoGr = () => {
       grDocumentItem: Number(item.grDocumentItem),
       grDocumentDate: moment(item.grDocumentDate).toISOString(),
       taxCode: item.taxCode,
-      itemAmount: Number(item.itemAmount),
+      itemAmount: Number(item.currency === item.currencyLC ? item.itemAmountLC : item.itemAmountTC),
       quantity: Number(item.quantity),
       uom: item.uom,
-      itemText: item.materialDescription,
+      itemText: item.itemText,
       conditionType: item.conditionType,
       conditionTypeDesc: item.conditionTypeDesc,
       qcStatus: item.qcStatus,
@@ -360,7 +360,7 @@ const mapDataPost = () => {
   } as ParamsSubmissionTypes
 
   return data
-} 
+}
 
 const goNext = () => {
   const list = ['data', 'information', 'preview']
@@ -384,7 +384,7 @@ const goNext = () => {
       const idModal = document.querySelector('#success_invoice_modal')
       const modal = KTModal.getInstance(idModal as HTMLElement)
       modal.show()
-  
+
       setTimeout(() => {
         modal.hide()
         router.push({
@@ -461,7 +461,10 @@ const setData = () => {
         grDocumentItem: item.grDocumentItem,
         grDocumentDate: item.grDocumentDate,
         taxCode: item.taxCode,
-        itemAmount: item.itemAmount,
+        currencyLC: form.currency,
+        currencyTC: form.currency,
+        itemAmountLC: item.itemAmount,
+        itemAmountTC: item.itemAmount,
         quantity: item.quantity,
         uom: item.uom,
         itemText: item.itemText,
@@ -548,7 +551,7 @@ onMounted(() => {
   }
 
   if (route.query.type === 'po-view' || route.query.invoice) {
-    
+
     invoiceApi.getPoDetail(route.query.invoice?.toString() || '').then(() => {
       setData()
     })
