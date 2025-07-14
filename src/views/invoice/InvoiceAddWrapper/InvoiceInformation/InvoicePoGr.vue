@@ -1,11 +1,11 @@
 <template>
   <div id="table-invoice-po-gr" class="flex flex-col gap-[16px]">
-    <p class="text-base font-semibold">Invoice PO & GR Item</p>
+    <p class="text-base font-semibold">{{ form?.invoiceDp === '9012' ? 'Invoice PO' : 'Invoice PO & GR Item' }}</p>
     <div>
       <div class="flex items-center gap-[10px]">
         <div class="relative max-w-[250px]">
           <label class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px]">
-            Search By PO Number
+            Reference Number
           </label>
           <div class="input">
             <input v-model="search" placeholder="" type="number" @keypress="searchEnter"/>

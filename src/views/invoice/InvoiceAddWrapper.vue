@@ -117,7 +117,7 @@ const form = reactive<formTypes>({
   invoiceDp: '9011',
   amountInvoice: '',
   taxNoInvoice: '',
-  remainingDpAmount: '',
+  remainingDpAmount: '1.000.000.000',
   dpAmountDeduction: '',
   currency: 'IDR',
   description: '',
@@ -321,8 +321,8 @@ const mapDataPost = () => {
       invoiceUId: form.status === 0 ? form.invoiceUId :'00000000-0000-0000-0000-000000000000',
       invoiceTypeCode: Number(form.invoiceType),
       invoiceTypeName: form.invoiceTypeName,
-      invoiceDPCode: Number(form.invoiceDp),
-      invoiceDPName: getDpName(),
+      invoiceDPCode: form.invoiceType === '901' ? Number(form.invoiceDp) : null,
+      invoiceDPName: form.invoiceType === '901' ? getDpName() : '',
       companyCode: form.companyCode,
       companyName: form.companyName,
       invoiceNo: form.invoiceNo,
@@ -356,7 +356,7 @@ const mapDataPost = () => {
       totalNetAmount: form.totalNetAmount,
     },
     pogr: mapPoGr(),
-    additionalCosts: mapAdditionalCost()
+    additionalCosts: form.invoiceDp === '9012' || form.invoiceDp === '9013' ? [] : mapAdditionalCost()
   } as ParamsSubmissionTypes
 
   return data
