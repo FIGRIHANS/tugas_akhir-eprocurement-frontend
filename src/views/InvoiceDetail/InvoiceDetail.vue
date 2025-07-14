@@ -160,7 +160,7 @@ const checkWorkflow = () => {
   const checkIndex = getWf?.findIndex((item) => item.profileId === getProfileId)
 
   if (checkIndex !== -1) {
-    if (getWf[checkIndex].stateCode === 3) return false
+    if (getWf[checkIndex].stateCode === 3 || getWf[checkIndex].stateCode === 4) return false
     else return true
   } else return true
 }
