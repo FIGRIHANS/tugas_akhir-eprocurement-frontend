@@ -1,7 +1,14 @@
-import axios from "axios";
+import axios from 'axios'
+import { getToken } from '@/composables/token'
 
-const vendorAPI = axios.create({
+const vendorApi = axios.create({
   baseURL: import.meta.env.VITE_API_VENDOR_BASE_URL,
 })
 
-export default vendorAPI
+vendorApi.interceptors.request.use((config) => {
+  const token = getToken()
+  if (token) config.headers.Authorization = token
+  return config
+})
+
+export default vendorApi
