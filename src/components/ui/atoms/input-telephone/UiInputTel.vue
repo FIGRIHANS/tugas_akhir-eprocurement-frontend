@@ -110,7 +110,7 @@ watch([countryPhonePrefix, noTel], () => {
   if (noTel.value) {
     model.value = `+${countryPhonePrefix.value} ${noTel.value}`
   } else {
-    model.value = ''
+    noTel.value = ''
   }
 })
 

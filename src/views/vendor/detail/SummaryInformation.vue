@@ -31,8 +31,12 @@ const inputError = ref<string[]>([])
 const loading = ref<boolean>(false)
 const error = ref<string | null>(null)
 
-const isVerified = computed(
-  () => verifStore.data[verifStore.data.length - 1]?.status === 'Verified',
+const isVerified = computed(() =>
+  verifStore.data.some(
+    (data) =>
+      data.status === 'Verified' &&
+      data.verificatorName === userStore.userData?.profile.employeeName,
+  ),
 )
 
 const isRejected = computed(() => verifStore.data[verifStore.data.length - 1]?.status === 'Reject')

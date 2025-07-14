@@ -25,6 +25,7 @@ export type DocumentTypes = {
 
 export type VendorTypes = {
   vendorId: number
+  vendorCode: string
   vendorName: string
   businessFieldId: number
   businessFieldName: string

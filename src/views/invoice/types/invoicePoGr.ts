@@ -8,8 +8,7 @@ export interface itemsPoGrType {
   itemAmount: number
   quantity: number
   uom: string
-  material: string
-  materialDescription: string
+  itemText: string
   currency: string
   conditionType: string
   conditionTypeDesc: string
@@ -34,9 +33,8 @@ export interface PoGrSearchTypes {
   taxCode: string
   itemAmount: number
   quantity: number
-  uom: string
-  material: string
-  materialDescription: string
+  unit: string
+  itemText: string
   currency: string
   conditionType: string
   conditionTypeDesc: string

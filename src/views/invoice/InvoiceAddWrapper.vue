@@ -306,7 +306,7 @@ const mapAdditionalCost = () => {
 }
 
 const getVendorName = () => {
-  const getIndex = vendorList.value.findIndex((item) => item.vendorId === Number(form?.vendorId))
+  const getIndex = vendorList.value.findIndex((item) => item.vendorCode === form?.vendorId)
   if (getIndex !== -1) return vendorList.value[getIndex].vendorName
 }
 
@@ -464,8 +464,7 @@ const setData = () => {
         itemAmount: item.itemAmount,
         quantity: item.quantity,
         uom: item.uom,
-        material: '',
-        materialDescription: item.itemText,
+        itemText: item.itemText,
         currency: 'IDR',
         conditionType: item.conditionType,
         conditionTypeDesc: item.conditionTypeDesc,
