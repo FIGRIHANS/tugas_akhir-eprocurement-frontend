@@ -110,7 +110,7 @@ const getPercentTax = (code: string) => {
 const getPercentWht = (code: string) => {
   const getIndex = whtCodeList.value.findIndex((item) => item.whtCode === code)
   if (getIndex !== -1) {
-    return whtCodeList.value[getIndex].tarif
+    return whtCodeList.value[getIndex].tarif / 100
   }
 }
 
