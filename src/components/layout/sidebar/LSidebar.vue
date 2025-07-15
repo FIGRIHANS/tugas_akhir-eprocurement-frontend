@@ -68,6 +68,15 @@ const filteredSidebarMenu = computed(() => {
     )
   }
 
+  if (userStore.userData?.profile.profileName.trim() === 'Sourcing Supervisor') {
+    return sidebarMenu
+      .filter((menu) => menu.id !== 'company-information')
+      .map((menu) => ({
+        ...menu,
+        child: menu.child ? menu.child.filter((child) => child.id !== 'vendor-approval') : [],
+      }))
+  }
+
   return sidebarMenu.filter((menu) => menu.id !== 'company-information')
 })
 </script>
