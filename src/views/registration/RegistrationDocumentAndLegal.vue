@@ -77,7 +77,7 @@
                   :text-length="15"
                   :max-size="16000000"
                   :placeholder="
-                    fileList[index].file.name !== 'placeholder.txt' ? fileList[index].file.name : ''
+                    fileList[index].file.name === 'placeholder.txt' ? '' : fileList[index].file.name
                   "
                   accepted-files=".jpg,.jpeg.,.png,.pdf,application/zip"
                   class="w-48"
@@ -201,9 +201,9 @@
                     :text-length="15"
                     :max-size="16000000"
                     :placeholder="
-                      fileOtherDocumentList[index]?.file.name !== 'placeholder.txt'
-                        ? fileOtherDocumentList[index]?.file.name
-                        : ''
+                      fileOtherDocumentList[index]?.file.name === 'placeholder.txt'
+                        ? ''
+                        : fileOtherDocumentList[index]?.file.name
                     "
                     accepted-files=".jpg,.jpeg.,.png,.pdf,application/zip"
                     class="w-48"
@@ -378,6 +378,8 @@ watch(
   async () => {
     if (documentAndLegal.value.kategori !== 0) {
       await vendorMasterDataStore.getVendorCompanyLicense(documentAndLegal.value.kategori)
+
+      registrationVendorStore.documentAndLegal.anotherDocuments = []
 
       selectedCategory.value = documentAndLegal.value.kategori
       registrationVendorStore.documentAndLegal.fields = tableItems.value.map((item) => ({

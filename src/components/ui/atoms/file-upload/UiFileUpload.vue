@@ -34,7 +34,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import type { IFileUploadProps } from './types/file-upload'
 
 const props = withDefaults(defineProps<IFileUploadProps>(), {
@@ -68,4 +68,11 @@ const uploadFile = (event: Event) => {
     emits('uploadFailed', true)
   }
 }
+
+watch(
+  () => props.placeholder,
+  (newVal) => {
+    selectedFile.value = newVal
+  },
+)
 </script>
