@@ -125,7 +125,7 @@ const countVatAmount = () => {
   for (const item of form.invoicePoGr) {
     const percentTax = getPercentTax(item.taxCode) || 0
     const itemAmount = form.currency === item.currencyLC ? item.itemAmountLC : item.itemAmountTC
-    totalPo = totalPo + (percentTax * itemAmount * item.quantity)
+    totalPo = totalPo + (percentTax * itemAmount)
   }
   for (const item of form.additionalCost) {
     const percentTax = getPercentTax(item.taxCode) || 0
@@ -166,7 +166,7 @@ const countWhtAmount = () => {
   for (const item of form.invoicePoGr) {
     const percentTax = 0
     const itemAmount = form.currency === item.currencyLC ? item.itemAmountLC : item.itemAmountTC
-    totalPo = totalPo + (percentTax * itemAmount * item.quantity)
+    totalPo = totalPo + (percentTax * itemAmount)
   }
   for (const item of form.additionalCost) {
     const percentTax = 0
