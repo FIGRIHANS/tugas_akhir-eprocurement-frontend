@@ -19,9 +19,9 @@
           <p class="mb-[14px]">
             Hi,
             {{
-              userData?.profile.employeeName
-                ? userData.profile.employeeName
-                : userData?.profile.vendorName
+              userData?.profile?.employeeName
+                ? userData?.profile?.employeeName
+                : userData?.profile?.vendorName
             }}
           </p>
           <a class="menu-link !px-[5px] !mx-[0px]" href="#" @click="logout">
