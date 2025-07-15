@@ -18,6 +18,7 @@ const route = useRoute()
 
 const modalReject = ref(false)
 const modalSuccess = ref(false)
+const modalError = ref(false)
 const reason = ref('')
 const inputError = ref<string[]>([])
 
@@ -48,7 +49,11 @@ const handleReject = async () => {
   } catch (err) {
     if (err instanceof Error) {
       if (axios.isAxiosError(err)) {
-        error.value = err.response?.data.result.message ?? 'Failed to reject approval Vendor'
+        error.value =
+          err.response?.data.result.message ??
+          'Vendor Data could not be reject due to a system error or invalid data.'
+        modalError.value = true
+        modalReject.value = false
       }
     }
   } finally {
@@ -107,5 +112,15 @@ const handleSuccess = () => {
     <img :src="successImg" alt="success" class="mx-auto mb-3" />
     <h3 class="font-medium text-lg text-gray-800 text-center">Vendor Rejected</h3>
     <p class="text-gray-600 text-center mb-3">Vendor has been successfully Rejected</p>
+  </UiModal>
+
+  <UiModal v-model="modalError" size="sm" @update:model-value="handleSuccess">
+    <div class="text-center mb-6">
+      <UiIcon name="cross-circle" variant="duotone" class="text-[150px] text-danger text-center" />
+    </div>
+    <h3 class="text-center text-lg font-medium">Failed to reject vendor data!</h3>
+    <p class="text-center text-base text-gray-600 mb-5">
+      {{ error }}
+    </p>
   </UiModal>
 </template>
