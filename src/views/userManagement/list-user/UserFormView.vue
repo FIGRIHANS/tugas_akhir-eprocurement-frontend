@@ -19,11 +19,14 @@
     />
 
     <div class="max-w-6xl mx-auto p-4">
-
-      <UserDetailStep v-if="tab.active === 'registration__information'" />
-      <UserProfileStep v-else-if="tab.active === 'registration__contact'" />
-      <UserAuthorizationStep v-else-if="tab.active === 'registration__document-and-legal'" />
-      <UserRoleStep v-else-if="tab.active === 'registration__payment-detail'" />
+      <UserDetailStep
+        v-if="tab.active === 'detail_user'"
+        :user-payload="userPayload"
+        @update:user-payload="userPayload = $event"
+      />
+      <UserProfileStep v-else-if="tab.active === 'profile'" />
+      <UserAuthorizationStep v-else-if="tab.active === 'authorization'" />
+      <UserRoleStep v-else-if="tab.active === 'role'" />
 
       <div class="flex justify-between items-center gap-3 mt-8">
         <UiButton outline @click="handleCancel">
@@ -57,13 +60,22 @@ import UserRoleStep from './sections/UserRoleStep.vue'
 const router = useRouter()
 
 const tab = reactive({
-  active: 'registration__information',
+  active: 'detail_user',
   items: [
-    { label: 'Detail User', value: 'registration__information', disabled: false },
-    { label: 'Profile', value: 'registration__contact', disabled: false },
-    { label: 'Authorization', value: 'registration__document-and-legal', disabled: false },
-    { label: 'Role', value: 'registration__payment-detail', disabled: false },
+    { label: 'Detail User', value: 'detail_user', disabled: false },
+    { label: 'Profile', value: 'profile', disabled: false },
+    { label: 'Authorization', value: 'authorization', disabled: false },
+    { label: 'Role', value: 'role', disabled: false },
   ],
+})
+
+const userPayload = reactive({
+  userName: '',
+  userPassword: '',
+  employeeName: '',
+  isActive: true,
+  employeeId: 0,
+  profileId: 0,
 })
 
 const currentStepIndex = computed(() => {
@@ -90,10 +102,13 @@ const handleBack = () => {
 
 const handleNext = () => {
   if (!isLastStep.value) {
+
+    console.log(userPayload)
+
     const nextStep = tab.items[currentStepIndex.value + 1]
     tab.active = nextStep.value
   } else {
-    alert('Formulir disubmit!')
+    console.log(userPayload)
   }
 }
 </script>
