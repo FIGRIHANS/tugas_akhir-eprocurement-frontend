@@ -19,10 +19,10 @@
           <p class="mb-[14px]">
             Hi,
             {{
-              !isEmpty(userData) ?
-              userData.profile.employeeName
+              !isEmpty(userData)
                 ? userData.profile.employeeName
-                : userData.profile.vendorName
+                  ? userData.profile.employeeName
+                  : userData.profile.vendorName
                 : ''
             }}
           </p>
