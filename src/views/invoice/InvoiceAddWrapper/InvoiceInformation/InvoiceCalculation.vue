@@ -111,7 +111,8 @@ const countSubtotal = () => {
   if (!form) return
   let total = 0
   for (const item of form.invoicePoGr) {
-    total = total + (item.itemAmount * item.quantity)
+    const itemAmount = form.currency === item.currencyLC ? item.itemAmountLC : item.itemAmountTC
+    total = total + itemAmount
   }
   return total
 }
@@ -123,7 +124,8 @@ const countVatAmount = () => {
   let totalAddCredit = 0
   for (const item of form.invoicePoGr) {
     const percentTax = getPercentTax(item.taxCode) || 0
-    totalPo = totalPo + (percentTax * item.itemAmount * item.quantity)
+    const itemAmount = form.currency === item.currencyLC ? item.itemAmountLC : item.itemAmountTC
+    totalPo = totalPo + (percentTax * itemAmount * item.quantity)
   }
   for (const item of form.additionalCost) {
     const percentTax = getPercentTax(item.taxCode) || 0
@@ -163,7 +165,8 @@ const countWhtAmount = () => {
   let totalAddCredit = 0
   for (const item of form.invoicePoGr) {
     const percentTax = 0
-    totalPo = totalPo + (percentTax * item.itemAmount * item.quantity)
+    const itemAmount = form.currency === item.currencyLC ? item.itemAmountLC : item.itemAmountTC
+    totalPo = totalPo + (percentTax * itemAmount * item.quantity)
   }
   for (const item of form.additionalCost) {
     const percentTax = 0
@@ -201,7 +204,7 @@ watch(
 )
 
 watch(
-  () => [form?.invoicePoGr, form?.additionalCost],
+  () => [form?.invoicePoGr, form?.additionalCost, form?.currency],
   () => {
     setCalculation()
   },
@@ -213,6 +216,6 @@ watch(
 
 onMounted(() => {
   typeForm.value = route.query.type?.toString().toLowerCase() || 'po'
-  setCalculation()  
+  setCalculation()
 })
 </script>

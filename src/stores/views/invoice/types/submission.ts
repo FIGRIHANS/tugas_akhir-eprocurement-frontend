@@ -129,9 +129,9 @@ export interface PoGrItemTypes {
   grDocumentItem: number
   grDocumentDate: string
   taxCode: string
-  itemAmount: number
   quantity: number
-  uom: string
+  unit: string
+  itemText: string
   material: string
   materialDescription: string
   currency: string
@@ -142,6 +142,10 @@ export interface PoGrItemTypes {
   enteredOn: string
   purchasingOrg: string
   department: string
+  currencyLC: string
+  currencyTC: string
+  itemAmountLC: number
+  itemAmountTC: number
 }
 
 export interface ListPoTypes {
@@ -164,6 +168,7 @@ export interface ListPoTypes {
   vendorName: string
   pOs: PoChildTypes[]
   isOpenChild: boolean
+  createdUtcDate: string
 }
 
 export interface PoChildTypes {
@@ -173,7 +178,7 @@ export interface PoChildTypes {
   itemText: string
   poNo: string
   quantity: number
-} 
+}
 
 export interface QueryParamsListPoTypes {
   statusCode?: number | null

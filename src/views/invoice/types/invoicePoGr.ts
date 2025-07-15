@@ -5,11 +5,9 @@ export interface itemsPoGrType {
   grDocumentItem: number
   grDocumentDate: string
   taxCode: string
-  itemAmount: number
   quantity: number
   uom: string
-  material: string
-  materialDescription: string
+  itemText: string
   currency: string
   conditionType: string
   conditionTypeDesc: string
@@ -18,6 +16,10 @@ export interface itemsPoGrType {
   enteredOn: string
   purchasingOrg: string
   department: string
+  currencyLC: string
+  currencyTC: string
+  itemAmountLC: number
+  itemAmountTC: number
   whtType?: string
   whtCode?: string
   whtBaseAmount?: number
@@ -32,11 +34,9 @@ export interface PoGrSearchTypes {
   grDocumentItem: number
   grDocumentDate: string
   taxCode: string
-  itemAmount: number
   quantity: number
-  uom: string
-  material: string
-  materialDescription: string
+  unit: string
+  itemText: string
   currency: string
   conditionType: string
   conditionTypeDesc: string
@@ -45,5 +45,9 @@ export interface PoGrSearchTypes {
   enteredOn: string
   purchasingOrg: string
   department: string
+  currencyLC: string
+  currencyTC: string
+  itemAmountLC: number
+  itemAmountTC: number
   isActive?: boolean
 }

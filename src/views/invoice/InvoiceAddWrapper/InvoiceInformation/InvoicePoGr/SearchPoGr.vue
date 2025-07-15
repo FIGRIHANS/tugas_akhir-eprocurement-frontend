@@ -45,10 +45,10 @@
                   <td>{{ item.grDocumentNo }}</td>
                   <td>{{ item.grDocumentItem }}</td>
                   <td>{{ item.grDocumentDate }}</td>
-                  <td class="text-right">{{ useFormatIdr(item.itemAmount) }}</td>
+                  <td class="text-right">{{ useFormatIdr(currency === item.currencyLC ? item.itemAmountLC : item.itemAmountTC) }}</td>
                   <td>{{ item.quantity }}</td>
-                  <td>{{ item.uom }}</td>
-                  <td>{{ item.materialDescription }}</td>
+                  <td>{{ item.unit }}</td>
+                  <td>{{ item.itemText }}</td>
                   <td>{{ item.conditionType }}</td>
                   <td>{{ item.conditionTypeDesc }}</td>
                   <td>{{ item.qcStatus }}</td>
@@ -82,6 +82,7 @@ import { useFormatIdr } from '@/composables/currency'
 const props = defineProps<{
   isInvoiceDp?: string
   isPoPib?: boolean
+  currency:string
 }>()
 
 const emits = defineEmits(['setItem'])

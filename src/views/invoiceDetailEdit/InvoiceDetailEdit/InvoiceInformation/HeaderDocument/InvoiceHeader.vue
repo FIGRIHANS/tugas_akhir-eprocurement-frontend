@@ -108,11 +108,12 @@
         <label class="form-label">
           Currency
         </label>
-        <select v-model="form.currCode" class="select" :class="{ 'border-danger': form.currCodeError }">
+        <input :value="form.currCode" class="input" placeholder="" disabled />
+        <!-- <select v-model="form.currCode" class="select" :class="{ 'border-danger': form.currCodeError }">
           <option v-for="item of currencyList" :key="item.code" :value="item.code">
             {{ item.code }}
           </option>
-        </select>
+        </select> -->
       </div>
       <!-- NPWP Reporting -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
@@ -154,7 +155,7 @@ const typeForm = ref<string>('')
 
 const dpTypeList = computed(() => invoiceMasterApi.dpType)
 const listInvoiceTypePo = computed(() => invoiceMasterApi.invoicePoType)
-const currencyList = computed(() => invoiceMasterApi.currency)
+// const currencyList = computed(() => invoiceMasterApi.currency)
 const paymentMethodList = computed(() => invoiceMasterApi.paymentMethodList)
 const userData = computed(() => invoiceLoginApi.userData)
 

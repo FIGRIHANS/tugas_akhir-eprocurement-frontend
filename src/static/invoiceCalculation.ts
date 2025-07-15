@@ -3,14 +3,14 @@ export const defaultField = [
   'VAT Amount',
   'Additional Cost',
   'Total Gross Amount',
-  'WHT AMount',
+  'WHT Amount',
   'Total Net Amount'
 ]
 
 export const dpField = [
   'Subtotal',
   'VAT Amount',
-  'WHT AMount',
+  'WHT Amount',
   'Total Gross Amount',
   'Total Net Amount'
 ]

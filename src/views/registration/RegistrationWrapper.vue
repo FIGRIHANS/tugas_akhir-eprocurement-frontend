@@ -55,12 +55,7 @@
     no-cancel
     static
     submit-button-text="Ok"
-    :submit="
-      () => {
-        modalTrigger.success = false
-        router.push({ name: 'landing-page' })
-      }
-    "
+    :submit="successAction"
   />
 </template>
 
@@ -390,6 +385,90 @@ const next = async () => {
       tab.active = tab.items[index].value
       router.push({ name: tab.items[index].value })
     }
+  }
+}
+
+const successAction = () => {
+  modalTrigger.value.success = false
+  router.push({ name: 'landing-page' })
+
+  registrationVendorStore.information = {
+    vendor: {
+      vendorName: '',
+      groupCompany: '',
+      foundedDate: '',
+    },
+    companyLocation: {
+      countryId: 0,
+      country: '',
+      stateId: 0,
+      state: '',
+      cityId: 0,
+      city: '',
+      postalCode: '',
+      addressDetail: '',
+    },
+    vendorLocation: {
+      countryId: 0,
+      country: '',
+      stateId: 0,
+      state: '',
+      cityId: 0,
+      city: '',
+      postalCode: '',
+      addressDetail: '',
+    },
+    vendorCommodities: {
+      businessFieldId: 0,
+      subBusinessFieldId: 0,
+      list: [],
+    },
+  }
+
+  registrationVendorStore.contact = {
+    account: {
+      username: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      website: '',
+      phone: '',
+    },
+    contactPerson: {
+      contactName: '',
+      contactPhone: '',
+      contactEmail: '',
+      positionTypeId: 0,
+      list: [],
+    },
+  }
+
+  registrationVendorStore.documentAndLegal = {
+    kategori: 0,
+    fields: [],
+    anotherDocuments: [],
+  }
+
+  registrationVendorStore.paymentDetail = {
+    accountNo: '',
+    accountName: '',
+    urlAccountDifferences: '',
+    urlFirstPage: '',
+    currencyId: '',
+    bankId: '',
+    bankKey: '',
+    bankCountryCode: '',
+    bankName: '',
+    branch: '',
+    swiftCode: '',
+    bankAddress: '',
+  }
+
+  registrationVendorStore.paymentDetailFlagging = {
+    isNotSameAsCompany: false,
+    bankNotRegistered: false,
+    acceptTermCondition: false,
+    captcha: false,
   }
 }
 

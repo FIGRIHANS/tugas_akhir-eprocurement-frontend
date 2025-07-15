@@ -31,9 +31,9 @@ const inputError = ref<string[]>([])
 const loading = ref<boolean>(false)
 const error = ref<string | null>(null)
 
-const isVerified = computed(
-  () => verifStore.data[verifStore.data.length - 1]?.status === 'Verified',
-)
+const isVerified = computed(() => vendorStore.vendors?.items[0]?.isVerified === 1)
+
+const isRejected = computed(() => vendorStore.vendors?.items[0]?.isVerified === 2)
 
 const handleVerify = async () => {
   if (!notes.value) {
@@ -106,6 +106,7 @@ const handleReject = async () => {
 
 onMounted(() => {
   verifStore.getData(Number(route.params.id))
+  vendorStore.getVendors({ vendorId: route.params.id })
 })
 </script>
 <template>
@@ -126,7 +127,7 @@ onMounted(() => {
       </UiButton>
 
       <div
-        v-if="route.name === 'vendor-verification-detail'"
+        v-if="route.name === 'vendor-verification-detail' && !isRejected"
         class="space-x-3 flex-1 flex justify-end"
       >
         <UiButton

@@ -117,7 +117,7 @@ const form = reactive<formTypes>({
   invoiceDp: '9011',
   amountInvoice: '',
   taxNoInvoice: '',
-  remainingDpAmount: '',
+  remainingDpAmount: '1.000.000.000',
   dpAmountDeduction: '',
   currency: 'IDR',
   description: '',
@@ -216,7 +216,7 @@ const checkInvoiceInformation = () => {
     form.invoiceDateError ||
     form.descriptionError ||
     form.invoiceDocumentError ||
-    form.invoicePoGrError || 
+    form.invoicePoGrError ||
     form.additionalCostError
   ) return false
   else return true
@@ -267,12 +267,12 @@ const mapPoGr = () => {
       poItem: Number(item.poItem),
       grDocumentNo: item.grDocumentNo,
       grDocumentItem: Number(item.grDocumentItem),
-      grDocumentDate: moment(item.grDocumentDate).toISOString(),
+      grDocumentDate: item.grDocumentDate,
       taxCode: item.taxCode,
-      itemAmount: Number(item.itemAmount),
+      itemAmount: Number(item.currency === item.currencyLC ? item.itemAmountLC : item.itemAmountTC),
       quantity: Number(item.quantity),
       uom: item.uom,
-      itemText: item.materialDescription,
+      itemText: item.itemText,
       conditionType: item.conditionType,
       conditionTypeDesc: item.conditionTypeDesc,
       qcStatus: item.qcStatus,
@@ -306,7 +306,7 @@ const mapAdditionalCost = () => {
 }
 
 const getVendorName = () => {
-  const getIndex = vendorList.value.findIndex((item) => item.vendorId === Number(form?.vendorId))
+  const getIndex = vendorList.value.findIndex((item) => item.vendorCode === form?.vendorId)
   if (getIndex !== -1) return vendorList.value[getIndex].vendorName
 }
 
@@ -321,8 +321,8 @@ const mapDataPost = () => {
       invoiceUId: form.status === 0 ? form.invoiceUId :'00000000-0000-0000-0000-000000000000',
       invoiceTypeCode: Number(form.invoiceType),
       invoiceTypeName: form.invoiceTypeName,
-      invoiceDPCode: Number(form.invoiceDp),
-      invoiceDPName: getDpName(),
+      invoiceDPCode: form.invoiceType === '901' ? Number(form.invoiceDp) : null,
+      invoiceDPName: form.invoiceType === '901' ? getDpName() : '',
       companyCode: form.companyCode,
       companyName: form.companyName,
       invoiceNo: form.invoiceNo,
@@ -356,11 +356,11 @@ const mapDataPost = () => {
       totalNetAmount: form.totalNetAmount,
     },
     pogr: mapPoGr(),
-    additionalCosts: mapAdditionalCost()
+    additionalCosts: form.invoiceDp === '9012' || form.invoiceDp === '9013' ? [] : mapAdditionalCost()
   } as ParamsSubmissionTypes
 
   return data
-} 
+}
 
 const goNext = () => {
   const list = ['data', 'information', 'preview']
@@ -384,7 +384,7 @@ const goNext = () => {
       const idModal = document.querySelector('#success_invoice_modal')
       const modal = KTModal.getInstance(idModal as HTMLElement)
       modal.show()
-  
+
       setTimeout(() => {
         modal.hide()
         router.push({
@@ -461,11 +461,13 @@ const setData = () => {
         grDocumentItem: item.grDocumentItem,
         grDocumentDate: item.grDocumentDate,
         taxCode: item.taxCode,
-        itemAmount: item.itemAmount,
+        currencyLC: form.currency,
+        currencyTC: form.currency,
+        itemAmountLC: item.itemAmount,
+        itemAmountTC: item.itemAmount,
         quantity: item.quantity,
         uom: item.uom,
-        material: '',
-        materialDescription: item.itemText,
+        itemText: item.itemText,
         currency: 'IDR',
         conditionType: item.conditionType,
         conditionTypeDesc: item.conditionTypeDesc,
@@ -549,7 +551,7 @@ onMounted(() => {
   }
 
   if (route.query.type === 'po-view' || route.query.invoice) {
-    
+
     invoiceApi.getPoDetail(route.query.invoice?.toString() || '').then(() => {
       setData()
     })
