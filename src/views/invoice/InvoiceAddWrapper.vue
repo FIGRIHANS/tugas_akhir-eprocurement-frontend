@@ -267,7 +267,7 @@ const mapPoGr = () => {
       poItem: Number(item.poItem),
       grDocumentNo: item.grDocumentNo,
       grDocumentItem: Number(item.grDocumentItem),
-      grDocumentDate: item.grDocumentDate,
+      grDocumentDate: moment(item.grDocumentDate, 'YYYY').startOf('year').format('YYYY-MM-DD'),
       taxCode: item.taxCode,
       itemAmount: Number(item.currency === item.currencyLC ? item.itemAmountLC : item.itemAmountTC),
       quantity: Number(item.quantity),

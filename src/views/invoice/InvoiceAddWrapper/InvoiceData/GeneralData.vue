@@ -11,7 +11,7 @@
           Vendor Name
           <span v-if="(form.status === 0 || form.status === -1 || form.status === 5) && !loginApi.isVendor" class="text-red-500 ml-[4px]">*</span>
         </label>
-        <input v-if="(form.status !== 0 && form.status !== -1 && form.status !== 5) || loginApi.isVendor" v-model="form.vendorId" class="input" placeholder="" disabled />
+        <input v-if="(form.status !== 0 && form.status !== -1 && form.status !== 5) || loginApi.isVendor" v-model="form.vendorName" class="input" placeholder="" disabled />
         <select v-else v-model="form.vendorId" class="select" :class="{ 'border-danger': form.vendorIdError }">
           <option v-for="item of vendorList" :key="item.vendorId" :value="item.vendorCode">
             {{ item.vendorName }}
@@ -50,6 +50,8 @@ const route = useRoute()
 const typeForm = ref<string>('')
 
 const vendorList = computed(() => invoiceMasterApi.vendorList)
+const userData = computed(() => loginApi.userData)
+const isVendor = computed(() => loginApi.isVendor)
 
 watch(
   () => form?.vendorId,
@@ -59,8 +61,22 @@ watch(
       if (getIndex !== -1) {
         form.address = vendorList.value[getIndex].address
         form.npwp = vendorList.value[getIndex].npwp
+        form.vendorName = vendorList.value[getIndex].vendorName
       }
     }
+  }
+)
+
+watch(
+  () => isVendor.value,
+  () => {
+    if (isVendor.value && form) {
+      form.vendorId = userData.value?.profile.vendorCode || ''
+      form.vendorName = userData.value?.profile.vendorName || ''
+    }
+  },
+  {
+    immediate: true
   }
 )
 
