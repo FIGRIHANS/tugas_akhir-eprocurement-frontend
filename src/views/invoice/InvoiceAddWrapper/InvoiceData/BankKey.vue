@@ -76,7 +76,7 @@ const checkBank = () => {
 }
 
 watch(
-  () => form?.vendorId,
+  () => [form?.vendorId, vendorList.value],
   () => {
     checkBank()
   }

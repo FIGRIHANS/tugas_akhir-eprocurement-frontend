@@ -54,7 +54,7 @@ const userData = computed(() => loginApi.userData)
 const isVendor = computed(() => loginApi.isVendor)
 
 watch(
-  () => form?.vendorId,
+  () => [form?.vendorId, vendorList.value],
   () => {
     if (form) {
       const getIndex = vendorList.value.findIndex((item) => item.vendorCode === form.vendorId)
