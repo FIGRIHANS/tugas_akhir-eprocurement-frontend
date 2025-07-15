@@ -6,7 +6,8 @@
       <div v-if="checkPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Invoice Type
-          <span v-if="(form.status === 0 || form.status === -1 || form.status === 5) && !loginApi.isVendor" class="text-red-500 ml-[4px]">*</span>
+          <span v-if="(form.status === 0 || form.status === -1 || form.status === 5) && !loginApi.isVendor"
+            class="text-red-500 ml-[4px]">*</span>
         </label>
         <input v-model="form.invoiceTypeName" class="input" placeholder="" disabled />
         <!-- <input v-if="form.status !== 0 || loginApi.isVendor" v-model="form.invoiceType" class="input" placeholder="" disabled />
@@ -22,7 +23,8 @@
           DP Option
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
-        <input v-if="form.status !== 0 && form.status !== -1 && form.status !== 5" v-model="form.invoiceDp" class="input" placeholder="" disabled />
+        <input v-if="form.status !== 0 && form.status !== -1 && form.status !== 5" v-model="form.invoiceDp"
+          class="input" placeholder="" disabled />
         <select v-else v-model="form.invoiceDp" class="select" :class="{ 'border-danger': form.invoiceDpError }">
           <option v-for="item of dpTypeList" :key="item.code" :value="item.code">
             {{ item.name }}
@@ -35,7 +37,8 @@
           Company Code
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
-        <input v-if="form.status !== 0 && form.status !== -1 && form.status !== 5" v-model="form.companyCode" class="input" placeholder="" disabled />
+        <input v-if="form.status !== 0 && form.status !== -1 && form.status !== 5" v-model="form.companyCode"
+          class="input" placeholder="" disabled />
         <select v-else v-model="form.companyCode" class="select" :class="{ 'border-danger': form.companyCodeError }">
           <option v-for="item of companyCodeList" :key="item.code" :value="item.code">
             {{ item.name }}
@@ -47,7 +50,7 @@
         <label class="form-label">
           Internal Invoice No.
         </label>
-        <input v-model="form.invoiceNo" class="input" placeholder="Auto Generated Number" disabled/>
+        <input v-model="form.invoiceNo" class="input" placeholder="Auto Generated Number" disabled />
       </div>
       <!-- Invoice Document No. * -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
@@ -55,7 +58,9 @@
           Invoice Document No.
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
-        <input v-model="form.invoiceNoVendor" class="input" placeholder=""  :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5" :class="{ 'border-danger': form.invoiceNoVendorError }"/>
+        <input v-model="form.invoiceNoVendor" class="input" placeholder=""
+          :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
+          :class="{ 'border-danger': form.invoiceNoVendorError }" />
       </div>
       <!-- Invoice Date -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
@@ -63,21 +68,25 @@
           Invoice Date
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
-        <DatePicker v-model="form.invoiceDate" format="yyyyMMdd" :error="form.invoiceDateError" :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5" class="w-full -ml-[15px]" />
+        <DatePicker v-model="form.invoiceDate" format="yyyyMMdd" :error="form.invoiceDateError"
+          :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5" class="w-full -ml-[15px]" />
       </div>
       <!-- Tax Document No. * -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Tax Document No.
         </label>
-        <input v-model="form.taxNoInvoice" class="input" placeholder="" :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5" :class="{ 'border-danger': form.taxNoInvoiceError }"/>
+        <input v-model="form.taxNoInvoice" class="input" placeholder=""
+          :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
+          :class="{ 'border-danger': form.taxNoInvoiceError }" />
       </div>
       <!-- Currency -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Currency
         </label>
-        <input v-if="form.status !== 0 && form.status !== -1 && form.status !== 5" v-model="form.currency" class="input" placeholder="" disabled />
+        <input v-if="form.status !== 0 && form.status !== -1 && form.status !== 5" v-model="form.currency" class="input"
+          placeholder="" disabled />
         <select v-else v-model="form.currency" class="select" :class="{ 'border-danger': form.currencyError }">
           <option v-for="item of currencyList" :key="item.code" :value="item.code">
             {{ item.code }}
@@ -89,14 +98,16 @@
         <label class="form-label">
           Remaining DP Amount
         </label>
-        <input v-model="form.remainingDpAmount" class="input" placeholder="" disabled/>
+        <input v-model="form.remainingDpAmount" class="input" placeholder="" disabled />
       </div>
       <!-- DP Amount Deduction -->
       <div v-if="form.invoiceDp === '9013'" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           DP Amount Deduction
         </label>
-        <input v-model="form.dpAmountDeduction" class="input" placeholder="" :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5" :class="{ 'border-danger': form.dpAmountDeductionError }"/>
+        <input v-model="form.dpAmountDeduction" class="input" placeholder=""
+          :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
+          :class="{ 'border-danger': form.dpAmountDeductionError }" />
       </div>
       <!-- Description -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
@@ -104,13 +115,9 @@
           Description
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
-        <textarea
-          v-model="form.description"
-          class="textarea"
-          placeholder=""
+        <textarea v-model="form.description" class="textarea" placeholder=""
           :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
-          :class="{ 'border-danger': form.descriptionError }"
-        ></textarea>
+          :class="{ 'border-danger': form.descriptionError }"></textarea>
       </div>
     </div>
   </div>
