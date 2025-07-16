@@ -61,7 +61,7 @@ const handleVerify = async () => {
   } catch (err) {
     if (err instanceof Error) {
       if (axios.isAxiosError(err)) {
-        error.value = err.response?.data.result.message ?? 'Failed to verify vendor'
+        error.value = err.response?.data.result?.message ?? 'Failed to verify vendor'
       }
     }
 
@@ -99,7 +99,7 @@ const handleReject = async () => {
   } catch (err) {
     if (err instanceof Error) {
       if (axios.isAxiosError(err)) {
-        error.value = err.response?.data.result.message ?? 'Failed to reject vendor'
+        error.value = err.response?.data.result?.message ?? 'Failed to reject vendor'
       }
     }
 
