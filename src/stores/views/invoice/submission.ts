@@ -92,7 +92,7 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
   const postSubmission = async (data: ParamsSubmissionTypes) => {
     const response: ApiResponse<void> = await invoiceApi.post(`/invoice/submission`, data)
 
-    return response.data.result
+    return response.data
   }
 
   return {

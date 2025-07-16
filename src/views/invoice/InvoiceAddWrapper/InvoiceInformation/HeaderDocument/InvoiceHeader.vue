@@ -9,7 +9,7 @@
           <span v-if="(form.status === 0 || form.status === -1 || form.status === 5) && !loginApi.isVendor" class="text-red-500 ml-[4px]">*</span>
         </label>
         <!-- <input v-model="form.invoiceTypeName" class="input" placeholder="" disabled /> -->
-        <input v-if="(form.status !== 0 && form.status !== -1) || loginApi.isVendor" v-model="form.invoiceType" class="input" placeholder="" disabled />
+        <input v-if="(form.status !== 0 && form.status !== -1) || loginApi.isVendor" v-model="form.invoiceTypeName" class="input" placeholder="" disabled />
         <select v-else v-model="form.invoiceType" class="select" :class="{ 'border-danger': form.invoiceTypeError }">
           <option v-for="item of listInvoiceTypePo" :key="item.code" :value="item.code">
             {{ item.name }}
