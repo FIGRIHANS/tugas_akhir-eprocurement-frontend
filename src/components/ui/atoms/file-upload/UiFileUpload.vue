@@ -35,7 +35,6 @@
 
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue'
-import { computed, ref, watch } from 'vue'
 import type { IFileUploadProps } from './types/file-upload'
 
 const props = withDefaults(defineProps<IFileUploadProps>(), {
