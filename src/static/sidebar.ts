@@ -24,7 +24,7 @@ export default [
     id: 'company-information',
     title: 'Company Information',
     icon: 'user',
-    to: 'company-information',
+    to: 'company information',
     child: [],
   },
   // {

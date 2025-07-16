@@ -11,14 +11,21 @@ export const useUploadStore = defineStore('upload', () => {
     formData.append('Actioner', String(Actioner))
 
     const response: ApiResponse<UploadFileResponse> = await generalApi.post(
-      '/api/file/upload',
+      '/file/upload',
       formData,
     )
 
     return response.data.result.content
   }
 
+  const previewFile = async (fullFilePath: string) => {
+    const response: ApiResponse = await generalApi.post('/file/preview', { fullFilePath })
+
+    return response.data.result.content
+  }
+
   return {
     uploadFile,
+    previewFile,
   }
 })
