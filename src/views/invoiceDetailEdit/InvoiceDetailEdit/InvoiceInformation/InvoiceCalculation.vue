@@ -110,7 +110,7 @@ const getPercentTax = (code: string) => {
 const getPercentWht = (code: string) => {
   const getIndex = whtCodeList.value.findIndex((item) => item.whtCode === code)
   if (getIndex !== -1) {
-    return whtCodeList.value[getIndex].tarif
+    return whtCodeList.value[getIndex].tarif / 100
   }
 }
 
@@ -118,7 +118,7 @@ const countSubtotal = () => {
   if (!form) return
   let total = 0
   for (const item of form.value.invoicePoGr) {
-    total = total + (item.itemAmount * item.quantity)
+    total = total + item.itemAmount
   }
   return total
 }
@@ -130,7 +130,7 @@ const countVatAmount = () => {
   let totalAddCredit = 0
   for (const item of form.value.invoicePoGr) {
     const percentTax = getPercentTax(item.taxCode) || 0
-    totalPo = totalPo + (percentTax * item.itemAmount * item.quantity)
+    totalPo = totalPo + (percentTax * item.itemAmount)
   }
   for (const item of form.value.additionalCosts) {
     const percentTax = getPercentTax(item.taxCode) || 0
@@ -170,7 +170,7 @@ const countWhtAmount = () => {
   let totalAddCredit = 0
   for (const item of form.value.invoicePoGr) {
     const percentTax = getPercentWht(item.whtCode) || 0
-    totalPo = totalPo + (percentTax * item.itemAmount * item.quantity)
+    totalPo = totalPo + (percentTax * item.itemAmount)
   }
   for (const item of form.value.additionalCosts) {
     const percentTax = getPercentWht(item.whtCode) || 0

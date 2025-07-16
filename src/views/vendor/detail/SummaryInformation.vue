@@ -23,6 +23,7 @@ const modalReject = ref<boolean>(false)
 const modalRejectSuccess = ref<boolean>(false)
 const modalVerify = ref<boolean>(false)
 const modalVerifySuccess = ref<boolean>(false)
+const modalError = ref<boolean>(false)
 
 const reason = ref<string>('')
 const notes = ref<string>('')
@@ -31,15 +32,9 @@ const inputError = ref<string[]>([])
 const loading = ref<boolean>(false)
 const error = ref<string | null>(null)
 
-const isVerified = computed(() =>
-  verifStore.data.some(
-    (data) =>
-      data.status === 'Verified' &&
-      data.verificatorName === userStore.userData?.profile.employeeName,
-  ),
-)
+const isVerified = computed(() => vendorStore.vendors?.items[0]?.isVerified === 1)
 
-const isRejected = computed(() => verifStore.data[verifStore.data.length - 1]?.status === 'Reject')
+const isRejected = computed(() => vendorStore.vendors?.items[0]?.isVerified === 2)
 
 const handleVerify = async () => {
   if (!notes.value) {
@@ -69,6 +64,8 @@ const handleVerify = async () => {
         error.value = err.response?.data.result.message ?? 'Failed to verify vendor'
       }
     }
+
+    handleError()
   } finally {
     loading.value = false
   }
@@ -105,13 +102,22 @@ const handleReject = async () => {
         error.value = err.response?.data.result.message ?? 'Failed to reject vendor'
       }
     }
+
+    handleError()
   } finally {
     loading.value = false
   }
 }
 
+const handleError = () => {
+  modalReject.value = false
+  modalVerify.value = false
+  modalError.value = true
+}
+
 onMounted(() => {
   verifStore.getData(Number(route.params.id))
+  vendorStore.getVendors({ vendorId: route.params.id })
 })
 </script>
 <template>
@@ -246,6 +252,16 @@ onMounted(() => {
     <h3 class="font-medium text-lg text-gray-800 text-center">Vendor Verification Completed</h3>
     <p class="text-gray-600 text-center mb-3">
       All vendor data has been successfully verified and is ready for approval.
+    </p>
+  </UiModal>
+
+  <UiModal v-model="modalError" size="sm">
+    <div class="text-center mb-6">
+      <UiIcon name="cross-circle" variant="duotone" class="text-[150px] text-danger text-center" />
+    </div>
+    <h3 class="text-center text-lg font-medium">An Error Accured!</h3>
+    <p class="text-center text-base text-gray-600 mb-5">
+      {{ error }}
     </p>
   </UiModal>
 </template>

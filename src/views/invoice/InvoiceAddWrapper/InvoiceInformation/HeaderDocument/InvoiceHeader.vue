@@ -8,16 +8,16 @@
           Invoice Type
           <span v-if="(form.status === 0 || form.status === -1 || form.status === 5) && !loginApi.isVendor" class="text-red-500 ml-[4px]">*</span>
         </label>
-        <input v-model="form.invoiceTypeName" class="input" placeholder="" disabled />
-        <!-- <input v-if="form.status !== 0 || loginApi.isVendor" v-model="form.invoiceType" class="input" placeholder="" disabled />
+        <!-- <input v-model="form.invoiceTypeName" class="input" placeholder="" disabled /> -->
+        <input v-if="(form.status !== 0 && form.status !== -1) || loginApi.isVendor" v-model="form.invoiceTypeName" class="input" placeholder="" disabled />
         <select v-else v-model="form.invoiceType" class="select" :class="{ 'border-danger': form.invoiceTypeError }">
           <option v-for="item of listInvoiceTypePo" :key="item.code" :value="item.code">
             {{ item.name }}
           </option>
-        </select> -->
+        </select>
       </div>
       <!-- DP Option -->
-      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div v-if="form.invoiceType === '901'" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           DP Option
           <span class="text-red-500 ml-[4px]">*</span>
@@ -95,8 +95,15 @@
       <div v-if="form.invoiceDp === '9013'" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           DP Amount Deduction
+          <span class="text-red-500 ml-[4px]">*</span>
         </label>
-        <input v-model="form.dpAmountDeduction" class="input" placeholder="" :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5" :class="{ 'border-danger': form.dpAmountDeductionError }"/>
+        <input
+          v-model="form.dpAmountDeduction"
+          class="input"
+          placeholder=""
+          :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
+          :class="{ 'border-danger': form.dpAmountDeductionError }"
+        />
       </div>
       <!-- Description -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
