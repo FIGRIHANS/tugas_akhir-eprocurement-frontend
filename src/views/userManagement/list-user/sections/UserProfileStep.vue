@@ -17,11 +17,14 @@
             <input
               class="form-check-input mr-2"
               type="radio"
-              :value="profile.profileName"
+              :value="profile.id"
               :id="profile.profileName"
-              v-model="selectedProfile"
+              v-model="selectedProfileId"
+              @change="updateProfilePayload"
             />
-            <label class="form-check-label" :for="profile.profileName">{{ profile.profileName }}</label>
+            <label class="form-check-label" :for="profile.profileName">{{
+              profile.profileName
+            }}</label>
           </div>
         </UiFormGroup>
 
@@ -34,11 +37,14 @@
             <input
               class="form-check-input mr-2"
               type="radio"
-              :value="profile.profileName"
+              :value="profile.id"
               :id="profile.profileName + '_col2'"
-              v-model="selectedProfile"
+              v-model="selectedProfileId"
+              @change="updateProfilePayload"
             />
-            <label class="form-check-label" :for="profile.profileName + '_col2'">{{ profile.profileName }}</label>
+            <label class="form-check-label" :for="profile.profileName + '_col2'">{{
+              profile.profileName
+            }}</label>
           </div>
         </UiFormGroup>
       </div>
@@ -50,16 +56,43 @@
 import UiFormGroup from '@/components/ui/atoms/form-group/UiFormGroup.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import { useUserProfileStore } from '@/stores/user-management/profile'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, defineProps, defineEmits, watch } from 'vue'
 
 const searchKeyword = ref('')
-const selectedProfile = ref<string | null>(null)
+// Ganti selectedProfile menjadi selectedProfileId untuk menyimpan ID
+const selectedProfileId = ref<number | null>(null)
 
 const userProfileStore = useUserProfileStore()
 
+// Mendefinisikan interface untuk prop profilePayload
+interface ProfilePayload {
+  profileId: number
+  profileName: string
+  isActive: boolean
+}
+
+const props = defineProps({
+  profilePayload: {
+    type: Object as () => ProfilePayload,
+    required: true,
+  },
+})
+
+const emit = defineEmits(['update:profile-payload'])
+
 onMounted(() => {
   userProfileStore.getAllUserProfiles()
+  // Inisialisasi selectedProfileId dari prop saat komponen dimuat
+  selectedProfileId.value = props.profilePayload.profileId
 })
+
+// Gunakan watch untuk memperbarui selectedProfileId saat prop profilePayload.profileId berubah
+watch(
+  () => props.profilePayload.profileId,
+  (newVal) => {
+    selectedProfileId.value = newVal
+  },
+)
 
 const filteredProfiles = computed(() => {
   if (!userProfileStore.profiles?.items) {
@@ -88,4 +121,21 @@ const profilesColumn2 = computed(() => {
   const mid = Math.ceil(profiles.length / 2)
   return profiles.slice(mid)
 })
+
+// Fungsi untuk memperbarui profilePayload saat radio button diubah
+const updateProfilePayload = () => {
+  const selectedProfileData = filteredProfiles.value.find(
+    (profile) => profile.id === selectedProfileId.value,
+  )
+  if (selectedProfileData) {
+    const newProfilePayload: ProfilePayload = {
+      profileId: selectedProfileData.id,
+      profileName: selectedProfileData.profileName,
+      isActive: selectedProfileData.isActive, // Asumsi isActive ada di data profil
+    }
+    emit('update:profile-payload', newProfilePayload)
+  }
+}
 </script>
+
+<style scoped></style>

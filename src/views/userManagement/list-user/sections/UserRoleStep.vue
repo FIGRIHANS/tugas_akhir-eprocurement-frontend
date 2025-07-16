@@ -34,14 +34,14 @@
               </tr>
               <tr
                 v-else
-                v-for="auth in filteredAvailableRoles"
-                :key="auth.code"
-                @click="toggleAvailableSelection(auth.code)"
+                v-for="role in filteredAvailableRoles"
+                :key="role.code"
+                @click="toggleAvailableSelection(role.code)"
                 class="cursor-pointer hover:bg-gray-50"
-                :class="{ 'bg-blue-100': isAvailableSelected(auth.code) }"
+                :class="{ 'bg-blue-100': isAvailableSelected(role.code) }"
               >
-                <td>{{ auth.code }}</td>
-                <td>{{ auth.name }}</td>
+                <td>{{ role.code }}</td>
+                <td>{{ role.name }}</td>
               </tr>
             </tbody>
           </table>
@@ -100,28 +100,28 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-if="assignedAuths.length === 0">
+              <tr v-if="assignedRoles.length === 0">
                 <td colspan="2" class="text-center text-gray-500 py-4">
                   No role objects selected.
                 </td>
               </tr>
               <tr
-                v-for="auth in assignedAuths"
-                :key="auth.code"
-                @click="toggleAssignedSelection(auth.code)"
+                v-for="role in assignedRoles"
+                :key="role.code"
+                @click="toggleAssignedSelection(role.code)"
                 class="cursor-pointer hover:bg-gray-50"
-                :class="{ 'bg-blue-100': isAssignedSelected(auth.code) }"
+                :class="{ 'bg-blue-100': isAssignedSelected(role.code) }"
               >
-                <td>{{ auth.code }}</td>
-                <td>{{ auth.name }}</td>
+                <td>{{ role.code }}</td>
+                <td>{{ role.name }}</td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
-    <p v-if="errors.assignedAuths" class="text-red-500 text-sm mt-4 text-center">
-      {{ errors.assignedAuths }}
+    <p v-if="errors.assignedRoles" class="text-red-500 text-sm mt-4 text-center">
+      {{ errors.assignedRoles }}
     </p>
   </div>
 </template>
@@ -130,62 +130,66 @@
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import { ref, reactive, computed, watch, inject, onMounted, type Ref } from 'vue'
-// Import the provided store
-import { useUserRoleStore } from '@/stores/user-management/role' // Updated import path
+import { useUserRoleStore } from '@/stores/user-management/role'
 
-// Define the interface for AuthObject, assuming IRole from the store is compatible (contains code and name)
-interface AuthObject {
+// Define the interface for a RoleObject (consistent with how roles are managed locally)
+interface RoleObject {
   code: string
   name: string
+  // Tambahkan properti lain yang mungkin ada di objek role jika diperlukan,
+  // contohnya: isActive: boolean;
 }
 
-// Initialize the store
-const userRoleStore = useUserRoleStore()
+// Define the interface for the prop that will hold the selected roles
+interface RolePayload {
+  selectedRoleIds: string[] // Array of role IDs (strings based on 'code')
+}
 
-// Local state for assigned roles (since the store only fetches all roles, we manage assigned state locally)
-const assignedAuths = ref<AuthObject[]>([])
-
-// Reactive state for selection tracking and errors
-const searchCodeKeyword = ref('')
-const selectedAvailableRoles = ref<string[]>([])
-const selectedAssignedAuths = ref<string[]>([])
-const errors = reactive({
-  assignedAuths: '',
+const props = defineProps({
+  rolePayload: {
+    type: Object as () => RolePayload,
+    required: true,
+  },
 })
 
-// Computed property for available roles
-const availableRoles = computed<AuthObject[]>(() => {
-  // Get all roles from the store
+const emit = defineEmits(['update:role-payload'])
+
+const userRoleStore = useUserRoleStore()
+
+// Gunakan assignedRoles untuk menyimpan daftar peran yang dipilih
+const assignedRoles = ref<RoleObject[]>([])
+
+const searchCodeKeyword = ref('')
+const selectedAvailableRoles = ref<string[]>([])
+const selectedAssignedAuths = ref<string[]>([]) // Masih menggunakan 'Auths' di sini, sebaiknya diganti menjadi 'Roles'
+const errors = reactive({
+  assignedRoles: '',
+})
+
+const availableRoles = computed<RoleObject[]>(() => {
   const allStoreRoles = userRoleStore.roles.items
+  const assignedCodes = new Set(assignedRoles.value.map((r) => r.code))
 
-  // Get codes of locally assigned roles
-  const assignedCodes = new Set(assignedAuths.value.map(r => r.code))
+  return allStoreRoles
+    .filter((role) => !assignedCodes.has(role.roleId))
+    .map((role) => ({
+      code: role.roleId ? role.roleId.toString() : 'N/A',
+      name: role.roleName || 'N/A',
+    }))
+})
 
-  // Filter the store roles to show only those that are not in assignedAuths
-  // We map the IRole structure from the store to AuthObject structure used in the component template.
-  return allStoreRoles.filter(role => !assignedCodes.has(role.roleId)).map(role => ({
-    // Assuming IRole has roleId and roleName properties that map to code and name.
-    code: role.roleId ? role.roleId.toString() : 'N/A', // Adjust based on actual IRole structure
-    name: role.roleName || 'N/A' // Adjust based on actual IRole structure
-  }));
-});
-
-// Filter available roles based on search keyword
 const filteredAvailableRoles = computed(() => {
   if (!searchCodeKeyword.value) {
     return availableRoles.value
   }
   const lowerCaseKeyword = searchCodeKeyword.value.toLowerCase()
   return availableRoles.value.filter(
-    (auth) =>
-      auth.code.toLowerCase().includes(lowerCaseKeyword) ||
-      auth.name.toLowerCase().includes(lowerCaseKeyword),
+    (role) =>
+      role.code.toLowerCase().includes(lowerCaseKeyword) ||
+      role.name.toLowerCase().includes(lowerCaseKeyword),
   )
 })
 
-console.log(filteredAvailableRoles)
-
-// Selection management functions (unchanged)
 const toggleAvailableSelection = (code: string) => {
   const index = selectedAvailableRoles.value.indexOf(code)
   if (index === -1) {
@@ -196,7 +200,7 @@ const toggleAvailableSelection = (code: string) => {
 }
 
 const toggleAssignedSelection = (code: string) => {
-  const index = selectedAssignedAuths.value.indexOf(code)
+  const index = selectedAssignedAuths.value.indexOf(code) // Perhatikan: masih 'Auths'
   if (index === -1) {
     selectedAssignedAuths.value.push(code)
   } else {
@@ -209,62 +213,111 @@ const isAvailableSelected = (code: string) => {
 }
 
 const isAssignedSelected = (code: string) => {
-  return selectedAssignedAuths.value.includes(code)
+  return selectedAssignedAuths.value.includes(code) // Perhatikan: masih 'Auths'
 }
 
-// Action functions (Add/Remove roles)
 const addSelectedAuths = () => {
-  // Find the AuthObject items that correspond to the selected codes in the available list
-  const itemsToAdd = availableRoles.value.filter((auth) =>
-    selectedAvailableRoles.value.includes(auth.code),
+  // Sebaiknya diganti namanya menjadi addSelectedRoles
+  const itemsToAdd = availableRoles.value.filter((role) =>
+    selectedAvailableRoles.value.includes(role.code),
   )
 
-  // Add items to the local assignedAuths state
   itemsToAdd.forEach((item) => {
-    if (!assignedAuths.value.some((auth) => auth.code === item.code)) {
-      assignedAuths.value.push(item)
+    if (!assignedRoles.value.some((role) => role.code === item.code)) {
+      assignedRoles.value.push(item)
     }
   })
 
-  // Clear selection
   selectedAvailableRoles.value = []
+  updateRolePayload() // Panggil fungsi untuk meng-emit perubahan
 }
 
 const removeSelectedAuths = () => {
-  const codesToRemove = selectedAssignedAuths.value
+  // Sebaiknya diganti namanya menjadi removeSelectedRoles
+  const codesToRemove = selectedAssignedAuths.value // Perhatikan: masih 'Auths'
 
-  // Filter the assignedAuths state to remove selected items
-  assignedAuths.value = assignedAuths.value.filter(
-    (auth) => !codesToRemove.includes(auth.code)
-  )
+  assignedRoles.value = assignedRoles.value.filter((role) => !codesToRemove.includes(role.code))
 
-  // Clear selection
-  selectedAssignedAuths.value = []
+  selectedAssignedAuths.value = [] // Perhatikan: masih 'Auths'
+  updateRolePayload() // Panggil fungsi untuk meng-emit perubahan
 }
 
-// Validation and data passing (Injects and Watch)
+// Fungsi baru untuk meng-emit payload role
+const updateRolePayload = () => {
+  const newRolePayload: RolePayload = {
+    selectedRoleIds: assignedRoles.value.map((role) => role.code),
+  }
+  emit('update:role-payload', newRolePayload)
+}
+
+// Validasi
 const validateForm = () => {
   let isValid = true
-  errors.assignedAuths = ''
+  errors.assignedRoles = ''
 
-  if (assignedAuths.value.length === 0) {
-    errors.assignedAuths = 'Please select at least one role.'
+  if (assignedRoles.value.length === 0) {
+    errors.assignedRoles = 'Please select at least one role.'
     isValid = false
   }
   return isValid
 }
 
+// Watch untuk sinkronisasi props ke assignedRoles lokal
+watch(
+  () => props.rolePayload.selectedRoleIds,
+  (newRoleIds) => {
+    // Hanya perbarui jika ada perbedaan yang signifikan untuk mencegah loop tak terbatas
+    const currentAssignedIds = assignedRoles.value.map((role) => role.code)
+    if (JSON.stringify(currentAssignedIds.sort()) !== JSON.stringify(newRoleIds.sort())) {
+      // Bangun assignedRoles berdasarkan newRoleIds dari semua peran yang tersedia
+      const allRoles = userRoleStore.roles.items
+      assignedRoles.value = newRoleIds
+        .map((id) => {
+          const foundRole = allRoles.find((r) => r.roleId === id)
+          return {
+            code: id,
+            name: foundRole ? foundRole.roleName : 'Unknown Role',
+          }
+        })
+        .filter((role) => role.name !== 'Unknown Role') // Filter out roles not found
+    }
+  },
+  { deep: true },
+)
+
+// Data fetching on mount
+onMounted(async () => {
+  await userRoleStore.getAllUserRoles()
+  // Setelah peran dimuat, inisialisasi assignedRoles dari props
+  if (props.rolePayload.selectedRoleIds.length > 0) {
+    const allRoles = userRoleStore.roles.items
+    assignedRoles.value = props.rolePayload.selectedRoleIds
+      .map((id) => {
+        const foundRole = allRoles.find((r) => r.roleId === id)
+        return {
+          code: id,
+          name: foundRole ? foundRole.roleName : 'Unknown Role',
+        }
+      })
+      .filter((role) => role.name !== 'Unknown Role') // Filter out roles not found
+  }
+})
+
+// Anda bisa menghapus bagian `inject` dan `watch(validationTrigger...)`
+// jika Anda ingin mengelola validasi dan pengiriman data sepenuhnya melalui event emit
+// dari komponen ini dan mengolahnya di parent.
+// Namun, jika Anda tetap menggunakan pola inject untuk validasi dari parent,
+// pastikan `allFormData` menerima `rolePayload` alih-alih `selectedAuthObjects`.
+
+// Jika Anda ingin mempertahankan inject untuk validasi dari parent:
 const validationTrigger = inject<Ref<number>>('validationTrigger', ref(0))
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const allFormData = inject<Record<string, any>>('allFormData')
 
-const emit = defineEmits(['validation-result'])
-
-// Watch for validation trigger from parent component
 watch(validationTrigger, (newVal, oldVal) => {
   if (newVal !== oldVal) {
     const isValid = validateForm()
-    const formData = { selectedAuthObjects: assignedAuths.value.map((auth) => auth.code) }
+    const formData: RolePayload = { selectedRoleIds: assignedRoles.value.map((role) => role.code) }
 
     // Update form data in injected object
     if (allFormData) {
@@ -274,12 +327,6 @@ watch(validationTrigger, (newVal, oldVal) => {
     // Emit validation result and form data
     emit('validation-result', { isValid: isValid, formData: formData })
   }
-})
-
-// Data fetching on mount
-onMounted(async () => {
-  // Fetch all roles using the provided store action
-  await userRoleStore.getAllUserRoles()
 })
 </script>
 

@@ -40,13 +40,15 @@
             text-key="label"
             :model-value="userPayload.isActive ? 'active' : 'inactive'"
             @update:model-value="
-              (value: any) => emit('update:userPayload', { ...userPayload, isReactive: value })
+              (value: string | number) =>
+                emit('update:userPayload', { ...userPayload, isActive: value === 'active' })
             "
           />
         </UiFormGroup>
         <UiFormGroup hide-border>
           <UiInput
             label="Password"
+            type="password"
             placeholder="Enter password"
             row
             required
@@ -55,7 +57,18 @@
               (value: any) => emit('update:userPayload', { ...userPayload, userPassword: value })
             "
           />
-          <UiInput label="Confirm Password" placeholder="Enter password" row required />
+          <UiInput
+            label="Confirm Password"
+            type="password"
+            placeholder="Enter password"
+            row
+            required
+            :model-value="userPayload.userPasswordConfirm"
+            @update:model-value="
+              (value: any) =>
+                emit('update:userPayload', { ...userPayload, userPasswordConfirm: value })
+            "
+          />
           <div class="text-sm text-gray-700">
             <p>The password must contain</p>
             <ul class="list-disc list-inside">
@@ -82,7 +95,7 @@ const statusOptions = [
   { label: 'Inactive', value: 'inactive' },
 ]
 
-const props = defineProps({
+defineProps({
   userPayload: {
     type: Object,
     required: true,

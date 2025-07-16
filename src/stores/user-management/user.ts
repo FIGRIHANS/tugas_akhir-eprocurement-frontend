@@ -63,12 +63,39 @@ export const useUserStore = defineStore('userStore', () => {
     }
   }
 
+  const storeUserData = async (body: any) => {
+    loading.value = true
+    error.value = null
+    try {
+      const response: ApiResponse<any> = await userApi.post('/auth', {
+        ...body
+      })
+
+      if (response.data.result.isError) {
+        error.value = response.data.result.message || 'Failed to post data due to an API error.'
+        throw new Error(error.value)
+      }
+
+      return response.data.result
+
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        error.value = err.message
+      } else {
+        error.value = 'Failed to post data'
+      }
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     users,
     loading,
     error,
 
-    getAllUsers
+    getAllUsers,
+    storeUserData
   }
 
 });

@@ -24,21 +24,24 @@
         :user-payload="userPayload"
         @update:user-payload="userPayload = $event"
       />
-      <UserProfileStep v-else-if="tab.active === 'profile'" />
+      <UserProfileStep
+        v-else-if="tab.active === 'profile'"
+        :profile-payload="profilePayload"
+        @update:profile-payload="profilePayload = $event"
+      />
       <UserAuthorizationStep v-else-if="tab.active === 'authorization'" />
-      <UserRoleStep v-else-if="tab.active === 'role'" />
+      <UserRoleStep
+        v-else-if="tab.active === 'role'"
+        :role-payload="rolePayload"
+        @update:role-payload="rolePayload = $event"
+      />
 
       <div class="flex justify-between items-center gap-3 mt-8">
-        <UiButton outline @click="handleCancel">
-          <UiIcon name="x-circle" class="mr-2" /> Cancel
-        </UiButton>
+        <UiButton outline @click="handleCancel">Cancel </UiButton>
         <div class="flex gap-3 items-center">
-          <UiButton :disabled="isFirstStep" @click="handleBack" outline>
-            <UiIcon name="arrow-left" class="mr-2" /> Back
-          </UiButton>
+          <UiButton :disabled="isFirstStep" @click="handleBack" outline> Back </UiButton>
           <UiButton variant="primary" @click="handleNext">
             {{ isLastStep ? 'Submit' : 'Next' }}
-            <UiIcon v-if="!isLastStep" name="arrow-right" class="ml-2" />
           </UiButton>
         </div>
       </div>
@@ -50,13 +53,15 @@
 import BreadcrumbView from '@/components/BreadcrumbView.vue'
 import UiTab from '@/components/ui/atoms/tab/UiTab.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
-import { reactive, computed } from 'vue'
+import { reactive, computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import UserDetailStep from './sections/UserDetailStep.vue'
 import UserProfileStep from './sections/UserProfileStep.vue'
 import UserAuthorizationStep from './sections/UserAuthorizationStep.vue'
 import UserRoleStep from './sections/UserRoleStep.vue'
+import { useUserStore } from '@/stores/user-management/user'
 
+const userStore = useUserStore()
 const router = useRouter()
 
 const tab = reactive({
@@ -69,13 +74,46 @@ const tab = reactive({
   ],
 })
 
-const userPayload = reactive({
+interface UserPayload {
+  userName: string
+  userPassword: string
+  userPasswordConfirm: string
+  employeeName: string
+  isActive: boolean
+  employeeId: number
+  profileId: number
+  selectedRoleIds: string[]
+}
+
+const userPayload = ref<UserPayload>({
   userName: '',
   userPassword: '',
+  userPasswordConfirm: '',
   employeeName: '',
   isActive: true,
   employeeId: 0,
   profileId: 0,
+  selectedRoleIds: [],
+})
+
+interface ProfilePayload {
+  profileId: number
+  profileName: string
+  isActive: boolean
+}
+
+const profilePayload = ref<ProfilePayload>({
+  profileId: 0,
+  profileName: '',
+  isActive: true,
+})
+
+interface RolePayload {
+  selectedRoleIds: string[]
+}
+
+const rolePayload = ref<RolePayload>({
+  selectedRoleIds: [],
 })
 
 const currentStepIndex = computed(() => {
@@ -100,15 +138,32 @@ const handleBack = () => {
   }
 }
 
+const handleSubmit = async () => {
+  try {
+    await userStore.storeUserData(userPayload.value)
+    router.push('/user-management/user')
+  } catch (error) {
+    console.error('Error creating user:', error)
+  }
+}
+
 const handleNext = () => {
+  if (tab.active === 'profile') {
+    userPayload.value.profileId = profilePayload.value.profileId
+    console.log('User Payload updated with profileId:', userPayload.value.profileId)
+  } else if (tab.active === 'role') {
+    userPayload.value.selectedRoleIds = rolePayload.value.selectedRoleIds
+    console.log('User Payload updated with selectedRoleIds:', userPayload.value.selectedRoleIds)
+  }
+
   if (!isLastStep.value) {
-
-    console.log(userPayload)
-
+    console.log('User Payload on Next Step : ', userPayload.value)
     const nextStep = tab.items[currentStepIndex.value + 1]
     tab.active = nextStep.value
   } else {
-    console.log(userPayload)
+    userPayload.value.profileId = profilePayload.value.profileId
+    userPayload.value.selectedRoleIds = rolePayload.value.selectedRoleIds
+    handleSubmit()
   }
 }
 </script>

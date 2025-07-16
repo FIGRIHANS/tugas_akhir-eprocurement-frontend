@@ -24,7 +24,6 @@ const handleShowUserForm = () => {
   router.push('/user-management/user/form')
 }
 
-// Computed property to filter users based on search input
 const filteredUsers = computed(() => {
   if (!userStore.users || userStore.users.items.length === 0) {
     return []
