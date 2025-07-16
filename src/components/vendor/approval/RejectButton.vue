@@ -49,9 +49,7 @@ const handleReject = async () => {
   } catch (err) {
     if (err instanceof Error) {
       if (axios.isAxiosError(err)) {
-        error.value =
-          err.response?.data.result.message ??
-          'Vendor Data could not be reject due to a system error or invalid data.'
+        error.value = 'Vendor Data could not be reject due to a system error or invalid data.'
         modalError.value = true
         modalReject.value = false
       }
