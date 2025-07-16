@@ -42,7 +42,7 @@
     </div>
 
     <AdministrationData v-if="currentTab === 'administration_data'" />
-    <!-- <PaymentDetailData v-if="currentTab === 'payment_information_data'" /> -->
+    <PaymentDetailData v-if="currentTab === 'payment_information_data'" />
     <!-- <CompanyDeedData v-if="currentTab === 'company_deed_data'" />
     <EquipmentData v-if="currentTab === 'equipment_data'" />
     <ExperienceData v-if="currentTab === 'experience_data'" />
@@ -60,7 +60,7 @@ type TabItemType = {
 import { computed, ref } from 'vue'
 
 import AdministrationData from './details/AdministrationData.vue'
-// import PaymentDetailData from './details/PaymentDetailData.vue'
+import PaymentDetailData from './details/PaymentDetailData.vue'
 // import CompanyDeedData from './details/CompanyDeedData.vue'
 // import EquipmentData from './details/EquipmentData.vue'
 // import ExpertPersonnelData from './details/ExpertPersonnelData.vue'
