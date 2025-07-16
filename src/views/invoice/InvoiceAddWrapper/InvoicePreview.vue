@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, inject, defineAsyncComponent } from 'vue'
+import { ref, watch, onMounted, inject, defineAsyncComponent } from 'vue'
 import { useRoute } from 'vue-router'
 import type { formTypes } from '../types/invoiceAddWrapper'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
@@ -47,12 +47,23 @@ const checkNonPo = () => {
   return typeForm.value === 'nonpo'
 }
 
+watch(
+  () => form,
+  () => {
+    if (form) {
+      invoiceMasterApi.getActivity(form.companyCode)
+    }
+  },
+  {
+    deep: true
+  }
+)
+
 onMounted(() => {
   typeForm.value = route.query.type?.toString().toLowerCase() || 'po'
 
   if (route.query.type === 'po-view') {
     invoiceMasterApi.getDpTypes()
-    invoiceMasterApi.getActivity(form?.companyCode || '')
     invoiceMasterApi.getCompanyCode()
   }
 })

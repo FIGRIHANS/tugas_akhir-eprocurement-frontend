@@ -15,7 +15,7 @@ interface ProfileUser {
   costCenter: string
   profileId: number
   profileName: string
-  vendorCode: number
+  vendorCode: string
   vendorName: string
 }
 

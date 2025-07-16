@@ -19,9 +19,11 @@
           <p class="mb-[14px]">
             Hi,
             {{
-              userData?.profile.employeeName
+              !isEmpty(userData)
                 ? userData.profile.employeeName
-                : userData?.profile.vendorName
+                  ? userData.profile.employeeName
+                  : userData.profile.vendorName
+                : ''
             }}
           </p>
           <a class="menu-link !px-[5px] !mx-[0px]" href="#" @click="logout">
@@ -64,6 +66,7 @@
 import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useLoginStore } from '@/stores/views/login'
+import { isEmpty } from 'lodash'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 

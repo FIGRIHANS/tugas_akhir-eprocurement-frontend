@@ -11,6 +11,7 @@ export interface formTypes extends documentFormTypes {
   invoiceTypeName: string
   vendorId: string
   vendorIdError?: boolean
+  vendorName: string
   npwp: string
   address: string
 

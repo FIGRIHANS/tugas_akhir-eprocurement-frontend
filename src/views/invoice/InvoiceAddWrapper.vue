@@ -49,6 +49,7 @@
       </div>
     </div>
     <ModalSuccess />
+    <ModalErrorDocumentNumberModal />
   </div>
 </template>
 
@@ -75,6 +76,7 @@ const InvoiceData = defineAsyncComponent(() => import('./InvoiceAddWrapper/Invoi
 const InvoiceInformation = defineAsyncComponent(() => import('./InvoiceAddWrapper/InvoiceInformation.vue'))
 const InvoicePreview = defineAsyncComponent(() => import('./InvoiceAddWrapper/InvoicePreview.vue'))
 const ModalSuccess = defineAsyncComponent(() => import('./InvoiceAddWrapper/InvoicePreview/ModalSuccess.vue'))
+const ModalErrorDocumentNumberModal = defineAsyncComponent(() => import('./InvoiceAddWrapper/ErrorDocumentNumberModal.vue'))
 
 const invoiceApi = useInvoiceSubmissionStore()
 const invoiceMasterApi = useInvoiceMasterDataStore()
@@ -100,6 +102,7 @@ const form = reactive<formTypes>({
   invoiceType: '901',
   invoiceTypeName: 'Invoice PO',
   vendorId: '',
+  vendorName: '',
   npwp: '',
   address: '',
   bankKeyId: '',
@@ -117,7 +120,7 @@ const form = reactive<formTypes>({
   invoiceDp: '9011',
   amountInvoice: '',
   taxNoInvoice: '',
-  remainingDpAmount: '',
+  remainingDpAmount: '1.000.000.000',
   dpAmountDeduction: '',
   currency: 'IDR',
   description: '',
@@ -267,7 +270,7 @@ const mapPoGr = () => {
       poItem: Number(item.poItem),
       grDocumentNo: item.grDocumentNo,
       grDocumentItem: Number(item.grDocumentItem),
-      grDocumentDate: moment(item.grDocumentDate).toISOString(),
+      grDocumentDate: moment(item.grDocumentDate, 'YYYY').startOf('year').format('YYYY-MM-DD'),
       taxCode: item.taxCode,
       itemAmount: Number(item.currency === item.currencyLC ? item.itemAmountLC : item.itemAmountTC),
       quantity: Number(item.quantity),
@@ -321,8 +324,8 @@ const mapDataPost = () => {
       invoiceUId: form.status === 0 ? form.invoiceUId :'00000000-0000-0000-0000-000000000000',
       invoiceTypeCode: Number(form.invoiceType),
       invoiceTypeName: form.invoiceTypeName,
-      invoiceDPCode: Number(form.invoiceDp),
-      invoiceDPName: getDpName(),
+      invoiceDPCode: form.invoiceType === '901' ? Number(form.invoiceDp) : null,
+      invoiceDPName: form.invoiceType === '901' ? getDpName() : '',
       companyCode: form.companyCode,
       companyName: form.companyName,
       invoiceNo: form.invoiceNo,
@@ -356,7 +359,7 @@ const mapDataPost = () => {
       totalNetAmount: form.totalNetAmount,
     },
     pogr: mapPoGr(),
-    additionalCosts: mapAdditionalCost()
+    additionalCosts: form.invoiceDp === '9012' || form.invoiceDp === '9013' ? [] : mapAdditionalCost()
   } as ParamsSubmissionTypes
 
   return data
@@ -380,17 +383,29 @@ const goNext = () => {
     }
   } else {
     isSubmit.value = true
-    invoiceApi.postSubmission(mapDataPost()).then(() => {
-      const idModal = document.querySelector('#success_invoice_modal')
-      const modal = KTModal.getInstance(idModal as HTMLElement)
-      modal.show()
-
-      setTimeout(() => {
-        modal.hide()
-        router.push({
-          name: 'invoice-list'
-        })
-      }, 1000)
+    invoiceApi.postSubmission(mapDataPost()).then((response) => {
+      if (response.statusCode === 200) {
+        const idModal = document.querySelector('#success_invoice_modal')
+        const modal = KTModal.getInstance(idModal as HTMLElement)
+        modal.show()
+  
+        setTimeout(() => {
+          modal.hide()
+          router.push({
+            name: 'invoice-list'
+          })
+        }, 1000)
+      } else {
+        if (response.result.message.includes('Invoice Document Number')) {
+        const idModal = document.querySelector('#error_document_number_modal')
+        const modal = KTModal.getInstance(idModal as HTMLElement)
+        modal.show()
+  
+        setTimeout(() => {
+          modal.hide()
+        }, 1500)
+        }
+      }
     })
     .catch((error) => {
       console.error(error)
