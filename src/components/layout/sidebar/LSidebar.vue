@@ -62,10 +62,33 @@ const redirectTo = (path?: string) => {
 }
 
 const filteredSidebarMenu = computed(() => {
+  if (userStore.userData?.profile.profileId === 3002 || userStore.userData?.profile.profileId === 3003) {
+    return sidebarMenu.map((menu) => {
+      return {
+        ...menu,
+        child: menu.child ? menu.child.filter((child) => child.id === 'invoice-verification') : []
+      }
+    })
+  }
+
+  if (userStore.userData?.profile.profileId === 3004) {
+    return sidebarMenu.map((menu) => {
+      return {
+        ...menu,
+        child: menu.child ? menu.child.filter((child) => child.id === 'invoice-approval') : []
+      }
+    })
+  }
+
   if (userStore.userData?.profile?.vendorCode) {
-    return sidebarMenu.filter(
-      (menu) => menu.id !== 'vendor-management' && menu.id !== 'userManagement',
-    )
+    return sidebarMenu
+    .filter((menu) => menu.id !== 'vendor-management' && menu.id !== 'userManagement')
+    .map((menu) => {
+      return {
+        ...menu,
+        child: menu.child ? menu.child.filter((child) => child.id !== 'invoice-verification' && child.id !== 'invoice-approval') : []
+      }
+    })
   }
 
   if (userStore.userData?.profile?.profileName.trim() === 'Sourcing Supervisor') {
