@@ -49,16 +49,17 @@ export interface IAdministration {
   vendorName: string
   companyCategoryId: number
   companyCategoryName: string
-  countryName: string
   groupCompany: string
   npwp: string
   npwpUrl: string
   vendorPhone: string
   vendorEmail: string
+  userEmail: string
   vendorWebsite: string
-  businessFieldName: string | null
+  businessFieldName: string
   businessUnitName: string
   addressCompanyDetail: string
+  countryName: string
   stateName: string
   cityName: string
   currencyLabel: string
