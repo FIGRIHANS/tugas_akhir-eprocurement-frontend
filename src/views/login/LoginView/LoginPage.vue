@@ -8,13 +8,13 @@
       <!-- input email -->
       <div v-if="!checkVendor()">
         <label class="font-normal text-[13px]">Email</label>
-        <input v-model="email" class="input mt-[8px]" placeholder="email@email.com" type="email" :class="{ 'border-danger': isError }" />
+        <input v-model="email" class="input mt-[8px]" placeholder="email@email.com" type="email" :class="{ 'border-danger text-danger': isError }" />
       </div>
 
       <!-- input username -->
       <div v-else>
         <label class="font-normal text-[13px]">Username</label>
-        <input v-model="username" class="input mt-[8px]" placeholder="Username" type="text" :class="{ 'border-danger': isError }" />
+        <input v-model="username" class="input mt-[8px]" placeholder="Username" type="text" :class="{ 'border-danger text-danger': isError }" />
       </div>
 
       <!-- input password -->
@@ -25,17 +25,22 @@
             >Forgot Password?</a
           >
         </div>
-        <div class="input max-w-72">
+        <div class="input max-w-72" :class="{ 'border-danger': isError }">
           <input
             v-model="password"
             placeholder="Password"
             :type="showPassword ? 'text' : 'password'"
+            :class="{ '!text-danger': isError }"
           />
           <div class="btn btn-icon" @click="togglePassword">
             <i class="ki-outline ki-eye" :class="{ hidden: showPassword }"></i>
             <i class="ki-outline ki-eye-slash" :class="{ hidden: !showPassword }"></i>
           </div>
         </div>
+      </div>
+
+      <div v-if="isError" class="rounded-lg p-[8px] bg-red-100 text-danger text-[11px]">
+        Email or password you entered is incorrect, Please double-check and try again.
       </div>
 
       <!-- remember -->
@@ -131,6 +136,8 @@ const nextStepLogin = (response: ApiResponseData<string>) => {
     router.replace({
       name: 'dashboard',
     })
+  } else {
+    isError.value = true
   }
 }
 
@@ -142,11 +149,7 @@ const goLogin = () => {
     loginApi
       .callLoginVendor(username.value, password.value)
       .then((response: ApiResponseData<string>) => {
-        if (response.statusCode === 200) {
-          nextStepLogin(response)
-        } else {
-          isError.value = true
-        }
+        nextStepLogin(response)
       })
       .finally(() => {
         isLoading.value = false
