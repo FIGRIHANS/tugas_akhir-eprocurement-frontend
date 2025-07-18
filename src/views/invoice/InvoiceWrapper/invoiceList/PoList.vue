@@ -33,6 +33,7 @@
                 </span>
               </td>
               <td>{{ parent.vendorName }}</td>
+              <td>{{ parent.documentNo }}</td>
               <td>{{ parent.companyCode }}</td>
               <td>{{ parent.invoiceTypeName }}</td>
               <td>{{ moment(parent.invoiceDate).format('DD MMMM YYYY') }}</td>
@@ -109,6 +110,7 @@ const columns = ref([
   'No Invoice',
   'Status',
   'Vendor Name',
+  'Invoice Vendor No',
   'Company Code',
   'Invoice PO Type',
   'Invoice Date',
