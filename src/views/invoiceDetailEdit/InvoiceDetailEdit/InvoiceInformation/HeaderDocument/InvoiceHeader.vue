@@ -122,6 +122,25 @@
         </label>
         <input v-model="form.npwpReporting" class="input" placeholder="" :class="{ 'border-danger': form.npwpReportingError }" :disabled="userData?.profile.profileId === 3002" />
       </div>
+      <!-- Remaining DP Amount -->
+      <div v-if="form.invoiceDPCode === 9013" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          Remaining DP Amount
+        </label>
+        <input v-model="form.remainingDpAmount" class="input" placeholder="" disabled/>
+      </div>
+      <!-- DP Amount Deduction -->
+      <div v-if="form.invoiceDPCode === 9013" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          DP Amount Deduction
+          <span class="text-red-500 ml-[4px]">*</span>
+        </label>
+        <input
+          v-model="form.dpAmountDeduction"
+          class="input"
+          placeholder=""
+        />
+      </div>
       <!-- Description -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
