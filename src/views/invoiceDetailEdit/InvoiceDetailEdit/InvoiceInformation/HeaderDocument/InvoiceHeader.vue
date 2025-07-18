@@ -16,6 +16,20 @@
         </label>
         <input :value="getDpName()" class="input" placeholder="" disabled />
       </div>
+      <!-- Company Code -->
+      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          Company Code
+        </label>
+        <input :value="form.companyName" class="input" placeholder="" disabled />
+      </div>
+      <!-- Invoice No. -->
+      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          Invoice No.
+        </label>
+        <input v-model="form.invoiceNo" class="input" placeholder="" disabled />
+      </div>
       <!-- Invoice Date -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
@@ -32,20 +46,6 @@
         </label>
         <DatePicker v-model="form.postingDate" :error="form.postingDateError" class="w-full -ml-[15px]" />
       </div>
-      <!-- Invoice No. -->
-      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-        <label class="form-label">
-          Invoice No.
-        </label>
-        <input v-model="form.invoiceNo" class="input" placeholder="" disabled />
-      </div>
-      <!-- Company Code -->
-      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-        <label class="form-label">
-          Company Code
-        </label>
-        <input :value="form.companyName" class="input" placeholder="" disabled />
-      </div>
       <!-- Invoicing Party -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
@@ -61,17 +61,17 @@
         </label>
         <DatePicker v-model="form.estimatedPaymentDate" :error="form.estimatedPaymentDateError" class="w-full -ml-[15px]" />
       </div>
-      <!-- No Tax Invoice -->
+      <!-- Tax Document No.  -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
-          No Tax Invoice
+          Tax Document No.
         </label>
         <input v-model="form.taxNo" class="input" placeholder="" :class="{ 'border-danger': form.taxNoError }" />
       </div>
-      <!-- No Invoice Vendor -->
+      <!-- Invoice Vendor No. -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
-          No Invoice Vendor
+          Invoice Vendor No.
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
         <input v-model="form.documentNo" class="input" placeholder="" :class="{ 'border-danger': form.documentNoError }" />

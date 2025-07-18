@@ -42,10 +42,10 @@
           </option>
         </select>
       </div>
-      <!-- No Invoice -->
+      <!-- Submitted Document No. -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
-          Internal Invoice No.
+          Submitted Document No.
         </label>
         <input v-model="form.invoiceNo" class="input" placeholder="Auto Generated Number" disabled/>
       </div>

@@ -17,7 +17,7 @@
       <p class="font-normal text-sm">{{ form.postingDate ? moment(form.postingDate).format('YYYYMMDD') : '-' }}</p>
     </div>
     <div class="flex items-center justify-between gap-[10px]">
-      <p class="font-normal text-sm text-gray-600">Invoice No</p>
+      <p class="font-normal text-sm text-gray-600">Submitted Document No.</p>
       <p class="font-normal text-sm">{{ form.invoiceNo || '-' }}</p>
     </div>
     <div class="flex items-center justify-between gap-[10px]">
@@ -35,11 +35,11 @@
       <p class="font-normal text-sm">{{ form.estimatedPaymentDate ? moment(form.estimatedPaymentDate).format('YYYYMMDD') : '-' }}</p>
     </div>
     <div class="flex items-center justify-between gap-[10px]">
-      <p class="font-normal text-sm text-gray-600">No Tax Invoice</p>
+      <p class="font-normal text-sm text-gray-600">Tax Document No.</p>
       <p class="font-normal text-sm">{{ form.taxNo || '-' }}</p>
     </div>
     <div class="flex items-center justify-between gap-[10px]">
-      <p class="font-normal text-sm text-gray-600">No Invoice Vendor</p>
+      <p class="font-normal text-sm text-gray-600">Invoice Vendor No.</p>
       <p class="font-normal text-sm">{{ form.documentNo || '-' }}</p>
     </div>
     <div class="flex items-center justify-between gap-[10px]">
