@@ -62,6 +62,14 @@
       <p class="font-normal text-sm text-gray-600">NPWP Reporting</p>
       <p class="font-normal text-sm">{{ form.npwpReporting || '-' }}</p>
     </div>
+    <div v-if="form.invoiceDPCode === 9013" class="flex items-center justify-between gap-[10px]">
+      <p class="font-normal text-sm text-gray-600">Remaining DP Amount</p>
+      <p class="font-normal text-sm">{{ form.remainingDpAmount || '-' }}</p>
+    </div>
+    <div v-if="form.invoiceDPCode === 9013" class="flex items-center justify-between gap-[10px]">
+      <p class="font-normal text-sm text-gray-600">DP Amount Deduction</p>
+      <p class="font-normal text-sm">{{ form.dpAmountDeduction || '-' }}</p>
+    </div>
     <div class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Description</p>
       <p class="font-normal text-sm">{{ form.notes || '-' }}</p>

@@ -1,6 +1,6 @@
 <template>
   <div id="table-invoice-po-gr" class="flex flex-col gap-[16px]">
-    <p class="text-base font-semibold">{{ form?.invoiceDp === '9012' ? 'Invoice PO' : 'Invoice PO & GR Item' }}</p>
+    <p class="text-base font-semibold">{{ form?.invoiceDp === '9012' ? 'Invoice PO Item' : 'Invoice PO & GR Item' }}</p>
     <div>
       <div class="flex items-center gap-[10px]">
         <div class="relative max-w-[250px]">
