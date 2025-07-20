@@ -58,8 +58,18 @@
       </div>
     </div>
 
-    <AdministrationData v-if="currentTab === 'administration_data'" />
-    <PaymentDetailData v-if="currentTab === 'payment_information_data'" />
+    <AdministrationData
+      v-if="currentTab === 'administration_data'"
+      :vendor-id="userData?.profile.profileId"
+    />
+    <BusinessLicenseData
+      v-if="currentTab === 'business_license_data'"
+      :vendor-id="userData?.profile.profileId"
+    />
+    <PaymentDetailData
+      v-if="currentTab === 'payment_information_data'"
+      :vendor-id="userData?.profile.profileId"
+    />
     <!-- <CompanyDeedData v-if="currentTab === 'company_deed_data'" />
     <EquipmentData v-if="currentTab === 'equipment_data'" />
     <ExperienceData v-if="currentTab === 'experience_data'" />
@@ -143,8 +153,11 @@ type TabItemType = {
 
 import { computed, ref } from 'vue'
 
+import { useLoginStore } from '@/stores/views/login'
+
 import AdministrationData from './details/AdministrationData.vue'
 import PaymentDetailData from './details/PaymentDetailData.vue'
+import BusinessLicenseData from './details/BusinessLicenseData.vue'
 // import CompanyDeedData from './details/CompanyDeedData.vue'
 // import EquipmentData from './details/EquipmentData.vue'
 // import ExpertPersonnelData from './details/ExpertPersonnelData.vue'
@@ -153,6 +166,9 @@ import PaymentDetailData from './details/PaymentDetailData.vue'
 
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
+
+const userStore = useLoginStore()
+const userData = computed(() => userStore.userData)
 
 const currentTab = ref<string>('administration_data')
 const tabItems = ref<TabItemType[]>([

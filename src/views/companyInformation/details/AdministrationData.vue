@@ -11,81 +11,88 @@
             <tr>
               <td class="text-gray-600">Username</td>
               <td class="font-bold w-1/3">
-                <span>{{ data?.userName ?? '-' }}</span>
+                <span>{{ data?.userName || '-' }}</span>
               </td>
               <td class="border-x w-6"></td>
               <td class="!pl-[1.875rem] text-gray-600">Country</td>
               <td class="font-bold w-1/3">
-                <span>{{ data?.countryName ?? '-' }}</span>
+                <span>{{ data?.countryName || '-' }}</span>
               </td>
             </tr>
             <tr>
               <td class="text-gray-600">Email User</td>
               <td class="font-bold w-1/3">
-                <span>{{ data?.userEmail ?? '-' }}</span>
+                <span>{{ data?.userEmail || '-' }}</span>
               </td>
               <td class="border-x w-6"></td>
               <td class="!pl-[1.875rem] text-gray-600">Province</td>
               <td class="font-bold w-1/3">
-                <span>{{ data?.stateName ?? '-' }}</span>
+                <span>{{ data?.stateName || '-' }}</span>
               </td>
             </tr>
             <tr>
               <td class="text-gray-600">Company Name</td>
               <td class="font-bold w-1/3">
-                <span>{{ data?.vendorName ?? '-' }}</span>
+                <span>{{ data?.vendorName || '-' }}</span>
               </td>
               <td class="border-x w-6"></td>
               <td class="!pl-[1.875rem] text-gray-600">City / District</td>
               <td class="font-bold w-1/3">
-                <span>{{ data?.cityName ?? '-' }}</span>
+                <span>{{ data?.cityName || '-' }}</span>
               </td>
             </tr>
             <tr>
               <td class="text-gray-600">Company Category</td>
               <td class="font-bold w-1/3">
-                <span>{{ data?.companyCategoryName ?? '-' }}</span>
+                <span>{{ data?.companyCategoryName || '-' }}</span>
               </td>
               <td class="border-x w-6"></td>
               <td class="!pl-[1.875rem] text-gray-600">Telephone</td>
               <td class="font-bold w-1/3">
-                <span>{{ data?.vendorPhone ?? '-' }}</span>
+                <span>{{ data?.vendorPhone || '-' }}</span>
               </td>
             </tr>
             <tr>
               <td class="text-gray-600">Company Group</td>
               <td class="font-bold w-1/3">
-                <span>{{ data?.groupCompany ?? '-' }}</span>
+                <span>{{ data?.groupCompany || '-' }}</span>
               </td>
               <td class="border-x w-6"></td>
               <td class="!pl-[1.875rem] text-gray-600">Vendor Email</td>
               <td class="font-bold w-1/3">
-                <span>{{ data?.vendorEmail ?? '-' }}</span>
+                <span>{{ data?.vendorEmail || '-' }}</span>
               </td>
             </tr>
             <tr>
               <td class="text-gray-600">NPWP No</td>
               <td class="font-bold w-1/3">
-                <span>{{ data?.npwp ?? '-' }}</span>
+                <span>{{ data?.npwp || '-' }}</span>
               </td>
               <td class="border-x w-6"></td>
               <td class="!pl-[1.875rem] text-gray-600">Website</td>
               <td class="font-bold w-1/3">
-                <span>{{ data?.vendorWebsite ?? '-' }}</span>
+                <span>{{ data?.vendorWebsite || '-' }}</span>
               </td>
             </tr>
             <tr>
               <td class="text-gray-600">NPWP Document</td>
               <td class="font-bold w-1/3">
-                <UiButton variant="primary" outline size="sm" @click="downloadFile(data!.npwpUrl)">
+                <span v-if="!data?.npwpUrl">-</span>
+                <UiButton
+                  v-else
+                  variant="primary"
+                  outline
+                  size="sm"
+                  @click="downloadFile(data.npwpUrl)"
+                >
                   <UiIcon name="cloud-download" variant="duotone" />
-                  Download Dokumen NPWP
+                  Download Document NPWP
                 </UiButton>
               </td>
               <td class="border-x w-6"></td>
               <td class="!pl-[1.875rem] text-gray-600">Currency Preference</td>
               <td class="font-bold w-1/3">
-                <span>{{ `${data?.currencySymbol ?? '-'} (${data?.currencyLabel ?? '-'})` }}</span>
+                <span>{{ `${data?.currencySymbol || '-'} (${data?.currencyLabel || '-'})` }}</span>
               </td>
             </tr>
             <tr>
@@ -94,7 +101,7 @@
               <td class="border-x w-6"></td>
               <td class="!pl-[1.875rem] text-gray-600">Company Address</td>
               <td class="font-bold w-1/3">
-                <span>{{ data?.addressCompanyDetail ?? '-' }}</span>
+                <span>{{ data?.addressCompanyDetail || '-' }}</span>
               </td>
             </tr>
             <tr>
@@ -118,13 +125,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 
 import { useVendorAdministrationStore } from '@/stores/vendor/vendor'
 import { useUploadStore } from '@/stores/general/upload'
 
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
+
+const props = defineProps<{ vendorId: number | undefined }>()
 
 const vendorStore = useVendorAdministrationStore()
 const uploadStore = useUploadStore()
@@ -136,6 +145,13 @@ const downloadFile = async (path: string) => {
 }
 
 onMounted(() => {
-  vendorStore.getData(String(149))
+  props.vendorId && vendorStore.getData(String(props.vendorId))
 })
+
+watch(
+  () => props.vendorId,
+  () => {
+    vendorStore.getData(String(props.vendorId))
+  },
+)
 </script>

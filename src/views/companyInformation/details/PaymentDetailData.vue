@@ -24,7 +24,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(paymentData, index) in data" :key="paymentData.id">
+            <tr v-for="(paymentData, index) in data" :key="paymentData?.id">
               <td>
                 <div class="dropdown" data-dropdown="true" data-dropdown-trigger="click">
                   <button class="dropdown-toggle px-0 size-8 flex justify-center btn btn-light">
@@ -44,18 +44,18 @@
                 </div>
               </td>
               <td>{{ index + 1 }}</td>
-              <td>{{ paymentData.accountNo || '-' }}</td>
-              <td>{{ paymentData.accountName || '-' }}</td>
-              <td>{{ paymentData.bankSwiftCode || '-' }}</td>
+              <td>{{ paymentData?.accountNo || '-' }}</td>
+              <td>{{ paymentData?.accountName || '-' }}</td>
+              <td>{{ paymentData?.bankSwiftCode || '-' }}</td>
               <td>
                 <div class="flex justify-center">
-                  <span v-if="!paymentData.urlAccountDifferences">-</span>
+                  <span v-if="!paymentData?.urlAccountDifferences">-</span>
                   <UiButton
                     v-else
                     variant="primary"
                     outline
                     size="sm"
-                    @click="downloadFile(paymentData.urlAccountDifferences)"
+                    @click="downloadFile(paymentData?.urlAccountDifferences)"
                   >
                     <UiIcon name="cloud-download" variant="duotone" />
                   </UiButton>
@@ -63,23 +63,23 @@
               </td>
               <td>
                 <div class="flex justify-center">
-                  <span v-if="!paymentData.urlFirstPage">-</span>
+                  <span v-if="!paymentData?.urlFirstPage">-</span>
                   <UiButton
                     v-else
                     variant="primary"
                     outline
                     size="sm"
-                    @click="downloadFile(paymentData.urlFirstPage)"
+                    @click="downloadFile(paymentData?.urlFirstPage)"
                   >
                     <UiIcon name="cloud-download" variant="duotone" />
                   </UiButton>
                 </div>
               </td>
-              <td>{{ paymentData.currencySymbol || '-' }}</td>
-              <td>{{ paymentData.bankCode || '-' }}</td>
-              <td>{{ paymentData.bankName || '-' }}</td>
-              <td>{{ paymentData.branch || '-' }}</td>
-              <td>{{ paymentData.bankAddress || '-' }}</td>
+              <td>{{ paymentData?.currencySymbol || '-' }}</td>
+              <td>{{ paymentData?.bankCode || '-' }}</td>
+              <td>{{ paymentData?.bankName || '-' }}</td>
+              <td>{{ paymentData?.branch || '-' }}</td>
+              <td>{{ paymentData?.bankAddress || '-' }}</td>
             </tr>
           </tbody>
         </table>
@@ -89,13 +89,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 
 import { useVendorPaymentStore } from '@/stores/vendor/vendor'
 import { useUploadStore } from '@/stores/general/upload'
 
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
+
+const props = defineProps<{ vendorId: number | undefined }>()
 
 const vendorStore = useVendorPaymentStore()
 const uploadStore = useUploadStore()
@@ -107,6 +109,13 @@ const downloadFile = async (path: string) => {
 }
 
 onMounted(() => {
-  vendorStore.getData(String(149))
+  props.vendorId && vendorStore.getData(String(props.vendorId))
 })
+
+watch(
+  () => props.vendorId,
+  () => {
+    vendorStore.getData(String(props.vendorId))
+  },
+)
 </script>
