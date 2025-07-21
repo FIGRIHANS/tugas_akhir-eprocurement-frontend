@@ -33,6 +33,7 @@ export type VendorTypes = {
   subBusinessFieldName: string
   npwp: string
   address: string
+  sapCode: string
   payment: PaymentTypes[]
 }
 

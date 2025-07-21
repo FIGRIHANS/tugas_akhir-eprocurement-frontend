@@ -26,6 +26,8 @@ export interface formTypes extends documentFormTypes {
   assigment: string
   transferNews: string
   npwpReporting: string
+  remainingDpAmount: string
+  dpAmountDeduction: string
 
   bankKey: string
   bankName: string

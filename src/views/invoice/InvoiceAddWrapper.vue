@@ -52,6 +52,7 @@
       </div>
     </div>
     <ModalSuccess />
+    <ModalErrorDocumentNumberModal />
   </div>
 </template>
 
@@ -78,6 +79,7 @@ const InvoiceData = defineAsyncComponent(() => import('./InvoiceAddWrapper/Invoi
 const InvoiceInformation = defineAsyncComponent(() => import('./InvoiceAddWrapper/InvoiceInformation.vue'))
 const InvoicePreview = defineAsyncComponent(() => import('./InvoiceAddWrapper/InvoicePreview.vue'))
 const ModalSuccess = defineAsyncComponent(() => import('./InvoiceAddWrapper/InvoicePreview/ModalSuccess.vue'))
+const ModalErrorDocumentNumberModal = defineAsyncComponent(() => import('./InvoiceAddWrapper/ErrorDocumentNumberModal.vue'))
 
 const invoiceApi = useInvoiceSubmissionStore()
 const invoiceMasterApi = useInvoiceMasterDataStore()
@@ -103,6 +105,7 @@ const form = reactive<formTypes>({
   invoiceType: '901',
   invoiceTypeName: 'Invoice PO',
   vendorId: '',
+  vendorName: '',
   npwp: '',
   address: '',
   bankKeyId: '',
@@ -321,7 +324,7 @@ const getDpName = () => {
 const mapDataPost = () => {
   const data = {
     header: {
-      invoiceUId: form.status === 0 ? form.invoiceUId : '00000000-0000-0000-0000-000000000000',
+      invoiceUId: form.status === 0 || form.status === 5 ? form.invoiceUId :'00000000-0000-0000-0000-000000000000',
       invoiceTypeCode: Number(form.invoiceType),
       invoiceTypeName: form.invoiceTypeName,
       invoiceDPCode: form.invoiceType === '901' ? Number(form.invoiceDp) : null,
@@ -383,17 +386,29 @@ const goNext = () => {
     }
   } else {
     isSubmit.value = true
-    invoiceApi.postSubmission(mapDataPost()).then(() => {
-      const idModal = document.querySelector('#success_invoice_modal')
-      const modal = KTModal.getInstance(idModal as HTMLElement)
-      modal.show()
-
-      setTimeout(() => {
-        modal.hide()
-        router.push({
-          name: 'invoice-list'
-        })
-      }, 1000)
+    invoiceApi.postSubmission(mapDataPost()).then((response) => {
+      if (response.statusCode === 200) {
+        const idModal = document.querySelector('#success_invoice_modal')
+        const modal = KTModal.getInstance(idModal as HTMLElement)
+        modal.show()
+  
+        setTimeout(() => {
+          modal.hide()
+          router.push({
+            name: 'invoice-list'
+          })
+        }, 1000)
+      } else {
+        if (response.result.message.includes('Invoice Document Number')) {
+        const idModal = document.querySelector('#error_document_number_modal')
+        const modal = KTModal.getInstance(idModal as HTMLElement)
+        modal.show()
+  
+        setTimeout(() => {
+          modal.hide()
+        }, 1500)
+        }
+      }
     })
       .catch((error) => {
         console.error(error)

@@ -21,13 +21,12 @@ export const useUserProfileStore = defineStore('userProfile', () => {
     pageSize: 0,
   })
 
-  // Dalam useUserProfileStore
   const getAllUserProfiles = async () => {
     loading.value = true
     error.value = null
 
     try {
-      const response: ApiResponse<IProfile[]> = await userApi.post('/profile/getall') // Ubah ApiResponse type
+      const response: ApiResponse<IProfile[]> = await userApi.post('/profile/getall')
 
       if (response.data.result.isError) {
         error.value = response.data.result.message || 'An unknown error occurred.'
@@ -36,10 +35,10 @@ export const useUserProfileStore = defineStore('userProfile', () => {
 
       if (response.data.result.content && Array.isArray(response.data.result.content)) {
         profiles.value = {
-          items: response.data.result.content, // Ambil array dari content
-          total: response.data.result.content.length, // Anda bisa menghitung total dari panjang array
-          page: 1, // Asumsi halaman pertama jika tidak ada informasi pagination dari API
-          pageSize: response.data.result.content.length, // Asumsi semua data dimuat dalam satu halaman
+          items: response.data.result.content,
+          total: response.data.result.content.length,
+          page: 1,
+          pageSize: response.data.result.content.length,
         }
       } else {
         profiles.value = {

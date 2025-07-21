@@ -21,13 +21,12 @@ export const defaultColumn = [
 
 export const invoiceDpColumn = [
   'PO Number',
-  'Tax Code',
   'Amount Invoice',
+  'Tax Code',
   'VAT Amount',
   'WHT Type',
   'WHT Code',
-  'WHT Base Amount',
-  'Category'
+  'WHT Base Amount'
 ]
 
 export const PoPibColumn = [

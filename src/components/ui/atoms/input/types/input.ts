@@ -6,7 +6,7 @@ export interface IInputProps {
   row?: boolean
   required?: boolean
   error?: boolean
-  type?: 'text' | 'number'
+  type?: 'text' | 'number' | 'password'
   hintText?: string
   maxLength?: number
 }

@@ -18,6 +18,7 @@ const route = useRoute()
 const props = defineProps<{ id: string | number; nama: string }>()
 const modal = ref(false)
 const successModal = ref(false)
+const errorModal = ref(false)
 
 const reason = ref('')
 const inputError = ref<string[]>([])
@@ -49,7 +50,11 @@ const handleApprove = async () => {
   } catch (err) {
     if (err instanceof Error) {
       if (axios.isAxiosError(err)) {
-        error.value = err.response?.data.result.message ?? 'Failed to approve vendor'
+        error.value =
+          err.response?.data.result?.message ??
+          'Vendor Data could not be approve due to a system error or invalid data.'
+        modal.value = false
+        errorModal.value = true
       }
     }
   } finally {
@@ -105,6 +110,16 @@ const handleSuccess = () => {
     <h3 class="text-center text-lg font-medium">Vendor {{ nama }} successfully approved</h3>
     <p class="text-center text-base text-gray-600 mb-5">
       The Vendor has been successfully approved.
+    </p>
+  </UiModal>
+
+  <UiModal v-model="errorModal" size="sm" @update:model-value="handleSuccess">
+    <div class="text-center mb-6">
+      <UiIcon name="cross-circle" variant="duotone" class="text-[150px] text-danger text-center" />
+    </div>
+    <h3 class="text-center text-lg font-medium">Failed to approve Vendor data!</h3>
+    <p class="text-center text-base text-gray-600 mb-5">
+      {{ error }}
     </p>
   </UiModal>
 </template>
