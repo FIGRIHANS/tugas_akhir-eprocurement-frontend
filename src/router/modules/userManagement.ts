@@ -48,6 +48,26 @@ export default [
     component: () => import('@/views/userManagement/master-role/MasterRoleListView.vue'),
   },
   {
+    path: '/user-management/master-employee',
+    name: 'user-management-master-employee',
+    component: () => import('@/views/userManagement/master-employee/EmployeeListView.vue'),
+  },
+  {
+    path: '/user-management/master-employee/:id',
+    name: 'user-management-master-employee-detail',
+    component: () => import('@/views/userManagement/master-employee/EmployeeDetailView.vue'),
+  },
+  {
+    path: '/user-management/master-employee/create',
+    name: 'user-management-master-employee-create',
+    component: () => import('@/views/userManagement/master-employee/EmployeeCreateView.vue'),
+  },
+  {
+    path: '/user-management/master-employee/edit/:id',
+    name: 'user-management-master-employee-edit',
+    component: () => import('@/views/userManagement/master-employee/EmployeeEditView.vue'),
+  },
+  {
     path: '/user-management/report-authorization',
     name: 'user-management-report-authorization',
     component: () =>

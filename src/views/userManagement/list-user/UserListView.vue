@@ -4,17 +4,37 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import ActionButtonView from '@/components/userManagement/ActionButtonView.vue'
-import { ref } from 'vue'
+import { useUserStore } from '@/stores/user-management/user'
+import moment from 'moment'
+import { onMounted, ref, computed } from 'vue' // Added computed
 import { useRouter } from 'vue-router'
 
 const search = ref('')
 
 const router = useRouter()
+const userStore = useUserStore()
+
+console.log(userStore)
+
+onMounted(() => {
+  userStore.getAllUsers()
+})
 
 const handleShowUserForm = () => {
   router.push('/user-management/user/form')
 }
 
+const filteredUsers = computed(() => {
+  if (!userStore.users || userStore.users.items.length === 0) {
+    return []
+  }
+  const searchTerm = search.value.toLowerCase()
+  return userStore.users.items.filter(
+    (user) =>
+      user.userName.toLowerCase().includes(searchTerm) ||
+      user.employeeName.toLowerCase().includes(searchTerm),
+  )
+})
 </script>
 
 <template>
@@ -46,26 +66,29 @@ const handleShowUserForm = () => {
       </div>
       <div class="card-body">
         <table class="table align-middle text-gray-700">
-          <thead class="">
+          <thead>
             <tr>
               <th></th>
               <th class="text-nowrap">User Name</th>
               <th class="text-nowrap">Email</th>
-              <th class="text-nowrap">Proile</th>
+              <th class="text-nowrap">Profile</th>
               <th class="text-nowrap">Position/Role</th>
               <th class="text-nowrap">Last Login</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
+            <tr v-if="filteredUsers.length === 0">
+              <td colspan="6" class="text-center py-4">No users found.</td>
+            </tr>
+            <tr v-for="user in filteredUsers" :key="user.id">
               <td>
                 <ActionButtonView />
               </td>
-              <td>Darlene Robertson</td>
-              <td>dolores.chambers@example.com</td>
-              <td>Department Head</td>
-              <td>Deputy Chief Financial Officer</td>
-              <td>Fri 19 Jun, 2020 09:35 am</td>
+              <td>{{ user.employeeName }}</td>
+              <td>{{ user.userName }}</td>
+              <td>{{ user.profileId }}</td>
+              <td>{{ user.employeeId }}</td>
+              <td>{{ moment(user.lastLoginDate).format('DD MMMM YYYY') }}</td>
             </tr>
           </tbody>
         </table>
