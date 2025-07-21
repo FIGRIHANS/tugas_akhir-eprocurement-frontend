@@ -45,7 +45,7 @@
                   <td>{{ item.grDocumentNo }}</td>
                   <td>{{ item.grDocumentItem }}</td>
                   <td>{{ item.grDocumentDate }}</td>
-                  <td class="text-right">{{ useFormatIdr(currency === item.currencyLC ? item.itemAmountLC : item.itemAmountTC) }}</td>
+                  <td class="text-right">{{ currency === item.currencyLC ? useFormatIdr(item.itemAmountLC) : useFormatUsd(item.itemAmountTC) }}</td>
                   <td>{{ item.quantity }}</td>
                   <td>{{ item.unit }}</td>
                   <td>{{ item.itemText }}</td>
@@ -77,7 +77,7 @@ import { ref, computed, watch } from 'vue'
 import { KTModal } from '@/metronic/core'
 import { searchDefaultColumn, searchInvoiceDpColumn, searchPoPibColumn } from '@/static/invoicePoGr'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
-import { useFormatIdr } from '@/composables/currency'
+import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 
 const props = defineProps<{
   isInvoiceDp?: string

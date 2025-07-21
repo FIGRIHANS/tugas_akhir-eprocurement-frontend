@@ -11,7 +11,9 @@ import type {
   ParamsSubmissionTypes,
   PoGrItemTypes,
   ListPoTypes,
-  QueryParamsListPoTypes
+  QueryParamsListPoTypes,
+  AvailableDpTypes,
+  RemainingDpTypes
 } from './types/submission'
 
 export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => {
@@ -96,15 +98,15 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
   }
 
   const getAvailableDp = async (poNumber: string, vendorNumber: string) => {
-    const response: ApiResponse<ParamsSubmissionTypes> = await invoiceApi.get(`/invoice/available-dp?poNumber=${poNumber}&vendorNo=${vendorNumber}`)
+    const response: ApiResponse<AvailableDpTypes> = await invoiceApi.get(`/invoice/available-dp?poNumber=${poNumber}&vendorNo=${vendorNumber}`)
   
-    return response.data.result
+    return response.data
   }
 
   const getRemainingDp = async (poNumber: string) => {
-    const response: ApiResponse<ParamsSubmissionTypes> = await invoiceApi.get(`/invoice/remaining-dp?poNumber=${poNumber}`)
+    const response: ApiResponse<RemainingDpTypes> = await invoiceApi.get(`/invoice/remaining-dp?poNumber=${poNumber}`)
   
-    return response.data.result
+    return response.data
   }
 
   return {
