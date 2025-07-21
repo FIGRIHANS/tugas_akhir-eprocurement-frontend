@@ -107,7 +107,7 @@ const filterForm = reactive<filterListTypes>({
 
 const columns = ref([
   '',
-  'No Invoice',
+  'Submitted Document No',
   'Status',
   'Vendor Name',
   'Invoice Vendor No',
