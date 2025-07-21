@@ -7,11 +7,15 @@ import IconPlusCircle from '@/assets/svg_icons/ic_plus_circle.svg'
 import { ref } from 'vue'
 import EmployeeMenuButton from '@/components/userManagement/EmployeeMenuButton.vue'
 import LPagination from '@/components/pagination/LPagination.vue'
+import { useRouter } from 'vue-router'
 
 const searchKeyword = ref('')
+const router = useRouter()
 
 const handleAddEmployee = () => {
-  console.log('Add Employee')
+  router.push({
+    name: 'user-management-master-employee-create',
+  })
 }
 </script>
 
