@@ -95,6 +95,18 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
     return response.data
   }
 
+  const getAvailableDp = async (poNumber: string, vendorNumber: string) => {
+    const response: ApiResponse<ParamsSubmissionTypes> = await invoiceApi.get(`/invoice/available-dp?poNumber=${poNumber}&vendorNo=${vendorNumber}`)
+  
+    return response.data.result
+  }
+
+  const getRemainingDp = async (poNumber: string) => {
+    const response: ApiResponse<ParamsSubmissionTypes> = await invoiceApi.get(`/invoice/remaining-dp?poNumber=${poNumber}`)
+  
+    return response.data.result
+  }
+
   return {
     submissionStatus,
     documentTypeList,
@@ -108,6 +120,8 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
     getPoGr,
     postSubmission,
     getListPo,
-    getPoDetail
+    getPoDetail,
+    getAvailableDp,
+    getRemainingDp
   }
 })

@@ -156,6 +156,7 @@ export interface ListPoTypes {
   invoiceDPName: string
   companyCode: string
   companyName: string
+  documentNo: string
   invoiceNo: string
   invoiceDate: string
   statusCode: number
