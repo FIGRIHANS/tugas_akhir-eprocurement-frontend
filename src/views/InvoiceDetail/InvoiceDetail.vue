@@ -112,6 +112,8 @@ const form = ref<formTypes>({
   assigment: '',
   transferNews: '',
   npwpReporting: '',
+  remainingDpAmount: '',
+  dpAmountDeduction: '',
   bankKey: '',
   bankName: '',
   beneficiaryName: '',
@@ -149,6 +151,7 @@ const checkStatusCode = () => {
 
   if (form.value.statusCode === 2 && route.query.type === '1') status = false
 
+  console.log(checkWorkflow())
   status = checkWorkflow()
   return status
 }
@@ -160,7 +163,7 @@ const checkWorkflow = () => {
   const checkIndex = getWf?.findIndex((item) => item.profileId === getProfileId)
 
   if (checkIndex !== -1) {
-    if (getWf[checkIndex].stateCode === 3 || getWf[checkIndex].stateCode === 4) return false
+    if (getWf[checkIndex].stateCode === 3 || getWf[checkIndex].stateCode === 4 || getWf[checkIndex].stateCode === 5) return false
     else return true
   } else return true
 }
@@ -429,6 +432,8 @@ const setDataDefault = () => {
     assigment: data?.header.assigment || '',
     transferNews: data?.header.transferNews || '',
     npwpReporting: data?.header.npwpReporting || '',
+    remainingDpAmount: '',
+    dpAmountDeduction: '',
     bankKey: data?.payment.bankKey || '',
     bankName: data?.payment.bankName || '',
     beneficiaryName: data?.payment.beneficiaryName || '',
@@ -478,6 +483,8 @@ const setDataEdit = () => {
     assigment: data?.assigment || '',
     transferNews: data?.transferNews || '',
     npwpReporting: data?.npwpReporting || '',
+    remainingDpAmount: '',
+    dpAmountDeduction: '',
     bankKey: data?.bankKey || '',
     bankName: data?.bankName || '',
     beneficiaryName: data?.beneficiaryName || '',

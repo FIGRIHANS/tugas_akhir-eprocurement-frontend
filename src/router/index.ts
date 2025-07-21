@@ -13,6 +13,7 @@ import registration from './modules/registration'
 import invoice from './modules/invoice'
 import dashboard from './modules/dashboard'
 import userManagement from './modules/userManagement'
+import paymentInformation from './modules/payment-information'
 
 const router = createRouter({
   history: createWebHistory('/eprocurement/'),
@@ -33,7 +34,7 @@ const router = createRouter({
     {
       path: '/',
       component: LayoutWithSidebar,
-      children: [...vendor, ...invoice, ...dashboard, ...userManagement],
+      children: [...vendor, ...invoice, ...dashboard, ...userManagement, ...paymentInformation],
       meta: {
         middleware: 'auth',
       },

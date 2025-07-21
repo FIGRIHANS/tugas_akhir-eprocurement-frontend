@@ -39,7 +39,7 @@
         </div>
       </div>
 
-      <div v-if="isError" class="rounded-lg p-[8px] bg-red-100 text-danger text-[11px]">
+      <div v-if="isError" class="radius-lg bg-red-100 text-danger p-[8px] text-[11px]">
         Email or password you entered is incorrect, Please double-check and try again.
       </div>
 

@@ -51,7 +51,7 @@ const handleApprove = async () => {
     if (err instanceof Error) {
       if (axios.isAxiosError(err)) {
         error.value =
-          err.response?.data.result.message ??
+          err.response?.data.result?.message ??
           'Vendor Data could not be approve due to a system error or invalid data.'
         modal.value = false
         errorModal.value = true

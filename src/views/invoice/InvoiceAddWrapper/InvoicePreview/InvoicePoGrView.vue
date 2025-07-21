@@ -25,7 +25,7 @@
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentNo }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentItem }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ moment(item.grDocumentDate).format('DD MMMM YYYY') }}</td>
-            <td v-if="!checkInvoiceDp()">{{ useFormatIdr(form.currency === item.currencyLC ? item.itemAmountLC : item.itemAmountTC) }}</td>
+            <td v-if="!checkInvoiceDp()">{{ form.currency === item.currencyLC ? useFormatIdr(item.itemAmountLC) : useFormatUsd(item.itemAmountTC) }}</td>
             <td v-if="!checkInvoiceDp()">{{ useFormatIdr(item.quantity) }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.uom }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.itemText }}</td>
@@ -49,7 +49,7 @@
 import { ref, inject, watch, onMounted } from 'vue'
 import type { formTypes } from '../../types/invoiceAddWrapper'
 import { defaultColumn, invoiceDpColumn, PoPibColumn } from '@/static/invoicePoGr'
-import { useFormatIdr } from '@/composables/currency'
+import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import moment from 'moment'
 
 const form = inject<formTypes>('form')

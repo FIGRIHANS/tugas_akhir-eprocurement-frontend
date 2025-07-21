@@ -13,6 +13,19 @@ export interface SubmissionStatusTypes {
   text: string
 }
 
+export interface AvailableDpTypes {
+  isAvailable: boolean
+}
+
+export interface RemainingDpTypes {
+  documentNo: string
+  documentDate: number
+  companyCode: string
+  poNumber: string
+  documentType: string
+  remainingDPAmount: number
+}
+
 export interface ParamsSubmissionTypes {
   header: ParamsSubmissionHeader
   vendor: ParamsSubmissionVendor
@@ -156,6 +169,7 @@ export interface ListPoTypes {
   invoiceDPName: string
   companyCode: string
   companyName: string
+  documentNo: string
   invoiceNo: string
   invoiceDate: string
   statusCode: number
