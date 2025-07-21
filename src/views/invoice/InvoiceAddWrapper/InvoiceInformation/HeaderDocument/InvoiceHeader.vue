@@ -12,7 +12,8 @@
         <!-- <input v-model="form.invoiceTypeName" class="input" placeholder="" disabled /> -->
         <input v-if="(form.status !== 0 && form.status !== -1) || loginApi.isVendor" v-model="form.invoiceType"
           class="input" placeholder="" disabled />
-        <select v-else v-model="form.invoiceType" class="select" :class="{ 'border-danger': form.invoiceTypeError }">
+        <select v-else v-model="form.invoiceType" @change="removeDpValue()" class="select"
+          :class="{ 'border-danger': form.invoiceTypeError }">
           <option v-for="item of listInvoiceTypePo" :key="item.code" :value="item.code">
             {{ item.name }}
           </option>
@@ -49,14 +50,14 @@
       <!-- No Invoice -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
-          Internal Invoice No.
+          Submitted Document No.
         </label>
         <input v-model="form.invoiceNo" class="input" placeholder="Auto Generated Number" disabled />
       </div>
       <!-- Invoice Document No. * -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
-          Invoice Document No.
+          Invoice Vendor No.
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
         <input v-model="form.invoiceNoVendor" class="input" placeholder=""
@@ -158,6 +159,12 @@ const listInvoiceTypePo = computed(() => invoiceMasterApi.invoicePoType)
 
 const checkPo = () => {
   return typeForm.value === 'po'
+}
+
+const removeDpValue = () => {
+  if (form && form?.invoiceType !== '901') {
+    form.invoiceDp = ''
+  }
 }
 
 watch(

@@ -10,12 +10,9 @@
     <div class="card-body p-[0px]">
       <div class="flex">
         <div class="flex flex-col flex-1">
-          <div
-            v-for="(item, index) in listCalculation"
-            :key="index"
+          <div v-for="(item, index) in listCalculation" :key="index"
             class="border-b border-gray-200 py-[31px] px-[20px] text-xs flex"
-            :class="index === listCalculation.length - 1 ? 'calculation__last-field' : ''"
-          >
+            :class="index === listCalculation.length - 1 ? 'calculation__last-field' : ''">
             <div class="flex-1">{{ item.name }}</div>
             <div class="flex-1">{{ useFormatIdr(item.amount) }}</div>
             <div>{{ form?.currCode }}</div>
@@ -90,7 +87,7 @@ const setCalculation = () => {
     const amount = setCount(item)
     const data = {
       name: item,
-      amount: amount.toString(),
+      amount: amount ? amount.toString() : '',
       currency: form?.value.currCode || ''
     }
     listCalculation.value.push(data)
@@ -103,7 +100,7 @@ const getPercentTax = (code: string) => {
   const getIndex = listTaxCalculation.value.findIndex((item) => item.code === code)
   if (getIndex !== -1) {
     const splitName = listTaxCalculation.value[getIndex].name.split(' - ')
-    return parseFloat(splitName[1].replace(',', '.').replace('%','')) / 100
+    return parseFloat(splitName[1].replace(',', '.').replace('%', '')) / 100
   }
 }
 
@@ -220,6 +217,6 @@ watch(
 
 onMounted(() => {
   typeForm.value = route.query.type?.toString().toLowerCase() || 'po'
-  setCalculation()  
+  setCalculation()
 })
 </script>

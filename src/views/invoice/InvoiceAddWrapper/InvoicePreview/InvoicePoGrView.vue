@@ -5,14 +5,9 @@
       <table class="table table-xs table-border">
         <thead>
           <tr>
-            <th
-              v-for="(item, index) in columns"
-              :key="index"
-              :class="{
-                'invoice__field-base--line': item.toLowerCase() === 'line'
-              }"
-              class="invoice__field-base"
-            >
+            <th v-for="(item, index) in columns" :key="index" :class="{
+              'invoice__field-base--line': item.toLowerCase() === 'line'
+            }" class="invoice__field-base">
               {{ item }}
             </th>
           </tr>
@@ -24,8 +19,10 @@
             <td v-if="!checkInvoiceDp()">{{ item.poItem }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentNo }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentItem }}</td>
-            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ moment(item.grDocumentDate).format('DD MMMM YYYY') }}</td>
-            <td v-if="!checkInvoiceDp()">{{ useFormatIdr(form.currency === item.currencyLC ? item.itemAmountLC : item.itemAmountTC) }}</td>
+            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentDate ?
+              moment(item.grDocumentDate).format('DD MMMM YYYY') : '-' }}</td>
+            <td v-if="!checkInvoiceDp()">{{ useFormatIdr(form.currency === item.currencyLC ? item.itemAmountLC :
+              item.itemAmountTC) }}</td>
             <td v-if="!checkInvoiceDp()">{{ useFormatIdr(item.quantity) }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.uom }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.itemText }}</td>
