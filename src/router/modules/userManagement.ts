@@ -53,11 +53,6 @@ export default [
     component: () => import('@/views/userManagement/master-employee/EmployeeListView.vue'),
   },
   {
-    path: '/user-management/master-employee/:id',
-    name: 'user-management-master-employee-detail',
-    component: () => import('@/views/userManagement/master-employee/EmployeeDetailView.vue'),
-  },
-  {
     path: '/user-management/master-employee/create',
     name: 'user-management-master-employee-create',
     component: () => import('@/views/userManagement/master-employee/EmployeeCreateView.vue'),
