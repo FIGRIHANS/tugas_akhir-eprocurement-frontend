@@ -60,6 +60,11 @@
         <UiFormGroup hide-border>
           <UiInput label="Bank Account Number" placeholder="Enter Bank Account Number" />
           <UiCheckbox label="Holder's name is different from the company name." />
+          <UiFileUpload
+            name="accountCover"
+            accepted-files=".jpg,.jpeg,.png,.pdf"
+            placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
+          />
           <UiSelect
             label="Bank Key"
             placeholder="Select"
@@ -86,6 +91,11 @@
             textKey="text"
             required
           />
+          <UiFileUpload
+            name="accountDiscrepancyStatement"
+            accepted-files=".jpg,.jpeg,.png,.pdf"
+            placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
+          />
           <UiCheckbox label="Bank not registered." />
           <UiInput label="Bank Branch" placeholder="Bank Branch" required />
           <UiInput label="Swift Code" placeholder="Swift Code" required />
@@ -105,6 +115,7 @@ import BreadcrumbView from '@/components/BreadcrumbView.vue'
 import UiModal from '@/components/modal/UiModal.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiCheckbox from '@/components/ui/atoms/checkbox/UiCheckbox.vue'
+import UiFileUpload from '@/components/ui/atoms/file-upload/UiFileUpload.vue'
 import UiFormGroup from '@/components/ui/atoms/form-group/UiFormGroup.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
