@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import UiModal from '@/components/modal/UiModal.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiInputTel from '@/components/ui/atoms/input-telephone/UiInputTel.vue'
@@ -17,8 +18,10 @@ import { type IAdministration, type IAdministrationPayload } from '@/stores/vend
 import { useVendorUploadStore } from '@/stores/vendor/upload'
 import { useVendorAdministrationStore } from '@/stores/vendor/vendor'
 import { useLoginStore } from '@/stores/views/login'
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import questionImg from '@/assets/question-alt.svg'
+import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
 
 const adminStore = useVendorAdministrationStore()
 const uploadStore = useVendorUploadStore()
@@ -28,23 +31,13 @@ const route = useRoute()
 
 const downloadLoading = ref<boolean>(false)
 const mode = ref<'view' | 'edit'>('view')
-const administrationData = reactive<IAdministration>(adminStore.data!)
-const editPayload = ref<IAdministrationPayload>({
-  vendorId: adminStore.data?.vendorId ?? 0,
-  cityId: adminStore.data?.cityId ?? 0,
-  companyAddress: adminStore.data?.addressCompanyDetail ?? '',
-  companyGroup: adminStore.data?.groupCompany ?? '',
-  companyName: adminStore.data?.vendorName ?? '',
-  currencySymbol: adminStore.data?.currencySymbol ?? '',
-  emailUser: adminStore.data?.userEmail ?? '',
-  npwpNo: adminStore.data?.npwp ?? '',
-  npwpUrl: adminStore.data?.npwpUrl ?? '',
-  updatedBy: userStore.userData?.profile.employeeName ?? '',
-  vendorPhone: adminStore.data?.vendorPhone ?? '',
-  vendorWebsite: adminStore.data?.vendorWebsite ?? '',
-})
-
+const administrationData = ref<IAdministration>(adminStore.data!)
+const editPayload = ref<IAdministrationPayload | undefined>(undefined)
 const errorFields = ref<string[]>([])
+const saveLoading = ref<boolean>(false)
+const confirmModal = ref<boolean>(false)
+const successModal = ref<boolean>(false)
+const errorModal = ref<boolean>(false)
 
 const countryOptions = computed<CountryListType>(() => lookupStore.countryList)
 const stateOptions = computed<ProvinceListType>(() => lookupStore.provinceList)
@@ -52,24 +45,28 @@ const cityOptions = computed<CityListType>(() => lookupStore.cityList)
 const currencyOptions = computed<CurrencyListType>(() => lookupStore.currencyList)
 
 const handleCancel = () => {
-  Object.assign(administrationData, adminStore.data)
+  if (adminStore.data) {
+    administrationData.value = {
+      ...adminStore.data,
+    }
+  }
   mode.value = 'view'
 }
 
 const handleDoneEdit = () => {
   editPayload.value = {
     vendorId: adminStore.data?.vendorId ?? 0,
-    cityId: administrationData.cityId,
-    companyAddress: administrationData.addressCompanyDetail,
-    companyGroup: administrationData.groupCompany,
-    companyName: administrationData.vendorName,
-    currencySymbol: administrationData.currencyLabel,
-    emailUser: administrationData.userEmail,
-    npwpNo: administrationData.npwp,
+    cityId: administrationData.value.cityId,
+    companyAddress: administrationData.value.addressCompanyDetail,
+    companyGroup: administrationData.value.groupCompany,
+    companyName: administrationData.value.vendorName,
+    currencySymbol: administrationData.value.currencyLabel,
+    emailUser: administrationData.value.userEmail,
+    npwpNo: administrationData.value.npwp,
     npwpUrl: adminStore.data?.npwpUrl ?? '',
     updatedBy: userStore.userData?.profile.employeeName ?? '',
-    vendorPhone: administrationData.vendorPhone,
-    vendorWebsite: administrationData.vendorWebsite,
+    vendorPhone: administrationData.value.vendorPhone,
+    vendorWebsite: administrationData.value.vendorWebsite,
   }
   errorFields.value = checkEmptyValues(editPayload.value)
 
@@ -80,25 +77,66 @@ const handleDoneEdit = () => {
   mode.value = 'view'
 }
 
+const handleSave = async () => {
+  saveLoading.value = true
+
+  if (!editPayload.value) {
+    editPayload.value = {
+      vendorId: adminStore.data?.vendorId ?? 0,
+      cityId: administrationData.value.cityId,
+      companyAddress: administrationData.value.addressCompanyDetail,
+      companyGroup: administrationData.value.groupCompany,
+      companyName: administrationData.value.vendorName,
+      currencySymbol: administrationData.value.currencyLabel,
+      emailUser: administrationData.value.userEmail,
+      npwpNo: administrationData.value.npwp,
+      npwpUrl: adminStore.data?.npwpUrl ?? '',
+      updatedBy: userStore.userData?.profile.employeeName ?? '',
+      vendorPhone: administrationData.value.vendorPhone,
+      vendorWebsite: administrationData.value.vendorWebsite,
+    }
+  }
+
+  try {
+    const response = await adminStore.update(editPayload.value!)
+
+    if (response.result.isError) {
+      errorModal.value = true
+      saveLoading.value = false
+      return
+    }
+
+    successModal.value = true
+    confirmModal.value = false
+  } catch (error) {
+    if (error instanceof Error) {
+      errorModal.value = true
+      confirmModal.value = false
+    }
+  } finally {
+    saveLoading.value = false
+  }
+}
+
 const selectCountry = () => {
-  administrationData.countryName = countryOptions.value.find(
-    (item) => item.countryID === administrationData.countryId,
+  administrationData.value.countryName = countryOptions.value.find(
+    (item) => item.countryID === administrationData.value.countryId,
   )?.countryName as string
 
-  lookupStore.getVendorProvince(administrationData.countryId)
+  lookupStore.getVendorProvince(administrationData.value.countryId)
 }
 
 const selectState = () => {
-  administrationData.stateName = stateOptions.value.find(
-    (item) => item.provinceID === administrationData.stateId,
+  administrationData.value.stateName = stateOptions.value.find(
+    (item) => item.provinceID === administrationData.value.stateId,
   )?.provinceName as string
 
-  lookupStore.getVendorCities(administrationData.stateId)
+  lookupStore.getVendorCities(administrationData.value.stateId)
 }
 
 const selectCity = () => {
-  administrationData.cityName = cityOptions.value.find(
-    (item) => item.cityID === administrationData.cityId,
+  administrationData.value.cityName = cityOptions.value.find(
+    (item) => item.cityID === administrationData.value.cityId,
   )?.cityName as string
 }
 
@@ -122,10 +160,14 @@ watch(
   () => adminStore.data,
   (data) => {
     if (data) {
-      Object.assign(administrationData, data)
-      lookupStore.getVendorProvince(administrationData.countryId)
-      lookupStore.getVendorCities(administrationData.stateId)
+      administrationData.value = { ...data }
+      lookupStore.getVendorProvince(data.countryId)
+      lookupStore.getVendorCities(data.stateId)
     }
+  },
+  {
+    immediate: true,
+    deep: true,
   },
 )
 
@@ -480,10 +522,49 @@ onMounted(() => {
         <UiIcon name="black-left" variant="duotone" />
         <span> Back </span>
       </UiButton>
-      <UiButton :disabled="mode === 'edit'">
+      <UiButton :disabled="mode === 'edit'" @click="confirmModal = true">
         <UiIcon name="file-added" variant="duotone" />
         <span> Save </span>
       </UiButton>
     </div>
   </div>
+
+  <UiModal v-model="confirmModal" size="sm">
+    <div class="flex flex-col justify-center items-center gap-3">
+      <img :src="questionImg" alt="Confirm" class="w-32 mx-auto mb-4" />
+      <h3 class="text-xl font-medium">Save</h3>
+      <p class="text-sm text-center font-light">
+        You are about to Save to this data. Please review your input before continuing.
+      </p>
+      <div class="space-x-3 mb-3">
+        <UiButton outline @click="confirmModal = false" class="px-8">
+          <UiIcon name="cross-circle" variant="duotone" />
+          <span> Cancel </span>
+        </UiButton>
+        <UiButton variant="primary" @click="handleSave" :disabled="saveLoading" class="px-8">
+          <UiIcon name="paper-plane" variant="duotone" />
+          <span> Save </span>
+        </UiButton>
+      </div>
+    </div>
+  </UiModal>
+
+  <UiModal v-model="successModal" size="sm">
+    <ModalSuccessLogo />
+    <h3 class="text-center text-lg font-medium">Administration Data Successfully Updated</h3>
+    <p class="text-center text-base text-gray-600 mb-5">
+      The data has been successfully updated in the admin system.
+    </p>
+  </UiModal>
+
+  <UiModal v-model="errorModal" size="sm">
+    <div class="text-center mb-6">
+      <UiIcon name="cross-circle" variant="duotone" class="text-[150px] text-danger text-center" />
+    </div>
+    <h3 class="text-center text-lg font-medium">Failed to Change Vendor data!</h3>
+    <p class="text-center text-base text-gray-600 mb-5">
+      Failed to change vendor data. Please try again later or contact support if the problem
+      persists.
+    </p>
+  </UiModal>
 </template>

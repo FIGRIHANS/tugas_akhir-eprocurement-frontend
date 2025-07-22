@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import type {
   IAdministration,
+  IAdministrationPayload,
   ILicense,
   IPayment,
   IPostBlacklist,
@@ -141,7 +142,15 @@ export const useVendorAdministrationStore = defineStore('vendor-administration',
     }
   }
 
-  return { data, loading, error, getData }
+  const update = async (payload: IAdministrationPayload) => {
+    const response: ApiResponse = await vendorAPI.post(
+      '/public/verifiedvendor/update-administration',
+      payload,
+    )
+    return response.data
+  }
+
+  return { data, loading, error, getData, update }
 })
 
 export const useVendorIzinUsahaStore = defineStore('vendor-izin-usaha', () => {
