@@ -12,7 +12,7 @@
       <div class="card-header">
         <h2 class="text-md font-bold text-slate-800">Payment Information</h2>
         <div class="flex">
-          <UiButton variant="primary" outline>
+          <UiButton variant="primary" outline @click="openModal()">
             <UiIcon variant="duotone" name="plus-circle" />
             Add Data</UiButton
           >
@@ -53,13 +53,82 @@
         >
       </div>
     </div>
+
+    <!-- modal form start -->
+    <UiModal :title="modalTitle" v-model="isModalOpen" @update:model-value="closeModal" size="lg">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+        <UiFormGroup hide-border>
+          <UiInput label="Bank Account Number" placeholder="Enter Bank Account Number" />
+          <UiCheckbox label="Holder's name is different from the company name." />
+          <UiSelect
+            label="Bank Key"
+            placeholder="Select"
+            :options="[]"
+            valueKey="value"
+            textKey="text"
+            required
+          />
+          <UiInput label="Bank Name" placeholder="Bank Name" required />
+          <UiInput label="Bank Key" placeholder="Bank Key" required />
+          <UiInput label="Bank Address" placeholder="Bank Address" required />
+        </UiFormGroup>
+        <UiFormGroup hide-border>
+          <UiInput
+            label="Account Holder Name"
+            placeholder="Enter full name as written in bank book"
+            required
+          />
+          <UiSelect
+            label="Currency"
+            placeholder="Select"
+            :options="currencyOptions"
+            valueKey="value"
+            textKey="text"
+            required
+          />
+          <UiCheckbox label="Bank not registered." />
+          <UiInput label="Bank Branch" placeholder="Bank Branch" required />
+          <UiInput label="Swift Code" placeholder="Swift Code" required />
+        </UiFormGroup>
+      </div>
+      <div class="mt-4 w-full flex justify-end items-center gap-2">
+        <UiButton outline>Cancel</UiButton>
+        <UiButton variant="primary">Save</UiButton>
+      </div>
+    </UiModal>
+    <!-- modal form end -->
   </div>
 </template>
 
 <script setup lang="ts">
 import BreadcrumbView from '@/components/BreadcrumbView.vue'
+import UiModal from '@/components/modal/UiModal.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
+import UiCheckbox from '@/components/ui/atoms/checkbox/UiCheckbox.vue'
+import UiFormGroup from '@/components/ui/atoms/form-group/UiFormGroup.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
+import UiInput from '@/components/ui/atoms/input/UiInput.vue'
+import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
+import { ref } from 'vue'
+
+const modalTitle = ref('Add Payment Information')
+const isModalOpen = ref(false)
+
+const currencyOptions = [
+  { value: 'USD', text: 'US Dollar' },
+  { value: 'EUR', text: 'Euro' },
+  { value: 'IDR', text: 'Rupiah' },
+]
+
+const closeModal = () => {
+  isModalOpen.value = false
+}
+
+const openModal = () => {
+  isModalOpen.value = true
+
+  console.log('oke')
+}
 </script>
 
 <style scoped></style>
