@@ -20,7 +20,7 @@ const handleSuccess = () => {
 </script>
 <template>
   <div class="dropdown" data-dropdown="true" data-dropdown-trigger="click">
-    <UiButton :outline="true" :icon="true" variant="secondary" class="dropdown-toggle">
+    <UiButton :outline="true" :icon="true" variant="secondary" class="dropdown-toggle" size="sm">
       <UiIcon variant="outline" name="dots-vertical" />
     </UiButton>
     <div class="dropdown-content w-full max-w-60 space-y-5">
