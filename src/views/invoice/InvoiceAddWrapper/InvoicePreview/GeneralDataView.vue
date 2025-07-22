@@ -32,7 +32,7 @@ const typeForm = ref<string>('')
 const vendorList = computed(() => invoiceMasterApi.vendorList)
 
 const getVendorName = () => {
-  const getIndex = vendorList.value.findIndex((item) => item.vendorCode === form?.vendorId)
+  const getIndex = vendorList.value.findIndex((item) => item.sapCode === form?.vendorId)
   if (getIndex !== -1) return vendorList.value[getIndex].vendorName
 }
 

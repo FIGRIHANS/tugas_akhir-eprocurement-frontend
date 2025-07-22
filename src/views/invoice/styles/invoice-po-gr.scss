@@ -30,8 +30,15 @@
       
       &--po-item {
         @extend .pogr__field-base;
-        min-width: 200px;
+        min-width: 250px;
       }
+
+      &--po-number {
+        @extend .pogr__field-base;
+        min-width: 250px;
+      }
+
+      
     }
   
     &__field-items {

@@ -16,7 +16,8 @@
       <Transition mode="out-in">
         <component :is="contentComponent" />
       </Transition>
-      <div v-if="(form.status === 0 || form.status === -1 || form.status === 5) && !checkInvoiceView()" class="flex justify-between items-center gap-[8px] mt-[24px]">
+      <div v-if="(form.status === 0 || form.status === -1 || form.status === 5) && !checkInvoiceView()"
+        class="flex justify-between items-center gap-[8px] mt-[24px]">
         <button class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goSaveDraft">
           Save as Draft
           <i class="ki-duotone ki-bookmark"></i>
@@ -34,11 +35,13 @@
         </div>
       </div>
       <div v-else class="flex justify-end items-center mt-[24px]">
-        <button v-if="tabNow !== 'preview' || checkInvoiceView()" class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goBack">
+        <button v-if="tabNow !== 'preview' || checkInvoiceView()" class="btn btn-outline btn-primary"
+          :disabled="isSubmit" @click="goBack">
           <i class="ki-filled ki-arrow-left"></i>
           Back
         </button>
-        <button v-if="tabNow !== 'preview' && !checkInvoiceView()" class="btn btn-primary" :disabled="isSubmit" @click="goNext">
+        <button v-if="tabNow !== 'preview' && !checkInvoiceView()" class="btn btn-primary" :disabled="isSubmit"
+          @click="goNext">
           Next
           <i class="ki-duotone ki-black-right"></i>
         </button>
@@ -270,7 +273,7 @@ const mapPoGr = () => {
       poItem: Number(item.poItem),
       grDocumentNo: item.grDocumentNo,
       grDocumentItem: Number(item.grDocumentItem),
-      grDocumentDate: moment(item.grDocumentDate, 'YYYY').startOf('year').format('YYYY-MM-DD'),
+      grDocumentDate: item.grDocumentDate ? moment(item.grDocumentDate, 'YYYY').startOf('year').format('YYYY-MM-DD') : null,
       taxCode: item.taxCode,
       itemAmount: Number(item.currency === item.currencyLC ? item.itemAmountLC : item.itemAmountTC),
       quantity: Number(item.quantity),
@@ -309,7 +312,7 @@ const mapAdditionalCost = () => {
 }
 
 const getVendorName = () => {
-  const getIndex = vendorList.value.findIndex((item) => item.vendorCode === form?.vendorId)
+  const getIndex = vendorList.value.findIndex((item) => item.sapCode === form?.vendorId)
   if (getIndex !== -1) return vendorList.value[getIndex].vendorName
 }
 
@@ -321,7 +324,7 @@ const getDpName = () => {
 const mapDataPost = () => {
   const data = {
     header: {
-      invoiceUId: form.status === 0 ? form.invoiceUId :'00000000-0000-0000-0000-000000000000',
+      invoiceUId: form.status === 0 || form.status === 5 ? form.invoiceUId :'00000000-0000-0000-0000-000000000000',
       invoiceTypeCode: Number(form.invoiceType),
       invoiceTypeName: form.invoiceTypeName,
       invoiceDPCode: form.invoiceType === '901' ? Number(form.invoiceDp) : null,
@@ -407,12 +410,12 @@ const goNext = () => {
         }
       }
     })
-    .catch((error) => {
-      console.error(error)
-    })
-    .finally(() => {
-      isSubmit.value = false
-    })
+      .catch((error) => {
+        console.error(error)
+      })
+      .finally(() => {
+        isSubmit.value = false
+      })
   }
 }
 
@@ -433,12 +436,12 @@ const goSaveDraft = () => {
       })
     }, 1000)
   })
-  .catch((error) => {
-    console.error(error)
-  })
-  .finally(() => {
-    isSubmit.value = false
-  })
+    .catch((error) => {
+      console.error(error)
+    })
+    .finally(() => {
+      isSubmit.value = false
+    })
 }
 
 const setData = () => {
