@@ -50,7 +50,6 @@ const goAdd = (isPo: boolean) => {
     name: 'invoiceAdd',
     query: {
       type: isPo ? 'po' : 'nonpo',
-      create: 'add'
     }
   })
 }
