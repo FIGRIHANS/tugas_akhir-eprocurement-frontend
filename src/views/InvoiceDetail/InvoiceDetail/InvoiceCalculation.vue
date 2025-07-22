@@ -2,15 +2,11 @@
   <div v-if="form" class="card">
     <div class="card-header py-[17px] flex items-center justify-between gap-[8px]">
       <h3 class="card-title text-base font-semibold">Invoice Calculation</h3>
-      <input v-if="isNeedCheck" v-model="form.invoiceCalculationCheck" class="checkbox" type="checkbox"/>
+      <input v-if="isNeedCheck" v-model="form.invoiceCalculationCheck" class="checkbox" type="checkbox" />
     </div>
     <div class="card-body flex flex-col p-0">
-      <div
-        v-for="(item, index) in listCalculation"
-        :key="index"
-        class="flex"
-        :class="index === listCalculation.length - 1 ? 'calculation__last-field' : ''"
-      >
+      <div v-for="(item, index) in listCalculation" :key="index" class="flex"
+        :class="index === listCalculation.length - 1 ? 'calculation__last-field' : ''">
         <p class="flex-1 py-[25px] px-[20px] text-xs">{{ item.name }}</p>
         <p class="flex-1 py-[25px] px-[20px] text-xs">{{ item.amount }}</p>
         <p class="flex-1 py-[25px] px-[20px] text-xs">{{ item.currency }}</p>
