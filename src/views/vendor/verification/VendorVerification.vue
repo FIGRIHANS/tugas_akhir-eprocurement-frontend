@@ -166,7 +166,7 @@ watch(
             <td>{{ vendor.companyCategoryName }}</td>
             <td>{{ formatDate(vendor.createdUTCDate) }}</td>
             <td>{{ formatDate(vendor.verifiedSendUTCDate!) }}</td>
-            <td>{{ formatDate(vendor.verifiedUTCDate) }}</td>
+            <td>{{ formatDate(vendor.verifiedUTCDate || '') }}</td>
             <td>
               <div
                 v-for="(license, index) in vendor.licenses"
