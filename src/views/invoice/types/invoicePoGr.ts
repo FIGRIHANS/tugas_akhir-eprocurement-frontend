@@ -3,7 +3,7 @@ export interface itemsPoGrType {
   poItem: number
   grDocumentNo: string
   grDocumentItem: number
-  grDocumentDate: string
+  grDocumentDate: string | null
   taxCode: string
   quantity: number
   uom: string
@@ -12,7 +12,7 @@ export interface itemsPoGrType {
   conditionType: string
   conditionTypeDesc: string
   qcStatus: string
-  postingDate: string
+  postingDate: string | null
   enteredOn: string
   purchasingOrg: string
   department: string
@@ -25,6 +25,8 @@ export interface itemsPoGrType {
   whtBaseAmount?: number
   whtAmount?: number
   isEdit?: boolean
+  poNoError: boolean
+  poItemError: boolean
 }
 
 export interface PoGrSearchTypes {
@@ -50,4 +52,6 @@ export interface PoGrSearchTypes {
   itemAmountLC: number
   itemAmountTC: number
   isActive?: boolean
+
 }
+
