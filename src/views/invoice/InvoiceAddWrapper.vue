@@ -51,7 +51,7 @@
         </button>
       </div>
     </div>
-    <ModalSuccess />
+    <ModalSuccess @afterClose="goToList" />
     <ModalErrorDocumentNumberModal />
   </div>
 </template>
@@ -391,22 +391,11 @@ const goNext = () => {
         const idModal = document.querySelector('#success_invoice_modal')
         const modal = KTModal.getInstance(idModal as HTMLElement)
         modal.show()
-  
-        setTimeout(() => {
-          modal.hide()
-          router.push({
-            name: 'invoice-list'
-          })
-        }, 1000)
       } else {
         if (response.result.message.includes('Invoice Document Number')) {
-        const idModal = document.querySelector('#error_document_number_modal')
-        const modal = KTModal.getInstance(idModal as HTMLElement)
-        modal.show()
-  
-        setTimeout(() => {
-          modal.hide()
-        }, 1500)
+          const idModal = document.querySelector('#error_document_number_modal')
+          const modal = KTModal.getInstance(idModal as HTMLElement)
+          modal.show()
         }
       }
     })
@@ -417,6 +406,12 @@ const goNext = () => {
         isSubmit.value = false
       })
   }
+}
+
+const goToList = () => {
+  router.push({
+    name: 'invoice-list'
+  })
 }
 
 const goSaveDraft = () => {
