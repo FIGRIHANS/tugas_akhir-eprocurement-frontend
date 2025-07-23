@@ -21,7 +21,7 @@
                 <button class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]" @click="goView(parent)">
                   <i class="ki-filled ki-eye !text-lg"></i>
                 </button>
-                <button class="btn btn-icon btn-primary w-[21px] h-[21px]" @click="parent.isOpenChild = !parent.isOpenChild">
+                <button class="btn btn-icon btn-outline btn-primary w-[21px] h-[21px]" @click="parent.isOpenChild = !parent.isOpenChild">
                   <i v-if="!parent.isOpenChild" class="ki-filled ki-right !text-[9px]"></i>
                   <i v-else class="ki-filled ki-down !text-[9px]"></i>
                 </button>

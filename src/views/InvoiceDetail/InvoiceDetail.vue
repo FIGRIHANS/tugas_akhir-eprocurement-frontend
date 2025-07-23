@@ -37,8 +37,8 @@
       </div>
     </div>
     <RejectVerification @reject="goReject" />
-    <SuccessVerifModal :statusCode="detailInvoice?.header.statusCode || -1" />
-    <SuccessRejectModal />
+    <SuccessVerifModal :statusCode="detailInvoice?.header.statusCode || -1" @afterClose="goToList" />
+    <SuccessRejectModal @afterClose="goToList" />
   </div>
 </template>
 
@@ -151,7 +151,6 @@ const checkStatusCode = () => {
 
   if (form.value.statusCode === 2 && route.query.type === '1') status = false
 
-  console.log(checkWorkflow())
   status = checkWorkflow()
   return status
 }
@@ -179,7 +178,7 @@ const goToEdit = () => {
 }
 
 const openReject = () => {
-  const idModal = document.querySelector('#reject_Verification_modal')
+  const idModal = document.querySelector('#reject_verification_modal')
   const modal = KTModal.getInstance(idModal as HTMLElement)
   modal.show()
 }
@@ -346,15 +345,15 @@ const goReject = (reason: string) => {
     const idModal = document.querySelector('#success_reject_modal')
     const modal = KTModal.getInstance(idModal as HTMLElement)
     modal.show()
-    setTimeout(() => {
-      modal.hide()
-      router.push({
-        name: route.query.type === '1' ? 'invoiceVerification' : 'invoiceApproval'
-      })
-    }, 1000)
   })
   .finally(() => {
     verificationApi.isRejectLoading = false
+  })
+}
+
+const goToList = () => {
+  router.push({
+    name: route.query.type === '1' ? 'invoiceVerification' : 'invoiceApproval'
   })
 }
 
