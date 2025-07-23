@@ -13,6 +13,8 @@ import UiLoading from '@/components/UiLoading.vue'
 import VendorListFilters from '@/components/vendor/filterButton/VendorListFilters.vue'
 import BreadcrumbView from '@/components/BreadcrumbView.vue'
 import { formatDate } from '@/composables/date-format'
+import UiButton from '@/components/ui/atoms/button/UiButton.vue'
+import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -123,6 +125,19 @@ watch(
                   :email="vendor.vendorEmail"
                   :status="vendor.isVerified"
                 />
+                <UiButton
+                  outline
+                  icon
+                  size="sm"
+                  @click="
+                    $router.push({
+                      name: 'vendor-company-information',
+                      params: { id: vendor.vendorId },
+                    })
+                  "
+                >
+                  <UiIcon name="eye" />
+                </UiButton>
                 <StatusToggle
                   :id="vendor.vendorId"
                   :name="vendor.vendorName"

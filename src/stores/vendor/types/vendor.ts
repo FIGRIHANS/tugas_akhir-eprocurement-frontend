@@ -46,6 +46,7 @@ export interface IAdministration {
   vendorId: number
   userId: number
   userName: string
+  userEmail: string
   vendorName: string
   companyCategoryId: number
   companyCategoryName: string
@@ -63,6 +64,28 @@ export interface IAdministration {
   cityName: string
   currencyLabel: string
   currencySymbol: string
+  countryId: number
+  stateId: number
+  cityId: number
+  currencyId: number
+}
+
+export interface IAdministrationPayload {
+  vendorId: number
+  emailUser: string
+  companyName: string
+  companyGroup: string
+  npwpNo: string
+  npwpUrl: string
+  currencySymbol: string
+  cityId: number
+  vendorPhone: string
+  vendorWebsite: string
+  companyAddress: string
+  vendorCommodities?: {
+    subBusinessFieldId: number
+  }[]
+  updatedBy: string
 }
 
 export interface ILicense {
