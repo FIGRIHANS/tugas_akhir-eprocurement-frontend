@@ -1,7 +1,7 @@
 <template>
   <div>
     <BreadcrumbView
-      title="Payment Information"
+      title="Company Information"
       :routes="[
         { name: 'Company Information', to: '/company-information' },
         { name: 'Business License Data', to: '#' },

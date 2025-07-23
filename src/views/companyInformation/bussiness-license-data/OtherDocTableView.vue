@@ -12,7 +12,12 @@ const endDate = ref<string | Date | null>(null)
 
 <template>
   <div class="my-6">
-    <h2 class="text-lg font-semibold text-slate-700">Other Document</h2>
+    <h2 class="text-lg font-semibold text-slate-700 mb-4">Other Document</h2>
+
+    <UiButton outline>
+      <UiIcon variant="duotone" name="plus-circle"></UiIcon>
+      Add Document</UiButton
+    >
 
     <div class="mt-6">
       <table class="table align-middle border">
