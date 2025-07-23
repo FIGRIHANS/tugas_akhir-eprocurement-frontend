@@ -1,5 +1,5 @@
 <template>
-  <div class="modal" data-modal="true" id="reject_Verification_modal">
+  <div class="modal" data-modal="true" id="reject_verification_modal">
     <div class="modal-content max-w-[500px] modal-center-y">
       <div class="modal-header py-[16px] px-[16px]">
         <h3 class="modal-title text-lg font-semibold">

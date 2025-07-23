@@ -21,5 +21,10 @@
     font-size: 16px;
     font-weight: 600;
     white-space: nowrap;
+
+    &--auto {
+      @extend .pending__column;
+      min-width: unset;
+    }
   }
 }
