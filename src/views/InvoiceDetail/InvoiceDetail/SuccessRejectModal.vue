@@ -13,5 +13,24 @@
 </template>
 
 <script lang="ts" setup>
+import { onMounted, onUnmounted } from 'vue'
+import { KTModal } from '@/metronic/core'
 import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
+
+const emits = defineEmits(['afterClose'])
+
+const hideModal = () => {
+  const idModal = document.querySelector('#success_reject_modal')
+  const modal = KTModal.getInstance(idModal as HTMLElement)
+  modal.hide()
+  emits('afterClose')
+}
+
+onMounted(() => {
+  document.getElementById('success_reject_modal')?.addEventListener('click', hideModal)
+})
+
+onUnmounted(() => {
+  document.getElementById('success_reject_modal')?.removeEventListener('click', hideModal)
+})
 </script>

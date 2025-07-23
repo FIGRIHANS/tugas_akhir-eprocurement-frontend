@@ -83,7 +83,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
       }
     })
   
-    listPo.value = response.data.result.content.sort((a, b) => moment(b.invoiceDate).valueOf() - moment(a.invoiceDate).valueOf())
+    listPo.value = response.data.result.content.length !== 0 ? response.data.result.content.sort((a, b) => moment(a.invoiceDate).valueOf() - moment(b.invoiceDate).valueOf()) : []
   
     return response.data.result.content
   }

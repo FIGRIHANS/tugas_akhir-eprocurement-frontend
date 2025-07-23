@@ -14,8 +14,6 @@ const search = ref('')
 const router = useRouter()
 const userStore = useUserStore()
 
-console.log(userStore)
-
 onMounted(() => {
   userStore.getAllUsers()
 })
