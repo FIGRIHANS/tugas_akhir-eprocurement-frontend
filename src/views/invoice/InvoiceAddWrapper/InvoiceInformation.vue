@@ -6,7 +6,7 @@
     </div>
     <InvoicePoGr v-if="checkPo()" class="mt-[24px]" />
     <InvoiceItem v-if="checkNonPo()" class="mt-[24px]" />
-    <AdditionalCost v-if="form.invoiceDp === '9011' && !checkNonPo() && isCreate != 'add'" class="mt-[24px]" />
+    <AdditionalCost v-if="form.invoiceDp === '9011' && !checkNonPo()" class="mt-[24px]" />
   </div>
 </template>
 
@@ -24,7 +24,6 @@ const AdditionalCost = defineAsyncComponent(() => import('./InvoiceInformation/A
 const form = inject<formTypes>('form')
 const route = useRoute()
 const typeForm = ref<string>('')
-const isCreate = ref<string>('')
 
 const checkPo = () => {
   return typeForm.value === 'po'
@@ -36,7 +35,6 @@ const checkNonPo = () => {
 
 onMounted(() => {
   typeForm.value = route.query.type?.toString().toLowerCase() || 'po'
-  isCreate.value = route.query.create?.toString() || 'edit'
 })
 </script>
 
