@@ -1,16 +1,16 @@
 <template>
-  <div>
+  <div class="space-y-3">
     <div class="card">
       <div class="card-header">
         <h2 class="text-md font-bold text-slate-800">Payment Information</h2>
         <div class="flex">
           <UiButton variant="primary" outline @click="openModal()">
             <UiIcon variant="duotone" name="plus-circle" />
-            Add Data</UiButton
-          >
+            <span>Add Data</span>
+          </UiButton>
         </div>
       </div>
-      <div class="card-body">
+      <div class="card-body card-table scrollable-x-auto">
         <table class="table align-middle text-gray-700">
           <thead class="border-b-2 border-b-primary">
             <tr>
@@ -21,13 +21,39 @@
               <th class="text-nowrap">SwiftCode</th>
               <th class="text-nowrap">Account Discrepancy Statement</th>
               <th class="text-nowrap">Account Cover</th>
-              <th class="text-nowrap">Currentcy</th>
+              <th class="text-nowrap">Currency</th>
               <th class="text-nowrap">Bank Key</th>
               <th class="text-nowrap">Bank Name</th>
               <th class="text-nowrap">Bank Branch</th>
               <th class="text-nowrap">Bank Address</th>
             </tr>
           </thead>
+          <tbody>
+            <tr v-for="(item, index) in paymentDataStore.data" :key="index">
+              <td class="text-center">
+                <UiIcon variant="duotone" name="edit" class="cursor-pointer" />
+              </td>
+              <td>{{ index + 1 }}</td>
+              <td>{{ item.accountNo }}</td>
+              <td>{{ item.accountName }}</td>
+              <td>{{ item.bankSwiftCode }}</td>
+              <td class="text-center">
+                <UiButton icon outline size="sm" :disabled="!item.isHolderNameDifferent">
+                  <UiIcon name="cloud-download" variant="duotone" />
+                </UiButton>
+              </td>
+              <td class="text-center">
+                <UiButton icon outline size="sm" :disabled="!item.urlFirstPage">
+                  <UiIcon name="cloud-download" variant="duotone" />
+                </UiButton>
+              </td>
+              <td>{{ item.currencyLabel }}</td>
+              <td>{{ item.bankCode }}</td>
+              <td>{{ item.bankName }}</td>
+              <td>{{ item.branch }}</td>
+              <td>{{ item.bankAddress }}</td>
+            </tr>
+          </tbody>
         </table>
       </div>
     </div>
@@ -48,7 +74,7 @@
     <UiModal :title="modalTitle" v-model="isModalOpen" @update:model-value="closeModal" size="lg">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
         <UiFormGroup hide-border>
-          <UiInput label="Bank Account Number" placeholder="Enter Bank Account Number" />
+          <UiInput label="Bank Account Number" placeholder="Enter Bank Account Number" required />
 
           <UiCheckbox
             label="Holder's name is different from the company name."
@@ -133,7 +159,13 @@ import UiFormGroup from '@/components/ui/atoms/form-group/UiFormGroup.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
-import { ref } from 'vue'
+import { useVendorPaymentStore } from '@/stores/vendor/vendor'
+import { onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
+
+// store
+const paymentDataStore = useVendorPaymentStore()
+const route = useRoute()
 
 const modalTitle = ref('Add Payment Information')
 const isModalOpen = ref(false)
@@ -161,4 +193,8 @@ const openModal = () => {
   isModalOpen.value = true
   console.log('oke')
 }
+
+onMounted(async () => {
+  await paymentDataStore.getData(route.params.id as string)
+})
 </script>
