@@ -1,10 +1,10 @@
 <template>
   <div class="grid grid-cols-2 gap-12 mb-[24px]">
-    <UiFormGroup title="Perusahaan" body-class="px-4" hide-border>
+    <UiFormGroup title="Company" body-class="px-4" hide-border>
       <UiInput
         v-model="information.vendor.vendorName"
-        label="Nama Perusahaan"
-        placeholder="Masukkan Nama Perusahaan"
+        label="Company Name"
+        placeholder="Enter your company name"
         row
         required
         :error="information.vendor.vendorNameError"
@@ -18,25 +18,25 @@
       />
       <UiInput
         v-model="information.vendor.groupCompany"
-        label="Group Perusahaan"
-        placeholder="Masukkan Group Perusahaan"
+        label="Company Group"
+        placeholder="Enter your company group"
         row
       />
       <DatePicker
         v-model="information.vendor.foundedDate"
-        label="Tanggal Berdiri"
-        placeholder="Pilih Tanggal"
+        label="Establishment Date"
+        placeholder="Select Date"
         format="dd MM yyyy"
         required
         :error="information.vendor.foundedDateError"
       />
     </UiFormGroup>
 
-    <UiFormGroup title="Lokasi Perusahaan" body-class="px-4" hide-border>
+    <UiFormGroup title="Company Location" body-class="px-4" hide-border>
       <UiSelect
         v-model="information.companyLocation.countryId"
-        label="Negara"
-        placeholder="Pilih Negara"
+        label="Country"
+        placeholder="Select"
         :options="countryList"
         value-key="countryID"
         text-key="countryName"
@@ -47,8 +47,8 @@
       />
       <UiSelect
         v-model="information.companyLocation.stateId"
-        label="Provinsi"
-        placeholder="Pilih Provinsi"
+        label="Province"
+        placeholder="Select"
         :disabled="!information.companyLocation.countryId"
         :options="provinceListCompany"
         value-key="provinceID"
@@ -60,8 +60,8 @@
       />
       <UiSelect
         v-model="information.companyLocation.cityId"
-        label="Kabupaten / Kota"
-        placeholder="Pilih Kabupaten / Kota"
+        label="City / District"
+        placeholder="Select"
         :disabled="!information.companyLocation.stateId"
         :options="cityListCompany"
         value-key="cityID"
@@ -73,8 +73,8 @@
       />
       <UiInput
         v-model="information.companyLocation.postalCode"
-        label="Kode Pos"
-        placeholder="Masukkan Kode Pos"
+        label="Postal Code"
+        placeholder="Enter postal code"
         row
         required
         type="number"
@@ -82,8 +82,8 @@
       />
       <UiTextarea
         v-model="information.companyLocation.addressDetail"
-        label="Alamat Lengkap"
-        placeholder="Masukkan Alamat Lengkap"
+        label="Full Address"
+        placeholder="Enter full address"
         row
         required
         :error="information.companyLocation.addressDetailError"
@@ -92,18 +92,18 @@
 
     <hr class="col-span-2 border-t-gray-200" />
 
-    <UiFormGroup title="Lokasi Kantor Pusat" body-class="px-4" hide-border>
+    <UiFormGroup title="Head Office Location" body-class="px-4" hide-border>
       <UiCheckbox
         v-model="isSameAsHq"
-        label="Lokasi perusahaan sama dengan kantor pusat"
+        label="Company location is the same as the head office"
         @click="checkSameAsHq"
       />
 
       <UiFormGroup hide-border>
         <UiSelect
           v-model="information.vendorLocation.countryId"
-          label="Negara"
-          placeholder="Pilih Negara"
+          label="Country"
+          placeholder="Select"
           :disabled="isSameAsHq"
           :options="countryList"
           value-key="countryID"
@@ -115,8 +115,8 @@
         />
         <UiSelect
           v-model="information.vendorLocation.stateId"
-          label="Provinsi"
-          placeholder="Pilih Provinsi"
+          label="Province"
+          placeholder="Select"
           :disabled="isSameAsHq || !information.vendorLocation.countryId"
           row
           required
@@ -128,8 +128,8 @@
         />
         <UiSelect
           v-model="information.vendorLocation.cityId"
-          label="Kabupaten / Kota"
-          placeholder="Pilih Kabupaten / Kota"
+          label="City / District"
+          placeholder="Select"
           :disabled="isSameAsHq || !information.vendorLocation.stateId"
           :options="cityListVendor"
           value-key="cityID"
@@ -141,8 +141,8 @@
         />
         <UiInput
           v-model="information.vendorLocation.postalCode"
-          label="Kode Pos"
-          placeholder="Masukkan Kode Pos"
+          label="Postal Code"
+          placeholder="Enter postal code"
           row
           required
           type="number"
@@ -151,8 +151,8 @@
         />
         <UiTextarea
           v-model="information.vendorLocation.addressDetail"
-          label="Alamat Lengkap"
-          placeholder="Masukkan Alamat Lengkap"
+          label="Full Address"
+          placeholder="Enter full address"
           row
           required
           :disabled="isSameAsHq"
@@ -161,16 +161,16 @@
       </UiFormGroup>
     </UiFormGroup>
 
-    <UiFormGroup title="Bidang Usaha" body-class="px-4" hide-border>
+    <UiFormGroup title="Business Sector " body-class="px-4" hide-border>
       <div class="flex flex-row gap-4 items-end">
         <div class="flex flex-col gap-2.5 w-full">
           <label class="form-label flex items-center gap-1">
-            Bidang Usaha <span class="text-danger"> * </span></label
+            Business Sector <span class="text-danger"> * </span></label
           >
           <UiSelect
             v-model="information.vendorCommodities.businessFieldId"
             class="w-full"
-            placeholder="Pilih"
+            placeholder="Select"
             :error="information.vendorCommodities.businessFieldError"
             :options="businessFieldList"
             value-key="businessFieldID"
@@ -180,12 +180,12 @@
         </div>
         <div class="flex flex-col gap-2.5 w-full">
           <label class="form-label flex items-center gap-1">
-            Sub Bidang Usaha <span class="text-danger"> * </span></label
+            Sub-Sector <span class="text-danger"> * </span></label
           >
           <UiSelect
             v-model="information.vendorCommodities.subBusinessFieldId"
             class="w-full"
-            placeholder="Pilih"
+            placeholder="Select"
             :error="information.vendorCommodities.subBusinessFieldError"
             :options="subBusinessFieldList"
             value-key="subBusinessFieldID"
@@ -194,7 +194,7 @@
         </div>
         <UiButton class="grow-0 w-fit" outline @click="addVendorCommodities">
           <UiIcon name="plus-circle" variant="duotone" />
-          Tambah
+          Add
         </UiButton>
       </div>
 
@@ -203,7 +203,7 @@
           <table class="table table-border align-middle text-gray-700 font-medium text-sm">
             <thead>
               <tr>
-                <th>Daftar Bidang Usaha</th>
+                <th>List of Business Sectors</th>
                 <th class="w-10">Action</th>
               </tr>
             </thead>
