@@ -45,6 +45,8 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
       assigment: '',
       transferNews: '',
       npwpReporting: '',
+      remainingDpAmount: '',
+      dpAmountDeduction: '',
       bankKey: '',
       bankName: '',
       beneficiaryName: '',
