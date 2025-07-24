@@ -75,6 +75,8 @@ interface ParamsSubmissionHeader {
   assigment: string
   transferNews: string
   npwpReporting: string
+  remainingDpAmount: string
+  dpAmountDeduction: string
 }
 
 interface ParamsSubmissionVendor {
@@ -280,6 +282,8 @@ export interface DetailInvoiceEditTypes {
   assigment: string
   transferNews: string
   npwpReporting: string
+  remainingDpAmount: string
+  dpAmountDeduction: string
 
   bankKey: string
   bankName: string

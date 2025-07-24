@@ -216,6 +216,10 @@ const checkInvoiceInformation = () => {
   form.invoicePoGrError = form.invoicePoGr.length === 0 || checkActiveEditPoGr()
   form.additionalCostError = checkActiveEditAdditional() || checkFieldAdditional()
 
+  if (Number(form.invoiceDp) === 9013) {
+    form.dpAmountDeductionError = Number(form.dpAmountDeduction) > Number(form.remainingDpAmount)
+  }
+
   if (
     form.companyCodeError ||
     form.invoiceNoVendorError ||
@@ -223,7 +227,8 @@ const checkInvoiceInformation = () => {
     form.descriptionError ||
     form.invoiceDocumentError ||
     form.invoicePoGrError ||
-    form.additionalCostError
+    form.additionalCostError ||
+    form.dpAmountDeductionError
   ) return false
   else return true
 }
