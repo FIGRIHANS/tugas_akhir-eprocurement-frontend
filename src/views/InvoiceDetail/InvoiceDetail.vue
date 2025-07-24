@@ -37,8 +37,8 @@
       </div>
     </div>
     <RejectVerification @reject="goReject" />
-    <SuccessVerifModal :statusCode="detailInvoice?.header.statusCode || -1" />
-    <SuccessRejectModal />
+    <SuccessVerifModal :statusCode="detailInvoice?.header.statusCode || -1" @afterClose="goToList" />
+    <SuccessRejectModal @afterClose="goToList" />
   </div>
 </template>
 
@@ -112,6 +112,8 @@ const form = ref<formTypes>({
   assigment: '',
   transferNews: '',
   npwpReporting: '',
+  remainingDpAmount: '',
+  dpAmountDeduction: '',
   bankKey: '',
   bankName: '',
   beneficiaryName: '',
@@ -160,7 +162,7 @@ const checkWorkflow = () => {
   const checkIndex = getWf?.findIndex((item) => item.profileId === getProfileId)
 
   if (checkIndex !== -1) {
-    if (getWf[checkIndex].stateCode === 3 || getWf[checkIndex].stateCode === 4) return false
+    if (getWf[checkIndex].stateCode === 3 || getWf[checkIndex].stateCode === 4 || getWf[checkIndex].stateCode === 5) return false
     else return true
   } else return true
 }
@@ -176,7 +178,7 @@ const goToEdit = () => {
 }
 
 const openReject = () => {
-  const idModal = document.querySelector('#reject_Verification_modal')
+  const idModal = document.querySelector('#reject_verification_modal')
   const modal = KTModal.getInstance(idModal as HTMLElement)
   modal.show()
 }
@@ -343,15 +345,15 @@ const goReject = (reason: string) => {
     const idModal = document.querySelector('#success_reject_modal')
     const modal = KTModal.getInstance(idModal as HTMLElement)
     modal.show()
-    setTimeout(() => {
-      modal.hide()
-      router.push({
-        name: route.query.type === '1' ? 'invoiceVerification' : 'invoiceApproval'
-      })
-    }, 1000)
   })
   .finally(() => {
     verificationApi.isRejectLoading = false
+  })
+}
+
+const goToList = () => {
+  router.push({
+    name: route.query.type === '1' ? 'invoiceVerification' : 'invoiceApproval'
   })
 }
 
@@ -429,6 +431,8 @@ const setDataDefault = () => {
     assigment: data?.header.assigment || '',
     transferNews: data?.header.transferNews || '',
     npwpReporting: data?.header.npwpReporting || '',
+    remainingDpAmount: '',
+    dpAmountDeduction: '',
     bankKey: data?.payment.bankKey || '',
     bankName: data?.payment.bankName || '',
     beneficiaryName: data?.payment.beneficiaryName || '',
@@ -478,6 +482,8 @@ const setDataEdit = () => {
     assigment: data?.assigment || '',
     transferNews: data?.transferNews || '',
     npwpReporting: data?.npwpReporting || '',
+    remainingDpAmount: '',
+    dpAmountDeduction: '',
     bankKey: data?.bankKey || '',
     bankName: data?.bankName || '',
     beneficiaryName: data?.beneficiaryName || '',

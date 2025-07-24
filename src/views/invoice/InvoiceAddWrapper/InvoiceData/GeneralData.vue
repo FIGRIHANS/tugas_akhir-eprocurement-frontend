@@ -13,7 +13,7 @@
         </label>
         <input v-if="(form.status !== 0 && form.status !== -1 && form.status !== 5) || loginApi.isVendor" v-model="form.vendorName" class="input" placeholder="" disabled />
         <select v-else v-model="form.vendorId" class="select" :class="{ 'border-danger': form.vendorIdError }">
-          <option v-for="item of vendorList" :key="item.vendorId" :value="item.vendorCode">
+          <option v-for="item of vendorList" :key="item.vendorId" :value="item.sapCode">
             {{ item.vendorName }}
           </option>
         </select>
@@ -57,7 +57,7 @@ watch(
   () => [form?.vendorId, vendorList.value],
   () => {
     if (form) {
-      const getIndex = vendorList.value.findIndex((item) => item.vendorCode === form.vendorId)
+      const getIndex = vendorList.value.findIndex((item) => item.sapCode === form.vendorId)
       if (getIndex !== -1) {
         form.address = vendorList.value[getIndex].address
         form.npwp = vendorList.value[getIndex].npwp

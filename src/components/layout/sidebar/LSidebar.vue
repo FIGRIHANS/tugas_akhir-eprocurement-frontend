@@ -49,6 +49,7 @@ import { useRouter } from 'vue-router'
 import LogoAN from '@/assets/svg/LogoAN.vue'
 import { computed } from 'vue'
 import { useLoginStore } from '@/stores/views/login'
+import { isEmpty } from 'lodash'
 
 const router = useRouter()
 const userStore = useLoginStore()
@@ -62,10 +63,36 @@ const redirectTo = (path?: string) => {
 }
 
 const filteredSidebarMenu = computed(() => {
+  if (!isEmpty(userStore.userData)) {
+    if (userStore.userData?.profile.profileId === 3002 || userStore.userData?.profile.profileId === 3003) {
+      return sidebarMenu.map((menu) => {
+        return {
+          ...menu,
+          child: menu.child ? menu.child.filter((child) => child.id === 'invoice-verification') : []
+        }
+      })
+    }
+
+    if (userStore.userData?.profile.profileId === 3004) {
+      return sidebarMenu.map((menu) => {
+        return {
+          ...menu,
+          child: menu.child ? menu.child.filter((child) => child.id === 'invoice-approval') : []
+        }
+      })
+    }
+  }
+
+
   if (userStore.userData?.profile?.vendorCode) {
-    return sidebarMenu.filter(
-      (menu) => menu.id !== 'vendor-management' && menu.id !== 'userManagement',
-    )
+    return sidebarMenu
+    .filter((menu) => menu.id !== 'vendor-management' && menu.id !== 'userManagement')
+    .map((menu) => {
+      return {
+        ...menu,
+        child: menu.child ? menu.child.filter((child) => child.id !== 'invoice-verification' && child.id !== 'invoice-approval') : []
+      }
+    })
   }
 
   if (userStore.userData?.profile?.profileName.trim() === 'Sourcing Supervisor') {

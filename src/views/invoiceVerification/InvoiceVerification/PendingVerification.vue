@@ -22,7 +22,7 @@
                   <button class="btn btn-outline btn-primary btn-icon w-[32px] h-[32px]" @click="openDetailVerification(parent.invoiceUId)">
                     <i class="ki-duotone ki-data !text-lg"></i>
                   </button>
-                  <button class="btn btn-icon btn-primary w-[21px] h-[21px]" @click="parent.isOpenChild = !parent.isOpenChild">
+                  <button class="btn btn-icon btn-outline btn-primary w-[21px] h-[21px]" @click="parent.isOpenChild = !parent.isOpenChild">
                     <i v-if="!parent.isOpenChild" class="ki-filled ki-right !text-[9px]"></i>
                     <i v-else class="ki-filled ki-down !text-[9px]"></i>
                   </button>
@@ -42,8 +42,8 @@
                 <td>{{ useFormatIdr(parent.totalNetAmount) || '-' }}</td>
                 <td>{{ parent.taxNo || '-' }}</td>
                 <td>{{ parent.documentNo || '-' }}</td>
-                <td>{{ parent.estimatePaymentDate ? moment(parent.estimatePaymentDate).format('YYYYMMDD') : '-' }}</td>
-                <td>{{ parent.invoiceDate ? moment(parent.invoiceDate).format('YYYYMMDD') : '-' }}</td>
+                <td>{{ parent.estimatePaymentDate ? moment(parent.estimatePaymentDate).format('DD MMMM YYYY') : '-' }}</td>
+                <td>{{ parent.invoiceDate ? moment(parent.invoiceDate).format('DD MMMM YYYY HH:mm:ss') : '-' }}</td>
                 <td>{{ parent.notes || '-' }}</td>
               </tr>
               <tr v-show="parent.isOpenChild">
@@ -132,7 +132,7 @@ const filterForm = reactive<filterListTypes>({
 
 const columns = ref<string[]>([
   '',
-  'No Invoice',
+  'Submitted Document No',
   'Status',
   'Invoice Type',
   'Company Code',

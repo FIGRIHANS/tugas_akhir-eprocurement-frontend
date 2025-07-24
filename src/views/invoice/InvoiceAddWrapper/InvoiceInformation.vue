@@ -5,7 +5,7 @@
       <InvoiceCalculation />
     </div>
     <InvoicePoGr v-if="checkPo()" class="mt-[24px]" />
-    <InvoiceItem v-if="checkNonPo()" class="mt-[24px]"/>
+    <InvoiceItem v-if="checkNonPo()" class="mt-[24px]" />
     <AdditionalCost v-if="form.invoiceDp === '9011' && !checkNonPo()" class="mt-[24px]" />
   </div>
 </template>

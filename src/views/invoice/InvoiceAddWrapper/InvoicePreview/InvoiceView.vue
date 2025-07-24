@@ -71,9 +71,11 @@ const companyCodeList = computed(() => invoiceMasterApi.companyCode)
 // }
 
 const getDpName = () => {
-  if (route.query.type === 'po-view') return 'Without DP'
-  const getIndex = dpTypeList.value.findIndex((item) => item.code === form?.invoiceDp)
-  if (getIndex !== -1) return dpTypeList.value[getIndex].name
+  if(form?.invoiceDp != ''){
+    if (route.query.type === 'po-view') return 'Without DP'  
+    const getIndex = dpTypeList.value.findIndex((item) => item.code === form?.invoiceDp)
+    if (getIndex !== -1) return dpTypeList.value[getIndex].name
+  }  
 }
 
 const getInvoiceTypeName = () => {

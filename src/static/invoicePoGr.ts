@@ -21,25 +21,35 @@ export const defaultColumn = [
 
 export const invoiceDpColumn = [
   'PO Number',
-  'Tax Code',
   'Amount Invoice',
+  'Tax Code',
   'VAT Amount',
   'WHT Type',
   'WHT Code',
-  'WHT Base Amount',
-  'Category'
+  'WHT Base Amount'
 ]
 
 export const PoPibColumn = [
   'PO Number',
   'PO Item',
-  'Tax Code',
+  'GR Document No',
+  'GR Document Item',
+  'GR Document Date',
   'Item Amount',
   'Quantity',
   'Unit',
   'Item Text',
-  'Category',
-  'Total Net Amount'
+  'Condition Type',
+  'Condition Type Description',
+  'QC Status',
+  'Tax Code',
+  'WHT Type',
+  'WHT Code',
+  'WHT Base Amount',
+  'WHT Amount',
+  'Departement'
+  // 'Category',
+  // 'Total Net Amount'
 ]
 
 export const searchDefaultColumn = [
@@ -71,4 +81,14 @@ export const searchPoPibColumn = [
   'Unit',
   'Item',
   'Item Amount'
+]
+
+export const manualAddColumn = [
+  'PO Number',
+  'Po Item',
+  'Item Amount',
+  'Quantity',
+  'Unit',
+  'Item Text',
+  'Departement',
 ]

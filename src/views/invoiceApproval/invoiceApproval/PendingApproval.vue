@@ -9,24 +9,64 @@
         <table class="table align-middle text-gray-700 rounded-xl font-medium text-sm">
           <thead>
             <tr>
-              <th v-for="(item, index) in columns" class="pending__column" :key="index">{{ item }}</th>
+              <th
+                v-for="(item, index) in columns"
+                class="pending__column"
+                :key="index"
+                :class="{
+                  'pending__column--auto': index <= 1
+                }"
+              >
+                {{ item }}
+              </th>
             </tr>
           </thead>
           <tbody>
             <template v-for="(parent, index) in list" :key="index">
               <tr>
-                <td class="max-w-[400px] flex justify-between items-center gap-[24px]">
-                  <button v-if="parent.statusCode === 4" class="btn btn-primary whitespace-nowrap w-[32px] h-[32px]" :disabled="isLoadingSap" @click="sendToSap(parent.invoiceUId)">
-                    <i class="ki-duotone ki-paper-plane !text-lg"></i>
-                    Send to SAP
-                  </button>
-                  <button class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]" @click="openDetailInvoice(parent.invoiceUId)">
-                    <i class="ki-duotone ki-eye !text-lg"></i>
-                  </button>
-                  <button class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]" @click="openDetailApproval(parent.invoiceUId)">
-                    <i class="ki-duotone ki-data !text-lg"></i>
-                  </button>
-                  <button class="btn btn-icon btn-primary w-[21px] h-[21px]" @click="parent.isOpenChild = !parent.isOpenChild">
+                <td>
+                  <div class="dropdown" data-dropdown="true" data-dropdown-trigger="click">
+                    <button class="dropdown-toggle btn btn-light btn-icon">
+                      <i class="ki-filled ki-dots-vertical"></i>
+                    </button>
+                    <div class="dropdown-content w-full max-w-56 py-2">
+                      <div class="menu menu-default flex flex-col w-full">
+                        <div v-if="parent.statusCode === 4" class="menu-item" @click="sendToSap(parent.invoiceUId)">
+                          <a class="menu-link" href="#">
+                            <span class="menu-icon">
+                              <i class="ki-duotone ki-paper-plane !text-lg"></i>
+                            </span>
+                            <span class="menu-title">
+                              Send to SAP
+                            </span>
+                          </a>
+                        </div>
+                        <div class="menu-item" @click="openDetailInvoice(parent.invoiceUId)">
+                          <a class="menu-link" href="#">
+                            <span class="menu-icon">
+                              <i class="ki-duotone ki-eye !text-lg"></i>
+                            </span>
+                            <span class="menu-title">
+                              Detail
+                            </span>
+                          </a>
+                        </div>
+                        <div class="menu-item" @click="openDetailApproval(parent.invoiceUId)">
+                          <a class="menu-link" href="#">
+                            <span class="menu-icon">
+                              <i class="ki-duotone ki-data !text-lg"></i>
+                            </span>
+                            <span class="menu-title">
+                              Detail Approval
+                            </span>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <button class="btn btn-icon btn-outline btn-primary w-[21px] h-[21px]" @click="parent.isOpenChild = !parent.isOpenChild">
                     <i v-if="!parent.isOpenChild" class="ki-filled ki-right !text-[9px]"></i>
                     <i v-else class="ki-filled ki-down !text-[9px]"></i>
                   </button>
@@ -46,8 +86,8 @@
                 <td>{{ useFormatIdr(parent.totalNetAmount) || '-' }}</td>
                 <td>{{ parent.taxNo || '-' }}</td>
                 <td>{{ parent.documentNo || '-' }}</td>
-                <td>{{ parent.estimatePaymentDate ? moment(parent.estimatePaymentDate).format('YYYYMMDD') : '-' }}</td>
-                <td>{{ parent.invoiceDate ? moment(parent.invoiceDate).format('YYYYMMDD') : '-' }}</td>
+                <td>{{ parent.estimatePaymentDate ? moment(parent.estimatePaymentDate).format('DD MMMM YYYY') : '-' }}</td>
+                <td>{{ parent.invoiceDate ? moment(parent.invoiceDate).format('DD MMMM YYYY HH:mm:ss') : '-' }}</td>
                 <td>{{ parent.notes || '-' }}</td>
               </tr>
               <tr v-show="parent.isOpenChild">
@@ -127,7 +167,8 @@ const filterForm = reactive<filterListTypes>({
 
 const columns = ref<string[]>([
   '',
-  'No Invoice',
+  '',
+  'Submitted Document No',
   'Status',
   'Invoice Type',
   'Company Code',
@@ -174,6 +215,7 @@ const goSearch = (event: KeyboardEvent) => {
 }
 
 const openDetailApproval = (invoiceId: string) => {
+  closeDropdown()
   viewDetailId.value = invoiceId
   const idModal = document.querySelector('#detail_approval_modal')
   const modal = KTModal.getInstance(idModal as HTMLElement)
@@ -181,6 +223,7 @@ const openDetailApproval = (invoiceId: string) => {
 }
 
 const openDetailInvoice = (invoiceId: string) => {
+  closeDropdown()
   router.push({
     name: 'invoiceDetail',
     query: {
@@ -227,7 +270,17 @@ const loadData = () => {
   invoiceApi.getPoDetail(viewDetailId.value)
 }
 
+const closeDropdown = () => {
+  const event = new MouseEvent('click', {
+    bubbles: true,
+    cancelable: true,
+    view: window,
+  })
+  document.body.dispatchEvent(event)
+}
+
 const sendToSap = (invoiceUId: string) => {
+  closeDropdown()
   isLoadingSap.value = true
   verificationApi.postSap(invoiceUId).then((statusCode: number) => {
     if (statusCode === 200) {

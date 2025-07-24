@@ -76,6 +76,17 @@ watch(
   }
 )
 
+watch(
+  () => form,
+  () => {
+    setCalculation()
+  },
+  {
+    deep: true,
+    immediate: true
+  }
+)
+
 onMounted(() => {
   typeForm.value = route.query.type?.toString().toLowerCase() || 'po'
   setCalculation()  

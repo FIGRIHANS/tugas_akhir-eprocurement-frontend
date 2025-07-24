@@ -49,7 +49,7 @@ const goAdd = (isPo: boolean) => {
   router.push({
     name: 'invoiceAdd',
     query: {
-      type: isPo ? 'po' : 'nonpo'
+      type: isPo ? 'po' : 'nonpo',
     }
   })
 }

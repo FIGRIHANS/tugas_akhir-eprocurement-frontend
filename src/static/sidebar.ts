@@ -174,6 +174,11 @@ export default [
         to: 'user-management-master-role',
       },
       {
+        id: 'Master Employee',
+        title: 'Master Employee',
+        to: 'user-management-master-employee',
+      },
+      {
         id: 'Report User Authorization',
         title: 'Report User Authorization',
         to: 'user-management-report-authorization',
