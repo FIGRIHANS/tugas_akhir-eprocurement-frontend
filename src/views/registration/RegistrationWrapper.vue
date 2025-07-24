@@ -20,13 +20,13 @@
       <div class="flex justify-end gap-4 w-full mb-[24px]">
         <UiButton v-if="showPrevious" outline @click="previous()">
           <UiIcon name="black-left" />
-          Kembali
+          Back
         </UiButton>
         <UiButton
           @click="next()"
           :disabled="tab.active === 'registration__payment-detail' ? !disabledRegistration : false"
         >
-          {{ tab.active === 'registration__payment-detail' ? 'Registration' : 'Lanjut' }}
+          {{ tab.active === 'registration__payment-detail' ? 'Registration' : 'Next' }}
           <UiIcon
             :name="isLoading ? 'loading' : 'black-right'"
             :class="{ 'animate-spin': isLoading }"

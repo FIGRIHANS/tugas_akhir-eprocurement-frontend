@@ -11,7 +11,7 @@ export const useUploadStore = defineStore('upload', () => {
     formData.append('Actioner', String(Actioner))
 
     const response: ApiResponse<UploadFileResponse> = await generalApi.post(
-      '/file/upload',
+      '/api/file/upload',
       formData,
     )
 
@@ -19,7 +19,7 @@ export const useUploadStore = defineStore('upload', () => {
   }
 
   const previewFile = async (fullFilePath: string) => {
-    const response: ApiResponse = await generalApi.post('/file/preview', { fullFilePath })
+    const response: ApiResponse = await generalApi.post('/api/file/preview', { fullFilePath })
 
     return response.data.result.content
   }
