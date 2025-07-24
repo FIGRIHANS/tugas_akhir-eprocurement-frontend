@@ -141,7 +141,7 @@ import { KTModal } from '@/metronic/core'
 import { defaultColumn, invoiceDpColumn, PoPibColumn, manualAddColumn } from '@/static/invoicePoGr'
 import SearchPoGr from './InvoicePoGr/SearchPoGr.vue'
 import type { PoGrSearchTypes, itemsPoGrType } from '../../types/invoicePoGr'
-import { useFormatIdr } from '@/composables/currency'
+import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 
 const invoiceApi = useInvoiceSubmissionStore()
@@ -225,6 +225,16 @@ const setItemPoGr = (items: PoGrSearchTypes[]) => {
     } as itemsPoGrType
 
     form?.invoicePoGr.push(data)
+
+    if (form?.invoicePoGr.length === 1) {
+      const firstItem = form.invoicePoGr[0]
+      invoiceApi.getRemainingDp(firstItem.poNo).then((response) => {
+        if (response.statusCode === 200) {
+          const remaining = response.result.content.remainingDPAmount
+          form.remainingDpAmount = form.currency === firstItem.currencyLC ? useFormatIdr(remaining) : useFormatUsd(remaining)
+        }
+      })
+    }
   }
 }
 
