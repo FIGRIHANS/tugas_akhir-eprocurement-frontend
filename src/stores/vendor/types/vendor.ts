@@ -143,6 +143,47 @@ export interface IPayment {
   isHolderNameDifferent: boolean
 }
 
+export interface IPaymentPayload {
+  request: {
+    bankDetailDto: IBankDetailDto
+    vendorBankDetail: IBankDetail
+    id: number
+    vendorId: number
+    updateBy: string
+  }
+}
+
+export interface IBankDetailDto {
+  bankCountryCode: string
+  bankKey: string
+  bankName: string
+  branch: string
+  swiftCode: string
+  address: string
+}
+
+export interface IBankDetail {
+  accountNo: string
+  accountName: string
+  bankKey: string
+  currencySymbol: string
+  urlDoc: string
+  urlBankAccountDeclaration: string
+  isHolderNameDifferent: boolean
+  urlFirstPage: string
+  urlAccountDifferences: string
+  isBankRegistered: boolean
+  bankAddress: string
+  countryId: number
+}
+
+export interface IDeletePaymentPayload {
+  request: {
+    id: number
+    updateBy: string
+  }
+}
+
 export interface IPostBlacklist {
   VendorId?: number
   BlacklistDescription?: string
