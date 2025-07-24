@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import UiModal from '@/components/modal/UiModal.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiInputTel from '@/components/ui/atoms/input-telephone/UiInputTel.vue'
@@ -19,6 +20,8 @@ import { useVendorAdministrationStore } from '@/stores/vendor/vendor'
 import { useLoginStore } from '@/stores/views/login'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import questionImg from '@/assets/question-alt.svg'
+import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
 
 const adminStore = useVendorAdministrationStore()
 const uploadStore = useVendorUploadStore()
@@ -29,22 +32,12 @@ const route = useRoute()
 const downloadLoading = ref<boolean>(false)
 const mode = ref<'view' | 'edit'>('view')
 const administrationData = ref<IAdministration>(adminStore.data!)
-const editPayload = ref<IAdministrationPayload>({
-  vendorId: adminStore.data?.vendorId ?? 0,
-  cityId: adminStore.data?.cityId ?? 0,
-  companyAddress: adminStore.data?.addressCompanyDetail ?? '',
-  companyGroup: adminStore.data?.groupCompany ?? '',
-  companyName: adminStore.data?.vendorName ?? '',
-  currencySymbol: adminStore.data?.currencySymbol ?? '',
-  emailUser: adminStore.data?.userEmail ?? '',
-  npwpNo: adminStore.data?.npwp ?? '',
-  npwpUrl: adminStore.data?.npwpUrl ?? '',
-  updatedBy: userStore.userData?.profile.employeeName ?? '',
-  vendorPhone: adminStore.data?.vendorPhone ?? '',
-  vendorWebsite: adminStore.data?.vendorWebsite ?? '',
-})
-
+const editPayload = ref<IAdministrationPayload | undefined>(undefined)
 const errorFields = ref<string[]>([])
+const saveLoading = ref<boolean>(false)
+const confirmModal = ref<boolean>(false)
+const successModal = ref<boolean>(false)
+const errorModal = ref<boolean>(false)
 
 const countryOptions = computed<CountryListType>(() => lookupStore.countryList)
 const stateOptions = computed<ProvinceListType>(() => lookupStore.provinceList)
@@ -52,7 +45,11 @@ const cityOptions = computed<CityListType>(() => lookupStore.cityList)
 const currencyOptions = computed<CurrencyListType>(() => lookupStore.currencyList)
 
 const handleCancel = () => {
-  Object.assign(editPayload, adminStore.data)
+  if (adminStore.data) {
+    administrationData.value = {
+      ...adminStore.data,
+    }
+  }
   mode.value = 'view'
 }
 
@@ -68,7 +65,6 @@ const handleDoneEdit = () => {
     npwpNo: administrationData.value.npwp,
     npwpUrl: adminStore.data?.npwpUrl ?? '',
     updatedBy: userStore.userData?.profile.employeeName ?? '',
-    vendorCommodities: [],
     vendorPhone: administrationData.value.vendorPhone,
     vendorWebsite: administrationData.value.vendorWebsite,
   }
@@ -79,6 +75,47 @@ const handleDoneEdit = () => {
   }
 
   mode.value = 'view'
+}
+
+const handleSave = async () => {
+  saveLoading.value = true
+
+  if (!editPayload.value) {
+    editPayload.value = {
+      vendorId: adminStore.data?.vendorId ?? 0,
+      cityId: administrationData.value.cityId,
+      companyAddress: administrationData.value.addressCompanyDetail,
+      companyGroup: administrationData.value.groupCompany,
+      companyName: administrationData.value.vendorName,
+      currencySymbol: administrationData.value.currencyLabel,
+      emailUser: administrationData.value.userEmail,
+      npwpNo: administrationData.value.npwp,
+      npwpUrl: adminStore.data?.npwpUrl ?? '',
+      updatedBy: userStore.userData?.profile.employeeName ?? '',
+      vendorPhone: administrationData.value.vendorPhone,
+      vendorWebsite: administrationData.value.vendorWebsite,
+    }
+  }
+
+  try {
+    const response = await adminStore.update(editPayload.value!)
+
+    if (response.result.isError) {
+      errorModal.value = true
+      saveLoading.value = false
+      return
+    }
+
+    successModal.value = true
+    confirmModal.value = false
+  } catch (error) {
+    if (error instanceof Error) {
+      errorModal.value = true
+      confirmModal.value = false
+    }
+  } finally {
+    saveLoading.value = false
+  }
 }
 
 const selectCountry = () => {
@@ -123,12 +160,14 @@ watch(
   () => adminStore.data,
   (data) => {
     if (data) {
-      administrationData.value = data
-
-      lookupStore.getVendorProvince(administrationData.value.countryId)
-
-      lookupStore.getVendorCities(administrationData.value.stateId)
+      administrationData.value = { ...data }
+      lookupStore.getVendorProvince(data.countryId)
+      lookupStore.getVendorCities(data.stateId)
     }
+  },
+  {
+    immediate: true,
+    deep: true,
   },
 )
 
@@ -196,7 +235,7 @@ onMounted(() => {
                     <template v-if="mode === 'edit'">
                       <UiInput
                         v-model="administrationData.userEmail"
-                        :error="errorFields.includes('emaiUser')"
+                        :error="errorFields.includes('emailUser')"
                       />
                       <span class="text-xs text-red-500" v-if="errorFields.includes('emailUser')">
                         User Email Required
@@ -213,9 +252,9 @@ onMounted(() => {
                     <template v-if="mode === 'edit'">
                       <UiInput
                         v-model="administrationData.vendorName"
-                        :error="errorFields.includes('vendorName')"
+                        :error="errorFields.includes('companyName')"
                       />
-                      <span class="text-xs text-red-500" v-if="errorFields.includes('vendorName')">
+                      <span class="text-xs text-red-500" v-if="errorFields.includes('companyName')">
                         Company Name Required
                       </span>
                     </template>
@@ -243,11 +282,11 @@ onMounted(() => {
                     <template v-if="mode === 'edit'">
                       <UiInput
                         v-model="administrationData.groupCompany"
-                        :error="errorFields.includes('groupCompany')"
+                        :error="errorFields.includes('companyGroup')"
                       />
                       <span
                         class="text-xs text-red-500"
-                        v-if="errorFields.includes('groupCompany')"
+                        v-if="errorFields.includes('companyGroup')"
                       >
                         group Company Required
                       </span>
@@ -263,9 +302,9 @@ onMounted(() => {
                     <template v-if="mode === 'edit'">
                       <UiInput
                         v-model="administrationData.npwp"
-                        :error="errorFields.includes('npwp')"
+                        :error="errorFields.includes('npwpNo')"
                       />
-                      <span class="text-xs text-red-500" v-if="errorFields.includes('npwp')">
+                      <span class="text-xs text-red-500" v-if="errorFields.includes('npwpNo')">
                         npwp Required
                       </span>
                     </template>
@@ -338,15 +377,19 @@ onMounted(() => {
                 <tr>
                   <td class="text-sm text-gray-600 font-medium w-[182px]">Regency/City</td>
                   <td class="text-sm font-bold text-gray-700">
-                    <UiSelect
-                      :options="cityOptions"
-                      v-model="administrationData.cityId"
-                      value-key="cityID"
-                      text-key="cityName"
-                      v-if="mode === 'edit'"
-                      @update:model-value="selectCity"
-                      :error="errorFields.includes('cityId')"
-                    />
+                    <template v-if="mode === 'edit'">
+                      <UiSelect
+                        :options="cityOptions"
+                        v-model="administrationData.cityId"
+                        value-key="cityID"
+                        text-key="cityName"
+                        @update:model-value="selectCity"
+                        :error="errorFields.includes('cityId')"
+                      />
+                      <span class="text-xs text-red-500" v-if="errorFields.includes('cityId')">
+                        City Required
+                      </span>
+                    </template>
 
                     <span v-else>
                       {{ administrationData?.cityName }}
@@ -356,11 +399,15 @@ onMounted(() => {
                 <tr>
                   <td class="text-sm text-gray-600 font-medium w-[182px]">Telephone</td>
                   <td class="text-sm font-bold text-gray-700">
-                    <UiInputTel
-                      v-model="administrationData.vendorPhone"
-                      v-if="mode === 'edit'"
-                      :error="errorFields.includes('vendorPhone')"
-                    />
+                    <template v-if="mode === 'edit'">
+                      <UiInputTel
+                        v-model="administrationData.vendorPhone"
+                        :error="errorFields.includes('vendorPhone')"
+                      />
+                      <span class="text-xs text-red-500" v-if="errorFields.includes('vendorPhone')">
+                        Vendor Phone Required
+                      </span>
+                    </template>
                     <span v-else>
                       {{ administrationData?.vendorPhone }}
                     </span>
@@ -385,14 +432,14 @@ onMounted(() => {
                   <td class="text-sm font-bold text-gray-700">
                     <template v-if="mode === 'edit'">
                       <UiInput
-                        v-model="administrationData.groupCompany"
-                        :error="errorFields.includes('groupCompany')"
+                        v-model="administrationData.vendorWebsite"
+                        :error="errorFields.includes('vendorWebsite')"
                       />
                       <span
                         class="text-xs text-red-500"
-                        v-if="errorFields.includes('groupCompany')"
+                        v-if="errorFields.includes('vendorWebsite')"
                       >
-                        group Company Required
+                        Vendor Website Required
                       </span>
                     </template>
                     <span v-else>
@@ -403,14 +450,21 @@ onMounted(() => {
                 <tr>
                   <td class="text-sm text-gray-600 font-medium w-[182px]">Currency Preference</td>
                   <td class="text-sm font-bold text-gray-700">
-                    <UiSelect
-                      :options="currencyOptions"
-                      v-model="administrationData.currencyId"
-                      value-key="currencyId"
-                      text-key="currencyName"
-                      v-if="mode === 'edit'"
-                      :error="errorFields.includes('currencyId')"
-                    />
+                    <template v-if="mode === 'edit'">
+                      <UiSelect
+                        :options="currencyOptions"
+                        v-model="administrationData.currencyId"
+                        value-key="currencyId"
+                        text-key="currencyName"
+                        :error="errorFields.includes('currencySymbol')"
+                      />
+                      <span
+                        class="text-red-500 text-xs"
+                        v-if="errorFields.includes('currencySymbol')"
+                      >
+                        Currency Required
+                      </span>
+                    </template>
 
                     <span v-else>
                       {{ administrationData?.currencyLabel }}
@@ -420,12 +474,18 @@ onMounted(() => {
                 <tr>
                   <td class="text-sm text-gray-600 font-medium w-[182px]">Company Address</td>
                   <td class="text-sm font-bold text-gray-700">
-                    <textarea
-                      class="textarea"
-                      v-if="mode === 'edit'"
-                      v-model="administrationData.addressCompanyDetail"
-                      :class="errorFields.includes('addressCompanyDetail') ? 'border-red-500' : ''"
-                    ></textarea>
+                    <template v-if="mode === 'edit'">
+                      <textarea
+                        class="textarea"
+                        v-model="administrationData.addressCompanyDetail"
+                        :class="errorFields.includes('companyAddress') ? 'border-red-500' : ''"
+                      ></textarea>
+                      <span
+                        class="text-xs text-red-500"
+                        v-if="errorFields.includes('companyAddress')"
+                        >Adress Required</span
+                      >
+                    </template>
                     <span v-else>
                       {{ administrationData?.addressCompanyDetail }}
                     </span>
@@ -458,10 +518,53 @@ onMounted(() => {
       </template>
     </div>
     <div class="flex gap-3 justify-end">
-      <UiButton :outline="true" @click="$router.go(-1)">
+      <UiButton outline @click="$router.go(-1)">
         <UiIcon name="black-left" variant="duotone" />
         <span> Back </span>
       </UiButton>
+      <UiButton :disabled="mode === 'edit'" @click="confirmModal = true">
+        <UiIcon name="file-added" variant="duotone" />
+        <span> Save </span>
+      </UiButton>
     </div>
   </div>
+
+  <UiModal v-model="confirmModal" size="sm">
+    <div class="flex flex-col justify-center items-center gap-3">
+      <img :src="questionImg" alt="Confirm" class="w-32 mx-auto mb-4" />
+      <h3 class="text-xl font-medium">Save</h3>
+      <p class="text-sm text-center font-light">
+        You are about to Save to this data. Please review your input before continuing.
+      </p>
+      <div class="space-x-3 mb-3">
+        <UiButton outline @click="confirmModal = false" class="px-8">
+          <UiIcon name="cross-circle" variant="duotone" />
+          <span> Cancel </span>
+        </UiButton>
+        <UiButton variant="primary" @click="handleSave" :disabled="saveLoading" class="px-8">
+          <UiIcon name="paper-plane" variant="duotone" />
+          <span> Save </span>
+        </UiButton>
+      </div>
+    </div>
+  </UiModal>
+
+  <UiModal v-model="successModal" size="sm">
+    <ModalSuccessLogo />
+    <h3 class="text-center text-lg font-medium">Administration Data Successfully Updated</h3>
+    <p class="text-center text-base text-gray-600 mb-5">
+      The data has been successfully updated in the admin system.
+    </p>
+  </UiModal>
+
+  <UiModal v-model="errorModal" size="sm">
+    <div class="text-center mb-6">
+      <UiIcon name="cross-circle" variant="duotone" class="text-[150px] text-danger text-center" />
+    </div>
+    <h3 class="text-center text-lg font-medium">Failed to Change Vendor data!</h3>
+    <p class="text-center text-base text-gray-600 mb-5">
+      Failed to change vendor data. Please try again later or contact support if the problem
+      persists.
+    </p>
+  </UiModal>
 </template>
