@@ -122,7 +122,12 @@
                 <td v-if="!checkInvoiceDp()">{{ item.quantity }}</td>
                 <td v-if="!checkInvoiceDp()">{{ item.uom || '-' }}</td>
                 <td v-if="!checkInvoiceDp()">{{ item.itemText || '-' }}</td>
-                <td v-if="!checkInvoiceDp()">{{ item.department || '-' }}</td>
+                <td v-if="!checkInvoiceDp()">
+                  <span v-if="!item.isEdit">{{ item.department }}</span>
+                  <input v-else v-model="item.department" class="input" placeholder=""
+                    :class="{ 'border-danger': !item.department }" />
+                  <!-- <p v-if="item.department" class="text-danger text-[9px]">*PO Number must be at least 10 digits</p> -->
+                </td>
               </tr>
             </template>
           </tbody>
