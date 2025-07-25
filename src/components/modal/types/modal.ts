@@ -1,6 +1,7 @@
 export interface IModalProps {
   title?: string
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'full'
+  static?: boolean
 }
 
 export type ModalConfirmationType = {
