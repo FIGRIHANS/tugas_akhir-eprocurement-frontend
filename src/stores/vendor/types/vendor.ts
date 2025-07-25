@@ -215,3 +215,12 @@ export interface IVerificationDetailData {
   status: string
   keterangan: string
 }
+
+export interface IOtherDocument {
+  documentName: string,
+  documentNo: string,
+  uploadUrl: string,
+  description: string,
+  issuedDate: string | number | unknown,
+  expiredDate: string | number | unknown,
+}
