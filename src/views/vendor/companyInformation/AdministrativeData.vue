@@ -42,7 +42,12 @@ const errorModal = ref<boolean>(false)
 const countryOptions = computed<CountryListType>(() => lookupStore.countryList)
 const stateOptions = computed<ProvinceListType>(() => lookupStore.provinceList)
 const cityOptions = computed<CityListType>(() => lookupStore.cityList)
-const currencyOptions = computed<CurrencyListType>(() => lookupStore.currencyList)
+const currencyOptions = computed<CurrencyListType>(() =>
+  lookupStore.currencyList.map((item) => ({
+    ...item,
+    label: `${item.currencyName} (${item.currencyCode})`,
+  })),
+)
 
 const handleCancel = () => {
   if (adminStore.data) {
@@ -60,7 +65,7 @@ const handleDoneEdit = () => {
     companyAddress: administrationData.value.addressCompanyDetail,
     companyGroup: administrationData.value.groupCompany,
     companyName: administrationData.value.vendorName,
-    currencySymbol: administrationData.value.currencyLabel,
+    currencySymbol: administrationData.value.currencySymbol,
     emailUser: administrationData.value.userEmail,
     npwpNo: administrationData.value.npwp,
     npwpUrl: adminStore.data?.npwpUrl ?? '',
@@ -87,7 +92,7 @@ const handleSave = async () => {
       companyAddress: administrationData.value.addressCompanyDetail,
       companyGroup: administrationData.value.groupCompany,
       companyName: administrationData.value.vendorName,
-      currencySymbol: administrationData.value.currencyLabel,
+      currencySymbol: administrationData.value.currencySymbol,
       emailUser: administrationData.value.userEmail,
       npwpNo: administrationData.value.npwp,
       npwpUrl: adminStore.data?.npwpUrl ?? '',
@@ -98,13 +103,7 @@ const handleSave = async () => {
   }
 
   try {
-    const response = await adminStore.update(editPayload.value!)
-
-    if (response.result.isError) {
-      errorModal.value = true
-      saveLoading.value = false
-      return
-    }
+    await adminStore.update(editPayload.value!)
 
     successModal.value = true
     confirmModal.value = false
@@ -138,6 +137,14 @@ const selectCity = () => {
   administrationData.value.cityName = cityOptions.value.find(
     (item) => item.cityID === administrationData.value.cityId,
   )?.cityName as string
+}
+
+const selectCurrency = () => {
+  const selectedCurrency = currencyOptions.value.find(
+    (item) => item.currencyId === administrationData.value.currencyId,
+  )
+  administrationData.value.currencyLabel = selectedCurrency?.currencyName as string
+  administrationData.value.currencySymbol = selectedCurrency?.currencyCode as string
 }
 
 const download = async (path: string) => {
@@ -455,8 +462,9 @@ onMounted(() => {
                         :options="currencyOptions"
                         v-model="administrationData.currencyId"
                         value-key="currencyId"
-                        text-key="currencyName"
+                        text-key="label"
                         :error="errorFields.includes('currencySymbol')"
+                        @update:model-value="selectCurrency"
                       />
                       <span
                         class="text-red-500 text-xs"
@@ -550,7 +558,7 @@ onMounted(() => {
   </UiModal>
 
   <UiModal v-model="successModal" size="sm">
-    <ModalSuccessLogo />
+    <ModalSuccessLogo class="mx-auto" />
     <h3 class="text-center text-lg font-medium">Administration Data Successfully Updated</h3>
     <p class="text-center text-base text-gray-600 mb-5">
       The data has been successfully updated in the admin system.
