@@ -550,8 +550,11 @@ onMounted(() => {
           <span> Cancel </span>
         </UiButton>
         <UiButton variant="primary" @click="handleSave" :disabled="saveLoading" class="px-8">
-          <UiIcon name="paper-plane" variant="duotone" />
-          <span> Save </span>
+          <span v-if="saveLoading"> Progress </span>
+          <template v-else>
+            <UiIcon name="paper-plane" variant="duotone" />
+            <span> Save </span>
+          </template>
         </UiButton>
       </div>
     </div>
