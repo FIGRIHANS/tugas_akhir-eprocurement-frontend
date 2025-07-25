@@ -55,6 +55,7 @@ export interface IAdministration {
   npwpUrl: string
   vendorPhone: string
   vendorEmail: string
+  userEmail: string
   vendorWebsite: string
   businessFieldName: string | null
   businessUnitName: string

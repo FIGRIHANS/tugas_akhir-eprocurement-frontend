@@ -1,10 +1,10 @@
 <template>
   <div class="flex flex-col gap-[24px] mb-[24px]">
-    <UiFormGroup title="Kategori Perusahaan" :grid="4">
+    <UiFormGroup title="Company Category" :grid="4">
       <UiSelect
         v-model="documentAndLegal.kategori"
-        label="Kategori"
-        placeholder="Pilih"
+        label="Category"
+        placeholder="Select"
         :options="companyCategoryList"
         text-key="companyCategoryName"
         value-key="companyCategoryId"
@@ -16,23 +16,11 @@
         <table class="table table-border align-middle text-gray-700 font-medium text-sm">
           <thead>
             <tr>
-              <th class="w-32">{{ selectedCategory === 4 ? 'Business Permit' : 'Izin Usaha' }}</th>
-              <th>
-                {{
-                  selectedCategory === 4
-                    ? 'License No. / Description'
-                    : 'No Izin Usaha / Keterangan'
-                }}
-              </th>
-              <th>
-                {{ selectedCategory === 4 ? 'Valid (Start Date)' : 'Berlaku (Tanggal Mulai)' }}
-              </th>
-              <th>
-                {{
-                  selectedCategory === 4 ? 'Valid (Completion Date)' : 'Berlaku (Tanggal Selesai)'
-                }}
-              </th>
-              <th>{{ selectedCategory === 4 ? 'Document' : 'Dokumen' }}</th>
+              <th class="w-32">Business License</th>
+              <th>License No. / Description</th>
+              <th>Valid From (Start Date)</th>
+              <th>Valid Until (End Date)</th>
+              <th>Document</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -50,7 +38,10 @@
                   :max-length="[12, 27].includes(item.licenseId) ? 16 : 9999"
                 />
                 <span v-if="item.licenseId === 12" class="text-danger text-[10px]"
-                  >*Batas upload NPWP sebanyak 3 kali</span
+                  >*NPWP upload is limited to 3 attempts</span
+                >
+                <span v-else-if="item.licenseId === 27" class="text-danger text-[10px]"
+                  >*consists of 16 numbers</span
                 >
               </td>
               <td class="align-top">
@@ -123,17 +114,13 @@
       <hr class="border-gray-300" />
 
       <div class="flex flex-row items-center gap-2">
-        <h2 class="font-semibold leading-[25px]">
-          {{ selectedCategory === 4 ? 'Other Document' : 'Dokumen Lainnya' }}
-        </h2>
+        <h2 class="font-semibold leading-[25px]">Other Documents</h2>
         <div class="relative">
           <UiIcon name="information-1" variant="outline" class="text-primary text-xl peer" />
           <div
             class="tooltip absolute bg-primary font-medium w-44 p-3 left-1/2 -translate-x-1/2 -top-14 text-[13px] text-center text-white peer-hover:block"
           >
-            {{
-              selectedCategory === 4 ? 'Maximum add 5 documents' : 'Maksimal menambahkan 5 dokumen'
-            }}
+            Maximum of 5 Documents Allowed
           </div>
         </div>
       </div>
@@ -152,21 +139,11 @@
           <table class="table table-border align-middle text-gray-700 font-medium text-sm">
             <thead>
               <tr>
-                <th>
-                  {{ selectedCategory === 4 ? 'Document Name' : 'Nama Dokumen' }}
-                </th>
-                <th>
-                  {{ selectedCategory === 4 ? 'Description' : 'Keterangan' }}
-                </th>
-                <th>
-                  {{ selectedCategory === 4 ? 'Valid (Start Date)' : 'Berlaku (Tanggal Mulai)' }}
-                </th>
-                <th>
-                  {{
-                    selectedCategory === 4 ? 'Valid (Completion Date)' : 'Berlaku (Tanggal Selesai)'
-                  }}
-                </th>
-                <th>{{ selectedCategory === 4 ? 'Document' : 'Dokumen' }}</th>
+                <th>Document Name</th>
+                <th>License No. / Description</th>
+                <th>Valid From (Start Date)</th>
+                <th>Valid Until (End Date)</th>
+                <th>Document</th>
                 <th>Action</th>
               </tr>
             </thead>
@@ -253,10 +230,9 @@
     <div class="card bg-primary-light border border-primary">
       <div class="card-body p-4 flex flex-row items-center gap-4 text-primary">
         <UiIcon variant="duotone" name="information" class="text-4xl" />
-
         <ul class="list-disc list-inside font-medium text-sm">
-          <li>Pastikan anda klik tombol upload setelah pilih dokumen</li>
-          <li>Dokumen berbintang wajib diisi</li>
+          <li>Make sure to click the upload button after selecting the document.</li>
+          <li>Fields marked (*) with an asterisk are required.</li>
         </ul>
       </div>
     </div>
