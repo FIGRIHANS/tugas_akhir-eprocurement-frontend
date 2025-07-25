@@ -50,16 +50,16 @@ export interface IAdministration {
   vendorName: string
   companyCategoryId: number
   companyCategoryName: string
-  countryName: string
   groupCompany: string
   npwp: string
   npwpUrl: string
   vendorPhone: string
   vendorEmail: string
   vendorWebsite: string
-  businessFieldName: string | null
+  businessFieldName: string
   businessUnitName: string
   addressCompanyDetail: string
+  countryName: string
   stateName: string
   cityName: string
   currencyLabel: string
@@ -141,6 +141,47 @@ export interface IPayment {
   urlBankAccountDeclaration: null | string
   isBankRegistered: boolean
   isHolderNameDifferent: boolean
+}
+
+export interface IPaymentPayload {
+  request: {
+    bankDetailDto: IBankDetailDto
+    vendorBankDetail: IBankDetail
+    id: number
+    vendorId: number
+    updateBy: string
+  }
+}
+
+export interface IBankDetailDto {
+  bankCountryCode: string
+  bankKey: string
+  bankName: string
+  branch: string
+  swiftCode: string
+  address: string
+}
+
+export interface IBankDetail {
+  accountNo: string
+  accountName: string
+  bankKey: string
+  currencySymbol: string
+  urlDoc: string
+  urlBankAccountDeclaration: string
+  isHolderNameDifferent: boolean
+  urlFirstPage: string
+  urlAccountDifferences: string
+  isBankRegistered: boolean
+  bankAddress: string
+  countryId: number
+}
+
+export interface IDeletePaymentPayload {
+  request: {
+    id: number
+    updateBy: string
+  }
 }
 
 export interface IPostBlacklist {

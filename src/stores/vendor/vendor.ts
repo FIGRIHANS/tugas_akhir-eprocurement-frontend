@@ -3,8 +3,11 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import type {
   IAdministration,
+  IAdministrationPayload,
+  IDeletePaymentPayload,
   ILicense,
   IPayment,
+  IPaymentPayload,
   IPostBlacklist,
   IVendorContent,
   IVerificationDetailData,
@@ -141,7 +144,15 @@ export const useVendorAdministrationStore = defineStore('vendor-administration',
     }
   }
 
-  return { data, loading, error, getData }
+  const update = async (payload: IAdministrationPayload) => {
+    const response: ApiResponse = await vendorAPI.post(
+      '/public/verifiedvendor/update-administration',
+      payload,
+    )
+    return response.data
+  }
+
+  return { data, loading, error, getData, update }
 })
 
 export const useVendorIzinUsahaStore = defineStore('vendor-izin-usaha', () => {
@@ -214,7 +225,23 @@ export const useVendorPaymentStore = defineStore('vendor-payment', () => {
     }
   }
 
-  return { data, loading, error, getData }
+  const addPayment = async (payload: IPaymentPayload) => {
+    const response: ApiResponse = await vendorAPI.post(
+      '/public/verifiedvendor/update-payment',
+      payload,
+    )
+    return response.data
+  }
+
+  const deletePayment = async (payload: IDeletePaymentPayload) => {
+    const response: ApiResponse = await vendorAPI.post(
+      '/public/verifiedvendor/delete-payment',
+      payload,
+    )
+    return response.data
+  }
+
+  return { data, loading, error, getData, addPayment, deletePayment }
 })
 
 export const useVerificationDetailStore = defineStore('verification-detail', () => {
