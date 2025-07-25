@@ -115,7 +115,13 @@
       </div>
     </div>
 
-    <UiModal :title="modalTitle" v-model="isModalOpen" @update:model-value="closeModal" size="lg">
+    <UiModal
+      :title="modalTitle"
+      v-model="isModalOpen"
+      @update:model-value="closeModal"
+      size="lg"
+      static
+    >
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
         <UiFormGroup hide-border>
           <UiInput
@@ -124,28 +130,41 @@
             required
             :readonly="mode === 'view'"
             v-model="payload.request.vendorBankDetail.accountNo"
+            :error="bankDetailError.includes('accountNo')"
           />
 
-          <UiCheckbox
-            label="Holder's name is different from the company name."
-            v-model="payload.request.vendorBankDetail.isHolderNameDifferent"
-          />
+          <div class="h-[40px]">
+            <UiCheckbox
+              label="Holder's name is different from the company name."
+              v-model="payload.request.vendorBankDetail.isHolderNameDifferent"
+            />
+          </div>
 
-          <UiFileUpload
-            v-if="payload.request.vendorBankDetail.isHolderNameDifferent"
-            name="accountCover"
-            accepted-files=".jpg,.jpeg,.png,.pdf"
-            placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
-          />
+          <div class="relative" v-if="payload.request.vendorBankDetail.isHolderNameDifferent">
+            <div
+              class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px]"
+            >
+              Account Cover
+              <span class="text-danger"> *</span>
+            </div>
+            <UiFileUpload
+              name="accountCover"
+              accepted-files=".jpg,.jpeg,.png,.pdf"
+              placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
+              :error="bankDetailError.includes('urlFirstPage')"
+            />
+          </div>
 
           <UiSelect
             label="Bank Key"
             placeholder="Select"
             :options="bankOptions"
             valueKey="bankKey"
-            textKey="bankNameAccount"
+            textKey="label"
             required
             :disabled="mode === 'view' || isBankNotRegistered"
+            v-model="payload.request.vendorBankDetail.bankKey"
+            :error="bankDetailError.includes('bankKey')"
           />
           <UiInput
             v-if="isBankNotRegistered"
@@ -161,7 +180,13 @@
             required
             v-model="payload.request.bankDetailDto.bankKey"
           />
-          <UiInput label="Bank Address" placeholder="Bank Address" required />
+          <UiInput
+            v-model="payload.request.vendorBankDetail.bankAddress"
+            label="Bank Address"
+            placeholder="Bank Address"
+            required
+            :error="bankDetailError.includes('bankAddress')"
+          />
         </UiFormGroup>
         <UiFormGroup hide-border>
           <UiInput
@@ -169,22 +194,33 @@
             placeholder="Enter full name as written in bank book"
             required
             v-model="payload.request.vendorBankDetail.accountName"
+            :error="bankDetailError.includes('accountName')"
           />
           <UiSelect
             label="Currency"
             placeholder="Select"
             :options="currencyOptions"
             valueKey="currencyCode"
-            textKey="currencyName"
+            textKey="label"
             required
             v-model="payload.request.vendorBankDetail.currencySymbol"
+            :error="bankDetailError.includes('currencySymbol')"
           />
-          <UiFileUpload
-            v-if="payload.request.vendorBankDetail.isHolderNameDifferent"
-            name="accountDiscrepancyStatement"
-            accepted-files=".jpg,.jpeg,.png,.pdf"
-            placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
-          />
+
+          <div class="relative" v-if="payload.request.vendorBankDetail.isHolderNameDifferent">
+            <div
+              class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px]"
+            >
+              Account Discrepancy Statement
+              <span class="text-danger"> *</span>
+            </div>
+            <UiFileUpload
+              name="accountDiscrepancyStatement"
+              accepted-files=".jpg,.jpeg,.png,.pdf"
+              placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
+              :error="bankDetailError.includes('urlAccountDifferences')"
+            />
+          </div>
 
           <UiCheckbox
             label="Bank not registered."
@@ -212,7 +248,7 @@
           <UiIcon name="black-left-line" />
           <span>Cancel</span>
         </UiButton>
-        <UiButton variant="primary" @click="handleSubmit">
+        <UiButton variant="primary" @click="handleSubmit" :disabled="isSaveLoading">
           <UiIcon name="file-added" variant="duotone" />
           <span>Save</span>
         </UiButton>
@@ -230,11 +266,13 @@ import UiFormGroup from '@/components/ui/atoms/form-group/UiFormGroup.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
+import { checkEmptyValues } from '@/composables/validation'
 import { type CurrencyListType } from '@/stores/master-data/types/vendor-master-data'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
 import type { IPaymentPayload } from '@/stores/vendor/types/vendor'
 import { useVendorUploadStore } from '@/stores/vendor/upload'
 import { useVendorPaymentStore } from '@/stores/vendor/vendor'
+import { useLoginStore } from '@/stores/views/login'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
@@ -242,6 +280,7 @@ import { useRoute } from 'vue-router'
 const paymentDataStore = useVendorPaymentStore()
 const uploadStore = useVendorUploadStore()
 const lookupStore = useVendorMasterDataStore()
+const userStore = useLoginStore()
 
 const route = useRoute()
 
@@ -260,34 +299,49 @@ const defaultPayload: IPaymentPayload = {
       accountName: '',
       urlAccountDifferences: '',
       urlFirstPage: '',
+      urlDoc: '',
+      urlBankAccountDeclaration: '',
       currencySymbol: '',
       bankAddress: '',
       bankKey: '',
       countryId: 0,
       isBankRegistered: true,
       isHolderNameDifferent: false,
-      urlBankAccountDeclaration: '',
-      urlDoc: '',
     },
     id: 0,
     vendorId: Number(route.params.id),
-    updateBy: '',
+    updateBy: userStore.userData?.profile.employeeName || '',
   },
 }
 
 const modalTitle = ref('Add Payment Information')
 const isModalOpen = ref(false)
 const isDownloadLoading = ref(false)
+const isSaveLoading = ref(false)
 const mode = ref<'add' | 'view' | 'edit' | 'delete'>('add')
 const selectedPaymentId = ref<number | null>(null)
 
 const isBankNotRegistered = ref(false)
 
+// validation
+const bankDtoError = ref<string[]>([])
+const bankDetailError = ref<string[]>([])
+
 // payload
 const payload = ref<IPaymentPayload>({ ...defaultPayload })
 
-const currencyOptions = computed<CurrencyListType>(() => lookupStore.currencyList)
-const bankOptions = computed(() => lookupStore.bankList)
+const currencyOptions = computed<CurrencyListType>(() =>
+  lookupStore.currencyList.map((item) => ({
+    ...item,
+    label: `${item.currencyName} (${item.currencyCode})`,
+  })),
+)
+const bankOptions = computed(() =>
+  lookupStore.bankList.map((item) => ({
+    ...item,
+    label: `${item.bankKey} - ${item.bankNameAccount}`,
+  })),
+)
 
 const closeModal = () => {
   isModalOpen.value = false
@@ -346,15 +400,43 @@ const handleSubmit = () => {
 }
 
 const handleAdd = async () => {
-  console.log('Adding payment information:', payload.value)
+  bankDetailError.value = checkEmptyValues(payload.value.request.vendorBankDetail)
+
+  // cek jika holder name berbeda, hapus field yang tidak diperlukan
+  if (!payload.value.request.vendorBankDetail.isHolderNameDifferent) {
+    bankDetailError.value = bankDetailError.value.filter(
+      (field) => !['urlFirstPage', 'urlAccountDifferences'].includes(field),
+    )
+  }
+
+  if (!payload.value.request.vendorBankDetail.isBankRegistered) {
+    bankDtoError.value = checkEmptyValues(payload.value.request.bankDetailDto)
+  }
+
+  // hapus error utk field yang kosong
+  bankDetailError.value = bankDetailError.value.filter(
+    (field) => !['urlDoc', 'urlBankAccountDeclaration'].includes(field),
+  )
+
+  if (bankDetailError.value.length > 0 || bankDtoError.value.length > 0) return
+
+  try {
+    isSaveLoading.value = true
+    await paymentDataStore.addPayment(payload.value)
+  } catch (error) {
+    if (error instanceof Error) {
+      console.log(error)
+    }
+  } finally {
+    isSaveLoading.value = false
+  }
 }
 
 const handleUpdate = async () => {}
 
-const handleDelete = async () => {}
-
 watch(isBankNotRegistered, (value) => {
   payload.value.request.vendorBankDetail.isBankRegistered = !value
+  payload.value.request.vendorBankDetail.bankKey = ''
 })
 
 onMounted(async () => {
