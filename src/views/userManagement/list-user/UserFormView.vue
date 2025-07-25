@@ -150,14 +150,11 @@ const handleSubmit = async () => {
 const handleNext = () => {
   if (tab.active === 'profile') {
     userPayload.value.profileId = profilePayload.value.profileId
-    console.log('User Payload updated with profileId:', userPayload.value.profileId)
   } else if (tab.active === 'role') {
     userPayload.value.selectedRoleIds = rolePayload.value.selectedRoleIds
-    console.log('User Payload updated with selectedRoleIds:', userPayload.value.selectedRoleIds)
   }
 
   if (!isLastStep.value) {
-    console.log('User Payload on Next Step : ', userPayload.value)
     const nextStep = tab.items[currentStepIndex.value + 1]
     tab.active = nextStep.value
   } else {
