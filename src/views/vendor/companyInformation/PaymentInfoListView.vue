@@ -159,6 +159,5 @@ const closeModal = () => {
 
 const openModal = () => {
   isModalOpen.value = true
-  console.log('oke')
 }
 </script>

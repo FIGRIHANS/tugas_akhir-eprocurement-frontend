@@ -15,7 +15,6 @@ import { useRoute } from 'vue-router'
 const vendorLicenseData = useVendorIzinUsahaStore()
 
 const route = useRoute()
-console.log(vendorLicenseData.data)
 
 onMounted(() => {
   vendorLicenseData.getData(route.params.id as string)
