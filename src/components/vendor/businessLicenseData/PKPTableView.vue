@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { type PropType } from 'vue'
+import { type PropType, ref } from 'vue' // Import ref
 import DatePicker from '@/components/datePicker/DatePicker.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import UiFileUpload from '@/components/ui/atoms/file-upload/UiFileUpload.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import type { ILicense } from '@/stores/vendor/types/vendor'
+
 defineProps({
   data: {
     type: Array as PropType<ILicense[]>,
@@ -13,11 +14,23 @@ defineProps({
   },
 })
 
-const emit = defineEmits(['update:license'])
+const emit = defineEmits(['update:license', 'delete:license'])
+
+const editingLicenseId = ref<string | null>(null)
 
 const updateLicense = (license: ILicense) => {
   console.log('Updating Licensee: ', license)
   emit('update:license', license)
+  editingLicenseId.value = null
+}
+
+const deleteLicense = (licenseId: string) => {
+  console.log('Deleting License: ', licenseId)
+  emit('delete:license', licenseId)
+}
+
+const startEditing = (licenseId: string) => {
+  editingLicenseId.value = licenseId
 }
 </script>
 
@@ -43,13 +56,18 @@ const updateLicense = (license: ILicense) => {
               <tr v-for="item in data" :key="item.licenseId">
                 <td>{{ item?.licenseName }}</td>
                 <td>
-                  <UiInput placeholder="License Number / Description" v-model="item.licenseNo" />
+                  <UiInput
+                    placeholder="License Number / Description"
+                    v-model="item.licenseNo"
+                    :disabled="editingLicenseId !== String(item.licenseId)"
+                  />
                 </td>
                 <td>
                   <DatePicker
                     v-model="item.issuedUTCDate"
                     format="dd MM yyyy"
                     placeholder="Pilih Tanggal"
+                    :disabled="editingLicenseId !== String(item.licenseId)"
                   />
                 </td>
                 <td>
@@ -57,6 +75,7 @@ const updateLicense = (license: ILicense) => {
                     v-model="item.expiredUTCDate"
                     format="dd MM yyyy"
                     placeholder="Pilih Tanggal"
+                    :disabled="editingLicenseId !== String(item.licenseId)"
                   />
                 </td>
                 <td>
@@ -65,12 +84,27 @@ const updateLicense = (license: ILicense) => {
                     accepted-files=".jpg,.jpeg,.png,.pdf"
                     v-model="item.documentUrl"
                     placeholder="Upload file"
+                    :disabled="editingLicenseId !== String(item.licenseId)"
                   />
                 </td>
                 <td>
-                  <UiButton outline @click="updateLicense(item)">
-                    <UiIcon variant="duotone" name="pencil"></UiIcon>
-                  </UiButton>
+                  <template v-if="editingLicenseId === String(item.licenseId)">
+                    <UiButton variant="primary" @click="updateLicense(item)" size="sm" class="me-2">
+                      <UiIcon variant="duotone" name="check-circle"></UiIcon>
+                    </UiButton>
+                    <UiButton
+                      variant="danger"
+                      @click="deleteLicense(String(item.licenseId))"
+                      size="sm"
+                    >
+                      <UiIcon variant="duotone" name="trash"></UiIcon>
+                    </UiButton>
+                  </template>
+                  <template v-else>
+                    <UiButton outline @click="startEditing(String(item.licenseId))" size="sm">
+                      <UiIcon variant="duotone" name="pencil"></UiIcon>
+                    </UiButton>
+                  </template>
                 </td>
               </tr>
             </tbody>
