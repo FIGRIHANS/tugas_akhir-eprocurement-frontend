@@ -80,6 +80,7 @@ watch(
             <th class="text-nowrap">Company Name</th>
             <th class="text-nowrap">Status</th>
             <th class="text-nowrap">Vendor Category</th>
+            <th class="text-nowrap">Business Field</th>
             <th class="text-nowrap">Registration Date</th>
             <th class="text-nowrap">Verification Request Date</th>
             <th class="text-nowrap">Verification Date</th>
@@ -143,8 +144,17 @@ watch(
               </span>
             </td>
             <td>{{ vendor.companyCategoryName }}</td>
+            <td>
+              <div
+                v-for="(item, index) in vendor.businessFields"
+                :key="item.vendorId"
+                class="text-nowrap"
+              >
+                {{ index + 1 }}. {{ item.businessFieldName }}
+              </div>
+            </td>
             <td>{{ formatDate(vendor.createdUTCDate) }}</td>
-            <td>{{ formatDate(vendor.verifiedSendUTCDate!) }}</td>
+            <td>{{ formatDate(vendor.verifiedSendUTCDate || '') }}</td>
             <td>{{ formatDate(vendor.verifiedUTCDate || '') }}</td>
             <td>
               <div
