@@ -172,6 +172,7 @@
             placeholder="Bank Name"
             required
             v-model="payload.request.bankDetailDto.bankName"
+            :error="bankDtoError.includes('bankName')"
           />
           <UiInput
             v-if="isBankNotRegistered"
@@ -179,13 +180,27 @@
             placeholder="Bank Key"
             required
             v-model="payload.request.bankDetailDto.bankKey"
+            :error="bankDtoError.includes('bankKey')"
           />
+
+          <!-- bank addres utk bank yang terdaftar -->
           <UiInput
             v-model="payload.request.vendorBankDetail.bankAddress"
             label="Bank Address"
             placeholder="Bank Address"
             required
             :error="bankDetailError.includes('bankAddress')"
+            v-if="!isBankNotRegistered"
+          />
+
+          <!-- bank address utk bank yang belum terdaftar -->
+          <UiInput
+            v-model="payload.request.bankDetailDto.address"
+            label="Bank Address"
+            placeholder="Bank Address"
+            required
+            :error="bankDtoError.includes('address')"
+            v-if="isBankNotRegistered"
           />
         </UiFormGroup>
         <UiFormGroup hide-border>
@@ -234,12 +249,15 @@
             placeholder="Bank Branch"
             required
             v-model="payload.request.bankDetailDto.branch"
+            :error="bankDtoError.includes('branch')"
           />
           <UiInput
             v-if="isBankNotRegistered"
             label="Swift Code"
             placeholder="Swift Code"
             required
+            v-model="payload.request.bankDetailDto.swiftCode"
+            :error="bankDtoError.includes('swiftCode')"
           />
         </UiFormGroup>
       </div>
@@ -346,6 +364,8 @@ const bankOptions = computed(() =>
 const closeModal = () => {
   isModalOpen.value = false
   payload.value = { ...defaultPayload }
+  bankDetailError.value = []
+  bankDtoError.value = []
 }
 
 const openModal = () => {
@@ -411,6 +431,9 @@ const handleAdd = async () => {
 
   if (!payload.value.request.vendorBankDetail.isBankRegistered) {
     bankDtoError.value = checkEmptyValues(payload.value.request.bankDetailDto)
+    bankDetailError.value = bankDetailError.value.filter(
+      (field) => !['bankKey', 'bankAddress'].includes(field),
+    )
   }
 
   // hapus error utk field yang kosong
