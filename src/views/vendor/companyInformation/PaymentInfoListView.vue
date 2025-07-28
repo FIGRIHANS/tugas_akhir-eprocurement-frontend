@@ -499,40 +499,34 @@ const handleDropdown = (id: number, newMode: 'view' | 'edit' | 'delete') => {
     case 'edit':
       modalTitle.value = 'Edit Payment Information'
       break
-    case 'delete':
-      modalTitle.value = 'Delete Payment Information'
-      break
   }
 
-  if (newMode === 'view' || newMode === 'edit') {
-    const paymentData = paymentDataStore.data.find((item) => item.id === id)
-    if (paymentData) {
-      payload.value.request.id = id
-      payload.value.request.vendorBankDetail.accountName = paymentData.accountName
-      payload.value.request.vendorBankDetail.accountNo = paymentData.accountNo
-      payload.value.request.vendorBankDetail.currencySymbol = paymentData.currencySymbol
-      payload.value.request.vendorBankDetail.bankAddress = paymentData.bankAddress
-      payload.value.request.vendorBankDetail.isBankRegistered = paymentData.isBankRegistered
-      payload.value.request.vendorBankDetail.isHolderNameDifferent =
-        paymentData.isHolderNameDifferent
-      isBankNotRegistered.value = !paymentData.isBankRegistered
+  const paymentData = paymentDataStore.data.find((item) => item.id === id)
+  if (paymentData) {
+    payload.value.request.id = id
+    payload.value.request.vendorBankDetail.accountName = paymentData.accountName
+    payload.value.request.vendorBankDetail.accountNo = paymentData.accountNo
+    payload.value.request.vendorBankDetail.currencySymbol = paymentData.currencySymbol
+    payload.value.request.vendorBankDetail.bankAddress = paymentData.bankAddress
+    payload.value.request.vendorBankDetail.isBankRegistered = paymentData.isBankRegistered
+    payload.value.request.vendorBankDetail.isHolderNameDifferent = paymentData.isHolderNameDifferent
+    isBankNotRegistered.value = !paymentData.isBankRegistered
 
-      if (paymentData.isBankRegistered) {
-        payload.value.request.vendorBankDetail = {
-          ...payload.value.request.vendorBankDetail,
-          bankKey: paymentData.bankCode,
-          urlBankAccountDeclaration: paymentData.urlBankAccountDeclaration!,
-        }
-      } else {
-        payload.value.request.bankDetailDto = {
-          ...payload.value.request.bankDetailDto,
-          address: paymentData.bankAddress,
-          bankCountryCode: paymentData.countryCode!,
-          bankKey: paymentData.bankCode,
-          bankName: paymentData.bankName,
-          branch: paymentData.branch,
-          swiftCode: paymentData.bankSwiftCode,
-        }
+    if (paymentData.isBankRegistered) {
+      payload.value.request.vendorBankDetail = {
+        ...payload.value.request.vendorBankDetail,
+        bankKey: paymentData.bankCode,
+        urlBankAccountDeclaration: paymentData.urlBankAccountDeclaration!,
+      }
+    } else {
+      payload.value.request.bankDetailDto = {
+        ...payload.value.request.bankDetailDto,
+        address: paymentData.bankAddress,
+        bankCountryCode: paymentData.countryCode!,
+        bankKey: paymentData.bankCode,
+        bankName: paymentData.bankName,
+        branch: paymentData.branch,
+        swiftCode: paymentData.bankSwiftCode,
       }
     }
   }
