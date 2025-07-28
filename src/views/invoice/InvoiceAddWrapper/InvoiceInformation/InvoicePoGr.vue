@@ -122,7 +122,18 @@
                 <td v-if="!checkInvoiceDp()">{{ item.quantity }}</td>
                 <td v-if="!checkInvoiceDp()">{{ item.uom || '-' }}</td>
                 <td v-if="!checkInvoiceDp()">{{ item.itemText || '-' }}</td>
-                <td v-if="!checkInvoiceDp()">{{ item.department || '-' }}</td>
+                <td v-if="!checkInvoiceDp()">
+                  <span v-if="!item.isEdit">{{ item.department || '-' }}</span>
+                  
+                  <select v-else v-model="item.department" class="select" name="select">
+                    <option v-for="item of costCenterList" :key="item.code" :value="item.code">
+                      {{ item.code }}
+                    </option>
+                  </select>
+
+                  <!-- <input v-else v-model="item.department" class="input" placeholder=""
+                    :class="{ 'border-danger': item.department }"  /> -->
+                </td>
               </tr>
             </template>
           </tbody>
@@ -135,7 +146,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, inject, watch, onMounted } from 'vue'
+import { ref, inject, watch, onMounted, computed } from 'vue'
 import type { formTypes } from '../../types/invoiceAddWrapper'
 import { KTModal } from '@/metronic/core'
 import { defaultColumn, invoiceDpColumn, PoPibColumn, manualAddColumn } from '@/static/invoicePoGr'
@@ -143,12 +154,17 @@ import SearchPoGr from './InvoicePoGr/SearchPoGr.vue'
 import type { PoGrSearchTypes, itemsPoGrType } from '../../types/invoicePoGr'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
+import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 
+const masterDataApi = useInvoiceMasterDataStore()
 const invoiceApi = useInvoiceSubmissionStore()
+
 const form = inject<formTypes>('form')
 const columns = ref<string[]>([])
 const search = ref<number | null>(null)
 const searchError = ref<boolean>(false)
+
+const costCenterList = computed(() => masterDataApi.costCenterList)
 
 const searchEnter = (event: KeyboardEvent) => {
   if (event.key === 'Enter') {
@@ -237,9 +253,17 @@ const setItemPoGr = (items: PoGrSearchTypes[]) => {
     }
   }
 }
+console.log(form, 'ini form');
 
 const addNewPodata = () => {
   if (form) {
+    if (!form.vendorId || !form.companyCode) {
+      form.companyCodeError = true
+      return
+    } else {
+      form.companyCodeError = false
+    }
+    masterDataApi.getCostCenter(form?.companyCode || '')
     const data = {
       poNo:'',
       poItem: 0,
@@ -302,6 +326,7 @@ watch(
 
 onMounted(() => {
   setColumn()
+
 })
 </script>
 
