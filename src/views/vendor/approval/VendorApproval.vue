@@ -130,7 +130,6 @@ watch(
                     $router.push({
                       name: 'vendor-approval-detail',
                       params: { id: item.vendorId },
-                      query: { status: item.approvalStatus },
                     })
                   "
                 >
