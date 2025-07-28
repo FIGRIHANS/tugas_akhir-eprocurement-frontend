@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, type PropType } from 'vue'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import UiFileUpload from '@/components/ui/atoms/file-upload/UiFileUpload.vue'
@@ -7,7 +7,22 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import type { IOtherDocument } from '@/stores/vendor/types/vendor'
 
-// State untuk form penambahan dokumen baru
+const props = defineProps({
+  otherDocuments: {
+    type: Array as PropType<IOtherDocument[]>,
+    default: () => [],
+  },
+})
+
+const emit = defineEmits(['update:otherDocuments'])
+
+const localOtherDocuments = computed({
+  get: () => props.otherDocuments,
+  set: (newValue) => {
+    emit('update:otherDocuments', newValue)
+  },
+})
+
 const newDocument = ref<IOtherDocument>({
   documentName: '',
   documentNo: '',
@@ -17,41 +32,14 @@ const newDocument = ref<IOtherDocument>({
   expiredDate: null,
 })
 
-// Contoh data dokumen lain (akan diisi dari API nanti)
-const otherDocuments = ref<IOtherDocument[]>([
-  {
-    documentName: 'Surat Keterangan Domisili',
-    documentNo: 'SKD-123/2024',
-    uploadUrl: 'path/to/skd.pdf',
-    description: 'Surat Keterangan Domisili Perusahaan',
-    issuedDate: '2023-01-15',
-    expiredDate: '2025-01-15',
-  },
-  {
-    documentName: 'Sertifikat ISO 9001',
-    documentNo: 'ISO-456/2023',
-    uploadUrl: 'path/to/iso.pdf',
-    description: 'Sertifikasi Sistem Manajemen Mutu',
-    issuedDate: '2023-03-01',
-    expiredDate: '2026-03-01',
-  },
-  // Anda bisa menambahkan data dummy lainnya di sini
-])
+const showAddForm = ref(false)
+const editingDocIndex = ref<number | null>(null)
 
-const showAddForm = ref(false) // State untuk menampilkan/menyembunyikan form
-const editingDocIndex = ref<number | null>(null) // State untuk melacak indeks dokumen yang sedang diedit
-
-const emit = defineEmits(['add:otherDocument', 'update:otherDocument', 'delete:otherDocument'])
-
-// Fungsi untuk menambahkan dokumen baru
 const addDocument = () => {
   if (newDocument.value.documentName && newDocument.value.documentNo) {
-    // Tambahkan dokumen baru ke array lokal untuk demo
-    // Di aplikasi nyata, Anda akan menunggu respons API sebelum menambahkan ke array
-    otherDocuments.value.push({ ...newDocument.value })
+    const updatedArray = [...localOtherDocuments.value, { ...newDocument.value }]
+    emit('update:otherDocuments', updatedArray)
 
-    emit('add:otherDocument', { ...newDocument.value })
-    // Reset form setelah ditambahkan
     newDocument.value = {
       documentName: '',
       documentNo: '',
@@ -60,37 +48,32 @@ const addDocument = () => {
       issuedDate: null,
       expiredDate: null,
     }
-    showAddForm.value = false // Sembunyikan form setelah submit
+    showAddForm.value = false
   } else {
-    alert('Nama Dokumen dan Nomor Dokumen tidak boleh kosong!')
+    console.warn('Nama Dokumen dan Nomor Dokumen tidak boleh kosong!')
   }
 }
 
-// Fungsi untuk memperbarui dokumen
-const updateDocument = (doc: IOtherDocument) => {
+const updateDocument = (doc: IOtherDocument, index: number) => {
   console.log('Updating other document:', doc)
-  emit('update:otherDocument', doc)
-  editingDocIndex.value = null // Keluar dari mode edit setelah update
+  const updatedArray = [...localOtherDocuments.value]
+  updatedArray[index] = { ...doc }
+  emit('update:otherDocuments', updatedArray)
+  editingDocIndex.value = null
 }
 
-// Fungsi untuk menghapus dokumen
 const deleteDocument = (index: number) => {
-  const deletedDoc = otherDocuments.value[index]
-  if (confirm(`Apakah Anda yakin ingin menghapus dokumen "${deletedDoc.documentName}"?`)) {
-    // Di aplikasi nyata, Anda akan memanggil API delete berdasarkan ID
-    // Kemudian, jika berhasil, hapus dari array lokal
-    // emit('delete:otherDocument', deletedDoc.id); // Asumsi ada ID
-    otherDocuments.value.splice(index, 1)
-    editingDocIndex.value = null // Pastikan keluar dari mode edit jika yang dihapus sedang diedit
-  }
+  const deletedDoc = localOtherDocuments.value[index]
+  console.log(`Attempting to delete document "${deletedDoc.documentName}"`)
+  const updatedArray = localOtherDocuments.value.filter((_, i) => i !== index)
+  emit('update:otherDocuments', updatedArray)
+  editingDocIndex.value = null
 }
 
-// Fungsi untuk memulai mode edit
 const startEditing = (index: number) => {
   editingDocIndex.value = index
 }
 
-// Fungsi untuk membatalkan mode edit
 const cancelEditing = () => {
   editingDocIndex.value = null
 }
@@ -206,12 +189,13 @@ const cancelEditing = () => {
               </tr>
             </thead>
             <tbody>
-              <tr v-if="otherDocuments.length === 0">
+              <tr v-if="localOtherDocuments.length === 0">
                 <td colspan="6" class="text-center text-gray-500 py-4">
                   No other documents available.
                 </td>
               </tr>
-              <tr v-for="(item, index) in otherDocuments" :key="index">
+              <!-- Use localOtherDocuments for iteration -->
+              <tr v-for="(item, index) in localOtherDocuments" :key="index">
                 <td>
                   <UiInput
                     v-model="item.documentName"
@@ -256,7 +240,7 @@ const cancelEditing = () => {
                     <template v-if="editingDocIndex === index">
                       <UiButton
                         variant="primary"
-                        @click="updateDocument(item)"
+                        @click="updateDocument(item, index)"
                         size="sm"
                         class="me-2"
                       >

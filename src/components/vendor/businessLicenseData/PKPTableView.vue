@@ -1,32 +1,49 @@
 <script setup lang="ts">
-import { type PropType, ref } from 'vue' // Import ref
+import { type PropType, ref, computed } from 'vue'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import UiFileUpload from '@/components/ui/atoms/file-upload/UiFileUpload.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import type { ILicense } from '@/stores/vendor/types/vendor'
+import { useVendorUploadStore } from '@/stores/vendor/upload'
 
-defineProps({
-  data: {
+const uploadStore = useVendorUploadStore()
+
+const props = defineProps({
+  licenses: {
     type: Array as PropType<ILicense[]>,
     default: () => [],
   },
 })
 
-const emit = defineEmits(['update:license', 'delete:license'])
+const emit = defineEmits(['update:licenses'])
 
 const editingLicenseId = ref<string | null>(null)
 
+const localLicenses = computed({
+  get: () => props.licenses,
+  set: (newValue) => {
+    emit('update:licenses', newValue)
+  },
+})
+
 const updateLicense = (license: ILicense) => {
-  console.log('Updating Licensee: ', license)
-  emit('update:license', license)
+  console.log('Updating License: ', license)
+  const index = localLicenses.value.findIndex((item) => item.licenseId === license.licenseId)
+  if (index !== -1) {
+    const updatedArray = [...localLicenses.value]
+    updatedArray[index] = { ...license }
+    emit('update:licenses', updatedArray)
+  }
   editingLicenseId.value = null
 }
 
 const deleteLicense = (licenseId: string) => {
   console.log('Deleting License: ', licenseId)
-  emit('delete:license', licenseId)
+  const updatedArray = localLicenses.value.filter((item) => String(item.licenseId) !== licenseId)
+  emit('update:licenses', updatedArray)
+  editingLicenseId.value = null
 }
 
 const startEditing = (licenseId: string) => {
@@ -53,7 +70,8 @@ const startEditing = (licenseId: string) => {
               </tr>
             </thead>
             <tbody>
-              <tr v-for="item in data" :key="item.licenseId">
+              <!-- Use localLicenses for iteration -->
+              <tr v-for="item in localLicenses" :key="item.licenseId">
                 <td>{{ item?.licenseName }}</td>
                 <td>
                   <UiInput
