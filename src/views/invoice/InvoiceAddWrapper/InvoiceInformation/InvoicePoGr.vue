@@ -138,7 +138,18 @@
                 <td v-if="!checkInvoiceDp()">{{ item.quantity }}</td>
                 <td v-if="!checkInvoiceDp()">{{ item.uom || '-' }}</td>
                 <td v-if="!checkInvoiceDp()">{{ item.itemText || '-' }}</td>
-                <td v-if="!checkInvoiceDp()">{{ item.department || '-' }}</td>
+                <td v-if="!checkInvoiceDp()">
+                  <span v-if="!item.isEdit">{{ item.department || '-' }}</span>
+                  
+                  <select v-else v-model="item.department" class="select" name="select">
+                    <option v-for="item of costCenterList" :key="item.code" :value="item.code">
+                      {{ item.code }}
+                    </option>
+                  </select>
+
+                  <!-- <input v-else v-model="item.department" class="input" placeholder=""
+                    :class="{ 'border-danger': item.department }"  /> -->
+                </td>
               </tr>
             </template>
           </tbody>
@@ -161,8 +172,9 @@ import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 
+const masterDataApi = useInvoiceMasterDataStore()
 const invoiceApi = useInvoiceSubmissionStore()
-const invoiceMasterApi = useInvoiceMasterDataStore()
+
 const form = inject<formTypes>('form')
 const columns = ref<string[]>([])
 const search = ref<number | null>(null)
@@ -177,6 +189,8 @@ const formEdit = reactive({
 })
 
 const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
+
+const costCenterList = computed(() => masterDataApi.costCenterList)
 
 const searchEnter = (event: KeyboardEvent) => {
   if (isDisabledSearch.value) return
@@ -351,6 +365,13 @@ const resetItem = (item: itemsPoGrType) => {
 
 const addNewPodata = () => {
   if (form) {
+    if (!form.vendorId || !form.companyCode) {
+      form.companyCodeError = true
+      return
+    } else {
+      form.companyCodeError = false
+    }
+    masterDataApi.getCostCenter(form?.companyCode || '')
     const data = {
       poNo:'',
       poItem: 0,
@@ -413,6 +434,7 @@ watch(
 
 onMounted(() => {
   setColumn()
+
 })
 </script>
 

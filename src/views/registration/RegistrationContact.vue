@@ -4,7 +4,6 @@
       <UiInput
         v-model="contact.account.username"
         label="Username"
-        placeholder="Masukkan Username"
         row
         required
         disabled
@@ -18,7 +17,7 @@
         <div class="input" :class="{ 'border-danger': contact.account.passwordError }">
           <input
             v-model="contact.account.password"
-            placeholder="Masukkan Password"
+            placeholder="Enter your password"
             :type="showPassword ? 'text' : 'password'"
           />
           <div class="btn btn-icon" @click="togglePassword('password')">
@@ -29,20 +28,20 @@
       <UiInput
         v-model="contact.account.email"
         label="Email"
-        placeholder="Masukkan Email"
+        placeholder="Enter your email"
         row
         required
         :error="contact.account.emailError"
       />
       <div class="flex items-center flex-wrap lg:flex-nowrap gap-2.5">
         <label class="form-label w-2/5 flex items-center gap-1">
-          Ulangi Password
+          Confirm Password
           <span class="text-danger"> * </span>
         </label>
         <div class="input" :class="{ '!border-danger': contact.account.confirmPasswordError }">
           <input
             v-model="contact.account.confirmPassword"
-            placeholder="Ulangi Password"
+            placeholder="Confirm Password"
             :type="showConfirmPassword ? 'text' : 'password'"
             @input="checkConfirmPassword"
           />
@@ -53,8 +52,8 @@
       </div>
       <UiInputTel
         v-model="contact.account.phone"
-        label="No Telephone"
-        placeholder="Masukkan no telephone"
+        label="Phone"
+        placeholder="000000"
         row
         required
         :error="contact.account.phoneError"
@@ -62,7 +61,7 @@
       <UiInput
         v-model="contact.account.website"
         label="Website"
-        placeholder="Masukkan website"
+        placeholder="Enter your website"
         row
       />
     </UiFormGroup>
@@ -73,8 +72,8 @@
       <UiFormGroup title="Contact Person" :grid="2" body-class="px-4" hide-border>
         <UiInput
           v-model="contact.contactPerson.contactName"
-          label="Nama"
-          placeholder="Masukkan nama lengkap"
+          label="Name"
+          placeholder="Full name"
           row
           required
           :error="contact.contactPerson.contactNameError"
@@ -82,23 +81,23 @@
         <UiInput
           v-model="contact.contactPerson.contactEmail"
           label="Email"
-          placeholder="Masukkan email"
+          placeholder="Email"
           row
           required
           :error="contact.contactPerson.contactEmailError"
         />
         <UiInputTel
           v-model="contact.contactPerson.contactPhone"
-          label="No Telephone"
-          placeholder="Masukkan no telephone"
+          label="Phone"
+          placeholder="000000"
           row
           required
           :error="contact.contactPerson.contactPhoneError"
         />
         <UiSelect
           v-model="contact.contactPerson.positionTypeId"
-          label="Bagian"
-          placeholder="Pilih"
+          label="Department"
+          placeholder="Select"
           :options="positionList"
           value-key="positionTypeId"
           text-key="positionName"
@@ -110,7 +109,7 @@
 
       <UiButton class="w-fit justify-self-end mx-4" outline @click="addContactPerson">
         <UiIcon variant="duotone" :name="isEdit ? 'file-added' : 'plus-circle'" />
-        {{ isEdit ? 'Simpan' : 'Tambah' }}
+        {{ isEdit ? 'Save' : 'Add' }}
       </UiButton>
 
       <div class="card min-w-full">
@@ -120,10 +119,10 @@
           >
             <thead>
               <tr>
-                <th>Nama Lengkap</th>
-                <th>No Telephone</th>
+                <th>Full Name</th>
+                <th>Phone</th>
                 <th>Email</th>
-                <th>Bagian</th>
+                <th>Department</th>
                 <th class="w-10">Action</th>
               </tr>
             </thead>
