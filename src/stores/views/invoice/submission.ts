@@ -97,8 +97,8 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
     return response.data
   }
 
-  const getAvailableDp = async (poNumber: string, vendorNumber: string) => {
-    const response: ApiResponse<AvailableDpTypes> = await invoiceApi.get(`/invoice/available-dp?poNumber=${poNumber}&vendorNo=${vendorNumber}`)
+  const getAvailableDp = async (poNumber: string, vendorNumber: string, amount: number) => {
+    const response: ApiResponse<AvailableDpTypes> = await invoiceApi.get(`/invoice/available-dp?poNumber=${poNumber}&vendorNo=${vendorNumber}&amount=${amount}`)
   
     return response.data
   }
