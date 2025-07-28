@@ -4,7 +4,7 @@
       <div class="card-header">
         <h2 class="text-md font-bold text-slate-800">Payment Information</h2>
         <div class="flex">
-          <UiButton variant="primary" outline @click="openModal()">
+          <UiButton variant="primary" outline @click="openModal">
             <UiIcon variant="duotone" name="plus-circle" />
             <span>Add Data</span>
           </UiButton>
@@ -74,22 +74,24 @@
                   icon
                   outline
                   size="sm"
-                  :disabled="!item.urlAccountDifferences"
+                  v-if="item.urlAccountDifferences"
                   @click="downloadFile(item.urlAccountDifferences)"
                 >
                   <UiIcon name="cloud-download" variant="duotone" />
                 </UiButton>
+                <span v-else>-</span>
               </td>
               <td class="text-center">
                 <UiButton
                   icon
                   outline
                   size="sm"
-                  :disabled="!item.urlFirstPage"
+                  v-if="item.urlFirstPage"
                   @click="downloadFile(item.urlFirstPage)"
                 >
                   <UiIcon name="cloud-download" variant="duotone" />
                 </UiButton>
+                <span v-else>-</span>
               </td>
               <td>{{ item.currencySymbol }}</td>
               <td>{{ item.bankCode }}</td>
@@ -115,6 +117,7 @@
       </div>
     </div>
 
+    <!-- Form modal -->
     <UiModal
       :title="modalTitle"
       v-model="isModalOpen"
@@ -152,6 +155,7 @@
               accepted-files=".jpg,.jpeg,.png,.pdf"
               placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
               :error="bankDetailError.includes('urlFirstPage')"
+              @addedFile="uploadFile($event, 'first page')"
             />
           </div>
 
@@ -201,6 +205,7 @@
             required
             :error="bankDtoError.includes('address')"
             v-if="isBankNotRegistered"
+            @update:model-value="payload.request.vendorBankDetail.bankAddress = $event"
           />
         </UiFormGroup>
         <UiFormGroup hide-border>
@@ -234,13 +239,28 @@
               accepted-files=".jpg,.jpeg,.png,.pdf"
               placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
               :error="bankDetailError.includes('urlAccountDifferences')"
+              @addedFile="uploadFile($event, 'different account')"
             />
           </div>
 
-          <UiCheckbox
-            label="Bank not registered."
-            v-model="isBankNotRegistered"
-            @update:mode-value="console.log('Bank not registered:')"
+          <div class="h-[40px]">
+            <UiCheckbox
+              label="Bank not registered."
+              v-model="isBankNotRegistered"
+              @update:mode-value="console.log('Bank not registered:')"
+            />
+          </div>
+
+          <UiSelect
+            v-if="isBankNotRegistered"
+            label="Bank Country"
+            placeholder="Select"
+            :options="countryOptions"
+            valueKey="value"
+            textKey="label"
+            required
+            v-model="payload.request.bankDetailDto.bankCountryCode"
+            :error="bankDtoError.includes('bankCountryCode')"
           />
 
           <UiInput
@@ -272,10 +292,38 @@
         </UiButton>
       </div>
     </UiModal>
+
+    <!-- Delete Modal -->
+
+    <!-- Success Modal -->
+    <UiModal v-model="successModal" size="sm" @update:model-value="handleSuccess">
+      <ModalSuccessLogo class="mx-auto" />
+      <h3 class="text-center text-lg font-medium">Administration Data Successfully Updated</h3>
+      <p class="text-center text-base text-gray-600 mb-5">
+        The data has been successfully updated in the admin system.
+      </p>
+    </UiModal>
+
+    <!-- Error Modal -->
+    <UiModal v-model="errorModal" size="sm">
+      <div class="text-center mb-6">
+        <UiIcon
+          name="cross-circle"
+          variant="duotone"
+          class="text-[150px] text-danger text-center"
+        />
+      </div>
+      <h3 class="text-center text-lg font-medium">Failed to Change Payment Information!</h3>
+      <p class="text-center text-base text-gray-600 mb-5">
+        Failed to change Payment Information. Please try again later or contact support if the
+        problem persists.
+      </p>
+    </UiModal>
   </div>
 </template>
 
 <script setup lang="ts">
+import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
 import UiModal from '@/components/modal/UiModal.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiCheckbox from '@/components/ui/atoms/checkbox/UiCheckbox.vue'
@@ -291,6 +339,7 @@ import type { IPaymentPayload } from '@/stores/vendor/types/vendor'
 import { useVendorUploadStore } from '@/stores/vendor/upload'
 import { useVendorPaymentStore } from '@/stores/vendor/vendor'
 import { useLoginStore } from '@/stores/views/login'
+import { cloneDeep } from 'lodash'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
@@ -338,6 +387,8 @@ const isDownloadLoading = ref(false)
 const isSaveLoading = ref(false)
 const mode = ref<'add' | 'view' | 'edit' | 'delete'>('add')
 const selectedPaymentId = ref<number | null>(null)
+const successModal = ref(false)
+const errorModal = ref(false)
 
 const isBankNotRegistered = ref(false)
 
@@ -346,7 +397,7 @@ const bankDtoError = ref<string[]>([])
 const bankDetailError = ref<string[]>([])
 
 // payload
-const payload = ref<IPaymentPayload>({ ...defaultPayload })
+const payload = ref<IPaymentPayload>(cloneDeep(defaultPayload))
 
 const currencyOptions = computed<CurrencyListType>(() =>
   lookupStore.currencyList.map((item) => ({
@@ -354,6 +405,7 @@ const currencyOptions = computed<CurrencyListType>(() =>
     label: `${item.currencyName} (${item.currencyCode})`,
   })),
 )
+
 const bankOptions = computed(() =>
   lookupStore.bankList.map((item) => ({
     ...item,
@@ -361,17 +413,25 @@ const bankOptions = computed(() =>
   })),
 )
 
+const countryOptions = computed(() =>
+  lookupStore.countryList.map((item) => ({
+    value: item.countryCode,
+    label: `${item.countryCode} - ${item.countryName}`,
+  })),
+)
+
 const closeModal = () => {
   isModalOpen.value = false
-  payload.value = { ...defaultPayload }
   bankDetailError.value = []
   bankDtoError.value = []
+  payload.value = cloneDeep(defaultPayload)
+  isBankNotRegistered.value = false
 }
 
 const openModal = () => {
-  isModalOpen.value = true
   mode.value = 'add'
   modalTitle.value = 'Add Payment Information'
+  isModalOpen.value = true
 }
 
 const downloadFile = async (path: string) => {
@@ -388,6 +448,29 @@ const downloadFile = async (path: string) => {
     }
   } finally {
     isDownloadLoading.value = false
+  }
+}
+
+const uploadFile = async (file: File, type: 'different account' | 'first page') => {
+  if (!file) return
+
+  const formData = new FormData()
+  formData.append('FormFile', file)
+  formData.append('Actioner', userStore.userData?.profile.profileId.toString() || '0')
+
+  try {
+    const response = await uploadStore.upload(formData)
+
+    if (type === 'different account') {
+      payload.value.request.vendorBankDetail.urlAccountDifferences = response?.path as string
+    } else if (type === 'first page') {
+      payload.value.request.vendorBankDetail.urlFirstPage = response?.path as string
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error)
+      alert('File upload failed. Please try again.')
+    }
   }
 }
 
@@ -419,6 +502,7 @@ const handleSubmit = () => {
   }
 }
 
+// tambah bank baru
 const handleAdd = async () => {
   bankDetailError.value = checkEmptyValues(payload.value.request.vendorBankDetail)
 
@@ -446,9 +530,12 @@ const handleAdd = async () => {
   try {
     isSaveLoading.value = true
     await paymentDataStore.addPayment(payload.value)
+    closeModal()
+    successModal.value = true
   } catch (error) {
     if (error instanceof Error) {
-      console.log(error)
+      closeModal()
+      errorModal.value = true
     }
   } finally {
     isSaveLoading.value = false
@@ -457,14 +544,19 @@ const handleAdd = async () => {
 
 const handleUpdate = async () => {}
 
+const handleSuccess = () => {
+  paymentDataStore.getData(route.params.id as string)
+}
+
 watch(isBankNotRegistered, (value) => {
   payload.value.request.vendorBankDetail.isBankRegistered = !value
   payload.value.request.vendorBankDetail.bankKey = ''
 })
 
-onMounted(async () => {
-  await paymentDataStore.getData(route.params.id as string)
-  await lookupStore.getVendorCurrency()
-  await lookupStore.getVendorBanks()
+onMounted(() => {
+  paymentDataStore.getData(route.params.id as string)
+  lookupStore.getVendorCurrency()
+  lookupStore.getVendorBanks()
+  lookupStore.getVendorCountries()
 })
 </script>
