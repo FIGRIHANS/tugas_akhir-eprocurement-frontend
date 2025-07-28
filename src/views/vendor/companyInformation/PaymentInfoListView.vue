@@ -131,7 +131,7 @@
             label="Bank Account Number"
             placeholder="Enter Bank Account Number"
             required
-            :readonly="mode === 'view'"
+            :disabled="mode === 'view'"
             v-model="payload.request.vendorBankDetail.accountNo"
             :error="bankDetailError.includes('accountNo')"
           />
@@ -140,6 +140,7 @@
             <UiCheckbox
               label="Holder's name is different from the company name."
               v-model="payload.request.vendorBankDetail.isHolderNameDifferent"
+              :disabled="mode === 'view'"
             />
           </div>
 
@@ -156,6 +157,7 @@
               placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
               :error="bankDetailError.includes('urlFirstPage')"
               @addedFile="uploadFile($event, 'first page')"
+              :disabled="mode === 'view'"
             />
           </div>
 
@@ -177,6 +179,7 @@
             required
             v-model="payload.request.bankDetailDto.bankName"
             :error="bankDtoError.includes('bankName')"
+            :disabled="mode === 'view'"
           />
           <UiInput
             v-if="isBankNotRegistered"
@@ -185,6 +188,7 @@
             required
             v-model="payload.request.bankDetailDto.bankKey"
             :error="bankDtoError.includes('bankKey')"
+            :disabled="mode === 'view'"
           />
 
           <!-- bank addres utk bank yang terdaftar -->
@@ -195,6 +199,7 @@
             required
             :error="bankDetailError.includes('bankAddress')"
             v-if="!isBankNotRegistered"
+            :disabled="mode === 'view'"
           />
 
           <!-- bank address utk bank yang belum terdaftar -->
@@ -206,6 +211,7 @@
             :error="bankDtoError.includes('address')"
             v-if="isBankNotRegistered"
             @update:model-value="payload.request.vendorBankDetail.bankAddress = $event"
+            :disabled="mode === 'view'"
           />
         </UiFormGroup>
         <UiFormGroup hide-border>
@@ -215,6 +221,7 @@
             required
             v-model="payload.request.vendorBankDetail.accountName"
             :error="bankDetailError.includes('accountName')"
+            :disabled="mode === 'view'"
           />
           <UiSelect
             label="Currency"
@@ -225,6 +232,7 @@
             required
             v-model="payload.request.vendorBankDetail.currencySymbol"
             :error="bankDetailError.includes('currencySymbol')"
+            :disabled="mode === 'view'"
           />
 
           <div class="relative" v-if="payload.request.vendorBankDetail.isHolderNameDifferent">
@@ -240,6 +248,7 @@
               placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
               :error="bankDetailError.includes('urlAccountDifferences')"
               @addedFile="uploadFile($event, 'different account')"
+              :disabled="mode === 'view'"
             />
           </div>
 
@@ -248,6 +257,7 @@
               label="Bank not registered."
               v-model="isBankNotRegistered"
               @update:mode-value="console.log('Bank not registered:')"
+              :disabled="mode === 'view'"
             />
           </div>
 
@@ -261,6 +271,7 @@
             required
             v-model="payload.request.bankDetailDto.bankCountryCode"
             :error="bankDtoError.includes('bankCountryCode')"
+            :disabled="mode === 'view'"
           />
 
           <UiInput
@@ -270,6 +281,7 @@
             required
             v-model="payload.request.bankDetailDto.branch"
             :error="bankDtoError.includes('branch')"
+            :disabled="mode === 'view'"
           />
           <UiInput
             v-if="isBankNotRegistered"
@@ -278,6 +290,7 @@
             required
             v-model="payload.request.bankDetailDto.swiftCode"
             :error="bankDtoError.includes('swiftCode')"
+            :disabled="mode === 'view'"
           />
         </UiFormGroup>
       </div>
@@ -490,20 +503,43 @@ const handleDropdown = (id: number, newMode: 'view' | 'edit' | 'delete') => {
       modalTitle.value = 'Delete Payment Information'
       break
   }
+
+  if (newMode === 'view' || newMode === 'edit') {
+    const paymentData = paymentDataStore.data.find((item) => item.id === id)
+    if (paymentData) {
+      payload.value.request.id = id
+      payload.value.request.vendorBankDetail.accountName = paymentData.accountName
+      payload.value.request.vendorBankDetail.accountNo = paymentData.accountNo
+      payload.value.request.vendorBankDetail.currencySymbol = paymentData.currencySymbol
+      payload.value.request.vendorBankDetail.bankAddress = paymentData.bankAddress
+      payload.value.request.vendorBankDetail.isBankRegistered = paymentData.isBankRegistered
+      payload.value.request.vendorBankDetail.isHolderNameDifferent =
+        paymentData.isHolderNameDifferent
+      isBankNotRegistered.value = !paymentData.isBankRegistered
+
+      if (paymentData.isBankRegistered) {
+        payload.value.request.vendorBankDetail = {
+          ...payload.value.request.vendorBankDetail,
+          bankKey: paymentData.bankCode,
+          urlBankAccountDeclaration: paymentData.urlBankAccountDeclaration!,
+        }
+      } else {
+        payload.value.request.bankDetailDto = {
+          ...payload.value.request.bankDetailDto,
+          address: paymentData.bankAddress,
+          bankCountryCode: paymentData.countryCode!,
+          bankKey: paymentData.bankCode,
+          bankName: paymentData.bankName,
+          branch: paymentData.branch,
+          swiftCode: paymentData.bankSwiftCode,
+        }
+      }
+    }
+  }
 }
 
-const handleSubmit = () => {
-  if (mode.value === 'add') {
-    handleAdd()
-  }
-
-  if (mode.value === 'edit') {
-    handleUpdate()
-  }
-}
-
-// tambah bank baru
-const handleAdd = async () => {
+// tambah atau edit bank
+const handleSubmit = async () => {
   bankDetailError.value = checkEmptyValues(payload.value.request.vendorBankDetail)
 
   // cek jika holder name berbeda, hapus field yang tidak diperlukan
@@ -541,8 +577,6 @@ const handleAdd = async () => {
     isSaveLoading.value = false
   }
 }
-
-const handleUpdate = async () => {}
 
 const handleSuccess = () => {
   paymentDataStore.getData(route.params.id as string)
