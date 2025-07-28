@@ -224,3 +224,21 @@ export interface IOtherDocument {
   issuedDate: string | number | unknown,
   expiredDate: string | number | unknown,
 }
+
+export interface IVendorPayload {
+  request: {
+    vendorLicenses: ILicensePayload[],
+    otherDocumentVendor: IOtherDocument[],
+    vendorId: number,
+    updatedBy: string
+  }
+}
+
+export interface ILicensePayload {
+  licenseId: number;
+  licenseNo: string;
+  uploadUrl: string;
+  description: string;
+  issuedDate: string;
+  expiredDate: string;
+}

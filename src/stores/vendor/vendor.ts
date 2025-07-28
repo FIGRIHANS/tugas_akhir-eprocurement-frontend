@@ -188,7 +188,38 @@ export const useVendorIzinUsahaStore = defineStore('vendor-izin-usaha', () => {
     }
   }
 
-  return { data, loading, error, getData }
+  /// TODO: change payload type soon
+  const updateData = async (payload: any) => {
+    loading.value = true
+    error.value = null
+
+    try {
+
+      const response = await vendorAPI.post(
+        '/public/verifiedvendor/update-license',
+        payload,
+      );
+
+      if (response.data.statusCode === 200) {
+        data.value = response.data.result.content
+      } else {
+        error.value = response.data.result.message
+        loading.value = false
+      }
+
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        error.value = err.message
+      } else {
+        error.value = 'Failed to update data'
+      }
+    } finally {
+      loading.value = false
+    }
+
+  }
+
+  return { data, loading, error, getData, updateData }
 })
 
 export const useVendorPaymentStore = defineStore('vendor-payment', () => {

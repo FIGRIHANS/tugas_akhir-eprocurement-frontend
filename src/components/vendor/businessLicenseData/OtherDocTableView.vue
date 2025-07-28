@@ -102,6 +102,16 @@ const cancelEditing = () => {
       <div class="card-body">
         <h2 class="text-lg font-semibold text-slate-700 mb-4">Other Document</h2>
 
+        <button class="btn btn-primary" data-tooltip="#custom_popover" data-tooltip-trigger="click">
+          Toggle Popover
+        </button>
+        <div class="popover max-w-72" id="custom_popover">
+          <div class="popover-header">Popover Title</div>
+          <div class="popover-body">
+            Behold this captivating popover content. It's quite engaging, wouldn't you say ?
+          </div>
+        </div>
+
         <UiButton outline @click="showAddForm = !showAddForm">
           <UiIcon variant="duotone" name="plus-circle"></UiIcon>
           {{ showAddForm ? 'Cancel Add Document' : 'Add Document' }}</UiButton
