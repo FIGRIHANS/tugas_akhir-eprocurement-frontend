@@ -36,7 +36,6 @@ const router = createRouter({
     {
       path: '/',
       component: LayoutWithSidebar,
-      children: [...vendor, ...invoice, ...dashboard, ...userManagement, ...companyInfomartion],
       children: [...vendor, ...invoice, ...dashboard, ...userManagement, ...companyInfomartion, ...paymentInformation, ...workflowConfig],
       meta: {
         middleware: 'auth',

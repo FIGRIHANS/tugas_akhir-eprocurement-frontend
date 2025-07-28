@@ -109,7 +109,7 @@
 
       <UiButton class="w-fit justify-self-end mx-4" outline @click="addContactPerson">
         <UiIcon variant="duotone" :name="isEdit ? 'file-added' : 'plus-circle'" />
-        {{ isEdit ? 'Simpan' : 'Tambah' }}
+        {{ isEdit ? 'Save' : 'Add' }}
       </UiButton>
 
       <div class="card min-w-full">

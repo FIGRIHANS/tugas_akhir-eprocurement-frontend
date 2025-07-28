@@ -30,6 +30,10 @@ export interface IVendorList {
     expiredUTCDate: string
     seq: number
   }[]
+  businessFields: {
+    vendorId: number
+    businessFieldName: string
+  }[]
   createdBy: string
   createdUTCDate: string
   modifiedUTCDate: string
