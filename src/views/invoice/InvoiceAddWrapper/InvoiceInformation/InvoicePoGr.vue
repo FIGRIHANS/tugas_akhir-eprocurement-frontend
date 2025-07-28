@@ -174,7 +174,6 @@ import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterDat
 
 const masterDataApi = useInvoiceMasterDataStore()
 const invoiceApi = useInvoiceSubmissionStore()
-
 const form = inject<formTypes>('form')
 const columns = ref<string[]>([])
 const search = ref<number | null>(null)
@@ -188,8 +187,7 @@ const formEdit = reactive({
   taxCode: '',
 })
 
-const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
-
+const listTaxCalculation = computed(() => masterDataApi.taxList)
 const costCenterList = computed(() => masterDataApi.costCenterList)
 
 const searchEnter = (event: KeyboardEvent) => {
