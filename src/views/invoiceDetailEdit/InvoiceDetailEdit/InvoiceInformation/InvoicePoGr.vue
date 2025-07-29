@@ -41,7 +41,7 @@
               <td v-if="!checkInvoiceDp()">{{ item.conditionType }}</td>
               <td v-if="!checkInvoiceDp()">{{ item.conditionTypeDesc }}</td>
               <td v-if="!checkInvoiceDp()">{{ item.qcStatus }}</td>
-            <td v-if="checkInvoiceDp()">
+              <td v-if="checkInvoiceDp()">
               <span v-if="!item.isEdit">{{ form.currCode === 'IDR' ? useFormatIdr(item.itemAmount) : useFormatUsd(item.itemAmount) }}</span>
               <input v-else v-model="formEdit.itemAmount" type="number" class="input" />
             </td>
@@ -193,8 +193,8 @@ const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
 const whtTypeList = computed(() => invoiceMasterApi.whtTypeList)
 const whtCodeList = computed(() => invoiceMasterApi.whtCodeList)
 
-const checkInvoiceDp = () => {
-  return form?.invoiceDPCode === 9012
+const checkInvoiceDp = () => {   
+  return form?.invoiceDPCode === 9012 
 }
 
 // const checkPoPib = () => {
@@ -239,12 +239,16 @@ const resetItem = (item: itemsPoGrType) => {
   resetFormEdit()
 }
 
-const setColumn = () => {
-  // if (form?.invoiceType === 'pib') columns.value = ['Action', ...PoPibColumn]
-  if (checkInvoiceDp()) columns.value = ['Action', ...invoiceDpColumn]
-  // else columns.value = ['Action', ...defaultColumn]
-  columns.value = ['Action', ...defaultColumn]
+const setColumn = (type: number) => {
+  console.log(type, 'ini type');
+  
+  if (type === 902) columns.value = ['Action', ...PoPibColumn]
+  else if (checkInvoiceDp()) columns.value = ['Action', ...invoiceDpColumn]
+  else columns.value = ['Action', ...defaultColumn]
+
+  return columns.value
 }
+
 
 const callWhtCode = (data: itemsPoGrType) => {
   formEdit.whtCode = ''
