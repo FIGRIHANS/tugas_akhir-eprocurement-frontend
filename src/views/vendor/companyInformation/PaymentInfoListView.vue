@@ -299,7 +299,12 @@
           <UiIcon name="black-left-line" />
           <span>Cancel</span>
         </UiButton>
-        <UiButton variant="primary" @click="handleSubmit" :disabled="isSaveLoading">
+        <UiButton
+          variant="primary"
+          @click="handleSubmit"
+          :disabled="isSaveLoading"
+          v-if="mode !== 'view'"
+        >
           <UiIcon name="file-added" variant="duotone" />
           <span>Save</span>
         </UiButton>
