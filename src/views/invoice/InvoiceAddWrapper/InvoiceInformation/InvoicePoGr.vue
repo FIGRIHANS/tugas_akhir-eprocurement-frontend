@@ -89,10 +89,14 @@
                     </option>
                   </select>
                 </td>
+                <td v-if="checkInvoiceDp()">
+                  <span v-if="item.isEdit">{{ form?.currency === item.currencyLC ? useFormatIdr(formEdit.vatAmount) : useFormatUsd(formEdit.vatAmount) }}</span>
+                  <span v-else>{{ form?.currency === item.currencyLC ? useFormatIdr(item.vatAmount || 0) : useFormatUsd(item.vatAmount || 0) }}</span>
+                </td>
                 <td>-</td>
                 <td>-</td>
                 <td>-</td>
-                <td>-</td>
+                <td v-if="!checkInvoiceDp()">-</td>
                 <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.department }}</td>
               </tr>
             </template>
@@ -193,6 +197,7 @@ const isDisabledSearch = ref<boolean>(false)
 const formEdit = reactive({
   itemAmountLC: 0,
   taxCode: '',
+  vatAmount: 0
 })
 
 const listTaxCalculation = computed(() => masterDataApi.taxList)
@@ -319,6 +324,7 @@ const setItemPoGr = (items: PoGrSearchTypes[]) => {
 const resetFormEdit = () => {
   formEdit.taxCode = ''
   formEdit.itemAmountLC = 0
+  formEdit.vatAmount = 0
 }
 
 const goEdit = (item: itemsPoGrType) => {
@@ -327,9 +333,11 @@ const goEdit = (item: itemsPoGrType) => {
   if (item.isEdit) {
     formEdit.taxCode = item.taxCode
     formEdit.itemAmountLC = item.itemAmountLC
+    if (checkInvoiceDp()) formEdit.vatAmount = item.vatAmount || 0
   } else {
     item.taxCode = formEdit.taxCode
     item.itemAmountLC = formEdit.itemAmountLC
+    if (checkInvoiceDp()) item.vatAmount = formEdit.vatAmount
     resetFormEdit()
   }
 }
@@ -398,6 +406,24 @@ const editForm = (index: number) => {
   }
 }
 
+const getPercentTax = (code: string) => {
+  if (code === 'V0') return 0
+  const getIndex = listTaxCalculation.value.findIndex((item) => item.code === code)
+  if (getIndex !== -1) {
+    const splitName = listTaxCalculation.value[getIndex].name.split(' - ')
+    return parseFloat(splitName[1].replace(',', '.').replace('%','')) / 100
+  }
+}
+
+const getVatAmount = () => {
+  const percentTax = getPercentTax(formEdit.taxCode) || 0
+  const itemAmount = formEdit.itemAmountLC
+  console.log(percentTax)
+  console.log(itemAmount)
+  const result = percentTax * itemAmount
+  formEdit.vatAmount = result
+}
+
 watch(
   () => [form?.invoiceDp, form?.invoiceType],
   () => {
@@ -442,6 +468,19 @@ watch(
         form.invoicePoGr.push(data)
       }
     }
+  }
+)
+
+watch(
+  () => [form?.invoicePoGr, formEdit],
+  () => {
+    if (checkInvoiceDp()) {
+      getVatAmount()
+    }
+  },
+  {
+    deep: true,
+    immediate: true
   }
 )
 
