@@ -6,9 +6,9 @@ import type { routeTypes } from '@/core/type/components/breadcrumb'
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import AdministrativeData from './AdministrativeData.vue'
-import BussinesLicenseDataListView from './BussinesLicenseDataListView.vue'
 import PaymentInfoListView from './PaymentInfoListView.vue'
 import CompanyDeedData from './CompanyDeedData.vue'
+import BussinesLicenseData from './BussinesLicenseData.vue'
 
 const route = useRoute()
 const currentTab = ref<string>('administrative-data')
@@ -84,7 +84,7 @@ watch(
   <BreadcrumbView title="Company Information" :routes="bcRoutes" />
   <UiTabClosable :tabs="tabsItem" v-model="currentTab" />
   <AdministrativeData v-if="currentTab === 'administrative-data'" />
-  <BussinesLicenseDataListView v-if="currentTab === 'business-license-data'" />
+  <BussinesLicenseData v-if="currentTab === 'business-license-data'" />
   <PaymentInfoListView v-if="currentTab === 'payment-information-data'" />
   <CompanyDeedData v-if="currentTab === 'company-deed-data'" />
 </template>
