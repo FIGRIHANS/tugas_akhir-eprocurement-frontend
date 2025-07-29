@@ -6,9 +6,9 @@ import UiFileUpload from '@/components/ui/atoms/file-upload/UiFileUpload.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import type { ILicense } from '@/stores/vendor/types/vendor'
-import { useVendorUploadStore } from '@/stores/vendor/upload'
+import { useUploadStore } from '@/stores/general/upload'
 
-const uploadStore = useVendorUploadStore()
+const uploadStore = useUploadStore()
 
 const props = defineProps({
   licenses: {
@@ -49,6 +49,26 @@ const deleteLicense = (licenseId: string) => {
 const startEditing = (licenseId: string) => {
   editingLicenseId.value = licenseId
 }
+
+const handleFileUpload = async (file: File, licenseId: string) => {
+  console.log(file)
+  if (!file) {
+    return
+  }
+
+  const uploadResult = await uploadStore.uploadFile(file, 0)
+
+  if (uploadResult) {
+    const index = localLicenses.value.findIndex((item) => String(item.licenseId) === licenseId)
+    if (index !== -1) {
+      const updatedArray = [...localLicenses.value]
+      updatedArray[index] = { ...updatedArray[index], documentUrl: uploadResult.path }
+      emit('update:licenses', updatedArray)
+    }
+  } else {
+    console.error('File upload failed:')
+  }
+}
 </script>
 
 <template>
@@ -70,7 +90,6 @@ const startEditing = (licenseId: string) => {
               </tr>
             </thead>
             <tbody>
-              <!-- Use localLicenses for iteration -->
               <tr v-for="item in localLicenses" :key="item.licenseId">
                 <td>{{ item?.licenseName }}</td>
                 <td>
@@ -98,11 +117,12 @@ const startEditing = (licenseId: string) => {
                 </td>
                 <td>
                   <UiFileUpload
-                    name="nibDocument"
+                    name="licenseDocument"
                     accepted-files=".jpg,.jpeg,.png,.pdf"
                     v-model="item.documentUrl"
                     placeholder="Upload file"
                     :disabled="editingLicenseId !== String(item.licenseId)"
+                    @added-file="(file) => handleFileUpload(file, String(item.licenseId))"
                   />
                 </td>
                 <td>

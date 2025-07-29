@@ -34,96 +34,87 @@
 import OtherDocTableView from '@/components/vendor/businessLicenseData/OtherDocTableView.vue'
 import PKPTableView from '@/components/vendor/businessLicenseData/PKPTableView.vue'
 import { useVendorIzinUsahaStore } from '@/stores/vendor/vendor'
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import informationIcon from '@/assets/svg/ic_info_alert.svg'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import type { ILicense, IOtherDocument } from '@/stores/vendor/types/vendor'
+import { useLoginStore } from '@/stores/views/login'
 
+const loginApi = useLoginStore()
 const vendorLicenseData = useVendorIzinUsahaStore()
 const route = useRoute()
+
+const userData = computed(() => loginApi.userData)
 
 const vendorLicensesPayload = ref<ILicense[]>([])
 const otherDocumentsPayload = ref<IOtherDocument[]>([])
 
-watch(() => vendorLicenseData.data, (newData) => {
-  if (newData) {
-    vendorLicensesPayload.value = JSON.parse(JSON.stringify(newData));
-  }
-}, { immediate: true });
+watch(
+  () => vendorLicenseData.data,
+  (newData) => {
+    if (newData) {
+      vendorLicensesPayload.value = JSON.parse(JSON.stringify(newData))
+    }
+  },
+  { immediate: true },
+)
 
 const formatToISOString = (date: Date | string | null): string | null => {
-  if (!date) return null;
-  const d = new Date(date);
+  if (!date) return null
+  const d = new Date(date)
   if (isNaN(d.getTime())) {
-    console.warn('Invalid date provided for ISO string conversion:', date);
-    return null;
+    console.warn('Invalid date provided for ISO string conversion:', date)
+    return null
   }
-  return d.toISOString();
-};
+  return d.toISOString()
+}
 
 const saveData = async () => {
-  const vendorId = route.params.id as string;
-  const updatedBy = "UserExample";
+  const vendorId = route.params.id as string
+  const updatedBy = userData.value?.profile.userName
 
-  const formattedVendorLicenses = vendorLicensesPayload.value.map(license => ({
+  const formattedVendorLicenses = vendorLicensesPayload.value.map((license) => ({
     licenseId: license.licenseId,
-    licenseNo: license.licenseNo || "string",
-    uploadUrl: license.documentUrl || "string",
-    description: license.description || "string",
+    licenseNo: license.licenseNo || 'string',
+    uploadUrl: license.documentUrl || 'string',
+    description: license.description || 'string',
     issuedDate: formatToISOString(license.issuedUTCDate),
-    expiredDate: formatToISOString(license.expiredUTCDate)
-  }));
+    expiredDate: formatToISOString(license.expiredUTCDate),
+  }))
 
-  const formattedOtherDocuments = otherDocumentsPayload.value.map(doc => ({
-    documentName: doc.documentName || "string",
-    documentNo: doc.documentNo || "string",
-    uploadUrl: doc.uploadUrl || "string",
-    description: doc.description || "string",
+  const formattedOtherDocuments = otherDocumentsPayload.value.map((doc) => ({
+    documentName: doc.documentName || 'string',
+    documentNo: doc.documentNo || 'string',
+    uploadUrl: doc.uploadUrl || 'string',
+    description: doc.description || 'string',
     issuedDate: formatToISOString(doc.issuedDate),
-    expiredDate: formatToISOString(doc.expiredDate)
-  }));
+    expiredDate: formatToISOString(doc.expiredDate),
+  }))
 
   const payload = {
     request: {
       vendorLicenses: formattedVendorLicenses,
       otherDocumentVendor: formattedOtherDocuments,
       vendorId: parseInt(vendorId),
-      updatedBy: updatedBy
-    }
-  };
+      updatedBy: updatedBy,
+    },
+  }
 
-  console.log("Payload to be sent:", payload);
-
-  const apiUrl = '/api/your-save-endpoint';
+  console.log('Payload to be sent:', payload)
 
   try {
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload)
-    });
+    const response = await vendorLicenseData.updateData(payload)
 
-    if (response.ok) {
-      const result = await response.json();
-      console.log('Data saved successfully:', result);
-      alert('Data saved successfully!');
-    } else {
-      const errorData = await response.json();
-      console.error('Failed to save data:', response.status, errorData);
-      alert(`Failed to save data: ${errorData.message || response.statusText}`);
-    }
+    console.log(response)
   } catch (error) {
-    console.error('Error sending data:', error);
-    alert('An error occurred while sending data.');
+    console.error('Error sending data:', error)
+    alert('An error occurred while sending data.')
   }
-};
+}
 
 onMounted(() => {
   vendorLicenseData.getData(route.params.id as string)
 })
 </script>
-

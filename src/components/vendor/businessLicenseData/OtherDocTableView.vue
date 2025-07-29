@@ -6,6 +6,9 @@ import UiFileUpload from '@/components/ui/atoms/file-upload/UiFileUpload.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import type { IOtherDocument } from '@/stores/vendor/types/vendor'
+import { useUploadStore } from '@/stores/general/upload'
+
+const uploadStore = useUploadStore()
 
 const props = defineProps({
   otherDocuments: {
@@ -77,6 +80,27 @@ const startEditing = (index: number) => {
 const cancelEditing = () => {
   editingDocIndex.value = null
 }
+
+const handleFileUpload = async (file: File, licenseId: string) => {
+  console.log(file)
+  if (!file) {
+    return
+  }
+
+  const uploadResult = await uploadStore.uploadFile(file, 0)
+
+  if (uploadResult) {
+    const index = localOtherDocuments.value.findIndex((item) => String(item.documentNo) === licenseId)
+    if (index !== -1) {
+      const updatedArray = [...localOtherDocuments.value]
+      updatedArray[index] = { ...updatedArray[index], uploadUrl: uploadResult.path }
+      emit('update:otherDocuments', updatedArray)
+    }
+  } else {
+    console.error('File upload failed:')
+  }
+}
+
 </script>
 
 <template>
@@ -84,16 +108,6 @@ const cancelEditing = () => {
     <div class="card">
       <div class="card-body">
         <h2 class="text-lg font-semibold text-slate-700 mb-4">Other Document</h2>
-
-        <button class="btn btn-primary" data-tooltip="#custom_popover" data-tooltip-trigger="click">
-          Toggle Popover
-        </button>
-        <div class="popover max-w-72" id="custom_popover">
-          <div class="popover-header">Popover Title</div>
-          <div class="popover-body">
-            Behold this captivating popover content. It's quite engaging, wouldn't you say ?
-          </div>
-        </div>
 
         <UiButton outline @click="showAddForm = !showAddForm">
           <UiIcon variant="duotone" name="plus-circle"></UiIcon>
@@ -233,6 +247,7 @@ const cancelEditing = () => {
                     v-model="item.uploadUrl"
                     placeholder="Upload file"
                     :disabled="editingDocIndex !== index"
+                     @added-file="(file) => handleFileUpload(file, String(item.licenseId))"
                   />
                 </td>
                 <td>
