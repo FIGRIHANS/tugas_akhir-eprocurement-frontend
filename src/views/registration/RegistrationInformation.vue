@@ -11,7 +11,7 @@
         @update:model-value="
           (value) => {
             registrationVendorStore.contact.account.username = value
-              .replace(/[\s-]/g, '_')
+              .replace(/[\s-]/g, '.')
               .toLowerCase()
           }
         "

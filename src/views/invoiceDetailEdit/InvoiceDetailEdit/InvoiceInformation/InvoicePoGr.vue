@@ -34,13 +34,17 @@
               <td v-if="!checkInvoiceDp()">{{ item.grDocumentNo }}</td>
               <td v-if="!checkInvoiceDp()">{{ item.grDocumentItem }}</td>
               <td v-if="!checkInvoiceDp()">{{ moment(item.grDocumentDate).format('DD MMMM YYYY') }}</td>
-              <td v-if="!checkInvoiceDp()">{{ item.itemAmount }}</td>
+              <td v-if="!checkInvoiceDp()">{{ form.currCode === 'IDR' ? useFormatIdr(item.itemAmount) : useFormatUsd(item.itemAmount) }}</td>
               <td v-if="!checkInvoiceDp()">{{ item.quantity }}</td>
               <td v-if="!checkInvoiceDp()">{{ item.uom }}</td>
               <td v-if="!checkInvoiceDp()">{{ item.itemText }}</td>
               <td v-if="!checkInvoiceDp()">{{ item.conditionType }}</td>
               <td v-if="!checkInvoiceDp()">{{ item.conditionTypeDesc }}</td>
               <td v-if="!checkInvoiceDp()">{{ item.qcStatus }}</td>
+            <td v-if="checkInvoiceDp()">
+              <span v-if="!item.isEdit">{{ form.currCode === 'IDR' ? useFormatIdr(item.itemAmount) : useFormatUsd(item.itemAmount) }}</span>
+              <input v-else v-model="formEdit.itemAmount" type="number" class="input" />
+            </td>
               <td>
                 <span v-if="!item.isEdit">{{ item.taxCode }}</span>
                 <select v-else v-model="formEdit.taxCode" class="select" placeholder="">
@@ -49,6 +53,7 @@
                   </option>
                 </select>
               </td>
+            <td v-if="checkInvoiceDp()">{{  }}</td>
               <td>
                 <span v-if="!item.isEdit">{{ item.whtType }}</span>
                 <select v-else v-model="formEdit.whtType" class="select" placeholder="" @change="callWhtCode(item)">
@@ -165,9 +170,9 @@
 <script lang="ts" setup>
 import { ref, reactive, computed, inject, watch, onMounted } from 'vue'
 import type { formTypes } from '../../types/invoiceDetailEdit'
-import { defaultColumn, PoPibColumn } from '@/static/invoicePoGr'
+import { defaultColumn, PoPibColumn, invoiceDpColumn } from '@/static/invoicePoGr'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
-import { useFormatIdr } from '@/composables/currency'
+import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import type { itemsPoGrType } from '../../types/invoicePoGr'
 import moment from 'moment'
 
@@ -175,7 +180,9 @@ const invoiceMasterApi = useInvoiceMasterDataStore()
 const form = inject<formTypes>('form')
 const columns = ref<string[]>([])
 const formEdit = reactive({
+  itemAmount: 0,
   taxCode: '',
+  vatAmount: 0,
   whtType: '',
   whtCode: '',
   whtBaseAmount: 0,
@@ -195,7 +202,9 @@ const checkInvoiceDp = () => {
 // }
 
 const resetFormEdit = () => {
+  formEdit.itemAmount = 0
   formEdit.taxCode = ''
+  formEdit.vatAmount = 0
   formEdit.whtType = ''
   formEdit.whtCode = ''
   formEdit.whtBaseAmount = 0
@@ -206,13 +215,17 @@ const goEdit = (item: itemsPoGrType) => {
   item.isEdit = !item.isEdit
 
   if (item.isEdit) {
+    formEdit.itemAmount = item.itemAmount
     formEdit.taxCode = item.taxCode
+    formEdit.vatAmount = item.vatAmount
     formEdit.whtType = item.whtType
     formEdit.whtCode = item.whtCode
     formEdit.whtBaseAmount = item.whtBaseAmount
     formEdit.whtAmount = item.whtAmount
   } else {
+    item.itemAmount = formEdit.itemAmount
     item.taxCode = formEdit.taxCode
+    item.vatAmount = formEdit.vatAmount
     item.whtType = formEdit.whtType
     item.whtCode = formEdit.whtCode
     item.whtBaseAmount = formEdit.whtBaseAmount
@@ -226,15 +239,11 @@ const resetItem = (item: itemsPoGrType) => {
   resetFormEdit()
 }
 
-const setColumn = (type: number) => {
-  console.log(type, 'ini type');
-  
-  if (type === 902) columns.value = ['Action', ...PoPibColumn]
-  // else if (form?.invoiceDp === 'IDP') columns.value = ['Action', ...invoiceDpColumn]
-  else columns.value = ['Action', ...defaultColumn]
-  // columns.value = ['Action', ...PoPibColumn]
-
-  return columns.value
+const setColumn = () => {
+  // if (form?.invoiceType === 'pib') columns.value = ['Action', ...PoPibColumn]
+  if (checkInvoiceDp()) columns.value = ['Action', ...invoiceDpColumn]
+  // else columns.value = ['Action', ...defaultColumn]
+  columns.value = ['Action', ...defaultColumn]
 }
 
 const callWhtCode = (data: itemsPoGrType) => {
@@ -244,12 +253,43 @@ const callWhtCode = (data: itemsPoGrType) => {
   })
 }
 
+const getPercentTax = (code: string) => {
+  if (code === 'V0') return 0
+  const getIndex = listTaxCalculation.value.findIndex((item) => item.code === code)
+  if (getIndex !== -1) {
+    const splitName = listTaxCalculation.value[getIndex].name.split(' - ')
+    return parseFloat(splitName[1].replace(',', '.').replace('%','')) / 100
+  }
+}
+
+const getVatAmount = () => {
+  const percentTax = getPercentTax(formEdit.taxCode) || 0
+  const itemAmount = formEdit.itemAmount
+  console.log(percentTax)
+  console.log(itemAmount)
+  const result = percentTax * itemAmount
+  formEdit.vatAmount = result
+}
+
 watch(
   () => [form?.invoiceDPCode, form?.invoiceTypeCode],
   () => {
     setColumn()
   },
   {
+    immediate: true
+  }
+)
+
+watch(
+  () => [form?.invoicePoGr, formEdit],
+  () => {
+    if (checkInvoiceDp()) {
+      getVatAmount()
+    }
+  },
+  {
+    deep: true,
     immediate: true
   }
 )
