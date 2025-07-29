@@ -94,6 +94,7 @@ interface ParamsSubmissionItem {
   grDocumentItem: number
   grDocumentDate: string
   taxCode: string
+  vatAmount: number
   itemAmount: number
   quantity: number
   uom: string
