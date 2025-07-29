@@ -54,7 +54,7 @@
                         </button>
                       </li>
                       <li class="menu-item">
-                        <button class="menu-link" @click="handleDropdown(item.id, 'delete')">
+                        <button class="menu-link" @click="handleDeleteModal(item.id)">
                           <span class="menu-icon">
                             <UiIcon variant="duotone" name="cross-circle" class="!text-danger" />
                           </span>
@@ -305,13 +305,47 @@
           :disabled="isSaveLoading"
           v-if="mode !== 'view'"
         >
-          <UiIcon name="file-added" variant="duotone" />
+          <UiLoading variant="white" v-if="isSaveLoading" />
+          <UiIcon name="file-added" variant="duotone" v-else />
           <span>Save</span>
         </UiButton>
       </div>
     </UiModal>
 
     <!-- Delete Modal -->
+    <UiModal v-model="deleteModal" size="sm">
+      <div class="text-center mb-6">
+        <UiIcon
+          name="cross-circle"
+          variant="duotone"
+          class="text-[150px] text-danger text-center"
+        />
+      </div>
+      <h3 class="text-center text-lg font-medium">Are You Sure You Want to Delete This Item?</h3>
+      <p class="text-center text-base text-gray-600 mb-5">
+        This action will permanently remove the selected data from the list.
+      </p>
+      <div class="flex gap-3 px-8 mb-3">
+        <UiButton
+          outline
+          @click="deleteModal = false"
+          class="flex-1 flex items-center justify-center"
+        >
+          <UiIcon name="black-left-line" />
+          <span>Cancel</span>
+        </UiButton>
+        <UiButton
+          variant="danger"
+          class="flex-1 flex items-center justify-center"
+          @click="handleDelete"
+          :disabled="isSaveLoading"
+        >
+          <UiLoading variant="white" v-if="isSaveLoading" />
+          <UiIcon name="cross-circle" variant="duotone" v-else />
+          <span>Delete</span>
+        </UiButton>
+      </div>
+    </UiModal>
 
     <!-- Success Modal -->
     <UiModal v-model="successModal" size="sm" @update:model-value="handleSuccess">
@@ -331,7 +365,10 @@
           class="text-[150px] text-danger text-center"
         />
       </div>
-      <h3 class="text-center text-lg font-medium">Failed to Change Payment Information!</h3>
+      <h3 class="text-center text-lg font-medium">
+        Failed to {{ mode == 'delete' ? 'Delete' : mode === 'edit' ? 'Change' : 'Add' }} Payment
+        Information!
+      </h3>
       <p class="text-center text-base text-gray-600 mb-5">
         Failed to change Payment Information. Please try again later or contact support if the
         problem persists.
@@ -350,6 +387,7 @@ import UiFormGroup from '@/components/ui/atoms/form-group/UiFormGroup.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
+import UiLoading from '@/components/UiLoading.vue'
 import { checkEmptyValues } from '@/composables/validation'
 import { type CurrencyListType } from '@/stores/master-data/types/vendor-master-data'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
@@ -407,6 +445,7 @@ const mode = ref<'add' | 'view' | 'edit' | 'delete'>('add')
 const selectedPaymentId = ref<number | null>(null)
 const successModal = ref(false)
 const errorModal = ref(false)
+const deleteModal = ref(false)
 
 const isBankNotRegistered = ref(false)
 
@@ -537,6 +576,12 @@ const handleDropdown = (id: number, newMode: 'view' | 'edit' | 'delete') => {
   }
 }
 
+const handleDeleteModal = (id: number) => {
+  mode.value = 'delete'
+  selectedPaymentId.value = id
+  deleteModal.value = true
+}
+
 // tambah atau edit bank
 const handleSubmit = async () => {
   bankDetailError.value = checkEmptyValues(payload.value.request.vendorBankDetail)
@@ -565,15 +610,36 @@ const handleSubmit = async () => {
   try {
     isSaveLoading.value = true
     await paymentDataStore.addPayment(payload.value)
-    closeModal()
     successModal.value = true
   } catch (error) {
     if (error instanceof Error) {
-      closeModal()
+      errorModal.value = true
+    }
+  } finally {
+    closeModal()
+    isSaveLoading.value = false
+  }
+}
+
+const handleDelete = async () => {
+  if (!selectedPaymentId.value) return
+
+  try {
+    isSaveLoading.value = true
+    await paymentDataStore.deletePayment({
+      request: {
+        id: selectedPaymentId.value,
+        updateBy: userStore.userData?.profile.employeeName as string,
+      },
+    })
+    successModal.value = true
+  } catch (error) {
+    if (error instanceof Error) {
       errorModal.value = true
     }
   } finally {
     isSaveLoading.value = false
+    deleteModal.value = false
   }
 }
 
