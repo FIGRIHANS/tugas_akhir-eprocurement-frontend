@@ -20,6 +20,7 @@ export interface itemsPoGrType {
   currencyTC: string
   itemAmountLC: number
   itemAmountTC: number
+  vatAmount?: number
   whtType?: string
   whtCode?: string
   whtBaseAmount?: number
