@@ -278,7 +278,7 @@ const getVatAmount = () => {
 watch(
   () => [form?.invoiceDPCode, form?.invoiceTypeCode],
   () => {
-    setColumn()
+    setColumn(form?.invoiceTypeCode)
   },
   {
     immediate: true
@@ -299,7 +299,7 @@ watch(
 )
 
 onMounted(() => {
-  setColumn()
+  setColumn(form?.invoiceTypeCode)
 })
 </script>
 
