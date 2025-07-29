@@ -4,10 +4,13 @@ import type { IModalProps } from './types/modal'
 
 const props = withDefaults(defineProps<IModalProps>(), {
   size: 'md',
+  static: false,
 })
 const open = defineModel()
 
 const handleClose = (event: Event) => {
+  if (props.static) return
+
   if (event.target === event.currentTarget) {
     open.value = !open.value
   }
