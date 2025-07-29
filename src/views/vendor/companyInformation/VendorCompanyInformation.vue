@@ -9,6 +9,8 @@ import AdministrativeData from './AdministrativeData.vue'
 import PaymentInfoListView from './PaymentInfoListView.vue'
 import CompanyDeedData from './CompanyDeedData.vue'
 import BussinesLicenseData from './BussinesLicenseData.vue'
+import EquipmentData from './EquipmentData.vue'
+import ExpertPersonnelData from './ExpertPersonnelData.vue'
 
 const route = useRoute()
 const currentTab = ref<string>('administrative-data')
@@ -87,4 +89,6 @@ watch(
   <BussinesLicenseData v-if="currentTab === 'business-license-data'" />
   <PaymentInfoListView v-if="currentTab === 'payment-information-data'" />
   <CompanyDeedData v-if="currentTab === 'company-deed-data'" />
+  <EquipmentData v-if="currentTab === 'equipment-data'" />
+  <ExpertPersonnelData v-if="currentTab === 'expert-personel-data'" />
 </template>
