@@ -242,3 +242,41 @@ export interface ILicensePayload {
   issuedDate: string;
   expiredDate: string;
 }
+
+export interface IShareholderPayload {
+  stockID: number;
+  vendorID: number;
+  ownerName: string;
+  ownerID: string;
+  ownerIDUrl: string;
+  ownerDOB: Date;
+  quantity: number;
+  unitID: number;
+  unitCurrencyID: number;
+  user: string;
+  isActive: boolean;
+  tmpBlacklist: boolean;
+  position: string;
+  isTemporary: boolean;
+  refVendorID: number;
+  action: number;
+  stockTypeID: number;
+}
+
+export interface IVendorLegalDocumentPayload {
+  id: number;
+  vendorID: number;
+  filename: string;
+  filesize: number;
+  documentURL: string;
+  documentType: number;
+  documentNo: string;
+  documentDate: Date;
+  notaryName: string;
+  notaryLocation: number;
+  user: string;
+  isActive: boolean;
+  isTemporary: boolean;
+  refVendorId: number;
+  action: number;
+}

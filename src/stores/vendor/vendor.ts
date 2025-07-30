@@ -9,7 +9,9 @@ import type {
   IPayment,
   IPaymentPayload,
   IPostBlacklist,
+  IShareholderPayload,
   IVendorContent,
+  IVendorLegalDocumentPayload,
   IVerificationDetailData,
   IVerifyLegal,
 } from './types/vendor'
@@ -305,3 +307,57 @@ export const useVerificationDetailStore = defineStore('verification-detail', () 
 
   return { loading, error, data, getData }
 })
+
+export const useCompanyDeedDataStore = defineStore("company-deed-data", () => {
+  const loading = ref(false)
+  const error = ref<string | null>(null)
+  const data = ref<any>([]) ///TODO: change type soon
+
+  const postShareholders = async (payload: IShareholderPayload) => {
+    try {
+
+      const response: ApiResponse = await vendorAPI.post(
+        '/public/vendorchangedata/post/shareholders', payload
+      )
+
+      return response.data
+
+    } catch (err) {
+      if (err instanceof Error) {
+        if (axios.isAxiosError(err)) {
+          error.value = err.response?.data.result.message
+        }
+      }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const postVendorLegalDocument = async (payload: IVendorLegalDocumentPayload) => {
+    try {
+
+      const response: ApiResponse = await vendorAPI.post('/public/vendorchangedata/post/vendorlegaldocument', payload)
+
+      return response.data
+
+    } catch (err) {
+      if (err instanceof Error) {
+        if (axios.isAxiosError(err)) {
+          error.value = err.response?.data.result.message
+        }
+      }
+    } finally {
+      loading.value = false
+    }
+  }
+
+
+  return {
+    loading,
+    error,
+    data,
+    postShareholders,
+    postVendorLegalDocument
+  }
+
+});
