@@ -565,7 +565,7 @@ onMounted(() => {
   invoiceMasterApi.getDocumentTypes()
   invoiceMasterApi.getVendorList()
   if (loginApi.isVendor) {
-    form.invoiceType = '1'
+    form.invoiceType = '901'
   }
 
   if (route.query.type === 'po-view') {
