@@ -3,19 +3,29 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import { useRoute, useRouter } from 'vue-router'
 import UiActions from './UiActions.vue'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import ModalForm from './ModalForm.vue'
 import { tableCols } from './static'
 import useExperienceStore from '@/stores/vendor/experience'
+import UiModal from '@/components/modal/UiModal.vue'
+import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
+import { formatDate } from '@/composables/date-format'
 
 const router = useRouter()
 const route = useRoute()
 const experienceStore = useExperienceStore()
 
-const mode = ref<'add' | 'view' | 'edit'>('add')
+const mode = ref<'add' | 'view' | 'edit' | 'delete'>('add')
 const selectedId = ref<number>(0)
 
 const modalForm = ref<boolean>(false)
+const errorModal = ref<boolean>(false)
+const successModal = ref<boolean>(false)
+
+const completedExp = computed(() =>
+  experienceStore.data.filter((item) => item.value === 'COMPLETED'),
+)
+const onGoingExp = computed(() => experienceStore.data.filter((item) => item.value === 'ON GOING'))
 
 const openModalForm = (newMode: 'add' | 'view' | 'edit', id?: number) => {
   modalForm.value = true
@@ -24,6 +34,10 @@ const openModalForm = (newMode: 'add' | 'view' | 'edit', id?: number) => {
   if (id) {
     selectedId.value = id
   }
+}
+
+const onSuccess = () => {
+  experienceStore.getData(Number(route.params.id))
 }
 
 onMounted(() => {
@@ -57,15 +71,23 @@ onMounted(() => {
                   </th>
                 </tr>
               </thead>
-              <tbody>
-                <tr>
+              <tbody class="text-nowrap">
+                <tr v-for="item in completedExp" :key="item.id">
                   <td>
                     <UiActions
-                      :id="1"
+                      :id="item.id"
                       @on-view="openModalForm('view')"
                       @on-edit="openModalForm('edit')"
                     />
                   </td>
+                  <td>{{ item.contractName }}</td>
+                  <td>{{ item.address }}</td>
+                  <td>{{ item.agency }}</td>
+                  <td>{{ item.contractValue }}</td>
+                  <td>{{ item.businessFieldName }}</td>
+                  <td>{{}}</td>
+                  <td>{{ formatDate(item.startDate) }}</td>
+                  <td>{{ formatDate(item.endDate) }}</td>
                 </tr>
               </tbody>
             </table>
@@ -85,6 +107,25 @@ onMounted(() => {
                   </th>
                 </tr>
               </thead>
+              <tbody class="text-nowrap">
+                <tr v-for="item in onGoingExp" :key="item.id">
+                  <td>
+                    <UiActions
+                      :id="item.id"
+                      @on-view="openModalForm('view')"
+                      @on-edit="openModalForm('edit')"
+                    />
+                  </td>
+                  <td>{{ item.contractName }}</td>
+                  <td>{{ item.address }}</td>
+                  <td>{{ item.agency }}</td>
+                  <td>{{ item.contractValue }}</td>
+                  <td>{{ item.businessFieldName }}</td>
+                  <td>{{}}</td>
+                  <td>{{ formatDate(item.startDate) }}</td>
+                  <td>{{ formatDate(item.endDate) }}</td>
+                </tr>
+              </tbody>
             </table>
           </div>
         </div>
@@ -99,5 +140,33 @@ onMounted(() => {
   </div>
 
   <!-- modal add experience data -->
-  <ModalForm v-model="modalForm" />
+  <ModalForm
+    v-model="modalForm"
+    :vendor-id="Number($route.params.id)"
+    @on-error="() => (errorModal = true)"
+    @on-success="() => (successModal = true)"
+  />
+
+  <!-- Error modal -->
+  <UiModal v-model="errorModal" size="sm">
+    <div class="text-center mb-6">
+      <UiIcon name="cross-circle" variant="duotone" class="text-[150px] text-danger text-center" />
+    </div>
+    <h3 class="text-center text-lg font-medium">
+      Failed to {{ mode == 'delete' ? 'Delete' : mode === 'edit' ? 'Change' : 'Add' }} Experience
+      data!
+    </h3>
+    <p class="text-center text-base text-gray-600 mb-5">
+      Please try again later or contact support if the problem persists.
+    </p>
+  </UiModal>
+
+  <!-- Success Modal -->
+  <UiModal v-model="successModal" size="sm" @update:model-value="onSuccess">
+    <ModalSuccessLogo class="mx-auto" />
+    <h3 class="text-center text-lg font-medium">Hooray!</h3>
+    <p class="text-center text-base text-gray-600 mb-5">
+      The data has been successfully updated in the admin system.
+    </p>
+  </UiModal>
 </template>
