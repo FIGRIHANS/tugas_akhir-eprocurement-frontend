@@ -43,11 +43,13 @@ export const useVendorStore = defineStore('vendor', () => {
         { params },
       )
 
-      if (response.data.statusCode === 200) {
-        vendors.value = response.data.result.content
-      } else {
+      if (response.data.result.isError) {
         error.value = response.data.result.message
+        return
       }
+
+      vendors.value = response.data.result.content
+      return response.data.result.content
     } catch (err: unknown) {
       if (err instanceof Error) {
         error.value = err.message
