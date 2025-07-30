@@ -57,11 +57,12 @@
         type="number"
       />
     </div>
+    <span v-if="hintText" class="form-hint !text-danger">{{ hintText }}</span>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, defineModel, ref, watch, onMounted, type ModelRef } from 'vue'
+import { computed, defineModel, ref, watch, onMounted } from 'vue'
 import type { IInputTelProps } from './types/input-tel'
 
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
