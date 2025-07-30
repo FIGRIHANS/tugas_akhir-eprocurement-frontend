@@ -38,7 +38,7 @@
                   :max-length="[12, 27].includes(item.licenseId) ? 16 : 9999"
                 />
                 <span v-if="item.licenseId === 12" class="text-danger text-[10px]"
-                  >*NPWP upload is limited to 3 attempts</span
+                  >*Please use a tax number that has not been registered before</span
                 >
                 <span v-else-if="item.licenseId === 27" class="text-danger text-[10px]"
                   >*consists of 16 numbers</span
