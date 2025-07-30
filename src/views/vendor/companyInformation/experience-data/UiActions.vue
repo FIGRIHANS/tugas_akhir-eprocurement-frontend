@@ -17,9 +17,9 @@ defineProps<{
         <li class="menu-item">
           <button class="menu-link" @click="emit('onView', id)">
             <span class="menu-icon">
-              <UiIcon variant="duotone" name="eye" class="!text-primary" />
+              <UiIcon variant="duotone" name="file-down" class="!text-primary" />
             </span>
-            <span class="menu-title"> View Data </span>
+            <span class="menu-title"> Download </span>
           </button>
         </li>
         <li class="menu-item">
