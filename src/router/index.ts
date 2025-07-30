@@ -16,6 +16,7 @@ import userManagement from './modules/userManagement'
 import companyInfomartion from './modules/companyInfomartion'
 import workflowConfig from './modules/workflowConfig'
 import paymentInformation from './modules/payment-information'
+import tender from './modules/tender'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -36,7 +37,16 @@ const router = createRouter({
     {
       path: '/',
       component: LayoutWithSidebar,
-      children: [...vendor, ...invoice, ...dashboard, ...userManagement, ...companyInfomartion, ...paymentInformation, ...workflowConfig],
+      children: [
+        ...vendor,
+        ...invoice,
+        ...dashboard,
+        ...userManagement,
+        ...companyInfomartion,
+        ...paymentInformation,
+        ...workflowConfig,
+        ...tender
+      ],
       meta: {
         middleware: 'auth',
       },

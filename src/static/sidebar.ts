@@ -43,6 +43,7 @@ export default [
       {
         id: 'create-tender-request',
         title: 'Create Tender Request',
+        to: 'tenderCreate'
       },
     ],
   },
