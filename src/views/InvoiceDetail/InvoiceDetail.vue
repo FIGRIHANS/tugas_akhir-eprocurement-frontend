@@ -13,7 +13,7 @@
       <InvoiceCalculation :isNeedCheck="checkStatusCode()" class="flex-1" :formInvoice="form" />
     </div>
     <InvoicePoGr v-if="checkPo()" :isNeedCheck="checkStatusCode()" class="mt-[24px]" />
-    <AdditionalCost v-if="form.invoiceDPCode === 9011 && checkPo()" :isNeedCheck="checkStatusCode()" class="mt-[24px]" />
+    <AdditionalCost v-if="form.invoiceDPCode === 9011 && checkPo() || form.invoiceTypeCode === 902 || form.invoiceTypeCode === 903" :isNeedCheck="checkStatusCode()" class="mt-[24px]" />
     <div class="flex items-center justify-between gap-[8px] mt-[24px]">
       <div class="flex items-center gap-[10px]">
         <button class="btn btn-outline btn-primary" :disabled="isLoading" @click="goBack">
@@ -184,7 +184,7 @@ const openReject = () => {
 }
 
 const checkPo = () => {
-  return form.value.invoiceTypeCode === 901
+  return form.value.invoiceTypeCode === 901 || form.value.invoiceTypeCode === 902
 }
 
 const checkVerifHeader = () => {
@@ -212,14 +212,13 @@ const checkVerif = () => {
   let status = true
   const data = form.value
   status = checkVerifHeader()
-
+  
   if (
     !data.bankKeyCheck ||
     !data.generalDataCheck ||
     !data.invoiceHeaderDocumentCheck ||
     !data.invoiceCalculationCheck ||
-    !data.invoicePoGrCheck ||
-    !data.additionalCostCheck
+    !data.invoicePoGrCheck 
   ) status = false
 
   return status
@@ -317,7 +316,7 @@ const mapDataVerif = () => {
 
 const goVerif = () => {
   const status = checkVerif()
-
+  
   if (!status) return
   isLoading.value = true
   verificationApi.postSubmission(mapDataVerif()).then(() => {
