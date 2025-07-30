@@ -4,8 +4,9 @@
       <HeaderDocument />
       <InvoiceCalculation />
     </div>
-    <InvoicePoGr v-if="checkPo()" class="mt-[24px]" />
-    <AdditionalCost v-if="form.invoiceDPCode === 9011 && !checkNonPo()" class="mt-[24px]" />
+    <!-- <InvoicePoGr v-if="checkPo()" class="mt-[24px]" /> -->
+    <InvoicePoGr  class="mt-[24px]" />
+    <AdditionalCost v-if="!checkNonPo()" class="mt-[24px]" />
   </div>
 </template>
 
@@ -25,9 +26,9 @@ const form = inject<Ref<formTypes>>('form')
 const route = useRoute()
 const typeForm = ref<string>('')
 
-const checkPo = () => {
-  return form?.value.invoiceTypeCode === 901
-}
+// const checkPo = () => {
+//   return form?.value.invoiceTypeCode === 901
+// }
 
 const checkNonPo = () => {
   return typeForm.value === 'nonpo'
