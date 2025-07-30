@@ -41,7 +41,7 @@
     id="registration-error"
     type="danger"
     title="Vendor Registration Failed"
-    text="Your registration could not be submitted. Please check the required data and try again"
+    :text="errorMessage"
     no-submit
     static
     :cancel="() => (modalTrigger.error = false)"
@@ -87,6 +87,10 @@ const isLoading = ref<boolean>(false)
 
 const registrationVendorStore = useRegistrationVendorStore()
 const vendorMasterDataStore = useVendorMasterDataStore()
+
+const errorMessage = ref<string>(
+  'Your registration could not be submitted. Please check the required data and try again',
+)
 
 const information = computed(() => registrationVendorStore.information)
 const contact = computed(() => registrationVendorStore.contact)
@@ -358,8 +362,12 @@ const submitData = async () => {
 
     await vendorMasterDataStore.postVendorRegistration(payload)
     modalTrigger.value.success = true
-  } catch (error) {
+  } catch (error: any) {
     modalTrigger.value.error = true
+    errorMessage.value =
+      typeof error.response.data === 'string'
+        ? error.response.data
+        : 'Your registration could not be submitted. Please check the required data and try again'
     console.error(error)
   } finally {
     isLoading.value = false
