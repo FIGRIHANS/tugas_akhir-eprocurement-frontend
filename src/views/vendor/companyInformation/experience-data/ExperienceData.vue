@@ -10,6 +10,8 @@ import useExperienceStore from '@/stores/vendor/experience'
 import UiModal from '@/components/modal/UiModal.vue'
 import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
 import { formatDate } from '@/composables/date-format'
+import ModalDelete from './ModalDelete.vue'
+import UiLoading from '@/components/UiLoading.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -21,6 +23,7 @@ const selectedId = ref<number>(0)
 const modalForm = ref<boolean>(false)
 const errorModal = ref<boolean>(false)
 const successModal = ref<boolean>(false)
+const deleteModal = ref<boolean>(false)
 
 const completedExp = computed(() =>
   experienceStore.data.filter((item) => item.value === 'COMPLETED'),
@@ -34,6 +37,12 @@ const openModalForm = (newMode: 'add' | 'view' | 'edit', id?: number) => {
   if (id) {
     selectedId.value = id
   }
+}
+
+const onModalDelete = (id: number) => {
+  selectedId.value = id
+  mode.value = 'delete'
+  deleteModal.value = true
 }
 
 const onSuccess = () => {
@@ -72,12 +81,33 @@ onMounted(() => {
                 </tr>
               </thead>
               <tbody class="text-nowrap">
-                <tr v-for="item in completedExp" :key="item.id">
+                <!-- loading -->
+                <tr v-if="experienceStore.loading">
+                  <td :colspan="tableCols.length - 1" class="text-center">
+                    <UiLoading size="md" variant="primary" />
+                  </td>
+                </tr>
+
+                <!-- error -->
+                <tr v-else-if="experienceStore.error">
+                  <td :colspan="tableCols.length - 1" class="text-center text-danger">
+                    {{ experienceStore.error }}
+                  </td>
+                </tr>
+
+                <!-- No data -->
+                <tr v-else-if="!experienceStore.data.length">
+                  <td :colspan="tableCols.length - 1" class="text-center text-danger">No data</td>
+                </tr>
+
+                <!-- loop data -->
+                <tr v-else v-for="item in completedExp" :key="item.id">
                   <td>
                     <UiActions
                       :id="item.id"
                       @on-view="openModalForm('view')"
                       @on-edit="openModalForm('edit')"
+                      @on-delete="onModalDelete(item.id)"
                     />
                   </td>
                   <td>{{ item.contractName }}</td>
@@ -108,7 +138,27 @@ onMounted(() => {
                 </tr>
               </thead>
               <tbody class="text-nowrap">
-                <tr v-for="item in onGoingExp" :key="item.id">
+                <!-- loading -->
+                <tr v-if="experienceStore.loading">
+                  <td :colspan="tableCols.length - 1" class="text-center">
+                    <UiLoading size="md" variant="primary" />
+                  </td>
+                </tr>
+
+                <!-- error -->
+                <tr v-else-if="experienceStore.error">
+                  <td :colspan="tableCols.length - 1" class="text-center text-danger">
+                    {{ experienceStore.error }}
+                  </td>
+                </tr>
+
+                <!-- No data -->
+                <tr v-else-if="!experienceStore.data.length">
+                  <td :colspan="tableCols.length - 1" class="text-center text-danger">No data</td>
+                </tr>
+
+                <!-- loop -->
+                <tr v-else v-for="item in onGoingExp" :key="item.id">
                   <td>
                     <UiActions
                       :id="item.id"
@@ -145,6 +195,14 @@ onMounted(() => {
     :vendor-id="Number($route.params.id)"
     @on-error="() => (errorModal = true)"
     @on-success="() => (successModal = true)"
+  />
+
+  <!-- delete modal -->
+  <ModalDelete
+    :id="selectedId"
+    v-model="deleteModal"
+    @on-error="() => (errorModal = true)"
+    @on-success="successModal = true"
   />
 
   <!-- Error modal -->

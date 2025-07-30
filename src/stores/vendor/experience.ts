@@ -30,6 +30,8 @@ const useExperienceStore = defineStore('experience-data', () => {
       if (err instanceof Error) {
         error.value = isAxiosError(err) ? err.response?.data : 'Failed to Get data'
       }
+    } finally {
+      loading.value = false
     }
   }
 
