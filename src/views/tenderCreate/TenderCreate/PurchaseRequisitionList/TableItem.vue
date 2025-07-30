@@ -1,5 +1,9 @@
 <template>
   <div>
+    <div class="input w-[250px] mb-[24px]">
+      <i class="ki-filled ki-magnifier"></i>
+      <input v-model="search" placeholder="Cari data" type="text"/>
+    </div>
     <div class="table-item__table">
       <table class="table text-gray-700 font-medium text-sm">
         <thead>
@@ -44,9 +48,11 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive } from 'vue'
+import { ref, reactive } from 'vue'
 import moment from 'moment'
 import type { TableItemTypes } from '../../types/purchaseRequisitionList'
+
+const search = ref<string>('')
 
 const columns = reactive<string[]>([
   '',
