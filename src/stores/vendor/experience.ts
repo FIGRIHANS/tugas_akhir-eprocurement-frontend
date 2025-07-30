@@ -3,10 +3,10 @@ import vendorApi from '@/core/utils/vendorApi'
 import { isAxiosError } from 'axios'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { IExperiencePayload } from './types/experience'
+import type { IExperienceData, IExperiencePayload } from './types/experience'
 
 const useExperienceStore = defineStore('experience-data', () => {
-  const data = ref()
+  const data = ref<IExperienceData[]>([])
   const loading = ref(false)
   const error = ref('')
 
@@ -15,7 +15,7 @@ const useExperienceStore = defineStore('experience-data', () => {
     error.value = ''
 
     try {
-      const response: ApiResponse = await vendorApi.get(
+      const response: ApiResponse<IExperienceData[]> = await vendorApi.get(
         `/public/vendorchangedata/vendorexperience?vendorId=${vendorId}`,
       )
 

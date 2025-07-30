@@ -11,27 +11,40 @@ import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import type { IExperiencePayload } from '@/stores/vendor/types/experience'
 import { cloneDeep } from 'lodash'
 import { computed, onMounted, ref } from 'vue'
-import { defaultFormData } from './static'
+import { defaultFormData, excludedFields } from './static'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
 import { useLoginStore } from '@/stores/views/login'
 import { useVendorUploadStore } from '@/stores/vendor/upload'
 import { checkEmptyValues } from '@/composables/validation'
-withDefaults(
+import useExperienceStore from '@/stores/vendor/experience'
+import UiLoading from '@/components/UiLoading.vue'
+
+const props = withDefaults(
   defineProps<{
     mode?: 'create' | 'edit' | 'view'
+    vendorId: number
   }>(),
   {
     mode: 'create',
   },
 )
+
+const emit = defineEmits(['onError', 'onSuccess'])
+
 const open = defineModel()
 const lookupStore = useVendorMasterDataStore()
 const userStore = useLoginStore()
 const uploadStore = useVendorUploadStore()
+const experienceStore = useExperienceStore()
+
+// ref bantuan
+const businessFieldId = ref<number>(0)
 
 const formData = ref<IExperiencePayload>(cloneDeep(defaultFormData))
 const uploadError = ref<string>('')
+const uploadLoading = ref<boolean>(false)
 const formError = ref<string[]>([])
+const submitLoading = ref<boolean>(false)
 
 // computed props
 const countryOptions = computed(() =>
@@ -52,7 +65,7 @@ const currencyOptions = computed(() =>
 const businessFieldOptions = computed(() => lookupStore.businessFieldList)
 const subBusinessFieldOptions = computed(() => {
   const businessField = lookupStore.businessFieldList.find(
-    (field) => field.businessFieldID === formData.value.field,
+    (field) => field.businessFieldID === businessFieldId.value,
   )
 
   if (businessField) {
@@ -65,20 +78,23 @@ const subBusinessFieldOptions = computed(() => {
 // functions
 const onUploadFile = async (file: File) => {
   if (!file) return
-
   uploadError.value = ''
   const formDataFile = new FormData()
   formDataFile.append('FormFile', file)
   formDataFile.append('Actioner', userStore.userData?.profile.profileId.toString() || '0')
 
   try {
+    uploadLoading.value = true
     const response = await uploadStore.upload(formDataFile)
     formData.value.documentURL = response?.path as string
+    formData.value.uploadDate = new Date().toISOString()
   } catch (error) {
     if (error instanceof Error) {
       console.error(error)
       alert('File upload failed. Please try again.')
     }
+  } finally {
+    uploadLoading.value = false
   }
 }
 
@@ -91,11 +107,31 @@ const onSelectState = (provinceId: number) => {
 }
 
 const onSubmit = async () => {
+  // set value for vendor id dan user
+  formData.value.vendorID = props.vendorId
+  formData.value.user = userStore.userData?.profile.employeeName as string
+
+  // check empty value for each form fields
   formError.value = checkEmptyValues(formData.value)
+
+  // remove excluded key
+  formError.value = formError.value.filter((field) => !excludedFields.includes(field))
 
   if (formError.value.length) return
 
-  console.log(formData.value)
+  try {
+    submitLoading.value = true
+    await experienceStore.update(formData.value)
+    emit('onSuccess')
+    onCloseModal()
+  } catch (error) {
+    if (error instanceof Error) {
+      emit('onError')
+      onCloseModal()
+    }
+  } finally {
+    submitLoading.value = false
+  }
 }
 
 const onCloseModal = () => {
@@ -137,7 +173,7 @@ onMounted(() => {
       </UiButton>
     </div>
 
-    <form action="" @submit.prevent="onSubmit">
+    <form @submit.prevent="onSubmit">
       <UiFormGroup hide-border :grid="2" class="mt-3">
         <!-- contract name -->
         <UiInput
@@ -167,9 +203,7 @@ onMounted(() => {
           text-key="businessFieldName"
           value-key="businessFieldID"
           placeholder="--Business Sector Type--"
-          v-model="formData.field"
-          :error="formError.includes('field')"
-          :hint-text="formError.includes('field') ? 'Business Sector required' : ''"
+          v-model="businessFieldId"
         />
 
         <!-- Sub business sector -->
@@ -180,9 +214,9 @@ onMounted(() => {
           text-key="subBusinessFieldName"
           value-key="subBusinessFieldID"
           placeholder="--Sub Business Sector--"
-          v-model="formData.fieldType"
-          :error="formError.includes('fieldType')"
-          :hint-text="formError.includes('fieldType') ? 'Sub Business Field required' : ''"
+          v-model="formData.field"
+          :error="formError.includes('field')"
+          :hint-text="formError.includes('field') ? 'Sub Business Field required' : ''"
         />
 
         <!-- Country -->
@@ -276,6 +310,7 @@ onMounted(() => {
         <UiInput
           label="Contract Value"
           placeholder="Contract Value"
+          type="number"
           required
           v-model="formData.contractValue"
           :error="formError.includes('contractValue')"
@@ -293,8 +328,11 @@ onMounted(() => {
             placeholder="Start Date"
             v-model="formData.startDate"
             :error="formError.includes('startDate')"
-            :hint-text="formError.includes('startDate') ? 'Start date required' : ''"
+            @update:model-value="formData.startDate = new Date($event).toISOString()"
           />
+          <span v-if="formError.includes('startDate')" class="form-hint !text-danger">
+            Start date required
+          </span>
         </div>
 
         <!-- End Date -->
@@ -308,8 +346,11 @@ onMounted(() => {
             placeholder="End Date"
             v-model="formData.endDate"
             :error="formError.includes('endDate')"
-            :hint-text="formError.includes('endDate') ? 'End date required' : ''"
+            @update:model-value="formData.endDate = new Date($event).toISOString()"
           />
+          <span v-if="formError.includes('endDate')" class="form-hint !text-danger">
+            End date required
+          </span>
         </div>
 
         <!-- Description -->
@@ -336,6 +377,7 @@ onMounted(() => {
                 : ''
           "
           :error="formError.includes('documentURL')"
+          :disabled="uploadLoading"
         />
       </UiFormGroup>
 
@@ -344,9 +386,9 @@ onMounted(() => {
           <UiIcon name="black-left-line" />
           <span>Cancel</span>
         </UiButton>
-        <UiButton variant="primary" type="submit">
-          <UiLoading variant="white" />
-          <UiIcon name="file-added" variant="duotone" />
+        <UiButton variant="primary" type="submit" :disabled="submitLoading || uploadLoading">
+          <UiLoading variant="white" v-if="submitLoading" />
+          <UiIcon name="file-added" variant="duotone" v-else />
           <span>Save</span>
         </UiButton>
       </div>

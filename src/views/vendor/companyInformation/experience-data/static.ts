@@ -21,13 +21,14 @@ export const tableCols: { key: string; label: string }[] = [
     key: 'contractValue',
     label: 'Contract Value',
   },
-  {
-    key: 'tenderCategoryType',
-    label: 'Tender Category Type',
-  },
+
   {
     key: 'businessSector',
     label: 'Business Sector',
+  },
+  {
+    key: 'subBusinessSector',
+    label: 'Sub Business Sector',
   },
   {
     key: 'startDate',
@@ -66,3 +67,13 @@ export const defaultFormData: IExperiencePayload = {
   remark: '',
   provinceLocation: 0,
 }
+
+export const excludedFields = [
+  'action',
+  'id',
+  'isTemporary',
+  'refVendorID',
+  'uploadDate',
+  'user',
+  'fieldType',
+]
