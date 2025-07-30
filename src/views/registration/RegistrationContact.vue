@@ -33,6 +33,7 @@
         required
         :error="contact.account.emailError"
       />
+
       <div class="flex items-center flex-wrap lg:flex-nowrap gap-2.5">
         <label class="form-label w-2/5 flex items-center gap-1">
           Confirm Password
@@ -50,6 +51,29 @@
           </div>
         </div>
       </div>
+
+      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5">
+        <div class="w-2/5"></div>
+        <div class="card bg-primary-light w-full">
+          <div class="card-body px-3 py-4">
+            <p class="text-xs text-primary">
+              Please use an Email that has not been registered before.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5">
+        <div class="w-2/5"></div>
+        <div class="card bg-gray-100 w-full">
+          <div class="card-body px-3 py-4 text-xs">
+            <span>
+              Make sure your new password is strong <br />
+              The password must contain.
+            </span>
+          </div>
+        </div>
+      </div>
       <UiInputTel
         v-model="contact.account.phone"
         label="Phone"
@@ -63,6 +87,7 @@
         label="Website"
         placeholder="Enter your website"
         row
+        class="col-start-1"
       />
     </UiFormGroup>
 
