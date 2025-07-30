@@ -153,7 +153,7 @@ const checkInvoiceInformation = () => {
     form.value.notesError||
     form.value.dpAmountDeductionError
   ) status = false
-
+  
   for (const item of form.value.additionalCosts) {
     if (!item.activityExpense || !item.itemAmount || !item.debitCredit) {
       status = false
