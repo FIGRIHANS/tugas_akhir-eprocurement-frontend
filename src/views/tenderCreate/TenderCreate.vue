@@ -31,6 +31,7 @@ import type { FormTypes } from './types/tenderCreate'
 
 const PurchaseRequisitionList = defineAsyncComponent(() => import('./TenderCreate/PurchaseRequisitionList.vue'))
 const VendorList = defineAsyncComponent(() => import('./TenderCreate/VendorList.vue'))
+const AdministrativeDocument = defineAsyncComponent(() => import('./TenderCreate/AdministrativeDocument.vue'))
 
 const routes = ref<routeTypes[]>([
   {
@@ -97,13 +98,17 @@ const form = reactive<FormTypes>({
     //   totalPo: '1000',
     //   isSelected: false
     // }
-  ]
+  ],
+  tenderStartDate: '',
+  tenderEndDate: '',
+  tenderMethod: ''
 })
 
 const contentComponent = computed(() => {
   const components = {
     purchase: PurchaseRequisitionList,
-    vendor: VendorList
+    vendor: VendorList,
+    admin: AdministrativeDocument
   } as { [key: string]: Component }
 
   return components[activeTab.value]

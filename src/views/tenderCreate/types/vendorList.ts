@@ -10,5 +10,5 @@ export interface TableItemTypes {
   afterSalesWarranty: string
   orderAbsorption: string
   totalPo: string
-  isSelected: boolean
+  isSelected?: boolean
 }

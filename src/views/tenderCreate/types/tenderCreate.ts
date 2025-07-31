@@ -7,6 +7,9 @@ export interface FormTypes {
   tenderPeriod: string
   remarks: string
   vendorList: VendorListTypes[]
+  tenderStartDate: string
+  tenderEndDate: string
+  tenderMethod: string
   tenderIdError?: boolean
   tenderStatusError?: boolean
   picError?: boolean

@@ -6,7 +6,7 @@
         <input v-model="search" placeholder="Cari data" type="text"/>
       </div>
       <div>
-        <button class="btn btn-primary">
+        <button class="btn btn-primary" @click="showAddVendor">
           Add vendor
           <i class="ki-duotone ki-questionnaire-tablet"></i>
         </button>
@@ -38,9 +38,11 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="data of form.vendorList" :key="data.id">
+          <tr v-for="(data, index) in form.vendorList" :key="data.id">
             <td>
-              <input v-model="data.isSelected" class="checkbox" type="checkbox"/>
+              <button class="btn btn-icon btn-outline btn-danger w-[32px] h-[32px]" @click="deleteItem(index)">
+                <i class="ki-duotone ki-trash !text-lg"></i>
+              </button>
             </td>
             <td>
               <span class="badge badge-pill badge-outline badge-primary">
@@ -87,18 +89,23 @@
     <div v-if="form.vendorList.length !== 0" class="mt-[24px] text-sm">
       Tampilkan {{ form.vendorList.length }} data dari total data {{ form.vendorList.length }}
     </div>
+    <AddVendorModal @setItem="setItemVendor" />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, inject } from 'vue'
+import { ref, reactive, inject, defineAsyncComponent } from 'vue'
+import { KTModal } from '@/metronic/core'
 import type { FormTypes } from '../types/tenderCreate'
+import type { TableItemTypes } from '../types/vendorList'
+
+const AddVendorModal = defineAsyncComponent(() => import('./VendorList/AddVendor.vue'))
 
 const form = inject<FormTypes>('form')
 const search = ref<string>('')
 
 const columns = reactive<string[]>([
-  '',
+  'Action',
   'Status',
   'Vendor Code',
   'Rank',
@@ -119,6 +126,22 @@ const colorRank = (rank: string) => {
     '4': 'badge-danger'
   } as { [key: string]: string }
   return lib[rank]
+}
+
+const deleteItem = (index: number) => {
+  form?.vendorList.splice(index, 1)
+}
+
+const showAddVendor = () => {
+  const idModal = document.querySelector('#add_vendor_tender_modal')
+  const modal = KTModal.getInstance(idModal as HTMLElement)
+  modal.show()
+}
+
+const setItemVendor = (items: TableItemTypes[]) => {
+  for (const data of items) {
+    form?.vendorList.push({ ...data, isSelected: false })
+  }
 }
 </script>
 
