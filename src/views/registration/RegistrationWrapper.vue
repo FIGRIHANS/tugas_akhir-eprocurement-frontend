@@ -142,7 +142,7 @@ const checkFieldNotEmpty = () => {
       vendorLocation: locationFields,
     },
     contact: {
-      account: ['username', 'email', 'password', 'confirmPassword', 'phone'],
+      account: ['username', 'email', 'phone'],
     },
     document: ['licenseNo', 'issuedDate', 'expiredDate', 'uploadUrl'],
     payment: ['accountNo', 'accountName', 'currencyId', 'bankAddress'],
@@ -190,6 +190,15 @@ const checkFieldNotEmpty = () => {
           ...checkErrors(section, fields.contact[key]),
         }
       })
+
+      const { password, passwordError, confirmPassword, confirmPasswordError } =
+        registrationVendorStore.contact.account
+
+      registrationVendorStore.contact.account = {
+        ...registrationVendorStore.contact.account,
+        passwordError: password ? passwordError : password === '',
+        confirmPasswordError: confirmPassword ? confirmPasswordError : confirmPassword === '',
+      }
 
       const hasContactPersons = registrationVendorStore.contact.contactPerson.list.length > 0
       const contactPersonHasFinance = registrationVendorStore.contact.contactPerson.list.some(
