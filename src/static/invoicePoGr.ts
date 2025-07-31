@@ -32,22 +32,10 @@ export const invoiceDpColumn = [
 export const PoPibColumn = [
   'PO Number',
   'PO Item',
-  'GR Document No',
-  'GR Document Item',
-  'GR Document Date',
   'Item Amount',
   'Quantity',
   'Unit',
   'Item Text',
-  'Condition Type',
-  'Condition Type Description',
-  'QC Status',
-  'Tax Code',
-  'WHT Type',
-  'WHT Code',
-  'WHT Base Amount',
-  'WHT Amount',
-  'Departement'
   // 'Category',
   // 'Total Net Amount'
 ]

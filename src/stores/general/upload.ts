@@ -18,7 +18,14 @@ export const useUploadStore = defineStore('upload', () => {
     return response.data.result.content
   }
 
+  const previewFile = async (fullFilePath: string) => {
+    const response: ApiResponse = await generalApi.post('/api/file/preview', { fullFilePath })
+
+    return response.data.result.content
+  }
+
   return {
     uploadFile,
+    previewFile,
   }
 })
