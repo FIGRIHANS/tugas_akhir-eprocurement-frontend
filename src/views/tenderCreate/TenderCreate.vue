@@ -6,7 +6,7 @@
     </div>
     <TabTender :activeTab="activeTab" class="mt-[24px]" />
     <Transition mode="out-in">
-      <component :is="contentComponent" />
+      <component :is="contentComponent" :activeTab="activeTabAdmin" @setTab="setTab" />
     </Transition>
     <div class="flex align-items-center justify-between gap-[8px] mt-[24px]">
       <button class="btn btn-outline btn-primary" :disabled="activeTab === 'purchase'" @click="goBack">
@@ -41,6 +41,7 @@ const routes = ref<routeTypes[]>([
 ])
 
 const activeTab = ref<string>('purchase')
+const activeTabAdmin = ref<string>('automatic')
 const tabList = reactive<string[]>([
   'purchase',
   'vendor',
@@ -101,7 +102,9 @@ const form = reactive<FormTypes>({
   ],
   tenderStartDate: '',
   tenderEndDate: '',
-  tenderMethod: ''
+  tenderMethod: '',
+  automaticCriteria: [],
+  manualCriteria: []
 })
 
 const contentComponent = computed(() => {
@@ -128,6 +131,10 @@ const goBack = () => {
   if (getIndex !== -1) {
     activeTab.value = tabList[getIndex - 1]
   }
+}
+
+const setTab = (tab: string) => {
+  activeTabAdmin.value = tab
 }
 
 provide('form', form)

@@ -5,6 +5,19 @@
       <TenderOrganization class="flex-1" />
       <DocumentAttachment class="flex-1" />
     </div>
+    <div class="border rounded-xl flex align-items-center gap-[24px] p-[24px]">
+      <p class="font-semibold">Vendor Evaluation Criteria</p>
+      <div class="border rounded-lg p-[4px]">
+        <div class="flex gap-4 mb-5" data-tabs="true">
+          <a class="btn btn-primary btn-clear" :class="{ 'active': activeTab === 'automatic' }" href="#" @click="onSetTab(true)">
+            Automatic Criteria
+          </a>
+          <a class="btn btn-primary btn-clear" :class="{ 'active': activeTab === 'manual' }" href="#" @click="onSetTab(false)">
+            Manual Criteria
+          </a>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -12,4 +25,14 @@
 import GeneralData from './AdministrativeDocument/GeneralData.vue'
 import TenderOrganization from './AdministrativeDocument/TenderOrganization.vue'
 import DocumentAttachment from './AdministrativeDocument/DocumentAttachment.vue'
+
+defineProps<{
+  activeTab: string
+}>()
+
+const emits = defineEmits(['setTab'])
+
+const onSetTab = (isAutomatic: boolean) => {
+  emits('setTab', isAutomatic ? 'automatic' : 'manual')
+}
 </script>

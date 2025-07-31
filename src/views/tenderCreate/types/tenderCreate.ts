@@ -10,6 +10,8 @@ export interface FormTypes {
   tenderStartDate: string
   tenderEndDate: string
   tenderMethod: string
+  automaticCriteria: CriteriaTypes[]
+  manualCriteria: CriteriaTypes[]
   tenderIdError?: boolean
   tenderStatusError?: boolean
   picError?: boolean
@@ -32,4 +34,15 @@ export interface VendorListTypes {
   orderAbsorption: string
   totalPo: string
   isSelected: boolean
+}
+
+export interface CriteriaTypes {
+  id: string
+  group: string
+  evaluationObject: string
+  type: string
+  evaluationItem: string
+  itemDescription: string
+  weight: string
+  status: string
 }
