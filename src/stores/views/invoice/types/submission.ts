@@ -15,6 +15,7 @@ export interface SubmissionStatusTypes {
 
 export interface AvailableDpTypes {
   isAvailable: boolean
+  department: string
 }
 
 export interface RemainingDpTypes {

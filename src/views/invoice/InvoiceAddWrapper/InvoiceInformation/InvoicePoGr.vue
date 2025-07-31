@@ -226,6 +226,7 @@ const addItemInvoiceDp = () => {
       if (response.statusCode === 200) {
         if (!response.result.content.isAvailable && form) {
           searchDpAvailableError.value = true
+          form.invoicePoGr[0].department = response.result.content.department
         }
       }
     })
