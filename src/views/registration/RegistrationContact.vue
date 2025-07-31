@@ -350,6 +350,9 @@ const displayPosition = (value: number) => {
 }
 
 onMounted(() => {
+  if (contact.value.account.password) {
+    checkPasswordRules()
+  }
   vendorMasterDataStore.getVendorPosition()
 })
 </script>
