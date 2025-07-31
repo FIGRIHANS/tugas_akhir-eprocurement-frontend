@@ -122,12 +122,6 @@ watch(
           >
             <td>
               <div class="flex items-center gap-3">
-                <VendorMenu
-                  :id="vendor.vendorId"
-                  :name="vendor.vendorName"
-                  :email="vendor.vendorEmail"
-                  :status="vendor.isVerified"
-                />
                 <UiButton
                   outline
                   icon
@@ -138,14 +132,24 @@ watch(
                       params: { id: vendor.vendorId },
                     })
                   "
+                  v-if="userData?.profile.profileId === 3192"
                 >
                   <UiIcon name="eye" />
                 </UiButton>
-                <StatusToggle
-                  :id="vendor.vendorId"
-                  :name="vendor.vendorName"
-                  :status="vendor.isActive"
-                />
+
+                <template v-else>
+                  <VendorMenu
+                    :id="vendor.vendorId"
+                    :name="vendor.vendorName"
+                    :email="vendor.vendorEmail"
+                    :status="vendor.isVerified"
+                  />
+                  <StatusToggle
+                    :id="vendor.vendorId"
+                    :name="vendor.vendorName"
+                    :status="vendor.isActive"
+                  />
+                </template>
               </div>
             </td>
             <td class="text-nowrap">{{ vendor.vendorName }}</td>
