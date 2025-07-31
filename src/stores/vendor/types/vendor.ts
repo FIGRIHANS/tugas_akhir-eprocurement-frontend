@@ -215,3 +215,30 @@ export interface IVerificationDetailData {
   status: string
   keterangan: string
 }
+
+export interface IOtherDocument {
+  documentName: string,
+  documentNo: string,
+  uploadUrl: string,
+  description: string,
+  issuedDate: string | number | unknown,
+  expiredDate: string | number | unknown,
+}
+
+export interface IVendorPayload {
+  request: {
+    vendorLicenses: ILicensePayload[],
+    otherDocumentVendor: IOtherDocument[],
+    vendorId: number,
+    updatedBy: string
+  }
+}
+
+export interface ILicensePayload {
+  licenseId: number;
+  licenseNo: string;
+  uploadUrl: string;
+  description: string;
+  issuedDate: string;
+  expiredDate: string;
+}
