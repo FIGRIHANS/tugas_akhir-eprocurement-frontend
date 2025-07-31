@@ -50,10 +50,10 @@ export interface IAdministration {
   vendorId: number
   userId: number
   userName: string
+  userEmail: string
   vendorName: string
   companyCategoryId: number
   companyCategoryName: string
-  countryName: string
   groupCompany: string
   npwp: string
   npwpUrl: string
@@ -61,13 +61,36 @@ export interface IAdministration {
   vendorEmail: string
   userEmail: string
   vendorWebsite: string
-  businessFieldName: string | null
+  businessFieldName: string
   businessUnitName: string
   addressCompanyDetail: string
+  countryName: string
   stateName: string
   cityName: string
   currencyLabel: string
   currencySymbol: string
+  countryId: number
+  stateId: number
+  cityId: number
+  currencyId: number
+}
+
+export interface IAdministrationPayload {
+  vendorId: number
+  emailUser: string
+  companyName: string
+  companyGroup: string
+  npwpNo: string
+  npwpUrl: string
+  currencySymbol: string
+  cityId: number
+  vendorPhone: string
+  vendorWebsite: string
+  companyAddress: string
+  vendorCommodities?: {
+    subBusinessFieldId: number
+  }[]
+  updatedBy: string
 }
 
 export interface ILicense {
@@ -125,6 +148,47 @@ export interface IPayment {
   isHolderNameDifferent: boolean
 }
 
+export interface IPaymentPayload {
+  request: {
+    bankDetailDto: IBankDetailDto
+    vendorBankDetail: IBankDetail
+    id: number
+    vendorId: number
+    updateBy: string
+  }
+}
+
+export interface IBankDetailDto {
+  bankCountryCode: string
+  bankKey: string
+  bankName: string
+  branch: string
+  swiftCode: string
+  address: string
+}
+
+export interface IBankDetail {
+  accountNo: string
+  accountName: string
+  bankKey: string
+  currencySymbol: string
+  urlDoc: string
+  urlBankAccountDeclaration: string
+  isHolderNameDifferent: boolean
+  urlFirstPage: string
+  urlAccountDifferences: string
+  isBankRegistered: boolean
+  bankAddress: string
+  countryId: number
+}
+
+export interface IDeletePaymentPayload {
+  request: {
+    id: number
+    updateBy: string
+  }
+}
+
 export interface IPostBlacklist {
   VendorId?: number
   BlacklistDescription?: string
@@ -155,4 +219,31 @@ export interface IVerificationDetailData {
   verificationType: string
   status: string
   keterangan: string
+}
+
+export interface IOtherDocument {
+  documentName: string,
+  documentNo: string,
+  uploadUrl: string,
+  description: string,
+  issuedDate: string | number | unknown,
+  expiredDate: string | number | unknown,
+}
+
+export interface IVendorPayload {
+  request: {
+    vendorLicenses: ILicensePayload[],
+    otherDocumentVendor: IOtherDocument[],
+    vendorId: number,
+    updatedBy: string
+  }
+}
+
+export interface ILicensePayload {
+  licenseId: number;
+  licenseNo: string;
+  uploadUrl: string;
+  description: string;
+  issuedDate: string;
+  expiredDate: string;
 }

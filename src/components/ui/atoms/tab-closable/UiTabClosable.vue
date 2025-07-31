@@ -8,7 +8,7 @@ const props = defineProps<ITabClosableProps>()
 defineEmits(['closeTab', 'addTab'])
 const currentTab = defineModel()
 
-const openedTabs = ref<ITabClosable[]>([...props.tabs.filter((tab) => !tab.isClosable)])
+const openedTabs = ref<ITabClosable[]>([props.tabs.find((tab) => tab.id === currentTab.value)!])
 const filteredTabs = computed(() =>
   props.tabs.filter((tab) => !openedTabs.value.some((opened) => opened.id === tab.id)),
 )

@@ -3,8 +3,11 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import type {
   IAdministration,
+  IAdministrationPayload,
+  IDeletePaymentPayload,
   ILicense,
   IPayment,
+  IPaymentPayload,
   IPostBlacklist,
   IVendorContent,
   IVerificationDetailData,
@@ -40,11 +43,13 @@ export const useVendorStore = defineStore('vendor', () => {
         { params },
       )
 
-      if (response.data.statusCode === 200) {
-        vendors.value = response.data.result.content
-      } else {
+      if (response.data.result.isError) {
         error.value = response.data.result.message
+        return
       }
+
+      vendors.value = response.data.result.content
+      return response.data.result.content
     } catch (err: unknown) {
       if (err instanceof Error) {
         error.value = err.message
@@ -141,7 +146,15 @@ export const useVendorAdministrationStore = defineStore('vendor-administration',
     }
   }
 
-  return { data, loading, error, getData }
+  const update = async (payload: IAdministrationPayload) => {
+    const response: ApiResponse = await vendorAPI.post(
+      '/public/verifiedvendor/update-administration',
+      payload,
+    )
+    return response.data
+  }
+
+  return { data, loading, error, getData, update }
 })
 
 export const useVendorIzinUsahaStore = defineStore('vendor-izin-usaha', () => {
@@ -177,7 +190,38 @@ export const useVendorIzinUsahaStore = defineStore('vendor-izin-usaha', () => {
     }
   }
 
-  return { data, loading, error, getData }
+  /// TODO: change payload type soon
+  const updateData = async (payload: any) => {
+    loading.value = true
+    error.value = null
+
+    try {
+
+      const response = await vendorAPI.post(
+        '/public/verifiedvendor/update-license',
+        payload,
+      );
+
+      if (response.data.statusCode === 200) {
+        data.value = response.data.result.content
+      } else {
+        error.value = response.data.result.message
+        loading.value = false
+      }
+
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        error.value = err.message
+      } else {
+        error.value = 'Failed to update data'
+      }
+    } finally {
+      loading.value = false
+    }
+
+  }
+
+  return { data, loading, error, getData, updateData }
 })
 
 export const useVendorPaymentStore = defineStore('vendor-payment', () => {
@@ -214,7 +258,23 @@ export const useVendorPaymentStore = defineStore('vendor-payment', () => {
     }
   }
 
-  return { data, loading, error, getData }
+  const addPayment = async (payload: IPaymentPayload) => {
+    const response: ApiResponse = await vendorAPI.post(
+      '/public/verifiedvendor/update-payment',
+      payload,
+    )
+    return response.data
+  }
+
+  const deletePayment = async (payload: IDeletePaymentPayload) => {
+    const response: ApiResponse = await vendorAPI.post(
+      '/public/verifiedvendor/delete-payment',
+      payload,
+    )
+    return response.data
+  }
+
+  return { data, loading, error, getData, addPayment, deletePayment }
 })
 
 export const useVerificationDetailStore = defineStore('verification-detail', () => {
