@@ -41,7 +41,7 @@
     id="registration-error"
     type="danger"
     title="Vendor Registration Failed"
-    text="Your registration could not be submitted. Please check the required data and try again"
+    :text="errorMessage"
     no-submit
     static
     :cancel="() => (modalTrigger.error = false)"
@@ -87,6 +87,10 @@ const isLoading = ref<boolean>(false)
 
 const registrationVendorStore = useRegistrationVendorStore()
 const vendorMasterDataStore = useVendorMasterDataStore()
+
+const errorMessage = ref<string>(
+  'Your registration could not be submitted. Please check the required data and try again',
+)
 
 const information = computed(() => registrationVendorStore.information)
 const contact = computed(() => registrationVendorStore.contact)
@@ -138,7 +142,7 @@ const checkFieldNotEmpty = () => {
       vendorLocation: locationFields,
     },
     contact: {
-      account: ['username', 'email', 'password', 'confirmPassword', 'phone'],
+      account: ['username', 'email', 'phone'],
     },
     document: ['licenseNo', 'issuedDate', 'expiredDate', 'uploadUrl'],
     payment: ['accountNo', 'accountName', 'currencyId', 'bankAddress'],
@@ -186,6 +190,15 @@ const checkFieldNotEmpty = () => {
           ...checkErrors(section, fields.contact[key]),
         }
       })
+
+      const { password, passwordError, confirmPassword, confirmPasswordError } =
+        registrationVendorStore.contact.account
+
+      registrationVendorStore.contact.account = {
+        ...registrationVendorStore.contact.account,
+        passwordError: password ? passwordError : password === '',
+        confirmPasswordError: confirmPassword ? confirmPasswordError : confirmPassword === '',
+      }
 
       const hasContactPersons = registrationVendorStore.contact.contactPerson.list.length > 0
       const contactPersonHasFinance = registrationVendorStore.contact.contactPerson.list.some(
@@ -358,8 +371,12 @@ const submitData = async () => {
 
     await vendorMasterDataStore.postVendorRegistration(payload)
     modalTrigger.value.success = true
-  } catch (error) {
+  } catch (error: any) {
     modalTrigger.value.error = true
+    errorMessage.value =
+      typeof error.response.data === 'string'
+        ? error.response.data
+        : 'Your registration could not be submitted. Please check the required data and try again'
     console.error(error)
   } finally {
     isLoading.value = false
