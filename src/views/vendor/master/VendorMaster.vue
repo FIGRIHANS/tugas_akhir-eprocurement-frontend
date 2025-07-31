@@ -85,6 +85,7 @@ watch(
             <th class="text-nowrap">Company Name</th>
             <th class="text-nowrap">Status</th>
             <th class="text-nowrap">Vendor Category</th>
+            <th class="text-nowrap">Business Field</th>
             <th class="text-nowrap">Registration Date</th>
             <th class="text-nowrap">Verification Request Date</th>
             <th class="text-nowrap">Verification Date</th>
@@ -122,12 +123,6 @@ watch(
           >
             <td>
               <div class="flex items-center gap-3">
-                <VendorMenu
-                  :id="vendor.vendorId"
-                  :name="vendor.vendorName"
-                  :email="vendor.vendorEmail"
-                  :status="vendor.isVerified"
-                />
                 <UiButton
                   outline
                   icon
@@ -138,14 +133,24 @@ watch(
                       params: { id: vendor.vendorId },
                     })
                   "
+                  v-if="userData?.profile.profileId === 3192"
                 >
                   <UiIcon name="eye" />
                 </UiButton>
-                <StatusToggle
-                  :id="vendor.vendorId"
-                  :name="vendor.vendorName"
-                  :status="vendor.isActive"
-                />
+
+                <template v-else>
+                  <VendorMenu
+                    :id="vendor.vendorId"
+                    :name="vendor.vendorName"
+                    :email="vendor.vendorEmail"
+                    :status="vendor.isVerified"
+                  />
+                  <StatusToggle
+                    :id="vendor.vendorId"
+                    :name="vendor.vendorName"
+                    :status="vendor.isActive"
+                  />
+                </template>
               </div>
             </td>
             <td class="text-nowrap">{{ vendor.vendorName }}</td>
@@ -161,8 +166,17 @@ watch(
               </span>
             </td>
             <td>{{ vendor.companyCategoryName }}</td>
+            <td>
+              <div
+                v-for="(item, index) in vendor.businessFields"
+                :key="item.vendorId"
+                class="text-nowrap"
+              >
+                {{ index + 1 }}. {{ item.businessFieldName }}
+              </div>
+            </td>
             <td>{{ formatDate(vendor.createdUTCDate) }}</td>
-            <td>{{ formatDate(vendor.verifiedSendUTCDate!) }}</td>
+            <td>{{ formatDate(vendor.verifiedSendUTCDate || '') }}</td>
             <td>{{ formatDate(vendor.verifiedUTCDate || '') }}</td>
             <td>
               <div

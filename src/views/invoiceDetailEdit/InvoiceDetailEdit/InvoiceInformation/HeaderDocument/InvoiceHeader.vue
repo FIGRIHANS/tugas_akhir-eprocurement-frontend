@@ -10,7 +10,7 @@
         <input :value="getInvoiceTypeName()" class="input" placeholder="" disabled />
       </div>
       <!-- DP Option -->
-      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div v-if="form.invoiceTypeCode === 901" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           DP Option
         </label>

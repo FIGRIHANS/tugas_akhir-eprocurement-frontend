@@ -12,7 +12,7 @@
       v-model="captchaValue"
       type="text"
       class="input"
-      placeholder="Input catcha"
+      placeholder="Input captcha"
       @input="emits('update:modelValue', captchaValue === captchaImage)"
     />
   </div>

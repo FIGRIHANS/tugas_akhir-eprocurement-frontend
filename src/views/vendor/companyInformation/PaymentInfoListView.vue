@@ -350,7 +350,7 @@
     <!-- Success Modal -->
     <UiModal v-model="successModal" size="sm" @update:model-value="handleSuccess">
       <ModalSuccessLogo class="mx-auto" />
-      <h3 class="text-center text-lg font-medium">Administration Data Successfully Updated</h3>
+      <h3 class="text-center text-lg font-medium">Hooray!</h3>
       <p class="text-center text-base text-gray-600 mb-5">
         The data has been successfully updated in the admin system.
       </p>

@@ -20,13 +20,13 @@
       <div class="flex justify-end gap-4 w-full mb-[24px]">
         <UiButton v-if="showPrevious" outline @click="previous()">
           <UiIcon name="black-left" />
-          Kembali
+          Back
         </UiButton>
         <UiButton
           @click="next()"
           :disabled="tab.active === 'registration__payment-detail' ? !disabledRegistration : false"
         >
-          {{ tab.active === 'registration__payment-detail' ? 'Registration' : 'Lanjut' }}
+          {{ tab.active === 'registration__payment-detail' ? 'Registration' : 'Next' }}
           <UiIcon
             :name="isLoading ? 'loading' : 'black-right'"
             :class="{ 'animate-spin': isLoading }"
@@ -41,7 +41,7 @@
     id="registration-error"
     type="danger"
     title="Vendor Registration Failed"
-    text="Your registration could not be submitted. Please check the required data and try again"
+    :text="errorMessage"
     no-submit
     static
     :cancel="() => (modalTrigger.error = false)"
@@ -87,6 +87,10 @@ const isLoading = ref<boolean>(false)
 
 const registrationVendorStore = useRegistrationVendorStore()
 const vendorMasterDataStore = useVendorMasterDataStore()
+
+const errorMessage = ref<string>(
+  'Your registration could not be submitted. Please check the required data and try again',
+)
 
 const information = computed(() => registrationVendorStore.information)
 const contact = computed(() => registrationVendorStore.contact)
@@ -358,8 +362,12 @@ const submitData = async () => {
 
     await vendorMasterDataStore.postVendorRegistration(payload)
     modalTrigger.value.success = true
-  } catch (error) {
+  } catch (error: any) {
     modalTrigger.value.error = true
+    errorMessage.value =
+      typeof error.response.data === 'string'
+        ? error.response.data
+        : 'Your registration could not be submitted. Please check the required data and try again'
     console.error(error)
   } finally {
     isLoading.value = false
