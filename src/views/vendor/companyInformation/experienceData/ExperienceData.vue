@@ -12,10 +12,12 @@ import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
 import { formatDate } from '@/composables/date-format'
 import ModalDelete from './ModalDelete.vue'
 import UiLoading from '@/components/UiLoading.vue'
+import { useVendorUploadStore } from '@/stores/vendor/upload'
 
 const router = useRouter()
 const route = useRoute()
 const experienceStore = useExperienceStore()
+const uploadStore = useVendorUploadStore()
 
 const mode = ref<'add' | 'view' | 'edit' | 'delete'>('add')
 const selectedId = ref<number>(0)
@@ -24,6 +26,7 @@ const modalForm = ref<boolean>(false)
 const errorModal = ref<boolean>(false)
 const successModal = ref<boolean>(false)
 const deleteModal = ref<boolean>(false)
+const downloadLoading = ref(false)
 
 const completedExp = computed(() =>
   experienceStore.data.filter((item) => item.value === 'COMPLETED' && item.isActive),
@@ -45,6 +48,23 @@ const onModalDelete = (id: number) => {
   selectedId.value = id
   mode.value = 'delete'
   deleteModal.value = true
+}
+
+const onDownload = async (path: string) => {
+  downloadLoading.value = true
+
+  try {
+    const file = await uploadStore.preview(path)
+    const link = URL.createObjectURL(file)
+    window.open(link, '_blank')
+    setTimeout(() => URL.revokeObjectURL(link), 1000)
+  } catch (err) {
+    if (err instanceof Error) {
+      alert('Failed to download document. Please try again later.')
+    }
+  } finally {
+    downloadLoading.value = false
+  }
 }
 
 const onSuccess = () => {
@@ -107,7 +127,7 @@ onMounted(() => {
                   <td>
                     <UiActions
                       :id="item.id"
-                      @on-view="openModalForm('view')"
+                      @on-view="onDownload(item.documentURL)"
                       @on-edit="openModalForm('edit', item.id)"
                       @on-delete="onModalDelete(item.id)"
                     />
@@ -164,8 +184,9 @@ onMounted(() => {
                   <td>
                     <UiActions
                       :id="item.id"
-                      @on-view="openModalForm('view')"
-                      @on-edit="openModalForm('edit')"
+                      @on-view="onDownload(item.documentURL)"
+                      @on-edit="openModalForm('edit', item.id)"
+                      @on-delete="onModalDelete(item.id)"
                     />
                   </td>
                   <td>{{ item.contractName }}</td>

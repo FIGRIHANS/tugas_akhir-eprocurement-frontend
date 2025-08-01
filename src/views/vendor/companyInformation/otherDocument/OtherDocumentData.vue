@@ -12,11 +12,13 @@ import UiLoading from '@/components/UiLoading.vue'
 import ModalDelete from './ModalDelete.vue'
 import UiModal from '@/components/modal/UiModal.vue'
 import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
+import { useVendorUploadStore } from '@/stores/vendor/upload'
 
 type Mode = 'add' | 'view' | 'edit' | 'delete'
 
 const route = useRoute()
 const otherDocStore = useOtherDocStore()
+const uploadStore = useVendorUploadStore()
 
 const modalForm = ref(false)
 const modalSuccess = ref(false)
@@ -24,6 +26,7 @@ const modalError = ref(false)
 const modalDelete = ref(false)
 const mode = ref<Mode>('add')
 const selectedId = ref<number>(0)
+const downloadLoading = ref(false)
 
 const onOpenForm = (newMode: Mode, id?: number) => {
   modalForm.value = true
@@ -39,6 +42,23 @@ const onModalDelete = (id: number) => {
   selectedId.value = id
   mode.value = 'delete'
   modalDelete.value = true
+}
+
+const onDownload = async (path: string) => {
+  downloadLoading.value = true
+
+  try {
+    const file = await uploadStore.preview(path)
+    const link = URL.createObjectURL(file)
+    window.open(link, '_blank')
+    setTimeout(() => URL.revokeObjectURL(link), 1000)
+  } catch (err) {
+    if (err instanceof Error) {
+      alert('Failed to download document. Please try again later.')
+    }
+  } finally {
+    downloadLoading.value = false
+  }
 }
 
 const onSuccess = () => {
@@ -92,6 +112,7 @@ onMounted(() => {
                 :id="item.id"
                 @on-delete="onModalDelete(item.id)"
                 @on-edit="onOpenForm('edit', item.id)"
+                @on-view="onDownload(item.documentUrl)"
               />
             </td>
             <td>{{ item.documentName }}</td>
