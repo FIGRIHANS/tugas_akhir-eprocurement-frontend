@@ -6,7 +6,9 @@ export interface IExperienceData {
   agency: string
   contractValue: number
   field: number
-  businessFieldName: string
+  businessFieldId: number
+  subBusiness: string
+  businessField: string
   experienceType: number
   value: string
   startDate: string

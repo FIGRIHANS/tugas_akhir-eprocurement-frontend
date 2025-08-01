@@ -10,7 +10,7 @@ import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import type { IExperiencePayload } from '@/stores/vendor/types/experience'
 import { cloneDeep } from 'lodash'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { defaultFormData, excludedFields } from './static'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
 import { useLoginStore } from '@/stores/views/login'
@@ -21,11 +21,12 @@ import UiLoading from '@/components/UiLoading.vue'
 
 const props = withDefaults(
   defineProps<{
-    mode?: 'create' | 'edit' | 'view'
+    mode?: 'add' | 'edit' | 'view' | 'delete'
     vendorId: number
+    id?: number
   }>(),
   {
-    mode: 'create',
+    mode: 'add',
   },
 )
 
@@ -139,6 +140,31 @@ const onCloseModal = () => {
   formData.value = cloneDeep(defaultFormData)
   formError.value = []
 }
+
+watch(
+  [props.id],
+  () => {
+    const selectedItem = experienceStore.data.find((item) => item.id === Number(props.id))
+
+    console.log(selectedItem)
+
+    if (!selectedItem) return
+
+    formData.value.id = Number(props.id)
+    formData.value.contractName = selectedItem.contractName
+    formData.value.address = selectedItem.address
+    formData.value.agency = selectedItem.agency
+    formData.value.contractValue = selectedItem.contractValue
+    businessFieldId.value = selectedItem.businessFieldId
+    formData.value.field = selectedItem.field
+    formData.value.experienceType = selectedItem.experienceType
+    formData.value.startDate = selectedItem.startDate
+    formData.value.endDate = selectedItem.endDate
+  },
+  {
+    immediate: true,
+  },
+)
 
 onMounted(() => {
   lookupStore.getVendorCountries()
