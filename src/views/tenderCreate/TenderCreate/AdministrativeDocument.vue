@@ -5,10 +5,10 @@
       <TenderOrganization class="flex-1" />
       <DocumentAttachment class="flex-1" />
     </div>
-    <div class="border rounded-xl flex align-items-center gap-[24px] p-[24px]">
+    <div class="border rounded-xl p-[24px]">
       <p class="font-semibold">Vendor Evaluation Criteria</p>
-      <div class="border rounded-lg p-[4px]">
-        <div class="flex gap-4 mb-5" data-tabs="true">
+      <div class="border rounded-lg p-[4px] mt-[24px] w-fit">
+        <div class="flex gap-4" data-tabs="true">
           <a class="btn btn-primary btn-clear" :class="{ 'active': activeTab === 'automatic' }" href="#" @click="onSetTab(true)">
             Automatic Criteria
           </a>

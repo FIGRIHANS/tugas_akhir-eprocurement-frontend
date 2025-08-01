@@ -44,5 +44,4 @@ export interface CriteriaTypes {
   evaluationItem: string
   itemDescription: string
   weight: string
-  status: string
 }
