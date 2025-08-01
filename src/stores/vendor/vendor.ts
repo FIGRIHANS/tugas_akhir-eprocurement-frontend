@@ -313,14 +313,16 @@ export const useCompanyDeedDataStore = defineStore("company-deed-data", () => {
   const error = ref<string | null>(null)
   const data = ref<any>([]) ///TODO: change type soon
 
-  const postShareholders = async (payload: IShareholderPayload) => {
+  const getShareholders = async (vendorId: number) => {
+    loading.value = true
     try {
+      const response: ApiResponse = await vendorAPI.get("/public/vendorchangedata/shareholders", {
+        params: { vendorId },
+      })
 
-      const response: ApiResponse = await vendorAPI.post(
-        '/public/vendorchangedata/post/shareholders', payload
-      )
-
-      return response.data
+      if (response.data.statusCode === 200) {
+        data.value = response.data.result.content
+      }
 
     } catch (err) {
       if (err instanceof Error) {
@@ -328,6 +330,42 @@ export const useCompanyDeedDataStore = defineStore("company-deed-data", () => {
           error.value = err.response?.data.result.message
         }
       }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const getVendorLegalDocument = async (vendorId: number) => {
+    loading.value = true
+    try {
+      const response: ApiResponse = await vendorAPI.get("/public/vendorchangedata/vendorlegaldocument", {
+        params: { vendorId },
+      })
+
+      if (response.data.statusCode === 200) {
+        data.value = response.data.result.content
+      }
+
+    } catch (err) {
+      if (err instanceof Error) {
+        if (axios.isAxiosError(err)) {
+          error.value = err.response?.data.result.message
+        }
+      }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const postShareholders = async (payload: IShareholderPayload) => {
+    try {
+      const response: ApiResponse = await vendorAPI.post(
+        '/public/vendorchangedata/post/shareholders', payload
+      )
+
+      return response.data
+    } catch (err) {
+      throw err
     } finally {
       loading.value = false
     }
@@ -357,7 +395,9 @@ export const useCompanyDeedDataStore = defineStore("company-deed-data", () => {
     error,
     data,
     postShareholders,
-    postVendorLegalDocument
+    postVendorLegalDocument,
+    getShareholders,
+    getVendorLegalDocument
   }
 
 });
