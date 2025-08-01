@@ -74,7 +74,7 @@ watch(
               <tr>
                 <td class="text-sm text-gray-600 font-medium w-[182px]">User Email</td>
                 <td class="text-sm font-bold text-gray-700">
-                  {{ administrasiStore.data.vendorEmail }}
+                  {{ administrasiStore.data.userEmail }}
                 </td>
               </tr>
               <tr>
