@@ -30,7 +30,7 @@
             <td v-if="!checkInvoiceDp() && !checkPoPib()">
               {{ moment(item.grDocumentDate).format('DD MMMM YYYY') || '-' }}
             </td>
-            <td v-if="!checkInvoiceDp()">{{ useFormatIdr(item.itemAmount) || '-' }}</td>
+            <td v-if="!checkInvoiceDp()">{{ form.currCode === 'IDR' ? useFormatIdr(item.itemAmount) : useFormatUsd(item.itemAmount) || '-' }}</td>
             <td v-if="!checkInvoiceDp()">{{ useFormatIdr(item.quantity) || '-' }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.uom || '-' }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.itemText || '-' }}</td>
@@ -38,6 +38,9 @@
             <td>{{ item.conditionTypeDesc || '-' }}</td>
             <td>{{ item.qcStatus || '-' }}</td>
             <td>{{ item.taxCode || '-' }}</td>
+            <td v-if="!checkPoPib()">
+              {{ form.currCode === 'IDR' ? useFormatIdr(item.vatAmount) : useFormatUsd(item.vatAmount) || '-' }}
+            </td>
             <td>{{ item.whtType || '-' }}</td>
             <td>{{ item.whtCode || '-' }}</td>
             <td>{{ useFormatIdr(item.whtBaseAmount) || '-' }}</td>
@@ -53,9 +56,9 @@
 <script lang="ts" setup>
 import { ref, watch, inject, onMounted } from 'vue'
 import type { formTypes } from '../types/invoiceDetail'
-import { defaultColumn } from '@/static/invoicePoGr'
+import { defaultColumn, invoiceDpColumn } from '@/static/invoicePoGr'
 import moment from 'moment'
-import { useFormatIdr } from '@/composables/currency'
+import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 
 defineProps<{
   isNeedCheck: boolean
@@ -74,9 +77,8 @@ const checkPoPib = () => {
 
 const setColumn = () => {
   // if (false) columns.value = ['Line', ...PoPibColumn]
-  // else if (form?.invoiceDPCode !== 9011) columns.value = ['Line', ...invoiceDpColumn]
-  // else columns.value = ['Line', ...defaultColumn]
-  columns.value = ['Line', ...defaultColumn]
+  if (checkInvoiceDp()) columns.value = ['Line', ...invoiceDpColumn]
+  else columns.value = ['Line', ...defaultColumn]
 }
 
 watch(

@@ -7,6 +7,7 @@ export interface itemsPoGrType {
   itemAmount: number
   quantity: number
   taxCode: string
+  vatAmount: number
   uom: string
   itemText: string
   conditionType: string
