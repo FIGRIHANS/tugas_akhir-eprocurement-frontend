@@ -12,6 +12,7 @@ export const defaultColumn = [
   'Condition Type Description',
   'QC Status',
   'Tax Code',
+  'VAT Amount',
   'WHT Type',
   'WHT Code',
   'WHT Base Amount',

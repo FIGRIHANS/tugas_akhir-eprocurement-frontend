@@ -89,7 +89,7 @@
                     </option>
                   </select>
                 </td>
-                <td v-if="checkInvoiceDp()">
+                <td v-if="!checkPoPib()">
                   <span v-if="item.isEdit">{{ form?.currency === item.currencyLC ? useFormatIdr(formEdit.vatAmount) : useFormatUsd(formEdit.vatAmount) }}</span>
                   <span v-else>{{ form?.currency === item.currencyLC ? useFormatIdr(item.vatAmount || 0) : useFormatUsd(item.vatAmount || 0) }}</span>
                 </td>
