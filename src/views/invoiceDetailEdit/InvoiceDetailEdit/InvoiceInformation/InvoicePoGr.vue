@@ -269,8 +269,6 @@ const getPercentTax = (code: string) => {
 const getVatAmount = () => {
   const percentTax = getPercentTax(formEdit.taxCode) || 0
   const itemAmount = formEdit.itemAmount
-  console.log(percentTax)
-  console.log(itemAmount)
   const result = percentTax * itemAmount
   formEdit.vatAmount = result
 }
