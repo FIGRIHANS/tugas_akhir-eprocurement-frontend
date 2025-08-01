@@ -59,9 +59,10 @@
                   <span v-if="!item.isEdit">{{ item.poNo }}</span>
                   <div v-else>
                     <div class="input" :class="{ 'border-danger': item.poNoError }">
-                      <input v-model="item.poNo" placeholder="" @keypress="searchEnter" />
+                      <input v-model="item.poNo" placeholder="" type="number" @keypress="searchEnter" />
                       <i class="ki-filled ki-magnifier"></i>
                     </div>
+                    <p v-if="searchError" class="text-danger text-[9px]">*PO Number must be exactly 10 characters long</p>
                     <p v-if="searchDpAvailableError" class="text-danger text-[9px]">*PO Number not available for DP</p>
                     <p v-if="isSearch && !searchDpAvailableError" class="text-success text-[9px]">*PO Number available for DP</p>
                   </div>
@@ -89,7 +90,7 @@
                     </option>
                   </select>
                 </td>
-                <td v-if="checkInvoiceDp()">
+                <td v-if="!checkPoPib()">
                   <span v-if="item.isEdit">{{ form?.currency === item.currencyLC ? useFormatIdr(formEdit.vatAmount) : useFormatUsd(formEdit.vatAmount) }}</span>
                   <span v-else>{{ form?.currency === item.currencyLC ? useFormatIdr(item.vatAmount || 0) : useFormatUsd(item.vatAmount || 0) }}</span>
                 </td>
@@ -97,7 +98,7 @@
                 <td>-</td>
                 <td>-</td>
                 <td v-if="!checkInvoiceDp()">-</td>
-                <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.department }}</td>
+                <td>{{ item.department || '-' }}</td>
               </tr>
             </template>
           </tbody>
@@ -220,6 +221,7 @@ const searchItem = () => {
 
 const addItemInvoiceDp = () => {
   const poNumber = search.value?.toString() ?? form?.invoicePoGr[0].poNo ?? ''
+  if (poNumber.length !== 10) return searchError.value = true
   isDisabledSearch.value = true
   invoiceApi.getAvailableDp(poNumber, form?.vendorId || '', formEdit.itemAmountLC || form?.invoicePoGr[0].itemAmountLC || 0)
     .then((response) => {
@@ -419,8 +421,6 @@ const getPercentTax = (code: string) => {
 const getVatAmount = () => {
   const percentTax = getPercentTax(formEdit.taxCode) || 0
   const itemAmount = formEdit.itemAmountLC
-  console.log(percentTax)
-  console.log(itemAmount)
   const result = percentTax * itemAmount
   formEdit.vatAmount = result
 }
