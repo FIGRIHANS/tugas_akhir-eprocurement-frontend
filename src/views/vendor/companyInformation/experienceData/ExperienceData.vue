@@ -26,9 +26,11 @@ const successModal = ref<boolean>(false)
 const deleteModal = ref<boolean>(false)
 
 const completedExp = computed(() =>
-  experienceStore.data.filter((item) => item.value === 'COMPLETED'),
+  experienceStore.data.filter((item) => item.value === 'COMPLETED' && item.isActive),
 )
-const onGoingExp = computed(() => experienceStore.data.filter((item) => item.value === 'ON GOING'))
+const onGoingExp = computed(() =>
+  experienceStore.data.filter((item) => item.value === 'ON GOING' && item.isActive),
+)
 
 const openModalForm = (newMode: 'add' | 'view' | 'edit', id?: number) => {
   modalForm.value = true
@@ -96,8 +98,8 @@ onMounted(() => {
                 </tr>
 
                 <!-- No data -->
-                <tr v-else-if="!experienceStore.data.length">
-                  <td :colspan="tableCols.length - 1" class="text-center text-danger">No data</td>
+                <tr v-else-if="!completedExp.length">
+                  <td :colspan="tableCols.length" class="text-center text-danger">No data</td>
                 </tr>
 
                 <!-- loop data -->
@@ -106,7 +108,7 @@ onMounted(() => {
                     <UiActions
                       :id="item.id"
                       @on-view="openModalForm('view')"
-                      @on-edit="openModalForm('edit')"
+                      @on-edit="openModalForm('edit', item.id)"
                       @on-delete="onModalDelete(item.id)"
                     />
                   </td>
@@ -114,8 +116,8 @@ onMounted(() => {
                   <td>{{ item.address }}</td>
                   <td>{{ item.agency }}</td>
                   <td>{{ item.contractValue }}</td>
-                  <td>{{ item.businessFieldName }}</td>
-                  <td>{{}}</td>
+                  <td>{{ item.businessField }}</td>
+                  <td>{{ item.subBusiness }}</td>
                   <td>{{ formatDate(item.startDate) }}</td>
                   <td>{{ formatDate(item.endDate) }}</td>
                 </tr>
@@ -140,21 +142,21 @@ onMounted(() => {
               <tbody class="text-nowrap">
                 <!-- loading -->
                 <tr v-if="experienceStore.loading">
-                  <td :colspan="tableCols.length - 1" class="text-center">
+                  <td :colspan="tableCols.length" class="text-center">
                     <UiLoading size="md" variant="primary" />
                   </td>
                 </tr>
 
                 <!-- error -->
                 <tr v-else-if="experienceStore.error">
-                  <td :colspan="tableCols.length - 1" class="text-center text-danger">
+                  <td :colspan="tableCols.length" class="text-center text-danger">
                     {{ experienceStore.error }}
                   </td>
                 </tr>
 
                 <!-- No data -->
-                <tr v-else-if="!experienceStore.data.length">
-                  <td :colspan="tableCols.length - 1" class="text-center text-danger">No data</td>
+                <tr v-else-if="!onGoingExp.length">
+                  <td :colspan="tableCols.length" class="text-center text-danger">No data</td>
                 </tr>
 
                 <!-- loop -->
@@ -170,8 +172,8 @@ onMounted(() => {
                   <td>{{ item.address }}</td>
                   <td>{{ item.agency }}</td>
                   <td>{{ item.contractValue }}</td>
-                  <td>{{ item.businessFieldName }}</td>
-                  <td>{{}}</td>
+                  <td>{{ item.businessField }}</td>
+                  <td>{{ item.subBusiness }}</td>
                   <td>{{ formatDate(item.startDate) }}</td>
                   <td>{{ formatDate(item.endDate) }}</td>
                 </tr>
@@ -192,9 +194,12 @@ onMounted(() => {
   <!-- modal add experience data -->
   <ModalForm
     v-model="modalForm"
+    :mode="mode"
+    :id="selectedId"
     :vendor-id="Number($route.params.id)"
     @on-error="() => (errorModal = true)"
     @on-success="() => (successModal = true)"
+    v-if="modalForm"
   />
 
   <!-- delete modal -->
