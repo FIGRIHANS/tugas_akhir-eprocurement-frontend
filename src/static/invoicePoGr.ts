@@ -27,7 +27,8 @@ export const invoiceDpColumn = [
   'VAT Amount',
   'WHT Type',
   'WHT Code',
-  'WHT Base Amount'
+  'WHT Base Amount',
+  'Department'
 ]
 
 export const PoPibColumn = [
