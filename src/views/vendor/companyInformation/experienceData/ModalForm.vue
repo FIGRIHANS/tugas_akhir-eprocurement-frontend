@@ -40,6 +40,8 @@ const experienceStore = useExperienceStore()
 
 // ref bantuan
 const businessFieldId = ref<number>(0)
+const countryId = ref<number>(0)
+const stateId = ref<number>(0)
 
 const formData = ref<IExperiencePayload>(cloneDeep(defaultFormData))
 const uploadError = ref<string>('')
@@ -143,23 +145,34 @@ const onCloseModal = () => {
 
 watch(
   [props.id],
-  () => {
+  async () => {
     const selectedItem = experienceStore.data.find((item) => item.id === Number(props.id))
 
-    console.log(selectedItem)
-
     if (!selectedItem) return
+
+    await lookupStore.getVendorProvince(selectedItem.countryId)
+    await lookupStore.getVendorCities(selectedItem.provinceId)
+
+    businessFieldId.value = selectedItem.businessFieldId
+    countryId.value = selectedItem.countryId
+    stateId.value = selectedItem.provinceId
 
     formData.value.id = Number(props.id)
     formData.value.contractName = selectedItem.contractName
     formData.value.address = selectedItem.address
     formData.value.agency = selectedItem.agency
     formData.value.contractValue = selectedItem.contractValue
-    businessFieldId.value = selectedItem.businessFieldId
     formData.value.field = selectedItem.field
     formData.value.experienceType = selectedItem.experienceType
     formData.value.startDate = selectedItem.startDate
     formData.value.endDate = selectedItem.endDate
+    formData.value.contractNo = selectedItem.contractNo
+    formData.value.agencyTelpNo = selectedItem.agencyTelpNo
+    formData.value.remark = selectedItem.remark
+    formData.value.documentURL = selectedItem.documentURL
+    formData.value.location = selectedItem.city
+    formData.value.expCurrID = selectedItem.expCurrID
+    formData.value.uploadDate = selectedItem.createdDate
   },
   {
     immediate: true,
@@ -224,7 +237,6 @@ onMounted(() => {
         <!-- Business Sector -->
         <UiSelect
           label="Business Sector Type"
-          required
           :options="businessFieldOptions"
           text-key="businessFieldName"
           value-key="businessFieldID"
@@ -243,35 +255,31 @@ onMounted(() => {
           v-model="formData.field"
           :error="formError.includes('field')"
           :hint-text="formError.includes('field') ? 'Sub Business Field required' : ''"
+          :disabled="!businessFieldId"
         />
 
         <!-- Country -->
         <UiSelect
           label="Country"
-          required
           :options="countryOptions"
           text-key="label"
           value-key="value"
           placeholder="--Country--"
           @update:model-value="onSelecCountry(Number($event))"
-          v-model="formData.stateLocation"
-          :error="formError.includes('stateLocation')"
-          :hint-text="formError.includes('stateLocation') ? 'Country required' : ''"
+          v-model="countryId"
         />
 
         <UiFormGroup hide-border :grid="2">
           <!-- Province -->
           <UiSelect
             label="Province"
-            required
             :options="stateOptions"
             text-key="provinceName"
             value-key="provinceID"
             placeholder="--Province--"
             @update:model-value="onSelectState(Number($event))"
-            v-model="formData.provinceLocation"
-            :error="formError.includes('provinceLocation')"
-            :hint-text="formError.includes('provinceLocation') ? 'Province required' : ''"
+            v-model="stateId"
+            :disabled="!countryId"
           />
 
           <!-- City -->
@@ -285,6 +293,7 @@ onMounted(() => {
             v-model="formData.location"
             :error="formError.includes('location')"
             :hint-text="formError.includes('location') ? 'City required' : ''"
+            :disabled="!stateId"
           />
         </UiFormGroup>
 
