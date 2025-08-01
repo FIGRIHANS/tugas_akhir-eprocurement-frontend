@@ -4,7 +4,6 @@
       <UiInput
         v-model="contact.account.username"
         label="Username"
-        placeholder="Masukkan Username"
         row
         required
         disabled
@@ -18,8 +17,9 @@
         <div class="input" :class="{ 'border-danger': contact.account.passwordError }">
           <input
             v-model="contact.account.password"
-            placeholder="Masukkan Password"
+            placeholder="Enter your password"
             :type="showPassword ? 'text' : 'password'"
+            @input="checkPasswordRules"
           />
           <div class="btn btn-icon" @click="togglePassword('password')">
             <i class="ki-outline" :class="showPassword ? 'ki-eye-slash' : 'ki-eye'"></i>
@@ -29,20 +29,21 @@
       <UiInput
         v-model="contact.account.email"
         label="Email"
-        placeholder="Masukkan Email"
+        placeholder="Enter your email"
         row
         required
         :error="contact.account.emailError"
       />
+
       <div class="flex items-center flex-wrap lg:flex-nowrap gap-2.5">
         <label class="form-label w-2/5 flex items-center gap-1">
-          Ulangi Password
+          Confirm Password
           <span class="text-danger"> * </span>
         </label>
         <div class="input" :class="{ '!border-danger': contact.account.confirmPasswordError }">
           <input
             v-model="contact.account.confirmPassword"
-            placeholder="Ulangi Password"
+            placeholder="Confirm Password"
             :type="showConfirmPassword ? 'text' : 'password'"
             @input="checkConfirmPassword"
           />
@@ -51,10 +52,46 @@
           </div>
         </div>
       </div>
+
+      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5">
+        <div class="w-2/5"></div>
+        <div class="card bg-primary-light w-full">
+          <div class="card-body px-3 py-4">
+            <p class="text-xs text-primary">
+              Please use an Email that has not been registered before.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 row-span-3">
+        <div class="w-2/5"></div>
+        <div class="card bg-gray-100 w-full">
+          <div class="card-body px-3 py-4 text-sm">
+            <span>
+              Make sure your new password is strong <br />
+              The password must contain.
+            </span>
+            <ul class="list-disc list-inside">
+              <div
+                v-for="rule in passwordRules"
+                :key="rule.id"
+                class="flex flex-row justify-between items-center transition-all duration-300"
+                :class="rule.status ? 'text-success' : 'text-gray-600'"
+              >
+                <li>
+                  <span>{{ rule.text }}</span>
+                </li>
+                <UiIcon v-if="rule.status" name="check-circle" variant="duotone" />
+              </div>
+            </ul>
+          </div>
+        </div>
+      </div>
       <UiInputTel
         v-model="contact.account.phone"
-        label="No Telephone"
-        placeholder="Masukkan no telephone"
+        label="Phone"
+        placeholder="000000"
         row
         required
         :error="contact.account.phoneError"
@@ -62,8 +99,9 @@
       <UiInput
         v-model="contact.account.website"
         label="Website"
-        placeholder="Masukkan website"
+        placeholder="Enter your website"
         row
+        class="col-start-1"
       />
     </UiFormGroup>
 
@@ -73,8 +111,8 @@
       <UiFormGroup title="Contact Person" :grid="2" body-class="px-4" hide-border>
         <UiInput
           v-model="contact.contactPerson.contactName"
-          label="Nama"
-          placeholder="Masukkan nama lengkap"
+          label="Name"
+          placeholder="Full name"
           row
           required
           :error="contact.contactPerson.contactNameError"
@@ -82,23 +120,23 @@
         <UiInput
           v-model="contact.contactPerson.contactEmail"
           label="Email"
-          placeholder="Masukkan email"
+          placeholder="Email"
           row
           required
           :error="contact.contactPerson.contactEmailError"
         />
         <UiInputTel
           v-model="contact.contactPerson.contactPhone"
-          label="No Telephone"
-          placeholder="Masukkan no telephone"
+          label="Phone"
+          placeholder="000000"
           row
           required
           :error="contact.contactPerson.contactPhoneError"
         />
         <UiSelect
           v-model="contact.contactPerson.positionTypeId"
-          label="Bagian"
-          placeholder="Pilih"
+          label="Department"
+          placeholder="Select"
           :options="positionList"
           value-key="positionTypeId"
           text-key="positionName"
@@ -110,7 +148,7 @@
 
       <UiButton class="w-fit justify-self-end mx-4" outline @click="addContactPerson">
         <UiIcon variant="duotone" :name="isEdit ? 'file-added' : 'plus-circle'" />
-        {{ isEdit ? 'Simpan' : 'Tambah' }}
+        {{ isEdit ? 'Save' : 'Add' }}
       </UiButton>
 
       <div class="card min-w-full">
@@ -120,10 +158,10 @@
           >
             <thead>
               <tr>
-                <th>Nama Lengkap</th>
-                <th>No Telephone</th>
+                <th>Full Name</th>
+                <th>Phone</th>
                 <th>Email</th>
-                <th>Bagian</th>
+                <th>Department</th>
                 <th class="w-10">Action</th>
               </tr>
             </thead>
@@ -180,6 +218,28 @@ const vendorMasterDataStore = useVendorMasterDataStore()
 
 const showPassword = ref<boolean>(false)
 const showConfirmPassword = ref<boolean>(false)
+const passwordRules = ref([
+  {
+    id: 'min8char',
+    text: 'Minimun 8 character',
+    status: false,
+  },
+  {
+    id: 'uppercase',
+    text: 'Uppercase',
+    status: false,
+  },
+  {
+    id: '1symbol',
+    text: 'At least one symbol',
+    status: false,
+  },
+  {
+    id: '1number',
+    text: 'At least one number',
+    status: false,
+  },
+])
 
 const contact = computed(() => registrationVendorStore.contact)
 const positionList = computed(() => vendorMasterDataStore.posistionList)
@@ -190,6 +250,27 @@ const togglePassword = (type: 'password' | 'confirmPassword') => {
   } else {
     showConfirmPassword.value = !showConfirmPassword.value
   }
+}
+
+const checkPasswordRules = () => {
+  const { password } = contact.value.account
+  const numbers = /\d/
+  const symbols = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/
+
+  const checks = {
+    min8char: password.length >= 8,
+    uppercase: password !== password.toLowerCase(),
+    '1symbol': symbols.test(password),
+    '1number': numbers.test(password),
+  }
+
+  passwordRules.value.forEach((item) => {
+    item.status = checks[item.id as 'min8char' | 'uppercase' | '1symbol' | '1number'] || false
+  })
+
+  registrationVendorStore.contact.account.passwordError = !passwordRules.value.every(
+    (value) => value.status === true,
+  )
 }
 
 const checkConfirmPassword = () => {
@@ -269,6 +350,9 @@ const displayPosition = (value: number) => {
 }
 
 onMounted(() => {
+  if (contact.value.account.password) {
+    checkPasswordRules()
+  }
   vendorMasterDataStore.getVendorPosition()
 })
 </script>

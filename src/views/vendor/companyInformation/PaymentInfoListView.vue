@@ -134,6 +134,7 @@
             :disabled="mode === 'view'"
             v-model="payload.request.vendorBankDetail.accountNo"
             :error="bankDetailError.includes('accountNo')"
+            :hint-text="bankDetailError.includes('accountNo') ? 'Account Number required' : ''"
           />
 
           <div class="h-[40px]">
@@ -156,6 +157,7 @@
               accepted-files=".jpg,.jpeg,.png,.pdf"
               placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
               :error="bankDetailError.includes('urlFirstPage')"
+              :hint-text="bankDetailError.includes('urlFirstPage') ? 'Account Cover required' : ''"
               @addedFile="uploadFile($event, 'first page')"
               :disabled="mode === 'view'"
             />
@@ -171,6 +173,7 @@
             :disabled="mode === 'view' || isBankNotRegistered"
             v-model="payload.request.vendorBankDetail.bankKey"
             :error="bankDetailError.includes('bankKey')"
+            :hint-text="bankDetailError.includes('bankKey') ? 'Bank Key required' : ''"
           />
           <UiInput
             v-if="isBankNotRegistered"
@@ -179,6 +182,7 @@
             required
             v-model="payload.request.bankDetailDto.bankName"
             :error="bankDtoError.includes('bankName')"
+            :hint-text="bankDtoError.includes('bankName') ? 'Bank Name required' : ''"
             :disabled="mode === 'view'"
           />
           <UiInput
@@ -188,6 +192,7 @@
             required
             v-model="payload.request.bankDetailDto.bankKey"
             :error="bankDtoError.includes('bankKey')"
+            :hint-text="bankDtoError.includes('bankKey') ? 'Bank Key required' : ''"
             :disabled="mode === 'view'"
           />
 
@@ -198,6 +203,7 @@
             placeholder="Bank Address"
             required
             :error="bankDetailError.includes('bankAddress')"
+            :hint-text="bankDetailError.includes('bankAddress') ? 'Bank Address required' : ''"
             v-if="!isBankNotRegistered"
             :disabled="mode === 'view'"
           />
@@ -209,6 +215,7 @@
             placeholder="Bank Address"
             required
             :error="bankDtoError.includes('address')"
+            :hint-text="bankDtoError.includes('address') ? 'Bank Address required' : ''"
             v-if="isBankNotRegistered"
             @update:model-value="payload.request.vendorBankDetail.bankAddress = $event"
             :disabled="mode === 'view'"
@@ -221,6 +228,7 @@
             required
             v-model="payload.request.vendorBankDetail.accountName"
             :error="bankDetailError.includes('accountName')"
+            :hint-text="bankDetailError.includes('accountName') ? 'Account Name required' : ''"
             :disabled="mode === 'view'"
           />
           <UiSelect
@@ -232,6 +240,7 @@
             required
             v-model="payload.request.vendorBankDetail.currencySymbol"
             :error="bankDetailError.includes('currencySymbol')"
+            :hint-text="bankDetailError.includes('currencySymbol') ? 'Currency required' : ''"
             :disabled="mode === 'view'"
           />
 
@@ -247,6 +256,11 @@
               accepted-files=".jpg,.jpeg,.png,.pdf"
               placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
               :error="bankDetailError.includes('urlAccountDifferences')"
+              :hint-text="
+                bankDetailError.includes('urlAccountDifferences')
+                  ? 'Account Difference required'
+                  : ''
+              "
               @addedFile="uploadFile($event, 'different account')"
               :disabled="mode === 'view'"
             />
@@ -271,6 +285,7 @@
             required
             v-model="payload.request.bankDetailDto.bankCountryCode"
             :error="bankDtoError.includes('bankCountryCode')"
+            :hint-text="bankDtoError.includes('bankCountryCode') ? 'Country required' : ''"
             :disabled="mode === 'view'"
           />
 
@@ -281,6 +296,7 @@
             required
             v-model="payload.request.bankDetailDto.branch"
             :error="bankDtoError.includes('branch')"
+            :hint-text="bankDtoError.includes('branch') ? 'Branch required' : ''"
             :disabled="mode === 'view'"
           />
           <UiInput
@@ -290,6 +306,7 @@
             required
             v-model="payload.request.bankDetailDto.swiftCode"
             :error="bankDtoError.includes('swiftCode')"
+            :hint-text="bankDtoError.includes('swiftCode') ? 'Swift Code required' : ''"
             :disabled="mode === 'view'"
           />
         </UiFormGroup>
@@ -350,7 +367,7 @@
     <!-- Success Modal -->
     <UiModal v-model="successModal" size="sm" @update:model-value="handleSuccess">
       <ModalSuccessLogo class="mx-auto" />
-      <h3 class="text-center text-lg font-medium">Administration Data Successfully Updated</h3>
+      <h3 class="text-center text-lg font-medium">Hooray!</h3>
       <p class="text-center text-base text-gray-600 mb-5">
         The data has been successfully updated in the admin system.
       </p>
@@ -602,7 +619,10 @@ const handleSubmit = async () => {
 
   // hapus error utk field yang kosong
   bankDetailError.value = bankDetailError.value.filter(
-    (field) => !['urlDoc', 'urlBankAccountDeclaration'].includes(field),
+    (field) =>
+      !['urlDoc', 'urlBankAccountDeclaration', 'countryId', 'isHolderNameDifferent'].includes(
+        field,
+      ),
   )
 
   if (bankDetailError.value.length > 0 || bankDtoError.value.length > 0) return

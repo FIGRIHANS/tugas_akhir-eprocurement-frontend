@@ -6,4 +6,5 @@ export interface IInputTelProps {
   row?: boolean
   required?: boolean
   error?: boolean
+  hintText?: string
 }

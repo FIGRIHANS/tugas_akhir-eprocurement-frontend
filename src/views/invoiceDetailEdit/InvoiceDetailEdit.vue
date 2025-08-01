@@ -89,6 +89,8 @@ const form = ref<formTypes>({
   assigment: '',
   transferNews: '',
   npwpReporting: '',
+  remainingDpAmount: '',
+  dpAmountDeduction: '',
   bankKey: '',
   bankName: '',
   beneficiaryName: '',
@@ -137,6 +139,10 @@ const checkInvoiceInformation = () => {
   form.value.transferNewsError = useCheckEmpty(form.value.transferNews).isError
   form.value.notesError = useCheckEmpty(form.value.notes).isError
 
+  if (Number(form.value.invoiceDPCode) === 9013) {
+    form.value.dpAmountDeductionError = Number(form.value.dpAmountDeduction) > Number(form.value.remainingDpAmount)
+  }
+
   if (
     form.value.invoiceDateError ||
     form.value.postingDateError ||
@@ -144,9 +150,10 @@ const checkInvoiceInformation = () => {
     form.value.documentNoError ||
     form.value.paymentMethodError ||
     form.value.transferNewsError ||
-    form.value.notesError
+    form.value.notesError||
+    form.value.dpAmountDeductionError
   ) status = false
-
+  
   for (const item of form.value.additionalCosts) {
     if (!item.activityExpense || !item.itemAmount || !item.debitCredit) {
       status = false
@@ -290,6 +297,8 @@ const setDataEdit = () => {
     assigment: data?.assigment || '',
     transferNews: data?.transferNews || '',
     npwpReporting: data?.npwpReporting || '',
+    remainingDpAmount: data?.remainingDpAmount || '',
+    dpAmountDeduction: data?.dpAmountDeduction || '',
     bankKey: data?.bankKey || '',
     bankName: data?.bankName || '',
     beneficiaryName: data?.beneficiaryName || '',
@@ -325,6 +334,7 @@ const setDataDefault = () => {
   for (const item of data?.pogr || []) {
     resultPoGr.push({
       ...item,
+      vatAmount: 0,
       isEdit: false
     })
   }
@@ -382,6 +392,8 @@ const setDataDefault = () => {
     assigment: data?.header.assigment || '',
     transferNews: data?.header.transferNews || '',
     npwpReporting: data?.header.npwpReporting || '',
+    remainingDpAmount: data?.header.remainingDpAmount || '',
+    dpAmountDeduction: data?.header.dpAmountDeduction || '',
     bankKey: data?.payment.bankKey || '',
     bankName: data?.payment.bankName || '',
     beneficiaryName: data?.payment.beneficiaryName || '',

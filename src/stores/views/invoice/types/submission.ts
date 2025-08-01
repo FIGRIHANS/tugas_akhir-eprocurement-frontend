@@ -15,6 +15,7 @@ export interface SubmissionStatusTypes {
 
 export interface AvailableDpTypes {
   isAvailable: boolean
+  department: string
 }
 
 export interface RemainingDpTypes {
@@ -94,6 +95,7 @@ interface ParamsSubmissionItem {
   grDocumentItem: number
   grDocumentDate: string
   taxCode: string
+  vatAmount: number
   itemAmount: number
   quantity: number
   uom: string
