@@ -148,7 +148,7 @@ watch(
   async () => {
     const selectedItem = experienceStore.data.find((item) => item.id === Number(props.id))
 
-    if (!selectedItem) return
+    if (!selectedItem || props.mode === 'add') return
 
     await lookupStore.getVendorProvince(selectedItem.countryId)
     await lookupStore.getVendorCities(selectedItem.provinceId)
