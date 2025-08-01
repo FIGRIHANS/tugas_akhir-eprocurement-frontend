@@ -9,7 +9,7 @@ import AdministrativeData from './AdministrativeData.vue'
 import PaymentInfoListView from './PaymentInfoListView.vue'
 import CompanyDeedData from './CompanyDeedData.vue'
 import BussinesLicenseData from './BussinesLicenseData.vue'
-import ExperienceData from './experience-data/ExperienceData.vue'
+import ExperienceData from './experienceData/ExperienceData.vue'
 
 const route = useRoute()
 const currentTab = ref<string>('administrative-data')
