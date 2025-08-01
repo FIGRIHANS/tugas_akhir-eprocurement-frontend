@@ -1,11 +1,10 @@
 <template>
   <div class="border rounded-xl">
     <div v-if="!props.isManual" class="py-[10px] px-[24px] flex align-items-center">
-      <label class="form-label max-w-32">
+      <label class="form-label max-w-32 h-fit self-center">
         Evaluation Object
-        <span class="text-red-500 ml-[4px]">*</span>
       </label>
-      <select v-model="selectedTemplate" class="select">
+      <select v-model="selectedTemplate" class="select w-[227px]">
         <option v-for="item of dummyOption" :key="item.id" :value="item.id">
           {{ item.name }}
         </option>
@@ -42,7 +41,7 @@
       </table>
     </div>
     
-    <button class="btn btn-primary py-[10px] px-[24px]">
+    <button v-if="props.isManual" class="btn btn-primary py-[10px] px-[24px]">
       Add Criteria
       <i class="ki-duotone ki-plus-circle"></i>
     </button>
@@ -50,8 +49,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, inject } from 'vue'
-import type { FormTypes } from '../../types/tenderCreate'
+import { ref, watch } from 'vue'
 import type { CriteriaTypes } from '../../types/tenderCreate'
 
 const props = defineProps<{
@@ -61,7 +59,6 @@ const props = defineProps<{
 
 const emits = defineEmits(['update:modelValue'])
 
-const form = inject<FormTypes>('form')
 const selectedTemplate = ref<string>('')
 const result = ref<CriteriaTypes[]>([])
 
@@ -176,4 +173,26 @@ const columns = ref<string[]>([
   'Item Description',
   'Weight'
 ])
+
+watch(
+  () => props.modelValue,
+  () => {
+    result.value = props.modelValue
+  },
+  {
+    deep: true,
+    immediate: true
+  }
+)
+
+watch(
+  () => result.value,
+  () => {
+    emits('update:modelValue', result.value)
+  },
+  {
+    deep: true,
+    immediate: true
+  }
+)
 </script>
