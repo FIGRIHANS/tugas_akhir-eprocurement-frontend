@@ -99,7 +99,7 @@ onMounted(() => {
 
                 <!-- No data -->
                 <tr v-else-if="!completedExp.length">
-                  <td :colspan="tableCols.length - 1" class="text-center text-danger">No data</td>
+                  <td :colspan="tableCols.length" class="text-center text-danger">No data</td>
                 </tr>
 
                 <!-- loop data -->
@@ -142,21 +142,21 @@ onMounted(() => {
               <tbody class="text-nowrap">
                 <!-- loading -->
                 <tr v-if="experienceStore.loading">
-                  <td :colspan="tableCols.length - 1" class="text-center">
+                  <td :colspan="tableCols.length" class="text-center">
                     <UiLoading size="md" variant="primary" />
                   </td>
                 </tr>
 
                 <!-- error -->
                 <tr v-else-if="experienceStore.error">
-                  <td :colspan="tableCols.length - 1" class="text-center text-danger">
+                  <td :colspan="tableCols.length" class="text-center text-danger">
                     {{ experienceStore.error }}
                   </td>
                 </tr>
 
                 <!-- No data -->
                 <tr v-else-if="!onGoingExp.length">
-                  <td :colspan="tableCols.length - 1" class="text-center text-danger">No data</td>
+                  <td :colspan="tableCols.length" class="text-center text-danger">No data</td>
                 </tr>
 
                 <!-- loop -->
