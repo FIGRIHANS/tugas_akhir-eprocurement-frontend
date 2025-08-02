@@ -1,5 +1,5 @@
 <template>
-  <button :class="classes">
+  <button :class="classes" :disabled="disabled">
     <slot>Button</slot>
   </button>
 </template>
@@ -12,7 +12,8 @@ const props = withDefaults(defineProps<IButtonProps>(), {
   outline: false,
   variant: 'primary',
   size: 'md',
-  icon: false
+  icon: false,
+  disabled: false,
 })
 
 const classes = computed(() => {

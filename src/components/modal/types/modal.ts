@@ -18,4 +18,5 @@ export type ModalConfirmationType = {
   noSubmit?: boolean
   cancel?: (...args: any[]) => void
   submit?: (...args: any[]) => void
+  loading?: boolean
 }

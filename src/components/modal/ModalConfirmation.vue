@@ -39,9 +39,15 @@
               v-if="!noSubmit"
               :variant="type === 'danger' ? 'danger' : 'primary'"
               class="w-full justify-center"
+              :disabled="loading"
               @click="submit"
             >
-              <UiIcon v-if="submitButtonIcon" :name="submitButtonIcon" variant="duotone" />
+              <UiIcon v-if="loading" name="loading" variant="filled" class="animate-spin" />
+              <UiIcon
+                v-if="submitButtonIcon && !loading"
+                :name="submitButtonIcon"
+                variant="duotone"
+              />
               {{ submitButtonText }}
             </UiButton>
           </div>
