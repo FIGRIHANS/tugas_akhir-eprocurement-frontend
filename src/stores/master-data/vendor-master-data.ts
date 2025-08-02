@@ -16,6 +16,7 @@ import type {
   DistrictListType,
   PositionListType,
   ProvinceListType,
+  ReferenceType,
   TermConditionType,
   UploadFileResponse,
   VendorRegistrationPayloadType,
@@ -34,6 +35,9 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
   const currencyList = ref<CurrencyListType>([])
   const companyCategoryList = ref<CompanyCategoryType>([])
   const companyLicense = ref<CompanyLicenseType>([])
+  const equipmentCategoryList = ref<ReferenceType>([])
+  const ownershipStatusList = ref<ReferenceType>([])
+  const conditionTypeList = ref<ReferenceType>([])
   const termCondition = ref<TermConditionType>()
 
   const getVendorCountries = async (countryName?: string) => {
@@ -190,6 +194,26 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
     return response.data.result
   }
 
+  const getVendorReference = async (
+    type: 'EQUIPMENT_CATEGORY' | 'OWNERSHIP_STATUS' | 'CONDITION_TYPE',
+  ) => {
+    const response: ApiResponse<ReferenceType> = await vendorAPI.get(`${baseUrl}/reference`, {
+      params: {
+        type,
+      },
+    })
+
+    if (type === 'EQUIPMENT_CATEGORY') {
+      equipmentCategoryList.value = response.data.result.content
+    } else if (type === 'OWNERSHIP_STATUS') {
+      ownershipStatusList.value = response.data.result.content
+    } else {
+      conditionTypeList.value = response.data.result.content
+    }
+
+    return response.data.result
+  }
+
   const getVendorTermCondition = async () => {
     const response: ApiResponse<TermConditionType> = await vendorAPI.get(
       `${baseUrl}/term-condition`,
@@ -244,6 +268,9 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
     currencyList,
     companyCategoryList,
     companyLicense,
+    equipmentCategoryList,
+    ownershipStatusList,
+    conditionTypeList,
     termCondition,
     getVendorCountries,
     getVendorProvince,
@@ -255,6 +282,7 @@ export const useVendorMasterDataStore = defineStore('vendorMasterData', () => {
     getVendorCurrency,
     getVendorCompanyCategory,
     getVendorCompanyLicense,
+    getVendorReference,
     getVendorTermCondition,
     uploadFile,
     postVendorRegistration,

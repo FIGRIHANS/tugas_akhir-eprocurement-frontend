@@ -215,3 +215,44 @@ export interface IVerificationDetailData {
   status: string
   keterangan: string
 }
+
+export type EquipmentDataType = {
+  id: number
+  vendorID: number
+  name: string
+  brand: string
+  type: string
+  mfgDate: string
+  serialNo: string
+  capacity: number
+  condition: number
+  conditionName: string
+  ownership: number
+  ownershipName: string
+  category: number
+  categoryName: string
+  createdBy: string
+  modifiedBy: string
+  isActive: boolean
+  createdDate: boolean
+  modifiedDate: true
+}
+
+export type PayloadEquipmentDataType = {
+  id: number
+  vendorID: number
+  name: string
+  brand: string
+  type: string
+  mfgDate: string
+  serialNo: string
+  capacity: number
+  condition: number
+  ownership: number
+  category: number
+  user: string
+  isActive: boolean
+  isTemporary: true
+  refVendorID: 0
+  action: 0
+}
