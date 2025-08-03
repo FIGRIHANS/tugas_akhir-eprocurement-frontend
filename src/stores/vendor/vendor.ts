@@ -309,51 +309,54 @@ export const useVerificationDetailStore = defineStore('verification-detail', () 
 })
 
 export const useCompanyDeedDataStore = defineStore("company-deed-data", () => {
-  const loading = ref(false)
-  const error = ref<string | null>(null)
-  const data = ref<any>([]) ///TODO: change type soon
+  const shareholdersData = ref<any>([]) ///TODO: change type soon
+  const vendorLegalDocData = ref<any>([]) ///TODO: change type soon
+  const shareholdersLoading = ref<boolean>(false)
+  const vendorLegalDocLoading = ref<boolean>(false)
+  const shareholdersError = ref<string | null>(null)
+  const vendorLegalDocError = ref<string | null>(null)
 
   const getShareholders = async (vendorId: number) => {
-    loading.value = true
+    shareholdersLoading.value = true
     try {
       const response: ApiResponse = await vendorAPI.get("/public/vendorchangedata/shareholders", {
         params: { vendorId },
       })
 
       if (response.data.statusCode === 200) {
-        data.value = response.data.result.content
+        shareholdersData.value = response.data.result.content
       }
 
     } catch (err) {
       if (err instanceof Error) {
         if (axios.isAxiosError(err)) {
-          error.value = err.response?.data.result.message
+          shareholdersError.value = err.response?.data.result.message
         }
       }
     } finally {
-      loading.value = false
+      shareholdersLoading.value = false
     }
   }
 
   const getVendorLegalDocument = async (vendorId: number) => {
-    loading.value = true
+    vendorLegalDocLoading.value = true
     try {
       const response: ApiResponse = await vendorAPI.get("/public/vendorchangedata/vendorlegaldocument", {
         params: { vendorId },
       })
 
       if (response.data.statusCode === 200) {
-        data.value = response.data.result.content
+        vendorLegalDocData.value = response.data.result.content
       }
 
     } catch (err) {
       if (err instanceof Error) {
         if (axios.isAxiosError(err)) {
-          error.value = err.response?.data.result.message
+          vendorLegalDocError.value = err.response?.data.result.message
         }
       }
     } finally {
-      loading.value = false
+      vendorLegalDocLoading.value = false
     }
   }
 
@@ -367,7 +370,7 @@ export const useCompanyDeedDataStore = defineStore("company-deed-data", () => {
     } catch (err) {
       throw err
     } finally {
-      loading.value = false
+      shareholdersLoading.value = false
     }
   }
 
@@ -381,19 +384,22 @@ export const useCompanyDeedDataStore = defineStore("company-deed-data", () => {
     } catch (err) {
       if (err instanceof Error) {
         if (axios.isAxiosError(err)) {
-          error.value = err.response?.data.result.message
+          vendorLegalDocError.value = err.response?.data.result.message
         }
       }
     } finally {
-      loading.value = false
+      vendorLegalDocLoading.value = false
     }
   }
 
 
   return {
-    loading,
-    error,
-    data,
+    shareholdersLoading,
+    vendorLegalDocLoading,
+    shareholdersError,
+    vendorLegalDocError,
+    shareholdersData,
+    vendorLegalDocData,
     postShareholders,
     postVendorLegalDocument,
     getShareholders,

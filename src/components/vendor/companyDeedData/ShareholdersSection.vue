@@ -195,7 +195,7 @@ const handleDropdown = (id: number, newMode: 'add' | 'edit' | 'delete') => {
       break
   }
 
-  const shareholderData = shareholdersStore.data.find(
+  const shareholderData = shareholdersStore.shareholdersData.find(
     (item: IShareholderPayload) => item.stockID === id,
   )
 
@@ -233,7 +233,7 @@ onMounted(() => {
 })
 
 const filteredShareholders = computed(() =>
-  shareholdersStore.data?.filter((item: IShareholderPayload) => item.isActive === true),
+  shareholdersStore.shareholdersData?.filter((item: IShareholderPayload) => item.isActive === true),
 )
 </script>
 
@@ -263,26 +263,26 @@ const filteredShareholders = computed(() =>
         </thead>
         <tbody>
           <!-- show loading -->
-          <tr v-if="shareholdersStore.loading">
+          <tr v-if="shareholdersStore.shareholdersLoading">
             <td colspan="7" class="text-center">
               <UiLoading size="md" />
             </td>
           </tr>
 
           <!-- show error message -->
-          <tr v-else-if="shareholdersStore.error">
+          <tr v-else-if="shareholdersStore.shareholdersError">
             <td colspan="7" class="text-center">
-              {{ shareholdersStore.error }}
+              {{ shareholdersStore.shareholdersError }}
             </td>
           </tr>
 
           <!-- show message if there are no data -->
-          <tr v-else-if="!shareholdersStore.data.length">
+          <tr v-else-if="!shareholdersStore.shareholdersData.length">
             <td colspan="7" class="text-center">No data</td>
           </tr>
 
           <!-- show data start -->
-          <template v-if="!shareholdersStore.loading">
+          <template v-if="!shareholdersStore.shareholdersLoading">
             <tr v-for="(item, index) in filteredShareholders" :key="index" class="text-nowrap">
               <td class="text-center">
                 <div class="dropdown" data-dropdown="true" data-dropdown-trigger="click">

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { reactive } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
 import UiFormGroup from '@/components/ui/atoms/form-group/UiFormGroup.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
@@ -7,7 +7,10 @@ import UiFileUpload from '@/components/ui/atoms/file-upload/UiFileUpload.vue'
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
-import type { IVendorLegalDocumentPayload } from '@/stores/vendor/types/vendor'
+import { IAdministration, type IVendorLegalDocumentPayload } from '@/stores/vendor/types/vendor'
+import { useCompanyDeedDataStore, useVendorAdministrationStore } from '@/stores/vendor/vendor'
+import { useRoute } from 'vue-router'
+import UiLoading from '@/components/UiLoading.vue'
 
 const vendorLegalDocPayload = reactive<IVendorLegalDocumentPayload>({
   id: 0,
@@ -27,9 +30,22 @@ const vendorLegalDocPayload = reactive<IVendorLegalDocumentPayload>({
   action: 0,
 })
 
+const vendorLegalDocStore = useCompanyDeedDataStore()
+const adminVendorStore = useVendorAdministrationStore()
+
+const route = useRoute()
+
+const administrationData = ref<IAdministration>(adminVendorStore.data!)
+
 const handleSave = () => {
   console.log(vendorLegalDocPayload)
 }
+
+onMounted(() => {
+  vendorLegalDocStore.getVendorLegalDocument(Number(route.params.id))
+})
+
+console.log(vendorLegalDocStore.vendorLegalDocData)
 </script>
 
 <template>
@@ -43,11 +59,13 @@ const handleSave = () => {
       <div class="space-y-6 mb-6">
         <div class="flex items-center gap-20">
           <p class="text-sm text-slate-700">Company Category</p>
-          <p class="text-sm text-slate-700">PKP</p>
+          <p class="text-sm text-slate-700">{{ administrationData?.companyCategoryName }}</p>
         </div>
         <div class="flex items-center gap-20">
           <p class="text-sm text-slate-700">Company Address</p>
-          <p class="text-sm text-slate-700">Jalan Bandung</p>
+          <p class="text-sm text-slate-700">
+            {{ administrationData?.addressCompanyDetail }}
+          </p>
         </div>
       </div>
 
@@ -65,7 +83,12 @@ const handleSave = () => {
             row
             v-model="vendorLegalDocPayload.notaryName"
           />
-          <UiFileUpload name="file" label="File" placeholder="Upload file" hint-text="*jpg, jpeg, png, pdf, zip / max : 16 MB" />
+          <UiFileUpload
+            name="file"
+            label="File"
+            placeholder="Upload file"
+            hint-text="*jpg, jpeg, png, pdf, zip / max : 16 MB"
+          />
         </UiFormGroup>
         <UiFormGroup hide-border>
           <DatePicker
@@ -100,6 +123,42 @@ const handleSave = () => {
             <th class="text-nowrap">Notary Office Location</th>
           </tr>
         </thead>
+        <tbody>
+          <!-- show loading -->
+          <tr v-if="vendorLegalDocStore.vendorLegalDocLoading">
+            <td colspan="5" class="text-center">
+              <UiLoading size="md" />
+            </td>
+          </tr>
+
+          <!-- show error message -->
+          <tr v-else-if="vendorLegalDocStore.vendorLegalDocError">
+            <td colspan="5" class="text-center">
+              {{ vendorLegalDocStore.vendorLegalDocError }}
+            </td>
+          </tr>
+
+          <!-- show message if there are no data -->
+          <tr v-else-if="!vendorLegalDocStore.vendorLegalDocData.length">
+            <td colspan="5" class="text-center">No data</td>
+          </tr>
+
+          <!-- show data -->
+          <tr
+            v-else
+            v-for="doc in vendorLegalDocStore.vendorLegalDocData"
+            :key="doc.id"
+            class="font-normal text-sm"
+          >
+            <td class="text-center">
+              <UiIcon name="check" variant="duotone" />
+            </td>
+            <td class="text-center">{{ doc.documentNo }}</td>
+            <td class="text-center">{{ doc.documentDate }}</td>
+            <td class="text-center">{{ doc.notaryName }}</td>
+            <td class="text-center">{{ doc.notaryLocation }}</td>
+          </tr>
+        </tbody>
       </table>
     </div>
   </div>
