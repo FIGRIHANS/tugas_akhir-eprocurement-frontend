@@ -102,12 +102,9 @@ const saveData = async () => {
     },
   }
 
-  console.log('Payload to be sent:', payload)
-
   try {
     const response = await vendorLicenseData.updateData(payload)
 
-    console.log(response)
   } catch (error) {
     console.error('Error sending data:', error)
     alert('An error occurred while sending data.')

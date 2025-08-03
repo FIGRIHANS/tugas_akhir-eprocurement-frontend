@@ -29,7 +29,6 @@ const localLicenses = computed({
 })
 
 const updateLicense = (license: ILicense) => {
-  console.log('Updating License: ', license)
   const index = localLicenses.value.findIndex((item) => item.licenseId === license.licenseId)
   if (index !== -1) {
     const updatedArray = [...localLicenses.value]
@@ -40,7 +39,6 @@ const updateLicense = (license: ILicense) => {
 }
 
 const deleteLicense = (licenseId: string) => {
-  console.log('Deleting License: ', licenseId)
   const updatedArray = localLicenses.value.filter((item) => String(item.licenseId) !== licenseId)
   emit('update:licenses', updatedArray)
   editingLicenseId.value = null
@@ -51,7 +49,6 @@ const startEditing = (licenseId: string) => {
 }
 
 const handleFileUpload = async (file: File, licenseId: string) => {
-  console.log(file)
   if (!file) {
     return
   }
