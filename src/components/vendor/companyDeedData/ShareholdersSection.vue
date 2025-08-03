@@ -46,6 +46,7 @@ const showSuccessModal = ref<boolean>(false)
 const showErrorModal = ref<boolean>(false)
 const showDeleteModal = ref<boolean>(false)
 const apiErrorMessage = ref<string>('')
+const isDownloadLoading = ref<boolean>(false)
 
 const shareHoldersError = ref<string[]>([])
 
@@ -165,6 +166,7 @@ const handleDelete = async () => {
     await shareholdersStore.postShareholders(payloadToSend)
     handleCloseModal()
     showSuccessModal.value = true
+    showDeleteModal.value = false
     shareholdersStore.getShareholders(Number(route.params.id))
   } catch (err) {
     if (axios.isAxiosError(err)) {
@@ -225,6 +227,23 @@ const uploadFile = async (file: File) => {
       console.log(err)
       alert('File upload failed, please try again')
     }
+  }
+}
+
+const handleDownload = async (path: string) => {
+  isDownloadLoading.value = true
+
+  try {
+    const file = await uploadStore.preview(path)
+    const link = URL.createObjectURL(file)
+    window.open(link, '_blank')
+    setTimeout(() => URL.revokeObjectURL(link), 1000)
+  } catch (err) {
+    if (err instanceof Error) {
+      alert('Failed to download document. Please try again later.')
+    }
+  } finally {
+    isDownloadLoading.value = false
   }
 }
 
@@ -292,7 +311,7 @@ const filteredShareholders = computed(() =>
                   <div class="dropdown-content w-full max-w-60 space-y-5">
                     <ul class="menu menu-default flex flex-col gap-2" data-dropdown-dismiss="true">
                       <li class="menu-item">
-                        <button class="menu-link" @click="handleDropdown(item.stockID, 'edit')">
+                        <button class="menu-link" @click="handleDownload(item.ownerIDUrl)">
                           <span class="menu-icon">
                             <UiIcon variant="duotone" name="arrow-down" class="!text-primary" />
                           </span>
