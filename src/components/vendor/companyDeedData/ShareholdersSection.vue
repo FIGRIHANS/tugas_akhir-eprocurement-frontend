@@ -224,7 +224,6 @@ const uploadFile = async (file: File) => {
     payload.ownerIDUrl = response?.path as string
   } catch (err) {
     if (err instanceof Error) {
-      console.log(err)
       alert('File upload failed, please try again')
     }
   }

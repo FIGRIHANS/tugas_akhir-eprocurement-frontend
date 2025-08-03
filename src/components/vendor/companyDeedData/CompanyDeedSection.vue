@@ -111,7 +111,6 @@ const onUploadFile = async (file: File) => {
     errors.documentURL = ''
   } catch (err) {
     if (err instanceof Error) {
-      console.log(err)
       alert('File upload failed, please try again')
     }
   }
