@@ -41,7 +41,6 @@ export const tableCols: { key: string; label: string }[] = [
 ]
 
 export const defaultFormData: IExperiencePayload = {
-  action: 0,
   address: '',
   agency: '',
   agencyTelpNo: '',
@@ -59,13 +58,11 @@ export const defaultFormData: IExperiencePayload = {
   location: 0,
   refVendorID: 0,
   startDate: '',
-  stateLocation: 0,
   uploadDate: '',
   user: '',
   vendorID: 0,
   expCurrID: 0,
   remark: '',
-  provinceLocation: 0,
 }
 
 export const excludedFields = [

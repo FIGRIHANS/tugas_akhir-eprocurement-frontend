@@ -58,7 +58,6 @@ const addDocument = () => {
 }
 
 const updateDocument = (doc: IOtherDocument, index: number) => {
-  console.log('Updating other document:', doc)
   const updatedArray = [...localOtherDocuments.value]
   updatedArray[index] = { ...doc }
   emit('update:otherDocuments', updatedArray)
@@ -66,8 +65,6 @@ const updateDocument = (doc: IOtherDocument, index: number) => {
 }
 
 const deleteDocument = (index: number) => {
-  const deletedDoc = localOtherDocuments.value[index]
-  console.log(`Attempting to delete document "${deletedDoc.documentName}"`)
   const updatedArray = localOtherDocuments.value.filter((_, i) => i !== index)
   emit('update:otherDocuments', updatedArray)
   editingDocIndex.value = null
@@ -82,7 +79,6 @@ const cancelEditing = () => {
 }
 
 const handleFileUpload = async (file: File, licenseId: string) => {
-  console.log(file)
   if (!file) {
     return
   }

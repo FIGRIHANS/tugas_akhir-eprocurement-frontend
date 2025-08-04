@@ -12,10 +12,12 @@ import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
 import { formatDate } from '@/composables/date-format'
 import ModalDelete from './ModalDelete.vue'
 import UiLoading from '@/components/UiLoading.vue'
+import { useVendorUploadStore } from '@/stores/vendor/upload'
 
 const router = useRouter()
 const route = useRoute()
 const experienceStore = useExperienceStore()
+const uploadStore = useVendorUploadStore()
 
 const mode = ref<'add' | 'view' | 'edit' | 'delete'>('add')
 const selectedId = ref<number>(0)
@@ -24,11 +26,14 @@ const modalForm = ref<boolean>(false)
 const errorModal = ref<boolean>(false)
 const successModal = ref<boolean>(false)
 const deleteModal = ref<boolean>(false)
+const downloadLoading = ref(false)
 
 const completedExp = computed(() =>
-  experienceStore.data.filter((item) => item.value === 'COMPLETED'),
+  experienceStore.data.filter((item) => item.value === 'COMPLETED' && item.isActive),
 )
-const onGoingExp = computed(() => experienceStore.data.filter((item) => item.value === 'ON GOING'))
+const onGoingExp = computed(() =>
+  experienceStore.data.filter((item) => item.value === 'ON GOING' && item.isActive),
+)
 
 const openModalForm = (newMode: 'add' | 'view' | 'edit', id?: number) => {
   modalForm.value = true
@@ -43,6 +48,23 @@ const onModalDelete = (id: number) => {
   selectedId.value = id
   mode.value = 'delete'
   deleteModal.value = true
+}
+
+const onDownload = async (path: string) => {
+  downloadLoading.value = true
+
+  try {
+    const file = await uploadStore.preview(path)
+    const link = URL.createObjectURL(file)
+    window.open(link, '_blank')
+    setTimeout(() => URL.revokeObjectURL(link), 1000)
+  } catch (err) {
+    if (err instanceof Error) {
+      alert('Failed to download document. Please try again later.')
+    }
+  } finally {
+    downloadLoading.value = false
+  }
 }
 
 const onSuccess = () => {
@@ -96,8 +118,8 @@ onMounted(() => {
                 </tr>
 
                 <!-- No data -->
-                <tr v-else-if="!experienceStore.data.length">
-                  <td :colspan="tableCols.length - 1" class="text-center text-danger">No data</td>
+                <tr v-else-if="!completedExp.length">
+                  <td :colspan="tableCols.length" class="text-center text-danger">No data</td>
                 </tr>
 
                 <!-- loop data -->
@@ -105,8 +127,8 @@ onMounted(() => {
                   <td>
                     <UiActions
                       :id="item.id"
-                      @on-view="openModalForm('view')"
-                      @on-edit="openModalForm('edit')"
+                      @on-view="onDownload(item.documentURL)"
+                      @on-edit="openModalForm('edit', item.id)"
                       @on-delete="onModalDelete(item.id)"
                     />
                   </td>
@@ -114,8 +136,8 @@ onMounted(() => {
                   <td>{{ item.address }}</td>
                   <td>{{ item.agency }}</td>
                   <td>{{ item.contractValue }}</td>
-                  <td>{{ item.businessFieldName }}</td>
-                  <td>{{}}</td>
+                  <td>{{ item.businessField }}</td>
+                  <td>{{ item.subBusiness }}</td>
                   <td>{{ formatDate(item.startDate) }}</td>
                   <td>{{ formatDate(item.endDate) }}</td>
                 </tr>
@@ -140,21 +162,21 @@ onMounted(() => {
               <tbody class="text-nowrap">
                 <!-- loading -->
                 <tr v-if="experienceStore.loading">
-                  <td :colspan="tableCols.length - 1" class="text-center">
+                  <td :colspan="tableCols.length" class="text-center">
                     <UiLoading size="md" variant="primary" />
                   </td>
                 </tr>
 
                 <!-- error -->
                 <tr v-else-if="experienceStore.error">
-                  <td :colspan="tableCols.length - 1" class="text-center text-danger">
+                  <td :colspan="tableCols.length" class="text-center text-danger">
                     {{ experienceStore.error }}
                   </td>
                 </tr>
 
                 <!-- No data -->
-                <tr v-else-if="!experienceStore.data.length">
-                  <td :colspan="tableCols.length - 1" class="text-center text-danger">No data</td>
+                <tr v-else-if="!onGoingExp.length">
+                  <td :colspan="tableCols.length" class="text-center text-danger">No data</td>
                 </tr>
 
                 <!-- loop -->
@@ -162,16 +184,17 @@ onMounted(() => {
                   <td>
                     <UiActions
                       :id="item.id"
-                      @on-view="openModalForm('view')"
-                      @on-edit="openModalForm('edit')"
+                      @on-view="onDownload(item.documentURL)"
+                      @on-edit="openModalForm('edit', item.id)"
+                      @on-delete="onModalDelete(item.id)"
                     />
                   </td>
                   <td>{{ item.contractName }}</td>
                   <td>{{ item.address }}</td>
                   <td>{{ item.agency }}</td>
                   <td>{{ item.contractValue }}</td>
-                  <td>{{ item.businessFieldName }}</td>
-                  <td>{{}}</td>
+                  <td>{{ item.businessField }}</td>
+                  <td>{{ item.subBusiness }}</td>
                   <td>{{ formatDate(item.startDate) }}</td>
                   <td>{{ formatDate(item.endDate) }}</td>
                 </tr>
@@ -192,9 +215,12 @@ onMounted(() => {
   <!-- modal add experience data -->
   <ModalForm
     v-model="modalForm"
+    :mode="mode"
+    :id="selectedId"
     :vendor-id="Number($route.params.id)"
     @on-error="() => (errorModal = true)"
     @on-success="() => (successModal = true)"
+    v-if="modalForm"
   />
 
   <!-- delete modal -->

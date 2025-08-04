@@ -39,8 +39,8 @@
               <td v-if="!checkInvoiceDp()">{{ item.uom }}</td>
               <td v-if="!checkInvoiceDp()">{{ item.itemText }}</td>
               <td v-if="!checkInvoiceDp()">{{ item.conditionType }}</td>
-              <td v-if="!checkInvoiceDp()">{{ item.conditionTypeDesc }}</td>
-              <td v-if="!checkInvoiceDp()">{{ item.qcStatus }}</td>
+              <td v-if="!checkInvoiceDp() && form?.invoiceTypeCode !== 903">{{ item.conditionTypeDesc }}</td>
+              <td v-if="!checkInvoiceDp() && form?.invoiceTypeCode !== 903">{{ item.qcStatus }}</td>
               <td v-if="checkInvoiceDp()">
                 <span v-if="!item.isEdit">{{ form.currCode === 'IDR' ? useFormatIdr(item.itemAmount) : useFormatUsd(item.itemAmount) }}</span>
                 <input v-else v-model="formEdit.itemAmount" type="number" class="input" />
@@ -52,6 +52,10 @@
                     {{ option.code }}
                   </option>
                 </select>
+              </td>
+              <td v-if="checkInvoiceDp()">{{  }}</td>
+              <td>
+                <span v-if="item.isEdit">{{ item.vatAmount || '-' }}</span>
               </td>
               <td v-if="checkPoPib()">
                 {{ form.currCode === 'IDR' ? useFormatIdr(item.vatAmount) : useFormatUsd(item.vatAmount) }}
@@ -172,7 +176,7 @@
 <script lang="ts" setup>
 import { ref, reactive, computed, inject, watch, onMounted } from 'vue'
 import type { formTypes } from '../../types/invoiceDetailEdit'
-import { defaultColumn, PoPibColumn, invoiceDpColumn } from '@/static/invoicePoGr'
+import { defaultColumn, PoPibColumn, invoiceDpColumn, poCCColumn } from '@/static/invoicePoGr'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import type { itemsPoGrType } from '../../types/invoicePoGr'
@@ -241,8 +245,9 @@ const resetItem = (item: itemsPoGrType) => {
   resetFormEdit()
 }
 
-const setColumn = (type: number) => {
+const setColumn = (type: number) => {  
   if (type === 902) columns.value = ['Action', ...PoPibColumn]
+  else if (type === 903) columns.value = ['Action', ...poCCColumn]
   else if (checkInvoiceDp()) columns.value = ['Action', ...invoiceDpColumn]
   else columns.value = ['Action', ...defaultColumn]
 

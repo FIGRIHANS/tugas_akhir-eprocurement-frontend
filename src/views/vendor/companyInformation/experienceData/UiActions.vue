@@ -2,9 +2,6 @@
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 const emit = defineEmits(['onView', 'onEdit', 'onDelete'])
-defineProps<{
-  id: number
-}>()
 </script>
 
 <template>
@@ -15,7 +12,7 @@ defineProps<{
     <div class="dropdown-content w-full max-w-60 space-y-5">
       <ul class="menu menu-default flex flex-col gap-2" data-dropdown-dismiss="true">
         <li class="menu-item">
-          <button class="menu-link" @click="emit('onView', id)">
+          <button class="menu-link" @click="emit('onView')">
             <span class="menu-icon">
               <UiIcon variant="duotone" name="file-down" class="!text-primary" />
             </span>
@@ -23,7 +20,7 @@ defineProps<{
           </button>
         </li>
         <li class="menu-item">
-          <button class="menu-link" @click="emit('onEdit', id)">
+          <button class="menu-link" @click="emit('onEdit')">
             <span class="menu-icon">
               <UiIcon variant="duotone" name="notepad-edit" class="!text-warning" />
             </span>
@@ -31,7 +28,7 @@ defineProps<{
           </button>
         </li>
         <li class="menu-item">
-          <button class="menu-link" @click="emit('onDelete', id)">
+          <button class="menu-link" @click="emit('onDelete')">
             <span class="menu-icon">
               <UiIcon variant="duotone" name="cross-circle" class="!text-danger" />
             </span>

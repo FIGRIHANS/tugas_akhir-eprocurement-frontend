@@ -4,9 +4,15 @@ export interface IExperienceData {
   contractName: string
   address: string
   agency: string
+  agencyTelpNo: string
+  contractNo: string
+  remark: string
+  documentURL: string
   contractValue: number
   field: number
-  businessFieldName: string
+  businessFieldId: number
+  businessField: string
+  subBusiness: string
   experienceType: number
   value: string
   startDate: string
@@ -15,11 +21,17 @@ export interface IExperienceData {
   createdDate: string
   modifiedBy: string | null
   modifiedDate: string | null
+  city: number
+  cityName: string
+  provinceId: number
+  provinceName: string
+  countryId: number
+  countryName: string
   isActive: boolean
+  expCurrID: number
 }
 
 export interface IExperiencePayload {
-  action: number
   address: string
   agency: string
   agencyTelpNo: string
@@ -36,11 +48,9 @@ export interface IExperiencePayload {
   isActive: boolean
   isTemporary: boolean
   location: number
-  provinceLocation: number
   refVendorID: number
   remark: string
   startDate: string
-  stateLocation: number
   uploadDate: string
   user: string
   vendorID: number

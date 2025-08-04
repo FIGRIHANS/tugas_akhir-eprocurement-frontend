@@ -28,7 +28,7 @@ export interface formTypes extends documentFormTypes {
   npwpReporting: string
   remainingDpAmount: string
   dpAmountDeduction: string
-
+  creditCardBillingId: string
   bankKey: string
   bankName: string
   beneficiaryName: string
