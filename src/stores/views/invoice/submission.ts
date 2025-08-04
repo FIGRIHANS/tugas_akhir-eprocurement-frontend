@@ -71,7 +71,7 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
       }
     })
 
-    const newList = response.data.result.content.map((item) => {
+    const newList = !response.data.result.content ? [] : response.data.result.content.map((item) => {
       return {
         ...item,
         isOpenChild: false
