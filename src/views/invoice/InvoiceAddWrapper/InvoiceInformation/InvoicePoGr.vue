@@ -100,7 +100,7 @@
                   <span v-if="item.isEdit">{{ form?.currency === item.currencyLC ? useFormatIdr(formEdit.vatAmount) : useFormatUsd(formEdit.vatAmount) }}</span>
                   <span v-else>{{ form?.currency === item.currencyLC ? useFormatIdr(item.vatAmount || 0) : useFormatUsd(item.vatAmount || 0) }}</span>
                 </td>
-                <td v-if="form?.invoiceType === '903'">-</td>
+                <td v-if="form?.invoiceType !== '903'">-</td>
                 <td v-if="form?.invoiceType !== '903'">-</td>
                 <td v-if="form?.invoiceType !== '903'">-</td>
                 <td v-if="!checkInvoiceDp()">-</td>
@@ -143,13 +143,13 @@
                 </td>
                 <td>
                   <span v-if="!item.isEdit">{{ item.poNo }}</span>
-                  <input v-else v-model="item.poNo" class="input" placeholder=""
+                  <input type="number" v-else v-model="item.poNo" class="input" placeholder=""
                     :class="{ 'border-danger': item.poNoError }" @change="item.poNoError = false" />
                   <p v-if="item.poNoError" class="text-danger text-[9px]">*PO Number must be at least 10 digits</p>
                 </td>
                 <td v-if="!checkInvoiceDp()">
                   <span v-if="!item.isEdit">{{ item.poItem }}</span>
-                  <input v-else v-model="item.poItem" class="input" placeholder=""
+                  <input type="number" v-else v-model="item.poItem" class="input" placeholder=""
                     :class="{ 'border-danger': item.poItemError }" @change="item.poItemError = false" />
                   <p v-if="item.poItemError" class="text-danger text-[9px]">*PO Item must be at least 2 digits</p>
                 </td>
@@ -160,12 +160,12 @@
                 <td v-if="!checkInvoiceDp()">
                   <span v-if="!item.isEdit">{{ item.department || '-' }}</span>
                   
-                  <select v-else v-model="item.department" class="select" name="select">
+                  <select v-else v-model="item.department" class="select" name="select" :class="{ 'border-danger': item.departementError }">
                     <option v-for="item of costCenterList" :key="item.code" :value="item.code">
                       {{ item.code }}
                     </option>
                   </select>
-
+                  <p v-if="item.departementError" class="text-danger text-[9px]">Please Chose Departement</p>
                   <!-- <input v-else v-model="item.department" class="input" placeholder=""
                     :class="{ 'border-danger': item.department }"  /> -->
                 </td>
@@ -389,7 +389,8 @@ const addNewPodata = () => {
       department:'',
       isEdit: true,
       poItemError: false,
-      poNoError: false
+      poNoError: false,
+      departementError: false
     }
     form.invoicePoGr.push(data)
   }
@@ -401,15 +402,21 @@ const editForm = (index: number) => {
     const data = form.invoicePoGr[index]
     data.poNoError = false
     data.poItemError = false
-    if (data.poNo.length !== 10) {
+    data.departementError = false
+
+    if (data.poNo.toString().length != 10) {
       data.poNoError = true
     }
 
-    if (data.poItem.toString().length < 2) {
+    if (data.poItem.toString().length != 2) {
       data.poItemError = true
     }
 
-    if (!data.poItemError && !data.poNoError) {
+    if (data.department === '') {
+      data.departementError = true
+    }
+
+    if (!data.poItemError && !data.poNoError && !data.departementError) {
       data.isEdit = !data.isEdit
     }
   }
