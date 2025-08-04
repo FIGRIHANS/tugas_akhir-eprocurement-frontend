@@ -114,7 +114,8 @@ const form = reactive<FormTypes>({
   automaticCriteria: [],
   manualCriteria: [],
   automaticTimeline: [],
-  manualTimeline: []
+  manualTimeline: [],
+  agreePersonInCharge: false
 })
 
 const contentComponent = computed(() => {

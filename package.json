@@ -25,6 +25,7 @@
     "vue-middleware": "^1.0.0-alpha.7",
     "vue-router": "^4.5.0",
     "vue3-apexcharts": "^1.8.0",
+    "vue3-signature": "^0.2.4",
     "zod": "^4.0.14"
   },
   "devDependencies": {

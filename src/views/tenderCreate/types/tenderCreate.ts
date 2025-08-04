@@ -14,6 +14,7 @@ export interface FormTypes {
   manualCriteria: CriteriaTypes[]
   automaticTimeline: BillingTimelineTypes[]
   manualTimeline: BillingTimelineTypes[]
+  agreePersonInCharge: boolean
   tenderIdError?: boolean
   tenderStatusError?: boolean
   picError?: boolean
