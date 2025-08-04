@@ -77,12 +77,12 @@
                 v-for="rule in passwordRules"
                 :key="rule.id"
                 class="flex flex-row justify-between items-center transition-all duration-300"
-                :class="rule.status ? 'text-success' : 'text-gray-600'"
+                :class="rule.status ? 'text-success' : 'text-danger'"
               >
                 <li>
                   <span>{{ rule.text }}</span>
                 </li>
-                <UiIcon v-if="rule.status" name="check-circle" variant="duotone" />
+                <UiIcon :name="rule.status ? 'check-circle' : 'cross-circle'" variant="duotone" />
               </div>
             </ul>
           </div>
