@@ -53,11 +53,7 @@
                   </option>
                 </select>
               </td>
-              <td v-if="checkInvoiceDp()">{{  }}</td>
-              <td>
-                <span v-if="item.isEdit">{{ item.vatAmount || '-' }}</span>
-              </td>
-              <td v-if="checkPoPib()">
+              <td v-if="!checkPoPib()">
                 {{ form.currCode === 'IDR' ? useFormatIdr(item.vatAmount) : useFormatUsd(item.vatAmount) }}
               </td>
               <td>
