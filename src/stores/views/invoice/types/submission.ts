@@ -53,6 +53,7 @@ interface ParamsSubmissionHeader {
   notes: string
   statusCode: number
   statusName: string
+  creditCardBillingId: string
 }
 
 interface ParamsSubmissionVendor {

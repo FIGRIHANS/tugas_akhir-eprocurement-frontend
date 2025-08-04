@@ -36,6 +36,7 @@ interface ParamsVerificationHeaderTypes {
   assigment: string
   transferNews: string
   npwpReporting: string
+  creditCardBillingId: string
 }
 
 interface ParamsVerificationItemTypes {
@@ -77,6 +78,7 @@ interface ParamsSubmissionHeader {
   npwpReporting: string
   remainingDpAmount: string
   dpAmountDeduction: string
+  creditCardBillingId: string
 }
 
 interface ParamsSubmissionVendor {
@@ -284,7 +286,7 @@ export interface DetailInvoiceEditTypes {
   npwpReporting: string
   remainingDpAmount: string
   dpAmountDeduction: string
-
+  creditCardBillingId: string
   bankKey: string
   bankName: string
   beneficiaryName: string
