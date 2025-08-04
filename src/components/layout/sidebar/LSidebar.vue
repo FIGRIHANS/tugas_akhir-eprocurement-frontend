@@ -64,11 +64,16 @@ const redirectTo = (path?: string) => {
 
 const filteredSidebarMenu = computed(() => {
   if (!isEmpty(userStore.userData)) {
-    if (userStore.userData?.profile.profileId === 3002 || userStore.userData?.profile.profileId === 3003) {
+    if (
+      userStore.userData?.profile.profileId === 3002 ||
+      userStore.userData?.profile.profileId === 3003
+    ) {
       return sidebarMenu.map((menu) => {
         return {
           ...menu,
-          child: menu.child ? menu.child.filter((child) => child.id === 'invoice-verification') : []
+          child: menu.child
+            ? menu.child.filter((child) => child.id === 'invoice-verification')
+            : [],
         }
       })
     }
@@ -77,31 +82,38 @@ const filteredSidebarMenu = computed(() => {
       return sidebarMenu.map((menu) => {
         return {
           ...menu,
-          child: menu.child ? menu.child.filter((child) => child.id === 'invoice-approval') : []
+          child: menu.child ? menu.child.filter((child) => child.id === 'invoice-approval') : [],
         }
       })
     }
-  }
 
+    if (userStore.userData?.profile?.vendorCode) {
+      return sidebarMenu
+        .filter((menu) => menu.id !== 'vendor-management' && menu.id !== 'userManagement')
+        .map((menu) => {
+          return {
+            ...menu,
+            child: menu.child
+              ? menu.child.filter(
+                  (child) => child.id !== 'invoice-verification' && child.id !== 'invoice-approval',
+                )
+              : [],
+          }
+        })
+    }
 
-  if (userStore.userData?.profile?.vendorCode) {
-    return sidebarMenu
-    .filter((menu) => menu.id !== 'vendor-management' && menu.id !== 'userManagement')
-    .map((menu) => {
-      return {
-        ...menu,
-        child: menu.child ? menu.child.filter((child) => child.id !== 'invoice-verification' && child.id !== 'invoice-approval') : []
-      }
-    })
-  }
-
-  if (userStore.userData?.profile?.profileName.trim() === 'Sourcing Supervisor') {
-    return sidebarMenu
-      .filter((menu) => menu.id !== 'company-information')
-      .map((menu) => ({
-        ...menu,
-        child: menu.child ? menu.child.filter((child) => child.id !== 'vendor-approval') : [],
-      }))
+    if (userStore.userData?.profile?.profileId === 3192) {
+      return sidebarMenu
+        .filter((menu) => menu.id !== 'company-information')
+        .map((menu) => ({
+          ...menu,
+          child: menu.child
+            ? menu.child.filter(
+                (child) => child.id !== 'vendor-approval' && child.id !== 'vendor-verification',
+              )
+            : [],
+        }))
+    }
   }
 
   return sidebarMenu.filter((menu) => menu.id !== 'company-information')

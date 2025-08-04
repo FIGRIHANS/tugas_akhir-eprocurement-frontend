@@ -281,3 +281,14 @@ onMounted(() => {
   vendorMasterDataStore.getVendorCountries()
 })
 </script>
+
+<style scoped>
+::v-deep(.term-condition ol) {
+  list-style-type: decimal !important;
+  padding-left: 1rem !important;
+}
+::v-deep(.term-condition ul) {
+  list-style-type: disc !important;
+  padding-left: 1rem !important;
+}
+</style>

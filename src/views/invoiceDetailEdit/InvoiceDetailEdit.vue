@@ -338,6 +338,7 @@ const setDataDefault = () => {
   for (const item of data?.pogr || []) {
     resultPoGr.push({
       ...item,
+      vatAmount: 0,
       isEdit: false
     })
   }

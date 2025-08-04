@@ -71,7 +71,7 @@ watch(
   () => isVendor.value,
   () => {
     if (isVendor.value && form) {
-      form.vendorId = userData.value?.profile.vendorCode || ''
+      form.vendorId = userData.value?.profile.sapCode || ''
       form.vendorName = userData.value?.profile.vendorName || ''
     }
   },

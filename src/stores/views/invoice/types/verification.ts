@@ -133,6 +133,7 @@ interface ParamsSubmissionItem {
   itemAmount: number
   quantity: number
   taxCode: string
+  vatAmount: number
   uom: string
   itemText: string
   conditionType: string
@@ -150,6 +151,7 @@ interface ParamsSubmissionCost {
   itemAmount: number
   debitCredit: string
   taxCode: string
+  vatAmount: number
   costCenter: string
   profitCenter: string
   assignment: string
@@ -248,6 +250,7 @@ export interface itemsPoGrType {
   itemAmount: number
   quantity: number
   taxCode: string
+  vatAmount: number
   uom: string
   itemText: string
   conditionType: string

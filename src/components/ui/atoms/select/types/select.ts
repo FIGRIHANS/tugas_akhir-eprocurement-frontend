@@ -9,4 +9,5 @@ export interface ISelectProps {
   textKey?: string
   required?: boolean
   error?: boolean
+  hintText?: string
 }

@@ -57,6 +57,9 @@
               <td>
                 <span v-if="item.isEdit">{{ item.vatAmount || '-' }}</span>
               </td>
+              <td v-if="checkPoPib()">
+                {{ form.currCode === 'IDR' ? useFormatIdr(item.vatAmount) : useFormatUsd(item.vatAmount) }}
+              </td>
               <td>
                 <span v-if="!item.isEdit">{{ item.whtType }}</span>
                 <select v-else v-model="formEdit.whtType" class="select" placeholder="" @change="callWhtCode(item)">
@@ -200,9 +203,9 @@ const checkInvoiceDp = () => {
   return form?.invoiceDPCode === 9012 
 }
 
-// const checkPoPib = () => {
-//   return true // form?.invoiceType === 'pib'
-// }
+const checkPoPib = () => {
+  return form?.invoiceTypeCode === 902
+}
 
 const resetFormEdit = () => {
   formEdit.itemAmount = 0
@@ -271,8 +274,6 @@ const getPercentTax = (code: string) => {
 const getVatAmount = () => {
   const percentTax = getPercentTax(formEdit.taxCode) || 0
   const itemAmount = formEdit.itemAmount
-  console.log(percentTax)
-  console.log(itemAmount)
   const result = percentTax * itemAmount
   formEdit.vatAmount = result
 }
@@ -280,7 +281,7 @@ const getVatAmount = () => {
 watch(
   () => [form?.invoiceDPCode, form?.invoiceTypeCode],
   () => {
-    setColumn(form?.invoiceTypeCode)
+    setColumn(form?.invoiceTypeCode || 0)
   },
   {
     immediate: true
@@ -301,7 +302,7 @@ watch(
 )
 
 onMounted(() => {
-  setColumn(form?.invoiceTypeCode)
+  setColumn(form?.invoiceTypeCode || 0)
 })
 </script>
 
