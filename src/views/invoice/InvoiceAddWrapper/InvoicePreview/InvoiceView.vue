@@ -6,7 +6,7 @@
         <p class="text-xs font-normal text-gray-700">Invoice Type</p>
         <p class="text-sm font-medium">{{ getInvoiceTypeName() || '-' }}</p>
       </div>
-      <div class="w-[calc(50%-10px)]">
+      <div v-if="form.invoiceType === '901'" class="w-[calc(50%-10px)]">
         <p class="text-xs font-normal text-gray-700">DP Option</p>
         <p class="text-sm font-medium">{{ getDpName() || '-' }}</p>
       </div>
@@ -22,7 +22,7 @@
         <p class="text-xs font-normal text-gray-700">Invoice Date</p>
         <p class="text-sm font-medium whitespace-nowrap">{{ form.invoiceDate ? moment(form.invoiceDate).format('YYYYMMDD') : '-' }}</p>
       </div>
-      <div class="w-[calc(50%-10px)]">
+      <div v-if="form.invoiceType !== '903'" class="w-[calc(50%-10px)]">
         <p class="text-xs font-normal text-gray-700">Tax Document No.</p>
         <p class="text-sm font-medium">{{ form.taxNoInvoice || '-' }}</p>
       </div>
@@ -38,7 +38,7 @@
         <p class="text-xs font-normal text-gray-700">DP Amount Deduction</p>
         <p class="text-sm font-medium">{{ form.dpAmountDeduction || '-' }}</p>
       </div>
-      <div class="w-[calc(50%-10px)]">
+      <div v-if="form.invoiceType !== '903'" class="w-[calc(50%-10px)]">
         <p class="text-xs font-normal text-gray-700">Description</p>
         <p class="text-sm font-medium">{{ form.description || '-' }}</p>
       </div>
