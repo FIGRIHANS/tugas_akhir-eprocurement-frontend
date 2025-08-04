@@ -6,7 +6,13 @@
     </div>
     <TabTender :activeTab="activeTab" class="mt-[24px]" />
     <Transition mode="out-in">
-      <component :is="contentComponent" :activeTab="activeTabAdmin" @setTab="setTab" />
+      <component
+        :is="contentComponent"
+        :activeTab="activeTabAdmin"
+        :activeTabTimeline="activeTabBilling"
+        @setTab="setTab"
+        @setTabTimeline="setTabTimeline"
+      />
     </Transition>
     <div class="flex align-items-center justify-between gap-[8px] mt-[24px]">
       <button class="btn btn-outline btn-primary" :disabled="activeTab === 'purchase'" @click="goBack">
@@ -32,6 +38,7 @@ import type { FormTypes } from './types/tenderCreate'
 const PurchaseRequisitionList = defineAsyncComponent(() => import('./TenderCreate/PurchaseRequisitionList.vue'))
 const VendorList = defineAsyncComponent(() => import('./TenderCreate/VendorList.vue'))
 const AdministrativeDocument = defineAsyncComponent(() => import('./TenderCreate/AdministrativeDocument.vue'))
+const TenderBilling = defineAsyncComponent(() => import('./TenderCreate/TenderBilling.vue'))
 
 const routes = ref<routeTypes[]>([
   {
@@ -42,6 +49,7 @@ const routes = ref<routeTypes[]>([
 
 const activeTab = ref<string>('purchase')
 const activeTabAdmin = ref<string>('automatic')
+const activeTabBilling = ref<string>('automatic')
 const tabList = reactive<string[]>([
   'purchase',
   'vendor',
@@ -104,14 +112,17 @@ const form = reactive<FormTypes>({
   tenderEndDate: '',
   tenderMethod: '',
   automaticCriteria: [],
-  manualCriteria: []
+  manualCriteria: [],
+  automaticTimeline: [],
+  manualTimeline: []
 })
 
 const contentComponent = computed(() => {
   const components = {
     purchase: PurchaseRequisitionList,
     vendor: VendorList,
-    admin: AdministrativeDocument
+    admin: AdministrativeDocument,
+    timeline: TenderBilling
   } as { [key: string]: Component }
 
   return components[activeTab.value]
@@ -135,6 +146,10 @@ const goBack = () => {
 
 const setTab = (tab: string) => {
   activeTabAdmin.value = tab
+}
+
+const setTabTimeline = (tab: string) => {
+  activeTabBilling.value = tab
 }
 
 provide('form', form)

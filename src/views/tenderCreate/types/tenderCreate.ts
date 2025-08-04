@@ -12,6 +12,8 @@ export interface FormTypes {
   tenderMethod: string
   automaticCriteria: CriteriaTypes[]
   manualCriteria: CriteriaTypes[]
+  automaticTimeline: BillingTimelineTypes[]
+  manualTimeline: BillingTimelineTypes[]
   tenderIdError?: boolean
   tenderStatusError?: boolean
   picError?: boolean
@@ -44,4 +46,17 @@ export interface CriteriaTypes {
   evaluationItem: string
   itemDescription: string
   weight: string
+  isEdit?: boolean
+}
+
+export interface BillingTimelineTypes {
+  id: string
+  group: string
+  step: string
+  process: string
+  startDate: string
+  endDate: string
+  workingDays: string
+  pic: string
+  isEdit?: boolean
 }

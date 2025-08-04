@@ -7,7 +7,7 @@
     </div>
     <div class="border rounded-xl p-[24px]">
       <p class="font-semibold">Vendor Evaluation Criteria</p>
-      <div class="border rounded-lg p-[4px] mt-[24px] w-fit">
+      <div class="border rounded-lg p-[4px] mt-[24px] mb-[24px] w-fit">
         <div class="flex gap-4" data-tabs="true">
           <a class="btn btn-primary btn-clear" :class="{ 'active': activeTab === 'automatic' }" href="#" @click="onSetTab(true)">
             Automatic Criteria
@@ -43,3 +43,7 @@ const onSetTab = (isAutomatic: boolean) => {
   emits('setTab', isAutomatic ? 'automatic' : 'manual')
 }
 </script>
+
+<style lang="scss" scoped>
+@use '../styles//administrativeDocument.scss';
+</style>
