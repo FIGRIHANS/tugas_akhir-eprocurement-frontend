@@ -64,6 +64,9 @@ watch(
         form.vendorName = vendorList.value[getIndex].vendorName
       }
     }
+  },
+  {
+    immediate: true
   }
 )
 
