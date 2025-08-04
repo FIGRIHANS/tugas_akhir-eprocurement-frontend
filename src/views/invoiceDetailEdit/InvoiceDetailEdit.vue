@@ -110,7 +110,9 @@ const form = ref<formTypes>({
   invoiceDocument: null,
   tax: null,
   referenceDocument: null,
-  otherDocument: null
+  otherDocument: null,
+  creditCardBillingId: '',
+  creditCardBillingError: false
 })
 
 const contentComponent = computed(() => {
@@ -138,6 +140,7 @@ const checkInvoiceInformation = () => {
   form.value.paymentMethodError = useCheckEmpty(form.value.paymentMethodCode).isError
   form.value.transferNewsError = useCheckEmpty(form.value.transferNews).isError
   form.value.notesError = useCheckEmpty(form.value.notes).isError
+  form.value.creditCardBillingError = useCheckEmpty(form.value.creditCardBillingId).isError
 
   if (Number(form.value.invoiceDPCode) === 9013) {
     form.value.dpAmountDeductionError = Number(form.value.dpAmountDeduction) > Number(form.value.remainingDpAmount)
@@ -318,7 +321,8 @@ const setDataEdit = () => {
     invoiceDocument: mapDocument(data?.invoiceDocument || null),
     tax: mapDocument(data?.tax || null),
     referenceDocument: mapDocument(data?.referenceDocument || null),
-    otherDocument: mapDocument(data?.otherDocument || null)
+    otherDocument: mapDocument(data?.otherDocument || null),
+    creditCardBillingId: data?.creditCardBillingId || ''
   }
 }
 
@@ -413,7 +417,8 @@ const setDataDefault = () => {
     invoiceDocument: invoice,
     tax: tax,
     referenceDocument: reference,
-    otherDocument: other
+    otherDocument: other,
+    creditCardBillingId: data?.header.creditCardBillingId || ''
   }
 }
 
