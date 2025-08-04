@@ -60,7 +60,7 @@
           <DatePicker
             v-model="form.tenderPeriod"
             label="Tender Period"
-            format="yyyyMMdd"
+            format="dd MMM yyyy"
             :error="form.tenderPeriodError"
             required
           />

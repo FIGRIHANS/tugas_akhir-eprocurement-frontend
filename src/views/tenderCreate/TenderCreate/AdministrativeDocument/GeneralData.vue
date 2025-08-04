@@ -24,11 +24,11 @@
       </div>
       <div class="flex align-items-center justify-between gap-[8px] text-sm mb-[20px]">
         <p class="text-gray-600 form-label h-fit self-center">Tender Start Date</p>
-        <DatePicker v-model="form.tenderStartDate" format="yyyyMMdd" />
+        <DatePicker v-model="form.tenderStartDate" format="dd MMM yyyy" />
       </div>
       <div class="flex align-items-center justify-between gap-[8px] text-sm mb-[20px]">
         <p class="text-gray-600 form-label h-fit self-center">Tender End Date</p>
-        <DatePicker v-model="form.tenderEndDate" format="yyyyMMdd" />
+        <DatePicker v-model="form.tenderEndDate" format="dd MMM yyyy" />
       </div>
     </div>
   </div>

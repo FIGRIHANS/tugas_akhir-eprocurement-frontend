@@ -34,11 +34,11 @@
             </td>
             <td>
               <!-- <span v-if="!data.isEdit">{{ data.startDate }}</span> -->
-              <DatePicker v-model="data.startDate" format="yyyyMMdd" />
+              <DatePicker v-model="data.startDate" format="dd MMM yyyy" />
             </td>
             <td>
               <!-- <span v-if="!data.isEdit">{{ data.endDate }}</span> -->
-              <DatePicker v-model="data.endDate" format="yyyyMMdd" />
+              <DatePicker v-model="data.endDate" format="dd MMM yyyy" />
             </td>
             <td>{{ data.workingDays }}</td>
             <td>{{ data.pic }}</td>

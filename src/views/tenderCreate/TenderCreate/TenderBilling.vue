@@ -24,11 +24,16 @@
     <div>
       <p class="font-semibold">Signature</p>
       <div class="flex gap-[16px] mt-[16px]">
-        <Vue3Signature :sigOption="optionSignature" :w="'346px'" :h="'220px'" class="border rounded-2xl border-gray-300 overflow-hidden" />
+        <Vue3Signature ref="signatureRef" :sigOption="optionSignature" :w="'346px'" :h="'220px'" class="border rounded-2xl border-gray-300 overflow-hidden" />
         <div class="flex flex-col justify-between">
           <div>
-            <p class="text-sm">PIC Tender</p>
+            <p class="text-sm text-gray-600">PIC Tender</p>
+            <p class="mt-[10px] text-sm">Joko Anwar</p>
           </div>
+          <button class="btn btn-outline btn-primary" @click="clearSignature">
+            <i class="ki-duotone ki-arrows-circle"></i>
+            Clear
+          </button>
         </div>
       </div>
     </div>
@@ -41,13 +46,15 @@ import BillingTimeline from './TenderBilling/BillingTimeline.vue'
 import Vue3Signature from "vue3-signature"
 import type { FormTypes } from '../types/tenderCreate'
 
-const form = inject<FormTypes>('form')
 
 defineProps<{
   activeTabTimeline: string
 }>()
 
 const emits = defineEmits(['setTabTimeline'])
+
+const form = inject<FormTypes>('form')
+const signatureRef = ref()
 
 const optionSignature = ref({
   penColor: "rgb(0, 0, 0)",
@@ -56,6 +63,10 @@ const optionSignature = ref({
 
 const onSetTab = (isAutomatic: boolean) => {
   emits('setTabTimeline', isAutomatic ? 'automatic' : 'manual')
+}
+
+const clearSignature = () => {
+  signatureRef.value.clear()
 }
 </script>
 

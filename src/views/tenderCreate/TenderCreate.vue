@@ -20,8 +20,9 @@
         Back
       </button>
       <button class="btn btn-primary" @click="goNext">
-        {{ activeTab === 'vendor' ? 'Invite and Next' : 'Next' }}
-        <i class="ki-filled ki-black-right"></i>
+        {{ activeTab === 'vendor' ? 'Invite and Next' : activeTab === 'timeline' ? 'Publish Tender Request' : 'Next' }}
+        <i v-if="activeTab !== 'timeline'" class="ki-filled ki-black-right"></i>
+        <i v-else class="ki-duotone ki-paper-plane"></i>
       </button>
     </div>
   </div>
