@@ -70,6 +70,9 @@
                 </select>
               </td>
               <td>
+                <span>{{ form?.currency === 'IDR' ? useFormatIdr(item.vatAmount) : useFormatUsd(item.vatAmount) }}</span>
+              </td>
+              <td>
                 <span>{{ item.costCenter || '-' }}</span>
               </td>
               <td>
@@ -99,7 +102,7 @@
 import { ref, computed, inject } from 'vue'
 import type { formTypes } from '../../types/invoiceAddWrapper'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
-import { useFormatIdr } from '@/composables/currency'
+import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const columns = ref([
@@ -108,6 +111,7 @@ const columns = ref([
   'Item Amount',
   'Debit/Credit',
   'Tax Code',
+  'VAT Amount',
   'Cost Center',
   'Profit Center',
   'Assignment',
@@ -128,6 +132,7 @@ const addNew = () => {
       itemAmount: '',
       debitCredit: '',
       taxCode: '',
+      vatAmount: 0,
       costCenter: '',
       profitCenter: '',
       assignment: '',

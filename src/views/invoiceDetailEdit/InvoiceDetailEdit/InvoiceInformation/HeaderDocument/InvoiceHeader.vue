@@ -103,6 +103,20 @@
         </label>
         <input v-model="form.transferNews" class="input" placeholder="" :class="{ 'border-danger': form.transferNewsError }" />
       </div>
+      <!-- Credit Card Billing ID -->
+      <div v-if="form.invoiceTypeCode === 903" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          Credit Card Billing ID
+          <span class="text-red-500 ml-[4px]">*</span>
+        </label>
+        <input
+          v-model="form.creditCardBillingId"
+          class="input"
+          placeholder=""
+          :disabled="userData?.profile.profileId !== 3190"
+          :class="{ 'border-danger': form.creditCardBillingError }"
+        />
+      </div>
       <!-- Currency -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
@@ -120,7 +134,7 @@
         <label class="form-label">
           NPWP Reporting
         </label>
-        <input v-model="form.npwpReporting" class="input" placeholder="" :class="{ 'border-danger': form.npwpReportingError }" :disabled="userData?.profile.profileId === 3002" />
+        <input v-model="form.npwpReporting" class="input" placeholder="" :class="{ 'border-danger': form.npwpReportingError }" :disabled="isNpwrDisabled()" />
       </div>
       <!-- Remaining DP Amount -->
       <div v-if="form.invoiceDPCode === 9013" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
@@ -141,6 +155,8 @@
           placeholder=""
         />
       </div>
+      
+
       <!-- Description -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
@@ -187,6 +203,15 @@ const getDpName = () => {
 const getInvoiceTypeName = () => {
   const getIndex = listInvoiceTypePo.value.findIndex((item) => item.code === form?.value.invoiceTypeCode.toString())
   if (getIndex !== -1) return listInvoiceTypePo.value[getIndex].name
+}
+
+const isNpwrDisabled = () => {
+  if (userData.value) {
+    [3002, 3190].includes(userData.value?.profile?.profileId);
+    return true
+  } else {
+    return false
+  }
 }
 
 // const checkPo = () => {

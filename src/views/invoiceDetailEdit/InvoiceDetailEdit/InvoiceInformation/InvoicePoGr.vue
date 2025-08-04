@@ -39,12 +39,12 @@
               <td v-if="!checkInvoiceDp()">{{ item.uom }}</td>
               <td v-if="!checkInvoiceDp()">{{ item.itemText }}</td>
               <td v-if="!checkInvoiceDp()">{{ item.conditionType }}</td>
-              <td v-if="!checkInvoiceDp()">{{ item.conditionTypeDesc }}</td>
-              <td v-if="!checkInvoiceDp()">{{ item.qcStatus }}</td>
+              <td v-if="!checkInvoiceDp() && form?.invoiceTypeCode !== 903">{{ item.conditionTypeDesc }}</td>
+              <td v-if="!checkInvoiceDp() && form?.invoiceTypeCode !== 903">{{ item.qcStatus }}</td>
               <td v-if="checkInvoiceDp()">
-              <span v-if="!item.isEdit">{{ form.currCode === 'IDR' ? useFormatIdr(item.itemAmount) : useFormatUsd(item.itemAmount) }}</span>
-              <input v-else v-model="formEdit.itemAmount" type="number" class="input" />
-            </td>
+                <span v-if="!item.isEdit">{{ form.currCode === 'IDR' ? useFormatIdr(item.itemAmount) : useFormatUsd(item.itemAmount) }}</span>
+                <input v-else v-model="formEdit.itemAmount" type="number" class="input" />
+              </td>
               <td>
                 <span v-if="!item.isEdit">{{ item.taxCode }}</span>
                 <select v-else v-model="formEdit.taxCode" class="select" placeholder="">
@@ -53,7 +53,13 @@
                   </option>
                 </select>
               </td>
-            <td v-if="checkInvoiceDp()">{{  }}</td>
+              <td v-if="checkInvoiceDp()">{{  }}</td>
+              <td>
+                <span v-if="item.isEdit">{{ item.vatAmount || '-' }}</span>
+              </td>
+              <td v-if="checkPoPib()">
+                {{ form.currCode === 'IDR' ? useFormatIdr(item.vatAmount) : useFormatUsd(item.vatAmount) }}
+              </td>
               <td>
                 <span v-if="!item.isEdit">{{ item.whtType }}</span>
                 <select v-else v-model="formEdit.whtType" class="select" placeholder="" @change="callWhtCode(item)">
@@ -170,7 +176,7 @@
 <script lang="ts" setup>
 import { ref, reactive, computed, inject, watch, onMounted } from 'vue'
 import type { formTypes } from '../../types/invoiceDetailEdit'
-import { defaultColumn, PoPibColumn, invoiceDpColumn } from '@/static/invoicePoGr'
+import { defaultColumn, PoPibColumn, invoiceDpColumn, poCCColumn } from '@/static/invoicePoGr'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import type { itemsPoGrType } from '../../types/invoicePoGr'
@@ -197,9 +203,9 @@ const checkInvoiceDp = () => {
   return form?.invoiceDPCode === 9012 
 }
 
-// const checkPoPib = () => {
-//   return true // form?.invoiceType === 'pib'
-// }
+const checkPoPib = () => {
+  return form?.invoiceTypeCode === 902
+}
 
 const resetFormEdit = () => {
   formEdit.itemAmount = 0
@@ -239,10 +245,9 @@ const resetItem = (item: itemsPoGrType) => {
   resetFormEdit()
 }
 
-const setColumn = (type: number) => {
-  console.log(type, 'ini type');
-  
+const setColumn = (type: number) => {  
   if (type === 902) columns.value = ['Action', ...PoPibColumn]
+  else if (type === 903) columns.value = ['Action', ...poCCColumn]
   else if (checkInvoiceDp()) columns.value = ['Action', ...invoiceDpColumn]
   else columns.value = ['Action', ...defaultColumn]
 
@@ -269,8 +274,6 @@ const getPercentTax = (code: string) => {
 const getVatAmount = () => {
   const percentTax = getPercentTax(formEdit.taxCode) || 0
   const itemAmount = formEdit.itemAmount
-  console.log(percentTax)
-  console.log(itemAmount)
   const result = percentTax * itemAmount
   formEdit.vatAmount = result
 }
@@ -278,7 +281,7 @@ const getVatAmount = () => {
 watch(
   () => [form?.invoiceDPCode, form?.invoiceTypeCode],
   () => {
-    setColumn(form?.invoiceTypeCode)
+    setColumn(form?.invoiceTypeCode || 0)
   },
   {
     immediate: true
@@ -299,7 +302,7 @@ watch(
 )
 
 onMounted(() => {
-  setColumn(form?.invoiceTypeCode)
+  setColumn(form?.invoiceTypeCode || 0)
 })
 </script>
 
