@@ -46,6 +46,7 @@ interface ParamsVerificationItemTypes {
   itemAmount: number
   quantity: number
   taxCode: string
+  vatAmount: number
   whtType: string
   whtCode: string
   whtBaseAmount: number
@@ -233,6 +234,7 @@ export interface itemsCostType {
   itemAmount: number
   debitCredit: string
   taxCode: string
+  vatAmount: number
   costCenter: string
   profitCenter: string
   assignment: string
