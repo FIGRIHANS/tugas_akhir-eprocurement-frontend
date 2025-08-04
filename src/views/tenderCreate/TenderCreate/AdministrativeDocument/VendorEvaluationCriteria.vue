@@ -41,7 +41,7 @@
       </table>
     </div>
     
-    <button v-if="props.isManual" class="btn btn-primary py-[10px] px-[24px]">
+    <button v-if="props.isManual" class="btn btn-primary my-[10px] mx-[24px]">
       Add Criteria
       <i class="ki-duotone ki-plus-circle"></i>
     </button>
