@@ -185,7 +185,7 @@ export interface ListPoTypes {
   companyCode: string
   companyName: string
   documentNo: string
-  estimatePaymentDate: string
+  estimatedPaymentDate: string
   invoiceDate: string
   invoiceNo: string
   invoiceTypeCode: number

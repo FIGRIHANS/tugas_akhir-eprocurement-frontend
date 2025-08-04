@@ -42,7 +42,7 @@
                 <td>{{ useFormatIdr(parent.totalNetAmount) || '-' }}</td>
                 <td>{{ parent.taxNo || '-' }}</td>
                 <td>{{ parent.documentNo || '-' }}</td>
-                <td>{{ parent.estimatePaymentDate ? moment(parent.estimatePaymentDate).format('DD MMMM YYYY') : '-' }}</td>
+                <td>{{ parent.estimatedPaymentDate ? moment(parent.estimatedPaymentDate).format('DD MMMM YYYY') : '-' }}</td>
                 <td>{{ parent.invoiceDate ? moment(parent.invoiceDate).format('DD MMMM YYYY HH:mm:ss') : '-' }}</td>
                 <td>{{ parent.notes || '-' }}</td>
               </tr>
