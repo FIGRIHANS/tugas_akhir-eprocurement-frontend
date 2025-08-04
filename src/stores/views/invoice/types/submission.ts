@@ -15,6 +15,7 @@ export interface SubmissionStatusTypes {
 
 export interface AvailableDpTypes {
   isAvailable: boolean
+  department: string
 }
 
 export interface RemainingDpTypes {
@@ -53,6 +54,7 @@ interface ParamsSubmissionHeader {
   notes: string
   statusCode: number
   statusName: string
+  creditCardBillingId: string
 }
 
 interface ParamsSubmissionVendor {

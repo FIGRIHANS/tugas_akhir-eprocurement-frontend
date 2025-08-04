@@ -1,6 +1,6 @@
 <template>
   <label class="form-label flex items-center gap-2.5">
-    <input v-model="model" class="checkbox" type="checkbox" />
+    <input v-model="model" class="checkbox" type="checkbox" :disabled="disabled" />
     {{ label }}
   </label>
 </template>

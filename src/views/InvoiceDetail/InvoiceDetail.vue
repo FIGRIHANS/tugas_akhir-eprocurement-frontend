@@ -118,6 +118,7 @@ const form = ref<formTypes>({
   bankName: '',
   beneficiaryName: '',
   bankAccountNo: '',
+  creditCardBillingId: '',
   vendorId: '',
   vendorName: '',
   npwp: '',
@@ -184,7 +185,7 @@ const openReject = () => {
 }
 
 const checkPo = () => {
-  return form.value.invoiceTypeCode === 901 || form.value.invoiceTypeCode === 902
+  return form.value.invoiceTypeCode === 901 || form.value.invoiceTypeCode === 902 || form.value.invoiceTypeCode === 903
 }
 
 const checkVerifHeader = () => {
@@ -290,7 +291,8 @@ const mapDataVerif = () => {
       paymentMethodName: form.value.paymentMethodName,
       assigment: form.value.assigment,
       transferNews: form.value.transferNews,
-      npwpReporting: form.value.npwpReporting
+      npwpReporting: form.value.npwpReporting,
+      creditCardBillingId: form.value.creditCardBillingId
     },
     payment: {
       bankKey: form.value.bankKey,
@@ -434,6 +436,7 @@ const setDataDefault = () => {
     dpAmountDeduction: '',
     bankKey: data?.payment.bankKey || '',
     bankName: data?.payment.bankName || '',
+    creditCardBillingId: data?.header.creditCardBillingId || '',
     beneficiaryName: data?.payment.beneficiaryName || '',
     bankAccountNo: data?.payment.bankAccountNo || '',
     vendorId: data?.vendor.vendorId || '',
@@ -487,6 +490,7 @@ const setDataEdit = () => {
     bankName: data?.bankName || '',
     beneficiaryName: data?.beneficiaryName || '',
     bankAccountNo: data?.bankAccountNo || '',
+    creditCardBillingId: data?.creditCardBillingId || '',
     vendorId: data?.vendorId || '',
     vendorName: data?.vendorName || '',
     npwp: data?.npwp || '',

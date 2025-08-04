@@ -27,6 +27,7 @@
             <td>{{ item.itemAmount || '-' }}</td>
             <td>{{ item.debitCredit || '-' }}</td>
             <td>{{ item.taxCode || '-' }}</td>
+            <td>{{ item.vatAmount ? form.currCode === 'IDR' ? useFormatIdr(item.vatAmount) : useFormatUsd(item.vatAmount) : '-' }}</td>
             <td>{{ item.costCenter || '-' }}</td>
             <td>{{ item.profitCenter || '-' }}</td>
             <td>{{ item.assignment || '-' }}</td>
@@ -43,6 +44,7 @@
 <script lang="ts" setup>
 import { ref, inject } from 'vue'
 import type { formTypes } from '../types/invoiceDetail'
+import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 
 defineProps<{
   isNeedCheck: boolean
@@ -56,6 +58,7 @@ const columns = ref([
   'Item Amount',
   'Debit/Credit',
   'Tax Code',
+  'VAT Amount',
   'Cost Center',
   'Profit Center',
   'Assignment',

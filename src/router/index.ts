@@ -15,8 +15,6 @@ import dashboard from './modules/dashboard'
 import userManagement from './modules/userManagement'
 import companyInfomartion from './modules/companyInfomartion'
 import workflowConfig from './modules/workflowConfig'
-import paymentInformation from './modules/payment-information'
-import tender from './modules/tender'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -43,9 +41,7 @@ const router = createRouter({
         ...dashboard,
         ...userManagement,
         ...companyInfomartion,
-        ...paymentInformation,
         ...workflowConfig,
-        ...tender
       ],
       meta: {
         middleware: 'auth',

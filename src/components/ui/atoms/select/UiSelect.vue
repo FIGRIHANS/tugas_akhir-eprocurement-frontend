@@ -12,6 +12,7 @@
       class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px]"
     >
       {{ label }}
+      <span v-if="required" class="text-danger"> * </span>
     </label>
     <label
       v-else-if="label && row"
@@ -36,6 +37,7 @@
         {{ option[textKey] }}
       </option>
     </select>
+    <span v-if="hintText" class="form-hint !text-danger">{{ hintText }}</span>
   </div>
 </template>
 

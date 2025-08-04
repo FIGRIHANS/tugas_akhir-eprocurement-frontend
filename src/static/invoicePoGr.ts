@@ -12,6 +12,27 @@ export const defaultColumn = [
   'Condition Type Description',
   'QC Status',
   'Tax Code',
+  'VAT Amount',
+  'WHT Type',
+  'WHT Code',
+  'WHT Base Amount',
+  'WHT Amount',
+  'Department'
+]
+
+export const poCCColumn = [
+  'PO Number',
+  'PO Item',
+  'GR Document No.',
+  'GR Document Item.',
+  'GR Document Date',
+  'Item Amount',
+  'Quantity',
+  'Unit',
+  'Item Text',
+  'Condition Type',
+  'Tax Code',
+  'VAT Amount',
   'WHT Type',
   'WHT Code',
   'WHT Base Amount',
@@ -26,7 +47,8 @@ export const invoiceDpColumn = [
   'VAT Amount',
   'WHT Type',
   'WHT Code',
-  'WHT Base Amount'
+  'WHT Base Amount',
+  'Department'
 ]
 
 export const PoPibColumn = [

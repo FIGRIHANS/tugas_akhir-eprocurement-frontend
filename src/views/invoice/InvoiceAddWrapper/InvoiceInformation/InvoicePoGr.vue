@@ -1,6 +1,7 @@
 <template>
   <div v-if="form" id="table-invoice-po-gr" class="flex flex-col gap-[16px]">
     <p class="text-base font-semibold">{{ form?.invoiceDp === '9012' ? 'Invoice PO' : 'Invoice PO & GR Item' }}</p>
+
     <div v-if="form?.invoiceType !== '902' && !checkInvoiceDp()">
       <div class="flex items-center gap-[10px]">
         <div class="relative max-w-[250px]">
@@ -59,9 +60,10 @@
                   <span v-if="!item.isEdit">{{ item.poNo }}</span>
                   <div v-else>
                     <div class="input" :class="{ 'border-danger': item.poNoError }">
-                      <input v-model="item.poNo" placeholder="" @keypress="searchEnter" />
+                      <input v-model="item.poNo" placeholder="" type="number" @keypress="searchEnter" />
                       <i class="ki-filled ki-magnifier"></i>
                     </div>
+                    <p v-if="searchError" class="text-danger text-[9px]">*PO Number must be exactly 10 characters long</p>
                     <p v-if="searchDpAvailableError" class="text-danger text-[9px]">*PO Number not available for DP</p>
                     <p v-if="isSearch && !searchDpAvailableError" class="text-success text-[9px]">*PO Number available for DP</p>
                   </div>
@@ -76,7 +78,12 @@
                 <td v-if="!checkInvoiceDp()">{{ item.itemText }}</td>
                 <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.conditionType }}</td>
                 <td v-if="!checkInvoiceDp()">{{ item.conditionTypeDesc || '-' }}</td>
-                <td v-if="!checkInvoiceDp()">{{ item.qcStatus || '-' }}</td>
+                <td v-if="form?.invoiceType === '903'">{{ item.taxCode || '-' }}</td>
+                <td v-if="!checkInvoiceDp() && form?.invoiceType !== '903'">{{ item.qcStatus || '-' }}</td>
+                <td v-if="form?.invoiceType === '903'">
+                  <span v-if="item.isEdit">{{ form?.currency === item.currencyLC ? useFormatIdr(formEdit.vatAmount) : useFormatUsd(formEdit.vatAmount) }}</span>
+                  <span v-else>{{ form?.currency === item.currencyLC ? useFormatIdr(item.vatAmount || 0) : useFormatUsd(item.vatAmount || 0) }}</span>
+                </td>
                 <td v-if="checkInvoiceDp()">
                   <span v-if="!item.isEdit">{{ useFormatIdr(item.itemAmountLC) }}</span>
                   <input v-else v-model="formEdit.itemAmountLC" type="number" class="input" />
@@ -89,15 +96,15 @@
                     </option>
                   </select>
                 </td>
-                <td v-if="checkInvoiceDp()">
+                <td v-if="!checkPoPib()">
                   <span v-if="item.isEdit">{{ form?.currency === item.currencyLC ? useFormatIdr(formEdit.vatAmount) : useFormatUsd(formEdit.vatAmount) }}</span>
                   <span v-else>{{ form?.currency === item.currencyLC ? useFormatIdr(item.vatAmount || 0) : useFormatUsd(item.vatAmount || 0) }}</span>
                 </td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
+                <td v-if="form?.invoiceType === '903'">-</td>
+                <td v-if="form?.invoiceType !== '903'">-</td>
+                <td v-if="form?.invoiceType !== '903'">-</td>
                 <td v-if="!checkInvoiceDp()">-</td>
-                <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.department }}</td>
+                <td>{{ item.department || '-' }}</td>
               </tr>
             </template>
           </tbody>
@@ -177,7 +184,7 @@
 import { ref, reactive, computed, inject, watch, onMounted } from 'vue'
 import type { formTypes } from '../../types/invoiceAddWrapper'
 import { KTModal } from '@/metronic/core'
-import { defaultColumn, invoiceDpColumn, PoPibColumn, manualAddColumn } from '@/static/invoicePoGr'
+import { defaultColumn, invoiceDpColumn, poCCColumn, manualAddColumn } from '@/static/invoicePoGr'
 import SearchPoGr from './InvoicePoGr/SearchPoGr.vue'
 import type { PoGrSearchTypes, itemsPoGrType } from '../../types/invoicePoGr'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
@@ -220,12 +227,14 @@ const searchItem = () => {
 
 const addItemInvoiceDp = () => {
   const poNumber = search.value?.toString() ?? form?.invoicePoGr[0].poNo ?? ''
+  if (poNumber.length !== 10) return searchError.value = true
   isDisabledSearch.value = true
   invoiceApi.getAvailableDp(poNumber, form?.vendorId || '', formEdit.itemAmountLC || form?.invoicePoGr[0].itemAmountLC || 0)
     .then((response) => {
       if (response.statusCode === 200) {
         if (!response.result.content.isAvailable && form) {
           searchDpAvailableError.value = true
+          form.invoicePoGr[0].department = response.result.content.department
         }
       }
     })
@@ -255,7 +264,7 @@ const openAddItem = () => {
   }
 }
 
-const checkInvoiceDp = () => {
+const checkInvoiceDp = () => {  
   return form?.invoiceDp === '9012'
 }
 
@@ -274,7 +283,7 @@ const deleteItem = (index: number) => {
 }
 
 const setColumn = () => {
-  if (form?.invoiceType === '903') columns.value = ['Action', ...PoPibColumn]
+  if (form?.invoiceType === '903') columns.value = ['Action', ...poCCColumn]
   else if (form?.invoiceDp === '9012') columns.value = ['Action', ...invoiceDpColumn]
   else if (form?.invoiceType === '902') columns.value = ['Actions', ...manualAddColumn]
   else columns.value = ['Action', ...defaultColumn]
@@ -328,16 +337,16 @@ const resetFormEdit = () => {
 }
 
 const goEdit = (item: itemsPoGrType) => {
-  if ((checkInvoiceDp() && searchDpAvailableError.value) || (!isSearch.value && item.isEdit)) return
+  if ((checkInvoiceDp() && searchDpAvailableError.value || form?.invoiceType === '903') || (!isSearch.value && item.isEdit)) return
   item.isEdit = !item.isEdit
   if (item.isEdit) {
     formEdit.taxCode = item.taxCode
     formEdit.itemAmountLC = item.itemAmountLC
-    if (checkInvoiceDp()) formEdit.vatAmount = item.vatAmount || 0
+    if (checkInvoiceDp() || form?.invoiceType === '903') formEdit.vatAmount = item.vatAmount || 0
   } else {
     item.taxCode = formEdit.taxCode
     item.itemAmountLC = formEdit.itemAmountLC
-    if (checkInvoiceDp()) item.vatAmount = formEdit.vatAmount
+    if (checkInvoiceDp() || form?.invoiceType === '903') item.vatAmount = formEdit.vatAmount
     resetFormEdit()
   }
 }
@@ -418,8 +427,6 @@ const getPercentTax = (code: string) => {
 const getVatAmount = () => {
   const percentTax = getPercentTax(formEdit.taxCode) || 0
   const itemAmount = formEdit.itemAmountLC
-  console.log(percentTax)
-  console.log(itemAmount)
   const result = percentTax * itemAmount
   formEdit.vatAmount = result
 }
