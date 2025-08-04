@@ -179,7 +179,7 @@ export interface ListPoTypes {
   statusName: string
   poNo: string
   grDocumentNo: string
-  estimatePaymentDate: string
+  estimatedPaymentDate: string
   totalGrossAmount: number
   totalNetAmount: number
   vendorName: string
