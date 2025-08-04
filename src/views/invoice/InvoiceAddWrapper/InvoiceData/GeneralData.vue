@@ -54,7 +54,7 @@ const userData = computed(() => loginApi.userData)
 const isVendor = computed(() => loginApi.isVendor)
 
 watch(
-  () => [vendorList.value, userData.value],
+  () => [vendorList.value, userData.value, form],
   () => {
     if (form) {
       const referenceSapCode = isVendor.value ? userData.value?.profile.sapCode : form.vendorId
@@ -67,6 +67,7 @@ watch(
     }
   },
   {
+    deep: true,
     immediate: true
   }
 )
