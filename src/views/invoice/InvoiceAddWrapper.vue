@@ -432,13 +432,6 @@ const goSaveDraft = () => {
     const idModal = document.querySelector('#success_invoice_modal')
     const modal = KTModal.getInstance(idModal as HTMLElement)
     modal.show()
-
-    setTimeout(() => {
-      modal.hide()
-      router.push({
-        name: 'invoice-list'
-      })
-    }, 1000)
   })
     .catch((error) => {
       console.error(error)
