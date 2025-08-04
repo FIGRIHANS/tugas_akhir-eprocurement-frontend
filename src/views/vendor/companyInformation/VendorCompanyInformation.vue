@@ -42,8 +42,8 @@ const tabsItem: ITabClosable[] = [
     isClosable: true,
   },
   {
-    id: 'deed-of-establishment-data',
-    label: 'Deed of Establishment Data',
+    id: 'company-deed-data',
+    label: 'Company Deed Data',
     isClosable: true,
   },
   {
@@ -64,11 +64,6 @@ const tabsItem: ITabClosable[] = [
   {
     id: 'other-documents-data',
     label: 'Other Documents',
-    isClosable: true,
-  },
-  {
-    id: 'company-deed-data',
-    label: 'Company Deed Data',
     isClosable: true,
   },
 ]
