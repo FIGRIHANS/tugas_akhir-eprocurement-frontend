@@ -35,7 +35,6 @@
                 </td>
                 <td>{{ parent.invoiceTypeName || '-' }}</td>
                 <td>{{ parent.companyCode || '-' }}</td>
-                <td>{{ parent.costCenterName || '-' }}</td>
                 <td>{{ useFormatIdr(parent.whtBaseAmount) || '-' }}</td>
                 <td>{{ useFormatIdr(parent.vatAmount) || '-' }}</td>
                 <td>{{ useFormatIdr(parent.whtAmount) || '-' }}</td>
@@ -136,7 +135,6 @@ const columns = ref<string[]>([
   'Status',
   'Invoice Type',
   'Company Code',
-  'Department',
   'Base Amount',
   'VAT Ammount',
   'WHT Amount',
