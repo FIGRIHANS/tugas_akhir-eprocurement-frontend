@@ -47,7 +47,7 @@
             <template v-else>
               <tr v-for="(item, index) in form.invoicePoGr" :key="index" class="pogr__field-items">
                 <td class="flex items-center justify-around gap-[8px]">
-                  <button v-if="checkInvoiceDp()" class="btn btn-outline btn-icon btn-primary" :disabled="checkIsEdit() && !item.isEdit" @click="goEdit(item)">
+                  <button v-if="checkInvoiceDp()" class="btn btn-outline btn-icon btn-primary" @click="goEdit(item)">
                     <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>
                     <i v-else class="ki-duotone ki-check-circle"></i>
                   </button>
@@ -181,7 +181,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, computed, inject, watch, onMounted, type Ref } from 'vue'
+import { ref, reactive, computed, inject, watch, onMounted } from 'vue'
 import type { formTypes } from '../../types/invoiceAddWrapper'
 import { KTModal } from '@/metronic/core'
 import { defaultColumn, invoiceDpColumn, poCCColumn, manualAddColumn } from '@/static/invoicePoGr'
@@ -193,7 +193,7 @@ import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterDat
 
 const masterDataApi = useInvoiceMasterDataStore()
 const invoiceApi = useInvoiceSubmissionStore()
-const form = inject<Ref<formTypes>>('form')
+const form = inject<formTypes>('form')
 const columns = ref<string[]>([])
 const search = ref<number | null>(null)
 const searchError = ref<boolean>(false)
@@ -209,11 +209,6 @@ const formEdit = reactive({
 
 const listTaxCalculation = computed(() => masterDataApi.taxList)
 const costCenterList = computed(() => masterDataApi.costCenterList)
-
-const checkIsEdit = () => {
-  const result = form?.value.additionalCost.findIndex((item) => item.isEdit)
-  return result !== -1
-}
 
 const searchEnter = (event: KeyboardEvent) => {
   if (isDisabledSearch.value) return
@@ -231,15 +226,15 @@ const searchItem = () => {
 }
 
 const addItemInvoiceDp = () => {
-  const poNumber = search.value?.toString() ?? form?.value.invoicePoGr[0].poNo ?? ''
+  const poNumber = search.value?.toString() ?? form?.invoicePoGr[0].poNo ?? ''
   if (poNumber.length !== 10) return searchError.value = true
   isDisabledSearch.value = true
-  invoiceApi.getAvailableDp(poNumber, form?.value.vendorId || '', formEdit.itemAmountLC || form?.value.invoicePoGr[0].itemAmountLC || 0)
+  invoiceApi.getAvailableDp(poNumber, form?.vendorId || '', formEdit.itemAmountLC || form?.invoicePoGr[0].itemAmountLC || 0)
     .then((response) => {
       if (response.statusCode === 200) {
         if (!response.result.content.isAvailable && form) {
           searchDpAvailableError.value = true
-          form.value.invoicePoGr[0].department = response.result.content.department
+          form.invoicePoGr[0].department = response.result.content.department
         }
       }
     })
@@ -254,15 +249,15 @@ const openAddItem = () => {
     if (search.value.toString().length !== 10) return searchError.value = true
     else searchError.value = false
     if (form) {
-      if (!form.value.vendorId || !form.value.companyCode) {
-        form.value.companyCodeError = true
+      if (!form.vendorId || !form.companyCode) {
+        form.companyCodeError = true
         return
       } else {
-        form.value.companyCodeError = false
+        form.companyCodeError = false
       }
     }
     if (search.value.toString().length !== 10) return
-    invoiceApi.getPoGr(search.value.toString(), form?.value.companyCode || '', form?.value.vendorId || '')
+    invoiceApi.getPoGr(search.value.toString(), form?.companyCode || '', form?.vendorId || '')
     const idModal = document.querySelector('#add_po_gr_item_modal')
     const modal = KTModal.getInstance(idModal as HTMLElement)
     modal.show()
@@ -270,27 +265,27 @@ const openAddItem = () => {
 }
 
 const checkInvoiceDp = () => {  
-  return form?.value.invoiceDp === '9012'
+  return form?.invoiceDp === '9012'
 }
 
 const checkPoPib = () => {
-  return form?.value.invoiceType === '902'
+  return form?.invoiceType === '902'
 }
 
 const deleteItem = (index: number) => {
   if (form) {
-    if (form.value.invoicePoGr[index].isEdit) {
-      resetItem(form.value.invoicePoGr[index])
+    if (form.invoicePoGr[index].isEdit) {
+      resetItem(form.invoicePoGr[index])
     } else {
-      form.value.invoicePoGr.splice(index, 1)
+      form.invoicePoGr.splice(index, 1)
     }
   }
 }
 
 const setColumn = () => {
-  if (form?.value.invoiceType === '903') columns.value = ['Action', ...poCCColumn]
-  else if (form?.value.invoiceDp === '9012') columns.value = ['Action', ...invoiceDpColumn]
-  else if (form?.value.invoiceType === '902') columns.value = ['Actions', ...manualAddColumn]
+  if (form?.invoiceType === '903') columns.value = ['Action', ...poCCColumn]
+  else if (form?.invoiceDp === '9012') columns.value = ['Action', ...invoiceDpColumn]
+  else if (form?.invoiceType === '902') columns.value = ['Actions', ...manualAddColumn]
   else columns.value = ['Action', ...defaultColumn]
 }
 
@@ -321,14 +316,14 @@ const setItemPoGr = (items: PoGrSearchTypes[]) => {
       isEdit: false
     } as itemsPoGrType
 
-    form?.value.invoicePoGr.push(data)
+    form?.invoicePoGr.push(data)
 
-    if (form?.value.invoicePoGr.length === 1) {
-      const firstItem = form.value.invoicePoGr[0]
+    if (form?.invoicePoGr.length === 1) {
+      const firstItem = form.invoicePoGr[0]
       invoiceApi.getRemainingDp(firstItem.poNo).then((response) => {
         if (response.statusCode === 200) {
           const remaining = response.result.content.remainingDPAmount
-          form.value.remainingDpAmount = form.value.currency === firstItem.currencyLC ? useFormatIdr(remaining) : useFormatUsd(remaining)
+          form.remainingDpAmount = form.currency === firstItem.currencyLC ? useFormatIdr(remaining) : useFormatUsd(remaining)
         }
       })
     }
@@ -342,16 +337,16 @@ const resetFormEdit = () => {
 }
 
 const goEdit = (item: itemsPoGrType) => {
-  if ((checkInvoiceDp() && searchDpAvailableError.value || form?.value.invoiceType === '903') || (!isSearch.value && item.isEdit)) return
+  if ((checkInvoiceDp() && searchDpAvailableError.value || form?.invoiceType === '903') || (!isSearch.value && item.isEdit)) return
   item.isEdit = !item.isEdit
   if (item.isEdit) {
     formEdit.taxCode = item.taxCode
     formEdit.itemAmountLC = item.itemAmountLC
-    if (checkInvoiceDp() || form?.value.invoiceType === '903') formEdit.vatAmount = item.vatAmount || 0
+    if (checkInvoiceDp() || form?.invoiceType === '903') formEdit.vatAmount = item.vatAmount || 0
   } else {
     item.taxCode = formEdit.taxCode
     item.itemAmountLC = formEdit.itemAmountLC
-    if (checkInvoiceDp() || form?.value.invoiceType === '903') item.vatAmount = formEdit.vatAmount
+    if (checkInvoiceDp() || form?.invoiceType === '903') item.vatAmount = formEdit.vatAmount
     resetFormEdit()
   }
 }
@@ -363,13 +358,13 @@ const resetItem = (item: itemsPoGrType) => {
 
 const addNewPodata = () => {
   if (form) {
-    if (!form.value.vendorId || !form.value.companyCode) {
-      form.value.companyCodeError = true
+    if (!form.vendorId || !form.companyCode) {
+      form.companyCodeError = true
       return
     } else {
-      form.value.companyCodeError = false
+      form.companyCodeError = false
     }
-    masterDataApi.getCostCenter(form?.value.companyCode || '')
+    masterDataApi.getCostCenter(form?.companyCode || '')
     const data = {
       poNo:'',
       poItem: 0,
@@ -397,14 +392,14 @@ const addNewPodata = () => {
       poNoError: false,
       departementError: false
     }
-    form.value.invoicePoGr.push(data)
+    form.invoicePoGr.push(data)
   }
 }
 
 const editForm = (index: number) => {
 
   if (form) {
-    const data = form.value.invoicePoGr[index]
+    const data = form.invoicePoGr[index]
     data.poNoError = false
     data.poItemError = false
     data.departementError = false
@@ -444,7 +439,7 @@ const getVatAmount = () => {
 }
 
 watch(
-  () => [form?.value.invoiceDp, form?.value.invoiceType],
+  () => [form?.invoiceDp, form?.invoiceType],
   () => {
     setColumn()
   },
@@ -454,10 +449,10 @@ watch(
 )
 
 watch(
-  () => form?.value.invoiceDp,
+  () => form?.invoiceDp,
   () => {
     if (form) {
-      form.value.invoicePoGr = []
+      form.invoicePoGr = []
       if (checkInvoiceDp()) {
         const data = {
           poNo: '',
@@ -484,14 +479,14 @@ watch(
           isEdit: false
         } as itemsPoGrType
 
-        form.value.invoicePoGr.push(data)
+        form.invoicePoGr.push(data)
       }
     }
   }
 )
 
 watch(
-  () => [form?.value.invoicePoGr, formEdit],
+  () => [form?.invoicePoGr, formEdit],
   () => {
     if (checkInvoiceDp()) {
       getVatAmount()
