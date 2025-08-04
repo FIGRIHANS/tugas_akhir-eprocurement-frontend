@@ -26,6 +26,7 @@
             <td>{{ item.itemAmount || '-' }}</td>
             <td>{{ getDebitCreditName(item.debitCredit) || '-' }}</td>
             <td>{{ item.taxCode || '-' }}</td>
+            <td>{{ item.vatAmount }}</td>
             <td>{{ item.costCenter || '-' }}</td>
             <td>{{ item.profitCenter || '-' }}</td>
             <td>{{ item.assignment || '-' }}</td>
@@ -55,6 +56,7 @@ const columns = ref([
   'Item Amount',
   'Debit/Credit',
   'Tax Code',
+  'Vat Amount',
   'Cost Center',
   'Profit Center',
   'Assignment',
