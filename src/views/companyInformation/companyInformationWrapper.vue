@@ -70,11 +70,14 @@
       v-if="currentTab === 'payment_information_data'"
       :vendor-id="userData?.profile.profileId"
     />
-    <!-- <CompanyDeedData v-if="currentTab === 'company_deed_data'" />
-    <EquipmentData v-if="currentTab === 'equipment_data'" />
-    <ExperienceData v-if="currentTab === 'experience_data'" />
-    <ExpertPersonnelData v-if="currentTab === 'expert_personnel_data'" />
-    <OtherDocument v-if="currentTab === 'other_documents'" /> -->
+    <CompanyDeedData
+      v-if="currentTab === 'company_deed_data'"
+      :vendor-id="userData?.profile.profileId"
+    />
+    <!-- <EquipmentData v-if="currentTab === 'equipment_data'" /> -->
+    <!-- <ExperienceData v-if="currentTab === 'experience_data'" /> -->
+    <!-- <ExpertPersonnelData v-if="currentTab === 'expert_personnel_data'" /> -->
+    <!-- <OtherDocument v-if="currentTab === 'other_documents'" /> -->
   </div>
 
   <Teleport to="body">
@@ -158,7 +161,7 @@ import { useLoginStore } from '@/stores/views/login'
 import AdministrationData from './details/AdministrationData.vue'
 import PaymentDetailData from './details/PaymentDetailData.vue'
 import BusinessLicenseData from './details/BusinessLicenseData.vue'
-// import CompanyDeedData from './details/CompanyDeedData.vue'
+import CompanyDeedData from './details/CompanyDeedData.vue'
 // import EquipmentData from './details/EquipmentData.vue'
 // import ExpertPersonnelData from './details/ExpertPersonnelData.vue'
 // import OtherDocument from './details/OtherDocument.vue'
