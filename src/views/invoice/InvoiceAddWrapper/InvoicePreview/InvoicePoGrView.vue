@@ -27,7 +27,7 @@
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.conditionType || '-' }}</td>
             <td v-if="!checkPoPib()">{{ item.conditionTypeDesc || '-' }}</td>
             <td v-if="!checkPoPib()">{{ item.qcStatus || '-' }}</td>
-            <td v-if="!checkPoPib()">{{ item.taxCode || '-' }}</td>  
+            <td v-if="!checkPoPib()">{{ item.taxCode || '-' }}</td>
             <td v-if="!checkPoPib()">{{ item.vatAmount || '-' }}</td>           
             <td v-if="!checkPoPib()">{{ item.whtType || '-' }}</td>
             <td v-if="!checkPoPib()">{{ item.whtCode || '-' }}</td>
@@ -52,7 +52,7 @@ const form = inject<formTypes>('form')
 const columns = ref<string[]>([])
 
 const checkInvoiceDp = () => {
-  return form?.invoiceDp === 'IDP'
+  return form?.invoiceDp === '9012'
 }
 
 const checkPoPib = () => {
@@ -61,7 +61,7 @@ const checkPoPib = () => {
 
 const setColumn = () => {
   if (form?.invoiceType === '902') columns.value = ['Line', ...PoPibColumn]
-  else if (form?.invoiceDp === 'IDP') columns.value = ['Line', ...invoiceDpColumn]
+  else if (checkInvoiceDp()) columns.value = ['Line', ...invoiceDpColumn]
   else columns.value = ['Line', ...defaultColumn]
 }
 

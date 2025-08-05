@@ -21,7 +21,7 @@
           <tbody>
             <tr v-for="(item, index) in form.invoicePoGr" :key="index" class="pogr__field-items">
               <td class="flex items-center justify-around gap-[8px]">
-                <button class="btn btn-outline btn-icon btn-primary" @click="goEdit(item)">
+                <button class="btn btn-outline btn-icon btn-primary" :disabled="checkIsEdit() && !item.isEdit" @click="goEdit(item)">
                   <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>
                   <i v-else class="ki-duotone ki-check-circle"></i>
                 </button>
@@ -54,7 +54,7 @@
                 </select>
               </td>
               <td v-if="!checkPoPib()">
-                {{ form.currCode === 'IDR' ? useFormatIdr(item.vatAmount) : useFormatUsd(item.vatAmount) }}
+                {{ form.currCode === 'IDR' ? useFormatIdr(item.isEdit ? formEdit.vatAmount : item.vatAmount) : useFormatUsd(item.isEdit ? formEdit.vatAmount : item.vatAmount) }}
               </td>
               <td>
                 <span v-if="!item.isEdit">{{ item.whtType }}</span>
@@ -170,7 +170,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, computed, inject, watch, onMounted } from 'vue'
+import { ref, reactive, computed, inject, watch, onMounted, type Ref } from 'vue'
 import type { formTypes } from '../../types/invoiceDetailEdit'
 import { defaultColumn, PoPibColumn, invoiceDpColumn, poCCColumn } from '@/static/invoicePoGr'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
@@ -179,7 +179,7 @@ import type { itemsPoGrType } from '../../types/invoicePoGr'
 import moment from 'moment'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
-const form = inject<formTypes>('form')
+const form = inject<Ref<formTypes>>('form')
 const columns = ref<string[]>([])
 const formEdit = reactive({
   itemAmount: 0,
@@ -195,12 +195,17 @@ const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
 const whtTypeList = computed(() => invoiceMasterApi.whtTypeList)
 const whtCodeList = computed(() => invoiceMasterApi.whtCodeList)
 
+const checkIsEdit = () => {
+  const result = form?.value.invoicePoGr.findIndex((item) => item.isEdit)
+  return result !== -1
+}
+
 const checkInvoiceDp = () => {   
-  return form?.invoiceDPCode === 9012 
+  return form?.value.invoiceDPCode === 9012 
 }
 
 const checkPoPib = () => {
-  return form?.invoiceTypeCode === 902
+  return form?.value.invoiceTypeCode === 902
 }
 
 const resetFormEdit = () => {
@@ -275,9 +280,9 @@ const getVatAmount = () => {
 }
 
 watch(
-  () => [form?.invoiceDPCode, form?.invoiceTypeCode],
+  () => [form?.value.invoiceDPCode, form?.value.invoiceTypeCode],
   () => {
-    setColumn(form?.invoiceTypeCode || 0)
+    setColumn(form?.value.invoiceTypeCode || 0)
   },
   {
     immediate: true
@@ -285,11 +290,9 @@ watch(
 )
 
 watch(
-  () => [form?.invoicePoGr, formEdit],
+  () => [form?.value.invoicePoGr, formEdit],
   () => {
-    if (checkInvoiceDp()) {
-      getVatAmount()
-    }
+    if (!checkPoPib()) getVatAmount()
   },
   {
     deep: true,
@@ -298,7 +301,7 @@ watch(
 )
 
 onMounted(() => {
-  setColumn(form?.invoiceTypeCode || 0)
+  setColumn(form?.value.invoiceTypeCode || 0)
 })
 </script>
 

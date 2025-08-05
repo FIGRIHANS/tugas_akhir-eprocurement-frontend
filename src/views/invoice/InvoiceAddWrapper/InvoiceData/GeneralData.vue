@@ -54,10 +54,11 @@ const userData = computed(() => loginApi.userData)
 const isVendor = computed(() => loginApi.isVendor)
 
 watch(
-  () => [vendorList.value, userData.value],
+  () => [vendorList.value, userData.value, form],
   () => {
     if (form) {
-      const getIndex = vendorList.value.findIndex((item) => item.sapCode === userData.value?.profile.sapCode)
+      const referenceSapCode = isVendor.value ? userData.value?.profile.sapCode : form.vendorId
+      const getIndex = vendorList.value.findIndex((item) => item.sapCode === referenceSapCode)
       if (getIndex !== -1) {
         form.address = vendorList.value[getIndex].address
         form.npwp = vendorList.value[getIndex].npwp
@@ -66,6 +67,7 @@ watch(
     }
   },
   {
+    deep: true,
     immediate: true
   }
 )
