@@ -67,7 +67,7 @@
         value-key="cityID"
         text-key="cityName"
         row
-        required
+        :required="checkCityRequired('hq')"
         :error="information.companyLocation.cityIdError"
         @update:model-value="selectCity('hq')"
       />
@@ -135,7 +135,7 @@
           value-key="cityID"
           text-key="cityName"
           row
-          required
+          :required="checkCityRequired('company')"
           :error="information.vendorLocation.cityIdError"
           @update:model-value="selectCity('company')"
         />
@@ -276,6 +276,17 @@ const checkSameAsHq = () => {
       ...information.value.companyLocation,
     }
   }
+}
+
+const checkCityRequired = (type: 'hq' | 'company') => {
+  const locationKey = type === 'hq' ? 'companyLocation' : 'vendorLocation'
+  const countryId = information.value[locationKey].countryId
+
+  if ([0, 360].includes(countryId)) {
+    return true
+  }
+
+  return false
 }
 
 const selectCountry = async (type: 'hq' | 'company') => {
