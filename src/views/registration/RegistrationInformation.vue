@@ -29,6 +29,7 @@
         format="dd MM yyyy"
         required
         :error="information.vendor.foundedDateError"
+        :max-date="todayDate"
       />
     </UiFormGroup>
 
@@ -259,6 +260,7 @@ const vendorMasterDataStore = useVendorMasterDataStore()
 
 const information = computed(() => registrationVendorStore.information)
 const isSameAsHq = ref<boolean>(false)
+const todayDate = new Date()
 
 const countryList = computed(() => vendorMasterDataStore.countryList)
 const businessFieldList = computed(() => vendorMasterDataStore.businessFieldList)
