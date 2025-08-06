@@ -13,7 +13,7 @@
         </label>
         <input v-if="form.status !== 0 && form.status !== -1 && form.status !== 5" v-model="form.bankKeyId" class="input" placeholder="" disabled />
         <select v-else v-model="form.bankKeyId" class="select" :class="{ 'border-danger': form.bankKeyIdError }">
-          <option v-for="item of bankList" :key="item.bankId" :value="item.bankId">
+          <option v-for="item of bankList" :key="item.bankId" :value="item.bankKey">
             {{ item.bankKey + ' - ' + item.accountNumber }}
           </option>
         </select>
@@ -61,7 +61,7 @@ const checkBank = () => {
     if (getIndex !== -1) {
       bankList.value = vendorList.value[getIndex].payment
       if (bankList.value.length === 1) {
-        form.bankKeyId = bankList.value[0].bankId.toString()
+        form.bankKeyId = bankList.value[0].bankKey
         form.bankNameId = bankList.value[0].bankName
         form.beneficiaryName = bankList.value[0].beneficiaryName
         form.bankAccountNumber = bankList.value[0].accountNumber
@@ -86,7 +86,7 @@ watch(
   () => form?.bankKeyId,
   () => {
     if (form) {
-      const getIndex = bankList.value.findIndex((item) => item.bankId === Number(form.bankKeyId))
+      const getIndex = bankList.value.findIndex((item) => item.bankKey === form.bankKeyId)
       if (getIndex !== -1) {
         form.bankNameId = bankList.value[getIndex].bankName
         form.beneficiaryName = bankList.value[getIndex].beneficiaryName
