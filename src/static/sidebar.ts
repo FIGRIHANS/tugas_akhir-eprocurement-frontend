@@ -39,6 +39,7 @@ export default [
       {
         id: 'tender-report-list',
         title: 'Tender Report List',
+        to: 'tenderReportList'
       },
       {
         id: 'create-tender-request',
