@@ -13,5 +13,10 @@ export default [
     path: '/tender/create',
     name: 'tenderCreate',
     component: () => import('@/views/tenderCreate/TenderCreate.vue')
+  },
+  {
+    path: '/tender/report',
+    name: 'tenderReportList',
+    component: () => import('@/views/tenderReportList/TenderReportList.vue')
   }
 ]
