@@ -28,6 +28,7 @@ export interface itemsPoGrType {
   isEdit?: boolean
   poNoError: boolean
   poItemError: boolean
+  departementError: boolean
 }
 
 export interface PoGrSearchTypes {

@@ -17,21 +17,22 @@
             <td>{{ index + 1 }}</td>
             <td>{{ item.poNo }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.poItem }}</td>
-            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentNo }}</td>
-            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentItem }}</td>
+            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentNo || '-' }}</td>
+            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentItem || '-' }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ moment(item.grDocumentDate).format('DD MMMM YYYY') }}</td>
             <td v-if="!checkInvoiceDp()">{{ form.currency === item.currencyLC ? useFormatIdr(item.itemAmountLC) : useFormatUsd(item.itemAmountTC) }}</td>
             <td v-if="!checkInvoiceDp()">{{ useFormatIdr(item.quantity) }}</td>
-            <td v-if="!checkInvoiceDp()">{{ item.uom }}</td>
-            <td v-if="!checkInvoiceDp()">{{ item.itemText }}</td>
-            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.conditionType }}</td>
-            <td>{{ item.conditionTypeDesc || '-' }}</td>
-            <td>{{ item.qcStatus || '-' }}</td>
-            <td>{{ item.taxCode || '-' }}</td>
-            <td>{{ item.whtType || '-' }}</td>
-            <td>{{ item.whtCode || '-' }}</td>
-            <td>{{ useFormatIdr(item.whtBaseAmount?.toString() || '') || 0 }}</td>
-            <td>{{ useFormatIdr(item.whtAmount?.toString() || '') || 0 }}</td>
+            <td v-if="!checkInvoiceDp()">{{ item.uom || '-' }}</td>
+            <td v-if="!checkInvoiceDp()">{{ item.itemText || '-' }}</td>
+            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.conditionType || '-' }}</td>
+            <td v-if="!checkPoPib()">{{ item.conditionTypeDesc || '-' }}</td>
+            <td v-if="!checkPoPib()">{{ item.qcStatus || '-' }}</td>
+            <td v-if="!checkPoPib()">{{ item.taxCode || '-' }}</td>
+            <td v-if="!checkPoPib()">{{ item.vatAmount || '-' }}</td>           
+            <td v-if="!checkPoPib()">{{ item.whtType || '-' }}</td>
+            <td v-if="!checkPoPib()">{{ item.whtCode || '-' }}</td>
+            <td v-if="!checkPoPib()">{{ useFormatIdr(item.whtBaseAmount?.toString() || '') || 0 }}</td>
+            <td v-if="!checkPoPib()">{{ useFormatIdr(item.whtAmount?.toString() || '') || 0 }}</td>
             <td>{{ item.department }}</td>
           </tr>
         </tbody>
@@ -51,16 +52,16 @@ const form = inject<formTypes>('form')
 const columns = ref<string[]>([])
 
 const checkInvoiceDp = () => {
-  return form?.invoiceDp === 'IDP'
+  return form?.invoiceDp === '9012'
 }
 
 const checkPoPib = () => {
-  return form?.invoiceType === 'pib'
+  return form?.invoiceType === '902'
 }
 
 const setColumn = () => {
-  if (form?.invoiceType === 'pib') columns.value = ['Line', ...PoPibColumn]
-  else if (form?.invoiceDp === 'IDP') columns.value = ['Line', ...invoiceDpColumn]
+  if (form?.invoiceType === '902') columns.value = ['Line', ...PoPibColumn]
+  else if (checkInvoiceDp()) columns.value = ['Line', ...invoiceDpColumn]
   else columns.value = ['Line', ...defaultColumn]
 }
 

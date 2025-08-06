@@ -58,6 +58,7 @@ export const PoPibColumn = [
   'Quantity',
   'Unit',
   'Item Text',
+  'Department'
   // 'Category',
   // 'Total Net Amount'
 ]
