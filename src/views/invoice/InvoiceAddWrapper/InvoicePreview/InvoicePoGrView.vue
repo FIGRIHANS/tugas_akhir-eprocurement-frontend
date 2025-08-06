@@ -13,7 +13,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(item, index) in form.invoicePoGr" :key="index">
+          <tr v-for="(item, index) in form.invoicePoGr" :key="index" class="invoice__field-items">
             <td>{{ index + 1 }}</td>
             <td>{{ item.poNo }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.poItem }}</td>

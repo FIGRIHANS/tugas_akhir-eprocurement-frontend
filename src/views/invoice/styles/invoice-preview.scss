@@ -49,6 +49,13 @@
         min-width: 200px;
       }
     }
+  
+    &__field-items {
+      td {
+        @apply px-[16px] !important;
+        @apply py-[7px] !important;
+      }
+    }
   }
 
   .table-head {
