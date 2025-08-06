@@ -1,6 +1,6 @@
 export interface IModalProps {
   title?: string
-  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full'
+  size?: 'xs' |'sm' | 'md' | 'lg' | 'xl' | 'full'
   static?: boolean
   center?: boolean
 }

@@ -15,6 +15,7 @@ import dashboard from './modules/dashboard'
 import userManagement from './modules/userManagement'
 import companyInfomartion from './modules/companyInfomartion'
 import workflowConfig from './modules/workflowConfig'
+import tender from './modules/tender'
 
 const router = createRouter({
   history: createWebHistory('/eprocurement/'),
@@ -42,6 +43,7 @@ const router = createRouter({
         ...userManagement,
         ...companyInfomartion,
         ...workflowConfig,
+        ...tender
       ],
       meta: {
         middleware: 'auth',

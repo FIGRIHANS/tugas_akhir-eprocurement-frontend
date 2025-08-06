@@ -64,27 +64,42 @@ const redirectTo = (path?: string) => {
 
 const filteredSidebarMenu = computed(() => {
   if (!isEmpty(userStore.userData)) {
+    if (userStore.userData?.profile.profileId === 3001) {
+      return sidebarMenu
+        .filter((menu) => menu.id === 'e-invoice' || menu.id === 'dashboard')
+        .map((menu) => {
+          return {
+            ...menu,
+            child: menu.child ? menu.child.filter((child) => child.id === 'invoice-list') : [],
+          }
+        })
+    }
+
     if (
       userStore.userData?.profile.profileId === 3002 ||
       userStore.userData?.profile.profileId === 3003
     ) {
-      return sidebarMenu.map((menu) => {
-        return {
-          ...menu,
-          child: menu.child
-            ? menu.child.filter((child) => child.id === 'invoice-verification')
-            : [],
-        }
-      })
+      return sidebarMenu
+        .filter((menu) => menu.id === 'e-invoice' || menu.id === 'dashboard')
+        .map((menu) => {
+          return {
+            ...menu,
+            child: menu.child
+              ? menu.child.filter((child) => child.id === 'invoice-verification')
+              : [],
+          }
+        })
     }
 
     if (userStore.userData?.profile.profileId === 3004) {
-      return sidebarMenu.map((menu) => {
-        return {
-          ...menu,
-          child: menu.child ? menu.child.filter((child) => child.id === 'invoice-approval') : [],
-        }
-      })
+      return sidebarMenu
+        .filter((menu) => menu.id === 'e-invoice' || menu.id === 'dashboard')
+        .map((menu) => {
+          return {
+            ...menu,
+            child: menu.child ? menu.child.filter((child) => child.id === 'invoice-approval') : [],
+          }
+        })
     }
 
     if (userStore.userData?.profile?.vendorCode) {
