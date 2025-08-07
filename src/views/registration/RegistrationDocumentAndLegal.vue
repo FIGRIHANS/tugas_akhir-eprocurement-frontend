@@ -125,14 +125,19 @@
         </div>
       </div>
 
-      <UiButton
-        icon
-        outline
-        class="w-fit px-4 py-2 flex flex-row gap-2 items-center"
-        @click="addAnotherDocument"
-      >
-        <i class="ki-filled ki-plus-circle"></i> Add Document
-      </UiButton>
+      <div class="flex flex-col gap-1">
+        <UiButton
+          icon
+          outline
+          class="w-fit px-4 py-2 flex flex-row gap-2 items-center"
+          @click="addAnotherDocument"
+        >
+          <i class="ki-filled ki-plus-circle"></i> Add Document
+        </UiButton>
+        <span class="text-danger text-xs"
+          >Must upload Account Statement. Without this document, data will be rejected.</span
+        >
+      </div>
 
       <div class="card min-w-full">
         <div class="card-table">
