@@ -22,6 +22,7 @@ const classes = computed(() => [
   {
     'modal-center-y': props.center,
     'top-[10%]': !props.center,
+    'max-w-[300px]': props.size === 'xs',
     'max-w-[500px]': props.size === 'sm',
     'md:max-w-[600px]': props.size === 'md',
     'lg:max-w-[800px]': props.size === 'lg',

@@ -28,7 +28,7 @@
                   {{ item.stateName }}
                 </span>
               </td>
-              <td class="text-right">{{ item.actionerNotes || '-' }}</td>
+              <td>{{ item.actionerNotes || '-' }}</td>
             </tr>
           </tbody>
         </table>
@@ -61,7 +61,8 @@ const badgeColor = (status: number) => {
   const list = {
     1: 'badge-info',
     5: 'badge-danger',
-    3: 'badge-success'
+    3: 'badge-success',
+    4: 'badge-success'
   } as { [key: number]: string }
   return list[status]
 }

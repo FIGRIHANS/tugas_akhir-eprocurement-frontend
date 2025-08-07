@@ -36,7 +36,7 @@ const getBankKey = () => {
   const getIndex = vendorList.value.findIndex((item) => item.sapCode === form?.vendorId)
   if (getIndex !== -1) {
     const bankList = vendorList.value[getIndex].payment
-    const getIndexBank = bankList.findIndex((item) => item.bankId === Number(form?.bankKeyId))
+    const getIndexBank = bankList.findIndex((item) => item.bankKey === form?.bankKeyId)
     if (getIndexBank !== -1) return bankList[getIndexBank].bankKey
   }
 }

@@ -1,0 +1,89 @@
+ /* Anda bisa menempatkan CSS di sini atau di file terpisah */
+ .card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    // box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+    width: 25%;
+    font-family: sans-serif;
+  }
+  
+  .card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0 0 16px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .card-content {
+    /* Untuk loading/error state */
+    padding-left: 16px;
+    padding-right: 16px;
+    min-height: 200px; 
+  }
+  
+  .total-label {
+    margin: 0;
+    color: #444444b6;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+  
+  .total-count {
+    font-size: 3rem;
+    font-weight: bold;
+    margin: 0 0 16px 0;
+    color: #333;
+  }
+  
+  .progress-bar-container {
+    display: flex;
+    height: 16px;
+    /* border-radius: 5px; */
+    gap: 2px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  
+  .progress-segment {
+    height: 100%;
+  }
+  
+  /* Warna-warna segmen */
+  .progress-segment.green { background-color: #4CAF50;  border-radius: 3px; }
+  .progress-segment.orange { background-color: #FF9800;  border-radius: 3px; }
+  .progress-segment.purple { background-color: #9C27B0;  border-radius: 3px; }
+  
+  .legend {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    padding-top: 16px;
+    gap: 8px;
+  }
+  
+  .legend li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    color: #444444b6;
+    font-weight: 600;
+  }
+  
+  .legend .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+  }
+  
+  /* Warna-warna dot legenda */
+  .legend .dot.green { background-color: #4CAF50; }
+  .legend .dot.orange { background-color: #FF9800; }
+  .legend .dot.purple { background-color: #9C27B0; }
+  
+  .error-message {
+    color: red;
+  }
