@@ -71,7 +71,9 @@
                 <td v-if="!checkInvoiceDp()">{{ item.poItem }}</td>
                 <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentNo }}</td>
                 <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentItem }}</td>
-                <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentDate }}</td>
+                <td v-if="!checkInvoiceDp() && !checkPoPib()">
+                  {{ form.status === 5 ? moment(item.grDocumentDate).format('YYYY') : moment(item.grDocumentDate).format('DD MMMM YYYY') }}
+                </td>
                 <td v-if="!checkInvoiceDp()">{{ form.currency === item.currencyLC ? useFormatIdr(item.itemAmountLC) : useFormatUsd(item.itemAmountTC) }}</td>
                 <td v-if="!checkInvoiceDp()">{{ item.quantity }}</td>
                 <td v-if="!checkInvoiceDp()">{{ item.uom }}</td>
@@ -186,6 +188,7 @@ import type { formTypes } from '../../types/invoiceAddWrapper'
 import { KTModal } from '@/metronic/core'
 import { defaultColumn, invoiceDpColumn, poCCColumn, manualAddColumn } from '@/static/invoicePoGr'
 import SearchPoGr from './InvoicePoGr/SearchPoGr.vue'
+import moment from 'moment'
 import type { PoGrSearchTypes, itemsPoGrType } from '../../types/invoicePoGr'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
