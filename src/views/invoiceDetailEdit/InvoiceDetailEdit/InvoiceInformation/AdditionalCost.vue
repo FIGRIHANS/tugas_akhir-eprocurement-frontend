@@ -14,6 +14,7 @@
               :key="index"
               class="cost__field-base"
               :class="{
+                'cost__field-base--cost': item.toLowerCase() === 'cost center',
                 'cost__field-base--description': item.toLowerCase() === 'description'
               }"
             >
@@ -70,7 +71,7 @@
               <span v-if="!item.isEdit">{{ item.costCenter }}</span>
               <select v-else v-model="formEdit.costCenter" class="select" placeholder="">
                 <option v-for="item of costCenterList" :key="item.code" :value="item.code">
-                  {{ item.name }}
+                  {{ item.code + ' - ' + item.name }}
                 </option>
               </select>
             </td>

@@ -52,9 +52,9 @@ watch(
   () => props.activeName,
   () => {
     for (const item of steps.value) {
-      const splitName = item.label.split(' ')
-      const getName = splitName.length > 1 ? splitName[1] : splitName[0]
-      if (getName.toLowerCase() === props.activeName.toLowerCase()) {
+      const getName = item.label.replace(/ /g, "")
+      const currentStepName = props.activeName.replace(/ /g, "")  
+      if (getName.toLowerCase() === currentStepName.toLowerCase()) {
         const getIndex = steps.value.findIndex((subItem) => subItem.label === item.label)
         if (getIndex !== -1) {
           for (let index = 0; index <= getIndex; index++) {
