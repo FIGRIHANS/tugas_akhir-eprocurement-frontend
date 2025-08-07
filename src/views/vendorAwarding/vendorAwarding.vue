@@ -1,6 +1,13 @@
 <template>
   <div>
     <Breadcrumb title="Vendor Awarding" :routes="routes" />
+    <div
+      v-if="tenderStatus === 'closed'"
+      class="flex items-center gap-2 p-4 rounded-md bg-violet-50 text-violet-800 ring-1 ring-violet-300 my-4"
+    >
+      <i class="ki-duotone ki-information-2 text-2xl"></i>
+      <span class="font-semibold">Tender Has Closed</span>
+    </div>
     <section name="Stepper" class="border rounded-md p-[24px] flex justify-center">
       <div>
         <StepperStatusTender activeName="Vendor Awarding" />
@@ -19,9 +26,7 @@
         <table class="table align-middle">
           <thead>
             <tr class="text-nowrap border-b">
-              <th class="flex items-center justify-center">
-                <input class="checkbox checkbox-sm" type="checkbox" v-model="selectAll" />
-              </th>
+              <th class="flex items-center justify-center"></th>
               <th>Status</th>
               <th>Vendor Code</th>
               <th>Rank</th>
@@ -50,19 +55,20 @@
 
             <tr v-else v-for="item in data" :key="item.id" class="text-nowrap">
               <td class="flex items-center justify-center">
-                <input
-                  v-if="item.status.name != 'Award'"
-                  class="checkbox checkbox-sm"
-                  type="checkbox"
-                  :value="item.id"
-                  v-model="selectedItems"
-                />
                 <div
-                  v-else
+                  v-if="item.status.name === 'Award' && tenderStatus === 'closed'"
                   class="bg-yellow-100 text-yellow-600 flex flex-row justify-center align-center p-[6px] w-[50px]"
                 >
                   <i class="ki-duotone ki-award text-2xl"></i>
                 </div>
+                <input
+                  v-else
+                  class="checkbox checkbox-sm"
+                  type="checkbox"
+                  :value="item.id"
+                  :checked="selectedItems === item.id"
+                  @change="handleCheckboxChange(item.id)"
+                />
               </td>
               <td>
                 <UiChips :color="item.status.color" :text="item.status.name" />
@@ -97,7 +103,7 @@
         <UiButton
           v-if="currentStatus === 3"
           variant="primary"
-          :disabled="selectedItems.length === 0"
+          :disabled="selectedItems === null"
           @click="currentStatus = 2"
           outline
         >
@@ -108,16 +114,16 @@
         <UiButton
           v-if="currentStatus === 1"
           variant="primary"
-          :disabled="selectedItems.length === 0"
-          @click="currentStatus = 2"
+          :disabled="selectedItems === null"
+          @click="serAwardedVendor()"
         >
           Award <i class="ki-duotone ki-ranking"></i
         ></UiButton>
         <UiButton
           v-if="currentStatus === 2"
           variant="primary"
-          :disabled="selectedItems.length === 0"
-          @click="currentStatus = 3"
+          :disabled="selectedItems === null"
+          @click="closeTender"
         >
           Close Tender <i class="ki-duotone ki-ranking"></i
         ></UiButton>
@@ -132,21 +138,22 @@ import Breadcrumb from '@/components/BreadcrumbView.vue'
 import InputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import UiChips from '@/components/ui/atoms/chips/UiChips.vue'
 import type { routeTypes } from '@/core/type/components/breadcrumb'
-import { ref, computed, watch } from 'vue'
+import { ref } from 'vue'
 import StepperStatusTender from '@/components/stepperStatusTender/StepperStatusTender.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 
 const search = ref('')
-const selectedItems = ref<number[]>([])
+const selectedItems = ref<number | null>(null)
 const currentStatus = ref<number>(1)
+const tenderStatus = ref<string>('open')
 //   const page = ref(1)
 
 const data = ref([
   {
     id: 1,
     status: {
-      name: 'Award',
-      color: 'blue',
+      name: 'invited',
+      color: 'green',
     },
     vendorCode: '1060',
     rank: {
@@ -201,35 +208,48 @@ const routes = ref<routeTypes[]>([
   },
 ])
 
-const selectAll = computed({
-  get() {
-    return data.value.length > 0 && selectedItems.value.length === data.value.length
-  },
-  set(value) {
-    if (value) {
-      selectedItems.value = data.value.map((item) => item.id)
-    } else {
-      selectedItems.value = []
-    }
-  },
-})
+const serAwardedVendor = () => {
+  const selectedData = data.value.find((item) => item.id === selectedItems.value)
 
-const isIndeterminate = computed(() => {
-  return selectedItems.value.length > 0 && selectedItems.value.length < data.value.length
-})
+  if (selectedData) {
+    selectedData.status.name = 'Award'
+    selectedData.status.color = 'blue'
+  }
+
+  currentStatus.value = 2
+}
+
+const closeTender = () => {
+  tenderStatus.value = 'closed'
+  currentStatus.value = 3
+}
+
+const handleCheckboxChange = (id: number) => {
+  // Jika item yang sama sudah dipilih, batalkan centangnya.
+  // Jika item lain dipilih, ganti dengan item yang baru.
+  if (selectedItems.value === id) {
+    selectedItems.value = null
+  } else {
+    selectedItems.value = id
+  }
+}
+
+// const isIndeterminate = computed(() => {
+//   return selectedItems.value.length > 0 && selectedItems.value.length < data.value.length
+// })
 
 // watch(filter, () => {
 //     hasActiveFilter()
 // }, { immediate: true })
 
-watch(
-  selectedItems,
-  () => {
-    const selectAllCheckbox = document.querySelector('thead input[type="checkbox"]')
-    if (selectAllCheckbox) {
-      ;(selectAllCheckbox as HTMLInputElement).indeterminate = isIndeterminate.value
-    }
-  },
-  { immediate: true },
-)
+// watch(
+//   selectedItems,
+//   () => {
+//     const selectAllCheckbox = document.querySelector('thead input[type="checkbox"]')
+//     if (selectAllCheckbox) {
+//       ;(selectAllCheckbox as HTMLInputElement).indeterminate = isIndeterminate.value
+//     }
+//   },
+//   { immediate: true },
+// )
 </script>
