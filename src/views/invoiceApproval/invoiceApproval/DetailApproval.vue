@@ -28,7 +28,7 @@
                   {{ item.stateName }}
                 </span>
               </td>
-              <td class="text-right">{{ item.actionerNotes || '-' }}</td>
+              <td>{{ item.actionerNotes || '-' }}</td>
             </tr>
           </tbody>
         </table>
