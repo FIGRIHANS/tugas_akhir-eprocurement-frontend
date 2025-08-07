@@ -328,12 +328,6 @@ const goVerif = () => {
     const idModal = document.querySelector('#success_verif_modal')
     const modal = KTModal.getInstance(idModal as HTMLElement)
     modal.show()
-    setTimeout(() => {
-      modal.hide()
-      router.push({
-        name: route.query.type === '1' ? 'invoiceVerification' : 'invoiceApproval'
-      })
-    }, 1000)
   }).finally(() => {
     isLoading.value = false
   })
