@@ -22,6 +22,11 @@
     @apply px-[20px] !important;
     @apply py-[13px] !important;
     
+    &--cost {
+      @extend .cost__field-base;
+      min-width: 360px;
+    }
+    
     &--description {
       @extend .cost__field-base;
       min-width: 300px;
