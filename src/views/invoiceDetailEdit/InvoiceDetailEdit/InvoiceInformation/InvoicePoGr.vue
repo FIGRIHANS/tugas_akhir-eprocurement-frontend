@@ -66,19 +66,18 @@
               </td>
               <td>
                 <span v-if="!item.isEdit">{{ item.whtCode }}</span>
-                <select v-else v-model="formEdit.whtCode" class="select" placeholder="">
+                <select v-else v-model="formEdit.whtCode" class="select" placeholder="" @change="setWhtAmount(item)">
                   <option v-for="sub of item.whtCodeList" :key="sub.whtCode" :value="sub.whtCode">
                     {{ sub.whtCode }}
                   </option>
                 </select>
               </td>
               <td>
-                <span v-if="!item.isEdit">{{ useFormatIdr(item.whtBaseAmount) }}</span>
+                <span v-if="!item.isEdit">{{ form.currCode === 'IDR' ? useFormatIdr(item.whtBaseAmount) : useFormatUsd(item.whtBaseAmount) }}</span>
                 <input v-else v-model="formEdit.whtBaseAmount" class="input" type="number" placeholder=""/>
               </td>
               <td>
-                <span v-if="!item.isEdit">{{ useFormatIdr(item.whtAmount) }}</span>
-                <input v-else v-model="formEdit.whtAmount" class="input" type="number" placeholder=""/>
+                <span>{{ form.currCode === 'IDR' ? useFormatIdr(item.isEdit ? formEdit.whtAmount : item.whtAmount) : useFormatUsd(item.isEdit ? formEdit.whtAmount : item.whtAmount) }}</span>
               </td>
               <td>{{ item.department }}</td>
             </tr>
@@ -255,12 +254,16 @@ const setColumn = (type: number) => {
   return columns.value
 }
 
+const getWhtCode = (data: itemsPoGrType, whtType: string) => {
+  invoiceMasterApi.getWhtCode(whtType).then(() => {
+    data.whtCodeList = whtCodeList.value
+  })
+}
+
 
 const callWhtCode = (data: itemsPoGrType) => {
   formEdit.whtCode = ''
-  invoiceMasterApi.getWhtCode(formEdit.whtType).then(() => {
-    data.whtCodeList = whtCodeList.value
-  })
+  getWhtCode(data, formEdit.whtType)
 }
 
 const getPercentTax = (code: string) => {
@@ -277,6 +280,15 @@ const getVatAmount = () => {
   const itemAmount = formEdit.itemAmount
   const result = percentTax * itemAmount
   formEdit.vatAmount = result
+}
+
+const setWhtAmount = (data: itemsPoGrType) => {
+  const whtlist = data.whtCodeList || []
+  const indexWht = whtlist.findIndex((item) => item.whtCode === formEdit.whtCode)
+  if (indexWht !== -1) {
+    const tarif = whtlist[indexWht].tarif / 100
+    formEdit.whtAmount = tarif * formEdit.whtBaseAmount
+  }
 }
 
 watch(
@@ -301,7 +313,14 @@ watch(
 )
 
 onMounted(() => {
-  setColumn(form?.value.invoiceTypeCode || 0)
+  if (form) {
+    setColumn(form.value.invoiceTypeCode || 0)
+  
+    for (const item of form.value.invoicePoGr) {
+      getWhtCode(item, item.whtType)
+      item.whtBaseAmount = item.itemAmount
+    }
+  }
 })
 </script>
 
