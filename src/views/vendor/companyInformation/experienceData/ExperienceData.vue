@@ -112,7 +112,7 @@ onMounted(() => {
 
                 <!-- error -->
                 <tr v-else-if="experienceStore.error">
-                  <td :colspan="tableCols.length - 1" class="text-center text-danger">
+                  <td :colspan="tableCols.length" class="text-center text-danger">
                     {{ experienceStore.error }}
                   </td>
                 </tr>
