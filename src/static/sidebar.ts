@@ -27,28 +27,28 @@ export default [
     to: 'company information',
     child: [],
   },
-  {
-    id: 'tender',
-    title: 'Tender Management',
-    icon: 'rocket',
-    child: [
-      {
-        id: 'pr-central-monitoring',
-        title: 'PR Central Monitoring',
-        to: 'tenderCentral',
-      },
-      {
-        id: 'tender-report-list',
-        title: 'Tender Report List',
-        to: 'tenderReportList'
-      },
-      {
-        id: 'create-tender-request',
-        title: 'Create Tender Request',
-        to: 'tenderCreate'
-      },
-    ],
-  },
+  // {
+  //   id: 'tender',
+  //   title: 'Tender Management',
+  //   icon: 'rocket',
+  //   child: [
+  //     {
+  //       id: 'pr-central-monitoring',
+  //       title: 'PR Central Monitoring',
+  //       to: 'tenderCentral',
+  //     },
+  //     {
+  //       id: 'tender-report-list',
+  //       title: 'Tender Report List',
+  //       to: 'tenderReportList'
+  //     },
+  //     {
+  //       id: 'create-tender-request',
+  //       title: 'Create Tender Request',
+  //       to: 'tenderCreate'
+  //     },
+  //   ],
+  // },
   {
     id: 'vendor-management',
     title: 'Vendor Management',
