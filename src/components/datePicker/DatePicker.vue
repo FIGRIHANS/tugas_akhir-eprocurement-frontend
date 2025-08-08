@@ -10,6 +10,7 @@
       :format="format"
       :preview-format="format"
       :min-date="minDate"
+      :max-date="maxDate"
       class="w-full"
     >
       <template #dp-input="{ value }">
@@ -43,6 +44,7 @@ const props = defineProps<{
   format?: string
   disabled?: boolean
   minDate?: Date | string
+  maxDate?: Date | string
 }>()
 
 const emits = defineEmits(['update:modelValue'])

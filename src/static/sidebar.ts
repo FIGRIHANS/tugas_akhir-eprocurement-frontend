@@ -35,10 +35,12 @@ export default [
       {
         id: 'pr-central-monitoring',
         title: 'PR Central Monitoring',
+        to: 'tenderCentral',
       },
       {
         id: 'tender-report-list',
         title: 'Tender Report List',
+        to: 'tenderReportList'
       },
       {
         id: 'create-tender-request',
