@@ -284,7 +284,7 @@ const mapPoGr = () => {
       grDocumentDate: item.grDocumentDate ? moment(item.grDocumentDate, 'YYYY').startOf('year').format('YYYY-MM-DD') : null,
       taxCode: item.taxCode,
       vatAmount: item.vatAmount || 0,
-      itemAmount: Number(item.currency === item.currencyLC ? item.itemAmountLC : item.itemAmountTC),
+      itemAmount: form.currency === item.currencyLC ? item.itemAmountLC : item.itemAmountTC,
       quantity: Number(item.quantity),
       uom: item.uom,
       itemText: item.itemText,
@@ -394,26 +394,27 @@ const goNext = () => {
       tabNow.value = list[checkIndex + 1]
     }
   } else {
-    isSubmit.value = true
-    invoiceApi.postSubmission(mapDataPost()).then((response) => {
-      if (response.statusCode === 200) {
-        const idModal = document.querySelector('#success_invoice_modal')
-        const modal = KTModal.getInstance(idModal as HTMLElement)
-        modal.show()
-      } else {
-        if (response.result.message.includes('Invoice Document Number')) {
-          const idModal = document.querySelector('#error_document_number_modal')
-          const modal = KTModal.getInstance(idModal as HTMLElement)
-          modal.show()
-        }
-      }
-    })
-      .catch((error) => {
-        console.error(error)
-      })
-      .finally(() => {
-        isSubmit.value = false
-      })
+    console.log(mapDataPost())
+    // isSubmit.value = true
+    // invoiceApi.postSubmission(mapDataPost()).then((response) => {
+    //   if (response.statusCode === 200) {
+    //     const idModal = document.querySelector('#success_invoice_modal')
+    //     const modal = KTModal.getInstance(idModal as HTMLElement)
+    //     modal.show()
+    //   } else {
+    //     if (response.result.message.includes('Invoice Document Number')) {
+    //       const idModal = document.querySelector('#error_document_number_modal')
+    //       const modal = KTModal.getInstance(idModal as HTMLElement)
+    //       modal.show()
+    //     }
+    //   }
+    // })
+    //   .catch((error) => {
+    //     console.error(error)
+    //   })
+    //   .finally(() => {
+    //     isSubmit.value = false
+    //   })
   }
 }
 
