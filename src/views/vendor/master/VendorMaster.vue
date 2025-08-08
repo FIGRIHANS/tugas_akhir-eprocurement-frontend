@@ -13,9 +13,8 @@ import UiLoading from '@/components/UiLoading.vue'
 import VendorListFilters from '@/components/vendor/filterButton/VendorListFilters.vue'
 import BreadcrumbView from '@/components/BreadcrumbView.vue'
 import { formatDate } from '@/composables/date-format'
-import UiButton from '@/components/ui/atoms/button/UiButton.vue'
-import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import { useLoginStore } from '@/stores/views/login'
+import { tableCols } from './static'
 
 const route = useRoute()
 const router = useRouter()
@@ -31,6 +30,7 @@ const getStatus = (status: string) => {
 }
 
 const userData = computed(() => userStore.userData)
+const isAdmin = computed(() => userData.value?.profile.profileId === 3192)
 
 const handleSearch = debounce((value) => {
   const query = { ...route.query }
@@ -79,39 +79,29 @@ watch(
       <!-- <FilterButton /> -->
       <VendorListFilters />
       <table class="table align-middle text-gray-700">
-        <thead class="border-b-2 border-b-primary">
+        <thead class="border-b-2 border-b-primary text-nowrap">
           <tr>
-            <th></th>
-            <th class="text-nowrap">Company Name</th>
-            <th class="text-nowrap">Status</th>
-            <th class="text-nowrap">Vendor Category</th>
-            <th class="text-nowrap">Business Field</th>
-            <th class="text-nowrap">Registration Date</th>
-            <th class="text-nowrap">Verification Request Date</th>
-            <th class="text-nowrap">Verification Date</th>
-            <th class="text-nowrap">Business License Status</th>
-            <th class="text-nowrap">E-Procurement Vendor Code</th>
-            <th class="text-nowrap">Vendor Code</th>
+            <th v-for="(col, index) in tableCols" :key="index">{{ col }}</th>
           </tr>
         </thead>
         <tbody>
           <!-- show loading -->
           <tr v-if="vendor.loading">
-            <td colspan="8" class="text-center">
+            <td :colspan="tableCols.length" class="text-center">
               <UiLoading size="md" />
             </td>
           </tr>
 
           <!-- show error -->
           <tr v-else-if="vendor.error">
-            <td colspan="8">
+            <td :colspan="tableCols.length">
               {{ vendor.error }}
             </td>
           </tr>
 
           <!-- show message if there are no data -->
           <tr v-else-if="!vendor.vendors.items.length">
-            <td colspan="8" class="text-center">No data</td>
+            <td :colspan="tableCols.length" class="text-center">No data</td>
           </tr>
 
           <!-- show data -->
@@ -123,34 +113,18 @@ watch(
           >
             <td>
               <div class="flex items-center gap-3">
-                <UiButton
-                  outline
-                  icon
-                  size="sm"
-                  @click="
-                    $router.push({
-                      name: 'vendor-company-information',
-                      params: { id: vendor.vendorId },
-                    })
-                  "
-                  v-if="userData?.profile.profileId === 3192"
-                >
-                  <UiIcon name="eye" />
-                </UiButton>
-
-                <template v-else>
-                  <VendorMenu
-                    :id="vendor.vendorId"
-                    :name="vendor.vendorName"
-                    :email="vendor.vendorEmail"
-                    :status="vendor.isVerified"
-                  />
-                  <StatusToggle
-                    :id="vendor.vendorId"
-                    :name="vendor.vendorName"
-                    :status="vendor.isActive"
-                  />
-                </template>
+                <VendorMenu
+                  :id="vendor.vendorId"
+                  :name="vendor.vendorName"
+                  :email="vendor.vendorEmail"
+                  :status="vendor.isVerified"
+                />
+                <StatusToggle
+                  v-if="isAdmin"
+                  :id="vendor.vendorId"
+                  :name="vendor.vendorName"
+                  :status="vendor.isActive"
+                />
               </div>
             </td>
             <td class="text-nowrap">{{ vendor.vendorName }}</td>
@@ -197,7 +171,11 @@ watch(
     <div
       class="card-footer justify-center md:justify-between flex-col md:flex-row gap-3 text-gray-800 text-sm font-medium"
     >
-      <div>Showing {{ vendor.vendors.pageSize }} of {{ vendor.vendors.total }} entries</div>
+      <div>
+        Showing {{ vendor.vendors.pageSize * (vendor.vendors.page - 1) + 1 }} to
+        {{ vendor.vendors.pageSize * (vendor.vendors.page - 1) + vendor.vendors.items.length }} of
+        {{ vendor.vendors.total }} entries
+      </div>
       <LPagination
         :total-items="Number(vendor.vendors.total)"
         :current-page="Number(vendor.vendors.page)"

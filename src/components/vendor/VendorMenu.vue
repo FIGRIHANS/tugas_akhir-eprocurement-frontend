@@ -1,18 +1,24 @@
 <script lang="ts" setup>
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import VendorVerificationModal from './verificationModal/VendorVerificationModal.vue'
 import VendorBlacklistModal from './vendorBlacklistModal/VendorBlacklistModal.vue'
 import UiModal from '../modal/UiModal.vue'
 import successImg from '@/assets/success.svg'
 import { useRouter } from 'vue-router'
+import { useLoginStore } from '@/stores/views/login'
 
 defineProps<{ id: string | number; name: string; email: string; status: number }>()
 const router = useRouter()
+
+const userStore = useLoginStore()
+
 const verificationModalOpen = ref<boolean>(false)
 const blacklistModalOpen = ref<boolean>(false)
 const blacklistSuccessOpen = ref<boolean>(false)
+
+const isAdmin = computed(() => userStore.userData?.profile.profileId === 3192)
 
 const handleSuccess = () => {
   router.replace({ name: 'vendor-list' })
@@ -26,7 +32,10 @@ const handleSuccess = () => {
     <div class="dropdown-content w-full max-w-60 space-y-5">
       <ul class="menu menu-default flex flex-col gap-2" data-dropdown-dismiss="true">
         <li class="menu-item">
-          <RouterLink class="menu-link" :to="`/vendor/master/${id}`">
+          <RouterLink
+            class="menu-link"
+            :to="isAdmin ? `/vendor/information/${id}` : `/vendor/master/${id}`"
+          >
             <span class="menu-icon">
               <UiIcon variant="duotone" name="eye" />
             </span>
@@ -41,8 +50,8 @@ const handleSuccess = () => {
             <span class="menu-title"> Verification Detail </span>
           </button>
         </li>
-        <div class="border-b border-b-gray-200"></div>
-        <li class="menu-item">
+        <div class="border-b border-b-gray-200" v-if="isAdmin"></div>
+        <li class="menu-item" v-if="isAdmin">
           <button
             class="menu-link disabled:cursor-not-allowed"
             @click="blacklistModalOpen = true"
