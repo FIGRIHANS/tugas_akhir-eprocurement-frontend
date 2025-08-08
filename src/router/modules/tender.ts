@@ -2,7 +2,7 @@ export default [
   {
     path: '/tender/central',
     name: 'tenderCentral',
-    component: () => import('@/views/prCentralMonitoring/prCentralMonitoring.vue')
+    component: () => import('@/views/prCentralMonitoring/prCentralMonitoring.vue'),
   },
   // {
   //   path: '/tender/report',
@@ -12,11 +12,16 @@ export default [
   {
     path: '/tender/create',
     name: 'tenderCreate',
-    component: () => import('@/views/tenderCreate/TenderCreate.vue')
+    component: () => import('@/views/tenderCreate/TenderCreate.vue'),
   },
   {
     path: '/tender/report',
     name: 'tenderReportList',
-    component: () => import('@/views/tenderReportList/TenderReportList.vue')
-  }
+    component: () => import('@/views/tenderReportList/TenderReportList.vue'),
+  },
+  {
+    path: '/tender/submission',
+    name: 'tenderSubmission',
+    component: () => import('@/views/tenderSubmission/TenderSubmission.vue'),
+  },
 ]
