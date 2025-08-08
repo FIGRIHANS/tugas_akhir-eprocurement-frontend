@@ -119,7 +119,7 @@ const filteredSidebarMenu = computed(() => {
 
     if (userStore.userData?.profile?.profileId === 3192) {
       return sidebarMenu
-        .filter((menu) => menu.id !== 'company-information' && menu.id !== 'tender')
+        .filter((menu) => menu.id !== 'company-information')
         .map((menu) => ({
           ...menu,
           child: menu.child
