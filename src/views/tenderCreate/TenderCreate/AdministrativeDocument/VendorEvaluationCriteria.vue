@@ -29,6 +29,16 @@
         <tbody>
           <tr v-for="(data, index) of result" :key="index">
             <td>
+              <button
+                v-if="isManual"
+                class="btn btn-icon btn-outline btn-danger w-[32px] h-[32px]"
+                @click="deleteItem(index)"
+              >
+                <i class="ki-duotone ki-trash !text-lg"></i>
+              </button>
+            </td>
+
+            <td>
               <div v-if="isManual">
                 <UiInput v-model="data.evaluationType" />
               </div>
@@ -363,6 +373,7 @@ const dummyOption = ref([
 ])
 
 const columns = ref<string[]>([
+  'Action',
   'Evaluation Type',
   'Evaluation Object',
   'Evaluation Item',
@@ -381,6 +392,10 @@ const addNewLine = () => {
     expectedSla: '',
   }
   result.value.push(data)
+}
+
+const deleteItem = (index: number) => {
+  result.value.splice(index, 1)
 }
 
 watch(
