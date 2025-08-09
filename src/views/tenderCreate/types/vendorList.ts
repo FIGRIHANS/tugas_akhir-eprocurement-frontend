@@ -10,5 +10,8 @@ export interface TableItemTypes {
   afterSalesWarranty: string
   orderAbsorption: string
   totalPo: string
+  yearlySpanding: string
+  currency: string
+  existingContract: string
   isSelected?: boolean
 }
