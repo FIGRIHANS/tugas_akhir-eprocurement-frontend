@@ -123,13 +123,27 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="data in filteredAnalytic" :key="data.vendor_id">
+        <tr v-for="data in filteredAnalytic" :key="data.vendor_id" class="table-border">
           <td class="text-center">{{ data.vendor_name }}</td>
           <td class="text-center">{{ data.lengh_of_sevice }}</td>
           <td class="text-center">{{ data.total_spending }}</td>
           <td class="text-center">
             {{ data.main_kpi }}<br />
-            <span class="badge badge-pill badge-outline badge-danger">{{ data.kpi_quality }}</span>
+            <span
+              v-if="data.kpi_quality === 'Menurun'"
+              class="badge badge-pill badge-outline badge-danger"
+              >{{ data.kpi_quality }}</span
+            >
+            <span
+              v-if="data.kpi_quality === 'Meningkat'"
+              class="badge badge-pill badge-outline badge-success"
+              >{{ data.kpi_quality }}</span
+            >
+            <span
+              v-if="data.kpi_quality === 'Stabil'"
+              class="badge badge-pill badge-outline badge-warning"
+              >{{ data.kpi_quality }}</span
+            >
           </td>
           <td>
             Kualitas: {{ data.sla_quality }} <br />
@@ -185,7 +199,7 @@ const analysisData = ref([
     total_spending: '$100.000',
     lengh_of_sevice: '5 Tahun',
     main_kpi: 'Rata-rata 80%',
-    kpi_quality: 'menurun',
+    kpi_quality: 'Menurun',
     sla_quality: 'Buruk',
     sla_delivery: 'Baik',
     high_level:
@@ -201,7 +215,7 @@ const analysisData = ref([
     lengh_of_sevice: '1 Tahun',
     main_kpi: 'Rata-rata 95%',
     kpi_quality: 'Meningkat',
-    sla_quality: 'Sabgat Baik',
+    sla_quality: 'Sangat Baik',
     sla_delivery: 'Sangat Baik',
     high_level:
       ' Meskipun hubungan baru, performa yang solid dan kepatuhan yang tinggi menjadikannya kandidat ideal untuk proyek penting.',
