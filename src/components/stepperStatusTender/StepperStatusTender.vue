@@ -14,13 +14,13 @@
         </div>
         <div
           v-if="index < steps.length - 1"
-          class="w-[95px] h-[5px]"
+          class="w-[120px] h-[5px]"
           :class="steps[index + 1].active ? 'bg-blue-500' : 'bg-gray-300'"
         ></div>
       </div>
       <div
         :class="{
-          '-ml-[100px]': index !== steps.length - 1,
+          '-ml-[120px]': index !== steps.length - 1,
           '-ml-[20px]': index === steps.length - 1,
         }"
       >
@@ -54,13 +54,13 @@ const props = withDefaults(
   },
 )
 
-const adminSteps: listStepTypes[] = [
+const steps = ref<listStepTypes[]>([
   {
     label: 'Create Tender Request',
     time: '2025-10-22',
     name: 'Joko Anwar',
     icon: 'ki-duotone ki-document',
-    active: false,
+    active: true,
   },
   {
     label: 'Published',
@@ -84,13 +84,6 @@ const adminSteps: listStepTypes[] = [
     active: false,
   },
   {
-    label: 'Vendor Evaluation',
-    time: '2025-10-22',
-    name: 'Joko Anwar',
-    icon: 'ki-duotone ki-shield-search',
-    active: false,
-  },
-  {
     label: 'Vendor Awarding',
     time: '2025-10-22',
     name: 'Joko Anwar',
@@ -104,45 +97,7 @@ const adminSteps: listStepTypes[] = [
     icon: 'ki-duotone ki-file-deleted',
     active: false,
   },
-]
-
-const vendorSteps: listStepTypes[] = [
-  {
-    label: 'Vendor Submission',
-    time: '2025-10-22',
-    name: 'Admin',
-    icon: 'ki-duotone ki-paper-plane',
-    active: false,
-  },
-  {
-    label: 'Vendor Negotiation',
-    time: '2025-10-22',
-    name: 'Joko Anwar',
-    icon: 'ki-duotone ki-book-open',
-    active: false,
-  },
-  {
-    label: 'Vendor Evaluation',
-    time: '2025-10-22',
-    name: 'Admin',
-    icon: 'ki-duotone ki-shield-search',
-    active: false,
-  },
-  {
-    label: 'Vendor Awarding',
-    time: '2025-10-22',
-    name: 'Admin',
-    icon: 'ki-duotone ki-ranking',
-    active: false,
-  },
-]
-
-const steps = computed<listStepTypes[]>(() => {
-  if (props.role === 'vendor') {
-    return vendorSteps
-  }
-  return adminSteps
-})
+])
 
 watch(
   () => props.activeName,

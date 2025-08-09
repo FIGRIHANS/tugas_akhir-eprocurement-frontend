@@ -71,54 +71,54 @@
                   <div class="dropdown-content w-fit max-w-56 py-2">
                     <div class="menu menu-default flex flex-col w-fit">
                       <div class="menu-item">
-                        <a class="menu-link" href="#">
-                        <span class="menu-icon">
-                          <i class="ki-duotone ki-file-up"></i>
-                        </span>
-                        <span class="menu-title">
-                          Publish
-                        </span>
-                        </a>
+                        <div class="menu-link" href="#">
+                          <span class="menu-icon">
+                            <i class="ki-duotone ki-file-up"></i>
+                          </span>
+                          <span class="menu-title">
+                            Publish
+                          </span>
+                        </div>
                       </div>
                       <div class="menu-item">
-                        <a class="menu-link" href="#">
-                        <span class="menu-icon">
-                          <i class="ki-duotone ki-eye"></i>
-                        </span>
-                        <span class="menu-title">
-                          Detail
-                        </span>
-                        </a>
+                        <div class="menu-link" href="#">
+                          <span class="menu-icon">
+                            <i class="ki-duotone ki-eye"></i>
+                          </span>
+                          <span class="menu-title">
+                            Detail
+                          </span>
+                        </div>
                       </div>
                       <div class="menu-item">
-                        <a class="menu-link" href="#">
-                        <span class="menu-icon">
-                          <i class="ki-duotone ki-update-file"></i>
-                        </span>
-                        <span class="menu-title">
-                          Negotiation
-                        </span>
-                        </a>
+                        <div class="menu-link" href="#" @click="goToNegotiation">
+                          <span class="menu-icon">
+                            <i class="ki-duotone ki-update-file"></i>
+                          </span>
+                          <span class="menu-title">
+                            Negotiation
+                          </span>
+                        </div>
                       </div>
                       <div class="menu-item">
-                        <a class="menu-link" href="#">
-                        <span class="menu-icon">
-                          <i class="ki-duotone ki-award"></i>
-                        </span>
-                        <span class="menu-title">
-                          Award
-                        </span>
-                        </a>
+                        <div class="menu-link" href="#">
+                          <span class="menu-icon">
+                            <i class="ki-duotone ki-award"></i>
+                          </span>
+                          <span class="menu-title">
+                            Award
+                          </span>
+                        </div>
                       </div>
                       <div class="menu-item">
-                        <a class="menu-link" href="#">
-                        <span class="menu-icon">
-                          <i class="ki-duotone ki-time"></i>
-                        </span>
-                        <span class="menu-title">
-                          History
-                        </span>
-                        </a>
+                        <div class="menu-link" href="#">
+                          <span class="menu-icon">
+                            <i class="ki-duotone ki-time"></i>
+                          </span>
+                          <span class="menu-title">
+                            History
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -152,14 +152,18 @@
 
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import moment from 'moment'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import CardGraph from './tenderReportList/CardGraph.vue'
 import LPagination from '@/components/pagination/LPagination.vue'
 import FilterList from './tenderReportList/FilterList.vue'
+import { useTenderStore } from '@/stores/views/tender/tender'
 import type { routeTypes } from '@/core/type/components/breadcrumb'
 import type { CardGraphTypes, ReportListTypes, filterListTypes } from './types/tenderReportList'
 
+const tenderApi = useTenderStore()
+const router = useRouter()
 const search = ref<string>('')
 const pageNo = ref<number>(1)
 const pageSize = ref<number>(10)
@@ -174,7 +178,7 @@ const filterForm = ref<filterListTypes>({
 const routes = ref<routeTypes[]>([
   {
     name: 'Tender Report List',
-    to: '/tender/create'
+    to: '/tender/report'
   }
 ])
 
@@ -361,6 +365,16 @@ const setFilter = (data: filterListTypes) => {
   filterForm.value.status = data.status
   filterForm.value.category = data.category
   filterForm.value.plant = data.plant
+}
+
+const goToNegotiation = () => {
+  tenderApi.negoId = '123'
+  router.push({
+    name: 'tenderReportNegotiation',
+    query: {
+      id: tenderApi.negoId
+    }
+  })
 }
 </script>
 

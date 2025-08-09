@@ -1,5 +1,5 @@
 :deep() {
-  .table-item {
+  .nego {
     &__table {
       padding-bottom: 4px;
       overflow-x: auto;
@@ -23,13 +23,8 @@
       white-space: nowrap;
       @apply py-[13px] !important;
       
-      &--action {
-        @extend .table-item__field-base;
-        min-width: 80px;
-      }
-      
       &--description {
-        @extend .table-item__field-base;
+        @extend .nego__field-base;
         min-width: 200px;
       }
     }
