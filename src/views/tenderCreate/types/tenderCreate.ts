@@ -40,14 +40,12 @@ export interface VendorListTypes {
 }
 
 export interface CriteriaTypes {
-  id: string
-  group: string
+  evaluationType: string
   evaluationObject: string
-  type: string
   evaluationItem: string
-  itemDescription: string
   weight: string
-  isEdit?: boolean
+  description: string
+  expectedSla: string
 }
 
 export interface BillingTimelineTypes {
