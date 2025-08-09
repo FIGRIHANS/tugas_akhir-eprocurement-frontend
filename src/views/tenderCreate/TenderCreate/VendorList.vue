@@ -1,5 +1,6 @@
 <template>
-  <div v-if="form" class="border rounded-md p-[24px]">
+  <div v-if="form" >
+  <div class="border rounded-md p-[24px]">
     <div class="flex align-items-center justify-between mb-[24px]">
       <div class="input w-[250px]">
         <i class="ki-filled ki-magnifier"></i>
@@ -94,11 +95,11 @@
     <AddVendorModal @setItem="setItemVendor" />
   </div>
   <section class="mt-[16px]">
-    <UiButton @click="showAnalytic()">
+    <UiButton @click="showAnalytic()" :disabled="form.vendorList.length == 0">
       Vendor Smart Analysis <i class="ki-duotone ki-artificial-intelligence"></i
     ></UiButton>
   </section>
-  <section v-if="showAnalysis !== false" name="smart-analysis scrollable-x-auto" class="mt-5">
+  <section v-if="showAnalysis !== false && form.vendorList.length > 0" name="smart-analysis scrollable-x-auto" class="border rounded-md p-[24px] mt-5">
     <table class="table-border text-gray-700 font-medium text-sm">
       <thead class="table-border">
         <tr>
@@ -123,7 +124,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="data in filteredAnalytic" :key="data.vendor_id" class="table-border">
+        <tr v-for="data in filteredAnalytic" :key="data.vendor_id" class="table-border ">
           <td class="text-center">{{ data.vendor_name }}</td>
           <td class="text-center">{{ data.lengh_of_sevice }}</td>
           <td class="text-center">{{ data.total_spending }}</td>
@@ -159,6 +160,8 @@
       </tbody>
     </table>
   </section>
+  </div>
+ 
 </template>
 
 <script lang="ts" setup>

@@ -9,7 +9,7 @@
       <component
         :is="contentComponent"
         :activeTab="activeTabAdmin"
-        :activeTabTimeline="activeTabBilling"
+        :activeTabTimeline="activeTabBilling" 
         @setTab="setTab"
         @setTabTimeline="setTabTimeline"
       />
@@ -24,13 +24,7 @@
         Back
       </button>
       <button class="btn btn-primary" @click="goNext">
-        {{
-          activeTab === 'vendor'
-            ? 'Invite and Next'
-            : activeTab === 'timeline'
-              ? 'Publish Tender Request'
-              : 'Next'
-        }}
+        {{ activeTab === 'vendor' ? 'Invite and Next' : activeTab === 'timeline' ? 'Publish Tender Request' : 'Next' }}
         <i v-if="activeTab !== 'timeline'" class="ki-filled ki-black-right"></i>
         <i v-else class="ki-duotone ki-paper-plane"></i>
       </button>
@@ -138,7 +132,6 @@ const contentComponent = computed(() => {
     admin: AdministrativeDocument,
     timeline: TenderBilling,
   } as { [key: string]: Component }
-
   return components[activeTab.value]
 })
 
