@@ -394,27 +394,26 @@ const goNext = () => {
       tabNow.value = list[checkIndex + 1]
     }
   } else {
-    console.log(mapDataPost())
-    // isSubmit.value = true
-    // invoiceApi.postSubmission(mapDataPost()).then((response) => {
-    //   if (response.statusCode === 200) {
-    //     const idModal = document.querySelector('#success_invoice_modal')
-    //     const modal = KTModal.getInstance(idModal as HTMLElement)
-    //     modal.show()
-    //   } else {
-    //     if (response.result.message.includes('Invoice Document Number')) {
-    //       const idModal = document.querySelector('#error_document_number_modal')
-    //       const modal = KTModal.getInstance(idModal as HTMLElement)
-    //       modal.show()
-    //     }
-    //   }
-    // })
-    //   .catch((error) => {
-    //     console.error(error)
-    //   })
-    //   .finally(() => {
-    //     isSubmit.value = false
-    //   })
+    isSubmit.value = true
+    invoiceApi.postSubmission(mapDataPost()).then((response) => {
+      if (response.statusCode === 200) {
+        const idModal = document.querySelector('#success_invoice_modal')
+        const modal = KTModal.getInstance(idModal as HTMLElement)
+        modal.show()
+      } else {
+        if (response.result.message.includes('Invoice Document Number')) {
+          const idModal = document.querySelector('#error_document_number_modal')
+          const modal = KTModal.getInstance(idModal as HTMLElement)
+          modal.show()
+        }
+      }
+    })
+      .catch((error) => {
+        console.error(error)
+      })
+      .finally(() => {
+        isSubmit.value = false
+      })
   }
 }
 
