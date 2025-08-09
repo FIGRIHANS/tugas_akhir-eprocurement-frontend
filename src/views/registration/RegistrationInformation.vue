@@ -29,7 +29,6 @@
         format="dd MM yyyy"
         required
         :error="information.vendor.foundedDateError"
-        :max-date="todayDate"
       />
     </UiFormGroup>
 
@@ -68,7 +67,7 @@
         value-key="cityID"
         text-key="cityName"
         row
-        :required="checkCityRequired('hq')"
+        required
         :error="information.companyLocation.cityIdError"
         @update:model-value="selectCity('hq')"
       />
@@ -136,7 +135,7 @@
           value-key="cityID"
           text-key="cityName"
           row
-          :required="checkCityRequired('company')"
+          required
           :error="information.vendorLocation.cityIdError"
           @update:model-value="selectCity('company')"
         />
@@ -260,7 +259,6 @@ const vendorMasterDataStore = useVendorMasterDataStore()
 
 const information = computed(() => registrationVendorStore.information)
 const isSameAsHq = ref<boolean>(false)
-const todayDate = new Date()
 
 const countryList = computed(() => vendorMasterDataStore.countryList)
 const businessFieldList = computed(() => vendorMasterDataStore.businessFieldList)
@@ -278,17 +276,6 @@ const checkSameAsHq = () => {
       ...information.value.companyLocation,
     }
   }
-}
-
-const checkCityRequired = (type: 'hq' | 'company') => {
-  const locationKey = type === 'hq' ? 'companyLocation' : 'vendorLocation'
-  const countryId = information.value[locationKey].countryId
-
-  if ([0, 360].includes(countryId)) {
-    return true
-  }
-
-  return false
 }
 
 const selectCountry = async (type: 'hq' | 'company') => {

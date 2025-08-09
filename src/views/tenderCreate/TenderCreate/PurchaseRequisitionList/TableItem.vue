@@ -32,7 +32,7 @@
               <input v-model="data.isSelected" class="checkbox" type="checkbox"/>
             </td>
             <td>{{ data.purchaseRequisitionNo }}</td>
-            <td>{{ data.type }}</td>
+            <td>{{ data.sourcingType }}</td>
             <td>{{ moment(data.deliveryDate).format('DD MMM YYYY') }}</td>
             <td>{{ data.plant }}</td>
             <td>{{ data.materialGroup }}</td>
@@ -69,7 +69,7 @@ const search = ref<string>('')
 const columns = reactive<string[]>([
   '',
   'PR NO',
-  'Type',
+  'Sourcing Type',
   'Delivery Date',
   'Plant',
   'Material Group',
@@ -82,56 +82,7 @@ const columns = reactive<string[]>([
   'Currency'
 ])
 
-const itemVendor = reactive<TableItemTypes[]>([
-  {
-    id: '1',
-    purchaseRequisitionNo: '10012525',
-    type: 'R',
-    deliveryDate: '2025-10-29',
-    plant: 'CHIP2',
-    materialGroup: '4',
-    itemNo: '20',
-    material: 'CH-1062',
-    materialDescription: 'Macro Feltilizer Urea',
-    quantity: 1000,
-    bottomPrice: 97000,
-    uom: 'KG',
-    currency: 'IDR',
-    isSelected: false
-  },
-  {
-    id: '2',
-    purchaseRequisitionNo: '10012525',
-    type: 'R',
-    deliveryDate: '2025-10-29',
-    plant: 'CHIP2',
-    materialGroup: '4',
-    itemNo: '20',
-    material: 'CH-1062',
-    materialDescription: 'Macro Feltilizer Urea',
-    quantity: 1000,
-    bottomPrice: 97000,
-    uom: 'KG',
-    currency: 'IDR',
-    isSelected: false
-  },
-  {
-    id: '3',
-    purchaseRequisitionNo: '10012525',
-    type: 'R',
-    deliveryDate: '2025-10-29',
-    plant: 'CHIP2',
-    materialGroup: '4',
-    itemNo: '20',
-    material: 'CH-1062',
-    materialDescription: 'Macro Feltilizer Urea',
-    quantity: 1000,
-    bottomPrice: 97000,
-    uom: 'KG',
-    currency: 'IDR',
-    isSelected: false
-  }
-])
+const itemVendor = reactive<TableItemTypes[]>([])
 
 const openAddSourcingRequisition = () => {
   const idModal = document.querySelector('#tender_add_sourcing_requisition_modal')
@@ -144,7 +95,7 @@ const setData = (dataVendor: SourcingRequestitionTypes[]) => {
     const data = {
       id: (itemVendor.length + 1).toString(),
       purchaseRequisitionNo: item.purchaseRequisitionNo,
-      type: item.type,
+      sourcingType: item.sourcingType,
       deliveryDate: item.deliveryDate,
       plant: item.plant,
       materialGroup: item.materialGroup,

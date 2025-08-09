@@ -1,7 +1,7 @@
 export interface TableItemTypes {
   id: string
   purchaseRequisitionNo: string
-  type: string
+  sourcingType: string
   deliveryDate: string
   plant: string
   materialGroup: string

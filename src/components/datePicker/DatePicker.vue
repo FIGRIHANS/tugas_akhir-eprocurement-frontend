@@ -11,7 +11,6 @@
       :range="range"
       :preview-format="format"
       :min-date="minDate"
-      :max-date="maxDate"
       class="w-full"
     >
       <template #dp-input="{ value }">
