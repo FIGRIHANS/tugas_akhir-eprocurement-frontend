@@ -10,7 +10,7 @@
     </div>
     <section name="Stepper" class="border rounded-md p-[24px] flex justify-center">
       <div>
-        <StepperStatusTender activeName="Vendor Awarding" />
+        <StepperStatusTender activeName="Vendor Awarding" role="admin" />
       </div>
     </section>
     <section
