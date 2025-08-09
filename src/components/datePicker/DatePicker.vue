@@ -8,6 +8,7 @@
       v-model="date"
       :enable-time="false"
       :format="format"
+      :range="range"
       :preview-format="format"
       :min-date="minDate"
       :max-date="maxDate"
@@ -45,6 +46,7 @@ const props = defineProps<{
   disabled?: boolean
   minDate?: Date | string
   maxDate?: Date | string
+  range?: boolean
 }>()
 
 const emits = defineEmits(['update:modelValue'])
