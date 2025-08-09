@@ -94,7 +94,7 @@
     <AddVendorModal @setItem="setItemVendor" />
   </div>
   <section class="mt-[16px]">
-    <UiButton @click="showAnalysis = true">
+    <UiButton @click="showAnalytic()">
       Vendor Smart Analysis <i class="ki-duotone ki-artificial-intelligence"></i
     ></UiButton>
   </section>
@@ -123,7 +123,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="data in analysisData" :key="data.vendor_id">
+        <tr v-for="data in filteredAnalytic" :key="data.vendor_id">
           <td class="text-center">{{ data.vendor_name }}</td>
           <td class="text-center">{{ data.lengh_of_sevice }}</td>
           <td class="text-center">{{ data.total_spending }}</td>
@@ -159,6 +159,7 @@ const AddVendorModal = defineAsyncComponent(() => import('./VendorList/AddVendor
 const form = inject<FormTypes>('form')
 const search = ref<string>('')
 const showAnalysis = ref<boolean>(false)
+const filteredAnalytic = ref<typeof analysisData.value>([])
 
 const columns = reactive<string[]>([
   'Action',
@@ -193,15 +194,36 @@ const analysisData = ref([
     contract_negotiation:
       'Harga: Negosiasikan untuk membekukan harga atau menuntut penurunan 3-5% SLA: Perkuat penalti untuk setiap insiden kualitas Term Condition: Tambahkan opsi pembatalan tanpa penalti jika kualitas tidak terpenuhi.',
   },
-  // {
-  //   vendor_id: '2',
-  //   vendor_name: null,
-  //   lengh_of_sevice: null,
-  //   main_kpi: null,
-  //   sla: null,
-  //   high_level: null,
-  //   contreact_negotiation: null,
-  // },
+  {
+    vendor_id: '2',
+    vendor_name: 'PT Heilzenberg',
+    total_spending: '$25.000',
+    lengh_of_sevice: '1 Tahun',
+    main_kpi: 'Rata-rata 95%',
+    kpi_quality: 'Meningkat',
+    sla_quality: 'Sabgat Baik',
+    sla_delivery: 'Sangat Baik',
+    high_level:
+      ' Meskipun hubungan baru, performa yang solid dan kepatuhan yang tinggi menjadikannya kandidat ideal untuk proyek penting.',
+    risk: 'Potensial Tinggi.',
+    contract_negotiation:
+      'Harga: Pertimbangkan untuk menawarkan diskon volume untuk mendorong pengeluaran yang lebih besar. SLA: Kunci standar SLA saat ini dalam kontrak jangka panjang Term Condition: Pertimbangkan perpanjangan kontrak otomatis sebagai insentif',
+  },
+  {
+    vendor_id: '3',
+    vendor_name: 'PT Surya Emas',
+    total_spending: '$80.000',
+    lengh_of_sevice: '3 tahun',
+    main_kpi: 'Rata-rata 92%',
+    kpi_quality: 'Stabil',
+    sla_quality: 'Baik',
+    sla_delivery: 'Buruk',
+    high_level:
+      'Memiliki rekam jejak yang stabil, namun masalah di area pengiriman menunjukkan adanya risiko operasional yang perlu ditangani.',
+    risk: 'Perlu Diperhatikan',
+    contract_negotiation:
+      'Harga: Negosiasikan diskon kecil sebagai imbalan untuk komitmen perbaikan masalah pengiriman. SLA: Tambahkan target pengiriman yang lebih agresif dengan penalti yang jelas. Term Condition: Tambahkan klausul yang mewajibkan vendor menyediakan rencana perbaikan.',
+  },
   // {
   //   vendor_id: '3',
   //   vendor_name: null,
@@ -221,6 +243,14 @@ const colorRank = (rank: string) => {
     '4': 'badge-danger',
   } as { [key: string]: string }
   return lib[rank]
+}
+
+const showAnalytic = () => {
+  if (form) {
+    const vendorIds = form.vendorList.map((data) => data.id)
+    filteredAnalytic.value = analysisData.value.filter((data) => vendorIds.includes(data.vendor_id))
+    showAnalysis.value = true
+  }
 }
 
 const deleteItem = (index: number) => {
