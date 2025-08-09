@@ -9,16 +9,33 @@
       <p class="font-semibold">Vendor Evaluation Criteria</p>
       <div class="border rounded-lg p-[4px] mt-[24px] mb-[24px] w-fit">
         <div class="flex gap-4" data-tabs="true">
-          <a class="btn btn-primary btn-clear" :class="{ 'active': activeTab === 'automatic' }" href="#" @click="onSetTab(true)">
+          <a
+            class="btn btn-primary btn-clear"
+            :class="{ active: activeTab === 'automatic' }"
+            href="#"
+            @click="onSetTab(true)"
+          >
             Automatic Criteria
           </a>
-          <a class="btn btn-primary btn-clear" :class="{ 'active': activeTab === 'manual' }" href="#" @click="onSetTab(false)">
+          <a
+            class="btn btn-primary btn-clear"
+            :class="{ active: activeTab === 'manual' }"
+            href="#"
+            @click="onSetTab(false)"
+          >
             Manual Criteria
           </a>
         </div>
       </div>
-      <VendorEvaluationCriteria v-show="activeTab === 'automatic'" v-model="form.automaticCriteria" />
-      <VendorEvaluationCriteria v-show="activeTab === 'manual'" v-model="form.manualCriteria" :isManual="true" />
+      <VendorEvaluationCriteria
+        v-show="activeTab === 'automatic'"
+        v-model="form.automaticCriteria"
+      />
+      <VendorEvaluationCriteria
+        v-show="activeTab === 'manual'"
+        v-model="form.manualCriteria"
+        :isManual="true"
+      />
     </div>
   </div>
 </template>
