@@ -1,8 +1,13 @@
 <template>
   <div>
-    <div class="input w-[250px] mb-[24px]">
-      <i class="ki-filled ki-magnifier"></i>
-      <input v-model="search" placeholder="Cari data" type="text"/>
+    <div class="flex align-items-center justify-between">
+      <div class="input w-[250px] mb-[24px]">
+        <i class="ki-filled ki-magnifier"></i>
+        <input v-model="search" placeholder="Cari data" type="text"/>
+      </div>
+      <button class="btn btn-primary" @click="openAddSourcingRequisition">
+        Add Sourcing Requesition
+      </button>
     </div>
     <div class="table-item__table">
       <table class="table text-gray-700 font-medium text-sm">
@@ -22,7 +27,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="data of items" :key="data.id">
+          <tr v-for="data of itemVendor" :key="data.id">
             <td>
               <input v-model="data.isSelected" class="checkbox" type="checkbox"/>
             </td>
@@ -34,23 +39,30 @@
             <td>{{ data.itemNo }}</td>
             <td>{{ data.material }}</td>
             <td>{{ data.materialDescription }}</td>
-            <td>{{ data.quantity }}</td>
-            <td>{{ data.buttomPrice }}</td>
+            <td>{{ useFormatIdr(data.quantity) }}</td>
             <td>{{ data.uom }}</td>
+            <td>{{ data.currency === 'IDR' ? useFormatIdr(data.bottomPrice) : useFormatUsd(data.bottomPrice) }}</td>
+            <td>{{ data.currency }}</td>
           </tr>
         </tbody>
       </table>
     </div>
     <div class="mt-[24px] text-sm">
-      Tampilkan {{ items.length }} data dari total data {{ items.length }}
+      Tampilkan {{ itemVendor.length }} data dari total data {{ itemVendor.length }}
     </div>
+    <AddSourcingRequisitionModal @setData="setData" />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, defineAsyncComponent } from 'vue'
+import { KTModal } from '@/metronic/core'
 import moment from 'moment'
+import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import type { TableItemTypes } from '../../types/purchaseRequisitionList'
+import type { SourcingRequestitionTypes } from '../../types/purchaseRequisitionList'
+
+const AddSourcingRequisitionModal = defineAsyncComponent(() => import('./TableItem/AddSourcingRequisitionModal.vue'))
 
 const search = ref<string>('')
 
@@ -65,11 +77,12 @@ const columns = reactive<string[]>([
   'Material',
   'Material Desc',
   'Quantity',
-  'Buttom Price',
-  'UOM'
+  'UOM',
+  'Bottom Price',
+  'Currency'
 ])
 
-const items = reactive<TableItemTypes[]>([
+const itemVendor = reactive<TableItemTypes[]>([
   {
     id: '1',
     purchaseRequisitionNo: '10012525',
@@ -80,9 +93,10 @@ const items = reactive<TableItemTypes[]>([
     itemNo: '20',
     material: 'CH-1062',
     materialDescription: 'Macro Feltilizer Urea',
-    quantity: '1000',
-    buttomPrice: '97000',
+    quantity: 1000,
+    bottomPrice: 97000,
     uom: 'KG',
+    currency: 'IDR',
     isSelected: false
   },
   {
@@ -95,9 +109,10 @@ const items = reactive<TableItemTypes[]>([
     itemNo: '20',
     material: 'CH-1062',
     materialDescription: 'Macro Feltilizer Urea',
-    quantity: '1000',
-    buttomPrice: '97000',
+    quantity: 1000,
+    bottomPrice: 97000,
     uom: 'KG',
+    currency: 'IDR',
     isSelected: false
   },
   {
@@ -110,12 +125,42 @@ const items = reactive<TableItemTypes[]>([
     itemNo: '20',
     material: 'CH-1062',
     materialDescription: 'Macro Feltilizer Urea',
-    quantity: '1000',
-    buttomPrice: '97000',
+    quantity: 1000,
+    bottomPrice: 97000,
     uom: 'KG',
+    currency: 'IDR',
     isSelected: false
   }
 ])
+
+const openAddSourcingRequisition = () => {
+  const idModal = document.querySelector('#tender_add_sourcing_requisition_modal')
+  const modal = KTModal.getInstance(idModal as HTMLElement)
+  modal.show()
+}
+
+const setData = (dataVendor: SourcingRequestitionTypes[]) => {
+  for (const item of dataVendor) {
+    const data = {
+      id: (itemVendor.length + 1).toString(),
+      purchaseRequisitionNo: item.purchaseRequisitionNo,
+      type: item.type,
+      deliveryDate: item.deliveryDate,
+      plant: item.plant,
+      materialGroup: item.materialGroup,
+      itemNo: item.itemNo,
+      material: item.material,
+      materialDescription: item.materialDescription,
+      quantity: item.quantity,
+      bottomPrice: item.bottomPrice,
+      uom: item.uom,
+      currency: item.currency,
+      isSelected: false
+    } as TableItemTypes
+
+    itemVendor.push(data)
+  }
+}
 </script>
 
 <style lang="scss" scoped>
