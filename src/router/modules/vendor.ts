@@ -51,10 +51,5 @@ export default [
     path: '/vendor/information/:id',
     name: 'vendor-company-information',
     component: () => import('@/views/vendor/companyInformation/VendorCompanyInformation.vue'),
-  },
-  {
-    path: '/vendor/awarding',
-    name: 'vendor-awarding',
-    component: () => import('@/views/vendorAwarding/vendorAwarding.vue'),
-  },
+  }
 ]
