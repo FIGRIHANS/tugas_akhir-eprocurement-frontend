@@ -34,4 +34,9 @@ export default [
     name: 'tenderAwarding',
     component: () => import('@/views/vendorAwarding/vendorAwarding.vue'),
   },
+  {
+    path: '/tender/evaluation',
+    name: 'tenderEvaluation',
+    component: () => import('@/views/tenderEvaluation/TenderEvaluation.vue'),
+  },
 ]

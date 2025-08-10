@@ -33,7 +33,7 @@
 </template>
 
 <script lang="ts" setup>
-import { watch, computed, ref } from 'vue'
+import { watch, ref } from 'vue'
 import moment from 'moment'
 
 interface listStepTypes {
@@ -47,7 +47,7 @@ interface listStepTypes {
 const props = withDefaults(
   defineProps<{
     activeName: string
-    role: 'admin' | 'vendor'
+    role?: 'admin' | 'vendor'
   }>(),
   {
     role: 'admin',
