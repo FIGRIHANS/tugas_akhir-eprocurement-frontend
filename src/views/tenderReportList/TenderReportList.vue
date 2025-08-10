@@ -385,8 +385,6 @@ const goToNegotiation = () => {
 }
 
 const goToAwarding = () => {
-  console.log('masuk');
-  
   tenderApi.negoId = '123'
   router.push({
     name: 'tenderAwarding',
