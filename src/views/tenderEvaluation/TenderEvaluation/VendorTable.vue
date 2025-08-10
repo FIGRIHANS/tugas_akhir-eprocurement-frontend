@@ -58,9 +58,9 @@
               </span>
             </td>
             <td>{{ data.vendorName }}</td>
-            <td>{{ data.totalScore }}</td>
-            <td>{{ data.technicalEvaluation }}</td>
-            <td>{{ data.commercialEvaluation }}</td>
+            <td>{{ data.totalScore + '%' }}</td>
+            <td>{{ data.technicalEvaluation + '%' }}</td>
+            <td>{{ data.commercialEvaluation + '%' }}</td>
             <td>{{ useFormatIdr(data.totalGrossAmount) }}</td>
             <td>{{ data.vendorDisc }}</td>
             <td>{{ data.discAmout }}</td>
