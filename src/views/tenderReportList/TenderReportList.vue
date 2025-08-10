@@ -108,7 +108,7 @@
                         </div>
                       </div>
                       <div class="menu-item">
-                        <div class="menu-link" href="#">
+                        <div class="menu-link" href="#" @click="goToAwarding">
                           <span class="menu-icon">
                             <i class="ki-duotone ki-award"></i>
                           </span>
@@ -378,6 +378,18 @@ const goToNegotiation = () => {
   tenderApi.negoId = '123'
   router.push({
     name: 'tenderReportNegotiation',
+    query: {
+      id: tenderApi.negoId
+    }
+  })
+}
+
+const goToAwarding = () => {
+  console.log('masuk');
+  
+  tenderApi.negoId = '123'
+  router.push({
+    name: 'tenderAwarding',
     query: {
       id: tenderApi.negoId
     }
