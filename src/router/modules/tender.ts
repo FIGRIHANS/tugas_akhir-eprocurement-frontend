@@ -39,4 +39,45 @@ export default [
     name: 'tenderEvaluation',
     component: () => import('@/views/tenderEvaluation/TenderEvaluation.vue'),
   },
+
+  // Vendor
+  {
+    path: '/vendor-tender/detail/negotiation',
+    name: 'tenderDetailNegotiation',
+    component: () =>
+      import('@/views/vendorTender/vendorTenderDetailNegotiation/TenderDetailNegotiation.vue'),
+  },
+  {
+    path: '/vendor-tender/detail/negotiation/fromAdmin',
+    name: 'tenderDetailNegotiationFromAdmin',
+    component: () =>
+      import(
+        '@/views/vendorTender/vendorTenderDetailNegotiation-NotifFromAdmin/TenderDetailNegotiation.vue'
+      ),
+  },
+  {
+    path: '/vendor-tender/submission',
+    name: 'tenderSubmission',
+    component: () =>
+      import(
+        '@/views/vendorTender/vendorTenderSubmissionNegotiation/TenderSubmissionNegotiation.vue'
+      ),
+  },
+  {
+    path: '/vendor-tender/awarding',
+    name: 'TenderAwarding',
+    component: () => import('@/views/vendorTender/vendorAwardingVendor/VendorAwardingVendor.vue'),
+  },
+  {
+    path: '/vendor-tender/awarding/success',
+    name: 'TenderAwardingSuccess',
+    component: () =>
+      import('@/views/vendorTender/vendorAwardingVendor/success/AwardingSuccess.vue'),
+  },
+  {
+    path: '/vendor-tender/awarding/failure',
+    name: 'TenderAwardingFailure',
+    component: () =>
+      import('@/views/vendorTender/vendorAwardingVendor/failure/AwardingFailure.vue'),
+  },
 ]
