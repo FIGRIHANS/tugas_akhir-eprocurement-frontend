@@ -29,4 +29,9 @@ export default [
     name: 'tenderNegotiation',
     component: () => import('@/views/tenderNegotiation/TenderNegotiation.vue'),
   },
+  {
+    path: '/tender/evaluation',
+    name: 'tenderEvaluation',
+    component: () => import('@/views/tenderEvaluation/TenderEvaluation.vue'),
+  },
 ]

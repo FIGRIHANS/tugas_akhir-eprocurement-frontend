@@ -91,6 +91,13 @@
                         </div>
                       </div>
                       <div class="menu-item">
+                        <div class="menu-link" href="#" @click="goToEvaluation">
+                          <span class="menu-title">
+                            Evaluation
+                          </span>
+                        </div>
+                      </div>
+                      <div class="menu-item">
                         <div class="menu-link" href="#" @click="goToNegotiation">
                           <span class="menu-icon">
                             <i class="ki-duotone ki-update-file"></i>
@@ -374,6 +381,12 @@ const goToNegotiation = () => {
     query: {
       id: tenderApi.negoId
     }
+  })
+}
+
+const goToEvaluation = () => {
+  router.push({
+    name: 'tenderEvaluation'
   })
 }
 </script>
