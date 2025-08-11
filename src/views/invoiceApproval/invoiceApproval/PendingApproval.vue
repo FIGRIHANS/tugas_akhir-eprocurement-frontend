@@ -297,20 +297,12 @@ const openSuccesSap = () => {
   const idModal = document.querySelector('#success_send_sap_modal')
   const modal = KTModal.getInstance(idModal as HTMLElement)
   modal.show()
-
-  setTimeout(() => {
-    modal.hide()
-  }, 1500)
 }
 
 const openFailedSap = () => {
   const idModal = document.querySelector('#failed_send_sap_modal')
   const modal = KTModal.getInstance(idModal as HTMLElement)
   modal.show()
-
-  setTimeout(() => {
-    modal.hide()
-  }, 1500)
 }
 
 onMounted(() => {
