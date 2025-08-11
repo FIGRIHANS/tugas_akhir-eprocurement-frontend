@@ -2,10 +2,9 @@
   <div>
     <Breadcrumb title="Tender Report List" :routes="routes" />
     <div class="flex align-items-center gap-[16px]">
-      <CardGraph title="Created" :data="dummyCardData" class="flex-1" />
-      <CardGraph title="Published" :data="dummyCardData" class="flex-1" />
-      <CardGraph title="Negotiation & Submission" :data="dummyCardData" class="flex-1" />
-      <CardGraph title="Close" :data="dummyCardData" class="flex-1" />
+      <CardGraph title="Vendor Feedback" :data="dummyCardData" class="flex-1" />
+      <CardGraph title="Vendor Negotiation" :data="dummyCardData" class="flex-1" />
+      <CardGraph title="Vendor Awarding" :data="dummyCardData" class="flex-1" />
     </div>
 
     <div class="border rounded-md p-[24px] mt-[24px]">
