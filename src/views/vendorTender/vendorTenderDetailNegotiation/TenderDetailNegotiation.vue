@@ -29,7 +29,7 @@
       </button>
     </div>
 
-    <SuccessNegotiation :show="showSuccessModal" @afterClose="closeSuccessModal" />
+    <SuccessNegotiation :show="showSuccessModal" @afterClose="$router.back()" />
   </div>
 </template>
 
@@ -65,11 +65,6 @@ const backPage = () => {
 
 const submitNego = () => {
   showSuccessModal.value = true
-}
-
-const closeSuccessModal = () => {
-  showSuccessModal.value = false
-  backPage()
 }
 </script>
 
