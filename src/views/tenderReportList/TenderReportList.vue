@@ -126,31 +126,46 @@
                     <div class="menu menu-default flex flex-col w-fit">
                       <div class="menu-item">
                         <div class="menu-link" href="#">
-                          <span class="menu-icon"><i class="ki-duotone ki-file-up"></i></span>
+                          <span class="menu-icon">
+                            <i class="ki-duotone ki-file-up"></i>
+                          </span>
                           <span class="menu-title"> Publish </span>
                         </div>
                       </div>
                       <div class="menu-item">
-                        <div class="menu-link" @click="goToDetail(data)">
-                          <span class="menu-icon"><i class="ki-duotone ki-eye"></i></span>
+                        <div class="menu-link" href="#" @click="goToDetail(data)">
+                          <span class="menu-icon">
+                            <i class="ki-duotone ki-eye"></i>
+                          </span>
                           <span class="menu-title"> Detail </span>
                         </div>
                       </div>
                       <div class="menu-item">
+                        <div class="menu-link" href="#" @click="goToEvaluation">
+                          <span class="menu-title"> Evaluation </span>
+                        </div>
+                      </div>
+                      <div class="menu-item">
                         <div class="menu-link" href="#" @click="goToNegotiation">
-                          <span class="menu-icon"><i class="ki-duotone ki-update-file"></i></span>
+                          <span class="menu-icon">
+                            <i class="ki-duotone ki-update-file"></i>
+                          </span>
                           <span class="menu-title"> Negotiation </span>
                         </div>
                       </div>
                       <div class="menu-item">
-                        <div class="menu-link" href="#">
-                          <span class="menu-icon"><i class="ki-duotone ki-award"></i></span>
+                        <div class="menu-link" href="#" @click="goToAwarding">
+                          <span class="menu-icon">
+                            <i class="ki-duotone ki-award"></i>
+                          </span>
                           <span class="menu-title"> Award </span>
                         </div>
                       </div>
                       <div class="menu-item">
                         <div class="menu-link" href="#">
-                          <span class="menu-icon"><i class="ki-duotone ki-time"></i></span>
+                          <span class="menu-icon">
+                            <i class="ki-duotone ki-time"></i>
+                          </span>
                           <span class="menu-title"> History </span>
                         </div>
                       </div>
@@ -498,6 +513,22 @@ watch(
 const goToNegotiation = () => {
   tenderApi.negoId = '123'
   router.push({ name: 'tenderReportNegotiation', query: { id: tenderApi.negoId } })
+}
+
+const goToAwarding = () => {
+  tenderApi.negoId = '123'
+  router.push({
+    name: 'tenderAwarding',
+    query: {
+      id: tenderApi.negoId
+    }
+  })
+}
+
+const goToEvaluation = () => {
+  router.push({
+    name: 'tenderEvaluation'
+  })
 }
 </script>
 
