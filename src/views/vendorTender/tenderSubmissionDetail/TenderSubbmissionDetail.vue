@@ -160,13 +160,13 @@
 
   <ModalConfirmation
     :open="modalSuccess"
-    id="equipment-success"
+    id="submission-success"
     type="success"
-    title="Equipment Data Successfully Updated"
-    text="The data has been successfully updated in the admin system."
+    title="You have successfully participated"
+    text="Please wait for further updates"
     no-cancel
     static
-    submit-button-text="Ok"
+    submit-button-text="Close"
     :submit="() => (modalSuccess = false)"
   />
 </template>
@@ -177,7 +177,7 @@ import { useRoute } from 'vue-router'
 import moment from 'moment'
 import { KTModal } from '@/metronic/core'
 
-import { useFormatIdr, useFormatUsd } from '@/composables/currency'
+import { useFormatIdr } from '@/composables/currency'
 
 import type { routeTypes } from '@/core/type/components/breadcrumb'
 
