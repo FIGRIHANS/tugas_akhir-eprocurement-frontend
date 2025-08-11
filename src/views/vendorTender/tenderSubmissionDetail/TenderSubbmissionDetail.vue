@@ -40,32 +40,24 @@
             </thead>
 
             <tbody>
-              <tr v-for="data of dataResponse" :key="data.id">
+              <tr v-for="data of dataResponse" :key="data.tenderRequestNumber">
                 <td>
                   <input v-model="data.isSelected" class="checkbox" type="checkbox" />
                 </td>
-                <td>{{ data.sourcingType }}</td>
-                <td>{{ data.purchaseRequisitionNo }}</td>
-                <td>{{ data.division }}</td>
+                <td>{{ data.tenderRequestNumber }}</td>
+                <td>{{ data.type }}</td>
+                <td>{{ moment(data.deliveryDate).format('DD MMM YYYY') }}</td>
                 <td>{{ data.plant }}</td>
-                <td>{{ data.department }}</td>
-                <td>{{ data.requestor }}</td>
                 <td>{{ data.materialGroup }}</td>
                 <td>{{ data.itemNo }}</td>
+                <td>
+                  {{ useFormatIdr(data.tenderPrice) }}
+                </td>
                 <td>{{ data.material }}</td>
                 <td>{{ data.materialDescription }}</td>
-                <td>{{ useFormatIdr(data.quantity) }}</td>
+                <td>{{ data.quantity }}</td>
+                <td>{{ data.buttonPrice }}</td>
                 <td>{{ data.uom }}</td>
-                <td>
-                  {{
-                    data.currency === 'IDR'
-                      ? useFormatIdr(data.bottomPrice)
-                      : useFormatUsd(data.bottomPrice)
-                  }}
-                </td>
-                <td>{{ data.currency }}</td>
-                <td>{{ moment(data.deliveryDate).format('DD MMM YYYY') }}</td>
-                <td>{{ data.type }}</td>
               </tr>
             </tbody>
           </table>
@@ -96,7 +88,6 @@
 
   <Teleport to="body">
     <div
-      v-if="priceUpdateTemp.length > 0"
       ref="modal"
       class="modal"
       data-modal="true"
@@ -106,7 +97,7 @@
       <div class="modal-content modal-center-y max-w-4xl">
         <div class="modal-body flex flex-col gap-4">
           <div class="scrollable-x-auto">
-            <table class="table align-middle">
+            <table v-if="priceUpdateTemp.length > 0" class="table align-middle">
               <thead>
                 <tr>
                   <th
@@ -122,34 +113,26 @@
               <tbody>
                 <tr
                   v-for="(data, index) of dataResponse.filter((item) => item.isSelected)"
-                  :key="data.id"
+                  :key="data.tenderRequestNumber"
                 >
-                  <td>{{ data.sourcingType }}</td>
-                  <td>{{ data.purchaseRequisitionNo }}</td>
-                  <td>{{ data.division }}</td>
+                  <td>{{ data.tenderRequestNumber }}</td>
+                  <td>{{ data.type }}</td>
+                  <td>{{ moment(data.deliveryDate).format('DD MMM YYYY') }}</td>
                   <td>{{ data.plant }}</td>
-                  <td>{{ data.department }}</td>
-                  <td>{{ data.requestor }}</td>
                   <td>{{ data.materialGroup }}</td>
                   <td>{{ data.itemNo }}</td>
-                  <td>{{ data.material }}</td>
-                  <td>{{ data.materialDescription }}</td>
-                  <td>{{ useFormatIdr(data.quantity) }}</td>
-                  <td>{{ data.uom }}</td>
                   <td>
                     <UiInput
                       v-model="priceUpdateTemp[index].price"
-                      :placeholder="
-                        data.currency === 'IDR'
-                          ? useFormatIdr(data.bottomPrice)
-                          : useFormatUsd(data.bottomPrice)
-                      "
+                      :placeholder="String(data.tenderPrice)"
                       type="number"
                     />
                   </td>
-                  <td>{{ data.currency }}</td>
-                  <td>{{ moment(data.deliveryDate).format('DD MMM YYYY') }}</td>
-                  <td>{{ data.type }}</td>
+                  <td>{{ data.material }}</td>
+                  <td>{{ data.materialDescription }}</td>
+                  <td>{{ data.quantity }}</td>
+                  <td>{{ data.buttonPrice }}</td>
+                  <td>{{ data.uom }}</td>
                 </tr>
               </tbody>
             </table>
@@ -236,22 +219,18 @@ const radioOptions = [
 ]
 const tableHeads = ref<string[]>([
   '',
-  'Sourcing Type',
-  'PR No',
-  'Division',
+  'Tender Request Number',
+  'Type',
+  'Delivery Date',
   'Plant',
-  'Department',
-  'Requestor',
   'Material Group',
   'Item No',
+  'Tender Price',
   'Material',
   'Material Desc',
   'Quantity',
-  'UoM',
-  'Bottom Price',
-  'Currency',
-  'Delivery Date',
-  'Type',
+  'Button Price',
+  'UOM',
 ])
 
 const listStep = ref([
@@ -279,123 +258,63 @@ const listStep = ref([
 
 const dataResponse = ref([
   {
-    id: '1',
-    sourcingType: 'PR',
-    purchaseRequisitionNo: '10012525',
-    division: 'Production',
-    plant: 'CHP2',
-    department: 'Services Area',
-    requestor: 'Budi',
+    tenderRequestNumber: '10012525',
+    type: 'R',
+    deliveryDate: '2025-06-14',
+    plant: 'CHIP2',
     materialGroup: '4',
     itemNo: '20',
+    tenderPrice: 10000,
     material: 'CH-1062',
-    materialDescription: 'Macro Fertilizer Urea',
-    quantity: 1000,
+    materialDescription: 'Macro Feltilizer Urea',
+    quantity: '1000',
+    buttonPrice: '97000',
     uom: 'KG',
-    bottomPrice: 100000,
-    currency: 'IDR',
-    deliveryDate: '2025-08-24',
-    type: 'R',
     isSelected: false,
   },
   {
-    id: '2',
-    sourcingType: 'PR',
-    purchaseRequisitionNo: '10012525',
-    division: 'Production',
-    plant: 'CHP2',
-    department: 'Services Area',
-    requestor: 'Budi',
+    tenderRequestNumber: '2763746',
+    type: 'R',
+    deliveryDate: '2025-06-14',
+    plant: 'CHIP2',
     materialGroup: '4',
     itemNo: '20',
-    material: 'CH-1064',
-    materialDescription: 'Macro Fertilizer NPK',
-    quantity: 1000,
+    tenderPrice: 10000,
+    material: 'CH-1062',
+    materialDescription: 'Material 123445',
+    quantity: '1000',
+    buttonPrice: '97000',
     uom: 'KG',
-    bottomPrice: 120000,
-    currency: 'IDR',
-    deliveryDate: '2025-08-24',
-    type: 'R',
     isSelected: false,
   },
   {
-    id: '3',
-    sourcingType: 'PR',
-    purchaseRequisitionNo: '10012525',
-    division: 'Production',
-    plant: 'CHP2',
-    department: 'Services Area',
-    requestor: 'Budi',
+    tenderRequestNumber: '9384756',
+    type: 'R',
+    deliveryDate: '2025-06-14',
+    plant: 'CHIP2',
     materialGroup: '4',
     itemNo: '20',
-    material: 'CH-1066',
-    materialDescription: 'Macro Fertilizer CaCO3',
-    quantity: 1000,
+    tenderPrice: 10000,
+    material: 'CH-1062',
+    materialDescription: 'Mate SA 2736',
+    quantity: '1000',
+    buttonPrice: '97000',
     uom: 'KG',
-    bottomPrice: 77000,
-    currency: 'IDR',
-    deliveryDate: '2025-08-24',
-    type: 'R',
     isSelected: false,
   },
   {
-    id: '4',
-    sourcingType: 'RFQ',
-    purchaseRequisitionNo: '50000342',
-    division: 'Asset Management',
-    plant: 'CHP2',
-    department: 'Asset Planning',
-    requestor: 'Anton',
+    tenderRequestNumber: '0192834',
+    type: 'R',
+    deliveryDate: '2025-06-14',
+    plant: 'CHIP2',
     materialGroup: '4',
     itemNo: '20',
-    material: 'KA-1001',
-    materialDescription: 'Conveyor Belt VA1',
-    quantity: 5,
+    tenderPrice: 10000,
+    material: 'CH-1062',
+    materialDescription: 'Real BHG',
+    quantity: '1000',
+    buttonPrice: '97000',
     uom: 'KG',
-    bottomPrice: 5000,
-    currency: 'USD',
-    deliveryDate: '2025-08-24',
-    type: 'R',
-    isSelected: false,
-  },
-  {
-    id: '5',
-    sourcingType: 'RFQ',
-    purchaseRequisitionNo: '50000342',
-    division: 'Asset Management',
-    plant: 'CHP2',
-    department: 'Asset Planning',
-    requestor: 'Anton',
-    materialGroup: '4',
-    itemNo: '20',
-    material: 'KA-1002',
-    materialDescription: 'Conveyor Belt VA2',
-    quantity: 4,
-    uom: 'KG',
-    bottomPrice: 11000,
-    currency: 'USD',
-    deliveryDate: '2025-08-24',
-    type: 'R',
-    isSelected: false,
-  },
-  {
-    id: '6',
-    sourcingType: 'RFQ',
-    purchaseRequisitionNo: '50000342',
-    division: 'Asset Management',
-    plant: 'CHP2',
-    department: 'Asset Planning',
-    requestor: 'Anton',
-    materialGroup: '4',
-    itemNo: '20',
-    material: 'KA-1003',
-    materialDescription: 'Conveyor Belt VA3',
-    quantity: 3,
-    uom: 'KG',
-    bottomPrice: 3500,
-    currency: 'USD',
-    deliveryDate: '2025-08-24',
-    type: 'R',
     isSelected: false,
   },
 ])
@@ -411,7 +330,7 @@ const clearPriceUpdateTemp = () => {
 const savePriceUpdateTemp = () => {
   priceUpdateTemp.value.forEach((item, index) => {
     if (item.isSelected) {
-      dataResponse.value[index].bottomPrice = item.price
+      dataResponse.value[index].tenderPrice = item.price
     }
   })
 
@@ -427,7 +346,7 @@ watch(
   dataResponse,
   (newVal) => {
     priceUpdateTemp.value = newVal.map((item) => ({
-      price: item.bottomPrice,
+      price: item.tenderPrice,
       isSelected: item.isSelected,
     }))
   },
