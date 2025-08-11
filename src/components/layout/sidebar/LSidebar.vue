@@ -104,7 +104,10 @@ const filteredSidebarMenu = computed(() => {
 
     if (userStore.userData?.profile?.vendorCode) {
       return sidebarMenu
-        .filter((menu) => menu.id !== 'vendor-management' && menu.id !== 'userManagement' && menu.id !== 'tender')
+        .filter(
+          (menu) =>
+            menu.id !== 'vendor-management' && menu.id !== 'userManagement' && menu.id !== 'tender',
+        )
         .map((menu) => {
           return {
             ...menu,
@@ -131,7 +134,9 @@ const filteredSidebarMenu = computed(() => {
     }
   }
 
-  return sidebarMenu.filter((menu) => menu.id !== 'company-information')
+  return sidebarMenu.filter(
+    (menu) => menu.id !== 'company-information' && menu.id !== 'vendor-tender',
+  )
 })
 </script>
 

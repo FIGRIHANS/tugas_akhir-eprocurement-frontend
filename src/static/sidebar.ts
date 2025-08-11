@@ -40,12 +40,24 @@ export default [
       {
         id: 'tender-report-list',
         title: 'Tender Report List',
-        to: 'tenderReportList'
+        to: 'tenderReportList',
       },
       {
         id: 'create-tender-request',
         title: 'Create Tender Request',
-        to: 'tenderCreate'
+        to: 'tenderCreate',
+      },
+    ],
+  },
+  {
+    id: 'vendor-tender',
+    title: 'Tender Management',
+    icon: 'rocket',
+    child: [
+      {
+        id: 'vendor-tender-submission',
+        title: 'Tender Submission',
+        to: 'tenderSubmission',
       },
     ],
   },
