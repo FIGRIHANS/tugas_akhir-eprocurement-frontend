@@ -9,7 +9,7 @@
       <component
         :is="contentComponent"
         :activeTab="activeTabAdmin"
-        :activeTabTimeline="activeTabBilling" 
+        :activeTabTimeline="activeTabBilling"
         @setTab="setTab"
         @setTabTimeline="setTabTimeline"
       />
@@ -24,11 +24,29 @@
         Back
       </button>
       <button class="btn btn-primary" @click="goNext">
-        {{ activeTab === 'vendor' ? 'Invite and Next' : activeTab === 'timeline' ? 'Publish Tender Request' : 'Next' }}
+        {{
+          activeTab === 'vendor'
+            ? 'Invite and Next'
+            : activeTab === 'timeline'
+              ? 'Publish Tender Request'
+              : 'Next'
+        }}
         <i v-if="activeTab !== 'timeline'" class="ki-filled ki-black-right"></i>
         <i v-else class="ki-duotone ki-paper-plane"></i>
       </button>
     </div>
+
+    <ModalConfirmation
+      :open="publishedModal"
+      id="published-modal"
+      type="success"
+      noCancel
+      :static="false"
+      :submit="() => (publishedModal = false)"
+      title="Tender Published"
+      text="Tender with ID 10000008 successfully published and forwarded to the appropriate vendors."
+      submitButtonText="Close"
+    />
   </div>
 </template>
 
@@ -39,6 +57,7 @@ import TabTender from '@/components/tender/TabTender.vue'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import type { routeTypes } from '@/core/type/components/breadcrumb'
 import type { FormTypes } from './types/tenderCreate'
+import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 
 const PurchaseRequisitionList = defineAsyncComponent(
   () => import('./TenderCreate/PurchaseRequisitionList.vue'),
@@ -124,6 +143,7 @@ const form = reactive<FormTypes>({
   manualTimeline: [],
   agreePersonInCharge: false,
 })
+const publishedModal = ref<boolean>(false)
 
 const contentComponent = computed(() => {
   const components = {
@@ -141,6 +161,10 @@ const goNext = () => {
     if (getIndex !== tabList.length - 1) {
       activeTab.value = tabList[getIndex + 1]
     }
+  }
+
+  if (activeTab.value === 'timeline') {
+    publishedModal.value = true
   }
 }
 
