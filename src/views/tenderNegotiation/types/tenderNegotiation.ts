@@ -14,6 +14,7 @@ export interface TableNegotiationTypes {
 }
 
 export interface NegotiationEntitiesTypes {
+  history_id: number
   prNo: string
   ItemNo: number
   Material: string
@@ -45,11 +46,26 @@ export interface tableNegotiationHistoryTypes {
   type: string
   expectedDisc: string
   vendorPurposedDisc: string
-  totalAmount: string
+  totalAmount: number
   totalCurrency: string
-  discAmount: string
+  discAmount: number
   discCurrency: string
   technicalNegotiation: string
-  finalAmount: string
+  finalAmount: number
   finalCurrency: string
+}
+
+export interface returnData {
+  expectedDicValueAdmin: number
+  expectedDicValueVendor: number
+  expectedDiscAdmin: string
+  expectedDiscDiffPerc: string
+  expectedDiscDiffValue: number
+  expectedDiscVendor: string
+  finalAmountAdmin: number
+  finalAmountDiff: number
+  finalAmountVendor: number
+  totalAmountAdmin: number
+  totalAmountVariance: number
+  totalAmountVendor: number
 }
