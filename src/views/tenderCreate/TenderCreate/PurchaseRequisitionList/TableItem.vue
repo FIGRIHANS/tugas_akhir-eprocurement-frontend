@@ -27,7 +27,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="data of itemVendor" :key="data.id">
+          <tr v-for="data of form?.requisitionList" :key="data.id">
             <td>
               <input v-model="data.isSelected" class="checkbox" type="checkbox"/>
             </td>
@@ -48,22 +48,24 @@
       </table>
     </div>
     <div class="mt-[24px] text-sm">
-      Tampilkan {{ itemVendor.length }} data dari total data {{ itemVendor.length }}
+      Tampilkan {{ form?.requisitionList.length }} data dari total data {{ form?.requisitionList.length }}
     </div>
     <AddSourcingRequisitionModal @setData="setData" />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, defineAsyncComponent } from 'vue'
+import { ref, reactive, inject, defineAsyncComponent } from 'vue'
 import { KTModal } from '@/metronic/core'
 import moment from 'moment'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
+import type { FormTypes } from '../../types/tenderCreate'
 import type { TableItemTypes } from '../../types/purchaseRequisitionList'
 import type { SourcingRequestitionTypes } from '../../types/purchaseRequisitionList'
 
 const AddSourcingRequisitionModal = defineAsyncComponent(() => import('./TableItem/AddSourcingRequisitionModal.vue'))
 
+const form = inject<FormTypes>('form')
 const search = ref<string>('')
 
 const columns = reactive<string[]>([
@@ -82,8 +84,6 @@ const columns = reactive<string[]>([
   'Currency'
 ])
 
-const itemVendor = reactive<TableItemTypes[]>([])
-
 const openAddSourcingRequisition = () => {
   const idModal = document.querySelector('#tender_add_sourcing_requisition_modal')
   const modal = KTModal.getInstance(idModal as HTMLElement)
@@ -91,9 +91,10 @@ const openAddSourcingRequisition = () => {
 }
 
 const setData = (dataVendor: SourcingRequestitionTypes[]) => {
+  if (!form) return
   for (const item of dataVendor) {
     const data = {
-      id: (itemVendor.length + 1).toString(),
+      id: (form.requisitionList.length + 1).toString(),
       purchaseRequisitionNo: item.purchaseRequisitionNo,
       sourcingType: item.sourcingType,
       deliveryDate: item.deliveryDate,
@@ -109,7 +110,7 @@ const setData = (dataVendor: SourcingRequestitionTypes[]) => {
       isSelected: false
     } as TableItemTypes
 
-    itemVendor.push(data)
+    form.requisitionList.push(data)
   }
 }
 </script>
