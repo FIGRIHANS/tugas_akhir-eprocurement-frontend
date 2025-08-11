@@ -61,6 +61,16 @@
                             </span>
                           </a>
                         </div>
+                        <div v-if="parent.statusCode === 4" class="menu-item" @click="openDetailInvoiceEdit(parent.invoiceUId)">
+                          <a class="menu-link" href="#">
+                            <span class="menu-icon">
+                              <i class="ki-duotone ki-message-edit"></i>
+                            </span>
+                            <span class="menu-title">
+                              Edit
+                            </span>
+                          </a>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -225,6 +235,16 @@ const openDetailInvoice = (invoiceId: string) => {
   router.push({
     name: 'invoiceDetail',
     query: {
+      id: invoiceId,
+      type: '2'
+    }
+  })
+}
+
+const openDetailInvoiceEdit = (invoiceId: string) => {
+  router.push({
+    name: 'invoiceDetailEdit',
+    query : {
       id: invoiceId,
       type: '2'
     }
