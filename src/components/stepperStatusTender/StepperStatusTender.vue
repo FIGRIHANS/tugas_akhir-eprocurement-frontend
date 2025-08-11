@@ -18,6 +18,7 @@
           :class="steps[index + 1].active ? 'bg-blue-500' : 'bg-gray-300'"
         ></div>
       </div>
+
       <div
         :class="{
           '-ml-[120px]': index !== steps.length - 1,
@@ -25,32 +26,18 @@
         }"
       >
         <p class="text-[13px] font-medium mb-[8px]">{{ step.label }}</p>
-        <p
-          class="text-xs mb-[8px]"
-          :class="{
-            'h-[16px]': !step.time
-          }"
-        >
-          {{ step.time ? moment(step.time).format('DD MMM YYYY') : '' }}
-        </p>
-        <p
-          class="text-xs font-bold text-primary"
-          :class="{
-            'h-[16px]': !step.name
-          }"
-        >
-          {{ step.name || '' }}
-        </p>
+        <p class="text-xs mb-[8px]">{{ moment(step.time).format('DD MMM YYYY') }}</p>
+        <p class="text-xs font-bold text-primary">{{ step.name }}</p>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { watch, ref } from 'vue'
+import { computed } from 'vue'
 import moment from 'moment'
 
-interface listStepTypes {
+interface ListStep {
   label: string
   time: string
   name: string
@@ -61,84 +48,163 @@ interface listStepTypes {
 const props = withDefaults(
   defineProps<{
     activeName: string
-    role?: 'admin' | 'vendor'
+    role: 'admin' | 'vendor'
   }>(),
   {
     role: 'admin',
   },
 )
 
-const steps = ref<listStepTypes[]>([
+/* ========= Base steps (tidak diubah) ========= */
+const BASE_ADMIN_STEPS: Omit<ListStep, 'active'>[] = [
   {
     label: 'Create Tender Request',
     time: '2025-10-22',
     name: 'Joko Anwar',
     icon: 'ki-duotone ki-document',
-    active: true,
   },
-  {
-    label: 'Published',
-    time: '',
-    name: '',
-    icon: 'ki-duotone ki-file-up',
-    active: false,
-  },
+  { label: 'Published', time: '2025-10-22', name: 'Joko Anwar', icon: 'ki-duotone ki-file-up' },
   {
     label: 'Vendor Submission',
-    time: '',
-    name: '',
+    time: '2025-10-22',
+    name: 'Joko Anwar',
     icon: 'ki-duotone ki-paper-plane',
-    active: false,
   },
   {
     label: 'Vendor Negotiation',
-    time: '',
-    name: '',
+    time: '2025-10-22',
+    name: 'Joko Anwar',
     icon: 'ki-duotone ki-book-open',
-    active: false,
+  },
+  {
+    label: 'Vendor Evaluation',
+    time: '2025-10-22',
+    name: 'Joko Anwar',
+    icon: 'ki-duotone ki-shield-search',
   },
   {
     label: 'Vendor Awarding',
-    time: '',
-    name: '',
+    time: '2025-10-22',
+    name: 'Joko Anwar',
     icon: 'ki-duotone ki-ranking',
-    active: false,
   },
   {
     label: 'Tender Close',
-    time: '',
-    name: '',
+    time: '2025-10-22',
+    name: 'Joko Anwar',
     icon: 'ki-duotone ki-file-deleted',
-    active: false,
   },
-])
+]
 
-watch(
-  () => props.activeName,
-
-  (newActiveName) => {
-    if (!steps.value || steps.value.length === 0) {
-      return
-    }
-
-    steps.value.forEach((step) => {
-      step.active = false
-    })
-
-    const getIndex = steps.value.findIndex(
-      (item) =>
-        item.label.toLowerCase().replace(/ /g, '') ===
-        newActiveName.toLowerCase().replace(/ /g, ''),
-    )
-
-    if (getIndex !== -1) {
-      for (let index = 0; index <= getIndex; index++) {
-        steps.value[index].active = true
-      }
-    }
+const BASE_VENDOR_STEPS: Omit<ListStep, 'active'>[] = [
+  {
+    label: 'Vendor Submission',
+    time: '2025-10-22',
+    name: 'Admin',
+    icon: 'ki-duotone ki-paper-plane',
   },
   {
-    immediate: true,
+    label: 'Vendor Negotiation',
+    time: '2025-10-22',
+    name: 'Joko Anwar',
+    icon: 'ki-duotone ki-book-open',
   },
-)
+  {
+    label: 'Vendor Evaluation',
+    time: '2025-10-22',
+    name: 'Admin',
+    icon: 'ki-duotone ki-shield-search',
+  },
+  { label: 'Vendor Awarding', time: '2025-10-22', name: 'Admin', icon: 'ki-duotone ki-ranking' },
+]
+
+/* ========= Helpers ========= */
+const decodePlus = (v: string) => v.replace(/\+/g, ' ')
+const norm = (v: unknown) =>
+  decodePlus(String(v ?? ''))
+    .toLowerCase()
+    .trim()
+
+// Alias agar input aktif dari URL tetap cocok dengan label step di atas
+const ADMIN_ALIASES: Record<string, string> = {
+  // Create
+  created: 'Create Tender Request',
+  create: 'Create Tender Request',
+  open: 'Create Tender Request',
+
+  // Publish
+  publish: 'Published',
+
+  // Submission/Negotiation/Evaluation/Awarding
+  submission: 'Vendor Submission',
+  'vendor submission': 'Vendor Submission',
+  negotiation: 'Vendor Negotiation',
+  'vendor negotiation': 'Vendor Negotiation',
+  'negotiation & submission': 'Vendor Negotiation', // gabungan → posisikan di negotiation
+  evaluation: 'Vendor Evaluation',
+  'vendor evaluation': 'Vendor Evaluation',
+  awarding: 'Vendor Awarding',
+  'vendor awarding': 'Vendor Awarding',
+  award: 'Vendor Awarding',
+
+  // Close
+  closed: 'Tender Close',
+  close: 'Tender Close',
+  'tender close': 'Tender Close',
+
+  // Kadang ada status SAP Completed di sistem lain → anggap menuju selesai
+  'sap completed': 'Tender Close',
+  sap: 'Tender Close',
+  completed: 'Tender Close',
+}
+
+const VENDOR_ALIASES: Record<string, string> = {
+  submission: 'Vendor Submission',
+  'vendor submission': 'Vendor Submission',
+  negotiation: 'Vendor Negotiation',
+  'vendor negotiation': 'Vendor Negotiation',
+  evaluation: 'Vendor Evaluation',
+  'vendor evaluation': 'Vendor Evaluation',
+  awarding: 'Vendor Awarding',
+  'vendor awarding': 'Vendor Awarding',
+  award: 'Vendor Awarding',
+}
+
+/** Ambil base steps berdasar role */
+const baseSteps = computed(() => (props.role === 'vendor' ? BASE_VENDOR_STEPS : BASE_ADMIN_STEPS))
+
+/** Resolusi label kanonik dari props.activeName (handle +, alias, fallback) */
+const canonicalLabel = computed<string>(() => {
+  const n = norm(props.activeName)
+  const base = baseSteps.value
+
+  // 1) Cocok langsung dengan label yang ada
+  const direct = base.find((s) => norm(s.label) === n)?.label
+  if (direct) return direct
+
+  // 2) Cek alias
+  const map = props.role === 'vendor' ? VENDOR_ALIASES : ADMIN_ALIASES
+  const alias = map[n]
+  if (alias && base.some((s) => s.label === alias)) return alias
+
+  // 3) Fallback ke step pertama
+  return base[0]?.label ?? ''
+})
+
+/** Index step aktif */
+const activeIndex = computed<number>(() => {
+  const base = baseSteps.value
+  const idx = base.findIndex((s) => s.label === canonicalLabel.value)
+  return idx >= 0 ? idx : 0
+})
+
+/** Steps final dengan flag active tanpa memutasi base */
+const steps = computed<ListStep[]>(() => {
+  const base = baseSteps.value
+  const idx = activeIndex.value
+  return base.map((s, i) => ({
+    ...s,
+    active: i <= idx,
+  }))
+})
 </script>
