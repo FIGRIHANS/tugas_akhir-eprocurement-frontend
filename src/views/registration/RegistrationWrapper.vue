@@ -138,8 +138,8 @@ const checkFieldNotEmpty = () => {
   const fields = {
     information: {
       vendor: ['vendorName', 'foundedDate'],
-      companyLocation: locationFields,
-      vendorLocation: locationFields,
+      companyLocation: [...locationFields],
+      vendorLocation: [...locationFields],
     },
     contact: {
       account: ['username', 'email', 'phone'],
@@ -154,16 +154,17 @@ const checkFieldNotEmpty = () => {
 
   switch (tab.active) {
     case 'registration__information':
-      Object.keys(fields.information).forEach((key) => {
-        // @ts-expect-error
-        const section = registrationVendorStore.information[key]
-        // @ts-expect-error
-        registrationVendorStore.information[key] = {
-          ...section,
-          // @ts-expect-error
-          ...checkErrors(section, fields.information[key]),
-        }
-      })
+      const { companyLocation, vendorLocation } = information.value
+
+      if (![0, 360].includes(companyLocation.countryId)) {
+        fields.information.companyLocation.splice(2, 1)
+        registrationVendorStore.information.companyLocation.cityIdError = false
+      }
+
+      if (![0, 360].includes(vendorLocation.countryId)) {
+        fields.information.vendorLocation.splice(2, 1)
+        registrationVendorStore.information.vendorLocation.cityIdError = false
+      }
 
       const hasBidangUsahaItems =
         registrationVendorStore.information.vendorCommodities.list.length > 0
