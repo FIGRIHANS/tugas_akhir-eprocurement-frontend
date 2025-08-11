@@ -14,7 +14,7 @@
             class="border-b border-gray-200 py-[31px] px-[20px] text-xs flex"
             :class="index === listCalculation.length - 1 ? 'calculation__last-field' : ''">
             <div class="flex-1">{{ item.name }}</div>
-            <div class="flex-1">{{ useFormatIdr(item.amount) }}</div>
+            <div class="flex-1">{{ form?.currCode === 'IDR' ? useFormatIdr(item.amount) : useFormatUsd(item.amount) }}</div>
             <div>{{ form?.currCode }}</div>
           </div>
         </div>
@@ -30,7 +30,7 @@ import type { listType } from '../../types/invoiceCalculation'
 import type { formTypes } from '../../types/invoiceDetailEdit'
 import { defaultField, dpField } from '@/static/invoiceCalculation'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
-import { useFormatIdr } from '@/composables/currency'
+import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const route = useRoute()

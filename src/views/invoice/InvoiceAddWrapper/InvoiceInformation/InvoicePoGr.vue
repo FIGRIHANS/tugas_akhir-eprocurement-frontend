@@ -439,10 +439,21 @@ const getPercentTax = (code: string) => {
 }
 
 const getVatAmount = () => {
-  const percentTax = getPercentTax(formEdit.taxCode) || 0
-  const itemAmount = formEdit.itemAmountLC
-  const result = percentTax * itemAmount
-  formEdit.vatAmount = result
+  if (!form) return
+  const checkIsEdit = form.invoicePoGr.findIndex((item) => item.isEdit)
+  if (checkIsEdit !== -1) {
+    const percentTax = getPercentTax(formEdit.taxCode) || 0
+    const itemAmount = formEdit.itemAmountLC
+    const result = percentTax * itemAmount
+    formEdit.vatAmount = result
+  } else {
+    for (const item of form.invoicePoGr) {
+      const percentTax = getPercentTax(item.taxCode) || 0
+      const itemAmount = form.currency === 'IDR' ? item.itemAmountLC : item.itemAmountTC
+      const result = percentTax * itemAmount
+      item.vatAmount = result
+    }
+  }
 }
 
 watch(
@@ -493,7 +504,7 @@ watch(
 )
 
 watch(
-  () => [form?.invoicePoGr, formEdit],
+  () => [form?.invoicePoGr, form?.currency, formEdit],
   () => {
     getVatAmount()
   },
