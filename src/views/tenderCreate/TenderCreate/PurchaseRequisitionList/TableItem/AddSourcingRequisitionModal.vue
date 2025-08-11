@@ -149,10 +149,10 @@ const originalList = ref<SourcingRequestitionTypes[]>([
     itemNo: '20',
     material: 'CH-1062',
     materialDescription: 'Macro Fertilizer Urea',
-    quantity: 1000,
-    uom: 'KG',
+    quantity: 30,
+    uom: 'TON',
     bottomPrice: 100000,
-    currency: 'IDR',
+    currency: 'USD',
     deliveryDate: '2025-08-24',
     type: 'R',
     isSelected: false
@@ -169,10 +169,10 @@ const originalList = ref<SourcingRequestitionTypes[]>([
     itemNo: '20',
     material: 'CH-1064',
     materialDescription: 'Macro Fertilizer NPK',
-    quantity: 1000,
-    uom: 'KG',
+    quantity: 33,
+    uom: 'TON',
     bottomPrice: 120000,
-    currency: 'IDR',
+    currency: 'USD',
     deliveryDate: '2025-08-24',
     type: 'R',
     isSelected: false
@@ -189,10 +189,10 @@ const originalList = ref<SourcingRequestitionTypes[]>([
     itemNo: '20',
     material: 'CH-1066',
     materialDescription: 'Macro Fertilizer CaCO3',
-    quantity: 1000,
-    uom: 'KG',
+    quantity: 25,
+    uom: 'TON',
     bottomPrice: 77000,
-    currency: 'IDR',
+    currency: 'USD',
     deliveryDate: '2025-08-24',
     type: 'R',
     isSelected: false
@@ -272,10 +272,10 @@ const list = ref<SourcingRequestitionTypes[]>([
     itemNo: '20',
     material: 'CH-1062',
     materialDescription: 'Macro Fertilizer Urea',
-    quantity: 1000,
-    uom: 'KG',
+    quantity: 30,
+    uom: 'TON',
     bottomPrice: 100000,
-    currency: 'IDR',
+    currency: 'USD',
     deliveryDate: '2025-08-24',
     type: 'R',
     isSelected: false
@@ -292,10 +292,10 @@ const list = ref<SourcingRequestitionTypes[]>([
     itemNo: '20',
     material: 'CH-1064',
     materialDescription: 'Macro Fertilizer NPK',
-    quantity: 1000,
-    uom: 'KG',
+    quantity: 33,
+    uom: 'TON',
     bottomPrice: 120000,
-    currency: 'IDR',
+    currency: 'USD',
     deliveryDate: '2025-08-24',
     type: 'R',
     isSelected: false
@@ -312,10 +312,10 @@ const list = ref<SourcingRequestitionTypes[]>([
     itemNo: '20',
     material: 'CH-1066',
     materialDescription: 'Macro Fertilizer CaCO3',
-    quantity: 1000,
-    uom: 'KG',
+    quantity: 25,
+    uom: 'TON',
     bottomPrice: 77000,
-    currency: 'IDR',
+    currency: 'USD',
     deliveryDate: '2025-08-24',
     type: 'R',
     isSelected: false
@@ -458,6 +458,14 @@ const reset = () => {
     item.isSelected = false
   }
   list.value = originalList.value
+  selectAll.value = false
+  sourcingType.value = ''
+  purchaseRequisitionNo.value = ''
+  plant.value = ''
+  requestor.value = ''
+  division.value = ''
+  department.value = ''
+  search.value = ''
 }
 
 const filterList = () => {

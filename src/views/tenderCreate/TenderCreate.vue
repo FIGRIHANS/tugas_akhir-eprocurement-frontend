@@ -29,6 +29,7 @@
         <i v-else class="ki-duotone ki-paper-plane"></i>
       </button>
     </div>
+    <SuccessCreate />
   </div>
 </template>
 
@@ -37,6 +38,7 @@ import { ref, reactive, computed, provide, defineAsyncComponent, type Component 
 import StepperStatusTender from '@/components/stepperStatusTender/StepperStatusTender.vue'
 import TabTender from '@/components/tender/TabTender.vue'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
+import { KTModal } from '@/metronic/core'
 import type { routeTypes } from '@/core/type/components/breadcrumb'
 import type { FormTypes } from './types/tenderCreate'
 
@@ -48,6 +50,7 @@ const AdministrativeDocument = defineAsyncComponent(
   () => import('./TenderCreate/AdministrativeDocument.vue'),
 )
 const TenderBilling = defineAsyncComponent(() => import('./TenderCreate/TenderBilling.vue'))
+const SuccessCreate = defineAsyncComponent(() => import('./TenderCreate/SuccessCreate.vue'))
 
 const routes = ref<routeTypes[]>([
   {
@@ -61,13 +64,14 @@ const activeTabAdmin = ref<string>('automatic')
 const activeTabBilling = ref<string>('automatic')
 const tabList = reactive<string[]>(['purchase', 'vendor', 'admin', 'timeline'])
 const form = reactive<FormTypes>({
-  tenderId: '',
-  tenderStatus: '',
+  tenderId: '#',
+  tenderStatus: 'Created',
   pic: '',
   purchaseRequisitionScenario: '',
   evaluationObject: '',
   tenderPeriod: '',
   remarks: '',
+  requisitionList: [],
   vendorList: [
     {
       id: '1',
@@ -86,34 +90,6 @@ const form = reactive<FormTypes>({
       existingContract: '30',
       isSelected: false,
     },
-    // {
-    //   id: '2',
-    //   status: 'Open',
-    //   vendorCode: '1060',
-    //   rank: '3',
-    //   vendorName: 'PT Walldorf Grosshandel Tbk',
-    //   totalScore: '78',
-    //   productQuality: '80',
-    //   leadTimeSupply: '90',
-    //   afterSalesWarranty: '70',
-    //   orderAbsorption: '80',
-    //   totalPo: '1000',
-    //   isSelected: false
-    // },
-    // {
-    //   id: '3',
-    //   status: 'Open',
-    //   vendorCode: '1060',
-    //   rank: '4',
-    //   vendorName: 'PT Walldorf Grosshandel Tbk',
-    //   totalScore: '78',
-    //   productQuality: '80',
-    //   leadTimeSupply: '90',
-    //   afterSalesWarranty: '70',
-    //   orderAbsorption: '80',
-    //   totalPo: '1000',
-    //   isSelected: false
-    // }
   ],
   tenderStartDate: '',
   tenderEndDate: '',
@@ -140,6 +116,10 @@ const goNext = () => {
   if (getIndex !== -1) {
     if (getIndex !== tabList.length - 1) {
       activeTab.value = tabList[getIndex + 1]
+    } else {
+      const idModal = document.querySelector('#success_create_tender_modal')
+      const modal = KTModal.getInstance(idModal as HTMLElement)
+      modal.show()
     }
   }
 }

@@ -8,7 +8,6 @@
         <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
           <label class="form-label max-w-32">
             Tender ID
-            <span class="text-red-500 ml-[4px]">*</span>
           </label>
           <input v-model="form.tenderId" class="input" placeholder="" :class="{ 'border-danger': form.tenderIdError }"/>
         </div>
@@ -16,9 +15,8 @@
         <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
           <label class="form-label max-w-32">
             Tender Status
-            <span class="text-red-500 ml-[4px]">*</span>
           </label>
-          <input v-model="form.tenderStatus" class="input" placeholder="" :class="{ 'border-danger': form.tenderStatusError }"/>
+          <input v-model="form.tenderStatus" class="input" placeholder="" disabled/>
         </div>
         <!-- PIC -->
         <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
@@ -82,7 +80,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, inject } from 'vue'
+import { ref, watch, inject } from 'vue'
 import type { FormTypes } from '../../types/tenderCreate'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
 
@@ -141,4 +139,21 @@ const evaluationOption = ref([
     name: 'Safety Tools'
   }
 ])
+
+watch(
+  () => form?.tenderPeriod,
+  () => {
+    if (!form) return
+    if (form.tenderPeriod.length !== 0) {
+      form.tenderStartDate = form?.tenderPeriod[0] 
+      form.tenderEndDate = form?.tenderPeriod[1] 
+    } else {
+      form.tenderStartDate = ''
+      form.tenderEndDate = ''
+    }
+  },
+  {
+    immediate: true
+  }
+)
 </script>
