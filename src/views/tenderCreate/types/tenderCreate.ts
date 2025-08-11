@@ -1,3 +1,5 @@
+import type { TableItemTypes } from './purchaseRequisitionList'
+
 export interface FormTypes {
   tenderId: string
   tenderStatus: string
@@ -6,6 +8,7 @@ export interface FormTypes {
   evaluationObject: string
   tenderPeriod: string
   remarks: string
+  requisitionList: TableItemTypes[]
   vendorList: VendorListTypes[]
   tenderStartDate: string
   tenderEndDate: string
