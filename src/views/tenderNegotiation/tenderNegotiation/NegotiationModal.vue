@@ -359,7 +359,6 @@ watch(
   () => props.data,
   () => {
     list.value = cloneDeep(props.data)
-    console.log(countTable.value)
     iteration.value = props.historyData.iteration
     expDisc.value = props.historyData.expectedDisc
     currency.value = props.historyData.discCurrency

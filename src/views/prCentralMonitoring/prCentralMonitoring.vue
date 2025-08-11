@@ -519,7 +519,6 @@ const handleCancel = () => {
 }
 
 const handlePageChange = (page: number) => {
-  console.log(page)
 
   //   const query = { ...route.query, page }
   //   router.replace({ query })
