@@ -25,8 +25,22 @@
         }"
       >
         <p class="text-[13px] font-medium mb-[8px]">{{ step.label }}</p>
-        <p class="text-xs mb-[8px]">{{ moment(step.time).format('DD MMM YYYY') }}</p>
-        <p class="text-xs font-bold text-primary">{{ step.name }}</p>
+        <p
+          class="text-xs mb-[8px]"
+          :class="{
+            'h-[16px]': !step.time
+          }"
+        >
+          {{ step.time ? moment(step.time).format('DD MMM YYYY') : '' }}
+        </p>
+        <p
+          class="text-xs font-bold text-primary"
+          :class="{
+            'h-[16px]': !step.name
+          }"
+        >
+          {{ step.name || '' }}
+        </p>
       </div>
     </div>
   </div>
@@ -64,36 +78,36 @@ const steps = ref<listStepTypes[]>([
   },
   {
     label: 'Published',
-    time: '2025-10-22',
-    name: 'Joko Anwar',
+    time: '',
+    name: '',
     icon: 'ki-duotone ki-file-up',
     active: false,
   },
   {
     label: 'Vendor Submission',
-    time: '2025-10-22',
-    name: 'Joko Anwar',
+    time: '',
+    name: '',
     icon: 'ki-duotone ki-paper-plane',
     active: false,
   },
   {
     label: 'Vendor Negotiation',
-    time: '2025-10-22',
-    name: 'Joko Anwar',
+    time: '',
+    name: '',
     icon: 'ki-duotone ki-book-open',
     active: false,
   },
   {
     label: 'Vendor Awarding',
-    time: '2025-10-22',
-    name: 'Joko Anwar',
+    time: '',
+    name: '',
     icon: 'ki-duotone ki-ranking',
     active: false,
   },
   {
     label: 'Tender Close',
-    time: '2025-10-22',
-    name: 'Joko Anwar',
+    time: '',
+    name: '',
     icon: 'ki-duotone ki-file-deleted',
     active: false,
   },

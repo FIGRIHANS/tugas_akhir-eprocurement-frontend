@@ -99,6 +99,9 @@
       Vendor Smart Analysis <i class="ki-duotone ki-artificial-intelligence"></i
     ></UiButton>
   </section>
+  <section class="mt-[24px] flex justify-center">
+    <UiLoading v-if="isLoading" size="lg" />
+  </section>
   <section v-if="showAnalysis !== false && form.vendorList.length > 0" name="smart-analysis scrollable-x-auto" class="border rounded-md p-[24px] mt-5">
     <table class="table-border text-gray-700 font-medium text-sm">
       <thead class="table-border">
@@ -109,10 +112,7 @@
         <tr>
           <th colspan="2" class="header-category table-border">Profil Vendor</th>
           <th colspan="2" class="header-category table-border">Kinerja Umum</th>
-          <th colspan="2" class="header-category table-border">Rekomendasi AI</th>
-        </tr>
-        <tr>
-          <th colspan="6" class="header-category table-border bg-blue-200">Metrik Terstruktur</th>
+          <th colspan="2" class="header-category table-border">AI Analysis</th>
         </tr>
         <tr>
           <th class="header-category table-border">Length of Services</th>
@@ -120,7 +120,7 @@
           <th class="header-category table-border">KPI Utama (3 tahun)</th>
           <th class="header-category table-border">Kepatuhan SLA</th>
           <th class="header-category table-border">Analisis High-Level</th>
-          <th class="header-category table-border">Analisis Negosiasi Kontrak</th>
+          <th class="header-category table-border">Analisis Negosiasi Contract Improvement</th>
         </tr>
       </thead>
       <tbody>
@@ -131,12 +131,12 @@
           <td class="text-center">
             {{ data.main_kpi }}<br />
             <span
-              v-if="data.kpi_quality === 'Menurun'"
+              v-if="data.kpi_quality === 'Bad'"
               class="badge badge-pill badge-outline badge-danger"
               >{{ data.kpi_quality }}</span
             >
             <span
-              v-if="data.kpi_quality === 'Meningkat'"
+              v-if="data.kpi_quality === 'Good'"
               class="badge badge-pill badge-outline badge-success"
               >{{ data.kpi_quality }}</span
             >
@@ -147,15 +147,35 @@
             >
           </td>
           <td>
-            Kualitas: {{ data.sla_quality }} <br />
-            Pengiriman: {{ data.sla_delivery }}
+            <p>Kualitas: 
+              <span
+                v-if="data.sla_quality === 'Bad'"
+                class="badge badge-pill badge-outline badge-danger"
+                >{{ data.sla_quality }}</span
+              >
+              <span
+                v-if="data.sla_quality === 'Good' || data.sla_quality === 'Very Good'"
+                class="badge badge-pill badge-outline badge-success"
+                >{{ data.sla_quality }}</span
+              >
+            </p>
+            <p>Pengiriman: 
+              <span
+                v-if="data.sla_delivery === 'Bad'"
+                class="badge badge-pill badge-outline badge-danger"
+                >{{ data.sla_delivery }}</span
+              >
+              <span
+                v-if="data.sla_delivery === 'Good' || data.sla_delivery === 'Very Good'"
+                class="badge badge-pill badge-outline badge-success"
+                >{{ data.sla_delivery }}</span
+              >
+            </p>
           </td>
           <td>
             <strong>{{ data.risk }}</strong> {{ data.high_level }}
           </td>
-          <td>
-            {{ data.contract_negotiation }}
-          </td>
+          <td v-html="data.contract_negotiation"></td>
         </tr>
       </tbody>
     </table>
@@ -170,6 +190,7 @@ import { KTModal } from '@/metronic/core'
 import type { FormTypes } from '../types/tenderCreate'
 import type { TableItemTypes } from '../types/vendorList'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
+import UiLoading from '@/components/UiLoading.vue'
 
 const AddVendorModal = defineAsyncComponent(() => import('./VendorList/AddVendor.vue'))
 
@@ -177,6 +198,7 @@ const form = inject<FormTypes>('form')
 const search = ref<string>('')
 const showAnalysis = ref<boolean>(false)
 const filteredAnalytic = ref<typeof analysisData.value>([])
+const isLoading = ref<boolean>(false)
 
 const columns = reactive<string[]>([
   'Action',
@@ -202,14 +224,17 @@ const analysisData = ref([
     total_spending: '$100.000',
     lengh_of_sevice: '5 Tahun',
     main_kpi: 'Rata-rata 80%',
-    kpi_quality: 'Menurun',
-    sla_quality: 'Buruk',
-    sla_delivery: 'Baik',
+    kpi_quality: 'Bad',
+    sla_quality: 'Bad',
+    sla_delivery: 'Very Good',
     high_level:
       'Walaupun pengeluaran signifikan dan hubungan jangka panjang, kinerja menurun konsisten. Ada risiko finansial dan operasional jika tren ini berlanjut.',
     risk: 'Berisiko Tinggi.',
     contract_negotiation:
-      'Harga: Negosiasikan untuk membekukan harga atau menuntut penurunan 3-5% SLA: Perkuat penalti untuk setiap insiden kualitas Term Condition: Tambahkan opsi pembatalan tanpa penalti jika kualitas tidak terpenuhi.',
+      `<p><span class="font-bold">Harga</span>: Negosiasikan untuk membekukan harga atau menuntut penurunan 3-5%.</p>
+        <p><span class="font-bold">SLA</span>: Perkuat penalti untuk setiap insiden kualitas</p>
+        <p><span class="font-bold">Term Condition</span>: Tambahkan opsi pembatalan tanpa penalti jika kualitas tidak terpenuhi.</p>
+      `,
   },
   {
     vendor_id: '2',
@@ -217,14 +242,17 @@ const analysisData = ref([
     total_spending: '$25.000',
     lengh_of_sevice: '1 Tahun',
     main_kpi: 'Rata-rata 95%',
-    kpi_quality: 'Meningkat',
-    sla_quality: 'Sangat Baik',
-    sla_delivery: 'Sangat Baik',
+    kpi_quality: 'Good',
+    sla_quality: 'Very Good',
+    sla_delivery: 'Very Good',
     high_level:
       ' Meskipun hubungan baru, performa yang solid dan kepatuhan yang tinggi menjadikannya kandidat ideal untuk proyek penting.',
     risk: 'Potensial Tinggi.',
     contract_negotiation:
-      'Harga: Pertimbangkan untuk menawarkan diskon volume untuk mendorong pengeluaran yang lebih besar. SLA: Kunci standar SLA saat ini dalam kontrak jangka panjang Term Condition: Pertimbangkan perpanjangan kontrak otomatis sebagai insentif',
+      `<p><span class="font-bold">Harga</span>: Pertimbangkan untuk menawarkan diskon volume untuk mendorong pengeluaran yang lebih besar.</p>
+      <p><span class="font-bold">SLA</span>: Kunci standar SLA saat ini dalam kontrak jangka panjang</p>
+      <p><span class="font-bold">Term Condition</span>: Pertimbangkan perpanjangan kontrak otomatis sebagai insentif</p>
+      `,
   },
   {
     vendor_id: '3',
@@ -233,13 +261,16 @@ const analysisData = ref([
     lengh_of_sevice: '3 tahun',
     main_kpi: 'Rata-rata 92%',
     kpi_quality: 'Stabil',
-    sla_quality: 'Baik',
-    sla_delivery: 'Buruk',
+    sla_quality: 'Good',
+    sla_delivery: 'Bad',
     high_level:
       'Memiliki rekam jejak yang stabil, namun masalah di area pengiriman menunjukkan adanya risiko operasional yang perlu ditangani.',
     risk: 'Perlu Diperhatikan',
     contract_negotiation:
-      'Harga: Negosiasikan diskon kecil sebagai imbalan untuk komitmen perbaikan masalah pengiriman. SLA: Tambahkan target pengiriman yang lebih agresif dengan penalti yang jelas. Term Condition: Tambahkan klausul yang mewajibkan vendor menyediakan rencana perbaikan.',
+      `<p><span class="font-bold">Harga</span>: Negosiasikan diskon kecil sebagai imbalan untuk komitmen perbaikan masalah pengiriman.</p>
+      <p><span class="font-bold">SLA</span>: Tambahkan target pengiriman yang lebih agresif dengan penalti yang jelas.</p>
+      <p><span class="font-bold">Term Condition</span>: Tambahkan klausul yang mewajibkan vendor menyediakan rencana perbaikan.</p>
+      `,
   },
   // {
   //   vendor_id: '3',
@@ -266,7 +297,11 @@ const showAnalytic = () => {
   if (form) {
     const vendorIds = form.vendorList.map((data) => data.id)
     filteredAnalytic.value = analysisData.value.filter((data) => vendorIds.includes(data.vendor_id))
-    showAnalysis.value = true
+    isLoading.value = true
+    setTimeout(() => {
+      showAnalysis.value = true
+      isLoading.value = false
+    }, 10000)
   }
 }
 
