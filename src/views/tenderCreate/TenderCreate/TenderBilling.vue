@@ -28,7 +28,7 @@
         <div class="flex flex-col justify-between">
           <div>
             <p class="text-sm text-gray-600">PIC Tender</p>
-            <p class="mt-[10px] text-sm">Joko Anwar</p>
+            <p class="mt-[10px] text-sm">{{ form.pic }}</p>
           </div>
           <button class="btn btn-outline btn-primary" @click="clearSignature">
             <i class="ki-duotone ki-arrows-circle"></i>
