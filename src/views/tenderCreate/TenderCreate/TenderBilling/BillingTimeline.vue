@@ -81,7 +81,7 @@ const dummyOption = ref([
     tenderMethod: 'Normal Tender',
     children: [
       {
-        id: '10000',
+        id: '10000008',
         group: 'Supervisor Production Area 1',
         step: '1',
         process: 'Tender Request',
@@ -91,7 +91,7 @@ const dummyOption = ref([
         pic: 'User Department/Requestor',
       },
       {
-        id: '10000',
+        id: '10000008',
         group: 'Supervisor Procurement Area 1',
         step: '2',
         process: 'Tender Creation',
@@ -101,7 +101,7 @@ const dummyOption = ref([
         pic: 'Procurement Team',
       },
       {
-        id: '10000',
+        id: '10000008',
         group: 'Procurement Manager Area 1',
         step: '3',
         process: 'Tender Approval',
@@ -111,7 +111,7 @@ const dummyOption = ref([
         pic: 'Procurement Manager/Management',
       },
       {
-        id: '10000',
+        id: '10000008',
         group: 'Supervisor Procurement Area 1',
         step: '4',
         process: 'Publish Tender',
@@ -121,7 +121,7 @@ const dummyOption = ref([
         pic: 'Procurement Team',
       },
       {
-        id: '10000',
+        id: '10000008',
         group: 'Vendors',
         step: '5',
         process: 'Vendor Submission',
@@ -131,7 +131,7 @@ const dummyOption = ref([
         pic: 'Vendors',
       },
       {
-        id: '10000',
+        id: '10000008',
         group: 'Committee Tender Area 1',
         step: '6',
         process: 'Beauty Contest',
@@ -141,7 +141,7 @@ const dummyOption = ref([
         pic: 'Evaluation Committee/Procurement Team & Vendors',
       },
       {
-        id: '10000',
+        id: '10000008',
         group: 'Vendors',
         step: '7',
         process: 'Vendor Negotiation',
@@ -151,7 +151,7 @@ const dummyOption = ref([
         pic: 'Procurement Team & Vendors',
       },
       {
-        id: '10000',
+        id: '10000008',
         group: 'Procurement Manager Area 1',
         step: '8',
         process: 'Vendor Evaluation',
@@ -161,7 +161,7 @@ const dummyOption = ref([
         pic: 'Evaluation Committee/Procurement Team',
       },
       {
-        id: '10000',
+        id: '10000008',
         group: 'Procurement Manager Area 1',
         step: '9',
         process: 'Vendor Awarding',
@@ -171,7 +171,7 @@ const dummyOption = ref([
         pic: 'Management/Procurement Manager',
       },
       {
-        id: '10000',
+        id: '10000008',
         group: 'Manager Legal',
         step: '10',
         process: 'Contract Signing',
@@ -189,7 +189,7 @@ const dummyOption = ref([
     tenderMethod: 'Auction',
     children: [
       {
-        id: '10000',
+        id: '10000008',
         group: 'Supervisor Production Area 1',
         step: '1',
         process: 'Tender Request',
@@ -199,7 +199,7 @@ const dummyOption = ref([
         pic: 'User Department/Requestor',
       },
       {
-        id: '10000',
+        id: '10000008',
         group: 'Supervisor Procurement Area 1',
         step: '2',
         process: 'Tender Creation',
@@ -209,7 +209,7 @@ const dummyOption = ref([
         pic: 'Procurement Team',
       },
       {
-        id: '10000',
+        id: '10000008',
         group: 'Procurement Manager Area 1',
         step: '3',
         process: 'Tender Approval',
@@ -219,7 +219,7 @@ const dummyOption = ref([
         pic: 'Procurement Manager/Management',
       },
       {
-        id: '10000',
+        id: '10000008',
         group: 'Supervisor Procurement Area 1',
         step: '4',
         process: 'Publish Tender',
@@ -229,7 +229,7 @@ const dummyOption = ref([
         pic: 'Procurement Team',
       },
       {
-        id: '10000',
+        id: '10000008',
         group: 'Vendors',
         step: '5',
         process: 'Vendor Submission',
@@ -239,7 +239,7 @@ const dummyOption = ref([
         pic: 'Vendors',
       },
       {
-        id: '10000',
+        id: '10000008',
         group: 'Committee Tender Area 1',
         step: '6',
         process: 'Beauty Contest',
@@ -249,7 +249,7 @@ const dummyOption = ref([
         pic: 'Evaluation Committee/Procurement Team & Vendors',
       },
       {
-        id: '10000',
+        id: '10000008',
         group: 'Vendors',
         step: '7',
         process: 'Auction Event',
@@ -259,7 +259,7 @@ const dummyOption = ref([
         pic: 'Procurement Team & Vendors',
       },
       {
-        id: '10000',
+        id: '10000008',
         group: 'Vendors',
         step: '8',
         process: 'Vendor Negotiation',
@@ -269,7 +269,7 @@ const dummyOption = ref([
         pic: 'Procurement Team & Vendors',
       },
       {
-        id: '10000',
+        id: '10000008',
         group: 'Procurement Manager Area 1',
         step: '9',
         process: 'Vendor Evaluation',
@@ -279,7 +279,7 @@ const dummyOption = ref([
         pic: 'Evaluation Committee/Procurement Team',
       },
       {
-        id: '10000',
+        id: '10000008',
         group: 'Procurement Manager Area 1',
         step: '10',
         process: 'Vendor Awarding',
@@ -289,7 +289,7 @@ const dummyOption = ref([
         pic: 'Management/Procurement Manager',
       },
       {
-        id: '10000',
+        id: '10000008',
         group: 'Manager Legal',
         step: '11',
         process: 'Contract Signing',
@@ -307,7 +307,7 @@ const dummyOption = ref([
     tenderMethod: 'Direct RFQ',
     children: [
       {
-        id: '10000',
+        id: '100000080008',
         group: 'Supervisor Production Area 1',
         step: '1',
         process: 'Tender Request',
@@ -317,7 +317,7 @@ const dummyOption = ref([
         pic: 'User Department/Requestor',
       },
       {
-        id: '10000',
+        id: '100000080008',
         group: 'Supervisor Procurement Area 1',
         step: '2',
         process: 'Tender Creation',
@@ -327,7 +327,7 @@ const dummyOption = ref([
         pic: 'Procurement Team',
       },
       {
-        id: '10000',
+        id: '100000080008',
         group: 'Procurement Manager Area 1',
         step: '3',
         process: 'Tender Approval',
@@ -337,7 +337,7 @@ const dummyOption = ref([
         pic: 'Procurement Manager/Management',
       },
       {
-        id: '10000',
+        id: '100000080008',
         group: 'Supervisor Procurement Area 1',
         step: '4',
         process: 'Publish Tender',
@@ -347,7 +347,7 @@ const dummyOption = ref([
         pic: 'Procurement Team',
       },
       {
-        id: '10000',
+        id: '100000080008',
         group: 'Vendors',
         step: '5',
         process: 'Vendor Submission',
@@ -357,7 +357,7 @@ const dummyOption = ref([
         pic: 'Vendors',
       },
       {
-        id: '10000',
+        id: '100000080008',
         group: 'Vendors',
         step: '6',
         process: 'Vendor Negotiation',
@@ -367,7 +367,7 @@ const dummyOption = ref([
         pic: 'Procurement Team & Vendors',
       },
       {
-        id: '10000',
+        id: '100000080008',
         group: 'Procurement Manager Area 1',
         step: '7',
         process: 'Vendor Evaluation',
@@ -377,7 +377,7 @@ const dummyOption = ref([
         pic: 'Evaluation Committee/Procurement Team',
       },
       {
-        id: '10000',
+        id: '100000080008',
         group: 'Procurement Manager Area 1',
         step: '8',
         process: 'Vendor Awarding',
@@ -387,7 +387,7 @@ const dummyOption = ref([
         pic: 'Management/Procurement Manager',
       },
       {
-        id: '10000',
+        id: '100000080008',
         group: 'Manager Legal',
         step: '9',
         process: 'Contract Signing',
@@ -413,7 +413,7 @@ const columns = ref<string[]>([
 
 const addNewLine = () => {
   const data = {
-    id: '10000000',
+    id: '10000008000',
     group: 'MRP',
     step: (result.value.length + 1).toString(),
     process: '',
