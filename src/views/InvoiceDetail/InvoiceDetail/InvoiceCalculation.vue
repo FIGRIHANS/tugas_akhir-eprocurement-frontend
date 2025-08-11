@@ -19,7 +19,7 @@
 import { ref, watch, inject } from 'vue'
 import type { listTypes } from '../types/invoiceCalculation'
 import type { formTypes } from '../types/invoiceDetail'
-import { useFormatIdr } from '@/composables/currency'
+import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 
 const props = defineProps<{
   formInvoice: formTypes
@@ -69,7 +69,7 @@ const setCalculation = () => {
   for (const item of listName.value) {
     const data = {
       name: item,
-      amount: useFormatIdr(setValue(item) || 0),
+      amount: props.formInvoice.currCode === 'IDR' ? useFormatIdr(setValue(item) || 0) : useFormatUsd(setValue(item) || 0),
       currency: props.formInvoice.currCode || ''
     }
     listCalculation.value.push(data)
