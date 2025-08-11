@@ -52,9 +52,9 @@
             <td>{{ data.type }}</td>
             <td>{{ data.expectedDisc }}</td>
             <td>{{ data.vendorPurposedDisc }}</td>
-            <td>{{ data.totalAmount }}</td>
+            <td>{{ countTotalAmount(data.historyId) }}</td>
             <td>{{ data.totalCurrency }}</td>
-            <td>{{ data.discAmount }}</td>
+            <td>{{ data.discAmount.toLocaleString() }}</td>
             <td>{{ data.discCurrency }}</td>
             <td>
               <span
@@ -67,7 +67,7 @@
                 {{ data.technicalNegotiation }}
               </span>
             </td>
-            <td>{{ data.finalAmount }}</td>
+            <td>{{ data.finalAmount.toLocaleString() }}</td>
             <td>{{ data.finalCurrency }}</td>
           </tr>
         </tbody>
@@ -76,7 +76,11 @@
     <p class="text-sm mt-[24px]">
       Showing {{ dummyHistory.length }} data from {{ dummyHistory.length }}
     </p>
-    <NegotiationModal :historyData="dummyHistory[0]" :data="entitiesData" @setNego="saveUpdate" />
+    <NegotiationModal
+      :historyData="dummyHistory[0]"
+      :data="selectedEntitiesData"
+      @setNego="saveUpdate"
+    />
   </div>
 </template>
 
@@ -87,11 +91,14 @@ import {
   type NegotiationEntitiesTypes,
   type TableNegotiationTypes,
   type tableNegotiationHistoryTypes,
+  type returnData,
 } from '../types/tenderNegotiation'
 
 const NegotiationModal = defineAsyncComponent(() => import('./NegotiationModal.vue'))
 
 const isChanged = ref<boolean>(false)
+
+const selectedEntitiesData = ref<NegotiationEntitiesTypes[]>([])
 
 const columns = ref<string[]>([
   'Iteration',
@@ -116,12 +123,12 @@ const dummyHistory = ref<tableNegotiationHistoryTypes[]>([
     type: 'Volume Disc',
     expectedDisc: '30%',
     vendorPurposedDisc: '25%',
-    totalAmount: '20,000',
+    totalAmount: 201000,
     totalCurrency: 'USD',
-    discAmount: '5,000',
+    discAmount: 140700,
     discCurrency: 'USD',
     technicalNegotiation: 'No',
-    finalAmount: '15,000',
+    finalAmount: 150750,
     finalCurrency: 'USD',
   },
   {
@@ -131,18 +138,26 @@ const dummyHistory = ref<tableNegotiationHistoryTypes[]>([
     type: 'Itemized Disc',
     expectedDisc: '40%',
     vendorPurposedDisc: '20%',
-    totalAmount: '20,000',
+    totalAmount: 20000,
     totalCurrency: 'USD',
-    discAmount: '4,000',
+    discAmount: 4000,
     discCurrency: 'USD',
     technicalNegotiation: 'Yes',
-    finalAmount: '16,000',
+    finalAmount: 16000,
     finalCurrency: 'USD',
   },
 ])
 
+const getOpenDummyChild = () => {
+  const filteredData = dummyHistory.value.filter((entity) => entity.status === 'Open')
+  const openId = filteredData[0].historyId
+
+  selectedEntitiesData.value = entitiesData.value.filter((entity) => entity.history_id === openId)
+}
+
 const entitiesData = ref<NegotiationEntitiesTypes[]>([
   {
+    history_id: 2,
     prNo: '10012525',
     ItemNo: 1,
     Material: 'CH-1062',
@@ -167,6 +182,7 @@ const entitiesData = ref<NegotiationEntitiesTypes[]>([
     varNettCurrency: 'USD',
   },
   {
+    history_id: 2,
     prNo: '10012525',
     ItemNo: 2,
     Material: 'CH-1064',
@@ -191,6 +207,7 @@ const entitiesData = ref<NegotiationEntitiesTypes[]>([
     varNettCurrency: 'USD',
   },
   {
+    history_id: 2,
     prNo: '10012525',
     ItemNo: 3,
     Material: 'CH-1066',
@@ -214,7 +231,42 @@ const entitiesData = ref<NegotiationEntitiesTypes[]>([
     VarNettAmount: 1500,
     varNettCurrency: 'USD',
   },
+  {
+    history_id: 1,
+    prNo: '10012525',
+    ItemNo: 3,
+    Material: 'CH-1066',
+    MaterialDesc: 'Macro Fertilizer CaCO3',
+    Quantity: 200,
+    UoM: 'TON',
+    UnitPrice: 3000,
+    unitCurrency: 'USD',
+    ExpDisc: '30%',
+    ExpectedDisc: 900,
+    ExpPricePerUnit: 2100,
+    TotalGrossAmount: 70000,
+    TotalDisc: 7500,
+    TotalNettAmount: 22500,
+    VendorPurposeDisc: '25%',
+    VendorDiscAmount: 250,
+    VendorPricePerUnit: 750,
+    vendorTotalGross: 30000,
+    vendorTotalDisc: 7500,
+    vendorTOtalNett: 22500,
+    VarNettAmount: 1500,
+    varNettCurrency: 'USD',
+  },
 ])
+
+const countTotalAmount = (id: number) => {
+  const filteredData = entitiesData.value.filter((entity) => entity.history_id === id)
+
+  const result = filteredData.reduce((accumulator, currentItem) => {
+    return accumulator + currentItem.Quantity * currentItem.UnitPrice
+  }, 0)
+
+  return result.toLocaleString()
+}
 
 const dataDummy = ref<TableNegotiationTypes[]>([
   {
@@ -335,13 +387,24 @@ const backupList = ref<TableNegotiationTypes[]>([
 ])
 
 const openNego = () => {
+  getOpenDummyChild()
   const idModal = document.querySelector('#tender_negotiation_modal')
   const modal = KTModal.getInstance(idModal as HTMLElement)
   modal.show()
 }
 
-const saveUpdate = (data: TableNegotiationTypes[]) => {
-  dataDummy.value = data
+const saveUpdate = (data: returnData) => {
+  const filteredData = dummyHistory.value.filter((entity) => entity.status === 'Open')
+  const selectedData = filteredData[0]
+
+  selectedData.totalAmount = data.totalAmountAdmin
+  selectedData.expectedDisc = data.expectedDiscAdmin
+  selectedData.vendorPurposedDisc = data.expectedDiscVendor
+  selectedData.discAmount = data.finalAmountAdmin
+  selectedData.finalAmount = data.finalAmountVendor
+
+  isChanged.value = true
+  // dataDummy.value = data
 }
 
 watch(
