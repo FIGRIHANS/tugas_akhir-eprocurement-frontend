@@ -104,7 +104,7 @@
                 <td>{{ data.Quantity }}</td>
                 <td>{{ data.UoM }}</td>
                 <td>
-                  {{ data.UnitPrice }}
+                  {{ data.UnitPrice?.toLocaleString() }}
                 </td>
                 <td>{{ data.unitCurrency }}</td>
                 <td>{{ data.ExpDisc }}</td>
@@ -116,14 +116,15 @@
                     class="input"
                   />
                   <span v-else>{{
-                    data.ExpectedDisc = getPercentFromString(data.ExpDisc) * data.UnitPrice
+                    (data.ExpectedDisc =
+                      getPercentFromString(data.ExpDisc) * data.UnitPrice)?.toLocaleString()
                   }}</span>
                 </td>
-                <td>{{ data.UnitPrice - data.ExpectedDisc }}</td>
-                <td>{{ data.Quantity * data.UnitPrice }}</td>
-                <td>{{ data.ExpectedDisc * data.Quantity }}</td>
+                <td>{{ (data.UnitPrice - data.ExpectedDisc)?.toLocaleString() }}</td>
+                <td>{{ (data.Quantity * data.UnitPrice)?.toLocaleString() }}</td>
+                <td>{{ (data.ExpectedDisc * data.Quantity)?.toLocaleString() }}</td>
                 <td>
-                  {{ (data.UnitPrice - data.ExpectedDisc) * data.Quantity }}
+                  {{ ((data.UnitPrice - data.ExpectedDisc) * data.Quantity)?.toLocaleString() }}
                 </td>
                 <td>{{ data.VendorPurposeDisc }}</td>
                 <td>
@@ -133,19 +134,26 @@
                   }}
                 </td>
                 <td>
-                  {{ data.UnitPrice - data.VendorDiscAmount }}
+                  {{ (data.UnitPrice - data.VendorDiscAmount)?.toLocaleString() }}
                 </td>
-                <td>{{ data.Quantity * data.UnitPrice }}</td>
+                <td>{{ (data.Quantity * data.UnitPrice)?.toLocaleString() }}</td>
                 <td>
-                  {{ data.Quantity * data.VendorDiscAmount }}
-                </td>
-                <td>
-                  {{ data.Quantity * data.UnitPrice - data.Quantity * data.VendorDiscAmount }}
+                  {{ (data.Quantity * data.VendorDiscAmount)?.toLocaleString() }}
                 </td>
                 <td>
                   {{
-                    data.Quantity * data.UnitPrice * getPercentFromString(data.ExpDisc) -
-                    data.Quantity * data.VendorDiscAmount
+                    (
+                      data.Quantity * data.UnitPrice -
+                      data.Quantity * data.VendorDiscAmount
+                    )?.toLocaleString()
+                  }}
+                </td>
+                <td>
+                  {{
+                    (
+                      data.Quantity * data.UnitPrice * getPercentFromString(data.ExpDisc) -
+                      data.Quantity * data.VendorDiscAmount
+                    )?.toLocaleString()
                   }}
                 </td>
                 <td>{{ data.varNettCurrency }}</td>
@@ -181,11 +189,11 @@ const currency = ref<string>()
 const discType = ref(1)
 const totalAmountAdmin = ref(171000)
 const totalAmountVendor = ref(171000)
-const totalAmountVariance = totalAmountAdmin.value - totalAmountVendor.value
+const totalAmountVariance = ref(totalAmountAdmin.value - totalAmountVendor.value)
 
 const expectedDiscAdmin = ref()
 const expectedDicValueAdmin = ref()
-const expectedDiscVendor = ref('25%')
+const expectedDiscVendor = ref()
 const expectedDicValueVendor = ref()
 
 const list = ref<NegotiationEntitiesTypes[]>([])
@@ -283,9 +291,9 @@ const countTable = computed(() => {
   return [
     {
       row1: 'Total Amount',
-      row2: totalAmountAdmin.value,
-      row3: totalAmountVendor.value,
-      row4: totalAmountVariance || '-',
+      row2: totalAmountAdmin.value.toLocaleString(),
+      row3: totalAmountVendor.value.toLocaleString(),
+      row4: totalAmountVariance.value.toLocaleString() || '-',
     },
     {
       row1: 'Expected Disc',
@@ -295,18 +303,19 @@ const countTable = computed(() => {
     },
     {
       row1: 'Expected Disc',
-      row2: expectedDicValueAdmin.value,
-      row3: expectedDicValueVendor.value,
-      row4: expectedDicValueAdmin.value - expectedDicValueVendor.value,
+      row2: expectedDicValueAdmin.value?.toLocaleString(),
+      row3: expectedDicValueVendor.value?.toLocaleString(),
+      row4: (expectedDicValueAdmin.value - expectedDicValueVendor.value)?.toLocaleString(),
     },
     {
       row1: 'Final Amount',
-      row2: totalAmountAdmin.value - expectedDicValueAdmin.value,
-      row3: totalAmountVendor.value - expectedDicValueVendor.value,
-      row4:
+      row2: (totalAmountAdmin.value - expectedDicValueAdmin.value)?.toLocaleString(),
+      row3: (totalAmountVendor.value - expectedDicValueVendor.value)?.toLocaleString(),
+      row4: (
         totalAmountAdmin.value -
         expectedDicValueAdmin.value -
-        (totalAmountVendor.value - expectedDicValueVendor.value),
+        (totalAmountVendor.value - expectedDicValueVendor.value)
+      )?.toLocaleString(),
     },
   ]
 })
@@ -318,7 +327,25 @@ const hide = () => {
 }
 
 const saveUpdate = () => {
-  emits('setNego', list.value)
+  const returnData = {
+    totalAmountAdmin: totalAmountAdmin.value,
+    totalAmountVendor: totalAmountVendor.value,
+    totalAmountVariance: totalAmountVariance.value,
+    expectedDiscAdmin: expectedDiscAdmin.value,
+    expectedDiscVendor: expectedDiscVendor.value,
+    expectedDiscDiffPerc: countpercentDiff(),
+    expectedDicValueAdmin: expectedDicValueAdmin.value,
+    expectedDicValueVendor: expectedDicValueVendor.value,
+    expectedDiscDiffValue: expectedDicValueAdmin.value - expectedDicValueVendor.value,
+    finalAmountAdmin: totalAmountAdmin.value - expectedDicValueAdmin.value,
+    finalAmountVendor: totalAmountVendor.value - expectedDicValueVendor.value,
+    finalAmountDiff:
+      totalAmountAdmin.value -
+      expectedDicValueAdmin.value -
+      (totalAmountVendor.value - expectedDicValueVendor.value),
+  }
+
+  emits('setNego', returnData)
   hide()
 }
 
@@ -338,6 +365,7 @@ watch(
     currency.value = props.historyData.discCurrency
     volumeDisc.value = expDisc.value
     expectedDiscAdmin.value = expDisc.value
+    expectedDiscVendor.value = props.historyData.vendorPurposedDisc
     calculateExpectedAmount()
     calculateDiscountValue()
   },
