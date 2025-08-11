@@ -42,7 +42,7 @@ export default [
 
   // Vendor
   {
-    path: '/vendor-tender/detail/negotiation',
+    path: '/vendor-tender/detail/negotiation/:id',
     name: 'tenderDetailNegotiation',
     component: () =>
       import('@/views/vendorTender/vendorTenderDetailNegotiation/TenderDetailNegotiation.vue'),
@@ -79,5 +79,11 @@ export default [
     name: 'TenderAwardingFailure',
     component: () =>
       import('@/views/vendorTender/vendorAwardingVendor/failure/AwardingFailure.vue'),
+  },
+  {
+    path: '/vendor-tender/submission/:id',
+    name: 'vendorTenderSubmissionDetail',
+    component: () =>
+      import('@/views/vendorTender/tenderSubmissionDetail/TenderSubbmissionDetail.vue'),
   },
 ]

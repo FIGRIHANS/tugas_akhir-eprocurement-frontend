@@ -1,16 +1,12 @@
 <template>
-
   <div>
-
     <Breadcrumb title="Negotiation" :routes="routes" />
 
     <section name="Stepper" class="border rounded-md p-[24px] flex justify-center mb-[24px]">
       <NegotiationStepper />
     </section>
 
-    <div class="border rounded-lg p-[24px] mt-[24px] font-medium">
-      PT Walldorf Grosshandel Tbk
-    </div>
+    <div class="border rounded-lg p-[24px] mt-[24px] font-medium">PT Walldorf Grosshandel Tbk</div>
 
     <div class="flex align-items-center gap-[24px] mt-[24px]">
       <GeneralData class="flex-1" />
@@ -38,49 +34,45 @@
 </template>
 
 <script lang="ts" setup>
-  import {
-    ref
-  } from 'vue'
-  import {
-    useRouter
-  } from 'vue-router'
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
-  import GeneralData from './tenderNegotiation/GeneralData.vue'
-  import TenderOrganization from './tenderNegotiation/TenderOrganization.vue'
-  import DocumentAttachment from './tenderNegotiation/DocumentAttachment.vue'
-  import TableNegotiation from './tenderNegotiation/TableNegotiation.vue'
-  import SuccessNegotiation from './tenderNegotiation/SuccessNegotiation.vue'
+import GeneralData from './tenderNegotiation/GeneralData.vue'
+import TenderOrganization from './tenderNegotiation/TenderOrganization.vue'
+import DocumentAttachment from './tenderNegotiation/DocumentAttachment.vue'
+import TableNegotiation from './tenderNegotiation/TableNegotiation.vue'
+import SuccessNegotiation from './tenderNegotiation/SuccessNegotiation.vue'
 
-  import NegotiationStepper from '@/views/tenderSubmissionNegotiationVendor/tenderSubmissionNegotiationVendor/NegotiationStepper.vue'
+import NegotiationStepper from '@/views/vendorTender/vendorTenderSubmissionNegotiation/tenderSubmissionNegotiation/NegotiationStepper.vue'
 
-  import Breadcrumb from '@/components/BreadcrumbView.vue'
-  import type {
-    routeTypes
-  } from '@/core/type/components/breadcrumb'
+import Breadcrumb from '@/components/BreadcrumbView.vue'
+import type { routeTypes } from '@/core/type/components/breadcrumb'
 
-  const router = useRouter()
+const router = useRouter()
 
-  const routes = ref < routeTypes[] > ([{
+const routes = ref<routeTypes[]>([
+  {
     name: 'Negotiation',
-    to: '/tender/submission/negotiation'
-  }])
+    to: '/tender/submission/negotiation',
+  },
+])
 
-  const showSuccessModal = ref(false)
+const showSuccessModal = ref(false)
 
-  const backPage = () => {
-    router.push('/tender/submission/negotiation')
-  }
+const backPage = () => {
+  router.push('/tender/submission/negotiation')
+}
 
-  const submitNego = () => {
-    showSuccessModal.value = true
-  }
+const submitNego = () => {
+  showSuccessModal.value = true
+}
 
-  const closeSuccessModal = () => {
-    showSuccessModal.value = false
-    backPage()
-  }
+const closeSuccessModal = () => {
+  showSuccessModal.value = false
+  backPage()
+}
 </script>
 
 <style lang="scss" scoped>
-  @use './styles/tenderNegotiation.scss';
+@use './styles/tenderNegotiation.scss';
 </style>
