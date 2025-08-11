@@ -182,7 +182,7 @@ const getVatAmount = () => {
 }
 
 watch(
-  () => form?.additionalCost,
+  () => [form?.additionalCost, form?.currency],
   () => {
     getVatAmount()
   },
