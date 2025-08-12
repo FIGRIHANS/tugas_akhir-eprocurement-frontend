@@ -12,19 +12,19 @@
           <span v-if="(form.status === 0 || form.status === -1 || form.status === 5) && !loginApi.isVendor" class="text-red-500 ml-[4px]">*</span>
         </label>
         <input v-if="(form.status !== 0 && form.status !== -1 && form.status !== 5) || loginApi.isVendor" v-model="form.vendorName" class="input" placeholder="" disabled />
-        <v-select
+        <!-- <v-select
           v-else
           v-model="form.vendorId"
           class="customSelect"
           :reduce="(option: any) => option.value"
           :options="customVendorList"
           :class="{ 'border-danger': form.vendorIdError }"
-        ></v-select>
-        <!-- <select v-else v-model="form.vendorId" class="select" :class="{ 'border-danger': form.vendorIdError }">
+        ></v-select> -->
+        <select v-else v-model="form.vendorId" class="select" :class="{ 'border-danger': form.vendorIdError }">
           <option v-for="item of vendorList" :key="item.vendorId" :value="item.sapCode">
             {{ item.vendorName }}
           </option>
-        </select> -->
+        </select>
       </div>
       <!-- NPWP -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
@@ -60,14 +60,14 @@ const typeForm = ref<string>('')
 const vendorList = computed(() => invoiceMasterApi.vendorList)
 const userData = computed(() => loginApi.userData)
 const isVendor = computed(() => loginApi.isVendor)
-const customVendorList = computed(() => {
-  return invoiceMasterApi.vendorList.map((item) => {
-    return {
-      label: item.vendorName,
-      value: item.sapCode
-    }
-  })
-})
+// const customVendorList = computed(() => {
+//   return invoiceMasterApi.vendorList.map((item) => {
+//     return {
+//       label: item.vendorName,
+//       value: item.sapCode
+//     }
+//   })
+// })
 
 watch(
   () => [vendorList.value, userData.value, form],
