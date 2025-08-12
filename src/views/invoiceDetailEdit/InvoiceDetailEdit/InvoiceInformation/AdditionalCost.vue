@@ -258,14 +258,25 @@ const getPercentTax = (code: string) => {
 }
 
 const getVatAmount = () => {
-  const percentTax = getPercentTax(formEdit.taxCode) || 0
-  const itemAmount = formEdit.itemAmount
-  const result = percentTax * itemAmount
-  formEdit.vatAmount = result
+  if (!form) return
+  const checkIsEdit = form.value.additionalCosts.findIndex((item) => item.isEdit)
+  if (checkIsEdit !== -1) {
+    const percentTax = getPercentTax(formEdit.taxCode) || 0
+    const itemAmount = formEdit.itemAmount
+    const result = percentTax * itemAmount
+    formEdit.vatAmount = result
+  } else {
+    for (const item of form.value.additionalCosts) {
+      const percentTax = getPercentTax(item.taxCode) || 0
+      const itemAmount = item.itemAmount
+      const result = percentTax * itemAmount
+      item.vatAmount = result
+    }
+  }
 }
 
 watch(
-  () => [form?.value.additionalCosts, formEdit],
+  () => [form?.value.additionalCosts, form?.value.currCode, formEdit],
   () => {
     if (!checkPoPib()) getVatAmount()
   },

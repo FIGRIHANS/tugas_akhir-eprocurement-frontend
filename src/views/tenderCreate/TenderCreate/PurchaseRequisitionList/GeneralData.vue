@@ -8,7 +8,6 @@
         <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
           <label class="form-label max-w-32">
             Tender ID
-            <span class="text-red-500 ml-[4px]">*</span>
           </label>
           <input v-model="form.tenderId" class="input" placeholder="" :class="{ 'border-danger': form.tenderIdError }"/>
         </div>
@@ -16,9 +15,8 @@
         <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
           <label class="form-label max-w-32">
             Tender Status
-            <span class="text-red-500 ml-[4px]">*</span>
           </label>
-          <input v-model="form.tenderStatus" class="input" placeholder="" :class="{ 'border-danger': form.tenderStatusError }"/>
+          <input v-model="form.tenderStatus" class="input" placeholder="" disabled/>
         </div>
         <!-- PIC -->
         <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
@@ -35,7 +33,7 @@
             <span class="text-red-500 ml-[4px]">*</span>
           </label>
           <select v-model="form.purchaseRequisitionScenario" class="select" :class="{ 'border-danger': form.purchaseRequisitionScenarioError }">
-            <option v-for="item of dummyOption" :key="item.id" :value="item.id">
+            <option v-for="item of prScenarioOption" :key="item.id" :value="item.id">
               {{ item.name }}
             </option>
           </select>
@@ -50,19 +48,22 @@
             <span class="text-red-500 ml-[4px]">*</span>
           </label>
           <select v-model="form.evaluationObject" class="select" :class="{ 'border-danger': form.evaluationObjectError }">
-            <option v-for="item of dummyOption" :key="item.id" :value="item.id">
+            <option v-for="item of evaluationOption" :key="item.id" :value="item.id">
               {{ item.name }}
             </option>
           </select>
         </div>
         <!-- Tender Period -->
-        <div class="py-[8px]">
+        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+          <label class="form-label max-w-32">
+            Tender Period
+            <span class="text-red-500 ml-[4px]">*</span>
+          </label>
           <DatePicker
             v-model="form.tenderPeriod"
-            label="Tender Period"
             format="dd MMM yyyy"
             :error="form.tenderPeriodError"
-            required
+            range
           />
         </div>
         <!-- Remarks -->
@@ -79,24 +80,80 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, inject } from 'vue'
+import { ref, watch, inject } from 'vue'
 import type { FormTypes } from '../../types/tenderCreate'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
 
 const form = inject<FormTypes>('form')
 
-const dummyOption = ref([
+const prScenarioOption = ref([
   {
-    id: '1',
-    name: 'test'
+    id: 'Fixed Asset',
+    name: 'Fixed Asset'
   },
   {
-    id: '2',
-    name: 'test2'
+    id: 'Adhoc',
+    name: 'Adhoc'
   },
   {
-    id: '3',
-    name: 'test3'
+    id: 'MRP',
+    name: 'MRP'
+  },
+  {
+    id: 'Non Stock Item',
+    name: 'Non Stock Item'
+  },
+  {
+    id: 'Services',
+    name: 'Services'
+  },
+  {
+    id: 'Project Based',
+    name: 'Project Based'
   }
 ])
+
+const evaluationOption = ref([
+  {
+    id: 'Raw Material',
+    name: 'Raw Material'
+  },
+  {
+    id: 'Fixed Asset',
+    name: 'Fixed Asset'
+  },
+  {
+    id: 'Services',
+    name: 'Services'
+  },
+  {
+    id: 'Labor & Supply',
+    name: 'Labor & Supply'
+  },
+  {
+    id: 'Finished Product',
+    name: 'Finished Product'
+  },
+  {
+    id: 'Safety Tools',
+    name: 'Safety Tools'
+  }
+])
+
+watch(
+  () => form?.tenderPeriod,
+  () => {
+    if (!form) return
+    if (form.tenderPeriod.length !== 0) {
+      form.tenderStartDate = form?.tenderPeriod[0] 
+      form.tenderEndDate = form?.tenderPeriod[1] 
+    } else {
+      form.tenderStartDate = ''
+      form.tenderEndDate = ''
+    }
+  },
+  {
+    immediate: true
+  }
+)
 </script>

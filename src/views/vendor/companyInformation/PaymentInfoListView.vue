@@ -106,10 +106,14 @@
 
     <div class="w-full flex justify-end items-center">
       <div class="flex items-center gap-4">
-        <UiButton variant="primary" outline @click="$router.back()">
+        <UiButton variant="primary" outline>
           <UiIcon variant="duotone" name="black-left" />
-          Back
-        </UiButton>
+          Back</UiButton
+        >
+        <UiButton variant="primary">
+          <UiIcon variant="duotone" name="plus" />
+          Save</UiButton
+        >
       </div>
     </div>
 
@@ -378,7 +382,10 @@
           class="text-[150px] text-danger text-center"
         />
       </div>
-      <h3 class="text-center text-lg font-medium">Failed to {{ mode }} Payment Information!</h3>
+      <h3 class="text-center text-lg font-medium">
+        Failed to {{ mode == 'delete' ? 'Delete' : mode === 'edit' ? 'Change' : 'Add' }} Payment
+        Information!
+      </h3>
       <p class="text-center text-base text-gray-600 mb-5">
         Failed to change Payment Information. Please try again later or contact support if the
         problem persists.

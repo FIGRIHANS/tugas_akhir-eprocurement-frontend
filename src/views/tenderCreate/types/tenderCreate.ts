@@ -1,3 +1,5 @@
+import type { TableItemTypes } from './purchaseRequisitionList'
+
 export interface FormTypes {
   tenderId: string
   tenderStatus: string
@@ -6,6 +8,7 @@ export interface FormTypes {
   evaluationObject: string
   tenderPeriod: string
   remarks: string
+  requisitionList: TableItemTypes[]
   vendorList: VendorListTypes[]
   tenderStartDate: string
   tenderEndDate: string
@@ -36,18 +39,19 @@ export interface VendorListTypes {
   afterSalesWarranty: string
   orderAbsorption: string
   totalPo: string
+  yearlySpanding: string
+  currency: string
+  existingContract: string
   isSelected: boolean
 }
 
 export interface CriteriaTypes {
-  id: string
-  group: string
+  evaluationType: string
   evaluationObject: string
-  type: string
   evaluationItem: string
-  itemDescription: string
   weight: string
-  isEdit?: boolean
+  description: string
+  expectedSla: string
 }
 
 export interface BillingTimelineTypes {

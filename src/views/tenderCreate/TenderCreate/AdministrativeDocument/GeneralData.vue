@@ -24,11 +24,11 @@
       </div>
       <div class="flex align-items-center justify-between gap-[8px] text-sm mb-[20px]">
         <p class="text-gray-600 form-label h-fit self-center">Tender Start Date</p>
-        <DatePicker v-model="form.tenderStartDate" format="dd MMM yyyy" />
+        <p class="whitespace-nowrap">{{ form.tenderStartDate ? moment(form.tenderStartDate).format('DD MMM YYYY') : '' }}</p>
       </div>
       <div class="flex align-items-center justify-between gap-[8px] text-sm mb-[20px]">
         <p class="text-gray-600 form-label h-fit self-center">Tender End Date</p>
-        <DatePicker v-model="form.tenderEndDate" format="dd MMM yyyy" />
+        <p class="whitespace-nowrap">{{ form.tenderEndDate ? moment(form.tenderEndDate).format('DD MMM YYYY') : '' }}</p>
       </div>
     </div>
   </div>
@@ -36,8 +36,8 @@
 
 <script lang="ts" setup>
 import { inject } from 'vue'
-import DatePicker from '@/components/datePicker/DatePicker.vue'
 import type { FormTypes } from '../../types/tenderCreate'
+import moment from 'moment'
 
 const form = inject<FormTypes>('form')
 </script>

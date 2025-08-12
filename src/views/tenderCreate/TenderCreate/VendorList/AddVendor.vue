@@ -2,12 +2,10 @@
   <div class="modal" data-modal="true" id="add_vendor_tender_modal">
     <div class="modal-content modal-center-y max-w-[1000px]">
       <div class="modal-header py-[20px] px-[16px]">
-        <h3 class="modal-title text-lg font-semibold p-[0px]">
-          Select Vendor
-        </h3>
+        <h3 class="modal-title text-lg font-semibold p-[0px]">Select Vendor</h3>
         <div class="input w-[250px]">
           <i class="ki-filled ki-magnifier"></i>
-          <input v-model="search" placeholder="Search" type="text"/>
+          <input v-model="search" placeholder="Search" type="text" />
         </div>
       </div>
       <div class="modal-body py-[16px] px-[16px] flex flex-col gap-[20px]">
@@ -21,7 +19,7 @@
                   class="vendor-list__field-base !border-b-blue-500"
                   :class="{
                     'vendor-list__field-base--action': index === 0,
-                    'vendor-list__field-base--name': item === 'Vendor Name'
+                    'vendor-list__field-base--name': item === 'Vendor Name',
                   }"
                 >
                   {{ item }}
@@ -35,7 +33,7 @@
               <template v-else>
                 <tr v-for="(item, index) in listItem" :key="index" class="vendor-list__field-items">
                   <td>
-                    <input v-model="item.isSelected" class="checkbox checkbox-sm" type="checkbox"/>
+                    <input v-model="item.isSelected" class="checkbox checkbox-sm" type="checkbox" />
                   </td>
                   <td>
                     <span class="badge badge-pill badge-outline badge-primary">
@@ -84,12 +82,8 @@
           Tampilkan {{ listItem.length }} data dari total data {{ listItem.length }}
         </div>
         <div class="flex items-center justify-end gap-[8px]">
-          <button class="btn btn-outline btn-primary" @click="cancelModal">
-            Cancel
-          </button>
-          <button class="btn btn-primary" @click="goAdd">
-            Add Vendor
-          </button>
+          <button class="btn btn-outline btn-primary" @click="cancelModal">Cancel</button>
+          <button class="btn btn-primary" @click="goAdd">Add Vendor</button>
         </div>
       </div>
     </div>
@@ -116,7 +110,7 @@ const listColumn = ref<string[]>([
   'Lead Time Supply',
   'After Sales Warranty',
   'Order Absorption',
-  'Total PO'
+  'Total PO',
 ])
 
 const listItem = ref<TableItemTypes[]>([
@@ -132,8 +126,28 @@ const listItem = ref<TableItemTypes[]>([
     afterSalesWarranty: '75',
     orderAbsorption: '86',
     totalPo: '90000',
-    isSelected: false
-  }
+    yearlySpanding: '25,000',
+    currency: 'USD',
+    existingContract: '9',
+    isSelected: false,
+  },
+  {
+    id: '3',
+    status: 'Open',
+    vendorCode: '1070',
+    rank: '2',
+    vendorName: 'PT Surya Emas',
+    totalScore: '56',
+    productQuality: '20',
+    leadTimeSupply: '60',
+    afterSalesWarranty: '50',
+    orderAbsorption: '50',
+    totalPo: '23',
+    yearlySpanding: '80,000',
+    currency: 'USD',
+    existingContract: '5',
+    isSelected: false,
+  },
 ])
 
 const colorRank = (rank: string) => {
@@ -141,7 +155,7 @@ const colorRank = (rank: string) => {
     '1': 'badge-success',
     '2': 'badge-primary',
     '3': 'badge-warning',
-    '4': 'badge-danger'
+    '4': 'badge-danger',
   } as { [key: string]: string }
   return lib[rank]
 }

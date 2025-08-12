@@ -10,7 +10,7 @@
     </div>
     <section name="Stepper" class="border rounded-md p-[24px] flex justify-center">
       <div>
-        <StepperStatusTender activeName="Vendor Awarding" />
+        <StepperStatusTender activeName="Vendor Awarding" role="admin" />
       </div>
     </section>
     <section
@@ -180,22 +180,22 @@ const data = ref([
       name: 'Invited',
       color: 'green',
     },
-    vendorCode: '1060',
+    vendorCode: '1070',
     rank: {
-      number: 1,
-      color: 'green',
+      number: 2,
+      color: 'yellow',
     },
-    vendorName: 'PT Walldorf Grosshandel Tbk',
+    vendorName: 'PT Sommer GmbHTbk',
     totalScore: {
-      score: 78,
+      score: 75,
       color: 'yellow',
     },
     productQuality: {
-      score: 80,
-      color: 'blue',
+      score: 78,
+      color: 'yellow',
     },
     leadTime: {
-      score: 90,
+      score: 85,
       color: 'green',
     },
   },

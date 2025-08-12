@@ -166,17 +166,6 @@ const checkFieldNotEmpty = () => {
         registrationVendorStore.information.vendorLocation.cityIdError = false
       }
 
-      Object.keys(fields.information).forEach((key) => {
-        // @ts-expect-error
-        const section = registrationVendorStore.information[key]
-        // @ts-expect-error
-        registrationVendorStore.information[key] = {
-          ...section,
-          // @ts-expect-error
-          ...checkErrors(section, fields.information[key]),
-        }
-      })
-
       const hasBidangUsahaItems =
         registrationVendorStore.information.vendorCommodities.list.length > 0
       registrationVendorStore.information.vendorCommodities = {
