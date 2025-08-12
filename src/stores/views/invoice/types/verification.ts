@@ -94,6 +94,7 @@ interface ParamsSubmissionPayment {
   bankName: string
   beneficiaryName: string
   bankAccountNo: string
+  bankCountryCode: string
 }
 
 interface ParamsSubmissionDocument {
@@ -296,6 +297,7 @@ export interface DetailInvoiceEditTypes {
   bankName: string
   beneficiaryName: string
   bankAccountNo: string
+  bankCountryCode: string
 
   vendorId: string
   vendorName: string

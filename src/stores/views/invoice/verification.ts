@@ -53,6 +53,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
       bankName: '',
       beneficiaryName: '',
       bankAccountNo: '',
+      bankCountryCode: '',
       vendorId: '',
       vendorName: '',
       npwp: '',
