@@ -6,20 +6,41 @@ import BreadcrumbView from '@/components/BreadcrumbView.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiTab from '@/components/ui/atoms/tab/UiTab.vue'
+import UiLoading from '@/components/UiLoading.vue'
 import AdministrativeCard from '@/components/vendor/cards/AdministrativeCard.vue'
 import LicenseCard from '@/components/vendor/cards/LicenseCard.vue'
 import PaymentCard from '@/components/vendor/cards/PaymentCard.vue'
 import { useApprovalStore } from '@/stores/vendor/approval'
-import { onMounted } from 'vue'
+import axios from 'axios'
+import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const approvalStore = useApprovalStore()
+const loading = ref<boolean>(false)
+const error = ref<string | null>(null)
+
+const getVendor = async () => {
+  loading.value = true
+  error.value = null
+  try {
+    await approvalStore.getVendorById(Number(route.params.id))
+  } catch (err) {
+    if (err instanceof Error) {
+      error.value = axios.isAxiosError(err)
+        ? (error.value = err.response?.data.result?.message)
+        : 'Failed to fetch vendor data.'
+    }
+  } finally {
+    loading.value = false
+  }
+}
 
 onMounted(() => {
   approvalStore.getMatrix({
     vendorId: Number(route.params.id),
   })
+  getVendor()
 })
 </script>
 <template>
@@ -35,9 +56,28 @@ onMounted(() => {
     model-value=""
     item-class="text-primary"
   />
-  <div class="space-y-5">
+  <!-- Loading -->
+  <div class="flex my-5 items-center justify-center" v-if="loading">
+    <UiLoading size="lg" />
+  </div>
+
+  <!-- Error -->
+  <div class="flex my-5 items-center justify-center" v-else-if="error">
+    <span class="text-red-500 font-medium text-lg">{{ error }}</span>
+  </div>
+
+  <!-- No data -->
+  <div
+    class="flex my-5 items-center justify-center"
+    v-else-if="approvalStore.vendorDetail.length === 0"
+  >
+    <span class="text-gray-700 font-medium text-lg">No data</span>
+  </div>
+
+  <!-- show data -->
+  <div class="space-y-5" v-else>
     <div
-      v-if="Number(route.query.status) === 1"
+      v-if="approvalStore.vendorDetail[0].approvalStatus === 1"
       class="rounded-lg border border-blue-200 bg-blue-50 p-4 flex items-center gap-4"
     >
       <LogoApproved />
@@ -50,7 +90,7 @@ onMounted(() => {
     </div>
 
     <div
-      v-if="Number(route.query.status) === 3"
+      v-if="approvalStore.vendorDetail[0].approvalStatus === 3"
       class="rounded-lg border border-blue-200 bg-blue-50 p-4 flex items-center gap-4"
     >
       <LogoSAP class="w-16 h-auto" />
@@ -61,7 +101,7 @@ onMounted(() => {
     </div>
 
     <div
-      v-if="Number(route.query.status) === 2"
+      v-if="approvalStore.vendorDetail[0].approvalStatus === 2"
       class="rounded-lg border border-red-500 bg-red-50 p-4 flex items-center gap-4"
     >
       <LogoRejected class="w-[34px]" />

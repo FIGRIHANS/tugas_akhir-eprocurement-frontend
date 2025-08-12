@@ -6,7 +6,7 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import { useVendorStore } from '@/stores/vendor/vendor'
 import { useVerificationStatus } from '@/stores/vendor/reference'
-import { reactive, ref, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { debounce } from 'lodash'
 import { useRoute, useRouter } from 'vue-router'
 import UiLoading from '@/components/UiLoading.vue'
@@ -14,18 +14,22 @@ import VendorListFilters from '@/components/vendor/filterButton/VendorListFilter
 import BreadcrumbView from '@/components/BreadcrumbView.vue'
 import VendorVerificationModal from '@/components/vendor/verificationModal/VendorVerificationModal.vue'
 import { formatDate } from '@/composables/date-format'
+import { useLoginStore } from '@/stores/views/login'
 
 const route = useRoute()
 const router = useRouter()
 
 const vendor = useVendorStore()
 const verificationStatusStore = useVerificationStatus()
+const userStore = useLoginStore()
 const search = ref('')
 const verifDetail = reactive({
   modal: false,
   id: 0,
   name: '',
 })
+
+const userData = computed(() => userStore.userData)
 
 const handleVerifDetail = (id: number, name: string) => {
   verifDetail.id = id
@@ -57,12 +61,12 @@ const handlePageChange = (page: number) => {
 watch(search, handleSearch)
 
 watch(
-  () => route.query,
-  (query) => {
-    search.value = (query.searchAny as string) || ''
+  () => [route.query, userData.value],
+  () => {
+    search.value = (route.query.searchAny as string) || ''
     // currentPage.value = Number(query.page) || 1
 
-    vendor.getVendors(query)
+    vendor.getVendors(route.query)
   },
   {
     immediate: true,
@@ -93,6 +97,7 @@ watch(
             <th class="text-nowrap">Company Name</th>
             <th class="text-nowrap">Status</th>
             <th class="text-nowrap">Vendor Category</th>
+            <th class="text-nowrap">Business Field</th>
             <th class="text-nowrap">Registration Date</th>
             <th class="text-nowrap">Verification Request Date</th>
             <th class="text-nowrap">Verification Date</th>
@@ -164,6 +169,15 @@ watch(
               >
             </td>
             <td>{{ vendor.companyCategoryName }}</td>
+            <td>
+              <div
+                v-for="(item, index) in vendor.businessFields"
+                :key="item.vendorId"
+                class="text-nowrap"
+              >
+                {{ index + 1 }}. {{ item.businessFieldName }}
+              </div>
+            </td>
             <td>{{ formatDate(vendor.createdUTCDate) }}</td>
             <td>{{ formatDate(vendor.verifiedSendUTCDate!) }}</td>
             <td>{{ formatDate(vendor.verifiedUTCDate || '') }}</td>

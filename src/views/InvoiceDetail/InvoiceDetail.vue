@@ -13,7 +13,7 @@
       <InvoiceCalculation :isNeedCheck="checkStatusCode()" class="flex-1" :formInvoice="form" />
     </div>
     <InvoicePoGr v-if="checkPo()" :isNeedCheck="checkStatusCode()" class="mt-[24px]" />
-    <AdditionalCost v-if="form.invoiceDPCode === 9011 && checkPo()" :isNeedCheck="checkStatusCode()" class="mt-[24px]" />
+    <AdditionalCost v-if="form.invoiceDPCode === 9011 && checkPo() || form.invoiceTypeCode === 902 || form.invoiceTypeCode === 903" :isNeedCheck="checkStatusCode()" class="mt-[24px]" />
     <div class="flex items-center justify-between gap-[8px] mt-[24px]">
       <div class="flex items-center gap-[10px]">
         <button class="btn btn-outline btn-primary" :disabled="isLoading" @click="goBack">
@@ -118,6 +118,7 @@ const form = ref<formTypes>({
   bankName: '',
   beneficiaryName: '',
   bankAccountNo: '',
+  creditCardBillingId: '',
   vendorId: '',
   vendorName: '',
   npwp: '',
@@ -184,7 +185,7 @@ const openReject = () => {
 }
 
 const checkPo = () => {
-  return form.value.invoiceTypeCode === 901
+  return form.value.invoiceTypeCode === 901 || form.value.invoiceTypeCode === 902 || form.value.invoiceTypeCode === 903
 }
 
 const checkVerifHeader = () => {
@@ -212,14 +213,13 @@ const checkVerif = () => {
   let status = true
   const data = form.value
   status = checkVerifHeader()
-
+  
   if (
     !data.bankKeyCheck ||
     !data.generalDataCheck ||
     !data.invoiceHeaderDocumentCheck ||
     !data.invoiceCalculationCheck ||
-    !data.invoicePoGrCheck ||
-    !data.additionalCostCheck
+    !data.invoicePoGrCheck 
   ) status = false
 
   return status
@@ -235,6 +235,7 @@ const mapPoGr = () => {
       itemAmount: Number(item.itemAmount),
       quantity: Number(item.quantity),
       taxCode: item.taxCode,
+      vatAmount: item.vatAmount,
       whtType: item.whtType,
       whtCode: item.whtCode,
       whtBaseAmount: item.whtBaseAmount,
@@ -252,6 +253,7 @@ const mapAdditionalCost = () => {
       itemAmount: Number(item.itemAmount),
       debitCredit: item.debitCredit,
       taxCode: item.taxCode,
+      vatAmount: item.vatAmount,
       costCenter: item.costCenter,
       profitCenter: item.profitCenter,
       assignment: item.assignment,
@@ -291,7 +293,8 @@ const mapDataVerif = () => {
       paymentMethodName: form.value.paymentMethodName,
       assigment: form.value.assigment,
       transferNews: form.value.transferNews,
-      npwpReporting: form.value.npwpReporting
+      npwpReporting: form.value.npwpReporting,
+      creditCardBillingId: form.value.creditCardBillingId
     },
     payment: {
       bankKey: form.value.bankKey,
@@ -317,7 +320,7 @@ const mapDataVerif = () => {
 
 const goVerif = () => {
   const status = checkVerif()
-
+  
   if (!status) return
   isLoading.value = true
   verificationApi.postSubmission(mapDataVerif()).then(() => {
@@ -325,12 +328,6 @@ const goVerif = () => {
     const idModal = document.querySelector('#success_verif_modal')
     const modal = KTModal.getInstance(idModal as HTMLElement)
     modal.show()
-    setTimeout(() => {
-      modal.hide()
-      router.push({
-        name: route.query.type === '1' ? 'invoiceVerification' : 'invoiceApproval'
-      })
-    }, 1000)
   }).finally(() => {
     isLoading.value = false
   })
@@ -435,6 +432,7 @@ const setDataDefault = () => {
     dpAmountDeduction: '',
     bankKey: data?.payment.bankKey || '',
     bankName: data?.payment.bankName || '',
+    creditCardBillingId: data?.header.creditCardBillingId || '',
     beneficiaryName: data?.payment.beneficiaryName || '',
     bankAccountNo: data?.payment.bankAccountNo || '',
     vendorId: data?.vendor.vendorId || '',
@@ -488,6 +486,7 @@ const setDataEdit = () => {
     bankName: data?.bankName || '',
     beneficiaryName: data?.beneficiaryName || '',
     bankAccountNo: data?.bankAccountNo || '',
+    creditCardBillingId: data?.creditCardBillingId || '',
     vendorId: data?.vendorId || '',
     vendorName: data?.vendorName || '',
     npwp: data?.npwp || '',

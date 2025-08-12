@@ -6,6 +6,7 @@ import type {
   IMatrixBody,
   IMatrixResponse,
   ISendSAPBody,
+  IVendorDetail,
 } from './types/approval'
 import type { ApiResponse } from '@/core/type/api'
 import vendorAPI from '@/core/utils/vendorApi'
@@ -24,6 +25,7 @@ export const useApprovalStore = defineStore('approval', () => {
   })
   const matrixData = ref<IMatrixResponse[]>([])
   const userData = computed(() => userStore.userData)
+  const vendorDetail = ref<IVendorDetail[]>([])
 
   const getApproval = async (params: unknown) => {
     loading.value = true
@@ -79,5 +81,35 @@ export const useApprovalStore = defineStore('approval', () => {
     return response.data
   }
 
-  return { loading, error, data, getApproval, approve, sendSAP, getMatrix, matrixData }
+  const getVendorById = async (vendorId: number) => {
+    try {
+      const response: ApiResponse<IVendorDetail[]> = await vendorAPI.get(
+        '/public/verifiedvendor/getvendor',
+        {
+          params: { vendorId },
+        },
+      )
+      if (response.data.result.isError) {
+        throw new Error(response.data.result.message)
+      }
+      vendorDetail.value = response.data.result.content
+      return vendorDetail.value
+    } catch (error) {
+      console.error('Error fetching vendor by ID:', error)
+      throw error
+    }
+  }
+
+  return {
+    loading,
+    error,
+    data,
+    getApproval,
+    approve,
+    sendSAP,
+    getMatrix,
+    matrixData,
+    getVendorById,
+    vendorDetail,
+  }
 })

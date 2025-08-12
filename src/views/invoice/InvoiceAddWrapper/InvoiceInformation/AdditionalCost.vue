@@ -70,6 +70,9 @@
                 </select>
               </td>
               <td>
+                <span>{{ form?.currency === 'IDR' ? useFormatIdr(item.vatAmount) : useFormatUsd(item.vatAmount) }}</span>
+              </td>
+              <td>
                 <span>{{ item.costCenter || '-' }}</span>
               </td>
               <td>
@@ -96,10 +99,10 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, inject } from 'vue'
+import { ref, computed, watch, inject } from 'vue'
 import type { formTypes } from '../../types/invoiceAddWrapper'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
-import { useFormatIdr } from '@/composables/currency'
+import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const columns = ref([
@@ -108,6 +111,7 @@ const columns = ref([
   'Item Amount',
   'Debit/Credit',
   'Tax Code',
+  'VAT Amount',
   'Cost Center',
   'Profit Center',
   'Assignment',
@@ -128,6 +132,7 @@ const addNew = () => {
       itemAmount: '',
       debitCredit: '',
       taxCode: '',
+      vatAmount: 0,
       costCenter: '',
       profitCenter: '',
       assignment: '',
@@ -154,7 +159,38 @@ const getDebitCreditName = (code: string) => {
   if (code === 'K') return 'Credit'
   else if (code === 'D') return 'Debit'
   else return '-'
-} 
+}
+
+const getPercentTax = (code: string) => {
+  if (code === 'V0') return 0
+  const getIndex = listTaxCalculation.value.findIndex((item) => item.code === code)
+  if (getIndex !== -1) {
+    const splitName = listTaxCalculation.value[getIndex].name.split(' - ')
+    return parseFloat(splitName[1].replace(',', '.').replace('%','')) / 100
+  }
+}
+
+const getVatAmount = () => {
+  if (form) {
+    for (const item of form.additionalCost) {
+      const percentTax = getPercentTax(item.taxCode) || 0
+      const itemAmount = Number(item.itemAmount)
+      const result = percentTax * itemAmount
+      item.vatAmount = result
+    }
+  }
+}
+
+watch(
+  () => [form?.additionalCost, form?.currency],
+  () => {
+    getVatAmount()
+  },
+  {
+    deep: true,
+    immediate: true
+  }
+)
 </script>
 
 <style lang="scss" scoped>

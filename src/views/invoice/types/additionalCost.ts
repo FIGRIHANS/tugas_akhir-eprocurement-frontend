@@ -3,6 +3,7 @@ export interface itemsCostType {
   itemAmount: string
   debitCredit: string
   taxCode: string
+  vatAmount: number
   costCenter: string
   profitCenter: string
   assignment: string

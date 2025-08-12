@@ -4,10 +4,14 @@ import type { IModalProps } from './types/modal'
 
 const props = withDefaults(defineProps<IModalProps>(), {
   size: 'md',
+  static: false,
+  center: true,
 })
 const open = defineModel()
 
 const handleClose = (event: Event) => {
+  if (props.static) return
+
   if (event.target === event.currentTarget) {
     open.value = !open.value
   }
@@ -15,8 +19,10 @@ const handleClose = (event: Event) => {
 
 const classes = computed(() => [
   'modal-content',
-  'modal-center-y',
   {
+    'modal-center-y': props.center,
+    'top-[10%]': !props.center,
+    'max-w-[300px]': props.size === 'xs',
     'max-w-[500px]': props.size === 'sm',
     'md:max-w-[600px]': props.size === 'md',
     'lg:max-w-[800px]': props.size === 'lg',

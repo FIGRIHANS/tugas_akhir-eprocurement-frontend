@@ -12,7 +12,7 @@
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
         <select v-model="form.bankKey" class="select" :class="{ 'border-danger': form.bankKeyIdError }">
-          <option v-for="item of bankList" :key="item.bankId" :value="item.bankId">
+          <option v-for="item of bankList" :key="item.bankId" :value="item.bankKey">
             {{ item.bankKey + ' - ' + item.accountNumber }}
           </option>
         </select>
@@ -56,11 +56,11 @@ const vendorList = computed(() => invoiceMasterApi.vendorList)
 
 const checkBank = () => {
   if (form) {
-    const getIndex = vendorList.value.findIndex((item) => item.sapCode === form.value.vendorId)
+    const getIndex = vendorList.value.findIndex((item) => item.sapCode === form.value.vendorId.toString())
     if (getIndex !== -1) {
       bankList.value = vendorList.value[getIndex].payment
       if (bankList.value.length === 1) {
-        form.value.bankKey = bankList.value[0].bankId.toString()
+        form.value.bankKey = bankList.value[0].bankKey
         form.value.bankName = bankList.value[0].bankName
         form.value.beneficiaryName = bankList.value[0].beneficiaryName
         form.value.bankAccountNo = bankList.value[0].accountNumber
@@ -99,7 +99,7 @@ watch(
   () => form?.value.bankKey,
   () => {
     if (form) {
-      const getIndex = bankList.value.findIndex((item) => item.bankId === Number(form.value.bankKey))
+      const getIndex = bankList.value.findIndex((item) => item.bankKey === form.value.bankKey)
       if (getIndex !== -1) {
         form.value.bankName = bankList.value[getIndex].bankName
         form.value.beneficiaryName = bankList.value[getIndex].beneficiaryName

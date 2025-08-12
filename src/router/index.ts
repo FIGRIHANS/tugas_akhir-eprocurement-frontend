@@ -13,8 +13,9 @@ import registration from './modules/registration'
 import invoice from './modules/invoice'
 import dashboard from './modules/dashboard'
 import userManagement from './modules/userManagement'
+import companyInfomartion from './modules/companyInfomartion'
 import workflowConfig from './modules/workflowConfig'
-import companyInformation from './modules/company-information'
+import tender from './modules/tender'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -35,7 +36,15 @@ const router = createRouter({
     {
       path: '/',
       component: LayoutWithSidebar,
-      children: [...vendor, ...invoice, ...dashboard, ...userManagement, ...companyInformation, ...workflowConfig],
+      children: [
+        ...vendor,
+        ...invoice,
+        ...dashboard,
+        ...userManagement,
+        ...companyInfomartion,
+        ...workflowConfig,
+        ...tender
+      ],
       meta: {
         middleware: 'auth',
       },

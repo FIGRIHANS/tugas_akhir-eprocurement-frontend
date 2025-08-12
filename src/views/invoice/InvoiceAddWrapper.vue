@@ -211,10 +211,17 @@ const checkInvoiceInformation = () => {
   form.companyCodeError = useCheckEmpty(form.companyCode).isError
   form.invoiceNoVendorError = useCheckEmpty(form.invoiceNoVendor).isError
   form.invoiceDateError = useCheckEmpty(form.invoiceDate).isError
-  form.descriptionError = useCheckEmpty(form.description).isError
   form.invoiceDocumentError = form.invoiceDocument === null
   form.invoicePoGrError = form.invoicePoGr.length === 0 || checkActiveEditPoGr()
   form.additionalCostError = checkActiveEditAdditional() || checkFieldAdditional()
+
+  if(form.invoiceType !== '903'){
+    form.descriptionError = useCheckEmpty(form.description).isError
+  }
+
+  if (Number(form.invoiceDp) === 9013) {
+    form.dpAmountDeductionError = Number(form.dpAmountDeduction) > Number(form.remainingDpAmount)
+  }
 
   if (
     form.companyCodeError ||
@@ -223,7 +230,8 @@ const checkInvoiceInformation = () => {
     form.descriptionError ||
     form.invoiceDocumentError ||
     form.invoicePoGrError ||
-    form.additionalCostError
+    form.additionalCostError ||
+    form.dpAmountDeductionError
   ) return false
   else return true
 }
@@ -275,7 +283,8 @@ const mapPoGr = () => {
       grDocumentItem: Number(item.grDocumentItem),
       grDocumentDate: item.grDocumentDate ? moment(item.grDocumentDate, 'YYYY').startOf('year').format('YYYY-MM-DD') : null,
       taxCode: item.taxCode,
-      itemAmount: Number(item.currency === item.currencyLC ? item.itemAmountLC : item.itemAmountTC),
+      vatAmount: item.vatAmount || 0,
+      itemAmount: form.currency === item.currencyLC ? item.itemAmountLC : item.itemAmountTC,
       quantity: Number(item.quantity),
       uom: item.uom,
       itemText: item.itemText,
@@ -423,13 +432,6 @@ const goSaveDraft = () => {
     const idModal = document.querySelector('#success_invoice_modal')
     const modal = KTModal.getInstance(idModal as HTMLElement)
     modal.show()
-
-    setTimeout(() => {
-      modal.hide()
-      router.push({
-        name: 'invoice-list'
-      })
-    }, 1000)
   })
     .catch((error) => {
       console.error(error)
@@ -556,7 +558,7 @@ onMounted(() => {
   invoiceMasterApi.getDocumentTypes()
   invoiceMasterApi.getVendorList()
   if (loginApi.isVendor) {
-    form.invoiceType = '1'
+    form.invoiceType = '901'
   }
 
   if (route.query.type === 'po-view') {

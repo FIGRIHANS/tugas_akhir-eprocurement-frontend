@@ -20,6 +20,7 @@ export interface itemsPoGrType {
   currencyTC: string
   itemAmountLC: number
   itemAmountTC: number
+  vatAmount?: number
   whtType?: string
   whtCode?: string
   whtBaseAmount?: number
@@ -27,6 +28,7 @@ export interface itemsPoGrType {
   isEdit?: boolean
   poNoError: boolean
   poItemError: boolean
+  departementError: boolean
 }
 
 export interface PoGrSearchTypes {

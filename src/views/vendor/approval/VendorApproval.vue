@@ -4,7 +4,7 @@ import LPagination from '@/components/pagination/LPagination.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import FilterDropdownApproval from '@/components/vendor/FilterDropdownApproval.vue'
 
@@ -17,13 +17,17 @@ import UiLoading from '@/components/UiLoading.vue'
 import VendorApprovalFilters from '@/components/vendor/filterButton/VendorApprovalFilters.vue'
 import SAPButton from '@/components/vendor/approval/SAPButton.vue'
 import { formatDate } from '@/composables/date-format'
+import { useLoginStore } from '@/stores/views/login'
 
 const route = useRoute()
 const router = useRouter()
 
 const approval = useApprovalStore()
+const userStore = useLoginStore()
 
 const search = ref<string>('')
+
+const userData = computed(() => userStore.userData)
 
 const handlePageChange = (page: number) => {
   const query = { ...route.query, page }
@@ -47,9 +51,9 @@ watch(search, (newSearch) => {
 })
 
 watch(
-  () => route.query,
-  (query) => {
-    search.value = (query.searchQuery as string) || ''
+  () => [route.query, userData.value],
+  () => {
+    search.value = (route.query.searchQuery as string) || ''
 
     approval.getApproval(route.query)
   },
@@ -130,7 +134,6 @@ watch(
                     $router.push({
                       name: 'vendor-approval-detail',
                       params: { id: item.vendorId },
-                      query: { status: item.approvalStatus },
                     })
                   "
                 >

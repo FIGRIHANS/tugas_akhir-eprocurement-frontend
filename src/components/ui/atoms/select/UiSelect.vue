@@ -37,6 +37,7 @@
         {{ option[textKey] }}
       </option>
     </select>
+    <span v-if="hintText" class="form-hint !text-danger">{{ hintText }}</span>
   </div>
 </template>
 

@@ -6,7 +6,7 @@ import VendorMenu from '@/components/vendor/VendorMenu.vue'
 import StatusToggle from '@/components/vendor/StatusToggle.vue'
 import { useVendorStore } from '@/stores/vendor/vendor'
 import { useVerificationStatus } from '@/stores/vendor/reference'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { debounce } from 'lodash'
 import { useRoute, useRouter } from 'vue-router'
 import UiLoading from '@/components/UiLoading.vue'
@@ -15,17 +15,22 @@ import BreadcrumbView from '@/components/BreadcrumbView.vue'
 import { formatDate } from '@/composables/date-format'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
+import { useLoginStore } from '@/stores/views/login'
 
 const route = useRoute()
 const router = useRouter()
 
 const vendor = useVendorStore()
 const verificationStatusStore = useVerificationStatus()
+const userStore = useLoginStore()
+
 const search = ref('')
 // const currentPage = ref(1)
 const getStatus = (status: string) => {
   return verificationStatusStore.data.find((item) => item.code === status)?.value
 }
+
+const userData = computed(() => userStore.userData)
 
 const handleSearch = debounce((value) => {
   const query = { ...route.query }
@@ -46,12 +51,10 @@ const handlePageChange = (page: number) => {
 watch(search, handleSearch)
 
 watch(
-  () => route.query,
-  (query) => {
-    search.value = (query.searchAny as string) || ''
-    // currentPage.value = Number(query.page) || 1
-
-    vendor.getVendors(query)
+  () => [route.query, userData.value],
+  () => {
+    search.value = (route.query.searchAny as string) || ''
+    vendor.getVendors(route.query)
   },
   {
     immediate: true,
@@ -82,6 +85,7 @@ watch(
             <th class="text-nowrap">Company Name</th>
             <th class="text-nowrap">Status</th>
             <th class="text-nowrap">Vendor Category</th>
+            <th class="text-nowrap">Business Field</th>
             <th class="text-nowrap">Registration Date</th>
             <th class="text-nowrap">Verification Request Date</th>
             <th class="text-nowrap">Verification Date</th>
@@ -119,12 +123,6 @@ watch(
           >
             <td>
               <div class="flex items-center gap-3">
-                <VendorMenu
-                  :id="vendor.vendorId"
-                  :name="vendor.vendorName"
-                  :email="vendor.vendorEmail"
-                  :status="vendor.isVerified"
-                />
                 <UiButton
                   outline
                   icon
@@ -135,14 +133,24 @@ watch(
                       params: { id: vendor.vendorId },
                     })
                   "
+                  v-if="userData?.profile.profileId === 3192"
                 >
                   <UiIcon name="eye" />
                 </UiButton>
-                <StatusToggle
-                  :id="vendor.vendorId"
-                  :name="vendor.vendorName"
-                  :status="vendor.isActive"
-                />
+
+                <template v-else>
+                  <VendorMenu
+                    :id="vendor.vendorId"
+                    :name="vendor.vendorName"
+                    :email="vendor.vendorEmail"
+                    :status="vendor.isVerified"
+                  />
+                  <StatusToggle
+                    :id="vendor.vendorId"
+                    :name="vendor.vendorName"
+                    :status="vendor.isActive"
+                  />
+                </template>
               </div>
             </td>
             <td class="text-nowrap">{{ vendor.vendorName }}</td>
@@ -158,8 +166,17 @@ watch(
               </span>
             </td>
             <td>{{ vendor.companyCategoryName }}</td>
+            <td>
+              <div
+                v-for="(item, index) in vendor.businessFields"
+                :key="item.vendorId"
+                class="text-nowrap"
+              >
+                {{ index + 1 }}. {{ item.businessFieldName }}
+              </div>
+            </td>
             <td>{{ formatDate(vendor.createdUTCDate) }}</td>
-            <td>{{ formatDate(vendor.verifiedSendUTCDate!) }}</td>
+            <td>{{ formatDate(vendor.verifiedSendUTCDate || '') }}</td>
             <td>{{ formatDate(vendor.verifiedUTCDate || '') }}</td>
             <td>
               <div

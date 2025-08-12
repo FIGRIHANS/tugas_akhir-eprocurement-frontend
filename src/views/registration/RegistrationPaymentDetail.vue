@@ -9,8 +9,8 @@
         <div class="card-body flex flex-col gap-6">
           <UiInput
             v-model="paymentDetail.accountNo"
-            label="No Rekening"
-            placeholder="Masukkan no rekening"
+            label="Bank Account Number"
+            placeholder="Enter bank account number"
             row
             required
             :error="paymentDetail.accountNoError"
@@ -19,8 +19,8 @@
           <div class="flex flex-col gap-6">
             <UiInput
               v-model="paymentDetail.accountName"
-              label="Nama Pemilik Akun"
-              placeholder="Nama lengkap sesuai buku tabungan"
+              label="Account Holder Name"
+              placeholder="Enter full name as written in bank book"
               row
               required
               :error="paymentDetail.accountNameError"
@@ -30,15 +30,15 @@
               <div class="w-2/5"></div>
               <UiCheckbox
                 v-model="paymentDetailFlagging.isNotSameAsCompany"
-                label="Nama pemilik rekening berbeda dengan nama perusahaan"
+                label="Holder's name is different from the company name"
               />
             </div>
           </div>
           <UiFileUpload
             v-if="paymentDetailFlagging.isNotSameAsCompany"
-            name="Pernyataan Perbedaan Rekening"
-            label="Pernyataan Perbedaan Rekening"
-            placeholder="Pilih"
+            name="Account Discrepancy Statement"
+            label="Account Discrepancy Statement"
+            placeholder="Account Discrepancy Statement"
             acceptedFiles=".pdf"
             :max-size="16000000"
             @addedFile="(file) => uploadFile(file, 'different account')"
@@ -48,9 +48,9 @@
           />
           <UiFileUpload
             v-if="paymentDetailFlagging.isNotSameAsCompany"
-            name="Halaman Pertama Buku Tabungan"
-            label="Halaman Pertama Buku Tabungan"
-            placeholder="Pilih"
+            name="Account Cover"
+            label="Account Cover"
+            placeholder="Account Cover"
             acceptedFiles=".pdf"
             :max-size="16000000"
             @addedFile="(file) => uploadFile(file, 'first page')"
@@ -60,8 +60,8 @@
           />
           <UiSelect
             v-model="paymentDetail.currencyId"
-            label="Mata Uang"
-            placeholder="Pilih"
+            label="Currency"
+            placeholder="Select"
             row
             required
             :options="currencyList"
@@ -71,7 +71,7 @@
             <UiSelect
               v-model="paymentDetail.bankId"
               label="Bank Key"
-              placeholder="Pilih"
+              placeholder="Select"
               row
               :options="bankList"
               valueKey="bankKey"
@@ -85,25 +85,45 @@
               <div class="w-2/5"></div>
               <UiCheckbox
                 v-model="paymentDetailFlagging.bankNotRegistered"
-                label="Bank belum terdaftar"
+                label="Bank not registered"
               />
             </div>
           </div>
-          <UiInput
-            v-if="paymentDetailFlagging.bankNotRegistered"
-            v-model="paymentDetail.bankKey"
-            label="Bank Key"
-            placeholder="AMBV0"
-            row
-            required
-            hint-text="*5 uppercase alphanumeric characters (e.g., AMBV0), must match official bank and unique."
-            :error="paymentDetail.bankKeyError"
-          />
+          <div class="flex flex-col gap-6">
+            <UiInput
+              v-if="paymentDetailFlagging.bankNotRegistered"
+              v-model="paymentDetail.bankKey"
+              label="Bank Key"
+              placeholder="AMBV0"
+              row
+              required
+              hint-text="*5 uppercase alphanumeric characters (e.g., AMBV0), must match official bank and unique."
+              :error="paymentDetail.bankKeyError"
+            />
+
+            <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5">
+              <div class="w-2/5"></div>
+              <div class="card bg-primary-light border border-primary w-full">
+                <div class="card-body p-4">
+                  <p class="text-sm">
+                    For vendors whose banks are not registered yet, <br />
+                    please contact the following email: <br />
+                    Non-Marketing: <br />
+                    <span class="text-primary">Laelani.Sabila@genero.co.id</span> <br /><br />
+
+                    Marketing: <br />
+                    <span class="text-primary">athaya.matanra@aryanoble.co.id</span> <br />
+                    <span class="text-primary">putri.suryansyah@aryanoble.co.id</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
           <UiSelect
             v-if="paymentDetailFlagging.bankNotRegistered"
             v-model="paymentDetail.bankCountryCode"
             label="Bank Country"
-            placeholder="Pilih"
+            placeholder="Select"
             row
             :options="countryList"
             required
@@ -112,8 +132,8 @@
           <UiInput
             v-if="paymentDetailFlagging.bankNotRegistered"
             v-model="paymentDetail.bankName"
-            label="Nama Bank"
-            placeholder="Nama Bank"
+            label="Bank Name"
+            placeholder="Enter bank name"
             row
             required
             :error="paymentDetail.bankNameError"
@@ -121,8 +141,8 @@
           <UiInput
             v-if="paymentDetailFlagging.bankNotRegistered"
             v-model="paymentDetail.branch"
-            label="Cabang Bank"
-            placeholder="Cabang Bank"
+            label="Bank Branch"
+            placeholder="Enter bank branch"
             row
             required
             :error="paymentDetail.branchError"
@@ -138,8 +158,8 @@
           />
           <UiInput
             v-model="paymentDetail.bankAddress"
-            label="Alamat Bank"
-            placeholder="Jl. ABC..."
+            label="Bank Address"
+            placeholder="Enter bank address"
             row
             required
             :error="paymentDetail.bankAddressError"
@@ -156,7 +176,7 @@
 
       <UiCheckbox
         v-model="paymentDetailFlagging.acceptTermCondition"
-        label="Baca dan setuju terhadap syarat dan ketentuan tender - eProcurement PT Arya Noble"
+        label="I have read and agree to the terms and conditions of PT Arya Noble’s e-Procurement system"
       />
 
       <div class="card w-fit justify-center">
@@ -170,11 +190,12 @@
           <UiIcon variant="duotone" name="information" class="text-4xl" />
 
           <div class="flex flex-col gap-1">
-            <span class="font-semibold text-primary">Perhatian</span>
+            <span class="font-semibold text-primary">Note</span>
             <p class="font-medium text-sm">
-              Vendor yang berminat mengikuti tender cukup satu kali registerasi dan pastikan data
-              yang anda inputkan valid. Data calon vendor yang tidak bisa dipertanggung jawabkan
-              dapat dikenakan sanksi oleh PT Arya Noble
+              Vendors who wish to participate in tendering only need to register once. Please make
+              sure all submitted data is valid. PT Arya Noble is not responsible for any
+              consequences resulting from invalid or unverifiable vendor data, and such vendors may
+              be subject to sanctions.
             </p>
           </div>
         </div>
@@ -260,3 +281,14 @@ onMounted(() => {
   vendorMasterDataStore.getVendorCountries()
 })
 </script>
+
+<style scoped>
+::v-deep(.term-condition ol) {
+  list-style-type: decimal !important;
+  padding-left: 1rem !important;
+}
+::v-deep(.term-condition ul) {
+  list-style-type: disc !important;
+  padding-left: 1rem !important;
+}
+</style>

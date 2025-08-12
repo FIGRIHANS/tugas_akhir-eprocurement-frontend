@@ -1,0 +1,34 @@
+.report {
+  &__table {
+    padding-bottom: 4px;
+    overflow-x: auto;
+    &::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+      background: transparent;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      width: 10px;
+      height: 10px;
+      border-radius: 15px;
+      background-color: #DBDFE9;
+    }
+  }
+
+  &__field-base {
+    min-inline-size: 130px;
+    white-space: nowrap;
+    padding-block: 13px;
+    border-block-end: 1px solid #3b82f6;
+    
+    &:first-child {
+      min-inline-size: 180px;
+    }
+    
+    &--long {
+      @extend .report__field-base;
+      min-inline-size: 200px;
+    }
+  }
+}

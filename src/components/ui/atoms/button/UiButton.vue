@@ -14,6 +14,7 @@ const props = withDefaults(defineProps<IButtonProps>(), {
   size: 'md',
   icon: false,
   disabled: false,
+  clear: false,
 })
 
 const classes = computed(() => {
@@ -24,6 +25,7 @@ const classes = computed(() => {
     {
       'btn-outline': props.outline,
       'btn-icon': props.icon,
+      'btn-clear': props.clear,
     },
   ]
 })

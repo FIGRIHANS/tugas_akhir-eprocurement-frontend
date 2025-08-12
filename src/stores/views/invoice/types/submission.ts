@@ -15,6 +15,7 @@ export interface SubmissionStatusTypes {
 
 export interface AvailableDpTypes {
   isAvailable: boolean
+  department: string
 }
 
 export interface RemainingDpTypes {
@@ -53,6 +54,7 @@ interface ParamsSubmissionHeader {
   notes: string
   statusCode: number
   statusName: string
+  creditCardBillingId: string
 }
 
 interface ParamsSubmissionVendor {
@@ -94,6 +96,7 @@ interface ParamsSubmissionItem {
   grDocumentItem: number
   grDocumentDate: string
   taxCode: string
+  vatAmount: number
   itemAmount: number
   quantity: number
   uom: string
@@ -176,7 +179,7 @@ export interface ListPoTypes {
   statusName: string
   poNo: string
   grDocumentNo: string
-  estimatePaymentDate: string
+  estimatedPaymentDate: string
   totalGrossAmount: number
   totalNetAmount: number
   vendorName: string

@@ -4,4 +4,5 @@ export interface IButtonProps {
   size?: 'sm' | 'md' | 'lg'
   icon?: boolean
   disabled?: boolean
+  clear?: boolean
 }

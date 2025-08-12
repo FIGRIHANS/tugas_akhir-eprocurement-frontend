@@ -71,7 +71,7 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
       }
     })
 
-    const newList = response.data.result.content.map((item) => {
+    const newList = !response.data.result.content ? [] : response.data.result.content.map((item) => {
       return {
         ...item,
         isOpenChild: false
@@ -97,8 +97,8 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
     return response.data
   }
 
-  const getAvailableDp = async (poNumber: string, vendorNumber: string) => {
-    const response: ApiResponse<AvailableDpTypes> = await invoiceApi.get(`/invoice/available-dp?poNumber=${poNumber}&vendorNo=${vendorNumber}`)
+  const getAvailableDp = async (poNumber: string, vendorNumber: string, amount: number) => {
+    const response: ApiResponse<AvailableDpTypes> = await invoiceApi.get(`/invoice/available-dp?poNumber=${poNumber}&vendorNo=${vendorNumber}&amount=${amount}`)
   
     return response.data
   }

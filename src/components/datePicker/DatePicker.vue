@@ -21,8 +21,10 @@
       v-model="date"
       :enable-time="false"
       :format="format"
+      :range="range"
       :preview-format="format"
       :min-date="minDate"
+      :max-date="maxDate"
       class="w-full"
     >
       <template #dp-input="{ value }">
@@ -57,6 +59,8 @@ const props = defineProps<{
   disabled?: boolean
   minDate?: Date | string
   labelTop?: boolean
+  maxDate?: Date | string
+  range?: boolean
 }>()
 
 const emits = defineEmits(['update:modelValue'])

@@ -19,6 +19,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
   const isFromEdit = ref<boolean>(false)
   const detailInvoiceEdit = ref<DetailInvoiceEditTypes>()
   const isRejectLoading = ref<boolean>(false)
+  const errorMessageSap = ref<string>('')
 
   const resetDetailInvoiceEdit = () => {
     detailInvoiceEdit.value = {
@@ -45,6 +46,9 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
       assigment: '',
       transferNews: '',
       npwpReporting: '',
+      remainingDpAmount: '',
+      dpAmountDeduction: '',
+      creditCardBillingId: '',
       bankKey: '',
       bankName: '',
       beneficiaryName: '',
@@ -83,7 +87,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
       }
     })
   
-    listPo.value = response.data.result.content.length !== 0 ? response.data.result.content.sort((a, b) => moment(a.invoiceDate).valueOf() - moment(b.invoiceDate).valueOf()) : []
+    listPo.value = response.data.result.content.length !== 0 ? response.data.result.content.sort((a, b) => moment(b.invoiceDate).valueOf() - moment(a.invoiceDate).valueOf()) : []
   
     return response.data.result.content
   }
@@ -110,6 +114,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
 
   const postSap = async (invoiceUId: string) => {
     const response: ApiResponse<void> = await invoiceApi.post(`/invoice/sap/${invoiceUId}`)
+    errorMessageSap.value = response.data.result.message
 
     return response.data.statusCode
   }
@@ -120,6 +125,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     isFromEdit,
     detailInvoiceEdit,
     isRejectLoading,
+    errorMessageSap,
     resetDetailInvoiceEdit,
     postSubmission,
     getListPo,

@@ -15,9 +15,7 @@ export function checkEmptyValues(obj: Record<string, unknown>): string[] {
 
   for (const [key, value] of Object.entries(obj)) {
     if (
-      value === null ||
-      value === undefined ||
-      value === '' ||
+      !value ||
       (Array.isArray(value) && value.length === 0) ||
       (typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0)
     ) {

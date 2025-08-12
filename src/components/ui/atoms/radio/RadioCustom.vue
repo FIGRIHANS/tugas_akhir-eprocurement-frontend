@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col gap-1">
-    <label class="text-[11px] px-[3px] text-gray-500 leading-[12px]"
+    <label v-if="label" class="text-[11px] px-[3px] text-gray-500 leading-[12px]"
       >{{ label }}<span v-if="required" class="text-danger"> * </span></label
     >
     <div
@@ -33,7 +33,7 @@
 
 <script setup lang="ts">
 type UiRadioType = {
-  label: string
+  label?: string
   name: string
   inline?: boolean
   required?: boolean

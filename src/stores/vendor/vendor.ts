@@ -10,7 +10,9 @@ import type {
   IPayment,
   IPaymentPayload,
   IPostBlacklist,
+  IShareholderPayload,
   IVendorContent,
+  IVendorLegalDocumentPayload,
   IVerificationDetailData,
   IVerifyLegal,
   PayloadEquipmentDataType,
@@ -45,11 +47,13 @@ export const useVendorStore = defineStore('vendor', () => {
         { params },
       )
 
-      if (response.data.statusCode === 200) {
-        vendors.value = response.data.result.content
-      } else {
+      if (response.data.result.isError) {
         error.value = response.data.result.message
+        return
       }
+
+      vendors.value = response.data.result.content
+      return response.data.result.content
     } catch (err: unknown) {
       if (err instanceof Error) {
         error.value = err.message
@@ -190,7 +194,32 @@ export const useVendorIzinUsahaStore = defineStore('vendor-izin-usaha', () => {
     }
   }
 
-  return { data, loading, error, getData }
+  /// TODO: change payload type soon
+  const updateData = async (payload: any) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const response = await vendorAPI.post('/public/verifiedvendor/update-license', payload)
+
+      if (response.data.statusCode === 200) {
+        data.value = response.data.result.content
+      } else {
+        error.value = response.data.result.message
+        loading.value = false
+      }
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        error.value = err.message
+      } else {
+        error.value = 'Failed to update data'
+      }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  return { data, loading, error, getData, updateData }
 })
 
 export const useVendorPaymentStore = defineStore('vendor-payment', () => {
@@ -340,4 +369,104 @@ export const useExpertPersonnelDataStore = defineStore('expert-personnel-data', 
   }
 
   return { loading, error, data, getData }
+})
+export const useCompanyDeedDataStore = defineStore('company-deed-data', () => {
+  const shareholdersData = ref<any>([]) ///TODO: change type soon
+  const vendorLegalDocData = ref<any>([]) ///TODO: change type soon
+  const shareholdersLoading = ref<boolean>(false)
+  const vendorLegalDocLoading = ref<boolean>(false)
+  const shareholdersError = ref<string | null>(null)
+  const vendorLegalDocError = ref<string | null>(null)
+
+  const getShareholders = async (vendorId: number) => {
+    shareholdersLoading.value = true
+    try {
+      const response: ApiResponse = await vendorAPI.get('/public/vendorchangedata/shareholders', {
+        params: { vendorId },
+      })
+
+      if (response.data.statusCode === 200) {
+        shareholdersData.value = response.data.result.content
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        if (axios.isAxiosError(err)) {
+          shareholdersError.value = err.response?.data.result.message
+        }
+      }
+    } finally {
+      shareholdersLoading.value = false
+    }
+  }
+
+  const getVendorLegalDocument = async (vendorId: number) => {
+    vendorLegalDocLoading.value = true
+    try {
+      const response: ApiResponse = await vendorAPI.get(
+        '/public/vendorchangedata/vendorlegaldocument',
+        {
+          params: { vendorId },
+        },
+      )
+
+      if (response.data.statusCode === 200) {
+        vendorLegalDocData.value = response.data.result.content
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        if (axios.isAxiosError(err)) {
+          vendorLegalDocError.value = err.response?.data.result.message
+        }
+      }
+    } finally {
+      vendorLegalDocLoading.value = false
+    }
+  }
+
+  const postShareholders = async (payload: IShareholderPayload) => {
+    try {
+      const response: ApiResponse = await vendorAPI.post(
+        '/public/vendorchangedata/post/shareholders',
+        payload,
+      )
+
+      return response.data
+    } catch (err) {
+      throw err
+    } finally {
+      shareholdersLoading.value = false
+    }
+  }
+
+  const postVendorLegalDocument = async (payload: IVendorLegalDocumentPayload) => {
+    try {
+      const response: ApiResponse = await vendorAPI.post(
+        '/public/vendorchangedata/post/vendorlegaldocument',
+        payload,
+      )
+
+      return response.data
+    } catch (err) {
+      if (err instanceof Error) {
+        if (axios.isAxiosError(err)) {
+          vendorLegalDocError.value = err.response?.data.result.message
+        }
+      }
+    } finally {
+      vendorLegalDocLoading.value = false
+    }
+  }
+
+  return {
+    shareholdersLoading,
+    vendorLegalDocLoading,
+    shareholdersError,
+    vendorLegalDocError,
+    shareholdersData,
+    vendorLegalDocData,
+    postShareholders,
+    postVendorLegalDocument,
+    getShareholders,
+    getVendorLegalDocument,
+  }
 })

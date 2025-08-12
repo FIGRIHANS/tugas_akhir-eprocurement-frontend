@@ -36,6 +36,7 @@ interface ParamsVerificationHeaderTypes {
   assigment: string
   transferNews: string
   npwpReporting: string
+  creditCardBillingId: string
 }
 
 interface ParamsVerificationItemTypes {
@@ -45,6 +46,7 @@ interface ParamsVerificationItemTypes {
   itemAmount: number
   quantity: number
   taxCode: string
+  vatAmount: number
   whtType: string
   whtCode: string
   whtBaseAmount: number
@@ -75,6 +77,9 @@ interface ParamsSubmissionHeader {
   assigment: string
   transferNews: string
   npwpReporting: string
+  remainingDpAmount: string
+  dpAmountDeduction: string
+  creditCardBillingId: string
 }
 
 interface ParamsSubmissionVendor {
@@ -129,6 +134,7 @@ interface ParamsSubmissionItem {
   itemAmount: number
   quantity: number
   taxCode: string
+  vatAmount: number
   uom: string
   itemText: string
   conditionType: string
@@ -146,6 +152,7 @@ interface ParamsSubmissionCost {
   itemAmount: number
   debitCredit: string
   taxCode: string
+  vatAmount: number
   costCenter: string
   profitCenter: string
   assignment: string
@@ -178,7 +185,7 @@ export interface ListPoTypes {
   companyCode: string
   companyName: string
   documentNo: string
-  estimatePaymentDate: string
+  estimatedPaymentDate: string
   invoiceDate: string
   invoiceNo: string
   invoiceTypeCode: number
@@ -227,6 +234,7 @@ export interface itemsCostType {
   itemAmount: number
   debitCredit: string
   taxCode: string
+  vatAmount: number
   costCenter: string
   profitCenter: string
   assignment: string
@@ -244,6 +252,7 @@ export interface itemsPoGrType {
   itemAmount: number
   quantity: number
   taxCode: string
+  vatAmount: number
   uom: string
   itemText: string
   conditionType: string
@@ -280,7 +289,9 @@ export interface DetailInvoiceEditTypes {
   assigment: string
   transferNews: string
   npwpReporting: string
-
+  remainingDpAmount: string
+  dpAmountDeduction: string
+  creditCardBillingId: string
   bankKey: string
   bankName: string
   beneficiaryName: string
