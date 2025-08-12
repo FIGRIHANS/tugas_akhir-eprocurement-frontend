@@ -124,7 +124,7 @@ const form = reactive<formTypes>({
   invoiceDp: '9011',
   amountInvoice: '',
   taxNoInvoice: '',
-  remainingDpAmount: '1.000.000.000',
+  remainingDpAmount: '',
   dpAmountDeduction: '',
   currency: 'IDR',
   description: '',
