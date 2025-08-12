@@ -23,6 +23,7 @@ export interface formTypes extends documentFormTypes {
   bankAccountNumber: string
   swiftCode: string
   bankAddress: string
+  bankCountryCode: string
   accountName?: string
   npwpNumber?: string
   bankNameNew?: string

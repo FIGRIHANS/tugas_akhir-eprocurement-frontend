@@ -59,7 +59,6 @@ export interface IAdministration {
   npwpUrl: string
   vendorPhone: string
   vendorEmail: string
-  userEmail: string
   vendorWebsite: string
   businessFieldName: string
   businessUnitName: string
@@ -221,67 +220,107 @@ export interface IVerificationDetailData {
   keterangan: string
 }
 
+export type EquipmentDataType = {
+  id: number
+  vendorID: number
+  name: string
+  brand: string
+  type: string
+  mfgDate: string
+  serialNo: string
+  capacity: number
+  condition: number
+  conditionName: string
+  ownership: number
+  ownershipName: string
+  category: number
+  categoryName: string
+  createdBy: string
+  modifiedBy: string
+  isActive: boolean
+  createdDate: boolean
+  modifiedDate: true
+}
+
+export type PayloadEquipmentDataType = {
+  id: number
+  vendorID: number
+  name: string
+  brand: string
+  type: string
+  mfgDate: string
+  serialNo: string
+  capacity: number
+  condition: number
+  ownership: number
+  category: number
+  user: string
+  isActive: boolean
+  isTemporary: true
+  refVendorID: 0
+  action: 0
+}
 export interface IOtherDocument {
-  documentName: string,
-  documentNo: string,
-  uploadUrl: string,
-  description: string,
-  issuedDate: string | number | unknown,
-  expiredDate: string | number | unknown,
+  documentName: string
+  documentNo: string
+  uploadUrl: string
+  description: string
+  issuedDate: string | number | unknown
+  expiredDate: string | number | unknown
 }
 
 export interface IVendorPayload {
   request: {
-    vendorLicenses: ILicensePayload[],
-    otherDocumentVendor: IOtherDocument[],
-    vendorId: number,
+    vendorLicenses: ILicensePayload[]
+    otherDocumentVendor: IOtherDocument[]
+    vendorId: number
     updatedBy: string
   }
 }
 
 export interface ILicensePayload {
-  licenseId: number;
-  licenseNo: string;
-  uploadUrl: string;
-  description: string;
-  issuedDate: string;
-  expiredDate: string;
+  licenseId: number
+  licenseNo: string
+  uploadUrl: string
+  description: string
+  issuedDate: string
+  expiredDate: string
 }
 
 export interface IShareholderPayload {
-  stockID: number;
-  vendorID: number;
-  ownerName: string;
-  ownerID: string;
-  ownerIDUrl: string;
-  ownerDOB: Date;
-  quantity: number;
-  unitID: number;
-  unitCurrencyID: number;
-  user: string;
-  isActive: boolean;
-  tmpBlacklist: boolean;
-  position: string;
-  isTemporary: boolean;
-  refVendorID: number;
-  action: number;
-  stockTypeID: number;
+  stockID: number
+  vendorID: number
+  ownerName: string
+  ownerID: string
+  ownerIDUrl: string
+  ownerDOB: Date
+  quantity: number
+  unitID: number
+  unitCurrencyID: number
+  user: string
+  isActive: boolean
+  tmpBlacklist: boolean
+  position: string
+  isTemporary: boolean
+  refVendorID: number
+  action: number
+  stockTypeID: number
 }
 
 export interface IVendorLegalDocumentPayload {
-  id: number;
-  vendorID: number;
-  filename: string;
-  filesize: number;
-  documentURL: string;
-  documentType: number;
-  documentNo: string;
-  documentDate: Date;
-  notaryName: string;
-  notaryLocation: number;
-  user: string;
-  isActive: boolean;
-  isTemporary: boolean;
-  refVendorId: number;
-  action: number;
+  id: number
+  vendorID: number
+  filename: string
+  filesize: number
+  documentURL: string
+  documentType: number
+  documentNo: string
+  documentDate: Date
+  notaryName: string
+  notaryLocation: number
+  user: string
+  isActive: boolean
+  isTemporary: boolean
+  refVendorId: number
+  action: number
 }

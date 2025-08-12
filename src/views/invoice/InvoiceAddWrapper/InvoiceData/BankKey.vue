@@ -39,6 +39,13 @@
         </label>
         <input v-model="form.bankAccountNumber" class="input" placeholder="" disabled/>
       </div>
+      <!-- Bank Country -->
+      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
+        <label class="form-label max-w-32">
+          Bank Country
+        </label>
+        <input v-model="form.bankCountryCode" class="input" placeholder="" disabled/>
+      </div>
     </div>
   </div>
 </template>
@@ -65,11 +72,13 @@ const checkBank = () => {
         form.bankNameId = bankList.value[0].bankName
         form.beneficiaryName = bankList.value[0].beneficiaryName
         form.bankAccountNumber = bankList.value[0].accountNumber
+        form.bankCountryCode = bankList.value[0].bankCountryCode
       } else {
         form.bankKeyId = ''
         form.bankNameId = ''
         form.beneficiaryName = ''
         form.bankAccountNumber = ''
+        form.bankCountryCode = ''
       }
     }
   }
@@ -91,6 +100,7 @@ watch(
         form.bankNameId = bankList.value[getIndex].bankName
         form.beneficiaryName = bankList.value[getIndex].beneficiaryName
         form.bankAccountNumber = bankList.value[getIndex].accountNumber
+        form.bankCountryCode = bankList.value[getIndex].bankCountryCode
       }
     }
   }

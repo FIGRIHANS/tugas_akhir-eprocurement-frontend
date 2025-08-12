@@ -114,6 +114,7 @@ const form = reactive<formTypes>({
   bankAccountNumber: '',
   swiftCode: '',
   bankAddress: '',
+  bankCountryCode: '',
   invoiceNo: '',
   companyCode: '',
   companyName: '',
@@ -359,7 +360,8 @@ const mapDataPost = () => {
       bankKey: form.bankKeyId,
       bankName: form.bankNameId,
       beneficiaryName: form.beneficiaryName,
-      bankAccountNo: form.bankAccountNumber
+      bankAccountNo: form.bankAccountNumber,
+      bankCountryCode: form.bankCountryCode
     },
     documents: mapDocument(),
     calculation: {
