@@ -78,6 +78,12 @@ export type CompanyLicenseType = {
   licenseName: string
 }[]
 
+export type ReferenceType = {
+  code: string
+  value: string
+  type: string
+}[]
+
 export type TermConditionType = {
   termCondition: string
 }
