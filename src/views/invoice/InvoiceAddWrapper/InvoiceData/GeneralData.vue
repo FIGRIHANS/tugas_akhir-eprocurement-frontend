@@ -18,7 +18,7 @@
           class="customSelect"
           :reduce="(option: any) => option.value"
           :options="customVendorList"
-          :class="{ 'border-danger': form.vendorIdError }"
+          :class="{ 'error-select': form.vendorIdError }"
         ></v-select>
         <!-- <select v-else v-model="form.vendorId" class="select" :class="{ 'border-danger': form.vendorIdError }">
           <option v-for="item of vendorList" :key="item.vendorId" :value="item.sapCode">
