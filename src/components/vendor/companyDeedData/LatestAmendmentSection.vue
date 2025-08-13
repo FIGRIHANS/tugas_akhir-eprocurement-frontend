@@ -25,7 +25,6 @@ const userLoginStore = useLoginStore()
 const uploadStore = useVendorUploadStore()
 const route = useRoute()
 
-// ===== UI States =====
 const showSuccessModal = ref<boolean>(false)
 const showErrorModal = ref<boolean>(false)
 const mode = ref<'add' | 'edit' | 'delete'>('add')
@@ -34,11 +33,8 @@ const apiErrorMessage = ref<string>('')
 const isDownloadLoading = ref<boolean>(false)
 const isSaveLoading = ref<boolean>(false)
 
-// NOTE: Jika backend membedakan dokumen "Latest Amendment" via documentType,
-// set konstanta ini sesuai enumerasi backend-mu. Default ke 0 agar aman.
-const AMENDMENT_DOCUMENT_TYPE = 0
+const AMENDMENT_DOCUMENT_TYPE = 3116
 
-// ===== Payload =====
 const vendorAmendmentPayload = reactive<IVendorLegalDocumentPayload>({
   id: 0,
   vendorID: Number(route.params.id),
@@ -59,7 +55,6 @@ const vendorAmendmentPayload = reactive<IVendorLegalDocumentPayload>({
 
 const administrationData = ref<IAdministration>(adminVendorStore.data!)
 
-// ===== Validations =====
 const errors = reactive({
   documentNo: '',
   notaryName: '',
@@ -99,7 +94,6 @@ const validateForm = () => {
   return isValid
 }
 
-// ===== Handlers =====
 const onUploadFile = async (file: File) => {
   if (!file) return
   const formData = new FormData()
@@ -107,7 +101,9 @@ const onUploadFile = async (file: File) => {
   formData.append('Actioner', userLoginStore.userData?.profile.profileId.toString() || '0')
   try {
     const response = await uploadStore.upload(formData)
+    vendorAmendmentPayload.filename = response?.name as string
     vendorAmendmentPayload.documentURL = response?.path as string
+    vendorAmendmentPayload.filesize = file.size
     errors.documentURL = ''
   } catch (err) {
     if (err instanceof Error) {
