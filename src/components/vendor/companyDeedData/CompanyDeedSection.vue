@@ -16,11 +16,13 @@ import { useVendorUploadStore } from '@/stores/vendor/upload'
 import UiModal from '@/components/modal/UiModal.vue'
 import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
 import axios from 'axios'
+import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
 
 const vendorLegalDocStore = useCompanyDeedDataStore()
 const adminVendorStore = useVendorAdministrationStore()
 const userLoginStore = useLoginStore()
 const uploadStore = useVendorUploadStore()
+const vendorMasterDataStore = useVendorMasterDataStore()
 
 const route = useRoute()
 
@@ -216,6 +218,7 @@ const handleDownload = async (path: string) => {
 
 onMounted(() => {
   vendorLegalDocStore.getVendorLegalDocument(Number(route.params.id))
+  vendorMasterDataStore.getVendorCountries()
 })
 
 const filteredCompanyDeedData = computed(() =>
@@ -281,16 +284,12 @@ const filteredCompanyDeedData = computed(() =>
           <UiSelect
             label="Notary Office Location"
             placeholder="Select"
-            :options="[
-              {
-                value: 1,
-                label: 'Office 1',
-              },
-              {
-                value: 2,
-                label: 'Office 2',
-              },
-            ]"
+            :options="
+              vendorMasterDataStore.countryList?.map((item) => ({
+                value: item.countryID,
+                label: item.countryName,
+              }))
+            "
             value-key="value"
             text-key="label"
             row
