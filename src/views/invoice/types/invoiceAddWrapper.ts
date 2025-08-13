@@ -85,6 +85,7 @@ export interface formTypes extends documentFormTypes {
   additionalCost: itemsCostType[]
   additionalCostError?: boolean
   invoiceItem: invoiceItemTypes[]
+  invoiceItemError?: boolean
 
   status: number
 }

@@ -61,7 +61,7 @@
                             </span>
                           </a>
                         </div>
-                        <!-- <div v-if="parent.statusCode === 4" class="menu-item" @click="openDetailInvoiceEdit(parent.invoiceUId)">
+                        <div v-if="parent.statusCode === 4" class="menu-item" @click="openDetailInvoiceEdit(parent.invoiceUId)">
                           <a class="menu-link" href="#">
                             <span class="menu-icon">
                               <i class="ki-duotone ki-message-edit"></i>
@@ -70,7 +70,7 @@
                               Edit
                             </span>
                           </a>
-                        </div> -->
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -241,15 +241,15 @@ const openDetailInvoice = (invoiceId: string) => {
   })
 }
 
-// const openDetailInvoiceEdit = (invoiceId: string) => {
-//   router.push({
-//     name: 'invoiceDetailEdit',
-//     query : {
-//       id: invoiceId,
-//       type: '2'
-//     }
-//   })
-// }
+const openDetailInvoiceEdit = (invoiceId: string) => {
+  router.push({
+    name: 'invoiceDetailEdit',
+    query : {
+      id: invoiceId,
+      type: '2'
+    }
+  })
+}
 
 const setList = () => {
   const result: ListPoTypes[] = []
