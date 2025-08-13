@@ -47,7 +47,7 @@
             <template v-else>
               <tr v-for="(item, index) in form.invoicePoGr" :key="index" class="pogr__field-items">
                 <td class="flex items-center justify-around gap-[8px]">
-                  <button v-if="checkInvoiceDp()" class="btn btn-outline btn-icon btn-primary" @click="goEdit(item)">
+                  <button class="btn btn-outline btn-icon btn-primary" @click="goEdit(item)">
                     <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>
                     <i v-else class="ki-duotone ki-check-circle"></i>
                   </button>

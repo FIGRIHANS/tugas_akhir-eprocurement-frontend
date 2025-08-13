@@ -30,6 +30,20 @@ export interface formTypes extends documentFormTypes {
   bankAccountNumberNew?: string
   bankAddressNew?: string
 
+  isAlternativePayee: boolean
+  isOneTimeVendor: boolean
+  nameAlternative: string
+  nameOtherAlternative: string
+  streetAltiernative: string
+  cityAlternative: string
+  countryAlternative: string
+  bankAccountNumberAlternative: string
+  bankKeyAlternative: string
+  bankCountryAlternative: string
+  npwpNumberAlternative: string
+  ktpNumberAlternative: string
+  emailAlternative: string
+
   // Invoice Information
   companyCode: string
   companyCodeError?: boolean
@@ -54,6 +68,9 @@ export interface formTypes extends documentFormTypes {
   currencyError?: boolean
   description: string
   descriptionError?: boolean
+
+  vendorNumber: string
+  department: string
 
   //invoice calculation
   subtotal: number
