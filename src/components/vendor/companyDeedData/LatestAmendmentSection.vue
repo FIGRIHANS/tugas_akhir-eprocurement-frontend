@@ -1,9 +1,8 @@
 <script lang="ts" setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
 
-import DatePicker from '@/components/datePicker/DatePicker.vue'
 import UiFormGroup from '@/components/ui/atoms/form-group/UiFormGroup.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import UiFileUpload from '@/components/ui/atoms/file-upload/UiFileUpload.vue'
@@ -14,15 +13,17 @@ import UiLoading from '@/components/UiLoading.vue'
 import UiModal from '@/components/modal/UiModal.vue'
 import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
 
-import type { IAdministration, IVendorLegalDocumentPayload } from '@/stores/vendor/types/vendor'
-import { useCompanyDeedDataStore, useVendorAdministrationStore } from '@/stores/vendor/vendor'
+import type { IVendorLegalDocumentPayload } from '@/stores/vendor/types/vendor'
+import { useCompanyDeedDataStore } from '@/stores/vendor/vendor'
 import { useVendorUploadStore } from '@/stores/vendor/upload'
 import { useLoginStore } from '@/stores/views/login'
+import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
 
 const vendorLegalDocStore = useCompanyDeedDataStore()
-const adminVendorStore = useVendorAdministrationStore()
 const userLoginStore = useLoginStore()
 const uploadStore = useVendorUploadStore()
+const vendorMasterDataStore = useVendorMasterDataStore()
+
 const route = useRoute()
 
 const showSuccessModal = ref<boolean>(false)
@@ -53,8 +54,6 @@ const vendorAmendmentPayload = reactive<IVendorLegalDocumentPayload>({
   action: 0,
 })
 
-const administrationData = ref<IAdministration>(adminVendorStore.data!)
-
 const errors = reactive({
   documentNo: '',
   notaryName: '',
@@ -68,7 +67,6 @@ const validateForm = () => {
   errors.documentNo = ''
   errors.notaryName = ''
   errors.documentURL = ''
-  errors.documentDate = ''
   errors.notaryLocation = ''
 
   if (!vendorAmendmentPayload.documentNo) {
@@ -83,14 +81,13 @@ const validateForm = () => {
     errors.documentURL = 'Document URL is required'
     isValid = false
   }
-  if (!vendorAmendmentPayload.documentDate) {
-    errors.documentDate = 'Document date is required'
-    isValid = false
-  }
   if (!vendorAmendmentPayload.notaryLocation) {
     errors.notaryLocation = 'Notary location is required'
     isValid = false
   }
+
+  console.log(errors)
+
   return isValid
 }
 
@@ -101,6 +98,7 @@ const onUploadFile = async (file: File) => {
   formData.append('Actioner', userLoginStore.userData?.profile.profileId.toString() || '0')
   try {
     const response = await uploadStore.upload(formData)
+
     vendorAmendmentPayload.filename = response?.name as string
     vendorAmendmentPayload.documentURL = response?.path as string
     vendorAmendmentPayload.filesize = file.size
@@ -134,6 +132,7 @@ const resetForm = () => {
 
 const handleSave = async () => {
   mode.value = vendorAmendmentPayload.id ? 'edit' : 'add'
+
   if (!validateForm()) return
 
   try {
@@ -145,8 +144,7 @@ const handleSave = async () => {
   } catch (err) {
     if (axios.isAxiosError(err)) {
       apiErrorMessage.value =
-        err.response?.data?.result?.message ||
-        'Terjadi kesalahan tidak terduga. Silahkan coba lagi'
+        err.response?.data?.result?.message || 'Terjadi kesalahan tidak terduga. Silahkan coba lagi'
     } else {
       apiErrorMessage.value = 'Terjadi kesalahan saat menyimpan data. Silahkan coba lagi'
     }
@@ -191,8 +189,7 @@ const handleProcessDelete = async () => {
   } catch (err) {
     if (axios.isAxiosError(err)) {
       apiErrorMessage.value =
-        err.response?.data?.result?.message ||
-        'Terjadi kesalahan tidak terduga. Silahkan coba lagi'
+        err.response?.data?.result?.message || 'Terjadi kesalahan tidak terduga. Silahkan coba lagi'
     } else {
       apiErrorMessage.value = 'Terjadi kesalahan saat menghapus data. Silahkan coba lagi'
     }
@@ -218,11 +215,6 @@ const handleDownload = async (path: string) => {
   }
 }
 
-// ===== Lifecycle & computed =====
-onMounted(() => {
-  vendorLegalDocStore.getVendorLegalDocument(Number(route.params.id))
-})
-
 const filteredAmendmentData = computed(() =>
   vendorLegalDocStore.vendorLegalDocData?.filter(
     (item: IVendorLegalDocumentPayload) =>
@@ -240,20 +232,6 @@ const filteredAmendmentData = computed(() =>
     </div>
 
     <div class="card-body">
-      <!-- Informasi singkat perusahaan (opsional, mengikuti CompanyDeedDataSection) -->
-      <div class="space-y-6 mb-6">
-        <div class="flex items-center gap-20">
-          <p class="text-sm text-slate-700">Company Category</p>
-          <p class="text-sm text-slate-700">{{ administrationData?.companyCategoryName }}</p>
-        </div>
-        <div class="flex items-center gap-20">
-          <p class="text-sm text-slate-700">Company Address</p>
-          <p class="text-sm text-slate-700">
-            {{ administrationData?.addressCompanyDetail }}
-          </p>
-        </div>
-      </div>
-
       <div class="grid grid-cols-1 md:grid-cols-2 gap-20 mb-8">
         <UiFormGroup hide-border>
           <UiInput
@@ -272,34 +250,31 @@ const filteredAmendmentData = computed(() =>
             :error="errors.notaryName !== ''"
             :hintText="errors.notaryName"
           />
-          <UiFileUpload
-            name="documentUrl"
-            label="File"
-            placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
-            hint-text="*jpg, jpeg, png, pdf, zip / max : 16 MB"
-            @added-file="onUploadFile($event)"
-          />
         </UiFormGroup>
 
         <UiFormGroup hide-border>
-          <DatePicker
-            v-model="vendorAmendmentPayload.documentDate"
-            label="Letter Date"
-            placeholder="Pilih Tanggal"
-          />
           <UiSelect
             label="Notary Office Location"
             placeholder="Select"
-            :options="[
-              { value: 1, label: 'Office 1' },
-              { value: 2, label: 'Office 2' },
-            ]"
+            :options="
+              vendorMasterDataStore.cityList?.map((item) => ({
+                value: item.cityID,
+                label: item.cityName,
+              }))
+            "
             value-key="value"
             text-key="label"
             row
             v-model="vendorAmendmentPayload.notaryLocation"
             :error="errors.notaryLocation !== ''"
             :hintText="errors.notaryLocation"
+          />
+          <UiFileUpload
+            name="latestAmmendmentDocumentUrl"
+            label="File"
+            placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
+            hint-text="*jpg, jpeg, png, pdf, zip / max : 16 MB"
+            @added-file="onUploadFile($event)"
           />
           <div class="flex justify-end items-center">
             <UiButton variant="primary" @click="handleSave" :disabled="isSaveLoading">
@@ -344,12 +319,7 @@ const filteredAmendmentData = computed(() =>
           </tr>
 
           <!-- data -->
-          <tr
-            v-else
-            v-for="doc in filteredAmendmentData"
-            :key="doc.id"
-            class="font-normal text-sm"
-          >
+          <tr v-else v-for="doc in filteredAmendmentData" :key="doc.id" class="font-normal text-sm">
             <td class="text-center">
               <div class="dropdown" data-dropdown="true" data-dropdown-trigger="click">
                 <UiButton outline icon size="sm" variant="secondary" class="dropdown-toggle">
