@@ -26,6 +26,7 @@
       :min-date="minDate"
       :max-date="maxDate"
       class="w-full"
+      :teleport="teleport"
     >
       <template #dp-input="{ value }">
         <div class="input relative" :class="{ 'border-danger': error }">
@@ -61,6 +62,7 @@ const props = defineProps<{
   labelTop?: boolean
   maxDate?: Date | string
   range?: boolean
+  teleport?: boolean
 }>()
 
 const emits = defineEmits(['update:modelValue'])
