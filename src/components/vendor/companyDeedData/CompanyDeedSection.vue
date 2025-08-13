@@ -40,7 +40,7 @@ const vendorLegalDocPayload = reactive<IVendorLegalDocumentPayload>({
   filename: '',
   filesize: 0,
   documentURL: '',
-  documentType: 0,
+  documentType: 3115,
   documentNo: '',
   documentDate: new Date(),
   notaryName: '',
@@ -109,7 +109,9 @@ const onUploadFile = async (file: File) => {
   try {
     const response = await uploadStore.upload(formData)
 
+    vendorLegalDocPayload.filename = response?.name as string
     vendorLegalDocPayload.documentURL = response?.path as string
+    vendorLegalDocPayload.filesize = file.size
     errors.documentURL = ''
   } catch (err) {
     if (err instanceof Error) {
@@ -132,7 +134,7 @@ const handleSave = async () => {
       filename: '',
       filesize: 0,
       documentURL: '',
-      documentType: 0,
+      documentType: 3115,
       documentNo: '',
       documentDate: new Date(),
       notaryName: '',
@@ -218,12 +220,12 @@ const handleDownload = async (path: string) => {
 
 onMounted(() => {
   vendorLegalDocStore.getVendorLegalDocument(Number(route.params.id))
-  vendorMasterDataStore.getVendorCountries()
+  vendorMasterDataStore.getVendorCities()
 })
 
 const filteredCompanyDeedData = computed(() =>
   vendorLegalDocStore.vendorLegalDocData?.filter(
-    (item: IVendorLegalDocumentPayload) => item.isActive === true,
+    (item: IVendorLegalDocumentPayload) => item.isActive === true && item.documentType === 3115,
   ),
 )
 </script>
@@ -285,9 +287,9 @@ const filteredCompanyDeedData = computed(() =>
             label="Notary Office Location"
             placeholder="Select"
             :options="
-              vendorMasterDataStore.countryList?.map((item) => ({
-                value: item.countryID,
-                label: item.countryName,
+              vendorMasterDataStore.cityList?.map((item) => ({
+                value: item.cityID,
+                label: item.cityName,
               }))
             "
             value-key="value"
