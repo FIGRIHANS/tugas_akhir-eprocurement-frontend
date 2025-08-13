@@ -43,6 +43,7 @@ export type PaymentTypes = {
   bankName: string
   beneficiaryName: string
   accountNumber: string
+  bankCountryCode: string
 }
 
 export type ActivityTypes = {

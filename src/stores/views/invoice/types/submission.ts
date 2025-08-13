@@ -71,6 +71,7 @@ interface ParamsSubmissionPayment {
   bankName: string
   beneficiaryName: string
   bankAccountNo: string
+  bankCountryCode: string
 }
 
 interface ParamsSubmissionDocument {

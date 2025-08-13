@@ -38,6 +38,13 @@
         </label>
         <input v-model="form.beneficiaryName" class="input" placeholder="" disabled/>
       </div>
+      <!-- Bank Country -->
+      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
+        <label class="form-label max-w-32">
+          Bank Country
+        </label>
+        <input v-model="form.bankCountryCode" class="input" placeholder="" disabled/>
+      </div>
     </div>
   </div>
 </template>
@@ -57,7 +64,6 @@ const vendorList = computed(() => invoiceMasterApi.vendorList)
 const checkBank = () => {
   if (form) {
     const getIndex = vendorList.value.findIndex((item) => item.sapCode === form.value.vendorId.toString())
-    console.log(getIndex)
     if (getIndex !== -1) {
       bankList.value = vendorList.value[getIndex].payment
       if (bankList.value.length === 1) {
@@ -65,11 +71,13 @@ const checkBank = () => {
         form.value.bankName = bankList.value[0].bankName
         form.value.beneficiaryName = bankList.value[0].beneficiaryName
         form.value.bankAccountNo = bankList.value[0].accountNumber
+        form.value.bankCountryCode = bankList.value[0].bankCountryCode
       } else {
         form.value.bankKey = ''
         form.value.bankName = ''
         form.value.beneficiaryName = ''
         form.value.bankAccountNo = ''
+        form.value.bankCountryCode = ''
       }
     }
   }
@@ -105,6 +113,7 @@ watch(
         form.value.bankName = bankList.value[getIndex].bankName
         form.value.beneficiaryName = bankList.value[getIndex].beneficiaryName
         form.value.bankAccountNo = bankList.value[getIndex].accountNumber
+        form.value.bankCountryCode = bankList.value[getIndex].bankCountryCode
       }
     }
   }

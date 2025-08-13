@@ -61,6 +61,16 @@
                             </span>
                           </a>
                         </div>
+                        <!-- <div v-if="parent.statusCode === 4" class="menu-item" @click="openDetailInvoiceEdit(parent.invoiceUId)">
+                          <a class="menu-link" href="#">
+                            <span class="menu-icon">
+                              <i class="ki-duotone ki-message-edit"></i>
+                            </span>
+                            <span class="menu-title">
+                              Edit
+                            </span>
+                          </a>
+                        </div> -->
                       </div>
                     </div>
                   </div>
@@ -231,6 +241,16 @@ const openDetailInvoice = (invoiceId: string) => {
   })
 }
 
+// const openDetailInvoiceEdit = (invoiceId: string) => {
+//   router.push({
+//     name: 'invoiceDetailEdit',
+//     query : {
+//       id: invoiceId,
+//       type: '2'
+//     }
+//   })
+// }
+
 const setList = () => {
   const result: ListPoTypes[] = []
   for (const [index, item] of verifList.value.entries()) {
@@ -297,20 +317,12 @@ const openSuccesSap = () => {
   const idModal = document.querySelector('#success_send_sap_modal')
   const modal = KTModal.getInstance(idModal as HTMLElement)
   modal.show()
-
-  setTimeout(() => {
-    modal.hide()
-  }, 1500)
 }
 
 const openFailedSap = () => {
   const idModal = document.querySelector('#failed_send_sap_modal')
   const modal = KTModal.getInstance(idModal as HTMLElement)
   modal.show()
-
-  setTimeout(() => {
-    modal.hide()
-  }, 1500)
 }
 
 onMounted(() => {

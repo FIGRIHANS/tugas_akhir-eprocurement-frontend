@@ -8,21 +8,21 @@
         <component :is="contentComponent" />
       </Transition>
       <div class="flex justify-end items-center mt-[24px] gap-[8px]">
-        <button class="btn btn-outline btn-primary" @click="goBack">
+        <button class="btn btn-outline btn-primary" :disabled="isLoading" @click="goBack">
           <i class="ki-filled ki-arrow-left"></i>
           Back
         </button>
-        <button v-if="tabNow !== 'information'" class="btn btn-primary" @click="goNext">
+        <button v-if="tabNow !== 'information'" class="btn btn-primary" :disabled="isLoading" @click="goNext">
           Next
           <i class="ki-duotone ki-black-right"></i>
         </button>
-        <button v-if="tabNow === 'information'" class="btn btn-primary" @click="goNext">
+        <button v-if="tabNow === 'information'" class="btn btn-primary" :disabled="isLoading" @click="goNext">
           Save
           <i class="ki-duotone ki-bookmark"></i>
         </button>
       </div>
     </div>
-    <!-- <ModalSuccess /> -->
+    <SuccessEditApproval @afterClose="goToListApproval" />
   </div>
 </template>
 
@@ -42,10 +42,13 @@ import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterDat
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 import moment from 'moment'
 import { isEmpty } from 'lodash'
+import { KTModal } from '@/metronic/core'
+import type { PostVerificationTypes } from '@/stores/views/invoice/types/verification'
 import type { documentDetailTypes as documentDetailTypesStore } from '@/stores/views/invoice/types/verification'
 
 const InvoiceData = defineAsyncComponent(() => import('./InvoiceDetailEdit/InvoiceData.vue'))
 const InvoiceInformation = defineAsyncComponent(() => import('./InvoiceDetailEdit/InvoiceInformation.vue'))
+const SuccessEditApproval = defineAsyncComponent(() => import('./InvoiceDetailEdit/SuccessEditApproval.vue'))
 
 const verificationApi = useInvoiceVerificationStore()
 const invoiceMasterApi = useInvoiceMasterDataStore()
@@ -53,6 +56,7 @@ const router = useRouter()
 const route = useRoute()
 const activeStep = ref<string>('')
 const tabNow = ref<string>('data')
+const isLoading = ref<boolean>(false)
 
 const routes = ref<routeTypes[]>([
   {
@@ -95,6 +99,7 @@ const form = ref<formTypes>({
   bankName: '',
   beneficiaryName: '',
   bankAccountNo: '',
+  bankCountryCode: '',
   vendorId: '',
   vendorName: '',
   npwp: '',
@@ -169,6 +174,13 @@ const checkInvoiceInformation = () => {
 const setTab = (value: string) => {
   tabNow.value = value
 }
+
+const goToListApproval = () => {
+  router.push({
+    name: 'invoiceApproval'
+  })
+}
+
 const goBack = () => {
   const list = ['data', 'information']
   if (tabNow.value === 'data') {
@@ -200,7 +212,7 @@ const goNext = () => {
     const check = checkInvoiceInformation()
     if (!check) return
     verificationApi.isFromEdit = true
-    verificationApi.detailInvoiceEdit = {
+    const data = {
       ...form.value,
       postingDate: moment(form.value.postingDate).toISOString(),
       estimatedPaymentDate: moment(form.value.estimatedPaymentDate).toISOString(),
@@ -229,13 +241,26 @@ const goNext = () => {
         documentSize: Number(form.value.otherDocument.fileSize)
       } : null
     }
-    router.push({
-      name: 'invoiceDetail',
-      query: {
-        id: route.query.id,
-        type: route.query.type
-      }
-    })
+    verificationApi.detailInvoiceEdit = data
+    if (form.value.statusCode === 4) {
+      isLoading.value = true
+      verificationApi.postSubmission(mapDataVerif()).then(() => {
+        verificationApi.resetDetailInvoiceEdit()
+        const idModal = document.querySelector('#success_data_edit_modal')
+        const modal = KTModal.getInstance(idModal as HTMLElement)
+        modal.show()
+      }).finally(() => {
+        isLoading.value = false
+      })
+    } else {
+      router.push({
+        name: 'invoiceDetail',
+        query: {
+          id: route.query.id,
+          type: route.query.type
+        }
+      })
+    }
   }
 }
 
@@ -306,6 +331,7 @@ const setDataEdit = () => {
     bankName: data?.bankName || '',
     beneficiaryName: data?.beneficiaryName || '',
     bankAccountNo: data?.bankAccountNo || '',
+    bankCountryCode: data?.bankCountryCode || '',
     vendorId: data?.vendorId || '',
     vendorName: data?.vendorName || '',
     npwp: data?.npwp || '',
@@ -402,6 +428,7 @@ const setDataDefault = () => {
     bankName: data?.payment.bankName || '',
     beneficiaryName: data?.payment.beneficiaryName || '',
     bankAccountNo: data?.payment.bankAccountNo || '',
+    bankCountryCode: data?.payment.bankCountryCode || '',
     vendorId: data?.vendor.vendorId || '',
     vendorName: data?.vendor.vendorName || '',
     npwp: data?.vendor.npwp || '',
@@ -420,6 +447,100 @@ const setDataDefault = () => {
     otherDocument: other,
     creditCardBillingId: data?.header.creditCardBillingId || ''
   }
+}
+
+const mapDataVerif = () => {
+  const invoiceDoc = form.value.invoiceDocument || {}
+  const taxDoc = form.value.tax || {}
+  const referenceDoc = form.value.referenceDocument || {}
+  const otherDoc = form.value.otherDocument || {}
+  const documents = []
+  if (!isEmpty(invoiceDoc)) documents.push(invoiceDoc)
+  if (!isEmpty(taxDoc)) documents.push(taxDoc)
+  if (!isEmpty(referenceDoc)) documents.push(referenceDoc)
+  if (!isEmpty(otherDoc)) documents.push(otherDoc)
+  const data = {
+    statusCode: route.query.type === '1'? 3 : 4,
+    statusName: route.query.type === '1'? 'Verified' : 'Approved',
+    statusNotes: '',
+    header: {
+      invoiceUId: form.value.invoiceUId,
+      documentNo: form.value.documentNo,
+      invoiceDate: form.value.invoiceDate,
+      taxNo: form.value.taxNo,
+      currCode: form.value.currCode,
+      notes: form.value.notes,
+      postingDate: form.value.postingDate,
+      invoicingParty: form.value.invoicingParty,
+      estimatedPaymentDate: form.value.estimatedPaymentDate,
+      paymentMethodCode: form.value.paymentMethodCode,
+      paymentMethodName: form.value.paymentMethodName,
+      assigment: form.value.assigment,
+      transferNews: form.value.transferNews,
+      npwpReporting: form.value.npwpReporting,
+      creditCardBillingId: form.value.creditCardBillingId
+    },
+    payment: {
+      bankKey: form.value.bankKey,
+      bankName: form.value.bankName,
+      beneficiaryName: form.value.beneficiaryName,
+      bankAccountNo: form.value.bankAccountNo,
+      bankCountryCode: form.value.bankCountryCode
+    },
+    calculation: {
+      subtotal: form.value.subtotal,
+      vatAmount: form.value.vatAmount,
+      whtAmount: form.value.whtAmount,
+      additionalCost: form.value.additionalCost,
+      totalGrossAmount: form.value.totalGrossAmount,
+      totalNetAmount: form.value.totalNetAmount
+    },
+    documents,
+    pogr: mapPoGr(),
+    additionalCosts: mapAdditionalCost()
+  } as PostVerificationTypes
+
+  return data
+}
+
+const mapPoGr = () => {
+  const poGr = []
+  for (const item of form.value.invoicePoGr) {
+    poGr.push({
+      poNo: item.poNo,
+      poItem: Number(item.poItem),
+      grDocumentNo: item.grDocumentNo,
+      itemAmount: Number(item.itemAmount),
+      quantity: Number(item.quantity),
+      taxCode: item.taxCode,
+      vatAmount: item.vatAmount,
+      whtType: item.whtType,
+      whtCode: item.whtCode,
+      whtBaseAmount: item.whtBaseAmount,
+      whtAmount: item.whtAmount
+    })
+  }
+  return poGr
+}
+
+const mapAdditionalCost = () => {
+  const cost = []
+  for (const item of form.value.additionalCosts) {
+    cost.push({
+      activityExpense: item.activityExpense,
+      itemAmount: Number(item.itemAmount),
+      debitCredit: item.debitCredit,
+      taxCode: item.taxCode,
+      vatAmount: item.vatAmount,
+      costCenter: item.costCenter,
+      profitCenter: item.profitCenter,
+      assignment: item.assignment,
+      whtType: item.whtType,
+      whtCode: item.whtCode,
+      whtBaseAmount: Number(item.whtBaseAmount)
+    })
+  }
+  return cost
 }
 
 onMounted(() => {

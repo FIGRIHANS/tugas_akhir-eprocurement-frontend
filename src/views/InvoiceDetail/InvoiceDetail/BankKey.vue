@@ -22,6 +22,10 @@
           <p class="font-normal text-sm text-gray-600">Bank Account Number</p>
           <p class="font-normal text-sm">{{ form.bankAccountNo }}</p>
         </div>
+        <div class="flex items-center justify-between gap-[10px]">
+          <p class="font-normal text-sm text-gray-600">Bank Country</p>
+          <p class="font-normal text-sm">{{ form.bankCountryCode }}</p>
+        </div>
       </div>
     </div>
   </div>

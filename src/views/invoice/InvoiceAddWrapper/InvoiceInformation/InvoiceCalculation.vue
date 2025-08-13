@@ -17,7 +17,7 @@
             :class="index === listCalculation.length - 1 ? 'calculation__last-field' : ''"
           >
             <div class="flex-1">{{ item.name }}</div>
-            <div class="flex-1">{{ useFormatIdr(item.amount) }}</div>
+            <div class="flex-1">{{ form?.currency === 'IDR' ? useFormatIdr(item.amount) : useFormatUsd(item.amount) }}</div>
             <div>{{ item.currency }}</div>
           </div>
         </div>
@@ -33,7 +33,7 @@ import type { listType } from '../../types/invoiceCalculation'
 import type { formTypes } from '../../types/invoiceAddWrapper'
 import { defaultField, dpField } from '@/static/invoiceCalculation'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
-import { useFormatIdr } from '@/composables/currency'
+import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const route = useRoute()

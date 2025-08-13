@@ -114,6 +114,7 @@ const form = reactive<formTypes>({
   bankAccountNumber: '',
   swiftCode: '',
   bankAddress: '',
+  bankCountryCode: '',
   invoiceNo: '',
   companyCode: '',
   companyName: '',
@@ -123,7 +124,7 @@ const form = reactive<formTypes>({
   invoiceDp: '9011',
   amountInvoice: '',
   taxNoInvoice: '',
-  remainingDpAmount: '1.000.000.000',
+  remainingDpAmount: '',
   dpAmountDeduction: '',
   currency: 'IDR',
   description: '',
@@ -140,7 +141,22 @@ const form = reactive<formTypes>({
   invoicePoGr: [],
   invoiceItem: [],
   additionalCost: [],
-  status: -1
+  status: -1,
+  isAlternativePayee: false,
+  isOneTimeVendor: false,
+  nameAlternative: '',
+  nameOtherAlternative: '',
+  streetAltiernative: '',
+  cityAlternative: '',
+  countryAlternative: '',
+  bankAccountNumberAlternative: '',
+  bankKeyAlternative: '',
+  bankCountryAlternative: '',
+  npwpNumberAlternative: '',
+  ktpNumberAlternative: '',
+  emailAlternative: '',
+  vendorNumber: '123456',
+  department: ''
 })
 
 const contentComponent = computed(() => {
@@ -157,6 +173,7 @@ const listDocumentType = computed(() => invoiceMasterApi.documentType)
 const vendorList = computed(() => invoiceMasterApi.vendorList)
 const invoiceDpList = computed(() => invoiceMasterApi.dpType)
 const detailPo = computed(() => invoiceApi.detailPo)
+const userData = computed(() => loginApi.userData)
 
 const checkInvoiceView = () => {
   return route.query.type === 'po-view'
@@ -359,7 +376,8 @@ const mapDataPost = () => {
       bankKey: form.bankKeyId,
       bankName: form.bankNameId,
       beneficiaryName: form.beneficiaryName,
-      bankAccountNo: form.bankAccountNumber
+      bankAccountNo: form.bankAccountNumber,
+      bankCountryCode: form.bankCountryCode
     },
     documents: mapDocument(),
     calculation: {
@@ -571,6 +589,8 @@ onMounted(() => {
       setData()
     })
   }
+
+  form.department = userData.value?.profile.costCenter || ''
 })
 
 provide('form', form)
