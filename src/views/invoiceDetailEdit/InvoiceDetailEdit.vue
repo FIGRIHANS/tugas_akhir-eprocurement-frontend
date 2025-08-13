@@ -244,7 +244,7 @@ const goNext = () => {
     verificationApi.detailInvoiceEdit = data
     if (form.value.statusCode === 4) {
       isLoading.value = true
-      verificationApi.postSubmission(mapDataVerif()).then(() => {
+      verificationApi.putSubmission(mapDataVerif()).then(() => {
         verificationApi.resetDetailInvoiceEdit()
         const idModal = document.querySelector('#success_data_edit_modal')
         const modal = KTModal.getInstance(idModal as HTMLElement)
