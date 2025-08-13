@@ -9,6 +9,7 @@ import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import UiLoading from '@/components/UiLoading.vue'
+import { useShareunits, useTypeShareholders } from '@/stores/vendor/reference'
 import type { IShareholderPayload } from '@/stores/vendor/types/vendor'
 import { useVendorUploadStore } from '@/stores/vendor/upload'
 import { useCompanyDeedDataStore } from '@/stores/vendor/vendor'
@@ -35,6 +36,8 @@ const errors = reactive<{ [key: string]: string }>({})
 const shareholdersStore = useCompanyDeedDataStore()
 const uploadStore = useVendorUploadStore()
 const userLoginStore = useLoginStore()
+const typeShareholders = useTypeShareholders()
+const shareUnits = useShareunits()
 
 const route = useRoute()
 
@@ -248,6 +251,8 @@ const handleDownload = async (path: string) => {
 
 onMounted(() => {
   shareholdersStore.getShareholders(Number(route.params.id))
+  typeShareholders.get()
+  shareUnits.get()
 })
 
 const filteredShareholders = computed(() =>
@@ -364,16 +369,9 @@ const filteredShareholders = computed(() =>
           label="Type shareholders"
           placeholder="--Type Shareholders--"
           :required="true"
-          :options="[
-            {
-              value: 1,
-              label: 'Shareholders 1',
-            },
-            {
-              value: 2,
-              label: 'Shareholders 2',
-            },
-          ]"
+          :options="
+            typeShareholders.data?.map((item) => ({ label: item.value, value: Number(item.code) })) || []
+          "
           value-key="value"
           text-key="label"
           v-model="payload.stockTypeID"
@@ -415,16 +413,7 @@ const filteredShareholders = computed(() =>
           label="Share Unit"
           placeholder="--Share Unit--"
           :required="true"
-          :options="[
-            {
-              value: 1,
-              label: 'Shareholders 1',
-            },
-            {
-              value: 2,
-              label: 'Shareholders 2',
-            },
-          ]"
+          :options="shareUnits.data?.map((item) => ({ label: item.value, value: Number(item.code) })) || []"
           value-key="value"
           text-key="label"
           v-model="payload.unitID"
