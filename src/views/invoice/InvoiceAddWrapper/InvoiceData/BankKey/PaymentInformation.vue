@@ -35,12 +35,12 @@
       <input v-model="form.bankAccountNumber" class="input" placeholder="" disabled/>
     </div>
     <!-- Bank Country -->
-    <!-- <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
+    <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
       <label class="form-label max-w-32">
         Bank Country
       </label>
       <input v-model="form.bankCountryCode" class="input" placeholder="" disabled/>
-    </div> -->
+    </div>
   </div>
 </template>
 
