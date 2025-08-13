@@ -141,7 +141,22 @@ const form = reactive<formTypes>({
   invoicePoGr: [],
   invoiceItem: [],
   additionalCost: [],
-  status: -1
+  status: -1,
+  isAlternativePayee: false,
+  isOneTimeVendor: false,
+  nameAlternative: '',
+  nameOtherAlternative: '',
+  streetAltiernative: '',
+  cityAlternative: '',
+  countryAlternative: '',
+  bankAccountNumberAlternative: '',
+  bankKeyAlternative: '',
+  bankCountryAlternative: '',
+  npwpNumberAlternative: '',
+  ktpNumberAlternative: '',
+  emailAlternative: '',
+  vendorNumber: '123456',
+  department: ''
 })
 
 const contentComponent = computed(() => {
@@ -158,6 +173,7 @@ const listDocumentType = computed(() => invoiceMasterApi.documentType)
 const vendorList = computed(() => invoiceMasterApi.vendorList)
 const invoiceDpList = computed(() => invoiceMasterApi.dpType)
 const detailPo = computed(() => invoiceApi.detailPo)
+const userData = computed(() => loginApi.userData)
 
 const checkInvoiceView = () => {
   return route.query.type === 'po-view'
@@ -573,6 +589,8 @@ onMounted(() => {
       setData()
     })
   }
+
+  form.department = userData.value?.profile.costCenter || ''
 })
 
 provide('form', form)
