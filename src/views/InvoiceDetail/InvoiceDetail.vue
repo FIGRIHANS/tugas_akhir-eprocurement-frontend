@@ -301,7 +301,8 @@ const mapDataVerif = () => {
       bankKey: form.value.bankKey,
       bankName: form.value.bankName,
       beneficiaryName: form.value.beneficiaryName,
-      bankAccountNo: form.value.bankAccountNo
+      bankAccountNo: form.value.bankAccountNo,
+      bankCountryCode: form.value.bankCountryCode
     },
     calculation: {
       subtotal: form.value.subtotal,

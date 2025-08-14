@@ -1,17 +1,17 @@
 <template>
   <div class="card flex-1">
     <div
-      class="card-header justify-start gap-[8px]"
+      class="card-header justify-center gap-[8px]"
       :class="{
         'px-[16px] py-[22px]': !checkIsNonPo(),
         'px-[20px] py-[8px]': checkIsNonPo()
       }"
     >
-      <div v-if="checkIsNonPo()" class="flex gap-4 mb-5" data-tabs="true">
-        <button class="btn btn-primary btn-clear" :class="{ 'active': isTabActive === 'payment' }" @click="isTabActive = 'payment'">
+      <div v-if="checkIsNonPo()" class="flex-1 flex gap-4" data-tabs="true">
+        <button class="btn btn-primary btn-clear flex-1 justify-center" :class="{ 'active': isTabActive === 'payment' }" @click="isTabActive = 'payment'">
           Payment Information
         </button>
-        <button class="btn btn-primary btn-clear" :class="{ 'active': isTabActive === 'alternative' }" @click="isTabActive = 'alternative'">
+        <button class="btn btn-primary btn-clear flex-1 justify-center" :class="{ 'active': isTabActive === 'alternative' }" @click="isTabActive = 'alternative'">
           Alternative Payment
         </button>
       </div>
