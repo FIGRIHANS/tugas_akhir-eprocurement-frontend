@@ -23,11 +23,26 @@ export interface formTypes extends documentFormTypes {
   bankAccountNumber: string
   swiftCode: string
   bankAddress: string
+  bankCountryCode: string
   accountName?: string
   npwpNumber?: string
   bankNameNew?: string
   bankAccountNumberNew?: string
   bankAddressNew?: string
+
+  isAlternativePayee: boolean
+  isOneTimeVendor: boolean
+  nameAlternative: string
+  nameOtherAlternative: string
+  streetAltiernative: string
+  cityAlternative: string
+  countryAlternative: string
+  bankAccountNumberAlternative: string
+  bankKeyAlternative: string
+  bankCountryAlternative: string
+  npwpNumberAlternative: string
+  ktpNumberAlternative: string
+  emailAlternative: string
 
   // Invoice Information
   companyCode: string
@@ -54,6 +69,9 @@ export interface formTypes extends documentFormTypes {
   description: string
   descriptionError?: boolean
 
+  vendorNumber: string
+  department: string
+
   //invoice calculation
   subtotal: number
   vatAmount: number
@@ -67,6 +85,7 @@ export interface formTypes extends documentFormTypes {
   additionalCost: itemsCostType[]
   additionalCostError?: boolean
   invoiceItem: invoiceItemTypes[]
+  invoiceItemError?: boolean
 
   status: number
 }

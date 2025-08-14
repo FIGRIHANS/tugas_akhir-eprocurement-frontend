@@ -71,6 +71,7 @@ interface ParamsSubmissionPayment {
   bankName: string
   beneficiaryName: string
   bankAccountNo: string
+  bankCountryCode: string
 }
 
 interface ParamsSubmissionDocument {
@@ -116,6 +117,7 @@ interface ParamsSubmissionCost {
   itemAmount: number
   debitCredit: string
   taxCode: string
+  vatAmount: number
   costCenter: string
   profitCenter: string
   assignment: string

@@ -118,6 +118,7 @@ const form = ref<formTypes>({
   bankName: '',
   beneficiaryName: '',
   bankAccountNo: '',
+  bankCountryCode: '',
   creditCardBillingId: '',
   vendorId: '',
   vendorName: '',
@@ -300,7 +301,8 @@ const mapDataVerif = () => {
       bankKey: form.value.bankKey,
       bankName: form.value.bankName,
       beneficiaryName: form.value.beneficiaryName,
-      bankAccountNo: form.value.bankAccountNo
+      bankAccountNo: form.value.bankAccountNo,
+      bankCountryCode: form.value.bankCountryCode
     },
     calculation: {
       subtotal: form.value.subtotal,
@@ -435,6 +437,7 @@ const setDataDefault = () => {
     creditCardBillingId: data?.header.creditCardBillingId || '',
     beneficiaryName: data?.payment.beneficiaryName || '',
     bankAccountNo: data?.payment.bankAccountNo || '',
+    bankCountryCode: data?.payment.bankCountryCode || '',
     vendorId: data?.vendor.vendorId || '',
     vendorName: data?.vendor.vendorName || '',
     npwp: data?.vendor.npwp || '',
@@ -486,6 +489,7 @@ const setDataEdit = () => {
     bankName: data?.bankName || '',
     beneficiaryName: data?.beneficiaryName || '',
     bankAccountNo: data?.bankAccountNo || '',
+    bankCountryCode: data?.bankCountryCode || '',
     creditCardBillingId: data?.creditCardBillingId || '',
     vendorId: data?.vendorId || '',
     vendorName: data?.vendorName || '',
@@ -506,7 +510,7 @@ const setDataEdit = () => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   if (route.query.type === '1') {
     activeStep.value = 'Verification'
     routes.value = [
@@ -532,7 +536,7 @@ onMounted(() => {
       }
     ]
   }
-  verificationApi.getInvoiceDetail(route.query.id?.toString() || '').then(() => {
+  await verificationApi.getInvoiceDetail(route.query.id?.toString() || '').then(() => {
     if (verificationApi.isFromEdit) {
       setDataEdit()
     } else {

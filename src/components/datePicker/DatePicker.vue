@@ -8,6 +8,7 @@
     ]"
   >
     <label
+      v-if="label"
       :class="{
         'text-[11px] px-[3px] text-gray-500 bg-white absolute z-50 -top-[6px] left-[7px] leading-[12px]':
           label && labelTop,

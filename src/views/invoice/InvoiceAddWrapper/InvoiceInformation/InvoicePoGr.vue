@@ -348,12 +348,13 @@ const goEdit = (item: itemsPoGrType) => {
   item.isEdit = !item.isEdit
   if (item.isEdit) {
     formEdit.taxCode = item.taxCode
-    formEdit.itemAmountLC = item.itemAmountLC
+    formEdit.itemAmountLC = form?.currency === 'IDR' ? item.itemAmountLC : item.itemAmountTC
     formEdit.vatAmount = item.vatAmount || 0
   } else {
     item.taxCode = formEdit.taxCode
-    item.itemAmountLC = formEdit.itemAmountLC
     item.vatAmount = formEdit.vatAmount
+    if (form?.currency === 'IDR') item.itemAmountLC = formEdit.itemAmountLC
+    else item.itemAmountTC = formEdit.itemAmountLC
     resetFormEdit()
   }
 }

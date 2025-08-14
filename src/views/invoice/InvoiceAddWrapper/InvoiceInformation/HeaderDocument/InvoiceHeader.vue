@@ -3,19 +3,35 @@
     <p class="mb-[16px] font-semibold text-base">Invoice Header</p>
     <div v-if="form">
       <!-- Invoice Type -->
-      <div v-if="checkPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div v-if="checkPo() || checkIsNonPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Invoice Type
           <span v-if="(form.status === 0 || form.status === -1 || form.status === 5) && !loginApi.isVendor"
             class="text-red-500 ml-[4px]">*</span>
         </label>
-        <!-- <input v-model="form.invoiceTypeName" class="input" placeholder="" disabled /> -->
-        <input v-if="(form.status !== 0 && form.status !== -1) || loginApi.isVendor" v-model="form.invoiceTypeName" class="input" placeholder="" disabled />
-        <select v-else v-model="form.invoiceType" class="select" :class="{ 'border-danger': form.invoiceTypeError }" @change="removeDpValue()" >
-          <option v-for="item of listInvoiceTypePo" :key="item.code" :value="item.code">
-            {{ item.name }}
-          </option>
-        </select>
+        <template v-if="checkIsNonPo()">
+          <select v-model="form.invoiceType" class="select" :class="{ 'border-danger': form.invoiceTypeError }" >
+            <option v-for="item of invoiceTypeNonPo" :key="item.id" :value="item.id">
+              {{ item.name }}
+            </option>
+          </select>
+        </template>
+        <template v-else>
+          <input v-if="(form.status !== 0 && form.status !== -1) || loginApi.isVendor" v-model="form.invoiceTypeName" class="input" placeholder="" disabled />
+          <select v-else v-model="form.invoiceType" class="select" :class="{ 'border-danger': form.invoiceTypeError }" @change="removeDpValue()" >
+            <option v-for="item of listInvoiceTypePo" :key="item.code" :value="item.code">
+              {{ item.name }}
+            </option>
+          </select>
+        </template>
+      </div>
+      <!-- Vendor No -->
+      <div v-if="checkIsNonPo()" class="flex items-baseline flex-wrap lg:flex-nowrap py-[8px]">
+        <label class="form-label">
+          Vendor No.
+          <span class="text-red-500 ml-[4px]">*</span>
+        </label>
+        <input v-model="form.vendorId" class="input" placeholder="" disabled />
       </div>
       <!-- DP Option -->
       <div v-if="form.invoiceType === '901'" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
@@ -138,6 +154,29 @@ const form = inject<formTypes>('form')
 const route = useRoute()
 const typeForm = ref<string>('')
 
+const invoiceTypeNonPo = ref([
+  {
+    id: '1',
+    name: 'Reimbursement'
+  },
+  {
+    id: '2',
+    name: 'Credit Card'
+  },
+  {
+    id: '3',
+    name: 'CAS'
+  },
+  {
+    id: '4',
+    name: 'LBA'
+  },
+  {
+    id: '5',
+    name: 'Petty Cash'
+  }
+])
+
 const currencyList = computed(() => {
   return invoiceMasterApi.currency
   // if (form?.invoicePoGr.length === 0 || !form?.invoicePoGr) {
@@ -157,6 +196,10 @@ const listInvoiceTypePo = computed(() => invoiceMasterApi.invoicePoType)
 
 const checkPo = () => {
   return typeForm.value === 'po'
+}
+
+const checkIsNonPo = () => {
+  return route.query.type === 'nonpo'
 }
 
 const removeDpValue = () => {

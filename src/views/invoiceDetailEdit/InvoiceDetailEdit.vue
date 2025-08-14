@@ -99,6 +99,7 @@ const form = ref<formTypes>({
   bankName: '',
   beneficiaryName: '',
   bankAccountNo: '',
+  bankCountryCode: '',
   vendorId: '',
   vendorName: '',
   npwp: '',
@@ -243,7 +244,7 @@ const goNext = () => {
     verificationApi.detailInvoiceEdit = data
     if (form.value.statusCode === 4) {
       isLoading.value = true
-      verificationApi.postSubmission(mapDataVerif()).then(() => {
+      verificationApi.putSubmission(mapDataVerif()).then(() => {
         verificationApi.resetDetailInvoiceEdit()
         const idModal = document.querySelector('#success_data_edit_modal')
         const modal = KTModal.getInstance(idModal as HTMLElement)
@@ -330,6 +331,7 @@ const setDataEdit = () => {
     bankName: data?.bankName || '',
     beneficiaryName: data?.beneficiaryName || '',
     bankAccountNo: data?.bankAccountNo || '',
+    bankCountryCode: data?.bankCountryCode || '',
     vendorId: data?.vendorId || '',
     vendorName: data?.vendorName || '',
     npwp: data?.npwp || '',
@@ -426,6 +428,7 @@ const setDataDefault = () => {
     bankName: data?.payment.bankName || '',
     beneficiaryName: data?.payment.beneficiaryName || '',
     bankAccountNo: data?.payment.bankAccountNo || '',
+    bankCountryCode: data?.payment.bankCountryCode || '',
     vendorId: data?.vendor.vendorId || '',
     vendorName: data?.vendor.vendorName || '',
     npwp: data?.vendor.npwp || '',
@@ -481,7 +484,8 @@ const mapDataVerif = () => {
       bankKey: form.value.bankKey,
       bankName: form.value.bankName,
       beneficiaryName: form.value.beneficiaryName,
-      bankAccountNo: form.value.bankAccountNo
+      bankAccountNo: form.value.bankAccountNo,
+      bankCountryCode: form.value.bankCountryCode
     },
     calculation: {
       subtotal: form.value.subtotal,

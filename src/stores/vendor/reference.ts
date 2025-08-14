@@ -6,7 +6,7 @@ import type { ApiResponse } from '@/core/type/api'
 import axios from 'axios'
 
 const getReference = async (
-  type: 'BLACKLIST' | 'APPROVAL_STATUS' | 'APPROVAL_TYPE' | 'BLACKLIST_TYPE' | 'VERIFY_STATUS',
+  type: 'BLACKLIST' | 'APPROVAL_STATUS' | 'APPROVAL_TYPE' | 'BLACKLIST_TYPE' | 'VERIFY_STATUS' | 'STOCK_UNIT' | 'STOCK_OPTION',
 ) => {
   const response: ApiResponse<IReferenceList[]> = await vendorAPI.get(
     '/public/vendor/registration/reference',
@@ -141,3 +141,50 @@ export const useBlacklistTypeStore = defineStore('blacklistPeriod', () => {
 
   return { loading, error, type, getType }
 })
+
+export const useTypeShareholders = defineStore('typeShareholders', () => {
+  const loading = ref<boolean>(false)
+  const error = ref<string | null>(null)
+  const data = ref<IReferenceList[]>([])
+
+  const get = async () => {
+    loading.value = true
+    error.value = null
+
+    try {
+      data.value = await getReference('STOCK_OPTION')
+    } catch (err) {
+      if (err instanceof Error) {
+        if (axios.isAxiosError(err)) {
+          error.value = err.response?.data.result.message || 'Failed to get data'
+        }
+      }
+    }
+  }
+
+  return { data, get }
+})
+
+export const useShareunits = defineStore('shareUnits', () => {
+  const loading = ref<boolean>(false)
+  const error = ref<string | null>(null)
+  const data = ref<IReferenceList[]>([])
+
+  const get = async () => {
+    loading.value = true
+    error.value = null
+
+    try {
+      data.value = await getReference('STOCK_UNIT')
+    } catch (err) {
+      if (err instanceof Error) {
+        if (axios.isAxiosError(err)) {
+          error.value = err.response?.data.result.message || 'Failed to get data'
+        }
+      }
+    }
+  }
+
+  return { data, get }
+})
+

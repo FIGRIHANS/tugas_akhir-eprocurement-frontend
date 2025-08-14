@@ -6,6 +6,7 @@
         <div>
           <p class="text-lg font-medium text-center">Failed to Send to SAP</p>
           <p class="text-[13px] mt-[14px] text-center">
+            <!-- The invoice could not be sent to SAP due to a system error or invalid data. -->
             The invoice could not be sent to SAP due to the following reason:
             {{ verificationApi.errorMessageSap }}
           </p>

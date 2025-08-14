@@ -16,7 +16,30 @@
       <Transition mode="out-in">
         <component :is="contentComponent" />
       </Transition>
-      <div v-if="(form.status === 0 || form.status === -1 || form.status === 5) && !checkInvoiceView()"
+      <div v-if="checkIsNonPo()" class="flex align-items-center justify-between gap-[8px] mt-[24px]">
+        <div class="flex-1 flex gap-[8px]">
+          <button class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goBack">
+            <i class="ki-filled ki-arrow-left"></i>
+            Back
+          </button>
+          <button class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goSaveDraft">
+            Save as Draft
+            <i class="ki-duotone ki-bookmark"></i>
+          </button>
+        </div>
+        <div class="flex-1 flex gap-[8px] justify-end">
+          <button class="btn btn-primary" :disabled="isSubmit || tabNow !== 'information'" @click="checkBudget">
+            Budget Checking
+            <i class="ki-duotone ki-dollar"></i>
+          </button>
+          <button class="btn btn-primary" :disabled="isSubmit || (!isCheckBudget && tabNow === 'information')" @click="goNext">
+            {{ tabNow !== 'preview' ? 'Next' : 'Submit' }}
+            <i v-if="tabNow !== 'preview'" class="ki-duotone ki-black-right"></i>
+            <i v-else class="ki-duotone ki-paper-plane"></i>
+          </button>
+        </div>
+      </div>
+      <div v-else-if="(form.status === 0 || form.status === -1 || form.status === 5) && !checkInvoiceView()"
         class="flex justify-between items-center gap-[8px] mt-[24px]">
         <button class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goSaveDraft">
           Save as Draft
@@ -28,7 +51,7 @@
             Back
           </button>
           <button class="btn btn-primary" :disabled="isSubmit" @click="goNext">
-            {{ tabNow !== 'preview' ? 'Lanjut' : 'Submit' }}
+            {{ tabNow !== 'preview' ? 'Next' : 'Submit' }}
             <i v-if="tabNow !== 'preview'" class="ki-duotone ki-black-right"></i>
             <i v-else class="ki-duotone ki-paper-plane"></i>
           </button>
@@ -51,8 +74,10 @@
         </button>
       </div>
     </div>
-    <ModalSuccess @afterClose="goToList" />
+    <ModalSuccess :isDraft="isClickDraft" @afterClose="goToList" />
     <ModalErrorDocumentNumberModal />
+    <ModalSuccessBudgetCheck @afterClose="isCheckBudget = true" />
+    <ModalFailedBudgetCheck />
   </div>
 </template>
 
@@ -80,6 +105,8 @@ const InvoiceInformation = defineAsyncComponent(() => import('./InvoiceAddWrappe
 const InvoicePreview = defineAsyncComponent(() => import('./InvoiceAddWrapper/InvoicePreview.vue'))
 const ModalSuccess = defineAsyncComponent(() => import('./InvoiceAddWrapper/InvoicePreview/ModalSuccess.vue'))
 const ModalErrorDocumentNumberModal = defineAsyncComponent(() => import('./InvoiceAddWrapper/ErrorDocumentNumberModal.vue'))
+const ModalSuccessBudgetCheck = defineAsyncComponent(() => import('./InvoiceAddWrapper/ModalSuccessBudgetCheck.vue'))
+const ModalFailedBudgetCheck = defineAsyncComponent(() => import('./InvoiceAddWrapper/ModalFailedBudgetCheck.vue'))
 
 const invoiceApi = useInvoiceSubmissionStore()
 const invoiceMasterApi = useInvoiceMasterDataStore()
@@ -88,6 +115,8 @@ const router = useRouter()
 const route = useRoute()
 const tabNow = ref<string>('data')
 const isSubmit = ref<boolean>(false)
+const isCheckBudget = ref<boolean>(false)
+const isClickDraft = ref<boolean>(false)
 
 const routes = ref<routeTypes[]>([
   {
@@ -114,6 +143,7 @@ const form = reactive<formTypes>({
   bankAccountNumber: '',
   swiftCode: '',
   bankAddress: '',
+  bankCountryCode: '',
   invoiceNo: '',
   companyCode: '',
   companyName: '',
@@ -123,7 +153,7 @@ const form = reactive<formTypes>({
   invoiceDp: '9011',
   amountInvoice: '',
   taxNoInvoice: '',
-  remainingDpAmount: '1.000.000.000',
+  remainingDpAmount: '',
   dpAmountDeduction: '',
   currency: 'IDR',
   description: '',
@@ -140,7 +170,22 @@ const form = reactive<formTypes>({
   invoicePoGr: [],
   invoiceItem: [],
   additionalCost: [],
-  status: -1
+  status: -1,
+  isAlternativePayee: false,
+  isOneTimeVendor: false,
+  nameAlternative: '',
+  nameOtherAlternative: '',
+  streetAltiernative: '',
+  cityAlternative: '',
+  countryAlternative: '',
+  bankAccountNumberAlternative: '',
+  bankKeyAlternative: '',
+  bankCountryAlternative: '',
+  npwpNumberAlternative: '',
+  ktpNumberAlternative: '',
+  emailAlternative: '',
+  vendorNumber: '123456',
+  department: ''
 })
 
 const contentComponent = computed(() => {
@@ -157,9 +202,14 @@ const listDocumentType = computed(() => invoiceMasterApi.documentType)
 const vendorList = computed(() => invoiceMasterApi.vendorList)
 const invoiceDpList = computed(() => invoiceMasterApi.dpType)
 const detailPo = computed(() => invoiceApi.detailPo)
+const userData = computed(() => loginApi.userData)
 
 const checkInvoiceView = () => {
   return route.query.type === 'po-view'
+}
+
+const checkIsNonPo = () => {
+  return route.query.type === 'nonpo'
 }
 
 const checkInvoiceData = () => {
@@ -207,13 +257,27 @@ const checkFieldAdditional = () => {
   return status
 }
 
+const checkActiveEditInvoiceItem = () => {
+  let status = false
+  for (const item of form.invoiceItem) {
+    if (status) return
+    if (item.isEdit) status = true
+  }
+  return status
+}
+
 const checkInvoiceInformation = () => {
   form.companyCodeError = useCheckEmpty(form.companyCode).isError
   form.invoiceNoVendorError = useCheckEmpty(form.invoiceNoVendor).isError
   form.invoiceDateError = useCheckEmpty(form.invoiceDate).isError
   form.invoiceDocumentError = form.invoiceDocument === null
-  form.invoicePoGrError = form.invoicePoGr.length === 0 || checkActiveEditPoGr()
-  form.additionalCostError = checkActiveEditAdditional() || checkFieldAdditional()
+  
+  if (!checkIsNonPo()) {
+    form.invoicePoGrError = form.invoicePoGr.length === 0 || checkActiveEditPoGr()
+    form.additionalCostError = checkActiveEditAdditional() || checkFieldAdditional()
+  } else {
+    form.invoiceItemError = form.invoiceItem.length === 0 || checkActiveEditInvoiceItem()
+  }
 
   if(form.invoiceType !== '903'){
     form.descriptionError = useCheckEmpty(form.description).isError
@@ -309,6 +373,7 @@ const mapAdditionalCost = () => {
       itemAmount: Number(item.itemAmount),
       debitCredit: item.debitCredit,
       taxCode: item.taxCode,
+      vatAmount: item.vatAmount,
       costCenter: item.costCenter,
       profitCenter: item.profitCenter,
       assignment: item.assignment,
@@ -346,8 +411,8 @@ const mapDataPost = () => {
       taxNo: form.taxNoInvoice,
       currCode: form.currency,
       notes: form.description,
-      statusCode: 1,
-      statusName: 'Waiting to Verify'
+      statusCode: isClickDraft.value ? 0 : 1,
+      statusName: isClickDraft.value ? 'Drafted' : 'Waiting to Verify'
     },
     vendor: {
       vendorId: Number(form.vendorId),
@@ -359,7 +424,8 @@ const mapDataPost = () => {
       bankKey: form.bankKeyId,
       bankName: form.bankNameId,
       beneficiaryName: form.beneficiaryName,
-      bankAccountNo: form.bankAccountNumber
+      bankAccountNo: form.bankAccountNumber,
+      bankCountryCode: form.bankCountryCode
     },
     documents: mapDocument(),
     calculation: {
@@ -418,6 +484,7 @@ const goNext = () => {
 }
 
 const goToList = () => {
+  isClickDraft.value = false
   router.push({
     name: 'invoice-list'
   })
@@ -428,10 +495,19 @@ const goSaveDraft = () => {
   data.header.statusCode = 0
   data.header.statusName = 'Draft'
   isSubmit.value = true
-  invoiceApi.postSubmission(data).then(() => {
-    const idModal = document.querySelector('#success_invoice_modal')
-    const modal = KTModal.getInstance(idModal as HTMLElement)
-    modal.show()
+  isClickDraft.value = true
+  invoiceApi.postSubmission(data).then((response) => {
+    if (response.statusCode === 200) {
+      const idModal = document.querySelector('#success_invoice_modal')
+      const modal = KTModal.getInstance(idModal as HTMLElement)
+      modal.show()
+    } else {
+      if (response.result.message.includes('Invoice Document Number')) {
+        const idModal = document.querySelector('#error_document_number_modal')
+        const modal = KTModal.getInstance(idModal as HTMLElement)
+        modal.show()
+      }
+    }
   })
     .catch((error) => {
       console.error(error)
@@ -454,6 +530,7 @@ const setData = () => {
     form.bankNameId = detail.payment.bankName
     form.beneficiaryName = detail.payment.beneficiaryName
     form.bankAccountNumber = detail.payment.bankAccountNo
+    form.bankCountryCode = detail.payment.bankCountryCode
     form.invoiceDp = detail.header.invoiceDPCode ? detail.header.invoiceDPCode.toString() : ''
     form.companyCode = detail.header.companyCode
     form.invoiceNoVendor = detail.header.documentNo ? detail.header.documentNo.toString() : ''
@@ -476,6 +553,7 @@ const setData = () => {
         grDocumentItem: item.grDocumentItem,
         grDocumentDate: item.grDocumentDate,
         taxCode: item.taxCode,
+        vatAmount: item.vatAmount,
         currencyLC: form.currency,
         currencyTC: form.currency,
         itemAmountLC: item.itemAmount,
@@ -506,6 +584,7 @@ const setData = () => {
         itemAmount: item.itemAmount.toString(),
         debitCredit: item.debitCredit,
         taxCode: item.taxCode,
+        vatAmount: item.vatAmount,
         costCenter: item.costCenter,
         profitCenter: item.profitCenter,
         assignment: item.assignment,
@@ -552,6 +631,12 @@ const setData = () => {
   }
 }
 
+const checkBudget = () => {
+  const idModal = document.querySelector('#success_budget_check_modal')
+  const modal = KTModal.getInstance(idModal as HTMLElement)
+  modal.show()
+}
+
 onMounted(() => {
   invoiceMasterApi.getTaxCode()
   invoiceMasterApi.getInvoicePoType()
@@ -571,6 +656,8 @@ onMounted(() => {
       setData()
     })
   }
+
+  form.department = userData.value?.profile.costCenter || ''
 })
 
 provide('form', form)

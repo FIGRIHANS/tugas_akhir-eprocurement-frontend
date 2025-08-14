@@ -135,7 +135,8 @@ const colorBadge = (statusCode: number) => {
     1: 'badge-warning',
     2: 'badge-info',
     4: 'badge-success',
-    5: 'badge-danger'
+    5: 'badge-danger',
+    7: 'badge-primary'
   } as { [key: number]: string }
   return list[statusCode]
 }

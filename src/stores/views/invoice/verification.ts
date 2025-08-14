@@ -53,6 +53,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
       bankName: '',
       beneficiaryName: '',
       bankAccountNo: '',
+      bankCountryCode: '',
       vendorId: '',
       vendorName: '',
       npwp: '',
@@ -119,6 +120,12 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     return response.data.statusCode
   }
 
+  const putSubmission = async (data: PostVerificationTypes) => {
+    const response: ApiResponse<void> = await invoiceApi.put(`/invoice/approval`, data)
+
+    return response.data.result
+  }
+
   return {
     listPo,
     detailInvoice,
@@ -131,6 +138,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     getListPo,
     getInvoiceDetail,
     postReject,
-    postSap
+    postSap,
+    putSubmission
   }
 })

@@ -20,13 +20,13 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(item, index) in form.additionalCost" :key="index">
+          <tr v-for="(item, index) in form.additionalCost" :key="index" class="invoice__field-items">
             <td>{{ index + 1 }}</td>
             <td>{{ getActivityName(item.activity) || '-' }}</td>
             <td>{{ item.itemAmount || '-' }}</td>
             <td>{{ getDebitCreditName(item.debitCredit) || '-' }}</td>
             <td>{{ item.taxCode || '-' }}</td>
-            <td>{{ item.vatAmount }}</td>
+            <td>{{ form.currency === 'IDR' ? useFormatIdr(item.vatAmount) : useFormatUsd(item.vatAmount) }}</td>
             <td>{{ item.costCenter || '-' }}</td>
             <td>{{ item.profitCenter || '-' }}</td>
             <td>{{ item.assignment || '-' }}</td>
@@ -42,6 +42,7 @@
 
 <script lang="ts" setup>
 import { ref, computed, inject } from 'vue'
+import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import type { formTypes } from '../../types/invoiceAddWrapper'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 

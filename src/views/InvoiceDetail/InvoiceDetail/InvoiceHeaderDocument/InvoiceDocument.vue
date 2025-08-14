@@ -63,14 +63,14 @@ const download = (path: string) => {
     const url = window.URL.createObjectURL(response.data)
     window.open(url, '_blank')
     URL.revokeObjectURL(url)
-    // const a = document.createElement('a')
-    // a.href = url
-    // const splitPath = path.split(/\\/)
-    // const filename = splitPath[splitPath.length - 1]
+  //   const a = document.createElement('a')
+  //   a.href = url
+  //   const splitPath = path.split(/\\/)
+  //   const filename = splitPath[splitPath.length - 1]
 
-    // a.download = filename
-    // a.click()
-    // URL.revokeObjectURL(url)
+  //   a.download = filename
+  //   a.click()
+  //   URL.revokeObjectURL(url)
   })
 }
 
