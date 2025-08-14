@@ -3,7 +3,7 @@
     <div class="card-header">
       <h3 class="card-title">Expert Personnel Data</h3>
 
-      <UiButton variant="primary" data-modal-toggle="#modal-expert-personnel">
+      <UiButton variant="primary" @click="openModalForm">
         <UiIcon name="plus-circle" variant="duotone" />
         Add
       </UiButton>
@@ -53,13 +53,13 @@
                         Download
                       </span>
                     </div>
-                    <div class="menu-item text-warning" @click="editData">
+                    <div class="menu-item text-warning" @click="editData(item.id)">
                       <span class="menu-link">
                         <UiIcon name="notepad-edit" variant="duotone" class="menu-icon" />
                         Edit
                       </span>
                     </div>
-                    <div class="menu-item text-danger" @click="deleteData">
+                    <div class="menu-item text-danger" @click="deleteData(item.id)">
                       <span class="menu-link">
                         <UiIcon name="cross-circle" variant="duotone" class="menu-icon" />
                         Hapus
@@ -79,7 +79,12 @@
       </table>
     </div>
 
-    <ModalForm @on-success="onSubmitSuccess" @on-error="onSubmitError" />
+    <ModalForm
+      :id="selectedId"
+      @on-success="onSubmitSuccess"
+      @on-error="onSubmitError"
+      @on-close="selectedId = 0"
+    />
     <ModalSuccess />
     <ModalError />
     <ModalDelete />
@@ -91,7 +96,7 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import ModalForm from './ModalForm.vue'
 import { useExpertPersonnelDataStore } from '@/stores/vendor/vendor'
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import UiLoading from '@/components/UiLoading.vue'
 import { KTModal } from '@/metronic/core'
@@ -101,6 +106,8 @@ import ModalDelete from './ModalDelete.vue'
 
 const route = useRoute()
 const expertPStore = useExpertPersonnelDataStore()
+
+const selectedId = ref(0)
 
 const tabCols = [
   '',
@@ -115,18 +122,25 @@ const downloadFile = () => {
   console.log('downloadFile')
 }
 
-const editData = () => {
-  console.log('editData')
-}
-
-const deleteData = () => {
-  console.log('deleteData')
-}
-
-const closeModalForm = () => {
+const editData = (id: number) => {
+  selectedId.value = id
   const idModal = document.querySelector('#modal-expert-personnel')
   const modal = KTModal.getInstance(idModal as HTMLElement)
-  modal.hide()
+  modal.show()
+}
+
+const deleteData = (id: number) => {
+  selectedId.value = id
+  const idModal = document.querySelector('#modal-delete')
+  const modal = KTModal.getInstance(idModal as HTMLElement)
+  modal.show()
+}
+
+const openModalForm = () => {
+  selectedId.value = 0
+  const idModal = document.querySelector('#modal-expert-personnel')
+  const modal = KTModal.getInstance(idModal as HTMLElement)
+  modal.show()
 }
 
 const openModalSuccess = () => {
@@ -142,12 +156,10 @@ const openModalError = () => {
 }
 
 const onSubmitSuccess = () => {
-  closeModalForm()
   openModalSuccess()
 }
 
 const onSubmitError = () => {
-  closeModalForm()
   openModalError()
 }
 

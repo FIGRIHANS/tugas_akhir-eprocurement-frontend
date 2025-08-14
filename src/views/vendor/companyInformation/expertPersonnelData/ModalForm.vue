@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import {
   type ErrorExportPersonnelDataType,
   type PayloadExportPersonnelDataType,
@@ -23,7 +23,8 @@ import { useExpertPersonnelDataStore } from '@/stores/vendor/vendor'
 import { cloneDeep } from 'lodash'
 import { defaultPayload, defaultPayloadError } from './static'
 
-const emit = defineEmits(['onSuccess', 'onError'])
+const props = defineProps<{ id: number }>()
+const emit = defineEmits(['onSuccess', 'onError', 'onClose'])
 
 const route = useRoute()
 
@@ -70,6 +71,7 @@ const closeModal = () => {
   payload.value = cloneDeep(defaultPayload)
   payloadError.value = cloneDeep(defaultPayloadError)
   tab.value.active = 'personal_information'
+  emit('onClose')
 }
 
 const nextStep = () => {
@@ -223,6 +225,45 @@ const onSubmit = async () => {
     closeModal()
   }
 }
+
+watch(
+  () => props.id,
+  async (newId) => {
+    const selectedItem = expertStore.data.find((data) => data.id === newId)
+
+    if (selectedItem) {
+      const certificates = await expertStore.getCertificates(selectedItem.id)
+      console.log(certificates)
+      payload.value = {
+        ...payload.value,
+        name: selectedItem.name,
+        address: selectedItem.address,
+        dateOfBirth: selectedItem.dateOfBirth,
+        education: selectedItem.education,
+        expertise: selectedItem.expertise,
+        gender: selectedItem.gender.toLocaleLowerCase(),
+        id: selectedItem.id,
+        nationality: selectedItem.nationality,
+        position: selectedItem.position,
+        status: selectedItem.status,
+        certificates: certificates.result.content.map((certi) => ({
+          vendorExpertId: certi.vendorExpertsID,
+          description: certi.description,
+          docUrl: certi.docUrl,
+          endDate: certi.endDate,
+          id: certi.id,
+          isActive: certi.isActive,
+          startDate: certi.startDate,
+          type: certi.type,
+        })),
+      }
+    }
+  },
+  {
+    immediate: true,
+    deep: true,
+  },
+)
 
 onMounted(() => {
   lookupStore.getVendorCountries()

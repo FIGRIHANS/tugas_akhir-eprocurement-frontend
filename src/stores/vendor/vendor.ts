@@ -6,6 +6,7 @@ import type {
   IAdministration,
   IAdministrationPayload,
   IDeletePaymentPayload,
+  IExpertPersonnelCertificateData,
   IExpertPersonnelData,
   ILicense,
   IPayment,
@@ -370,6 +371,13 @@ export const useExpertPersonnelDataStore = defineStore('expert-personnel-data', 
     }
   }
 
+  const getCertificates = async (id: number) => {
+    const response: ApiResponse<IExpertPersonnelCertificateData[]> = await vendorAPI.get(
+      `/public/vendorchangedata/vendorexpert-certificate?vendorExpertId=${id}`,
+    )
+    return response.data
+  }
+
   const update = async (payload: PayloadExportPersonnelDataType) => {
     const response: ApiResponse = await vendorAPI.post(
       '/public/vendorchangedata/post/vendorexpert',
@@ -378,7 +386,7 @@ export const useExpertPersonnelDataStore = defineStore('expert-personnel-data', 
     return response.data
   }
 
-  return { loading, error, data, getData, update }
+  return { loading, error, data, getData, update, getCertificates }
 })
 export const useCompanyDeedDataStore = defineStore('company-deed-data', () => {
   const shareholdersData = ref<any>([]) ///TODO: change type soon

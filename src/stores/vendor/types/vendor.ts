@@ -346,3 +346,19 @@ export interface IExpertPersonnelData {
   modifiedDate: string | null
   isActive: boolean
 }
+
+export interface IExpertPersonnelCertificateData {
+  id: number
+  vendorExpertsID: number
+  startDate: string
+  endDate: string
+  description: string
+  docUrl: string
+  type: number
+  typeCertif: string
+  createdBy: string
+  createdDate: string
+  modifiedBy: string | null
+  modifiedDate: string | null
+  isActive: boolean
+}
