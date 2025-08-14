@@ -20,6 +20,8 @@ import UiFileUpload from '@/components/ui/atoms/file-upload/UiFileUpload.vue'
 import { useVendorUploadStore } from '@/stores/vendor/upload'
 import UiLoading from '@/components/UiLoading.vue'
 import { useExpertPersonnelDataStore } from '@/stores/vendor/vendor'
+import { cloneDeep } from 'lodash'
+import { defaultPayload, defaultPayloadError } from './static'
 
 const emit = defineEmits(['onSuccess', 'onError'])
 
@@ -61,64 +63,12 @@ const certificateType = ref<IReferenceList[]>([])
 const uploadLoading = ref<boolean>(false)
 const submitLoading = ref<boolean>(false)
 
-const payload = ref<PayloadExportPersonnelDataType>({
-  name: '',
-  action: 0,
-  address: '',
-  dateOfBirth: '',
-  education: '',
-  email: '',
-  expertise: '',
-  gender: '',
-  id: 0,
-  isActive: true,
-  isTemporary: false,
-  nationality: 0,
-  position: '',
-  refVendorID: 0,
-  status: 0,
-  user: '',
-  vendorID: 0,
-  yearOfExperience: 0,
-  certificates: [],
-})
-
-const payloadError = ref<ErrorExportPersonnelDataType>({
-  action: false,
-  address: false,
-  dateOfBirth: false,
-  education: false,
-  email: false,
-  expertise: false,
-  gender: false,
-  id: false,
-  isActive: false,
-  isTemporary: false,
-  name: false,
-  nationality: false,
-  position: false,
-  refVendorID: false,
-  status: false,
-  user: false,
-  vendorID: false,
-  yearOfExperience: false,
-})
+const payload = ref<PayloadExportPersonnelDataType>(cloneDeep(defaultPayload))
+const payloadError = ref<ErrorExportPersonnelDataType>(cloneDeep(defaultPayloadError))
 
 const closeModal = () => {
-  Object.keys(payload.value).forEach((key) => {
-    const type = typeof (
-      payload.value as Record<string, string | number | boolean | Array<unknown>>
-    )[key]
-    if (type === 'string') {
-      ;(payload.value as Record<string, string | number | boolean | Array<unknown>>)[key] = ''
-    }
-    if (type === 'number') {
-      ;(payload.value as Record<string, string | number | boolean | Array<unknown>>)[key] = 0
-    }
-  })
-  Object.keys(payloadError.value).forEach((key) => {
-    ;(payloadError.value as Record<string, string | number | boolean>)[key] = false
-  })
+  payload.value = cloneDeep(defaultPayload)
+  payloadError.value = cloneDeep(defaultPayloadError)
   tab.value.active = 'personal_information'
 }
 
@@ -518,11 +468,6 @@ onMounted(() => {
           <UiButton variant="primary" outline @click="tab.active = 'personal_information'">
             <UiIcon name="black-left" variant="filled" />
             Back
-          </UiButton>
-
-          <UiButton variant="primary" outline @click="calculateYOE">
-            <UiIcon name="black-left" variant="filled" />
-            hitung experience
           </UiButton>
 
           <UiButton variant="primary" @click="onSubmit" :disabled="submitLoading">
