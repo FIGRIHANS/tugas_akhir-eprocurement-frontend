@@ -14,11 +14,11 @@
             </tr>
             <tr>
               <td class="!border-b-0">Notary</td>
-              <td class="!border-b-0">{{ formatDate(companyDeedData?.documentDate) }}</td>
+              <td class="!border-b-0">{{ companyDeedData?.cityName }}</td>
             </tr>
             <tr>
               <td class="!border-b-0">Notary Place</td>
-              <td class="!border-b-0">{{ formatDate(companyDeedData?.documentDate) }}</td>
+              <td class="!border-b-0">{{ companyDeedData?.cityName }}</td>
             </tr>
             <tr>
               <td class="!border-b-0">File</td>
@@ -134,32 +134,16 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="x in 4" :key="x">
+            <tr v-for="data in shareholderData" :key="data.stockID">
+              <td>{{ data.isActive ? 'AKTIF' : 'TIDAK AKTIF' }}</td>
+              <td>{{ data.ownerName }}</td>
+              <td>{{ formatDate(data.ownerDOB) }}</td>
+              <td>{{ data.quantity }}</td>
+              <td>{{ data.shareUnit }}</td>
+              <td>{{ data.ownerID }}</td>
               <td>
-                <div class="dropdown" data-dropdown="true" data-dropdown-trigger="click">
-                  <button class="dropdown-toggle px-0 size-8 flex justify-center btn btn-light">
-                    <UiIcon name="dots-vertical" />
-                  </button>
-
-                  <div class="dropdown-content w-full max-w-56" data-dropdown-dismiss="true">
-                    <div class="menu menu-default flex flex-col w-full text-sm">
-                      <div class="menu-item text-primary" @click="downloadFile">
-                        <span class="menu-link">
-                          <UiIcon name="file-down" variant="duotone" class="menu-icon" />
-                          Download
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <AttachmentView :file-data="{ name: data.ownerID, path: data.ownerIDUrl }" />
               </td>
-              <td>Aktif</td>
-              <td>John Doe {{ x }}</td>
-              <td>{{ x }} Januari 2025</td>
-              <td>{{ x }}0.000.000</td>
-              <td>Lembar</td>
-              <td>123456789{{ x }}</td>
-              <td>itulah</td>
             </tr>
           </tbody>
         </table>
@@ -175,14 +159,27 @@ import { useCompanyDeedDataStore } from '@/stores/vendor/vendor'
 
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import { formatDate } from '@/composables/date-format'
+import AttachmentView from '@/components/ui/attachment/AttachmentView.vue'
 
 const props = defineProps<{ vendorId: number | undefined }>()
 
 const companyDeedDataStore = useCompanyDeedDataStore()
 
-const companyDeedData = computed(() => companyDeedDataStore.vendorLegalDocData[0])
-const latestAmendmentData = computed(() => companyDeedDataStore.vendorLegalDocData[1])
-const ratificationData = computed(() => companyDeedDataStore.vendorLegalDocData[2])
+const companyDeedData = computed(() =>
+  companyDeedDataStore.vendorLegalDocData.find(
+    (item) => item?.value === 'Akta Pendirian' && item?.isActive,
+  ),
+)
+const latestAmendmentData = computed(() =>
+  companyDeedDataStore.vendorLegalDocData.find(
+    (item) => item?.value === 'Akta Perubahan Terakhir' && item?.isActive,
+  ),
+)
+const ratificationData = computed(() =>
+  companyDeedDataStore.vendorLegalDocData.find(
+    (item) => item?.value === 'Pengesahan Kemenkumham' && item?.isActive,
+  ),
+)
 const shareholderData = computed(() => companyDeedDataStore.shareholdersData)
 
 const downloadFile = () => {

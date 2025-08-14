@@ -372,7 +372,7 @@ export const useExpertPersonnelDataStore = defineStore('expert-personnel-data', 
 })
 export const useCompanyDeedDataStore = defineStore('company-deed-data', () => {
   const shareholdersData = ref<any>([]) ///TODO: change type soon
-  const vendorLegalDocData = ref<any>([]) ///TODO: change type soon
+  const vendorLegalDocData = ref<any[]>([]) ///TODO: change type soon
   const shareholdersLoading = ref<boolean>(false)
   const vendorLegalDocLoading = ref<boolean>(false)
   const shareholdersError = ref<string | null>(null)
@@ -402,7 +402,7 @@ export const useCompanyDeedDataStore = defineStore('company-deed-data', () => {
   const getVendorLegalDocument = async (vendorId: number) => {
     vendorLegalDocLoading.value = true
     try {
-      const response: ApiResponse = await vendorAPI.get(
+      const response: ApiResponse<any[]> = await vendorAPI.get(
         '/public/vendorchangedata/vendorlegaldocument',
         {
           params: { vendorId },
