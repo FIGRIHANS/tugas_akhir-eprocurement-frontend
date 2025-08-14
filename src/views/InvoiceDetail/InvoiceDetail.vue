@@ -509,7 +509,7 @@ const setDataEdit = () => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   if (route.query.type === '1') {
     activeStep.value = 'Verification'
     routes.value = [
@@ -535,7 +535,7 @@ onMounted(() => {
       }
     ]
   }
-  verificationApi.getInvoiceDetail(route.query.id?.toString() || '').then(() => {
+  await verificationApi.getInvoiceDetail(route.query.id?.toString() || '').then(() => {
     if (verificationApi.isFromEdit) {
       setDataEdit()
     } else {
