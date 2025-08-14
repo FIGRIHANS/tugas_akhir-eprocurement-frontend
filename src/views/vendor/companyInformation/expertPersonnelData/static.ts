@@ -1,0 +1,47 @@
+import type {
+  ErrorExportPersonnelDataType,
+  PayloadExportPersonnelDataType,
+} from './types/expertPersonnelData'
+
+export const defaultPayload: PayloadExportPersonnelDataType = {
+  name: '',
+  action: 0,
+  address: '',
+  dateOfBirth: '',
+  education: '',
+  email: '',
+  expertise: '',
+  gender: '',
+  id: 0,
+  isActive: true,
+  isTemporary: false,
+  nationality: 0,
+  position: '',
+  refVendorID: 0,
+  status: 0,
+  user: '',
+  vendorID: 0,
+  yearOfExperience: 0,
+  certificates: [],
+}
+
+export const defaultPayloadError: ErrorExportPersonnelDataType = {
+  action: false,
+  address: false,
+  dateOfBirth: false,
+  education: false,
+  email: false,
+  expertise: false,
+  gender: false,
+  id: false,
+  isActive: false,
+  isTemporary: false,
+  name: false,
+  nationality: false,
+  position: false,
+  refVendorID: false,
+  status: false,
+  user: false,
+  vendorID: false,
+  yearOfExperience: false,
+}

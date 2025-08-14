@@ -9,7 +9,7 @@
   >
     <label
       v-if="label && !row"
-      class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px]"
+      class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px] z-10"
     >
       {{ label }}
       <span v-if="required" class="text-danger"> * </span>

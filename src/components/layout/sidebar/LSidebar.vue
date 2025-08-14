@@ -132,6 +132,20 @@ const filteredSidebarMenu = computed(() => {
             : [],
         }))
     }
+
+    if (userStore.userData?.profile?.profileId === 3132) {
+      return sidebarMenu
+        .filter(
+          (menu) =>
+            menu.id !== 'company-information' &&
+            menu.id !== 'e-invoice' &&
+            menu.id !== 'userManagement',
+        )
+        .map((menu) => ({
+          ...menu,
+          child: menu.child ? menu.child.filter((child) => child.id !== 'vendor-blacklist') : [],
+        }))
+    }
   }
 
   return sidebarMenu.filter(
