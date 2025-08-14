@@ -15,6 +15,18 @@ const getReference = async (
   return response.data.result.content
 }
 
+export const useRefStore = defineStore('sysReference', () => {
+  const getReference = async (type: string) => {
+    const response: ApiResponse<IReferenceList[]> = await vendorAPI.get(
+      '/public/vendor/registration/reference',
+      { params: { type } },
+    )
+    return response.data
+  }
+
+  return { getReference }
+})
+
 export const useVerificationStatus = defineStore('verificationStatus', () => {
   const loading = ref<boolean>(false)
   const error = ref<string | null>(null)

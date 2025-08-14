@@ -25,3 +25,16 @@ export function checkEmptyValues(obj: Record<string, unknown>): string[] {
 
   return emptyKeys
 }
+
+export function checkEmptyStatus(obj: Record<string, unknown>): Record<string, boolean> {
+  const statusObj: Record<string, boolean> = {}
+
+  for (const [key, value] of Object.entries(obj)) {
+    statusObj[key] =
+      !value ||
+      (Array.isArray(value) && value.length === 0) ||
+      (typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0)
+  }
+
+  return statusObj
+}
