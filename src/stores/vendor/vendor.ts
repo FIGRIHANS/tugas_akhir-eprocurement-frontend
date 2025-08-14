@@ -6,6 +6,7 @@ import type {
   IAdministration,
   IAdministrationPayload,
   IDeletePaymentPayload,
+  IExpertPersonnelData,
   ILicense,
   IPayment,
   IPaymentPayload,
@@ -20,6 +21,7 @@ import type {
 import type { ApiResponse } from '@/core/type/api'
 import axios from 'axios'
 import { useLoginStore } from '../views/login'
+import type { PayloadExportPersonnelDataType } from '@/views/vendor/companyInformation/expertPersonnelData/types/expertPersonnelData'
 
 const userStore = useLoginStore()
 
@@ -345,15 +347,15 @@ export const useEquipmentDataStore = defineStore('equipment-data', () => {
 export const useExpertPersonnelDataStore = defineStore('expert-personnel-data', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
-  const data = ref<IVerificationDetailData[]>([])
+  const data = ref<IExpertPersonnelData[]>([])
 
   const getData = async (vendorId: number) => {
     loading.value = true
     error.value = null
 
     try {
-      const response: ApiResponse<IVerificationDetailData[]> = await vendorAPI.get(
-        '/public/verifiedvendor/verify/vendor-detail',
+      const response: ApiResponse<IExpertPersonnelData[]> = await vendorAPI.get(
+        '/public/vendorchangedata/vendorexpert',
         { params: { vendorId } },
       )
       data.value = response.data.result.content
@@ -368,7 +370,15 @@ export const useExpertPersonnelDataStore = defineStore('expert-personnel-data', 
     }
   }
 
-  return { loading, error, data, getData }
+  const update = async (payload: PayloadExportPersonnelDataType) => {
+    const response: ApiResponse = await vendorAPI.post(
+      '/public/vendorchangedata/post/vendorexpert',
+      payload,
+    )
+    return response.data
+  }
+
+  return { loading, error, data, getData, update }
 })
 export const useCompanyDeedDataStore = defineStore('company-deed-data', () => {
   const shareholdersData = ref<any>([]) ///TODO: change type soon

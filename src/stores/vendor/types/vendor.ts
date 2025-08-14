@@ -324,3 +324,25 @@ export interface IVendorLegalDocumentPayload {
   refVendorId: number
   action: number
 }
+
+export interface IExpertPersonnelData {
+  id: number
+  vendorID: number
+  name: string
+  education: string
+  position: string
+  yearOfExperience: number
+  expertise: string
+  dateOfBirth: string
+  gender: string
+  address: string
+  nationality: number
+  countryName: string
+  status: number
+  value: string
+  createdBy: string
+  createdDate: string
+  modifiedBy: string | null
+  modifiedDate: string | null
+  isActive: boolean
+}

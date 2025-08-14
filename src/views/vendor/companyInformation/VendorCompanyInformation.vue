@@ -10,7 +10,7 @@ import PaymentInfoListView from './PaymentInfoListView.vue'
 import CompanyDeedData from './CompanyDeedData.vue'
 import BussinesLicenseData from './BussinesLicenseData.vue'
 import EquipmentData from './EquipmentData.vue'
-import ExpertPersonnelData from './ExpertPersonnelData.vue'
+import ExpertPersonnelData from './expertPersonnelData/ExpertPersonnelData.vue'
 import ExperienceData from './experienceData/ExperienceData.vue'
 import OtherDocumentData from './otherDocument/OtherDocumentData.vue'
 
