@@ -74,10 +74,22 @@
       v-if="currentTab === 'company_deed_data'"
       :vendor-id="userData?.profile.profileId"
     />
-    <!-- <EquipmentData v-if="currentTab === 'equipment_data'" /> -->
-    <!-- <ExperienceData v-if="currentTab === 'experience_data'" /> -->
-    <!-- <ExpertPersonnelData v-if="currentTab === 'expert_personnel_data'" /> -->
-    <!-- <OtherDocument v-if="currentTab === 'other_documents'" /> -->
+    <EquipmentData
+      v-if="currentTab === 'equipment_data'"
+      :vendor-id="userData?.profile.profileId"
+    />
+    <ExperienceData
+      v-if="currentTab === 'experience_data'"
+      :vendor-id="userData?.profile.profileId"
+    />
+    <ExpertPersonnelData
+      v-if="currentTab === 'expert_personnel_data'"
+      :vendor-id="userData?.profile.profileId"
+    />
+    <OtherDocumentData
+      v-if="currentTab === 'other_documents'"
+      :vendor-id="userData?.profile.profileId"
+    />
   </div>
 
   <Teleport to="body">
@@ -162,10 +174,10 @@ import AdministrationData from './details/AdministrationData.vue'
 import PaymentDetailData from './details/PaymentDetailData.vue'
 import BusinessLicenseData from './details/BusinessLicenseData.vue'
 import CompanyDeedData from './details/CompanyDeedData.vue'
-// import EquipmentData from './details/EquipmentData.vue'
-// import ExpertPersonnelData from './details/ExpertPersonnelData.vue'
-// import OtherDocument from './details/OtherDocument.vue'
-// import ExperienceData from './details/ExperienceData.vue'
+import EquipmentData from './details/EquipmentData.vue'
+import ExperienceData from './details/ExperienceData.vue'
+import ExpertPersonnelData from './details/ExpertPersonnelData.vue'
+import OtherDocumentData from './details/OtherDocumentData.vue'
 
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
