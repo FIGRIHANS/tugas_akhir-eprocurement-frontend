@@ -117,6 +117,7 @@ interface ParamsSubmissionCost {
   itemAmount: number
   debitCredit: string
   taxCode: string
+  vatAmount: number
   costCenter: string
   profitCenter: string
   assignment: string

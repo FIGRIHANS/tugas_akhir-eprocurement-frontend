@@ -20,7 +20,7 @@
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentNo || '-' }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentItem || '-' }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ moment(item.grDocumentDate).format('DD MMMM YYYY') }}</td>
-            <td v-if="!checkInvoiceDp()">{{ form.currency === item.currencyLC ? useFormatIdr(item.itemAmountLC) : useFormatUsd(item.itemAmountTC) }}</td>
+            <td v-if="!checkInvoiceDp()">{{ form.currency === 'IDR' ? useFormatIdr(item.itemAmountLC) : useFormatUsd(item.itemAmountTC) }}</td>
             <td v-if="!checkInvoiceDp()">{{ useFormatIdr(item.quantity) }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.uom || '-' }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.itemText || '-' }}</td>
@@ -28,11 +28,11 @@
             <td v-if="!checkPoPib()">{{ item.conditionTypeDesc || '-' }}</td>
             <td v-if="!checkPoPib()">{{ item.qcStatus || '-' }}</td>
             <td v-if="!checkPoPib()">{{ item.taxCode || '-' }}</td>
-            <td v-if="!checkPoPib()">{{ item.vatAmount || '-' }}</td>           
+            <td v-if="!checkPoPib()">{{ form.currency === 'IDR' ? useFormatIdr(item.vatAmount || '-') : useFormatUsd(item.vatAmount || '-') }}</td>           
             <td v-if="!checkPoPib()">{{ item.whtType || '-' }}</td>
             <td v-if="!checkPoPib()">{{ item.whtCode || '-' }}</td>
-            <td v-if="!checkPoPib()">{{ useFormatIdr(item.whtBaseAmount?.toString() || '') || 0 }}</td>
-            <td v-if="!checkPoPib()">{{ useFormatIdr(item.whtAmount?.toString() || '') || 0 }}</td>
+            <td v-if="!checkPoPib()">{{ form.currency === 'IDR' ? useFormatIdr(item.whtBaseAmount?.toString() || '') : useFormatUsd(item.whtBaseAmount?.toString() || '') }}</td>
+            <td v-if="!checkPoPib()">{{ form.currency === 'IDR' ? useFormatIdr(item.whtAmount?.toString() || '') : useFormatUsd(item.whtAmount?.toString() || '') }}</td>
             <td>{{ item.department }}</td>
           </tr>
         </tbody>
