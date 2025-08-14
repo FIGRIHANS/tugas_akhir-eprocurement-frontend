@@ -519,6 +519,7 @@ const setData = () => {
     form.bankNameId = detail.payment.bankName
     form.beneficiaryName = detail.payment.beneficiaryName
     form.bankAccountNumber = detail.payment.bankAccountNo
+    form.bankCountryCode = detail.payment.bankCountryCode
     form.invoiceDp = detail.header.invoiceDPCode ? detail.header.invoiceDPCode.toString() : ''
     form.companyCode = detail.header.companyCode
     form.invoiceNoVendor = detail.header.documentNo ? detail.header.documentNo.toString() : ''
