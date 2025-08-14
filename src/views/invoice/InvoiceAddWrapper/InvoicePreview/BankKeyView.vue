@@ -18,6 +18,10 @@
         <p class="text-xs font-normal text-gray-700">Bank Account Number</p>
         <p class="text-sm font-medium whitespace-nowrap">{{ form.bankAccountNumber || '-' }}</p>
       </div>
+      <div>
+        <p class="text-xs font-normal text-gray-700">Bank Country</p>
+        <p class="text-sm font-medium whitespace-nowrap">{{ form.bankCountryCode || '-' }}</p>
+      </div>
     </div>
   </div>
 </template>
