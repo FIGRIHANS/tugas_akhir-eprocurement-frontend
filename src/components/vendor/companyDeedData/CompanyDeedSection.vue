@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
 import UiFormGroup from '@/components/ui/atoms/form-group/UiFormGroup.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
@@ -218,11 +218,6 @@ const handleDownload = async (path: string) => {
   }
 }
 
-onMounted(() => {
-  vendorLegalDocStore.getVendorLegalDocument(Number(route.params.id))
-  vendorMasterDataStore.getVendorCities()
-})
-
 const filteredCompanyDeedData = computed(() =>
   vendorLegalDocStore.vendorLegalDocData?.filter(
     (item: IVendorLegalDocumentPayload) => item.isActive === true && item.documentType === 3115,
@@ -270,7 +265,7 @@ const filteredCompanyDeedData = computed(() =>
             :hintText="errors.notaryName"
           />
           <UiFileUpload
-            name="documentUrl"
+            name="vendorLegalDocumentUrl"
             label="File"
             placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
             hint-text="*jpg, jpeg, png, pdf, zip / max : 16 MB"
@@ -285,7 +280,7 @@ const filteredCompanyDeedData = computed(() =>
           />
           <UiSelect
             label="Notary Office Location"
-            placeholder="Select"
+            placeholder="-- Notary Office Location --"
             :options="
               vendorMasterDataStore.cityList?.map((item) => ({
                 value: item.cityID,

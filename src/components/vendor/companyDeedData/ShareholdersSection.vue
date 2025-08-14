@@ -16,7 +16,7 @@ import { useCompanyDeedDataStore } from '@/stores/vendor/vendor'
 import { useLoginStore } from '@/stores/views/login'
 import axios from 'axios'
 import moment from 'moment'
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { z } from 'zod'
 
@@ -32,7 +32,6 @@ const shareholderSchema = z.object({
 
 const errors = reactive<{ [key: string]: string }>({})
 
-// pinia store
 const shareholdersStore = useCompanyDeedDataStore()
 const uploadStore = useVendorUploadStore()
 const userLoginStore = useLoginStore()
@@ -248,12 +247,6 @@ const handleDownload = async (path: string) => {
     isDownloadLoading.value = false
   }
 }
-
-onMounted(() => {
-  shareholdersStore.getShareholders(Number(route.params.id))
-  typeShareholders.get()
-  shareUnits.get()
-})
 
 const filteredShareholders = computed(() =>
   shareholdersStore.shareholdersData?.filter((item: IShareholderPayload) => item.isActive === true),
