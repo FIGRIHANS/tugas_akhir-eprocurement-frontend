@@ -87,7 +87,12 @@
     />
     <ModalSuccess />
     <ModalError />
-    <ModalDelete />
+    <ModalDelete
+      :id="selectedId"
+      @on-success="onSubmitSuccess"
+      @on-error="onSubmitError"
+      @on-close="selectedId = 0"
+    />
   </div>
 </template>
 

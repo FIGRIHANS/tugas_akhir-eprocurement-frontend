@@ -233,7 +233,6 @@ watch(
 
     if (selectedItem) {
       const certificates = await expertStore.getCertificates(selectedItem.id)
-      console.log(certificates)
       payload.value = {
         ...payload.value,
         name: selectedItem.name,
