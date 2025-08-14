@@ -61,6 +61,16 @@
                             </span>
                           </a>
                         </div>
+                        <div v-if="parent.statusCode === 4" class="menu-item" @click="openDetailInvoiceEdit(parent.invoiceUId)">
+                          <a class="menu-link" href="#">
+                            <span class="menu-icon">
+                              <i class="ki-duotone ki-message-edit"></i>
+                            </span>
+                            <span class="menu-title">
+                              Edit
+                            </span>
+                          </a>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -79,14 +89,13 @@
                 </td>
                 <td>{{ parent.invoiceTypeName || '-' }}</td>
                 <td>{{ parent.companyCode || '-' }}</td>
-                <td>{{ parent.costCenterName || '-' }}</td>
                 <td>{{ useFormatIdr(parent.whtBaseAmount) || '-' }}</td>
                 <td>{{ useFormatIdr(parent.vatAmount) || '-' }}</td>
                 <td>{{ useFormatIdr(parent.whtAmount) || '-' }}</td>
                 <td>{{ useFormatIdr(parent.totalNetAmount) || '-' }}</td>
                 <td>{{ parent.taxNo || '-' }}</td>
                 <td>{{ parent.documentNo || '-' }}</td>
-                <td>{{ parent.estimatePaymentDate ? moment(parent.estimatePaymentDate).format('DD MMMM YYYY') : '-' }}</td>
+                <td>{{ parent.estimatedPaymentDate ? moment(parent.estimatedPaymentDate).format('DD MMMM YYYY') : '-' }}</td>
                 <td>{{ parent.invoiceDate ? moment(parent.invoiceDate).format('DD MMMM YYYY HH:mm:ss') : '-' }}</td>
                 <td>{{ parent.notes || '-' }}</td>
               </tr>
@@ -172,7 +181,6 @@ const columns = ref<string[]>([
   'Status',
   'Invoice Type',
   'Company Code',
-  'Department',
   'Base Amount',
   'VAT Ammount',
   'WHT Amount',
@@ -227,6 +235,16 @@ const openDetailInvoice = (invoiceId: string) => {
   router.push({
     name: 'invoiceDetail',
     query: {
+      id: invoiceId,
+      type: '2'
+    }
+  })
+}
+
+const openDetailInvoiceEdit = (invoiceId: string) => {
+  router.push({
+    name: 'invoiceDetailEdit',
+    query : {
       id: invoiceId,
       type: '2'
     }
@@ -299,20 +317,12 @@ const openSuccesSap = () => {
   const idModal = document.querySelector('#success_send_sap_modal')
   const modal = KTModal.getInstance(idModal as HTMLElement)
   modal.show()
-
-  setTimeout(() => {
-    modal.hide()
-  }, 1500)
 }
 
 const openFailedSap = () => {
   const idModal = document.querySelector('#failed_send_sap_modal')
   const modal = KTModal.getInstance(idModal as HTMLElement)
   modal.show()
-
-  setTimeout(() => {
-    modal.hide()
-  }, 1500)
 }
 
 onMounted(() => {

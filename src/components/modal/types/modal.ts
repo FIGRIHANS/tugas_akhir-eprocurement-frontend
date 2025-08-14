@@ -1,6 +1,6 @@
 export interface IModalProps {
   title?: string
-  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full'
+  size?: 'xs' |'sm' | 'md' | 'lg' | 'xl' | 'full'
   static?: boolean
   center?: boolean
 }
@@ -20,4 +20,5 @@ export type ModalConfirmationType = {
   noSubmit?: boolean
   cancel?: (...args: any[]) => void
   submit?: (...args: any[]) => void
+  loading?: boolean
 }

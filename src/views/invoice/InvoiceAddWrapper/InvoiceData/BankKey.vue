@@ -1,102 +1,59 @@
 <template>
   <div class="card flex-1">
-    <div class="card-header justify-start gap-[8px] px-[16px] py-[22px]">
-      <i class="ki-duotone ki-bill text-gray-600 text-xl"></i>
-      <span class="font-medium">Payment Information</span>
+    <div
+      class="card-header justify-start gap-[8px]"
+      :class="{
+        'px-[16px] py-[22px]': !checkIsNonPo(),
+        'px-[20px] py-[8px]': checkIsNonPo()
+      }"
+    >
+      <div v-if="checkIsNonPo()" class="flex gap-4 mb-5" data-tabs="true">
+        <button class="btn btn-primary btn-clear" :class="{ 'active': isTabActive === 'payment' }" @click="isTabActive = 'payment'">
+          Payment Information
+        </button>
+        <button class="btn btn-primary btn-clear" :class="{ 'active': isTabActive === 'alternative' }" @click="isTabActive = 'alternative'">
+          Alternative Payment
+        </button>
+      </div>
+      <div v-else>
+        <i class="ki-duotone ki-bill text-gray-600 text-xl"></i>
+        <span class="font-medium">Payment Information</span>
+      </div>
     </div>
-    <div v-if="form" class="card-body py-[8px] px-[50px]">
-      <!-- Bank Key -->
-      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-        <label class="form-label max-w-32">
-          Bank Key
-          <span class="text-red-500 ml-[4px]">*</span>
-        </label>
-        <input v-if="form.status !== 0 && form.status !== -1 && form.status !== 5" v-model="form.bankKeyId" class="input" placeholder="" disabled />
-        <select v-else v-model="form.bankKeyId" class="select" :class="{ 'border-danger': form.bankKeyIdError }">
-          <option v-for="item of bankList" :key="item.bankId" :value="item.bankId">
-            {{ item.bankKey + ' - ' + item.accountNumber }}
-          </option>
-        </select>
-      </div>
-      <!-- Bank Name -->
-      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-        <label class="form-label max-w-32">
-          Bank Name
-        </label>
-        <input v-model="form.bankNameId" class="input" placeholder="" disabled/>
-      </div>
-      <!-- Beneficiary Name -->
-      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-        <label class="form-label max-w-32">
-          Beneficiary Name
-        </label>
-        <input v-model="form.beneficiaryName" class="input" placeholder="" disabled/>
-      </div>
-      <!-- Bank Account Number -->
-      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-        <label class="form-label max-w-32">
-          Bank Account Number
-        </label>
-        <input v-model="form.bankAccountNumber" class="input" placeholder="" disabled/>
-      </div>
+    <div
+      class="card-body"
+      :class="{
+        'py-[8px] px-[50px]': isTabActive === 'payment',
+        'p-0': isTabActive === 'alternative'
+      }"
+    >
+      <Transition mode="out-in">
+        <component :is="contentComponent" />
+      </Transition>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, onMounted, inject } from 'vue'
-import type { formTypes } from '../../types/invoiceAddWrapper'
-import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
-import type { PaymentTypes } from '@/stores/master-data/types/invoiceMasterData'
+import { ref, computed, defineAsyncComponent, type Component } from 'vue'
+import { useRoute } from 'vue-router'
 
-const invoiceMasterApi = useInvoiceMasterDataStore()
-const form = inject<formTypes>('form')
-const bankList = ref<PaymentTypes[]>([])
+const PaymentInformation = defineAsyncComponent(() => import('./BankKey/PaymentInformation.vue'))
+const AlternativePayment = defineAsyncComponent(() => import('./BankKey/AlternativePayment.vue'))
 
-const vendorList = computed(() => invoiceMasterApi.vendorList)
+const route = useRoute()
+const isTabActive = ref<string>('payment')
 
-const checkBank = () => {
-  if (form) {
-    const getIndex = vendorList.value.findIndex((item) => item.sapCode === form?.vendorId)
-    if (getIndex !== -1) {
-      bankList.value = vendorList.value[getIndex].payment
-      if (bankList.value.length === 1) {
-        form.bankKeyId = bankList.value[0].bankId.toString()
-        form.bankNameId = bankList.value[0].bankName
-        form.beneficiaryName = bankList.value[0].beneficiaryName
-        form.bankAccountNumber = bankList.value[0].accountNumber
-      } else {
-        form.bankKeyId = ''
-        form.bankNameId = ''
-        form.beneficiaryName = ''
-        form.bankAccountNumber = ''
-      }
-    }
-  }
-}
+const contentComponent = computed(() => {
+  const components = {
+    payment: PaymentInformation,
+    alternative: AlternativePayment
+  } as { [key: string]: Component }
 
-watch(
-  () => [form?.vendorId, vendorList.value],
-  () => {
-    checkBank()
-  }
-)
-
-watch(
-  () => form?.bankKeyId,
-  () => {
-    if (form) {
-      const getIndex = bankList.value.findIndex((item) => item.bankId === Number(form.bankKeyId))
-      if (getIndex !== -1) {
-        form.bankNameId = bankList.value[getIndex].bankName
-        form.beneficiaryName = bankList.value[getIndex].beneficiaryName
-        form.bankAccountNumber = bankList.value[getIndex].accountNumber
-      }
-    }
-  }
-)
-
-onMounted(() => {
-  checkBank()
+  return components[isTabActive.value]
 })
+
+const checkIsNonPo = () => {
+  return route.query.type === 'nonpo'
+}
 </script>

@@ -118,6 +118,7 @@ const form = ref<formTypes>({
   bankName: '',
   beneficiaryName: '',
   bankAccountNo: '',
+  bankCountryCode: '',
   creditCardBillingId: '',
   vendorId: '',
   vendorName: '',
@@ -235,6 +236,7 @@ const mapPoGr = () => {
       itemAmount: Number(item.itemAmount),
       quantity: Number(item.quantity),
       taxCode: item.taxCode,
+      vatAmount: item.vatAmount,
       whtType: item.whtType,
       whtCode: item.whtCode,
       whtBaseAmount: item.whtBaseAmount,
@@ -252,6 +254,7 @@ const mapAdditionalCost = () => {
       itemAmount: Number(item.itemAmount),
       debitCredit: item.debitCredit,
       taxCode: item.taxCode,
+      vatAmount: item.vatAmount,
       costCenter: item.costCenter,
       profitCenter: item.profitCenter,
       assignment: item.assignment,
@@ -326,12 +329,6 @@ const goVerif = () => {
     const idModal = document.querySelector('#success_verif_modal')
     const modal = KTModal.getInstance(idModal as HTMLElement)
     modal.show()
-    setTimeout(() => {
-      modal.hide()
-      router.push({
-        name: route.query.type === '1' ? 'invoiceVerification' : 'invoiceApproval'
-      })
-    }, 1000)
   }).finally(() => {
     isLoading.value = false
   })
@@ -439,6 +436,7 @@ const setDataDefault = () => {
     creditCardBillingId: data?.header.creditCardBillingId || '',
     beneficiaryName: data?.payment.beneficiaryName || '',
     bankAccountNo: data?.payment.bankAccountNo || '',
+    bankCountryCode: data?.payment.bankCountryCode || '',
     vendorId: data?.vendor.vendorId || '',
     vendorName: data?.vendor.vendorName || '',
     npwp: data?.vendor.npwp || '',
@@ -490,6 +488,7 @@ const setDataEdit = () => {
     bankName: data?.bankName || '',
     beneficiaryName: data?.beneficiaryName || '',
     bankAccountNo: data?.bankAccountNo || '',
+    bankCountryCode: data?.bankCountryCode || '',
     creditCardBillingId: data?.creditCardBillingId || '',
     vendorId: data?.vendorId || '',
     vendorName: data?.vendorName || '',

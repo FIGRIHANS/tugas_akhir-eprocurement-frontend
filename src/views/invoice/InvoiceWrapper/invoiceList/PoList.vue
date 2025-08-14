@@ -39,7 +39,7 @@
               <td>{{ moment(parent.invoiceDate).format('DD MMMM YYYY') }}</td>
               <td>{{ useFormatIdr(parent.totalGrossAmount) }}</td>
               <td>{{ useFormatIdr(parent.totalNetAmount) }}</td>
-              <td>{{ parent.estimatePaymentDate ? moment(parent.estimatePaymentDate).format('DD MMMM YYYY') : '-' }}</td>
+              <td>{{ parent.estimatedPaymentDate ? moment(parent.estimatedPaymentDate).format('DD MMMM YYYY') : '-' }}</td>
             </tr>
             <tr v-show="parent.isOpenChild">
               <td></td>
@@ -135,7 +135,8 @@ const colorBadge = (statusCode: number) => {
     1: 'badge-warning',
     2: 'badge-info',
     4: 'badge-success',
-    5: 'badge-danger'
+    5: 'badge-danger',
+    7: 'badge-primary'
   } as { [key: number]: string }
   return list[statusCode]
 }

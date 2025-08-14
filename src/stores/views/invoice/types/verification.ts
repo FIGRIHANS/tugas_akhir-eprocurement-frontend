@@ -46,6 +46,7 @@ interface ParamsVerificationItemTypes {
   itemAmount: number
   quantity: number
   taxCode: string
+  vatAmount: number
   whtType: string
   whtCode: string
   whtBaseAmount: number
@@ -93,6 +94,7 @@ interface ParamsSubmissionPayment {
   bankName: string
   beneficiaryName: string
   bankAccountNo: string
+  bankCountryCode: string
 }
 
 interface ParamsSubmissionDocument {
@@ -184,7 +186,7 @@ export interface ListPoTypes {
   companyCode: string
   companyName: string
   documentNo: string
-  estimatePaymentDate: string
+  estimatedPaymentDate: string
   invoiceDate: string
   invoiceNo: string
   invoiceTypeCode: number
@@ -233,6 +235,7 @@ export interface itemsCostType {
   itemAmount: number
   debitCredit: string
   taxCode: string
+  vatAmount: number
   costCenter: string
   profitCenter: string
   assignment: string
@@ -294,6 +297,7 @@ export interface DetailInvoiceEditTypes {
   bankName: string
   beneficiaryName: string
   bankAccountNo: string
+  bankCountryCode: string
 
   vendorId: string
   vendorName: string

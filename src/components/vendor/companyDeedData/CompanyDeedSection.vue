@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
 import UiFormGroup from '@/components/ui/atoms/form-group/UiFormGroup.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
@@ -16,11 +16,13 @@ import { useVendorUploadStore } from '@/stores/vendor/upload'
 import UiModal from '@/components/modal/UiModal.vue'
 import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
 import axios from 'axios'
+import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
 
 const vendorLegalDocStore = useCompanyDeedDataStore()
 const adminVendorStore = useVendorAdministrationStore()
 const userLoginStore = useLoginStore()
 const uploadStore = useVendorUploadStore()
+const vendorMasterDataStore = useVendorMasterDataStore()
 
 const route = useRoute()
 
@@ -38,7 +40,7 @@ const vendorLegalDocPayload = reactive<IVendorLegalDocumentPayload>({
   filename: '',
   filesize: 0,
   documentURL: '',
-  documentType: 0,
+  documentType: 3115,
   documentNo: '',
   documentDate: new Date(),
   notaryName: '',
@@ -107,7 +109,9 @@ const onUploadFile = async (file: File) => {
   try {
     const response = await uploadStore.upload(formData)
 
+    vendorLegalDocPayload.filename = response?.name as string
     vendorLegalDocPayload.documentURL = response?.path as string
+    vendorLegalDocPayload.filesize = file.size
     errors.documentURL = ''
   } catch (err) {
     if (err instanceof Error) {
@@ -130,7 +134,7 @@ const handleSave = async () => {
       filename: '',
       filesize: 0,
       documentURL: '',
-      documentType: 0,
+      documentType: 3115,
       documentNo: '',
       documentDate: new Date(),
       notaryName: '',
@@ -214,13 +218,9 @@ const handleDownload = async (path: string) => {
   }
 }
 
-onMounted(() => {
-  vendorLegalDocStore.getVendorLegalDocument(Number(route.params.id))
-})
-
 const filteredCompanyDeedData = computed(() =>
   vendorLegalDocStore.vendorLegalDocData?.filter(
-    (item: IVendorLegalDocumentPayload) => item.isActive === true,
+    (item: IVendorLegalDocumentPayload) => item.isActive === true && item.documentType === 3115,
   ),
 )
 </script>
@@ -265,7 +265,7 @@ const filteredCompanyDeedData = computed(() =>
             :hintText="errors.notaryName"
           />
           <UiFileUpload
-            name="documentUrl"
+            name="vendorLegalDocumentUrl"
             label="File"
             placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
             hint-text="*jpg, jpeg, png, pdf, zip / max : 16 MB"
@@ -280,17 +280,13 @@ const filteredCompanyDeedData = computed(() =>
           />
           <UiSelect
             label="Notary Office Location"
-            placeholder="Select"
-            :options="[
-              {
-                value: 1,
-                label: 'Office 1',
-              },
-              {
-                value: 2,
-                label: 'Office 2',
-              },
-            ]"
+            placeholder="-- Notary Office Location --"
+            :options="
+              vendorMasterDataStore.cityList?.map((item) => ({
+                value: item.cityID,
+                label: item.cityName,
+              }))
+            "
             value-key="value"
             text-key="label"
             row

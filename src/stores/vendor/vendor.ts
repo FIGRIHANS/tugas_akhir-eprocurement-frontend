@@ -2,6 +2,7 @@ import vendorAPI from '@/core/utils/vendorApi'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import type {
+  EquipmentDataType,
   IAdministration,
   IAdministrationPayload,
   IDeletePaymentPayload,
@@ -14,6 +15,7 @@ import type {
   IVendorLegalDocumentPayload,
   IVerificationDetailData,
   IVerifyLegal,
+  PayloadEquipmentDataType,
 } from './types/vendor'
 import type { ApiResponse } from '@/core/type/api'
 import axios from 'axios'
@@ -198,11 +200,7 @@ export const useVendorIzinUsahaStore = defineStore('vendor-izin-usaha', () => {
     error.value = null
 
     try {
-
-      const response = await vendorAPI.post(
-        '/public/verifiedvendor/update-license',
-        payload,
-      );
+      const response = await vendorAPI.post('/public/verifiedvendor/update-license', payload)
 
       if (response.data.statusCode === 200) {
         data.value = response.data.result.content
@@ -210,7 +208,6 @@ export const useVendorIzinUsahaStore = defineStore('vendor-izin-usaha', () => {
         error.value = response.data.result.message
         loading.value = false
       }
-
     } catch (err: unknown) {
       if (err instanceof Error) {
         error.value = err.message
@@ -220,7 +217,6 @@ export const useVendorIzinUsahaStore = defineStore('vendor-izin-usaha', () => {
     } finally {
       loading.value = false
     }
-
   }
 
   return { data, loading, error, getData, updateData }
@@ -308,7 +304,73 @@ export const useVerificationDetailStore = defineStore('verification-detail', () 
   return { loading, error, data, getData }
 })
 
-export const useCompanyDeedDataStore = defineStore("company-deed-data", () => {
+export const useEquipmentDataStore = defineStore('equipment-data', () => {
+  const loading = ref(false)
+  const error = ref<string | null>(null)
+  const data = ref<EquipmentDataType[]>([])
+
+  const getData = async (vendorId: number) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const response: ApiResponse<EquipmentDataType[]> = await vendorAPI.get(
+        '/public/vendorchangedata/vendorequipment',
+        { params: { vendorId } },
+      )
+      data.value = response.data.result.content
+    } catch (err) {
+      if (err instanceof Error) {
+        if (axios.isAxiosError(err)) {
+          error.value = err.response?.data.result.message
+        }
+      }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const postData = async (payload: PayloadEquipmentDataType) => {
+    const response: ApiResponse = await vendorAPI.post(
+      '/public/vendorchangedata/post/vendorequipment',
+      { ...payload },
+    )
+
+    return response.data.result
+  }
+
+  return { loading, error, data, getData, postData }
+})
+
+export const useExpertPersonnelDataStore = defineStore('expert-personnel-data', () => {
+  const loading = ref(false)
+  const error = ref<string | null>(null)
+  const data = ref<IVerificationDetailData[]>([])
+
+  const getData = async (vendorId: number) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const response: ApiResponse<IVerificationDetailData[]> = await vendorAPI.get(
+        '/public/verifiedvendor/verify/vendor-detail',
+        { params: { vendorId } },
+      )
+      data.value = response.data.result.content
+    } catch (err) {
+      if (err instanceof Error) {
+        if (axios.isAxiosError(err)) {
+          error.value = err.response?.data.result.message
+        }
+      }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  return { loading, error, data, getData }
+})
+export const useCompanyDeedDataStore = defineStore('company-deed-data', () => {
   const shareholdersData = ref<any>([]) ///TODO: change type soon
   const vendorLegalDocData = ref<any>([]) ///TODO: change type soon
   const shareholdersLoading = ref<boolean>(false)
@@ -319,14 +381,13 @@ export const useCompanyDeedDataStore = defineStore("company-deed-data", () => {
   const getShareholders = async (vendorId: number) => {
     shareholdersLoading.value = true
     try {
-      const response: ApiResponse = await vendorAPI.get("/public/vendorchangedata/shareholders", {
+      const response: ApiResponse = await vendorAPI.get('/public/vendorchangedata/shareholders', {
         params: { vendorId },
       })
 
       if (response.data.statusCode === 200) {
         shareholdersData.value = response.data.result.content
       }
-
     } catch (err) {
       if (err instanceof Error) {
         if (axios.isAxiosError(err)) {
@@ -341,14 +402,16 @@ export const useCompanyDeedDataStore = defineStore("company-deed-data", () => {
   const getVendorLegalDocument = async (vendorId: number) => {
     vendorLegalDocLoading.value = true
     try {
-      const response: ApiResponse = await vendorAPI.get("/public/vendorchangedata/vendorlegaldocument", {
-        params: { vendorId },
-      })
+      const response: ApiResponse = await vendorAPI.get(
+        '/public/vendorchangedata/vendorlegaldocument',
+        {
+          params: { vendorId },
+        },
+      )
 
       if (response.data.statusCode === 200) {
         vendorLegalDocData.value = response.data.result.content
       }
-
     } catch (err) {
       if (err instanceof Error) {
         if (axios.isAxiosError(err)) {
@@ -363,7 +426,8 @@ export const useCompanyDeedDataStore = defineStore("company-deed-data", () => {
   const postShareholders = async (payload: IShareholderPayload) => {
     try {
       const response: ApiResponse = await vendorAPI.post(
-        '/public/vendorchangedata/post/shareholders', payload
+        '/public/vendorchangedata/post/shareholders',
+        payload,
       )
 
       return response.data
@@ -376,11 +440,12 @@ export const useCompanyDeedDataStore = defineStore("company-deed-data", () => {
 
   const postVendorLegalDocument = async (payload: IVendorLegalDocumentPayload) => {
     try {
-
-      const response: ApiResponse = await vendorAPI.post('/public/vendorchangedata/post/vendorlegaldocument', payload)
+      const response: ApiResponse = await vendorAPI.post(
+        '/public/vendorchangedata/post/vendorlegaldocument',
+        payload,
+      )
 
       return response.data
-
     } catch (err) {
       if (err instanceof Error) {
         if (axios.isAxiosError(err)) {
@@ -392,7 +457,6 @@ export const useCompanyDeedDataStore = defineStore("company-deed-data", () => {
     }
   }
 
-
   return {
     shareholdersLoading,
     vendorLegalDocLoading,
@@ -403,7 +467,6 @@ export const useCompanyDeedDataStore = defineStore("company-deed-data", () => {
     postShareholders,
     postVendorLegalDocument,
     getShareholders,
-    getVendorLegalDocument
+    getVendorLegalDocument,
   }
-
-});
+})

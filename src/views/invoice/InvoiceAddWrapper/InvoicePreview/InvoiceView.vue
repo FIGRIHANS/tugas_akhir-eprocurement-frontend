@@ -6,13 +6,17 @@
         <p class="text-xs font-normal text-gray-700">Invoice Type</p>
         <p class="text-sm font-medium">{{ getInvoiceTypeName() || '-' }}</p>
       </div>
-      <div class="w-[calc(50%-10px)]">
+      <div v-if="form.invoiceType === '901' && !checkIsNonPo()" class="w-[calc(50%-10px)]">
         <p class="text-xs font-normal text-gray-700">DP Option</p>
         <p class="text-sm font-medium">{{ getDpName() || '-' }}</p>
       </div>
       <div class="w-[calc(50%-10px)]">
         <p class="text-xs font-normal text-gray-700">Company Code</p>
         <p class="text-sm font-medium">{{ getCompanyName() || '-' }}</p>
+      </div>
+      <div v-if="checkIsNonPo()" class="w-[calc(50%-10px)]">
+        <p class="text-xs font-normal text-gray-700">Vendor No.</p>
+        <p class="text-sm font-medium">{{ form.vendorId || '-' }}</p>
       </div>
       <div class="w-[calc(50%-10px)]">
         <p class="text-xs font-normal text-gray-700">Invoice Document No.</p>
@@ -23,12 +27,12 @@
         <p class="text-sm font-medium whitespace-nowrap">{{ form.invoiceDate ? moment(form.invoiceDate).format('YYYYMMDD') : '-' }}</p>
       </div>
       <div class="w-[calc(50%-10px)]">
-        <p class="text-xs font-normal text-gray-700">Tax Document No.</p>
-        <p class="text-sm font-medium">{{ form.taxNoInvoice || '-' }}</p>
-      </div>
-      <div class="w-[calc(50%-10px)]">
         <p class="text-xs font-normal text-gray-700">Currency</p>
         <p class="text-sm font-medium">{{ form.currency || '-' }}</p>
+      </div>
+      <div v-if="form.invoiceType !== '903'" class="w-[calc(50%-10px)]">
+        <p class="text-xs font-normal text-gray-700">Tax Document No.</p>
+        <p class="text-sm font-medium">{{ form.taxNoInvoice || '-' }}</p>
       </div>
       <div v-if="form.invoiceDp === '9013'" class="w-[calc(50%-10px)]">
         <p class="text-xs font-normal text-gray-700">Remaining DP Amount</p>
@@ -38,7 +42,11 @@
         <p class="text-xs font-normal text-gray-700">DP Amount Deduction</p>
         <p class="text-sm font-medium">{{ form.dpAmountDeduction || '-' }}</p>
       </div>
-      <div class="w-[calc(50%-10px)]">
+      <div v-if="checkIsNonPo()" class="w-[calc(50%-10px)]">
+        <p class="text-xs font-normal text-gray-700">Departement</p>
+        <p class="text-sm font-medium">{{ form.department || '-' }}</p>
+      </div>
+      <div v-if="form.invoiceType !== '903'" class="w-[calc(50%-10px)]">
         <p class="text-xs font-normal text-gray-700">Description</p>
         <p class="text-sm font-medium">{{ form.description || '-' }}</p>
       </div>
@@ -61,6 +69,10 @@ const typeForm = ref<string>('')
 const dpTypeList = computed(() => invoiceMasterApi.dpType)
 const listInvoiceTypePo = computed(() => invoiceMasterApi.invoicePoType)
 const companyCodeList = computed(() => invoiceMasterApi.companyCode)
+
+const checkIsNonPo = () => {
+  return route.query.type === 'nonpo'
+}
 
 // const checkPo = () => {
 //   return typeForm.value === 'po'

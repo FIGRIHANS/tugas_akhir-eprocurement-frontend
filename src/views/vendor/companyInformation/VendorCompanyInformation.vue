@@ -9,6 +9,8 @@ import AdministrativeData from './AdministrativeData.vue'
 import PaymentInfoListView from './PaymentInfoListView.vue'
 import CompanyDeedData from './CompanyDeedData.vue'
 import BussinesLicenseData from './BussinesLicenseData.vue'
+import EquipmentData from './EquipmentData.vue'
+import ExpertPersonnelData from './ExpertPersonnelData.vue'
 import ExperienceData from './experienceData/ExperienceData.vue'
 import OtherDocumentData from './otherDocument/OtherDocumentData.vue'
 
@@ -42,8 +44,8 @@ const tabsItem: ITabClosable[] = [
     isClosable: true,
   },
   {
-    id: 'deed-of-establishment-data',
-    label: 'Deed of Establishment Data',
+    id: 'company-deed-data',
+    label: 'Company Deed Data',
     isClosable: true,
   },
   {
@@ -66,11 +68,6 @@ const tabsItem: ITabClosable[] = [
     label: 'Other Documents',
     isClosable: true,
   },
-  {
-    id: 'company-deed-data',
-    label: 'Company Deed Data',
-    isClosable: true,
-  },
 ]
 
 watch(
@@ -89,6 +86,8 @@ watch(
   <BussinesLicenseData v-if="currentTab === 'business-license-data'" />
   <PaymentInfoListView v-if="currentTab === 'payment-information-data'" />
   <CompanyDeedData v-if="currentTab === 'company-deed-data'" />
+  <EquipmentData v-if="currentTab === 'equipment-data'" />
+  <ExpertPersonnelData v-if="currentTab === 'expert-personel-data'" />
   <ExperienceData v-if="currentTab === 'experience-data'" />
   <OtherDocumentData v-if="currentTab === 'other-documents-data'" />
 </template>

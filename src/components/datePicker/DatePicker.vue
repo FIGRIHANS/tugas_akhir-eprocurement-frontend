@@ -1,6 +1,19 @@
 <template>
-  <div class="min-w-[0px] w-full flex items-center flex-wrap lg:flex-nowrap gap-2.5">
-    <label v-if="label" class="form-label flex items-center gap-1 w-2/5">
+  <div
+    :class="[
+      'relative',
+      {
+        'min-w-[0px] w-full flex items-center flex-wrap lg:flex-nowrap gap-2.5': !labelTop,
+      },
+    ]"
+  >
+    <label
+      :class="{
+        'text-[11px] px-[3px] text-gray-500 bg-white absolute z-50 -top-[6px] left-[7px] leading-[12px]':
+          label && labelTop,
+        'form-label flex items-center gap-1 w-2/5': label && !labelTop,
+      }"
+    >
       {{ label }}
       <span v-if="required" class="text-danger"> * </span>
     </label>
@@ -8,8 +21,10 @@
       v-model="date"
       :enable-time="false"
       :format="format"
+      :range="range"
       :preview-format="format"
       :min-date="minDate"
+      :max-date="maxDate"
       class="w-full"
     >
       <template #dp-input="{ value }">
@@ -43,6 +58,9 @@ const props = defineProps<{
   format?: string
   disabled?: boolean
   minDate?: Date | string
+  labelTop?: boolean
+  maxDate?: Date | string
+  range?: boolean
 }>()
 
 const emits = defineEmits(['update:modelValue'])

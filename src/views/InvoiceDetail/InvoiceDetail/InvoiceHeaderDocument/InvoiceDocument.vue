@@ -61,14 +61,16 @@ const download = (path: string) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   previewApi.getPreview(path).then((response: any) => {
     const url = window.URL.createObjectURL(response.data)
-    const a = document.createElement('a')
-    a.href = url
-    const splitPath = path.split(/\\/)
-    const filename = splitPath[splitPath.length - 1]
-
-    a.download = filename
-    a.click()
+    window.open(url, '_blank')
     URL.revokeObjectURL(url)
+  //   const a = document.createElement('a')
+  //   a.href = url
+  //   const splitPath = path.split(/\\/)
+  //   const filename = splitPath[splitPath.length - 1]
+
+  //   a.download = filename
+  //   a.click()
+  //   URL.revokeObjectURL(url)
   })
 }
 

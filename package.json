@@ -24,7 +24,9 @@
     "vue": "^3.5.13",
     "vue-middleware": "^1.0.0-alpha.7",
     "vue-router": "^4.5.0",
+    "vue-select": "^4.0.0-beta.6",
     "vue3-apexcharts": "^1.8.0",
+    "vue3-signature": "^0.2.4",
     "zod": "^4.0.14"
   },
   "devDependencies": {
@@ -32,6 +34,7 @@
     "@types/lodash": "^4.17.16",
     "@types/moment": "^2.13.0",
     "@types/node": "^22.10.7",
+    "@types/vue-select": "^3.16.8",
     "@vitejs/plugin-vue": "^5.2.1",
     "@vue/eslint-config-prettier": "^10.1.0",
     "@vue/eslint-config-typescript": "^14.3.0",

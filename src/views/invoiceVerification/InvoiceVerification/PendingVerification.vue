@@ -35,14 +35,13 @@
                 </td>
                 <td>{{ parent.invoiceTypeName || '-' }}</td>
                 <td>{{ parent.companyCode || '-' }}</td>
-                <td>{{ parent.costCenterName || '-' }}</td>
                 <td>{{ useFormatIdr(parent.whtBaseAmount) || '-' }}</td>
                 <td>{{ useFormatIdr(parent.vatAmount) || '-' }}</td>
                 <td>{{ useFormatIdr(parent.whtAmount) || '-' }}</td>
                 <td>{{ useFormatIdr(parent.totalNetAmount) || '-' }}</td>
                 <td>{{ parent.taxNo || '-' }}</td>
                 <td>{{ parent.documentNo || '-' }}</td>
-                <td>{{ parent.estimatePaymentDate ? moment(parent.estimatePaymentDate).format('DD MMMM YYYY') : '-' }}</td>
+                <td>{{ parent.estimatedPaymentDate ? moment(parent.estimatedPaymentDate).format('DD MMMM YYYY') : '-' }}</td>
                 <td>{{ parent.invoiceDate ? moment(parent.invoiceDate).format('DD MMMM YYYY HH:mm:ss') : '-' }}</td>
                 <td>{{ parent.notes || '-' }}</td>
               </tr>
@@ -136,7 +135,6 @@ const columns = ref<string[]>([
   'Status',
   'Invoice Type',
   'Company Code',
-  'Department',
   'Base Amount',
   'VAT Ammount',
   'WHT Amount',

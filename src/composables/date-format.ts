@@ -21,3 +21,11 @@ export const formatDateTime = (value: string) => {
     .tz('Asia/Jakarta')
     .format('MMMM DD, YYYY HH:mm:ss')
 }
+
+// 2025
+export const formatDateYear = (value: Date | string) => {
+  if (value === null || value === undefined || value === '') {
+    return value
+  }
+  return moment(value).format('YYYY')
+}
