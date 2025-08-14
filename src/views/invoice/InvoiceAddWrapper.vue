@@ -74,7 +74,7 @@
         </button>
       </div>
     </div>
-    <ModalSuccess @afterClose="goToList" />
+    <ModalSuccess :isDraft="isClickDraft" @afterClose="goToList" />
     <ModalErrorDocumentNumberModal />
     <ModalSuccessBudgetCheck @afterClose="isCheckBudget = true" />
     <ModalFailedBudgetCheck />
@@ -116,6 +116,7 @@ const route = useRoute()
 const tabNow = ref<string>('data')
 const isSubmit = ref<boolean>(false)
 const isCheckBudget = ref<boolean>(false)
+const isClickDraft = ref<boolean>(false)
 
 const routes = ref<routeTypes[]>([
   {
@@ -410,8 +411,8 @@ const mapDataPost = () => {
       taxNo: form.taxNoInvoice,
       currCode: form.currency,
       notes: form.description,
-      statusCode: 1,
-      statusName: 'Waiting to Verify'
+      statusCode: isClickDraft.value ? 0 : 1,
+      statusName: isClickDraft.value ? 'Drafted' : 'Waiting to Verify'
     },
     vendor: {
       vendorId: Number(form.vendorId),
@@ -483,6 +484,7 @@ const goNext = () => {
 }
 
 const goToList = () => {
+  isClickDraft.value = false
   router.push({
     name: 'invoice-list'
   })
@@ -493,10 +495,19 @@ const goSaveDraft = () => {
   data.header.statusCode = 0
   data.header.statusName = 'Draft'
   isSubmit.value = true
-  invoiceApi.postSubmission(data).then(() => {
-    const idModal = document.querySelector('#success_invoice_modal')
-    const modal = KTModal.getInstance(idModal as HTMLElement)
-    modal.show()
+  isClickDraft.value = true
+  invoiceApi.postSubmission(data).then((response) => {
+    if (response.statusCode === 200) {
+      const idModal = document.querySelector('#success_invoice_modal')
+      const modal = KTModal.getInstance(idModal as HTMLElement)
+      modal.show()
+    } else {
+      if (response.result.message.includes('Invoice Document Number')) {
+        const idModal = document.querySelector('#error_document_number_modal')
+        const modal = KTModal.getInstance(idModal as HTMLElement)
+        modal.show()
+      }
+    }
   })
     .catch((error) => {
       console.error(error)
