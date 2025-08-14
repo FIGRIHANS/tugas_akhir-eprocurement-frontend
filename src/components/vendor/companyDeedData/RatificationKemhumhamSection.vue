@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
 
@@ -23,7 +23,6 @@ const uploadStore = useVendorUploadStore()
 const userLoginStore = useLoginStore()
 const route = useRoute()
 
-// === UI state ===
 const showSuccessModal = ref(false)
 const showErrorModal = ref(false)
 const showDeleteModal = ref(false)
@@ -32,10 +31,8 @@ const isDownloadLoading = ref(false)
 const isSaveLoading = ref(false)
 const mode = ref<'add' | 'edit' | 'delete'>('add')
 
-// NOTE: set sesuai enumerasi backend-mu untuk dokumen "Ratification by Kemkumham"
-const RATIFICATION_DOCUMENT_TYPE = 3
+const RATIFICATION_DOCUMENT_TYPE = 3117
 
-// === form model ===
 const payload = reactive<IVendorLegalDocumentPayload>({
   id: 0,
   vendorID: Number(route.params.id),
@@ -45,8 +42,8 @@ const payload = reactive<IVendorLegalDocumentPayload>({
   documentType: RATIFICATION_DOCUMENT_TYPE,
   documentNo: '',
   documentDate: new Date(),
-  notaryName: '',       // tidak dipakai di form ini (biarkan kosong)
-  notaryLocation: 0,    // tidak dipakai di form ini (biarkan 0)
+  notaryName: '',
+  notaryLocation: 0,
   user: '',
   isActive: true,
   isTemporary: true,
@@ -54,7 +51,6 @@ const payload = reactive<IVendorLegalDocumentPayload>({
   action: 0,
 })
 
-// === validation ===
 const errors = reactive({
   documentNo: '',
   documentURL: '',
@@ -82,7 +78,6 @@ const validateForm = () => {
   return ok
 }
 
-// === handlers ===
 const onUploadFile = async (file: File) => {
   if (!file) return
   const formData = new FormData()
@@ -91,6 +86,9 @@ const onUploadFile = async (file: File) => {
   try {
     const res = await uploadStore.upload(formData)
     payload.documentURL = res?.path as string
+    payload.filename = res?.name as string
+    payload.filesize = file.size
+
     errors.documentURL = ''
   } catch {
     alert('File upload failed, please try again')
@@ -129,8 +127,7 @@ const handleSave = async () => {
   } catch (err) {
     if (axios.isAxiosError(err)) {
       apiErrorMessage.value =
-        err.response?.data?.result?.message ||
-        'Terjadi kesalahan tidak terduga. Silahkan coba lagi'
+        err.response?.data?.result?.message || 'Terjadi kesalahan tidak terduga. Silahkan coba lagi'
     } else {
       apiErrorMessage.value = 'Terjadi kesalahan saat menyimpan data. Silahkan coba lagi'
     }
@@ -168,8 +165,7 @@ const handleProcessDelete = async () => {
   } catch (err) {
     if (axios.isAxiosError(err)) {
       apiErrorMessage.value =
-        err.response?.data?.result?.message ||
-        'Terjadi kesalahan tidak terduga. Silahkan coba lagi'
+        err.response?.data?.result?.message || 'Terjadi kesalahan tidak terduga. Silahkan coba lagi'
     } else {
       apiErrorMessage.value = 'Terjadi kesalahan saat menghapus data. Silahkan coba lagi'
     }
@@ -193,11 +189,6 @@ const handleDownload = async (path: string) => {
   }
 }
 
-// === lifecycle & computed ===
-onMounted(() => {
-  vendorLegalDocStore.getVendorLegalDocument(Number(route.params.id))
-})
-
 const filteredRatifications = computed(() =>
   vendorLegalDocStore.vendorLegalDocData?.filter(
     (d: IVendorLegalDocumentPayload) =>
@@ -212,9 +203,7 @@ const filteredRatifications = computed(() =>
       <div class="w-full flex justify-between items-center">
         <div>
           <h3 class="text-lg font-semibold text-slate-800">Ratification by Kemkumham</h3>
-          <p class="text-red-500 text-xs">
-            Specifically for companies with PT legal entity status
-          </p>
+          <p class="text-red-500 text-xs">Specifically for companies with PT legal entity status</p>
         </div>
       </div>
     </div>
@@ -231,13 +220,15 @@ const filteredRatifications = computed(() =>
             :hintText="errors.documentNo"
           />
           <UiFileUpload
-            name="documentUrl"
+            name="ratificationDocumentUrl"
             label="File"
             placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
             hint-text="*jpg, jpeg, png, pdf, zip / max : 16 MB"
             @added-file="onUploadFile($event)"
           />
-          <p v-if="errors.documentURL" class="text-xs text-red-500 mt-1">{{ errors.documentURL }}</p>
+          <p v-if="errors.documentURL" class="text-xs text-red-500 mt-1">
+            {{ errors.documentURL }}
+          </p>
         </UiFormGroup>
 
         <UiFormGroup hide-border>
@@ -246,7 +237,9 @@ const filteredRatifications = computed(() =>
             label="Letter Date"
             placeholder="Pilih Tanggal"
           />
-          <p v-if="errors.documentDate" class="text-xs text-red-500 mt-1">{{ errors.documentDate }}</p>
+          <p v-if="errors.documentDate" class="text-xs text-red-500 mt-1">
+            {{ errors.documentDate }}
+          </p>
 
           <div class="flex justify-end items-center">
             <UiButton variant="primary" @click="handleSave" :disabled="isSaveLoading">
@@ -289,12 +282,7 @@ const filteredRatifications = computed(() =>
           </tr>
 
           <!-- data -->
-          <tr
-            v-else
-            v-for="doc in filteredRatifications"
-            :key="doc.id"
-            class="font-normal text-sm"
-          >
+          <tr v-else v-for="doc in filteredRatifications" :key="doc.id" class="font-normal text-sm">
             <td class="text-center">
               <div class="dropdown" data-dropdown="true" data-dropdown-trigger="click">
                 <UiButton outline icon size="sm" variant="secondary" class="dropdown-toggle">
@@ -351,7 +339,11 @@ const filteredRatifications = computed(() =>
     <!-- Error -->
     <UiModal v-model="showErrorModal" size="sm">
       <div class="text-center mb-6">
-        <UiIcon name="cross-circle" variant="duotone" class="text-[150px] text-danger text-center" />
+        <UiIcon
+          name="cross-circle"
+          variant="duotone"
+          class="text-[150px] text-danger text-center"
+        />
       </div>
       <h3 class="text-center text-lg font-medium">
         Failed to {{ mode == 'delete' ? 'Delete' : mode === 'edit' ? 'Change' : 'Add' }} document!
@@ -364,18 +356,31 @@ const filteredRatifications = computed(() =>
     <!-- Confirm Delete -->
     <UiModal v-model="showDeleteModal" size="sm">
       <div class="text-center mb-6">
-        <UiIcon name="cross-circle" variant="duotone" class="text-[150px] text-danger text-center" />
+        <UiIcon
+          name="cross-circle"
+          variant="duotone"
+          class="text-[150px] text-danger text-center"
+        />
       </div>
       <h3 class="text-center text-lg font-medium">Are You Sure You Want to Delete This Item?</h3>
       <p class="text-center text-base text-gray-600 mb-5">
         This action will permanently remove the selected data from the list.
       </p>
       <div class="flex gap-3 px-8 mb-3">
-        <UiButton outline @click="showDeleteModal = false" class="flex-1 flex items-center justify-center">
+        <UiButton
+          outline
+          @click="showDeleteModal = false"
+          class="flex-1 flex items-center justify-center"
+        >
           <UiIcon name="black-left-line" />
           <span>Cancel</span>
         </UiButton>
-        <UiButton variant="danger" class="flex-1 flex items-center justify-center" @click="handleProcessDelete" :disabled="isSaveLoading">
+        <UiButton
+          variant="danger"
+          class="flex-1 flex items-center justify-center"
+          @click="handleProcessDelete"
+          :disabled="isSaveLoading"
+        >
           <UiLoading variant="white" v-if="isSaveLoading" />
           <UiIcon name="cross-circle" variant="duotone" v-else />
           <span>Delete</span>
