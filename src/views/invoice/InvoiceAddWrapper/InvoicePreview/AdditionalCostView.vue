@@ -20,7 +20,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(item, index) in form.additionalCost" :key="index">
+          <tr v-for="(item, index) in form.additionalCost" :key="index" class="invoice__field-items">
             <td>{{ index + 1 }}</td>
             <td>{{ getActivityName(item.activity) || '-' }}</td>
             <td>{{ item.itemAmount || '-' }}</td>
