@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, inject, onMounted, ref, watch } from 'vue'
 import {
   type ErrorExportPersonnelDataType,
   type PayloadExportPersonnelDataType,
@@ -25,6 +25,7 @@ import { defaultPayload, defaultPayloadError } from './static'
 
 const props = defineProps<{ id: number }>()
 const emit = defineEmits(['onSuccess', 'onError', 'onClose'])
+const mode = inject<'add' | 'view' | 'edit'>('mode')
 
 const route = useRoute()
 
@@ -112,6 +113,19 @@ const addCertificate = (code: number) => {
     type: code,
     vendorExpertId: 0,
   })
+}
+
+const onDownload = async (path: string) => {
+  try {
+    const file = await uploadStore.preview(path)
+    const link = URL.createObjectURL(file)
+    window.open(link, '_blank')
+    setTimeout(() => URL.revokeObjectURL(link), 1000)
+  } catch (err) {
+    if (err instanceof Error) {
+      alert('Failed to download document. Please try again later.')
+    }
+  }
 }
 
 const removeCertificate = (index: number, code: number) => {
@@ -318,6 +332,7 @@ onMounted(() => {
             required
             :error="payloadError.name"
             :hint-text="payloadError.name ? 'Name Required' : ''"
+            :readonly="mode === 'view'"
           />
           <div>
             <DatePicker
@@ -331,6 +346,7 @@ onMounted(() => {
               @update:model-value="
                 payload.dateOfBirth = $event ? new Date($event).toISOString() : ''
               "
+              :disabled="mode === 'view'"
             />
             <span class="form-hint !text-danger">
               {{ payloadError.dateOfBirth ? 'date of birth Required' : '' }}
@@ -346,6 +362,7 @@ onMounted(() => {
               size="sm"
               required
               :error="payloadError.gender"
+              :disabled="mode === 'view'"
             />
             <span class="form-hint !text-danger">
               {{ payloadError.gender ? 'gender Required' : '' }}
@@ -358,6 +375,7 @@ onMounted(() => {
             required
             :error="payloadError.address"
             :hint-text="payloadError.address ? 'address Required' : ''"
+            :readonly="mode === 'view'"
           />
           <UiSelect
             v-model="payload.education"
@@ -369,6 +387,7 @@ onMounted(() => {
             required
             :error="payloadError.education"
             :hint-text="payloadError.education ? 'education Required' : ''"
+            :disabled="mode === 'view'"
           />
           <UiSelect
             v-model="payload.nationality"
@@ -380,6 +399,7 @@ onMounted(() => {
             required
             :error="payloadError.nationality"
             :hint-text="payloadError.nationality ? 'nationality Required' : ''"
+            :disabled="mode === 'view'"
           />
           <UiInput
             v-model="payload.position"
@@ -388,6 +408,7 @@ onMounted(() => {
             required
             :error="payloadError.position"
             :hint-text="payloadError.position ? 'position Required' : ''"
+            :readonly="mode === 'view'"
           />
           <div>
             <RadioCustom
@@ -415,6 +436,7 @@ onMounted(() => {
             class="col-span-2"
             :error="payloadError.expertise"
             :hint-text="payloadError.expertise ? 'expertise Required' : ''"
+            :readonly="mode === 'view'"
           />
         </div>
 
@@ -423,7 +445,7 @@ onMounted(() => {
           <div class="card" v-for="certificate in certificateType" :key="certificate.code">
             <div class="card-header">
               <div class="card-title">{{ certificate.value }}</div>
-              <UiButton @click="addCertificate(Number(certificate.code))">
+              <UiButton @click="addCertificate(Number(certificate.code))" v-if="mode !== 'view'">
                 <UiIcon name="plus-circle" variant="duotone" />
                 <span>Add</span>
               </UiButton>
@@ -444,8 +466,8 @@ onMounted(() => {
                   >
                     <td>
                       <UiButton
+                        v-if="mode !== 'view'"
                         icon
-                        size="sm"
                         variant="danger"
                         outline
                         @click="removeCertificate(index, subCertificate.type)"
@@ -460,6 +482,7 @@ onMounted(() => {
                         @update:model-value="
                           $event ? (subCertificate.startDate = new Date($event).toISOString()) : ''
                         "
+                        :disabled="mode === 'view'"
                       />
                     </td>
                     <td>
@@ -469,10 +492,21 @@ onMounted(() => {
                         @update:model-value="
                           $event ? (subCertificate.endDate = new Date($event).toISOString()) : ''
                         "
+                        :disabled="mode === 'view'"
                       />
                     </td>
                     <td>
+                      <UiButton
+                        outline
+                        size="sm"
+                        v-if="mode === 'view'"
+                        @click="onDownload(subCertificate.docUrl)"
+                      >
+                        <UiIcon name="cloud-download" variant="duotone" />
+                        Download
+                      </UiButton>
                       <UiFileUpload
+                        v-else
                         placeholder="Upload file"
                         name="docUrl"
                         accepted-files=".jpg,.jpeg,.png,.pdf"
@@ -482,7 +516,11 @@ onMounted(() => {
                       />
                     </td>
                     <td>
-                      <UiInput placeholder="Description" v-model="subCertificate.description" />
+                      <UiInput
+                        placeholder="Description"
+                        v-model="subCertificate.description"
+                        :readonly="mode === 'view'"
+                      />
                     </td>
                   </tr>
                 </tbody>
@@ -510,7 +548,12 @@ onMounted(() => {
             Back
           </UiButton>
 
-          <UiButton variant="primary" @click="onSubmit" :disabled="submitLoading">
+          <UiButton
+            variant="primary"
+            @click="onSubmit"
+            :disabled="submitLoading"
+            v-if="mode !== 'view'"
+          >
             <UiLoading v-if="submitLoading" variant="white" />
             <UiIcon v-else name="file-added" variant="duotone" />
             Save

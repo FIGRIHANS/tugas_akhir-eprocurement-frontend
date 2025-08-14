@@ -47,10 +47,10 @@
 
                 <div class="dropdown-content w-full max-w-56" data-dropdown-dismiss="true">
                   <div class="menu menu-default flex flex-col w-full text-sm">
-                    <div class="menu-item text-primary" @click="downloadFile">
+                    <div class="menu-item text-primary" @click="downloadFile(item.id)">
                       <span class="menu-link">
-                        <UiIcon name="file-down" variant="duotone" class="menu-icon" />
-                        Download
+                        <UiIcon name="eye" variant="duotone" class="menu-icon" />
+                        View Detail
                       </span>
                     </div>
                     <div class="menu-item text-warning" @click="editData(item.id)">
@@ -101,7 +101,7 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import ModalForm from './ModalForm.vue'
 import { useExpertPersonnelDataStore } from '@/stores/vendor/vendor'
-import { onMounted, ref } from 'vue'
+import { onMounted, provide, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import UiLoading from '@/components/UiLoading.vue'
 import { KTModal } from '@/metronic/core'
@@ -113,6 +113,7 @@ const route = useRoute()
 const expertPStore = useExpertPersonnelDataStore()
 
 const selectedId = ref(0)
+const mode = ref<'add' | 'view' | 'edit'>('view')
 
 const tabCols = [
   '',
@@ -123,11 +124,16 @@ const tabCols = [
   'Expertise / Skills',
 ]
 
-const downloadFile = () => {
-  console.log('downloadFile')
+const downloadFile = (id: number) => {
+  selectedId.value = id
+  mode.value = 'view'
+  const idModal = document.querySelector('#modal-expert-personnel')
+  const modal = KTModal.getInstance(idModal as HTMLElement)
+  modal.show()
 }
 
 const editData = (id: number) => {
+  mode.value = 'edit'
   selectedId.value = id
   const idModal = document.querySelector('#modal-expert-personnel')
   const modal = KTModal.getInstance(idModal as HTMLElement)
@@ -142,6 +148,7 @@ const deleteData = (id: number) => {
 }
 
 const openModalForm = () => {
+  mode.value = 'add'
   selectedId.value = 0
   const idModal = document.querySelector('#modal-expert-personnel')
   const modal = KTModal.getInstance(idModal as HTMLElement)
@@ -171,4 +178,6 @@ const onSubmitError = () => {
 onMounted(() => {
   expertPStore.getData(Number(route.params.id))
 })
+
+provide('mode', mode)
 </script>
