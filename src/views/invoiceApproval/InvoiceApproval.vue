@@ -20,8 +20,8 @@ const invoiceMasterApi = useInvoiceMasterDataStore()
 const routes = ref<routeTypes[]>([
   {
     name: 'Invoice Approval',
-    to: '/invoice/approval'
-  }
+    to: '/invoice/approval',
+  },
 ])
 
 onMounted(() => {
