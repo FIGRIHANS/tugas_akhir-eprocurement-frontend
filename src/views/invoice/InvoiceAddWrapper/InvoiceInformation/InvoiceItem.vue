@@ -51,7 +51,7 @@
                 <input v-else v-model="item.itemAmount" class="input" type="number" placeholder=""/>
               </td>
               <td>
-                <span v-if="!item.isEdit">{{ useFormatIdr(item.itemText) || '-' }}</span>
+                <span v-if="!item.isEdit">{{ item.itemText || '-' }}</span>
                 <input v-else v-model="item.itemText" class="input" type="text" placeholder=""/>
               </td>
               <td>
