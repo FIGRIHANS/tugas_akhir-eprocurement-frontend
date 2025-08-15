@@ -14,7 +14,7 @@
             </tr>
             <tr>
               <td class="!border-b-0">Notary</td>
-              <td class="!border-b-0">{{ companyDeedData?.cityName }}</td>
+              <td class="!border-b-0">{{ companyDeedData?.notaryName || '-' }}</td>
             </tr>
             <tr>
               <td class="!border-b-0">Notary Place</td>
@@ -22,7 +22,14 @@
             </tr>
             <tr>
               <td class="!border-b-0">File</td>
-              <td class="!border-b-0">{{ formatDate(companyDeedData?.documentDate) }}</td>
+              <td class="!border-b-0">
+                <AttachmentView
+                  class="cursor-pointer"
+                  :file-data="{ name: companyDeedData?.value, path: companyDeedData?.documentURL }"
+                  reverse-icon
+                  @click="downloadFile(companyDeedData?.documentURL)"
+                />
+              </td>
             </tr>
           </tbody>
         </table>
@@ -39,15 +46,25 @@
           <tbody>
             <tr>
               <td class="!border-b-0">Letter Date</td>
-              <td class="!border-b-0">{{ formatDate(companyDeedData?.documentDate) }}</td>
+              <td class="!border-b-0">{{ formatDate(latestAmendmentData?.documentDate) }}</td>
             </tr>
             <tr>
               <td class="!border-b-0">Notary</td>
-              <td class="!border-b-0">{{ formatDate(companyDeedData?.documentDate) }}</td>
+              <td class="!border-b-0">{{ latestAmendmentData?.notaryName || '-' }}</td>
             </tr>
             <tr>
               <td class="!border-b-0">File</td>
-              <td class="!border-b-0">{{ formatDate(companyDeedData?.documentDate) }}</td>
+              <td class="!border-b-0">
+                <AttachmentView
+                  class="cursor-pointer"
+                  :file-data="{
+                    name: latestAmendmentData?.value,
+                    path: latestAmendmentData?.documentURL,
+                  }"
+                  reverse-icon
+                  @click="downloadFile(latestAmendmentData?.documentURL)"
+                />
+              </td>
             </tr>
           </tbody>
         </table>
@@ -55,8 +72,11 @@
     </div>
 
     <div class="card min-w-full">
-      <div class="card-header">
+      <div class="card-header flex-col items-start gap-1">
         <h3 class="card-title">Ratification by Kemenkumham</h3>
+        <span class="text-danger text-xs"
+          >Specifically for companies with PT legal entity status</span
+        >
       </div>
 
       <div class="card-table">
@@ -64,15 +84,25 @@
           <tbody>
             <tr>
               <td class="!border-b-0">Letter Date</td>
-              <td class="!border-b-0">{{ formatDate(companyDeedData?.documentDate) }}</td>
+              <td class="!border-b-0">{{ formatDate(ratificationData?.documentDate) }}</td>
             </tr>
             <tr>
               <td class="!border-b-0">Notary</td>
-              <td class="!border-b-0">{{ formatDate(companyDeedData?.documentDate) }}</td>
+              <td class="!border-b-0">{{ ratificationData?.notaryName || '-' }}</td>
             </tr>
             <tr>
               <td class="!border-b-0">File</td>
-              <td class="!border-b-0">{{ formatDate(companyDeedData?.documentDate) }}</td>
+              <td class="!border-b-0">
+                <AttachmentView
+                  class="cursor-pointer"
+                  :file-data="{
+                    name: ratificationData?.value,
+                    path: ratificationData?.documentURL,
+                  }"
+                  reverse-icon
+                  @click="downloadFile(ratificationData?.documentURL)"
+                />
+              </td>
             </tr>
           </tbody>
         </table>
@@ -88,7 +118,6 @@
         <table class="table align-middle">
           <thead>
             <tr>
-              <th class="w-[70px]"></th>
               <th>
                 <span class="sort">
                   <span class="sort-label">Type</span>
@@ -142,7 +171,12 @@
               <td>{{ data.shareUnit }}</td>
               <td>{{ data.ownerID }}</td>
               <td>
-                <AttachmentView :file-data="{ name: data.ownerID, path: data.ownerIDUrl }" />
+                <AttachmentView
+                  v-if="data.ownerIDUrl"
+                  :file-data="{ name: data.ownerID, path: data.ownerIDUrl }"
+                  @click="downloadFile(data?.ownerIDUrl)"
+                />
+                <span v-else>-</span>
               </td>
             </tr>
           </tbody>
@@ -156,14 +190,16 @@
 import { computed, onMounted, watch } from 'vue'
 
 import { useCompanyDeedDataStore } from '@/stores/vendor/vendor'
+import { useUploadStore } from '@/stores/general/upload'
 
-import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import { formatDate } from '@/composables/date-format'
+
 import AttachmentView from '@/components/ui/attachment/AttachmentView.vue'
 
 const props = defineProps<{ vendorId: number | undefined }>()
 
 const companyDeedDataStore = useCompanyDeedDataStore()
+const uploadStore = useUploadStore()
 
 const companyDeedData = computed(() =>
   companyDeedDataStore.vendorLegalDocData.find(
@@ -182,8 +218,8 @@ const ratificationData = computed(() =>
 )
 const shareholderData = computed(() => companyDeedDataStore.shareholdersData)
 
-const downloadFile = () => {
-  console.log('a')
+const downloadFile = async (path: string) => {
+  await uploadStore.previewFile(path)
 }
 
 onMounted(() => {

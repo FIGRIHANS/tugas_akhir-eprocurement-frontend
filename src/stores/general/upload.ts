@@ -19,9 +19,17 @@ export const useUploadStore = defineStore('upload', () => {
   }
 
   const previewFile = async (fullFilePath: string) => {
-    const response: ApiResponse = await generalApi.post('/api/file/preview', { fullFilePath })
+    try {
+      const response = await generalApi.get('/api/file/preview', {
+        params: { fullFilePath },
+        responseType: 'blob',
+      })
 
-    return response.data.result.content
+      const link = URL.createObjectURL(response.data)
+      window.open(link, '_blank')
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   return {
