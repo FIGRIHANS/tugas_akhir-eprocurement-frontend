@@ -2,7 +2,6 @@
   <div>
     <div class="border rounded-lg">
       <p class="mx-[30px] my-[20px]">Participating Vendors</p>
-      
       <div class="nego__table">
         <table class="table text-gray-700 font-medium text-sm">
           <thead>
