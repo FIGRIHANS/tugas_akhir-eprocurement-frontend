@@ -143,7 +143,6 @@ const uploadFile = async (file: File, index: number, code: number) => {
   const formDataFile = new FormData()
   formDataFile.append('FormFile', file)
   formDataFile.append('Actioner', userStore.userData?.profile.profileId.toString() || '0')
-  console.log('target', index)
 
   try {
     uploadLoading.value = true
