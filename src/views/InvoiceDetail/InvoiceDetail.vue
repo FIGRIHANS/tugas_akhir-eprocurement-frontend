@@ -12,15 +12,33 @@
       <InvoiceHeaderDocument :isNeedCheck="checkStatusCode()" class="flex-1" />
       <InvoiceCalculation :isNeedCheck="checkStatusCode()" class="flex-1" :formInvoice="form" />
     </div>
-    <InvoicePoGr v-if="checkPo()" :isNeedCheck="checkStatusCode()" class="mt-[24px]" />
-    <AdditionalCost v-if="form.invoiceDPCode === 9011 && checkPo() || form.invoiceTypeCode === 902 || form.invoiceTypeCode === 903" :isNeedCheck="checkStatusCode()" class="mt-[24px]" />
+    <div v-if="currentRouteName === 'invoiceDetail'">
+      <InvoicePoGr v-if="checkPo()" :isNeedCheck="checkStatusCode()" class="mt-[24px]" />
+      <AdditionalCost
+        v-if="
+          (form.invoiceDPCode === 9011 && checkPo()) ||
+          form.invoiceTypeCode === 902 ||
+          form.invoiceTypeCode === 903
+        "
+        :isNeedCheck="checkStatusCode()"
+        class="mt-[24px]"
+      />
+    </div>
+    <div v-else>
+      <ConstExpenses :isNeedCheck="checkStatusCode()" class="mt-[24px]" />
+    </div>
     <div class="flex items-center justify-between gap-[8px] mt-[24px]">
       <div class="flex items-center gap-[10px]">
         <button class="btn btn-outline btn-primary" :disabled="isLoading" @click="goBack">
           <i class="ki-filled ki-black-left"></i>
           Back
         </button>
-        <button v-if="checkStatusCode()" class="btn btn-primary" :disabled="isLoading" @click="goToEdit">
+        <button
+          v-if="checkStatusCode()"
+          class="btn btn-primary"
+          :disabled="isLoading"
+          @click="goToEdit"
+        >
           <i class="ki-duotone ki-pencil"></i>
           Edit
         </button>
@@ -37,7 +55,10 @@
       </div>
     </div>
     <RejectVerification @reject="goReject" />
-    <SuccessVerifModal :statusCode="detailInvoice?.header.statusCode || -1" @afterClose="goToList" />
+    <SuccessVerifModal
+      :statusCode="detailInvoice?.header.statusCode || -1"
+      @afterClose="goToList"
+    />
     <SuccessRejectModal @afterClose="goToList" />
   </div>
 </template>
@@ -62,13 +83,24 @@ import { isEmpty } from 'lodash'
 const StatusInvoice = defineAsyncComponent(() => import('./InvoiceDetail/StatusInvoice.vue'))
 const GeneralData = defineAsyncComponent(() => import('./InvoiceDetail/GeneralData.vue'))
 const BankKey = defineAsyncComponent(() => import('./InvoiceDetail/BankKey.vue'))
-const InvoiceHeaderDocument = defineAsyncComponent(() => import('./InvoiceDetail/InvoiceHeaderDocument.vue'))
-const InvoiceCalculation = defineAsyncComponent(() => import('./InvoiceDetail/InvoiceCalculation.vue'))
+const InvoiceHeaderDocument = defineAsyncComponent(
+  () => import('./InvoiceDetail/InvoiceHeaderDocument.vue'),
+)
+const InvoiceCalculation = defineAsyncComponent(
+  () => import('./InvoiceDetail/InvoiceCalculation.vue'),
+)
 const InvoicePoGr = defineAsyncComponent(() => import('./InvoiceDetail/InvoicePoGr.vue'))
 const AdditionalCost = defineAsyncComponent(() => import('./InvoiceDetail/AdditionalCost.vue'))
-const RejectVerification = defineAsyncComponent(() => import('./InvoiceDetail/RejectVerification.vue'))
-const SuccessVerifModal = defineAsyncComponent(() => import('./InvoiceDetail/SuccessVerifModal.vue'))
-const SuccessRejectModal = defineAsyncComponent(() => import('./InvoiceDetail/SuccessRejectModal.vue'))
+const ConstExpenses = defineAsyncComponent(() => import('./InvoiceDetail/CostExpenses.vue'))
+const RejectVerification = defineAsyncComponent(
+  () => import('./InvoiceDetail/RejectVerification.vue'),
+)
+const SuccessVerifModal = defineAsyncComponent(
+  () => import('./InvoiceDetail/SuccessVerifModal.vue'),
+)
+const SuccessRejectModal = defineAsyncComponent(
+  () => import('./InvoiceDetail/SuccessRejectModal.vue'),
+)
 
 const activeStep = ref<string>('')
 const router = useRouter()
@@ -77,15 +109,19 @@ const verificationApi = useInvoiceVerificationStore()
 const loginApi = useLoginStore()
 const isLoading = ref<boolean>(false)
 
+const currentRouteName = computed(() => {
+  return route.name
+})
+
 const routes = ref<routeTypes[]>([
   {
     name: 'Invoice Approval',
-    to: '/invoice/approval'
+    to: '/invoice/approval',
   },
   {
     name: 'Detail Invoice',
-    to: '/invoice/detail'
-  }
+    to: '/invoice/detail',
+  },
 ])
 
 const form = ref<formTypes>({
@@ -135,7 +171,7 @@ const form = ref<formTypes>({
   invoiceDocument: null,
   tax: null,
   referenceDocument: null,
-  otherDocument: null
+  otherDocument: null,
 })
 
 const detailInvoice = computed(() => verificationApi.detailInvoice)
@@ -164,7 +200,12 @@ const checkWorkflow = () => {
   const checkIndex = getWf?.findIndex((item) => item.profileId === getProfileId)
 
   if (checkIndex !== -1) {
-    if (getWf[checkIndex].stateCode === 3 || getWf[checkIndex].stateCode === 4 || getWf[checkIndex].stateCode === 5) return false
+    if (
+      getWf[checkIndex].stateCode === 3 ||
+      getWf[checkIndex].stateCode === 4 ||
+      getWf[checkIndex].stateCode === 5
+    )
+      return false
     else return true
   } else return true
 }
@@ -172,10 +213,10 @@ const checkWorkflow = () => {
 const goToEdit = () => {
   router.push({
     name: 'invoiceDetailEdit',
-    query : {
+    query: {
       id: route.query.id,
-      type: route.query.type
-    }
+      type: route.query.type,
+    },
   })
 }
 
@@ -186,7 +227,11 @@ const openReject = () => {
 }
 
 const checkPo = () => {
-  return form.value.invoiceTypeCode === 901 || form.value.invoiceTypeCode === 902 || form.value.invoiceTypeCode === 903
+  return (
+    form.value.invoiceTypeCode === 901 ||
+    form.value.invoiceTypeCode === 902 ||
+    form.value.invoiceTypeCode === 903
+  )
 }
 
 const checkVerifHeader = () => {
@@ -206,7 +251,8 @@ const checkVerifHeader = () => {
     paymentMethodError ||
     transferNewsError ||
     notesError
-  ) return false
+  )
+    return false
   return true
 }
 
@@ -214,14 +260,15 @@ const checkVerif = () => {
   let status = true
   const data = form.value
   status = checkVerifHeader()
-  
+
   if (
     !data.bankKeyCheck ||
     !data.generalDataCheck ||
     !data.invoiceHeaderDocumentCheck ||
     !data.invoiceCalculationCheck ||
-    !data.invoicePoGrCheck 
-  ) status = false
+    !data.invoicePoGrCheck
+  )
+    status = false
 
   return status
 }
@@ -240,7 +287,7 @@ const mapPoGr = () => {
       whtType: item.whtType,
       whtCode: item.whtCode,
       whtBaseAmount: item.whtBaseAmount,
-      whtAmount: item.whtAmount
+      whtAmount: item.whtAmount,
     })
   }
   return poGr
@@ -260,7 +307,7 @@ const mapAdditionalCost = () => {
       assignment: item.assignment,
       whtType: item.whtType,
       whtCode: item.whtCode,
-      whtBaseAmount: Number(item.whtBaseAmount)
+      whtBaseAmount: Number(item.whtBaseAmount),
     })
   }
   return cost
@@ -277,8 +324,8 @@ const mapDataVerif = () => {
   if (!isEmpty(referenceDoc)) documents.push(referenceDoc)
   if (!isEmpty(otherDoc)) documents.push(otherDoc)
   const data = {
-    statusCode: route.query.type === '1'? 3 : 4,
-    statusName: route.query.type === '1'? 'Verified' : 'Approved',
+    statusCode: route.query.type === '1' ? 3 : 4,
+    statusName: route.query.type === '1' ? 'Verified' : 'Approved',
     statusNotes: '',
     header: {
       invoiceUId: form.value.invoiceUId,
@@ -295,14 +342,14 @@ const mapDataVerif = () => {
       assigment: form.value.assigment,
       transferNews: form.value.transferNews,
       npwpReporting: form.value.npwpReporting,
-      creditCardBillingId: form.value.creditCardBillingId
+      creditCardBillingId: form.value.creditCardBillingId,
     },
     payment: {
       bankKey: form.value.bankKey,
       bankName: form.value.bankName,
       beneficiaryName: form.value.beneficiaryName,
       bankAccountNo: form.value.bankAccountNo,
-      bankCountryCode: form.value.bankCountryCode
+      bankCountryCode: form.value.bankCountryCode,
     },
     calculation: {
       subtotal: form.value.subtotal,
@@ -310,11 +357,11 @@ const mapDataVerif = () => {
       whtAmount: form.value.whtAmount,
       additionalCost: form.value.additionalCost,
       totalGrossAmount: form.value.totalGrossAmount,
-      totalNetAmount: form.value.totalNetAmount
+      totalNetAmount: form.value.totalNetAmount,
     },
     documents,
     pogr: mapPoGr(),
-    additionalCosts: mapAdditionalCost()
+    additionalCosts: mapAdditionalCost(),
   } as PostVerificationTypes
 
   return data
@@ -322,48 +369,53 @@ const mapDataVerif = () => {
 
 const goVerif = () => {
   const status = checkVerif()
-  
+
   if (!status) return
   isLoading.value = true
-  verificationApi.postSubmission(mapDataVerif()).then(() => {
-    verificationApi.resetDetailInvoiceEdit()
-    const idModal = document.querySelector('#success_verif_modal')
-    const modal = KTModal.getInstance(idModal as HTMLElement)
-    modal.show()
-  }).finally(() => {
-    isLoading.value = false
-  })
+  verificationApi
+    .postSubmission(mapDataVerif())
+    .then(() => {
+      verificationApi.resetDetailInvoiceEdit()
+      const idModal = document.querySelector('#success_verif_modal')
+      const modal = KTModal.getInstance(idModal as HTMLElement)
+      modal.show()
+    })
+    .finally(() => {
+      isLoading.value = false
+    })
 }
 
 const goReject = (reason: string) => {
   verificationApi.isRejectLoading = true
-  verificationApi.postReject({
-    invoiceUId: form.value.invoiceUId,
-    notes: reason
-  }).then(() => {
-    const idModal = document.querySelector('#success_reject_modal')
-    const modal = KTModal.getInstance(idModal as HTMLElement)
-    modal.show()
-  })
-  .finally(() => {
-    verificationApi.isRejectLoading = false
-  })
+  verificationApi
+    .postReject({
+      invoiceUId: form.value.invoiceUId,
+      notes: reason,
+    })
+    .then(() => {
+      const idModal = document.querySelector('#success_reject_modal')
+      const modal = KTModal.getInstance(idModal as HTMLElement)
+      modal.show()
+    })
+    .finally(() => {
+      verificationApi.isRejectLoading = false
+    })
 }
 
 const goToList = () => {
   router.push({
-    name: route.query.type === '1' ? 'invoiceVerification' : 'invoiceApproval'
+    name: route.query.type === '1' ? 'invoiceVerification' : 'invoiceApproval',
   })
 }
 
 const goBack = () => {
   if (route.query.type === '1') {
     router.push({
-      name: 'invoiceVerification'
+      name: 'invoiceVerification',
     })
   } else {
     router.push({
-      name: 'invoiceApproval'
+      name: 'invoiceApproval',
     })
   }
 }
@@ -379,13 +431,13 @@ const setDataDefault = () => {
 
   for (const item of data?.pogr || []) {
     resultPoGr.push({
-      ...item
+      ...item,
     })
   }
 
   for (const item of data?.additionalCosts || []) {
     resultAdditional.push({
-      ...item
+      ...item,
     })
   }
 
@@ -453,7 +505,7 @@ const setDataDefault = () => {
     invoiceDocument: invoice,
     tax: tax,
     referenceDocument: reference,
-    otherDocument: other
+    otherDocument: other,
   }
 }
 
@@ -506,7 +558,7 @@ const setDataEdit = () => {
     invoiceDocument: data?.invoiceDocument || null,
     tax: data?.tax || null,
     referenceDocument: data?.referenceDocument || null,
-    otherDocument: data?.otherDocument || null
+    otherDocument: data?.otherDocument || null,
   }
 }
 
@@ -516,24 +568,24 @@ onMounted(async () => {
     routes.value = [
       {
         name: 'Invoice Verification',
-        to: '/invoice/verification'
+        to: '/invoice/verification',
       },
       {
         name: 'Detail Invoice',
-        to: '/invoice/detail'
-      }
+        to: '/invoice/detail',
+      },
     ]
   } else {
     activeStep.value = 'Approval'
     routes.value = [
       {
         name: 'Invoice Approval',
-        to: '/invoice/approval'
+        to: '/invoice/approval',
       },
       {
         name: 'Detail Invoice',
-        to: '/invoice/detail'
-      }
+        to: '/invoice/detail',
+      },
     ]
   }
   await verificationApi.getInvoiceDetail(route.query.id?.toString() || '').then(() => {
