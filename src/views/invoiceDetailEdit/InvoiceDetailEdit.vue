@@ -112,12 +112,26 @@ const form = ref<formTypes>({
   totalNetAmount: 0,
   invoicePoGr: [],
   additionalCosts: [],
+  invoiceItem: [],
   invoiceDocument: null,
   tax: null,
   referenceDocument: null,
   otherDocument: null,
   creditCardBillingId: '',
-  creditCardBillingError: false
+  creditCardBillingError: false,
+  isAlternativePayee: false,
+  isOneTimeVendor: false,
+  nameAlternative: '',
+  nameOtherAlternative: '',
+  streetAltiernative: '',
+  cityAlternative: '',
+  countryAlternative: '',
+  bankAccountNumberAlternative: '',
+  bankKeyAlternative: '',
+  bankCountryAlternative: '',
+  npwpNumberAlternative: '',
+  ktpNumberAlternative: '',
+  emailAlternative: ''
 })
 
 const contentComponent = computed(() => {
@@ -344,11 +358,26 @@ const setDataEdit = () => {
     totalNetAmount: data?.totalNetAmount || 0,
     invoicePoGr: mapDataEditPoGr(),
     additionalCosts: mapDataEditAdditional(),
+    invoiceItem: [],
     invoiceDocument: mapDocument(data?.invoiceDocument || null),
     tax: mapDocument(data?.tax || null),
     referenceDocument: mapDocument(data?.referenceDocument || null),
     otherDocument: mapDocument(data?.otherDocument || null),
-    creditCardBillingId: data?.creditCardBillingId || ''
+    creditCardBillingId: data?.creditCardBillingId || '',
+    isAlternativePayee: false,
+    isOneTimeVendor: false,
+    nameAlternative: '',
+    nameOtherAlternative: '',
+    streetAltiernative: '',
+    cityAlternative: '',
+    countryAlternative: '',
+    bankAccountNumberAlternative: '',
+    bankKeyAlternative: '',
+    bankCountryAlternative: '',
+    npwpNumberAlternative: '',
+    ktpNumberAlternative: '',
+    emailAlternative: ''
+    
   }
 }
 
@@ -441,11 +470,25 @@ const setDataDefault = () => {
     totalNetAmount: data?.calculation.totalNetAmount || 0,
     invoicePoGr: resultPoGr,
     additionalCosts: resultAdditional,
+    invoiceItem: [],
     invoiceDocument: invoice,
     tax: tax,
     referenceDocument: reference,
     otherDocument: other,
-    creditCardBillingId: data?.header.creditCardBillingId || ''
+    creditCardBillingId: data?.header.creditCardBillingId || '',
+    isAlternativePayee: false,
+    isOneTimeVendor: false,
+    nameAlternative: '',
+    nameOtherAlternative: '',
+    streetAltiernative: '',
+    cityAlternative: '',
+    countryAlternative: '',
+    bankAccountNumberAlternative: '',
+    bankKeyAlternative: '',
+    bankCountryAlternative: '',
+    npwpNumberAlternative: '',
+    ktpNumberAlternative: '',
+    emailAlternative: ''
   }
 }
 

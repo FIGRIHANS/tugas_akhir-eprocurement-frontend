@@ -104,7 +104,7 @@ const handleSave = async () => {
 
   try {
     await adminStore.update(editPayload.value!)
-
+    await adminStore.getData(route.params.id as string)
     successModal.value = true
     confirmModal.value = false
   } catch (error) {
