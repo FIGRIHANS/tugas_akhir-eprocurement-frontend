@@ -347,6 +347,7 @@ onMounted(() => {
                 payload.dateOfBirth = $event ? new Date($event).toISOString() : ''
               "
               :disabled="mode === 'view'"
+              :max-date="new Date(new Date().setFullYear(new Date().getFullYear() - 17))"
             />
             <span class="form-hint !text-danger">
               {{ payloadError.dateOfBirth ? 'date of birth Required' : '' }}
@@ -483,6 +484,7 @@ onMounted(() => {
                           $event ? (subCertificate.startDate = new Date($event).toISOString()) : ''
                         "
                         :disabled="mode === 'view'"
+                        :max-date="new Date()"
                       />
                     </td>
                     <td>
