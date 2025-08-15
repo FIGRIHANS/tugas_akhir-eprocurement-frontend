@@ -34,6 +34,7 @@ const onDelete = async () => {
     }
   } finally {
     loading.value = false
+    model.value = false
   }
 }
 </script>

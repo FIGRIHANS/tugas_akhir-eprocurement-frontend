@@ -301,7 +301,8 @@ const mapDataVerif = () => {
       bankKey: form.value.bankKey,
       bankName: form.value.bankName,
       beneficiaryName: form.value.beneficiaryName,
-      bankAccountNo: form.value.bankAccountNo
+      bankAccountNo: form.value.bankAccountNo,
+      bankCountryCode: form.value.bankCountryCode
     },
     calculation: {
       subtotal: form.value.subtotal,
@@ -509,7 +510,7 @@ const setDataEdit = () => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   if (route.query.type === '1') {
     activeStep.value = 'Verification'
     routes.value = [
@@ -535,7 +536,7 @@ onMounted(() => {
       }
     ]
   }
-  verificationApi.getInvoiceDetail(route.query.id?.toString() || '').then(() => {
+  await verificationApi.getInvoiceDetail(route.query.id?.toString() || '').then(() => {
     if (verificationApi.isFromEdit) {
       setDataEdit()
     } else {

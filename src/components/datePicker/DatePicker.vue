@@ -8,6 +8,7 @@
     ]"
   >
     <label
+      v-if="label"
       :class="{
         'text-[11px] px-[3px] text-gray-500 bg-white absolute z-50 -top-[6px] left-[7px] leading-[12px]':
           label && labelTop,
@@ -26,6 +27,7 @@
       :min-date="minDate"
       :max-date="maxDate"
       class="w-full"
+      :teleport="teleport"
     >
       <template #dp-input="{ value }">
         <div class="input relative" :class="{ 'border-danger': error }">
@@ -61,6 +63,7 @@ const props = defineProps<{
   labelTop?: boolean
   maxDate?: Date | string
   range?: boolean
+  teleport?: boolean
 }>()
 
 const emits = defineEmits(['update:modelValue'])

@@ -6,12 +6,12 @@ import UiIcon from '../ui/atoms/icon/UiIcon.vue'
 import successImg from '@/assets/success.svg'
 import { useVendorStore } from '@/stores/vendor/vendor'
 import axios from 'axios'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useLoginStore } from '@/stores/views/login'
 import UiQuestion from '@/assets/svg/UiQuestion.vue'
 
 const router = useRouter()
-
+const route = useRoute()
 // store
 const vendorStore = useVendorStore()
 const userStore = useLoginStore()
@@ -45,6 +45,7 @@ const handleSubmit = async () => {
     isChecked.value = false
     modalDeactive.value = false
     modalSuccess.value = true
+    vendorStore.getVendors(route.query)
   } catch (err) {
     if (err instanceof Error) {
       if (axios.isAxiosError(err)) {
@@ -74,6 +75,7 @@ const handleSubmitActivate = async () => {
     isChecked.value = true
     modalActivate.value = false
     modalSuccess.value = true
+    vendorStore.getVendors(route.query)
   } catch (err) {
     if (err instanceof Error) {
       if (axios.isAxiosError(err)) {
