@@ -17,7 +17,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="data in dataResponse" :key="data.vendorId">
+          <tr v-for="data in dataResponse" :key="data.id">
             <td>
               <div class="dropdown" data-dropdown="true" data-dropdown-trigger="click">
                 <button class="dropdown-toggle px-0 size-8 flex justify-center btn btn-light">
@@ -36,11 +36,11 @@
                 </div>
               </div>
             </td>
-            <td>Luffy</td>
-            <td>S1</td>
-            <td>Manager</td>
-            <td>1</td>
-            <td>Time Management</td>
+            <td>{{ data.name }}</td>
+            <td>{{ data.education }}</td>
+            <td>{{ data.position }}</td>
+            <td>{{ data.yearOfExperience }}</td>
+            <td>{{ data.expertise }}</td>
           </tr>
         </tbody>
       </table>
@@ -49,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 
 import { useExpertPersonnelDataStore } from '@/stores/vendor/vendor'
 import { useUploadStore } from '@/stores/general/upload'
