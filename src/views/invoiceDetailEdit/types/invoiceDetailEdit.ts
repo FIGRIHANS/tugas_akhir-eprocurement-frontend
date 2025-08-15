@@ -1,6 +1,7 @@
 import type { documentFormTypes } from './invoiceDocument'
 import type { itemsPoGrType } from './invoicePoGr'
 import type { itemsCostType } from './additionalCost'
+import type { invoiceItemTypes } from './invoiceItem'
 
 export interface formTypes extends documentFormTypes {
   invoiceUId: string
@@ -50,6 +51,20 @@ export interface formTypes extends documentFormTypes {
   bankAccountNo: string
   bankCountryCode: string
 
+  isAlternativePayee: boolean
+  isOneTimeVendor: boolean
+  nameAlternative: string
+  nameOtherAlternative: string
+  streetAltiernative: string
+  cityAlternative: string
+  countryAlternative: string
+  bankAccountNumberAlternative: string
+  bankKeyAlternative: string
+  bankCountryAlternative: string
+  npwpNumberAlternative: string
+  ktpNumberAlternative: string
+  emailAlternative: string
+
   vendorId: string
   vendorName: string
   npwp: string
@@ -65,4 +80,5 @@ export interface formTypes extends documentFormTypes {
   invoicePoGr: itemsPoGrType[]
   invoicePoGrError?: boolean
   additionalCosts: itemsCostType[]
+  invoiceItem: invoiceItemTypes[]
 }
