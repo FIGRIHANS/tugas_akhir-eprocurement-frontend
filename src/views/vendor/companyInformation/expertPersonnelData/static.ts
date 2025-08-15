@@ -7,7 +7,7 @@ export const defaultPayload: PayloadExportPersonnelDataType = {
   name: '',
   action: 0,
   address: '',
-  dateOfBirth: '',
+  dateOfBirth: new Date(new Date().setFullYear(new Date().getFullYear() - 17)).toISOString(),
   education: '',
   email: '',
   expertise: '',
