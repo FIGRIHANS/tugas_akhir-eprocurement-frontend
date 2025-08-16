@@ -259,16 +259,18 @@ watch(
         nationality: selectedItem.nationality,
         position: selectedItem.position,
         status: selectedItem.status,
-        certificates: certificates.result.content.map((certi) => ({
-          vendorExpertId: certi.vendorExpertsID,
-          description: certi.description,
-          docUrl: certi.docUrl,
-          endDate: certi.endDate,
-          id: certi.id,
-          isActive: certi.isActive,
-          startDate: certi.startDate,
-          type: certi.type,
-        })),
+        certificates: !certificates.result.isError
+          ? certificates?.result?.content?.map((certi) => ({
+              vendorExpertId: certi.vendorExpertsID,
+              description: certi.description,
+              docUrl: certi.docUrl,
+              endDate: certi.endDate,
+              id: certi.id,
+              isActive: certi.isActive,
+              startDate: certi.startDate,
+              type: certi.type,
+            }))
+          : [],
       }
     }
   },
@@ -347,6 +349,7 @@ onMounted(() => {
                 payload.dateOfBirth = $event ? new Date($event).toISOString() : ''
               "
               :disabled="mode === 'view'"
+              :max-date="new Date(new Date().setFullYear(new Date().getFullYear() - 17))"
             />
             <span class="form-hint !text-danger">
               {{ payloadError.dateOfBirth ? 'date of birth Required' : '' }}
@@ -463,6 +466,7 @@ onMounted(() => {
                       (c) => c.type === Number(certificate.code),
                     )"
                     :key="`sub-${index}`"
+                    :id="'sub' + index"
                   >
                     <td>
                       <UiButton
@@ -483,6 +487,7 @@ onMounted(() => {
                           $event ? (subCertificate.startDate = new Date($event).toISOString()) : ''
                         "
                         :disabled="mode === 'view'"
+                        :max-date="new Date()"
                       />
                     </td>
                     <td>
@@ -498,7 +503,6 @@ onMounted(() => {
                     <td>
                       <UiButton
                         outline
-                        size="sm"
                         v-if="mode === 'view'"
                         @click="onDownload(subCertificate.docUrl)"
                       >
@@ -508,11 +512,13 @@ onMounted(() => {
                       <UiFileUpload
                         v-else
                         placeholder="Upload file"
-                        name="docUrl"
+                        :name="`docUrl${index}${subCertificate.type}`"
                         accepted-files=".jpg,.jpeg,.png,.pdf"
                         @added-file="uploadFile($event, index, subCertificate.type)"
+                        @upload-failed="console.log('gagal')"
                         :disabled="uploadLoading"
                         hint-text="*jpg, jpeg, png, pdf, zip / max : 16 MB"
+                        :max-size="16000000"
                       />
                     </td>
                     <td>
