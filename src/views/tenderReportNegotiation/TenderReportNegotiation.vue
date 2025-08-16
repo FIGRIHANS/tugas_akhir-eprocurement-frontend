@@ -4,11 +4,14 @@
     <div class="border rounded-lg p-[24px]">
       <UiTab :items="tabItems" v-model="currentTab" />
       <AwardingDraft
-        :data="dummyData"
+        :data="tenderEvoStore.dummyData"
         @updateCount="updateData"
         v-if="currentTab === 'awardingDraft'"
       />
-      <NegotiationSummary :data="dummyData" v-if="currentTab === 'negotiationSummary'" />
+      <NegotiationSummary
+        :data="tenderEvoStore.dummyData"
+        v-if="currentTab === 'negotiationSummary'"
+      />
       <ParticipatingVendor class="mt-[24px]" />
     </div>
   </div>
