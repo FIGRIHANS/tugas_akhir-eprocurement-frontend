@@ -11,7 +11,7 @@
                 :key="index"
                 class="nego__field-base !border-b-blue-500"
                 :class="{
-                  'nego__field-base--vendor-name': item === 'Vendor Name'
+                  'nego__field-base--vendor-name': item === 'Vendor Name',
                 }"
               >
                 {{ item }}
@@ -21,7 +21,10 @@
           <tbody>
             <tr v-for="data of dummyData" :key="data.id">
               <td>
-                <button class="btn btn-icon btn-primary btn-outline" @click="goToNegotiation">
+                <button
+                  class="btn btn-icon btn-primary btn-outline"
+                  @click="goToNegotiation(data.id)"
+                >
                   <i class="ki-duotone ki-eye"></i>
                 </button>
               </td>
@@ -96,7 +99,7 @@ const columns = ref<string[]>([
   'Lead Time Supply',
   'After Sales Warranty',
   'Order Absorption',
-  'Total PO'
+  'Total PO',
 ])
 
 const dummyData = ref<ParticipatingVendorTypes[]>([
@@ -111,7 +114,7 @@ const dummyData = ref<ParticipatingVendorTypes[]>([
     leadTimeQuality: '80',
     afterSalesWarranty: '80',
     orderAbsorption: '80',
-    totalPo: '1000'
+    totalPo: '1000',
   },
   {
     id: '2',
@@ -124,7 +127,7 @@ const dummyData = ref<ParticipatingVendorTypes[]>([
     leadTimeQuality: '80',
     afterSalesWarranty: '80',
     orderAbsorption: '80',
-    totalPo: '1000'
+    totalPo: '1000',
   },
   {
     id: '3',
@@ -137,7 +140,7 @@ const dummyData = ref<ParticipatingVendorTypes[]>([
     leadTimeQuality: '80',
     afterSalesWarranty: '80',
     orderAbsorption: '80',
-    totalPo: '1000'
+    totalPo: '1000',
   },
   {
     id: '4',
@@ -150,26 +153,29 @@ const dummyData = ref<ParticipatingVendorTypes[]>([
     leadTimeQuality: '80',
     afterSalesWarranty: '80',
     orderAbsorption: '80',
-    totalPo: '1000'
-  }
+    totalPo: '1000',
+  },
 ])
 
 const getBadgeColor = (rank: string) => {
- switch (rank) {
-  case '1':
-    return 'badge-success'
-  case '2':
-    return 'badge-primary'
-  case '3':
-    return 'badge-warning'
-  case '4':
-    return 'badge-danger'
- }
+  switch (rank) {
+    case '1':
+      return 'badge-success'
+    case '2':
+      return 'badge-primary'
+    case '3':
+      return 'badge-warning'
+    case '4':
+      return 'badge-danger'
+  }
 }
 
-const goToNegotiation = () => {
+const goToNegotiation = (id: number) => {
   router.push({
-    name: 'tenderNegotiation'
+    name: 'tenderNegotiation',
+    query: {
+      id: id,
+    },
   })
 }
 </script>
