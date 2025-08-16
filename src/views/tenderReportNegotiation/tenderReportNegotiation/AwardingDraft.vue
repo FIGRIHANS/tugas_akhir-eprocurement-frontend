@@ -29,9 +29,13 @@
               </td>
 
               <td v-for="key in parentKeys" :key="key" class="align-top">
-                <template
-                  v-if="['bottomPriceLBMA', 'unitPriceLBMA', 'simulationAmount'].includes(key)"
-                >
+                <template v-if="['simulationAmount'].includes(key)">
+                  {{ formatNumber(sumNegotiationAmount(row)) }}
+                </template>
+                <template v-else-if="key === 'variance'">
+                  {{ formatPercentage(calculateVariance(row)) }}
+                </template>
+                <template v-else-if="['bottomPriceLBMA', 'unitPriceLBMA'].includes(key)">
                   {{ formatNumber(row[key as keyof typeof row]) }}
                 </template>
                 <template v-else>
@@ -68,7 +72,7 @@
                         />
                       </td>
                       <td>{{ bid.uom }}</td>
-                      <td>{{ bid.bottomPrice == null ? '-' : formatNumber(bid.bottomPrice) }}</td>
+                      <td>{{ formatNumber(calculateChildBottomPrice(row, bid)) }}</td>
                       <td>{{ formatNumber(bid.unitPrice) }}</td>
                       <td>
                         {{
@@ -99,6 +103,8 @@ defineEmits(['updateCount'])
 const props = defineProps<{
   data: any
 }>()
+
+console.log(props)
 
 // dummy data
 // const dummyData = [
@@ -315,12 +321,37 @@ const rows = ref(
 )
 
 ///TODO: change any to spesific data type
-const formatNumber = (val: any) => {
-  new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(Number(val ?? 0))
+const formatNumber = (val: string | number) => {
+  return new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(Number(val ?? 0))
+}
+const sumNego = (row: any) => {
+  return row.bids.reduce((s: number, b: any) => s + Number(b.negoQty || 0), 0)
 }
 
-const sumNego = (rows: any) => {
-  rows.bids.reduce((s: number, b: any) => s + Number(b.negoQty || 0), 0)
+const sumNegotiationAmount = (row: any) => {
+  return row.bids.reduce((s: number, b: any) => s + Number(b.negotiationAmount || 0), 0)
+}
+
+const formatPercentage = (val: number | null | undefined) => {
+  if (val === null || Number.isNaN(val)) return '-'
+  return new Intl.NumberFormat('en-US', {
+    style: 'percent',
+    maximumFractionDigits: 2,
+  }).format(Number(val))
+}
+
+const calculateVariance = (row: any) => {
+  const simulationAmount = sumNegotiationAmount(row)
+  const base = Number(row.bottomPriceLBMA ?? 0)
+  if (!base) return
+  return (simulationAmount - base) / base
+}
+
+const calculateChildBottomPrice = (row: any, bid: any) => {
+  const qty = Number(bid.negoQty || 0)
+  const lbma = Number(row.unitPriceLBMA || 0)
+
+  return qty * lbma
 }
 
 const onChangeNegoQty = (row: any, bid: any) => {
