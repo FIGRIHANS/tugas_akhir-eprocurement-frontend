@@ -204,7 +204,7 @@ const dummyData = [
     materialCode: 'CH-1066',
     materialDesc: 'Macro Fertilizer CaCO3',
     quantity: 25,
-    uom: 'Oz t',
+    uom: 'TON',
     bottomPriceLBMA: 84051.25,
     unitPriceLBMA: 3362.0,
     simulationAmount: 79250.0,
