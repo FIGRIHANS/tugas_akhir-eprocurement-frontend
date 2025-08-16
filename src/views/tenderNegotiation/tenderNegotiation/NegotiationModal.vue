@@ -88,7 +88,7 @@
                   <tr v-for="data of list" :key="data.prNo">
                     <td>{{ data.MaterialDesc }}</td>
                     <td>{{ data.Quantity }}</td>
-                    <td>{{ data.Quantity }}</td>
+                    <td>{{ selectMaterialData(data.Material) }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -201,6 +201,14 @@ import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import { cloneDeep } from 'lodash'
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
+import { useRoute } from 'vue-router'
+import { useTenderEvoStore } from '@/stores/tender-evo/tenderNegotiation'
+
+const route = useRoute()
+
+const tenderEvoStore = useTenderEvoStore()
+
+const vendorID = ref(route.query.id)
 
 const iteration = ref<string>('')
 const volumeDisc = ref<string>()
@@ -374,6 +382,24 @@ onMounted(() => {
   calculateExpectedAmount()
   calculateDiscountValue()
 })
+
+const selectMaterialData = (code: string) => {
+  const id = vendorID.value
+  const materialCode = code
+
+  const data = tenderEvoStore.dummyData
+
+  const materialData = data.find((item) => item.materialCode === materialCode)
+
+  let selectedBid = null
+
+  if (materialData) {
+    // Jika objek material ditemukan, cari objek bid di dalamnya
+    selectedBid = materialData.bids.find((bid) => String(bid.id) === String(id))
+  }
+
+  return selectedBid?.negoQty
+}
 
 watch(
   () => props.data,
