@@ -97,10 +97,10 @@ import { ref } from 'vue'
 // dummy data
 const dummyData = [
   {
-    materialCode: 'AURM4',
-    materialDesc: 'Aurum Product 4',
+    materialCode: 'CH-1062',
+    materialDesc: '	Macro Fertilizer Urea',
     quantity: 30,
-    uom: 'Oz t',
+    uom: 'TON',
     bottomPriceLBMA: 100861.5,
     unitPriceLBMA: 3362.0,
     simulationAmount: 93000.0,
@@ -149,10 +149,10 @@ const dummyData = [
     ],
   },
   {
-    materialCode: 'AURM5',
-    materialDesc: 'Aurum Product 5',
+    materialCode: 'CH-1064',
+    materialDesc: 'Macro Fertilizer NPK',
     quantity: 33,
-    uom: 'Oz t',
+    uom: 'TON',
     bottomPriceLBMA: 110947.65,
     unitPriceLBMA: 3362.05,
     simulationAmount: 103300.0,
@@ -201,10 +201,10 @@ const dummyData = [
     ],
   },
   {
-    materialCode: 'AURM6',
-    materialDesc: 'Aurum Product 6',
+    materialCode: '	CH-1066',
+    materialDesc: 'Macro Fertilizer CaCO3',
     quantity: 25,
-    uom: 'Oz t',
+    uom: 'TON',
     bottomPriceLBMA: 84051.25,
     unitPriceLBMA: 3362.0,
     simulationAmount: 79250.0,
