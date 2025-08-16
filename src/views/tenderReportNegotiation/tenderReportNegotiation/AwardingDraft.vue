@@ -94,7 +94,7 @@
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import { ref } from 'vue'
 
-const emits = defineEmits(['updateCount'])
+defineEmits(['updateCount'])
 
 const props = defineProps<{
   data: any
@@ -340,9 +340,5 @@ const onChangeNegoQty = (row: any, bid: any) => {
   if (bid.unitPrice != null) {
     bid.negotiationAmount = qty > 0 ? qty * Number(bid.unitPrice) : 0
   }
-
-  // Calculate total count and emit
-  const totalCount = row.bids.reduce((sum, b) => sum + (b.negoQty || 0), 0)
-  emits('updateCount', totalCount)
 }
 </script>

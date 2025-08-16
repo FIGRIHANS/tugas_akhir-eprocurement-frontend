@@ -207,8 +207,26 @@ const dummyData = [
 
 const currentTab = ref<string>('awardingDraft')
 
-const updateQty = (data: string) => {
-  console.log(data)
+const updateQty = (row: any, bid: any) => {
+  let qty = Number(bid.negoQty || 0)
+  if (qty < 0) qty = 0
+  if (qty > row.quantity) qty = row.quantity
+
+  const totalOthers = row.bids
+    .filter((b: any) => b !== bid)
+    .reduce((s: number, b: any) => s + Number(b.negoQty || 0), 0)
+
+  const allowedForThis = Math.max(0, row.quantity - totalOthers)
+  if (qty > allowedForThis) qty = allowedForThis
+
+  bid.negoQty = qty
+
+  if (bid.unitPrice != null) {
+    bid.negotiationAmount = qty > 0 ? qty * Number(bid.unitPrice) : 0
+  }
+
+  // // Calculate total count and emit
+  // const totalCount = row.bids.reduce((sum, b) => sum + (b.negoQty || 0), 0)
 }
 </script>
 
