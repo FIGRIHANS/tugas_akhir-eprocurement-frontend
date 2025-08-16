@@ -1,7 +1,63 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
+import type { ParticipatingVendorTypes } from '../types/participatingVendor'
 
 export const useTenderEvoStore = defineStore('tenderNegotiationEvo', () => {
+  const dummyVendor = ref<ParticipatingVendorTypes[]>([
+    {
+      id: '1',
+      status: 'invited',
+      vendorCode: '1060',
+      rank: '1',
+      vendorName: 'PT Walldorf Grosshandel Tbk',
+      totalScore: '80',
+      productQuality: '80',
+      leadTimeQuality: '80',
+      afterSalesWarranty: '80',
+      orderAbsorption: '80',
+      totalPo: '1000',
+    },
+    {
+      id: '2',
+      status: 'invited',
+      vendorCode: '2983',
+      rank: '2',
+      vendorName: 'PT Sommer GmbHTbk',
+      totalScore: '80',
+      productQuality: '80',
+      leadTimeQuality: '80',
+      afterSalesWarranty: '80',
+      orderAbsorption: '80',
+      totalPo: '1000',
+    },
+    {
+      id: '3',
+      status: 'invited',
+      vendorCode: '8765',
+      rank: '3',
+      vendorName: 'PT Kreutzschmid KgaA Tbk',
+      totalScore: '80',
+      productQuality: '80',
+      leadTimeQuality: '80',
+      afterSalesWarranty: '80',
+      orderAbsorption: '80',
+      totalPo: '1000',
+    },
+    {
+      id: '4',
+      status: 'invited',
+      vendorCode: '3546',
+      rank: '4',
+      vendorName: 'PT Hamberger u. CO.Tbk',
+      totalScore: '80',
+      productQuality: '80',
+      leadTimeQuality: '80',
+      afterSalesWarranty: '80',
+      orderAbsorption: '80',
+      totalPo: '1000',
+    },
+  ])
+
   const dummyData = ref([
     {
       materialCode: 'CH-1062',
@@ -193,6 +249,7 @@ export const useTenderEvoStore = defineStore('tenderNegotiationEvo', () => {
   }
 
   return {
+    dummyVendor,
     dummyData,
     updateQty,
   }

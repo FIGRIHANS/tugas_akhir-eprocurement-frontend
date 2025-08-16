@@ -82,11 +82,15 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import LPagination from '@/components/pagination/LPagination.vue'
-import type { ParticipatingVendorTypes } from '../types/participatingVendor'
+import { useTenderEvoStore } from '@/stores/tender-evo/tenderNegotiation'
 
 const router = useRouter()
 const pageNo = ref<number>(1)
 const pageSize = ref<number>(10)
+
+const tenderStore = useTenderEvoStore()
+
+const dummyData = tenderStore.dummyVendor
 
 const columns = ref<string[]>([
   'Action',
@@ -100,61 +104,6 @@ const columns = ref<string[]>([
   'After Sales Warranty',
   'Order Absorption',
   'Total PO',
-])
-
-const dummyData = ref<ParticipatingVendorTypes[]>([
-  {
-    id: '1',
-    status: 'invited',
-    vendorCode: '1060',
-    rank: '1',
-    vendorName: 'PT Walldorf Grosshandel Tbk',
-    totalScore: '80',
-    productQuality: '80',
-    leadTimeQuality: '80',
-    afterSalesWarranty: '80',
-    orderAbsorption: '80',
-    totalPo: '1000',
-  },
-  {
-    id: '2',
-    status: 'invited',
-    vendorCode: '2983',
-    rank: '2',
-    vendorName: 'PT Sommer GmbHTbk',
-    totalScore: '80',
-    productQuality: '80',
-    leadTimeQuality: '80',
-    afterSalesWarranty: '80',
-    orderAbsorption: '80',
-    totalPo: '1000',
-  },
-  {
-    id: '3',
-    status: 'invited',
-    vendorCode: '8765',
-    rank: '3',
-    vendorName: 'PT Kreutzschmid KgaA Tbk',
-    totalScore: '80',
-    productQuality: '80',
-    leadTimeQuality: '80',
-    afterSalesWarranty: '80',
-    orderAbsorption: '80',
-    totalPo: '1000',
-  },
-  {
-    id: '4',
-    status: 'invited',
-    vendorCode: '3546',
-    rank: '4',
-    vendorName: 'PT Hamberger u. CO.Tbk',
-    totalScore: '80',
-    productQuality: '80',
-    leadTimeQuality: '80',
-    afterSalesWarranty: '80',
-    orderAbsorption: '80',
-    totalPo: '1000',
-  },
 ])
 
 const getBadgeColor = (rank: string) => {
