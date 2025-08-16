@@ -4,7 +4,7 @@
     <div class="border rounded-lg p-[24px]">
       <StepperStatusTender role="admin" activeName="Vendor Negotiation" />
     </div>
-    <div class="border rounded-lg p-[24px] mt-[24px] font-medium">PT Walldorf Grosshandel Tbk</div>
+    <div class="border rounded-lg p-[24px] mt-[24px] font-medium">{{ getVendorName() }}</div>
     <div class="flex align-items-center gap-[24px] mt-[24px]">
       <GeneralData class="flex-1" />
       <TenderOrganization class="flex-1" />
@@ -203,7 +203,7 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import GeneralData from './tenderNegotiation/GeneralData.vue'
 import TenderOrganization from './tenderNegotiation/TenderOrganization.vue'
 import DocumentAttachment from './tenderNegotiation/DocumentAttachment.vue'
@@ -216,9 +216,12 @@ import { useTenderStore } from '@/stores/views/tender/tender'
 import type { routeTypes } from '@/core/type/components/breadcrumb'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiModal from '@/components/modal/UiModal.vue'
+import { useTenderEvoStore } from '@/stores/tender-evo/tenderNegotiation'
 
+const tenderEvo = useTenderEvoStore()
 const tenderApi = useTenderStore()
 const router = useRouter()
+const route = useRoute()
 const showAnalytic = ref<boolean>(false)
 const isModalAnalytic = ref<boolean>(false)
 
@@ -228,6 +231,12 @@ const routes = ref<routeTypes[]>([
     to: '/tender/negotiation',
   },
 ])
+
+const getVendorName = () => {
+  const vendor = tenderEvo.dummyVendor.find((data) => data.id === route.query.id)
+
+  return vendor.vendorName
+}
 
 const backPage = () => {
   router.push({
