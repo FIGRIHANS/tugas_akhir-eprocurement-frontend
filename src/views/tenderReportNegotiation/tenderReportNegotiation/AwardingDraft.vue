@@ -28,7 +28,14 @@
                 </button>
               </td>
 
-              <td v-for="key in parentKeys" :key="key" class="align-top">
+              <td
+                v-for="key in parentKeys"
+                :key="key"
+                class="align-top"
+                :class="{
+                  'whitespace-nowrap': key === 'simulationMessage',
+                }"
+              >
                 <template v-if="['simulationAmount'].includes(key)">
                   {{ formatNumber(sumNegotiationAmount(row)) }}
                 </template>

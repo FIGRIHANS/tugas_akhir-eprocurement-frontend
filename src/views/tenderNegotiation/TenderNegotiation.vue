@@ -129,8 +129,8 @@
           </thead>
           <tbody>
             <tr>
-              <td>CH-1062</td>
-              <td>Macro Fertilizer Urea</td>
+              <td>AURM4</td>
+              <td>Aurum Product 4</td>
               <td class="demand-up">
                 <span class="badge badge-success badge-outline fs-base">
                   <i class="ki-duotone ki-arrow-up fs-5 text-success ms-n1"
@@ -152,8 +152,8 @@
               </td>
             </tr>
             <tr>
-              <td>CH-1064</td>
-              <td>Macro Fertilizer NPK</td>
+              <td>AURM5</td>
+              <td>Aurum Product 5</td>
               <td class="demand-up">
                 <span class="badge badge-success badge-outline fs-base">
                   <i class="ki-duotone ki-arrow-up fs-5 text-success ms-n1"></i>
@@ -173,8 +173,8 @@
               </td>
             </tr>
             <tr>
-              <td>CH-1066</td>
-              <td>Macro Fertilizer CaCO3</td>
+              <td>AURM6</td>
+              <td>Aurum Product 6</td>
               <td class="demand-down">
                 <span class="badge badge-danger badge-outline fs-base">
                   <i class="ki-duotone ki-arrow-down fs-5 text-danger ms-n1"></i>
