@@ -3,64 +3,64 @@
     &__table {
       padding-bottom: 4px;
       overflow-x: auto;
-  
+
       &::-webkit-scrollbar {
         width: 10px;
         height: 10px;
         background: transparent;
       }
-      
+
       &::-webkit-scrollbar-thumb {
         width: 10px;
         height: 10px;
         border-radius: 15px;
-        background-color: #DBDFE9;
+        background-color: #dbdfe9;
       }
     }
-  
+
     &__field-base {
       min-width: 130px;
       white-space: nowrap;
       @apply py-[13px] !important;
-      
+
       &--accordion {
         @extend .eva__field-base;
         min-width: 50px;
       }
-      
+
       &--weight {
         @extend .eva__field-base;
         min-width: 0;
         max-width: 50px;
       }
-      
+
       &--vendor-name {
         @extend .eva__field-base;
         min-width: 300px;
       }
-      
+
       &--remarks {
         @extend .eva__field-base;
         min-width: 500px;
       }
     }
-  
+
     &__field-base-child {
       min-width: 200px;
       white-space: nowrap;
       @apply py-[13px] !important;
-      
+
       &--evaluation {
         @extend .eva__field-base-child;
         min-width: 300px;
       }
-      
+
       &--weight {
         @extend .eva__field-base-child;
         min-width: 0;
         max-width: 180px;
       }
-      
+
       &--description {
         @extend .eva__field-base-child;
         min-width: 400px;
