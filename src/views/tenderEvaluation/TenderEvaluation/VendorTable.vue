@@ -8,10 +8,10 @@
             <th
               v-for="(item, index) in columns"
               :key="index"
-              class="eva__field-base !border-b-blue-500"
+              class="eva__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"
               :class="{
                 'eva__field-base--vendor-name': item === 'Vendor Name',
-                'eva__field-base--remarks': item === 'Remarks'
+                'eva__field-base--remarks': item === 'Remarks',
               }"
             >
               {{ item }}
@@ -32,9 +32,7 @@
                         <span class="menu-icon">
                           <i class="ki-duotone ki-file-up"></i>
                         </span>
-                        <span class="menu-title">
-                          Winner
-                        </span>
+                        <span class="menu-title"> Winner </span>
                       </div>
                     </div>
                     <div class="menu-item">
@@ -42,9 +40,7 @@
                         <span class="menu-icon">
                           <i class="ki-duotone ki-eye"></i>
                         </span>
-                        <span class="menu-title">
-                          Negotiation History
-                        </span>
+                        <span class="menu-title"> Negotiation History </span>
                       </div>
                     </div>
                   </div>
@@ -94,19 +90,19 @@ const columns = ref<string[]>([
   'Vendor Disc',
   'Disc Amount',
   'Total Nett Amount',
-  'Remarks'
+  'Remarks',
 ])
 
 const getBadgeColor = (rank: number) => {
- switch (rank) {
-  case 1:
-    return 'badge-success'
-  case 2:
-    return 'badge-primary'
-  case 3:
-    return 'badge-warning'
-  case 4:
-    return 'badge-danger'
- }
+  switch (rank) {
+    case 1:
+      return 'badge-success'
+    case 2:
+      return 'badge-primary'
+    case 3:
+      return 'badge-warning'
+    case 4:
+      return 'badge-danger'
+  }
 }
 </script>

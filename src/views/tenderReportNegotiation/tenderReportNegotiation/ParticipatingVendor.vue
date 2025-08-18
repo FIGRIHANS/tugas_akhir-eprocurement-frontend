@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="border rounded-lg">
+    <div class="border rounded-lg p-5">
       <p class="mx-[30px] my-[20px]">Participating Vendors</p>
       <div class="nego__table">
         <table class="table text-gray-700 font-medium text-sm">
@@ -9,7 +9,7 @@
               <th
                 v-for="(item, index) in columns"
                 :key="index"
-                class="nego__field-base !border-b-blue-500"
+                class="nego__field-base !border-b-blue-50 !bg-blue-100 !text-blue-500"
                 :class="{
                   'nego__field-base--vendor-name': item === 'Vendor Name',
                 }"

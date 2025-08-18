@@ -105,7 +105,7 @@
               <th
                 v-for="(item, index) in columns"
                 :key="index"
-                class="report__field-base !border-b-blue-500"
+                class="report__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"
                 :class="{
                   'report__field-base--long': item === 'Tender Status' || item === 'PIC Tender',
                 }"
@@ -520,14 +520,14 @@ const goToAwarding = () => {
   router.push({
     name: 'tenderAwarding',
     query: {
-      id: tenderApi.negoId
-    }
+      id: tenderApi.negoId,
+    },
   })
 }
 
 const goToEvaluation = () => {
   router.push({
-    name: 'tenderEvaluation'
+    name: 'tenderEvaluation',
   })
 }
 </script>

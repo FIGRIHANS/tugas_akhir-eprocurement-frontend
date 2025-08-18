@@ -1,13 +1,13 @@
 <template>
   <div>
     <div class="eva__table mt-[24px] overflow-auto">
-      <table class="table text-gray-700 font-medium text-sm w-full">
+      <table class="table text-gray-700 font-medium text-sm w-full !rounded-none">
         <thead>
           <tr>
             <th
               v-for="(item, index) in columns"
               :key="index"
-              class="eva__field-base !border-b-blue-500"
+              class="eva__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"
               :class="{ 'eva__field-base--accordion': index === 0 }"
             >
               {{ item }}
@@ -54,10 +54,14 @@
             <tr v-show="row.isOpenChild">
               <td></td>
               <td :colspan="parentKeys.length" class="!pt-[0px]">
-                <table class="table">
+                <table class="table !rounded-none">
                   <thead>
                     <tr class="border-b">
-                      <th v-for="(c, i) in childColumns" :key="i" class="eva__field-base-child">
+                      <th
+                        v-for="(c, i) in childColumns"
+                        :key="i"
+                        class="eva__field-base-child !radius-0 !bg-blue-100 !text-blue-500"
+                      >
                         {{ c }}
                       </th>
                     </tr>
