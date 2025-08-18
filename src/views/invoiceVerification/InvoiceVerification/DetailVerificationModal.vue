@@ -60,9 +60,11 @@ const list = computed(() => invoiceApi.detailPo)
 const badgeColor = (status: number) => {
   const list = {
     1: 'badge-info',
-    5: 'badge-danger',
+    2: 'badge-info',
     3: 'badge-success',
-    4: 'badge-success'
+    4: 'badge-success',
+    5: 'badge-danger',
+    7: 'badge-primary'
   } as { [key: number]: string }
   return list[status]
 }
