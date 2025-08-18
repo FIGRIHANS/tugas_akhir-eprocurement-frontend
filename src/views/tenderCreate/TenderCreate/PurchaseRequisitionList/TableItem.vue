@@ -80,7 +80,7 @@ const columns = reactive<string[]>([
   'Material Desc',
   'Quantity',
   'UOM',
-  'Bottom Price',
+  'Bottom Price (LBMA)',
   'Currency'
 ])
 
