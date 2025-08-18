@@ -84,6 +84,7 @@
                     <td>
                       <AttachmentView
                         v-if="data.docUrl"
+                        class="cursor-pointer"
                         :file-data="{ name: data.description, path: data.docUrl }"
                         :upload-date="
                           formatDate(data.modifiedDate ? data.modifiedDate : data.createdDate)
@@ -117,6 +118,7 @@
                     <td>
                       <AttachmentView
                         v-if="data.docUrl"
+                        class="cursor-pointer"
                         :file-data="{ name: data.description, path: data.docUrl }"
                         :upload-date="
                           formatDate(data.modifiedDate ? data.modifiedDate : data.createdDate)
@@ -150,6 +152,7 @@
                     <td>
                       <AttachmentView
                         v-if="data.docUrl"
+                        class="cursor-pointer"
                         :file-data="{ name: data.description, path: data.docUrl }"
                         :upload-date="
                           formatDate(data.modifiedDate ? data.modifiedDate : data.createdDate)

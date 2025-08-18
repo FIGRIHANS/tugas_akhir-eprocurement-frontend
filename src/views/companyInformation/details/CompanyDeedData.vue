@@ -173,6 +173,7 @@
               <td>
                 <AttachmentView
                   v-if="data.ownerIDUrl"
+                  class="cursor-pointer"
                   :file-data="{ name: data.ownerID, path: data.ownerIDUrl }"
                   @click="downloadFile(data?.ownerIDUrl)"
                 />
