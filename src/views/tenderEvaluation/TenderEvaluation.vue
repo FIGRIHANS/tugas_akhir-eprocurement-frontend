@@ -149,7 +149,7 @@ const dummyDataDetail = ref<DetailVendorParentTypes[]>([
     id: 2,
     evaluationType: 'Commercial Evaluation',
     evaluationItem: '',
-    weight: '4%',
+    weight: '40%',
     description: '',
     expectedSla: '',
     isOpenChild: false,
