@@ -15,3 +15,18 @@ export interface TableItemTypes {
   existingContract: string
   isSelected?: boolean
 }
+
+export interface ContractHistoryTypes {
+  id: number
+  year: string
+  material: string
+  materialDescription: string
+  quantity: number
+  uom: string
+  totalContractAmount: number
+  discount: number
+  currency: string
+  contractPrice: number
+  lbma: number
+  var: number
+}
