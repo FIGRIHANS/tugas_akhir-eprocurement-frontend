@@ -14,14 +14,14 @@
         </div>
         <div
           v-if="index < steps.length - 1"
-          class="w-[120px] h-[5px]"
+          class="w-[100px] h-[5px]"
           :class="steps[index + 1].active ? 'bg-blue-500' : 'bg-gray-300'"
         ></div>
       </div>
 
       <div
         :class="{
-          '-ml-[120px]': index !== steps.length - 1,
+          '-ml-[100px]': index !== steps.length - 1,
           '-ml-[20px]': index === steps.length - 1,
         }"
       >

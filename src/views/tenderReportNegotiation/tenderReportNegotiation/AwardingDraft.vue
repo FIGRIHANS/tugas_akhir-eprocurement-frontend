@@ -28,14 +28,7 @@
                 </button>
               </td>
 
-              <td
-                v-for="key in parentKeys"
-                :key="key"
-                class="align-top"
-                :class="{
-                  'whitespace-nowrap': key === 'simulationMessage',
-                }"
-              >
+              <td v-for="key in parentKeys" :key="key" class="align-top">
                 <template v-if="['simulationAmount'].includes(key)">
                   {{ formatNumber(sumNegotiationAmount(row)) }}
                 </template>
@@ -44,6 +37,17 @@
                 </template>
                 <template v-else-if="['bottomPriceLBMA', 'unitPriceLBMA'].includes(key)">
                   {{ formatNumber(row[key as keyof typeof row]) }}
+                </template>
+                <template v-else-if="['simulationStatus'].includes(key)">
+                  <span
+                    v-if="row[key as keyof typeof row] === 'Error'"
+                    class="badge badge-outline badge-pill badge-danger"
+                  >
+                    {{ row[key as keyof typeof row] }}
+                  </span>
+                  <span v-else class="badge badge-outline badge-pill badge-success">
+                    {{ row[key as keyof typeof row] }}
+                  </span>
                 </template>
                 <template v-else>
                   {{ row[key as keyof typeof row] ?? '-' }}
@@ -68,7 +72,18 @@
                   </thead>
                   <tbody>
                     <tr v-for="(bid, i) in row.bids" :key="i">
-                      <td>{{ bid.rank }}</td>
+                      <td>
+                        <span
+                          class="badge badge-outline badge-pill"
+                          :class="{
+                            'badge-success': bid.rank === 1,
+                            'badge-primary': bid.rank === 2,
+                            'badge-warning': bid.rank >= 3,
+                          }"
+                        >
+                          {{ bid.rank }}</span
+                        >
+                      </td>
                       <td>{{ bid.vendor }}</td>
                       <td>
                         <UiInput
@@ -92,7 +107,10 @@
                       </td>
                       <td>{{ bid.var }}</td>
                       <td>{{ bid.currency }}</td>
-                      <td>{{ bid.awardStatus || '-' }}</td>
+                      <td>
+                        <div v-if="bid.negoQty != 0">🏅</div>
+                        <div v-else></div>
+                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -114,8 +132,6 @@ defineEmits(['updateCount'])
 const props = defineProps<{
   data: any
 }>()
-
-console.log(props)
 
 // dummy data
 // const dummyData = [
@@ -382,5 +398,15 @@ const onChangeNegoQty = (row: any, bid: any) => {
   if (bid.unitPrice != null) {
     bid.negotiationAmount = qty > 0 ? qty * Number(bid.unitPrice) : 0
   }
+
+  let count = 0
+
+  for (let i = 0; i < row.bids.length; i++) {
+    if (row.bids[i].negoQty !== 0) {
+      count++
+    }
+  }
+
+  row.awardDraft = count + ' Winner'
 }
 </script>
