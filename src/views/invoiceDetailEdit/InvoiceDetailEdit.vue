@@ -570,6 +570,7 @@ const mapAdditionalCost = () => {
   const cost = []
   for (const item of form.value.additionalCosts) {
     cost.push({
+      id: item.id,
       activityExpense: item.activityExpense,
       itemAmount: Number(item.itemAmount),
       debitCredit: item.debitCredit,
