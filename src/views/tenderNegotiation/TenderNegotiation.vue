@@ -4,7 +4,7 @@
     <div class="border rounded-lg p-[24px]">
       <StepperStatusTender role="admin" activeName="Vendor Negotiation" />
     </div>
-    <div class="border rounded-lg p-[24px] mt-[24px] font-medium">PT Walldorf Grosshandel Tbk</div>
+    <div class="border rounded-lg p-[24px] mt-[24px] font-medium">{{ getVendorName() }}</div>
     <div class="flex align-items-center gap-[24px] mt-[24px]">
       <GeneralData class="flex-1" />
       <TenderOrganization class="flex-1" />
@@ -129,8 +129,8 @@
           </thead>
           <tbody>
             <tr>
-              <td>CH-1062</td>
-              <td>Macro Fertilizer Urea</td>
+              <td>AURM4</td>
+              <td>Aurum Product 4</td>
               <td class="demand-up">
                 <span class="badge badge-success badge-outline fs-base">
                   <i class="ki-duotone ki-arrow-up fs-5 text-success ms-n1"
@@ -152,8 +152,8 @@
               </td>
             </tr>
             <tr>
-              <td>CH-1064</td>
-              <td>Macro Fertilizer NPK</td>
+              <td>AURM5</td>
+              <td>Aurum Product 5</td>
               <td class="demand-up">
                 <span class="badge badge-success badge-outline fs-base">
                   <i class="ki-duotone ki-arrow-up fs-5 text-success ms-n1"></i>
@@ -173,8 +173,8 @@
               </td>
             </tr>
             <tr>
-              <td>CH-1066</td>
-              <td>Macro Fertilizer CaCO3</td>
+              <td>AURM6</td>
+              <td>Aurum Product 6</td>
               <td class="demand-down">
                 <span class="badge badge-danger badge-outline fs-base">
                   <i class="ki-duotone ki-arrow-down fs-5 text-danger ms-n1"></i>
@@ -203,7 +203,7 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import GeneralData from './tenderNegotiation/GeneralData.vue'
 import TenderOrganization from './tenderNegotiation/TenderOrganization.vue'
 import DocumentAttachment from './tenderNegotiation/DocumentAttachment.vue'
@@ -216,9 +216,12 @@ import { useTenderStore } from '@/stores/views/tender/tender'
 import type { routeTypes } from '@/core/type/components/breadcrumb'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiModal from '@/components/modal/UiModal.vue'
+import { useTenderEvoStore } from '@/stores/tender-evo/tenderNegotiation'
 
+const tenderEvo = useTenderEvoStore()
 const tenderApi = useTenderStore()
 const router = useRouter()
+const route = useRoute()
 const showAnalytic = ref<boolean>(false)
 const isModalAnalytic = ref<boolean>(false)
 
@@ -228,6 +231,12 @@ const routes = ref<routeTypes[]>([
     to: '/tender/negotiation',
   },
 ])
+
+const getVendorName = () => {
+  const vendor = tenderEvo.dummyVendor.find((data) => data.id === route.query.id)
+
+  return vendor.vendorName
+}
 
 const backPage = () => {
   router.push({

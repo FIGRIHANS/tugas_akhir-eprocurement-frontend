@@ -3,7 +3,7 @@
     <div class="flex align-items-center justify-between">
       <div class="input w-[250px] mb-[24px]">
         <i class="ki-filled ki-magnifier"></i>
-        <input v-model="search" placeholder="Cari data" type="text"/>
+        <input v-model="search" placeholder="Cari data" type="text" />
       </div>
       <button class="btn btn-primary" @click="openAddSourcingRequisition">
         Add Sourcing Requesition
@@ -16,10 +16,10 @@
             <th
               v-for="(item, index) in columns"
               :key="index"
-              class="table-item__field-base !border-b-blue-500"
+              class="table-item__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"
               :class="{
                 'table-item__field-base--action': index === 0,
-                'table-item__field-base--description': item === 'Material Desc'
+                'table-item__field-base--description': item === 'Material Desc',
               }"
             >
               {{ item }}
@@ -29,7 +29,7 @@
         <tbody>
           <tr v-for="data of form?.requisitionList" :key="data.id">
             <td>
-              <input v-model="data.isSelected" class="checkbox" type="checkbox"/>
+              <input v-model="data.isSelected" class="checkbox" type="checkbox" />
             </td>
             <td>{{ data.purchaseRequisitionNo }}</td>
             <td>{{ data.sourcingType }}</td>
@@ -41,14 +41,21 @@
             <td>{{ data.materialDescription }}</td>
             <td>{{ useFormatIdr(data.quantity) }}</td>
             <td>{{ data.uom }}</td>
-            <td>{{ data.currency === 'IDR' ? useFormatIdr(data.bottomPrice) : useFormatUsd(data.bottomPrice) }}</td>
+            <td>
+              {{
+                data.currency === 'IDR'
+                  ? useFormatIdr(data.bottomPrice)
+                  : useFormatUsd(data.bottomPrice)
+              }}
+            </td>
             <td>{{ data.currency }}</td>
           </tr>
         </tbody>
       </table>
     </div>
     <div class="mt-[24px] text-sm">
-      Tampilkan {{ form?.requisitionList.length }} data dari total data {{ form?.requisitionList.length }}
+      Tampilkan {{ form?.requisitionList.length }} data dari total data
+      {{ form?.requisitionList.length }}
     </div>
     <AddSourcingRequisitionModal @setData="setData" />
   </div>
@@ -63,7 +70,9 @@ import type { FormTypes } from '../../types/tenderCreate'
 import type { TableItemTypes } from '../../types/purchaseRequisitionList'
 import type { SourcingRequestitionTypes } from '../../types/purchaseRequisitionList'
 
-const AddSourcingRequisitionModal = defineAsyncComponent(() => import('./TableItem/AddSourcingRequisitionModal.vue'))
+const AddSourcingRequisitionModal = defineAsyncComponent(
+  () => import('./TableItem/AddSourcingRequisitionModal.vue'),
+)
 
 const form = inject<FormTypes>('form')
 const search = ref<string>('')
@@ -107,7 +116,7 @@ const setData = (dataVendor: SourcingRequestitionTypes[]) => {
       bottomPrice: item.bottomPrice,
       uom: item.uom,
       currency: item.currency,
-      isSelected: false
+      isSelected: false,
     } as TableItemTypes
 
     form.requisitionList.push(data)
