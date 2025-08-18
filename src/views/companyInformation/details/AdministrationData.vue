@@ -105,14 +105,14 @@
               </td>
             </tr>
             <tr>
-              <td class="text-gray-600">Bidang Usaha</td>
+              <td class="text-gray-600">Business Field</td>
               <td colspan="4" class="font-bold">
                 <ol class="list-decimal list-inside">
                   <li
                     v-for="(businessField, index) in data?.businessFieldName?.split(',')"
                     :key="index"
                   >
-                    Bidang Usaha {{ businessField.trim() }}
+                    {{ businessField.trim() }}
                   </li>
                 </ol>
               </td>
