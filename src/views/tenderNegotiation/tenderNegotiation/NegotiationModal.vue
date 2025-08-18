@@ -49,30 +49,50 @@
             />
           </div>
           <div class="w-[70%]">
-            <table class="table text-gray-700 font-medium text-sm">
-              <thead>
-                <tr>
-                  <th
-                    v-for="(item, index) in columnsCalculation"
-                    :key="index"
-                    class="nego__field-base !border-b-blue-500"
-                    :class="{
-                      'nego__field-base--description': item === 'Material Desc',
-                    }"
-                  >
-                    {{ item }}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(data, index) of countTable" :key="index">
-                  <td>{{ data.row1 }}</td>
-                  <td>{{ data.row2 }}</td>
-                  <td>{{ data.row3 }}</td>
-                  <td>{{ data.row4 }}</td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="flex flex-col gap-5">
+              <table class="table text-gray-700 font-medium text-sm">
+                <thead>
+                  <tr>
+                    <th
+                      v-for="(item, index) in columnsCalculation"
+                      :key="index"
+                      class="nego__field-base !border-b-blue-500"
+                      :class="{
+                        'nego__field-base--description': item === 'Material Desc',
+                      }"
+                    >
+                      {{ item }}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(data, index) of countTable" :key="index">
+                    <td>{{ data.row1 }}</td>
+                    <td>{{ data.row2 }}</td>
+                    <td>{{ data.row3 }}</td>
+                    <td>{{ data.row4 }}</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <!-- Negotiation Remarks -->
+              <table class="table text-gray-700 font-medium text-sm">
+                <thead>
+                  <tr>
+                    <th class="nego__field-base !border-b-blue-500">Material Desc</th>
+                    <th class="nego__field-base !border-b-blue-500">Tender QTY</th>
+                    <th class="nego__field-base !border-b-blue-500">Nego QTY</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="data of list" :key="data.prNo">
+                    <td>{{ data.MaterialDesc }}</td>
+                    <td>{{ data.Quantity }}</td>
+                    <td>{{ selectMaterialData(data.Material) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
         <div class="flex justify-end mt-5">
@@ -181,6 +201,14 @@ import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import { cloneDeep } from 'lodash'
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
+import { useRoute } from 'vue-router'
+import { useTenderEvoStore } from '@/stores/tender-evo/tenderNegotiation'
+
+const route = useRoute()
+
+const tenderEvoStore = useTenderEvoStore()
+
+const vendorID = ref(route.query.id)
 
 const iteration = ref<string>('')
 const volumeDisc = ref<string>()
@@ -354,6 +382,24 @@ onMounted(() => {
   calculateExpectedAmount()
   calculateDiscountValue()
 })
+
+const selectMaterialData = (code: string) => {
+  const id = vendorID.value
+  const materialCode = code
+
+  const data = tenderEvoStore.dummyData
+
+  const materialData = data.find((item) => item.materialCode === materialCode)
+
+  let selectedBid = null
+
+  if (materialData) {
+    // Jika objek material ditemukan, cari objek bid di dalamnya
+    selectedBid = materialData.bids.find((bid) => String(bid.id) === String(id))
+  }
+
+  return selectedBid?.negoQty
+}
 
 watch(
   () => props.data,

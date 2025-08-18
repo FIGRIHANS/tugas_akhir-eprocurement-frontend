@@ -65,16 +65,18 @@ watch(
         nationality: selectedItem.nationality,
         position: selectedItem.position,
         status: selectedItem.status,
-        certificates: certificates.result.content.map((certi) => ({
-          vendorExpertId: certi.vendorExpertsID,
-          description: certi.description,
-          docUrl: certi.docUrl,
-          endDate: certi.endDate,
-          id: certi.id,
-          isActive: certi.isActive,
-          startDate: certi.startDate,
-          type: certi.type,
-        })),
+        certificates: !certificates.result.isError
+          ? certificates?.result.content.map((certi) => ({
+              vendorExpertId: certi.vendorExpertsID,
+              description: certi.description,
+              docUrl: certi.docUrl,
+              endDate: certi.endDate,
+              id: certi.id,
+              isActive: certi.isActive,
+              startDate: certi.startDate,
+              type: certi.type,
+            }))
+          : [],
       }
     }
   },

@@ -12,8 +12,9 @@
       <InvoiceHeaderDocument :isNeedCheck="checkStatusCode()" class="flex-1" />
       <InvoiceCalculation :isNeedCheck="checkStatusCode()" class="flex-1" :formInvoice="form" />
     </div>
-    <InvoicePoGr v-if="checkPo()" :isNeedCheck="checkStatusCode()" class="mt-[24px]" />
-    <AdditionalCost v-if="form.invoiceDPCode === 9011 && checkPo() || form.invoiceTypeCode === 902 || form.invoiceTypeCode === 903" :isNeedCheck="checkStatusCode()" class="mt-[24px]" />
+    <InvoicePoGr v-if="checkPo() && !isNonPo" :isNeedCheck="checkStatusCode()" class="mt-[24px]" />
+    <InvoiceItem v-if="isNonPo" />
+    <AdditionalCost v-if="form.invoiceDPCode === 9011 && !isNonPo && checkPo() || form.invoiceTypeCode === 902 || form.invoiceTypeCode === 903" :isNeedCheck="checkStatusCode()" class="mt-[24px]" />
     <div class="flex items-center justify-between gap-[8px] mt-[24px]">
       <div class="flex items-center gap-[10px]">
         <button class="btn btn-outline btn-primary" :disabled="isLoading" @click="goBack">
@@ -66,6 +67,7 @@ const InvoiceHeaderDocument = defineAsyncComponent(() => import('./InvoiceDetail
 const InvoiceCalculation = defineAsyncComponent(() => import('./InvoiceDetail/InvoiceCalculation.vue'))
 const InvoicePoGr = defineAsyncComponent(() => import('./InvoiceDetail/InvoicePoGr.vue'))
 const AdditionalCost = defineAsyncComponent(() => import('./InvoiceDetail/AdditionalCost.vue'))
+const InvoiceItem = defineAsyncComponent(() => import('./InvoiceDetail/InvoiceItem.vue'))
 const RejectVerification = defineAsyncComponent(() => import('./InvoiceDetail/RejectVerification.vue'))
 const SuccessVerifModal = defineAsyncComponent(() => import('./InvoiceDetail/SuccessVerifModal.vue'))
 const SuccessRejectModal = defineAsyncComponent(() => import('./InvoiceDetail/SuccessRejectModal.vue'))
@@ -76,6 +78,7 @@ const route = useRoute()
 const verificationApi = useInvoiceVerificationStore()
 const loginApi = useLoginStore()
 const isLoading = ref<boolean>(false)
+const isNonPo = ref<boolean>(true)
 
 const routes = ref<routeTypes[]>([
   {
@@ -132,6 +135,7 @@ const form = ref<formTypes>({
   totalNetAmount: 0,
   invoicePoGr: [],
   additionalCosts: [],
+  invoiceItem: [],
   invoiceDocument: null,
   tax: null,
   referenceDocument: null,
@@ -450,6 +454,7 @@ const setDataDefault = () => {
     totalNetAmount: data?.calculation.totalNetAmount || 0,
     invoicePoGr: resultPoGr,
     additionalCosts: resultAdditional,
+    invoiceItem: [],
     invoiceDocument: invoice,
     tax: tax,
     referenceDocument: reference,
@@ -503,6 +508,7 @@ const setDataEdit = () => {
     totalNetAmount: data?.totalNetAmount || 0,
     invoicePoGr: data?.invoicePoGr || [],
     additionalCosts: data?.additionalCosts || [],
+    invoiceItem: [],
     invoiceDocument: data?.invoiceDocument || null,
     tax: data?.tax || null,
     referenceDocument: data?.referenceDocument || null,

@@ -1,6 +1,7 @@
 import type { documentFormTypes } from './invoiceDocument'
 import type { itemsPoGrType } from './invoicePoGr'
 import type { itemsCostType } from './additionalCost'
+import type { invoiceItemTypes } from './invoiceItem'
 
 export interface formTypes extends documentFormTypes {
   invoiceUId: string
@@ -49,6 +50,7 @@ export interface formTypes extends documentFormTypes {
 
   invoicePoGr: itemsPoGrType[]
   additionalCosts: itemsCostType[]
+  invoiceItem: invoiceItemTypes[]
 
   generalDataCheck?: boolean
   bankKeyCheck?: boolean
