@@ -34,7 +34,6 @@ const uploadStore = useVendorUploadStore()
 const route = useRoute()
 const router = useRouter()
 const search = ref('')
-const page = ref(1)
 const selectedId = ref(0)
 const mode = ref<'approve' | 'reject'>('approve')
 
@@ -193,7 +192,7 @@ watch(
       </div>
       <LPagination
         :total-items="Number(blacklistStore.blacklist.total)"
-        :current-page="page"
+        :current-page="Number(blacklistStore.blacklist.page)"
         :page-size="Number(blacklistStore.blacklist.pageSize)"
         @page-change="handlePageChange"
       />
