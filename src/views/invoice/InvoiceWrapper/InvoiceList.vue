@@ -4,25 +4,11 @@
       <button class="tab px-[10px]" :class="{ 'active': tabNow === 'po' }" @click="setTab('po')">
         Invoice PO
       </button>
-      
-      <div class="dropdown ml-auto" data-dropdown="true" data-dropdown-trigger="click">
-        <button class="dropdown-toggle btn btn-primary">
-          <i class="ki-duotone ki-plus-circle"></i>
-          Add Invoice
-        </button>
-        <div class="dropdown-content w-full max-w-56 p-[10px]">
-          <div class="flex flex-col gap-[4px]">
-            <button class="btn btn-clear btn-light w-full" @click="goAdd(true)">
-              <i class="ki-duotone ki-file-added"></i>
-              Invoice PO
-            </button>
-            <button class="btn btn-clear btn-light w-full" @click="goAdd(false)">
-              <i class="ki-duotone ki-file-deleted"></i>
-              Invoice Non PO
-            </button>
-          </div>
-        </div>
-      </div>
+
+      <button class="btn btn-primary ml-auto" @click="goAdd(true)">
+        <i class="ki-duotone ki-plus-circle"></i>
+        Add Invoice
+      </button>
     </div>
     <div class="mt-[24px]">
       <PoList />

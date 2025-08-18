@@ -13,7 +13,7 @@
       <InvoiceCalculation :isNeedCheck="checkStatusCode()" class="flex-1" :formInvoice="form" />
     </div>
     <InvoicePoGr v-if="checkPo() && !isNonPo" :isNeedCheck="checkStatusCode()" class="mt-[24px]" />
-    <InvoiceItem v-if="isNonPo" />
+    <InvoiceItem v-if="isNonPo" class="mt-[24px]" />
     <AdditionalCost v-if="form.invoiceDPCode === 9011 && !isNonPo && checkPo() || form.invoiceTypeCode === 902 || form.invoiceTypeCode === 903" :isNeedCheck="checkStatusCode()" class="mt-[24px]" />
     <div class="flex items-center justify-between gap-[8px] mt-[24px]">
       <div class="flex items-center gap-[10px]">
@@ -78,7 +78,7 @@ const route = useRoute()
 const verificationApi = useInvoiceVerificationStore()
 const loginApi = useLoginStore()
 const isLoading = ref<boolean>(false)
-const isNonPo = ref<boolean>(true)
+const isNonPo = ref<boolean>(false)
 
 const routes = ref<routeTypes[]>([
   {
@@ -144,6 +144,7 @@ const form = ref<formTypes>({
 
 const detailInvoice = computed(() => verificationApi.detailInvoice)
 const userData = computed(() => loginApi.userData)
+const additionalCostTempDelete = computed(() => verificationApi.additionalCostTempDelete)
 
 const checkStatusCode = () => {
   let status = true
@@ -334,6 +335,9 @@ const goVerif = () => {
     const idModal = document.querySelector('#success_verif_modal')
     const modal = KTModal.getInstance(idModal as HTMLElement)
     modal.show()
+    for (const item of additionalCostTempDelete.value) {
+      verificationApi.deleteAdditionalCost(form.value.invoiceUId, item.id)
+    }
   }).finally(() => {
     isLoading.value = false
   })
