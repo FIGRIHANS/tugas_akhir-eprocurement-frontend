@@ -19,7 +19,7 @@ import ModalError from './components/ModalError.vue'
 import ModalApprove from './components/ModalApprove.vue'
 
 const tableCols = [
-  'Action',
+  'Actions',
   'Company Name',
   'Type',
   'Start Date',
@@ -37,15 +37,15 @@ const search = ref('')
 const selectedId = ref(0)
 const mode = ref<'approve' | 'reject'>('approve')
 
-const handleSearch = debounce((value) => {
+const handleSearch = debounce((value: string) => {
   const query = { ...route.query }
+
   if (!value) {
-    delete query.SearchQuery
-    router.replace({ query: { ...query, page: 1 } })
+    delete query.searchQuery
+    router.push({ query: { ...query, page: 1 } })
     return
   }
-
-  router.replace({ query: { ...query, SearchQuery: value, page: 1 } })
+  router.push({ query: { ...query, searchQuery: value, page: 1 } })
 }, 500)
 
 const handlePageChange = (page: number) => {
@@ -100,16 +100,18 @@ watch(
   () => route.query,
   (query) => {
     blacklistStore.getBlacklist(query, 0)
+    search.value = (query.searchQuery as string) || ''
   },
   {
     immediate: true,
+    deep: true,
   },
 )
 </script>
 <template>
   <div class="card">
     <div class="card-header">
-      <UiInputSearch v-model="search" placeholder="Cari Vendor" />
+      <UiInputSearch v-model="search" placeholder="Search Vendor" />
       <FilterDropdownBlacklist />
     </div>
     <div class="card-body scrollable-x-auto">
