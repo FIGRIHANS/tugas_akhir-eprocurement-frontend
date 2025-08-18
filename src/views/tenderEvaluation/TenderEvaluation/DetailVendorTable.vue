@@ -72,9 +72,7 @@
                               @change="calculate(sub, key)"
                             />
                           </td>
-                          <td v-if="key.startsWith('score')">
-                            {{ sub[key] + '%' }}
-                          </td>
+                          <td v-if="key.startsWith('score')">{{ (typeof sub[key] === 'number' ? sub[key] : Number(sub[key])).toFixed(2) }}%</td>
                         </template>
                       </tr>
                     </template>
@@ -111,11 +109,20 @@ const tableHeaderChild = computed(() => {
   return Object.keys(props.data[0].children[0])
 })
 
+// const calculate = (data: DetailVendorChildTypes, name: string) => {
+//   const getWeight = parseInt(data.weight)
+//   const getRate = Number(data[name])
+//   const vendorCode = name.split('_')[1]
+
+//   data[`score_${vendorCode}`] = getRate * getWeight
+// }
+
 const calculate = (data: DetailVendorChildTypes, name: string) => {
-  const getWeight = parseInt(data.weight)
-  const getRate = Number(data[name])
+  const weight = parseFloat(data.weight) / 100 // "20%" => 0.2
+  const rate = Number(data[name]) // input rate 0–100
   const vendorCode = name.split('_')[1]
 
-  data[`score_${vendorCode}`] = getRate * getWeight
+  // Score = rate (%) * weight (%)
+  data[`score_${vendorCode}`] = (rate / 100) * (weight * 100)
 }
 </script>
