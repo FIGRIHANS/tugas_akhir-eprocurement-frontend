@@ -148,7 +148,8 @@ interface ParamsSubmissionItem {
   department: string
 }
 
-interface ParamsSubmissionCost {
+export interface ParamsSubmissionCost {
+  id: number
   activityExpense: string
   itemAmount: number
   debitCredit: string
@@ -231,6 +232,7 @@ export interface documentDetailTypes {
 }
 
 export interface itemsCostType {
+  id: number
   activityExpense: string
   itemAmount: number
   debitCredit: string

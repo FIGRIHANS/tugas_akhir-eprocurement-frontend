@@ -89,8 +89,8 @@ const columns = reactive<string[]>([
   'Material Desc',
   'Quantity',
   'UOM',
-  'Bottom Price',
-  'Currency',
+  'Bottom Price (LBMA)',
+  'Currency'
 ])
 
 const openAddSourcingRequisition = () => {
