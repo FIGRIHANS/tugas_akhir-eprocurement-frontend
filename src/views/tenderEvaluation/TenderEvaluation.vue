@@ -181,7 +181,7 @@ const dummyDataDetail = ref<DetailVendorParentTypes[]>([
       },
       {
         evaluationItem: 'Kepatuhan Regulasi',
-        weight: '10%',
+        weight: '20%',
         description: 'Kepatuhan vendor terhadap semua peraturan dan standar industri yang berlaku.',
         expectedSla: 'Nol pelanggaran regulasi',
       },
@@ -288,7 +288,7 @@ watch(
           const getRate = subItemChild[`rate_${item.vendorCode}`]
           const getScore = subItemChild[`score_${item.vendorCode}`]
           totalRate += Number(getRate)
-          totalScore += Number(getScore)
+          totalScore += Number(getScore) || 0
         }
         subItem[`totalRate_${item.vendorCode}`] = totalRate
         subItem[`totalScore_${item.vendorCode}`] = totalScore
