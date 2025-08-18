@@ -37,7 +37,7 @@ const AlternativePayment = defineAsyncComponent(() => import('./BankKey/Alternat
 
 const form = inject<Ref<formTypes>>('form')
 const isTabActive = ref<string>('payment')
-const isNonPo = ref<boolean>(true)
+const isNonPo = ref<boolean>(false)
 
 const contentComponent = computed(() => {
   const components = {
