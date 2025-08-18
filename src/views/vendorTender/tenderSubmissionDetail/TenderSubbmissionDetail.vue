@@ -32,6 +32,7 @@
                 <th
                   v-for="head in tableHeads"
                   :key="head"
+                  class="!border-b-blue-500 !bg-blue-100 !text-blue-500"
                   :class="head === '' ? '' : 'min-w-[150px]'"
                 >
                   {{ head }}
@@ -265,11 +266,11 @@ const dataResponse = ref([
     materialGroup: '4',
     itemNo: '20',
     tenderPrice: 10000,
-    material: 'CH-1062',
-    materialDescription: 'Macro Feltilizer Urea',
+    material: 'AURM4',
+    materialDescription: 'Aurum Product 4',
     quantity: '1000',
     buttonPrice: '97000',
-    uom: 'KG',
+    uom: 'Oz t',
     isSelected: false,
   },
   {
@@ -280,11 +281,11 @@ const dataResponse = ref([
     materialGroup: '4',
     itemNo: '20',
     tenderPrice: 10000,
-    material: 'CH-1062',
-    materialDescription: 'Material 123445',
+    material: 'AURM4',
+    materialDescription: 'Aurum Product 5',
     quantity: '1000',
     buttonPrice: '97000',
-    uom: 'KG',
+    uom: 'Oz t',
     isSelected: false,
   },
   {
@@ -295,26 +296,11 @@ const dataResponse = ref([
     materialGroup: '4',
     itemNo: '20',
     tenderPrice: 10000,
-    material: 'CH-1062',
-    materialDescription: 'Mate SA 2736',
+    material: 'AURM6',
+    materialDescription: 'Aurum Product 6',
     quantity: '1000',
     buttonPrice: '97000',
-    uom: 'KG',
-    isSelected: false,
-  },
-  {
-    tenderRequestNumber: '0192834',
-    type: 'R',
-    deliveryDate: '2025-06-14',
-    plant: 'CHIP2',
-    materialGroup: '4',
-    itemNo: '20',
-    tenderPrice: 10000,
-    material: 'CH-1062',
-    materialDescription: 'Real BHG',
-    quantity: '1000',
-    buttonPrice: '97000',
-    uom: 'KG',
+    uom: 'Oz t',
     isSelected: false,
   },
 ])
