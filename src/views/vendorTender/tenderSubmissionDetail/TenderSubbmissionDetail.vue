@@ -32,6 +32,7 @@
                 <th
                   v-for="head in tableHeads"
                   :key="head"
+                  class="!border-b-blue-500 !bg-blue-100 !text-blue-500"
                   :class="head === '' ? '' : 'min-w-[150px]'"
                 >
                   {{ head }}
