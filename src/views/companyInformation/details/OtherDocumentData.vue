@@ -17,6 +17,7 @@
           <tr v-for="data in dataResponse" :key="data.id">
             <td>
               <AttachmentView
+                class="cursor-pointer"
                 :file-data="{ name: data.documentName, path: data.documentUrl }"
                 :upload-date="formatDate(data.issuedUTCDate)"
                 @click="downloadFile(data.documentUrl)"
