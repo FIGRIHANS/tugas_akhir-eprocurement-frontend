@@ -82,9 +82,9 @@
                 </span>
               </td>
               <td>{{ data.totalPo }}</td>
-              <td>{{ data.yearlySpanding }}</td>
+              <td>{{ useFormatUsd(data.yearlySpanding) }}</td>
               <td>{{ data.currency }}</td>
-              <td>{{ data.existingContract }}</td>
+              <td class="cursor-pointer" @click="showContractHistory">{{ data.existingContract }}</td>
             </tr>
           </tbody>
         </table>
@@ -186,18 +186,21 @@
         </tbody>
       </table>
     </section>
+    <ContractHistory />
   </div>
 </template>
 
 <script lang="ts" setup>
 import { ref, reactive, inject, defineAsyncComponent } from 'vue'
 import { KTModal } from '@/metronic/core'
+import { useFormatUsd } from '@/composables/currency'
 import type { FormTypes } from '../types/tenderCreate'
 import type { TableItemTypes } from '../types/vendorList'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiLoading from '@/components/UiLoading.vue'
 
 const AddVendorModal = defineAsyncComponent(() => import('./VendorList/AddVendor.vue'))
+const ContractHistory = defineAsyncComponent(() => import('./VendorList/ContractHistory.vue'))
 
 const form = inject<FormTypes>('form')
 const search = ref<string>('')
@@ -313,6 +316,12 @@ const deleteItem = (index: number) => {
 
 const showAddVendor = () => {
   const idModal = document.querySelector('#add_vendor_tender_modal')
+  const modal = KTModal.getInstance(idModal as HTMLElement)
+  modal.show()
+}
+
+const showContractHistory = () => {
+  const idModal = document.querySelector('#contract_history_modal')
   const modal = KTModal.getInstance(idModal as HTMLElement)
   modal.show()
 }
