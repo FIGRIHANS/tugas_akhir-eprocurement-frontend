@@ -4,6 +4,9 @@
     <div class="border rounded-lg p-[24px]">
       <StepperStatusTender activeName="Vendor Awarding" />
     </div>
+    <div class="mt-[24px] w-full flex justify-end">
+      <UiButton @click="openModal">Final Awarding</UiButton>
+    </div>
     <div class="mt-[24px] border rounded-lg p-[24px]">
       <AwardingDraft :data="tenderEvoStore.dummyData" @updateCount="updateData" />
     </div>
@@ -17,6 +20,22 @@
         :columns-child="childColumns"
       />
     </div>
+
+    <!-- modal confirm start -->
+    <ModalConfirmation
+      :open="isOpenModal"
+      id="equipment-delete"
+      type="confirm"
+      title="Are You Sure You Want to Final Award?"
+      text="Please review before final award."
+      static
+      :loading="loading"
+      cancel-button-text="Cancel"
+      submit-button-text="Yes, Final Award"
+      :cancel="() => closeModal"
+      :submit="submitData"
+    />
+    <!-- modal confirm end -->
   </div>
 </template>
 
@@ -30,8 +49,31 @@ import type { routeTypes } from '@/core/type/components/breadcrumb'
 import type { VendorListTypes, DetailVendorParentTypes } from './types/tenderEvaluation'
 import { useTenderEvoStore } from '@/stores/tender-evo/tenderNegotiation'
 import AwardingDraft from '../tenderReportNegotiation/tenderReportNegotiation/AwardingDraft.vue'
+import UiButton from '@/components/ui/atoms/button/UiButton.vue'
+import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 
 const tenderEvoStore = useTenderEvoStore()
+
+// state modal
+const isOpenModal = ref(false)
+const loading = ref(false)
+
+const openModal = () => {
+  isOpenModal.value = true
+}
+
+const closeModal = () => {
+  isOpenModal.value = false
+}
+
+const submitData = () => {
+  loading.value = true
+
+  setTimeout(() => {
+    loading.value = false
+    isOpenModal.value = false
+  }, 1000)
+}
 
 const updateData = (row: any, bid: any) => {
   tenderEvoStore.updateQty(row, bid)
@@ -139,7 +181,7 @@ const dummyDataDetail = ref<DetailVendorParentTypes[]>([
       },
       {
         evaluationItem: 'Kepatuhan Regulasi',
-        weight: '10%',
+        weight: '20%',
         description: 'Kepatuhan vendor terhadap semua peraturan dan standar industri yang berlaku.',
         expectedSla: 'Nol pelanggaran regulasi',
       },
@@ -149,7 +191,7 @@ const dummyDataDetail = ref<DetailVendorParentTypes[]>([
     id: 2,
     evaluationType: 'Commercial Evaluation',
     evaluationItem: '',
-    weight: '4%',
+    weight: '40%',
     description: '',
     expectedSla: '',
     isOpenChild: false,
@@ -246,7 +288,7 @@ watch(
           const getRate = subItemChild[`rate_${item.vendorCode}`]
           const getScore = subItemChild[`score_${item.vendorCode}`]
           totalRate += Number(getRate)
-          totalScore += Number(getScore)
+          totalScore += Number(getScore) || 0
         }
         subItem[`totalRate_${item.vendorCode}`] = totalRate
         subItem[`totalScore_${item.vendorCode}`] = totalScore
