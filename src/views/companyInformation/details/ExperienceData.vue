@@ -29,7 +29,7 @@
 
                   <div class="dropdown-content w-full max-w-56" data-dropdown-dismiss="true">
                     <div class="menu menu-default flex flex-col w-full text-sm">
-                      <div class="menu-item text-warning" @click="downloadFile(data.documentURL)">
+                      <div class="menu-item text-primary" @click="downloadFile(data.documentURL)">
                         <span class="menu-link">
                           <UiIcon name="file-down" variant="duotone" class="menu-icon" />
                           Download
