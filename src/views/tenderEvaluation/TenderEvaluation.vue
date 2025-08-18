@@ -61,9 +61,9 @@ const dummyData = ref<VendorListTypes[]>([
   },
   {
     id: 2,
-    vendorCode: '1061',
+    vendorCode: '2983',
     rank: 2,
-    vendorName: 'PT Hellzenberg',
+    vendorName: 'PT Sommer GmbHTbk',
     totalScore: 0,
     technicalEvaluation: 0,
     commercialEvaluation: 0,
@@ -75,9 +75,9 @@ const dummyData = ref<VendorListTypes[]>([
   },
   {
     id: 3,
-    vendorCode: '1062',
+    vendorCode: '8765',
     rank: 3,
-    vendorName: 'PT Surya Emas',
+    vendorName: 'PT Kreutzschmid KgaA Tbk',
     totalScore: 0,
     technicalEvaluation: 0,
     commercialEvaluation: 0,
