@@ -17,7 +17,7 @@
       <AwardingDraft :data="tenderEvoStore.dummyData" />
     </section>
     <section class="py-5 flex justify-end">
-      <UiButton> Approve Evaluation </UiButton>
+      <UiButton> Approve Awarding </UiButton>
     </section>
     <section>
       <ParticipatingVendor class="mt-[24px]" />
@@ -84,7 +84,7 @@
         </table>
       </div>
     </section> -->
-    <section name="button-wrapper">
+    <!-- <section name="button-wrapper">
       <div class="mt-[24px] flex flex-row justify-start">
         <UiButton
           v-if="currentStatus === 3"
@@ -114,15 +114,15 @@
           Close Tender <i class="ki-duotone ki-ranking"></i
         ></UiButton>
       </div>
-    </section>
+    </section> -->
   </div>
 </template>
 
 <script lang="ts" setup>
 //   import LPagination from '@/components/pagination/LPagination.vue'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
-import InputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
-import UiChips from '@/components/ui/atoms/chips/UiChips.vue'
+// import InputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
+// import UiChips from '@/components/ui/atoms/chips/UiChips.vue'
 import type { routeTypes } from '@/core/type/components/breadcrumb'
 import { ref } from 'vue'
 import StepperStatusTender from '@/components/stepperStatusTender/StepperStatusTender.vue'
