@@ -13,6 +13,12 @@
         <StepperStatusTender activeName="Vendor Awarding" role="admin" />
       </div>
     </section>
+    <section class="px-5">
+      <AwardingDraft :data="tenderEvoStore.dummyData" />
+    </section>
+    <section class="py-5 flex justify-end">
+      <UiButton> Approve Evaluation </UiButton>
+    </section>
     <section
       name="table"
       class="border rounded-md mt-[24px] p-[24px] flex flex-col gap-[24px] justify-center bg-white"
@@ -26,14 +32,14 @@
         <table class="table align-middle">
           <thead>
             <tr class="text-nowrap border-b">
-              <th class="flex items-center justify-center"></th>
-              <th>Status</th>
-              <th>Vendor Code</th>
-              <th>Rank</th>
-              <th>Vendor Name</th>
-              <th>Total Score</th>
-              <th>Product Quality</th>
-              <th>Lead Time</th>
+              <th class="flex items-center justify-center !bg-blue-100 !text-blue-500"></th>
+              <th class="!bg-blue-100 !text-blue-500">Status</th>
+              <th class="!bg-blue-100 !text-blue-500">Vendor Code</th>
+              <th class="!bg-blue-100 !text-blue-500">Rank</th>
+              <th class="!bg-blue-100 !text-blue-500">Vendor Name</th>
+              <th class="!bg-blue-100 !text-blue-500">Total Score</th>
+              <th class="!bg-blue-100 !text-blue-500">Product Quality</th>
+              <th class="!bg-blue-100 !text-blue-500">Lead Time</th>
             </tr>
           </thead>
           <tbody>
@@ -141,6 +147,10 @@ import type { routeTypes } from '@/core/type/components/breadcrumb'
 import { ref } from 'vue'
 import StepperStatusTender from '@/components/stepperStatusTender/StepperStatusTender.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
+import AwardingDraft from '@/views/tenderReportNegotiation/tenderReportNegotiation/AwardingDraft.vue'
+import { useTenderEvoStore } from '@/stores/tender-evo/tenderNegotiation'
+
+const tenderEvoStore = useTenderEvoStore()
 
 const search = ref('')
 const selectedItems = ref<number | null>(null)
