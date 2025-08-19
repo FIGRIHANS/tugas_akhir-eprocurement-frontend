@@ -40,15 +40,18 @@
         <i v-else class="ki-duotone ki-paper-plane"></i>
       </button>
     </div>
+    <SuccessCreate @afterClose="goToTenderList" />
   </div>
 </template>
 
 <script lang="ts" setup>
 import { ref, reactive, computed, provide, defineAsyncComponent, type Component, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { KTModal } from '@/metronic/core'
 import StepperStatusTender from '@/components/stepperStatusTender/StepperStatusTender.vue'
 import TabTender from '@/components/tender/TabTender.vue'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
+import SuccessCreate from './TenderCreate/SuccessCreate.vue'
 import type { routeTypes } from '@/core/type/components/breadcrumb'
 import type { FormTypes } from './types/tenderCreate'
 
@@ -64,6 +67,7 @@ const TenderBilling = defineAsyncComponent(() => import('./TenderCreate/TenderBi
 
 /* ===== Routing ===== */
 const route = useRoute()
+const router = useRouter()
 
 /* ===== Breadcrumb ===== */
 const routes = ref<routeTypes[]>([{ name: 'Create Tender Request', to: '/tender/create' }])
@@ -83,6 +87,8 @@ const form = reactive<FormTypes>({
   evaluationObject: '',
   tenderPeriod: '',
   remarks: '',
+  lbmaPriceOz: 3362.05,
+  biExchangeRate: 16155,
   vendorList: [
     {
       id: '1',
@@ -127,8 +133,14 @@ const contentComponent = computed<Component>(() => {
 
 /* ===== Nav actions ===== */
 const goNext = () => {
-  const idx = tabList.indexOf(activeTab.value as (typeof tabList)[number])
-  if (idx !== -1 && idx < tabList.length - 1) activeTab.value = tabList[idx + 1]
+  if (activeTab.value === 'timeline') {
+    const idModal = document.querySelector('#success_create_tender_modal')
+    const modal = KTModal.getInstance(idModal as HTMLElement)
+    modal.show()
+  } else {
+    const idx = tabList.indexOf(activeTab.value as (typeof tabList)[number])
+    if (idx !== -1 && idx < tabList.length - 1) activeTab.value = tabList[idx + 1]
+  }
 }
 const goBack = () => {
   const idx = tabList.indexOf(activeTab.value as (typeof tabList)[number])
@@ -217,6 +229,12 @@ const STATUS_TO_TAB: Record<string, string> = {
   completed: 'timeline',
   closed: 'timeline',
   close: 'timeline',
+}
+
+const goToTenderList = () => {
+  router.push({
+    name: 'tenderReportList'
+  })
 }
 
 watch(
