@@ -1,5 +1,5 @@
 <template>
-  <div class="px-[1.875rem] py-5 grid grid-cols-3 gap-5">
+  <div class="grid grid-cols-3 gap-5">
     <div class="card min-w-full">
       <div class="card-header">
         <h3 class="card-title">Company Deed Data</h3>
