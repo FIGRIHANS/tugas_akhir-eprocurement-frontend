@@ -90,7 +90,7 @@
           <label class="form-label max-w-32 whitespace-nowrap">
             LBMA Ref Price(oz t)
           </label>
-          <span class="text-sm">{{ useFormatUsd(lbmaPriceOz) }}</span>
+          <span class="text-sm">{{ useFormatUsd(form.lbmaPriceOz) }}</span>
           <span class="text-sm">USD</span>
         </div>
         <!-- LBMA Ref Price(gr) -->
@@ -98,7 +98,7 @@
           <label class="form-label max-w-32 whitespace-nowrap">
             LBMA Ref Price(gr)
           </label>
-          <span class="text-sm">{{ useFormatUsd(lbmaPriceOz / 31.1034768) }}</span>
+          <span class="text-sm">{{ useFormatUsd(form.lbmaPriceOz / 31.1034768) }}</span>
           <span class="text-sm">USD</span>
         </div>
         <!-- BI Middle Exc Rate -->
@@ -106,7 +106,7 @@
           <label class="form-label max-w-32 whitespace-nowrap">
             BI Middle Exc Rate
           </label>
-          <span class="text-sm">{{ useFormatIdr(biExchangeRate) }}</span>
+          <span class="text-sm">{{ useFormatIdr(form.biExchangeRate) }}</span>
           <span class="text-sm">IDR</span>
         </div>
         <!-- LBMA Ref Price(gr) -->
@@ -114,7 +114,7 @@
           <label class="form-label max-w-32 whitespace-nowrap">
             LBMA Ref Price(gr)
           </label>
-          <span class="text-sm">{{ useFormatIdr(biExchangeRate * (lbmaPriceOz / 31.1034768)) }}</span>
+          <span class="text-sm">{{ useFormatIdr(form.biExchangeRate * (form.lbmaPriceOz / 31.1034768)) }}</span>
           <span class="text-sm">IDR</span>
         </div>
       </div>
@@ -134,8 +134,6 @@ import moment from 'moment'
 const TrendLbma = defineAsyncComponent(() => import('./GeneralData/TrendLbma.vue'))
 
 const form = inject<FormTypes>('form')
-const lbmaPriceOz = ref<number>(3362.05)
-const biExchangeRate = ref<number>(16155)
 
 const prScenarioOption = ref([
   {

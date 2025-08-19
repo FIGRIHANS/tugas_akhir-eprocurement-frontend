@@ -113,7 +113,7 @@ const setData = (dataVendor: SourcingRequestitionTypes[]) => {
       material: item.material,
       materialDescription: item.materialDescription,
       quantity: item.quantity,
-      bottomPrice: item.bottomPrice,
+      bottomPrice: item.quantity * form.lbmaPriceOz,
       uom: item.uom,
       currency: item.currency,
       isSelected: false,
