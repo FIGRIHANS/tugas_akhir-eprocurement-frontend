@@ -8,6 +8,8 @@ export interface FormTypes {
   evaluationObject: string
   tenderPeriod: string
   remarks: string
+  lbmaPriceOz: number
+  biExchangeRate: number
   requisitionList: TableItemTypes[]
   vendorList: VendorListTypes[]
   tenderStartDate: string
