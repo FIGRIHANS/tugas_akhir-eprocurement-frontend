@@ -9,7 +9,7 @@ export const useTenderEvoStore = defineStore('tenderNegotiationEvo', () => {
       status: 'invited',
       vendorCode: '1060',
       rank: '1',
-      vendorName: 'PT Walldorf Tbk',
+      vendorName: 'PT Walldorf Grosshandel Tbk',
       totalScore: '80',
       productQuality: '80',
       leadTimeQuality: '80',
@@ -63,7 +63,7 @@ export const useTenderEvoStore = defineStore('tenderNegotiationEvo', () => {
         {
           id: 1,
           rank: 1,
-          vendor: 'PT Walldorf Tbk',
+          vendor: 'PT Walldorf Grosshandel Tbk',
           negoQty: 30,
           uom: 'Oz t',
           bottomPrice: 100861.5,
@@ -118,7 +118,7 @@ export const useTenderEvoStore = defineStore('tenderNegotiationEvo', () => {
         {
           id: 1,
           rank: 1,
-          vendor: 'PT Walldorf Tbk',
+          vendor: 'PT Walldorf Grosshandel Tbk',
           negoQty: 23,
           uom: 'Oz t',
           bottomPrice: 77327.15,
