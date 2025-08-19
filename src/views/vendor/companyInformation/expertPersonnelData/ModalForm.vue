@@ -300,7 +300,7 @@ onMounted(() => {
       :class="tab.active === 'personal_information' ? 'max-w-4xl' : 'max-w-7xl'"
     >
       <div class="modal-header">
-        <h3 class="modal-title text-lg">Experience Data</h3>
+        <h3 class="modal-title text-lg">Expert Personnel Data</h3>
       </div>
 
       <div class="modal-body !py-5 flex flex-col items-center gap-4">
@@ -340,7 +340,7 @@ onMounted(() => {
             <DatePicker
               v-model="payload.dateOfBirth"
               placeholder="Select"
-              format="dd MM yyyy"
+              format="dd/MM/yyyy"
               label="Date of Birth"
               required
               label-top
@@ -482,6 +482,7 @@ onMounted(() => {
                     <td>
                       <DatePicker
                         v-model="subCertificate.startDate"
+                        format="dd/MM/yyyy"
                         teleport
                         @update:model-value="
                           $event ? (subCertificate.startDate = new Date($event).toISOString()) : ''
@@ -493,6 +494,7 @@ onMounted(() => {
                     <td>
                       <DatePicker
                         v-model="subCertificate.endDate"
+                        format="dd/MM/yyyy"
                         teleport
                         @update:model-value="
                           $event ? (subCertificate.endDate = new Date($event).toISOString()) : ''
