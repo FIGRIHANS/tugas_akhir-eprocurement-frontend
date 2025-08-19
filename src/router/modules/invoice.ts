@@ -38,6 +38,11 @@ export default [
     component: () => import('@/views/InvoiceDetail/InvoiceDetail.vue'),
   },
   {
+    path: '/invoice/detail/noPo',
+    name: 'invoiceDetailNonPo',
+    component: () => import('@/views/InvoiceDetail/InvoiceDetail.vue'),
+  },
+  {
     path: '/invoice/detail/edit',
     name: 'invoiceDetailEdit',
     component: () => import('@/views/invoiceDetailEdit/InvoiceDetailEdit.vue'),
