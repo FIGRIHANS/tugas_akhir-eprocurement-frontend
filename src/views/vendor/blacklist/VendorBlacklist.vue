@@ -140,8 +140,8 @@ watch(
         </tbody>
       </table>
     </div>
-    <div class="card-footer">
-      <div>
+    <div class="card-footer" v-show="blacklistStore.blacklist.items.length">
+      <div class="text-sm text-gray-800">
         Showing {{ blacklistStore.blacklist.pageSize * (blacklistStore.blacklist.page - 1) + 1 }} to
         {{
           blacklistStore.blacklist.pageSize * (blacklistStore.blacklist.page - 1) +

@@ -170,6 +170,7 @@ watch(
     </div>
     <div
       class="card-footer justify-center md:justify-between flex-col md:flex-row gap-3 text-gray-800 text-sm font-medium"
+      v-show="vendor.vendors.items.length"
     >
       <div>
         Showing {{ vendor.vendors.pageSize * (vendor.vendors.page - 1) + 1 }} to
