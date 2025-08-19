@@ -376,7 +376,7 @@ const filteredCompanyDeedData = computed(() =>
             </td>
             <td class="text-nowrap">{{ doc.documentNo }}</td>
             <td class="text-nowrap">{{ doc.documentDate }}</td>
-            <td class="text-nowrap">{{ doc.value }}</td>
+            <td class="text-nowrap">{{ doc.notaryName }}</td>
             <td class="text-nowrap">{{ doc.cityName }}</td>
           </tr>
         </tbody>
