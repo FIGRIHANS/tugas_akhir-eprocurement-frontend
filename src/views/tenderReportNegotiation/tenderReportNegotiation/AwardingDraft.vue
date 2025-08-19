@@ -1,13 +1,13 @@
 <template>
   <div>
     <div class="eva__table mt-[24px] overflow-auto">
-      <table class="table text-gray-700 font-medium text-sm w-full">
+      <table class="table text-gray-700 font-medium text-sm w-full !rounded-none">
         <thead>
           <tr>
             <th
               v-for="(item, index) in columns"
               :key="index"
-              class="eva__field-base !border-b-blue-500"
+              class="eva__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"
               :class="{ 'eva__field-base--accordion': index === 0 }"
             >
               {{ item }}
@@ -28,14 +28,7 @@
                 </button>
               </td>
 
-              <td
-                v-for="key in parentKeys"
-                :key="key"
-                class="align-top"
-                :class="{
-                  'whitespace-nowrap': key === 'simulationMessage',
-                }"
-              >
+              <td v-for="key in parentKeys" :key="key" class="align-top">
                 <template v-if="['simulationAmount'].includes(key)">
                   {{ formatNumber(sumNegotiationAmount(row)) }}
                 </template>
@@ -44,6 +37,17 @@
                 </template>
                 <template v-else-if="['bottomPriceLBMA', 'unitPriceLBMA'].includes(key)">
                   {{ formatNumber(row[key as keyof typeof row]) }}
+                </template>
+                <template v-else-if="['simulationStatus'].includes(key)">
+                  <span
+                    v-if="row[key as keyof typeof row] === 'Error'"
+                    class="badge badge-outline badge-pill badge-danger"
+                  >
+                    {{ row[key as keyof typeof row] }}
+                  </span>
+                  <span v-else class="badge badge-outline badge-pill badge-success">
+                    {{ row[key as keyof typeof row] }}
+                  </span>
                 </template>
                 <template v-else>
                   {{ row[key as keyof typeof row] ?? '-' }}
@@ -54,17 +58,32 @@
             <tr v-show="row.isOpenChild">
               <td></td>
               <td :colspan="parentKeys.length" class="!pt-[0px]">
-                <table class="table">
+                <table class="table !rounded-none">
                   <thead>
                     <tr class="border-b">
-                      <th v-for="(c, i) in childColumns" :key="i" class="eva__field-base-child">
+                      <th
+                        v-for="(c, i) in childColumns"
+                        :key="i"
+                        class="eva__field-base-child !radius-0 !bg-blue-100 !text-blue-500"
+                      >
                         {{ c }}
                       </th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr v-for="(bid, i) in row.bids" :key="i">
-                      <td>{{ bid.rank }}</td>
+                      <td>
+                        <span
+                          class="badge badge-outline badge-pill"
+                          :class="{
+                            'badge-success': bid.rank === 1,
+                            'badge-primary': bid.rank === 2,
+                            'badge-warning': bid.rank >= 3,
+                          }"
+                        >
+                          {{ bid.rank }}</span
+                        >
+                      </td>
                       <td>{{ bid.vendor }}</td>
                       <td>
                         <UiInput
@@ -88,7 +107,10 @@
                       </td>
                       <td>{{ bid.var }}</td>
                       <td>{{ bid.currency }}</td>
-                      <td>{{ bid.awardStatus || '-' }}</td>
+                      <td>
+                        <div v-if="bid.negoQty != 0">🏅</div>
+                        <div v-else></div>
+                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -110,8 +132,6 @@ defineEmits(['updateCount'])
 const props = defineProps<{
   data: any
 }>()
-
-console.log(props)
 
 // dummy data
 // const dummyData = [
@@ -378,5 +398,15 @@ const onChangeNegoQty = (row: any, bid: any) => {
   if (bid.unitPrice != null) {
     bid.negotiationAmount = qty > 0 ? qty * Number(bid.unitPrice) : 0
   }
+
+  let count = 0
+
+  for (let i = 0; i < row.bids.length; i++) {
+    if (row.bids[i].negoQty !== 0) {
+      count++
+    }
+  }
+
+  row.awardDraft = count + ' Winner'
 }
 </script>

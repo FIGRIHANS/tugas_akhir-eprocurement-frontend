@@ -202,30 +202,30 @@
         <table class="table align-middle">
           <thead>
             <tr class="text-nowrap border-b border-primary">
-              <th>
+              <th class="!bg-blue-100 !text-blue-500">
                 <input class="checkbox checkbox-sm" type="checkbox" v-model="selectAll" />
               </th>
-              <th>Purch Req</th>
-              <th>PR Scenario</th>
-              <th>PR Item No</th>
-              <th>PO Item No</th>
-              <th>PO</th>
-              <th>Tender Status</th>
-              <th>Material No</th>
-              <th>Material Desc</th>
-              <th>Qty</th>
-              <th>UoM</th>
-              <th>Delivery Category</th>
-              <th>Material Group</th>
-              <th>Plant</th>
-              <th>S Loc</th>
-              <th>Purch Group</th>
-              <th>Agreement</th>
-              <th>Info Record</th>
-              <th>Indicator</th>
-              <th>Creation Indicator</th>
-              <th>Account Assignment Category</th>
-              <th>Asset No</th>
+              <th class="!bg-blue-100 !text-blue-500">Purch Req</th>
+              <th class="!bg-blue-100 !text-blue-500">PR Scenario</th>
+              <th class="!bg-blue-100 !text-blue-500">PR Item No</th>
+              <th class="!bg-blue-100 !text-blue-500">PO Item No</th>
+              <th class="!bg-blue-100 !text-blue-500">PO</th>
+              <th class="!bg-blue-100 !text-blue-500">Tender Status</th>
+              <th class="!bg-blue-100 !text-blue-500">Material No</th>
+              <th class="!bg-blue-100 !text-blue-500">Material Desc</th>
+              <th class="!bg-blue-100 !text-blue-500">Qty</th>
+              <th class="!bg-blue-100 !text-blue-500">UoM</th>
+              <th class="!bg-blue-100 !text-blue-500">Delivery Category</th>
+              <th class="!bg-blue-100 !text-blue-500">Material Group</th>
+              <th class="!bg-blue-100 !text-blue-500">Plant</th>
+              <th class="!bg-blue-100 !text-blue-500">S Loc</th>
+              <th class="!bg-blue-100 !text-blue-500">Purch Group</th>
+              <th class="!bg-blue-100 !text-blue-500">Agreement</th>
+              <th class="!bg-blue-100 !text-blue-500">Info Record</th>
+              <th class="!bg-blue-100 !text-blue-500">Indicator</th>
+              <th class="!bg-blue-100 !text-blue-500">Creation Indicator</th>
+              <th class="!bg-blue-100 !text-blue-500">Account Assignment Category</th>
+              <th class="!bg-blue-100 !text-blue-500">Asset No</th>
             </tr>
           </thead>
           <tbody>

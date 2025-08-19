@@ -120,8 +120,10 @@ import type { formTypes } from '../../types/invoiceDetailEdit'
 import type { itemsCostType } from '../../types/additionalCost'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
+import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
+const verificationApi = useInvoiceVerificationStore()
 const form = inject<Ref<formTypes>>('form')
 const columns = ref([
   'Action',
@@ -170,6 +172,7 @@ const checkPoPib = () => {
 const addNew = () => {
   if (form) {
     const data = {
+      id: 0,
       activityExpense: '',
       itemAmount: 0,
       debitCredit: '',
@@ -237,7 +240,10 @@ const resetItem = (item: itemsCostType, index: number) => {
     item.isEdit = !item.isEdit
     resetFormEdit()
   } else {
-    form?.value.additionalCosts.splice(index, 1)
+    if (form) {
+      verificationApi.additionalCostTempDelete?.push(form.value.additionalCosts[index])
+      form.value.additionalCosts.splice(index, 1)
+    }
   }
 }
 
