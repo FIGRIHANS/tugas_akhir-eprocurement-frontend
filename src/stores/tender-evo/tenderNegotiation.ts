@@ -173,7 +173,7 @@ export const useTenderEvoStore = defineStore('tenderNegotiationEvo', () => {
         {
           id: 1,
           rank: 1,
-          vendor: 'PT Walldorf Tbk',
+          vendor: 'PT Walldorf Grosshandel Tbk',
           negoQty: 10,
           uom: 'Oz t',
           bottomPrice: 33620.5,
