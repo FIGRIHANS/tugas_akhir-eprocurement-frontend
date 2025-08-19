@@ -71,10 +71,10 @@
         </table>
       </div>
     </div>
-    <div class="flex align-items-center justify-between gap-[8px] mt-[24px]">
+    <!-- <div class="flex align-items-center justify-between gap-[8px] mt-[24px]">
       <span class="text-sm">Show {{ dummyData.length }} data from {{ dummyData.length }}</span>
       <LPagination :totalItems="dummyData.length" :currentPage="pageNo" :pageSize="pageSize" />
-    </div>
+    </div> -->
   </div>
 </template>
 
