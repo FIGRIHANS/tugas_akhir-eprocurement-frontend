@@ -35,6 +35,7 @@ const onClose = () => {
   const modal = KTModal.getInstance(idModal as HTMLElement)
   modal.hide()
   payloadError.value = []
+  payload.value.ApprovalNote = ''
 }
 
 const onSubmit = async () => {
@@ -84,9 +85,9 @@ const onSubmit = async () => {
                 required
                 :error="payloadError.includes('ApprovalNote')"
               />
-              <span v-if="payloadError.includes('ApprovalNote')" class="form-hint !text-danger"
-                >Reason required</span
-              >
+              <span v-if="payloadError.includes('ApprovalNote')" class="form-hint !text-danger">
+                Reason required
+              </span>
             </div>
           </UiFormGroup>
           <ui-form-group hide-border :grid="2" class="mt-2">

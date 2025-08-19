@@ -31,7 +31,7 @@ const payloadError = ref<string[]>([])
 const loading = ref(false)
 
 const onClose = () => {
-  const idModal = document.querySelector('#modal-reject')
+  const idModal = document.querySelector('#modal-approve')
   const modal = KTModal.getInstance(idModal as HTMLElement)
   modal.hide()
   payloadError.value = []
