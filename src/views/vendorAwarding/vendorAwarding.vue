@@ -16,6 +16,9 @@
     <section class="px-5">
       <AwardingDraft :data="tenderEvoStore.dummyData" />
     </section>
+    <section class="py-5 flex justify-end">
+      <UiButton> Approve Evaluation </UiButton>
+    </section>
     <section
       name="table"
       class="border rounded-md mt-[24px] p-[24px] flex flex-col gap-[24px] justify-center bg-white"
