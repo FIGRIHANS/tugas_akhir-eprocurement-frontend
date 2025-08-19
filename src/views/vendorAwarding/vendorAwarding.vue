@@ -19,7 +19,10 @@
     <section class="py-5 flex justify-end">
       <UiButton> Approve Evaluation </UiButton>
     </section>
-    <section
+    <section>
+      <ParticipatingVendor class="mt-[24px]" />
+    </section>
+    <!-- <section
       name="table"
       class="border rounded-md mt-[24px] p-[24px] flex flex-col gap-[24px] justify-center bg-white"
     >
@@ -28,6 +31,7 @@
           <InputSearch placeholder="Search" v-model="search" />
         </div>
       </div>
+
       <div class="scrollable-x-auto">
         <table class="table align-middle">
           <thead>
@@ -43,18 +47,6 @@
             </tr>
           </thead>
           <tbody>
-            <!-- <tr v-if="loading">
-                      <td colspan="7" class="text-center">
-                      <UiLoading />
-                      </td>
-                  </tr>
-  
-                  <tr v-else-if="error">
-                      <td colspan="7" class="text-center text-red-500">
-                      {{ error }}
-                      </td>
-                  </tr> -->
-
             <tr v-if="!data.length">
               <td colspan="7" class="text-center">No data found.</td>
             </tr>
@@ -91,19 +83,7 @@
           </tbody>
         </table>
       </div>
-      <!-- <div class="card-footer">
-              <div>
-                  Tampilkan {{ '10' }} data dari total data
-                  {{ '100' }}
-              </div>
-              <LPagination
-                  :current-page="page"
-                  :page-size="10"
-                  :total-items="100"
-                  @page-change="handlePageChange"
-              />
-          </div> -->
-    </section>
+    </section> -->
     <section name="button-wrapper">
       <div class="mt-[24px] flex flex-row justify-start">
         <UiButton
@@ -149,6 +129,7 @@ import StepperStatusTender from '@/components/stepperStatusTender/StepperStatusT
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import AwardingDraft from '@/views/tenderReportNegotiation/tenderReportNegotiation/AwardingDraft.vue'
 import { useTenderEvoStore } from '@/stores/tender-evo/tenderNegotiation'
+import ParticipatingVendor from '../tenderReportNegotiation/tenderReportNegotiation/ParticipatingVendor.vue'
 
 const tenderEvoStore = useTenderEvoStore()
 
