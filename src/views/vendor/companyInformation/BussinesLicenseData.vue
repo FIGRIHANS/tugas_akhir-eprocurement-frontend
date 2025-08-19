@@ -3,16 +3,12 @@
     <PKPTableView v-model:licenses="vendorLicensesPayload" />
     <OtherDocTableView v-model:other-documents="otherDocumentsPayload" />
 
-    <div
-      class="w-full p-4 rounded-lg bg-primary-light border border-primary flex items-center gap-3"
-    >
-      <div>
-        <img :src="informationIcon" alt="" />
-      </div>
-      <div>
-        <ul class="list-disc list-inside text-sm text-primary font-medium">
+    <div class="card bg-primary-light border border-primary">
+      <div class="card-body p-4 flex flex-row items-center gap-4 text-primary">
+        <UiIcon variant="duotone" name="information" class="text-4xl" />
+        <ul class="list-disc list-inside font-medium text-sm">
           <li>Make sure to click the upload button after selecting the document.</li>
-          <li>Fields marked(*) with an asterisk are required</li>
+          <li>Fields marked (*) with an asterisk are required.</li>
         </ul>
       </div>
     </div>
@@ -22,11 +18,49 @@
         <UiIcon variant="duotone" name="black-left" />
         Back</UiButton
       >
-      <UiButton variant="primary" @click="saveData">
+      <UiButton variant="primary" @click="openModalConfirm">
         Save
         <UiIcon variant="duotone" name="arrow-right" />
       </UiButton>
     </div>
+
+    <!-- modal confirm -->
+    <ModalConfirmation
+      :open="isOpenModalConfirmSave"
+      id="license-save"
+      type="confirm"
+      title="Save"
+      text="You are about to Save to this data. Please review your input before continuing"
+      static
+      :loading="isLoadingSubmit"
+      cancel-button-text="Cancel"
+      submit-button-text="Save"
+      :cancel="() => (isOpenModalConfirmSave = false)"
+      :submit="onConfirmSave"
+    />
+
+    <!-- modal success -->
+    <ModalConfirmation
+      :open="isOpenModalSuccess"
+      id="license-save-success"
+      type="success"
+      title="Business License Data Sucessfully Updated"
+      text="The data has been successfully updated in the admin system"
+      no-cancel
+      no-submit
+    />
+    <!-- modal error -->
+    <ModalConfirmation
+      :open="isOpenModalError"
+      type="danger"
+      id="license-save-error"
+      title="Error Updated Data"
+      text="An error occurred while updating the data. Please try again later."
+      no-cancel
+      static
+      submit-button-text="Close"
+      :submit="() => (isOpenModalError = false)"
+    />
   </div>
 </template>
 
@@ -36,11 +70,17 @@ import PKPTableView from '@/components/vendor/businessLicenseData/PKPTableView.v
 import { useVendorIzinUsahaStore } from '@/stores/vendor/vendor'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import informationIcon from '@/assets/svg/ic_info_alert.svg'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import type { ILicense, IOtherDocument } from '@/stores/vendor/types/vendor'
 import { useLoginStore } from '@/stores/views/login'
+import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
+
+// modal confirm state
+const isOpenModalConfirmSave = ref(false)
+const isOpenModalSuccess = ref(false)
+const isOpenModalError = ref(false)
+const isLoadingSubmit = ref(false)
 
 const loginApi = useLoginStore()
 const vendorLicenseData = useVendorIzinUsahaStore()
@@ -69,6 +109,26 @@ const formatToISOString = (date: Date | string | null): string | null => {
     return null
   }
   return d.toISOString()
+}
+
+const openModalConfirm = () => {
+  isOpenModalConfirmSave.value = true
+}
+
+const onConfirmSave = async () => {
+  if (isLoadingSubmit.value) return
+
+  isLoadingSubmit.value = true
+
+  try {
+    const response = await saveData()
+    isOpenModalConfirmSave.value = false
+  } catch (err: any) {
+    console.log('Error saving data:', err)
+    isOpenModalConfirmSave.value = false
+  } finally {
+    isLoadingSubmit.value = false
+  }
 }
 
 const saveData = async () => {
@@ -103,11 +163,11 @@ const saveData = async () => {
   }
 
   try {
-    const response = await vendorLicenseData.updateData(payload)
-
-  } catch (error) {
-    console.error('Error sending data:', error)
-    alert('An error occurred while sending data.')
+    await vendorLicenseData.updateData(payload)
+    isOpenModalSuccess.value = true
+  } catch (error: any) {
+    console.log(error);
+    isOpenModalError.value = true
   }
 }
 
