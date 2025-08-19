@@ -300,7 +300,7 @@ onMounted(() => {
       :class="tab.active === 'personal_information' ? 'max-w-4xl' : 'max-w-7xl'"
     >
       <div class="modal-header">
-        <h3 class="modal-title text-lg">Experience Data</h3>
+        <h3 class="modal-title text-lg">Expert Personnel Data</h3>
       </div>
 
       <div class="modal-body !py-5 flex flex-col items-center gap-4">
