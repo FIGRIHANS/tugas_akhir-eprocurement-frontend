@@ -23,6 +23,13 @@
         <UiIcon variant="duotone" name="arrow-right" />
       </UiButton>
     </div>
+
+    <!-- modal confirm -->
+
+    <!-- modal success -->
+
+    <!-- modal error -->
+
   </div>
 </template>
 
@@ -32,7 +39,6 @@ import PKPTableView from '@/components/vendor/businessLicenseData/PKPTableView.v
 import { useVendorIzinUsahaStore } from '@/stores/vendor/vendor'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import informationIcon from '@/assets/svg/ic_info_alert.svg'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import type { ILicense, IOtherDocument } from '@/stores/vendor/types/vendor'

@@ -20,19 +20,16 @@ const props = defineProps({
 
 const emit = defineEmits(['update:otherDocuments'])
 
-/** v-model bridge */
 const localOtherDocuments = computed<IOtherDocument[]>({
   get: () => props.otherDocuments,
   set: (newValue) => emit('update:otherDocuments', newValue),
 })
 
-/** File list sinkron dengan baris dokumen (placeholder + status) */
 type FileStatus = 'notUpload' | 'loading' | 'success'
 type FileSlot = { file: File; status: FileStatus }
 const fileOtherDocumentList = ref<FileSlot[]>([])
 const modalUploadFailed = ref(false)
 
-/** Pastikan panjang fileOtherDocumentList == jumlah baris dokumen */
 const ensureFileListLength = () => {
   const need = localOtherDocuments.value.length
   while (fileOtherDocumentList.value.length < need) {
@@ -48,7 +45,6 @@ const ensureFileListLength = () => {
 onMounted(ensureFileListLength)
 watch(() => localOtherDocuments.value.length, ensureFileListLength)
 
-/** Tambah baris dokumen (maks 5) */
 const addAnotherDocument = () => {
   if (localOtherDocuments.value.length >= 5) return
   const updated = [...localOtherDocuments.value]
@@ -63,14 +59,12 @@ const addAnotherDocument = () => {
   emit('update:otherDocuments', updated)
 }
 
-/** Hapus baris + slot filenya */
 const deleteRow = (index: number) => {
   const updated = localOtherDocuments.value.filter((_, i) => i !== index)
   emit('update:otherDocuments', updated)
   fileOtherDocumentList.value.splice(index, 1)
 }
 
-/** Saat user memilih file (belum upload) */
 const onPickFile = (file: File, index: number) => {
   fileOtherDocumentList.value.splice(index, 1, {
     file,
@@ -78,7 +72,6 @@ const onPickFile = (file: File, index: number) => {
   })
 }
 
-/** Klik Upload — kirim ke server via uploadStore */
 const uploadPickedFile = async (index: number) => {
   const slot = fileOtherDocumentList.value[index]
   if (!slot || slot.file.name === 'placeholder.txt') return
@@ -104,7 +97,6 @@ const uploadPickedFile = async (index: number) => {
   }
 }
 
-/** Guard: expiredDate tidak boleh < issuedDate */
 watch(
   () => localOtherDocuments.value,
   (docs) => {
@@ -113,7 +105,7 @@ watch(
       const expired = doc.expiredDate ? new Date(doc.expiredDate as string) : null
       if (issued && expired && expired < issued) {
         const updated = [...docs]
-        updated[i] = { ...updated[i], expiredDate: '' as unknown as null }
+        updated[i] = { ...updated[i], expiredDate: '' as string }
         emit('update:otherDocuments', updated)
       }
     })
