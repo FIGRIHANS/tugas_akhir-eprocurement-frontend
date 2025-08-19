@@ -32,6 +32,11 @@
         @extend .vendor-list__field-base;
         min-width: 200px;
       }
+
+      &--desc {
+        @extend .vendor-list__field-base;
+        min-width: 200px;
+      }
     }
   }
 }

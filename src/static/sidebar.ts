@@ -51,7 +51,7 @@ export default [
   },
   {
     id: 'vendor-tender',
-    title: 'Tender Management',
+    title: 'Tender Vendor Management',
     icon: 'rocket',
     child: [
       {
