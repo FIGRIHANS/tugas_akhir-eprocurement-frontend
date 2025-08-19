@@ -4,7 +4,7 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import UiLoading from '@/components/UiLoading.vue'
-import FilterButton from '@/components/vendor/filterButton/FilterButton.vue'
+import VendorBlacklistFilters from '@/components/vendor/filterButton/VendorBlacklistFilters.vue'
 import FilterDropdownBlacklist from '@/components/vendor/FilterDropdownBlacklist.vue'
 import { formatDate } from '@/composables/date-format'
 import { useBlacklistStore } from '@/stores/vendor/blacklist'
@@ -80,10 +80,8 @@ watch(
       <UiInputSearch placeholder="Cari Vendor" v-model="search" />
       <FilterDropdownBlacklist />
     </div>
-    <div class="card-body">
-      <FilterButton />
-    </div>
     <div class="card-body scrollable-x-auto">
+      <VendorBlacklistFilters />
       <table class="table align-middle">
         <thead>
           <tr class="text-nowrap border-b-2 border-primary">
