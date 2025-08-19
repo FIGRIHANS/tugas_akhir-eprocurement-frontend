@@ -29,14 +29,14 @@
         <table class="table align-middle">
           <thead>
             <tr class="text-nowrap border-b">
-              <th class="flex items-center justify-center"></th>
-              <th>Status</th>
-              <th>Vendor Code</th>
-              <th>Rank</th>
-              <th>Vendor Name</th>
-              <th>Total Score</th>
-              <th>Product Quality</th>
-              <th>Lead Time</th>
+              <th class="flex items-center justify-center !bg-blue-100 !text-blue-500"></th>
+              <th class="!bg-blue-100 !text-blue-500">Status</th>
+              <th class="!bg-blue-100 !text-blue-500">Vendor Code</th>
+              <th class="!bg-blue-100 !text-blue-500">Rank</th>
+              <th class="!bg-blue-100 !text-blue-500">Vendor Name</th>
+              <th class="!bg-blue-100 !text-blue-500">Total Score</th>
+              <th class="!bg-blue-100 !text-blue-500">Product Quality</th>
+              <th class="!bg-blue-100 !text-blue-500">Lead Time</th>
             </tr>
           </thead>
           <tbody>
