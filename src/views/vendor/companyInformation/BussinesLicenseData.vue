@@ -3,16 +3,12 @@
     <PKPTableView v-model:licenses="vendorLicensesPayload" />
     <OtherDocTableView v-model:other-documents="otherDocumentsPayload" />
 
-    <div
-      class="w-full p-4 rounded-lg bg-primary-light border border-primary flex items-center gap-3"
-    >
-      <div>
-        <img :src="informationIcon" alt="" />
-      </div>
-      <div>
-        <ul class="list-disc list-inside text-sm text-primary font-medium">
+    <div class="card bg-primary-light border border-primary">
+      <div class="card-body p-4 flex flex-row items-center gap-4 text-primary">
+        <UiIcon variant="duotone" name="information" class="text-4xl" />
+        <ul class="list-disc list-inside font-medium text-sm">
           <li>Make sure to click the upload button after selecting the document.</li>
-          <li>Fields marked(*) with an asterisk are required</li>
+          <li>Fields marked (*) with an asterisk are required.</li>
         </ul>
       </div>
     </div>
@@ -104,7 +100,6 @@ const saveData = async () => {
 
   try {
     const response = await vendorLicenseData.updateData(payload)
-
   } catch (error) {
     console.error('Error sending data:', error)
     alert('An error occurred while sending data.')

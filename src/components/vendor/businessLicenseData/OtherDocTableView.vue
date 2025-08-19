@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref, computed, type PropType } from 'vue'
+import { ref, computed, type PropType, watch, onMounted } from 'vue'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import UiFileUpload from '@/components/ui/atoms/file-upload/UiFileUpload.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
+import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 import type { IOtherDocument } from '@/stores/vendor/types/vendor'
 import { useUploadStore } from '@/stores/general/upload'
 
@@ -19,175 +20,141 @@ const props = defineProps({
 
 const emit = defineEmits(['update:otherDocuments'])
 
-const localOtherDocuments = computed({
+/** v-model bridge */
+const localOtherDocuments = computed<IOtherDocument[]>({
   get: () => props.otherDocuments,
-  set: (newValue) => {
-    emit('update:otherDocuments', newValue)
+  set: (newValue) => emit('update:otherDocuments', newValue),
+})
+
+/** File list sinkron dengan baris dokumen (placeholder + status) */
+type FileStatus = 'notUpload' | 'loading' | 'success'
+type FileSlot = { file: File; status: FileStatus }
+const fileOtherDocumentList = ref<FileSlot[]>([])
+const modalUploadFailed = ref(false)
+
+/** Pastikan panjang fileOtherDocumentList == jumlah baris dokumen */
+const ensureFileListLength = () => {
+  const need = localOtherDocuments.value.length
+  while (fileOtherDocumentList.value.length < need) {
+    fileOtherDocumentList.value.push({
+      file: new File([''], 'placeholder.txt'),
+      status: 'notUpload',
+    })
+  }
+  if (fileOtherDocumentList.value.length > need) {
+    fileOtherDocumentList.value.splice(need)
+  }
+}
+onMounted(ensureFileListLength)
+watch(() => localOtherDocuments.value.length, ensureFileListLength)
+
+/** Tambah baris dokumen (maks 5) */
+const addAnotherDocument = () => {
+  if (localOtherDocuments.value.length >= 5) return
+  const updated = [...localOtherDocuments.value]
+  updated.push({
+    documentName: '',
+    documentNo: '',
+    description: '',
+    issuedDate: '',
+    expiredDate: '',
+    uploadUrl: '',
+  })
+  emit('update:otherDocuments', updated)
+}
+
+/** Hapus baris + slot filenya */
+const deleteRow = (index: number) => {
+  const updated = localOtherDocuments.value.filter((_, i) => i !== index)
+  emit('update:otherDocuments', updated)
+  fileOtherDocumentList.value.splice(index, 1)
+}
+
+/** Saat user memilih file (belum upload) */
+const onPickFile = (file: File, index: number) => {
+  fileOtherDocumentList.value.splice(index, 1, {
+    file,
+    status: 'notUpload',
+  })
+}
+
+/** Klik Upload — kirim ke server via uploadStore */
+const uploadPickedFile = async (index: number) => {
+  const slot = fileOtherDocumentList.value[index]
+  if (!slot || slot.file.name === 'placeholder.txt') return
+
+  try {
+    fileOtherDocumentList.value[index].status = 'loading'
+    const response = await uploadStore.uploadFile(slot.file, 0)
+
+    if (response?.path) {
+      const updated = [...localOtherDocuments.value]
+      updated[index] = { ...updated[index], uploadUrl: response.path }
+      emit('update:otherDocuments', updated)
+      fileOtherDocumentList.value[index].status = 'success'
+    } else {
+      fileOtherDocumentList.value[index].status = 'notUpload'
+      modalUploadFailed.value = true
+      console.error('Upload gagal: response kosong')
+    }
+  } catch (e) {
+    console.error(e)
+    fileOtherDocumentList.value[index].status = 'notUpload'
+    modalUploadFailed.value = true
+  }
+}
+
+/** Guard: expiredDate tidak boleh < issuedDate */
+watch(
+  () => localOtherDocuments.value,
+  (docs) => {
+    docs.forEach((doc, i) => {
+      const issued = doc.issuedDate ? new Date(doc.issuedDate as any) : null
+      const expired = doc.expiredDate ? new Date(doc.expiredDate as any) : null
+      if (issued && expired && expired < issued) {
+        const updated = [...docs]
+        updated[i] = { ...updated[i], expiredDate: '' as unknown as null }
+        emit('update:otherDocuments', updated)
+      }
+    })
   },
-})
-
-const newDocument = ref<IOtherDocument>({
-  documentName: '',
-  documentNo: '',
-  uploadUrl: '',
-  description: '',
-  issuedDate: null,
-  expiredDate: null,
-})
-
-const showAddForm = ref(false)
-const editingDocIndex = ref<number | null>(null)
-
-const addDocument = () => {
-  if (newDocument.value.documentName && newDocument.value.documentNo) {
-    const updatedArray = [...localOtherDocuments.value, { ...newDocument.value }]
-    emit('update:otherDocuments', updatedArray)
-
-    newDocument.value = {
-      documentName: '',
-      documentNo: '',
-      uploadUrl: '',
-      description: '',
-      issuedDate: null,
-      expiredDate: null,
-    }
-    showAddForm.value = false
-  } else {
-    console.warn('Nama Dokumen dan Nomor Dokumen tidak boleh kosong!')
-  }
-}
-
-const updateDocument = (doc: IOtherDocument, index: number) => {
-  const updatedArray = [...localOtherDocuments.value]
-  updatedArray[index] = { ...doc }
-  emit('update:otherDocuments', updatedArray)
-  editingDocIndex.value = null
-}
-
-const deleteDocument = (index: number) => {
-  const updatedArray = localOtherDocuments.value.filter((_, i) => i !== index)
-  emit('update:otherDocuments', updatedArray)
-  editingDocIndex.value = null
-}
-
-const startEditing = (index: number) => {
-  editingDocIndex.value = index
-}
-
-const cancelEditing = () => {
-  editingDocIndex.value = null
-}
-
-const handleFileUpload = async (file: File, licenseId: string) => {
-  if (!file) {
-    return
-  }
-
-  const uploadResult = await uploadStore.uploadFile(file, 0)
-
-  if (uploadResult) {
-    const index = localOtherDocuments.value.findIndex((item) => String(item.documentNo) === licenseId)
-    if (index !== -1) {
-      const updatedArray = [...localOtherDocuments.value]
-      updatedArray[index] = { ...updatedArray[index], uploadUrl: uploadResult.path }
-      emit('update:otherDocuments', updatedArray)
-    }
-  } else {
-    console.error('File upload failed:')
-  }
-}
-
+  { deep: true },
+)
 </script>
 
 <template>
   <div class="my-6">
     <div class="card">
       <div class="card-body">
-        <h2 class="text-lg font-semibold text-slate-700 mb-4">Other Document</h2>
-
-        <UiButton outline @click="showAddForm = !showAddForm">
-          <UiIcon variant="duotone" name="plus-circle"></UiIcon>
-          {{ showAddForm ? 'Cancel Add Document' : 'Add Document' }}</UiButton
-        >
-
-        <div v-if="showAddForm" class="mt-4 p-4 border rounded-md bg-gray-50">
-          <h3 class="text-md font-semibold mb-3">Add New Document</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label for="newDocName" class="block text-sm font-medium text-gray-700"
-                >Document Name</label
-              >
-              <UiInput
-                id="newDocName"
-                v-model="newDocument.documentName"
-                placeholder="Document Name"
-              />
+        <div class="flex items-center gap-2 mb-2">
+          <h2 class="text-lg font-semibold text-slate-700">Other Documents</h2>
+          <div class="relative">
+            <UiIcon name="information-1" variant="outline" class="text-primary text-xl peer" />
+            <div
+              class="tooltip absolute bg-primary font-medium w-44 p-3 left-1/2 -translate-x-1/2 -top-14 text-[13px] text-center text-white peer-hover:block"
+            >
+              Maximum of 5 Documents Allowed
             </div>
-            <div>
-              <label for="newDocNo" class="block text-sm font-medium text-gray-700"
-                >License Number / Description</label
-              >
-              <UiInput
-                id="newDocNo"
-                v-model="newDocument.documentNo"
-                placeholder="License Number / Description"
-              />
-            </div>
-            <div>
-              <label for="newDocIssuedDate" class="block text-sm font-medium text-gray-700"
-                >Valid From (Start Date)</label
-              >
-              <DatePicker
-                id="newDocIssuedDate"
-                v-model="newDocument.issuedDate as string | Date | null"
-                format="dd MM yyyy"
-                placeholder="Pilih Tanggal"
-              />
-            </div>
-            <div>
-              <label for="newDocExpiredDate" class="block text-sm font-medium text-gray-700"
-                >Valid Until (End Date)</label
-              >
-              <DatePicker
-                id="newDocExpiredDate"
-                v-model="newDocument.expiredDate as string | Date | null"
-                format="dd MM yyyy"
-                placeholder="Pilih Tanggal"
-              />
-            </div>
-            <div class="col-span-full">
-              <label for="newDocUpload" class="block text-sm font-medium text-gray-700"
-                >Document File</label
-              >
-              <UiFileUpload
-                id="newDocUpload"
-                name="otherDocumentFile"
-                accepted-files=".jpg,.jpeg,.png,.pdf"
-                v-model="newDocument.uploadUrl"
-                placeholder="Upload file"
-              />
-            </div>
-            <div class="col-span-full">
-              <label for="newDocDescription" class="block text-sm font-medium text-gray-700"
-                >Description</label
-              >
-              <UiInput
-                id="newDocDescription"
-                v-model="newDocument.description"
-                placeholder="Description"
-              />
-            </div>
-          </div>
-          <div class="mt-4 flex justify-end">
-            <UiButton @click="addDocument">
-              <UiIcon variant="duotone" name="save"></UiIcon>
-              Save Document
-            </UiButton>
           </div>
         </div>
 
-        <div class="mt-6">
-          <table class="table align-middle border">
+        <div class="flex flex-col gap-1 mb-4">
+          <UiButton
+            icon
+            outline
+            class="w-fit px-4 py-2 flex flex-row gap-2 items-center"
+            :disabled="localOtherDocuments.length >= 5"
+            @click="addAnotherDocument"
+          >
+            <i class="ki-filled ki-plus-circle"></i> Add Document
+          </UiButton>
+          <span class="text-danger text-xs"
+            >Must upload Account Statement. Without this document, data will be rejected.</span
+          >
+        </div>
+
+        <div class="mt-2">
+          <table class="table align-middle border text-gray-700 font-medium text-sm">
             <thead>
               <tr>
                 <th class="text-nowrap">Document Name</th>
@@ -198,78 +165,90 @@ const handleFileUpload = async (file: File, licenseId: string) => {
                 <th class="text-nowrap">Action</th>
               </tr>
             </thead>
+
             <tbody>
               <tr v-if="localOtherDocuments.length === 0">
                 <td colspan="6" class="text-center text-gray-500 py-4">
                   No other documents available.
                 </td>
               </tr>
-              <!-- Use localOtherDocuments for iteration -->
-              <tr v-for="(item, index) in localOtherDocuments" :key="index">
-                <td>
+
+              <tr v-for="(_, index) in localOtherDocuments" :key="index">
+                <td class="align-top">
                   <UiInput
-                    v-model="item.documentName"
+                    v-model="localOtherDocuments[index].documentName"
                     placeholder="Document Name"
-                    :disabled="editingDocIndex !== index"
                   />
                 </td>
-                <td>
+                <td class="align-top">
                   <UiInput
-                    v-model="item.documentNo"
+                    v-model="localOtherDocuments[index].documentNo"
                     placeholder="License Number / Description"
-                    :disabled="editingDocIndex !== index"
                   />
                 </td>
-                <td>
+                <td class="align-top">
                   <DatePicker
-                    v-model="item.issuedDate as string | Date | null"
+                    v-model="localOtherDocuments[index].issuedDate"
                     format="dd MM yyyy"
-                    placeholder="Pilih Tanggal"
-                    :disabled="editingDocIndex !== index"
+                    class="!w-48"
                   />
                 </td>
-                <td>
+                <td class="align-top">
                   <DatePicker
-                    v-model="item.expiredDate as string | Date | null"
+                    v-model="localOtherDocuments[index].expiredDate"
                     format="dd MM yyyy"
-                    placeholder="Pilih Tanggal"
-                    :disabled="editingDocIndex !== index"
+                    class="!w-48"
+                    :disabled="localOtherDocuments[index]?.issuedDate ? false : true"
+                    :min-date="localOtherDocuments[index]?.issuedDate"
                   />
                 </td>
-                <td>
+                <td class="align-top">
                   <UiFileUpload
-                    name="otherDocFile"
-                    accepted-files=".jpg,.jpeg,.png,.pdf"
-                    v-model="item.uploadUrl"
-                    placeholder="Upload file"
-                    :disabled="editingDocIndex !== index"
-                     @added-file="(file) => handleFileUpload(file, String(item.licenseId))"
+                    :name="`${index}`"
+                    :text-length="15"
+                    :max-size="16000000"
+                    :placeholder="
+                      fileOtherDocumentList[index]?.file.name === 'placeholder.txt'
+                        ? ''
+                        : fileOtherDocumentList[index]?.file.name
+                    "
+                    accepted-files=".jpg,.jpeg,.png,.pdf,application/zip"
+                    class="w-48"
+                    @addedFile="(file) => onPickFile(file, index)"
+                    @upload-failed="() => (modalUploadFailed = true)"
                   />
+                  <span class="text-danger text-[10px]"
+                    >*jpg, jpeg, png, pdf, zip / max : 16 MB</span
+                  >
                 </td>
-                <td>
-                  <div class="flex gap-2">
-                    <template v-if="editingDocIndex === index">
-                      <UiButton
-                        variant="primary"
-                        @click="updateDocument(item, index)"
-                        size="sm"
-                        class="me-2"
-                      >
-                        <UiIcon variant="duotone" name="check-circle"></UiIcon>
-                      </UiButton>
-                      <UiButton variant="danger" @click="deleteDocument(index)" size="sm">
-                        <UiIcon variant="duotone" name="trash"></UiIcon>
-                      </UiButton>
-                      <UiButton outline @click="cancelEditing()" size="sm" class="ms-2">
-                        <UiIcon variant="duotone" name="times-circle"></UiIcon>
-                      </UiButton>
-                    </template>
-                    <template v-else>
-                      <UiButton outline @click="startEditing(index)" size="sm">
-                        <UiIcon variant="duotone" name="pencil"></UiIcon>
-                      </UiButton>
-                    </template>
-                  </div>
+                <td class="flex flex-row items-center gap-2">
+                  <div
+                    v-if="fileOtherDocumentList?.[index]?.status === 'loading'"
+                    class="rounded-full border-2 size-8 border-primary border-t-primary-light animate-spin text-xs"
+                  ></div>
+                  <UiIcon
+                    v-else-if="fileOtherDocumentList?.[index]?.status === 'success'"
+                    name="check-circle"
+                    variant="filled"
+                    class="text-success text-4xl"
+                  />
+                  <UiButton
+                    v-if="!['loading', 'success'].includes(fileOtherDocumentList?.[index]?.status)"
+                    icon
+                    outline
+                    @click="uploadPickedFile(index)"
+                  >
+                    <i class="ki-filled ki-exit-up"></i>
+                  </UiButton>
+                  <UiButton
+                    v-if="!['loading', 'success'].includes(fileOtherDocumentList?.[index]?.status)"
+                    variant="danger"
+                    icon
+                    outline
+                    @click="deleteRow(index)"
+                  >
+                    <i class="ki-filled ki-cross-circle"></i>
+                  </UiButton>
                 </td>
               </tr>
             </tbody>
@@ -278,4 +257,16 @@ const handleFileUpload = async (file: File, licenseId: string) => {
       </div>
     </div>
   </div>
+
+  <!-- Modal error upload (ukuran > 16MB atau gagal lainnya) -->
+  <ModalConfirmation
+    :open="modalUploadFailed"
+    id="other-doc-upload-error"
+    type="danger"
+    title="Upload Failed"
+    text="File size exceeds the maximum limit of 16 MB. Please choose a smaller file."
+    no-submit
+    static
+    :cancel="() => (modalUploadFailed = false)"
+  />
 </template>
