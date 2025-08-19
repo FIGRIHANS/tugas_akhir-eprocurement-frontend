@@ -124,18 +124,14 @@ const handleFileUpload = async (file: File, licenseId: string) => {
                         @added-file="(file) => handleFileUpload(file, String(item.licenseId))"
                       />
                     </td>
-                    <td>
+                    <td class="flex flex-row items-center gap-2">
                       <template v-if="editingLicenseId === String(item.licenseId)">
-                        <UiButton
-                          variant="primary"
-                          @click="updateLicense(item)"
-                          size="sm"
-                          class="me-2"
-                        >
+                        <UiButton outline @click="updateLicense(item)" size="sm" class="me-2">
                           <UiIcon variant="duotone" name="check-circle"></UiIcon>
                         </UiButton>
                         <UiButton
                           variant="danger"
+                          outline
                           @click="deleteLicense(String(item.licenseId))"
                           size="sm"
                         >

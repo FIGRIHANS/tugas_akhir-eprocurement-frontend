@@ -109,8 +109,8 @@ watch(
   () => localOtherDocuments.value,
   (docs) => {
     docs.forEach((doc, i) => {
-      const issued = doc.issuedDate ? new Date(doc.issuedDate as any) : null
-      const expired = doc.expiredDate ? new Date(doc.expiredDate as any) : null
+      const issued = doc.issuedDate ? new Date(doc.issuedDate as string) : null
+      const expired = doc.expiredDate ? new Date(doc.expiredDate as string) : null
       if (issued && expired && expired < issued) {
         const updated = [...docs]
         updated[i] = { ...updated[i], expiredDate: '' as unknown as null }
@@ -188,18 +188,18 @@ watch(
                 </td>
                 <td class="align-top">
                   <DatePicker
-                    v-model="localOtherDocuments[index].issuedDate"
+                    v-model="localOtherDocuments[index].issuedDate as string | Date | null"
                     format="dd MM yyyy"
                     class="!w-48"
                   />
                 </td>
                 <td class="align-top">
                   <DatePicker
-                    v-model="localOtherDocuments[index].expiredDate"
+                    v-model="localOtherDocuments[index].expiredDate as string | Date | null"
                     format="dd MM yyyy"
                     class="!w-48"
                     :disabled="localOtherDocuments[index]?.issuedDate ? false : true"
-                    :min-date="localOtherDocuments[index]?.issuedDate"
+                    :min-date="localOtherDocuments[index]?.issuedDate as string | Date | undefined"
                   />
                 </td>
                 <td class="align-top">
