@@ -14,11 +14,15 @@
     </div>
     <div class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Invoice Date</p>
-      <p class="font-normal text-sm">{{ form.invoiceDate ? moment(form.invoiceDate).format('YYYYMMDD') : '-' }}</p>
+      <p class="font-normal text-sm">
+        {{ form.invoiceDate ? moment(form.invoiceDate).format('YYYYMMDD') : '-' }}
+      </p>
     </div>
     <div class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Posting Date</p>
-      <p class="font-normal text-sm">{{ form.postingDate ? moment(form.postingDate).format('YYYYMMDD') : '-' }}</p>
+      <p class="font-normal text-sm">
+        {{ form.postingDate ? moment(form.postingDate).format('YYYYMMDD') : '-' }}
+      </p>
     </div>
     <div class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Submitted Document No.</p>
@@ -35,12 +39,14 @@
       <p class="font-normal text-sm">{{ form.invoicingParty || '-' }}</p>
     </div>
     <div v-if="isNonPo" class="flex items-center justify-between gap-[10px]">
-      <p class="font-normal text-sm text-gray-600">Proposal Amount </p>
+      <p class="font-normal text-sm text-gray-600">Proposal Amount</p>
       <p class="font-normal text-sm">{{ '-' }}</p>
     </div>
     <div class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Estimated Payment Date</p>
-      <p class="font-normal text-sm">{{ form.estimatedPaymentDate ? moment(form.estimatedPaymentDate).format('YYYYMMDD') : '-' }}</p>
+      <p class="font-normal text-sm">
+        {{ form.estimatedPaymentDate ? moment(form.estimatedPaymentDate).format('YYYYMMDD') : '-' }}
+      </p>
     </div>
     <div class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Tax Document No.</p>
@@ -97,6 +103,13 @@
 import { ref, inject } from 'vue'
 import type { formTypes } from '../../types/invoiceDetail'
 import moment from 'moment'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+
+const currentRouteName = computed(() => {
+  return route.name
+})
 
 const form = inject<formTypes>('form')
 const isNonPo = ref<boolean>(false)
