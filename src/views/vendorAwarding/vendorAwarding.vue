@@ -13,6 +13,9 @@
         <StepperStatusTender activeName="Vendor Awarding" role="admin" />
       </div>
     </section>
+    <section class="px-5">
+      <AwardingDraft :data="tenderEvoStore.dummyData" />
+    </section>
     <section
       name="table"
       class="border rounded-md mt-[24px] p-[24px] flex flex-col gap-[24px] justify-center bg-white"
@@ -141,6 +144,10 @@ import type { routeTypes } from '@/core/type/components/breadcrumb'
 import { ref } from 'vue'
 import StepperStatusTender from '@/components/stepperStatusTender/StepperStatusTender.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
+import AwardingDraft from '@/views/tenderReportNegotiation/tenderReportNegotiation/AwardingDraft.vue'
+import { useTenderEvoStore } from '@/stores/tender-evo/tenderNegotiation'
+
+const tenderEvoStore = useTenderEvoStore()
 
 const search = ref('')
 const selectedItems = ref<number | null>(null)
