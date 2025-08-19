@@ -204,12 +204,13 @@ export const useVendorIzinUsahaStore = defineStore('vendor-izin-usaha', () => {
 
     try {
       const response = await vendorAPI.post('/public/verifiedvendor/update-license', payload)
-
       if (response.data.statusCode === 200) {
         data.value = response.data.result.content
+        return response.data
       } else {
         error.value = response.data.result.message
         loading.value = false
+        throw new Error(response.data.result.message)
       }
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -217,6 +218,7 @@ export const useVendorIzinUsahaStore = defineStore('vendor-izin-usaha', () => {
       } else {
         error.value = 'Failed to update data'
       }
+      throw err
     } finally {
       loading.value = false
     }
