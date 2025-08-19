@@ -4,24 +4,7 @@
     <div class="btn btn-light btn-sm" v-for="(filter, index) in filteredFilters" :key="index">
       <span class="text-gray-500">{{ filtersKey.find((f) => f.item === filter.key)?.value }}</span>
       <span class="font-semibold">
-        <template v-if="filter.key === 'statusId'">
-          {{ verifStatus.data.find((type) => type.code === filter.value)?.value }}
-        </template>
-
-        <template v-else-if="filter.key === 'categoryId'">
-          {{
-            categories.categories.find((item) => item.companyCategoryId.toString() === filter.value)
-              ?.companyCategoryName
-          }}
-        </template>
-
-        <template v-else>
-          {{
-            filter.key === 'startDate' || filter.key === 'endDate'
-              ? formatDate(filter.key)
-              : filter.value
-          }}
-        </template>
+        {{ filter.value }}
       </span>
       <UiIcon name="cross" @click="handleRemoveFilter(filter.key)" />
     </div>
@@ -33,27 +16,17 @@
 <script lang="ts" setup>
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
-import { formatDate } from '@/composables/date-format'
-import { useVendorCategoryStore } from '@/stores/vendor/category'
-import { useVerificationStatus } from '@/stores/vendor/reference'
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter, type LocationQueryValue } from 'vue-router'
 
 const router = useRouter()
 const route = useRoute()
-const categories = useVendorCategoryStore()
-const verifStatus = useVerificationStatus()
-const filtersKey: { item: string; value: string }[] = [
-  { item: 'statusId', value: 'Status' },
-  { item: 'categoryId', value: 'Category' },
-  { item: 'startDate', value: 'Registration Start Date' },
-  { item: 'endDate', value: 'Registration End Date' },
-]
+const filtersKey: { item: string; value: string }[] = [{ item: 'MasaBlacklist', value: 'Period' }]
 
 const filters = ref<{ key: string; value: LocationQueryValue | LocationQueryValue[] }[]>([])
 
 const filteredFilters = computed(() =>
-  filters.value.filter((filter) => filter.key !== 'page' && filter.key !== 'searchAny'),
+  filters.value.filter((filter) => filter.key !== 'page' && filter.key !== 'searchQuery'),
 )
 
 const handleRemoveFilter = (key: string) => {
