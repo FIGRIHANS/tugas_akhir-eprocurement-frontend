@@ -2,7 +2,9 @@
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 
 type Props = {
-  mode: string
+  id: string
+  title?: string
+  text?: string
 }
 defineProps<Props>()
 </script>
@@ -19,10 +21,10 @@ defineProps<Props>()
           />
         </div>
         <h3 class="text-center text-lg font-medium">
-          Failed to <span class="capitalize">{{ mode }}</span> Vendor Blacklist Request
+          {{ title ?? 'Oops!' }}
         </h3>
         <p class="text-center text-base text-gray-600">
-          Please try again later or contact support if the problem persists.
+          {{ text ?? 'Please try again later or contact support if the problem persists.' }}
         </p>
       </div>
     </div>

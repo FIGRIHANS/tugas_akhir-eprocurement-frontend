@@ -214,8 +214,16 @@ watch(
       @on-error="onError"
     />
 
-    <ModalSuccess :mode="mode" />
+    <ModalSuccess
+      id="modal-success"
+      :title="`Blacklist Vendor Request ${mode === 'approve' ? 'Approved' : 'Rejected'}`"
+      :text="`Blacklist Vendor request has been successfully ${mode === 'approve' ? 'Approved' : 'Rejected'}.`"
+    />
 
-    <ModalError :mode="mode" />
+    <ModalError
+      id="modal-error"
+      :title="`Failed to ${mode} Blacklist Vendor Request`"
+      :text="`Blacklist Vendor request failed to ${mode}.`"
+    />
   </div>
 </template>

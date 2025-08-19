@@ -12,6 +12,10 @@ import { useVendorUploadStore } from '@/stores/vendor/upload'
 import { debounce } from 'lodash'
 import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import ModalRemove from './components/ModalRemove.vue'
+import ModalSuccess from './components/ModalSuccess.vue'
+import ModalError from './components/ModalError.vue'
+import { KTModal } from '@/metronic/core'
 
 const tableCols = [
   'Actions',
@@ -30,6 +34,7 @@ const blacklistStore = useBlacklistStore()
 const uploadStore = useVendorUploadStore()
 
 const search = ref('')
+const selectedId = ref(0)
 
 const handleSearch = debounce((value: string) => {
   const query = { ...route.query }
@@ -56,6 +61,27 @@ const onDownload = async (url: string) => {
   } catch (err) {
     if (err instanceof Error) alert('Failed to download document. Please try again later.')
   }
+}
+
+const openModalRemove = (blacklistId: number) => {
+  selectedId.value = blacklistId
+  const id = document.querySelector('#modal-remove')
+  const modal = KTModal.getInstance(id as HTMLElement)
+  modal.show()
+}
+
+const onSuccess = () => {
+  blacklistStore.getBlacklist(route.query, 1)
+
+  const idModal = document.querySelector('#modal-success')
+  const modal = KTModal.getInstance(idModal as HTMLElement)
+  modal.show()
+}
+
+const onError = () => {
+  const idModal = document.querySelector('#modal-error')
+  const modal = KTModal.getInstance(idModal as HTMLElement)
+  modal.show()
 }
 
 watch(search, handleSearch)
@@ -115,7 +141,7 @@ watch(
             class="text-nowrap"
           >
             <td>
-              <UiButton :outline="true" :icon="true" size="sm">
+              <UiButton outline icon size="sm" @click="openModalRemove(item.blacklistId)">
                 <UiIcon name="check-circle" variant="duotone" />
               </UiButton>
             </td>
@@ -154,5 +180,22 @@ watch(
         @page-change="handlePageChange"
       />
     </div>
+
+    <ModalRemove
+      :id="selectedId"
+      @on-close="selectedId = 0"
+      @on-error="onError"
+      @on-success="onSuccess"
+    />
+    <ModalSuccess
+      id="modal-success"
+      title="Vendor Successfully Removed from Blacklist"
+      text="The Vendor is now active in the system again."
+    />
+    <ModalError
+      id="modal-error"
+      title="Failed to remove vendor from blacklist"
+      text="Remove vendor from Blacklist failed"
+    />
   </div>
 </template>
