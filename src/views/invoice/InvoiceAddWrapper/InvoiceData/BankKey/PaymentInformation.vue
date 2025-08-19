@@ -61,19 +61,24 @@ const checkBank = () => {
     const getIndex = vendorList.value.findIndex((item) => item.sapCode === form?.vendorId)
     if (getIndex !== -1) {
       bankList.value = vendorList.value[getIndex].payment
-      if (bankList.value.length === 1) {
-        form.bankKeyId = bankList.value[0].bankKey
-        form.bankNameId = bankList.value[0].bankName
-        form.beneficiaryName = bankList.value[0].beneficiaryName
-        form.bankAccountNumber = bankList.value[0].accountNumber
-        form.bankCountryCode = bankList.value[0].bankCountryCode
-      } else {
-        form.bankKeyId = ''
-        form.bankNameId = ''
-        form.beneficiaryName = ''
-        form.bankAccountNumber = ''
-        form.bankCountryCode = ''
-      }
+    }
+  }
+}
+
+const setBank = () => {
+  if (form) {
+    if (bankList.value.length === 1) {
+      form.bankKeyId = bankList.value[0].bankKey
+      form.bankNameId = bankList.value[0].bankName
+      form.beneficiaryName = bankList.value[0].beneficiaryName
+      form.bankAccountNumber = bankList.value[0].accountNumber
+      form.bankCountryCode = bankList.value[0].bankCountryCode
+    } else {
+      form.bankKeyId = ''
+      form.bankNameId = ''
+      form.beneficiaryName = ''
+      form.bankAccountNumber = ''
+      form.bankCountryCode = ''
     }
   }
 }
@@ -82,6 +87,7 @@ watch(
   () => [form?.vendorId, vendorList.value],
   () => {
     checkBank()
+    setBank()
   }
 )
 

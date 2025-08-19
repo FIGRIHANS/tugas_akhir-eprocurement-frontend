@@ -83,7 +83,7 @@
             LBMA Ref Date
           </label>
           <span class="text-sm">{{ moment().format('DD.MM.YYYY') }}</span>
-          <button class="btn btn-xs btn-primary">Trend</button>
+          <button class="btn btn-xs btn-primary" @click="openTrend">Trend</button>
         </div>
         <!-- LBMA Ref Price(oz t) -->
         <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
@@ -119,15 +119,19 @@
         </div>
       </div>
     </div>
+    <TrendLbma />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, inject } from 'vue'
+import { ref, watch, inject, defineAsyncComponent } from 'vue'
+import { KTModal } from '@/metronic/core'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import type { FormTypes } from '../../types/tenderCreate'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
 import moment from 'moment'
+
+const TrendLbma = defineAsyncComponent(() => import('./GeneralData/TrendLbma.vue'))
 
 const form = inject<FormTypes>('form')
 const lbmaPriceOz = ref<number>(3362.05)
@@ -186,6 +190,12 @@ const evaluationOption = ref([
     name: 'Safety Tools'
   }
 ])
+
+const openTrend = () => {
+  const idModal = document.querySelector('#trend_lbma_modal')
+  const modal = KTModal.getInstance(idModal as HTMLElement)
+  modal.show()
+}
 
 watch(
   () => form?.tenderPeriod,

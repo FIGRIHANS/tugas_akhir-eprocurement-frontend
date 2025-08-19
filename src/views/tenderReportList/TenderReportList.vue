@@ -142,6 +142,9 @@
                       </div>
                       <div class="menu-item">
                         <div class="menu-link" href="#" @click="goToEvaluation">
+                          <span class="menu-icon">
+                            <i class="ki-duotone ki-file-down"></i>
+                          </span>
                           <span class="menu-title"> Evaluation </span>
                         </div>
                       </div>

@@ -4,7 +4,7 @@
 
     <div class="border rounded-md p-[24px] flex justify-center">
       <!-- Stepper aktif sesuai query ?status= -->
-      <StepperStatusTender :activeName="activeStepName" />
+      <StepperStatusTender :activeName="activeStepName" role="admin" />
     </div>
 
     <TabTender :activeTab="activeTab" class="mt-[24px]" />
@@ -95,11 +95,11 @@ const form = reactive<FormTypes>({
       leadTimeSupply: '90',
       afterSalesWarranty: '70',
       orderAbsorption: '80',
-      totalPo: '1000',
+      totalPo: '120',
       isSelected: false,
-      yearlySpanding: '',
-      currency: '',
-      existingContract: '',
+      yearlySpanding: '3000000',
+      currency: 'USD',
+      existingContract: '3',
     },
   ],
   tenderStartDate: '',
