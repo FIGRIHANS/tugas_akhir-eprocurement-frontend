@@ -10,13 +10,15 @@
         <GeneralDataView />
         <hr class="border-gray-300" />
         <BankKeyView />
+        <hr v-if="checkIsNonPo()" class="border-gray-300" />
+        <OneTimePayment v-if="checkIsNonPo()" />
       </div>
     </div>
     <hr class="border-gray-300" />
     <InvoicePoGrView v-if="checkPo()" />
-    <InvoiceItemView v-if="checkNonPo()" />
+    <InvoiceItemView v-if="checkIsNonPo()" />
     <hr class="border-gray-300" />
-    <AdditionalCostView v-if="form.invoiceDp === '9011' && !checkNonPo()" />
+    <AdditionalCostView v-if="form.invoiceDp === '9011' && !checkIsNonPo()" />
   </div>
 </template>
 
@@ -33,6 +35,7 @@ const AdditionalCostView = defineAsyncComponent(() => import('./InvoicePreview/A
 const InvoiceCalculationView = defineAsyncComponent(() => import('./InvoicePreview/InvoiceCalculationView.vue'))
 const GeneralDataView = defineAsyncComponent(() => import('./InvoicePreview/GeneralDataView.vue'))
 const BankKeyView = defineAsyncComponent(() => import('./InvoicePreview/BankKeyView.vue'))
+const OneTimePayment = defineAsyncComponent(() => import('./InvoicePreview/OneTimePayment.vue'))
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const form = inject<formTypes>('form')
@@ -43,7 +46,7 @@ const checkPo = () => {
   return typeForm.value === 'po' || typeForm.value === 'po-view'
 }
 
-const checkNonPo = () => {
+const checkIsNonPo = () => {
   return typeForm.value === 'nonpo'
 }
 

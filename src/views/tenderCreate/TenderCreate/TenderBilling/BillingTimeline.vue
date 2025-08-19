@@ -21,7 +21,7 @@
             <th
               v-for="(item, index) in columns"
               :key="index"
-              class="criteria__field-base !border-b-blue-500"
+              class="criteria__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"
             >
               {{ item }}
             </th>

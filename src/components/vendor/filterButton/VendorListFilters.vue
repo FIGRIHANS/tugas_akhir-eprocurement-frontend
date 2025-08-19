@@ -18,7 +18,7 @@
         <template v-else>
           {{
             filter.key === 'startDate' || filter.key === 'endDate'
-              ? formatDate(new Date(filter.value as string), 'en-US')
+              ? formatDate(filter.key)
               : filter.value
           }}
         </template>
@@ -33,7 +33,7 @@
 <script lang="ts" setup>
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
-import { formatDate } from '@/core/utils/format'
+import { formatDate } from '@/composables/date-format'
 import { useVendorCategoryStore } from '@/stores/vendor/category'
 import { useVerificationStatus } from '@/stores/vendor/reference'
 import { computed, ref, watch } from 'vue'

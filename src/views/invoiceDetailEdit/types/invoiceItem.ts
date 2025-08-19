@@ -1,19 +1,18 @@
+import type { WhtCodeTypes } from '@/stores/master-data/types/invoiceMasterData' 
 export interface invoiceItemTypes {
   activity: string
-  glAccount: string
-  item: string
-  quantity: string
-  uom: string
+  itemAmount: number
+  itemText: string
+  debitCredit: string
+  taxCode: string
+  vatAmount: number
   costCenter: string
-  costPerUnit: string
-  totalCost: string
+  profitCenter: string
+  assignment: string
   whtType: string
   whtCode: string
-  dpp: string
-  whtValue: string
-  vat: string
-  otherDpp: string
-  amount: string
-  invoiceDueDate: string
+  whtBaseAmount: number
+  whtAmount: number
+  whtCodeList?: WhtCodeTypes[]
   isEdit: boolean
 }

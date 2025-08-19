@@ -39,7 +39,7 @@
           </select>
         </div>
       </div>
-      <!-- right -->
+      <!-- middle -->
       <div class="flex-1">
         <!-- Evaluation Object -->
         <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
@@ -75,14 +75,63 @@
           <textarea v-model="form.remarks" class="textarea" placeholder="" rows="6" :class="{ 'border-danger': form.remarksError }"></textarea>
         </div>
       </div>
+      <!-- right -->
+      <div class="flex-1">
+        <!-- LBMA Ref Date -->
+        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+          <label class="form-label max-w-32 whitespace-nowrap">
+            LBMA Ref Date
+          </label>
+          <span class="text-sm">{{ moment().format('DD.MM.YYYY') }}</span>
+          <button class="btn btn-xs btn-primary" @click="openTrend">Trend</button>
+        </div>
+        <!-- LBMA Ref Price(oz t) -->
+        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+          <label class="form-label max-w-32 whitespace-nowrap">
+            LBMA Ref Price(oz t)
+          </label>
+          <span class="text-sm">{{ useFormatUsd(form.lbmaPriceOz) }}</span>
+          <span class="text-sm">USD</span>
+        </div>
+        <!-- LBMA Ref Price(gr) -->
+        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+          <label class="form-label max-w-32 whitespace-nowrap">
+            LBMA Ref Price(gr)
+          </label>
+          <span class="text-sm">{{ useFormatUsd(form.lbmaPriceOz / 31.1034768) }}</span>
+          <span class="text-sm">USD</span>
+        </div>
+        <!-- BI Middle Exc Rate -->
+        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+          <label class="form-label max-w-32 whitespace-nowrap">
+            BI Middle Exc Rate
+          </label>
+          <span class="text-sm">{{ useFormatIdr(form.biExchangeRate) }}</span>
+          <span class="text-sm">IDR</span>
+        </div>
+        <!-- LBMA Ref Price(gr) -->
+        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+          <label class="form-label max-w-32 whitespace-nowrap">
+            LBMA Ref Price(gr)
+          </label>
+          <span class="text-sm">{{ useFormatIdr(form.biExchangeRate * (form.lbmaPriceOz / 31.1034768)) }}</span>
+          <span class="text-sm">IDR</span>
+        </div>
+      </div>
     </div>
+    <TrendLbma />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, inject } from 'vue'
+import { ref, watch, inject, defineAsyncComponent } from 'vue'
+import { KTModal } from '@/metronic/core'
+import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import type { FormTypes } from '../../types/tenderCreate'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
+import moment from 'moment'
+
+const TrendLbma = defineAsyncComponent(() => import('./GeneralData/TrendLbma.vue'))
 
 const form = inject<FormTypes>('form')
 
@@ -139,6 +188,12 @@ const evaluationOption = ref([
     name: 'Safety Tools'
   }
 ])
+
+const openTrend = () => {
+  const idModal = document.querySelector('#trend_lbma_modal')
+  const modal = KTModal.getInstance(idModal as HTMLElement)
+  modal.show()
+}
 
 watch(
   () => form?.tenderPeriod,

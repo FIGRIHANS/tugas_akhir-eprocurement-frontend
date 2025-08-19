@@ -259,16 +259,18 @@ watch(
         nationality: selectedItem.nationality,
         position: selectedItem.position,
         status: selectedItem.status,
-        certificates: certificates.result.content.map((certi) => ({
-          vendorExpertId: certi.vendorExpertsID,
-          description: certi.description,
-          docUrl: certi.docUrl,
-          endDate: certi.endDate,
-          id: certi.id,
-          isActive: certi.isActive,
-          startDate: certi.startDate,
-          type: certi.type,
-        })),
+        certificates: !certificates.result.isError
+          ? certificates?.result?.content?.map((certi) => ({
+              vendorExpertId: certi.vendorExpertsID,
+              description: certi.description,
+              docUrl: certi.docUrl,
+              endDate: certi.endDate,
+              id: certi.id,
+              isActive: certi.isActive,
+              startDate: certi.startDate,
+              type: certi.type,
+            }))
+          : [],
       }
     }
   },
@@ -298,7 +300,7 @@ onMounted(() => {
       :class="tab.active === 'personal_information' ? 'max-w-4xl' : 'max-w-7xl'"
     >
       <div class="modal-header">
-        <h3 class="modal-title text-lg">Experience Data</h3>
+        <h3 class="modal-title text-lg">Expert Personnel Data</h3>
       </div>
 
       <div class="modal-body !py-5 flex flex-col items-center gap-4">
@@ -338,7 +340,7 @@ onMounted(() => {
             <DatePicker
               v-model="payload.dateOfBirth"
               placeholder="Select"
-              format="dd MM yyyy"
+              format="dd/MM/yyyy"
               label="Date of Birth"
               required
               label-top
@@ -347,6 +349,7 @@ onMounted(() => {
                 payload.dateOfBirth = $event ? new Date($event).toISOString() : ''
               "
               :disabled="mode === 'view'"
+              :max-date="new Date(new Date().setFullYear(new Date().getFullYear() - 17))"
             />
             <span class="form-hint !text-danger">
               {{ payloadError.dateOfBirth ? 'date of birth Required' : '' }}
@@ -463,6 +466,7 @@ onMounted(() => {
                       (c) => c.type === Number(certificate.code),
                     )"
                     :key="`sub-${index}`"
+                    :id="'sub' + index"
                   >
                     <td>
                       <UiButton
@@ -478,16 +482,19 @@ onMounted(() => {
                     <td>
                       <DatePicker
                         v-model="subCertificate.startDate"
+                        format="dd/MM/yyyy"
                         teleport
                         @update:model-value="
                           $event ? (subCertificate.startDate = new Date($event).toISOString()) : ''
                         "
                         :disabled="mode === 'view'"
+                        :max-date="new Date()"
                       />
                     </td>
                     <td>
                       <DatePicker
                         v-model="subCertificate.endDate"
+                        format="dd/MM/yyyy"
                         teleport
                         @update:model-value="
                           $event ? (subCertificate.endDate = new Date($event).toISOString()) : ''
@@ -498,7 +505,6 @@ onMounted(() => {
                     <td>
                       <UiButton
                         outline
-                        size="sm"
                         v-if="mode === 'view'"
                         @click="onDownload(subCertificate.docUrl)"
                       >
@@ -508,11 +514,13 @@ onMounted(() => {
                       <UiFileUpload
                         v-else
                         placeholder="Upload file"
-                        name="docUrl"
+                        :name="`docUrl${index}${subCertificate.type}`"
                         accepted-files=".jpg,.jpeg,.png,.pdf"
                         @added-file="uploadFile($event, index, subCertificate.type)"
+                        @upload-failed="console.log('gagal')"
                         :disabled="uploadLoading"
                         hint-text="*jpg, jpeg, png, pdf, zip / max : 16 MB"
+                        :max-size="16000000"
                       />
                     </td>
                     <td>
