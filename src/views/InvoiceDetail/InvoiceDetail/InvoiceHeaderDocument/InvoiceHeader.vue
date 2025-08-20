@@ -103,13 +103,13 @@
 import { ref, inject } from 'vue'
 import type { formTypes } from '../../types/invoiceDetail'
 import moment from 'moment'
-import { useRoute } from 'vue-router'
+// import { useRoute } from 'vue-router'
 
-const route = useRoute()
+// const route = useRoute()
 
-const currentRouteName = computed(() => {
-  return route.name
-})
+// const currentRouteName = computed(() => {
+//   return route.name
+// })
 
 const form = inject<formTypes>('form')
 const isNonPo = ref<boolean>(false)
