@@ -39,7 +39,7 @@
             <td>{{ item.qcStatus || '-' }}</td>
             <td>{{ item.taxCode || '-' }}</td>
             <td v-if="!checkPoPib()">
-              {{ form.currCode === 'IDR' ? useFormatIdr(item.vatAmount) : useFormatUsd(item.vatAmount) || '-' }}
+              {{ form.currCode === 'IDR' ? useFormatIdr(item.vatAmount) : useFormatUsd(item.vatAmount) || 0 }}
             </td>
             <td>{{ item.whtType || '-' }}</td>
             <td>{{ item.whtCode || '-' }}</td>
