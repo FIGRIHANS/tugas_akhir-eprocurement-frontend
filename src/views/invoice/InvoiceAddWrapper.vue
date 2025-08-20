@@ -132,7 +132,7 @@ const routes = ref<routeTypes[]>([
 const form = reactive<formTypes>({
   invoiceUId: '',
   invoiceType: '901',
-  invoiceTypeName: 'Invoice PO',
+  invoiceTypeName: 'PO',
   vendorId: '',
   vendorName: '',
   npwp: '',

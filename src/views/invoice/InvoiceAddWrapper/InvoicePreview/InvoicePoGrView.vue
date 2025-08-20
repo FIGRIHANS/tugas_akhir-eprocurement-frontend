@@ -28,7 +28,7 @@
             <td v-if="!checkPoPib()">{{ item.conditionTypeDesc || '-' }}</td>
             <td v-if="!checkPoPib()">{{ item.qcStatus || '-' }}</td>
             <td v-if="!checkPoPib()">{{ item.taxCode || '-' }}</td>
-            <td v-if="!checkPoPib()">{{ form.currency === 'IDR' ? useFormatIdr(item.vatAmount || '-') : useFormatUsd(item.vatAmount || '-') }}</td>           
+            <td v-if="!checkPoPib()">{{ form.currency === 'IDR' ? useFormatIdr(item.vatAmount || 0) : useFormatUsd(item.vatAmount || 0) }}</td>           
             <td v-if="!checkPoPib()">{{ item.whtType || '-' }}</td>
             <td v-if="!checkPoPib()">{{ item.whtCode || '-' }}</td>
             <td v-if="!checkPoPib()">{{ form.currency === 'IDR' ? useFormatIdr(item.whtBaseAmount?.toString() || '') : useFormatUsd(item.whtBaseAmount?.toString() || '') }}</td>
