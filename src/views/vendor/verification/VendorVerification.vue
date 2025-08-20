@@ -199,8 +199,13 @@ watch(
     </div>
     <div
       class="card-footer justify-center md:justify-between flex-col md:flex-row gap-3 text-gray-800 text-sm font-medium"
+      v-show="vendor.vendors.items.length"
     >
-      <div>Showing {{ vendor.vendors.pageSize }} of {{ vendor.vendors.total }} entries</div>
+      <div>
+        Showing {{ vendor.vendors.pageSize * (vendor.vendors.page - 1) + 1 }} to
+        {{ vendor.vendors.pageSize * (vendor.vendors.page - 1) + vendor.vendors.items.length }} of
+        {{ vendor.vendors.total }} entries
+      </div>
       <LPagination
         :total-items="Number(vendor.vendors.total)"
         :current-page="Number(vendor.vendors.page)"
