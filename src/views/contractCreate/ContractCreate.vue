@@ -49,7 +49,7 @@ const DocumentInformation = defineAsyncComponent(
 )
 
 /* ===== Tabs ===== */
-const activeTab = ref<string>('document')
+const activeTab = ref<string>('header')
 const tabList = ['purchase', 'vendor', 'admin', 'timeline']
 
 /* ===== Breadcrumb ===== */
