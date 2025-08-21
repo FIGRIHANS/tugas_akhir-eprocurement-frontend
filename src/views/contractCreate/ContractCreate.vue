@@ -23,11 +23,7 @@
         Back
       </button>
       <button class="btn btn-primary" @click="goNext">
-        {{
-          activeTab === 'document'
-            ? 'Publish Contract Request'
-            : 'Next'
-        }}
+        {{ activeTab === 'document' ? 'Publish Contract Request' : 'Next' }}
         <i v-if="activeTab !== 'document'" class="ki-filled ki-black-right"></i>
         <i v-else class="ki-duotone ki-paper-plane"></i>
       </button>
@@ -44,9 +40,13 @@ import Breadcrumb from '@/components/BreadcrumbView.vue'
 import type { routeTypes } from '@/core/type/components/breadcrumb'
 import type { FormTypes } from './types/contractCreate'
 
-const HeaderInformation = defineAsyncComponent(() => import('./ContractCreate/HeaderInformation.vue'))
+const HeaderInformation = defineAsyncComponent(
+  () => import('./ContractCreate/HeaderInformation.vue'),
+)
 const MaterialServices = defineAsyncComponent(() => import('./ContractCreate/MaterialServices.vue'))
-const DocumentInformation = defineAsyncComponent(() => import('./ContractCreate/DocumentInformation.vue'))
+const DocumentInformation = defineAsyncComponent(
+  () => import('./ContractCreate/DocumentInformation.vue'),
+)
 
 /* ===== Tabs ===== */
 const activeTab = ref<string>('header')
@@ -57,7 +57,7 @@ const routes = ref<routeTypes[]>([{ name: 'Create Contract Request', to: '/contr
 
 /* ===== Form (provide ke child) ===== */
 const form = reactive<FormTypes>({
-  title: ''
+  title: '',
 })
 provide('form', form)
 
@@ -66,7 +66,7 @@ const contentComponent = computed<Component>(() => {
   const map: Record<string, Component> = {
     header: HeaderInformation,
     material: MaterialServices,
-    document: DocumentInformation
+    document: DocumentInformation,
   }
   return map[activeTab.value]
 })
