@@ -58,6 +58,23 @@ const routes = ref<routeTypes[]>([{ name: 'Create Contract Request', to: '/contr
 /* ===== Form (provide ke child) ===== */
 const form = reactive<FormTypes>({
   title: '',
+  contractOverview: '',
+  language: '',
+  bindingType: null,
+  supplier: '',
+  totalAmount: '',
+  commodity: '',
+  department: '',
+  agrementType: '',
+  agreementDate: '',
+  costType: '',
+  relationType: '',
+  riskAllocation: '',
+  effectiveDate: '',
+  expirationDate: '',
+  noticePeriod: '',
+  contractReference: '',
+  tenderIdReference: '',
 })
 provide('form', form)
 
