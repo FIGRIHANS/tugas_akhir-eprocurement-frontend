@@ -49,7 +49,7 @@ const MaterialServices = defineAsyncComponent(() => import('./ContractCreate/Mat
 const DocumentInformation = defineAsyncComponent(() => import('./ContractCreate/DocumentInformation.vue'))
 
 /* ===== Tabs ===== */
-const activeTab = ref<string>('header')
+const activeTab = ref<string>('material')
 const tabList = ['purchase', 'vendor', 'admin', 'timeline']
 
 /* ===== Breadcrumb ===== */
