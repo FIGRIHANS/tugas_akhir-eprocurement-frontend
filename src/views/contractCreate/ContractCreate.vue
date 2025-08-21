@@ -4,7 +4,7 @@
 
     <div class="border rounded-md p-[24px] flex justify-center">
       <!-- Stepper aktif sesuai query ?status= -->
-      <StepperStatusGlobal :listStep="listStep" :activeStep="1" />
+      <StepperStatusContract activeName="Create Contract Request" />
     </div>
 
     <TabContract :activeTab="activeTab" class="mt-[24px]" />
@@ -38,11 +38,11 @@
 <script lang="ts" setup>
 import { ref, reactive, computed, provide, defineAsyncComponent, type Component } from 'vue'
 import { KTModal } from '@/metronic/core'
-import StepperStatusGlobal from '@/components/stepperStatusGlobal/StepperStatusGlobal.vue'
+import StepperStatusContract from '@/components/stepperStatusContract/StepperStatusContract.vue'
 import TabContract from '@/components/contract/TabContract.vue'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import type { routeTypes } from '@/core/type/components/breadcrumb'
-import type { FormTypes } from './types/ContractCreate'
+import type { FormTypes } from './types/contractCreate'
 
 const HeaderInformation = defineAsyncComponent(() => import('./ContractCreate/HeaderInformation.vue'))
 const MaterialServices = defineAsyncComponent(() => import('./ContractCreate/MaterialServices.vue'))
@@ -54,34 +54,6 @@ const tabList = ['purchase', 'vendor', 'admin', 'timeline']
 
 /* ===== Breadcrumb ===== */
 const routes = ref<routeTypes[]>([{ name: 'Create Contract Request', to: '/contract/create' }])
-
-/* ===== Step ===== */
-const listStep = ref([
-  {
-    icon: 'ki-duotone ki-document',
-    name: 'Create Contract Request'
-  },
-  {
-    icon: 'ki-duotone ki-paper-plane',
-    name: 'Published'
-  },
-  {
-    icon: 'ki-duotone ki-book-open',
-    name: 'Vendor Feedback'
-  },
-  {
-    icon: 'ki-duotone ki-shield-search',
-    name: 'Contract Finalization'
-  },
-  {
-    icon: 'ki-duotone ki-ranking',
-    name: 'Contract Settlement'
-  },
-  {
-    icon: 'ki-duotone ki-file-deleted',
-    name: 'Contract Close'
-  }
-])
 
 /* ===== Form (provide ke child) ===== */
 const form = reactive<FormTypes>({
