@@ -1,4 +1,4 @@
-
+import type { TableItemTypes } from './purchaseRequisitionList'
 
 export interface FormTypes {
   title: string
