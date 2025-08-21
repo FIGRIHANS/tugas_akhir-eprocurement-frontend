@@ -27,71 +27,111 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="data of form?.requisitionList" :key="data.id">
+          <tr v-for="data of dummyData" :key="data.id">
             <td>
               <input v-model="data.isSelected" class="checkbox" type="checkbox" />
             </td>
-            <td>{{ data.purchaseRequisitionNo }}</td>
-            <td>{{ data.sourcingType }}</td>
-            <td>{{ moment(data.deliveryDate).format('DD MMM YYYY') }}</td>
-            <td>{{ data.plant }}</td>
-            <td>{{ data.materialGroup }}</td>
-            <td>{{ data.itemNo }}</td>
-            <td>{{ data.material }}</td>
-            <td>{{ data.materialDescription }}</td>
-            <td>{{ useFormatIdr(data.quantity) }}</td>
+            <td>{{ data.materialNo }}</td>
+            <td>{{ data.materialDesc }}</td>
+            <td>{{ data.quantity }}</td>
             <td>{{ data.uom }}</td>
-            <td>
-              {{
-                data.currency === 'IDR'
-                  ? useFormatIdr(data.bottomPrice)
-                  : useFormatUsd(data.bottomPrice)
-              }}
-            </td>
+            <td>{{ useFormatUsd(data.totalAmountUsd) }}</td>
+            <td>{{ useFormatUsd(data.pricePerUnitUsd) }}</td>
             <td>{{ data.currency }}</td>
+            <td>{{ useFormatIdr(data.totalAmountIDR) }}</td>
+            <td>{{ useFormatIdr(data.pricePerUnitIDR) }}</td>
+            <td>{{ data.localCurrency }}</td>
+            <td>{{ data.plant }}</td>
+            <td>{{ data.vendorMaterialNo }}</td>
           </tr>
         </tbody>
       </table>
     </div>
-    <!-- <div class="mt-[24px] text-sm">
-      Tampilkan {{ form?.requisitionList.length }} data dari total data
-      {{ form?.requisitionList.length }}
-    </div> -->
+    <div class="mt-[24px] text-sm">
+      Tampilkan {{ dummyData.length }} data dari total data
+      {{ dummyData.length }}
+    </div>
     <AddSourcingRequisitionModal @setData="setData" />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, inject, defineAsyncComponent } from 'vue'
+import { ref, reactive, defineAsyncComponent } from 'vue'
 import { KTModal } from '@/metronic/core'
-import moment from 'moment'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
-import type { FormTypes } from '../types/contractCreate'
-import type { TableItemTypes } from '../types/purchaseRequisitionList'
-import type { SourcingRequestitionTypes } from '../types/purchaseRequisitionList'
+import type { MaterialServiceItem } from '../types/materialServices'
 
 const AddSourcingRequisitionModal = defineAsyncComponent(
   () => import('./TableItem/AddSourcingRequisitionModal.vue'),
 )
 
-const form = inject<FormTypes>('form')
-console.log(form)
 const search = ref<string>('')
 
 const columns = reactive<string[]>([
   '',
-  'PR NO',
-  'Sourcing Type',
-  'Delivery Date',
-  'Plant',
-  'Material Group',
-  'Item No',
-  'Material',
+  'Material No',
   'Material Desc',
-  'Quantity',
+  'Qty',
   'UOM',
-  'Bottom Price (LBMA)',
+  'Total Amount',
+  'Price per Unit',
   'Currency',
+  'Total Amount',
+  'Price per Unit',
+  'Local Currency',
+  'Plant',
+  'Vendor Material No',
+])
+
+const dummyData = ref<MaterialServiceItem[]>([
+  {
+    id: 1,
+    materialNo: 'AURM4',
+    materialDesc: 'Aurum Product 4',
+    quantity: 30,
+    uom: 'Oz t',
+    totalAmountUsd: 100861,
+    pricePerUnitUsd: 3362,
+    currency: 'USD',
+    totalAmountIDR: 1613776000,
+    pricePerUnitIDR: 53792533,
+    localCurrency: 'IDR',
+    plant: 'CH 2',
+    vendorMaterialNo: 'AURM5X1',
+    isSelected: false,
+  },
+  {
+    id: 2,
+    materialNo: 'AURM5',
+    materialDesc: 'Aurum Product 5',
+    quantity: 30,
+    uom: 'Oz t',
+    totalAmountUsd: 100861,
+    pricePerUnitUsd: 3362,
+    currency: 'USD',
+    totalAmountIDR: 1613776000,
+    pricePerUnitIDR: 53792533,
+    localCurrency: 'IDR',
+    plant: 'CH 2',
+    vendorMaterialNo: 'AURM5X2',
+    isSelected: false,
+  },
+  {
+    id: 3,
+    materialNo: 'AURM6',
+    materialDesc: 'Aurum Product 6',
+    quantity: 30,
+    uom: 'Oz t',
+    totalAmountUsd: 100861,
+    pricePerUnitUsd: 3362,
+    currency: 'USD',
+    totalAmountIDR: 1613776000,
+    pricePerUnitIDR: 53792533,
+    localCurrency: 'IDR',
+    plant: 'CH 2',
+    vendorMaterialNo: 'AURM5X3',
+    isSelected: false,
+  },
 ])
 
 const openAddSourcingRequisition = () => {
@@ -100,28 +140,8 @@ const openAddSourcingRequisition = () => {
   modal.show()
 }
 
-const setData = (dataVendor: SourcingRequestitionTypes[]) => {
-  if (!form) return
-  for (const item of dataVendor) {
-    const data = {
-      id: (form.requisitionList.length + 1).toString(),
-      purchaseRequisitionNo: item.purchaseRequisitionNo,
-      sourcingType: item.sourcingType,
-      deliveryDate: item.deliveryDate,
-      plant: item.plant,
-      materialGroup: item.materialGroup,
-      itemNo: item.itemNo,
-      material: item.material,
-      materialDescription: item.materialDescription,
-      quantity: item.quantity,
-      bottomPrice: item.quantity * form.lbmaPriceOz,
-      uom: item.uom,
-      currency: item.currency,
-      isSelected: false,
-    } as TableItemTypes
-
-    form.requisitionList.push(data)
-  }
+const setData = (data: unknown[]) => {
+  console.log(data)
 }
 </script>
 
