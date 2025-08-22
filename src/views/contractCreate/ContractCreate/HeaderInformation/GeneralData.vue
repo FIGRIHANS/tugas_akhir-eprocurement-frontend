@@ -206,7 +206,7 @@ const TenderIdReferenceModal = defineAsyncComponent(() => import('./GeneralData/
 
 const form = inject<FormTypes>('form')
 
-const languageList = ref<string[]>(['Bahasa', 'Englist'])
+const languageList = ref<string[]>(['Bahasa', 'English'])
 const bindingTypeList = ref<defaultTypes[]>([
   {
     id: 1,
@@ -224,43 +224,55 @@ const bindingTypeList = ref<defaultTypes[]>([
 const supplierList = ref<defaultTypes[]>([
   {
     id: '1',
-    name: 'Supplier 1'
+    name: 'PT Walldorf Tbk'
   },
   {
     id: '2',
-    name: 'Supplier 2'
+    name: 'PT Sommer GmbH Tbk'
   },
   {
     id: '3',
-    name: 'Supplier 3'
+    name: 'PT Kreutzschmid KgaA Tbk'
   }
 ])
 const commodityList = ref<defaultTypes[]>([
   {
     id: '1',
-    name: 'Commodity 1'
+    name: 'Raw Material Pharma'
   },
   {
     id: '2',
-    name: 'Commodity 2'
+    name: 'Laboratory'
   },
   {
     id: '3',
-    name: 'Commodity 3'
+    name: 'Office Supplies'
+  },
+  {
+    id: '4',
+    name: 'Packaging Material'
   }
 ])
 const departmentList = ref<defaultTypes[]>([
   {
     id: '1',
-    name: 'Department 1'
+    name: 'Production'
   },
   {
     id: '2',
-    name: 'Department 2'
+    name: 'R&D'
   },
   {
     id: '3',
-    name: 'Department 3'
+    name: 'Finance & Accounting'
+  },
+  {
+    id: '4',
+    name: 'Asset Maintenance'
+  },
+  {
+    id: '5',
+    name: 'HRGA'
   }
 ])
 const aggrementTypeList = ref<defaultTypes[]>([
