@@ -1,0 +1,65 @@
+:deep() {
+  .calculation {
+    &__last-field {
+      background-color: #EFF6FF;
+      color: #006AE6;
+      border-bottom-right-radius: 12px;
+      border-bottom-left-radius: 12px;
+      @apply font-bold;
+    }
+  }
+
+  .invoice {
+    &__table {
+      overflow-x: scroll;
+      padding-bottom: 4px;
+
+      &::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+        background: transparent;
+      }
+      
+      &::-webkit-scrollbar-thumb {
+        width: 10px;
+        height: 10px;
+        border-radius: 15px;
+        background-color: #DBDFE9;
+      }
+    }
+
+    &__field-base {
+      min-width: 150px;
+      white-space: nowrap;
+      @apply px-[20px] !important;
+      @apply py-[13px] !important;
+
+      &--line {
+        @extend .invoice__field-base;
+        min-width: 80px;
+      }
+
+      &--activity {
+        @extend .invoice__field-base;
+        min-width: 200px;
+      }
+
+      &--item-amount {
+        @extend .invoice__field-base;
+        min-width: 200px;
+      }
+    }
+  
+    &__field-items {
+      td {
+        @apply px-[16px] !important;
+        @apply py-[7px] !important;
+      }
+    }
+  }
+
+  .table-head {
+    padding: 13px 8px !important;
+    min-width: 130px;
+  }
+}
