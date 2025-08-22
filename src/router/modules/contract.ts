@@ -8,5 +8,5 @@ export default [
     path: '/contract/create',
     name: 'contractCreate',
     component: () => import('@/views/contractCreate/ContractCreate.vue'),
-  }
+  },
 ]

@@ -1,0 +1,368 @@
+<template>
+  <div>
+    <p class="mb-[16px] font-semibold text-base">Requisition Header</p>
+    <div v-if="form">
+      <!-- Invoice Type -->
+      <div
+        v-if="checkPo() || checkIsNonPo()"
+        class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+      >
+        <label class="form-label">
+          Requisition Type
+          <span
+            v-if="
+              (form.status === 0 || form.status === -1 || form.status === 5) && !loginApi.isVendor
+            "
+            class="text-red-500 ml-[4px]"
+            >*</span
+          >
+        </label>
+        <!-- <template v-if="checkIsNonPo()">
+          <select
+            v-model="form.invoiceType"
+            class="select"
+            :class="{ 'border-danger': form.invoiceTypeError }"
+          >
+            <option v-for="item of invoiceTypeNonPo" :key="item.id" :value="item.id">
+              {{ item.name }}
+            </option>
+          </select>
+        </template> -->
+        <!-- <template v-else> -->
+        <!-- <input
+          v-if="(form.status !== 0 && form.status !== -1) || loginApi.isVendor"
+          v-model="form.invoiceTypeName"
+          class="input"
+          placeholder=""
+          disabled
+        /> -->
+        <select
+          v-model="form.invoiceType"
+          class="select"
+          :class="{ 'border-danger': form.invoiceTypeError }"
+          @change="removeDpValue()"
+        >
+          <option v-for="item of listInvoiceTypePo" :key="item.code" :value="item.code">
+            {{ item.name }}
+          </option>
+        </select>
+        <!-- </template> -->
+      </div>
+      <!-- Vendor No -->
+      <div v-if="checkIsNonPo()" class="flex items-baseline flex-wrap lg:flex-nowrap py-[8px]">
+        <label class="form-label">
+          Vendor No.
+          <span class="text-red-500 ml-[4px]">*</span>
+        </label>
+        <input v-model="form.vendorId" class="input" placeholder="" disabled />
+      </div>
+      <!-- DP Option -->
+      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          Source Type
+          <span class="text-red-500 ml-[4px]">*</span>
+        </label>
+        <select
+          v-model="form.invoiceDp"
+          class="select"
+          :class="{ 'border-danger': form.invoiceDpError }"
+        >
+          <option v-for="item of dpTypeList" :key="item.code" :value="item.code">
+            {{ item.name }}
+          </option>
+        </select>
+      </div>
+      <!-- Company Code -->
+      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          Company Code
+          <span class="text-red-500 ml-[4px]">*</span>
+        </label>
+        <select
+          v-model="form.companyCode"
+          class="select"
+          :class="{ 'border-danger': form.companyCodeError }"
+        >
+          <option v-for="item of companyCodeList" :key="item.code" :value="item.code">
+            {{ item.name }}
+          </option>
+        </select>
+      </div>
+      <!-- Submitted Document No. -->
+      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label"> Submitted Document No. </label>
+        <input
+          v-model="form.invoiceNo"
+          class="input"
+          placeholder="Auto Generated Number"
+          disabled
+        />
+      </div>
+      <!-- Invoice Document No. * -->
+      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          Remarks.
+          <span class="text-red-500 ml-[4px]">*</span>
+        </label>
+        <input
+          v-model="form.invoiceNoVendor"
+          class="input"
+          placeholder=""
+          :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
+          :class="{ 'border-danger': form.invoiceNoVendorError }"
+        />
+      </div>
+      <!-- Invoice Date -->
+      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          Requisition Date
+          <span class="text-red-500 ml-[4px]">*</span>
+        </label>
+        <DatePicker
+          v-model="form.invoiceDate"
+          format="yyyyMMdd"
+          :error="form.invoiceDateError"
+          :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
+          class="w-full -ml-[15px]"
+        />
+      </div>
+      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          Purchasing Group
+          <span class="text-red-500 ml-[4px]">*</span>
+        </label>
+        <select
+          v-model="form.purchasingGroup"
+          class="select"
+          :class="{ 'border-danger': form.companyCodeError }"
+        >
+          <option v-for="item of purchasingGroupList" :key="item.code" :value="item.code">
+            {{ item.name }}
+          </option>
+        </select>
+      </div>
+
+      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          Requisition Code
+          <span class="text-red-500 ml-[4px]">*</span>
+        </label>
+        <select
+          v-model="form.RequisitionCode"
+          class="select"
+          :class="{ 'border-danger': form.companyCodeError }"
+        >
+          <option v-for="item of requisitionCodeList" :key="item.code" :value="item.code">
+            {{ item.name }}
+          </option>
+        </select>
+      </div>
+      <!-- Tax Document No. * -->
+      <div
+        v-if="form.invoiceType != '903'"
+        class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+      >
+        <label class="form-label"> Tax Document No. </label>
+        <input
+          v-model="form.taxNoInvoice"
+          class="input"
+          placeholder=""
+          :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
+          :class="{ 'border-danger': form.taxNoInvoiceError }"
+        />
+      </div>
+      <!-- Currency -->
+      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label"> Currency </label>
+        <input
+          v-if="form.status !== 0 && form.status !== -1 && form.status !== 5"
+          v-model="form.currency"
+          class="input"
+          placeholder=""
+          disabled
+        />
+        <select
+          v-else
+          v-model="form.currency"
+          class="select"
+          :class="{ 'border-danger': form.currencyError }"
+        >
+          <option v-for="item of currencyList" :key="item.code" :value="item.code">
+            {{ item.code }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Description -->
+      <div
+        v-if="form.invoiceType != '903'"
+        class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+      >
+        <label class="form-label">
+          Description
+          <span class="text-red-500 ml-[4px]">*</span>
+        </label>
+        <textarea
+          v-model="form.description"
+          class="textarea"
+          placeholder=""
+          :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
+          :class="{ 'border-danger': form.descriptionError }"
+        ></textarea>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script lang="ts" setup>
+import { ref, computed, onMounted, watch, inject } from 'vue'
+import { useRoute } from 'vue-router'
+import type { formTypes } from '../../../types/invoiceAddWrapper'
+import DatePicker from '@/components/datePicker/DatePicker.vue'
+import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
+import { useLoginStore } from '@/stores/views/login'
+
+const invoiceMasterApi = useInvoiceMasterDataStore()
+const loginApi = useLoginStore()
+const form = inject<formTypes>('form')
+const route = useRoute()
+const typeForm = ref<string>('')
+
+// const invoiceTypeNonPo = ref([
+//   {
+//     id: '1',
+//     name: 'Reimbursement',
+//   },
+//   {
+//     id: '2',
+//     name: 'Credit Card',
+//   },
+//   {
+//     id: '3',
+//     name: 'CAS',
+//   },
+//   {
+//     id: '4',
+//     name: 'LBA',
+//   },
+//   {
+//     id: '5',
+//     name: 'Petty Cash',
+//   },
+// ])
+
+const currencyList = computed(() => {
+  return invoiceMasterApi.currency
+  // if (form?.invoicePoGr.length === 0 || !form?.invoicePoGr) {
+  //   return []
+  // } else {
+  //   const result = []
+  //   for (const item of form.invoicePoGr) {
+  //     const check = invoiceMasterApi.currency.findIndex((subItem) => subItem.code === item.currency)
+  //     if (check !== -1) result.push(item.currency)
+  //   }
+  //   return result
+  // }
+})
+const companyCodeList = computed(() => invoiceMasterApi.companyCode)
+const dpTypeList = ref([
+  {
+    code: '1',
+    name: 'Tender',
+  },
+  {
+    code: '2',
+    name: 'Non Tender',
+  },
+])
+const listInvoiceTypePo = ref([
+  {
+    code: '1',
+    name: 'Standart Requisition',
+  },
+  {
+    code: '2',
+    name: 'Project Requisition',
+  },
+])
+
+const purchasingGroupList = ref([
+  {
+    code: '1',
+    name: 'PG01',
+  },
+  {
+    code: '2',
+    name: 'PG02',
+  },
+])
+
+const requisitionCodeList = ref([
+  {
+    code: 'PROD1',
+    name: 'PROD1 - Production Area 1',
+  },
+  {
+    code: 'PROD2',
+    name: 'PROD2 - Production Area 2',
+  },
+  {
+    code: 'PROD3',
+    name: 'PROD3 - Production Area 3',
+  },
+  {
+    code: 'PROD4',
+    name: 'PROD4 - Production Area 4',
+  },
+  {
+    code: 'ASSET1',
+    name: 'PROD1 - Asset Maintance Area 1',
+  },
+])
+
+const checkPo = () => {
+  return typeForm.value === 'po'
+}
+
+const checkIsNonPo = () => {
+  return route.query.type === 'nonpo'
+}
+
+const removeDpValue = () => {
+  if (form && form?.invoiceType !== '901') {
+    form.invoiceDp = ''
+  }
+}
+
+watch(
+  () => form,
+  () => {
+    if (form?.invoiceType) {
+      const getIndex = listInvoiceTypePo.value.findIndex((item) => item.code === form.invoiceType)
+      if (getIndex !== -1) form.invoiceTypeName = listInvoiceTypePo.value[getIndex].name
+    }
+
+    if (form?.companyCode) {
+      const getIndex = companyCodeList.value.findIndex((item) => item.code === form.companyCode)
+      if (getIndex !== -1) form.companyName = companyCodeList.value[getIndex].name.split(' - ')[1]
+    }
+  },
+  {
+    deep: true,
+  },
+)
+
+watch(
+  () => form?.companyCode,
+  () => {
+    invoiceMasterApi.getActivity(form?.companyCode || '')
+  },
+)
+
+onMounted(() => {
+  typeForm.value = route.query.type?.toString().toLowerCase() || 'po'
+  invoiceMasterApi.getCurrency()
+  invoiceMasterApi.getCompanyCode()
+  invoiceMasterApi.getDpTypes()
+})
+</script>

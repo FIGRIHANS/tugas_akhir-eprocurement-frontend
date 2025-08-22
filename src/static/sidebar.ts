@@ -62,6 +62,23 @@ export default [
     ],
   },
   {
+    id: 'requisition',
+    title: 'Requisition',
+    icon: 'rocket',
+    child: [
+      {
+        id: 'requission-list',
+        title: 'Requisition List',
+        to: 'requissionList',
+      },
+      {
+        id: 'requission-add',
+        title: 'Create Requisition',
+        to: 'requisitionAdd',
+      },
+    ],
+  },
+  {
     id: 'contract',
     title: 'Contract Lifecycle Management',
     icon: 'rocket',
