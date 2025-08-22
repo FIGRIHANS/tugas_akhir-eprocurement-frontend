@@ -100,7 +100,7 @@
           </table>
         </div>
         <div class="flex flex-row-reverse align-items-center gap-[8px] mt-[24px]">
-          <button class="btn btn-primary" @click="saveUpdate">Confirm</button>
+          <button class="btn btn-primary" @click="saveUpdate">Adopt</button>
           <button class="btn btn-outline btn-primary" @click="hide">Cancel</button>
         </div>
       </div>
