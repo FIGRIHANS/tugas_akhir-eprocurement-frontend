@@ -1,54 +1,65 @@
 <template>
-  <div class="relative w-full">
+  <div
+    :class="[
+      'relative',
+      {
+        'flex items-center flex-wrap lg:flex-nowrap gap-2.5': row,
+      },
+    ]"
+  >
     <label
-      class="absolute -top-[10px] left-3 text-gray-500 text-sm bg-white px-1"
+      v-if="label && !row"
+      class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px]"
     >
       {{ label }}
-      <span v-if="required" class="text-red-500">*</span>
+      <span v-if="required" class="text-danger"> * </span>
     </label>
-    <textarea
-      v-model="textValue"
-      :placeholder="placeholder"
-      :disabled="disabled"
-      :class="{
-        'border-danger': error,
-        'border-gray-300': !error
-      }"
-      class="w-full h-32 p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-    ></textarea>
+    <div v-else-if="label && row" class="form-label w-2/5">
+      <label class="" :class="{ 'flex items-center gap-1': required }">
+        {{ label }}
+        <span v-if="required" class="text-danger"> * </span>
+      </label>
+    </div>
+    <div class="flex flex-col w-full gap-1">
+      <textarea
+        v-model="model"
+        class="input h-[150px]"
+        :class="{ 'border-danger': error }"
+        :placeholder="placeholder"
+        :readonly="readonly"
+        :disabled="disabled"
+        :maxlength="maxLength"
+      ></textarea>
+      <span v-if="hintText" class="form-hint !text-danger">{{ hintText }}</span>
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, watch } from 'vue'
+import { defineModel } from 'vue'
+// import type { IInputProps } from './types/input'
 
-const props = defineProps<{
-  modelValue: string
-  label: string
+interface ITextAreaProps {
+  label?: string
   placeholder?: string
+  readonly?: boolean
   disabled?: boolean
-  error?: boolean
+  row?: boolean
   required?: boolean
-}>()
+  error?: boolean
+  maxLength?: number | string
+  hintText?: string
+}
 
-const emits = defineEmits(['update:modelValue'])
+withDefaults(defineProps<ITextAreaProps>(), {
+  placeholder: '',
+  readonly: false,
+  disabled: false,
+  row: false,
+  required: false,
+  error: false,
+  type: 'text',
+})
 
-const textValue = ref<string>('')
-
-watch(
-  () => props.modelValue,
-  () => {
-    textValue.value = props.modelValue
-  },
-  {
-    immediate: true
-  }
-)
-
-watch(
-  () => textValue.value,
-  () => {
-    emits('update:modelValue', textValue.value)
-  }
-)
+const model = defineModel()
 </script>

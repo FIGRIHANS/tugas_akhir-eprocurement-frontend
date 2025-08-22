@@ -30,7 +30,7 @@
 <script setup lang="ts">
 import UiIcon from '../ui/atoms/icon/UiIcon.vue'
 
-const props = defineProps<{
+defineProps<{
   listStep: {
     icon: string
     name: string

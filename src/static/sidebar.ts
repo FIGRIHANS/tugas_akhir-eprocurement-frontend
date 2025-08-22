@@ -62,6 +62,23 @@ export default [
     ],
   },
   {
+    id: 'contract',
+    title: 'Contract Lifecycle Management',
+    icon: 'rocket',
+    child: [
+      {
+        id: 'contract-list',
+        title: 'Contract List',
+        to: 'contractList',
+      },
+      {
+        id: 'contract-request',
+        title: 'Contract Request',
+        to: 'contractCreate',
+      },
+    ],
+  },
+  {
     id: 'vendor-management',
     title: 'Vendor Management',
     icon: 'users',
