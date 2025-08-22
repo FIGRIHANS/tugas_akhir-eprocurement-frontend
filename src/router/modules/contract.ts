@@ -1,9 +1,9 @@
 export default [
-  // {
-  //   path: '/contract',
-  //   name: 'contractList',
-  //   // component: () => import('@/views/prCentralMonitoring/prCentralMonitoring.vue'),
-  // },
+  {
+    path: '/contract',
+    name: 'contractList',
+    component: () => import('@/views/contractList/ContractList.vue'),
+  },
   {
     path: '/contract/create',
     name: 'contractCreate',
