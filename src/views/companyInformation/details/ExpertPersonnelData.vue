@@ -80,8 +80,8 @@
                 </thead>
                 <tbody>
                   <tr v-for="data in dataFileYearsofExp" :key="data.id">
-                    <td>{{ data.description || '-' }}</td>
-                    <td>
+                    <td class="w-1/2">{{ data.description || '-' }}</td>
+                    <td class="w-1/2">
                       <AttachmentView
                         v-if="data.docUrl"
                         class="cursor-pointer"
@@ -114,8 +114,8 @@
                 </thead>
                 <tbody>
                   <tr v-for="data in dataFileEducation" :key="data.id">
-                    <td>{{ data.description || '-' }}</td>
-                    <td>
+                    <td class="w-1/2">{{ data.description || '-' }}</td>
+                    <td class="w-1/2">
                       <AttachmentView
                         v-if="data.docUrl"
                         class="cursor-pointer"
@@ -148,8 +148,8 @@
                 </thead>
                 <tbody>
                   <tr v-for="data in dataFileCertificate" :key="data.id">
-                    <td>{{ data.description || '-' }}</td>
-                    <td>
+                    <td class="w-1/2">{{ data.description || '-' }}</td>
+                    <td class="w-1/2">
                       <AttachmentView
                         v-if="data.docUrl"
                         class="cursor-pointer"
