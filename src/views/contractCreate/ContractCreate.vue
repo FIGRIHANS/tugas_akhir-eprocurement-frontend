@@ -49,8 +49,8 @@ const DocumentInformation = defineAsyncComponent(
 )
 
 /* ===== Tabs ===== */
-const activeTab = ref<string>('material')
-const tabList = ['purchase', 'vendor', 'admin', 'timeline']
+const activeTab = ref<string>('header')
+const tabList = ['header', 'material', 'document']
 
 /* ===== Breadcrumb ===== */
 const routes = ref<routeTypes[]>([{ name: 'Create Contract Request', to: '/contract/create' }])
