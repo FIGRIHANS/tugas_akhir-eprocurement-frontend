@@ -62,52 +62,33 @@ const errors = reactive({
   notaryLocation: '',
 })
 
+/* ===== UI helpers: tombol dinamis ===== */
+const isEditing = computed(() => mode.value === 'edit' || vendorAmendmentPayload.id > 0)
+const submitLabel = computed(() => (isEditing.value ? 'Update' : 'Add'))
+const submitIcon = computed(() => (isEditing.value ? 'notepad-edit' : 'plus-circle'))
+
+/* ===== Validasi & util ===== */
 const validateForm = () => {
   let isValid = true
   errors.documentNo = ''
   errors.notaryName = ''
   errors.documentURL = ''
+  errors.documentDate = ''
   errors.notaryLocation = ''
 
   if (!vendorAmendmentPayload.documentNo) {
-    errors.documentNo = 'Document no is required'
-    isValid = false
+    errors.documentNo = 'Document no is required'; isValid = false
   }
   if (!vendorAmendmentPayload.notaryName) {
-    errors.notaryName = 'Notary name is required'
-    isValid = false
+    errors.notaryName = 'Notary name is required'; isValid = false
   }
   if (!vendorAmendmentPayload.documentURL) {
-    errors.documentURL = 'Document URL is required'
-    isValid = false
+    errors.documentURL = 'Document URL is required'; isValid = false
   }
   if (!vendorAmendmentPayload.notaryLocation) {
-    errors.notaryLocation = 'Notary location is required'
-    isValid = false
+    errors.notaryLocation = 'Notary location is required'; isValid = false
   }
-
-  console.log(errors)
-
   return isValid
-}
-
-const onUploadFile = async (file: File) => {
-  if (!file) return
-  const formData = new FormData()
-  formData.append('FormFile', file)
-  formData.append('Actioner', userLoginStore.userData?.profile.profileId.toString() || '0')
-  try {
-    const response = await uploadStore.upload(formData)
-
-    vendorAmendmentPayload.filename = response?.name as string
-    vendorAmendmentPayload.documentURL = response?.path as string
-    vendorAmendmentPayload.filesize = file.size
-    errors.documentURL = ''
-  } catch (err) {
-    if (err instanceof Error) {
-      alert('File upload failed, please try again')
-    }
-  }
 }
 
 const resetForm = () => {
@@ -127,12 +108,30 @@ const resetForm = () => {
     isTemporary: true,
     refVendorId: 0,
     action: 0,
-  })
+  } as IVendorLegalDocumentPayload)
+  mode.value = 'add'
+}
+
+/* ===== Handlers ===== */
+const onUploadFile = async (file: File) => {
+  if (!file) return
+  const formData = new FormData()
+  formData.append('FormFile', file)
+  formData.append('Actioner', userLoginStore.userData?.profile.profileId.toString() || '0')
+  try {
+    const response = await uploadStore.upload(formData)
+    vendorAmendmentPayload.filename = response?.name as string
+    vendorAmendmentPayload.documentURL = response?.path as string
+    vendorAmendmentPayload.filesize = file.size
+    errors.documentURL = ''
+  } catch {
+    alert('File upload failed, please try again')
+  }
 }
 
 const handleSave = async () => {
+  // mode otomatis dari payload.id (edit kalau id > 0)
   mode.value = vendorAmendmentPayload.id ? 'edit' : 'add'
-
   if (!validateForm()) return
 
   try {
@@ -155,37 +154,35 @@ const handleSave = async () => {
 }
 
 const handleEdit = (id: number) => {
-  mode.value = 'edit'
   const data = vendorLegalDocStore.vendorLegalDocData.find(
     (item: IVendorLegalDocumentPayload) => item.id === id,
   )
   if (data) {
     Object.assign(vendorAmendmentPayload, data)
+    mode.value = 'edit' // mengubah tombol jadi Update
   }
 }
 
 const handleDelete = (id: number) => {
-  mode.value = 'delete'
-  showDeleteModal.value = true
   const data = vendorLegalDocStore.vendorLegalDocData.find(
     (item: IVendorLegalDocumentPayload) => item.id === id,
   )
   if (data) {
     Object.assign(vendorAmendmentPayload, data)
+    mode.value = 'delete'
+    showDeleteModal.value = true
   }
 }
 
 const handleProcessDelete = async () => {
   try {
     isSaveLoading.value = true
-    const payloadToSend = {
-      ...vendorAmendmentPayload,
-      isActive: false,
-    }
+    const payloadToSend = { ...vendorAmendmentPayload, isActive: false }
     await vendorLegalDocStore.postVendorLegalDocument(payloadToSend)
     showDeleteModal.value = false
     showSuccessModal.value = true
     await vendorLegalDocStore.getVendorLegalDocument(Number(route.params.id))
+    resetForm()
   } catch (err) {
     if (axios.isAxiosError(err)) {
       apiErrorMessage.value =
@@ -206,10 +203,8 @@ const handleDownload = async (path: string) => {
     const link = URL.createObjectURL(file)
     window.open(link, '_blank')
     setTimeout(() => URL.revokeObjectURL(link), 1000)
-  } catch (err) {
-    if (err instanceof Error) {
-      alert('Failed to download document. Please try again later.')
-    }
+  } catch {
+    alert('Failed to download document. Please try again later.')
   } finally {
     isDownloadLoading.value = false
   }
@@ -276,12 +271,14 @@ const filteredAmendmentData = computed(() =>
             hint-text="*jpg, jpeg, png, pdf, zip / max : 16 MB"
             @added-file="onUploadFile($event)"
           />
+
+          <!-- Tombol dinamis: Add / Update -->
           <div class="flex justify-end items-center">
             <UiButton variant="primary" @click="handleSave" :disabled="isSaveLoading">
               <UiLoading v-if="isSaveLoading" variant="white" />
               <template v-else>
-                <UiIcon variant="duotone" name="plus-circle" />
-                Add
+                <UiIcon variant="duotone" :name="submitIcon" />
+                {{ submitLabel }}
               </template>
             </UiButton>
           </div>

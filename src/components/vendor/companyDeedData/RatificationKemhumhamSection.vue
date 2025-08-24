@@ -57,6 +57,12 @@ const errors = reactive({
   documentDate: '',
 })
 
+/* ==== UI helpers: label & ikon tombol dinamis ==== */
+const isEditing = computed(() => mode.value === 'edit' || payload.id > 0)
+const submitLabel = computed(() => (isEditing.value ? 'Update' : 'Add'))
+const submitIcon = computed(() => (isEditing.value ? 'notepad-edit' : 'plus-circle'))
+
+/* ==== Validasi & Util ==== */
 const validateForm = () => {
   let ok = true
   errors.documentNo = ''
@@ -88,7 +94,6 @@ const onUploadFile = async (file: File) => {
     payload.documentURL = res?.path as string
     payload.filename = res?.name as string
     payload.filesize = file.size
-
     errors.documentURL = ''
   } catch {
     alert('File upload failed, please try again')
@@ -112,9 +117,11 @@ const resetForm = () => {
     isTemporary: true,
     refVendorId: 0,
     action: 0,
-  })
+  } as IVendorLegalDocumentPayload)
+  mode.value = 'add'
 }
 
+/* ==== Handlers ==== */
 const handleSave = async () => {
   mode.value = payload.id ? 'edit' : 'add'
   if (!validateForm()) return
@@ -138,19 +145,21 @@ const handleSave = async () => {
 }
 
 const handleEdit = (id: number) => {
-  mode.value = 'edit'
   const data = vendorLegalDocStore.vendorLegalDocData.find(
     (d: IVendorLegalDocumentPayload) => d.id === id,
   )
-  if (data) Object.assign(payload, data)
+  if (data) {
+    Object.assign(payload, data)
+    mode.value = 'edit' // -> tombol jadi "Update"
+  }
 }
 
 const handleAskDelete = (id: number) => {
-  mode.value = 'delete'
   const data = vendorLegalDocStore.vendorLegalDocData.find(
     (d: IVendorLegalDocumentPayload) => d.id === id,
   )
   if (data) Object.assign(payload, data)
+  mode.value = 'delete'
   showDeleteModal.value = true
 }
 
@@ -162,6 +171,7 @@ const handleProcessDelete = async () => {
     showDeleteModal.value = false
     showSuccessModal.value = true
     await vendorLegalDocStore.getVendorLegalDocument(Number(route.params.id))
+    resetForm()
   } catch (err) {
     if (axios.isAxiosError(err)) {
       apiErrorMessage.value =
@@ -241,12 +251,13 @@ const filteredRatifications = computed(() =>
             {{ errors.documentDate }}
           </p>
 
+          <!-- Tombol dinamis: Add / Update -->
           <div class="flex justify-end items-center">
             <UiButton variant="primary" @click="handleSave" :disabled="isSaveLoading">
               <UiLoading v-if="isSaveLoading" variant="white" />
               <template v-else>
-                <UiIcon variant="duotone" name="plus-circle" />
-                Add
+                <UiIcon variant="duotone" :name="submitIcon" />
+                {{ submitLabel }}
               </template>
             </UiButton>
           </div>
