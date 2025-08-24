@@ -204,7 +204,14 @@ const handleDropdown = (id: number, newMode: 'add' | 'edit' | 'delete') => {
   )
 
   if (shareholderData) {
-    Object.assign(payload, shareholderData)
+    Object.assign(payload, {
+      ...shareholderData,
+      unitID: shareholderData.unitID != null ? Number(shareholderData.unitID) : 0,
+      stockTypeID: shareholderData.stockTypeID != null ? Number(shareholderData.stockTypeID) : 0,
+      ownerDOB: shareholderData.ownerDOB
+        ? new Date(shareholderData.ownerDOB as unknown as string)
+        : new Date(),
+    })
   }
 }
 
@@ -363,7 +370,10 @@ const filteredShareholders = computed(() =>
           placeholder="--Type Shareholders--"
           :required="true"
           :options="
-            typeShareholders.data?.map((item) => ({ label: item.value, value: Number(item.code) })) || []
+            typeShareholders.data?.map((item) => ({
+              label: item.value,
+              value: Number(item.code),
+            })) || []
           "
           value-key="value"
           text-key="label"
@@ -406,7 +416,9 @@ const filteredShareholders = computed(() =>
           label="Share Unit"
           placeholder="--Share Unit--"
           :required="true"
-          :options="shareUnits.data?.map((item) => ({ label: item.value, value: Number(item.code) })) || []"
+          :options="
+            shareUnits.data?.map((item) => ({ label: item.value, value: Number(item.code) })) || []
+          "
           value-key="value"
           text-key="label"
           v-model="payload.unitID"
