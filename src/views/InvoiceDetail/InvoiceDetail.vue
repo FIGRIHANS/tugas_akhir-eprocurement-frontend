@@ -267,17 +267,7 @@ const checkVerifHeader = () => {
 
 const checkVerif = () => {
   let status = true
-  const data = form.value
   status = checkVerifHeader()
-
-  if (
-    !data.bankKeyCheck ||
-    !data.generalDataCheck ||
-    !data.invoiceHeaderDocumentCheck ||
-    !data.invoiceCalculationCheck ||
-    !data.invoicePoGrCheck
-  )
-    status = false
 
   return status
 }
