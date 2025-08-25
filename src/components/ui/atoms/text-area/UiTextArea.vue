@@ -23,7 +23,7 @@
     <div class="flex flex-col w-full gap-1">
       <textarea
         v-model="model"
-        class="input h-[150px]"
+        class="input h-[150px] px-3 py-4"
         :class="{ 'border-danger': error }"
         :placeholder="placeholder"
         :readonly="readonly"

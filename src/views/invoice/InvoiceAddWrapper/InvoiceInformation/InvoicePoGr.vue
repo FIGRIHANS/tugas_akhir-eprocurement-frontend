@@ -72,7 +72,7 @@
                 <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentNo }}</td>
                 <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentItem }}</td>
                 <td v-if="!checkInvoiceDp() && !checkPoPib()">
-                  {{ form.status === 5 ? moment(item.grDocumentDate).format('YYYY') : item.grDocumentDate ? moment(item.grDocumentDate).format('DD MMMM YYYY') : item.grDocumentDate }}
+                  {{ form.status === 5 ? moment(item.grDocumentDate).format('YYYY') : item.grDocumentDate ? moment(item.grDocumentDate).format('YYYY/MM/DD') : item.grDocumentDate }}
                 </td>
                 <td v-if="!checkInvoiceDp()">{{ form.currency === item.currencyLC ? useFormatIdr(item.itemAmountLC) : useFormatUsd(item.itemAmountTC) }}</td>
                 <td v-if="!checkInvoiceDp()">{{ item.quantity }}</td>

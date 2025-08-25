@@ -2,7 +2,6 @@
   <div v-if="form" class="flex flex-col gap-[24px]">
     <div class="flex items-center gap-[24px]">
       <p class="text-lg font-semibold m-[0px]">Invoice PO & GR Item</p>
-      <input v-if="isNeedCheck" v-model="form.invoicePoGrCheck" class="checkbox" type="checkbox"/>
     </div>
     <div class="po__table">
       <table class="table table-xs table-border">
@@ -28,7 +27,7 @@
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentNo || '-' }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentItem || '-' }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">
-              {{ moment(item.grDocumentDate).format('DD MMMM YYYY') || '-' }}
+              {{ moment(item.grDocumentDate).format('YYYY/MM/DD') || '-' }}
             </td>
             <td v-if="!checkInvoiceDp()">{{ form.currCode === 'IDR' ? useFormatIdr(item.itemAmount) : useFormatUsd(item.itemAmount) || '-' }}</td>
             <td v-if="!checkInvoiceDp()">{{ useFormatIdr(item.quantity) || '-' }}</td>
@@ -59,10 +58,6 @@ import type { formTypes } from '../types/invoiceDetail'
 import { defaultColumn, invoiceDpColumn } from '@/static/invoicePoGr'
 import moment from 'moment'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
-
-defineProps<{
-  isNeedCheck: boolean
-}>()
 
 const form = inject<formTypes>('form')
 const columns = ref<string[]>([])
