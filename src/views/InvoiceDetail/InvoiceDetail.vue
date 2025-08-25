@@ -5,17 +5,16 @@
     <hr class="-mx-[24px] mb-[24px]" />
     <StatusInvoice :statusCode="form.statusCode" class="mb-[24px]" />
     <div class="flex gap-[24px]">
-      <GeneralData :isNeedCheck="checkStatusCode()" class="flex-1" />
-      <BankKey :isNeedCheck="checkStatusCode()" class="flex-1" />
+      <GeneralData class="flex-1" />
+      <BankKey class="flex-1" />
     </div>
     <div class="flex gap-[24px] mt-[24px] max-h-[457px]">
-      <InvoiceHeaderDocument :isNeedCheck="checkStatusCode()" class="flex-1" />
-      <InvoiceCalculation :isNeedCheck="checkStatusCode()" class="flex-1" :formInvoice="form" />
+      <InvoiceHeaderDocument class="flex-1" />
+      <InvoiceCalculation class="flex-1" :formInvoice="form" />
     </div>
     <div v-if="currentRouteName === 'invoiceDetail'">
       <InvoicePoGr
         v-if="checkPo() && !isNonPo"
-        :isNeedCheck="checkStatusCode()"
         class="mt-[24px]"
       />
       <InvoiceItem v-if="isNonPo" class="mt-[24px]" />
@@ -25,12 +24,11 @@
           form.invoiceTypeCode === 902 ||
           form.invoiceTypeCode === 903
         "
-        :isNeedCheck="checkStatusCode()"
         class="mt-[24px]"
       />
     </div>
     <div v-else>
-      <ConstExpenses :isNeedCheck="checkStatusCode()" class="mt-[24px]" />
+      <ConstExpenses class="mt-[24px]" />
     </div>
     <div class="flex items-center justify-between gap-[8px] mt-[24px]">
       <div class="flex items-center gap-[10px]">
