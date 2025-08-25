@@ -329,8 +329,8 @@ onMounted(() => {
         <div v-if="tab.active === 'personal_information'" class="grid grid-cols-2 gap-4 w-full">
           <UiInput
             v-model="payload.name"
-            label="Contract Name"
-            placeholder="Contract Name"
+            label="Name"
+            placeholder="Name"
             required
             :error="payloadError.name"
             :hint-text="payloadError.name ? 'Name Required' : ''"

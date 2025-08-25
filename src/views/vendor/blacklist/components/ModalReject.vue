@@ -2,7 +2,7 @@
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiFormGroup from '@/components/ui/atoms/form-group/UiFormGroup.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
-import UiTextArea from '@/components/ui/atoms/text-area/UiTextArea.vue'
+import UiTextarea from '@/components/ui/atoms/textarea/UiTextarea.vue'
 import UiLoading from '@/components/UiLoading.vue'
 import { KTModal } from '@/metronic/core'
 import { useBlacklistStore } from '@/stores/vendor/blacklist'
@@ -78,7 +78,7 @@ const onSubmit = async () => {
         <form @submit.prevent="onSubmit">
           <UiFormGroup hide-border>
             <div>
-              <UiTextArea
+              <UiTextarea
                 v-model="payload.ApprovalNote"
                 label="Reason"
                 placeholder="Reason"

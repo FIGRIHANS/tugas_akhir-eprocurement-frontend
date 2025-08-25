@@ -1,0 +1,667 @@
+<template>
+  <div v-if="form" id="table-invoice-po-gr" class="flex flex-col gap-[16px]">
+    <p class="text-base font-semibold">
+      <!-- {{ form?.invoiceDp === '9012' ? 'Invoice PO' : 'Invoice PO & GR Item' }} -->
+      Requisition Item
+    </p>
+
+    <!-- <div v-if="form?.invoiceType !== '902' && !checkInvoiceDp()">
+      <div class="flex items-center gap-[10px]">
+        <div class="relative max-w-[250px]">
+          <label
+            class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px]"
+          >
+            Reference Number
+          </label>
+          <div class="input">
+            <input
+              v-model="search"
+              placeholder=""
+              type="number"
+              @keypress="searchEnter"
+              @disabled="form.invoicePoGr.length > 0"
+            />
+            <i class="ki-outline ki-magnifier"></i>
+          </div>
+        </div>
+        <button
+          class="btn btn-outline btn-primary"
+          @click="searchItem"
+          :disabled="isDisabledSearch"
+        >
+          Search
+        </button>
+      </div>
+      <p v-if="searchError" class="text-danger text-[9px]">
+        *PO Number must be exactly 10 characters long
+      </p>
+    </div> -->
+    <div>
+      <button class="btn btn-outline btn-primary" @click="addNewPodata">
+        <i class="ki-duotone ki-plus-circle"></i>
+        Add Line Item
+      </button>
+    </div>
+
+    <!-- Invoice PO & GR Item By Search Table  -->
+    <!-- 
+    <div v-if="form?.invoiceType !== '902'">
+      <div v-if="form" class="overflow-x-auto pogr__table">
+        <table class="table table-xs table-border" :class="{ 'border-danger': form?.invoicePoGrError }">
+          <thead>
+            <tr>
+              <th v-for="(item, index) in columns" :key="index" class="pogr__field-base" :class="{
+                'pogr__field-base--po-item': item.toLowerCase() === 'item text'
+              }">
+                {{ item }}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="form.invoicePoGr.length === 0">
+              <td colspan="11" class="text-center text-[13px]">No Data Available</td>
+            </tr>
+            <template v-else>
+              <tr v-for="(item, index) in form.invoicePoGr" :key="index" class="pogr__field-items">
+                <td class="flex items-center justify-around gap-[8px]">
+                  <button class="btn btn-outline btn-icon btn-primary" @click="goEdit(item)">
+                    <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>
+                    <i v-else class="ki-duotone ki-check-circle"></i>
+                  </button>
+                  <button v-if="(form.status === 0 || form.status === -1 || form.status === 5) && !checkInvoiceDp()"
+                    class="btn btn-icon btn-outline btn-danger" @click="deleteItem(index)">
+                    <i class="ki-duotone ki-cross-circle"></i>
+                  </button>
+                </td>
+                <td>
+                  <span v-if="(!item.isEdit && checkInvoiceDp()) || !checkInvoiceDp()">{{ item.poNo }}</span>
+                  <div v-if="item.isEdit && checkInvoiceDp()">
+                    <div class="input" :class="{ 'border-danger': item.poNoError }">
+                      <input v-model="item.poNo" placeholder="" type="number" @keypress="searchEnter" />
+                      <i class="ki-filled ki-magnifier"></i>
+                    </div>
+                    <p v-if="searchError" class="text-danger text-[9px]">*PO Number must be exactly 10 characters long</p>
+                    <p v-if="searchDpAvailableError" class="text-danger text-[9px]">*PO Number not available for DP</p>
+                    <p v-if="isSearch && !searchDpAvailableError" class="text-success text-[9px]">*PO Number available for DP</p>
+                  </div>
+                </td>
+                <td v-if="!checkInvoiceDp()">{{ item.poItem }}</td>
+                <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentNo }}</td>
+                <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentItem }}</td>
+                <td v-if="!checkInvoiceDp() && !checkPoPib()">
+                  {{ form.status === 5 ? moment(item.grDocumentDate).format('YYYY') : item.grDocumentDate ? moment(item.grDocumentDate).format('DD MMMM YYYY') : item.grDocumentDate }}
+                </td>
+                <td v-if="!checkInvoiceDp()">{{ form.currency === item.currencyLC ? useFormatIdr(item.itemAmountLC) : useFormatUsd(item.itemAmountTC) }}</td>
+                <td v-if="!checkInvoiceDp()">{{ item.quantity }}</td>
+                <td v-if="!checkInvoiceDp()">{{ item.uom }}</td>
+                <td v-if="!checkInvoiceDp()">{{ item.itemText }}</td>
+                <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.conditionType }}</td>
+                <td v-if="!checkInvoiceDp()">{{ item.conditionTypeDesc || '-' }}</td>
+                <td v-if="form?.invoiceType === '903'">{{ item.taxCode || '-' }}</td>
+                <td v-if="!checkInvoiceDp() && form?.invoiceType !== '903'">{{ item.qcStatus || '-' }}</td>
+                <td v-if="form?.invoiceType === '903'">
+                  <span v-if="item.isEdit">{{ form?.currency === item.currencyLC ? useFormatIdr(formEdit.vatAmount) : useFormatUsd(formEdit.vatAmount) }}</span>
+                  <span v-else>{{ form?.currency === item.currencyLC ? useFormatIdr(item.vatAmount || 0) : useFormatUsd(item.vatAmount || 0) }}</span>
+                </td>
+                <td v-if="checkInvoiceDp()">
+                  <span v-if="!item.isEdit">{{ useFormatIdr(item.itemAmountLC) }}</span>
+                  <input v-else v-model="formEdit.itemAmountLC" type="number" class="input" />
+                </td>
+                <td>
+                  <span v-if="!item.isEdit">{{ item.taxCode || '-' }}</span>
+                  <select v-if="item.isEdit" v-model="formEdit.taxCode" class="select" placeholder="">
+                    <option v-for="(option, index) in listTaxCalculation" :key="index" :value="option.code">
+                      {{ option.code }}
+                    </option>
+                  </select>
+                </td>
+                <td v-if="!checkPoPib()">
+                  <span v-if="item.isEdit">{{ form?.currency === item.currencyLC ? useFormatIdr(formEdit.vatAmount) : useFormatUsd(formEdit.vatAmount) }}</span>
+                  <span v-else>{{ form?.currency === item.currencyLC ? useFormatIdr(item.vatAmount || 0) : useFormatUsd(item.vatAmount || 0) }}</span>
+                </td>
+                <td v-if="form?.invoiceType !== '903'">-</td>
+                <td v-if="form?.invoiceType !== '903'">-</td>
+                <td v-if="form?.invoiceType !== '903'">-</td>
+                <td v-if="!checkInvoiceDp()">-</td>
+                <td>{{ item.department || '-' }}</td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </div> -->
+
+    <!-- Invoice PO & Gr Add Item Manual -->
+    <div>
+      <div v-if="form" class="overflow-x-auto pogr__table">
+        <table
+          class="table table-xs table-border"
+          :class="{ 'border-danger': form?.invoicePoGrError }"
+        >
+          <thead>
+            <tr>
+              <th
+                v-for="(item, index) in columns"
+                :key="index"
+                class="pogr__field-base"
+                :class="{
+                  'pogr__field-base--po-number': item.toLowerCase() === 'po number',
+                  'pogr__field-base--po-item': item.toLowerCase() === 'po item',
+                }"
+              >
+                {{ item }}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="form.invoicePoGr.length === 0">
+              <td colspan="11" class="text-center text-[13px]">No Data Available</td>
+            </tr>
+            <template v-else>
+              <tr v-for="(item, index) in form.invoicePoGr" :key="index" class="pogr__field-items">
+                <td class="flex items-center justify-around gap-[8px]">
+                  <button class="btn btn-icon btn-primary" @click="editForm(index)">
+                    <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>
+                    <i v-else class="ki-duotone ki-check-circle"></i>
+                  </button>
+                  <button class="btn btn-icon btn-outline btn-danger" @click="deleteItem(index)">
+                    <i class="ki-duotone ki-cross-circle"></i>
+                  </button>
+                </td>
+                <td>
+                  <span v-if="!item.isEdit">{{ item.poNo }}</span>
+                  <select
+                    v-else
+                    v-model="item.material"
+                    class="select"
+                    :class="{ 'border-danger': form.currencyError }"
+                    @change="setItemDetail(index)"
+                  >
+                    <option v-for="item of materialList" :key="item.code" :value="item.code">
+                      {{ item.code }}
+                    </option>
+                  </select>
+                </td>
+                <td>{{ item.materialDesc }}</td>
+                <td>
+                  <span v-if="!item.isEdit">{{ item.quantity }}</span>
+                  <input
+                    type="date"
+                    v-else
+                    v-model="item.quantity"
+                    class="input"
+                    placeholder=""
+                    :class="{ 'border-danger': item.poItemError }"
+                    @change="item.poItemError = false"
+                  />
+                </td>
+                <td>
+                  <span v-if="!item.isEdit">{{ item.plant }}</span>
+                  <select
+                    v-else
+                    v-model="item.plant"
+                    class="select"
+                    :class="{ 'border-danger': form.currencyError }"
+                  >
+                    <option v-for="item of plantList" :key="item.code" :value="item.code">
+                      {{ item.code }}
+                    </option>
+                  </select>
+                </td>
+                <td>
+                  <span v-if="!item.isEdit">{{ item.quantity }}</span>
+                  <input
+                    type="number"
+                    v-else
+                    v-model="item.quantity"
+                    class="input"
+                    placeholder=""
+                    :class="{ 'border-danger': item.poItemError }"
+                    @change="item.poItemError = false"
+                  />
+                </td>
+                <td>
+                  <span v-if="!item.isEdit">{{ item.uom }}</span>
+                  <input
+                    type="text"
+                    v-else
+                    v-model="item.uom"
+                    class="input"
+                    placeholder=""
+                    :class="{ 'border-danger': item.poItemError }"
+                    @change="item.poItemError = false"
+                  />
+                </td>
+                <td>
+                  <span v-if="!item.isEdit">{{ item.pricePerunit }}</span>
+                  <input
+                    type="text"
+                    v-else
+                    v-model="item.pricePerunit"
+                    class="input"
+                    placeholder=""
+                    :class="{ 'border-danger': item.poItemError }"
+                    @change="item.poItemError = false"
+                  />
+                </td>
+                <td>
+                  {{ item.quantity * item.pricePerunit }}
+                  <!-- <input v-else v-model="item.department" class="input" placeholder=""
+                    :class="{ 'border-danger': item.department }"  /> -->
+                </td>
+                <td>
+                  <span v-if="!item.isEdit">{{ item.uom }}</span>
+                  <input
+                    type="text"
+                    v-else
+                    v-model="item.currency"
+                    class="input"
+                    placeholder=""
+                    :class="{ 'border-danger': item.poItemError }"
+                    @change="item.poItemError = false"
+                  />
+                </td>
+                <!-- <td>{{ item.itemText || '-' }}</td> -->
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <SearchPoGr
+      :currency="form?.currency || ''"
+      :is-invoice-dp="form?.invoiceDp"
+      :is-po-pib="form?.invoiceType === 'pib'"
+      @setItem="setItemPoGr"
+    />
+  </div>
+</template>
+
+<script lang="ts" setup>
+import { ref, reactive, computed, inject, watch, onMounted } from 'vue'
+import type { formTypes } from '../../types/invoiceAddWrapper'
+// import { KTModal } from '@/metronic/core'
+// import { defaultColumn, invoiceDpColumn, poCCColumn, manualAddColumn } from '@/static/invoicePoGr'
+import SearchPoGr from './InvoicePoGr/SearchPoGr.vue'
+// import moment from 'moment'
+import type { PoGrSearchTypes, itemsPoGrType } from '../../types/invoicePoGr'
+import { useFormatIdr, useFormatUsd } from '@/composables/currency'
+import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
+import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
+
+const masterDataApi = useInvoiceMasterDataStore()
+const invoiceApi = useInvoiceSubmissionStore()
+const form = inject<formTypes>('form')
+const columns = ref<string[]>([
+  'Action',
+  'Material',
+  'Material Desc',
+  'Delivery Date',
+  'Plant',
+  'Quantity',
+  'UOM',
+  'Price Per Unit',
+  'Total Price',
+  'Currency',
+])
+// const search = ref<number | null>(null)
+// const searchError = ref<boolean>(false)
+// const searchDpAvailableError = ref<boolean>(false)
+// const isSearch = ref<boolean>(false)
+// const isDisabledSearch = ref<boolean>(false)
+
+const setItemDetail = (index: number) => {
+  if (form) {
+    const data = form?.invoicePoGr[index]
+
+    const selectedData = materialList.value.find((item) => item.code === data.material)
+
+    data.materialDesc = selectedData?.desc ?? ''
+  }
+  // if (form) {
+  //   form?.invoicePoGr[index] =
+  // }
+}
+
+const formEdit = reactive({
+  itemAmountLC: 0,
+  taxCode: '',
+  vatAmount: 0,
+})
+
+const listTaxCalculation = computed(() => masterDataApi.taxList)
+const costCenterList = computed(() => masterDataApi.costCenterList)
+
+const materialList = ref([
+  {
+    code: 'AURM4',
+    name: 'AURM4',
+    desc: 'Aurum Product 4',
+    price: '',
+  },
+  {
+    code: 'AURM5',
+    name: 'AURM5',
+    desc: 'Aurum Product 5',
+  },
+  {
+    code: 'AURM6',
+    name: 'AURM6',
+    desc: 'Aurum Product 6',
+  },
+  {
+    code: 'AURM7',
+    name: 'AURM7',
+    desc: 'Aurum Product 7',
+  },
+  {
+    code: 'AURM8',
+    name: 'AURM8',
+    desc: 'Aurum Product 8',
+  },
+  {
+    code: 'AURM9',
+    name: 'AURM9',
+    desc: 'Aurum Product 9',
+  },
+  {
+    code: 'AURM10',
+    name: 'AURM10',
+    desc: 'Aurum Product 10',
+  },
+  {
+    code: 'AURM11',
+    name: 'AURM11',
+    desc: 'Aurum Product 11',
+  },
+])
+
+const plantList = ref([
+  {
+    code: 'CHP1',
+    name: 'CHP1',
+  },
+  {
+    code: 'CHP2',
+    name: 'CHP2',
+  },
+  {
+    code: 'CHP3',
+    name: 'CHP3',
+  },
+  {
+    code: 'CHP4',
+    name: 'CHP4',
+  },
+])
+
+const checkInvoiceDp = () => {
+  return form?.invoiceDp === '9012'
+}
+
+const checkInvoiceWithDp = () => {
+  return form?.invoiceDp === '9013'
+}
+
+// const checkPoPib = () => {
+//   return form?.invoiceType === '902'
+// }
+
+const deleteItem = (index: number) => {
+  if (form) {
+    if (form.invoicePoGr[index].isEdit) {
+      resetItem(form.invoicePoGr[index])
+    } else {
+      form.invoicePoGr.splice(index, 1)
+    }
+  }
+}
+
+// const setColumn = () => {
+//   if (form?.invoiceType === '903') columns.value = ['Action', ...poCCColumn]
+//   else if (form?.invoiceDp === '9012') columns.value = ['Action', ...invoiceDpColumn]
+//   else if (form?.invoiceType === '902') columns.value = ['Actions', ...manualAddColumn]
+//   else columns.value = ['Action', ...defaultColumn]
+// }
+
+const setItemPoGr = (items: PoGrSearchTypes[]) => {
+  for (const item of items) {
+    const data = {
+      poNo: item.poNo,
+      poItem: item.poItem,
+      grDocumentNo: item.grDocumentNo,
+      grDocumentItem: item.grDocumentItem,
+      grDocumentDate: item.grDocumentDate,
+      taxCode: item.taxCode,
+      currencyLC: item.currencyLC,
+      currencyTC: item.currencyTC,
+      itemAmountLC: item.itemAmountLC,
+      itemAmountTC: item.itemAmountTC,
+      quantity: item.quantity,
+      uom: item.unit,
+      itemText: item.itemText,
+      currency: item.currency,
+      conditionType: item.conditionType,
+      conditionTypeDesc: item.conditionTypeDesc,
+      qcStatus: item.qcStatus,
+      postingDate: item.postingDate,
+      enteredOn: item.enteredOn,
+      purchasingOrg: item.purchasingOrg,
+      department: item.department,
+      material: item.material,
+      plant: item.plant,
+      pricePerunit: item.pricePerunit?.toString() || '',
+      materialDesc: '',
+      poNoError: false,
+      poItemError: false,
+      departementError: false,
+      isEdit: false,
+    } as itemsPoGrType
+
+    form?.invoicePoGr.push(data)
+
+    if (form?.invoicePoGr.length === 1 && checkInvoiceWithDp()) {
+      const firstItem = form.invoicePoGr[0]
+      invoiceApi.getRemainingDp(firstItem.poNo).then((response) => {
+        if (response.statusCode === 200) {
+          const remaining = response.result.content.remainingDPAmount
+          form.remainingDpAmount =
+            form.currency === firstItem.currencyLC
+              ? useFormatIdr(remaining)
+              : useFormatUsd(remaining)
+        }
+      })
+    }
+  }
+}
+
+const resetFormEdit = () => {
+  formEdit.taxCode = ''
+  formEdit.itemAmountLC = 0
+  formEdit.vatAmount = 0
+}
+
+// const goEdit = (item: itemsPoGrType) => {
+//   if (
+//     (checkInvoiceDp() && searchDpAvailableError.value) ||
+//     form?.invoiceType === '903' ||
+//     (checkInvoiceDp() && !isSearch.value && item.isEdit)
+//   )
+//     return
+//   item.isEdit = !item.isEdit
+//   if (item.isEdit) {
+//     formEdit.taxCode = item.taxCode
+//     formEdit.itemAmountLC = form?.currency === 'IDR' ? item.itemAmountLC : item.itemAmountTC
+//     formEdit.vatAmount = item.vatAmount || 0
+//   } else {
+//     item.taxCode = formEdit.taxCode
+//     item.vatAmount = formEdit.vatAmount
+//     if (form?.currency === 'IDR') item.itemAmountLC = formEdit.itemAmountLC
+//     else item.itemAmountTC = formEdit.itemAmountLC
+//     resetFormEdit()
+//   }
+// }
+
+const resetItem = (item: itemsPoGrType) => {
+  item.isEdit = !item.isEdit
+  resetFormEdit()
+}
+
+const addNewPodata = () => {
+  if (form) {
+    // if (!form.vendorId || !form.companyCode) {
+    //   form.companyCodeError = true
+    //   return
+    // } else {
+    //   form.companyCodeError = false
+    // }
+    masterDataApi.getCostCenter(form?.companyCode || '')
+    const data = {
+      poNo: '',
+      poItem: 0,
+      grDocumentNo: '',
+      grDocumentItem: 0,
+      grDocumentDate: null,
+      taxCode: '',
+      currencyLC: '',
+      currencyTC: '',
+      itemAmountLC: 0,
+      itemAmountTC: 0,
+      quantity: 0,
+      uom: '',
+      itemText: '',
+      currency: '',
+      conditionType: '',
+      conditionTypeDesc: '',
+      qcStatus: '',
+      postingDate: null,
+      enteredOn: '',
+      purchasingOrg: '',
+      department: '',
+      isEdit: true,
+      poItemError: false,
+      poNoError: false,
+      departementError: false,
+    }
+    form.invoicePoGr.push(data)
+  }
+}
+
+const editForm = (index: number) => {
+  if (form) {
+    const data = form.invoicePoGr[index]
+    data.poNoError = false
+    data.poItemError = false
+    data.departementError = false
+
+    // if (data.poNo.toString().length != 10) {
+    //   data.poNoError = true
+    // }
+
+    // if (data.poItem.toString().length != 2) {
+    //   data.poItemError = true
+    // }
+
+    // if (data.department === '') {
+    //   data.departementError = true
+    // }
+
+    if (!data.poItemError && !data.poNoError && !data.departementError) {
+      data.isEdit = !data.isEdit
+    }
+  }
+}
+
+const getPercentTax = (code: string) => {
+  if (code === 'V0') return 0
+  const getIndex = listTaxCalculation.value.findIndex((item) => item.code === code)
+  if (getIndex !== -1) {
+    const splitName = listTaxCalculation.value[getIndex].name.split(' - ')
+    return parseFloat(splitName[1].replace(',', '.').replace('%', '')) / 100
+  }
+}
+
+const getVatAmount = () => {
+  if (!form) return
+  const checkIsEdit = form.invoicePoGr.findIndex((item) => item.isEdit)
+  if (checkIsEdit !== -1) {
+    const percentTax = getPercentTax(formEdit.taxCode) || 0
+    const itemAmount = formEdit.itemAmountLC
+    const result = percentTax * itemAmount
+    formEdit.vatAmount = result
+  } else {
+    for (const item of form.invoicePoGr) {
+      const percentTax = getPercentTax(item.taxCode) || 0
+      const itemAmount = form.currency === 'IDR' ? item.itemAmountLC : item.itemAmountTC
+      const result = percentTax * itemAmount
+      item.vatAmount = result
+    }
+  }
+}
+
+watch(
+  () => [form?.invoiceDp, form?.invoiceType],
+  () => {
+    // setColumn()
+  },
+  {
+    immediate: true,
+  },
+)
+
+watch(
+  () => form?.invoiceDp,
+  () => {
+    if (form) {
+      form.invoicePoGr = []
+      if (checkInvoiceDp()) {
+        const data = {
+          poNo: '',
+          poItem: 0,
+          grDocumentNo: '',
+          grDocumentItem: 0,
+          grDocumentDate: '',
+          taxCode: '',
+          currencyLC: '',
+          currencyTC: '',
+          itemAmountLC: 0,
+          itemAmountTC: 0,
+          quantity: 0,
+          uom: '',
+          itemText: '',
+          currency: '',
+          conditionType: '',
+          conditionTypeDesc: '',
+          qcStatus: '',
+          postingDate: '',
+          enteredOn: '',
+          purchasingOrg: '',
+          department: '',
+          isEdit: false,
+        } as itemsPoGrType
+
+        form.invoicePoGr.push(data)
+      }
+    }
+  },
+)
+
+watch(
+  () => [form?.invoicePoGr, form?.currency, formEdit],
+  () => {
+    getVatAmount()
+  },
+  {
+    deep: true,
+    immediate: true,
+  },
+)
+
+onMounted(() => {
+  // setColumn()
+})
+</script>
+
+<style lang="scss" scoped>
+@use '../../styles/invoice-po-gr.scss';
+</style>
