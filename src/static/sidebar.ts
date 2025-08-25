@@ -62,6 +62,40 @@ export default [
     ],
   },
   {
+    id: 'requisition',
+    title: 'Requisition',
+    icon: 'rocket',
+    child: [
+      {
+        id: 'requission-list',
+        title: 'Requisition List',
+        to: 'requissionList',
+      },
+      {
+        id: 'requission-add',
+        title: 'Create Requisition',
+        to: 'requisitionAdd',
+      },
+    ],
+  },
+  {
+    id: 'contract',
+    title: 'Contract Lifecycle Management',
+    icon: 'rocket',
+    child: [
+      {
+        id: 'contract-list',
+        title: 'Contract List',
+        to: 'contractList',
+      },
+      {
+        id: 'contract-request',
+        title: 'Contract Request',
+        to: 'contractCreate',
+      },
+    ],
+  },
+  {
     id: 'vendor-management',
     title: 'Vendor Management',
     icon: 'users',

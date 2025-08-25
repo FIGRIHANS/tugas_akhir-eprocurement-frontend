@@ -16,6 +16,8 @@ import userManagement from './modules/userManagement'
 import companyInfomartion from './modules/companyInfomartion'
 import workflowConfig from './modules/workflowConfig'
 import tender from './modules/tender'
+import contract from './modules/contract'
+import requisition from './modules/requisition'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -43,7 +45,9 @@ const router = createRouter({
         ...userManagement,
         ...companyInfomartion,
         ...workflowConfig,
-        ...tender
+        ...tender,
+        ...contract,
+        ...requisition,
       ],
       meta: {
         middleware: 'auth',

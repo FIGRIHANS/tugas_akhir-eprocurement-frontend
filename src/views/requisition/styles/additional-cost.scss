@@ -1,0 +1,47 @@
+.cost {
+  &__table {
+    padding-bottom: 4px;
+
+    &::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+      background: transparent;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      width: 10px;
+      height: 10px;
+      border-radius: 15px;
+      background-color: #DBDFE9;
+    }
+  }
+
+  &__field-base {
+    min-width: 130px;
+    white-space: nowrap;
+    @apply px-[20px] !important;
+    @apply py-[13px] !important;
+    
+    &--activity {
+      @extend .cost__field-base;
+      min-width: 200px;
+    }
+    
+    &--item-amount {
+      @extend .cost__field-base;
+      min-width: 200px;
+    }
+    
+    &--description {
+      @extend .cost__field-base;
+      min-width: 300px;
+    }
+  }
+
+  &__field-items {
+    td {
+      @apply px-[16px] !important;
+      @apply py-[7px] !important;
+    }
+  }
+}

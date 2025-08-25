@@ -209,7 +209,7 @@ const setPage = (value: number) => {
 
 const openDetailInvoice = (invoiceId: string) => {
   router.push({
-    name: 'invoiceDetail',
+    name: 'invoiceDetailNonPo',
     query: {
       id: invoiceId,
       type: '1',

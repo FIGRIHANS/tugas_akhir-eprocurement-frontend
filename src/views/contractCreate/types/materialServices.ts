@@ -1,0 +1,16 @@
+export interface MaterialServiceItem {
+  id: number,
+  materialNo: string,
+  materialDesc: string,
+  quantity: number,
+  uom: string,
+  totalAmountUsd: number,
+  pricePerUnitUsd: number,
+  currency: string,
+  totalAmountIDR: number,
+  pricePerUnitIDR: number,
+  localCurrency: string,
+  plant: string,
+  vendorMaterialNo: string,
+  isSelected: boolean,
+}
