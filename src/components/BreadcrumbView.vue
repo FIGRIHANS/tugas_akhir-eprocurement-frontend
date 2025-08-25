@@ -16,12 +16,16 @@
   </div>
 </template>
 
-<script lang="ts" setup>
-/* eslint-disable no-undef */
-import { type routeTypes } from '@/core/type/components/breadcrumb'
+<script lang="ts">
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
+import type { routeTypes } from '@/core/type/components/breadcrumb'
 
-defineProps<{
-  title: string,
-  routes: routeTypes[]
-}>()
+export default defineComponent({
+  name: 'BreadcrumbView',
+  props: {
+    title: { type: String as () => string, required: true },
+    routes: { type: Array as PropType<routeTypes[]>, required: true }
+  }
+})
 </script>

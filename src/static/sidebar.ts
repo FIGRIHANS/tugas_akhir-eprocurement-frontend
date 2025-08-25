@@ -242,4 +242,11 @@ export default [
       },
     ],
   },
+  {
+    id: 'Workflow Configuration',
+    title: 'Workflow Configuration',
+    icon: 'check',
+    to: 'workflow-configuration',
+    child: [],
+  },
 ]
