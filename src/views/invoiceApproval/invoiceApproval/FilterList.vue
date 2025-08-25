@@ -42,7 +42,7 @@
         </div>
         <div class="relative">
           <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white z-[1]">Invoice Date</label>
-          <DatePicker v-model="date" />
+          <DatePicker v-model="date" format="yyyy/MM/dd" teleport />
         </div>
       </div>
       <div class="flex align-center justify-between gap-[16px]">

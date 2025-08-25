@@ -28,7 +28,7 @@
       <div>
         <p class="text-[15px] font-semibold mb-[4px]">Successfully Rejected Invoice</p>
         <p class="text-[13px] font-medium text-danger">
-          The invoice has been rejected and returned to previous approval.
+          The invoice has been rejected and returned to submitter.
         </p>
       </div>
     </div>

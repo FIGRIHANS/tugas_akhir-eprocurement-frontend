@@ -92,11 +92,15 @@
                 </td>
                 <td>
                   <span v-if="!item.isEdit">{{ item.taxCode || '-' }}</span>
-                  <select v-if="item.isEdit" v-model="formEdit.taxCode" class="select" placeholder="">
-                    <option v-for="(option, index) in listTaxCalculation" :key="index" :value="option.code">
-                      {{ option.code }}
-                    </option>
-                  </select>
+                  <v-select
+                    v-else
+                    v-model="formEdit.taxCode"
+                    class="customSelect"
+                    label="code"
+                    :reduce="(option: any) => option.code"
+                    :options="listTaxCalculation"
+                    appendToBody
+                  ></v-select>
                 </td>
                 <td v-if="!checkPoPib()">
                   <span v-if="item.isEdit">{{ form?.currency === item.currencyLC ? useFormatIdr(formEdit.vatAmount) : useFormatUsd(formEdit.vatAmount) }}</span>
