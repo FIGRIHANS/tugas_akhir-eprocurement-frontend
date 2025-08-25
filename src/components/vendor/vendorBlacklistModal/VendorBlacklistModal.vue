@@ -12,7 +12,6 @@ import axios from 'axios'
 import { isArray } from 'lodash'
 import { useLoginStore } from '@/stores/views/login'
 import type { UploadFileResponse } from '@/stores/general/types/upload'
-import { useRoute } from 'vue-router'
 import UiFormGroup from '@/components/ui/atoms/form-group/UiFormGroup.vue'
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
@@ -23,8 +22,6 @@ const periodStore = useBlacklistPeriodStore()
 const uploadStore = useVendorUploadStore()
 const vendorStore = useVendorStore()
 const userStore = useLoginStore()
-
-const route = useRoute()
 
 const props = defineProps<IVendorBlacklistModalProps>()
 const open = defineModel('open')
@@ -100,7 +97,6 @@ const handleSubmit = async () => {
 
     modalSuccess.value = true
     open.value = false
-    vendorStore.getVendors(route.query)
   } catch (err) {
     if (err instanceof Error) {
       if (axios.isAxiosError(err)) {
