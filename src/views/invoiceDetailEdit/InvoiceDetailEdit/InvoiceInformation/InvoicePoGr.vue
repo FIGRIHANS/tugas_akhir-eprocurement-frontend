@@ -33,7 +33,7 @@
               <td v-if="!checkInvoiceDp()">{{ item.poItem }}</td>
               <td v-if="!checkInvoiceDp()">{{ item.grDocumentNo }}</td>
               <td v-if="!checkInvoiceDp()">{{ item.grDocumentItem }}</td>
-              <td v-if="!checkInvoiceDp()">{{ moment(item.grDocumentDate).format('DD MMMM YYYY') }}</td>
+              <td v-if="!checkInvoiceDp()">{{ moment(item.grDocumentDate).format('YYYY/MM/DD') }}</td>
               <td v-if="!checkInvoiceDp()">{{ form.currCode === 'IDR' ? useFormatIdr(item.itemAmount) : useFormatUsd(item.itemAmount) }}</td>
               <td v-if="!checkInvoiceDp()">{{ item.quantity }}</td>
               <td v-if="!checkInvoiceDp()">{{ item.uom }}</td>
