@@ -1,22 +1,22 @@
 <template>
   <div>
-    <Breadcrumb title="Invoice" :routes="routes" />
+    <!-- <Breadcrumb title="Invoice" :routes="routes" /> -->
 
     <section
       name="table"
-      class="border rounded-md mt-[24px] p-[24px] flex flex-col gap-[24px] justify-center bg-white"
+      class="border rounded-md p-[24px] flex flex-col gap-[24px] justify-center bg-white"
     >
-      <div class="flex flex-row gap-[24px] justify-between w-full">
-        <div>Invoice Non PO</div>
-        <div class="flex flex-row gap-[8px]">
+      <div class="flex flex-row gap-4 justify-between w-full">
+        <h1>Invoice Non PO</h1>
+        <div class="flex flex-row gap-3">
           <InputSearch placeholder="Search" v-model="search" />
-          <FilterList :data="filterForm" @setData="setDataFilter" />
-          <UiButton variant="primary"
+          <FilterList type="non-po" :data="filterForm" @setData="setDataFilter" />
+          <UiButton variant="primary" @click="goAdd(false)"
             ><i class="ki-duotone ki-plus-circle"></i>Add invoice</UiButton
           >
         </div>
       </div>
-      <div class="scrollable-x-auto">
+      <div class="scrollable-x-auto list__table">
         <table class="table align-middle">
           <thead>
             <tr class="text-nowrap border-b border-primary">
@@ -30,7 +30,10 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="item in data" :key="item.invoiceNo" class="text-nowrap">
+            <tr v-if="poList?.length === 0">
+              <td colspan="10" class="text-center">No data found.</td>
+            </tr>
+            <tr v-for="item in list" :key="item.invoiceNo" class="text-nowrap">
               <td>
                 <button
                   class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]"
@@ -49,24 +52,26 @@
               <td>{{ item.documentNo || '-' }}</td>
               <td>{{ item.companyCode || '-' }}</td>
               <td>{{ item.invoiceTypeName }}</td>
-              <td>{{ item.invoiceDate }}</td>
-              <td>{{ item.totalGrossAmount }}</td>
-              <td>{{ item.totalNetAmount }}</td>
-              <td>{{ item.estimatedPaymentDate }}</td>
+              <td>{{ moment(item.invoiceDate).format('DD MMMM YYYY') }}</td>
+              <td>{{ useFormatIdr(item.totalGrossAmount) }}</td>
+              <td>{{ useFormatIdr(item.totalNetAmount) }}</td>
+              <td>{{ moment(item.estimatedPaymentDate).format('DD MMMM YYYY') }}</td>
             </tr>
           </tbody>
         </table>
       </div>
-      <div class="card-footer">
-        <div>
-          Tampilkan {{ '10' }} data dari total data
-          {{ '100' }}
-        </div>
+      <div class="flex items-center justify-between mt-[24px]">
+        <p class="m-0 text-sm">
+          Tampilkan
+          {{ pageSize * currentPage > poList?.length ? poList?.length : pageSize * currentPage }}
+          data dari total data
+          {{ poList?.length }}
+        </p>
         <LPagination
-          :current-page="page"
-          :page-size="10"
-          :total-items="100"
-          @page-change="handlePageChange"
+          :totalItems="poList?.length || 0"
+          :pageSize="pageSize"
+          :currentPage="currentPage"
+          @page-change="setPage"
         />
       </div>
     </section>
@@ -76,24 +81,29 @@
 <script lang="ts" setup>
 import { ref, reactive, defineAsyncComponent, onMounted, computed } from 'vue'
 import LPagination from '@/components/pagination/LPagination.vue'
-import type { filterListTypes } from './types/invoiceList'
-import Breadcrumb from '@/components/BreadcrumbView.vue'
+import type { filterListTypes } from '../../types/invoiceList'
 import InputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
-import type { routeTypes } from '@/core/type/components/breadcrumb'
-const FilterList = defineAsyncComponent(() => import('./vendorListSubmission/FilterList.vue'))
+const FilterList = defineAsyncComponent(() => import('./FilterList.vue'))
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
+import { useFormatIdr } from '@/composables/currency'
+import moment from 'moment'
+import type { ListPoTypes } from '@/stores/views/invoice/types/submission'
+import { useRouter } from 'vue-router'
 
 const invoiceSubmissionApi = useInvoiceSubmissionStore()
+const router = useRouter()
 
 // import UiModal from '@/components/modal/UiModal.vue'
 // import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 // import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 
-const search = ref('')
-// const selectedItems = ref<number[]>([])
-const page = ref(1)
-// const isModalFilterOpen = ref(false)
+const search = ref<string>('')
+const currentPage = ref<number>(1)
+const pageSize = ref<number>(10)
+const list = ref<ListPoTypes[]>([])
+
+const poList = computed(() => invoiceSubmissionApi.listNonPo)
 
 const filterForm = reactive<filterListTypes>({
   status: '1',
@@ -132,13 +142,6 @@ const data = ref([
   },
 ])
 
-const routes = ref<routeTypes[]>([
-  {
-    name: 'Invoice Non PO',
-    to: '/tender/central',
-  },
-])
-
 const colorBadge = (statusCode: number) => {
   const list = {
     0: 'badge-primary',
@@ -151,15 +154,28 @@ const colorBadge = (statusCode: number) => {
   return list[statusCode]
 }
 
-const handlePageChange = () => {
-  console.log('masuk')
+const setList = () => {
+  const result: ListPoTypes[] = []
+  for (const [index, item] of poList.value.entries()) {
+    const start = currentPage.value * pageSize.value - pageSize.value
+    const end = currentPage.value * pageSize.value - 1
+    if (index >= start && index <= end) {
+      result.push(item)
+    }
+  }
+  list.value = result
+}
+
+const setPage = (value: number) => {
+  currentPage.value = value
+  setList()
 }
 
 const setDataFilter = (data: filterListTypes) => {
   filterForm.status = data.status
   filterForm.date = data.date
   filterForm.companyCode = data.companyCode
-  filterForm.invoiceType = data.invoiceType
+  //   filterForm.invoiceType = data.invoiceType
   listCall()
 }
 
@@ -173,11 +189,18 @@ const listCall = () => {
       searchText: search.value,
     })
     .finally(() => {
-      console.log(nonPoList.value, 'list')
+      setList()
     })
 }
 
-const nonPoList = computed(() => invoiceSubmissionApi.listNonPo)
+const goAdd = (isPo: boolean) => {
+  router.push({
+    name: 'invoiceAdd',
+    query: {
+      type: isPo ? 'po' : 'nonpo',
+    },
+  })
+}
 
 onMounted(() => {
   listCall()

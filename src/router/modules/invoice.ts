@@ -10,6 +10,11 @@ export default [
         name: 'invoice-list',
         component: () => import('@/views/invoice/InvoiceWrapper/InvoiceList.vue'),
       },
+      {
+        path: 'list/non-po',
+        name: 'invoice-list-non-po',
+        component: () => import('@/views/invoice/InvoiceWrapper/InvoiceList.vue'),
+      },
     ],
   },
   {
@@ -46,10 +51,5 @@ export default [
     path: '/invoice/detail/edit',
     name: 'invoiceDetailEdit',
     component: () => import('@/views/invoiceDetailEdit/InvoiceDetailEdit.vue'),
-  },
-  {
-    path: '/invoice/vendor/list/submission',
-    name: 'vendor-list-submission',
-    component: () => import('@/views/vendorListSubmission/vendorListSubmission.vue'),
   },
 ]

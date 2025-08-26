@@ -195,6 +195,11 @@ export default [
         to: 'invoice',
       },
       {
+        id: 'invoice-list-non-po',
+        title: 'Invoice Non PO',
+        to: 'invoice-list-non-po',
+      },
+      {
         id: 'invoice-verification',
         title: 'Invoice Verification',
         to: 'invoiceVerification',
