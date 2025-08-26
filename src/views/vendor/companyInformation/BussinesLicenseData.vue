@@ -91,12 +91,46 @@ const userData = computed(() => loginApi.userData)
 const vendorLicensesPayload = ref<ILicense[]>([])
 const otherDocumentsPayload = ref<IOtherDocument[]>([])
 
+console.log(vendorLicenseData.data)
 watch(
   () => vendorLicenseData.data,
   (newData) => {
-    if (newData) {
-      vendorLicensesPayload.value = JSON.parse(JSON.stringify(newData))
+    if (!Array.isArray(newData)) {
+      vendorLicensesPayload.value = []
+      otherDocumentsPayload.value = []
+      return
     }
+
+    const licenses: ILicense[] = []
+    const others: IOtherDocument[] = []
+
+    newData.forEach((row: any) => {
+      if (row?.licenseId != null) {
+        // masuk ke licenses
+        licenses.push({
+          licenseId: row.licenseId,
+          licenseName: row.licenseName ?? '',
+          licenseNo: row.licenseNo ?? '',
+          documentUrl: row.documentUrl ?? '',
+          description: row.description ?? '',
+          issuedUTCDate: row.issuedUTCDate ?? null,
+          expiredUTCDate: row.expiredUTCDate ?? null,
+        } as ILicense)
+      } else {
+        // masuk ke other documents (mapping field secukupnya)
+        others.push({
+          documentName: row.licenseName ?? row.documentName ?? '',
+          documentNo: row.documentNo ?? row.licenseNo ?? '',
+          uploadUrl: row.uploadUrl ?? row.documentUrl ?? '',
+          description: row.description ?? '',
+          issuedDate: row.issuedDate ?? row.issuedUTCDate ?? null,
+          expiredDate: row.expiredDate ?? row.expiredUTCDate ?? null,
+        } as IOtherDocument)
+      }
+    })
+
+    vendorLicensesPayload.value = licenses
+    otherDocumentsPayload.value = others
   },
   { immediate: true },
 )
@@ -135,23 +169,27 @@ const saveData = async () => {
   const vendorId = route.params.id as string
   const updatedBy = userData.value?.profile.userName
 
-  const formattedVendorLicenses = vendorLicensesPayload.value.map((license) => ({
-    licenseId: license.licenseId,
-    licenseNo: license.licenseNo || 'string',
-    uploadUrl: license.documentUrl || 'string',
-    description: license.description || 'string',
-    issuedDate: formatToISOString(license.issuedUTCDate),
-    expiredDate: formatToISOString(license.expiredUTCDate),
-  }))
+  const formattedVendorLicenses = vendorLicensesPayload.value
+    .filter((license: any) => license.licenseId !== null)
+    .map((license) => ({
+      licenseId: license.licenseId,
+      licenseNo: license.licenseNo || 'string',
+      uploadUrl: license.documentUrl || 'string',
+      description: license.description || 'string',
+      issuedDate: formatToISOString(license.issuedUTCDate),
+      expiredDate: formatToISOString(license.expiredUTCDate),
+    }))
 
-  const formattedOtherDocuments = otherDocumentsPayload.value.map((doc) => ({
-    documentName: doc.documentName || 'string',
-    documentNo: doc.documentNo || 'string',
-    uploadUrl: doc.uploadUrl || 'string',
-    description: doc.description || 'string',
-    issuedDate: formatToISOString(doc.issuedDate),
-    expiredDate: formatToISOString(doc.expiredDate),
-  }))
+  const formattedOtherDocuments = otherDocumentsPayload.value
+    .filter((license: any) => license.licenseId === null)
+    .map((doc) => ({
+      documentName: doc.documentName || 'string',
+      documentNo: doc.documentNo || 'string',
+      uploadUrl: doc.uploadUrl || 'string',
+      description: doc.description || 'string',
+      issuedDate: formatToISOString(doc.issuedDate),
+      expiredDate: formatToISOString(doc.expiredDate),
+    }))
 
   const payload = {
     request: {
@@ -166,12 +204,15 @@ const saveData = async () => {
     await vendorLicenseData.updateData(payload)
     isOpenModalSuccess.value = true
   } catch (error: any) {
-    console.log(error);
+    console.log(error)
     isOpenModalError.value = true
   }
 }
 
 onMounted(() => {
   vendorLicenseData.getData(route.params.id as string)
+
+  console.log(vendorLicensesPayload)
+  console.log(otherDocumentsPayload)
 })
 </script>
