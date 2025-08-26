@@ -21,7 +21,7 @@
             <tr v-for="(item, index) in list?.workflow" :key="index" class="text-sm font-normal">
               <td>{{ index + 1 }}</td>
               <td>{{ item.profileName }}</td>
-              <td>{{ item.actionerDate && item.actioner !== 0 ? moment(item.actionerDate).format('DD MMMM YYYY HH:mm:ss') : '-' }}</td>
+              <td>{{ item.actionerDate && item.actioner !== 0 ? moment(item.actionerDate).format('YYYY/MM/DD HH:mm:ss') : '-' }}</td>
               <td>
                 <span v-if="item.stateCode === 99">-</span>
                 <span v-else class="badge badge-outline" :class="badgeColor(item.stateCode)">

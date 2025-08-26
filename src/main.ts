@@ -13,6 +13,7 @@ import VueDatePicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
 import VueApexCharts from 'vue3-apexcharts'
 import vSelect from 'vue-select'
+import 'vue-toastification/dist/index.css'
 
 const app = createApp(App)
 
