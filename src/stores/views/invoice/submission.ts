@@ -13,7 +13,8 @@ import type {
   ListPoTypes,
   QueryParamsListPoTypes,
   AvailableDpTypes,
-  RemainingDpTypes
+  RemainingDpTypes,
+  ParamsSubmissionNonPo
 } from './types/submission'
 
 export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => {
@@ -109,6 +110,12 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
     return response.data
   }
 
+  const postSubmissionNonPo = async (data: ParamsSubmissionNonPo) => {
+    const response: ApiResponse<void> = await invoiceApi.post(`/invoice/submission-non-po`, data)
+
+    return response.data
+  }
+
   return {
     submissionStatus,
     documentTypeList,
@@ -124,6 +131,7 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
     getListPo,
     getPoDetail,
     getAvailableDp,
-    getRemainingDp
+    getRemainingDp,
+    postSubmissionNonPo
   }
 })

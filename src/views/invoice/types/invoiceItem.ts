@@ -1,6 +1,6 @@
 export interface invoiceItemTypes {
   activity: string
-  itemAmount: string
+  itemAmount: number
   itemText: string
   debitCredit: string
   taxCode: string
