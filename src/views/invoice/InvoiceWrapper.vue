@@ -13,11 +13,21 @@
 import { ref } from 'vue'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
+import { useRoute } from 'vue-router'
 
-const routes = ref<routeTypes[]>([
-  {
+const route = useRoute()
+
+const routes = ref<routeTypes[]>([])
+
+if (route.name === 'invoice-list') {
+  routes.value.push({
     name: 'E-invoice',
-    to: '/invoice'
-  }
-])
+    to: '/invoice/list',
+  })
+} else {
+  routes.value.push({
+    name: 'Invoice Non PO',
+    to: '/invoice/list/non-po',
+  })
+}
 </script>

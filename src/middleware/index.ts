@@ -7,7 +7,8 @@ import loginAuth from './loginAuth'
 
 export default {
   install: (app: App<Element>) => {
-    app.use(vueMiddleware, {
+    // Cast vueMiddleware to any to avoid type incompatibility with the Plugin type
+    app.use(vueMiddleware as any, {
       middleware: { auth, guest, loginAuth },
     })
   },

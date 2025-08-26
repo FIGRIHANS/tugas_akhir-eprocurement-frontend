@@ -1,7 +1,12 @@
 <template>
   <div class="border border-gray-200 rounded-xl p-[24px]">
     <div class="flex justify-between gap-[8px]">
-      <UiInputSearch v-model="search" placeholder="Cari Invoice" class="w-[250px]" @keypress="goSearch" />
+      <UiInputSearch
+        v-model="search"
+        placeholder="Cari Invoice"
+        class="w-[250px]"
+        @keypress="goSearch"
+      />
       <FilterList :data="filterForm" @setData="setDataFilter" />
     </div>
 
@@ -9,7 +14,11 @@
       <table class="table align-middle text-gray-700 font-medium text-sm">
         <thead>
           <tr>
-            <th v-for="(item, index) in columns" :key="index" :class="index !== 0 ? 'list__long' : ''">
+            <th
+              v-for="(item, index) in columns"
+              :key="index"
+              :class="index !== 0 ? 'list__long' : ''"
+            >
               {{ item }}
             </th>
           </tr>
@@ -18,10 +27,16 @@
           <template v-for="(parent, index) in list" :key="index">
             <tr>
               <td class="flex items-center gap-[24px]">
-                <button class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]" @click="goView(parent)">
+                <button
+                  class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]"
+                  @click="goView(parent)"
+                >
                   <i class="ki-filled ki-eye !text-lg"></i>
                 </button>
-                <button class="btn btn-icon btn-outline btn-primary w-[21px] h-[21px]" @click="parent.isOpenChild = !parent.isOpenChild">
+                <button
+                  class="btn btn-icon btn-outline btn-primary w-[21px] h-[21px]"
+                  @click="parent.isOpenChild = !parent.isOpenChild"
+                >
                   <i v-if="!parent.isOpenChild" class="ki-filled ki-right !text-[9px]"></i>
                   <i v-else class="ki-filled ki-down !text-[9px]"></i>
                 </button>
@@ -39,7 +54,13 @@
               <td>{{ moment(parent.invoiceDate).format('YYYY/MM/DD') }}</td>
               <td>{{ useFormatIdr(parent.totalGrossAmount) }}</td>
               <td>{{ useFormatIdr(parent.totalNetAmount) }}</td>
-              <td>{{ parent.estimatedPaymentDate ? moment(parent.estimatedPaymentDate).format('YYYY/MM/DD') : '-' }}</td>
+              <td>
+                {{
+                  parent.estimatedPaymentDate
+                    ? moment(parent.estimatedPaymentDate).format('YYYY/MM/DD')
+                    : '-'
+                }}
+              </td>
             </tr>
             <tr v-show="parent.isOpenChild">
               <td></td>
@@ -72,8 +93,17 @@
     </div>
 
     <div class="flex items-center justify-between mt-[24px]">
-      <p class="m-0 text-sm">Tampilkan {{ pageSize * currentPage > poList.length ? poList.length : pageSize * currentPage }} data dari total data {{ poList.length }}</p>
-      <LPagination :totalItems="poList.length" :pageSize="pageSize" :currentPage="currentPage" @pageChange="setPage" />
+      <p class="m-0 text-sm">
+        Tampilkan
+        {{ pageSize * currentPage > poList.length ? poList.length : pageSize * currentPage }} data
+        dari total data {{ poList.length }}
+      </p>
+      <LPagination
+        :totalItems="poList.length"
+        :pageSize="pageSize"
+        :currentPage="currentPage"
+        @pageChange="setPage"
+      />
     </div>
   </div>
 </template>
@@ -102,7 +132,7 @@ const filterForm = reactive<filterListTypes>({
   status: '1',
   date: '',
   companyCode: '',
-  invoiceType: ''
+  invoiceType: '',
 })
 
 const columns = ref([
@@ -116,16 +146,10 @@ const columns = ref([
   'Invoice Date',
   'Total Gross Amount',
   'Total Net Amount',
-  'Estimated Payment Date'
+  'Estimated Payment Date',
 ])
 
-const columnsChild = ref([
-  'No PO',
-  'No GR',
-  'Item Description',
-  'Item Amount',
-  'Quantity'
-])
+const columnsChild = ref(['No PO', 'No GR', 'Item Description', 'Item Amount', 'Quantity'])
 
 const poList = computed(() => invoiceApi.listPo)
 
@@ -136,7 +160,7 @@ const colorBadge = (statusCode: number) => {
     2: 'badge-info',
     4: 'badge-success',
     5: 'badge-danger',
-    7: 'badge-primary'
+    7: 'badge-primary',
   } as { [key: number]: string }
   return list[statusCode]
 }
@@ -164,31 +188,33 @@ const goView = (data: ListPoTypes) => {
       name: 'invoiceAdd',
       query: {
         type: 'po',
-        invoice: data.invoiceUId
-      }
+        invoice: data.invoiceUId,
+      },
     })
   } else {
     router.push({
       name: 'invoiceAdd',
       query: {
         type: 'po-view',
-        invoice: data.invoiceUId
-      }
+        invoice: data.invoiceUId,
+      },
     })
   }
 }
 
 const callList = () => {
   list.value = []
-  invoiceApi.getListPo({
-    statusCode: filterForm.status === '0' || filterForm.status ? Number(filterForm.status) : 1,
-    companyCode: filterForm.companyCode,
-    invoiceTypeCode: Number(filterForm.invoiceType),
-    invoiceDate: filterForm.date,
-    searchText: search.value
-  }).finally(() => {
-    setListPo()
-  })
+  invoiceApi
+    .getListPo({
+      statusCode: filterForm.status === '0' || filterForm.status ? Number(filterForm.status) : 1,
+      companyCode: filterForm.companyCode,
+      invoiceTypeCode: Number(filterForm.invoiceType),
+      invoiceDate: filterForm.date,
+      searchText: search.value,
+    })
+    .finally(() => {
+      setListPo()
+    })
 }
 
 const setDataFilter = (data: filterListTypes) => {

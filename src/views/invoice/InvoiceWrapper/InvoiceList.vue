@@ -1,7 +1,7 @@
 <template>
   <div class="p-[24px]">
-    <div class="tabs mb-5">
-      <button class="tab px-[10px]" :class="{ 'active': tabNow === 'po' }" @click="setTab('po')">
+    <div class="tabs mb-5" v-if="checkPo()">
+      <button class="tab px-[10px]" :class="{ active: tabNow === 'po' }" @click="setTab('po')">
         Invoice PO
       </button>
 
@@ -11,16 +11,20 @@
       </button>
     </div>
     <div class="mt-[24px]">
-      <PoList />
+      <PoList v-if="checkPo()" />
+      <NoPoList v-else />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { ref, onMounted, defineAsyncComponent } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 
+const route = useRoute()
+
+const NoPoList = defineAsyncComponent(() => import('./invoiceList/noPoList.vue'))
 const PoList = defineAsyncComponent(() => import('./invoiceList/PoList.vue'))
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
@@ -36,7 +40,7 @@ const goAdd = (isPo: boolean) => {
     name: 'invoiceAdd',
     query: {
       type: isPo ? 'po' : 'nonpo',
-    }
+    },
   })
 }
 
@@ -44,6 +48,16 @@ onMounted(() => {
   invoiceMasterApi.getInvoicePoType()
   invoiceMasterApi.getCompanyCode()
 })
+
+const checkPo = () => {
+  console.log(route.name)
+
+  if (route.name === 'invoice-list') {
+    return true
+  } else {
+    return false
+  }
+}
 </script>
 
 <style lang="scss" scoped>
