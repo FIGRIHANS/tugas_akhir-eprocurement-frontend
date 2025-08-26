@@ -19,8 +19,8 @@
         Back</UiButton
       >
       <UiButton variant="primary" @click="openModalConfirm">
+        <UiIcon variant="duotone" name="file-added" />
         Save
-        <UiIcon variant="duotone" name="arrow-right" />
       </UiButton>
     </div>
 
