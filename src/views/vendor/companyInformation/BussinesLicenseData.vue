@@ -77,6 +77,29 @@ import { useLoginStore } from '@/stores/views/login'
 import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 import type { IPayloadRequestUpdateLicense } from '@/stores/vendor/types/bussines-license'
 
+interface IRowItem {
+  vendorId?: number
+  licenseId?: number | null
+  licenseName?: string | null
+  licenseNo?: string | null
+  documentUrl?: string | null
+  description?: string | null
+  issuedUTCDate?: string | null
+  expiredUTCDate?: string | null
+  issuedBy?: string | null
+  issuedLocation?: string | null
+  remark?: string | null
+  action?: string | null
+  isTemporary?: string | null
+  seq?: number | null
+  companyCategoryId?: number | null
+  documentName?: string | null
+  documentNo?: string | null
+  uploadUrl?: string | null
+  issuedDate?: string | null
+  expiredDate?: string | null
+}
+
 // modal confirm state
 const isOpenModalConfirmSave = ref(false)
 const isOpenModalSuccess = ref(false)
@@ -105,7 +128,7 @@ watch(
     const licenses: ILicense[] = []
     const others: IOtherDocument[] = []
 
-    newData.forEach((row: any) => {
+    newData.forEach((row: IRowItem) => {
       if (row?.licenseId != null) {
         // masuk ke licenses
         licenses.push({
@@ -116,7 +139,7 @@ watch(
           description: row.description ?? '',
           issuedUTCDate: row.issuedUTCDate ?? null,
           expiredUTCDate: row.expiredUTCDate ?? null,
-        } as ILicense)
+        } as unknown as ILicense)
       } else {
         // masuk ke other documents (mapping field secukupnya)
         others.push({
@@ -156,9 +179,9 @@ const onConfirmSave = async () => {
   isLoadingSubmit.value = true
 
   try {
-    const response = await saveData()
+    await saveData()
     isOpenModalConfirmSave.value = false
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.log('Error saving data:', err)
     isOpenModalConfirmSave.value = false
   } finally {
@@ -170,7 +193,7 @@ const saveData = async () => {
   const vendorId = route.params.id as string
   const updatedBy = userData.value?.profile.userName
 
-  const formattedVendorLicenses = vendorLicensesPayload.value.map((license) => ({
+  const formattedVendorLicenses = vendorLicensesPayload.value.map((license: IRowItem) => ({
     licenseId: license.licenseId,
     licenseNo: license.licenseNo || '',
     uploadUrl: license.documentUrl || '',
@@ -179,13 +202,13 @@ const saveData = async () => {
     expiredDate: formatToISOString(license.expiredUTCDate),
   }))
 
-  const formattedOtherDocuments = otherDocumentsPayload.value.map((doc) => ({
+  const formattedOtherDocuments = (otherDocumentsPayload.value as IOtherDocument[]).map((doc: IOtherDocument) => ({
     documentName: doc.documentName || 'string',
     documentNo: doc.documentNo || 'string',
     uploadUrl: doc.uploadUrl || 'string',
     description: doc.description || 'string',
-    issuedDate: formatToISOString(doc.issuedDate),
-    expiredDate: formatToISOString(doc.expiredDate),
+    issuedDate: formatToISOString(doc.issuedDate as string | Date | null),
+    expiredDate: formatToISOString(doc.expiredDate as string | Date | null),
   }))
 
   const payload: IPayloadRequestUpdateLicense = {
@@ -200,7 +223,7 @@ const saveData = async () => {
   try {
     await vendorLicenseData.updateData(payload)
     isOpenModalSuccess.value = true
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.log(error)
     isOpenModalError.value = true
   }

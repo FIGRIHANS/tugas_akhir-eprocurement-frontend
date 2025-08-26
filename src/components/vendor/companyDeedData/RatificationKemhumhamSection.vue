@@ -17,6 +17,7 @@ import type { IVendorLegalDocumentPayload } from '@/stores/vendor/types/vendor'
 import { useCompanyDeedDataStore } from '@/stores/vendor/vendor'
 import { useVendorUploadStore } from '@/stores/vendor/upload'
 import { useLoginStore } from '@/stores/views/login'
+import moment from 'moment'
 
 const vendorLegalDocStore = useCompanyDeedDataStore()
 const uploadStore = useVendorUploadStore()
@@ -59,7 +60,7 @@ const errors = reactive({
 
 /* ==== UI helpers: label & ikon tombol dinamis ==== */
 const isEditing = computed(() => mode.value === 'edit' || payload.id > 0)
-const submitLabel = computed(() => (isEditing.value ? 'Update' : 'Add'))
+const submitLabel = computed(() => (isEditing.value ? 'Save' : 'Add'))
 const submitIcon = computed(() => (isEditing.value ? 'notepad-edit' : 'plus-circle'))
 
 /* ==== Validasi & Util ==== */
@@ -330,7 +331,7 @@ const filteredRatifications = computed(() =>
               </div>
             </td>
             <td class="text-nowrap">{{ doc.documentNo }}</td>
-            <td class="text-nowrap">{{ doc.documentDate }}</td>
+            <td class="text-nowrap">{{ moment(doc.documentDate).format('DD MMMM YYYY') }}</td>
           </tr>
         </tbody>
       </table>
