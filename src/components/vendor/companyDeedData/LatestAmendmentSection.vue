@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
 
@@ -18,6 +18,7 @@ import { useCompanyDeedDataStore } from '@/stores/vendor/vendor'
 import { useVendorUploadStore } from '@/stores/vendor/upload'
 import { useLoginStore } from '@/stores/views/login'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
+import moment from 'moment'
 
 const vendorLegalDocStore = useCompanyDeedDataStore()
 const userLoginStore = useLoginStore()
@@ -26,13 +27,13 @@ const vendorMasterDataStore = useVendorMasterDataStore()
 
 const route = useRoute()
 
-const showSuccessModal = ref<boolean>(false)
-const showErrorModal = ref<boolean>(false)
+const showSuccessModal = ref(false)
+const showErrorModal = ref(false)
 const mode = ref<'add' | 'edit' | 'delete'>('add')
-const showDeleteModal = ref<boolean>(false)
-const apiErrorMessage = ref<string>('')
-const isDownloadLoading = ref<boolean>(false)
-const isSaveLoading = ref<boolean>(false)
+const showDeleteModal = ref(false)
+const apiErrorMessage = ref('')
+const isDownloadLoading = ref(false)
+const isSaveLoading = ref(false)
 
 const AMENDMENT_DOCUMENT_TYPE = 3116
 
@@ -46,7 +47,7 @@ const vendorAmendmentPayload = reactive<IVendorLegalDocumentPayload>({
   documentNo: '',
   documentDate: new Date(),
   notaryName: '',
-  notaryLocation: 0,
+  notaryLocation: 0, // <- harus cityID (number)
   user: '',
   isActive: true,
   isTemporary: true,
@@ -64,10 +65,25 @@ const errors = reactive({
 
 /* ===== UI helpers: tombol dinamis ===== */
 const isEditing = computed(() => mode.value === 'edit' || vendorAmendmentPayload.id > 0)
-const submitLabel = computed(() => (isEditing.value ? 'Update' : 'Add'))
+const submitLabel = computed(() => (isEditing.value ? 'Save' : 'Add'))
 const submitIcon = computed(() => (isEditing.value ? 'notepad-edit' : 'plus-circle'))
 
-/* ===== Validasi & util ===== */
+/* ===== Util ===== */
+const toNumber = (v: unknown) => (v === null || v === undefined || v === '' ? 0 : Number(v))
+
+/** Map dari payload/edit ke cityID:
+ * 1) Jika notaryLocation sudah number>0 -> pakai
+ * 2) Jika tidak, coba cari dari cityName / notaryLocationName di daftar kota
+ */
+const resolveNotaryLocationId = (data: { notaryLocation?: any; cityName?: string; notaryLocationName?: string }) => {
+  if (typeof data.notaryLocation === 'number' && data.notaryLocation > 0) return data.notaryLocation
+  const name = (data.cityName || data.notaryLocationName || '').toString().trim().toLowerCase()
+  if (!name) return 0
+  const hit = vendorMasterDataStore.cityList?.find((c: any) => c.cityName?.toLowerCase() === name)
+  return hit?.cityID ?? 0
+}
+
+/* ===== Validasi ===== */
 const validateForm = () => {
   let isValid = true
   errors.documentNo = ''
@@ -85,7 +101,7 @@ const validateForm = () => {
   if (!vendorAmendmentPayload.documentURL) {
     errors.documentURL = 'Document URL is required'; isValid = false
   }
-  if (!vendorAmendmentPayload.notaryLocation) {
+  if (!toNumber(vendorAmendmentPayload.notaryLocation)) {
     errors.notaryLocation = 'Notary location is required'; isValid = false
   }
   return isValid
@@ -136,6 +152,7 @@ const handleSave = async () => {
 
   try {
     isSaveLoading.value = true
+    vendorAmendmentPayload.notaryLocation = toNumber(vendorAmendmentPayload.notaryLocation) // pastikan number
     await vendorLegalDocStore.postVendorLegalDocument(vendorAmendmentPayload)
     await vendorLegalDocStore.getVendorLegalDocument(Number(route.params.id))
     showSuccessModal.value = true
@@ -159,7 +176,15 @@ const handleEdit = (id: number) => {
   )
   if (data) {
     Object.assign(vendorAmendmentPayload, data)
-    mode.value = 'edit' // mengubah tombol jadi Update
+    // Normalisasi: pastikan notaryLocation jadi cityID (number)
+    vendorAmendmentPayload.notaryLocation = toNumber(
+      resolveNotaryLocationId({
+        notaryLocation: (data as any).notaryLocation,
+        cityName: (data as any).cityName,
+        notaryLocationName: (data as any).notaryLocationName,
+      }),
+    )
+    mode.value = 'edit'
   }
 }
 
@@ -216,6 +241,31 @@ const filteredAmendmentData = computed(() =>
       item.isActive === true && item.documentType === AMENDMENT_DOCUMENT_TYPE,
   ),
 )
+
+/** Pastikan cityList tersedia; kalau store punya action loader, panggil di sini */
+onMounted(async () => {
+  if (!vendorMasterDataStore.cityList?.length && typeof vendorMasterDataStore.getCityList === 'function') {
+    try { await vendorMasterDataStore.getCityList() } catch {}
+  }
+})
+
+/** Jika cityList datang belakangan (async) dan kita sedang edit, re-map lagi supaya select terisi */
+watch(
+  () => vendorMasterDataStore.cityList,
+  (list) => {
+    if (!list?.length) return
+    if (mode.value === 'edit') {
+      vendorAmendmentPayload.notaryLocation = toNumber(
+        resolveNotaryLocationId({
+          notaryLocation: vendorAmendmentPayload.notaryLocation,
+          cityName: (vendorAmendmentPayload as any).cityName,
+          notaryLocationName: (vendorAmendmentPayload as any).notaryLocationName,
+        }),
+      )
+    }
+  },
+  { immediate: false },
+)
 </script>
 
 <template>
@@ -250,17 +300,12 @@ const filteredAmendmentData = computed(() =>
         <UiFormGroup hide-border>
           <UiSelect
             label="Notary Office Location"
-            placeholder="Select"
-            :options="
-              vendorMasterDataStore.cityList?.map((item) => ({
-                value: item.cityID,
-                label: item.cityName,
-              }))
-            "
+            placeholder="-- Notary Office Location --"
+            :options="vendorMasterDataStore.cityList?.map((item) => ({ value: item.cityID, label: item.cityName }))"
             value-key="value"
             text-key="label"
             row
-            v-model="vendorAmendmentPayload.notaryLocation"
+            v-model.number="vendorAmendmentPayload.notaryLocation"
             :error="errors.notaryLocation !== ''"
             :hintText="errors.notaryLocation"
           />
@@ -353,7 +398,7 @@ const filteredAmendmentData = computed(() =>
               </div>
             </td>
             <td class="text-nowrap">{{ doc.documentNo }}</td>
-            <td class="text-nowrap">{{ doc.documentDate }}</td>
+            <td class="text-nowrap">{{ moment(doc.documentDate).format('DD MMMM YYYY') }}</td>
             <td class="text-nowrap">{{ doc.notaryName ?? doc.value }}</td>
             <td class="text-nowrap">{{ doc.cityName }}</td>
           </tr>

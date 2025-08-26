@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, watch, onMounted } from 'vue'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
 import UiFormGroup from '@/components/ui/atoms/form-group/UiFormGroup.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
@@ -7,16 +7,17 @@ import UiFileUpload from '@/components/ui/atoms/file-upload/UiFileUpload.vue'
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
-import type { IAdministration, IVendorLegalDocumentPayload } from '@/stores/vendor/types/vendor'
-import { useCompanyDeedDataStore, useVendorAdministrationStore } from '@/stores/vendor/vendor'
-import { useRoute } from 'vue-router'
 import UiLoading from '@/components/UiLoading.vue'
-import { useLoginStore } from '@/stores/views/login'
-import { useVendorUploadStore } from '@/stores/vendor/upload'
 import UiModal from '@/components/modal/UiModal.vue'
 import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
-import axios from 'axios'
+import type { IAdministration, IVendorLegalDocumentPayload } from '@/stores/vendor/types/vendor'
+import { useCompanyDeedDataStore, useVendorAdministrationStore } from '@/stores/vendor/vendor'
+import { useVendorUploadStore } from '@/stores/vendor/upload'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
+import { useLoginStore } from '@/stores/views/login'
+import { useRoute } from 'vue-router'
+import axios from 'axios'
+import moment from 'moment'
 
 const vendorLegalDocStore = useCompanyDeedDataStore()
 const adminVendorStore = useVendorAdministrationStore()
@@ -26,13 +27,13 @@ const vendorMasterDataStore = useVendorMasterDataStore()
 
 const route = useRoute()
 
-const showSuccessModal = ref<boolean>(false)
-const showErrorModal = ref<boolean>(false)
+const showSuccessModal = ref(false)
+const showErrorModal = ref(false)
 const mode = ref<'add' | 'edit' | 'delete'>('add')
-const showDeleteModal = ref<boolean>(false)
-const apiErrorMessage = ref<string>('')
-const isDownloadLoading = ref<boolean>(false)
-const isSaveLoading = ref<boolean>(false)
+const showDeleteModal = ref(false)
+const apiErrorMessage = ref('')
+const isDownloadLoading = ref(false)
+const isSaveLoading = ref(false)
 
 const vendorLegalDocPayload = reactive<IVendorLegalDocumentPayload>({
   id: 0,
@@ -40,11 +41,11 @@ const vendorLegalDocPayload = reactive<IVendorLegalDocumentPayload>({
   filename: '',
   filesize: 0,
   documentURL: '',
-  documentType: 3115,
+  documentType: 3115, // Company Deed
   documentNo: '',
   documentDate: new Date(),
   notaryName: '',
-  notaryLocation: 0,
+  notaryLocation: 0, // <-- harus cityID (number)
   user: '',
   isActive: true,
   isTemporary: true,
@@ -52,7 +53,7 @@ const vendorLegalDocPayload = reactive<IVendorLegalDocumentPayload>({
   action: 0,
 })
 
-const administrationData = ref<IAdministration>(adminVendorStore.data!)
+const administrationData = ref<IAdministration>(adminVendorStore.data as IAdministration)
 
 const errors = reactive({
   documentNo: '',
@@ -63,8 +64,24 @@ const errors = reactive({
 })
 
 const isEditing = computed(() => mode.value === 'edit' || vendorLegalDocPayload.id > 0)
-const submitLabel = computed(() => (isEditing.value ? 'Update' : 'Add'))
+const submitLabel = computed(() => (isEditing.value ? 'Save' : 'Add'))
 const submitIcon = computed(() => (isEditing.value ? 'notepad-edit' : 'plus-circle'))
+
+const toNumber = (v: unknown) => (v === null || v === undefined || v === '' ? 0 : Number(v))
+
+const resolveNotaryLocationId = (data: {
+  notaryLocation?: string | number
+  cityName?: string
+  notaryLocationName?: string
+}) => {
+  if (typeof data.notaryLocation === 'number' && data.notaryLocation > 0) return data.notaryLocation
+  const name = (data.cityName || data.notaryLocationName || '').toString().trim().toLowerCase()
+  if (!name) return 0
+  const hit = vendorMasterDataStore.cityList?.find(
+    (c: { cityID: number; cityName: string }) => c.cityName?.toLowerCase() === name,
+  )
+  return hit?.cityID ?? 0
+}
 
 const resetForm = () => {
   Object.assign(vendorLegalDocPayload, {
@@ -96,19 +113,24 @@ const validateForm = () => {
   errors.notaryLocation = ''
 
   if (!vendorLegalDocPayload.documentNo) {
-    errors.documentNo = 'Document no is required'; isValid = false
+    errors.documentNo = 'Document no is required'
+    isValid = false
   }
   if (!vendorLegalDocPayload.notaryName) {
-    errors.notaryName = 'Notary name is required'; isValid = false
+    errors.notaryName = 'Notary name is required'
+    isValid = false
   }
   if (!vendorLegalDocPayload.documentURL) {
-    errors.documentURL = 'Document URL is required'; isValid = false
+    errors.documentURL = 'Document URL is required'
+    isValid = false
   }
   if (!vendorLegalDocPayload.documentDate) {
-    errors.documentDate = 'Document date is required'; isValid = false
+    errors.documentDate = 'Document date is required'
+    isValid = false
   }
-  if (!vendorLegalDocPayload.notaryLocation) {
-    errors.notaryLocation = 'Notary location is required'; isValid = false
+  if (!toNumber(vendorLegalDocPayload.notaryLocation)) {
+    errors.notaryLocation = 'Notary location is required'
+    isValid = false
   }
   return isValid
 }
@@ -133,6 +155,7 @@ const handleSave = async () => {
   if (!validateForm()) return
   try {
     isSaveLoading.value = true
+    vendorLegalDocPayload.notaryLocation = toNumber(vendorLegalDocPayload.notaryLocation) // pastikan number
     await vendorLegalDocStore.postVendorLegalDocument(vendorLegalDocPayload)
     await vendorLegalDocStore.getVendorLegalDocument(Number(route.params.id))
     showSuccessModal.value = true
@@ -159,6 +182,14 @@ const handleEdit = (id: number) => {
   )
   if (data) {
     Object.assign(vendorLegalDocPayload, data)
+    // Normalisasi: pastikan notaryLocation jadi cityID (number).
+    vendorLegalDocPayload.notaryLocation = toNumber(
+      resolveNotaryLocationId({
+        notaryLocation: (data as any).notaryLocation,
+        cityName: (data as any).cityName,
+        notaryLocationName: (data as any).notaryLocationName,
+      }),
+    )
     mode.value = 'edit'
   }
 }
@@ -217,6 +248,33 @@ const filteredCompanyDeedData = computed(() =>
   vendorLegalDocStore.vendorLegalDocData?.filter(
     (item: IVendorLegalDocumentPayload) => item.isActive === true && item.documentType === 3115,
   ),
+)
+
+/** Pastikan daftar kota tersedia (kalau store punya action loader) */
+onMounted(async () => {
+  if (!vendorMasterDataStore.cityList?.length) {
+    try {
+      await vendorMasterDataStore.cityList?.()
+    } catch {}
+  }
+})
+
+/** Jika cityList baru tersedia setelah edit, re-map notaryLocation agar select terisi benar */
+watch(
+  () => vendorMasterDataStore.cityList,
+  (list) => {
+    if (!list?.length) return
+    if (mode.value === 'edit') {
+      vendorLegalDocPayload.notaryLocation = toNumber(
+        resolveNotaryLocationId({
+          notaryLocation: vendorLegalDocPayload.notaryLocation,
+          cityName: (vendorLegalDocPayload as any).cityName,
+          notaryLocationName: (vendorLegalDocPayload as any).notaryLocationName,
+        }),
+      )
+    }
+  },
+  { immediate: false },
 )
 </script>
 
@@ -285,11 +343,11 @@ const filteredCompanyDeedData = computed(() =>
             value-key="value"
             text-key="label"
             row
-            v-model="vendorLegalDocPayload.notaryLocation"
+            v-model.number="vendorLegalDocPayload.notaryLocation"
             :error="errors.notaryLocation !== ''"
+            :hintText="errors.notaryLocation"
           />
 
-          <!-- Tombol dinamis: Add / Update -->
           <div class="flex justify-end items-center">
             <UiButton variant="primary" @click="handleSave" :disabled="isSaveLoading">
               <UiIcon variant="duotone" :name="submitIcon" />
@@ -368,7 +426,7 @@ const filteredCompanyDeedData = computed(() =>
               </div>
             </td>
             <td class="text-nowrap">{{ doc.documentNo }}</td>
-            <td class="text-nowrap">{{ doc.documentDate }}</td>
+            <td class="text-nowrap">{{ moment(doc.documentDate).format('DD MMMM YYYY') }}</td>
             <td class="text-nowrap">{{ doc.notaryName }}</td>
             <td class="text-nowrap">{{ doc.cityName }}</td>
           </tr>
@@ -390,7 +448,11 @@ const filteredCompanyDeedData = computed(() =>
     <!-- modal error -->
     <UiModal v-model="showErrorModal" size="sm">
       <div class="text-center mb-6">
-        <UiIcon name="cross-circle" variant="duotone" class="text-[150px] text-danger text-center" />
+        <UiIcon
+          name="cross-circle"
+          variant="duotone"
+          class="text-[150px] text-danger text-center"
+        />
       </div>
       <h3 class="text-center text-lg font-medium">
         Failed to {{ mode == 'delete' ? 'Delete' : mode === 'edit' ? 'Change' : 'Add' }} Vendor
@@ -404,7 +466,11 @@ const filteredCompanyDeedData = computed(() =>
     <!-- modal confirm delete -->
     <UiModal v-model="showDeleteModal" size="sm">
       <div class="text-center mb-6">
-        <UiIcon name="cross-circle" variant="duotone" class="text-[150px] text-danger text-center" />
+        <UiIcon
+          name="cross-circle"
+          variant="duotone"
+          class="text-[150px] text-danger text-center"
+        />
       </div>
       <h3 class="text-center text-lg font-medium">Are You Sure You Want to Delete This Item?</h3>
       <p class="text-center text-base text-gray-600 mb-5">
