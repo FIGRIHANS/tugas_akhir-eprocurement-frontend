@@ -75,6 +75,7 @@ import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import type { ILicense, IOtherDocument } from '@/stores/vendor/types/vendor'
 import { useLoginStore } from '@/stores/views/login'
 import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
+import type { IPayloadRequestUpdateLicense } from '@/stores/vendor/types/bussines-license'
 
 // modal confirm state
 const isOpenModalConfirmSave = ref(false)
@@ -169,29 +170,25 @@ const saveData = async () => {
   const vendorId = route.params.id as string
   const updatedBy = userData.value?.profile.userName
 
-  const formattedVendorLicenses = vendorLicensesPayload.value
-    .filter((license: any) => license.licenseId !== null)
-    .map((license) => ({
-      licenseId: license.licenseId,
-      licenseNo: license.licenseNo || 'string',
-      uploadUrl: license.documentUrl || 'string',
-      description: license.description || 'string',
-      issuedDate: formatToISOString(license.issuedUTCDate),
-      expiredDate: formatToISOString(license.expiredUTCDate),
-    }))
+  const formattedVendorLicenses = vendorLicensesPayload.value.map((license) => ({
+    licenseId: license.licenseId,
+    licenseNo: license.licenseNo || '',
+    uploadUrl: license.documentUrl || '',
+    description: license.description || '',
+    issuedDate: formatToISOString(license.issuedUTCDate),
+    expiredDate: formatToISOString(license.expiredUTCDate),
+  }))
 
-  const formattedOtherDocuments = otherDocumentsPayload.value
-    .filter((license: any) => license.licenseId === null)
-    .map((doc) => ({
-      documentName: doc.documentName || 'string',
-      documentNo: doc.documentNo || 'string',
-      uploadUrl: doc.uploadUrl || 'string',
-      description: doc.description || 'string',
-      issuedDate: formatToISOString(doc.issuedDate),
-      expiredDate: formatToISOString(doc.expiredDate),
-    }))
+  const formattedOtherDocuments = otherDocumentsPayload.value.map((doc) => ({
+    documentName: doc.documentName || 'string',
+    documentNo: doc.documentNo || 'string',
+    uploadUrl: doc.uploadUrl || 'string',
+    description: doc.description || 'string',
+    issuedDate: formatToISOString(doc.issuedDate),
+    expiredDate: formatToISOString(doc.expiredDate),
+  }))
 
-  const payload = {
+  const payload: IPayloadRequestUpdateLicense = {
     request: {
       vendorLicenses: formattedVendorLicenses,
       otherDocumentVendor: formattedOtherDocuments,
