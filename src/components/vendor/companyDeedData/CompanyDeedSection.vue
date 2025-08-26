@@ -62,9 +62,33 @@ const errors = reactive({
   notaryLocation: '',
 })
 
+const isEditing = computed(() => mode.value === 'edit' || vendorLegalDocPayload.id > 0)
+const submitLabel = computed(() => (isEditing.value ? 'Update' : 'Add'))
+const submitIcon = computed(() => (isEditing.value ? 'notepad-edit' : 'plus-circle'))
+
+const resetForm = () => {
+  Object.assign(vendorLegalDocPayload, {
+    id: 0,
+    vendorID: Number(route.params.id),
+    filename: '',
+    filesize: 0,
+    documentURL: '',
+    documentType: 3115,
+    documentNo: '',
+    documentDate: new Date(),
+    notaryName: '',
+    notaryLocation: 0,
+    user: '',
+    isActive: true,
+    isTemporary: true,
+    refVendorId: 0,
+    action: 0,
+  } as IVendorLegalDocumentPayload)
+  mode.value = 'add'
+}
+
 const validateForm = () => {
   let isValid = true
-
   errors.documentNo = ''
   errors.notaryName = ''
   errors.documentURL = ''
@@ -72,81 +96,60 @@ const validateForm = () => {
   errors.notaryLocation = ''
 
   if (!vendorLegalDocPayload.documentNo) {
-    errors.documentNo = 'Document no is required'
-    isValid = false
+    errors.documentNo = 'Document no is required'; isValid = false
   }
-
   if (!vendorLegalDocPayload.notaryName) {
-    errors.notaryName = 'Notary name is required'
-    isValid = false
+    errors.notaryName = 'Notary name is required'; isValid = false
   }
-
   if (!vendorLegalDocPayload.documentURL) {
-    errors.documentURL = 'Document URL is required'
-    isValid = false
+    errors.documentURL = 'Document URL is required'; isValid = false
   }
-
   if (!vendorLegalDocPayload.documentDate) {
-    errors.documentDate = 'Document date is required'
-    isValid = false
+    errors.documentDate = 'Document date is required'; isValid = false
   }
-
   if (!vendorLegalDocPayload.notaryLocation) {
-    errors.notaryLocation = 'Notary location is required'
-    isValid = false
+    errors.notaryLocation = 'Notary location is required'; isValid = false
   }
-
   return isValid
 }
 
 const onUploadFile = async (file: File) => {
   if (!file) return
-
   const formData = new FormData()
   formData.append('FormFile', file)
   formData.append('Actioner', userLoginStore.userData?.profile.profileId.toString() || '0')
-
   try {
     const response = await uploadStore.upload(formData)
-
     vendorLegalDocPayload.filename = response?.name as string
     vendorLegalDocPayload.documentURL = response?.path as string
     vendorLegalDocPayload.filesize = file.size
     errors.documentURL = ''
-  } catch (err) {
-    if (err instanceof Error) {
-      alert('File upload failed, please try again')
-    }
+  } catch {
+    alert('File upload failed, please try again')
   }
 }
 
 const handleSave = async () => {
-  if (validateForm()) {
+  if (!validateForm()) return
+  try {
+    isSaveLoading.value = true
     await vendorLegalDocStore.postVendorLegalDocument(vendorLegalDocPayload)
-
-    vendorLegalDocStore.getVendorLegalDocument(Number(route.params.id))
-
+    await vendorLegalDocStore.getVendorLegalDocument(Number(route.params.id))
     showSuccessModal.value = true
-
-    Object.assign(vendorLegalDocPayload, {
-      id: 0,
-      vendorID: Number(route.params.id),
-      filename: '',
-      filesize: 0,
-      documentURL: '',
-      documentType: 3115,
-      documentNo: '',
-      documentDate: new Date(),
-      notaryName: '',
-      notaryLocation: 0,
-      user: '',
-      isActive: true,
-      isTemporary: true,
-      refVendorId: 0,
-      action: 0,
-    })
-  } else {
-    console.error('Validasi gagal, mohon periksa kembali')
+    resetForm()
+  } catch (err) {
+    if (axios.isAxiosError(err)) {
+      if (err.response?.data?.result) {
+        apiErrorMessage.value = err.response.data.result.message
+      } else {
+        apiErrorMessage.value = 'Terjadi kesalahan tidak terduga. Silahkan coba lagi'
+      }
+    } else {
+      apiErrorMessage.value = 'Terjadi kesalahan saat menyimpan data. Silahkan coba lagi'
+    }
+    showErrorModal.value = true
+  } finally {
+    isSaveLoading.value = false
   }
 }
 
@@ -154,48 +157,43 @@ const handleEdit = (id: number) => {
   const data = vendorLegalDocStore.vendorLegalDocData.find(
     (item: IVendorLegalDocumentPayload) => item.id === id,
   )
-
   if (data) {
     Object.assign(vendorLegalDocPayload, data)
+    mode.value = 'edit'
   }
 }
 
 const handleDelete = (id: number) => {
   showDeleteModal.value = true
-
   const data = vendorLegalDocStore.vendorLegalDocData.find(
     (item: IVendorLegalDocumentPayload) => item.id === id,
   )
-
   if (data) {
     Object.assign(vendorLegalDocPayload, data)
+    mode.value = 'delete'
   }
 }
 
 const handleProcessDelete = async () => {
   try {
     isSaveLoading.value = true
-
-    const payloadToSend = {
-      ...vendorLegalDocPayload,
-      isActive: false,
-    }
-
+    const payloadToSend = { ...vendorLegalDocPayload, isActive: false }
     await vendorLegalDocStore.postVendorLegalDocument(payloadToSend)
     showDeleteModal.value = false
     showSuccessModal.value = true
-    vendorLegalDocStore.getVendorLegalDocument(Number(route.params.id))
+    await vendorLegalDocStore.getVendorLegalDocument(Number(route.params.id))
+    resetForm()
   } catch (err) {
     if (axios.isAxiosError(err)) {
-      if (err.response && err.response.data && err.response.data.result) {
-        const errorMsg = err.response.data.result.message
-        apiErrorMessage.value = errorMsg
+      if (err.response?.data?.result) {
+        apiErrorMessage.value = err.response.data.result.message
       } else {
         apiErrorMessage.value = 'Terjadi kesalahan tidak terduga. Silahkan coba lagi'
       }
     } else {
       apiErrorMessage.value = 'Terjadi kesalahan saat menghapus data. Silahkan coba lagi'
     }
+    showErrorModal.value = true
   } finally {
     isSaveLoading.value = false
   }
@@ -203,16 +201,13 @@ const handleProcessDelete = async () => {
 
 const handleDownload = async (path: string) => {
   isDownloadLoading.value = true
-
   try {
     const file = await uploadStore.preview(path)
     const link = URL.createObjectURL(file)
     window.open(link, '_blank')
     setTimeout(() => URL.revokeObjectURL(link), 1000)
-  } catch (err) {
-    if (err instanceof Error) {
-      alert('Failed to download document. Please try again later.')
-    }
+  } catch {
+    alert('Failed to download document. Please try again later.')
   } finally {
     isDownloadLoading.value = false
   }
@@ -232,6 +227,7 @@ const filteredCompanyDeedData = computed(() =>
         <h3 class="text-lg font-semibold text-slate-800">Company Deed Data</h3>
       </div>
     </div>
+
     <div class="card-body">
       <div class="space-y-6 mb-6">
         <div class="flex items-center gap-20">
@@ -240,9 +236,7 @@ const filteredCompanyDeedData = computed(() =>
         </div>
         <div class="flex items-center gap-20">
           <p class="text-sm text-slate-700">Company Address</p>
-          <p class="text-sm text-slate-700">
-            {{ administrationData?.addressCompanyDetail }}
-          </p>
+          <p class="text-sm text-slate-700">{{ administrationData?.addressCompanyDetail }}</p>
         </div>
       </div>
 
@@ -272,6 +266,7 @@ const filteredCompanyDeedData = computed(() =>
             @added-file="onUploadFile($event)"
           />
         </UiFormGroup>
+
         <UiFormGroup hide-border>
           <DatePicker
             v-model="vendorLegalDocPayload.documentDate"
@@ -293,10 +288,12 @@ const filteredCompanyDeedData = computed(() =>
             v-model="vendorLegalDocPayload.notaryLocation"
             :error="errors.notaryLocation !== ''"
           />
+
+          <!-- Tombol dinamis: Add / Update -->
           <div class="flex justify-end items-center">
-            <UiButton variant="primary" @click="handleSave">
-              <UiIcon variant="duotone" name="plus-circle" />
-              Add
+            <UiButton variant="primary" @click="handleSave" :disabled="isSaveLoading">
+              <UiIcon variant="duotone" :name="submitIcon" />
+              {{ submitLabel }}
             </UiButton>
           </div>
         </UiFormGroup>
@@ -313,26 +310,22 @@ const filteredCompanyDeedData = computed(() =>
           </tr>
         </thead>
         <tbody>
-          <!-- show loading -->
           <tr v-if="vendorLegalDocStore.vendorLegalDocLoading">
             <td colspan="5" class="text-center">
               <UiLoading size="md" />
             </td>
           </tr>
 
-          <!-- show error message -->
           <tr v-else-if="vendorLegalDocStore.vendorLegalDocError">
             <td colspan="5" class="text-center">
               {{ vendorLegalDocStore.vendorLegalDocError }}
             </td>
           </tr>
 
-          <!-- show message if there are no data -->
           <tr v-else-if="!vendorLegalDocStore.vendorLegalDocData.length">
             <td colspan="5" class="text-center">No data</td>
           </tr>
 
-          <!-- show data -->
           <tr
             v-else
             v-for="doc in filteredCompanyDeedData"
@@ -363,7 +356,7 @@ const filteredCompanyDeedData = computed(() =>
                       </button>
                     </li>
                     <li class="menu-item">
-                      <button class="menu-link" @click="handleDelete(doc)">
+                      <button class="menu-link" @click="handleDelete(doc.id)">
                         <span class="menu-icon">
                           <UiIcon variant="duotone" name="cross-circle" class="!text-danger" />
                         </span>
@@ -397,16 +390,11 @@ const filteredCompanyDeedData = computed(() =>
     <!-- modal error -->
     <UiModal v-model="showErrorModal" size="sm">
       <div class="text-center mb-6">
-        <UiIcon
-          name="cross-circle"
-          variant="duotone"
-          class="text-[150px] text-danger text-center"
-        />
+        <UiIcon name="cross-circle" variant="duotone" class="text-[150px] text-danger text-center" />
       </div>
       <h3 class="text-center text-lg font-medium">
-        Failed to
-        {{ mode == 'delete' ? 'Delete' : mode === 'edit' ? 'Change' : 'Add' }} Vendor legal
-        document!
+        Failed to {{ mode == 'delete' ? 'Delete' : mode === 'edit' ? 'Change' : 'Add' }} Vendor
+        legal document!
       </h3>
       <p class="text-center text-base text-gray-600 mb-5">
         {{ apiErrorMessage }}
@@ -416,11 +404,7 @@ const filteredCompanyDeedData = computed(() =>
     <!-- modal confirm delete -->
     <UiModal v-model="showDeleteModal" size="sm">
       <div class="text-center mb-6">
-        <UiIcon
-          name="cross-circle"
-          variant="duotone"
-          class="text-[150px] text-danger text-center"
-        />
+        <UiIcon name="cross-circle" variant="duotone" class="text-[150px] text-danger text-center" />
       </div>
       <h3 class="text-center text-lg font-medium">Are You Sure You Want to Delete This Item?</h3>
       <p class="text-center text-base text-gray-600 mb-5">
