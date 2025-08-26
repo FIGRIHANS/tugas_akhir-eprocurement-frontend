@@ -4,7 +4,7 @@ export const defaultField = [
   'Additional Cost',
   'Total Gross Amount',
   'WHT Amount',
-  'Total Net Amount'
+  'Total Net Amount',
 ]
 
 export const dpField = [
@@ -12,5 +12,5 @@ export const dpField = [
   'VAT Amount',
   'WHT Amount',
   'Total Gross Amount',
-  'Total Net Amount'
+  'Total Net Amount',
 ]

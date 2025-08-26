@@ -8,38 +8,32 @@
       <p class="text-lg font-semibold mb-[8px]">Filter</p>
       <div class="flex flex-col gap-[24px] py-[16px]">
         <div class="relative">
-          <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white">Status</label>
+          <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
+            >Status</label
+          >
           <select v-model="status" class="select" name="select">
-            <option value="1">
-              Waiting to Verify
-            </option>
-            <option value="0">
-              Draft
-            </option>
-            <option value="2">
-              Waiting for Approval
-            </option>
-            <option value="4">
-              Approved
-            </option>
-            <option value="5">
-              Rejected
-            </option>
-            <option value="7">
-              Sent to SAP
-            </option>
+            <option value="1">Waiting to Verify</option>
+            <option value="0">Draft</option>
+            <option value="2">Waiting for Approval</option>
+            <option value="4">Approved</option>
+            <option value="5">Rejected</option>
+            <option value="7">Sent to SAP</option>
           </select>
         </div>
         <div class="relative">
-          <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white">Company Code</label>
+          <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
+            >Company Code</label
+          >
           <select v-model="companyCode" class="select" name="select">
             <option v-for="item of companyCodeList" :key="item.code" :value="item.code">
               {{ item.name }}
             </option>
           </select>
         </div>
-        <div class="relative">
-          <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white">Invoice PO Type</label>
+        <div v-if="type !== 'non-po'" class="relative">
+          <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
+            >Invoice PO Type</label
+          >
           <select v-model="invoiceType" class="select" name="select">
             <option v-for="item of invoiceTypeList" :key="item.code" :value="item.code">
               {{ item.name }}
@@ -47,7 +41,10 @@
           </select>
         </div>
         <div class="relative">
-          <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white z-[1]">Invoice Date</label>
+          <label
+            class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white z-[1]"
+            >Invoice Date</label
+          >
           <DatePicker v-model="date" />
         </div>
       </div>
@@ -73,6 +70,7 @@ import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterDat
 
 const props = defineProps<{
   data: filterListTypes
+  type?: string
 }>()
 
 const emits = defineEmits(['setData'])
@@ -98,7 +96,7 @@ const goFilter = () => {
     status: status.value,
     date: date.value,
     companyCode: companyCode.value,
-    invoiceType: invoiceType.value
+    invoiceType: invoiceType.value,
   }
   emits('setData', data)
 }
@@ -113,7 +111,7 @@ watch(
   },
   {
     deep: true,
-    immediate: true
-  }
+    immediate: true,
+  },
 )
 </script>
