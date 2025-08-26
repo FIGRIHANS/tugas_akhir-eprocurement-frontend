@@ -7,7 +7,7 @@
         </h3>
       </div>
       <div class="modal-body flex flex-col justify-center items-center gap-[30px] p-[16px]">
-        <UiTextArea v-model="reason" label="Reason" placeholder="Enter reason" :error="isReasonError" required />
+        <UiTextArea v-model="reason" label="Reason" placeholder="Enter reason" class="w-full" :error="isReasonError" required />
         <div class="flex gap-[16px] w-full">
           <button class="btn btn-outline btn-primary btn-lg w-full justify-center" :disabled="verificationApi.isRejectLoading" data-modal-dismiss="true">
             <i class="ki-duotone ki-black-left-line"></i>

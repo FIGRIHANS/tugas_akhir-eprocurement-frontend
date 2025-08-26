@@ -51,12 +51,4 @@ export interface formTypes extends documentFormTypes {
   invoicePoGr: itemsPoGrType[]
   additionalCosts: itemsCostType[]
   invoiceItem: invoiceItemTypes[]
-
-  generalDataCheck?: boolean
-  bankKeyCheck?: boolean
-  invoiceHeaderDocumentCheck?: boolean
-  invoiceCalculationCheck?: boolean
-  invoicePoGrCheck?: boolean
-  invoiceItemCheck?: boolean
-  additionalCostCheck?: boolean
 }

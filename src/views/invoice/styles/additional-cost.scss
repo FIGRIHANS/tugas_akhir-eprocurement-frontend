@@ -24,7 +24,12 @@
     
     &--activity {
       @extend .cost__field-base;
-      min-width: 200px;
+      min-width: 350px;
+    }
+    
+    &--tax {
+      @extend .cost__field-base;
+      min-width: 350px;
     }
     
     &--item-amount {

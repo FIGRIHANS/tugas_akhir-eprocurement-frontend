@@ -15,13 +15,13 @@
     <div class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Invoice Date</p>
       <p class="font-normal text-sm">
-        {{ form.invoiceDate ? moment(form.invoiceDate).format('YYYYMMDD') : '-' }}
+        {{ form.invoiceDate ? moment(form.invoiceDate).format('YYYY/MM/DD') : '-' }}
       </p>
     </div>
     <div class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Posting Date</p>
       <p class="font-normal text-sm">
-        {{ form.postingDate ? moment(form.postingDate).format('YYYYMMDD') : '-' }}
+        {{ form.postingDate ? moment(form.postingDate).format('YYYY/MM/DD') : '-' }}
       </p>
     </div>
     <div class="flex items-center justify-between gap-[10px]">
@@ -45,7 +45,7 @@
     <div class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Estimated Payment Date</p>
       <p class="font-normal text-sm">
-        {{ form.estimatedPaymentDate ? moment(form.estimatedPaymentDate).format('YYYYMMDD') : '-' }}
+        {{ form.estimatedPaymentDate ? moment(form.estimatedPaymentDate).format('YYYY/MM/DD') : '-' }}
       </p>
     </div>
     <div class="flex items-center justify-between gap-[10px]">

@@ -14,6 +14,8 @@
               :key="index"
               class="cost__field-base"
               :class="{
+                'cost__field-base--activity': item.toLowerCase() === 'activity / expense',
+                'cost__field-base--tax': item.toLowerCase() === 'tax code',
                 'cost__field-base--cost': item.toLowerCase() === 'cost center',
                 'cost__field-base--description': item.toLowerCase() === 'description'
               }"
@@ -34,12 +36,16 @@
               </button>
             </td>
             <td>
-              <span v-if="!item.isEdit">{{ item.activityExpense }}</span>
-              <select v-else v-model="formEdit.activityExpense" class="select" placeholder="">
-                <option v-for="item of listActivity" :key="item.code" :value="item.code">
-                  {{ item.name }}
-                </option>
-              </select>
+              <span v-if="!item.isEdit">{{ getActivityName(item.activityExpense) }}</span>
+              <v-select
+                v-else
+                v-model="formEdit.activityExpense"
+                class="customSelect"
+                :get-option-label="(option: any) => `${option.code} - ${option.name}`"
+                :reduce="(option: any) => option.code"
+                :options="listActivity"
+                appendToBody
+              ></v-select>
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.itemAmount }}</span>
@@ -57,23 +63,31 @@
               </select>
             </td>
             <td>
-              <span v-if="!item.isEdit">{{ item.taxCode }}</span>
-              <select v-else v-model="formEdit.taxCode" class="select" placeholder="">
-                <option v-for="(option, index) in listTaxCalculation" :key="index" :value="option.code">
-                  {{ option.code }}
-                </option>
-              </select>
+              <span v-if="!item.isEdit">{{ getTaxCodeName(item.taxCode) }}</span>
+              <v-select
+                v-else
+                v-model="formEdit.taxCode"
+                class="customSelect"
+                :get-option-label="(option: any) => `${option.code} - ${option.name}`"
+                :reduce="(option: any) => option.code"
+                :options="listTaxCalculation"
+                appendToBody
+              ></v-select>
             </td>
               <td v-if="!checkPoPib()">
                 {{ form.currCode === 'IDR' ? useFormatIdr(item.isEdit ? formEdit.vatAmount : item.vatAmount) : useFormatUsd(item.isEdit ? formEdit.vatAmount : item.vatAmount) }}
               </td>
             <td>
-              <span v-if="!item.isEdit">{{ item.costCenter }}</span>
-              <select v-else v-model="formEdit.costCenter" class="select" placeholder="">
-                <option v-for="item of costCenterList" :key="item.code" :value="item.code">
-                  {{ item.code + ' - ' + item.name }}
-                </option>
-              </select>
+              <span v-if="!item.isEdit">{{ getCostCenterName(item.costCenter) }}</span>
+              <v-select
+                v-else
+                v-model="formEdit.costCenter"
+                class="customSelect"
+                :get-option-label="(option: any) => `${option.code} - ${option.name}`"
+                :reduce="(option: any) => option.code"
+                :options="costCenterList"
+                appendToBody
+              ></v-select>
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.profitCenter }}</span>
@@ -89,19 +103,28 @@
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.whtType }}</span>
-              <select v-else v-model="formEdit.whtType" class="select" placeholder="" @change="callWhtCode(item)">
-                <option v-for="item of whtTypeList" :key="item.code" :value="item.code">
-                  {{ item.name }}
-                </option>
-              </select>
+              <v-select
+                v-else
+                v-model="formEdit.whtType"
+                class="customSelect"
+                label="name"
+                :reduce="(option: any) => option.code"
+                :options="whtTypeList"
+                appendToBody
+                @update:modelValue="callWhtCode(item)"
+              ></v-select>
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.whtCode }}</span>
-              <select v-else v-model="formEdit.whtCode" class="select" placeholder="">
-                <option v-for="sub of item.whtCodeList" :key="sub.whtCode" :value="sub.whtCode">
-                  {{ sub.whtCode }}
-                </option>
-              </select>
+              <v-select
+                v-else
+                v-model="formEdit.whtCode"
+                class="customSelect"
+                label="whtCode"
+                :reduce="(option: any) => option.whtCode"
+                :options="whtCodeList"
+                appendToBody
+              ></v-select>
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.whtBaseAmount }}</span>
@@ -279,6 +302,29 @@ const getVatAmount = () => {
       item.vatAmount = result
     }
   }
+}
+
+const getCostCenterName = (costCenter: string) => {
+  const index = costCenterList.value.findIndex((item) => item.code === costCenter)
+  if (index !== -1) {
+    const data = costCenterList.value[index]
+    return `${data.code} - ${data.name}`
+  }
+  return '-'
+}
+
+const getActivityName = (code: string) => {
+  const getIndex = listActivity.value.findIndex((item) => item.code === code)
+  if (getIndex !== -1) return `${listActivity.value[getIndex].code} - ${listActivity.value[getIndex].name}`
+}
+
+const getTaxCodeName = (taxCode: string) => {
+  const index = listTaxCalculation.value.findIndex((item) => item.code === taxCode)
+  if (index !== -1) {
+    const data = listTaxCalculation.value[index]
+    return `${data.code} - ${data.name}`
+  }
+  return '-'
 }
 
 watch(

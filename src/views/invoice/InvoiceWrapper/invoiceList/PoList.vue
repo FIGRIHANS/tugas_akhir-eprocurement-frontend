@@ -51,13 +51,13 @@
               <td>{{ parent.documentNo }}</td>
               <td>{{ parent.companyCode }}</td>
               <td>{{ parent.invoiceTypeName }}</td>
-              <td>{{ moment(parent.invoiceDate).format('DD MMMM YYYY') }}</td>
+              <td>{{ moment(parent.invoiceDate).format('YYYY/MM/DD') }}</td>
               <td>{{ useFormatIdr(parent.totalGrossAmount) }}</td>
               <td>{{ useFormatIdr(parent.totalNetAmount) }}</td>
               <td>
                 {{
                   parent.estimatedPaymentDate
-                    ? moment(parent.estimatedPaymentDate).format('DD MMMM YYYY')
+                    ? moment(parent.estimatedPaymentDate).format('YYYY/MM/DD')
                     : '-'
                 }}
               </td>

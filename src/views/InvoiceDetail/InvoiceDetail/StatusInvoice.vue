@@ -28,7 +28,7 @@
       <div>
         <p class="text-[15px] font-semibold mb-[4px]">Successfully Rejected Invoice</p>
         <p class="text-[13px] font-medium text-danger">
-          The invoice has been rejected and returned to previous approval.
+          The invoice has been rejected and returned to submitter.
         </p>
       </div>
     </div>
@@ -44,25 +44,39 @@
       </div>
     </div>
 
-    <div v-if="status === 'reject' || status === 'return'" class="mt-[24px]">
+    <div v-if="props.statusCode === 5" class="mt-[24px]">
       <UiTextArea v-model="reason" label="Reason" disabled />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import UiTextArea from '@/components/ui/atoms/text-area/UiTextArea.vue'
 import SapLogo from './StatusInvoice/SapLogo.vue'
+import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 
 const props = defineProps<{
   statusCode: number
 }>()
 
 const route = useRoute()
-const status = ref<string>('sap')
-const reason = ref<string>('Invoice telah ditolak karena terdapat ketidaksesuaian dalam data yang dikirimkan. Beberapa kemungkinan penyebabnya termasuk perbedaan antara nomor invoice dan PO, kesalahan perhitungan pajak, dokumen pendukung yang tidak lengkap, atau perbedaan jumlah tagihan dengan barang yang diterima. Silakan tinjau alasan penolakan, lakukan koreksi yang diperlukan, dan ajukan kembali invoice untuk diproses lebih lanjut. ')
+const reason = ref<string>('')
+const verificationApi = useInvoiceVerificationStore()
+
+const detailInvoice = computed(() => verificationApi.detailInvoice)
+
+const getRejectReason = () => {
+  if (!detailInvoice.value) return
+  const index = detailInvoice.value.workflow.findIndex((item) => item.stateCode === 5)
+
+  if (index !== -1) reason.value = detailInvoice.value.workflow[index].actionerNotes
+}
+
+onMounted(() => {
+  getRejectReason()
+})
 </script>
 
 <style lang="scss" scoped>

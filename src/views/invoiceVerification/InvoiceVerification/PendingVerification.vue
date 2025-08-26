@@ -41,8 +41,8 @@
                 <td>{{ useFormatIdr(parent.totalNetAmount) || '-' }}</td>
                 <td>{{ parent.taxNo || '-' }}</td>
                 <td>{{ parent.documentNo || '-' }}</td>
-                <td>{{ parent.estimatedPaymentDate ? moment(parent.estimatedPaymentDate).format('DD MMMM YYYY') : '-' }}</td>
-                <td>{{ parent.invoiceDate ? moment(parent.invoiceDate).format('DD MMMM YYYY HH:mm:ss') : '-' }}</td>
+                <td>{{ parent.estimatedPaymentDate ? moment(parent.estimatedPaymentDate).format('YYYY/MM/DD') : '-' }}</td>
+                <td>{{ parent.invoiceDate ? moment(parent.invoiceDate).format('YYYY/MM/DD HH:mm:ss') : '-' }}</td>
                 <td>{{ parent.notes || '-' }}</td>
               </tr>
               <tr v-show="parent.isOpenChild">

@@ -182,6 +182,26 @@ const checkInvoiceInformation = () => {
     }
   }
 
+  status = checkTableItem()
+
+  return status
+}
+
+const checkTableItem = () => {
+  let status = true
+
+  for (const item of form.value.invoicePoGr) {
+    if (item.isEdit) status = false
+  }
+
+  for (const item of form.value.additionalCosts) {
+    if (item.isEdit) status = false
+  }
+
+  for (const item of form.value.invoiceItem) {
+    if (item.isEdit) status = false
+  }
+
   return status
 }
 
