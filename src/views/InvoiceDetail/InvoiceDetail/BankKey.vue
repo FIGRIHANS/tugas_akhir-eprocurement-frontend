@@ -2,7 +2,6 @@
   <div v-if="form" class="card">
     <div class="card-header py-[17px] flex items-center justify-between gap-[8px]">
       <h3 class="card-title text-base font-semibold">Payment Information</h3>
-      <input v-if="isNeedCheck" v-model="form.bankKeyCheck" class="checkbox" type="checkbox"/>
     </div>
     <div v-if="isNonPo" class="tabs">
       <button class="tab flex-1 justify-center" :class="{ 'active': tabActive === 'payment' }" @click="tabActive = 'payment'">
@@ -92,10 +91,6 @@
 <script lang="ts" setup>
 import { ref, inject } from 'vue'
 import type { formTypes } from '../types/invoiceDetail'
-
-defineProps<{
-  isNeedCheck: boolean
-}>()
 
 const form = inject<formTypes>('form')
 const tabActive = ref<string>('payment')

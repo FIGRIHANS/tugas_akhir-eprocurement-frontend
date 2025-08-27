@@ -74,15 +74,17 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, defineAsyncComponent } from 'vue'
+import { ref, reactive, defineAsyncComponent, onMounted, computed } from 'vue'
 import LPagination from '@/components/pagination/LPagination.vue'
 import type { filterListTypes } from './types/invoiceList'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import InputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import type { routeTypes } from '@/core/type/components/breadcrumb'
 const FilterList = defineAsyncComponent(() => import('./vendorListSubmission/FilterList.vue'))
-
+import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
+
+const invoiceSubmissionApi = useInvoiceSubmissionStore()
 
 // import UiModal from '@/components/modal/UiModal.vue'
 // import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
@@ -153,9 +155,33 @@ const handlePageChange = () => {
   console.log('masuk')
 }
 
-const setDataFilter = () => {
-  console.log('masuk')
+const setDataFilter = (data: filterListTypes) => {
+  filterForm.status = data.status
+  filterForm.date = data.date
+  filterForm.companyCode = data.companyCode
+  filterForm.invoiceType = data.invoiceType
+  listCall()
 }
+
+const listCall = () => {
+  invoiceSubmissionApi
+    .getListNonPo({
+      statusCode: filterForm.status === '0' || filterForm.status ? Number(filterForm.status) : 1,
+      companyCode: filterForm.companyCode,
+      invoiceTypeCode: Number(filterForm.invoiceType),
+      invoiceDate: filterForm.date,
+      searchText: search.value,
+    })
+    .finally(() => {
+      console.log(nonPoList.value, 'list')
+    })
+}
+
+const nonPoList = computed(() => invoiceSubmissionApi.listNonPo)
+
+onMounted(() => {
+  listCall()
+})
 
 // const isIndeterminate = computed(() => {
 //   return selectedItems.value.length > 0 && selectedItems.value.length < prData.value.length

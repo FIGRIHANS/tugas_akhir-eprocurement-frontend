@@ -15,6 +15,7 @@
               class="cost__field-base"
               :class="{
                 'cost__field-base--activity': item.toLowerCase() === 'activity / expense',
+                'cost__field-base--tax': item.toLowerCase() === 'tax code',
                 'cost__field-base--item-amount': item.toLowerCase() === 'item amount',
                 'cost__field-base--description': item.toLowerCase() === 'description'
               }"
@@ -40,11 +41,15 @@
               </td>
               <td>
                 <span v-if="!item.isEdit">{{ getActivityName(item.activity) || '-' }}</span>
-                <select v-else v-model="item.activity" class="select" placeholder="">
-                  <option v-for="item of listActivity" :key="item.code" :value="item.code">
-                    {{ item.name }}
-                  </option>
-                </select>
+                <v-select
+                  v-else
+                  v-model="item.activity"
+                  class="customSelect"
+                  :get-option-label="(option: any) => `${option.code} - ${option.name}`"
+                  :reduce="(option: any) => option.code"
+                  :options="listActivity"
+                  appendToBody
+                ></v-select>
               </td>
               <td>
                 <span v-if="!item.isEdit">{{ useFormatIdr(item.itemAmount) || '-' }}</span>
@@ -62,12 +67,16 @@
                 </select>
               </td>
               <td>
-                <span v-if="!item.isEdit">{{ item.taxCode || '-' }}</span>
-                <select v-else v-model="item.taxCode" class="select" placeholder="">
-                  <option v-for="(option, index) in listTaxCalculation" :key="index" :value="option.code">
-                    {{ option.code }}
-                  </option>
-                </select>
+                <span v-if="!item.isEdit">{{ getTaxCodeName(item.taxCode) || '-' }}</span>
+                <v-select
+                  v-else
+                  v-model="item.taxCode"
+                  class="customSelect"
+                  :get-option-label="(option: any) => `${option.code} - ${option.name}`"
+                  :reduce="(option: any) => option.code"
+                  :options="listTaxCalculation"
+                  appendToBody
+                ></v-select>
               </td>
               <td>
                 <span>{{ form?.currency === 'IDR' ? useFormatIdr(item.vatAmount) : useFormatUsd(item.vatAmount) }}</span>
@@ -152,7 +161,7 @@ const deleteItem = (index: number) => {
 
 const getActivityName = (code: string) => {
   const getIndex = listActivity.value.findIndex((item) => item.code === code)
-  if (getIndex !== -1) return listActivity.value[getIndex].name
+  if (getIndex !== -1) return `${listActivity.value[getIndex].code} - ${listActivity.value[getIndex].name}`
 }
 
 const getDebitCreditName = (code: string) => {
@@ -179,6 +188,15 @@ const getVatAmount = () => {
       item.vatAmount = result
     }
   }
+}
+
+const getTaxCodeName = (taxCode: string) => {
+  const index = listTaxCalculation.value.findIndex((item) => item.code === taxCode)
+  if (index !== -1) {
+    const data = listTaxCalculation.value[index]
+    return `${data.code} - ${data.name}`
+  }
+  return '-'
 }
 
 watch(

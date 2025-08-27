@@ -117,7 +117,7 @@ watch(
 <template>
   <div class="my-6">
     <div class="card">
-      <div class="card-body">
+      <div class="card-body overflow-auto">
         <div class="flex items-center gap-2 mb-2">
           <h2 class="text-lg font-semibold text-slate-700">Other Documents</h2>
           <div class="relative">
@@ -191,7 +191,7 @@ watch(
                     format="dd MM yyyy"
                     class="!w-48"
                     :disabled="localOtherDocuments[index]?.issuedDate ? false : true"
-                    :min-date="localOtherDocuments[index]?.issuedDate as string | Date | undefined"
+                    :min-date="localOtherDocuments[index]?.issuedDate"
                   />
                 </td>
                 <td class="align-top">

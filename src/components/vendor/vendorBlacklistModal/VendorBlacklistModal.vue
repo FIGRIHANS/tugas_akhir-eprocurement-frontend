@@ -1,26 +1,27 @@
 <script setup lang="ts">
 import UiModal from '@/components/modal/UiModal.vue'
 import type { IVendorBlacklistModalProps } from './types/vendorBlacklistModal'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import { useBlacklistPeriodStore } from '@/stores/vendor/reference'
 import { useVendorUploadStore } from '@/stores/vendor/upload'
 import UiLoading from '@/components/UiLoading.vue'
 import { useVendorStore } from '@/stores/vendor/vendor'
-import { formattoMySQL } from '@/core/utils/format'
 import axios from 'axios'
 import { isArray } from 'lodash'
 import { useLoginStore } from '@/stores/views/login'
 import type { UploadFileResponse } from '@/stores/general/types/upload'
-import { useRoute } from 'vue-router'
+import UiFormGroup from '@/components/ui/atoms/form-group/UiFormGroup.vue'
+import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
+import DatePicker from '@/components/datePicker/DatePicker.vue'
+import { formatDatePayload } from '@/composables/date-format'
+import UiTextarea from '@/components/ui/atoms/textarea/UiTextarea.vue'
 
 const periodStore = useBlacklistPeriodStore()
 const uploadStore = useVendorUploadStore()
 const vendorStore = useVendorStore()
 const userStore = useLoginStore()
-
-const route = useRoute()
 
 const props = defineProps<IVendorBlacklistModalProps>()
 const open = defineModel('open')
@@ -28,13 +29,25 @@ const modalSuccess = defineModel('success')
 const period = ref<string>('')
 const file = ref<File>()
 const reason = ref<string>('')
-const tglMulai = ref<Date>()
-const tglSelesai = ref<Date>()
+const tglMulai = ref<string>('')
+const tglSelesai = ref<string>('')
 const uploadedFile = ref<UploadFileResponse>()
 const inputError = ref<string[]>([])
 
 const loading = ref<boolean>(false)
 const error = ref<unknown>(null)
+
+const periodOpions = computed(() =>
+  periodStore.period.map((item) => ({
+    text: item.value,
+    value: item.code,
+  })),
+)
+
+const handleSelectPeriod = () => {
+  tglMulai.value = ''
+  tglSelesai.value = ''
+}
 
 const handleUpload = async () => {
   const formData = new FormData()
@@ -78,13 +91,12 @@ const handleSubmit = async () => {
       BlacklistTypeID: Number(period.value),
       CreatedBy: userStore.userData?.profile.employeeId.toString(),
       DocUrl: uploadedFile.value?.path,
-      EndDate: tglSelesai.value ? formattoMySQL(tglSelesai.value as Date) : '',
-      StartDate: tglMulai.value ? formattoMySQL(tglMulai.value as Date) : '',
+      EndDate: tglSelesai.value,
+      StartDate: tglMulai.value,
     })
 
     modalSuccess.value = true
     open.value = false
-    vendorStore.getVendors(route.query)
   } catch (err) {
     if (err instanceof Error) {
       if (axios.isAxiosError(err)) {
@@ -101,100 +113,92 @@ onMounted(periodStore.getPeriod)
 <template>
   <UiModal v-model="open" title="Blacklist Vendor" size="sm">
     <form action="" class="space-y-4" @submit.prevent="handleSubmit">
-      <div class="relative">
-        <label for="period" class="absolute top-0 left-0 -mt-2 ml-2 bg-white px-1 text-gray-500">
-          Period
-        </label>
-        <select id="period" v-model="period" class="select" required>
-          <option disabled value="">Select period</option>
-          <option v-for="item in periodStore.period" :key="item.code" :value="item.code">
-            {{ item.value }}
-          </option>
-        </select>
-        <span v-if="inputError.includes('period')">Period is Required</span>
-      </div>
-      <div v-if="period === `0`" class="flex gap-3 max-w-full">
-        <VueDatePicker v-model="tglMulai" class="w-full">
-          <template #dp-input="{ value }">
-            <div class="input relative">
-              <div
-                :class="[
-                  'absolute top-0 left-0 -mt-2 ml-2 bg-white px-1 text-gray-500 text-[11px] font-normal',
-                ]"
-              >
-                Start Date
-              </div>
-              <input :placeholder="'Select'" :value="value" readonly class="min-w-[0px]" />
-              <button class="btn btn-icon" type="button">
-                <i class="ki-filled ki-calendar"></i>
-              </button>
-            </div>
-            <span class="text-xs text-red-500" v-if="inputError.includes('tglMulai')">
-              Start Date is Required
-            </span>
-          </template>
-        </VueDatePicker>
-        <VueDatePicker v-model="tglSelesai" class="w-full">
-          <template #dp-input="{ value }">
-            <div class="input relative">
-              <div
-                :class="[
-                  'absolute top-0 left-0 -mt-2 ml-2 bg-white px-1 text-gray-500 text-[11px] font-normal',
-                ]"
-              >
-                End Date
-              </div>
-              <input :placeholder="'Select'" :value="value" readonly class="min-w-[0px]" />
-              <button class="btn btn-icon" type="button">
-                <i class="ki-filled ki-calendar"></i>
-              </button>
-            </div>
-            <span class="text-xs text-red-500" v-if="inputError.includes('tglSelesai')">
-              End Date is Required
-            </span>
-          </template>
-        </VueDatePicker>
-      </div>
-      <div class="flex rounded-md overflow-hidden border border-primary">
-        <label
-          for="file"
-          class="flex items-center px-3 text-primary bg-opacity-20 bg-blue-400 flex-1 cursor-pointer"
-        >
-          <div>{{ file ? file.name : 'Upload supporting files' }}</div>
-          <input
-            type="file"
-            name="file"
-            id="file"
-            hidden
-            :disabled="uploadStore.loading"
-            @input="file = ($event.target as HTMLInputElement)?.files?.[0]"
+      <!-- period -->
+      <UiSelect
+        v-model="period"
+        placeholder="Select Type"
+        label="Blacklist Type"
+        :options="periodOpions"
+        text-key="text"
+        value-key="value"
+        required
+        :hint-text="inputError.includes('period') ? 'Blacklist type is Required' : ''"
+        :error="inputError.includes('period')"
+        @update:model-value="handleSelectPeriod"
+      />
+
+      <!-- start date and end date -->
+      <UiFormGroup :grid="2" hide-border v-if="period === `0`">
+        <div class="relative">
+          <div
+            :class="[
+              'absolute z-10 top-0 left-0 -mt-2 ml-2 bg-white px-1 text-gray-500 text-[11px] font-normal',
+            ]"
+          >
+            Start Date
+          </div>
+          <DatePicker
+            v-model="tglMulai"
+            required
+            format="dd/MM/yyyy"
+            @update:model-value="tglMulai = $event ? formatDatePayload($event) : ''"
           />
-        </label>
-        <button
-          type="button"
-          class="h-10 bg-primary text-white flex items-center justify-center px-3 border border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-          @click="handleUpload"
-          :disabled="uploadStore.loading || !file"
-        >
-          <UiLoading size="sm" v-if="uploadStore.loading" />
-          <span v-else>Upload</span>
-        </button>
-      </div>
-      <span class="text-danger text-[12px]" v-if="uploadStore.error">{{ uploadStore.error }}</span>
-      <span class="text-success text-[12px]" v-if="uploadedFile?.name">Upload file success</span>
-      <div class="relative">
-        <label for="reason" class="absolute -mt-2 ml-2 px-1 text-gray-500 bg-white">
-          Reason <span class="text-danger">*</span>
-        </label>
-        <textarea
-          id="reason"
-          v-model="reason"
-          class="textarea textarea-lg"
-          rows="6"
+        </div>
+        <DatePicker
+          v-model="tglSelesai"
           required
-        ></textarea>
-        <span v-if="inputError.includes('reason')">Reason is Required</span>
+          format="dd/MM/yyyy"
+          @update:model-value="tglSelesai = $event ? formatDatePayload($event) : ''"
+        />
+      </UiFormGroup>
+
+      <!-- file -->
+      <div>
+        <div class="flex rounded-md overflow-hidden border border-primary">
+          <label
+            for="file"
+            class="flex items-center px-3 text-primary bg-opacity-20 bg-blue-400 flex-1 cursor-pointer"
+          >
+            <div>{{ file ? file.name : 'Upload supporting files' }}</div>
+            <input
+              type="file"
+              name="file"
+              id="file"
+              hidden
+              :disabled="uploadStore.loading"
+              @input="file = ($event.target as HTMLInputElement)?.files?.[0]"
+            />
+          </label>
+          <button
+            type="button"
+            class="h-10 bg-primary text-white flex items-center justify-center px-3 border border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="handleUpload"
+            :disabled="uploadStore.loading || !file"
+          >
+            <UiLoading size="sm" v-if="uploadStore.loading" />
+            <span v-else>Upload</span>
+          </button>
+        </div>
+        <span class="text-danger text-[12px]" v-if="uploadStore.error">{{
+          uploadStore.error
+        }}</span>
+        <span class="text-success text-[12px]" v-if="uploadedFile?.name">Upload file success</span>
       </div>
+
+      <!-- reason -->
+      <div class="relative">
+        <UiTextarea
+          v-model="reason"
+          label="Reason"
+          required
+          :error="inputError.includes('reason')"
+          :hint-text="inputError.includes('reason') ? 'Reason is Required' : ''"
+        />
+        <span class="form-hint !text-danger">
+          {{ inputError.includes('reason') ? 'Reason Required' : '' }}
+        </span>
+      </div>
+
       <div class="bg-red-100 border border-red-200 px-2 py-3 rounded-lg text-danger" v-if="error">
         <ul v-if="isArray(error)">
           <li v-for="err in error" :key="err">{{ err }}</li>

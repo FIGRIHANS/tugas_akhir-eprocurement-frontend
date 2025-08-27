@@ -72,7 +72,7 @@
                 <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentNo }}</td>
                 <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentItem }}</td>
                 <td v-if="!checkInvoiceDp() && !checkPoPib()">
-                  {{ form.status === 5 ? moment(item.grDocumentDate).format('YYYY') : item.grDocumentDate ? moment(item.grDocumentDate).format('DD MMMM YYYY') : item.grDocumentDate }}
+                  {{ form.status === 5 ? moment(item.grDocumentDate).format('YYYY') : item.grDocumentDate ? moment(item.grDocumentDate).format('YYYY/MM/DD') : item.grDocumentDate }}
                 </td>
                 <td v-if="!checkInvoiceDp()">{{ form.currency === item.currencyLC ? useFormatIdr(item.itemAmountLC) : useFormatUsd(item.itemAmountTC) }}</td>
                 <td v-if="!checkInvoiceDp()">{{ item.quantity }}</td>
@@ -92,11 +92,15 @@
                 </td>
                 <td>
                   <span v-if="!item.isEdit">{{ item.taxCode || '-' }}</span>
-                  <select v-if="item.isEdit" v-model="formEdit.taxCode" class="select" placeholder="">
-                    <option v-for="(option, index) in listTaxCalculation" :key="index" :value="option.code">
-                      {{ option.code }}
-                    </option>
-                  </select>
+                  <v-select
+                    v-else
+                    v-model="formEdit.taxCode"
+                    class="customSelect"
+                    label="code"
+                    :reduce="(option: any) => option.code"
+                    :options="listTaxCalculation"
+                    appendToBody
+                  ></v-select>
                 </td>
                 <td v-if="!checkPoPib()">
                   <span v-if="item.isEdit">{{ form?.currency === item.currencyLC ? useFormatIdr(formEdit.vatAmount) : useFormatUsd(formEdit.vatAmount) }}</span>

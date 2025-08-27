@@ -6,13 +6,15 @@ import VendorVerificationModal from './verificationModal/VendorVerificationModal
 import VendorBlacklistModal from './vendorBlacklistModal/VendorBlacklistModal.vue'
 import UiModal from '../modal/UiModal.vue'
 import successImg from '@/assets/success.svg'
-import { useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useLoginStore } from '@/stores/views/login'
+import { useVendorStore } from '@/stores/vendor/vendor'
 
 defineProps<{ id: string | number; name: string; email: string; status: number }>()
-const router = useRouter()
+const route = useRoute()
 
 const userStore = useLoginStore()
+const vendorStore = useVendorStore()
 
 const verificationModalOpen = ref<boolean>(false)
 const blacklistModalOpen = ref<boolean>(false)
@@ -21,7 +23,7 @@ const blacklistSuccessOpen = ref<boolean>(false)
 const isAdmin = computed(() => userStore.userData?.profile.profileId === 3192)
 
 const handleSuccess = () => {
-  router.replace({ name: 'vendor-list' })
+  vendorStore.getVendors(route.query)
 }
 </script>
 <template>

@@ -59,14 +59,14 @@
                 <td>
                   {{
                     parent.estimatedPaymentDate
-                      ? moment(parent.estimatedPaymentDate).format('DD MMMM YYYY')
+                      ? moment(parent.estimatedPaymentDate).format('YYYY/MM/DD')
                       : '-'
                   }}
                 </td>
                 <td>
                   {{
                     parent.invoiceDate
-                      ? moment(parent.invoiceDate).format('DD MMMM YYYY HH:mm:ss')
+                      ? moment(parent.invoiceDate).format('YYYY/MM/DD HH:mm:ss')
                       : '-'
                   }}
                 </td>

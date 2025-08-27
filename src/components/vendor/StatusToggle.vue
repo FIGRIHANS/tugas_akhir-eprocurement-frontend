@@ -6,11 +6,12 @@ import UiIcon from '../ui/atoms/icon/UiIcon.vue'
 import successImg from '@/assets/success.svg'
 import { useVendorStore } from '@/stores/vendor/vendor'
 import axios from 'axios'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useLoginStore } from '@/stores/views/login'
-import UiQuestion from '@/assets/svg/UiQuestion.vue'
+import LogoQuestionWhite from '@/assets/svg/LogoQuestionWhite.vue'
+import UiLoading from '../UiLoading.vue'
+import ModalError from '@/views/vendor/blacklist/components/ModalError.vue'
 
-const router = useRouter()
 const route = useRoute()
 // store
 const vendorStore = useVendorStore()
@@ -20,6 +21,7 @@ const props = defineProps<{ id: string | number; status: boolean; name: string }
 const modalDeactive = ref(false)
 const modalActivate = ref<boolean>(false)
 const modalSuccess = ref(false)
+const modalError = ref(false)
 
 // refs
 const reason = ref<string>('')
@@ -29,30 +31,25 @@ const loading = ref<boolean>(false)
 const error = ref<string>('')
 
 const handleSubmit = async () => {
-  if (!reason.value) {
-    inputError.value.push('reason')
-    return
-  }
-
   loading.value = true
   error.value = ''
   try {
     await vendorStore.deactiveVendor({
       vendorId: Number(props.id),
-      reason: reason.value,
+      reason: 'deactivated',
       employeeId: userStore.userData?.profile.employeeId.toString() as string,
     })
     isChecked.value = false
-    modalDeactive.value = false
     modalSuccess.value = true
-    vendorStore.getVendors(route.query)
   } catch (err) {
     if (err instanceof Error) {
       if (axios.isAxiosError(err)) {
         error.value = err.response?.data.result.message || 'Failed to deactive vendor'
       }
+      modalError.value = true
     }
   } finally {
+    modalDeactive.value = false
     loading.value = false
   }
 }
@@ -73,16 +70,16 @@ const handleSubmitActivate = async () => {
     }
 
     isChecked.value = true
-    modalActivate.value = false
     modalSuccess.value = true
-    vendorStore.getVendors(route.query)
   } catch (err) {
     if (err instanceof Error) {
       if (axios.isAxiosError(err)) {
         error.value = err.response?.data.result.message || 'Failed to activate vendor'
       }
+      modalError.value = true
     }
   } finally {
+    modalActivate.value = false
     loading.value = false
   }
 }
@@ -105,7 +102,7 @@ const handleChange = () => {
 }
 
 const handleSuccess = () => {
-  router.replace({ name: 'vendor-list' })
+  vendorStore.getVendors(route.query)
 }
 
 onMounted(() => {
@@ -131,44 +128,23 @@ onMounted(() => {
   <UiModal
     v-if="modalDeactive"
     v-model="modalDeactive"
-    :title="`Deactive Vendor ${name}`"
     size="sm"
     @update:model-value="handleCancel"
   >
     <form action="" @submit.prevent="handleSubmit" class="space-y-4">
-      <div class="relative">
-        <label
-          for="reason"
-          class="absolute -mt-2 ml-2 px-1 bg-white text-gray-500"
-          :class="{ '!text-danger': inputError.includes('reason') }"
-        >
-          Reason <span class="text-danger">*</span>
-        </label>
-        <textarea
-          v-model="reason"
-          class="textarea"
-          :class="{ 'border-danger': inputError.includes('reason') }"
-          rows="5"
-          id="reason"
-        ></textarea>
-        <span v-if="inputError.includes('reason')" class="text-danger text-sm font-medium">
-          Reason is Required
-        </span>
-      </div>
-      <div class="card bg-danger-clarity shadow-none" v-if="error">
-        <div class="card-body p-3 text-danger">{{ error }}</div>
-      </div>
+      <LogoQuestionWhite class="mx-auto" />
+      <h3 class="font-medium text-lg text-gray-800 text-center">
+        Do you want to Deactivate this vendor?
+      </h3>
       <div class="flex gap-3">
         <UiButton class="flex-1 justify-center" :outline="true" type="button" @click="handleCancel">
           <UiIcon name="black-left-line" variant="duotone" />
           <span>Cancel</span>
         </UiButton>
         <UiButton class="flex-1 justify-center" variant="danger" :disabled="loading">
-          <span v-if="loading">Progress</span>
-          <template v-else>
-            <UiIcon name="cross-circle" variant="duotone" />
-            <span>Deactive</span>
-          </template>
+          <UiLoading variant="white" v-if="loading" />
+          <UiIcon name="cross-circle" variant="duotone" v-else />
+          <span>Deactivate</span>
         </UiButton>
       </div>
     </form>
@@ -178,13 +154,14 @@ onMounted(() => {
   <UiModal
     v-if="modalActivate"
     v-model="modalActivate"
-    title="Activate Vendor"
     @update:model-value="handleCancel"
     size="sm"
   >
     <div class="space-y-5">
-      <UiQuestion class="mx-auto w-56" />
-      <h3 class="font-medium text-lg text-gray-800 text-center">Activate vendor?</h3>
+      <LogoQuestionWhite class="mx-auto" />
+      <h3 class="font-medium text-lg text-gray-800 text-center">
+        Do you want to Activate this vendor?
+      </h3>
       <div class="flex gap-3">
         <UiButton class="flex-1 justify-center" :outline="true" type="button" @click="handleCancel">
           <UiIcon name="black-left-line" variant="duotone" />
@@ -196,11 +173,9 @@ onMounted(() => {
           :disabled="loading"
           @click="handleSubmitActivate"
         >
-          <span v-if="loading">Progress</span>
-          <template v-else>
-            <UiIcon name="cross-circle" variant="duotone" />
-            <span>Activate</span>
-          </template>
+          <UiLoading variant="white" v-if="loading" />
+          <UiIcon name="cross-circle" variant="duotone" v-else />
+          <span>Activate</span>
         </UiButton>
       </div>
       <div class="badge badge-outline badge-lg badge-danger" v-if="error">{{ error }}</div>
@@ -215,6 +190,19 @@ onMounted(() => {
     </h3>
     <p class="text-gray-600 text-center mb-3">
       Vendor has been successfully {{ props.status ? 'Deactivated' : 'Activated' }}.
+    </p>
+  </UiModal>
+
+  <!-- error modal -->
+  <UiModal v-if="modalError" v-model="ModalError" size="sm">
+    <div class="text-center mb-6">
+      <UiIcon name="cross-circle" variant="duotone" class="text-[150px] text-danger text-center" />
+    </div>
+    <h3 class="text-center text-lg font-medium">
+      Failed to {{ props.status ? 'Deactivated' : 'Activated' }} vendor!
+    </h3>
+    <p class="text-center text-base text-gray-600">
+      Please try again later or contact support if the problem persists.
     </p>
   </UiModal>
 </template>
