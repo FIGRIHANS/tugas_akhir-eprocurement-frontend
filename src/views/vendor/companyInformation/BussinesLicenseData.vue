@@ -115,7 +115,6 @@ const userData = computed(() => loginApi.userData)
 const vendorLicensesPayload = ref<ILicense[]>([])
 const otherDocumentsPayload = ref<IOtherDocument[]>([])
 
-console.log(vendorLicenseData.data)
 watch(
   () => vendorLicenseData.data,
   (newData) => {
@@ -130,7 +129,6 @@ watch(
 
     newData.forEach((row: IRowItem) => {
       if (row?.licenseId != null) {
-        // masuk ke licenses
         licenses.push({
           licenseId: row.licenseId,
           licenseName: row.licenseName ?? '',
@@ -139,9 +137,9 @@ watch(
           description: row.description ?? '',
           issuedUTCDate: row.issuedUTCDate ?? null,
           expiredUTCDate: row.expiredUTCDate ?? null,
+          seq: row.seq ?? null,
         } as unknown as ILicense)
       } else {
-        // masuk ke other documents (mapping field secukupnya)
         others.push({
           documentName: row.licenseName ?? row.documentName ?? '',
           documentNo: row.documentNo ?? row.licenseNo ?? '',
@@ -149,8 +147,31 @@ watch(
           description: row.description ?? '',
           issuedDate: row.issuedDate ?? row.issuedUTCDate ?? null,
           expiredDate: row.expiredDate ?? row.expiredUTCDate ?? null,
+          seq: row.seq ?? null,
         } as IOtherDocument)
       }
+    })
+
+    const toNum = (v: unknown) => {
+      if (v === null || v === undefined || v === '') return Number.POSITIVE_INFINITY
+      const n = Number(v)
+      return Number.isNaN(n) ? Number.POSITIVE_INFINITY : n
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    licenses.sort((a: any, b: any) => {
+      const sa = toNum(a.seq)
+      const sb = toNum(b.seq)
+      if (sa !== sb) return sa - sb
+      return (a.licenseName || '').localeCompare(b.licenseName || '')
+    })
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    others.sort((a: any, b: any) => {
+      const sa = toNum(a.seq)
+      const sb = toNum(b.seq)
+      if (sa !== sb) return sa - sb
+      return (a.documentName || '').localeCompare(b.documentName || '')
     })
 
     vendorLicensesPayload.value = licenses
@@ -202,14 +223,16 @@ const saveData = async () => {
     expiredDate: formatToISOString(license.expiredUTCDate),
   }))
 
-  const formattedOtherDocuments = (otherDocumentsPayload.value as IOtherDocument[]).map((doc: IOtherDocument) => ({
-    documentName: doc.documentName || 'string',
-    documentNo: doc.documentNo || 'string',
-    uploadUrl: doc.uploadUrl || 'string',
-    description: doc.description || 'string',
-    issuedDate: formatToISOString(doc.issuedDate as string | Date | null),
-    expiredDate: formatToISOString(doc.expiredDate as string | Date | null),
-  }))
+  const formattedOtherDocuments = (otherDocumentsPayload.value as IOtherDocument[]).map(
+    (doc: IOtherDocument) => ({
+      documentName: doc.documentName || 'string',
+      documentNo: doc.documentNo || 'string',
+      uploadUrl: doc.uploadUrl || 'string',
+      description: doc.description || 'string',
+      issuedDate: formatToISOString(doc.issuedDate as string | Date | null),
+      expiredDate: formatToISOString(doc.expiredDate as string | Date | null),
+    }),
+  )
 
   const payload: IPayloadRequestUpdateLicense = {
     request: {
@@ -231,8 +254,5 @@ const saveData = async () => {
 
 onMounted(() => {
   vendorLicenseData.getData(route.params.id as string)
-
-  console.log(vendorLicensesPayload)
-  console.log(otherDocumentsPayload)
 })
 </script>
