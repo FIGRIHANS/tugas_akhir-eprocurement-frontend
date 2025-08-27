@@ -3,6 +3,7 @@ import LogoSAP from '@/assets/svg/LogoSAP.vue'
 import UiModal from '@/components/modal/UiModal.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
+import UiLoading from '@/components/UiLoading.vue'
 import { useApprovalStore } from '@/stores/vendor/approval'
 import { useLoginStore } from '@/stores/views/login'
 import { isAxiosError } from 'axios'
@@ -77,11 +78,9 @@ watch(isSent, (value) => {
 
 <template>
   <UiButton @click="handleSend" :disabled="loading">
-    <span v-if="loading">Progress</span>
-    <template v-else>
-      <UiIcon name="paper-plane" variant="duotone" />
-      <span class="text-nowrap">Send to SAP</span>
-    </template>
+    <UiLoading variant="white" v-if="loading" />
+    <UiIcon name="paper-plane" variant="duotone" v-else />
+    <span class="text-nowrap">Send to SAP</span>
   </UiButton>
 
   <UiModal v-model="modalSuccess" size="sm" @update:model-value="handleClose">
