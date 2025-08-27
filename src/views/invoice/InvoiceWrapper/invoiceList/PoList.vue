@@ -1,13 +1,19 @@
 <template>
   <div class="border border-gray-200 rounded-xl p-[24px]">
-    <div class="flex justify-between gap-[8px]">
-      <UiInputSearch
-        v-model="search"
-        placeholder="Cari Invoice"
-        class="w-[250px]"
-        @keypress="goSearch"
-      />
-      <FilterList :data="filterForm" @setData="setDataFilter" />
+    <div class="flex justify-between align-items-center gap-[8px]">
+      <h1>Invoice PO</h1>
+      <div class="flex align-items-center gap-3">
+        <UiInputSearch
+          v-model="search"
+          placeholder="Search"
+          @keypress="goSearch"
+        />
+        <FilterList :data="filterForm" @setData="setDataFilter" />
+        <button class="btn btn-primary ml-auto" @click="goAdd()">
+          <i class="ki-duotone ki-plus-circle"></i>
+          Add Invoice
+        </button>
+      </div>
     </div>
 
     <div class="overflow-x-auto list__table mt-[24px]">
@@ -24,6 +30,9 @@
           </tr>
         </thead>
         <tbody>
+          <tr v-if="poList?.length === 0">
+            <td colspan="10" class="text-center">No data found.</td>
+          </tr>
           <template v-for="(parent, index) in list" :key="index">
             <tr>
               <td class="flex items-center gap-[24px]">
@@ -229,6 +238,15 @@ const goSearch = (event: KeyboardEvent) => {
   if (event.key === 'Enter') {
     callList()
   }
+}
+
+const goAdd = () => {
+  router.push({
+    name: 'invoiceAdd',
+    query: {
+      type: 'po',
+    },
+  })
 }
 
 onMounted(() => {
