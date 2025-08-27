@@ -26,7 +26,7 @@
         </template>
       </div>
       <!-- Vendor No -->
-      <div v-if="checkIsNonPo()" class="flex items-baseline flex-wrap lg:flex-nowrap py-[8px]">
+      <div v-if="checkIsNonPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Vendor No.
           <span class="text-red-500 ml-[4px]">*</span>
