@@ -10,7 +10,6 @@ import { useRoute } from 'vue-router'
 import { useLoginStore } from '@/stores/views/login'
 import LogoQuestionWhite from '@/assets/svg/LogoQuestionWhite.vue'
 import UiLoading from '../UiLoading.vue'
-import ModalError from '@/views/vendor/blacklist/components/ModalError.vue'
 
 const route = useRoute()
 // store
@@ -194,7 +193,7 @@ onMounted(() => {
   </UiModal>
 
   <!-- error modal -->
-  <UiModal v-if="modalError" v-model="ModalError" size="sm">
+  <UiModal v-if="modalError" v-model="modalError" size="sm">
     <div class="text-center mb-6">
       <UiIcon name="cross-circle" variant="duotone" class="text-[150px] text-danger text-center" />
     </div>
