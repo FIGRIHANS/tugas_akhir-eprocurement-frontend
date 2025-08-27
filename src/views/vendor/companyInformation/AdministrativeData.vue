@@ -22,6 +22,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import questionImg from '@/assets/question-alt.svg'
 import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
+import UiFileUpload from '@/components/ui/atoms/file-upload/UiFileUpload.vue'
 
 const adminStore = useVendorAdministrationStore()
 const uploadStore = useVendorUploadStore()
@@ -38,6 +39,7 @@ const saveLoading = ref<boolean>(false)
 const confirmModal = ref<boolean>(false)
 const successModal = ref<boolean>(false)
 const errorModal = ref<boolean>(false)
+const uploadLoading = ref<boolean>(false)
 
 const countryOptions = computed<CountryListType>(() => lookupStore.countryList)
 const stateOptions = computed<ProvinceListType>(() => lookupStore.provinceList)
@@ -49,12 +51,32 @@ const currencyOptions = computed<CurrencyListType>(() =>
   })),
 )
 
+const handleUpload = async (file: File) => {
+  if (!file) return
+  const formDataFile = new FormData()
+  formDataFile.append('FormFile', file)
+  formDataFile.append('Actioner', userStore.userData?.profile.profileId.toString() || '0')
+
+  try {
+    uploadLoading.value = true
+    const response = await uploadStore.upload(formDataFile)
+    administrationData.value.npwpUrl = response?.path as string
+  } catch (error) {
+    if (error instanceof Error) {
+      alert('File upload failed. Please try again.')
+    }
+  } finally {
+    uploadLoading.value = false
+  }
+}
+
 const handleCancel = () => {
   if (adminStore.data) {
     administrationData.value = {
       ...adminStore.data,
     }
   }
+  errorFields.value = []
   mode.value = 'view'
 }
 
@@ -68,12 +90,21 @@ const handleDoneEdit = () => {
     currencySymbol: administrationData.value.currencySymbol,
     emailUser: administrationData.value.userEmail,
     npwpNo: administrationData.value.npwp,
-    npwpUrl: adminStore.data?.npwpUrl ?? '',
+    npwpUrl: administrationData.value.npwpUrl,
     updatedBy: userStore.userData?.profile.employeeName ?? '',
     vendorPhone: administrationData.value.vendorPhone,
     vendorWebsite: administrationData.value.vendorWebsite,
   }
   errorFields.value = checkEmptyValues(editPayload.value)
+
+  //website optional
+  errorFields.value = errorFields.value.filter(
+    (field) => !['vendorWebsite', 'companyGroup'].includes(field),
+  )
+  // npwp opsional kalau category tidak PKP
+  if (administrationData.value.companyCategoryId !== 1) {
+    errorFields.value = errorFields.value.filter((field) => !['npwpNo', 'npwpUrl'].includes(field))
+  }
 
   if (errorFields.value.length > 0) {
     return
@@ -196,7 +227,7 @@ onMounted(() => {
         <div class="space-x-3" v-else>
           <UiButton variant="primary" @click="handleDoneEdit">
             <UiIcon name="check-circle" variant="duotone" />
-            <span class="font-medium">Save</span>
+            <span class="font-medium">Done</span>
           </UiButton>
           <UiButton variant="danger" outline @click="handleCancel">
             <UiIcon name="cross-circle" variant="duotone" />
@@ -316,7 +347,7 @@ onMounted(() => {
                       </span>
                     </template>
                     <span v-else>
-                      {{ administrationData?.npwp }}
+                      {{ administrationData.npwp || '-' }}
                     </span>
                   </td>
                 </tr>
@@ -327,7 +358,8 @@ onMounted(() => {
                       :outline="true"
                       size="sm"
                       @click="download(adminStore.data.npwpUrl)"
-                      :disabled="downloadLoading"
+                      :disabled="downloadLoading || !administrationData.npwpUrl"
+                      v-if="mode === 'view'"
                     >
                       <span v-if="downloadLoading">
                         <UiLoading />
@@ -337,6 +369,19 @@ onMounted(() => {
                         <span>Download NPWP Document</span>
                       </template>
                     </UiButton>
+                    <div v-else class="flex items-center gap-2">
+                      <UiFileUpload
+                        accepted-files=".jpg,.jpeg,.png,.pdf"
+                        name="file"
+                        placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
+                        @added-file="handleUpload"
+                        :hint-text="errorFields.includes('npwpUrl') ? 'NPWP Document required' : ''"
+                        :error="errorFields.includes('npwpUrl')"
+                        :disabled="uploadLoading"
+                        class="w-full"
+                      />
+                      <UiLoading v-if="uploadLoading" size="md" />
+                    </div>
                   </td>
                 </tr>
               </tbody>
@@ -550,11 +595,9 @@ onMounted(() => {
           <span> Cancel </span>
         </UiButton>
         <UiButton variant="primary" @click="handleSave" :disabled="saveLoading" class="px-8">
-          <span v-if="saveLoading"> Progress </span>
-          <template v-else>
-            <UiIcon name="paper-plane" variant="duotone" />
-            <span> Save </span>
-          </template>
+          <UiLoading v-if="saveLoading" variant="white" />
+          <UiIcon name="paper-plane" variant="duotone" v-else />
+          <span> Save </span>
         </UiButton>
       </div>
     </div>

@@ -380,7 +380,7 @@ watch(
             </td>
           </tr>
 
-          <tr v-else-if="!vendorLegalDocStore.vendorLegalDocData.length">
+          <tr v-else-if="!filteredCompanyDeedData.length">
             <td colspan="5" class="text-center">No data</td>
           </tr>
 
