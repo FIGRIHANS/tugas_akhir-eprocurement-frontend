@@ -12,8 +12,10 @@ import type {
   IPayment,
   IPaymentPayload,
   IPostBlacklist,
+  IShareholder,
   IShareholderPayload,
   IVendorContent,
+  IVendorLegalDoc,
   IVendorLegalDocumentPayload,
   IVerificationDetailData,
   IVerifyLegal,
@@ -384,8 +386,8 @@ export const useExpertPersonnelDataStore = defineStore('expert-personnel-data', 
   return { loading, error, data, getData, update, getCertificates }
 })
 export const useCompanyDeedDataStore = defineStore('company-deed-data', () => {
-  const shareholdersData = ref<any>([]) ///TODO: change type soon
-  const vendorLegalDocData = ref<any[]>([]) ///TODO: change type soon
+  const shareholdersData = ref<IShareholder[]>([])
+  const vendorLegalDocData = ref<IVendorLegalDoc[]>([]) ///TODO: change type soon
   const shareholdersLoading = ref<boolean>(false)
   const vendorLegalDocLoading = ref<boolean>(false)
   const shareholdersError = ref<string | null>(null)
@@ -394,12 +396,13 @@ export const useCompanyDeedDataStore = defineStore('company-deed-data', () => {
   const getShareholders = async (vendorId: number) => {
     shareholdersLoading.value = true
     try {
-      const response: ApiResponse = await vendorAPI.get('/public/vendorchangedata/shareholders', {
+      const response: ApiResponse<{ items: IShareholder[] }> = await vendorAPI.get('/public/vendorchangedata/shareholders', {
         params: { vendorId },
       })
 
       if (response.data.statusCode === 200) {
-        shareholdersData.value = response.data.result.content
+        shareholdersData.value = response.data.result.content.items
+
       }
     } catch (err) {
       if (err instanceof Error) {
@@ -415,7 +418,7 @@ export const useCompanyDeedDataStore = defineStore('company-deed-data', () => {
   const getVendorLegalDocument = async (vendorId: number) => {
     vendorLegalDocLoading.value = true
     try {
-      const response: ApiResponse<any[]> = await vendorAPI.get(
+      const response: ApiResponse<{ items: IVendorLegalDoc[] }> = await vendorAPI.get(
         '/public/vendorchangedata/vendorlegaldocument',
         {
           params: { vendorId },
@@ -423,7 +426,7 @@ export const useCompanyDeedDataStore = defineStore('company-deed-data', () => {
       )
 
       if (response.data.statusCode === 200) {
-        vendorLegalDocData.value = response.data.result.content
+        vendorLegalDocData.value = response.data.result.content.items
       }
     } catch (err) {
       if (err instanceof Error) {
