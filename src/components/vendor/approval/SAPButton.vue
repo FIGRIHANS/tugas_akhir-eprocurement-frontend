@@ -5,7 +5,7 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import { useApprovalStore } from '@/stores/vendor/approval'
 import { useLoginStore } from '@/stores/views/login'
-import axios from 'axios'
+import { isAxiosError } from 'axios'
 import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -32,12 +32,10 @@ const handleSend = async () => {
     isSent.value = true
   } catch (err) {
     if (err instanceof Error) {
-      if (axios.isAxiosError(err)) {
-        error.value =
-          err.response?.data.result?.message ??
-          'Vendor Data could not be sent to SAP due to a system error or invalid data.'
-        modalError.value = true
-      }
+      error.value = isAxiosError(err)
+        ? err.response?.data
+        : 'Vendor Data could not be sent to SAP due to a system error or invalid data.'
+      modalError.value = true
     }
   } finally {
     loading.value = false
@@ -57,12 +55,10 @@ const handleApprove = async () => {
     modalSuccess.value = true
   } catch (err) {
     if (err instanceof Error) {
-      if (axios.isAxiosError(err)) {
-        error.value =
-          err.response?.data.result?.message ??
-          'Vendor Data could not be sent to SAP due to a system error or invalid data.'
-        modalError.value = true
-      }
+      error.value = isAxiosError(err)
+        ? err.response.data.result.message
+        : 'Vendor Data could not be sent to SAP due to a system error or invalid data.'
+      modalError.value = true
     }
   }
 }
