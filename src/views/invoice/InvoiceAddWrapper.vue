@@ -475,8 +475,8 @@ const mapDataPostNonPo = () => {
       invoiceNo: form.invoiceNo,
       documentNo: form.invoiceNoVendor,
       invoiceDate: moment(form.invoiceDate).toISOString(),
-      postingDate: '2025-08-26',
-      estimatedPaymentDate: '2025-08-26',
+      postingDate: null,
+      estimatedPaymentDate: null,
       paymentMethodCode: '',
       paymentMethodName: '',
       taxNo: form.taxNoInvoice,
@@ -484,7 +484,9 @@ const mapDataPostNonPo = () => {
       creditCardBillingID: '',
       notes: form.description,
       statusCode: isClickDraft.value ? 0 : 1,
-      statusName: isClickDraft.value ? 'Drafted' : 'Waiting to Verify'
+      statusName: isClickDraft.value ? 'Drafted' : 'Waiting to Verify',
+      department: userData.value.profile.costCenter || '',
+      profileId: userData.value.profile.profileId.toString()
     },
     vendor: {
       vendorId: Number(form.vendorId),
