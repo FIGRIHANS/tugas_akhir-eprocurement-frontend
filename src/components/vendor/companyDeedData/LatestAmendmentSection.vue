@@ -236,7 +236,7 @@ const handleDownload = async (path: string) => {
 }
 
 const filteredAmendmentData = computed(() =>
-  vendorLegalDocStore.vendorLegalDocData?.filter(
+  vendorLegalDocStore.vendorLegalDocData.items?.filter(
     (item: IVendorLegalDocumentPayload) =>
       item.isActive === true && item.documentType === AMENDMENT_DOCUMENT_TYPE,
   ),

@@ -260,7 +260,9 @@ const handleDownload = async (path: string) => {
 const formatNumber = (num: number) => num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')
 
 const filteredShareholders = computed(() =>
-  shareholdersStore.shareholdersData?.filter((item: IShareholderPayload) => item.isActive === true),
+  shareholdersStore.shareholdersData.items?.filter(
+    (item: IShareholderPayload) => item.isActive === true,
+  ),
 )
 </script>
 

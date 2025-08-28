@@ -201,7 +201,7 @@ const handleDownload = async (path: string) => {
 }
 
 const filteredRatifications = computed(() =>
-  vendorLegalDocStore.vendorLegalDocData?.filter(
+  vendorLegalDocStore.vendorLegalDocData.items?.filter(
     (d: IVendorLegalDocumentPayload) =>
       d.isActive === true && d.documentType === RATIFICATION_DOCUMENT_TYPE,
   ),

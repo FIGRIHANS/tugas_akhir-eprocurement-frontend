@@ -245,7 +245,7 @@ const handleDownload = async (path: string) => {
 }
 
 const filteredCompanyDeedData = computed(() =>
-  vendorLegalDocStore.vendorLegalDocData?.filter(
+  vendorLegalDocStore.vendorLegalDocData.items?.filter(
     (item: IVendorLegalDocumentPayload) => item.isActive === true && item.documentType === 3115,
   ),
 )
