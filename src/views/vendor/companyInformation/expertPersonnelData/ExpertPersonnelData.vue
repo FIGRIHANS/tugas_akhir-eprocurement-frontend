@@ -158,13 +158,7 @@ const pagination = ref({
   total: 10,
 })
 
-const dataResponse = computed(() => {
-  const { items, total } = expertPStore.data
-
-  pagination.value.total = total
-
-  return items
-})
+const dataResponse = computed(() => expertPStore.data.items)
 
 const downloadFile = (id: number) => {
   selectedId.value = id
@@ -237,6 +231,14 @@ const getData = async () => {
 onMounted(() => {
   getData()
 })
+
+watch(
+  () => expertPStore.data,
+  (newData) => {
+    pagination.value.total = newData.total
+  },
+  { immediate: true, deep: true },
+)
 
 watch(
   () => [pagination.value.currentPage, pagination.value.pageSize],
