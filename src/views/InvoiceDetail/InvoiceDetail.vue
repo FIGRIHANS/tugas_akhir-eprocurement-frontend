@@ -464,34 +464,34 @@ const setDataDefault = () => {
   }
 
   form.value = {
-    // invoiceUId: data?.header.invoiceUId || '',
-    // invoiceTypeCode: data?.header.invoiceTypeCode || 0,
-    // invoiceTypeName: data?.header.invoiceTypeName || '',
-    // invoiceDPCode: data?.header.invoiceDPCode || 0,
-    // invoiceDPName: data?.header.invoiceDPName || '',
-    // companyCode: data?.header.companyCode || '',
-    // companyName: data?.header.companyName || '',
-    // invoiceNo: data?.header.invoiceNo || '',
-    // documentNo: data?.header.documentNo || '',
-    // invoiceDate: data?.header.invoiceDate || '',
-    // taxNo: data?.header.taxNo || '',
-    // currCode: data?.header.currCode || '',
-    // notes: data?.header.notes || '',
-    // statusCode: data?.header.statusCode || 0,
-    // statusName: data?.header.statusName || '',
-    // postingDate: data?.header.postingDate || '',
-    // invoicingParty: data?.header.invoicingParty || '',
-    // estimatedPaymentDate: data?.header.estimatedPaymentDate || '',
-    // paymentMethodCode: data?.header.paymentMethodCode || '',
-    // paymentMethodName: data?.header.paymentMethodName || '',
-    // assigment: data?.header.assigment || '',
-    // transferNews: data?.header.transferNews || '',
-    // npwpReporting: data?.header.npwpReporting || '',
+    invoiceUId: data?.header.invoiceUId || '',
+    invoiceTypeCode: data?.header.invoiceTypeCode || 0,
+    invoiceTypeName: data?.header.invoiceTypeName || '',
+    invoiceDPCode: data?.header.invoiceDPCode || 0,
+    invoiceDPName: data?.header.invoiceDPName || '',
+    companyCode: data?.header.companyCode || '',
+    companyName: data?.header.companyName || '',
+    invoiceNo: data?.header.invoiceNo || '',
+    documentNo: data?.header.documentNo || '',
+    invoiceDate: data?.header.invoiceDate || '',
+    taxNo: data?.header.taxNo || '',
+    currCode: data?.header.currCode || '',
+    notes: data?.header.notes || '',
+    statusCode: data?.header.statusCode || 0,
+    statusName: data?.header.statusName || '',
+    postingDate: data?.header.postingDate || '',
+    invoicingParty: data?.header.invoicingParty || '',
+    estimatedPaymentDate: data?.header.estimatedPaymentDate || '',
+    paymentMethodCode: data?.header.paymentMethodCode || '',
+    paymentMethodName: data?.header.paymentMethodName || '',
+    assigment: data?.header.assigment || '',
+    transferNews: data?.header.transferNews || '',
+    npwpReporting: data?.header.npwpReporting || '',
     remainingDpAmount: '',
     dpAmountDeduction: '',
     bankKey: data?.payment.bankKey || '',
     bankName: data?.payment.bankName || '',
-    // creditCardBillingId: data?.header.creditCardBillingId || '',
+    creditCardBillingId: data?.header.creditCardBillingId || '',
     beneficiaryName: data?.payment.beneficiaryName || '',
     bankAccountNo: data?.payment.bankAccountNo || '',
     bankCountryCode: data?.payment.bankCountryCode || '',
@@ -570,6 +570,8 @@ const setDataEdit = () => {
 }
 
 onMounted(async () => {
+  console.log('masuk')
+
   if (route.query.type === '1') {
     activeStep.value = 'Verification'
     routes.value = [
@@ -595,49 +597,49 @@ onMounted(async () => {
       },
     ]
   }
-  if (checkPo()) {
-    await verificationApi.getInvoiceDetail(route.query.id?.toString() || '').then(() => {
-      if (verificationApi.isFromEdit) {
-        setDataEdit()
-      } else {
-        setDataDefault()
-      }
-      switch (detailInvoice.value?.header.statusCode) {
-        case 1:
-        case 3:
-          activeStep.value = 'Verification'
-          break
-        case 2:
-        case 4:
-          activeStep.value = 'Approval'
-          break
-        case 7:
-          activeStep.value = 'Posting'
-          break
-      }
-    })
-  } else {
-    await verificationApi.getInvoiceNonPoDetail(route.query.id?.toString() || '').then(() => {
-      if (verificationApi.isFromEdit) {
-        setDataEdit()
-      } else {
-        setDataDefault()
-      }
-      switch (detailInvoice.value?.header.statusCode) {
-        case 1:
-        case 3:
-          activeStep.value = 'Verification'
-          break
-        case 2:
-        case 4:
-          activeStep.value = 'Approval'
-          break
-        case 7:
-          activeStep.value = 'Posting'
-          break
-      }
-    })
-  }
+  // if (checkPo()) {
+  //   await verificationApi.getInvoiceDetail(route.query.id?.toString() || '').then(() => {
+  //     if (verificationApi.isFromEdit) {
+  //       setDataEdit()
+  //     } else {
+  //       setDataDefault()
+  //     }
+  //     switch (detailInvoice.value?.header.statusCode) {
+  //       case 1:
+  //       case 3:
+  //         activeStep.value = 'Verification'
+  //         break
+  //       case 2:
+  //       case 4:
+  //         activeStep.value = 'Approval'
+  //         break
+  //       case 7:
+  //         activeStep.value = 'Posting'
+  //         break
+  //     }
+  //   })
+  // } else {
+  await verificationApi.getInvoiceNonPoDetail(route.query.id?.toString() || '').then(() => {
+    if (verificationApi.isFromEdit) {
+      setDataEdit()
+    } else {
+      setDataDefault()
+    }
+    switch (detailInvoice.value?.header.statusCode) {
+      case 1:
+      case 3:
+        activeStep.value = 'Verification'
+        break
+      case 2:
+      case 4:
+        activeStep.value = 'Approval'
+        break
+      case 7:
+        activeStep.value = 'Posting'
+        break
+    }
+  })
+  // }
 })
 
 provide('form', form)
