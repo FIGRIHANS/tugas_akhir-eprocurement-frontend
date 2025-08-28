@@ -1,3 +1,9 @@
+export type Pagination<R> = {
+  items: R
+  total: number
+  page: number
+  pageSize: number
+}
 export interface IVendorList {
   id: number
   vendorCode: string
@@ -324,6 +330,46 @@ export interface IVendorLegalDocumentPayload {
   refVendorId: number
   action: number
 }
+
+export type ShareholdersResponseType = Pagination<
+  {
+    stockID: number
+    vendorId: number
+    isActive: boolean
+    ownerName: string
+    ownerDOB: string
+    quantity: number
+    unitID: number
+    shareUnit: string
+    ownerID: string
+    ownerIDUrl: string
+    position: string
+    stockTypeID: number
+    typeShareholders: string
+    createdBy: string
+    createdDate: string
+    modifiedBy: string
+    modifiedDate: string
+  }[]
+>
+
+export type VendorLegalDocumentResponseType = {
+  id: number
+  vendorId: number
+  filename: string
+  documentURL: string
+  cityName: string
+  documentDate: string
+  notaryName: string
+  documentNo: string
+  documentType: number
+  value: string
+  createdBy: string
+  createdDate: string
+  modifiedBy: string
+  modifiedDate: string
+  isActive: boolean
+}[]
 
 export interface IExpertPersonnelData {
   id: number

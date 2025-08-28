@@ -2,6 +2,7 @@ import vendorAPI from '@/core/utils/vendorApi'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import type {
+  VendorLegalDocumentResponseType,
   EquipmentDataType,
   IAdministration,
   IAdministrationPayload,
@@ -17,7 +18,9 @@ import type {
   IVendorLegalDocumentPayload,
   IVerificationDetailData,
   IVerifyLegal,
+  Pagination,
   PayloadEquipmentDataType,
+  ShareholdersResponseType,
 } from './types/vendor'
 import type { ApiResponse } from '@/core/type/api'
 import axios from 'axios'
@@ -391,19 +394,50 @@ export const useExpertPersonnelDataStore = defineStore('expert-personnel-data', 
   return { loading, error, data, getData, update, getCertificates }
 })
 export const useCompanyDeedDataStore = defineStore('company-deed-data', () => {
-  const shareholdersData = ref<any>([]) ///TODO: change type soon
-  const vendorLegalDocData = ref<any[]>([]) ///TODO: change type soon
+  const shareholdersData = ref<ShareholdersResponseType>({
+    items: [],
+    total: 0,
+    page: 1,
+    pageSize: 10,
+  })
+  const vendorLegalDocData = ref<Pagination<VendorLegalDocumentResponseType>>({
+    items: [],
+    total: 0,
+    page: 1,
+    pageSize: 10,
+  })
+  const companyDeedData = ref<Pagination<VendorLegalDocumentResponseType>>({
+    items: [],
+    total: 0,
+    page: 1,
+    pageSize: 10,
+  })
+  const latestAmendmentData = ref<Pagination<VendorLegalDocumentResponseType>>({
+    items: [],
+    total: 0,
+    page: 1,
+    pageSize: 10,
+  })
+  const ratificationData = ref<Pagination<VendorLegalDocumentResponseType>>({
+    items: [],
+    total: 0,
+    page: 1,
+    pageSize: 10,
+  })
   const shareholdersLoading = ref<boolean>(false)
   const vendorLegalDocLoading = ref<boolean>(false)
   const shareholdersError = ref<string | null>(null)
   const vendorLegalDocError = ref<string | null>(null)
 
-  const getShareholders = async (vendorId: number) => {
+  const getShareholders = async (vendorId: number, page: number, pageSize: number) => {
     shareholdersLoading.value = true
     try {
-      const response: ApiResponse = await vendorAPI.get('/public/vendorchangedata/shareholders', {
-        params: { vendorId },
-      })
+      const response: ApiResponse<ShareholdersResponseType> = await vendorAPI.get(
+        '/public/vendorchangedata/shareholders',
+        {
+          params: { vendorId, page, pageSize },
+        },
+      )
 
       if (response.data.statusCode === 200) {
         shareholdersData.value = response.data.result.content
@@ -419,18 +453,30 @@ export const useCompanyDeedDataStore = defineStore('company-deed-data', () => {
     }
   }
 
-  const getVendorLegalDocument = async (vendorId: number) => {
+  const getVendorLegalDocument = async (
+    vendorId: number,
+    page: number,
+    pageSize: number,
+    documentType: number,
+  ) => {
     vendorLegalDocLoading.value = true
     try {
-      const response: ApiResponse<any[]> = await vendorAPI.get(
-        '/public/vendorchangedata/vendorlegaldocument',
-        {
-          params: { vendorId },
-        },
-      )
+      const response: ApiResponse<Pagination<VendorLegalDocumentResponseType>> =
+        await vendorAPI.get('/public/vendorchangedata/vendorlegaldocument', {
+          params: { vendorId, page, pageSize, documentType: documentType || null },
+        })
 
       if (response.data.statusCode === 200) {
         vendorLegalDocData.value = response.data.result.content
+
+        switch (documentType) {
+          case 3115:
+            return (companyDeedData.value = response.data.result.content)
+          case 3116:
+            return (latestAmendmentData.value = response.data.result.content)
+          case 3117:
+            return (ratificationData.value = response.data.result.content)
+        }
       }
     } catch (err) {
       if (err instanceof Error) {
@@ -484,6 +530,9 @@ export const useCompanyDeedDataStore = defineStore('company-deed-data', () => {
     vendorLegalDocError,
     shareholdersData,
     vendorLegalDocData,
+    companyDeedData,
+    latestAmendmentData,
+    ratificationData,
     postShareholders,
     postVendorLegalDocument,
     getShareholders,
