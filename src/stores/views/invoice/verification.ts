@@ -13,7 +13,7 @@ import type {
   ParamsRejectTypes,
   ParamsSubmissionCost,
   QueryParamsListNoPoTypes,
-  ListNonPoTypes,,
+  ListNonPoTypes,
 } from './types/verification'
 
 export const useInvoiceVerificationStore = defineStore('invoiceVerification', () => {
@@ -86,7 +86,6 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
       invoiceTypeCode: Number(data.invoiceTypeCode) || null,
       invoiceDate: data.invoiceDate || null,
       searchText: data.searchText || null,
-      searchText: data.searchText || null,
     }
     const response: ApiResponse<ListPoTypes[]> = await invoiceApi.get(`/invoice/approval`, {
       params: {
@@ -121,7 +120,6 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     )
 
     detailInvoice.value = response.data.result.content
-
 
     return response.data.result
   }
@@ -178,6 +176,6 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     postSap,
     putSubmission,
     deleteAdditionalCost,
-    getInvoiceNonPoDetail,,
+    getInvoiceNonPoDetail,
   }
 })
