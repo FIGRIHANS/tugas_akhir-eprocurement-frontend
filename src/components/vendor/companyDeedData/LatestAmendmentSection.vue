@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
 
@@ -18,6 +18,7 @@ import { useCompanyDeedDataStore } from '@/stores/vendor/vendor'
 import { useVendorUploadStore } from '@/stores/vendor/upload'
 import { useLoginStore } from '@/stores/views/login'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
+import moment from 'moment'
 
 const vendorLegalDocStore = useCompanyDeedDataStore()
 const userLoginStore = useLoginStore()
@@ -26,13 +27,13 @@ const vendorMasterDataStore = useVendorMasterDataStore()
 
 const route = useRoute()
 
-const showSuccessModal = ref<boolean>(false)
-const showErrorModal = ref<boolean>(false)
+const showSuccessModal = ref(false)
+const showErrorModal = ref(false)
 const mode = ref<'add' | 'edit' | 'delete'>('add')
-const showDeleteModal = ref<boolean>(false)
-const apiErrorMessage = ref<string>('')
-const isDownloadLoading = ref<boolean>(false)
-const isSaveLoading = ref<boolean>(false)
+const showDeleteModal = ref(false)
+const apiErrorMessage = ref('')
+const isDownloadLoading = ref(false)
+const isSaveLoading = ref(false)
 
 const AMENDMENT_DOCUMENT_TYPE = 3116
 
@@ -46,7 +47,7 @@ const vendorAmendmentPayload = reactive<IVendorLegalDocumentPayload>({
   documentNo: '',
   documentDate: new Date(),
   notaryName: '',
-  notaryLocation: 0,
+  notaryLocation: 0, // <- harus cityID (number)
   user: '',
   isActive: true,
   isTemporary: true,
@@ -62,52 +63,48 @@ const errors = reactive({
   notaryLocation: '',
 })
 
+/* ===== UI helpers: tombol dinamis ===== */
+const isEditing = computed(() => mode.value === 'edit' || vendorAmendmentPayload.id > 0)
+const submitLabel = computed(() => (isEditing.value ? 'Save' : 'Add'))
+const submitIcon = computed(() => (isEditing.value ? 'notepad-edit' : 'plus-circle'))
+
+/* ===== Util ===== */
+const toNumber = (v: unknown) => (v === null || v === undefined || v === '' ? 0 : Number(v))
+
+/** Map dari payload/edit ke cityID:
+ * 1) Jika notaryLocation sudah number>0 -> pakai
+ * 2) Jika tidak, coba cari dari cityName / notaryLocationName di daftar kota
+ */
+const resolveNotaryLocationId = (data: { notaryLocation?: any; cityName?: string; notaryLocationName?: string }) => {
+  if (typeof data.notaryLocation === 'number' && data.notaryLocation > 0) return data.notaryLocation
+  const name = (data.cityName || data.notaryLocationName || '').toString().trim().toLowerCase()
+  if (!name) return 0
+  const hit = vendorMasterDataStore.cityList?.find((c: any) => c.cityName?.toLowerCase() === name)
+  return hit?.cityID ?? 0
+}
+
+/* ===== Validasi ===== */
 const validateForm = () => {
   let isValid = true
   errors.documentNo = ''
   errors.notaryName = ''
   errors.documentURL = ''
+  errors.documentDate = ''
   errors.notaryLocation = ''
 
   if (!vendorAmendmentPayload.documentNo) {
-    errors.documentNo = 'Document no is required'
-    isValid = false
+    errors.documentNo = 'Document no is required'; isValid = false
   }
   if (!vendorAmendmentPayload.notaryName) {
-    errors.notaryName = 'Notary name is required'
-    isValid = false
+    errors.notaryName = 'Notary name is required'; isValid = false
   }
   if (!vendorAmendmentPayload.documentURL) {
-    errors.documentURL = 'Document URL is required'
-    isValid = false
+    errors.documentURL = 'Document URL is required'; isValid = false
   }
-  if (!vendorAmendmentPayload.notaryLocation) {
-    errors.notaryLocation = 'Notary location is required'
-    isValid = false
+  if (!toNumber(vendorAmendmentPayload.notaryLocation)) {
+    errors.notaryLocation = 'Notary location is required'; isValid = false
   }
-
-  console.log(errors)
-
   return isValid
-}
-
-const onUploadFile = async (file: File) => {
-  if (!file) return
-  const formData = new FormData()
-  formData.append('FormFile', file)
-  formData.append('Actioner', userLoginStore.userData?.profile.profileId.toString() || '0')
-  try {
-    const response = await uploadStore.upload(formData)
-
-    vendorAmendmentPayload.filename = response?.name as string
-    vendorAmendmentPayload.documentURL = response?.path as string
-    vendorAmendmentPayload.filesize = file.size
-    errors.documentURL = ''
-  } catch (err) {
-    if (err instanceof Error) {
-      alert('File upload failed, please try again')
-    }
-  }
 }
 
 const resetForm = () => {
@@ -127,16 +124,35 @@ const resetForm = () => {
     isTemporary: true,
     refVendorId: 0,
     action: 0,
-  })
+  } as IVendorLegalDocumentPayload)
+  mode.value = 'add'
+}
+
+/* ===== Handlers ===== */
+const onUploadFile = async (file: File) => {
+  if (!file) return
+  const formData = new FormData()
+  formData.append('FormFile', file)
+  formData.append('Actioner', userLoginStore.userData?.profile.profileId.toString() || '0')
+  try {
+    const response = await uploadStore.upload(formData)
+    vendorAmendmentPayload.filename = response?.name as string
+    vendorAmendmentPayload.documentURL = response?.path as string
+    vendorAmendmentPayload.filesize = file.size
+    errors.documentURL = ''
+  } catch {
+    alert('File upload failed, please try again')
+  }
 }
 
 const handleSave = async () => {
+  // mode otomatis dari payload.id (edit kalau id > 0)
   mode.value = vendorAmendmentPayload.id ? 'edit' : 'add'
-
   if (!validateForm()) return
 
   try {
     isSaveLoading.value = true
+    vendorAmendmentPayload.notaryLocation = toNumber(vendorAmendmentPayload.notaryLocation) // pastikan number
     await vendorLegalDocStore.postVendorLegalDocument(vendorAmendmentPayload)
     await vendorLegalDocStore.getVendorLegalDocument(Number(route.params.id))
     showSuccessModal.value = true
@@ -155,37 +171,43 @@ const handleSave = async () => {
 }
 
 const handleEdit = (id: number) => {
-  mode.value = 'edit'
   const data = vendorLegalDocStore.vendorLegalDocData.find(
     (item: IVendorLegalDocumentPayload) => item.id === id,
   )
   if (data) {
     Object.assign(vendorAmendmentPayload, data)
+    // Normalisasi: pastikan notaryLocation jadi cityID (number)
+    vendorAmendmentPayload.notaryLocation = toNumber(
+      resolveNotaryLocationId({
+        notaryLocation: (data as any).notaryLocation,
+        cityName: (data as any).cityName,
+        notaryLocationName: (data as any).notaryLocationName,
+      }),
+    )
+    mode.value = 'edit'
   }
 }
 
 const handleDelete = (id: number) => {
-  mode.value = 'delete'
-  showDeleteModal.value = true
   const data = vendorLegalDocStore.vendorLegalDocData.find(
     (item: IVendorLegalDocumentPayload) => item.id === id,
   )
   if (data) {
     Object.assign(vendorAmendmentPayload, data)
+    mode.value = 'delete'
+    showDeleteModal.value = true
   }
 }
 
 const handleProcessDelete = async () => {
   try {
     isSaveLoading.value = true
-    const payloadToSend = {
-      ...vendorAmendmentPayload,
-      isActive: false,
-    }
+    const payloadToSend = { ...vendorAmendmentPayload, isActive: false }
     await vendorLegalDocStore.postVendorLegalDocument(payloadToSend)
     showDeleteModal.value = false
     showSuccessModal.value = true
     await vendorLegalDocStore.getVendorLegalDocument(Number(route.params.id))
+    resetForm()
   } catch (err) {
     if (axios.isAxiosError(err)) {
       apiErrorMessage.value =
@@ -206,10 +228,8 @@ const handleDownload = async (path: string) => {
     const link = URL.createObjectURL(file)
     window.open(link, '_blank')
     setTimeout(() => URL.revokeObjectURL(link), 1000)
-  } catch (err) {
-    if (err instanceof Error) {
-      alert('Failed to download document. Please try again later.')
-    }
+  } catch {
+    alert('Failed to download document. Please try again later.')
   } finally {
     isDownloadLoading.value = false
   }
@@ -220,6 +240,31 @@ const filteredAmendmentData = computed(() =>
     (item: IVendorLegalDocumentPayload) =>
       item.isActive === true && item.documentType === AMENDMENT_DOCUMENT_TYPE,
   ),
+)
+
+/** Pastikan cityList tersedia; kalau store punya action loader, panggil di sini */
+onMounted(async () => {
+  if (!vendorMasterDataStore.cityList?.length && typeof vendorMasterDataStore.getCityList === 'function') {
+    try { await vendorMasterDataStore.getCityList() } catch {}
+  }
+})
+
+/** Jika cityList datang belakangan (async) dan kita sedang edit, re-map lagi supaya select terisi */
+watch(
+  () => vendorMasterDataStore.cityList,
+  (list) => {
+    if (!list?.length) return
+    if (mode.value === 'edit') {
+      vendorAmendmentPayload.notaryLocation = toNumber(
+        resolveNotaryLocationId({
+          notaryLocation: vendorAmendmentPayload.notaryLocation,
+          cityName: (vendorAmendmentPayload as any).cityName,
+          notaryLocationName: (vendorAmendmentPayload as any).notaryLocationName,
+        }),
+      )
+    }
+  },
+  { immediate: false },
 )
 </script>
 
@@ -255,17 +300,12 @@ const filteredAmendmentData = computed(() =>
         <UiFormGroup hide-border>
           <UiSelect
             label="Notary Office Location"
-            placeholder="Select"
-            :options="
-              vendorMasterDataStore.cityList?.map((item) => ({
-                value: item.cityID,
-                label: item.cityName,
-              }))
-            "
+            placeholder="-- Notary Office Location --"
+            :options="vendorMasterDataStore.cityList?.map((item) => ({ value: item.cityID, label: item.cityName }))"
             value-key="value"
             text-key="label"
             row
-            v-model="vendorAmendmentPayload.notaryLocation"
+            v-model.number="vendorAmendmentPayload.notaryLocation"
             :error="errors.notaryLocation !== ''"
             :hintText="errors.notaryLocation"
           />
@@ -276,12 +316,14 @@ const filteredAmendmentData = computed(() =>
             hint-text="*jpg, jpeg, png, pdf, zip / max : 16 MB"
             @added-file="onUploadFile($event)"
           />
+
+          <!-- Tombol dinamis: Add / Update -->
           <div class="flex justify-end items-center">
             <UiButton variant="primary" @click="handleSave" :disabled="isSaveLoading">
               <UiLoading v-if="isSaveLoading" variant="white" />
               <template v-else>
-                <UiIcon variant="duotone" name="plus-circle" />
-                Add
+                <UiIcon variant="duotone" :name="submitIcon" />
+                {{ submitLabel }}
               </template>
             </UiButton>
           </div>
@@ -356,7 +398,7 @@ const filteredAmendmentData = computed(() =>
               </div>
             </td>
             <td class="text-nowrap">{{ doc.documentNo }}</td>
-            <td class="text-nowrap">{{ doc.documentDate }}</td>
+            <td class="text-nowrap">{{ moment(doc.documentDate).format('DD MMMM YYYY') }}</td>
             <td class="text-nowrap">{{ doc.notaryName ?? doc.value }}</td>
             <td class="text-nowrap">{{ doc.cityName }}</td>
           </tr>

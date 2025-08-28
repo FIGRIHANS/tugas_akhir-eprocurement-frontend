@@ -26,7 +26,7 @@
         </template>
       </div>
       <!-- Vendor No -->
-      <div v-if="checkIsNonPo()" class="flex items-baseline flex-wrap lg:flex-nowrap py-[8px]">
+      <div v-if="checkIsNonPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Vendor No.
           <span class="text-red-500 ml-[4px]">*</span>
@@ -125,6 +125,13 @@
         <input v-model="form.dpAmountDeduction" class="input" placeholder=""
           :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
           :class="{ 'border-danger': form.dpAmountDeductionError }" />
+      </div>
+      <!-- Department -->
+      <div v-if="checkIsNonPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          Department
+        </label>
+        <input v-model="form.department" class="input" placeholder="" disabled />
       </div>
       <!-- Description -->
       <div v-if="form.invoiceType != '903'" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">

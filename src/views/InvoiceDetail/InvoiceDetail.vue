@@ -368,13 +368,15 @@ const goVerif = () => {
   isLoading.value = true
   verificationApi
     .postSubmission(mapDataVerif())
-    .then(() => {
-      verificationApi.resetDetailInvoiceEdit()
-      const idModal = document.querySelector('#success_verif_modal')
-      const modal = KTModal.getInstance(idModal as HTMLElement)
-      modal.show()
-      for (const item of additionalCostTempDelete.value) {
-        verificationApi.deleteAdditionalCost(form.value.invoiceUId, item.id)
+    .then((response) => {
+      if (response.statusCode === 200) {
+        verificationApi.resetDetailInvoiceEdit()
+        const idModal = document.querySelector('#success_verif_modal')
+        const modal = KTModal.getInstance(idModal as HTMLElement)
+        modal.show()
+        for (const item of additionalCostTempDelete.value) {
+          verificationApi.deleteAdditionalCost(form.value.invoiceUId, item.id)
+        }
       }
     })
     .finally(() => {
@@ -389,10 +391,12 @@ const goReject = (reason: string) => {
       invoiceUId: form.value.invoiceUId,
       notes: reason,
     })
-    .then(() => {
-      const idModal = document.querySelector('#success_reject_modal')
-      const modal = KTModal.getInstance(idModal as HTMLElement)
-      modal.show()
+    .then((response) => {
+      if (response.statusCode === 200) {
+        const idModal = document.querySelector('#success_reject_modal')
+        const modal = KTModal.getInstance(idModal as HTMLElement)
+        modal.show()
+      }
     })
     .finally(() => {
       verificationApi.isRejectLoading = false

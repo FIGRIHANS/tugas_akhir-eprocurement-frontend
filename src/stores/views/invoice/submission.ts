@@ -14,6 +14,8 @@ import type {
   QueryParamsListPoTypes,
   AvailableDpTypes,
   RemainingDpTypes,
+  ParamsSubmissionNonPo,
+  ParamsCheckBudgetType
 } from './types/submission'
 
 export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => {
@@ -121,9 +123,13 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
   }
 
   const getRemainingDp = async (poNumber: string) => {
-    const response: ApiResponse<RemainingDpTypes> = await invoiceApi.get(
-      `/invoice/remaining-dp?poNumber=${poNumber}`,
-    )
+    const response: ApiResponse<RemainingDpTypes> = await invoiceApi.get(`/invoice/remaining-dp?poNumber=${poNumber}`)
+  
+    return response.data
+  }
+
+  const postSubmissionNonPo = async (data: ParamsSubmissionNonPo) => {
+    const response: ApiResponse<void> = await invoiceApi.post(`/invoice/submission-non-po`, data)
 
     return response.data
   }
@@ -165,6 +171,12 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
     return newList
   }
 
+  const postCheckBudget = async (data: ParamsCheckBudgetType) => {
+    const response: ApiResponse<void> = await invoiceApi.post(`/invoice/invoice/check-budget`, data)
+
+    return response.data
+  }
+
   return {
     submissionStatus,
     documentTypeList,
@@ -183,5 +195,7 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
     getAvailableDp,
     getRemainingDp,
     getListNonPo,
+    postSubmissionNonPo,
+    postCheckBudget
   }
 })

@@ -2,6 +2,7 @@ import vendorAPI from '@/core/utils/vendorApi'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import type {
+  VendorLegalDocumentResponseType,
   EquipmentDataType,
   IAdministration,
   IAdministrationPayload,
@@ -12,17 +13,22 @@ import type {
   IPayment,
   IPaymentPayload,
   IPostBlacklist,
+  IShareholder,
   IShareholderPayload,
   IVendorContent,
+  IVendorLegalDoc,
   IVendorLegalDocumentPayload,
   IVerificationDetailData,
   IVerifyLegal,
+  Pagination,
   PayloadEquipmentDataType,
+  ShareholdersResponseType,
 } from './types/vendor'
 import type { ApiResponse } from '@/core/type/api'
 import axios from 'axios'
 import { useLoginStore } from '../views/login'
 import type { PayloadExportPersonnelDataType } from '@/views/vendor/companyInformation/expertPersonnelData/types/expertPersonnelData'
+import type { IPayloadRequestUpdateLicense } from './types/bussines-license'
 
 const userStore = useLoginStore()
 
@@ -197,22 +203,14 @@ export const useVendorIzinUsahaStore = defineStore('vendor-izin-usaha', () => {
     }
   }
 
-  /// TODO: change payload type soon
-  const updateData = async (payload: any) => {
+  const updateData = async (payload: IPayloadRequestUpdateLicense) => {
     loading.value = true
     error.value = null
 
     try {
-      const response = await vendorAPI.post('/public/verifiedvendor/update-license', payload)
-      if (response.data.statusCode === 200) {
-        data.value = response.data.result.content
-        return response.data
-      } else {
-        error.value = response.data.result.message
-        loading.value = false
-        throw new Error(response.data.result.message)
-      }
+      await vendorAPI.post('/public/verifiedvendor/update-license', payload)
     } catch (err: unknown) {
+      console.log(err)
       if (err instanceof Error) {
         error.value = err.message
       } else {
@@ -312,16 +310,21 @@ export const useVerificationDetailStore = defineStore('verification-detail', () 
 export const useEquipmentDataStore = defineStore('equipment-data', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
-  const data = ref<EquipmentDataType[]>([])
+  const data = ref<Pagination<EquipmentDataType[]>>({
+    items: [],
+    total: 0,
+    page: 1,
+    pageSize: 10,
+  })
 
-  const getData = async (vendorId: number) => {
+  const getData = async (vendorId: number, page: number, pageSize: number) => {
     loading.value = true
     error.value = null
 
     try {
-      const response: ApiResponse<EquipmentDataType[]> = await vendorAPI.get(
+      const response: ApiResponse<Pagination<EquipmentDataType[]>> = await vendorAPI.get(
         '/public/vendorchangedata/vendorequipment',
-        { params: { vendorId } },
+        { params: { vendorId, page, pageSize } },
       )
       data.value = response.data.result.content
     } catch (err) {
@@ -350,16 +353,21 @@ export const useEquipmentDataStore = defineStore('equipment-data', () => {
 export const useExpertPersonnelDataStore = defineStore('expert-personnel-data', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
-  const data = ref<IExpertPersonnelData[]>([])
+  const data = ref<Pagination<IExpertPersonnelData[]>>({
+    items: [],
+    total: 0,
+    page: 1,
+    pageSize: 10,
+  })
 
-  const getData = async (vendorId: number) => {
+  const getData = async (vendorId: number, page: number, pageSize: number) => {
     loading.value = true
     error.value = null
 
     try {
-      const response: ApiResponse<IExpertPersonnelData[]> = await vendorAPI.get(
+      const response: ApiResponse<Pagination<IExpertPersonnelData[]>> = await vendorAPI.get(
         '/public/vendorchangedata/vendorexpert',
-        { params: { vendorId } },
+        { params: { vendorId, page, pageSize } },
       )
       data.value = response.data.result.content
     } catch (err) {
@@ -391,19 +399,50 @@ export const useExpertPersonnelDataStore = defineStore('expert-personnel-data', 
   return { loading, error, data, getData, update, getCertificates }
 })
 export const useCompanyDeedDataStore = defineStore('company-deed-data', () => {
-  const shareholdersData = ref<any>([]) ///TODO: change type soon
-  const vendorLegalDocData = ref<any[]>([]) ///TODO: change type soon
+  const shareholdersData = ref<ShareholdersResponseType>({
+    items: [],
+    total: 0,
+    page: 1,
+    pageSize: 10,
+  })
+  const vendorLegalDocData = ref<Pagination<VendorLegalDocumentResponseType>>({
+    items: [],
+    total: 0,
+    page: 1,
+    pageSize: 10,
+  })
+  const companyDeedData = ref<Pagination<VendorLegalDocumentResponseType>>({
+    items: [],
+    total: 0,
+    page: 1,
+    pageSize: 10,
+  })
+  const latestAmendmentData = ref<Pagination<VendorLegalDocumentResponseType>>({
+    items: [],
+    total: 0,
+    page: 1,
+    pageSize: 10,
+  })
+  const ratificationData = ref<Pagination<VendorLegalDocumentResponseType>>({
+    items: [],
+    total: 0,
+    page: 1,
+    pageSize: 10,
+  })
   const shareholdersLoading = ref<boolean>(false)
   const vendorLegalDocLoading = ref<boolean>(false)
   const shareholdersError = ref<string | null>(null)
   const vendorLegalDocError = ref<string | null>(null)
 
-  const getShareholders = async (vendorId: number) => {
+  const getShareholders = async (vendorId: number, page: number, pageSize: number) => {
     shareholdersLoading.value = true
     try {
-      const response: ApiResponse = await vendorAPI.get('/public/vendorchangedata/shareholders', {
-        params: { vendorId },
-      })
+      const response: ApiResponse<ShareholdersResponseType> = await vendorAPI.get(
+        '/public/vendorchangedata/shareholders',
+        {
+          params: { vendorId, page, pageSize },
+        },
+      )
 
       if (response.data.statusCode === 200) {
         shareholdersData.value = response.data.result.content
@@ -419,18 +458,30 @@ export const useCompanyDeedDataStore = defineStore('company-deed-data', () => {
     }
   }
 
-  const getVendorLegalDocument = async (vendorId: number) => {
+  const getVendorLegalDocument = async (
+    vendorId: number,
+    page: number,
+    pageSize: number,
+    documentType: number,
+  ) => {
     vendorLegalDocLoading.value = true
     try {
-      const response: ApiResponse<any[]> = await vendorAPI.get(
-        '/public/vendorchangedata/vendorlegaldocument',
-        {
-          params: { vendorId },
-        },
-      )
+      const response: ApiResponse<Pagination<VendorLegalDocumentResponseType>> =
+        await vendorAPI.get('/public/vendorchangedata/vendorlegaldocument', {
+          params: { vendorId, page, pageSize, documentType: documentType || null },
+        })
 
       if (response.data.statusCode === 200) {
         vendorLegalDocData.value = response.data.result.content
+
+        switch (documentType) {
+          case 3115:
+            return (companyDeedData.value = response.data.result.content)
+          case 3116:
+            return (latestAmendmentData.value = response.data.result.content)
+          case 3117:
+            return (ratificationData.value = response.data.result.content)
+        }
       }
     } catch (err) {
       if (err instanceof Error) {
@@ -484,6 +535,9 @@ export const useCompanyDeedDataStore = defineStore('company-deed-data', () => {
     vendorLegalDocError,
     shareholdersData,
     vendorLegalDocData,
+    companyDeedData,
+    latestAmendmentData,
+    ratificationData,
     postShareholders,
     postVendorLegalDocument,
     getShareholders,

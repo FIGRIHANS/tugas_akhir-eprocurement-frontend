@@ -106,53 +106,63 @@
         </div>
 
         <div class="modal-body scrollable-y !py-5 flex flex-col gap-4">
-          <span>First Step</span>
-          <div class="bg-gray-200 rounded-lg px-8 py-4">
-            <p>Open your email (ex : Gmail, Yahoo, etc)</p>
+          <div class="border border-gray-300 rounded-md p-1 flex items-center gap-2">
+            <UiButton
+              class="flex-1 flex items-center justify-center !border-none"
+              :variant="emailLanguage === 'english' ? 'primary' : 'light'"
+              @click="emailLanguage = 'english'"
+            >
+              English
+            </UiButton>
+            <UiButton
+              class="flex-1 flex items-center justify-center !border-none"
+              :variant="emailLanguage === 'indonesia' ? 'primary' : 'light'"
+              @click="emailLanguage = 'indonesia'"
+            >
+              Indonesia
+            </UiButton>
           </div>
 
-          <span>Second Step</span>
+          <span>{{ emailLanguage === 'english' ? 'First Step' : 'Langkah Pertama' }}</span>
           <div class="bg-gray-200 rounded-lg px-8 py-4">
             <p>
-              Create a new email addressed to the admin <br />
+              {{ emailLanguage === 'english' ? englishEmail.firstStep : indonesaiEmail.firstStep }}
+            </p>
+          </div>
+
+          <span>{{ emailLanguage === 'english' ? 'Second Step' : 'Langkah Kedua' }}</span>
+          <div class="bg-gray-200 rounded-lg px-8 py-4">
+            <p>
+              {{
+                emailLanguage === 'english' ? englishEmail.createEmail : indonesaiEmail.createEmail
+              }}
+              <br />
               Ardyan Saputra - <em class="text-primary">ardyan.saputra@aryanoble.co.id</em> <br />
-              With subject: "Overall Data Change Request" <br />
+              {{ emailLanguage === 'english' ? englishEmail.subject : indonesaiEmail.subject }}
+              <br />
               ------------------------------------------- <br />
-              and Cc email to <br />
+              {{ emailLanguage === 'english' ? englishEmail.ccEmail : indonesaiEmail.ccEmail }}
+              <br />
               Basaria: <em class="text-primary">basaria.tambunan@genero.co.id</em> <br />
               Cirscelda: <em class="text-primary">criscelda.kurniasih@aryanoble.co.id</em> <br />
               Bella: <em class="text-primary">bella.agustina@aryanoble.co.id</em>
             </p>
           </div>
 
-          <span>Third Step</span>
+          <span>{{ emailLanguage === 'english' ? 'Third Step' : 'Langkah Ketiga' }}</span>
           <div class="bg-gray-200 rounded-lg px-8 py-4">
             <p>
-              Fill in the body of the email clearly and the reason for changing the data Example:
+              {{
+                emailLanguage === 'english' ? englishEmail.writeEmail : indonesaiEmail.writeEmail
+              }}
             </p>
           </div>
           <div class="bg-gray-200 rounded-lg px-8 py-4">
-            <p>
-              Yth. Admin Procurement, <br /><br />
-
-              Dengan hormat, <br /><br />
-
-              Kami bermaksud mengajukan permohonan untuk melakukan perubahan data vendor secara
-              keseluruhan. Mohon bantuannya untuk memproses pembaruan data tersebut sesuai prosedur
-              yang berlaku. <br /><br />
-
-              Apabila diperlukan informasi tambahan atau pengisian formulir tertentu, kami siap
-              untuk melengkapinya. <br /><br />
-
-              Demikian permohonan ini kami sampaikan. Atas perhatian dan kerjasamanya, kami ucapkan
-              terima kasih. <br /><br />
-
-              Hormat kami, <br />
-              [Nama Perwakilan Vendor] <br />
-              [Nama Perusahaan Vendor] <br />
-              [No. HP] <br />
-              [Email Aktif]
-            </p>
+            <p
+              v-html="
+                emailLanguage === 'english' ? englishEmail.bodyEmail : indonesaiEmail.bodyEmail
+              "
+            ></p>
           </div>
         </div>
       </div>
@@ -170,6 +180,8 @@ import { computed, ref } from 'vue'
 
 import { useLoginStore } from '@/stores/views/login'
 
+import { indonesaiEmail, englishEmail } from '@/static/emailRequestChangeData'
+
 import AdministrationData from './details/AdministrationData.vue'
 import PaymentDetailData from './details/PaymentDetailData.vue'
 import BusinessLicenseData from './details/BusinessLicenseData.vue'
@@ -185,6 +197,7 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 const userStore = useLoginStore()
 const userData = computed(() => userStore.userData)
 
+const emailLanguage = ref<'english' | 'indonesia'>('english')
 const currentTab = ref<string>('administration_data')
 const tabItems = ref<TabItemType[]>([
   {

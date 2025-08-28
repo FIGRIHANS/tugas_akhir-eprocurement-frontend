@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, watch, onMounted } from 'vue'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
 import UiFormGroup from '@/components/ui/atoms/form-group/UiFormGroup.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
@@ -7,16 +7,17 @@ import UiFileUpload from '@/components/ui/atoms/file-upload/UiFileUpload.vue'
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
-import type { IAdministration, IVendorLegalDocumentPayload } from '@/stores/vendor/types/vendor'
-import { useCompanyDeedDataStore, useVendorAdministrationStore } from '@/stores/vendor/vendor'
-import { useRoute } from 'vue-router'
 import UiLoading from '@/components/UiLoading.vue'
-import { useLoginStore } from '@/stores/views/login'
-import { useVendorUploadStore } from '@/stores/vendor/upload'
 import UiModal from '@/components/modal/UiModal.vue'
 import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
-import axios from 'axios'
+import type { IAdministration, IVendorLegalDocumentPayload } from '@/stores/vendor/types/vendor'
+import { useCompanyDeedDataStore, useVendorAdministrationStore } from '@/stores/vendor/vendor'
+import { useVendorUploadStore } from '@/stores/vendor/upload'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
+import { useLoginStore } from '@/stores/views/login'
+import { useRoute } from 'vue-router'
+import axios from 'axios'
+import moment from 'moment'
 
 const vendorLegalDocStore = useCompanyDeedDataStore()
 const adminVendorStore = useVendorAdministrationStore()
@@ -26,13 +27,13 @@ const vendorMasterDataStore = useVendorMasterDataStore()
 
 const route = useRoute()
 
-const showSuccessModal = ref<boolean>(false)
-const showErrorModal = ref<boolean>(false)
+const showSuccessModal = ref(false)
+const showErrorModal = ref(false)
 const mode = ref<'add' | 'edit' | 'delete'>('add')
-const showDeleteModal = ref<boolean>(false)
-const apiErrorMessage = ref<string>('')
-const isDownloadLoading = ref<boolean>(false)
-const isSaveLoading = ref<boolean>(false)
+const showDeleteModal = ref(false)
+const apiErrorMessage = ref('')
+const isDownloadLoading = ref(false)
+const isSaveLoading = ref(false)
 
 const vendorLegalDocPayload = reactive<IVendorLegalDocumentPayload>({
   id: 0,
@@ -40,11 +41,11 @@ const vendorLegalDocPayload = reactive<IVendorLegalDocumentPayload>({
   filename: '',
   filesize: 0,
   documentURL: '',
-  documentType: 3115,
+  documentType: 3115, // Company Deed
   documentNo: '',
   documentDate: new Date(),
   notaryName: '',
-  notaryLocation: 0,
+  notaryLocation: 0, // <-- harus cityID (number)
   user: '',
   isActive: true,
   isTemporary: true,
@@ -52,7 +53,7 @@ const vendorLegalDocPayload = reactive<IVendorLegalDocumentPayload>({
   action: 0,
 })
 
-const administrationData = ref<IAdministration>(adminVendorStore.data!)
+const administrationData = ref<IAdministration>(adminVendorStore.data as IAdministration)
 
 const errors = reactive({
   documentNo: '',
@@ -62,9 +63,49 @@ const errors = reactive({
   notaryLocation: '',
 })
 
+const isEditing = computed(() => mode.value === 'edit' || vendorLegalDocPayload.id > 0)
+const submitLabel = computed(() => (isEditing.value ? 'Save' : 'Add'))
+const submitIcon = computed(() => (isEditing.value ? 'notepad-edit' : 'plus-circle'))
+
+const toNumber = (v: unknown) => (v === null || v === undefined || v === '' ? 0 : Number(v))
+
+const resolveNotaryLocationId = (data: {
+  notaryLocation?: string | number
+  cityName?: string
+  notaryLocationName?: string
+}) => {
+  if (typeof data.notaryLocation === 'number' && data.notaryLocation > 0) return data.notaryLocation
+  const name = (data.cityName || data.notaryLocationName || '').toString().trim().toLowerCase()
+  if (!name) return 0
+  const hit = vendorMasterDataStore.cityList?.find(
+    (c: { cityID: number; cityName: string }) => c.cityName?.toLowerCase() === name,
+  )
+  return hit?.cityID ?? 0
+}
+
+const resetForm = () => {
+  Object.assign(vendorLegalDocPayload, {
+    id: 0,
+    vendorID: Number(route.params.id),
+    filename: '',
+    filesize: 0,
+    documentURL: '',
+    documentType: 3115,
+    documentNo: '',
+    documentDate: new Date(),
+    notaryName: '',
+    notaryLocation: 0,
+    user: '',
+    isActive: true,
+    isTemporary: true,
+    refVendorId: 0,
+    action: 0,
+  } as IVendorLegalDocumentPayload)
+  mode.value = 'add'
+}
+
 const validateForm = () => {
   let isValid = true
-
   errors.documentNo = ''
   errors.notaryName = ''
   errors.documentURL = ''
@@ -75,78 +116,63 @@ const validateForm = () => {
     errors.documentNo = 'Document no is required'
     isValid = false
   }
-
   if (!vendorLegalDocPayload.notaryName) {
     errors.notaryName = 'Notary name is required'
     isValid = false
   }
-
   if (!vendorLegalDocPayload.documentURL) {
     errors.documentURL = 'Document URL is required'
     isValid = false
   }
-
   if (!vendorLegalDocPayload.documentDate) {
     errors.documentDate = 'Document date is required'
     isValid = false
   }
-
-  if (!vendorLegalDocPayload.notaryLocation) {
+  if (!toNumber(vendorLegalDocPayload.notaryLocation)) {
     errors.notaryLocation = 'Notary location is required'
     isValid = false
   }
-
   return isValid
 }
 
 const onUploadFile = async (file: File) => {
   if (!file) return
-
   const formData = new FormData()
   formData.append('FormFile', file)
   formData.append('Actioner', userLoginStore.userData?.profile.profileId.toString() || '0')
-
   try {
     const response = await uploadStore.upload(formData)
-
     vendorLegalDocPayload.filename = response?.name as string
     vendorLegalDocPayload.documentURL = response?.path as string
     vendorLegalDocPayload.filesize = file.size
     errors.documentURL = ''
-  } catch (err) {
-    if (err instanceof Error) {
-      alert('File upload failed, please try again')
-    }
+  } catch {
+    alert('File upload failed, please try again')
   }
 }
 
 const handleSave = async () => {
-  if (validateForm()) {
+  if (!validateForm()) return
+  try {
+    isSaveLoading.value = true
+    vendorLegalDocPayload.notaryLocation = toNumber(vendorLegalDocPayload.notaryLocation) // pastikan number
     await vendorLegalDocStore.postVendorLegalDocument(vendorLegalDocPayload)
-
-    vendorLegalDocStore.getVendorLegalDocument(Number(route.params.id))
-
+    await vendorLegalDocStore.getVendorLegalDocument(Number(route.params.id))
     showSuccessModal.value = true
-
-    Object.assign(vendorLegalDocPayload, {
-      id: 0,
-      vendorID: Number(route.params.id),
-      filename: '',
-      filesize: 0,
-      documentURL: '',
-      documentType: 3115,
-      documentNo: '',
-      documentDate: new Date(),
-      notaryName: '',
-      notaryLocation: 0,
-      user: '',
-      isActive: true,
-      isTemporary: true,
-      refVendorId: 0,
-      action: 0,
-    })
-  } else {
-    console.error('Validasi gagal, mohon periksa kembali')
+    resetForm()
+  } catch (err) {
+    if (axios.isAxiosError(err)) {
+      if (err.response?.data?.result) {
+        apiErrorMessage.value = err.response.data.result.message
+      } else {
+        apiErrorMessage.value = 'Terjadi kesalahan tidak terduga. Silahkan coba lagi'
+      }
+    } else {
+      apiErrorMessage.value = 'Terjadi kesalahan saat menyimpan data. Silahkan coba lagi'
+    }
+    showErrorModal.value = true
+  } finally {
+    isSaveLoading.value = false
   }
 }
 
@@ -154,48 +180,51 @@ const handleEdit = (id: number) => {
   const data = vendorLegalDocStore.vendorLegalDocData.find(
     (item: IVendorLegalDocumentPayload) => item.id === id,
   )
-
   if (data) {
     Object.assign(vendorLegalDocPayload, data)
+    // Normalisasi: pastikan notaryLocation jadi cityID (number).
+    vendorLegalDocPayload.notaryLocation = toNumber(
+      resolveNotaryLocationId({
+        notaryLocation: (data as any).notaryLocation,
+        cityName: (data as any).cityName,
+        notaryLocationName: (data as any).notaryLocationName,
+      }),
+    )
+    mode.value = 'edit'
   }
 }
 
 const handleDelete = (id: number) => {
   showDeleteModal.value = true
-
   const data = vendorLegalDocStore.vendorLegalDocData.find(
     (item: IVendorLegalDocumentPayload) => item.id === id,
   )
-
   if (data) {
     Object.assign(vendorLegalDocPayload, data)
+    mode.value = 'delete'
   }
 }
 
 const handleProcessDelete = async () => {
   try {
     isSaveLoading.value = true
-
-    const payloadToSend = {
-      ...vendorLegalDocPayload,
-      isActive: false,
-    }
-
+    const payloadToSend = { ...vendorLegalDocPayload, isActive: false }
     await vendorLegalDocStore.postVendorLegalDocument(payloadToSend)
     showDeleteModal.value = false
     showSuccessModal.value = true
-    vendorLegalDocStore.getVendorLegalDocument(Number(route.params.id))
+    await vendorLegalDocStore.getVendorLegalDocument(Number(route.params.id))
+    resetForm()
   } catch (err) {
     if (axios.isAxiosError(err)) {
-      if (err.response && err.response.data && err.response.data.result) {
-        const errorMsg = err.response.data.result.message
-        apiErrorMessage.value = errorMsg
+      if (err.response?.data?.result) {
+        apiErrorMessage.value = err.response.data.result.message
       } else {
         apiErrorMessage.value = 'Terjadi kesalahan tidak terduga. Silahkan coba lagi'
       }
     } else {
       apiErrorMessage.value = 'Terjadi kesalahan saat menghapus data. Silahkan coba lagi'
     }
+    showErrorModal.value = true
   } finally {
     isSaveLoading.value = false
   }
@@ -203,16 +232,13 @@ const handleProcessDelete = async () => {
 
 const handleDownload = async (path: string) => {
   isDownloadLoading.value = true
-
   try {
     const file = await uploadStore.preview(path)
     const link = URL.createObjectURL(file)
     window.open(link, '_blank')
     setTimeout(() => URL.revokeObjectURL(link), 1000)
-  } catch (err) {
-    if (err instanceof Error) {
-      alert('Failed to download document. Please try again later.')
-    }
+  } catch {
+    alert('Failed to download document. Please try again later.')
   } finally {
     isDownloadLoading.value = false
   }
@@ -223,6 +249,33 @@ const filteredCompanyDeedData = computed(() =>
     (item: IVendorLegalDocumentPayload) => item.isActive === true && item.documentType === 3115,
   ),
 )
+
+/** Pastikan daftar kota tersedia (kalau store punya action loader) */
+onMounted(async () => {
+  if (!vendorMasterDataStore.cityList?.length) {
+    try {
+      await vendorMasterDataStore.cityList?.()
+    } catch {}
+  }
+})
+
+/** Jika cityList baru tersedia setelah edit, re-map notaryLocation agar select terisi benar */
+watch(
+  () => vendorMasterDataStore.cityList,
+  (list) => {
+    if (!list?.length) return
+    if (mode.value === 'edit') {
+      vendorLegalDocPayload.notaryLocation = toNumber(
+        resolveNotaryLocationId({
+          notaryLocation: vendorLegalDocPayload.notaryLocation,
+          cityName: (vendorLegalDocPayload as any).cityName,
+          notaryLocationName: (vendorLegalDocPayload as any).notaryLocationName,
+        }),
+      )
+    }
+  },
+  { immediate: false },
+)
 </script>
 
 <template>
@@ -232,6 +285,7 @@ const filteredCompanyDeedData = computed(() =>
         <h3 class="text-lg font-semibold text-slate-800">Company Deed Data</h3>
       </div>
     </div>
+
     <div class="card-body">
       <div class="space-y-6 mb-6">
         <div class="flex items-center gap-20">
@@ -240,9 +294,7 @@ const filteredCompanyDeedData = computed(() =>
         </div>
         <div class="flex items-center gap-20">
           <p class="text-sm text-slate-700">Company Address</p>
-          <p class="text-sm text-slate-700">
-            {{ administrationData?.addressCompanyDetail }}
-          </p>
+          <p class="text-sm text-slate-700">{{ administrationData?.addressCompanyDetail }}</p>
         </div>
       </div>
 
@@ -272,6 +324,7 @@ const filteredCompanyDeedData = computed(() =>
             @added-file="onUploadFile($event)"
           />
         </UiFormGroup>
+
         <UiFormGroup hide-border>
           <DatePicker
             v-model="vendorLegalDocPayload.documentDate"
@@ -290,13 +343,15 @@ const filteredCompanyDeedData = computed(() =>
             value-key="value"
             text-key="label"
             row
-            v-model="vendorLegalDocPayload.notaryLocation"
+            v-model.number="vendorLegalDocPayload.notaryLocation"
             :error="errors.notaryLocation !== ''"
+            :hintText="errors.notaryLocation"
           />
+
           <div class="flex justify-end items-center">
-            <UiButton variant="primary" @click="handleSave">
-              <UiIcon variant="duotone" name="plus-circle" />
-              Add
+            <UiButton variant="primary" @click="handleSave" :disabled="isSaveLoading">
+              <UiIcon variant="duotone" :name="submitIcon" />
+              {{ submitLabel }}
             </UiButton>
           </div>
         </UiFormGroup>
@@ -313,26 +368,22 @@ const filteredCompanyDeedData = computed(() =>
           </tr>
         </thead>
         <tbody>
-          <!-- show loading -->
           <tr v-if="vendorLegalDocStore.vendorLegalDocLoading">
             <td colspan="5" class="text-center">
               <UiLoading size="md" />
             </td>
           </tr>
 
-          <!-- show error message -->
           <tr v-else-if="vendorLegalDocStore.vendorLegalDocError">
             <td colspan="5" class="text-center">
               {{ vendorLegalDocStore.vendorLegalDocError }}
             </td>
           </tr>
 
-          <!-- show message if there are no data -->
-          <tr v-else-if="!vendorLegalDocStore.vendorLegalDocData.length">
+          <tr v-else-if="!filteredCompanyDeedData.length">
             <td colspan="5" class="text-center">No data</td>
           </tr>
 
-          <!-- show data -->
           <tr
             v-else
             v-for="doc in filteredCompanyDeedData"
@@ -363,7 +414,7 @@ const filteredCompanyDeedData = computed(() =>
                       </button>
                     </li>
                     <li class="menu-item">
-                      <button class="menu-link" @click="handleDelete(doc)">
+                      <button class="menu-link" @click="handleDelete(doc.id)">
                         <span class="menu-icon">
                           <UiIcon variant="duotone" name="cross-circle" class="!text-danger" />
                         </span>
@@ -375,7 +426,7 @@ const filteredCompanyDeedData = computed(() =>
               </div>
             </td>
             <td class="text-nowrap">{{ doc.documentNo }}</td>
-            <td class="text-nowrap">{{ doc.documentDate }}</td>
+            <td class="text-nowrap">{{ moment(doc.documentDate).format('DD MMMM YYYY') }}</td>
             <td class="text-nowrap">{{ doc.notaryName }}</td>
             <td class="text-nowrap">{{ doc.cityName }}</td>
           </tr>
@@ -404,9 +455,8 @@ const filteredCompanyDeedData = computed(() =>
         />
       </div>
       <h3 class="text-center text-lg font-medium">
-        Failed to
-        {{ mode == 'delete' ? 'Delete' : mode === 'edit' ? 'Change' : 'Add' }} Vendor legal
-        document!
+        Failed to {{ mode == 'delete' ? 'Delete' : mode === 'edit' ? 'Change' : 'Add' }} Vendor
+        legal document!
       </h3>
       <p class="text-center text-base text-gray-600 mb-5">
         {{ apiErrorMessage }}

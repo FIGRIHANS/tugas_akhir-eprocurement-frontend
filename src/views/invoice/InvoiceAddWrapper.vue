@@ -28,7 +28,7 @@
           </button>
         </div>
         <div class="flex-1 flex gap-[8px] justify-end">
-          <button class="btn btn-primary" :disabled="isSubmit || tabNow !== 'information'" @click="checkBudget">
+          <button v-if="tabNow === 'information'" class="btn btn-primary" :disabled="isSubmit || checkFormBudget()" @click="checkBudget">
             Budget Checking
             <i class="ki-duotone ki-dollar"></i>
           </button>
@@ -94,7 +94,15 @@ import { KTModal } from '@/metronic/core'
 import { useCheckEmpty } from '@/composables/validation'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
-import type { ParamsSubmissionTypes } from '@/stores/views/invoice/types/submission'
+import type {
+  ParamsSubmissionTypes,
+  ParamsSubmissionNonPo,
+  ParamsCheckBudgetType,
+  GlaccountDatum,
+  AccountPayable,
+  Accounttax,
+  Currencyamount
+} from '@/stores/views/invoice/types/submission'
 import { useLoginStore } from '@/stores/views/login'
 import moment from 'moment'
 import type { itemsPoGrType } from './types/invoicePoGr'
@@ -117,6 +125,7 @@ const tabNow = ref<string>('data')
 const isSubmit = ref<boolean>(false)
 const isCheckBudget = ref<boolean>(false)
 const isClickDraft = ref<boolean>(false)
+const itemNoAcc = ref<number>(0)
 
 const routes = ref<routeTypes[]>([
   {
@@ -203,6 +212,7 @@ const vendorList = computed(() => invoiceMasterApi.vendorList)
 const invoiceDpList = computed(() => invoiceMasterApi.dpType)
 const detailPo = computed(() => invoiceApi.detailPo)
 const userData = computed(() => loginApi.userData)
+const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
 
 const checkInvoiceView = () => {
   return route.query.type === 'po-view'
@@ -385,6 +395,26 @@ const mapAdditionalCost = () => {
   return cost
 }
 
+const mapInvoiceItem = () => {
+  const cost = []
+  for (const item of form.invoiceItem) {
+    cost.push({
+      activityExpense: item.activity,
+      itemAmount: Number(item.itemAmount),
+      debitCredit: item.debitCredit,
+      taxCode: item.taxCode,
+      vatAmount: item.vatAmount,
+      costCenter: item.costCenter,
+      profitCenter: item.profitCenter,
+      assignment: item.assignment,
+      whtType: item.whtType,
+      whtCode: item.whtCode,
+      whtBaseAmount: Number(item.whtBaseAmount)
+    })
+  }
+  return cost
+}
+
 const getVendorName = () => {
   const getIndex = vendorList.value.findIndex((item) => item.sapCode === form?.vendorId)
   if (getIndex !== -1) return vendorList.value[getIndex].vendorName
@@ -443,6 +473,59 @@ const mapDataPost = () => {
   return data
 }
 
+const mapDataPostNonPo = () => {
+  const data = {
+    header: {
+      invoiceUId: form.status === 0 || form.status === 5 ? form.invoiceUId :'00000000-0000-0000-0000-000000000000',
+      invoiceTypeCode: Number(form.invoiceType),
+      invoiceTypeName: form.invoiceTypeName,
+      invoiceVendorNo: form.vendorId,
+      companyCode: form.companyCode,
+      companyName: form.companyName,
+      invoiceNo: form.invoiceNo,
+      documentNo: form.invoiceNoVendor,
+      invoiceDate: moment(form.invoiceDate).toISOString(),
+      postingDate: null,
+      estimatedPaymentDate: null,
+      paymentMethodCode: '',
+      paymentMethodName: '',
+      taxNo: form.taxNoInvoice,
+      currCode: form.currency,
+      creditCardBillingID: '',
+      notes: form.description,
+      statusCode: isClickDraft.value ? 0 : 1,
+      statusName: isClickDraft.value ? 'Drafted' : 'Waiting to Verify',
+      department: userData.value.profile.costCenter || '',
+      profileId: userData.value.profile.profileId.toString()
+    },
+    vendor: {
+      vendorId: Number(form.vendorId),
+      vendorName: getVendorName(),
+      npwp: form.npwp,
+      vendorAddress: form.address
+    },
+    payment: {
+      bankKey: form.bankKeyId,
+      bankName: form.bankNameId,
+      beneficiaryName: form.beneficiaryName,
+      bankAccountNo: form.bankAccountNumber,
+      bankCountryCode: form.bankCountryCode
+    },
+    documents: mapDocument(),
+    calculation: {
+      subtotal: form.subtotal,
+      vatAmount: form.vatAmount,
+      whtAmount: form.whtAmount,
+      additionalCost: form.additionalCostCalc,
+      totalGrossAmount: form.totalGrossAmount,
+      totalNetAmount: form.totalNetAmount,
+    },
+    additionalCosts: mapInvoiceItem()
+  } as ParamsSubmissionNonPo
+
+  return data
+}
+
 const goNext = () => {
   const list = ['data', 'information', 'preview']
   if (tabNow.value !== 'preview') {
@@ -461,25 +544,47 @@ const goNext = () => {
     }
   } else {
     isSubmit.value = true
-    invoiceApi.postSubmission(mapDataPost()).then((response) => {
-      if (response.statusCode === 200) {
-        const idModal = document.querySelector('#success_invoice_modal')
-        const modal = KTModal.getInstance(idModal as HTMLElement)
-        modal.show()
-      } else {
-        if (response.result.message.includes('Invoice Document Number')) {
-          const idModal = document.querySelector('#error_document_number_modal')
+    if (route.query.type === 'nonpo') {
+      invoiceApi.postSubmissionNonPo(mapDataPostNonPo()).then((response) => {
+        if (response.statusCode === 200) {
+          const idModal = document.querySelector('#success_invoice_modal')
           const modal = KTModal.getInstance(idModal as HTMLElement)
           modal.show()
+        } else {
+          if (response.result.message.includes('Invoice Document Number')) {
+            const idModal = document.querySelector('#error_document_number_modal')
+            const modal = KTModal.getInstance(idModal as HTMLElement)
+            modal.show()
+          }
         }
-      }
-    })
-      .catch((error) => {
-        console.error(error)
       })
-      .finally(() => {
-        isSubmit.value = false
+        .catch((error) => {
+          console.error(error)
+        })
+        .finally(() => {
+          isSubmit.value = false
+        })
+    } else {
+      invoiceApi.postSubmission(mapDataPost()).then((response) => {
+        if (response.statusCode === 200) {
+          const idModal = document.querySelector('#success_invoice_modal')
+          const modal = KTModal.getInstance(idModal as HTMLElement)
+          modal.show()
+        } else {
+          if (response.result.message.includes('Invoice Document Number')) {
+            const idModal = document.querySelector('#error_document_number_modal')
+            const modal = KTModal.getInstance(idModal as HTMLElement)
+            modal.show()
+          }
+        }
       })
+        .catch((error) => {
+          console.error(error)
+        })
+        .finally(() => {
+          isSubmit.value = false
+        })
+    }
   }
 }
 
@@ -631,10 +736,152 @@ const setData = () => {
   }
 }
 
+const mapDataCheck = () => {
+  const glAccount = [] as GlaccountDatum[]
+  const accountPayable = [] as AccountPayable[]
+  const accountTax = [] as Accounttax[]
+  const currencyAmount = [] as Currencyamount[]
+
+  for (const item of form.invoiceItem) {
+    itemNoAcc.value += 1
+    const glData = {
+      ITEMNO_ACC: itemNoAcc.value,
+      GL_ACCOUNT: item.activity,
+      ITEM_TEXT: item.itemText,
+      ALLOC_NMBR: '',
+      TAX_CODE: item.taxCode,
+      COSTCENTER: item.costCenter,
+      PROFIT_CTR: ''
+    }
+    glAccount.push(glData)
+  }
+
+  for (const item of glAccount) {
+    const checkTaxCode = accountPayable.findIndex((sub) => sub.TAX_CODE === item.TAX_CODE)
+    if (checkTaxCode === -1) {
+      itemNoAcc.value += 1
+      const accData = {
+        ITEMNO_ACC: itemNoAcc.value,
+        VENDOR_NO: form.vendorId,
+        REF_KEY_1: form.invoiceNo,
+        REF_KEY_2: '',
+        REF_KEY_3: '',
+        BLINE_DATE: '',
+        PMNTTRMS: '',
+        PYMT_METH: '',
+        ALLOC_NMBR: '',
+        ITEM_TEXT: '',
+        TAX_CODE: item.TAX_CODE,
+        PAYMT_REF: ''
+      }
+      accountPayable.push(accData)
+    }
+  }
+
+  for (const item of accountPayable) {
+    const index = listTaxCalculation.value.findIndex((sub) => sub.code === item.TAX_CODE)
+    if (index !== -1) {
+      itemNoAcc.value += 1
+      const taxData = {
+        ITEMNO_ACC: itemNoAcc.value,
+        TAX_CODE: item.TAX_CODE,
+        TAX_RATE: listTaxCalculation.value[index].value
+      }
+      accountTax.push(taxData)
+    }
+  }
+
+  itemNoAcc.value = 0
+
+  for (const item of form.invoiceItem) {
+    itemNoAcc.value += 1
+    const currData = {
+      ITEMNO_ACC: itemNoAcc.value,
+      CURRENCY: form.currency,
+      AMT_DOCCUR: item.itemAmount,
+      AMT_BASE: 0
+    }
+    currencyAmount.push(currData)
+  }
+
+  for (const item of accountTax) {
+    const filterTax = form.invoiceItem.filter((sub) => sub.taxCode === item.TAX_CODE)
+    if (filterTax.length !== 0) {
+      itemNoAcc.value += 1
+      let totalVat = 0
+      let totalAmount = 0
+      for (const subItem of filterTax) {
+        totalVat += subItem.vatAmount
+        totalAmount += subItem.itemAmount
+      }
+      const currData = {
+        ITEMNO_ACC: itemNoAcc.value,
+        CURRENCY: form.currency,
+        AMT_DOCCUR: totalVat,
+        AMT_BASE: totalAmount
+      }
+      currencyAmount.push(currData)
+    }
+  }
+
+  for (const item of form.invoiceItem) {
+    itemNoAcc.value += 1
+    const currData = {
+      ITEMNO_ACC: itemNoAcc.value,
+      CURRENCY: form.currency,
+      AMT_DOCCUR: (item.itemAmount + item.vatAmount) * -1,
+      AMT_BASE: 0
+    }
+    currencyAmount.push(currData)
+  }
+
+  const data = {
+    REQUEST: {
+      HEADER_TXT: form.taxNoInvoice,
+      COMP_CODE: form.companyCode,
+      DOC_DATE: moment(form.invoiceDate).format('YYYYMMDD'),
+      PSTNG_DATE: '',
+      FISC_YEAR: 0,
+      FIS_PERIOD: 0,
+      DOC_TYPE: '',
+      REF_DOC_NO: form.invoiceNoVendor,
+      GLACCOUNT_DATA: glAccount,
+      ACCOUNT_PAYABLE: accountPayable,
+      ACCOUNTTAX: accountTax,
+      CURRENCYAMOUNT: currencyAmount
+    }
+  } as ParamsCheckBudgetType
+
+  return data
+}
+
 const checkBudget = () => {
-  const idModal = document.querySelector('#success_budget_check_modal')
-  const modal = KTModal.getInstance(idModal as HTMLElement)
-  modal.show()
+  const data = mapDataCheck()
+  invoiceApi.postCheckBudget(data).then((response) => {
+    if (response.statusCode === 200) {
+      const idModal = document.querySelector('#success_budget_check_modal')
+      const modal = KTModal.getInstance(idModal as HTMLElement)
+      modal.show()
+    }
+  })
+}
+
+const checkFormBudget = () => {
+  let status = false
+  if (
+    !form.companyCode ||
+    !form.invoiceNoVendor ||
+    !form.invoiceDate ||
+    !form.description ||
+    !form.invoiceDocument ||
+    form.invoiceItem.length === 0
+  ) status = true
+  
+  for (const item of form.invoiceItem) {
+    if (item.isEdit || !item.itemAmount || !item.taxCode) status = true
+  }
+
+  return status
 }
 
 onMounted(() => {
@@ -646,12 +893,15 @@ onMounted(() => {
     form.invoiceType = '901'
   }
 
+  if (route.query.type === 'nonpo') {
+    form.invoiceType = '1'
+  }
+
   if (route.query.type === 'po-view') {
     tabNow.value = 'preview'
   }
 
   if (route.query.type === 'po-view' || route.query.invoice) {
-
     invoiceApi.getPoDetail(route.query.invoice?.toString() || '').then(() => {
       setData()
     })

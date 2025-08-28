@@ -32,6 +32,11 @@
       min-width: 350px;
     }
     
+    &--cost {
+      @extend .cost__field-base;
+      min-width: 400px;
+    }
+    
     &--item-amount {
       @extend .cost__field-base;
       min-width: 200px;
