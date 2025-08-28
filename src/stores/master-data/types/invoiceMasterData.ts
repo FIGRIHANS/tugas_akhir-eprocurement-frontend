@@ -3,6 +3,11 @@ export type InvoicePoTypes = {
   name: string
 }
 
+export type InvoiceNonPoTypes = {
+  code: string
+  name: string
+}
+
 export type CurrencyTypes = {
   code: string
   name: string

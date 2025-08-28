@@ -13,10 +13,7 @@
       <InvoiceCalculation class="flex-1" :formInvoice="form" />
     </div>
     <div v-if="currentRouteName === 'invoiceDetail'">
-      <InvoicePoGr
-        v-if="checkPo() && !isNonPo"
-        class="mt-[24px]"
-      />
+      <InvoicePoGr v-if="checkPo() && !isNonPo" class="mt-[24px]" />
       <InvoiceItem v-if="isNonPo" class="mt-[24px]" />
       <AdditionalCost
         v-if="
@@ -417,6 +414,10 @@ const goBack = () => {
     router.push({
       name: 'invoiceVerification',
     })
+  } else if (!checkPo()) {
+    router.push({
+      name: 'invoice-list-non-po',
+    })
   } else {
     router.push({
       name: 'invoiceApproval',
@@ -463,34 +464,34 @@ const setDataDefault = () => {
   }
 
   form.value = {
-    invoiceUId: data?.header.invoiceUId || '',
-    invoiceTypeCode: data?.header.invoiceTypeCode || 0,
-    invoiceTypeName: data?.header.invoiceTypeName || '',
-    invoiceDPCode: data?.header.invoiceDPCode || 0,
-    invoiceDPName: data?.header.invoiceDPName || '',
-    companyCode: data?.header.companyCode || '',
-    companyName: data?.header.companyName || '',
-    invoiceNo: data?.header.invoiceNo || '',
-    documentNo: data?.header.documentNo || '',
-    invoiceDate: data?.header.invoiceDate || '',
-    taxNo: data?.header.taxNo || '',
-    currCode: data?.header.currCode || '',
-    notes: data?.header.notes || '',
-    statusCode: data?.header.statusCode || 0,
-    statusName: data?.header.statusName || '',
-    postingDate: data?.header.postingDate || '',
-    invoicingParty: data?.header.invoicingParty || '',
-    estimatedPaymentDate: data?.header.estimatedPaymentDate || '',
-    paymentMethodCode: data?.header.paymentMethodCode || '',
-    paymentMethodName: data?.header.paymentMethodName || '',
-    assigment: data?.header.assigment || '',
-    transferNews: data?.header.transferNews || '',
-    npwpReporting: data?.header.npwpReporting || '',
+    // invoiceUId: data?.header.invoiceUId || '',
+    // invoiceTypeCode: data?.header.invoiceTypeCode || 0,
+    // invoiceTypeName: data?.header.invoiceTypeName || '',
+    // invoiceDPCode: data?.header.invoiceDPCode || 0,
+    // invoiceDPName: data?.header.invoiceDPName || '',
+    // companyCode: data?.header.companyCode || '',
+    // companyName: data?.header.companyName || '',
+    // invoiceNo: data?.header.invoiceNo || '',
+    // documentNo: data?.header.documentNo || '',
+    // invoiceDate: data?.header.invoiceDate || '',
+    // taxNo: data?.header.taxNo || '',
+    // currCode: data?.header.currCode || '',
+    // notes: data?.header.notes || '',
+    // statusCode: data?.header.statusCode || 0,
+    // statusName: data?.header.statusName || '',
+    // postingDate: data?.header.postingDate || '',
+    // invoicingParty: data?.header.invoicingParty || '',
+    // estimatedPaymentDate: data?.header.estimatedPaymentDate || '',
+    // paymentMethodCode: data?.header.paymentMethodCode || '',
+    // paymentMethodName: data?.header.paymentMethodName || '',
+    // assigment: data?.header.assigment || '',
+    // transferNews: data?.header.transferNews || '',
+    // npwpReporting: data?.header.npwpReporting || '',
     remainingDpAmount: '',
     dpAmountDeduction: '',
     bankKey: data?.payment.bankKey || '',
     bankName: data?.payment.bankName || '',
-    creditCardBillingId: data?.header.creditCardBillingId || '',
+    // creditCardBillingId: data?.header.creditCardBillingId || '',
     beneficiaryName: data?.payment.beneficiaryName || '',
     bankAccountNo: data?.payment.bankAccountNo || '',
     bankCountryCode: data?.payment.bankCountryCode || '',
@@ -594,26 +595,49 @@ onMounted(async () => {
       },
     ]
   }
-  await verificationApi.getInvoiceDetail(route.query.id?.toString() || '').then(() => {
-    if (verificationApi.isFromEdit) {
-      setDataEdit()
-    } else {
-      setDataDefault()
-    }
-    switch (detailInvoice.value?.header.statusCode) {
-      case 1:
-      case 3:
-        activeStep.value = 'Verification'
-        break
-      case 2:
-      case 4:
-        activeStep.value = 'Approval'
-        break
-      case 7:
-        activeStep.value = 'Posting'
-        break
-    }
-  })
+  if (checkPo()) {
+    await verificationApi.getInvoiceDetail(route.query.id?.toString() || '').then(() => {
+      if (verificationApi.isFromEdit) {
+        setDataEdit()
+      } else {
+        setDataDefault()
+      }
+      switch (detailInvoice.value?.header.statusCode) {
+        case 1:
+        case 3:
+          activeStep.value = 'Verification'
+          break
+        case 2:
+        case 4:
+          activeStep.value = 'Approval'
+          break
+        case 7:
+          activeStep.value = 'Posting'
+          break
+      }
+    })
+  } else {
+    await verificationApi.getInvoiceNonPoDetail(route.query.id?.toString() || '').then(() => {
+      if (verificationApi.isFromEdit) {
+        setDataEdit()
+      } else {
+        setDataDefault()
+      }
+      switch (detailInvoice.value?.header.statusCode) {
+        case 1:
+        case 3:
+          activeStep.value = 'Verification'
+          break
+        case 2:
+        case 4:
+          activeStep.value = 'Approval'
+          break
+        case 7:
+          activeStep.value = 'Posting'
+          break
+      }
+    })
+  }
 })
 
 provide('form', form)

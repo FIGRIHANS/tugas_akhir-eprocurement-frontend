@@ -25,6 +25,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
   const additionalCostTempDelete = ref<ParamsSubmissionCost[]>([])
   const isRejectLoading = ref<boolean>(false)
   const errorMessageSap = ref<string>('')
+  const detailNonPoInvoice = ref<ParamsSubmissionTypes>()
 
   const resetDetailInvoiceEdit = () => {
     detailInvoiceEdit.value = {
@@ -103,37 +104,19 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     return response.data.result.content
   }
 
-  const getListNonPo = async (data: QueryParamsListNoPoTypes) => {
-    listNonPo.value = []
-    const query = {
-      companyCode: data.companyCode || null,
-      invoiceTypeCode: Number(data.invoiceTypeCode) || null,
-      invoiceDate: data.invoiceDate || null,
-      searchText: data.searchText || null,
-    }
-    const response: ApiResponse<ListNonPoTypes[]> = await invoiceApi.get(
-      `/invoice/approval/non-po`,
-      {
-        params: {
-          ...(data.statusCode !== null ? { statuscode: Number(data.statusCode) } : {}),
-          ...query,
-        },
-      },
-    )
-
-    listNonPo.value =
-      response.data.result.content.length !== 0
-        ? response.data.result.content.sort(
-            (a, b) => moment(b.invoiceDate).valueOf() - moment(a.invoiceDate).valueOf(),
-          )
-        : []
-
-    return response.data.result.content
-  }
-
   const getInvoiceDetail = async (uid: string) => {
     const response: ApiResponse<ParamsSubmissionTypes> = await invoiceApi.get(
       `/invoice/approval/${uid}`,
+    )
+
+    detailInvoice.value = response.data.result.content
+
+    return response.data.result
+  }
+
+  const getInvoiceNonPoDetail = async (uid: string) => {
+    const response: ApiResponse<ParamsSubmissionTypes> = await invoiceApi.get(
+      `/invoice/submission-non-po/${uid}`,
     )
 
     detailInvoice.value = response.data.result.content
@@ -183,6 +166,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     additionalCostTempDelete,
     isRejectLoading,
     errorMessageSap,
+    detailNonPoInvoice,
     resetDetailInvoiceEdit,
     postSubmission,
     getListPo,
@@ -192,5 +176,6 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     postSap,
     putSubmission,
     deleteAdditionalCost,
+    getInvoiceNonPoDetail,
   }
 })

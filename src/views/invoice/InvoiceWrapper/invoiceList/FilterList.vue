@@ -35,7 +35,17 @@
             >Invoice PO Type</label
           >
           <select v-model="invoiceType" class="select" name="select">
-            <option v-for="item of invoiceTypeList" :key="item.code" :value="item.code">
+            <option v-for="item of invoicePoTypeList" :key="item.code" :value="item.code">
+              {{ item.name }}
+            </option>
+          </select>
+        </div>
+        <div v-if="type === 'non-po'" class="relative">
+          <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
+            >Invoice Non PO Type</label
+          >
+          <select v-model="invoiceType" class="select" name="select">
+            <option v-for="item of invoiceNonPoTypeList" :key="item.code" :value="item.code">
               {{ item.name }}
             </option>
           </select>
@@ -82,7 +92,8 @@ const companyCode = ref<string>('')
 const invoiceType = ref<string>('')
 
 const companyCodeList = computed(() => invoiceMasterApi.companyCode)
-const invoiceTypeList = computed(() => invoiceMasterApi.invoicePoType)
+const invoicePoTypeList = computed(() => invoiceMasterApi.invoicePoType)
+const invoiceNonPoTypeList = computed(() => invoiceMasterApi.invoiceNonPoType)
 
 const resetFilter = () => {
   status.value = ''
@@ -98,6 +109,7 @@ const goFilter = () => {
     companyCode: companyCode.value,
     invoiceType: invoiceType.value,
   }
+
   emits('setData', data)
 }
 

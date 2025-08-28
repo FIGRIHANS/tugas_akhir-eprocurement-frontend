@@ -4,10 +4,18 @@
       <h3 class="card-title text-base font-semibold">Payment Information</h3>
     </div>
     <div v-if="isNonPo" class="tabs">
-      <button class="tab flex-1 justify-center" :class="{ 'active': tabActive === 'payment' }" @click="tabActive = 'payment'">
+      <button
+        class="tab flex-1 justify-center"
+        :class="{ active: tabActive === 'payment' }"
+        @click="tabActive = 'payment'"
+      >
         Payment Information
       </button>
-      <button class="tab flex-1 justify-center" :class="{ 'active': tabActive === 'alternative' }" @click="tabActive = 'alternative'">
+      <button
+        class="tab flex-1 justify-center"
+        :class="{ active: tabActive === 'alternative' }"
+        @click="tabActive = 'alternative'"
+      >
         Alternative Payment
       </button>
     </div>
@@ -19,19 +27,19 @@
         </div>
         <div class="flex items-center justify-between gap-[10px]">
           <p class="font-normal text-sm text-gray-600">Bank Name</p>
-          <p class="font-normal text-sm">{{ form.bankName }}</p>
+          <p class="font-normal text-sm">{{ form?.bankName }}</p>
         </div>
         <div class="flex items-center justify-between gap-[10px]">
           <p class="font-normal text-sm text-gray-600">Beneficiary Name</p>
-          <p class="font-normal text-sm">{{ form.beneficiaryName }}</p>
+          <p class="font-normal text-sm">{{ form?.beneficiaryName }}</p>
         </div>
         <div class="flex items-center justify-between gap-[10px]">
           <p class="font-normal text-sm text-gray-600">Bank Account Number</p>
-          <p class="font-normal text-sm">{{ form.bankAccountNo }}</p>
+          <p class="font-normal text-sm">{{ form?.bankAccountNo }}</p>
         </div>
         <div class="flex items-center justify-between gap-[10px]">
           <p class="font-normal text-sm text-gray-600">Bank Country</p>
-          <p class="font-normal text-sm">{{ form.bankCountryCode }}</p>
+          <p class="font-normal text-sm">{{ form?.bankCountryCode }}</p>
         </div>
       </div>
       <div v-show="tabActive === 'alternative'" class="flex flex-col gap-[20px]">
@@ -95,5 +103,4 @@ import type { formTypes } from '../types/invoiceDetail'
 const form = inject<formTypes>('form')
 const tabActive = ref<string>('payment')
 const isNonPo = ref<boolean>(false)
-
 </script>
