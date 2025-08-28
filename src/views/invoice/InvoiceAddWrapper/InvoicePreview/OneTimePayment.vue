@@ -5,9 +5,13 @@
       <div class="flex-1 flex flex-col gap-[20px]">
         <div>
           <p class="text-xs font-normal text-gray-700">Type</p>
-          <p class="text-sm font-medium flex align-items-center gap-[8px]">
+          <p v-if="form.isAlternativePayee" class="text-sm font-medium flex align-items-center gap-[8px]">
             <i class="ki-solid ki-check-circle text-success text-base"></i>
             <span class="h-fit">Alternative Payee</span>
+          </p>
+          <p v-if="form.isOneTimeVendor" class="text-sm font-medium flex align-items-center gap-[8px]">
+            <i class="ki-solid ki-check-circle text-success text-base"></i>
+            <span class="h-fit">One Time Vendor</span>
           </p>
         </div>
         <div>

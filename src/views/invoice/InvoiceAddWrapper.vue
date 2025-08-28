@@ -94,7 +94,15 @@ import { KTModal } from '@/metronic/core'
 import { useCheckEmpty } from '@/composables/validation'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
-import type { ParamsSubmissionTypes, ParamsSubmissionNonPo } from '@/stores/views/invoice/types/submission'
+import type {
+  ParamsSubmissionTypes,
+  ParamsSubmissionNonPo,
+  ParamsCheckBudgetType,
+  GlaccountDatum,
+  AccountPayable,
+  Accounttax,
+  Currencyamount
+} from '@/stores/views/invoice/types/submission'
 import { useLoginStore } from '@/stores/views/login'
 import moment from 'moment'
 import type { itemsPoGrType } from './types/invoicePoGr'
@@ -117,6 +125,7 @@ const tabNow = ref<string>('data')
 const isSubmit = ref<boolean>(false)
 const isCheckBudget = ref<boolean>(false)
 const isClickDraft = ref<boolean>(false)
+const itemNoAcc = ref<number>(0)
 
 const routes = ref<routeTypes[]>([
   {
@@ -203,6 +212,7 @@ const vendorList = computed(() => invoiceMasterApi.vendorList)
 const invoiceDpList = computed(() => invoiceMasterApi.dpType)
 const detailPo = computed(() => invoiceApi.detailPo)
 const userData = computed(() => loginApi.userData)
+const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
 
 const checkInvoiceView = () => {
   return route.query.type === 'po-view'
@@ -726,10 +736,134 @@ const setData = () => {
   }
 }
 
+const mapDataCheck = () => {
+  const glAccount = [] as GlaccountDatum[]
+  const accountPayable = [] as AccountPayable[]
+  const accountTax = [] as Accounttax[]
+  const currencyAmount = [] as Currencyamount[]
+
+  for (const item of form.invoiceItem) {
+    itemNoAcc.value += 1
+    const glData = {
+      ITEMNO_ACC: itemNoAcc.value,
+      GL_ACCOUNT: item.activity,
+      ITEM_TEXT: item.itemText,
+      ALLOC_NMBR: '',
+      TAX_CODE: item.taxCode,
+      COSTCENTER: item.costCenter,
+      PROFIT_CTR: ''
+    }
+    glAccount.push(glData)
+  }
+
+  for (const item of glAccount) {
+    const checkTaxCode = accountPayable.findIndex((sub) => sub.TAX_CODE === item.TAX_CODE)
+    if (checkTaxCode === -1) {
+      itemNoAcc.value += 1
+      const accData = {
+        ITEMNO_ACC: itemNoAcc.value,
+        VENDOR_NO: form.vendorId,
+        REF_KEY_1: form.invoiceNo,
+        REF_KEY_2: '',
+        REF_KEY_3: '',
+        BLINE_DATE: '',
+        PMNTTRMS: '',
+        PYMT_METH: '',
+        ALLOC_NMBR: '',
+        ITEM_TEXT: '',
+        TAX_CODE: item.TAX_CODE,
+        PAYMT_REF: ''
+      }
+      accountPayable.push(accData)
+    }
+  }
+
+  for (const item of accountPayable) {
+    const index = listTaxCalculation.value.findIndex((sub) => sub.code === item.TAX_CODE)
+    if (index !== -1) {
+      itemNoAcc.value += 1
+      const taxData = {
+        ITEMNO_ACC: itemNoAcc.value,
+        TAX_CODE: item.TAX_CODE,
+        TAX_RATE: listTaxCalculation.value[index].value
+      }
+      accountTax.push(taxData)
+    }
+  }
+
+  itemNoAcc.value = 0
+
+  for (const item of form.invoiceItem) {
+    itemNoAcc.value += 1
+    const currData = {
+      ITEMNO_ACC: itemNoAcc.value,
+      CURRENCY: form.currency,
+      AMT_DOCCUR: item.itemAmount,
+      AMT_BASE: 0
+    }
+    currencyAmount.push(currData)
+  }
+
+  for (const item of accountTax) {
+    const filterTax = form.invoiceItem.filter((sub) => sub.taxCode === item.TAX_CODE)
+    if (filterTax.length !== 0) {
+      itemNoAcc.value += 1
+      let totalVat = 0
+      let totalAmount = 0
+      for (const subItem of filterTax) {
+        totalVat += subItem.vatAmount
+        totalAmount += subItem.itemAmount
+      }
+      const currData = {
+        ITEMNO_ACC: itemNoAcc.value,
+        CURRENCY: form.currency,
+        AMT_DOCCUR: totalVat,
+        AMT_BASE: totalAmount
+      }
+      currencyAmount.push(currData)
+    }
+  }
+
+  for (const item of form.invoiceItem) {
+    itemNoAcc.value += 1
+    const currData = {
+      ITEMNO_ACC: itemNoAcc.value,
+      CURRENCY: form.currency,
+      AMT_DOCCUR: (item.itemAmount + item.vatAmount) * -1,
+      AMT_BASE: 0
+    }
+    currencyAmount.push(currData)
+  }
+
+  const data = {
+    REQUEST: {
+      HEADER_TXT: form.taxNoInvoice,
+      COMP_CODE: form.companyCode,
+      DOC_DATE: moment(form.invoiceDate).format('YYYYMMDD'),
+      PSTNG_DATE: '',
+      FISC_YEAR: 0,
+      FIS_PERIOD: 0,
+      DOC_TYPE: '',
+      REF_DOC_NO: form.invoiceNoVendor,
+      GLACCOUNT_DATA: glAccount,
+      ACCOUNT_PAYABLE: accountPayable,
+      ACCOUNTTAX: accountTax,
+      CURRENCYAMOUNT: currencyAmount
+    }
+  } as ParamsCheckBudgetType
+
+  return data
+}
+
 const checkBudget = () => {
-  const idModal = document.querySelector('#success_budget_check_modal')
-  const modal = KTModal.getInstance(idModal as HTMLElement)
-  modal.show()
+  const data = mapDataCheck()
+  invoiceApi.postCheckBudget(data).then((response) => {
+    if (response.statusCode === 200) {
+      const idModal = document.querySelector('#success_budget_check_modal')
+      const modal = KTModal.getInstance(idModal as HTMLElement)
+      modal.show()
+    }
+  })
 }
 
 const checkFormBudget = () => {
