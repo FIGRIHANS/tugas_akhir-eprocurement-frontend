@@ -54,6 +54,7 @@ export type ActivityTypes = {
 export type TaxCodeTypes = {
   code: string
   name: string
+  value: number
 }
 
 export type PaymentMethodTypes = {
