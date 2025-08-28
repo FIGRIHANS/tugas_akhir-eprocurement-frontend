@@ -235,4 +235,6 @@ interface ParamsSubmissionHeaderNonPo {
   notes: string
   statusCode: number
   statusName: string
+  department: string
+  profileId: string
 }
