@@ -15,7 +15,7 @@
           Invoice Date
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
-        <DatePicker v-model="form.invoiceDate" :error="form.invoiceDateError" class="w-full -ml-[15px]" />
+        <DatePicker v-model="form.invoiceDate" format="yyyy/MM/dd" :error="form.invoiceDateError" class="w-full -ml-[15px]" teleport />
       </div>
       <!-- Posting Date -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
@@ -23,7 +23,7 @@
           Posting Date
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
-        <DatePicker v-model="form.postingDate" :error="form.postingDateError" class="w-full -ml-[15px]" />
+        <DatePicker v-model="form.postingDate" format="yyyy/MM/dd" :error="form.postingDateError" class="w-full -ml-[15px]" teleport />
       </div>
       <!-- Invoice No. -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
@@ -45,7 +45,7 @@
           Estimated Payment Date
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
-        <DatePicker v-model="form.estimatedPaymentDate" :error="form.estimatedPaymentDateError" class="w-full -ml-[15px]" />
+        <DatePicker v-model="form.estimatedPaymentDate" format="yyyy/MM/dd" :error="form.estimatedPaymentDateError" class="w-full -ml-[15px]" teleport />
       </div>
       <!-- Invoice Vendor No. -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">

@@ -22,9 +22,19 @@
     @apply px-[20px] !important;
     @apply py-[13px] !important;
     
+    &--activity {
+      @extend .cost__field-base;
+      min-width: 350px;
+    }
+    
+    &--tax {
+      @extend .cost__field-base;
+      min-width: 350px;
+    }
+    
     &--cost {
       @extend .cost__field-base;
-      min-width: 360px;
+      min-width: 400px;
     }
     
     &--description {

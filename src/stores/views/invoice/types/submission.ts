@@ -206,3 +206,35 @@ export interface QueryParamsListPoTypes {
   invoiceDate?: string | null
   searchText?: string | null
 }
+
+export interface ParamsSubmissionNonPo {
+  header: ParamsSubmissionHeaderNonPo
+  vendor: ParamsSubmissionVendor
+  payment: ParamsSubmissionPayment
+  documents: ParamsSubmissionDocument[]
+  calculation: ParamsSubmissionCalculation
+  additionalCosts: ParamsSubmissionCost[]
+}
+interface ParamsSubmissionHeaderNonPo {
+  invoiceUId: string
+  invoiceTypeCode: number
+  invoiceTypeName: string
+  invoiceVendorNo: string
+  companyCode: string
+  companyName: string
+  invoiceNo: string
+  documentNo: string
+  invoiceDate: string
+  postingDate: string
+  estimatedPaymentDate: string
+  paymentMethodCode: string
+  paymentMethodName: string
+  taxNo: string
+  currCode: string
+  creditCardBillingID: string
+  notes: string
+  statusCode: number
+  statusName: string
+  department: string
+  profileId: string
+}

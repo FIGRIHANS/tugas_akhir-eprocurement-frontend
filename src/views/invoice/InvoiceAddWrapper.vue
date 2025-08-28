@@ -28,7 +28,7 @@
           </button>
         </div>
         <div class="flex-1 flex gap-[8px] justify-end">
-          <button class="btn btn-primary" :disabled="isSubmit || tabNow !== 'information'" @click="checkBudget">
+          <button v-if="tabNow === 'information'" class="btn btn-primary" :disabled="isSubmit || checkFormBudget()" @click="checkBudget">
             Budget Checking
             <i class="ki-duotone ki-dollar"></i>
           </button>
@@ -94,7 +94,7 @@ import { KTModal } from '@/metronic/core'
 import { useCheckEmpty } from '@/composables/validation'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
-import type { ParamsSubmissionTypes } from '@/stores/views/invoice/types/submission'
+import type { ParamsSubmissionTypes, ParamsSubmissionNonPo } from '@/stores/views/invoice/types/submission'
 import { useLoginStore } from '@/stores/views/login'
 import moment from 'moment'
 import type { itemsPoGrType } from './types/invoicePoGr'
@@ -385,6 +385,26 @@ const mapAdditionalCost = () => {
   return cost
 }
 
+const mapInvoiceItem = () => {
+  const cost = []
+  for (const item of form.invoiceItem) {
+    cost.push({
+      activityExpense: item.activity,
+      itemAmount: Number(item.itemAmount),
+      debitCredit: item.debitCredit,
+      taxCode: item.taxCode,
+      vatAmount: item.vatAmount,
+      costCenter: item.costCenter,
+      profitCenter: item.profitCenter,
+      assignment: item.assignment,
+      whtType: item.whtType,
+      whtCode: item.whtCode,
+      whtBaseAmount: Number(item.whtBaseAmount)
+    })
+  }
+  return cost
+}
+
 const getVendorName = () => {
   const getIndex = vendorList.value.findIndex((item) => item.sapCode === form?.vendorId)
   if (getIndex !== -1) return vendorList.value[getIndex].vendorName
@@ -443,6 +463,59 @@ const mapDataPost = () => {
   return data
 }
 
+const mapDataPostNonPo = () => {
+  const data = {
+    header: {
+      invoiceUId: form.status === 0 || form.status === 5 ? form.invoiceUId :'00000000-0000-0000-0000-000000000000',
+      invoiceTypeCode: Number(form.invoiceType),
+      invoiceTypeName: form.invoiceTypeName,
+      invoiceVendorNo: form.vendorId,
+      companyCode: form.companyCode,
+      companyName: form.companyName,
+      invoiceNo: form.invoiceNo,
+      documentNo: form.invoiceNoVendor,
+      invoiceDate: moment(form.invoiceDate).toISOString(),
+      postingDate: null,
+      estimatedPaymentDate: null,
+      paymentMethodCode: '',
+      paymentMethodName: '',
+      taxNo: form.taxNoInvoice,
+      currCode: form.currency,
+      creditCardBillingID: '',
+      notes: form.description,
+      statusCode: isClickDraft.value ? 0 : 1,
+      statusName: isClickDraft.value ? 'Drafted' : 'Waiting to Verify',
+      department: userData.value.profile.costCenter || '',
+      profileId: userData.value.profile.profileId.toString()
+    },
+    vendor: {
+      vendorId: Number(form.vendorId),
+      vendorName: getVendorName(),
+      npwp: form.npwp,
+      vendorAddress: form.address
+    },
+    payment: {
+      bankKey: form.bankKeyId,
+      bankName: form.bankNameId,
+      beneficiaryName: form.beneficiaryName,
+      bankAccountNo: form.bankAccountNumber,
+      bankCountryCode: form.bankCountryCode
+    },
+    documents: mapDocument(),
+    calculation: {
+      subtotal: form.subtotal,
+      vatAmount: form.vatAmount,
+      whtAmount: form.whtAmount,
+      additionalCost: form.additionalCostCalc,
+      totalGrossAmount: form.totalGrossAmount,
+      totalNetAmount: form.totalNetAmount,
+    },
+    additionalCosts: mapInvoiceItem()
+  } as ParamsSubmissionNonPo
+
+  return data
+}
+
 const goNext = () => {
   const list = ['data', 'information', 'preview']
   if (tabNow.value !== 'preview') {
@@ -461,25 +534,47 @@ const goNext = () => {
     }
   } else {
     isSubmit.value = true
-    invoiceApi.postSubmission(mapDataPost()).then((response) => {
-      if (response.statusCode === 200) {
-        const idModal = document.querySelector('#success_invoice_modal')
-        const modal = KTModal.getInstance(idModal as HTMLElement)
-        modal.show()
-      } else {
-        if (response.result.message.includes('Invoice Document Number')) {
-          const idModal = document.querySelector('#error_document_number_modal')
+    if (route.query.type === 'nonpo') {
+      invoiceApi.postSubmissionNonPo(mapDataPostNonPo()).then((response) => {
+        if (response.statusCode === 200) {
+          const idModal = document.querySelector('#success_invoice_modal')
           const modal = KTModal.getInstance(idModal as HTMLElement)
           modal.show()
+        } else {
+          if (response.result.message.includes('Invoice Document Number')) {
+            const idModal = document.querySelector('#error_document_number_modal')
+            const modal = KTModal.getInstance(idModal as HTMLElement)
+            modal.show()
+          }
         }
-      }
-    })
-      .catch((error) => {
-        console.error(error)
       })
-      .finally(() => {
-        isSubmit.value = false
+        .catch((error) => {
+          console.error(error)
+        })
+        .finally(() => {
+          isSubmit.value = false
+        })
+    } else {
+      invoiceApi.postSubmission(mapDataPost()).then((response) => {
+        if (response.statusCode === 200) {
+          const idModal = document.querySelector('#success_invoice_modal')
+          const modal = KTModal.getInstance(idModal as HTMLElement)
+          modal.show()
+        } else {
+          if (response.result.message.includes('Invoice Document Number')) {
+            const idModal = document.querySelector('#error_document_number_modal')
+            const modal = KTModal.getInstance(idModal as HTMLElement)
+            modal.show()
+          }
+        }
       })
+        .catch((error) => {
+          console.error(error)
+        })
+        .finally(() => {
+          isSubmit.value = false
+        })
+    }
   }
 }
 
@@ -637,6 +732,24 @@ const checkBudget = () => {
   modal.show()
 }
 
+const checkFormBudget = () => {
+  let status = false
+  if (
+    !form.companyCode ||
+    !form.invoiceNoVendor ||
+    !form.invoiceDate ||
+    !form.description ||
+    !form.invoiceDocument ||
+    form.invoiceItem.length === 0
+  ) status = true
+  
+  for (const item of form.invoiceItem) {
+    if (item.isEdit || !item.itemAmount || !item.taxCode) status = true
+  }
+
+  return status
+}
+
 onMounted(() => {
   invoiceMasterApi.getTaxCode()
   invoiceMasterApi.getInvoicePoType()
@@ -646,12 +759,15 @@ onMounted(() => {
     form.invoiceType = '901'
   }
 
+  if (route.query.type === 'nonpo') {
+    form.invoiceType = '1'
+  }
+
   if (route.query.type === 'po-view') {
     tabNow.value = 'preview'
   }
 
   if (route.query.type === 'po-view' || route.query.invoice) {
-
     invoiceApi.getPoDetail(route.query.invoice?.toString() || '').then(() => {
       setData()
     })

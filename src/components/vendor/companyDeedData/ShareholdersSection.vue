@@ -8,7 +8,9 @@ import UiFormGroup from '@/components/ui/atoms/form-group/UiFormGroup.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
+import AttachmentView from '@/components/ui/attachment/AttachmentView.vue'
 import UiLoading from '@/components/UiLoading.vue'
+import { formatDate } from '@/composables/date-format'
 import { useShareunits, useTypeShareholders } from '@/stores/vendor/reference'
 import type { IShareholderPayload } from '@/stores/vendor/types/vendor'
 import { useVendorUploadStore } from '@/stores/vendor/upload'
@@ -204,7 +206,14 @@ const handleDropdown = (id: number, newMode: 'add' | 'edit' | 'delete') => {
   )
 
   if (shareholderData) {
-    Object.assign(payload, shareholderData)
+    Object.assign(payload, {
+      ...shareholderData,
+      unitID: shareholderData.unitID != null ? Number(shareholderData.unitID) : 0,
+      stockTypeID: shareholderData.stockTypeID != null ? Number(shareholderData.stockTypeID) : 0,
+      ownerDOB: shareholderData.ownerDOB
+        ? new Date(shareholderData.ownerDOB as unknown as string)
+        : new Date(),
+    })
   }
 }
 
@@ -248,6 +257,8 @@ const handleDownload = async (path: string) => {
   }
 }
 
+const formatNumber = (num: number) => num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')
+
 const filteredShareholders = computed(() =>
   shareholdersStore.shareholdersData?.filter((item: IShareholderPayload) => item.isActive === true),
 )
@@ -264,7 +275,7 @@ const filteredShareholders = computed(() =>
         </UiButton>
       </div>
     </div>
-    <div class="card-body">
+    <div class="card-body overflow-auto">
       <table class="table align-middle text-gray-700">
         <thead>
           <tr>
@@ -274,7 +285,8 @@ const filteredShareholders = computed(() =>
             <th class="text-nowrap">Date of Birth / Company Establishment Date</th>
             <th class="text-nowrap">Nominal Value</th>
             <th class="text-nowrap">Share Unit</th>
-            <th class="text-nowrap">No KTP</th>
+            <th class="text-nowrap">No KTP/Paspor/NPWP</th>
+            <th class="text-nowrap">File</th>
           </tr>
         </thead>
         <tbody>
@@ -337,10 +349,22 @@ const filteredShareholders = computed(() =>
               </td>
               <td>{{ item.isActive ? 'Active' : 'Inactive' }}</td>
               <td>{{ item.ownerName }}</td>
-              <td>{{ moment(item.ownerDOB).format('YYYY MMM DD') }}</td>
-              <td>{{ item.quantity }}</td>
+              <td>{{ moment(item.ownerDOB).format('DD MMMM YYYY') }}</td>
+              <td>{{ formatNumber(item.quantity) }}</td>
               <td>{{ item.shareUnit }}</td>
               <td>{{ item.ownerID }}</td>
+              <td>
+                <AttachmentView
+                  v-if="item.ownerIDUrl"
+                  class="cursor-pointer"
+                  :file-data="{ name: item.description, path: item.docUrl }"
+                  :upload-date="
+                    formatDate(item.modifiedDate ? item.modifiedDate : item.createdDate)
+                  "
+                  @click="handleDownload(item.ownerIDUrl)"
+                />
+                <span v-else>-</span>
+              </td>
             </tr>
           </template>
           <!-- show data end -->
@@ -363,7 +387,10 @@ const filteredShareholders = computed(() =>
           placeholder="--Type Shareholders--"
           :required="true"
           :options="
-            typeShareholders.data?.map((item) => ({ label: item.value, value: Number(item.code) })) || []
+            typeShareholders.data?.map((item) => ({
+              label: item.value,
+              value: Number(item.code),
+            })) || []
           "
           value-key="value"
           text-key="label"
@@ -406,7 +433,9 @@ const filteredShareholders = computed(() =>
           label="Share Unit"
           placeholder="--Share Unit--"
           :required="true"
-          :options="shareUnits.data?.map((item) => ({ label: item.value, value: Number(item.code) })) || []"
+          :options="
+            shareUnits.data?.map((item) => ({ label: item.value, value: Number(item.code) })) || []
+          "
           value-key="value"
           text-key="label"
           v-model="payload.unitID"

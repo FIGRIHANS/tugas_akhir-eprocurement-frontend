@@ -124,7 +124,7 @@ watch(
         </h2>
 
         <div class="mt-6">
-          <div class="card min-w-full">
+          <div class="card min-w-full overflow-auto">
             <div class="card-table">
               <table class="table table-border align-middle text-gray-700 font-medium text-sm">
                 <thead>
@@ -139,105 +139,137 @@ watch(
                 </thead>
 
                 <tbody>
-                  <tr v-for="(item, index) in localLicenses" :key="item.licenseId">
-                    <td class="align-top">{{ item?.licenseName }}</td>
-
-                    <td class="align-top">
-                      <UiInput
-                        placeholder="License Number / Description"
-                        v-model="item.licenseNo"
-                        :disabled="editingLicenseId !== String(item.licenseId)"
-                      />
+                  <tr v-for="(item, index) in localLicenses" :key="item.licenseId ?? index">
+                    <!-- Business License -->
+                    <td class="p-2 align-middle">
+                      <div class="h-14 flex items-center whitespace-nowrap truncate max-w-[240px]">
+                        {{ item?.licenseName }}
+                      </div>
                     </td>
 
-                    <td class="align-top">
-                      <DatePicker
-                        v-model="item.issuedUTCDate"
-                        format="dd MM yyyy"
-                        placeholder="Pilih Tanggal"
-                        :disabled="editingLicenseId !== String(item.licenseId)"
-                        class="!w-48"
-                      />
+                    <!-- License Number / Description -->
+                    <td class="p-2 align-middle">
+                      <div class="h-14 flex items-center">
+                        <UiInput
+                          placeholder="License Number / Description"
+                          v-model="item.licenseNo"
+                          :disabled="editingLicenseId !== String(item.licenseId)"
+                          class="w-full"
+                        />
+                      </div>
                     </td>
 
-                    <td class="align-top">
-                      <DatePicker
-                        v-model="item.expiredUTCDate"
-                        format="dd MM yyyy"
-                        placeholder="Pilih Tanggal"
-                        :disabled="
-                          editingLicenseId !== String(item.licenseId) || !item.issuedUTCDate
-                        "
-                        :min-date="item.issuedUTCDate"
-                        class="!w-48"
-                      />
+                    <!-- Valid From -->
+                    <td class="p-2 align-middle">
+                      <div class="h-14 flex items-center">
+                        <DatePicker
+                          v-model="item.issuedUTCDate"
+                          format="dd MM yyyy"
+                          placeholder="Pilih Tanggal"
+                          :disabled="editingLicenseId !== String(item.licenseId)"
+                          class="!w-48"
+                        />
+                      </div>
                     </td>
 
-                    <td class="align-top">
-                      <UiFileUpload
-                        :name="String(item.licenseId)"
-                        :text-length="15"
-                        :max-size="16000000"
-                        :placeholder="
-                          fileList[index]?.file.name === 'placeholder.txt'
-                            ? ''
-                            : fileList[index]?.file.name
-                        "
-                        accepted-files=".jpg,.jpeg,.png,.pdf,application/zip"
-                        class="w-48"
-                        :disabled="editingLicenseId !== String(item.licenseId)"
-                        @addedFile="(file) => onPickFile(file, index)"
-                        @upload-failed="() => (modalUploadFailed = true)"
-                      />
-                      <span class="text-danger text-[10px]"
-                        >*jpg, jpeg, png, pdf, zip / max : 16 MB</span
-                      >
+                    <!-- Valid Until -->
+                    <td class="p-2 align-middle">
+                      <div class="h-14 flex items-center">
+                        <DatePicker
+                          v-model="item.expiredUTCDate"
+                          format="dd MM yyyy"
+                          placeholder="Pilih Tanggal"
+                          :disabled="
+                            editingLicenseId !== String(item.licenseId) || !item.issuedUTCDate
+                          "
+                          :min-date="item.issuedUTCDate"
+                          class="!w-48"
+                        />
+                      </div>
                     </td>
 
-                    <td class="flex flex-row items-center gap-2">
-                      <!-- status upload -->
-                      <div
-                        v-if="fileList?.[index]?.status === 'loading'"
-                        class="rounded-full border-2 size-8 border-primary border-t-primary-light animate-spin text-xs"
-                      ></div>
-                      <UiIcon
-                        v-else-if="fileList?.[index]?.status === 'success'"
-                        name="check-circle"
-                        variant="filled"
-                        class="text-success text-4xl"
-                      />
+                    <!-- Document -->
+                    <td class="p-2 align-middle">
+                      <div class="h-14 flex items-center gap-2">
+                        <UiFileUpload
+                          :name="String(item.licenseId)"
+                          :text-length="15"
+                          :max-size="16000000"
+                          :placeholder="
+                            fileList[index]?.file.name === 'placeholder.txt'
+                              ? ''
+                              : fileList[index]?.file.name
+                          "
+                          accepted-files=".jpg,.jpeg,.png,.pdf,application/zip"
+                          class="w-48"
+                          :disabled="editingLicenseId !== String(item.licenseId)"
+                          @addedFile="(file) => onPickFile(file, index)"
+                          @upload-failed="() => (modalUploadFailed = true)"
+                        />
+                        <!-- status / upload -->
+                        <div class="min-w-8 flex items-center justify-center">
+                          <div
+                            v-if="fileList?.[index]?.status === 'loading'"
+                            class="rounded-full border-2 size-6 border-primary border-t-primary-light animate-spin"
+                          />
+                          <UiIcon
+                            v-else-if="fileList?.[index]?.status === 'success'"
+                            name="check-circle"
+                            variant="filled"
+                            class="text-success text-xl"
+                          />
+                          <UiButton
+                            v-else
+                            icon
+                            outline
+                            size="sm"
+                            @click="uploadPickedFile(index)"
+                            :disabled="editingLicenseId !== String(item.licenseId)"
+                            aria-label="Upload document"
+                          >
+                            <i class="ki-filled ki-exit-up"></i>
+                          </UiButton>
+                        </div>
+                      </div>
+                      <!-- Pindahkan catatan file type di luar baris agar tidak menambah tinggi baris -->
+                    </td>
 
-                      <!-- actions -->
-                      <template v-if="editingLicenseId === String(item.licenseId)">
-                        <UiButton
-                          v-if="!['loading', 'success'].includes(fileList?.[index]?.status)"
-                          icon
-                          outline
-                          @click="uploadPickedFile(index)"
-                          class="me-2"
-                        >
-                          <i class="ki-filled ki-exit-up"></i>
-                        </UiButton>
-
-                        <UiButton outline @click="updateLicense(item)" icon class="me-2">
-                          <UiIcon variant="duotone" name="check-circle"></UiIcon>
-                        </UiButton>
-
-                        <UiButton
-                          variant="danger"
-                          outline
-                          @click="deleteLicense(String(item.licenseId))"
-                          icon
-                        >
-                          <UiIcon variant="duotone" name="trash"></UiIcon>
-                        </UiButton>
-                      </template>
-
-                      <template v-else>
-                        <UiButton outline @click="startEditing(String(item.licenseId))" icon>
-                          <UiIcon variant="duotone" name="notepad-edit"></UiIcon>
-                        </UiButton>
-                      </template>
+                    <!-- Action -->
+                    <td class="p-2 align-middle">
+                      <div class="h-14 flex items-center justify-center gap-2">
+                        <template v-if="editingLicenseId === String(item.licenseId)">
+                          <UiButton
+                            outline
+                            icon
+                            size="sm"
+                            @click="updateLicense(item)"
+                            aria-label="Save"
+                          >
+                            <UiIcon variant="duotone" name="check-circle" />
+                          </UiButton>
+                          <UiButton
+                            variant="danger"
+                            outline
+                            icon
+                            size="sm"
+                            @click="deleteLicense(String(item.licenseId))"
+                            aria-label="Delete"
+                          >
+                            <UiIcon variant="duotone" name="trash" />
+                          </UiButton>
+                        </template>
+                        <template v-else>
+                          <UiButton
+                            outline
+                            icon
+                            size="sm"
+                            @click="startEditing(String(item.licenseId))"
+                            aria-label="Edit"
+                          >
+                            <UiIcon variant="duotone" name="notepad-edit" />
+                          </UiButton>
+                        </template>
+                      </div>
                     </td>
                   </tr>
                 </tbody>

@@ -47,30 +47,44 @@
               </td>
               <td>
                 <span v-if="!item.isEdit">{{ item.taxCode }}</span>
-                <select v-else v-model="formEdit.taxCode" class="select" placeholder="">
-                  <option v-for="(option, index) in listTaxCalculation" :key="index" :value="option.code">
-                    {{ option.code }}
-                  </option>
-                </select>
+                <v-select
+                  v-else
+                  v-model="formEdit.taxCode"
+                  class="customSelect"
+                  label="code"
+                  :reduce="(option: any) => option.code"
+                  :options="listTaxCalculation"
+                  appendToBody
+                ></v-select>
               </td>
               <td v-if="!checkPoPib()">
                 {{ form.currCode === 'IDR' ? useFormatIdr(item.isEdit ? formEdit.vatAmount : item.vatAmount) : useFormatUsd(item.isEdit ? formEdit.vatAmount : item.vatAmount) }}
               </td>
               <td>
                 <span v-if="!item.isEdit">{{ item.whtType }}</span>
-                <select v-else v-model="formEdit.whtType" class="select" placeholder="" @change="callWhtCode(item)">
-                  <option v-for="item of whtTypeList" :key="item.code" :value="item.code">
-                    {{ item.name }}
-                  </option>
-                </select>
+                <v-select
+                  v-else
+                  v-model="formEdit.whtType"
+                  class="customSelect"
+                  label="name"
+                  :reduce="(option: any) => option.code"
+                  :options="whtTypeList"
+                  appendToBody
+                  @update:modelValue="callWhtCode(item)"
+                ></v-select>
               </td>
               <td>
                 <span v-if="!item.isEdit">{{ item.whtCode }}</span>
-                <select v-else v-model="formEdit.whtCode" class="select" placeholder="" @change="setWhtAmount(item)">
-                  <option v-for="sub of item.whtCodeList" :key="sub.whtCode" :value="sub.whtCode">
-                    {{ sub.whtCode }}
-                  </option>
-                </select>
+                <v-select
+                  v-else
+                  v-model="formEdit.whtCode"
+                  class="customSelect"
+                  label="whtCode"
+                  :reduce="(option: any) => option.whtCode"
+                  :options="whtCodeList"
+                  appendToBody
+                  @update:modelValue="setWhtAmount(item)"
+                ></v-select>
               </td>
               <td>
                 <span v-if="!item.isEdit">{{ form.currCode === 'IDR' ? useFormatIdr(item.whtBaseAmount) : useFormatUsd(item.whtBaseAmount) }}</span>
@@ -263,7 +277,8 @@ const getWhtCode = (data: itemsPoGrType, whtType: string) => {
 
 const callWhtCode = (data: itemsPoGrType) => {
   formEdit.whtCode = ''
-  getWhtCode(data, formEdit.whtType)
+  data.whtCodeList = []
+  if (formEdit.whtType && formEdit.whtType !== '-') getWhtCode(data, formEdit.whtType)
 }
 
 const getPercentTax = (code: string) => {
@@ -328,7 +343,7 @@ onMounted(() => {
     setColumn(form.value.invoiceTypeCode || 0)
   
     for (const item of form.value.invoicePoGr) {
-      getWhtCode(item, item.whtType)
+      if (item.whtType && item.whtType !== '-') getWhtCode(item, item.whtType)
       item.whtBaseAmount = item.itemAmount
     }
   }

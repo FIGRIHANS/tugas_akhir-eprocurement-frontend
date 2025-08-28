@@ -148,9 +148,12 @@ const filteredSidebarMenu = computed(() => {
     }
   }
 
-  return sidebarMenu.filter(
-    (menu) => menu.id !== 'company-information' && menu.id !== 'vendor-tender',
-  )
+  return sidebarMenu
+    .filter((menu) => menu.id !== 'company-information' && menu.id !== 'vendor-tender')
+    .map((menu) => ({
+      ...menu,
+      child: menu.child ? menu.child.filter((child) => child.id !== 'vendor-blacklist') : [],
+    }))
 })
 </script>
 

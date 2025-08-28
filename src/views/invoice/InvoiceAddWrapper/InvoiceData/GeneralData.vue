@@ -15,9 +15,10 @@
         <v-select
           v-else
           v-model="form.vendorId"
-          class="customSelect"
-          :reduce="(option: any) => option.value"
-          :options="customVendorList"
+          class="customSelect w-full"
+          label="vendorName"
+          :reduce="(option: any) => option.sapCode"
+          :options="vendorList"
           :class="{ 'error-select': form.vendorIdError }"
         ></v-select>
         <!-- <select v-else v-model="form.vendorId" class="select" :class="{ 'border-danger': form.vendorIdError }">
@@ -60,14 +61,6 @@ const typeForm = ref<string>('')
 const vendorList = computed(() => invoiceMasterApi.vendorList)
 const userData = computed(() => loginApi.userData)
 const isVendor = computed(() => loginApi.isVendor)
-const customVendorList = computed(() => {
-  return invoiceMasterApi.vendorList.map((item) => {
-    return {
-      label: item.vendorName,
-      value: item.sapCode
-    }
-  })
-})
 
 watch(
   () => [vendorList.value, userData.value, form],

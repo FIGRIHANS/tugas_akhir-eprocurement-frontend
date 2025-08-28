@@ -13,8 +13,10 @@ import type {
   IPayment,
   IPaymentPayload,
   IPostBlacklist,
+  IShareholder,
   IShareholderPayload,
   IVendorContent,
+  IVendorLegalDoc,
   IVendorLegalDocumentPayload,
   IVerificationDetailData,
   IVerifyLegal,
@@ -26,6 +28,7 @@ import type { ApiResponse } from '@/core/type/api'
 import axios from 'axios'
 import { useLoginStore } from '../views/login'
 import type { PayloadExportPersonnelDataType } from '@/views/vendor/companyInformation/expertPersonnelData/types/expertPersonnelData'
+import type { IPayloadRequestUpdateLicense } from './types/bussines-license'
 
 const userStore = useLoginStore()
 
@@ -200,22 +203,14 @@ export const useVendorIzinUsahaStore = defineStore('vendor-izin-usaha', () => {
     }
   }
 
-  /// TODO: change payload type soon
-  const updateData = async (payload: any) => {
+  const updateData = async (payload: IPayloadRequestUpdateLicense) => {
     loading.value = true
     error.value = null
 
     try {
-      const response = await vendorAPI.post('/public/verifiedvendor/update-license', payload)
-      if (response.data.statusCode === 200) {
-        data.value = response.data.result.content
-        return response.data
-      } else {
-        error.value = response.data.result.message
-        loading.value = false
-        throw new Error(response.data.result.message)
-      }
+      await vendorAPI.post('/public/verifiedvendor/update-license', payload)
     } catch (err: unknown) {
+      console.log(err)
       if (err instanceof Error) {
         error.value = err.message
       } else {
