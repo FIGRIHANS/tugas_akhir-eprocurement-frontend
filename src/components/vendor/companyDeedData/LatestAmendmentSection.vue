@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, reactive, ref, watch, onMounted } from 'vue'
+import { computed, reactive, ref, watch, onMounted, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
 
@@ -19,13 +19,28 @@ import { useVendorUploadStore } from '@/stores/vendor/upload'
 import { useLoginStore } from '@/stores/views/login'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
 import moment from 'moment'
+import LPagination from '@/components/pagination/LPagination.vue'
 
-const vendorLegalDocStore = useCompanyDeedDataStore()
+const companyDeedDataStore = useCompanyDeedDataStore()
 const userLoginStore = useLoginStore()
 const uploadStore = useVendorUploadStore()
 const vendorMasterDataStore = useVendorMasterDataStore()
 
 const route = useRoute()
+
+const pageSizeOptions = ref([
+  { value: 5, text: '5' },
+  { value: 10, text: '10' },
+  { value: 15, text: '15' },
+  { value: 20, text: '20' },
+  { value: 50, text: '50' },
+])
+
+const paginationLatestAmandmentDataStore = ref({
+  pageSize: 10,
+  currentPage: 1,
+  total: 10,
+})
 
 const showSuccessModal = ref(false)
 const showErrorModal = ref(false)
@@ -63,19 +78,17 @@ const errors = reactive({
   notaryLocation: '',
 })
 
-/* ===== UI helpers: tombol dinamis ===== */
 const isEditing = computed(() => mode.value === 'edit' || vendorAmendmentPayload.id > 0)
 const submitLabel = computed(() => (isEditing.value ? 'Save' : 'Add'))
 const submitIcon = computed(() => (isEditing.value ? 'notepad-edit' : 'plus-circle'))
 
-/* ===== Util ===== */
 const toNumber = (v: unknown) => (v === null || v === undefined || v === '' ? 0 : Number(v))
 
-/** Map dari payload/edit ke cityID:
- * 1) Jika notaryLocation sudah number>0 -> pakai
- * 2) Jika tidak, coba cari dari cityName / notaryLocationName di daftar kota
- */
-const resolveNotaryLocationId = (data: { notaryLocation?: any; cityName?: string; notaryLocationName?: string }) => {
+const resolveNotaryLocationId = (data: {
+  notaryLocation?: any
+  cityName?: string
+  notaryLocationName?: string
+}) => {
   if (typeof data.notaryLocation === 'number' && data.notaryLocation > 0) return data.notaryLocation
   const name = (data.cityName || data.notaryLocationName || '').toString().trim().toLowerCase()
   if (!name) return 0
@@ -93,16 +106,20 @@ const validateForm = () => {
   errors.notaryLocation = ''
 
   if (!vendorAmendmentPayload.documentNo) {
-    errors.documentNo = 'Document no is required'; isValid = false
+    errors.documentNo = 'Document no is required'
+    isValid = false
   }
   if (!vendorAmendmentPayload.notaryName) {
-    errors.notaryName = 'Notary name is required'; isValid = false
+    errors.notaryName = 'Notary name is required'
+    isValid = false
   }
   if (!vendorAmendmentPayload.documentURL) {
-    errors.documentURL = 'Document URL is required'; isValid = false
+    errors.documentURL = 'Document URL is required'
+    isValid = false
   }
   if (!toNumber(vendorAmendmentPayload.notaryLocation)) {
-    errors.notaryLocation = 'Notary location is required'; isValid = false
+    errors.notaryLocation = 'Notary location is required'
+    isValid = false
   }
   return isValid
 }
@@ -153,8 +170,13 @@ const handleSave = async () => {
   try {
     isSaveLoading.value = true
     vendorAmendmentPayload.notaryLocation = toNumber(vendorAmendmentPayload.notaryLocation) // pastikan number
-    await vendorLegalDocStore.postVendorLegalDocument(vendorAmendmentPayload)
-    await vendorLegalDocStore.getVendorLegalDocument(Number(route.params.id))
+    await companyDeedDataStore.postVendorLegalDocument(vendorAmendmentPayload)
+    await companyDeedDataStore.getVendorLegalDocument(
+      Number(route.params.id),
+      paginationLatestAmandmentDataStore.value.currentPage,
+      paginationLatestAmandmentDataStore.value.pageSize,
+      3116,
+    )
     showSuccessModal.value = true
     resetForm()
   } catch (err) {
@@ -171,9 +193,10 @@ const handleSave = async () => {
 }
 
 const handleEdit = (id: number) => {
-  const data = vendorLegalDocStore.vendorLegalDocData.find(
-    (item: IVendorLegalDocumentPayload) => item.id === id,
+  const data = companyDeedDataStore.vendorLegalDocData.items.find(
+     (item) => (item as unknown as IVendorLegalDocumentPayload).id === id,
   )
+
   if (data) {
     Object.assign(vendorAmendmentPayload, data)
     // Normalisasi: pastikan notaryLocation jadi cityID (number)
@@ -189,7 +212,7 @@ const handleEdit = (id: number) => {
 }
 
 const handleDelete = (id: number) => {
-  const data = vendorLegalDocStore.vendorLegalDocData.find(
+  const data = companyDeedDataStore.vendorLegalDocData.find(
     (item: IVendorLegalDocumentPayload) => item.id === id,
   )
   if (data) {
@@ -203,10 +226,15 @@ const handleProcessDelete = async () => {
   try {
     isSaveLoading.value = true
     const payloadToSend = { ...vendorAmendmentPayload, isActive: false }
-    await vendorLegalDocStore.postVendorLegalDocument(payloadToSend)
+    await companyDeedDataStore.postVendorLegalDocument(payloadToSend)
     showDeleteModal.value = false
     showSuccessModal.value = true
-    await vendorLegalDocStore.getVendorLegalDocument(Number(route.params.id))
+    await companyDeedDataStore.getVendorLegalDocument(
+      Number(route.params.id),
+      paginationLatestAmandmentDataStore.value.currentPage,
+      paginationLatestAmandmentDataStore.value.pageSize,
+      3116,
+    )
     resetForm()
   } catch (err) {
     if (axios.isAxiosError(err)) {
@@ -235,17 +263,15 @@ const handleDownload = async (path: string) => {
   }
 }
 
-const filteredAmendmentData = computed(() =>
-  vendorLegalDocStore.vendorLegalDocData.items?.filter(
-    (item: IVendorLegalDocumentPayload) =>
-      item.isActive === true && item.documentType === AMENDMENT_DOCUMENT_TYPE,
-  ),
-)
-
 /** Pastikan cityList tersedia; kalau store punya action loader, panggil di sini */
 onMounted(async () => {
-  if (!vendorMasterDataStore.cityList?.length && typeof vendorMasterDataStore.getCityList === 'function') {
-    try { await vendorMasterDataStore.getCityList() } catch {}
+  if (
+    !vendorMasterDataStore.cityList?.length &&
+    typeof vendorMasterDataStore.getVendorCities === 'function'
+  ) {
+    try {
+      await vendorMasterDataStore.getVendorCities()
+    } catch {}
   }
 })
 
@@ -266,6 +292,32 @@ watch(
   },
   { immediate: false },
 )
+
+const setPageLatestAmandmentData = async (page: number) => {
+  paginationLatestAmandmentDataStore.value.currentPage = page
+}
+
+const latestAmandmentData = computed(() => {
+  const { items, total } = companyDeedDataStore.vendorLegalDocData
+
+  // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+  paginationLatestAmandmentDataStore.value.total = total
+
+  return items
+})
+
+watchEffect(async () => {
+  try {
+    await companyDeedDataStore.getVendorLegalDocument(
+      Number(route.params.id),
+      paginationLatestAmandmentDataStore.value.currentPage,
+      paginationLatestAmandmentDataStore.value.pageSize,
+      3116,
+    )
+  } catch (error) {
+    console.log(error)
+  }
+})
 </script>
 
 <template>
@@ -301,7 +353,12 @@ watch(
           <UiSelect
             label="Notary Office Location"
             placeholder="-- Notary Office Location --"
-            :options="vendorMasterDataStore.cityList?.map((item) => ({ value: item.cityID, label: item.cityName }))"
+            :options="
+              vendorMasterDataStore.cityList?.map((item) => ({
+                value: item.cityID,
+                label: item.cityName,
+              }))
+            "
             value-key="value"
             text-key="label"
             row
@@ -342,26 +399,26 @@ watch(
         </thead>
         <tbody>
           <!-- loading -->
-          <tr v-if="vendorLegalDocStore.vendorLegalDocLoading">
+          <tr v-if="companyDeedDataStore.vendorLegalDocLoading">
             <td colspan="5" class="text-center">
               <UiLoading size="md" />
             </td>
           </tr>
 
           <!-- error -->
-          <tr v-else-if="vendorLegalDocStore.vendorLegalDocError">
+          <tr v-else-if="companyDeedDataStore.vendorLegalDocError">
             <td colspan="5" class="text-center">
-              {{ vendorLegalDocStore.vendorLegalDocError }}
+              {{ companyDeedDataStore.vendorLegalDocError }}
             </td>
           </tr>
 
           <!-- empty -->
-          <tr v-else-if="!filteredAmendmentData?.length">
+          <tr v-else-if="!latestAmandmentData?.length">
             <td colspan="5" class="text-center">No data</td>
           </tr>
 
           <!-- data -->
-          <tr v-else v-for="doc in filteredAmendmentData" :key="doc.id" class="font-normal text-sm">
+          <tr v-else v-for="doc in latestAmandmentData" :key="doc.id" class="font-normal text-sm">
             <td class="text-center">
               <div class="dropdown" data-dropdown="true" data-dropdown-trigger="click">
                 <UiButton outline icon size="sm" variant="secondary" class="dropdown-toggle">
@@ -404,6 +461,24 @@ watch(
           </tr>
         </tbody>
       </table>
+      <div class="flex flex-row items-center justify-between px-4">
+        <div class="flex flex-row items-center gap-2">
+          Show
+          <UiSelect
+            v-model="paginationLatestAmandmentDataStore.pageSize"
+            :options="pageSizeOptions"
+            class="w-16"
+          />
+          per page from {{ paginationLatestAmandmentDataStore.total }} data
+        </div>
+
+        <LPagination
+          :totalItems="paginationLatestAmandmentDataStore.total"
+          :pageSize="paginationLatestAmandmentDataStore.pageSize"
+          :currentPage="paginationLatestAmandmentDataStore.currentPage"
+          @pageChange="setPageLatestAmandmentData"
+        />
+      </div>
     </div>
 
     <!-- modal success -->

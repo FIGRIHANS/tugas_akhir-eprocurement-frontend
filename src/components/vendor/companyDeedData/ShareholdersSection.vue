@@ -219,8 +219,8 @@ const handleDropdown = (id: number, newMode: 'add' | 'edit' | 'delete') => {
   }
 
   const shareholderData = companyDeedDataStore.shareholdersData.items.find(
-    (item: IShareholderPayload) => item.stockID === id,
-  )
+    (item) => (item as unknown as IShareholderPayload).stockID === id,
+  ) as unknown as IShareholderPayload | undefined
 
   if (shareholderData) {
     Object.assign(payload, {
@@ -380,7 +380,10 @@ watchEffect(async () => {
                         </button>
                       </li>
                       <li class="menu-item">
-                        <button class="menu-link" @click="handleDeleteModal(item)">
+                        <button
+                          class="menu-link"
+                          @click="handleDeleteModal(item as unknown as IShareholderPayload)"
+                        >
                           <span class="menu-icon">
                             <UiIcon variant="duotone" name="cross-circle" class="!text-danger" />
                           </span>

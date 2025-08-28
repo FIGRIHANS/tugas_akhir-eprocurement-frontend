@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, reactive, ref, watch, onMounted } from 'vue'
+import { computed, reactive, ref, watch, onMounted, watchEffect } from 'vue'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
 import UiFormGroup from '@/components/ui/atoms/form-group/UiFormGroup.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
@@ -18,14 +18,29 @@ import { useLoginStore } from '@/stores/views/login'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
 import moment from 'moment'
+import LPagination from '@/components/pagination/LPagination.vue'
 
-const vendorLegalDocStore = useCompanyDeedDataStore()
+const companyDeedDataStore = useCompanyDeedDataStore()
 const adminVendorStore = useVendorAdministrationStore()
 const userLoginStore = useLoginStore()
 const uploadStore = useVendorUploadStore()
 const vendorMasterDataStore = useVendorMasterDataStore()
 
 const route = useRoute()
+
+const pageSizeOptions = ref([
+  { value: 5, text: '5' },
+  { value: 10, text: '10' },
+  { value: 15, text: '15' },
+  { value: 20, text: '20' },
+  { value: 50, text: '50' },
+])
+
+const paginationCompanyDeedDataStore = ref({
+  pageSize: 10,
+  currentPage: 1,
+  total: 10,
+})
 
 const showSuccessModal = ref(false)
 const showErrorModal = ref(false)
@@ -156,8 +171,13 @@ const handleSave = async () => {
   try {
     isSaveLoading.value = true
     vendorLegalDocPayload.notaryLocation = toNumber(vendorLegalDocPayload.notaryLocation) // pastikan number
-    await vendorLegalDocStore.postVendorLegalDocument(vendorLegalDocPayload)
-    await vendorLegalDocStore.getVendorLegalDocument(Number(route.params.id))
+    await companyDeedDataStore.postVendorLegalDocument(vendorLegalDocPayload)
+    await companyDeedDataStore.getVendorLegalDocument(
+      Number(route.params.id),
+      paginationCompanyDeedDataStore.value.currentPage,
+      paginationCompanyDeedDataStore.value.pageSize,
+      3115,
+    )
     showSuccessModal.value = true
     resetForm()
   } catch (err) {
@@ -177,15 +197,14 @@ const handleSave = async () => {
 }
 
 const handleEdit = (id: number) => {
-  const data = vendorLegalDocStore.vendorLegalDocData.find(
-    (item: IVendorLegalDocumentPayload) => item.id === id,
-  )
+  const data = companyDeedDataStore.vendorLegalDocData.items.find(
+    (item) => (item as unknown as IVendorLegalDocumentPayload).id === id,
+  ) as unknown as IVendorLegalDocumentPayload | undefined
   if (data) {
     Object.assign(vendorLegalDocPayload, data)
-    // Normalisasi: pastikan notaryLocation jadi cityID (number).
     vendorLegalDocPayload.notaryLocation = toNumber(
       resolveNotaryLocationId({
-        notaryLocation: (data as any).notaryLocation,
+        notaryLocation: (data as unknown as IVendorLegalDocumentPayload).notaryLocation,
         cityName: (data as any).cityName,
         notaryLocationName: (data as any).notaryLocationName,
       }),
@@ -196,9 +215,9 @@ const handleEdit = (id: number) => {
 
 const handleDelete = (id: number) => {
   showDeleteModal.value = true
-  const data = vendorLegalDocStore.vendorLegalDocData.find(
-    (item: IVendorLegalDocumentPayload) => item.id === id,
-  )
+  const data = companyDeedDataStore.vendorLegalDocData.items.find(
+    (item) => (item as unknown as IVendorLegalDocumentPayload).id === id,
+  ) as unknown as IVendorLegalDocumentPayload | undefined
   if (data) {
     Object.assign(vendorLegalDocPayload, data)
     mode.value = 'delete'
@@ -209,10 +228,15 @@ const handleProcessDelete = async () => {
   try {
     isSaveLoading.value = true
     const payloadToSend = { ...vendorLegalDocPayload, isActive: false }
-    await vendorLegalDocStore.postVendorLegalDocument(payloadToSend)
+    await companyDeedDataStore.postVendorLegalDocument(payloadToSend)
     showDeleteModal.value = false
     showSuccessModal.value = true
-    await vendorLegalDocStore.getVendorLegalDocument(Number(route.params.id))
+    await companyDeedDataStore.getVendorLegalDocument(
+      Number(route.params.id),
+      paginationCompanyDeedDataStore.value.currentPage,
+      paginationCompanyDeedDataStore.value.pageSize,
+      3115,
+    )
     resetForm()
   } catch (err) {
     if (axios.isAxiosError(err)) {
@@ -244,12 +268,6 @@ const handleDownload = async (path: string) => {
   }
 }
 
-const filteredCompanyDeedData = computed(() =>
-  vendorLegalDocStore.vendorLegalDocData.items?.filter(
-    (item: IVendorLegalDocumentPayload) => item.isActive === true && item.documentType === 3115,
-  ),
-)
-
 /** Pastikan daftar kota tersedia (kalau store punya action loader) */
 onMounted(async () => {
   if (!vendorMasterDataStore.cityList?.length) {
@@ -276,6 +294,32 @@ watch(
   },
   { immediate: false },
 )
+
+const setPageCompanyDeedData = async (page: number) => {
+  paginationCompanyDeedDataStore.value.currentPage = page
+}
+
+const companyDeedData = computed(() => {
+  const { items, total } = companyDeedDataStore.vendorLegalDocData
+
+  // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+  paginationCompanyDeedDataStore.value.total = total
+
+  return items
+})
+
+watchEffect(async () => {
+  try {
+    await companyDeedDataStore.getVendorLegalDocument(
+      Number(route.params.id),
+      paginationCompanyDeedDataStore.value.currentPage,
+      paginationCompanyDeedDataStore.value.pageSize,
+      3115,
+    )
+  } catch (error) {
+    console.log(error)
+  }
+})
 </script>
 
 <template>
@@ -368,28 +412,23 @@ watch(
           </tr>
         </thead>
         <tbody>
-          <tr v-if="vendorLegalDocStore.vendorLegalDocLoading">
+          <tr v-if="companyDeedDataStore.vendorLegalDocLoading">
             <td colspan="5" class="text-center">
               <UiLoading size="md" />
             </td>
           </tr>
 
-          <tr v-else-if="vendorLegalDocStore.vendorLegalDocError">
+          <tr v-else-if="companyDeedDataStore.vendorLegalDocError">
             <td colspan="5" class="text-center">
-              {{ vendorLegalDocStore.vendorLegalDocError }}
+              {{ companyDeedDataStore.vendorLegalDocError }}
             </td>
           </tr>
 
-          <tr v-else-if="!filteredCompanyDeedData.length">
+          <tr v-else-if="!companyDeedData.length">
             <td colspan="5" class="text-center">No data</td>
           </tr>
 
-          <tr
-            v-else
-            v-for="doc in filteredCompanyDeedData"
-            :key="doc.id"
-            class="font-normal text-sm"
-          >
+          <tr v-else v-for="doc in companyDeedData" :key="doc" class="font-normal text-sm">
             <td class="text-center">
               <div class="dropdown" data-dropdown="true" data-dropdown-trigger="click">
                 <UiButton outline icon size="sm" variant="secondary" class="dropdown-toggle">
@@ -432,6 +471,24 @@ watch(
           </tr>
         </tbody>
       </table>
+      <div class="flex flex-row items-center justify-between px-4">
+        <div class="flex flex-row items-center gap-2">
+          Show
+          <UiSelect
+            v-model="paginationCompanyDeedDataStore.pageSize"
+            :options="pageSizeOptions"
+            class="w-16"
+          />
+          per page from {{ paginationCompanyDeedDataStore.total }} data
+        </div>
+
+        <LPagination
+          :totalItems="paginationCompanyDeedDataStore.total"
+          :pageSize="paginationCompanyDeedDataStore.pageSize"
+          :currentPage="paginationCompanyDeedDataStore.currentPage"
+          @pageChange="setPageCompanyDeedData"
+        />
+      </div>
     </div>
 
     <!-- modal success -->
