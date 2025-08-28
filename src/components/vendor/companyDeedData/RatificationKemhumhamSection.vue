@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
 
@@ -18,11 +18,27 @@ import { useCompanyDeedDataStore } from '@/stores/vendor/vendor'
 import { useVendorUploadStore } from '@/stores/vendor/upload'
 import { useLoginStore } from '@/stores/views/login'
 import moment from 'moment'
+import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
+import LPagination from '@/components/pagination/LPagination.vue'
 
-const vendorLegalDocStore = useCompanyDeedDataStore()
+const companyDeedDataStore = useCompanyDeedDataStore()
 const uploadStore = useVendorUploadStore()
 const userLoginStore = useLoginStore()
 const route = useRoute()
+
+const pageSizeOptions = ref([
+  { value: 5, text: '5' },
+  { value: 10, text: '10' },
+  { value: 15, text: '15' },
+  { value: 20, text: '20' },
+  { value: 50, text: '50' },
+])
+
+const paginationRatificationDataStore = ref({
+  pageSize: 10,
+  currentPage: 1,
+  total: 10,
+})
 
 const showSuccessModal = ref(false)
 const showErrorModal = ref(false)
@@ -128,8 +144,13 @@ const handleSave = async () => {
   if (!validateForm()) return
   try {
     isSaveLoading.value = true
-    await vendorLegalDocStore.postVendorLegalDocument(payload)
-    await vendorLegalDocStore.getVendorLegalDocument(Number(route.params.id))
+    await companyDeedDataStore.postVendorLegalDocument(payload)
+    await companyDeedDataStore.getVendorLegalDocument(
+      Number(route.params.id),
+      paginationRatificationDataStore.value.currentPage,
+      paginationRatificationDataStore.value.pageSize,
+      3117,
+    )
     showSuccessModal.value = true
     resetForm()
   } catch (err) {
@@ -146,8 +167,8 @@ const handleSave = async () => {
 }
 
 const handleEdit = (id: number) => {
-  const data = vendorLegalDocStore.vendorLegalDocData.find(
-    (d: IVendorLegalDocumentPayload) => d.id === id,
+  const data = companyDeedDataStore.vendorLegalDocData.items.find(
+    (item) => (item as unknown as IVendorLegalDocumentPayload).id === id,
   )
   if (data) {
     Object.assign(payload, data)
@@ -156,8 +177,8 @@ const handleEdit = (id: number) => {
 }
 
 const handleAskDelete = (id: number) => {
-  const data = vendorLegalDocStore.vendorLegalDocData.find(
-    (d: IVendorLegalDocumentPayload) => d.id === id,
+  const data = companyDeedDataStore.vendorLegalDocData.items.find(
+    (item) => (item as unknown as IVendorLegalDocumentPayload).id === id,
   )
   if (data) Object.assign(payload, data)
   mode.value = 'delete'
@@ -168,10 +189,15 @@ const handleProcessDelete = async () => {
   try {
     isSaveLoading.value = true
     const toSend = { ...payload, isActive: false }
-    await vendorLegalDocStore.postVendorLegalDocument(toSend)
+    await companyDeedDataStore.postVendorLegalDocument(toSend)
     showDeleteModal.value = false
     showSuccessModal.value = true
-    await vendorLegalDocStore.getVendorLegalDocument(Number(route.params.id))
+    await companyDeedDataStore.getVendorLegalDocument(
+      Number(route.params.id),
+      paginationRatificationDataStore.value.currentPage,
+      paginationRatificationDataStore.value.pageSize,
+      3117,
+    )
     resetForm()
   } catch (err) {
     if (axios.isAxiosError(err)) {
@@ -200,12 +226,31 @@ const handleDownload = async (path: string) => {
   }
 }
 
-const filteredRatifications = computed(() =>
-  vendorLegalDocStore.vendorLegalDocData?.filter(
-    (d: IVendorLegalDocumentPayload) =>
-      d.isActive === true && d.documentType === RATIFICATION_DOCUMENT_TYPE,
-  ),
-)
+const setPageRatification = async (page: number) => {
+  paginationRatificationDataStore.value.currentPage = page
+}
+
+const ratificationData = computed(() => {
+  const { items, total } = companyDeedDataStore.vendorLegalDocData
+
+  // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+  paginationRatificationDataStore.value.total = total
+
+  return items
+})
+
+watchEffect(async () => {
+  try {
+    await companyDeedDataStore.getVendorLegalDocument(
+      Number(route.params.id),
+      paginationRatificationDataStore.value.currentPage,
+      paginationRatificationDataStore.value.pageSize,
+      3117,
+    )
+  } catch (error) {
+    console.log(error)
+  }
+})
 </script>
 
 <template>
@@ -275,26 +320,26 @@ const filteredRatifications = computed(() =>
         </thead>
         <tbody>
           <!-- loading -->
-          <tr v-if="vendorLegalDocStore.vendorLegalDocLoading">
+          <tr v-if="companyDeedDataStore.vendorLegalDocLoading">
             <td colspan="3" class="text-center">
               <UiLoading size="md" />
             </td>
           </tr>
 
           <!-- error -->
-          <tr v-else-if="vendorLegalDocStore.vendorLegalDocError">
+          <tr v-else-if="companyDeedDataStore.vendorLegalDocError">
             <td colspan="3" class="text-center">
-              {{ vendorLegalDocStore.vendorLegalDocError }}
+              {{ companyDeedDataStore.vendorLegalDocError }}
             </td>
           </tr>
 
           <!-- empty -->
-          <tr v-else-if="!filteredRatifications?.length">
+          <tr v-else-if="!ratificationData?.length">
             <td colspan="3" class="text-center">No data</td>
           </tr>
 
           <!-- data -->
-          <tr v-else v-for="doc in filteredRatifications" :key="doc.id" class="font-normal text-sm">
+          <tr v-else v-for="doc in ratificationData" :key="doc.id" class="font-normal text-sm">
             <td class="text-center">
               <div class="dropdown" data-dropdown="true" data-dropdown-trigger="click">
                 <UiButton outline icon size="sm" variant="secondary" class="dropdown-toggle">
@@ -335,6 +380,24 @@ const filteredRatifications = computed(() =>
           </tr>
         </tbody>
       </table>
+      <div class="flex flex-row items-center justify-between px-4">
+        <div class="flex flex-row items-center gap-2">
+          Show
+          <UiSelect
+            v-model="paginationRatificationDataStore.pageSize"
+            :options="pageSizeOptions"
+            class="w-16"
+          />
+          per page from {{ paginationRatificationDataStore.total }} data
+        </div>
+
+        <LPagination
+          :totalItems="paginationRatificationDataStore.total"
+          :pageSize="paginationRatificationDataStore.pageSize"
+          :currentPage="paginationRatificationDataStore.currentPage"
+          @pageChange="setPageRatification"
+        />
+      </div>
     </div>
 
     <!-- Success -->

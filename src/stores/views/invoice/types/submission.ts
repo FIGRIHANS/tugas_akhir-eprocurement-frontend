@@ -238,3 +238,58 @@ interface ParamsSubmissionHeaderNonPo {
   department: string
   profileId: string
 }
+
+export interface ParamsCheckBudgetType {
+  REQUEST: {
+    HEADER_TXT: string
+    COMP_CODE: string
+    DOC_DATE: string
+    PSTNG_DATE: string
+    FISC_YEAR: number
+    FIS_PERIOD: number
+    DOC_TYPE: string
+    REF_DOC_NO: string
+    GLACCOUNT_DATA: GlaccountDatum[]
+    ACCOUNT_PAYABLE: AccountPayable[]
+    ACCOUNTTAX: Accounttax[]
+    CURRENCYAMOUNT: Currencyamount[]
+  }
+}
+
+export interface Accounttax {
+  ITEMNO_ACC: number
+  TAX_CODE: string
+  TAX_RATE: number
+}
+
+export interface AccountPayable {
+  ITEMNO_ACC: number
+  VENDOR_NO: string
+  REF_KEY_1: string
+  REF_KEY_2: string
+  REF_KEY_3: string
+  BLINE_DATE: string
+  PMNTTRMS: string
+  PYMT_METH: string
+  ALLOC_NMBR: string
+  ITEM_TEXT: string
+  TAX_CODE: string
+  PAYMT_REF: string
+}
+
+export interface Currencyamount {
+  ITEMNO_ACC: number
+  CURRENCY: string
+  AMT_DOCCUR: number
+  AMT_BASE: number
+}
+
+export interface GlaccountDatum {
+  ITEMNO_ACC: number
+  GL_ACCOUNT: string
+  ITEM_TEXT: string
+  ALLOC_NMBR: string
+  TAX_CODE: string
+  COSTCENTER: string
+  PROFIT_CTR: string
+}
