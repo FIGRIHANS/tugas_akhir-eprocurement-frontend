@@ -9,58 +9,75 @@
       </UiButton>
     </div>
 
-    <div class="card-table">
-      <table class="table align-middle">
-        <thead>
-          <tr>
-            <th class="w-[70px]"></th>
-            <th>Equipment Name</th>
-            <th>Brand / Type</th>
-            <th>Year of Manufacture</th>
-            <th>Serial / License Number</th>
-            <th>Capacity (Tonnage)</th>
-            <th>Condition</th>
-            <th>Ownership Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="data in dataResponse">
-            <td>
-              <div class="dropdown" data-dropdown="true" data-dropdown-trigger="click">
-                <button class="dropdown-toggle px-0 size-8 flex justify-center btn btn-light">
-                  <UiIcon name="dots-vertical" />
-                </button>
+    <div class="flex flex-col gap-4 pb-4">
+      <div class="card-table">
+        <table class="table align-middle">
+          <thead>
+            <tr>
+              <th class="w-[70px]"></th>
+              <th>Equipment Name</th>
+              <th>Brand / Type</th>
+              <th>Year of Manufacture</th>
+              <th>Serial / License Number</th>
+              <th>Capacity (Tonnage)</th>
+              <th>Condition</th>
+              <th>Ownership Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="data in dataResponse">
+              <td>
+                <div class="dropdown" data-dropdown="true" data-dropdown-trigger="click">
+                  <button class="dropdown-toggle px-0 size-8 flex justify-center btn btn-light">
+                    <UiIcon name="dots-vertical" />
+                  </button>
 
-                <div class="dropdown-content w-full max-w-56" data-dropdown-dismiss="true">
-                  <div class="menu menu-default flex flex-col w-full text-sm">
-                    <div class="menu-item text-warning" @click="editData(data)">
-                      <span class="menu-link">
-                        <UiIcon name="notepad-edit" variant="duotone" class="menu-icon" />
-                        Edit
-                      </span>
-                    </div>
-                    <div class="menu-item text-danger" @click="deleteData(data)">
-                      <span class="menu-link">
-                        <UiIcon name="cross-circle" variant="duotone" class="menu-icon" />
-                        Hapus
-                      </span>
+                  <div class="dropdown-content w-full max-w-56" data-dropdown-dismiss="true">
+                    <div class="menu menu-default flex flex-col w-full text-sm">
+                      <div class="menu-item text-warning" @click="editData(data)">
+                        <span class="menu-link">
+                          <UiIcon name="notepad-edit" variant="duotone" class="menu-icon" />
+                          Edit
+                        </span>
+                      </div>
+                      <div class="menu-item text-danger" @click="deleteData(data)">
+                        <span class="menu-link">
+                          <UiIcon name="cross-circle" variant="duotone" class="menu-icon" />
+                          Hapus
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </td>
-            <td>{{ data.name }}</td>
-            <td>{{ data.brand }}</td>
-            <td>{{ formatDateYear(data.mfgDate) }}</td>
-            <td>{{ data.serialNo || '-' }}</td>
-            <td>{{ data.capacity }}</td>
-            <td>{{ data.conditionName }}</td>
-            <td>
-              <UiBadge variant="success" size="sm" outline>{{ data.ownershipName }}</UiBadge>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+              </td>
+              <td>{{ data.name }}</td>
+              <td>{{ data.brand }}</td>
+              <td>{{ formatDateYear(data.mfgDate) }}</td>
+              <td>{{ data.serialNo || '-' }}</td>
+              <td>{{ data.capacity }}</td>
+              <td>{{ data.conditionName }}</td>
+              <td>
+                <UiBadge variant="success" size="sm" outline>{{ data.ownershipName }}</UiBadge>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="flex flex-row items-center justify-between px-4">
+        <div class="flex flex-row items-center gap-2">
+          Show
+          <UiSelect v-model="pagination.pageSize" :options="pageSizeOptions" class="w-16" />
+          per page from {{ pagination.total }} data
+        </div>
+
+        <LPagination
+          :totalItems="pagination.total"
+          :pageSize="pagination.pageSize"
+          :currentPage="pagination.currentPage"
+          @pageChange="setPagePagination"
+        />
+      </div>
     </div>
   </div>
 
@@ -210,6 +227,7 @@ import type { EquipmentDataType, PayloadEquipmentDataType } from '@/stores/vendo
 import { formatDatePayload, formatDateYear } from '@/composables/date-format'
 import { useCheckEmpty } from '@/composables/validation'
 
+import LPagination from '@/components/pagination/LPagination.vue'
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
@@ -232,10 +250,28 @@ const modalTrigger = ref({
 })
 const loading = ref<boolean>(false)
 const isNotEmpty = ref<boolean>(false)
+const pageSizeOptions = ref([
+  { value: 5, text: '5' },
+  { value: 10, text: '10' },
+  { value: 15, text: '15' },
+  { value: 20, text: '20' },
+  { value: 50, text: '50' },
+])
+const pagination = ref({
+  pageSize: 10,
+  currentPage: 1,
+  total: 10,
+})
 
 const conditionTypeList = computed(() => vendorMasterData.conditionTypeList)
 const ownershipStatusList = computed(() => vendorMasterData.ownershipStatusList)
-const dataResponse = computed(() => equipmentDataStore.data)
+const dataResponse = computed(() => {
+  const { items, total } = equipmentDataStore.data
+
+  pagination.value.total = total
+
+  return items
+})
 
 const payload = ref<PayloadEquipmentDataType>({
   id: 0,
@@ -303,9 +339,17 @@ const closeModal = (type: 'success' | 'confirm' | 'delete') => {
   resetPayload()
 }
 
+const setPagePagination = async (page: number) => {
+  pagination.value.currentPage = page
+}
+
 const getData = async () => {
   try {
-    await equipmentDataStore.getData(Number(route.params.id))
+    await equipmentDataStore.getData(
+      Number(route.params.id),
+      pagination.value.currentPage,
+      pagination.value.pageSize,
+    )
   } catch (error) {
     console.error(error)
   }
@@ -410,6 +454,13 @@ watch(
         user: newVal.userName,
       }
     }
+  },
+)
+
+watch(
+  () => [pagination.value.currentPage, pagination.value.pageSize],
+  () => {
+    getData()
   },
 )
 </script>
