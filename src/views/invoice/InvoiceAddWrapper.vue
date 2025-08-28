@@ -28,7 +28,7 @@
           </button>
         </div>
         <div class="flex-1 flex gap-[8px] justify-end">
-          <button class="btn btn-primary" :disabled="isSubmit || tabNow !== 'information'" @click="checkBudget">
+          <button v-if="tabNow === 'information'" class="btn btn-primary" :disabled="isSubmit || checkFormBudget()" @click="checkBudget">
             Budget Checking
             <i class="ki-duotone ki-dollar"></i>
           </button>
@@ -475,8 +475,8 @@ const mapDataPostNonPo = () => {
       invoiceNo: form.invoiceNo,
       documentNo: form.invoiceNoVendor,
       invoiceDate: moment(form.invoiceDate).toISOString(),
-      postingDate: '2025-08-26',
-      estimatedPaymentDate: '2025-08-26',
+      postingDate: null,
+      estimatedPaymentDate: null,
       paymentMethodCode: '',
       paymentMethodName: '',
       taxNo: form.taxNoInvoice,
@@ -484,7 +484,9 @@ const mapDataPostNonPo = () => {
       creditCardBillingID: '',
       notes: form.description,
       statusCode: isClickDraft.value ? 0 : 1,
-      statusName: isClickDraft.value ? 'Drafted' : 'Waiting to Verify'
+      statusName: isClickDraft.value ? 'Drafted' : 'Waiting to Verify',
+      department: userData.value.profile.costCenter || '',
+      profileId: userData.value.profile.profileId.toString()
     },
     vendor: {
       vendorId: Number(form.vendorId),
@@ -728,6 +730,24 @@ const checkBudget = () => {
   const idModal = document.querySelector('#success_budget_check_modal')
   const modal = KTModal.getInstance(idModal as HTMLElement)
   modal.show()
+}
+
+const checkFormBudget = () => {
+  let status = false
+  if (
+    !form.companyCode ||
+    !form.invoiceNoVendor ||
+    !form.invoiceDate ||
+    !form.description ||
+    !form.invoiceDocument ||
+    form.invoiceItem.length === 0
+  ) status = true
+  
+  for (const item of form.invoiceItem) {
+    if (item.isEdit || !item.itemAmount || !item.taxCode) status = true
+  }
+
+  return status
 }
 
 onMounted(() => {

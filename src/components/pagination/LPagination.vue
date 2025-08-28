@@ -1,7 +1,12 @@
 <template>
   <div class="pagination">
     <!-- Tombol Prev -->
-    <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="btn btn-light">
+    <button
+      v-if="!numberOnly"
+      @click="goToPage(currentPage - 1)"
+      :disabled="currentPage === 1"
+      class="btn btn-light"
+    >
       <UiIcon name="left" variant="outline" />
     </button>
 
@@ -21,6 +26,7 @@
 
     <!-- Tombol Next -->
     <button
+      v-if="!numberOnly"
       @click="goToPage(currentPage + 1)"
       :disabled="currentPage === totalPages"
       class="btn btn-light"

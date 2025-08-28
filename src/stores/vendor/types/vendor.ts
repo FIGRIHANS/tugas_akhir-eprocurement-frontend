@@ -1,3 +1,9 @@
+export type Pagination<R> = {
+  items: R
+  total: number
+  page: number
+  pageSize: number
+}
 export interface IVendorList {
   id: number
   vendorCode: string
@@ -325,6 +331,46 @@ export interface IVendorLegalDocumentPayload {
   action: number
 }
 
+export type ShareholdersResponseType = Pagination<
+  {
+    stockID: number
+    vendorId: number
+    isActive: boolean
+    ownerName: string
+    ownerDOB: string
+    quantity: number
+    unitID: number
+    shareUnit: string
+    ownerID: string
+    ownerIDUrl: string
+    position: string
+    stockTypeID: number
+    typeShareholders: string
+    createdBy: string
+    createdDate: string
+    modifiedBy: string
+    modifiedDate: string
+  }[]
+>
+
+export type VendorLegalDocumentResponseType = {
+  id: number
+  vendorId: number
+  filename: string
+  documentURL: string
+  cityName: string
+  documentDate: string
+  notaryName: string
+  documentNo: string
+  documentType: number
+  value: string
+  createdBy: string
+  createdDate: string
+  modifiedBy: string
+  modifiedDate: string
+  isActive: boolean
+}[]
+
 export interface IExpertPersonnelData {
   items: IExpertPersonnelItem[]
   page: 1
@@ -368,4 +414,42 @@ export interface IExpertPersonnelCertificateData {
   modifiedBy: string | null
   modifiedDate: string | null
   isActive: boolean
+}
+
+export interface IShareholder {
+  stockID: number;
+  vendorId: number;
+  isActive: boolean;
+  ownerName: string;
+  ownerDOB: Date;
+  quantity: number;
+  unitID: number;
+  shareUnit: string;
+  ownerID: string;
+  ownerIDUrl: string;
+  position: string;
+  stockTypeID: number;
+  typeShareholders: string;
+  createdBy: string;
+  createdDate: Date;
+  modifiedBy: string;
+  modifiedDate: Date;
+}
+
+export interface IVendorLegalDoc {
+  id: number;
+  vendorId: number;
+  filename: string;
+  documentURL: string;
+  cityName: string;
+  documentDate: Date;
+  notaryName: string;
+  documentNo: string;
+  documentType: number;
+  value: null;
+  createdBy: string;
+  createdDate: Date;
+  modifiedBy: string;
+  modifiedDate: Date;
+  isActive: boolean;
 }

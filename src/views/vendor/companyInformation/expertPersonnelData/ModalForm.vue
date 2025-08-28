@@ -229,7 +229,7 @@ const onSubmit = async () => {
     await expertStore.update(payload.value)
 
     emit('onSuccess')
-    await expertStore.getData(Number(route.params.id))
+    // await expertStore.getData(Number(route.params.id))
   } catch (error) {
     if (error instanceof Error) {
       emit('onError')
