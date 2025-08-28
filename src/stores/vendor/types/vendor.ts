@@ -372,13 +372,6 @@ export type VendorLegalDocumentResponseType = {
 }[]
 
 export interface IExpertPersonnelData {
-  items: IExpertPersonnelItem[]
-  page: 1
-  pageSize: 10
-  total: 0
-}
-
-export interface IExpertPersonnelItem {
   id: number
   vendorID: number
   name: string
@@ -417,39 +410,39 @@ export interface IExpertPersonnelCertificateData {
 }
 
 export interface IShareholder {
-  stockID: number;
-  vendorId: number;
-  isActive: boolean;
-  ownerName: string;
-  ownerDOB: Date;
-  quantity: number;
-  unitID: number;
-  shareUnit: string;
-  ownerID: string;
-  ownerIDUrl: string;
-  position: string;
-  stockTypeID: number;
-  typeShareholders: string;
-  createdBy: string;
-  createdDate: Date;
-  modifiedBy: string;
-  modifiedDate: Date;
+  stockID: number
+  vendorId: number
+  isActive: boolean
+  ownerName: string
+  ownerDOB: Date
+  quantity: number
+  unitID: number
+  shareUnit: string
+  ownerID: string
+  ownerIDUrl: string
+  position: string
+  stockTypeID: number
+  typeShareholders: string
+  createdBy: string
+  createdDate: Date
+  modifiedBy: string
+  modifiedDate: Date
 }
 
 export interface IVendorLegalDoc {
-  id: number;
-  vendorId: number;
-  filename: string;
-  documentURL: string;
-  cityName: string;
-  documentDate: Date;
-  notaryName: string;
-  documentNo: string;
-  documentType: number;
-  value: null;
-  createdBy: string;
-  createdDate: Date;
-  modifiedBy: string;
-  modifiedDate: Date;
-  isActive: boolean;
+  id: number
+  vendorId: number
+  filename: string
+  documentURL: string
+  cityName: string
+  documentDate: Date
+  notaryName: string
+  documentNo: string
+  documentType: number
+  value: null
+  createdBy: string
+  createdDate: Date
+  modifiedBy: string
+  modifiedDate: Date
+  isActive: boolean
 }

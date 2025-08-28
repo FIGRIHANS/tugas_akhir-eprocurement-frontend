@@ -124,7 +124,6 @@ import ModalForm from './ModalForm.vue'
 import ModalSuccess from './ModalSuccess.vue'
 import ModalError from './ModalError.vue'
 import ModalDelete from './ModalDelete.vue'
-import LPagination from '@/components/pagination/LPagination.vue'
 
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
@@ -137,7 +136,6 @@ const expertPStore = useExpertPersonnelDataStore()
 
 const selectedId = ref(0)
 const mode = ref<'add' | 'view' | 'edit'>('view')
-const page = ref(1)
 
 const tabCols = [
   '',
@@ -160,13 +158,7 @@ const pagination = ref({
   total: 10,
 })
 
-const dataResponse = computed(() => {
-  const { items, total } = expertPStore.data
-
-  pagination.value.total = total
-
-  return items
-})
+const dataResponse = computed(() => expertPStore.data.items)
 
 const downloadFile = (id: number) => {
   selectedId.value = id
@@ -239,6 +231,14 @@ const getData = async () => {
 onMounted(() => {
   getData()
 })
+
+watch(
+  () => expertPStore.data,
+  (newData) => {
+    pagination.value.total = newData.total
+  },
+  { immediate: true, deep: true },
+)
 
 watch(
   () => [pagination.value.currentPage, pagination.value.pageSize],
