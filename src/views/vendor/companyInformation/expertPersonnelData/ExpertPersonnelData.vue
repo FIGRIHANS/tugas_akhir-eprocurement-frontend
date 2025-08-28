@@ -34,11 +34,11 @@
           </tr>
 
           <!-- empty -->
-          <tr v-else-if="!expertPStore.data.length">
+          <tr v-else-if="!expertPStore.data.items.length">
             <th class="text-center" :colspan="tabCols.length">No data</th>
           </tr>
 
-          <tr v-else v-for="(item, index) in expertPStore.data" :key="'expert' + index">
+          <tr v-else v-for="(item, index) in expertPStore.data.items" :key="'expert' + index">
             <td>
               <div class="dropdown" data-dropdown="true" data-dropdown-trigger="click">
                 <button class="dropdown-toggle px-0 size-8 flex justify-center btn btn-light">
@@ -79,6 +79,25 @@
       </table>
     </div>
 
+    <div
+      class="card-footer justify-center md:justify-between flex-col md:flex-row gap-3 text-gray-800 text-sm font-medium"
+      v-show="expertPStore.data.items.length"
+    >
+      <div>
+        Showing {{ expertPStore.data.pageSize * (expertPStore.data.page - 1) + 1 }} to
+        {{
+          expertPStore.data.pageSize * (expertPStore.data.page - 1) + expertPStore.data.items.length
+        }}
+        of {{ expertPStore.data.total }} entries
+      </div>
+      <LPagination
+        :total-items="Number(expertPStore.data.total)"
+        :current-page="Number(expertPStore.data.page)"
+        :page-size="Number(expertPStore.data.pageSize)"
+        @page-change="handlePageChange"
+      />
+    </div>
+
     <ModalForm
       :id="selectedId"
       @on-success="onSubmitSuccess"
@@ -108,12 +127,14 @@ import { KTModal } from '@/metronic/core'
 import ModalSuccess from './ModalSuccess.vue'
 import ModalError from './ModalError.vue'
 import ModalDelete from './ModalDelete.vue'
+import LPagination from '@/components/pagination/LPagination.vue'
 
 const route = useRoute()
 const expertPStore = useExpertPersonnelDataStore()
 
 const selectedId = ref(0)
 const mode = ref<'add' | 'view' | 'edit'>('view')
+const page = ref(1)
 
 const tabCols = [
   '',
@@ -173,6 +194,11 @@ const onSubmitSuccess = () => {
 
 const onSubmitError = () => {
   openModalError()
+}
+
+const handlePageChange = (newPage: number) => {
+  page.value = newPage
+  expertPStore.getData(Number(route.params.id), newPage)
 }
 
 onMounted(() => {

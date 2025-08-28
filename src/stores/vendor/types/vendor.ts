@@ -326,6 +326,13 @@ export interface IVendorLegalDocumentPayload {
 }
 
 export interface IExpertPersonnelData {
+  items: IExpertPersonnelItem[]
+  page: 1
+  pageSize: 10
+  total: 0
+}
+
+export interface IExpertPersonnelItem {
   id: number
   vendorID: number
   name: string

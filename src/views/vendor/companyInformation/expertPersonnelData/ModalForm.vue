@@ -243,7 +243,7 @@ const onSubmit = async () => {
 watch(
   () => props.id,
   async (newId) => {
-    const selectedItem = expertStore.data.find((data) => data.id === newId)
+    const selectedItem = expertStore.data.items.find((data) => data.id === newId)
 
     if (selectedItem) {
       const certificates = await expertStore.getCertificates(selectedItem.id)

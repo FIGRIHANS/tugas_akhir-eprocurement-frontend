@@ -343,16 +343,21 @@ export const useEquipmentDataStore = defineStore('equipment-data', () => {
 export const useExpertPersonnelDataStore = defineStore('expert-personnel-data', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
-  const data = ref<IExpertPersonnelData[]>([])
+  const data = ref<IExpertPersonnelData>({
+    items: [],
+    total: 0,
+    page: 1,
+    pageSize: 10,
+  })
 
-  const getData = async (vendorId: number) => {
+  const getData = async (vendorId: number, page = 1) => {
     loading.value = true
     error.value = null
 
     try {
-      const response: ApiResponse<IExpertPersonnelData[]> = await vendorAPI.get(
+      const response: ApiResponse<IExpertPersonnelData> = await vendorAPI.get(
         '/public/vendorchangedata/vendorexpert',
-        { params: { vendorId } },
+        { params: { vendorId, page } },
       )
       data.value = response.data.result.content
     } catch (err) {
