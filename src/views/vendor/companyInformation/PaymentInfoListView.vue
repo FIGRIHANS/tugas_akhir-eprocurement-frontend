@@ -110,10 +110,6 @@
           <UiIcon variant="duotone" name="black-left" />
           Back</UiButton
         >
-        <UiButton variant="primary">
-          <UiIcon variant="duotone" name="plus" />
-          Save</UiButton
-        >
       </div>
     </div>
 
