@@ -61,7 +61,7 @@ const props = defineProps<{ vendorId: number | undefined }>()
 const vendorStore = useVendorIzinUsahaStore()
 const uploadStore = useUploadStore()
 
-const data = computed(() => vendorStore.data)
+const data = computed(() => vendorStore.data.sort((a, b) => a.seq - b.seq))
 
 const downloadFile = async (path: string) => {
   await uploadStore.previewFile(path)

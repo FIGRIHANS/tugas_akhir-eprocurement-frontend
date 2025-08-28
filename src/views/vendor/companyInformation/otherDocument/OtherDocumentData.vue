@@ -103,7 +103,7 @@ onMounted(() => {
 
           <!-- No data -->
           <tr v-else-if="!otherDocStore.data.length">
-            <td :colspan="tableCols.length - 1" class="text-center text-danger">No data</td>
+            <td :colspan="tableCols.length" class="text-center text-gray-800">No data</td>
           </tr>
 
           <tr v-else v-for="item in otherDocStore.data" :key="item.id">
