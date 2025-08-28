@@ -207,6 +207,31 @@ export interface ListPoTypes {
   isOpenChild: boolean
 }
 
+export interface ListNonPoTypes {
+  companyCode: string
+  companyName: string
+  documentNo: string
+  estimatedPaymentDate: string
+  invoiceDate: string
+  invoiceNo: string
+  invoiceTypeCode: number
+  invoiceTypeName: string
+  invoiceUId: string
+  notes: string
+  pOs: PoChildTypes[]
+  statusCode: number
+  statusName: string
+  taxNo: string
+  totalNetAmount: number
+  vatAmount: number
+  whtAmount: number
+  whtBaseAmount: number
+  costCenterCode: string
+  costCenterName: string
+  isOpenChild: boolean
+}
+
+
 export interface PoChildTypes {
   grDocumentNo: string
   invoiceUId: string
@@ -214,7 +239,7 @@ export interface PoChildTypes {
   itemText: string
   poNo: string
   quantity: number
-} 
+}
 
 export interface QueryParamsListPoTypes {
   statusCode?: number | null
@@ -223,6 +248,15 @@ export interface QueryParamsListPoTypes {
   invoiceDate?: string | null
   searchText?: string | null
 }
+
+export interface QueryParamsListNoPoTypes {
+  statusCode?: number | null
+  companyCode?: string | null
+  invoiceTypeCode?: number | null
+  invoiceDate?: string | null
+  searchText?: string | null
+}
+
 
 export interface documentDetailTypes {
   documentType: number

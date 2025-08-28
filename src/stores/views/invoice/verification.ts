@@ -12,10 +12,13 @@ import type {
   PostVerificationTypes,
   ParamsRejectTypes,
   ParamsSubmissionCost,
+  QueryParamsListNoPoTypes,
+  ListNonPoTypes,,
 } from './types/verification'
 
 export const useInvoiceVerificationStore = defineStore('invoiceVerification', () => {
   const listPo = ref<ListPoTypes[]>([])
+  const listNonPo = ref<ListNonPoTypes[]>([])
   const detailInvoice = ref<ParamsSubmissionTypes>()
   const isFromEdit = ref<boolean>(false)
   const detailInvoiceEdit = ref<DetailInvoiceEditTypes>()
@@ -83,6 +86,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
       invoiceTypeCode: Number(data.invoiceTypeCode) || null,
       invoiceDate: data.invoiceDate || null,
       searchText: data.searchText || null,
+      searchText: data.searchText || null,
     }
     const response: ApiResponse<ListPoTypes[]> = await invoiceApi.get(`/invoice/approval`, {
       params: {
@@ -117,6 +121,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     )
 
     detailInvoice.value = response.data.result.content
+
 
     return response.data.result
   }
@@ -156,6 +161,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
 
   return {
     listPo,
+    listNonPo,
     detailInvoice,
     isFromEdit,
     detailInvoiceEdit,
@@ -166,11 +172,12 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     resetDetailInvoiceEdit,
     postSubmission,
     getListPo,
+    getListNonPo,
     getInvoiceDetail,
     postReject,
     postSap,
     putSubmission,
     deleteAdditionalCost,
-    getInvoiceNonPoDetail,
+    getInvoiceNonPoDetail,,
   }
 })

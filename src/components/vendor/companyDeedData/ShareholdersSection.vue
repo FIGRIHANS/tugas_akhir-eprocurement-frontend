@@ -2,6 +2,7 @@
 import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
 import UiModal from '@/components/modal/UiModal.vue'
+import LPagination from '@/components/pagination/LPagination.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiFileUpload from '@/components/ui/atoms/file-upload/UiFileUpload.vue'
 import UiFormGroup from '@/components/ui/atoms/form-group/UiFormGroup.vue'
@@ -18,7 +19,7 @@ import { useCompanyDeedDataStore } from '@/stores/vendor/vendor'
 import { useLoginStore } from '@/stores/views/login'
 import axios from 'axios'
 import moment from 'moment'
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 import { z } from 'zod'
 
@@ -32,13 +33,21 @@ const shareholderSchema = z.object({
   position: z.string().min(1, 'Position / Role is required'),
 })
 
+const pageSizeOptions = ref([
+  { value: 5, text: '5' },
+  { value: 10, text: '10' },
+  { value: 15, text: '15' },
+  { value: 20, text: '20' },
+  { value: 50, text: '50' },
+])
+
 const errors = reactive<{ [key: string]: string }>({})
 
-const shareholdersStore = useCompanyDeedDataStore()
 const uploadStore = useVendorUploadStore()
 const userLoginStore = useLoginStore()
 const typeShareholders = useTypeShareholders()
 const shareUnits = useShareunits()
+const companyDeedDataStore = useCompanyDeedDataStore()
 
 const route = useRoute()
 
@@ -136,10 +145,14 @@ const handleSubmit = async () => {
       quantity: Number(payload.quantity),
     }
 
-    await shareholdersStore.postShareholders(payloadToSend)
+    await companyDeedDataStore.postShareholders(payloadToSend)
     handleCloseModal()
     showSuccessModal.value = true
-    shareholdersStore.getShareholders(Number(route.params.id))
+    companyDeedDataStore.getShareholders(
+      Number(route.params.id),
+      paginationShareholders.value.currentPage,
+      paginationShareholders.value.pageSize,
+    )
   } catch (err) {
     if (axios.isAxiosError(err)) {
       if (err.response && err.response.data && err.response.data.result) {
@@ -167,11 +180,15 @@ const handleDelete = async () => {
       isActive: false,
     }
 
-    await shareholdersStore.postShareholders(payloadToSend)
+    await companyDeedDataStore.postShareholders(payloadToSend)
     handleCloseModal()
     showSuccessModal.value = true
     showDeleteModal.value = false
-    shareholdersStore.getShareholders(Number(route.params.id))
+    companyDeedDataStore.getShareholders(
+      Number(route.params.id),
+      paginationShareholders.value.pageSize,
+      paginationShareholders.value.currentPage,
+    )
   } catch (err) {
     if (axios.isAxiosError(err)) {
       if (err.response && err.response.data && err.response.data.result) {
@@ -201,9 +218,9 @@ const handleDropdown = (id: number, newMode: 'add' | 'edit' | 'delete') => {
       break
   }
 
-  const shareholderData = shareholdersStore.shareholdersData.find(
-    (item: IShareholderPayload) => item.stockID === id,
-  )
+  const shareholderData = companyDeedDataStore.shareholdersData.items.find(
+    (item) => (item as unknown as IShareholderPayload).stockID === id,
+  ) as unknown as IShareholderPayload | undefined
 
   if (shareholderData) {
     Object.assign(payload, {
@@ -259,9 +276,36 @@ const handleDownload = async (path: string) => {
 
 const formatNumber = (num: number) => num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')
 
-const filteredShareholders = computed(() =>
-  shareholdersStore.shareholdersData?.filter((item: IShareholderPayload) => item.isActive === true),
-)
+const shareholderData = computed(() => {
+  const { items, total } = companyDeedDataStore.shareholdersData
+
+  // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+  paginationShareholders.value.total = total
+
+  return items
+})
+
+const paginationShareholders = ref({
+  pageSize: 10,
+  currentPage: 1,
+  total: 10,
+})
+
+const setPageShareholders = async (page: number) => {
+  paginationShareholders.value.currentPage = page
+}
+
+watchEffect(async () => {
+  try {
+    await companyDeedDataStore.getShareholders(
+      Number(route.params.id),
+      paginationShareholders.value.currentPage,
+      paginationShareholders.value.pageSize,
+    )
+  } catch (error) {
+    console.log(error)
+  }
+})
 </script>
 
 <template>
@@ -291,27 +335,27 @@ const filteredShareholders = computed(() =>
         </thead>
         <tbody>
           <!-- show loading -->
-          <tr v-if="shareholdersStore.shareholdersLoading">
+          <tr v-if="companyDeedDataStore.shareholdersLoading">
             <td colspan="7" class="text-center">
               <UiLoading size="md" />
             </td>
           </tr>
 
           <!-- show error message -->
-          <tr v-else-if="shareholdersStore.shareholdersError">
+          <tr v-else-if="companyDeedDataStore.shareholdersError">
             <td colspan="7" class="text-center">
-              {{ shareholdersStore.shareholdersError }}
+              {{ companyDeedDataStore.shareholdersError }}
             </td>
           </tr>
 
           <!-- show message if there are no data -->
-          <tr v-else-if="!shareholdersStore.shareholdersData.length">
+          <tr v-else-if="!companyDeedDataStore.shareholdersData.items.length">
             <td colspan="7" class="text-center">No data</td>
           </tr>
 
           <!-- show data start -->
-          <template v-if="!shareholdersStore.shareholdersLoading">
-            <tr v-for="(item, index) in filteredShareholders" :key="index" class="text-nowrap">
+          <template v-if="!companyDeedDataStore.shareholdersLoading">
+            <tr v-for="(item, index) in shareholderData" :key="index" class="text-nowrap">
               <td class="text-center">
                 <div class="dropdown" data-dropdown="true" data-dropdown-trigger="click">
                   <UiButton outline icon size="sm" variant="secondary" class="dropdown-toggle">
@@ -336,7 +380,10 @@ const filteredShareholders = computed(() =>
                         </button>
                       </li>
                       <li class="menu-item">
-                        <button class="menu-link" @click="handleDeleteModal(item)">
+                        <button
+                          class="menu-link"
+                          @click="handleDeleteModal(item as unknown as IShareholderPayload)"
+                        >
                           <span class="menu-icon">
                             <UiIcon variant="duotone" name="cross-circle" class="!text-danger" />
                           </span>
@@ -357,7 +404,7 @@ const filteredShareholders = computed(() =>
                 <AttachmentView
                   v-if="item.ownerIDUrl"
                   class="cursor-pointer"
-                  :file-data="{ name: item.description, path: item.docUrl }"
+                  :file-data="{ name: item.ownerID, path: item.ownerIDUrl }"
                   :upload-date="
                     formatDate(item.modifiedDate ? item.modifiedDate : item.createdDate)
                   "
@@ -370,6 +417,25 @@ const filteredShareholders = computed(() =>
           <!-- show data end -->
         </tbody>
       </table>
+    </div>
+
+    <div class="flex flex-row items-center justify-between px-4">
+      <div class="flex flex-row items-center gap-2">
+        Show
+        <UiSelect
+          v-model="paginationShareholders.pageSize"
+          :options="pageSizeOptions"
+          class="w-16"
+        />
+        per page from {{ paginationShareholders.total }} data
+      </div>
+
+      <LPagination
+        :totalItems="paginationShareholders.total"
+        :pageSize="paginationShareholders.pageSize"
+        :currentPage="paginationShareholders.currentPage"
+        @pageChange="setPageShareholders"
+      />
     </div>
   </div>
 
