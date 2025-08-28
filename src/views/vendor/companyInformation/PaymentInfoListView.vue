@@ -620,9 +620,13 @@ const handleSubmit = async () => {
   // hapus error utk field yang kosong
   bankDetailError.value = bankDetailError.value.filter(
     (field) =>
-      !['urlDoc', 'urlBankAccountDeclaration', 'countryId', 'isHolderNameDifferent'].includes(
-        field,
-      ),
+      ![
+        'urlDoc',
+        'urlBankAccountDeclaration',
+        'countryId',
+        'isHolderNameDifferent',
+        'isBankRegistered',
+      ].includes(field),
   )
 
   if (bankDetailError.value.length > 0 || bankDtoError.value.length > 0) return
