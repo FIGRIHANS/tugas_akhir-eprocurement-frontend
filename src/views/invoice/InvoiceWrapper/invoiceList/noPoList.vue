@@ -178,7 +178,7 @@ const setDataFilter = (data: filterListTypes) => {
   filterForm.status = data.status
   filterForm.date = data.date
   filterForm.companyCode = data.companyCode
-  //   filterForm.invoiceType = data.invoiceType
+  filterForm.invoiceType = data.invoiceType
   listCall()
 }
 
