@@ -310,16 +310,21 @@ export const useVerificationDetailStore = defineStore('verification-detail', () 
 export const useEquipmentDataStore = defineStore('equipment-data', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
-  const data = ref<EquipmentDataType[]>([])
+  const data = ref<Pagination<EquipmentDataType[]>>({
+    items: [],
+    total: 0,
+    page: 1,
+    pageSize: 10,
+  })
 
-  const getData = async (vendorId: number) => {
+  const getData = async (vendorId: number, page: number, pageSize: number) => {
     loading.value = true
     error.value = null
 
     try {
-      const response: ApiResponse<EquipmentDataType[]> = await vendorAPI.get(
+      const response: ApiResponse<Pagination<EquipmentDataType[]>> = await vendorAPI.get(
         '/public/vendorchangedata/vendorequipment',
-        { params: { vendorId } },
+        { params: { vendorId, page, pageSize } },
       )
       data.value = response.data.result.content
     } catch (err) {
@@ -348,16 +353,21 @@ export const useEquipmentDataStore = defineStore('equipment-data', () => {
 export const useExpertPersonnelDataStore = defineStore('expert-personnel-data', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
-  const data = ref<IExpertPersonnelData[]>([])
+  const data = ref<Pagination<IExpertPersonnelData[]>>({
+    items: [],
+    total: 0,
+    page: 1,
+    pageSize: 10,
+  })
 
-  const getData = async (vendorId: number) => {
+  const getData = async (vendorId: number, page: number, pageSize: number) => {
     loading.value = true
     error.value = null
 
     try {
-      const response: ApiResponse<IExpertPersonnelData[]> = await vendorAPI.get(
+      const response: ApiResponse<Pagination<IExpertPersonnelData[]>> = await vendorAPI.get(
         '/public/vendorchangedata/vendorexpert',
-        { params: { vendorId } },
+        { params: { vendorId, page, pageSize } },
       )
       data.value = response.data.result.content
     } catch (err) {
