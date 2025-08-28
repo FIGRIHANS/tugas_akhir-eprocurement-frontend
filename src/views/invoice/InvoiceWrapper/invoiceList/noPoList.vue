@@ -37,7 +37,7 @@
               <td>
                 <button
                   class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]"
-                  @click="console.log('masuk')"
+                  @click="goToDetail(item.invoiceUId)"
                 >
                   <i class="ki-filled ki-eye !text-lg"></i>
                 </button>
@@ -52,10 +52,10 @@
               <td>{{ item.documentNo || '-' }}</td>
               <td>{{ item.companyCode || '-' }}</td>
               <td>{{ item.invoiceTypeName }}</td>
-              <td>{{ moment(item.invoiceDate).format('DD MMMM YYYY') }}</td>
+              <td>{{ formatDate(item.invoiceDate) }}</td>
               <td>{{ useFormatIdr(item.totalGrossAmount) }}</td>
               <td>{{ useFormatIdr(item.totalNetAmount) }}</td>
-              <td>{{ moment(item.estimatedPaymentDate).format('DD MMMM YYYY') }}</td>
+              <td>{{ formatDate(item.estimatedPaymentDate) }}</td>
             </tr>
           </tbody>
         </table>
@@ -87,7 +87,8 @@ const FilterList = defineAsyncComponent(() => import('./FilterList.vue'))
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import { useFormatIdr } from '@/composables/currency'
-import moment from 'moment'
+import { formatDate } from '@/composables/date-format'
+// import moment from 'moment'
 import type { ListPoTypes } from '@/stores/views/invoice/types/submission'
 import { useRouter } from 'vue-router'
 
@@ -126,21 +127,21 @@ const columns = ref([
   'Estimated Payment Date',
 ])
 
-const data = ref([
-  {
-    statusCode: 1,
-    invoiceNo: 'DPL-AP202312500001',
-    statusName: 'Waiting to Verify',
-    vendorName: 'PT Talent Setyaji',
-    documentNo: 'INV2310232501726',
-    companyCode: 'DPLA',
-    invoiceTypeName: 'Non-PO - Non-Investment',
-    invoiceDate: '16 Oktober 2024',
-    totalGrossAmount: '1.000.000',
-    totalNetAmount: '1.000.000',
-    estimatedPaymentDate: '30 November 2024',
-  },
-])
+// const data = ref([
+//   {
+//     statusCode: 1,
+//     invoiceNo: 'DPL-AP202312500001',
+//     statusName: 'Waiting to Verify',
+//     vendorName: 'PT Talent Setyaji',
+//     documentNo: 'INV2310232501726',
+//     companyCode: 'DPLA',
+//     invoiceTypeName: 'Non-PO - Non-Investment',
+//     invoiceDate: '16 Oktober 2024',
+//     totalGrossAmount: '1.000.000',
+//     totalNetAmount: '1.000.000',
+//     estimatedPaymentDate: '30 November 2024',
+//   },
+// ])
 
 const colorBadge = (statusCode: number) => {
   const list = {
@@ -156,6 +157,8 @@ const colorBadge = (statusCode: number) => {
 
 const setList = () => {
   const result: ListPoTypes[] = []
+  console.log(invoiceSubmissionApi.listNonPo, 'polist')
+
   for (const [index, item] of poList.value.entries()) {
     const start = currentPage.value * pageSize.value - pageSize.value
     const end = currentPage.value * pageSize.value - 1
@@ -198,6 +201,15 @@ const goAdd = (isPo: boolean) => {
     name: 'invoiceAdd',
     query: {
       type: isPo ? 'po' : 'nonpo',
+    },
+  })
+}
+
+const goToDetail = (id: string) => {
+  router.push({
+    name: 'invoiceDetailNonPo',
+    query: {
+      id: id,
     },
   })
 }

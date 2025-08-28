@@ -13,10 +13,7 @@
       <InvoiceCalculation class="flex-1" :formInvoice="form" />
     </div>
     <div v-if="currentRouteName === 'invoiceDetail'">
-      <InvoicePoGr
-        v-if="checkPo() && !isNonPo"
-        class="mt-[24px]"
-      />
+      <InvoicePoGr v-if="checkPo() && !isNonPo" class="mt-[24px]" />
       <InvoiceItem v-if="isNonPo" class="mt-[24px]" />
       <AdditionalCost
         v-if="
@@ -413,6 +410,10 @@ const goBack = () => {
     router.push({
       name: 'invoiceVerification',
     })
+  } else if (!checkPo()) {
+    router.push({
+      name: 'invoice-list-non-po',
+    })
   } else {
     router.push({
       name: 'invoiceApproval',
@@ -590,26 +591,49 @@ onMounted(async () => {
       },
     ]
   }
-  await verificationApi.getInvoiceDetail(route.query.id?.toString() || '').then(() => {
-    if (verificationApi.isFromEdit) {
-      setDataEdit()
-    } else {
-      setDataDefault()
-    }
-    switch (detailInvoice.value?.header.statusCode) {
-      case 1:
-      case 3:
-        activeStep.value = 'Verification'
-        break
-      case 2:
-      case 4:
-        activeStep.value = 'Approval'
-        break
-      case 7:
-        activeStep.value = 'Posting'
-        break
-    }
-  })
+  if (checkPo) {
+    await verificationApi.getInvoiceDetail(route.query.id?.toString() || '').then(() => {
+      if (verificationApi.isFromEdit) {
+        setDataEdit()
+      } else {
+        setDataDefault()
+      }
+      switch (detailInvoice.value?.header.statusCode) {
+        case 1:
+        case 3:
+          activeStep.value = 'Verification'
+          break
+        case 2:
+        case 4:
+          activeStep.value = 'Approval'
+          break
+        case 7:
+          activeStep.value = 'Posting'
+          break
+      }
+    })
+  } else {
+    await verificationApi.getInvoiceNonPoDetail(route.query.id?.toString() || '').then(() => {
+      if (verificationApi.isFromEdit) {
+        setDataEdit()
+      } else {
+        setDataDefault()
+      }
+      switch (detailInvoice.value?.header.statusCode) {
+        case 1:
+        case 3:
+          activeStep.value = 'Verification'
+          break
+        case 2:
+        case 4:
+          activeStep.value = 'Approval'
+          break
+        case 7:
+          activeStep.value = 'Posting'
+          break
+      }
+    })
+  }
 })
 
 provide('form', form)
