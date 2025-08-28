@@ -170,7 +170,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     resetDetailInvoiceEdit,
     postSubmission,
     getListPo,
-    getListNonPo,
+    // getListNonPo,
     getInvoiceDetail,
     postReject,
     postSap,
