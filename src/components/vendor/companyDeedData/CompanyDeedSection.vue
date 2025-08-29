@@ -215,7 +215,7 @@ const handleEdit = (id: number) => {
 
 const handleDelete = (id: number) => {
   showDeleteModal.value = true
-  const data = companyDeedDataStore.vendorLegalDocData.items.find(
+  const data = companyDeedDataStore.companyDeedData.items.find(
     (item) => (item as unknown as IVendorLegalDocumentPayload).id === id,
   ) as unknown as IVendorLegalDocumentPayload | undefined
   if (data) {
@@ -300,12 +300,14 @@ const setPageCompanyDeedData = async (page: number) => {
 }
 
 const companyDeedData = computed(() => {
-  const { items, total } = companyDeedDataStore.vendorLegalDocData
+  const { items, total } = companyDeedDataStore.companyDeedData
 
   // eslint-disable-next-line vue/no-side-effects-in-computed-properties
   paginationCompanyDeedDataStore.value.total = total
 
-  return items
+  const activeItems = (items ?? []).filter((i) => i?.isActive === true)
+
+  return activeItems as typeof items
 })
 
 watchEffect(async () => {
