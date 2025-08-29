@@ -1,5 +1,6 @@
 import type { WhtCodeTypes } from '@/stores/master-data/types/invoiceMasterData' 
 export interface itemsPoGrType {
+  id: number
   poNo: string
   poItem: number
   grDocumentNo: string

@@ -124,7 +124,7 @@ interface ParamsSubmissionCost {
   whtType: string
   whtCode: string
   whtBaseAmount: number
-  amount: number
+  whtAmount: number
 }
 
 interface ParamsSubmissionWorkflow {
