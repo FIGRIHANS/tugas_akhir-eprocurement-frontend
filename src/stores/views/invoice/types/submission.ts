@@ -91,6 +91,7 @@ interface ParamsSubmissionCalculation {
 }
 
 interface ParamsSubmissionItem {
+  id: number
   poNo: string
   poItem: number
   grDocumentNo: string

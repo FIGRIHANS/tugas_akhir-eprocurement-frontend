@@ -351,6 +351,7 @@ const mapPoGr = () => {
   const poGr = []
   for (const item of form.invoicePoGr) {
     poGr.push({
+      id: item.id || 0,
       poNo: item.poNo,
       poItem: Number(item.poItem),
       grDocumentNo: item.grDocumentNo,
@@ -653,6 +654,7 @@ const setData = () => {
     form.invoicePoGr = []
     for (const item of detail.pogr) {
       const data = {
+        id: item.id,
         poNo: item.poNo,
         poItem: item.poItem,
         grDocumentNo: item.grDocumentNo,
@@ -907,8 +909,6 @@ onMounted(() => {
       setData()
     })
   }
-
-  form.department = userData.value?.profile.costCenter || ''
 })
 
 provide('form', form)

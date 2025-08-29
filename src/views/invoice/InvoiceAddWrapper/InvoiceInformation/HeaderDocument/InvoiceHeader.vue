@@ -134,7 +134,7 @@
         <v-select
           v-model="form.department"
           class="customSelect w-full -ml-[15px]"
-          label="name"
+          :get-option-label="(option: any) => `${option.code} - ${option.name}`"
           :reduce="(option: any) => option.code"
           :options="listCostCenter"
         ></v-select>
