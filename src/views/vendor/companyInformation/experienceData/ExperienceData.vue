@@ -29,10 +29,10 @@ const deleteModal = ref<boolean>(false)
 const downloadLoading = ref(false)
 
 const completedExp = computed(() =>
-  experienceStore.data.filter((item) => item.value === 'COMPLETED' && item.isActive),
+  experienceStore.data.filter((item) => item.experienceType === 3153 && item.isActive),
 )
 const onGoingExp = computed(() =>
-  experienceStore.data.filter((item) => item.value === 'ON GOING' && item.isActive),
+  experienceStore.data.filter((item) => item.experienceType === 3154 && item.isActive),
 )
 
 const openModalForm = (newMode: 'add' | 'view' | 'edit', id?: number) => {
