@@ -91,6 +91,7 @@ interface ParamsSubmissionCalculation {
 }
 
 interface ParamsSubmissionItem {
+  id: number
   poNo: string
   poItem: number
   grDocumentNo: string
@@ -124,7 +125,7 @@ interface ParamsSubmissionCost {
   whtType: string
   whtCode: string
   whtBaseAmount: number
-  amount: number
+  whtAmount: number
 }
 
 interface ParamsSubmissionWorkflow {

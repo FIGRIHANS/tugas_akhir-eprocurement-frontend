@@ -1,4 +1,5 @@
 export interface itemsPoGrType {
+  id: number
   poNo: string
   poItem: number
   grDocumentNo: string
