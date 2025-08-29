@@ -807,6 +807,17 @@ const mapDataCheck = () => {
     currencyAmount.push(currData)
   }
 
+  for (const item of form.invoiceItem) {
+    itemNoAcc.value += 1
+    const currData = {
+      ITEMNO_ACC: itemNoAcc.value,
+      CURRENCY: form.currency,
+      AMT_DOCCUR: (item.itemAmount + item.vatAmount) * -1,
+      AMT_BASE: 0
+    }
+    currencyAmount.push(currData)
+  }
+
   for (const item of accountTax) {
     const filterTax = form.invoiceItem.filter((sub) => sub.taxCode === item.TAX_CODE)
     if (filterTax.length !== 0) {
@@ -827,26 +838,11 @@ const mapDataCheck = () => {
     }
   }
 
-  for (const item of form.invoiceItem) {
-    itemNoAcc.value += 1
-    const currData = {
-      ITEMNO_ACC: itemNoAcc.value,
-      CURRENCY: form.currency,
-      AMT_DOCCUR: (item.itemAmount + item.vatAmount) * -1,
-      AMT_BASE: 0
-    }
-    currencyAmount.push(currData)
-  }
-
   const data = {
     REQUEST: {
       HEADER_TXT: form.taxNoInvoice,
       COMP_CODE: form.companyCode,
       DOC_DATE: moment(form.invoiceDate).format('YYYYMMDD'),
-      PSTNG_DATE: '',
-      FISC_YEAR: 0,
-      FIS_PERIOD: 0,
-      DOC_TYPE: '',
       REF_DOC_NO: form.invoiceNoVendor,
       GLACCOUNT_DATA: glAccount,
       ACCOUNT_PAYABLE: accountPayable,
