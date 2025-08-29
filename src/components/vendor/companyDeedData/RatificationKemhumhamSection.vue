@@ -167,7 +167,7 @@ const handleSave = async () => {
 }
 
 const handleEdit = (id: number) => {
-  const data = companyDeedDataStore.vendorLegalDocData.items.find(
+  const data = companyDeedDataStore.ratificationData.items.find(
     (item) => (item as unknown as IVendorLegalDocumentPayload).id === id,
   )
   if (data) {
@@ -231,12 +231,14 @@ const setPageRatification = async (page: number) => {
 }
 
 const ratificationData = computed(() => {
-  const { items, total } = companyDeedDataStore.vendorLegalDocData
+  const { items, total } = companyDeedDataStore.ratificationData
 
   // eslint-disable-next-line vue/no-side-effects-in-computed-properties
   paginationRatificationDataStore.value.total = total
 
-  return items
+  const activeItems = (items ?? []).filter((i) => i?.isActive === true)
+
+  return activeItems as typeof items
 })
 
 watchEffect(async () => {

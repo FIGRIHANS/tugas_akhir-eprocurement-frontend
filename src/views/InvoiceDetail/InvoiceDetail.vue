@@ -271,7 +271,6 @@ const mapPoGr = () => {
   const poGr = []
   for (const item of form.value.invoicePoGr) {
     poGr.push({
-      id: item.id,
       poNo: item.poNo,
       poItem: Number(item.poItem),
       grDocumentNo: item.grDocumentNo,
@@ -303,7 +302,6 @@ const mapAdditionalCost = () => {
       whtType: item.whtType,
       whtCode: item.whtCode,
       whtBaseAmount: Number(item.whtBaseAmount),
-      whtAmount: 0
     })
   }
   return cost
@@ -599,49 +597,49 @@ onMounted(async () => {
       },
     ]
   }
-  // if (checkPo()) {
-  //   await verificationApi.getInvoiceDetail(route.query.id?.toString() || '').then(() => {
-  //     if (verificationApi.isFromEdit) {
-  //       setDataEdit()
-  //     } else {
-  //       setDataDefault()
-  //     }
-  //     switch (detailInvoice.value?.header.statusCode) {
-  //       case 1:
-  //       case 3:
-  //         activeStep.value = 'Verification'
-  //         break
-  //       case 2:
-  //       case 4:
-  //         activeStep.value = 'Approval'
-  //         break
-  //       case 7:
-  //         activeStep.value = 'Posting'
-  //         break
-  //     }
-  //   })
-  // } else {
-  await verificationApi.getInvoiceNonPoDetail(route.query.id?.toString() || '').then(() => {
-    if (verificationApi.isFromEdit) {
-      setDataEdit()
-    } else {
-      setDataDefault()
-    }
-    switch (detailInvoice.value?.header.statusCode) {
-      case 1:
-      case 3:
-        activeStep.value = 'Verification'
-        break
-      case 2:
-      case 4:
-        activeStep.value = 'Approval'
-        break
-      case 7:
-        activeStep.value = 'Posting'
-        break
-    }
-  })
-  // }
+  if (currentRouteName.value === 'invoiceDetail') {
+    await verificationApi.getInvoiceDetail(route.query.id?.toString() || '').then(() => {
+      if (verificationApi.isFromEdit) {
+        setDataEdit()
+      } else {
+        setDataDefault()
+      }
+      switch (detailInvoice.value?.header.statusCode) {
+        case 1:
+        case 3:
+          activeStep.value = 'Verification'
+          break
+        case 2:
+        case 4:
+          activeStep.value = 'Approval'
+          break
+        case 7:
+          activeStep.value = 'Posting'
+          break
+      }
+    })
+  } else {
+    await verificationApi.getInvoiceNonPoDetail(route.query.id?.toString() || '').then(() => {
+      if (verificationApi.isFromEdit) {
+        setDataEdit()
+      } else {
+        setDataDefault()
+      }
+      switch (detailInvoice.value?.header.statusCode) {
+        case 1:
+        case 3:
+          activeStep.value = 'Verification'
+          break
+        case 2:
+        case 4:
+          activeStep.value = 'Approval'
+          break
+        case 7:
+          activeStep.value = 'Posting'
+          break
+      }
+    })
+  }
 })
 
 provide('form', form)

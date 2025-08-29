@@ -186,8 +186,8 @@ const handleDelete = async () => {
     showDeleteModal.value = false
     companyDeedDataStore.getShareholders(
       Number(route.params.id),
-      paginationShareholders.value.pageSize,
       paginationShareholders.value.currentPage,
+      paginationShareholders.value.pageSize,
     )
   } catch (err) {
     if (axios.isAxiosError(err)) {
@@ -282,7 +282,9 @@ const shareholderData = computed(() => {
   // eslint-disable-next-line vue/no-side-effects-in-computed-properties
   paginationShareholders.value.total = total
 
-  return items
+  const activeItems = (items ?? []).filter((i) => i?.isActive === true)
+
+  return activeItems as typeof items
 })
 
 const paginationShareholders = ref({
@@ -418,8 +420,7 @@ watchEffect(async () => {
         </tbody>
       </table>
     </div>
-
-    <div class="flex flex-row items-center justify-between px-4">
+    <div class="p-5 flex flex-row items-center justify-between px-4">
       <div class="flex flex-row items-center gap-2">
         Show
         <UiSelect

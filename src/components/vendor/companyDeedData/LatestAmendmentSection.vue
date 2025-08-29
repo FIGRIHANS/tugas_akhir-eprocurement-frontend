@@ -194,7 +194,7 @@ const handleSave = async () => {
 
 const handleEdit = (id: number) => {
   const data = companyDeedDataStore.vendorLegalDocData.items.find(
-     (item) => (item as unknown as IVendorLegalDocumentPayload).id === id,
+    (item) => (item as unknown as IVendorLegalDocumentPayload).id === id,
   )
 
   if (data) {
@@ -212,8 +212,8 @@ const handleEdit = (id: number) => {
 }
 
 const handleDelete = (id: number) => {
-  const data = companyDeedDataStore.vendorLegalDocData.find(
-    (item: IVendorLegalDocumentPayload) => item.id === id,
+  const data = companyDeedDataStore.latestAmendmentData.items.find(
+    (item) => (item as unknown as IVendorLegalDocumentPayload).id === id,
   )
   if (data) {
     Object.assign(vendorAmendmentPayload, data)
@@ -298,12 +298,14 @@ const setPageLatestAmandmentData = async (page: number) => {
 }
 
 const latestAmandmentData = computed(() => {
-  const { items, total } = companyDeedDataStore.vendorLegalDocData
+  const { items, total } = companyDeedDataStore.latestAmendmentData
 
   // eslint-disable-next-line vue/no-side-effects-in-computed-properties
   paginationLatestAmandmentDataStore.value.total = total
 
-  return items
+  const activeItems = (items ?? []).filter((i) => i?.isActive === true)
+
+  return activeItems as typeof items
 })
 
 watchEffect(async () => {
