@@ -18,7 +18,11 @@ const PoList = defineAsyncComponent(() => import('./invoiceList/PoList.vue'))
 const invoiceMasterApi = useInvoiceMasterDataStore()
 
 onMounted(() => {
-  invoiceMasterApi.getInvoicePoType()
+  if (checkPo()) {
+    invoiceMasterApi.getInvoicePoType()
+  } else {
+    invoiceMasterApi.getInvoiceNonPoType()
+  }
   invoiceMasterApi.getCompanyCode()
 })
 

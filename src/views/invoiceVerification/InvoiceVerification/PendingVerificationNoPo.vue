@@ -143,7 +143,7 @@
 import { ref, reactive, computed, onMounted, defineAsyncComponent } from 'vue'
 import { useRouter } from 'vue-router'
 import type { filterListTypes } from '../types/pendingVerification'
-import type { ListPoTypes } from '@/stores/views/invoice/types/verification'
+import type { ListNonPoTypes } from '@/stores/views/invoice/types/verification'
 import LPagination from '@/components/pagination/LPagination.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import { KTModal } from '@/metronic/core'
@@ -161,7 +161,7 @@ const router = useRouter()
 const search = ref<string>('')
 const currentPage = ref<number>(1)
 const pageSize = ref<number>(10)
-const list = ref<ListPoTypes[]>([])
+const list = ref<ListNonPoTypes[]>([])
 const viewDetailId = ref<string>('')
 
 const filterForm = reactive<filterListTypes>({
@@ -191,7 +191,7 @@ const columns = ref<string[]>([
 
 const columnsChild = ref(['No PO', 'No GR', 'Item Description', 'Item Amount', 'Quantity'])
 
-const verifList = computed(() => verificationApi.listPo)
+const verifList = computed(() => verificationApi.listNonPo)
 
 const colorBadge = (statusCode: number) => {
   const list = {
@@ -231,7 +231,7 @@ const goSearch = (event: KeyboardEvent) => {
 }
 
 const setList = () => {
-  const result: ListPoTypes[] = []
+  const result: ListNonPoTypes[] = []
   for (const [index, item] of verifList.value.entries()) {
     const start = currentPage.value * pageSize.value - pageSize.value
     const end = currentPage.value * pageSize.value - 1
@@ -245,7 +245,7 @@ const setList = () => {
 const callList = () => {
   list.value = []
   verificationApi
-    .getListPo({
+    .getListNonPo({
       statusCode: filterForm.status || 1,
       companyCode: filterForm.companyCode,
       invoiceTypeCode: Number(filterForm.invoiceType),
