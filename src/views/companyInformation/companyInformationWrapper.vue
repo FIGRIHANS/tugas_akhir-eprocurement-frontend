@@ -220,7 +220,7 @@ const tabsMenu = computed<TabItemType[]>(() => {
       value: 'payment_information_data',
     },
     {
-      name: 'Company Deed Data',
+      name: 'Deed of Stabilisment Data',
       value: 'company_deed_data',
     },
     {
