@@ -161,8 +161,7 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
             isOpenChild: false,
           }
         })
-
-    listPo.value =
+    listNonPo.value =
       newList.length !== 0
         ? newList.sort(
             (a, b) => moment(b.createdUtcDate).valueOf() - moment(a.createdUtcDate).valueOf(),

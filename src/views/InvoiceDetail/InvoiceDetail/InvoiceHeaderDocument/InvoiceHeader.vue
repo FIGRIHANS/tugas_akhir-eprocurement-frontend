@@ -45,7 +45,9 @@
     <div class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Estimated Payment Date</p>
       <p class="font-normal text-sm">
-        {{ form.estimatedPaymentDate ? moment(form.estimatedPaymentDate).format('YYYY/MM/DD') : '-' }}
+        {{
+          form.estimatedPaymentDate ? moment(form.estimatedPaymentDate).format('YYYY/MM/DD') : '-'
+        }}
       </p>
     </div>
     <div class="flex items-center justify-between gap-[10px]">
@@ -100,19 +102,25 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, inject } from 'vue'
+import { ref, inject, computed, onMounted } from 'vue'
 import type { formTypes } from '../../types/invoiceDetail'
 import moment from 'moment'
-// import { useRoute } from 'vue-router'
+import { useRoute } from 'vue-router'
 
-// const route = useRoute()
+const route = useRoute()
 
-// const currentRouteName = computed(() => {
-//   return route.name
-// })
+const currentRouteName = computed(() => {
+  return route.name
+})
 
 const form = inject<formTypes>('form')
 const isNonPo = ref<boolean>(false)
+
+const checkNonPo = () => {
+  if (currentRouteName.value === 'invoiceDetailNonPo') {
+    isNonPo.value = true
+  }
+}
 
 const checkPo = () => {
   return form?.invoiceTypeCode === 901
@@ -121,4 +129,8 @@ const checkPo = () => {
 const checkPoPib = () => {
   return form?.invoiceTypeCode === 2
 }
+
+onMounted(() => {
+  checkNonPo()
+})
 </script>

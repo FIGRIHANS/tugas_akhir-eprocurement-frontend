@@ -6,20 +6,13 @@ import ShareholdersSection from '@/components/vendor/companyDeedData/Shareholder
 
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
 import { useShareunits, useTypeShareholders } from '@/stores/vendor/reference'
-import { useCompanyDeedDataStore } from '@/stores/vendor/vendor'
-import { onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { watchEffect } from 'vue'
 
-const companyDeedDataStore = useCompanyDeedDataStore()
 const vendorMasterDataStore = useVendorMasterDataStore()
 const typeShareholders = useTypeShareholders()
 const shareUnits = useShareunits()
 
-const route = useRoute()
-
-onMounted(() => {
-  companyDeedDataStore.getVendorLegalDocument(Number(route.params.id))
-  companyDeedDataStore.getShareholders(Number(route.params.id))
+watchEffect(() => {
   vendorMasterDataStore.getVendorCities()
   typeShareholders.get()
   shareUnits.get()

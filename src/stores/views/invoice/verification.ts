@@ -11,17 +11,21 @@ import type {
   DetailInvoiceEditTypes,
   PostVerificationTypes,
   ParamsRejectTypes,
-  ParamsSubmissionCost
+  ParamsSubmissionCost,
+  QueryParamsListNoPoTypes,
+  ListNonPoTypes,
 } from './types/verification'
 
 export const useInvoiceVerificationStore = defineStore('invoiceVerification', () => {
   const listPo = ref<ListPoTypes[]>([])
+  const listNonPo = ref<ListNonPoTypes[]>([])
   const detailInvoice = ref<ParamsSubmissionTypes>()
   const isFromEdit = ref<boolean>(false)
   const detailInvoiceEdit = ref<DetailInvoiceEditTypes>()
   const additionalCostTempDelete = ref<ParamsSubmissionCost[]>([])
   const isRejectLoading = ref<boolean>(false)
   const errorMessageSap = ref<string>('')
+  const detailNonPoInvoice = ref<ParamsSubmissionTypes>()
 
   const resetDetailInvoiceEdit = () => {
     detailInvoiceEdit.value = {
@@ -71,7 +75,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
       invoiceDocument: null,
       tax: null,
       referenceDocument: null,
-      otherDocument: null
+      otherDocument: null,
     }
   }
 
@@ -81,25 +85,42 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
       companyCode: data.companyCode || null,
       invoiceTypeCode: Number(data.invoiceTypeCode) || null,
       invoiceDate: data.invoiceDate || null,
-      searchText: data.searchText || null
+      searchText: data.searchText || null,
     }
     const response: ApiResponse<ListPoTypes[]> = await invoiceApi.get(`/invoice/approval`, {
       params: {
         ...(data.statusCode !== null ? { statuscode: Number(data.statusCode) } : {}),
-        ...query
-      }
+        ...query,
+      },
     })
-  
-    listPo.value = response.data.result.content.length !== 0 ? response.data.result.content.sort((a, b) => moment(b.invoiceDate).valueOf() - moment(a.invoiceDate).valueOf()) : []
-  
+
+    listPo.value =
+      response.data.result.content.length !== 0
+        ? response.data.result.content.sort(
+            (a, b) => moment(b.invoiceDate).valueOf() - moment(a.invoiceDate).valueOf(),
+          )
+        : []
+
     return response.data.result.content
   }
 
   const getInvoiceDetail = async (uid: string) => {
-    const response: ApiResponse<ParamsSubmissionTypes> = await invoiceApi.get(`/invoice/approval/${uid}`)
-  
+    const response: ApiResponse<ParamsSubmissionTypes> = await invoiceApi.get(
+      `/invoice/approval/${uid}`,
+    )
+
     detailInvoice.value = response.data.result.content
-  
+
+    return response.data.result
+  }
+
+  const getInvoiceNonPoDetail = async (uid: string) => {
+    const response: ApiResponse<ParamsSubmissionTypes> = await invoiceApi.get(
+      `/invoice/submission-non-po/${uid}`,
+    )
+
+    detailInvoice.value = response.data.result.content
+
     return response.data.result
   }
 
@@ -129,26 +150,32 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
   }
 
   const deleteAdditionalCost = async (invoiceUid: string, additionaCostId: number) => {
-    const response: ApiResponse<void> = await invoiceApi.delete(`/invoice/${invoiceUid}/additional-cost/${additionaCostId}`)
+    const response: ApiResponse<void> = await invoiceApi.delete(
+      `/invoice/${invoiceUid}/additional-cost/${additionaCostId}`,
+    )
 
     return response.data.result
   }
 
   return {
     listPo,
+    listNonPo,
     detailInvoice,
     isFromEdit,
     detailInvoiceEdit,
     additionalCostTempDelete,
     isRejectLoading,
     errorMessageSap,
+    detailNonPoInvoice,
     resetDetailInvoiceEdit,
     postSubmission,
     getListPo,
+    // getListNonPo,
     getInvoiceDetail,
     postReject,
     postSap,
     putSubmission,
-    deleteAdditionalCost
+    deleteAdditionalCost,
+    getInvoiceNonPoDetail,
   }
 })

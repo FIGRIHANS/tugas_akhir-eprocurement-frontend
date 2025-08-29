@@ -6,6 +6,7 @@ import generalApi from '@/core/utils/generalApi'
 import type { ApiResponse } from '@/core/type/api'
 import type {
   InvoicePoTypes,
+  InvoiceNonPoTypes,
   CurrencyTypes,
   CompanyCodeTypes,
   DpTypes,
@@ -17,11 +18,12 @@ import type {
   ProfitCenterTypes,
   WhtTypes,
   WhtCodeTypes,
-  CostCenterTypes
+  CostCenterTypes,
 } from './types/invoiceMasterData'
 
 export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => {
   const invoicePoType = ref<InvoicePoTypes[]>([])
+  const invoiceNonPoType = ref<InvoiceNonPoTypes[]>([])
   const currency = ref<CurrencyTypes[]>([])
   const companyCode = ref<CompanyCodeTypes[]>([])
   const dpType = ref<DpTypes[]>([])
@@ -36,11 +38,19 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
   const costCenterList = ref<CostCenterTypes[]>([])
 
   const getInvoicePoType = async () => {
-    const response: ApiResponse<InvoicePoTypes[]> = await generalApi.get(
-      `/lookup/invoice-po-type`,
-    )
+    const response: ApiResponse<InvoicePoTypes[]> = await generalApi.get(`/lookup/invoice-po-type`)
 
     invoicePoType.value = response.data.result.content
+
+    return response.data.result
+  }
+
+  const getInvoiceNonPoType = async () => {
+    const response: ApiResponse<InvoicePoTypes[]> = await generalApi.get(
+      `/lookup/invoice-non-po-type`,
+    )
+
+    invoiceNonPoType.value = response.data.result.content
 
     return response.data.result
   }
@@ -55,7 +65,9 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
   }
 
   const getCompanyCode = async (searchText?: string) => {
-    const url = searchText ? `/lookup/company-code?searchText=${searchText}` : `/lookup/company-code`
+    const url = searchText
+      ? `/lookup/company-code?searchText=${searchText}`
+      : `/lookup/company-code`
     const response: ApiResponse<CompanyCodeTypes[]> = await generalApi.get(url)
 
     companyCode.value = response.data.result.content
@@ -64,9 +76,7 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
   }
 
   const getDpTypes = async () => {
-    const response: ApiResponse<DpTypes[]> = await generalApi.get(
-      `/lookup/dp-type`,
-    )
+    const response: ApiResponse<DpTypes[]> = await generalApi.get(`/lookup/dp-type`)
 
     dpType.value = response.data.result.content
 
@@ -74,9 +84,7 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
   }
 
   const getDocumentTypes = async () => {
-    const response: ApiResponse<DocumentTypes[]> = await generalApi.get(
-      `/lookup/document-type`,
-    )
+    const response: ApiResponse<DocumentTypes[]> = await generalApi.get(`/lookup/document-type`)
 
     documentType.value = response.data.result.content
 
@@ -94,7 +102,9 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
   }
 
   const getActivity = async (companyCode: string, searchText?: string) => {
-    const url = searchText ? `/lookup/activity?companyCode=${companyCode}&searchText=${searchText}` : `/lookup/activity?companyCode=${companyCode}`
+    const url = searchText
+      ? `/lookup/activity?companyCode=${companyCode}&searchText=${searchText}`
+      : `/lookup/activity?companyCode=${companyCode}`
     const response: ApiResponse<ActivityTypes[]> = await generalApi.get(url)
 
     activityList.value = response.data.result.content
@@ -112,7 +122,9 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
   }
 
   const getPaymentMethod = async (searchText?: string) => {
-    const url = searchText ? `/lookup/payment-method?searchText=${searchText}` : `/lookup/payment-method`
+    const url = searchText
+      ? `/lookup/payment-method?searchText=${searchText}`
+      : `/lookup/payment-method`
     const response: ApiResponse<PaymentMethodTypes[]> = await generalApi.get(url)
 
     paymentMethodList.value = response.data.result.content
@@ -121,7 +133,9 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
   }
 
   const getProfitCenter = async (searchText?: string) => {
-    const url = searchText ? `/lookup/profit-center?searchText=${searchText}` : `/lookup/profit-center`
+    const url = searchText
+      ? `/lookup/profit-center?searchText=${searchText}`
+      : `/lookup/profit-center`
     const response: ApiResponse<ProfitCenterTypes[]> = await generalApi.get(url)
 
     profilCenterList.value = response.data.result.content
@@ -139,7 +153,9 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
   }
 
   const getWhtCode = async (whtType: string, searchText?: string) => {
-    const url = searchText ? `/lookup/wht-code?whtType=${whtType}&searchText=${searchText}` : `/lookup/wht-code?whtType=${whtType}`
+    const url = searchText
+      ? `/lookup/wht-code?whtType=${whtType}&searchText=${searchText}`
+      : `/lookup/wht-code?whtType=${whtType}`
     const response: ApiResponse<WhtCodeTypes[]> = await generalApi.get(url)
 
     whtCodeList.value = response.data.result.content
@@ -152,7 +168,7 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
     const params = {
       companyCode,
       ...(profitCenter !== undefined && profitCenter !== '' && { profitCenter }),
-      ...(searchText !== undefined && searchText !== '' && { searchText })
+      ...(searchText !== undefined && searchText !== '' && { searchText }),
     }
     const response: ApiResponse<CostCenterTypes[]> = await generalApi.get(url, { params })
 
@@ -163,6 +179,7 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
 
   return {
     invoicePoType,
+    invoiceNonPoType,
     currency,
     companyCode,
     dpType,
@@ -176,6 +193,7 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
     whtCodeList,
     costCenterList,
     getInvoicePoType,
+    getInvoiceNonPoType,
     getCurrency,
     getCompanyCode,
     getDpTypes,
@@ -187,6 +205,6 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
     getProfitCenter,
     getWhtType,
     getWhtCode,
-    getCostCenter
+    getCostCenter,
   }
 })
