@@ -131,7 +131,13 @@
         <label class="form-label">
           Department
         </label>
-        <input v-model="form.department" class="input" placeholder="" disabled />
+        <v-select
+          v-model="form.department"
+          class="customSelect w-full -ml-[15px]"
+          label="name"
+          :reduce="(option: any) => option.code"
+          :options="listCostCenter"
+        ></v-select>
       </div>
       <!-- Description -->
       <div v-if="form.invoiceType != '903'" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
@@ -200,6 +206,7 @@ const currencyList = computed(() => {
 const companyCodeList = computed(() => invoiceMasterApi.companyCode)
 const dpTypeList = computed(() => invoiceMasterApi.dpType)
 const listInvoiceTypePo = computed(() => invoiceMasterApi.invoicePoType)
+const listCostCenter = computed(() => invoiceMasterApi.costCenterList)
 
 const checkPo = () => {
   return typeForm.value === 'po'
