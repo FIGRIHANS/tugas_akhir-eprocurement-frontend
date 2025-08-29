@@ -146,7 +146,7 @@ watch(
         </div>
 
         <div class="mt-2">
-          <table class="table align-middle border text-gray-700 font-medium text-sm">
+          <table class="table table-border align-middle border text-gray-700 font-medium text-sm">
             <thead>
               <tr>
                 <th class="text-nowrap">Document Name</th>
@@ -213,34 +213,42 @@ watch(
                     >*jpg, jpeg, png, pdf, zip / max : 16 MB</span
                   >
                 </td>
-                <td class="flex flex-row items-center gap-2">
-                  <div
-                    v-if="fileOtherDocumentList?.[index]?.status === 'loading'"
-                    class="rounded-full border-2 size-8 border-primary border-t-primary-light animate-spin text-xs"
-                  ></div>
-                  <UiIcon
-                    v-else-if="fileOtherDocumentList?.[index]?.status === 'success'"
-                    name="check-circle"
-                    variant="filled"
-                    class="text-success text-4xl"
-                  />
-                  <UiButton
-                    v-if="!['loading', 'success'].includes(fileOtherDocumentList?.[index]?.status)"
-                    icon
-                    outline
-                    @click="uploadPickedFile(index)"
-                  >
-                    <i class="ki-filled ki-exit-up"></i>
-                  </UiButton>
-                  <UiButton
-                    v-if="!['loading', 'success'].includes(fileOtherDocumentList?.[index]?.status)"
-                    variant="danger"
-                    icon
-                    outline
-                    @click="deleteRow(index)"
-                  >
-                    <i class="ki-filled ki-cross-circle"></i>
-                  </UiButton>
+                <td class="align-middle">
+                  <div class="flex items-center justify-center gap-2">
+                    <div
+                      v-if="fileOtherDocumentList?.[index]?.status === 'loading'"
+                      class="rounded-full border-2 size-8 border-primary border-t-primary-light animate-spin text-xs"
+                    ></div>
+                    <UiIcon
+                      v-else-if="fileOtherDocumentList?.[index]?.status === 'success'"
+                      name="check-circle"
+                      variant="filled"
+                      class="text-success text-4xl"
+                    />
+                    <UiButton
+                      v-if="
+                        !['loading', 'success'].includes(fileOtherDocumentList?.[index]?.status)
+                      "
+                      icon
+                      outline
+                      size="sm"
+                      @click="uploadPickedFile(index)"
+                    >
+                      <i class="ki-filled ki-exit-up"></i>
+                    </UiButton>
+                    <UiButton
+                      v-if="
+                        !['loading', 'success'].includes(fileOtherDocumentList?.[index]?.status)
+                      "
+                      variant="danger"
+                      icon
+                      outline
+                      size="sm"
+                      @click="deleteRow(index)"
+                    >
+                      <UiIcon variant="duotone" name="trash" />
+                    </UiButton>
+                  </div>
                 </td>
               </tr>
             </tbody>
