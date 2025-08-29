@@ -104,6 +104,31 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     return response.data.result.content
   }
 
+    const getListNonPo = async (data: QueryParamsListPoTypes) => {
+    listPo.value = []
+    const query = {
+      companyCode: data.companyCode || null,
+      invoiceTypeCode: Number(data.invoiceTypeCode) || null,
+      invoiceDate: data.invoiceDate || null,
+      searchText: data.searchText || null,
+    }
+    const response: ApiResponse<ListPoTypes[]> = await invoiceApi.get(`/invoice/approval/non-po`, {
+      params: {
+        ...(data.statusCode !== null ? { statuscode: Number(data.statusCode) } : {}),
+        ...query,
+      },
+    })
+
+    listPo.value =
+      response.data.result.content.length !== 0
+        ? response.data.result.content.sort(
+            (a, b) => moment(b.invoiceDate).valueOf() - moment(a.invoiceDate).valueOf(),
+          )
+        : []
+
+    return response.data.result.content
+  }
+
   const getInvoiceDetail = async (uid: string) => {
     const response: ApiResponse<ParamsSubmissionTypes> = await invoiceApi.get(
       `/invoice/approval/${uid}`,
@@ -170,7 +195,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     resetDetailInvoiceEdit,
     postSubmission,
     getListPo,
-    // getListNonPo,
+    getListNonPo,
     getInvoiceDetail,
     postReject,
     postSap,
