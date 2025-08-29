@@ -40,6 +40,7 @@ interface ParamsVerificationHeaderTypes {
 }
 
 interface ParamsVerificationItemTypes {
+  id: number
   poNo: string
   poItem: number
   grDocumentNo: string
@@ -127,6 +128,7 @@ interface ParamsSubmissionWorkflow {
 }
 
 interface ParamsSubmissionItem {
+  id: number
   poNo: string
   poItem: number
   grDocumentNo: string
@@ -161,6 +163,7 @@ export interface ParamsSubmissionCost {
   whtType: string
   whtCode: string
   whtBaseAmount: number
+  whtAmount: number
 }
 
 export interface PoGrItemTypes {
@@ -281,6 +284,7 @@ export interface itemsCostType {
 }
 
 export interface itemsPoGrType {
+  id: number
   poNo: string
   poItem: number
   grDocumentNo: string

@@ -13,5 +13,6 @@ export interface itemsCostType {
   whtCode: string
   whtBaseAmount: number
   whtCodeList?: WhtCodeTypes[]
+  whtAmount: number
   isEdit: boolean
 }
