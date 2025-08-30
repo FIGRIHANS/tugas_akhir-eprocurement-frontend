@@ -302,6 +302,7 @@ const mapAdditionalCost = () => {
       whtType: item.whtType,
       whtCode: item.whtCode,
       whtBaseAmount: Number(item.whtBaseAmount),
+      whtAmount: 0
     })
   }
   return cost
