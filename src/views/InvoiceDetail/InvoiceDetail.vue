@@ -598,7 +598,7 @@ onMounted(async () => {
       },
     ]
   }
-  if (checkPo()) {
+  if (currentRouteName.value === 'invoiceDetail') {
     await verificationApi.getInvoiceDetail(route.query.id?.toString() || '').then(() => {
       if (verificationApi.isFromEdit) {
         setDataEdit()

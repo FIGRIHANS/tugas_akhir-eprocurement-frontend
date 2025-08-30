@@ -47,7 +47,9 @@
       title="Business License Data Sucessfully Updated"
       text="The data has been successfully updated in the admin system"
       no-cancel
-      no-submit
+      static
+      submit-button-text="Close"
+      :submit="() => (isOpenModalSuccess = false)"
     />
     <!-- modal error -->
     <ModalConfirmation
