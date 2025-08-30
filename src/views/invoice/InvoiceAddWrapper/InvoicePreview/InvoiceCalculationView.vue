@@ -10,7 +10,9 @@
       >
         <div class="flex-1">{{ item.name }}</div>
         <div class="flex-1 flex items-center justify-center">
-          <div class="flex-1">{{ form?.currency === 'IDR' ? useFormatIdr(item.amount) : useFormatUsd(item.amount) }}</div>
+          <div class="flex-1">
+            {{ form?.currency === 'IDR' ? useFormatIdr(item.amount) : useFormatUsd(item.amount) }}
+          </div>
           <div>{{ item.currency }}</div>
         </div>
       </div>
@@ -34,12 +36,12 @@ const listCalculation = ref<listType[]>([])
 
 const setCount = (name: string) => {
   const list = {
-    'subtotal': form?.subtotal,
+    subtotal: form?.subtotal,
     'vat amount': form?.vatAmount,
     'wht amount': form?.whtAmount,
     'additional cost': form?.additionalCostCalc,
     'total gross amount': form?.totalGrossAmount,
-    'total net amount': form?.totalNetAmount
+    'total net amount': form?.totalNetAmount,
   } as { [key: string]: number }
 
   return list[name.toLowerCase()]
@@ -48,12 +50,17 @@ const setCount = (name: string) => {
 const setCalculation = () => {
   listCalculation.value = []
   for (const item of listName.value) {
-    if ((typeForm.value === 'nonpo' && item !== 'Additional Cost') || typeForm.value === 'po' || typeForm.value === 'po-view') {
+    if (
+      (typeForm.value === 'nonpo' && item !== 'Additional Cost') ||
+      typeForm.value === 'po' ||
+      typeForm.value === 'po-view' ||
+      typeForm.value === 'non-po-view'
+    ) {
       const amount = setCount(item)
       const data = {
         name: item,
         amount: amount.toString(),
-        currency: form?.currency || ''
+        currency: form?.currency || '',
       }
       listCalculation.value.push(data)
     }
@@ -72,8 +79,8 @@ watch(
   },
   {
     deep: true,
-    immediate: true
-  }
+    immediate: true,
+  },
 )
 
 watch(
@@ -83,12 +90,12 @@ watch(
   },
   {
     deep: true,
-    immediate: true
-  }
+    immediate: true,
+  },
 )
 
 onMounted(() => {
   typeForm.value = route.query.type?.toString().toLowerCase() || 'po'
-  setCalculation()  
+  setCalculation()
 })
 </script>
