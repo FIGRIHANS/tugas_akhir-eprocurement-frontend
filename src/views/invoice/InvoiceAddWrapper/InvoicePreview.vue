@@ -31,8 +31,12 @@ import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterDat
 const InvoiceView = defineAsyncComponent(() => import('./InvoicePreview/InvoiceView.vue'))
 const InvoicePoGrView = defineAsyncComponent(() => import('./InvoicePreview/InvoicePoGrView.vue'))
 const InvoiceItemView = defineAsyncComponent(() => import('./InvoicePreview/InvoiceItemView.vue'))
-const AdditionalCostView = defineAsyncComponent(() => import('./InvoicePreview/AdditionalCostView.vue'))
-const InvoiceCalculationView = defineAsyncComponent(() => import('./InvoicePreview/InvoiceCalculationView.vue'))
+const AdditionalCostView = defineAsyncComponent(
+  () => import('./InvoicePreview/AdditionalCostView.vue'),
+)
+const InvoiceCalculationView = defineAsyncComponent(
+  () => import('./InvoicePreview/InvoiceCalculationView.vue'),
+)
 const GeneralDataView = defineAsyncComponent(() => import('./InvoicePreview/GeneralDataView.vue'))
 const BankKeyView = defineAsyncComponent(() => import('./InvoicePreview/BankKeyView.vue'))
 const OneTimePayment = defineAsyncComponent(() => import('./InvoicePreview/OneTimePayment.vue'))
@@ -58,8 +62,8 @@ watch(
     }
   },
   {
-    deep: true
-  }
+    deep: true,
+  },
 )
 
 onMounted(() => {
@@ -68,6 +72,12 @@ onMounted(() => {
   if (route.query.type === 'po-view') {
     invoiceMasterApi.getDpTypes()
     invoiceMasterApi.getCompanyCode()
+  }
+
+  if (route.query.type === 'non-po-view') {
+    invoiceMasterApi.getDpTypes()
+    invoiceMasterApi.getCompanyCode()
+    typeForm.value = 'nonpo'
   }
 })
 </script>

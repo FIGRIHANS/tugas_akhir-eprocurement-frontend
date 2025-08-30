@@ -207,9 +207,10 @@ const goAdd = (isPo: boolean) => {
 
 const goToDetail = (id: string) => {
   router.push({
-    name: 'invoiceDetailNonPo',
+    name: 'invoiceAdd',
     query: {
-      id: id,
+      type: 'non-po-view',
+      invoice: id,
     },
   })
 }
