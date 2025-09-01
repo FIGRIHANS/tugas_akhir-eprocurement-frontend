@@ -1,12 +1,18 @@
 <template>
   <div v-if="form" class="flex flex-col gap-[24px]">
     <p class="text-lg font-semibold m-[0px]">{{ form.invoiceNo || '-' }}</p>
-    <div class="flex flex-wrap align-items-center gap-[20px]" :class="{ 'flex-col align-items-start': checkIsNonPo() }">
+    <div
+      class="flex flex-wrap align-items-center gap-[20px]"
+      :class="{ 'flex-col align-items-start': checkIsNonPo() }"
+    >
       <div :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
         <p class="text-xs font-normal text-gray-700">Invoice Type</p>
         <p class="text-sm font-medium">{{ getInvoiceTypeName() || '-' }}</p>
       </div>
-      <div v-if="form.invoiceType === '901' && !checkIsNonPo()" :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
+      <div
+        v-if="form.invoiceType === '901' && !checkIsNonPo()"
+        :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }"
+      >
         <p class="text-xs font-normal text-gray-700">DP Option</p>
         <p class="text-sm font-medium">{{ getDpName() || '-' }}</p>
       </div>
@@ -24,7 +30,9 @@
       </div>
       <div :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
         <p class="text-xs font-normal text-gray-700">Invoice Date</p>
-        <p class="text-sm font-medium whitespace-nowrap">{{ form.invoiceDate ? moment(form.invoiceDate).format('YYYY/MM/DD') : '-' }}</p>
+        <p class="text-sm font-medium whitespace-nowrap">
+          {{ form.invoiceDate ? moment(form.invoiceDate).format('YYYY/MM/DD') : '-' }}
+        </p>
       </div>
       <div :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
         <p class="text-xs font-normal text-gray-700">Currency</p>
@@ -71,7 +79,7 @@ const listInvoiceTypePo = computed(() => invoiceMasterApi.invoicePoType)
 const companyCodeList = computed(() => invoiceMasterApi.companyCode)
 
 const checkIsNonPo = () => {
-  return route.query.type === 'nonpo'
+  return route.query.type === 'nonpo' || route.query.type === 'non-po-view'
 }
 
 // const checkPo = () => {
@@ -83,11 +91,11 @@ const checkIsNonPo = () => {
 // }
 
 const getDpName = () => {
-  if(form?.invoiceDp != ''){
-    if (route.query.type === 'po-view') return 'Without DP'  
+  if (form?.invoiceDp != '') {
+    if (route.query.type === 'po-view') return 'Without DP'
     const getIndex = dpTypeList.value.findIndex((item) => item.code === form?.invoiceDp)
     if (getIndex !== -1) return dpTypeList.value[getIndex].name
-  }  
+  }
 }
 
 const getInvoiceTypeName = () => {

@@ -191,7 +191,7 @@ export default [
     child: [
       {
         id: 'invoice-list',
-        title: 'E-invoice',
+        title: 'Invoice PO',
         to: 'invoice',
       },
       {
