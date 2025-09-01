@@ -33,6 +33,7 @@
             <td>{{ item.whtType || '-' }}</td>
             <td>{{ item.whtCode || '-' }}</td>
             <td>{{ item.whtBaseAmount || '-' }}</td>
+            <td>{{ item.whtAmount || '-' }}</td>
           </tr>
         </tbody>
       </table>
@@ -59,7 +60,8 @@ const columns = ref([
   'Assignment',
   'WHT Type',
   'WHT Code',
-  'WHT Base Amount'
+  'WHT Base Amount',
+  'WHT Amount'
 ])
 </script>
 
