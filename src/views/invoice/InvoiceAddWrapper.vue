@@ -748,7 +748,7 @@ const setData = () => {
     for (const item of detail.additionalCosts) {
       const data = {
         activity: item.activityExpense,
-        itemAmount: item.itemAmount.toString(),
+        itemAmount: item.itemAmount,
         debitCredit: item.debitCredit,
         taxCode: item.taxCode,
         vatAmount: item.vatAmount,
@@ -757,7 +757,8 @@ const setData = () => {
         assignment: item.assignment,
         whtType: item.whtType,
         whtCode: item.whtCode,
-        whtBaseAmount: item.whtBaseAmount.toString(),
+        whtBaseAmount: item.whtBaseAmount,
+        whtAmount: item.whtAmount,
         isEdit: false,
       } as itemsCostType
       form.additionalCost.push(data)
@@ -887,7 +888,7 @@ const setDataNonPo = () => {
     // for (const item of detail.additionalCosts) {
     //   const data = {
     //     activity: item.activityExpense,
-    //     itemAmount: item.itemAmount.toString(),
+    //     itemAmount: item.itemAmount,
     //     debitCredit: item.debitCredit,
     //     taxCode: item.taxCode,
     //     vatAmount: item.vatAmount,
@@ -896,7 +897,8 @@ const setDataNonPo = () => {
     //     assignment: item.assignment,
     //     whtType: item.whtType,
     //     whtCode: item.whtCode,
-    //     whtBaseAmount: item.whtBaseAmount.toString(),
+    //     whtBaseAmount: item.whtBaseAmount,
+    //     whtAmount: item.whtAmount,
     //     isEdit: false,
     //   } as itemsCostType
     //   form.additionalCost.push(data)

@@ -53,7 +53,7 @@
               </td>
               <td>
                 <span v-if="!item.isEdit">{{ useFormatIdr(item.itemAmount) || '-' }}</span>
-                <input v-else v-model="item.itemAmount" class="input" type="number" placeholder=""/>
+                <input v-else v-model="item.itemAmount" class="input" type="number" placeholder="" @change="item.whtBaseAmount = Number(item.itemAmount)"/>
               </td>
               <td>
                 <span v-if="!item.isEdit">{{ getDebitCreditName(item.debitCredit) || '-' }}</span>
@@ -142,7 +142,7 @@ const addNew = () => {
   if (form) {
     const data = {
       activity: '',
-      itemAmount: '',
+      itemAmount: 0,
       debitCredit: '',
       taxCode: '',
       vatAmount: 0,
@@ -151,8 +151,8 @@ const addNew = () => {
       assignment: '',
       whtType: '',
       whtCode: '',
-      whtBaseAmount: '',
-      whtAmount: '',
+      whtBaseAmount: 0,
+      whtAmount: 0,
       isEdit: false
     }
     form.additionalCost.push(data)
