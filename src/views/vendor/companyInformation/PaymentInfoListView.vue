@@ -150,7 +150,7 @@
             </div>
             <UiFileUpload
               name="accountCover"
-              accepted-files=".jpg,.jpeg,.png,.pdf"
+              accepted-files=".jpg,.jpeg,.png,.pdf,.zip"
               placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
               :error="bankDetailError.includes('urlFirstPage')"
               :hint-text="bankDetailError.includes('urlFirstPage') ? 'Account Cover required' : ''"
@@ -249,7 +249,7 @@
             </div>
             <UiFileUpload
               name="accountDiscrepancyStatement"
-              accepted-files=".jpg,.jpeg,.png,.pdf"
+              accepted-files=".jpg,.jpeg,.png,.pdf,.zip"
               placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
               :error="bankDetailError.includes('urlAccountDifferences')"
               :hint-text="
