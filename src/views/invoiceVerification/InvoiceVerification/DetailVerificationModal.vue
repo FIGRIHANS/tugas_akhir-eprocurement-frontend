@@ -14,14 +14,22 @@
         <table class="table align-middle text-gray-700 font-medium text-sm">
           <thead>
             <tr>
-              <td v-for="(item, index) in columns" :key="index" class="detail-approval__column">{{ item }}</td>
+              <td v-for="(item, index) in columns" :key="index" class="detail-approval__column">
+                {{ item }}
+              </td>
             </tr>
           </thead>
           <tbody>
             <tr v-for="(item, index) in list?.workflow" :key="index" class="text-sm font-normal">
               <td>{{ index + 1 }}</td>
               <td>{{ item.profileName }}</td>
-              <td>{{ item.actionerDate && item.actioner !== 0 ? moment(item.actionerDate).format('YYYY/MM/DD HH:mm:ss') : '-' }}</td>
+              <td>
+                {{
+                  item.actionerDate && item.actioner !== 0
+                    ? moment(item.actionerDate).format('YYYY/MM/DD HH:mm:ss')
+                    : '-'
+                }}
+              </td>
               <td>
                 <span v-if="item.stateCode === 99">-</span>
                 <span v-else class="badge badge-outline" :class="badgeColor(item.stateCode)">
@@ -42,20 +50,25 @@ import { ref, computed, onMounted } from 'vue'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { KTModal } from '@/metronic/core'
 import moment from 'moment'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
 
 const emits = defineEmits(['loadDetail', 'setClearId'])
 
 const invoiceApi = useInvoiceSubmissionStore()
 
-const columns = ref<string[]>([
-  'No.',
-  'Department',
-  'Verification Date',
-  'Status',
-  'Description'
-])
+const columns = ref<string[]>(['No.', 'Department', 'Verification Date', 'Status', 'Description'])
 
-const list = computed(() => invoiceApi.detailPo)
+const list = computed(() => {
+  if (route.name === 'invoiceVerificationNoPo') {
+    // Jika kondisi terpenuhi, kembalikan nilai ini
+    return invoiceApi.detailNonPo
+  } else {
+    // Jika tidak, kembalikan nilai ini
+    return invoiceApi.detailPo
+  }
+})
 
 const badgeColor = (status: number) => {
   const list = {
@@ -64,7 +77,7 @@ const badgeColor = (status: number) => {
     3: 'badge-success',
     4: 'badge-success',
     5: 'badge-danger',
-    7: 'badge-primary'
+    7: 'badge-primary',
   } as { [key: number]: string }
   return list[status]
 }

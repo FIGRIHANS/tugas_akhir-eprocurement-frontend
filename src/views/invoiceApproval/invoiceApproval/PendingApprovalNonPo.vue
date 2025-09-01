@@ -291,7 +291,8 @@ const callList = () => {
   list.value = []
   verificationApi
     .getListNonPo({
-      statusCode: filterForm.status || 2,
+      // filterForm.status ||
+      statusCode: 1,
       companyCode: filterForm.companyCode,
       invoiceTypeCode: Number(filterForm.invoiceType),
       invoiceDate: filterForm.date,
@@ -311,7 +312,7 @@ const setDataFilter = (data: filterListTypes) => {
 }
 
 const loadData = () => {
-  invoiceApi.getPoDetail(viewDetailId.value)
+  invoiceApi.getNonPoDetail(viewDetailId.value)
 }
 
 const closeDropdown = () => {
