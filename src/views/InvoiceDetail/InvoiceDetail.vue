@@ -271,6 +271,7 @@ const mapPoGr = () => {
   const poGr = []
   for (const item of form.value.invoicePoGr) {
     poGr.push({
+      id: item.id,
       poNo: item.poNo,
       poItem: Number(item.poItem),
       grDocumentNo: item.grDocumentNo,
