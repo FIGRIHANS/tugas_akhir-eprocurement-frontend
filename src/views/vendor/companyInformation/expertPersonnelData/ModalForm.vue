@@ -515,7 +515,7 @@ onMounted(() => {
                         v-else
                         placeholder="Upload file"
                         :name="`docUrl${index}${subCertificate.type}`"
-                        accepted-files=".jpg,.jpeg,.png,.pdf"
+                        accepted-files=".jpg,.jpeg,.png,.pdf, .zip"
                         @added-file="uploadFile($event, index, subCertificate.type)"
                         @upload-failed="console.log('gagal')"
                         :disabled="uploadLoading"
