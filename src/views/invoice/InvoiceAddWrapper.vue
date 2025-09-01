@@ -602,17 +602,7 @@ const goNext = () => {
       invoiceApi
         .postSubmissionNonPo(mapDataPostNonPo())
         .then((response) => {
-          if (response.statusCode === 200) {
-            const idModal = document.querySelector('#success_invoice_modal')
-            const modal = KTModal.getInstance(idModal as HTMLElement)
-            modal.show()
-          } else {
-            if (response.result.message.includes('Invoice Document Number')) {
-              const idModal = document.querySelector('#error_document_number_modal')
-              const modal = KTModal.getInstance(idModal as HTMLElement)
-              modal.show()
-            }
-          }
+          setAfterResponsePost(response)
         })
         .catch((error) => {
           console.error(error)
@@ -624,17 +614,7 @@ const goNext = () => {
       invoiceApi
         .postSubmission(mapDataPost())
         .then((response) => {
-          if (response.statusCode === 200) {
-            const idModal = document.querySelector('#success_invoice_modal')
-            const modal = KTModal.getInstance(idModal as HTMLElement)
-            modal.show()
-          } else {
-            if (response.result.message.includes('Invoice Document Number')) {
-              const idModal = document.querySelector('#error_document_number_modal')
-              const modal = KTModal.getInstance(idModal as HTMLElement)
-              modal.show()
-            }
-          }
+          setAfterResponsePost(response)
         })
         .catch((error) => {
           console.error(error)
@@ -654,32 +634,53 @@ const goToList = () => {
 }
 
 const goSaveDraft = () => {
-  const data = mapDataPost()
-  data.header.statusCode = 0
-  data.header.statusName = 'Draft'
   isSubmit.value = true
   isClickDraft.value = true
-  invoiceApi
-    .postSubmission(data)
-    .then((response) => {
-      if (response.statusCode === 200) {
-        const idModal = document.querySelector('#success_invoice_modal')
-        const modal = KTModal.getInstance(idModal as HTMLElement)
-        modal.show()
-      } else {
-        if (response.result.message.includes('Invoice Document Number')) {
-          const idModal = document.querySelector('#error_document_number_modal')
-          const modal = KTModal.getInstance(idModal as HTMLElement)
-          modal.show()
-        }
-      }
-    })
-    .catch((error) => {
-      console.error(error)
-    })
-    .finally(() => {
-      isSubmit.value = false
-    })
+  if (route.query.type === 'nonpo') {
+    const data = mapDataPostNonPo()
+    data.header.statusCode = 0
+    data.header.statusName = 'Draft'
+    invoiceApi
+      .postSubmissionNonPo(data)
+      .then((response) => {
+        setAfterResponsePost(response)
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+      .finally(() => {
+        isSubmit.value = false
+      })
+  } else {
+    const data = mapDataPost()
+    data.header.statusCode = 0
+    data.header.statusName = 'Draft'
+    invoiceApi
+      .postSubmission(data)
+      .then((response) => {
+        setAfterResponsePost(response)
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+      .finally(() => {
+        isSubmit.value = false
+      })
+  }
+}
+
+const setAfterResponsePost = (response) => {
+  if (response.statusCode === 200) {
+    const idModal = document.querySelector('#success_invoice_modal')
+    const modal = KTModal.getInstance(idModal as HTMLElement)
+    modal.show()
+  } else {
+    if (response.result.message.includes('Invoice Document Number')) {
+      const idModal = document.querySelector('#error_document_number_modal')
+      const modal = KTModal.getInstance(idModal as HTMLElement)
+      modal.show()
+    }
+  }
 }
 
 const setData = () => {
