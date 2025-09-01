@@ -40,8 +40,6 @@ const experienceStore = useExperienceStore()
 
 // ref bantuan
 const businessFieldId = ref<number>(0)
-const countryId = ref<number>(0)
-const stateId = ref<number>(0)
 
 const formData = ref<IExperiencePayload>(cloneDeep(defaultFormData))
 const uploadError = ref<string>('')
@@ -101,11 +99,13 @@ const onUploadFile = async (file: File) => {
   }
 }
 
-const onSelecCountry = (countryId: number) => {
+const onSelectCountry = (countryId: number) => {
+  formData.value.provinceLocation = 0
   lookupStore.getVendorProvince(countryId)
 }
 
 const onSelectState = (provinceId: number) => {
+  formData.value.location = 0
   lookupStore.getVendorCities(provinceId)
 }
 
@@ -115,10 +115,17 @@ const onSubmit = async () => {
   formData.value.user = userStore.userData?.profile.employeeName as string
 
   // check empty value for each form fields
-  formError.value = checkEmptyValues(formData.value)
+  formError.value = checkEmptyValues({
+    ...formData.value,
+    businessFieldId: businessFieldId.value,
+  })
 
   // remove excluded key
   formError.value = formError.value.filter((field) => !excludedFields.includes(field))
+
+  if (formData.value.stateLocation !== 360) {
+    formError.value = formError.value.filter((field) => field !== 'location')
+  }
 
   if (formError.value.length) return
 
@@ -144,9 +151,9 @@ const onCloseModal = () => {
 }
 
 watch(
-  [props.id],
-  async () => {
-    const selectedItem = experienceStore.data.find((item) => item.id === Number(props.id))
+  () => props.id,
+  async (newId) => {
+    const selectedItem = experienceStore.data.find((item) => item.id === Number(newId))
 
     if (!selectedItem || props.mode === 'add') return
 
@@ -154,8 +161,6 @@ watch(
     await lookupStore.getVendorCities(selectedItem.provinceId)
 
     businessFieldId.value = selectedItem.businessFieldId
-    countryId.value = selectedItem.countryId
-    stateId.value = selectedItem.provinceId
 
     formData.value.id = Number(props.id)
     formData.value.contractName = selectedItem.contractName
@@ -173,6 +178,8 @@ watch(
     formData.value.location = selectedItem.city
     formData.value.expCurrID = selectedItem.expCurrID
     formData.value.uploadDate = selectedItem.createdDate
+    formData.value.provinceLocation = selectedItem.provinceId
+    formData.value.stateLocation = selectedItem.countryId
   },
   {
     immediate: true,
@@ -242,6 +249,9 @@ onMounted(() => {
           value-key="businessFieldID"
           placeholder="--Business Sector Type--"
           v-model="businessFieldId"
+          required
+          :error="formError.includes('businessFieldId')"
+          :hint-text="formError.includes('businessFieldId') ? 'Business Field required' : ''"
         />
 
         <!-- Sub business sector -->
@@ -265,8 +275,11 @@ onMounted(() => {
           text-key="label"
           value-key="value"
           placeholder="--Country--"
-          @update:model-value="onSelecCountry(Number($event))"
-          v-model="countryId"
+          @update:model-value="onSelectCountry(Number($event))"
+          v-model="formData.stateLocation"
+          required
+          :error="formError.includes('stateLocation')"
+          :hint-text="formError.includes('stateLocation') ? 'Country required' : ''"
         />
 
         <UiFormGroup hide-border :grid="2">
@@ -278,14 +291,17 @@ onMounted(() => {
             value-key="provinceID"
             placeholder="--Province--"
             @update:model-value="onSelectState(Number($event))"
-            v-model="stateId"
-            :disabled="!countryId"
+            v-model="formData.provinceLocation"
+            :disabled="!formData.stateLocation"
+            :hint-text="formError.includes('provinceLocation') ? 'Province required' : ''"
+            required
+            :error="formError.includes('provinceLocation')"
           />
 
           <!-- City -->
           <UiSelect
             label="City"
-            required
+            :required="formData.stateLocation === 360"
             :options="cityOptions"
             text-key="cityName"
             value-key="cityID"
@@ -293,7 +309,7 @@ onMounted(() => {
             v-model="formData.location"
             :error="formError.includes('location')"
             :hint-text="formError.includes('location') ? 'City required' : ''"
-            :disabled="!stateId"
+            :disabled="!formData.provinceLocation"
           />
         </UiFormGroup>
 
@@ -364,6 +380,7 @@ onMounted(() => {
             v-model="formData.startDate"
             :error="formError.includes('startDate')"
             @update:model-value="formData.startDate = new Date($event).toISOString()"
+            format="dd/MM/yyyy"
           />
           <span v-if="formError.includes('startDate')" class="form-hint !text-danger">
             Start date required
@@ -382,6 +399,7 @@ onMounted(() => {
             v-model="formData.endDate"
             :error="formError.includes('endDate')"
             @update:model-value="formData.endDate = new Date($event).toISOString()"
+            format="dd/MM/yyyy"
           />
           <span v-if="formError.includes('endDate')" class="form-hint !text-danger">
             End date required
@@ -400,7 +418,7 @@ onMounted(() => {
 
         <!-- upload -->
         <UiFileUpload
-          accepted-files=".jpg,.jpeg,.png,.pdf"
+          accepted-files=".jpg,.jpeg,.png,.pdf,.zip"
           name="file"
           placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
           @added-file="onUploadFile"
