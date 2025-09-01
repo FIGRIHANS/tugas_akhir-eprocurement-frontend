@@ -64,6 +64,8 @@ const selectedLanguage = computed(() => locale.value.toUpperCase())
 
 const changeLocale = (value: 'id' | 'en') => {
   locale.value = value
+
+  localStorage.setItem('locale', value)
 }
 
 onMounted(() => {
