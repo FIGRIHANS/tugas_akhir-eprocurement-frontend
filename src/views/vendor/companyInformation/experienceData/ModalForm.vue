@@ -418,9 +418,9 @@ onMounted(() => {
 
         <!-- upload -->
         <UiFileUpload
-          accepted-files=".jpg,.jpeg,.png,.pdf"
+          accepted-files=".jpg,.jpeg,.png,.pdf,.zip"
           name="file"
-          placeholder="Upload file - (*jpg, jpeg, png, pdf / max : 16 MB)"
+          placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
           @added-file="onUploadFile"
           :hint-text="
             uploadError

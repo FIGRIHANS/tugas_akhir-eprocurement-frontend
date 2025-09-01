@@ -371,7 +371,7 @@ onMounted(() => {
                     </UiButton>
                     <div v-else class="flex items-center gap-2">
                       <UiFileUpload
-                        accepted-files=".jpg,.jpeg,.png,.pdf"
+                        accepted-files=".jpg,.jpeg,.png,.pdf,.zip"
                         name="file"
                         placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
                         @added-file="handleUpload"
