@@ -49,7 +49,7 @@
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.itemAmount }}</span>
-              <input v-else v-model="formEdit.itemAmount" class="input" type="number" placeholder=""/>
+              <input v-else v-model="formEdit.itemAmount" class="input" type="number" placeholder="" @change="formEdit.whtBaseAmount = formEdit.itemAmount"/>
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.debitCredit }}</span>
