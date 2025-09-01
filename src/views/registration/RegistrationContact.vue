@@ -1,9 +1,9 @@
 <template>
   <div class="flex flex-col gap-12 mb-[24px]">
-    <UiFormGroup title="Account" :grid="2" body-class="px-4" hide-border>
+    <UiFormGroup :title="$t('registration.account')" :grid="2" body-class="px-4" hide-border>
       <UiInput
         v-model="contact.account.username"
-        label="Username"
+        :label="$t('registration.username')"
         row
         required
         disabled
@@ -11,13 +11,13 @@
       />
       <div class="flex items-center flex-wrap lg:flex-nowrap gap-2.5">
         <label class="form-label w-2/5 flex items-center gap-1">
-          Password
+          {{ $t('registration.password') }}
           <span class="text-danger"> * </span>
         </label>
         <div class="input" :class="{ 'border-danger': contact.account.passwordError }">
           <input
             v-model="contact.account.password"
-            placeholder="Enter your password"
+            :placeholder="$t('general.input', { field: $t('registration.password') })"
             :type="showPassword ? 'text' : 'password'"
             @input="checkPasswordRules"
           />
@@ -29,7 +29,7 @@
       <UiInput
         v-model="contact.account.email"
         label="Email"
-        placeholder="Enter your email"
+        :placeholder="$t('general.input', { field: 'email' })"
         row
         required
         :error="contact.account.emailError"
@@ -37,13 +37,13 @@
 
       <div class="flex items-center flex-wrap lg:flex-nowrap gap-2.5">
         <label class="form-label w-2/5 flex items-center gap-1">
-          Confirm Password
+          {{ $t('registration.confirmPassword') }}
           <span class="text-danger"> * </span>
         </label>
         <div class="input" :class="{ '!border-danger': contact.account.confirmPasswordError }">
           <input
             v-model="contact.account.confirmPassword"
-            placeholder="Confirm Password"
+            :placeholder="$t('registration.confirmPassword')"
             :type="showConfirmPassword ? 'text' : 'password'"
             @input="checkConfirmPassword"
           />
@@ -58,7 +58,7 @@
         <div class="card bg-primary-light w-full">
           <div class="card-body px-3 py-4">
             <p class="text-xs text-primary">
-              Please use an Email that has not been registered before.
+              {{ $t('registration.duplicateEmail') }}
             </p>
           </div>
         </div>
@@ -69,8 +69,8 @@
         <div class="card bg-gray-100 w-full">
           <div class="card-body px-3 py-4 text-sm">
             <span>
-              Make sure your new password is strong <br />
-              The password must contain.
+              {{ $t('registration.strongPassword') }} <br />
+              {{ $t('registration.containPassword') }}
             </span>
             <ul class="list-disc list-inside">
               <div
@@ -90,7 +90,7 @@
       </div>
       <UiInputTel
         v-model="contact.account.phone"
-        label="Phone"
+        :label="$t('registration.phone')"
         placeholder="000000"
         row
         required
@@ -98,8 +98,8 @@
       />
       <UiInput
         v-model="contact.account.website"
-        label="Website"
-        placeholder="Enter your website"
+        :label="$t('registration.website')"
+        :placeholder="$t('general.input', { field: $t('registration.website') })"
         row
         class="col-start-1"
       />
@@ -108,11 +108,16 @@
     <hr class="col-span-2 border-t-gray-200" />
 
     <UiFormGroup hide-border>
-      <UiFormGroup title="Contact Person" :grid="2" body-class="px-4" hide-border>
+      <UiFormGroup
+        :title="$t('registration.contactPerson')"
+        :grid="2"
+        body-class="px-4"
+        hide-border
+      >
         <UiInput
           v-model="contact.contactPerson.contactName"
-          label="Name"
-          placeholder="Full name"
+          :label="$t('registration.name')"
+          :placeholder="$t('registration.fullName')"
           row
           required
           :error="contact.contactPerson.contactNameError"
@@ -127,7 +132,7 @@
         />
         <UiInputTel
           v-model="contact.contactPerson.contactPhone"
-          label="Phone"
+          :label="$t('registration.phone')"
           placeholder="000000"
           row
           required
@@ -135,8 +140,8 @@
         />
         <UiSelect
           v-model="contact.contactPerson.positionTypeId"
-          label="Department"
-          placeholder="Select"
+          :label="$t('registration.department')"
+          :placeholder="$t('general.select')"
           :options="positionList"
           value-key="positionTypeId"
           text-key="positionName"
@@ -148,7 +153,7 @@
 
       <UiButton class="w-fit justify-self-end mx-4" outline @click="addContactPerson">
         <UiIcon variant="duotone" :name="isEdit ? 'file-added' : 'plus-circle'" />
-        {{ isEdit ? 'Save' : 'Add' }}
+        {{ isEdit ? $t('general.save') : $t('general.add') }}
       </UiButton>
 
       <div class="card min-w-full">
@@ -158,19 +163,19 @@
           >
             <thead>
               <tr>
-                <th>Full Name</th>
-                <th>Phone</th>
+                <th>{{ $t('registration.fullName') }}</th>
+                <th>{{ $t('registration.phone') }}</th>
                 <th>Email</th>
-                <th>Department</th>
-                <th class="w-10">Action</th>
+                <th>{{ $t('registration.department') }}</th>
+                <th class="w-10">{{ $t('general.action') }}</th>
               </tr>
             </thead>
             <tbody v-if="contact.contactPerson.list.length === 0">
               <tr>
-                <td class="text-center">No Data</td>
-                <td class="text-center">No Data</td>
-                <td class="text-center">No Data</td>
-                <td class="text-center">No Data</td>
+                <td class="text-center">{{ $t('general.noData') }}</td>
+                <td class="text-center">{{ $t('general.noData') }}</td>
+                <td class="text-center">{{ $t('general.noData') }}</td>
+                <td class="text-center">{{ $t('general.noData') }}</td>
                 <td></td>
               </tr>
             </tbody>
@@ -198,7 +203,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import { useRegistrationVendorStore } from '@/stores/views/registration'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
@@ -209,6 +215,8 @@ import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiInputTel from '@/components/ui/atoms/input-telephone/UiInputTel.vue'
+
+const { t, locale } = useI18n()
 
 const isEdit = ref<boolean>(false)
 const editIndex = ref<number | null>(null)
@@ -221,22 +229,22 @@ const showConfirmPassword = ref<boolean>(false)
 const passwordRules = ref([
   {
     id: 'min8char',
-    text: 'Minimun 8 character',
+    text: t('registration.minPassword'),
     status: false,
   },
   {
     id: 'uppercase',
-    text: 'Uppercase',
+    text: t('registration.capitalPassword'),
     status: false,
   },
   {
     id: '1symbol',
-    text: 'At least one symbol',
+    text: t('registration.symbolPassword'),
     status: false,
   },
   {
     id: '1number',
-    text: 'At least one number',
+    text: t('registration.numberPassword'),
     status: false,
   },
 ])
@@ -355,4 +363,32 @@ onMounted(() => {
   }
   vendorMasterDataStore.getVendorPosition()
 })
+
+watch(
+  () => locale.value,
+  () => {
+    passwordRules.value = [
+      {
+        id: 'min8char',
+        text: t('registration.minPassword'),
+        status: false,
+      },
+      {
+        id: 'uppercase',
+        text: t('registration.capitalPassword'),
+        status: false,
+      },
+      {
+        id: '1symbol',
+        text: t('registration.symbolPassword'),
+        status: false,
+      },
+      {
+        id: '1number',
+        text: t('registration.numberPassword'),
+        status: false,
+      },
+    ]
+  },
+)
 </script>

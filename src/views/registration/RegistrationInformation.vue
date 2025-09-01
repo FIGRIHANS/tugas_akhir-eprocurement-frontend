@@ -1,10 +1,10 @@
 <template>
   <div class="grid grid-cols-2 gap-12 mb-[24px]">
-    <UiFormGroup title="Company" body-class="px-4" hide-border>
+    <UiFormGroup :title="$t('registration.company')" body-class="px-4" hide-border>
       <UiInput
         v-model="information.vendor.vendorName"
-        label="Company Name"
-        placeholder="Enter your company name"
+        :label="$t('registration.companyName')"
+        :placeholder="$t('general.input', { field: $t('registration.companyName') })"
         row
         required
         :error="information.vendor.vendorNameError"
@@ -18,14 +18,14 @@
       />
       <UiInput
         v-model="information.vendor.groupCompany"
-        label="Company Group"
-        placeholder="Enter your company group"
+        :label="$t('registration.companyGroup')"
+        :placeholder="$t('general.input', { field: $t('registration.companyGroup') })"
         row
       />
       <DatePicker
         v-model="information.vendor.foundedDate"
-        label="Establishment Date"
-        placeholder="Select Date"
+        :label="$t('registration.establishmentDate')"
+        :placeholder="$t('general.input', { field: $t('registration.establishmentDate') })"
         format="dd MM yyyy"
         required
         :error="information.vendor.foundedDateError"
@@ -33,11 +33,11 @@
       />
     </UiFormGroup>
 
-    <UiFormGroup title="Company Location" body-class="px-4" hide-border>
+    <UiFormGroup :title="$t('registration.companyLocation')" body-class="px-4" hide-border>
       <UiSelect
         v-model="information.companyLocation.countryId"
-        label="Country"
-        placeholder="Select"
+        :label="$t('registration.country')"
+        :placeholder="$t('general.select')"
         :options="countryList"
         value-key="countryID"
         text-key="countryName"
@@ -48,8 +48,8 @@
       />
       <UiSelect
         v-model="information.companyLocation.stateId"
-        label="Province"
-        placeholder="Select"
+        :label="$t('registration.province')"
+        :placeholder="$t('general.select')"
         :disabled="!information.companyLocation.countryId"
         :options="provinceListCompany"
         value-key="provinceID"
@@ -61,8 +61,8 @@
       />
       <UiSelect
         v-model="information.companyLocation.cityId"
-        label="City / District"
-        placeholder="Select"
+        :label="$t('registration.city')"
+        :placeholder="$t('general.select')"
         :disabled="!information.companyLocation.stateId"
         :options="cityListCompany"
         value-key="cityID"
@@ -74,8 +74,8 @@
       />
       <UiInput
         v-model="information.companyLocation.postalCode"
-        label="Postal Code"
-        placeholder="Enter postal code"
+        :label="$t('registration.postalCode')"
+        :placeholder="$t('general.input', { field: $t('registration.postalCode') })"
         row
         required
         type="number"
@@ -83,8 +83,8 @@
       />
       <UiTextarea
         v-model="information.companyLocation.addressDetail"
-        label="Full Address"
-        placeholder="Enter full address"
+        :label="$t('registration.fullAddress')"
+        :placeholder="$t('general.input', { field: $t('registration.fullAddress') })"
         row
         required
         :error="information.companyLocation.addressDetailError"
@@ -93,18 +93,18 @@
 
     <hr class="col-span-2 border-t-gray-200" />
 
-    <UiFormGroup title="Head Office Location" body-class="px-4" hide-border>
+    <UiFormGroup :title="$t('registration.headOfficeLocation')" body-class="px-4" hide-border>
       <UiCheckbox
         v-model="isSameAsHq"
-        label="Company location is the same as the head office"
+        :label="$t('registration.companyLocationSame')"
         @click="checkSameAsHq"
       />
 
       <UiFormGroup hide-border>
         <UiSelect
           v-model="information.vendorLocation.countryId"
-          label="Country"
-          placeholder="Select"
+          :label="$t('registration.country')"
+          :placeholder="$t('general.select')"
           :disabled="isSameAsHq"
           :options="countryList"
           value-key="countryID"
@@ -116,8 +116,8 @@
         />
         <UiSelect
           v-model="information.vendorLocation.stateId"
-          label="Province"
-          placeholder="Select"
+          :label="$t('registration.province')"
+          :placeholder="$t('general.select')"
           :disabled="isSameAsHq || !information.vendorLocation.countryId"
           row
           required
@@ -129,8 +129,8 @@
         />
         <UiSelect
           v-model="information.vendorLocation.cityId"
-          label="City / District"
-          placeholder="Select"
+          :label="$t('registration.city')"
+          :placeholder="$t('general.select')"
           :disabled="isSameAsHq || !information.vendorLocation.stateId"
           :options="cityListVendor"
           value-key="cityID"
@@ -142,8 +142,8 @@
         />
         <UiInput
           v-model="information.vendorLocation.postalCode"
-          label="Postal Code"
-          placeholder="Enter postal code"
+          :label="$t('registration.postalCode')"
+          :placeholder="$t('general.input', { field: $t('registration.postalCode') })"
           row
           required
           type="number"
@@ -152,8 +152,8 @@
         />
         <UiTextarea
           v-model="information.vendorLocation.addressDetail"
-          label="Full Address"
-          placeholder="Enter full address"
+          :label="$t('registration.fullAddress')"
+          :placeholder="$t('general.input', { field: $t('registration.fullAddress') })"
           row
           required
           :disabled="isSameAsHq"
@@ -162,16 +162,16 @@
       </UiFormGroup>
     </UiFormGroup>
 
-    <UiFormGroup title="Business Sector " body-class="px-4" hide-border>
+    <UiFormGroup :title="$t('registration.businessSector')" body-class="px-4" hide-border>
       <div class="flex flex-row gap-4 items-end">
         <div class="flex flex-col gap-2.5 w-full">
           <label class="form-label flex items-center gap-1">
-            Business Sector <span class="text-danger"> * </span></label
+            {{ $t('registration.businessSectorField') }}<span class="text-danger"> * </span></label
           >
           <UiSelect
             v-model="information.vendorCommodities.businessFieldId"
             class="w-full"
-            placeholder="Select"
+            :placeholder="$t('general.select')"
             :error="information.vendorCommodities.businessFieldError"
             :options="businessFieldList"
             value-key="businessFieldID"
@@ -181,12 +181,12 @@
         </div>
         <div class="flex flex-col gap-2.5 w-full">
           <label class="form-label flex items-center gap-1">
-            Sub-Sector <span class="text-danger"> * </span></label
+            {{ $t('registration.subsector') }}<span class="text-danger"> * </span></label
           >
           <UiSelect
             v-model="information.vendorCommodities.subBusinessFieldId"
             class="w-full"
-            placeholder="Select"
+            :placeholder="$t('general.select')"
             :error="information.vendorCommodities.subBusinessFieldError"
             :options="subBusinessFieldList"
             value-key="subBusinessFieldID"
@@ -195,7 +195,7 @@
         </div>
         <UiButton class="grow-0 w-fit" outline @click="addVendorCommodities">
           <UiIcon name="plus-circle" variant="duotone" />
-          Add
+          {{ $t('general.add') }}
         </UiButton>
       </div>
 
@@ -204,13 +204,13 @@
           <table class="table table-border align-middle text-gray-700 font-medium text-sm">
             <thead>
               <tr>
-                <th>List of Business Sectors</th>
-                <th class="w-10">Action</th>
+                <th>{{ $t('registration.listOfBusinessSector') }}</th>
+                <th class="w-10">{{ $t('general.action') }}</th>
               </tr>
             </thead>
             <tbody v-if="information.vendorCommodities.list.length === 0">
               <tr>
-                <td class="text-center">No Data</td>
+                <td class="text-center">{{ $t('general.noData') }}</td>
                 <td></td>
               </tr>
             </tbody>
