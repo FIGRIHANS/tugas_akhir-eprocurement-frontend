@@ -99,6 +99,9 @@
               <td>
                 <span>{{ item.whtBaseAmount || '-' }}</span>
               </td>
+              <td>
+                <span>{{ item.whtAmount || '-' }}</span>
+              </td>
             </tr>
           </template>
         </tbody>
@@ -126,7 +129,8 @@ const columns = ref([
   'Assignment',
   'WHT Type',
   'WHT Code',
-  'WHT Base Amount'
+  'WHT Base Amount',
+  'WHT Amount'
 ])
 
 const form = inject<formTypes>('form')
@@ -148,7 +152,7 @@ const addNew = () => {
       whtType: '',
       whtCode: '',
       whtBaseAmount: '',
-      amount: '',
+      whtAmount: '',
       isEdit: false
     }
     form.additionalCost.push(data)

@@ -157,8 +157,6 @@ const colorBadge = (statusCode: number) => {
 
 const setList = () => {
   const result: ListPoTypes[] = []
-  console.log(invoiceSubmissionApi.listNonPo, 'polist')
-
   for (const [index, item] of poList.value.entries()) {
     const start = currentPage.value * pageSize.value - pageSize.value
     const end = currentPage.value * pageSize.value - 1
