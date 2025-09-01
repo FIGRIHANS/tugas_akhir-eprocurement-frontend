@@ -291,8 +291,7 @@ const callList = () => {
   list.value = []
   verificationApi
     .getListNonPo({
-      // filterForm.status ||
-      statusCode: 1,
+      statusCode: filterForm.status || 2,
       companyCode: filterForm.companyCode,
       invoiceTypeCode: Number(filterForm.invoiceType),
       invoiceDate: filterForm.date,
