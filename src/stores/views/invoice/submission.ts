@@ -11,11 +11,12 @@ import type {
   ParamsSubmissionTypes,
   PoGrItemTypes,
   ListPoTypes,
+  ListNonPoTypes,
   QueryParamsListPoTypes,
   AvailableDpTypes,
   RemainingDpTypes,
   ParamsSubmissionNonPo,
-  ParamsCheckBudgetType
+  ParamsCheckBudgetType,
 } from './types/submission'
 
 export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => {
@@ -24,8 +25,9 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
   const taxCalculationList = ref<TaxCalculationTypes[]>([])
   const poGrList = ref<PoGrItemTypes[]>([])
   const listPo = ref<ListPoTypes[]>([])
-  const listNonPo = ref<ListPoTypes[]>()
+  const listNonPo = ref<ListNonPoTypes[]>()
   const detailPo = ref<ParamsSubmissionTypes>()
+  const detailNonPo = ref<ParamsSubmissionTypes>()
 
   const getSubmissionStatus = async () => {
     const response: ApiResponse<SubmissionStatusTypes[]> = await invoiceApi.get(
@@ -108,6 +110,16 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
     return response.data.result
   }
 
+  const getNonPoDetail = async (uid: string) => {
+    const response: ApiResponse<ParamsSubmissionTypes> = await invoiceApi.get(
+      `/invoice/submission-non-po/${uid}`,
+    )
+
+    detailNonPo.value = response.data.result.content
+
+    return response.data.result
+  }
+
   const postSubmission = async (data: ParamsSubmissionTypes) => {
     const response: ApiResponse<void> = await invoiceApi.post(`/invoice/submission`, data)
 
@@ -123,8 +135,10 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
   }
 
   const getRemainingDp = async (poNumber: string) => {
-    const response: ApiResponse<RemainingDpTypes> = await invoiceApi.get(`/invoice/remaining-dp?poNumber=${poNumber}`)
-  
+    const response: ApiResponse<RemainingDpTypes> = await invoiceApi.get(
+      `/invoice/remaining-dp?poNumber=${poNumber}`,
+    )
+
     return response.data
   }
 
@@ -184,6 +198,7 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
     poGrList,
     listPo,
     detailPo,
+    detailNonPo,
     listNonPo,
     getSubmissionStatus,
     getDocumentType,
@@ -192,10 +207,11 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
     postSubmission,
     getListPo,
     getPoDetail,
+    getNonPoDetail,
     getAvailableDp,
     getRemainingDp,
     getListNonPo,
     postSubmissionNonPo,
-    postCheckBudget
+    postCheckBudget,
   }
 })

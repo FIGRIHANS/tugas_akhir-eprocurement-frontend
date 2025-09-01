@@ -36,6 +36,7 @@ export interface ParamsSubmissionTypes {
   pogr: ParamsSubmissionItem[]
   additionalCosts: ParamsSubmissionCost[]
   workflow: ParamsSubmissionWorkflow[]
+  alternativePayee: itemsAlternativePayee[]
 }
 
 interface ParamsSubmissionHeader {
@@ -189,6 +190,47 @@ export interface ListPoTypes {
   pOs: PoChildTypes[]
   isOpenChild: boolean
   createdUtcDate: string
+}
+
+export interface ListNonPoTypes {
+  invoiceUId: string
+  invoiceTypeCode: number
+  invoiceTypeName: string
+  invoiceDPCode: number
+  invoiceDPName: string
+  companyCode: string
+  companyName: string
+  documentNo: string
+  invoiceNo: string
+  invoiceDate: string
+  statusCode: number
+  statusName: string
+  poNo: string
+  grDocumentNo: string
+  estimatedPaymentDate: string
+  totalGrossAmount: number
+  totalNetAmount: number
+  vendorName: string
+  pOs: PoChildTypes[]
+  isOpenChild: boolean
+  createdUtcDate: string
+}
+
+export interface itemsAlternativePayee {
+  id: number
+  name: string
+  name2: string
+  street: string
+  city: string
+  country: string
+  bankAccountNumber: string
+  bankKey: string
+  bankCountry: string
+  npwp: string
+  ktp: string
+  email: string
+  isAlternativePayee: boolean
+  isOneTimeVendor: boolean
 }
 
 export interface PoChildTypes {
