@@ -378,6 +378,7 @@ const addNewPodata = () => {
     }
     masterDataApi.getCostCenter(form?.companyCode || '')
     const data = {
+      id: 0,
       poNo:'',
       poItem: 0,
       grDocumentNo: '',

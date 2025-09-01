@@ -12,7 +12,6 @@ import type {
   PostVerificationTypes,
   ParamsRejectTypes,
   ParamsSubmissionCost,
-  QueryParamsListNoPoTypes,
   ListNonPoTypes,
 } from './types/verification'
 
