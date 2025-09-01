@@ -40,7 +40,6 @@ const experienceStore = useExperienceStore()
 
 // ref bantuan
 const businessFieldId = ref<number>(0)
-const countryId = ref<number>(0)
 
 const formData = ref<IExperiencePayload>(cloneDeep(defaultFormData))
 const uploadError = ref<string>('')
@@ -118,14 +117,13 @@ const onSubmit = async () => {
   // check empty value for each form fields
   formError.value = checkEmptyValues({
     ...formData.value,
-    countryId: countryId.value,
     businessFieldId: businessFieldId.value,
   })
 
   // remove excluded key
   formError.value = formError.value.filter((field) => !excludedFields.includes(field))
 
-  if (countryId.value !== 360) {
+  if (formData.value.stateLocation !== 360) {
     formError.value = formError.value.filter((field) => field !== 'location')
   }
 
@@ -163,7 +161,6 @@ watch(
     await lookupStore.getVendorCities(selectedItem.provinceId)
 
     businessFieldId.value = selectedItem.businessFieldId
-    countryId.value = selectedItem.countryId
 
     formData.value.id = Number(props.id)
     formData.value.contractName = selectedItem.contractName
@@ -182,6 +179,7 @@ watch(
     formData.value.expCurrID = selectedItem.expCurrID
     formData.value.uploadDate = selectedItem.createdDate
     formData.value.provinceLocation = selectedItem.provinceId
+    formData.value.stateLocation = selectedItem.countryId
   },
   {
     immediate: true,
@@ -278,10 +276,10 @@ onMounted(() => {
           value-key="value"
           placeholder="--Country--"
           @update:model-value="onSelectCountry(Number($event))"
-          v-model="countryId"
+          v-model="formData.stateLocation"
           required
-          :error="formError.includes('countryId')"
-          :hint-text="formError.includes('countryId') ? 'Country required' : ''"
+          :error="formError.includes('stateLocation')"
+          :hint-text="formError.includes('stateLocation') ? 'Country required' : ''"
         />
 
         <UiFormGroup hide-border :grid="2">
@@ -294,7 +292,7 @@ onMounted(() => {
             placeholder="--Province--"
             @update:model-value="onSelectState(Number($event))"
             v-model="formData.provinceLocation"
-            :disabled="!countryId"
+            :disabled="!formData.stateLocation"
             :hint-text="formError.includes('provinceLocation') ? 'Province required' : ''"
             required
             :error="formError.includes('provinceLocation')"
@@ -303,7 +301,7 @@ onMounted(() => {
           <!-- City -->
           <UiSelect
             label="City"
-            :required="countryId === 360"
+            :required="formData.stateLocation === 360"
             :options="cityOptions"
             text-key="cityName"
             value-key="cityID"

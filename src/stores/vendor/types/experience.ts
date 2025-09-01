@@ -55,4 +55,5 @@ export interface IExperiencePayload {
   user: string
   vendorID: number
   provinceLocation: number
+  stateLocation: number
 }

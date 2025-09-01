@@ -64,6 +64,7 @@ export const defaultFormData: IExperiencePayload = {
   expCurrID: 0,
   remark: '',
   provinceLocation: 0,
+  stateLocation: 0,
 }
 
 export const excludedFields = [
