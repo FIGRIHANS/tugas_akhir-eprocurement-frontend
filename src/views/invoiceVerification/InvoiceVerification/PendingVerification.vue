@@ -1,7 +1,12 @@
 <template>
   <div class="border border-gray-200 rounded-xl p-[24px]">
     <div class="flex justify-between gap-[8px]">
-      <UiInputSearch v-model="search" placeholder="Cari Invoice" class="w-[250px]" @keypress="goSearch" />
+      <UiInputSearch
+        v-model="search"
+        placeholder="Cari Invoice"
+        class="w-[250px]"
+        @keypress="goSearch"
+      />
       <FilterList :data="filterForm" @setData="setDataFilter" />
     </div>
     <div class="mt-[24px]">
@@ -9,20 +14,31 @@
         <table class="table align-middle text-gray-700 rounded-xl font-medium text-sm">
           <thead>
             <tr>
-              <th v-for="(item, index) in columns" class="pending__column" :key="index">{{ item }}</th>
+              <th v-for="(item, index) in columns" class="pending__column" :key="index">
+                {{ item }}
+              </th>
             </tr>
           </thead>
           <tbody>
             <template v-for="(parent, index) in list" :key="index">
               <tr>
                 <td class="flex justify-between items-center gap-[24px]">
-                  <button class="btn btn-outline btn-primary btn-icon w-[32px] h-[32px]" @click="openDetailInvoice(parent.invoiceUId)">
+                  <button
+                    class="btn btn-outline btn-primary btn-icon w-[32px] h-[32px]"
+                    @click="openDetailInvoice(parent.invoiceUId)"
+                  >
                     <i class="ki-filled ki-eye !text-lg"></i>
                   </button>
-                  <button class="btn btn-outline btn-primary btn-icon w-[32px] h-[32px]" @click="openDetailVerification(parent.invoiceUId)">
+                  <button
+                    class="btn btn-outline btn-primary btn-icon w-[32px] h-[32px]"
+                    @click="openDetailVerification(parent.invoiceUId)"
+                  >
                     <i class="ki-duotone ki-data !text-lg"></i>
                   </button>
-                  <button class="btn btn-icon btn-outline btn-primary w-[21px] h-[21px]" @click="parent.isOpenChild = !parent.isOpenChild">
+                  <button
+                    class="btn btn-icon btn-outline btn-primary w-[21px] h-[21px]"
+                    @click="parent.isOpenChild = !parent.isOpenChild"
+                  >
                     <i v-if="!parent.isOpenChild" class="ki-filled ki-right !text-[9px]"></i>
                     <i v-else class="ki-filled ki-down !text-[9px]"></i>
                   </button>
@@ -41,8 +57,20 @@
                 <td>{{ useFormatIdr(parent.totalNetAmount) || '-' }}</td>
                 <td>{{ parent.taxNo || '-' }}</td>
                 <td>{{ parent.documentNo || '-' }}</td>
-                <td>{{ parent.estimatedPaymentDate ? moment(parent.estimatedPaymentDate).format('YYYY/MM/DD') : '-' }}</td>
-                <td>{{ parent.invoiceDate ? moment(parent.invoiceDate).format('YYYY/MM/DD HH:mm:ss') : '-' }}</td>
+                <td>
+                  {{
+                    parent.estimatedPaymentDate
+                      ? moment(parent.estimatedPaymentDate).format('YYYY/MM/DD')
+                      : '-'
+                  }}
+                </td>
+                <td>
+                  {{
+                    parent.invoiceDate
+                      ? moment(parent.invoiceDate).format('YYYY/MM/DD HH:mm:ss')
+                      : '-'
+                  }}
+                </td>
                 <td>{{ parent.notes || '-' }}</td>
               </tr>
               <tr v-show="parent.isOpenChild">
@@ -76,24 +104,39 @@
       </div>
       <div class="flex items-center gap-[16px] mt-[24px]">
         <div class="flex items-center">
-          <div class="bg-primary rounded-md p-[7px] w-[40px] h-[40px] flex items-center justify-center">
+          <div
+            class="bg-primary rounded-md p-[7px] w-[40px] h-[40px] flex items-center justify-center"
+          >
             <i class="ki-filled ki-eye text-white text-[24px]"></i>
           </div>
           <p class="ml-[8px]">: View Detail invoice</p>
         </div>
         <div class="flex items-center">
-          <div class="bg-primary-light border border-primary-clarity rounded-md p-[7px] w-[40px] h-[40px] flex items-center justify-center">
+          <div
+            class="bg-primary-light border border-primary-clarity rounded-md p-[7px] w-[40px] h-[40px] flex items-center justify-center"
+          >
             <i class="ki-duotone ki-data text-primary text-[24px]"></i>
           </div>
-          <p class="ml-[8px]">: Verification  Detail Invoice</p>
+          <p class="ml-[8px]">: Verification Detail Invoice</p>
         </div>
       </div>
       <div class="flex items-center justify-between mt-[24px]">
-        <p class="m-0 text-sm">Tampilkan {{ pageSize * currentPage > verifList.length ? verifList.length : pageSize * currentPage }} data dari total data {{ verifList.length }}</p>
-        <LPagination :totalItems="verifList.length" :pageSize="pageSize" :currentPage="currentPage" @pageChange="setPage" />
+        <p class="m-0 text-sm">
+          Tampilkan
+          {{
+            pageSize * currentPage > verifList.length ? verifList.length : pageSize * currentPage
+          }}
+          data dari total data {{ verifList.length }}
+        </p>
+        <LPagination
+          :totalItems="verifList.length"
+          :pageSize="pageSize"
+          :currentPage="currentPage"
+          @pageChange="setPage"
+        />
       </div>
     </div>
-    <DetailVerificationModal @loadDetail="loadData" @setClearId="viewDetailId = ''"/>
+    <DetailVerificationModal @loadDetail="loadData" @setClearId="viewDetailId = ''" />
   </div>
 </template>
 
@@ -126,7 +169,7 @@ const filterForm = reactive<filterListTypes>({
   status: 1,
   date: '',
   companyCode: '',
-  invoiceType: ''
+  invoiceType: '',
 })
 
 const columns = ref<string[]>([
@@ -143,16 +186,10 @@ const columns = ref<string[]>([
   'Invoice Vendor No.',
   'Estimated Payment Date',
   'Invoice Submission Date',
-  'Description'
+  'Description',
 ])
 
-const columnsChild = ref([
-  'No PO',
-  'No GR',
-  'Item Description',
-  'Item Amount',
-  'Quantity'
-])
+const columnsChild = ref(['No PO', 'No GR', 'Item Description', 'Item Amount', 'Quantity'])
 
 const verifList = computed(() => verificationApi.listPo)
 
@@ -160,7 +197,7 @@ const colorBadge = (statusCode: number) => {
   const list = {
     1: 'badge-info',
     5: 'badge-danger',
-    3: 'badge-success'
+    3: 'badge-success',
   } as { [key: number]: string }
   return list[statusCode]
 }
@@ -175,8 +212,8 @@ const openDetailInvoice = (invoiceId: string) => {
     name: 'invoiceDetail',
     query: {
       id: invoiceId,
-      type: '1'
-    }
+      type: '1',
+    },
   })
 }
 
@@ -207,15 +244,17 @@ const setList = () => {
 
 const callList = () => {
   list.value = []
-  verificationApi.getListPo({
-    statusCode: filterForm.status || 1,
-    companyCode: filterForm.companyCode,
-    invoiceTypeCode: Number(filterForm.invoiceType),
-    invoiceDate: filterForm.date,
-    searchText: search.value
-  }).finally(() => {
-    setList()
-  })
+  verificationApi
+    .getListPo({
+      statusCode: filterForm.status || 1,
+      companyCode: filterForm.companyCode,
+      invoiceTypeCode: Number(filterForm.invoiceType),
+      invoiceDate: filterForm.date,
+      searchText: search.value,
+    })
+    .finally(() => {
+      setList()
+    })
 }
 
 const setDataFilter = (data: filterListTypes) => {

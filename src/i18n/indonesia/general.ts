@@ -1,0 +1,12 @@
+export const general = {
+  input: 'Masukkan {field}',
+  select: 'Pilih {field}',
+  add: 'Tambah {field}',
+  action: 'Aksi',
+  noData: 'Belum Ada Data',
+  back: 'Kembali',
+  next: 'Berikutnya',
+  save: 'Simpan',
+  uploadFile: 'Unggah Gagal',
+  fileSizeExceed: 'Ukuran file melebihi batas maksimum 16 MB. Silakan pilih file yang lebih kecil.',
+}

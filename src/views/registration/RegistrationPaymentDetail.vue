@@ -3,14 +3,14 @@
     <div class="w-2/3 flex flex-col items-center gap-6">
       <div class="card w-full">
         <div class="card-header">
-          <h3 class="card-title">Payment Detail</h3>
+          <h3 class="card-title">{{ $t('registration.paymentDetail') }}</h3>
         </div>
 
         <div class="card-body flex flex-col gap-6">
           <UiInput
             v-model="paymentDetail.accountNo"
-            label="Bank Account Number"
-            placeholder="Enter bank account number"
+            :label="$t('registration.bankAccountNumber')"
+            :placeholder="$t('general.input', { field: $t('registration.bankAccountNumber') })"
             row
             required
             :error="paymentDetail.accountNoError"
@@ -19,8 +19,8 @@
           <div class="flex flex-col gap-6">
             <UiInput
               v-model="paymentDetail.accountName"
-              label="Account Holder Name"
-              placeholder="Enter full name as written in bank book"
+              :label="$t('registration.accountHolderName')"
+              :placeholder="$t('registration.placeholderAccountHolderName')"
               row
               required
               :error="paymentDetail.accountNameError"
@@ -30,15 +30,15 @@
               <div class="w-2/5"></div>
               <UiCheckbox
                 v-model="paymentDetailFlagging.isNotSameAsCompany"
-                label="Holder's name is different from the company name"
+                :label="$t('registration.holderNameDifferent')"
               />
             </div>
           </div>
           <UiFileUpload
             v-if="paymentDetailFlagging.isNotSameAsCompany"
             name="Account Discrepancy Statement"
-            label="Account Discrepancy Statement"
-            placeholder="Account Discrepancy Statement"
+            :label="$t('registration.accountDiscrepancy')"
+            :placeholder="$t('registration.accountDiscrepancy')"
             acceptedFiles=".pdf"
             :max-size="16000000"
             @addedFile="(file) => uploadFile(file, 'different account')"
@@ -49,8 +49,8 @@
           <UiFileUpload
             v-if="paymentDetailFlagging.isNotSameAsCompany"
             name="Account Cover"
-            label="Account Cover"
-            placeholder="Account Cover"
+            :label="$t('registration.accountCover')"
+            :placeholder="$t('registration.accountCover')"
             acceptedFiles=".pdf"
             :max-size="16000000"
             @addedFile="(file) => uploadFile(file, 'first page')"
@@ -60,8 +60,8 @@
           />
           <UiSelect
             v-model="paymentDetail.currencyId"
-            label="Currency"
-            placeholder="Select"
+            :label="$t('registration.currency')"
+            :placeholder="$t('general.select')"
             row
             required
             :options="currencyList"
@@ -70,8 +70,8 @@
           <div class="flex flex-col gap-6">
             <UiSelect
               v-model="paymentDetail.bankId"
-              label="Bank Key"
-              placeholder="Select"
+              :label="$t('registration.bankKey')"
+              :placeholder="$t('general.select')"
               row
               :options="bankList"
               valueKey="bankKey"
@@ -85,7 +85,7 @@
               <div class="w-2/5"></div>
               <UiCheckbox
                 v-model="paymentDetailFlagging.bankNotRegistered"
-                label="Bank not registered"
+                :label="$t('registration.bankNotRegister')"
               />
             </div>
           </div>
@@ -93,11 +93,10 @@
             <UiInput
               v-if="paymentDetailFlagging.bankNotRegistered"
               v-model="paymentDetail.bankKey"
-              label="Bank Key"
+              :label="$t('registration.bankKey')"
               placeholder="AMBV0"
               row
               required
-              hint-text="*5 uppercase alphanumeric characters (e.g., AMBV0), must match official bank and unique."
               :error="paymentDetail.bankKeyError"
             />
 
@@ -106,8 +105,7 @@
               <div class="card bg-primary-light border border-primary w-full">
                 <div class="card-body p-4">
                   <p class="text-sm">
-                    For vendors whose banks are not registered yet, <br />
-                    please contact the following email: <br />
+                    {{ $t('registration.contactEmail') }} <br />
                     Non-Marketing: <br />
                     <span class="text-primary">Laelani.Sabila@genero.co.id</span> <br /><br />
 
@@ -122,8 +120,8 @@
           <UiSelect
             v-if="paymentDetailFlagging.bankNotRegistered"
             v-model="paymentDetail.bankCountryCode"
-            label="Bank Country"
-            placeholder="Select"
+            :label="$t('registration.bankCountry')"
+            :placeholder="$t('general.select')"
             row
             :options="countryList"
             required
@@ -132,8 +130,8 @@
           <UiInput
             v-if="paymentDetailFlagging.bankNotRegistered"
             v-model="paymentDetail.bankName"
-            label="Bank Name"
-            placeholder="Enter bank name"
+            :label="$t('registration.bankName')"
+            :placeholder="$t('general.input', { field: $t('registration.bankName') })"
             row
             required
             :error="paymentDetail.bankNameError"
@@ -141,8 +139,8 @@
           <UiInput
             v-if="paymentDetailFlagging.bankNotRegistered"
             v-model="paymentDetail.branch"
-            label="Bank Branch"
-            placeholder="Enter bank branch"
+            :label="$t('registration.bankBranch')"
+            :placeholder="$t('registration.bankBranch')"
             row
             required
             :error="paymentDetail.branchError"
@@ -150,16 +148,16 @@
           <UiInput
             v-if="paymentDetailFlagging.bankNotRegistered"
             v-model="paymentDetail.swiftCode"
-            label="SwiftCode"
-            placeholder="SwiftCode"
+            :label="$t('registration.swiftCode')"
+            :placeholder="$t('registration.swiftCode')"
             row
             required
             :error="paymentDetail.swiftCodeError"
           />
           <UiInput
             v-model="paymentDetail.bankAddress"
-            label="Bank Address"
-            placeholder="Enter bank address"
+            :label="$t('registration.bankAddress')"
+            :placeholder="$t('general.input', { field: $t('registration.bankAddress') })"
             row
             required
             :error="paymentDetail.bankAddressError"
@@ -176,7 +174,7 @@
 
       <UiCheckbox
         v-model="paymentDetailFlagging.acceptTermCondition"
-        label="I have read and agree to the terms and conditions of PT Arya Noble’s e-Procurement system"
+        :label="$t('registration.agreeTC')"
       />
 
       <div class="card w-fit justify-center">
@@ -190,13 +188,8 @@
           <UiIcon variant="duotone" name="information" class="text-4xl" />
 
           <div class="flex flex-col gap-1">
-            <span class="font-semibold text-primary">Note</span>
-            <p class="font-medium text-sm">
-              Vendors who wish to participate in tendering only need to register once. Please make
-              sure all submitted data is valid. PT Arya Noble is not responsible for any
-              consequences resulting from invalid or unverifiable vendor data, and such vendors may
-              be subject to sanctions.
-            </p>
+            <span class="font-semibold text-primary">{{ $t('registration.note') }}</span>
+            <p class="font-medium text-sm">{{ $t('registration.paymentDetailNote') }}</p>
           </div>
         </div>
       </div>
@@ -207,8 +200,8 @@
     :open="modalUploadFailed"
     id="payment-upload-error"
     type="danger"
-    title="Upload Failed"
-    text="File size exceeds the maximum limit of 16 MB. Please choose a smaller file."
+    :title="$t('general.uploadFile')"
+    :text="$t('general.fileSizeExceed')"
     no-submit
     static
     :cancel="() => (modalUploadFailed = false)"

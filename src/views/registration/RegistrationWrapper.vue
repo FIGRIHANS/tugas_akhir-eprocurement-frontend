@@ -8,7 +8,7 @@
     @update:model-value="changeTab"
   />
   <h1 class="text-center text-[22px] font-semibold pb-7.5 mb-6 border-b border-gray-300">
-    eProcurement - Registration
+    eProcurement - {{ $t('registration.registration') }}
   </h1>
 
   <div class="flex justify-center">
@@ -20,13 +20,17 @@
       <div class="flex justify-end gap-4 w-full mb-[24px]">
         <UiButton v-if="showPrevious" outline @click="previous()">
           <UiIcon name="black-left" />
-          Back
+          {{ $t('general.back') }}
         </UiButton>
         <UiButton
           @click="next()"
           :disabled="tab.active === 'registration__payment-detail' ? !disabledRegistration : false"
         >
-          {{ tab.active === 'registration__payment-detail' ? 'Registration' : 'Next' }}
+          {{
+            tab.active === 'registration__payment-detail'
+              ? $t('registration.registration')
+              : $t('general.next')
+          }}
           <UiIcon
             :name="isLoading ? 'loading' : 'black-right'"
             :class="{ 'animate-spin': isLoading }"
@@ -63,6 +67,7 @@
 import { useRoute, useRouter } from 'vue-router'
 import { useNavbarUtilsStore } from '@/stores/navbar'
 import { computed, onBeforeMount, onMounted, onUnmounted, reactive, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import { useCheckEmpty } from '@/composables/validation'
 import { formatDatePayload } from '@/composables/date-format'
@@ -78,6 +83,7 @@ import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 
 const modalTrigger = ref({
   error: false,
@@ -182,12 +188,9 @@ const checkFieldNotEmpty = () => {
 
     case 'registration__contact':
       Object.keys(fields.contact).forEach((key) => {
-        // @ts-expect-error
         const section = registrationVendorStore.contact[key]
-        // @ts-expect-error
         registrationVendorStore.contact[key] = {
           ...section,
-          // @ts-expect-error
           ...checkErrors(section, fields.contact[key]),
         }
       })
