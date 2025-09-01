@@ -1,10 +1,10 @@
 <template>
   <div class="flex flex-col gap-[24px] mb-[24px]">
-    <UiFormGroup title="Company Category" :grid="4">
+    <UiFormGroup :title="$t('registration.companyCategory')" :grid="4">
       <UiSelect
         v-model="documentAndLegal.kategori"
-        label="Category"
-        placeholder="Select"
+        :label="$t('registration.category')"
+        :placeholder="$t('registration.select')"
         :options="companyCategoryList"
         text-key="companyCategoryName"
         value-key="companyCategoryId"
@@ -16,12 +16,12 @@
         <table class="table table-border align-middle text-gray-700 font-medium text-sm">
           <thead>
             <tr>
-              <th class="w-32">Business License</th>
-              <th>License No. / Description</th>
-              <th>Valid From (Start Date)</th>
-              <th>Valid Until (End Date)</th>
-              <th>Document</th>
-              <th>Action</th>
+              <th class="w-32">{{ $t('registration.businessLicense') }}</th>
+              <th>{{ $t('registration.licenseNo') }}</th>
+              <th>{{ $t('registration.validStart') }}</th>
+              <th>{{ $t('registration.validEnd') }}</th>
+              <th>{{ $t('registration.document') }}</th>
+              <th>{{ $t('general.action') }}</th>
             </tr>
           </thead>
 
@@ -38,10 +38,10 @@
                   :max-length="[12, 27].includes(item.licenseId) ? 16 : 9999"
                 />
                 <span v-if="item.licenseId === 12" class="text-danger text-[10px]"
-                  >*Please use a tax number that has not been registered before</span
+                  >*{{ $t('registration.hintTaxNumber') }}</span
                 >
                 <span v-else-if="item.licenseId === 27" class="text-danger text-[10px]"
-                  >*consists of 16 numbers</span
+                  >*{{ $t('registration.hintIdCard') }}</span
                 >
               </td>
               <td class="align-top">
@@ -98,11 +98,11 @@
 
           <tbody v-else>
             <tr>
-              <td class="text-center">No Data</td>
-              <td class="text-center">No Data</td>
-              <td class="text-center">No Data</td>
-              <td class="text-center">No Data</td>
-              <td class="text-center">No Data</td>
+              <td class="text-center">{{ $t('general.noData') }}</td>
+              <td class="text-center">{{ $t('general.noData') }}</td>
+              <td class="text-center">{{ $t('general.noData') }}</td>
+              <td class="text-center">{{ $t('general.noData') }}</td>
+              <td class="text-center">{{ $t('general.noData') }}</td>
               <td></td>
             </tr>
           </tbody>
@@ -114,13 +114,13 @@
       <hr class="border-gray-300" />
 
       <div class="flex flex-row items-center gap-2">
-        <h2 class="font-semibold leading-[25px]">Other Documents</h2>
+        <h2 class="font-semibold leading-[25px]">{{ $t('registration.otherDocument') }}</h2>
         <div class="relative">
           <UiIcon name="information-1" variant="outline" class="text-primary text-xl peer" />
           <div
             class="tooltip absolute bg-primary font-medium w-44 p-3 left-1/2 -translate-x-1/2 -top-14 text-[13px] text-center text-white peer-hover:block"
           >
-            Maximum of 5 Documents Allowed
+            {{ $t('registration.hintOtherDocument') }}
           </div>
         </div>
       </div>
@@ -132,11 +132,10 @@
           class="w-fit px-4 py-2 flex flex-row gap-2 items-center"
           @click="addAnotherDocument"
         >
-          <i class="ki-filled ki-plus-circle"></i> Add Document
+          <i class="ki-filled ki-plus-circle"></i>
+          {{ $t('general.add', { field: $t('registration.document') }) }}
         </UiButton>
-        <span class="text-danger text-xs"
-          >Must upload Account Statement. Without this document, data will be rejected.</span
-        >
+        <span class="text-danger text-xs">{{ $t('registration.hintAddDocument') }}</span>
       </div>
 
       <div class="card min-w-full">
@@ -144,12 +143,12 @@
           <table class="table table-border align-middle text-gray-700 font-medium text-sm">
             <thead>
               <tr>
-                <th>Document Name</th>
-                <th>License No. / Description</th>
-                <th>Valid From (Start Date)</th>
-                <th>Valid Until (End Date)</th>
-                <th>Document</th>
-                <th>Action</th>
+                <th class="w-32">{{ $t('registration.businessLicense') }}</th>
+                <th>{{ $t('registration.licenseNo') }}</th>
+                <th>{{ $t('registration.validStart') }}</th>
+                <th>{{ $t('registration.validEnd') }}</th>
+                <th>{{ $t('registration.document') }}</th>
+                <th>{{ $t('general.action') }}</th>
               </tr>
             </thead>
 
@@ -236,8 +235,8 @@
       <div class="card-body p-4 flex flex-row items-center gap-4 text-primary">
         <UiIcon variant="duotone" name="information" class="text-4xl" />
         <ul class="list-disc list-inside font-medium text-sm">
-          <li>Make sure to click the upload button after selecting the document.</li>
-          <li>Fields marked (*) with an asterisk are required.</li>
+          <li>{{ $t('registration.docLegalFirstHint') }}</li>
+          <li>{{ $t('registration.docLegalSecondHint') }}</li>
         </ul>
       </div>
     </div>
@@ -247,8 +246,8 @@
     :open="modalUploadFailed"
     id="doc-legal-upload-error"
     type="danger"
-    title="Upload Failed"
-    text="File size exceeds the maximum limit of 16 MB. Please choose a smaller file."
+    :title="$t('general.uploadFile')"
+    :text="$t('general.fileSizeExceed')"
     no-submit
     static
     :cancel="() => (modalUploadFailed = false)"

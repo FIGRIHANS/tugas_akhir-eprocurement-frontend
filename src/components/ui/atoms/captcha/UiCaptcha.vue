@@ -12,7 +12,7 @@
       v-model="captchaValue"
       type="text"
       class="input"
-      placeholder="Input captcha"
+      :placeholder="$t('general.input', { field: 'captcha' })"
       @input="emits('update:modelValue', captchaValue === captchaImage)"
     />
   </div>

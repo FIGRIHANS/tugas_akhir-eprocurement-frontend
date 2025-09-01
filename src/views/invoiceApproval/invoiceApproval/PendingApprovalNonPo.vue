@@ -311,7 +311,7 @@ const setDataFilter = (data: filterListTypes) => {
 }
 
 const loadData = () => {
-  invoiceApi.getPoDetail(viewDetailId.value)
+  invoiceApi.getNonPoDetail(viewDetailId.value)
 }
 
 const closeDropdown = () => {
