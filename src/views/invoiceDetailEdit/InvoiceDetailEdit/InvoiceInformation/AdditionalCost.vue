@@ -124,11 +124,15 @@
                 :reduce="(option: any) => option.whtCode"
                 :options="whtCodeList"
                 appendToBody
+                @update:modelValue="setWhtAmount(item)"
               ></v-select>
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.whtBaseAmount }}</span>
               <input v-else v-model="formEdit.whtBaseAmount" class="input" type="number" placeholder=""/>
+            </td>
+            <td>
+              <span>{{ form.currCode === 'IDR' ? useFormatIdr(item.isEdit ? formEdit.whtAmount : item.whtAmount) : useFormatUsd(item.isEdit ? formEdit.whtAmount : item.whtAmount) }}</span>
             </td>
           </tr>
         </tbody>
@@ -160,7 +164,8 @@ const columns = ref([
   'Assignment',
   'WHT Type',
   'WHT Code',
-  'WHT Base Amount'
+  'WHT Base Amount',
+  'WHT Amount'
 ])
 const formEdit = reactive({
   activityExpense: '',
@@ -173,7 +178,8 @@ const formEdit = reactive({
   assignment: '',
   whtType: '',
   whtCode: '',
-  whtBaseAmount: 0
+  whtBaseAmount: 0,
+  whtAmount: 0
 })
 
 const listActivity = computed(() => invoiceMasterApi.activityList)
@@ -207,6 +213,7 @@ const addNew = () => {
       whtType: '',
       whtCode: '',
       whtBaseAmount: 0,
+      whtAmount: 0,
       isEdit: false
     }
     form.value.additionalCosts.push(data)
@@ -225,6 +232,7 @@ const resetFormEdit = () => {
   formEdit.whtType = ''
   formEdit.whtCode = ''
   formEdit.whtBaseAmount = 0
+  formEdit.whtAmount = 0
 }
 
 const goEdit = (item: itemsCostType) => {
@@ -242,6 +250,7 @@ const goEdit = (item: itemsCostType) => {
     formEdit.whtType = item.whtType
     formEdit.whtCode = item.whtCode
     formEdit.whtBaseAmount = item.whtBaseAmount
+    formEdit.whtAmount = item.whtAmount
   } else {
     item.activityExpense = formEdit.activityExpense
     item.itemAmount = formEdit.itemAmount
@@ -254,6 +263,7 @@ const goEdit = (item: itemsCostType) => {
     item.whtType = formEdit.whtType
     item.whtCode = formEdit.whtCode
     item.whtBaseAmount = formEdit.whtBaseAmount
+    item.whtAmount = formEdit.whtAmount
     resetFormEdit()
   }
 }
@@ -325,6 +335,15 @@ const getTaxCodeName = (taxCode: string) => {
     return `${data.code} - ${data.name}`
   }
   return '-'
+}
+
+const setWhtAmount = (data: itemsCostType) => {
+  const whtlist = data.whtCodeList || []
+  const indexWht = whtlist.findIndex((item) => item.whtCode === formEdit.whtCode)
+  if (indexWht !== -1) {
+    const tarif = whtlist[indexWht].tarif / 100
+    formEdit.whtAmount = tarif * formEdit.whtBaseAmount
+  }
 }
 
 watch(

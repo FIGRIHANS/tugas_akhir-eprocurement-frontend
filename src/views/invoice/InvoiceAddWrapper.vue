@@ -800,8 +800,6 @@ const setData = () => {
 
 const setDataNonPo = () => {
   const detail = detailNonPo.value
-  console.log(detail, 'alternativePayee')
-
   if (form && detail) {
     form.status = detail.header.statusCode
     form.invoiceUId = detail.header.invoiceUId
