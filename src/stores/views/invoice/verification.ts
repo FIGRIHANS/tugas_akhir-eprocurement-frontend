@@ -104,8 +104,8 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     return response.data.result.content
   }
 
-    const getListNonPo = async (data: QueryParamsListPoTypes) => {
-    listPo.value = []
+  const getListNonPo = async (data: QueryParamsListPoTypes) => {
+    listNonPo.value = []
     const query = {
       companyCode: data.companyCode || null,
       invoiceTypeCode: Number(data.invoiceTypeCode) || null,
@@ -118,8 +118,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
         ...query,
       },
     })
-
-    listPo.value =
+    listNonPo.value =
       response.data.result.content.length !== 0
         ? response.data.result.content.sort(
             (a, b) => moment(b.invoiceDate).valueOf() - moment(a.invoiceDate).valueOf(),
