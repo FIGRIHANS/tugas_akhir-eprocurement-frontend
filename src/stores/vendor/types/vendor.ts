@@ -234,7 +234,7 @@ export type EquipmentDataType = {
   type: string
   mfgDate: string
   serialNo: string
-  capacity: number
+  capacity: string
   condition: number
   conditionName: string
   ownership: number
@@ -256,7 +256,7 @@ export type PayloadEquipmentDataType = {
   type: string
   mfgDate: string
   serialNo: string
-  capacity: number
+  capacity: string
   condition: number
   ownership: number
   category: number
