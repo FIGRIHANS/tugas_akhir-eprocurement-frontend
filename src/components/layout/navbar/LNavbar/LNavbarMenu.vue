@@ -18,11 +18,11 @@
       data-menu-item-permanent="true"
     >
       <button class="menu-toggle btn btn-light text-gray-600 border-0 flex items-center">
-        <span class="text-base font-semibold"> ID </span>
+        <span class="text-base font-semibold"> {{ selectedLanguage }} </span>
         <i class="ki-filled ki-down text-[20px]"></i>
       </button>
       <div class="menu-dropdown w-48 py-2">
-        <div class="menu-item">
+        <div class="menu-item" @click="changeLocale('id')">
           <a class="menu-link" href="#">
             <span class="menu-icon">
               <i class="ki-outline ki-profile-circle"> </i>
@@ -30,7 +30,7 @@
             <span class="menu-title"> Indonesia (ID) </span>
           </a>
         </div>
-        <div class="menu-item">
+        <div class="menu-item" @click="changeLocale('en')">
           <a class="menu-link" href="#">
             <span class="menu-icon">
               <IconEN />
@@ -45,8 +45,12 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import moment from 'moment'
+
 import IconEN from '@/components/icons/IconEN.vue'
+
+const { locale } = useI18n({ useScope: 'global' })
 
 /**TODO - Add isLoggedIn condit */
 
@@ -55,6 +59,14 @@ import IconEN from '@/components/icons/IconEN.vue'
  */
 const momentRef = ref<string>(moment())
 const timeInterval = ref()
+
+const selectedLanguage = computed(() => locale.value.toUpperCase())
+
+const changeLocale = (value: 'id' | 'en') => {
+  locale.value = value
+
+  localStorage.setItem('locale', value)
+}
 
 onMounted(() => {
   timeInterval.value = setInterval(updateTime, 1000)
