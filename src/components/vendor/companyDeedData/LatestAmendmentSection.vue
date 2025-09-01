@@ -80,7 +80,7 @@ const errors = reactive({
 
 const isEditing = computed(() => mode.value === 'edit' || vendorAmendmentPayload.id > 0)
 const submitLabel = computed(() => (isEditing.value ? 'Save' : 'Add'))
-const submitIcon = computed(() => (isEditing.value ? 'notepad-edit' : 'plus-circle'))
+const submitIcon = computed(() => (isEditing.value ? 'file-added' : 'plus-circle'))
 
 const toNumber = (v: unknown) => (v === null || v === undefined || v === '' ? 0 : Number(v))
 

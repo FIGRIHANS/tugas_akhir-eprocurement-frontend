@@ -77,7 +77,7 @@ const errors = reactive({
 /* ==== UI helpers: label & ikon tombol dinamis ==== */
 const isEditing = computed(() => mode.value === 'edit' || payload.id > 0)
 const submitLabel = computed(() => (isEditing.value ? 'Save' : 'Add'))
-const submitIcon = computed(() => (isEditing.value ? 'notepad-edit' : 'plus-circle'))
+const submitIcon = computed(() => (isEditing.value ? 'file-added' : 'plus-circle'))
 
 /* ==== Validasi & Util ==== */
 const validateForm = () => {

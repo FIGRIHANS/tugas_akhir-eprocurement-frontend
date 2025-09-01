@@ -80,7 +80,7 @@ const errors = reactive({
 
 const isEditing = computed(() => mode.value === 'edit' || vendorLegalDocPayload.id > 0)
 const submitLabel = computed(() => (isEditing.value ? 'Save' : 'Add'))
-const submitIcon = computed(() => (isEditing.value ? 'notepad-edit' : 'plus-circle'))
+const submitIcon = computed(() => (isEditing.value ? 'file-added' : 'plus-circle'))
 
 const toNumber = (v: unknown) => (v === null || v === undefined || v === '' ? 0 : Number(v))
 
@@ -197,9 +197,11 @@ const handleSave = async () => {
 }
 
 const handleEdit = (id: number) => {
-  const data = companyDeedDataStore.vendorLegalDocData.items.find(
+  console.log(id)
+  const data = companyDeedDataStore.companyDeedData.items.find(
     (item) => (item as unknown as IVendorLegalDocumentPayload).id === id,
-  ) as unknown as IVendorLegalDocumentPayload | undefined
+  )
+
   if (data) {
     Object.assign(vendorLegalDocPayload, data)
     vendorLegalDocPayload.notaryLocation = toNumber(
