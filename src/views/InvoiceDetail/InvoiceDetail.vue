@@ -292,7 +292,10 @@ const mapAdditionalCost = () => {
   const cost = []
   for (const item of form.value.additionalCosts) {
     cost.push({
+      id: item.id,
+      activityId: item.activityId,
       activityExpense: item.activityExpense,
+      activityName: item.activityName,
       itemAmount: Number(item.itemAmount),
       debitCredit: item.debitCredit,
       taxCode: item.taxCode,

@@ -571,6 +571,7 @@ const mapPoGr = () => {
   const poGr = []
   for (const item of form.value.invoicePoGr) {
     poGr.push({
+      id: item.id,
       poNo: item.poNo,
       poItem: Number(item.poItem),
       grDocumentNo: item.grDocumentNo,
@@ -592,7 +593,9 @@ const mapAdditionalCost = () => {
   for (const item of form.value.additionalCosts) {
     cost.push({
       id: item.id,
+      activityId: item.activityId,
       activityExpense: item.activityExpense,
+      activityName: item.activityName,
       itemAmount: Number(item.itemAmount),
       debitCredit: item.debitCredit,
       taxCode: item.taxCode,
