@@ -52,6 +52,7 @@ export type PaymentTypes = {
 }
 
 export type ActivityTypes = {
+  id: number
   code: string
   name: string
 }

@@ -152,7 +152,9 @@ interface ParamsSubmissionItem {
 
 export interface ParamsSubmissionCost {
   id: number
+  activityId: number
   activityExpense: string
+  activityName: string
   itemAmount: number
   debitCredit: string
   taxCode: string
@@ -270,7 +272,9 @@ export interface documentDetailTypes {
 
 export interface itemsCostType {
   id: number
+  activityId: number
   activityExpense: string
+  activityName: string
   itemAmount: number
   debitCredit: string
   taxCode: string

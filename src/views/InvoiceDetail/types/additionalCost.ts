@@ -1,5 +1,8 @@
 export interface itemsCostType {
+  id: number
+  activityId: number | null
   activityExpense: string
+  activityName: string
   itemAmount: number
   debitCredit: string
   taxCode: string

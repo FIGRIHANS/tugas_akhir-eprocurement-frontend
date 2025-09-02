@@ -115,7 +115,9 @@ interface ParamsSubmissionItem {
 }
 
 interface ParamsSubmissionCost {
+  activityId: number
   activityExpense: string
+  activityName: string
   itemAmount: number
   debitCredit: string
   taxCode: string
