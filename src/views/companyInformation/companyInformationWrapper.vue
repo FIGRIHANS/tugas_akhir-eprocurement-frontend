@@ -63,31 +63,22 @@
       :vendor-id="userData?.profile.profileId"
     />
     <BusinessLicenseData
-      v-if="currentTab === 'business_license_data'"
+      v-if="currentTab === 'businessLicense'"
       :vendor-id="userData?.profile.profileId"
     />
     <PaymentDetailData
-      v-if="currentTab === 'payment_information_data'"
+      v-if="currentTab === 'paymentInformation'"
       :vendor-id="userData?.profile.profileId"
     />
-    <CompanyDeedData
-      v-if="currentTab === 'company_deed_data'"
-      :vendor-id="userData?.profile.profileId"
-    />
-    <EquipmentData
-      v-if="currentTab === 'equipment_data'"
-      :vendor-id="userData?.profile.profileId"
-    />
-    <ExperienceData
-      v-if="currentTab === 'experience_data'"
-      :vendor-id="userData?.profile.profileId"
-    />
+    <CompanyDeedData v-if="currentTab === 'companyDeed'" :vendor-id="userData?.profile.profileId" />
+    <EquipmentData v-if="currentTab === 'equipment'" :vendor-id="userData?.profile.profileId" />
+    <ExperienceData v-if="currentTab === 'experience'" :vendor-id="userData?.profile.profileId" />
     <ExpertPersonnelData
-      v-if="currentTab === 'expert_personnel_data'"
+      v-if="currentTab === 'expertPersonnel'"
       :vendor-id="userData?.profile.profileId"
     />
     <OtherDocumentData
-      v-if="currentTab === 'other_documents'"
+      v-if="currentTab === 'otherDocuments'"
       :vendor-id="userData?.profile.profileId"
     />
   </div>

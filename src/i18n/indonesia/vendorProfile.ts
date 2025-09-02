@@ -26,4 +26,9 @@ export const vendorProfile = {
   website: 'Situs Web',
   currencyPreference: 'Preferensi Mata Uang',
   companyAddress: 'Alamat Perusahaan',
+  licenseType: 'Jenis Lisensi',
+  licenseNo: 'Nomor Lisensi/ Deskripsi',
+  validStart: 'Berlaku Dari (Tanggal Mulai)',
+  validEnd: 'Berlaku Hingga (Tanggal Akhir)',
+  document: 'Dokumen',
 }

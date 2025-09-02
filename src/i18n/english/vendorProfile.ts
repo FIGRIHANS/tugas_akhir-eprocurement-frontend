@@ -26,4 +26,9 @@ export const vendorProfile = {
   website: 'Website',
   currencyPreference: 'Currency Preference',
   companyAddress: 'Company Address',
+  licenseType: 'License Type',
+  licenseNo: 'License No./ Description',
+  validStart: 'Valid From (Start Date)',
+  validEnd: 'Valid Until (End Date)',
+  document: 'Document',
 }
