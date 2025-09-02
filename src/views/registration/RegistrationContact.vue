@@ -367,28 +367,16 @@ onMounted(() => {
 watch(
   () => locale.value,
   () => {
-    passwordRules.value = [
-      {
-        id: 'min8char',
-        text: t('registration.minPassword'),
-        status: false,
-      },
-      {
-        id: 'uppercase',
-        text: t('registration.capitalPassword'),
-        status: false,
-      },
-      {
-        id: '1symbol',
-        text: t('registration.symbolPassword'),
-        status: false,
-      },
-      {
-        id: '1number',
-        text: t('registration.numberPassword'),
-        status: false,
-      },
-    ]
+    const checks = {
+      min8char: t('registration.minPassword'),
+      uppercase: t('registration.capitalPassword'),
+      '1symbol': t('registration.symbolPassword'),
+      '1number': t('registration.numberPassword'),
+    }
+
+    passwordRules.value.forEach((item) => {
+      item.text = checks[item.id]
+    })
   },
 )
 </script>
