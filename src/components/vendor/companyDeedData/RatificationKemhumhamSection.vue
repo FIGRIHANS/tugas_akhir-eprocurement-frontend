@@ -40,6 +40,8 @@ const paginationRatificationDataStore = ref({
   total: 10,
 })
 
+const fileUploaderRef = ref<InstanceType<typeof UiFileUpload> | null>(null)
+
 const showSuccessModal = ref(false)
 const showErrorModal = ref(false)
 const showDeleteModal = ref(false)
@@ -136,6 +138,8 @@ const resetForm = () => {
     action: 0,
   } as IVendorLegalDocumentPayload)
   mode.value = 'add'
+
+  fileUploaderRef.value?.clear()
 }
 
 /* ==== Handlers ==== */
@@ -152,6 +156,9 @@ const handleSave = async () => {
       3117,
     )
     showSuccessModal.value = true
+
+    fileUploaderRef.value?.clear()
+
     resetForm()
   } catch (err) {
     if (axios.isAxiosError(err)) {
@@ -278,6 +285,7 @@ watchEffect(async () => {
             :hintText="errors.documentNo"
           />
           <UiFileUpload
+            ref="fileUploaderRef"
             name="ratificationDocumentUrl"
             label="File"
             placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"

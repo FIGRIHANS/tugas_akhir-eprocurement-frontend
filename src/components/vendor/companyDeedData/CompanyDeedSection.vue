@@ -50,6 +50,8 @@ const apiErrorMessage = ref('')
 const isDownloadLoading = ref(false)
 const isSaveLoading = ref(false)
 
+const fileUploaderRef = ref<InstanceType<typeof UiFileUpload> | null>(null)
+
 const vendorLegalDocPayload = reactive<IVendorLegalDocumentPayload>({
   id: 0,
   vendorID: Number(route.params.id),
@@ -117,6 +119,8 @@ const resetForm = () => {
     action: 0,
   } as IVendorLegalDocumentPayload)
   mode.value = 'add'
+
+  fileUploaderRef.value?.clear()
 }
 
 const validateForm = () => {
@@ -170,7 +174,7 @@ const handleSave = async () => {
   if (!validateForm()) return
   try {
     isSaveLoading.value = true
-    vendorLegalDocPayload.notaryLocation = toNumber(vendorLegalDocPayload.notaryLocation) // pastikan number
+    vendorLegalDocPayload.notaryLocation = toNumber(vendorLegalDocPayload.notaryLocation)
     await companyDeedDataStore.postVendorLegalDocument(vendorLegalDocPayload)
     await companyDeedDataStore.getVendorLegalDocument(
       Number(route.params.id),
@@ -179,6 +183,9 @@ const handleSave = async () => {
       3115,
     )
     showSuccessModal.value = true
+
+    fileUploaderRef.value?.clear()
+
     resetForm()
   } catch (err) {
     if (axios.isAxiosError(err)) {
@@ -365,6 +372,7 @@ watchEffect(async () => {
             :hintText="errors.notaryName"
           />
           <UiFileUpload
+            ref="fileUploaderRef"
             name="vendorLegalDocumentUrl"
             label="File"
             placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"

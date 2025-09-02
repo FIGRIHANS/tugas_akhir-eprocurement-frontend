@@ -50,6 +50,8 @@ const apiErrorMessage = ref('')
 const isDownloadLoading = ref(false)
 const isSaveLoading = ref(false)
 
+const fileUploaderRef = ref<InstanceType<typeof UiFileUpload> | null>(null)
+
 const AMENDMENT_DOCUMENT_TYPE = 3116
 
 const vendorAmendmentPayload = reactive<IVendorLegalDocumentPayload>({
@@ -143,6 +145,8 @@ const resetForm = () => {
     action: 0,
   } as IVendorLegalDocumentPayload)
   mode.value = 'add'
+
+  fileUploaderRef.value?.clear()
 }
 
 /* ===== Handlers ===== */
@@ -178,6 +182,9 @@ const handleSave = async () => {
       3116,
     )
     showSuccessModal.value = true
+
+    fileUploaderRef.value?.clear()
+
     resetForm()
   } catch (err) {
     if (axios.isAxiosError(err)) {
@@ -369,6 +376,7 @@ watchEffect(async () => {
             :hintText="errors.notaryLocation"
           />
           <UiFileUpload
+            ref="fileUploaderRef"
             name="latestAmmendmentDocumentUrl"
             label="File"
             placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
