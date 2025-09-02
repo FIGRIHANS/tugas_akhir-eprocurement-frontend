@@ -1112,7 +1112,7 @@ onMounted(() => {
   }
 
   if (route.query.invoice) {
-    if (route.query.type === 'po-view') {
+    if (route.query.type === 'po-view' || route.query.invoice) {
       invoiceApi.getPoDetail(route.query.invoice?.toString() || '').then(() => {
         setData()
       })
