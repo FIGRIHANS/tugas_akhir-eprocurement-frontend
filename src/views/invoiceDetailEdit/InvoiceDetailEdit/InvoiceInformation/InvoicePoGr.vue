@@ -11,7 +11,8 @@
                 :key="index"
                 class="pogr__field-base"
                 :class="{
-                  'pogr__field-base--po-item': item.toLowerCase() === 'item text'
+                  'pogr__field-base--po-item': item.toLowerCase() === 'item text',
+                  'pogr__field-base--tax': item.toLowerCase() === 'tax code'
                 }"
               >
                 {{ item }}
@@ -46,12 +47,12 @@
                 <input v-else v-model="formEdit.itemAmount" type="number" class="input" />
               </td>
               <td>
-                <span v-if="!item.isEdit">{{ item.taxCode }}</span>
+                <span v-if="!item.isEdit">{{ getTaxCodeName(item.taxCode) }}</span>
                 <v-select
                   v-else
                   v-model="formEdit.taxCode"
                   class="customSelect"
-                  label="code"
+                  :get-option-label="(option: any) => `${option.code} - ${option.name}`"
                   :reduce="(option: any) => option.code"
                   :options="listTaxCalculation"
                   appendToBody
@@ -315,6 +316,15 @@ const setWhtAmount = (data: itemsPoGrType) => {
     const tarif = whtlist[indexWht].tarif / 100
     formEdit.whtAmount = tarif * formEdit.whtBaseAmount
   }
+}
+
+const getTaxCodeName = (taxCode: string) => {
+  const index = listTaxCalculation.value.findIndex((item) => item.code === taxCode)
+  if (index !== -1) {
+    const data = listTaxCalculation.value[index]
+    return `${data.code} - ${data.name}`
+  }
+  return '-'
 }
 
 watch(
