@@ -36,13 +36,13 @@
               </button>
             </td>
             <td>
-              <span v-if="!item.isEdit">{{ getActivityName(item.activityExpense) }}</span>
+              <span v-if="!item.isEdit">{{ getActivityName(item.activityId) }}</span>
               <v-select
                 v-else
                 v-model="formEdit.activityExpense"
                 class="customSelect"
                 :get-option-label="(option: any) => `${option.code} - ${option.name}`"
-                :reduce="(option: any) => option.code"
+                :reduce="(option: any) => option.id"
                 :options="listActivity"
                 appendToBody
               ></v-select>
@@ -168,7 +168,7 @@ const columns = ref([
   'WHT Amount'
 ])
 const formEdit = reactive({
-  activityExpense: '',
+  activityExpense: null,
   itemAmount: 0,
   debitCredit: '',
   taxCode: '',
@@ -202,7 +202,9 @@ const addNew = () => {
   if (form) {
     const data = {
       id: 0,
+      activityId: null,
       activityExpense: '',
+      activityName: '',
       itemAmount: 0,
       debitCredit: '',
       taxCode: '',
@@ -221,7 +223,7 @@ const addNew = () => {
 }
 
 const resetFormEdit = () => {
-  formEdit.activityExpense = ''
+  formEdit.activityExpense = null
   formEdit.itemAmount = 0
   formEdit.debitCredit = ''
   formEdit.taxCode = ''
@@ -239,7 +241,7 @@ const goEdit = (item: itemsCostType) => {
   item.isEdit = !item.isEdit
 
   if (item.isEdit) {
-    formEdit.activityExpense = item.activityExpense
+    formEdit.activityExpense = item.activityId
     formEdit.itemAmount = item.itemAmount
     formEdit.debitCredit = item.debitCredit
     formEdit.taxCode = item.taxCode
@@ -252,7 +254,10 @@ const goEdit = (item: itemsCostType) => {
     formEdit.whtBaseAmount = item.whtBaseAmount
     formEdit.whtAmount = item.whtAmount
   } else {
-    item.activityExpense = formEdit.activityExpense
+    const itemIndex = listActivity.value.findIndex((sub) => sub.id === formEdit.activityExpense)
+    item.activityId = formEdit.activityExpense
+    item.activityExpense = listActivity.value[itemIndex].code
+    item.activityName = listActivity.value[itemIndex].name
     item.itemAmount = formEdit.itemAmount
     item.debitCredit = formEdit.debitCredit
     item.taxCode = formEdit.taxCode
@@ -323,8 +328,8 @@ const getCostCenterName = (costCenter: string) => {
   return '-'
 }
 
-const getActivityName = (code: string) => {
-  const getIndex = listActivity.value.findIndex((item) => item.code === code)
+const getActivityName = (id: number) => {
+  const getIndex = listActivity.value.findIndex((item) => item.id === id)
   if (getIndex !== -1) return `${listActivity.value[getIndex].code} - ${listActivity.value[getIndex].name}`
 }
 

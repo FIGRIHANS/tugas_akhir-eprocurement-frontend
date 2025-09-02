@@ -265,6 +265,7 @@ const detailPo = computed(() => invoiceApi.detailPo)
 const detailNonPo = computed(() => invoiceApi.detailNonPo)
 const userData = computed(() => loginApi.userData)
 const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
+const listActivity = computed(() => invoiceMasterApi.activityList)
 
 const checkInvoiceView = () => {
   return route.query.type === 'po-view'
@@ -424,8 +425,11 @@ const mapPoGr = () => {
 const mapAdditionalCost = () => {
   const cost = []
   for (const item of form.additionalCost) {
+    const itemIndex = listActivity.value.findIndex((sub) => sub.id === item.activity)
     cost.push({
-      activityExpense: item.activity,
+      activityId: item.activity,
+      activityExpense: listActivity.value[itemIndex].code,
+      activityName: listActivity.value[itemIndex].name,
       itemAmount: Number(item.itemAmount),
       debitCredit: item.debitCredit,
       taxCode: item.taxCode,
@@ -445,8 +449,11 @@ const mapAdditionalCost = () => {
 const mapInvoiceItem = () => {
   const cost = []
   for (const item of form.invoiceItem) {
+    const itemIndex = listActivity.value.findIndex((sub) => sub.id === item.activity)
     cost.push({
-      activityExpense: item.activity,
+      activityId: item.activity,
+      activityExpense: listActivity.value[itemIndex].code,
+      activityName: listActivity.value[itemIndex].name,
       itemAmount: Number(item.itemAmount),
       debitCredit: item.debitCredit,
       taxCode: item.taxCode,
@@ -747,7 +754,9 @@ const setData = () => {
     form.additionalCost = []
     for (const item of detail.additionalCosts) {
       const data = {
-        activity: item.activityExpense,
+        activity: item.activityId,
+        activityCode: item.activityExpense,
+        activityName: item.activityName,
         itemAmount: item.itemAmount,
         debitCredit: item.debitCredit,
         taxCode: item.taxCode,
@@ -947,9 +956,10 @@ const mapDataCheck = () => {
 
   for (const item of form.invoiceItem) {
     itemNoAcc.value += 1
+    const itemIndex = listActivity.value.findIndex((sub) => sub.id === item.activity)
     const glData = {
       ITEMNO_ACC: itemNoAcc.value,
-      GL_ACCOUNT: item.activity,
+      GL_ACCOUNT: listActivity.value[itemIndex].code,
       ITEM_TEXT: item.itemText,
       ALLOC_NMBR: '',
       TAX_CODE: item.taxCode,
@@ -1102,7 +1112,7 @@ onMounted(() => {
   }
 
   if (route.query.invoice) {
-    if (route.query.type === 'po-view') {
+    if (route.query.type === 'po-view' || route.query.invoice) {
       invoiceApi.getPoDetail(route.query.invoice?.toString() || '').then(() => {
         setData()
       })

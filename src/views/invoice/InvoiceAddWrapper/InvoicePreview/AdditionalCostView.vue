@@ -22,7 +22,7 @@
         <tbody>
           <tr v-for="(item, index) in form.additionalCost" :key="index" class="invoice__field-items">
             <td>{{ index + 1 }}</td>
-            <td>{{ getActivityName(item.activity) || '-' }}</td>
+            <td>{{ item.activityName || '-' }}</td>
             <td>{{ item.itemAmount || '-' }}</td>
             <td>{{ getDebitCreditName(item.debitCredit) || '-' }}</td>
             <td>{{ item.taxCode || '-' }}</td>
@@ -41,15 +41,11 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, inject } from 'vue'
+import { ref, inject } from 'vue'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import type { formTypes } from '../../types/invoiceAddWrapper'
-import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 
-const invoiceMasterApi = useInvoiceMasterDataStore()
 const form = inject<formTypes>('form')
-
-const listActivity = computed(() => invoiceMasterApi.activityList)
 
 const columns = ref([
   'Line',
@@ -65,11 +61,6 @@ const columns = ref([
   'WHT Code',
   'WHT Base Amount'
 ])
-
-const getActivityName = (code: string) => {
-  const getIndex = listActivity.value.findIndex((item) => item.code === code)
-  if (getIndex !== -1) return listActivity.value[getIndex].name
-}
 
 const getDebitCreditName = (code: string) => {
   if (code === 'K') return 'Credit'
