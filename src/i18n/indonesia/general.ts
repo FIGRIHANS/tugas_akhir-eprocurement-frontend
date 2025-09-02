@@ -10,4 +10,6 @@ export const general = {
   uploadFile: 'Unggah Gagal',
   fileSizeExceed: 'Ukuran file melebihi batas maksimum 16 MB. Silakan pilih file yang lebih kecil.',
   download: 'Unduh {field}',
+  show: 'Menampilkan',
+  perPage: 'per halaman | per halaman dari {n} data',
 }

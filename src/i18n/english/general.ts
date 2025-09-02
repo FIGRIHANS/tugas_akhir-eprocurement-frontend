@@ -10,4 +10,6 @@ export const general = {
   uploadFile: 'Upload Failed',
   fileSizeExceed: 'File size exceeds the maximum limit of 16 MB. Please choose a smaller file.',
   download: 'Download {field}',
+  show: 'Show',
+  perPage: 'per page | per page from {n} data',
 }
