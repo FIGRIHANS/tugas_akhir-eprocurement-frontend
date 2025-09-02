@@ -9,8 +9,9 @@
         <span
           class="btn btn-input bg-primary-clarity border rounded-r-none border-primary"
           :class="{ 'flex items-center gap-1': required, '!border-danger': error }"
-          ><i class="ki-filled ki-cloud-add !text-primary"> </i
-        ></span>
+        >
+          <i class="ki-filled ki-cloud-add !text-primary"></i>
+        </span>
         <span
           class="input select-none !text-primary bg-primary-light border-primary hover:border-primary"
           :class="{ 'flex items-center gap-1': required, '!border-danger': error }"
@@ -19,8 +20,9 @@
           {{ truncateSelectedFile }}
         </span>
       </div>
-      <span v-if="hintText" class="text-xs text-danger"> {{ hintText }} </span>
+      <span v-if="hintText" class="text-xs text-danger">{{ hintText }}</span>
     </label>
+
     <input
       :id="name"
       class="hidden"
@@ -29,6 +31,7 @@
       type="file"
       hidden
       @change="uploadFile($event)"
+      ref="fileEl"
     />
   </div>
 </template>
@@ -44,35 +47,47 @@ const props = withDefaults(defineProps<IFileUploadProps>(), {
   error: false,
   hintText: '',
 })
-const emits = defineEmits(['addedFile', 'uploadFailed'])
+const emits = defineEmits(['addedFile', 'uploadFailed', 'cleared'])
 
 const selectedFile = ref(props.placeholder)
+const fileEl = ref<HTMLInputElement | null>(null)
 
 const truncateSelectedFile = computed(() => {
   if (props.textLength && selectedFile.value) {
-    return selectedFile.value.substring(0, props.textLength) + '...'
+    return selectedFile.value.length > props.textLength
+      ? selectedFile.value.substring(0, props.textLength) + '...'
+      : selectedFile.value
   }
-
   return selectedFile.value
 })
 
 const uploadFile = (event: Event) => {
-  const filesUploaded = event.target as HTMLInputElement
-  const isBelowMaxSize =
-    filesUploaded.files && props.maxSize ? filesUploaded.files[0].size <= props.maxSize : true
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  const isBelowMaxSize = file && props.maxSize ? file.size <= props.maxSize : true
 
-  if (filesUploaded.files && filesUploaded.files?.length > 0 && isBelowMaxSize) {
-    selectedFile.value = filesUploaded.files[0].name
-    emits('addedFile', filesUploaded.files[0])
+  if (file && isBelowMaxSize) {
+    selectedFile.value = file.name
+    emits('addedFile', file)
   } else {
     emits('uploadFailed', true)
   }
 }
 
+const clear = () => {
+  if (fileEl.value) fileEl.value.value = ''
+  selectedFile.value = props.placeholder || ''
+  emits('cleared')
+}
+
+defineExpose({ clear })
+
 watch(
   () => props.placeholder,
   (newVal) => {
-    selectedFile.value = newVal
+    if (!fileEl.value || fileEl.value.value === '') {
+      selectedFile.value = newVal
+    }
   },
 )
 

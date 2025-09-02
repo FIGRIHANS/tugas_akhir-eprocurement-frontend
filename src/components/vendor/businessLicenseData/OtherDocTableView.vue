@@ -30,6 +30,11 @@ type FileSlot = { file: File; status: FileStatus }
 const fileOtherDocumentList = ref<FileSlot[]>([])
 const modalUploadFailed = ref(false)
 
+const editingIndex = ref<number | null>(null)
+const originalMap = ref<Record<string, IOtherDocument>>({})
+
+const isEditing = (idx: number) => editingIndex.value === idx
+
 const ensureFileListLength = () => {
   const need = localOtherDocuments.value.length
   while (fileOtherDocumentList.value.length < need) {
@@ -45,6 +50,38 @@ const ensureFileListLength = () => {
 onMounted(ensureFileListLength)
 watch(() => localOtherDocuments.value.length, ensureFileListLength)
 
+const resetPickedFile = (index: number) => {
+  if (index >= 0 && index < fileOtherDocumentList.value.length) {
+    fileOtherDocumentList.value[index] = {
+      file: new File([''], 'placeholder.txt'),
+      status: 'notUpload',
+    }
+  }
+}
+
+const startEditing = (index: number) => {
+  editingIndex.value = index
+  originalMap.value[String(index)] = JSON.parse(JSON.stringify(localOtherDocuments.value[index]))
+  resetPickedFile(index)
+}
+
+const cancelEditing = (index: number) => {
+  const snapshot = originalMap.value[String(index)]
+  if (snapshot) {
+    const updated = [...localOtherDocuments.value]
+    updated[index] = { ...snapshot }
+    emit('update:otherDocuments', updated)
+  }
+  delete originalMap.value[String(index)]
+  resetPickedFile(index)
+  editingIndex.value = null
+}
+
+const saveRow = (index: number) => {
+  delete originalMap.value[String(index)]
+  editingIndex.value = null
+}
+
 const addAnotherDocument = () => {
   if (localOtherDocuments.value.length >= 5) return
   const updated = [...localOtherDocuments.value]
@@ -57,12 +94,19 @@ const addAnotherDocument = () => {
     uploadUrl: '',
   })
   emit('update:otherDocuments', updated)
+  const newIndex = updated.length - 1
+  startEditing(newIndex)
 }
 
 const deleteRow = (index: number) => {
   const updated = localOtherDocuments.value.filter((_, i) => i !== index)
   emit('update:otherDocuments', updated)
   fileOtherDocumentList.value.splice(index, 1)
+  delete originalMap.value[String(index)]
+  if (editingIndex.value !== null) {
+    if (index === editingIndex.value) editingIndex.value = null
+    else if (index < editingIndex.value) editingIndex.value = editingIndex.value - 1
+  }
 }
 
 const onPickFile = (file: File, index: number) => {
@@ -95,6 +139,11 @@ const uploadPickedFile = async (index: number) => {
     fileOtherDocumentList.value[index].status = 'notUpload'
     modalUploadFailed.value = true
   }
+}
+
+const downloadFile = (url: string) => {
+  if (!url) return
+  window.open(url, '_blank', 'noopener,noreferrer')
 }
 
 watch(
@@ -140,9 +189,9 @@ watch(
           >
             <i class="ki-filled ki-plus-circle"></i> Add Document
           </UiButton>
-          <span class="text-danger text-xs"
-            >Must upload Account Statement. Without this document, data will be rejected.</span
-          >
+          <span class="text-danger text-xs">
+            Must upload Account Statement. Without this document, data will be rejected.
+          </span>
         </div>
 
         <div class="mt-2">
@@ -170,84 +219,132 @@ watch(
                   <UiInput
                     v-model="localOtherDocuments[index].documentName"
                     placeholder="Document Name"
+                    :disabled="!isEditing(index)"
                   />
                 </td>
+
                 <td class="align-top">
                   <UiInput
                     v-model="localOtherDocuments[index].documentNo"
                     placeholder="License Number / Description"
+                    :disabled="!isEditing(index)"
                   />
                 </td>
+
                 <td class="align-top">
                   <DatePicker
                     v-model="localOtherDocuments[index].issuedDate as string | Date | null"
                     format="dd MM yyyy"
                     class="!w-48"
+                    :disabled="!isEditing(index)"
                   />
                 </td>
+
                 <td class="align-top">
                   <DatePicker
                     v-model="localOtherDocuments[index].expiredDate as string | Date | null"
                     format="dd MM yyyy"
                     class="!w-48"
-                    :disabled="localOtherDocuments[index]?.issuedDate ? false : true"
+                    :disabled="!isEditing(index) || !localOtherDocuments[index]?.issuedDate"
                     :min-date="localOtherDocuments[index]?.issuedDate"
                   />
                 </td>
+
                 <td class="align-top">
-                  <UiFileUpload
-                    :name="`${index}`"
-                    :text-length="15"
-                    :max-size="16000000"
-                    :placeholder="
-                      fileOtherDocumentList[index]?.file.name === 'placeholder.txt'
-                        ? ''
-                        : fileOtherDocumentList[index]?.file.name
-                    "
-                    accepted-files=".jpg,.jpeg,.png,.pdf,application/zip"
-                    class="w-48"
-                    @addedFile="(file) => onPickFile(file, index)"
-                    @upload-failed="() => (modalUploadFailed = true)"
-                  />
-                  <span class="text-danger text-[10px]"
-                    >*jpg, jpeg, png, pdf, zip / max : 16 MB</span
-                  >
+                  <div v-if="isEditing(index)" class="flex items-center gap-2">
+                    <UiFileUpload
+                      :name="`${index}`"
+                      :text-length="15"
+                      :max-size="16000000"
+                      :placeholder="
+                        fileOtherDocumentList[index]?.file.name === 'placeholder.txt'
+                          ? 'Choose file...'
+                          : fileOtherDocumentList[index]?.file.name
+                      "
+                      accepted-files=".jpg,.jpeg,.png,.pdf,application/zip"
+                      class="w-48"
+                      :disabled="false"
+                      @addedFile="(file) => onPickFile(file, index)"
+                      @upload-failed="() => (modalUploadFailed = true)"
+                    />
+
+                    <div class="min-w-8 flex items-center justify-center">
+                      <div
+                        v-if="fileOtherDocumentList?.[index]?.status === 'loading'"
+                        class="rounded-full border-2 size-6 border-primary border-t-primary-light animate-spin"
+                      />
+                      <UiIcon
+                        v-else-if="fileOtherDocumentList?.[index]?.status === 'success'"
+                        name="check-circle"
+                        variant="filled"
+                        class="text-success text-xl"
+                      />
+                      <UiButton
+                        v-else
+                        icon
+                        outline
+                        size="sm"
+                        @click="uploadPickedFile(index)"
+                        :disabled="fileOtherDocumentList?.[index]?.file?.name === 'placeholder.txt'"
+                        aria-label="Upload document"
+                      >
+                        <i class="ki-filled ki-exit-up"></i>
+                      </UiButton>
+                    </div>
+                  </div>
+
+                  <div v-else class="flex items-center">
+                    <template v-if="localOtherDocuments[index].uploadUrl">
+                      <UiButton
+                        outline
+                        size="sm"
+                        @click="downloadFile(localOtherDocuments[index].uploadUrl as string)"
+                      >
+                        <UiIcon name="cloud-download" variant="duotone" />
+                        <span>Download Document</span>
+                      </UiButton>
+                    </template>
+                    <span v-else class="text-slate-400">–</span>
+                  </div>
                 </td>
+
                 <td class="align-middle">
                   <div class="flex items-center justify-center gap-2">
-                    <div
-                      v-if="fileOtherDocumentList?.[index]?.status === 'loading'"
-                      class="rounded-full border-2 size-8 border-primary border-t-primary-light animate-spin text-xs"
-                    ></div>
-                    <UiIcon
-                      v-else-if="fileOtherDocumentList?.[index]?.status === 'success'"
-                      name="check-circle"
-                      variant="filled"
-                      class="text-success text-4xl"
-                    />
-                    <UiButton
-                      v-if="
-                        !['loading', 'success'].includes(fileOtherDocumentList?.[index]?.status)
-                      "
-                      icon
-                      outline
-                      size="sm"
-                      @click="uploadPickedFile(index)"
-                    >
-                      <i class="ki-filled ki-exit-up"></i>
-                    </UiButton>
-                    <UiButton
-                      v-if="
-                        !['loading', 'success'].includes(fileOtherDocumentList?.[index]?.status)
-                      "
-                      variant="danger"
-                      icon
-                      outline
-                      size="sm"
-                      @click="deleteRow(index)"
-                    >
-                      <UiIcon variant="duotone" name="trash" />
-                    </UiButton>
+                    <template v-if="isEditing(index)">
+                      <UiButton
+                        outline
+                        icon
+                        size="sm"
+                        @click="saveRow(index)"
+                        aria-label="Save"
+                        title="Save"
+                      >
+                        <UiIcon variant="duotone" name="check-circle" />
+                      </UiButton>
+                      <UiButton
+                        outline
+                        icon
+                        size="sm"
+                        @click="cancelEditing(index)"
+                        aria-label="Cancel edit"
+                        title="Cancel edit"
+                        variant="danger"
+                      >
+                        <UiIcon variant="duotone" name="cross-circle" />
+                      </UiButton>
+                    </template>
+                    <template v-else>
+                      <UiButton
+                        outline
+                        icon
+                        size="sm"
+                        @click="startEditing(index)"
+                        aria-label="Edit"
+                        title="Edit"
+                      >
+                        <UiIcon variant="duotone" name="notepad-edit" />
+                      </UiButton>
+                    </template>
                   </div>
                 </td>
               </tr>
@@ -258,7 +355,6 @@ watch(
     </div>
   </div>
 
-  <!-- Modal error upload (ukuran > 16MB atau gagal lainnya) -->
   <ModalConfirmation
     :open="modalUploadFailed"
     id="other-doc-upload-error"
