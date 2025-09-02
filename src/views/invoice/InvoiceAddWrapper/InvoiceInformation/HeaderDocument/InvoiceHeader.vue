@@ -244,6 +244,9 @@ watch(
   () => form?.companyCode,
   () => {
     invoiceMasterApi.getActivity(form?.companyCode || '')
+  },
+  {
+    immediate: true
   }
 )
 
