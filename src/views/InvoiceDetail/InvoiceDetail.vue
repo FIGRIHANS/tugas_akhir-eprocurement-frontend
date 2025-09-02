@@ -79,6 +79,7 @@ import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification
 import { useLoginStore } from '@/stores/views/login'
 import type { PostVerificationTypes } from '@/stores/views/invoice/types/verification'
 import { isEmpty } from 'lodash'
+import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 
 const StatusInvoice = defineAsyncComponent(() => import('./InvoiceDetail/StatusInvoice.vue'))
 const GeneralData = defineAsyncComponent(() => import('./InvoiceDetail/GeneralData.vue'))
@@ -106,6 +107,7 @@ const SuccessRejectModal = defineAsyncComponent(
 const activeStep = ref<string>('')
 const router = useRouter()
 const route = useRoute()
+const invoiceMasterApi = useInvoiceMasterDataStore()
 const verificationApi = useInvoiceVerificationStore()
 const loginApi = useLoginStore()
 const isLoading = ref<boolean>(false)
@@ -620,6 +622,7 @@ onMounted(async () => {
           activeStep.value = 'Posting'
           break
       }
+      invoiceMasterApi.getActivity(form.value.companyCode || '')
     })
   } else {
     await verificationApi.getInvoiceNonPoDetail(route.query.id?.toString() || '').then(() => {
