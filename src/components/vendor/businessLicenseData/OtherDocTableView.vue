@@ -30,7 +30,6 @@ type FileSlot = { file: File; status: FileStatus }
 const fileOtherDocumentList = ref<FileSlot[]>([])
 const modalUploadFailed = ref(false)
 
-// ====== EDIT STATE & SNAPSHOT ======
 const editingIndex = ref<number | null>(null)
 const originalMap = ref<Record<string, IOtherDocument>>({})
 
@@ -79,12 +78,10 @@ const cancelEditing = (index: number) => {
 }
 
 const saveRow = (index: number) => {
-  // data sudah terikat via v-model; cukup bersihkan snapshot & keluar dari edit
   delete originalMap.value[String(index)]
   editingIndex.value = null
 }
 
-// ====== ROW CRUD ======
 const addAnotherDocument = () => {
   if (localOtherDocuments.value.length >= 5) return
   const updated = [...localOtherDocuments.value]
@@ -97,7 +94,6 @@ const addAnotherDocument = () => {
     uploadUrl: '',
   })
   emit('update:otherDocuments', updated)
-  // otomatis masuk mode edit pada baris baru
   const newIndex = updated.length - 1
   startEditing(newIndex)
 }
@@ -108,13 +104,11 @@ const deleteRow = (index: number) => {
   fileOtherDocumentList.value.splice(index, 1)
   delete originalMap.value[String(index)]
   if (editingIndex.value !== null) {
-    // sesuaikan editingIndex bila baris di atasnya dihapus
     if (index === editingIndex.value) editingIndex.value = null
     else if (index < editingIndex.value) editingIndex.value = editingIndex.value - 1
   }
 }
 
-// ====== FILE UPLOAD ======
 const onPickFile = (file: File, index: number) => {
   fileOtherDocumentList.value.splice(index, 1, {
     file,
@@ -147,13 +141,11 @@ const uploadPickedFile = async (index: number) => {
   }
 }
 
-// ====== DOWNLOAD (VIEW MODE) ======
 const downloadFile = (url: string) => {
   if (!url) return
   window.open(url, '_blank', 'noopener,noreferrer')
 }
 
-// ====== VALIDASI TANGGAL ======
 watch(
   () => localOtherDocuments.value,
   (docs) => {
@@ -223,7 +215,6 @@ watch(
               </tr>
 
               <tr v-for="(_, index) in localOtherDocuments" :key="index">
-                <!-- Document Name -->
                 <td class="align-top">
                   <UiInput
                     v-model="localOtherDocuments[index].documentName"
@@ -232,7 +223,6 @@ watch(
                   />
                 </td>
 
-                <!-- License Number / Description -->
                 <td class="align-top">
                   <UiInput
                     v-model="localOtherDocuments[index].documentNo"
@@ -241,7 +231,6 @@ watch(
                   />
                 </td>
 
-                <!-- Valid From -->
                 <td class="align-top">
                   <DatePicker
                     v-model="localOtherDocuments[index].issuedDate as string | Date | null"
@@ -251,7 +240,6 @@ watch(
                   />
                 </td>
 
-                <!-- Valid Until -->
                 <td class="align-top">
                   <DatePicker
                     v-model="localOtherDocuments[index].expiredDate as string | Date | null"
@@ -262,9 +250,7 @@ watch(
                   />
                 </td>
 
-                <!-- Document -->
                 <td class="align-top">
-                  <!-- EDIT MODE: tampilkan uploader; jika ada file lama, tampilkan tombol 'Current' -->
                   <div v-if="isEditing(index)" class="flex items-center gap-2">
                     <UiFileUpload
                       :name="`${index}`"
@@ -282,7 +268,6 @@ watch(
                       @upload-failed="() => (modalUploadFailed = true)"
                     />
 
-                    <!-- status / upload -->
                     <div class="min-w-8 flex items-center justify-center">
                       <div
                         v-if="fileOtherDocumentList?.[index]?.status === 'loading'"
@@ -308,7 +293,6 @@ watch(
                     </div>
                   </div>
 
-                  <!-- VIEW MODE: tampilkan tombol download jika ada; jika tidak, tanda '-' -->
                   <div v-else class="flex items-center">
                     <template v-if="localOtherDocuments[index].uploadUrl">
                       <UiButton
@@ -324,11 +308,9 @@ watch(
                   </div>
                 </td>
 
-                <!-- Action -->
                 <td class="align-middle">
                   <div class="flex items-center justify-center gap-2">
                     <template v-if="isEditing(index)">
-                      <!-- Save -->
                       <UiButton
                         outline
                         icon
@@ -339,7 +321,6 @@ watch(
                       >
                         <UiIcon variant="duotone" name="check-circle" />
                       </UiButton>
-                      <!-- Cancel (circle X) -->
                       <UiButton
                         outline
                         icon
@@ -374,7 +355,6 @@ watch(
     </div>
   </div>
 
-  <!-- Modal error upload (ukuran > 16MB atau gagal lainnya) -->
   <ModalConfirmation
     :open="modalUploadFailed"
     id="other-doc-upload-error"
