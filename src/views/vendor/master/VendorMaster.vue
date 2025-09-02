@@ -36,6 +36,11 @@ const isAdmin = computed(() => userData.value?.profile.profileId === 3192)
 const tableCols = computed(() => {
   return i18n.locale.value === 'id' ? tableColsId : tableColsEn
 })
+const start = computed(() => vendor.vendors.pageSize * (vendor.vendors.page - 1) + 1)
+const end = computed(
+  () => vendor.vendors.pageSize * (vendor.vendors.page - 1) + vendor.vendors.items.length,
+)
+const total = computed(() => vendor.vendors.total)
 
 const handleSearch = debounce((value) => {
   const query = { ...route.query }
@@ -178,9 +183,7 @@ watch(
       v-show="vendor.vendors.items.length"
     >
       <div>
-        Showing {{ vendor.vendors.pageSize * (vendor.vendors.page - 1) + 1 }} to
-        {{ vendor.vendors.pageSize * (vendor.vendors.page - 1) + vendor.vendors.items.length }} of
-        {{ vendor.vendors.total }} entries
+        {{ $t('vendor.pagination.show', { start, end, total }) }}
       </div>
       <LPagination
         :total-items="Number(vendor.vendors.total)"
