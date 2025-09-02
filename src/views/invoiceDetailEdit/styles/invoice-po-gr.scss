@@ -26,6 +26,11 @@
       @extend .pogr__field-base;
       min-width: 200px;
     }
+    
+    &--tax {
+      @extend .pogr__field-base;
+      min-width: 350px;
+    }
   }
 
   &__field-items {

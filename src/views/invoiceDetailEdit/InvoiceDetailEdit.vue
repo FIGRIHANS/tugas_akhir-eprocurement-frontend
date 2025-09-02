@@ -182,7 +182,7 @@ const checkInvoiceInformation = () => {
     }
   }
 
-  status = checkTableItem()
+  status = status ? checkTableItem() : false
 
   return status
 }
