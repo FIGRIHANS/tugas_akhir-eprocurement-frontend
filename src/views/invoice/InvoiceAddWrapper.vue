@@ -602,17 +602,7 @@ const goNext = () => {
       invoiceApi
         .postSubmissionNonPo(mapDataPostNonPo())
         .then((response) => {
-          if (response.statusCode === 200) {
-            const idModal = document.querySelector('#success_invoice_modal')
-            const modal = KTModal.getInstance(idModal as HTMLElement)
-            modal.show()
-          } else {
-            if (response.result.message.includes('Invoice Document Number')) {
-              const idModal = document.querySelector('#error_document_number_modal')
-              const modal = KTModal.getInstance(idModal as HTMLElement)
-              modal.show()
-            }
-          }
+          setAfterResponsePost(response)
         })
         .catch((error) => {
           console.error(error)
@@ -624,17 +614,7 @@ const goNext = () => {
       invoiceApi
         .postSubmission(mapDataPost())
         .then((response) => {
-          if (response.statusCode === 200) {
-            const idModal = document.querySelector('#success_invoice_modal')
-            const modal = KTModal.getInstance(idModal as HTMLElement)
-            modal.show()
-          } else {
-            if (response.result.message.includes('Invoice Document Number')) {
-              const idModal = document.querySelector('#error_document_number_modal')
-              const modal = KTModal.getInstance(idModal as HTMLElement)
-              modal.show()
-            }
-          }
+          setAfterResponsePost(response)
         })
         .catch((error) => {
           console.error(error)
@@ -654,32 +634,53 @@ const goToList = () => {
 }
 
 const goSaveDraft = () => {
-  const data = mapDataPost()
-  data.header.statusCode = 0
-  data.header.statusName = 'Draft'
   isSubmit.value = true
   isClickDraft.value = true
-  invoiceApi
-    .postSubmission(data)
-    .then((response) => {
-      if (response.statusCode === 200) {
-        const idModal = document.querySelector('#success_invoice_modal')
-        const modal = KTModal.getInstance(idModal as HTMLElement)
-        modal.show()
-      } else {
-        if (response.result.message.includes('Invoice Document Number')) {
-          const idModal = document.querySelector('#error_document_number_modal')
-          const modal = KTModal.getInstance(idModal as HTMLElement)
-          modal.show()
-        }
-      }
-    })
-    .catch((error) => {
-      console.error(error)
-    })
-    .finally(() => {
-      isSubmit.value = false
-    })
+  if (route.query.type === 'nonpo') {
+    const data = mapDataPostNonPo()
+    data.header.statusCode = 0
+    data.header.statusName = 'Draft'
+    invoiceApi
+      .postSubmissionNonPo(data)
+      .then((response) => {
+        setAfterResponsePost(response)
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+      .finally(() => {
+        isSubmit.value = false
+      })
+  } else {
+    const data = mapDataPost()
+    data.header.statusCode = 0
+    data.header.statusName = 'Draft'
+    invoiceApi
+      .postSubmission(data)
+      .then((response) => {
+        setAfterResponsePost(response)
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+      .finally(() => {
+        isSubmit.value = false
+      })
+  }
+}
+
+const setAfterResponsePost = (response) => {
+  if (response.statusCode === 200) {
+    const idModal = document.querySelector('#success_invoice_modal')
+    const modal = KTModal.getInstance(idModal as HTMLElement)
+    modal.show()
+  } else {
+    if (response.result.message.includes('Invoice Document Number')) {
+      const idModal = document.querySelector('#error_document_number_modal')
+      const modal = KTModal.getInstance(idModal as HTMLElement)
+      modal.show()
+    }
+  }
 }
 
 const setData = () => {
@@ -747,7 +748,7 @@ const setData = () => {
     for (const item of detail.additionalCosts) {
       const data = {
         activity: item.activityExpense,
-        itemAmount: item.itemAmount.toString(),
+        itemAmount: item.itemAmount,
         debitCredit: item.debitCredit,
         taxCode: item.taxCode,
         vatAmount: item.vatAmount,
@@ -756,7 +757,8 @@ const setData = () => {
         assignment: item.assignment,
         whtType: item.whtType,
         whtCode: item.whtCode,
-        whtBaseAmount: item.whtBaseAmount.toString(),
+        whtBaseAmount: item.whtBaseAmount,
+        whtAmount: item.whtAmount,
         isEdit: false,
       } as itemsCostType
       form.additionalCost.push(data)
@@ -799,8 +801,6 @@ const setData = () => {
 
 const setDataNonPo = () => {
   const detail = detailNonPo.value
-  console.log(detail, 'alternativePayee')
-
   if (form && detail) {
     form.status = detail.header.statusCode
     form.invoiceUId = detail.header.invoiceUId
@@ -888,7 +888,7 @@ const setDataNonPo = () => {
     // for (const item of detail.additionalCosts) {
     //   const data = {
     //     activity: item.activityExpense,
-    //     itemAmount: item.itemAmount.toString(),
+    //     itemAmount: item.itemAmount,
     //     debitCredit: item.debitCredit,
     //     taxCode: item.taxCode,
     //     vatAmount: item.vatAmount,
@@ -897,7 +897,8 @@ const setDataNonPo = () => {
     //     assignment: item.assignment,
     //     whtType: item.whtType,
     //     whtCode: item.whtCode,
-    //     whtBaseAmount: item.whtBaseAmount.toString(),
+    //     whtBaseAmount: item.whtBaseAmount,
+    //     whtAmount: item.whtAmount,
     //     isEdit: false,
     //   } as itemsCostType
     //   form.additionalCost.push(data)

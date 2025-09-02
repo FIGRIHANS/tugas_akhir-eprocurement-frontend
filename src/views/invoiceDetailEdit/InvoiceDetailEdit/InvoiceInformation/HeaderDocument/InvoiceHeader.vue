@@ -206,8 +206,13 @@ const getInvoiceTypeName = () => {
 }
 
 const isNpwrDisabled = () => {
-  if (userData.value) {
-    [3002, 3190].includes(userData.value?.profile?.profileId);
+  if (
+    userData.value &&
+    (userData.value.profile.profileId === 3002 ||
+    userData.value.profile.profileId === 3190 ||
+    userData.value.profile.profileId === 3003 ||
+    userData.value.profile.profileId === 3004)
+  ) {
     return true
   } else {
     return false

@@ -114,10 +114,10 @@ const uploadStore = useUploadStore()
 
 const dataResponse = computed(() => experienceStore.data)
 const completedProject = computed(() =>
-  dataResponse.value.filter((item) => item.value === 'COMPLETED'),
+  dataResponse.value.filter((item) => item.experienceType === 3153 && item.isActive),
 )
 const onGoingProject = computed(() =>
-  dataResponse.value.filter((item) => item.value === 'ON GOING'),
+  dataResponse.value.filter((item) => item.experienceType === 3154 && item.isActive),
 )
 
 const downloadFile = async (path: string) => {

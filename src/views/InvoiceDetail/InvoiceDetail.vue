@@ -271,6 +271,7 @@ const mapPoGr = () => {
   const poGr = []
   for (const item of form.value.invoicePoGr) {
     poGr.push({
+      id: item.id,
       poNo: item.poNo,
       poItem: Number(item.poItem),
       grDocumentNo: item.grDocumentNo,
@@ -302,7 +303,7 @@ const mapAdditionalCost = () => {
       whtType: item.whtType,
       whtCode: item.whtCode,
       whtBaseAmount: Number(item.whtBaseAmount),
-      whtAmount: 0
+      whtAmount: item.whtAmount
     })
   }
   return cost
@@ -571,8 +572,6 @@ const setDataEdit = () => {
 }
 
 onMounted(async () => {
-  console.log('masuk')
-
   if (route.query.type === '1') {
     activeStep.value = 'Verification'
     routes.value = [

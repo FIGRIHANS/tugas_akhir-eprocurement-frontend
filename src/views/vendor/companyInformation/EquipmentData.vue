@@ -123,12 +123,7 @@
             label="Serial Number / License Plate Number"
             placeholder="Serial Number / License Plate Number"
           />
-          <UiInput
-            v-model="payload.capacity"
-            type="number"
-            label="Capacity (Tonnage)"
-            placeholder="Write Number"
-          />
+          <UiInput v-model="payload.capacity" label="Capacity" placeholder="Write Number" />
           <UiSelect
             v-model="payload.condition"
             label="Condition"
@@ -281,7 +276,7 @@ const payload = ref<PayloadEquipmentDataType>({
   type: '',
   mfgDate: '',
   serialNo: '',
-  capacity: 0,
+  capacity: '',
   condition: 0,
   ownership: 0,
   category: 0,
@@ -309,7 +304,7 @@ const resetPayload = () => {
     type: '',
     mfgDate: '',
     serialNo: '',
-    capacity: 0,
+    capacity: '',
     condition: 0,
     ownership: 0,
     category: 0,

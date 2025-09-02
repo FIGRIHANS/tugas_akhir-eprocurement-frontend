@@ -54,4 +54,6 @@ export interface IExperiencePayload {
   uploadDate: string
   user: string
   vendorID: number
+  provinceLocation: number
+  stateLocation: number
 }
