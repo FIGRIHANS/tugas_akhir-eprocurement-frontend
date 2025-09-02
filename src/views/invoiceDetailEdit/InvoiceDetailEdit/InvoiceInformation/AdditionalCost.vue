@@ -36,7 +36,7 @@
               </button>
             </td>
             <td>
-              <span v-if="!item.isEdit">{{ getActivityName(item.activityExpense) }}</span>
+              <span v-if="!item.isEdit">{{ getActivityName(item.activityId) }}</span>
               <v-select
                 v-else
                 v-model="formEdit.activityExpense"
@@ -328,8 +328,8 @@ const getCostCenterName = (costCenter: string) => {
   return '-'
 }
 
-const getActivityName = (code: string) => {
-  const getIndex = listActivity.value.findIndex((item) => item.code === code)
+const getActivityName = (id: number) => {
+  const getIndex = listActivity.value.findIndex((item) => item.id === id)
   if (getIndex !== -1) return `${listActivity.value[getIndex].code} - ${listActivity.value[getIndex].name}`
 }
 
