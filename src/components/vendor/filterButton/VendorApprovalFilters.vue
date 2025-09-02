@@ -25,17 +25,19 @@ import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 
 import moment from 'moment'
 import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter, type LocationQueryValue } from 'vue-router'
 
 const router = useRouter()
 const route = useRoute()
+const { t } = useI18n()
 
-const filtersKey: { item: string; value: string }[] = [
+const filtersKey = computed(() => [
   { item: 'ApprovalStatusName', value: 'Status' },
-  { item: 'CompanyCategoryName', value: 'Category' },
-  { item: 'SendApprovalDate', value: 'Approval Sent Date' },
+  { item: 'CompanyCategoryName', value: t('vendor.approvalFilters.category') },
+  { item: 'SendApprovalDate', value: t('vendor.approvalFilters.approvalDateSent') },
   { item: 'ApprovalTypeName', value: 'Approval Type' },
-]
+])
 
 const filters = ref<{ key: string; value: LocationQueryValue | LocationQueryValue[] }[]>([])
 

@@ -5,6 +5,11 @@ const masterFilters = {
   reset: 'Atur ulang Filter',
 }
 
+const approvalFilters = {
+  category: 'Kategori',
+  approvalDateSent: 'Tanggal Persetujuan Dikirim',
+}
+
 const pagination = {
   show: 'Menampilkan { start } ke { end } dari { total } data',
 }
@@ -12,4 +17,5 @@ const pagination = {
 export default {
   masterFilters,
   pagination,
+  approvalFilters,
 }
