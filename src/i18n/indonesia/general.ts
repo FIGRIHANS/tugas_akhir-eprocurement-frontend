@@ -9,4 +9,5 @@ export const general = {
   save: 'Simpan',
   uploadFile: 'Unggah Gagal',
   fileSizeExceed: 'Ukuran file melebihi batas maksimum 16 MB. Silakan pilih file yang lebih kecil.',
+  download: 'Unduh {field}',
 }
