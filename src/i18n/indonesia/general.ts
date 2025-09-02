@@ -9,4 +9,7 @@ export const general = {
   save: 'Simpan',
   uploadFile: 'Unggah Gagal',
   fileSizeExceed: 'Ukuran file melebihi batas maksimum 16 MB. Silakan pilih file yang lebih kecil.',
+  search: 'Cari {field}',
+  apply: 'Terapkan',
+  reset: 'Atur Ulang',
 }

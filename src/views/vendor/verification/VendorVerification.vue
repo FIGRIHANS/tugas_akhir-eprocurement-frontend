@@ -15,9 +15,12 @@ import BreadcrumbView from '@/components/BreadcrumbView.vue'
 import VendorVerificationModal from '@/components/vendor/verificationModal/VendorVerificationModal.vue'
 import { formatDate } from '@/composables/date-format'
 import { useLoginStore } from '@/stores/views/login'
+import { useI18n } from 'vue-i18n'
+import { tableColsEn, tableColsId } from '../master/static'
 
 const route = useRoute()
 const router = useRouter()
+const { locale } = useI18n()
 
 const vendor = useVendorStore()
 const verificationStatusStore = useVerificationStatus()
@@ -30,7 +33,13 @@ const verifDetail = reactive({
 })
 
 const userData = computed(() => userStore.userData)
+const tableCols = computed(() => (locale.value === 'id' ? tableColsId : tableColsEn))
 
+const start = computed(() => vendor.vendors.pageSize * (vendor.vendors.page - 1) + 1)
+const end = computed(
+  () => vendor.vendors.pageSize * (vendor.vendors.page - 1) + vendor.vendors.items.length,
+)
+const total = computed(() => vendor.vendors.total)
 const handleVerifDetail = (id: number, name: string) => {
   verifDetail.id = id
   verifDetail.name = name
@@ -82,7 +91,7 @@ watch(
   />
   <div class="card">
     <div class="card-header p-6">
-      <UiInputSearch v-model="search" placeholder="Search vendor" />
+      <UiInputSearch v-model="search" :placeholder="$t('general.search', { field: 'Vendor' })" />
       <div class="flex gap-3">
         <FilterDropdown />
       </div>
@@ -91,39 +100,29 @@ watch(
       <!-- <FilterButton /> -->
       <VendorListFilters />
       <table class="table align-middle text-gray-700">
-        <thead class="border-b-2 border-b-primary">
+        <thead class="border-b-2 border-b-primary text-nowrap">
           <tr>
-            <th></th>
-            <th class="text-nowrap">Company Name</th>
-            <th class="text-nowrap">Status</th>
-            <th class="text-nowrap">Vendor Category</th>
-            <th class="text-nowrap">Business Field</th>
-            <th class="text-nowrap">Registration Date</th>
-            <th class="text-nowrap">Verification Request Date</th>
-            <th class="text-nowrap">Verification Date</th>
-            <th class="text-nowrap">Business License Status</th>
-            <th class="text-nowrap">E-Procurement Vendor Code</th>
-            <th class="text-nowrap">Vendor Code</th>
+            <th v-for="col in tableCols" :key="col">{{ col }}</th>
           </tr>
         </thead>
         <tbody>
           <!-- show loading -->
           <tr v-if="vendor.loading">
-            <td colspan="8" class="text-center">
+            <td :colspan="tableCols.length" class="text-center">
               <UiLoading size="md" />
             </td>
           </tr>
 
           <!-- show error -->
           <tr v-else-if="vendor.error">
-            <td colspan="8">
+            <td :colspan="tableCols.length">
               {{ vendor.error }}
             </td>
           </tr>
 
           <!-- show message if there are no data -->
           <tr v-else-if="!vendor.vendors.items.length">
-            <td colspan="8" class="text-center">No data</td>
+            <td :colspan="tableCols.length" class="text-center">No data</td>
           </tr>
 
           <!-- show data -->
@@ -202,9 +201,7 @@ watch(
       v-show="vendor.vendors.items.length"
     >
       <div>
-        Showing {{ vendor.vendors.pageSize * (vendor.vendors.page - 1) + 1 }} to
-        {{ vendor.vendors.pageSize * (vendor.vendors.page - 1) + vendor.vendors.items.length }} of
-        {{ vendor.vendors.total }} entries
+        {{ $t('vendor.pagination.show', { start, end, total }) }}
       </div>
       <LPagination
         :total-items="Number(vendor.vendors.total)"
