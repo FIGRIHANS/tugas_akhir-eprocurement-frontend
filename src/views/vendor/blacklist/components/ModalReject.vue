@@ -72,7 +72,7 @@ const onSubmit = async () => {
   <div class="modal" data-modal="true" id="modal-reject" data-modal-backdrop-static="true">
     <div class="modal-content modal-center-y w-full md:w-[500px]">
       <div class="modal-header">
-        <h3 class="modal-title text-lg">Reject Blacklist Vendor Request</h3>
+        <h3 class="modal-title text-lg">{{ $t('vendor.blacklist.rejectTitle') }}</h3>
       </div>
       <div class="modal-body">
         <form @submit.prevent="onSubmit">
@@ -80,13 +80,13 @@ const onSubmit = async () => {
             <div>
               <UiTextarea
                 v-model="payload.ApprovalNote"
-                label="Reason"
-                placeholder="Reason"
+                :label="$t('vendor.blacklist.reason')"
+                :placeholder="$t('vendor.blacklist.reason')"
                 required
                 :error="payloadError.includes('ApprovalNote')"
               />
               <span v-if="payloadError.includes('ApprovalNote')" class="form-hint !text-danger">
-                Reason required
+                {{ $t('blacklist.vendor.reasonError') }}
               </span>
             </div>
           </UiFormGroup>
@@ -98,7 +98,7 @@ const onSubmit = async () => {
               @click="onClose"
             >
               <UiIcon name="black-left-line" variant="duotone" />
-              <span>Cancel</span>
+              <span>{{ $t('vendor.blacklist.cancelButton') }}</span>
             </UiButton>
             <UiButton
               variant="danger"
@@ -108,7 +108,7 @@ const onSubmit = async () => {
             >
               <UiLoading variant="white" v-if="loading" />
               <UiIcon v-else name="cross-circle" variant="duotone" />
-              <span>Reject</span>
+              <span>{{ $t('vendor.blacklist.rejectButton') }}</span>
             </UiButton>
           </ui-form-group>
         </form>

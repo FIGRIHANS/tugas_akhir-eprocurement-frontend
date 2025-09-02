@@ -1,3 +1,18 @@
+const blacklist = {
+  approveButton: 'Setujui',
+  rejectButton: 'Tolak',
+  cancelButton: 'Batal',
+  removeButton: 'Hapus',
+  downloadButton: 'Unduh',
+  reason: 'Alasan',
+  reasonError: 'Alasan wajib diisi',
+  rejectTitle: 'Tolak permintaan blacklist vendor',
+  approveTitle: 'Setujui permintaan blacklist vendor?',
+  approveText: 'Vendor akan diblacklist',
+  removeTitle: 'Hapus vendor dari blacklist?',
+  removeText: 'Vendor akan dihapus dari blacklist',
+}
+
 const masterFilters = {
   category: 'Kategori',
   registrationStartDate: 'Tanggal Awal Registrasi',
@@ -18,4 +33,5 @@ export default {
   masterFilters,
   pagination,
   approvalFilters,
+  blacklist,
 }
