@@ -10,9 +10,11 @@ import type { ILicense } from '@/stores/vendor/types/vendor'
 import { useUploadStore } from '@/stores/general/upload'
 import { useVendorAdministrationStore } from '@/stores/vendor/vendor'
 import { useRoute } from 'vue-router'
+import { useVendorUploadStore } from '@/stores/vendor/upload'
 
 const uploadStore = useUploadStore()
 const adminStore = useVendorAdministrationStore()
+const uploadVendorStore = useVendorUploadStore()
 
 const route = useRoute()
 
@@ -32,10 +34,16 @@ const localLicenses = computed<ILicense[]>({
   set: (newValue) => emit('update:licenses', newValue),
 })
 
+const downloadLoading = ref<boolean>(false)
+
 type FileStatus = 'notUpload' | 'loading' | 'success'
 type FileSlot = { file: File; status: FileStatus }
 const fileList = ref<FileSlot[]>([])
 const modalUploadFailed = ref(false)
+
+const originalMap = ref<Record<string, ILicense>>({})
+
+const isEditing = (id: string | number) => editingLicenseId.value === String(id)
 
 const ensureFileListLength = () => {
   const need = localLicenses.value.length
@@ -43,6 +51,12 @@ const ensureFileListLength = () => {
     fileList.value.push({ file: new File([''], 'placeholder.txt'), status: 'notUpload' })
   }
   if (fileList.value.length > need) fileList.value.splice(need)
+}
+
+const resetPickedFile = (index: number) => {
+  if (index >= 0 && index < fileList.value.length) {
+    fileList.value[index] = { file: new File([''], 'placeholder.txt'), status: 'notUpload' }
+  }
 }
 
 onMounted(() => {
@@ -53,6 +67,11 @@ watch(() => localLicenses.value.length, ensureFileListLength)
 
 const startEditing = (licenseId: string) => {
   editingLicenseId.value = licenseId
+  const idx = localLicenses.value.findIndex((i) => String(i.licenseId) === licenseId)
+  if (idx !== -1) {
+    originalMap.value[licenseId] = JSON.parse(JSON.stringify(localLicenses.value[idx]))
+    resetPickedFile(idx)
+  }
 }
 
 const updateLicense = (license: ILicense) => {
@@ -62,12 +81,27 @@ const updateLicense = (license: ILicense) => {
     updated[idx] = { ...license }
     emit('update:licenses', updated)
   }
+  delete originalMap.value[String(license.licenseId)]
   editingLicenseId.value = null
 }
 
-const deleteLicense = (licenseId: string) => {
-  const updated = localLicenses.value.filter((i) => String(i.licenseId) !== licenseId)
-  emit('update:licenses', updated)
+// const deleteLicense = (licenseId: string) => {
+//   const updated = localLicenses.value.filter((i) => String(i.licenseId) !== licenseId)
+//   emit('update:licenses', updated)
+//   delete originalMap.value[licenseId]
+//   editingLicenseId.value = null
+// }
+
+const cancelEditing = (licenseId: string) => {
+  const idx = localLicenses.value.findIndex((i) => String(i.licenseId) === licenseId)
+  const original = originalMap.value[licenseId]
+  if (idx !== -1 && original) {
+    const updated = [...localLicenses.value]
+    updated[idx] = { ...original }
+    emit('update:licenses', updated)
+  }
+  delete originalMap.value[licenseId]
+  if (idx !== -1) resetPickedFile(idx)
   editingLicenseId.value = null
 }
 
@@ -95,6 +129,21 @@ const uploadPickedFile = async (index: number) => {
     console.error(e)
     fileList.value[index].status = 'notUpload'
     modalUploadFailed.value = true
+  }
+}
+
+const downloadFile = async (path: string) => {
+  downloadLoading.value = true
+  try {
+    const file = await uploadVendorStore.preview(path)
+    const link = URL.createObjectURL(file)
+    window.open(link, '_blank')
+    setTimeout(() => URL.revokeObjectURL(link), 1000)
+  } catch (error) {
+    console.log(error)
+    alert('failed to download document. please try again later.')
+  } finally {
+    downloadLoading.value = false
   }
 }
 
@@ -153,7 +202,7 @@ watch(
                         <UiInput
                           placeholder="License Number / Description"
                           v-model="item.licenseNo"
-                          :disabled="editingLicenseId !== String(item.licenseId)"
+                          :disabled="!isEditing(item.licenseId)"
                           class="w-full"
                         />
                       </div>
@@ -166,7 +215,7 @@ watch(
                           v-model="item.issuedUTCDate"
                           format="dd MM yyyy"
                           placeholder="Pilih Tanggal"
-                          :disabled="editingLicenseId !== String(item.licenseId)"
+                          :disabled="!isEditing(item.licenseId)"
                           class="!w-48"
                         />
                       </div>
@@ -179,34 +228,31 @@ watch(
                           v-model="item.expiredUTCDate"
                           format="dd MM yyyy"
                           placeholder="Pilih Tanggal"
-                          :disabled="
-                            editingLicenseId !== String(item.licenseId) || !item.issuedUTCDate
-                          "
+                          :disabled="!isEditing(item.licenseId) || !item.issuedUTCDate"
                           :min-date="item.issuedUTCDate"
                           class="!w-48"
                         />
                       </div>
                     </td>
 
-                    <!-- Document -->
                     <td class="p-2 align-middle">
-                      <div class="h-14 flex items-center gap-2">
+                      <div v-if="isEditing(item.licenseId)" class="h-14 flex items-center gap-2">
                         <UiFileUpload
                           :name="String(item.licenseId)"
                           :text-length="15"
                           :max-size="16000000"
                           :placeholder="
                             fileList[index]?.file.name === 'placeholder.txt'
-                              ? ''
+                              ? 'Choose file...'
                               : fileList[index]?.file.name
                           "
                           accepted-files=".jpg,.jpeg,.png,.pdf,application/zip"
                           class="w-48"
-                          :disabled="editingLicenseId !== String(item.licenseId)"
+                          :disabled="false"
                           @addedFile="(file) => onPickFile(file, index)"
                           @upload-failed="() => (modalUploadFailed = true)"
                         />
-                        <!-- status / upload -->
+
                         <div class="min-w-8 flex items-center justify-center">
                           <div
                             v-if="fileList?.[index]?.status === 'loading'"
@@ -224,38 +270,53 @@ watch(
                             outline
                             size="sm"
                             @click="uploadPickedFile(index)"
-                            :disabled="editingLicenseId !== String(item.licenseId)"
+                            :disabled="fileList?.[index]?.file?.name === 'placeholder.txt'"
                             aria-label="Upload document"
                           >
                             <i class="ki-filled ki-exit-up"></i>
                           </UiButton>
                         </div>
                       </div>
-                      <!-- Pindahkan catatan file type di luar baris agar tidak menambah tinggi baris -->
+
+                      <div v-else class="h-14 flex items-center">
+                        <template v-if="item.documentUrl">
+                          <UiButton
+                            outline
+                            size="sm"
+                            @click="downloadFile(item.documentUrl)"
+                            :disabled="downloadLoading"
+                          >
+                            <UiIcon name="cloud-download" variant="duotone" />
+                            <span>Download Document</span>
+                          </UiButton>
+                        </template>
+                        <span v-else class="text-slate-400">–</span>
+                      </div>
                     </td>
 
-                    <!-- Action -->
                     <td class="p-2 align-middle">
                       <div class="h-14 flex items-center justify-center gap-2">
-                        <template v-if="editingLicenseId === String(item.licenseId)">
+                        <template v-if="isEditing(item.licenseId)">
                           <UiButton
                             outline
                             icon
                             size="sm"
                             @click="updateLicense(item)"
                             aria-label="Save"
+                            title="Save"
                           >
                             <UiIcon variant="duotone" name="check-circle" />
                           </UiButton>
                           <UiButton
-                            variant="danger"
                             outline
                             icon
+                            variant="danger"
                             size="sm"
-                            @click="deleteLicense(String(item.licenseId))"
-                            aria-label="Delete"
+                            @click="cancelEditing(String(item.licenseId))"
+                            aria-label="Cancel edit"
+                            title="Cancel edit"
                           >
-                            <UiIcon variant="duotone" name="trash" />
+                            <UiIcon variant="duotone" name="cross-circle" />
                           </UiButton>
                         </template>
                         <template v-else>
@@ -265,6 +326,7 @@ watch(
                             size="sm"
                             @click="startEditing(String(item.licenseId))"
                             aria-label="Edit"
+                            title="Edit"
                           >
                             <UiIcon variant="duotone" name="notepad-edit" />
                           </UiButton>
