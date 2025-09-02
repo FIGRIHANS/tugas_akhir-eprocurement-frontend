@@ -22,7 +22,7 @@
         <tbody>
           <tr v-for="(item, index) in form.additionalCosts" :key="index" class="cost__items">
             <td>{{ index + 1 }}</td>
-            <td>{{ item.activityExpense || '-' }}</td>
+            <td>{{ getActivityName(item.activityId) || '-' }}</td>
             <td>{{ item.itemAmount || '-' }}</td>
             <td>{{ item.debitCredit || '-' }}</td>
             <td>{{ item.taxCode || '-' }}</td>
@@ -42,10 +42,12 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, inject } from 'vue'
+import { ref,computed, inject } from 'vue'
 import type { formTypes } from '../types/invoiceDetail'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
+import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 
+const invoiceMasterApi = useInvoiceMasterDataStore()
 const form = inject<formTypes>('form')
 
 const columns = ref([
@@ -63,6 +65,13 @@ const columns = ref([
   'WHT Base Amount',
   'WHT Amount'
 ])
+
+const listActivity = computed(() => invoiceMasterApi.activityList)
+
+const getActivityName = (id: number) => {
+  const getIndex = listActivity.value.findIndex((item) => item.id === id)
+  if (getIndex !== -1) return `${listActivity.value[getIndex].code} - ${listActivity.value[getIndex].name}`
+}
 </script>
 
 <style lang="scss" scoped>
