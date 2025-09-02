@@ -13,14 +13,14 @@ import { createI18n } from 'vue-i18n'
 import { message } from '@/i18n/index'
 
 import VueDatePicker from '@vuepic/vue-datepicker'
-import '@vuepic/vue-datepicker/dist/main.css'
 import VueApexCharts from 'vue3-apexcharts'
 import vSelect from 'vue-select'
+import '@vuepic/vue-datepicker/dist/main.css'
 import 'vue-toastification/dist/index.css'
 
 const app = createApp(App)
 const i18n = createI18n({
-  locale: localStorage.getItem('locale') || 'id',
+  locale: localStorage.getItem('locale') || 'en',
   fallbackLocale: 'en',
   messages: message,
 })
