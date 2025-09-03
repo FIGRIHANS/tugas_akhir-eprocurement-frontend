@@ -180,6 +180,12 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     return response.data.result
   }
 
+  const verifyInvoiceNonPo = async (invoiceUid: string) => {
+    const response: ApiResponse<void> = await invoiceApi.post(`/invoice/non-po/verificator/${invoiceUid}`)
+
+    return response.data
+  }
+
   return {
     listPo,
     listNonPo,
@@ -200,5 +206,6 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     putSubmission,
     deleteAdditionalCost,
     getInvoiceNonPoDetail,
+    verifyInvoiceNonPo
   }
 })
