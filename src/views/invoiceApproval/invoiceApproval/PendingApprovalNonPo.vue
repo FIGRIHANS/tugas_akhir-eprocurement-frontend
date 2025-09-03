@@ -257,7 +257,7 @@ const openDetailApproval = (invoiceId: string) => {
 const openDetailInvoice = (invoiceId: string) => {
   closeDropdown()
   router.push({
-    name: 'invoiceDetail',
+    name: 'invoiceDetailNonPo',
     query: {
       id: invoiceId,
       type: '2',
@@ -291,7 +291,7 @@ const callList = () => {
   list.value = []
   verificationApi
     .getListNonPo({
-      statusCode: filterForm.status || 2,
+      statusCode: 1,
       companyCode: filterForm.companyCode,
       invoiceTypeCode: Number(filterForm.invoiceType),
       invoiceDate: filterForm.date,
