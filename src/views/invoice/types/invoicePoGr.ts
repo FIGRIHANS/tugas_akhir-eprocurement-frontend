@@ -1,3 +1,4 @@
+import type { WhtCodeTypes } from '@/stores/master-data/types/invoiceMasterData' 
 export interface itemsPoGrType {
   id: number
   poNo: string
@@ -30,6 +31,7 @@ export interface itemsPoGrType {
   poNoError: boolean
   poItemError: boolean
   departementError: boolean
+  whtCodeList?: WhtCodeTypes[]
 }
 
 export interface PoGrSearchTypes {
