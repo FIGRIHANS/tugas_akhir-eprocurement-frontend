@@ -51,7 +51,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import UiTextArea from '@/components/ui/atoms/text-area/UiTextArea.vue'
 import SapLogo from './StatusInvoice/SapLogo.vue'
@@ -73,6 +73,16 @@ const getRejectReason = () => {
 
   if (index !== -1) reason.value = detailInvoice.value.workflow[index].actionerNotes
 }
+
+watch(
+  () => detailInvoice.value,
+  () => {
+    getRejectReason()
+  },
+  {
+    deep: true
+  }
+)
 
 onMounted(() => {
   getRejectReason()
