@@ -39,14 +39,34 @@
         min-width: 80px;
       }
 
-      &--activity {
-        @extend .invoice__field-base;
-        min-width: 200px;
-      }
-
       &--item-amount {
         @extend .invoice__field-base;
         min-width: 200px;
+      }
+    
+      &--activity {
+        @extend .invoice__field-base;
+        min-width: 350px;
+      }
+    
+      &--tax {
+        @extend .invoice__field-base;
+        min-width: 350px;
+      }
+    
+      &--cost {
+        @extend .invoice__field-base;
+        min-width: 400px;
+      }
+
+      &--wht-type {
+        @extend .invoice__field-base;
+        min-width: 250px;
+      }
+
+      &--wht-code {
+        @extend .invoice__field-base;
+        min-width: 400px;
       }
     }
   
