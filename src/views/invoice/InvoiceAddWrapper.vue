@@ -381,10 +381,11 @@ const mapDocument = () => {
   for (const [index, item] of libDocument.entries()) {
     if (form[item as keyof typeof form]) {
       document.push({
+        id: form[item].id || 0,
         documentType: Number(listDocumentType.value[index].code),
-        documentName: form.invoiceDocument?.name,
-        documentUrl: form.invoiceDocument?.path,
-        documentSize: Number(form.invoiceDocument?.fileSize),
+        documentName: form[item].name,
+        documentUrl: form[item].path,
+        documentSize: Number(form[item].fileSize),
       })
     }
   }
@@ -777,6 +778,7 @@ const setData = () => {
       switch (doc.documentType) {
         case 1:
           form.invoiceDocument = {
+            id: doc.id,
             name: doc.documentName,
             fileSize: doc.documentSize.toString(),
             path: doc.documentUrl,
@@ -784,6 +786,7 @@ const setData = () => {
           break
         case 2:
           form.tax = {
+            id: doc.id,
             name: doc.documentName,
             fileSize: doc.documentSize.toString(),
             path: doc.documentUrl,
@@ -791,6 +794,7 @@ const setData = () => {
           break
         case 3:
           form.referenceDocument = {
+            id: doc.id,
             name: doc.documentName,
             fileSize: doc.documentSize.toString(),
             path: doc.documentUrl,
@@ -798,6 +802,7 @@ const setData = () => {
           break
         case 4:
           form.otherDocument = {
+            id: doc.id,
             name: doc.documentName,
             fileSize: doc.documentSize.toString(),
             path: doc.documentUrl,
@@ -917,6 +922,7 @@ const setDataNonPo = () => {
       switch (doc.documentType) {
         case 1:
           form.invoiceDocument = {
+            id: doc.id,
             name: doc.documentName,
             fileSize: doc.documentSize.toString(),
             path: doc.documentUrl,
@@ -924,6 +930,7 @@ const setDataNonPo = () => {
           break
         case 2:
           form.tax = {
+            id: doc.id,
             name: doc.documentName,
             fileSize: doc.documentSize.toString(),
             path: doc.documentUrl,
@@ -931,6 +938,7 @@ const setDataNonPo = () => {
           break
         case 3:
           form.referenceDocument = {
+            id: doc.id,
             name: doc.documentName,
             fileSize: doc.documentSize.toString(),
             path: doc.documentUrl,
@@ -938,6 +946,7 @@ const setDataNonPo = () => {
           break
         case 4:
           form.otherDocument = {
+            id: doc.id,
             name: doc.documentName,
             fileSize: doc.documentSize.toString(),
             path: doc.documentUrl,

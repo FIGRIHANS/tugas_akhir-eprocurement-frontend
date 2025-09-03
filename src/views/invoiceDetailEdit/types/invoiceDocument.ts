@@ -13,6 +13,7 @@ export interface documentDetailTypes {
   name?: string
   path: string
   fileSize: string
+  id: number
 }
 
 export interface listFormTypes {
