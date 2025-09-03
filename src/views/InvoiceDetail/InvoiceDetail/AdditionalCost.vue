@@ -83,7 +83,7 @@ const setAdditionalCostList = () => {
   const result = [] as itemsCostType[]
   if (form.value.additionalCosts) {
     for (const item of form.value.additionalCosts) {
-      callWhtCode(item.whtType)
+      if (item.whtType) callWhtCode(item.whtType)
       const data = {
         ...item,
         whtCodeList: whtCodeList.value
