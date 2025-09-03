@@ -17,6 +17,8 @@
                 'cost__field-base--activity': item.toLowerCase() === 'activity / expense',
                 'cost__field-base--tax': item.toLowerCase() === 'tax code',
                 'cost__field-base--cost': item.toLowerCase() === 'cost center',
+                'cost__field-base--wht-type': item.toLowerCase() === 'wht type',
+                'cost__field-base--wht-code': item.toLowerCase() === 'wht code',
                 'cost__field-base--description': item.toLowerCase() === 'description'
               }"
             >
@@ -36,13 +38,13 @@
               </button>
             </td>
             <td>
-              <span v-if="!item.isEdit">{{ getActivityName(item.activityExpense) }}</span>
+              <span v-if="!item.isEdit">{{ getActivityName(item.activityId) }}</span>
               <v-select
                 v-else
                 v-model="formEdit.activityExpense"
                 class="customSelect"
                 :get-option-label="(option: any) => `${option.code} - ${option.name}`"
-                :reduce="(option: any) => option.code"
+                :reduce="(option: any) => option.id"
                 :options="listActivity"
                 appendToBody
               ></v-select>
@@ -102,12 +104,12 @@
               <input v-else v-model="formEdit.assignment" class="input" placeholder=""/>
             </td>
             <td>
-              <span v-if="!item.isEdit">{{ item.whtType }}</span>
+              <span v-if="!item.isEdit">{{ getWhtTypeName(item.whtType) }}</span>
               <v-select
                 v-else
                 v-model="formEdit.whtType"
                 class="customSelect"
-                label="name"
+                :get-option-label="(option: any) => `${option.code} - ${option.name}`"
                 :reduce="(option: any) => option.code"
                 :options="whtTypeList"
                 appendToBody
@@ -115,12 +117,12 @@
               ></v-select>
             </td>
             <td>
-              <span v-if="!item.isEdit">{{ item.whtCode }}</span>
+              <span v-if="!item.isEdit">{{ getWhtCodeName(item.whtCode, item) }}</span>
               <v-select
                 v-else
                 v-model="formEdit.whtCode"
                 class="customSelect"
-                label="whtCode"
+                :get-option-label="(option: any) => `${option.whtCode} - ${option.description}`"
                 :reduce="(option: any) => option.whtCode"
                 :options="whtCodeList"
                 appendToBody
@@ -168,7 +170,7 @@ const columns = ref([
   'WHT Amount'
 ])
 const formEdit = reactive({
-  activityExpense: '',
+  activityExpense: null,
   itemAmount: 0,
   debitCredit: '',
   taxCode: '',
@@ -202,7 +204,9 @@ const addNew = () => {
   if (form) {
     const data = {
       id: 0,
+      activityId: null,
       activityExpense: '',
+      activityName: '',
       itemAmount: 0,
       debitCredit: '',
       taxCode: '',
@@ -214,6 +218,7 @@ const addNew = () => {
       whtCode: '',
       whtBaseAmount: 0,
       whtAmount: 0,
+      whtCodeList: [],
       isEdit: false
     }
     form.value.additionalCosts.push(data)
@@ -221,7 +226,7 @@ const addNew = () => {
 }
 
 const resetFormEdit = () => {
-  formEdit.activityExpense = ''
+  formEdit.activityExpense = null
   formEdit.itemAmount = 0
   formEdit.debitCredit = ''
   formEdit.taxCode = ''
@@ -239,7 +244,7 @@ const goEdit = (item: itemsCostType) => {
   item.isEdit = !item.isEdit
 
   if (item.isEdit) {
-    formEdit.activityExpense = item.activityExpense
+    formEdit.activityExpense = item.activityId
     formEdit.itemAmount = item.itemAmount
     formEdit.debitCredit = item.debitCredit
     formEdit.taxCode = item.taxCode
@@ -252,7 +257,10 @@ const goEdit = (item: itemsCostType) => {
     formEdit.whtBaseAmount = item.whtBaseAmount
     formEdit.whtAmount = item.whtAmount
   } else {
-    item.activityExpense = formEdit.activityExpense
+    const itemIndex = listActivity.value.findIndex((sub) => sub.id === formEdit.activityExpense)
+    item.activityId = formEdit.activityExpense
+    item.activityExpense = listActivity.value[itemIndex].code
+    item.activityName = listActivity.value[itemIndex].name
     item.itemAmount = formEdit.itemAmount
     item.debitCredit = formEdit.debitCredit
     item.taxCode = formEdit.taxCode
@@ -282,6 +290,7 @@ const resetItem = (item: itemsCostType, index: number) => {
 
 const callWhtCode = (data: itemsCostType) => {
   formEdit.whtCode = ''
+  data.whtCodeList = []
   invoiceMasterApi.getWhtCode(formEdit.whtType).then(() => {
     data.whtCodeList = whtCodeList.value
   })
@@ -323,8 +332,8 @@ const getCostCenterName = (costCenter: string) => {
   return '-'
 }
 
-const getActivityName = (code: string) => {
-  const getIndex = listActivity.value.findIndex((item) => item.code === code)
+const getActivityName = (id: number) => {
+  const getIndex = listActivity.value.findIndex((item) => item.id === id)
   if (getIndex !== -1) return `${listActivity.value[getIndex].code} - ${listActivity.value[getIndex].name}`
 }
 
@@ -337,12 +346,34 @@ const getTaxCodeName = (taxCode: string) => {
   return '-'
 }
 
+const getWhtTypeName = (code: string) => {
+  const index = whtTypeList.value.findIndex((item) => item.code === code)
+  if (index !== -1) {
+    const data = whtTypeList.value[index]
+    return `${data.code} - ${data.name}`
+  }
+  return '-'
+}
+
+const getWhtCodeName = (code: string, data: itemsCostType) => {
+  const index = data.whtCodeList.findIndex((item) => item.whtCode === code)
+  if (index !== -1) {
+    const detailData = data.whtCodeList[index]
+    return `${detailData.whtCode} - ${detailData.description}`
+  }
+  return '-'
+}
+
 const setWhtAmount = (data: itemsCostType) => {
-  const whtlist = data.whtCodeList || []
-  const indexWht = whtlist.findIndex((item) => item.whtCode === formEdit.whtCode)
-  if (indexWht !== -1) {
-    const tarif = whtlist[indexWht].tarif / 100
-    formEdit.whtAmount = tarif * formEdit.whtBaseAmount
+  if (formEdit.whtCode) {
+    const whtlist = data.whtCodeList || []
+    const indexWht = whtlist.findIndex((item) => item.whtCode === formEdit.whtCode)
+    if (indexWht !== -1) {
+      const tarif = whtlist[indexWht].tarif / 100
+      formEdit.whtAmount = tarif * formEdit.whtBaseAmount
+    }
+  } else {
+    formEdit.whtAmount = 0
   }
 }
 

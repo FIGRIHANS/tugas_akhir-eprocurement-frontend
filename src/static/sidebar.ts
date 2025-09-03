@@ -205,9 +205,19 @@ export default [
         to: 'invoiceVerification',
       },
       {
+        id: 'invoice-verification-no-po',
+        title: 'Invoice Verification Non Po',
+        to: 'invoiceVerificationNoPo',
+      },
+      {
         id: 'invoice-approval',
         title: 'Invoice Approval',
         to: 'invoiceApproval',
+      },
+      {
+        id: 'invoice-approval-no-po',
+        title: 'Invoice Approval Non Po',
+        to: 'invoiceApprovalNonPo',
       },
       // {
       //   id: 'schedule-payment',

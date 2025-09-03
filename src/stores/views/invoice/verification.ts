@@ -142,13 +142,19 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
       `/invoice/submission-non-po/${uid}`,
     )
 
-    detailInvoice.value = response.data.result.content
+    detailNonPoInvoice.value = response.data.result.content
 
     return response.data.result
   }
 
   const postSubmission = async (data: PostVerificationTypes) => {
     const response: ApiResponse<void> = await invoiceApi.post(`/invoice/approval`, data)
+
+    return response.data
+  }
+
+  const postSubmissionNonPo = async (data: PostVerificationTypes) => {
+    const response: ApiResponse<void> = await invoiceApi.post(`/invoice/approval-non-po`, data)
 
     return response.data
   }
@@ -180,6 +186,13 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     return response.data.result
   }
 
+  const verifyInvoiceNonPo = async (invoiceUid: string) => {
+    const response: ApiResponse<void> = await invoiceApi.post(
+      `/invoice/non-po/verificator/${invoiceUid}`,
+    )
+    return response.data
+  }
+
   return {
     listPo,
     listNonPo,
@@ -192,6 +205,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     detailNonPoInvoice,
     resetDetailInvoiceEdit,
     postSubmission,
+    postSubmissionNonPo,
     getListPo,
     getListNonPo,
     getInvoiceDetail,
@@ -200,5 +214,6 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     putSubmission,
     deleteAdditionalCost,
     getInvoiceNonPoDetail,
+    verifyInvoiceNonPo,
   }
 })

@@ -182,7 +182,7 @@ const checkInvoiceInformation = () => {
     }
   }
 
-  status = checkTableItem()
+  status = status ? checkTableItem() : false
 
   return status
 }
@@ -251,24 +251,28 @@ const goNext = () => {
       postingDate: moment(form.value.postingDate).toISOString(),
       estimatedPaymentDate: moment(form.value.estimatedPaymentDate).toISOString(),
       invoiceDocument: !isEmpty(form.value.invoiceDocument) ? {
+        id: form.value.invoiceDocument.id || 0,
         documentType: 1,
         documentName: form.value.invoiceDocument.name || '',
         documentUrl: form.value.invoiceDocument.path,
         documentSize: Number(form.value.invoiceDocument.fileSize)
       } : null,
       tax: !isEmpty(form.value.tax) ? {
+        id: form.value.tax.id || 0,
         documentType: 2,
         documentName: form.value.tax.name || '',
         documentUrl: form.value.tax.path,
         documentSize: Number(form.value.tax.fileSize)
       } : null,
       referenceDocument: !isEmpty(form.value.referenceDocument) ? {
+        id: form.value.referenceDocument.id || 0,
         documentType: 3,
         documentName: form.value.referenceDocument.name || '',
         documentUrl: form.value.referenceDocument.path,
         documentSize: Number(form.value.referenceDocument.fileSize)
       } : null,
       otherDocument: !isEmpty(form.value.otherDocument) ? {
+        id: form.value.otherDocument.id || 0,
         documentType: 4,
         documentName: form.value.otherDocument.name || '',
         documentUrl: form.value.otherDocument.path,
@@ -328,6 +332,7 @@ const mapDataEditAdditional = () => {
 const mapDocument = (data: documentDetailTypesStore | null) => {
   if (!data) return null
   return {
+    id: data.id,
     name: data.documentName,
     path: data.documentUrl,
     fileSize: data.documentSize ? data.documentSize.toString() : '0'
@@ -398,7 +403,6 @@ const setDataEdit = () => {
     npwpNumberAlternative: '',
     ktpNumberAlternative: '',
     emailAlternative: ''
-    
   }
 }
 
@@ -422,12 +426,14 @@ const setDataDefault = () => {
   for (const item of data?.additionalCosts || []) {
     resultAdditional.push({
       ...item,
+      whtCodeList: [],
       isEdit: false
     })
   }
 
   for (const item of data?.documents || []) {
     const data = {
+      id: item.id,
       name: item.documentName,
       path: item.documentUrl,
       fileSize: item.documentSize ? item.documentSize.toString() : '0'
@@ -571,6 +577,7 @@ const mapPoGr = () => {
   const poGr = []
   for (const item of form.value.invoicePoGr) {
     poGr.push({
+      id: item.id,
       poNo: item.poNo,
       poItem: Number(item.poItem),
       grDocumentNo: item.grDocumentNo,
@@ -592,7 +599,9 @@ const mapAdditionalCost = () => {
   for (const item of form.value.additionalCosts) {
     cost.push({
       id: item.id,
+      activityId: item.activityId,
       activityExpense: item.activityExpense,
+      activityName: item.activityName,
       itemAmount: Number(item.itemAmount),
       debitCredit: item.debitCredit,
       taxCode: item.taxCode,

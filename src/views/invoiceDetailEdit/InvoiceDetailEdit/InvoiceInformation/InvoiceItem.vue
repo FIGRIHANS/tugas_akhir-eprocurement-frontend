@@ -94,19 +94,29 @@
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.whtType }}</span>
-              <select v-else v-model="formEdit.whtType" class="select" placeholder="" @change="callWhtCode(item)">
-                <option v-for="item of whtTypeList" :key="item.code" :value="item.code">
-                  {{ item.name }}
-                </option>
-              </select>
+              <v-select
+                v-else
+                v-model="formEdit.whtType"
+                class="customSelect"
+                label="name"
+                :reduce="(option: any) => option.code"
+                :options="whtTypeList"
+                appendToBody
+                @update:modelValue="callWhtCode(item)"
+              ></v-select>
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.whtCode }}</span>
-              <select v-else v-model="formEdit.whtCode" class="select" placeholder="">
-                <option v-for="sub of item.whtCodeList" :key="sub.whtCode" :value="sub.whtCode">
-                  {{ sub.whtCode }}
-                </option>
-              </select>
+              <v-select
+                v-else
+                v-model="formEdit.whtCode"
+                class="customSelect"
+                label="whtCode"
+                :reduce="(option: any) => option.whtCode"
+                :options="whtCodeList"
+                appendToBody
+                @update:modelValue="setWhtAmount(item)"
+              ></v-select>
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.whtBaseAmount }}</span>
@@ -264,6 +274,7 @@ const resetItem = (item: invoiceItemTypes, index: number) => {
 
 const callWhtCode = (data: invoiceItemTypes) => {
   formEdit.whtCode = ''
+  data.whtCodeList = []
   invoiceMasterApi.getWhtCode(formEdit.whtType).then(() => {
     data.whtCodeList = whtCodeList.value
   })
@@ -300,6 +311,19 @@ const getDebitCreditName = (code: string) => {
   if (code === 'K') return 'Credit'
   else if (code === 'D') return 'Debit'
   else return '-'
+}
+
+const setWhtAmount = (data: invoiceItemTypes) => {
+  if (formEdit.whtCode) {
+    const whtlist = data.whtCodeList || []
+    const indexWht = whtlist.findIndex((item) => item.whtCode === formEdit.whtCode)
+    if (indexWht !== -1) {
+      const tarif = whtlist[indexWht].tarif / 100
+      formEdit.whtAmount = tarif * formEdit.whtBaseAmount
+    }
+  } else {
+    formEdit.whtAmount = 0
+  }
 }
 
 watch(

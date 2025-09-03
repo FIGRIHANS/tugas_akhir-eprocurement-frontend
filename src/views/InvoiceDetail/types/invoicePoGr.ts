@@ -1,3 +1,4 @@
+import type { WhtCodeTypes } from '@/stores/master-data/types/invoiceMasterData' 
 export interface itemsPoGrType {
   id: number
   poNo: string
@@ -19,4 +20,5 @@ export interface itemsPoGrType {
   whtBaseAmount: number
   whtAmount: number
   department: string
+  whtCodeList?: WhtCodeTypes[]
 }

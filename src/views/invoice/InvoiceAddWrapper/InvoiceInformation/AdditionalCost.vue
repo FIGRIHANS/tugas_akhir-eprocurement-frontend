@@ -46,7 +46,7 @@
                   v-model="item.activity"
                   class="customSelect"
                   :get-option-label="(option: any) => `${option.code} - ${option.name}`"
-                  :reduce="(option: any) => option.code"
+                  :reduce="(option: any) => option.id"
                   :options="listActivity"
                   appendToBody
                 ></v-select>
@@ -141,7 +141,9 @@ const listActivity = computed(() => invoiceMasterApi.activityList)
 const addNew = () => {
   if (form) {
     const data = {
-      activity: '',
+      activity: null,
+      activityCode: '',
+      activityName: '',
       itemAmount: 0,
       debitCredit: '',
       taxCode: '',
@@ -163,8 +165,8 @@ const deleteItem = (index: number) => {
   form?.additionalCost.splice(index, 1)
 }
 
-const getActivityName = (code: string) => {
-  const getIndex = listActivity.value.findIndex((item) => item.code === code)
+const getActivityName = (id: number) => {
+  const getIndex = listActivity.value.findIndex((item) => item.id === id)
   if (getIndex !== -1) return `${listActivity.value[getIndex].code} - ${listActivity.value[getIndex].name}`
 }
 
