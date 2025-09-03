@@ -36,6 +36,16 @@
       @extend .cost__field-base;
       min-width: 400px;
     }
+
+    &--wht-type {
+      @extend .cost__field-base;
+      min-width: 250px;
+    }
+
+    &--wht-code {
+      @extend .cost__field-base;
+      min-width: 400px;
+    }
     
     &--description {
       @extend .cost__field-base;

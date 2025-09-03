@@ -595,17 +595,16 @@ const afterGetDetail = () => {
       activeStep.value = 'Posting'
       break
   }
-  invoiceMasterApi.getActivity(form.value.companyCode || '')
 }
 
 watch(
   () => detailInvoice.value,
   () => {
     afterGetDetail()
+    invoiceMasterApi.getActivity(form.value.companyCode || '')
   },
   {
-    deep: true,
-    immediate: true
+    deep: true
   }
 )
 
