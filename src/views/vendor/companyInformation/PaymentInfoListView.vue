@@ -567,6 +567,8 @@ const handleDropdown = (id: number, newMode: 'view' | 'edit' | 'delete') => {
     payload.value.request.vendorBankDetail.bankAddress = paymentData.bankAddress
     payload.value.request.vendorBankDetail.isBankRegistered = paymentData.isBankRegistered
     payload.value.request.vendorBankDetail.isHolderNameDifferent = paymentData.isHolderNameDifferent
+    payload.value.request.vendorBankDetail.urlAccountDifferences = paymentData.urlAccountDifferences
+    payload.value.request.vendorBankDetail.urlFirstPage = paymentData.urlFirstPage
     isBankNotRegistered.value = !paymentData.isBankRegistered
 
     if (paymentData.isBankRegistered) {

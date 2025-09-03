@@ -18,9 +18,12 @@ import VendorApprovalFilters from '@/components/vendor/filterButton/VendorApprov
 import SAPButton from '@/components/vendor/approval/SAPButton.vue'
 import { formatDate } from '@/composables/date-format'
 import { useLoginStore } from '@/stores/views/login'
+import { useI18n } from 'vue-i18n'
+import { tableColsEn, tableColsId } from './static'
 
 const route = useRoute()
 const router = useRouter()
+const { locale } = useI18n()
 
 const approval = useApprovalStore()
 const userStore = useLoginStore()
@@ -28,6 +31,12 @@ const userStore = useLoginStore()
 const search = ref<string>('')
 
 const userData = computed(() => userStore.userData)
+const tableCols = computed(() => (locale.value === 'id' ? tableColsId : tableColsEn))
+const start = computed(() => approval.data.pageSize * (approval.data.page - 1) + 1)
+const end = computed(
+  () => approval.data.pageSize * (approval.data.page - 1) + approval.data.items.length,
+)
+const total = computed(() => approval.data.total)
 
 const handlePageChange = (page: number) => {
   const query = { ...route.query, page }
@@ -70,7 +79,7 @@ watch(
   />
   <div class="card">
     <div class="card-header p-6">
-      <UiInputSearch v-model="search" placeholder="Search vendor" />
+      <UiInputSearch v-model="search" :placeholder="$t('general.search', { field: 'Vendor' })" />
       <div class="flex gap-3">
         <FilterDropdownApproval />
       </div>
@@ -80,33 +89,27 @@ watch(
       <table class="table align-middle">
         <thead>
           <tr class="text-nowrap">
-            <th>Action</th>
-            <th>Company Name</th>
-            <th>Status</th>
-            <th>Vendor Address</th>
-            <th>Vendor Category</th>
-            <th>Activation Date</th>
-            <th>Approval Date Sent</th>
+            <th v-for="cols in tableCols" :key="cols">{{ cols }}</th>
           </tr>
         </thead>
         <tbody>
           <!-- show loading -->
           <tr v-if="approval.loading">
-            <td colspan="8" class="text-center">
+            <td :colspan="tableCols.length" class="text-center">
               <UiLoading size="md" />
             </td>
           </tr>
 
           <!-- show error -->
           <tr v-else-if="approval.error">
-            <td colspan="8">
+            <td :colspan="tableCols.length">
               {{ approval.error }}
             </td>
           </tr>
 
           <!-- show message if there are no data -->
           <tr v-else-if="!approval.data.items.length">
-            <td colspan="8" class="text-center">No data</td>
+            <td :colspan="tableCols.length" class="text-center">No data</td>
           </tr>
 
           <tr
@@ -166,9 +169,7 @@ watch(
     </div>
     <div class="card-footer">
       <div class="text-sm text-gray-800">
-        Showing {{ approval.data.pageSize * (approval.data.page - 1) + 1 }} to
-        {{ approval.data.pageSize * (approval.data.page - 1) + approval.data.items.length }}
-        of {{ approval.data.total }} entries
+        {{ $t('vendor.pagination.show', { start, end, total }) }}
       </div>
       <LPagination
         :current-page="approval.data.page"

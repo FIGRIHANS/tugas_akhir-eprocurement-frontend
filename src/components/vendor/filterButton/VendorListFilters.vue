@@ -26,7 +26,7 @@
       <UiIcon name="cross" @click="handleRemoveFilter(filter.key)" />
     </div>
     <UiButton variant="light" size="sm" class="btn-clear" @click="handleResetFilter">
-      Reset Filter
+      {{ $t('vendor.masterFilters.reset') }}
     </UiButton>
   </div>
 </template>
@@ -37,18 +37,22 @@ import { formatDate } from '@/composables/date-format'
 import { useVendorCategoryStore } from '@/stores/vendor/category'
 import { useVerificationStatus } from '@/stores/vendor/reference'
 import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter, type LocationQueryValue } from 'vue-router'
 
 const router = useRouter()
 const route = useRoute()
+const { t } = useI18n()
+
 const categories = useVendorCategoryStore()
 const verifStatus = useVerificationStatus()
-const filtersKey: { item: string; value: string }[] = [
+
+const filtersKey = computed(() => [
   { item: 'statusId', value: 'Status' },
-  { item: 'categoryId', value: 'Category' },
-  { item: 'startDate', value: 'Registration Start Date' },
-  { item: 'endDate', value: 'Registration End Date' },
-]
+  { item: 'categoryId', value: t('vendor.masterFilters.category') },
+  { item: 'startDate', value: t('vendor.masterFilters.registrationStartDate') },
+  { item: 'endDate', value: t('vendor.masterFilters.registrationEndDate') },
+])
 
 const filters = ref<{ key: string; value: LocationQueryValue | LocationQueryValue[] }[]>([])
 
