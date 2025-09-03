@@ -89,7 +89,7 @@ const setAdditionalCostList = () => {
 }
 
 const checkInvoiceDp = () => {
-  return form.value.invoiceDPCode === 9011
+  return form.value.invoiceDPCode === 9012
 }
 
 const checkPoPib = () => {
