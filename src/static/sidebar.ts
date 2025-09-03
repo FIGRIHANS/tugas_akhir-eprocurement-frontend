@@ -217,7 +217,7 @@ export default [
       {
         id: 'invoice-approval-no-po',
         title: 'Invoice Approval Non Po',
-        to: 'invoiceApprovalNoPo',
+        to: 'invoiceApprovalNonPo',
       },
       // {
       //   id: 'schedule-payment',
