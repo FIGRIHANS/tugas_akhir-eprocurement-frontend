@@ -308,7 +308,7 @@ const mapAdditionalCost = () => {
       whtType: item.whtType,
       whtCode: item.whtCode,
       whtBaseAmount: Number(item.whtBaseAmount),
-      whtAmount: item.whtAmount
+      whtAmount: item.whtAmount,
     })
   }
   return cost
@@ -369,6 +369,29 @@ const mapDataVerif = () => {
 }
 
 const goVerif = () => {
+  if (route.query.invoiceType === 'no_po') {
+    isLoading.value = true
+    verificationApi
+      .verifyInvoiceNonPo(form.value.invoiceUId)
+      .then((res) => {
+        if (res.statusCode === 200) {
+          verificationApi.resetDetailInvoiceEdit()
+          const idModal = document.querySelector('#success_verif_modal')
+          const modal = KTModal.getInstance(idModal as HTMLElement)
+          modal.show()
+          for (const item of additionalCostTempDelete.value) {
+            verificationApi.deleteAdditionalCost(form.value.invoiceUId, item.id)
+          }
+        }
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+      .finally(() => {
+        isLoading.value = false
+      })
+  }
+
   const status = checkVerif()
 
   if (!status) return
@@ -604,8 +627,8 @@ watch(
     invoiceMasterApi.getActivity(form.value.companyCode || '')
   },
   {
-    deep: true
-  }
+    deep: true,
+  },
 )
 
 onMounted(async () => {
