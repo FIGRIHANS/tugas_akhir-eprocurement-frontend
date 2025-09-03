@@ -426,6 +426,7 @@ const setDataDefault = () => {
   for (const item of data?.additionalCosts || []) {
     resultAdditional.push({
       ...item,
+      whtCodeList: [],
       isEdit: false
     })
   }
