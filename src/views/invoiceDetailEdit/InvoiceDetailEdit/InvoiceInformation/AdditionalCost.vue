@@ -17,6 +17,8 @@
                 'cost__field-base--activity': item.toLowerCase() === 'activity / expense',
                 'cost__field-base--tax': item.toLowerCase() === 'tax code',
                 'cost__field-base--cost': item.toLowerCase() === 'cost center',
+                'cost__field-base--wht-type': item.toLowerCase() === 'wht type',
+                'cost__field-base--wht-code': item.toLowerCase() === 'wht code',
                 'cost__field-base--description': item.toLowerCase() === 'description'
               }"
             >
@@ -102,12 +104,12 @@
               <input v-else v-model="formEdit.assignment" class="input" placeholder=""/>
             </td>
             <td>
-              <span v-if="!item.isEdit">{{ item.whtType }}</span>
+              <span v-if="!item.isEdit">{{ getWhtTypeName(item.whtType) }}</span>
               <v-select
                 v-else
                 v-model="formEdit.whtType"
                 class="customSelect"
-                label="name"
+                :get-option-label="(option: any) => `${option.code} - ${option.name}`"
                 :reduce="(option: any) => option.code"
                 :options="whtTypeList"
                 appendToBody
@@ -115,12 +117,12 @@
               ></v-select>
             </td>
             <td>
-              <span v-if="!item.isEdit">{{ item.whtCode }}</span>
+              <span v-if="!item.isEdit">{{ getWhtCodeName(item.whtCode, item) }}</span>
               <v-select
                 v-else
                 v-model="formEdit.whtCode"
                 class="customSelect"
-                label="whtCode"
+                :get-option-label="(option: any) => `${option.whtCode} - ${option.description}`"
                 :reduce="(option: any) => option.whtCode"
                 :options="whtCodeList"
                 appendToBody
@@ -216,6 +218,7 @@ const addNew = () => {
       whtCode: '',
       whtBaseAmount: 0,
       whtAmount: 0,
+      whtCodeList: [],
       isEdit: false
     }
     form.value.additionalCosts.push(data)
@@ -339,6 +342,24 @@ const getTaxCodeName = (taxCode: string) => {
   if (index !== -1) {
     const data = listTaxCalculation.value[index]
     return `${data.code} - ${data.name}`
+  }
+  return '-'
+}
+
+const getWhtTypeName = (code: string) => {
+  const index = whtTypeList.value.findIndex((item) => item.code === code)
+  if (index !== -1) {
+    const data = whtTypeList.value[index]
+    return `${data.code} - ${data.name}`
+  }
+  return '-'
+}
+
+const getWhtCodeName = (code: string, data: itemsCostType) => {
+  const index = data.whtCodeList.findIndex((item) => item.whtCode === code)
+  if (index !== -1) {
+    const detailData = data.whtCodeList[index]
+    return `${detailData.whtCode} - ${detailData.description}`
   }
   return '-'
 }

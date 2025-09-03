@@ -28,6 +28,31 @@
       @extend .cost__column;
       min-width: 80px;
     }
+    
+    &--activity {
+      @extend .cost__column;
+      min-width: 350px;
+    }
+    
+    &--tax {
+      @extend .cost__column;
+      min-width: 350px;
+    }
+    
+    &--cost {
+      @extend .cost__column;
+      min-width: 400px;
+    }
+
+    &--wht-type {
+      @extend .cost__column;
+      min-width: 250px;
+    }
+
+    &--wht-code {
+      @extend .cost__column;
+      min-width: 400px;
+    }
   }
 
   &__items {

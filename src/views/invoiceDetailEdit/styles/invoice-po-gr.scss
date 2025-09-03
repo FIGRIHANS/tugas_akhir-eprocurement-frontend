@@ -31,6 +31,16 @@
       @extend .pogr__field-base;
       min-width: 350px;
     }
+
+    &--wht-type {
+      @extend .pogr__field-base;
+      min-width: 250px;
+    }
+
+    &--wht-code {
+      @extend .pogr__field-base;
+      min-width: 400px;
+    }
   }
 
   &__field-items {
