@@ -8,6 +8,26 @@ export interface ParamsSubmissionTypes {
   additionalCosts: ParamsSubmissionCost[]
   workflow: ParamsSubmissionWorkflow[]
   alternativePayee: itemsAlternativePayee[]
+  costExpense: ParamsSubmissionCostExpense[]
+}
+
+interface ParamsSubmissionCostExpense {
+  id: number
+  activityId: number
+  activityExpenses: string
+  activityName: string
+  itemAmount: number
+  itemText: string
+  debitCredit: string
+  taxCode: string
+  vatAmount: number
+  costCenter: string
+  profitCenter: string
+  assignment: string
+  whtType: string
+  whtCode: string
+  whtBaseAmount: number
+  whtAmount: number
 }
 
 export interface PostVerificationTypes {
