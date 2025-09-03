@@ -381,11 +381,10 @@ const mapDocument = () => {
   for (const [index, item] of libDocument.entries()) {
     if (form[item as keyof typeof form]) {
       document.push({
-        id: form[item].id || 0,
         documentType: Number(listDocumentType.value[index].code),
-        documentName: form[item].name,
-        documentUrl: form[item].path,
-        documentSize: Number(form[item].fileSize),
+        documentName: form.invoiceDocument?.name,
+        documentUrl: form.invoiceDocument?.path,
+        documentSize: Number(form.invoiceDocument?.fileSize),
       })
     }
   }
@@ -413,8 +412,8 @@ const mapPoGr = () => {
       conditionType: item.conditionType,
       conditionTypeDesc: item.conditionTypeDesc,
       qcStatus: item.qcStatus,
-      whtType: '',
-      whtCode: '',
+      whtType: '-',
+      whtCode: '-',
       whtBaseAmount: 0,
       whtAmount: 0,
       department: item.department,
@@ -778,7 +777,6 @@ const setData = () => {
       switch (doc.documentType) {
         case 1:
           form.invoiceDocument = {
-            id: doc.id,
             name: doc.documentName,
             fileSize: doc.documentSize.toString(),
             path: doc.documentUrl,
@@ -786,7 +784,6 @@ const setData = () => {
           break
         case 2:
           form.tax = {
-            id: doc.id,
             name: doc.documentName,
             fileSize: doc.documentSize.toString(),
             path: doc.documentUrl,
@@ -794,7 +791,6 @@ const setData = () => {
           break
         case 3:
           form.referenceDocument = {
-            id: doc.id,
             name: doc.documentName,
             fileSize: doc.documentSize.toString(),
             path: doc.documentUrl,
@@ -802,7 +798,6 @@ const setData = () => {
           break
         case 4:
           form.otherDocument = {
-            id: doc.id,
             name: doc.documentName,
             fileSize: doc.documentSize.toString(),
             path: doc.documentUrl,
@@ -922,7 +917,6 @@ const setDataNonPo = () => {
       switch (doc.documentType) {
         case 1:
           form.invoiceDocument = {
-            id: doc.id,
             name: doc.documentName,
             fileSize: doc.documentSize.toString(),
             path: doc.documentUrl,
@@ -930,7 +924,6 @@ const setDataNonPo = () => {
           break
         case 2:
           form.tax = {
-            id: doc.id,
             name: doc.documentName,
             fileSize: doc.documentSize.toString(),
             path: doc.documentUrl,
@@ -938,7 +931,6 @@ const setDataNonPo = () => {
           break
         case 3:
           form.referenceDocument = {
-            id: doc.id,
             name: doc.documentName,
             fileSize: doc.documentSize.toString(),
             path: doc.documentUrl,
@@ -946,7 +938,6 @@ const setDataNonPo = () => {
           break
         case 4:
           form.otherDocument = {
-            id: doc.id,
             name: doc.documentName,
             fileSize: doc.documentSize.toString(),
             path: doc.documentUrl,
@@ -1120,16 +1111,16 @@ onMounted(() => {
     tabNow.value = 'preview'
   }
 
-  if (route.query.invoice) {
-    if (route.query.type === 'po-view' || route.query.invoice) {
-      invoiceApi.getPoDetail(route.query.invoice?.toString() || '').then(() => {
-        setData()
-      })
-    } else if (route.query.type === 'non-po-view') {
-      invoiceApi.getNonPoDetail(route.query.invoice?.toString() || '').then(() => {
-        setDataNonPo()
-      })
-    }
+  if (route.query.type === 'non-po-view') {
+    invoiceApi.getNonPoDetail(route.query.invoice?.toString() || '').then(() => {
+      setDataNonPo()
+    })
+  }
+
+  if (route.query.type === 'po-view' || route.query.invoice) {
+    invoiceApi.getPoDetail(route.query.invoice?.toString() || '').then(() => {
+      setData()
+    })
   }
 })
 
