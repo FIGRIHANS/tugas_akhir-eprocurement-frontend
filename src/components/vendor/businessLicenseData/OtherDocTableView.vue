@@ -166,7 +166,7 @@ watch(
 <template>
   <div class="my-6">
     <div class="card">
-      <div class="card-body overflow-auto">
+      <div class="card-body">
         <div class="flex items-center gap-2 mb-2">
           <h2 class="text-lg font-semibold text-slate-700">Other Documents</h2>
           <div class="relative">
@@ -325,7 +325,7 @@ watch(
                         outline
                         icon
                         size="sm"
-                        @click="cancelEditing(index)"
+                        @click="deleteRow(index)"
                         aria-label="Cancel edit"
                         title="Cancel edit"
                         variant="danger"
