@@ -64,7 +64,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, provide, defineAsyncComponent, onMounted } from 'vue'
+import { ref, computed, watch, provide, defineAsyncComponent, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import type { formTypes } from './types/invoiceDetail'
 import type { itemsPoGrType } from './types/invoicePoGr'
@@ -576,6 +576,39 @@ const setDataEdit = () => {
   }
 }
 
+const afterGetDetail = () => {
+  if (verificationApi.isFromEdit) {
+    setDataEdit()
+  } else {
+    setDataDefault()
+  }
+  switch (detailInvoice.value?.header.statusCode) {
+    case 1:
+    case 3:
+      activeStep.value = 'Verification'
+      break
+    case 2:
+    case 4:
+      activeStep.value = 'Approval'
+      break
+    case 7:
+      activeStep.value = 'Posting'
+      break
+  }
+  invoiceMasterApi.getActivity(form.value.companyCode || '')
+}
+
+watch(
+  () => detailInvoice.value,
+  () => {
+    afterGetDetail()
+  },
+  {
+    deep: true,
+    immediate: true
+  }
+)
+
 onMounted(async () => {
   if (route.query.type === '1') {
     activeStep.value = 'Verification'
@@ -604,46 +637,11 @@ onMounted(async () => {
   }
   if (currentRouteName.value === 'invoiceDetail') {
     await verificationApi.getInvoiceDetail(route.query.id?.toString() || '').then(() => {
-      if (verificationApi.isFromEdit) {
-        setDataEdit()
-      } else {
-        setDataDefault()
-      }
-      switch (detailInvoice.value?.header.statusCode) {
-        case 1:
-        case 3:
-          activeStep.value = 'Verification'
-          break
-        case 2:
-        case 4:
-          activeStep.value = 'Approval'
-          break
-        case 7:
-          activeStep.value = 'Posting'
-          break
-      }
-      invoiceMasterApi.getActivity(form.value.companyCode || '')
+      afterGetDetail()
     })
   } else {
     await verificationApi.getInvoiceNonPoDetail(route.query.id?.toString() || '').then(() => {
-      if (verificationApi.isFromEdit) {
-        setDataEdit()
-      } else {
-        setDataDefault()
-      }
-      switch (detailInvoice.value?.header.statusCode) {
-        case 1:
-        case 3:
-          activeStep.value = 'Verification'
-          break
-        case 2:
-        case 4:
-          activeStep.value = 'Approval'
-          break
-        case 7:
-          activeStep.value = 'Posting'
-          break
-      }
+      afterGetDetail()
     })
   }
 })

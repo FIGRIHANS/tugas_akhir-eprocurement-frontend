@@ -287,6 +287,7 @@ const resetItem = (item: itemsCostType, index: number) => {
 
 const callWhtCode = (data: itemsCostType) => {
   formEdit.whtCode = ''
+  data.whtCodeList = []
   invoiceMasterApi.getWhtCode(formEdit.whtType).then(() => {
     data.whtCodeList = whtCodeList.value
   })
@@ -343,11 +344,15 @@ const getTaxCodeName = (taxCode: string) => {
 }
 
 const setWhtAmount = (data: itemsCostType) => {
-  const whtlist = data.whtCodeList || []
-  const indexWht = whtlist.findIndex((item) => item.whtCode === formEdit.whtCode)
-  if (indexWht !== -1) {
-    const tarif = whtlist[indexWht].tarif / 100
-    formEdit.whtAmount = tarif * formEdit.whtBaseAmount
+  if (formEdit.whtCode) {
+    const whtlist = data.whtCodeList || []
+    const indexWht = whtlist.findIndex((item) => item.whtCode === formEdit.whtCode)
+    if (indexWht !== -1) {
+      const tarif = whtlist[indexWht].tarif / 100
+      formEdit.whtAmount = tarif * formEdit.whtBaseAmount
+    }
+  } else {
+    formEdit.whtAmount = 0
   }
 }
 
