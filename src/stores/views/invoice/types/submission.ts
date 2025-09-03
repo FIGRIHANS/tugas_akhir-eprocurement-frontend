@@ -80,6 +80,7 @@ interface ParamsSubmissionDocument {
   documentName: string
   documentUrl: string
   documentSize: number
+  id: number
 }
 
 interface ParamsSubmissionCalculation {

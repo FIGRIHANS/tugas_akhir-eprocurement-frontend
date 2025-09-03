@@ -103,6 +103,7 @@ interface ParamsSubmissionDocument {
   documentName: string
   documentUrl: string
   documentSize: number
+  id: number
 }
 
 interface ParamsSubmissionCalculation {
@@ -268,6 +269,7 @@ export interface documentDetailTypes {
   documentName: string
   documentUrl: string
   documentSize: number
+  id: number
 }
 
 export interface itemsCostType {
