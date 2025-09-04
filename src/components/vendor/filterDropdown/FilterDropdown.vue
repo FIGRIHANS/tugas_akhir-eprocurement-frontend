@@ -31,7 +31,7 @@ const handleReset = () => {
           <UiIcon variant="outline" name="filter" />
           <span>Filter</span>
         </UiButton>
-        <div class="dropdown-content w-full max-w-60 p-4 space-y-5">
+        <div class="dropdown-content w-full max-w-64 p-4 space-y-5">
           <h1 class="text-lg font-semibold text-gray-700 mb-5">Filter</h1>
           <slot></slot>
           <div class="flex items-center space-x-3">
@@ -43,11 +43,11 @@ const handleReset = () => {
               data-dropdown-dismiss="true"
             >
               <UiIcon variant="duotone" name="arrows-circle" />
-              Reset
+              {{ $t('general.reset') }}
             </UiButton>
             <UiButton class="flex-1" data-dropdown-dismiss="true">
               <UiIcon variant="outline" name="check-circle" />
-              Apply
+              {{ $t('general.apply') }}
             </UiButton>
           </div>
         </div>
