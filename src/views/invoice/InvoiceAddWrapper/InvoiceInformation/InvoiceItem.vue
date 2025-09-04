@@ -157,7 +157,9 @@ const costCenterList = computed(() => invoiceMasterApi.costCenterList)
 const addNew = () => {
   if (form) {
     const data = {
-      activity: '',
+      activity: null,
+      activityCode: '',
+      activityName: '',
       itemAmount: 0,
       itemText: '',
       debitCredit: '',
@@ -180,8 +182,8 @@ const deleteItem = (index: number) => {
   form?.invoiceItem.splice(index, 1)
 }
 
-const getActivityName = (code: string) => {
-  const getIndex = listActivity.value.findIndex((item) => item.code === code)
+const getActivityName = (id: number) => {
+  const getIndex = listActivity.value.findIndex((item) => item.id === id)
   if (getIndex !== -1) return listActivity.value[getIndex].name
 }
 
