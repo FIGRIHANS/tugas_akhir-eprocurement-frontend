@@ -43,7 +43,7 @@ onMounted(() => {
   invoiceMasterApi.getProfitCenter()
   invoiceMasterApi.getWhtType()
   invoiceMasterApi.getCostCenter(form?.value.companyCode || '')
-  invoiceMasterApi.getActivity(form?.value.companyCode || '')
+  if (form.value.companyCode) invoiceMasterApi.getActivity(form.value.companyCode || '')
 })
 </script>
 

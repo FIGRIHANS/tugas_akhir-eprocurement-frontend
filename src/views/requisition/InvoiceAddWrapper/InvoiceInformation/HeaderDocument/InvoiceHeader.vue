@@ -355,7 +355,7 @@ watch(
 watch(
   () => form?.companyCode,
   () => {
-    invoiceMasterApi.getActivity(form?.companyCode || '')
+    if (form.companyCode) invoiceMasterApi.getActivity(form.companyCode || '')
   },
 )
 
