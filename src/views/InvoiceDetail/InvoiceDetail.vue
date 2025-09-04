@@ -675,6 +675,8 @@ const setDataDefault = () => {
     invoicePoGr: resultPoGr,
     additionalCosts: resultAdditional,
     invoiceItem: [],
+    costExpense: [],
+    alternativePayee: [],
     invoiceDocument: invoice,
     tax: tax,
     referenceDocument: reference,
@@ -686,7 +688,7 @@ const setDataDefaultNonPo = () => {
   const data = detailInvoiceNonPo.value
   const resultPoGr: itemsPoGrType[] = []
   const resultAdditional: itemsCostType[] = []
-  let alternativePaeeValue = {} as itemsAlternativePayee
+  let alternativePaeeValue: itemsAlternativePayee | null = null
 
   if (data?.alternativePayee.length > 0) {
     alternativePaeeValue = {
@@ -714,7 +716,21 @@ const setDataDefaultNonPo = () => {
 
   for (const item of data?.costExpense || []) {
     resultAdditional.push({
-      ...item,
+      id: item.id as number,
+      activityId: item.activityId as number,
+      activityExpense: item.activityExpenses as string,
+      activityName: item.activityName as string,
+      itemAmount: item.itemAmount as number,
+      debitCredit: item.debitCredit as string,
+      taxCode: item.taxCode as string,
+      vatAmount: item.vatAmount as number,
+      costCenter: item.costCenter as string,
+      profitCenter: item.profitCenter as string,
+      assignment: item.assignment as string,
+      whtType: item.whtType as string,
+      whtCode: item.whtCode as string,
+      whtBaseAmount: item.whtBaseAmount as number,
+      whtAmount: item.whtAmount as number,
     })
   }
 
@@ -779,7 +795,7 @@ const setDataDefaultNonPo = () => {
     totalNetAmount: data?.calculation.totalNetAmount || 0,
     invoicePoGr: resultPoGr,
     costExpense: resultAdditional,
-    alternativePayee: alternativePaeeValue,
+    alternativePayee: alternativePaeeValue ? [alternativePaeeValue] : [],
     invoiceItem: [],
     invoiceDocument: invoice,
     tax: tax,
@@ -835,6 +851,8 @@ const setDataEdit = () => {
     invoicePoGr: data?.invoicePoGr || [],
     additionalCosts: data?.additionalCosts || [],
     invoiceItem: [],
+    costExpense: [],
+    alternativePayee: [],
     invoiceDocument: data?.invoiceDocument || null,
     tax: data?.tax || null,
     referenceDocument: data?.referenceDocument || null,

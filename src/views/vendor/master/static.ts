@@ -1,4 +1,4 @@
-export const tableCols = [
+export const tableColsEn = [
   '',
   'Company Name',
   'Status',
@@ -10,4 +10,18 @@ export const tableCols = [
   'Business License Status',
   'E-Procurement Vendor Code',
   'Vendor Code',
+]
+
+export const tableColsId = [
+  '',
+  'Nama Perusahaan',
+  'Status',
+  'Kategori Vendor',
+  'Bidang Usaha',
+  'Tanggal Registrasi',
+  'Tanggal Permintaan Verifikasi',
+  'Tanggal Verifikasi',
+  'Status Izin Usaha',
+  'Kode Vendor E-Procurement',
+  'Kode Vendor',
 ]

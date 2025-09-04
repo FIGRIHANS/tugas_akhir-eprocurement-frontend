@@ -60,15 +60,15 @@ onMounted(() => {
     <!-- status -->
     <UiSelect
       label="Status"
-      placeholder="select"
+      :placeholder="$t('general.select')"
       v-model="filters.ApprovalStatusName"
       :options="statusOptions"
     />
 
     <!-- category -->
     <UiSelect
-      label="Category"
-      placeholder="Select"
+      :label="$t('vendor.approvalFilters.category')"
+      :placeholder="$t('general.select')"
       v-model="filters.CompanyCategoryName"
       :options="categoryOptions"
     />
@@ -82,9 +82,14 @@ onMounted(() => {
                 'absolute top-0 left-0 -mt-2 ml-2 bg-white px-1 text-gray-500 text-[11px] font-normal',
               ]"
             >
-              Approval Date Sent
+              {{ $t('vendor.approvalFilters.approvalDateSent') }}
             </div>
-            <input :placeholder="'Select'" :value="value" readonly class="min-w-[0px]" />
+            <input
+              :placeholder="$t('general.select')"
+              :value="value"
+              readonly
+              class="min-w-[0px]"
+            />
             <button class="btn btn-icon">
               <i class="ki-filled ki-calendar"></i>
             </button>
