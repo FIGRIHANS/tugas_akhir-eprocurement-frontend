@@ -54,7 +54,7 @@ watch(
   () => form,
   () => {
     if (form) {
-      invoiceMasterApi.getActivity(form.companyCode)
+      if (form.companyCode) invoiceMasterApi.getActivity(form.companyCode)
     }
   },
   {

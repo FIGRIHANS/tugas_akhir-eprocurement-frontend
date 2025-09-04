@@ -417,7 +417,6 @@ const mapDataVerifNonPo = () => {
   if (!isEmpty(taxDoc)) documents.push(taxDoc)
   if (!isEmpty(referenceDoc)) documents.push(referenceDoc)
   if (!isEmpty(otherDoc)) documents.push(otherDoc)
-  console.log(form.value, 'form value')
 
   const data = {
     statusCode: route.query.type === '1' ? 3 : 4,
@@ -505,6 +504,7 @@ const goVerif = () => {
       })
       .finally(() => {
         isLoading.value = false
+        verificationApi.isFromEdit = false
       })
   } else if (route.name === 'invoiceDetail') {
     const status = checkVerif()
@@ -525,6 +525,7 @@ const goVerif = () => {
       })
       .finally(() => {
         isLoading.value = false
+        verificationApi.isFromEdit = false
       })
   } else {
     // const status = checkVerif()
@@ -906,7 +907,7 @@ watch(
   () => detailInvoice.value,
   () => {
     afterGetDetail()
-    invoiceMasterApi.getActivity(form.value.companyCode || '')
+    if (form.value.companyCode) invoiceMasterApi.getActivity(form.value.companyCode || '')
   },
   {
     deep: true,
