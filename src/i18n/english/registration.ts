@@ -58,8 +58,6 @@ export const registration = {
   currency: 'Currency',
   bankKey: 'Bank Key',
   bankNotRegister: 'Bank not registered',
-  bankKeyHint:
-    '5 uppercase alphanumeric characters (e.g., AMBV0), must match official bank and unique.',
   bankCountry: 'Bank Country',
   bankName: 'Bank Name',
   bankBranch: 'Bank Branch',

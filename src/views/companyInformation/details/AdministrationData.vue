@@ -2,80 +2,80 @@
   <div class="flex flex-col gap-6">
     <div class="card min-w-full">
       <div class="card-header">
-        <h3 class="card-title">Administration</h3>
+        <h3 class="card-title">{{ $t('vendorProfile.administration') }}</h3>
       </div>
 
       <div class="card-table">
         <table class="table align-middle">
           <tbody>
             <tr>
-              <td class="text-gray-600">Username</td>
+              <td class="text-gray-600">{{ $t('vendorProfile.username') }}</td>
               <td class="font-bold w-1/3">
                 <span>{{ data?.userName || '-' }}</span>
               </td>
               <td class="border-x w-6"></td>
-              <td class="!pl-[1.875rem] text-gray-600">Country</td>
+              <td class="!pl-[1.875rem] text-gray-600">{{ $t('vendorProfile.country') }}</td>
               <td class="font-bold w-1/3">
                 <span>{{ data?.countryName || '-' }}</span>
               </td>
             </tr>
             <tr>
-              <td class="text-gray-600">Email User</td>
+              <td class="text-gray-600">{{ $t('vendorProfile.emailUser') }}</td>
               <td class="font-bold w-1/3">
                 <span>{{ data?.userEmail || '-' }}</span>
               </td>
               <td class="border-x w-6"></td>
-              <td class="!pl-[1.875rem] text-gray-600">Province</td>
+              <td class="!pl-[1.875rem] text-gray-600">{{ $t('vendorProfile.province') }}</td>
               <td class="font-bold w-1/3">
                 <span>{{ data?.stateName || '-' }}</span>
               </td>
             </tr>
             <tr>
-              <td class="text-gray-600">Company Name</td>
+              <td class="text-gray-600">{{ $t('vendorProfile.companyName') }}</td>
               <td class="font-bold w-1/3">
                 <span>{{ data?.vendorName || '-' }}</span>
               </td>
               <td class="border-x w-6"></td>
-              <td class="!pl-[1.875rem] text-gray-600">City / District</td>
+              <td class="!pl-[1.875rem] text-gray-600">{{ $t('vendorProfile.city') }}</td>
               <td class="font-bold w-1/3">
                 <span>{{ data?.cityName || '-' }}</span>
               </td>
             </tr>
             <tr>
-              <td class="text-gray-600">Company Category</td>
+              <td class="text-gray-600">{{ $t('vendorProfile.companyCategory') }}</td>
               <td class="font-bold w-1/3">
                 <span>{{ data?.companyCategoryName || '-' }}</span>
               </td>
               <td class="border-x w-6"></td>
-              <td class="!pl-[1.875rem] text-gray-600">Telephone</td>
+              <td class="!pl-[1.875rem] text-gray-600">{{ $t('vendorProfile.telephone') }}</td>
               <td class="font-bold w-1/3">
                 <span>{{ data?.vendorPhone || '-' }}</span>
               </td>
             </tr>
             <tr>
-              <td class="text-gray-600">Company Group</td>
+              <td class="text-gray-600">{{ $t('vendorProfile.companyGroup') }}</td>
               <td class="font-bold w-1/3">
                 <span>{{ data?.groupCompany || '-' }}</span>
               </td>
               <td class="border-x w-6"></td>
-              <td class="!pl-[1.875rem] text-gray-600">Vendor Email</td>
+              <td class="!pl-[1.875rem] text-gray-600">{{ $t('vendorProfile.vendorEmail') }}</td>
               <td class="font-bold w-1/3">
                 <span>{{ data?.vendorEmail || '-' }}</span>
               </td>
             </tr>
             <tr>
-              <td class="text-gray-600">NPWP No</td>
+              <td class="text-gray-600">{{ $t('vendorProfile.npwpNo') }}</td>
               <td class="font-bold w-1/3">
                 <span>{{ data?.npwp || '-' }}</span>
               </td>
               <td class="border-x w-6"></td>
-              <td class="!pl-[1.875rem] text-gray-600">Website</td>
+              <td class="!pl-[1.875rem] text-gray-600">{{ $t('vendorProfile.website') }}</td>
               <td class="font-bold w-1/3">
                 <span>{{ data?.vendorWebsite || '-' }}</span>
               </td>
             </tr>
             <tr>
-              <td class="text-gray-600">NPWP Document</td>
+              <td class="text-gray-600">{{ $t('vendorProfile.npwpDoc') }}</td>
               <td class="font-bold w-1/3">
                 <span v-if="!data?.npwpUrl">-</span>
                 <UiButton
@@ -86,11 +86,13 @@
                   @click="downloadFile(data.npwpUrl)"
                 >
                   <UiIcon name="cloud-download" variant="duotone" />
-                  Download Document NPWP
+                  {{ $t('general.download', { field: $t('vendorProfile.npwpDoc') }) }}
                 </UiButton>
               </td>
               <td class="border-x w-6"></td>
-              <td class="!pl-[1.875rem] text-gray-600">Currency Preference</td>
+              <td class="!pl-[1.875rem] text-gray-600">
+                {{ $t('vendorProfile.currencyPreference') }}
+              </td>
               <td class="font-bold w-1/3">
                 <span>{{ `${data?.currencySymbol || '-'} (${data?.currencyLabel || '-'})` }}</span>
               </td>
@@ -99,13 +101,13 @@
               <td class="text-gray-600"></td>
               <td class="font-bold w-1/3"></td>
               <td class="border-x w-6"></td>
-              <td class="!pl-[1.875rem] text-gray-600">Company Address</td>
+              <td class="!pl-[1.875rem] text-gray-600">{{ $t('vendorProfile.companyAddress') }}</td>
               <td class="font-bold w-1/3">
                 <span>{{ data?.addressCompanyDetail || '-' }}</span>
               </td>
             </tr>
             <tr>
-              <td class="text-gray-600">Business Field</td>
+              <td class="text-gray-600">{{ $t('vendorProfile.businessField') }}</td>
               <td colspan="4" class="font-bold">
                 <ol class="list-decimal list-inside">
                   <li

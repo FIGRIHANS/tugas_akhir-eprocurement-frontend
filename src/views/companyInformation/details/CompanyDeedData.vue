@@ -2,7 +2,9 @@
   <div class="grid grid-cols-3 gap-5">
     <div class="card min-w-full">
       <div class="card-header">
-        <h3 class="card-title">Company Deed Data</h3>
+        <h3 class="card-title">
+          {{ $t('vendorProfile.data', { field: $t('vendorProfile.companyDeed') }) }}
+        </h3>
       </div>
 
       <div class="flex flex-col items-center pb-4 gap-4 justify-between h-full">
@@ -10,24 +12,24 @@
           <table class="table align-middle">
             <tbody>
               <tr>
-                <td class="!border-b-0">Letter Date</td>
+                <td class="!border-b-0">{{ $t('vendorProfile.letterDate') }}</td>
                 <td class="!border-b-0">{{ formatDate(companyDeedData?.documentDate) }}</td>
               </tr>
               <tr>
-                <td class="!border-b-0">Notary</td>
+                <td class="!border-b-0">{{ $t('vendorProfile.notary') }}</td>
                 <td class="!border-b-0">{{ companyDeedData?.notaryName || '-' }}</td>
               </tr>
               <tr>
-                <td class="!border-b-0">Notary Place</td>
+                <td class="!border-b-0">{{ $t('vendorProfile.notaryPlace') }}</td>
                 <td class="!border-b-0">{{ companyDeedData?.cityName }}</td>
               </tr>
               <tr>
-                <td class="!border-b-0">File</td>
+                <td class="!border-b-0">{{ $t('vendorProfile.file') }}</td>
                 <td class="!border-b-0">
                   <AttachmentView
                     class="cursor-pointer flex justify-end"
                     :file-data="{
-                      name: companyDeedData?.value,
+                      name: $t('vendorProfile.companyDeed'),
                       path: companyDeedData?.documentURL,
                     }"
                     reverse-icon
@@ -52,7 +54,9 @@
 
     <div class="card min-w-full">
       <div class="card-header">
-        <h3 class="card-title">Latest Amendment Data</h3>
+        <h3 class="card-title">
+          {{ $t('vendorProfile.data', { field: $t('vendorProfile.latestAmendment') }) }}
+        </h3>
       </div>
 
       <div class="flex flex-col items-center gap-4 pb-4 justify-between h-full">
@@ -60,20 +64,20 @@
           <table class="table align-middle">
             <tbody>
               <tr>
-                <td class="!border-b-0">Letter Date</td>
+                <td class="!border-b-0">{{ $t('vendorProfile.letterDate') }}</td>
                 <td class="!border-b-0">{{ formatDate(latestAmendmentData?.documentDate) }}</td>
               </tr>
               <tr>
-                <td class="!border-b-0">Notary</td>
+                <td class="!border-b-0">{{ $t('vendorProfile.notary') }}</td>
                 <td class="!border-b-0">{{ latestAmendmentData?.notaryName || '-' }}</td>
               </tr>
               <tr>
-                <td class="!border-b-0">File</td>
+                <td class="!border-b-0">{{ $t('vendorProfile.file') }}</td>
                 <td class="!border-b-0">
                   <AttachmentView
                     class="cursor-pointer flex justify-end"
                     :file-data="{
-                      name: latestAmendmentData?.value,
+                      name: $t('vendorProfile.latestAmendment'),
                       path: latestAmendmentData?.documentURL,
                     }"
                     reverse-icon
@@ -98,10 +102,8 @@
 
     <div class="card min-w-full">
       <div class="card-header flex-col items-start gap-1">
-        <h3 class="card-title">Ratification by Kemenkumham</h3>
-        <span class="text-danger text-xs"
-          >Specifically for companies with PT legal entity status</span
-        >
+        <h3 class="card-title">{{ $t('vendorProfile.ratification') }}</h3>
+        <span class="text-danger text-xs">{{ $t('vendorProfile.ratificationHint') }}</span>
       </div>
 
       <div class="flex flex-col items-center gap-4 pb-4 justify-between h-full">
@@ -109,20 +111,20 @@
           <table class="table align-middle">
             <tbody>
               <tr>
-                <td class="!border-b-0">Letter Date</td>
+                <td class="!border-b-0">{{ $t('vendorProfile.letterDate') }}</td>
                 <td class="!border-b-0">{{ formatDate(ratificationData?.documentDate) }}</td>
               </tr>
               <tr>
-                <td class="!border-b-0">Notary</td>
-                <td class="!border-b-0">{{ ratificationData?.notaryName || '-' }}</td>
+                <td class="!border-b-0">{{ $t('vendorProfile.documentNo') }}</td>
+                <td class="!border-b-0">{{ ratificationData?.documentNo || '-' }}</td>
               </tr>
               <tr>
-                <td class="!border-b-0">File</td>
+                <td class="!border-b-0">{{ $t('vendorProfile.file') }}</td>
                 <td class="!border-b-0">
                   <AttachmentView
                     class="cursor-pointer flex justify-end"
                     :file-data="{
-                      name: ratificationData?.value,
+                      name: $t('vendorProfile.ratification'),
                       path: ratificationData?.documentURL,
                     }"
                     reverse-icon
@@ -147,7 +149,7 @@
 
     <div class="card min-w-full col-span-3">
       <div class="card-header">
-        <h3 class="card-title">Shareholders</h3>
+        <h3 class="card-title">{{ $t('vendorProfile.shareholders') }}</h3>
       </div>
 
       <div class="flex flex-col gap-4 pb-4">
@@ -156,52 +158,31 @@
             <thead>
               <tr>
                 <th>
-                  <span class="sort">
-                    <span class="sort-label">Type</span>
-                    <span class="sort-icon"></span>
-                  </span>
+                  {{ $t('vendorProfile.type') }}
                 </th>
                 <th class="min-w-[228px]">
-                  <span class="sort">
-                    <span class="sort-label">Shareholder Name</span>
-                    <span class="sort-icon"></span>
-                  </span>
+                  {{ $t('vendorProfile.shareholderName') }}
                 </th>
                 <th class="min-w-[268px]">
-                  <span class="sort">
-                    <span class="sort-label">Date of Birth / Company Establishment Date</span>
-                    <span class="sort-icon"></span>
-                  </span>
+                  {{ $t('vendorProfile.dateBirth') }}
                 </th>
                 <th class="min-w-[199px]">
-                  <span class="sort">
-                    <span class="sort-label">Nominal Value</span>
-                    <span class="sort-icon"></span>
-                  </span>
+                  {{ $t('vendorProfile.nominalValue') }}
                 </th>
                 <th class="min-w-[147px]">
-                  <span class="sort">
-                    <span class="sort-label">Share Unit</span>
-                    <span class="sort-icon"></span>
-                  </span>
+                  {{ $t('vendorProfile.shareUnit') }}
                 </th>
-                <th class="min-w-[195px]">
-                  <span class="sort">
-                    <span class="sort-label">No KTP/Paspor/NPWP</span>
-                    <span class="sort-icon"></span>
-                  </span>
-                </th>
+                <th class="min-w-[195px]">No KTP/Paspor/NPWP</th>
                 <th class="min-w-[251px]">
-                  <span class="sort">
-                    <span class="sort-label">File</span>
-                    <span class="sort-icon"></span>
-                  </span>
+                  {{ $t('vendorProfile.file') }}
                 </th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="data in shareholderData" :key="data.stockID">
-                <td>{{ data.isActive ? 'AKTIF' : 'TIDAK AKTIF' }}</td>
+                <td>
+                  {{ data.typeShareholders }}
+                </td>
                 <td>{{ data.ownerName }}</td>
                 <td>{{ formatDate(data.ownerDOB) }}</td>
                 <td>{{ data.quantity }}</td>
@@ -223,13 +204,14 @@
 
         <div class="flex flex-row items-center justify-between px-4">
           <div class="flex flex-row items-center gap-2">
-            Show
+            {{ $t('general.show') }}
             <UiSelect
               v-model="paginationShareholders.pageSize"
               :options="pageSizeOptions"
               class="w-16"
             />
-            per page from {{ paginationShareholders.total }} data
+            {{ $t('general.perPage', paginationShareholders.total) }}
+            <!-- per page from {{ paginationShareholders.total }} data -->
           </div>
 
           <LPagination

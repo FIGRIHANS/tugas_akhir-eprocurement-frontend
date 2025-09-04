@@ -2,18 +2,18 @@
   <div class="flex flex-col gap-6">
     <div class="card min-w-full">
       <div class="card-header">
-        <h3 class="card-title">Business License</h3>
+        <h3 class="card-title">{{ $t('vendorProfile.businessLicense') }}</h3>
       </div>
 
       <div class="card-table scrollable-x-auto pb-2">
         <table class="table align-middle">
           <thead>
             <tr>
-              <th>License Type</th>
-              <th>License Number</th>
-              <th>Start Date</th>
-              <th>End Date</th>
-              <th>Document</th>
+              <th>{{ $t('vendorProfile.licenseType') }}</th>
+              <th>{{ $t('vendorProfile.licenseNo') }}</th>
+              <th>{{ $t('vendorProfile.validStart') }}</th>
+              <th>{{ $t('vendorProfile.validEnd') }}</th>
+              <th>{{ $t('vendorProfile.document') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -33,7 +33,7 @@
                     @click="downloadFile(license?.documentUrl)"
                   >
                     <UiIcon name="cloud-download" variant="duotone" />
-                    Download Document
+                    {{ $t('general.download', { field: $t('vendorProfile.document') }) }}
                   </UiButton>
                 </div>
               </td>
