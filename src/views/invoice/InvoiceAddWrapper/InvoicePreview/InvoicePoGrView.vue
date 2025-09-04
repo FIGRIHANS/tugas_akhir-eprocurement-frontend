@@ -62,11 +62,11 @@ const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
 const whtTypeList = computed(() => invoiceMasterApi.whtTypeList)
 const whtCodeList = computed(() => invoiceMasterApi.whtCodeList)
 
-const setPoGrList = () => {
+const setPoGrList = async () => {
   const result = [] as itemsPoGrType[]
   if (form.invoicePoGr) {
     for (const item of form.invoicePoGr) {
-      if (item.whtType) callWhtCode(item.whtType)
+      if (item.whtType) await callWhtCode(item.whtType)
       const data = {
         ...item,
         whtCodeList: whtCodeList.value
@@ -77,8 +77,8 @@ const setPoGrList = () => {
   pogrLsit.value = result
 }
 
-const callWhtCode = (whtType: string) => {
-  invoiceMasterApi.getWhtCode(whtType)
+const callWhtCode = async (whtType: string) => {
+  await invoiceMasterApi.getWhtCode(whtType)
 }
 
 const checkInvoiceDp = () => {
