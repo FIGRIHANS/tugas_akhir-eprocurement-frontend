@@ -79,11 +79,11 @@ const listActivity = computed(() => invoiceMasterApi.activityList)
 const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
 const costCenterList = computed(() => invoiceMasterApi.costCenterList)
 
-const setAdditionalCostList = () => {
+const setAdditionalCostList = async () => {
   const result = [] as itemsCostType[]
   if (form.value.additionalCosts) {
     for (const item of form.value.additionalCosts) {
-      if (item.whtType) callWhtCode(item.whtType)
+      if (item.whtType) await callWhtCode(item.whtType)
       const data = {
         ...item,
         whtCodeList: whtCodeList.value
@@ -94,8 +94,8 @@ const setAdditionalCostList = () => {
   additionalList.value = result
 }
 
-const callWhtCode = (whtType: string) => {
-  invoiceMasterApi.getWhtCode(whtType)
+const callWhtCode = async (whtType: string) => {
+  await invoiceMasterApi.getWhtCode(whtType)
 }
 
 const getActivityName = (id: number) => {

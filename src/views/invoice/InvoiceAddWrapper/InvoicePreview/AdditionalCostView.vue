@@ -75,11 +75,11 @@ const costCenterList = computed(() => invoiceMasterApi.costCenterList)
 const whtTypeList = computed(() => invoiceMasterApi.whtTypeList)
 const whtCodeList = computed(() => invoiceMasterApi.whtCodeList)
 
-const setAdditionalCostList = () => {
+const setAdditionalCostList = async () => {
   const result = [] as itemsCostType[]
   if (form.additionalCost) {
     for (const item of form.additionalCost) {
-      if (item.whtType) callWhtCode(item.whtType)
+      if (item.whtType) await callWhtCode(item.whtType)
       const data = {
         ...item,
         whtCodeList: whtCodeList.value
@@ -90,8 +90,8 @@ const setAdditionalCostList = () => {
   additionalList.value = result
 }
 
-const callWhtCode = (whtType: string) => {
-  invoiceMasterApi.getWhtCode(whtType)
+const callWhtCode = async (whtType: string) => {
+  await invoiceMasterApi.getWhtCode(whtType)
 }
 
 const getDebitCreditName = (code: string) => {

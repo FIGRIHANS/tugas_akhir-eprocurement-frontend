@@ -940,6 +940,7 @@ onMounted(async () => {
       },
     ]
   }
+  invoiceMasterApi.getWhtType()
   if (currentRouteName.value === 'invoiceDetail') {
     await verificationApi.getInvoiceDetail(route.query.id?.toString() || '').then(() => {
       afterGetDetail()
