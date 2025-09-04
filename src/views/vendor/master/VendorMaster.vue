@@ -14,10 +14,12 @@ import VendorListFilters from '@/components/vendor/filterButton/VendorListFilter
 import BreadcrumbView from '@/components/BreadcrumbView.vue'
 import { formatDate } from '@/composables/date-format'
 import { useLoginStore } from '@/stores/views/login'
-import { tableCols } from './static'
+import { tableColsId, tableColsEn } from './static'
+import { useI18n } from 'vue-i18n'
 
 const route = useRoute()
 const router = useRouter()
+const i18n = useI18n()
 
 const vendor = useVendorStore()
 const verificationStatusStore = useVerificationStatus()
@@ -31,6 +33,14 @@ const getStatus = (status: string) => {
 
 const userData = computed(() => userStore.userData)
 const isAdmin = computed(() => userData.value?.profile.profileId === 3192)
+const tableCols = computed(() => {
+  return i18n.locale.value === 'id' ? tableColsId : tableColsEn
+})
+const start = computed(() => vendor.vendors.pageSize * (vendor.vendors.page - 1) + 1)
+const end = computed(
+  () => vendor.vendors.pageSize * (vendor.vendors.page - 1) + vendor.vendors.items.length,
+)
+const total = computed(() => vendor.vendors.total)
 
 const handleSearch = debounce((value) => {
   const query = { ...route.query }
@@ -70,7 +80,7 @@ watch(
   />
   <div class="card">
     <div class="card-header p-6">
-      <UiInputSearch v-model="search" placeholder="Search vendor" />
+      <UiInputSearch v-model="search" :placeholder="$t('general.search', { field: 'Vendor' })" />
       <div class="flex gap-3">
         <FilterDropdown />
       </div>
@@ -173,9 +183,7 @@ watch(
       v-show="vendor.vendors.items.length"
     >
       <div>
-        Showing {{ vendor.vendors.pageSize * (vendor.vendors.page - 1) + 1 }} to
-        {{ vendor.vendors.pageSize * (vendor.vendors.page - 1) + vendor.vendors.items.length }} of
-        {{ vendor.vendors.total }} entries
+        {{ $t('vendor.pagination.show', { start, end, total }) }}
       </div>
       <LPagination
         :total-items="Number(vendor.vendors.total)"

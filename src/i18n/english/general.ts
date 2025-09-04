@@ -12,4 +12,7 @@ export const general = {
   download: 'Download {field}',
   show: 'Show',
   perPage: 'per page | per page from {n} data',
+  search: 'Search {field}',
+  apply: 'Apply',
+  reset: 'Reset',
 }

@@ -64,7 +64,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, provide, defineAsyncComponent, onMounted } from 'vue'
+import { ref, computed, watch, provide, defineAsyncComponent, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import type { formTypes } from './types/invoiceDetail'
 import type { itemsPoGrType } from './types/invoicePoGr'
@@ -77,8 +77,13 @@ import Breadcrumb from '@/components/BreadcrumbView.vue'
 import StepperStatus from '../../components/stepperStatus/StepperStatus.vue'
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 import { useLoginStore } from '@/stores/views/login'
-import type { PostVerificationTypes } from '@/stores/views/invoice/types/verification'
+import type {
+  PostVerificationTypes,
+  SubmissionNonPoTypes,
+  itemsAlternativePayee,
+} from '@/stores/views/invoice/types/verification'
 import { isEmpty } from 'lodash'
+import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 
 const StatusInvoice = defineAsyncComponent(() => import('./InvoiceDetail/StatusInvoice.vue'))
 const GeneralData = defineAsyncComponent(() => import('./InvoiceDetail/GeneralData.vue'))
@@ -106,6 +111,7 @@ const SuccessRejectModal = defineAsyncComponent(
 const activeStep = ref<string>('')
 const router = useRouter()
 const route = useRoute()
+const invoiceMasterApi = useInvoiceMasterDataStore()
 const verificationApi = useInvoiceVerificationStore()
 const loginApi = useLoginStore()
 const isLoading = ref<boolean>(false)
@@ -171,6 +177,8 @@ const form = ref<formTypes>({
   invoicePoGr: [],
   additionalCosts: [],
   invoiceItem: [],
+  costExpense: [],
+  alternativePayee: [],
   invoiceDocument: null,
   tax: null,
   referenceDocument: null,
@@ -178,6 +186,7 @@ const form = ref<formTypes>({
 })
 
 const detailInvoice = computed(() => verificationApi.detailInvoice)
+const detailInvoiceNonPo = computed(() => verificationApi.detailNonPoInvoice)
 const userData = computed(() => loginApi.userData)
 const additionalCostTempDelete = computed(() => verificationApi.additionalCostTempDelete)
 
@@ -267,6 +276,13 @@ const checkVerif = () => {
   return status
 }
 
+// const checkVerifNonPo = () => {
+//   let status = true
+//   status = checkVerifHeader()
+
+//   return status
+// }
+
 const mapPoGr = () => {
   const poGr = []
   for (const item of form.value.invoicePoGr) {
@@ -292,7 +308,10 @@ const mapAdditionalCost = () => {
   const cost = []
   for (const item of form.value.additionalCosts) {
     cost.push({
+      id: item.id,
+      activityId: item.activityId,
       activityExpense: item.activityExpense,
+      activityName: item.activityName,
       itemAmount: Number(item.itemAmount),
       debitCredit: item.debitCredit,
       taxCode: item.taxCode,
@@ -303,12 +322,37 @@ const mapAdditionalCost = () => {
       whtType: item.whtType,
       whtCode: item.whtCode,
       whtBaseAmount: Number(item.whtBaseAmount),
-      whtAmount: item.whtAmount
+      whtAmount: item.whtAmount,
     })
   }
   return cost
 }
 
+const mapCostExpenses = () => {
+  const cost = []
+
+  for (const item of form.value.costExpense) {
+    cost.push({
+      id: item.id,
+      activityId: item.activityId,
+      activityExpenses: item.activityId,
+      activityName: item.activityName,
+      itemAmount: item.itemAmount,
+      // itemText: item.itemText,
+      debitCredit: item.debitCredit,
+      taxCode: item.taxCode,
+      vatAmount: item.vatAmount,
+      costCenter: item.costCenter,
+      profitCenter: item.profitCenter,
+      // assignment: item.assigment,
+      whtType: item.whtType,
+      whtCode: item.whtCode,
+      whtBaseAmount: item.whtBaseAmount,
+      whtAmount: item.whtAmount,
+    })
+  }
+  return cost
+}
 const mapDataVerif = () => {
   const invoiceDoc = form.value.invoiceDocument || {}
   const taxDoc = form.value.tax || {}
@@ -363,27 +407,149 @@ const mapDataVerif = () => {
   return data
 }
 
-const goVerif = () => {
-  const status = checkVerif()
+const mapDataVerifNonPo = () => {
+  const invoiceDoc = form.value.invoiceDocument || {}
+  const taxDoc = form.value.tax || {}
+  const referenceDoc = form.value.referenceDocument || {}
+  const otherDoc = form.value.otherDocument || {}
+  const documents = []
+  if (!isEmpty(invoiceDoc)) documents.push(invoiceDoc)
+  if (!isEmpty(taxDoc)) documents.push(taxDoc)
+  if (!isEmpty(referenceDoc)) documents.push(referenceDoc)
+  if (!isEmpty(otherDoc)) documents.push(otherDoc)
 
-  if (!status) return
-  isLoading.value = true
-  verificationApi
-    .postSubmission(mapDataVerif())
-    .then((response) => {
-      if (response.statusCode === 200) {
-        verificationApi.resetDetailInvoiceEdit()
-        const idModal = document.querySelector('#success_verif_modal')
-        const modal = KTModal.getInstance(idModal as HTMLElement)
-        modal.show()
-        for (const item of additionalCostTempDelete.value) {
-          verificationApi.deleteAdditionalCost(form.value.invoiceUId, item.id)
+  const data = {
+    statusCode: route.query.type === '1' ? 3 : 4,
+    statusName: route.query.type === '1' ? 'Verified' : 'Approved',
+    statusNotes: '',
+    header: {
+      invoiceUId: form.value.invoiceUId,
+      invoiceDate: form.value.invoiceDate,
+      postingDate: form.value.invoiceDate,
+      documentNo: form.value.documentNo,
+      taxNo: form.value.taxNo,
+      invoicingParty: form.value.invoicingParty,
+      estimatedPaymentDate: form.value.estimatedPaymentDate,
+      paymentMethodCode: form.value.paymentMethodCode,
+      paymentMethodName: form.value.paymentMethodName,
+      assigment: form.value.assigment,
+      transferNews: form.value.transferNews,
+      notes: form.value.notes,
+      currCode: form.value.currCode,
+      npwpReporting: form.value.npwpReporting,
+    },
+    payment: {
+      bankKey: form.value.bankKey,
+      bankName: form.value.bankName,
+      beneficiaryName: form.value.beneficiaryName,
+      bankAccountNo: form.value.bankAccountNo,
+      bankCountryCode: form.value.bankCountryCode,
+    },
+    calculation: {
+      subtotal: form.value.subtotal,
+      vatAmount: form.value.vatAmount,
+      whtAmount: form.value.whtAmount,
+      additionalCost: form.value.additionalCost,
+      totalGrossAmount: form.value.totalGrossAmount,
+      totalNetAmount: form.value.totalNetAmount,
+    },
+    // alternativePay: {
+    //   id: form.value.alternativePayee.id,
+    //   invoiceUId: form.value.alternativePayee.invoiceUId,
+    //   name: form.value.alternativePayee.name,
+    //   name2: form.value.alternativePayee.name2,
+    //   street: form.value.alternativePayee.street,
+    //   city: form.value.alternativePayee.city,
+    //   country: form.value.alternativePayee.country,
+    //   bankAccountNumber: form.value.alternativePayee.bankAccountNumber,
+    //   bankKey: form.value.alternativePayee.bankKey,
+    //   bankCountry: form.value.alternativePayee.bankCountry,
+    //   npwp: form.value.alternativePayee.npwp,
+    //   ktp: form.value.alternativePayee.ktp,
+    //   email: form.value.alternativePayee.email,
+    //   isAlternativePayee: form.value.alternativePayee.isAlternativePayee,
+    //   isOneTimeVendor: form.value.alternativePayee.isOneTimeVendor,
+    //   isActive: form.value.alternativePayee.isActive,
+    //   isDeleted: form.value.alternativePayee.isDeleted,
+    //   createdBy: form.value.alternativePayee.createdBy,
+    //   createdUtcDate: form.value.alternativePayee.createdUtcDate,
+    //   modifiedBy: form.value.alternativePayee.modifiedBy,
+    //   modifiedUtcDate: form.value.alternativePayee.modifiedUtcDate,
+    // },
+    costExpenses: mapCostExpenses(),
+    documents,
+  } as SubmissionNonPoTypes
+
+  return data
+}
+
+const goVerif = () => {
+  if (route.query.invoiceType === 'no_po') {
+    isLoading.value = true
+    verificationApi
+      .verifyInvoiceNonPo(form.value.invoiceUId)
+      .then((res) => {
+        if (res.statusCode === 200) {
+          verificationApi.resetDetailInvoiceEdit()
+          const idModal = document.querySelector('#success_verif_modal')
+          const modal = KTModal.getInstance(idModal as HTMLElement)
+          modal.show()
+          for (const item of additionalCostTempDelete.value) {
+            verificationApi.deleteAdditionalCost(form.value.invoiceUId, item.id)
+          }
         }
-      }
-    })
-    .finally(() => {
-      isLoading.value = false
-    })
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+      .finally(() => {
+        isLoading.value = false
+        verificationApi.isFromEdit = false
+      })
+  } else if (route.name === 'invoiceDetail') {
+    const status = checkVerif()
+    if (!status) return
+    isLoading.value = true
+    verificationApi
+      .postSubmission(mapDataVerif())
+      .then((response) => {
+        if (response.statusCode === 200) {
+          verificationApi.resetDetailInvoiceEdit()
+          const idModal = document.querySelector('#success_verif_modal')
+          const modal = KTModal.getInstance(idModal as HTMLElement)
+          modal.show()
+          for (const item of additionalCostTempDelete.value) {
+            verificationApi.deleteAdditionalCost(form.value.invoiceUId, item.id)
+          }
+        }
+      })
+      .finally(() => {
+        isLoading.value = false
+        verificationApi.isFromEdit = false
+      })
+  } else {
+    // const status = checkVerif()
+    // if (!status) return
+    console.log('masuk')
+
+    isLoading.value = true
+    verificationApi
+      .postSubmissionNonPo(mapDataVerifNonPo())
+      .then((response) => {
+        if (response.statusCode === 200) {
+          verificationApi.resetDetailInvoiceEdit()
+          const idModal = document.querySelector('#success_verif_modal')
+          const modal = KTModal.getInstance(idModal as HTMLElement)
+          modal.show()
+          for (const item of additionalCostTempDelete.value) {
+            verificationApi.deleteAdditionalCost(form.value.invoiceUId, item.id)
+          }
+        }
+      })
+      .finally(() => {
+        isLoading.value = false
+      })
+  }
 }
 
 const goReject = (reason: string) => {
@@ -510,6 +676,128 @@ const setDataDefault = () => {
     invoicePoGr: resultPoGr,
     additionalCosts: resultAdditional,
     invoiceItem: [],
+    costExpense: [],
+    alternativePayee: [],
+    invoiceDocument: invoice,
+    tax: tax,
+    referenceDocument: reference,
+    otherDocument: other,
+  }
+}
+
+const setDataDefaultNonPo = () => {
+  const data = detailInvoiceNonPo.value
+  const resultPoGr: itemsPoGrType[] = []
+  const resultAdditional: itemsCostType[] = []
+  let alternativePaeeValue: itemsAlternativePayee | null = null
+
+  if (data?.alternativePayee.length > 0) {
+    alternativePaeeValue = {
+      id: data?.alternativePayee[0]?.id,
+      name: data?.alternativePayee[0]?.name,
+      name2: data?.alternativePayee[0]?.name2,
+      street: data?.alternativePayee[0]?.street,
+      city: data?.alternativePayee[0]?.city,
+      country: data?.alternativePayee[0]?.country,
+      bankAccountNumber: data?.alternativePayee[0].bankAccountNumber,
+      bankKey: data?.alternativePayee[0]?.bankKey,
+      bankCountry: data?.alternativePayee[0]?.bankCountry,
+      npwp: data?.alternativePayee[0]?.npwp,
+      ktp: data?.alternativePayee[0]?.ktp,
+      email: data?.alternativePayee[0]?.email,
+      isAlternativePayee: data?.alternativePayee[0]?.isAlternativePayee,
+      isOneTimeVendor: data?.alternativePayee[0]?.isOneTimeVendor,
+    }
+  }
+
+  let invoice = {} as documentDetailTypes
+  let tax = {} as documentDetailTypes
+  let reference = {} as documentDetailTypes
+  let other = {} as documentDetailTypes
+
+  for (const item of data?.costExpense || []) {
+    resultAdditional.push({
+      id: item.id as number,
+      activityId: item.activityId as number,
+      activityExpense: item.activityExpenses as string,
+      activityName: item.activityName as string,
+      itemAmount: item.itemAmount as number,
+      debitCredit: item.debitCredit as string,
+      taxCode: item.taxCode as string,
+      vatAmount: item.vatAmount as number,
+      costCenter: item.costCenter as string,
+      profitCenter: item.profitCenter as string,
+      assignment: item.assignment as string,
+      whtType: item.whtType as string,
+      whtCode: item.whtCode as string,
+      whtBaseAmount: item.whtBaseAmount as number,
+      whtAmount: item.whtAmount as number,
+    })
+  }
+
+  for (const item of data?.documents || []) {
+    switch (item.documentType) {
+      case 1:
+        invoice = item
+        break
+      case 2:
+        tax = item
+        break
+      case 3:
+        reference = item
+        break
+      case 4:
+        other = item
+        break
+    }
+  }
+
+  form.value = {
+    invoiceUId: data?.header.invoiceUId || '',
+    invoiceTypeCode: data?.header.invoiceTypeCode || 0,
+    invoiceTypeName: data?.header.invoiceTypeName || '',
+    invoiceDPCode: data?.header.invoiceDPCode || 0,
+    invoiceDPName: data?.header.invoiceDPName || '',
+    companyCode: data?.header.companyCode || '',
+    companyName: data?.header.companyName || '',
+    invoiceNo: data?.header.invoiceNo || '',
+    documentNo: data?.header.documentNo || '',
+    invoiceDate: data?.header.invoiceDate || null,
+    taxNo: data?.header.taxNo || '',
+    currCode: data?.header.currCode || '',
+    notes: data?.header.notes || '',
+    statusCode: data?.header.statusCode || 0,
+    statusName: data?.header.statusName || '',
+    postingDate: data?.header.postingDate || null,
+    invoicingParty: data?.header.invoicingParty || '',
+    estimatedPaymentDate: data?.header.estimatedPaymentDate || null,
+    paymentMethodCode: data?.header.paymentMethodCode || '',
+    paymentMethodName: data?.header.paymentMethodName || '',
+    assigment: data?.header.assigment || '',
+    transferNews: data?.header.transferNews || '',
+    npwpReporting: data?.header.npwpReporting || '',
+    remainingDpAmount: '',
+    dpAmountDeduction: '',
+    bankKey: data?.payment.bankKey || '',
+    bankName: data?.payment.bankName || '',
+    creditCardBillingId: data?.header.creditCardBillingId || '',
+    beneficiaryName: data?.payment.beneficiaryName || '',
+    bankAccountNo: data?.payment.bankAccountNo || '',
+    bankCountryCode: data?.payment.bankCountryCode || '',
+    vendorId: data?.vendor.vendorId || '',
+    vendorName: data?.vendor.vendorName || '',
+    npwp: data?.vendor.npwp || '',
+    vendorAddress: data?.vendor.vendorAddress || '',
+    subtotal: data?.calculation.subtotal || 0,
+    vatAmount: data?.calculation.vatAmount || 0,
+    whtAmount: data?.calculation.whtAmount || 0,
+    additionalCost: data?.calculation.additionalCost || 0,
+    totalGrossAmount: data?.calculation.totalGrossAmount || 0,
+    totalNetAmount: data?.calculation.totalNetAmount || 0,
+    invoicePoGr: resultPoGr,
+    costExpense: resultAdditional,
+    alternativePayee: alternativePaeeValue ? [alternativePaeeValue] : [],
+    invoiceItem: [],
     invoiceDocument: invoice,
     tax: tax,
     referenceDocument: reference,
@@ -564,12 +852,67 @@ const setDataEdit = () => {
     invoicePoGr: data?.invoicePoGr || [],
     additionalCosts: data?.additionalCosts || [],
     invoiceItem: [],
+    costExpense: [],
+    alternativePayee: [],
     invoiceDocument: data?.invoiceDocument || null,
     tax: data?.tax || null,
     referenceDocument: data?.referenceDocument || null,
     otherDocument: data?.otherDocument || null,
   }
 }
+
+const afterGetDetail = () => {
+  if (verificationApi.isFromEdit) {
+    setDataEdit()
+  } else {
+    setDataDefault()
+  }
+  switch (detailInvoice.value?.header.statusCode) {
+    case 1:
+    case 3:
+      activeStep.value = 'Verification'
+      break
+    case 2:
+    case 4:
+      activeStep.value = 'Approval'
+      break
+    case 7:
+      activeStep.value = 'Posting'
+      break
+  }
+}
+
+const afterGetDetailNonPo = () => {
+  if (verificationApi.isFromEdit) {
+    setDataEdit()
+  } else {
+    setDataDefaultNonPo()
+  }
+  switch (detailInvoiceNonPo.value?.header.statusCode) {
+    case 1:
+    case 3:
+      activeStep.value = 'Verification'
+      break
+    case 2:
+    case 4:
+      activeStep.value = 'Approval'
+      break
+    case 7:
+      activeStep.value = 'Posting'
+      break
+  }
+}
+
+watch(
+  () => detailInvoice.value,
+  () => {
+    afterGetDetail()
+    if (form.value.companyCode) invoiceMasterApi.getActivity(form.value.companyCode || '')
+  },
+  {
+    deep: true,
+  },
+)
 
 onMounted(async () => {
   if (route.query.type === '1') {
@@ -597,47 +940,14 @@ onMounted(async () => {
       },
     ]
   }
+  invoiceMasterApi.getWhtType()
   if (currentRouteName.value === 'invoiceDetail') {
     await verificationApi.getInvoiceDetail(route.query.id?.toString() || '').then(() => {
-      if (verificationApi.isFromEdit) {
-        setDataEdit()
-      } else {
-        setDataDefault()
-      }
-      switch (detailInvoice.value?.header.statusCode) {
-        case 1:
-        case 3:
-          activeStep.value = 'Verification'
-          break
-        case 2:
-        case 4:
-          activeStep.value = 'Approval'
-          break
-        case 7:
-          activeStep.value = 'Posting'
-          break
-      }
+      afterGetDetail()
     })
   } else {
     await verificationApi.getInvoiceNonPoDetail(route.query.id?.toString() || '').then(() => {
-      if (verificationApi.isFromEdit) {
-        setDataEdit()
-      } else {
-        setDataDefault()
-      }
-      switch (detailInvoice.value?.header.statusCode) {
-        case 1:
-        case 3:
-          activeStep.value = 'Verification'
-          break
-        case 2:
-        case 4:
-          activeStep.value = 'Approval'
-          break
-        case 7:
-          activeStep.value = 'Posting'
-          break
-      }
+      afterGetDetailNonPo()
     })
   }
 })

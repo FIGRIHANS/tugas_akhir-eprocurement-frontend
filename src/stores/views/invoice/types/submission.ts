@@ -37,6 +37,26 @@ export interface ParamsSubmissionTypes {
   additionalCosts: ParamsSubmissionCost[]
   workflow: ParamsSubmissionWorkflow[]
   alternativePayee: itemsAlternativePayee[]
+  costExpense: ParamsSubmissionCostExpense[]
+}
+
+interface ParamsSubmissionCostExpense {
+  id: number
+  activityId: number
+  activityExpenses: string
+  activityName: string
+  itemAmount: number
+  itemText: string
+  debitCredit: string
+  taxCode: string
+  vatAmount: number
+  costCenter: string
+  profitCenter: string
+  assignment: string
+  whtType: string
+  whtCode: string
+  whtBaseAmount: number
+  whtAmount: number
 }
 
 interface ParamsSubmissionHeader {
@@ -80,6 +100,7 @@ interface ParamsSubmissionDocument {
   documentName: string
   documentUrl: string
   documentSize: number
+  id: number
 }
 
 interface ParamsSubmissionCalculation {
@@ -115,7 +136,9 @@ interface ParamsSubmissionItem {
 }
 
 interface ParamsSubmissionCost {
+  activityId: number
   activityExpense: string
+  activityName: string
   itemAmount: number
   debitCredit: string
   taxCode: string

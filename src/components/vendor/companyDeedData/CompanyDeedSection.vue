@@ -50,6 +50,8 @@ const apiErrorMessage = ref('')
 const isDownloadLoading = ref(false)
 const isSaveLoading = ref(false)
 
+const fileUploaderRef = ref<InstanceType<typeof UiFileUpload> | null>(null)
+
 const vendorLegalDocPayload = reactive<IVendorLegalDocumentPayload>({
   id: 0,
   vendorID: Number(route.params.id),
@@ -80,7 +82,7 @@ const errors = reactive({
 
 const isEditing = computed(() => mode.value === 'edit' || vendorLegalDocPayload.id > 0)
 const submitLabel = computed(() => (isEditing.value ? 'Save' : 'Add'))
-const submitIcon = computed(() => (isEditing.value ? 'notepad-edit' : 'plus-circle'))
+const submitIcon = computed(() => (isEditing.value ? 'file-added' : 'plus-circle'))
 
 const toNumber = (v: unknown) => (v === null || v === undefined || v === '' ? 0 : Number(v))
 
@@ -117,6 +119,8 @@ const resetForm = () => {
     action: 0,
   } as IVendorLegalDocumentPayload)
   mode.value = 'add'
+
+  fileUploaderRef.value?.clear()
 }
 
 const validateForm = () => {
@@ -170,7 +174,7 @@ const handleSave = async () => {
   if (!validateForm()) return
   try {
     isSaveLoading.value = true
-    vendorLegalDocPayload.notaryLocation = toNumber(vendorLegalDocPayload.notaryLocation) // pastikan number
+    vendorLegalDocPayload.notaryLocation = toNumber(vendorLegalDocPayload.notaryLocation)
     await companyDeedDataStore.postVendorLegalDocument(vendorLegalDocPayload)
     await companyDeedDataStore.getVendorLegalDocument(
       Number(route.params.id),
@@ -179,6 +183,9 @@ const handleSave = async () => {
       3115,
     )
     showSuccessModal.value = true
+
+    fileUploaderRef.value?.clear()
+
     resetForm()
   } catch (err) {
     if (axios.isAxiosError(err)) {
@@ -197,9 +204,11 @@ const handleSave = async () => {
 }
 
 const handleEdit = (id: number) => {
-  const data = companyDeedDataStore.vendorLegalDocData.items.find(
+  console.log(id)
+  const data = companyDeedDataStore.companyDeedData.items.find(
     (item) => (item as unknown as IVendorLegalDocumentPayload).id === id,
-  ) as unknown as IVendorLegalDocumentPayload | undefined
+  )
+
   if (data) {
     Object.assign(vendorLegalDocPayload, data)
     vendorLegalDocPayload.notaryLocation = toNumber(
@@ -363,6 +372,7 @@ watchEffect(async () => {
             :hintText="errors.notaryName"
           />
           <UiFileUpload
+            ref="fileUploaderRef"
             name="vendorLegalDocumentUrl"
             label="File"
             placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"

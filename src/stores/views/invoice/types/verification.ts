@@ -7,6 +7,27 @@ export interface ParamsSubmissionTypes {
   pogr: ParamsSubmissionItem[]
   additionalCosts: ParamsSubmissionCost[]
   workflow: ParamsSubmissionWorkflow[]
+  alternativePayee: itemsAlternativePayee[]
+  costExpense: ParamsSubmissionCostExpense[]
+}
+
+interface ParamsSubmissionCostExpense {
+  id: number
+  activityId: number
+  activityExpenses: string
+  activityName: string
+  itemAmount: number
+  itemText: string
+  debitCredit: string
+  taxCode: string
+  vatAmount: number
+  costCenter: string
+  profitCenter: string
+  assignment: string
+  whtType: string
+  whtCode: string
+  whtBaseAmount: number
+  whtAmount: number
 }
 
 export interface PostVerificationTypes {
@@ -103,6 +124,7 @@ interface ParamsSubmissionDocument {
   documentName: string
   documentUrl: string
   documentSize: number
+  id: number
 }
 
 interface ParamsSubmissionCalculation {
@@ -152,7 +174,9 @@ interface ParamsSubmissionItem {
 
 export interface ParamsSubmissionCost {
   id: number
+  activityId: number
   activityExpense: string
+  activityName: string
   itemAmount: number
   debitCredit: string
   taxCode: string
@@ -234,7 +258,6 @@ export interface ListNonPoTypes {
   isOpenChild: boolean
 }
 
-
 export interface PoChildTypes {
   grDocumentNo: string
   invoiceUId: string
@@ -260,17 +283,19 @@ export interface QueryParamsListNoPoTypes {
   searchText?: string | null
 }
 
-
 export interface documentDetailTypes {
   documentType: number
   documentName: string
   documentUrl: string
   documentSize: number
+  id: number
 }
 
 export interface itemsCostType {
   id: number
+  activityId: number
   activityExpense: string
+  activityName: string
   itemAmount: number
   debitCredit: string
   taxCode: string
@@ -364,4 +389,120 @@ export interface DetailInvoiceEditTypes {
 export interface ParamsRejectTypes {
   invoiceUId: string
   notes: string
+}
+
+export interface itemsAlternativePayee {
+  id: number
+  name: string
+  name2: string
+  street: string
+  city: string
+  country: string
+  bankAccountNumber: string
+  bankKey: string
+  bankCountry: string
+  npwp: string
+  ktp: string
+  email: string
+  isAlternativePayee: boolean
+  isOneTimeVendor: boolean
+}
+
+// Approval Non Po Type
+interface CostExpenses {
+  id: number | null
+  activityId: number | null
+  activityExpenses: string | null
+  activityName: string | null
+  itemAmount: number | null
+  itemText: string | null
+  debitCredit: string | null
+  taxCode: string | null
+  vatAmount: number | null
+  costCenter: string | null
+  profitCenter: string | null
+  assignment: string | null
+  whtType: string | null
+  whtCode: string | null
+  whtBaseAmount: number | null
+  whtAmount: number | null
+}
+
+interface AlternativePay {
+  id: number | null
+  invoiceUId: string | null
+  name: string | null
+  name2: string | null
+  street: string | null
+  city: string | null
+  country: string | null
+  bankAccountNumber: string | null
+  bankKey: string | null
+  bankCountry: string | null
+  npwp: string | null
+  ktp: string | null
+  email: string | null
+  isAlternativePayee: boolean | null
+  isOneTimeVendor: boolean | null
+  isActive: boolean | null
+  isDeleted: boolean | null
+  createdBy: number | null
+  createdUtcDate: string | null
+  modifiedBy: number | null
+  modifiedUtcDate: string | null
+}
+
+interface Calculation {
+  subtotal: number | null
+  vatAmount: number | null
+  whtAmount: number | null
+  additionalCost: number | null
+  totalGrossAmount: number | null
+  totalNetAmount: number | null
+}
+
+interface Document {
+  id: number | null
+  documentType: number | null
+  documentName: string | null
+  documentUrl: string | null
+  documentSize: number | null
+}
+
+interface Payment {
+  bankKey: string | null
+  bankName: string | null
+  beneficiaryName: string | null
+  bankAccountNo: string | null
+  bankCountryCode: string | null
+}
+
+interface Header {
+  invoiceUId: string | null
+  invoiceDate: string | null
+  postingDate: string | null
+  documentNo: string | null
+  taxNo: string | null
+  invoicingParty: string | null
+  estimatedPaymentDate: string | null
+  paymentMethodCode: string | null
+  paymentMethodName: string | null
+  assigment: string | null
+  transferNews: string | null
+  notes: string | null
+  currCode: string | null
+  npwpReporting: string | null
+}
+
+export interface SubmissionNonPoTypes {
+  statusCode: number | null
+  statusName: string | null
+  statusNotes: string | null
+  header: Header
+  payment: Payment
+  documents: Document[]
+  calculation: Calculation
+  alternativePay: AlternativePay
+  alternativePayee: AlternativePay[]
+  costExpenses: CostExpenses[]
 }

@@ -12,4 +12,7 @@ export const general = {
   download: 'Unduh {field}',
   show: 'Menampilkan',
   perPage: 'per halaman | per halaman dari {n} data',
+  search: 'Cari {field}',
+  apply: 'Terapkan',
+  reset: 'Atur Ulang',
 }

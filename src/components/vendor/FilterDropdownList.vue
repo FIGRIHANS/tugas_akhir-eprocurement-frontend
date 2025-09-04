@@ -54,14 +54,14 @@ onMounted(() => {
   <FilterDropdown :filters="filters">
     <UiSelect
       label="Status"
-      placeholder="Pilih"
+      :placeholder="$t('general.select')"
       v-model="filters.statusId"
       :options="statusOptions"
     />
 
     <UiSelect
-      label="Category"
-      placeholder="Pilih"
+      :label="$t('vendor.masterFilters.category')"
+      :placeholder="$t('general.select')"
       v-model="filters.categoryId"
       :options="categoryOptions"
     />
@@ -75,9 +75,14 @@ onMounted(() => {
                 'absolute top-0 left-0 -mt-2 ml-2 bg-white px-1 text-gray-500 text-[11px] font-normal',
               ]"
             >
-              Registration Start Date
+              {{ $t('vendor.masterFilters.registrationStartDate') }}
             </div>
-            <input :placeholder="'Select'" :value="value" readonly class="min-w-[0px]" />
+            <input
+              :placeholder="$t('general.select')"
+              :value="value"
+              readonly
+              class="min-w-[0px]"
+            />
             <button class="btn btn-icon" type="button">
               <i class="ki-filled ki-calendar"></i>
             </button>
@@ -95,9 +100,14 @@ onMounted(() => {
                 'absolute top-0 left-0 -mt-2 ml-2 bg-white px-1 text-gray-500 text-[11px] font-normal',
               ]"
             >
-              Registration End Date
+              {{ $t('vendor.masterFilters.registrationEndDate') }}
             </div>
-            <input :placeholder="'Select'" :value="value" readonly class="min-w-[0px]" />
+            <input
+              :placeholder="$t('general.select')"
+              :value="value"
+              readonly
+              class="min-w-[0px]"
+            />
             <button class="btn btn-icon" type="button">
               <i class="ki-filled ki-calendar"></i>
             </button>

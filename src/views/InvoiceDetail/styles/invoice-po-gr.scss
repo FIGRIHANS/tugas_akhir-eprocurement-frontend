@@ -28,6 +28,21 @@
       @extend .po__column;
       min-width: 80px;
     }
+    
+    &--tax {
+      @extend .po__column;
+      min-width: 350px;
+    }
+
+    &--wht-type {
+      @extend .po__column;
+      min-width: 250px;
+    }
+
+    &--wht-code {
+      @extend .po__column;
+      min-width: 400px;
+    }
   }
 
   &__items {

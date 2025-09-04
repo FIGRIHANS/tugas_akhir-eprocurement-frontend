@@ -16,6 +16,7 @@ export interface listFormTypes {
 }
 
 export interface responseFileTypes {
+  id: number
   name: string
   path: string
   fileSize: string

@@ -213,6 +213,7 @@ const openDetailInvoice = (invoiceId: string) => {
     query: {
       id: invoiceId,
       type: '1',
+      invoiceType: 'no_po',
     },
   })
 }

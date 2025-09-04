@@ -466,7 +466,6 @@ watchEffect(async () => {
         <DatePicker placeholder="Date of birth" v-model="payload.ownerDOB" />
         <UiFileUpload
           name="shareholderFile"
-          accepted-files=".jpg,.jpeg,.png,pdf"
           placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
           @added-file="uploadFile($event)"
         />

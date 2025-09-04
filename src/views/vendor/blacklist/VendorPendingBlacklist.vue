@@ -9,7 +9,7 @@ import { formatDate } from '@/composables/date-format'
 import { useBlacklistStore } from '@/stores/vendor/blacklist'
 import { useVendorUploadStore } from '@/stores/vendor/upload'
 import { debounce } from 'lodash'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ModalReject from './components/ModalReject.vue'
 import { KTModal } from '@/metronic/core'
@@ -17,25 +17,30 @@ import ModalSuccess from './components/ModalSuccess.vue'
 import ModalError from './components/ModalError.vue'
 import ModalApprove from './components/ModalApprove.vue'
 import VendorBlacklistFilters from '@/components/vendor/filterButton/VendorBlacklistFilters.vue'
-
-const tableCols = [
-  'Actions',
-  'Company Name',
-  'Type',
-  'Start Date',
-  'End Date',
-  'Blacklist Description',
-  'Document',
-]
+import { useI18n } from 'vue-i18n'
+import { pendingTableColsEn, pendingTableColsId } from './static'
 
 const blacklistStore = useBlacklistStore()
 const uploadStore = useVendorUploadStore()
 
 const route = useRoute()
 const router = useRouter()
+const { locale } = useI18n()
+
 const search = ref('')
 const selectedId = ref(0)
 const mode = ref<'approve' | 'reject'>('approve')
+
+const tableCols = computed(() => (locale.value === 'id' ? pendingTableColsId : pendingTableColsEn))
+const start = computed(
+  () => blacklistStore.blacklist.pageSize * (blacklistStore.blacklist.page - 1) + 1,
+)
+const end = computed(
+  () =>
+    blacklistStore.blacklist.pageSize * (blacklistStore.blacklist.page - 1) +
+    blacklistStore.blacklist.items.length,
+)
+const total = computed(() => blacklistStore.blacklist.total)
 
 const handleSearch = debounce((value: string) => {
   const query = { ...route.query }
@@ -111,7 +116,7 @@ watch(
 <template>
   <div class="card">
     <div class="card-header">
-      <UiInputSearch v-model="search" placeholder="Search Vendor" />
+      <UiInputSearch v-model="search" :placeholder="$t('general.search', { field: 'Vendor' })" />
       <FilterDropdownBlacklist />
     </div>
     <div class="card-body scrollable-x-auto">
@@ -175,7 +180,7 @@ watch(
             <td>
               <UiButton v-if="item.docUrl" size="sm" outline @click="onDownload(item.docUrl)">
                 <UiIcon name="cloud-download" variant="duotone" />
-                Download
+                {{ $t('vendor.blacklist.downloadButton') }}
               </UiButton>
               <span v-else>-</span>
             </td>
@@ -185,12 +190,7 @@ watch(
     </div>
     <div class="card-footer" v-show="blacklistStore.blacklist.items.length">
       <div class="text-sm text-gray-800">
-        Showing {{ blacklistStore.blacklist.pageSize * (blacklistStore.blacklist.page - 1) + 1 }} to
-        {{
-          blacklistStore.blacklist.pageSize * (blacklistStore.blacklist.page - 1) +
-          blacklistStore.blacklist.items.length
-        }}
-        of {{ blacklistStore.blacklist.total }} entries
+        {{ $t('vendor.pagination.show', { start, end, total }) }}
       </div>
       <LPagination
         :total-items="Number(blacklistStore.blacklist.total)"

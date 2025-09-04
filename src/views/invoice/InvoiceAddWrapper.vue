@@ -265,6 +265,7 @@ const detailPo = computed(() => invoiceApi.detailPo)
 const detailNonPo = computed(() => invoiceApi.detailNonPo)
 const userData = computed(() => loginApi.userData)
 const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
+const listActivity = computed(() => invoiceMasterApi.activityList)
 
 const checkInvoiceView = () => {
   return route.query.type === 'po-view'
@@ -380,10 +381,11 @@ const mapDocument = () => {
   for (const [index, item] of libDocument.entries()) {
     if (form[item as keyof typeof form]) {
       document.push({
+        id: form[item].id || 0,
         documentType: Number(listDocumentType.value[index].code),
-        documentName: form.invoiceDocument?.name,
-        documentUrl: form.invoiceDocument?.path,
-        documentSize: Number(form.invoiceDocument?.fileSize),
+        documentName: form[item].name,
+        documentUrl: form[item].path,
+        documentSize: Number(form[item].fileSize),
       })
     }
   }
@@ -411,8 +413,8 @@ const mapPoGr = () => {
       conditionType: item.conditionType,
       conditionTypeDesc: item.conditionTypeDesc,
       qcStatus: item.qcStatus,
-      whtType: '-',
-      whtCode: '-',
+      whtType: '',
+      whtCode: '',
       whtBaseAmount: 0,
       whtAmount: 0,
       department: item.department,
@@ -424,8 +426,11 @@ const mapPoGr = () => {
 const mapAdditionalCost = () => {
   const cost = []
   for (const item of form.additionalCost) {
+    const itemIndex = listActivity.value.findIndex((sub) => sub.id === item.activity)
     cost.push({
-      activityExpense: item.activity,
+      activityId: item.activity,
+      activityExpense: listActivity.value[itemIndex].code,
+      activityName: listActivity.value[itemIndex].name,
       itemAmount: Number(item.itemAmount),
       debitCredit: item.debitCredit,
       taxCode: item.taxCode,
@@ -445,8 +450,11 @@ const mapAdditionalCost = () => {
 const mapInvoiceItem = () => {
   const cost = []
   for (const item of form.invoiceItem) {
+    const itemIndex = listActivity.value.findIndex((sub) => sub.id === item.activity)
     cost.push({
-      activityExpense: item.activity,
+      activityId: item.activity,
+      activityExpense: listActivity.value[itemIndex].code,
+      activityName: listActivity.value[itemIndex].name,
       itemAmount: Number(item.itemAmount),
       debitCredit: item.debitCredit,
       taxCode: item.taxCode,
@@ -747,7 +755,9 @@ const setData = () => {
     form.additionalCost = []
     for (const item of detail.additionalCosts) {
       const data = {
-        activity: item.activityExpense,
+        activity: item.activityId,
+        activityCode: item.activityExpense,
+        activityName: item.activityName,
         itemAmount: item.itemAmount,
         debitCredit: item.debitCredit,
         taxCode: item.taxCode,
@@ -768,6 +778,7 @@ const setData = () => {
       switch (doc.documentType) {
         case 1:
           form.invoiceDocument = {
+            id: doc.id,
             name: doc.documentName,
             fileSize: doc.documentSize.toString(),
             path: doc.documentUrl,
@@ -775,6 +786,7 @@ const setData = () => {
           break
         case 2:
           form.tax = {
+            id: doc.id,
             name: doc.documentName,
             fileSize: doc.documentSize.toString(),
             path: doc.documentUrl,
@@ -782,6 +794,7 @@ const setData = () => {
           break
         case 3:
           form.referenceDocument = {
+            id: doc.id,
             name: doc.documentName,
             fileSize: doc.documentSize.toString(),
             path: doc.documentUrl,
@@ -789,6 +802,7 @@ const setData = () => {
           break
         case 4:
           form.otherDocument = {
+            id: doc.id,
             name: doc.documentName,
             fileSize: doc.documentSize.toString(),
             path: doc.documentUrl,
@@ -908,6 +922,7 @@ const setDataNonPo = () => {
       switch (doc.documentType) {
         case 1:
           form.invoiceDocument = {
+            id: doc.id,
             name: doc.documentName,
             fileSize: doc.documentSize.toString(),
             path: doc.documentUrl,
@@ -915,6 +930,7 @@ const setDataNonPo = () => {
           break
         case 2:
           form.tax = {
+            id: doc.id,
             name: doc.documentName,
             fileSize: doc.documentSize.toString(),
             path: doc.documentUrl,
@@ -922,6 +938,7 @@ const setDataNonPo = () => {
           break
         case 3:
           form.referenceDocument = {
+            id: doc.id,
             name: doc.documentName,
             fileSize: doc.documentSize.toString(),
             path: doc.documentUrl,
@@ -929,6 +946,7 @@ const setDataNonPo = () => {
           break
         case 4:
           form.otherDocument = {
+            id: doc.id,
             name: doc.documentName,
             fileSize: doc.documentSize.toString(),
             path: doc.documentUrl,
@@ -947,9 +965,10 @@ const mapDataCheck = () => {
 
   for (const item of form.invoiceItem) {
     itemNoAcc.value += 1
+    const itemIndex = listActivity.value.findIndex((sub) => sub.id === item.activity)
     const glData = {
       ITEMNO_ACC: itemNoAcc.value,
-      GL_ACCOUNT: item.activity,
+      GL_ACCOUNT: listActivity.value[itemIndex].code,
       ITEM_TEXT: item.itemText,
       ALLOC_NMBR: '',
       TAX_CODE: item.taxCode,
@@ -1101,16 +1120,16 @@ onMounted(() => {
     tabNow.value = 'preview'
   }
 
-  if (route.query.invoice) {
-    if (route.query.type === 'po-view') {
-      invoiceApi.getPoDetail(route.query.invoice?.toString() || '').then(() => {
-        setData()
-      })
-    } else if (route.query.type === 'non-po-view') {
-      invoiceApi.getNonPoDetail(route.query.invoice?.toString() || '').then(() => {
-        setDataNonPo()
-      })
-    }
+  if (route.query.type === 'non-po-view') {
+    invoiceApi.getNonPoDetail(route.query.invoice?.toString() || '').then(() => {
+      setDataNonPo()
+    })
+  }
+
+  if (route.query.type === 'po-view' || route.query.invoice) {
+    invoiceApi.getPoDetail(route.query.invoice?.toString() || '').then(() => {
+      setData()
+    })
   }
 })
 

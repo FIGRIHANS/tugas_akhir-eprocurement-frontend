@@ -34,7 +34,8 @@
           <thead>
             <tr>
               <th v-for="(item, index) in columns" :key="index" class="pogr__field-base" :class="{
-                'pogr__field-base--po-item': item.toLowerCase() === 'item text'
+                'pogr__field-base--po-item': item.toLowerCase() === 'item text',
+                'pogr__field-base--tax': item.toLowerCase() === 'tax code',
               }">
                 {{ item }}
               </th>
@@ -47,7 +48,7 @@
             <template v-else>
               <tr v-for="(item, index) in form.invoicePoGr" :key="index" class="pogr__field-items">
                 <td class="flex items-center justify-around gap-[8px]">
-                  <button class="btn btn-outline btn-icon btn-primary" @click="goEdit(item)">
+                  <button class="btn btn-outline btn-icon btn-primary" :disabled="checkIsEdit() && !item.isEdit" @click="goEdit(item)">
                     <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>
                     <i v-else class="ki-duotone ki-check-circle"></i>
                   </button>
@@ -80,7 +81,7 @@
                 <td v-if="!checkInvoiceDp()">{{ item.itemText }}</td>
                 <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.conditionType }}</td>
                 <td v-if="!checkInvoiceDp()">{{ item.conditionTypeDesc || '-' }}</td>
-                <td v-if="form?.invoiceType === '903'">{{ item.taxCode || '-' }}</td>
+                <td v-if="form?.invoiceType === '903'">{{ getTaxCodeName(item.taxCode) || '-' }}</td>
                 <td v-if="!checkInvoiceDp() && form?.invoiceType !== '903'">{{ item.qcStatus || '-' }}</td>
                 <td v-if="form?.invoiceType === '903'">
                   <span v-if="item.isEdit">{{ form?.currency === item.currencyLC ? useFormatIdr(formEdit.vatAmount) : useFormatUsd(formEdit.vatAmount) }}</span>
@@ -91,12 +92,12 @@
                   <input v-else v-model="formEdit.itemAmountLC" type="number" class="input" />
                 </td>
                 <td>
-                  <span v-if="!item.isEdit">{{ item.taxCode || '-' }}</span>
+                  <span v-if="!item.isEdit">{{ getTaxCodeName(item.taxCode) || '-' }}</span>
                   <v-select
                     v-else
                     v-model="formEdit.taxCode"
                     class="customSelect"
-                    label="code"
+                    :get-option-label="(option: any) => `${option.code} - ${option.name}`"
                     :reduce="(option: any) => option.code"
                     :options="listTaxCalculation"
                     appendToBody
@@ -216,6 +217,11 @@ const formEdit = reactive({
 
 const listTaxCalculation = computed(() => masterDataApi.taxList)
 const costCenterList = computed(() => masterDataApi.costCenterList)
+
+const checkIsEdit = () => {
+  const result = form?.invoicePoGr.findIndex((item) => item.isEdit)
+  return result !== -1
+}
 
 const searchEnter = (event: KeyboardEvent) => {
   if (isDisabledSearch.value) return
@@ -460,6 +466,15 @@ const getVatAmount = () => {
       item.vatAmount = result
     }
   }
+}
+
+const getTaxCodeName = (taxCode: string) => {
+  const index = listTaxCalculation.value.findIndex((item) => item.code === taxCode)
+  if (index !== -1) {
+    const data = listTaxCalculation.value[index]
+    return `${data.code} - ${data.name}`
+  }
+  return '-'
 }
 
 watch(
