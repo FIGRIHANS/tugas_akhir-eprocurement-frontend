@@ -6,9 +6,9 @@
           <UiIcon variant="duotone" name="information-3" class="text-4xl" />
 
           <div class="flex flex-col gap-1">
-            <span class="font-semibold text-gray-800">Changes to Overall Data</span>
+            <span class="font-semibold text-gray-800">{{ $t('vendorProfile.changeData') }}</span>
             <p class="font-medium text-sm text-gray-600">
-              If you want to change the overall data please send a request via email to the admin
+              {{ $t('vendorProfile.requestChangeData') }}
               <strong>(superadmin@gmail.com)</strong>
             </p>
           </div>
@@ -24,16 +24,16 @@
         v-for="(item, index) in tabItems"
         :key="index"
         class="tab"
-        :class="item.value === currentTab ? 'active' : ''"
+        :class="item === currentTab ? 'active' : ''"
       >
-        <span @click="changeTab(item.value)" class="cursor-pointer">
-          {{ item.name }}
+        <span @click="changeTab(item)" class="cursor-pointer">
+          {{ t('vendorProfile.data', { field: $t(`vendorProfile.${item}`) }) }}
         </span>
         <UiIcon
           name="cross-circle"
           variant="duotone"
           class="cursor-pointer"
-          @click="closeTab(item.value)"
+          @click="closeTab(item)"
         />
       </div>
       <div class="dropdown" data-dropdown="true" data-dropdown-trigger="click">
@@ -50,7 +50,7 @@
               @click="addTab(menu)"
             >
               <div class="menu-link">
-                <span>{{ menu.name }}</span>
+                <span>{{ t('vendorProfile.data', { field: $t(`vendorProfile.${menu}`) }) }}</span>
               </div>
             </div>
           </div>
@@ -59,35 +59,26 @@
     </div>
 
     <AdministrationData
-      v-if="currentTab === 'administration_data'"
+      v-if="currentTab === 'administration'"
       :vendor-id="userData?.profile.profileId"
     />
     <BusinessLicenseData
-      v-if="currentTab === 'business_license_data'"
+      v-if="currentTab === 'businessLicense'"
       :vendor-id="userData?.profile.profileId"
     />
     <PaymentDetailData
-      v-if="currentTab === 'payment_information_data'"
+      v-if="currentTab === 'paymentInformation'"
       :vendor-id="userData?.profile.profileId"
     />
-    <CompanyDeedData
-      v-if="currentTab === 'company_deed_data'"
-      :vendor-id="userData?.profile.profileId"
-    />
-    <EquipmentData
-      v-if="currentTab === 'equipment_data'"
-      :vendor-id="userData?.profile.profileId"
-    />
-    <ExperienceData
-      v-if="currentTab === 'experience_data'"
-      :vendor-id="userData?.profile.profileId"
-    />
+    <CompanyDeedData v-if="currentTab === 'companyDeed'" :vendor-id="userData?.profile.profileId" />
+    <EquipmentData v-if="currentTab === 'equipment'" :vendor-id="userData?.profile.profileId" />
+    <ExperienceData v-if="currentTab === 'experience'" :vendor-id="userData?.profile.profileId" />
     <ExpertPersonnelData
-      v-if="currentTab === 'expert_personnel_data'"
+      v-if="currentTab === 'expertPersonnel'"
       :vendor-id="userData?.profile.profileId"
     />
     <OtherDocumentData
-      v-if="currentTab === 'other_documents'"
+      v-if="currentTab === 'otherDocuments'"
       :vendor-id="userData?.profile.profileId"
     />
   </div>
@@ -171,12 +162,8 @@
 </template>
 
 <script setup lang="ts">
-type TabItemType = {
-  name: string
-  value: string
-}
-
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import { useLoginStore } from '@/stores/views/login'
 
@@ -194,56 +181,27 @@ import OtherDocumentData from './details/OtherDocumentData.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 
+const { t } = useI18n()
+
 const userStore = useLoginStore()
 const userData = computed(() => userStore.userData)
 
 const emailLanguage = ref<'english' | 'indonesia'>('english')
-const currentTab = ref<string>('administration_data')
-const tabItems = ref<TabItemType[]>([
-  {
-    name: 'Administration Data',
-    value: 'administration_data',
-  },
-])
-const tabsMenu = computed<TabItemType[]>(() => {
+const currentTab = ref<string>('administration')
+const tabItems = ref<string[]>(['administration'])
+const tabsMenu = computed<string[]>(() => {
   const menu = [
-    {
-      name: 'Administration Data',
-      value: 'administration_data',
-    },
-    {
-      name: 'Business License Data',
-      value: 'business_license_data',
-    },
-    {
-      name: 'Payment Information Data',
-      value: 'payment_information_data',
-    },
-    {
-      name: 'Deed of Stabilisment Data',
-      value: 'company_deed_data',
-    },
-    {
-      name: 'Equipment Data',
-      value: 'equipment_data',
-    },
-    {
-      name: 'Experience Data',
-      value: 'experience_data',
-    },
-    {
-      name: 'Expert Personnel Data',
-      value: 'expert_personnel_data',
-    },
-    {
-      name: 'Other Documents',
-      value: 'other_documents',
-    },
+    'administration',
+    'businessLicense',
+    'paymentInformation',
+    'companyDeed',
+    'equipment',
+    'experience',
+    'expertPersonnel',
+    'otherDocuments',
   ]
 
-  return menu.filter(
-    (menuItem) => !tabItems.value.some((tabItem) => tabItem.value === menuItem.value),
-  )
+  return menu.filter((menuItem) => !tabItems.value.some((tabItem) => tabItem === menuItem))
 })
 
 const changeTab = (value: string) => {
@@ -251,20 +209,20 @@ const changeTab = (value: string) => {
 }
 
 const closeTab = (value: string) => {
-  const findIndex = tabItems.value.findIndex((item) => item.value === value)
+  const findIndex = tabItems.value.findIndex((item) => item === value)
 
   if (currentTab.value === value) {
     if (findIndex === tabItems.value.length - 1) {
-      currentTab.value = tabItems.value[findIndex - 1]?.value
+      currentTab.value = tabItems.value[findIndex - 1]
     } else {
-      currentTab.value = tabItems.value[findIndex + 1]?.value
+      currentTab.value = tabItems.value[findIndex + 1]
     }
   }
 
   tabItems.value.splice(findIndex, 1)
 }
 
-const addTab = (menu: TabItemType) => {
+const addTab = (menu: string) => {
   tabItems.value.push(menu)
 }
 </script>
