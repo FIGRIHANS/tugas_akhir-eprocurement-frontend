@@ -907,7 +907,10 @@ watch(
   () => detailInvoice.value,
   () => {
     afterGetDetail()
-    if (form.value.companyCode) invoiceMasterApi.getActivity(form.value.companyCode || '')
+    if (form.value.companyCode) {
+      invoiceMasterApi.getActivity(form.value.companyCode || '')
+      invoiceMasterApi.getCostCenter(form.value.companyCode || '')
+    }
   },
   {
     deep: true,
@@ -941,6 +944,7 @@ onMounted(async () => {
     ]
   }
   invoiceMasterApi.getWhtType()
+  invoiceMasterApi.getTaxCode()
   if (currentRouteName.value === 'invoiceDetail') {
     await verificationApi.getInvoiceDetail(route.query.id?.toString() || '').then(() => {
       afterGetDetail()
