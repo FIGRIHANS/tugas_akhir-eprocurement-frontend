@@ -8,8 +8,10 @@ import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 import type { IOtherDocument } from '@/stores/vendor/types/vendor'
 import { useUploadStore } from '@/stores/general/upload'
+import { useVendorUploadStore } from '@/stores/vendor/upload'
 
 const uploadStore = useUploadStore()
+const uploadVendorStore = useVendorUploadStore()
 
 const props = defineProps({
   otherDocuments: {
@@ -20,10 +22,14 @@ const props = defineProps({
 
 const emit = defineEmits(['update:otherDocuments'])
 
+const downloadLoading = ref<boolean>(false)
+
 const localOtherDocuments = computed<IOtherDocument[]>({
   get: () => props.otherDocuments,
   set: (newValue) => emit('update:otherDocuments', newValue),
 })
+
+console.log(localOtherDocuments)
 
 type FileStatus = 'notUpload' | 'loading' | 'success'
 type FileSlot = { file: File; status: FileStatus }
@@ -65,22 +71,22 @@ const startEditing = (index: number) => {
   resetPickedFile(index)
 }
 
-const cancelEditing = (index: number) => {
-  const snapshot = originalMap.value[String(index)]
-  if (snapshot) {
-    const updated = [...localOtherDocuments.value]
-    updated[index] = { ...snapshot }
-    emit('update:otherDocuments', updated)
-  }
-  delete originalMap.value[String(index)]
-  resetPickedFile(index)
-  editingIndex.value = null
-}
+// const cancelEditing = (index: number) => {
+//   const snapshot = originalMap.value[String(index)]
+//   if (snapshot) {
+//     const updated = [...localOtherDocuments.value]
+//     updated[index] = { ...snapshot }
+//     emit('update:otherDocuments', updated)
+//   }
+//   delete originalMap.value[String(index)]
+//   resetPickedFile(index)
+//   editingIndex.value = null
+// }
 
-const saveRow = (index: number) => {
-  delete originalMap.value[String(index)]
-  editingIndex.value = null
-}
+// const saveRow = (index: number) => {
+//   delete originalMap.value[String(index)]
+//   editingIndex.value = null
+// }
 
 const addAnotherDocument = () => {
   if (localOtherDocuments.value.length >= 5) return
@@ -141,9 +147,20 @@ const uploadPickedFile = async (index: number) => {
   }
 }
 
-const downloadFile = (url: string) => {
-  if (!url) return
-  window.open(url, '_blank', 'noopener,noreferrer')
+const downloadFile = async (url: string) => {
+  downloadLoading.value = true
+  try {
+    const file = await uploadVendorStore.preview(url)
+    const link = URL.createObjectURL(file)
+
+    window.open(link, '_blank')
+    setTimeout(() => URL.revokeObjectURL(link), 1000)
+  } catch (error) {
+    console.log(error)
+    alert('failed to download document. please try again')
+  } finally {
+    downloadLoading.value = false
+  }
 }
 
 watch(
@@ -299,6 +316,7 @@ watch(
                         outline
                         size="sm"
                         @click="downloadFile(localOtherDocuments[index].uploadUrl as string)"
+                        :disabled="downloadLoading"
                       >
                         <UiIcon name="cloud-download" variant="duotone" />
                         <span>Download Document</span>
