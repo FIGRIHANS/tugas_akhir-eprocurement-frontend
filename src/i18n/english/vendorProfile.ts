@@ -47,6 +47,7 @@ export const vendorProfile = {
   letterDate: 'Letter Date',
   notary: 'Notary',
   notaryPlace: 'Notary Place',
+  documnetNo: 'Document No',
   file: 'File',
   shareholders: 'Shareholders',
   type: 'Type',
@@ -54,6 +55,4 @@ export const vendorProfile = {
   dateBirth: 'Date of Birth / Company Establishment Date',
   nominalValue: 'Nominal Value',
   shareUnit: 'Share Unit',
-  active: 'ACTIVE',
-  notActive: 'NOT ACTIVE',
 }

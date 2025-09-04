@@ -115,8 +115,8 @@
                 <td class="!border-b-0">{{ formatDate(ratificationData?.documentDate) }}</td>
               </tr>
               <tr>
-                <td class="!border-b-0">{{ $t('vendorProfile.notary') }}</td>
-                <td class="!border-b-0">{{ ratificationData?.notaryName || '-' }}</td>
+                <td class="!border-b-0">{{ $t('vendorProfile.documentNo') }}</td>
+                <td class="!border-b-0">{{ ratificationData?.documentNo || '-' }}</td>
               </tr>
               <tr>
                 <td class="!border-b-0">{{ $t('vendorProfile.file') }}</td>
@@ -158,53 +158,30 @@
             <thead>
               <tr>
                 <th>
-                  <span class="sort">
-                    <span class="sort-label">{{ $t('vendorProfile.type') }}</span>
-                    <span class="sort-icon"></span>
-                  </span>
+                  {{ $t('vendorProfile.type') }}
                 </th>
                 <th class="min-w-[228px]">
-                  <span class="sort">
-                    <span class="sort-label">{{ $t('vendorProfile.shareholderName') }}</span>
-                    <span class="sort-icon"></span>
-                  </span>
+                  {{ $t('vendorProfile.shareholderName') }}
                 </th>
                 <th class="min-w-[268px]">
-                  <span class="sort">
-                    <span class="sort-label">{{ $t('vendorProfile.dateBirth') }}</span>
-                    <span class="sort-icon"></span>
-                  </span>
+                  {{ $t('vendorProfile.dateBirth') }}
                 </th>
                 <th class="min-w-[199px]">
-                  <span class="sort">
-                    <span class="sort-label">{{ $t('vendorProfile.nominalValue') }}</span>
-                    <span class="sort-icon"></span>
-                  </span>
+                  {{ $t('vendorProfile.nominalValue') }}
                 </th>
                 <th class="min-w-[147px]">
-                  <span class="sort">
-                    <span class="sort-label">{{ $t('vendorProfile.shareUnit') }}</span>
-                    <span class="sort-icon"></span>
-                  </span>
+                  {{ $t('vendorProfile.shareUnit') }}
                 </th>
-                <th class="min-w-[195px]">
-                  <span class="sort">
-                    <span class="sort-label">No KTP/Paspor/NPWP</span>
-                    <span class="sort-icon"></span>
-                  </span>
-                </th>
+                <th class="min-w-[195px]">No KTP/Paspor/NPWP</th>
                 <th class="min-w-[251px]">
-                  <span class="sort">
-                    <span class="sort-label">{{ $t('vendorProfile.file') }}</span>
-                    <span class="sort-icon"></span>
-                  </span>
+                  {{ $t('vendorProfile.file') }}
                 </th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="data in shareholderData" :key="data.stockID">
                 <td>
-                  {{ data.isActive ? $t('vendorProfile.active') : $t('vendorProfile.notActive') }}
+                  {{ data.typeShareholders }}
                 </td>
                 <td>{{ data.ownerName }}</td>
                 <td>{{ formatDate(data.ownerDOB) }}</td>

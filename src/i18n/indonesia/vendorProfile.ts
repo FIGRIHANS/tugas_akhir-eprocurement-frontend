@@ -47,6 +47,7 @@ export const vendorProfile = {
   letterDate: 'Tanggal Surat',
   notary: 'Notaris',
   notaryPlace: 'Tempat Notaris',
+  documentNo: 'No Dokumen',
   file: 'Berkas',
   shareholders: 'Pemegang Saham',
   type: 'Tipe',
@@ -54,6 +55,4 @@ export const vendorProfile = {
   dateBirth: 'Tanggal Lahir / Tanggal Pendirian Perusahaan',
   nominalValue: 'Nilai Nominal',
   shareUnit: 'Unit Saham',
-  active: 'AKTIF',
-  notActive: 'TIDAK AKTIF',
 }
