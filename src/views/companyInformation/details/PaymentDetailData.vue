@@ -2,7 +2,7 @@
   <div class="flex flex-col gap-6">
     <div class="card min-w-full">
       <div class="card-header">
-        <h3 class="card-title">Payment Information</h3>
+        <h3 class="card-title">{{ $t('vendorProfile.paymentInformation') }}</h3>
       </div>
 
       <div class="card-table scrollable-x-auto pb-2">
@@ -10,16 +10,16 @@
           <thead>
             <tr>
               <th>No</th>
-              <th class="min-w-40">Account No</th>
-              <th class="min-w-52">Account Holder Name</th>
-              <th class="min-w-32">SwiftCode</th>
-              <th class="min-w-72">Account Discrepancy Statement</th>
-              <th class="min-w-40">Account Cover</th>
-              <th class="min-w-40">Currency</th>
-              <th class="min-w-40">Bank Key</th>
-              <th class="min-w-40">Bank Name</th>
-              <th class="min-w-40">Bank Branch</th>
-              <th class="min-w-72">Bank Address</th>
+              <th class="min-w-40">{{ $t('vendorProfile.accountNo') }}</th>
+              <th class="min-w-52">{{ $t('vendorProfile.accountHolderName') }}</th>
+              <th class="min-w-32">{{ $t('vendorProfile.swiftCode') }}</th>
+              <th class="min-w-72">{{ $t('vendorProfile.accountDiscrepancy') }}</th>
+              <th class="min-w-40">{{ $t('vendorProfile.accountCover') }}</th>
+              <th class="min-w-40">{{ $t('vendorProfile.currency') }}</th>
+              <th class="min-w-40">{{ $t('vendorProfile.bankKey') }}</th>
+              <th class="min-w-40">{{ $t('vendorProfile.bankName') }}</th>
+              <th class="min-w-40">{{ $t('vendorProfile.bankBranch') }}</th>
+              <th class="min-w-72">{{ $t('vendorProfile.bankAddress') }}</th>
             </tr>
           </thead>
           <tbody>
