@@ -1,5 +1,7 @@
 export interface invoiceItemTypes {
   activity: number | null
+  activityCode: string
+  activityName: string
   itemAmount: number
   itemText: string
   debitCredit: string
