@@ -96,8 +96,8 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     listPo.value =
       response.data.result.content.length !== 0
         ? response.data.result.content.sort(
-            (a, b) => moment(b.invoiceDate).valueOf() - moment(a.invoiceDate).valueOf(),
-          )
+          (a, b) => moment(b.invoiceDate).valueOf() - moment(a.invoiceDate).valueOf(),
+        )
         : []
 
     return response.data.result.content
@@ -120,8 +120,8 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     listNonPo.value =
       response.data.result.content.length !== 0
         ? response.data.result.content.sort(
-            (a, b) => moment(b.invoiceDate).valueOf() - moment(a.invoiceDate).valueOf(),
-          )
+          (a, b) => moment(b.invoiceDate).valueOf() - moment(a.invoiceDate).valueOf(),
+        )
         : []
 
     return response.data.result.content
@@ -178,6 +178,12 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     return response.data.result
   }
 
+  const putEditInvoice = async (data: PostVerificationTypes) => {
+    const response: ApiResponse<void> = await invoiceApi.put(`/invoice/edit`, data)
+
+    return response.data.result
+  }
+
   const deleteAdditionalCost = async (invoiceUid: string, additionaCostId: number) => {
     const response: ApiResponse<void> = await invoiceApi.delete(
       `/invoice/${invoiceUid}/additional-cost/${additionaCostId}`,
@@ -215,5 +221,6 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     deleteAdditionalCost,
     getInvoiceNonPoDetail,
     verifyInvoiceNonPo,
+    putEditInvoice,
   }
 })
