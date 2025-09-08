@@ -958,6 +958,7 @@ const setDataNonPo = () => {
 }
 
 const mapDataCheck = () => {
+  itemNoAcc.value = 0
   const glAccount = [] as GlaccountDatum[]
   const accountPayable = [] as AccountPayable[]
   const accountTax = [] as Accounttax[]
@@ -985,14 +986,14 @@ const mapDataCheck = () => {
       const accData = {
         ITEMNO_ACC: itemNoAcc.value,
         VENDOR_NO: form.vendorId,
-        REF_KEY_1: form.invoiceNo,
+        REF_KEY_1: form.npwp,
         REF_KEY_2: '',
         REF_KEY_3: '',
         BLINE_DATE: '',
         PMNTTRMS: '',
         PYMT_METH: '',
         ALLOC_NMBR: '',
-        ITEM_TEXT: '',
+        ITEM_TEXT: form.invoiceNoVendor,
         TAX_CODE: item.TAX_CODE,
         PAYMT_REF: '',
       }
