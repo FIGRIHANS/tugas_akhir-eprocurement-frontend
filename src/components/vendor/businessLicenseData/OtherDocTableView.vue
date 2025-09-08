@@ -83,10 +83,10 @@ const startEditing = (index: number) => {
 //   editingIndex.value = null
 // }
 
-// const saveRow = (index: number) => {
-//   delete originalMap.value[String(index)]
-//   editingIndex.value = null
-// }
+const saveRow = (index: number) => {
+  delete originalMap.value[String(index)]
+  editingIndex.value = null
+}
 
 const addAnotherDocument = () => {
   if (localOtherDocuments.value.length >= 5) return
