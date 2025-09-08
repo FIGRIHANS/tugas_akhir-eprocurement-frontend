@@ -716,6 +716,7 @@ const setData = () => {
     form.subtotal = detail.calculation.subtotal
     form.vatAmount = detail.calculation.vatAmount
     form.additionalCostCalc = detail.calculation.additionalCost
+    form.whtAmount = detail.calculation.whtAmount
     form.totalGrossAmount = detail.calculation.totalGrossAmount
     form.totalNetAmount = detail.calculation.totalNetAmount
     form.invoicePoGr = []
