@@ -47,7 +47,7 @@
                   v-model="item.activity"
                   class="customSelect"
                   :get-option-label="(option: any) => `${option.code} - ${option.name}`"
-                  :reduce="(option: any) => option.code"
+                  :reduce="(option: any) => option.id"
                   :options="listActivity"
                   appendToBody
                 ></v-select>
@@ -184,7 +184,7 @@ const deleteItem = (index: number) => {
 
 const getActivityName = (id: number) => {
   const getIndex = listActivity.value.findIndex((item) => item.id === id)
-  if (getIndex !== -1) return listActivity.value[getIndex].name
+  if (getIndex !== -1) return `${listActivity.value[getIndex].code} - ${listActivity.value[getIndex].name}`
 }
 
 const getDebitCreditName = (code: string) => {
