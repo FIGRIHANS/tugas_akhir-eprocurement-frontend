@@ -39,10 +39,10 @@ const props = defineProps<{
 }>()
 
 const steps = ref<listStepTypes[]>([
-  { label: 'Requisition Submission', icon: 'ki-duotone ki-document', active: true },
-  { label: 'Requisition Verification', icon: 'ki-duotone ki-shield-tick', active: false },
-  { label: 'Requisition Approval', icon: 'ki-duotone ki-double-check-circle', active: false },
-  { label: 'Requisition Posting', icon: 'ki-duotone ki-paper-plane', active: false },
+  { label: 'Invoice Submission', icon: 'ki-duotone ki-document', active: true },
+  { label: 'Invoice Verification', icon: 'ki-duotone ki-shield-tick', active: false },
+  { label: 'Invoice Approval', icon: 'ki-duotone ki-double-check-circle', active: false },
+  { label: 'Invoice Posting', icon: 'ki-duotone ki-paper-plane', active: false },
 ])
 
 watch(
