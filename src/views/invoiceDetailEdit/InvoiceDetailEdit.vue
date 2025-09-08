@@ -311,6 +311,19 @@ const goNext = () => {
         .finally(() => {
           isLoading.value = false
         })
+    } else if (form.value.statusCode === 1) {
+      isLoading.value = true
+      verificationApi
+        .putEditInvoice(mapDataVerif())
+        .then(() => {
+          verificationApi.resetDetailInvoiceEdit()
+          const idModal = document.querySelector('#success_data_edit_modal')
+          const modal = KTModal.getInstance(idModal as HTMLElement)
+          modal.show()
+        })
+        .finally(() => {
+          isLoading.value = false
+        })
     } else {
       router.push({
         name: 'invoiceDetail',
