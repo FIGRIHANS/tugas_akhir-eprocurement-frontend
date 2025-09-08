@@ -396,7 +396,7 @@ watchEffect(async () => {
                   </div>
                 </div>
               </td>
-              <td>{{ item.isActive ? 'Active' : 'Inactive' }}</td>
+              <td>{{ item.typeShareholders }}</td>
               <td>{{ item.ownerName }}</td>
               <td>{{ moment(item.ownerDOB).format('DD MMMM YYYY') }}</td>
               <td>{{ formatNumber(item.quantity) }}</td>
