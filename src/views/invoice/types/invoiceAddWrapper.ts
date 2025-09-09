@@ -2,7 +2,6 @@ import type { documentFormTypes } from './invoiceDocument'
 import type { itemsPoGrType } from './invoicePoGr'
 import type { itemsCostType } from './additionalCost'
 import type { invoiceItemTypes } from './invoiceItem'
-import type { alternativePayee } from './itemsAlternativePayee'
 
 export interface formTypes extends documentFormTypes {
   // Invoice Data
@@ -87,8 +86,6 @@ export interface formTypes extends documentFormTypes {
   additionalCostError?: boolean
   invoiceItem: invoiceItemTypes[]
   invoiceItemError?: boolean
-  alternativePayee: alternativePayee[]
-  costExpense: []
 
   status: number
 }
