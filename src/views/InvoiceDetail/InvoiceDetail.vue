@@ -189,6 +189,7 @@ const detailInvoice = computed(() => verificationApi.detailInvoice)
 const detailInvoiceNonPo = computed(() => verificationApi.detailNonPoInvoice)
 const userData = computed(() => loginApi.userData)
 const additionalCostTempDelete = computed(() => verificationApi.additionalCostTempDelete)
+const whtCodeList = computed(() => invoiceMasterApi.whtCodeList)
 
 const checkStatusCode = () => {
   let status = true
@@ -229,6 +230,7 @@ const goToEdit = () => {
     query: {
       id: route.query.id,
       type: route.query.type,
+      invoiceType: route.query.invoiceType,
     },
   })
 }
@@ -593,7 +595,11 @@ const goBack = () => {
   }
 }
 
-const setDataDefault = () => {
+const callWhtCode = async (whtType: string) => {
+  await invoiceMasterApi.getWhtCode(whtType)
+}
+
+const setDataDefault = async () => {
   const data = detailInvoice.value
   const resultPoGr: itemsPoGrType[] = []
   const resultAdditional: itemsCostType[] = []
@@ -603,14 +609,18 @@ const setDataDefault = () => {
   let other = {} as documentDetailTypes
 
   for (const item of data?.pogr || []) {
+    if (item.whtType) await callWhtCode(item.whtType)
     resultPoGr.push({
       ...item,
+      whtCodeList: item.whtType ? whtCodeList.value : []
     })
   }
 
   for (const item of data?.additionalCosts || []) {
+    if (item.whtType) await callWhtCode(item.whtType)
     resultAdditional.push({
       ...item,
+      whtCodeList: item.whtType ? whtCodeList.value : []
     })
   }
 
@@ -907,7 +917,10 @@ watch(
   () => detailInvoice.value,
   () => {
     afterGetDetail()
-    if (form.value.companyCode) invoiceMasterApi.getActivity(form.value.companyCode || '')
+    if (form.value.companyCode) {
+      invoiceMasterApi.getActivity(form.value.companyCode || '')
+      invoiceMasterApi.getCostCenter(form.value.companyCode || '')
+    }
   },
   {
     deep: true,
@@ -941,6 +954,7 @@ onMounted(async () => {
     ]
   }
   invoiceMasterApi.getWhtType()
+  invoiceMasterApi.getTaxCode()
   if (currentRouteName.value === 'invoiceDetail') {
     await verificationApi.getInvoiceDetail(route.query.id?.toString() || '').then(() => {
       afterGetDetail()

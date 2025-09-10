@@ -26,7 +26,7 @@
         <tbody>
           <tr v-for="(item, index) in additionalList" :key="index" class="invoice__field-items">
             <td>{{ index + 1 }}</td>
-            <td>{{ `${item.activityCode} - ${item.activityName}` || '-' }}</td>
+            <td>{{ !item.activityCode && !item.activityName ? getActivityName(item.activity) : `${item.activityCode} - ${item.activityName}` || '-' }}</td>
             <td>{{ item.itemAmount || '-' }}</td>
             <td>{{ getDebitCreditName(item.debitCredit) || '-' }}</td>
             <td>{{ getTaxCodeName(item.taxCode) || '-' }}</td>
@@ -74,6 +74,7 @@ const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
 const costCenterList = computed(() => invoiceMasterApi.costCenterList)
 const whtTypeList = computed(() => invoiceMasterApi.whtTypeList)
 const whtCodeList = computed(() => invoiceMasterApi.whtCodeList)
+const listActivity = computed(() => invoiceMasterApi.activityList)
 
 const setAdditionalCostList = async () => {
   const result = [] as itemsCostType[]
@@ -92,6 +93,11 @@ const setAdditionalCostList = async () => {
 
 const callWhtCode = async (whtType: string) => {
   await invoiceMasterApi.getWhtCode(whtType)
+}
+
+const getActivityName = (id: number) => {
+  const getIndex = listActivity.value.findIndex((item) => item.id === id)
+  if (getIndex !== -1) return `${listActivity.value[getIndex].code} - ${listActivity.value[getIndex].name}`
 }
 
 const getDebitCreditName = (code: string) => {
