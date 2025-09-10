@@ -3,8 +3,8 @@
     <div class="card">
       <div class="card-header">
         <div class="flex flex-col gap-2">
-          <h3 class="card-title">Completed Projects</h3>
-          <span class="text-danger text-sm">(Last 5 Years)</span>
+          <h3 class="card-title">{{ $t('vendorProfile.completedProjects') }}</h3>
+          <span class="text-danger text-sm">({{ $t('vendorProfile.last5Years') }})</span>
         </div>
       </div>
 
@@ -13,10 +13,10 @@
           <thead>
             <tr>
               <th class="w-[70px]"></th>
-              <th>Contract Name</th>
-              <th>Contract Address</th>
-              <th>Institution</th>
-              <th>Contract Value</th>
+              <th>{{ $t('vendorProfile.contractName') }}</th>
+              <th>{{ $t('vendorProfile.contractAddress') }}</th>
+              <th>{{ $t('vendorProfile.institution') }}</th>
+              <th>{{ $t('vendorProfile.contractValue') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -32,7 +32,7 @@
                       <div class="menu-item text-primary" @click="downloadFile(data.documentURL)">
                         <span class="menu-link">
                           <UiIcon name="file-down" variant="duotone" class="menu-icon" />
-                          Download
+                          {{ $t('general.download') }}
                         </span>
                       </div>
                     </div>
@@ -51,7 +51,7 @@
 
     <div class="card">
       <div class="card-header">
-        <h3 class="card-title">Ongoing Projects</h3>
+        <h3 class="card-title">{{ $t('vendorProfile.ongoingProjects') }}</h3>
       </div>
 
       <div class="card-table">
@@ -59,10 +59,10 @@
           <thead>
             <tr>
               <th class="w-[70px]"></th>
-              <th>Contract Name</th>
-              <th>Contract Address</th>
-              <th>Institution</th>
-              <th>Contract Value</th>
+              <th>{{ $t('vendorProfile.contractName') }}</th>
+              <th>{{ $t('vendorProfile.contractAddress') }}</th>
+              <th>{{ $t('vendorProfile.institution') }}</th>
+              <th>{{ $t('vendorProfile.contractValue') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -78,7 +78,7 @@
                       <div class="menu-item text-warning" @click="downloadFile(data.documentURL)">
                         <span class="menu-link">
                           <UiIcon name="file-down" variant="duotone" class="menu-icon" />
-                          Download
+                          {{ $t('general.download') }}
                         </span>
                       </div>
                     </div>
