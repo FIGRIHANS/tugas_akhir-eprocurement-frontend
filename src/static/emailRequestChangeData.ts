@@ -18,3 +18,17 @@ export const englishEmail = {
   bodyEmail:
     'Dear Procurement Admin, <br /><br />\r\nWith respect, <br /><br />\r\nWe would like to request a complete change to our vendor data. We kindly ask for your assistance in processing this data update in accordance with the applicable procedures. <br /><br />\r\nIf additional information or specific forms are required, we are ready to provide them. <br /><br />\r\nWe hereby submit this request. Thank you for your attention and cooperation. <br /><br />\r\nSincerely, <br />\r\n[Vendor Representative Name] <br />\r\n[Vendor Company Name] <br />\r\n[Mobile Number] <br />\r\n[Active Email]',
 }
+
+export const listCcEmail = {
+  indonesia: [
+    { user: 'Basaria', email: 'basaria.tambunan@genero.co.id' },
+    { user: 'Cirscelda', email: 'criscelda.kurniasih@aryanoble.co.id' },
+    { user: 'Bella', email: 'bella.agustina@aryanoble.co.id' },
+  ],
+  english: [
+    { user: 'Laelani', email: 'laelani.sabila@genero.co.id' },
+    { user: 'Edit', email: 'edit.setiantono@aryanoble.co.id' },
+    { user: 'Putri', email: 'putri.suryansyah@aryanoble.co.id' },
+    { user: 'Athaya', email: 'athaya.matanra@aryanoble.co.id' },
+  ],
+}
