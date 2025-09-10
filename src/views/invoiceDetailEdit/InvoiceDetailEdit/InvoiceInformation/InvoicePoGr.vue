@@ -379,7 +379,6 @@ onMounted(() => {
   
     for (const item of form.value.invoicePoGr) {
       if (item.whtType && item.whtType !== '-') getWhtCode(item, item.whtType)
-      item.whtBaseAmount = item.itemAmount
     }
   }
 })

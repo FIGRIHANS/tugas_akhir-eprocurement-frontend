@@ -414,7 +414,7 @@ const mapPoGr = () => {
       qcStatus: item.qcStatus,
       whtType: '',
       whtCode: '',
-      whtBaseAmount: 0,
+      whtBaseAmount: item.whtBaseAmount,
       whtAmount: 0,
       department: item.department,
     })
