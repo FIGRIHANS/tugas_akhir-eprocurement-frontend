@@ -109,7 +109,7 @@
                 </td>
                 <td v-if="form?.invoiceType !== '903'">-</td>
                 <td v-if="form?.invoiceType !== '903'">-</td>
-                <td v-if="form?.invoiceType !== '903'">-</td>
+                <td v-if="form?.invoiceType !== '903'">{{ item.whtBaseAmount }}</td>
                 <td v-if="!checkInvoiceDp()">-</td>
                 <td>{{ item.department || '-' }}</td>
               </tr>
@@ -365,6 +365,7 @@ const goEdit = (item: itemsPoGrType) => {
     item.vatAmount = formEdit.vatAmount
     if (form?.currency === 'IDR') item.itemAmountLC = formEdit.itemAmountLC
     else item.itemAmountTC = formEdit.itemAmountLC
+    item.whtBaseAmount = formEdit.itemAmountLC
     resetFormEdit()
   }
 }
