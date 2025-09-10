@@ -189,6 +189,7 @@ const detailInvoice = computed(() => verificationApi.detailInvoice)
 const detailInvoiceNonPo = computed(() => verificationApi.detailNonPoInvoice)
 const userData = computed(() => loginApi.userData)
 const additionalCostTempDelete = computed(() => verificationApi.additionalCostTempDelete)
+const whtCodeList = computed(() => invoiceMasterApi.whtCodeList)
 
 const checkStatusCode = () => {
   let status = true
@@ -594,7 +595,11 @@ const goBack = () => {
   }
 }
 
-const setDataDefault = () => {
+const callWhtCode = async (whtType: string) => {
+  await invoiceMasterApi.getWhtCode(whtType)
+}
+
+const setDataDefault = async () => {
   const data = detailInvoice.value
   const resultPoGr: itemsPoGrType[] = []
   const resultAdditional: itemsCostType[] = []
@@ -604,14 +609,18 @@ const setDataDefault = () => {
   let other = {} as documentDetailTypes
 
   for (const item of data?.pogr || []) {
+    await callWhtCode(item.whtType)
     resultPoGr.push({
       ...item,
+      whtCodeList: whtCodeList.value
     })
   }
 
   for (const item of data?.additionalCosts || []) {
+    await callWhtCode(item.whtType)
     resultAdditional.push({
       ...item,
+      whtCodeList: whtCodeList.value
     })
   }
 
