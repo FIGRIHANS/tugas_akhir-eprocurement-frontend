@@ -99,6 +99,7 @@ const listItem = computed(() => {
 })
 
 const resetActive = () => {
+  selectAll.value = false
   for (const item of listItem.value) {
     item.isActive = false
   }
