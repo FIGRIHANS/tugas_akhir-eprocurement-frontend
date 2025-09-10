@@ -1,16 +1,16 @@
 <template>
   <div class="card min-w-full">
     <div class="card-header">
-      <h3 class="card-title">Other Documents</h3>
+      <h3 class="card-title">{{ $t('vendorProfile.otherDocuments') }}</h3>
     </div>
 
     <div class="card-table">
       <table class="table align-middle">
         <thead>
           <tr>
-            <th>Document Name</th>
-            <th>Document Number</th>
-            <th>Available until</th>
+            <th>{{ $t('vendorProfile.documentName') }}</th>
+            <th>{{ $t('vendorProfile.documentNumber') }}</th>
+            <th>{{ $t('vendorProfile.availableUntil') }}</th>
           </tr>
         </thead>
         <tbody>

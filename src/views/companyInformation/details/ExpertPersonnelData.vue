@@ -1,7 +1,9 @@
 <template>
   <div class="card min-w-full">
     <div class="card-header">
-      <h3 class="card-title">Expert Personnel Data</h3>
+      <h3 class="card-title">
+        {{ $t('vendorProfile.data', { field: $t('vendorProfile.expertPersonnel') }) }}
+      </h3>
     </div>
 
     <div class="flex flex-col gap-4 pb-4">
@@ -10,11 +12,11 @@
           <thead>
             <tr>
               <th class="w-[70px]"></th>
-              <th>Name</th>
-              <th>Highest Education Level</th>
-              <th>Position / Role</th>
-              <th>Years of Experience</th>
-              <th>Expertise / Skills</th>
+              <th>{{ $t('vendorProfile.name') }}</th>
+              <th>{{ $t('vendorProfile.highestEducation') }}</th>
+              <th>{{ $t('vendorProfile.position') }}</th>
+              <th>{{ $t('vendorProfile.yearsExperience') }}</th>
+              <th>{{ $t('vendorProfile.skills') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -34,7 +36,7 @@
                       >
                         <span class="menu-link">
                           <UiIcon name="file-down" variant="duotone" class="menu-icon" />
-                          Download
+                          {{ $t('general.download') }}
                         </span>
                       </div>
                     </div>
@@ -53,9 +55,9 @@
 
       <div class="flex flex-row items-center justify-between px-4">
         <div class="flex flex-row items-center gap-2">
-          Show
+          {{ $t('general.show') }}
           <UiSelect v-model="pagination.pageSize" :options="pageSizeOptions" class="w-16" />
-          per page from {{ pagination.total }} data
+          {{ $t('general.perPage', pagination.total) }}
         </div>
 
         <LPagination
@@ -84,15 +86,15 @@
         <div class="modal-body flex flex-col gap-4">
           <div class="card min-w-full">
             <div class="card-header">
-              <h3 class="card-title">Years of Experience</h3>
+              <h3 class="card-title">{{ $t('vendorProfile.yearsExperience') }}</h3>
             </div>
 
             <div class="card-table">
               <table class="table align-middle">
                 <thead>
                   <tr>
-                    <th>Description</th>
-                    <th>File</th>
+                    <th>{{ $t('vendorProfile.description') }}</th>
+                    <th>{{ $t('vendorProfile.file') }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -118,15 +120,15 @@
 
           <div class="card min-w-full">
             <div class="card-header">
-              <h3 class="card-title">Education</h3>
+              <h3 class="card-title">{{ $t('vendorProfile.education') }}</h3>
             </div>
 
             <div class="card-table">
               <table class="table align-middle">
                 <thead>
                   <tr>
-                    <th>Description</th>
-                    <th>File</th>
+                    <th>{{ $t('vendorProfile.description') }}</th>
+                    <th>{{ $t('vendorProfile.file') }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -152,15 +154,15 @@
 
           <div class="card min-w-full">
             <div class="card-header">
-              <h3 class="card-title">Certificate Expertise / Skills</h3>
+              <h3 class="card-title">{{ $t('vendorProfile.certificateSkills') }}</h3>
             </div>
 
             <div class="card-table">
               <table class="table align-middle">
                 <thead>
                   <tr>
-                    <th>Description</th>
-                    <th>File</th>
+                    <th>{{ $t('vendorProfile.description') }}</th>
+                    <th>{{ $t('vendorProfile.file') }}</th>
                   </tr>
                 </thead>
                 <tbody>
