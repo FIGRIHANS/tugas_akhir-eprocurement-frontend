@@ -46,16 +46,25 @@
                 :get-option-label="(option: any) => `${option.code} - ${option.name}`"
                 :reduce="(option: any) => option.id"
                 :options="listActivity"
+                :error="{ 'error-select': item.isActivityError }"
                 appendToBody
               ></v-select>
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.itemAmount }}</span>
-              <input v-else v-model="formEdit.itemAmount" class="input" type="number" placeholder="" @change="formEdit.whtBaseAmount = formEdit.itemAmount"/>
+              <input
+                v-else
+                v-model="formEdit.itemAmount"
+                class="input"
+                type="number"
+                placeholder=""
+                :class="{ 'border-danger': item.isItemAmountError }"
+                @change="formEdit.whtBaseAmount = formEdit.itemAmount"
+              />
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.debitCredit }}</span>
-              <select v-else v-model="formEdit.debitCredit" class="select" placeholder="">
+              <select v-else v-model="formEdit.debitCredit" class="select" placeholder="" :class="{ 'border-danger': item.isDebitCreditError }">
                 <option value="D">
                   Debit
                 </option>
@@ -241,6 +250,23 @@ const resetFormEdit = () => {
 }
 
 const goEdit = (item: itemsCostType) => {
+  if (item.isEdit) {
+    for (const data of form.value.additionalCosts) {
+      if (!data.activityExpense) data.isActivityError = true
+      else data.isActivityError = false
+  
+      if (!data.itemAmount || data.itemAmount < 0) data.isItemAmountError = true
+      else data.isItemAmountError = false
+  
+      if (!data.debitCredit) data.isDebitCreditError = true
+      else data.isDebitCreditError = false
+    }
+    if (
+      item.isActivityError ||
+      item.isItemAmountError ||
+      item.isDebitCreditError
+    ) return
+  }
   item.isEdit = !item.isEdit
 
   if (item.isEdit) {

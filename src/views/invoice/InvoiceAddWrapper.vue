@@ -145,7 +145,7 @@ import { useLoginStore } from '@/stores/views/login'
 import moment from 'moment'
 import type { itemsPoGrType } from './types/invoicePoGr'
 import type { itemsCostType } from './types/additionalCost'
-import type { itemsAlternativePayee } from '@/stores/views/invoice/types/submission'
+import type { invoiceItemTypes } from './types/invoiceItem'
 
 const InvoiceData = defineAsyncComponent(() => import('./InvoiceAddWrapper/InvoiceData.vue'))
 const InvoiceInformation = defineAsyncComponent(
@@ -228,8 +228,6 @@ const form = reactive<formTypes>({
   invoicePoGr: [],
   invoiceItem: [],
   additionalCost: [],
-  alternativePayee: [],
-  costExpense: [],
   status: -1,
   isAlternativePayee: false,
   isOneTimeVendor: false,
@@ -366,8 +364,9 @@ const goBack = () => {
   const list = ['data', 'information', 'preview']
   const checkIndex = list.findIndex((item) => item === tabNow.value)
   if (checkIndex === 0 || checkInvoiceView() || checkInvoiceNonPoView()) {
+    const nameRoute = checkInvoiceView() ? 'invoice' : 'invoice-list-non-po'
     router.push({
-      name: 'invoice',
+      name: nameRoute,
     })
   }
   if (checkIndex !== -1 && checkIndex !== 0) {
@@ -415,7 +414,7 @@ const mapPoGr = () => {
       qcStatus: item.qcStatus,
       whtType: '',
       whtCode: '',
-      whtBaseAmount: 0,
+      whtBaseAmount: item.whtBaseAmount,
       whtAmount: 0,
       department: item.department,
     })
@@ -716,6 +715,7 @@ const setData = () => {
     form.subtotal = detail.calculation.subtotal
     form.vatAmount = detail.calculation.vatAmount
     form.additionalCostCalc = detail.calculation.additionalCost
+    form.whtAmount = detail.calculation.whtAmount
     form.totalGrossAmount = detail.calculation.totalGrossAmount
     form.totalNetAmount = detail.calculation.totalNetAmount
     form.invoicePoGr = []
@@ -840,83 +840,44 @@ const setDataNonPo = () => {
     form.additionalCostCalc = detail.calculation.additionalCost
     form.totalGrossAmount = detail.calculation.totalGrossAmount
     form.totalNetAmount = detail.calculation.totalNetAmount
-    form.invoicePoGr = []
-    // for (const item of detail.pogr) {
-    //   const data = {
-    //     id: item.id,
-    //     poNo: item.poNo,
-    //     poItem: item.poItem,
-    //     grDocumentNo: item.grDocumentNo,
-    //     grDocumentItem: item.grDocumentItem,
-    //     grDocumentDate: item.grDocumentDate,
-    //     taxCode: item.taxCode,
-    //     vatAmount: item.vatAmount,
-    //     currencyLC: form.currency,
-    //     currencyTC: form.currency,
-    //     itemAmountLC: item.itemAmount,
-    //     itemAmountTC: item.itemAmount,
-    //     quantity: item.quantity,
-    //     uom: item.uom,
-    //     itemText: item.itemText,
-    //     currency: 'IDR',
-    //     conditionType: item.conditionType,
-    //     conditionTypeDesc: item.conditionTypeDesc,
-    //     qcStatus: item.qcStatus,
-    //     postingDate: '',
-    //     enteredOn: '',
-    //     purchasingOrg: '',
-    //     department: item.department,
-    //     whtType: item.whtType,
-    //     whtCode: item.whtCode,
-    //     whtBaseAmount: item.whtBaseAmount,
-    //     whtAmount: item.whtAmount,
-    //     isEdit: false,
-    //   } as itemsPoGrType
-    //   form.invoicePoGr.push(data)
-    // }
 
-    form.alternativePayee = []
-    for (const item of detail.alternativePayee) {
+    const dataAlternativePayee = detail.alternativePayee[0]
+    form.isAlternativePayee = dataAlternativePayee ? dataAlternativePayee.isAlternativePayee : false
+    form.isOneTimeVendor = dataAlternativePayee ? dataAlternativePayee.isOneTimeVendor : false
+    form.nameAlternative = dataAlternativePayee ? dataAlternativePayee.name : '-'
+    form.nameOtherAlternative = dataAlternativePayee ? dataAlternativePayee.name2 : '-'
+    form.streetAltiernative = dataAlternativePayee ? dataAlternativePayee.street : '-'
+    form.cityAlternative = dataAlternativePayee ? dataAlternativePayee.city : '-'
+    form.countryAlternative = dataAlternativePayee ? dataAlternativePayee.country : '-'
+    form.bankAccountNumberAlternative = dataAlternativePayee ? dataAlternativePayee.bankAccountNumber : '-'
+    form.bankKeyAlternative = dataAlternativePayee ? dataAlternativePayee.bankKey : '-'
+    form.bankCountryAlternative = dataAlternativePayee ? dataAlternativePayee.bankCountry : '-'
+    form.npwpNumberAlternative = dataAlternativePayee ? dataAlternativePayee.npwp : '-'
+    form.ktpNumberAlternative = dataAlternativePayee ? dataAlternativePayee.ktp : '-'
+    form.emailAlternative = dataAlternativePayee ? dataAlternativePayee.email : '-'
+
+    form.invoiceItem = []
+    for (const item of detail.costExpense) {
       const data = {
-        id: item.id,
-        name: item.name,
-        name2: item.name2,
-        street: item.street,
-        city: item.city,
-        country: item.country,
-        bankAccountNumber: item.bankAccountNumber,
-        bankKey: item.bankKey,
-        bankCountry: item.bankCountry,
-        npwp: item.npwp,
-        ktp: item.ktp,
-        email: item.email,
-        isAlternativePayee: item.isAlternativePayee,
-        isOneTimeVendor: item.isOneTimeVendor,
-      } as itemsAlternativePayee
-      form.alternativePayee.push(data)
+        activity: item.activityId,
+        activityCode: item.activityExpenses,
+        activityName: item.activityName,
+        itemAmount: item.itemAmount,
+        itemText: item.itemText,
+        debitCredit: item.debitCredit,
+        taxCode: item.taxCode,
+        vatAmount: item.vatAmount,
+        costCenter: item.costCenter,
+        profitCenter: item.profitCenter,
+        assignment: item.assignment,
+        whtType: item.whtType,
+        whtCode: item.whtCode,
+        whtBaseAmount: item.whtBaseAmount.toString(),
+        whtAmount: item.whtAmount.toString(),
+        isEdit: false,
+      } as invoiceItemTypes
+      form.invoiceItem.push(data)
     }
-
-    form.costExpense = []
-
-    // form.additionalCost = []
-    // for (const item of detail.additionalCosts) {
-    //   const data = {
-    //     activity: item.activityExpense,
-    //     itemAmount: item.itemAmount,
-    //     debitCredit: item.debitCredit,
-    //     taxCode: item.taxCode,
-    //     vatAmount: item.vatAmount,
-    //     costCenter: item.costCenter,
-    //     profitCenter: item.profitCenter,
-    //     assignment: item.assignment,
-    //     whtType: item.whtType,
-    //     whtCode: item.whtCode,
-    //     whtBaseAmount: item.whtBaseAmount,
-    //     whtAmount: item.whtAmount,
-    //     isEdit: false,
-    //   } as itemsCostType
-    //   form.additionalCost.push(data)
-    // }
 
     for (const doc of detail.documents) {
       switch (doc.documentType) {
@@ -1127,7 +1088,7 @@ onMounted(() => {
     })
   }
 
-  if (route.query.type === 'po-view' || route.query.invoice) {
+  if (route.query.type === 'po-view' || (route.query.invoice && route.query.type !== 'non-po-view')) {
     invoiceApi.getPoDetail(route.query.invoice?.toString() || '').then(() => {
       setData()
     })
