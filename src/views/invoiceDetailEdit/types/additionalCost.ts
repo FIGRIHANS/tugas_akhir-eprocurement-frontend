@@ -17,4 +17,7 @@ export interface itemsCostType {
   whtCodeList?: WhtCodeTypes[]
   whtAmount: number
   isEdit: boolean
+  isActivityError?: boolean
+  isItemAmountError?: boolean
+  isDebitCreditError?: boolean
 }

@@ -31,7 +31,7 @@
           <template v-else>
             <tr v-for="(item, index) in form.additionalCost" :key="index" class="cost__field-items">
               <td class="flex items-center justify-around gap-[8px]">
-                <button v-if="form.status === 0 || form.status === -1 || form.status === 5" class="btn btn-icon btn-primary" @click="item.isEdit = !item.isEdit">
+                <button v-if="form.status === 0 || form.status === -1 || form.status === 5" class="btn btn-icon btn-primary" @click="goEdit(item)">
                   <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>
                   <i v-else class="ki-duotone ki-check-circle"></i>
                 </button>
@@ -48,16 +48,25 @@
                   :get-option-label="(option: any) => `${option.code} - ${option.name}`"
                   :reduce="(option: any) => option.id"
                   :options="listActivity"
+                  :error="{ 'error-select': item.isActivityError }"
                   appendToBody
                 ></v-select>
               </td>
               <td>
                 <span v-if="!item.isEdit">{{ useFormatIdr(item.itemAmount) || '-' }}</span>
-                <input v-else v-model="item.itemAmount" class="input" type="number" placeholder="" @change="item.whtBaseAmount = Number(item.itemAmount)"/>
+                <input
+                  v-else
+                  v-model="item.itemAmount"
+                  class="input"
+                  type="number"
+                  placeholder=""
+                  :class="{ 'border-danger': item.isItemAmountError }"
+                  @change="item.whtBaseAmount = Number(item.itemAmount)"
+                />
               </td>
               <td>
                 <span v-if="!item.isEdit">{{ getDebitCreditName(item.debitCredit) || '-' }}</span>
-                <select v-else v-model="item.debitCredit" class="select" placeholder="">
+                <select v-else v-model="item.debitCredit" class="select" placeholder="" :class="{ 'border-danger': item.isDebitCreditError }">
                   <option value="D">
                     Debit
                   </option>
@@ -115,6 +124,7 @@ import { ref, computed, watch, inject } from 'vue'
 import type { formTypes } from '../../types/invoiceAddWrapper'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
+import type { itemsCostType } from '../../types/additionalCost'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const columns = ref([
@@ -203,6 +213,27 @@ const getTaxCodeName = (taxCode: string) => {
     return `${data.code} - ${data.name}`
   }
   return '-'
+}
+
+const goEdit = (item: itemsCostType) => {
+  if (item.isEdit) {
+    for (const data of form.additionalCost) {
+      if (!data.activity) data.isActivityError = true
+      else data.isActivityError = false
+  
+      if (!data.itemAmount || data.itemAmount < 0) data.isItemAmountError = true
+      else data.isItemAmountError = false
+  
+      if (!data.debitCredit) data.isDebitCreditError = true
+      else data.isDebitCreditError = false
+    }
+    if (
+      item.isActivityError ||
+      item.isItemAmountError ||
+      item.isDebitCreditError
+    ) return
+  }
+  item.isEdit = !item.isEdit
 }
 
 watch(
