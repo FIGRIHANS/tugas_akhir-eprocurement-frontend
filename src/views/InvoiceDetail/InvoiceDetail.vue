@@ -609,18 +609,18 @@ const setDataDefault = async () => {
   let other = {} as documentDetailTypes
 
   for (const item of data?.pogr || []) {
-    await callWhtCode(item.whtType)
+    if (item.whtType) await callWhtCode(item.whtType)
     resultPoGr.push({
       ...item,
-      whtCodeList: whtCodeList.value
+      whtCodeList: item.whtType ? whtCodeList.value : []
     })
   }
 
   for (const item of data?.additionalCosts || []) {
-    await callWhtCode(item.whtType)
+    if (item.whtType) await callWhtCode(item.whtType)
     resultAdditional.push({
       ...item,
-      whtCodeList: whtCodeList.value
+      whtCodeList: item.whtType ? whtCodeList.value : []
     })
   }
 
