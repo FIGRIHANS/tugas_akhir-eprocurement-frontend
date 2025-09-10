@@ -1,7 +1,9 @@
 <template>
   <div class="card min-w-full">
     <div class="card-header">
-      <h3 class="card-title">Equipment Data</h3>
+      <h3 class="card-title">
+        {{ $t('vendorProfile.data', { field: $t('vendorProfile.equipment') }) }}
+      </h3>
     </div>
 
     <div class="flex flex-col gap-4 pb-4">
@@ -9,13 +11,13 @@
         <table class="table align-middle">
           <thead>
             <tr>
-              <th>Equipment Name</th>
-              <th>Brand / Type</th>
-              <th>Year of Manufacture</th>
-              <th>Serial / License Number</th>
-              <th>Capacity (Tonnage)</th>
-              <th>Condition</th>
-              <th>Ownership Status</th>
+              <th>{{ $t('vendorProfile.equipmentName') }}</th>
+              <th>{{ $t('vendorProfile.brand') }}</th>
+              <th>{{ $t('vendorProfile.yom') }}</th>
+              <th>{{ $t('vendorProfile.licenseNumber') }}</th>
+              <th>{{ $t('vendorProfile.capacity') }}</th>
+              <th>{{ $t('vendorProfile.condition') }}</th>
+              <th>{{ $t('vendorProfile.ownershipStatus') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -36,9 +38,9 @@
 
       <div class="flex flex-row items-center justify-between px-4">
         <div class="flex flex-row items-center gap-2">
-          Show
+          {{ $t('general.show') }}
           <UiSelect v-model="pagination.pageSize" :options="pageSizeOptions" class="w-16" />
-          per page from {{ pagination.total }} data
+          {{ $t('general.perPage', pagination.total) }}
         </div>
 
         <LPagination
