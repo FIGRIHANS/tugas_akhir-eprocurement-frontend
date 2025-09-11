@@ -9,7 +9,7 @@
       <div class="flex flex-row gap-4 justify-between w-full">
         <h1>Invoice Non PO</h1>
         <div class="flex flex-row gap-3">
-          <InputSearch placeholder="Search" v-model="search" />
+          <InputSearch placeholder="Search" v-model="search" @keypress="goSearch" />
           <FilterList type="non-po" :data="filterForm" @setData="setDataFilter" />
           <UiButton variant="primary" @click="goAdd(false)"
             ><i class="ki-duotone ki-plus-circle"></i>Add invoice</UiButton
@@ -52,10 +52,10 @@
               <td>{{ item.documentNo || '-' }}</td>
               <td>{{ item.companyCode || '-' }}</td>
               <td>{{ item.invoiceTypeName }}</td>
-              <td>{{ formatDate(item.invoiceDate) }}</td>
+              <td>{{ formatDateYearFirst(item.invoiceDate) }}</td>
               <td>{{ useFormatIdr(item.totalGrossAmount) }}</td>
               <td>{{ useFormatIdr(item.totalNetAmount) }}</td>
-              <td>{{ formatDate(item.estimatedPaymentDate) }}</td>
+              <td>{{ formatDateYearFirst(item.estimatedPaymentDate) }}</td>
             </tr>
           </tbody>
         </table>
@@ -87,8 +87,8 @@ const FilterList = defineAsyncComponent(() => import('./FilterList.vue'))
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import { useFormatIdr } from '@/composables/currency'
-import { formatDate } from '@/composables/date-format'
-// import moment from 'moment'
+import { formatDateYearFirst } from '@/composables/date-format'
+import moment from 'moment'
 import type { ListPoTypes } from '@/stores/views/invoice/types/submission'
 import { useRouter } from 'vue-router'
 
@@ -120,28 +120,18 @@ const columns = ref([
   'Vendor Name',
   'Invoice Vendor No',
   'Company Code',
-  'Invoice PO Type',
+  'Invoice Non PO Type',
   'Invoice Date',
   'Total Gross Amount',
   'Total Net Amount',
   'Estimated Payment Date',
 ])
 
-// const data = ref([
-//   {
-//     statusCode: 1,
-//     invoiceNo: 'DPL-AP202312500001',
-//     statusName: 'Waiting to Verify',
-//     vendorName: 'PT Talent Setyaji',
-//     documentNo: 'INV2310232501726',
-//     companyCode: 'DPLA',
-//     invoiceTypeName: 'Non-PO - Non-Investment',
-//     invoiceDate: '16 Oktober 2024',
-//     totalGrossAmount: '1.000.000',
-//     totalNetAmount: '1.000.000',
-//     estimatedPaymentDate: '30 November 2024',
-//   },
-// ])
+const goSearch = (event: KeyboardEvent) => {
+  if (event.key === 'Enter') {
+    listCall()
+  }
+}
 
 const colorBadge = (statusCode: number) => {
   const list = {
