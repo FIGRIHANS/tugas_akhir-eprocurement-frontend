@@ -216,9 +216,22 @@ const setTab = (value: string) => {
 }
 
 const handleAfterSuccess = () => {
-  if (form.value.statusCode === 1) {
+  if (form.value.statusCode === 1 && route.query.invoiceType === 'no_po') {
     router.push({
-      name: 'invoiceVerificationNoPo'
+      name: 'invoiceDetail',
+      query: {
+        id: form.value.invoiceUId,
+        type: '1',
+        invoiceType: 'no_po'
+      }
+    })
+  } else if (form.value.statusCode === 1 && route.query.invoiceType === 'po') {
+    router.push({
+      name: 'invoiceDetail',
+      query: {
+        id: form.value.invoiceUId,
+        type: '1',
+      }
     })
   } else {
     router.push({
@@ -257,7 +270,6 @@ const goNext = () => {
     }
 
   } else {
-    console.log(form.value)
     const check = checkInvoiceInformation()
     if (!check) return
 
@@ -304,6 +316,7 @@ const goNext = () => {
         : null,
     }
     verificationApi.detailInvoiceEdit = data
+
     if (form.value.statusCode === 4) {
       isLoading.value = true
       verificationApi
