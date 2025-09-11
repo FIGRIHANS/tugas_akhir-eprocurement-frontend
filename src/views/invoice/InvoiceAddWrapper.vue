@@ -556,7 +556,7 @@ const mapDataPostNonPo = () => {
       notes: form.description,
       statusCode: isClickDraft.value ? 0 : 1,
       statusName: isClickDraft.value ? 'Drafted' : 'Waiting to Verify',
-      department: userData.value.profile.costCenter || '',
+      department: checkIsNonPo() ? form.department : userData.value.profile.costCenter || '',
       profileId: userData.value.profile.profileId.toString(),
     },
     vendor: {
@@ -1067,7 +1067,8 @@ const checkFormBudget = () => {
 
 onMounted(() => {
   invoiceMasterApi.getTaxCode()
-  invoiceMasterApi.getInvoicePoType()
+  if (!checkIsNonPo()) invoiceMasterApi.getInvoicePoType()
+  else invoiceMasterApi.getInvoiceNonPoType()
   invoiceMasterApi.getDocumentTypes()
   invoiceMasterApi.getVendorList()
   if (loginApi.isVendor) {
@@ -1076,6 +1077,7 @@ onMounted(() => {
 
   if (route.query.type === 'nonpo') {
     form.invoiceType = '1'
+    form.invoiceTypeName = 'Reimbursement'
   }
 
   if (route.query.type === 'po-view' || route.query.type === 'non-po-view') {

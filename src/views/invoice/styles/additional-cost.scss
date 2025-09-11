@@ -55,3 +55,11 @@
     }
   }
 }
+
+:deep() {
+  .error-select {
+    .vs__dropdown-toggle {
+      @apply border-danger;
+    }
+  }
+}

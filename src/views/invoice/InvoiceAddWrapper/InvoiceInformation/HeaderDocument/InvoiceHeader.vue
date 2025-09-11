@@ -206,6 +206,7 @@ const currencyList = computed(() => {
 const companyCodeList = computed(() => invoiceMasterApi.companyCode)
 const dpTypeList = computed(() => invoiceMasterApi.dpType)
 const listInvoiceTypePo = computed(() => invoiceMasterApi.invoicePoType)
+const listInvoiceTypeNonPo = computed(() => invoiceMasterApi.invoiceNonPoType)
 const listCostCenter = computed(() => invoiceMasterApi.costCenterList)
 
 const checkPo = () => {
@@ -226,8 +227,13 @@ watch(
   () => form,
   () => {
     if (form?.invoiceType) {
-      const getIndex = listInvoiceTypePo.value.findIndex((item) => item.code === form.invoiceType)
-      if (getIndex !== -1) form.invoiceTypeName = listInvoiceTypePo.value[getIndex].name
+      if (checkIsNonPo()) {
+        const getIndex = listInvoiceTypeNonPo.value.findIndex((item) => item.code === form.invoiceType)
+        if (getIndex !== -1) form.invoiceTypeName = listInvoiceTypeNonPo.value[getIndex].name
+      } else {
+        const getIndex = listInvoiceTypePo.value.findIndex((item) => item.code === form.invoiceType)
+        if (getIndex !== -1) form.invoiceTypeName = listInvoiceTypePo.value[getIndex].name
+      }
     }
 
     if (form?.companyCode) {

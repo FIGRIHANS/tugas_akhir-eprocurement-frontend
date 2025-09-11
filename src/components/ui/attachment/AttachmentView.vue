@@ -3,7 +3,9 @@
     <iconPDF />
     <div v-if="fileData">
       <p class="text-sm font-medium mb-[4px]">{{ fileName() }}</p>
-      <p v-if="uploadDate" class="text-xs text-gray-700">Uploaded: {{ uploadDate }}</p>
+      <p v-if="uploadDate" class="text-xs text-gray-700">
+        {{ $t('general.uploaded') }}: {{ uploadDate }}
+      </p>
     </div>
   </div>
 </template>
