@@ -35,7 +35,7 @@
         <input v-model="form.npwp" class="input" placeholder="" disabled/>
       </div>
       <!-- Address -->
-      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
+      <div class="flex items-center flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
         <label class="form-label max-w-32">
           Address
         </label>
@@ -72,6 +72,10 @@ watch(
         form.address = vendorList.value[getIndex].address
         form.npwp = vendorList.value[getIndex].npwp
         form.vendorName = vendorList.value[getIndex].vendorName
+      } else {
+        form.address = ''
+        form.npwp = ''
+        form.vendorName = ''
       }
     }
   },
