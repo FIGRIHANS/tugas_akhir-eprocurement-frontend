@@ -211,7 +211,6 @@
               class="w-16"
             />
             {{ $t('general.perPage', paginationShareholders.total) }}
-            <!-- per page from {{ paginationShareholders.total }} data -->
           </div>
 
           <LPagination

@@ -9,7 +9,7 @@
             <span class="font-semibold text-gray-800">{{ $t('vendorProfile.changeData') }}</span>
             <p class="font-medium text-sm text-gray-600">
               {{ $t('vendorProfile.requestChangeData') }}
-              <strong>(superadmin@gmail.com)</strong>
+              <strong>(ardyan.saputra@aryanoble.co.id)</strong>
             </p>
           </div>
         </div>
@@ -134,9 +134,9 @@
               ------------------------------------------- <br />
               {{ emailLanguage === 'english' ? englishEmail.ccEmail : indonesaiEmail.ccEmail }}
               <br />
-              Basaria: <em class="text-primary">basaria.tambunan@genero.co.id</em> <br />
-              Cirscelda: <em class="text-primary">criscelda.kurniasih@aryanoble.co.id</em> <br />
-              Bella: <em class="text-primary">bella.agustina@aryanoble.co.id</em>
+            </p>
+            <p v-for="(ccEmail, index) in filteredListCcEmail" :key="index">
+              {{ ccEmail.user }}: <em class="text-primary">{{ ccEmail.email }}</em>
             </p>
           </div>
 
@@ -167,7 +167,7 @@ import { useI18n } from 'vue-i18n'
 
 import { useLoginStore } from '@/stores/views/login'
 
-import { indonesaiEmail, englishEmail } from '@/static/emailRequestChangeData'
+import { indonesaiEmail, englishEmail, listCcEmail } from '@/static/emailRequestChangeData'
 
 import AdministrationData from './details/AdministrationData.vue'
 import PaymentDetailData from './details/PaymentDetailData.vue'
@@ -203,6 +203,9 @@ const tabsMenu = computed<string[]>(() => {
 
   return menu.filter((menuItem) => !tabItems.value.some((tabItem) => tabItem === menuItem))
 })
+const filteredListCcEmail = computed(() =>
+  emailLanguage.value === 'english' ? listCcEmail.english : listCcEmail.indonesia,
+)
 
 const changeTab = (value: string) => {
   currentTab.value = value

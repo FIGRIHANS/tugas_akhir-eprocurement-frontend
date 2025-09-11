@@ -15,4 +15,5 @@ export const general = {
   search: 'Search {field}',
   apply: 'Apply',
   reset: 'Reset',
+  uploaded: 'Uploaded',
 }

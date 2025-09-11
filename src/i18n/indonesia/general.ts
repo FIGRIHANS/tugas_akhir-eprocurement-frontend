@@ -15,4 +15,5 @@ export const general = {
   search: 'Cari {field}',
   apply: 'Terapkan',
   reset: 'Atur Ulang',
+  uploaded: 'Diunggah',
 }
