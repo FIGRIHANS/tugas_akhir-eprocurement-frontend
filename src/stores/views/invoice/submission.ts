@@ -151,7 +151,7 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
   const getListNonPo = async (data: QueryParamsListPoTypes) => {
     listNonPo.value = []
     const query = {
-      statusCode: data.statusCode || null,
+      // statusCode: data.statusCode || null,
       companyCode: data.companyCode || null,
       invoiceTypeCode: Number(data.invoiceTypeCode) || null,
       invoiceDate: data.invoiceDate || null,
