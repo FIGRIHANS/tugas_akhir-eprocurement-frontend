@@ -22,7 +22,7 @@
         </button>
       </div>
     </div>
-    <SuccessEditApproval @afterClose="goToListApproval" />
+    <SuccessEditApproval @afterClose="handleAfterSuccess" />
   </div>
 </template>
 
@@ -215,10 +215,16 @@ const setTab = (value: string) => {
   tabNow.value = value
 }
 
-const goToListApproval = () => {
-  router.push({
-    name: 'invoiceApproval',
-  })
+const handleAfterSuccess = () => {
+  if (form.value.statusCode === 1) {
+    router.push({
+      name: 'invoiceVerificationNoPo'
+    })
+  } else {
+    router.push({
+      name: 'invoiceApproval',
+    })
+  }
 }
 
 const goBack = () => {
