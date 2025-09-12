@@ -107,7 +107,7 @@
     <ModalSuccess :isDraft="isClickDraft" @afterClose="goToList" />
     <ModalErrorDocumentNumberModal />
     <ModalSuccessBudgetCheck @afterClose="isCheckBudget = true" />
-    <ModalFailedBudgetCheck />
+    <ModalFailedBudgetCheck @afterClose="isCheckBudget = false" />
   </div>
 </template>
 
