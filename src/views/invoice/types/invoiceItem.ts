@@ -1,4 +1,5 @@
 export interface invoiceItemTypes {
+  id: number
   activity: number | null
   activityCode: string
   activityName: string

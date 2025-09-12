@@ -279,7 +279,8 @@ export interface ParamsSubmissionNonPo {
   payment: ParamsSubmissionPayment
   documents: ParamsSubmissionDocument[]
   calculation: ParamsSubmissionCalculation
-  additionalCosts: ParamsSubmissionCost[]
+  alternativePay: ParamsSubmissionAlternativePay
+  costExpenses: ParamsSubmissionCostExpense[]
 }
 interface ParamsSubmissionHeaderNonPo {
   invoiceUId: string
@@ -303,6 +304,42 @@ interface ParamsSubmissionHeaderNonPo {
   statusName: string
   department: string
   profileId: string
+}
+
+interface ParamsSubmissionAlternativePay {
+  id: number
+  invoiceUId: string
+  name: string
+  name2: string
+  street: string
+  city: string
+  country: string
+  bankAccountNumber: string
+  bankKey: string
+  bankCountry: string
+  npwp: string
+  ktp: string
+  email: string
+  isAlternativePayee: boolean
+  isOneTimeVendor: boolean
+}
+
+interface ParamsSubmissionCostExpense {
+  id: number
+  activityId: number
+  activityExpense: string
+  activityName: string
+  itemAmount: number
+  debitCredit: string
+  taxCode: string
+  vatAmount: number
+  costCenter: string
+  profitCenter: string
+  assignment: string
+  whtType: string
+  whtCode: string
+  whtBaseAmount: number
+  whtAmount: number
 }
 
 export interface ParamsCheckBudgetType {

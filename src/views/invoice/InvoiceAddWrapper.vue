@@ -229,6 +229,7 @@ const form = reactive<formTypes>({
   invoiceItem: [],
   additionalCost: [],
   status: -1,
+  idAlternativePayment: 0,
   isAlternativePayee: false,
   isOneTimeVendor: false,
   nameAlternative: '',
@@ -451,6 +452,7 @@ const mapInvoiceItem = () => {
   for (const item of form.invoiceItem) {
     const itemIndex = listActivity.value.findIndex((sub) => sub.id === item.activity)
     cost.push({
+      id: item.id || 0,
       activityId: item.activity,
       activityExpense: listActivity.value[itemIndex].code,
       activityName: listActivity.value[itemIndex].name,
@@ -581,7 +583,26 @@ const mapDataPostNonPo = () => {
       totalGrossAmount: form.totalGrossAmount,
       totalNetAmount: form.totalNetAmount,
     },
-    additionalCosts: mapInvoiceItem(),
+    alternativePay: {
+      id: form.idAlternativePayment,
+      invoiceUId: form.status === 0 || form.status === 5
+        ? form.invoiceUId
+        : '00000000-0000-0000-0000-000000000000',
+      name: form.nameAlternative,
+      name2: form.nameOtherAlternative,
+      street: form.streetAltiernative,
+      city: form.cityAlternative,
+      country: form.countryAlternative,
+      bankAccountNumber: form.bankAccountNumberAlternative,
+      bankKey: form.bankKeyAlternative,
+      bankCountry: form.bankCountryAlternative,
+      npwp: form.npwp,
+      ktp: form.ktpNumberAlternative,
+      email: form.emailAlternative,
+      isAlternativePayee: form.isAlternativePayee,
+      isOneTimeVendor: form.isOneTimeVendor
+    },
+    costExpenses: mapInvoiceItem(),
   } as ParamsSubmissionNonPo
 
   return data
