@@ -12,10 +12,11 @@ import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import AttachmentView from '@/components/ui/attachment/AttachmentView.vue'
 import UiLoading from '@/components/UiLoading.vue'
 import { formatDate } from '@/composables/date-format'
+import { useChangeDataEmailStore } from '@/stores/vendor/email-change-data'
 import { useShareunits, useTypeShareholders } from '@/stores/vendor/reference'
 import type { IShareholderPayload } from '@/stores/vendor/types/vendor'
 import { useVendorUploadStore } from '@/stores/vendor/upload'
-import { useCompanyDeedDataStore } from '@/stores/vendor/vendor'
+import { useCompanyDeedDataStore, useVendorAdministrationStore } from '@/stores/vendor/vendor'
 import { useLoginStore } from '@/stores/views/login'
 import axios from 'axios'
 import moment from 'moment'
@@ -48,6 +49,8 @@ const userLoginStore = useLoginStore()
 const typeShareholders = useTypeShareholders()
 const shareUnits = useShareunits()
 const companyDeedDataStore = useCompanyDeedDataStore()
+const adminStore = useVendorAdministrationStore()
+const changeDataEmailStore = useChangeDataEmailStore()
 
 const route = useRoute()
 
@@ -146,6 +149,16 @@ const handleSubmit = async () => {
     }
 
     await companyDeedDataStore.postShareholders(payloadToSend)
+
+    await changeDataEmailStore.sendEmail({
+      recepientName: adminStore.data?.vendorName || '',
+      recepients: {
+        emailTo: adminStore.data?.vendorEmail || '',
+        emailCc: '',
+        emailBcc: ''
+      }
+    })
+
     handleCloseModal()
     showSuccessModal.value = true
     companyDeedDataStore.getShareholders(
@@ -382,10 +395,7 @@ watchEffect(async () => {
                         </button>
                       </li>
                       <li class="menu-item">
-                        <button
-                          class="menu-link"
-                          @click="handleDeleteModal(item as unknown as IShareholderPayload)"
-                        >
+                        <button class="menu-link" @click="handleDeleteModal(item as unknown as IShareholderPayload)">
                           <span class="menu-icon">
                             <UiIcon variant="duotone" name="cross-circle" class="!text-danger" />
                           </span>
@@ -403,15 +413,9 @@ watchEffect(async () => {
               <td>{{ item.shareUnit }}</td>
               <td>{{ item.ownerID }}</td>
               <td>
-                <AttachmentView
-                  v-if="item.ownerIDUrl"
-                  class="cursor-pointer"
-                  :file-data="{ name: item.ownerID, path: item.ownerIDUrl }"
-                  :upload-date="
-                    formatDate(item.modifiedDate ? item.modifiedDate : item.createdDate)
-                  "
-                  @click="handleDownload(item.ownerIDUrl)"
-                />
+                <AttachmentView v-if="item.ownerIDUrl" class="cursor-pointer"
+                  :file-data="{ name: item.ownerID, path: item.ownerIDUrl }" :upload-date="formatDate(item.modifiedDate ? item.modifiedDate : item.createdDate)
+                    " @click="handleDownload(item.ownerIDUrl)" />
                 <span v-else>-</span>
               </td>
             </tr>
@@ -423,99 +427,40 @@ watchEffect(async () => {
     <div class="p-5 flex flex-row items-center justify-between px-4">
       <div class="flex flex-row items-center gap-2">
         Show
-        <UiSelect
-          v-model="paginationShareholders.pageSize"
-          :options="pageSizeOptions"
-          class="w-16"
-        />
+        <UiSelect v-model="paginationShareholders.pageSize" :options="pageSizeOptions" class="w-16" />
         per page from {{ paginationShareholders.total }} data
       </div>
 
-      <LPagination
-        :totalItems="paginationShareholders.total"
-        :pageSize="paginationShareholders.pageSize"
-        :currentPage="paginationShareholders.currentPage"
-        @pageChange="setPageShareholders"
-      />
+      <LPagination :totalItems="paginationShareholders.total" :pageSize="paginationShareholders.pageSize"
+        :currentPage="paginationShareholders.currentPage" @pageChange="setPageShareholders" />
     </div>
   </div>
 
   <!-- modal -->
-  <UiModal
-    :title="modalTitle"
-    v-model="isModalOpen"
-    @update:model-value="handleCloseModal"
-    size="lg"
-  >
+  <UiModal :title="modalTitle" v-model="isModalOpen" @update:model-value="handleCloseModal" size="lg">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <UiFormGroup hide-border>
-        <UiSelect
-          label="Type shareholders"
-          placeholder="--Type Shareholders--"
-          :required="true"
-          :options="
-            typeShareholders.data?.map((item) => ({
-              label: item.value,
-              value: Number(item.code),
-            })) || []
-          "
-          value-key="value"
-          text-key="label"
-          v-model="payload.stockTypeID"
-        />
+        <UiSelect label="Type shareholders" placeholder="--Type Shareholders--" :required="true" :options="typeShareholders.data?.map((item) => ({
+          label: item.value,
+          value: Number(item.code),
+        })) || []
+          " value-key="value" text-key="label" v-model="payload.stockTypeID" />
         <DatePicker placeholder="Date of birth" v-model="payload.ownerDOB" />
-        <UiFileUpload
-          name="shareholderFile"
-          placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
-          @added-file="uploadFile($event)"
-        />
-        <UiInput
-          label="Nominal Share Value"
-          :required="true"
-          placeholder="Nominal Share Value"
-          v-model="payload.quantity"
-          :error="!!errors.quantity"
-          :hintText="errors.quantity"
-        />
+        <UiFileUpload name="shareholderFile" placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
+          @added-file="uploadFile($event)" />
+        <UiInput label="Nominal Share Value" :required="true" placeholder="Nominal Share Value"
+          v-model="payload.quantity" :error="!!errors.quantity" :hintText="errors.quantity" />
       </UiFormGroup>
       <UiFormGroup hide-border>
-        <UiInput
-          label="Shareholder Name"
-          placeholder="Name"
-          :required="true"
-          v-model="payload.ownerName"
-          :error="!!errors.ownerName"
-          :hintText="errors.ownerName"
-        />
-        <UiInput
-          label="No. Identitas"
-          placeholder="ID Number"
-          :required="true"
-          v-model="payload.ownerID"
-          :error="!!errors.ownerID"
-          :hintText="errors.ownerID"
-        />
-        <UiSelect
-          label="Share Unit"
-          placeholder="--Share Unit--"
-          :required="true"
-          :options="
-            shareUnits.data?.map((item) => ({ label: item.value, value: Number(item.code) })) || []
-          "
-          value-key="value"
-          text-key="label"
-          v-model="payload.unitID"
-          :error="!!errors.unitID"
-          :hintText="errors.unitID"
-        />
-        <UiInput
-          label="Position / Role"
-          placeholder="Position / Role"
-          :required="true"
-          v-model="payload.position"
-          :error="!!errors.position"
-          :hintText="errors.position"
-        />
+        <UiInput label="Shareholder Name" placeholder="Name" :required="true" v-model="payload.ownerName"
+          :error="!!errors.ownerName" :hintText="errors.ownerName" />
+        <UiInput label="No. Identitas" placeholder="ID Number" :required="true" v-model="payload.ownerID"
+          :error="!!errors.ownerID" :hintText="errors.ownerID" />
+        <UiSelect label="Share Unit" placeholder="--Share Unit--" :required="true" :options="shareUnits.data?.map((item) => ({ label: item.value, value: Number(item.code) })) || []
+          " value-key="value" text-key="label" v-model="payload.unitID" :error="!!errors.unitID"
+          :hintText="errors.unitID" />
+        <UiInput label="Position / Role" placeholder="Position / Role" :required="true" v-model="payload.position"
+          :error="!!errors.position" :hintText="errors.position" />
       </UiFormGroup>
     </div>
 
@@ -538,20 +483,12 @@ watchEffect(async () => {
       This action will permanently remove the selected data from the list.
     </p>
     <div class="flex gap-3 px-8 mb-3">
-      <UiButton
-        outline
-        @click="showDeleteModal = false"
-        class="flex-1 flex items-center justify-center"
-      >
+      <UiButton outline @click="showDeleteModal = false" class="flex-1 flex items-center justify-center">
         <UiIcon name="black-left-line" />
         <span>Cancel</span>
       </UiButton>
-      <UiButton
-        variant="danger"
-        class="flex-1 flex items-center justify-center"
-        @click="handleDelete"
-        :disabled="isSaveLoading"
-      >
+      <UiButton variant="danger" class="flex-1 flex items-center justify-center" @click="handleDelete"
+        :disabled="isSaveLoading">
         <UiLoading variant="white" v-if="isSaveLoading" />
         <UiIcon name="cross-circle" variant="duotone" v-else />
         <span>Delete</span>

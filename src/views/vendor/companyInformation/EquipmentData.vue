@@ -71,23 +71,13 @@
           per page from {{ pagination.total }} data
         </div>
 
-        <LPagination
-          :totalItems="pagination.total"
-          :pageSize="pagination.pageSize"
-          :currentPage="pagination.currentPage"
-          @pageChange="setPagePagination"
-        />
+        <LPagination :totalItems="pagination.total" :pageSize="pagination.pageSize"
+          :currentPage="pagination.currentPage" @pageChange="setPagePagination" />
       </div>
     </div>
   </div>
 
-  <div
-    ref="modal"
-    class="modal"
-    data-modal="true"
-    data-modal-backdrop-static="true"
-    id="modal-equipment"
-  >
+  <div ref="modal" class="modal" data-modal="true" data-modal-backdrop-static="true" id="modal-equipment">
     <div class="modal-content modal-center-y max-w-4xl">
       <div class="modal-header">
         <h3 class="modal-title text-lg">Heavy Equipment</h3>
@@ -95,55 +85,19 @@
 
       <div class="modal-body !py-5 flex flex-col gap-4">
         <div class="grid grid-cols-2 gap-4">
-          <UiInput
-            v-model="payload.name"
-            label="Equipment Name"
-            placeholder="Equipment Name"
-            :error="payloadError.name"
-            required
-          />
-          <UiInput
-            v-model="payload.brand"
-            label="Brand / Type "
-            placeholder="Brand / Type "
-            :error="payloadError.brand"
-            required
-          />
-          <DatePicker
-            v-model="payload.mfgDate"
-            placeholder="Select"
-            format="dd MM yyyy"
-            label="Year of Manufacture"
-            :error="payloadError.mfgDate"
-            required
-            label-top
-          />
-          <UiInput
-            v-model="payload.serialNo"
-            label="Serial Number / License Plate Number"
-            placeholder="Serial Number / License Plate Number"
-          />
+          <UiInput v-model="payload.name" label="Equipment Name" placeholder="Equipment Name" :error="payloadError.name"
+            required />
+          <UiInput v-model="payload.brand" label="Brand / Type " placeholder="Brand / Type " :error="payloadError.brand"
+            required />
+          <DatePicker v-model="payload.mfgDate" placeholder="Select" format="dd MM yyyy" label="Year of Manufacture"
+            :error="payloadError.mfgDate" required label-top />
+          <UiInput v-model="payload.serialNo" label="Serial Number / License Plate Number"
+            placeholder="Serial Number / License Plate Number" />
           <UiInput v-model="payload.capacity" label="Capacity" placeholder="Write Number" />
-          <UiSelect
-            v-model="payload.condition"
-            label="Condition"
-            placeholder="--Condition Heavy Equipment--"
-            :options="conditionTypeList"
-            text-key="value"
-            value-key="code"
-            :error="payloadError.condition"
-            required
-          />
-          <UiSelect
-            v-model="payload.ownership"
-            label="Ownership Status"
-            placeholder="--Ownership Status--"
-            :options="ownershipStatusList"
-            text-key="value"
-            value-key="code"
-            :error="payloadError.ownership"
-            required
-          />
+          <UiSelect v-model="payload.condition" label="Condition" placeholder="--Condition Heavy Equipment--"
+            :options="conditionTypeList" text-key="value" value-key="code" :error="payloadError.condition" required />
+          <UiSelect v-model="payload.ownership" label="Ownership Status" placeholder="--Ownership Status--"
+            :options="ownershipStatusList" text-key="value" value-key="code" :error="payloadError.ownership" required />
         </div>
 
         <div class="flex flex-row justify-end items-center gap-4 w-full">
@@ -161,43 +115,16 @@
     </div>
   </div>
 
-  <ModalConfirmation
-    :open="modalTrigger.success"
-    id="equipment-success"
-    type="success"
-    title="Equipment Data Successfully Updated"
-    text="The data has been successfully updated in the admin system."
-    no-cancel
-    static
-    submit-button-text="Ok"
-    :submit="() => closeModal('success')"
-  />
-  <ModalConfirmation
-    :open="modalTrigger.confirm"
-    id="equipment-confirm"
-    type="confirm"
-    title="Save"
-    text="You are about to Save to this data. Please review your input before continuing."
-    static
-    :loading="loading"
-    cancel-button-text="Cancel"
-    submit-button-text="Save"
-    :cancel="() => closeModal('confirm')"
-    :submit="submitData"
-  />
-  <ModalConfirmation
-    :open="modalTrigger.delete"
-    id="equipment-delete"
-    type="danger"
+  <ModalConfirmation :open="modalTrigger.success" id="equipment-success" type="success"
+    title="Equipment Data Successfully Updated" text="The data has been successfully updated in the admin system."
+    no-cancel static submit-button-text="Ok" :submit="() => closeModal('success')" />
+  <ModalConfirmation :open="modalTrigger.confirm" id="equipment-confirm" type="confirm" title="Save"
+    text="You are about to Save to this data. Please review your input before continuing." static :loading="loading"
+    cancel-button-text="Cancel" submit-button-text="Save" :cancel="() => closeModal('confirm')" :submit="submitData" />
+  <ModalConfirmation :open="modalTrigger.delete" id="equipment-delete" type="danger"
     title="Are You Sure You Want to Delete This Item?"
-    text="This action will permanently remove the selected data from the list."
-    static
-    :loading="loading"
-    cancel-button-text="Cancel"
-    submit-button-text="Delete"
-    :cancel="() => closeModal('delete')"
-    :submit="submitData"
-  />
+    text="This action will permanently remove the selected data from the list." static :loading="loading"
+    cancel-button-text="Cancel" submit-button-text="Delete" :cancel="() => closeModal('delete')" :submit="submitData" />
 </template>
 
 <script setup lang="ts">
@@ -214,7 +141,7 @@ import { useRoute } from 'vue-router'
 import { KTModal } from '@/metronic/core'
 
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
-import { useEquipmentDataStore } from '@/stores/vendor/vendor'
+import { useEquipmentDataStore, useVendorAdministrationStore } from '@/stores/vendor/vendor'
 import { useLoginStore } from '@/stores/views/login'
 
 import type { EquipmentDataType, PayloadEquipmentDataType } from '@/stores/vendor/types/vendor'
@@ -230,10 +157,13 @@ import UiBadge from '@/components/ui/atoms/badge/UiBadge.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
+import { useChangeDataEmailStore } from '@/stores/vendor/email-change-data'
 
 const vendorMasterData = useVendorMasterDataStore()
 const equipmentDataStore = useEquipmentDataStore()
 const loginStore = useLoginStore()
+const adminStore = useVendorAdministrationStore()
+const changeDataEmailStore = useChangeDataEmailStore()
 
 const route = useRoute()
 const modal = ref()
@@ -423,6 +353,15 @@ const submitData = async () => {
     }
 
     await equipmentDataStore.postData(payload.value)
+    await changeDataEmailStore.sendEmail({
+      recepientName: adminStore.data.vendorName,
+      recepients: {
+        emailTo: adminStore.data.vendorEmail,
+        emailCc: '',
+        emailBcc: '',
+      }
+    })
+
     closeModal('confirm')
     modalTrigger.value.success = true
     await getData()
