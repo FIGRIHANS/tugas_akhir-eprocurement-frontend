@@ -72,6 +72,7 @@ export interface formTypes extends documentFormTypes {
 
   vendorNumber: string
   department: string
+  departmentError?: boolean
 
   //invoice calculation
   subtotal: number

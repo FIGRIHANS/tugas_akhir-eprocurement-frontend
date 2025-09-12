@@ -336,6 +336,7 @@ const checkInvoiceInformation = () => {
     form.additionalCostError = checkActiveEditAdditional() || checkFieldAdditional()
   } else {
     form.invoiceItemError = form.invoiceItem.length === 0 || checkActiveEditInvoiceItem()
+    form.departmentError = useCheckEmpty(form.department).isError
   }
 
   if (form.invoiceType !== '903') {
@@ -354,7 +355,8 @@ const checkInvoiceInformation = () => {
     form.invoiceDocumentError ||
     form.invoicePoGrError ||
     form.additionalCostError ||
-    form.dpAmountDeductionError
+    form.dpAmountDeductionError ||
+    form.departmentError
   )
     return false
   else return true
