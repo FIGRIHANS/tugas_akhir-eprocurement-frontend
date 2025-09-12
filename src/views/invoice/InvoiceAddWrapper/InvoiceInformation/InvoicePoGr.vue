@@ -109,7 +109,7 @@
                 </td>
                 <td v-if="form?.invoiceType !== '903'">-</td>
                 <td v-if="form?.invoiceType !== '903'">-</td>
-                <td v-if="form?.invoiceType !== '903'">{{ item.whtBaseAmount }}</td>
+                <td v-if="form?.invoiceType !== '903'">{{ form?.currency === item.currencyLC ? useFormatIdr(item.whtBaseAmount) : useFormatUsd(item.whtBaseAmount) }}</td>
                 <td v-if="!checkInvoiceDp()">-</td>
                 <td>{{ item.department || '-' }}</td>
               </tr>
@@ -330,6 +330,7 @@ const setItemPoGr = (items: PoGrSearchTypes[]) => {
       enteredOn: item.enteredOn,
       purchasingOrg: item.purchasingOrg,
       department: item.department,
+      whtBaseAmount: form.currency === 'IDR' ? item.itemAmountLC : item.itemAmountTC,
       isEdit: false
     } as itemsPoGrType
 
