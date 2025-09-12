@@ -132,6 +132,7 @@ import { KTModal } from '@/metronic/core'
 import { useCheckEmpty } from '@/composables/validation'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
+import { useNotifInvoiceEmailStore } from '@/stores/views/invoice/email'
 import type {
   ParamsSubmissionTypes,
   ParamsSubmissionNonPo,
@@ -167,6 +168,7 @@ const ModalFailedBudgetCheck = defineAsyncComponent(
 
 const invoiceApi = useInvoiceSubmissionStore()
 const invoiceMasterApi = useInvoiceMasterDataStore()
+const notifEmailApi = useNotifInvoiceEmailStore()
 const loginApi = useLoginStore()
 const router = useRouter()
 const route = useRoute()
@@ -636,6 +638,7 @@ const goNext = () => {
           console.error(error)
         })
         .finally(() => {
+          sendEmailReminder(form)
           isSubmit.value = false
         })
     } else {
@@ -870,7 +873,9 @@ const setDataNonPo = () => {
     form.streetAltiernative = dataAlternativePayee ? dataAlternativePayee.street : '-'
     form.cityAlternative = dataAlternativePayee ? dataAlternativePayee.city : '-'
     form.countryAlternative = dataAlternativePayee ? dataAlternativePayee.country : '-'
-    form.bankAccountNumberAlternative = dataAlternativePayee ? dataAlternativePayee.bankAccountNumber : '-'
+    form.bankAccountNumberAlternative = dataAlternativePayee
+      ? dataAlternativePayee.bankAccountNumber
+      : '-'
     form.bankKeyAlternative = dataAlternativePayee ? dataAlternativePayee.bankKey : '-'
     form.bankCountryAlternative = dataAlternativePayee ? dataAlternativePayee.bankCountry : '-'
     form.npwpNumberAlternative = dataAlternativePayee ? dataAlternativePayee.npwp : '-'
@@ -1089,6 +1094,18 @@ const checkFormBudget = () => {
   return status
 }
 
+const sendEmailReminder = (data: formTypes) => {
+  notifEmailApi.sendVerificationReminderEmail({
+    recepientName: 'yonathan',
+    invoiceNo: data.invoiceNo,
+    recepients: {
+      emailTo: 'yonathan.moniaga@yopmail.com',
+      emailCc: '',
+      emailBcc: '',
+    },
+  })
+}
+
 onMounted(() => {
   invoiceMasterApi.getTaxCode()
   if (!checkIsNonPo()) invoiceMasterApi.getInvoicePoType()
@@ -1114,7 +1131,10 @@ onMounted(() => {
     })
   }
 
-  if (route.query.type === 'po-view' || (route.query.invoice && route.query.type !== 'non-po-view')) {
+  if (
+    route.query.type === 'po-view' ||
+    (route.query.invoice && route.query.type !== 'non-po-view')
+  ) {
     invoiceApi.getPoDetail(route.query.invoice?.toString() || '').then(() => {
       setData()
     })

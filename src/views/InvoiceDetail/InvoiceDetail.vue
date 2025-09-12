@@ -15,14 +15,11 @@
     <div v-if="currentRouteName === 'invoiceDetail'">
       <InvoicePoGr v-if="checkPo() && !isNonPo" class="mt-[24px]" />
       <InvoiceItem v-if="isNonPo" class="mt-[24px]" />
-      <AdditionalCost
-        v-if="
-          (form.invoiceDPCode === 9011 && !isNonPo && checkPo()) ||
-          form.invoiceTypeCode === 902 ||
-          form.invoiceTypeCode === 903
-        "
-        class="mt-[24px]"
-      />
+      <AdditionalCost v-if="
+        (form.invoiceDPCode === 9011 && !isNonPo && checkPo()) ||
+        form.invoiceTypeCode === 902 ||
+        form.invoiceTypeCode === 903
+      " class="mt-[24px]" />
     </div>
     <div v-else>
       <ConstExpenses class="mt-[24px]" />
@@ -33,12 +30,7 @@
           <i class="ki-filled ki-black-left"></i>
           Back
         </button>
-        <button
-          v-if="checkStatusCode()"
-          class="btn btn-primary"
-          :disabled="isLoading"
-          @click="goToEdit"
-        >
+        <button v-if="checkStatusCode()" class="btn btn-primary" :disabled="isLoading" @click="goToEdit">
           <i class="ki-duotone ki-pencil"></i>
           Edit
         </button>
@@ -55,10 +47,7 @@
       </div>
     </div>
     <RejectVerification @reject="goReject" />
-    <SuccessVerifModal
-      :statusCode="detailInvoice?.header.statusCode || -1"
-      @afterClose="goToList"
-    />
+    <SuccessVerifModal :statusCode="detailInvoice?.header.statusCode || -1" @afterClose="goToList" />
     <SuccessRejectModal @afterClose="goToList" />
   </div>
 </template>
@@ -119,6 +108,7 @@ const isLoading = ref<boolean>(false)
 const currentRouteName = computed(() => {
   return route.name
 })
+
 const isNonPo = ref<boolean>(false)
 
 const routes = ref<routeTypes[]>([
@@ -230,7 +220,7 @@ const goToEdit = () => {
     query: {
       id: route.query.id,
       type: route.query.type,
-      invoiceType: route.query.invoiceType,
+      invoiceType: route.name === 'invoiceDetail' ? 'po' : 'no_po',
     },
   })
 }

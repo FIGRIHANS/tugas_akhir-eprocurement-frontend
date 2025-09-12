@@ -2,7 +2,12 @@
   <div>
     <Breadcrumb title="Add Invoice" :routes="routes" />
     <StepperStatus :active-name="activeStep" />
-    <TabInvoice :active-tab="tabNow" :with-preview="false" @change-tab="setTab" class="-mx-[24px]" />
+    <TabInvoice
+      :active-tab="tabNow"
+      :with-preview="false"
+      @change-tab="setTab"
+      class="-mx-[24px]"
+    />
     <div>
       <Transition mode="out-in">
         <component :is="contentComponent" />
@@ -12,17 +17,27 @@
           <i class="ki-filled ki-arrow-left"></i>
           Back
         </button>
-        <button v-if="tabNow !== 'information'" class="btn btn-primary" :disabled="isLoading" @click="goNext">
+        <button
+          v-if="tabNow !== 'information'"
+          class="btn btn-primary"
+          :disabled="isLoading"
+          @click="goNext"
+        >
           Next
           <i class="ki-duotone ki-black-right"></i>
         </button>
-        <button v-if="tabNow === 'information'" class="btn btn-primary" :disabled="isLoading" @click="goNext">
+        <button
+          v-if="tabNow === 'information'"
+          class="btn btn-primary"
+          :disabled="isLoading"
+          @click="goNext"
+        >
           Save
           <i class="ki-duotone ki-bookmark"></i>
         </button>
       </div>
     </div>
-    <SuccessEditApproval @afterClose="goToListApproval" />
+    <SuccessEditApproval @afterClose="handleAfterSuccess" />
   </div>
 </template>
 
@@ -215,10 +230,29 @@ const setTab = (value: string) => {
   tabNow.value = value
 }
 
-const goToListApproval = () => {
-  router.push({
-    name: 'invoiceApproval',
-  })
+const handleAfterSuccess = () => {
+  if (form.value.statusCode === 1 && route.query.invoiceType === 'no_po') {
+    router.push({
+      name: 'invoiceDetail',
+      query: {
+        id: form.value.invoiceUId,
+        type: '1',
+        invoiceType: 'no_po',
+      },
+    })
+  } else if (form.value.statusCode === 1 && route.query.invoiceType === 'po') {
+    router.push({
+      name: 'invoiceDetail',
+      query: {
+        id: form.value.invoiceUId,
+        type: '1',
+      },
+    })
+  } else {
+    router.push({
+      name: 'invoiceApproval',
+    })
+  }
 }
 
 const goBack = () => {
@@ -249,9 +283,7 @@ const goNext = () => {
     if (checkIndex !== -1) {
       tabNow.value = list[checkIndex + 1]
     }
-
   } else {
-    console.log(form.value)
     const check = checkInvoiceInformation()
     if (!check) return
 
@@ -262,59 +294,47 @@ const goNext = () => {
       estimatedPaymentDate: moment(form.value.estimatedPaymentDate).toISOString(),
       invoiceDocument: !isEmpty(form.value.invoiceDocument)
         ? {
-          id: form.value.invoiceDocument.id || 0,
-          documentType: 1,
-          documentName: form.value.invoiceDocument.name || '',
-          documentUrl: form.value.invoiceDocument.path,
-          documentSize: Number(form.value.invoiceDocument.fileSize),
-        }
+            id: form.value.invoiceDocument.id || 0,
+            documentType: 1,
+            documentName: form.value.invoiceDocument.name || '',
+            documentUrl: form.value.invoiceDocument.path,
+            documentSize: Number(form.value.invoiceDocument.fileSize),
+          }
         : null,
       tax: !isEmpty(form.value.tax)
         ? {
-          id: form.value.tax.id || 0,
-          documentType: 2,
-          documentName: form.value.tax.name || '',
-          documentUrl: form.value.tax.path,
-          documentSize: Number(form.value.tax.fileSize),
-        }
+            id: form.value.tax.id || 0,
+            documentType: 2,
+            documentName: form.value.tax.name || '',
+            documentUrl: form.value.tax.path,
+            documentSize: Number(form.value.tax.fileSize),
+          }
         : null,
       referenceDocument: !isEmpty(form.value.referenceDocument)
         ? {
-          id: form.value.referenceDocument.id || 0,
-          documentType: 3,
-          documentName: form.value.referenceDocument.name || '',
-          documentUrl: form.value.referenceDocument.path,
-          documentSize: Number(form.value.referenceDocument.fileSize),
-        }
+            id: form.value.referenceDocument.id || 0,
+            documentType: 3,
+            documentName: form.value.referenceDocument.name || '',
+            documentUrl: form.value.referenceDocument.path,
+            documentSize: Number(form.value.referenceDocument.fileSize),
+          }
         : null,
       otherDocument: !isEmpty(form.value.otherDocument)
         ? {
-          id: form.value.otherDocument.id || 0,
-          documentType: 4,
-          documentName: form.value.otherDocument.name || '',
-          documentUrl: form.value.otherDocument.path,
-          documentSize: Number(form.value.otherDocument.fileSize),
-        }
+            id: form.value.otherDocument.id || 0,
+            documentType: 4,
+            documentName: form.value.otherDocument.name || '',
+            documentUrl: form.value.otherDocument.path,
+            documentSize: Number(form.value.otherDocument.fileSize),
+          }
         : null,
     }
     verificationApi.detailInvoiceEdit = data
+
     if (form.value.statusCode === 4) {
       isLoading.value = true
       verificationApi
         .putSubmission(mapDataVerif())
-        .then(() => {
-          verificationApi.resetDetailInvoiceEdit()
-          const idModal = document.querySelector('#success_data_edit_modal')
-          const modal = KTModal.getInstance(idModal as HTMLElement)
-          modal.show()
-        })
-        .finally(() => {
-          isLoading.value = false
-        })
-    } else if (form.value.statusCode === 1) {
-      isLoading.value = true
-      verificationApi
-        .putEditInvoice(mapDataVerif())
         .then(() => {
           verificationApi.resetDetailInvoiceEdit()
           const idModal = document.querySelector('#success_data_edit_modal')
