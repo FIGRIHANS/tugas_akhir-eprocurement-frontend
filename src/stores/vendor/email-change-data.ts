@@ -2,9 +2,8 @@ import type { ApiResponse } from '@/core/type/api'
 import generalApi from '@/core/utils/generalApi'
 import { defineStore } from 'pinia'
 
-export type NotifEmailBody = {
+export type ChangeDataEmailBody = {
   recepientName: string
-  message: string
   recepients: {
     emailTo: string
     emailCc: string
@@ -12,13 +11,13 @@ export type NotifEmailBody = {
   }
 }
 
-export const useNotifEmailStore = defineStore('notifEmail', () => {
-  const send = async (body: NotifEmailBody) => {
+export const useChangeDataEmailStore = defineStore('changeDataEmail', () => {
+  const sendEmail = async (body: ChangeDataEmailBody) => {
     const response: ApiResponse<unknown> = await generalApi.post(
-      '/notification/email/vendor-data-updates',
+      '/notification/email/vendor-data-changedata',
       body,
     )
     return response.data
   }
-  return { send }
+  return { sendEmail }
 })

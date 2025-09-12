@@ -23,12 +23,14 @@ import { useRoute } from 'vue-router'
 import questionImg from '@/assets/question-alt.svg'
 import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
 import UiFileUpload from '@/components/ui/atoms/file-upload/UiFileUpload.vue'
+import { useChangeDataEmailStore } from '@/stores/vendor/email-change-data'
 
 const adminStore = useVendorAdministrationStore()
 const uploadStore = useVendorUploadStore()
 const lookupStore = useVendorMasterDataStore()
 const userStore = useLoginStore()
 const route = useRoute()
+const changeDataEmailStore = useChangeDataEmailStore()
 
 const downloadLoading = ref<boolean>(false)
 const mode = ref<'view' | 'edit'>('view')
@@ -116,6 +118,8 @@ const handleDoneEdit = () => {
 const handleSave = async () => {
   saveLoading.value = true
 
+  console.log(adminStore.data.vendorEmail)
+
   if (!editPayload.value) {
     editPayload.value = {
       vendorId: adminStore.data?.vendorId ?? 0,
@@ -136,6 +140,16 @@ const handleSave = async () => {
   try {
     await adminStore.update(editPayload.value!)
     await adminStore.getData(route.params.id as string)
+
+    await changeDataEmailStore.sendEmail({
+      recepientName: administrationData.value.userName,
+      recepients: {
+        emailTo: adminStore.data?.vendorEmail || '',
+        emailCc: '',
+        emailBcc: '',
+      },
+    })
+
     successModal.value = true
     confirmModal.value = false
   } catch (error) {
@@ -235,10 +249,7 @@ onMounted(() => {
           </UiButton>
         </div>
       </div>
-      <div
-        v-if="adminStore.loading"
-        class="flex items-center justify-center text-xl text-primary py-5"
-      >
+      <div v-if="adminStore.loading" class="flex items-center justify-center text-xl text-primary py-5">
         <UiLoading size="md" />
       </div>
       <div v-else-if="adminStore.error" class="flex items-center justify-center py-5">
@@ -257,11 +268,7 @@ onMounted(() => {
                 <tr>
                   <td class="text-sm text-gray-600 font-medium w-[182px]">Username</td>
                   <td class="text-sm font-bold text-gray-700">
-                    <UiInput
-                      v-model="administrationData.userName"
-                      disabled
-                      v-if="mode === 'edit'"
-                    />
+                    <UiInput v-model="administrationData.userName" disabled v-if="mode === 'edit'" />
                     <span v-else>
                       {{ administrationData?.userName }}
                     </span>
@@ -271,10 +278,7 @@ onMounted(() => {
                   <td class="text-sm text-gray-600 font-medium w-[182px]">User Email</td>
                   <td class="text-sm font-bold text-gray-700">
                     <template v-if="mode === 'edit'">
-                      <UiInput
-                        v-model="administrationData.userEmail"
-                        :error="errorFields.includes('emailUser')"
-                      />
+                      <UiInput v-model="administrationData.userEmail" :error="errorFields.includes('emailUser')" />
                       <span class="text-xs text-red-500" v-if="errorFields.includes('emailUser')">
                         User Email Required
                       </span>
@@ -288,10 +292,7 @@ onMounted(() => {
                   <td class="text-sm text-gray-600 font-medium w-[182px]">Company Name</td>
                   <td class="text-sm font-bold text-gray-700">
                     <template v-if="mode === 'edit'">
-                      <UiInput
-                        v-model="administrationData.vendorName"
-                        :error="errorFields.includes('companyName')"
-                      />
+                      <UiInput v-model="administrationData.vendorName" :error="errorFields.includes('companyName')" />
                       <span class="text-xs text-red-500" v-if="errorFields.includes('companyName')">
                         Company Name Required
                       </span>
@@ -304,11 +305,7 @@ onMounted(() => {
                 <tr>
                   <td class="text-sm text-gray-600 font-medium w-[182px]">Company Category</td>
                   <td class="text-sm font-bold text-gray-700">
-                    <UiInput
-                      v-model="administrationData.companyCategoryName"
-                      disabled
-                      v-if="mode === 'edit'"
-                    />
+                    <UiInput v-model="administrationData.companyCategoryName" disabled v-if="mode === 'edit'" />
                     <span v-else>
                       {{ administrationData?.companyCategoryName }}
                     </span>
@@ -318,14 +315,9 @@ onMounted(() => {
                   <td class="text-sm text-gray-600 font-medium w-[182px]">Company Group</td>
                   <td class="text-sm font-bold text-gray-700">
                     <template v-if="mode === 'edit'">
-                      <UiInput
-                        v-model="administrationData.groupCompany"
-                        :error="errorFields.includes('companyGroup')"
-                      />
-                      <span
-                        class="text-xs text-red-500"
-                        v-if="errorFields.includes('companyGroup')"
-                      >
+                      <UiInput v-model="administrationData.groupCompany"
+                        :error="errorFields.includes('companyGroup')" />
+                      <span class="text-xs text-red-500" v-if="errorFields.includes('companyGroup')">
                         group Company Required
                       </span>
                     </template>
@@ -338,10 +330,7 @@ onMounted(() => {
                   <td class="text-sm text-gray-600 font-medium w-[182px]">NPWP Number</td>
                   <td class="text-sm font-bold text-gray-700">
                     <template v-if="mode === 'edit'">
-                      <UiInput
-                        v-model="administrationData.npwp"
-                        :error="errorFields.includes('npwpNo')"
-                      />
+                      <UiInput v-model="administrationData.npwp" :error="errorFields.includes('npwpNo')" />
                       <span class="text-xs text-red-500" v-if="errorFields.includes('npwpNo')">
                         npwp Required
                       </span>
@@ -354,13 +343,8 @@ onMounted(() => {
                 <tr>
                   <td class="text-sm text-gray-600 font-medium w-[182px]">NPWP Document</td>
                   <td class="text-sm font-bold text-gray-700">
-                    <UiButton
-                      :outline="true"
-                      size="sm"
-                      @click="download(adminStore.data.npwpUrl)"
-                      :disabled="downloadLoading || !administrationData.npwpUrl"
-                      v-if="mode === 'view'"
-                    >
+                    <UiButton :outline="true" size="sm" @click="download(adminStore.data.npwpUrl)"
+                      :disabled="downloadLoading || !administrationData.npwpUrl" v-if="mode === 'view'">
                       <span v-if="downloadLoading">
                         <UiLoading />
                       </span>
@@ -370,16 +354,10 @@ onMounted(() => {
                       </template>
                     </UiButton>
                     <div v-else class="flex items-center gap-2">
-                      <UiFileUpload
-                        accepted-files=".jpg,.jpeg,.png,.pdf,.zip"
-                        name="file"
-                        placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
-                        @added-file="handleUpload"
+                      <UiFileUpload accepted-files=".jpg,.jpeg,.png,.pdf,.zip" name="file"
+                        placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)" @added-file="handleUpload"
                         :hint-text="errorFields.includes('npwpUrl') ? 'NPWP Document required' : ''"
-                        :error="errorFields.includes('npwpUrl')"
-                        :disabled="uploadLoading"
-                        class="w-full"
-                      />
+                        :error="errorFields.includes('npwpUrl')" :disabled="uploadLoading" class="w-full" />
                       <UiLoading v-if="uploadLoading" size="md" />
                     </div>
                   </td>
@@ -393,15 +371,9 @@ onMounted(() => {
                 <tr>
                   <td class="text-sm text-gray-600 font-medium w-[182px]">Country</td>
                   <td class="text-sm font-bold text-gray-700">
-                    <UiSelect
-                      :options="countryOptions"
-                      v-model="administrationData.countryId"
-                      value-key="countryID"
-                      text-key="countryName"
-                      v-if="mode === 'edit'"
-                      @update:model-value="selectCountry"
-                      :error="errorFields.includes('countryId')"
-                    />
+                    <UiSelect :options="countryOptions" v-model="administrationData.countryId" value-key="countryID"
+                      text-key="countryName" v-if="mode === 'edit'" @update:model-value="selectCountry"
+                      :error="errorFields.includes('countryId')" />
 
                     <span v-else>
                       {{ administrationData?.countryName }}
@@ -411,15 +383,9 @@ onMounted(() => {
                 <tr>
                   <td class="text-sm text-gray-600 font-medium w-[182px]">Province</td>
                   <td class="text-sm font-bold text-gray-700">
-                    <UiSelect
-                      :options="stateOptions"
-                      v-model="administrationData.stateId"
-                      value-key="provinceID"
-                      text-key="provinceName"
-                      v-if="mode === 'edit'"
-                      @update:model-value="selectState"
-                      :error="errorFields.includes('stateId')"
-                    />
+                    <UiSelect :options="stateOptions" v-model="administrationData.stateId" value-key="provinceID"
+                      text-key="provinceName" v-if="mode === 'edit'" @update:model-value="selectState"
+                      :error="errorFields.includes('stateId')" />
 
                     <span v-else>
                       {{ administrationData?.stateName }}
@@ -430,14 +396,8 @@ onMounted(() => {
                   <td class="text-sm text-gray-600 font-medium w-[182px]">Regency/City</td>
                   <td class="text-sm font-bold text-gray-700">
                     <template v-if="mode === 'edit'">
-                      <UiSelect
-                        :options="cityOptions"
-                        v-model="administrationData.cityId"
-                        value-key="cityID"
-                        text-key="cityName"
-                        @update:model-value="selectCity"
-                        :error="errorFields.includes('cityId')"
-                      />
+                      <UiSelect :options="cityOptions" v-model="administrationData.cityId" value-key="cityID"
+                        text-key="cityName" @update:model-value="selectCity" :error="errorFields.includes('cityId')" />
                       <span class="text-xs text-red-500" v-if="errorFields.includes('cityId')">
                         City Required
                       </span>
@@ -452,10 +412,8 @@ onMounted(() => {
                   <td class="text-sm text-gray-600 font-medium w-[182px]">Telephone</td>
                   <td class="text-sm font-bold text-gray-700">
                     <template v-if="mode === 'edit'">
-                      <UiInputTel
-                        v-model="administrationData.vendorPhone"
-                        :error="errorFields.includes('vendorPhone')"
-                      />
+                      <UiInputTel v-model="administrationData.vendorPhone"
+                        :error="errorFields.includes('vendorPhone')" />
                       <span class="text-xs text-red-500" v-if="errorFields.includes('vendorPhone')">
                         Vendor Phone Required
                       </span>
@@ -468,12 +426,7 @@ onMounted(() => {
                 <tr>
                   <td class="text-sm text-gray-600 font-medium w-[182px]">Vendor Email</td>
                   <td class="text-sm font-bold text-gray-700">
-                    <UiInput
-                      v-model="administrationData.vendorEmail"
-                      v-if="mode === 'edit'"
-                      readonly
-                      disabled
-                    />
+                    <UiInput v-model="administrationData.vendorEmail" v-if="mode === 'edit'" readonly disabled />
                     <span v-else>
                       {{ administrationData?.vendorEmail }}
                     </span>
@@ -483,14 +436,9 @@ onMounted(() => {
                   <td class="text-sm text-gray-600 font-medium w-[182px]">Website</td>
                   <td class="text-sm font-bold text-gray-700">
                     <template v-if="mode === 'edit'">
-                      <UiInput
-                        v-model="administrationData.vendorWebsite"
-                        :error="errorFields.includes('vendorWebsite')"
-                      />
-                      <span
-                        class="text-xs text-red-500"
-                        v-if="errorFields.includes('vendorWebsite')"
-                      >
+                      <UiInput v-model="administrationData.vendorWebsite"
+                        :error="errorFields.includes('vendorWebsite')" />
+                      <span class="text-xs text-red-500" v-if="errorFields.includes('vendorWebsite')">
                         Vendor Website Required
                       </span>
                     </template>
@@ -503,18 +451,10 @@ onMounted(() => {
                   <td class="text-sm text-gray-600 font-medium w-[182px]">Currency Preference</td>
                   <td class="text-sm font-bold text-gray-700">
                     <template v-if="mode === 'edit'">
-                      <UiSelect
-                        :options="currencyOptions"
-                        v-model="administrationData.currencyId"
-                        value-key="currencyId"
-                        text-key="label"
-                        :error="errorFields.includes('currencySymbol')"
-                        @update:model-value="selectCurrency"
-                      />
-                      <span
-                        class="text-red-500 text-xs"
-                        v-if="errorFields.includes('currencySymbol')"
-                      >
+                      <UiSelect :options="currencyOptions" v-model="administrationData.currencyId"
+                        value-key="currencyId" text-key="label" :error="errorFields.includes('currencySymbol')"
+                        @update:model-value="selectCurrency" />
+                      <span class="text-red-500 text-xs" v-if="errorFields.includes('currencySymbol')">
                         Currency Required
                       </span>
                     </template>
@@ -528,16 +468,10 @@ onMounted(() => {
                   <td class="text-sm text-gray-600 font-medium w-[182px]">Company Address</td>
                   <td class="text-sm font-bold text-gray-700">
                     <template v-if="mode === 'edit'">
-                      <textarea
-                        class="textarea"
-                        v-model="administrationData.addressCompanyDetail"
-                        :class="errorFields.includes('companyAddress') ? 'border-red-500' : ''"
-                      ></textarea>
-                      <span
-                        class="text-xs text-red-500"
-                        v-if="errorFields.includes('companyAddress')"
-                        >Adress Required</span
-                      >
+                      <textarea class="textarea" v-model="administrationData.addressCompanyDetail"
+                        :class="errorFields.includes('companyAddress') ? 'border-red-500' : ''"></textarea>
+                      <span class="text-xs text-red-500" v-if="errorFields.includes('companyAddress')">Adress
+                        Required</span>
                     </template>
                     <span v-else>
                       {{ administrationData?.addressCompanyDetail }}
@@ -555,10 +489,7 @@ onMounted(() => {
                 <td class="text-sm text-gray-600 font-medium w-[182px]">Business Fields</td>
                 <td class="text-sm text-gray-700">
                   <ul>
-                    <li
-                      v-for="(bf, index) in adminStore.data.businessFieldName?.split(',')"
-                      :key="bf"
-                    >
+                    <li v-for="(bf, index) in adminStore.data.businessFieldName?.split(',')" :key="bf">
                       <strong> {{ index + 1 }}. {{ bf.split('(')[0]?.trim() ?? bf }}, </strong>
                       <span>{{ bf.split('(')[1]?.trim()?.replace(')', '') ?? '' }}</span>
                     </li>
