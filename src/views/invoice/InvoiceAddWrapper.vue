@@ -456,9 +456,10 @@ const mapInvoiceItem = () => {
     cost.push({
       id: item.id || 0,
       activityId: item.activity,
-      activityExpense: listActivity.value[itemIndex].code,
+      activityExpenses: listActivity.value[itemIndex].code,
       activityName: listActivity.value[itemIndex].name,
       itemAmount: Number(item.itemAmount),
+      itemText: item.itemText,
       debitCredit: item.debitCredit,
       taxCode: item.taxCode,
       vatAmount: item.vatAmount,
