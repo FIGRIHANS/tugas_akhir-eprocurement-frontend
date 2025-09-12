@@ -8,8 +8,10 @@ import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import UiLoading from '@/components/UiLoading.vue'
 import { checkEmptyValues } from '@/composables/validation'
+import { useChangeDataEmailStore } from '@/stores/vendor/email-change-data'
 import useOtherDocStore from '@/stores/vendor/otherDocuments'
 import { useVendorUploadStore } from '@/stores/vendor/upload'
+import { useVendorAdministrationStore } from '@/stores/vendor/vendor'
 import { useLoginStore } from '@/stores/views/login'
 import { computed, onMounted, ref } from 'vue'
 
@@ -25,6 +27,8 @@ const model = defineModel()
 const userStore = useLoginStore()
 const otherDocStore = useOtherDocStore()
 const uploadStore = useVendorUploadStore()
+const adminStore = useVendorAdministrationStore()
+const changeDataEmailStore = useChangeDataEmailStore()
 
 const formData = ref({
   id: 0,
@@ -65,6 +69,16 @@ const onSubmit = async () => {
   try {
     submitLoading.value = true
     await otherDocStore.update(formData.value)
+
+    await changeDataEmailStore.sendEmail({
+      recepientName: adminStore.data.vendorName || '',
+      recepients: {
+        emailTo: adminStore.data.vendorEmail,
+        emailCc: '',
+        emailBcc: ''
+      }
+    })
+
     emit('onSuccess')
   } catch (error) {
     if (error instanceof Error) {
@@ -113,57 +127,35 @@ onMounted(() => {
     <form @submit.prevent="onSubmit">
       <UiFormGroup hide-border>
         <!-- document name -->
-        <UiInput
-          label="Document Name"
-          required
-          v-model="formData.documentName"
+        <UiInput label="Document Name" required v-model="formData.documentName"
           :error="formError.includes('documentName')"
-          :hint-text="formError.includes('documentName') ? 'Document name required' : ''"
-        />
+          :hint-text="formError.includes('documentName') ? 'Document name required' : ''" />
 
         <!-- Document Number -->
-        <UiInput
-          label="Document Number"
-          required
-          v-model="formData.documentNo"
+        <UiInput label="Document Number" required v-model="formData.documentNo"
           :error="formError.includes('documentNo')"
-          :hint-text="formError.includes('documentNo') ? 'Document number required' : ''"
-        />
+          :hint-text="formError.includes('documentNo') ? 'Document number required' : ''" />
 
         <!-- Available Until -->
         <div class="relative">
-          <span
-            class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px] z-10"
-          >
+          <span class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px] z-10">
             Available Until <span class="text-danger">*</span>
           </span>
-          <DatePicker
-            placeholder="Start Date"
-            v-model="formData.expiredUTCDate"
-            :error="formError.includes('expiredUTCDate')"
-            @update:model-value="onSelectDate"
-          />
+          <DatePicker placeholder="Start Date" v-model="formData.expiredUTCDate"
+            :error="formError.includes('expiredUTCDate')" @update:model-value="onSelectDate" />
           <span v-if="formError.includes('expiredUTCDate')" class="form-hint !text-danger">
             Expired date required
           </span>
         </div>
 
         <!-- upload -->
-        <UiFileUpload
-          accepted-files=".jpg,.jpeg,.png,.pdf,.zip"
-          name="file"
-          placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
-          @added-file="onUploadFile"
-          :hint-text="
-            uploadError
-              ? 'An error accoured, please try again'
-              : formError.includes('documentUrl')
-                ? 'Document required'
-                : ''
-          "
-          :error="formError.includes('documentUrl')"
-          :disabled="uploadLoading"
-        />
+        <UiFileUpload accepted-files=".jpg,.jpeg,.png,.pdf,.zip" name="file"
+          placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)" @added-file="onUploadFile" :hint-text="uploadError
+            ? 'An error accoured, please try again'
+            : formError.includes('documentUrl')
+              ? 'Document required'
+              : ''
+            " :error="formError.includes('documentUrl')" :disabled="uploadLoading" />
       </UiFormGroup>
       <div class="flex justify-end gap-3 mt-3">
         <UiButton outline type="button" @click="model = false">
