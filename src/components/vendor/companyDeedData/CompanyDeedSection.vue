@@ -19,12 +19,15 @@ import { useRoute } from 'vue-router'
 import axios from 'axios'
 import moment from 'moment'
 import LPagination from '@/components/pagination/LPagination.vue'
+import { useChangeDataEmailStore } from '@/stores/vendor/email-change-data'
 
 const companyDeedDataStore = useCompanyDeedDataStore()
 const adminVendorStore = useVendorAdministrationStore()
 const userLoginStore = useLoginStore()
 const uploadStore = useVendorUploadStore()
 const vendorMasterDataStore = useVendorMasterDataStore()
+const adminStore = useVendorAdministrationStore()
+const changeDataEmailStore = useChangeDataEmailStore()
 
 const route = useRoute()
 
@@ -182,6 +185,16 @@ const handleSave = async () => {
       paginationCompanyDeedDataStore.value.pageSize,
       3115,
     )
+
+    await changeDataEmailStore.sendEmail({
+      recepientName: adminStore.data?.vendorName || '',
+      recepients: {
+        emailTo: adminStore.data?.vendorEmail || '',
+        emailCc: '',
+        emailBcc: ''
+      }
+    })
+
     showSuccessModal.value = true
 
     fileUploaderRef.value?.clear()
@@ -282,7 +295,7 @@ onMounted(async () => {
   if (!vendorMasterDataStore.cityList?.length) {
     try {
       await vendorMasterDataStore.cityList?.()
-    } catch {}
+    } catch { }
   }
 })
 
@@ -355,54 +368,23 @@ watchEffect(async () => {
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-20 mb-8">
         <UiFormGroup hide-border>
-          <UiInput
-            label="Number"
-            placeholder="Number"
-            row
-            v-model="vendorLegalDocPayload.documentNo"
-            :error="errors.documentNo !== ''"
-            :hintText="errors.documentNo"
-          />
-          <UiInput
-            label="Notary"
-            placeholder="Notary full name"
-            row
-            v-model="vendorLegalDocPayload.notaryName"
-            :error="errors.notaryName !== ''"
-            :hintText="errors.notaryName"
-          />
-          <UiFileUpload
-            ref="fileUploaderRef"
-            name="vendorLegalDocumentUrl"
-            label="File"
+          <UiInput label="Number" placeholder="Number" row v-model="vendorLegalDocPayload.documentNo"
+            :error="errors.documentNo !== ''" :hintText="errors.documentNo" />
+          <UiInput label="Notary" placeholder="Notary full name" row v-model="vendorLegalDocPayload.notaryName"
+            :error="errors.notaryName !== ''" :hintText="errors.notaryName" />
+          <UiFileUpload ref="fileUploaderRef" name="vendorLegalDocumentUrl" label="File"
             placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
-            hint-text="*jpg, jpeg, png, pdf, zip / max : 16 MB"
-            @added-file="onUploadFile($event)"
-          />
+            hint-text="*jpg, jpeg, png, pdf, zip / max : 16 MB" @added-file="onUploadFile($event)" />
         </UiFormGroup>
 
         <UiFormGroup hide-border>
-          <DatePicker
-            v-model="vendorLegalDocPayload.documentDate"
-            label="Letter Date"
-            placeholder="Pilih Tanggal"
-          />
-          <UiSelect
-            label="Notary Office Location"
-            placeholder="-- Notary Office Location --"
-            :options="
-              vendorMasterDataStore.cityList?.map((item) => ({
-                value: item.cityID,
-                label: item.cityName,
-              }))
-            "
-            value-key="value"
-            text-key="label"
-            row
-            v-model.number="vendorLegalDocPayload.notaryLocation"
-            :error="errors.notaryLocation !== ''"
-            :hintText="errors.notaryLocation"
-          />
+          <DatePicker v-model="vendorLegalDocPayload.documentDate" label="Letter Date" placeholder="Pilih Tanggal" />
+          <UiSelect label="Notary Office Location" placeholder="-- Notary Office Location --" :options="vendorMasterDataStore.cityList?.map((item) => ({
+            value: item.cityID,
+            label: item.cityName,
+          }))
+            " value-key="value" text-key="label" row v-model.number="vendorLegalDocPayload.notaryLocation"
+            :error="errors.notaryLocation !== ''" :hintText="errors.notaryLocation" />
 
           <div class="flex justify-end items-center">
             <UiButton variant="primary" @click="handleSave" :disabled="isSaveLoading">
@@ -486,20 +468,13 @@ watchEffect(async () => {
       <div class="flex flex-row items-center justify-between px-4">
         <div class="flex flex-row items-center gap-2">
           Show
-          <UiSelect
-            v-model="paginationCompanyDeedDataStore.pageSize"
-            :options="pageSizeOptions"
-            class="w-16"
-          />
+          <UiSelect v-model="paginationCompanyDeedDataStore.pageSize" :options="pageSizeOptions" class="w-16" />
           per page from {{ paginationCompanyDeedDataStore.total }} data
         </div>
 
-        <LPagination
-          :totalItems="paginationCompanyDeedDataStore.total"
-          :pageSize="paginationCompanyDeedDataStore.pageSize"
-          :currentPage="paginationCompanyDeedDataStore.currentPage"
-          @pageChange="setPageCompanyDeedData"
-        />
+        <LPagination :totalItems="paginationCompanyDeedDataStore.total"
+          :pageSize="paginationCompanyDeedDataStore.pageSize" :currentPage="paginationCompanyDeedDataStore.currentPage"
+          @pageChange="setPageCompanyDeedData" />
       </div>
     </div>
 
@@ -517,11 +492,7 @@ watchEffect(async () => {
     <!-- modal error -->
     <UiModal v-model="showErrorModal" size="sm">
       <div class="text-center mb-6">
-        <UiIcon
-          name="cross-circle"
-          variant="duotone"
-          class="text-[150px] text-danger text-center"
-        />
+        <UiIcon name="cross-circle" variant="duotone" class="text-[150px] text-danger text-center" />
       </div>
       <h3 class="text-center text-lg font-medium">
         Failed to {{ mode == 'delete' ? 'Delete' : mode === 'edit' ? 'Change' : 'Add' }} Vendor
@@ -535,31 +506,19 @@ watchEffect(async () => {
     <!-- modal confirm delete -->
     <UiModal v-model="showDeleteModal" size="sm">
       <div class="text-center mb-6">
-        <UiIcon
-          name="cross-circle"
-          variant="duotone"
-          class="text-[150px] text-danger text-center"
-        />
+        <UiIcon name="cross-circle" variant="duotone" class="text-[150px] text-danger text-center" />
       </div>
       <h3 class="text-center text-lg font-medium">Are You Sure You Want to Delete This Item?</h3>
       <p class="text-center text-base text-gray-600 mb-5">
         This action will permanently remove the selected data from the list.
       </p>
       <div class="flex gap-3 px-8 mb-3">
-        <UiButton
-          outline
-          @click="showDeleteModal = false"
-          class="flex-1 flex items-center justify-center"
-        >
+        <UiButton outline @click="showDeleteModal = false" class="flex-1 flex items-center justify-center">
           <UiIcon name="black-left-line" />
           <span>Cancel</span>
         </UiButton>
-        <UiButton
-          variant="danger"
-          class="flex-1 flex items-center justify-center"
-          @click="handleProcessDelete"
-          :disabled="isSaveLoading"
-        >
+        <UiButton variant="danger" class="flex-1 flex items-center justify-center" @click="handleProcessDelete"
+          :disabled="isSaveLoading">
           <UiLoading variant="white" v-if="isSaveLoading" />
           <UiIcon name="cross-circle" variant="duotone" v-else />
           <span>Delete</span>
