@@ -157,6 +157,7 @@ const costCenterList = computed(() => invoiceMasterApi.costCenterList)
 const addNew = () => {
   if (form) {
     const data = {
+      id: 0,
       activity: null,
       activityCode: '',
       activityName: '',

@@ -17,6 +17,7 @@ import type {
   RemainingDpTypes,
   ParamsSubmissionNonPo,
   ParamsCheckBudgetType,
+  ResponseCheckBudgetTypes
 } from './types/submission'
 
 export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => {
@@ -28,6 +29,7 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
   const listNonPo = ref<ListNonPoTypes[]>()
   const detailPo = ref<ParamsSubmissionTypes>()
   const detailNonPo = ref<ParamsSubmissionTypes>()
+  const responseCheckBudget = ref<ResponseCheckBudgetTypes>()
 
   const getSubmissionStatus = async () => {
     const response: ApiResponse<SubmissionStatusTypes[]> = await invoiceApi.get(
@@ -186,9 +188,19 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
   }
 
   const postCheckBudget = async (data: ParamsCheckBudgetType) => {
-    const response: ApiResponse<void> = await invoiceApi.post(`/invoice/invoice/check-budget`, data)
-
-    return response.data
+    let response: ApiResponse<void>
+    try {
+      response = await invoiceApi.post(`/invoice/invoice/check-budget`, data)
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    catch(err: any) {
+      responseCheckBudget.value = err.response.data
+    }
+    finally {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      responseCheckBudget.value = response.data as any
+      return response.data
+    }
   }
 
   return {
@@ -200,6 +212,7 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
     detailPo,
     detailNonPo,
     listNonPo,
+    responseCheckBudget,
     getSubmissionStatus,
     getDocumentType,
     getTaxCalculation,

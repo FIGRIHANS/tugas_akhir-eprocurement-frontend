@@ -30,6 +30,7 @@ export interface formTypes extends documentFormTypes {
   bankAccountNumberNew?: string
   bankAddressNew?: string
 
+  idAlternativePayment: number
   isAlternativePayee: boolean
   isOneTimeVendor: boolean
   nameAlternative: string

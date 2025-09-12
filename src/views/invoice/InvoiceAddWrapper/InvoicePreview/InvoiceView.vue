@@ -77,6 +77,7 @@ const typeForm = ref<string>('')
 const dpTypeList = computed(() => invoiceMasterApi.dpType)
 const listInvoiceTypePo = computed(() => invoiceMasterApi.invoicePoType)
 const companyCodeList = computed(() => invoiceMasterApi.companyCode)
+const listInvoiceTypeNonPo = computed(() => invoiceMasterApi.invoiceNonPoType)
 
 const checkIsNonPo = () => {
   return route.query.type === 'nonpo' || route.query.type === 'non-po-view'
@@ -99,8 +100,13 @@ const getDpName = () => {
 }
 
 const getInvoiceTypeName = () => {
-  const getIndex = listInvoiceTypePo.value.findIndex((item) => item.code === form?.invoiceType)
-  if (getIndex !== -1) return listInvoiceTypePo.value[getIndex].name
+  if (checkIsNonPo()) {
+    const getIndex = listInvoiceTypeNonPo.value.findIndex((item) => item.code === form.invoiceType)
+    if (getIndex !== -1) return listInvoiceTypeNonPo.value[getIndex].name
+  } else {
+    const getIndex = listInvoiceTypePo.value.findIndex((item) => item.code === form.invoiceType)
+    if (getIndex !== -1) return listInvoiceTypePo.value[getIndex].name
+  }
 }
 
 const getCompanyName = () => {
