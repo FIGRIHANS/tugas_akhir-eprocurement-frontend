@@ -80,12 +80,12 @@ const filteredSidebarMenu = computed(() => {
       userStore.userData?.profile.profileId === 3003
     ) {
       return sidebarMenu
-        .filter((menu) => menu.id === 'e-invoice' || menu.id === 'dashboard')
+        .filter((menu) => menu.id === 'e-invoice' || menu.id === 'vendor-management' || menu.id === 'dashboard')
         .map((menu) => {
           return {
             ...menu,
             child: menu.child
-              ? menu.child.filter((child) => child.id === 'invoice-verification')
+              ? menu.child.filter((child) => child.id === 'invoice-verification' || child.id === 'invoice-approval-no-po' || child.id === 'vendor-master')
               : [],
           }
         })
@@ -93,11 +93,11 @@ const filteredSidebarMenu = computed(() => {
 
     if (userStore.userData?.profile.profileId === 3004) {
       return sidebarMenu
-        .filter((menu) => menu.id === 'e-invoice' || menu.id === 'dashboard')
+        .filter((menu) => menu.id === 'e-invoice' || menu.id === 'vendor-management' || menu.id === 'dashboard')
         .map((menu) => {
           return {
             ...menu,
-            child: menu.child ? menu.child.filter((child) => child.id === 'invoice-approval') : [],
+            child: menu.child ? menu.child.filter((child) => child.id === 'invoice-approval' || child.id === 'invoice-approval-no-po' || child.id === 'vendor-master') : [],
           }
         })
     }
@@ -145,6 +145,60 @@ const filteredSidebarMenu = computed(() => {
           ...menu,
           child: menu.child ? menu.child.filter((child) => child.id !== 'vendor-blacklist') : [],
         }))
+    }
+
+    
+    // non po
+    if (
+      userStore.userData?.profile.profileId === 3029 ||
+      userStore.userData?.profile.profileId === 3075 ||
+      userStore.userData?.profile.profileId === 3036 ||
+      userStore.userData?.profile.profileId === 3066 ||
+      userStore.userData?.profile.profileId === 3030 ||
+      userStore.userData?.profile.profileId === 3089 ||
+      userStore.userData?.profile.profileId === 3028 ||
+      userStore.userData?.profile.profileId === 3193 ||
+      userStore.userData?.profile.profileId === 3194
+    ) {
+      return sidebarMenu
+        .filter((menu) => menu.id === 'e-invoice' || menu.id === 'vendor-management' || menu.id === 'dashboard')
+        .map((menu) => {
+          return {
+            ...menu,
+            child: menu.child
+              ? menu.child.filter((child) => child.id === 'invoice-verification-no-po' || child.id === 'vendor-master')
+              : [],
+          }
+        })
+    }
+    if (
+      userStore.userData?.profile.profileId === 3201 ||
+      userStore.userData?.profile.profileId === 3202
+    ) {
+      return sidebarMenu
+        .filter((menu) => menu.id === 'e-invoice' || menu.id === 'vendor-management' || menu.id === 'dashboard')
+        .map((menu) => {
+          return {
+            ...menu,
+            child: menu.child
+              ? menu.child.filter((child) => child.id === 'invoice-approval-no-po' || child.id === 'vendor-master')
+              : [],
+          }
+        })
+    }
+    if (
+      userStore.userData?.profile.profileId === 3200
+    ) {
+      return sidebarMenu
+        .filter((menu) => menu.id === 'e-invoice' || menu.id === 'vendor-management' || menu.id === 'dashboard')
+        .map((menu) => {
+          return {
+            ...menu,
+            child: menu.child
+              ? menu.child.filter((child) => child.id === 'invoice-list-non-po' || child.id === 'vendor-master')
+              : [],
+          }
+        })
     }
   }
 
