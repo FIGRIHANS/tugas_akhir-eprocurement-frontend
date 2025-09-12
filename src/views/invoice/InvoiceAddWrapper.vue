@@ -662,8 +662,9 @@ const goNext = () => {
 
 const goToList = () => {
   isClickDraft.value = false
+  const nameRoute = checkInvoiceView() ? 'invoice' : 'invoice-list-non-po'
   router.push({
-    name: 'invoice-list',
+    name: nameRoute,
   })
 }
 
