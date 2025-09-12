@@ -1058,12 +1058,15 @@ const mapDataCheck = () => {
 
 const checkBudget = () => {
   const data = mapDataCheck()
-  invoiceApi.postCheckBudget(data).then((response) => {
-    if (response.statusCode === 200) {
-      const idModal = document.querySelector('#success_budget_check_modal')
-      const modal = KTModal.getInstance(idModal as HTMLElement)
-      modal.show()
-    }
+  invoiceApi.postCheckBudget(data).then(() => {
+    const idModal = document.querySelector('#success_budget_check_modal')
+    const modal = KTModal.getInstance(idModal as HTMLElement)
+    modal.show()
+  })
+  .catch(() => {
+    const idModal = document.querySelector('#failed_budget_check_modal')
+    const modal = KTModal.getInstance(idModal as HTMLElement)
+    modal.show()
   })
 }
 

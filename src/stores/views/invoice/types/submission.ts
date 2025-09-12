@@ -396,3 +396,12 @@ export interface GlaccountDatum {
   COSTCENTER: string
   PROFIT_CTR: string
 }
+
+export interface ResponseCheckBudgetTypes {
+  RESPONSE: SubResponseCheckBudgetTypes[]
+}
+
+export interface SubResponseCheckBudgetTypes {
+  TYPE: string
+  MESSAGE: string[]
+}
