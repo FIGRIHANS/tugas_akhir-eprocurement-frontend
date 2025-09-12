@@ -1,12 +1,7 @@
 <template>
   <div class="border border-gray-200 rounded-xl p-[24px]">
     <div class="flex justify-between gap-[8px]">
-      <UiInputSearch
-        v-model="search"
-        placeholder="Cari Invoice"
-        class="w-[250px]"
-        @keypress="goSearch"
-      />
+      <UiInputSearch v-model="search" placeholder="Cari Invoice" class="w-[250px]" @keypress="goSearch" />
       <FilterList :data="filterForm" @setData="setDataFilter" />
     </div>
     <div class="mt-[24px]">
@@ -23,22 +18,16 @@
             <template v-for="(parent, index) in list" :key="index">
               <tr>
                 <td class="flex justify-between items-center gap-[24px]">
-                  <button
-                    class="btn btn-outline btn-primary btn-icon w-[32px] h-[32px]"
-                    @click="openDetailInvoice(parent.invoiceUId)"
-                  >
+                  <button class="btn btn-outline btn-primary btn-icon w-[32px] h-[32px]"
+                    @click="openDetailInvoice(parent.invoiceUId)">
                     <i class="ki-filled ki-eye !text-lg"></i>
                   </button>
-                  <button
-                    class="btn btn-outline btn-primary btn-icon w-[32px] h-[32px]"
-                    @click="openDetailVerification(parent.invoiceUId)"
-                  >
+                  <button class="btn btn-outline btn-primary btn-icon w-[32px] h-[32px]"
+                    @click="openDetailVerification(parent.invoiceUId)">
                     <i class="ki-duotone ki-data !text-lg"></i>
                   </button>
-                  <button
-                    class="btn btn-icon btn-outline btn-primary w-[21px] h-[21px]"
-                    @click="parent.isOpenChild = !parent.isOpenChild"
-                  >
+                  <button class="btn btn-icon btn-outline btn-primary w-[21px] h-[21px]"
+                    @click="parent.isOpenChild = !parent.isOpenChild">
                     <i v-if="!parent.isOpenChild" class="ki-filled ki-right !text-[9px]"></i>
                     <i v-else class="ki-filled ki-down !text-[9px]"></i>
                   </button>
@@ -104,17 +93,14 @@
       </div>
       <div class="flex items-center gap-[16px] mt-[24px]">
         <div class="flex items-center">
-          <div
-            class="bg-primary rounded-md p-[7px] w-[40px] h-[40px] flex items-center justify-center"
-          >
+          <div class="bg-primary rounded-md p-[7px] w-[40px] h-[40px] flex items-center justify-center">
             <i class="ki-filled ki-eye text-white text-[24px]"></i>
           </div>
           <p class="ml-[8px]">: View Detail invoice</p>
         </div>
         <div class="flex items-center">
           <div
-            class="bg-primary-light border border-primary-clarity rounded-md p-[7px] w-[40px] h-[40px] flex items-center justify-center"
-          >
+            class="bg-primary-light border border-primary-clarity rounded-md p-[7px] w-[40px] h-[40px] flex items-center justify-center">
             <i class="ki-duotone ki-data text-primary text-[24px]"></i>
           </div>
           <p class="ml-[8px]">: Verification Detail Invoice</p>
@@ -128,12 +114,8 @@
           }}
           data dari total data {{ verifList.length }}
         </p>
-        <LPagination
-          :totalItems="verifList.length"
-          :pageSize="pageSize"
-          :currentPage="currentPage"
-          @pageChange="setPage"
-        />
+        <LPagination :totalItems="verifList.length" :pageSize="pageSize" :currentPage="currentPage"
+          @pageChange="setPage" />
       </div>
     </div>
     <DetailVerificationModal @loadDetail="loadData" @setClearId="viewDetailId = ''" />
