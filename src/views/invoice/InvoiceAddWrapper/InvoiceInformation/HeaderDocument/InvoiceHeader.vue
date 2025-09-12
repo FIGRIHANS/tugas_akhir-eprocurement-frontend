@@ -130,6 +130,7 @@
       <div v-if="checkIsNonPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Department
+          <span class="text-red-500 ml-[4px]">*</span>
         </label>
         <v-select
           v-model="form.department"
@@ -137,6 +138,8 @@
           :get-option-label="(option: any) => `${option.code} - ${option.name}`"
           :reduce="(option: any) => option.code"
           :options="listCostCenter"
+          :class="{ 'error-select': form.departmentError }"
+          appendToBody
         ></v-select>
       </div>
       <!-- Description -->
