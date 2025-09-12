@@ -46,7 +46,7 @@
                 :get-option-label="(option: any) => `${option.code} - ${option.name}`"
                 :reduce="(option: any) => option.id"
                 :options="listActivity"
-                :error="{ 'error-select': item.isActivityError }"
+                :error="{ 'error-select': formEdit.isActivityError }"
                 appendToBody
               ></v-select>
             </td>
@@ -58,13 +58,13 @@
                 class="input"
                 type="number"
                 placeholder=""
-                :class="{ 'border-danger': item.isItemAmountError }"
+                :class="{ 'border-danger': formEdit.isItemAmountError }"
                 @change="formEdit.whtBaseAmount = formEdit.itemAmount"
               />
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.debitCredit }}</span>
-              <select v-else v-model="formEdit.debitCredit" class="select" placeholder="" :class="{ 'border-danger': item.isDebitCreditError }">
+              <select v-else v-model="formEdit.debitCredit" class="select" placeholder="" :class="{ 'border-danger': formEdit.isDebitCreditError }">
                 <option value="D">
                   Debit
                 </option>
@@ -190,7 +190,10 @@ const formEdit = reactive({
   whtType: '',
   whtCode: '',
   whtBaseAmount: 0,
-  whtAmount: 0
+  whtAmount: 0,
+  isActivityError: false,
+  isItemAmountError: false,
+  isDebitCreditError: false
 })
 
 const listActivity = computed(() => invoiceMasterApi.activityList)
@@ -247,26 +250,27 @@ const resetFormEdit = () => {
   formEdit.whtCode = ''
   formEdit.whtBaseAmount = 0
   formEdit.whtAmount = 0
+  formEdit.isActivityError = false
+  formEdit.isItemAmountError = false
+  formEdit.isDebitCreditError = false
 }
 
 const goEdit = (item: itemsCostType) => {
   if (item.isEdit) {
-    for (const data of form.value.additionalCosts) {
-      if (!data.activityExpense) data.isActivityError = true
-      else data.isActivityError = false
-  
-      if (!data.itemAmount || data.itemAmount < 0) data.isItemAmountError = true
-      else data.isItemAmountError = false
-  
-      if (!data.debitCredit) data.isDebitCreditError = true
-      else data.isDebitCreditError = false
-    }
-    if (
-      item.isActivityError ||
-      item.isItemAmountError ||
-      item.isDebitCreditError
-    ) return
+    if (!formEdit.activityExpense) formEdit.isActivityError = true
+    else formEdit.isActivityError = false
+
+    if (!formEdit.itemAmount || formEdit.itemAmount < 0) formEdit.isItemAmountError = true
+    else formEdit.isItemAmountError = false
+
+    if (!formEdit.debitCredit) formEdit.isDebitCreditError = true
+    else formEdit.isDebitCreditError = false
   }
+  if (
+    formEdit.isActivityError ||
+    formEdit.isItemAmountError ||
+    formEdit.isDebitCreditError
+  ) return
   item.isEdit = !item.isEdit
 
   if (item.isEdit) {

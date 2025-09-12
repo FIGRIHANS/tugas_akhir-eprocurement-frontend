@@ -5,7 +5,7 @@
         <ModalSuccessLogo />
         <div class="text-center font-inter">
           <p class="text-lg font-medium">Budget Checking Succeed</p>
-          <p class="text-[13px] font-normal">Budget check passed. Transaction approved</p>
+          <p class="text-[13px] font-normal">{{ getResponseMessage() }}</p>
         </div>
       </div>
     </div>
@@ -13,11 +13,25 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted } from 'vue'
+import { computed, onMounted, onUnmounted } from 'vue'
 import { KTModal } from '@/metronic/core'
 import ModalSuccessLogo from './ModalSuccessBudgetCheck/LogoSuccess.vue'
+import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
+import { isEmpty } from 'lodash'
 
 const emits = defineEmits(['afterClose'])
+const invoiceApi = useInvoiceSubmissionStore()
+
+const responseCheckBudget = computed(() => invoiceApi.responseCheckBudget)
+
+const getResponseMessage = () => {
+  if (!isEmpty(responseCheckBudget.value) && responseCheckBudget.value) {
+    const index = responseCheckBudget.value.RESPONSE.findIndex((item) => item.TYPE === 'S')
+    if (index !== -1) return responseCheckBudget.value.RESPONSE[index].MESSAGE.join(' ')
+  } else {
+    return ''
+  }
+}
 
 const hideModal = () => {
   const idModal = document.querySelector('#success_budget_check_modal')

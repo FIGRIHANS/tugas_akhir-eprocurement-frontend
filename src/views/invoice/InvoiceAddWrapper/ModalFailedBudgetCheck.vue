@@ -6,7 +6,7 @@
         <div>
           <p class="text-lg font-medium text-center">Budget Checking Failed</p>
           <p class="text-[13px] mt-[14px] text-center">
-            No available budget for this cost center/account
+            {{ getResponseMessage() }}
           </p>
         </div>
       </div>
@@ -15,11 +15,25 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted } from 'vue'
+import { computed, onMounted, onUnmounted } from 'vue'
 import { KTModal } from '@/metronic/core'
 import FailedLogo from './ModalFailedBudgetCheck/FailedLogo.vue'
+import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
+import { isEmpty } from 'lodash'
 
 const emits = defineEmits(['afterClose'])
+const invoiceApi = useInvoiceSubmissionStore()
+
+const responseCheckBudget = computed(() => invoiceApi.responseCheckBudget)
+
+const getResponseMessage = () => {
+  if (!isEmpty(responseCheckBudget.value) && responseCheckBudget.value) {
+    const index = responseCheckBudget.value.RESPONSE.findIndex((item) => item.TYPE === 'E')
+    if (index !== -1) return responseCheckBudget.value.RESPONSE[index].MESSAGE.join(' ')
+  } else {
+    return ''
+  }
+}
 
 const hideModal = () => {
   const idModal = document.querySelector('#failed_budget_check_modal')
