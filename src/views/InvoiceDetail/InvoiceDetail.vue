@@ -15,11 +15,14 @@
     <div v-if="currentRouteName === 'invoiceDetail'">
       <InvoicePoGr v-if="checkPo() && !isNonPo" class="mt-[24px]" />
       <InvoiceItem v-if="isNonPo" class="mt-[24px]" />
-      <AdditionalCost v-if="
-        (form.invoiceDPCode === 9011 && !isNonPo && checkPo()) ||
-        form.invoiceTypeCode === 902 ||
-        form.invoiceTypeCode === 903
-      " class="mt-[24px]" />
+      <AdditionalCost
+        v-if="
+          (form.invoiceDPCode === 9011 && !isNonPo && checkPo()) ||
+          form.invoiceTypeCode === 902 ||
+          form.invoiceTypeCode === 903
+        "
+        class="mt-[24px]"
+      />
     </div>
     <div v-else>
       <ConstExpenses class="mt-[24px]" />
@@ -30,7 +33,12 @@
           <i class="ki-filled ki-black-left"></i>
           Back
         </button>
-        <button v-if="checkStatusCode()" class="btn btn-primary" :disabled="isLoading" @click="goToEdit">
+        <button
+          v-if="checkStatusCode()"
+          class="btn btn-primary"
+          :disabled="isLoading"
+          @click="goToEdit"
+        >
           <i class="ki-duotone ki-pencil"></i>
           Edit
         </button>
@@ -47,7 +55,10 @@
       </div>
     </div>
     <RejectVerification @reject="goReject" />
-    <SuccessVerifModal :statusCode="detailInvoice?.header.statusCode || -1" @afterClose="goToList" />
+    <SuccessVerifModal
+      :statusCode="detailInvoice?.header.statusCode || -1"
+      @afterClose="goToList"
+    />
     <SuccessRejectModal @afterClose="goToList" />
   </div>
 </template>
@@ -191,7 +202,11 @@ const checkStatusCode = () => {
       break
   }
 
-  if (form.value.statusCode === 2 && route.query.type === '1') status = false
+  if (
+    form.value.statusCode === 2 &&
+    (route.query.type === '1' || route.query.invoiceType === 'no_po')
+  )
+    status = false
 
   status = checkWorkflow()
   return status
@@ -602,7 +617,7 @@ const setDataDefault = async () => {
     if (item.whtType) await callWhtCode(item.whtType)
     resultPoGr.push({
       ...item,
-      whtCodeList: item.whtType ? whtCodeList.value : []
+      whtCodeList: item.whtType ? whtCodeList.value : [],
     })
   }
 
@@ -610,7 +625,7 @@ const setDataDefault = async () => {
     if (item.whtType) await callWhtCode(item.whtType)
     resultAdditional.push({
       ...item,
-      whtCodeList: item.whtType ? whtCodeList.value : []
+      whtCodeList: item.whtType ? whtCodeList.value : [],
     })
   }
 
