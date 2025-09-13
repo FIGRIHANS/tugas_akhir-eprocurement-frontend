@@ -202,13 +202,11 @@ const checkStatusCode = () => {
       break
   }
 
-  if (
-    form.value.statusCode === 2 &&
-    (route.query.type === '1' || route.query.invoiceType === 'no_po')
-  )
-    status = false
+  if (form.value.statusCode === 2 && route.query.type === '1') status = false
 
-  status = checkWorkflow()
+  if (route.query.invoiceType !== 'no_po') {
+    status = checkWorkflow()
+  }
   return status
 }
 
