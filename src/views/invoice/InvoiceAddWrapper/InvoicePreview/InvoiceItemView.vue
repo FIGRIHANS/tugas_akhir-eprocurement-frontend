@@ -11,9 +11,9 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(item, index) in form.invoiceItem" :key="index">
+          <tr v-for="(item, index) in form.costExpenses" :key="index">
             <td>{{ index + 1 }}</td>
-            <td>{{ getActivityName(item.activity) || '-' }}</td>
+            <td>{{ getActivityName(item.activityExpenses) || '-' }}</td>
             <td>{{ item.itemAmount || '-' }}</td>
             <td>{{ item.itemText || '-' }}</td>
             <td>{{ getDebitCreditName(item.debitCredit) || '-' }}</td>
@@ -24,7 +24,8 @@
             <td>{{ item.assignment || '-' }}</td>
             <td>{{ item.whtType || '-' }}</td>
             <td>{{ item.whtCode || '-' }}</td>
-            <td>{{ form.currency === 'IDR' ? useFormatIdr(item.whtBaseAmount) : useFormatUsd(item.whtBaseAmount) || '-' }}</td>
+            <td>{{ form.currency === 'IDR' ? useFormatIdr(item.whtBaseAmount) : useFormatUsd(item.whtBaseAmount) || '-'
+              }}</td>
             <td>{{ form.currency === 'IDR' ? useFormatIdr(item.whtAmount) : useFormatUsd(item.whtAmount) || '-' }}</td>
           </tr>
         </tbody>
