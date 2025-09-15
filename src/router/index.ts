@@ -20,7 +20,7 @@ import contract from './modules/contract'
 import requisition from './modules/requisition'
 
 const router = createRouter({
-  history: createWebHistory('/eprocurement/'),
+  history: createWebHistory('/financeportal/'),
   routes: [
     ...login,
     {
