@@ -20,6 +20,7 @@ import { useLoginStore } from '@/stores/views/login'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
 import moment from 'moment'
 import LPagination from '@/components/pagination/LPagination.vue'
+import { useChangeDataEmailStore } from '@/stores/vendor/email-change-data'
 
 const companyDeedDataStore = useCompanyDeedDataStore()
 const userLoginStore = useLoginStore()
