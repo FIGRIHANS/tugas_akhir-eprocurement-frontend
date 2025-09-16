@@ -34,7 +34,7 @@
           Back
         </button>
         <button
-          v-if="checkStatusCode()"
+          v-if="checkEditButton()"
           class="btn btn-primary"
           :disabled="isLoading"
           @click="goToEdit"
@@ -204,9 +204,27 @@ const checkStatusCode = () => {
 
   if (form.value.statusCode === 2 && route.query.type === '1') status = false
 
-  if (route.query.invoiceType !== 'no_po') {
-    status = checkWorkflow()
+  status = checkWorkflow()
+
+  return status
+}
+
+const checkEditButton = () => {
+  let status = true
+  switch (form.value.statusCode) {
+    case 4:
+    case 5:
+    case 7:
+      status = false
+      break
   }
+
+  if (form.value.statusCode === 2 && route.query.type === '1') status = false
+
+  status = checkWorkflow()
+
+  if (route.query.invoiceType === 'no_po') status = false
+
   return status
 }
 
@@ -577,24 +595,42 @@ const goReject = (reason: string) => {
 }
 
 const goToList = () => {
-  router.push({
-    name: route.query.type === '1' ? 'invoiceVerification' : 'invoiceApproval',
-  })
+  if (route.query.invoiceType === 'no_po') {
+    router.push({
+      name: route.query.type === '1' ? 'invoiceVerificationNoPo' : 'invoiceApprovalNonPo',
+    })
+  } else {
+    router.push({
+      name: route.query.type === '1' ? 'invoiceVerification' : 'invoiceApproval',
+    })
+  }
 }
 
 const goBack = () => {
   if (route.query.type === '1') {
-    router.push({
-      name: 'invoiceVerification',
-    })
+    if (route.query.invoiceType === 'no_po') {
+      router.push({
+        name: 'invoiceVerificationNoPo',
+      })
+    } else {
+      router.push({
+        name: 'invoiceVerification',
+      })
+    }
   } else if (!checkPo()) {
     router.push({
       name: 'invoice-list-non-po',
     })
   } else {
-    router.push({
-      name: 'invoiceApproval',
-    })
+    if (route.query.invoiceType === 'no_po') {
+      router.push({
+        name: 'invoiceApprovalNonPo',
+      })
+    } else {
+      router.push({
+        name: 'invoiceApproval',
+      })
+    }
   }
 }
 
