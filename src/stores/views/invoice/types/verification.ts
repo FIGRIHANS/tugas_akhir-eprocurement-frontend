@@ -256,6 +256,7 @@ export interface ListNonPoTypes {
   costCenterCode: string
   costCenterName: string
   isOpenChild: boolean
+  vendorName: string
 }
 
 export interface PoChildTypes {

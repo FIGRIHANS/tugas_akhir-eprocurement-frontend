@@ -47,6 +47,7 @@
                     {{ parent.statusName }}
                   </span>
                 </td>
+                <td>{{ parent.vendorName || '-' }}</td>
                 <td>{{ parent.invoiceTypeName || '-' }}</td>
                 <td>{{ parent.companyCode || '-' }}</td>
                 <td>{{ '-' }}</td>
@@ -175,6 +176,7 @@ const columns = ref<string[]>([
   '',
   'Submitted Document No',
   'Status',
+  'Vendor Name',
   'Invoice Type',
   'Company Code',
   'Departement',
@@ -247,7 +249,7 @@ const callList = () => {
   list.value = []
   verificationApi
     .getListNonPo({
-      statusCode: filterForm.status || 1,
+      statusCode: filterForm.status || 2,
       companyCode: filterForm.companyCode,
       invoiceTypeCode: Number(filterForm.invoiceType),
       invoiceDate: filterForm.date,
