@@ -20,13 +20,13 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(item, index) in form.additionalCosts" :key="index" class="cost__items">
+          <tr v-for="(item, index) in form.costExpense" :key="index" class="cost__items">
             <td>{{ index + 1 }}</td>
-            <td>{{ item.activityExpense || '-' }}</td>
+            <td>{{ item.activityExpenses || '-' }}</td>
+            <!-- <td>{{ item.activityName || '-' }}</td> -->
             <td>{{ item.itemAmount || '-' }}</td>
-            <td>{{ item.itemAmount || '-' }}</td>
-            <td>{{ item.taxCode || '-' }}</td>
-            <td>
+            <td>{{ item.itemText || '-' }}</td>
+            <!-- <td>
               {{
                 item.vatAmount
                   ? form.currCode === 'IDR'
@@ -34,15 +34,17 @@
                     : useFormatUsd(item.vatAmount)
                   : '-'
               }}
-            </td>
+            </td> -->
             <td>{{ item.debitCredit || '-' }}</td>
+            <td>{{ item.taxCode || '-' }}</td>
+            <td>{{ item.vatAmount || '-' }}</td>
             <td>{{ item.costCenter || '-' }}</td>
             <td>{{ item.profitCenter || '-' }}</td>
             <td>{{ item.assignment || '-' }}</td>
             <td>{{ item.whtType || '-' }}</td>
             <td>{{ item.whtCode || '-' }}</td>
             <td>{{ item.whtBaseAmount || '-' }}</td>
-            <td>{{ item.whtBaseAmount || '-' }}</td>
+            <td>{{ item.whtAmount || '-' }}</td>
           </tr>
         </tbody>
       </table>
@@ -53,7 +55,7 @@
 <script lang="ts" setup>
 import { ref, inject } from 'vue'
 import type { formTypes } from '../types/invoiceDetail'
-import { useFormatIdr, useFormatUsd } from '@/composables/currency'
+// import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 
 const form = inject<formTypes>('form')
 
