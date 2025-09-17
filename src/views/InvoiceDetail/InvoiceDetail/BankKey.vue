@@ -37,59 +37,83 @@
           <p class="font-normal text-sm text-gray-600">Bank Account Number</p>
           <p class="font-normal text-sm">{{ form?.bankAccountNo }}</p>
         </div>
-        <div class="flex items-center justify-between gap-[10px]">
+        <div
+          v-if="route.query.invoiceType !== 'no_po'"
+          class="flex items-center justify-between gap-[10px]"
+        >
           <p class="font-normal text-sm text-gray-600">Bank Country</p>
           <p class="font-normal text-sm">{{ form?.bankCountryCode }}</p>
         </div>
       </div>
-      <div v-show="tabActive === 'alternative'" class="flex flex-col gap-[20px]">
-        <div class="flex items-center justify-between gap-[10px]">
-          <p class="font-normal text-sm text-gray-600">Type</p>
-          <p class="font-normal text-sm">Alternative Payee</p>
+      <div v-show="tabActive === 'alternative'" class="grid grid-cols-2">
+        <div class="flex flex-col gap-[20px] col-span-1">
+          <div class="flex flex-col items-start gap-[10px]">
+            <p class="font-normal text-sm text-gray-600">Type</p>
+            <div>
+              <p class="font-normal text-sm">
+                <i
+                  class="ki-solid ki-check-circle text-green-400"
+                  v-if="form.alternativePayee[0]?.isAlternativePayee ?? false"
+                ></i>
+                Alternative Payee
+              </p>
+              <p class="font-normal text-sm">
+                <i
+                  class="ki-solid ki-check-circle text-green-400"
+                  v-if="form.alternativePayee[0]?.isOneTimeVendor ?? false"
+                ></i>
+                One Time Vendor
+              </p>
+            </div>
+          </div>
+          <div class="flex flex-col items-start gap-[10px]">
+            <p class="font-normal text-sm text-gray-600">Name</p>
+            <p class="font-normal text-sm">{{ form.alternativePayee[0]?.name || '-' }}</p>
+          </div>
+          <div class="flex flex-col items-start gap-[10px]">
+            <p class="font-normal text-sm text-gray-600">Name 2</p>
+            <p class="font-normal text-sm">{{ form.alternativePayee[0]?.name2 || '-' }}</p>
+          </div>
+          <div class="flex flex-col items-start gap-[10px]">
+            <p class="font-normal text-sm text-gray-600">Street</p>
+            <p class="font-normal text-sm">{{ form.alternativePayee[0]?.street || '-' }}</p>
+          </div>
+          <div class="flex flex-col items-start gap-[10px]">
+            <p class="font-normal text-sm text-gray-600">City</p>
+            <p class="font-normal text-sm">{{ form.alternativePayee[0]?.city || '-' }}</p>
+          </div>
+          <div class="flex flex-col items-start gap-[10px]">
+            <p class="font-normal text-sm text-gray-600">Country</p>
+            <p class="font-normal text-sm">{{ form.alternativePayee[0]?.country || '-' }}</p>
+          </div>
         </div>
-        <div class="flex items-center justify-between gap-[10px]">
-          <p class="font-normal text-sm text-gray-600">Name</p>
-          <p class="font-normal text-sm">Ali Imran</p>
-        </div>
-        <div class="flex items-center justify-between gap-[10px]">
-          <p class="font-normal text-sm text-gray-600">Name 2</p>
-          <p class="font-normal text-sm">Amelia Nina</p>
-        </div>
-        <div class="flex items-center justify-between gap-[10px]">
-          <p class="font-normal text-sm text-gray-600">Street</p>
-          <p class="font-normal text-sm">Jl. Mangrove 12, Jakarta Selatan</p>
-        </div>
-        <div class="flex items-center justify-between gap-[10px]">
-          <p class="font-normal text-sm text-gray-600">City</p>
-          <p class="font-normal text-sm">Jakarta Selatan</p>
-        </div>
-        <div class="flex items-center justify-between gap-[10px]">
-          <p class="font-normal text-sm text-gray-600">Country</p>
-          <p class="font-normal text-sm">Indonesia</p>
-        </div>
-        <div class="flex items-center justify-between gap-[10px]">
-          <p class="font-normal text-sm text-gray-600">Bank Account Number</p>
-          <p class="font-normal text-sm">32876487</p>
-        </div>
-        <div class="flex items-center justify-between gap-[10px]">
-          <p class="font-normal text-sm text-gray-600">Bank Key</p>
-          <p class="font-normal text-sm">192</p>
-        </div>
-        <div class="flex items-center justify-between gap-[10px]">
-          <p class="font-normal text-sm text-gray-600">Bank Country</p>
-          <p class="font-normal text-sm">Indonesia</p>
-        </div>
-        <div class="flex items-center justify-between gap-[10px]">
-          <p class="font-normal text-sm text-gray-600">No. NPWP</p>
-          <p class="font-normal text-sm">2387928473264</p>
-        </div>
-        <div class="flex items-center justify-between gap-[10px]">
-          <p class="font-normal text-sm text-gray-600">No. KTP</p>
-          <p class="font-normal text-sm">5201011212120003</p>
-        </div>
-        <div class="flex items-center justify-between gap-[10px]">
-          <p class="font-normal text-sm text-gray-600">Email</p>
-          <p class="font-normal text-sm">alibaba@mail.com</p>
+        <div class="flex flex-col gap-[20px] col-span-1">
+          <div class="flex flex-col items-start gap-[10px]">
+            <p class="font-normal text-sm text-gray-600">Bank Account Number</p>
+            <p class="font-normal text-sm">
+              {{ form.alternativePayee[0]?.bankAccountNumber || '-' }}
+            </p>
+          </div>
+          <div class="flex flex-col items-start gap-[10px]">
+            <p class="font-normal text-sm text-gray-600">Bank Key</p>
+            <p class="font-normal text-sm">{{ form.alternativePayee[0]?.bankKey || '-' }}</p>
+          </div>
+          <div class="flex flex-col items-start gap-[10px]">
+            <p class="font-normal text-sm text-gray-600">Bank Country</p>
+            <p class="font-normal text-sm">{{ form.alternativePayee[0]?.bankCountry || '-' }}</p>
+          </div>
+          <div class="flex flex-col items-start gap-[10px]">
+            <p class="font-normal text-sm text-gray-600">No. NPWP</p>
+            <p class="font-normal text-sm">{{ form.alternativePayee[0]?.npwp || '-' }}</p>
+          </div>
+          <div class="flex flex-col items-start gap-[10px]">
+            <p class="font-normal text-sm text-gray-600">No. KTP</p>
+            <p class="font-normal text-sm">{{ form.alternativePayee[0]?.ktp || '-' }}</p>
+          </div>
+          <div class="flex flex-col items-start gap-[10px]">
+            <p class="font-normal text-sm text-gray-600">Email</p>
+            <p class="font-normal text-sm">{{ form.alternativePayee[0]?.email || '-' }}</p>
+          </div>
         </div>
       </div>
     </div>
@@ -97,10 +121,18 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, inject } from 'vue'
+import { ref, inject, onMounted } from 'vue'
 import type { formTypes } from '../types/invoiceDetail'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const form = inject<formTypes>('form')
 const tabActive = ref<string>('payment')
 const isNonPo = ref<boolean>(false)
+
+onMounted(() => {
+  if (route.query.invoiceType === 'no_po') {
+    isNonPo.value = true
+  }
+})
 </script>
