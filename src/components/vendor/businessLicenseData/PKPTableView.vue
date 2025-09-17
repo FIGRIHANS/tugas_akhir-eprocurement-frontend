@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { type PropType, ref, computed, watch, onMounted } from 'vue'
+import { useRegistrationVendorStore } from '@/stores/views/registration'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import UiFileUpload from '@/components/ui/atoms/file-upload/UiFileUpload.vue'
@@ -12,9 +13,38 @@ import { useVendorAdministrationStore } from '@/stores/vendor/vendor'
 import { useRoute } from 'vue-router'
 import { useVendorUploadStore } from '@/stores/vendor/upload'
 
+
 const uploadStore = useUploadStore()
 const adminStore = useVendorAdministrationStore()
 const uploadVendorStore = useVendorUploadStore()
+
+// Required document logic
+const registrationVendorStore = useRegistrationVendorStore()
+const requiredDocumentFields = registrationVendorStore.requiredDocumentFields
+const selectedCategory = computed(() => adminStore.data?.companyCategoryId ?? 0)
+
+const checkIsRequired = (licenseId) => {
+  return (
+    requiredDocumentFields[selectedCategory.value]?.includes(licenseId) ?? false
+  )
+}
+
+// Error state for required fields
+const requiredError = ref(false)
+const requiredErrorText = ref('Please fill all required fields before saving.')
+
+const validateRequiredFields = () => {
+  const requiredIds = requiredDocumentFields[selectedCategory.value] || []
+  for (const id of requiredIds) {
+    const found = localLicenses.value.find(l => l.licenseId === id)
+    if (!found || !found.licenseNo || !found.documentUrl) {
+      requiredError.value = true
+      return false
+    }
+  }
+  requiredError.value = false
+  return true
+}
 
 const route = useRoute()
 
@@ -193,8 +223,13 @@ watch(
                     <td class="p-2 align-middle">
                       <div class="h-14 flex items-center whitespace-nowrap truncate max-w-[240px]">
                         {{ item?.licenseName }}
+                        <span v-if="checkIsRequired(item.licenseId)" class="text-danger">*</span>
                       </div>
                     </td>
+                    <!-- Modal error required fields -->
+                    <ModalConfirmation :open="requiredError" id="license-required-error" type="danger"
+                      title="Required Fields Missing" :text="requiredErrorText" no-cancel static
+                      submit-button-text="Close" :submit="() => (requiredError = false)" />
 
                     <!-- License Number / Description -->
                     <td class="p-2 align-middle">
@@ -225,8 +260,8 @@ watch(
                       <div v-if="isEditing(item.licenseId)" class="h-14 flex items-center gap-2">
                         <UiFileUpload :name="String(item.licenseId)" :text-length="15" :max-size="16000000"
                           :placeholder="fileList[index]?.file.name === 'placeholder.txt'
-                              ? 'Choose file...'
-                              : fileList[index]?.file.name
+                            ? 'Choose file...'
+                            : fileList[index]?.file.name
                             " accepted-files=".jpg,.jpeg,.png,.pdf,application/zip" class="w-48" :disabled="false"
                           @addedFile="(file) => onPickFile(file, index)"
                           @upload-failed="() => (modalUploadFailed = true)" />
