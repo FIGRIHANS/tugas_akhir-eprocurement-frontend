@@ -165,6 +165,12 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     return response.data
   }
 
+  const postRejectNonPo = async (data: ParamsRejectTypes) => {
+    const response: ApiResponse<void> = await invoiceApi.post(`/invoice/reject-non-po`, data)
+
+    return response.data
+  }
+
   const postSap = async (invoiceUId: string) => {
     const response: ApiResponse<void> = await invoiceApi.post(`/invoice/sap/${invoiceUId}`)
     errorMessageSap.value = response.data.result.message
@@ -216,6 +222,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     getListNonPo,
     getInvoiceDetail,
     postReject,
+    postRejectNonPo,
     postSap,
     putSubmission,
     deleteAdditionalCost,
