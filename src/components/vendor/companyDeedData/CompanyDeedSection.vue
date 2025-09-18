@@ -205,10 +205,10 @@ const handleSave = async () => {
       if (err.response?.data?.result) {
         apiErrorMessage.value = err.response.data.result.message
       } else {
-        apiErrorMessage.value = 'Terjadi kesalahan tidak terduga. Silahkan coba lagi'
+        apiErrorMessage.value = 'An unexpected error occurred. Please try again'
       }
     } else {
-      apiErrorMessage.value = 'Terjadi kesalahan saat menyimpan data. Silahkan coba lagi'
+      apiErrorMessage.value = 'An error occurred while saving data. Please try again'
     }
     showErrorModal.value = true
   } finally {
@@ -265,10 +265,10 @@ const handleProcessDelete = async () => {
       if (err.response?.data?.result) {
         apiErrorMessage.value = err.response.data.result.message
       } else {
-        apiErrorMessage.value = 'Terjadi kesalahan tidak terduga. Silahkan coba lagi'
+        apiErrorMessage.value = 'An unexpected error occurred. Please try again'
       }
     } else {
-      apiErrorMessage.value = 'Terjadi kesalahan saat menghapus data. Silahkan coba lagi'
+      apiErrorMessage.value = 'An error occurred while deleting data. Please try again'
     }
     showErrorModal.value = true
   } finally {

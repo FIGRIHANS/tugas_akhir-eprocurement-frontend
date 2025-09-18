@@ -1,7 +1,5 @@
 <template>
   <div>
-    <!-- <Breadcrumb title="Invoice" :routes="routes" /> -->
-
     <section
       name="table"
       class="border rounded-md p-[24px] flex flex-col gap-[24px] justify-center bg-white"
@@ -10,11 +8,42 @@
         <h1>Invoice Non PO</h1>
         <div class="flex flex-row gap-3">
           <InputSearch placeholder="Search" v-model="search" @keypress="goSearch" />
-          <FilterList type="non-po" :data="filterForm" @setData="setDataFilter" />
+          <FilterList type="non-po" :data="filterForm" @setData="setDataFilter" ref="filterChild" />
           <UiButton variant="primary" @click="goAdd(false)"
             ><i class="ki-duotone ki-plus-circle"></i>Add invoice</UiButton
           >
         </div>
+      </div>
+      <div class="flex overflow-x-auto gap-3 mb-5 items-center" v-if="filteredPayload.length > 0">
+        <div class="font-medium text-lg text-gray-800">Filter</div>
+        <div v-for="items in filteredPayload" :key="items.key">
+          <div class="btn btn-light btn-sm" v-if="items.value !== ''">
+            <span class="text-gray-500"> {{ items.key }} </span>
+            <span class="font-semibold">
+              <p v-if="items.key === 'Status'">
+                {{ StatusInvoice.find((item) => item.value.toString() === items.value)?.label }}
+              </p>
+              <p v-else-if="items.key === 'Company Code'">
+                {{
+                  companyCodeList.find((item) => item.code.toString() === filterForm.companyCode)
+                    ?.name
+                }}
+              </p>
+              <p v-else-if="items.key === 'Invoice Type'">
+                {{
+                  invoiceNonPoTypeList.find(
+                    (item) => item.code.toString() === filterForm.invoiceType,
+                  )?.name
+                }}
+              </p>
+              <p v-else>{{ filterForm.date }}</p>
+            </span>
+            <i class="ki-filled ki-cross" @click="deleteFilter(items.key)"></i>
+          </div>
+        </div>
+        <UiButton variant="light" size="sm" class="btn-clear" @click="resetFilter()">
+          {{ $t('vendor.masterFilters.reset') }}
+        </UiButton>
       </div>
       <div class="scrollable-x-auto list__table">
         <table class="table align-middle">
@@ -88,16 +117,30 @@ import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import { useFormatIdr } from '@/composables/currency'
 import { formatDateYearFirst } from '@/composables/date-format'
+import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 // import moment from 'moment'
 import type { ListPoTypes } from '@/stores/views/invoice/types/submission'
 import { useRouter } from 'vue-router'
 
 const invoiceSubmissionApi = useInvoiceSubmissionStore()
 const router = useRouter()
+const invoiceMasterApi = useInvoiceMasterDataStore()
+const filterChild = ref(null)
 
 // import UiModal from '@/components/modal/UiModal.vue'
 // import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 // import UiInput from '@/components/ui/atoms/input/UiInput.vue'
+const StatusInvoice = ref([
+  { value: '1', label: 'Waiting to Verify' },
+  { value: '0', label: 'Draft' },
+  { value: '2', label: 'Waiting for Approval' },
+  { value: '4', label: 'Approved' },
+  { value: '5', label: 'Rejected' },
+  { value: '7', label: 'Sent to SAP' },
+])
+
+const companyCodeList = computed(() => invoiceMasterApi.companyCode)
+const invoiceNonPoTypeList = computed(() => invoiceMasterApi.invoiceNonPoType)
 
 const search = ref<string>('')
 const currentPage = ref<number>(1)
@@ -113,6 +156,8 @@ const filterForm = reactive<filterListTypes>({
   invoiceType: '',
 })
 
+const filteredPayload = ref([])
+
 const columns = ref([
   '',
   'Submitted Document No',
@@ -126,6 +171,13 @@ const columns = ref([
   'Total Net Amount',
   'Estimated Payment Date',
 ])
+
+const resetFilter = () => {
+  filterChild.value.resetFilter()
+  filteredPayload.value = []
+  filterChild.value.goFilter()
+  listCall()
+}
 
 const goSearch = (event: KeyboardEvent) => {
   if (event.key === 'Enter') {
@@ -162,7 +214,56 @@ const setPage = (value: number) => {
   setList()
 }
 
+const deleteFilter = (key: string) => {
+  const deletedData = filteredPayload.value.filter((item) => item.key !== key)
+  filteredPayload.value = deletedData
+
+  if (key === 'Status') {
+    filterChild.value.resetStatus()
+  } else if (key === 'Date') {
+    filterChild.value.resetDate()
+  } else if (key === 'Company Code') {
+    filterChild.value.resetCompanyCode()
+  } else {
+    filterChild.value.resetInvoiceType()
+  }
+  filterChild.value.goFilter()
+  listCall()
+}
+
 const setDataFilter = (data: filterListTypes) => {
+  const filteredData: { key: string; value: string }[] = []
+
+  if (data.status && data.status.trim() !== '') {
+    filteredData.push({
+      key: 'Status',
+      value: data.status,
+    })
+  }
+
+  if (data.date && data.date.trim() !== '') {
+    filteredData.push({
+      key: 'Date',
+      value: data.date,
+    })
+  }
+
+  if (data.companyCode && data.companyCode.trim() !== '') {
+    filteredData.push({
+      key: 'Company Code',
+      value: data.companyCode,
+    })
+  }
+
+  if (data.invoiceType && data.invoiceType.trim() !== '') {
+    filteredData.push({
+      key: 'Invoice Type',
+      value: data.invoiceType,
+    })
+  }
+
+  filteredPayload.value = filteredData
+
   filterForm.status = data.status
   filterForm.date = data.date
   filterForm.companyCode = data.companyCode
@@ -173,7 +274,7 @@ const setDataFilter = (data: filterListTypes) => {
 const listCall = () => {
   invoiceSubmissionApi
     .getListNonPo({
-      statusCode: null,
+      statusCode: parseInt(filterForm.status) || null,
       companyCode: filterForm.companyCode,
       invoiceTypeCode: Number(filterForm.invoiceType),
       invoiceDate: filterForm.date,

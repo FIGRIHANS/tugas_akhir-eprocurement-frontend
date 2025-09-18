@@ -202,9 +202,9 @@ const handleSave = async () => {
   } catch (err) {
     if (axios.isAxiosError(err)) {
       apiErrorMessage.value =
-        err.response?.data?.result?.message || 'Terjadi kesalahan tidak terduga. Silahkan coba lagi'
+        err.response?.data?.result?.message || 'An unexpected error occurred. Please try again'
     } else {
-      apiErrorMessage.value = 'Terjadi kesalahan saat menyimpan data. Silahkan coba lagi'
+      apiErrorMessage.value = 'An error occurred while saving data. Please try again'
     }
     showErrorModal.value = true
   } finally {
@@ -259,9 +259,9 @@ const handleProcessDelete = async () => {
   } catch (err) {
     if (axios.isAxiosError(err)) {
       apiErrorMessage.value =
-        err.response?.data?.result?.message || 'Terjadi kesalahan tidak terduga. Silahkan coba lagi'
+        err.response?.data?.result?.message || 'An unexpected error occurred. Please try again'
     } else {
-      apiErrorMessage.value = 'Terjadi kesalahan saat menghapus data. Silahkan coba lagi'
+      apiErrorMessage.value = 'An error occurred while deleting data. Please try again'
     }
     showErrorModal.value = true
   } finally {

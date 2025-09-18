@@ -15,7 +15,7 @@ export interface IChildSidebarMenu {
 export default [
   {
     id: 'dashboard',
-    title: 'Beranda',
+    title: 'Home',
     icon: 'element-11',
     to: 'dashboard',
     child: [],

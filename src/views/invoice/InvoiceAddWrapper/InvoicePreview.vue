@@ -66,8 +66,6 @@ watch(
   },
 )
 
-console.log(form)
-
 onMounted(() => {
   typeForm.value = route.query.type?.toString().toLowerCase() || 'po'
 

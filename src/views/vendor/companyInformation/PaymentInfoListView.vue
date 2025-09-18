@@ -470,7 +470,6 @@ const handleDeleteModal = (id: number) => {
 const handleSubmit = async () => {
   bankDetailError.value = checkEmptyValues(payload.value.request.vendorBankDetail)
 
-  // cek jika holder name berbeda, hapus field yang tidak diperlukan
   if (!payload.value.request.vendorBankDetail.isHolderNameDifferent) {
     bankDetailError.value = bankDetailError.value.filter(
       (field) => !['urlFirstPage', 'urlAccountDifferences'].includes(field),
@@ -484,7 +483,6 @@ const handleSubmit = async () => {
     )
   }
 
-  // hapus error utk field yang kosong
   bankDetailError.value = bankDetailError.value.filter(
     (field) =>
       ![
