@@ -577,21 +577,39 @@ const goVerif = () => {
 
 const goReject = (reason: string) => {
   verificationApi.isRejectLoading = true
-  verificationApi
-    .postReject({
-      invoiceUId: form.value.invoiceUId,
-      notes: reason,
-    })
-    .then((response) => {
-      if (response.statusCode === 200) {
-        const idModal = document.querySelector('#success_reject_modal')
-        const modal = KTModal.getInstance(idModal as HTMLElement)
-        modal.show()
-      }
-    })
-    .finally(() => {
-      verificationApi.isRejectLoading = false
-    })
+  if (route.query.invoiceType === 'no_po') {
+    verificationApi
+      .postRejectNonPo({
+        invoiceUId: form.value.invoiceUId,
+        notes: reason,
+      })
+      .then((response) => {
+        if (response.statusCode === 200) {
+          const idModal = document.querySelector('#success_reject_modal')
+          const modal = KTModal.getInstance(idModal as HTMLElement)
+          modal.show()
+        }
+      })
+      .finally(() => {
+        verificationApi.isRejectLoading = false
+      })
+  } else {
+    verificationApi
+      .postReject({
+        invoiceUId: form.value.invoiceUId,
+        notes: reason,
+      })
+      .then((response) => {
+        if (response.statusCode === 200) {
+          const idModal = document.querySelector('#success_reject_modal')
+          const modal = KTModal.getInstance(idModal as HTMLElement)
+          modal.show()
+        }
+      })
+      .finally(() => {
+        verificationApi.isRejectLoading = false
+      })
+  }
 }
 
 const goToList = () => {
