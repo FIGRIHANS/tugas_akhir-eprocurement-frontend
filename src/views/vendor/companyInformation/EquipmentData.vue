@@ -43,7 +43,7 @@
                       <div class="menu-item text-danger" @click="deleteData(data)">
                         <span class="menu-link">
                           <UiIcon name="cross-circle" variant="duotone" class="menu-icon" />
-                          Hapus
+                          Delete
                         </span>
                       </div>
                     </div>

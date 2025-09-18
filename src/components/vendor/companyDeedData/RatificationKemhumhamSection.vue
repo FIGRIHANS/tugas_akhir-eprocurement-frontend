@@ -177,9 +177,9 @@ const handleSave = async () => {
   } catch (err) {
     if (axios.isAxiosError(err)) {
       apiErrorMessage.value =
-        err.response?.data?.result?.message || 'Terjadi kesalahan tidak terduga. Silahkan coba lagi'
+        err.response?.data?.result?.message || 'An unexpected error occurred. Please try again'
     } else {
-      apiErrorMessage.value = 'Terjadi kesalahan saat menyimpan data. Silahkan coba lagi'
+      apiErrorMessage.value = 'An error occurred while saving data. Please try again'
     }
     showErrorModal.value = true
   } finally {
@@ -223,9 +223,9 @@ const handleProcessDelete = async () => {
   } catch (err) {
     if (axios.isAxiosError(err)) {
       apiErrorMessage.value =
-        err.response?.data?.result?.message || 'Terjadi kesalahan tidak terduga. Silahkan coba lagi'
+        err.response?.data?.result?.message || 'An unexpected error occurred. Please try again'
     } else {
-      apiErrorMessage.value = 'Terjadi kesalahan saat menghapus data. Silahkan coba lagi'
+      apiErrorMessage.value = 'An error occurred while deleting data. Please try again'
     }
     showErrorModal.value = true
   } finally {
@@ -301,7 +301,7 @@ watchEffect(async () => {
         </UiFormGroup>
 
         <UiFormGroup hide-border>
-          <DatePicker v-model="payload.documentDate" label="Letter Date" placeholder="Pilih Tanggal" />
+          <DatePicker v-model="payload.documentDate" label="Letter Date" placeholder="Select Date" />
           <p v-if="errors.documentDate" class="text-xs text-red-500 mt-1">
             {{ errors.documentDate }}
           </p>

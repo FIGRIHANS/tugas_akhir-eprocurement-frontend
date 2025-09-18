@@ -60,7 +60,6 @@ const onSelectDate = () => {
 const onSubmit = async () => {
   formError.value = checkEmptyValues(formData.value)
 
-  // hapus field yang akan dibiarkan kosong
   formError.value = formError.value.filter((form) => !['id'].includes(form))
 
   // check jika ada error
