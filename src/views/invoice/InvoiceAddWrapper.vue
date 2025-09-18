@@ -1,7 +1,7 @@
 <template>
   <div>
     <Breadcrumb title="Add Invoice" :routes="routes" />
-    <StepperStatus active-name="Submission" />
+    <StepperStatus :active-name="stepperStatus" />
     <TabInvoice :active-tab="tabNow" @change-tab="setTab" class="-mx-[24px]" />
     <!-- <div v-if="form.status !== 0" class="status__box--approved -mt-5 -mx-[24px]">
       <i class="ki-outline ki-shield-tick text-primary text-[36px]"></i>
@@ -177,6 +177,8 @@ const isSubmit = ref<boolean>(false)
 const isCheckBudget = ref<boolean>(false)
 const isClickDraft = ref<boolean>(false)
 const itemNoAcc = ref<number>(0)
+
+const stepperStatus = ref('')
 
 const routes = ref<routeTypes[]>([
   {
@@ -1118,6 +1120,16 @@ const sendEmailReminder = (data: formTypes) => {
   })
 }
 
+const setStepperStatus = () => {
+  console.log(detailNonPo.value.header.statusCode, 'status')
+
+  if (detailNonPo.value.header.statusCode === 1) {
+    stepperStatus.value = 'Submission'
+  } else if (detailNonPo.value.header.statusCode === 2) {
+    stepperStatus.value = 'Approval'
+  }
+}
+
 onMounted(() => {
   invoiceMasterApi.getTaxCode()
   if (!checkIsNonPo()) invoiceMasterApi.getInvoicePoType()
@@ -1139,7 +1151,9 @@ onMounted(() => {
 
   if (route.query.type === 'non-po-view') {
     invoiceApi.getNonPoDetail(route.query.invoice?.toString() || '').then(() => {
+      setStepperStatus()
       setDataNonPo()
+      // setStepperStatus()
     })
   }
 
