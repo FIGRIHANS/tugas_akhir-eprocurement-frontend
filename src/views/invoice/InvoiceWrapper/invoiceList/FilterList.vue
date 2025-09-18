@@ -102,6 +102,19 @@ const resetFilter = () => {
   invoiceType.value = ''
 }
 
+const resetStatus = () => {
+  status.value = ''
+}
+const resetDate = () => {
+  date.value = ''
+}
+const resetCompanyCode = () => {
+  companyCode.value = ''
+}
+const resetInvoiceType = () => {
+  invoiceType.value = ''
+}
+
 const goFilter = () => {
   const data = {
     status: status.value,
@@ -126,4 +139,13 @@ watch(
     immediate: true,
   },
 )
+
+defineExpose({
+  resetFilter,
+  resetStatus,
+  resetDate,
+  resetInvoiceType,
+  resetCompanyCode,
+  goFilter,
+})
 </script>

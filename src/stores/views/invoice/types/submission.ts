@@ -76,6 +76,7 @@ interface ParamsSubmissionHeader {
   statusCode: number
   statusName: string
   creditCardBillingId: string
+  department?: string
 }
 
 interface ParamsSubmissionVendor {
@@ -282,7 +283,7 @@ export interface ParamsSubmissionNonPo {
   alternativePay: ParamsSubmissionAlternativePay
   costExpenses: ParamsSubmissionCostExpense[]
 }
-interface ParamsSubmissionHeaderNonPo {
+export interface ParamsSubmissionHeaderNonPo {
   invoiceUId: string
   invoiceTypeCode: number
   invoiceTypeName: string

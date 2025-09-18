@@ -45,7 +45,11 @@ const setTab = (value: string) => {
 }
 
 onMounted(() => {
-  invoiceMasterApi.getInvoicePoType()
+  if (currentRouteName.value === 'invoiceVerification') {
+    invoiceMasterApi.getInvoicePoType()
+  } else {
+    invoiceMasterApi.getInvoiceNonPoType()
+  }
   invoiceMasterApi.getCompanyCode()
 })
 </script>
