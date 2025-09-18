@@ -206,7 +206,6 @@ const form = reactive<formTypes>({
   invoicePoGr: [],
   invoiceItem: [],
   additionalCost: [],
-  costExpenses: [],
   status: -1,
   idAlternativePayment: 0,
   isAlternativePayee: false,
@@ -864,13 +863,6 @@ const setDataNonPo = () => {
     form.npwpNumberAlternative = dataAlternativePayee ? dataAlternativePayee.npwp : '-'
     form.ktpNumberAlternative = dataAlternativePayee ? dataAlternativePayee.ktp : '-'
     form.emailAlternative = dataAlternativePayee ? dataAlternativePayee.email : '-'
-
-    form.costExpenses = detail?.costExpense
-      ? detail.costExpense.map(item => ({
-        ...item,
-        activityExpenses: Number(item.activityExpenses)
-      }))
-      : []
 
     form.invoiceItem = []
     for (const item of detail.costExpense) {
