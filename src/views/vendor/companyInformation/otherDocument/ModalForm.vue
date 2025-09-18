@@ -60,7 +60,9 @@ const onSelectDate = () => {
 const onSubmit = async () => {
   formError.value = checkEmptyValues(formData.value)
 
-  formError.value = formError.value.filter((form) => !['id'].includes(form))
+  formError.value = formError.value.filter((form) => !['id', 'expiredUTCDate', 'issuedUTCDate', 'validDate'].includes(form))
+
+  console.log(formError.value)
 
   // check jika ada error
   if (formError.value.length) return
@@ -138,13 +140,9 @@ onMounted(() => {
         <!-- Available Until -->
         <div class="relative">
           <span class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px] z-10">
-            Available Until <span class="text-danger">*</span>
+            Available Until
           </span>
-          <DatePicker placeholder="Start Date" v-model="formData.expiredUTCDate"
-            :error="formError.includes('expiredUTCDate')" @update:model-value="onSelectDate" />
-          <span v-if="formError.includes('expiredUTCDate')" class="form-hint !text-danger">
-            Expired date required
-          </span>
+          <DatePicker placeholder="Start Date" v-model="formData.expiredUTCDate" @update:model-value="onSelectDate" />
         </div>
 
         <!-- upload -->
