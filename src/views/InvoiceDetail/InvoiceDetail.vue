@@ -460,6 +460,7 @@ const mapDataVerifNonPo = () => {
       notes: form.value.notes,
       currCode: form.value.currCode,
       npwpReporting: form.value.npwpReporting,
+      department: form.value.department
     },
     payment: {
       bankKey: form.value.bankKey,
@@ -824,6 +825,7 @@ const setDataDefaultNonPo = () => {
     assigment: data?.header.assigment || '',
     transferNews: data?.header.transferNews || '',
     npwpReporting: data?.header.npwpReporting || '',
+    department: data?.header.department,
     remainingDpAmount: '',
     dpAmountDeduction: '',
     bankKey: data?.payment.bankKey || '',

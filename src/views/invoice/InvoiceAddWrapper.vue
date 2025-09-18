@@ -206,7 +206,6 @@ const form = reactive<formTypes>({
   invoicePoGr: [],
   invoiceItem: [],
   additionalCost: [],
-  costExpenses: [],
   status: -1,
   idAlternativePayment: 0,
   isAlternativePayee: false,
@@ -346,7 +345,7 @@ const goBack = () => {
   const list = ['data', 'information', 'preview']
   const checkIndex = list.findIndex((item) => item === tabNow.value)
   if (checkIndex === 0 || checkInvoiceView() || checkInvoiceNonPoView()) {
-    const nameRoute = checkInvoiceView() || !checkIsNonPo() ? 'invoice' : 'invoice-list-non-po'
+    const nameRoute = checkInvoiceView() || (!checkIsNonPo() && !checkInvoiceNonPoView()) ? 'invoice' : 'invoice-list-non-po'
     router.push({
       name: nameRoute,
     })
@@ -864,13 +863,6 @@ const setDataNonPo = () => {
     form.npwpNumberAlternative = dataAlternativePayee ? dataAlternativePayee.npwp : '-'
     form.ktpNumberAlternative = dataAlternativePayee ? dataAlternativePayee.ktp : '-'
     form.emailAlternative = dataAlternativePayee ? dataAlternativePayee.email : '-'
-
-    form.costExpenses = detail?.costExpense
-      ? detail.costExpense.map(item => ({
-        ...item,
-        activityExpenses: Number(item.activityExpenses)
-      }))
-      : []
 
     form.invoiceItem = []
     for (const item of detail.costExpense) {
