@@ -346,7 +346,7 @@ const goBack = () => {
   const list = ['data', 'information', 'preview']
   const checkIndex = list.findIndex((item) => item === tabNow.value)
   if (checkIndex === 0 || checkInvoiceView() || checkInvoiceNonPoView()) {
-    const nameRoute = checkInvoiceView() || !checkIsNonPo() ? 'invoice' : 'invoice-list-non-po'
+    const nameRoute = checkInvoiceView() || (!checkIsNonPo() && !checkInvoiceNonPoView()) ? 'invoice' : 'invoice-list-non-po'
     router.push({
       name: nameRoute,
     })
