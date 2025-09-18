@@ -63,7 +63,7 @@
                       <div class="menu-item text-danger" @click="deleteData(item.id)">
                         <span class="menu-link">
                           <UiIcon name="cross-circle" variant="duotone" class="menu-icon" />
-                          Hapus
+                          Delete
                         </span>
                       </div>
                     </div>
@@ -87,29 +87,15 @@
           per page from {{ pagination.total }} data
         </div>
 
-        <LPagination
-          :totalItems="pagination.total"
-          :pageSize="pagination.pageSize"
-          :currentPage="pagination.currentPage"
-          @pageChange="setPagePagination"
-        />
+        <LPagination :totalItems="pagination.total" :pageSize="pagination.pageSize"
+          :currentPage="pagination.currentPage" @pageChange="setPagePagination" />
       </div>
     </div>
 
-    <ModalForm
-      :id="selectedId"
-      @on-success="onSubmitSuccess"
-      @on-error="onSubmitError"
-      @on-close="selectedId = 0"
-    />
+    <ModalForm :id="selectedId" @on-success="onSubmitSuccess" @on-error="onSubmitError" @on-close="selectedId = 0" />
     <ModalSuccess />
     <ModalError />
-    <ModalDelete
-      :id="selectedId"
-      @on-success="onSubmitSuccess"
-      @on-error="onSubmitError"
-      @on-close="selectedId = 0"
-    />
+    <ModalDelete :id="selectedId" @on-success="onSubmitSuccess" @on-error="onSubmitError" @on-close="selectedId = 0" />
   </div>
 </template>
 
