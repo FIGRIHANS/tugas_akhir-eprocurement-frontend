@@ -911,7 +911,8 @@ const setDataNonPo = () => {
         whtType: item.whtType,
         whtCode: item.whtCode,
         whtBaseAmount: item.whtBaseAmount.toString(),
-        whtAmount: item.whtAmount.toString(),
+        whtAmount: item.whtAmount ? item.whtAmount.toString() : '0',
+        whtCodeList: [],
         isEdit: false,
       } as invoiceItemTypes
       form.invoiceItem.push(data)
