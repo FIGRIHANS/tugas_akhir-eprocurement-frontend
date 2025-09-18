@@ -102,6 +102,7 @@ interface ParamsSubmissionHeader {
   remainingDpAmount: string
   dpAmountDeduction: string
   creditCardBillingId: string
+  department: string
 }
 
 interface ParamsSubmissionVendor {
@@ -493,6 +494,7 @@ interface Header {
   notes: string | null
   currCode: string | null
   npwpReporting: string | null
+  department: string | null
 }
 
 export interface SubmissionNonPoTypes {

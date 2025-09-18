@@ -173,6 +173,7 @@ const addNew = () => {
       whtCode: '',
       whtBaseAmount: '',
       whtAmount: '',
+      whtCodeList: [],
       isEdit: false
     }
     form.invoiceItem.push(data)
