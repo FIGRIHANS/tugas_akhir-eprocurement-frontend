@@ -88,7 +88,7 @@ import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import { useFormatIdr } from '@/composables/currency'
 import { formatDateYearFirst } from '@/composables/date-format'
-import moment from 'moment'
+// import moment from 'moment'
 import type { ListPoTypes } from '@/stores/views/invoice/types/submission'
 import { useRouter } from 'vue-router'
 
@@ -107,7 +107,7 @@ const list = ref<ListPoTypes[]>([])
 const poList = computed(() => invoiceSubmissionApi.listNonPo)
 
 const filterForm = reactive<filterListTypes>({
-  status: '1',
+  status: '',
   date: '',
   companyCode: '',
   invoiceType: '',
@@ -173,7 +173,7 @@ const setDataFilter = (data: filterListTypes) => {
 const listCall = () => {
   invoiceSubmissionApi
     .getListNonPo({
-      statusCode: filterForm.status === '0' || filterForm.status ? Number(filterForm.status) : 1,
+      statusCode: null,
       companyCode: filterForm.companyCode,
       invoiceTypeCode: Number(filterForm.invoiceType),
       invoiceDate: filterForm.date,

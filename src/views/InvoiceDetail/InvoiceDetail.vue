@@ -34,7 +34,7 @@
           Back
         </button>
         <button
-          v-if="checkStatusCode()"
+          v-if="checkEditButton()"
           class="btn btn-primary"
           :disabled="isLoading"
           @click="goToEdit"
@@ -204,9 +204,27 @@ const checkStatusCode = () => {
 
   if (form.value.statusCode === 2 && route.query.type === '1') status = false
 
-  if (route.query.invoiceType !== 'no_po') {
-    status = checkWorkflow()
+  status = checkWorkflow()
+
+  return status
+}
+
+const checkEditButton = () => {
+  let status = true
+  switch (form.value.statusCode) {
+    case 4:
+    case 5:
+    case 7:
+      status = false
+      break
   }
+
+  if (form.value.statusCode === 2 && route.query.type === '1') status = false
+
+  status = checkWorkflow()
+
+  if (route.query.invoiceType === 'no_po') status = false
+
   return status
 }
 
@@ -458,29 +476,29 @@ const mapDataVerifNonPo = () => {
       totalGrossAmount: form.value.totalGrossAmount,
       totalNetAmount: form.value.totalNetAmount,
     },
-    // alternativePay: {
-    //   id: form.value.alternativePayee.id,
-    //   invoiceUId: form.value.alternativePayee.invoiceUId,
-    //   name: form.value.alternativePayee.name,
-    //   name2: form.value.alternativePayee.name2,
-    //   street: form.value.alternativePayee.street,
-    //   city: form.value.alternativePayee.city,
-    //   country: form.value.alternativePayee.country,
-    //   bankAccountNumber: form.value.alternativePayee.bankAccountNumber,
-    //   bankKey: form.value.alternativePayee.bankKey,
-    //   bankCountry: form.value.alternativePayee.bankCountry,
-    //   npwp: form.value.alternativePayee.npwp,
-    //   ktp: form.value.alternativePayee.ktp,
-    //   email: form.value.alternativePayee.email,
-    //   isAlternativePayee: form.value.alternativePayee.isAlternativePayee,
-    //   isOneTimeVendor: form.value.alternativePayee.isOneTimeVendor,
-    //   isActive: form.value.alternativePayee.isActive,
-    //   isDeleted: form.value.alternativePayee.isDeleted,
-    //   createdBy: form.value.alternativePayee.createdBy,
-    //   createdUtcDate: form.value.alternativePayee.createdUtcDate,
-    //   modifiedBy: form.value.alternativePayee.modifiedBy,
-    //   modifiedUtcDate: form.value.alternativePayee.modifiedUtcDate,
-    // },
+    alternativePay: {
+      id: form.value.alternativePayee[0].id,
+      invoiceUId: form.value.invoiceUId,
+      name: form.value.alternativePayee[0].name,
+      name2: form.value.alternativePayee[0].name2,
+      street: form.value.alternativePayee[0].street,
+      city: form.value.alternativePayee[0].city,
+      country: form.value.alternativePayee[0].country,
+      bankAccountNumber: form.value.alternativePayee[0].bankAccountNumber,
+      bankKey: form.value.alternativePayee[0].bankKey,
+      bankCountry: form.value.alternativePayee[0].bankCountry,
+      npwp: form.value.alternativePayee[0].npwp,
+      ktp: form.value.alternativePayee[0].ktp,
+      email: form.value.alternativePayee[0].email,
+      isAlternativePayee: form.value.alternativePayee[0].isAlternativePayee,
+      isOneTimeVendor: form.value.alternativePayee[0].isOneTimeVendor,
+      // isActive: form.value.alternativePayee[0].isActive,
+      // isDeleted: form.value.alternativePayee[0].isDeleted,
+      // createdBy: form.value.alternativePayee[0].createdBy,
+      // createdUtcDate: form.value.alternativePayee[0].createdUtcDate,
+      // modifiedBy: form.value.alternativePayee[0].modifiedBy,
+      // modifiedUtcDate: form.value.alternativePayee[0].modifiedUtcDate,
+    },
     costExpenses: mapCostExpenses(),
     documents,
   } as SubmissionNonPoTypes
@@ -535,7 +553,6 @@ const goVerif = () => {
   } else {
     // const status = checkVerif()
     // if (!status) return
-    console.log('masuk')
 
     isLoading.value = true
     verificationApi
@@ -577,24 +594,42 @@ const goReject = (reason: string) => {
 }
 
 const goToList = () => {
-  router.push({
-    name: route.query.type === '1' ? 'invoiceVerification' : 'invoiceApproval',
-  })
+  if (route.query.invoiceType === 'no_po' || currentRouteName.value !== 'invoiceDetail') {
+    router.push({
+      name: route.query.type === '1' ? 'invoiceVerificationNoPo' : 'invoiceApprovalNonPo',
+    })
+  } else {
+    router.push({
+      name: route.query.type === '1' ? 'invoiceVerification' : 'invoiceApproval',
+    })
+  }
 }
 
 const goBack = () => {
   if (route.query.type === '1') {
-    router.push({
-      name: 'invoiceVerification',
-    })
+    if (route.query.invoiceType === 'no_po') {
+      router.push({
+        name: 'invoiceVerificationNoPo',
+      })
+    } else {
+      router.push({
+        name: 'invoiceVerification',
+      })
+    }
   } else if (!checkPo()) {
     router.push({
       name: 'invoice-list-non-po',
     })
   } else {
-    router.push({
-      name: 'invoiceApproval',
-    })
+    if (route.query.invoiceType === 'no_po') {
+      router.push({
+        name: 'invoiceApprovalNonPo',
+      })
+    } else {
+      router.push({
+        name: 'invoiceApproval',
+      })
+    }
   }
 }
 
