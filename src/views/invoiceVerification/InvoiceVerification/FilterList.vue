@@ -8,15 +8,29 @@
       <p class="text-lg font-semibold mb-[8px]">Filter</p>
       <div class="flex flex-col gap-[24px] py-[16px]">
         <div class="relative">
-          <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white">Company Code</label>
+          <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
+            >Company Code</label
+          >
           <select v-model="companyCode" class="select" name="select">
             <option v-for="item of companyCodeList" :key="item.code" :value="item.code">
               {{ item.name }}
             </option>
           </select>
         </div>
-        <div class="relative">
-          <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white">Invoice Type</label>
+        <div class="relative" v-if="route.name === 'invoiceVerificationNoPo'">
+          <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
+            >Invoice Type</label
+          >
+          <select v-model="invoiceType" class="select" name="select">
+            <option v-for="item of invoiceTypenonPoList" :key="item.code" :value="item.code">
+              {{ item.name }}
+            </option>
+          </select>
+        </div>
+        <div class="relative" v-else>
+          <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
+            >Invoice Type</label
+          >
           <select v-model="invoiceType" class="select" name="select">
             <option v-for="item of invoiceTypeList" :key="item.code" :value="item.code">
               {{ item.name }}
@@ -24,21 +38,20 @@
           </select>
         </div>
         <div class="relative">
-          <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white">Status</label>
+          <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
+            >Status</label
+          >
           <select v-model="status" class="select" name="select">
-            <option value="1">
-              Waiting for Verify
-            </option>
-            <option value="3">
-              Verified
-            </option>
-            <option value="5">
-              Rejected
-            </option>
+            <option value="1">Waiting for Verify</option>
+            <option value="3">Verified</option>
+            <option value="5">Rejected</option>
           </select>
         </div>
         <div class="relative">
-          <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white z-[1]">Invoice Date</label>
+          <label
+            class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white z-[1]"
+            >Invoice Date</label
+          >
           <DatePicker v-model="date" format="yyyy/MM/dd" teleport />
         </div>
       </div>
@@ -61,7 +74,9 @@ import { ref, computed, watch } from 'vue'
 import type { filterListTypes } from '../types/pendingVerification'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const props = defineProps<{
   data: filterListTypes
 }>()
@@ -76,10 +91,23 @@ const invoiceType = ref<string>('')
 
 const companyCodeList = computed(() => invoiceMasterApi.companyCode)
 const invoiceTypeList = computed(() => invoiceMasterApi.invoicePoType)
+const invoiceTypenonPoList = computed(() => invoiceMasterApi.invoiceNonPoType)
 
 const resetFilter = () => {
   date.value = ''
   companyCode.value = ''
+  invoiceType.value = ''
+}
+const resetStatus = () => {
+  status.value = null
+}
+const resetDate = () => {
+  date.value = ''
+}
+const resetCompanyCode = () => {
+  companyCode.value = ''
+}
+const resetInvoiceType = () => {
   invoiceType.value = ''
 }
 
@@ -88,7 +116,7 @@ const goFilter = () => {
     status: status.value,
     date: date.value,
     companyCode: companyCode.value,
-    invoiceType: invoiceType.value
+    invoiceType: invoiceType.value,
   }
   emits('setData', data)
 }
@@ -103,7 +131,16 @@ watch(
   },
   {
     deep: true,
-    immediate: true
-  }
+    immediate: true,
+  },
 )
+
+defineExpose({
+  resetFilter,
+  resetStatus,
+  resetDate,
+  resetInvoiceType,
+  resetCompanyCode,
+  goFilter,
+})
 </script>
