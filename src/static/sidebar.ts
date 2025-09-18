@@ -28,40 +28,6 @@ export default [
     child: [],
   },
   // {
-  //   id: 'tender',
-  //   title: 'Tender Management',
-  //   icon: 'rocket',
-  //   child: [
-  //     {
-  //       id: 'pr-central-monitoring',
-  //       title: 'PR Central Monitoring',
-  //       to: 'tenderCentral',
-  //     },
-  //     {
-  //       id: 'tender-report-list',
-  //       title: 'Tender Report List',
-  //       to: 'tenderReportList',
-  //     },
-  //     {
-  //       id: 'create-tender-request',
-  //       title: 'Create Tender Request',
-  //       to: 'tenderCreate',
-  //     },
-  //   ],
-  // },
-  // {
-  //   id: 'vendor-tender',
-  //   title: 'Tender Vendor Management',
-  //   icon: 'rocket',
-  //   child: [
-  //     {
-  //       id: 'vendor-tender-submission',
-  //       title: 'Tender Submission',
-  //       to: 'tenderSubmission',
-  //     },
-  //   ],
-  // },
-  // {
   //   id: 'requisition',
   //   title: 'Requisition',
   //   icon: 'rocket',
@@ -75,23 +41,6 @@ export default [
   //       id: 'requission-add',
   //       title: 'Create Requisition',
   //       to: 'requisitionAdd',
-  //     },
-  //   ],
-  // },
-  // {
-  //   id: 'contract',
-  //   title: 'Contract Lifecycle Management',
-  //   icon: 'rocket',
-  //   child: [
-  //     {
-  //       id: 'contract-list',
-  //       title: 'Contract List',
-  //       to: 'contractList',
-  //     },
-  //     {
-  //       id: 'contract-request',
-  //       title: 'Contract Request',
-  //       to: 'contractCreate',
   //     },
   //   ],
   // },
