@@ -36,6 +36,7 @@ export interface formTypes extends documentFormTypes {
   beneficiaryName: string
   bankAccountNo: string
   bankCountryCode: string
+  department?: string
 
   vendorId: string
   vendorName: string
