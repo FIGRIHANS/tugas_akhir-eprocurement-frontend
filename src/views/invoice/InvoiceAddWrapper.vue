@@ -1027,16 +1027,20 @@ const mapDataCheck = () => {
     currencyAmount.push(currData)
   }
 
+  let totalItemAmountCurr = 0
+  let totalVatAmountCurr = 0
   for (const item of form.invoiceItem) {
-    itemNoAcc.value += 1
+    totalItemAmountCurr += item.itemAmount
+    totalVatAmountCurr += item.vatAmount
+  }
+  itemNoAcc.value += 1
     const currData = {
       ITEMNO_ACC: itemNoAcc.value,
       CURRENCY: form.currency,
-      AMT_DOCCUR: (item.itemAmount + item.vatAmount) * -1,
+      AMT_DOCCUR: (totalItemAmountCurr + totalVatAmountCurr) * -1,
       AMT_BASE: 0,
     }
     currencyAmount.push(currData)
-  }
 
   for (const item of accountTax) {
     const filterTax = form.invoiceItem.filter((sub) => sub.taxCode === item.TAX_CODE)
