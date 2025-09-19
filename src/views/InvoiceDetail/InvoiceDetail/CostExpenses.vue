@@ -22,7 +22,7 @@
         <tbody>
           <tr v-for="(item, index) in form.costExpense" :key="index" class="cost__items">
             <td>{{ index + 1 }}</td>
-            <td>{{ item.activityExpenses || '-' }}</td>
+            <td>{{ item.activityExpenses + '-' + item.activityName || '-' }}</td>
             <!-- <td>{{ item.activityName || '-' }}</td> -->
             <td>{{ item.itemAmount || '-' }}</td>
             <td>{{ item.itemText || '-' }}</td>
@@ -62,6 +62,7 @@ const form = inject<formTypes>('form')
 const columns = ref([
   'Line',
   'Activity / Expense',
+  // 'Activity Name',
   'Item Amount',
   'Item Text',
   'Tax Code',

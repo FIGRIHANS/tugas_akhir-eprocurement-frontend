@@ -16,7 +16,7 @@
               :class="{
                 'cost__field-base--activity': item.toLowerCase() === 'activity / expense',
                 'cost__field-base--item-amount': item.toLowerCase() === 'item amount',
-                'cost__field-base--description': item.toLowerCase() === 'description'
+                'cost__field-base--description': item.toLowerCase() === 'description',
               }"
             >
               {{ item }}
@@ -26,7 +26,11 @@
         <tbody>
           <tr v-for="(item, index) in form.invoiceItem" :key="index" class="cost__field-items">
             <td class="flex items-center justify-around gap-[8px]">
-              <button class="btn btn-outline btn-icon btn-primary" :disabled="checkIsEdit() && !item.isEdit" @click="goEdit(item)">
+              <button
+                class="btn btn-outline btn-icon btn-primary"
+                :disabled="checkIsEdit() && !item.isEdit"
+                @click="goEdit(item)"
+              >
                 <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>
                 <i v-else class="ki-duotone ki-check-circle"></i>
               </button>
@@ -44,33 +48,43 @@
             </td>
             <td>
               <span v-if="!item.isEdit">{{ useFormatIdr(item.itemAmount) }}</span>
-              <input v-else v-model="formEdit.itemAmount" class="input" type="number" placeholder=""/>
+              <input
+                v-else
+                v-model="formEdit.itemAmount"
+                class="input"
+                type="number"
+                placeholder=""
+              />
             </td>
-              <td>
-                <span v-if="!item.isEdit">{{ item.itemText || '-' }}</span>
-                <input v-else v-model="formEdit.itemText" class="input" type="text" placeholder=""/>
-              </td>
+            <td>
+              <span v-if="!item.isEdit">{{ item.itemText || '-' }}</span>
+              <input v-else v-model="formEdit.itemText" class="input" type="text" placeholder="" />
+            </td>
             <td>
               <span v-if="!item.isEdit">{{ getDebitCreditName(item.debitCredit) || '-' }}</span>
               <select v-else v-model="formEdit.debitCredit" class="select" placeholder="">
-                <option value="D">
-                  Debit
-                </option>
-                <option value="K">
-                  Credit
-                </option>
+                <option value="D">Debit</option>
+                <option value="K">Credit</option>
               </select>
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.taxCode }}</span>
               <select v-else v-model="formEdit.taxCode" class="select" placeholder="">
-                <option v-for="(option, index) in listTaxCalculation" :key="index" :value="option.code">
+                <option
+                  v-for="(option, index) in listTaxCalculation"
+                  :key="index"
+                  :value="option.code"
+                >
                   {{ option.code }}
                 </option>
               </select>
             </td>
             <td>
-              {{ form.currCode === 'IDR' ? useFormatIdr(item.isEdit ? formEdit.vatAmount : item.vatAmount) : useFormatUsd(item.isEdit ? formEdit.vatAmount : item.vatAmount) }}
+              {{
+                form.currCode === 'IDR'
+                  ? useFormatIdr(item.isEdit ? formEdit.vatAmount : item.vatAmount)
+                  : useFormatUsd(item.isEdit ? formEdit.vatAmount : item.vatAmount)
+              }}
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.costCenter }}</span>
@@ -90,7 +104,7 @@
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.assignment }}</span>
-              <input v-else v-model="formEdit.assignment" class="input" placeholder=""/>
+              <input v-else v-model="formEdit.assignment" class="input" placeholder="" />
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.whtType }}</span>
@@ -120,11 +134,23 @@
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.whtBaseAmount }}</span>
-              <input v-else v-model="formEdit.whtBaseAmount" class="input" type="number" placeholder=""/>
+              <input
+                v-else
+                v-model="formEdit.whtBaseAmount"
+                class="input"
+                type="number"
+                placeholder=""
+              />
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.whtAmount }}</span>
-              <input v-else v-model="formEdit.whtAmount" class="input" type="number" placeholder=""/>
+              <input
+                v-else
+                v-model="formEdit.whtAmount"
+                class="input"
+                type="number"
+                placeholder=""
+              />
             </td>
           </tr>
         </tbody>
@@ -156,7 +182,7 @@ const columns = ref([
   'WHT Type',
   'WHT Code',
   'WHT Base Amount',
-  'WHT Amount'
+  'WHT Amount',
 ])
 const formEdit = reactive({
   activityExpense: '',
@@ -206,7 +232,7 @@ const addNew = () => {
       whtCode: '',
       whtBaseAmount: 0,
       whtAmount: 0,
-      isEdit: false
+      isEdit: false,
     } as invoiceItemTypes
     form.value.invoiceItem.push(data)
   }
@@ -285,7 +311,7 @@ const getPercentTax = (code: string) => {
   const getIndex = listTaxCalculation.value.findIndex((item) => item.code === code)
   if (getIndex !== -1) {
     const splitName = listTaxCalculation.value[getIndex].name.split(' - ')
-    return parseFloat(splitName[1].replace(',', '.').replace('%','')) / 100
+    return parseFloat(splitName[1].replace(',', '.').replace('%', '')) / 100
   }
 }
 
@@ -333,8 +359,8 @@ watch(
   },
   {
     deep: true,
-    immediate: true
-  }
+    immediate: true,
+  },
 )
 </script>
 

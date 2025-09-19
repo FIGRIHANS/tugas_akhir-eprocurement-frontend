@@ -71,6 +71,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
       totalNetAmount: 0,
       invoicePoGr: [],
       additionalCosts: [],
+      costExpense: [],
       invoiceDocument: null,
       tax: null,
       referenceDocument: null,
@@ -96,8 +97,8 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     listPo.value =
       response.data.result.content.length !== 0
         ? response.data.result.content.sort(
-          (a, b) => moment(b.invoiceDate).valueOf() - moment(a.invoiceDate).valueOf(),
-        )
+            (a, b) => moment(b.invoiceDate).valueOf() - moment(a.invoiceDate).valueOf(),
+          )
         : []
 
     return response.data.result.content
@@ -120,8 +121,8 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     listNonPo.value =
       response.data.result.content.length !== 0
         ? response.data.result.content.sort(
-          (a, b) => moment(b.invoiceDate).valueOf() - moment(a.invoiceDate).valueOf(),
-        )
+            (a, b) => moment(b.invoiceDate).valueOf() - moment(a.invoiceDate).valueOf(),
+          )
         : []
 
     return response.data.result.content

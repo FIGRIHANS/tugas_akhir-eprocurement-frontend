@@ -229,7 +229,14 @@ const checkEditButton = () => {
 }
 
 const checkWorkflow = () => {
-  const getWf = detailInvoice.value?.workflow || []
+  let getWf = []
+
+  if (currentRouteName.value !== 'invoiceDetail') {
+    getWf = detailInvoiceNonPo.value?.workflow || []
+  } else {
+    getWf = detailInvoice.value?.workflow || []
+  }
+
   const getProfileId = userData.value?.profile.profileId
 
   const checkIndex = getWf?.findIndex((item) => item.profileId === getProfileId)
@@ -358,7 +365,7 @@ const mapCostExpenses = () => {
     cost.push({
       id: item.id,
       activityId: item.activityId,
-      activityExpenses: item.activityId,
+      activityExpenses: item.activityExpenses,
       activityName: item.activityName,
       itemAmount: item.itemAmount,
       // itemText: item.itemText,
@@ -460,7 +467,7 @@ const mapDataVerifNonPo = () => {
       notes: form.value.notes,
       currCode: form.value.currCode,
       npwpReporting: form.value.npwpReporting,
-      department: form.value.department
+      department: form.value.department,
     },
     payment: {
       bankKey: form.value.bankKey,
@@ -635,12 +642,8 @@ const goBack = () => {
         name: 'invoiceVerification',
       })
     }
-  } else if (!checkPo()) {
-    router.push({
-      name: 'invoice-list-non-po',
-    })
   } else {
-    if (route.query.invoiceType === 'no_po') {
+    if (!checkPo()) {
       router.push({
         name: 'invoiceApprovalNonPo',
       })
@@ -650,6 +653,15 @@ const goBack = () => {
       })
     }
   }
+  // } else if (route.query.type === '2' && !checkPo()) {
+  //   router.push({
+  //     name: 'invoiceApprovalNonPo',
+  //   })
+  // } else if (!checkPo()) {
+  //   router.push({
+  //     name: 'invoice-list-non-po',
+  //   })
+  // }
 }
 
 const callWhtCode = async (whtType: string) => {
@@ -786,9 +798,10 @@ const setDataDefaultNonPo = () => {
     resultAdditional.push({
       id: item.id as number,
       activityId: item.activityId as number,
-      activityExpense: item.activityExpenses as string,
+      activityExpenses: item.activityExpenses as string,
       activityName: item.activityName as string,
       itemAmount: item.itemAmount as number,
+      itemText: item.itemText as string,
       debitCredit: item.debitCredit as string,
       taxCode: item.taxCode as string,
       vatAmount: item.vatAmount as number,

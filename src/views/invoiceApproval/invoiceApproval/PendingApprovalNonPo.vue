@@ -10,8 +10,8 @@
       <FilterList :data="filterForm" @setData="setDataFilter" ref="filterChild" />
     </div>
     <div
-      class="flex overflow-x-auto gap-3 mb-5 items-center mt-5"
       v-if="filteredPayload.length > 0"
+      class="flex overflow-x-auto gap-3 mb-5 items-center mt-5"
     >
       <div class="font-medium text-lg text-gray-800">Filter</div>
       <div v-for="items in filteredPayload" :key="items.key">
@@ -327,6 +327,7 @@ const openDetailInvoiceEdit = (invoiceId: string) => {
 }
 
 const resetFilter = () => {
+  filterForm.status = null
   filterChild.value.resetFilter()
   filteredPayload.value = []
   filterChild.value.goFilter()
@@ -366,7 +367,7 @@ const callList = () => {
   list.value = []
   verificationApi
     .getListNonPo({
-      statusCode: filterForm.status || 2,
+      statusCode: filterForm.status,
       companyCode: filterForm.companyCode,
       invoiceTypeCode: Number(filterForm.invoiceType),
       invoiceDate: filterForm.date,
@@ -460,6 +461,12 @@ const openFailedSap = () => {
 }
 
 onMounted(() => {
+  const filteredData: { key: string; value: string | number }[] = []
+  filteredData.push({
+    key: 'Status',
+    value: 2,
+  })
+  filteredPayload.value = filteredData
   callList()
 })
 </script>

@@ -48,6 +48,7 @@ import { type routeTypes } from '@/core/type/components/breadcrumb'
 import type { formTypes } from './types/invoiceDetailEdit'
 import type { itemsPoGrType } from './types/invoicePoGr'
 import type { itemsCostType } from './types/additionalCost'
+import type { CostExpenses } from '@/stores/views/invoice/types/verification'
 import type { documentDetailTypes } from './types/invoiceDocument'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import StepperStatus from '../../components/stepperStatus/StepperStatus.vue'
@@ -60,6 +61,7 @@ import { isEmpty } from 'lodash'
 import { KTModal } from '@/metronic/core'
 import type { PostVerificationTypes } from '@/stores/views/invoice/types/verification'
 import type { documentDetailTypes as documentDetailTypesStore } from '@/stores/views/invoice/types/verification'
+// import type { invoiceItemTypes } from './types/invoiceItem'
 
 const InvoiceData = defineAsyncComponent(() => import('./InvoiceDetailEdit/InvoiceData.vue'))
 const InvoiceInformation = defineAsyncComponent(
@@ -369,6 +371,19 @@ const mapDataEditPoGr = () => {
   return result
 }
 
+const mapDataEditCostExpanses = () => {
+  const result = [] as CostExpenses[]
+  if (verificationApi.detailInvoiceEdit) {
+    for (const item of verificationApi.detailInvoiceEdit.costExpense) {
+      result.push({
+        ...item,
+        isEdit: false,
+      })
+    }
+  }
+  return result
+}
+
 const mapDataEditAdditional = () => {
   const result = [] as itemsCostType[]
   if (verificationApi.detailInvoiceEdit) {
@@ -460,16 +475,92 @@ const setDataEdit = () => {
   }
 }
 
+const setDataEditNonPo = () => {
+  const data = verificationApi.detailInvoiceEdit
+  form.value = {
+    invoiceUId: data?.invoiceUId || '',
+    invoiceTypeCode: data?.invoiceTypeCode || 0,
+    invoiceTypeName: data?.invoiceTypeName || '',
+    invoiceDPCode: data?.invoiceDPCode || 0,
+    invoiceDPName: data?.invoiceDPName || '',
+    companyCode: data?.companyCode || '',
+    companyName: data?.companyName || '',
+    invoiceNo: data?.invoiceNo || '',
+    documentNo: data?.documentNo || '',
+    invoiceDate: data?.invoiceDate || '',
+    taxNo: data?.taxNo || '',
+    currCode: data?.currCode || '',
+    notes: data?.notes || '',
+    statusCode: data?.statusCode || 0,
+    statusName: data?.statusName || '',
+    postingDate: data?.postingDate || '',
+    invoicingParty: data?.invoicingParty || '',
+    estimatedPaymentDate: data?.estimatedPaymentDate || '',
+    paymentMethodCode: data?.paymentMethodCode || '',
+    paymentMethodName: data?.paymentMethodName || '',
+    assigment: data?.assigment || '',
+    transferNews: data?.transferNews || '',
+    npwpReporting: data?.npwpReporting || '',
+    remainingDpAmount: data?.remainingDpAmount || '',
+    dpAmountDeduction: data?.dpAmountDeduction || '',
+    bankKey: data?.bankKey || '',
+    bankName: data?.bankName || '',
+    beneficiaryName: data?.beneficiaryName || '',
+    bankAccountNo: data?.bankAccountNo || '',
+    bankCountryCode: data?.bankCountryCode || '',
+    vendorId: data?.vendorId || '',
+    vendorName: data?.vendorName || '',
+    npwp: data?.npwp || '',
+    vendorAddress: data?.vendorAddress || '',
+    subtotal: data?.subtotal || 0,
+    vatAmount: data?.vatAmount || 0,
+    whtAmount: data?.whtAmount || 0,
+    additionalCost: data?.additionalCost || 0,
+    totalGrossAmount: data?.totalGrossAmount || 0,
+    totalNetAmount: data?.totalNetAmount || 0,
+    // invoicePoGr: mapDataEditPoGr(),
+    // additionalCosts: mapDataEditAdditional(),
+    // costExpense: mapDataEditCostExpanses(),
+    invoiceItem: mapDataEditCostExpanses(),
+    invoiceDocument: mapDocument(data?.invoiceDocument || null),
+    tax: mapDocument(data?.tax || null),
+    referenceDocument: mapDocument(data?.referenceDocument || null),
+    otherDocument: mapDocument(data?.otherDocument || null),
+    creditCardBillingId: data?.creditCardBillingId || '',
+    isAlternativePayee: false,
+    isOneTimeVendor: false,
+    nameAlternative: '',
+    nameOtherAlternative: '',
+    streetAltiernative: '',
+    cityAlternative: '',
+    countryAlternative: '',
+    bankAccountNumberAlternative: '',
+    bankKeyAlternative: '',
+    bankCountryAlternative: '',
+    npwpNumberAlternative: '',
+    ktpNumberAlternative: '',
+    emailAlternative: '',
+  }
+}
+
 const setDataDefault = () => {
   const invoiceType = route.query.invoiceType
 
   const data = invoiceType === 'no_po' ? detailInvoiceNonPO.value : detailInvoice.value
   const resultPoGr: itemsPoGrType[] = []
   const resultAdditional: itemsCostType[] = []
+  const resultCostEspense: CostExpenses[] = []
   let invoice = {} as documentDetailTypes
   let tax = {} as documentDetailTypes
   let reference = {} as documentDetailTypes
   let other = {} as documentDetailTypes
+
+  for (const item of data?.costExpense || []) {
+    resultCostEspense.push({
+      ...item,
+      isEdit: false,
+    })
+  }
 
   for (const item of data?.pogr || []) {
     resultPoGr.push({
@@ -553,7 +644,7 @@ const setDataDefault = () => {
     totalNetAmount: data?.calculation.totalNetAmount || 0,
     invoicePoGr: resultPoGr,
     additionalCosts: resultAdditional,
-    invoiceItem: [],
+    invoiceItem: resultCostEspense,
     invoiceDocument: invoice,
     tax: tax,
     referenceDocument: reference,
@@ -689,7 +780,7 @@ onMounted(() => {
   if (route.query.invoiceType === 'no_po') {
     verificationApi.getInvoiceNonPoDetail(route.query.id?.toString() || '').then(() => {
       if (verificationApi.isFromEdit) {
-        setDataEdit()
+        setDataEditNonPo()
       } else {
         setDataDefault()
       }
