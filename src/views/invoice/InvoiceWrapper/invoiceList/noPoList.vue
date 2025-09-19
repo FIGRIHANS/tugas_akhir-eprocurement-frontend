@@ -66,7 +66,7 @@
               <td>
                 <button
                   class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]"
-                  @click="goToDetail(item.invoiceUId)"
+                  @click="goToDetail(item)"
                 >
                   <i class="ki-filled ki-eye !text-lg"></i>
                 </button>
@@ -232,38 +232,6 @@ const deleteFilter = (key: string) => {
 }
 
 const setDataFilter = (data: filterListTypes) => {
-  const filteredData: { key: string; value: string }[] = []
-
-  if (data.status && data.status.trim() !== '') {
-    filteredData.push({
-      key: 'Status',
-      value: data.status,
-    })
-  }
-
-  if (data.date && data.date.trim() !== '') {
-    filteredData.push({
-      key: 'Date',
-      value: data.date,
-    })
-  }
-
-  if (data.companyCode && data.companyCode.trim() !== '') {
-    filteredData.push({
-      key: 'Company Code',
-      value: data.companyCode,
-    })
-  }
-
-  if (data.invoiceType && data.invoiceType.trim() !== '') {
-    filteredData.push({
-      key: 'Invoice Type',
-      value: data.invoiceType,
-    })
-  }
-
-  filteredPayload.value = filteredData
-
   filterForm.status = data.status
   filterForm.date = data.date
   filterForm.companyCode = data.companyCode
@@ -274,7 +242,7 @@ const setDataFilter = (data: filterListTypes) => {
 const listCall = () => {
   invoiceSubmissionApi
     .getListNonPo({
-      statusCode: parseInt(filterForm.status) || null,
+      statusCode: filterForm.status === '0' || filterForm.status ? Number(filterForm.status) : 1,
       companyCode: filterForm.companyCode,
       invoiceTypeCode: Number(filterForm.invoiceType),
       invoiceDate: filterForm.date,
@@ -294,25 +262,27 @@ const goAdd = (isPo: boolean) => {
   })
 }
 
-const goToDetail = (id: string) => {
-  router.push({
-    name: 'invoiceAdd',
-    query: {
-      type: 'non-po-view',
-      invoice: id,
-    },
-  })
+const goToDetail = (data: ListPoTypes) => {
+  if (data.statusCode === 0 || data.statusCode === 5) {
+    router.push({
+      name: 'invoiceAdd',
+      query: {
+        type: 'nonpo',
+        invoice: data.invoiceUId,
+      },
+    })
+  } else {
+    router.push({
+      name: 'invoiceAdd',
+      query: {
+        type: 'non-po-view',
+        invoice: data.invoiceUId,
+      },
+    })
+  }
 }
 
 onMounted(() => {
   listCall()
 })
-
-// const isIndeterminate = computed(() => {
-//   return selectedItems.value.length > 0 && selectedItems.value.length < prData.value.length
-// })
-
-// watch(filter, () => {
-//     hasActiveFilter()
-// }, { immediate: true })
 </script>
