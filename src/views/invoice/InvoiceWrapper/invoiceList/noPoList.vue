@@ -206,8 +206,6 @@ const setList = () => {
       result.push(item)
     }
   }
-  console.log(poList.value)
-  console.log(result)
   list.value = result
 }
 
