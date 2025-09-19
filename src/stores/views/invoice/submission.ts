@@ -191,6 +191,7 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
     let response: ApiResponse<void>
     try {
       response = await invoiceApi.post(`/invoice/invoice/check-budget`, data)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       responseCheckBudget.value = err.response.data

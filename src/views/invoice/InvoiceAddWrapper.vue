@@ -1150,17 +1150,18 @@ onMounted(() => {
     tabNow.value = 'preview'
   }
 
-  if (route.query.type === 'non-po-view') {
+  if (route.query.type === 'non-po-view'||
+    (route.query.invoice && route.query.type !== 'non-po-view' && route.query.type !== 'po-view' && route.query.type === 'nonpo')
+  ) {
     invoiceApi.getNonPoDetail(route.query.invoice?.toString() || '').then(() => {
       setStepperStatus()
       setDataNonPo()
-      // setStepperStatus()
     })
   }
 
   if (
     route.query.type === 'po-view' ||
-    (route.query.invoice && route.query.type !== 'non-po-view')
+    (route.query.invoice && route.query.type !== 'non-po-view' && route.query.type !== 'po-view' && route.query.type === 'po')
   ) {
     invoiceApi.getPoDetail(route.query.invoice?.toString() || '').then(() => {
       setData()
