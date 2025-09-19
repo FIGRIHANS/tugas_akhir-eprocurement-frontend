@@ -386,6 +386,8 @@ export interface DetailInvoiceEditTypes {
   tax: documentDetailTypes | null
   referenceDocument: documentDetailTypes | null
   otherDocument: documentDetailTypes | null
+
+  costExpense: CostExpenses[]
 }
 
 export interface ParamsRejectTypes {
@@ -411,7 +413,7 @@ export interface itemsAlternativePayee {
 }
 
 // Approval Non Po Type
-interface CostExpenses {
+export interface CostExpenses {
   id: number | null
   activityId: number | null
   activityExpenses: string | null
@@ -428,6 +430,7 @@ interface CostExpenses {
   whtCode: string | null
   whtBaseAmount: number | null
   whtAmount: number | null
+  isEdit: boolean
 }
 
 interface AlternativePay {

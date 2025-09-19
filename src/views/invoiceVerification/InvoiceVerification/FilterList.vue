@@ -94,6 +94,7 @@ const invoiceTypeList = computed(() => invoiceMasterApi.invoicePoType)
 const invoiceTypenonPoList = computed(() => invoiceMasterApi.invoiceNonPoType)
 
 const resetFilter = () => {
+  status.value = null
   date.value = ''
   companyCode.value = ''
   invoiceType.value = ''
