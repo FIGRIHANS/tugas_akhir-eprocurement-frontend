@@ -18,7 +18,9 @@ import type { formTypes } from '../types/invoiceDetailEdit'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 
 const HeaderDocument = defineAsyncComponent(() => import('./InvoiceInformation/HeaderDocument.vue'))
-const InvoiceCalculation = defineAsyncComponent(() => import('./InvoiceInformation/InvoiceCalculation.vue'))
+const InvoiceCalculation = defineAsyncComponent(
+  () => import('./InvoiceInformation/InvoiceCalculation.vue'),
+)
 const InvoicePoGr = defineAsyncComponent(() => import('./InvoiceInformation/InvoicePoGr.vue'))
 const AdditionalCost = defineAsyncComponent(() => import('./InvoiceInformation/AdditionalCost.vue'))
 const InvoiceItem = defineAsyncComponent(() => import('./InvoiceInformation/InvoiceItem.vue'))
@@ -44,6 +46,7 @@ onMounted(() => {
   invoiceMasterApi.getWhtType()
   invoiceMasterApi.getCostCenter(form?.value.companyCode || '')
   if (form.value.companyCode) invoiceMasterApi.getActivity(form.value.companyCode || '')
+  if (route.query.invoiceType === 'no_po') isNonPo.value = true
 })
 </script>
 

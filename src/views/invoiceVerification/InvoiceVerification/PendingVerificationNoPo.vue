@@ -375,6 +375,12 @@ const loadData = () => {
 }
 
 onMounted(() => {
+  const filteredData: { key: string; value: string | number }[] = []
+  filteredData.push({
+    key: 'Status',
+    value: 1,
+  })
+  filteredPayload.value = filteredData
   callList()
 })
 </script>
