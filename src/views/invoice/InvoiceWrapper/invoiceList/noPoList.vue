@@ -62,7 +62,7 @@
             <tr v-if="poList?.length === 0">
               <td colspan="10" class="text-center">No data found.</td>
             </tr>
-            <tr v-for="item in list" :key="item.invoiceNo" class="text-nowrap">
+            <tr v-for="item in list" :key="item.invoiceUId" class="text-nowrap">
               <td>
                 <button
                   class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]"
@@ -206,6 +206,8 @@ const setList = () => {
       result.push(item)
     }
   }
+  console.log(poList.value)
+  console.log(result)
   list.value = result
 }
 
@@ -242,7 +244,7 @@ const setDataFilter = (data: filterListTypes) => {
 const listCall = () => {
   invoiceSubmissionApi
     .getListNonPo({
-      statusCode: filterForm.status === '0' || filterForm.status ? Number(filterForm.status) : 1,
+      statusCode: filterForm.status === '0' || filterForm.status ? Number(filterForm.status) : null,
       companyCode: filterForm.companyCode,
       invoiceTypeCode: Number(filterForm.invoiceType),
       invoiceDate: filterForm.date,
