@@ -15,11 +15,14 @@
     <div v-if="currentRouteName === 'invoiceDetail'">
       <InvoicePoGr v-if="checkPo() && !isNonPo" class="mt-[24px]" />
       <InvoiceItem v-if="isNonPo" class="mt-[24px]" />
-      <AdditionalCost v-if="
-        (form.invoiceDPCode === 9011 && !isNonPo && checkPo()) ||
-        form.invoiceTypeCode === 902 ||
-        form.invoiceTypeCode === 903
-      " class="mt-[24px]" />
+      <AdditionalCost
+        v-if="
+          (form.invoiceDPCode === 9011 && !isNonPo && checkPo()) ||
+          form.invoiceTypeCode === 902 ||
+          form.invoiceTypeCode === 903
+        "
+        class="mt-[24px]"
+      />
     </div>
     <div v-else>
       <ConstExpenses class="mt-[24px]" />
@@ -30,7 +33,12 @@
           <i class="ki-filled ki-black-left"></i>
           Back
         </button>
-        <button v-if="checkStatusCode()" class="btn btn-primary" :disabled="isLoading" @click="goToEdit">
+        <button
+          v-if="checkEditButton()"
+          class="btn btn-primary"
+          :disabled="isLoading"
+          @click="goToEdit"
+        >
           <i class="ki-duotone ki-pencil"></i>
           Edit
         </button>
@@ -47,7 +55,10 @@
       </div>
     </div>
     <RejectVerification @reject="goReject" />
-    <SuccessVerifModal :statusCode="detailInvoice?.header.statusCode || -1" @afterClose="goToList" />
+    <SuccessVerifModal
+      :statusCode="detailInvoice?.header.statusCode || -1"
+      @afterClose="goToList"
+    />
     <SuccessRejectModal @afterClose="goToList" />
   </div>
 </template>
@@ -194,6 +205,26 @@ const checkStatusCode = () => {
   if (form.value.statusCode === 2 && route.query.type === '1') status = false
 
   status = checkWorkflow()
+
+  return status
+}
+
+const checkEditButton = () => {
+  let status = true
+  switch (form.value.statusCode) {
+    case 4:
+    case 5:
+    case 7:
+      status = false
+      break
+  }
+
+  if (form.value.statusCode === 2 && route.query.type === '1') status = false
+
+  status = checkWorkflow()
+
+  if (route.query.invoiceType === 'no_po') status = false
+
   return status
 }
 
@@ -564,24 +595,42 @@ const goReject = (reason: string) => {
 }
 
 const goToList = () => {
-  router.push({
-    name: route.query.type === '1' ? 'invoiceVerification' : 'invoiceApproval',
-  })
+  if (route.query.invoiceType === 'no_po') {
+    router.push({
+      name: route.query.type === '1' ? 'invoiceVerificationNoPo' : 'invoiceApprovalNonPo',
+    })
+  } else {
+    router.push({
+      name: route.query.type === '1' ? 'invoiceVerification' : 'invoiceApproval',
+    })
+  }
 }
 
 const goBack = () => {
   if (route.query.type === '1') {
-    router.push({
-      name: 'invoiceVerification',
-    })
+    if (route.query.invoiceType === 'no_po') {
+      router.push({
+        name: 'invoiceVerificationNoPo',
+      })
+    } else {
+      router.push({
+        name: 'invoiceVerification',
+      })
+    }
   } else if (!checkPo()) {
     router.push({
       name: 'invoice-list-non-po',
     })
   } else {
-    router.push({
-      name: 'invoiceApproval',
-    })
+    if (route.query.invoiceType === 'no_po') {
+      router.push({
+        name: 'invoiceApprovalNonPo',
+      })
+    } else {
+      router.push({
+        name: 'invoiceApproval',
+      })
+    }
   }
 }
 
@@ -602,7 +651,7 @@ const setDataDefault = async () => {
     if (item.whtType) await callWhtCode(item.whtType)
     resultPoGr.push({
       ...item,
-      whtCodeList: item.whtType ? whtCodeList.value : []
+      whtCodeList: item.whtType ? whtCodeList.value : [],
     })
   }
 
@@ -610,7 +659,7 @@ const setDataDefault = async () => {
     if (item.whtType) await callWhtCode(item.whtType)
     resultAdditional.push({
       ...item,
-      whtCodeList: item.whtType ? whtCodeList.value : []
+      whtCodeList: item.whtType ? whtCodeList.value : [],
     })
   }
 

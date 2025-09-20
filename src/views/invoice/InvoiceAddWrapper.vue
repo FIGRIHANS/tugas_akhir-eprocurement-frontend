@@ -16,10 +16,7 @@
       <Transition mode="out-in">
         <component :is="contentComponent" />
       </Transition>
-      <div
-        v-if="checkIsNonPo()"
-        class="flex align-items-center justify-between gap-[8px] mt-[24px]"
-      >
+      <div v-if="checkIsNonPo()" class="flex align-items-center justify-between gap-[8px] mt-[24px]">
         <div class="flex-1 flex gap-[8px]">
           <button class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goBack">
             <i class="ki-filled ki-arrow-left"></i>
@@ -31,34 +28,24 @@
           </button>
         </div>
         <div class="flex-1 flex gap-[8px] justify-end">
-          <button
-            v-if="tabNow === 'information'"
-            class="btn btn-primary"
-            :disabled="isSubmit || checkFormBudget()"
-            @click="checkBudget"
-          >
+          <button v-if="tabNow === 'information'" class="btn btn-primary" :disabled="isSubmit || checkFormBudget()"
+            @click="checkBudget">
             Budget Checking
             <i class="ki-duotone ki-dollar"></i>
           </button>
-          <button
-            class="btn btn-primary"
-            :disabled="isSubmit || (!isCheckBudget && tabNow === 'information')"
-            @click="goNext"
-          >
+          <button class="btn btn-primary" :disabled="isSubmit || (!isCheckBudget && tabNow === 'information')"
+            @click="goNext">
             {{ tabNow !== 'preview' ? 'Next' : 'Submit' }}
             <i v-if="tabNow !== 'preview'" class="ki-duotone ki-black-right"></i>
             <i v-else class="ki-duotone ki-paper-plane"></i>
           </button>
         </div>
       </div>
-      <div
-        v-else-if="
-          (form.status === 0 || form.status === -1 || form.status === 5) &&
-          !checkInvoiceView() &&
-          !checkInvoiceNonPoView()
-        "
-        class="flex justify-between items-center gap-[8px] mt-[24px]"
-      >
+      <div v-else-if="
+        (form.status === 0 || form.status === -1 || form.status === 5) &&
+        !checkInvoiceView() &&
+        !checkInvoiceNonPoView()
+      " class="flex justify-between items-center gap-[8px] mt-[24px]">
         <button class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goSaveDraft">
           Save as Draft
           <i class="ki-duotone ki-bookmark"></i>
@@ -76,29 +63,18 @@
         </div>
       </div>
       <div v-else class="flex justify-end items-center mt-[24px]">
-        <button
-          v-if="tabNow !== 'preview' || checkInvoiceView() || checkInvoiceNonPoView()"
-          class="btn btn-outline btn-primary"
-          :disabled="isSubmit"
-          @click="goBack"
-        >
+        <button v-if="tabNow !== 'preview' || checkInvoiceView() || checkInvoiceNonPoView()"
+          class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goBack">
           <i class="ki-filled ki-arrow-left"></i>
           Back
         </button>
-        <button
-          v-if="tabNow !== 'preview' && !checkInvoiceView() && !checkInvoiceNonPoView()"
-          class="btn btn-primary"
-          :disabled="isSubmit"
-          @click="goNext"
-        >
+        <button v-if="tabNow !== 'preview' && !checkInvoiceView() && !checkInvoiceNonPoView()" class="btn btn-primary"
+          :disabled="isSubmit" @click="goNext">
           Next
           <i class="ki-duotone ki-black-right"></i>
         </button>
-        <button
-          v-if="tabNow === 'preview' && !checkInvoiceView() && !checkInvoiceNonPoView()"
-          class="btn btn-primary"
-          :disabled="isSubmit"
-        >
+        <button v-if="tabNow === 'preview' && !checkInvoiceView() && !checkInvoiceNonPoView()" class="btn btn-primary"
+          :disabled="isSubmit">
           Save as PDF
           <iconPDF />
         </button>
@@ -230,6 +206,7 @@ const form = reactive<formTypes>({
   invoicePoGr: [],
   invoiceItem: [],
   additionalCost: [],
+  costExpenses: [],
   status: -1,
   idAlternativePayment: 0,
   isAlternativePayee: false,
@@ -720,6 +697,7 @@ const setAfterResponsePost = (response) => {
 
 const setData = () => {
   const detail = detailPo.value
+
   if (form && detail) {
     form.status = detail.header.statusCode
     form.invoiceUId = detail.header.invoiceUId
@@ -843,6 +821,7 @@ const setData = () => {
 
 const setDataNonPo = () => {
   const detail = detailNonPo.value
+  console.log(detail)
   if (form && detail) {
     form.status = detail.header.statusCode
     form.invoiceUId = detail.header.invoiceUId
@@ -885,6 +864,13 @@ const setDataNonPo = () => {
     form.npwpNumberAlternative = dataAlternativePayee ? dataAlternativePayee.npwp : '-'
     form.ktpNumberAlternative = dataAlternativePayee ? dataAlternativePayee.ktp : '-'
     form.emailAlternative = dataAlternativePayee ? dataAlternativePayee.email : '-'
+
+    form.costExpenses = detail?.costExpense
+      ? detail.costExpense.map(item => ({
+        ...item,
+        activityExpenses: Number(item.activityExpenses)
+      }))
+      : []
 
     form.invoiceItem = []
     for (const item of detail.costExpense) {
@@ -1072,11 +1058,11 @@ const checkBudget = () => {
     const modal = KTModal.getInstance(idModal as HTMLElement)
     modal.show()
   })
-  .catch(() => {
-    const idModal = document.querySelector('#failed_budget_check_modal')
-    const modal = KTModal.getInstance(idModal as HTMLElement)
-    modal.show()
-  })
+    .catch(() => {
+      const idModal = document.querySelector('#failed_budget_check_modal')
+      const modal = KTModal.getInstance(idModal as HTMLElement)
+      modal.show()
+    })
 }
 
 const checkFormBudget = () => {
