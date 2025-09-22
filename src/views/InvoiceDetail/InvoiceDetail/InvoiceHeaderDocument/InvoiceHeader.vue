@@ -10,7 +10,7 @@
     </div>
     <div v-if="checkIsNonPo()" class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Vendor No.</p>
-      <p class="font-normal text-sm">{{ '-' }}</p>
+      <p class="font-normal text-sm">{{ form.vendorId }}</p>
     </div>
     <div class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Invoice Date</p>

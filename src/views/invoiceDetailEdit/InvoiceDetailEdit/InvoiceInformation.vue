@@ -40,7 +40,6 @@ onMounted(() => {
   invoiceMasterApi.getWhtType()
   invoiceMasterApi.getCostCenter(form?.value.companyCode || '')
   if (form.value.companyCode) invoiceMasterApi.getActivity(form.value.companyCode || '')
-  if (route.query.invoiceType === 'no_po') isNonPo.value = true
 })
 </script>
 
