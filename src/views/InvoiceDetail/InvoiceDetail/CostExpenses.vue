@@ -61,6 +61,7 @@ const costExpenseList = ref<itemsCostType[]>([])
 const columns = ref([
   'Line',
   'Activity / Expense',
+  // 'Activity Name',
   'Item Amount',
   'Item Text',
   'Tax Code',

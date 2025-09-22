@@ -43,14 +43,16 @@
           >
           <select v-model="status" class="select" name="select">
             <option value="1">Waiting for Verify</option>
-            <option value="3">Verified</option>
+            <option value="2">Waiting for Approval</option>
+            <option value="4">Approved</option>
             <option value="5">Rejected</option>
+            <option value="7">Sent to SAP</option>
           </select>
         </div>
         <div class="relative">
           <label
             class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white z-[1]"
-            >Invoice Date</label
+            >Estimated Payment Date</label
           >
           <DatePicker v-model="date" format="yyyy/MM/dd" teleport />
         </div>
@@ -75,6 +77,7 @@ import type { filterListTypes } from '../types/pendingVerification'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useRoute } from 'vue-router'
+import { formatfilterDate } from '@/composables/date-format'
 
 const route = useRoute()
 const props = defineProps<{
@@ -94,6 +97,7 @@ const invoiceTypeList = computed(() => invoiceMasterApi.invoicePoType)
 const invoiceTypenonPoList = computed(() => invoiceMasterApi.invoiceNonPoType)
 
 const resetFilter = () => {
+  status.value = null
   date.value = ''
   companyCode.value = ''
   invoiceType.value = ''
@@ -114,7 +118,7 @@ const resetInvoiceType = () => {
 const goFilter = () => {
   const data = {
     status: status.value,
-    date: date.value,
+    date: formatfilterDate(date.value),
     companyCode: companyCode.value,
     invoiceType: invoiceType.value,
   }

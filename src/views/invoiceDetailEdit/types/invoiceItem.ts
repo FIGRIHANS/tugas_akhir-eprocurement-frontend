@@ -1,4 +1,4 @@
-import type { WhtCodeTypes } from '@/stores/master-data/types/invoiceMasterData' 
+import type { WhtCodeTypes } from '@/stores/master-data/types/invoiceMasterData'
 export interface invoiceItemTypes {
   id: number
   activityId: number | null
