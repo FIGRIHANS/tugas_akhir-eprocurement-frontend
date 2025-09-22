@@ -38,7 +38,7 @@
                   ?.name
               }}
             </p>
-            <p v-else>{{ filterForm.date }}</p>
+            <p v-else-if="items.key === 'Date'">{{ filterForm.date }}</p>
           </span>
           <i class="ki-filled ki-cross" @click="deleteFilter(items.key)"></i>
         </div>
@@ -83,7 +83,7 @@
                 <td>{{ parent.vendorName || '-' }}</td>
                 <td>{{ parent.invoiceTypeName || '-' }}</td>
                 <td>{{ parent.companyCode || '-' }}</td>
-                <td>{{ '-' }}</td>
+                <td>{{ parent.department || '-' }}</td>
                 <td>{{ useFormatIdr(parent.whtBaseAmount) || '-' }}</td>
                 <td>{{ useFormatIdr(parent.vatAmount) || '-' }}</td>
                 <td>{{ useFormatIdr(parent.whtAmount) || '-' }}</td>
@@ -206,8 +206,9 @@ const list = ref<ListNonPoTypes[]>([])
 const viewDetailId = ref<string>('')
 const StatusInvoice = ref([
   { value: 1, label: 'Waiting for Verify' },
-  { value: 3, label: 'Verified' },
-  { value: 5, label: 'Rejected' },
+  { value: 2, label: 'Waiting for Approval' },
+  { value: 4, label: 'Approved' },
+  { value: 7, label: 'Sent to SAP' },
 ])
 
 const filteredPayload = ref([])
@@ -281,6 +282,7 @@ const goSearch = (event: KeyboardEvent) => {
 }
 
 const resetFilter = () => {
+  filterForm.status = null
   filterChild.value.resetFilter()
   filteredPayload.value = []
   filterChild.value.goFilter()
@@ -320,7 +322,7 @@ const callList = () => {
   list.value = []
   verificationApi
     .getListNonPo({
-      statusCode: filterForm.status || 1,
+      statusCode: filterForm.status || null,
       companyCode: filterForm.companyCode,
       invoiceTypeCode: Number(filterForm.invoiceType),
       invoiceDate: filterForm.date,
