@@ -21,7 +21,10 @@
             <span class="text-gray-500"> {{ items.key }} </span>
             <span class="font-semibold">
               <p v-if="items.key === 'Status'">
-                {{ StatusInvoice.find((item) => item.value.toString() === items.value)?.label }}
+                {{
+                  StatusInvoice.find((item) => item.value.toString() === items.value.toString())
+                    ?.label
+                }}
               </p>
               <p v-else-if="items.key === 'Company Code'">
                 {{
@@ -173,9 +176,11 @@ const columns = ref([
 ])
 
 const resetFilter = () => {
+  filterForm.status = null
   filterChild.value.resetFilter()
   filteredPayload.value = []
   filterChild.value.goFilter()
+
   listCall()
 }
 
@@ -232,6 +237,38 @@ const deleteFilter = (key: string) => {
 }
 
 const setDataFilter = (data: filterListTypes) => {
+  const filteredData: { key: string; value: string | number }[] = []
+
+  if (data.status !== '') {
+    filteredData.push({
+      key: 'Status',
+      value: Number(data.status),
+    })
+  }
+
+  if (data.date && data.date.trim() !== '') {
+    filteredData.push({
+      key: 'Date',
+      value: data.date,
+    })
+  }
+
+  if (data.companyCode && data.companyCode.trim() !== '') {
+    filteredData.push({
+      key: 'Company Code',
+      value: data.companyCode,
+    })
+  }
+
+  if (data.invoiceType && data.invoiceType.trim() !== '') {
+    filteredData.push({
+      key: 'Invoice Type',
+      value: data.invoiceType,
+    })
+  }
+
+  filteredPayload.value = filteredData
+
   filterForm.status = data.status
   filterForm.date = data.date
   filterForm.companyCode = data.companyCode

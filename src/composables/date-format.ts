@@ -34,3 +34,8 @@ export const formatDateYearFirst = (value: Date | string) => {
   if (!value) return '-'
   return moment(value).format('YYYY/MM/DD')
 }
+
+export const formatfilterDate = (value: Date | string) => {
+  if (!value) return ''
+  return moment(value).format('YYYY/MM/DD')
+}
