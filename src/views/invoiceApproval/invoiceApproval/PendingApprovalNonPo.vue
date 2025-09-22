@@ -312,6 +312,7 @@ const openDetailInvoice = (invoiceId: string) => {
     query: {
       id: invoiceId,
       type: '2',
+      invoiceType: 'no_po',
     },
   })
 }
@@ -433,7 +434,7 @@ const sendToSap = (invoiceUId: string) => {
   closeDropdown()
   isLoadingSap.value = true
   verificationApi
-    .postSap(invoiceUId)
+    .postSapNonPo(invoiceUId)
     .then((statusCode: number) => {
       if (statusCode === 200) {
         openSuccesSap()

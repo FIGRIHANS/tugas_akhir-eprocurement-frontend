@@ -40,6 +40,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
       invoiceDate: '',
       taxNo: '',
       currCode: '',
+      department: '',
       notes: '',
       statusCode: 0,
       statusName: '',
@@ -69,8 +70,23 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
       additionalCost: 0,
       totalGrossAmount: 0,
       totalNetAmount: 0,
+      idAlternative: 0,
+      name: '',
+      name2: '',
+      street: '',
+      city: '',
+      country: '',
+      bankAccountNumber: '',
+      bankKeyAlternative: '',
+      bankCountry: '',
+      npwpAlternative: '',
+      ktp: '',
+      email: '',
+      isAlternativePayee: false,
+      isOneTimeVendor: false,
       invoicePoGr: [],
       additionalCosts: [],
+      costExpenses: [],
       invoiceDocument: null,
       tax: null,
       referenceDocument: null,
@@ -178,6 +194,13 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     return response.data.statusCode
   }
 
+  const postSapNonPo = async (invoiceUId: string) => {
+    const response: ApiResponse<void> = await invoiceApi.post(`/invoice/sap/non-po/${invoiceUId}`)
+    errorMessageSap.value = response.data.result.message
+
+    return response.data.statusCode
+  }
+
   const putSubmission = async (data: PostVerificationTypes) => {
     const response: ApiResponse<void> = await invoiceApi.put(`/invoice/approval`, data)
 
@@ -224,6 +247,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     postReject,
     postRejectNonPo,
     postSap,
+    postSapNonPo,
     putSubmission,
     deleteAdditionalCost,
     getInvoiceNonPoDetail,

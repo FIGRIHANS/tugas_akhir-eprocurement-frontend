@@ -12,7 +12,7 @@
       <InvoiceHeaderDocument class="flex-1" />
       <InvoiceCalculation class="flex-1" :formInvoice="form" />
     </div>
-    <div v-if="currentRouteName === 'invoiceDetail'">
+    <div v-if="!checkIsNonPo()">
       <InvoicePoGr v-if="checkPo() && !isNonPo" class="mt-[24px]" />
       <InvoiceItem v-if="isNonPo" class="mt-[24px]" />
       <AdditionalCost
@@ -69,6 +69,7 @@ import { useRouter, useRoute } from 'vue-router'
 import type { formTypes } from './types/invoiceDetail'
 import type { itemsPoGrType } from './types/invoicePoGr'
 import type { itemsCostType } from './types/additionalCost'
+import type { invoiceItemTypes } from './types/invoiceItem'
 import type { documentDetailTypes } from './types/invoiceDocument'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import { KTModal } from '@/metronic/core'
@@ -192,6 +193,10 @@ const userData = computed(() => loginApi.userData)
 const additionalCostTempDelete = computed(() => verificationApi.additionalCostTempDelete)
 const whtCodeList = computed(() => invoiceMasterApi.whtCodeList)
 
+const checkIsNonPo = () => {
+  return route.query.invoiceType === 'no_po'
+}
+
 const checkStatusCode = () => {
   let status = true
   switch (form.value.statusCode) {
@@ -223,7 +228,7 @@ const checkEditButton = () => {
 
   status = checkWorkflow()
 
-  if (route.query.invoiceType === 'no_po') status = false
+  if (route.query.type === '1' && checkIsNonPo()) status = false
 
   return status
 }
@@ -333,7 +338,7 @@ const mapAdditionalCost = () => {
     cost.push({
       id: item.id,
       activityId: item.activityId,
-      activityExpense: item.activityExpense,
+      activityExpense: item.activityExpenses,
       activityName: item.activityName,
       itemAmount: Number(item.itemAmount),
       debitCredit: item.debitCredit,
@@ -508,7 +513,7 @@ const mapDataVerifNonPo = () => {
 }
 
 const goVerif = () => {
-  if (route.query.invoiceType === 'no_po') {
+  if (route.query.invoiceType === 'no_po' && route.query.type === '1') {
     isLoading.value = true
     verificationApi
       .verifyInvoiceNonPo(form.value.invoiceUId)
@@ -530,48 +535,49 @@ const goVerif = () => {
         isLoading.value = false
         verificationApi.isFromEdit = false
       })
-  } else if (route.name === 'invoiceDetail') {
+  } else if (!checkIsNonPo()) {
     const status = checkVerif()
     if (!status) return
     isLoading.value = true
-    verificationApi
-      .postSubmission(mapDataVerif())
-      .then((response) => {
-        if (response.statusCode === 200) {
-          verificationApi.resetDetailInvoiceEdit()
-          const idModal = document.querySelector('#success_verif_modal')
-          const modal = KTModal.getInstance(idModal as HTMLElement)
-          modal.show()
-          for (const item of additionalCostTempDelete.value) {
-            verificationApi.deleteAdditionalCost(form.value.invoiceUId, item.id)
-          }
-        }
-      })
-      .finally(() => {
-        isLoading.value = false
-        verificationApi.isFromEdit = false
-      })
+    // verificationApi
+    //   .postSubmission(mapDataVerif())
+    //   .then((response) => {
+    //     if (response.statusCode === 200) {
+    //       verificationApi.resetDetailInvoiceEdit()
+    //       const idModal = document.querySelector('#success_verif_modal')
+    //       const modal = KTModal.getInstance(idModal as HTMLElement)
+    //       modal.show()
+    //       for (const item of additionalCostTempDelete.value) {
+    //         verificationApi.deleteAdditionalCost(form.value.invoiceUId, item.id)
+    //       }
+    //     }
+    //   })
+    //   .finally(() => {
+    //     isLoading.value = false
+    //     verificationApi.isFromEdit = false
+    //   })
   } else {
-    // const status = checkVerif()
-    // if (!status) return
+    const status = checkVerif()
+    if (!status) return
 
     isLoading.value = true
-    verificationApi
-      .postSubmissionNonPo(mapDataVerifNonPo())
-      .then((response) => {
-        if (response.statusCode === 200) {
-          verificationApi.resetDetailInvoiceEdit()
-          const idModal = document.querySelector('#success_verif_modal')
-          const modal = KTModal.getInstance(idModal as HTMLElement)
-          modal.show()
-          for (const item of additionalCostTempDelete.value) {
-            verificationApi.deleteAdditionalCost(form.value.invoiceUId, item.id)
-          }
-        }
-      })
-      .finally(() => {
-        isLoading.value = false
-      })
+    console.log(mapDataVerifNonPo())
+    // verificationApi
+    //   .postSubmissionNonPo(mapDataVerifNonPo())
+    //   .then((response) => {
+    //     if (response.statusCode === 200) {
+    //       verificationApi.resetDetailInvoiceEdit()
+    //       const idModal = document.querySelector('#success_verif_modal')
+    //       const modal = KTModal.getInstance(idModal as HTMLElement)
+    //       modal.show()
+    //       for (const item of additionalCostTempDelete.value) {
+    //         verificationApi.deleteAdditionalCost(form.value.invoiceUId, item.id)
+    //       }
+    //     }
+    //   })
+    //   .finally(() => {
+    //     isLoading.value = false
+    //   })
   }
 }
 
@@ -635,10 +641,6 @@ const goBack = () => {
         name: 'invoiceVerification',
       })
     }
-  } else if (!checkPo()) {
-    router.push({
-      name: 'invoice-list-non-po',
-    })
   } else {
     if (route.query.invoiceType === 'no_po') {
       router.push({
@@ -754,8 +756,7 @@ const setDataDefault = async () => {
 
 const setDataDefaultNonPo = () => {
   const data = detailInvoiceNonPo.value
-  const resultPoGr: itemsPoGrType[] = []
-  const resultAdditional: itemsCostType[] = []
+  const resultAdditional: invoiceItemTypes[] = []
   let alternativePaeeValue: itemsAlternativePayee | null = null
 
   if (data?.alternativePayee.length > 0) {
@@ -784,21 +785,24 @@ const setDataDefaultNonPo = () => {
 
   for (const item of data?.costExpense || []) {
     resultAdditional.push({
-      id: item.id as number,
-      activityId: item.activityId as number,
-      activityExpense: item.activityExpenses as string,
-      activityName: item.activityName as string,
-      itemAmount: item.itemAmount as number,
-      debitCredit: item.debitCredit as string,
-      taxCode: item.taxCode as string,
-      vatAmount: item.vatAmount as number,
-      costCenter: item.costCenter as string,
-      profitCenter: item.profitCenter as string,
-      assignment: item.assignment as string,
-      whtType: item.whtType as string,
-      whtCode: item.whtCode as string,
-      whtBaseAmount: item.whtBaseAmount as number,
-      whtAmount: item.whtAmount as number,
+      id: item.id,
+      activityId: item.activityId,
+      activityExpenses: item.activityExpenses,
+      activityName: item.activityName,
+      itemText: item.itemText,
+      itemAmount: item.itemAmount,
+      debitCredit: item.debitCredit,
+      taxCode: item.taxCode,
+      vatAmount: item.vatAmount,
+      costCenter: item.costCenter,
+      profitCenter: item.profitCenter,
+      assignment: item.assignment,
+      whtType: item.whtType,
+      whtCode: item.whtCode,
+      whtBaseAmount: item.whtBaseAmount,
+      whtAmount: item.whtAmount,
+      whtCodeList: [],
+      isEdit: false
     })
   }
 
@@ -862,7 +866,8 @@ const setDataDefaultNonPo = () => {
     additionalCost: data?.calculation.additionalCost || 0,
     totalGrossAmount: data?.calculation.totalGrossAmount || 0,
     totalNetAmount: data?.calculation.totalNetAmount || 0,
-    invoicePoGr: resultPoGr,
+    invoicePoGr: [],
+    additionalCosts: [],
     costExpense: resultAdditional,
     alternativePayee: alternativePaeeValue ? [alternativePaeeValue] : [],
     invoiceItem: [],
@@ -881,6 +886,7 @@ const setDataEdit = () => {
     invoiceTypeName: data?.invoiceTypeName || '',
     invoiceDPCode: data?.invoiceDPCode || 0,
     invoiceDPName: data?.invoiceDPName || '',
+    invoiceVendorNo: data?.vendorId,
     companyCode: data?.companyCode || '',
     companyName: data?.companyName || '',
     invoiceNo: data?.invoiceNo || '',
@@ -901,6 +907,7 @@ const setDataEdit = () => {
     npwpReporting: data?.npwpReporting || '',
     remainingDpAmount: '',
     dpAmountDeduction: '',
+    department: data?.department,
     bankKey: data?.bankKey || '',
     bankName: data?.bankName || '',
     beneficiaryName: data?.beneficiaryName || '',
@@ -920,8 +927,25 @@ const setDataEdit = () => {
     invoicePoGr: data?.invoicePoGr || [],
     additionalCosts: data?.additionalCosts || [],
     invoiceItem: [],
-    costExpense: [],
-    alternativePayee: [],
+    costExpense: data?.costExpenses,
+    alternativePayee: [
+      {
+        id: data?.idAlternative,
+        name: data?.name,
+        name2: data?.name2,
+        street: data?.street,
+        city: data?.city,
+        country: data?.country,
+        bankAccountNumber: data?.bankAccountNumber,
+        bankKey: data?.bankKeyAlternative,
+        bankCountry: data?.bankCountry,
+        npwp: data?.npwpAlternative,
+        ktp: data?.ktp,
+        email: data?.email,
+        isAlternativePayee: data?.isAlternativePayee,
+        isOneTimeVendor: data?.isOneTimeVendor
+      }
+    ],
     invoiceDocument: data?.invoiceDocument || null,
     tax: data?.tax || null,
     referenceDocument: data?.referenceDocument || null,
@@ -972,9 +996,10 @@ const afterGetDetailNonPo = () => {
 }
 
 watch(
-  () => detailInvoice.value,
+  () => [detailInvoice.value, detailInvoiceNonPo.value],
   () => {
-    afterGetDetail()
+    if (!checkIsNonPo()) afterGetDetail()
+    else afterGetDetailNonPo()
     if (form.value.companyCode) {
       invoiceMasterApi.getActivity(form.value.companyCode || '')
       invoiceMasterApi.getCostCenter(form.value.companyCode || '')
@@ -1013,7 +1038,7 @@ onMounted(async () => {
   }
   invoiceMasterApi.getWhtType()
   invoiceMasterApi.getTaxCode()
-  if (currentRouteName.value === 'invoiceDetail') {
+  if (!checkIsNonPo()) {
     await verificationApi.getInvoiceDetail(route.query.id?.toString() || '').then(() => {
       afterGetDetail()
     })

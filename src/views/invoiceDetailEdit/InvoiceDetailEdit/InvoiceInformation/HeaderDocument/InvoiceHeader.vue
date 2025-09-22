@@ -9,6 +9,14 @@
         </label>
         <input :value="getInvoiceTypeName()" class="input" placeholder="" disabled />
       </div>
+      <!-- Vendor No -->
+      <div v-if="checkIsNonPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          Vendor No.
+          <span class="text-red-500 ml-[4px]">*</span>
+        </label>
+        <input v-model="form.vendorId" class="input" placeholder="" disabled />
+      </div>
       <!-- DP Option -->
       <div v-if="form.invoiceTypeCode === 901" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
@@ -155,8 +163,22 @@
           placeholder=""
         />
       </div>
-      
-
+      <!-- Department -->
+      <div v-if="checkIsNonPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          Department
+          <span class="text-red-500 ml-[4px]">*</span>
+        </label>
+        <v-select
+          v-model="form.department"
+          class="customSelect w-full -ml-[15px]"
+          :get-option-label="(option: any) => `${option.code} - ${option.name}`"
+          :reduce="(option: any) => option.code"
+          :options="listCostCenter"
+          :class="{ 'error-select': form.departmentError }"
+          appendToBody
+        ></v-select>
+      </div>
       <!-- Description -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
@@ -190,9 +212,15 @@ const typeForm = ref<string>('')
 
 const dpTypeList = computed(() => invoiceMasterApi.dpType)
 const listInvoiceTypePo = computed(() => invoiceMasterApi.invoicePoType)
+const listInvoiceTypeNonPo = computed(() => invoiceMasterApi.invoiceNonPoType)
 // const currencyList = computed(() => invoiceMasterApi.currency)
 const paymentMethodList = computed(() => invoiceMasterApi.paymentMethodList)
 const userData = computed(() => invoiceLoginApi.userData)
+const listCostCenter = computed(() => invoiceMasterApi.costCenterList)
+
+const checkIsNonPo = () => {
+  return route.query.invoiceType === 'no_po'
+}
 
 const getDpName = () => {
   if (route.query.type === 'po-view') return 'Without DP'
@@ -201,8 +229,9 @@ const getDpName = () => {
 }
 
 const getInvoiceTypeName = () => {
-  const getIndex = listInvoiceTypePo.value.findIndex((item) => item.code === form?.value.invoiceTypeCode.toString())
-  if (getIndex !== -1) return listInvoiceTypePo.value[getIndex].name
+  const listType = checkIsNonPo() ? listInvoiceTypeNonPo.value : listInvoiceTypePo.value
+  const getIndex = listType.findIndex((item) => item.code === form?.value.invoiceTypeCode.toString())
+  if (getIndex !== -1) return listType[getIndex].name
 }
 
 const isNpwrDisabled = () => {
