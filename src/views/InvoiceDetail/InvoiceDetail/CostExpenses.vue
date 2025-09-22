@@ -35,9 +35,9 @@
                   : '-'
               }}
             </td> -->
-            <td>{{ item.debitCredit || '-' }}</td>
             <td>{{ item.taxCode || '-' }}</td>
             <td>{{ item.vatAmount || '-' }}</td>
+            <td>{{ item.debitCredit || '-' }}</td>
             <td>{{ item.costCenter || '-' }}</td>
             <td>{{ item.profitCenter || '-' }}</td>
             <td>{{ item.assignment || '-' }}</td>
