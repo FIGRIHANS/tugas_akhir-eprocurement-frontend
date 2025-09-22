@@ -45,6 +45,7 @@
             <option value="1">Waiting for Verify</option>
             <option value="2">Waiting for Approval</option>
             <option value="4">Approved</option>
+            <option value="5">Rejected</option>
             <option value="7">Sent to SAP</option>
           </select>
         </div>
