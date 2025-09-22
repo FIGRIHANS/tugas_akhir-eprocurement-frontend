@@ -34,14 +34,12 @@
 import { ref, computed, type Component } from 'vue'
 import InvoiceHeader from './HeaderDocument/InvoiceHeader.vue'
 import InvoiceDocument from './HeaderDocument/InvoiceDocument.vue'
-import InvoiceNonPoHeader from './HeaderDocument/InvoiceNonPoHeader.vue'
 
 const invoiceTypeTab = ref<string>('header')
 
 const contentComponent = computed(() => {
   const components = {
     header: InvoiceHeader,
-    headerNonPo: InvoiceNonPoHeader,
     document: InvoiceDocument
   } as { [key: string]: Component }
 
