@@ -59,7 +59,7 @@ const setCalculation = () => {
       const amount = setCount(item)
       const data = {
         name: item,
-        amount: amount.toString(),
+        amount: amount ? amount.toString() : '0',
         currency: form?.currency || '',
       }
       listCalculation.value.push(data)

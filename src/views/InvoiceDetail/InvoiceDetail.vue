@@ -12,7 +12,7 @@
       <InvoiceHeaderDocument class="flex-1" />
       <InvoiceCalculation class="flex-1" :formInvoice="form" />
     </div>
-    <div v-if="currentRouteName === 'invoiceDetail'">
+    <div v-if="!checkIsNonPo()">
       <InvoicePoGr v-if="checkPo() && !isNonPo" class="mt-[24px]" />
       <InvoiceItem v-if="isNonPo" class="mt-[24px]" />
       <AdditionalCost
@@ -56,7 +56,7 @@
     </div>
     <RejectVerification @reject="goReject" />
     <SuccessVerifModal
-      :statusCode="detailInvoice?.header.statusCode || -1"
+      :statusCode="detailInvoice?.header.statusCode || detailInvoiceNonPo?.header.statusCode || -1"
       @afterClose="goToList"
     />
     <SuccessRejectModal @afterClose="goToList" />
@@ -69,6 +69,7 @@ import { useRouter, useRoute } from 'vue-router'
 import type { formTypes } from './types/invoiceDetail'
 import type { itemsPoGrType } from './types/invoicePoGr'
 import type { itemsCostType } from './types/additionalCost'
+import type { invoiceItemTypes } from './types/invoiceItem'
 import type { documentDetailTypes } from './types/invoiceDocument'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import { KTModal } from '@/metronic/core'
@@ -192,6 +193,10 @@ const userData = computed(() => loginApi.userData)
 const additionalCostTempDelete = computed(() => verificationApi.additionalCostTempDelete)
 const whtCodeList = computed(() => invoiceMasterApi.whtCodeList)
 
+const checkIsNonPo = () => {
+  return route.query.invoiceType === 'no_po'
+}
+
 const checkStatusCode = () => {
   let status = true
   switch (form.value.statusCode) {
@@ -223,13 +228,20 @@ const checkEditButton = () => {
 
   status = checkWorkflow()
 
-  if (route.query.invoiceType === 'no_po') status = false
+  if (route.query.type === '1' && checkIsNonPo()) status = false
 
   return status
 }
 
 const checkWorkflow = () => {
-  const getWf = detailInvoice.value?.workflow || []
+  let getWf = []
+
+  if (currentRouteName.value !== 'invoiceDetail') {
+    getWf = detailInvoiceNonPo.value?.workflow || []
+  } else {
+    getWf = detailInvoice.value?.workflow || []
+  }
+
   const getProfileId = userData.value?.profile.profileId
 
   const checkIndex = getWf?.findIndex((item) => item.profileId === getProfileId)
@@ -333,7 +345,7 @@ const mapAdditionalCost = () => {
     cost.push({
       id: item.id,
       activityId: item.activityId,
-      activityExpense: item.activityExpense,
+      activityExpense: item.activityExpenses,
       activityName: item.activityName,
       itemAmount: Number(item.itemAmount),
       debitCredit: item.debitCredit,
@@ -358,16 +370,16 @@ const mapCostExpenses = () => {
     cost.push({
       id: item.id,
       activityId: item.activityId,
-      activityExpenses: item.activityId,
+      activityExpenses: item.activityExpenses,
       activityName: item.activityName,
       itemAmount: item.itemAmount,
-      // itemText: item.itemText,
+      itemText: item.itemText,
       debitCredit: item.debitCredit,
       taxCode: item.taxCode,
       vatAmount: item.vatAmount,
       costCenter: item.costCenter,
       profitCenter: item.profitCenter,
-      // assignment: item.assigment,
+      assignment: item.assignment,
       whtType: item.whtType,
       whtCode: item.whtCode,
       whtBaseAmount: item.whtBaseAmount,
@@ -460,6 +472,7 @@ const mapDataVerifNonPo = () => {
       notes: form.value.notes,
       currCode: form.value.currCode,
       npwpReporting: form.value.npwpReporting,
+      department: form.value.department,
     },
     payment: {
       bankKey: form.value.bankKey,
@@ -476,29 +489,29 @@ const mapDataVerifNonPo = () => {
       totalGrossAmount: form.value.totalGrossAmount,
       totalNetAmount: form.value.totalNetAmount,
     },
-    // alternativePay: {
-    //   id: form.value.alternativePayee.id,
-    //   invoiceUId: form.value.alternativePayee.invoiceUId,
-    //   name: form.value.alternativePayee.name,
-    //   name2: form.value.alternativePayee.name2,
-    //   street: form.value.alternativePayee.street,
-    //   city: form.value.alternativePayee.city,
-    //   country: form.value.alternativePayee.country,
-    //   bankAccountNumber: form.value.alternativePayee.bankAccountNumber,
-    //   bankKey: form.value.alternativePayee.bankKey,
-    //   bankCountry: form.value.alternativePayee.bankCountry,
-    //   npwp: form.value.alternativePayee.npwp,
-    //   ktp: form.value.alternativePayee.ktp,
-    //   email: form.value.alternativePayee.email,
-    //   isAlternativePayee: form.value.alternativePayee.isAlternativePayee,
-    //   isOneTimeVendor: form.value.alternativePayee.isOneTimeVendor,
-    //   isActive: form.value.alternativePayee.isActive,
-    //   isDeleted: form.value.alternativePayee.isDeleted,
-    //   createdBy: form.value.alternativePayee.createdBy,
-    //   createdUtcDate: form.value.alternativePayee.createdUtcDate,
-    //   modifiedBy: form.value.alternativePayee.modifiedBy,
-    //   modifiedUtcDate: form.value.alternativePayee.modifiedUtcDate,
-    // },
+    alternativePay: {
+      id: form.value.alternativePayee[0].id,
+      invoiceUId: form.value.invoiceUId,
+      name: form.value.alternativePayee[0].name,
+      name2: form.value.alternativePayee[0].name2,
+      street: form.value.alternativePayee[0].street,
+      city: form.value.alternativePayee[0].city,
+      country: form.value.alternativePayee[0].country,
+      bankAccountNumber: form.value.alternativePayee[0].bankAccountNumber,
+      bankKey: form.value.alternativePayee[0].bankKey,
+      bankCountry: form.value.alternativePayee[0].bankCountry,
+      npwp: form.value.alternativePayee[0].npwp,
+      ktp: form.value.alternativePayee[0].ktp,
+      email: form.value.alternativePayee[0].email,
+      isAlternativePayee: form.value.alternativePayee[0].isAlternativePayee,
+      isOneTimeVendor: form.value.alternativePayee[0].isOneTimeVendor,
+      // isActive: form.value.alternativePayee[0].isActive,
+      // isDeleted: form.value.alternativePayee[0].isDeleted,
+      // createdBy: form.value.alternativePayee[0].createdBy,
+      // createdUtcDate: form.value.alternativePayee[0].createdUtcDate,
+      // modifiedBy: form.value.alternativePayee[0].modifiedBy,
+      // modifiedUtcDate: form.value.alternativePayee[0].modifiedUtcDate,
+    },
     costExpenses: mapCostExpenses(),
     documents,
   } as SubmissionNonPoTypes
@@ -507,7 +520,7 @@ const mapDataVerifNonPo = () => {
 }
 
 const goVerif = () => {
-  if (route.query.invoiceType === 'no_po') {
+  if (route.query.invoiceType === 'no_po' && route.query.type === '1') {
     isLoading.value = true
     verificationApi
       .verifyInvoiceNonPo(form.value.invoiceUId)
@@ -529,7 +542,7 @@ const goVerif = () => {
         isLoading.value = false
         verificationApi.isFromEdit = false
       })
-  } else if (route.name === 'invoiceDetail') {
+  } else if (!checkIsNonPo()) {
     const status = checkVerif()
     if (!status) return
     isLoading.value = true
@@ -551,9 +564,8 @@ const goVerif = () => {
         verificationApi.isFromEdit = false
       })
   } else {
-    // const status = checkVerif()
-    // if (!status) return
-    console.log('masuk')
+    const status = checkVerif()
+    if (!status) return
 
     isLoading.value = true
     verificationApi
@@ -571,31 +583,50 @@ const goVerif = () => {
       })
       .finally(() => {
         isLoading.value = false
+        verificationApi.isFromEdit = false
       })
   }
 }
 
 const goReject = (reason: string) => {
   verificationApi.isRejectLoading = true
-  verificationApi
-    .postReject({
-      invoiceUId: form.value.invoiceUId,
-      notes: reason,
-    })
-    .then((response) => {
-      if (response.statusCode === 200) {
-        const idModal = document.querySelector('#success_reject_modal')
-        const modal = KTModal.getInstance(idModal as HTMLElement)
-        modal.show()
-      }
-    })
-    .finally(() => {
-      verificationApi.isRejectLoading = false
-    })
+  if (route.query.invoiceType === 'no_po') {
+    verificationApi
+      .postRejectNonPo({
+        invoiceUId: form.value.invoiceUId,
+        notes: reason,
+      })
+      .then((response) => {
+        if (response.statusCode === 200) {
+          const idModal = document.querySelector('#success_reject_modal')
+          const modal = KTModal.getInstance(idModal as HTMLElement)
+          modal.show()
+        }
+      })
+      .finally(() => {
+        verificationApi.isRejectLoading = false
+      })
+  } else {
+    verificationApi
+      .postReject({
+        invoiceUId: form.value.invoiceUId,
+        notes: reason,
+      })
+      .then((response) => {
+        if (response.statusCode === 200) {
+          const idModal = document.querySelector('#success_reject_modal')
+          const modal = KTModal.getInstance(idModal as HTMLElement)
+          modal.show()
+        }
+      })
+      .finally(() => {
+        verificationApi.isRejectLoading = false
+      })
+  }
 }
 
 const goToList = () => {
-  if (route.query.invoiceType === 'no_po') {
+  if (route.query.invoiceType === 'no_po' || currentRouteName.value !== 'invoiceDetail') {
     router.push({
       name: route.query.type === '1' ? 'invoiceVerificationNoPo' : 'invoiceApprovalNonPo',
     })
@@ -617,12 +648,8 @@ const goBack = () => {
         name: 'invoiceVerification',
       })
     }
-  } else if (!checkPo()) {
-    router.push({
-      name: 'invoice-list-non-po',
-    })
   } else {
-    if (route.query.invoiceType === 'no_po') {
+    if (!checkPo()) {
       router.push({
         name: 'invoiceApprovalNonPo',
       })
@@ -632,6 +659,15 @@ const goBack = () => {
       })
     }
   }
+  // } else if (route.query.type === '2' && !checkPo()) {
+  //   router.push({
+  //     name: 'invoiceApprovalNonPo',
+  //   })
+  // } else if (!checkPo()) {
+  //   router.push({
+  //     name: 'invoice-list-non-po',
+  //   })
+  // }
 }
 
 const callWhtCode = async (whtType: string) => {
@@ -736,8 +772,7 @@ const setDataDefault = async () => {
 
 const setDataDefaultNonPo = () => {
   const data = detailInvoiceNonPo.value
-  const resultPoGr: itemsPoGrType[] = []
-  const resultAdditional: itemsCostType[] = []
+  const resultAdditional: invoiceItemTypes[] = []
   let alternativePaeeValue: itemsAlternativePayee | null = null
 
   if (data?.alternativePayee.length > 0) {
@@ -766,21 +801,24 @@ const setDataDefaultNonPo = () => {
 
   for (const item of data?.costExpense || []) {
     resultAdditional.push({
-      id: item.id as number,
-      activityId: item.activityId as number,
-      activityExpense: item.activityExpenses as string,
-      activityName: item.activityName as string,
-      itemAmount: item.itemAmount as number,
-      debitCredit: item.debitCredit as string,
-      taxCode: item.taxCode as string,
-      vatAmount: item.vatAmount as number,
-      costCenter: item.costCenter as string,
-      profitCenter: item.profitCenter as string,
-      assignment: item.assignment as string,
-      whtType: item.whtType as string,
-      whtCode: item.whtCode as string,
-      whtBaseAmount: item.whtBaseAmount as number,
-      whtAmount: item.whtAmount as number,
+      id: item.id,
+      activityId: item.activityId,
+      activityExpenses: item.activityExpenses,
+      activityName: item.activityName,
+      itemText: item.itemText,
+      itemAmount: item.itemAmount,
+      debitCredit: item.debitCredit,
+      taxCode: item.taxCode,
+      vatAmount: item.vatAmount,
+      costCenter: item.costCenter,
+      profitCenter: item.profitCenter,
+      assignment: item.assignment,
+      whtType: item.whtType,
+      whtCode: item.whtCode,
+      whtBaseAmount: item.whtBaseAmount,
+      whtAmount: item.whtAmount,
+      whtCodeList: [],
+      isEdit: false
     })
   }
 
@@ -825,6 +863,7 @@ const setDataDefaultNonPo = () => {
     assigment: data?.header.assigment || '',
     transferNews: data?.header.transferNews || '',
     npwpReporting: data?.header.npwpReporting || '',
+    department: data?.header.department,
     remainingDpAmount: '',
     dpAmountDeduction: '',
     bankKey: data?.payment.bankKey || '',
@@ -843,7 +882,8 @@ const setDataDefaultNonPo = () => {
     additionalCost: data?.calculation.additionalCost || 0,
     totalGrossAmount: data?.calculation.totalGrossAmount || 0,
     totalNetAmount: data?.calculation.totalNetAmount || 0,
-    invoicePoGr: resultPoGr,
+    invoicePoGr: [],
+    additionalCosts: [],
     costExpense: resultAdditional,
     alternativePayee: alternativePaeeValue ? [alternativePaeeValue] : [],
     invoiceItem: [],
@@ -862,6 +902,7 @@ const setDataEdit = () => {
     invoiceTypeName: data?.invoiceTypeName || '',
     invoiceDPCode: data?.invoiceDPCode || 0,
     invoiceDPName: data?.invoiceDPName || '',
+    invoiceVendorNo: data?.vendorId,
     companyCode: data?.companyCode || '',
     companyName: data?.companyName || '',
     invoiceNo: data?.invoiceNo || '',
@@ -882,6 +923,7 @@ const setDataEdit = () => {
     npwpReporting: data?.npwpReporting || '',
     remainingDpAmount: '',
     dpAmountDeduction: '',
+    department: data?.department,
     bankKey: data?.bankKey || '',
     bankName: data?.bankName || '',
     beneficiaryName: data?.beneficiaryName || '',
@@ -901,8 +943,25 @@ const setDataEdit = () => {
     invoicePoGr: data?.invoicePoGr || [],
     additionalCosts: data?.additionalCosts || [],
     invoiceItem: [],
-    costExpense: [],
-    alternativePayee: [],
+    costExpense: data?.costExpenses,
+    alternativePayee: [
+      {
+        id: data?.idAlternative,
+        name: data?.name,
+        name2: data?.name2,
+        street: data?.street,
+        city: data?.city,
+        country: data?.country,
+        bankAccountNumber: data?.bankAccountNumber,
+        bankKey: data?.bankKeyAlternative,
+        bankCountry: data?.bankCountry,
+        npwp: data?.npwpAlternative,
+        ktp: data?.ktp,
+        email: data?.email,
+        isAlternativePayee: data?.isAlternativePayee,
+        isOneTimeVendor: data?.isOneTimeVendor
+      }
+    ],
     invoiceDocument: data?.invoiceDocument || null,
     tax: data?.tax || null,
     referenceDocument: data?.referenceDocument || null,
@@ -953,9 +1012,10 @@ const afterGetDetailNonPo = () => {
 }
 
 watch(
-  () => detailInvoice.value,
+  () => [detailInvoice.value, detailInvoiceNonPo.value],
   () => {
-    afterGetDetail()
+    if (!checkIsNonPo()) afterGetDetail()
+    else afterGetDetailNonPo()
     if (form.value.companyCode) {
       invoiceMasterApi.getActivity(form.value.companyCode || '')
       invoiceMasterApi.getCostCenter(form.value.companyCode || '')
@@ -994,7 +1054,7 @@ onMounted(async () => {
   }
   invoiceMasterApi.getWhtType()
   invoiceMasterApi.getTaxCode()
-  if (currentRouteName.value === 'invoiceDetail') {
+  if (!checkIsNonPo()) {
     await verificationApi.getInvoiceDetail(route.query.id?.toString() || '').then(() => {
       afterGetDetail()
     })

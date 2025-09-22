@@ -54,7 +54,7 @@
               </td>
               <td>
                 <span v-if="!item.isEdit">{{ useFormatIdr(item.itemAmount) || '-' }}</span>
-                <input v-else v-model="item.itemAmount" class="input" type="number" placeholder=""/>
+                <input v-else v-model="item.itemAmount" class="input" type="number" placeholder="" @change="item.whtBaseAmount = item.itemAmount.toString()"/>
               </td>
               <td>
                 <span v-if="!item.isEdit">{{ item.itemText || '-' }}</span>
@@ -173,6 +173,7 @@ const addNew = () => {
       whtCode: '',
       whtBaseAmount: '',
       whtAmount: '',
+      whtCodeList: [],
       isEdit: false
     }
     form.invoiceItem.push(data)

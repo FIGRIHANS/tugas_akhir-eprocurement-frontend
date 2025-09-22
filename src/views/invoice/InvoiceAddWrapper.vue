@@ -1,7 +1,7 @@
 <template>
   <div>
     <Breadcrumb title="Add Invoice" :routes="routes" />
-    <StepperStatus active-name="Submission" />
+    <StepperStatus :active-name="stepperStatus" />
     <TabInvoice :active-tab="tabNow" @change-tab="setTab" class="-mx-[24px]" />
     <!-- <div v-if="form.status !== 0" class="status__box--approved -mt-5 -mx-[24px]">
       <i class="ki-outline ki-shield-tick text-primary text-[36px]"></i>
@@ -16,7 +16,10 @@
       <Transition mode="out-in">
         <component :is="contentComponent" />
       </Transition>
-      <div v-if="checkIsNonPo()" class="flex align-items-center justify-between gap-[8px] mt-[24px]">
+      <div
+        v-if="checkIsNonPo()"
+        class="flex align-items-center justify-between gap-[8px] mt-[24px]"
+      >
         <div class="flex-1 flex gap-[8px]">
           <button class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goBack">
             <i class="ki-filled ki-arrow-left"></i>
@@ -28,24 +31,34 @@
           </button>
         </div>
         <div class="flex-1 flex gap-[8px] justify-end">
-          <button v-if="tabNow === 'information'" class="btn btn-primary" :disabled="isSubmit || checkFormBudget()"
-            @click="checkBudget">
+          <button
+            v-if="tabNow === 'information'"
+            class="btn btn-primary"
+            :disabled="isSubmit || checkFormBudget()"
+            @click="checkBudget"
+          >
             Budget Checking
             <i class="ki-duotone ki-dollar"></i>
           </button>
-          <button class="btn btn-primary" :disabled="isSubmit || (!isCheckBudget && tabNow === 'information')"
-            @click="goNext">
+          <button
+            class="btn btn-primary"
+            :disabled="isSubmit || (!isCheckBudget && tabNow === 'information')"
+            @click="goNext"
+          >
             {{ tabNow !== 'preview' ? 'Next' : 'Submit' }}
             <i v-if="tabNow !== 'preview'" class="ki-duotone ki-black-right"></i>
             <i v-else class="ki-duotone ki-paper-plane"></i>
           </button>
         </div>
       </div>
-      <div v-else-if="
-        (form.status === 0 || form.status === -1 || form.status === 5) &&
-        !checkInvoiceView() &&
-        !checkInvoiceNonPoView()
-      " class="flex justify-between items-center gap-[8px] mt-[24px]">
+      <div
+        v-else-if="
+          (form.status === 0 || form.status === -1 || form.status === 5) &&
+          !checkInvoiceView() &&
+          !checkInvoiceNonPoView()
+        "
+        class="flex justify-between items-center gap-[8px] mt-[24px]"
+      >
         <button class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goSaveDraft">
           Save as Draft
           <i class="ki-duotone ki-bookmark"></i>
@@ -63,18 +76,29 @@
         </div>
       </div>
       <div v-else class="flex justify-end items-center mt-[24px]">
-        <button v-if="tabNow !== 'preview' || checkInvoiceView() || checkInvoiceNonPoView()"
-          class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goBack">
+        <button
+          v-if="tabNow !== 'preview' || checkInvoiceView() || checkInvoiceNonPoView()"
+          class="btn btn-outline btn-primary"
+          :disabled="isSubmit"
+          @click="goBack"
+        >
           <i class="ki-filled ki-arrow-left"></i>
           Back
         </button>
-        <button v-if="tabNow !== 'preview' && !checkInvoiceView() && !checkInvoiceNonPoView()" class="btn btn-primary"
-          :disabled="isSubmit" @click="goNext">
+        <button
+          v-if="tabNow !== 'preview' && !checkInvoiceView() && !checkInvoiceNonPoView()"
+          class="btn btn-primary"
+          :disabled="isSubmit"
+          @click="goNext"
+        >
           Next
           <i class="ki-duotone ki-black-right"></i>
         </button>
-        <button v-if="tabNow === 'preview' && !checkInvoiceView() && !checkInvoiceNonPoView()" class="btn btn-primary"
-          :disabled="isSubmit">
+        <button
+          v-if="tabNow === 'preview' && !checkInvoiceView() && !checkInvoiceNonPoView()"
+          class="btn btn-primary"
+          :disabled="isSubmit"
+        >
           Save as PDF
           <iconPDF />
         </button>
@@ -154,6 +178,8 @@ const isCheckBudget = ref<boolean>(false)
 const isClickDraft = ref<boolean>(false)
 const itemNoAcc = ref<number>(0)
 
+const stepperStatus = ref('')
+
 const routes = ref<routeTypes[]>([
   {
     name: 'E-invoice',
@@ -206,7 +232,6 @@ const form = reactive<formTypes>({
   invoicePoGr: [],
   invoiceItem: [],
   additionalCost: [],
-  costExpenses: [],
   status: -1,
   idAlternativePayment: 0,
   isAlternativePayee: false,
@@ -346,7 +371,10 @@ const goBack = () => {
   const list = ['data', 'information', 'preview']
   const checkIndex = list.findIndex((item) => item === tabNow.value)
   if (checkIndex === 0 || checkInvoiceView() || checkInvoiceNonPoView()) {
-    const nameRoute = checkInvoiceView() || !checkIsNonPo() ? 'invoice' : 'invoice-list-non-po'
+    const nameRoute =
+      checkInvoiceView() || (!checkIsNonPo() && !checkInvoiceNonPoView())
+        ? 'invoice'
+        : 'invoice-list-non-po'
     router.push({
       name: nameRoute,
     })
@@ -567,9 +595,10 @@ const mapDataPostNonPo = () => {
     },
     alternativePay: {
       id: form.idAlternativePayment,
-      invoiceUId: form.status === 0 || form.status === 5
-        ? form.invoiceUId
-        : '00000000-0000-0000-0000-000000000000',
+      invoiceUId:
+        form.status === 0 || form.status === 5
+          ? form.invoiceUId
+          : '00000000-0000-0000-0000-000000000000',
       name: form.nameAlternative,
       name2: form.nameOtherAlternative,
       street: form.streetAltiernative,
@@ -582,7 +611,7 @@ const mapDataPostNonPo = () => {
       ktp: form.ktpNumberAlternative,
       email: form.emailAlternative,
       isAlternativePayee: form.isAlternativePayee,
-      isOneTimeVendor: form.isOneTimeVendor
+      isOneTimeVendor: form.isOneTimeVendor,
     },
     costExpenses: mapInvoiceItem(),
   } as ParamsSubmissionNonPo
@@ -821,7 +850,6 @@ const setData = () => {
 
 const setDataNonPo = () => {
   const detail = detailNonPo.value
-  console.log(detail)
   if (form && detail) {
     form.status = detail.header.statusCode
     form.invoiceUId = detail.header.invoiceUId
@@ -847,6 +875,7 @@ const setDataNonPo = () => {
     form.additionalCostCalc = detail.calculation.additionalCost
     form.totalGrossAmount = detail.calculation.totalGrossAmount
     form.totalNetAmount = detail.calculation.totalNetAmount
+    form.department = detail.header.department
 
     const dataAlternativePayee = detail.alternativePayee[0]
     form.isAlternativePayee = dataAlternativePayee ? dataAlternativePayee.isAlternativePayee : false
@@ -865,13 +894,6 @@ const setDataNonPo = () => {
     form.ktpNumberAlternative = dataAlternativePayee ? dataAlternativePayee.ktp : '-'
     form.emailAlternative = dataAlternativePayee ? dataAlternativePayee.email : '-'
 
-    form.costExpenses = detail?.costExpense
-      ? detail.costExpense.map(item => ({
-        ...item,
-        activityExpenses: Number(item.activityExpenses)
-      }))
-      : []
-
     form.invoiceItem = []
     for (const item of detail.costExpense) {
       const data = {
@@ -889,7 +911,8 @@ const setDataNonPo = () => {
         whtType: item.whtType,
         whtCode: item.whtCode,
         whtBaseAmount: item.whtBaseAmount.toString(),
-        whtAmount: item.whtAmount.toString(),
+        whtAmount: item.whtAmount ? item.whtAmount.toString() : '0',
+        whtCodeList: [],
         isEdit: false,
       } as invoiceItemTypes
       form.invoiceItem.push(data)
@@ -1004,16 +1027,20 @@ const mapDataCheck = () => {
     currencyAmount.push(currData)
   }
 
+  let totalItemAmountCurr = 0
+  let totalVatAmountCurr = 0
   for (const item of form.invoiceItem) {
-    itemNoAcc.value += 1
-    const currData = {
-      ITEMNO_ACC: itemNoAcc.value,
-      CURRENCY: form.currency,
-      AMT_DOCCUR: (item.itemAmount + item.vatAmount) * -1,
-      AMT_BASE: 0,
-    }
-    currencyAmount.push(currData)
+    totalItemAmountCurr += item.itemAmount
+    totalVatAmountCurr += item.vatAmount
   }
+  itemNoAcc.value += 1
+  const currData = {
+    ITEMNO_ACC: itemNoAcc.value,
+    CURRENCY: form.currency,
+    AMT_DOCCUR: (totalItemAmountCurr + totalVatAmountCurr) * -1,
+    AMT_BASE: 0,
+  }
+  currencyAmount.push(currData)
 
   for (const item of accountTax) {
     const filterTax = form.invoiceItem.filter((sub) => sub.taxCode === item.TAX_CODE)
@@ -1053,11 +1080,13 @@ const mapDataCheck = () => {
 
 const checkBudget = () => {
   const data = mapDataCheck()
-  invoiceApi.postCheckBudget(data).then(() => {
-    const idModal = document.querySelector('#success_budget_check_modal')
-    const modal = KTModal.getInstance(idModal as HTMLElement)
-    modal.show()
-  })
+  invoiceApi
+    .postCheckBudget(data)
+    .then(() => {
+      const idModal = document.querySelector('#success_budget_check_modal')
+      const modal = KTModal.getInstance(idModal as HTMLElement)
+      modal.show()
+    })
     .catch(() => {
       const idModal = document.querySelector('#failed_budget_check_modal')
       const modal = KTModal.getInstance(idModal as HTMLElement)
@@ -1096,6 +1125,14 @@ const sendEmailReminder = (data: formTypes) => {
   })
 }
 
+const setStepperStatus = () => {
+  if (detailNonPo.value.header.statusCode === 1) {
+    stepperStatus.value = 'Submission'
+  } else if (detailNonPo.value.header.statusCode === 2) {
+    stepperStatus.value = 'Approval'
+  }
+}
+
 onMounted(() => {
   invoiceMasterApi.getTaxCode()
   if (!checkIsNonPo()) invoiceMasterApi.getInvoicePoType()
@@ -1115,15 +1152,18 @@ onMounted(() => {
     tabNow.value = 'preview'
   }
 
-  if (route.query.type === 'non-po-view') {
+  if (route.query.type === 'non-po-view'||
+    (route.query.invoice && route.query.type !== 'non-po-view' && route.query.type !== 'po-view' && route.query.type === 'nonpo')
+  ) {
     invoiceApi.getNonPoDetail(route.query.invoice?.toString() || '').then(() => {
+      setStepperStatus()
       setDataNonPo()
     })
   }
 
   if (
     route.query.type === 'po-view' ||
-    (route.query.invoice && route.query.type !== 'non-po-view')
+    (route.query.invoice && route.query.type !== 'non-po-view' && route.query.type !== 'po-view' && route.query.type === 'po')
   ) {
     invoiceApi.getPoDetail(route.query.invoice?.toString() || '').then(() => {
       setData()

@@ -81,17 +81,23 @@ const setToForm = (name: string, value: number) => {
   }
 }
 
+const checkIsNonPo = () => {
+  return route.query.invoiceType === 'no_po'
+}
+
 const setCalculation = () => {
   listCalculation.value = []
   for (const item of listName.value) {
-    const amount = setCount(item)
-    const data = {
-      name: item,
-      amount: amount ? amount.toString() : '',
-      currency: form?.value.currCode || ''
+    if ((checkIsNonPo() && item !== 'Additional Cost') || typeForm.value === 'po') {
+      const amount = setCount(item)
+      const data = {
+        name: item,
+        amount: amount.toString(),
+        currency: form.value.currCode || ''
+      }
+      listCalculation.value.push(data)
+      setToForm(item, amount)
     }
-    listCalculation.value.push(data)
-    setToForm(item, amount)
   }
 }
 
@@ -114,8 +120,18 @@ const getPercentWht = (code: string) => {
 const countSubtotal = () => {
   if (!form) return
   let total = 0
-  for (const item of form.value.invoicePoGr) {
-    total = total + item.itemAmount
+  if (!checkIsNonPo()) {
+    for (const item of form.value.invoicePoGr) {
+      total = total + item.itemAmount
+    }
+  } else {
+    for (const item of form.value.invoiceItem) {
+      if (item.debitCredit === 'D') {
+        total = total + item.itemAmount
+      } else {
+        total = total - item.itemAmount
+      }
+    }
   }
   return total
 }
@@ -125,16 +141,27 @@ const countVatAmount = () => {
   let totalPo = 0
   let totalAddDebit = 0
   let totalAddCredit = 0
-  for (const item of form.value.invoicePoGr) {
-    const percentTax = getPercentTax(item.taxCode) || 0
-    totalPo = totalPo + (percentTax * item.itemAmount)
-  }
-  for (const item of form.value.additionalCosts) {
-    const percentTax = getPercentTax(item.taxCode) || 0
-    if (item.debitCredit === 'D') {
-      totalAddDebit = totalAddDebit + (percentTax * Number(item.itemAmount))
-    } else {
-      totalAddCredit = totalAddCredit + (percentTax * Number(item.itemAmount))
+  if (!checkIsNonPo()) {
+    for (const item of form.value.invoicePoGr) {
+      const percentTax = getPercentTax(item.taxCode) || 0
+      totalPo = totalPo + (percentTax * item.itemAmount)
+    }
+    for (const item of form.value.additionalCosts) {
+      const percentTax = getPercentTax(item.taxCode) || 0
+      if (item.debitCredit === 'D') {
+        totalAddDebit = totalAddDebit + (percentTax * Number(item.itemAmount))
+      } else {
+        totalAddCredit = totalAddCredit - (percentTax * Number(item.itemAmount))
+      }
+    }
+  } else {
+    for (const item of form.value.invoiceItem) {
+      const percentTax = getPercentTax(item.taxCode) || 0
+      if (item.debitCredit === 'D') {
+        totalAddDebit = totalAddDebit + (percentTax * Number(item.itemAmount))
+      } else {
+        totalAddCredit = totalAddCredit - (percentTax * Number(item.itemAmount))
+      }
     }
   }
   return totalPo + totalAddDebit - totalAddCredit
@@ -165,16 +192,27 @@ const countWhtAmount = () => {
   let totalPo = 0
   let totalAddDebit = 0
   let totalAddCredit = 0
-  for (const item of form.value.invoicePoGr) {
-    const percentTax = getPercentWht(item.whtCode) || 0
-    totalPo = totalPo + (percentTax * item.whtBaseAmount)
-  }
-  for (const item of form.value.additionalCosts) {
-    const percentTax = getPercentWht(item.whtCode) || 0
-    if (item.debitCredit === 'D') {
-      totalAddDebit = totalAddDebit + (percentTax * Number(item.whtBaseAmount))
-    } else {
-      totalAddCredit = totalAddCredit + (percentTax * Number(item.whtBaseAmount))
+  if (!checkIsNonPo()) {
+    for (const item of form.value.invoicePoGr) {
+      const percentTax = getPercentWht(item.whtCode) || 0
+      totalPo = totalPo + (percentTax * item.whtBaseAmount)
+    }
+    for (const item of form.value.additionalCosts) {
+      const percentTax = getPercentWht(item.whtCode) || 0
+      if (item.debitCredit === 'D') {
+        totalAddDebit = totalAddDebit - (percentTax * Number(item.whtBaseAmount))
+      } else {
+        totalAddCredit = totalAddCredit + (percentTax * Number(item.whtBaseAmount))
+      }
+    }
+  } else {
+    for (const item of form.value.invoiceItem) {
+      const percentTax = 0
+      if (item.debitCredit === 'D') {
+        totalAddDebit = totalAddDebit - (percentTax * Number(item.itemAmount))
+      } else {
+        totalAddCredit = totalAddCredit + (percentTax * Number(item.itemAmount))
+      }
     }
   }
   return totalPo + totalAddDebit - totalAddCredit
@@ -205,7 +243,7 @@ watch(
 )
 
 watch(
-  () => [form?.value.invoicePoGr, form?.value.additionalCosts],
+  () => [form?.value.invoicePoGr, form?.value.additionalCosts, form.value.invoiceItem],
   () => {
     setCalculation()
   },

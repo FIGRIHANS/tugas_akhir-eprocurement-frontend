@@ -25,7 +25,7 @@ const onDelete = async () => {
     await otherDocStore.update({
       id: props.id,
       isActive: false,
-      remark: 'dihapus',
+      remark: 'deleted',
       documentName: selectedItem.value?.documentName,
       documentNo: selectedItem.value?.documentNo,
       documentUrl: selectedItem.value?.documentUrl,
@@ -59,12 +59,7 @@ const onDelete = async () => {
         <UiIcon name="black-left-line" />
         <span>Cancel</span>
       </UiButton>
-      <UiButton
-        variant="danger"
-        class="flex-1 flex items-center justify-center"
-        @click="onDelete"
-        :disabled="loading"
-      >
+      <UiButton variant="danger" class="flex-1 flex items-center justify-center" @click="onDelete" :disabled="loading">
         <UiLoading variant="white" v-if="loading" />
         <UiIcon name="cross-circle" variant="duotone" v-else />
         <span>Delete</span>

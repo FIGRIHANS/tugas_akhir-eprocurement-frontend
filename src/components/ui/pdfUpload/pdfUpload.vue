@@ -1,6 +1,6 @@
 <template>
   <div class="file-upload">
-    <input type="file" ref="fileInput" accept=".pdf" @change="handleFileUpload" class="hidden" :disabled="disabled" />
+    <input type="file" ref="fileInput" accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx" @change="handleFileUpload" class="hidden" :disabled="disabled" />
 
     <div class="flex items-center" :class="{ 'border-danger': error }" @click="triggerFileInput">
       <slot>
@@ -8,7 +8,7 @@
           <IconUpload />
         </div>
         <div class="upload__right">
-          Select file - Pdf (Max 2 mb)
+          Select file - Pdf (Max 16 mb)
         </div>
       </slot>
     </div>
@@ -42,7 +42,7 @@ const handleFileUpload = async (event: Event) => {
 
   const file = target.files[0]
 
-  if (file.size > 2 * 1024 * 1024) return
+  if (file.size > 16 * 1024 * 1024) return
 
   try {
     const response = await uploadApi.uploadFile(file, 0)

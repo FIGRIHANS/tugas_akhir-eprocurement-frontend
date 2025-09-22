@@ -35,10 +35,10 @@ const formData = ref({
   vendorID: props.vendorId,
   documentName: '',
   documentNo: '',
-  documentUrl: '',
-  expiredUTCDate: '',
-  issuedUTCDate: '',
-  validDate: '',
+  documentUrl: null,
+  expiredUTCDate: null,
+  issuedUTCDate: null,
+  validDate: null,
   remark: 'Other document',
   isActive: true,
 })
@@ -60,8 +60,11 @@ const onSelectDate = () => {
 const onSubmit = async () => {
   formError.value = checkEmptyValues(formData.value)
 
-  // hapus field yang akan dibiarkan kosong
-  formError.value = formError.value.filter((form) => !['id'].includes(form))
+  formError.value = formError.value.filter(
+    (form) => !['id', 'expiredUTCDate', 'issuedUTCDate', 'validDate', 'documentUrl'].includes(form),
+  )
+
+  console.log(formError.value)
 
   // check jika ada error
   if (formError.value.length) return
@@ -75,8 +78,8 @@ const onSubmit = async () => {
       recepients: {
         emailTo: adminStore.data.vendorEmail,
         emailCc: '',
-        emailBcc: ''
-      }
+        emailBcc: '',
+      },
     })
 
     emit('onSuccess')
@@ -127,35 +130,45 @@ onMounted(() => {
     <form @submit.prevent="onSubmit">
       <UiFormGroup hide-border>
         <!-- document name -->
-        <UiInput label="Document Name" required v-model="formData.documentName"
+        <UiInput
+          label="Document Name"
+          required
+          v-model="formData.documentName"
           :error="formError.includes('documentName')"
-          :hint-text="formError.includes('documentName') ? 'Document name required' : ''" />
+          :hint-text="formError.includes('documentName') ? 'Document name required' : ''"
+        />
 
         <!-- Document Number -->
-        <UiInput label="Document Number" required v-model="formData.documentNo"
+        <UiInput
+          label="Document Number"
+          required
+          v-model="formData.documentNo"
           :error="formError.includes('documentNo')"
-          :hint-text="formError.includes('documentNo') ? 'Document number required' : ''" />
+          :hint-text="formError.includes('documentNo') ? 'Document number required' : ''"
+        />
 
         <!-- Available Until -->
         <div class="relative">
-          <span class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px] z-10">
-            Available Until <span class="text-danger">*</span>
+          <span
+            class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px] z-10"
+          >
+            Available Until
           </span>
-          <DatePicker placeholder="Start Date" v-model="formData.expiredUTCDate"
-            :error="formError.includes('expiredUTCDate')" @update:model-value="onSelectDate" />
-          <span v-if="formError.includes('expiredUTCDate')" class="form-hint !text-danger">
-            Expired date required
-          </span>
+          <DatePicker
+            placeholder="Start Date"
+            v-model="formData.expiredUTCDate"
+            @update:model-value="onSelectDate"
+          />
         </div>
 
         <!-- upload -->
-        <UiFileUpload accepted-files=".jpg,.jpeg,.png,.pdf,.zip" name="file"
-          placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)" @added-file="onUploadFile" :hint-text="uploadError
-            ? 'An error accoured, please try again'
-            : formError.includes('documentUrl')
-              ? 'Document required'
-              : ''
-            " :error="formError.includes('documentUrl')" :disabled="uploadLoading" />
+        <UiFileUpload
+          accepted-files=".jpg,.jpeg,.png,.pdf,.zip"
+          name="file"
+          placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
+          @added-file="onUploadFile"
+          :disabled="uploadLoading"
+        />
       </UiFormGroup>
       <div class="flex justify-end gap-3 mt-3">
         <UiButton outline type="button" @click="model = false">

@@ -7,7 +7,40 @@
         class="w-[250px]"
         @keypress="goSearch"
       />
-      <FilterList :data="filterForm" @setData="setDataFilter" />
+      <FilterList :data="filterForm" @setData="setDataFilter" ref="filterChild" />
+    </div>
+    <div
+      v-if="filteredPayload.length > 0"
+      class="flex overflow-x-auto gap-3 mb-5 items-center mt-5"
+    >
+      <div class="font-medium text-lg text-gray-800">Filter</div>
+      <div v-for="items in filteredPayload" :key="items.key">
+        <div class="btn btn-light btn-sm" v-if="items.value !== '' || items.value !== null">
+          <span class="text-gray-500"> {{ items.key }} </span>
+          <span class="font-semibold">
+            <p v-if="items.key === 'Status'">
+              {{ StatusInvoice.find((item) => item.value === items.value)?.label }}
+            </p>
+            <p v-if="items.key === 'Company Code'">
+              {{
+                companyCodeList.find((item) => item.code.toString() === filterForm.companyCode)
+                  ?.name
+              }}
+            </p>
+            <p v-else-if="items.key === 'Invoice Type'">
+              {{
+                invoiceNonPoTypeList.find((item) => item.code.toString() === filterForm.invoiceType)
+                  ?.name
+              }}
+            </p>
+            <p v-else>{{ filterForm.date }}</p>
+          </span>
+          <i class="ki-filled ki-cross" @click="deleteFilter(items.key)"></i>
+        </div>
+      </div>
+      <UiButton variant="light" size="sm" class="btn-clear" @click="resetFilter()">
+        {{ $t('vendor.masterFilters.reset') }}
+      </UiButton>
     </div>
     <div class="mt-[24px]">
       <div class="pending__table overflow-x-auto">
@@ -92,6 +125,7 @@
                     {{ parent.statusName }}
                   </span>
                 </td>
+                <td>{{ parent.vendorName || '-' }}</td>
                 <td>{{ parent.invoiceTypeName || '-' }}</td>
                 <td>{{ parent.companyCode || '-' }}</td>
                 <td>{{ useFormatIdr(parent.whtBaseAmount) || '-' }}</td>
@@ -171,6 +205,7 @@
 import { ref, reactive, computed, onMounted, defineAsyncComponent } from 'vue'
 import { useRouter } from 'vue-router'
 import { KTModal } from '@/metronic/core'
+import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import LPagination from '@/components/pagination/LPagination.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
@@ -178,6 +213,7 @@ import type { filterListTypes } from '../types/pendingApproval'
 import type { ListNonPoTypes } from '@/stores/views/invoice/types/verification'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { useFormatIdr } from '@/composables/currency'
+import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import moment from 'moment'
 
 const ModalDetailApproval = defineAsyncComponent(() => import('./DetailApproval.vue'))
@@ -186,9 +222,14 @@ const SuccessSendToSap = defineAsyncComponent(
   () => import('./pendingApproval/SuccessSendToSap.vue'),
 )
 const FailedSendToSap = defineAsyncComponent(() => import('./pendingApproval/FailedSendToSap.vue'))
+const invoiceMasterApi = useInvoiceMasterDataStore()
+
+const companyCodeList = computed(() => invoiceMasterApi.companyCode)
+const invoiceNonPoTypeList = computed(() => invoiceMasterApi.invoiceNonPoType)
 
 const invoiceApi = useInvoiceSubmissionStore()
 const verificationApi = useInvoiceVerificationStore()
+const filterChild = ref(null)
 const router = useRouter()
 const search = ref<string>('')
 const currentPage = ref<number>(1)
@@ -196,6 +237,15 @@ const pageSize = ref<number>(10)
 const list = ref<ListNonPoTypes[]>([])
 const viewDetailId = ref<string>('')
 const isLoadingSap = ref<boolean>(false)
+
+const StatusInvoice = ref([
+  { value: 2, label: 'Waiting for Approval' },
+  { value: 4, label: 'Approved' },
+  { value: 5, label: 'Rejected' },
+  { value: 7, label: 'Sent to SAP' },
+])
+
+const filteredPayload = ref([])
 
 const filterForm = reactive<filterListTypes>({
   status: 2,
@@ -209,6 +259,7 @@ const columns = ref<string[]>([
   // '',
   'Submitted Document No',
   'Status',
+  'Vendor Name',
   'Invoice Type',
   'Company Code',
   'Base Amount',
@@ -261,6 +312,7 @@ const openDetailInvoice = (invoiceId: string) => {
     query: {
       id: invoiceId,
       type: '2',
+      invoiceType: 'no_po',
     },
   })
 }
@@ -271,8 +323,34 @@ const openDetailInvoiceEdit = (invoiceId: string) => {
     query: {
       id: invoiceId,
       type: '2',
+      invoiceType: 'no_po',
     },
   })
+}
+
+const resetFilter = () => {
+  filterForm.status = null
+  filterChild.value.resetFilter()
+  filteredPayload.value = []
+  filterChild.value.goFilter()
+  callList()
+}
+
+const deleteFilter = (key: string) => {
+  const deletedData = filteredPayload.value.filter((item) => item.key !== key)
+  filteredPayload.value = deletedData
+
+  if (key === 'Status') {
+    filterChild.value.resetStatus()
+  } else if (key === 'Date') {
+    filterChild.value.resetDate()
+  } else if (key === 'Company Code') {
+    filterChild.value.resetCompanyCode()
+  } else {
+    filterChild.value.resetInvoiceType()
+  }
+  filterChild.value.goFilter()
+  callList()
 }
 
 const setList = () => {
@@ -291,7 +369,7 @@ const callList = () => {
   list.value = []
   verificationApi
     .getListNonPo({
-      statusCode: 1,
+      statusCode: filterForm.status,
       companyCode: filterForm.companyCode,
       invoiceTypeCode: Number(filterForm.invoiceType),
       invoiceDate: filterForm.date,
@@ -303,6 +381,37 @@ const callList = () => {
 }
 
 const setDataFilter = (data: filterListTypes) => {
+  const filteredData: { key: string; value: string | number }[] = []
+
+  if (data.status !== null) {
+    filteredData.push({
+      key: 'Status',
+      value: data.status,
+    })
+  }
+
+  if (data.date && data.date.trim() !== '') {
+    filteredData.push({
+      key: 'Date',
+      value: data.date,
+    })
+  }
+
+  if (data.companyCode && data.companyCode.trim() !== '') {
+    filteredData.push({
+      key: 'Company Code',
+      value: data.companyCode,
+    })
+  }
+
+  if (data.invoiceType && data.invoiceType.trim() !== '') {
+    filteredData.push({
+      key: 'Invoice Type',
+      value: data.invoiceType,
+    })
+  }
+
+  filteredPayload.value = filteredData
   filterForm.status = data.status
   filterForm.date = data.date
   filterForm.companyCode = data.companyCode
@@ -327,7 +436,7 @@ const sendToSap = (invoiceUId: string) => {
   closeDropdown()
   isLoadingSap.value = true
   verificationApi
-    .postSap(invoiceUId)
+    .postSapNonPo(invoiceUId)
     .then((statusCode: number) => {
       if (statusCode === 200) {
         openSuccesSap()
@@ -354,6 +463,12 @@ const openFailedSap = () => {
 }
 
 onMounted(() => {
+  const filteredData: { key: string; value: string | number }[] = []
+  filteredData.push({
+    key: 'Status',
+    value: 2,
+  })
+  filteredPayload.value = filteredData
   callList()
 })
 </script>

@@ -132,11 +132,9 @@ const onDownload = async (path: string) => {
 }
 
 const removeCertificate = (index: number, code: number) => {
-  // get datanya dan hapus target
   const targetCertificate = payload.value.certificates.filter((c) => c.type === code)
   targetCertificate.splice(index, 1)
 
-  // hapus dulu certificate dengan code yang dikirim
   payload.value.certificates = payload.value.certificates.filter((c) => c.type !== code)
   payload.value.certificates = [...payload.value.certificates, ...targetCertificate]
 }
@@ -151,16 +149,12 @@ const uploadFile = async (file: File, index: number, code: number) => {
     uploadLoading.value = true
     const response = await uploadStore.upload(formDataFile)
 
-    // target certificate
     const targetCertificate = payload.value.certificates.filter((c) => c.type === code)
 
-    // update value docUrl target dengan index yang dikirim
     targetCertificate[index].docUrl = response?.path as string
 
-    // hapus dulu certificate
     payload.value.certificates = payload.value.certificates.filter((c) => c.type !== code)
 
-    // assign payload dengan data terbaru
     payload.value.certificates = [...payload.value.certificates, ...targetCertificate]
   } catch (error) {
     if (error instanceof Error) {

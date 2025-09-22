@@ -8,7 +8,9 @@
       <p class="text-lg font-semibold mb-[8px]">Filter</p>
       <div class="flex flex-col gap-[24px] py-[16px]">
         <div class="relative">
-          <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white">Company Code</label>
+          <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
+            >Company Code</label
+          >
           <select v-model="companyCode" class="select" name="select">
             <option v-for="item of companyCodeList" :key="item.code" :value="item.code">
               {{ item.name }}
@@ -16,7 +18,9 @@
           </select>
         </div>
         <div class="relative">
-          <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white">Invoice Type</label>
+          <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
+            >Invoice Type</label
+          >
           <select v-model="invoiceType" class="select" name="select">
             <option v-for="item of invoiceTypeList" :key="item.code" :value="item.code">
               {{ item.name }}
@@ -24,24 +28,21 @@
           </select>
         </div>
         <div class="relative">
-          <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white">Status</label>
+          <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
+            >Status</label
+          >
           <select v-model="status" class="select" name="select">
-            <option value="2">
-              Waiting for Approval
-            </option>
-            <option value="4">
-              Approved
-            </option>
-            <option value="5">
-              Rejected
-            </option>
-            <option value="7">
-              Sent to SAP
-            </option>
+            <option value="2">Waiting for Approval</option>
+            <option value="4">Approved</option>
+            <option value="5">Rejected</option>
+            <option value="7">Sent to SAP</option>
           </select>
         </div>
         <div class="relative">
-          <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white z-[1]">Invoice Date</label>
+          <label
+            class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white z-[1]"
+            >Invoice Date</label
+          >
           <DatePicker v-model="date" format="yyyy/MM/dd" teleport />
         </div>
       </div>
@@ -81,8 +82,21 @@ const companyCodeList = computed(() => invoiceMasterApi.companyCode)
 const invoiceTypeList = computed(() => invoiceMasterApi.invoicePoType)
 
 const resetFilter = () => {
+  status.value = null
   date.value = ''
   companyCode.value = ''
+  invoiceType.value = ''
+}
+const resetStatus = () => {
+  status.value = null
+}
+const resetDate = () => {
+  date.value = ''
+}
+const resetCompanyCode = () => {
+  companyCode.value = ''
+}
+const resetInvoiceType = () => {
   invoiceType.value = ''
 }
 
@@ -91,7 +105,7 @@ const goFilter = () => {
     status: status.value,
     date: date.value,
     companyCode: companyCode.value,
-    invoiceType: invoiceType.value
+    invoiceType: invoiceType.value,
   }
   emits('setData', data)
 }
@@ -106,7 +120,15 @@ watch(
   },
   {
     deep: true,
-    immediate: true
-  }
+    immediate: true,
+  },
 )
+defineExpose({
+  resetFilter,
+  resetStatus,
+  resetDate,
+  resetInvoiceType,
+  resetCompanyCode,
+  goFilter,
+})
 </script>

@@ -102,6 +102,7 @@ interface ParamsSubmissionHeader {
   remainingDpAmount: string
   dpAmountDeduction: string
   creditCardBillingId: string
+  department: string
 }
 
 interface ParamsSubmissionVendor {
@@ -256,6 +257,8 @@ export interface ListNonPoTypes {
   costCenterCode: string
   costCenterName: string
   isOpenChild: boolean
+  vendorName: string
+  department: string
 }
 
 export interface PoChildTypes {
@@ -332,6 +335,25 @@ export interface itemsPoGrType {
   department: string
 }
 
+export interface itemsCostExpenseType {
+  id: number
+  activityId: number
+  activityExpenses: string
+  activityName: string
+  itemAmount: number
+  itemText: string
+  debitCredit: string
+  taxCode: string
+  vatAmount: number
+  costCenter: string
+  profitCenter: string
+  assignment: string
+  whtType: string
+  whtCode: string
+  whtBaseAmount: number
+  whtAmount: number
+}
+
 export interface DetailInvoiceEditTypes {
   invoiceUId: string
   invoiceTypeCode: number
@@ -345,6 +367,7 @@ export interface DetailInvoiceEditTypes {
   invoiceDate: string
   taxNo: string
   currCode: string
+  department: string
   notes: string
   statusCode: number
   statusName: string
@@ -377,8 +400,24 @@ export interface DetailInvoiceEditTypes {
   totalGrossAmount: number
   totalNetAmount: number
 
+  idAlternative: number
+  name: string
+  name2: string
+  street: string
+  city: string
+  country: string
+  bankAccountNumber: string
+  bankKeyAlternative: string
+  bankCountry: string
+  npwpAlternative: string
+  ktp: string
+  email: string
+  isAlternativePayee: boolean
+  isOneTimeVendor: boolean
+
   invoicePoGr: itemsPoGrType[]
   additionalCosts: itemsCostType[]
+  costExpenses: itemsCostExpenseType[]
 
   invoiceDocument: documentDetailTypes | null
   tax: documentDetailTypes | null
@@ -408,8 +447,27 @@ export interface itemsAlternativePayee {
   isOneTimeVendor: boolean
 }
 
+export interface costExpensesType {
+  id: number
+  activityId: number
+  activityExpenses: string
+  activityName: string
+  itemAmount: number
+  itemText: string
+  debitCredit: string
+  taxCode: string
+  vatAmount: number
+  costCenter: string
+  profitCenter: string
+  assignment: string
+  whtType: string
+  whtCode: string
+  whtBaseAmount: number
+  whtAmount: number
+}
+
 // Approval Non Po Type
-interface CostExpenses {
+export interface CostExpenses {
   id: number | null
   activityId: number | null
   activityExpenses: string | null
@@ -426,6 +484,7 @@ interface CostExpenses {
   whtCode: string | null
   whtBaseAmount: number | null
   whtAmount: number | null
+  isEdit: boolean
 }
 
 interface AlternativePay {
@@ -492,6 +551,7 @@ interface Header {
   notes: string | null
   currCode: string | null
   npwpReporting: string | null
+  department: string | null
 }
 
 export interface SubmissionNonPoTypes {
@@ -505,4 +565,40 @@ export interface SubmissionNonPoTypes {
   alternativePay: AlternativePay
   alternativePayee: AlternativePay[]
   costExpenses: CostExpenses[]
+}
+
+export interface PostVerificationNonPoTypes {
+  statusCode: number
+  statusName: string
+  statusNotes: string
+  header: ParamsVerificationHeaderNonPoTypes
+  payment: ParamsSubmissionPayment
+  documents: ParamsSubmissionDocument[]
+  calculation: ParamsSubmissionCalculation
+  alternativePayment: itemsAlternativePayee
+  additionalCosts: costExpensesType[]
+}
+
+interface ParamsVerificationHeaderNonPoTypes {
+  invoiceUId: string
+  invoiceTypeCode: number
+  invoiceTypeName: string
+  invoiceVendorNo: string
+  companyCode: string
+  companyName: string
+  invoiceNo: string
+  documentNo: string
+  invoiceDate: string
+  postingDate: string
+  estimatedPaymentDate: string
+  paymentMethodCode: string
+  paymentMethodName: string
+  taxNo: string
+  currCode: string
+  creditCardBillingID: string
+  notes: string
+  statusCode: number
+  statusName: string
+  department: string
+  profileId: string
 }
