@@ -20,6 +20,8 @@ export interface formTypes extends documentFormTypes {
   taxNoError?: boolean
   currCode: string
   currCodeError?: boolean
+  department: string
+  departmentError?: boolean
   notes: string
   notesError?: boolean
   statusCode: number
@@ -51,6 +53,7 @@ export interface formTypes extends documentFormTypes {
   bankAccountNo: string
   bankCountryCode: string
 
+  idAlternative: number
   isAlternativePayee: boolean
   isOneTimeVendor: boolean
   nameAlternative: string

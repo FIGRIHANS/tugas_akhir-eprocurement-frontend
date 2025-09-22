@@ -33,27 +33,25 @@
           </label>
           <input v-model="form.streetAltiernative" class="input" placeholder=""/>
         </div>
-        <!-- City -->
-        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-          <label class="form-label max-w-32">
-            City
-          </label>
-          <select v-model="form.cityAlternative" class="select">
-            <option v-for="item of dummyCity" :key="item.id" :value="item.id">
-              {{ item.name }}
-            </option>
-          </select>
-        </div>
         <!-- Country -->
         <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
           <label class="form-label max-w-32">
             Country
           </label>
-          <select v-model="form.countryAlternative" class="select">
-            <option v-for="item of dummyCountry" :key="item.id" :value="item.id">
-              {{ item.name }}
-            </option>
-          </select>
+          <v-select
+            v-model="form.countryAlternative"
+            class="customSelect w-full"
+            label="countryName"
+            :reduce="(option: any) => option.countryCode"
+            :options="listCountry"
+          ></v-select>
+        </div>
+        <!-- City -->
+        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
+          <label class="form-label max-w-32">
+            City
+          </label>
+          <input v-model="form.cityAlternative" class="input" placeholder=""/>
         </div>
         <!-- Bank Account Number -->
         <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
@@ -105,46 +103,16 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, inject } from 'vue'
+import { computed, inject, onMounted } from 'vue'
 import type { formTypes } from '../../../types/invoiceDetailEdit'
+import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
 
 const form = inject<formTypes>('form')
+const vendorMasterApi = useVendorMasterDataStore()
 
-const dummyCity = ref([
-  {
-    id: '1',
-    name: 'Jakarta'
-  },
-  {
-    id: '2',
-    name: 'Tangerang'
-  },
-  {
-    id: '3',
-    name: 'Medan'
-  },
-  {
-    id: '4',
-    name: 'Bandung'
-  }
-])
+const listCountry = computed(() => vendorMasterApi.countryList)
 
-const dummyCountry = ref([
-  {
-    id: '1',
-    name: 'Indonesia'
-  },
-  {
-    id: '2',
-    name: 'Rusia'
-  },
-  {
-    id: '3',
-    name: 'Malaysia'
-  },
-  {
-    id: '4',
-    name: 'Singapore'
-  }
-])
+onMounted(() => {
+  vendorMasterApi.getVendorCountries()
+})
 </script>

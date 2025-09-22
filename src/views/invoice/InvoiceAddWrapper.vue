@@ -1126,8 +1126,6 @@ const sendEmailReminder = (data: formTypes) => {
 }
 
 const setStepperStatus = () => {
-  console.log(detailNonPo.value.header.statusCode, 'status')
-
   if (detailNonPo.value.header.statusCode === 1) {
     stepperStatus.value = 'Submission'
   } else if (detailNonPo.value.header.statusCode === 2) {

@@ -29,12 +29,14 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, inject, defineAsyncComponent, type Ref, type Component } from 'vue'
+import { ref, computed, inject, defineAsyncComponent, onMounted, type Ref, type Component } from 'vue'
 import type { formTypes } from '../../types/invoiceDetailEdit'
+import { useRoute } from 'vue-router'
 
 const PaymentInformation = defineAsyncComponent(() => import('./BankKey/PaymentInformation.vue'))
 const AlternativePayment = defineAsyncComponent(() => import('./BankKey/AlternativePayment.vue'))
 
+const route = useRoute()
 const form = inject<Ref<formTypes>>('form')
 const isTabActive = ref<string>('payment')
 const isNonPo = ref<boolean>(false)
@@ -46,5 +48,11 @@ const contentComponent = computed(() => {
   } as { [key: string]: Component }
 
   return components[isTabActive.value]
+})
+
+onMounted(() => {
+  if (route.query.invoiceType === 'no_po') {
+    isNonPo.value = true
+  }
 })
 </script>
