@@ -167,17 +167,8 @@
       <div v-if="checkIsNonPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Department
-          <span class="text-red-500 ml-[4px]">*</span>
         </label>
-        <v-select
-          v-model="form.department"
-          class="customSelect w-full -ml-[15px]"
-          :get-option-label="(option: any) => `${option.code} - ${option.name}`"
-          :reduce="(option: any) => option.code"
-          :options="listCostCenter"
-          :class="{ 'error-select': form.departmentError }"
-          appendToBody
-        ></v-select>
+        <input :value="form.department" class="input" placeholder="" disabled />
       </div>
       <!-- Description -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
@@ -216,7 +207,6 @@ const listInvoiceTypeNonPo = computed(() => invoiceMasterApi.invoiceNonPoType)
 // const currencyList = computed(() => invoiceMasterApi.currency)
 const paymentMethodList = computed(() => invoiceMasterApi.paymentMethodList)
 const userData = computed(() => invoiceLoginApi.userData)
-const listCostCenter = computed(() => invoiceMasterApi.costCenterList)
 
 const checkIsNonPo = () => {
   return route.query.invoiceType === 'no_po'
