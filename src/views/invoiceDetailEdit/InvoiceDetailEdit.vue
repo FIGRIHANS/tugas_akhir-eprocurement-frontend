@@ -352,18 +352,17 @@ const goNext = () => {
 
     if (form.value.statusCode === 4) {
       isLoading.value = true
-      console.log(mapDataVerif())
-      // verificationApi
-      //   .putSubmission(mapDataVerif())
-      //   .then(() => {
-      //     verificationApi.resetDetailInvoiceEdit()
-      //     const idModal = document.querySelector('#success_data_edit_modal')
-      //     const modal = KTModal.getInstance(idModal as HTMLElement)
-      //     modal.show()
-      //   })
-      //   .finally(() => {
-      //     isLoading.value = false
-      //   })
+      verificationApi
+        .putSubmission(mapDataVerif())
+        .then(() => {
+          verificationApi.resetDetailInvoiceEdit()
+          const idModal = document.querySelector('#success_data_edit_modal')
+          const modal = KTModal.getInstance(idModal as HTMLElement)
+          modal.show()
+        })
+        .finally(() => {
+          isLoading.value = false
+        })
     } else {
       router.push({
         name: 'invoiceDetail',
