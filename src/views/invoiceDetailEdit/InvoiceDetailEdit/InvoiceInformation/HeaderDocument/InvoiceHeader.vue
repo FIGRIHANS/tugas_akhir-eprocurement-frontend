@@ -44,7 +44,7 @@
           Invoice Date
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
-        <DatePicker v-model="form.invoiceDate" format="yyyy/MM/dd" :error="form.invoiceDateError" class="w-full -ml-[15px]" teleport />
+        <DatePicker v-model="form.invoiceDate" format="yyyy/MM/dd" :disabled="checkIsAccountingTax()" :error="form.invoiceDateError" class="w-full -ml-[15px]" teleport />
       </div>
       <!-- Posting Date -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
@@ -67,7 +67,7 @@
           Estimated Payment Date
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
-        <DatePicker v-model="form.estimatedPaymentDate" format="yyyy/MM/dd" :error="form.estimatedPaymentDateError" class="w-full -ml-[15px]" teleport />
+        <DatePicker v-model="form.estimatedPaymentDate" format="yyyy/MM/dd" :disabled="checkIsAccountingTax()" :error="form.estimatedPaymentDateError" class="w-full -ml-[15px]" teleport />
       </div>
       <!-- Tax Document No.  -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
@@ -82,7 +82,7 @@
           Invoice Vendor No.
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
-        <input v-model="form.documentNo" class="input" placeholder="" :class="{ 'border-danger': form.documentNoError }" />
+        <input v-model="form.documentNo" class="input" placeholder="" :class="{ 'border-danger': form.documentNoError }" :disabled="checkIsAccountingTax()" />
       </div>
       <!-- Payment Method -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
@@ -90,7 +90,7 @@
           Payment Method
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
-        <select v-model="form.paymentMethodCode" class="select" placeholder="" :class="{ 'border-danger': form.paymentMethodError }">
+        <select v-model="form.paymentMethodCode" class="select" placeholder="" :class="{ 'border-danger': form.paymentMethodError }" :disabled="checkIsAccountingTax()">
           <option v-for="item of paymentMethodList" :key="item.code" :value="item.code">
             {{ item.name }}
           </option>
@@ -109,7 +109,7 @@
           Transfer News
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
-        <input v-model="form.transferNews" class="input" placeholder="" :class="{ 'border-danger': form.transferNewsError }" />
+        <input v-model="form.transferNews" class="input" placeholder="" :class="{ 'border-danger': form.transferNewsError }" :disabled="checkIsAccountingTax()" />
       </div>
       <!-- Credit Card Billing ID -->
       <div v-if="form.invoiceTypeCode === 903" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
@@ -210,6 +210,10 @@ const userData = computed(() => invoiceLoginApi.userData)
 
 const checkIsNonPo = () => {
   return route.query.invoiceType === 'no_po'
+}
+
+const checkIsAccountingTax = () => {
+  return userData.value.profile.profileId === 3003 || userData.value.profile.profileId === 3202
 }
 
 const getDpName = () => {
