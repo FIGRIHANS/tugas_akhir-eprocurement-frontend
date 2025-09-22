@@ -158,6 +158,7 @@
                 class="input"
                 type="number"
                 placeholder=""
+                @change="setWhtAmount(item)"
               />
             </td>
             <td>
