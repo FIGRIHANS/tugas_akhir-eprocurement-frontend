@@ -423,8 +423,6 @@ export interface DetailInvoiceEditTypes {
   tax: documentDetailTypes | null
   referenceDocument: documentDetailTypes | null
   otherDocument: documentDetailTypes | null
-
-  costExpense: CostExpenses[]
 }
 
 export interface ParamsRejectTypes {

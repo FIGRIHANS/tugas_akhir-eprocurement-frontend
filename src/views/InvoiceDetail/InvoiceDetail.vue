@@ -546,45 +546,44 @@ const goVerif = () => {
     const status = checkVerif()
     if (!status) return
     isLoading.value = true
-    // verificationApi
-    //   .postSubmission(mapDataVerif())
-    //   .then((response) => {
-    //     if (response.statusCode === 200) {
-    //       verificationApi.resetDetailInvoiceEdit()
-    //       const idModal = document.querySelector('#success_verif_modal')
-    //       const modal = KTModal.getInstance(idModal as HTMLElement)
-    //       modal.show()
-    //       for (const item of additionalCostTempDelete.value) {
-    //         verificationApi.deleteAdditionalCost(form.value.invoiceUId, item.id)
-    //       }
-    //     }
-    //   })
-    //   .finally(() => {
-    //     isLoading.value = false
-    //     verificationApi.isFromEdit = false
-    //   })
+    verificationApi
+      .postSubmission(mapDataVerif())
+      .then((response) => {
+        if (response.statusCode === 200) {
+          verificationApi.resetDetailInvoiceEdit()
+          const idModal = document.querySelector('#success_verif_modal')
+          const modal = KTModal.getInstance(idModal as HTMLElement)
+          modal.show()
+          for (const item of additionalCostTempDelete.value) {
+            verificationApi.deleteAdditionalCost(form.value.invoiceUId, item.id)
+          }
+        }
+      })
+      .finally(() => {
+        isLoading.value = false
+        verificationApi.isFromEdit = false
+      })
   } else {
     const status = checkVerif()
     if (!status) return
 
     isLoading.value = true
-    console.log(mapDataVerifNonPo())
-    // verificationApi
-    //   .postSubmissionNonPo(mapDataVerifNonPo())
-    //   .then((response) => {
-    //     if (response.statusCode === 200) {
-    //       verificationApi.resetDetailInvoiceEdit()
-    //       const idModal = document.querySelector('#success_verif_modal')
-    //       const modal = KTModal.getInstance(idModal as HTMLElement)
-    //       modal.show()
-    //       for (const item of additionalCostTempDelete.value) {
-    //         verificationApi.deleteAdditionalCost(form.value.invoiceUId, item.id)
-    //       }
-    //     }
-    //   })
-    //   .finally(() => {
-    //     isLoading.value = false
-    //   })
+    verificationApi
+      .postSubmissionNonPo(mapDataVerifNonPo())
+      .then((response) => {
+        if (response.statusCode === 200) {
+          verificationApi.resetDetailInvoiceEdit()
+          const idModal = document.querySelector('#success_verif_modal')
+          const modal = KTModal.getInstance(idModal as HTMLElement)
+          modal.show()
+          for (const item of additionalCostTempDelete.value) {
+            verificationApi.deleteAdditionalCost(form.value.invoiceUId, item.id)
+          }
+        }
+      })
+      .finally(() => {
+        isLoading.value = false
+      })
   }
 }
 
