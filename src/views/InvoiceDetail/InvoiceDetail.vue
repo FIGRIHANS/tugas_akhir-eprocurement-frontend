@@ -56,7 +56,7 @@
     </div>
     <RejectVerification @reject="goReject" />
     <SuccessVerifModal
-      :statusCode="detailInvoice?.header.statusCode || -1"
+      :statusCode="detailInvoice?.header.statusCode || detailInvoiceNonPo?.header.statusCode || -1"
       @afterClose="goToList"
     />
     <SuccessRejectModal @afterClose="goToList" />
@@ -373,13 +373,13 @@ const mapCostExpenses = () => {
       activityExpenses: item.activityExpenses,
       activityName: item.activityName,
       itemAmount: item.itemAmount,
-      // itemText: item.itemText,
+      itemText: item.itemText,
       debitCredit: item.debitCredit,
       taxCode: item.taxCode,
       vatAmount: item.vatAmount,
       costCenter: item.costCenter,
       profitCenter: item.profitCenter,
-      // assignment: item.assigment,
+      assignment: item.assignment,
       whtType: item.whtType,
       whtCode: item.whtCode,
       whtBaseAmount: item.whtBaseAmount,
@@ -583,6 +583,7 @@ const goVerif = () => {
       })
       .finally(() => {
         isLoading.value = false
+        verificationApi.isFromEdit = false
       })
   }
 }

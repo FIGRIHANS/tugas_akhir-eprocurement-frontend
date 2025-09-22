@@ -243,7 +243,7 @@ watch(
 )
 
 watch(
-  () => [form?.value.invoicePoGr, form?.value.additionalCosts],
+  () => [form?.value.invoicePoGr, form?.value.additionalCosts, form.value.invoiceItem],
   () => {
     setCalculation()
   },
