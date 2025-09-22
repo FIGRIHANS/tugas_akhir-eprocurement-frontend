@@ -108,8 +108,12 @@ onMounted(() => {
 
           <tr v-else v-for="item in otherDocStore.data" :key="item.id">
             <td>
-              <UiActions :id="item.id" @on-delete="onModalDelete(item.id)" @on-edit="onOpenForm('edit', item.id)"
-                @on-view="onDownload(item.documentUrl)" />
+              <UiActions
+                :id="item.id"
+                @on-delete="onModalDelete(item.id)"
+                @on-edit="onOpenForm('edit', item.id)"
+                @on-view="onDownload(item.documentUrl)"
+              />
             </td>
             <td>{{ item.documentName }}</td>
             <td>{{ item.documentNo }}</td>
@@ -126,11 +130,22 @@ onMounted(() => {
     </UiButton>
   </div>
 
-  <ModalForm v-if="modalForm" v-model="modalForm" :vendor-id="Number($route.params.id)" :id="selectedId"
-    @on-success="() => (modalSuccess = true)" @on-error="() => (modalError = true)" />
+  <ModalForm
+    v-if="modalForm"
+    v-model="modalForm"
+    :vendor-id="Number($route.params.id)"
+    :id="selectedId"
+    @on-success="() => (modalSuccess = true)"
+    @on-error="() => (modalError = true)"
+  />
 
-  <ModalDelete v-if="modalDelete" v-model="modalDelete" :id="selectedId" @on-error="() => (modalError = true)"
-    @on-success="() => (modalSuccess = true)" />
+  <ModalDelete
+    v-if="modalDelete"
+    v-model="modalDelete"
+    :id="selectedId"
+    @on-error="() => (modalError = true)"
+    @on-success="() => (modalSuccess = true)"
+  />
 
   <!-- Error modal -->
   <UiModal v-model="modalError" size="sm" v-if="modalError">
