@@ -70,14 +70,25 @@
               <td>{{ item.accountName }}</td>
               <td>{{ item.bankSwiftCode }}</td>
               <td class="text-center">
-                <UiButton icon outline size="sm" v-if="item.urlAccountDifferences"
-                  @click="downloadFile(item.urlAccountDifferences)">
+                <UiButton
+                  icon
+                  outline
+                  size="sm"
+                  v-if="item.urlAccountDifferences"
+                  @click="downloadFile(item.urlAccountDifferences)"
+                >
                   <UiIcon name="cloud-download" variant="duotone" />
                 </UiButton>
                 <span v-else>-</span>
               </td>
               <td class="text-center">
-                <UiButton icon outline size="sm" v-if="item.urlFirstPage" @click="downloadFile(item.urlFirstPage)">
+                <UiButton
+                  icon
+                  outline
+                  size="sm"
+                  v-if="item.urlFirstPage"
+                  @click="downloadFile(item.urlFirstPage)"
+                >
                   <UiIcon name="cloud-download" variant="duotone" />
                 </UiButton>
                 <span v-else>-</span>
@@ -103,95 +114,197 @@
     </div>
 
     <!-- Form modal -->
-    <UiModal :title="modalTitle" v-model="isModalOpen" @update:model-value="closeModal" size="lg" static>
+    <UiModal
+      :title="modalTitle"
+      v-model="isModalOpen"
+      @update:model-value="closeModal"
+      size="lg"
+      static
+    >
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
         <UiFormGroup hide-border>
-          <UiInput label="Bank Account Number" placeholder="Enter Bank Account Number" required
-            :disabled="mode === 'view'" v-model="payload.request.vendorBankDetail.accountNo"
+          <UiInput
+            label="Bank Account Number"
+            placeholder="Enter Bank Account Number"
+            required
+            :disabled="mode === 'view'"
+            v-model="payload.request.vendorBankDetail.accountNo"
             :error="bankDetailError.includes('accountNo')"
-            :hint-text="bankDetailError.includes('accountNo') ? 'Account Number required' : ''" />
+            :hint-text="bankDetailError.includes('accountNo') ? 'Account Number required' : ''"
+          />
 
           <div class="h-[40px]">
-            <UiCheckbox label="Holder's name is different from the company name."
-              v-model="payload.request.vendorBankDetail.isHolderNameDifferent" :disabled="mode === 'view'" />
+            <UiCheckbox
+              label="Holder's name is different from the company name."
+              v-model="payload.request.vendorBankDetail.isHolderNameDifferent"
+              :disabled="mode === 'view'"
+            />
           </div>
 
           <div class="relative" v-if="payload.request.vendorBankDetail.isHolderNameDifferent">
-            <div class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px]">
+            <div
+              class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px]"
+            >
               Account Cover
               <span class="text-danger"> *</span>
             </div>
-            <UiFileUpload name="accountCover" accepted-files=".jpg,.jpeg,.png,.pdf,.zip"
+            <UiFileUpload
+              name="accountCover"
+              accepted-files=".jpg,.jpeg,.png,.pdf,.zip"
               placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
               :error="bankDetailError.includes('urlFirstPage')"
               :hint-text="bankDetailError.includes('urlFirstPage') ? 'Account Cover required' : ''"
-              @addedFile="uploadFile($event, 'first page')" :disabled="mode === 'view'" />
+              @addedFile="uploadFile($event, 'first page')"
+              :disabled="mode === 'view'"
+            />
           </div>
 
-          <UiSelect label="Bank Key" placeholder="Select" :options="bankOptions" valueKey="bankKey" textKey="label"
-            required :disabled="mode === 'view' || isBankNotRegistered"
-            v-model="payload.request.vendorBankDetail.bankKey" :error="bankDetailError.includes('bankKey')"
-            :hint-text="bankDetailError.includes('bankKey') ? 'Bank Key required' : ''" />
-          <UiInput v-if="isBankNotRegistered" label="Bank Name" placeholder="Bank Name" required
-            v-model="payload.request.bankDetailDto.bankName" :error="bankDtoError.includes('bankName')"
-            :hint-text="bankDtoError.includes('bankName') ? 'Bank Name required' : ''" :disabled="mode === 'view'" />
-          <UiInput v-if="isBankNotRegistered" label="Bank Key" placeholder="Bank Key" required
-            v-model="payload.request.bankDetailDto.bankKey" :error="bankDtoError.includes('bankKey')"
-            :hint-text="bankDtoError.includes('bankKey') ? 'Bank Key required' : ''" :disabled="mode === 'view'" />
+          <UiSelect
+            label="Bank Key"
+            placeholder="Select"
+            :options="bankOptions"
+            valueKey="bankKey"
+            textKey="label"
+            required
+            :disabled="mode === 'view' || isBankNotRegistered"
+            v-model="payload.request.vendorBankDetail.bankKey"
+            :error="bankDetailError.includes('bankKey')"
+            :hint-text="bankDetailError.includes('bankKey') ? 'Bank Key required' : ''"
+          />
+          <UiInput
+            v-if="isBankNotRegistered"
+            label="Bank Name"
+            placeholder="Bank Name"
+            required
+            v-model="payload.request.bankDetailDto.bankName"
+            :error="bankDtoError.includes('bankName')"
+            :hint-text="bankDtoError.includes('bankName') ? 'Bank Name required' : ''"
+            :disabled="mode === 'view'"
+          />
+          <UiInput
+            v-if="isBankNotRegistered"
+            label="Bank Key"
+            placeholder="Bank Key"
+            required
+            v-model="payload.request.bankDetailDto.bankKey"
+            :error="bankDtoError.includes('bankKey')"
+            :hint-text="bankDtoError.includes('bankKey') ? 'Bank Key required' : ''"
+            :disabled="mode === 'view'"
+          />
 
           <!-- bank addres utk bank yang terdaftar -->
-          <UiInput v-model="payload.request.vendorBankDetail.bankAddress" label="Bank Address"
-            placeholder="Bank Address" required :error="bankDetailError.includes('bankAddress')"
+          <UiInput
+            v-model="payload.request.vendorBankDetail.bankAddress"
+            label="Bank Address"
+            placeholder="Bank Address"
+            required
+            :error="bankDetailError.includes('bankAddress')"
             :hint-text="bankDetailError.includes('bankAddress') ? 'Bank Address required' : ''"
-            v-if="!isBankNotRegistered" :disabled="mode === 'view'" />
+            v-if="!isBankNotRegistered"
+            :disabled="mode === 'view'"
+          />
 
           <!-- bank address utk bank yang belum terdaftar -->
-          <UiInput v-model="payload.request.bankDetailDto.address" label="Bank Address" placeholder="Bank Address"
-            required :error="bankDtoError.includes('address')"
-            :hint-text="bankDtoError.includes('address') ? 'Bank Address required' : ''" v-if="isBankNotRegistered"
-            @update:model-value="payload.request.vendorBankDetail.bankAddress = $event" :disabled="mode === 'view'" />
+          <UiInput
+            v-model="payload.request.bankDetailDto.address"
+            label="Bank Address"
+            placeholder="Bank Address"
+            required
+            :error="bankDtoError.includes('address')"
+            :hint-text="bankDtoError.includes('address') ? 'Bank Address required' : ''"
+            v-if="isBankNotRegistered"
+            @update:model-value="payload.request.vendorBankDetail.bankAddress = $event"
+            :disabled="mode === 'view'"
+          />
         </UiFormGroup>
         <UiFormGroup hide-border>
-          <UiInput label="Account Holder Name" placeholder="Enter full name as written in bank book" required
-            v-model="payload.request.vendorBankDetail.accountName" :error="bankDetailError.includes('accountName')"
+          <UiInput
+            label="Account Holder Name"
+            placeholder="Enter full name as written in bank book"
+            required
+            v-model="payload.request.vendorBankDetail.accountName"
+            :error="bankDetailError.includes('accountName')"
             :hint-text="bankDetailError.includes('accountName') ? 'Account Name required' : ''"
-            :disabled="mode === 'view'" />
-          <UiSelect label="Currency" placeholder="Select" :options="currencyOptions" valueKey="currencyCode"
-            textKey="label" required v-model="payload.request.vendorBankDetail.currencySymbol"
+            :disabled="mode === 'view'"
+          />
+          <UiSelect
+            label="Currency"
+            placeholder="Select"
+            :options="currencyOptions"
+            valueKey="currencyCode"
+            textKey="label"
+            required
+            v-model="payload.request.vendorBankDetail.currencySymbol"
             :error="bankDetailError.includes('currencySymbol')"
             :hint-text="bankDetailError.includes('currencySymbol') ? 'Currency required' : ''"
-            :disabled="mode === 'view'" />
+            :disabled="mode === 'view'"
+          />
 
           <div class="relative" v-if="payload.request.vendorBankDetail.isHolderNameDifferent">
-            <div class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px]">
+            <div
+              class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px]"
+            >
               Account Discrepancy Statement
               <span class="text-danger"> *</span>
             </div>
-            <UiFileUpload name="accountDiscrepancyStatement" accepted-files=".jpg,.jpeg,.png,.pdf,.zip"
+            <UiFileUpload
+              name="accountDiscrepancyStatement"
+              accepted-files=".jpg,.jpeg,.png,.pdf,.zip"
               placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
-              :error="bankDetailError.includes('urlAccountDifferences')" :hint-text="bankDetailError.includes('urlAccountDifferences')
-                ? 'Account Difference required'
-                : ''
-                " @addedFile="uploadFile($event, 'different account')" :disabled="mode === 'view'" />
+              :error="bankDetailError.includes('urlAccountDifferences')"
+              :hint-text="
+                bankDetailError.includes('urlAccountDifferences')
+                  ? 'Account Difference required'
+                  : ''
+              "
+              @addedFile="uploadFile($event, 'different account')"
+              :disabled="mode === 'view'"
+            />
           </div>
 
           <div class="h-[40px]">
-            <UiCheckbox label="Bank not registered." v-model="isBankNotRegistered"
-              @update:mode-value="console.log('Bank not registered:')" :disabled="mode === 'view'" />
+            <UiCheckbox
+              label="Bank not registered."
+              v-model="isBankNotRegistered"
+              @update:mode-value="console.log('Bank not registered:')"
+              :disabled="mode === 'view'"
+            />
           </div>
 
-          <UiSelect v-if="isBankNotRegistered" label="Bank Country" placeholder="Select" :options="countryOptions"
-            valueKey="value" textKey="label" required v-model="payload.request.bankDetailDto.bankCountryCode"
+          <UiSelect
+            v-if="isBankNotRegistered"
+            label="Bank Country"
+            placeholder="Select"
+            :options="countryOptions"
+            valueKey="value"
+            textKey="label"
+            required
+            v-model="payload.request.bankDetailDto.bankCountryCode"
             :error="bankDtoError.includes('bankCountryCode')"
             :hint-text="bankDtoError.includes('bankCountryCode') ? 'Country required' : ''"
-            :disabled="mode === 'view'" />
+            :disabled="mode === 'view'"
+          />
 
-          <UiInput v-if="isBankNotRegistered" label="Bank Branch" placeholder="Bank Branch" required
-            v-model="payload.request.bankDetailDto.branch" :error="bankDtoError.includes('branch')"
-            :hint-text="bankDtoError.includes('branch') ? 'Branch required' : ''" :disabled="mode === 'view'" />
-          <UiInput v-if="isBankNotRegistered" label="Swift Code" placeholder="Swift Code" required
-            v-model="payload.request.bankDetailDto.swiftCode" :error="bankDtoError.includes('swiftCode')"
-            :hint-text="bankDtoError.includes('swiftCode') ? 'Swift Code required' : ''" :disabled="mode === 'view'" />
+          <UiInput
+            v-if="isBankNotRegistered"
+            label="Bank Branch"
+            placeholder="Bank Branch"
+            required
+            v-model="payload.request.bankDetailDto.branch"
+            :error="bankDtoError.includes('branch')"
+            :hint-text="bankDtoError.includes('branch') ? 'Branch required' : ''"
+            :disabled="mode === 'view'"
+          />
+          <UiInput
+            v-if="isBankNotRegistered"
+            label="Swift Code"
+            placeholder="Swift Code"
+            required
+            v-model="payload.request.bankDetailDto.swiftCode"
+            :error="bankDtoError.includes('swiftCode')"
+            :hint-text="bankDtoError.includes('swiftCode') ? 'Swift Code required' : ''"
+            :disabled="mode === 'view'"
+          />
         </UiFormGroup>
       </div>
       <div class="mt-4 w-full flex justify-end items-center gap-2">
@@ -199,7 +312,12 @@
           <UiIcon name="black-left-line" />
           <span>Cancel</span>
         </UiButton>
-        <UiButton variant="primary" @click="handleSubmit" :disabled="isSaveLoading" v-if="mode !== 'view'">
+        <UiButton
+          variant="primary"
+          @click="handleSubmit"
+          :disabled="isSaveLoading"
+          v-if="mode !== 'view'"
+        >
           <UiLoading variant="white" v-if="isSaveLoading" />
           <UiIcon name="file-added" variant="duotone" v-else />
           <span>Save</span>
@@ -210,19 +328,31 @@
     <!-- Delete Modal -->
     <UiModal v-model="deleteModal" size="sm">
       <div class="text-center mb-6">
-        <UiIcon name="cross-circle" variant="duotone" class="text-[150px] text-danger text-center" />
+        <UiIcon
+          name="cross-circle"
+          variant="duotone"
+          class="text-[150px] text-danger text-center"
+        />
       </div>
       <h3 class="text-center text-lg font-medium">Are You Sure You Want to Delete This Item?</h3>
       <p class="text-center text-base text-gray-600 mb-5">
         This action will permanently remove the selected data from the list.
       </p>
       <div class="flex gap-3 px-8 mb-3">
-        <UiButton outline @click="deleteModal = false" class="flex-1 flex items-center justify-center">
+        <UiButton
+          outline
+          @click="deleteModal = false"
+          class="flex-1 flex items-center justify-center"
+        >
           <UiIcon name="black-left-line" />
           <span>Cancel</span>
         </UiButton>
-        <UiButton variant="danger" class="flex-1 flex items-center justify-center" @click="handleDelete"
-          :disabled="isSaveLoading">
+        <UiButton
+          variant="danger"
+          class="flex-1 flex items-center justify-center"
+          @click="handleDelete"
+          :disabled="isSaveLoading"
+        >
           <UiLoading variant="white" v-if="isSaveLoading" />
           <UiIcon name="cross-circle" variant="duotone" v-else />
           <span>Delete</span>
@@ -242,7 +372,11 @@
     <!-- Error Modal -->
     <UiModal v-model="errorModal" size="sm">
       <div class="text-center mb-6">
-        <UiIcon name="cross-circle" variant="duotone" class="text-[150px] text-danger text-center" />
+        <UiIcon
+          name="cross-circle"
+          variant="duotone"
+          class="text-[150px] text-danger text-center"
+        />
       </div>
       <h3 class="text-center text-lg font-medium">
         Failed to {{ mode == 'delete' ? 'Delete' : mode === 'edit' ? 'Change' : 'Add' }} Payment
@@ -253,12 +387,26 @@
         problem persists.
       </p>
     </UiModal>
+
+    <!-- File Size Error Modal -->
+    <ModalConfirmation
+      :open="fileSizeErrorModal"
+      id="file-size-error"
+      type="danger"
+      title="File Size Exceeded"
+      text="File size exceeds the maximum limit of 16 MB. Please choose a smaller file."
+      no-cancel
+      static
+      submit-button-text="Close"
+      :submit="() => (fileSizeErrorModal = false)"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
 import UiModal from '@/components/modal/UiModal.vue'
+import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiCheckbox from '@/components/ui/atoms/checkbox/UiCheckbox.vue'
 import UiFileUpload from '@/components/ui/atoms/file-upload/UiFileUpload.vue'
@@ -328,6 +476,7 @@ const selectedPaymentId = ref<number | null>(null)
 const successModal = ref(false)
 const errorModal = ref(false)
 const deleteModal = ref(false)
+const fileSizeErrorModal = ref(false)
 
 const isBankNotRegistered = ref(false)
 
@@ -393,6 +542,13 @@ const downloadFile = async (path: string) => {
 const uploadFile = async (file: File, type: 'different account' | 'first page') => {
   if (!file) return
 
+  // Validate file size (16 MB = 16 * 1024 * 1024 bytes)
+  const maxSizeInBytes = 16 * 1024 * 1024
+  if (file.size > maxSizeInBytes) {
+    fileSizeErrorModal.value = true
+    return
+  }
+
   const formData = new FormData()
   formData.append('FormFile', file)
   formData.append('Actioner', userStore.userData?.profile.profileId.toString() || '0')
@@ -409,6 +565,13 @@ const uploadFile = async (file: File, type: 'different account' | 'first page') 
     if (error instanceof Error) {
       console.error(error)
       alert('File upload failed. Please try again.')
+
+      // Clear the file URLs to ensure failed uploads don't persist
+      if (type === 'different account') {
+        payload.value.request.vendorBankDetail.urlAccountDifferences = ''
+      } else if (type === 'first page') {
+        payload.value.request.vendorBankDetail.urlFirstPage = ''
+      }
     }
   }
 }
@@ -506,11 +669,10 @@ const handleSubmit = async () => {
         emailTo: adminStore?.data?.vendorEmail || '',
         emailCc: '',
         emailBcc: '',
-      }
+      },
     })
 
     successModal.value = true
-
   } catch (error) {
     if (error instanceof Error) {
       errorModal.value = true

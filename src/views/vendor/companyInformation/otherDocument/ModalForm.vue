@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import DatePicker from '@/components/datePicker/DatePicker.vue'
+import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 import UiModal from '@/components/modal/UiModal.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiFileUpload from '@/components/ui/atoms/file-upload/UiFileUpload.vue'
@@ -35,10 +36,10 @@ const formData = ref({
   vendorID: props.vendorId,
   documentName: '',
   documentNo: '',
-  documentUrl: '',
-  expiredUTCDate: '',
-  issuedUTCDate: '',
-  validDate: '',
+  documentUrl: null,
+  expiredUTCDate: null,
+  issuedUTCDate: null,
+  validDate: null,
   remark: 'Other document',
   isActive: true,
 })
@@ -46,6 +47,7 @@ const formError = ref<string[]>([])
 const uploadError = ref('')
 const uploadLoading = ref(false)
 const submitLoading = ref(false)
+const fileSizeErrorModal = ref(false)
 
 const selectedItem = computed(() => otherDocStore.data.find((item) => item.id === props.id))
 
@@ -60,7 +62,9 @@ const onSelectDate = () => {
 const onSubmit = async () => {
   formError.value = checkEmptyValues(formData.value)
 
-  formError.value = formError.value.filter((form) => !['id', 'expiredUTCDate', 'issuedUTCDate', 'validDate'].includes(form))
+  formError.value = formError.value.filter(
+    (form) => !['id', 'expiredUTCDate', 'issuedUTCDate', 'validDate', 'documentUrl'].includes(form),
+  )
 
   console.log(formError.value)
 
@@ -76,8 +80,8 @@ const onSubmit = async () => {
       recepients: {
         emailTo: adminStore.data.vendorEmail,
         emailCc: '',
-        emailBcc: ''
-      }
+        emailBcc: '',
+      },
     })
 
     emit('onSuccess')
@@ -89,6 +93,10 @@ const onSubmit = async () => {
     submitLoading.value = false
     model.value = false
   }
+}
+
+const handleUploadFailed = () => {
+  fileSizeErrorModal.value = true
 }
 
 const onUploadFile = async (file: File) => {
@@ -128,31 +136,48 @@ onMounted(() => {
     <form @submit.prevent="onSubmit">
       <UiFormGroup hide-border>
         <!-- document name -->
-        <UiInput label="Document Name" required v-model="formData.documentName"
+        <UiInput
+          label="Document Name"
+          required
+          v-model="formData.documentName"
           :error="formError.includes('documentName')"
-          :hint-text="formError.includes('documentName') ? 'Document name required' : ''" />
+          :hint-text="formError.includes('documentName') ? 'Document name required' : ''"
+        />
 
         <!-- Document Number -->
-        <UiInput label="Document Number" required v-model="formData.documentNo"
+        <UiInput
+          label="Document Number"
+          required
+          v-model="formData.documentNo"
           :error="formError.includes('documentNo')"
-          :hint-text="formError.includes('documentNo') ? 'Document number required' : ''" />
+          :hint-text="formError.includes('documentNo') ? 'Document number required' : ''"
+        />
 
         <!-- Available Until -->
         <div class="relative">
-          <span class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px] z-10">
+          <span
+            class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px] z-10"
+          >
             Available Until
           </span>
-          <DatePicker placeholder="Start Date" v-model="formData.expiredUTCDate" @update:model-value="onSelectDate" />
+          <DatePicker
+            placeholder="Start Date"
+            v-model="formData.expiredUTCDate"
+            @update:model-value="onSelectDate"
+          />
         </div>
 
         <!-- upload -->
-        <UiFileUpload accepted-files=".jpg,.jpeg,.png,.pdf,.zip" name="file"
-          placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)" @added-file="onUploadFile" :hint-text="uploadError
-            ? 'An error accoured, please try again'
-            : formError.includes('documentUrl')
-              ? 'Document required'
-              : ''
-            " :error="formError.includes('documentUrl')" :disabled="uploadLoading" />
+        <UiFileUpload
+          accepted-files=".jpg,.jpeg,.png,.pdf,.zip"
+          name="file"
+          placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
+          @added-file="onUploadFile"
+          @upload-failed="handleUploadFailed"
+          :disabled="uploadLoading"
+          :max-size="16000000"
+          hint-text="*jpg, jpeg, png, pdf, zip / max : 16 MB"
+        />
       </UiFormGroup>
       <div class="flex justify-end gap-3 mt-3">
         <UiButton outline type="button" @click="model = false">
@@ -166,5 +191,18 @@ onMounted(() => {
         </UiButton>
       </div>
     </form>
+
+    <!-- File Size Error Modal -->
+    <ModalConfirmation
+      :open="fileSizeErrorModal"
+      id="file-size-error"
+      type="danger"
+      title="File Size Exceeded"
+      text="File size exceeds the maximum limit of 16 MB. Please choose a smaller file."
+      no-cancel
+      static
+      submit-button-text="Close"
+      :submit="() => (fileSizeErrorModal = false)"
+    />
   </UiModal>
 </template>
