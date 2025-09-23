@@ -228,14 +228,14 @@ const onSubmit = async () => {
   try {
     await expertStore.update(payload.value)
 
-    await changeDataEmailStore.sendEmail({
-      recepientName: adminStore.data.vendorName || '',
-      recepients: {
-        emailTo: adminStore.data.vendorEmail || '',
-        emailCc: '',
-        emailBcc: '',
-      },
-    })
+    // await changeDataEmailStore.sendEmail({
+    //   recepientName: adminStore.data.vendorName || '',
+    //   recepients: {
+    //     emailTo: adminStore.data.vendorEmail || '',
+    //     emailCc: '',
+    //     emailBcc: '',
+    //   },
+    // })
 
     emit('onSuccess')
     // await expertStore.getData(Number(route.params.id))

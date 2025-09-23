@@ -418,7 +418,7 @@ import UiLoading from '@/components/UiLoading.vue'
 import { checkEmptyValues } from '@/composables/validation'
 import { type CurrencyListType } from '@/stores/master-data/types/vendor-master-data'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
-import { useChangeDataEmailStore } from '@/stores/vendor/email-change-data'
+// import { useChangeDataEmailStore } from '@/stores/vendor/email-change-data'
 import type { IPaymentPayload } from '@/stores/vendor/types/vendor'
 import { useVendorUploadStore } from '@/stores/vendor/upload'
 import { useVendorAdministrationStore, useVendorPaymentStore } from '@/stores/vendor/vendor'
@@ -433,7 +433,7 @@ const uploadStore = useVendorUploadStore()
 const lookupStore = useVendorMasterDataStore()
 const userStore = useLoginStore()
 const adminStore = useVendorAdministrationStore()
-const changeDataEmailStore = useChangeDataEmailStore()
+// const changeDataEmailStore = useChangeDataEmailStore()
 
 const route = useRoute()
 
@@ -663,14 +663,14 @@ const handleSubmit = async () => {
     isSaveLoading.value = true
     await paymentDataStore.addPayment(payload.value)
 
-    await changeDataEmailStore.sendEmail({
-      recepientName: adminStore?.data?.vendorName || '',
-      recepients: {
-        emailTo: adminStore?.data?.vendorEmail || '',
-        emailCc: '',
-        emailBcc: '',
-      },
-    })
+    // await changeDataEmailStore.sendEmail({
+    //   recepientName: adminStore?.data?.vendorName || '',
+    //   recepients: {
+    //     emailTo: adminStore?.data?.vendorEmail || '',
+    //     emailCc: '',
+    //     emailBcc: '',
+    //   },
+    // })
 
     successModal.value = true
   } catch (error) {
