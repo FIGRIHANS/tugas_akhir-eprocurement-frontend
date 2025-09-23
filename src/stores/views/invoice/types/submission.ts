@@ -353,11 +353,28 @@ export interface ParamsCheckBudgetType {
     FIS_PERIOD: number
     DOC_TYPE: string
     REF_DOC_NO: string
+    CUSTOMERCPD: ParamsCostumerTypes
     GLACCOUNT_DATA: GlaccountDatum[]
     ACCOUNT_PAYABLE: AccountPayable[]
     ACCOUNTTAX: Accounttax[]
     CURRENCYAMOUNT: Currencyamount[]
   }
+}
+
+export interface ParamsCostumerTypes {
+  NAME: string
+  NAME_2: string
+  POSTL_CODE: string
+  CITY: string
+  COUNTRY: string
+  STREET: string
+  BANK_ACCT: string
+  BANK_NO: string
+  BANK_CTRY: string
+  TAX_NO_1: string
+  TAX_NO_3: string
+  LANGU_ISO: string
+  GLO_RE1_OT: string
 }
 
 export interface Accounttax {

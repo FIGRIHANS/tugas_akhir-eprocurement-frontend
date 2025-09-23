@@ -1034,13 +1034,13 @@ const mapDataCheck = () => {
     totalVatAmountCurr += item.vatAmount
   }
   itemNoAcc.value += 1
-  const currData = {
-    ITEMNO_ACC: itemNoAcc.value,
-    CURRENCY: form.currency,
-    AMT_DOCCUR: (totalItemAmountCurr + totalVatAmountCurr) * -1,
-    AMT_BASE: 0,
-  }
-  currencyAmount.push(currData)
+    const currData = {
+      ITEMNO_ACC: itemNoAcc.value,
+      CURRENCY: form.currency,
+      AMT_DOCCUR: (totalItemAmountCurr + totalVatAmountCurr) * -1,
+      AMT_BASE: 0,
+    }
+    currencyAmount.push(currData)
 
   for (const item of accountTax) {
     const filterTax = form.invoiceItem.filter((sub) => sub.taxCode === item.TAX_CODE)
@@ -1068,6 +1068,21 @@ const mapDataCheck = () => {
       COMP_CODE: form.companyCode,
       DOC_DATE: moment(form.invoiceDate).format('YYYYMMDD'),
       REF_DOC_NO: form.invoiceNoVendor,
+      CUSTOMERCPD: {
+        NAME: form.nameAlternative,
+        NAME_2: form.nameOtherAlternative,
+        POSTL_CODE: '',
+        CITY: form.cityAlternative,
+        COUNTRY: form.countryAlternative,
+        STREET: form.streetAltiernative,
+        BANK_ACCT: form.bankAccountNumberAlternative,
+        BANK_NO: form.bankKeyAlternative,
+        BANK_CTRY: form.bankCountryAlternative,
+        TAX_NO_1: form.npwpNumberAlternative,
+        TAX_NO_3: form.ktpNumberAlternative,
+        LANGU_ISO: '',
+        GLO_RE1_OT: ''
+      },
       GLACCOUNT_DATA: glAccount,
       ACCOUNT_PAYABLE: accountPayable,
       ACCOUNTTAX: accountTax,
