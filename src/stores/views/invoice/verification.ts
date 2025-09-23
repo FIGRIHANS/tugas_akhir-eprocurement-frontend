@@ -13,6 +13,7 @@ import type {
   ParamsRejectTypes,
   ParamsSubmissionCost,
   ListNonPoTypes,
+  PostEditApprovalNonPoTypes
 } from './types/verification'
 
 export const useInvoiceVerificationStore = defineStore('invoiceVerification', () => {
@@ -207,6 +208,12 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     return response.data.result
   }
 
+  const putSubmissionNonPo = async (data: PostEditApprovalNonPoTypes) => {
+    const response: ApiResponse<void> = await invoiceApi.put(`/invoice/edit-non-po`, data)
+
+    return response.data.result
+  }
+
   const putEditInvoice = async (data: PostVerificationTypes) => {
     const response: ApiResponse<void> = await invoiceApi.put(`/invoice/edit`, data)
 
@@ -253,5 +260,6 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     getInvoiceNonPoDetail,
     verifyInvoiceNonPo,
     putEditInvoice,
+    putSubmissionNonPo,
   }
 })

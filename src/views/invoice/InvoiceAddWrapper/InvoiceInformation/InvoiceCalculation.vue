@@ -31,7 +31,7 @@ import { ref, computed, onMounted, watch, inject } from 'vue'
 import { useRoute } from 'vue-router'
 import type { listType } from '../../types/invoiceCalculation'
 import type { formTypes } from '../../types/invoiceAddWrapper'
-import { defaultField, dpField } from '@/static/invoiceCalculation'
+import { defaultField, dpField, nonPoField } from '@/static/invoiceCalculation'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 
@@ -224,10 +224,12 @@ const countTotalNetAmount = () => {
 }
 
 watch(
-  () => [form?.invoiceDp],
+  () => form,
   () => {
     if (form?.invoiceDp !== '9011') {
       listName.value = [...dpField]
+    } else if (checkIsNonPo()) {
+      listName.value = [...nonPoField]
     } else {
       listName.value = [...defaultField]
     }
