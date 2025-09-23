@@ -150,14 +150,14 @@ const handleSubmit = async () => {
 
     await companyDeedDataStore.postShareholders(payloadToSend)
 
-    await changeDataEmailStore.sendEmail({
-      recepientName: adminStore.data?.vendorName || '',
-      recepients: {
-        emailTo: adminStore.data?.vendorEmail || '',
-        emailCc: '',
-        emailBcc: '',
-      },
-    })
+    // await changeDataEmailStore.sendEmail({
+    //   recepientName: adminStore.data?.vendorName || '',
+    //   recepients: {
+    //     emailTo: adminStore.data?.vendorEmail || '',
+    //     emailCc: '',
+    //     emailBcc: '',
+    //   },
+    // })
 
     handleCloseModal()
     showSuccessModal.value = true

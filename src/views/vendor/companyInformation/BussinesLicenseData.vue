@@ -25,20 +25,44 @@
     </div>
 
     <!-- modal confirm -->
-    <ModalConfirmation :open="isOpenModalConfirmSave" id="license-save" type="confirm" title="Save"
-      text="You are about to Save to this data. Please review your input before continuing" static
-      :loading="isLoadingSubmit" cancel-button-text="Cancel" submit-button-text="Save"
-      :cancel="() => (isOpenModalConfirmSave = false)" :submit="onConfirmSave" />
+    <ModalConfirmation
+      :open="isOpenModalConfirmSave"
+      id="license-save"
+      type="confirm"
+      title="Save"
+      text="You are about to Save to this data. Please review your input before continuing"
+      static
+      :loading="isLoadingSubmit"
+      cancel-button-text="Cancel"
+      submit-button-text="Save"
+      :cancel="() => (isOpenModalConfirmSave = false)"
+      :submit="onConfirmSave"
+    />
 
     <!-- modal success -->
-    <ModalConfirmation :open="isOpenModalSuccess" id="license-save-success" type="success"
+    <ModalConfirmation
+      :open="isOpenModalSuccess"
+      id="license-save-success"
+      type="success"
       title="Business License Data Sucessfully Updated"
-      text="The data has been successfully updated in the admin system" no-cancel static submit-button-text="Close"
-      :submit="() => (isOpenModalSuccess = false)" />
+      text="The data has been successfully updated in the admin system"
+      no-cancel
+      static
+      submit-button-text="Close"
+      :submit="() => (isOpenModalSuccess = false)"
+    />
     <!-- modal error -->
-    <ModalConfirmation :open="isOpenModalError" type="danger" id="license-save-error" title="Error Updated Data"
-      text="An error occurred while updating the data. Please try again later." no-cancel static
-      submit-button-text="Close" :submit="() => (isOpenModalError = false)" />
+    <ModalConfirmation
+      :open="isOpenModalError"
+      type="danger"
+      id="license-save-error"
+      title="Error Updated Data"
+      text="An error occurred while updating the data. Please try again later."
+      no-cancel
+      static
+      submit-button-text="Close"
+      :submit="() => (isOpenModalError = false)"
+    />
   </div>
 </template>
 
@@ -54,10 +78,10 @@ import type { ILicense, IOtherDocument } from '@/stores/vendor/types/vendor'
 import { useLoginStore } from '@/stores/views/login'
 import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 import type { IPayloadRequestUpdateLicense } from '@/stores/vendor/types/bussines-license'
-import { useChangeDataEmailStore } from '@/stores/vendor/email-change-data'
+// import { useChangeDataEmailStore } from '@/stores/vendor/email-change-data'
 
 const adminStore = useVendorAdministrationStore()
-const changeDataEmailStore = useChangeDataEmailStore()
+// const changeDataEmailStore = useChangeDataEmailStore()
 
 interface IRowItem {
   vendorId?: number
@@ -228,14 +252,14 @@ const saveData = async () => {
   try {
     await vendorLicenseData.updateData(payload)
 
-    await changeDataEmailStore.sendEmail({
-      recepientName: adminStore.data?.vendorName,
-      recepients: {
-        emailTo: adminStore.data?.vendorEmail || '',
-        emailCc: '',
-        emailBcc: '',
-      },
-    })
+    // await changeDataEmailStore.sendEmail({
+    //   recepientName: adminStore.data?.vendorName,
+    //   recepients: {
+    //     emailTo: adminStore.data?.vendorEmail || '',
+    //     emailCc: '',
+    //     emailBcc: '',
+    //   },
+    // })
 
     isOpenModalSuccess.value = true
   } catch (error: unknown) {

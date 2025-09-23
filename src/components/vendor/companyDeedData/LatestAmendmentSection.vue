@@ -185,14 +185,14 @@ const handleSave = async () => {
       3116,
     )
 
-    await changeDataEmailStore.sendEmail({
-      recepientName: adminStore.data?.vendorName || '',
-      recepients: {
-        emailTo: adminStore.data?.vendorEmail || '',
-        emailCc: '',
-        emailBcc: '',
-      },
-    })
+    // await changeDataEmailStore.sendEmail({
+    //   recepientName: adminStore.data?.vendorName || '',
+    //   recepients: {
+    //     emailTo: adminStore.data?.vendorEmail || '',
+    //     emailCc: '',
+    //     emailBcc: '',
+    //   },
+    // })
 
     showSuccessModal.value = true
 
