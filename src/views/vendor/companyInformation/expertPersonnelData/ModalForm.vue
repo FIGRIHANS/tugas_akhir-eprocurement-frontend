@@ -19,6 +19,7 @@ import { useRoute } from 'vue-router'
 import UiFileUpload from '@/components/ui/atoms/file-upload/UiFileUpload.vue'
 import { useVendorUploadStore } from '@/stores/vendor/upload'
 import UiLoading from '@/components/UiLoading.vue'
+import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 import { useExpertPersonnelDataStore, useVendorAdministrationStore } from '@/stores/vendor/vendor'
 import { cloneDeep } from 'lodash'
 import { defaultPayload, defaultPayloadError } from './static'
@@ -67,6 +68,7 @@ const certificateType = ref<IReferenceList[]>([])
 
 const uploadLoading = ref<boolean>(false)
 const submitLoading = ref<boolean>(false)
+const fileSizeErrorModal = ref<boolean>(false)
 
 const payload = ref<PayloadExportPersonnelDataType>(cloneDeep(defaultPayload))
 const payloadError = ref<ErrorExportPersonnelDataType>(cloneDeep(defaultPayloadError))
@@ -141,6 +143,7 @@ const removeCertificate = (index: number, code: number) => {
 
 const uploadFile = async (file: File, index: number, code: number) => {
   if (!file) return
+
   const formDataFile = new FormData()
   formDataFile.append('FormFile', file)
   formDataFile.append('Actioner', userStore.userData?.profile.profileId.toString() || '0')
@@ -230,8 +233,8 @@ const onSubmit = async () => {
       recepients: {
         emailTo: adminStore.data.vendorEmail || '',
         emailCc: '',
-        emailBcc: ''
-      }
+        emailBcc: '',
+      },
     })
 
     emit('onSuccess')
@@ -267,15 +270,15 @@ watch(
         status: selectedItem.status,
         certificates: !certificates.result.isError
           ? certificates?.result?.content?.map((certi) => ({
-            vendorExpertId: certi.vendorExpertsID,
-            description: certi.description,
-            docUrl: certi.docUrl,
-            endDate: certi.endDate,
-            id: certi.id,
-            isActive: certi.isActive,
-            startDate: certi.startDate,
-            type: certi.type,
-          }))
+              vendorExpertId: certi.vendorExpertsID,
+              description: certi.description,
+              docUrl: certi.docUrl,
+              endDate: certi.endDate,
+              id: certi.id,
+              isActive: certi.isActive,
+              startDate: certi.startDate,
+              type: certi.type,
+            }))
           : [],
       }
     }
@@ -295,70 +298,158 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="modal" data-modal="true" data-modal-backdrop-static="true" id="modal-expert-personnel">
-    <div class="modal-content modal-center-y"
-      :class="tab.active === 'personal_information' ? 'max-w-4xl' : 'max-w-7xl'">
+  <div
+    class="modal"
+    data-modal="true"
+    data-modal-backdrop-static="true"
+    id="modal-expert-personnel"
+  >
+    <div
+      class="modal-content modal-center-y"
+      :class="tab.active === 'personal_information' ? 'max-w-4xl' : 'max-w-7xl'"
+    >
       <div class="modal-header">
         <h3 class="modal-title text-lg">Expert Personnel Data</h3>
       </div>
 
       <div class="modal-body !py-5 flex flex-col items-center gap-4">
         <div class="tabs">
-          <div v-for="item in tab.items" :key="item.value" class="tab"
-            :class="item.value === tab.active ? 'active' : ''">
-            <div class="size-5 rounded-full flex items-center justify-center"
-              :class="item.value === tab.active ? 'bg-primary' : 'bg-gray-600'">
-              <UiIcon :name="item.icon" variant="solid" class="!text-xs"
-                :class="item.value === tab.active ? '!text-white' : '!text-primary-light'" />
+          <div
+            v-for="item in tab.items"
+            :key="item.value"
+            class="tab"
+            :class="item.value === tab.active ? 'active' : ''"
+          >
+            <div
+              class="size-5 rounded-full flex items-center justify-center"
+              :class="item.value === tab.active ? 'bg-primary' : 'bg-gray-600'"
+            >
+              <UiIcon
+                :name="item.icon"
+                variant="solid"
+                class="!text-xs"
+                :class="item.value === tab.active ? '!text-white' : '!text-primary-light'"
+              />
             </div>
             {{ item.label }}
           </div>
         </div>
 
         <div v-if="tab.active === 'personal_information'" class="grid grid-cols-2 gap-4 w-full">
-          <UiInput v-model="payload.name" label="Name" placeholder="Name" required :error="payloadError.name"
-            :hint-text="payloadError.name ? 'Name Required' : ''" :readonly="mode === 'view'" />
+          <UiInput
+            v-model="payload.name"
+            label="Name"
+            placeholder="Name"
+            required
+            :error="payloadError.name"
+            :hint-text="payloadError.name ? 'Name Required' : ''"
+            :readonly="mode === 'view'"
+          />
           <div>
-            <DatePicker v-model="payload.dateOfBirth" placeholder="Select" format="dd/MM/yyyy" label="Date of Birth"
-              required label-top :error="payloadError.dateOfBirth" @update:model-value="
+            <DatePicker
+              v-model="payload.dateOfBirth"
+              placeholder="Select"
+              format="MMMM dd, yyyy"
+              label="Date of Birth"
+              required
+              label-top
+              :error="payloadError.dateOfBirth"
+              @update:model-value="
                 payload.dateOfBirth = $event ? new Date($event).toISOString() : ''
-                " :disabled="mode === 'view'"
-              :max-date="new Date(new Date().setFullYear(new Date().getFullYear() - 17))" />
+              "
+              :disabled="mode === 'view'"
+              :max-date="new Date(new Date().setFullYear(new Date().getFullYear() - 17))"
+            />
             <span class="form-hint !text-danger">
               {{ payloadError.dateOfBirth ? 'date of birth Required' : '' }}
             </span>
           </div>
           <div>
-            <RadioCustom v-model="payload.gender" label="Gender" name="gender" :options="genderOptions" inline size="sm"
-              required :error="payloadError.gender" :disabled="mode === 'view'" />
+            <RadioCustom
+              v-model="payload.gender"
+              label="Gender"
+              name="gender"
+              :options="genderOptions"
+              inline
+              size="sm"
+              required
+              :error="payloadError.gender"
+              :disabled="mode === 'view'"
+            />
             <span class="form-hint !text-danger">
               {{ payloadError.gender ? 'gender Required' : '' }}
             </span>
           </div>
-          <UiInput v-model="payload.address" label="Address" placeholder="Address" required
-            :error="payloadError.address" :hint-text="payloadError.address ? 'address Required' : ''"
-            :readonly="mode === 'view'" />
-          <UiSelect v-model="payload.education" label="Highest Education Level"
-            placeholder="--Highest Education Level * --" :options="educationOptions" text-key="value" value-key="value"
-            required :error="payloadError.education" :hint-text="payloadError.education ? 'education Required' : ''"
-            :disabled="mode === 'view'" />
-          <UiSelect v-model="payload.nationality" label="Nationality" placeholder="--Nationality--"
-            :options="nationalityOptions" text-key="text" value-key="value" required :error="payloadError.nationality"
-            :hint-text="payloadError.nationality ? 'nationality Required' : ''" :disabled="mode === 'view'" />
-          <UiInput v-model="payload.position" label="Position / Role" placeholder="Position / Role" required
-            :error="payloadError.position" :hint-text="payloadError.position ? 'position Required' : ''"
-            :readonly="mode === 'view'" />
+          <UiInput
+            v-model="payload.address"
+            label="Address"
+            placeholder="Address"
+            required
+            :error="payloadError.address"
+            :hint-text="payloadError.address ? 'address Required' : ''"
+            :readonly="mode === 'view'"
+          />
+          <UiSelect
+            v-model="payload.education"
+            label="Highest Education Level"
+            placeholder="--Highest Education Level * --"
+            :options="educationOptions"
+            text-key="value"
+            value-key="value"
+            required
+            :error="payloadError.education"
+            :hint-text="payloadError.education ? 'education Required' : ''"
+            :disabled="mode === 'view'"
+          />
+          <UiSelect
+            v-model="payload.nationality"
+            label="Nationality"
+            placeholder="--Nationality--"
+            :options="nationalityOptions"
+            text-key="text"
+            value-key="value"
+            required
+            :error="payloadError.nationality"
+            :hint-text="payloadError.nationality ? 'nationality Required' : ''"
+            :disabled="mode === 'view'"
+          />
+          <UiInput
+            v-model="payload.position"
+            label="Position / Role"
+            placeholder="Position / Role"
+            required
+            :error="payloadError.position"
+            :hint-text="payloadError.position ? 'position Required' : ''"
+            :readonly="mode === 'view'"
+          />
           <div>
-            <RadioCustom v-model="payload.status" label="Employment Status" name="employment status"
-              :options="employmentOptions" inline size="sm" required :error="payloadError.status" text-key="value"
-              value-key="code" @update:model-value="payload.status = Number($event)" />
+            <RadioCustom
+              v-model="payload.status"
+              label="Employment Status"
+              name="employment status"
+              :options="employmentOptions"
+              inline
+              size="sm"
+              required
+              :error="payloadError.status"
+              text-key="value"
+              value-key="code"
+              @update:model-value="payload.status = Number($event)"
+            />
             <span class="form-hint !text-danger">
               {{ payloadError.status ? 'Employment status Required' : '' }}
             </span>
           </div>
-          <UiInput v-model="payload.expertise" label="Expertise / Skills" placeholder="Elaborate Expertise / Skills"
-            required class="col-span-2" :error="payloadError.expertise"
-            :hint-text="payloadError.expertise ? 'expertise Required' : ''" :readonly="mode === 'view'" />
+          <UiInput
+            v-model="payload.expertise"
+            label="Expertise / Skills"
+            placeholder="Elaborate Expertise / Skills"
+            required
+            class="col-span-2"
+            :error="payloadError.expertise"
+            :hint-text="payloadError.expertise ? 'expertise Required' : ''"
+            :readonly="mode === 'view'"
+          />
         </div>
 
         <div v-if="tab.active === 'cv_details'" class="space-y-4 w-full">
@@ -379,39 +470,79 @@ onMounted(() => {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(subCertificate, index) in payload.certificates.filter(
-                    (c) => c.type === Number(certificate.code),
-                  )" :key="`sub-${index}`" :id="'sub' + index">
+                  <tr
+                    v-for="(subCertificate, index) in payload.certificates.filter(
+                      (c) => c.type === Number(certificate.code),
+                    )"
+                    :key="`sub-${index}`"
+                    :id="'sub' + index"
+                  >
                     <td>
-                      <UiButton v-if="mode !== 'view'" icon variant="danger" outline
-                        @click="removeCertificate(index, subCertificate.type)">
+                      <UiButton
+                        v-if="mode !== 'view'"
+                        icon
+                        variant="danger"
+                        outline
+                        @click="removeCertificate(index, subCertificate.type)"
+                      >
                         <UiIcon name="cross-circle" variant="duotone" />
                       </UiButton>
                     </td>
                     <td>
-                      <DatePicker v-model="subCertificate.startDate" format="dd/MM/yyyy" teleport @update:model-value="
-                        $event ? (subCertificate.startDate = new Date($event).toISOString()) : ''
-                        " :disabled="mode === 'view'" :max-date="new Date()" />
+                      <DatePicker
+                        v-model="subCertificate.startDate"
+                        format="MMMM dd, yyyy"
+                        teleport
+                        @update:model-value="
+                          $event ? (subCertificate.startDate = new Date($event).toISOString()) : ''
+                        "
+                        :disabled="mode === 'view'"
+                        :max-date="new Date()"
+                      />
                     </td>
                     <td>
-                      <DatePicker v-model="subCertificate.endDate" format="dd/MM/yyyy" teleport @update:model-value="
-                        $event ? (subCertificate.endDate = new Date($event).toISOString()) : ''
-                        " :disabled="mode === 'view'" />
+                      <DatePicker
+                        v-model="subCertificate.endDate"
+                        format="MMMM dd, yyyy"
+                        teleport
+                        @update:model-value="
+                          $event ? (subCertificate.endDate = new Date($event).toISOString()) : ''
+                        "
+                        :disabled="mode === 'view'"
+                      />
                     </td>
                     <td>
-                      <UiButton outline v-if="mode === 'view'" @click="onDownload(subCertificate.docUrl)">
+                      <UiButton
+                        outline
+                        v-if="mode === 'view'"
+                        @click="onDownload(subCertificate.docUrl)"
+                      >
                         <UiIcon name="cloud-download" variant="duotone" />
                         Download
                       </UiButton>
-                      <UiFileUpload v-else placeholder="Upload file" :name="`docUrl${index}${subCertificate.type}`"
+                      <UiFileUpload
+                        v-else
+                        placeholder="Upload file"
+                        :name="`docUrl${index}${subCertificate.type}`"
                         accepted-files=".jpg,.jpeg,.png,.pdf, .zip"
                         @added-file="uploadFile($event, index, subCertificate.type)"
-                        @upload-failed="console.log('gagal')" :disabled="uploadLoading"
-                        hint-text="*jpg, jpeg, png, pdf, zip / max : 16 MB" :max-size="16000000" />
+                        @upload-failed="
+                          () => {
+                            fileSizeErrorModal = true
+                            console.log(fileSizeErrorModal)
+                          }
+                        "
+                        :disabled="uploadLoading"
+                        hint-text="*jpg, jpeg, png, pdf, zip / max : 16 MB"
+                        :max-size="16000000"
+                      />
                     </td>
                     <td>
-                      <UiInput placeholder="Description" v-model="subCertificate.description"
-                        :readonly="mode === 'view'" />
+                      <UiInput
+                        placeholder="Description"
+                        v-model="subCertificate.description"
+                        :readonly="mode === 'view'"
+                      />
                     </td>
                   </tr>
                 </tbody>
@@ -420,7 +551,10 @@ onMounted(() => {
           </div>
         </div>
 
-        <div v-if="tab.active === 'personal_information'" class="flex flex-row justify-end items-center gap-4 w-full">
+        <div
+          v-if="tab.active === 'personal_information'"
+          class="flex flex-row justify-end items-center gap-4 w-full"
+        >
           <UiButton variant="primary" outline data-modal-dismiss="true" @click="closeModal">
             <UiIcon name="black-left" variant="filled" />
             Cancel
@@ -436,7 +570,12 @@ onMounted(() => {
             Back
           </UiButton>
 
-          <UiButton variant="primary" @click="onSubmit" :disabled="submitLoading" v-if="mode !== 'view'">
+          <UiButton
+            variant="primary"
+            @click="onSubmit"
+            :disabled="submitLoading"
+            v-if="mode !== 'view'"
+          >
             <UiLoading v-if="submitLoading" variant="white" />
             <UiIcon v-else name="file-added" variant="duotone" />
             Save
@@ -444,5 +583,18 @@ onMounted(() => {
         </div>
       </div>
     </div>
+
+    <!-- File Size Error Modal -->
+    <ModalConfirmation
+      :open="fileSizeErrorModal"
+      id="file-size-error"
+      type="danger"
+      title="File Size Exceeded"
+      text="File size exceeds the maximum limit of 16 MB. Please choose a smaller file."
+      no-cancel
+      static
+      submit-button-text="Close"
+      :submit="() => (fileSizeErrorModal = false)"
+    />
   </div>
 </template>

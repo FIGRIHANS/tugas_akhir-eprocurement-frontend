@@ -165,8 +165,8 @@ const handleSave = async () => {
       recepients: {
         emailTo: adminStore.data?.vendorEmail || '',
         emailCc: '',
-        emailBcc: ''
-      }
+        emailBcc: '',
+      },
     })
 
     showSuccessModal.value = true
@@ -290,18 +290,34 @@ watchEffect(async () => {
     <div class="card-body">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-20 mb-8">
         <UiFormGroup hide-border>
-          <UiInput label="Number" placeholder="Number" row v-model="payload.documentNo"
-            :error="errors.documentNo !== ''" :hintText="errors.documentNo" />
-          <UiFileUpload ref="fileUploaderRef" name="ratificationDocumentUrl" label="File"
+          <UiInput
+            label="Number"
+            placeholder="Number"
+            row
+            v-model="payload.documentNo"
+            :error="errors.documentNo !== ''"
+            :hintText="errors.documentNo"
+          />
+          <UiFileUpload
+            ref="fileUploaderRef"
+            name="ratificationDocumentUrl"
+            label="File"
             placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
-            hint-text="*jpg, jpeg, png, pdf, zip / max : 16 MB" @added-file="onUploadFile($event)" />
+            hint-text="*jpg, jpeg, png, pdf, zip / max : 16 MB"
+            @added-file="onUploadFile($event)"
+          />
           <p v-if="errors.documentURL" class="text-xs text-red-500 mt-1">
             {{ errors.documentURL }}
           </p>
         </UiFormGroup>
 
         <UiFormGroup hide-border>
-          <DatePicker v-model="payload.documentDate" label="Letter Date" placeholder="Select Date" />
+          <DatePicker
+            v-model="payload.documentDate"
+            label="Letter Date"
+            placeholder="Select Date"
+            :format="'MMMM dd, yyyy'"
+          />
           <p v-if="errors.documentDate" class="text-xs text-red-500 mt-1">
             {{ errors.documentDate }}
           </p>
@@ -385,20 +401,27 @@ watchEffect(async () => {
               </div>
             </td>
             <td class="text-nowrap">{{ doc.documentNo }}</td>
-            <td class="text-nowrap">{{ moment(doc.documentDate).format('DD MMMM YYYY') }}</td>
+            <td class="text-nowrap">{{ moment(doc.documentDate).format('MMMM DD, yyyy') }}</td>
           </tr>
         </tbody>
       </table>
       <div class="flex flex-row items-center justify-between px-4">
         <div class="flex flex-row items-center gap-2">
           Show
-          <UiSelect v-model="paginationRatificationDataStore.pageSize" :options="pageSizeOptions" class="w-16" />
+          <UiSelect
+            v-model="paginationRatificationDataStore.pageSize"
+            :options="pageSizeOptions"
+            class="w-16"
+          />
           per page from {{ paginationRatificationDataStore.total }} data
         </div>
 
-        <LPagination :totalItems="paginationRatificationDataStore.total"
+        <LPagination
+          :totalItems="paginationRatificationDataStore.total"
           :pageSize="paginationRatificationDataStore.pageSize"
-          :currentPage="paginationRatificationDataStore.currentPage" @pageChange="setPageRatification" />
+          :currentPage="paginationRatificationDataStore.currentPage"
+          @pageChange="setPageRatification"
+        />
       </div>
     </div>
 
@@ -416,7 +439,11 @@ watchEffect(async () => {
     <!-- Error -->
     <UiModal v-model="showErrorModal" size="sm">
       <div class="text-center mb-6">
-        <UiIcon name="cross-circle" variant="duotone" class="text-[150px] text-danger text-center" />
+        <UiIcon
+          name="cross-circle"
+          variant="duotone"
+          class="text-[150px] text-danger text-center"
+        />
       </div>
       <h3 class="text-center text-lg font-medium">
         Failed to {{ mode == 'delete' ? 'Delete' : mode === 'edit' ? 'Change' : 'Add' }} document!
@@ -429,19 +456,31 @@ watchEffect(async () => {
     <!-- Confirm Delete -->
     <UiModal v-model="showDeleteModal" size="sm">
       <div class="text-center mb-6">
-        <UiIcon name="cross-circle" variant="duotone" class="text-[150px] text-danger text-center" />
+        <UiIcon
+          name="cross-circle"
+          variant="duotone"
+          class="text-[150px] text-danger text-center"
+        />
       </div>
       <h3 class="text-center text-lg font-medium">Are You Sure You Want to Delete This Item?</h3>
       <p class="text-center text-base text-gray-600 mb-5">
         This action will permanently remove the selected data from the list.
       </p>
       <div class="flex gap-3 px-8 mb-3">
-        <UiButton outline @click="showDeleteModal = false" class="flex-1 flex items-center justify-center">
+        <UiButton
+          outline
+          @click="showDeleteModal = false"
+          class="flex-1 flex items-center justify-center"
+        >
           <UiIcon name="black-left-line" />
           <span>Cancel</span>
         </UiButton>
-        <UiButton variant="danger" class="flex-1 flex items-center justify-center" @click="handleProcessDelete"
-          :disabled="isSaveLoading">
+        <UiButton
+          variant="danger"
+          class="flex-1 flex items-center justify-center"
+          @click="handleProcessDelete"
+          :disabled="isSaveLoading"
+        >
           <UiLoading variant="white" v-if="isSaveLoading" />
           <UiIcon name="cross-circle" variant="duotone" v-else />
           <span>Delete</span>

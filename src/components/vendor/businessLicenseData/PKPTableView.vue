@@ -13,7 +13,6 @@ import { useVendorAdministrationStore } from '@/stores/vendor/vendor'
 import { useRoute } from 'vue-router'
 import { useVendorUploadStore } from '@/stores/vendor/upload'
 
-
 const uploadStore = useUploadStore()
 const adminStore = useVendorAdministrationStore()
 const uploadVendorStore = useVendorUploadStore()
@@ -24,9 +23,7 @@ const requiredDocumentFields = registrationVendorStore.requiredDocumentFields
 const selectedCategory = computed(() => adminStore.data?.companyCategoryId ?? 0)
 
 const checkIsRequired = (licenseId) => {
-  return (
-    requiredDocumentFields[selectedCategory.value]?.includes(licenseId) ?? false
-  )
+  return requiredDocumentFields[selectedCategory.value]?.includes(licenseId) ?? false
 }
 
 // Error state for required fields
@@ -36,7 +33,7 @@ const requiredErrorText = ref('Please fill all required fields before saving.')
 const validateRequiredFields = () => {
   const requiredIds = requiredDocumentFields[selectedCategory.value] || []
   for (const id of requiredIds) {
-    const found = localLicenses.value.find(l => l.licenseId === id)
+    const found = localLicenses.value.find((l) => l.licenseId === id)
     if (!found || !found.licenseNo || !found.documentUrl) {
       requiredError.value = true
       return false
@@ -70,6 +67,7 @@ type FileStatus = 'notUpload' | 'loading' | 'success'
 type FileSlot = { file: File; status: FileStatus }
 const fileList = ref<FileSlot[]>([])
 const modalUploadFailed = ref(false)
+const fileSizeErrorModal = ref(false)
 
 const originalMap = ref<Record<string, ILicense>>({})
 
@@ -142,6 +140,15 @@ const onPickFile = (file: File, index: number) => {
 const uploadPickedFile = async (index: number) => {
   const slot = fileList.value[index]
   if (!slot || slot.file.name === 'placeholder.txt') return
+
+  // Validate file size (16 MB = 16 * 1024 * 1024 bytes)
+  const maxSizeInBytes = 16 * 1024 * 1024
+  if (slot.file.size > maxSizeInBytes) {
+    fileSizeErrorModal.value = true
+    fileList.value[index].status = 'notUpload'
+    return
+  }
+
   try {
     fileList.value[index].status = 'loading'
     const response = await uploadStore.uploadFile(slot.file, 0)
@@ -226,54 +233,84 @@ watch(
                         <span v-if="checkIsRequired(item.licenseId)" class="text-danger">*</span>
                       </div>
                     </td>
-                    <!-- Modal error required fields -->
-                    <ModalConfirmation :open="requiredError" id="license-required-error" type="danger"
-                      title="Required Fields Missing" :text="requiredErrorText" no-cancel static
-                      submit-button-text="Close" :submit="() => (requiredError = false)" />
 
                     <!-- License Number / Description -->
                     <td class="p-2 align-middle">
                       <div class="h-14 flex items-center">
-                        <UiInput placeholder="License Number / Description" v-model="item.licenseNo"
-                          :disabled="!isEditing(item.licenseId)" class="w-full" />
+                        <UiInput
+                          placeholder="License Number / Description"
+                          v-model="item.licenseNo"
+                          :disabled="!isEditing(item.licenseId)"
+                          class="w-full"
+                        />
                       </div>
                     </td>
 
                     <!-- Valid From -->
                     <td class="p-2 align-middle">
                       <div class="h-14 flex items-center">
-                        <DatePicker v-model="item.issuedUTCDate" format="dd MM yyyy" placeholder="Pilih Tanggal"
-                          :disabled="!isEditing(item.licenseId)" class="!w-48" />
+                        <DatePicker
+                          v-model="item.issuedUTCDate"
+                          format="dd MM yyyy"
+                          placeholder="Pilih Tanggal"
+                          :disabled="!isEditing(item.licenseId)"
+                          class="!w-48"
+                        />
                       </div>
                     </td>
 
                     <!-- Valid Until -->
                     <td class="p-2 align-middle">
                       <div class="h-14 flex items-center">
-                        <DatePicker v-model="item.expiredUTCDate" format="dd MM yyyy" placeholder="Pilih Tanggal"
-                          :disabled="!isEditing(item.licenseId) || !item.issuedUTCDate" :min-date="item.issuedUTCDate"
-                          class="!w-48" />
+                        <DatePicker
+                          v-model="item.expiredUTCDate"
+                          format="dd MM yyyy"
+                          placeholder="Pilih Tanggal"
+                          :disabled="!isEditing(item.licenseId) || !item.issuedUTCDate"
+                          :min-date="item.issuedUTCDate"
+                          class="!w-48"
+                        />
                       </div>
                     </td>
 
                     <td class="p-2 align-middle">
                       <div v-if="isEditing(item.licenseId)" class="h-14 flex items-center gap-2">
-                        <UiFileUpload :name="String(item.licenseId)" :text-length="15" :max-size="16000000"
-                          :placeholder="fileList[index]?.file.name === 'placeholder.txt'
-                            ? 'Choose file...'
-                            : fileList[index]?.file.name
-                            " accepted-files=".jpg,.jpeg,.png,.pdf,application/zip" class="w-48" :disabled="false"
+                        <UiFileUpload
+                          :name="String(item.licenseId)"
+                          :text-length="15"
+                          :max-size="16000000"
+                          :placeholder="
+                            fileList[index]?.file.name === 'placeholder.txt'
+                              ? 'Choose file...'
+                              : fileList[index]?.file.name
+                          "
+                          accepted-files=".jpg,.jpeg,.png,.pdf,application/zip"
+                          class="w-48"
+                          :disabled="false"
                           @addedFile="(file) => onPickFile(file, index)"
-                          @upload-failed="() => (modalUploadFailed = true)" />
+                          @upload-failed="() => (modalUploadFailed = true)"
+                        />
 
                         <div class="min-w-8 flex items-center justify-center">
-                          <div v-if="fileList?.[index]?.status === 'loading'"
-                            class="rounded-full border-2 size-6 border-primary border-t-primary-light animate-spin" />
-                          <UiIcon v-else-if="fileList?.[index]?.status === 'success'" name="check-circle"
-                            variant="filled" class="text-success text-xl" />
-                          <UiButton v-else icon outline size="sm" @click="uploadPickedFile(index)"
+                          <div
+                            v-if="fileList?.[index]?.status === 'loading'"
+                            class="rounded-full border-2 size-6 border-primary border-t-primary-light animate-spin"
+                          />
+                          <UiIcon
+                            v-else-if="fileList?.[index]?.status === 'success'"
+                            name="check-circle"
+                            variant="filled"
+                            class="text-success text-xl"
+                          />
+                          <UiButton
+                            v-else
+                            icon
+                            outline
+                            size="sm"
+                            @click="uploadPickedFile(index)"
                             :disabled="fileList?.[index]?.file?.name === 'placeholder.txt'"
-                            aria-label="Upload document">
+                            aria-label="Upload document"
+                          >
                             <i class="ki-filled ki-exit-up"></i>
                           </UiButton>
                         </div>
@@ -281,8 +318,12 @@ watch(
 
                       <div v-else class="h-14 flex items-center">
                         <template v-if="item.documentUrl">
-                          <UiButton outline size="sm" @click="downloadFile(item.documentUrl)"
-                            :disabled="downloadLoading">
+                          <UiButton
+                            outline
+                            size="sm"
+                            @click="downloadFile(item.documentUrl)"
+                            :disabled="downloadLoading"
+                          >
                             <UiIcon name="cloud-download" variant="duotone" />
                             <span>Download Document</span>
                           </UiButton>
@@ -294,17 +335,37 @@ watch(
                     <td class="p-2 align-middle">
                       <div class="h-14 flex items-center justify-center gap-2">
                         <template v-if="isEditing(item.licenseId)">
-                          <UiButton outline icon size="sm" @click="updateLicense(item)" aria-label="Save" title="Save">
+                          <UiButton
+                            outline
+                            icon
+                            size="sm"
+                            @click="updateLicense(item)"
+                            aria-label="Save"
+                            title="Save"
+                          >
                             <UiIcon variant="duotone" name="check-circle" />
                           </UiButton>
-                          <UiButton outline icon variant="danger" size="sm"
-                            @click="cancelEditing(String(item.licenseId))" aria-label="Cancel edit" title="Cancel edit">
+                          <UiButton
+                            outline
+                            icon
+                            variant="danger"
+                            size="sm"
+                            @click="cancelEditing(String(item.licenseId))"
+                            aria-label="Cancel edit"
+                            title="Cancel edit"
+                          >
                             <UiIcon variant="duotone" name="cross-circle" />
                           </UiButton>
                         </template>
                         <template v-else>
-                          <UiButton outline icon size="sm" @click="startEditing(String(item.licenseId))"
-                            aria-label="Edit" title="Edit">
+                          <UiButton
+                            outline
+                            icon
+                            size="sm"
+                            @click="startEditing(String(item.licenseId))"
+                            aria-label="Edit"
+                            title="Edit"
+                          >
                             <UiIcon variant="duotone" name="notepad-edit" />
                           </UiButton>
                         </template>
@@ -317,9 +378,42 @@ watch(
           </div>
 
           <!-- Modal error upload -->
-          <ModalConfirmation :open="modalUploadFailed" id="license-upload-error" type="danger" title="Upload Failed"
-            text="File size exceeds the maximum limit of 16 MB. Please choose a smaller file." no-submit static
-            :cancel="() => (modalUploadFailed = false)" />
+          <ModalConfirmation
+            :open="modalUploadFailed"
+            id="license-upload-error"
+            type="danger"
+            title="Upload Failed"
+            text="Upload failed. Please try again later."
+            no-submit
+            static
+            :cancel="() => (modalUploadFailed = false)"
+          />
+
+          <!-- Modal error required fields -->
+          <ModalConfirmation
+            :open="requiredError"
+            id="license-required-error"
+            type="danger"
+            title="Required Fields Missing"
+            :text="requiredErrorText"
+            no-cancel
+            static
+            submit-button-text="Close"
+            :submit="() => (requiredError = false)"
+          />
+
+          <!-- Modal file size error -->
+          <ModalConfirmation
+            :open="fileSizeErrorModal"
+            id="file-size-error"
+            type="danger"
+            title="File Size Exceeded"
+            text="File size exceeds the maximum limit of 16 MB. Please choose a smaller file."
+            no-cancel
+            static
+            submit-button-text="Close"
+            :submit="() => (fileSizeErrorModal = false)"
+          />
         </div>
       </div>
     </div>
