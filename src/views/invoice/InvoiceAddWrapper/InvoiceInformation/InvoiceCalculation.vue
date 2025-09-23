@@ -147,7 +147,7 @@ const countVatAmount = () => {
       if (item.debitCredit === 'D') {
         totalAddDebit = totalAddDebit + (percentTax * Number(item.itemAmount))
       } else {
-        totalAddCredit = totalAddCredit - (percentTax * Number(item.itemAmount))
+        totalAddCredit = totalAddCredit + (percentTax * Number(item.itemAmount))
       }
     }
   } else {
@@ -156,7 +156,7 @@ const countVatAmount = () => {
       if (item.debitCredit === 'D') {
         totalAddDebit = totalAddDebit + (percentTax * Number(item.itemAmount))
       } else {
-        totalAddCredit = totalAddCredit - (percentTax * Number(item.itemAmount))
+        totalAddCredit = totalAddCredit + (percentTax * Number(item.itemAmount))
       }
     }
   }
@@ -197,7 +197,7 @@ const countWhtAmount = () => {
     for (const item of form.additionalCost) {
       const percentTax = 0
       if (item.debitCredit === 'D') {
-        totalAddDebit = totalAddDebit - (percentTax * Number(item.itemAmount))
+        totalAddDebit = totalAddDebit + (percentTax * Number(item.itemAmount))
       } else {
         totalAddCredit = totalAddCredit + (percentTax * Number(item.itemAmount))
       }
@@ -206,7 +206,7 @@ const countWhtAmount = () => {
     for (const item of form.invoiceItem) {
       const percentTax = 0
       if (item.debitCredit === 'D') {
-        totalAddDebit = totalAddDebit - (percentTax * Number(item.itemAmount))
+        totalAddDebit = totalAddDebit + (percentTax * Number(item.itemAmount))
       } else {
         totalAddCredit = totalAddCredit + (percentTax * Number(item.itemAmount))
       }
