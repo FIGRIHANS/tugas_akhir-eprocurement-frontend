@@ -14,3 +14,11 @@ export const dpField = [
   'Total Gross Amount',
   'Total Net Amount',
 ]
+
+export const nonPoField = [
+  'Subtotal',
+  'VAT Amount',
+  'Total Gross Amount',
+  'WHT Amount',
+  'Total Net Amount',
+]

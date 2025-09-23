@@ -16,26 +16,24 @@
 
 <script lang="ts" setup>
 import { ref, watch, inject } from 'vue'
+import { useRoute } from 'vue-router'
 import type { listTypes } from '../types/invoiceCalculation'
 import type { formTypes } from '../types/invoiceDetail'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
+import { defaultField, dpField, nonPoField } from '@/static/invoiceCalculation'
 
 const props = defineProps<{
   formInvoice: formTypes
 }>()
 
+const route = useRoute()
 const form = inject<formTypes>('form')
-
-const listName = ref<string[]>([
-  'Subtotal',
-  'VAT Amount',
-  'Additional Cost',
-  'Total Gross Amount',
-  'WHT Amount',
-  'Total Net Amount'
-])
-
+const listName = ref<string[]>([])
 const listCalculation = ref<listTypes[]>([])
+
+const checkIsNonPo = () => {
+  return route.query.type === 'nonpo'
+}
 
 const setValue = (key: string) => {
   let result = 0
@@ -77,6 +75,24 @@ const setCalculation = () => {
 watch(
   () => props.formInvoice,
   () => {
+    setCalculation()
+  },
+  {
+    deep: true,
+    immediate: true
+  }
+)
+
+watch(
+  () => form,
+  () => {
+    if (form?.invoiceDPCode !== 9011) {
+      listName.value = [...dpField]
+    } else if (checkIsNonPo()) {
+      listName.value = [...nonPoField]
+    } else {
+      listName.value = [...defaultField]
+    }
     setCalculation()
   },
   {
