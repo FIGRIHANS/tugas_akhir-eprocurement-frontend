@@ -59,7 +59,7 @@ import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification
 import moment from 'moment'
 import { isEmpty } from 'lodash'
 import { KTModal } from '@/metronic/core'
-import type { PostVerificationTypes, PostVerificationNonPoTypes } from '@/stores/views/invoice/types/verification'
+import type { PostVerificationTypes, PostEditApprovalNonPoTypes } from '@/stores/views/invoice/types/verification'
 import type { documentDetailTypes as documentDetailTypesStore } from '@/stores/views/invoice/types/verification'
 
 const InvoiceData = defineAsyncComponent(() => import('./InvoiceDetailEdit/InvoiceData.vue'))
@@ -352,17 +352,31 @@ const goNext = () => {
 
     if (form.value.statusCode === 4) {
       isLoading.value = true
-      verificationApi
-        .putSubmission(mapDataVerif())
-        .then(() => {
-          verificationApi.resetDetailInvoiceEdit()
-          const idModal = document.querySelector('#success_data_edit_modal')
-          const modal = KTModal.getInstance(idModal as HTMLElement)
-          modal.show()
-        })
-        .finally(() => {
-          isLoading.value = false
-        })
+      if (route.query.invoiceType !== 'no_po') {
+        verificationApi
+          .putSubmission(mapDataVerif())
+          .then(() => {
+            verificationApi.resetDetailInvoiceEdit()
+            const idModal = document.querySelector('#success_data_edit_modal')
+            const modal = KTModal.getInstance(idModal as HTMLElement)
+            modal.show()
+          })
+          .finally(() => {
+            isLoading.value = false
+          })
+      } else {
+        verificationApi
+          .putSubmissionNonPo(mapDataVerif())
+          .then(() => {
+            verificationApi.resetDetailInvoiceEdit()
+            const idModal = document.querySelector('#success_data_edit_modal')
+            const modal = KTModal.getInstance(idModal as HTMLElement)
+            modal.show()
+          })
+          .finally(() => {
+            isLoading.value = false
+          })
+      }
     } else {
       router.push({
         name: 'invoiceDetail',
@@ -633,112 +647,112 @@ const mapDataVerif = () => {
   if (!isEmpty(referenceDoc)) documents.push(referenceDoc)
   if (!isEmpty(otherDoc)) documents.push(otherDoc)
   if (route.query.invoiceType !== 'no_po') {
-  const data = {
-    statusCode: route.query.type === '1' ? 3 : 4,
-    statusName: route.query.type === '1' ? 'Verified' : 'Approved',
-    statusNotes: '',
-    header: {
-      invoiceUId: form.value.invoiceUId,
-      documentNo: form.value.documentNo,
-      invoiceDate: form.value.invoiceDate,
-      taxNo: form.value.taxNo,
-      currCode: form.value.currCode,
-      notes: form.value.notes,
-      postingDate: form.value.postingDate,
-      invoicingParty: form.value.invoicingParty,
-      estimatedPaymentDate: form.value.estimatedPaymentDate,
-      paymentMethodCode: form.value.paymentMethodCode,
-      paymentMethodName: form.value.paymentMethodName,
-      assigment: form.value.assigment,
-      transferNews: form.value.transferNews,
-      npwpReporting: form.value.npwpReporting,
-      creditCardBillingId: form.value.creditCardBillingId,
-    },
-    payment: {
-      bankKey: form.value.bankKey,
-      bankName: form.value.bankName,
-      beneficiaryName: form.value.beneficiaryName,
-      bankAccountNo: form.value.bankAccountNo,
-      bankCountryCode: form.value.bankCountryCode,
-    },
-    calculation: {
-      subtotal: form.value.subtotal,
-      vatAmount: form.value.vatAmount,
-      whtAmount: form.value.whtAmount,
-      additionalCost: form.value.additionalCost,
-      totalGrossAmount: form.value.totalGrossAmount,
-      totalNetAmount: form.value.totalNetAmount,
-    },
-    documents,
-    pogr: mapPoGr(),
-    additionalCosts: mapAdditionalCost(),
-    } as PostVerificationTypes
-
-  return data
-  } else {
-  const data = {
-    statusCode: route.query.type === '1' ? 3 : 4,
-    statusName: route.query.type === '1' ? 'Verified' : 'Approved',
-    statusNotes: '',
-    header: {
-      invoiceUId: form.value.invoiceUId,
-      invoiceTypeCode: form.value.invoiceTypeCode,
-      invoiceTypeName: form.value.invoiceTypeName,
-      invoiceVendorNo: form.value.vendorId,
-      companyCode: form.value.companyCode,
-      companyName: form.value.companyName,
-      invoiceNo: form.value.invoiceNo,
-      documentNo: form.value.documentNo,
-      invoiceDate: form.value.invoiceDate,
-      postingDate: form.value.postingDate,
-      estimatedPaymentDate: form.value.estimatedPaymentDate,
-      paymentMethodCode: form.value.paymentMethodCode,
-      paymentMethodName: form.value.paymentMethodName,
-      taxNo: form.value.taxNo,
-      currCode: form.value.currCode,
-      creditCardBillingID: form.value.creditCardBillingId,
-      notes: form.value.notes,
+    const data = {
       statusCode: route.query.type === '1' ? 3 : 4,
       statusName: route.query.type === '1' ? 'Verified' : 'Approved',
-      department: form.value.department,
-      profileId: '0'
-    },
-    payment: {
-      bankKey: form.value.bankKey,
-      bankName: form.value.bankName,
-      beneficiaryName: form.value.beneficiaryName,
-      bankAccountNo: form.value.bankAccountNo,
-      bankCountryCode: form.value.bankCountryCode,
-    },
-    calculation: {
-      subtotal: form.value.subtotal,
-      vatAmount: form.value.vatAmount,
-      whtAmount: form.value.whtAmount,
-      additionalCost: form.value.additionalCost,
-      totalGrossAmount: form.value.totalGrossAmount,
-      totalNetAmount: form.value.totalNetAmount,
-    },
-    documents,
-    alternativePayment: {
-      id: form.value.idAlternative,
-      name: form.value.nameAlternative,
-      name2: form.value.nameOtherAlternative,
-      street: form.value.streetAltiernative,
-      city: form.value.cityAlternative,
-      country: form.value.countryAlternative,
-      bankAccountNumber: form.value.bankAccountNumberAlternative,
-      bankKey: form.value.bankKeyAlternative,
-      bankCountry: form.value.bankCountryAlternative,
-      npwp: form.value.npwpNumberAlternative,
-      ktp: form.value.ktpNumberAlternative,
-      email: form.value.emailAlternative,
-      isAlternativePayee: form.value.isAlternativePayee,
-      isOneTimeVendor: form.value.isOneTimeVendor,
-    },
-    additionalCosts: mapCostExpense()
-    } as PostVerificationNonPoTypes
+      statusNotes: '',
+      header: {
+        invoiceUId: form.value.invoiceUId,
+        documentNo: form.value.documentNo,
+        invoiceDate: form.value.invoiceDate,
+        taxNo: form.value.taxNo,
+        currCode: form.value.currCode,
+        notes: form.value.notes,
+        postingDate: form.value.postingDate,
+        invoicingParty: form.value.invoicingParty,
+        estimatedPaymentDate: form.value.estimatedPaymentDate,
+        paymentMethodCode: form.value.paymentMethodCode,
+        paymentMethodName: form.value.paymentMethodName,
+        assigment: form.value.assigment,
+        transferNews: form.value.transferNews,
+        npwpReporting: form.value.npwpReporting,
+        creditCardBillingId: form.value.creditCardBillingId,
+      },
+      payment: {
+        bankKey: form.value.bankKey,
+        bankName: form.value.bankName,
+        beneficiaryName: form.value.beneficiaryName,
+        bankAccountNo: form.value.bankAccountNo,
+        bankCountryCode: form.value.bankCountryCode,
+      },
+      calculation: {
+        subtotal: form.value.subtotal,
+        vatAmount: form.value.vatAmount,
+        whtAmount: form.value.whtAmount,
+        additionalCost: form.value.additionalCost,
+        totalGrossAmount: form.value.totalGrossAmount,
+        totalNetAmount: form.value.totalNetAmount,
+      },
+      documents,
+      pogr: mapPoGr(),
+      additionalCosts: mapAdditionalCost(),
+      } as PostVerificationTypes
 
-  return data
+    return data
+  } else {
+    const data = {
+      statusCode: route.query.type === '1' ? 3 : 4,
+      statusName: route.query.type === '1' ? 'Verified' : 'Approved',
+      statusNotes: '',
+      header: {
+        invoiceUId: form.value.invoiceUId,
+        invoiceTypeCode: form.value.invoiceTypeCode,
+        invoiceTypeName: form.value.invoiceTypeName,
+        invoiceVendorNo: form.value.vendorId,
+        companyCode: form.value.companyCode,
+        companyName: form.value.companyName,
+        invoiceNo: form.value.invoiceNo,
+        documentNo: form.value.documentNo,
+        invoiceDate: form.value.invoiceDate,
+        postingDate: form.value.postingDate,
+        estimatedPaymentDate: form.value.estimatedPaymentDate,
+        paymentMethodCode: form.value.paymentMethodCode,
+        paymentMethodName: form.value.paymentMethodName,
+        taxNo: form.value.taxNo,
+        currCode: form.value.currCode,
+        creditCardBillingID: form.value.creditCardBillingId,
+        notes: form.value.notes,
+        statusCode: route.query.type === '1' ? 3 : 4,
+        statusName: route.query.type === '1' ? 'Verified' : 'Approved',
+        department: form.value.department,
+        profileId: '0'
+      },
+      payment: {
+        bankKey: form.value.bankKey,
+        bankName: form.value.bankName,
+        beneficiaryName: form.value.beneficiaryName,
+        bankAccountNo: form.value.bankAccountNo,
+        bankCountryCode: form.value.bankCountryCode,
+      },
+      calculation: {
+        subtotal: form.value.subtotal,
+        vatAmount: form.value.vatAmount,
+        whtAmount: form.value.whtAmount,
+        additionalCost: form.value.additionalCost,
+        totalGrossAmount: form.value.totalGrossAmount,
+        totalNetAmount: form.value.totalNetAmount,
+      },
+      documents,
+      alternativePay: {
+        id: form.value.idAlternative,
+        name: form.value.nameAlternative,
+        name2: form.value.nameOtherAlternative,
+        street: form.value.streetAltiernative,
+        city: form.value.cityAlternative,
+        country: form.value.countryAlternative,
+        bankAccountNumber: form.value.bankAccountNumberAlternative,
+        bankKey: form.value.bankKeyAlternative,
+        bankCountry: form.value.bankCountryAlternative,
+        npwp: form.value.npwpNumberAlternative,
+        ktp: form.value.ktpNumberAlternative,
+        email: form.value.emailAlternative,
+        isAlternativePayee: form.value.isAlternativePayee,
+        isOneTimeVendor: form.value.isOneTimeVendor,
+      },
+      costExpenses: mapCostExpense()
+    } as PostEditApprovalNonPoTypes
+
+    return data
   }
 }
 

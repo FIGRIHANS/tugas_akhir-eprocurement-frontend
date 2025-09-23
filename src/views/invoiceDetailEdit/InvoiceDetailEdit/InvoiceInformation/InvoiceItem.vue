@@ -172,7 +172,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, computed, watch, inject, type Ref } from 'vue'
+import { ref, reactive, computed, watch, inject, onMounted, type Ref } from 'vue'
 import type { formTypes } from '../../types/invoiceDetailEdit'
 import type { invoiceItemTypes } from '../../types/invoiceItem'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
@@ -443,6 +443,16 @@ watch(
     immediate: true,
   },
 )
+
+onMounted(() => {
+  for (const item of form.value.invoiceItem) {
+    if (item.whtCode) {
+      invoiceMasterApi.getWhtCode(item.whtType).then(() => {
+        item.whtCodeList = whtCodeList.value
+      })
+    }
+  }
+})
 </script>
 
 <style lang="scss" scoped>
