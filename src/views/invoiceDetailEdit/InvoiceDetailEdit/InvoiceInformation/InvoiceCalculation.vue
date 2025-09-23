@@ -151,7 +151,7 @@ const countVatAmount = () => {
       if (item.debitCredit === 'D') {
         totalAddDebit = totalAddDebit + (percentTax * Number(item.itemAmount))
       } else {
-        totalAddCredit = totalAddCredit - (percentTax * Number(item.itemAmount))
+        totalAddCredit = totalAddCredit + (percentTax * Number(item.itemAmount))
       }
     }
   } else {
@@ -160,7 +160,7 @@ const countVatAmount = () => {
       if (item.debitCredit === 'D') {
         totalAddDebit = totalAddDebit + (percentTax * Number(item.itemAmount))
       } else {
-        totalAddCredit = totalAddCredit - (percentTax * Number(item.itemAmount))
+        totalAddCredit = totalAddCredit + (percentTax * Number(item.itemAmount))
       }
     }
   }
@@ -200,7 +200,7 @@ const countWhtAmount = () => {
     for (const item of form.value.additionalCosts) {
       const percentTax = getPercentWht(item.whtCode) || 0
       if (item.debitCredit === 'D') {
-        totalAddDebit = totalAddDebit - (percentTax * Number(item.whtBaseAmount))
+        totalAddDebit = totalAddDebit + (percentTax * Number(item.whtBaseAmount))
       } else {
         totalAddCredit = totalAddCredit + (percentTax * Number(item.whtBaseAmount))
       }
@@ -208,7 +208,7 @@ const countWhtAmount = () => {
   } else {
     for (const item of form.value.invoiceItem) {
       if (item.debitCredit === 'D') {
-        totalAddDebit = totalAddDebit - item.whtAmount
+        totalAddDebit = totalAddDebit + item.whtAmount
       } else {
         totalAddCredit = totalAddCredit + item.whtAmount
       }
