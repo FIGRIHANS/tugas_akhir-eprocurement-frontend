@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import DatePicker from '@/components/datePicker/DatePicker.vue'
+import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 import UiModal from '@/components/modal/UiModal.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiFileUpload from '@/components/ui/atoms/file-upload/UiFileUpload.vue'
@@ -46,6 +47,7 @@ const formError = ref<string[]>([])
 const uploadError = ref('')
 const uploadLoading = ref(false)
 const submitLoading = ref(false)
+const fileSizeErrorModal = ref(false)
 
 const selectedItem = computed(() => otherDocStore.data.find((item) => item.id === props.id))
 
@@ -91,6 +93,10 @@ const onSubmit = async () => {
     submitLoading.value = false
     model.value = false
   }
+}
+
+const handleUploadFailed = () => {
+  fileSizeErrorModal.value = true
 }
 
 const onUploadFile = async (file: File) => {
@@ -167,7 +173,10 @@ onMounted(() => {
           name="file"
           placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
           @added-file="onUploadFile"
+          @upload-failed="handleUploadFailed"
           :disabled="uploadLoading"
+          :max-size="16000000"
+          hint-text="*jpg, jpeg, png, pdf, zip / max : 16 MB"
         />
       </UiFormGroup>
       <div class="flex justify-end gap-3 mt-3">
@@ -182,5 +191,18 @@ onMounted(() => {
         </UiButton>
       </div>
     </form>
+
+    <!-- File Size Error Modal -->
+    <ModalConfirmation
+      :open="fileSizeErrorModal"
+      id="file-size-error"
+      type="danger"
+      title="File Size Exceeded"
+      text="File size exceeds the maximum limit of 16 MB. Please choose a smaller file."
+      no-cancel
+      static
+      submit-button-text="Close"
+      :submit="() => (fileSizeErrorModal = false)"
+    />
   </UiModal>
 </template>
