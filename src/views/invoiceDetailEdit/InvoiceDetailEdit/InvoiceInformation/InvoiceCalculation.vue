@@ -28,7 +28,7 @@ import { ref, computed, onMounted, watch, inject, type Ref } from 'vue'
 import { useRoute } from 'vue-router'
 import type { listType } from '../../types/invoiceCalculation'
 import type { formTypes } from '../../types/invoiceDetailEdit'
-import { defaultField, dpField } from '@/static/invoiceCalculation'
+import { defaultField, dpField, nonPoField } from '@/static/invoiceCalculation'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 
@@ -207,11 +207,10 @@ const countWhtAmount = () => {
     }
   } else {
     for (const item of form.value.invoiceItem) {
-      const percentTax = 0
       if (item.debitCredit === 'D') {
-        totalAddDebit = totalAddDebit - (percentTax * Number(item.itemAmount))
+        totalAddDebit = totalAddDebit - item.whtAmount
       } else {
-        totalAddCredit = totalAddCredit + (percentTax * Number(item.itemAmount))
+        totalAddCredit = totalAddCredit + item.whtAmount
       }
     }
   }
@@ -227,10 +226,12 @@ const countTotalNetAmount = () => {
 }
 
 watch(
-  () => [form?.value.invoiceDPCode],
+  () => form.value,
   () => {
     if (form?.value.invoiceDPCode !== 9011) {
       listName.value = [...dpField]
+    } else if (checkIsNonPo()) {
+      listName.value = [...nonPoField]
     } else {
       listName.value = [...defaultField]
     }
