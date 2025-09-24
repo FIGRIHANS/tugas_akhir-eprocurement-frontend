@@ -52,7 +52,7 @@
         <div class="relative">
           <label
             class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white z-[1]"
-            >Estimated Payment Date</label
+            >Submitted Document Date</label
           >
           <DatePicker v-model="date" format="yyyy/MM/dd" teleport />
         </div>
