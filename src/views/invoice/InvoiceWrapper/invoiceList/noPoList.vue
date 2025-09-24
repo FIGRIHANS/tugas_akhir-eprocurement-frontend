@@ -326,8 +326,7 @@ const goToDetail = (data: ListPoTypes) => {
   }
 }
 
-const sortColumn = (name: string | null) => {
-  if (!name) return setList(poList.value)
+const sortColumn = (columnName: string | null) => {
   const list = {
     'Submitted Document No': 'invoiceNo',
     'Status': 'statusName',
@@ -346,14 +345,18 @@ const sortColumn = (name: string | null) => {
   const listData = cloneDeep(poList.value)
   let result: ListPoTypes[] = []
 
-  if (sortColumnName.value !== name) sortBy.value = ''
-  sortColumnName.value = name
+  if (columnName) {
+    if (sortColumnName.value !== columnName) sortBy.value = ''
+    sortColumnName.value = columnName
 
-  const indexSort = roleSort.findIndex((item) => item === sortBy.value)
-  if (indexSort === -1) return setList(poList.value)
-  sortBy.value = indexSort + 1 === roleSort.length ? roleSort[0] : roleSort[indexSort + 1]
+    const indexSort = roleSort.findIndex((item) => item === sortBy.value)
+    if (indexSort === -1) return setList(poList.value)
+    sortBy.value = indexSort + 1 === roleSort.length ? roleSort[0] : roleSort[indexSort + 1]
+  
+    if (!sortBy.value) return setList(poList.value)
+  }
 
-  if (!sortBy.value) return setList(poList.value)
+  const name = columnName || sortColumnName.value
 
   if (name === 'Total Gross Amount' || name === 'Total Net Amount') {
     result = listData.sort((a, b) => {
