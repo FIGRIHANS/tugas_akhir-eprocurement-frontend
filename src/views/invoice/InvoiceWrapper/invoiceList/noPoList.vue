@@ -55,9 +55,12 @@
               <th
                 v-for="(item, index) in columns"
                 :key="index"
+                class="cursor-pointer"
                 :class="index !== 0 ? 'list__long' : ''"
+                @click="sortColumn(item)"
               >
                 {{ item }}
+                <i v-if="item" class="ki-filled ki-arrow-up-down"></i>
               </th>
             </tr>
           </thead>
@@ -124,6 +127,8 @@ import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterDat
 // import moment from 'moment'
 import type { ListPoTypes } from '@/stores/views/invoice/types/submission'
 import { useRouter } from 'vue-router'
+import { cloneDeep } from 'lodash'
+
 
 const invoiceSubmissionApi = useInvoiceSubmissionStore()
 const router = useRouter()
@@ -149,6 +154,8 @@ const search = ref<string>('')
 const currentPage = ref<number>(1)
 const pageSize = ref<number>(10)
 const list = ref<ListPoTypes[]>([])
+const sortBy = ref<string>('')
+const sortColumnName = ref<string>('')
 
 const poList = computed(() => invoiceSubmissionApi.listNonPo)
 
@@ -202,9 +209,9 @@ const colorBadge = (statusCode: number) => {
   return list[statusCode]
 }
 
-const setList = () => {
+const setList = (listData: ListPoTypes[]) => {
   const result: ListPoTypes[] = []
-  for (const [index, item] of poList.value.entries()) {
+  for (const [index, item] of listData.entries()) {
     const start = currentPage.value * pageSize.value - pageSize.value
     const end = currentPage.value * pageSize.value - 1
     if (index >= start && index <= end) {
@@ -216,7 +223,7 @@ const setList = () => {
 
 const setPage = (value: number) => {
   currentPage.value = value
-  setList()
+  sortColumn(null)
 }
 
 const deleteFilter = (key: string) => {
@@ -286,7 +293,7 @@ const listCall = () => {
       searchText: search.value,
     })
     .finally(() => {
-      setList()
+      sortColumn(null)
     })
 }
 
@@ -317,6 +324,68 @@ const goToDetail = (data: ListPoTypes) => {
       },
     })
   }
+}
+
+const sortColumn = (name: string | null) => {
+  if (!name) return setList(poList.value)
+  const list = {
+    'Submitted Document No': 'invoiceNo',
+    'Status': 'statusName',
+    'Vendor Name': 'vendorName',
+    'Invoice Vendor No': 'documentNo',
+    'Company Code': 'companyCode',
+    'Invoice Non PO Type': 'invoiceTypeName',
+    'Invoice Date': 'invoiceDate',
+    'Total Gross Amount': 'totalGrossAmount',
+    'Total Net Amount': 'totalNetAmount',
+    'Estimated Payment Date': 'estimatedPaymentDate',
+  } as {[key: string]: string}
+
+  const roleSort = ['asc', 'desc', '']
+
+  const listData = cloneDeep(poList.value)
+  let result: ListPoTypes[] = []
+
+  if (sortColumnName.value !== name) sortBy.value = ''
+  sortColumnName.value = name
+
+  const indexSort = roleSort.findIndex((item) => item === sortBy.value)
+  if (indexSort === -1) return setList(poList.value)
+  sortBy.value = indexSort + 1 === roleSort.length ? roleSort[0] : roleSort[indexSort + 1]
+
+  if (!sortBy.value) return setList(poList.value)
+
+  if (name === 'Total Gross Amount' || name === 'Total Net Amount') {
+    result = listData.sort((a, b) => {
+      if (sortBy.value === 'asc') {
+        return a[list[name]] - b[list[name]]
+      } else {
+        return b[list[name]] - a[list[name]]
+      }
+    })
+  } else if (name === 'Invoice Date' || name === 'Estimated Payment Date') {
+    result = listData.sort((a, b) => {
+      const convA = a[list[name]] ? new Date(a[list[name]]).getTime() : 0
+      const convB = b[list[name]] ? new Date(b[list[name]]).getTime() : 0
+      if (sortBy.value === 'asc') {
+        return convA - convB
+      } else {
+        return convB - convA
+      }
+    })
+  } else {
+    result = listData.sort((a, b) => {
+      const convA = a[list[name]] ? a[list[name]] : ''
+      const convB = b[list[name]] ? b[list[name]] : ''
+      if (sortBy.value === 'asc') {
+        return convA.localeCompare(convB)
+      } else {
+        return convB.localeCompare(convA)
+      }
+    })
+  }
+
+  return setList(result)
 }
 
 onMounted(() => {
