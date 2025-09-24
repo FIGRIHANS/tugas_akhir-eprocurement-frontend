@@ -74,13 +74,7 @@
           <label class="form-label max-w-32">
             Bank Country
           </label>
-          <v-select
-            v-model="form.bankCountryAlternative"
-            class="customSelect w-full"
-            label="countryName"
-            :reduce="(option: any) => option.countryCode"
-            :options="listCountry"
-          ></v-select>
+          <input v-model="form.bankCountryAlternative" class="input" placeholder=""/>
         </div>
         <!-- No. NPWP -->
         <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
