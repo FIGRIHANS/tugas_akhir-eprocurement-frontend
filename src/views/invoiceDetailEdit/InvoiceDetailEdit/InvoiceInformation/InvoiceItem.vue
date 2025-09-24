@@ -334,7 +334,7 @@ const resetItem = (item: invoiceItemTypes, index: number) => {
     item.isEdit = !item.isEdit
     resetFormEdit()
   } else {
-    form?.value.additionalCosts.splice(index, 1)
+    form?.value.invoiceItem.splice(index, 1)
   }
 }
 

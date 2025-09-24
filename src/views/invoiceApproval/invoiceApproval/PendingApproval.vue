@@ -246,7 +246,8 @@ const openDetailInvoiceEdit = (invoiceId: string) => {
     name: 'invoiceDetailEdit',
     query : {
       id: invoiceId,
-      type: '2'
+      type: '2',
+      edit: 'true'
     }
   })
 }

@@ -19,7 +19,7 @@
         </div>
         <div class="relative" v-if="route.name === 'invoiceVerificationNoPo'">
           <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
-            >Invoice Type</label
+            >Invoice Non PO Type</label
           >
           <select v-model="invoiceType" class="select" name="select">
             <option v-for="item of invoiceTypenonPoList" :key="item.code" :value="item.code">
@@ -29,7 +29,7 @@
         </div>
         <div class="relative" v-else>
           <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
-            >Invoice Type</label
+            >Invoice PO Type</label
           >
           <select v-model="invoiceType" class="select" name="select">
             <option v-for="item of invoiceTypeList" :key="item.code" :value="item.code">
@@ -52,7 +52,7 @@
         <div class="relative">
           <label
             class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white z-[1]"
-            >Estimated Payment Date</label
+            >Submitted Document Date</label
           >
           <DatePicker v-model="date" format="yyyy/MM/dd" teleport />
         </div>

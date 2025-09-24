@@ -261,13 +261,19 @@ const handleAfterSuccess = () => {
 const goBack = () => {
   const list = ['data', 'information']
   if (tabNow.value === 'data') {
-    router.push({
-      name: 'invoiceDetail',
-      query: {
-        id: route.query.id,
-        type: route.query.type,
-      },
-    })
+    if (route.query.edit === 'true') {
+      router.push({
+        name: route.query.invoiceType === 'no_po' ? 'invoiceApprovalNonPo' : 'invoiceApproval'
+      })
+    } else {
+      router.push({
+        name: 'invoiceDetail',
+        query: {
+          id: route.query.id,
+          type: route.query.type,
+        },
+      })
+    }
   } else {
     const checkIndex = list.findIndex((item) => item === tabNow.value)
     if (checkIndex !== -1) {
