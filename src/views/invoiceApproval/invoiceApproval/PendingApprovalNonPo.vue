@@ -324,6 +324,7 @@ const openDetailInvoiceEdit = (invoiceId: string) => {
       id: invoiceId,
       type: '2',
       invoiceType: 'no_po',
+      edit: 'true'
     },
   })
 }
