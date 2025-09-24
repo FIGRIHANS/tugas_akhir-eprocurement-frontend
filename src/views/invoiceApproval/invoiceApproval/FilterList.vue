@@ -17,9 +17,19 @@
             </option>
           </select>
         </div>
-        <div class="relative">
+        <div class="relative" v-if="route.name === 'invoiceApprovalNonPo'">
           <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
-            >Invoice Type</label
+            >Invoice Non PO Type</label
+          >
+          <select v-model="invoiceType" class="select" name="select">
+            <option v-for="item of invoiceTypenonPoList" :key="item.code" :value="item.code">
+              {{ item.name }}
+            </option>
+          </select>
+        </div>
+        <div class="relative" v-else>
+          <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
+            >Invoice PO Type</label
           >
           <select v-model="invoiceType" class="select" name="select">
             <option v-for="item of invoiceTypeList" :key="item.code" :value="item.code">
@@ -41,7 +51,7 @@
         <div class="relative">
           <label
             class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white z-[1]"
-            >Invoice Date</label
+            >Submitted Document Date</label
           >
           <DatePicker v-model="date" format="yyyy/MM/dd" teleport />
         </div>
@@ -63,6 +73,7 @@
 <script lang="ts" setup>
 import { ref, computed, watch } from 'vue'
 import type { filterListTypes } from '../types/pendingApproval'
+import { useRoute } from 'vue-router'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 
@@ -72,6 +83,7 @@ const props = defineProps<{
 
 const emits = defineEmits(['setData'])
 
+const route = useRoute()
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const status = ref<number | null>(null)
 const date = ref<string>('')
@@ -80,6 +92,7 @@ const invoiceType = ref<string>('')
 
 const companyCodeList = computed(() => invoiceMasterApi.companyCode)
 const invoiceTypeList = computed(() => invoiceMasterApi.invoicePoType)
+const invoiceTypenonPoList = computed(() => invoiceMasterApi.invoiceNonPoType)
 
 const resetFilter = () => {
   status.value = null
