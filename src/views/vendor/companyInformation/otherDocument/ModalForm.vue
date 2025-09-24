@@ -75,14 +75,14 @@ const onSubmit = async () => {
     submitLoading.value = true
     await otherDocStore.update(formData.value)
 
-    await changeDataEmailStore.sendEmail({
-      recepientName: adminStore.data.vendorName || '',
-      recepients: {
-        emailTo: adminStore.data.vendorEmail,
-        emailCc: '',
-        emailBcc: '',
-      },
-    })
+    // await changeDataEmailStore.sendEmail({
+    //   recepientName: adminStore.data.vendorName || '',
+    //   recepients: {
+    //     emailTo: adminStore.data.vendorEmail,
+    //     emailCc: '',
+    //     emailBcc: '',
+    //   },
+    // })
 
     emit('onSuccess')
   } catch (error) {
