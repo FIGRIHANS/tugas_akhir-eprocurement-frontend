@@ -647,7 +647,6 @@ const goNext = () => {
           console.error(error)
         })
         .finally(() => {
-          sendEmailReminder(form)
           isSubmit.value = false
         })
     } else {
@@ -1034,13 +1033,13 @@ const mapDataCheck = () => {
     totalVatAmountCurr += item.vatAmount
   }
   itemNoAcc.value += 1
-    const currData = {
-      ITEMNO_ACC: itemNoAcc.value,
-      CURRENCY: form.currency,
-      AMT_DOCCUR: (totalItemAmountCurr + totalVatAmountCurr) * -1,
-      AMT_BASE: 0,
-    }
-    currencyAmount.push(currData)
+  const currData = {
+    ITEMNO_ACC: itemNoAcc.value,
+    CURRENCY: form.currency,
+    AMT_DOCCUR: (totalItemAmountCurr + totalVatAmountCurr) * -1,
+    AMT_BASE: 0,
+  }
+  currencyAmount.push(currData)
 
   for (const item of accountTax) {
     const filterTax = form.invoiceItem.filter((sub) => sub.taxCode === item.TAX_CODE)
@@ -1081,7 +1080,7 @@ const mapDataCheck = () => {
         TAX_NO_1: form.npwpNumberAlternative,
         TAX_NO_3: form.ktpNumberAlternative,
         LANGU_ISO: '',
-        GLO_RE1_OT: ''
+        GLO_RE1_OT: '',
       },
       GLACCOUNT_DATA: glAccount,
       ACCOUNT_PAYABLE: accountPayable,
@@ -1128,18 +1127,6 @@ const checkFormBudget = () => {
   return status
 }
 
-const sendEmailReminder = (data: formTypes) => {
-  notifEmailApi.sendVerificationReminderEmail({
-    recepientName: 'yonathan',
-    invoiceNo: data.invoiceNo,
-    recepients: {
-      emailTo: 'yonathan.moniaga@yopmail.com',
-      emailCc: '',
-      emailBcc: '',
-    },
-  })
-}
-
 const setStepperStatus = () => {
   if (detailNonPo.value.header.statusCode === 1) {
     stepperStatus.value = 'Submission'
@@ -1167,8 +1154,12 @@ onMounted(() => {
     tabNow.value = 'preview'
   }
 
-  if (route.query.type === 'non-po-view'||
-    (route.query.invoice && route.query.type !== 'non-po-view' && route.query.type !== 'po-view' && route.query.type === 'nonpo')
+  if (
+    route.query.type === 'non-po-view' ||
+    (route.query.invoice &&
+      route.query.type !== 'non-po-view' &&
+      route.query.type !== 'po-view' &&
+      route.query.type === 'nonpo')
   ) {
     invoiceApi.getNonPoDetail(route.query.invoice?.toString() || '').then(() => {
       setStepperStatus()
@@ -1178,7 +1169,10 @@ onMounted(() => {
 
   if (
     route.query.type === 'po-view' ||
-    (route.query.invoice && route.query.type !== 'non-po-view' && route.query.type !== 'po-view' && route.query.type === 'po')
+    (route.query.invoice &&
+      route.query.type !== 'non-po-view' &&
+      route.query.type !== 'po-view' &&
+      route.query.type === 'po')
   ) {
     invoiceApi.getPoDetail(route.query.invoice?.toString() || '').then(() => {
       setData()
