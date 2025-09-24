@@ -112,10 +112,7 @@ watch(
 <template>
   <BreadcrumbView title="Company Information" :routes="bcRoutes" />
 
-  <div
-    v-if="currentTab === 'administrative-data'"
-    class="p-4 mb-5 bg-amber-100/70 rounded-md w-full text-sm flex items-center justify-between"
-  >
+  <div class="p-4 mb-5 bg-amber-100/70 rounded-md w-full text-sm flex items-center justify-between">
     <div class="flex items-center gap-2">
       <img src="/icons/information.svg" alt="" />
       <div>
