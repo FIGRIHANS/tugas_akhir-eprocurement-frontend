@@ -23,7 +23,7 @@
             <tr v-for="(item, index) in list?.workflow" :key="index" class="text-sm font-normal">
               <td>{{ index + 1 }}</td>
               <td>{{ item.profileName }}</td>
-              <td v-if="route.name === 'invoiceVerificationNoPo'">{{ item.actionerName }}</td>
+              <td v-if="route.name === 'invoiceVerificationNoPo'">{{ item.actionerName || '-' }}</td>
               <td>
                 {{
                   item.actionerDate && item.actioner !== 0
