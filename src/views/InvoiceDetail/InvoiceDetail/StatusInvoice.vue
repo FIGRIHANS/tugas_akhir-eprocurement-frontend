@@ -66,16 +66,23 @@ const reason = ref<string>('')
 const verificationApi = useInvoiceVerificationStore()
 
 const detailInvoice = computed(() => verificationApi.detailInvoice)
+const detailInvoiceNonPo = computed(() => verificationApi.detailNonPoInvoice)
+
+const checkIsNonPo = () => {
+  return route.query.invoiceType === 'no_po'
+}
 
 const getRejectReason = () => {
-  if (!detailInvoice.value) return
-  const index = detailInvoice.value.workflow.findIndex((item) => item.stateCode === 5)
+  if (!detailInvoice.value && !detailInvoiceNonPo.value) return
 
-  if (index !== -1) reason.value = detailInvoice.value.workflow[index].actionerNotes
+  const list = checkIsNonPo() ? detailInvoiceNonPo.value : detailInvoice.value
+  const index = list.workflow.findIndex((item) => item.stateCode === 5)
+
+  if (index !== -1) reason.value = list.workflow[index].actionerNotes
 }
 
 watch(
-  () => detailInvoice.value,
+  () => [detailInvoice.value, detailInvoiceNonPo.value],
   () => {
     getRejectReason()
   },
