@@ -1032,7 +1032,7 @@ onMounted(async () => {
     routes.value = [
       {
         name: 'Invoice Verification',
-        to: '/invoice/verification',
+        to: checkIsNonPo() ? '/invoice/verification/noPo' : '/invoice/verification',
       },
       {
         name: 'Detail Invoice',
@@ -1044,7 +1044,7 @@ onMounted(async () => {
     routes.value = [
       {
         name: 'Invoice Approval',
-        to: '/invoice/approval',
+        to: checkIsNonPo() ? '/invoice/approval/nonPo' : '/invoice/approval',
       },
       {
         name: 'Detail Invoice',
