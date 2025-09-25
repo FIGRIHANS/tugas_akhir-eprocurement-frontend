@@ -20,6 +20,7 @@ import axios from 'axios'
 import moment from 'moment'
 import LPagination from '@/components/pagination/LPagination.vue'
 import { useChangeDataEmailStore } from '@/stores/vendor/email-change-data'
+import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 
 const companyDeedDataStore = useCompanyDeedDataStore()
 const adminVendorStore = useVendorAdministrationStore()
@@ -52,6 +53,7 @@ const showDeleteModal = ref(false)
 const apiErrorMessage = ref('')
 const isDownloadLoading = ref(false)
 const isSaveLoading = ref(false)
+const modalUploadFailed = ref<boolean>(false)
 
 const fileUploaderRef = ref<InstanceType<typeof UiFileUpload> | null>(null)
 
@@ -290,6 +292,10 @@ const handleDownload = async (path: string) => {
   }
 }
 
+const handleUploadFailed = () => {
+  modalUploadFailed.value = true
+}
+
 /** Pastikan daftar kota tersedia (kalau store punya action loader) */
 onMounted(async () => {
   if (!vendorMasterDataStore.cityList?.length) {
@@ -391,6 +397,8 @@ watchEffect(async () => {
             placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
             hint-text="*jpg, jpeg, png, pdf, zip / max : 16 MB"
             @added-file="onUploadFile($event)"
+            @upload-failed="handleUploadFailed()"
+            :max-size="16000000"
           />
         </UiFormGroup>
 
@@ -580,5 +588,15 @@ watchEffect(async () => {
         </UiButton>
       </div>
     </UiModal>
+    <ModalConfirmation
+      :open="modalUploadFailed"
+      id="other-doc-upload-error"
+      type="danger"
+      title="Upload Failed"
+      text="File size exceeds the maximum limit of 16 MB. Please choose a smaller file."
+      no-submit
+      static
+      :cancel="() => (modalUploadFailed = false)"
+    />
   </div>
 </template>

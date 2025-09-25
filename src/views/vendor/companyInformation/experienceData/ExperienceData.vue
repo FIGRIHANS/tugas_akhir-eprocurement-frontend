@@ -9,10 +9,11 @@ import { tableCols } from './static'
 import useExperienceStore from '@/stores/vendor/experience'
 import UiModal from '@/components/modal/UiModal.vue'
 import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
-import { formatDate } from '@/composables/date-format'
+// import { formatDate } from '@/composables/date-format'
 import ModalDelete from './ModalDelete.vue'
 import UiLoading from '@/components/UiLoading.vue'
 import { useVendorUploadStore } from '@/stores/vendor/upload'
+import moment from 'moment'
 
 const router = useRouter()
 const route = useRoute()
@@ -138,8 +139,8 @@ onMounted(() => {
                   <td>{{ item.contractValue }}</td>
                   <td>{{ item.businessField }}</td>
                   <td>{{ item.subBusiness }}</td>
-                  <td>{{ formatDate(item.startDate) }}</td>
-                  <td>{{ formatDate(item.endDate) }}</td>
+                  <td>{{ moment(item.startDate).format('MMM DD, yyyy') }}</td>
+                  <td>{{ moment(item.endDate).format('MMM DD, yyyy') }}</td>
                 </tr>
               </tbody>
             </table>

@@ -251,7 +251,7 @@ watch(
                       <div class="h-14 flex items-center">
                         <DatePicker
                           v-model="item.issuedUTCDate"
-                          format="dd MM yyyy"
+                          format="MMM dd, yyyy"
                           placeholder="Pilih Tanggal"
                           :disabled="!isEditing(item.licenseId)"
                           class="!w-48"
@@ -264,7 +264,7 @@ watch(
                       <div class="h-14 flex items-center">
                         <DatePicker
                           v-model="item.expiredUTCDate"
-                          format="dd MM yyyy"
+                          format="MMM dd, yyyy"
                           placeholder="Pilih Tanggal"
                           :disabled="!isEditing(item.licenseId) || !item.issuedUTCDate"
                           :min-date="item.issuedUTCDate"
