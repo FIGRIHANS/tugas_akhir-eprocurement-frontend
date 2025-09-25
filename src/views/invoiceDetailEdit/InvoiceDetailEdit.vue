@@ -254,9 +254,15 @@ const handleAfterSuccess = () => {
       },
     })
   } else {
-    router.push({
-      name: 'invoiceApproval',
-    })
+    if (route.query.invoiceType === 'no_po') {
+      router.push({
+        name: 'invoiceApprovalNonPo'
+      })
+    } else {
+      router.push({
+        name: 'invoiceApproval',
+      })
+    }
   }
 }
 
