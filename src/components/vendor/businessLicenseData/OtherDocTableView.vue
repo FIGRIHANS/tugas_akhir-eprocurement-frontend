@@ -251,19 +251,19 @@ watch(
                 <td class="align-top">
                   <DatePicker
                     v-model="localOtherDocuments[index].issuedDate as string | Date | null"
-                    format="dd MM yyyy"
                     class="!w-48"
                     :disabled="!isEditing(index)"
+                    :format="'MMM dd, yyyy'"
                   />
                 </td>
 
                 <td class="align-top">
                   <DatePicker
                     v-model="localOtherDocuments[index].expiredDate as string | Date | null"
-                    format="dd MM yyyy"
                     class="!w-48"
                     :disabled="!isEditing(index) || !localOtherDocuments[index]?.issuedDate"
                     :min-date="localOtherDocuments[index]?.issuedDate"
+                    :format="'MMM dd, yyyy'"
                   />
                 </td>
 
