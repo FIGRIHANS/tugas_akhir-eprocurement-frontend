@@ -129,8 +129,10 @@ import { ref, computed, watch, inject } from 'vue'
 import type { formTypes } from '../../types/invoiceAddWrapper'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
+import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
+const verificationApi = useInvoiceVerificationStore()
 const columns = ref([
   'Action',
   'Activity / Expense',
@@ -181,6 +183,9 @@ const addNew = () => {
 }
 
 const deleteItem = (index: number) => {
+  if (form.invoiceItem[index].id) {
+    verificationApi.costExpenseTempDelete?.push(form.invoiceItem[index].id)
+  }
   form?.invoiceItem.splice(index, 1)
 }
 

@@ -532,7 +532,7 @@ const goVerif = () => {
           const modal = KTModal.getInstance(idModal as HTMLElement)
           modal.show()
           for (const item of costExpensesTempDelete.value) {
-            verificationApi.deleteCostExpense(form.value.invoiceUId, item.id)
+            verificationApi.deleteCostExpense(form.value.invoiceUId, item)
           }
         }
       })
@@ -556,7 +556,7 @@ const goVerif = () => {
           const modal = KTModal.getInstance(idModal as HTMLElement)
           modal.show()
           for (const item of costExpensesTempDelete.value) {
-            verificationApi.deleteCostExpense(form.value.invoiceUId, item.id)
+            verificationApi.deleteCostExpense(form.value.invoiceUId, item)
           }
         }
       })
@@ -578,7 +578,7 @@ const goVerif = () => {
           const modal = KTModal.getInstance(idModal as HTMLElement)
           modal.show()
           for (const item of additionalCostTempDelete.value) {
-            verificationApi.deleteAdditionalCost(form.value.invoiceUId, item.id)
+            verificationApi.deleteAdditionalCost(form.value.invoiceUId, item)
           }
         }
       })

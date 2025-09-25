@@ -11,10 +11,8 @@ import type {
   DetailInvoiceEditTypes,
   PostVerificationTypes,
   ParamsRejectTypes,
-  ParamsSubmissionCost,
   ListNonPoTypes,
-  PostEditApprovalNonPoTypes,
-  ParamsSubmissionCostExpenseType
+  PostEditApprovalNonPoTypes
 } from './types/verification'
 
 export const useInvoiceVerificationStore = defineStore('invoiceVerification', () => {
@@ -23,8 +21,8 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
   const detailInvoice = ref<ParamsSubmissionTypes>()
   const isFromEdit = ref<boolean>(false)
   const detailInvoiceEdit = ref<DetailInvoiceEditTypes>()
-  const additionalCostTempDelete = ref<ParamsSubmissionCost[]>([])
-  const costExpenseTempDelete = ref<ParamsSubmissionCostExpenseType[]>([])
+  const additionalCostTempDelete = ref<number[]>([])
+  const costExpenseTempDelete = ref<number[]>([])
   const isRejectLoading = ref<boolean>(false)
   const errorMessageSap = ref<string>('')
   const detailNonPoInvoice = ref<ParamsSubmissionTypes>()

@@ -147,6 +147,7 @@ import moment from 'moment'
 import type { itemsPoGrType } from './types/invoicePoGr'
 import type { itemsCostType } from './types/additionalCost'
 import type { invoiceItemTypes } from './types/invoiceItem'
+import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 
 const InvoiceData = defineAsyncComponent(() => import('./InvoiceAddWrapper/InvoiceData.vue'))
 const InvoiceInformation = defineAsyncComponent(
@@ -168,6 +169,7 @@ const ModalFailedBudgetCheck = defineAsyncComponent(
 
 const invoiceApi = useInvoiceSubmissionStore()
 const invoiceMasterApi = useInvoiceMasterDataStore()
+const verificationApi = useInvoiceVerificationStore()
 const notifEmailApi = useNotifInvoiceEmailStore()
 const loginApi = useLoginStore()
 const router = useRouter()
@@ -269,6 +271,8 @@ const detailNonPo = computed(() => invoiceApi.detailNonPo)
 const userData = computed(() => loginApi.userData)
 const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
 const listActivity = computed(() => invoiceMasterApi.activityList)
+const additionalCostTempDelete = computed(() => verificationApi.additionalCostTempDelete)
+const costExpensesTempDelete = computed(() => verificationApi.costExpenseTempDelete)
 
 const checkInvoiceView = () => {
   return route.query.type === 'po-view'
@@ -714,6 +718,17 @@ const setAfterResponsePost = (response) => {
     const idModal = document.querySelector('#success_invoice_modal')
     const modal = KTModal.getInstance(idModal as HTMLElement)
     modal.show()
+    if (form.invoiceUId) {
+      if (route.query.type === 'nonpo') {
+        for (const item of costExpensesTempDelete.value) {
+          verificationApi.deleteCostExpense(form.invoiceUId, item)
+        }
+      } else {
+        for (const item of additionalCostTempDelete.value) {
+          verificationApi.deleteAdditionalCost(form.invoiceUId, item)
+        }
+      }
+    }
   } else {
     if (response.result.message.includes('Invoice Document Number')) {
       const idModal = document.querySelector('#error_document_number_modal')

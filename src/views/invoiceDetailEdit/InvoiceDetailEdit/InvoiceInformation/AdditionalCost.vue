@@ -312,7 +312,7 @@ const resetItem = (item: itemsCostType, index: number) => {
     resetFormEdit()
   } else {
     if (form) {
-      verificationApi.additionalCostTempDelete?.push(form.value.additionalCosts[index])
+      verificationApi.additionalCostTempDelete?.push(form.value.additionalCosts[index].id)
       form.value.additionalCosts.splice(index, 1)
     }
   }

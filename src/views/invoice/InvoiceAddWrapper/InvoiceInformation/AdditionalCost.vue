@@ -125,8 +125,10 @@ import type { formTypes } from '../../types/invoiceAddWrapper'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import type { itemsCostType } from '../../types/additionalCost'
+import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
+const verificationApi = useInvoiceVerificationStore()
 const columns = ref([
   'Action',
   'Activity / Expense',
@@ -151,6 +153,7 @@ const listActivity = computed(() => invoiceMasterApi.activityList)
 const addNew = () => {
   if (form) {
     const data = {
+      id: 0,
       activity: null,
       activityCode: '',
       activityName: '',
@@ -172,6 +175,9 @@ const addNew = () => {
 }
 
 const deleteItem = (index: number) => {
+  if (form.additionalCost[index].id) {
+    verificationApi.additionalCostTempDelete?.push(form.additionalCost[index].id)
+  }
   form?.additionalCost.splice(index, 1)
 }
 
