@@ -316,7 +316,7 @@ watchEffect(async () => {
             v-model="payload.documentDate"
             label="Letter Date"
             placeholder="Select Date"
-            :format="'MMMM dd, yyyy'"
+            :format="'MMM dd, yyyy'"
           />
           <p v-if="errors.documentDate" class="text-xs text-red-500 mt-1">
             {{ errors.documentDate }}
@@ -401,7 +401,7 @@ watchEffect(async () => {
               </div>
             </td>
             <td class="text-nowrap">{{ doc.documentNo }}</td>
-            <td class="text-nowrap">{{ moment(doc.documentDate).format('MMMM DD, yyyy') }}</td>
+            <td class="text-nowrap">{{ moment(doc.documentDate).format('MMM dd, yyyy') }}</td>
           </tr>
         </tbody>
       </table>
