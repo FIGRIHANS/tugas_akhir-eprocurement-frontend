@@ -478,7 +478,7 @@ watchEffect(async () => {
               </div>
             </td>
             <td class="text-nowrap">{{ doc.documentNo }}</td>
-            <td class="text-nowrap">{{ moment(doc.documentDate).format('MMMM DD, yyyy') }}</td>
+            <td class="text-nowrap">{{ moment(doc.documentDate).format('MMM dd, yyyy') }}</td>
             <td class="text-nowrap">{{ doc.notaryName ?? doc.value }}</td>
             <td class="text-nowrap">{{ doc.cityName }}</td>
           </tr>
