@@ -55,8 +55,11 @@
               <th
                 v-for="(item, index) in columns"
                 :key="index"
-                class="cursor-pointer"
-                :class="index !== 0 ? 'list__long' : ''"
+                :class="{
+                  'list__long ': index !== 0,
+                  'cursor-pointer': item,
+                  '!text-blue-500': item === sortColumnName && sortBy !== ''
+                }"
                 @click="sortColumn(item)"
               >
                 {{ item }}
