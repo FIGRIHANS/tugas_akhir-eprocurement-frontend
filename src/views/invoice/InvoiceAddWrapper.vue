@@ -607,7 +607,7 @@ const mapDataPostNonPo = () => {
       bankAccountNumber: form.bankAccountNumberAlternative,
       bankKey: form.bankKeyAlternative,
       bankCountry: form.bankCountryAlternative,
-      npwp: form.npwp,
+      npwp: form.npwpNumberAlternative,
       ktp: form.ktpNumberAlternative,
       email: form.emailAlternative,
       isAlternativePayee: form.isAlternativePayee,
