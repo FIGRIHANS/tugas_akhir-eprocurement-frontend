@@ -23,6 +23,7 @@ import moment from 'moment'
 import { computed, reactive, ref, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 import { z } from 'zod'
+import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 
 const shareholderSchema = z.object({
   ownerName: z.string().min(1, 'Shareholder Name is required'),
@@ -63,6 +64,7 @@ const showErrorModal = ref<boolean>(false)
 const showDeleteModal = ref<boolean>(false)
 const apiErrorMessage = ref<string>('')
 const isDownloadLoading = ref<boolean>(false)
+const modalUploadFailed = ref<boolean>(false)
 
 const shareHoldersError = ref<string[]>([])
 
@@ -310,6 +312,10 @@ const setPageShareholders = async (page: number) => {
   paginationShareholders.value.currentPage = page
 }
 
+const handleUploadFailed = () => {
+  modalUploadFailed.value = true
+}
+
 watchEffect(async () => {
   try {
     await companyDeedDataStore.getShareholders(
@@ -485,6 +491,8 @@ watchEffect(async () => {
           name="shareholderFile"
           placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
           @added-file="uploadFile($event)"
+          @upload-failed="handleUploadFailed()"
+          :max-size="16000000"
         />
         <UiInput
           label="Nominal Share Value"
@@ -599,4 +607,15 @@ watchEffect(async () => {
       {{ apiErrorMessage }}
     </p>
   </UiModal>
+
+  <ModalConfirmation
+    :open="modalUploadFailed"
+    id="other-doc-upload-error"
+    type="danger"
+    title="Upload Failed"
+    text="File size exceeds the maximum limit of 16 MB. Please choose a smaller file."
+    no-submit
+    static
+    :cancel="() => (modalUploadFailed = false)"
+  />
 </template>
