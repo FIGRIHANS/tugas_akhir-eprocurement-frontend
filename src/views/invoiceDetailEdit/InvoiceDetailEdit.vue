@@ -167,6 +167,8 @@ const contentComponent = computed(() => {
 
 const detailInvoice = computed(() => verificationApi.detailInvoice)
 const detailInvoiceNonPO = computed(() => verificationApi.detailNonPoInvoice)
+const additionalCostTempDelete = computed(() => verificationApi.additionalCostTempDelete)
+const costExpensesTempDelete = computed(() => verificationApi.costExpenseTempDelete)
 
 const checkInvoiceData = () => {
   return true
@@ -366,6 +368,9 @@ const goNext = () => {
             const idModal = document.querySelector('#success_data_edit_modal')
             const modal = KTModal.getInstance(idModal as HTMLElement)
             modal.show()
+            for (const item of additionalCostTempDelete.value) {
+              verificationApi.deleteAdditionalCost(form.value.invoiceUId, item)
+            }
           })
           .finally(() => {
             isLoading.value = false
@@ -378,6 +383,9 @@ const goNext = () => {
             const idModal = document.querySelector('#success_data_edit_modal')
             const modal = KTModal.getInstance(idModal as HTMLElement)
             modal.show()
+            for (const item of costExpensesTempDelete.value) {
+              verificationApi.deleteCostExpense(form.value.invoiceUId, item)
+            }
           })
           .finally(() => {
             isLoading.value = false

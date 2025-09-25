@@ -721,10 +721,12 @@ const setAfterResponsePost = (response) => {
     if (form.invoiceUId) {
       if (route.query.type === 'nonpo') {
         for (const item of costExpensesTempDelete.value) {
+          console.log('non po')
           verificationApi.deleteCostExpense(form.invoiceUId, item)
         }
       } else {
         for (const item of additionalCostTempDelete.value) {
+          console.log('po')
           verificationApi.deleteAdditionalCost(form.invoiceUId, item)
         }
       }
@@ -804,6 +806,7 @@ const setData = () => {
     form.additionalCost = []
     for (const item of detail.additionalCosts) {
       const data = {
+        id: item.id,
         activity: item.activityId,
         activityCode: item.activityExpense,
         activityName: item.activityName,
@@ -911,6 +914,7 @@ const setDataNonPo = () => {
     form.invoiceItem = []
     for (const item of detail.costExpense) {
       const data = {
+        id: item.id,
         activity: item.activityId,
         activityCode: item.activityExpenses,
         activityName: item.activityName,
