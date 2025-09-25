@@ -349,7 +349,7 @@ onMounted(() => {
             <DatePicker
               v-model="payload.dateOfBirth"
               placeholder="Select"
-              format="MMMM dd, yyyy"
+              format="MMM dd, yyyy"
               label="Date of Birth"
               required
               label-top
@@ -491,7 +491,7 @@ onMounted(() => {
                     <td>
                       <DatePicker
                         v-model="subCertificate.startDate"
-                        format="MMMM dd, yyyy"
+                        format="MMM dd, yyyy"
                         teleport
                         @update:model-value="
                           $event ? (subCertificate.startDate = new Date($event).toISOString()) : ''
@@ -503,7 +503,7 @@ onMounted(() => {
                     <td>
                       <DatePicker
                         v-model="subCertificate.endDate"
-                        format="MMMM dd, yyyy"
+                        format="MMM dd, yyyy"
                         teleport
                         @update:model-value="
                           $event ? (subCertificate.endDate = new Date($event).toISOString()) : ''

@@ -411,7 +411,7 @@ watchEffect(async () => {
               </td>
               <td>{{ item.typeShareholders }}</td>
               <td>{{ item.ownerName }}</td>
-              <td>{{ moment(item.ownerDOB).format('MMMM DD, yyyy') }}</td>
+              <td>{{ moment(item.ownerDOB).format('MMM dd, yyyy') }}</td>
               <td>{{ formatNumber(item.quantity) }}</td>
               <td>{{ item.shareUnit }}</td>
               <td>{{ item.ownerID }}</td>
@@ -479,7 +479,7 @@ watchEffect(async () => {
         <DatePicker
           placeholder="Date of birth"
           v-model="payload.ownerDOB"
-          :format="'MMMM dd, yyyy'"
+          :format="'MMM dd, yyyy'"
         />
         <UiFileUpload
           name="shareholderFile"

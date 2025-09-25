@@ -112,7 +112,7 @@
           <DatePicker
             v-model="payload.mfgDate"
             placeholder="Select"
-            format="MMMM dd, yyyy"
+            format="MMM dd, yyyy"
             label="Year of Manufacture"
             :error="payloadError.mfgDate"
             required
