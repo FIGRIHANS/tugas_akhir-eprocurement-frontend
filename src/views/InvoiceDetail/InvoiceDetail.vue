@@ -191,6 +191,7 @@ const detailInvoice = computed(() => verificationApi.detailInvoice)
 const detailInvoiceNonPo = computed(() => verificationApi.detailNonPoInvoice)
 const userData = computed(() => loginApi.userData)
 const additionalCostTempDelete = computed(() => verificationApi.additionalCostTempDelete)
+const costExpensesTempDelete = computed(() => verificationApi.costExpenseTempDelete)
 const whtCodeList = computed(() => invoiceMasterApi.whtCodeList)
 
 const checkIsNonPo = () => {
@@ -530,8 +531,8 @@ const goVerif = () => {
           const idModal = document.querySelector('#success_verif_modal')
           const modal = KTModal.getInstance(idModal as HTMLElement)
           modal.show()
-          for (const item of additionalCostTempDelete.value) {
-            verificationApi.deleteAdditionalCost(form.value.invoiceUId, item.id)
+          for (const item of costExpensesTempDelete.value) {
+            verificationApi.deleteCostExpense(form.value.invoiceUId, item.id)
           }
         }
       })
@@ -554,8 +555,8 @@ const goVerif = () => {
           const idModal = document.querySelector('#success_verif_modal')
           const modal = KTModal.getInstance(idModal as HTMLElement)
           modal.show()
-          for (const item of additionalCostTempDelete.value) {
-            verificationApi.deleteAdditionalCost(form.value.invoiceUId, item.id)
+          for (const item of costExpensesTempDelete.value) {
+            verificationApi.deleteCostExpense(form.value.invoiceUId, item.id)
           }
         }
       })
