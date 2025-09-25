@@ -13,7 +13,8 @@ import type {
   ParamsRejectTypes,
   ParamsSubmissionCost,
   ListNonPoTypes,
-  PostEditApprovalNonPoTypes
+  PostEditApprovalNonPoTypes,
+  ParamsSubmissionCostExpenseType
 } from './types/verification'
 
 export const useInvoiceVerificationStore = defineStore('invoiceVerification', () => {
@@ -23,6 +24,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
   const isFromEdit = ref<boolean>(false)
   const detailInvoiceEdit = ref<DetailInvoiceEditTypes>()
   const additionalCostTempDelete = ref<ParamsSubmissionCost[]>([])
+  const costExpenseTempDelete = ref<ParamsSubmissionCostExpenseType[]>([])
   const isRejectLoading = ref<boolean>(false)
   const errorMessageSap = ref<string>('')
   const detailNonPoInvoice = ref<ParamsSubmissionTypes>()
@@ -228,6 +230,14 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     return response.data.result
   }
 
+  const deleteCostExpense = async (invoiceUid: string, costExpensesId: number) => {
+    const response: ApiResponse<void> = await invoiceApi.delete(
+      `/invoice/${invoiceUid}/cost-expenses/${costExpensesId}`,
+    )
+
+    return response.data.result
+  }
+
   const verifyInvoiceNonPo = async (invoiceUid: string) => {
     const response: ApiResponse<void> = await invoiceApi.post(
       `/invoice/non-po/verificator/${invoiceUid}`,
@@ -242,6 +252,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     isFromEdit,
     detailInvoiceEdit,
     additionalCostTempDelete,
+    costExpenseTempDelete,
     isRejectLoading,
     errorMessageSap,
     detailNonPoInvoice,
@@ -257,6 +268,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     postSapNonPo,
     putSubmission,
     deleteAdditionalCost,
+    deleteCostExpense,
     getInvoiceNonPoDetail,
     verifyInvoiceNonPo,
     putEditInvoice,
