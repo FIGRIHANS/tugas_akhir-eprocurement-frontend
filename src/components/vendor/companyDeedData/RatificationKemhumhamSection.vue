@@ -12,6 +12,7 @@ import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiLoading from '@/components/UiLoading.vue'
 import UiModal from '@/components/modal/UiModal.vue'
 import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
+import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 
 import type { IVendorLegalDocumentPayload } from '@/stores/vendor/types/vendor'
 import { useCompanyDeedDataStore, useVendorAdministrationStore } from '@/stores/vendor/vendor'
@@ -53,6 +54,7 @@ const apiErrorMessage = ref('')
 const isDownloadLoading = ref(false)
 const isSaveLoading = ref(false)
 const mode = ref<'add' | 'edit' | 'delete'>('add')
+const modalUploadFailed = ref<boolean>(false)
 
 const RATIFICATION_DOCUMENT_TYPE = 3117
 
@@ -262,6 +264,10 @@ const ratificationData = computed(() => {
   return activeItems as typeof items
 })
 
+const handleUploadFailed = () => {
+  modalUploadFailed.value = true
+}
+
 watchEffect(async () => {
   try {
     await companyDeedDataStore.getVendorLegalDocument(
@@ -305,6 +311,8 @@ watchEffect(async () => {
             placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
             hint-text="*jpg, jpeg, png, pdf, zip / max : 16 MB"
             @added-file="onUploadFile($event)"
+            @upload-failed="handleUploadFailed()"
+            :max-size="16000000"
           />
           <p v-if="errors.documentURL" class="text-xs text-red-500 mt-1">
             {{ errors.documentURL }}
@@ -487,5 +495,15 @@ watchEffect(async () => {
         </UiButton>
       </div>
     </UiModal>
+    <ModalConfirmation
+      :open="modalUploadFailed"
+      id="other-doc-upload-error"
+      type="danger"
+      title="Upload Failed"
+      text="File size exceeds the maximum limit of 16 MB. Please choose a smaller file."
+      no-submit
+      static
+      :cancel="() => (modalUploadFailed = false)"
+    />
   </div>
 </template>
