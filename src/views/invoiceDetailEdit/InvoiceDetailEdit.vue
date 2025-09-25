@@ -704,7 +704,7 @@ const mapDataVerif = () => {
         invoiceUId: form.value.invoiceUId,
         invoiceTypeCode: form.value.invoiceTypeCode,
         invoiceTypeName: form.value.invoiceTypeName,
-        invoiceVendorNo: form.value.vendorId,
+        invoiceVendorNo: form.value.vendorId.toString(),
         companyCode: form.value.companyCode,
         companyName: form.value.companyName,
         invoiceNo: form.value.invoiceNo,
