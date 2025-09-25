@@ -173,6 +173,7 @@
 
 <script lang="ts" setup>
 import { ref, reactive, computed, watch, inject, onMounted, type Ref } from 'vue'
+import { useRoute } from 'vue-router'
 import type { formTypes } from '../../types/invoiceDetailEdit'
 import type { invoiceItemTypes } from '../../types/invoiceItem'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
@@ -181,6 +182,7 @@ import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const verificationApi = useInvoiceVerificationStore()
+const route = useRoute()
 const form = inject<Ref<formTypes>>('form')
 const columns = ref([
   'Action',
@@ -231,6 +233,10 @@ const checkIsEdit = () => {
 
 const checkPoPib = () => {
   return form?.value.invoiceTypeCode === 902
+}
+
+const checkIsNonPo = () => {
+  return route.query.invoiceType === 'no_po'
 }
 
 const addNew = () => {
@@ -362,18 +368,35 @@ const getPercentTax = (code: string) => {
 
 const getVatAmount = () => {
   if (!form) return
-  const checkIsEdit = form.value.additionalCosts.findIndex((item) => item.isEdit)
-  if (checkIsEdit !== -1) {
-    const percentTax = getPercentTax(formEdit.taxCode) || 0
-    const itemAmount = formEdit.itemAmount
-    const result = percentTax * itemAmount
-    formEdit.vatAmount = result
-  } else {
-    for (const item of form.value.additionalCosts) {
-      const percentTax = getPercentTax(item.taxCode) || 0
-      const itemAmount = item.itemAmount
+  if (checkIsNonPo()) {
+    const checkIsEdit = form.value.invoiceItem.findIndex((item) => item.isEdit)
+    if (checkIsEdit !== -1) {
+      const percentTax = getPercentTax(formEdit.taxCode) || 0
+      const itemAmount = formEdit.itemAmount
       const result = percentTax * itemAmount
-      item.vatAmount = result
+      formEdit.vatAmount = result
+    } else {
+      for (const item of form.value.invoiceItem) {
+        const percentTax = getPercentTax(item.taxCode) || 0
+        const itemAmount = item.itemAmount
+        const result = percentTax * itemAmount
+        item.vatAmount = result
+      }
+    }
+  } else {
+    const checkIsEdit = form.value.additionalCosts.findIndex((item) => item.isEdit)
+    if (checkIsEdit !== -1) {
+      const percentTax = getPercentTax(formEdit.taxCode) || 0
+      const itemAmount = formEdit.itemAmount
+      const result = percentTax * itemAmount
+      formEdit.vatAmount = result
+    } else {
+      for (const item of form.value.additionalCosts) {
+        const percentTax = getPercentTax(item.taxCode) || 0
+        const itemAmount = item.itemAmount
+        const result = percentTax * itemAmount
+        item.vatAmount = result
+      }
     }
   }
 }
