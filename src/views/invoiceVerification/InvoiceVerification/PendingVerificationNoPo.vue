@@ -60,6 +60,7 @@
                   'cursor-pointer': item,
                   '!text-blue-500': item === sortColumnName && sortBy !== ''
                 }"
+                @click="sortColumn(item)"
               >
                 {{ item }}
                 <i v-if="item" class="ki-filled ki-arrow-up-down"></i>
