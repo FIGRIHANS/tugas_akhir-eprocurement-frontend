@@ -137,6 +137,7 @@ interface ParamsSubmissionItem {
 }
 
 interface ParamsSubmissionCost {
+  id: number
   activityId: number
   activityExpense: string
   activityName: string
