@@ -177,8 +177,10 @@ import type { formTypes } from '../../types/invoiceDetailEdit'
 import type { invoiceItemTypes } from '../../types/invoiceItem'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
+import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
+const verificationApi = useInvoiceVerificationStore()
 const form = inject<Ref<formTypes>>('form')
 const columns = ref([
   'Action',
@@ -334,7 +336,10 @@ const resetItem = (item: invoiceItemTypes, index: number) => {
     item.isEdit = !item.isEdit
     resetFormEdit()
   } else {
-    form?.value.invoiceItem.splice(index, 1)
+    if (form) {
+      verificationApi.costExpenseTempDelete?.push(form.value.invoiceItem[index])
+      form.value.invoiceItem.splice(index, 1)
+    }
   }
 }
 
