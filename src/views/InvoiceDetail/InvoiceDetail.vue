@@ -555,8 +555,8 @@ const goVerif = () => {
           const idModal = document.querySelector('#success_verif_modal')
           const modal = KTModal.getInstance(idModal as HTMLElement)
           modal.show()
-          for (const item of costExpensesTempDelete.value) {
-            verificationApi.deleteCostExpense(form.value.invoiceUId, item)
+          for (const item of additionalCostTempDelete.value) {
+            verificationApi.deleteAdditionalCost(form.value.invoiceUId, item)
           }
         }
       })
@@ -577,8 +577,8 @@ const goVerif = () => {
           const idModal = document.querySelector('#success_verif_modal')
           const modal = KTModal.getInstance(idModal as HTMLElement)
           modal.show()
-          for (const item of additionalCostTempDelete.value) {
-            verificationApi.deleteAdditionalCost(form.value.invoiceUId, item)
+          for (const item of costExpensesTempDelete.value) {
+            verificationApi.deleteCostExpense(form.value.invoiceUId, item)
           }
         }
       })
