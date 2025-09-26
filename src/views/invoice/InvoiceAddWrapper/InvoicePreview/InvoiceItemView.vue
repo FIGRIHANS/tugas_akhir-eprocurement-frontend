@@ -150,6 +150,7 @@ watch(
   () => form,
   () => {
     setAdditionalCostList()
+    invoiceMasterApi.getCostCenter(form.companyCode || '')
   },
   {
     deep: true,
