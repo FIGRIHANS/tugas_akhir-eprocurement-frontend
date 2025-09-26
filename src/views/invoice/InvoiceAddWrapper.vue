@@ -996,39 +996,34 @@ const mapDataCheck = () => {
     }
     glAccount.push(glData)
   }
-
-  for (const item of glAccount) {
-    const checkTaxCode = accountPayable.findIndex((sub) => sub.TAX_CODE === item.TAX_CODE)
-    if (checkTaxCode === -1) {
-      itemNoAcc.value += 1
-      const accData = {
-        ITEMNO_ACC: itemNoAcc.value,
-        VENDOR_NO: form.vendorId,
-        REF_KEY_1: form.npwp,
-        REF_KEY_2: '',
-        REF_KEY_3: '',
-        BLINE_DATE: '',
-        PMNTTRMS: '',
-        PYMT_METH: '',
-        ALLOC_NMBR: '',
-        ITEM_TEXT: form.invoiceNoVendor,
-        TAX_CODE: item.TAX_CODE,
-        PAYMT_REF: '',
-      }
-      accountPayable.push(accData)
-    }
+  const accData = {
+    ITEMNO_ACC: itemNoAcc.value,
+    VENDOR_NO: form.vendorId,
+    REF_KEY_1: form.npwp,
+    REF_KEY_2: '',
+    REF_KEY_3: '',
+    BLINE_DATE: '',
+    PMNTTRMS: '',
+    PYMT_METH: '',
+    ALLOC_NMBR: '',
+    ITEM_TEXT: form.invoiceNoVendor,
+    TAX_CODE: form.invoiceItem[0].taxCode,
+    PAYMT_REF: '',
   }
+  accountPayable.push(accData)
 
   for (const item of accountPayable) {
-    const index = listTaxCalculation.value.findIndex((sub) => sub.code === item.TAX_CODE)
-    if (index !== -1) {
-      itemNoAcc.value += 1
-      const taxData = {
-        ITEMNO_ACC: itemNoAcc.value,
-        TAX_CODE: item.TAX_CODE,
-        TAX_RATE: listTaxCalculation.value[index].value,
+    if (item.TAX_CODE !== 'V0') {
+      const index = listTaxCalculation.value.findIndex((sub) => sub.code === item.TAX_CODE)
+      if (index !== -1) {
+        itemNoAcc.value += 1
+        const taxData = {
+          ITEMNO_ACC: itemNoAcc.value,
+          TAX_CODE: item.TAX_CODE,
+          TAX_RATE: listTaxCalculation.value[index].value,
+        }
+        accountTax.push(taxData)
       }
-      accountTax.push(taxData)
     }
   }
 
@@ -1061,22 +1056,24 @@ const mapDataCheck = () => {
   currencyAmount.push(currData)
 
   for (const item of accountTax) {
-    const filterTax = form.invoiceItem.filter((sub) => sub.taxCode === item.TAX_CODE)
-    if (filterTax.length !== 0) {
-      itemNoAcc.value += 1
-      let totalVat = 0
-      let totalAmount = 0
-      for (const subItem of filterTax) {
-        totalVat += subItem.vatAmount
-        totalAmount += subItem.itemAmount
+    if (item.TAX_CODE !== 'V0') {
+      const filterTax = form.invoiceItem.filter((sub) => sub.taxCode === item.TAX_CODE)
+      if (filterTax.length !== 0) {
+        itemNoAcc.value += 1
+        let totalVat = 0
+        let totalAmount = 0
+        for (const subItem of filterTax) {
+          totalVat += subItem.vatAmount
+          totalAmount += subItem.itemAmount
+        }
+        const currData = {
+          ITEMNO_ACC: itemNoAcc.value,
+          CURRENCY: form.currency,
+          AMT_DOCCUR: totalVat,
+          AMT_BASE: totalAmount,
+        }
+        currencyAmount.push(currData)
       }
-      const currData = {
-        ITEMNO_ACC: itemNoAcc.value,
-        CURRENCY: form.currency,
-        AMT_DOCCUR: totalVat,
-        AMT_BASE: totalAmount,
-      }
-      currencyAmount.push(currData)
     }
   }
 
