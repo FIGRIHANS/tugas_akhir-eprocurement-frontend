@@ -196,8 +196,8 @@ onMounted(() => {
                   <td>{{ item.contractValue }}</td>
                   <td>{{ item.businessField }}</td>
                   <td>{{ item.subBusiness }}</td>
-                  <td>{{ formatDate(item.startDate) }}</td>
-                  <td>{{ formatDate(item.endDate) }}</td>
+                  <td>{{ moment(item.startDate).format('MMM DD, yyyy') }}</td>
+                  <td>{{ moment(item.endDate).format('MMM DD, yyyy') }}</td>
                 </tr>
               </tbody>
             </table>
