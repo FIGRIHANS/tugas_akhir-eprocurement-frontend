@@ -1014,14 +1014,14 @@ const mapDataCheck = () => {
   }
   accountPayable.push(accData)
 
-  for (const item of accountPayable) {
-    if (item.TAX_CODE !== 'V0') {
-      const index = listTaxCalculation.value.findIndex((sub) => sub.code === item.TAX_CODE)
+  for (const item of form.invoiceItem) {
+    if (item.taxCode !== 'V0') {
+      const index = listTaxCalculation.value.findIndex((sub) => sub.code === item.taxCode)
       if (index !== -1) {
         itemNoAcc.value += 1
         const taxData = {
           ITEMNO_ACC: itemNoAcc.value,
-          TAX_CODE: item.TAX_CODE,
+          TAX_CODE: item.taxCode,
           TAX_RATE: listTaxCalculation.value[index].value,
         }
         accountTax.push(taxData)
