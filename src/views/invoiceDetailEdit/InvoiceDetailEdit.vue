@@ -380,6 +380,7 @@ const goNext = () => {
           })
           .finally(() => {
             isLoading.value = false
+            verificationApi.isFromEdit = false
           })
       } else {
         verificationApi
@@ -395,6 +396,7 @@ const goNext = () => {
           })
           .finally(() => {
             isLoading.value = false
+            verificationApi.isFromEdit = false
           })
       }
     } else {
@@ -567,6 +569,7 @@ const setDataDefault = () => {
   }
 
   for (const item of data?.documents || []) {
+    console.log(item)
     const data = {
       id: item.id,
       name: item.documentName,
@@ -735,7 +738,11 @@ const mapDataVerif = () => {
         statusCode: route.query.type === '1' ? 3 : 4,
         statusName: route.query.type === '1' ? 'Verified' : 'Approved',
         department: form.value.department,
-        profileId: '0'
+        profileId: '0',
+        invoicingParty: form.value.invoicingParty,
+        assigment: form.value.assigment,
+        transferNews: form.value.transferNews,
+        npwpReporting: form.value.npwpReporting
       },
       payment: {
         bankKey: form.value.bankKey,
