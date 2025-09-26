@@ -996,6 +996,8 @@ const mapDataCheck = () => {
     }
     glAccount.push(glData)
   }
+
+  itemNoAcc.value += 1
   const accData = {
     ITEMNO_ACC: itemNoAcc.value,
     VENDOR_NO: form.vendorId,
