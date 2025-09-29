@@ -46,6 +46,7 @@ export interface formTypes extends documentFormTypes {
   dpAmountDeductionError?: boolean
   creditCardBillingId: string
   creditCardBillingError?: boolean
+  paymentId: number
   bankKey: string
   bankKeyIdError?: boolean
   bankName: string

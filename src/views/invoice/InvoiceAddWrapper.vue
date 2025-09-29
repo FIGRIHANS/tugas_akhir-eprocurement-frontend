@@ -132,7 +132,6 @@ import { KTModal } from '@/metronic/core'
 import { useCheckEmpty } from '@/composables/validation'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
-import { useNotifInvoiceEmailStore } from '@/stores/views/invoice/email'
 import type {
   ParamsSubmissionTypes,
   ParamsSubmissionNonPo,
@@ -170,7 +169,6 @@ const ModalFailedBudgetCheck = defineAsyncComponent(
 const invoiceApi = useInvoiceSubmissionStore()
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const verificationApi = useInvoiceVerificationStore()
-const notifEmailApi = useNotifInvoiceEmailStore()
 const loginApi = useLoginStore()
 const router = useRouter()
 const route = useRoute()
@@ -201,6 +199,7 @@ const form = reactive<formTypes>({
   vendorName: '',
   npwp: '',
   address: '',
+  paymentId: 0,
   bankKeyId: '',
   bankNameId: '',
   beneficiaryName: '',
@@ -750,6 +749,7 @@ const setData = () => {
     form.vendorId = detail.vendor.vendorId ? detail.vendor.vendorId.toString() : ''
     form.npwp = detail.vendor.npwp
     form.address = detail.vendor.vendorAddress
+    form.paymentId = detail.payment.paymentId
     form.bankKeyId = detail.payment.bankKey
     form.bankNameId = detail.payment.bankName
     form.beneficiaryName = detail.payment.beneficiaryName
@@ -874,6 +874,7 @@ const setDataNonPo = () => {
     form.vendorId = detail.vendor.vendorId ? detail.vendor.vendorId.toString() : ''
     form.npwp = detail.vendor.npwp
     form.address = detail.vendor.vendorAddress
+    form.paymentId = detail.payment.paymentId
     form.bankKeyId = detail.payment.bankKey
     form.bankNameId = detail.payment.bankName
     form.beneficiaryName = detail.payment.beneficiaryName

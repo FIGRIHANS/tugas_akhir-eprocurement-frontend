@@ -89,6 +89,7 @@ interface ParamsSubmissionVendor {
 }
 
 interface ParamsSubmissionPayment {
+  paymentId: number
   bankKey: string
   bankName: string
   beneficiaryName: string
