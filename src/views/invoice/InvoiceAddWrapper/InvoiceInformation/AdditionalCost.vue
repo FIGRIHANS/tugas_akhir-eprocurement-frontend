@@ -53,7 +53,7 @@
                 ></v-select>
               </td>
               <td>
-                <span v-if="!item.isEdit">{{ useFormatIdr(item.itemAmount) || '-' }}</span>
+                <span v-if="!item.isEdit">{{ form?.currency === 'IDR' ? useFormatIdr(item.itemAmount) : useFormatUsd(item.itemAmount) || '-' }}</span>
                 <input
                   v-else
                   v-model="item.itemAmount"
@@ -106,10 +106,10 @@
                 <span>{{ item.whtCode || '-' }}</span>
               </td>
               <td>
-                <span>{{ item.whtBaseAmount || '-' }}</span>
+                <span>{{ form?.currency === 'IDR' ? useFormatIdr(item.whtBaseAmount) : useFormatUsd(item.whtBaseAmount) || '-' }}</span>
               </td>
               <td>
-                <span>{{ item.whtAmount || '-' }}</span>
+                <span>{{ form?.currency === 'IDR' ? useFormatIdr(item.whtAmount) : useFormatUsd(item.whtAmount) || '-' }}</span>
               </td>
             </tr>
           </template>
