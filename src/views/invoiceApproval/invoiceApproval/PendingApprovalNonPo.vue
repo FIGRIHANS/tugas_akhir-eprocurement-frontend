@@ -19,7 +19,7 @@
           <span class="text-gray-500"> {{ items.key }} </span>
           <span class="font-semibold">
             <p v-if="items.key === 'Status'">
-              {{ StatusInvoice.find((item) => item.value === items.value)?.label }}
+              {{ StatusInvoice.find((item) => item.value === Number(items.value))?.label }}
             </p>
             <p v-if="items.key === 'Company Code'">
               {{
