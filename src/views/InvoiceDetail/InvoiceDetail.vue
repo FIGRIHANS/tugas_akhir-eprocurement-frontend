@@ -264,7 +264,7 @@ const goToEdit = () => {
     query: {
       id: route.query.id,
       type: route.query.type,
-      invoiceType: route.name === 'invoiceDetail' ? 'po' : 'no_po',
+      invoiceType: route.query.invoiceType,
     },
   })
 }
