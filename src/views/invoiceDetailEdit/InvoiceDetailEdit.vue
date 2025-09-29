@@ -279,6 +279,7 @@ const goBack = () => {
         query: {
           id: route.query.id,
           type: route.query.type,
+          invoiceType: route.query.invoiceType,
         },
       })
     }
@@ -569,7 +570,6 @@ const setDataDefault = () => {
   }
 
   for (const item of data?.documents || []) {
-    console.log(item)
     const data = {
       id: item.id,
       name: item.documentName,

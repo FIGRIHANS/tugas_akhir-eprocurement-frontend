@@ -55,7 +55,13 @@
               ></v-select>
             </td>
             <td>
-              <span v-if="!item.isEdit">{{ item.itemAmount }}</span>
+              <span v-if="!item.isEdit">
+                {{
+                  form.currCode === 'IDR'
+                    ? useFormatIdr(item.isEdit ? formEdit.itemAmount : item.itemAmount)
+                    : useFormatUsd(item.isEdit ? formEdit.itemAmount : item.itemAmount)
+                }}
+              </span>
               <input
                 v-else
                 v-model="formEdit.itemAmount"
@@ -151,7 +157,13 @@
               ></v-select>
             </td>
             <td>
-              <span v-if="!item.isEdit">{{ item.whtBaseAmount }}</span>
+              <span v-if="!item.isEdit">
+                {{
+                  form.currCode === 'IDR'
+                    ? useFormatIdr(item.isEdit ? formEdit.whtBaseAmount : item.whtBaseAmount)
+                    : useFormatUsd(item.isEdit ? formEdit.whtBaseAmount : item.whtBaseAmount)
+                }}
+              </span>
               <input
                 v-else
                 v-model="formEdit.whtBaseAmount"
@@ -227,7 +239,7 @@ const whtTypeList = computed(() => invoiceMasterApi.whtTypeList)
 const whtCodeList = computed(() => invoiceMasterApi.whtCodeList)
 
 const checkIsEdit = () => {
-  const result = form?.value.additionalCosts.findIndex((item) => item.isEdit)
+  const result = form?.value.invoiceItem.findIndex((item) => item.isEdit)
   return result !== -1
 }
 
