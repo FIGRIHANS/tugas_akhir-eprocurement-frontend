@@ -56,6 +56,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
       remainingDpAmount: '',
       dpAmountDeduction: '',
       creditCardBillingId: '',
+      paymentId: 0,
       bankKey: '',
       bankName: '',
       beneficiaryName: '',
