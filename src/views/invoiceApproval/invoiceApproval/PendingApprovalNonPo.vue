@@ -78,40 +78,40 @@
                           class="menu-item"
                           @click="sendToSap(parent.invoiceUId)"
                         >
-                          <a class="menu-link" href="#">
+                          <div class="menu-link">
                             <span class="menu-icon">
                               <i class="ki-duotone ki-paper-plane !text-lg"></i>
                             </span>
                             <span class="menu-title"> Send to SAP </span>
-                          </a>
+                          </div>
                         </div>
                         <div class="menu-item" @click="openDetailInvoice(parent.invoiceUId)">
-                          <a class="menu-link" href="#">
+                          <div class="menu-link">
                             <span class="menu-icon">
                               <i class="ki-duotone ki-eye !text-lg"></i>
                             </span>
                             <span class="menu-title"> Detail </span>
-                          </a>
+                          </div>
                         </div>
                         <div class="menu-item" @click="openDetailApproval(parent.invoiceUId)">
-                          <a class="menu-link" href="#">
+                          <div class="menu-link">
                             <span class="menu-icon">
                               <i class="ki-duotone ki-data !text-lg"></i>
                             </span>
                             <span class="menu-title"> Detail Approval </span>
-                          </a>
+                          </div>
                         </div>
                         <div
                           v-if="parent.statusCode === 4"
                           class="menu-item"
                           @click="openDetailInvoiceEdit(parent.invoiceUId)"
                         >
-                          <a class="menu-link" href="#">
+                          <div class="menu-link">
                             <span class="menu-icon">
                               <i class="ki-duotone ki-message-edit"></i>
                             </span>
                             <span class="menu-title"> Edit </span>
-                          </a>
+                          </div>
                         </div>
                       </div>
                     </div>
