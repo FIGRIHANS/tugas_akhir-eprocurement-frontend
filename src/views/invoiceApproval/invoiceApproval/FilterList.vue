@@ -76,6 +76,7 @@ import type { filterListTypes } from '../types/pendingApproval'
 import { useRoute } from 'vue-router'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
+import { formatfilterDate } from '@/composables/date-format'
 
 const props = defineProps<{
   data: filterListTypes
@@ -116,7 +117,7 @@ const resetInvoiceType = () => {
 const goFilter = () => {
   const data = {
     status: status.value,
-    date: date.value,
+    date: formatfilterDate(date.value),
     companyCode: companyCode.value,
     invoiceType: invoiceType.value,
   }
