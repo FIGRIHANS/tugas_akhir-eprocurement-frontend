@@ -33,7 +33,7 @@
                   ?.name
               }}
             </p>
-            <p v-else>{{ filterForm.date }}</p>
+            <p v-else-if="items.key === 'Date'">{{ filterForm.date }}</p>
           </span>
           <i class="ki-filled ki-cross" @click="deleteFilter(items.key)"></i>
         </div>
@@ -54,7 +54,7 @@
                 :class="{
                   'pending__column--auto': index <= 1,
                   'cursor-pointer': item,
-                  '!text-blue-500': item === sortColumnName && sortBy !== ''
+                  '!text-blue-500': item === sortColumnName && sortBy !== '',
                 }"
                 @click="sortColumn(item)"
               >
@@ -332,7 +332,7 @@ const openDetailInvoiceEdit = (invoiceId: string) => {
       id: invoiceId,
       type: '2',
       invoiceType: 'no_po',
-      edit: 'true'
+      edit: 'true',
     },
   })
 }
@@ -399,7 +399,7 @@ const setDataFilter = (data: filterListTypes) => {
     })
   }
 
-  if (data.date && data.date.trim() !== '') {
+  if (data.date !== '') {
     filteredData.push({
       key: 'Date',
       value: data.date,
@@ -474,7 +474,7 @@ const openFailedSap = () => {
 const sortColumn = (columnName: string | null) => {
   const list = {
     'Submitted Document No': 'invoiceNo',
-    'Status': 'statusName',
+    Status: 'statusName',
     'Vendor Name': 'vendorName',
     'Invoice Type': 'invoiceTypeName',
     'Company Code': 'companyCode',
@@ -486,8 +486,8 @@ const sortColumn = (columnName: string | null) => {
     'Invoice Vendor No.': 'documentNo',
     'Estimated Payment Date': 'estimatedPaymentDate',
     'Invoice Submission Date': 'invoiceDate',
-    'Description': 'notes'
-  } as {[key: string]: string}
+    Description: 'notes',
+  } as { [key: string]: string }
 
   const roleSort = ['asc', 'desc', '']
 
@@ -501,13 +501,18 @@ const sortColumn = (columnName: string | null) => {
     const indexSort = roleSort.findIndex((item) => item === sortBy.value)
     if (indexSort === -1) return setList(verifList.value)
     sortBy.value = indexSort + 1 === roleSort.length ? roleSort[0] : roleSort[indexSort + 1]
-  
+
     if (!sortBy.value) return setList(verifList.value)
   }
 
   const name = columnName || sortColumnName.value
 
-  if (name === 'Base Amount' || name === 'VAT Ammount' || name === 'WHT Amount' || name === 'Total Net Amount') {
+  if (
+    name === 'Base Amount' ||
+    name === 'VAT Ammount' ||
+    name === 'WHT Amount' ||
+    name === 'Total Net Amount'
+  ) {
     result = listData.sort((a, b) => {
       if (sortBy.value === 'asc') {
         return a[list[name]] - b[list[name]]
