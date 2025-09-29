@@ -113,6 +113,7 @@ interface ParamsSubmissionVendor {
 }
 
 interface ParamsSubmissionPayment {
+  paymentId: number
   bankKey: string
   bankName: string
   beneficiaryName: string
@@ -457,6 +458,7 @@ export interface DetailInvoiceEditTypes {
   remainingDpAmount: string
   dpAmountDeduction: string
   creditCardBillingId: string
+  paymentId: number
   bankKey: string
   bankName: string
   beneficiaryName: string
@@ -604,6 +606,7 @@ interface Document {
 }
 
 interface Payment {
+  paymentId: number
   bankKey: string | null
   bankName: string | null
   beneficiaryName: string | null

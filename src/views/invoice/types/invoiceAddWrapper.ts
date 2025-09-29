@@ -15,6 +15,7 @@ export interface formTypes extends documentFormTypes {
   npwp: string
   address: string
 
+  paymentId: number
   isNotRegisteredBank?: boolean
   bankKeyId: string
   bankKeyIdError?: boolean
