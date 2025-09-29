@@ -279,6 +279,7 @@ const goBack = () => {
         query: {
           id: route.query.id,
           type: route.query.type,
+          invoiceType: route.query.invoiceType,
         },
       })
     }
