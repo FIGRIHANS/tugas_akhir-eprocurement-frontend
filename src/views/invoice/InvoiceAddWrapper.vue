@@ -720,12 +720,10 @@ const setAfterResponsePost = (response) => {
     if (form.invoiceUId) {
       if (route.query.type === 'nonpo') {
         for (const item of costExpensesTempDelete.value) {
-          console.log('non po')
           verificationApi.deleteCostExpense(form.invoiceUId, item)
         }
       } else {
         for (const item of additionalCostTempDelete.value) {
-          console.log('po')
           verificationApi.deleteAdditionalCost(form.invoiceUId, item)
         }
       }
