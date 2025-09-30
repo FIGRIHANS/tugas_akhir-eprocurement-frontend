@@ -4,8 +4,9 @@ import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 import type { ITabClosable } from '@/components/ui/atoms/tab-closable/types/tabClosable'
 import UiTabClosable from '@/components/ui/atoms/tab-closable/UiTabClosable.vue'
 import type { routeTypes } from '@/core/type/components/breadcrumb'
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import AdministrativeData from './AdministrativeData.vue'
 import PaymentInfoListView from './PaymentInfoListView.vue'
 import CompanyDeedData from './CompanyDeedData.vue'
@@ -20,65 +21,66 @@ import { useChangeDataEmailStore } from '@/stores/vendor/email-change-data'
 
 const adminStore = useVendorAdministrationStore()
 const changeDataEmailStore = useChangeDataEmailStore()
+const { t } = useI18n()
 
 const route = useRoute()
 const currentTab = ref<string>('administrative-data')
 const emailSuccessModal = ref(false)
 const emailErrorModal = ref(false)
 const emailSending = ref(false)
-const bcRoutes = ref<routeTypes[]>([
+const bcRoutes = computed<routeTypes[]>(() => [
   {
-    name: 'Company Information',
+    name: t('companyInformation.breadcrumb.companyInformation'),
     to: `/vendor/information/${route.params.id}`,
   },
   {
-    name: 'Administrative Data',
+    name: t('companyInformation.breadcrumb.administrativeData'),
     to: route.path,
   },
 ])
 
-const tabsItem: ITabClosable[] = [
+const tabsItem = computed<ITabClosable[]>(() => [
   {
     id: 'administrative-data',
-    label: 'Administrative Data',
+    label: t('companyInformation.tabs.administrativeData'),
     isClosable: true,
   },
   {
     id: 'business-license-data',
-    label: 'Business License Data',
+    label: t('companyInformation.tabs.businessLicenseData'),
     isClosable: true,
   },
   {
     id: 'payment-information-data',
-    label: 'Payment Information Data',
+    label: t('companyInformation.tabs.paymentInformationData'),
     isClosable: true,
   },
   {
     id: 'company-deed-data',
-    label: 'Company Deed Data',
+    label: t('companyInformation.tabs.companyDeedData'),
     isClosable: true,
   },
   {
     id: 'equipment-data',
-    label: 'Equipment Data',
+    label: t('companyInformation.tabs.equipmentData'),
     isClosable: true,
   },
   {
     id: 'experience-data',
-    label: 'Experience Data',
+    label: t('companyInformation.tabs.experienceData'),
     isClosable: true,
   },
   {
     id: 'expert-personel-data',
-    label: 'Expert Personnel Data',
+    label: t('companyInformation.tabs.expertPersonnelData'),
     isClosable: true,
   },
   {
     id: 'other-documents-data',
-    label: 'Other Documents',
+    label: t('companyInformation.tabs.otherDocuments'),
     isClosable: true,
   },
-]
+])
 
 const sendEmail = async () => {
   try {
@@ -104,21 +106,24 @@ watch(
   () => currentTab.value,
   (newTab) => {
     bcRoutes.value[1].name =
-      tabsItem.find((tab) => tab.id === newTab)?.label || 'Administrative Data'
+      tabsItem.value.find((tab) => tab.id === newTab)?.label ||
+      t('companyInformation.breadcrumb.administrativeData')
   },
 )
 </script>
 
 <template>
-  <BreadcrumbView title="Company Information" :routes="bcRoutes" />
+  <BreadcrumbView :title="$t('companyInformation.title')" :routes="bcRoutes" />
 
   <div class="p-4 mb-5 bg-amber-100/70 rounded-md w-full text-sm flex items-center justify-between">
     <div class="flex items-center gap-2">
       <img src="/icons/information.svg" alt="" />
       <div>
-        <h3 class="text-sm font-semibold text-slate-700">Information</h3>
+        <h3 class="text-sm font-semibold text-slate-700">
+          {{ $t('companyInformation.notification.title') }}
+        </h3>
         <p class="text-sm text-slate-500">
-          If you make changes to the data, don't forget to click the send notification button.
+          {{ $t('companyInformation.notification.message') }}
         </p>
       </div>
     </div>
@@ -127,7 +132,11 @@ watch(
         class="bg-amber-400 hover:bg-amber-500 hover:shadow-none transition-all duration-150 text-white"
         @click="sendEmail"
         :disabled="emailSending"
-        >{{ emailSending ? 'Sending...' : 'Send Notification' }}</UiButton
+        >{{
+          emailSending
+            ? $t('companyInformation.notification.sending')
+            : $t('companyInformation.notification.sendButton')
+        }}</UiButton
       >
     </div>
   </div>
@@ -148,11 +157,11 @@ watch(
     :open="emailSuccessModal"
     id="email-success"
     type="success"
-    title="Email Sent Successfully"
-    text="The notification email has been sent successfully to the vendor."
+    :title="$t('companyInformation.modal.emailSuccess.title')"
+    :text="$t('companyInformation.modal.emailSuccess.message')"
     no-cancel
     static
-    submit-button-text="Close"
+    :submit-button-text="$t('companyInformation.modal.emailSuccess.close')"
     :submit="() => (emailSuccessModal = false)"
   />
 
@@ -161,11 +170,11 @@ watch(
     :open="emailErrorModal"
     id="email-error"
     type="danger"
-    title="Email Sending Failed"
-    text="There was an error sending the notification email to the vendor."
+    :title="$t('companyInformation.modal.emailError.title')"
+    :text="$t('companyInformation.modal.emailError.message')"
     no-cancel
     static
-    submit-button-text="Close"
+    :submit-button-text="$t('companyInformation.modal.emailError.close')"
     :submit="() => (emailErrorModal = false)"
   />
 </template>
