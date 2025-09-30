@@ -1014,7 +1014,8 @@ const mapDataCheck = () => {
   accountPayable.push(accData)
 
   for (const item of form.invoiceItem) {
-    if (item.taxCode !== 'V0') {
+    const checkAccountTax = accountTax.findIndex((sub) => sub.TAX_CODE === item.taxCode)
+    if (item.taxCode !== 'V0' && checkAccountTax === -1) {
       const index = listTaxCalculation.value.findIndex((sub) => sub.code === item.taxCode)
       if (index !== -1) {
         itemNoAcc.value += 1
