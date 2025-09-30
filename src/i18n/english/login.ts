@@ -20,7 +20,7 @@ export const login = {
     signIn: 'Sign in',
     admin: 'admin',
     email: 'Email',
-    emailPlaceholder: 'email@email.com',
+    emailPlaceholder: 'Enter your email',
     username: 'Username',
     usernamePlaceholder: 'Username',
     password: 'Password',
