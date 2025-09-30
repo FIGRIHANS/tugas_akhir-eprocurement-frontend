@@ -12,13 +12,17 @@
         </div>
       </slot>
     </div>
+    <ErrorUploadModal :error-message="errorMessageUpload" />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, defineExpose } from 'vue'
+import { ref, computed, defineExpose, defineAsyncComponent, watch } from 'vue'
 import IconUpload from './PdfUpload/IconUpload.vue'
 import { useUploadStore } from '@/stores/general/upload'
+import { KTModal } from '@/metronic/core'
+
+const ErrorUploadModal = defineAsyncComponent(() => import('./PdfUpload/ErrorUploadModal.vue'))
 
 const props = defineProps<{
   error?: boolean
@@ -30,6 +34,8 @@ const emits = defineEmits(['setFile'])
 
 const uploadApi = useUploadStore()
 const fileInput = ref<HTMLInputElement | null>(null)
+
+const errorMessageUpload = computed(() => uploadApi.errorMessageUpload)
 
 const triggerFileInput = () => {
   fileInput.value?.click()
@@ -56,6 +62,17 @@ const handleFileUpload = async (event: Event) => {
 
   }
 }
+
+watch(
+  () => errorMessageUpload.value,
+  () => {
+    if (errorMessageUpload.value) {
+      const idModal = document.querySelector('#error_upload_modal')
+      const modal = KTModal.getInstance(idModal as HTMLElement)
+      modal.show()
+    }
+  }
+)
 
 defineExpose({
   triggerFileInput
