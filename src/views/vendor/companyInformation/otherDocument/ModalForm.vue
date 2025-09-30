@@ -9,12 +9,11 @@ import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import UiLoading from '@/components/UiLoading.vue'
 import { checkEmptyValues } from '@/composables/validation'
-import { useChangeDataEmailStore } from '@/stores/vendor/email-change-data'
 import useOtherDocStore from '@/stores/vendor/otherDocuments'
 import { useVendorUploadStore } from '@/stores/vendor/upload'
-import { useVendorAdministrationStore } from '@/stores/vendor/vendor'
 import { useLoginStore } from '@/stores/views/login'
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 type Props = {
   id?: number
@@ -28,8 +27,7 @@ const model = defineModel()
 const userStore = useLoginStore()
 const otherDocStore = useOtherDocStore()
 const uploadStore = useVendorUploadStore()
-const adminStore = useVendorAdministrationStore()
-const changeDataEmailStore = useChangeDataEmailStore()
+const { t } = useI18n()
 
 const formData = ref({
   id: 0,
@@ -74,16 +72,6 @@ const onSubmit = async () => {
   try {
     submitLoading.value = true
     await otherDocStore.update(formData.value)
-
-    // await changeDataEmailStore.sendEmail({
-    //   recepientName: adminStore.data.vendorName || '',
-    //   recepients: {
-    //     emailTo: adminStore.data.vendorEmail,
-    //     emailCc: '',
-    //     emailBcc: '',
-    //   },
-    // })
-
     emit('onSuccess')
   } catch (error) {
     if (error instanceof Error) {
@@ -132,25 +120,33 @@ onMounted(() => {
 </script>
 
 <template>
-  <UiModal v-model="model" title="Other Document">
+  <UiModal v-model="model" :title="t('otherDocumentData.modal.form.title')">
     <form @submit.prevent="onSubmit">
       <UiFormGroup hide-border>
         <!-- document name -->
         <UiInput
-          label="Document Name"
+          :label="t('otherDocumentData.modal.form.labels.documentName')"
           required
           v-model="formData.documentName"
           :error="formError.includes('documentName')"
-          :hint-text="formError.includes('documentName') ? 'Document name required' : ''"
+          :hint-text="
+            formError.includes('documentName')
+              ? t('otherDocumentData.validation.documentNameRequired')
+              : ''
+          "
         />
 
         <!-- Document Number -->
         <UiInput
-          label="Document Number"
+          :label="t('otherDocumentData.modal.form.labels.documentNo')"
           required
           v-model="formData.documentNo"
           :error="formError.includes('documentNo')"
-          :hint-text="formError.includes('documentNo') ? 'Document number required' : ''"
+          :hint-text="
+            formError.includes('documentNo')
+              ? t('otherDocumentData.validation.documentNoRequired')
+              : ''
+          "
         />
 
         <!-- Available Until -->
@@ -158,10 +154,10 @@ onMounted(() => {
           <span
             class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px] z-10"
           >
-            Available Until
+            {{ t('otherDocumentData.modal.form.labels.availableUntil') }}
           </span>
           <DatePicker
-            placeholder="Start Date"
+            :placeholder="t('otherDocumentData.modal.form.placeholders.startDate')"
             v-model="formData.expiredUTCDate"
             @update:model-value="onSelectDate"
           />
@@ -171,23 +167,23 @@ onMounted(() => {
         <UiFileUpload
           accepted-files=".jpg,.jpeg,.png,.pdf,.zip"
           name="file"
-          placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
+          :placeholder="t('otherDocumentData.modal.form.placeholders.upload')"
           @added-file="onUploadFile"
           @upload-failed="handleUploadFailed"
           :disabled="uploadLoading"
           :max-size="16000000"
-          hint-text="*jpg, jpeg, png, pdf, zip / max : 16 MB"
+          :hint-text="t('otherDocumentData.modal.form.uploadHint')"
         />
       </UiFormGroup>
       <div class="flex justify-end gap-3 mt-3">
         <UiButton outline type="button" @click="model = false">
           <UiIcon name="black-left-line" />
-          <span>Cancel</span>
+          <span>{{ t('otherDocumentData.buttons.cancel') }}</span>
         </UiButton>
         <UiButton variant="primary" type="submit" :disabled="submitLoading || uploadLoading">
           <UiLoading variant="white" v-if="submitLoading" />
           <UiIcon name="file-added" variant="duotone" v-else />
-          <span>Save</span>
+          <span>{{ t('otherDocumentData.buttons.save') }}</span>
         </UiButton>
       </div>
     </form>
@@ -197,11 +193,11 @@ onMounted(() => {
       :open="fileSizeErrorModal"
       id="file-size-error"
       type="danger"
-      title="File Size Exceeded"
-      text="File size exceeds the maximum limit of 16 MB. Please choose a smaller file."
+      :title="t('otherDocumentData.modal.fileSizeError.title')"
+      :text="t('otherDocumentData.modal.fileSizeError.message')"
       no-cancel
       static
-      submit-button-text="Close"
+      :submit-button-text="t('otherDocumentData.buttons.close')"
       :submit="() => (fileSizeErrorModal = false)"
     />
   </UiModal>

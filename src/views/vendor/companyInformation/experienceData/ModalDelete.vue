@@ -6,9 +6,12 @@ import UiLoading from '@/components/UiLoading.vue'
 import useExperienceStore from '@/stores/vendor/experience'
 import { computed, ref } from 'vue'
 import { defaultFormData } from './static'
+import { useI18n } from 'vue-i18n'
 const props = defineProps<{ id: number }>()
 const model = defineModel()
 const emit = defineEmits(['onError', 'onSuccess'])
+
+const { t } = useI18n()
 
 const experienceStore = useExperienceStore()
 const loading = ref<boolean>(false)
@@ -44,14 +47,14 @@ const onDelete = async () => {
     <div class="text-center mb-6">
       <UiIcon name="cross-circle" variant="duotone" class="text-[150px] text-danger text-center" />
     </div>
-    <h3 class="text-center text-lg font-medium">Are You Sure You Want to Delete This Item?</h3>
+    <h3 class="text-center text-lg font-medium">{{ t('experienceData.modal.delete.title') }}</h3>
     <p class="text-center text-base text-gray-600 mb-5">
-      This action will permanently remove the selected data from the list.
+      {{ t('experienceData.modal.delete.message') }}
     </p>
     <div class="flex gap-3 px-8 mb-3">
       <UiButton outline @click="model = false" class="flex-1 flex items-center justify-center">
         <UiIcon name="black-left-line" />
-        <span>Cancel</span>
+        <span>{{ t('experienceData.buttons.cancel') }}</span>
       </UiButton>
       <UiButton
         variant="danger"
@@ -61,7 +64,7 @@ const onDelete = async () => {
       >
         <UiLoading variant="white" v-if="loading" />
         <UiIcon name="cross-circle" variant="duotone" v-else />
-        <span>Delete</span>
+        <span>{{ t('experienceData.buttons.delete') }}</span>
       </UiButton>
     </div>
   </UiModal>
