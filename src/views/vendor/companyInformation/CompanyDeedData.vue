@@ -22,7 +22,7 @@ watchEffect(() => {
 <template>
   <div class="card">
     <div class="card-header">
-      <h3 class="text-lg font-semibold text-slate-800">Company Deed Data</h3>
+      <h3 class="text-lg font-semibold text-slate-800">{{ $t('companyDeed.title') }}</h3>
     </div>
     <div class="card-body space-y-4">
       <ShareholdersSection />

@@ -1,42 +1,41 @@
 import type { IExperiencePayload } from '@/stores/vendor/types/experience'
 
-export const tableCols: { key: string; label: string }[] = [
+export const getTableCols = (t: (key: string) => string): { key: string; label: string }[] => [
   {
     key: 'actions',
     label: '',
   },
   {
     key: 'contractName',
-    label: 'Contract Name',
+    label: t('experienceData.table.headers.contractName'),
   },
   {
     key: 'contractAddress',
-    label: 'Contract Address',
+    label: t('experienceData.table.headers.address'),
   },
   {
     key: 'institution',
-    label: 'Institution',
+    label: t('experienceData.table.headers.agency'),
   },
   {
     key: 'contractValue',
-    label: 'Contract Value',
+    label: t('experienceData.table.headers.contractValue'),
   },
-
   {
     key: 'businessSector',
-    label: 'Business Sector',
+    label: t('experienceData.table.headers.businessField'),
   },
   {
     key: 'subBusinessSector',
-    label: 'Sub Business Sector',
+    label: t('experienceData.table.headers.subBusiness'),
   },
   {
     key: 'startDate',
-    label: 'Start Date',
+    label: t('experienceData.table.headers.startDate'),
   },
   {
     key: 'endDate',
-    label: 'End Date',
+    label: t('experienceData.table.headers.endDate'),
   },
 ]
 

@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -14,10 +17,10 @@ import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
           />
         </div>
         <h3 class="text-center text-lg font-medium">
-          Failed to Change Expert Personnel Data data!
+          {{ t('expertPersonnelData.modal.error.title') }}
         </h3>
         <p class="text-center text-base text-gray-600">
-          Please try again later or contact support if the problem persists.
+          {{ t('expertPersonnelData.modal.error.message') }}
         </p>
       </div>
     </div>

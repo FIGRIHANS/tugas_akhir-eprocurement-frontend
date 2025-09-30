@@ -287,8 +287,10 @@ watchEffect(async () => {
     <div class="card-header">
       <div class="w-full flex justify-between items-center">
         <div>
-          <h3 class="text-lg font-semibold text-slate-800">Ratification by Kemkumham</h3>
-          <p class="text-red-500 text-xs">Specifically for companies with PT legal entity status</p>
+          <h3 class="text-lg font-semibold text-slate-800">
+            {{ $t('companyDeed.ratification.title') }}
+          </h3>
+          <p class="text-red-500 text-xs">{{ $t('companyDeed.ratification.subtitle') }}</p>
         </div>
       </div>
     </div>
