@@ -42,7 +42,7 @@ watch(
 <template>
   <div class="card card-grid">
     <div class="card-header">
-      <div class="card-title">Payment Information</div>
+      <div class="card-title">{{ $t('vendorVerification.paymentinfo.paymentinfo') }}</div>
     </div>
     <div class="card-body">
       <div v-if="paymentStore.loading" class="flex items-center justify-center py-5">
@@ -62,11 +62,15 @@ watch(
       <table class="table align-middle" v-else>
         <tbody>
           <tr>
-            <td class="text-sm text-gray-600 font-medium">Account No.</td>
+            <td class="text-sm text-gray-600 font-medium">
+              {{ $t('vendorVerification.paymentinfo.accountno') }}
+            </td>
             <td class="text-sm font-bold text-gray-700">{{ paymentStore.data[0].accountNo }}</td>
           </tr>
           <tr>
-            <td class="text-sm text-gray-600 font-medium">Account Holder Name</td>
+            <td class="text-sm text-gray-600 font-medium">
+              {{ $t('vendorVerification.paymentinfo.accountholdername') }}
+            </td>
             <td class="text-sm font-bold text-gray-700">{{ paymentStore.data[0].accountName }}</td>
           </tr>
           <tr>
@@ -78,11 +82,13 @@ watch(
                 :checked="paymentStore.data[0].isHolderNameDifferent"
                 disabled
               />
-              Holder's name is different from the company name.
+              {{ $t('vendorVerification.paymentinfo.holdernamedifferent') }}
             </td>
           </tr>
           <tr>
-            <td class="text-sm text-gray-600 font-medium">Account Discrepancy Statement</td>
+            <td class="text-sm text-gray-600 font-medium">
+              {{ $t('vendorVerification.paymentinfo.accountdiscrepancystatement') }}
+            </td>
             <td class="text-sm font-bold text-gray-700">
               <UiButton
                 :disabled="loading || !paymentStore.data[0].urlAccountDifferences"
@@ -91,13 +97,19 @@ watch(
                 @click="download(paymentStore.data[0].urlAccountDifferences as string)"
               >
                 <UiIcon name="cloud-download" variant="duotone" />
-                <span>Download Account Discrepancy Statement</span>
+                <span>{{
+                  $t('general.download', {
+                    field: $t('vendorVerification.paymentinfo.accountdiscrepancystatement'),
+                  })
+                }}</span>
               </UiButton>
             </td>
           </tr>
 
           <tr>
-            <td class="text-sm text-gray-600 font-medium">Accouunt Cover</td>
+            <td class="text-sm text-gray-600 font-medium">
+              {{ $t('vendorVerification.paymentinfo.accountcover') }}
+            </td>
             <td class="text-sm font-bold text-gray-700">
               <UiButton
                 :disabled="loading || !paymentStore.data[0].urlFirstPage"
@@ -106,18 +118,26 @@ watch(
                 @click="download(paymentStore.data[0].urlFirstPage as string)"
               >
                 <UiIcon name="cloud-download" variant="duotone" />
-                <span>Download Accouunt Cover </span>
+                <span>{{
+                  $t('general.download', {
+                    field: $t('vendorVerification.paymentinfo.accountcover'),
+                  })
+                }}</span>
               </UiButton>
             </td>
           </tr>
           <tr>
-            <td class="text-sm text-gray-600 font-medium">Currency</td>
+            <td class="text-sm text-gray-600 font-medium">
+              {{ $t('vendorVerification.paymentinfo.currency') }}
+            </td>
             <td class="text-sm font-bold text-gray-700">
               {{ paymentStore.data[0].currencySymbol }}
             </td>
           </tr>
           <tr>
-            <td class="text-sm text-gray-600 font-medium">Bank Key</td>
+            <td class="text-sm text-gray-600 font-medium">
+              {{ $t('vendorVerification.paymentinfo.bankkey') }}
+            </td>
             <td class="text-sm font-bold text-gray-700">{{ paymentStore.data[0].bankCode }}</td>
           </tr>
           <tr>
@@ -129,35 +149,45 @@ watch(
                 :checked="!paymentStore.data[0].isBankRegistered"
                 disabled
               />
-              Bank not Registered
+              {{ $t('vendorVerification.paymentinfo.banknotregistered') }}
             </td>
           </tr>
           <tr>
-            <td class="text-sm text-gray-600 font-medium">Bank Country</td>
+            <td class="text-sm text-gray-600 font-medium">
+              {{ $t('vendorVerification.paymentinfo.bankcountry') }}
+            </td>
             <td class="text-sm font-bold text-gray-700">
               {{ paymentStore.data[0].countryName ?? '-' }}
             </td>
           </tr>
           <tr>
-            <td class="text-sm text-gray-600 font-medium">Bank Name</td>
+            <td class="text-sm text-gray-600 font-medium">
+              {{ $t('vendorVerification.paymentinfo.bankname') }}
+            </td>
             <td class="text-sm font-bold text-gray-700">
               {{ paymentStore.data[0].bankName ?? '-' }}
             </td>
           </tr>
           <tr>
-            <td class="text-sm text-gray-600 font-medium">Bank Branch</td>
+            <td class="text-sm text-gray-600 font-medium">
+              {{ $t('vendorVerification.paymentinfo.bankbrach') }}
+            </td>
             <td class="text-sm font-bold text-gray-700">
               {{ paymentStore.data[0].branch ?? '-' }}
             </td>
           </tr>
           <tr>
-            <td class="text-sm text-gray-600 font-medium">Swift Code</td>
+            <td class="text-sm text-gray-600 font-medium">
+              {{ $t('vendorVerification.paymentinfo.swiftcode') }}
+            </td>
             <td class="text-sm font-bold text-gray-700">
               {{ paymentStore.data[0].bankSwiftCode ?? '-' }}
             </td>
           </tr>
           <tr>
-            <td class="text-sm text-gray-600 font-medium">Bank Address</td>
+            <td class="text-sm text-gray-600 font-medium">
+              {{ $t('vendorVerification.paymentinfo.bankaddress') }}
+            </td>
             <td class="text-sm font-bold text-gray-700">{{ paymentStore.data[0].bankAddress }}</td>
           </tr>
         </tbody>

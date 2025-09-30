@@ -433,7 +433,7 @@ const mapDataEditAdditional = () => {
     for (const item of verificationApi.detailInvoiceEdit.additionalCosts) {
       result.push({
         ...item,
-        whtAmount: 0,
+        whtAmount: item.whtAmount || 0,
         isEdit: false,
       })
     }
@@ -447,7 +447,7 @@ const mapDataEditCostExpense = () => {
     for (const item of verificationApi.detailInvoiceEdit.costExpenses) {
       result.push({
         ...item,
-        whtAmount: 0,
+        whtAmount: item.whtAmount || 0,
         isEdit: false,
       })
     }
