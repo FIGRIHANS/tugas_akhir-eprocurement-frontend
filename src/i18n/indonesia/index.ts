@@ -9,6 +9,7 @@ import { paymentInfo } from './paymentInfo'
 import { equipmentData } from './equipmentData'
 import { experienceData } from './experienceData'
 import { expertPersonnelData } from './expertPersonnelData'
+import { otherDocumentData } from './otherDocumentData'
 import vendor from './vendor'
 import vendorVerification from './vendorVerification'
 
@@ -24,6 +25,7 @@ export default {
   equipmentData: equipmentData,
   experienceData: experienceData,
   expertPersonnelData: expertPersonnelData,
+  otherDocumentData: otherDocumentData,
   vendor,
   vendorVerification,
 }
