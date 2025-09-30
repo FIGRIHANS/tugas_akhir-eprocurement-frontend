@@ -8,6 +8,7 @@ const tabitems = {
   administrative: 'Administrative Data',
   businessLicenses: 'Business Licenses Data',
   paymentinfo: 'Payment Information Data',
+  open: 'Open',
 }
 
 const administration = {
