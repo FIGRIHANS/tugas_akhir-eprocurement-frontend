@@ -32,7 +32,7 @@
           <template v-else>
             <tr v-for="(item, index) in form.invoiceItem" :key="index" class="cost__field-items">
               <td class="flex items-center justify-around gap-[8px]">
-                <button v-if="form.status === 0 || form.status === -1 || form.status === 5" class="btn btn-icon btn-primary" @click="item.isEdit = !item.isEdit">
+                <button v-if="form.status === 0 || form.status === -1 || form.status === 5" class="btn btn-icon btn-primary" :disabled="checkIsEdit() && !item.isEdit" @click="item.isEdit = !item.isEdit">
                   <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>
                   <i v-else class="ki-duotone ki-check-circle"></i>
                 </button>
@@ -236,6 +236,11 @@ const getCostCenterName = (costCenter: string) => {
     return `${data.code} - ${data.name}`
   }
   return '-'
+}
+
+const checkIsEdit = () => {
+  const checkIndex = form.invoiceItem.findIndex((item) => item.isEdit)
+  return checkIndex !== -1
 }
 
 watch(

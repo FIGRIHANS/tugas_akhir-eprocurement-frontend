@@ -356,7 +356,9 @@ watchEffect(async () => {
   <div class="card">
     <div class="card-header">
       <div class="w-full flex justify-between items-center">
-        <h3 class="text-lg font-semibold text-slate-800">Company Deed Data</h3>
+        <h3 class="text-lg font-semibold text-slate-800">
+          {{ $t('companyDeed.companyDeedSection.title') }}
+        </h3>
       </div>
     </div>
 
@@ -375,16 +377,16 @@ watchEffect(async () => {
       <div class="grid grid-cols-1 md:grid-cols-2 gap-20 mb-8">
         <UiFormGroup hide-border>
           <UiInput
-            label="Number"
-            placeholder="Number"
+            :label="$t('companyDeed.companyDeedSection.documentNo')"
+            :placeholder="$t('companyDeed.companyDeedSection.documentNo')"
             row
             v-model="vendorLegalDocPayload.documentNo"
             :error="errors.documentNo !== ''"
             :hintText="errors.documentNo"
           />
           <UiInput
-            label="Notary"
-            placeholder="Notary full name"
+            :label="$t('companyDeed.companyDeedSection.notaryName')"
+            :placeholder="$t('companyDeed.companyDeedSection.notaryName')"
             row
             v-model="vendorLegalDocPayload.notaryName"
             :error="errors.notaryName !== ''"
@@ -393,7 +395,7 @@ watchEffect(async () => {
           <UiFileUpload
             ref="fileUploaderRef"
             name="vendorLegalDocumentUrl"
-            label="File"
+            :label="$t('companyDeed.companyDeedSection.document')"
             placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
             hint-text="*jpg, jpeg, png, pdf, zip / max : 16 MB"
             @added-file="onUploadFile($event)"
@@ -405,13 +407,13 @@ watchEffect(async () => {
         <UiFormGroup hide-border>
           <DatePicker
             v-model="vendorLegalDocPayload.documentDate"
-            label="Letter Date"
+            :label="$t('companyDeed.companyDeedSection.documentDate')"
             placeholder="Pilih Tanggal"
             :format="'MMM dd, yyyy'"
           />
           <UiSelect
-            label="Notary Office Location"
-            placeholder="-- Notary Office Location --"
+            :label="$t('companyDeed.companyDeedSection.notaryLocation')"
+            :placeholder="'-- ' + $t('companyDeed.companyDeedSection.notaryLocation') + ' --'"
             :options="
               vendorMasterDataStore.cityList?.map((item) => ({
                 value: item.cityID,
@@ -439,10 +441,10 @@ watchEffect(async () => {
         <thead>
           <tr>
             <th class="text-nowrap"></th>
-            <th class="text-nowrap">Number</th>
-            <th class="text-nowrap">Letter Date</th>
-            <th class="text-nowrap">Notary</th>
-            <th class="text-nowrap">Notary Office Location</th>
+            <th class="text-nowrap">{{ $t('companyDeed.companyDeedSection.documentNo') }}</th>
+            <th class="text-nowrap">{{ $t('companyDeed.companyDeedSection.documentDate') }}</th>
+            <th class="text-nowrap">{{ $t('companyDeed.companyDeedSection.notaryName') }}</th>
+            <th class="text-nowrap">{{ $t('companyDeed.companyDeedSection.notaryLocation') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -459,7 +461,7 @@ watchEffect(async () => {
           </tr>
 
           <tr v-else-if="!companyDeedData.length">
-            <td colspan="5" class="text-center">No data</td>
+            <td colspan="5" class="text-center">{{ $t('companyDeed.common.noData') }}</td>
           </tr>
 
           <tr v-else v-for="doc in companyDeedData" :key="doc" class="font-normal text-sm">
@@ -475,7 +477,7 @@ watchEffect(async () => {
                         <span class="menu-icon">
                           <UiIcon variant="duotone" name="arrow-down" class="!text-primary" />
                         </span>
-                        <span class="menu-title"> Download </span>
+                        <span class="menu-title"> {{ $t('companyDeed.common.download') }} </span>
                       </button>
                     </li>
                     <li class="menu-item">
@@ -483,7 +485,9 @@ watchEffect(async () => {
                         <span class="menu-icon">
                           <UiIcon variant="duotone" name="notepad-edit" class="!text-warning" />
                         </span>
-                        <span class="menu-title"> Edit </span>
+                        <span class="menu-title">
+                          {{ $t('companyDeed.shareholders.edit_action') }}
+                        </span>
                       </button>
                     </li>
                     <li class="menu-item">
@@ -491,7 +495,9 @@ watchEffect(async () => {
                         <span class="menu-icon">
                           <UiIcon variant="duotone" name="cross-circle" class="!text-danger" />
                         </span>
-                        <span class="menu-title"> Delete </span>
+                        <span class="menu-title">
+                          {{ $t('companyDeed.shareholders.delete_action') }}
+                        </span>
                       </button>
                     </li>
                   </ul>
@@ -507,13 +513,14 @@ watchEffect(async () => {
       </table>
       <div class="flex flex-row items-center justify-between px-4">
         <div class="flex flex-row items-center gap-2">
-          Show
+          {{ $t('companyDeed.common.show') }}
           <UiSelect
             v-model="paginationCompanyDeedDataStore.pageSize"
             :options="pageSizeOptions"
             class="w-16"
           />
-          per page from {{ paginationCompanyDeedDataStore.total }} data
+          {{ $t('companyDeed.common.perPage') }} from
+          {{ paginationCompanyDeedDataStore.total }} data
         </div>
 
         <LPagination
@@ -529,9 +536,9 @@ watchEffect(async () => {
     <UiModal v-model="showSuccessModal" size="sm">
       <div class="text-center mb-6">
         <ModalSuccessLogo class="mx-auto" />
-        <h3 class="text-center text-lg font-medium">Hooray!</h3>
+        <h3 class="text-center text-lg font-medium">{{ $t('companyDeed.common.hooray') }}</h3>
         <p class="text-center text-base text-gray-600 mb-5">
-          The data has been successfully updated in the admin system
+          {{ $t('companyDeed.common.successMessage') }}
         </p>
       </div>
     </UiModal>
@@ -546,8 +553,15 @@ watchEffect(async () => {
         />
       </div>
       <h3 class="text-center text-lg font-medium">
-        Failed to {{ mode == 'delete' ? 'Delete' : mode === 'edit' ? 'Change' : 'Add' }} Vendor
-        legal document!
+        {{ $t('companyDeed.common.failed') }}
+        {{
+          mode == 'delete'
+            ? $t('companyDeed.common.failedDelete')
+            : mode === 'edit'
+              ? $t('companyDeed.common.failedChange')
+              : $t('companyDeed.common.failedAdd')
+        }}
+        {{ $t('companyDeed.common.document') }}!
       </h3>
       <p class="text-center text-base text-gray-600 mb-5">
         {{ apiErrorMessage }}
@@ -563,9 +577,9 @@ watchEffect(async () => {
           class="text-[150px] text-danger text-center"
         />
       </div>
-      <h3 class="text-center text-lg font-medium">Are You Sure You Want to Delete This Item?</h3>
+      <h3 class="text-center text-lg font-medium">{{ $t('companyDeed.common.deleteTitle') }}</h3>
       <p class="text-center text-base text-gray-600 mb-5">
-        This action will permanently remove the selected data from the list.
+        {{ $t('companyDeed.common.deleteMessage') }}
       </p>
       <div class="flex gap-3 px-8 mb-3">
         <UiButton
@@ -574,7 +588,7 @@ watchEffect(async () => {
           class="flex-1 flex items-center justify-center"
         >
           <UiIcon name="black-left-line" />
-          <span>Cancel</span>
+          <span>{{ $t('companyDeed.common.cancel') }}</span>
         </UiButton>
         <UiButton
           variant="danger"
@@ -584,7 +598,7 @@ watchEffect(async () => {
         >
           <UiLoading variant="white" v-if="isSaveLoading" />
           <UiIcon name="cross-circle" variant="duotone" v-else />
-          <span>Delete</span>
+          <span>{{ $t('companyDeed.common.delete') }}</span>
         </UiButton>
       </div>
     </UiModal>
@@ -592,8 +606,8 @@ watchEffect(async () => {
       :open="modalUploadFailed"
       id="other-doc-upload-error"
       type="danger"
-      title="Upload Failed"
-      text="File size exceeds the maximum limit of 16 MB. Please choose a smaller file."
+      :title="$t('companyDeed.common.uploadFailed')"
+      :text="$t('companyDeed.common.fileSizeExceeds')"
       no-submit
       static
       :cancel="() => (modalUploadFailed = false)"

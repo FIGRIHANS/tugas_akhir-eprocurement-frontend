@@ -20,38 +20,47 @@ import UiFileUpload from '@/components/ui/atoms/file-upload/UiFileUpload.vue'
 import { useVendorUploadStore } from '@/stores/vendor/upload'
 import UiLoading from '@/components/UiLoading.vue'
 import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
-import { useExpertPersonnelDataStore, useVendorAdministrationStore } from '@/stores/vendor/vendor'
+import { useExpertPersonnelDataStore } from '@/stores/vendor/vendor'
 import { cloneDeep } from 'lodash'
 import { defaultPayload, defaultPayloadError } from './static'
-import { useChangeDataEmailStore } from '@/stores/vendor/email-change-data'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{ id: number }>()
 const emit = defineEmits(['onSuccess', 'onError', 'onClose'])
 const mode = inject<'add' | 'view' | 'edit'>('mode')
 
 const route = useRoute()
+const { t } = useI18n()
 
 const lookupStore = useVendorMasterDataStore()
 const refStore = useRefStore()
 const userStore = useLoginStore()
 const uploadStore = useVendorUploadStore()
 const expertStore = useExpertPersonnelDataStore()
-const adminStore = useVendorAdministrationStore()
-const changeDataEmailStore = useChangeDataEmailStore()
 
-const cvTableCols = ['', 'Start', 'until', 'file', 'description']
+const cvTableCols = computed(() => [
+  t('expertPersonnelData.modal.cvDetails.tableHeaders.action'),
+  t('expertPersonnelData.modal.cvDetails.tableHeaders.start'),
+  t('expertPersonnelData.modal.cvDetails.tableHeaders.until'),
+  t('expertPersonnelData.modal.cvDetails.tableHeaders.file'),
+  t('expertPersonnelData.modal.cvDetails.tableHeaders.description'),
+])
 
-const genderOptions = [
-  { text: 'Male', value: 'male' },
-  { text: 'Female', value: 'female' },
-]
+const genderOptions = computed(() => [
+  { text: t('expertPersonnelData.modal.personalInfo.genderOptions.male'), value: 'male' },
+  { text: t('expertPersonnelData.modal.personalInfo.genderOptions.female'), value: 'female' },
+])
 
 const tab = ref({
   active: 'personal_information',
-  items: [
-    { label: 'Personal Information', value: 'personal_information', icon: 'user' },
-    { label: 'CV Details', value: 'cv_details', icon: 'document' },
-  ],
+  items: computed(() => [
+    {
+      label: t('expertPersonnelData.modal.tabs.personalInfo'),
+      value: 'personal_information',
+      icon: 'user',
+    },
+    { label: t('expertPersonnelData.modal.tabs.cvDetails'), value: 'cv_details', icon: 'document' },
+  ]),
 })
 
 const nationalityOptions = computed(() =>
@@ -128,7 +137,7 @@ const onDownload = async (path: string) => {
     setTimeout(() => URL.revokeObjectURL(link), 1000)
   } catch (err) {
     if (err instanceof Error) {
-      alert('Failed to download document. Please try again later.')
+      alert(t('expertPersonnelData.error.downloadFailed'))
     }
   }
 }
@@ -162,7 +171,7 @@ const uploadFile = async (file: File, index: number, code: number) => {
   } catch (error) {
     if (error instanceof Error) {
       console.error(error)
-      alert('File upload failed. Please try again.')
+      alert(t('expertPersonnelData.error.uploadFailed'))
     }
   } finally {
     uploadLoading.value = false
@@ -227,16 +236,6 @@ const onSubmit = async () => {
 
   try {
     await expertStore.update(payload.value)
-
-    // await changeDataEmailStore.sendEmail({
-    //   recepientName: adminStore.data.vendorName || '',
-    //   recepients: {
-    //     emailTo: adminStore.data.vendorEmail || '',
-    //     emailCc: '',
-    //     emailBcc: '',
-    //   },
-    // })
-
     emit('onSuccess')
     // await expertStore.getData(Number(route.params.id))
   } catch (error) {
@@ -309,7 +308,7 @@ onMounted(() => {
       :class="tab.active === 'personal_information' ? 'max-w-4xl' : 'max-w-7xl'"
     >
       <div class="modal-header">
-        <h3 class="modal-title text-lg">Expert Personnel Data</h3>
+        <h3 class="modal-title text-lg">{{ t('expertPersonnelData.modal.title') }}</h3>
       </div>
 
       <div class="modal-body !py-5 flex flex-col items-center gap-4">
@@ -338,19 +337,19 @@ onMounted(() => {
         <div v-if="tab.active === 'personal_information'" class="grid grid-cols-2 gap-4 w-full">
           <UiInput
             v-model="payload.name"
-            label="Name"
-            placeholder="Name"
+            :label="t('expertPersonnelData.modal.personalInfo.labels.name')"
+            :placeholder="t('expertPersonnelData.modal.personalInfo.placeholders.name')"
             required
             :error="payloadError.name"
-            :hint-text="payloadError.name ? 'Name Required' : ''"
+            :hint-text="payloadError.name ? t('expertPersonnelData.validation.nameRequired') : ''"
             :readonly="mode === 'view'"
           />
           <div>
             <DatePicker
               v-model="payload.dateOfBirth"
-              placeholder="Select"
+              :placeholder="t('expertPersonnelData.modal.personalInfo.placeholders.selectDate')"
               format="MMM dd, yyyy"
-              label="Date of Birth"
+              :label="t('expertPersonnelData.modal.personalInfo.labels.dateOfBirth')"
               required
               label-top
               :error="payloadError.dateOfBirth"
@@ -361,13 +360,17 @@ onMounted(() => {
               :max-date="new Date(new Date().setFullYear(new Date().getFullYear() - 17))"
             />
             <span class="form-hint !text-danger">
-              {{ payloadError.dateOfBirth ? 'date of birth Required' : '' }}
+              {{
+                payloadError.dateOfBirth
+                  ? t('expertPersonnelData.validation.dateOfBirthRequired')
+                  : ''
+              }}
             </span>
           </div>
           <div>
             <RadioCustom
               v-model="payload.gender"
-              label="Gender"
+              :label="t('expertPersonnelData.modal.personalInfo.labels.gender')"
               name="gender"
               :options="genderOptions"
               inline
@@ -377,55 +380,65 @@ onMounted(() => {
               :disabled="mode === 'view'"
             />
             <span class="form-hint !text-danger">
-              {{ payloadError.gender ? 'gender Required' : '' }}
+              {{ payloadError.gender ? t('expertPersonnelData.validation.genderRequired') : '' }}
             </span>
           </div>
           <UiInput
             v-model="payload.address"
-            label="Address"
-            placeholder="Address"
+            :label="t('expertPersonnelData.modal.personalInfo.labels.address')"
+            :placeholder="t('expertPersonnelData.modal.personalInfo.placeholders.address')"
             required
             :error="payloadError.address"
-            :hint-text="payloadError.address ? 'address Required' : ''"
+            :hint-text="
+              payloadError.address ? t('expertPersonnelData.validation.addressRequired') : ''
+            "
             :readonly="mode === 'view'"
           />
           <UiSelect
             v-model="payload.education"
-            label="Highest Education Level"
-            placeholder="--Highest Education Level * --"
+            :label="t('expertPersonnelData.modal.personalInfo.labels.education')"
+            :placeholder="t('expertPersonnelData.modal.personalInfo.placeholders.education')"
             :options="educationOptions"
             text-key="value"
             value-key="value"
             required
             :error="payloadError.education"
-            :hint-text="payloadError.education ? 'education Required' : ''"
+            :hint-text="
+              payloadError.education ? t('expertPersonnelData.validation.educationRequired') : ''
+            "
             :disabled="mode === 'view'"
           />
           <UiSelect
             v-model="payload.nationality"
-            label="Nationality"
-            placeholder="--Nationality--"
+            :label="t('expertPersonnelData.modal.personalInfo.labels.nationality')"
+            :placeholder="t('expertPersonnelData.modal.personalInfo.placeholders.nationality')"
             :options="nationalityOptions"
             text-key="text"
             value-key="value"
             required
             :error="payloadError.nationality"
-            :hint-text="payloadError.nationality ? 'nationality Required' : ''"
+            :hint-text="
+              payloadError.nationality
+                ? t('expertPersonnelData.validation.nationalityRequired')
+                : ''
+            "
             :disabled="mode === 'view'"
           />
           <UiInput
             v-model="payload.position"
-            label="Position / Role"
-            placeholder="Position / Role"
+            :label="t('expertPersonnelData.modal.personalInfo.labels.position')"
+            :placeholder="t('expertPersonnelData.modal.personalInfo.placeholders.position')"
             required
             :error="payloadError.position"
-            :hint-text="payloadError.position ? 'position Required' : ''"
+            :hint-text="
+              payloadError.position ? t('expertPersonnelData.validation.positionRequired') : ''
+            "
             :readonly="mode === 'view'"
           />
           <div>
             <RadioCustom
               v-model="payload.status"
-              label="Employment Status"
+              :label="t('expertPersonnelData.modal.personalInfo.labels.employmentStatus')"
               name="employment status"
               :options="employmentOptions"
               inline
@@ -437,17 +450,23 @@ onMounted(() => {
               @update:model-value="payload.status = Number($event)"
             />
             <span class="form-hint !text-danger">
-              {{ payloadError.status ? 'Employment status Required' : '' }}
+              {{
+                payloadError.status
+                  ? t('expertPersonnelData.validation.employmentStatusRequired')
+                  : ''
+              }}
             </span>
           </div>
           <UiInput
             v-model="payload.expertise"
-            label="Expertise / Skills"
-            placeholder="Elaborate Expertise / Skills"
+            :label="t('expertPersonnelData.modal.personalInfo.labels.expertise')"
+            :placeholder="t('expertPersonnelData.modal.personalInfo.placeholders.expertise')"
             required
             class="col-span-2"
             :error="payloadError.expertise"
-            :hint-text="payloadError.expertise ? 'expertise Required' : ''"
+            :hint-text="
+              payloadError.expertise ? t('expertPersonnelData.validation.expertiseRequired') : ''
+            "
             :readonly="mode === 'view'"
           />
         </div>
@@ -459,7 +478,7 @@ onMounted(() => {
               <div class="card-title">{{ certificate.value }}</div>
               <UiButton @click="addCertificate(Number(certificate.code))" v-if="mode !== 'view'">
                 <UiIcon name="plus-circle" variant="duotone" />
-                <span>Add</span>
+                <span>{{ t('expertPersonnelData.buttons.add') }}</span>
               </UiButton>
             </div>
             <div class="card-table scrollable-x-auto">
@@ -518,11 +537,11 @@ onMounted(() => {
                         @click="onDownload(subCertificate.docUrl)"
                       >
                         <UiIcon name="cloud-download" variant="duotone" />
-                        Download
+                        {{ t('expertPersonnelData.buttons.download') }}
                       </UiButton>
                       <UiFileUpload
                         v-else
-                        placeholder="Upload file"
+                        :placeholder="t('expertPersonnelData.modal.cvDetails.uploadPlaceholder')"
                         :name="`docUrl${index}${subCertificate.type}`"
                         accepted-files=".jpg,.jpeg,.png,.pdf, .zip"
                         @added-file="uploadFile($event, index, subCertificate.type)"
@@ -533,13 +552,15 @@ onMounted(() => {
                           }
                         "
                         :disabled="uploadLoading"
-                        hint-text="*jpg, jpeg, png, pdf, zip / max : 16 MB"
+                        :hint-text="t('expertPersonnelData.modal.cvDetails.uploadHint')"
                         :max-size="16000000"
                       />
                     </td>
                     <td>
                       <UiInput
-                        placeholder="Description"
+                        :placeholder="
+                          t('expertPersonnelData.modal.cvDetails.descriptionPlaceholder')
+                        "
                         v-model="subCertificate.description"
                         :readonly="mode === 'view'"
                       />
@@ -557,17 +578,17 @@ onMounted(() => {
         >
           <UiButton variant="primary" outline data-modal-dismiss="true" @click="closeModal">
             <UiIcon name="black-left" variant="filled" />
-            Cancel
+            {{ t('expertPersonnelData.buttons.cancel') }}
           </UiButton>
           <UiButton variant="primary" @click="nextStep">
-            Next
+            {{ t('expertPersonnelData.buttons.next') }}
             <UiIcon name="black-right" variant="duotone" />
           </UiButton>
         </div>
         <div v-else class="flex flex-row justify-end items-center gap-4 w-full">
           <UiButton variant="primary" outline @click="tab.active = 'personal_information'">
             <UiIcon name="black-left" variant="filled" />
-            Back
+            {{ t('expertPersonnelData.buttons.back') }}
           </UiButton>
 
           <UiButton
@@ -578,7 +599,7 @@ onMounted(() => {
           >
             <UiLoading v-if="submitLoading" variant="white" />
             <UiIcon v-else name="file-added" variant="duotone" />
-            Save
+            {{ t('expertPersonnelData.buttons.save') }}
           </UiButton>
         </div>
       </div>
@@ -589,11 +610,11 @@ onMounted(() => {
       :open="fileSizeErrorModal"
       id="file-size-error"
       type="danger"
-      title="File Size Exceeded"
-      text="File size exceeds the maximum limit of 16 MB. Please choose a smaller file."
+      :title="t('expertPersonnelData.modal.fileSizeError.title')"
+      :text="t('expertPersonnelData.modal.fileSizeError.message')"
       no-cancel
       static
-      submit-button-text="Close"
+      :submit-button-text="t('expertPersonnelData.buttons.close')"
       :submit="() => (fileSizeErrorModal = false)"
     />
   </div>

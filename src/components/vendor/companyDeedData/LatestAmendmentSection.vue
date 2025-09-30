@@ -352,7 +352,9 @@ watchEffect(async () => {
   <div class="card">
     <div class="card-header">
       <div class="w-full flex justify-between items-center">
-        <h3 class="text-lg font-semibold text-slate-800">Latest Amendment Data</h3>
+        <h3 class="text-lg font-semibold text-slate-800">
+          {{ $t('companyDeed.latestAmendment.title') }}
+        </h3>
       </div>
     </div>
 

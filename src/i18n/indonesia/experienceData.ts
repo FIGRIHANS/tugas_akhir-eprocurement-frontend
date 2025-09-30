@@ -1,0 +1,127 @@
+export const experienceData = {
+  pageTitle: 'Proyek Pengalaman',
+
+  projectType: {
+    completed: 'Proyek Yang Telah Selesai',
+    ongoing: 'Proyek Yang Sedang Berlangsung',
+  },
+
+  table: {
+    headers: {
+      action: 'Aksi',
+      contractName: 'Nama Kontrak',
+      address: 'Alamat',
+      agency: 'Instansi',
+      contractValue: 'Nilai Kontrak',
+      businessField: 'Bidang Usaha',
+      subBusiness: 'Sub Bidang Usaha',
+      startDate: 'Tanggal Mulai',
+      endDate: 'Tanggal Selesai',
+    },
+    noData: 'Tidak ada data',
+  },
+
+  buttons: {
+    add: 'Tambah',
+    back: 'Kembali',
+    cancel: 'Batal',
+    save: 'Simpan',
+    delete: 'Hapus',
+  },
+
+  form: {
+    labels: {
+      contractName: 'Nama Kontrak',
+      agency: 'Instansi',
+      businessField: 'Jenis Sektor Bisnis',
+      subBusiness: 'Sub Sektor Bisnis',
+      country: 'Negara',
+      province: 'Provinsi',
+      city: 'Kota',
+      address: 'Alamat',
+      phoneNumber: 'Nomor Telepon',
+      contractNumber: 'Nomor Kontrak',
+      currency: 'Mata Uang',
+      contractValue: 'Nilai Kontrak',
+      startDate: 'Tanggal Mulai',
+      endDate: 'Tanggal Selesai',
+      description: 'Deskripsi',
+    },
+    placeholders: {
+      contractName: 'Nama Kontrak',
+      agency: 'Instansi',
+      businessField: '--Jenis Sektor Bisnis--',
+      subBusiness: '--Sub Sektor Bisnis--',
+      country: '--Negara--',
+      province: '--Provinsi--',
+      city: '--Kota--',
+      address: 'Alamat',
+      phoneNumber: 'Nomor Telepon',
+      contractNumber: 'Nomor Kontrak',
+      currency: '--Mata Uang--',
+      contractValue: 'Nilai Kontrak',
+      startDate: 'Tanggal Mulai',
+      endDate: 'Tanggal Selesai',
+      description: 'Deskripsi',
+      upload: 'Unggah file - (*jpg, jpeg, png, pdf, zip / maks : 16 MB)',
+    },
+  },
+
+  validation: {
+    contractName: 'Nama Kontrak diperlukan',
+    agency: 'Instansi diperlukan',
+    businessField: 'Bidang Usaha diperlukan',
+    businessFieldId: 'Bidang Usaha diperlukan',
+    field: 'Sub Bidang Usaha diperlukan',
+    subBusiness: 'Sub Bidang Usaha diperlukan',
+    country: 'Negara diperlukan',
+    stateLocation: 'Negara diperlukan',
+    province: 'Provinsi diperlukan',
+    provinceLocation: 'Provinsi diperlukan',
+    city: 'Kota diperlukan',
+    location: 'Kota diperlukan',
+    address: 'Alamat diperlukan',
+    phoneNumber: 'Nomor telepon diperlukan',
+    agencyTelpNo: 'Nomor telepon diperlukan',
+    contractNumber: 'Nomor Kontrak diperlukan',
+    contractNo: 'Nomor Kontrak diperlukan',
+    currency: 'Mata Uang diperlukan',
+    expCurrID: 'Mata Uang diperlukan',
+    contractValue: 'Nilai Kontrak diperlukan',
+    startDate: 'Tanggal mulai diperlukan',
+    endDate: 'Tanggal selesai diperlukan',
+    description: 'Deskripsi diperlukan',
+    remark: 'Deskripsi diperlukan',
+    document: 'Dokumen diperlukan',
+    documentURL: 'Dokumen diperlukan',
+  },
+
+  modal: {
+    form: {
+      title: 'Data Pengalaman',
+    },
+    success: {
+      title: 'Hore!',
+      message: 'Data telah berhasil diperbarui dalam sistem admin.',
+    },
+    error: {
+      title: 'Gagal {action} Data Pengalaman!',
+      message: 'Silakan coba lagi nanti atau hubungi dukungan jika masalah terus berlanjut.',
+      actions: {
+        add: 'Menambah',
+        change: 'Mengubah',
+        delete: 'Menghapus',
+      },
+    },
+    delete: {
+      title: 'Apakah Anda Yakin Ingin Menghapus Item Ini?',
+      message: 'Tindakan ini akan menghapus secara permanen data yang dipilih dari daftar.',
+    },
+  },
+
+  error: {
+    downloadFailed: 'Gagal mengunduh dokumen. Silakan coba lagi nanti.',
+    uploadFailed: 'Upload file gagal. Silakan coba lagi.',
+    uploadError: 'Terjadi kesalahan, silakan coba lagi',
+  },
+}
