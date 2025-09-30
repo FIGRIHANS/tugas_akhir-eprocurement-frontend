@@ -70,4 +70,9 @@ export const registration = {
   note: 'Note',
   paymentDetailNote:
     'Vendors who wish to participate in tendering only need to register once. Please make sure all submitted data is valid. PT Arya Noble is not responsible for any consequences resulting from invalid or unverifiable vendor data, and such vendors may be subject to sanctions.',
+  // Tab labels
+  information: 'Information',
+  contact: 'Contact',
+  documentAndLegal: 'Document & Legal',
+  paymentDetailTab: 'Payment Detail',
 }

@@ -1,7 +1,7 @@
 <template>
   <UiTab
     v-model="tab.active"
-    :items="tab.items"
+    :items="tabItems"
     class="justify-center bg-secondary-active mb-7.5"
     numbering
     step
@@ -108,16 +108,17 @@ const isBankNotRegistered = computed(
 
 const tab = reactive({
   active: 'registration__information',
-  items: [
-    { label: 'Information', value: 'registration__information', disabled: true },
-    { label: 'Contact', value: 'registration__contact', disabled: true },
-    { label: 'Document & Legal', value: 'registration__document-and-legal', disabled: true },
-    { label: 'Payment Detail', value: 'registration__payment-detail', disabled: true },
-  ],
 })
 
+const tabItems = computed(() => [
+  { label: t('registration.information'), value: 'registration__information', disabled: true },
+  { label: t('registration.contact'), value: 'registration__contact', disabled: true },
+  { label: t('registration.documentAndLegal'), value: 'registration__document-and-legal', disabled: true },
+  { label: t('registration.paymentDetailTab'), value: 'registration__payment-detail', disabled: true },
+])
+
 const tabPosition = computed(() => {
-  return tab.items.findIndex((item) => item.value === tab.active)
+  return tabItems.value.findIndex((item) => item.value === tab.active)
 })
 
 const showPrevious = computed(() => {
@@ -392,19 +393,19 @@ const previous = () => {
 
   if (index < 0) return
 
-  tab.active = tab.items[index].value
-  router.push({ name: tab.items[index].value })
+  tab.active = tabItems.value[index].value
+  router.push({ name: tabItems.value[index].value })
 }
 
 const next = async () => {
   const index = tabPosition.value + 1
 
   if (checkFieldNotEmpty()) {
-    if (index >= tab.items.length) {
+    if (index >= tabItems.value.length) {
       await submitData()
     } else {
-      tab.active = tab.items[index].value
-      router.push({ name: tab.items[index].value })
+      tab.active = tabItems.value[index].value
+      router.push({ name: tabItems.value[index].value })
     }
   }
 }

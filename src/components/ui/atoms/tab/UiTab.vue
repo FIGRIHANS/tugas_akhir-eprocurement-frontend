@@ -30,7 +30,6 @@ const position = computed(() => {
   return props.items.findIndex((item) => item.value === props.modelValue)
 })
 
-
 const itemClasees = (item: ITabItem, tabIndex: number) => {
   return [
     'tab',
@@ -38,7 +37,7 @@ const itemClasees = (item: ITabItem, tabIndex: number) => {
     {
       active: item.value === props.modelValue,
       disabled: item.disabled,
-      visited: isVisited(tabIndex)
+      visited: isVisited(tabIndex),
     },
   ]
 }
