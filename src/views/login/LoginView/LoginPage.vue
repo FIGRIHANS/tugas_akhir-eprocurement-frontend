@@ -1,34 +1,46 @@
 <template>
   <div class="max-w-[343px] border border-grey-200 rounded-xl p-[40px] h-fit">
     <p class="m-0 text-center text-lg font-medium">
-      Sign in
-      <span v-if="!checkVendor()"> admin</span>
+      {{ $t('login.form.signIn') }}
+      <span v-if="!checkVendor()"> {{ $t('login.form.admin') }}</span>
     </p>
     <div class="mt-[30px] flex flex-col gap-[20px]">
       <!-- input email -->
       <div v-if="!checkVendor()">
-        <label class="font-normal text-[13px]">Email</label>
-        <input v-model="email" class="input mt-[8px]" placeholder="email@email.com" type="email" :class="{ 'border-danger text-danger': isError }" />
+        <label class="font-normal text-[13px]">{{ $t('login.form.email') }}</label>
+        <input
+          v-model="email"
+          class="input mt-[8px]"
+          :placeholder="$t('login.form.emailPlaceholder')"
+          type="email"
+          :class="{ 'border-danger text-danger': isError }"
+        />
       </div>
 
       <!-- input username -->
       <div v-else>
-        <label class="font-normal text-[13px]">Username</label>
-        <input v-model="username" class="input mt-[8px]" placeholder="Username" type="text" :class="{ 'border-danger text-danger': isError }" />
+        <label class="font-normal text-[13px]">{{ $t('login.form.username') }}</label>
+        <input
+          v-model="username"
+          class="input mt-[8px]"
+          :placeholder="$t('login.form.usernamePlaceholder')"
+          type="text"
+          :class="{ 'border-danger text-danger': isError }"
+        />
       </div>
 
       <!-- input password -->
       <div>
         <div class="flex justify-between gap-[8px]">
-          <label class="font-normal text-[13px]">Password</label>
-          <a v-if="checkVendor()" href="#" class="text-primary text-[13px]" @click="goToForgot"
-            >Forgot Password?</a
-          >
+          <label class="font-normal text-[13px]">{{ $t('login.form.password') }}</label>
+          <a v-if="checkVendor()" href="#" class="text-primary text-[13px]" @click="goToForgot">{{
+            $t('login.form.forgotPassword')
+          }}</a>
         </div>
         <div class="input max-w-72" :class="{ 'border-danger': isError }">
           <input
             v-model="password"
-            placeholder="Password"
+            :placeholder="$t('login.form.passwordPlaceholder')"
             :type="showPassword ? 'text' : 'password'"
             :class="{ '!text-danger': isError }"
           />
@@ -40,14 +52,14 @@
       </div>
 
       <div v-if="isError" class="radius-lg bg-red-100 text-danger p-[8px] text-[11px]">
-        Email or password you entered is incorrect, Please double-check and try again.
+        {{ $t('login.form.errorMessage') }}
       </div>
 
       <!-- remember -->
       <div class="flex flex-col items-start gap-[4px]">
         <label class="form-label flex items-center gap-2.5">
           <input v-model="rememberMe" class="checkbox" name="check" type="checkbox" value="1" />
-          Remember me
+          {{ $t('login.form.rememberMe') }}
         </label>
       </div>
 
@@ -58,7 +70,7 @@
           :disabled="isLoading"
           @click="goLogin"
         >
-          Sign In
+          {{ $t('login.form.signInButton') }}
         </button>
         <button
           v-if="checkVendor()"
@@ -66,7 +78,7 @@
           :disabled="isLoading"
           @click="goRegister"
         >
-          Register
+          {{ $t('login.form.registerButton') }}
         </button>
       </div>
     </div>
