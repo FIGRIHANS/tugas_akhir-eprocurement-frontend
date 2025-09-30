@@ -1,11 +1,11 @@
 <template>
   <div class="card min-w-full">
     <div class="card-header">
-      <h3 class="card-title">Equipment Data (Heavy Machinery)</h3>
+      <h3 class="card-title">{{ $t('equipmentData.title') }}</h3>
 
       <UiButton variant="primary" data-modal-toggle="#modal-equipment">
         <UiIcon name="plus-circle" variant="duotone" />
-        Add
+        {{ $t('equipmentData.add') }}
       </UiButton>
     </div>
 
@@ -15,17 +15,17 @@
           <thead>
             <tr>
               <th class="w-[70px]"></th>
-              <th>Equipment Name</th>
-              <th>Brand / Type</th>
-              <th>Year of Manufacture</th>
-              <th>Serial / License Number</th>
-              <th>Capacity (Tonnage)</th>
-              <th>Condition</th>
-              <th>Ownership Status</th>
+              <th>{{ $t('equipmentData.tableHeaders.equipmentName') }}</th>
+              <th>{{ $t('equipmentData.tableHeaders.brandType') }}</th>
+              <th>{{ $t('equipmentData.tableHeaders.yearOfManufacture') }}</th>
+              <th>{{ $t('equipmentData.tableHeaders.serialLicenseNumber') }}</th>
+              <th>{{ $t('equipmentData.tableHeaders.capacity') }}</th>
+              <th>{{ $t('equipmentData.tableHeaders.condition') }}</th>
+              <th>{{ $t('equipmentData.tableHeaders.ownershipStatus') }}</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="data in dataResponse">
+            <tr v-for="data in dataResponse.items" :key="data.id">
               <td>
                 <div class="dropdown" data-dropdown="true" data-dropdown-trigger="click">
                   <button class="dropdown-toggle px-0 size-8 flex justify-center btn btn-light">
@@ -37,13 +37,13 @@
                       <div class="menu-item text-warning" @click="editData(data)">
                         <span class="menu-link">
                           <UiIcon name="notepad-edit" variant="duotone" class="menu-icon" />
-                          Edit
+                          {{ $t('equipmentData.actions.edit') }}
                         </span>
                       </div>
                       <div class="menu-item text-danger" @click="deleteData(data)">
                         <span class="menu-link">
                           <UiIcon name="cross-circle" variant="duotone" class="menu-icon" />
-                          Delete
+                          {{ $t('equipmentData.actions.delete') }}
                         </span>
                       </div>
                     </div>
@@ -66,65 +66,143 @@
 
       <div class="flex flex-row items-center justify-between px-4">
         <div class="flex flex-row items-center gap-2">
-          Show
+          {{ $t('equipmentData.pagination.show') }}
           <UiSelect v-model="pagination.pageSize" :options="pageSizeOptions" class="w-16" />
-          per page from {{ pagination.total }} data
+          {{ $t('equipmentData.pagination.perPage') }} {{ dataResponse.total }}
+          {{ $t('equipmentData.pagination.data') }}
         </div>
 
-        <LPagination :totalItems="pagination.total" :pageSize="pagination.pageSize"
-          :currentPage="pagination.currentPage" @pageChange="setPagePagination" />
+        <LPagination
+          :totalItems="dataResponse.total"
+          :pageSize="pagination.pageSize"
+          :currentPage="pagination.currentPage"
+          @pageChange="setPagePagination"
+        />
       </div>
     </div>
   </div>
 
-  <div ref="modal" class="modal" data-modal="true" data-modal-backdrop-static="true" id="modal-equipment">
+  <div
+    ref="modal"
+    class="modal"
+    data-modal="true"
+    data-modal-backdrop-static="true"
+    id="modal-equipment"
+  >
     <div class="modal-content modal-center-y max-w-4xl">
       <div class="modal-header">
-        <h3 class="modal-title text-lg">Heavy Equipment</h3>
+        <h3 class="modal-title text-lg">{{ $t('equipmentData.modalTitles.heavyEquipment') }}</h3>
       </div>
 
       <div class="modal-body !py-5 flex flex-col gap-4">
         <div class="grid grid-cols-2 gap-4">
-          <UiInput v-model="payload.name" label="Equipment Name" placeholder="Equipment Name" :error="payloadError.name"
-            required />
-          <UiInput v-model="payload.brand" label="Brand / Type " placeholder="Brand / Type " :error="payloadError.brand"
-            required />
-          <DatePicker v-model="payload.mfgDate" placeholder="Select" format="dd MM yyyy" label="Year of Manufacture"
-            :error="payloadError.mfgDate" required label-top />
-          <UiInput v-model="payload.serialNo" label="Serial Number / License Plate Number"
-            placeholder="Serial Number / License Plate Number" />
-          <UiInput v-model="payload.capacity" label="Capacity" placeholder="Write Number" />
-          <UiSelect v-model="payload.condition" label="Condition" placeholder="--Condition Heavy Equipment--"
-            :options="conditionTypeList" text-key="value" value-key="code" :error="payloadError.condition" required />
-          <UiSelect v-model="payload.ownership" label="Ownership Status" placeholder="--Ownership Status--"
-            :options="ownershipStatusList" text-key="value" value-key="code" :error="payloadError.ownership" required />
+          <UiInput
+            v-model="payload.name"
+            :label="$t('equipmentData.form.equipmentName')"
+            :placeholder="$t('equipmentData.form.equipmentNamePlaceholder')"
+            :error="payloadError.name"
+            required
+          />
+          <UiInput
+            v-model="payload.brand"
+            :label="$t('equipmentData.form.brandType')"
+            :placeholder="$t('equipmentData.form.brandTypePlaceholder')"
+            :error="payloadError.brand"
+            required
+          />
+          <DatePicker
+            v-model="payload.mfgDate"
+            :placeholder="$t('equipmentData.form.select')"
+            format="MMM dd, yyyy"
+            :label="$t('equipmentData.form.yearOfManufacture')"
+            :error="payloadError.mfgDate"
+            required
+            label-top
+          />
+          <UiInput
+            v-model="payload.serialNo"
+            :label="$t('equipmentData.form.serialNumber')"
+            :placeholder="$t('equipmentData.form.serialNumberPlaceholder')"
+          />
+          <UiInput
+            v-model="payload.capacity"
+            :label="$t('equipmentData.form.capacity')"
+            :placeholder="$t('equipmentData.form.capacityPlaceholder')"
+          />
+          <UiSelect
+            v-model="payload.condition"
+            :label="$t('equipmentData.form.condition')"
+            :placeholder="$t('equipmentData.form.conditionPlaceholder')"
+            :options="conditionTypeList"
+            text-key="value"
+            value-key="code"
+            :error="payloadError.condition"
+            required
+          />
+          <UiSelect
+            v-model="payload.ownership"
+            :label="$t('equipmentData.form.ownershipStatus')"
+            :placeholder="$t('equipmentData.form.ownershipStatusPlaceholder')"
+            :options="ownershipStatusList"
+            text-key="value"
+            value-key="code"
+            :error="payloadError.ownership"
+            required
+          />
         </div>
 
         <div class="flex flex-row justify-end items-center gap-4 w-full">
           <UiButton variant="primary" outline @click="resetPayload" data-modal-dismiss="true">
             <UiIcon name="black-left" variant="filled" />
-            Cancel
+            {{ $t('equipmentData.buttons.cancel') }}
           </UiButton>
           <UiButton variant="primary" @click="checkPayload">
             <UiIcon v-if="loading" name="loading" variant="filled" class="animate-spin" />
             <UiIcon v-else name="file-added" variant="duotone" />
-            Save
+            {{ $t('equipmentData.buttons.save') }}
           </UiButton>
         </div>
       </div>
     </div>
   </div>
 
-  <ModalConfirmation :open="modalTrigger.success" id="equipment-success" type="success"
-    title="Equipment Data Successfully Updated" text="The data has been successfully updated in the admin system."
-    no-cancel static submit-button-text="Ok" :submit="() => closeModal('success')" />
-  <ModalConfirmation :open="modalTrigger.confirm" id="equipment-confirm" type="confirm" title="Save"
-    text="You are about to Save to this data. Please review your input before continuing." static :loading="loading"
-    cancel-button-text="Cancel" submit-button-text="Save" :cancel="() => closeModal('confirm')" :submit="submitData" />
-  <ModalConfirmation :open="modalTrigger.delete" id="equipment-delete" type="danger"
-    title="Are You Sure You Want to Delete This Item?"
-    text="This action will permanently remove the selected data from the list." static :loading="loading"
-    cancel-button-text="Cancel" submit-button-text="Delete" :cancel="() => closeModal('delete')" :submit="submitData" />
+  <ModalConfirmation
+    :open="modalTrigger.success"
+    id="equipment-success"
+    type="success"
+    :title="$t('equipmentData.successModal.title')"
+    :text="$t('equipmentData.successModal.message')"
+    no-cancel
+    static
+    :submit-button-text="$t('equipmentData.buttons.ok')"
+    :submit="() => closeModal('success')"
+  />
+  <ModalConfirmation
+    :open="modalTrigger.confirm"
+    id="equipment-confirm"
+    type="confirm"
+    :title="$t('equipmentData.confirmModal.title')"
+    :text="$t('equipmentData.confirmModal.message')"
+    static
+    :loading="loading"
+    :cancel-button-text="$t('equipmentData.buttons.cancel')"
+    :submit-button-text="$t('equipmentData.buttons.save')"
+    :cancel="() => closeModal('confirm')"
+    :submit="submitData"
+  />
+  <ModalConfirmation
+    :open="modalTrigger.delete"
+    id="equipment-delete"
+    type="danger"
+    :title="$t('equipmentData.deleteModal.title')"
+    :text="$t('equipmentData.deleteModal.message')"
+    static
+    :loading="loading"
+    :cancel-button-text="$t('equipmentData.buttons.cancel')"
+    :submit-button-text="$t('equipmentData.buttons.delete')"
+    :cancel="() => closeModal('delete')"
+    :submit="submitData"
+  />
 </template>
 
 <script setup lang="ts">
@@ -185,17 +263,13 @@ const pageSizeOptions = ref([
 const pagination = ref({
   pageSize: 10,
   currentPage: 1,
-  total: 10,
 })
 
 const conditionTypeList = computed(() => vendorMasterData.conditionTypeList)
 const ownershipStatusList = computed(() => vendorMasterData.ownershipStatusList)
 const dataResponse = computed(() => {
   const { items, total } = equipmentDataStore.data
-
-  pagination.value.total = total
-
-  return items
+  return { items, total }
 })
 
 const payload = ref<PayloadEquipmentDataType>({
@@ -281,16 +355,25 @@ const getData = async () => {
 }
 
 const editData = (value: EquipmentDataType) => {
-  const {
-    conditionName,
-    ownershipName,
-    categoryName,
-    createdBy,
-    modifiedBy,
-    createdDate,
-    modifiedDate,
-    ...cleanPayload
-  } = value
+  // Create clean payload by copying only needed properties
+  const cleanPayload = {
+    id: value.id,
+    vendorID: value.vendorID,
+    name: value.name,
+    brand: value.brand,
+    type: value.type,
+    mfgDate: value.mfgDate,
+    serialNo: value.serialNo,
+    capacity: value.capacity,
+    condition: value.condition,
+    ownership: value.ownership,
+    category: value.category,
+    user: value.user,
+    isActive: value.isActive,
+    isTemporary: value.isTemporary,
+    refVendorID: value.refVendorID,
+    action: value.action,
+  }
 
   payload.value = {
     ...payload.value,
@@ -301,21 +384,29 @@ const editData = (value: EquipmentDataType) => {
 }
 
 const deleteData = (value: EquipmentDataType) => {
-  const {
-    conditionName,
-    ownershipName,
-    categoryName,
-    createdBy,
-    modifiedBy,
-    createdDate,
-    modifiedDate,
-    ...cleanPayload
-  } = value
+  // Create clean payload by copying only needed properties
+  const cleanPayload = {
+    id: value.id,
+    vendorID: value.vendorID,
+    name: value.name,
+    brand: value.brand,
+    type: value.type,
+    mfgDate: value.mfgDate,
+    serialNo: value.serialNo,
+    capacity: value.capacity,
+    condition: value.condition,
+    ownership: value.ownership,
+    category: value.category,
+    user: value.user,
+    isActive: false, // Set to false for deletion
+    isTemporary: value.isTemporary,
+    refVendorID: value.refVendorID,
+    action: value.action,
+  }
 
   payload.value = {
     ...payload.value,
     ...cleanPayload,
-    isActive: false,
   }
 
   modalTrigger.value.delete = true
@@ -359,7 +450,7 @@ const submitData = async () => {
         emailTo: adminStore.data.vendorEmail,
         emailCc: '',
         emailBcc: '',
-      }
+      },
     })
 
     closeModal('confirm')

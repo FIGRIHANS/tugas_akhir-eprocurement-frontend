@@ -12,6 +12,7 @@ import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiLoading from '@/components/UiLoading.vue'
 import UiModal from '@/components/modal/UiModal.vue'
 import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
+import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 
 import type { IVendorLegalDocumentPayload } from '@/stores/vendor/types/vendor'
 import { useCompanyDeedDataStore, useVendorAdministrationStore } from '@/stores/vendor/vendor'
@@ -53,6 +54,7 @@ const apiErrorMessage = ref('')
 const isDownloadLoading = ref(false)
 const isSaveLoading = ref(false)
 const mode = ref<'add' | 'edit' | 'delete'>('add')
+const modalUploadFailed = ref<boolean>(false)
 
 const RATIFICATION_DOCUMENT_TYPE = 3117
 
@@ -160,14 +162,14 @@ const handleSave = async () => {
       3117,
     )
 
-    await changeDataEmailStore.sendEmail({
-      recepientName: adminStore.data?.vendorName || '',
-      recepients: {
-        emailTo: adminStore.data?.vendorEmail || '',
-        emailCc: '',
-        emailBcc: '',
-      },
-    })
+    // await changeDataEmailStore.sendEmail({
+    //   recepientName: adminStore.data?.vendorName || '',
+    //   recepients: {
+    //     emailTo: adminStore.data?.vendorEmail || '',
+    //     emailCc: '',
+    //     emailBcc: '',
+    //   },
+    // })
 
     showSuccessModal.value = true
 
@@ -262,6 +264,10 @@ const ratificationData = computed(() => {
   return activeItems as typeof items
 })
 
+const handleUploadFailed = () => {
+  modalUploadFailed.value = true
+}
+
 watchEffect(async () => {
   try {
     await companyDeedDataStore.getVendorLegalDocument(
@@ -281,8 +287,10 @@ watchEffect(async () => {
     <div class="card-header">
       <div class="w-full flex justify-between items-center">
         <div>
-          <h3 class="text-lg font-semibold text-slate-800">Ratification by Kemkumham</h3>
-          <p class="text-red-500 text-xs">Specifically for companies with PT legal entity status</p>
+          <h3 class="text-lg font-semibold text-slate-800">
+            {{ $t('companyDeed.ratification.title') }}
+          </h3>
+          <p class="text-red-500 text-xs">{{ $t('companyDeed.ratification.subtitle') }}</p>
         </div>
       </div>
     </div>
@@ -305,6 +313,8 @@ watchEffect(async () => {
             placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
             hint-text="*jpg, jpeg, png, pdf, zip / max : 16 MB"
             @added-file="onUploadFile($event)"
+            @upload-failed="handleUploadFailed()"
+            :max-size="16000000"
           />
           <p v-if="errors.documentURL" class="text-xs text-red-500 mt-1">
             {{ errors.documentURL }}
@@ -316,7 +326,7 @@ watchEffect(async () => {
             v-model="payload.documentDate"
             label="Letter Date"
             placeholder="Select Date"
-            :format="'MMMM dd, yyyy'"
+            :format="'MMM dd, yyyy'"
           />
           <p v-if="errors.documentDate" class="text-xs text-red-500 mt-1">
             {{ errors.documentDate }}
@@ -401,7 +411,7 @@ watchEffect(async () => {
               </div>
             </td>
             <td class="text-nowrap">{{ doc.documentNo }}</td>
-            <td class="text-nowrap">{{ moment(doc.documentDate).format('MMMM DD, yyyy') }}</td>
+            <td class="text-nowrap">{{ moment(doc.documentDate).format('MMM dd, yyyy') }}</td>
           </tr>
         </tbody>
       </table>
@@ -487,5 +497,15 @@ watchEffect(async () => {
         </UiButton>
       </div>
     </UiModal>
+    <ModalConfirmation
+      :open="modalUploadFailed"
+      id="other-doc-upload-error"
+      type="danger"
+      title="Upload Failed"
+      text="File size exceeds the maximum limit of 16 MB. Please choose a smaller file."
+      no-submit
+      static
+      :cancel="() => (modalUploadFailed = false)"
+    />
   </div>
 </template>

@@ -70,4 +70,9 @@ export const registration = {
   note: 'Catatan',
   paymentDetailNote:
     'Vendor yang ingin berpartisipasi dalam tender hanya perlu mendaftar sekali. Harap pastikan semua data yang diserahkan valid. PT Arya Noble tidak bertanggung jawab atas konsekuensi yang dihasilkan dari data vendor yang tidak valid atau tidak dapat diverifikasi, dan vendor tersebut dapat dikenakan sanksi.',
+  // Tab labels
+  information: 'Informasi',
+  contact: 'Kontak',
+  documentAndLegal: 'Dokumen & Legal',
+  paymentDetailTab: 'Detail Pembayaran',
 }

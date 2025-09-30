@@ -32,7 +32,7 @@
           <template v-else>
             <tr v-for="(item, index) in form.invoiceItem" :key="index" class="cost__field-items">
               <td class="flex items-center justify-around gap-[8px]">
-                <button v-if="form.status === 0 || form.status === -1 || form.status === 5" class="btn btn-icon btn-primary" @click="item.isEdit = !item.isEdit">
+                <button v-if="form.status === 0 || form.status === -1 || form.status === 5" class="btn btn-icon btn-primary" :disabled="checkIsEdit() && !item.isEdit" @click="item.isEdit = !item.isEdit">
                   <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>
                   <i v-else class="ki-duotone ki-check-circle"></i>
                 </button>
@@ -53,7 +53,7 @@
                 ></v-select>
               </td>
               <td>
-                <span v-if="!item.isEdit">{{ useFormatIdr(item.itemAmount) || '-' }}</span>
+                <span v-if="!item.isEdit">{{ form?.currency === 'IDR' ? useFormatIdr(item.itemAmount) : useFormatUsd(item.itemAmount) || '-' }}</span>
                 <input v-else v-model="item.itemAmount" class="input" type="number" placeholder="" @change="item.whtBaseAmount = item.itemAmount.toString()"/>
               </td>
               <td>
@@ -111,10 +111,10 @@
                 <span>{{ item.whtCode || '-' }}</span>
               </td>
               <td>
-                <span>{{ item.whtBaseAmount || '-' }}</span>
+                <span>{{ form?.currency === 'IDR' ? useFormatIdr(item.whtBaseAmount) : useFormatUsd(item.whtBaseAmount) || '-' }}</span>
               </td>
               <td>
-                <span>{{ item.whtAmount || '-' }}</span>
+                <span>{{ form?.currency === 'IDR' ? useFormatIdr(item.whtAmount) : useFormatUsd(item.whtAmount) || '-' }}</span>
               </td>
             </tr>
           </template>
@@ -129,8 +129,10 @@ import { ref, computed, watch, inject } from 'vue'
 import type { formTypes } from '../../types/invoiceAddWrapper'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
+import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
+const verificationApi = useInvoiceVerificationStore()
 const columns = ref([
   'Action',
   'Activity / Expense',
@@ -181,6 +183,9 @@ const addNew = () => {
 }
 
 const deleteItem = (index: number) => {
+  if (form.invoiceItem[index].id) {
+    verificationApi.costExpenseTempDelete?.push(form.invoiceItem[index].id)
+  }
   form?.invoiceItem.splice(index, 1)
 }
 
@@ -231,6 +236,11 @@ const getCostCenterName = (costCenter: string) => {
     return `${data.code} - ${data.name}`
   }
   return '-'
+}
+
+const checkIsEdit = () => {
+  const checkIndex = form.invoiceItem.findIndex((item) => item.isEdit)
+  return checkIndex !== -1
 }
 
 watch(

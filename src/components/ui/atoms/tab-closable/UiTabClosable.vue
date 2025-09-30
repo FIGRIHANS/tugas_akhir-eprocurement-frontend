@@ -56,7 +56,7 @@ const handleClose = (id: string) => {
       </UiButton>
       <div class="dropdown-content w-full max-w-fit">
         <div class="flex items-center justify-between p-4 pb-0">
-          <h3 class="text-lg font-semibold">Open</h3>
+          <h3 class="text-lg font-semibold">{{ $t('vendorVerification.tabitems.open') }}</h3>
           <UiButton
             variant="light"
             :icon="true"

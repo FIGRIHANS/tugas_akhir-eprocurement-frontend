@@ -28,20 +28,6 @@ const checkIsRequired = (licenseId) => {
 
 // Error state for required fields
 const requiredError = ref(false)
-const requiredErrorText = ref('Please fill all required fields before saving.')
-
-const validateRequiredFields = () => {
-  const requiredIds = requiredDocumentFields[selectedCategory.value] || []
-  for (const id of requiredIds) {
-    const found = localLicenses.value.find((l) => l.licenseId === id)
-    if (!found || !found.licenseNo || !found.documentUrl) {
-      requiredError.value = true
-      return false
-    }
-  }
-  requiredError.value = false
-  return true
-}
 
 const route = useRoute()
 
@@ -178,7 +164,11 @@ const downloadFile = async (path: string) => {
     setTimeout(() => URL.revokeObjectURL(link), 1000)
   } catch (error) {
     console.log(error)
-    alert('failed to download document. please try again later.')
+    alert(
+      this.$t
+        ? this.$t('businessLicense.errors.downloadFailed')
+        : 'Failed to download document. Please try again later.',
+    )
   } finally {
     downloadLoading.value = false
   }
@@ -206,7 +196,7 @@ watch(
     <div class="card">
       <div class="card-body">
         <h2 class="text-lg font-semibold text-slate-700">
-          Business License Data - {{ adminStore.data?.companyCategoryName }}
+          {{ $t('businessLicense.pkpTable.title') }} - {{ adminStore.data?.companyCategoryName }}
         </h2>
 
         <div class="mt-6">
@@ -215,12 +205,22 @@ watch(
               <table class="table table-border align-middle text-gray-700 font-medium text-sm">
                 <thead>
                   <tr>
-                    <th class="text-nowrap">Business License</th>
-                    <th class="text-nowrap">License Number / Description</th>
-                    <th class="text-nowrap">Valid From (Start Date)</th>
-                    <th class="text-nowrap">Valid Until (End Date)</th>
-                    <th class="text-nowrap">Document</th>
-                    <th class="text-nowrap">Action</th>
+                    <th class="text-nowrap">
+                      {{ $t('businessLicense.pkpTable.headers.businessLicense') }}
+                    </th>
+                    <th class="text-nowrap">
+                      {{ $t('businessLicense.pkpTable.headers.licenseNumber') }}
+                    </th>
+                    <th class="text-nowrap">
+                      {{ $t('businessLicense.pkpTable.headers.validFrom') }}
+                    </th>
+                    <th class="text-nowrap">
+                      {{ $t('businessLicense.pkpTable.headers.validUntil') }}
+                    </th>
+                    <th class="text-nowrap">
+                      {{ $t('businessLicense.pkpTable.headers.document') }}
+                    </th>
+                    <th class="text-nowrap">{{ $t('businessLicense.pkpTable.headers.action') }}</th>
                   </tr>
                 </thead>
 
@@ -238,7 +238,7 @@ watch(
                     <td class="p-2 align-middle">
                       <div class="h-14 flex items-center">
                         <UiInput
-                          placeholder="License Number / Description"
+                          :placeholder="$t('businessLicense.pkpTable.placeholders.licenseNumber')"
                           v-model="item.licenseNo"
                           :disabled="!isEditing(item.licenseId)"
                           class="w-full"
@@ -251,8 +251,8 @@ watch(
                       <div class="h-14 flex items-center">
                         <DatePicker
                           v-model="item.issuedUTCDate"
-                          format="dd MM yyyy"
-                          placeholder="Pilih Tanggal"
+                          format="MMM dd, yyyy"
+                          :placeholder="$t('businessLicense.pkpTable.placeholders.selectDate')"
                           :disabled="!isEditing(item.licenseId)"
                           class="!w-48"
                         />
@@ -264,8 +264,8 @@ watch(
                       <div class="h-14 flex items-center">
                         <DatePicker
                           v-model="item.expiredUTCDate"
-                          format="dd MM yyyy"
-                          placeholder="Pilih Tanggal"
+                          format="MMM dd, yyyy"
+                          :placeholder="$t('businessLicense.pkpTable.placeholders.selectDate')"
                           :disabled="!isEditing(item.licenseId) || !item.issuedUTCDate"
                           :min-date="item.issuedUTCDate"
                           class="!w-48"
@@ -281,7 +281,7 @@ watch(
                           :max-size="16000000"
                           :placeholder="
                             fileList[index]?.file.name === 'placeholder.txt'
-                              ? 'Choose file...'
+                              ? $t('businessLicense.pkpTable.placeholders.chooseFile')
                               : fileList[index]?.file.name
                           "
                           accepted-files=".jpg,.jpeg,.png,.pdf,application/zip"
@@ -325,7 +325,9 @@ watch(
                             :disabled="downloadLoading"
                           >
                             <UiIcon name="cloud-download" variant="duotone" />
-                            <span>Download Document</span>
+                            <span>{{
+                              $t('businessLicense.pkpTable.buttons.downloadDocument')
+                            }}</span>
                           </UiButton>
                         </template>
                         <span v-else class="text-slate-400">–</span>
@@ -382,8 +384,8 @@ watch(
             :open="modalUploadFailed"
             id="license-upload-error"
             type="danger"
-            title="Upload Failed"
-            text="Upload failed. Please try again later."
+            :title="$t('businessLicense.uploadErrorModal.title')"
+            :text="$t('businessLicense.uploadErrorModal.message')"
             no-submit
             static
             :cancel="() => (modalUploadFailed = false)"
@@ -394,11 +396,11 @@ watch(
             :open="requiredError"
             id="license-required-error"
             type="danger"
-            title="Required Fields Missing"
-            :text="requiredErrorText"
+            :title="$t('businessLicense.requiredFieldsModal.title')"
+            :text="$t('businessLicense.requiredFieldsModal.message')"
             no-cancel
             static
-            submit-button-text="Close"
+            :submit-button-text="$t('businessLicense.buttons.close')"
             :submit="() => (requiredError = false)"
           />
 
@@ -407,11 +409,11 @@ watch(
             :open="fileSizeErrorModal"
             id="file-size-error"
             type="danger"
-            title="File Size Exceeded"
-            text="File size exceeds the maximum limit of 16 MB. Please choose a smaller file."
+            :title="$t('businessLicense.fileSizeErrorModal.title')"
+            :text="$t('businessLicense.fileSizeErrorModal.message')"
             no-cancel
             static
-            submit-button-text="Close"
+            :submit-button-text="$t('businessLicense.buttons.close')"
             :submit="() => (fileSizeErrorModal = false)"
           />
         </div>

@@ -12,6 +12,7 @@ import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiLoading from '@/components/UiLoading.vue'
 import UiModal from '@/components/modal/UiModal.vue'
 import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
+import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 
 import type { IVendorLegalDocumentPayload } from '@/stores/vendor/types/vendor'
 import { useCompanyDeedDataStore, useVendorAdministrationStore } from '@/stores/vendor/vendor'
@@ -52,6 +53,7 @@ const showDeleteModal = ref(false)
 const apiErrorMessage = ref('')
 const isDownloadLoading = ref(false)
 const isSaveLoading = ref(false)
+const modalUploadFailed = ref<boolean>(false)
 
 const fileUploaderRef = ref<InstanceType<typeof UiFileUpload> | null>(null)
 
@@ -185,14 +187,14 @@ const handleSave = async () => {
       3116,
     )
 
-    await changeDataEmailStore.sendEmail({
-      recepientName: adminStore.data?.vendorName || '',
-      recepients: {
-        emailTo: adminStore.data?.vendorEmail || '',
-        emailCc: '',
-        emailBcc: '',
-      },
-    })
+    // await changeDataEmailStore.sendEmail({
+    //   recepientName: adminStore.data?.vendorName || '',
+    //   recepients: {
+    //     emailTo: adminStore.data?.vendorEmail || '',
+    //     emailCc: '',
+    //     emailBcc: '',
+    //   },
+    // })
 
     showSuccessModal.value = true
 
@@ -283,6 +285,10 @@ const handleDownload = async (path: string) => {
   }
 }
 
+const handleUploadFailed = () => {
+  modalUploadFailed.value = true
+}
+
 /** Pastikan cityList tersedia; kalau store punya action loader, panggil di sini */
 onMounted(async () => {
   if (
@@ -346,7 +352,9 @@ watchEffect(async () => {
   <div class="card">
     <div class="card-header">
       <div class="w-full flex justify-between items-center">
-        <h3 class="text-lg font-semibold text-slate-800">Latest Amendment Data</h3>
+        <h3 class="text-lg font-semibold text-slate-800">
+          {{ $t('companyDeed.latestAmendment.title') }}
+        </h3>
       </div>
     </div>
 
@@ -395,6 +403,8 @@ watchEffect(async () => {
             placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
             hint-text="*jpg, jpeg, png, pdf, zip / max : 16 MB"
             @added-file="onUploadFile($event)"
+            @upload-failed="handleUploadFailed()"
+            :max-size="16000000"
           />
 
           <!-- Tombol dinamis: Add / Update -->
@@ -478,7 +488,7 @@ watchEffect(async () => {
               </div>
             </td>
             <td class="text-nowrap">{{ doc.documentNo }}</td>
-            <td class="text-nowrap">{{ moment(doc.documentDate).format('MMMM DD, yyyy') }}</td>
+            <td class="text-nowrap">{{ moment(doc.documentDate).format('MMM dd, yyyy') }}</td>
             <td class="text-nowrap">{{ doc.notaryName ?? doc.value }}</td>
             <td class="text-nowrap">{{ doc.cityName }}</td>
           </tr>
@@ -567,5 +577,15 @@ watchEffect(async () => {
         </UiButton>
       </div>
     </UiModal>
+    <ModalConfirmation
+      :open="modalUploadFailed"
+      id="other-doc-upload-error"
+      type="danger"
+      title="Upload Failed"
+      text="File size exceeds the maximum limit of 16 MB. Please choose a smaller file."
+      no-submit
+      static
+      :cancel="() => (modalUploadFailed = false)"
+    />
   </div>
 </template>

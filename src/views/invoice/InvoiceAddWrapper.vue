@@ -132,7 +132,6 @@ import { KTModal } from '@/metronic/core'
 import { useCheckEmpty } from '@/composables/validation'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
-import { useNotifInvoiceEmailStore } from '@/stores/views/invoice/email'
 import type {
   ParamsSubmissionTypes,
   ParamsSubmissionNonPo,
@@ -147,6 +146,7 @@ import moment from 'moment'
 import type { itemsPoGrType } from './types/invoicePoGr'
 import type { itemsCostType } from './types/additionalCost'
 import type { invoiceItemTypes } from './types/invoiceItem'
+import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 
 const InvoiceData = defineAsyncComponent(() => import('./InvoiceAddWrapper/InvoiceData.vue'))
 const InvoiceInformation = defineAsyncComponent(
@@ -168,7 +168,7 @@ const ModalFailedBudgetCheck = defineAsyncComponent(
 
 const invoiceApi = useInvoiceSubmissionStore()
 const invoiceMasterApi = useInvoiceMasterDataStore()
-const notifEmailApi = useNotifInvoiceEmailStore()
+const verificationApi = useInvoiceVerificationStore()
 const loginApi = useLoginStore()
 const router = useRouter()
 const route = useRoute()
@@ -199,6 +199,7 @@ const form = reactive<formTypes>({
   vendorName: '',
   npwp: '',
   address: '',
+  paymentId: 0,
   bankKeyId: '',
   bankNameId: '',
   beneficiaryName: '',
@@ -269,6 +270,8 @@ const detailNonPo = computed(() => invoiceApi.detailNonPo)
 const userData = computed(() => loginApi.userData)
 const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
 const listActivity = computed(() => invoiceMasterApi.activityList)
+const additionalCostTempDelete = computed(() => verificationApi.additionalCostTempDelete)
+const costExpensesTempDelete = computed(() => verificationApi.costExpenseTempDelete)
 
 const checkInvoiceView = () => {
   return route.query.type === 'po-view'
@@ -520,6 +523,7 @@ const mapDataPost = () => {
       vendorAddress: form.address,
     },
     payment: {
+      paymentId: form.paymentId,
       bankKey: form.bankKeyId,
       bankName: form.bankNameId,
       beneficiaryName: form.beneficiaryName,
@@ -538,6 +542,7 @@ const mapDataPost = () => {
     pogr: mapPoGr(),
     additionalCosts:
       form.invoiceDp === '9012' || form.invoiceDp === '9013' ? [] : mapAdditionalCost(),
+    isSaveAsDraft: false
   } as ParamsSubmissionTypes
 
   return data
@@ -578,6 +583,7 @@ const mapDataPostNonPo = () => {
       vendorAddress: form.address,
     },
     payment: {
+      paymentId: form.paymentId,
       bankKey: form.bankKeyId,
       bankName: form.bankNameId,
       beneficiaryName: form.beneficiaryName,
@@ -607,13 +613,14 @@ const mapDataPostNonPo = () => {
       bankAccountNumber: form.bankAccountNumberAlternative,
       bankKey: form.bankKeyAlternative,
       bankCountry: form.bankCountryAlternative,
-      npwp: form.npwp,
+      npwp: form.npwpNumberAlternative,
       ktp: form.ktpNumberAlternative,
       email: form.emailAlternative,
       isAlternativePayee: form.isAlternativePayee,
       isOneTimeVendor: form.isOneTimeVendor,
     },
     costExpenses: mapInvoiceItem(),
+    isSaveAsDraft: false
   } as ParamsSubmissionNonPo
 
   return data
@@ -647,7 +654,6 @@ const goNext = () => {
           console.error(error)
         })
         .finally(() => {
-          sendEmailReminder(form)
           isSubmit.value = false
         })
     } else {
@@ -681,6 +687,7 @@ const goSaveDraft = () => {
     const data = mapDataPostNonPo()
     data.header.statusCode = 0
     data.header.statusName = 'Draft'
+    data.isSaveAsDraft = true
     invoiceApi
       .postSubmissionNonPo(data)
       .then((response) => {
@@ -696,6 +703,7 @@ const goSaveDraft = () => {
     const data = mapDataPost()
     data.header.statusCode = 0
     data.header.statusName = 'Draft'
+    data.isSaveAsDraft = true
     invoiceApi
       .postSubmission(data)
       .then((response) => {
@@ -715,6 +723,17 @@ const setAfterResponsePost = (response) => {
     const idModal = document.querySelector('#success_invoice_modal')
     const modal = KTModal.getInstance(idModal as HTMLElement)
     modal.show()
+    if (form.invoiceUId) {
+      if (route.query.type === 'nonpo') {
+        for (const item of costExpensesTempDelete.value) {
+          verificationApi.deleteCostExpense(form.invoiceUId, item)
+        }
+      } else {
+        for (const item of additionalCostTempDelete.value) {
+          verificationApi.deleteAdditionalCost(form.invoiceUId, item)
+        }
+      }
+    }
   } else {
     if (response.result.message.includes('Invoice Document Number')) {
       const idModal = document.querySelector('#error_document_number_modal')
@@ -734,6 +753,7 @@ const setData = () => {
     form.vendorId = detail.vendor.vendorId ? detail.vendor.vendorId.toString() : ''
     form.npwp = detail.vendor.npwp
     form.address = detail.vendor.vendorAddress
+    form.paymentId = detail.payment.paymentId
     form.bankKeyId = detail.payment.bankKey
     form.bankNameId = detail.payment.bankName
     form.beneficiaryName = detail.payment.beneficiaryName
@@ -790,6 +810,7 @@ const setData = () => {
     form.additionalCost = []
     for (const item of detail.additionalCosts) {
       const data = {
+        id: item.id,
         activity: item.activityId,
         activityCode: item.activityExpense,
         activityName: item.activityName,
@@ -857,6 +878,7 @@ const setDataNonPo = () => {
     form.vendorId = detail.vendor.vendorId ? detail.vendor.vendorId.toString() : ''
     form.npwp = detail.vendor.npwp
     form.address = detail.vendor.vendorAddress
+    form.paymentId = detail.payment.paymentId
     form.bankKeyId = detail.payment.bankKey
     form.bankNameId = detail.payment.bankName
     form.beneficiaryName = detail.payment.beneficiaryName
@@ -897,6 +919,7 @@ const setDataNonPo = () => {
     form.invoiceItem = []
     for (const item of detail.costExpense) {
       const data = {
+        id: item.id,
         activity: item.activityId,
         activityCode: item.activityExpenses,
         activityName: item.activityName,
@@ -979,38 +1002,36 @@ const mapDataCheck = () => {
     glAccount.push(glData)
   }
 
-  for (const item of glAccount) {
-    const checkTaxCode = accountPayable.findIndex((sub) => sub.TAX_CODE === item.TAX_CODE)
-    if (checkTaxCode === -1) {
-      itemNoAcc.value += 1
-      const accData = {
-        ITEMNO_ACC: itemNoAcc.value,
-        VENDOR_NO: form.vendorId,
-        REF_KEY_1: form.npwp,
-        REF_KEY_2: '',
-        REF_KEY_3: '',
-        BLINE_DATE: '',
-        PMNTTRMS: '',
-        PYMT_METH: '',
-        ALLOC_NMBR: '',
-        ITEM_TEXT: form.invoiceNoVendor,
-        TAX_CODE: item.TAX_CODE,
-        PAYMT_REF: '',
-      }
-      accountPayable.push(accData)
-    }
+  itemNoAcc.value += 1
+  const accData = {
+    ITEMNO_ACC: itemNoAcc.value,
+    VENDOR_NO: form.vendorId,
+    REF_KEY_1: form.npwp,
+    REF_KEY_2: '',
+    REF_KEY_3: '',
+    BLINE_DATE: '',
+    PMNTTRMS: '',
+    PYMT_METH: '',
+    ALLOC_NMBR: '',
+    ITEM_TEXT: form.invoiceNoVendor,
+    TAX_CODE: form.invoiceItem[0].taxCode,
+    PAYMT_REF: '',
   }
+  accountPayable.push(accData)
 
-  for (const item of accountPayable) {
-    const index = listTaxCalculation.value.findIndex((sub) => sub.code === item.TAX_CODE)
-    if (index !== -1) {
-      itemNoAcc.value += 1
-      const taxData = {
-        ITEMNO_ACC: itemNoAcc.value,
-        TAX_CODE: item.TAX_CODE,
-        TAX_RATE: listTaxCalculation.value[index].value,
+  for (const item of form.invoiceItem) {
+    const checkAccountTax = accountTax.findIndex((sub) => sub.TAX_CODE === item.taxCode)
+    if (item.taxCode !== 'V0' && checkAccountTax === -1) {
+      const index = listTaxCalculation.value.findIndex((sub) => sub.code === item.taxCode)
+      if (index !== -1) {
+        itemNoAcc.value += 1
+        const taxData = {
+          ITEMNO_ACC: itemNoAcc.value,
+          TAX_CODE: item.taxCode,
+          TAX_RATE: listTaxCalculation.value[index].value,
+        }
+        accountTax.push(taxData)
       }
-      accountTax.push(taxData)
     }
   }
 
@@ -1043,22 +1064,24 @@ const mapDataCheck = () => {
   currencyAmount.push(currData)
 
   for (const item of accountTax) {
-    const filterTax = form.invoiceItem.filter((sub) => sub.taxCode === item.TAX_CODE)
-    if (filterTax.length !== 0) {
-      itemNoAcc.value += 1
-      let totalVat = 0
-      let totalAmount = 0
-      for (const subItem of filterTax) {
-        totalVat += subItem.vatAmount
-        totalAmount += subItem.itemAmount
+    if (item.TAX_CODE !== 'V0') {
+      const filterTax = form.invoiceItem.filter((sub) => sub.taxCode === item.TAX_CODE)
+      if (filterTax.length !== 0) {
+        itemNoAcc.value += 1
+        let totalVat = 0
+        let totalAmount = 0
+        for (const subItem of filterTax) {
+          totalVat += subItem.vatAmount
+          totalAmount += subItem.itemAmount
+        }
+        const currData = {
+          ITEMNO_ACC: itemNoAcc.value,
+          CURRENCY: form.currency,
+          AMT_DOCCUR: totalVat,
+          AMT_BASE: totalAmount,
+        }
+        currencyAmount.push(currData)
       }
-      const currData = {
-        ITEMNO_ACC: itemNoAcc.value,
-        CURRENCY: form.currency,
-        AMT_DOCCUR: totalVat,
-        AMT_BASE: totalAmount,
-      }
-      currencyAmount.push(currData)
     }
   }
 
@@ -1068,6 +1091,21 @@ const mapDataCheck = () => {
       COMP_CODE: form.companyCode,
       DOC_DATE: moment(form.invoiceDate).format('YYYYMMDD'),
       REF_DOC_NO: form.invoiceNoVendor,
+      CUSTOMERCPD: {
+        NAME: form.nameAlternative,
+        NAME_2: form.nameOtherAlternative,
+        POSTL_CODE: '',
+        CITY: form.cityAlternative,
+        COUNTRY: form.countryAlternative,
+        STREET: form.streetAltiernative,
+        BANK_ACCT: form.bankAccountNumberAlternative,
+        BANK_NO: form.bankKeyAlternative,
+        BANK_CTRY: form.bankCountryAlternative,
+        TAX_NO_1: form.npwpNumberAlternative,
+        TAX_NO_3: form.ktpNumberAlternative,
+        LANGU_ISO: '',
+        GLO_RE1_OT: '',
+      },
       GLACCOUNT_DATA: glAccount,
       ACCOUNT_PAYABLE: accountPayable,
       ACCOUNTTAX: accountTax,
@@ -1113,18 +1151,6 @@ const checkFormBudget = () => {
   return status
 }
 
-const sendEmailReminder = (data: formTypes) => {
-  notifEmailApi.sendVerificationReminderEmail({
-    recepientName: 'yonathan',
-    invoiceNo: data.invoiceNo,
-    recepients: {
-      emailTo: 'yonathan.moniaga@yopmail.com',
-      emailCc: '',
-      emailBcc: '',
-    },
-  })
-}
-
 const setStepperStatus = () => {
   if (detailNonPo.value.header.statusCode === 1) {
     stepperStatus.value = 'Submission'
@@ -1152,8 +1178,12 @@ onMounted(() => {
     tabNow.value = 'preview'
   }
 
-  if (route.query.type === 'non-po-view'||
-    (route.query.invoice && route.query.type !== 'non-po-view' && route.query.type !== 'po-view' && route.query.type === 'nonpo')
+  if (
+    route.query.type === 'non-po-view' ||
+    (route.query.invoice &&
+      route.query.type !== 'non-po-view' &&
+      route.query.type !== 'po-view' &&
+      route.query.type === 'nonpo')
   ) {
     invoiceApi.getNonPoDetail(route.query.invoice?.toString() || '').then(() => {
       setStepperStatus()
@@ -1163,7 +1193,10 @@ onMounted(() => {
 
   if (
     route.query.type === 'po-view' ||
-    (route.query.invoice && route.query.type !== 'non-po-view' && route.query.type !== 'po-view' && route.query.type === 'po')
+    (route.query.invoice &&
+      route.query.type !== 'non-po-view' &&
+      route.query.type !== 'po-view' &&
+      route.query.type === 'po')
   ) {
     invoiceApi.getPoDetail(route.query.invoice?.toString() || '').then(() => {
       setData()

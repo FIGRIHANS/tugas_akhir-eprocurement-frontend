@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import BreadcrumbView from '@/components/BreadcrumbView.vue'
+import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 import type { ITabClosable } from '@/components/ui/atoms/tab-closable/types/tabClosable'
 import UiTabClosable from '@/components/ui/atoms/tab-closable/UiTabClosable.vue'
 import type { routeTypes } from '@/core/type/components/breadcrumb'
@@ -13,9 +14,18 @@ import EquipmentData from './EquipmentData.vue'
 import ExpertPersonnelData from './expertPersonnelData/ExpertPersonnelData.vue'
 import ExperienceData from './experienceData/ExperienceData.vue'
 import OtherDocumentData from './otherDocument/OtherDocumentData.vue'
+import UiButton from '@/components/ui/atoms/button/UiButton.vue'
+import { useVendorAdministrationStore } from '@/stores/vendor/vendor'
+import { useChangeDataEmailStore } from '@/stores/vendor/email-change-data'
+
+const adminStore = useVendorAdministrationStore()
+const changeDataEmailStore = useChangeDataEmailStore()
 
 const route = useRoute()
 const currentTab = ref<string>('administrative-data')
+const emailSuccessModal = ref(false)
+const emailErrorModal = ref(false)
+const emailSending = ref(false)
 const bcRoutes = ref<routeTypes[]>([
   {
     name: 'Company Information',
@@ -70,6 +80,26 @@ const tabsItem: ITabClosable[] = [
   },
 ]
 
+const sendEmail = async () => {
+  try {
+    emailSending.value = true
+    await changeDataEmailStore.sendEmail({
+      recepientName: adminStore?.data?.vendorName || '',
+      recepients: {
+        emailTo: adminStore?.data?.vendorEmail || '',
+        emailCc: '',
+        emailBcc: '',
+      },
+    })
+    emailSuccessModal.value = true
+  } catch (error) {
+    console.error('Failed to send email:', error)
+    emailErrorModal.value = true
+  } finally {
+    emailSending.value = false
+  }
+}
+
 watch(
   () => currentTab.value,
   (newTab) => {
@@ -81,7 +111,29 @@ watch(
 
 <template>
   <BreadcrumbView title="Company Information" :routes="bcRoutes" />
+
+  <div class="p-4 mb-5 bg-amber-100/70 rounded-md w-full text-sm flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <img src="/icons/information.svg" alt="" />
+      <div>
+        <h3 class="text-sm font-semibold text-slate-700">Information</h3>
+        <p class="text-sm text-slate-500">
+          If you make changes to the data, don't forget to click the send notification button.
+        </p>
+      </div>
+    </div>
+    <div>
+      <UiButton
+        class="bg-amber-400 hover:bg-amber-500 hover:shadow-none transition-all duration-150 text-white"
+        @click="sendEmail"
+        :disabled="emailSending"
+        >{{ emailSending ? 'Sending...' : 'Send Notification' }}</UiButton
+      >
+    </div>
+  </div>
+
   <UiTabClosable :tabs="tabsItem" v-model="currentTab" />
+
   <AdministrativeData v-if="currentTab === 'administrative-data'" />
   <BussinesLicenseData v-if="currentTab === 'business-license-data'" />
   <PaymentInfoListView v-if="currentTab === 'payment-information-data'" />
@@ -90,4 +142,30 @@ watch(
   <ExpertPersonnelData v-if="currentTab === 'expert-personel-data'" />
   <ExperienceData v-if="currentTab === 'experience-data'" />
   <OtherDocumentData v-if="currentTab === 'other-documents-data'" />
+
+  <!-- Email Success Modal -->
+  <ModalConfirmation
+    :open="emailSuccessModal"
+    id="email-success"
+    type="success"
+    title="Email Sent Successfully"
+    text="The notification email has been sent successfully to the vendor."
+    no-cancel
+    static
+    submit-button-text="Close"
+    :submit="() => (emailSuccessModal = false)"
+  />
+
+  <!-- Email error modal -->
+  <ModalConfirmation
+    :open="emailErrorModal"
+    id="email-error"
+    type="danger"
+    title="Email Sending Failed"
+    text="There was an error sending the notification email to the vendor."
+    no-cancel
+    static
+    submit-button-text="Close"
+    :submit="() => (emailErrorModal = false)"
+  />
 </template>

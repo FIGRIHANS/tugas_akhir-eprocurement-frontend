@@ -45,8 +45,8 @@
             </td>
             <td>{{ getWhtTypeName(item.whtType) || '-' }}</td>
             <td>{{ getWhtCodeName(item.whtCode, item) || '-' }}</td>
-            <td>{{ useFormatIdr(item.whtBaseAmount) || '-' }}</td>
-            <td>{{ useFormatIdr(item.whtAmount) || '-' }}</td>
+            <td>{{ item.whtBaseAmount ? form.currCode === 'IDR' ? useFormatIdr(item.whtBaseAmount) : useFormatUsd(item.whtBaseAmount) : '-' }}</td>
+            <td>{{ item.whtAmount ? form.currCode === 'IDR' ? useFormatIdr(item.whtAmount) : useFormatUsd(item.whtAmount) : '-' }}</td>
             <td>{{ item.department || '-' }}</td>
           </tr>
         </tbody>

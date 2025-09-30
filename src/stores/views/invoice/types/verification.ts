@@ -113,6 +113,7 @@ interface ParamsSubmissionVendor {
 }
 
 interface ParamsSubmissionPayment {
+  paymentId: number
   bankKey: string
   bankName: string
   beneficiaryName: string
@@ -189,6 +190,81 @@ export interface ParamsSubmissionCost {
   whtCode: string
   whtBaseAmount: number
   whtAmount: number
+}
+
+export interface PostEditApprovalNonPoTypes {
+  statusCode: number
+  statusName: string
+  statusNotes: string
+  header: ParamsNonPoHeaderTypes
+  payment: ParamsSubmissionPayment
+  documents: ParamsSubmissionDocument[]
+  calculation: ParamsSubmissionCalculation
+  costExpenses: ParamsSubmissionCostExpenseType[]
+  alternativePay: ParamsAlternativePayType
+}
+
+interface ParamsNonPoHeaderTypes {
+  invoiceUId: string
+  invoiceTypeCode: number
+  invoiceTypeName: string
+  invoiceVendorNo: string
+  companyCode: string
+  companyName: string
+  invoiceNo: string
+  documentNo: string
+  invoicingParty: string
+  assigment: string
+  transferNews: string
+  npwpReporting: string
+  invoiceDate: string
+  postingDate: string
+  estimatedPaymentDate: string
+  paymentMethodCode: string
+  paymentMethodName: string
+  taxNo: string
+  currCode: string
+  creditCardBillingID: string
+  notes: string
+  statusCode: number
+  statusName: string
+  department: string
+  profileId: string
+}
+export interface ParamsSubmissionCostExpenseType {
+  id: number
+  activityId: number
+  activityExpenses: string
+  activityName: string
+  itemAmount: number
+  itemText: string
+  debitCredit: string
+  taxCode: string
+  vatAmount: number
+  costCenter: string
+  profitCenter: string
+  assignment: string
+  whtType: string
+  whtCode: string
+  whtBaseAmount: number
+  whtAmount: number
+}
+export interface ParamsAlternativePayType {
+  id: number
+  invoiceUId: string
+  name: string
+  name2: string
+  street: string
+  city: string
+  country: string
+  bankAccountNumber: string
+  bankKey: string
+  bankCountry: string
+  npwp: string
+  ktp: string
+  email: string
+  isAlternativePayee: boolean
+  isOneTimeVendor: boolean
 }
 
 export interface PoGrItemTypes {
@@ -382,6 +458,7 @@ export interface DetailInvoiceEditTypes {
   remainingDpAmount: string
   dpAmountDeduction: string
   creditCardBillingId: string
+  paymentId: number
   bankKey: string
   bankName: string
   beneficiaryName: string
@@ -529,6 +606,7 @@ interface Document {
 }
 
 interface Payment {
+  paymentId: number
   bankKey: string | null
   bankName: string | null
   beneficiaryName: string | null
@@ -565,40 +643,4 @@ export interface SubmissionNonPoTypes {
   alternativePay: AlternativePay
   alternativePayee: AlternativePay[]
   costExpenses: CostExpenses[]
-}
-
-export interface PostVerificationNonPoTypes {
-  statusCode: number
-  statusName: string
-  statusNotes: string
-  header: ParamsVerificationHeaderNonPoTypes
-  payment: ParamsSubmissionPayment
-  documents: ParamsSubmissionDocument[]
-  calculation: ParamsSubmissionCalculation
-  alternativePayment: itemsAlternativePayee
-  additionalCosts: costExpensesType[]
-}
-
-interface ParamsVerificationHeaderNonPoTypes {
-  invoiceUId: string
-  invoiceTypeCode: number
-  invoiceTypeName: string
-  invoiceVendorNo: string
-  companyCode: string
-  companyName: string
-  invoiceNo: string
-  documentNo: string
-  invoiceDate: string
-  postingDate: string
-  estimatedPaymentDate: string
-  paymentMethodCode: string
-  paymentMethodName: string
-  taxNo: string
-  currCode: string
-  creditCardBillingID: string
-  notes: string
-  statusCode: number
-  statusName: string
-  department: string
-  profileId: string
 }

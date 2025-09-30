@@ -11,8 +11,8 @@ import type {
   DetailInvoiceEditTypes,
   PostVerificationTypes,
   ParamsRejectTypes,
-  ParamsSubmissionCost,
   ListNonPoTypes,
+  PostEditApprovalNonPoTypes
 } from './types/verification'
 
 export const useInvoiceVerificationStore = defineStore('invoiceVerification', () => {
@@ -21,7 +21,8 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
   const detailInvoice = ref<ParamsSubmissionTypes>()
   const isFromEdit = ref<boolean>(false)
   const detailInvoiceEdit = ref<DetailInvoiceEditTypes>()
-  const additionalCostTempDelete = ref<ParamsSubmissionCost[]>([])
+  const additionalCostTempDelete = ref<number[]>([])
+  const costExpenseTempDelete = ref<number[]>([])
   const isRejectLoading = ref<boolean>(false)
   const errorMessageSap = ref<string>('')
   const detailNonPoInvoice = ref<ParamsSubmissionTypes>()
@@ -55,6 +56,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
       remainingDpAmount: '',
       dpAmountDeduction: '',
       creditCardBillingId: '',
+      paymentId: 0,
       bankKey: '',
       bankName: '',
       beneficiaryName: '',
@@ -207,6 +209,12 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     return response.data.result
   }
 
+  const putSubmissionNonPo = async (data: PostEditApprovalNonPoTypes) => {
+    const response: ApiResponse<void> = await invoiceApi.put(`/invoice/edit-non-po`, data)
+
+    return response.data.result
+  }
+
   const putEditInvoice = async (data: PostVerificationTypes) => {
     const response: ApiResponse<void> = await invoiceApi.put(`/invoice/edit`, data)
 
@@ -216,6 +224,14 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
   const deleteAdditionalCost = async (invoiceUid: string, additionaCostId: number) => {
     const response: ApiResponse<void> = await invoiceApi.delete(
       `/invoice/${invoiceUid}/additional-cost/${additionaCostId}`,
+    )
+
+    return response.data.result
+  }
+
+  const deleteCostExpense = async (invoiceUid: string, costExpensesId: number) => {
+    const response: ApiResponse<void> = await invoiceApi.delete(
+      `/invoice/${invoiceUid}/cost-expenses/${costExpensesId}`,
     )
 
     return response.data.result
@@ -235,6 +251,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     isFromEdit,
     detailInvoiceEdit,
     additionalCostTempDelete,
+    costExpenseTempDelete,
     isRejectLoading,
     errorMessageSap,
     detailNonPoInvoice,
@@ -250,8 +267,10 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     postSapNonPo,
     putSubmission,
     deleteAdditionalCost,
+    deleteCostExpense,
     getInvoiceNonPoDetail,
     verifyInvoiceNonPo,
     putEditInvoice,
+    putSubmissionNonPo,
   }
 })

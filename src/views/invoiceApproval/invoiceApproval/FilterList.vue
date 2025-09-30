@@ -17,9 +17,19 @@
             </option>
           </select>
         </div>
-        <div class="relative">
+        <div class="relative" v-if="route.name === 'invoiceApprovalNonPo'">
           <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
-            >Invoice Type</label
+            >Invoice Non PO Type</label
+          >
+          <select v-model="invoiceType" class="select" name="select">
+            <option v-for="item of invoiceTypenonPoList" :key="item.code" :value="item.code">
+              {{ item.name }}
+            </option>
+          </select>
+        </div>
+        <div class="relative" v-else>
+          <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
+            >Invoice PO Type</label
           >
           <select v-model="invoiceType" class="select" name="select">
             <option v-for="item of invoiceTypeList" :key="item.code" :value="item.code">
@@ -31,7 +41,19 @@
           <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
             >Status</label
           >
-          <select v-model="status" class="select" name="select">
+          <select
+            v-if="route.name === 'invoiceApprovalNonPo'"
+            v-model="status"
+            class="select"
+            name="select"
+          >
+            <option value="1">Waiting for Verify</option>
+            <option value="2">Waiting for Approval</option>
+            <option value="4">Approved</option>
+            <option value="5">Rejected</option>
+            <option value="7">Sent to SAP</option>
+          </select>
+          <select v-else v-model="status" class="select" name="select">
             <option value="2">Waiting for Approval</option>
             <option value="4">Approved</option>
             <option value="5">Rejected</option>
@@ -41,7 +63,7 @@
         <div class="relative">
           <label
             class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white z-[1]"
-            >Invoice Date</label
+            >Submitted Document Date</label
           >
           <DatePicker v-model="date" format="yyyy/MM/dd" teleport />
         </div>
@@ -63,8 +85,10 @@
 <script lang="ts" setup>
 import { ref, computed, watch } from 'vue'
 import type { filterListTypes } from '../types/pendingApproval'
+import { useRoute } from 'vue-router'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
+import { formatfilterDate } from '@/composables/date-format'
 
 const props = defineProps<{
   data: filterListTypes
@@ -72,6 +96,7 @@ const props = defineProps<{
 
 const emits = defineEmits(['setData'])
 
+const route = useRoute()
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const status = ref<number | null>(null)
 const date = ref<string>('')
@@ -80,6 +105,7 @@ const invoiceType = ref<string>('')
 
 const companyCodeList = computed(() => invoiceMasterApi.companyCode)
 const invoiceTypeList = computed(() => invoiceMasterApi.invoicePoType)
+const invoiceTypenonPoList = computed(() => invoiceMasterApi.invoiceNonPoType)
 
 const resetFilter = () => {
   status.value = null
@@ -103,7 +129,7 @@ const resetInvoiceType = () => {
 const goFilter = () => {
   const data = {
     status: status.value,
-    date: date.value,
+    date: formatfilterDate(date.value),
     companyCode: companyCode.value,
     invoiceType: invoiceType.value,
   }

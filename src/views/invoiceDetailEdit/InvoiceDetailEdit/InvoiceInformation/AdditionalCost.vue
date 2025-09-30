@@ -51,7 +51,9 @@
               ></v-select>
             </td>
             <td>
-              <span v-if="!item.isEdit">{{ item.itemAmount }}</span>
+              <span v-if="!item.isEdit">
+                {{ form.currCode === 'IDR' ? useFormatIdr(item.isEdit ? formEdit.itemAmount : item.itemAmount) : useFormatUsd(item.isEdit ? formEdit.itemAmount : item.itemAmount) }}
+              </span>
               <input
                 v-else
                 v-model="formEdit.itemAmount"
@@ -139,7 +141,9 @@
               ></v-select>
             </td>
             <td>
-              <span v-if="!item.isEdit">{{ item.whtBaseAmount }}</span>
+              <span v-if="!item.isEdit">
+                {{ form.currCode === 'IDR' ? useFormatIdr(item.whtBaseAmount) : useFormatUsd(item.whtBaseAmount) }}
+              </span>
               <input v-else v-model="formEdit.whtBaseAmount" class="input" type="number" placeholder="" @change="setWhtAmount(item)"/>
             </td>
             <td>
@@ -312,7 +316,7 @@ const resetItem = (item: itemsCostType, index: number) => {
     resetFormEdit()
   } else {
     if (form) {
-      verificationApi.additionalCostTempDelete?.push(form.value.additionalCosts[index])
+      verificationApi.additionalCostTempDelete?.push(form.value.additionalCosts[index].id)
       form.value.additionalCosts.splice(index, 1)
     }
   }
@@ -408,7 +412,7 @@ const setWhtAmount = (data: itemsCostType) => {
 }
 
 watch(
-  () => [form?.value.additionalCosts, form?.value.currCode, formEdit],
+  () => [form?.value.additionalCosts, form?.value.invoiceItem, form?.value.currCode, formEdit],
   () => {
     if (!checkPoPib()) getVatAmount()
   },

@@ -23,6 +23,7 @@ import moment from 'moment'
 import { computed, reactive, ref, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 import { z } from 'zod'
+import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 
 const shareholderSchema = z.object({
   ownerName: z.string().min(1, 'Shareholder Name is required'),
@@ -54,7 +55,7 @@ const changeDataEmailStore = useChangeDataEmailStore()
 
 const route = useRoute()
 
-const modalTitle = ref<string>('Add new shareolders')
+const modalTitle = ref<string>('Add new shareholders')
 const isModalOpen = ref<boolean>(false)
 const isSaveLoading = ref<boolean>(false)
 const mode = ref<'add' | 'edit' | 'delete'>('add')
@@ -63,6 +64,7 @@ const showErrorModal = ref<boolean>(false)
 const showDeleteModal = ref<boolean>(false)
 const apiErrorMessage = ref<string>('')
 const isDownloadLoading = ref<boolean>(false)
+const modalUploadFailed = ref<boolean>(false)
 
 const shareHoldersError = ref<string[]>([])
 
@@ -150,14 +152,14 @@ const handleSubmit = async () => {
 
     await companyDeedDataStore.postShareholders(payloadToSend)
 
-    await changeDataEmailStore.sendEmail({
-      recepientName: adminStore.data?.vendorName || '',
-      recepients: {
-        emailTo: adminStore.data?.vendorEmail || '',
-        emailCc: '',
-        emailBcc: '',
-      },
-    })
+    // await changeDataEmailStore.sendEmail({
+    //   recepientName: adminStore.data?.vendorName || '',
+    //   recepients: {
+    //     emailTo: adminStore.data?.vendorEmail || '',
+    //     emailCc: '',
+    //     emailBcc: '',
+    //   },
+    // })
 
     handleCloseModal()
     showSuccessModal.value = true
@@ -310,6 +312,10 @@ const setPageShareholders = async (page: number) => {
   paginationShareholders.value.currentPage = page
 }
 
+const handleUploadFailed = () => {
+  modalUploadFailed.value = true
+}
+
 watchEffect(async () => {
   try {
     await companyDeedDataStore.getShareholders(
@@ -327,10 +333,12 @@ watchEffect(async () => {
   <div class="card">
     <div class="card-header">
       <div class="w-full flex justify-between items-center">
-        <h3 class="text-lg font-semibold text-slate-800">Shareholders</h3>
+        <h3 class="text-lg font-semibold text-slate-800">
+          {{ $t('companyDeed.shareholders.title') }}
+        </h3>
         <UiButton variant="primary" @click="handleOpenModal">
           <UiIcon variant="duotone" name="plus-circle" />
-          Add
+          {{ $t('companyDeed.shareholders.add') }}
         </UiButton>
       </div>
     </div>
@@ -339,13 +347,13 @@ watchEffect(async () => {
         <thead>
           <tr>
             <th class="text-nowrap"></th>
-            <th class="text-nowrap">Type</th>
-            <th class="text-nowrap">Shareholder Name</th>
-            <th class="text-nowrap">Date of Birth / Company Establishment Date</th>
-            <th class="text-nowrap">Nominal Value</th>
-            <th class="text-nowrap">Share Unit</th>
-            <th class="text-nowrap">No KTP/Paspor/NPWP</th>
-            <th class="text-nowrap">File</th>
+            <th class="text-nowrap">{{ $t('companyDeed.shareholders.type') }}</th>
+            <th class="text-nowrap">{{ $t('companyDeed.shareholders.name') }}</th>
+            <th class="text-nowrap">{{ $t('companyDeed.shareholders.birthDate') }}</th>
+            <th class="text-nowrap">{{ $t('companyDeed.shareholders.nominalShare') }}</th>
+            <th class="text-nowrap">{{ $t('companyDeed.shareholders.shareUnit') }}</th>
+            <th class="text-nowrap">{{ $t('companyDeed.shareholders.idNumber') }}</th>
+            <th class="text-nowrap">{{ $t('companyDeed.shareholders.idCopy') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -365,7 +373,7 @@ watchEffect(async () => {
 
           <!-- show message if there are no data -->
           <tr v-else-if="!companyDeedDataStore.shareholdersData.items.length">
-            <td colspan="7" class="text-center">No data</td>
+            <td colspan="7" class="text-center">{{ $t('companyDeed.common.noData') }}</td>
           </tr>
 
           <!-- show data start -->
@@ -383,7 +391,7 @@ watchEffect(async () => {
                           <span class="menu-icon">
                             <UiIcon variant="duotone" name="arrow-down" class="!text-primary" />
                           </span>
-                          <span class="menu-title"> Download </span>
+                          <span class="menu-title"> {{ $t('companyDeed.common.download') }} </span>
                         </button>
                       </li>
                       <li class="menu-item">
@@ -391,7 +399,9 @@ watchEffect(async () => {
                           <span class="menu-icon">
                             <UiIcon variant="duotone" name="notepad-edit" class="!text-warning" />
                           </span>
-                          <span class="menu-title"> Edit </span>
+                          <span class="menu-title">
+                            {{ $t('companyDeed.shareholders.edit_action') }}
+                          </span>
                         </button>
                       </li>
                       <li class="menu-item">
@@ -402,7 +412,9 @@ watchEffect(async () => {
                           <span class="menu-icon">
                             <UiIcon variant="duotone" name="cross-circle" class="!text-danger" />
                           </span>
-                          <span class="menu-title"> Delete </span>
+                          <span class="menu-title">
+                            {{ $t('companyDeed.shareholders.delete_action') }}
+                          </span>
                         </button>
                       </li>
                     </ul>
@@ -411,7 +423,7 @@ watchEffect(async () => {
               </td>
               <td>{{ item.typeShareholders }}</td>
               <td>{{ item.ownerName }}</td>
-              <td>{{ moment(item.ownerDOB).format('MMMM DD, yyyy') }}</td>
+              <td>{{ moment(item.ownerDOB).format('MMM dd, yyyy') }}</td>
               <td>{{ formatNumber(item.quantity) }}</td>
               <td>{{ item.shareUnit }}</td>
               <td>{{ item.ownerID }}</td>
@@ -435,13 +447,13 @@ watchEffect(async () => {
     </div>
     <div class="p-5 flex flex-row items-center justify-between px-4">
       <div class="flex flex-row items-center gap-2">
-        Show
+        {{ $t('companyDeed.common.show') }}
         <UiSelect
           v-model="paginationShareholders.pageSize"
           :options="pageSizeOptions"
           class="w-16"
         />
-        per page from {{ paginationShareholders.total }} data
+        {{ $t('companyDeed.common.perPage') }} from {{ paginationShareholders.total }} data
       </div>
 
       <LPagination
@@ -463,8 +475,8 @@ watchEffect(async () => {
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <UiFormGroup hide-border>
         <UiSelect
-          label="Type shareholders"
-          placeholder="--Type Shareholders--"
+          :label="$t('companyDeed.shareholders.type')"
+          :placeholder="'--' + $t('companyDeed.shareholders.type') + '--'"
           :required="true"
           :options="
             typeShareholders.data?.map((item) => ({
@@ -477,19 +489,21 @@ watchEffect(async () => {
           v-model="payload.stockTypeID"
         />
         <DatePicker
-          placeholder="Date of birth"
+          :placeholder="$t('companyDeed.shareholders.birthDate')"
           v-model="payload.ownerDOB"
-          :format="'MMMM dd, yyyy'"
+          :format="'MMM dd, yyyy'"
         />
         <UiFileUpload
           name="shareholderFile"
           placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
           @added-file="uploadFile($event)"
+          @upload-failed="handleUploadFailed()"
+          :max-size="16000000"
         />
         <UiInput
-          label="Nominal Share Value"
+          :label="$t('companyDeed.shareholders.nominalShare')"
           :required="true"
-          placeholder="Nominal Share Value"
+          :placeholder="$t('companyDeed.shareholders.nominalShare')"
           v-model="payload.quantity"
           :error="!!errors.quantity"
           :hintText="errors.quantity"
@@ -497,24 +511,24 @@ watchEffect(async () => {
       </UiFormGroup>
       <UiFormGroup hide-border>
         <UiInput
-          label="Shareholder Name"
-          placeholder="Name"
+          :label="$t('companyDeed.shareholders.name')"
+          :placeholder="$t('companyDeed.shareholders.name')"
           :required="true"
           v-model="payload.ownerName"
           :error="!!errors.ownerName"
           :hintText="errors.ownerName"
         />
         <UiInput
-          label="No. Identitas"
-          placeholder="ID Number"
+          :label="$t('companyDeed.shareholders.idNumber')"
+          :placeholder="$t('companyDeed.shareholders.idNumber')"
           :required="true"
           v-model="payload.ownerID"
           :error="!!errors.ownerID"
           :hintText="errors.ownerID"
         />
         <UiSelect
-          label="Share Unit"
-          placeholder="--Share Unit--"
+          :label="$t('companyDeed.shareholders.shareUnit')"
+          :placeholder="'--' + $t('companyDeed.shareholders.shareUnit') + '--'"
           :required="true"
           :options="
             shareUnits.data?.map((item) => ({ label: item.value, value: Number(item.code) })) || []
@@ -526,8 +540,8 @@ watchEffect(async () => {
           :hintText="errors.unitID"
         />
         <UiInput
-          label="Position / Role"
-          placeholder="Position / Role"
+          :label="$t('companyDeed.shareholders.position')"
+          :placeholder="$t('companyDeed.shareholders.position')"
           :required="true"
           v-model="payload.position"
           :error="!!errors.position"
@@ -537,10 +551,12 @@ watchEffect(async () => {
     </div>
 
     <div class="mt-4 w-full gap-2 justify-end items-center flex">
-      <UiButton outline @click="handleCloseModal">Cancel</UiButton>
+      <UiButton outline @click="handleCloseModal">{{
+        $t('companyDeed.shareholders.cancel')
+      }}</UiButton>
       <UiButton variant="primary" @click="handleSubmit" :disabled="isSaveLoading">
-        <span v-if="isSaveLoading">Saving...</span>
-        <span v-else>Save</span>
+        <span v-if="isSaveLoading">{{ $t('companyDeed.shareholders.saving') }}</span>
+        <span v-else>{{ $t('companyDeed.shareholders.save') }}</span>
       </UiButton>
     </div>
   </UiModal>
@@ -550,9 +566,9 @@ watchEffect(async () => {
     <div class="text-center mb-6">
       <UiIcon name="cross-circle" variant="duotone" class="text-[150px] text-danger text-center" />
     </div>
-    <h3 class="text-center text-lg font-medium">Are You Sure You Want to Delete This Item?</h3>
+    <h3 class="text-center text-lg font-medium">{{ $t('companyDeed.common.deleteTitle') }}</h3>
     <p class="text-center text-base text-gray-600 mb-5">
-      This action will permanently remove the selected data from the list.
+      {{ $t('companyDeed.common.deleteMessage') }}
     </p>
     <div class="flex gap-3 px-8 mb-3">
       <UiButton
@@ -561,7 +577,7 @@ watchEffect(async () => {
         class="flex-1 flex items-center justify-center"
       >
         <UiIcon name="black-left-line" />
-        <span>Cancel</span>
+        <span>{{ $t('companyDeed.common.cancel') }}</span>
       </UiButton>
       <UiButton
         variant="danger"
@@ -571,7 +587,7 @@ watchEffect(async () => {
       >
         <UiLoading variant="white" v-if="isSaveLoading" />
         <UiIcon name="cross-circle" variant="duotone" v-else />
-        <span>Delete</span>
+        <span>{{ $t('companyDeed.common.delete') }}</span>
       </UiButton>
     </div>
   </UiModal>
@@ -580,9 +596,9 @@ watchEffect(async () => {
   <UiModal v-model="showSuccessModal" size="sm">
     <div class="text-center mb-6">
       <ModalSuccessLogo class="mx-auto" />
-      <h3 class="text-center text-lg font-medium">Hooray!</h3>
+      <h3 class="text-center text-lg font-medium">{{ $t('companyDeed.common.hooray') }}</h3>
       <p class="text-center text-base text-gray-600 mb-5">
-        The data has been successfully updated in the admin system
+        {{ $t('companyDeed.common.successMessage') }}
       </p>
     </div>
   </UiModal>
@@ -593,10 +609,29 @@ watchEffect(async () => {
       <UiIcon name="cross-circle" variant="duotone" class="text-[150px] text-danger text-center" />
     </div>
     <h3 class="text-center text-lg font-medium">
-      Failed to {{ mode == 'delete' ? 'Delete' : mode === 'edit' ? 'Change' : 'Add' }} Shareholders!
+      {{ $t('companyDeed.common.failed') }}
+      {{
+        mode == 'delete'
+          ? $t('companyDeed.common.failedDelete')
+          : mode === 'edit'
+            ? $t('companyDeed.common.failedChange')
+            : $t('companyDeed.common.failedAdd')
+      }}
+      {{ $t('companyDeed.common.shareholders') }}!
     </h3>
     <p class="text-center text-base text-gray-600 mb-5">
       {{ apiErrorMessage }}
     </p>
   </UiModal>
+
+  <ModalConfirmation
+    :open="modalUploadFailed"
+    id="other-doc-upload-error"
+    type="danger"
+    :title="$t('companyDeed.common.uploadFailed')"
+    :text="$t('companyDeed.common.fileSizeExceeds')"
+    no-submit
+    static
+    :cancel="() => (modalUploadFailed = false)"
+  />
 </template>

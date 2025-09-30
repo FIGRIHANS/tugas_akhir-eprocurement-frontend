@@ -23,6 +23,7 @@
             <tr v-for="(item, index) in list?.workflow" :key="index" class="text-sm font-normal">
               <td>{{ index + 1 }}</td>
               <td>{{ item.profileName }}</td>
+              <td v-if="route.name === 'invoiceApprovalNonPo'">{{ item.actionerName || '-' }}</td>
               <td>
                 {{
                   item.actionerDate && item.actioner !== 0
@@ -81,6 +82,11 @@ const badgeColor = (status: number) => {
 }
 
 onMounted(() => {
+  const departmentIndex = columns.value.indexOf('Department')
+
+  if (route.name === 'invoiceApprovalNonPo') {
+    columns.value.splice(departmentIndex + 1, 0, 'Actioner Name')
+  }
   const idModal = document.querySelector('#detail_approval_modal')
   const modal = KTModal.getInstance(idModal as HTMLElement)
 

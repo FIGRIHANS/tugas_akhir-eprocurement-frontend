@@ -160,6 +160,7 @@ const form = ref<formTypes>({
   npwpReporting: '',
   remainingDpAmount: '',
   dpAmountDeduction: '',
+  paymentId: 0,
   bankKey: '',
   bankName: '',
   beneficiaryName: '',
@@ -191,6 +192,7 @@ const detailInvoice = computed(() => verificationApi.detailInvoice)
 const detailInvoiceNonPo = computed(() => verificationApi.detailNonPoInvoice)
 const userData = computed(() => loginApi.userData)
 const additionalCostTempDelete = computed(() => verificationApi.additionalCostTempDelete)
+const costExpensesTempDelete = computed(() => verificationApi.costExpenseTempDelete)
 const whtCodeList = computed(() => invoiceMasterApi.whtCodeList)
 
 const checkIsNonPo = () => {
@@ -263,7 +265,7 @@ const goToEdit = () => {
     query: {
       id: route.query.id,
       type: route.query.type,
-      invoiceType: route.name === 'invoiceDetail' ? 'po' : 'no_po',
+      invoiceType: route.query.invoiceType,
     },
   })
 }
@@ -420,6 +422,7 @@ const mapDataVerif = () => {
       creditCardBillingId: form.value.creditCardBillingId,
     },
     payment: {
+      paymentId: form.value.paymentId,
       bankKey: form.value.bankKey,
       bankName: form.value.bankName,
       beneficiaryName: form.value.beneficiaryName,
@@ -475,6 +478,7 @@ const mapDataVerifNonPo = () => {
       department: form.value.department,
     },
     payment: {
+      paymentId: form.value.paymentId,
       bankKey: form.value.bankKey,
       bankName: form.value.bankName,
       beneficiaryName: form.value.beneficiaryName,
@@ -530,8 +534,8 @@ const goVerif = () => {
           const idModal = document.querySelector('#success_verif_modal')
           const modal = KTModal.getInstance(idModal as HTMLElement)
           modal.show()
-          for (const item of additionalCostTempDelete.value) {
-            verificationApi.deleteAdditionalCost(form.value.invoiceUId, item.id)
+          for (const item of costExpensesTempDelete.value) {
+            verificationApi.deleteCostExpense(form.value.invoiceUId, item)
           }
         }
       })
@@ -555,7 +559,7 @@ const goVerif = () => {
           const modal = KTModal.getInstance(idModal as HTMLElement)
           modal.show()
           for (const item of additionalCostTempDelete.value) {
-            verificationApi.deleteAdditionalCost(form.value.invoiceUId, item.id)
+            verificationApi.deleteAdditionalCost(form.value.invoiceUId, item)
           }
         }
       })
@@ -576,8 +580,8 @@ const goVerif = () => {
           const idModal = document.querySelector('#success_verif_modal')
           const modal = KTModal.getInstance(idModal as HTMLElement)
           modal.show()
-          for (const item of additionalCostTempDelete.value) {
-            verificationApi.deleteAdditionalCost(form.value.invoiceUId, item.id)
+          for (const item of costExpensesTempDelete.value) {
+            verificationApi.deleteCostExpense(form.value.invoiceUId, item)
           }
         }
       })
@@ -742,6 +746,7 @@ const setDataDefault = async () => {
     npwpReporting: data?.header.npwpReporting || '',
     remainingDpAmount: '',
     dpAmountDeduction: '',
+    paymentId: data?.payment.paymentId || 0,
     bankKey: data?.payment.bankKey || '',
     bankName: data?.payment.bankName || '',
     creditCardBillingId: data?.header.creditCardBillingId || '',
@@ -866,6 +871,7 @@ const setDataDefaultNonPo = () => {
     department: data?.header.department,
     remainingDpAmount: '',
     dpAmountDeduction: '',
+    paymentId: data?.payment.paymentId || 0,
     bankKey: data?.payment.bankKey || '',
     bankName: data?.payment.bankName || '',
     creditCardBillingId: data?.header.creditCardBillingId || '',
@@ -924,6 +930,7 @@ const setDataEdit = () => {
     remainingDpAmount: '',
     dpAmountDeduction: '',
     department: data?.department,
+    paymentId: data?.paymentId,
     bankKey: data?.bankKey || '',
     bankName: data?.bankName || '',
     beneficiaryName: data?.beneficiaryName || '',
@@ -1032,7 +1039,7 @@ onMounted(async () => {
     routes.value = [
       {
         name: 'Invoice Verification',
-        to: '/invoice/verification',
+        to: checkIsNonPo() ? '/invoice/verification/noPo' : '/invoice/verification',
       },
       {
         name: 'Detail Invoice',
@@ -1044,7 +1051,7 @@ onMounted(async () => {
     routes.value = [
       {
         name: 'Invoice Approval',
-        to: '/invoice/approval',
+        to: checkIsNonPo() ? '/invoice/approval/nonPo' : '/invoice/approval',
       },
       {
         name: 'Detail Invoice',

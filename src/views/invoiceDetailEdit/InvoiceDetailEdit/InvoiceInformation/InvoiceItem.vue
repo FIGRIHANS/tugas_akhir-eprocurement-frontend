@@ -55,7 +55,13 @@
               ></v-select>
             </td>
             <td>
-              <span v-if="!item.isEdit">{{ item.itemAmount }}</span>
+              <span v-if="!item.isEdit">
+                {{
+                  form.currCode === 'IDR'
+                    ? useFormatIdr(item.isEdit ? formEdit.itemAmount : item.itemAmount)
+                    : useFormatUsd(item.isEdit ? formEdit.itemAmount : item.itemAmount)
+                }}
+              </span>
               <input
                 v-else
                 v-model="formEdit.itemAmount"
@@ -151,7 +157,13 @@
               ></v-select>
             </td>
             <td>
-              <span v-if="!item.isEdit">{{ item.whtBaseAmount }}</span>
+              <span v-if="!item.isEdit">
+                {{
+                  form.currCode === 'IDR'
+                    ? useFormatIdr(item.isEdit ? formEdit.whtBaseAmount : item.whtBaseAmount)
+                    : useFormatUsd(item.isEdit ? formEdit.whtBaseAmount : item.whtBaseAmount)
+                }}
+              </span>
               <input
                 v-else
                 v-model="formEdit.whtBaseAmount"
@@ -173,12 +185,16 @@
 
 <script lang="ts" setup>
 import { ref, reactive, computed, watch, inject, onMounted, type Ref } from 'vue'
+import { useRoute } from 'vue-router'
 import type { formTypes } from '../../types/invoiceDetailEdit'
 import type { invoiceItemTypes } from '../../types/invoiceItem'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
+import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
+const verificationApi = useInvoiceVerificationStore()
+const route = useRoute()
 const form = inject<Ref<formTypes>>('form')
 const columns = ref([
   'Action',
@@ -223,12 +239,16 @@ const whtTypeList = computed(() => invoiceMasterApi.whtTypeList)
 const whtCodeList = computed(() => invoiceMasterApi.whtCodeList)
 
 const checkIsEdit = () => {
-  const result = form?.value.additionalCosts.findIndex((item) => item.isEdit)
+  const result = form?.value.invoiceItem.findIndex((item) => item.isEdit)
   return result !== -1
 }
 
 const checkPoPib = () => {
   return form?.value.invoiceTypeCode === 902
+}
+
+const checkIsNonPo = () => {
+  return route.query.invoiceType === 'no_po'
 }
 
 const addNew = () => {
@@ -334,7 +354,10 @@ const resetItem = (item: invoiceItemTypes, index: number) => {
     item.isEdit = !item.isEdit
     resetFormEdit()
   } else {
-    form?.value.additionalCosts.splice(index, 1)
+    if (form) {
+      verificationApi.costExpenseTempDelete?.push(form.value.invoiceItem[index].id)
+      form.value.invoiceItem.splice(index, 1)
+    }
   }
 }
 
@@ -357,18 +380,35 @@ const getPercentTax = (code: string) => {
 
 const getVatAmount = () => {
   if (!form) return
-  const checkIsEdit = form.value.additionalCosts.findIndex((item) => item.isEdit)
-  if (checkIsEdit !== -1) {
-    const percentTax = getPercentTax(formEdit.taxCode) || 0
-    const itemAmount = formEdit.itemAmount
-    const result = percentTax * itemAmount
-    formEdit.vatAmount = result
-  } else {
-    for (const item of form.value.additionalCosts) {
-      const percentTax = getPercentTax(item.taxCode) || 0
-      const itemAmount = item.itemAmount
+  if (checkIsNonPo()) {
+    const checkIsEdit = form.value.invoiceItem.findIndex((item) => item.isEdit)
+    if (checkIsEdit !== -1) {
+      const percentTax = getPercentTax(formEdit.taxCode) || 0
+      const itemAmount = formEdit.itemAmount
       const result = percentTax * itemAmount
-      item.vatAmount = result
+      formEdit.vatAmount = result
+    } else {
+      for (const item of form.value.invoiceItem) {
+        const percentTax = getPercentTax(item.taxCode) || 0
+        const itemAmount = item.itemAmount
+        const result = percentTax * itemAmount
+        item.vatAmount = result
+      }
+    }
+  } else {
+    const checkIsEdit = form.value.additionalCosts.findIndex((item) => item.isEdit)
+    if (checkIsEdit !== -1) {
+      const percentTax = getPercentTax(formEdit.taxCode) || 0
+      const itemAmount = formEdit.itemAmount
+      const result = percentTax * itemAmount
+      formEdit.vatAmount = result
+    } else {
+      for (const item of form.value.additionalCosts) {
+        const percentTax = getPercentTax(item.taxCode) || 0
+        const itemAmount = item.itemAmount
+        const result = percentTax * itemAmount
+        item.vatAmount = result
+      }
     }
   }
 }

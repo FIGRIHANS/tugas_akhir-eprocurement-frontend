@@ -19,7 +19,7 @@
           <span class="text-gray-500"> {{ items.key }} </span>
           <span class="font-semibold">
             <p v-if="items.key === 'Status'">
-              {{ StatusInvoice.find((item) => item.value === items.value)?.label }}
+              {{ StatusInvoice.find((item) => item.value === Number(items.value))?.label }}
             </p>
             <p v-if="items.key === 'Company Code'">
               {{
@@ -33,7 +33,7 @@
                   ?.name
               }}
             </p>
-            <p v-else>{{ filterForm.date }}</p>
+            <p v-else-if="items.key === 'Date'">{{ filterForm.date }}</p>
           </span>
           <i class="ki-filled ki-cross" @click="deleteFilter(items.key)"></i>
         </div>
@@ -53,9 +53,13 @@
                 :key="index"
                 :class="{
                   'pending__column--auto': index <= 1,
+                  'cursor-pointer': item,
+                  '!text-blue-500': item === sortColumnName && sortBy !== '',
                 }"
+                @click="sortColumn(item)"
               >
                 {{ item }}
+                <i v-if="item" class="ki-filled ki-arrow-up-down"></i>
               </th>
             </tr>
           </thead>
@@ -74,40 +78,40 @@
                           class="menu-item"
                           @click="sendToSap(parent.invoiceUId)"
                         >
-                          <a class="menu-link" href="#">
+                          <div class="menu-link">
                             <span class="menu-icon">
                               <i class="ki-duotone ki-paper-plane !text-lg"></i>
                             </span>
                             <span class="menu-title"> Send to SAP </span>
-                          </a>
+                          </div>
                         </div>
                         <div class="menu-item" @click="openDetailInvoice(parent.invoiceUId)">
-                          <a class="menu-link" href="#">
+                          <div class="menu-link">
                             <span class="menu-icon">
                               <i class="ki-duotone ki-eye !text-lg"></i>
                             </span>
                             <span class="menu-title"> Detail </span>
-                          </a>
+                          </div>
                         </div>
                         <div class="menu-item" @click="openDetailApproval(parent.invoiceUId)">
-                          <a class="menu-link" href="#">
+                          <div class="menu-link">
                             <span class="menu-icon">
                               <i class="ki-duotone ki-data !text-lg"></i>
                             </span>
                             <span class="menu-title"> Detail Approval </span>
-                          </a>
+                          </div>
                         </div>
                         <div
                           v-if="parent.statusCode === 4"
                           class="menu-item"
                           @click="openDetailInvoiceEdit(parent.invoiceUId)"
                         >
-                          <a class="menu-link" href="#">
+                          <div class="menu-link">
                             <span class="menu-icon">
                               <i class="ki-duotone ki-message-edit"></i>
                             </span>
                             <span class="menu-title"> Edit </span>
-                          </a>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -215,6 +219,7 @@ import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { useFormatIdr } from '@/composables/currency'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import moment from 'moment'
+import { cloneDeep } from 'lodash'
 
 const ModalDetailApproval = defineAsyncComponent(() => import('./DetailApproval.vue'))
 const FilterList = defineAsyncComponent(() => import('./FilterList.vue'))
@@ -237,6 +242,8 @@ const pageSize = ref<number>(10)
 const list = ref<ListNonPoTypes[]>([])
 const viewDetailId = ref<string>('')
 const isLoadingSap = ref<boolean>(false)
+const sortBy = ref<string>('')
+const sortColumnName = ref<string>('')
 
 const StatusInvoice = ref([
   { value: 2, label: 'Waiting for Approval' },
@@ -289,6 +296,7 @@ const colorBadge = (statusCode: number) => {
 
 const setPage = (value: number) => {
   currentPage.value = value
+  sortColumn(null)
 }
 
 const goSearch = (event: KeyboardEvent) => {
@@ -324,6 +332,7 @@ const openDetailInvoiceEdit = (invoiceId: string) => {
       id: invoiceId,
       type: '2',
       invoiceType: 'no_po',
+      edit: 'true',
     },
   })
 }
@@ -353,9 +362,9 @@ const deleteFilter = (key: string) => {
   callList()
 }
 
-const setList = () => {
+const setList = (listData: ListNonPoTypes[]) => {
   const result: ListNonPoTypes[] = []
-  for (const [index, item] of verifList.value.entries()) {
+  for (const [index, item] of listData.entries()) {
     const start = currentPage.value * pageSize.value - pageSize.value
     const end = currentPage.value * pageSize.value - 1
     if (index >= start && index <= end) {
@@ -376,7 +385,7 @@ const callList = () => {
       searchText: search.value,
     })
     .finally(() => {
-      setList()
+      sortColumn(null)
     })
 }
 
@@ -390,7 +399,7 @@ const setDataFilter = (data: filterListTypes) => {
     })
   }
 
-  if (data.date && data.date.trim() !== '') {
+  if (data.date !== '') {
     filteredData.push({
       key: 'Date',
       value: data.date,
@@ -460,6 +469,80 @@ const openFailedSap = () => {
   const idModal = document.querySelector('#failed_send_sap_modal')
   const modal = KTModal.getInstance(idModal as HTMLElement)
   modal.show()
+}
+
+const sortColumn = (columnName: string | null) => {
+  const list = {
+    'Submitted Document No': 'invoiceNo',
+    Status: 'statusName',
+    'Vendor Name': 'vendorName',
+    'Invoice Type': 'invoiceTypeName',
+    'Company Code': 'companyCode',
+    'Base Amount': 'whtBaseAmount',
+    'VAT Ammount': 'vatAmount',
+    'WHT Amount': 'whtAmount',
+    'Total Net Amount': 'totalNetAmount',
+    'No Tax Invoice': 'taxNo',
+    'Invoice Vendor No.': 'documentNo',
+    'Estimated Payment Date': 'estimatedPaymentDate',
+    'Invoice Submission Date': 'invoiceDate',
+    Description: 'notes',
+  } as { [key: string]: string }
+
+  const roleSort = ['asc', 'desc', '']
+
+  const listData = cloneDeep(verifList.value)
+  let result: ListNonPoTypes[] = []
+
+  if (columnName) {
+    if (sortColumnName.value !== columnName) sortBy.value = ''
+    sortColumnName.value = columnName
+
+    const indexSort = roleSort.findIndex((item) => item === sortBy.value)
+    if (indexSort === -1) return setList(verifList.value)
+    sortBy.value = indexSort + 1 === roleSort.length ? roleSort[0] : roleSort[indexSort + 1]
+
+    if (!sortBy.value) return setList(verifList.value)
+  }
+
+  const name = columnName || sortColumnName.value
+
+  if (
+    name === 'Base Amount' ||
+    name === 'VAT Ammount' ||
+    name === 'WHT Amount' ||
+    name === 'Total Net Amount'
+  ) {
+    result = listData.sort((a, b) => {
+      if (sortBy.value === 'asc') {
+        return a[list[name]] - b[list[name]]
+      } else {
+        return b[list[name]] - a[list[name]]
+      }
+    })
+  } else if (name === 'Invoice Submission Date' || name === 'Estimated Payment Date') {
+    result = listData.sort((a, b) => {
+      const convA = a[list[name]] ? new Date(a[list[name]]).getTime() : 0
+      const convB = b[list[name]] ? new Date(b[list[name]]).getTime() : 0
+      if (sortBy.value === 'asc') {
+        return convA - convB
+      } else {
+        return convB - convA
+      }
+    })
+  } else {
+    result = listData.sort((a, b) => {
+      const convA = a[list[name]] ? a[list[name]] : ''
+      const convB = b[list[name]] ? b[list[name]] : ''
+      if (sortBy.value === 'asc') {
+        return convA.localeCompare(convB)
+      } else {
+        return convB.localeCompare(convA)
+      }
+    })
+  }
+
+  return setList(result)
 }
 
 onMounted(() => {

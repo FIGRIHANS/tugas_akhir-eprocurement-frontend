@@ -18,8 +18,7 @@ import { useVendorUploadStore } from '@/stores/vendor/upload'
 import { checkEmptyValues } from '@/composables/validation'
 import useExperienceStore from '@/stores/vendor/experience'
 import UiLoading from '@/components/UiLoading.vue'
-import { useVendorAdministrationStore } from '@/stores/vendor/vendor'
-import { useChangeDataEmailStore } from '@/stores/vendor/email-change-data'
+import { useI18n } from 'vue-i18n'
 
 const props = withDefaults(
   defineProps<{
@@ -35,12 +34,11 @@ const props = withDefaults(
 const emit = defineEmits(['onError', 'onSuccess'])
 
 const open = defineModel()
+const { t } = useI18n()
 const lookupStore = useVendorMasterDataStore()
 const userStore = useLoginStore()
 const uploadStore = useVendorUploadStore()
 const experienceStore = useExperienceStore()
-const adminStore = useVendorAdministrationStore()
-const changeDataEmailStore = useChangeDataEmailStore()
 
 // ref bantuan
 const businessFieldId = ref<number>(0)
@@ -96,7 +94,7 @@ const onUploadFile = async (file: File) => {
   } catch (error) {
     if (error instanceof Error) {
       console.error(error)
-      alert('File upload failed. Please try again.')
+      alert(t('experienceData.error.uploadFailed'))
     }
   } finally {
     uploadLoading.value = false
@@ -136,14 +134,7 @@ const onSubmit = async () => {
   try {
     submitLoading.value = true
     await experienceStore.update(formData.value)
-    await changeDataEmailStore.sendEmail({
-      recepientName: adminStore.data.vendorName || '',
-      recepients: {
-        emailTo: adminStore.data.vendorEmail,
-        emailCc: '',
-        emailBcc: ''
-      }
-    })
+
     emit('onSuccess')
     onCloseModal()
   } catch (error) {
@@ -206,137 +197,276 @@ onMounted(() => {
 </script>
 
 <template>
-  <UiModal v-model="open" size="lg" title="Experience Data" :center="false" static @update:model-value="onCloseModal">
+  <UiModal
+    v-model="open"
+    size="lg"
+    :title="t('experienceData.modal.form.title')"
+    :center="false"
+    static
+    @update:model-value="onCloseModal"
+  >
     <div class="border border-secondary-active rounded-md p-1 flex items-center gap-2">
-      <UiButton class="flex-1 flex items-center justify-center"
-        :variant="formData.experienceType === 3153 ? 'primary' : 'light'" @click="formData.experienceType = 3153">
-        Completed Projects
+      <UiButton
+        class="flex-1 flex items-center justify-center"
+        :variant="formData.experienceType === 3153 ? 'primary' : 'light'"
+        @click="formData.experienceType = 3153"
+      >
+        {{ t('experienceData.projectType.completed') }}
       </UiButton>
-      <UiButton class="flex-1 flex items-center justify-center"
-        :variant="formData.experienceType === 3154 ? 'primary' : 'light'" @click="formData.experienceType = 3154">
-        Ongoing Projects
+      <UiButton
+        class="flex-1 flex items-center justify-center"
+        :variant="formData.experienceType === 3154 ? 'primary' : 'light'"
+        @click="formData.experienceType = 3154"
+      >
+        {{ t('experienceData.projectType.ongoing') }}
       </UiButton>
     </div>
 
     <form @submit.prevent="onSubmit">
       <UiFormGroup hide-border :grid="2" class="mt-3">
         <!-- contract name -->
-        <UiInput required placeholder="Contract Name" label="Contract Name" v-model="formData.contractName"
+        <UiInput
+          required
+          :placeholder="t('experienceData.form.placeholders.contractName')"
+          :label="t('experienceData.form.labels.contractName')"
+          v-model="formData.contractName"
           :error="formError.includes('contractName')"
-          :hint-text="formError.includes('contractName') ? 'Contract Name required' : ''" />
+          :hint-text="
+            formError.includes('contractName') ? t('experienceData.validation.contractName') : ''
+          "
+        />
 
         <!-- institution -->
-        <UiInput label="Institution" placeholder="Institution" required v-model="formData.agency"
+        <UiInput
+          :label="t('experienceData.form.labels.agency')"
+          :placeholder="t('experienceData.form.placeholders.agency')"
+          required
+          v-model="formData.agency"
           :error="formError.includes('agency')"
-          :hint-text="formError.includes('agency') ? 'Institution required' : ''" />
+          :hint-text="formError.includes('agency') ? t('experienceData.validation.agency') : ''"
+        />
 
         <!-- Business Sector -->
-        <UiSelect label="Business Sector Type" :options="businessFieldOptions" text-key="businessFieldName"
-          value-key="businessFieldID" placeholder="--Business Sector Type--" v-model="businessFieldId" required
+        <UiSelect
+          :label="t('experienceData.form.labels.businessField')"
+          :options="businessFieldOptions"
+          text-key="businessFieldName"
+          value-key="businessFieldID"
+          :placeholder="t('experienceData.form.placeholders.businessField')"
+          v-model="businessFieldId"
+          required
           :error="formError.includes('businessFieldId')"
-          :hint-text="formError.includes('businessFieldId') ? 'Business Field required' : ''" />
+          :hint-text="
+            formError.includes('businessFieldId')
+              ? t('experienceData.validation.businessField')
+              : ''
+          "
+        />
 
         <!-- Sub business sector -->
-        <UiSelect label="Sub Business Sector" required :options="subBusinessFieldOptions"
-          text-key="subBusinessFieldName" value-key="subBusinessFieldID" placeholder="--Sub Business Sector--"
-          v-model="formData.field" :error="formError.includes('field')"
-          :hint-text="formError.includes('field') ? 'Sub Business Field required' : ''" :disabled="!businessFieldId" />
+        <UiSelect
+          :label="t('experienceData.form.labels.subBusiness')"
+          required
+          :options="subBusinessFieldOptions"
+          text-key="subBusinessFieldName"
+          value-key="subBusinessFieldID"
+          :placeholder="t('experienceData.form.placeholders.subBusiness')"
+          v-model="formData.field"
+          :error="formError.includes('field')"
+          :hint-text="formError.includes('field') ? t('experienceData.validation.subBusiness') : ''"
+          :disabled="!businessFieldId"
+        />
 
         <!-- Country -->
-        <UiSelect label="Country" :options="countryOptions" text-key="label" value-key="value" placeholder="--Country--"
-          @update:model-value="onSelectCountry(Number($event))" v-model="formData.stateLocation" required
+        <UiSelect
+          :label="t('experienceData.form.labels.country')"
+          :options="countryOptions"
+          text-key="label"
+          value-key="value"
+          :placeholder="t('experienceData.form.placeholders.country')"
+          @update:model-value="onSelectCountry(Number($event))"
+          v-model="formData.stateLocation"
+          required
           :error="formError.includes('stateLocation')"
-          :hint-text="formError.includes('stateLocation') ? 'Country required' : ''" />
+          :hint-text="
+            formError.includes('stateLocation') ? t('experienceData.validation.country') : ''
+          "
+        />
 
         <UiFormGroup hide-border :grid="2">
           <!-- Province -->
-          <UiSelect label="Province" :options="stateOptions" text-key="provinceName" value-key="provinceID"
-            placeholder="--Province--" @update:model-value="onSelectState(Number($event))"
-            v-model="formData.provinceLocation" :disabled="!formData.stateLocation"
-            :hint-text="formError.includes('provinceLocation') ? 'Province required' : ''" required
-            :error="formError.includes('provinceLocation')" />
+          <UiSelect
+            :label="t('experienceData.form.labels.province')"
+            :options="stateOptions"
+            text-key="provinceName"
+            value-key="provinceID"
+            :placeholder="t('experienceData.form.placeholders.province')"
+            @update:model-value="onSelectState(Number($event))"
+            v-model="formData.provinceLocation"
+            :disabled="!formData.stateLocation"
+            :hint-text="
+              formError.includes('provinceLocation') ? t('experienceData.validation.province') : ''
+            "
+            required
+            :error="formError.includes('provinceLocation')"
+          />
 
           <!-- City -->
-          <UiSelect label="City" :required="formData.stateLocation === 360" :options="cityOptions" text-key="cityName"
-            value-key="cityID" placeholder="--City--" v-model="formData.location"
-            :error="formError.includes('location')" :hint-text="formError.includes('location') ? 'City required' : ''"
-            :disabled="!formData.provinceLocation" />
+          <UiSelect
+            :label="t('experienceData.form.labels.city')"
+            :required="formData.stateLocation === 360"
+            :options="cityOptions"
+            text-key="cityName"
+            value-key="cityID"
+            :placeholder="t('experienceData.form.placeholders.city')"
+            v-model="formData.location"
+            :error="formError.includes('location')"
+            :hint-text="formError.includes('location') ? t('experienceData.validation.city') : ''"
+            :disabled="!formData.provinceLocation"
+          />
         </UiFormGroup>
 
         <!-- Address -->
-        <UiInput label="Address" placeholder="Address" required v-model="formData.address"
-          :error="formError.includes('address')" :hint-text="formError.includes('address') ? 'Address required' : ''" />
+        <UiInput
+          :label="t('experienceData.form.labels.address')"
+          :placeholder="t('experienceData.form.placeholders.address')"
+          required
+          v-model="formData.address"
+          :error="formError.includes('address')"
+          :hint-text="formError.includes('address') ? t('experienceData.validation.address') : ''"
+        />
 
         <!-- Phone Number -->
-        <UiInputTel placeholder="Phone Number" required v-model="formData.agencyTelpNo"
+        <UiInputTel
+          :label="t('experienceData.form.labels.phoneNumber')"
+          :placeholder="t('experienceData.form.placeholders.phoneNumber')"
+          required
+          v-model="formData.agencyTelpNo"
           :error="formError.includes('agencyTelpNo')"
-          :hint-text="formError.includes('agencyTelpNo') ? 'Phone number required' : ''" />
+          :hint-text="
+            formError.includes('agencyTelpNo') ? t('experienceData.validation.phoneNumber') : ''
+          "
+        />
 
         <UiFormGroup hide-border :grid="2">
           <!-- Contract Number -->
-          <UiInput label="Contract Number" placeholder="Contract Number" required v-model="formData.contractNo"
+          <UiInput
+            :label="t('experienceData.form.labels.contractNumber')"
+            :placeholder="t('experienceData.form.placeholders.contractNumber')"
+            required
+            v-model="formData.contractNo"
             :error="formError.includes('contractNo')"
-            :hint-text="formError.includes('contractNo') ? 'Contract Number required' : ''" />
+            :hint-text="
+              formError.includes('contractNo') ? t('experienceData.validation.contractNumber') : ''
+            "
+          />
 
           <!-- Currency -->
-          <UiSelect label="Currency" required :options="currencyOptions" text-key="label" value-key="value"
-            placeholder="--Currency--" v-model="formData.expCurrID" :error="formError.includes('expCurrID')"
-            :hint-text="formError.includes('expCurrID') ? 'Currency required' : ''" />
+          <UiSelect
+            :label="t('experienceData.form.labels.currency')"
+            required
+            :options="currencyOptions"
+            text-key="label"
+            value-key="value"
+            :placeholder="t('experienceData.form.placeholders.currency')"
+            v-model="formData.expCurrID"
+            :error="formError.includes('expCurrID')"
+            :hint-text="
+              formError.includes('expCurrID') ? t('experienceData.validation.currency') : ''
+            "
+          />
         </UiFormGroup>
 
         <!-- Contract Value -->
-        <UiInput label="Contract Value" placeholder="Contract Value" type="number" required
-          v-model="formData.contractValue" :error="formError.includes('contractValue')"
-          :hint-text="formError.includes('contractValue') ? 'Contract Value required' : ''" />
+        <UiInput
+          :label="t('experienceData.form.labels.contractValue')"
+          :placeholder="t('experienceData.form.placeholders.contractValue')"
+          type="number"
+          required
+          v-model="formData.contractValue"
+          :error="formError.includes('contractValue')"
+          :hint-text="
+            formError.includes('contractValue') ? t('experienceData.validation.contractValue') : ''
+          "
+        />
 
         <!-- Start date -->
         <div class="relative">
-          <span class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px] z-10">
-            Start Date <span class="text-danger">*</span>
+          <span
+            class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px] z-10"
+          >
+            {{ t('experienceData.form.labels.startDate') }} <span class="text-danger">*</span>
           </span>
-          <DatePicker placeholder="Start Date" v-model="formData.startDate" :error="formError.includes('startDate')"
-            @update:model-value="formData.startDate = new Date($event).toISOString()" format="dd/MM/yyyy" />
+          <DatePicker
+            :placeholder="t('experienceData.form.placeholders.startDate')"
+            v-model="formData.startDate"
+            :error="formError.includes('startDate')"
+            @update:model-value="formData.startDate = new Date($event).toISOString()"
+            format="dd/MM/yyyy"
+          />
           <span v-if="formError.includes('startDate')" class="form-hint !text-danger">
-            Start date required
+            {{ t('experienceData.validation.startDate') }}
           </span>
         </div>
 
         <!-- End Date -->
         <div class="relative">
-          <span class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px] z-10">
-            End Date <span class="text-danger">*</span>
+          <span
+            class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px] z-10"
+          >
+            {{ t('experienceData.form.labels.endDate') }} <span class="text-danger">*</span>
           </span>
-          <DatePicker placeholder="End Date" v-model="formData.endDate" :error="formError.includes('endDate')"
-            @update:model-value="formData.endDate = new Date($event).toISOString()" format="dd/MM/yyyy" />
+          <DatePicker
+            :placeholder="t('experienceData.form.placeholders.endDate')"
+            v-model="formData.endDate"
+            :error="formError.includes('endDate')"
+            @update:model-value="formData.endDate = new Date($event).toISOString()"
+            format="dd/MM/yyyy"
+          />
           <span v-if="formError.includes('endDate')" class="form-hint !text-danger">
-            End date required
+            {{ t('experienceData.validation.endDate') }}
           </span>
         </div>
 
         <!-- Description -->
-        <UiInput label="Description" placeholder="Description" required v-model="formData.remark"
+        <UiInput
+          :label="t('experienceData.form.labels.description')"
+          :placeholder="t('experienceData.form.placeholders.description')"
+          required
+          v-model="formData.remark"
           :error="formError.includes('remark')"
-          :hint-text="formError.includes('remark') ? 'Description required' : ''" />
+          :hint-text="
+            formError.includes('remark') ? t('experienceData.validation.description') : ''
+          "
+        />
 
         <!-- upload -->
-        <UiFileUpload accepted-files=".jpg,.jpeg,.png,.pdf,.zip" name="file"
-          placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)" @added-file="onUploadFile" :hint-text="uploadError
-            ? 'An error accoured, please try again'
-            : formError.includes('documentURL')
-              ? 'Document required'
-              : ''
-            " :error="formError.includes('documentURL')" :disabled="uploadLoading" />
+        <UiFileUpload
+          accepted-files=".jpg,.jpeg,.png,.pdf,.zip"
+          name="file"
+          :placeholder="t('experienceData.form.placeholders.upload')"
+          @added-file="onUploadFile"
+          :hint-text="
+            uploadError
+              ? t('experienceData.error.uploadError')
+              : formError.includes('documentURL')
+                ? t('experienceData.validation.document')
+                : ''
+          "
+          :error="formError.includes('documentURL')"
+          :disabled="uploadLoading"
+        />
       </UiFormGroup>
 
       <div class="flex justify-end gap-3 mt-4">
         <UiButton outline type="button" @click="onCloseModal">
           <UiIcon name="black-left-line" />
-          <span>Cancel</span>
+          <span>{{ t('experienceData.buttons.cancel') }}</span>
         </UiButton>
         <UiButton variant="primary" type="submit" :disabled="submitLoading || uploadLoading">
           <UiLoading variant="white" v-if="submitLoading" />
           <UiIcon name="file-added" variant="duotone" v-else />
-          <span>Save</span>
+          <span>{{ t('experienceData.buttons.save') }}</span>
         </UiButton>
       </div>
     </form>
