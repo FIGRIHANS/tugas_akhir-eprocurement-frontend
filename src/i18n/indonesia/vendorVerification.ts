@@ -8,6 +8,7 @@ const tabitems = {
   administrative: 'Data Administrasi',
   businessLicenses: 'Data Izin Usaha',
   paymentinfo: 'Data Informasi Pembayaran',
+  open: 'Buka',
 }
 
 const administration = {
