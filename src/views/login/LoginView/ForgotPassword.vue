@@ -1,7 +1,7 @@
 <template>
   <div class="max-w-[343px] border border-grey-200 rounded-xl p-[40px] h-fit">
     <p class="m-0 text-center text-lg font-medium">
-      Forgot Password
+      {{ $t('login.forgot.title') }}
     </p>
     <FormForgot v-if="!loginApi.isSendForgot" />
     <SuccessForgot v-else />

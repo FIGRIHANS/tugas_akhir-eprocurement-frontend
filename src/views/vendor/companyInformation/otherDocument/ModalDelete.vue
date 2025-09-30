@@ -4,6 +4,7 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import useOtherDocStore from '@/stores/vendor/otherDocuments'
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 type Props = {
   id: number
@@ -15,6 +16,7 @@ const emit = defineEmits(['onSuccess', 'onError'])
 
 const otherDocStore = useOtherDocStore()
 const loading = ref(false)
+const { t } = useI18n()
 
 const selectedItem = computed(() => otherDocStore.data.find((item) => (item.id = props.id)))
 
@@ -50,19 +52,24 @@ const onDelete = async () => {
     <div class="text-center mb-6">
       <UiIcon name="cross-circle" variant="duotone" class="text-[150px] text-danger text-center" />
     </div>
-    <h3 class="text-center text-lg font-medium">Are You Sure You Want to Delete This Item?</h3>
+    <h3 class="text-center text-lg font-medium">{{ t('otherDocumentData.modal.delete.title') }}</h3>
     <p class="text-center text-base text-gray-600 mb-5">
-      This action will permanently remove the selected data from the list.
+      {{ t('otherDocumentData.modal.delete.message') }}
     </p>
     <div class="flex gap-3 px-8 mb-3">
       <UiButton outline @click="model = false" class="flex-1 flex items-center justify-center">
         <UiIcon name="black-left-line" />
-        <span>Cancel</span>
+        <span>{{ t('otherDocumentData.buttons.cancel') }}</span>
       </UiButton>
-      <UiButton variant="danger" class="flex-1 flex items-center justify-center" @click="onDelete" :disabled="loading">
+      <UiButton
+        variant="danger"
+        class="flex-1 flex items-center justify-center"
+        @click="onDelete"
+        :disabled="loading"
+      >
         <UiLoading variant="white" v-if="loading" />
         <UiIcon name="cross-circle" variant="duotone" v-else />
-        <span>Delete</span>
+        <span>{{ t('otherDocumentData.buttons.delete') }}</span>
       </UiButton>
     </div>
   </UiModal>

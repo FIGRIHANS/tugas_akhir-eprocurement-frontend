@@ -1,18 +1,18 @@
-export const tableCols: { key: string; label: string }[] = [
+export const getTableCols = (t: (key: string) => string): { key: string; label: string }[] => [
   {
     key: 'actions',
     label: '',
   },
   {
     key: 'documentName',
-    label: 'Document Name',
+    label: t('otherDocumentData.table.headers.documentName'),
   },
   {
     key: 'documentNo',
-    label: 'Document Number',
+    label: t('otherDocumentData.table.headers.documentNo'),
   },
   {
     key: 'availabelUntil',
-    label: 'Available Until',
+    label: t('otherDocumentData.table.headers.availableUntil'),
   },
 ]

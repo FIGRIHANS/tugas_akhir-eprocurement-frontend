@@ -1,0 +1,127 @@
+export const experienceData = {
+  pageTitle: 'Experience Projects',
+
+  projectType: {
+    completed: 'Completed Projects',
+    ongoing: 'Ongoing Projects',
+  },
+
+  table: {
+    headers: {
+      action: 'Action',
+      contractName: 'Contract Name',
+      address: 'Address',
+      agency: 'Agency',
+      contractValue: 'Contract Value',
+      businessField: 'Business Field',
+      subBusiness: 'Sub Business',
+      startDate: 'Start Date',
+      endDate: 'End Date',
+    },
+    noData: 'No data',
+  },
+
+  buttons: {
+    add: 'Add',
+    back: 'Back',
+    cancel: 'Cancel',
+    save: 'Save',
+    delete: 'Delete',
+  },
+
+  form: {
+    labels: {
+      contractName: 'Contract Name',
+      agency: 'Institution',
+      businessField: 'Business Sector Type',
+      subBusiness: 'Sub Business Sector',
+      country: 'Country',
+      province: 'Province',
+      city: 'City',
+      address: 'Address',
+      phoneNumber: 'Phone Number',
+      contractNumber: 'Contract Number',
+      currency: 'Currency',
+      contractValue: 'Contract Value',
+      startDate: 'Start Date',
+      endDate: 'End Date',
+      description: 'Description',
+    },
+    placeholders: {
+      contractName: 'Contract Name',
+      agency: 'Institution',
+      businessField: '--Business Sector Type--',
+      subBusiness: '--Sub Business Sector--',
+      country: '--Country--',
+      province: '--Province--',
+      city: '--City--',
+      address: 'Address',
+      phoneNumber: 'Phone Number',
+      contractNumber: 'Contract Number',
+      currency: '--Currency--',
+      contractValue: 'Contract Value',
+      startDate: 'Start Date',
+      endDate: 'End Date',
+      description: 'Description',
+      upload: 'Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)',
+    },
+  },
+
+  validation: {
+    contractName: 'Contract Name required',
+    agency: 'Institution required',
+    businessField: 'Business Field required',
+    businessFieldId: 'Business Field required',
+    field: 'Sub Business Field required',
+    subBusiness: 'Sub Business Field required',
+    country: 'Country required',
+    stateLocation: 'Country required',
+    province: 'Province required',
+    provinceLocation: 'Province required',
+    city: 'City required',
+    location: 'City required',
+    address: 'Address required',
+    phoneNumber: 'Phone number required',
+    agencyTelpNo: 'Phone number required',
+    contractNumber: 'Contract Number required',
+    contractNo: 'Contract Number required',
+    currency: 'Currency required',
+    expCurrID: 'Currency required',
+    contractValue: 'Contract Value required',
+    startDate: 'Start date required',
+    endDate: 'End date required',
+    description: 'Description required',
+    remark: 'Description required',
+    document: 'Document required',
+    documentURL: 'Document required',
+  },
+
+  modal: {
+    form: {
+      title: 'Experience Data',
+    },
+    success: {
+      title: 'Hooray!',
+      message: 'The data has been successfully updated in the admin system.',
+    },
+    error: {
+      title: 'Failed to {action} Experience data!',
+      message: 'Please try again later or contact support if the problem persists.',
+      actions: {
+        add: 'Add',
+        change: 'Change',
+        delete: 'Delete',
+      },
+    },
+    delete: {
+      title: 'Are You Sure You Want to Delete This Item?',
+      message: 'This action will permanently remove the selected data from the list.',
+    },
+  },
+
+  error: {
+    downloadFailed: 'Failed to download document. Please try again later.',
+    uploadFailed: 'File upload failed. Please try again.',
+    uploadError: 'An error occurred, please try again',
+  },
+}

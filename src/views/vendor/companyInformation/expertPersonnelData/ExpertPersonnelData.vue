@@ -1,11 +1,11 @@
 <template>
   <div class="card min-w-full">
     <div class="card-header">
-      <h3 class="card-title">Expert Personnel Data</h3>
+      <h3 class="card-title">{{ t('expertPersonnelData.pageTitle') }}</h3>
 
       <UiButton variant="primary" @click="openModalForm">
         <UiIcon name="plus-circle" variant="duotone" />
-        Add
+        {{ t('expertPersonnelData.buttons.add') }}
       </UiButton>
     </div>
 
@@ -36,7 +36,9 @@
 
             <!-- empty -->
             <tr v-else-if="pagination.total === 0">
-              <th class="text-center" :colspan="tabCols.length">No data</th>
+              <th class="text-center" :colspan="tabCols.length">
+                {{ t('expertPersonnelData.table.noData') }}
+              </th>
             </tr>
 
             <tr v-else v-for="(item, index) in dataResponse" :key="'expert' + index">
@@ -51,19 +53,19 @@
                       <div class="menu-item text-primary" @click="downloadFile(item.id)">
                         <span class="menu-link">
                           <UiIcon name="eye" variant="duotone" class="menu-icon" />
-                          View Detail
+                          {{ t('expertPersonnelData.actions.viewDetail') }}
                         </span>
                       </div>
                       <div class="menu-item text-warning" @click="editData(item.id)">
                         <span class="menu-link">
                           <UiIcon name="notepad-edit" variant="duotone" class="menu-icon" />
-                          Edit
+                          {{ t('expertPersonnelData.actions.edit') }}
                         </span>
                       </div>
                       <div class="menu-item text-danger" @click="deleteData(item.id)">
                         <span class="menu-link">
                           <UiIcon name="cross-circle" variant="duotone" class="menu-icon" />
-                          Delete
+                          {{ t('expertPersonnelData.actions.delete') }}
                         </span>
                       </div>
                     </div>
@@ -82,9 +84,10 @@
 
       <div class="flex flex-row items-center justify-between px-4">
         <div class="flex flex-row items-center gap-2">
-          Show
+          {{ t('expertPersonnelData.table.showPerPage') }}
           <UiSelect v-model="pagination.pageSize" :options="pageSizeOptions" class="w-16" />
-          per page from {{ pagination.total }} data
+          {{ t('expertPersonnelData.table.perPageText') }} {{ pagination.total }}
+          {{ t('expertPersonnelData.table.dataText') }}
         </div>
 
         <LPagination
@@ -117,6 +120,7 @@
 import { computed, onMounted, provide, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { KTModal } from '@/metronic/core'
+import { useI18n } from 'vue-i18n'
 
 import { useExpertPersonnelDataStore } from '@/stores/vendor/vendor'
 
@@ -133,18 +137,19 @@ import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 
 const route = useRoute()
 const expertPStore = useExpertPersonnelDataStore()
+const { t } = useI18n()
 
 const selectedId = ref(0)
 const mode = ref<'add' | 'view' | 'edit'>('view')
 
-const tabCols = [
-  '',
-  'Name',
-  'Highest Education Level',
-  'Position / Role',
-  'Years of Experience',
-  'Expertise / Skills',
-]
+const tabCols = computed(() => [
+  t('expertPersonnelData.table.headers.action'),
+  t('expertPersonnelData.table.headers.name'),
+  t('expertPersonnelData.table.headers.education'),
+  t('expertPersonnelData.table.headers.position'),
+  t('expertPersonnelData.table.headers.experience'),
+  t('expertPersonnelData.table.headers.expertise'),
+])
 const pageSizeOptions = ref([
   { value: 5, text: '5' },
   { value: 10, text: '10' },
