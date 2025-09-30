@@ -38,6 +38,7 @@ export interface ParamsSubmissionTypes {
   workflow: ParamsSubmissionWorkflow[]
   alternativePayee: itemsAlternativePayee[]
   costExpense: ParamsSubmissionCostExpense[]
+  isSaveAsDraft: boolean
 }
 
 interface ParamsSubmissionCostExpense {
@@ -284,6 +285,7 @@ export interface ParamsSubmissionNonPo {
   calculation: ParamsSubmissionCalculation
   alternativePay: ParamsSubmissionAlternativePay
   costExpenses: ParamsSubmissionCostExpense[]
+  isSaveAsDraft: boolean
 }
 export interface ParamsSubmissionHeaderNonPo {
   invoiceUId: string

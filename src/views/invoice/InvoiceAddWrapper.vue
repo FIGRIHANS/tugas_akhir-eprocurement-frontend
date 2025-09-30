@@ -541,6 +541,7 @@ const mapDataPost = () => {
     pogr: mapPoGr(),
     additionalCosts:
       form.invoiceDp === '9012' || form.invoiceDp === '9013' ? [] : mapAdditionalCost(),
+    isSaveAsDraft: false
   } as ParamsSubmissionTypes
 
   return data
@@ -617,6 +618,7 @@ const mapDataPostNonPo = () => {
       isOneTimeVendor: form.isOneTimeVendor,
     },
     costExpenses: mapInvoiceItem(),
+    isSaveAsDraft: false
   } as ParamsSubmissionNonPo
 
   return data
@@ -683,6 +685,7 @@ const goSaveDraft = () => {
     const data = mapDataPostNonPo()
     data.header.statusCode = 0
     data.header.statusName = 'Draft'
+    data.isSaveAsDraft = true
     invoiceApi
       .postSubmissionNonPo(data)
       .then((response) => {
@@ -698,6 +701,7 @@ const goSaveDraft = () => {
     const data = mapDataPost()
     data.header.statusCode = 0
     data.header.statusName = 'Draft'
+    data.isSaveAsDraft = true
     invoiceApi
       .postSubmission(data)
       .then((response) => {
