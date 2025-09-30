@@ -523,6 +523,7 @@ const mapDataPost = () => {
       vendorAddress: form.address,
     },
     payment: {
+      paymentId: form.paymentId,
       bankKey: form.bankKeyId,
       bankName: form.bankNameId,
       beneficiaryName: form.beneficiaryName,
@@ -582,6 +583,7 @@ const mapDataPostNonPo = () => {
       vendorAddress: form.address,
     },
     payment: {
+      paymentId: form.paymentId,
       bankKey: form.bankKeyId,
       bankName: form.bankNameId,
       beneficiaryName: form.beneficiaryName,
