@@ -9,16 +9,18 @@ import SummaryInformation from '../detail/SummaryInformation.vue'
 import AdministrativeData from '../detail/AdministrativeData.vue'
 import BusinessLicense from '../detail/BusinessLicense.vue'
 import PaymentInformation from '../detail/PaymentInformation.vue'
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 
 const route = useRoute()
 
 const bcRoutes: routeTypes[] = [
   {
-    name: 'Vendor Verification',
+    name: t('vendorVerification.breadcrums.title'),
     to: '/vendor/verification',
   },
   {
-    name: 'Verification Process',
+    name: t('vendorVerification.breadcrums.verificationproccess'),
     to: route.path,
   },
 ]
@@ -26,21 +28,21 @@ const bcRoutes: routeTypes[] = [
 const tabsItem: ITabClosable[] = [
   {
     id: 'summary-information',
-    label: 'Summary Information',
+    label: t('vendorVerification.tabitems.summary'),
   },
   {
     id: 'administrative-data',
-    label: 'Administrative Data',
+    label: t('vendorVerification.tabitems.administrative'),
     isClosable: true,
   },
   {
     id: 'business-license-data',
-    label: 'Business License Data',
+    label: t('vendorVerification.tabitems.businessLicenses'),
     isClosable: true,
   },
   {
     id: 'payment-information-data',
-    label: 'Payment Information Data',
+    label: t('vendorVerification.tabitems.paymentinfo'),
     isClosable: true,
   },
 ]
@@ -48,7 +50,7 @@ const currentTab = ref<string>('summary-information')
 </script>
 
 <template>
-  <BreadcrumbView title="Vendor Verfication" :routes="bcRoutes" />
+  <BreadcrumbView :title="$t('vendorVerification.breadcrums.title')" :routes="bcRoutes" />
   <UiTabClosable :tabs="tabsItem" v-model="currentTab" />
 
   <SummaryInformation v-if="currentTab === 'summary-information'" />
