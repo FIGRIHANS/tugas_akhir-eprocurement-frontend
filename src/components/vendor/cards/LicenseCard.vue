@@ -54,17 +54,17 @@ watch(
 <template>
   <div class="card card-grid">
     <div class="card-header">
-      <div class="card-title">Business Licenses</div>
+      <div class="card-title">{{ $t('vendorVerification.businessLicenses.businesslicenses') }}</div>
     </div>
     <div class="card-table scrollable-x-auto">
       <table class="table align-middle table-border">
         <thead>
           <tr class="text-nowrap">
-            <th>License Type</th>
-            <th>License Number</th>
-            <th>Start Date</th>
-            <th>End Date</th>
-            <th>Document</th>
+            <th>{{ $t('vendorVerification.businessLicenses.licensetype') }}</th>
+            <th>{{ $t('vendorVerification.businessLicenses.licensenumber') }}</th>
+            <th>{{ $t('vendorVerification.businessLicenses.startdate') }}</th>
+            <th>{{ $t('vendorVerification.businessLicenses.enddate') }}</th>
+            <th>{{ $t('vendorVerification.businessLicenses.document') }}</th>
           </tr>
         </thead>
         <tbody class="text-nowrap">
@@ -104,7 +104,11 @@ watch(
                 @click="download(item.documentUrl)"
               >
                 <UiIcon name="cloud-download" variant="duotone" />
-                <span>Download Document</span>
+                <span>{{
+                  $t('general.download', {
+                    field: $t('vendorVerification.businessLicenses.document'),
+                  })
+                }}</span>
               </UiButton>
             </td>
           </tr>
