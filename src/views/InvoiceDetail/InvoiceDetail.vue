@@ -199,6 +199,10 @@ const checkIsNonPo = () => {
   return route.query.invoiceType === 'no_po'
 }
 
+const checkVerifikator1 = () => {
+  return userData.value.profile.profileId === 3190
+}
+
 const checkStatusCode = () => {
   let status = true
   switch (form.value.statusCode) {
@@ -286,12 +290,14 @@ const checkPo = () => {
 
 const checkVerifHeader = () => {
   const invoiceDateError = useCheckEmpty(form.value.invoiceDate).isError
-  const postingDateError = useCheckEmpty(form.value.postingDate).isError
-  const estimatedPaymentDateError = useCheckEmpty(form.value.estimatedPaymentDate).isError
   const documentNoError = useCheckEmpty(form.value.documentNo).isError
-  const paymentMethodError = useCheckEmpty(form.value.paymentMethodCode).isError
-  const transferNewsError = useCheckEmpty(form.value.transferNews).isError
-  const notesError = useCheckEmpty(form.value.notes).isError
+  const creditCardBillingError = checkVerifikator1() ? useCheckEmpty(form.value.creditCardBillingId).isError : false
+  
+  const postingDateError = !checkVerifikator1() ? useCheckEmpty(form.value.postingDate).isError : false
+  const estimatedPaymentDateError = !checkVerifikator1() ? useCheckEmpty(form.value.estimatedPaymentDate).isError : false
+  const paymentMethodError = !checkVerifikator1() ? useCheckEmpty(form.value.paymentMethodCode).isError : false
+  const transferNewsError = !checkVerifikator1() ? useCheckEmpty(form.value.transferNews).isError : false
+  const notesError = !checkVerifikator1() ? useCheckEmpty(form.value.notes).isError : false
 
   if (
     invoiceDateError ||
@@ -300,6 +306,7 @@ const checkVerifHeader = () => {
     documentNoError ||
     paymentMethodError ||
     transferNewsError ||
+    creditCardBillingError ||
     notesError
   )
     return false
