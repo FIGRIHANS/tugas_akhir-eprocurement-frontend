@@ -17,7 +17,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, defineExpose, defineAsyncComponent, watch } from 'vue'
+import { ref, computed, defineAsyncComponent, watch } from 'vue'
 import IconUpload from './PdfUpload/IconUpload.vue'
 import { useUploadStore } from '@/stores/general/upload'
 import { KTModal } from '@/metronic/core'
