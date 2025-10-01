@@ -137,8 +137,13 @@ watch(
 watch(
   () => selectAll.value,
   () => {
+    const listIsActive = listItem.value.filter((item) => item.isActive)
     for (const item of listItem.value) {
-      item.isActive = !item.isActive
+      if (listIsActive.length !== listItem.value.length) {
+        item.isActive = true
+      } else {
+        item.isActive = false
+      }
     }
   }
 )

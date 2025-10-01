@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col gap-[16px]">
     <p class="text-base font-semibold">Additional Cost</p>
-    <button class="btn btn-outline btn-primary w-fit" @click="addNew">
+    <button v-if="!checkVerifikator1()" class="btn btn-outline btn-primary w-fit" @click="addNew">
       <i class="ki-duotone ki-plus-circle"></i>
       Add Additional Cost
     </button>
@@ -163,9 +163,11 @@ import type { itemsCostType } from '../../types/additionalCost'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
+import { useLoginStore } from '@/stores/views/login'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const verificationApi = useInvoiceVerificationStore()
+const loginApi = useLoginStore()
 const form = inject<Ref<formTypes>>('form')
 const columns = ref([
   'Action',
@@ -206,6 +208,7 @@ const costCenterList = computed(() => invoiceMasterApi.costCenterList)
 const profitCenter = computed(() => invoiceMasterApi.profilCenterList)
 const whtTypeList = computed(() => invoiceMasterApi.whtTypeList)
 const whtCodeList = computed(() => invoiceMasterApi.whtCodeList)
+const userData = computed(() => loginApi.userData)
 
 const checkIsEdit = () => {
   const result = form?.value.additionalCosts.findIndex((item) => item.isEdit)
@@ -214,6 +217,10 @@ const checkIsEdit = () => {
 
 const checkPoPib = () => {
   return form?.value.invoiceTypeCode === 902
+}
+
+const checkVerifikator1 = () => {
+  return userData.value.profile.profileId === 3190
 }
 
 const addNew = () => {

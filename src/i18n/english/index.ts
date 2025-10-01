@@ -10,6 +10,9 @@ import { equipmentData } from './equipmentData'
 import { experienceData } from './experienceData'
 import { expertPersonnelData } from './expertPersonnelData'
 import { otherDocumentData } from './otherDocumentData'
+import { companyInformation } from './companyInformation'
+import { vendorMaster } from './vendorMaster'
+import { vendorBlacklist } from './vendorBlacklist'
 import vendor from './vendor'
 import vendorVerification from './vendorVerification'
 
@@ -26,6 +29,9 @@ export default {
   experienceData: experienceData,
   expertPersonnelData: expertPersonnelData,
   otherDocumentData: otherDocumentData,
+  companyInformation: companyInformation,
+  vendorMaster: vendorMaster,
+  vendorBlacklist: vendorBlacklist,
   vendor,
   vendorVerification,
 }
