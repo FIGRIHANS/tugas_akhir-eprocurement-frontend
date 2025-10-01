@@ -144,7 +144,7 @@ watch(
 
           <!-- empty data -->
           <tr v-else-if="!blacklistStore.blacklist.items.length" class="text-center">
-            <td :colspan="tableCols.length">No data</td>
+            <td :colspan="tableCols.length">{{ $t('vendorBlacklist.table.noData') }}</td>
           </tr>
 
           <!-- show data -->
@@ -216,14 +216,28 @@ watch(
 
     <ModalSuccess
       id="modal-success"
-      :title="`Blacklist Vendor Request ${mode === 'approve' ? 'Approved' : 'Rejected'}`"
-      :text="`Blacklist Vendor request has been successfully ${mode === 'approve' ? 'Approved' : 'Rejected'}.`"
+      :title="
+        $t('vendorBlacklist.modal.success.title', {
+          action:
+            mode === 'approve'
+              ? $t('vendorBlacklist.actions.approved')
+              : $t('vendorBlacklist.actions.rejected'),
+        })
+      "
+      :text="
+        $t('vendorBlacklist.modal.success.message', {
+          action:
+            mode === 'approve'
+              ? $t('vendorBlacklist.actions.approved')
+              : $t('vendorBlacklist.actions.rejected'),
+        })
+      "
     />
 
     <ModalError
       id="modal-error"
-      :title="`Failed to ${mode} Blacklist Vendor Request`"
-      :text="`Blacklist Vendor request failed to ${mode}.`"
+      :title="$t('vendorBlacklist.modal.error.title', { action: mode })"
+      :text="$t('vendorBlacklist.modal.error.message', { action: mode })"
     />
   </div>
 </template>
