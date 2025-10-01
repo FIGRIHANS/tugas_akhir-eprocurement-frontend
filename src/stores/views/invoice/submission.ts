@@ -30,6 +30,7 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
   const detailPo = ref<ParamsSubmissionTypes>()
   const detailNonPo = ref<ParamsSubmissionTypes>()
   const responseCheckBudget = ref<ResponseCheckBudgetTypes>()
+  const errorMessageSubmission = ref<string>('')
 
   const getSubmissionStatus = async () => {
     const response: ApiResponse<SubmissionStatusTypes[]> = await invoiceApi.get(
@@ -212,6 +213,7 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
     detailNonPo,
     listNonPo,
     responseCheckBudget,
+    errorMessageSubmission,
     getSubmissionStatus,
     getDocumentType,
     getTaxCalculation,

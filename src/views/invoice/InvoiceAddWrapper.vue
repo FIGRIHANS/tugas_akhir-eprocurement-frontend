@@ -105,7 +105,7 @@
       </div>
     </div>
     <ModalSuccess :isDraft="isClickDraft" @afterClose="goToList" />
-    <ModalErrorDocumentNumberModal />
+    <ErrorSubmissionModal />
     <ModalSuccessBudgetCheck @afterClose="isCheckBudget = true" />
     <ModalFailedBudgetCheck @afterClose="isCheckBudget = false" />
   </div>
@@ -156,8 +156,8 @@ const InvoicePreview = defineAsyncComponent(() => import('./InvoiceAddWrapper/In
 const ModalSuccess = defineAsyncComponent(
   () => import('./InvoiceAddWrapper/InvoicePreview/ModalSuccess.vue'),
 )
-const ModalErrorDocumentNumberModal = defineAsyncComponent(
-  () => import('./InvoiceAddWrapper/ErrorDocumentNumberModal.vue'),
+const ErrorSubmissionModal = defineAsyncComponent(
+  () => import('./InvoiceAddWrapper/ErrorSubmissionModal.vue'),
 )
 const ModalSuccessBudgetCheck = defineAsyncComponent(
   () => import('./InvoiceAddWrapper/ModalSuccessBudgetCheck.vue'),
@@ -735,11 +735,10 @@ const setAfterResponsePost = (response) => {
       }
     }
   } else {
-    if (response.result.message.includes('Invoice Document Number')) {
-      const idModal = document.querySelector('#error_document_number_modal')
-      const modal = KTModal.getInstance(idModal as HTMLElement)
-      modal.show()
-    }
+    invoiceApi.errorMessageSubmission = response.result.message
+    const idModal = document.querySelector('#error_submission_modal')
+    const modal = KTModal.getInstance(idModal as HTMLElement)
+    modal.show()
   }
 }
 
