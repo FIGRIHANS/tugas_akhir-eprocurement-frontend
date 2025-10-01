@@ -22,6 +22,7 @@ export const companyDeed = {
     cancel: 'Cancel',
     save: 'Save',
     saving: 'Saving...',
+    uploadPlaceholder: 'Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)',
 
     // Validation messages
     validation: {
@@ -122,5 +123,6 @@ export const companyDeed = {
     // Pagination
     show: 'Show',
     perPage: 'per page',
+    from: 'from',
   },
 }

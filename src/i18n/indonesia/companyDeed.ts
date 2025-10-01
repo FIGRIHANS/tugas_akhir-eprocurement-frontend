@@ -22,6 +22,7 @@ export const companyDeed = {
     cancel: 'Batal',
     save: 'Simpan',
     saving: 'Menyimpan...',
+    uploadPlaceholder: 'Unggah file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)',
 
     // Validation messages
     validation: {
@@ -123,5 +124,6 @@ export const companyDeed = {
     // Pagination
     show: 'Tampilkan',
     perPage: 'per halaman',
+    from: 'dari',
   },
 }
