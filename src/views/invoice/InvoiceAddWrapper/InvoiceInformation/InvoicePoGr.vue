@@ -239,7 +239,7 @@ const searchItem = () => {
 }
 
 const addItemInvoiceDp = () => {
-  const poNumber = search.value?.toString() ?? form?.invoicePoGr[0].poNo ?? ''
+  const poNumber = search.value?.toString() ?? form?.invoicePoGr[0].poNo.toString() ?? ''
   if (poNumber.length !== 10) return searchError.value = true
   isDisabledSearch.value = true
   invoiceApi.getAvailableDp(poNumber, form?.vendorId || '', formEdit.itemAmountLC || form?.invoicePoGr[0].itemAmountLC || 0)
