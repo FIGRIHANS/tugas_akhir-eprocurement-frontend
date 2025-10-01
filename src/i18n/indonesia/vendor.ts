@@ -26,7 +26,7 @@ const approvalFilters = {
 }
 
 const pagination = {
-  show: 'Showing { start } to { end } of { total } data',
+  show: 'Menampilkan { start } sampai { end } dari { total } data',
 }
 
 export default {
