@@ -44,6 +44,7 @@ export const companyDeed = {
     document: 'Dokumen',
     add: 'Tambah',
     save: 'Simpan',
+    selectDate: 'Pilih Tanggal',
 
     // Validation
     validation: {
@@ -101,6 +102,11 @@ export const companyDeed = {
     download: 'Unduh',
     hooray: 'Berhasil!',
     successMessage: 'Data berhasil disimpan. Terima kasih atas partisipasi Anda!',
+    companyCategory: 'Kategori Perusahaan',
+    companyAddress: 'Alamat Perusahaan',
+    datePlaceholder: 'Pilih Tanggal',
+    uploadHint: 'Unggah berkas di sini',
+    data: 'data',
 
     // Error modal
     failed: 'Gagal',

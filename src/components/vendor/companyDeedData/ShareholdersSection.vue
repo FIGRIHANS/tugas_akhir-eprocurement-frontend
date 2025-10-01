@@ -12,11 +12,10 @@ import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import AttachmentView from '@/components/ui/attachment/AttachmentView.vue'
 import UiLoading from '@/components/UiLoading.vue'
 import { formatDate } from '@/composables/date-format'
-import { useChangeDataEmailStore } from '@/stores/vendor/email-change-data'
 import { useShareunits, useTypeShareholders } from '@/stores/vendor/reference'
 import type { IShareholderPayload } from '@/stores/vendor/types/vendor'
 import { useVendorUploadStore } from '@/stores/vendor/upload'
-import { useCompanyDeedDataStore, useVendorAdministrationStore } from '@/stores/vendor/vendor'
+import { useCompanyDeedDataStore } from '@/stores/vendor/vendor'
 import { useLoginStore } from '@/stores/views/login'
 import axios from 'axios'
 import moment from 'moment'
@@ -53,8 +52,6 @@ const userLoginStore = useLoginStore()
 const typeShareholders = useTypeShareholders()
 const shareUnits = useShareunits()
 const companyDeedDataStore = useCompanyDeedDataStore()
-const adminStore = useVendorAdministrationStore()
-const changeDataEmailStore = useChangeDataEmailStore()
 
 const route = useRoute()
 

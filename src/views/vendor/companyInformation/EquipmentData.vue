@@ -219,7 +219,7 @@ import { useRoute } from 'vue-router'
 import { KTModal } from '@/metronic/core'
 
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
-import { useEquipmentDataStore, useVendorAdministrationStore } from '@/stores/vendor/vendor'
+import { useEquipmentDataStore } from '@/stores/vendor/vendor'
 import { useLoginStore } from '@/stores/views/login'
 
 import type { EquipmentDataType, PayloadEquipmentDataType } from '@/stores/vendor/types/vendor'
@@ -235,13 +235,10 @@ import UiBadge from '@/components/ui/atoms/badge/UiBadge.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
-import { useChangeDataEmailStore } from '@/stores/vendor/email-change-data'
 
 const vendorMasterData = useVendorMasterDataStore()
 const equipmentDataStore = useEquipmentDataStore()
 const loginStore = useLoginStore()
-const adminStore = useVendorAdministrationStore()
-const changeDataEmailStore = useChangeDataEmailStore()
 
 const route = useRoute()
 const modal = ref()
@@ -444,14 +441,6 @@ const submitData = async () => {
     }
 
     await equipmentDataStore.postData(payload.value)
-    await changeDataEmailStore.sendEmail({
-      recepientName: adminStore.data.vendorName,
-      recepients: {
-        emailTo: adminStore.data.vendorEmail,
-        emailCc: '',
-        emailBcc: '',
-      },
-    })
 
     closeModal('confirm')
     modalTrigger.value.success = true
