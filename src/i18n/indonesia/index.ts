@@ -11,6 +11,7 @@ import { experienceData } from './experienceData'
 import { expertPersonnelData } from './expertPersonnelData'
 import { otherDocumentData } from './otherDocumentData'
 import { companyInformation } from './companyInformation'
+import { vendorMaster } from './vendorMaster'
 import vendor from './vendor'
 import vendorVerification from './vendorVerification'
 
@@ -28,6 +29,7 @@ export default {
   expertPersonnelData: expertPersonnelData,
   otherDocumentData: otherDocumentData,
   companyInformation: companyInformation,
+  vendorMaster: vendorMaster,
   vendor,
   vendorVerification,
 }
