@@ -1,21 +1,24 @@
 <script setup lang="ts">
 import BreadcrumbView from '@/components/BreadcrumbView.vue'
 import UiTab from '@/components/ui/atoms/tab/UiTab.vue'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 const route = useRoute()
 const router = useRouter()
-const tabs = [
+const { t } = useI18n()
+
+const tabs = computed(() => [
   {
-    label: 'Pending Blacklist',
+    label: t('vendorBlacklist.tabs.pendingBlacklist'),
     value: 'vendor-pending-blacklist',
   },
   {
-    label: 'Blacklist Vendor',
+    label: t('vendorBlacklist.tabs.blacklistVendor'),
     value: 'vendor-blacklist-list',
   },
-]
+])
 const currentTab = ref('')
 
 const handleChange = (value: string) => {
@@ -28,8 +31,8 @@ onMounted(() => {
 </script>
 <template>
   <BreadcrumbView
-    title="Vendor Blacklist"
-    :routes="[{ name: 'Vendor blacklist', to: '/vendor-blacklist' }]"
+    :title="$t('vendorBlacklist.title')"
+    :routes="[{ name: $t('vendorBlacklist.breadcrumb.vendorBlacklist'), to: '/vendor-blacklist' }]"
   />
   <UiTab :items="tabs" v-model="currentTab" @update:model-value="handleChange" />
   <RouterView v-slot="{ Component }">

@@ -111,18 +111,22 @@ const handleSubmit = async () => {
 onMounted(periodStore.getPeriod)
 </script>
 <template>
-  <UiModal v-model="open" title="Blacklist Vendor" size="sm">
+  <UiModal v-model="open" :title="$t('vendorBlacklist.modal.blacklist.title')" size="sm">
     <form action="" class="space-y-4" @submit.prevent="handleSubmit">
       <!-- period -->
       <UiSelect
         v-model="period"
-        placeholder="Select Type"
-        label="Blacklist Type"
+        :placeholder="$t('vendorBlacklist.modal.blacklist.fields.selectType')"
+        :label="$t('vendorBlacklist.modal.blacklist.fields.blacklistType')"
         :options="periodOpions"
         text-key="text"
         value-key="value"
         required
-        :hint-text="inputError.includes('period') ? 'Blacklist type is Required' : ''"
+        :hint-text="
+          inputError.includes('period')
+            ? $t('vendorBlacklist.modal.blacklist.validation.blacklistTypeRequired')
+            : ''
+        "
         :error="inputError.includes('period')"
         @update:model-value="handleSelectPeriod"
       />
@@ -135,7 +139,7 @@ onMounted(periodStore.getPeriod)
               'absolute z-10 top-0 left-0 -mt-2 ml-2 bg-white px-1 text-gray-500 text-[11px] font-normal',
             ]"
           >
-            Start Date
+            {{ $t('vendorBlacklist.modal.blacklist.fields.startDate') }}
           </div>
           <DatePicker
             v-model="tglMulai"
@@ -159,7 +163,9 @@ onMounted(periodStore.getPeriod)
             for="file"
             class="flex items-center px-3 text-primary bg-opacity-20 bg-blue-400 flex-1 cursor-pointer"
           >
-            <div>{{ file ? file.name : 'Upload supporting files' }}</div>
+            <div>
+              {{ file ? file.name : $t('vendorBlacklist.modal.blacklist.fields.uploadFiles') }}
+            </div>
             <input
               type="file"
               name="file"
@@ -176,13 +182,15 @@ onMounted(periodStore.getPeriod)
             :disabled="uploadStore.loading || !file"
           >
             <UiLoading size="sm" v-if="uploadStore.loading" />
-            <span v-else>Upload</span>
+            <span v-else>{{ $t('vendorBlacklist.modal.blacklist.buttons.upload') }}</span>
           </button>
         </div>
         <span class="text-danger text-[12px]" v-if="uploadStore.error">{{
           uploadStore.error
         }}</span>
-        <span class="text-success text-[12px]" v-if="uploadedFile?.name">Upload file success</span>
+        <span class="text-success text-[12px]" v-if="uploadedFile?.name">{{
+          $t('vendorBlacklist.modal.blacklist.messages.uploadSuccess')
+        }}</span>
       </div>
 
       <!-- reason -->
@@ -207,13 +215,13 @@ onMounted(periodStore.getPeriod)
       <div class="flex gap-3">
         <UiButton class="flex-1 justify-center" :outline="true" type="button" @click="open = !open">
           <UiIcon name="black-left-line" variant="duotone" />
-          <span>Cancel</span>
+          <span>{{ $t('vendorBlacklist.modal.blacklist.buttons.cancel') }}</span>
         </UiButton>
         <UiButton class="flex-1 justify-center" variant="danger" :disabled="loading">
-          <span v-if="loading">Progress</span>
+          <span v-if="loading">{{ $t('vendorBlacklist.modal.blacklist.buttons.progress') }}</span>
           <template v-else>
             <UiIcon name="cross-circle" variant="duotone" />
-            <span>Blacklist</span>
+            <span>{{ $t('vendorBlacklist.modal.blacklist.buttons.blacklist') }}</span>
           </template>
         </UiButton>
       </div>
