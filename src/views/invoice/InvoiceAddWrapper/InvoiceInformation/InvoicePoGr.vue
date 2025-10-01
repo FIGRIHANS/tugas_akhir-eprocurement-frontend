@@ -88,7 +88,7 @@
                   <span v-else>{{ form?.currency === item.currencyLC ? useFormatIdr(item.vatAmount || 0) : useFormatUsd(item.vatAmount || 0) }}</span>
                 </td>
                 <td v-if="checkInvoiceDp()">
-                  <span v-if="!item.isEdit">{{ useFormatIdr(item.itemAmountLC) }}</span>
+                  <span v-if="!item.isEdit">{{ form?.currency === item.currencyLC ? useFormatIdr(item.itemAmountLC) : useFormatUsd(formEdit.itemAmountLC) }}</span>
                   <input v-else v-model="formEdit.itemAmountLC" type="number" class="input" />
                 </td>
                 <td>
@@ -110,7 +110,7 @@
                 <td v-if="form?.invoiceType !== '903'">-</td>
                 <td v-if="form?.invoiceType !== '903'">-</td>
                 <td v-if="form?.invoiceType !== '903'">{{ form?.currency === item.currencyLC ? useFormatIdr(item.whtBaseAmount) : useFormatUsd(item.whtBaseAmount) }}</td>
-                <td v-if="!checkInvoiceDp()">-</td>
+                <td>-</td>
                 <td>{{ item.department || '-' }}</td>
               </tr>
             </template>
@@ -517,6 +517,8 @@ watch(
           enteredOn: '',
           purchasingOrg: '',
           department: '',
+          whtBaseAmount: 0,
+          whtAmount: 0,
           isEdit: false
         } as itemsPoGrType
 
