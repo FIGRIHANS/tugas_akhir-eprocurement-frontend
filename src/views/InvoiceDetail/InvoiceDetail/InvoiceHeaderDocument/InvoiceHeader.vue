@@ -70,6 +70,10 @@
       <p class="font-normal text-sm text-gray-600">Transfer News</p>
       <p class="font-normal text-sm">{{ form.transferNews || '-' }}</p>
     </div>
+    <div v-if="checkPoCc()" class="flex items-center justify-between gap-[10px]">
+      <p class="font-normal text-sm text-gray-600">Credit Card Billing ID</p>
+      <p class="font-normal text-sm">{{ form.creditCardBillingId || '-' }}</p>
+    </div>
     <div class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Currency</p>
       <p class="font-normal text-sm">{{ form.currCode || '-' }}</p>
@@ -102,24 +106,28 @@
 </template>
 
 <script lang="ts" setup>
-import { inject } from 'vue'
+import { inject, type Ref } from 'vue'
 import type { formTypes } from '../../types/invoiceDetail'
 import moment from 'moment'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
 
-const form = inject<formTypes>('form')
+const form = inject<Ref<formTypes>>('form')
 
 const checkIsNonPo = () => {
   return route.query.invoiceType === 'no_po'
 }
 
 const checkPo = () => {
-  return form?.invoiceTypeCode === 901
+  return form.value.invoiceTypeCode === 901
 }
 
 const checkPoPib = () => {
-  return form?.invoiceTypeCode === 2
+  return form.value.invoiceTypeCode === 902
+}
+
+const checkPoCc = () => {
+  return form.value.invoiceTypeCode === 903
 }
 </script>

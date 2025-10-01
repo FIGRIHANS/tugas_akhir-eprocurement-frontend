@@ -24,7 +24,7 @@
           <tbody>
             <tr v-for="(item, index) in form.invoicePoGr" :key="index" class="pogr__field-items">
               <td class="flex items-center justify-around gap-[8px]">
-                <button class="btn btn-outline btn-icon btn-primary" :disabled="checkIsEdit() && !item.isEdit" @click="goEdit(item)">
+                <button class="btn btn-outline btn-icon btn-primary" :disabled="(checkIsEdit() && !item.isEdit) || checkVerifikator1()" @click="goEdit(item)">
                   <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>
                   <i v-else class="ki-duotone ki-check-circle"></i>
                 </button>
@@ -190,11 +190,13 @@ import { ref, reactive, computed, inject, watch, onMounted, type Ref } from 'vue
 import type { formTypes } from '../../types/invoiceDetailEdit'
 import { defaultColumn, PoPibColumn, invoiceDpColumn, poCCColumn } from '@/static/invoicePoGr'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
+import { useLoginStore } from '@/stores/views/login'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import type { itemsPoGrType } from '../../types/invoicePoGr'
 import moment from 'moment'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
+const loginApi = useLoginStore()
 const form = inject<Ref<formTypes>>('form')
 const columns = ref<string[]>([])
 const formEdit = reactive({
@@ -210,6 +212,7 @@ const formEdit = reactive({
 const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
 const whtTypeList = computed(() => invoiceMasterApi.whtTypeList)
 const whtCodeList = computed(() => invoiceMasterApi.whtCodeList)
+const userData = computed(() => loginApi.userData)
 
 const checkIsEdit = () => {
   const result = form?.value.invoicePoGr.findIndex((item) => item.isEdit)
@@ -222,6 +225,10 @@ const checkInvoiceDp = () => {
 
 const checkPoPib = () => {
   return form?.value.invoiceTypeCode === 902
+}
+
+const checkVerifikator1 = () => {
+  return userData.value.profile.profileId === 3190
 }
 
 const resetFormEdit = () => {

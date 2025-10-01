@@ -89,16 +89,15 @@ const setToForm = (name: string, value: number) => {
 const setCalculation = () => {
   listCalculation.value = []
   for (const item of listName.value) {
-    if ((typeForm.value === 'nonpo' && item !== 'Additional Cost') || typeForm.value === 'po') {
-      const amount = setCount(item)
-      const data = {
-        name: item,
-        amount: amount.toString(),
-        currency: form?.currency || ''
-      }
-      listCalculation.value.push(data)
-      setToForm(item, amount)
+    if (typeForm.value === 'nonpo' && item !== 'Additional Cost') return
+    const amount = setCount(item)
+    const data = {
+      name: item,
+      amount: amount.toString(),
+      currency: form?.currency || ''
     }
+    listCalculation.value.push(data)
+    setToForm(item, amount)
   }
 }
 

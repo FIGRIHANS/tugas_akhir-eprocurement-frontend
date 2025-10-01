@@ -88,16 +88,15 @@ const checkIsNonPo = () => {
 const setCalculation = () => {
   listCalculation.value = []
   for (const item of listName.value) {
-    if ((checkIsNonPo() && item !== 'Additional Cost') || typeForm.value === 'po') {
-      const amount = setCount(item)
-      const data = {
-        name: item,
-        amount: amount.toString(),
-        currency: form.value.currCode || ''
-      }
-      listCalculation.value.push(data)
-      setToForm(item, amount)
+    if (checkIsNonPo() && item === 'Additional Cost') return
+    const amount = setCount(item)
+    const data = {
+      name: item,
+      amount: amount.toString(),
+      currency: form.value.currCode || ''
     }
+    listCalculation.value.push(data)
+    setToForm(item, amount)
   }
 }
 
