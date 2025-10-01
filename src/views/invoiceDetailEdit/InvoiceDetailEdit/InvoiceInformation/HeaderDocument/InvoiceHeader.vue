@@ -50,37 +50,39 @@
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Posting Date
-          <span class="text-red-500 ml-[4px]">*</span>
+          <span v-if="!checkVerifikator1()" class="text-red-500 ml-[4px]">*</span>
         </label>
-        <DatePicker v-model="form.postingDate" format="yyyy/MM/dd" :error="form.postingDateError" class="w-full -ml-[15px]" teleport />
+        <input v-if="checkVerifikator1()" v-model="form.postingDate" class="input" placeholder="" disabled />
+        <DatePicker v-else v-model="form.postingDate" format="yyyy/MM/dd" :error="form.postingDateError" class="w-full -ml-[15px]" teleport />
       </div>
       <!-- Invoicing Party -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Invoicing Party
         </label>
-        <input v-model="form.invoicingParty" class="input" placeholder="" :class="{ 'border-danger': form.invoicingPartyError }" />
+        <input v-model="form.invoicingParty" class="input" placeholder="" :class="{ 'border-danger': form.invoicingPartyError }" :disabled="checkVerifikator1()" />
       </div>
       <!-- Estimated Payment Date * -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Estimated Payment Date
-          <span class="text-red-500 ml-[4px]">*</span>
+          <span v-if="!checkVerifikator1()" class="text-red-500 ml-[4px]">*</span>
         </label>
-        <DatePicker v-model="form.estimatedPaymentDate" format="yyyy/MM/dd" :disabled="checkIsAccountingTax()" :error="form.estimatedPaymentDateError" class="w-full -ml-[15px]" teleport />
+        <input v-if="checkVerifikator1()" v-model="form.estimatedPaymentDate" class="input" placeholder="" disabled />
+        <DatePicker v-else v-model="form.estimatedPaymentDate" format="yyyy/MM/dd" :disabled="checkIsAccountingTax()" :error="form.estimatedPaymentDateError" class="w-full -ml-[15px]" teleport />
       </div>
       <!-- Tax Document No.  -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Tax Document No.
         </label>
-        <input v-model="form.taxNo" class="input" placeholder="" :class="{ 'border-danger': form.taxNoError }" />
+        <input v-model="form.taxNo" class="input" placeholder="" :class="{ 'border-danger': form.taxNoError }" :disabled="checkVerifikator1()" />
       </div>
       <!-- Invoice Vendor No. -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Invoice Vendor No.
-          <span class="text-red-500 ml-[4px]">*</span>
+          <span v-if="!checkIsAccountingTax()" class="text-red-500 ml-[4px]">*</span>
         </label>
         <input v-model="form.documentNo" class="input" placeholder="" :class="{ 'border-danger': form.documentNoError }" :disabled="checkIsAccountingTax()" />
       </div>
@@ -88,9 +90,9 @@
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Payment Method
-          <span class="text-red-500 ml-[4px]">*</span>
+          <span v-if="!checkIsAccountingTax() && !checkVerifikator1()" class="text-red-500 ml-[4px]">*</span>
         </label>
-        <select v-model="form.paymentMethodCode" class="select" placeholder="" :class="{ 'border-danger': form.paymentMethodError }" :disabled="checkIsAccountingTax()">
+        <select v-model="form.paymentMethodCode" class="select" placeholder="" :class="{ 'border-danger': form.paymentMethodError }" :disabled="checkIsAccountingTax() || checkVerifikator1()">
           <option v-for="item of paymentMethodList" :key="item.code" :value="item.code">
             {{ item.name }}
           </option>
@@ -101,15 +103,15 @@
         <label class="form-label">
           Assignment
         </label>
-        <input v-model="form.assigment" class="input" placeholder="" :class="{ 'border-danger': form.assignmentError }" />
+        <input v-model="form.assigment" class="input" placeholder="" :class="{ 'border-danger': form.assignmentError }" :disabled="checkVerifikator1()" />
       </div>
       <!-- Transfer News -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Transfer News
-          <span class="text-red-500 ml-[4px]">*</span>
+          <span v-if="!checkIsAccountingTax() && !checkVerifikator1()" class="text-red-500 ml-[4px]">*</span>
         </label>
-        <input v-model="form.transferNews" class="input" placeholder="" :class="{ 'border-danger': form.transferNewsError }" :disabled="checkIsAccountingTax()" />
+        <input v-model="form.transferNews" class="input" placeholder="" :class="{ 'border-danger': form.transferNewsError }" :disabled="checkIsAccountingTax() || checkVerifikator1()" />
       </div>
       <!-- Credit Card Billing ID -->
       <div v-if="form.invoiceTypeCode === 903" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
@@ -142,7 +144,7 @@
         <label class="form-label">
           NPWP Reporting
         </label>
-        <input v-model="form.npwpReporting" class="input" placeholder="" :class="{ 'border-danger': form.npwpReportingError }" :disabled="isNpwrDisabled()" />
+        <input v-model="form.npwpReporting" class="input" placeholder="" :class="{ 'border-danger': form.npwpReportingError }" :disabled="isNpwrDisabled() || checkVerifikator1()" />
       </div>
       <!-- Remaining DP Amount -->
       <div v-if="form.invoiceDPCode === 9013" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
@@ -155,12 +157,13 @@
       <div v-if="form.invoiceDPCode === 9013" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           DP Amount Deduction
-          <span class="text-red-500 ml-[4px]">*</span>
+          <span v-if="!checkVerifikator1()" class="text-red-500 ml-[4px]">*</span>
         </label>
         <input
           v-model="form.dpAmountDeduction"
           class="input"
           placeholder=""
+          :disabled="checkVerifikator1()"
         />
       </div>
       <!-- Department -->
@@ -174,13 +177,14 @@
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Description
-          <span class="text-red-500 ml-[4px]">*</span>
+          <span v-if="!checkVerifikator1()" class="text-red-500 ml-[4px]">*</span>
         </label>
         <textarea
           v-model="form.notes"
           class="textarea"
           placeholder=""
           :class="{ 'border-danger': form.notesError }"
+          :disabled="checkVerifikator1()"
         ></textarea>
       </div>
     </div>
@@ -214,6 +218,10 @@ const checkIsNonPo = () => {
 
 const checkIsAccountingTax = () => {
   return userData.value.profile.profileId === 3003 || userData.value.profile.profileId === 3202
+}
+
+const checkVerifikator1 = () => {
+  return userData.value.profile.profileId === 3190
 }
 
 const getDpName = () => {
