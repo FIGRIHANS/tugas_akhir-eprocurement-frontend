@@ -48,6 +48,7 @@ export const invoiceDpColumn = [
   'WHT Type',
   'WHT Code',
   'WHT Base Amount',
+  'WHT Amount',
   'Department'
 ]
 
