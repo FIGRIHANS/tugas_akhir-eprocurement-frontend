@@ -1,27 +1,27 @@
 <template>
   <div>
     <p class="mt-[24px] text-justify">
-      To reset your password, please enter the email used during registration, make sure the email is active and we will send you a link to change your new password!
+      {{ $t('login.forgot.form.description') }}
     </p>
     <div class="mt-[24px]">
       <!-- input email -->
       <div>
-        <label class="font-normal text-[13px]">Email</label>
+        <label class="font-normal text-[13px]">{{ $t('login.forgot.form.email') }}</label>
         <input
           v-model="email"
           class="input mt-[8px]"
-          placeholder="email@email.com"
+          :placeholder="$t('login.forgot.form.emailPlaceholder')"
           type="email"
           :class="{
-            'forgot__error': emailError
+            forgot__error: emailError,
           }"
         />
         <p v-if="emailError" class="mt-[8px] text-red-500 text-[13px]">
-          We did not find the email you entered, please check the email you used for your first registration.
+          {{ $t('login.forgot.form.emailError') }}
         </p>
       </div>
       <button class="btn btn-primary mt-[20px] w-full justify-center">
-        Reset Password
+        {{ $t('login.forgot.form.resetButton') }}
       </button>
     </div>
   </div>
