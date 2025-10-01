@@ -134,7 +134,7 @@ onMounted(() => {
     <div class="flex justify-end space-x-3">
       <UiButton :outline="true" @click="router.go(-1)">
         <UiIcon name="black-left" variant="duotone" />
-        <span> Back </span>
+        <span> {{ $t('general.back') }} </span>
       </UiButton>
 
       <div
@@ -149,11 +149,11 @@ onMounted(() => {
           :disabled="isVerified"
         >
           <UiIcon name="cross-circle" variant="duotone" />
-          <span> Reject </span>
+          <span> {{ $t('general.reject') }} </span>
         </UiButton>
         <UiButton @click="modalVerify = true" :disabled="isVerified">
           <UiIcon name="check-squared" variant="duotone" />
-          <span> Verify </span>
+          <span> {{ $t('general.verify') }} </span>
         </UiButton>
       </div>
     </div>
@@ -185,13 +185,13 @@ onMounted(() => {
           @click="modalReject = !modalReject"
         >
           <UiIcon name="black-left-line" variant="duotone" />
-          <span>Cancel</span>
+          <span>{{ $t('general.cancle') }}</span>
         </UiButton>
         <UiButton class="flex-1 justify-center" variant="danger" :disabled="loading">
           <span v-if="loading"> Progress </span>
           <template v-else>
             <UiIcon name="cross-circle" variant="duotone" />
-            <span>Reject</span>
+            <span>{{ $t('general.reject') }}</span>
           </template>
         </UiButton>
       </div>
@@ -218,13 +218,13 @@ onMounted(() => {
           @click="modalVerify = !modalVerify"
         >
           <UiIcon name="black-left-line" variant="duotone" />
-          <span>Cancel</span>
+          <span>{{ $t('general.cancel') }}</span>
         </UiButton>
         <UiButton class="flex-1 justify-center" variant="primary" :disabled="loading">
           <span v-if="loading"> Progress </span>
           <template v-else>
             <UiIcon name="check-circle" variant="duotone" />
-            <span>Verify</span>
+            <span>{{ $t('general.verify') }}</span>
           </template>
         </UiButton>
       </div>

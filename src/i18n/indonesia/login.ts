@@ -20,7 +20,7 @@ export const login = {
     signIn: 'Masuk',
     admin: 'admin',
     email: 'Email',
-    emailPlaceholder: 'email@email.com',
+    emailPlaceholder: 'Masukkan email Anda',
     username: 'Username',
     usernamePlaceholder: 'Username',
     password: 'Password',
