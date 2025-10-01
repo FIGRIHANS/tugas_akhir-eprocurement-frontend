@@ -35,5 +35,20 @@ export const login = {
   // Forgot Password
   forgot: {
     title: 'Lupa Password',
+    form: {
+      description:
+        'Untuk reset password Anda, silakan masukkan email yang digunakan saat registrasi, pastikan email aktif dan kami akan mengirimkan link untuk mengganti password baru Anda!',
+      email: 'Email',
+      emailPlaceholder: 'Masukkan email Anda',
+      resetButton: 'Reset Password',
+      emailError:
+        'Kami tidak menemukan email yang Anda masukkan, silakan periksa email yang Anda gunakan untuk registrasi pertama.',
+    },
+    success: {
+      title: 'Email Terkirim',
+      message:
+        'Kami telah mengirimkan link untuk membuat password baru ke alamat email Anda, silakan buka email Anda dan ikuti petunjuk di email Anda!',
+      backButton: 'Kembali',
+    },
   },
 }
