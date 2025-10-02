@@ -652,7 +652,7 @@ const setDataDefault = () => {
     tax: tax,
     referenceDocument: reference,
     otherDocument: other,
-    creditCardBillingId: data?.header.creditCardBillingId || '',
+    creditCardBillingId: data?.header.creditCardBillingID || '',
     idAlternative: data?.alternativePayee && data?.alternativePayee.length !== 0 ? data?.alternativePayee[0].id : 0,
     isAlternativePayee: data?.alternativePayee && data?.alternativePayee.length !== 0 ? data?.alternativePayee[0].isAlternativePayee : false,
     isOneTimeVendor: data?.alternativePayee && data?.alternativePayee.length !== 0 ? data?.alternativePayee[0].isOneTimeVendor : false,
@@ -700,7 +700,7 @@ const mapDataVerif = () => {
         assigment: form.value.assigment,
         transferNews: form.value.transferNews,
         npwpReporting: form.value.npwpReporting,
-        creditCardBillingId: form.value.creditCardBillingId,
+        creditCardBillingID: form.value.creditCardBillingId,
       },
       payment: {
         paymentId: form.value.paymentId,
