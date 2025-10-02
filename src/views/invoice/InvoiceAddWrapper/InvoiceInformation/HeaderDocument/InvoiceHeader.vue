@@ -129,15 +129,15 @@
       <!-- Department -->
       <div v-if="checkIsNonPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
-          Department
+          Requestor
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
         <v-select
           v-model="form.department"
           class="customSelect w-full -ml-[15px]"
-          :get-option-label="(option: any) => `${option.code} - ${option.name}`"
-          :reduce="(option: any) => option.code"
-          :options="listCostCenter"
+          label="workflowDescription"
+          :reduce="(option: any) => option.workflowCode"
+          :options="listMatrixApproval"
           :class="{ 'error-select': form.departmentError }"
           appendToBody
         ></v-select>
@@ -210,7 +210,7 @@ const companyCodeList = computed(() => invoiceMasterApi.companyCode)
 const dpTypeList = computed(() => invoiceMasterApi.dpType)
 const listInvoiceTypePo = computed(() => invoiceMasterApi.invoicePoType)
 const listInvoiceTypeNonPo = computed(() => invoiceMasterApi.invoiceNonPoType)
-const listCostCenter = computed(() => invoiceMasterApi.costCenterList)
+const listMatrixApproval = computed(() => invoiceMasterApi.matrixApprovalList)
 
 const checkPo = () => {
   return typeForm.value === 'po'
@@ -250,9 +250,9 @@ watch(
 )
 
 watch(
-  () => form?.companyCode,
+  () => [form?.companyCode, form.invoiceType],
   () => {
-    if (form.companyCode) invoiceMasterApi.getActivity(form.companyCode || '')
+    if (form.companyCode && form.invoiceType) invoiceMasterApi.getMatrixApproval(form.invoiceType || '', form.companyCode || '')
   },
   {
     immediate: true

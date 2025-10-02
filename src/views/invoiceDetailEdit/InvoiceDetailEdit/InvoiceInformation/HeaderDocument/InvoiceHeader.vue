@@ -169,7 +169,7 @@
       <!-- Department -->
       <div v-if="checkIsNonPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
-          Department
+          Requestor
         </label>
         <input :value="form.department" class="input" placeholder="" disabled />
       </div>
