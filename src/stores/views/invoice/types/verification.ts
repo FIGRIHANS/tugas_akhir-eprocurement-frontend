@@ -57,7 +57,7 @@ interface ParamsVerificationHeaderTypes {
   assigment: string
   transferNews: string
   npwpReporting: string
-  creditCardBillingId: string
+  creditCardBillingID: string
 }
 
 interface ParamsVerificationItemTypes {
@@ -101,7 +101,7 @@ interface ParamsSubmissionHeader {
   npwpReporting: string
   remainingDpAmount: string
   dpAmountDeduction: string
-  creditCardBillingId: string
+  creditCardBillingID: string
   department: string
 }
 
