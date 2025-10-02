@@ -16,19 +16,17 @@ import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
 import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 
 import type { IVendorLegalDocumentPayload } from '@/stores/vendor/types/vendor'
-import { useCompanyDeedDataStore, useVendorAdministrationStore } from '@/stores/vendor/vendor'
+import { useCompanyDeedDataStore } from '@/stores/vendor/vendor'
 import { useVendorUploadStore } from '@/stores/vendor/upload'
 import { useLoginStore } from '@/stores/views/login'
 import moment from 'moment'
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import LPagination from '@/components/pagination/LPagination.vue'
-import { useChangeDataEmailStore } from '@/stores/vendor/email-change-data'
 
 const companyDeedDataStore = useCompanyDeedDataStore()
 const uploadStore = useVendorUploadStore()
 const userLoginStore = useLoginStore()
-const adminStore = useVendorAdministrationStore()
-const changeDataEmailStore = useChangeDataEmailStore()
+
 const { t } = useI18n()
 
 const route = useRoute()
