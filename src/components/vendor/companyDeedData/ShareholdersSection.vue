@@ -12,11 +12,10 @@ import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import AttachmentView from '@/components/ui/attachment/AttachmentView.vue'
 import UiLoading from '@/components/UiLoading.vue'
 import { formatDate } from '@/composables/date-format'
-import { useChangeDataEmailStore } from '@/stores/vendor/email-change-data'
 import { useShareunits, useTypeShareholders } from '@/stores/vendor/reference'
 import type { IShareholderPayload } from '@/stores/vendor/types/vendor'
 import { useVendorUploadStore } from '@/stores/vendor/upload'
-import { useCompanyDeedDataStore, useVendorAdministrationStore } from '@/stores/vendor/vendor'
+import { useCompanyDeedDataStore } from '@/stores/vendor/vendor'
 import { useLoginStore } from '@/stores/views/login'
 import axios from 'axios'
 import moment from 'moment'
@@ -24,6 +23,9 @@ import { computed, reactive, ref, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 import { z } from 'zod'
 import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const shareholderSchema = z.object({
   ownerName: z.string().min(1, 'Shareholder Name is required'),
@@ -50,12 +52,14 @@ const userLoginStore = useLoginStore()
 const typeShareholders = useTypeShareholders()
 const shareUnits = useShareunits()
 const companyDeedDataStore = useCompanyDeedDataStore()
-const adminStore = useVendorAdministrationStore()
-const changeDataEmailStore = useChangeDataEmailStore()
 
 const route = useRoute()
 
-const modalTitle = ref<string>('Add new shareholders')
+const modalTitle = computed(() => {
+  return mode.value === 'edit'
+    ? t('companyDeed.shareholders.edit')
+    : t('companyDeed.shareholders.addNew')
+})
 const isModalOpen = ref<boolean>(false)
 const isSaveLoading = ref<boolean>(false)
 const mode = ref<'add' | 'edit' | 'delete'>('add')
@@ -90,7 +94,6 @@ const payload = reactive<IShareholderPayload>({
 
 const handleOpenModal = () => {
   mode.value = 'add'
-  modalTitle.value = 'Add new shareholders'
   isModalOpen.value = true
 }
 
@@ -224,14 +227,6 @@ const handleDelete = async () => {
 const handleDropdown = (id: number, newMode: 'add' | 'edit' | 'delete') => {
   mode.value = newMode
   isModalOpen.value = true
-
-  switch (newMode) {
-    case 'edit':
-      modalTitle.value = 'Edit shareholders'
-      break
-    default:
-      break
-  }
 
   const shareholderData = companyDeedDataStore.shareholdersData.items.find(
     (item) => (item as unknown as IShareholderPayload).stockID === id,
@@ -453,7 +448,8 @@ watchEffect(async () => {
           :options="pageSizeOptions"
           class="w-16"
         />
-        {{ $t('companyDeed.common.perPage') }} from {{ paginationShareholders.total }} data
+        {{ $t('companyDeed.common.perPage') }} {{ $t('companyDeed.common.from') }}
+        {{ paginationShareholders.total }} data
       </div>
 
       <LPagination
@@ -495,7 +491,7 @@ watchEffect(async () => {
         />
         <UiFileUpload
           name="shareholderFile"
-          placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
+          :placeholder="$t('companyDeed.shareholders.uploadPlaceholder')"
           @added-file="uploadFile($event)"
           @upload-failed="handleUploadFailed()"
           :max-size="16000000"

@@ -32,7 +32,7 @@
       <template #dp-input="{ value }">
         <div class="input relative" :class="{ 'border-danger': error }">
           <input
-            placeholder="Select"
+            :placeholder="placeholder"
             :value="value"
             readonly
             class="min-w-[0px]"

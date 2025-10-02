@@ -66,19 +66,19 @@ const onSubmit = async () => {
     <div class="modal-content modal-center-y w-full md:w-[500px]">
       <div class="modal-body py-5">
         <img :src="information" width="150" class="mx-auto mb-3" />
-        <h3 class="text-center text-lg font-medium">Remove vendor from blacklist?</h3>
+        <h3 class="text-center text-lg font-medium">{{ $t('vendor.blacklist.removeTitle') }}</h3>
         <p class="text-center text-base text-gray-600 mb-5">
-          The vendor will be remove from blacklist
+          {{ $t('vendor.blacklist.removeText') }}
         </p>
         <ui-form-group hide-border :grid="2">
           <UiButton outline class="flex items-center justify-center" @click="onClose">
             <ui-icon name="black-left-line" variant="duotone" />
-            <span>Cancel</span>
+            <span>{{ $t('vendor.blacklist.cancelButton') }}</span>
           </UiButton>
           <UiButton class="flex items-center justify-center" @click="onSubmit" :disabled="loading">
             <ui-loading variant="white" v-if="loading" />
             <ui-icon name="check-circle" variant="duotone" v-else />
-            <span>Remove</span>
+            <span>{{ $t('vendor.blacklist.removeButton') }}</span>
           </UiButton>
         </ui-form-group>
       </div>
