@@ -51,7 +51,7 @@
         <p class="text-sm font-medium">{{ form.dpAmountDeduction || '-' }}</p>
       </div>
       <div v-if="checkIsNonPo()" :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
-        <p class="text-xs font-normal text-gray-700">Departement</p>
+        <p class="text-xs font-normal text-gray-700">Requestor</p>
         <p class="text-sm font-medium">{{ form.department || '-' }}</p>
       </div>
       <div v-if="form.invoiceType !== '903'" :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">

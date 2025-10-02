@@ -16,11 +16,7 @@
       <InvoicePoGr v-if="checkPo() && !isNonPo" class="mt-[24px]" />
       <InvoiceItem v-if="isNonPo" class="mt-[24px]" />
       <AdditionalCost
-        v-if="
-          (form.invoiceDPCode === 9011 && !isNonPo && checkPo()) ||
-          form.invoiceTypeCode === 902 ||
-          form.invoiceTypeCode === 903
-        "
+        v-if="!isNonPo && (checkIsWithoutDp() || !checkIsPoPib())"
         class="mt-[24px]"
       />
     </div>
@@ -201,6 +197,14 @@ const checkIsNonPo = () => {
 
 const checkVerifikator1 = () => {
   return userData.value.profile.profileId === 3190
+}
+
+const checkIsWithoutDp = () => {
+  return form.value.invoiceDPCode === 9011
+}
+
+const checkIsPoPib = () => {
+  return form.value.invoiceTypeCode === 902
 }
 
 const checkStatusCode = () => {
