@@ -1,16 +1,16 @@
 const blacklist = {
-  approveButton: 'Approve',
-  rejectButton: 'Reject',
-  cancelButton: 'Cancel',
-  removeButton: 'Remove',
-  downloadButton: 'Download',
-  reason: 'Reason',
-  reasonError: 'Reason is required',
-  rejectTitle: 'Reject vendor blacklist request',
-  approveTitle: 'Approve vendor blacklist request?',
-  approveText: 'Vendor will be blacklisted',
-  removeTitle: 'Remove vendor from blacklist?',
-  removeText: 'Vendor will be removed from blacklist',
+  approveButton: 'Setuju',
+  rejectButton: 'Tolak',
+  cancelButton: 'Batal',
+  removeButton: 'Hapus',
+  downloadButton: 'Unduh',
+  reason: 'Alasan',
+  reasonError: 'Alasan wajib diisi',
+  rejectTitle: 'Tolak permintaan blacklist vendor',
+  approveTitle: 'Setujui permintaan blacklist vendor?',
+  approveText: 'Vendor akan dimasukkan ke blacklist',
+  removeTitle: 'Hapus vendor dari blacklist?',
+  removeText: 'Vendor akan dihapus dari blacklist',
 }
 
 const masterFilters = {
