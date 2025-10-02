@@ -50,4 +50,30 @@ export const login = {
       backButton: 'Back',
     },
   },
+  reset: {
+    title: 'Enter New password',
+    description:
+      'Make sure your new password is strong and contains a combination of numbers, upper and lower case letters and a combination of characters!',
+    form: {
+      enterNewPassword: 'Enter New Password',
+      confirmNewPassword: 'Confirm New Password',
+      confirm: 'Confirm',
+    },
+  },
+  setNewPassword: {
+    title: 'Enter New Password',
+    form: {
+      description:
+        'Make sure your new password is strong and contains a combination of numbers, upper and lower case letters and a combination of characters!',
+      enterNewPassword: 'Enter New Password',
+      confirmNewPassword: 'Confirm New Password',
+      passwordPlaceholder: 'Password',
+      confirm: 'Confirm',
+    },
+    success: {
+      title: 'Success!',
+      message: 'You have just changed your password, please log in again using the new password!',
+      loginButton: 'login',
+    },
+  },
 }
