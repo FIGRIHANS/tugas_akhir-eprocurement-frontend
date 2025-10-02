@@ -19,11 +19,15 @@
 
 <script lang="ts" setup>
 import { useLoginStore } from '@/stores/views/login'
+import { useForgotPasswordStore } from '@/stores/views/forgot-password'
 
-const loginApi = useLoginStore()
+const loginStore = useLoginStore()
+const forgotPasswordStore = useForgotPasswordStore()
 
 const goBack = () => {
-  loginApi.isSendForgot = false
-  loginApi.selectedLogin = 'vendor'
+  forgotPasswordStore.resetState()
+
+  loginStore.isSendForgot = false
+  loginStore.selectedLogin = 'vendor'
 }
 </script>
