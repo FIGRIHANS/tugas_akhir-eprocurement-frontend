@@ -86,7 +86,7 @@ const onSubmit = async () => {
                 :error="payloadError.includes('ApprovalNote')"
               />
               <span v-if="payloadError.includes('ApprovalNote')" class="form-hint !text-danger">
-                {{ $t('blacklist.vendor.reasonError') }}
+                {{ $t('vendor.blacklist.reasonError') }}
               </span>
             </div>
           </UiFormGroup>

@@ -22,6 +22,7 @@ export const companyDeed = {
     cancel: 'Batal',
     save: 'Simpan',
     saving: 'Menyimpan...',
+    uploadPlaceholder: 'Unggah file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)',
 
     // Validation messages
     validation: {
@@ -43,6 +44,7 @@ export const companyDeed = {
     document: 'Dokumen',
     add: 'Tambah',
     save: 'Simpan',
+    selectDate: 'Pilih Tanggal',
 
     // Validation
     validation: {
@@ -100,6 +102,11 @@ export const companyDeed = {
     download: 'Unduh',
     hooray: 'Berhasil!',
     successMessage: 'Data berhasil disimpan. Terima kasih atas partisipasi Anda!',
+    companyCategory: 'Kategori Perusahaan',
+    companyAddress: 'Alamat Perusahaan',
+    datePlaceholder: 'Pilih Tanggal',
+    uploadHint: 'Unggah berkas di sini',
+    data: 'data',
 
     // Error modal
     failed: 'Gagal',
@@ -123,5 +130,6 @@ export const companyDeed = {
     // Pagination
     show: 'Tampilkan',
     perPage: 'per halaman',
+    from: 'dari',
   },
 }

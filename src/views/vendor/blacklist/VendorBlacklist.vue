@@ -36,7 +36,7 @@ const tableCols = computed(() => [
   t('vendorBlacklist.table.columns.type'),
   t('vendorBlacklist.table.columns.startDate'),
   t('vendorBlacklist.table.columns.endDate'),
-  t('vendorBlacklist.table.columns.description'),
+  t('vendorBlacklist.table.columns.blacklistDescription'),
   t('vendorBlacklist.table.columns.document'),
   t('vendorBlacklist.table.columns.status'),
 ])
@@ -168,7 +168,7 @@ watch(
             <td>
               <UiButton v-if="item.docUrl" size="sm" outline @click="onDownload(item.docUrl)">
                 <UiIcon name="cloud-download" variant="duotone" />
-                {{ $t('vendorBlacklist.table.actions.download') }}
+                {{ $t('vendorBlacklist.actions.download') }}
               </UiButton>
               <span v-else>-</span>
             </td>

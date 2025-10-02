@@ -19,7 +19,6 @@ import { useRoute } from 'vue-router'
 import axios from 'axios'
 import moment from 'moment'
 import LPagination from '@/components/pagination/LPagination.vue'
-import { useChangeDataEmailStore } from '@/stores/vendor/email-change-data'
 import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 
 const companyDeedDataStore = useCompanyDeedDataStore()
@@ -27,8 +26,6 @@ const adminVendorStore = useVendorAdministrationStore()
 const userLoginStore = useLoginStore()
 const uploadStore = useVendorUploadStore()
 const vendorMasterDataStore = useVendorMasterDataStore()
-const adminStore = useVendorAdministrationStore()
-const changeDataEmailStore = useChangeDataEmailStore()
 
 const route = useRoute()
 
@@ -86,7 +83,6 @@ const errors = reactive({
 })
 
 const isEditing = computed(() => mode.value === 'edit' || vendorLegalDocPayload.id > 0)
-const submitLabel = computed(() => (isEditing.value ? 'Save' : 'Add'))
 const submitIcon = computed(() => (isEditing.value ? 'file-added' : 'plus-circle'))
 
 const toNumber = (v: unknown) => (v === null || v === undefined || v === '' ? 0 : Number(v))
@@ -137,23 +133,23 @@ const validateForm = () => {
   errors.notaryLocation = ''
 
   if (!vendorLegalDocPayload.documentNo) {
-    errors.documentNo = 'Document no is required'
+    errors.documentNo = 'Document no is required' // Keep English for now as this is validation logic
     isValid = false
   }
   if (!vendorLegalDocPayload.notaryName) {
-    errors.notaryName = 'Notary name is required'
+    errors.notaryName = 'Notary name is required' // Keep English for now as this is validation logic
     isValid = false
   }
   if (!vendorLegalDocPayload.documentURL) {
-    errors.documentURL = 'Document URL is required'
+    errors.documentURL = 'Document URL is required' // Keep English for now as this is validation logic
     isValid = false
   }
   if (!vendorLegalDocPayload.documentDate) {
-    errors.documentDate = 'Document date is required'
+    errors.documentDate = 'Document date is required' // Keep English for now as this is validation logic
     isValid = false
   }
   if (!toNumber(vendorLegalDocPayload.notaryLocation)) {
-    errors.notaryLocation = 'Notary location is required'
+    errors.notaryLocation = 'Notary location is required' // Keep English for now as this is validation logic
     isValid = false
   }
   return isValid
@@ -365,11 +361,11 @@ watchEffect(async () => {
     <div class="card-body">
       <div class="space-y-6 mb-6">
         <div class="flex items-center gap-20">
-          <p class="text-sm text-slate-700">Company Category</p>
+          <p class="text-sm text-slate-700">{{ $t('companyDeed.common.companyCategory') }}</p>
           <p class="text-sm text-slate-700">{{ administrationData?.companyCategoryName }}</p>
         </div>
         <div class="flex items-center gap-20">
-          <p class="text-sm text-slate-700">Company Address</p>
+          <p class="text-sm text-slate-700">{{ $t('companyDeed.common.companyAddress') }}</p>
           <p class="text-sm text-slate-700">{{ administrationData?.addressCompanyDetail }}</p>
         </div>
       </div>
@@ -396,8 +392,8 @@ watchEffect(async () => {
             ref="fileUploaderRef"
             name="vendorLegalDocumentUrl"
             :label="$t('companyDeed.companyDeedSection.document')"
-            placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
-            hint-text="*jpg, jpeg, png, pdf, zip / max : 16 MB"
+            :placeholder="$t('companyDeed.shareholders.uploadPlaceholder')"
+            :hint-text="$t('companyDeed.common.uploadHint')"
             @added-file="onUploadFile($event)"
             @upload-failed="handleUploadFailed()"
             :max-size="16000000"
@@ -408,7 +404,7 @@ watchEffect(async () => {
           <DatePicker
             v-model="vendorLegalDocPayload.documentDate"
             :label="$t('companyDeed.companyDeedSection.documentDate')"
-            placeholder="Pilih Tanggal"
+            :placeholder="$t('companyDeed.companyDeedSection.selectDate')"
             :format="'MMM dd, yyyy'"
           />
           <UiSelect
@@ -431,7 +427,11 @@ watchEffect(async () => {
           <div class="flex justify-end items-center">
             <UiButton variant="primary" @click="handleSave" :disabled="isSaveLoading">
               <UiIcon variant="duotone" :name="submitIcon" />
-              {{ submitLabel }}
+              {{
+                isEditing
+                  ? $t('companyDeed.companyDeedSection.save')
+                  : $t('companyDeed.companyDeedSection.add')
+              }}
             </UiButton>
           </div>
         </UiFormGroup>
@@ -519,8 +519,8 @@ watchEffect(async () => {
             :options="pageSizeOptions"
             class="w-16"
           />
-          {{ $t('companyDeed.common.perPage') }} from
-          {{ paginationCompanyDeedDataStore.total }} data
+          {{ $t('companyDeed.common.perPage') }} {{ $t('companyDeed.common.from') }}
+          {{ paginationCompanyDeedDataStore.total }} {{ $t('companyDeed.common.data') }}
         </div>
 
         <LPagination

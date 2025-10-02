@@ -22,6 +22,7 @@ export const companyDeed = {
     cancel: 'Cancel',
     save: 'Save',
     saving: 'Saving...',
+    uploadPlaceholder: 'Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)',
 
     // Validation messages
     validation: {
@@ -43,6 +44,7 @@ export const companyDeed = {
     document: 'Document',
     add: 'Add',
     save: 'Save',
+    selectDate: 'Select Date',
 
     // Validation
     validation: {
@@ -100,6 +102,11 @@ export const companyDeed = {
     download: 'Download',
     hooray: 'Hooray!',
     successMessage: 'Data saved successfully. Thank you for your participation!',
+    companyCategory: 'Company Category',
+    companyAddress: 'Company Address',
+    datePlaceholder: 'Select Date',
+    uploadHint: 'Upload file here',
+    data: 'data',
 
     // Error modal
     failed: 'Failed to',
@@ -122,5 +129,6 @@ export const companyDeed = {
     // Pagination
     show: 'Show',
     perPage: 'per page',
+    from: 'from',
   },
 }
