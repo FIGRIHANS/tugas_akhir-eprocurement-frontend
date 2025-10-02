@@ -1,32 +1,32 @@
 const blacklist = {
-  approveButton: 'Setujui',
-  rejectButton: 'Tolak',
-  cancelButton: 'Batal',
-  removeButton: 'Hapus',
-  downloadButton: 'Unduh',
-  reason: 'Alasan',
-  reasonError: 'Alasan wajib diisi',
-  rejectTitle: 'Tolak permintaan blacklist vendor',
-  approveTitle: 'Setujui permintaan blacklist vendor?',
-  approveText: 'Vendor akan diblacklist',
-  removeTitle: 'Hapus vendor dari blacklist?',
-  removeText: 'Vendor akan dihapus dari blacklist',
+  approveButton: 'Approve',
+  rejectButton: 'Reject',
+  cancelButton: 'Cancel',
+  removeButton: 'Remove',
+  downloadButton: 'Download',
+  reason: 'Reason',
+  reasonError: 'Reason is required',
+  rejectTitle: 'Reject vendor blacklist request',
+  approveTitle: 'Approve vendor blacklist request?',
+  approveText: 'Vendor will be blacklisted',
+  removeTitle: 'Remove vendor from blacklist?',
+  removeText: 'Vendor will be removed from blacklist',
 }
 
 const masterFilters = {
-  category: 'Kategori',
-  registrationStartDate: 'Tanggal Awal Registrasi',
-  registrationEndDate: 'Tanggal Akhir Registrasi',
-  reset: 'Atur ulang Filter',
+  category: 'Category',
+  registrationStartDate: 'Registration Start Date',
+  registrationEndDate: 'Registration End Date',
+  reset: 'Reset Filter',
 }
 
 const approvalFilters = {
-  category: 'Kategori',
-  approvalDateSent: 'Tanggal Persetujuan Dikirim',
+  category: 'Category',
+  approvalDateSent: 'Approval Date Sent',
 }
 
 const pagination = {
-  show: 'Menampilkan { start } ke { end } dari { total } data',
+  show: 'Menampilkan { start } sampai { end } dari { total } data',
 }
 
 export default {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import UiButton from '../button/UiButton.vue'
 import UiIcon from '../icon/UiIcon.vue'
 import { type ITabClosable, type ITabClosableProps } from './types/tabClosable'
@@ -8,19 +8,40 @@ const props = defineProps<ITabClosableProps>()
 defineEmits(['closeTab', 'addTab'])
 const currentTab = defineModel()
 
-const openedTabs = ref<ITabClosable[]>([props.tabs.find((tab) => tab.id === currentTab.value)!])
+const openedTabIds = ref<string[]>([currentTab.value as string])
+
+const openedTabs = computed(
+  () =>
+    openedTabIds.value
+      .map((id) => props.tabs.find((tab) => tab.id === id))
+      .filter(Boolean) as ITabClosable[],
+)
+
 const filteredTabs = computed(() =>
-  props.tabs.filter((tab) => !openedTabs.value.some((opened) => opened.id === tab.id)),
+  props.tabs.filter((tab) => !openedTabIds.value.includes(tab.id)),
+)
+
+watch(
+  () => currentTab.value,
+  (newTabId) => {
+    if (newTabId && !openedTabIds.value.includes(newTabId as string)) {
+      openedTabIds.value.push(newTabId as string)
+    }
+  },
+  { immediate: true },
 )
 
 const handleOpen = (tab: ITabClosable) => {
-  openedTabs.value = [...openedTabs.value, tab]
+  openedTabIds.value = [...openedTabIds.value, tab.id]
   currentTab.value = tab.id
 }
 
 const handleClose = (id: string) => {
-  openedTabs.value = openedTabs.value.filter((current) => current.id !== id)
-  currentTab.value = openedTabs.value[openedTabs.value.length - 1].id
+  openedTabIds.value = openedTabIds.value.filter((currentId) => currentId !== id)
+  const remainingTabs = openedTabs.value
+  if (remainingTabs.length > 0) {
+    currentTab.value = remainingTabs[remainingTabs.length - 1].id
+  }
 }
 </script>
 <template>
@@ -56,7 +77,7 @@ const handleClose = (id: string) => {
       </UiButton>
       <div class="dropdown-content w-full max-w-fit">
         <div class="flex items-center justify-between p-4 pb-0">
-          <h3 class="text-lg font-semibold">Open</h3>
+          <h3 class="text-lg font-semibold">{{ $t('vendorVerification.tabitems.open') }}</h3>
           <UiButton
             variant="light"
             :icon="true"

@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col gap-[16px]">
     <p class="text-base font-semibold">Additional Cost</p>
-    <button class="btn btn-outline btn-primary w-fit" @click="addNew">
+    <button v-if="!checkVerifikator1()" class="btn btn-outline btn-primary w-fit" @click="addNew">
       <i class="ki-duotone ki-plus-circle"></i>
       Add Additional Cost
     </button>
@@ -51,7 +51,9 @@
               ></v-select>
             </td>
             <td>
-              <span v-if="!item.isEdit">{{ item.itemAmount }}</span>
+              <span v-if="!item.isEdit">
+                {{ form.currCode === 'IDR' ? useFormatIdr(item.isEdit ? formEdit.itemAmount : item.itemAmount) : useFormatUsd(item.isEdit ? formEdit.itemAmount : item.itemAmount) }}
+              </span>
               <input
                 v-else
                 v-model="formEdit.itemAmount"
@@ -139,7 +141,9 @@
               ></v-select>
             </td>
             <td>
-              <span v-if="!item.isEdit">{{ item.whtBaseAmount }}</span>
+              <span v-if="!item.isEdit">
+                {{ form.currCode === 'IDR' ? useFormatIdr(item.whtBaseAmount) : useFormatUsd(item.whtBaseAmount) }}
+              </span>
               <input v-else v-model="formEdit.whtBaseAmount" class="input" type="number" placeholder="" @change="setWhtAmount(item)"/>
             </td>
             <td>
@@ -153,15 +157,17 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, computed, watch, inject, type Ref } from 'vue'
+import { ref, reactive, computed, watch, inject, onMounted, type Ref } from 'vue'
 import type { formTypes } from '../../types/invoiceDetailEdit'
 import type { itemsCostType } from '../../types/additionalCost'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
+import { useLoginStore } from '@/stores/views/login'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const verificationApi = useInvoiceVerificationStore()
+const loginApi = useLoginStore()
 const form = inject<Ref<formTypes>>('form')
 const columns = ref([
   'Action',
@@ -202,6 +208,7 @@ const costCenterList = computed(() => invoiceMasterApi.costCenterList)
 const profitCenter = computed(() => invoiceMasterApi.profilCenterList)
 const whtTypeList = computed(() => invoiceMasterApi.whtTypeList)
 const whtCodeList = computed(() => invoiceMasterApi.whtCodeList)
+const userData = computed(() => loginApi.userData)
 
 const checkIsEdit = () => {
   const result = form?.value.additionalCosts.findIndex((item) => item.isEdit)
@@ -210,6 +217,10 @@ const checkIsEdit = () => {
 
 const checkPoPib = () => {
   return form?.value.invoiceTypeCode === 902
+}
+
+const checkVerifikator1 = () => {
+  return userData.value.profile.profileId === 3190
 }
 
 const addNew = () => {
@@ -312,7 +323,7 @@ const resetItem = (item: itemsCostType, index: number) => {
     resetFormEdit()
   } else {
     if (form) {
-      verificationApi.additionalCostTempDelete?.push(form.value.additionalCosts[index])
+      verificationApi.additionalCostTempDelete?.push(form.value.additionalCosts[index].id)
       form.value.additionalCosts.splice(index, 1)
     }
   }
@@ -408,7 +419,7 @@ const setWhtAmount = (data: itemsCostType) => {
 }
 
 watch(
-  () => [form?.value.additionalCosts, form?.value.currCode, formEdit],
+  () => [form?.value.additionalCosts, form?.value.invoiceItem, form?.value.currCode, formEdit],
   () => {
     if (!checkPoPib()) getVatAmount()
   },
@@ -417,6 +428,16 @@ watch(
     immediate: true
   }
 )
+
+onMounted(() => {
+  for (const item of form.value.invoiceItem) {
+    if (item.whtCode) {
+      invoiceMasterApi.getWhtCode(item.whtType).then(() => {
+        item.whtCodeList = whtCodeList.value
+      })
+    }
+  }
+})
 </script>
 
 <style lang="scss" scoped>

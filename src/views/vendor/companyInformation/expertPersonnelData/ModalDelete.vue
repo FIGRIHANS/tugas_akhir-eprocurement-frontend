@@ -6,15 +6,15 @@ import { KTModal } from '@/metronic/core'
 import { ref, watch } from 'vue'
 import type { PayloadExportPersonnelDataType } from './types/expertPersonnelData'
 import { cloneDeep } from 'lodash'
+import { useI18n } from 'vue-i18n'
 import { defaultPayload } from './static'
 import { useExpertPersonnelDataStore } from '@/stores/vendor/vendor'
-import { useRoute } from 'vue-router'
 
 const props = defineProps<{ id: number }>()
 const emit = defineEmits(['onSuccess', 'onError', 'onClose'])
 const expertStore = useExpertPersonnelDataStore()
+const { t } = useI18n()
 const payload = ref<PayloadExportPersonnelDataType>(cloneDeep(defaultPayload))
-const route = useRoute()
 
 const deleteLoading = ref(false)
 
@@ -98,14 +98,16 @@ watch(
             class="text-[150px] text-danger text-center"
           />
         </div>
-        <h3 class="text-center text-lg font-medium">Are You Sure You Want to Delete This Item?</h3>
+        <h3 class="text-center text-lg font-medium">
+          {{ t('expertPersonnelData.modal.delete.title') }}
+        </h3>
         <p class="text-center text-base text-gray-600 mb-5">
-          This action will permanently remove the selected data from the list.
+          {{ t('expertPersonnelData.modal.delete.message') }}
         </p>
         <div class="flex gap-3 px-8 w-full">
           <UiButton outline class="flex-1 flex items-center justify-center" @click="onClose">
             <UiIcon name="black-left-line" />
-            <span>Cancel</span>
+            <span>{{ t('expertPersonnelData.buttons.cancel') }}</span>
           </UiButton>
           <UiButton
             variant="danger"
@@ -115,7 +117,7 @@ watch(
           >
             <UiLoading variant="white" v-if="deleteLoading" />
             <UiIcon name="cross-circle" variant="duotone" v-else />
-            <span>Delete</span>
+            <span>{{ t('expertPersonnelData.buttons.delete') }}</span>
           </UiButton>
         </div>
       </div>

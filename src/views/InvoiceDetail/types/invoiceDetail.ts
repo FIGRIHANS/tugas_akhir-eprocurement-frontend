@@ -31,11 +31,13 @@ export interface formTypes extends documentFormTypes {
   remainingDpAmount: string
   dpAmountDeduction: string
   creditCardBillingId: string
+  paymentId: number
   bankKey: string
   bankName: string
   beneficiaryName: string
   bankAccountNo: string
   bankCountryCode: string
+  department?: string
 
   vendorId: string
   vendorName: string

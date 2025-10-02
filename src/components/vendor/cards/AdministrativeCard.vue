@@ -44,7 +44,7 @@ watch(
 <template>
   <div class="card">
     <div class="card-header">
-      <div class="card-title">Administration</div>
+      <div class="card-title">{{ $t('vendorVerification.administration.administration') }}</div>
     </div>
     <div
       v-if="administrasiStore.loading"
@@ -66,43 +66,57 @@ watch(
           <table class="table align-middle">
             <tbody>
               <tr>
-                <td class="text-sm text-gray-600 font-medium w-[182px]">Username</td>
+                <td class="text-sm text-gray-600 font-medium w-[182px]">
+                  {{ $t('vendorVerification.administration.username') }}
+                </td>
                 <td class="text-sm font-bold text-gray-700">
                   {{ administrasiStore.data.userName }}
                 </td>
               </tr>
               <tr>
-                <td class="text-sm text-gray-600 font-medium w-[182px]">User Email</td>
+                <td class="text-sm text-gray-600 font-medium w-[182px]">
+                  {{ $t('vendorVerification.administration.useremail') }}
+                </td>
                 <td class="text-sm font-bold text-gray-700">
                   {{ administrasiStore.data.userEmail }}
                 </td>
               </tr>
               <tr>
-                <td class="text-sm text-gray-600 font-medium w-[182px]">Company Name</td>
+                <td class="text-sm text-gray-600 font-medium w-[182px]">
+                  {{ $t('vendorVerification.administration.companyname') }}
+                </td>
                 <td class="text-sm font-bold text-gray-700">
                   {{ administrasiStore.data.vendorName }}
                 </td>
               </tr>
               <tr>
-                <td class="text-sm text-gray-600 font-medium w-[182px]">Company Category</td>
+                <td class="text-sm text-gray-600 font-medium w-[182px]">
+                  {{ $t('vendorVerification.administration.companycategory') }}
+                </td>
                 <td class="text-sm font-bold text-gray-700">
                   {{ administrasiStore.data.companyCategoryName }}
                 </td>
               </tr>
               <tr>
-                <td class="text-sm text-gray-600 font-medium w-[182px]">Company Group</td>
+                <td class="text-sm text-gray-600 font-medium w-[182px]">
+                  {{ $t('vendorVerification.administration.companygroup') }}
+                </td>
                 <td class="text-sm font-bold text-gray-700">
                   {{ administrasiStore.data.groupCompany }}
                 </td>
               </tr>
               <tr>
-                <td class="text-sm text-gray-600 font-medium w-[182px]">NPWP Number</td>
+                <td class="text-sm text-gray-600 font-medium w-[182px]">
+                  {{ $t('vendorVerification.administration.npwpnumber') }}
+                </td>
                 <td class="text-sm font-bold text-gray-700">
                   {{ administrasiStore.data.npwp }}
                 </td>
               </tr>
               <tr>
-                <td class="text-sm text-gray-600 font-medium w-[182px]">NPWP Document</td>
+                <td class="text-sm text-gray-600 font-medium w-[182px]">
+                  {{ $t('vendorVerification.administration.npwpdoc') }}
+                </td>
                 <td class="text-sm font-bold text-gray-700">
                   <UiButton
                     :outline="true"
@@ -115,7 +129,13 @@ watch(
                     </span>
                     <template v-else>
                       <UiIcon name="cloud-download" variant="duotone" />
-                      <span>Download NPWP Document</span>
+                      <span>
+                        {{
+                          $t('general.download', {
+                            field: $t('vendorVerification.administration.npwpdoc'),
+                          })
+                        }}</span
+                      >
                     </template>
                   </UiButton>
                 </td>
@@ -127,49 +147,65 @@ watch(
           <table class="table align-middle">
             <tbody>
               <tr>
-                <td class="text-sm text-gray-600 font-medium w-[182px]">Country</td>
+                <td class="text-sm text-gray-600 font-medium w-[182px]">
+                  {{ $t('vendorVerification.administration.country') }}
+                </td>
                 <td class="text-sm font-bold text-gray-700">
                   {{ administrasiStore.data.countryName }}
                 </td>
               </tr>
               <tr>
-                <td class="text-sm text-gray-600 font-medium w-[182px]">Province</td>
+                <td class="text-sm text-gray-600 font-medium w-[182px]">
+                  {{ $t('vendorVerification.administration.province') }}
+                </td>
                 <td class="text-sm font-bold text-gray-700">
                   {{ administrasiStore.data.stateName }}
                 </td>
               </tr>
               <tr>
-                <td class="text-sm text-gray-600 font-medium w-[182px]">Regency/City</td>
+                <td class="text-sm text-gray-600 font-medium w-[182px]">
+                  {{ $t('vendorVerification.administration.city') }}
+                </td>
                 <td class="text-sm font-bold text-gray-700">
                   {{ administrasiStore.data.cityName }}
                 </td>
               </tr>
               <tr>
-                <td class="text-sm text-gray-600 font-medium w-[182px]">Telephone</td>
+                <td class="text-sm text-gray-600 font-medium w-[182px]">
+                  {{ $t('vendorVerification.administration.telephone') }}
+                </td>
                 <td class="text-sm font-bold text-gray-700">
                   {{ administrasiStore.data.vendorPhone }}
                 </td>
               </tr>
               <tr>
-                <td class="text-sm text-gray-600 font-medium w-[182px]">Vendor Email</td>
+                <td class="text-sm text-gray-600 font-medium w-[182px]">
+                  {{ $t('vendorVerification.administration.vendoremail') }}
+                </td>
                 <td class="text-sm font-bold text-gray-700">
                   {{ administrasiStore.data.vendorEmail }}
                 </td>
               </tr>
               <tr>
-                <td class="text-sm text-gray-600 font-medium w-[182px]">Website</td>
+                <td class="text-sm text-gray-600 font-medium w-[182px]">
+                  {{ $t('vendorVerification.administration.website') }}
+                </td>
                 <td class="text-sm font-bold text-gray-700">
                   {{ administrasiStore.data.vendorWebsite }}
                 </td>
               </tr>
               <tr>
-                <td class="text-sm text-gray-600 font-medium w-[182px]">Currency Preference</td>
+                <td class="text-sm text-gray-600 font-medium w-[182px]">
+                  {{ $t('vendorVerification.administration.currencyPref') }}
+                </td>
                 <td class="text-sm font-bold text-gray-700">
                   {{ administrasiStore.data.currencyLabel }}
                 </td>
               </tr>
               <tr>
-                <td class="text-sm text-gray-600 font-medium w-[182px]">Company Address</td>
+                <td class="text-sm text-gray-600 font-medium w-[182px]">
+                  {{ $t('vendorVerification.administration.companyaddress') }}
+                </td>
                 <td class="text-sm font-bold text-gray-700">
                   {{ administrasiStore.data.addressCompanyDetail }}
                 </td>
@@ -182,7 +218,9 @@ watch(
         <table class="table align-middle">
           <tbody>
             <tr>
-              <td class="text-sm text-gray-600 font-medium w-[182px]">Business Fields</td>
+              <td class="text-sm text-gray-600 font-medium w-[182px]">
+                {{ $t('vendorVerification.administration.bussinessfield') }}
+              </td>
               <td class="text-sm text-gray-700">
                 <ul>
                   <li

@@ -38,6 +38,7 @@ export interface ParamsSubmissionTypes {
   workflow: ParamsSubmissionWorkflow[]
   alternativePayee: itemsAlternativePayee[]
   costExpense: ParamsSubmissionCostExpense[]
+  isSaveAsDraft: boolean
 }
 
 interface ParamsSubmissionCostExpense {
@@ -76,6 +77,7 @@ interface ParamsSubmissionHeader {
   statusCode: number
   statusName: string
   creditCardBillingId: string
+  department?: string
 }
 
 interface ParamsSubmissionVendor {
@@ -88,6 +90,7 @@ interface ParamsSubmissionVendor {
 }
 
 interface ParamsSubmissionPayment {
+  paymentId: number
   bankKey: string
   bankName: string
   beneficiaryName: string
@@ -136,6 +139,7 @@ interface ParamsSubmissionItem {
 }
 
 interface ParamsSubmissionCost {
+  id: number
   activityId: number
   activityExpense: string
   activityName: string
@@ -281,8 +285,9 @@ export interface ParamsSubmissionNonPo {
   calculation: ParamsSubmissionCalculation
   alternativePay: ParamsSubmissionAlternativePay
   costExpenses: ParamsSubmissionCostExpense[]
+  isSaveAsDraft: boolean
 }
-interface ParamsSubmissionHeaderNonPo {
+export interface ParamsSubmissionHeaderNonPo {
   invoiceUId: string
   invoiceTypeCode: number
   invoiceTypeName: string
@@ -352,11 +357,28 @@ export interface ParamsCheckBudgetType {
     FIS_PERIOD: number
     DOC_TYPE: string
     REF_DOC_NO: string
+    CUSTOMERCPD: ParamsCostumerTypes
     GLACCOUNT_DATA: GlaccountDatum[]
     ACCOUNT_PAYABLE: AccountPayable[]
     ACCOUNTTAX: Accounttax[]
     CURRENCYAMOUNT: Currencyamount[]
   }
+}
+
+export interface ParamsCostumerTypes {
+  NAME: string
+  NAME_2: string
+  POSTL_CODE: string
+  CITY: string
+  COUNTRY: string
+  STREET: string
+  BANK_ACCT: string
+  BANK_NO: string
+  BANK_CTRY: string
+  TAX_NO_1: string
+  TAX_NO_3: string
+  LANGU_ISO: string
+  GLO_RE1_OT: string
 }
 
 export interface Accounttax {

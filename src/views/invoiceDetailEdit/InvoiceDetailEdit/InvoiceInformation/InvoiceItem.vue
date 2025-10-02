@@ -15,7 +15,10 @@
               class="cost__field-base"
               :class="{
                 'cost__field-base--activity': item.toLowerCase() === 'activity / expense',
-                'cost__field-base--item-amount': item.toLowerCase() === 'item amount',
+                'cost__field-base--tax': item.toLowerCase() === 'tax code',
+                'cost__field-base--cost': item.toLowerCase() === 'cost center',
+                'cost__field-base--wht-type': item.toLowerCase() === 'wht type',
+                'cost__field-base--wht-code': item.toLowerCase() === 'wht code',
                 'cost__field-base--description': item.toLowerCase() === 'description'
               }"
             >
@@ -26,7 +29,11 @@
         <tbody>
           <tr v-for="(item, index) in form.invoiceItem" :key="index" class="cost__field-items">
             <td class="flex items-center justify-around gap-[8px]">
-              <button class="btn btn-outline btn-icon btn-primary" :disabled="checkIsEdit() && !item.isEdit" @click="goEdit(item)">
+              <button
+                class="btn btn-outline btn-icon btn-primary"
+                :disabled="checkIsEdit() && !item.isEdit"
+                @click="goEdit(item)"
+              >
                 <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>
                 <i v-else class="ki-duotone ki-check-circle"></i>
               </button>
@@ -35,24 +42,43 @@
               </button>
             </td>
             <td>
-              <span v-if="!item.isEdit">{{ item.activity }}</span>
-              <select v-else v-model="formEdit.activityExpense" class="select" placeholder="">
-                <option v-for="item of listActivity" :key="item.code" :value="item.code">
-                  {{ item.name }}
-                </option>
-              </select>
+              <span v-if="!item.isEdit">{{ getActivityName(item.activityId) }}</span>
+              <v-select
+                v-else
+                v-model="formEdit.activityExpense"
+                class="customSelect"
+                :get-option-label="(option: any) => `${option.code} - ${option.name}`"
+                :reduce="(option: any) => option.id"
+                :options="listActivity"
+                :error="{ 'error-select': formEdit.isActivityError }"
+                appendToBody
+              ></v-select>
             </td>
             <td>
-              <span v-if="!item.isEdit">{{ useFormatIdr(item.itemAmount) }}</span>
-              <input v-else v-model="formEdit.itemAmount" class="input" type="number" placeholder=""/>
+              <span v-if="!item.isEdit">
+                {{
+                  form.currCode === 'IDR'
+                    ? useFormatIdr(item.isEdit ? formEdit.itemAmount : item.itemAmount)
+                    : useFormatUsd(item.isEdit ? formEdit.itemAmount : item.itemAmount)
+                }}
+              </span>
+              <input
+                v-else
+                v-model="formEdit.itemAmount"
+                class="input"
+                type="number"
+                placeholder=""
+                :class="{ 'border-danger': formEdit.isItemAmountError }"
+                @change="formEdit.whtBaseAmount = formEdit.itemAmount"
+              />
             </td>
-              <td>
-                <span v-if="!item.isEdit">{{ item.itemText || '-' }}</span>
-                <input v-else v-model="formEdit.itemText" class="input" type="text" placeholder=""/>
-              </td>
+            <td>
+              <span v-if="!item.isEdit">{{ item.itemText || '-' }}</span>
+              <input v-else v-model="formEdit.itemText" class="input" type="text" placeholder="" />
+            </td>
             <td>
               <span v-if="!item.isEdit">{{ getDebitCreditName(item.debitCredit) || '-' }}</span>
-              <select v-else v-model="formEdit.debitCredit" class="select" placeholder="">
+              <select v-else v-model="formEdit.debitCredit" class="select" placeholder="" :class="{ 'border-danger': formEdit.isDebitCreditError }">
                 <option value="D">
                   Debit
                 </option>
@@ -62,23 +88,35 @@
               </select>
             </td>
             <td>
-              <span v-if="!item.isEdit">{{ item.taxCode }}</span>
-              <select v-else v-model="formEdit.taxCode" class="select" placeholder="">
-                <option v-for="(option, index) in listTaxCalculation" :key="index" :value="option.code">
-                  {{ option.code }}
-                </option>
-              </select>
+              <span v-if="!item.isEdit">{{ getTaxCodeName(item.taxCode) }}</span>
+              <v-select
+                v-else
+                v-model="formEdit.taxCode"
+                class="customSelect"
+                :get-option-label="(option: any) => `${option.code} - ${option.name}`"
+                :reduce="(option: any) => option.code"
+                :options="listTaxCalculation"
+                appendToBody
+              ></v-select>
             </td>
             <td>
-              {{ form.currCode === 'IDR' ? useFormatIdr(item.isEdit ? formEdit.vatAmount : item.vatAmount) : useFormatUsd(item.isEdit ? formEdit.vatAmount : item.vatAmount) }}
+              {{
+                form.currCode === 'IDR'
+                  ? useFormatIdr(item.isEdit ? formEdit.vatAmount : item.vatAmount)
+                  : useFormatUsd(item.isEdit ? formEdit.vatAmount : item.vatAmount)
+              }}
             </td>
             <td>
-              <span v-if="!item.isEdit">{{ item.costCenter }}</span>
-              <select v-else v-model="formEdit.costCenter" class="select" placeholder="">
-                <option v-for="item of costCenterList" :key="item.code" :value="item.code">
-                  {{ item.code + ' - ' + item.name }}
-                </option>
-              </select>
+              <span v-if="!item.isEdit">{{ getCostCenterName(item.costCenter) }}</span>
+              <v-select
+                v-else
+                v-model="formEdit.costCenter"
+                class="customSelect"
+                :get-option-label="(option: any) => `${option.code} - ${option.name}`"
+                :reduce="(option: any) => option.code"
+                :options="costCenterList"
+                appendToBody
+              ></v-select>
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.profitCenter }}</span>
@@ -90,15 +128,15 @@
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.assignment }}</span>
-              <input v-else v-model="formEdit.assignment" class="input" placeholder=""/>
+              <input v-else v-model="formEdit.assignment" class="input" placeholder="" />
             </td>
             <td>
-              <span v-if="!item.isEdit">{{ item.whtType }}</span>
+              <span v-if="!item.isEdit">{{ getWhtTypeName(item.whtType) }}</span>
               <v-select
                 v-else
                 v-model="formEdit.whtType"
                 class="customSelect"
-                label="name"
+                :get-option-label="(option: any) => `${option.code} - ${option.name}`"
                 :reduce="(option: any) => option.code"
                 :options="whtTypeList"
                 appendToBody
@@ -106,12 +144,12 @@
               ></v-select>
             </td>
             <td>
-              <span v-if="!item.isEdit">{{ item.whtCode }}</span>
+              <span v-if="!item.isEdit">{{ getWhtCodeName(item.whtCode, item) }}</span>
               <v-select
                 v-else
                 v-model="formEdit.whtCode"
                 class="customSelect"
-                label="whtCode"
+                :get-option-label="(option: any) => `${option.whtCode} - ${option.description}`"
                 :reduce="(option: any) => option.whtCode"
                 :options="whtCodeList"
                 appendToBody
@@ -119,12 +157,24 @@
               ></v-select>
             </td>
             <td>
-              <span v-if="!item.isEdit">{{ item.whtBaseAmount }}</span>
-              <input v-else v-model="formEdit.whtBaseAmount" class="input" type="number" placeholder=""/>
+              <span v-if="!item.isEdit">
+                {{
+                  form.currCode === 'IDR'
+                    ? useFormatIdr(item.isEdit ? formEdit.whtBaseAmount : item.whtBaseAmount)
+                    : useFormatUsd(item.isEdit ? formEdit.whtBaseAmount : item.whtBaseAmount)
+                }}
+              </span>
+              <input
+                v-else
+                v-model="formEdit.whtBaseAmount"
+                class="input"
+                type="number"
+                placeholder=""
+                @change="setWhtAmount(item)"
+              />
             </td>
             <td>
-              <span v-if="!item.isEdit">{{ item.whtAmount }}</span>
-              <input v-else v-model="formEdit.whtAmount" class="input" type="number" placeholder=""/>
+              <span>{{ form.currCode === 'IDR' ? useFormatIdr(item.isEdit ? formEdit.whtAmount : item.whtAmount) : useFormatUsd(item.isEdit ? formEdit.whtAmount : item.whtAmount) }}</span>
             </td>
           </tr>
         </tbody>
@@ -134,13 +184,17 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, computed, watch, inject, type Ref } from 'vue'
+import { ref, reactive, computed, watch, inject, onMounted, type Ref } from 'vue'
+import { useRoute } from 'vue-router'
 import type { formTypes } from '../../types/invoiceDetailEdit'
 import type { invoiceItemTypes } from '../../types/invoiceItem'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
+import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
+const verificationApi = useInvoiceVerificationStore()
+const route = useRoute()
 const form = inject<Ref<formTypes>>('form')
 const columns = ref([
   'Action',
@@ -156,10 +210,10 @@ const columns = ref([
   'WHT Type',
   'WHT Code',
   'WHT Base Amount',
-  'WHT Amount'
+  'WHT Amount',
 ])
 const formEdit = reactive({
-  activityExpense: '',
+  activityExpense: 0,
   itemAmount: 0,
   itemText: '',
   debitCredit: '',
@@ -172,6 +226,9 @@ const formEdit = reactive({
   whtCode: '',
   whtBaseAmount: 0,
   whtAmount: 0,
+  isActivityError: false,
+  isItemAmountError: false,
+  isDebitCreditError: false
 })
 
 const listActivity = computed(() => invoiceMasterApi.activityList)
@@ -182,7 +239,7 @@ const whtTypeList = computed(() => invoiceMasterApi.whtTypeList)
 const whtCodeList = computed(() => invoiceMasterApi.whtCodeList)
 
 const checkIsEdit = () => {
-  const result = form?.value.additionalCosts.findIndex((item) => item.isEdit)
+  const result = form?.value.invoiceItem.findIndex((item) => item.isEdit)
   return result !== -1
 }
 
@@ -190,10 +247,17 @@ const checkPoPib = () => {
   return form?.value.invoiceTypeCode === 902
 }
 
+const checkIsNonPo = () => {
+  return route.query.invoiceType === 'no_po'
+}
+
 const addNew = () => {
   if (form) {
     const data = {
-      activity: '',
+      id: 0,
+      activityId: null,
+      activityExpenses: '',
+      activityName: '',
       itemAmount: 0,
       itemText: '',
       debitCredit: '',
@@ -206,6 +270,7 @@ const addNew = () => {
       whtCode: '',
       whtBaseAmount: 0,
       whtAmount: 0,
+      whtCodeList: [],
       isEdit: false
     } as invoiceItemTypes
     form.value.invoiceItem.push(data)
@@ -213,7 +278,7 @@ const addNew = () => {
 }
 
 const resetFormEdit = () => {
-  formEdit.activityExpense = ''
+  formEdit.activityExpense = 0
   formEdit.itemAmount = 0
   formEdit.itemText = ''
   formEdit.debitCredit = ''
@@ -226,13 +291,31 @@ const resetFormEdit = () => {
   formEdit.whtCode = ''
   formEdit.whtBaseAmount = 0
   formEdit.whtAmount = 0
+  formEdit.isActivityError = false
+  formEdit.isItemAmountError = false
+  formEdit.isDebitCreditError = false
 }
 
 const goEdit = (item: invoiceItemTypes) => {
+  if (item.isEdit) {
+    if (!formEdit.activityExpense) formEdit.isActivityError = true
+    else formEdit.isActivityError = false
+
+    if (!formEdit.itemAmount || formEdit.itemAmount < 0) formEdit.isItemAmountError = true
+    else formEdit.isItemAmountError = false
+
+    if (!formEdit.debitCredit) formEdit.isDebitCreditError = true
+    else formEdit.isDebitCreditError = false
+  }
+  if (
+    formEdit.isActivityError ||
+    formEdit.isItemAmountError ||
+    formEdit.isDebitCreditError
+  ) return
   item.isEdit = !item.isEdit
 
   if (item.isEdit) {
-    formEdit.activityExpense = item.activity
+    formEdit.activityExpense = item.activityId
     formEdit.itemAmount = item.itemAmount
     formEdit.itemText = item.itemText
     formEdit.debitCredit = item.debitCredit
@@ -246,7 +329,10 @@ const goEdit = (item: invoiceItemTypes) => {
     formEdit.whtBaseAmount = item.whtBaseAmount
     formEdit.whtAmount = item.whtAmount
   } else {
-    item.activity = formEdit.activityExpense
+    const itemIndex = listActivity.value.findIndex((sub) => sub.id === formEdit.activityExpense)
+    item.activityId = formEdit.activityExpense
+    item.activityExpenses = listActivity.value[itemIndex].code
+    item.activityName = listActivity.value[itemIndex].name
     item.itemAmount = formEdit.itemAmount
     item.itemText = formEdit.itemText
     item.debitCredit = formEdit.debitCredit
@@ -268,7 +354,10 @@ const resetItem = (item: invoiceItemTypes, index: number) => {
     item.isEdit = !item.isEdit
     resetFormEdit()
   } else {
-    form?.value.additionalCosts.splice(index, 1)
+    if (form) {
+      verificationApi.costExpenseTempDelete?.push(form.value.invoiceItem[index].id)
+      form.value.invoiceItem.splice(index, 1)
+    }
   }
 }
 
@@ -285,32 +374,90 @@ const getPercentTax = (code: string) => {
   const getIndex = listTaxCalculation.value.findIndex((item) => item.code === code)
   if (getIndex !== -1) {
     const splitName = listTaxCalculation.value[getIndex].name.split(' - ')
-    return parseFloat(splitName[1].replace(',', '.').replace('%','')) / 100
+    return parseFloat(splitName[1].replace(',', '.').replace('%', '')) / 100
   }
 }
 
 const getVatAmount = () => {
   if (!form) return
-  const checkIsEdit = form.value.additionalCosts.findIndex((item) => item.isEdit)
-  if (checkIsEdit !== -1) {
-    const percentTax = getPercentTax(formEdit.taxCode) || 0
-    const itemAmount = formEdit.itemAmount
-    const result = percentTax * itemAmount
-    formEdit.vatAmount = result
-  } else {
-    for (const item of form.value.additionalCosts) {
-      const percentTax = getPercentTax(item.taxCode) || 0
-      const itemAmount = item.itemAmount
+  if (checkIsNonPo()) {
+    const checkIsEdit = form.value.invoiceItem.findIndex((item) => item.isEdit)
+    if (checkIsEdit !== -1) {
+      const percentTax = getPercentTax(formEdit.taxCode) || 0
+      const itemAmount = formEdit.itemAmount
       const result = percentTax * itemAmount
-      item.vatAmount = result
+      formEdit.vatAmount = result
+    } else {
+      for (const item of form.value.invoiceItem) {
+        const percentTax = getPercentTax(item.taxCode) || 0
+        const itemAmount = item.itemAmount
+        const result = percentTax * itemAmount
+        item.vatAmount = result
+      }
+    }
+  } else {
+    const checkIsEdit = form.value.additionalCosts.findIndex((item) => item.isEdit)
+    if (checkIsEdit !== -1) {
+      const percentTax = getPercentTax(formEdit.taxCode) || 0
+      const itemAmount = formEdit.itemAmount
+      const result = percentTax * itemAmount
+      formEdit.vatAmount = result
+    } else {
+      for (const item of form.value.additionalCosts) {
+        const percentTax = getPercentTax(item.taxCode) || 0
+        const itemAmount = item.itemAmount
+        const result = percentTax * itemAmount
+        item.vatAmount = result
+      }
     }
   }
+}
+
+const getCostCenterName = (costCenter: string) => {
+  const index = costCenterList.value.findIndex((item) => item.code === costCenter)
+  if (index !== -1) {
+    const data = costCenterList.value[index]
+    return `${data.code} - ${data.name}`
+  }
+  return '-'
+}
+
+const getActivityName = (id: number) => {
+  const getIndex = listActivity.value.findIndex((item) => item.id === id)
+  if (getIndex !== -1) return `${listActivity.value[getIndex].code} - ${listActivity.value[getIndex].name}`
+}
+
+const getTaxCodeName = (taxCode: string) => {
+  const index = listTaxCalculation.value.findIndex((item) => item.code === taxCode)
+  if (index !== -1) {
+    const data = listTaxCalculation.value[index]
+    return `${data.code} - ${data.name}`
+  }
+  return '-'
 }
 
 const getDebitCreditName = (code: string) => {
   if (code === 'K') return 'Credit'
   else if (code === 'D') return 'Debit'
   else return '-'
+}
+
+const getWhtTypeName = (code: string) => {
+  const index = whtTypeList.value.findIndex((item) => item.code === code)
+  if (index !== -1) {
+    const data = whtTypeList.value[index]
+    return `${data.code} - ${data.name}`
+  }
+  return '-'
+}
+
+const getWhtCodeName = (code: string, data: invoiceItemTypes) => {
+  const index = data.whtCodeList.findIndex((item) => item.whtCode === code)
+  if (index !== -1) {
+    const detailData = data.whtCodeList[index]
+    return `${detailData.whtCode} - ${detailData.description}`
+  }
+  return '-'
 }
 
 const setWhtAmount = (data: invoiceItemTypes) => {
@@ -333,9 +480,19 @@ watch(
   },
   {
     deep: true,
-    immediate: true
-  }
+    immediate: true,
+  },
 )
+
+onMounted(() => {
+  for (const item of form.value.invoiceItem) {
+    if (item.whtCode) {
+      invoiceMasterApi.getWhtCode(item.whtType).then(() => {
+        item.whtCodeList = whtCodeList.value
+      })
+    }
+  }
+})
 </script>
 
 <style lang="scss" scoped>

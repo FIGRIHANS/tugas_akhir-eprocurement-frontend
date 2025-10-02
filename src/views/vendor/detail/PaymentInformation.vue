@@ -10,7 +10,7 @@ import PaymentCard from '@/components/vendor/cards/PaymentCard.vue'
     <div class="flex gap-3 justify-end">
       <UiButton :outline="true" @click="$router.go(-1)">
         <UiIcon name="black-left" variant="duotone" />
-        <span> Back </span>
+        <span> {{ $t('general.back') }} </span>
       </UiButton>
     </div>
   </div>

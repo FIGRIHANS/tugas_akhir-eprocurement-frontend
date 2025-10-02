@@ -1,6 +1,6 @@
 <template>
   <div class="modal" data-modal="true" id="detail_verification_modal">
-    <div class="modal-content max-w-[821px] modal-center-y">
+    <div class="modal-content max-w-[900px] modal-center-y">
       <div class="modal-header">
         <h3 class="modal-title text-lg font-semibold text-gray-700">Verification Detail Invoice</h3>
         <button class="btn btn-xs btn-icon btn-light btn-clear" data-modal-dismiss="true">
@@ -23,6 +23,7 @@
             <tr v-for="(item, index) in list?.workflow" :key="index" class="text-sm font-normal">
               <td>{{ index + 1 }}</td>
               <td>{{ item.profileName }}</td>
+              <td v-if="route.name === 'invoiceVerificationNoPo'">{{ item.actionerName || '-' }}</td>
               <td>
                 {{
                   item.actionerDate && item.actioner !== 0
@@ -83,6 +84,11 @@ const badgeColor = (status: number) => {
 }
 
 onMounted(() => {
+  const departmentIndex = columns.value.indexOf('Department')
+
+  if (route.name === 'invoiceVerificationNoPo') {
+    columns.value.splice(departmentIndex + 1, 0, 'Actioner Name')
+  }
   const idModal = document.querySelector('#detail_verification_modal')
   const modal = KTModal.getInstance(idModal as HTMLElement)
 

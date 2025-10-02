@@ -155,7 +155,7 @@ export default [
       },
       {
         id: 'invoice-verification-no-po',
-        title: 'Invoice Verification Non Po',
+        title: 'Invoice Verification Non PO',
         to: 'invoiceVerificationNoPo',
       },
       {
@@ -165,7 +165,7 @@ export default [
       },
       {
         id: 'invoice-approval-no-po',
-        title: 'Invoice Approval Non Po',
+        title: 'Invoice Approval Non PO',
         to: 'invoiceApprovalNonPo',
       },
       // {

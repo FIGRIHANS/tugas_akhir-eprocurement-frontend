@@ -8,9 +8,9 @@
       <p class="font-normal text-sm text-gray-600">DP Option</p>
       <p class="font-normal text-sm">{{ form.invoiceDPName || '-' }}</p>
     </div>
-    <div v-if="isNonPo" class="flex items-center justify-between gap-[10px]">
+    <div v-if="checkIsNonPo()" class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Vendor No.</p>
-      <p class="font-normal text-sm">{{ '-' }}</p>
+      <p class="font-normal text-sm">{{ form.vendorId }}</p>
     </div>
     <div class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Invoice Date</p>
@@ -34,11 +34,11 @@
         {{ `${form.companyCode} - ${form.companyName}` || '-' }}
       </p>
     </div>
-    <div v-if="!isNonPo" class="flex items-center justify-between gap-[10px]">
+    <div v-if="!checkIsNonPo()" class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Invoicing Party</p>
       <p class="font-normal text-sm">{{ form.invoicingParty || '-' }}</p>
     </div>
-    <div v-if="isNonPo" class="flex items-center justify-between gap-[10px]">
+    <div v-if="checkIsNonPo()" class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Proposal Amount</p>
       <p class="font-normal text-sm">{{ '-' }}</p>
     </div>
@@ -54,7 +54,7 @@
       <p class="font-normal text-sm text-gray-600">Tax Document No.</p>
       <p class="font-normal text-sm">{{ form.taxNo || '-' }}</p>
     </div>
-    <div v-if="!isNonPo" class="flex items-center justify-between gap-[10px]">
+    <div v-if="!checkIsNonPo()" class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Invoice Vendor No.</p>
       <p class="font-normal text-sm">{{ form.documentNo || '-' }}</p>
     </div>
@@ -69,6 +69,10 @@
     <div class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Transfer News</p>
       <p class="font-normal text-sm">{{ form.transferNews || '-' }}</p>
+    </div>
+    <div v-if="checkPoCc()" class="flex items-center justify-between gap-[10px]">
+      <p class="font-normal text-sm text-gray-600">Credit Card Billing ID</p>
+      <p class="font-normal text-sm">{{ form.creditCardBillingId || '-' }}</p>
     </div>
     <div class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Currency</p>
@@ -86,13 +90,13 @@
       <p class="font-normal text-sm text-gray-600">DP Amount Deduction</p>
       <p class="font-normal text-sm">{{ form.dpAmountDeduction || '-' }}</p>
     </div>
-    <div v-if="isNonPo" class="flex items-center justify-between gap-[10px]">
+    <div v-if="checkIsNonPo()" class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">PIC Finance</p>
       <p class="font-normal text-sm">{{ '-' }}</p>
     </div>
-    <div v-if="isNonPo" class="flex items-center justify-between gap-[10px]">
+    <div v-if="checkIsNonPo()" class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Department</p>
-      <p class="font-normal text-sm">{{ '-' }}</p>
+      <p class="font-normal text-sm">{{ form.department || '-' }}</p>
     </div>
     <div class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Description</p>
@@ -102,35 +106,28 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, inject, computed, onMounted } from 'vue'
+import { inject, type Ref } from 'vue'
 import type { formTypes } from '../../types/invoiceDetail'
 import moment from 'moment'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
 
-const currentRouteName = computed(() => {
-  return route.name
-})
+const form = inject<Ref<formTypes>>('form')
 
-const form = inject<formTypes>('form')
-const isNonPo = ref<boolean>(false)
-
-const checkNonPo = () => {
-  if (currentRouteName.value === 'invoiceDetailNonPo') {
-    isNonPo.value = true
-  }
+const checkIsNonPo = () => {
+  return route.query.invoiceType === 'no_po'
 }
 
 const checkPo = () => {
-  return form?.invoiceTypeCode === 901
+  return form.value.invoiceTypeCode === 901
 }
 
 const checkPoPib = () => {
-  return form?.invoiceTypeCode === 2
+  return form.value.invoiceTypeCode === 902
 }
 
-onMounted(() => {
-  checkNonPo()
-})
+const checkPoCc = () => {
+  return form.value.invoiceTypeCode === 903
+}
 </script>

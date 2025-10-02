@@ -18,7 +18,7 @@ import workflowConfig from './modules/workflowConfig'
 import requisition from './modules/requisition'
 
 const router = createRouter({
-  history: createWebHistory('/financeportal/'),
+  history: createWebHistory('/eprocurement/'),
   routes: [
     ...login,
     {

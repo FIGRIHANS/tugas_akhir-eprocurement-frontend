@@ -3,52 +3,54 @@ import BreadcrumbView from '@/components/BreadcrumbView.vue'
 import type { ITabClosable } from '@/components/ui/atoms/tab-closable/types/tabClosable'
 import UiTabClosable from '@/components/ui/atoms/tab-closable/UiTabClosable.vue'
 import type { routeTypes } from '@/core/type/components/breadcrumb'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import SummaryInformation from '../detail/SummaryInformation.vue'
 import AdministrativeData from '../detail/AdministrativeData.vue'
 import BusinessLicense from '../detail/BusinessLicense.vue'
 import PaymentInformation from '../detail/PaymentInformation.vue'
 
 const route = useRoute()
+const { t } = useI18n()
 
-const bcRoutes: routeTypes[] = [
+const bcRoutes = computed<routeTypes[]>(() => [
   {
-    name: 'Vendor Master',
+    name: t('vendorMaster.breadcrumb.vendorMaster'),
     to: '/vendor/master',
   },
   {
-    name: 'Detail Vendor',
+    name: t('vendorMaster.breadcrumb.detailVendor'),
     to: route.path,
   },
-]
+])
 
-const tabsItem: ITabClosable[] = [
+const tabsItem = computed<ITabClosable[]>(() => [
   {
     id: 'summary-information',
-    label: 'Summary Information',
+    label: t('vendorMaster.tabs.summaryInformation'),
   },
   {
     id: 'administrative-data',
-    label: 'Administrative Data',
+    label: t('vendorMaster.tabs.administrativeData'),
     isClosable: true,
   },
   {
     id: 'business-license-data',
-    label: 'Business License Data',
+    label: t('vendorMaster.tabs.businessLicenseData'),
     isClosable: true,
   },
   {
     id: 'payment-information-data',
-    label: 'Payment Information Data',
+    label: t('vendorMaster.tabs.paymentInformationData'),
     isClosable: true,
   },
-]
+])
 const currentTab = ref<string>('summary-information')
 </script>
 
 <template>
-  <BreadcrumbView title="Vendor Master" :routes="bcRoutes" />
+  <BreadcrumbView :title="$t('vendorMaster.title')" :routes="bcRoutes" />
   <UiTabClosable :tabs="tabsItem" v-model="currentTab" />
 
   <SummaryInformation v-if="currentTab === 'summary-information'" />

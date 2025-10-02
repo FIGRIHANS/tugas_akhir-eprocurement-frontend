@@ -53,7 +53,7 @@
                 ></v-select>
               </td>
               <td>
-                <span v-if="!item.isEdit">{{ useFormatIdr(item.itemAmount) || '-' }}</span>
+                <span v-if="!item.isEdit">{{ form?.currency === 'IDR' ? useFormatIdr(item.itemAmount) : useFormatUsd(item.itemAmount) || '-' }}</span>
                 <input
                   v-else
                   v-model="item.itemAmount"
@@ -106,10 +106,10 @@
                 <span>{{ item.whtCode || '-' }}</span>
               </td>
               <td>
-                <span>{{ item.whtBaseAmount || '-' }}</span>
+                <span>{{ form?.currency === 'IDR' ? useFormatIdr(item.whtBaseAmount) : useFormatUsd(item.whtBaseAmount) || '-' }}</span>
               </td>
               <td>
-                <span>{{ item.whtAmount || '-' }}</span>
+                <span>{{ form?.currency === 'IDR' ? useFormatIdr(item.whtAmount) : useFormatUsd(item.whtAmount) || '-' }}</span>
               </td>
             </tr>
           </template>
@@ -125,8 +125,10 @@ import type { formTypes } from '../../types/invoiceAddWrapper'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import type { itemsCostType } from '../../types/additionalCost'
+import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
+const verificationApi = useInvoiceVerificationStore()
 const columns = ref([
   'Action',
   'Activity / Expense',
@@ -151,6 +153,7 @@ const listActivity = computed(() => invoiceMasterApi.activityList)
 const addNew = () => {
   if (form) {
     const data = {
+      id: 0,
       activity: null,
       activityCode: '',
       activityName: '',
@@ -172,6 +175,9 @@ const addNew = () => {
 }
 
 const deleteItem = (index: number) => {
+  if (form.additionalCost[index].id) {
+    verificationApi.additionalCostTempDelete?.push(form.additionalCost[index].id)
+  }
   form?.additionalCost.splice(index, 1)
 }
 

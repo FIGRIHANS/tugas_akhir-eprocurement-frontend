@@ -1,6 +1,6 @@
 <template>
   <div class="file-upload">
-    <input type="file" ref="fileInput" accept=".pdf" @change="handleFileUpload" class="hidden" :disabled="disabled" />
+    <input type="file" ref="fileInput" accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx" @change="handleFileUpload" class="hidden" :disabled="disabled" />
 
     <div class="flex items-center" :class="{ 'border-danger': error }" @click="triggerFileInput">
       <slot>
@@ -8,17 +8,21 @@
           <IconUpload />
         </div>
         <div class="upload__right">
-          Select file - Pdf (Max 2 mb)
+          Select file - Pdf (Max 16 mb)
         </div>
       </slot>
     </div>
+    <ErrorUploadModal :error-message="errorMessageUpload" />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, defineExpose } from 'vue'
+import { ref, computed, defineAsyncComponent, watch } from 'vue'
 import IconUpload from './PdfUpload/IconUpload.vue'
 import { useUploadStore } from '@/stores/general/upload'
+import { KTModal } from '@/metronic/core'
+
+const ErrorUploadModal = defineAsyncComponent(() => import('./PdfUpload/ErrorUploadModal.vue'))
 
 const props = defineProps<{
   error?: boolean
@@ -31,6 +35,8 @@ const emits = defineEmits(['setFile'])
 const uploadApi = useUploadStore()
 const fileInput = ref<HTMLInputElement | null>(null)
 
+const errorMessageUpload = computed(() => uploadApi.errorMessageUpload)
+
 const triggerFileInput = () => {
   fileInput.value?.click()
 }
@@ -42,7 +48,7 @@ const handleFileUpload = async (event: Event) => {
 
   const file = target.files[0]
 
-  if (file.size > 2 * 1024 * 1024) return
+  if (file.size > 16 * 1024 * 1024) return
 
   try {
     const response = await uploadApi.uploadFile(file, 0)
@@ -56,6 +62,17 @@ const handleFileUpload = async (event: Event) => {
 
   }
 }
+
+watch(
+  () => errorMessageUpload.value,
+  () => {
+    if (errorMessageUpload.value) {
+      const idModal = document.querySelector('#error_upload_modal')
+      const modal = KTModal.getInstance(idModal as HTMLElement)
+      modal.show()
+    }
+  }
+)
 
 defineExpose({
   triggerFileInput

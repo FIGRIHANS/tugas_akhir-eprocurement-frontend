@@ -28,7 +28,7 @@
           <tr v-for="(item, index) in additionalList" :key="index" class="cost__items">
             <td>{{ index + 1 }}</td>
             <td>{{ getActivityName(item.activityId) || '-' }}</td>
-            <td>{{ item.itemAmount || '-' }}</td>
+            <td>{{ form.currCode === 'IDR' ? useFormatIdr(item.itemAmount) : useFormatUsd(item.itemAmount) || '-' }}</td>
             <td>{{ item.debitCredit || '-' }}</td>
             <td>{{ getTaxCodeName(item.taxCode) || '-' }}</td>
             <td>{{ item.vatAmount ? form.currCode === 'IDR' ? useFormatIdr(item.vatAmount) : useFormatUsd(item.vatAmount) : '-' }}</td>
@@ -37,8 +37,8 @@
             <td>{{ item.assignment || '-' }}</td>
             <td>{{ getWhtTypeName(item.whtType) || '-' }}</td>
             <td>{{ getWhtCodeName(item.whtCode, item) || '-' }}</td>
-            <td>{{ item.whtBaseAmount || '-' }}</td>
-            <td>{{ item.whtAmount || '-' }}</td>
+            <td>{{ item.whtBaseAmount ? form.currCode === 'IDR' ? useFormatIdr(item.whtBaseAmount) : useFormatUsd(item.whtBaseAmount) : '-' }}</td>
+            <td>{{ item.whtAmount ? form.currCode === 'IDR' ? useFormatIdr(item.whtAmount) : useFormatUsd(item.whtAmount) : '-' }}</td>
           </tr>
         </tbody>
       </table>

@@ -53,7 +53,7 @@
         <div class="relative">
           <label
             class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white z-[1]"
-            >Invoice Date</label
+            >Submitted Document Date</label
           >
           <DatePicker v-model="date" format="yyyy/MM/dd" teleport />
         </div>
@@ -77,6 +77,7 @@ import { ref, computed, watch } from 'vue'
 import type { filterListTypes } from '../../types/invoiceList'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
+import { formatfilterDate } from '@/composables/date-format'
 
 const props = defineProps<{
   data: filterListTypes
@@ -102,10 +103,23 @@ const resetFilter = () => {
   invoiceType.value = ''
 }
 
+const resetStatus = () => {
+  status.value = ''
+}
+const resetDate = () => {
+  date.value = ''
+}
+const resetCompanyCode = () => {
+  companyCode.value = ''
+}
+const resetInvoiceType = () => {
+  invoiceType.value = ''
+}
+
 const goFilter = () => {
   const data = {
     status: status.value,
-    date: date.value,
+    date: formatfilterDate(date.value),
     companyCode: companyCode.value,
     invoiceType: invoiceType.value,
   }
@@ -126,4 +140,13 @@ watch(
     immediate: true,
   },
 )
+
+defineExpose({
+  resetFilter,
+  resetStatus,
+  resetDate,
+  resetInvoiceType,
+  resetCompanyCode,
+  goFilter,
+})
 </script>

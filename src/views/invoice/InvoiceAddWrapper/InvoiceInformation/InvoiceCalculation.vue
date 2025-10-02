@@ -31,7 +31,7 @@ import { ref, computed, onMounted, watch, inject } from 'vue'
 import { useRoute } from 'vue-router'
 import type { listType } from '../../types/invoiceCalculation'
 import type { formTypes } from '../../types/invoiceAddWrapper'
-import { defaultField, dpField } from '@/static/invoiceCalculation'
+import { defaultField, dpField, nonPoField } from '@/static/invoiceCalculation'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 
@@ -89,16 +89,15 @@ const setToForm = (name: string, value: number) => {
 const setCalculation = () => {
   listCalculation.value = []
   for (const item of listName.value) {
-    if ((typeForm.value === 'nonpo' && item !== 'Additional Cost') || typeForm.value === 'po') {
-      const amount = setCount(item)
-      const data = {
-        name: item,
-        amount: amount.toString(),
-        currency: form?.currency || ''
-      }
-      listCalculation.value.push(data)
-      setToForm(item, amount)
+    if (typeForm.value === 'nonpo' && item !== 'Additional Cost') return
+    const amount = setCount(item)
+    const data = {
+      name: item,
+      amount: amount.toString(),
+      currency: form?.currency || ''
     }
+    listCalculation.value.push(data)
+    setToForm(item, amount)
   }
 }
 
@@ -121,7 +120,11 @@ const countSubtotal = () => {
     }
   } else {
     for (const item of form.invoiceItem) {
-      total = total + item.itemAmount
+      if (item.debitCredit === 'D') {
+        total = total + item.itemAmount
+      } else {
+        total = total - item.itemAmount
+      }
     }
   }
   return total
@@ -220,10 +223,12 @@ const countTotalNetAmount = () => {
 }
 
 watch(
-  () => [form?.invoiceDp],
+  () => form,
   () => {
     if (form?.invoiceDp !== '9011') {
       listName.value = [...dpField]
+    } else if (checkIsNonPo()) {
+      listName.value = [...nonPoField]
     } else {
       listName.value = [...defaultField]
     }

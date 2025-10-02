@@ -12,6 +12,7 @@ import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiLoading from '@/components/UiLoading.vue'
 import UiModal from '@/components/modal/UiModal.vue'
 import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
+import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 
 import type { IVendorLegalDocumentPayload } from '@/stores/vendor/types/vendor'
 import { useCompanyDeedDataStore, useVendorAdministrationStore } from '@/stores/vendor/vendor'
@@ -20,6 +21,7 @@ import { useLoginStore } from '@/stores/views/login'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
 import moment from 'moment'
 import LPagination from '@/components/pagination/LPagination.vue'
+import { useChangeDataEmailStore } from '@/stores/vendor/email-change-data'
 
 const companyDeedDataStore = useCompanyDeedDataStore()
 const userLoginStore = useLoginStore()
@@ -51,6 +53,7 @@ const showDeleteModal = ref(false)
 const apiErrorMessage = ref('')
 const isDownloadLoading = ref(false)
 const isSaveLoading = ref(false)
+const modalUploadFailed = ref<boolean>(false)
 
 const fileUploaderRef = ref<InstanceType<typeof UiFileUpload> | null>(null)
 
@@ -184,14 +187,14 @@ const handleSave = async () => {
       3116,
     )
 
-    await changeDataEmailStore.sendEmail({
-      recepientName: adminStore.data?.vendorName || '',
-      recepients: {
-        emailTo: adminStore.data?.vendorEmail || '',
-        emailCc: '',
-        emailBcc: ''
-      }
-    })
+    // await changeDataEmailStore.sendEmail({
+    //   recepientName: adminStore.data?.vendorName || '',
+    //   recepients: {
+    //     emailTo: adminStore.data?.vendorEmail || '',
+    //     emailCc: '',
+    //     emailBcc: '',
+    //   },
+    // })
 
     showSuccessModal.value = true
 
@@ -201,9 +204,9 @@ const handleSave = async () => {
   } catch (err) {
     if (axios.isAxiosError(err)) {
       apiErrorMessage.value =
-        err.response?.data?.result?.message || 'Terjadi kesalahan tidak terduga. Silahkan coba lagi'
+        err.response?.data?.result?.message || 'An unexpected error occurred. Please try again'
     } else {
-      apiErrorMessage.value = 'Terjadi kesalahan saat menyimpan data. Silahkan coba lagi'
+      apiErrorMessage.value = 'An error occurred while saving data. Please try again'
     }
     showErrorModal.value = true
   } finally {
@@ -258,9 +261,9 @@ const handleProcessDelete = async () => {
   } catch (err) {
     if (axios.isAxiosError(err)) {
       apiErrorMessage.value =
-        err.response?.data?.result?.message || 'Terjadi kesalahan tidak terduga. Silahkan coba lagi'
+        err.response?.data?.result?.message || 'An unexpected error occurred. Please try again'
     } else {
-      apiErrorMessage.value = 'Terjadi kesalahan saat menghapus data. Silahkan coba lagi'
+      apiErrorMessage.value = 'An error occurred while deleting data. Please try again'
     }
     showErrorModal.value = true
   } finally {
@@ -282,6 +285,10 @@ const handleDownload = async (path: string) => {
   }
 }
 
+const handleUploadFailed = () => {
+  modalUploadFailed.value = true
+}
+
 /** Pastikan cityList tersedia; kalau store punya action loader, panggil di sini */
 onMounted(async () => {
   if (
@@ -290,7 +297,7 @@ onMounted(async () => {
   ) {
     try {
       await vendorMasterDataStore.getVendorCities()
-    } catch { }
+    } catch {}
   }
 })
 
@@ -345,29 +352,60 @@ watchEffect(async () => {
   <div class="card">
     <div class="card-header">
       <div class="w-full flex justify-between items-center">
-        <h3 class="text-lg font-semibold text-slate-800">Latest Amendment Data</h3>
+        <h3 class="text-lg font-semibold text-slate-800">
+          {{ $t('companyDeed.latestAmendment.title') }}
+        </h3>
       </div>
     </div>
 
     <div class="card-body">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-20 mb-8">
         <UiFormGroup hide-border>
-          <UiInput label="Number" placeholder="Number" row v-model="vendorAmendmentPayload.documentNo"
-            :error="errors.documentNo !== ''" :hintText="errors.documentNo" />
-          <UiInput label="Notary" placeholder="Notary full name" row v-model="vendorAmendmentPayload.notaryName"
-            :error="errors.notaryName !== ''" :hintText="errors.notaryName" />
+          <UiInput
+            label="Number"
+            placeholder="Number"
+            row
+            v-model="vendorAmendmentPayload.documentNo"
+            :error="errors.documentNo !== ''"
+            :hintText="errors.documentNo"
+          />
+          <UiInput
+            label="Notary"
+            placeholder="Notary full name"
+            row
+            v-model="vendorAmendmentPayload.notaryName"
+            :error="errors.notaryName !== ''"
+            :hintText="errors.notaryName"
+          />
         </UiFormGroup>
 
         <UiFormGroup hide-border>
-          <UiSelect label="Notary Office Location" placeholder="-- Notary Office Location --" :options="vendorMasterDataStore.cityList?.map((item) => ({
-            value: item.cityID,
-            label: item.cityName,
-          }))
-            " value-key="value" text-key="label" row v-model.number="vendorAmendmentPayload.notaryLocation"
-            :error="errors.notaryLocation !== ''" :hintText="errors.notaryLocation" />
-          <UiFileUpload ref="fileUploaderRef" name="latestAmmendmentDocumentUrl" label="File"
+          <UiSelect
+            label="Notary Office Location"
+            placeholder="-- Notary Office Location --"
+            :options="
+              vendorMasterDataStore.cityList?.map((item) => ({
+                value: item.cityID,
+                label: item.cityName,
+              }))
+            "
+            value-key="value"
+            text-key="label"
+            row
+            v-model.number="vendorAmendmentPayload.notaryLocation"
+            :error="errors.notaryLocation !== ''"
+            :hintText="errors.notaryLocation"
+          />
+          <UiFileUpload
+            ref="fileUploaderRef"
+            name="latestAmmendmentDocumentUrl"
+            label="File"
             placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
-            hint-text="*jpg, jpeg, png, pdf, zip / max : 16 MB" @added-file="onUploadFile($event)" />
+            hint-text="*jpg, jpeg, png, pdf, zip / max : 16 MB"
+            @added-file="onUploadFile($event)"
+            @upload-failed="handleUploadFailed()"
+            :max-size="16000000"
+          />
 
           <!-- Tombol dinamis: Add / Update -->
           <div class="flex justify-end items-center">
@@ -450,7 +488,7 @@ watchEffect(async () => {
               </div>
             </td>
             <td class="text-nowrap">{{ doc.documentNo }}</td>
-            <td class="text-nowrap">{{ moment(doc.documentDate).format('DD MMMM YYYY') }}</td>
+            <td class="text-nowrap">{{ moment(doc.documentDate).format('MMM dd, yyyy') }}</td>
             <td class="text-nowrap">{{ doc.notaryName ?? doc.value }}</td>
             <td class="text-nowrap">{{ doc.cityName }}</td>
           </tr>
@@ -459,13 +497,20 @@ watchEffect(async () => {
       <div class="flex flex-row items-center justify-between px-4">
         <div class="flex flex-row items-center gap-2">
           Show
-          <UiSelect v-model="paginationLatestAmandmentDataStore.pageSize" :options="pageSizeOptions" class="w-16" />
+          <UiSelect
+            v-model="paginationLatestAmandmentDataStore.pageSize"
+            :options="pageSizeOptions"
+            class="w-16"
+          />
           per page from {{ paginationLatestAmandmentDataStore.total }} data
         </div>
 
-        <LPagination :totalItems="paginationLatestAmandmentDataStore.total"
+        <LPagination
+          :totalItems="paginationLatestAmandmentDataStore.total"
           :pageSize="paginationLatestAmandmentDataStore.pageSize"
-          :currentPage="paginationLatestAmandmentDataStore.currentPage" @pageChange="setPageLatestAmandmentData" />
+          :currentPage="paginationLatestAmandmentDataStore.currentPage"
+          @pageChange="setPageLatestAmandmentData"
+        />
       </div>
     </div>
 
@@ -483,7 +528,11 @@ watchEffect(async () => {
     <!-- modal error -->
     <UiModal v-model="showErrorModal" size="sm">
       <div class="text-center mb-6">
-        <UiIcon name="cross-circle" variant="duotone" class="text-[150px] text-danger text-center" />
+        <UiIcon
+          name="cross-circle"
+          variant="duotone"
+          class="text-[150px] text-danger text-center"
+        />
       </div>
       <h3 class="text-center text-lg font-medium">
         Failed to
@@ -497,24 +546,46 @@ watchEffect(async () => {
     <!-- modal confirm delete -->
     <UiModal v-model="showDeleteModal" size="sm">
       <div class="text-center mb-6">
-        <UiIcon name="cross-circle" variant="duotone" class="text-[150px] text-danger text-center" />
+        <UiIcon
+          name="cross-circle"
+          variant="duotone"
+          class="text-[150px] text-danger text-center"
+        />
       </div>
       <h3 class="text-center text-lg font-medium">Are You Sure You Want to Delete This Item?</h3>
       <p class="text-center text-base text-gray-600 mb-5">
         This action will permanently remove the selected data from the list.
       </p>
       <div class="flex gap-3 px-8 mb-3">
-        <UiButton outline @click="showDeleteModal = false" class="flex-1 flex items-center justify-center">
+        <UiButton
+          outline
+          @click="showDeleteModal = false"
+          class="flex-1 flex items-center justify-center"
+        >
           <UiIcon name="black-left-line" />
           <span>Cancel</span>
         </UiButton>
-        <UiButton variant="danger" class="flex-1 flex items-center justify-center" @click="handleProcessDelete"
-          :disabled="isSaveLoading">
+        <UiButton
+          variant="danger"
+          class="flex-1 flex items-center justify-center"
+          @click="handleProcessDelete"
+          :disabled="isSaveLoading"
+        >
           <UiLoading variant="white" v-if="isSaveLoading" />
           <UiIcon name="cross-circle" variant="duotone" v-else />
           <span>Delete</span>
         </UiButton>
       </div>
     </UiModal>
+    <ModalConfirmation
+      :open="modalUploadFailed"
+      id="other-doc-upload-error"
+      type="danger"
+      title="Upload Failed"
+      text="File size exceeds the maximum limit of 16 MB. Please choose a smaller file."
+      no-submit
+      static
+      :cancel="() => (modalUploadFailed = false)"
+    />
   </div>
 </template>

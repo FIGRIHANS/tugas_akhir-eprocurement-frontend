@@ -1,3 +1,4 @@
+import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import generalApi from '@/core/utils/generalApi'
 
@@ -5,6 +6,8 @@ import type { ApiResponse } from '@/core/type/api'
 import type { UploadFileResponse } from './types/upload'
 
 export const useUploadStore = defineStore('upload', () => {
+  const errorMessageUpload = ref<string>('')
+
   const uploadFile = async (FormFile: File, Actioner: number) => {
     const formData = new FormData()
     formData.append('FormFile', FormFile)
@@ -14,6 +17,8 @@ export const useUploadStore = defineStore('upload', () => {
       '/api/file/upload',
       formData,
     )
+
+    errorMessageUpload.value = response.data.result.message
 
     return response.data.result.content
   }
@@ -33,6 +38,7 @@ export const useUploadStore = defineStore('upload', () => {
   }
 
   return {
+    errorMessageUpload,
     uploadFile,
     previewFile,
   }

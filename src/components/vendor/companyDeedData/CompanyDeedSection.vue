@@ -20,6 +20,7 @@ import axios from 'axios'
 import moment from 'moment'
 import LPagination from '@/components/pagination/LPagination.vue'
 import { useChangeDataEmailStore } from '@/stores/vendor/email-change-data'
+import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 
 const companyDeedDataStore = useCompanyDeedDataStore()
 const adminVendorStore = useVendorAdministrationStore()
@@ -52,6 +53,7 @@ const showDeleteModal = ref(false)
 const apiErrorMessage = ref('')
 const isDownloadLoading = ref(false)
 const isSaveLoading = ref(false)
+const modalUploadFailed = ref<boolean>(false)
 
 const fileUploaderRef = ref<InstanceType<typeof UiFileUpload> | null>(null)
 
@@ -186,14 +188,14 @@ const handleSave = async () => {
       3115,
     )
 
-    await changeDataEmailStore.sendEmail({
-      recepientName: adminStore.data?.vendorName || '',
-      recepients: {
-        emailTo: adminStore.data?.vendorEmail || '',
-        emailCc: '',
-        emailBcc: ''
-      }
-    })
+    // await changeDataEmailStore.sendEmail({
+    //   recepientName: adminStore.data?.vendorName || '',
+    //   recepients: {
+    //     emailTo: adminStore.data?.vendorEmail || '',
+    //     emailCc: '',
+    //     emailBcc: '',
+    //   },
+    // })
 
     showSuccessModal.value = true
 
@@ -205,10 +207,10 @@ const handleSave = async () => {
       if (err.response?.data?.result) {
         apiErrorMessage.value = err.response.data.result.message
       } else {
-        apiErrorMessage.value = 'Terjadi kesalahan tidak terduga. Silahkan coba lagi'
+        apiErrorMessage.value = 'An unexpected error occurred. Please try again'
       }
     } else {
-      apiErrorMessage.value = 'Terjadi kesalahan saat menyimpan data. Silahkan coba lagi'
+      apiErrorMessage.value = 'An error occurred while saving data. Please try again'
     }
     showErrorModal.value = true
   } finally {
@@ -265,10 +267,10 @@ const handleProcessDelete = async () => {
       if (err.response?.data?.result) {
         apiErrorMessage.value = err.response.data.result.message
       } else {
-        apiErrorMessage.value = 'Terjadi kesalahan tidak terduga. Silahkan coba lagi'
+        apiErrorMessage.value = 'An unexpected error occurred. Please try again'
       }
     } else {
-      apiErrorMessage.value = 'Terjadi kesalahan saat menghapus data. Silahkan coba lagi'
+      apiErrorMessage.value = 'An error occurred while deleting data. Please try again'
     }
     showErrorModal.value = true
   } finally {
@@ -290,12 +292,16 @@ const handleDownload = async (path: string) => {
   }
 }
 
+const handleUploadFailed = () => {
+  modalUploadFailed.value = true
+}
+
 /** Pastikan daftar kota tersedia (kalau store punya action loader) */
 onMounted(async () => {
   if (!vendorMasterDataStore.cityList?.length) {
     try {
       await vendorMasterDataStore.cityList?.()
-    } catch { }
+    } catch {}
   }
 })
 
@@ -350,7 +356,9 @@ watchEffect(async () => {
   <div class="card">
     <div class="card-header">
       <div class="w-full flex justify-between items-center">
-        <h3 class="text-lg font-semibold text-slate-800">Company Deed Data</h3>
+        <h3 class="text-lg font-semibold text-slate-800">
+          {{ $t('companyDeed.companyDeedSection.title') }}
+        </h3>
       </div>
     </div>
 
@@ -368,23 +376,57 @@ watchEffect(async () => {
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-20 mb-8">
         <UiFormGroup hide-border>
-          <UiInput label="Number" placeholder="Number" row v-model="vendorLegalDocPayload.documentNo"
-            :error="errors.documentNo !== ''" :hintText="errors.documentNo" />
-          <UiInput label="Notary" placeholder="Notary full name" row v-model="vendorLegalDocPayload.notaryName"
-            :error="errors.notaryName !== ''" :hintText="errors.notaryName" />
-          <UiFileUpload ref="fileUploaderRef" name="vendorLegalDocumentUrl" label="File"
+          <UiInput
+            :label="$t('companyDeed.companyDeedSection.documentNo')"
+            :placeholder="$t('companyDeed.companyDeedSection.documentNo')"
+            row
+            v-model="vendorLegalDocPayload.documentNo"
+            :error="errors.documentNo !== ''"
+            :hintText="errors.documentNo"
+          />
+          <UiInput
+            :label="$t('companyDeed.companyDeedSection.notaryName')"
+            :placeholder="$t('companyDeed.companyDeedSection.notaryName')"
+            row
+            v-model="vendorLegalDocPayload.notaryName"
+            :error="errors.notaryName !== ''"
+            :hintText="errors.notaryName"
+          />
+          <UiFileUpload
+            ref="fileUploaderRef"
+            name="vendorLegalDocumentUrl"
+            :label="$t('companyDeed.companyDeedSection.document')"
             placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
-            hint-text="*jpg, jpeg, png, pdf, zip / max : 16 MB" @added-file="onUploadFile($event)" />
+            hint-text="*jpg, jpeg, png, pdf, zip / max : 16 MB"
+            @added-file="onUploadFile($event)"
+            @upload-failed="handleUploadFailed()"
+            :max-size="16000000"
+          />
         </UiFormGroup>
 
         <UiFormGroup hide-border>
-          <DatePicker v-model="vendorLegalDocPayload.documentDate" label="Letter Date" placeholder="Pilih Tanggal" />
-          <UiSelect label="Notary Office Location" placeholder="-- Notary Office Location --" :options="vendorMasterDataStore.cityList?.map((item) => ({
-            value: item.cityID,
-            label: item.cityName,
-          }))
-            " value-key="value" text-key="label" row v-model.number="vendorLegalDocPayload.notaryLocation"
-            :error="errors.notaryLocation !== ''" :hintText="errors.notaryLocation" />
+          <DatePicker
+            v-model="vendorLegalDocPayload.documentDate"
+            :label="$t('companyDeed.companyDeedSection.documentDate')"
+            placeholder="Pilih Tanggal"
+            :format="'MMM dd, yyyy'"
+          />
+          <UiSelect
+            :label="$t('companyDeed.companyDeedSection.notaryLocation')"
+            :placeholder="'-- ' + $t('companyDeed.companyDeedSection.notaryLocation') + ' --'"
+            :options="
+              vendorMasterDataStore.cityList?.map((item) => ({
+                value: item.cityID,
+                label: item.cityName,
+              }))
+            "
+            value-key="value"
+            text-key="label"
+            row
+            v-model.number="vendorLegalDocPayload.notaryLocation"
+            :error="errors.notaryLocation !== ''"
+            :hintText="errors.notaryLocation"
+          />
 
           <div class="flex justify-end items-center">
             <UiButton variant="primary" @click="handleSave" :disabled="isSaveLoading">
@@ -399,10 +441,10 @@ watchEffect(async () => {
         <thead>
           <tr>
             <th class="text-nowrap"></th>
-            <th class="text-nowrap">Number</th>
-            <th class="text-nowrap">Letter Date</th>
-            <th class="text-nowrap">Notary</th>
-            <th class="text-nowrap">Notary Office Location</th>
+            <th class="text-nowrap">{{ $t('companyDeed.companyDeedSection.documentNo') }}</th>
+            <th class="text-nowrap">{{ $t('companyDeed.companyDeedSection.documentDate') }}</th>
+            <th class="text-nowrap">{{ $t('companyDeed.companyDeedSection.notaryName') }}</th>
+            <th class="text-nowrap">{{ $t('companyDeed.companyDeedSection.notaryLocation') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -419,7 +461,7 @@ watchEffect(async () => {
           </tr>
 
           <tr v-else-if="!companyDeedData.length">
-            <td colspan="5" class="text-center">No data</td>
+            <td colspan="5" class="text-center">{{ $t('companyDeed.common.noData') }}</td>
           </tr>
 
           <tr v-else v-for="doc in companyDeedData" :key="doc" class="font-normal text-sm">
@@ -435,7 +477,7 @@ watchEffect(async () => {
                         <span class="menu-icon">
                           <UiIcon variant="duotone" name="arrow-down" class="!text-primary" />
                         </span>
-                        <span class="menu-title"> Download </span>
+                        <span class="menu-title"> {{ $t('companyDeed.common.download') }} </span>
                       </button>
                     </li>
                     <li class="menu-item">
@@ -443,7 +485,9 @@ watchEffect(async () => {
                         <span class="menu-icon">
                           <UiIcon variant="duotone" name="notepad-edit" class="!text-warning" />
                         </span>
-                        <span class="menu-title"> Edit </span>
+                        <span class="menu-title">
+                          {{ $t('companyDeed.shareholders.edit_action') }}
+                        </span>
                       </button>
                     </li>
                     <li class="menu-item">
@@ -451,7 +495,9 @@ watchEffect(async () => {
                         <span class="menu-icon">
                           <UiIcon variant="duotone" name="cross-circle" class="!text-danger" />
                         </span>
-                        <span class="menu-title"> Delete </span>
+                        <span class="menu-title">
+                          {{ $t('companyDeed.shareholders.delete_action') }}
+                        </span>
                       </button>
                     </li>
                   </ul>
@@ -459,7 +505,7 @@ watchEffect(async () => {
               </div>
             </td>
             <td class="text-nowrap">{{ doc.documentNo }}</td>
-            <td class="text-nowrap">{{ moment(doc.documentDate).format('DD MMMM YYYY') }}</td>
+            <td class="text-nowrap">{{ moment(doc.documentDate).format('MMM dd, yyyy') }}</td>
             <td class="text-nowrap">{{ doc.notaryName }}</td>
             <td class="text-nowrap">{{ doc.cityName }}</td>
           </tr>
@@ -467,14 +513,22 @@ watchEffect(async () => {
       </table>
       <div class="flex flex-row items-center justify-between px-4">
         <div class="flex flex-row items-center gap-2">
-          Show
-          <UiSelect v-model="paginationCompanyDeedDataStore.pageSize" :options="pageSizeOptions" class="w-16" />
-          per page from {{ paginationCompanyDeedDataStore.total }} data
+          {{ $t('companyDeed.common.show') }}
+          <UiSelect
+            v-model="paginationCompanyDeedDataStore.pageSize"
+            :options="pageSizeOptions"
+            class="w-16"
+          />
+          {{ $t('companyDeed.common.perPage') }} from
+          {{ paginationCompanyDeedDataStore.total }} data
         </div>
 
-        <LPagination :totalItems="paginationCompanyDeedDataStore.total"
-          :pageSize="paginationCompanyDeedDataStore.pageSize" :currentPage="paginationCompanyDeedDataStore.currentPage"
-          @pageChange="setPageCompanyDeedData" />
+        <LPagination
+          :totalItems="paginationCompanyDeedDataStore.total"
+          :pageSize="paginationCompanyDeedDataStore.pageSize"
+          :currentPage="paginationCompanyDeedDataStore.currentPage"
+          @pageChange="setPageCompanyDeedData"
+        />
       </div>
     </div>
 
@@ -482,9 +536,9 @@ watchEffect(async () => {
     <UiModal v-model="showSuccessModal" size="sm">
       <div class="text-center mb-6">
         <ModalSuccessLogo class="mx-auto" />
-        <h3 class="text-center text-lg font-medium">Hooray!</h3>
+        <h3 class="text-center text-lg font-medium">{{ $t('companyDeed.common.hooray') }}</h3>
         <p class="text-center text-base text-gray-600 mb-5">
-          The data has been successfully updated in the admin system
+          {{ $t('companyDeed.common.successMessage') }}
         </p>
       </div>
     </UiModal>
@@ -492,11 +546,22 @@ watchEffect(async () => {
     <!-- modal error -->
     <UiModal v-model="showErrorModal" size="sm">
       <div class="text-center mb-6">
-        <UiIcon name="cross-circle" variant="duotone" class="text-[150px] text-danger text-center" />
+        <UiIcon
+          name="cross-circle"
+          variant="duotone"
+          class="text-[150px] text-danger text-center"
+        />
       </div>
       <h3 class="text-center text-lg font-medium">
-        Failed to {{ mode == 'delete' ? 'Delete' : mode === 'edit' ? 'Change' : 'Add' }} Vendor
-        legal document!
+        {{ $t('companyDeed.common.failed') }}
+        {{
+          mode == 'delete'
+            ? $t('companyDeed.common.failedDelete')
+            : mode === 'edit'
+              ? $t('companyDeed.common.failedChange')
+              : $t('companyDeed.common.failedAdd')
+        }}
+        {{ $t('companyDeed.common.document') }}!
       </h3>
       <p class="text-center text-base text-gray-600 mb-5">
         {{ apiErrorMessage }}
@@ -506,24 +571,46 @@ watchEffect(async () => {
     <!-- modal confirm delete -->
     <UiModal v-model="showDeleteModal" size="sm">
       <div class="text-center mb-6">
-        <UiIcon name="cross-circle" variant="duotone" class="text-[150px] text-danger text-center" />
+        <UiIcon
+          name="cross-circle"
+          variant="duotone"
+          class="text-[150px] text-danger text-center"
+        />
       </div>
-      <h3 class="text-center text-lg font-medium">Are You Sure You Want to Delete This Item?</h3>
+      <h3 class="text-center text-lg font-medium">{{ $t('companyDeed.common.deleteTitle') }}</h3>
       <p class="text-center text-base text-gray-600 mb-5">
-        This action will permanently remove the selected data from the list.
+        {{ $t('companyDeed.common.deleteMessage') }}
       </p>
       <div class="flex gap-3 px-8 mb-3">
-        <UiButton outline @click="showDeleteModal = false" class="flex-1 flex items-center justify-center">
+        <UiButton
+          outline
+          @click="showDeleteModal = false"
+          class="flex-1 flex items-center justify-center"
+        >
           <UiIcon name="black-left-line" />
-          <span>Cancel</span>
+          <span>{{ $t('companyDeed.common.cancel') }}</span>
         </UiButton>
-        <UiButton variant="danger" class="flex-1 flex items-center justify-center" @click="handleProcessDelete"
-          :disabled="isSaveLoading">
+        <UiButton
+          variant="danger"
+          class="flex-1 flex items-center justify-center"
+          @click="handleProcessDelete"
+          :disabled="isSaveLoading"
+        >
           <UiLoading variant="white" v-if="isSaveLoading" />
           <UiIcon name="cross-circle" variant="duotone" v-else />
-          <span>Delete</span>
+          <span>{{ $t('companyDeed.common.delete') }}</span>
         </UiButton>
       </div>
     </UiModal>
+    <ModalConfirmation
+      :open="modalUploadFailed"
+      id="other-doc-upload-error"
+      type="danger"
+      :title="$t('companyDeed.common.uploadFailed')"
+      :text="$t('companyDeed.common.fileSizeExceeds')"
+      no-submit
+      static
+      :cancel="() => (modalUploadFailed = false)"
+    />
   </div>
 </template>

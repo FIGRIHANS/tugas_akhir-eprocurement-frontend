@@ -13,8 +13,8 @@
         <tbody>
           <tr v-for="(item, index) in form.invoiceItem" :key="index" class="invoice__items">
             <td>{{ index + 1 }}</td>
-            <td>{{ getActivityName(item.activity) || '-' }}</td>
-            <td>{{ item.itemAmount || '-' }}</td>
+            <td>{{ getActivityName(item.activityId) || '-' }}</td>
+            <td>{{ form.currCode === 'IDR' ? useFormatIdr(item.itemAmount) : useFormatUsd(item.itemAmount) || '-' }}</td>
             <td>{{ item.itemText || '-' }}</td>
             <td>{{ getDebitCreditName(item.debitCredit) || '-' }}</td>
             <td>{{ item.taxCode || '-' }}</td>
@@ -61,9 +61,9 @@ const columns = ref<string[]>([
   'WHT Amount'
 ])
 
-const getActivityName = (code: string) => {
-  const getIndex = listActivity.value.findIndex((item) => item.code === code)
-  if (getIndex !== -1) return listActivity.value[getIndex].name
+const getActivityName = (id: number) => {
+  const getIndex = listActivity.value.findIndex((item) => item.id === id)
+  if (getIndex !== -1) return `${listActivity.value[getIndex].code} - ${listActivity.value[getIndex].name}`
 }
 
 const getDebitCreditName = (code: string) => {

@@ -1,6 +1,6 @@
 import type { documentFormTypes } from './invoiceDocument'
 import type { itemsPoGrType } from './invoicePoGr'
-import type { costExpenseType, itemsCostType } from './additionalCost'
+import type { itemsCostType } from './additionalCost'
 import type { invoiceItemTypes } from './invoiceItem'
 
 export interface formTypes extends documentFormTypes {
@@ -15,6 +15,7 @@ export interface formTypes extends documentFormTypes {
   npwp: string
   address: string
 
+  paymentId: number
   isNotRegisteredBank?: boolean
   bankKeyId: string
   bankKeyIdError?: boolean
@@ -88,7 +89,6 @@ export interface formTypes extends documentFormTypes {
   additionalCostError?: boolean
   invoiceItem: invoiceItemTypes[]
   invoiceItemError?: boolean
-  costExpenses: costExpenseType[]
 
   status: number
 }

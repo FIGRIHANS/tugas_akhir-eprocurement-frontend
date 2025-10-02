@@ -150,7 +150,7 @@
                 </td>
                 <td>
                   <span v-if="!item.isEdit">{{ item.poNo }}</span>
-                  <input type="number" v-else v-model="item.poNo" class="input" placeholder=""
+                  <input type="text" v-else v-model="item.poNo" class="input" placeholder=""
                     :class="{ 'border-danger': item.poNoError }" @change="item.poNoError = false" />
                   <p v-if="item.poNoError" class="text-danger text-[9px]">*PO Number must be at least 10 digits</p>
                 </td>
@@ -160,7 +160,7 @@
                     :class="{ 'border-danger': item.poItemError }" @change="item.poItemError = false" />
                   <p v-if="item.poItemError" class="text-danger text-[9px]">*PO Item must be at least 2 digits</p>
                 </td>
-                <td v-if="!checkInvoiceDp()">{{ item.itemAmountLC }}</td>
+                <td v-if="!checkInvoiceDp()">{{ form.currency === item.currencyLC ? useFormatIdr(item.itemAmountLC) : useFormatUsd(item.itemAmountTC) }}</td>
                 <td v-if="!checkInvoiceDp()">{{ item.quantity }}</td>
                 <td v-if="!checkInvoiceDp()">{{ item.uom || '-' }}</td>
                 <td v-if="!checkInvoiceDp()">{{ item.itemText || '-' }}</td>

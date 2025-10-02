@@ -7,8 +7,8 @@
       <div class="card-body p-4 flex flex-row items-center gap-4 text-primary">
         <UiIcon variant="duotone" name="information" class="text-4xl" />
         <ul class="list-disc list-inside font-medium text-sm">
-          <li>Make sure to click the upload button after selecting the document.</li>
-          <li>Fields marked (*) with an asterisk are required.</li>
+          <li>{{ $t('businessLicense.instructions.uploadReminder') }}</li>
+          <li>{{ $t('businessLicense.instructions.requiredFields') }}</li>
         </ul>
       </div>
     </div>
@@ -16,36 +16,60 @@
     <div class="flex items-center justify-end mt-4 gap-2">
       <UiButton outline>
         <UiIcon variant="duotone" name="black-left" />
-        Back
+        {{ $t('businessLicense.buttons.back') }}
       </UiButton>
       <UiButton variant="primary" @click="openModalConfirm">
         <UiIcon variant="duotone" name="file-added" />
-        Save
+        {{ $t('businessLicense.buttons.save') }}
       </UiButton>
     </div>
 
     <!-- modal confirm -->
-    <ModalConfirmation :open="isOpenModalConfirmSave" id="license-save" type="confirm" title="Save"
-      text="You are about to Save to this data. Please review your input before continuing" static
-      :loading="isLoadingSubmit" cancel-button-text="Cancel" submit-button-text="Save"
-      :cancel="() => (isOpenModalConfirmSave = false)" :submit="onConfirmSave" />
+    <ModalConfirmation
+      :open="isOpenModalConfirmSave"
+      id="license-save"
+      type="confirm"
+      :title="$t('businessLicense.confirmModal.title')"
+      :text="$t('businessLicense.confirmModal.message')"
+      static
+      :loading="isLoadingSubmit"
+      :cancel-button-text="$t('businessLicense.buttons.cancel')"
+      :submit-button-text="$t('businessLicense.buttons.save')"
+      :cancel="() => (isOpenModalConfirmSave = false)"
+      :submit="onConfirmSave"
+    />
 
     <!-- modal success -->
-    <ModalConfirmation :open="isOpenModalSuccess" id="license-save-success" type="success"
-      title="Business License Data Sucessfully Updated"
-      text="The data has been successfully updated in the admin system" no-cancel static submit-button-text="Close"
-      :submit="() => (isOpenModalSuccess = false)" />
+    <ModalConfirmation
+      :open="isOpenModalSuccess"
+      id="license-save-success"
+      type="success"
+      :title="$t('businessLicense.successModal.title')"
+      :text="$t('businessLicense.successModal.message')"
+      no-cancel
+      static
+      :submit-button-text="$t('businessLicense.buttons.close')"
+      :submit="() => (isOpenModalSuccess = false)"
+    />
     <!-- modal error -->
-    <ModalConfirmation :open="isOpenModalError" type="danger" id="license-save-error" title="Error Updated Data"
-      text="An error occurred while updating the data. Please try again later." no-cancel static
-      submit-button-text="Close" :submit="() => (isOpenModalError = false)" />
+    <ModalConfirmation
+      :open="isOpenModalError"
+      type="danger"
+      id="license-save-error"
+      :title="$t('businessLicense.errorModal.title')"
+      :text="$t('businessLicense.errorModal.message')"
+      no-cancel
+      static
+      :submit-button-text="$t('businessLicense.buttons.close')"
+      :submit="() => (isOpenModalError = false)"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import OtherDocTableView from '@/components/vendor/businessLicenseData/OtherDocTableView.vue'
 import PKPTableView from '@/components/vendor/businessLicenseData/PKPTableView.vue'
-import { useVendorAdministrationStore, useVendorIzinUsahaStore } from '@/stores/vendor/vendor'
+import { useVendorIzinUsahaStore } from '@/stores/vendor/vendor'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
@@ -54,10 +78,10 @@ import type { ILicense, IOtherDocument } from '@/stores/vendor/types/vendor'
 import { useLoginStore } from '@/stores/views/login'
 import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 import type { IPayloadRequestUpdateLicense } from '@/stores/vendor/types/bussines-license'
-import { useChangeDataEmailStore } from '@/stores/vendor/email-change-data'
+// import { useChangeDataEmailStore } from '@/stores/vendor/email-change-data'
 
-const adminStore = useVendorAdministrationStore()
-const changeDataEmailStore = useChangeDataEmailStore()
+// const adminStore = useVendorAdministrationStore()
+// const changeDataEmailStore = useChangeDataEmailStore()
 
 interface IRowItem {
   vendorId?: number
@@ -228,14 +252,14 @@ const saveData = async () => {
   try {
     await vendorLicenseData.updateData(payload)
 
-    await changeDataEmailStore.sendEmail({
-      recepientName: adminStore.data?.vendorName,
-      recepients: {
-        emailTo: adminStore.data?.vendorEmail || '',
-        emailCc: '',
-        emailBcc: '',
-      },
-    })
+    // await changeDataEmailStore.sendEmail({
+    //   recepientName: adminStore.data?.vendorName,
+    //   recepients: {
+    //     emailTo: adminStore.data?.vendorEmail || '',
+    //     emailCc: '',
+    //     emailBcc: '',
+    //   },
+    // })
 
     isOpenModalSuccess.value = true
   } catch (error: unknown) {

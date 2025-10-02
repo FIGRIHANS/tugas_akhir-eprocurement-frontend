@@ -157,7 +157,11 @@ const downloadFile = async (url: string) => {
     setTimeout(() => URL.revokeObjectURL(link), 1000)
   } catch (error) {
     console.log(error)
-    alert('failed to download document. please try again')
+    alert(
+      this.$t
+        ? this.$t('businessLicense.errors.downloadFailed')
+        : 'Failed to download document. Please try again later.',
+    )
   } finally {
     downloadLoading.value = false
   }
@@ -185,13 +189,15 @@ watch(
     <div class="card">
       <div class="card-body">
         <div class="flex items-center gap-2 mb-2">
-          <h2 class="text-lg font-semibold text-slate-700">Other Documents</h2>
+          <h2 class="text-lg font-semibold text-slate-700">
+            {{ $t('businessLicense.otherDocuments.title') }}
+          </h2>
           <div class="relative">
             <UiIcon name="information-1" variant="outline" class="text-primary text-xl peer" />
             <div
               class="tooltip absolute bg-primary font-medium w-44 p-3 left-1/2 -translate-x-1/2 -top-14 text-[13px] text-center text-white peer-hover:block"
             >
-              Maximum of 5 Documents Allowed
+              {{ $t('businessLicense.otherDocuments.tooltip') }}
             </div>
           </div>
         </div>
@@ -204,10 +210,11 @@ watch(
             :disabled="localOtherDocuments.length >= 5"
             @click="addAnotherDocument"
           >
-            <i class="ki-filled ki-plus-circle"></i> Add Document
+            <i class="ki-filled ki-plus-circle"></i>
+            {{ $t('businessLicense.otherDocuments.buttons.addDocument') }}
           </UiButton>
           <span class="text-danger text-xs">
-            Must upload Account Statement. Without this document, data will be rejected.
+            {{ $t('businessLicense.otherDocuments.messages.accountStatementRequired') }}
           </span>
         </div>
 
@@ -215,19 +222,31 @@ watch(
           <table class="table table-border align-middle border text-gray-700 font-medium text-sm">
             <thead>
               <tr>
-                <th class="text-nowrap">Document Name</th>
-                <th class="text-nowrap">License Number / Description</th>
-                <th class="text-nowrap">Valid From (Start Date)</th>
-                <th class="text-nowrap">Valid Until (End Date)</th>
-                <th class="text-nowrap">Document</th>
-                <th class="text-nowrap">Action</th>
+                <th class="text-nowrap">
+                  {{ $t('businessLicense.otherDocuments.headers.documentName') }}
+                </th>
+                <th class="text-nowrap">
+                  {{ $t('businessLicense.otherDocuments.headers.licenseNumber') }}
+                </th>
+                <th class="text-nowrap">
+                  {{ $t('businessLicense.otherDocuments.headers.validFrom') }}
+                </th>
+                <th class="text-nowrap">
+                  {{ $t('businessLicense.otherDocuments.headers.validUntil') }}
+                </th>
+                <th class="text-nowrap">
+                  {{ $t('businessLicense.otherDocuments.headers.document') }}
+                </th>
+                <th class="text-nowrap">
+                  {{ $t('businessLicense.otherDocuments.headers.action') }}
+                </th>
               </tr>
             </thead>
 
             <tbody>
               <tr v-if="localOtherDocuments.length === 0">
                 <td colspan="6" class="text-center text-gray-500 py-4">
-                  No other documents available.
+                  {{ $t('businessLicense.otherDocuments.messages.noData') }}
                 </td>
               </tr>
 
@@ -235,7 +254,7 @@ watch(
                 <td class="align-top">
                   <UiInput
                     v-model="localOtherDocuments[index].documentName"
-                    placeholder="Document Name"
+                    :placeholder="$t('businessLicense.otherDocuments.placeholders.documentName')"
                     :disabled="!isEditing(index)"
                   />
                 </td>
@@ -243,7 +262,7 @@ watch(
                 <td class="align-top">
                   <UiInput
                     v-model="localOtherDocuments[index].documentNo"
-                    placeholder="License Number / Description"
+                    :placeholder="$t('businessLicense.otherDocuments.placeholders.licenseNumber')"
                     :disabled="!isEditing(index)"
                   />
                 </td>
@@ -251,19 +270,19 @@ watch(
                 <td class="align-top">
                   <DatePicker
                     v-model="localOtherDocuments[index].issuedDate as string | Date | null"
-                    format="dd MM yyyy"
                     class="!w-48"
                     :disabled="!isEditing(index)"
+                    :format="'MMM dd, yyyy'"
                   />
                 </td>
 
                 <td class="align-top">
                   <DatePicker
                     v-model="localOtherDocuments[index].expiredDate as string | Date | null"
-                    format="dd MM yyyy"
                     class="!w-48"
                     :disabled="!isEditing(index) || !localOtherDocuments[index]?.issuedDate"
                     :min-date="localOtherDocuments[index]?.issuedDate"
+                    :format="'MMM dd, yyyy'"
                   />
                 </td>
 
@@ -275,7 +294,7 @@ watch(
                       :max-size="16000000"
                       :placeholder="
                         fileOtherDocumentList[index]?.file.name === 'placeholder.txt'
-                          ? 'Choose file...'
+                          ? $t('businessLicense.otherDocuments.placeholders.chooseFile')
                           : fileOtherDocumentList[index]?.file.name
                       "
                       accepted-files=".jpg,.jpeg,.png,.pdf,application/zip"
@@ -319,7 +338,9 @@ watch(
                         :disabled="downloadLoading"
                       >
                         <UiIcon name="cloud-download" variant="duotone" />
-                        <span>Download Document</span>
+                        <span>{{
+                          $t('businessLicense.otherDocuments.buttons.downloadDocument')
+                        }}</span>
                       </UiButton>
                     </template>
                     <span v-else class="text-slate-400">–</span>
@@ -377,8 +398,8 @@ watch(
     :open="modalUploadFailed"
     id="other-doc-upload-error"
     type="danger"
-    title="Upload Failed"
-    text="File size exceeds the maximum limit of 16 MB. Please choose a smaller file."
+    :title="$t('businessLicense.fileSizeErrorModal.title')"
+    :text="$t('businessLicense.fileSizeErrorModal.message')"
     no-submit
     static
     :cancel="() => (modalUploadFailed = false)"

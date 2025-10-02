@@ -15,19 +15,19 @@ onMounted(() => {
 })
 </script>
 <template>
-  <UiModal v-model="open" title="Verification Detail" size="lg">
+  <UiModal v-model="open" :title="$t('vendorVerification.verificationdetail.title')" size="lg">
     <div class="space-y-5 mb-5">
       <h3 class="text-center text-lg">Vendor: {{ name }}</h3>
       <div class="modal-table scrollable-auto">
         <table class="table align-middle">
           <thead>
             <tr class="border-b-2 border-b-primary text-nowrap">
-              <th>No</th>
-              <th>Verificator Name</th>
-              <th>Position</th>
-              <th>Verification Date</th>
-              <th>Status</th>
-              <th>Description</th>
+              <th>{{ $t('vendorVerification.verificationdetail.no') }}</th>
+              <th>{{ $t('vendorVerification.verificationdetail.verificatorname') }}</th>
+              <th>{{ $t('vendorVerification.verificationdetail.position') }}</th>
+              <th>{{ $t('vendorVerification.verificationdetail.verificationdate') }}</th>
+              <th>{{ $t('vendorVerification.verificationdetail.status') }}</th>
+              <th>{{ $t('vendorVerification.verificationdetail.description') }}</th>
             </tr>
           </thead>
           <tbody>
