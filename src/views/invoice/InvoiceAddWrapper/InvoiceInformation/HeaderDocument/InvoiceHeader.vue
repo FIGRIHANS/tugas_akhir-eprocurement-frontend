@@ -252,6 +252,7 @@ watch(
 watch(
   () => [form?.companyCode, form.invoiceType],
   () => {
+    if (form.companyCode) invoiceMasterApi.getActivity(form.companyCode || '')
     if (form.companyCode && form.invoiceType) invoiceMasterApi.getMatrixApproval(form.invoiceType || '', form.companyCode || '')
   },
   {
