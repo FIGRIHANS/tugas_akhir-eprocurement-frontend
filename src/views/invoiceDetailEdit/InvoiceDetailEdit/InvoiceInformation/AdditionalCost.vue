@@ -87,9 +87,9 @@
                 appendToBody
               ></v-select>
             </td>
-              <td v-if="!checkPoPib()">
-                {{ form.currCode === 'IDR' ? useFormatIdr(item.isEdit ? formEdit.vatAmount : item.vatAmount) : useFormatUsd(item.isEdit ? formEdit.vatAmount : item.vatAmount) }}
-              </td>
+            <td>
+              {{ form.currCode === 'IDR' ? useFormatIdr(item.isEdit ? formEdit.vatAmount : item.vatAmount) : useFormatUsd(item.isEdit ? formEdit.vatAmount : item.vatAmount) }}
+            </td>
             <td>
               <span v-if="!item.isEdit">{{ getCostCenterName(item.costCenter) }}</span>
               <v-select
@@ -147,7 +147,8 @@
               <input v-else v-model="formEdit.whtBaseAmount" class="input" type="number" placeholder="" @change="setWhtAmount(item)"/>
             </td>
             <td>
-              <span>{{ form.currCode === 'IDR' ? useFormatIdr(item.isEdit ? formEdit.whtAmount : item.whtAmount) : useFormatUsd(item.isEdit ? formEdit.whtAmount : item.whtAmount) }}</span>
+              <span v-if="!item.isEdit">{{ form.currCode === 'IDR' ? useFormatIdr(item.isEdit ? formEdit.whtAmount : item.whtAmount) : useFormatUsd(item.isEdit ? formEdit.whtAmount : item.whtAmount) }}</span>
+              <input v-if="item.isEdit && checkVerifikator2()" v-model="formEdit.whtAmount" class="input" type="number" placeholder=""/>
             </td>
           </tr>
         </tbody>
@@ -221,6 +222,10 @@ const checkPoPib = () => {
 
 const checkVerifikator1 = () => {
   return userData.value.profile.profileId === 3190
+}
+
+const checkVerifikator2 = () => {
+  return userData.value.profile.profileId === 3002
 }
 
 const addNew = () => {
