@@ -89,7 +89,7 @@ const setToForm = (name: string, value: number) => {
 const setCalculation = () => {
   listCalculation.value = []
   for (const item of listName.value) {
-    if (typeForm.value === 'nonpo' && item !== 'Additional Cost') return
+    if (typeForm.value === 'nonpo' && item === 'Additional Cost') break
     const amount = setCount(item)
     const data = {
       name: item,
