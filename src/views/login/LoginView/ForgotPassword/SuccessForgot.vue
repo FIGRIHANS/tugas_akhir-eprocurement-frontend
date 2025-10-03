@@ -6,7 +6,7 @@
       <i class="ki-duotone ki-shield-tick text-[34px] text-green-500"></i>
       <div>
         <p class="font-semibold">{{ $t('login.forgot.success.title') }}</p>
-        <p class="text-green-500 font-medium leading-[14px] mt-[4px]">
+        <p class="text-green-500 font-medium text-sm leading-[16px] mt-[4px]">
           {{ $t('login.forgot.success.message') }}
         </p>
       </div>
@@ -19,11 +19,15 @@
 
 <script lang="ts" setup>
 import { useLoginStore } from '@/stores/views/login'
+import { useForgotPasswordStore } from '@/stores/views/forgot-password'
 
-const loginApi = useLoginStore()
+const loginStore = useLoginStore()
+const forgotPasswordStore = useForgotPasswordStore()
 
 const goBack = () => {
-  loginApi.isSendForgot = false
-  loginApi.selectedLogin = 'vendor'
+  forgotPasswordStore.resetState()
+
+  loginStore.isSendForgot = false
+  loginStore.selectedLogin = 'vendor'
 }
 </script>

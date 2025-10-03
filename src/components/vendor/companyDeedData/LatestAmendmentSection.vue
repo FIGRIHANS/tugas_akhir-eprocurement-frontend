@@ -16,20 +16,17 @@ import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
 import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 
 import type { IVendorLegalDocumentPayload } from '@/stores/vendor/types/vendor'
-import { useCompanyDeedDataStore, useVendorAdministrationStore } from '@/stores/vendor/vendor'
+import { useCompanyDeedDataStore } from '@/stores/vendor/vendor'
 import { useVendorUploadStore } from '@/stores/vendor/upload'
 import { useLoginStore } from '@/stores/views/login'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
 import moment from 'moment'
 import LPagination from '@/components/pagination/LPagination.vue'
-import { useChangeDataEmailStore } from '@/stores/vendor/email-change-data'
 
 const companyDeedDataStore = useCompanyDeedDataStore()
 const userLoginStore = useLoginStore()
 const uploadStore = useVendorUploadStore()
 const vendorMasterDataStore = useVendorMasterDataStore()
-const adminStore = useVendorAdministrationStore()
-const changeDataEmailStore = useChangeDataEmailStore()
 const { t } = useI18n()
 
 const route = useRoute()
@@ -191,15 +188,6 @@ const handleSave = async () => {
       3116,
     )
 
-    // await changeDataEmailStore.sendEmail({
-    //   recepientName: adminStore.data?.vendorName || '',
-    //   recepients: {
-    //     emailTo: adminStore.data?.vendorEmail || '',
-    //     emailCc: '',
-    //     emailBcc: '',
-    //   },
-    // })
-
     showSuccessModal.value = true
 
     fileUploaderRef.value?.clear()
@@ -219,13 +207,12 @@ const handleSave = async () => {
 }
 
 const handleEdit = (id: number) => {
-  const data = companyDeedDataStore.vendorLegalDocData.items.find(
+  const data = companyDeedDataStore.latestAmendmentData.items.find(
     (item) => (item as unknown as IVendorLegalDocumentPayload).id === id,
   )
 
   if (data) {
     Object.assign(vendorAmendmentPayload, data)
-    // Normalisasi: pastikan notaryLocation jadi cityID (number)
     vendorAmendmentPayload.notaryLocation = toNumber(
       resolveNotaryLocationId({
         notaryLocation: (data as any).notaryLocation,

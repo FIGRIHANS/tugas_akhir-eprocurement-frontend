@@ -3,7 +3,7 @@
     <div class="card-header">
       <h3 class="card-title">{{ $t('equipmentData.title') }}</h3>
 
-      <UiButton variant="primary" data-modal-toggle="#modal-equipment">
+      <UiButton variant="primary" data-modal-toggle="#modal-equipment" @click="closeAllDropdowns">
         <UiIcon name="plus-circle" variant="duotone" />
         {{ $t('equipmentData.add') }}
       </UiButton>
@@ -295,6 +295,20 @@ const payloadError = ref<PayloadEquipmentDataErrorType>({
   condition: false,
   ownership: false,
 })
+
+const closeAllDropdowns = () => {
+  // Tutup semua dropdown yang sedang terbuka dengan cara yang lebih reliable
+  const openDropdowns = document.querySelectorAll('[data-dropdown="true"]')
+  openDropdowns.forEach((dropdown) => {
+    const dropdownContent = dropdown.querySelector('.dropdown-content')
+    if (dropdownContent && dropdownContent.classList.contains('show')) {
+      dropdownContent.classList.remove('show')
+    }
+  })
+
+  // Alternatif: gunakan event click pada document untuk menutup dropdown
+  document.body.click()
+}
 
 const resetPayload = () => {
   payload.value = {
