@@ -5,7 +5,7 @@
       <InvoiceCalculation />
     </div>
     <InvoicePoGr v-if="!checkIsNonPo()" class="mt-[24px]" />
-    <AdditionalCost v-if="!checkIsNonPo() && (checkIsWithoutDp() || !checkIsPoPib())" class="mt-[24px]" />
+    <AdditionalCost v-if="!checkIsNonPo() && (checkIsWithoutDp() || checkIsPoPib())" class="mt-[24px]" />
     <InvoiceItem v-if="checkIsNonPo()" class="mt-[24px]" />
   </div>
 </template>
