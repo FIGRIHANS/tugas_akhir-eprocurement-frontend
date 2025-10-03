@@ -16,7 +16,7 @@
       <InvoicePoGr v-if="checkPo() && !isNonPo" class="mt-[24px]" />
       <InvoiceItem v-if="isNonPo" class="mt-[24px]" />
       <AdditionalCost
-        v-if="!isNonPo && (checkIsWithoutDp() || !checkIsPoPib())"
+        v-if="!isNonPo && (checkIsWithoutDp() || checkIsPoPib())"
         class="mt-[24px]"
       />
     </div>
