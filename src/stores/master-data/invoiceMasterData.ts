@@ -19,6 +19,7 @@ import type {
   WhtTypes,
   WhtCodeTypes,
   CostCenterTypes,
+  MatrixApprovalTypes
 } from './types/invoiceMasterData'
 
 export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => {
@@ -36,6 +37,7 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
   const whtTypeList = ref<WhtTypes[]>([])
   const whtCodeList = ref<WhtCodeTypes[]>([])
   const costCenterList = ref<CostCenterTypes[]>([])
+  const matrixApprovalList = ref<MatrixApprovalTypes[]>([])
 
   const getInvoicePoType = async () => {
     const response: ApiResponse<InvoicePoTypes[]> = await generalApi.get(`/lookup/invoice-po-type`)
@@ -177,6 +179,15 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
     return response.data.result
   }
 
+  const getMatrixApproval = async (invoiceTypeCode: string, companyCode: string) => {
+    const url = `/lookup/matrix-approval?invoiceTypeCode=${invoiceTypeCode}&companyCode=${companyCode}`
+    const response: ApiResponse<MatrixApprovalTypes[]> = await generalApi.get(url)
+
+    matrixApprovalList.value = response.data.result.content
+
+    return response.data.result
+  }
+
   return {
     invoicePoType,
     invoiceNonPoType,
@@ -192,6 +203,7 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
     whtTypeList,
     whtCodeList,
     costCenterList,
+    matrixApprovalList,
     getInvoicePoType,
     getInvoiceNonPoType,
     getCurrency,
@@ -206,5 +218,6 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
     getWhtType,
     getWhtCode,
     getCostCenter,
+    getMatrixApproval,
   }
 })

@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { computed, reactive, ref, watch, onMounted, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import axios from 'axios'
 
 import UiFormGroup from '@/components/ui/atoms/form-group/UiFormGroup.vue'
@@ -15,20 +16,18 @@ import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
 import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 
 import type { IVendorLegalDocumentPayload } from '@/stores/vendor/types/vendor'
-import { useCompanyDeedDataStore, useVendorAdministrationStore } from '@/stores/vendor/vendor'
+import { useCompanyDeedDataStore } from '@/stores/vendor/vendor'
 import { useVendorUploadStore } from '@/stores/vendor/upload'
 import { useLoginStore } from '@/stores/views/login'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
 import moment from 'moment'
 import LPagination from '@/components/pagination/LPagination.vue'
-import { useChangeDataEmailStore } from '@/stores/vendor/email-change-data'
 
 const companyDeedDataStore = useCompanyDeedDataStore()
 const userLoginStore = useLoginStore()
 const uploadStore = useVendorUploadStore()
 const vendorMasterDataStore = useVendorMasterDataStore()
-const adminStore = useVendorAdministrationStore()
-const changeDataEmailStore = useChangeDataEmailStore()
+const { t } = useI18n()
 
 const route = useRoute()
 
@@ -69,7 +68,7 @@ const vendorAmendmentPayload = reactive<IVendorLegalDocumentPayload>({
   documentNo: '',
   documentDate: new Date(),
   notaryName: '',
-  notaryLocation: 0, // <- harus cityID (number)
+  notaryLocation: 0,
   user: '',
   isActive: true,
   isTemporary: true,
@@ -86,7 +85,9 @@ const errors = reactive({
 })
 
 const isEditing = computed(() => mode.value === 'edit' || vendorAmendmentPayload.id > 0)
-const submitLabel = computed(() => (isEditing.value ? 'Save' : 'Add'))
+const submitLabel = computed(() =>
+  isEditing.value ? t('companyDeed.latestAmendment.save') : t('companyDeed.latestAmendment.add'),
+)
 const submitIcon = computed(() => (isEditing.value ? 'file-added' : 'plus-circle'))
 
 const toNumber = (v: unknown) => (v === null || v === undefined || v === '' ? 0 : Number(v))
@@ -113,19 +114,19 @@ const validateForm = () => {
   errors.notaryLocation = ''
 
   if (!vendorAmendmentPayload.documentNo) {
-    errors.documentNo = 'Document no is required'
+    errors.documentNo = t('companyDeed.latestAmendment.validation.documentNoRequired')
     isValid = false
   }
   if (!vendorAmendmentPayload.notaryName) {
-    errors.notaryName = 'Notary name is required'
+    errors.notaryName = t('companyDeed.latestAmendment.validation.notaryNameRequired')
     isValid = false
   }
   if (!vendorAmendmentPayload.documentURL) {
-    errors.documentURL = 'Document URL is required'
+    errors.documentURL = t('companyDeed.latestAmendment.validation.documentRequired')
     isValid = false
   }
   if (!toNumber(vendorAmendmentPayload.notaryLocation)) {
-    errors.notaryLocation = 'Notary location is required'
+    errors.notaryLocation = t('companyDeed.latestAmendment.validation.notaryLocationRequired')
     isValid = false
   }
   return isValid
@@ -187,15 +188,6 @@ const handleSave = async () => {
       3116,
     )
 
-    // await changeDataEmailStore.sendEmail({
-    //   recepientName: adminStore.data?.vendorName || '',
-    //   recepients: {
-    //     emailTo: adminStore.data?.vendorEmail || '',
-    //     emailCc: '',
-    //     emailBcc: '',
-    //   },
-    // })
-
     showSuccessModal.value = true
 
     fileUploaderRef.value?.clear()
@@ -215,13 +207,12 @@ const handleSave = async () => {
 }
 
 const handleEdit = (id: number) => {
-  const data = companyDeedDataStore.vendorLegalDocData.items.find(
+  const data = companyDeedDataStore.latestAmendmentData.items.find(
     (item) => (item as unknown as IVendorLegalDocumentPayload).id === id,
   )
 
   if (data) {
     Object.assign(vendorAmendmentPayload, data)
-    // Normalisasi: pastikan notaryLocation jadi cityID (number)
     vendorAmendmentPayload.notaryLocation = toNumber(
       resolveNotaryLocationId({
         notaryLocation: (data as any).notaryLocation,
@@ -362,16 +353,16 @@ watchEffect(async () => {
       <div class="grid grid-cols-1 md:grid-cols-2 gap-20 mb-8">
         <UiFormGroup hide-border>
           <UiInput
-            label="Number"
-            placeholder="Number"
+            :label="$t('companyDeed.latestAmendment.documentNo')"
+            :placeholder="$t('companyDeed.latestAmendment.documentNo')"
             row
             v-model="vendorAmendmentPayload.documentNo"
             :error="errors.documentNo !== ''"
             :hintText="errors.documentNo"
           />
           <UiInput
-            label="Notary"
-            placeholder="Notary full name"
+            :label="$t('companyDeed.latestAmendment.notaryName')"
+            :placeholder="$t('companyDeed.latestAmendment.notaryName')"
             row
             v-model="vendorAmendmentPayload.notaryName"
             :error="errors.notaryName !== ''"
@@ -381,8 +372,8 @@ watchEffect(async () => {
 
         <UiFormGroup hide-border>
           <UiSelect
-            label="Notary Office Location"
-            placeholder="-- Notary Office Location --"
+            :label="$t('companyDeed.latestAmendment.notaryLocation')"
+            :placeholder="'-- ' + $t('companyDeed.latestAmendment.notaryLocation') + ' --'"
             :options="
               vendorMasterDataStore.cityList?.map((item) => ({
                 value: item.cityID,
@@ -399,9 +390,9 @@ watchEffect(async () => {
           <UiFileUpload
             ref="fileUploaderRef"
             name="latestAmmendmentDocumentUrl"
-            label="File"
-            placeholder="Upload file - (*jpg, jpeg, png, pdf, zip / max : 16 MB)"
-            hint-text="*jpg, jpeg, png, pdf, zip / max : 16 MB"
+            :label="$t('companyDeed.latestAmendment.document')"
+            :placeholder="$t('companyDeed.shareholders.uploadPlaceholder')"
+            :hint-text="$t('companyDeed.common.uploadHint')"
             @added-file="onUploadFile($event)"
             @upload-failed="handleUploadFailed()"
             :max-size="16000000"
@@ -424,10 +415,10 @@ watchEffect(async () => {
         <thead>
           <tr>
             <th class="text-nowrap"></th>
-            <th class="text-nowrap">Number</th>
-            <th class="text-nowrap">Letter Date</th>
-            <th class="text-nowrap">Notary</th>
-            <th class="text-nowrap">Notary Office Location</th>
+            <th class="text-nowrap">{{ $t('companyDeed.latestAmendment.documentNo') }}</th>
+            <th class="text-nowrap">{{ $t('companyDeed.latestAmendment.documentDate') }}</th>
+            <th class="text-nowrap">{{ $t('companyDeed.latestAmendment.notaryName') }}</th>
+            <th class="text-nowrap">{{ $t('companyDeed.latestAmendment.notaryLocation') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -447,7 +438,7 @@ watchEffect(async () => {
 
           <!-- empty -->
           <tr v-else-if="!latestAmandmentData?.length">
-            <td colspan="5" class="text-center">No data</td>
+            <td colspan="5" class="text-center">{{ $t('companyDeed.common.noData') }}</td>
           </tr>
 
           <!-- data -->
@@ -464,7 +455,7 @@ watchEffect(async () => {
                         <span class="menu-icon">
                           <UiIcon variant="duotone" name="arrow-down" class="!text-primary" />
                         </span>
-                        <span class="menu-title"> Download </span>
+                        <span class="menu-title"> {{ $t('companyDeed.common.download') }} </span>
                       </button>
                     </li>
                     <li class="menu-item">
@@ -472,7 +463,9 @@ watchEffect(async () => {
                         <span class="menu-icon">
                           <UiIcon variant="duotone" name="notepad-edit" class="!text-warning" />
                         </span>
-                        <span class="menu-title"> Edit </span>
+                        <span class="menu-title">
+                          {{ $t('companyDeed.shareholders.edit_action') }}
+                        </span>
                       </button>
                     </li>
                     <li class="menu-item">
@@ -480,7 +473,9 @@ watchEffect(async () => {
                         <span class="menu-icon">
                           <UiIcon variant="duotone" name="cross-circle" class="!text-danger" />
                         </span>
-                        <span class="menu-title"> Delete </span>
+                        <span class="menu-title">
+                          {{ $t('companyDeed.shareholders.delete_action') }}
+                        </span>
                       </button>
                     </li>
                   </ul>
@@ -496,13 +491,14 @@ watchEffect(async () => {
       </table>
       <div class="flex flex-row items-center justify-between px-4">
         <div class="flex flex-row items-center gap-2">
-          Show
+          {{ $t('companyDeed.common.show') }}
           <UiSelect
             v-model="paginationLatestAmandmentDataStore.pageSize"
             :options="pageSizeOptions"
             class="w-16"
           />
-          per page from {{ paginationLatestAmandmentDataStore.total }} data
+          {{ $t('companyDeed.common.perPage') }} {{ $t('companyDeed.common.from') }}
+          {{ paginationLatestAmandmentDataStore.total }} {{ $t('companyDeed.common.data') }}
         </div>
 
         <LPagination
@@ -518,9 +514,9 @@ watchEffect(async () => {
     <UiModal v-model="showSuccessModal" size="sm">
       <div class="text-center mb-6">
         <ModalSuccessLogo class="mx-auto" />
-        <h3 class="text-center text-lg font-medium">Hooray!</h3>
+        <h3 class="text-center text-lg font-medium">{{ $t('companyDeed.common.hooray') }}</h3>
         <p class="text-center text-base text-gray-600 mb-5">
-          The data has been successfully updated in the admin system
+          {{ $t('companyDeed.common.successMessage') }}
         </p>
       </div>
     </UiModal>
@@ -535,8 +531,15 @@ watchEffect(async () => {
         />
       </div>
       <h3 class="text-center text-lg font-medium">
-        Failed to
-        {{ mode == 'delete' ? 'Delete' : mode === 'edit' ? 'Change' : 'Add' }} Amendment document!
+        {{ $t('companyDeed.common.failed') }}
+        {{
+          mode == 'delete'
+            ? $t('companyDeed.common.failedDelete')
+            : mode === 'edit'
+              ? $t('companyDeed.common.failedChange')
+              : $t('companyDeed.common.failedAdd')
+        }}
+        {{ $t('companyDeed.common.document') }}!
       </h3>
       <p class="text-center text-base text-gray-600 mb-5">
         {{ apiErrorMessage }}
@@ -552,9 +555,9 @@ watchEffect(async () => {
           class="text-[150px] text-danger text-center"
         />
       </div>
-      <h3 class="text-center text-lg font-medium">Are You Sure You Want to Delete This Item?</h3>
+      <h3 class="text-center text-lg font-medium">{{ $t('companyDeed.common.deleteTitle') }}</h3>
       <p class="text-center text-base text-gray-600 mb-5">
-        This action will permanently remove the selected data from the list.
+        {{ $t('companyDeed.common.deleteMessage') }}
       </p>
       <div class="flex gap-3 px-8 mb-3">
         <UiButton
@@ -563,7 +566,7 @@ watchEffect(async () => {
           class="flex-1 flex items-center justify-center"
         >
           <UiIcon name="black-left-line" />
-          <span>Cancel</span>
+          <span>{{ $t('companyDeed.common.cancel') }}</span>
         </UiButton>
         <UiButton
           variant="danger"
@@ -573,7 +576,7 @@ watchEffect(async () => {
         >
           <UiLoading variant="white" v-if="isSaveLoading" />
           <UiIcon name="cross-circle" variant="duotone" v-else />
-          <span>Delete</span>
+          <span>{{ $t('companyDeed.common.delete') }}</span>
         </UiButton>
       </div>
     </UiModal>
@@ -581,8 +584,8 @@ watchEffect(async () => {
       :open="modalUploadFailed"
       id="other-doc-upload-error"
       type="danger"
-      title="Upload Failed"
-      text="File size exceeds the maximum limit of 16 MB. Please choose a smaller file."
+      :title="$t('companyDeed.common.uploadFailed')"
+      :text="$t('companyDeed.common.fileSizeExceeds')"
       no-submit
       static
       :cancel="() => (modalUploadFailed = false)"

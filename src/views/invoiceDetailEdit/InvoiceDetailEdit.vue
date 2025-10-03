@@ -56,6 +56,7 @@ import TabInvoice from '@/components/invoice/TabInvoice.vue'
 import { useCheckEmpty } from '@/composables/validation'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
+import { useLoginStore } from '@/stores/views/login'
 import moment from 'moment'
 import { isEmpty } from 'lodash'
 import { KTModal } from '@/metronic/core'
@@ -72,6 +73,7 @@ const SuccessEditApproval = defineAsyncComponent(
 
 const verificationApi = useInvoiceVerificationStore()
 const invoiceMasterApi = useInvoiceMasterDataStore()
+const loginApi = useLoginStore()
 const router = useRouter()
 const route = useRoute()
 const activeStep = ref<string>('')
@@ -170,22 +172,28 @@ const detailInvoice = computed(() => verificationApi.detailInvoice)
 const detailInvoiceNonPO = computed(() => verificationApi.detailNonPoInvoice)
 const additionalCostTempDelete = computed(() => verificationApi.additionalCostTempDelete)
 const costExpensesTempDelete = computed(() => verificationApi.costExpenseTempDelete)
+const userData = computed(() => loginApi.userData)
 
 const checkInvoiceData = () => {
   return true
   // if (!form.bankKeyId) return false
 }
 
+const checkVerifikator1 = () => {
+  return userData.value.profile.profileId === 3190
+}
+
 const checkInvoiceInformation = () => {
   let status = true
   form.value.invoiceDateError = useCheckEmpty(form.value.invoiceDate).isError
-  form.value.postingDateError = useCheckEmpty(form.value.postingDate).isError
-  form.value.estimatedPaymentDateError = useCheckEmpty(form.value.estimatedPaymentDate).isError
   form.value.documentNoError = useCheckEmpty(form.value.documentNo).isError
-  form.value.paymentMethodError = useCheckEmpty(form.value.paymentMethodCode).isError
-  form.value.transferNewsError = useCheckEmpty(form.value.transferNews).isError
-  form.value.notesError = useCheckEmpty(form.value.notes).isError
-  form.value.creditCardBillingError = useCheckEmpty(form.value.creditCardBillingId).isError
+  form.value.creditCardBillingError = checkVerifikator1() ? useCheckEmpty(form.value.creditCardBillingId).isError : false
+
+  form.value.postingDateError = !checkVerifikator1() ? useCheckEmpty(form.value.postingDate).isError : false
+  form.value.estimatedPaymentDateError = !checkVerifikator1() ? useCheckEmpty(form.value.estimatedPaymentDate).isError : false
+  form.value.paymentMethodError = !checkVerifikator1() ? useCheckEmpty(form.value.paymentMethodCode).isError : false
+  form.value.transferNewsError = !checkVerifikator1() ? useCheckEmpty(form.value.transferNews).isError : false
+  form.value.notesError = !checkVerifikator1() ? useCheckEmpty(form.value.notes).isError : false
 
   if (Number(form.value.invoiceDPCode) === 9013) {
     form.value.dpAmountDeductionError =
@@ -644,7 +652,7 @@ const setDataDefault = () => {
     tax: tax,
     referenceDocument: reference,
     otherDocument: other,
-    creditCardBillingId: data?.header.creditCardBillingId || '',
+    creditCardBillingId: data?.header.creditCardBillingID || '',
     idAlternative: data?.alternativePayee && data?.alternativePayee.length !== 0 ? data?.alternativePayee[0].id : 0,
     isAlternativePayee: data?.alternativePayee && data?.alternativePayee.length !== 0 ? data?.alternativePayee[0].isAlternativePayee : false,
     isOneTimeVendor: data?.alternativePayee && data?.alternativePayee.length !== 0 ? data?.alternativePayee[0].isOneTimeVendor : false,
@@ -692,7 +700,7 @@ const mapDataVerif = () => {
         assigment: form.value.assigment,
         transferNews: form.value.transferNews,
         npwpReporting: form.value.npwpReporting,
-        creditCardBillingId: form.value.creditCardBillingId,
+        creditCardBillingID: form.value.creditCardBillingId,
       },
       payment: {
         paymentId: form.value.paymentId,

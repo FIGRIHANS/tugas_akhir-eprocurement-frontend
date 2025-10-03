@@ -90,3 +90,12 @@ export type CostCenterTypes = {
   code: string
   name: string
 }
+
+export type MatrixApprovalTypes = {
+  companyCode: string
+  id: number
+  invoiceTypeCode: string
+  invoiceTypeName: string
+  workflowCode: string
+  workflowDescription: string
+}

@@ -510,6 +510,7 @@ onMounted(() => {
                     <td>
                       <DatePicker
                         v-model="subCertificate.startDate"
+                        :placeholder="t('expertPersonnelData.modal.cvDetails.placeholders.start')"
                         format="MMM dd, yyyy"
                         teleport
                         @update:model-value="
@@ -522,6 +523,7 @@ onMounted(() => {
                     <td>
                       <DatePicker
                         v-model="subCertificate.endDate"
+                        :placeholder="t('expertPersonnelData.modal.cvDetails.placeholders.until')"
                         format="MMM dd, yyyy"
                         teleport
                         @update:model-value="
@@ -559,7 +561,7 @@ onMounted(() => {
                     <td>
                       <UiInput
                         :placeholder="
-                          t('expertPersonnelData.modal.cvDetails.descriptionPlaceholder')
+                          t('expertPersonnelData.modal.cvDetails.placeholders.description')
                         "
                         v-model="subCertificate.description"
                         :readonly="mode === 'view'"

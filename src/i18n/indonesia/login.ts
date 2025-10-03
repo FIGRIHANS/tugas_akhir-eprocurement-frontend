@@ -51,4 +51,30 @@ export const login = {
       backButton: 'Kembali',
     },
   },
+  reset: {
+    title: 'Masukkan password baru',
+    description:
+      'Pastikan password baru anda kuat dan mengandung kombinasi angka, huruf besar dan kecil serta kombinasi karakter!',
+    form: {
+      enterNewPassword: 'Masukkan Password Baru',
+      confirmNewPassword: 'Konfirmasi Password Baru',
+      confirm: 'Konfirmasi',
+    },
+  },
+  setNewPassword: {
+    title: 'Masukkan Password Baru',
+    form: {
+      description:
+        'Pastikan password baru Anda kuat dan mengandung kombinasi angka, huruf besar dan kecil serta kombinasi karakter!',
+      enterNewPassword: 'Masukkan Password Baru',
+      confirmNewPassword: 'Konfirmasi Password Baru',
+      passwordPlaceholder: 'Password',
+      confirm: 'Konfirmasi',
+    },
+    success: {
+      title: 'Berhasil!',
+      message: 'Anda baru saja mengubah password, silakan login kembali menggunakan password baru!',
+      loginButton: 'login',
+    },
+  },
 }

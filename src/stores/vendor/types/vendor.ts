@@ -254,7 +254,7 @@ export type PayloadEquipmentDataType = {
   name: string
   brand: string
   type: string
-  mfgDate: string
+  mfgDate: string | Date
   serialNo: string
   capacity: string
   condition: number

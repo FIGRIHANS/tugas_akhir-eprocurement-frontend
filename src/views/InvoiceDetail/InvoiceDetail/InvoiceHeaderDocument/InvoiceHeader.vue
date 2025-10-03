@@ -95,7 +95,7 @@
       <p class="font-normal text-sm">{{ '-' }}</p>
     </div>
     <div v-if="checkIsNonPo()" class="flex items-center justify-between gap-[10px]">
-      <p class="font-normal text-sm text-gray-600">Department</p>
+      <p class="font-normal text-sm text-gray-600">Requestor</p>
       <p class="font-normal text-sm">{{ form.department || '-' }}</p>
     </div>
     <div class="flex items-center justify-between gap-[10px]">

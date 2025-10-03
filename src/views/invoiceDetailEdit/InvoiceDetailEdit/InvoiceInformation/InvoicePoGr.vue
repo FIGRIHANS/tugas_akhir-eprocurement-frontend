@@ -54,6 +54,7 @@
                   v-else
                   v-model="formEdit.taxCode"
                   class="customSelect"
+                  placeholder="Select"
                   :get-option-label="(option: any) => `${option.code} - ${option.name}`"
                   :reduce="(option: any) => option.code"
                   :options="listTaxCalculation"
@@ -69,6 +70,7 @@
                   v-else
                   v-model="formEdit.whtType"
                   class="customSelect"
+                  placeholder="Select"
                   :get-option-label="(option: any) => `${option.code} - ${option.name}`"
                   :reduce="(option: any) => option.code"
                   :options="whtTypeList"
@@ -82,6 +84,7 @@
                   v-else
                   v-model="formEdit.whtCode"
                   class="customSelect"
+                  placeholder="Select"
                   :get-option-label="(option: any) => `${option.whtCode} - ${option.description}`"
                   :reduce="(option: any) => option.whtCode"
                   :options="whtCodeList"
@@ -162,20 +165,24 @@
                   <!-- <p v-if="!item.uom && item.isEdit" class="text-danger text-[9px]">*Item Unit be at least 3 digits</p> -->
                 </td>
                 <td v-if="!checkInvoiceDp()">
-                  <span v-if="!item.isEdit">{{ item.itemText}}</span>
+                  <span v-if="!item.isEdit">{{ item.itemText ||'-' }}</span>
                   <input v-else v-model="item.itemText" class="input" placeholder=""
                      />
                   <!-- <p v-if="!item.itemText && item.isEdit" class="text-danger text-[9px]">*Item Quantity be at least 1 digits</p> -->
                 </td>
-                <!-- <td v-if="!checkInvoiceDp()">
+                <td v-if="!checkInvoiceDp()">
                   <span v-if="!item.isEdit">{{ item.department || '-' }}</span>
-                  
-                  <select v-else v-model="item.department" class="select" name="select">
-                    <option v-for="item of costCenterList" :key="item.code" :value="item.code">
-                      {{ item.code }}
-                    </option>
-                  </select>
-                </td> -->
+                  <v-select
+                    v-else
+                    v-model="item.department"
+                    class="customSelect w-full -ml-[15px]"
+                    label="workflowDescription"
+                    placeholder="Select"
+                    :reduce="(option: any) => option.workflowCode"
+                    :options="listMatrixApproval"
+                    appendToBody
+                  ></v-select>
+                </td>
               </tr>
             </template>
           </tbody>
@@ -212,6 +219,7 @@ const formEdit = reactive({
 const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
 const whtTypeList = computed(() => invoiceMasterApi.whtTypeList)
 const whtCodeList = computed(() => invoiceMasterApi.whtCodeList)
+const listMatrixApproval = computed(() => invoiceMasterApi.matrixApprovalList)
 const userData = computed(() => loginApi.userData)
 
 const checkIsEdit = () => {
@@ -376,6 +384,16 @@ watch(
   },
   {
     deep: true,
+    immediate: true
+  }
+)
+
+watch(
+  () => [form.value.companyCode, form.value.invoiceTypeCode],
+  () => {
+    if (form.value.companyCode && form.value.invoiceTypeCode) invoiceMasterApi.getMatrixApproval(form.value.invoiceTypeCode.toString() || '', form.value.companyCode || '')
+  },
+  {
     immediate: true
   }
 )

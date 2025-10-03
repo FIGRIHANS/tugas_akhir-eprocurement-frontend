@@ -88,7 +88,7 @@
                   <span v-else>{{ form?.currency === item.currencyLC ? useFormatIdr(item.vatAmount || 0) : useFormatUsd(item.vatAmount || 0) }}</span>
                 </td>
                 <td v-if="checkInvoiceDp()">
-                  <span v-if="!item.isEdit">{{ useFormatIdr(item.itemAmountLC) }}</span>
+                  <span v-if="!item.isEdit">{{ form?.currency === item.currencyLC ? useFormatIdr(item.itemAmountLC) : useFormatUsd(formEdit.itemAmountLC) }}</span>
                   <input v-else v-model="formEdit.itemAmountLC" type="number" class="input" />
                 </td>
                 <td>
@@ -97,6 +97,7 @@
                     v-else
                     v-model="formEdit.taxCode"
                     class="customSelect"
+                    placeholder="Select"
                     :get-option-label="(option: any) => `${option.code} - ${option.name}`"
                     :reduce="(option: any) => option.code"
                     :options="listTaxCalculation"
@@ -110,7 +111,7 @@
                 <td v-if="form?.invoiceType !== '903'">-</td>
                 <td v-if="form?.invoiceType !== '903'">-</td>
                 <td v-if="form?.invoiceType !== '903'">{{ form?.currency === item.currencyLC ? useFormatIdr(item.whtBaseAmount) : useFormatUsd(item.whtBaseAmount) }}</td>
-                <td v-if="!checkInvoiceDp()">-</td>
+                <td>-</td>
                 <td>{{ item.department || '-' }}</td>
               </tr>
             </template>
@@ -239,8 +240,9 @@ const searchItem = () => {
 }
 
 const addItemInvoiceDp = () => {
-  const poNumber = search.value?.toString() ?? form?.invoicePoGr[0].poNo ?? ''
+  const poNumber = search.value?.toString() ?? form?.invoicePoGr[0].poNo.toString() ?? ''
   if (poNumber.length !== 10) return searchError.value = true
+  else searchError.value = false
   isDisabledSearch.value = true
   invoiceApi.getAvailableDp(poNumber, form?.vendorId || '', formEdit.itemAmountLC || form?.invoicePoGr[0].itemAmountLC || 0)
     .then((response) => {
@@ -517,6 +519,8 @@ watch(
           enteredOn: '',
           purchasingOrg: '',
           department: '',
+          whtBaseAmount: 0,
+          whtAmount: 0,
           isEdit: false
         } as itemsPoGrType
 

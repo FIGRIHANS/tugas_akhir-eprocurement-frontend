@@ -83,6 +83,11 @@ export const expertPersonnelData = {
         file: 'File',
         description: 'Deskripsi',
       },
+      placeholders: {
+        start: 'Tanggal Mulai',
+        until: 'Tanggal Berakhir',
+        description: 'Deskripsi',
+      },
       uploadPlaceholder: 'Unggah file',
       uploadHint: '*jpg, jpeg, png, pdf, zip / maks : 16 MB',
       descriptionPlaceholder: 'Deskripsi',
