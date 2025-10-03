@@ -17,6 +17,7 @@
           v-model="form.vendorId"
           class="customSelect w-full"
           label="vendorName"
+          placeholder="Select"
           :reduce="(option: any) => option.sapCode"
           :options="vendorList"
           :class="{ 'error-select': form.vendorIdError }"
