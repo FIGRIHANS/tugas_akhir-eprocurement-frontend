@@ -136,6 +136,7 @@
           v-model="form.department"
           class="customSelect w-full -ml-[15px]"
           label="workflowDescription"
+          placeholder="Select"
           :reduce="(option: any) => option.workflowCode"
           :options="listMatrixApproval"
           :class="{ 'error-select': form.departmentError }"
