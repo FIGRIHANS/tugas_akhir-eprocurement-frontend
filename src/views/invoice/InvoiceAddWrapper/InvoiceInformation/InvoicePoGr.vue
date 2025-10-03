@@ -97,6 +97,7 @@
                     v-else
                     v-model="formEdit.taxCode"
                     class="customSelect"
+                    placeholder="Select"
                     :get-option-label="(option: any) => `${option.code} - ${option.name}`"
                     :reduce="(option: any) => option.code"
                     :options="listTaxCalculation"

@@ -46,6 +46,7 @@
                   v-else
                   v-model="item.activity"
                   class="customSelect"
+                  placeholder="Select"
                   :get-option-label="(option: any) => `${option.code} - ${option.name}`"
                   :reduce="(option: any) => option.id"
                   :options="listActivity"
@@ -77,6 +78,7 @@
                   v-else
                   v-model="item.taxCode"
                   class="customSelect"
+                  placeholder="Select"
                   :get-option-label="(option: any) => `${option.code} - ${option.name}`"
                   :reduce="(option: any) => option.code"
                   :options="listTaxCalculation"
@@ -92,6 +94,7 @@
                   v-else
                   v-model="item.costCenter"
                   class="customSelect"
+                  placeholder="Select"
                   :get-option-label="(option: any) => `${option.code} - ${option.name}`"
                   :reduce="(option: any) => option.code"
                   :options="costCenterList"

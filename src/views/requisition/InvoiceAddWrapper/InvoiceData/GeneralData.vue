@@ -16,6 +16,7 @@
           v-else
           v-model="form.vendorId"
           class="customSelect"
+          placeholder="Select"
           :reduce="(option: any) => option.value"
           :options="customVendorList"
           :class="{ 'error-select': form.vendorIdError }"

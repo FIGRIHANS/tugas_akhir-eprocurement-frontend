@@ -42,6 +42,7 @@
             v-model="form.countryAlternative"
             class="customSelect w-full"
             label="countryName"
+            placeholder="Select"
             :reduce="(option: any) => option.countryCode"
             :options="listCountry"
           ></v-select>
@@ -78,6 +79,7 @@
             v-model="form.bankCountryAlternative"
             class="customSelect w-full"
             label="countryName"
+            placeholder="Select"
             :reduce="(option: any) => option.countryCode"
             :options="listCountry"
           ></v-select>

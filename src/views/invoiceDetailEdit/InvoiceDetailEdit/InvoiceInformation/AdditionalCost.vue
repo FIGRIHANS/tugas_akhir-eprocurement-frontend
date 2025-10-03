@@ -43,6 +43,7 @@
                 v-else
                 v-model="formEdit.activityExpense"
                 class="customSelect"
+                placeholder="Select"
                 :get-option-label="(option: any) => `${option.code} - ${option.name}`"
                 :reduce="(option: any) => option.id"
                 :options="listActivity"
@@ -81,6 +82,7 @@
                 v-else
                 v-model="formEdit.taxCode"
                 class="customSelect"
+                placeholder="Select"
                 :get-option-label="(option: any) => `${option.code} - ${option.name}`"
                 :reduce="(option: any) => option.code"
                 :options="listTaxCalculation"
@@ -96,6 +98,7 @@
                 v-else
                 v-model="formEdit.costCenter"
                 class="customSelect"
+                placeholder="Select"
                 :get-option-label="(option: any) => `${option.code} - ${option.name}`"
                 :reduce="(option: any) => option.code"
                 :options="costCenterList"
@@ -120,6 +123,7 @@
                 v-else
                 v-model="formEdit.whtType"
                 class="customSelect"
+                placeholder="Select"
                 :get-option-label="(option: any) => `${option.code} - ${option.name}`"
                 :reduce="(option: any) => option.code"
                 :options="whtTypeList"
@@ -133,6 +137,7 @@
                 v-else
                 v-model="formEdit.whtCode"
                 class="customSelect"
+                placeholder="Select"
                 :get-option-label="(option: any) => `${option.whtCode} - ${option.description}`"
                 :reduce="(option: any) => option.whtCode"
                 :options="whtCodeList"
