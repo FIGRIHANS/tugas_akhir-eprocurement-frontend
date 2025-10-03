@@ -37,16 +37,16 @@
             <td v-if="!checkInvoiceDp()">{{ item.uom || '-' }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.itemText || '-' }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.conditionType || '-' }}</td>
-            <td>{{ item.conditionTypeDesc || '-' }}</td>
-            <td>{{ item.qcStatus || '-' }}</td>
-            <td>{{ getTaxCodeName(item.taxCode) || '-' }}</td>
+            <td v-if="!checkPoPib()">{{ item.conditionTypeDesc || '-' }}</td>
+            <td v-if="!checkPoPib()">{{ item.qcStatus || '-' }}</td>
+            <td v-if="!checkPoPib()">{{ getTaxCodeName(item.taxCode) || '-' }}</td>
             <td v-if="!checkPoPib()">
               {{ form.currCode === 'IDR' ? useFormatIdr(item.vatAmount) : useFormatUsd(item.vatAmount) || 0 }}
             </td>
-            <td>{{ getWhtTypeName(item.whtType) || '-' }}</td>
-            <td>{{ getWhtCodeName(item.whtCode, item) || '-' }}</td>
-            <td>{{ item.whtBaseAmount ? form.currCode === 'IDR' ? useFormatIdr(item.whtBaseAmount) : useFormatUsd(item.whtBaseAmount) : '-' }}</td>
-            <td>{{ item.whtAmount ? form.currCode === 'IDR' ? useFormatIdr(item.whtAmount) : useFormatUsd(item.whtAmount) : '-' }}</td>
+            <td v-if="!checkPoPib()">{{ getWhtTypeName(item.whtType) || '-' }}</td>
+            <td v-if="!checkPoPib()">{{ getWhtCodeName(item.whtCode, item) || '-' }}</td>
+            <td v-if="!checkPoPib()">{{ item.whtBaseAmount ? form.currCode === 'IDR' ? useFormatIdr(item.whtBaseAmount) : useFormatUsd(item.whtBaseAmount) : '-' }}</td>
+            <td v-if="!checkPoPib()">{{ item.whtAmount ? form.currCode === 'IDR' ? useFormatIdr(item.whtAmount) : useFormatUsd(item.whtAmount) : '-' }}</td>
             <td>{{ item.department || '-' }}</td>
           </tr>
         </tbody>
@@ -58,7 +58,7 @@
 <script lang="ts" setup>
 import { ref, computed, watch, inject, onMounted, type Ref } from 'vue'
 import type { formTypes } from '../types/invoiceDetail'
-import { defaultColumn, invoiceDpColumn } from '@/static/invoicePoGr'
+import { defaultColumn, manualAddColumn, invoiceDpColumn } from '@/static/invoicePoGr'
 import moment from 'moment'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
@@ -97,8 +97,8 @@ const checkPoPib = () => {
 }
 
 const setColumn = () => {
-  // if (false) columns.value = ['Line', ...PoPibColumn]
   if (checkInvoiceDp()) columns.value = ['Line', ...invoiceDpColumn]
+  else if (checkPoPib()) columns.value = ['Line', ...manualAddColumn]
   else columns.value = ['Line', ...defaultColumn]
 }
 
