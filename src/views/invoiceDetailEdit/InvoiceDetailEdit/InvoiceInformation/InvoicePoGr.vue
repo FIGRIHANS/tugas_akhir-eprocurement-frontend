@@ -114,6 +114,7 @@
               <th v-for="(item, index) in setColumn(form?.invoiceTypeCode)" :key="index" class="pogr__field-base" :class="{
                 'pogr__field-base--po-number': item.toLowerCase() === 'po number',
                 'pogr__field-base--po-item': item.toLowerCase() === 'po item',
+                'pogr__field-base--department': item.toLowerCase() === 'department',
               }">
                 {{ item }}
               </th>
@@ -147,7 +148,7 @@
                   <p v-if="!item.poItem && item.isEdit" class="text-danger text-[9px]">*PO Item must be at least 2 digits</p>
                 </td>
                 <td v-if="!checkInvoiceDp()">
-                  <span v-if="!item.isEdit">{{ item.itemAmount }}</span>
+                  <span v-if="!item.isEdit">{{ form.currCode === 'IDR' ? useFormatIdr(item.itemAmount) : useFormatUsd(item.itemAmount) }}</span>
                   <input v-else v-model="item.itemAmount" class="input" placeholder=""
                      />
                   <!-- <p v-if="!item.itemAmount && item.isEdit" class="text-danger text-[9px]">*Item Amount be at least 1 digits</p> -->
@@ -166,22 +167,11 @@
                 </td>
                 <td v-if="!checkInvoiceDp()">
                   <span v-if="!item.isEdit">{{ item.itemText ||'-' }}</span>
-                  <input v-else v-model="item.itemText" class="input" placeholder=""
-                     />
+                  <input v-else v-model="item.itemText" class="input" placeholder="" />
                   <!-- <p v-if="!item.itemText && item.isEdit" class="text-danger text-[9px]">*Item Quantity be at least 1 digits</p> -->
                 </td>
                 <td v-if="!checkInvoiceDp()">
-                  <span v-if="!item.isEdit">{{ item.department || '-' }}</span>
-                  <v-select
-                    v-else
-                    v-model="item.department"
-                    class="customSelect w-full -ml-[15px]"
-                    label="workflowDescription"
-                    placeholder="Select"
-                    :reduce="(option: any) => option.workflowCode"
-                    :options="listMatrixApproval"
-                    appendToBody
-                  ></v-select>
+                  <span>{{ getCostCenterName(item.department) || '-' }}</span>
                 </td>
               </tr>
             </template>
@@ -219,7 +209,7 @@ const formEdit = reactive({
 const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
 const whtTypeList = computed(() => invoiceMasterApi.whtTypeList)
 const whtCodeList = computed(() => invoiceMasterApi.whtCodeList)
-const listMatrixApproval = computed(() => invoiceMasterApi.matrixApprovalList)
+const costCenterList = computed(() => invoiceMasterApi.costCenterList)
 const userData = computed(() => loginApi.userData)
 
 const checkIsEdit = () => {
@@ -363,6 +353,15 @@ const getWhtCodeName = (code: string, data: itemsPoGrType) => {
   if (index !== -1) {
     const detailData = data.whtCodeList[index]
     return `${detailData.whtCode} - ${detailData.description}`
+  }
+  return '-'
+}
+
+const getCostCenterName = (costCenter: string) => {
+  const index = costCenterList.value.findIndex((item) => item.code === costCenter)
+  if (index !== -1) {
+    const data = costCenterList.value[index]
+    return `${data.code} - ${data.name}`
   }
   return '-'
 }
