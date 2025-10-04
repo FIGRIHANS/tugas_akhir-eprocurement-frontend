@@ -431,7 +431,7 @@ const setWhtAmount = (data: itemsCostType) => {
 watch(
   () => [form?.value.additionalCosts, form?.value.invoiceItem, form?.value.currCode, formEdit],
   () => {
-    if (!checkPoPib()) getVatAmount()
+    getVatAmount()
   },
   {
     deep: true,
