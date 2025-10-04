@@ -97,7 +97,7 @@ export const searchPoPibColumn = [
 
 export const manualAddColumn = [
   'PO Number',
-  'Po Item',
+  'PO Item',
   'Item Amount',
   'Quantity',
   'Unit',
