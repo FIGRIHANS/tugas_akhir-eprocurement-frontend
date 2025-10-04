@@ -242,24 +242,27 @@ const resetFormEdit = () => {
 const goEdit = (item: itemsPoGrType) => {
   item.isEdit = !item.isEdit
 
-  if (item.isEdit) {
-    formEdit.itemAmount = item.itemAmount
-    formEdit.taxCode = item.taxCode
-    formEdit.vatAmount = item.vatAmount
-    formEdit.whtType = item.whtType
-    formEdit.whtCode = item.whtCode
-    formEdit.whtBaseAmount = item.whtBaseAmount
-    formEdit.whtAmount = item.whtAmount
-  } else {
-    item.itemAmount = formEdit.itemAmount
-    item.taxCode = formEdit.taxCode
-    item.vatAmount = formEdit.vatAmount
-    item.whtType = formEdit.whtType
-    item.whtCode = formEdit.whtCode
-    item.whtBaseAmount = formEdit.whtBaseAmount
-    item.whtAmount = formEdit.whtAmount
-    resetFormEdit()
+  if (!checkPoPib()) {
+    if (item.isEdit) {
+      formEdit.itemAmount = item.itemAmount
+      formEdit.taxCode = item.taxCode
+      formEdit.vatAmount = item.vatAmount
+      formEdit.whtType = item.whtType
+      formEdit.whtCode = item.whtCode
+      formEdit.whtBaseAmount = item.whtBaseAmount
+      formEdit.whtAmount = item.whtAmount
+    } else {
+      item.itemAmount = formEdit.itemAmount
+      item.taxCode = formEdit.taxCode
+      item.vatAmount = formEdit.vatAmount
+      item.whtType = formEdit.whtType
+      item.whtCode = formEdit.whtCode
+      item.whtBaseAmount = formEdit.whtBaseAmount
+      item.whtAmount = formEdit.whtAmount
+      resetFormEdit()
+    }
   }
+
 }
 
 const resetItem = (item: itemsPoGrType) => {
