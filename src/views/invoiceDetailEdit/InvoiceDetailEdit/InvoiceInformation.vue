@@ -5,7 +5,7 @@
       <InvoiceCalculation />
     </div>
     <InvoicePoGr v-if="!checkIsNonPo()" class="mt-[24px]" />
-    <AdditionalCost v-if="!checkIsNonPo()" class="mt-[24px]" />
+    <AdditionalCost v-if="!checkIsNonPo() && (checkIsWithoutDp() || checkIsPoPib())" class="mt-[24px]" />
     <InvoiceItem v-if="checkIsNonPo()" class="mt-[24px]" />
   </div>
 </template>
@@ -29,6 +29,14 @@ const form = inject<Ref<formTypes>>('form')
 const route = useRoute()
 const typeForm = ref<string>('')
 
+const checkIsWithoutDp = () => {
+  return form.value.invoiceDPCode === 9011
+}
+
+const checkIsPoPib = () => {
+  return form.value.invoiceTypeCode === 902
+}
+
 const checkIsNonPo = () => {
   return route.query.invoiceType === 'no_po'
 }
@@ -39,6 +47,7 @@ onMounted(() => {
   invoiceMasterApi.getProfitCenter()
   invoiceMasterApi.getWhtType()
   invoiceMasterApi.getCostCenter(form?.value.companyCode || '')
+  invoiceMasterApi.getMatrixApproval(form.value.invoiceTypeCode.toString() || '', form.value.companyCode || '')
   if (form.value.companyCode) invoiceMasterApi.getActivity(form.value.companyCode || '')
 })
 </script>

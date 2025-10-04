@@ -20,7 +20,7 @@ export const login = {
     signIn: 'Sign in',
     admin: 'admin',
     email: 'Email',
-    emailPlaceholder: 'email@email.com',
+    emailPlaceholder: 'Enter your email',
     username: 'Username',
     usernamePlaceholder: 'Username',
     password: 'Password',
@@ -34,5 +34,46 @@ export const login = {
   // Forgot Password
   forgot: {
     title: 'Forgot Password',
+    form: {
+      description:
+        'To reset your password, please enter the email used during registration, make sure the email is active and we will send you a link to change your new password!',
+      email: 'Email',
+      emailPlaceholder: 'Enter your email',
+      resetButton: 'Reset Password',
+      emailError:
+        'We did not find the email you entered, please check the email you used for your first registration.',
+    },
+    success: {
+      title: 'Email Sent',
+      message:
+        'We have sent a link to create a new password to your email address, please open your email and follow the instructions in your email!',
+      backButton: 'Back',
+    },
+  },
+  reset: {
+    title: 'Enter New password',
+    description:
+      'Make sure your new password is strong and contains a combination of numbers, upper and lower case letters and a combination of characters!',
+    form: {
+      enterNewPassword: 'Enter New Password',
+      confirmNewPassword: 'Confirm New Password',
+      confirm: 'Confirm',
+    },
+  },
+  setNewPassword: {
+    title: 'Enter New Password',
+    form: {
+      description:
+        'Make sure your new password is strong and contains a combination of numbers, upper and lower case letters and a combination of characters!',
+      enterNewPassword: 'Enter New Password',
+      confirmNewPassword: 'Confirm New Password',
+      passwordPlaceholder: 'Password',
+      confirm: 'Confirm',
+    },
+    success: {
+      title: 'Success!',
+      message: 'You have just changed your password, please log in again using the new password!',
+      loginButton: 'login',
+    },
   },
 }

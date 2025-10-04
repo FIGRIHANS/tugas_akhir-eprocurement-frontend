@@ -195,7 +195,11 @@ const filteredSidebarMenu = computed(() => {
           return {
             ...menu,
             child: menu.child
-              ? menu.child.filter((child) => child.id === 'invoice-list-non-po' || child.id === 'vendor-master')
+              ? menu.child.filter((child) =>
+                child.id === 'vendor-master' ||
+                child.id === 'invoice-list' ||
+                child.id === 'invoice-list-non-po'
+              )
               : [],
           }
         })

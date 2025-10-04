@@ -88,7 +88,7 @@
                   <span v-else>{{ form?.currency === item.currencyLC ? useFormatIdr(item.vatAmount || 0) : useFormatUsd(item.vatAmount || 0) }}</span>
                 </td>
                 <td v-if="checkInvoiceDp()">
-                  <span v-if="!item.isEdit">{{ useFormatIdr(item.itemAmountLC) }}</span>
+                  <span v-if="!item.isEdit">{{ form?.currency === item.currencyLC ? useFormatIdr(item.itemAmountLC) : useFormatUsd(formEdit.itemAmountLC) }}</span>
                   <input v-else v-model="formEdit.itemAmountLC" type="number" class="input" />
                 </td>
                 <td>
@@ -97,6 +97,7 @@
                     v-else
                     v-model="formEdit.taxCode"
                     class="customSelect"
+                    placeholder="Select"
                     :get-option-label="(option: any) => `${option.code} - ${option.name}`"
                     :reduce="(option: any) => option.code"
                     :options="listTaxCalculation"
@@ -110,7 +111,7 @@
                 <td v-if="form?.invoiceType !== '903'">-</td>
                 <td v-if="form?.invoiceType !== '903'">-</td>
                 <td v-if="form?.invoiceType !== '903'">{{ form?.currency === item.currencyLC ? useFormatIdr(item.whtBaseAmount) : useFormatUsd(item.whtBaseAmount) }}</td>
-                <td v-if="!checkInvoiceDp()">-</td>
+                <td>-</td>
                 <td>{{ item.department || '-' }}</td>
               </tr>
             </template>
@@ -128,6 +129,7 @@
               <th v-for="(item, index) in columns" :key="index" class="pogr__field-base" :class="{
                 'pogr__field-base--po-number': item.toLowerCase() === 'po number',
                 'pogr__field-base--po-item': item.toLowerCase() === 'po item',
+                'pogr__field-base--department': item.toLowerCase() === 'department',
               }">
                 {{ item }}
               </th>
@@ -165,16 +167,18 @@
                 <td v-if="!checkInvoiceDp()">{{ item.uom || '-' }}</td>
                 <td v-if="!checkInvoiceDp()">{{ item.itemText || '-' }}</td>
                 <td v-if="!checkInvoiceDp()">
-                  <span v-if="!item.isEdit">{{ item.department || '-' }}</span>
-                  
-                  <select v-else v-model="item.department" class="select" name="select" :class="{ 'border-danger': item.departementError }">
-                    <option v-for="item of costCenterList" :key="item.code" :value="item.code">
-                      {{ item.code }}
-                    </option>
-                  </select>
+                  <span v-if="!item.isEdit">{{ getCostCenterName(item.department) || '-' }}</span>
+                  <v-select
+                    v-else
+                    v-model="item.department"
+                    class="customSelect"
+                    placeholder="Select"
+                    :get-option-label="(option: any) => `${option.code} - ${option.name}`"
+                    :reduce="(option: any) => option.code"
+                    :options="costCenterList"
+                    appendToBody
+                  ></v-select>
                   <p v-if="item.departementError" class="text-danger text-[9px]">Please Chose Departement</p>
-                  <!-- <input v-else v-model="item.department" class="input" placeholder=""
-                    :class="{ 'border-danger': item.department }"  /> -->
                 </td>
               </tr>
             </template>
@@ -239,8 +243,9 @@ const searchItem = () => {
 }
 
 const addItemInvoiceDp = () => {
-  const poNumber = search.value?.toString() ?? form?.invoicePoGr[0].poNo ?? ''
+  const poNumber = search.value?.toString() ?? form?.invoicePoGr[0].poNo.toString() ?? ''
   if (poNumber.length !== 10) return searchError.value = true
+  else searchError.value = false
   isDisabledSearch.value = true
   invoiceApi.getAvailableDp(poNumber, form?.vendorId || '', formEdit.itemAmountLC || form?.invoicePoGr[0].itemAmountLC || 0)
     .then((response) => {
@@ -479,6 +484,15 @@ const getTaxCodeName = (taxCode: string) => {
   return '-'
 }
 
+const getCostCenterName = (costCenter: string) => {
+  const index = costCenterList.value.findIndex((item) => item.code === costCenter)
+  if (index !== -1) {
+    const data = costCenterList.value[index]
+    return `${data.code} - ${data.name}`
+  }
+  return '-'
+}
+
 watch(
   () => [form?.invoiceDp, form?.invoiceType],
   () => {
@@ -517,6 +531,8 @@ watch(
           enteredOn: '',
           purchasingOrg: '',
           department: '',
+          whtBaseAmount: 0,
+          whtAmount: 0,
           isEdit: false
         } as itemsPoGrType
 

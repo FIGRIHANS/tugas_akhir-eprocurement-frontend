@@ -16,11 +16,7 @@
       <InvoicePoGr v-if="checkPo() && !isNonPo" class="mt-[24px]" />
       <InvoiceItem v-if="isNonPo" class="mt-[24px]" />
       <AdditionalCost
-        v-if="
-          (form.invoiceDPCode === 9011 && !isNonPo && checkPo()) ||
-          form.invoiceTypeCode === 902 ||
-          form.invoiceTypeCode === 903
-        "
+        v-if="!isNonPo && (checkIsWithoutDp() || checkIsPoPib())"
         class="mt-[24px]"
       />
     </div>
@@ -199,6 +195,18 @@ const checkIsNonPo = () => {
   return route.query.invoiceType === 'no_po'
 }
 
+const checkVerifikator1 = () => {
+  return userData.value.profile.profileId === 3190
+}
+
+const checkIsWithoutDp = () => {
+  return form.value.invoiceDPCode === 9011
+}
+
+const checkIsPoPib = () => {
+  return form.value.invoiceTypeCode === 902
+}
+
 const checkStatusCode = () => {
   let status = true
   switch (form.value.statusCode) {
@@ -286,12 +294,14 @@ const checkPo = () => {
 
 const checkVerifHeader = () => {
   const invoiceDateError = useCheckEmpty(form.value.invoiceDate).isError
-  const postingDateError = useCheckEmpty(form.value.postingDate).isError
-  const estimatedPaymentDateError = useCheckEmpty(form.value.estimatedPaymentDate).isError
   const documentNoError = useCheckEmpty(form.value.documentNo).isError
-  const paymentMethodError = useCheckEmpty(form.value.paymentMethodCode).isError
-  const transferNewsError = useCheckEmpty(form.value.transferNews).isError
-  const notesError = useCheckEmpty(form.value.notes).isError
+  const creditCardBillingError = checkVerifikator1() ? useCheckEmpty(form.value.creditCardBillingId).isError : false
+  
+  const postingDateError = !checkVerifikator1() ? useCheckEmpty(form.value.postingDate).isError : false
+  const estimatedPaymentDateError = !checkVerifikator1() ? useCheckEmpty(form.value.estimatedPaymentDate).isError : false
+  const paymentMethodError = !checkVerifikator1() ? useCheckEmpty(form.value.paymentMethodCode).isError : false
+  const transferNewsError = !checkVerifikator1() ? useCheckEmpty(form.value.transferNews).isError : false
+  const notesError = !checkVerifikator1() ? useCheckEmpty(form.value.notes).isError : false
 
   if (
     invoiceDateError ||
@@ -300,6 +310,7 @@ const checkVerifHeader = () => {
     documentNoError ||
     paymentMethodError ||
     transferNewsError ||
+    creditCardBillingError ||
     notesError
   )
     return false
@@ -411,15 +422,15 @@ const mapDataVerif = () => {
       taxNo: form.value.taxNo,
       currCode: form.value.currCode,
       notes: form.value.notes,
-      postingDate: form.value.postingDate,
+      postingDate: form.value.postingDate || null,
       invoicingParty: form.value.invoicingParty,
-      estimatedPaymentDate: form.value.estimatedPaymentDate,
+      estimatedPaymentDate: form.value.estimatedPaymentDate || null,
       paymentMethodCode: form.value.paymentMethodCode,
       paymentMethodName: form.value.paymentMethodName,
       assigment: form.value.assigment,
       transferNews: form.value.transferNews,
       npwpReporting: form.value.npwpReporting,
-      creditCardBillingId: form.value.creditCardBillingId,
+      creditCardBillingID: form.value.creditCardBillingId,
     },
     payment: {
       paymentId: form.value.paymentId,
@@ -463,11 +474,11 @@ const mapDataVerifNonPo = () => {
     header: {
       invoiceUId: form.value.invoiceUId,
       invoiceDate: form.value.invoiceDate,
-      postingDate: form.value.invoiceDate,
+      postingDate: form.value.invoiceDate || null,
       documentNo: form.value.documentNo,
       taxNo: form.value.taxNo,
       invoicingParty: form.value.invoicingParty,
-      estimatedPaymentDate: form.value.estimatedPaymentDate,
+      estimatedPaymentDate: form.value.estimatedPaymentDate || null,
       paymentMethodCode: form.value.paymentMethodCode,
       paymentMethodName: form.value.paymentMethodName,
       assigment: form.value.assigment,
@@ -749,7 +760,7 @@ const setDataDefault = async () => {
     paymentId: data?.payment.paymentId || 0,
     bankKey: data?.payment.bankKey || '',
     bankName: data?.payment.bankName || '',
-    creditCardBillingId: data?.header.creditCardBillingId || '',
+    creditCardBillingId: data?.header.creditCardBillingID || '',
     beneficiaryName: data?.payment.beneficiaryName || '',
     bankAccountNo: data?.payment.bankAccountNo || '',
     bankCountryCode: data?.payment.bankCountryCode || '',
@@ -874,7 +885,7 @@ const setDataDefaultNonPo = () => {
     paymentId: data?.payment.paymentId || 0,
     bankKey: data?.payment.bankKey || '',
     bankName: data?.payment.bankName || '',
-    creditCardBillingId: data?.header.creditCardBillingId || '',
+    creditCardBillingId: data?.header.creditCardBillingID || '',
     beneficiaryName: data?.payment.beneficiaryName || '',
     bankAccountNo: data?.payment.bankAccountNo || '',
     bankCountryCode: data?.payment.bankCountryCode || '',

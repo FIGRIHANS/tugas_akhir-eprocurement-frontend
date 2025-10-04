@@ -32,7 +32,7 @@
       <template #dp-input="{ value }">
         <div class="input relative" :class="{ 'border-danger': error }">
           <input
-            placeholder="Select"
+            :placeholder="placeholder"
             :value="value"
             readonly
             class="min-w-[0px]"
@@ -51,20 +51,25 @@
 /* eslint-disable no-undef */
 import { ref, watch } from 'vue'
 
-const props = defineProps<{
-  modelValue: Date | string | null
-  error?: boolean
-  label?: string
-  required?: boolean
-  placeholder?: string
-  format?: string
-  disabled?: boolean
-  minDate?: Date | string
-  labelTop?: boolean
-  maxDate?: Date | string
-  range?: boolean
-  teleport?: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    modelValue: Date | string | null
+    error?: boolean
+    label?: string
+    required?: boolean
+    placeholder?: string
+    format?: string
+    disabled?: boolean
+    minDate?: Date | string
+    labelTop?: boolean
+    maxDate?: Date | string
+    range?: boolean
+    teleport?: boolean
+  }>(),
+  {
+    placeholder: 'Select'
+  }
+)
 
 const emits = defineEmits(['update:modelValue'])
 

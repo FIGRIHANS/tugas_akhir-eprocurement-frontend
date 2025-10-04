@@ -1,6 +1,6 @@
 <template>
   <div class="flex overflow-x-auto gap-3 mb-5 items-center" v-if="filteredFilters.length">
-    <div class="font-medium text-lg text-gray-800">Filter</div>
+    <div class="font-medium text-lg text-gray-800">{{ $t('vendorBlacklist.filter.title') }}</div>
     <div class="btn btn-light btn-sm" v-for="(filter, index) in filteredFilters" :key="index">
       <span class="text-gray-500">{{ filtersKey.find((f) => f.item === filter.key)?.value }}</span>
       <span class="font-semibold">
@@ -9,7 +9,7 @@
       <UiIcon name="cross" @click="handleRemoveFilter(filter.key)" />
     </div>
     <UiButton variant="light" size="sm" class="btn-clear" @click="handleResetFilter">
-      Reset Filter
+      {{ $t('vendorBlacklist.filter.resetFilter') }}
     </UiButton>
   </div>
 </template>
@@ -18,10 +18,15 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter, type LocationQueryValue } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
 const route = useRoute()
-const filtersKey: { item: string; value: string }[] = [{ item: 'MasaBlacklist', value: 'Period' }]
+const { t } = useI18n()
+
+const filtersKey = computed(() => [
+  { item: 'MasaBlacklist', value: t('vendorBlacklist.filter.period') },
+])
 
 const filters = ref<{ key: string; value: LocationQueryValue | LocationQueryValue[] }[]>([])
 

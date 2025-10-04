@@ -27,7 +27,7 @@ const administration = {
   telephone: 'Telfon',
   vendoremail: 'Email Vendor',
   website: 'Website',
-  currencyPref: 'Preferensi Mata Uang',
+  currencyPref: 'Mata Uang',
   companyaddress: 'Alamat Perusahaan',
 }
 
@@ -47,7 +47,7 @@ const paymentinfo = {
   accountdiscrepancystatement: 'Pernyataan Ketidaksesuaian Rekening',
   accountcover: 'Sampul Akun',
   currency: 'Mata Uang',
-  bankkey: 'Kunci Bank',
+  bankkey: 'Bank Key',
   bankcountry: 'Negara Bank',
   bankname: 'Nama Bank',
   bankbrach: 'Cabang Bank',
@@ -57,10 +57,21 @@ const paymentinfo = {
   holdernamedifferent: 'Nama pemegang berbeda dengan nama perusahaan.',
 }
 
+const verificationdetail = {
+  title: 'Detail Verifikasi',
+  no: 'No',
+  verificatorname: 'Nama Verifikator',
+  position: 'Posisi',
+  verificationdate: 'Tanggal Verifikasi',
+  status: 'Status',
+  description: 'Keterangan',
+}
+
 export default {
   breadcrums,
   tabitems,
   administration,
   businessLicenses,
   paymentinfo,
+  verificationdetail,
 }

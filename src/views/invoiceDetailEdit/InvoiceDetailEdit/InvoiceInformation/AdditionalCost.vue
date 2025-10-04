@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col gap-[16px]">
     <p class="text-base font-semibold">Additional Cost</p>
-    <button class="btn btn-outline btn-primary w-fit" @click="addNew">
+    <button v-if="!checkVerifikator1()" class="btn btn-outline btn-primary w-fit" @click="addNew">
       <i class="ki-duotone ki-plus-circle"></i>
       Add Additional Cost
     </button>
@@ -43,6 +43,7 @@
                 v-else
                 v-model="formEdit.activityExpense"
                 class="customSelect"
+                placeholder="Select"
                 :get-option-label="(option: any) => `${option.code} - ${option.name}`"
                 :reduce="(option: any) => option.id"
                 :options="listActivity"
@@ -81,21 +82,23 @@
                 v-else
                 v-model="formEdit.taxCode"
                 class="customSelect"
+                placeholder="Select"
                 :get-option-label="(option: any) => `${option.code} - ${option.name}`"
                 :reduce="(option: any) => option.code"
                 :options="listTaxCalculation"
                 appendToBody
               ></v-select>
             </td>
-              <td v-if="!checkPoPib()">
-                {{ form.currCode === 'IDR' ? useFormatIdr(item.isEdit ? formEdit.vatAmount : item.vatAmount) : useFormatUsd(item.isEdit ? formEdit.vatAmount : item.vatAmount) }}
-              </td>
+            <td>
+              {{ form.currCode === 'IDR' ? useFormatIdr(item.isEdit ? formEdit.vatAmount : item.vatAmount) : useFormatUsd(item.isEdit ? formEdit.vatAmount : item.vatAmount) }}
+            </td>
             <td>
               <span v-if="!item.isEdit">{{ getCostCenterName(item.costCenter) }}</span>
               <v-select
                 v-else
                 v-model="formEdit.costCenter"
                 class="customSelect"
+                placeholder="Select"
                 :get-option-label="(option: any) => `${option.code} - ${option.name}`"
                 :reduce="(option: any) => option.code"
                 :options="costCenterList"
@@ -120,6 +123,7 @@
                 v-else
                 v-model="formEdit.whtType"
                 class="customSelect"
+                placeholder="Select"
                 :get-option-label="(option: any) => `${option.code} - ${option.name}`"
                 :reduce="(option: any) => option.code"
                 :options="whtTypeList"
@@ -133,6 +137,7 @@
                 v-else
                 v-model="formEdit.whtCode"
                 class="customSelect"
+                placeholder="Select"
                 :get-option-label="(option: any) => `${option.whtCode} - ${option.description}`"
                 :reduce="(option: any) => option.whtCode"
                 :options="whtCodeList"
@@ -147,7 +152,8 @@
               <input v-else v-model="formEdit.whtBaseAmount" class="input" type="number" placeholder="" @change="setWhtAmount(item)"/>
             </td>
             <td>
-              <span>{{ form.currCode === 'IDR' ? useFormatIdr(item.isEdit ? formEdit.whtAmount : item.whtAmount) : useFormatUsd(item.isEdit ? formEdit.whtAmount : item.whtAmount) }}</span>
+              <span v-if="!item.isEdit">{{ form.currCode === 'IDR' ? useFormatIdr(item.isEdit ? formEdit.whtAmount : item.whtAmount) : useFormatUsd(item.isEdit ? formEdit.whtAmount : item.whtAmount) }}</span>
+              <input v-if="item.isEdit && checkVerifikator2()" v-model="formEdit.whtAmount" class="input" type="number" placeholder=""/>
             </td>
           </tr>
         </tbody>
@@ -163,9 +169,11 @@ import type { itemsCostType } from '../../types/additionalCost'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
+import { useLoginStore } from '@/stores/views/login'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const verificationApi = useInvoiceVerificationStore()
+const loginApi = useLoginStore()
 const form = inject<Ref<formTypes>>('form')
 const columns = ref([
   'Action',
@@ -173,7 +181,7 @@ const columns = ref([
   'Item Amount',
   'Debit/Credit',
   'Tax Code',
-  'Vat Amount',
+  'VAT Amount',
   'Cost Center',
   'Profit Center',
   'Assignment',
@@ -206,6 +214,7 @@ const costCenterList = computed(() => invoiceMasterApi.costCenterList)
 const profitCenter = computed(() => invoiceMasterApi.profilCenterList)
 const whtTypeList = computed(() => invoiceMasterApi.whtTypeList)
 const whtCodeList = computed(() => invoiceMasterApi.whtCodeList)
+const userData = computed(() => loginApi.userData)
 
 const checkIsEdit = () => {
   const result = form?.value.additionalCosts.findIndex((item) => item.isEdit)
@@ -214,6 +223,14 @@ const checkIsEdit = () => {
 
 const checkPoPib = () => {
   return form?.value.invoiceTypeCode === 902
+}
+
+const checkVerifikator1 = () => {
+  return userData.value.profile.profileId === 3190
+}
+
+const checkVerifikator2 = () => {
+  return userData.value.profile.profileId === 3002
 }
 
 const addNew = () => {
@@ -414,7 +431,7 @@ const setWhtAmount = (data: itemsCostType) => {
 watch(
   () => [form?.value.additionalCosts, form?.value.invoiceItem, form?.value.currCode, formEdit],
   () => {
-    if (!checkPoPib()) getVatAmount()
+    getVatAmount()
   },
   {
     deep: true,

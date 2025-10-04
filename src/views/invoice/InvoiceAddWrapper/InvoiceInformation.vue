@@ -6,7 +6,7 @@
     </div>
     <InvoicePoGr v-if="!checkNonPo()" class="mt-[24px]" />
     <InvoiceItem v-if="checkNonPo()" class="mt-[24px]" />
-    <AdditionalCost v-if="form.invoiceDp === '9011' && !checkNonPo()" class="mt-[24px]" />
+    <AdditionalCost v-if="checkPoWithoutDp() && !checkNonPo()" class="mt-[24px]" />
   </div>
 </template>
 
@@ -27,6 +27,14 @@ const typeForm = ref<string>('')
 
 const checkNonPo = () => {
   return typeForm.value === 'nonpo'
+}
+
+const checkPoPib = () => {
+  return form.invoiceType === '902'
+}
+
+const checkPoWithoutDp = () => {
+  return form.invoiceDp === '9011'
 }
 
 onMounted(() => {

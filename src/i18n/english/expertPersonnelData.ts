@@ -83,6 +83,11 @@ export const expertPersonnelData = {
         file: 'File',
         description: 'Description',
       },
+      placeholders: {
+        start: 'Start Date',
+        until: 'End Date',
+        description: 'Description',
+      },
       uploadPlaceholder: 'Upload file',
       uploadHint: '*jpg, jpeg, png, pdf, zip / max : 16 MB',
       descriptionPlaceholder: 'Description',

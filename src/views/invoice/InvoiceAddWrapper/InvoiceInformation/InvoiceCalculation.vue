@@ -89,16 +89,15 @@ const setToForm = (name: string, value: number) => {
 const setCalculation = () => {
   listCalculation.value = []
   for (const item of listName.value) {
-    if ((typeForm.value === 'nonpo' && item !== 'Additional Cost') || typeForm.value === 'po') {
-      const amount = setCount(item)
-      const data = {
-        name: item,
-        amount: amount.toString(),
-        currency: form?.currency || ''
-      }
-      listCalculation.value.push(data)
-      setToForm(item, amount)
+    if (typeForm.value === 'nonpo' && item === 'Additional Cost') break
+    const amount = setCount(item)
+    const data = {
+      name: item,
+      amount: amount.toString(),
+      currency: form?.currency || ''
     }
+    listCalculation.value.push(data)
+    setToForm(item, amount)
   }
 }
 
@@ -117,7 +116,7 @@ const countSubtotal = () => {
   if (!checkIsNonPo()) {
     for (const item of form.invoicePoGr) {
       const itemAmount = form.currency === item.currencyLC ? item.itemAmountLC : item.itemAmountTC
-      total = total + itemAmount
+      total = total + Number(itemAmount)
     }
   } else {
     for (const item of form.invoiceItem) {

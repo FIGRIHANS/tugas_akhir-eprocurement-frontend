@@ -24,7 +24,7 @@
           <tbody>
             <tr v-for="(item, index) in form.invoicePoGr" :key="index" class="pogr__field-items">
               <td class="flex items-center justify-around gap-[8px]">
-                <button class="btn btn-outline btn-icon btn-primary" :disabled="checkIsEdit() && !item.isEdit" @click="goEdit(item)">
+                <button class="btn btn-outline btn-icon btn-primary" :disabled="(checkIsEdit() && !item.isEdit) || checkVerifikator1()" @click="goEdit(item)">
                   <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>
                   <i v-else class="ki-duotone ki-check-circle"></i>
                 </button>
@@ -54,6 +54,7 @@
                   v-else
                   v-model="formEdit.taxCode"
                   class="customSelect"
+                  placeholder="Select"
                   :get-option-label="(option: any) => `${option.code} - ${option.name}`"
                   :reduce="(option: any) => option.code"
                   :options="listTaxCalculation"
@@ -69,6 +70,7 @@
                   v-else
                   v-model="formEdit.whtType"
                   class="customSelect"
+                  placeholder="Select"
                   :get-option-label="(option: any) => `${option.code} - ${option.name}`"
                   :reduce="(option: any) => option.code"
                   :options="whtTypeList"
@@ -82,6 +84,7 @@
                   v-else
                   v-model="formEdit.whtCode"
                   class="customSelect"
+                  placeholder="Select"
                   :get-option-label="(option: any) => `${option.whtCode} - ${option.description}`"
                   :reduce="(option: any) => option.whtCode"
                   :options="whtCodeList"
@@ -111,6 +114,7 @@
               <th v-for="(item, index) in setColumn(form?.invoiceTypeCode)" :key="index" class="pogr__field-base" :class="{
                 'pogr__field-base--po-number': item.toLowerCase() === 'po number',
                 'pogr__field-base--po-item': item.toLowerCase() === 'po item',
+                'pogr__field-base--department': item.toLowerCase() === 'department',
               }">
                 {{ item }}
               </th>
@@ -144,7 +148,7 @@
                   <p v-if="!item.poItem && item.isEdit" class="text-danger text-[9px]">*PO Item must be at least 2 digits</p>
                 </td>
                 <td v-if="!checkInvoiceDp()">
-                  <span v-if="!item.isEdit">{{ item.itemAmount }}</span>
+                  <span v-if="!item.isEdit">{{ form.currCode === 'IDR' ? useFormatIdr(item.itemAmount) : useFormatUsd(item.itemAmount) }}</span>
                   <input v-else v-model="item.itemAmount" class="input" placeholder=""
                      />
                   <!-- <p v-if="!item.itemAmount && item.isEdit" class="text-danger text-[9px]">*Item Amount be at least 1 digits</p> -->
@@ -162,20 +166,13 @@
                   <!-- <p v-if="!item.uom && item.isEdit" class="text-danger text-[9px]">*Item Unit be at least 3 digits</p> -->
                 </td>
                 <td v-if="!checkInvoiceDp()">
-                  <span v-if="!item.isEdit">{{ item.itemText}}</span>
-                  <input v-else v-model="item.itemText" class="input" placeholder=""
-                     />
+                  <span v-if="!item.isEdit">{{ item.itemText ||'-' }}</span>
+                  <input v-else v-model="item.itemText" class="input" placeholder="" />
                   <!-- <p v-if="!item.itemText && item.isEdit" class="text-danger text-[9px]">*Item Quantity be at least 1 digits</p> -->
                 </td>
-                <!-- <td v-if="!checkInvoiceDp()">
-                  <span v-if="!item.isEdit">{{ item.department || '-' }}</span>
-                  
-                  <select v-else v-model="item.department" class="select" name="select">
-                    <option v-for="item of costCenterList" :key="item.code" :value="item.code">
-                      {{ item.code }}
-                    </option>
-                  </select>
-                </td> -->
+                <td v-if="!checkInvoiceDp()">
+                  <span>{{ getCostCenterName(item.department) || '-' }}</span>
+                </td>
               </tr>
             </template>
           </tbody>
@@ -190,11 +187,13 @@ import { ref, reactive, computed, inject, watch, onMounted, type Ref } from 'vue
 import type { formTypes } from '../../types/invoiceDetailEdit'
 import { defaultColumn, PoPibColumn, invoiceDpColumn, poCCColumn } from '@/static/invoicePoGr'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
+import { useLoginStore } from '@/stores/views/login'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import type { itemsPoGrType } from '../../types/invoicePoGr'
 import moment from 'moment'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
+const loginApi = useLoginStore()
 const form = inject<Ref<formTypes>>('form')
 const columns = ref<string[]>([])
 const formEdit = reactive({
@@ -210,6 +209,8 @@ const formEdit = reactive({
 const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
 const whtTypeList = computed(() => invoiceMasterApi.whtTypeList)
 const whtCodeList = computed(() => invoiceMasterApi.whtCodeList)
+const costCenterList = computed(() => invoiceMasterApi.costCenterList)
+const userData = computed(() => loginApi.userData)
 
 const checkIsEdit = () => {
   const result = form?.value.invoicePoGr.findIndex((item) => item.isEdit)
@@ -222,6 +223,10 @@ const checkInvoiceDp = () => {
 
 const checkPoPib = () => {
   return form?.value.invoiceTypeCode === 902
+}
+
+const checkVerifikator1 = () => {
+  return userData.value.profile.profileId === 3190
 }
 
 const resetFormEdit = () => {
@@ -237,24 +242,27 @@ const resetFormEdit = () => {
 const goEdit = (item: itemsPoGrType) => {
   item.isEdit = !item.isEdit
 
-  if (item.isEdit) {
-    formEdit.itemAmount = item.itemAmount
-    formEdit.taxCode = item.taxCode
-    formEdit.vatAmount = item.vatAmount
-    formEdit.whtType = item.whtType
-    formEdit.whtCode = item.whtCode
-    formEdit.whtBaseAmount = item.whtBaseAmount
-    formEdit.whtAmount = item.whtAmount
-  } else {
-    item.itemAmount = formEdit.itemAmount
-    item.taxCode = formEdit.taxCode
-    item.vatAmount = formEdit.vatAmount
-    item.whtType = formEdit.whtType
-    item.whtCode = formEdit.whtCode
-    item.whtBaseAmount = formEdit.whtBaseAmount
-    item.whtAmount = formEdit.whtAmount
-    resetFormEdit()
+  if (!checkPoPib()) {
+    if (item.isEdit) {
+      formEdit.itemAmount = item.itemAmount
+      formEdit.taxCode = item.taxCode
+      formEdit.vatAmount = item.vatAmount
+      formEdit.whtType = item.whtType
+      formEdit.whtCode = item.whtCode
+      formEdit.whtBaseAmount = item.whtBaseAmount
+      formEdit.whtAmount = item.whtAmount
+    } else {
+      item.itemAmount = formEdit.itemAmount
+      item.taxCode = formEdit.taxCode
+      item.vatAmount = formEdit.vatAmount
+      item.whtType = formEdit.whtType
+      item.whtCode = formEdit.whtCode
+      item.whtBaseAmount = formEdit.whtBaseAmount
+      item.whtAmount = formEdit.whtAmount
+      resetFormEdit()
+    }
   }
+
 }
 
 const resetItem = (item: itemsPoGrType) => {
@@ -352,6 +360,15 @@ const getWhtCodeName = (code: string, data: itemsPoGrType) => {
   return '-'
 }
 
+const getCostCenterName = (costCenter: string) => {
+  const index = costCenterList.value.findIndex((item) => item.code === costCenter)
+  if (index !== -1) {
+    const data = costCenterList.value[index]
+    return `${data.code} - ${data.name}`
+  }
+  return '-'
+}
+
 watch(
   () => [form?.value.invoiceDPCode, form?.value.invoiceTypeCode],
   () => {
@@ -369,6 +386,16 @@ watch(
   },
   {
     deep: true,
+    immediate: true
+  }
+)
+
+watch(
+  () => [form.value.companyCode, form.value.invoiceTypeCode],
+  () => {
+    if (form.value.companyCode && form.value.invoiceTypeCode) invoiceMasterApi.getMatrixApproval(form.value.invoiceTypeCode.toString() || '', form.value.companyCode || '')
+  },
+  {
     immediate: true
   }
 )

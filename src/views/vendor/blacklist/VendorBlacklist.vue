@@ -16,17 +16,30 @@ import ModalRemove from './components/ModalRemove.vue'
 import ModalSuccess from './components/ModalSuccess.vue'
 import ModalError from './components/ModalError.vue'
 import { KTModal } from '@/metronic/core'
+import { useI18n } from 'vue-i18n'
+import { computed } from 'vue'
 
-const tableCols = [
-  'Actions',
-  'Company Name',
-  'Type',
-  'Start Date',
-  'End Date',
-  'Blacklist Description',
-  'Document',
-  'Status',
-]
+const { t } = useI18n()
+
+const start = computed(
+  () => blacklistStore.blacklist.pageSize * (blacklistStore.blacklist.page - 1) + 1,
+)
+const end = computed(
+  () =>
+    blacklistStore.blacklist.pageSize * (blacklistStore.blacklist.page - 1) +
+    blacklistStore.blacklist.items.length,
+)
+const total = computed(() => blacklistStore.blacklist.total)
+const tableCols = computed(() => [
+  t('vendorBlacklist.table.columns.actions'),
+  t('vendorBlacklist.table.columns.companyName'),
+  t('vendorBlacklist.table.columns.type'),
+  t('vendorBlacklist.table.columns.startDate'),
+  t('vendorBlacklist.table.columns.endDate'),
+  t('vendorBlacklist.table.columns.blacklistDescription'),
+  t('vendorBlacklist.table.columns.document'),
+  t('vendorBlacklist.table.columns.status'),
+])
 
 const route = useRoute()
 const router = useRouter()
@@ -103,7 +116,7 @@ watch(
 <template>
   <div class="card">
     <div class="card-header">
-      <UiInputSearch placeholder="Cari Vendor" v-model="search" />
+      <UiInputSearch :placeholder="$t('general.search', { field: 'Vendor' })" v-model="search" />
       <FilterDropdownBlacklist />
     </div>
     <div class="card-body scrollable-x-auto">
@@ -131,7 +144,9 @@ watch(
 
           <!-- show message if there are no data -->
           <tr v-else-if="!blacklistStore.blacklist.items.length">
-            <td :colspan="tableCols.length" class="text-center">No data</td>
+            <td :colspan="tableCols.length" class="text-center">
+              {{ $t('vendorBlacklist.table.noData') }}
+            </td>
           </tr>
 
           <tr
@@ -153,7 +168,7 @@ watch(
             <td>
               <UiButton v-if="item.docUrl" size="sm" outline @click="onDownload(item.docUrl)">
                 <UiIcon name="cloud-download" variant="duotone" />
-                Download
+                {{ $t('vendorBlacklist.actions.download') }}
               </UiButton>
               <span v-else>-</span>
             </td>
@@ -166,12 +181,7 @@ watch(
     </div>
     <div class="card-footer" v-show="blacklistStore.blacklist.items.length">
       <div class="text-sm text-gray-800">
-        Showing {{ blacklistStore.blacklist.pageSize * (blacklistStore.blacklist.page - 1) + 1 }} to
-        {{
-          blacklistStore.blacklist.pageSize * (blacklistStore.blacklist.page - 1) +
-          blacklistStore.blacklist.items.length
-        }}
-        of {{ blacklistStore.blacklist.total }} entries
+        {{ $t('vendor.pagination.show', { start, end, total }) }}
       </div>
       <LPagination
         :total-items="Number(blacklistStore.blacklist.total)"
@@ -189,13 +199,13 @@ watch(
     />
     <ModalSuccess
       id="modal-success"
-      title="Vendor Successfully Removed from Blacklist"
-      text="The Vendor is now active in the system again."
+      :title="$t('vendorBlacklist.modal.remove.success.title')"
+      :text="$t('vendorBlacklist.modal.remove.success.message')"
     />
     <ModalError
       id="modal-error"
-      title="Failed to remove vendor from blacklist"
-      text="Remove vendor from Blacklist failed"
+      :title="$t('vendorBlacklist.modal.remove.error.title')"
+      :text="$t('vendorBlacklist.modal.remove.error.message')"
     />
   </div>
 </template>

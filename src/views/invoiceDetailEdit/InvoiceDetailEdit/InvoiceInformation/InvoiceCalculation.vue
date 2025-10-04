@@ -88,16 +88,15 @@ const checkIsNonPo = () => {
 const setCalculation = () => {
   listCalculation.value = []
   for (const item of listName.value) {
-    if ((checkIsNonPo() && item !== 'Additional Cost') || typeForm.value === 'po') {
-      const amount = setCount(item)
-      const data = {
-        name: item,
-        amount: amount.toString(),
-        currency: form.value.currCode || ''
-      }
-      listCalculation.value.push(data)
-      setToForm(item, amount)
+    if (checkIsNonPo() && item === 'Additional Cost') return
+    const amount = setCount(item)
+    const data = {
+      name: item,
+      amount: amount.toString(),
+      currency: form.value.currCode || ''
     }
+    listCalculation.value.push(data)
+    setToForm(item, amount)
   }
 }
 
@@ -122,7 +121,7 @@ const countSubtotal = () => {
   let total = 0
   if (!checkIsNonPo()) {
     for (const item of form.value.invoicePoGr) {
-      total = total + item.itemAmount
+      total = total + Number(item.itemAmount)
     }
   } else {
     for (const item of form.value.invoiceItem) {
@@ -184,6 +183,9 @@ const countTotalGrossAmount = () => {
   const subTotal = countSubtotal() || 0
   const vatAmount = countVatAmount() || 0
   const additionalCost = countAdditionalCost() || 0
+  console.log(subTotal)
+  console.log(vatAmount)
+  console.log(additionalCost)
   return subTotal + vatAmount + additionalCost
 }
 

@@ -57,10 +57,21 @@ const paymentinfo = {
   holdernamedifferent: "Holder's name is different from the company name.",
 }
 
+const verificationdetail = {
+  title: 'Verification Detail',
+  no: 'No',
+  verificatorname: 'Verificator Name',
+  position: 'Position',
+  verificationdate: 'Verification Date',
+  status: 'Status',
+  description: 'Description',
+}
+
 export default {
   breadcrums,
   tabitems,
   administration,
   businessLicenses,
   paymentinfo,
+  verificationdetail,
 }

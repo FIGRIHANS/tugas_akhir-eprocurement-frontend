@@ -48,6 +48,7 @@ export const invoiceDpColumn = [
   'WHT Type',
   'WHT Code',
   'WHT Base Amount',
+  'WHT Amount',
   'Department'
 ]
 
@@ -96,10 +97,10 @@ export const searchPoPibColumn = [
 
 export const manualAddColumn = [
   'PO Number',
-  'Po Item',
+  'PO Item',
   'Item Amount',
   'Quantity',
   'Unit',
   'Item Text',
-  'Departement',
+  'Department',
 ]
