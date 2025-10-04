@@ -102,5 +102,5 @@ export const manualAddColumn = [
   'Quantity',
   'Unit',
   'Item Text',
-  'Departement',
+  'Department',
 ]

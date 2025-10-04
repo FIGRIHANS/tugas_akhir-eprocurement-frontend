@@ -129,6 +129,7 @@
               <th v-for="(item, index) in columns" :key="index" class="pogr__field-base" :class="{
                 'pogr__field-base--po-number': item.toLowerCase() === 'po number',
                 'pogr__field-base--po-item': item.toLowerCase() === 'po item',
+                'pogr__field-base--department': item.toLowerCase() === 'department',
               }">
                 {{ item }}
               </th>
@@ -166,16 +167,18 @@
                 <td v-if="!checkInvoiceDp()">{{ item.uom || '-' }}</td>
                 <td v-if="!checkInvoiceDp()">{{ item.itemText || '-' }}</td>
                 <td v-if="!checkInvoiceDp()">
-                  <span v-if="!item.isEdit">{{ item.department || '-' }}</span>
-                  
-                  <select v-else v-model="item.department" class="select" name="select" :class="{ 'border-danger': item.departementError }">
-                    <option v-for="item of costCenterList" :key="item.code" :value="item.code">
-                      {{ item.code }}
-                    </option>
-                  </select>
+                  <span v-if="!item.isEdit">{{ getCostCenterName(item.department) || '-' }}</span>
+                  <v-select
+                    v-else
+                    v-model="item.department"
+                    class="customSelect"
+                    placeholder="Select"
+                    :get-option-label="(option: any) => `${option.code} - ${option.name}`"
+                    :reduce="(option: any) => option.code"
+                    :options="costCenterList"
+                    appendToBody
+                  ></v-select>
                   <p v-if="item.departementError" class="text-danger text-[9px]">Please Chose Departement</p>
-                  <!-- <input v-else v-model="item.department" class="input" placeholder=""
-                    :class="{ 'border-danger': item.department }"  /> -->
                 </td>
               </tr>
             </template>
@@ -476,6 +479,15 @@ const getTaxCodeName = (taxCode: string) => {
   const index = listTaxCalculation.value.findIndex((item) => item.code === taxCode)
   if (index !== -1) {
     const data = listTaxCalculation.value[index]
+    return `${data.code} - ${data.name}`
+  }
+  return '-'
+}
+
+const getCostCenterName = (costCenter: string) => {
+  const index = costCenterList.value.findIndex((item) => item.code === costCenter)
+  if (index !== -1) {
+    const data = costCenterList.value[index]
     return `${data.code} - ${data.name}`
   }
   return '-'
