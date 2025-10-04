@@ -181,7 +181,7 @@ const columns = ref([
   'Item Amount',
   'Debit/Credit',
   'Tax Code',
-  'Vat Amount',
+  'VAT Amount',
   'Cost Center',
   'Profit Center',
   'Assignment',
