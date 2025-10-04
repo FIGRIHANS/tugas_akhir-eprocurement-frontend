@@ -181,7 +181,7 @@ const columns = ref([
   'Item Amount',
   'Debit/Credit',
   'Tax Code',
-  'Vat Amount',
+  'VAT Amount',
   'Cost Center',
   'Profit Center',
   'Assignment',
@@ -431,7 +431,7 @@ const setWhtAmount = (data: itemsCostType) => {
 watch(
   () => [form?.value.additionalCosts, form?.value.invoiceItem, form?.value.currCode, formEdit],
   () => {
-    if (!checkPoPib()) getVatAmount()
+    getVatAmount()
   },
   {
     deep: true,

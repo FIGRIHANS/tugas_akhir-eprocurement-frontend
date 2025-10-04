@@ -42,6 +42,11 @@
         @extend .pogr__field-base;
         min-width: 350px;
       }
+    
+      &--department {
+        @extend .pogr__field-base;
+        min-width: 400px;
+      }
     }
   
     &__field-items {
