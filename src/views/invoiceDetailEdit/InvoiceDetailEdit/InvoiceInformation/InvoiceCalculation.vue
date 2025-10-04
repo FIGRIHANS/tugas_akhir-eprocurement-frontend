@@ -121,7 +121,7 @@ const countSubtotal = () => {
   let total = 0
   if (!checkIsNonPo()) {
     for (const item of form.value.invoicePoGr) {
-      total = total + item.itemAmount
+      total = total + Number(item.itemAmount)
     }
   } else {
     for (const item of form.value.invoiceItem) {
@@ -183,6 +183,9 @@ const countTotalGrossAmount = () => {
   const subTotal = countSubtotal() || 0
   const vatAmount = countVatAmount() || 0
   const additionalCost = countAdditionalCost() || 0
+  console.log(subTotal)
+  console.log(vatAmount)
+  console.log(additionalCost)
   return subTotal + vatAmount + additionalCost
 }
 
