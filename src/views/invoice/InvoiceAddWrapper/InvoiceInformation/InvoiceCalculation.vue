@@ -116,7 +116,7 @@ const countSubtotal = () => {
   if (!checkIsNonPo()) {
     for (const item of form.invoicePoGr) {
       const itemAmount = form.currency === item.currencyLC ? item.itemAmountLC : item.itemAmountTC
-      total = total + itemAmount
+      total = total + Number(itemAmount)
     }
   } else {
     for (const item of form.invoiceItem) {
