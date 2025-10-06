@@ -63,8 +63,8 @@ export interface formTypes extends documentFormTypes {
   amountInvoiceError?: boolean
   taxNoInvoice: string
   taxNoInvoiceError?: boolean
-  remainingDpAmount: string
-  dpAmountDeduction: string
+  remainingDpAmount: number
+  dpAmountDeduction: number
   dpAmountDeductionError?: boolean
   currency: string
   currencyError?: boolean

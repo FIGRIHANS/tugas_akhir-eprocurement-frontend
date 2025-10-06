@@ -44,11 +44,11 @@
       </div>
       <div v-if="form.invoiceDp === '9013'" :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
         <p class="text-xs font-normal text-gray-700">Remaining DP Amount</p>
-        <p class="text-sm font-medium">{{ form.remainingDpAmount || '-' }}</p>
+        <p class="text-sm font-medium">{{ form.remainingDpAmount || '0' }}</p>
       </div>
       <div v-if="form.invoiceDp === '9013'" :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
         <p class="text-xs font-normal text-gray-700">DP Amount Deduction</p>
-        <p class="text-sm font-medium">{{ form.dpAmountDeduction || '-' }}</p>
+        <p class="text-sm font-medium">{{ form.dpAmountDeduction || '0' }}</p>
       </div>
       <div v-if="checkIsNonPo()" :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
         <p class="text-xs font-normal text-gray-700">Requestor</p>
