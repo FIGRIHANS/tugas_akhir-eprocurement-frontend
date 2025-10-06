@@ -183,9 +183,6 @@ const countTotalGrossAmount = () => {
   const subTotal = countSubtotal() || 0
   const vatAmount = countVatAmount() || 0
   const additionalCost = countAdditionalCost() || 0
-  console.log(subTotal)
-  console.log(vatAmount)
-  console.log(additionalCost)
   return subTotal + vatAmount + additionalCost
 }
 

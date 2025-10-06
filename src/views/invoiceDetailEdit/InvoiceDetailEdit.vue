@@ -212,7 +212,7 @@ const checkInvoiceInformation = () => {
   )
     status = false
   for (const item of form.value.additionalCosts) {
-    if (!item.activityExpense || !item.itemAmount || !item.debitCredit) {
+    if (!item.activityId || !item.itemAmount || !item.debitCredit) {
       status = false
     }
   }
