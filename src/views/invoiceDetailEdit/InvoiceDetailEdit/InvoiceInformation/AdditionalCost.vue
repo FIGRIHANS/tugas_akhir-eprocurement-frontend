@@ -152,8 +152,8 @@
               <input v-else v-model="formEdit.whtBaseAmount" class="input" type="number" placeholder="" @change="setWhtAmount(item)"/>
             </td>
             <td>
-              <span v-if="!item.isEdit">{{ form.currCode === 'IDR' ? useFormatIdr(item.isEdit ? formEdit.whtAmount : item.whtAmount) : useFormatUsd(item.isEdit ? formEdit.whtAmount : item.whtAmount) }}</span>
-              <input v-if="item.isEdit && checkVerifikator2()" v-model="formEdit.whtAmount" class="input" type="number" placeholder=""/>
+              <span v-if="!item.isEdit || (item.isEdit && !checkVerifikator2())">{{ form.currCode === 'IDR' ? useFormatIdr(item.isEdit ? formEdit.whtAmount : item.whtAmount) : useFormatUsd(item.isEdit ? formEdit.whtAmount : item.whtAmount) }}</span>
+              <input v-if="(item.isEdit && !checkPoPib()) || (item.isEdit && checkVerifikator2() && checkPoPib())" v-model="formEdit.whtAmount" class="input" type="number" placeholder=""/>
             </td>
           </tr>
         </tbody>
@@ -440,7 +440,7 @@ watch(
 )
 
 onMounted(() => {
-  for (const item of form.value.invoiceItem) {
+  for (const item of form.value.additionalCosts) {
     if (item.whtCode) {
       invoiceMasterApi.getWhtCode(item.whtType).then(() => {
         item.whtCodeList = whtCodeList.value

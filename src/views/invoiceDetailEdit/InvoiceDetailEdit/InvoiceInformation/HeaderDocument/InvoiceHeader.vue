@@ -163,7 +163,7 @@
           v-model="form.dpAmountDeduction"
           class="input"
           placeholder=""
-          :disabled="checkVerifikator1()"
+          :disabled="checkVerifikator1() || checkInvoiceDp()"
         />
       </div>
       <!-- Department -->
@@ -222,6 +222,10 @@ const checkIsAccountingTax = () => {
 
 const checkVerifikator1 = () => {
   return userData.value.profile.profileId === 3190
+}
+
+const checkInvoiceDp = () => {
+  return form.value.invoiceTypeCode === 9012
 }
 
 const getDpName = () => {

@@ -99,8 +99,8 @@ interface ParamsSubmissionHeader {
   assigment: string
   transferNews: string
   npwpReporting: string
-  remainingDpAmount: string
-  dpAmountDeduction: string
+  remainingDpAmount: number
+  dpAmountDeduction: number
   creditCardBillingID: string
   department: string
 }
@@ -455,8 +455,8 @@ export interface DetailInvoiceEditTypes {
   assigment: string
   transferNews: string
   npwpReporting: string
-  remainingDpAmount: string
-  dpAmountDeduction: string
+  remainingDpAmount: number
+  dpAmountDeduction: number
   creditCardBillingId: string
   paymentId: number
   bankKey: string
