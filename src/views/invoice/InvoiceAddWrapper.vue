@@ -248,7 +248,7 @@ const form = reactive<formTypes>({
   npwpNumberAlternative: '',
   ktpNumberAlternative: '',
   emailAlternative: '',
-  vendorNumber: '123456',
+  vendorNumber: '',
   department: '',
 })
 
