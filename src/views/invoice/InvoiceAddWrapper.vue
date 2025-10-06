@@ -515,8 +515,8 @@ const mapDataPost = () => {
       notes: form.description,
       statusCode: isClickDraft.value ? 0 : 1,
       statusName: isClickDraft.value ? 'Drafted' : 'Waiting to Verify',
-      remainingDPAmount: form.remainingDpAmount,
-      dpAmountDeduction: form.dpAmountDeduction
+      remainingDPAmount: Number(form.remainingDpAmount),
+      dpAmountDeduction: Number(form.dpAmountDeduction)
     },
     vendor: {
       vendorId: Number(form.vendorId),
