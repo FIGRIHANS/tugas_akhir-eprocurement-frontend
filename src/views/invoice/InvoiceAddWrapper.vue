@@ -216,8 +216,8 @@ const form = reactive<formTypes>({
   invoiceDp: '9011',
   amountInvoice: '',
   taxNoInvoice: '',
-  remainingDpAmount: '',
-  dpAmountDeduction: '',
+  remainingDpAmount: 0,
+  dpAmountDeduction: 0,
   currency: 'IDR',
   description: '',
   invoiceDocument: null,
@@ -248,7 +248,7 @@ const form = reactive<formTypes>({
   npwpNumberAlternative: '',
   ktpNumberAlternative: '',
   emailAlternative: '',
-  vendorNumber: '123456',
+  vendorNumber: '',
   department: '',
 })
 
@@ -515,6 +515,8 @@ const mapDataPost = () => {
       notes: form.description,
       statusCode: isClickDraft.value ? 0 : 1,
       statusName: isClickDraft.value ? 'Drafted' : 'Waiting to Verify',
+      remainingDPAmount: Number(form.remainingDpAmount),
+      dpAmountDeduction: Number(form.dpAmountDeduction)
     },
     vendor: {
       vendorId: Number(form.vendorId),
