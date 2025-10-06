@@ -409,7 +409,7 @@ const mapPoGr = () => {
   for (const item of form.invoicePoGr) {
     poGr.push({
       id: item.id || 0,
-      poNo: item.poNo,
+      poNo: item.poNo.toString(),
       poItem: Number(item.poItem),
       grDocumentNo: item.grDocumentNo,
       grDocumentItem: Number(item.grDocumentItem),
@@ -418,7 +418,7 @@ const mapPoGr = () => {
         : null,
       taxCode: item.taxCode,
       vatAmount: item.vatAmount || 0,
-      itemAmount: form.currency === item.currencyLC ? item.itemAmountLC : item.itemAmountTC,
+      itemAmount: form.currency === 'IDR' ? item.itemAmountLC : item.itemAmountTC,
       quantity: Number(item.quantity),
       uom: item.uom,
       itemText: item.itemText,
