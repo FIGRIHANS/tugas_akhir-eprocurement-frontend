@@ -27,7 +27,7 @@
           <tr v-for="(item, index) in form.invoiceItem" :key="index" class="invoice__field-items">
             <td>{{ index + 1 }}</td>
             <td>{{ !item.activityCode && !item.activityName ? getActivityName(item.activity) : `${item.activityCode} - ${item.activityName}` || '-' }}</td>
-            <td>{{ item.itemAmount || '-' }}</td>
+            <td>{{ form.currency === 'IDR' ? useFormatIdr(item.itemAmount) : useFormatUsd(item.itemAmount) || '-' }}</td>
             <td>{{ item.itemText || '-' }}</td>
             <td>{{ getDebitCreditName(item.debitCredit) || '-' }}</td>
             <td>{{ getTaxCodeName(item.taxCode) || '-' }}</td>
