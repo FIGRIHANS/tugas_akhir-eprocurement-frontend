@@ -122,7 +122,7 @@
           DP Amount Deduction
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
-        <input v-model="form.dpAmountDeduction" class="input" placeholder=""
+        <input v-model="form.dpAmountDeduction" class="input" placeholder="" type="number"
           :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
           :class="{ 'border-danger': form.dpAmountDeductionError }" />
       </div>
