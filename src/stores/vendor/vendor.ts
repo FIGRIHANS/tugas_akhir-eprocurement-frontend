@@ -23,6 +23,7 @@ import type {
   Pagination,
   PayloadEquipmentDataType,
   ShareholdersResponseType,
+  IsapCodePayload,
 } from './types/vendor'
 import type { ApiResponse } from '@/core/type/api'
 import axios from 'axios'
@@ -167,7 +168,15 @@ export const useVendorAdministrationStore = defineStore('vendor-administration',
     return response.data
   }
 
-  return { data, loading, error, getData, update }
+  const updateSapCode = async (payload: IsapCodePayload) => {
+    const response: ApiResponse = await vendorAPI.post(
+      '/public/verifiedvendor/sapcode-update',
+      payload,
+    )
+    return response.data
+  }
+
+  return { data, loading, error, getData, update, updateSapCode }
 })
 
 export const useVendorIzinUsahaStore = defineStore('vendor-izin-usaha', () => {
