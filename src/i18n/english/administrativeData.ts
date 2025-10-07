@@ -29,6 +29,7 @@ export const administrativeData = {
     currencyPreference: 'Currency Preference',
     companyAddress: 'Company Address',
     businessFields: 'Business Fields',
+    sapcode: 'SAP Code',
   },
 
   // Actions

@@ -80,4 +80,6 @@ export const vendorProfile = {
   documentName: 'Document Name',
   documentNumber: 'Document Number',
   availableUntil: 'Available Until',
+  companyGroup: 'Company Group',
+  sapCode: 'SAP Code',
 }

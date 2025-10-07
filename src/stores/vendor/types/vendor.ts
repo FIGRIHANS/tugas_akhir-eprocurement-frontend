@@ -78,6 +78,7 @@ export interface IAdministration {
   stateId: number
   cityId: number
   currencyId: number
+  sapCode: string
 }
 
 export interface IAdministrationPayload {
@@ -445,4 +446,10 @@ export interface IVendorLegalDoc {
   modifiedBy: string
   modifiedDate: Date
   isActive: boolean
+}
+
+export interface IsapCodePayload {
+  vendorId: number
+  sapCode: string
+  employeeId: string
 }

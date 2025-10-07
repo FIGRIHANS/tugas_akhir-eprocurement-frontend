@@ -29,6 +29,7 @@ export const administrativeData = {
     currencyPreference: 'Preferensi Mata Uang',
     companyAddress: 'Alamat Perusahaan',
     businessFields: 'Bidang Usaha',
+    sapcode: 'Kode SAP',
   },
 
   // Actions
