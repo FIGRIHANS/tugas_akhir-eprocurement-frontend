@@ -16,7 +16,7 @@
       <InvoicePoGr v-if="checkPo() && !isNonPo" class="mt-[24px]" />
       <InvoiceItem v-if="isNonPo" class="mt-[24px]" />
       <AdditionalCost
-        v-if="!isNonPo && (checkIsWithoutDp() || checkIsPoPib())"
+        v-if="!isNonPo && (checkIsWithoutDp() || checkIsPoPib() || checkIsPoCC())"
         class="mt-[24px]"
       />
     </div>
@@ -154,8 +154,8 @@ const form = ref<formTypes>({
   assigment: '',
   transferNews: '',
   npwpReporting: '',
-  remainingDpAmount: '',
-  dpAmountDeduction: '',
+  remainingDpAmount: 0,
+  dpAmountDeduction: 0,
   paymentId: 0,
   bankKey: '',
   bankName: '',
@@ -205,6 +205,10 @@ const checkIsWithoutDp = () => {
 
 const checkIsPoPib = () => {
   return form.value.invoiceTypeCode === 902
+}
+
+const checkIsPoCC = () => {
+  return form.value.invoiceTypeCode === 903
 }
 
 const checkStatusCode = () => {
@@ -339,7 +343,9 @@ const mapPoGr = () => {
       poNo: item.poNo,
       poItem: Number(item.poItem),
       grDocumentNo: item.grDocumentNo,
+      itemText: item.itemText,
       itemAmount: Number(item.itemAmount),
+      uom: item.uom,
       quantity: Number(item.quantity),
       taxCode: item.taxCode,
       vatAmount: item.vatAmount,
@@ -710,6 +716,8 @@ const setDataDefault = async () => {
     if (item.whtType) await callWhtCode(item.whtType)
     resultAdditional.push({
       ...item,
+      activityExpenses: item.activityExpense,
+      itemText: '',
       whtCodeList: item.whtType ? whtCodeList.value : [],
     })
   }
@@ -755,8 +763,8 @@ const setDataDefault = async () => {
     assigment: data?.header.assigment || '',
     transferNews: data?.header.transferNews || '',
     npwpReporting: data?.header.npwpReporting || '',
-    remainingDpAmount: '',
-    dpAmountDeduction: '',
+    remainingDpAmount: data?.header.remainingDpAmount,
+    dpAmountDeduction: data?.header.dpAmountDeduction,
     paymentId: data?.payment.paymentId || 0,
     bankKey: data?.payment.bankKey || '',
     bankName: data?.payment.bankName || '',
@@ -880,8 +888,8 @@ const setDataDefaultNonPo = () => {
     transferNews: data?.header.transferNews || '',
     npwpReporting: data?.header.npwpReporting || '',
     department: data?.header.department,
-    remainingDpAmount: '',
-    dpAmountDeduction: '',
+    remainingDpAmount: data?.header.remainingDpAmount,
+    dpAmountDeduction: data?.header.dpAmountDeduction,
     paymentId: data?.payment.paymentId || 0,
     bankKey: data?.payment.bankKey || '',
     bankName: data?.payment.bankName || '',
@@ -938,8 +946,8 @@ const setDataEdit = () => {
     assigment: data?.assigment || '',
     transferNews: data?.transferNews || '',
     npwpReporting: data?.npwpReporting || '',
-    remainingDpAmount: '',
-    dpAmountDeduction: '',
+    remainingDpAmount: data?.remainingDpAmount,
+    dpAmountDeduction: data?.dpAmountDeduction,
     department: data?.department,
     paymentId: data?.paymentId,
     bankKey: data?.bankKey || '',

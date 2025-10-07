@@ -41,19 +41,7 @@
           <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
             >Status</label
           >
-          <select
-            v-if="route.name === 'invoiceVerificationNoPo'"
-            v-model="status"
-            class="select"
-            name="select"
-          >
-            <option value="1">Waiting for Verify</option>
-            <option value="2">Waiting for Approval</option>
-            <option value="4">Approved</option>
-            <option value="5">Rejected</option>
-            <option value="7">Sent to SAP</option>
-          </select>
-          <select v-else v-model="status" class="select" name="select">
+          <select v-model="status" class="select" name="select">
             <option value="1">Waiting for Verify</option>
             <option value="3">Verified</option>
             <option value="5">Rejected</option>

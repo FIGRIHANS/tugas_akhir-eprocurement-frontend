@@ -78,6 +78,8 @@ interface ParamsSubmissionHeader {
   statusName: string
   creditCardBillingId: string
   department?: string
+  remainingDPAmount: number
+  dpAmountDeduction: number
 }
 
 interface ParamsSubmissionVendor {

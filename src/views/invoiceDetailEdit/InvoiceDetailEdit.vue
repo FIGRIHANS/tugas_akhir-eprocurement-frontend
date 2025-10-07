@@ -116,8 +116,8 @@ const form = ref<formTypes>({
   assigment: '',
   transferNews: '',
   npwpReporting: '',
-  remainingDpAmount: '',
-  dpAmountDeduction: '',
+  remainingDpAmount: 0,
+  dpAmountDeduction: 0,
   paymentId: 0,
   bankKey: '',
   bankName: '',
@@ -212,7 +212,7 @@ const checkInvoiceInformation = () => {
   )
     status = false
   for (const item of form.value.additionalCosts) {
-    if (!item.activityExpense || !item.itemAmount || !item.debitCredit) {
+    if (!item.activityId || !item.itemAmount || !item.debitCredit) {
       status = false
     }
   }
@@ -500,8 +500,8 @@ const setDataEdit = () => {
     assigment: data?.assigment || '',
     transferNews: data?.transferNews || '',
     npwpReporting: data?.npwpReporting || '',
-    remainingDpAmount: data?.remainingDpAmount || '',
-    dpAmountDeduction: data?.dpAmountDeduction || '',
+    remainingDpAmount: data?.remainingDpAmount || 0,
+    dpAmountDeduction: data?.dpAmountDeduction || 0,
     paymentId: data?.paymentId || 0,
     bankKey: data?.bankKey || '',
     bankName: data?.bankName || '',
@@ -627,8 +627,8 @@ const setDataDefault = () => {
     assigment: data?.header.assigment || '',
     transferNews: data?.header.transferNews || '',
     npwpReporting: data?.header.npwpReporting || '',
-    remainingDpAmount: data?.header.remainingDpAmount || '',
-    dpAmountDeduction: data?.header.dpAmountDeduction || '',
+    remainingDpAmount: data?.header.remainingDpAmount || 0,
+    dpAmountDeduction: data?.header.dpAmountDeduction || 0,
     paymentId: data?.payment.paymentId || 0,
     bankKey: data?.payment.bankKey || '',
     bankName: data?.payment.bankName || '',

@@ -151,7 +151,7 @@
         <label class="form-label">
           Remaining DP Amount
         </label>
-        <input v-model="form.remainingDpAmount" class="input" placeholder="" disabled/>
+        <input v-model="remainingDpAmountVal" class="input" placeholder="" disabled/>
       </div>
       <!-- DP Amount Deduction -->
       <div v-if="form.invoiceDPCode === 9013" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
@@ -163,7 +163,7 @@
           v-model="form.dpAmountDeduction"
           class="input"
           placeholder=""
-          :disabled="checkVerifikator1()"
+          :disabled="checkVerifikator1() || checkInvoiceDp()"
         />
       </div>
       <!-- Department -->
@@ -198,6 +198,7 @@ import type { formTypes } from '../../../types/invoiceDetailEdit'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useLoginStore } from '@/stores/views/login'
+import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const invoiceLoginApi = useLoginStore()
@@ -212,6 +213,14 @@ const listInvoiceTypeNonPo = computed(() => invoiceMasterApi.invoiceNonPoType)
 const paymentMethodList = computed(() => invoiceMasterApi.paymentMethodList)
 const userData = computed(() => invoiceLoginApi.userData)
 
+const remainingDpAmountVal = computed(() => {
+  if (form.value.currCode === 'IDR') {
+    return useFormatIdr(form.value.remainingDpAmount)
+  } else {
+    return useFormatUsd(form.value.remainingDpAmount)
+  }
+})
+
 const checkIsNonPo = () => {
   return route.query.invoiceType === 'no_po'
 }
@@ -222,6 +231,10 @@ const checkIsAccountingTax = () => {
 
 const checkVerifikator1 = () => {
   return userData.value.profile.profileId === 3190
+}
+
+const checkInvoiceDp = () => {
+  return form.value.invoiceTypeCode === 9012
 }
 
 const getDpName = () => {

@@ -10,15 +10,15 @@ export const login = {
   },
   // Branch Login
   branch: {
-    adminTitle: 'Login as admin',
-    adminDesc: 'If you are admin login here',
+    adminTitle: 'Login as employee',
+    adminDesc: 'If you are employee login here',
     vendorTitle: 'Login as vendor',
     vendorDesc: 'If you are vendor login here',
   },
   // Login Form
   form: {
     signIn: 'Sign in',
-    admin: 'admin',
+    admin: 'employee',
     email: 'Email',
     emailPlaceholder: 'Enter your email',
     username: 'Username',

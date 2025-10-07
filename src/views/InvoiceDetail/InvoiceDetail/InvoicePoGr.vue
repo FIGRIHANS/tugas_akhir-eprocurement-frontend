@@ -32,13 +32,13 @@
             <td v-if="!checkInvoiceDp() && !checkPoPib()">
               {{ moment(item.grDocumentDate).format('YYYY/MM/DD') || '-' }}
             </td>
-            <td v-if="!checkInvoiceDp()">{{ form.currCode === 'IDR' ? useFormatIdr(item.itemAmount) : useFormatUsd(item.itemAmount) || '-' }}</td>
+            <td>{{ form.currCode === 'IDR' ? useFormatIdr(item.itemAmount) : useFormatUsd(item.itemAmount) || '-' }}</td>
             <td v-if="!checkInvoiceDp()">{{ useFormatIdr(item.quantity) || '-' }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.uom || '-' }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.itemText || '-' }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.conditionType || '-' }}</td>
-            <td v-if="!checkPoPib()">{{ item.conditionTypeDesc || '-' }}</td>
-            <td v-if="!checkPoPib()">{{ item.qcStatus || '-' }}</td>
+            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.conditionTypeDesc || '-' }}</td>
+            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.qcStatus || '-' }}</td>
             <td v-if="!checkPoPib()">{{ getTaxCodeName(item.taxCode) || '-' }}</td>
             <td v-if="!checkPoPib()">
               {{ form.currCode === 'IDR' ? useFormatIdr(item.vatAmount) : useFormatUsd(item.vatAmount) || 0 }}

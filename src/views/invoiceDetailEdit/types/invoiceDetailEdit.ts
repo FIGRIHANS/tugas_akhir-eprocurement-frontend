@@ -41,8 +41,8 @@ export interface formTypes extends documentFormTypes {
   transferNewsError?: boolean
   npwpReporting: string
   npwpReportingError?: boolean
-  remainingDpAmount: string
-  dpAmountDeduction: string
+  remainingDpAmount: number
+  dpAmountDeduction: number
   dpAmountDeductionError?: boolean
   creditCardBillingId: string
   creditCardBillingError?: boolean
