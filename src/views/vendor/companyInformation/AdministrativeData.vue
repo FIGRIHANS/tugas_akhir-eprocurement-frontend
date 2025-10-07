@@ -48,7 +48,7 @@ const errorModal = ref<boolean>(false)
 const uploadLoading = ref<boolean>(false)
 const sapCode = ref<IsapCodePayload>({
   vendorId: Number(route.params.id) || 0,
-  sapCode: administrationData.value?.sapCode || '',
+  sapCode: '',
   employeeId: userStore.userData?.profile.profileId.toString() || '',
 })
 
@@ -226,6 +226,8 @@ watch(
       administrationData.value = { ...data }
       lookupStore.getVendorProvince(data.countryId)
       lookupStore.getVendorCities(data.stateId)
+
+      sapCode.value.sapCode = administrationData.value?.sapCode
     }
   },
   {
@@ -238,6 +240,8 @@ onMounted(() => {
   adminStore.getData(route.params.id as string)
   lookupStore.getVendorCountries()
   lookupStore.getVendorCurrency()
+
+  sapCode.value.sapCode = administrationData.value?.sapCode
 })
 </script>
 <template>
