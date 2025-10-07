@@ -168,7 +168,7 @@ const addNew = () => {
       activityName: '',
       itemAmount: 0,
       itemText: '',
-      debitCredit: '',
+      debitCredit: 'D',
       taxCode: '',
       vatAmount: 0,
       costCenter: '',

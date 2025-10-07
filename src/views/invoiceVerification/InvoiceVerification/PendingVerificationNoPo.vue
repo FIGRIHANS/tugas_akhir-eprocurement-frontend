@@ -85,6 +85,7 @@
                   </button>
                 </td>
                 <td>{{ parent.invoiceNo || '-' }}</td>
+                <td>{{ parent.notes || '-' }}</td>
                 <td>
                   <span class="badge badge-outline" :class="colorBadge(parent.statusCode)">
                     {{ parent.statusName }}
@@ -114,7 +115,6 @@
                       : '-'
                   }}
                 </td>
-                <td>{{ parent.notes || '-' }}</td>
               </tr>
               <tr v-show="parent.isOpenChild">
                 <td></td>
@@ -237,6 +237,7 @@ const filterForm = reactive<filterListTypes>({
 const columns = ref<string[]>([
   '',
   'Submitted Document No',
+  'Description',
   'Status',
   'Vendor Name',
   'Invoice Type',
@@ -250,7 +251,6 @@ const columns = ref<string[]>([
   'Invoice Vendor No.',
   'Estimated Payment Date',
   'Invoice Submission Date',
-  'Description',
 ])
 
 const columnsChild = ref(['No PO', 'No GR', 'Item Description', 'Item Amount', 'Quantity'])
@@ -335,7 +335,7 @@ const setList = (listData: ListNonPoTypes[]) => {
 const callList = () => {
   list.value = []
   verificationApi
-    .getListNonPo({
+    .getListVerifNonPo({
       statusCode: filterForm.status || null,
       companyCode: filterForm.companyCode,
       invoiceTypeCode: Number(filterForm.invoiceType),
