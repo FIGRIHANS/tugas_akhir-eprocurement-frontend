@@ -75,6 +75,23 @@
               </td>
             </tr>
             <tr>
+              <td class="text-gray-600">{{ $t('vendorProfile.sapCode') }}</td>
+              <td class="font-bold w-1/3">
+                <span>{{ data?.sapCode || '-' }}</span>
+              </td>
+              <td class="border-x w-6"></td>
+              <td class="!pl-[1.875rem] text-gray-600">
+                {{ $t('vendorProfile.currencyPreference') }}
+              </td>
+              <td class="font-bold w-1/3">
+                <span>{{ `${data?.currencySymbol || '-'} (${data?.currencyLabel || '-'})` }}</span>
+              </td>
+              <!-- <td class="!pl-[1.875rem] text-gray-600">{{ $t('vendorProfile.website') }}</td>
+              <td class="font-bold w-1/3">
+                <span>{{ data?.vendorWebsite || '-' }}</span>
+              </td> -->
+            </tr>
+            <tr>
               <td class="text-gray-600">{{ $t('vendorProfile.npwpDoc') }}</td>
               <td class="font-bold w-1/3">
                 <span v-if="!data?.npwpUrl">-</span>
@@ -89,17 +106,6 @@
                   {{ $t('general.download', { field: $t('vendorProfile.npwpDoc') }) }}
                 </UiButton>
               </td>
-              <td class="border-x w-6"></td>
-              <td class="!pl-[1.875rem] text-gray-600">
-                {{ $t('vendorProfile.currencyPreference') }}
-              </td>
-              <td class="font-bold w-1/3">
-                <span>{{ `${data?.currencySymbol || '-'} (${data?.currencyLabel || '-'})` }}</span>
-              </td>
-            </tr>
-            <tr>
-              <td class="text-gray-600"></td>
-              <td class="font-bold w-1/3"></td>
               <td class="border-x w-6"></td>
               <td class="!pl-[1.875rem] text-gray-600">{{ $t('vendorProfile.companyAddress') }}</td>
               <td class="font-bold w-1/3">

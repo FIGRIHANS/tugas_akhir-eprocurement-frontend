@@ -80,4 +80,6 @@ export const vendorProfile = {
   documentName: 'Nama Dokumen',
   documentNumber: 'Nomor Dokumen',
   availableUntil: 'Berlaku Hingga',
+  companyGroup: 'Grup Perusahaan',
+  sapCode: 'Kode SAP',
 }
