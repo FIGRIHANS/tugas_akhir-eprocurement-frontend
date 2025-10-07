@@ -335,7 +335,7 @@ const setList = (listData: ListNonPoTypes[]) => {
 const callList = () => {
   list.value = []
   verificationApi
-    .getListNonPo({
+    .getListVerifNonPo({
       statusCode: filterForm.status || null,
       companyCode: filterForm.companyCode,
       invoiceTypeCode: Number(filterForm.invoiceType),
