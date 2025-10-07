@@ -716,6 +716,8 @@ const setDataDefault = async () => {
     if (item.whtType) await callWhtCode(item.whtType)
     resultAdditional.push({
       ...item,
+      activityExpenses: item.activityExpense,
+      itemText: '',
       whtCodeList: item.whtType ? whtCodeList.value : [],
     })
   }

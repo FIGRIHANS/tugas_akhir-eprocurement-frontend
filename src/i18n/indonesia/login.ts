@@ -10,8 +10,8 @@ export const login = {
   },
   // Branch Login
   branch: {
-    adminTitle: 'Login sebagai admin',
-    adminDesc: 'Jika Anda admin login di sini',
+    adminTitle: 'Login sebagai employee',
+    adminDesc: 'Jika Anda employee login di sini',
     vendorTitle: 'Login sebagai vendor',
     vendorDesc: 'Jika Anda vendor login di sini',
   },

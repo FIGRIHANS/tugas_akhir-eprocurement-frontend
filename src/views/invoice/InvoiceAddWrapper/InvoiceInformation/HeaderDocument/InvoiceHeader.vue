@@ -114,7 +114,7 @@
         <label class="form-label">
           Remaining DP Amount
         </label>
-        <input v-model="form.remainingDpAmount" class="input" placeholder="" disabled />
+        <input v-model="remainingDpAmountVal" class="input" placeholder="" disabled />
       </div>
       <!-- DP Amount Deduction -->
       <div v-if="form.invoiceDp === '9013'" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
@@ -164,6 +164,7 @@ import type { formTypes } from '../../../types/invoiceAddWrapper'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useLoginStore } from '@/stores/views/login'
+import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const loginApi = useLoginStore()
@@ -174,7 +175,7 @@ const typeForm = ref<string>('')
 const invoiceTypeNonPo = ref([
   {
     id: '1',
-    name: 'Reimbursement'
+    name: 'Non PO/Reimbursement'
   },
   {
     id: '2',
@@ -212,6 +213,14 @@ const dpTypeList = computed(() => invoiceMasterApi.dpType)
 const listInvoiceTypePo = computed(() => invoiceMasterApi.invoicePoType)
 const listInvoiceTypeNonPo = computed(() => invoiceMasterApi.invoiceNonPoType)
 const listMatrixApproval = computed(() => invoiceMasterApi.matrixApprovalList)
+
+const remainingDpAmountVal = computed(() => {
+  if (form.currency === 'IDR') {
+    return useFormatIdr(form.remainingDpAmount)
+  } else {
+    return useFormatUsd(form.remainingDpAmount)
+  }
+})
 
 const checkPo = () => {
   return typeForm.value === 'po'

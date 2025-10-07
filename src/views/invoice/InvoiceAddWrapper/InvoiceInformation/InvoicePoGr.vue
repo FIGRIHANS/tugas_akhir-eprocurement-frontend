@@ -88,7 +88,7 @@
                   <span v-else>{{ form?.currency === item.currencyLC ? useFormatIdr(item.vatAmount || 0) : useFormatUsd(item.vatAmount || 0) }}</span>
                 </td>
                 <td v-if="checkInvoiceDp()">
-                  <span v-if="!item.isEdit">{{ form?.currency === item.currencyLC ? useFormatIdr(item.itemAmountLC) : useFormatUsd(formEdit.itemAmountLC) }}</span>
+                  <span v-if="!item.isEdit">{{ form?.currency === 'IDR' ? useFormatIdr(item.itemAmountLC) : useFormatUsd(item.itemAmountLC) }}</span>
                   <input v-else v-model="formEdit.itemAmountLC" type="number" class="input" />
                 </td>
                 <td>
@@ -252,6 +252,8 @@ const addItemInvoiceDp = () => {
       if (response.statusCode === 200) {
         if (!response.result.content.isAvailable && form) {
           searchDpAvailableError.value = true
+        } else {
+          searchDpAvailableError.value = false
           form.invoicePoGr[0].department = response.result.content.department
         }
       }
@@ -346,7 +348,7 @@ const setItemPoGr = (items: PoGrSearchTypes[]) => {
       invoiceApi.getRemainingDp(firstItem.poNo).then((response) => {
         if (response.statusCode === 200) {
           const remaining = response.result.content.remainingDPAmount
-          form.remainingDpAmount = form.currency === firstItem.currencyLC ? useFormatIdr(remaining) : useFormatUsd(remaining)
+          form.remainingDpAmount = remaining
         }
       })
     }

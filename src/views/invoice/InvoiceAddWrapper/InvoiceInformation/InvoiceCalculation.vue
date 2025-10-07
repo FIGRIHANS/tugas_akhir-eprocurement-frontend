@@ -115,7 +115,7 @@ const countSubtotal = () => {
   let total = 0
   if (!checkIsNonPo()) {
     for (const item of form.invoicePoGr) {
-      const itemAmount = form.currency === item.currencyLC ? item.itemAmountLC : item.itemAmountTC
+      const itemAmount = form.currency === 'IDR' ? item.itemAmountLC : item.itemAmountTC
       total = total + Number(itemAmount)
     }
   } else {
@@ -138,7 +138,7 @@ const countVatAmount = () => {
   if (!checkIsNonPo()) {
     for (const item of form.invoicePoGr) {
       const percentTax = getPercentTax(item.taxCode) || 0
-      const itemAmount = form.currency === item.currencyLC ? item.itemAmountLC : item.itemAmountTC
+      const itemAmount = form.currency === 'IDR' ? item.itemAmountLC : item.itemAmountTC
       totalPo = totalPo + (percentTax * itemAmount)
     }
     for (const item of form.additionalCost) {
@@ -190,7 +190,7 @@ const countWhtAmount = () => {
   if (!checkIsNonPo()) {
     for (const item of form.invoicePoGr) {
       const percentTax = 0
-      const itemAmount = form.currency === item.currencyLC ? item.itemAmountLC : item.itemAmountTC
+      const itemAmount = form.currency === 'IDR' ? item.itemAmountLC : item.itemAmountTC
       totalPo = totalPo + (percentTax * itemAmount)
     }
     for (const item of form.additionalCost) {
