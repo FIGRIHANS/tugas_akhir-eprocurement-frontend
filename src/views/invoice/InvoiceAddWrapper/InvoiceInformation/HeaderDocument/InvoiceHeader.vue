@@ -175,7 +175,7 @@ const typeForm = ref<string>('')
 const invoiceTypeNonPo = ref([
   {
     id: '1',
-    name: 'Reimbursement'
+    name: 'Non PO/Reimbursement'
   },
   {
     id: '2',
