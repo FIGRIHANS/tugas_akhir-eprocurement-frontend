@@ -143,15 +143,15 @@ const handleResetPassword = async () => {
 
   try {
     const resetToken = route.query.token as string
-    const vendorId = parseInt(route.query.vendorId as string)
+    const vendorEmail = route.query.vendorEmail as string
 
-    if (!resetToken || !vendorId) {
+    if (!resetToken || !vendorEmail) {
       passwordError.value = 'Invalid reset link'
       return
     }
 
     await forgotPasswordStore.resetPasswordWithNewPassword({
-      vendorId,
+      vendorEmail,
       newPassword: newPassword.value,
       resetToken,
     })
