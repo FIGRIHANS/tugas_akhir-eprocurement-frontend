@@ -14,7 +14,11 @@ import {
   type CurrencyListType,
 } from '@/stores/master-data/types/vendor-master-data'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
-import { type IAdministration, type IAdministrationPayload } from '@/stores/vendor/types/vendor'
+import {
+  type IAdministration,
+  type IAdministrationPayload,
+  type IsapCodePayload,
+} from '@/stores/vendor/types/vendor'
 import { useVendorUploadStore } from '@/stores/vendor/upload'
 import { useVendorAdministrationStore } from '@/stores/vendor/vendor'
 import { useLoginStore } from '@/stores/views/login'
@@ -42,6 +46,11 @@ const confirmModal = ref<boolean>(false)
 const successModal = ref<boolean>(false)
 const errorModal = ref<boolean>(false)
 const uploadLoading = ref<boolean>(false)
+const sapCode = ref<IsapCodePayload>({
+  vendorId: Number(route.params.id) || 0,
+  sapCode: '',
+  employeeId: userStore.userData?.profile.profileId.toString() || '',
+})
 
 const countryOptions = computed<CountryListType>(() => lookupStore.countryList)
 const stateOptions = computed<ProvinceListType>(() => lookupStore.provinceList)
@@ -138,6 +147,8 @@ const handleSave = async () => {
   }
 
   try {
+    sapCode.value.sapCode = sapCode.value.sapCode.toString()
+    await adminStore.updateSapCode(sapCode.value)
     await adminStore.update(editPayload.value!)
     await adminStore.getData(route.params.id as string)
 
@@ -215,6 +226,8 @@ watch(
       administrationData.value = { ...data }
       lookupStore.getVendorProvince(data.countryId)
       lookupStore.getVendorCities(data.stateId)
+
+      sapCode.value.sapCode = administrationData.value?.sapCode
     }
   },
   {
@@ -227,6 +240,8 @@ onMounted(() => {
   adminStore.getData(route.params.id as string)
   lookupStore.getVendorCountries()
   lookupStore.getVendorCurrency()
+
+  sapCode.value.sapCode = administrationData.value?.sapCode
 })
 </script>
 <template>
@@ -374,6 +389,19 @@ onMounted(() => {
                     </template>
                     <span v-else>
                       {{ administrationData.npwp || '-' }}
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="text-sm text-gray-600 font-medium w-[182px]">
+                    {{ $t('administrativeData.fields.sapcode') }}
+                  </td>
+                  <td class="text-sm font-bold text-gray-700">
+                    <template v-if="mode === 'edit'">
+                      <UiInput v-model="sapCode.sapCode" type="number" />
+                    </template>
+                    <span v-else>
+                      {{ sapCode.sapCode || '-' }}
                     </span>
                   </td>
                 </tr>
