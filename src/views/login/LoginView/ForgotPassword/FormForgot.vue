@@ -68,9 +68,9 @@ const handleSendResetEmail = async () => {
 
   try {
     await forgotPasswordStore.sendResetPasswordEmail({
-      vendorId: '',
+      vendorId: 'vendorID',
       email: email.value,
-      vendorName: '',
+      vendorName: 'vendorName',
     })
   } catch (error) {
     console.error('Failed to send reset email:', error)
