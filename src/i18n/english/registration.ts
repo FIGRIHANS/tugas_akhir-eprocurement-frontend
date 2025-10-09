@@ -75,4 +75,5 @@ export const registration = {
   contact: 'Contact',
   documentAndLegal: 'Document & Legal',
   paymentDetailTab: 'Payment Detail',
+  select: 'Select',
 }

@@ -142,7 +142,7 @@
           v-model="contact.contactPerson.positionTypeId"
           :label="$t('registration.department')"
           :placeholder="$t('general.select')"
-          :options="positionList"
+          :options="translatedPositionList"
           value-key="positionTypeId"
           text-key="positionName"
           row
@@ -199,12 +199,14 @@
         </div>
       </div>
     </UiFormGroup>
+    <div></div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import tr from '@/composables/translator'
 
 import { useRegistrationVendorStore } from '@/stores/views/registration'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
@@ -251,6 +253,15 @@ const passwordRules = ref([
 
 const contact = computed(() => registrationVendorStore.contact)
 const positionList = computed(() => vendorMasterDataStore.posistionList)
+
+const translatedPositionList = computed(() => {
+  return positionList.value.map((position) => {
+    return {
+      ...position,
+      positionName: tr(position.positionName),
+    }
+  })
+})
 
 const togglePassword = (type: 'password' | 'confirmPassword') => {
   if (type === 'password') {
