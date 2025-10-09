@@ -84,11 +84,11 @@
     </div>
     <div v-if="form.invoiceDPCode === 9013" class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Remaining DP Amount</p>
-      <p class="font-normal text-sm">{{ form.remainingDpAmount || '-' }}</p>
+      <p class="font-normal text-sm">{{ form.currCode === 'IDR' ? useFormatIdr(form.remainingDpAmount) : useFormatUsd(form.remainingDpAmount) || '-' }}</p>
     </div>
     <div v-if="form.invoiceDPCode === 9013" class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">DP Amount Deduction</p>
-      <p class="font-normal text-sm">{{ form.dpAmountDeduction || '-' }}</p>
+      <p class="font-normal text-sm">{{ form.currCode === 'IDR' ? useFormatIdr(form.dpAmountDeduction) : useFormatUsd(form.dpAmountDeduction) || '-' }}</p>
     </div>
     <div v-if="checkIsNonPo()" class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">PIC Finance</p>
@@ -110,6 +110,7 @@ import { inject, type Ref } from 'vue'
 import type { formTypes } from '../../types/invoiceDetail'
 import moment from 'moment'
 import { useRoute } from 'vue-router'
+import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 
 const route = useRoute()
 

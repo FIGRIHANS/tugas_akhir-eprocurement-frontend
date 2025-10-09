@@ -5,7 +5,7 @@
       <InvoiceCalculation />
     </div>
     <InvoicePoGr v-if="!checkIsNonPo()" class="mt-[24px]" />
-    <AdditionalCost v-if="!checkIsNonPo() && (checkIsWithoutDp() || checkIsPoPib() || checkIsPoCC())" class="mt-[24px]" />
+    <AdditionalCost v-if="!checkIsNonPo() && (checkIsWithoutDp() || checkIsPoPib() || checkIsPoCC() || checkPoWithDp())" class="mt-[24px]" />
     <InvoiceItem v-if="checkIsNonPo()" class="mt-[24px]" />
   </div>
 </template>
@@ -31,6 +31,10 @@ const typeForm = ref<string>('')
 
 const checkIsWithoutDp = () => {
   return form.value.invoiceDPCode === 9011
+}
+
+const checkPoWithDp = () => {
+  return form.value.invoiceDPCode === 9013
 }
 
 const checkIsPoPib = () => {

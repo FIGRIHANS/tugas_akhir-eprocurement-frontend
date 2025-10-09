@@ -2,7 +2,7 @@ import type { WhtCodeTypes } from '@/stores/master-data/types/invoiceMasterData'
 export interface itemsCostType {
   id: number
   activityId: number | null
-  activityExpenses: string
+  activityExpense: string
   activityName: string
   itemAmount: number
   debitCredit: string

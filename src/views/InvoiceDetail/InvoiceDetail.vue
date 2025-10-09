@@ -16,7 +16,7 @@
       <InvoicePoGr v-if="checkPo() && !isNonPo" class="mt-[24px]" />
       <InvoiceItem v-if="isNonPo" class="mt-[24px]" />
       <AdditionalCost
-        v-if="!isNonPo && (checkIsWithoutDp() || checkIsPoPib() || checkIsPoCC())"
+        v-if="!isNonPo && (checkIsWithoutDp() || checkIsPoPib() || checkIsPoCC() || checkPoWithDp())"
         class="mt-[24px]"
       />
     </div>
@@ -203,6 +203,10 @@ const checkIsWithoutDp = () => {
   return form.value.invoiceDPCode === 9011
 }
 
+const checkPoWithDp = () => {
+  return form.value.invoiceDPCode === 9013
+}
+
 const checkIsPoPib = () => {
   return form.value.invoiceTypeCode === 902
 }
@@ -364,7 +368,7 @@ const mapAdditionalCost = () => {
     cost.push({
       id: item.id,
       activityId: item.activityId,
-      activityExpense: item.activityExpenses,
+      activityExpense: item.activityExpense,
       activityName: item.activityName,
       itemAmount: Number(item.itemAmount),
       debitCredit: item.debitCredit,
@@ -716,7 +720,7 @@ const setDataDefault = async () => {
     if (item.whtType) await callWhtCode(item.whtType)
     resultAdditional.push({
       ...item,
-      activityExpenses: item.activityExpense,
+      activityExpense: item.activityExpense,
       itemText: '',
       whtCodeList: item.whtType ? whtCodeList.value : [],
     })
@@ -763,7 +767,7 @@ const setDataDefault = async () => {
     assigment: data?.header.assigment || '',
     transferNews: data?.header.transferNews || '',
     npwpReporting: data?.header.npwpReporting || '',
-    remainingDpAmount: data?.header.remainingDpAmount,
+    remainingDpAmount: data?.header.remainingDPAmount,
     dpAmountDeduction: data?.header.dpAmountDeduction,
     paymentId: data?.payment.paymentId || 0,
     bankKey: data?.payment.bankKey || '',
@@ -888,7 +892,7 @@ const setDataDefaultNonPo = () => {
     transferNews: data?.header.transferNews || '',
     npwpReporting: data?.header.npwpReporting || '',
     department: data?.header.department,
-    remainingDpAmount: data?.header.remainingDpAmount,
+    remainingDpAmount: data?.header.remainingDPAmount,
     dpAmountDeduction: data?.header.dpAmountDeduction,
     paymentId: data?.payment.paymentId || 0,
     bankKey: data?.payment.bankKey || '',
