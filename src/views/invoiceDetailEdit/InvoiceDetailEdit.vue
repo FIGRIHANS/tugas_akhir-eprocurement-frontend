@@ -627,7 +627,7 @@ const setDataDefault = () => {
     assigment: data?.header.assigment || '',
     transferNews: data?.header.transferNews || '',
     npwpReporting: data?.header.npwpReporting || '',
-    remainingDpAmount: data?.header.remainingDpAmount || 0,
+    remainingDpAmount: data?.header.remainingDPAmount || 0,
     dpAmountDeduction: data?.header.dpAmountDeduction || 0,
     paymentId: data?.payment.paymentId || 0,
     bankKey: data?.payment.bankKey || '',
