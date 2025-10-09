@@ -62,7 +62,7 @@
                   <div v-if="item.isEdit && checkInvoiceDp()">
                     <div class="input" :class="{ 'border-danger': item.poNoError }">
                       <input v-model="item.poNo" placeholder="" type="number" @keypress="searchEnter" />
-                      <i class="ki-filled ki-magnifier"></i>
+                      <i @click="searchItem" class="ki-filled ki-magnifier"></i>
                     </div>
                     <p v-if="searchError" class="text-danger text-[9px]">*PO Number must be exactly 10 characters long</p>
                     <p v-if="searchDpAvailableError" class="text-danger text-[9px]">*PO Number not available for DP</p>

@@ -151,7 +151,7 @@ const handleResetPassword = async () => {
     }
 
     await forgotPasswordStore.resetPasswordWithNewPassword({
-      vendorEmail,
+      email: vendorEmail,
       newPassword: newPassword.value,
       resetToken,
     })
