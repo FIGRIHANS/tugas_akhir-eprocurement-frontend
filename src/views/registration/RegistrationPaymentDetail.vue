@@ -168,7 +168,7 @@
       <div class="card bg-gray-100">
         <div
           class="term-condition card-body flex flex-col gap-4 scrollable h-[635px] py-0 my-4 pr-4 mr-2"
-          v-html="termCondition?.termCondition"
+          v-html="tr('Agreement')"
         ></div>
       </div>
 
@@ -222,6 +222,7 @@ import UiFileUpload from '@/components/ui/atoms/file-upload/UiFileUpload.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiCaptcha from '@/components/ui/atoms/captcha/UiCaptcha.vue'
 import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
+import tr from '@/composables/translator'
 
 const registrationVendorStore = useRegistrationVendorStore()
 const vendorMasterDataStore = useVendorMasterDataStore()
@@ -231,7 +232,7 @@ const paymentDetail = computed(() => registrationVendorStore.paymentDetail)
 const paymentDetailFlagging = computed(() => registrationVendorStore.paymentDetailFlagging)
 const modalUploadFailed = ref<boolean>(false)
 
-const termCondition = computed(() => vendorMasterDataStore.termCondition)
+// const termCondition = computed(() => vendorMasterDataStore.termCondition)
 const bankList = computed(() =>
   vendorMasterDataStore.bankList.map((item) => ({
     ...item,
