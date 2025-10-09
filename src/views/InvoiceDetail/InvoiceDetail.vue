@@ -16,7 +16,7 @@
       <InvoicePoGr v-if="checkPo() && !isNonPo" class="mt-[24px]" />
       <InvoiceItem v-if="isNonPo" class="mt-[24px]" />
       <AdditionalCost
-        v-if="!isNonPo && (checkIsWithoutDp() || checkIsPoPib() || checkIsPoCC())"
+        v-if="!isNonPo && (checkIsWithoutDp() || checkIsPoPib() || checkIsPoCC() || checkPoWithDp())"
         class="mt-[24px]"
       />
     </div>
@@ -201,6 +201,10 @@ const checkVerifikator1 = () => {
 
 const checkIsWithoutDp = () => {
   return form.value.invoiceDPCode === 9011
+}
+
+const checkPoWithDp = () => {
+  return form.value.invoiceDPCode === 9013
 }
 
 const checkIsPoPib = () => {
