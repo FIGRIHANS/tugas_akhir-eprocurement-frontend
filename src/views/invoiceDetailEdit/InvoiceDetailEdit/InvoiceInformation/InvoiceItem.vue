@@ -368,6 +368,7 @@ const resetItem = (item: invoiceItemTypes, index: number) => {
 
 const callWhtCode = (data: invoiceItemTypes) => {
   formEdit.whtCode = ''
+  formEdit.whtAmount = 0
   data.whtCodeList = []
   invoiceMasterApi.getWhtCode(formEdit.whtType).then(() => {
     data.whtCodeList = whtCodeList.value

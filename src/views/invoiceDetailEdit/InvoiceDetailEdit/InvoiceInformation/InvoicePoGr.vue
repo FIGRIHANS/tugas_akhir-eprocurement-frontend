@@ -288,6 +288,7 @@ const getWhtCode = (data: itemsPoGrType, whtType: string) => {
 
 const callWhtCode = (data: itemsPoGrType) => {
   formEdit.whtCode = ''
+  formEdit.whtAmount = 0
   data.whtCodeList = []
   if (formEdit.whtType && formEdit.whtType !== '-') getWhtCode(data, formEdit.whtType)
 }
