@@ -214,6 +214,7 @@ const colorBadge = (statusCode: number) => {
 
 const setPage = (value: number) => {
   currentPage.value = value
+  setList()
 }
 
 const goSearch = (event: KeyboardEvent) => {
