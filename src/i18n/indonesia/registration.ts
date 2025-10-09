@@ -75,4 +75,5 @@ export const registration = {
   contact: 'Kontak',
   documentAndLegal: 'Dokumen & Legal',
   paymentDetailTab: 'Detail Pembayaran',
+  select: 'Pilih',
 }
