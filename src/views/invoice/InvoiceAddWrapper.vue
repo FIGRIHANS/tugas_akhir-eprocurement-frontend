@@ -543,7 +543,7 @@ const mapDataPost = () => {
     },
     pogr: mapPoGr(),
     additionalCosts:
-      form.invoiceDp === '9012' || form.invoiceDp === '9013' ? [] : mapAdditionalCost(),
+      form.invoiceDp === '9012' ? [] : mapAdditionalCost(),
     isSaveAsDraft: false
   } as ParamsSubmissionTypes
 
