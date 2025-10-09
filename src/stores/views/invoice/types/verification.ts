@@ -99,7 +99,7 @@ interface ParamsSubmissionHeader {
   assigment: string
   transferNews: string
   npwpReporting: string
-  remainingDpAmount: number
+  remainingDPAmount: number
   dpAmountDeduction: number
   creditCardBillingID: string
   department: string
