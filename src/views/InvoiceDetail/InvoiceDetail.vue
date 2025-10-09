@@ -364,7 +364,7 @@ const mapAdditionalCost = () => {
     cost.push({
       id: item.id,
       activityId: item.activityId,
-      activityExpense: item.activityExpenses,
+      activityExpense: item.activityExpense,
       activityName: item.activityName,
       itemAmount: Number(item.itemAmount),
       debitCredit: item.debitCredit,
@@ -716,7 +716,7 @@ const setDataDefault = async () => {
     if (item.whtType) await callWhtCode(item.whtType)
     resultAdditional.push({
       ...item,
-      activityExpenses: item.activityExpense,
+      activityExpense: item.activityExpense,
       itemText: '',
       whtCodeList: item.whtType ? whtCodeList.value : [],
     })

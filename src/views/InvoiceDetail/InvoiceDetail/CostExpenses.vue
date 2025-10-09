@@ -50,13 +50,13 @@
 <script lang="ts" setup>
 import { ref, computed, watch, inject, type Ref } from 'vue'
 import type { formTypes } from '../types/invoiceDetail'
-import type { itemsCostType } from '../types/additionalCost'
+import type { invoiceItemTypes } from '../types/invoiceItem'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const form = inject<Ref<formTypes>>('form')
-const costExpenseList = ref<itemsCostType[]>([])
+const costExpenseList = ref<invoiceItemTypes[]>([])
 
 const columns = ref([
   'Line',
@@ -83,7 +83,7 @@ const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
 const costCenterList = computed(() => invoiceMasterApi.costCenterList)
 
 const setCostExpenseList = async () => {
-  const result = [] as itemsCostType[]
+  const result = [] as invoiceItemTypes[]
   if (form.value.costExpense) {
     for (const item of form.value.costExpense) {
       if (item.whtType) await callWhtCode(item.whtType)
@@ -133,7 +133,7 @@ const getWhtTypeName = (code: string) => {
   return '-'
 }
 
-const getWhtCodeName = (code: string, data: itemsCostType) => {
+const getWhtCodeName = (code: string, data: invoiceItemTypes) => {
   const index = data.whtCodeList.findIndex((item) => item.whtCode === code)
   if (index !== -1) {
     const detailData = data.whtCodeList[index]
