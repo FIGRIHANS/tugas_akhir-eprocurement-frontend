@@ -9,7 +9,7 @@ export interface ISendResetPasswordEmailPayload {
 }
 
 export interface IResetPasswordPayload {
-  vendorId: number
+  vendorEmail: string
   newPassword: string
   resetToken: string
 }

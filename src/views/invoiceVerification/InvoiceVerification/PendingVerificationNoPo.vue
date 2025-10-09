@@ -221,6 +221,7 @@ const StatusInvoice = ref([
   { value: 1, label: 'Waiting for Verify' },
   { value: 2, label: 'Waiting for Approval' },
   { value: 4, label: 'Approved' },
+  { value: 3, label: 'Verified' },
   { value: 5, label: 'Rejected' },
   { value: 7, label: 'Sent to SAP' },
 ])
