@@ -54,6 +54,6 @@ export interface formTypes extends documentFormTypes {
   invoicePoGr: itemsPoGrType[]
   additionalCosts: itemsCostType[]
   invoiceItem: invoiceItemTypes[]
-  costExpense: itemsCostType[]
+  costExpense: invoiceItemTypes[]
   alternativePayee: itemsAlternativePayee[]
 }
