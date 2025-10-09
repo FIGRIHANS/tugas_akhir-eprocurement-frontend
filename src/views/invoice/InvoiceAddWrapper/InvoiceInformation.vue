@@ -6,7 +6,7 @@
     </div>
     <InvoicePoGr v-if="!checkNonPo()" class="mt-[24px]" />
     <InvoiceItem v-if="checkNonPo()" class="mt-[24px]" />
-    <AdditionalCost v-if="checkPoWithoutDp() && !checkNonPo()" class="mt-[24px]" />
+    <AdditionalCost v-if="(checkPoWithoutDp() || checkPoWithDp()) && !checkNonPo()" class="mt-[24px]" />
   </div>
 </template>
 
@@ -35,6 +35,10 @@ const checkPoPib = () => {
 
 const checkPoWithoutDp = () => {
   return form.invoiceDp === '9011'
+}
+
+const checkPoWithDp = () => {
+  return form.invoiceDp === '9013'
 }
 
 onMounted(() => {
