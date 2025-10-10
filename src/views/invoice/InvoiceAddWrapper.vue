@@ -767,6 +767,8 @@ const setData = () => {
     form.invoiceDate = detail.header.invoiceDate
     form.taxNoInvoice = detail.header.taxNo
     form.currency = detail.header.currCode
+    form.dpAmountDeduction = detail.header.dpAmountDeduction
+    form.remainingDpAmount = detail.header.remainingDPAmount
     form.description = detail.header.notes
     form.subtotal = detail.calculation.subtotal
     form.vatAmount = detail.calculation.vatAmount
