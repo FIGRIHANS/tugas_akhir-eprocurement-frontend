@@ -35,9 +35,6 @@
             <td>{{ getCostCenterName(item.costCenter) || '-' }}</td>
             <td>{{ item.profitCenter || '-' }}</td>
             <td>{{ item.assignment || '-' }}</td>
-            <td>{{ getWhtTypeName(item.whtType) || '-' }}</td>
-            <td>{{ getWhtCodeName(item.whtCode, item) || '-' }}</td>
-            <td>{{ form.currency === 'IDR' ? useFormatIdr(item.whtBaseAmount) : useFormatUsd(item.whtBaseAmount) || '-' }}</td>
             <td>{{ form.currency === 'IDR' ? useFormatIdr(item.whtAmount) : useFormatUsd(item.whtAmount) || '-' }}</td>
           </tr>
         </tbody>
@@ -68,15 +65,11 @@ const columns = ref<string[]>([
   'Cost Center',
   'Profit Center',
   'Assignment',
-  'WHT Type',
-  'WHT Code',
-  'WHT Base Amount',
   'WHT Amount'
 ])
 
 const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
 const costCenterList = computed(() => invoiceMasterApi.costCenterList)
-const whtTypeList = computed(() => invoiceMasterApi.whtTypeList)
 const whtCodeList = computed(() => invoiceMasterApi.whtCodeList)
 const listActivity = computed(() => invoiceMasterApi.activityList)
 
@@ -124,24 +117,6 @@ const getCostCenterName = (costCenter: string) => {
   if (index !== -1) {
     const data = costCenterList.value[index]
     return `${data.code} - ${data.name}`
-  }
-  return '-'
-}
-
-const getWhtTypeName = (code: string) => {
-  const index = whtTypeList.value.findIndex((item) => item.code === code)
-  if (index !== -1) {
-    const data = whtTypeList.value[index]
-    return `${data.code} - ${data.name}`
-  }
-  return '-'
-}
-
-const getWhtCodeName = (code: string, data: invoiceItemTypes) => {
-  const index = data.whtCodeList.findIndex((item) => item.whtCode === code)
-  if (index !== -1) {
-    const detailData = data.whtCodeList[index]
-    return `${detailData.whtCode} - ${detailData.description}`
   }
   return '-'
 }

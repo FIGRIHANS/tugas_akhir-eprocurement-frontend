@@ -25,7 +25,7 @@
           </select>
         </template>
       </div>
-      <div v-if="checkIsNonPo() && !isPettyCash" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div v-if="checkIsNonPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Vendor No.
           <span class="text-red-500 ml-[4px]">*</span>
@@ -130,8 +130,8 @@
           :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
           :class="{ 'border-danger': form.taxNoInvoiceError }" />
       </div>
-      <!-- Currency: hide visible controls for Petty Cash, keep hidden input to preserve value -->
-      <div v-if="!isPettyCash" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <!-- Currency -->
+      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Currency
         </label>
@@ -143,8 +143,6 @@
           </option>
         </select>
       </div>
-      <!-- keep hidden input for Petty Cash so the value remains in the form model -->
-      <input v-if="isPettyCash" type="hidden" v-model="form.currency" />
       <!-- Remaining DP Amount -->
       <div v-if="form.invoiceDp === '9013'" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">

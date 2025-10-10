@@ -338,9 +338,21 @@ const checkActiveEditInvoiceItem = () => {
 
 const checkInvoiceInformation = () => {
   form.companyCodeError = useCheckEmpty(form.companyCode).isError
-  form.invoiceNoVendorError = useCheckEmpty(form.invoiceNoVendor).isError
-  form.invoiceDateError = useCheckEmpty(form.invoiceDate).isError
-  form.invoiceDocumentError = form.invoiceDocument === null
+
+  // Check if invoice type is Petty Cash
+  const isPettyCash = form.invoiceType === '5'
+
+  if (!isPettyCash) {
+    // For non-Petty Cash invoices
+    form.invoiceNoVendorError = useCheckEmpty(form.invoiceNoVendor).isError
+    form.invoiceDateError = useCheckEmpty(form.invoiceDate).isError
+    form.invoiceDocumentError = form.invoiceDocument === null
+  } else {
+    // For Petty Cash, these fields are not required
+    form.invoiceNoVendorError = false
+    form.invoiceDateError = false
+    form.invoiceDocumentError = false
+  }
 
   if (!checkIsNonPo()) {
     form.invoicePoGrError = form.invoicePoGr.length === 0 || checkActiveEditPoGr()
@@ -472,7 +484,7 @@ const mapInvoiceItem = () => {
     cost.push({
       id: item.id || 0,
       activityId: item.activity,
-      activityExpenses: listActivity.value[itemIndex].code,
+      activityExpense: listActivity.value[itemIndex].code,  // Changed from activityExpenses to activityExpense
       activityName: listActivity.value[itemIndex].name,
       itemAmount: Number(item.itemAmount),
       itemText: item.itemText,
@@ -482,9 +494,10 @@ const mapInvoiceItem = () => {
       costCenter: item.costCenter,
       profitCenter: item.profitCenter,
       assignment: item.assignment,
-      whtType: item.whtType,
-      whtCode: item.whtCode,
-      whtBaseAmount: Number(item.whtBaseAmount),
+      whtType: item.whtType || '',
+      whtCode: item.whtCode || '',
+      whtBaseAmount: Number(item.whtBaseAmount) || 0,
+      whtAmount: Number(item.whtAmount) || 0,
     })
   }
   return cost
@@ -557,6 +570,19 @@ const mapDataPost = () => {
 }
 
 const mapDataPostNonPo = () => {
+  const isPettyCash = form.invoiceType === '5'
+
+  // For Petty Cash, use pettyCashPeriod[0] as invoice date, otherwise use invoiceDate
+  let invoiceDateToUse = ''
+  if (isPettyCash && Array.isArray(form.pettyCashPeriod) && form.pettyCashPeriod[0]) {
+    invoiceDateToUse = moment(form.pettyCashPeriod[0]).toISOString()
+  } else if (form.invoiceDate) {
+    invoiceDateToUse = moment(form.invoiceDate).toISOString()
+  } else {
+    // Fallback to current date if no date is provided
+    invoiceDateToUse = moment().toISOString()
+  }
+
   const data = {
     header: {
       invoiceUId:
@@ -569,13 +595,13 @@ const mapDataPostNonPo = () => {
       companyCode: form.companyCode,
       companyName: form.companyName,
       invoiceNo: form.invoiceNo,
-      documentNo: form.invoiceNoVendor,
-      invoiceDate: moment(form.invoiceDate).toISOString(),
+      documentNo: isPettyCash ? (form.cashJournal || '') : (form.invoiceNoVendor || ''),
+      invoiceDate: invoiceDateToUse,
       postingDate: null,
       estimatedPaymentDate: null,
       paymentMethodCode: '',
       paymentMethodName: '',
-      taxNo: form.taxNoInvoice,
+      taxNo: isPettyCash ? '' : (form.taxNoInvoice || ''),
       currCode: form.currency,
       creditCardBillingID: '',
       notes: form.description,
@@ -653,13 +679,17 @@ const goNext = () => {
   } else {
     isSubmit.value = true
     if (route.query.type === 'nonpo') {
+      const submissionData = mapDataPostNonPo()
+      console.log('📤 Submitting Non-PO Invoice Data:', submissionData)
       invoiceApi
-        .postSubmissionNonPo(mapDataPostNonPo())
+        .postSubmissionNonPo(submissionData)
         .then((response) => {
+          console.log('✅ Submission Response:', response)
           setAfterResponsePost(response)
         })
         .catch((error) => {
-          console.error(error)
+          console.error('❌ Submission Error:', error)
+          console.error('Error Response:', error.response?.data)
         })
         .finally(() => {
           isSubmit.value = false
@@ -727,7 +757,11 @@ const goSaveDraft = () => {
 }
 
 const setAfterResponsePost = (response) => {
+  console.log('📊 Response Status Code:', response.statusCode)
+  console.log('📊 Full Response:', response)
+
   if (response.statusCode === 200) {
+    console.log('✅ Invoice submitted successfully!')
     const idModal = document.querySelector('#success_invoice_modal')
     const modal = KTModal.getInstance(idModal as HTMLElement)
     modal.show()
@@ -743,6 +777,8 @@ const setAfterResponsePost = (response) => {
       }
     }
   } else {
+    console.log('❌ Invoice submission failed!')
+    console.log('Error Message:', response.result?.message)
     invoiceApi.errorMessageSubmission = response.result.message
     const idModal = document.querySelector('#error_submission_modal')
     const modal = KTModal.getInstance(idModal as HTMLElement)
@@ -1011,9 +1047,26 @@ const mapDataCheck = () => {
 
   itemNoAcc.value += 1
 
-  // For Petty Cash, we don't use ACCOUNT_PAYABLE (no vendor involved)
-  // Only add ACCOUNT_PAYABLE for non-Petty Cash invoices
-  if (form.invoiceType !== '5') {
+  // Add ACCOUNT_PAYABLE for all invoice types including Petty Cash
+  if (form.invoiceType === '5') {
+    // For Petty Cash: use vendorId from form and cashJournal as reference
+    const accData = {
+      ITEMNO_ACC: itemNoAcc.value,
+      VENDOR_NO: form.vendorId || '',  // Use vendorId from form for Petty Cash
+      REF_KEY_1: '',  // No NPWP for Petty Cash
+      REF_KEY_2: '',
+      REF_KEY_3: '',
+      BLINE_DATE: '',
+      PMNTTRMS: '',
+      PYMT_METH: '',
+      ALLOC_NMBR: '',
+      ITEM_TEXT: form.cashJournal || '',
+      TAX_CODE: form.invoiceItem.length > 0 ? form.invoiceItem[0].taxCode : '',
+      PAYMT_REF: '',
+    }
+    accountPayable.push(accData)
+  } else {
+    // For non-Petty Cash invoices
     const accData = {
       ITEMNO_ACC: itemNoAcc.value,
       VENDOR_NO: form.vendorId,
