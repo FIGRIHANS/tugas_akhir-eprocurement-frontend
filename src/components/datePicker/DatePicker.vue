@@ -23,6 +23,7 @@
       :enable-time="false"
       :format="format"
       :range="range"
+        :months-to-show="props.monthsToShow"
       :preview-format="format"
       :min-date="minDate"
       :max-date="maxDate"
@@ -53,7 +54,7 @@ import { ref, watch } from 'vue'
 
 const props = withDefaults(
   defineProps<{
-    modelValue: Date | string | null
+    modelValue: Date | string | Array<string | Date> | null
     error?: boolean
     label?: string
     required?: boolean
@@ -64,6 +65,7 @@ const props = withDefaults(
     labelTop?: boolean
     maxDate?: Date | string
     range?: boolean
+    monthsToShow?: number
     teleport?: boolean
   }>(),
   {
@@ -73,7 +75,7 @@ const props = withDefaults(
 
 const emits = defineEmits(['update:modelValue'])
 
-const date = ref<Date | string | null>('')
+const date = ref<Date | string | Array<string | Date> | null>('')
 
 watch(
   () => props.modelValue,
