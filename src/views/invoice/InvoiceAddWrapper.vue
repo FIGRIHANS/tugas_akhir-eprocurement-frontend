@@ -349,7 +349,7 @@ const checkInvoiceInformation = () => {
   }
 
   if (Number(form.invoiceDp) === 9013) {
-    form.dpAmountDeductionError = Number(form.dpAmountDeduction) > Number(form.remainingDpAmount)
+    form.dpAmountDeductionError = form.dpAmountDeduction > form.remainingDpAmount || (form.remainingDpAmount !== 0 && form.dpAmountDeduction === 0)
   }
 
   if (
@@ -767,6 +767,8 @@ const setData = () => {
     form.invoiceDate = detail.header.invoiceDate
     form.taxNoInvoice = detail.header.taxNo
     form.currency = detail.header.currCode
+    form.dpAmountDeduction = detail.header.dpAmountDeduction
+    form.remainingDpAmount = detail.header.remainingDPAmount
     form.description = detail.header.notes
     form.subtotal = detail.calculation.subtotal
     form.vatAmount = detail.calculation.vatAmount

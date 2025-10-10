@@ -44,11 +44,11 @@
       </div>
       <div v-if="form.invoiceDp === '9013'" :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
         <p class="text-xs font-normal text-gray-700">Remaining DP Amount</p>
-        <p class="text-sm font-medium">{{ form.remainingDpAmount || '0' }}</p>
+        <p class="text-sm font-medium">{{ form.currency === 'IDR' ? useFormatIdr(form.remainingDpAmount) : useFormatUsd(form.remainingDpAmount) || '0' }}</p>
       </div>
       <div v-if="form.invoiceDp === '9013'" :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
         <p class="text-xs font-normal text-gray-700">DP Amount Deduction</p>
-        <p class="text-sm font-medium">{{ form.dpAmountDeduction || '0' }}</p>
+        <p class="text-sm font-medium">{{ form.currency === 'IDR' ? useFormatIdr(form.dpAmountDeduction) : useFormatUsd(form.dpAmountDeduction) || '0' }}</p>
       </div>
       <div v-if="checkIsNonPo()" :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
         <p class="text-xs font-normal text-gray-700">Requestor</p>
@@ -68,6 +68,7 @@ import { useRoute } from 'vue-router'
 import type { formTypes } from '../../types/invoiceAddWrapper'
 import moment from 'moment'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
+import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const form = inject<formTypes>('form')
@@ -83,17 +84,8 @@ const checkIsNonPo = () => {
   return route.query.type === 'nonpo' || route.query.type === 'non-po-view'
 }
 
-// const checkPo = () => {
-//   return typeForm.value === 'po'
-// }
-
-// const checkPoPib = () => {
-//   return form?.invoiceType === '2'
-// }
-
 const getDpName = () => {
   if (form?.invoiceDp != '') {
-    if (route.query.type === 'po-view') return 'Without DP'
     const getIndex = dpTypeList.value.findIndex((item) => item.code === form?.invoiceDp)
     if (getIndex !== -1) return dpTypeList.value[getIndex].name
   }
