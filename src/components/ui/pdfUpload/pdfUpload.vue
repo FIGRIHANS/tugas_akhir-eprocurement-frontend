@@ -54,6 +54,7 @@ const handleFileUpload = async (event: Event) => {
     const response = await uploadApi.uploadFile(file, 0)
 
     emits('setFile', {
+      id: 0,
       name: response.name,
       path: response.path,
       fileSize: file.size
