@@ -19,12 +19,12 @@
         :teleport="teleport"
       >
         <template #dp-input="{ value }">
-          <div class="input relative w-full" :class="{ 'border-danger': !!validationError }">
+          <div class="input relative" :class="{ 'border-danger': !!validationError }">
             <input
               :placeholder="placeholder"
               :value="value"
               readonly
-              class="min-w-[0px] w-full"
+              class="min-w-[0px]"
             />
             <button class="btn btn-icon">
               <i class="ki-filled ki-calendar"></i>
@@ -165,13 +165,4 @@ onMounted(() => {
 @use './styles/datepicker.scss';
 /* small tweaks to align with existing styles */
 .form-label { display: block }
-
-/* Ensure the datepicker is wider and properly aligned */
-:deep(.dp__main) {
-  inline-size: 100%;
-}
-
-:deep(.dp__input_wrap) {
-  inline-size: 100%;
-}
 </style>

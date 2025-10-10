@@ -85,10 +85,7 @@
                   appendToBody
                 ></v-select>
               </td>
-              <td v-if="!isPettyCash">
-                <span>{{ form?.currency === 'IDR' ? useFormatIdr(item.vatAmount) : useFormatUsd(item.vatAmount) }}</span>
-              </td>
-              <td v-if="!isPettyCash">
+              <td>
                 <span v-if="!item.isEdit">{{ getCostCenterName(item.costCenter) || '-' }}</span>
                 <v-select
                   v-else
@@ -100,6 +97,9 @@
                   :options="costCenterList"
                   appendToBody
                 ></v-select>
+              </td>
+              <td>
+                <span>{{ form?.currency === 'IDR' ? useFormatIdr(item.vatAmount) : useFormatUsd(item.vatAmount) }}</span>
               </td>
               <td>
                 <span>{{ item.profitCenter || '-' }}</span>
@@ -153,13 +153,11 @@ const columns = computed(() => {
     'Tax Code',
   ]
 
-  // Hide these columns for Petty Cash
-  if (!isPettyCash.value) {
-    baseColumns.push('VAT Amount')
-    baseColumns.push('Cost Center')
-  } else {
-    // For Petty Cash, skip VAT Amount and Cost Center
-  }
+  // Always show Cost Center column
+  baseColumns.push('Cost Center')
+
+  // Always show VAT Amount column
+  baseColumns.push('VAT Amount')
 
   baseColumns.push('Profit Center')
   baseColumns.push('Assignment')
