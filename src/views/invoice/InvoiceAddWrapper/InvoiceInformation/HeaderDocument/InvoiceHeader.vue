@@ -25,28 +25,14 @@
           </select>
         </template>
       </div>
-      <!-- Vendor No -->
-      <div v-if="checkIsNonPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div v-if="checkIsNonPo() && !isPettyCash" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Vendor No.
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
         <input v-model="form.vendorId" class="input" placeholder="" disabled />
       </div>
-      <!-- DP Option -->
-      <div v-if="form.invoiceType === '901'" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-        <label class="form-label">
-          DP Option
-          <span class="text-red-500 ml-[4px]">*</span>
-        </label>
-        <input v-if="form.status !== 0 && form.status !== -1 && form.status !== 5" v-model="form.invoiceDp"
-          class="input" placeholder="" disabled />
-        <select v-else v-model="form.invoiceDp" class="select" :class="{ 'border-danger': form.invoiceDpError }">
-          <option v-for="item of dpTypeList" :key="item.code" :value="item.code">
-            {{ item.name }}
-          </option>
-        </select>
-      </div>
+
       <!-- Company Code -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
@@ -61,15 +47,60 @@
           </option>
         </select>
       </div>
-      <!-- Submitted Document No. -->
-      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+
+      <!-- Reference - Show only for Petty Cash (readonly) -->
+      <div v-if="isPettyCash" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          Reference
+        </label>
+        <input v-model="form.reference" class="input" placeholder="Auto Generated Number" disabled />
+      </div>
+
+      <!-- Cash Journal - only for Petty Cash (active) -->
+      <div v-if="isPettyCash" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          Cash Journal
+        </label>
+        <input v-model="form.cashJournal" class="input" placeholder="" />
+      </div>
+
+      <!-- Petty Cash Period - range picker limited to selected month (only for Petty Cash) -->
+      <div v-if="isPettyCash" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          Petty Cash Period
+        </label>
+        <DateRangePicker v-model="form.pettyCashPeriod" format="yyyy/MM/dd" class="w-full -ml-[15px]" teleport :min-days="7" />
+      </div>
+
+      <!-- CAS No - Show only for CAS type (readonly) or editable for LBA -->
+      <div v-if="isCAS || isLBA" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          CAS No.
+          <span v-if="isCAS" class="text-red-500 ml-[4px]">*</span>
+        </label>
+        <input v-model="form.casNo" class="input" :placeholder="isCAS ? 'Auto Generated Number' : ''" :disabled="isCAS" />
+      </div>
+
+      <!-- Submitted Document No. (readonly) for Reimbursement, Credit Card, LBA -->
+      <div v-if="isReimbursement || isCreditCard || isLBA" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Submitted Document No.
         </label>
         <input v-model="form.invoiceNo" class="input" placeholder="Auto Generated Number" disabled />
       </div>
-      <!-- Invoice Document No. * -->
-      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+
+      <!-- Proposal Amount - Show for Credit Card only -->
+      <div v-if="isCreditCard" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          Proposal Amount
+          <span class="text-red-500 ml-[4px]">*</span>
+        </label>
+        <input v-model="form.proposalAmountVal" class="input" placeholder=""
+          :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5" />
+      </div>
+
+      <!-- Invoice Document No. * (only for Reimbursement) -->
+      <div v-if="isReimbursement" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Invoice Vendor No.
           <span class="text-red-500 ml-[4px]">*</span>
@@ -78,8 +109,9 @@
           :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
           :class="{ 'border-danger': form.invoiceNoVendorError }" />
       </div>
-      <!-- Invoice Date -->
-      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+
+      <!-- Invoice Date (only for Reimbursement) -->
+      <div v-if="isReimbursement" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Invoice Date
           <span class="text-red-500 ml-[4px]">*</span>
@@ -87,17 +119,19 @@
         <DatePicker v-model="form.invoiceDate" format="yyyy/MM/dd" :error="form.invoiceDateError"
           :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5" class="w-full -ml-[15px]" teleport />
       </div>
-      <!-- Tax Document No. * -->
-      <div v-if="form.invoiceType != '903'" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+
+      <!-- Tax Document No - Show for Reimbursement, CAS, and LBA -->
+      <div v-if="isReimbursement || isCAS || isLBA" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Tax Document No.
+          <span class="text-red-500 ml-[4px]">*</span>
         </label>
         <input v-model="form.taxNoInvoice" class="input" placeholder=""
           :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
           :class="{ 'border-danger': form.taxNoInvoiceError }" />
       </div>
-      <!-- Currency -->
-      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <!-- Currency: hide visible controls for Petty Cash, keep hidden input to preserve value -->
+      <div v-if="!isPettyCash" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Currency
         </label>
@@ -109,6 +143,8 @@
           </option>
         </select>
       </div>
+      <!-- keep hidden input for Petty Cash so the value remains in the form model -->
+      <input v-if="isPettyCash" type="hidden" v-model="form.currency" />
       <!-- Remaining DP Amount -->
       <div v-if="form.invoiceDp === '9013'" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
@@ -162,6 +198,7 @@ import { ref, computed, onMounted, watch, inject } from 'vue'
 import { useRoute } from 'vue-router'
 import type { formTypes } from '../../../types/invoiceAddWrapper'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
+import DateRangePicker from '@/components/datePicker/DateRangePicker.vue'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useLoginStore } from '@/stores/views/login'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
@@ -209,10 +246,21 @@ const currencyList = computed(() => {
   // }
 })
 const companyCodeList = computed(() => invoiceMasterApi.companyCode)
-const dpTypeList = computed(() => invoiceMasterApi.dpType)
 const listInvoiceTypePo = computed(() => invoiceMasterApi.invoicePoType)
 const listInvoiceTypeNonPo = computed(() => invoiceMasterApi.invoiceNonPoType)
 const listMatrixApproval = computed(() => invoiceMasterApi.matrixApprovalList)
+
+// Date range picker no longer needs these variables for month constraints
+
+// Note: We removed month options and date constraints to allow cross-month selection in the date range picker
+
+
+// Helper computed properties for invoice type checks
+const isReimbursement = computed(() => form?.invoiceType === '1')
+const isCreditCard = computed(() => form?.invoiceType === '2')
+const isCAS = computed(() => form?.invoiceType === '3')
+const isLBA = computed(() => form?.invoiceType === '4')
+const isPettyCash = computed(() => form?.invoiceType === '5')
 
 const remainingDpAmountVal = computed(() => {
   if (form.currency === 'IDR') {

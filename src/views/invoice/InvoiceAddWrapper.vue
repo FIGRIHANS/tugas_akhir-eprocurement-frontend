@@ -250,6 +250,12 @@ const form = reactive<formTypes>({
   emailAlternative: '',
   vendorNumber: '',
   department: '',
+  // Add missing properties to satisfy formTypes
+  reference: '',
+  cashJournal: '',
+  pettyCashPeriod: [null, null],
+  casNo: '',
+  proposalAmountVal: '',
 })
 
 const contentComponent = computed(() => {
@@ -997,28 +1003,33 @@ const mapDataCheck = () => {
       ITEM_TEXT: item.itemText,
       ALLOC_NMBR: '',
       TAX_CODE: item.taxCode,
-      COSTCENTER: item.costCenter,
-      PROFIT_CTR: '',
+      COSTCENTER: item.costCenter || '',
+      PROFIT_CTR: item.profitCenter || '',
     }
     glAccount.push(glData)
   }
 
   itemNoAcc.value += 1
-  const accData = {
-    ITEMNO_ACC: itemNoAcc.value,
-    VENDOR_NO: form.vendorId,
-    REF_KEY_1: form.npwp,
-    REF_KEY_2: '',
-    REF_KEY_3: '',
-    BLINE_DATE: '',
-    PMNTTRMS: '',
-    PYMT_METH: '',
-    ALLOC_NMBR: '',
-    ITEM_TEXT: form.invoiceNoVendor,
-    TAX_CODE: form.invoiceItem[0].taxCode,
-    PAYMT_REF: '',
+
+  // For Petty Cash, we don't use ACCOUNT_PAYABLE (no vendor involved)
+  // Only add ACCOUNT_PAYABLE for non-Petty Cash invoices
+  if (form.invoiceType !== '5') {
+    const accData = {
+      ITEMNO_ACC: itemNoAcc.value,
+      VENDOR_NO: form.vendorId,
+      REF_KEY_1: form.npwp,
+      REF_KEY_2: '',
+      REF_KEY_3: '',
+      BLINE_DATE: '',
+      PMNTTRMS: '',
+      PYMT_METH: '',
+      ALLOC_NMBR: '',
+      ITEM_TEXT: form.invoiceNoVendor,
+      TAX_CODE: form.invoiceItem[0].taxCode,
+      PAYMT_REF: '',
+    }
+    accountPayable.push(accData)
   }
-  accountPayable.push(accData)
 
   for (const item of form.invoiceItem) {
     const checkAccountTax = accountTax.findIndex((sub) => sub.TAX_CODE === item.taxCode)
@@ -1090,8 +1101,12 @@ const mapDataCheck = () => {
     REQUEST: {
       HEADER_TXT: form.taxNoInvoice,
       COMP_CODE: form.companyCode,
-      DOC_DATE: moment(form.invoiceDate).format('YYYYMMDD'),
-      REF_DOC_NO: form.invoiceNoVendor,
+      DOC_DATE: form.invoiceType === '5'
+        ? (Array.isArray(form.pettyCashPeriod) && form.pettyCashPeriod[0]
+            ? moment(form.pettyCashPeriod[0]).format('YYYYMMDD')
+            : moment().format('YYYYMMDD'))
+        : moment(form.invoiceDate).format('YYYYMMDD'),
+      REF_DOC_NO: form.invoiceType === '5' ? form.cashJournal : form.invoiceNoVendor,
       CUSTOMERCPD: {
         NAME: form.nameAlternative,
         NAME_2: form.nameOtherAlternative,
@@ -1135,15 +1150,35 @@ const checkBudget = () => {
 
 const checkFormBudget = () => {
   let status = false
-  if (
-    !form.companyCode ||
-    !form.invoiceNoVendor ||
-    !form.invoiceDate ||
-    !form.description ||
-    !form.invoiceDocument ||
-    form.invoiceItem.length === 0
-  )
-    status = true
+
+  // Check if invoice type is Petty Cash (id = '5')
+  const isPettyCash = form.invoiceType === '5'
+
+  if (isPettyCash) {
+    // Petty Cash specific validation
+    if (
+      !form.companyCode ||
+      !form.cashJournal ||
+      !form.pettyCashPeriod ||
+      (Array.isArray(form.pettyCashPeriod) && (!form.pettyCashPeriod[0] || !form.pettyCashPeriod[1])) ||
+      !form.description ||
+      !form.department ||
+      form.invoiceItem.length === 0
+    ) {
+      status = true
+    }
+  } else {
+    // Original validation for other invoice types
+    if (
+      !form.companyCode ||
+      !form.invoiceNoVendor ||
+      !form.invoiceDate ||
+      !form.description ||
+      !form.invoiceDocument ||
+      form.invoiceItem.length === 0
+    )
+      status = true
+  }
 
   for (const item of form.invoiceItem) {
     if (item.isEdit || !item.itemAmount || !item.taxCode) status = true
