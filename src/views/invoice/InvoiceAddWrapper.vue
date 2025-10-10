@@ -349,7 +349,7 @@ const checkInvoiceInformation = () => {
   }
 
   if (Number(form.invoiceDp) === 9013) {
-    form.dpAmountDeductionError = Number(form.dpAmountDeduction) > Number(form.remainingDpAmount)
+    form.dpAmountDeductionError = form.dpAmountDeduction > form.remainingDpAmount || (form.remainingDpAmount !== 0 && form.dpAmountDeduction === 0)
   }
 
   if (
