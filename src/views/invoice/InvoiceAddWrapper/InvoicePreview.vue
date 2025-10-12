@@ -18,7 +18,7 @@
     <InvoicePoGrView v-if="checkPo()" />
     <InvoiceItemView v-if="checkIsNonPo()" />
     <hr class="border-gray-300" />
-    <AdditionalCostView v-if="(checkIsWithoutDp() || checkPoWithDp()) && !checkIsNonPo()" />
+    <AdditionalCostView v-if="(checkIsWithoutDp() || checkPoWithDp() || checkIsPoPibCc()) && !checkIsNonPo()" />
   </div>
 </template>
 
@@ -62,8 +62,8 @@ const checkPoWithDp = () => {
   return form.invoiceDp === '9013'
 }
 
-const checkIsPoPib = () => {
-  return form.invoiceType === '902'
+const checkIsPoPibCc = () => {
+  return (form.invoiceType === '902' || form.invoiceType === '903') && form.status > 0
 }
 
 watch(

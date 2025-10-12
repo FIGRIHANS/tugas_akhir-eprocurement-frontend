@@ -67,10 +67,14 @@ const setCalculation = () => {
   }
 }
 
+const checkIsPoPibCc = () => {
+  return (form.invoiceType === '902' || form.invoiceType === '903') && form.status > 0
+}
+
 watch(
   () => [form?.invoiceDp],
   () => {
-    if (form?.invoiceDp !== '9011' && form?.invoiceDp !== '9013' && (typeForm.value !== 'po' && form.invoiceDp !== '902' && form.invoiceDp !== '903')) {
+    if (form?.invoiceDp !== '9011' && form?.invoiceDp !== '9013' && !checkIsPoPibCc()) {
       listName.value = [...dpField]
     } else {
       listName.value = [...defaultField]
