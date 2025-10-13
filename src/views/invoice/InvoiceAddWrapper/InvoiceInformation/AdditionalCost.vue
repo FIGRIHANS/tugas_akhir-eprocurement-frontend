@@ -177,7 +177,7 @@ const addNew = () => {
 }
 
 const deleteItem = (index: number) => {
-  if (form.additionalCost[index].id) {
+  if (form.additionalCost[index].id !== 0) {
     verificationApi.additionalCostTempDelete?.push(form.additionalCost[index].id)
   }
   form?.additionalCost.splice(index, 1)

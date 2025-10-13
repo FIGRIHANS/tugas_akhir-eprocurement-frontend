@@ -1042,10 +1042,8 @@ const afterGetDetailNonPo = () => {
 }
 
 watch(
-  () => [detailInvoice.value, detailInvoiceNonPo.value],
+  () => form.value,
   () => {
-    if (!checkIsNonPo()) afterGetDetail()
-    else afterGetDetailNonPo()
     if (form.value.companyCode) {
       invoiceMasterApi.getActivity(form.value.companyCode || '')
       invoiceMasterApi.getCostCenter(form.value.companyCode || '')
@@ -1053,6 +1051,7 @@ watch(
   },
   {
     deep: true,
+    immediate: true
   },
 )
 
