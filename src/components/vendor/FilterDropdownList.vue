@@ -6,6 +6,7 @@ import FilterDropdown from './filterDropdown/FilterDropdown.vue'
 import { useVendorCategoryStore } from '@/stores/vendor/category'
 import { useVerificationStatus } from '@/stores/vendor/reference'
 import { formattoMySQL } from '@/core/utils/format'
+import tr from '@/composables/translator'
 
 const route = useRoute()
 const categories = useVendorCategoryStore()
@@ -35,6 +36,13 @@ const categoryOptions = computed(() =>
   })),
 )
 
+const translatedCategoryOptions = computed(() => {
+  return categoryOptions.value.map((item) => ({
+    text: tr(item.text),
+    value: item.value,
+  }))
+})
+
 watch(
   () => route.query,
   (query) => {
@@ -63,7 +71,7 @@ onMounted(() => {
       :label="$t('vendor.masterFilters.category')"
       :placeholder="$t('general.select')"
       v-model="filters.categoryId"
-      :options="categoryOptions"
+      :options="translatedCategoryOptions"
     />
 
     <div class="min-w-[0px] w-full">

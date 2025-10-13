@@ -28,7 +28,7 @@
           <tbody v-if="documentAndLegal.kategori">
             <tr v-for="(item, index) in tableItems" :key="item.id">
               <td>
-                {{ item.licenseName }}
+                {{ tr(item.licenseName) }}
                 <span v-if="checkIsRequired(item.licenseId)" class="text-danger">*</span>
               </td>
               <td class="align-top">
