@@ -46,11 +46,13 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useDictionaryStore } from '@/stores/general/dictionary'
 import moment from 'moment'
 
 import IconEN from '@/components/icons/IconEN.vue'
 
 const { locale } = useI18n({ useScope: 'global' })
+const dictionaryStore = useDictionaryStore()
 
 /**TODO - Add isLoggedIn condit */
 
@@ -64,11 +66,12 @@ const selectedLanguage = computed(() => locale.value.toUpperCase())
 
 const changeLocale = (value: 'id' | 'en') => {
   locale.value = value
-
+  dictionaryStore.setLocale(value)
   localStorage.setItem('locale', value)
 }
 
 onMounted(() => {
+  dictionaryStore.getDictionary()
   timeInterval.value = setInterval(updateTime, 1000)
 })
 

@@ -17,6 +17,7 @@ import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
 import { formatDatePayload } from '@/composables/date-format'
 import UiTextarea from '@/components/ui/atoms/textarea/UiTextarea.vue'
+import tr from '@/composables/translator'
 
 const periodStore = useBlacklistPeriodStore()
 const uploadStore = useVendorUploadStore()
@@ -41,6 +42,13 @@ const periodOpions = computed(() =>
   periodStore.period.map((item) => ({
     text: item.value,
     value: item.code,
+  })),
+)
+
+const translatedPeriodOptions = computed(() =>
+  periodOpions.value.map((item) => ({
+    text: tr(item.text),
+    value: item.value,
   })),
 )
 
@@ -118,7 +126,7 @@ onMounted(periodStore.getPeriod)
         v-model="period"
         :placeholder="$t('vendorBlacklist.modal.blacklist.fields.selectType')"
         :label="$t('vendorBlacklist.modal.blacklist.fields.blacklistType')"
-        :options="periodOpions"
+        :options="translatedPeriodOptions"
         text-key="text"
         value-key="value"
         required

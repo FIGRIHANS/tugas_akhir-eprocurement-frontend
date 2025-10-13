@@ -15,7 +15,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, inject } from 'vue'
+import { ref, watch, inject, type Ref } from 'vue'
 import { useRoute } from 'vue-router'
 import type { listTypes } from '../types/invoiceCalculation'
 import type { formTypes } from '../types/invoiceDetail'
@@ -27,7 +27,7 @@ const props = defineProps<{
 }>()
 
 const route = useRoute()
-const form = inject<formTypes>('form')
+const form = inject<Ref<formTypes>>('form')
 const listName = ref<string[]>([])
 const listCalculation = ref<listTypes[]>([])
 
@@ -86,7 +86,7 @@ watch(
 watch(
   () => form,
   () => {
-    if (form?.invoiceDPCode !== 9011) {
+    if (form.value.invoiceDPCode !== 9011 && form.value.invoiceDPCode !== 9013 && form.value.invoiceTypeCode !== 902 && form.value.invoiceTypeCode !== 903) {
       listName.value = [...dpField]
     } else if (checkIsNonPo()) {
       listName.value = [...nonPoField]

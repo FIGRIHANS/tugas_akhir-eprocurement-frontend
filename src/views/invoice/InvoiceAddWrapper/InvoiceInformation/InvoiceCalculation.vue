@@ -225,7 +225,7 @@ const countTotalNetAmount = () => {
 watch(
   () => form,
   () => {
-    if (form?.invoiceDp !== '9011') {
+    if (form?.invoiceDp !== '9011' && form?.invoiceDp !== '9013') {
       listName.value = [...dpField]
     } else if (checkIsNonPo()) {
       listName.value = [...nonPoField]
