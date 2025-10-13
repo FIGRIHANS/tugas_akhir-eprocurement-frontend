@@ -4,7 +4,7 @@
       <div class="modal-body p-[40px] flex flex-col gap-[30px] items-center">
         <ModalRejectLogo />
         <div class="text-center font-inter">
-          <p class="text-lg font-medium">Submssion Failed</p>
+          <p class="text-lg font-medium">Submission Failed</p>
           <p class="text-[13px] font-normal text-gray-700">We couldn't submit your invoice due to the following reason(s):</p>
           <p class="text-[13px] font-normal text-gray-700">{{ invoiceApi.errorMessageSubmission }}</p>
           <p class="text-[13px] font-normal text-gray-700">Please correct the errors and try again.</p>
