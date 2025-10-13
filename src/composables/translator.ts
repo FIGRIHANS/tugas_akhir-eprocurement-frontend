@@ -7,7 +7,9 @@ const tr = (key: string): string => {
   const dictionary = dictionaryStore.dictionary
 
   const dictionaryData = dictionary.find(
-    (item) => item.code.toLowerCase().replace(/\s+/g, '') === key.toLowerCase().replace(/\s+/g, ''),
+    (item) =>
+      item.code.toLowerCase().replace(/[^a-zA-Z0-9]/g, '') ===
+      key.toLowerCase().replace(/[^a-zA-Z0-9]/g, ''),
   )
 
   if (!dictionaryData) {

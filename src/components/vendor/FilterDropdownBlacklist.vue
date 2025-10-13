@@ -4,6 +4,7 @@ import { onMounted, reactive, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import FilterDropdown from './filterDropdown/FilterDropdown.vue'
 import UiIcon from '../ui/atoms/icon/UiIcon.vue'
+import tr from '@/composables/translator'
 
 const route = useRoute()
 
@@ -44,7 +45,7 @@ onMounted(blacklistPeriod.getPeriod)
             :class="{ hidden: filters.MasaBlacklist !== period.value }"
           />
         </div>
-        <span class="font-medium">{{ period.value }}</span>
+        <span class="font-medium">{{ tr(period.value) }}</span>
       </label>
     </template>
   </FilterDropdown>
