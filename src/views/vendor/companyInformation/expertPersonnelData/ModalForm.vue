@@ -24,6 +24,7 @@ import { useExpertPersonnelDataStore } from '@/stores/vendor/vendor'
 import { cloneDeep } from 'lodash'
 import { defaultPayload, defaultPayloadError } from './static'
 import { useI18n } from 'vue-i18n'
+import tr from '@/composables/translator'
 
 const props = defineProps<{ id: number }>()
 const emit = defineEmits(['onSuccess', 'onError', 'onClose'])
@@ -74,6 +75,13 @@ const nationalityOptions = computed(() =>
 const employmentOptions = ref<IReferenceList[]>([])
 const educationOptions = ref<IReferenceList[]>([])
 const certificateType = ref<IReferenceList[]>([])
+
+const translatedEducationOptions = computed(() => {
+  return educationOptions.value.map((item) => ({
+    ...item,
+    text: tr(item.text),
+  }))
+})
 
 const uploadLoading = ref<boolean>(false)
 const submitLoading = ref<boolean>(false)

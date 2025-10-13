@@ -24,7 +24,7 @@ import { useRoute } from 'vue-router'
 import { z } from 'zod'
 import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 import { useI18n } from 'vue-i18n'
-
+import tr from '@/composables/translator'
 const { t } = useI18n()
 
 const shareholderSchema = z.object({
@@ -52,6 +52,9 @@ const userLoginStore = useLoginStore()
 const typeShareholders = useTypeShareholders()
 const shareUnits = useShareunits()
 const companyDeedDataStore = useCompanyDeedDataStore()
+const shareUnitsOptions = computed(() => {
+  return shareUnits.data?.map((item) => ({ label: tr(item.value), value: Number(item.code) })) || []
+})
 
 const route = useRoute()
 
@@ -476,7 +479,7 @@ watchEffect(async () => {
           :required="true"
           :options="
             typeShareholders.data?.map((item) => ({
-              label: item.value,
+              label: tr(item.value),
               value: Number(item.code),
             })) || []
           "
@@ -526,9 +529,7 @@ watchEffect(async () => {
           :label="$t('companyDeed.shareholders.shareUnit')"
           :placeholder="'--' + $t('companyDeed.shareholders.shareUnit') + '--'"
           :required="true"
-          :options="
-            shareUnits.data?.map((item) => ({ label: item.value, value: Number(item.code) })) || []
-          "
+          :options="shareUnitsOptions"
           value-key="value"
           text-key="label"
           v-model="payload.unitID"
