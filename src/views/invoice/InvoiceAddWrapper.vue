@@ -245,7 +245,7 @@ const form = reactive<formTypes>({
   bankAccountNumberAlternative: '',
   bankKeyAlternative: '',
   bankCountryAlternative: '',
-  npwpNumberAlternative: '',
+  npwpNumberAlternative: '', 
   ktpNumberAlternative: '',
   emailAlternative: '',
   vendorNumber: '',

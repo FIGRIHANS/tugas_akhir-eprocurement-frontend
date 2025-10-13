@@ -19,12 +19,12 @@
         :teleport="teleport"
       >
         <template #dp-input="{ value }">
-          <div class="input relative" :class="{ 'border-danger': !!validationError }">
+          <div class="input relative w-full" :class="{ 'border-danger': !!validationError }">
             <input
               :placeholder="placeholder"
               :value="value"
               readonly
-              class="min-w-[0px]"
+              class="min-w-[0px] w-full"
             />
             <button class="btn btn-icon">
               <i class="ki-filled ki-calendar"></i>
@@ -87,20 +87,23 @@ const getToday = (): Date => {
 }
 
 // normalize modelValue to an array [start, end]
-const toRange = (val: unknown) => {
+const toRange = (val: unknown): [Date | null, Date | null] => {
   if (!val || val === '') {
     // Default: today as start date if nothing is provided
     return [getToday(), null]
   }
   if (Array.isArray(val)) {
-    // If first value is missing, use today as default start date
-    return [val[0] ?? getToday(), val[1] ?? null]
+    // Convert to Date objects if needed
+    const start = val[0] ? (val[0] instanceof Date ? val[0] : new Date(String(val[0]))) : getToday()
+    const end = val[1] ? (val[1] instanceof Date ? val[1] : new Date(String(val[1]))) : null
+    return [start, end]
   }
   // single value -> treat as start with no end yet
-  return [val as Date | string, null]
+  const singleDate = val instanceof Date ? val : new Date(String(val))
+  return [singleDate, null]
 }
 
-const internalRange = ref<Array<Date | string | null>>(toRange(props.modelValue))
+const internalRange = ref<[Date | null, Date | null]>(toRange(props.modelValue))
 const validationError = ref<string | null>(null)
 
 watch(
@@ -165,4 +168,13 @@ onMounted(() => {
 @use './styles/datepicker.scss';
 /* small tweaks to align with existing styles */
 .form-label { display: block }
+
+/* Ensure the datepicker is wider and properly aligned */
+:deep(.dp__main) {
+  inline-size: 100%;
+}
+
+:deep(.dp__input_wrap) {
+  inline-size: 100%;
+}
 </style>
