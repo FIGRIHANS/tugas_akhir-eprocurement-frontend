@@ -19,6 +19,7 @@ import ModalApprove from './components/ModalApprove.vue'
 import VendorBlacklistFilters from '@/components/vendor/filterButton/VendorBlacklistFilters.vue'
 import { useI18n } from 'vue-i18n'
 import { pendingTableColsEn, pendingTableColsId } from './static'
+import tr from '@/composables/translator'
 
 const blacklistStore = useBlacklistStore()
 const uploadStore = useVendorUploadStore()
@@ -171,7 +172,7 @@ watch(
               </div>
             </td>
             <td>{{ item.vendorName }}</td>
-            <td>{{ item.masaBlacklist }}</td>
+            <td>{{ tr(item.masaBlacklist) }}</td>
             <td>{{ item.startDate ? formatDate(item.startDate) : '-' }}</td>
             <td>{{ item.endDate ? formatDate(item.endDate) : '-' }}</td>
             <td>

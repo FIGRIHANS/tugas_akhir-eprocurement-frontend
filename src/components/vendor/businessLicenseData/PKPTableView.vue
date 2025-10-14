@@ -12,6 +12,7 @@ import { useUploadStore } from '@/stores/general/upload'
 import { useVendorAdministrationStore } from '@/stores/vendor/vendor'
 import { useRoute } from 'vue-router'
 import { useVendorUploadStore } from '@/stores/vendor/upload'
+import tr from '@/composables/translator'
 
 const uploadStore = useUploadStore()
 const adminStore = useVendorAdministrationStore()
@@ -196,7 +197,8 @@ watch(
     <div class="card">
       <div class="card-body">
         <h2 class="text-lg font-semibold text-slate-700">
-          {{ $t('businessLicense.pkpTable.title') }} - {{ adminStore.data?.companyCategoryName }}
+          {{ $t('businessLicense.pkpTable.title') }} -
+          {{ tr(adminStore.data?.companyCategoryName) }}
         </h2>
 
         <div class="mt-6">
@@ -229,7 +231,7 @@ watch(
                     <!-- Business License -->
                     <td class="p-2 align-middle">
                       <div class="h-14 flex items-center whitespace-nowrap truncate max-w-[240px]">
-                        {{ item?.licenseName }}
+                        {{ tr(item?.licenseName) }}
                         <span v-if="checkIsRequired(item.licenseId)" class="text-danger">*</span>
                       </div>
                     </td>

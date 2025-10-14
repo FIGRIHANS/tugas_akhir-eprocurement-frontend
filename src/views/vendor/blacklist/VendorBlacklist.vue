@@ -18,6 +18,7 @@ import ModalError from './components/ModalError.vue'
 import { KTModal } from '@/metronic/core'
 import { useI18n } from 'vue-i18n'
 import { computed } from 'vue'
+import tr from '@/composables/translator'
 
 const { t } = useI18n()
 
@@ -161,7 +162,7 @@ watch(
               </UiButton>
             </td>
             <td>{{ item.vendorName }}</td>
-            <td>{{ item.masaBlacklist }}</td>
+            <td>{{ tr(item.masaBlacklist) }}</td>
             <td>{{ item.startDate ? formatDate(item.startDate) : '-' }}</td>
             <td>{{ item.endDate ? formatDate(item.endDate) : '-' }}</td>
             <td>{{ item.blacklistDescription }}</td>

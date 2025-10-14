@@ -133,7 +133,7 @@
             v-model="payload.condition"
             :label="$t('equipmentData.form.condition')"
             :placeholder="$t('equipmentData.form.conditionPlaceholder')"
-            :options="conditionTypeList"
+            :options="translatedConditionTypeList"
             text-key="value"
             value-key="code"
             :error="payloadError.condition"
@@ -143,7 +143,7 @@
             v-model="payload.ownership"
             :label="$t('equipmentData.form.ownershipStatus')"
             :placeholder="$t('equipmentData.form.ownershipStatusPlaceholder')"
-            :options="ownershipStatusList"
+            :options="translatedOwnershipStatusList"
             text-key="value"
             value-key="code"
             :error="payloadError.ownership"
@@ -235,6 +235,7 @@ import UiBadge from '@/components/ui/atoms/badge/UiBadge.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
+import tr from '@/composables/translator'
 
 const vendorMasterData = useVendorMasterDataStore()
 const equipmentDataStore = useEquipmentDataStore()
@@ -263,7 +264,19 @@ const pagination = ref({
 })
 
 const conditionTypeList = computed(() => vendorMasterData.conditionTypeList)
+const translatedConditionTypeList = computed(() => {
+  return conditionTypeList.value.map((item) => ({
+    ...item,
+    value: tr(item.value),
+  }))
+})
 const ownershipStatusList = computed(() => vendorMasterData.ownershipStatusList)
+const translatedOwnershipStatusList = computed(() => {
+  return ownershipStatusList.value.map((item) => ({
+    ...item,
+    value: tr(item.value),
+  }))
+})
 const dataResponse = computed(() => {
   const { items, total } = equipmentDataStore.data
   return { items, total }
