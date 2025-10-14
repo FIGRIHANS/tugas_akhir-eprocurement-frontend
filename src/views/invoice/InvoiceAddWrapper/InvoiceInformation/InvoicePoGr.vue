@@ -162,9 +162,18 @@
                     :class="{ 'border-danger': item.poItemError }" @change="item.poItemError = false" />
                   <p v-if="item.poItemError" class="text-danger text-[9px]">*PO Item must be at least 2 digits</p>
                 </td>
-                <td v-if="!checkInvoiceDp()">{{ form.currency === item.currencyLC ? useFormatIdr(item.itemAmountLC) : useFormatUsd(item.itemAmountTC) }}</td>
-                <td v-if="!checkInvoiceDp()">{{ item.quantity }}</td>
-                <td v-if="!checkInvoiceDp()">{{ item.uom || '-' }}</td>
+                <td v-if="!checkInvoiceDp()">
+                  <span v-if="!item.isEdit">{{ form?.currency === 'IDR' ? useFormatIdr(item.itemAmountLC) : useFormatUsd(item.itemAmountLC) }}</span>
+                  <input v-else v-model="item.itemAmountLC" type="number" class="input" />
+                </td>
+                <td v-if="!checkInvoiceDp()">
+                  <span v-if="!item.isEdit">{{ item.quantity }}</span>
+                  <input v-else v-model="item.quantity" type="number" class="input" />
+                </td>
+                <td v-if="!checkInvoiceDp()">
+                  <span v-if="!item.isEdit">{{ item.uom || '-' }}</span>
+                  <input v-else v-model="item.uom" class="input" />
+                </td>
                 <td v-if="!checkInvoiceDp()">{{ item.itemText || '-' }}</td>
                 <td v-if="!checkInvoiceDp()">
                   <span v-if="!item.isEdit">{{ getCostCenterName(item.department) || '-' }}</span>
@@ -216,7 +225,9 @@ const isDisabledSearch = ref<boolean>(false)
 const formEdit = reactive({
   itemAmountLC: 0,
   taxCode: '',
-  vatAmount: 0
+  vatAmount: 0,
+  quantity: 0,
+  uom: ''
 })
 
 const listTaxCalculation = computed(() => masterDataApi.taxList)
@@ -359,6 +370,8 @@ const resetFormEdit = () => {
   formEdit.taxCode = ''
   formEdit.itemAmountLC = 0
   formEdit.vatAmount = 0
+  formEdit.quantity = 0
+  formEdit.uom = ''
 }
 
 const goEdit = (item: itemsPoGrType) => {
