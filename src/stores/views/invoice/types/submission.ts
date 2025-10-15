@@ -61,6 +61,17 @@ interface ParamsSubmissionHeader {
   department?: string
   remainingDPAmount: number
   dpAmountDeduction: number
+  // Petty Cash specific fields
+  cashJournalCode?: string
+  cashJournalName?: string
+  npwpReporting?: string
+  pettyCashStartDate?: string
+  pettyCashEndDate?: string
+  // Credit Card specific field
+  proposalAmount?: string
+  // CAS and LBA specific field
+  casNoCode?: string
+  casNoName?: string
 }
 
 interface ParamsSubmissionVendor {

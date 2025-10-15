@@ -61,8 +61,19 @@
       <div v-if="isPettyCash" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Cash Journal
+          <!-- Temporarily not required -->
         </label>
-        <input v-model="form.cashJournal" class="input" placeholder="" />
+        <v-select
+          v-model="form.cashJournalCode"
+          class="customSelect w-full -ml-[15px]"
+          label="name"
+          placeholder="Select"
+          :reduce="(option: any) => option.code"
+          :options="listCashJournal"
+          :class="{ 'error-select': form.cashJournalCodeError }"
+          :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
+          appendToBody
+        ></v-select>
       </div>
 
       <!-- Petty Cash Period - range picker limited to selected month (only for Petty Cash) -->
@@ -79,7 +90,27 @@
           CAS No.
           <span v-if="isCAS" class="text-red-500 ml-[4px]">*</span>
         </label>
-        <input v-model="form.casNo" class="input" :placeholder="isCAS ? 'Auto Generated Number' : ''" :disabled="isCAS" />
+        <!-- CAS Type: Auto Generated Number (disabled input) -->
+        <input
+          v-if="isCAS"
+          v-model="form.casNoCode"
+          class="input"
+          placeholder="Auto Generated Number"
+          disabled
+        />
+        <!-- LBA Type: Dropdown select -->
+        <v-select
+          v-else-if="isLBA"
+          v-model="form.casNoCode"
+          class="customSelect w-full -ml-[15px]"
+          label="name"
+          placeholder="Select"
+          :reduce="(option: any) => option.code"
+          :options="listCasNo"
+          :class="{ 'error-select': form.casNoCodeError }"
+          :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
+          appendToBody
+        ></v-select>
       </div>
 
       <!-- Submitted Document No. (readonly) for Reimbursement, Credit Card, LBA -->
@@ -178,6 +209,7 @@
           appendToBody
         ></v-select>
       </div>
+
       <!-- Description -->
       <div v-if="form.invoiceType != '903'" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
@@ -248,6 +280,8 @@ const companyCodeList = computed(() => invoiceMasterApi.companyCode)
 const listInvoiceTypePo = computed(() => invoiceMasterApi.invoicePoType)
 const listInvoiceTypeNonPo = computed(() => invoiceMasterApi.invoiceNonPoType)
 const listMatrixApproval = computed(() => invoiceMasterApi.matrixApprovalList)
+const listCashJournal = ref([])
+const listCasNo = ref([])
 
 // Date range picker no longer needs these variables for month constraints
 
@@ -297,6 +331,18 @@ watch(
       const getIndex = companyCodeList.value.findIndex((item) => item.code === form.companyCode)
       if (getIndex !== -1) form.companyName = companyCodeList.value[getIndex].name.split(' - ')[1]
     }
+
+    // Extract cashJournalName from cashJournalCode (for Petty Cash)
+    if (form?.cashJournalCode && listCashJournal.value.length > 0) {
+      const getIndex = listCashJournal.value.findIndex((item) => item.code === form.cashJournalCode)
+      if (getIndex !== -1) form.cashJournalName = listCashJournal.value[getIndex].name
+    }
+
+    // Extract casNoName from casNoCode (for LBA)
+    if (form?.casNoCode && listCasNo.value.length > 0 && form.invoiceType === '4') {
+      const getIndex = listCasNo.value.findIndex((item) => item.code === form.casNoCode)
+      if (getIndex !== -1) form.casNoName = listCasNo.value[getIndex].name
+    }
   },
   {
     deep: true
@@ -307,13 +353,13 @@ watch(
 watch(
   () => form?.invoiceType,
   (newType, oldType) => {
-    // When changing TO CAS (type 3), reset casNo to empty (will show "Auto Generated Number")
+    // When changing TO CAS (type 3), reset casNoCode to empty (will show "Auto Generated Number")
     if (newType === '3' && oldType !== '3') {
-      form.casNo = ''
+      form.casNoCode = ''
     }
-    // When changing FROM CAS to LBA (type 4), also reset casNo to allow manual input
+    // When changing FROM CAS to LBA (type 4), also reset casNoCode to allow manual input
     if (newType === '4' && oldType === '3') {
-      form.casNo = ''
+      form.casNoCode = ''
     }
   }
 )

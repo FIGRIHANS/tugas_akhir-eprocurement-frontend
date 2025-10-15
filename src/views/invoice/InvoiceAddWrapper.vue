@@ -261,9 +261,11 @@ const form = reactive<formTypes>({
   department: '',
   // Add missing properties to satisfy formTypes
   reference: '',
-  cashJournal: '',
+  cashJournalCode: '',
+  cashJournalName: '',
   pettyCashPeriod: [null, null],
-  casNo: '',
+  casNoCode: '',
+  casNoName: '',
   proposalAmountVal: '',
 })
 
@@ -413,6 +415,9 @@ const checkInvoiceInformation = () => {
     form.proposalAmountError = false
     // But at least one document must be uploaded
     form.invoiceDocumentError = !hasAtLeastOneDocument
+    // Petty Cash specific validations - Temporarily not required for budget checking
+    // form.cashJournalCodeError = useCheckEmpty(form.cashJournalCode).isError
+    form.cashJournalCodeError = false
   }
 
   if (!checkIsNonPo()) {
@@ -444,6 +449,7 @@ const checkInvoiceInformation = () => {
     form.taxNoInvoiceError ||
     form.proposalAmountError ||
     form.invoiceItemError
+    // Temporarily disabled: form.cashJournalCodeError
   )
     return false
   else return true
@@ -684,10 +690,10 @@ const mapDataPostNonPo = () => {
       invoiceNo: form.invoiceNo,
 
       // documentNo: different per invoice type
-      documentNo: isPettyCash ? (form.cashJournal || '') :
+      documentNo: isPettyCash ? (form.cashJournalCode || '') :
                   isReimbursement ? (form.invoiceNoVendor || '') :
                   isCreditCard ? (form.proposalAmountVal || '') :
-                  (isCAS || isLBA) ? (form.casNo || form.taxNoInvoice || '') : '',
+                  (isCAS || isLBA) ? (form.casNoCode || form.taxNoInvoice || '') : '',
 
       // invoiceDate: ONLY for Reimbursement
       ...(isReimbursement && invoiceDateToUse && { invoiceDate: invoiceDateToUse }),
@@ -710,7 +716,8 @@ const mapDataPostNonPo = () => {
 
       // Petty Cash specific fields
       ...(isPettyCash && {
-        cashJournal: form.cashJournal || '',
+        cashJournalCode: form.cashJournalCode || '',
+        cashJournalName: form.cashJournalName || '',
         pettyCashStartDate: pettyCashStartDate,
         pettyCashEndDate: pettyCashEndDate
       }),
@@ -722,12 +729,13 @@ const mapDataPostNonPo = () => {
 
       // CAS specific fields
       ...(isCAS && {
-        casNo: form.casNo || ''
+        casNoCode: form.casNoCode || ''
       }),
 
       // LBA specific fields (casNo is optional for LBA)
       ...(isLBA && {
-        casNo: form.casNo || ''
+        casNoCode: form.casNoCode || '',
+        casNoName: form.casNoName || ''
       })
     },
     vendor: {
@@ -1088,6 +1096,34 @@ const setDataNonPo = () => {
     form.totalNetAmount = detail.calculation.totalNetAmount
     form.department = detail.header.department
 
+    // Petty Cash specific fields
+    if (detail.header.invoiceTypeCode === 5) {
+      form.cashJournalCode = detail.header.cashJournalCode || ''
+      form.cashJournalName = detail.header.cashJournalName || ''
+      if (detail.header.pettyCashStartDate && detail.header.pettyCashEndDate) {
+        form.pettyCashPeriod = [
+          new Date(detail.header.pettyCashStartDate),
+          new Date(detail.header.pettyCashEndDate)
+        ]
+      }
+    }
+
+    // Credit Card specific fields
+    if (detail.header.invoiceTypeCode === 2) {
+      form.proposalAmountVal = detail.header.proposalAmount || ''
+    }
+
+    // CAS specific fields
+    if (detail.header.invoiceTypeCode === 3) {
+      form.casNoCode = detail.header.casNoCode || ''
+    }
+
+    // LBA specific fields
+    if (detail.header.invoiceTypeCode === 4) {
+      form.casNoCode = detail.header.casNoCode || ''
+      form.casNoName = detail.header.casNoName || ''
+    }
+
     const dataAlternativePayee = detail.alternativePayee[0]
     form.isAlternativePayee = dataAlternativePayee ? dataAlternativePayee.isAlternativePayee : false
     form.isOneTimeVendor = dataAlternativePayee ? dataAlternativePayee.isOneTimeVendor : false
@@ -1195,7 +1231,7 @@ const mapDataCheck = () => {
 
   // Add ACCOUNT_PAYABLE for all invoice types including Petty Cash
   if (form.invoiceType === '5') {
-    // For Petty Cash: use vendorId from form and cashJournal as reference
+    // For Petty Cash: use vendorId from form and cashJournalCode as reference
     const accData = {
       ITEMNO_ACC: itemNoAcc.value,
       VENDOR_NO: form.vendorId || '',  // Use vendorId from form for Petty Cash
@@ -1206,7 +1242,7 @@ const mapDataCheck = () => {
       PMNTTRMS: '',
       PYMT_METH: '',
       ALLOC_NMBR: '',
-      ITEM_TEXT: form.cashJournal || '',
+      ITEM_TEXT: form.cashJournalCode || '',
       TAX_CODE: form.invoiceItem.length > 0 ? form.invoiceItem[0].taxCode : '',
       PAYMT_REF: '',
     }
@@ -1222,8 +1258,8 @@ const mapDataCheck = () => {
       // Credit Card: use proposalAmountVal or description
       itemText = form.proposalAmountVal || form.description || ''
     } else if (form.invoiceType === '3' || form.invoiceType === '4') {
-      // CAS or LBA: use casNo or taxNoInvoice
-      itemText = form.casNo || form.taxNoInvoice || ''
+      // CAS or LBA: use casNoCode or taxNoInvoice
+      itemText = form.casNoCode || form.taxNoInvoice || ''
     }
 
     const accData = {
@@ -1325,20 +1361,25 @@ const mapDataCheck = () => {
   }
   // For Credit Card (2), CAS (3), and LBA (4): use current date (already set as default)
 
-  // Determine REF_DOC_NO based on invoice type
+  // Determine REF_DOC_NO based on invoice type - MUST NOT BE EMPTY
   let refDocNo = ''
   if (form.invoiceType === '5') {
-    // Petty Cash: use cashJournal
-    refDocNo = form.cashJournal || ''
+    // Petty Cash: use cashJournalCode, fallback to invoiceNo or description
+    refDocNo = form.cashJournalCode || form.invoiceNo || form.description || 'PETTY_CASH'
   } else if (form.invoiceType === '1') {
-    // Reimbursement: use invoiceNoVendor
-    refDocNo = form.invoiceNoVendor || ''
+    // Reimbursement: use invoiceNoVendor, fallback to taxNoInvoice
+    refDocNo = form.invoiceNoVendor || form.taxNoInvoice || form.invoiceNo || 'REIMBURSEMENT'
   } else if (form.invoiceType === '2') {
-    // Credit Card: use proposalAmountVal or empty
-    refDocNo = form.proposalAmountVal || ''
+    // Credit Card: use proposalAmountVal, fallback to invoiceNo or description
+    refDocNo = form.proposalAmountVal || form.invoiceNo || form.description || 'CREDIT_CARD'
   } else if (form.invoiceType === '3' || form.invoiceType === '4') {
-    // CAS or LBA: use casNo or taxNoInvoice
-    refDocNo = form.casNo || form.taxNoInvoice || ''
+    // CAS or LBA: use casNoCode or taxNoInvoice, fallback to invoiceNo
+    refDocNo = form.casNoCode || form.taxNoInvoice || form.invoiceNo || (form.invoiceType === '3' ? 'CAS' : 'LBA')
+  }
+
+  // Final safety check - ensure REF_DOC_NO is never empty
+  if (!refDocNo || refDocNo.trim() === '') {
+    refDocNo = form.invoiceNo || form.description || 'REF_DOC'
   }
 
   const data = {
@@ -1403,9 +1444,9 @@ const checkFormBudget = () => {
 
   if (isPettyCash) {
     // Petty Cash specific validation
+    // Temporarily disabled: !form.cashJournalCode
     if (
       !form.companyCode ||
-      !form.cashJournal ||
       !form.pettyCashPeriod ||
       (Array.isArray(form.pettyCashPeriod) && (!form.pettyCashPeriod[0] || !form.pettyCashPeriod[1])) ||
       !form.description ||
