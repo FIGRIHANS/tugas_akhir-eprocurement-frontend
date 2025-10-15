@@ -2,7 +2,14 @@
   <div>
     <Breadcrumb title="Add Invoice" :routes="routes" />
     <StepperStatus :active-name="stepperStatus" />
-    <TabInvoice :active-tab="tabNow" @change-tab="setTab" class="-mx-[24px]" />
+    <TabInvoice
+      :active-tab="tabNow"
+      :can-click-data="true"
+      :can-click-information="canClickInformationTab"
+      :can-click-preview="canClickPreviewTab"
+      @change-tab="setTab"
+      class="-mx-[24px]"
+    />
     <!-- <div v-if="form.status !== 0" class="status__box--approved -mt-5 -mx-[24px]">
       <i class="ki-outline ki-shield-tick text-primary text-[36px]"></i>
       <div>
@@ -136,6 +143,7 @@ import type {
   ParamsSubmissionTypes,
   ParamsSubmissionNonPo,
   ParamsCheckBudgetType,
+  ParamsSubmissionCostExpense,
   GlaccountDatum,
   AccountPayable,
   Accounttax,
@@ -177,6 +185,7 @@ const isSubmit = ref<boolean>(false)
 const isCheckBudget = ref<boolean>(false)
 const isClickDraft = ref<boolean>(false)
 const itemNoAcc = ref<number>(0)
+const hasCompletedDataTab = ref<boolean>(false) // Track if user has completed Invoice Data
 
 const stepperStatus = ref('')
 
@@ -245,7 +254,7 @@ const form = reactive<formTypes>({
   bankAccountNumberAlternative: '',
   bankKeyAlternative: '',
   bankCountryAlternative: '',
-  npwpNumberAlternative: '', 
+  npwpNumberAlternative: '',
   ktpNumberAlternative: '',
   emailAlternative: '',
   vendorNumber: '',
@@ -278,6 +287,17 @@ const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
 const listActivity = computed(() => invoiceMasterApi.activityList)
 const additionalCostTempDelete = computed(() => verificationApi.additionalCostTempDelete)
 const costExpensesTempDelete = computed(() => verificationApi.costExpenseTempDelete)
+
+// Computed properties for tab navigation control
+const canClickInformationTab = computed(() => {
+  // Information tab can be clicked only after Invoice Data is completed via Next button
+  return hasCompletedDataTab.value
+})
+
+const canClickPreviewTab = computed(() => {
+  // Preview tab can be clicked only after budget checking is completed
+  return isCheckBudget.value
+})
 
 const checkInvoiceView = () => {
   return route.query.type === 'po-view'
@@ -342,16 +362,57 @@ const checkInvoiceInformation = () => {
   // Check if invoice type is Petty Cash
   const isPettyCash = form.invoiceType === '5'
 
+  // Check if at least one document is uploaded (Invoice Document, Tax, Reference Document, or Other Document)
+  const hasAtLeastOneDocument =
+    form.invoiceDocument !== null ||
+    form.tax !== null ||
+    form.referenceDocument !== null ||
+    form.otherDocument !== null
+
+  // Invoice type specific validations
+  const isReimbursement = form.invoiceType === '1'
+  const isCreditCard = form.invoiceType === '2'
+  const isCAS = form.invoiceType === '3'
+  const isLBA = form.invoiceType === '4'
+
   if (!isPettyCash) {
-    // For non-Petty Cash invoices
-    form.invoiceNoVendorError = useCheckEmpty(form.invoiceNoVendor).isError
-    form.invoiceDateError = useCheckEmpty(form.invoiceDate).isError
-    form.invoiceDocumentError = form.invoiceDocument === null
+    // For non-Petty Cash invoices - at least one document must be uploaded
+    form.invoiceDocumentError = !hasAtLeastOneDocument
+
+    // Reimbursement specific validations
+    if (isReimbursement) {
+      form.invoiceNoVendorError = useCheckEmpty(form.invoiceNoVendor).isError
+      form.invoiceDateError = useCheckEmpty(form.invoiceDate).isError
+      form.taxNoInvoiceError = useCheckEmpty(form.taxNoInvoice).isError
+    } else {
+      form.invoiceNoVendorError = false
+      form.invoiceDateError = false
+    }
+
+    // Credit Card specific validations
+    if (isCreditCard) {
+      form.proposalAmountError = useCheckEmpty(form.proposalAmountVal).isError
+    } else {
+      form.proposalAmountError = false
+    }
+
+    // CAS specific validations
+    if (isCAS) {
+      form.taxNoInvoiceError = useCheckEmpty(form.taxNoInvoice).isError
+    }
+
+    // LBA specific validations
+    if (isLBA) {
+      form.taxNoInvoiceError = useCheckEmpty(form.taxNoInvoice).isError
+    }
   } else {
     // For Petty Cash, these fields are not required
     form.invoiceNoVendorError = false
     form.invoiceDateError = false
-    form.invoiceDocumentError = false
+    form.taxNoInvoiceError = false
+    form.proposalAmountError = false
+    // But at least one document must be uploaded
+    form.invoiceDocumentError = !hasAtLeastOneDocument
   }
 
   if (!checkIsNonPo()) {
@@ -379,13 +440,20 @@ const checkInvoiceInformation = () => {
     form.invoicePoGrError ||
     form.additionalCostError ||
     form.dpAmountDeductionError ||
-    form.departmentError
+    form.departmentError ||
+    form.taxNoInvoiceError ||
+    form.proposalAmountError ||
+    form.invoiceItemError
   )
     return false
   else return true
 }
 
 const setTab = (value: string) => {
+  // Only allow tab change if the tab is clickable
+  if (value === 'information' && !canClickInformationTab.value) return
+  if (value === 'preview' && !canClickPreviewTab.value) return
+
   tabNow.value = value
 }
 const goBack = () => {
@@ -478,13 +546,17 @@ const mapAdditionalCost = () => {
 }
 
 const mapInvoiceItem = () => {
-  const cost = []
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const cost: Record<string, any>[] = []
+  const isPettyCash = form.invoiceType === '5'
+
   for (const item of form.invoiceItem) {
     const itemIndex = listActivity.value.findIndex((sub) => sub.id === item.activity)
-    cost.push({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const baseData: Record<string, any> = {
       id: item.id || 0,
       activityId: item.activity,
-      activityExpense: listActivity.value[itemIndex].code,  // Changed from activityExpenses to activityExpense
+      activityExpense: listActivity.value[itemIndex].code,
       activityName: listActivity.value[itemIndex].name,
       itemAmount: Number(item.itemAmount),
       itemText: item.itemText,
@@ -494,11 +566,17 @@ const mapInvoiceItem = () => {
       costCenter: item.costCenter,
       profitCenter: item.profitCenter,
       assignment: item.assignment,
-      whtType: item.whtType || '',
-      whtCode: item.whtCode || '',
-      whtBaseAmount: Number(item.whtBaseAmount) || 0,
-      whtAmount: Number(item.whtAmount) || 0,
-    })
+    }
+
+    // Only add WHT fields for non-Petty Cash invoices
+    if (!isPettyCash) {
+      baseData.whtType = item.whtType || ''
+      baseData.whtCode = item.whtCode || ''
+      baseData.whtBaseAmount = Number(item.whtBaseAmount) || 0
+      baseData.whtAmount = Number(item.whtAmount) || 0
+    }
+
+    cost.push(baseData)
   }
   return cost
 }
@@ -570,18 +648,27 @@ const mapDataPost = () => {
 }
 
 const mapDataPostNonPo = () => {
+  // Determine invoice type
+  const isReimbursement = form.invoiceType === '1'
+  const isCreditCard = form.invoiceType === '2'
+  const isCAS = form.invoiceType === '3'
+  const isLBA = form.invoiceType === '4'
   const isPettyCash = form.invoiceType === '5'
 
-  // For Petty Cash, use pettyCashPeriod[0] as invoice date, otherwise use invoiceDate
-  let invoiceDateToUse = ''
+  // Prepare date fields based on invoice type
+  let invoiceDateToUse = null
+  let pettyCashStartDate = null
+  let pettyCashEndDate = null
+
   if (isPettyCash && Array.isArray(form.pettyCashPeriod) && form.pettyCashPeriod[0]) {
-    invoiceDateToUse = moment(form.pettyCashPeriod[0]).toISOString()
-  } else if (form.invoiceDate) {
+    // For Petty Cash: use pettyCashPeriod
+    pettyCashStartDate = moment(form.pettyCashPeriod[0]).toISOString()
+    pettyCashEndDate = form.pettyCashPeriod[1] ? moment(form.pettyCashPeriod[1]).toISOString() : null
+  } else if (isReimbursement && form.invoiceDate) {
+    // For Reimbursement ONLY: use invoiceDate
     invoiceDateToUse = moment(form.invoiceDate).toISOString()
-  } else {
-    // Fallback to current date if no date is provided
-    invoiceDateToUse = moment().toISOString()
   }
+  // For Credit Card, CAS, LBA: DO NOT use invoiceDate (leave null)
 
   const data = {
     header: {
@@ -595,13 +682,24 @@ const mapDataPostNonPo = () => {
       companyCode: form.companyCode,
       companyName: form.companyName,
       invoiceNo: form.invoiceNo,
-      documentNo: isPettyCash ? (form.cashJournal || '') : (form.invoiceNoVendor || ''),
-      invoiceDate: invoiceDateToUse,
+
+      // documentNo: different per invoice type
+      documentNo: isPettyCash ? (form.cashJournal || '') :
+                  isReimbursement ? (form.invoiceNoVendor || '') :
+                  isCreditCard ? (form.proposalAmountVal || '') :
+                  (isCAS || isLBA) ? (form.casNo || form.taxNoInvoice || '') : '',
+
+      // invoiceDate: ONLY for Reimbursement
+      ...(isReimbursement && invoiceDateToUse && { invoiceDate: invoiceDateToUse }),
+
       postingDate: null,
       estimatedPaymentDate: null,
       paymentMethodCode: '',
       paymentMethodName: '',
+
+      // taxNo: NOT for Petty Cash
       taxNo: isPettyCash ? '' : (form.taxNoInvoice || ''),
+
       currCode: form.currency,
       creditCardBillingID: '',
       notes: form.description,
@@ -609,10 +707,34 @@ const mapDataPostNonPo = () => {
       statusName: isClickDraft.value ? 'Drafted' : 'Waiting to Verify',
       department: checkIsNonPo() ? form.department : userData.value.profile.costCenter || '',
       profileId: userData.value.profile.profileId.toString(),
+
+      // Petty Cash specific fields
+      ...(isPettyCash && {
+        cashJournal: form.cashJournal || '',
+        pettyCashStartDate: pettyCashStartDate,
+        pettyCashEndDate: pettyCashEndDate
+      }),
+
+      // Credit Card specific fields
+      ...(isCreditCard && {
+        proposalAmount: form.proposalAmountVal || ''
+      }),
+
+      // CAS specific fields
+      ...(isCAS && {
+        casNo: form.casNo || ''
+      }),
+
+      // LBA specific fields (casNo is optional for LBA)
+      ...(isLBA && {
+        casNo: form.casNo || ''
+      })
     },
     vendor: {
       vendorId: Number(form.vendorId),
-      vendorName: getVendorName(),
+      vendorName: getVendorName() || '',
+      vendorBusinessUnit: '',
+      vendorSubBusinessUnit: '',
       npwp: form.npwp,
       vendorAddress: form.address,
     },
@@ -653,7 +775,7 @@ const mapDataPostNonPo = () => {
       isAlternativePayee: form.isAlternativePayee,
       isOneTimeVendor: form.isOneTimeVendor,
     },
-    costExpenses: mapInvoiceItem(),
+    costExpenses: mapInvoiceItem() as ParamsSubmissionCostExpense[],
     isSaveAsDraft: false
   } as ParamsSubmissionNonPo
 
@@ -667,6 +789,8 @@ const goNext = () => {
       if (tabNow.value === 'data') {
         const check = checkInvoiceData()
         if (!check) return
+        // Mark that user has completed Invoice Data tab
+        hasCompletedDataTab.value = true
       } else {
         const check = checkInvoiceInformation()
         if (!check) return
@@ -690,6 +814,11 @@ const goNext = () => {
         .catch((error) => {
           console.error('❌ Submission Error:', error)
           console.error('Error Response:', error.response?.data)
+          // Show error modal on catch
+          invoiceApi.errorMessageSubmission = error.response?.data?.result?.message || error.message || 'An unexpected error occurred'
+          const idModal = document.querySelector('#error_submission_modal')
+          const modal = KTModal.getInstance(idModal as HTMLElement)
+          modal.show()
         })
         .finally(() => {
           isSubmit.value = false
@@ -701,7 +830,12 @@ const goNext = () => {
           setAfterResponsePost(response)
         })
         .catch((error) => {
-          console.error(error)
+          console.error('❌ Submission Error:', error)
+          // Show error modal on catch
+          invoiceApi.errorMessageSubmission = error.response?.data?.result?.message || error.message || 'An unexpected error occurred'
+          const idModal = document.querySelector('#error_submission_modal')
+          const modal = KTModal.getInstance(idModal as HTMLElement)
+          modal.show()
         })
         .finally(() => {
           isSubmit.value = false
@@ -732,7 +866,12 @@ const goSaveDraft = () => {
         setAfterResponsePost(response)
       })
       .catch((error) => {
-        console.error(error)
+        console.error('❌ Save Draft Error:', error)
+        // Show error modal on catch
+        invoiceApi.errorMessageSubmission = error.response?.data?.result?.message || error.message || 'Failed to save draft'
+        const idModal = document.querySelector('#error_submission_modal')
+        const modal = KTModal.getInstance(idModal as HTMLElement)
+        modal.show()
       })
       .finally(() => {
         isSubmit.value = false
@@ -748,7 +887,12 @@ const goSaveDraft = () => {
         setAfterResponsePost(response)
       })
       .catch((error) => {
-        console.error(error)
+        console.error('❌ Save Draft Error:', error)
+        // Show error modal on catch
+        invoiceApi.errorMessageSubmission = error.response?.data?.result?.message || error.message || 'Failed to save draft'
+        const idModal = document.querySelector('#error_submission_modal')
+        const modal = KTModal.getInstance(idModal as HTMLElement)
+        modal.show()
       })
       .finally(() => {
         isSubmit.value = false
@@ -966,7 +1110,7 @@ const setDataNonPo = () => {
       const data = {
         id: item.id,
         activity: item.activityId,
-        activityCode: item.activityExpenses,
+        activityCode: item.activityExpense,
         activityName: item.activityName,
         itemAmount: item.itemAmount,
         itemText: item.itemText,
@@ -1069,6 +1213,19 @@ const mapDataCheck = () => {
     accountPayable.push(accData)
   } else {
     // For non-Petty Cash invoices
+    // Determine ITEM_TEXT based on invoice type
+    let itemText = ''
+    if (form.invoiceType === '1') {
+      // Reimbursement: use invoiceNoVendor
+      itemText = form.invoiceNoVendor || ''
+    } else if (form.invoiceType === '2') {
+      // Credit Card: use proposalAmountVal or description
+      itemText = form.proposalAmountVal || form.description || ''
+    } else if (form.invoiceType === '3' || form.invoiceType === '4') {
+      // CAS or LBA: use casNo or taxNoInvoice
+      itemText = form.casNo || form.taxNoInvoice || ''
+    }
+
     const accData = {
       ITEMNO_ACC: itemNoAcc.value,
       VENDOR_NO: form.vendorId,
@@ -1079,7 +1236,7 @@ const mapDataCheck = () => {
       PMNTTRMS: '',
       PYMT_METH: '',
       ALLOC_NMBR: '',
-      ITEM_TEXT: form.invoiceNoVendor,
+      ITEM_TEXT: itemText,
       TAX_CODE: form.invoiceItem[0].taxCode,
       PAYMT_REF: '',
     }
@@ -1152,16 +1309,44 @@ const mapDataCheck = () => {
     }
   }
 
+  // Determine DOC_DATE based on invoice type
+  let docDate = moment().format('YYYYMMDD') // Default to current date
+
+  if (form.invoiceType === '5') {
+    // Petty Cash: use pettyCashPeriod start date
+    if (Array.isArray(form.pettyCashPeriod) && form.pettyCashPeriod[0]) {
+      docDate = moment(form.pettyCashPeriod[0]).format('YYYYMMDD')
+    }
+  } else if (form.invoiceType === '1') {
+    // Reimbursement: use invoiceDate
+    if (form.invoiceDate) {
+      docDate = moment(form.invoiceDate).format('YYYYMMDD')
+    }
+  }
+  // For Credit Card (2), CAS (3), and LBA (4): use current date (already set as default)
+
+  // Determine REF_DOC_NO based on invoice type
+  let refDocNo = ''
+  if (form.invoiceType === '5') {
+    // Petty Cash: use cashJournal
+    refDocNo = form.cashJournal || ''
+  } else if (form.invoiceType === '1') {
+    // Reimbursement: use invoiceNoVendor
+    refDocNo = form.invoiceNoVendor || ''
+  } else if (form.invoiceType === '2') {
+    // Credit Card: use proposalAmountVal or empty
+    refDocNo = form.proposalAmountVal || ''
+  } else if (form.invoiceType === '3' || form.invoiceType === '4') {
+    // CAS or LBA: use casNo or taxNoInvoice
+    refDocNo = form.casNo || form.taxNoInvoice || ''
+  }
+
   const data = {
     REQUEST: {
-      HEADER_TXT: form.taxNoInvoice,
+      HEADER_TXT: form.taxNoInvoice || '',
       COMP_CODE: form.companyCode,
-      DOC_DATE: form.invoiceType === '5'
-        ? (Array.isArray(form.pettyCashPeriod) && form.pettyCashPeriod[0]
-            ? moment(form.pettyCashPeriod[0]).format('YYYYMMDD')
-            : moment().format('YYYYMMDD'))
-        : moment(form.invoiceDate).format('YYYYMMDD'),
-      REF_DOC_NO: form.invoiceType === '5' ? form.cashJournal : form.invoiceNoVendor,
+      DOC_DATE: docDate,
+      REF_DOC_NO: refDocNo,
       CUSTOMERCPD: {
         NAME: form.nameAlternative,
         NAME_2: form.nameOtherAlternative,
@@ -1209,6 +1394,13 @@ const checkFormBudget = () => {
   // Check if invoice type is Petty Cash (id = '5')
   const isPettyCash = form.invoiceType === '5'
 
+  // Check if at least one document is uploaded (Invoice Document, Tax, Reference Document, or Other Document)
+  const hasAtLeastOneDocument =
+    form.invoiceDocument !== null ||
+    form.tax !== null ||
+    form.referenceDocument !== null ||
+    form.otherDocument !== null
+
   if (isPettyCash) {
     // Petty Cash specific validation
     if (
@@ -1218,21 +1410,56 @@ const checkFormBudget = () => {
       (Array.isArray(form.pettyCashPeriod) && (!form.pettyCashPeriod[0] || !form.pettyCashPeriod[1])) ||
       !form.description ||
       !form.department ||
-      form.invoiceItem.length === 0
+      form.invoiceItem.length === 0 ||
+      !hasAtLeastOneDocument
     ) {
       status = true
     }
   } else {
-    // Original validation for other invoice types
+    // Validation for other invoice types (Reimbursement, Credit Card, CAS, LBA)
+    const isReimbursement = form.invoiceType === '1'
+    const isCreditCard = form.invoiceType === '2'
+    const isCAS = form.invoiceType === '3'
+    const isLBA = form.invoiceType === '4'
+
+    // Common required fields for all non-Petty Cash types
     if (
       !form.companyCode ||
-      !form.invoiceNoVendor ||
-      !form.invoiceDate ||
       !form.description ||
-      !form.invoiceDocument ||
-      form.invoiceItem.length === 0
-    )
+      !form.department ||
+      form.invoiceItem.length === 0 ||
+      !hasAtLeastOneDocument
+    ) {
       status = true
+    }
+
+    // Reimbursement specific fields
+    if (isReimbursement) {
+      if (!form.invoiceNoVendor || !form.invoiceDate || !form.taxNoInvoice) {
+        status = true
+      }
+    }
+
+    // Credit Card specific fields
+    if (isCreditCard) {
+      if (!form.proposalAmountVal) {
+        status = true
+      }
+    }
+
+    // CAS specific fields
+    if (isCAS) {
+      if (!form.taxNoInvoice) {
+        status = true
+      }
+    }
+
+    // LBA specific fields
+    if (isLBA) {
+      if (!form.taxNoInvoice) {
+        status = true
+      }
+    }
   }
 
   for (const item of form.invoiceItem) {
@@ -1267,6 +1494,8 @@ onMounted(() => {
 
   if (route.query.type === 'po-view' || route.query.type === 'non-po-view') {
     tabNow.value = 'preview'
+    // For view mode, all tabs should be accessible
+    hasCompletedDataTab.value = true
   }
 
   if (
@@ -1276,6 +1505,9 @@ onMounted(() => {
       route.query.type !== 'po-view' &&
       route.query.type === 'nonpo')
   ) {
+    // For edit mode (existing invoice), all tabs should be accessible
+    hasCompletedDataTab.value = true
+
     invoiceApi.getNonPoDetail(route.query.invoice?.toString() || '').then(() => {
       setStepperStatus()
       setDataNonPo()
@@ -1289,6 +1521,9 @@ onMounted(() => {
       route.query.type !== 'po-view' &&
       route.query.type === 'po')
   ) {
+    // For edit mode (existing PO invoice), all tabs should be accessible
+    hasCompletedDataTab.value = true
+
     invoiceApi.getPoDetail(route.query.invoice?.toString() || '').then(() => {
       setData()
     })

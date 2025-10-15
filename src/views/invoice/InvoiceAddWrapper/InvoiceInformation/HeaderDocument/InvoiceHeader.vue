@@ -25,7 +25,8 @@
           </select>
         </template>
       </div>
-      <div v-if="checkIsNonPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+
+      <div v-if="checkIsNonPo() && !isPettyCash" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Vendor No.
           <span class="text-red-500 ml-[4px]">*</span>
@@ -48,7 +49,7 @@
         </select>
       </div>
 
-      <!-- Reference - Show only for Petty Cash (readonly) -->
+      <!-- Reference - Show only for Petty Cash -->
       <div v-if="isPettyCash" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Reference
@@ -250,9 +251,6 @@ const listMatrixApproval = computed(() => invoiceMasterApi.matrixApprovalList)
 
 // Date range picker no longer needs these variables for month constraints
 
-// Note: We removed month options and date constraints to allow cross-month selection in the date range picker
-
-
 // Helper computed properties for invoice type checks
 const isReimbursement = computed(() => form?.invoiceType === '1')
 const isCreditCard = computed(() => form?.invoiceType === '2')
@@ -302,6 +300,21 @@ watch(
   },
   {
     deep: true
+  }
+)
+
+// Watch for invoice type changes to handle CAS No field
+watch(
+  () => form?.invoiceType,
+  (newType, oldType) => {
+    // When changing TO CAS (type 3), reset casNo to empty (will show "Auto Generated Number")
+    if (newType === '3' && oldType !== '3') {
+      form.casNo = ''
+    }
+    // When changing FROM CAS to LBA (type 4), also reset casNo to allow manual input
+    if (newType === '4' && oldType === '3') {
+      form.casNo = ''
+    }
   }
 )
 
