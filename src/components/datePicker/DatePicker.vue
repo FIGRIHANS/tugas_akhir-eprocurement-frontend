@@ -49,7 +49,6 @@
 </template>
 
 <script lang="ts" setup>
-/* eslint-disable no-undef */
 import { ref, watch } from 'vue'
 
 const props = withDefaults(

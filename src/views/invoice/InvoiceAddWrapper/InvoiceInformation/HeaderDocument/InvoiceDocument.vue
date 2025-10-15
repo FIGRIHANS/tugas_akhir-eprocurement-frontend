@@ -8,7 +8,7 @@
           <span v-if="index === 0" class="text-red-500 ml-[4px]">*</span>
         </label>
         <pdfUpload ref="pdfUploadRef" v-show="!form[item.varName as keyof typeof form]"
-          :error="!!form[item.varErrorName as keyof documentFormTypes]"
+          :error="index === 0 && !!formInject?.invoiceDocumentError && !hasAnyDocument"
           :disabled="formInject?.status !== 0 && formInject?.status !== -1 && formInject?.status !== 5"
           @setFile="setFile($event, item.varName as keyof documentFormTypes)" />
         <div v-if="form[item.varName as keyof typeof form]" class="flex justify-between items-center gap-[8px] flex-1">
@@ -19,12 +19,15 @@
             @click="changeFile(index)">Edit</span>
         </div>
       </div>
+      <p v-if="formInject?.invoiceDocumentError && !hasAnyDocument" class="text-red-500 text-xs -mt-8">
+        * At least one document must be uploaded
+      </p>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, inject, watch, toRef } from 'vue'
+import { ref, reactive, inject, watch, toRef, computed } from 'vue'
 import type { documentFormTypes, responseFileTypes, listFormTypes } from '../../../types/invoiceDocument'
 import type { formTypes } from '../../../types/invoiceAddWrapper'
 import pdfUpload from '@/components/ui/pdfUpload/pdfUpload.vue'
@@ -35,6 +38,16 @@ const form = reactive<documentFormTypes>({
   tax: null,
   referenceDocument: null,
   otherDocument: null
+})
+
+// Check if at least one document is uploaded
+const hasAnyDocument = computed(() => {
+  return (
+    form.invoiceDocument !== null ||
+    form.tax !== null ||
+    form.referenceDocument !== null ||
+    form.otherDocument !== null
+  )
 })
 
 const list = ref<listFormTypes[]>([

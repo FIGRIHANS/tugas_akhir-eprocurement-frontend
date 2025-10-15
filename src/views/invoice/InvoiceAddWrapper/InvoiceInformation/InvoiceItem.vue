@@ -86,6 +86,9 @@
                 ></v-select>
               </td>
               <td>
+                <span>{{ form?.currency === 'IDR' ? useFormatIdr(item.vatAmount) : useFormatUsd(item.vatAmount) }}</span>
+              </td>
+              <td>
                 <span v-if="!item.isEdit">{{ getCostCenterName(item.costCenter) || '-' }}</span>
                 <v-select
                   v-else
@@ -97,9 +100,6 @@
                   :options="costCenterList"
                   appendToBody
                 ></v-select>
-              </td>
-              <td>
-                <span>{{ form?.currency === 'IDR' ? useFormatIdr(item.vatAmount) : useFormatUsd(item.vatAmount) }}</span>
               </td>
               <td>
                 <span>{{ item.profitCenter || '-' }}</span>
@@ -116,7 +116,7 @@
               <td v-if="!isPettyCash">
                 <span>{{ form?.currency === 'IDR' ? useFormatIdr(item.whtBaseAmount) : useFormatUsd(item.whtBaseAmount) || '-' }}</span>
               </td>
-              <td>
+              <td v-if="!isPettyCash">
                 <span>{{ form?.currency === 'IDR' ? useFormatIdr(item.whtAmount) : useFormatUsd(item.whtAmount) || '-' }}</span>
               </td>
             </tr>
@@ -151,25 +151,19 @@ const columns = computed(() => {
     'Item Text',
     'Debit/Credit',
     'Tax Code',
+    'VAT Amount',
+    'Cost Center',
+    'Profit Center',
+    'Assignment'
   ]
-
-  // Always show Cost Center column
-  baseColumns.push('Cost Center')
-
-  // Always show VAT Amount column
-  baseColumns.push('VAT Amount')
-
-  baseColumns.push('Profit Center')
-  baseColumns.push('Assignment')
 
   // Hide WHT columns for Petty Cash
   if (!isPettyCash.value) {
     baseColumns.push('WHT Type')
     baseColumns.push('WHT Code')
     baseColumns.push('WHT Base Amount')
+    baseColumns.push('WHT Amount')
   }
-
-  baseColumns.push('WHT Amount')
 
   return baseColumns
 })

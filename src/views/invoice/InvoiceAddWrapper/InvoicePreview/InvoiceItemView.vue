@@ -16,6 +16,8 @@
                 'invoice__field-base--cost': item.toLowerCase() === 'cost center',
                 'invoice__field-base--wht-type': item.toLowerCase() === 'wht type',
                 'invoice__field-base--wht-code': item.toLowerCase() === 'wht code',
+                'invoice__field-base--wht-base': item.toLowerCase() === 'wht base amount',
+                'invoice__field-base--wht-amount': item.toLowerCase() === 'wht amount',
               }"
               class="invoice__field-base"
             >
@@ -35,7 +37,10 @@
             <td>{{ getCostCenterName(item.costCenter) || '-' }}</td>
             <td>{{ item.profitCenter || '-' }}</td>
             <td>{{ item.assignment || '-' }}</td>
-            <td>{{ form.currency === 'IDR' ? useFormatIdr(item.whtAmount) : useFormatUsd(item.whtAmount) || '-' }}</td>
+            <td v-if="!isPettyCash">{{ item.whtType || '-' }}</td>
+            <td v-if="!isPettyCash">{{ item.whtCode || '-' }}</td>
+            <td v-if="!isPettyCash">{{ form.currency === 'IDR' ? useFormatIdr(item.whtBaseAmount) : useFormatUsd(item.whtBaseAmount) || '-' }}</td>
+            <td v-if="!isPettyCash">{{ form.currency === 'IDR' ? useFormatIdr(item.whtAmount) : useFormatUsd(item.whtAmount) || '-' }}</td>
           </tr>
         </tbody>
       </table>
@@ -54,19 +59,34 @@ const invoiceMasterApi = useInvoiceMasterDataStore()
 const form = inject<formTypes>('form')
 const costExpenseList = ref<invoiceItemTypes[]>([])
 
-const columns = ref<string[]>([
-  'Line',
-  'Activity / Expense',
-  'Item Amount',
-  'Item Text',
-  'Debit/Credit',
-  'Tax Code',
-  'VAT Amount',
-  'Cost Center',
-  'Profit Center',
-  'Assignment',
-  'WHT Amount'
-])
+// Check if invoice type is Petty Cash
+const isPettyCash = computed(() => form?.invoiceType === '5')
+
+// Dynamic columns based on invoice type
+const columns = computed(() => {
+  const baseColumns = [
+    'Line',
+    'Activity / Expense',
+    'Item Amount',
+    'Item Text',
+    'Debit/Credit',
+    'Tax Code',
+    'VAT Amount',
+    'Cost Center',
+    'Profit Center',
+    'Assignment'
+  ]
+
+  // Hide WHT columns for Petty Cash
+  if (!isPettyCash.value) {
+    baseColumns.push('WHT Type')
+    baseColumns.push('WHT Code')
+    baseColumns.push('WHT Base Amount')
+    baseColumns.push('WHT Amount')
+  }
+
+  return baseColumns
+})
 
 const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
 const costCenterList = computed(() => invoiceMasterApi.costCenterList)

@@ -41,25 +41,6 @@ export interface ParamsSubmissionTypes {
   isSaveAsDraft: boolean
 }
 
-interface ParamsSubmissionCostExpense {
-  id: number
-  activityId: number
-  activityExpenses: string
-  activityName: string
-  itemAmount: number
-  itemText: string
-  debitCredit: string
-  taxCode: string
-  vatAmount: number
-  costCenter: string
-  profitCenter: string
-  assignment: string
-  whtType: string
-  whtCode: string
-  whtBaseAmount: number
-  whtAmount: number
-}
-
 interface ParamsSubmissionHeader {
   invoiceUId: string
   invoiceTypeCode: number
@@ -298,7 +279,7 @@ export interface ParamsSubmissionHeaderNonPo {
   companyName: string
   invoiceNo: string
   documentNo: string
-  invoiceDate: string
+  invoiceDate?: string
   postingDate: string
   estimatedPaymentDate: string
   paymentMethodCode: string
@@ -311,6 +292,9 @@ export interface ParamsSubmissionHeaderNonPo {
   statusName: string
   department: string
   profileId: string
+  cashJournal?: string
+  pettyCashStartDate?: string | null
+  pettyCashEndDate?: string | null
 }
 
 interface ParamsSubmissionAlternativePay {
@@ -331,22 +315,23 @@ interface ParamsSubmissionAlternativePay {
   isOneTimeVendor: boolean
 }
 
-interface ParamsSubmissionCostExpense {
+export interface ParamsSubmissionCostExpense {
   id: number
   activityId: number
   activityExpense: string
   activityName: string
   itemAmount: number
+  itemText?: string
   debitCredit: string
   taxCode: string
   vatAmount: number
   costCenter: string
   profitCenter: string
   assignment: string
-  whtType: string
-  whtCode: string
-  whtBaseAmount: number
-  whtAmount: number
+  whtType?: string
+  whtCode?: string
+  whtBaseAmount?: number
+  whtAmount?: number
 }
 
 export interface ParamsCheckBudgetType {
