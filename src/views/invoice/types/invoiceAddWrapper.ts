@@ -52,12 +52,14 @@ export interface formTypes extends documentFormTypes {
   companyName: string
   reference: string
   referenceError?: boolean
-  cashJournal: string
-  cashJournalError?: boolean
+  cashJournalCode: string
+  cashJournalCodeError?: boolean
+  cashJournalName: string
   pettyCashPeriod: [Date | null, Date | null] | null
   pettyCashPeriodError?: boolean
-  casNo: string
-  casNoError?: boolean
+  casNoCode: string
+  casNoCodeError?: boolean
+  casNoName: string
   invoiceNo: string
   invoiceNoVendor: string
   invoiceNoVendorError?: boolean
@@ -83,7 +85,7 @@ export interface formTypes extends documentFormTypes {
 
   vendorNumber: string
   department: string
-  departmentError?: boolean 
+  departmentError?: boolean
 
   //invoice calculation
   subtotal: number

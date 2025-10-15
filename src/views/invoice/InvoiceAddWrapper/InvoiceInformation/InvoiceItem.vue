@@ -61,7 +61,7 @@
                 <span v-if="!item.isEdit">{{ item.itemText || '-' }}</span>
                 <input v-else v-model="item.itemText" class="input" type="text" placeholder=""/>
               </td>
-              <td>
+              <td v-if="!isPettyCash">
                 <span v-if="!item.isEdit">{{ getDebitCreditName(item.debitCredit) || '-' }}</span>
                 <select v-else v-model="item.debitCredit" class="select" placeholder="">
                   <option value="D">
@@ -148,14 +148,19 @@ const columns = computed(() => {
     'Action',
     'Activity / Expense',
     'Item Amount',
-    'Item Text',
-    'Debit/Credit',
-    'Tax Code',
-    'VAT Amount',
-    'Cost Center',
-    'Profit Center',
-    'Assignment'
+    'Item Text'
   ]
+
+  // Hide Debit/Credit for Petty Cash
+  if (!isPettyCash.value) {
+    baseColumns.push('Debit/Credit')
+  }
+
+  baseColumns.push('Tax Code')
+  baseColumns.push('VAT Amount')
+  baseColumns.push('Cost Center')
+  baseColumns.push('Profit Center')
+  baseColumns.push('Assignment')
 
   // Hide WHT columns for Petty Cash
   if (!isPettyCash.value) {

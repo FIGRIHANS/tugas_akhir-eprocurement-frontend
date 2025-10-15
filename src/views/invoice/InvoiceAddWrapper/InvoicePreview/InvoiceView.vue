@@ -33,7 +33,7 @@
       <!-- Cash Journal - Only for Petty Cash -->
       <div v-if="isPettyCash" :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
         <p class="text-xs font-normal text-gray-700">Cash Journal</p>
-        <p class="text-sm font-medium">{{ form.cashJournal || '-' }}</p>
+        <p class="text-sm font-medium">{{ form.cashJournalName || form.cashJournalCode || '-' }}</p>
       </div>
 
       <!-- Petty Cash Period - Only for Petty Cash -->
@@ -44,10 +44,10 @@
         </p>
       </div>
 
-      <!-- CAS No. - Only for CAS and LBA (hidden if not filled) -->
-      <div v-if="(isCAS || isLBA) && form.casNo" :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
+      <!-- CAS No. - Only for CAS and LBA -->
+      <div v-if="isCAS || isLBA" :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
         <p class="text-xs font-normal text-gray-700">CAS No.</p>
-        <p class="text-sm font-medium">{{ form.casNo }}</p>
+        <p class="text-sm font-medium">{{ form.casNoName || form.casNoCode || '-' }}</p>
       </div>
 
       <!-- Submitted Document No. - Only for Reimbursement, Credit Card, and LBA (hidden if not filled) -->
