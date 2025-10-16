@@ -769,17 +769,12 @@ const goNext = () => {
     isSubmit.value = true
     if (route.query.type === 'nonpo') {
       const submissionData = mapDataPostNonPo()
-      console.log('📤 Submitting Non-PO Invoice Data:', submissionData)
       invoiceApi
         .postSubmissionNonPo(submissionData)
         .then((response) => {
-          console.log('✅ Submission Response:', response)
           setAfterResponsePost(response)
         })
         .catch((error) => {
-          console.error('❌ Submission Error:', error)
-          console.error('Error Response:', error.response?.data)
-          // Show error modal on catch
           invoiceApi.errorMessageSubmission = error.response?.data?.result?.message || error.message || 'An unexpected error occurred'
           const idModal = document.querySelector('#error_submission_modal')
           const modal = KTModal.getInstance(idModal as HTMLElement)
@@ -795,7 +790,6 @@ const goNext = () => {
           setAfterResponsePost(response)
         })
         .catch((error) => {
-          console.error('❌ Submission Error:', error)
           invoiceApi.errorMessageSubmission = error.response?.data?.result?.message || error.message || 'An unexpected error occurred'
           const idModal = document.querySelector('#error_submission_modal')
           const modal = KTModal.getInstance(idModal as HTMLElement)
@@ -830,7 +824,6 @@ const goSaveDraft = () => {
         setAfterResponsePost(response)
       })
       .catch((error) => {
-        console.error('❌ Save Draft Error:', error)
         invoiceApi.errorMessageSubmission = error.response?.data?.result?.message || error.message || 'Failed to save draft'
         const idModal = document.querySelector('#error_submission_modal')
         const modal = KTModal.getInstance(idModal as HTMLElement)
@@ -850,7 +843,6 @@ const goSaveDraft = () => {
         setAfterResponsePost(response)
       })
       .catch((error) => {
-        console.error('❌ Save Draft Error:', error)
         invoiceApi.errorMessageSubmission = error.response?.data?.result?.message || error.message || 'Failed to save draft'
         const idModal = document.querySelector('#error_submission_modal')
         const modal = KTModal.getInstance(idModal as HTMLElement)
@@ -863,11 +855,7 @@ const goSaveDraft = () => {
 }
 
 const setAfterResponsePost = (response: { statusCode: number; result: { message: string } }) => {
-  console.log('📊 Response Status Code:', response.statusCode)
-  console.log('📊 Full Response:', response)
-
   if (response.statusCode === 200) {
-    console.log('✅ Invoice submitted successfully!')
     const idModal = document.querySelector('#success_invoice_modal')
     const modal = KTModal.getInstance(idModal as HTMLElement)
     modal.show()
@@ -883,8 +871,6 @@ const setAfterResponsePost = (response: { statusCode: number; result: { message:
       }
     }
   } else {
-    console.log('❌ Invoice submission failed!')
-    console.log('Error Message:', response.result?.message)
     invoiceApi.errorMessageSubmission = response.result.message
     const idModal = document.querySelector('#error_submission_modal')
     const modal = KTModal.getInstance(idModal as HTMLElement)
@@ -1155,13 +1141,11 @@ const mapDataCheck = () => {
 
   itemNoAcc.value += 1
 
-  // Add ACCOUNT_PAYABLE for all invoice types including Petty Cash
   if (form.invoiceType === '5') {
-    // For Petty Cash: use vendorId from form and cashJournal as reference
     const accData = {
       ITEMNO_ACC: itemNoAcc.value,
-      VENDOR_NO: form.vendorId || '',  // Use vendorId from form for Petty Cash
-      REF_KEY_1: '',  // No NPWP for Petty Cash
+      VENDOR_NO: form.vendorId || '',
+      REF_KEY_1: '',
       REF_KEY_2: '',
       REF_KEY_3: '',
       BLINE_DATE: '',
@@ -1174,17 +1158,12 @@ const mapDataCheck = () => {
     }
     accountPayable.push(accData)
   } else {
-    // For non-Petty Cash invoices
-    // Determine ITEM_TEXT based on invoice type
     let itemText = ''
     if (form.invoiceType === '1') {
-      // Reimbursement: use invoiceNoVendor
       itemText = form.invoiceNoVendor || ''
     } else if (form.invoiceType === '2') {
-      // Credit Card: use proposalAmountVal or description
       itemText = form.proposalAmountVal || form.description || ''
     } else if (form.invoiceType === '3' || form.invoiceType === '4') {
-      // CAS or LBA: use casNoCode or taxNoInvoice
       itemText = form.casNoCode || form.taxNoInvoice || ''
     }
 
@@ -1271,39 +1250,29 @@ const mapDataCheck = () => {
     }
   }
 
-  // Determine DOC_DATE based on invoice type
-  let docDate = moment().format('YYYYMMDD') // Default to current date
+  let docDate = moment().format('YYYYMMDD')
 
   if (form.invoiceType === '5') {
-    // Petty Cash: use pettyCashPeriod start date
     if (Array.isArray(form.pettyCashPeriod) && form.pettyCashPeriod[0]) {
       docDate = moment(form.pettyCashPeriod[0]).format('YYYYMMDD')
     }
   } else if (form.invoiceType === '1') {
-    // Reimbursement: use invoiceDate
     if (form.invoiceDate) {
       docDate = moment(form.invoiceDate).format('YYYYMMDD')
     }
   }
-  // For Credit Card (2), CAS (3), and LBA (4): use current date (already set as default)
 
-  // Determine REF_DOC_NO based on invoice type - MUST NOT BE EMPTY
   let refDocNo = ''
   if (form.invoiceType === '5') {
-    // Petty Cash: use cashJournalCode, fallback to invoiceNo or description
     refDocNo = form.cashJournalCode || form.invoiceNo || form.description || 'PETTY_CASH'
   } else if (form.invoiceType === '1') {
-    // Reimbursement: use invoiceNoVendor, fallback to taxNoInvoice
     refDocNo = form.invoiceNoVendor || form.taxNoInvoice || form.invoiceNo || 'REIMBURSEMENT'
   } else if (form.invoiceType === '2') {
-    // Credit Card: use proposalAmountVal, fallback to invoiceNo or description
     refDocNo = form.proposalAmountVal || form.invoiceNo || form.description || 'CREDIT_CARD'
   } else if (form.invoiceType === '3' || form.invoiceType === '4') {
-    // CAS or LBA: use casNoCode or taxNoInvoice, fallback to invoiceNo
     refDocNo = form.casNoCode || form.taxNoInvoice || form.invoiceNo || (form.invoiceType === '3' ? 'CAS' : 'LBA')
   }
 
-  // Final safety check - ensure REF_DOC_NO is never empty
   if (!refDocNo || refDocNo.trim() === '') {
     refDocNo = form.invoiceNo || form.description || 'REF_DOC'
   }
@@ -1383,13 +1352,11 @@ const checkFormBudget = () => {
       status = true
     }
   } else {
-    // Validation for other invoice types (Reimbursement, Credit Card, CAS, LBA)
     const isReimbursement = form.invoiceType === '1'
     const isCreditCard = form.invoiceType === '2'
     const isCAS = form.invoiceType === '3'
     const isLBA = form.invoiceType === '4'
 
-    // Common required fields for all non-Petty Cash types
     if (
       !form.companyCode ||
       !form.description ||
@@ -1400,28 +1367,24 @@ const checkFormBudget = () => {
       status = true
     }
 
-    // Reimbursement specific fields
     if (isReimbursement) {
       if (!form.invoiceNoVendor || !form.invoiceDate || !form.taxNoInvoice) {
         status = true
       }
     }
 
-    // Credit Card specific fields
     if (isCreditCard) {
       if (!form.proposalAmountVal) {
         status = true
       }
     }
 
-    // CAS specific fields
     if (isCAS) {
       if (!form.taxNoInvoice) {
         status = true
       }
     }
 
-    // LBA specific fields
     if (isLBA) {
       if (!form.taxNoInvoice) {
         status = true
@@ -1461,7 +1424,6 @@ onMounted(() => {
 
   if (route.query.type === 'po-view' || route.query.type === 'non-po-view') {
     tabNow.value = 'preview'
-    // For view mode, all tabs should be accessible
     hasCompletedDataTab.value = true
   }
 
@@ -1472,7 +1434,6 @@ onMounted(() => {
       route.query.type !== 'po-view' &&
       route.query.type === 'nonpo')
   ) {
-    // For edit mode (existing invoice), all tabs should be accessible
     hasCompletedDataTab.value = true
 
     invoiceApi.getNonPoDetail(route.query.invoice?.toString() || '').then(() => {
@@ -1488,7 +1449,6 @@ onMounted(() => {
       route.query.type !== 'po-view' &&
       route.query.type === 'po')
   ) {
-    // For edit mode (existing PO invoice), all tabs should be accessible
     hasCompletedDataTab.value = true
 
     invoiceApi.getPoDetail(route.query.invoice?.toString() || '').then(() => {
