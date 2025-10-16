@@ -75,7 +75,7 @@
         <label class="form-label">
           Petty Cash Period
         </label>
-        <DateRangePicker v-model="form.pettyCashPeriod" format="yyyy/MM/dd" class="w-full -ml-[15px]" teleport :min-days="7" />
+        <DatePicker v-model="form.pettyCashPeriod" format="yyyy/MM/dd" class="w-full -ml-[15px]" teleport :min-days="7" :range="true" />
       </div>
 
       <div v-if="isCAS || isLBA" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
@@ -215,7 +215,6 @@ import { ref, computed, onMounted, watch, inject } from 'vue'
 import { useRoute } from 'vue-router'
 import type { formTypes } from '../../../types/invoiceAddWrapper'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
-import DateRangePicker from '@/components/datePicker/DateRangePicker.vue'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useLoginStore } from '@/stores/views/login'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
