@@ -260,11 +260,9 @@ const form = reactive<formTypes>({
   vendorNumber: '',
   department: '',
   reference: '',
-  cashJournal: '',
   cashJournalCode: '',
   cashJournalName: '',
   pettyCashPeriod: [null, null],
-  casNo: '',
   casNoCode: '',
   casNoName: '',
   proposalAmountVal: '',
@@ -684,6 +682,7 @@ const mapDataPostNonPo = () => {
       paymentMethodCode: '',
       paymentMethodName: '',
       creditCardBillingID: '',
+      submittedDate: moment().toISOString(),
       statusCode: isClickDraft.value ? 0 : 1,
       statusName: isClickDraft.value ? 'Drafted' : 'Waiting to Verify'
     },
@@ -1342,10 +1341,9 @@ const checkFormBudget = () => {
     form.otherDocument !== null
 
   if (isPettyCash) {
-    // Petty Cash specific validation
     if (
       !form.companyCode ||
-      !form.cashJournal ||
+      !form.cashJournalCode ||
       !form.pettyCashPeriod ||
       (Array.isArray(form.pettyCashPeriod) && (!form.pettyCashPeriod[0] || !form.pettyCashPeriod[1])) ||
       !form.description ||

@@ -83,6 +83,7 @@
           CAS No.
           <span v-if="isCAS" class="text-red-500 ml-[4px]">*</span>
         </label>
+
         <input
           v-if="isCAS"
           v-model="form.casNoCode"
@@ -267,7 +268,6 @@ const listInvoiceTypeNonPo = computed(() => invoiceMasterApi.invoiceNonPoType)
 const listMatrixApproval = computed(() => invoiceMasterApi.matrixApprovalList)
 const listCashJournal = ref([])
 const listCasNo = ref([])
-
 const isReimbursement = computed(() => form?.invoiceType === '1')
 const isCreditCard = computed(() => form?.invoiceType === '2')
 const isCAS = computed(() => form?.invoiceType === '3')
@@ -319,7 +319,6 @@ watch(
       if (getIndex !== -1) form.cashJournalName = listCashJournal.value[getIndex].name
     }
 
-
     if (form?.casNoCode && listCasNo.value.length > 0 && form.invoiceType === '4') {
       const getIndex = listCasNo.value.findIndex((item) => item.code === form.casNoCode)
       if (getIndex !== -1) form.casNoName = listCasNo.value[getIndex].name
@@ -327,6 +326,21 @@ watch(
   },
   {
     deep: true
+  }
+)
+
+// Watch for invoice type changes to handle CAS No field
+watch(
+  () => form?.invoiceType,
+  (newType, oldType) => {
+    // When changing TO CAS (type 3), reset casNoCode to empty (will show "Auto Generated Number")
+    if (newType === '3' && oldType !== '3') {
+      form.casNoCode = ''
+    }
+    // When changing FROM CAS to LBA (type 4), also reset casNoCode to allow manual input
+    if (newType === '4' && oldType === '3') {
+      form.casNoCode = ''
+    }
   }
 )
 

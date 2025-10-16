@@ -61,7 +61,7 @@
                 <span v-if="!item.isEdit">{{ item.itemText || '-' }}</span>
                 <input v-else v-model="item.itemText" class="input" type="text" placeholder=""/>
               </td>
-              <td>
+              <td v-if="!isPettyCash">
                 <span v-if="!item.isEdit">{{ getDebitCreditName(item.debitCredit) || '-' }}</span>
                 <select v-else v-model="item.debitCredit" class="select" placeholder="">
                   <option value="D">
