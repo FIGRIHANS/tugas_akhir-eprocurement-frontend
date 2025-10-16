@@ -649,52 +649,43 @@ const mapDataPostNonPo = () => {
 
   const data = {
     header: {
-      invoiceUId:
-        form.status === 0 || form.status === 5
-          ? form.invoiceUId
-          : '00000000-0000-0000-0000-000000000000',
       invoiceTypeCode: Number(form.invoiceType),
       invoiceTypeName: form.invoiceTypeName,
       invoiceVendorNo: form.vendorId,
       companyCode: form.companyCode,
       companyName: form.companyName,
       invoiceNo: form.invoiceNo,
-
-      documentNo: isPettyCash ? (form.cashJournalCode || '') :
-                  isReimbursement ? (form.invoiceNoVendor || '') :
-                  isCreditCard ? (form.proposalAmountVal || '') :
-                  (isCAS || isLBA) ? (form.casNoCode || form.taxNoInvoice || '') : '',
-
-      invoiceDate: invoiceDateToUse,
-
-      postingDate: null,
-      estimatedPaymentDate: null,
-      paymentMethodCode: '',
-      paymentMethodName: '',
-
-      taxNo: form.taxNoInvoice || '',
-
-      currCode: form.currency,
-      creditCardBillingID: '',
-      notes: form.description,
-      statusCode: isClickDraft.value ? 0 : 1,
-      statusName: isClickDraft.value ? 'Drafted' : 'Waiting to Verify',
-      department: checkIsNonPo() ? form.department : userData.value.profile.costCenter || '',
-      profileId: userData.value.profile.profileId.toString(),
-
       cashJournal: form.cashJournalCode || '',
       cashJournalCode: form.cashJournalCode || '',
       cashJournalName: form.cashJournalName || '',
       pettyCashStartDate: pettyCashStartDate,
       pettyCashEndDate: pettyCashEndDate,
-
-      proposalAmount: form.proposalAmountVal || '',
-
       casNo: form.casNoCode || '',
       casNoCode: form.casNoCode || '',
       casNoName: form.casNoName || '',
-
-      invoiceNoVendor: form.invoiceNoVendor || ''
+      documentNo: isPettyCash ? (form.cashJournalCode || '') :
+                  isReimbursement ? (form.invoiceNoVendor || '') :
+                  isCreditCard ? (form.proposalAmountVal || '') :
+                  (isCAS || isLBA) ? (form.casNoCode || form.taxNoInvoice || '') : '',
+      invoiceNoVendor: form.invoiceNoVendor || '',
+      invoiceDate: invoiceDateToUse,
+      taxNo: form.taxNoInvoice || '',
+      proposalAmount: form.proposalAmountVal || '',
+      currCode: form.currency,
+      department: checkIsNonPo() ? form.department : userData.value.profile.costCenter || '',
+      profileId: userData.value.profile.profileId.toString(),
+      notes: form.description,
+      invoiceUId:
+        form.status === 0 || form.status === 5
+          ? form.invoiceUId
+          : '00000000-0000-0000-0000-000000000000',
+      postingDate: null,
+      estimatedPaymentDate: null,
+      paymentMethodCode: '',
+      paymentMethodName: '',
+      creditCardBillingID: '',
+      statusCode: isClickDraft.value ? 0 : 1,
+      statusName: isClickDraft.value ? 'Drafted' : 'Waiting to Verify'
     },
     vendor: {
       vendorId: Number(form.vendorId),
@@ -769,12 +760,25 @@ const goNext = () => {
     isSubmit.value = true
     if (route.query.type === 'nonpo') {
       const submissionData = mapDataPostNonPo()
+
+      // Debug: Log submission data
+      console.log('=== DEBUG INVOICE NON-PO SUBMISSION ===')
+      console.log('Full Submission Data:', JSON.stringify(submissionData, null, 2))
+      console.log('Header:', submissionData.header)
+      console.log('CostExpenses Count:', submissionData.costExpenses?.length)
+      console.log('CostExpenses:', submissionData.costExpenses)
+      console.log('=======================================')
+
       invoiceApi
         .postSubmissionNonPo(submissionData)
         .then((response) => {
+          console.log('✅ Submission Success:', response)
           setAfterResponsePost(response)
         })
         .catch((error) => {
+          console.error('❌ Submission Error:', error)
+          console.error('Error Response:', error.response)
+          console.error('Error Data:', error.response?.data)
           invoiceApi.errorMessageSubmission = error.response?.data?.result?.message || error.message || 'An unexpected error occurred'
           const idModal = document.querySelector('#error_submission_modal')
           const modal = KTModal.getInstance(idModal as HTMLElement)

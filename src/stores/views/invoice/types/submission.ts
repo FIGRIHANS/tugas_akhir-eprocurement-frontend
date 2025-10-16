@@ -279,9 +279,9 @@ export interface ParamsSubmissionHeaderNonPo {
   companyName: string
   invoiceNo: string
   documentNo: string
-  invoiceDate?: string
-  postingDate: string
-  estimatedPaymentDate: string
+  invoiceDate?: string | null
+  postingDate?: string | null
+  estimatedPaymentDate?: string | null
   paymentMethodCode: string
   paymentMethodName: string
   taxNo: string
@@ -293,8 +293,15 @@ export interface ParamsSubmissionHeaderNonPo {
   department: string
   profileId: string
   cashJournal?: string
+  cashJournalCode?: string
+  cashJournalName?: string
   pettyCashStartDate?: string | null
   pettyCashEndDate?: string | null
+  proposalAmount?: string
+  casNo?: string
+  casNoCode?: string
+  casNoName?: string
+  invoiceNoVendor?: string
 }
 
 interface ParamsSubmissionAlternativePay {
