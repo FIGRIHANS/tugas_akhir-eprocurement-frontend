@@ -33,6 +33,20 @@
         <input v-model="form.vendorId" class="input" placeholder="" disabled />
       </div>
 
+      <div v-if="form.invoiceType === '901'" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          DP Option
+          <span class="text-red-500 ml-[4px]">*</span>
+        </label>
+        <input v-if="form.status !== 0 && form.status !== -1 && form.status !== 5" v-model="form.invoiceDp"
+          class="input" placeholder="" disabled />
+        <select v-else v-model="form.invoiceDp" class="select" :class="{ 'border-danger': form.invoiceDpError }">
+          <option v-for="item of dpTypeList" :key="item.code" :value="item.code">
+            {{ item.name }}
+          </option>
+        </select>
+      </div>
+
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Company Code
@@ -52,6 +66,41 @@
           Reference
         </label>
         <input v-model="form.reference" class="input" placeholder="Auto Generated Number" disabled />
+      </div>
+
+      <div v-if="checkPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          Submitted Document No.
+        </label>
+        <input v-model="form.invoiceNo" class="input" placeholder="Auto Generated Number" disabled />
+      </div>
+
+      <div v-if="checkPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          Invoice Vendor No.
+          <span class="text-red-500 ml-[4px]">*</span>
+        </label>
+        <input v-model="form.invoiceNoVendor" class="input" placeholder=""
+          :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
+          :class="{ 'border-danger': form.invoiceNoVendorError }" />
+      </div>
+
+      <div v-if="checkPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          Invoice Date
+          <span class="text-red-500 ml-[4px]">*</span>
+        </label>
+        <DatePicker v-model="form.invoiceDate" format="yyyy/MM/dd" :error="form.invoiceDateError"
+          :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5" class="w-full -ml-[15px]" teleport />
+      </div>
+
+      <div v-if="checkPo() && form.invoiceType != '903'" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          Tax Document No.
+        </label>
+        <input v-model="form.taxNoInvoice" class="input" placeholder=""
+          :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
+          :class="{ 'border-danger': form.taxNoInvoiceError }" />
       </div>
 
       <div v-if="isPettyCash" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
@@ -262,6 +311,7 @@ const currencyList = computed(() => {
   // }
 })
 const companyCodeList = computed(() => invoiceMasterApi.companyCode)
+const dpTypeList = computed(() => invoiceMasterApi.dpType)
 const listInvoiceTypePo = computed(() => invoiceMasterApi.invoicePoType)
 const listInvoiceTypeNonPo = computed(() => invoiceMasterApi.invoiceNonPoType)
 const listMatrixApproval = computed(() => invoiceMasterApi.matrixApprovalList)
