@@ -61,7 +61,7 @@
                 <span v-if="!item.isEdit">{{ item.itemText || '-' }}</span>
                 <input v-else v-model="item.itemText" class="input" type="text" placeholder=""/>
               </td>
-              <td v-if="!isPettyCash">
+              <td>
                 <span v-if="!item.isEdit">{{ getDebitCreditName(item.debitCredit) || '-' }}</span>
                 <select v-else v-model="item.debitCredit" class="select" placeholder="">
                   <option value="D">
@@ -139,30 +139,22 @@ const verificationApi = useInvoiceVerificationStore()
 
 const form = inject<formTypes>('form')
 
-// Check if invoice type is Petty Cash
 const isPettyCash = computed(() => form?.invoiceType === '5')
 
-// Dynamic columns based on invoice type
 const columns = computed(() => {
   const baseColumns = [
     'Action',
     'Activity / Expense',
     'Item Amount',
-    'Item Text'
+    'Item Text',
+    'Debit/Credit',
+    'Tax Code',
+    'VAT Amount',
+    'Cost Center',
+    'Profit Center',
+    'Assignment'
   ]
 
-  // Hide Debit/Credit for Petty Cash
-  if (!isPettyCash.value) {
-    baseColumns.push('Debit/Credit')
-  }
-
-  baseColumns.push('Tax Code')
-  baseColumns.push('VAT Amount')
-  baseColumns.push('Cost Center')
-  baseColumns.push('Profit Center')
-  baseColumns.push('Assignment')
-
-  // Hide WHT columns for Petty Cash
   if (!isPettyCash.value) {
     baseColumns.push('WHT Type')
     baseColumns.push('WHT Code')

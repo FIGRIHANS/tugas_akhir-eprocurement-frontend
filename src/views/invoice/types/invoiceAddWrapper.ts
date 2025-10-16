@@ -52,11 +52,15 @@ export interface formTypes extends documentFormTypes {
   companyName: string
   reference: string
   referenceError?: boolean
+  cashJournal: string
+  cashJournalError?: boolean
   cashJournalCode: string
   cashJournalCodeError?: boolean
   cashJournalName: string
   pettyCashPeriod: [Date | null, Date | null] | null
   pettyCashPeriodError?: boolean
+  casNo: string
+  casNoError?: boolean
   casNoCode: string
   casNoCodeError?: boolean
   casNoName: string

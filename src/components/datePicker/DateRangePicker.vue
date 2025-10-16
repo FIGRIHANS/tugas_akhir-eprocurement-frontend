@@ -2,7 +2,6 @@
   <div>
     <label v-if="label" class="form-label mb-2">{{ label }}</label>
     <div class="w-full">
-      <!-- Reuse existing DatePicker component but enable range and show 2 months side-by-side -->
       <VueDatePicker
         v-model="internalRange"
         :enable-time="false"
@@ -43,7 +42,6 @@ import type { PropType } from 'vue'
 import VueDatePicker from '@vuepic/vue-datepicker'
 
 const props = defineProps({
-  // Accept either a single date/string or an array [start, end] to match parent form types
   modelValue: {
     type: [Array, Date, String] as PropType<Date | string | Array<Date | string | null> | null>,
     default: () => [null, null]
@@ -80,25 +78,20 @@ const props = defineProps({
 
 const emits = defineEmits(['update:modelValue', 'change'])
 
-// Get today's date at midnight for default start date
 const getToday = (): Date => {
   const now = new Date()
   return new Date(now.getFullYear(), now.getMonth(), now.getDate())
 }
 
-// normalize modelValue to an array [start, end]
 const toRange = (val: unknown): [Date | null, Date | null] => {
   if (!val || val === '') {
-    // Default: today as start date if nothing is provided
     return [getToday(), null]
   }
   if (Array.isArray(val)) {
-    // Convert to Date objects if needed
     const start = val[0] ? (val[0] instanceof Date ? val[0] : new Date(String(val[0]))) : getToday()
     const end = val[1] ? (val[1] instanceof Date ? val[1] : new Date(String(val[1]))) : null
     return [start, end]
   }
-  // single value -> treat as start with no end yet
   const singleDate = val instanceof Date ? val : new Date(String(val))
   return [singleDate, null]
 }
@@ -114,8 +107,6 @@ watch(
   { immediate: true }
 )
 
-// helper to compute inclusive days
-// helper to convert input (Date|string) to a Date at start of day
 function toMidnightDate(input: Date | string | null): Date | null {
   if (!input) return null
   const d = input instanceof Date ? input : new Date(String(input))
@@ -145,7 +136,6 @@ watch(
         emits('change', [start, end])
       }
     } else {
-      // partial selection
       validationError.value = null
       emits('update:modelValue', [start, end])
       emits('change', [start, end])
@@ -154,7 +144,6 @@ watch(
   { deep: true }
 )
 
-// Initialize with today's date if not already set
 onMounted(() => {
   const [start, end] = internalRange.value
   if (!start) {
@@ -166,10 +155,8 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 @use './styles/datepicker.scss';
-/* small tweaks to align with existing styles */
 .form-label { display: block }
 
-/* Ensure the datepicker is wider and properly aligned */
 :deep(.dp__main) {
   inline-size: 100%;
 }
