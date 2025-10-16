@@ -682,7 +682,6 @@ const mapDataPostNonPo = () => {
       paymentMethodCode: '',
       paymentMethodName: '',
       creditCardBillingID: '',
-      submittedDate: moment().toISOString(),
       statusCode: isClickDraft.value ? 0 : 1,
       statusName: isClickDraft.value ? 'Drafted' : 'Waiting to Verify'
     },

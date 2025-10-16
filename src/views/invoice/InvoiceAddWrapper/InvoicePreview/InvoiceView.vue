@@ -27,7 +27,7 @@
 
       <div v-if="isPettyCash" :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
         <p class="text-xs font-normal text-gray-700">Cash Journal</p>
-        <p class="text-sm font-medium">{{ form.cashJournal || '-' }}</p>
+        <p class="text-sm font-medium">{{ form.cashJournalCode || '-' }}</p>
       </div>
 
       <div v-if="isPettyCash" :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
@@ -37,9 +37,9 @@
         </p>
       </div>
 
-      <div v-if="(isCAS || isLBA) && form.casNo" :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
+      <div v-if="(isCAS || isLBA) && form.casNoCode" :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
         <p class="text-xs font-normal text-gray-700">CAS No.</p>
-        <p class="text-sm font-medium">{{ form.casNo }}</p>
+        <p class="text-sm font-medium">{{ form.casNoCode }}</p>
       </div>
 
       <div v-if="(isReimbursement || isCreditCard || isLBA) && form.invoiceNo" :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
