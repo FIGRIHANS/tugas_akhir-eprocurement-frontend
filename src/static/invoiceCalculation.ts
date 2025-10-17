@@ -22,3 +22,10 @@ export const nonPoField = [
   'WHT Amount',
   'Total Net Amount',
 ]
+
+export const pettyCashField = [
+  'Subtotal',
+  'VAT Amount',
+  'Total Gross Amount',
+  'Total Net Amount',
+]

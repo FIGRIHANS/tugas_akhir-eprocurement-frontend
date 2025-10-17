@@ -231,6 +231,11 @@ const form = reactive<formTypes>({
   emailAlternative: '',
   vendorNumber: '123456',
   department: '',
+  purchasingGroup: '',
+  RequisitionCode: '',
+  material: '',
+  plant: '',
+  pricePerunit: '',
 })
 
 const contentComponent = computed(() => {
@@ -247,6 +252,7 @@ const listDocumentType = computed(() => invoiceMasterApi.documentType)
 const vendorList = computed(() => invoiceMasterApi.vendorList)
 const invoiceDpList = computed(() => invoiceMasterApi.dpType)
 const detailPo = computed(() => invoiceApi.detailPo)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const userData = computed(() => loginApi.userData)
 
 const checkInvoiceView = () => {
@@ -257,6 +263,7 @@ const checkIsNonPo = () => {
   return route.query.type === 'nonpo'
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const checkInvoiceData = () => {
   form.vendorIdError = useCheckEmpty(form.vendorId).isError
   form.bankKeyIdError = useCheckEmpty(form.bankKeyId).isError
@@ -302,6 +309,7 @@ const checkActiveEditInvoiceItem = () => {
   return status
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const checkInvoiceInformation = () => {
   form.companyCodeError = useCheckEmpty(form.companyCode).isError
   form.invoiceNoVendorError = useCheckEmpty(form.invoiceNoVendor).isError
@@ -334,9 +342,10 @@ const checkInvoiceInformation = () => {
     form.dpAmountDeductionError
   )
     return false
-  else return true
+    else return true
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const setTab = (value: string) => {
   tabNow.value = value
 }
@@ -563,6 +572,7 @@ const goSaveDraft = () => {
     })
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const setData = () => {
   const detail = detailPo.value
   if (form && detail) {
