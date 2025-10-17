@@ -2,7 +2,6 @@
   <div>
     <p class="mb-[16px] font-semibold text-base">Invoice Header</p>
     <div v-if="form">
-      <!-- Invoice Type -->
       <div v-if="checkPo() || checkIsNonPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Invoice Type
@@ -25,15 +24,15 @@
           </select>
         </template>
       </div>
-      <!-- Vendor No -->
-      <div v-if="checkIsNonPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+
+      <div v-if="checkIsNonPo() && !isPettyCash" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Vendor No.
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
         <input v-model="form.vendorId" class="input" placeholder="" disabled />
       </div>
-      <!-- DP Option -->
+
       <div v-if="form.invoiceType === '901'" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           DP Option
@@ -47,7 +46,7 @@
           </option>
         </select>
       </div>
-      <!-- Company Code -->
+
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Company Code
@@ -61,15 +60,22 @@
           </option>
         </select>
       </div>
-      <!-- Submitted Document No. -->
-      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+
+      <div v-if="isPettyCash" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          Reference
+        </label>
+        <input v-model="form.reference" class="input" placeholder="Auto Generated Number" disabled />
+      </div>
+
+      <div v-if="checkPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Submitted Document No.
         </label>
         <input v-model="form.invoiceNo" class="input" placeholder="Auto Generated Number" disabled />
       </div>
-      <!-- Invoice Document No. * -->
-      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+
+      <div v-if="checkPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Invoice Vendor No.
           <span class="text-red-500 ml-[4px]">*</span>
@@ -78,8 +84,8 @@
           :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
           :class="{ 'border-danger': form.invoiceNoVendorError }" />
       </div>
-      <!-- Invoice Date -->
-      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+
+      <div v-if="checkPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Invoice Date
           <span class="text-red-500 ml-[4px]">*</span>
@@ -87,8 +93,8 @@
         <DatePicker v-model="form.invoiceDate" format="yyyy/MM/dd" :error="form.invoiceDateError"
           :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5" class="w-full -ml-[15px]" teleport />
       </div>
-      <!-- Tax Document No. * -->
-      <div v-if="form.invoiceType != '903'" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+
+      <div v-if="checkPo() && form.invoiceType != '903'" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Tax Document No.
         </label>
@@ -96,7 +102,103 @@
           :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
           :class="{ 'border-danger': form.taxNoInvoiceError }" />
       </div>
-      <!-- Currency -->
+
+      <div v-if="isPettyCash" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          Cash Journal
+        </label>
+        <v-select
+          v-model="form.cashJournalCode"
+          class="customSelect w-full -ml-[15px]"
+          label="name"
+          placeholder="Select"
+          :reduce="(option: any) => option.code"
+          :options="listCashJournal"
+          :class="{ 'error-select': form.cashJournalCodeError }"
+          :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
+          appendToBody
+        ></v-select>
+      </div>
+
+      <div v-if="isPettyCash" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          Petty Cash Period
+        </label>
+        <DatePicker v-model="form.pettyCashPeriod" format="yyyy/MM/dd" class="w-full -ml-[15px]" teleport :min-days="7" :range="true" />
+      </div>
+
+      <div v-if="isCAS || isLBA" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          CAS No.
+          <span v-if="isCAS" class="text-red-500 ml-[4px]">*</span>
+        </label>
+
+        <input
+          v-if="isCAS"
+          v-model="form.casNoCode"
+          class="input"
+          placeholder="Auto Generated Number"
+          disabled
+        />
+        <v-select
+          v-else-if="isLBA"
+          v-model="form.casNoCode"
+          class="customSelect w-full -ml-[15px]"
+          label="name"
+          placeholder="Select"
+          :reduce="(option: any) => option.code"
+          :options="listCasNo"
+          :class="{ 'error-select': form.casNoCodeError }"
+          :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
+          appendToBody
+        ></v-select>
+      </div>
+
+      <div v-if="isReimbursement || isCreditCard || isLBA" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          Submitted Document No.
+        </label>
+        <input v-model="form.invoiceNo" class="input" placeholder="Auto Generated Number" disabled />
+      </div>
+
+      <div v-if="isCreditCard" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          Proposal Amount
+          <span class="text-red-500 ml-[4px]">*</span>
+        </label>
+        <input v-model="form.proposalAmountVal" class="input" placeholder=""
+          :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5" />
+      </div>
+
+      <div v-if="isReimbursement" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          Invoice Vendor No.
+          <span class="text-red-500 ml-[4px]">*</span>
+        </label>
+        <input v-model="form.invoiceNoVendor" class="input" placeholder=""
+          :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
+          :class="{ 'border-danger': form.invoiceNoVendorError }" />
+      </div>
+
+      <div v-if="isReimbursement" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          Invoice Date
+          <span class="text-red-500 ml-[4px]">*</span>
+        </label>
+        <DatePicker v-model="form.invoiceDate" format="yyyy/MM/dd" :error="form.invoiceDateError"
+          :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5" class="w-full -ml-[15px]" teleport />
+      </div>
+
+      <div v-if="isReimbursement || isCAS || isLBA" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          Tax Document No.
+          <span class="text-red-500 ml-[4px]">*</span>
+        </label>
+        <input v-model="form.taxNoInvoice" class="input" placeholder=""
+          :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
+          :class="{ 'border-danger': form.taxNoInvoiceError }" />
+      </div>
+
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Currency
@@ -109,14 +211,14 @@
           </option>
         </select>
       </div>
-      <!-- Remaining DP Amount -->
+
       <div v-if="form.invoiceDp === '9013'" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Remaining DP Amount
         </label>
         <input v-model="remainingDpAmountVal" class="input" placeholder="" disabled />
       </div>
-      <!-- DP Amount Deduction -->
+
       <div v-if="form.invoiceDp === '9013'" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           DP Amount Deduction
@@ -126,7 +228,7 @@
           :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
           :class="{ 'border-danger': form.dpAmountDeductionError }" />
       </div>
-      <!-- Department -->
+
       <div v-if="checkIsNonPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Requestor
@@ -143,7 +245,7 @@
           appendToBody
         ></v-select>
       </div>
-      <!-- Description -->
+
       <div v-if="form.invoiceType != '903'" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Description
@@ -213,6 +315,13 @@ const dpTypeList = computed(() => invoiceMasterApi.dpType)
 const listInvoiceTypePo = computed(() => invoiceMasterApi.invoicePoType)
 const listInvoiceTypeNonPo = computed(() => invoiceMasterApi.invoiceNonPoType)
 const listMatrixApproval = computed(() => invoiceMasterApi.matrixApprovalList)
+const listCashJournal = ref([])
+const listCasNo = ref([])
+const isReimbursement = computed(() => form?.invoiceType === '1')
+const isCreditCard = computed(() => form?.invoiceType === '2')
+const isCAS = computed(() => form?.invoiceType === '3')
+const isLBA = computed(() => form?.invoiceType === '4')
+const isPettyCash = computed(() => form?.invoiceType === '5')
 
 const remainingDpAmountVal = computed(() => {
   if (form.currency === 'IDR') {
@@ -253,9 +362,46 @@ watch(
       const getIndex = companyCodeList.value.findIndex((item) => item.code === form.companyCode)
       if (getIndex !== -1) form.companyName = companyCodeList.value[getIndex].name.split(' - ')[1]
     }
+
+    if (form?.cashJournalCode && listCashJournal.value.length > 0) {
+      const getIndex = listCashJournal.value.findIndex((item) => item.code === form.cashJournalCode)
+      if (getIndex !== -1) form.cashJournalName = listCashJournal.value[getIndex].name
+    }
+
+    if (form?.casNoCode && listCasNo.value.length > 0 && form.invoiceType === '4') {
+      const getIndex = listCasNo.value.findIndex((item) => item.code === form.casNoCode)
+      if (getIndex !== -1) form.casNoName = listCasNo.value[getIndex].name
+    }
   },
   {
     deep: true
+  }
+)
+
+// Watch for invoice type changes to handle CAS No field
+watch(
+  () => form?.invoiceType,
+  (newType, oldType) => {
+    // When changing TO CAS (type 3), reset casNoCode to empty (will show "Auto Generated Number")
+    if (newType === '3' && oldType !== '3') {
+      form.casNoCode = ''
+    }
+    // When changing FROM CAS to LBA (type 4), also reset casNoCode to allow manual input
+    if (newType === '4' && oldType === '3') {
+      form.casNoCode = ''
+    }
+  }
+)
+
+watch(
+  () => form?.invoiceType,
+  (newType, oldType) => {
+    if (newType === '3' && oldType !== '3') {
+      form.casNoCode = ''
+    }
+    if (newType === '4' && oldType === '3') {
+      form.casNoCode = ''
+    }
   }
 )
 

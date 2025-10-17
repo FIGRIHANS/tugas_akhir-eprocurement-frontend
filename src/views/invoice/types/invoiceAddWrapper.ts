@@ -50,6 +50,16 @@ export interface formTypes extends documentFormTypes {
   companyCode: string
   companyCodeError?: boolean
   companyName: string
+  reference: string
+  referenceError?: boolean
+  cashJournalCode: string
+  cashJournalCodeError?: boolean
+  cashJournalName: string
+  pettyCashPeriod: [Date | null, Date | null] | null
+  pettyCashPeriodError?: boolean
+  casNoCode: string
+  casNoCodeError?: boolean
+  casNoName: string
   invoiceNo: string
   invoiceNoVendor: string
   invoiceNoVendorError?: boolean
@@ -66,6 +76,8 @@ export interface formTypes extends documentFormTypes {
   remainingDpAmount: number
   dpAmountDeduction: number
   dpAmountDeductionError?: boolean
+  proposalAmountVal: string
+  proposalAmountError?: boolean
   currency: string
   currencyError?: boolean
   description: string

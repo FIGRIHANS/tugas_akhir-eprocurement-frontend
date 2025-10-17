@@ -27,7 +27,7 @@
         </thead>
         <tbody>
           <tr v-if="form.invoiceItem.length === 0">
-            <td colspan="11" class="text-center text-[13px]">No Data Available</td>
+            <td :colspan="columns.length" class="text-center text-[13px]">No Data Available</td>
           </tr>
           <template v-else>
             <tr v-for="(item, index) in form.invoiceItem" :key="index" class="cost__field-items">
@@ -61,7 +61,7 @@
                 <span v-if="!item.isEdit">{{ item.itemText || '-' }}</span>
                 <input v-else v-model="item.itemText" class="input" type="text" placeholder=""/>
               </td>
-              <td>
+              <td v-if="!isPettyCash">
                 <span v-if="!item.isEdit">{{ getDebitCreditName(item.debitCredit) || '-' }}</span>
                 <select v-else v-model="item.debitCredit" class="select" placeholder="">
                   <option value="D">
@@ -107,16 +107,16 @@
               <td>
                 <span>{{ item.assignment || '-' }}</span>
               </td>
-              <td>
+              <td v-if="!isPettyCash">
                 <span>{{ item.whtType || '-' }}</span>
               </td>
-              <td>
+              <td v-if="!isPettyCash">
                 <span>{{ item.whtCode || '-' }}</span>
               </td>
-              <td>
+              <td v-if="!isPettyCash">
                 <span>{{ form?.currency === 'IDR' ? useFormatIdr(item.whtBaseAmount) : useFormatUsd(item.whtBaseAmount) || '-' }}</span>
               </td>
-              <td>
+              <td v-if="!isPettyCash">
                 <span>{{ form?.currency === 'IDR' ? useFormatIdr(item.whtAmount) : useFormatUsd(item.whtAmount) || '-' }}</span>
               </td>
             </tr>
@@ -128,7 +128,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, inject } from 'vue'
+import { computed, watch, inject } from 'vue'
 import type { formTypes } from '../../types/invoiceAddWrapper'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
@@ -136,24 +136,34 @@ import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const verificationApi = useInvoiceVerificationStore()
-const columns = ref([
-  'Action',
-  'Activity / Expense',
-  'Item Amount',
-  'Item Text',
-  'Debit/Credit',
-  'Tax Code',
-  'VAT Amount',
-  'Cost Center',
-  'Profit Center',
-  'Assignment',
-  'WHT Type',
-  'WHT Code',
-  'WHT Base Amount',
-  'WHT Amount'
-])
 
 const form = inject<formTypes>('form')
+
+const isPettyCash = computed(() => form?.invoiceType === '5')
+
+const columns = computed(() => {
+  const baseColumns = [
+    'Action',
+    'Activity / Expense',
+    'Item Amount',
+    'Item Text',
+    'Debit/Credit',
+    'Tax Code',
+    'VAT Amount',
+    'Cost Center',
+    'Profit Center',
+    'Assignment'
+  ]
+
+  if (!isPettyCash.value) {
+    baseColumns.push('WHT Type')
+    baseColumns.push('WHT Code')
+    baseColumns.push('WHT Base Amount')
+    baseColumns.push('WHT Amount')
+  }
+
+  return baseColumns
+})
 
 const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
 const listActivity = computed(() => invoiceMasterApi.activityList)

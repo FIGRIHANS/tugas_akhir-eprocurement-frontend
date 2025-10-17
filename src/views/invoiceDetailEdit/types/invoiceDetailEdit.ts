@@ -74,6 +74,11 @@ export interface formTypes extends documentFormTypes {
   npwp: string
   vendorAddress: string
 
+  // Petty Cash fields
+  reference: string
+  cashJournal: string
+  pettyCashPeriod?: string | Date | Array<string | Date>
+
   subtotal: number
   vatAmount: number
   whtAmount: number
