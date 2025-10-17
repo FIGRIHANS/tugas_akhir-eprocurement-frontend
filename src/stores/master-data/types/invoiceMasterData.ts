@@ -99,3 +99,10 @@ export type MatrixApprovalTypes = {
   workflowCode: string
   workflowDescription: string
 }
+
+export type NpwpReportingTypes = {
+  id: number
+  companyCodeName: string
+  npwpLocation: string
+  npwpDescription: string
+}
