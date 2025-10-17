@@ -157,18 +157,17 @@
           Currency
         </label>
         <input :value="form.currCode" class="input" placeholder="" disabled />
-        <!-- <select v-model="form.currCode" class="select" :class="{ 'border-danger': form.currCodeError }">
-          <option v-for="item of currencyList" :key="item.code" :value="item.code">
-            {{ item.code }}
-          </option>
-        </select> -->
       </div>
       <!-- NPWP Reporting -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           NPWP Reporting
         </label>
-        <input v-model="form.npwpReporting" class="input" placeholder="" :class="{ 'border-danger': form.npwpReportingError }" :disabled="isNpwrDisabled() || checkVerifikator1()" />
+        <select v-model="form.npwpReporting" class="select" placeholder="" :class="{ 'border-danger': form.npwpReportingError }" :disabled="isNpwrDisabled() || checkVerifikator1()">
+          <option v-for="item of npwpReportingList" :key="item.npwpLocation" :value="item.npwpLocation">
+            {{ item.npwpDescription }}
+          </option>
+        </select>
       </div>
       <!-- Remaining DP Amount -->
       <div v-if="form.invoiceDPCode === 9013" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
@@ -236,6 +235,7 @@ const listInvoiceTypeNonPo = computed(() => invoiceMasterApi.invoiceNonPoType)
 // const currencyList = computed(() => invoiceMasterApi.currency)
 const paymentMethodList = computed(() => invoiceMasterApi.paymentMethodList)
 const userData = computed(() => invoiceLoginApi.userData)
+const npwpReportingList = computed(() => invoiceMasterApi.npwpReportingList)
 
 const remainingDpAmountVal = computed(() => {
   if (form.value.currCode === 'IDR') {
@@ -273,13 +273,13 @@ const checkNonPoLba = () => {
   return form.value.invoiceTypeCode === 3
 }
 
-const checkNonPoCc = () => {
-  return form.value.invoiceTypeCode === 2
-}
+// const checkNonPoCc = () => {
+//   return form.value.invoiceTypeCode === 2
+// }
 
-const checkNonPoPettyCash = () => {
-  return form.value.invoiceTypeCode === 5
-}
+// const checkNonPoPettyCash = () => {
+//   return form.value.invoiceTypeCode === 5
+// }
 
 const getDpName = () => {
   if (route.query.type === 'po-view') return 'Without DP'
