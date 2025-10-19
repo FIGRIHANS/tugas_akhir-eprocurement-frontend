@@ -113,6 +113,18 @@
                             <span class="menu-title"> Edit </span>
                           </div>
                         </div>
+                        <div
+                          v-if="parent.statusCode === 7"
+                          class="menu-item"
+                          @click="openDetailInvoiceEditSendSap(parent.invoiceUId)"
+                        >
+                          <div class="menu-link">
+                            <span class="menu-icon">
+                              <i class="ki-duotone ki-message-edit"></i>
+                            </span>
+                            <span class="menu-title"> Edit </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -332,6 +344,19 @@ const openDetailInvoiceEdit = (invoiceId: string) => {
       type: '2',
       invoiceType: 'no_po',
       edit: 'true',
+    },
+  })
+}
+
+const openDetailInvoiceEditSendSap = (invoiceId: string) => {
+  router.push({
+    name: 'invoiceDetailEdit',
+    query: {
+      id: invoiceId,
+      type: '2',
+      invoiceType: 'no_po',
+      edit: 'true',
+      isSendSap: 'true',
     },
   })
 }

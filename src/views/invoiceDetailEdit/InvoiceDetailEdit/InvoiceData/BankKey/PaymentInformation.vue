@@ -6,7 +6,12 @@
         Bank Key
         <span class="text-red-500 ml-[4px]">*</span>
       </label>
-      <select v-model="form.bankKey" class="select" :class="{ 'border-danger': form.bankKeyIdError }">
+      <select
+        v-model="form.bankKey"
+        class="select"
+        :class="{ 'border-danger': form.bankKeyIdError }"
+        :disabled="route.query.isSendSap === 'true'"
+      >
         <option v-for="item of bankList" :key="item.bankId" :value="item.bankKey">
           {{ item.bankKey + ' - ' + item.accountNumber }}
         </option>
@@ -14,31 +19,23 @@
     </div>
     <!-- Bank Account Number -->
     <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-      <label class="form-label max-w-32">
-        Bank Account Number
-      </label>
-      <input v-model="form.bankAccountNo" class="input" placeholder="" disabled/>
+      <label class="form-label max-w-32"> Bank Account Number </label>
+      <input v-model="form.bankAccountNo" class="input" placeholder="" disabled />
     </div>
     <!-- Bank Name -->
     <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-      <label class="form-label max-w-32">
-        Bank Name
-      </label>
-      <input v-model="form.bankName" class="input" placeholder="" disabled/>
+      <label class="form-label max-w-32"> Bank Name </label>
+      <input v-model="form.bankName" class="input" placeholder="" disabled />
     </div>
     <!-- Beneficiary Name -->
     <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-      <label class="form-label max-w-32">
-        Beneficiary Name
-      </label>
-      <input v-model="form.beneficiaryName" class="input" placeholder="" disabled/>
+      <label class="form-label max-w-32"> Beneficiary Name </label>
+      <input v-model="form.beneficiaryName" class="input" placeholder="" disabled />
     </div>
     <!-- Bank Country -->
     <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-      <label class="form-label max-w-32">
-        Bank Country
-      </label>
-      <input v-model="form.bankCountryCode" class="input" placeholder="" disabled/>
+      <label class="form-label max-w-32"> Bank Country </label>
+      <input v-model="form.bankCountryCode" class="input" placeholder="" disabled />
     </div>
   </div>
 </template>
@@ -48,7 +45,9 @@ import { ref, computed, watch, inject, type Ref } from 'vue'
 import type { formTypes } from '../../../types/invoiceDetailEdit'
 import type { PaymentTypes } from '@/stores/master-data/types/invoiceMasterData'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const form = inject<Ref<formTypes>>('form')
 const bankList = ref<PaymentTypes[]>([])
@@ -57,7 +56,9 @@ const vendorList = computed(() => invoiceMasterApi.vendorList)
 
 const checkBank = () => {
   if (form) {
-    const getIndex = vendorList.value.findIndex((item) => item.sapCode === form.value.vendorId.toString())
+    const getIndex = vendorList.value.findIndex(
+      (item) => item.sapCode === form.value.vendorId.toString(),
+    )
     if (getIndex !== -1) {
       bankList.value = vendorList.value[getIndex].payment
       if (bankList.value.length === 1) {
@@ -83,8 +84,8 @@ watch(
     checkBank()
   },
   {
-    deep: true
-  }
+    deep: true,
+  },
 )
 
 watch(
@@ -94,8 +95,8 @@ watch(
   },
   {
     deep: true,
-    immediate: true
-  }
+    immediate: true,
+  },
 )
 
 watch(
@@ -110,6 +111,6 @@ watch(
         form.value.bankCountryCode = bankList.value[getIndex].bankCountryCode
       }
     }
-  }
+  },
 )
 </script>
