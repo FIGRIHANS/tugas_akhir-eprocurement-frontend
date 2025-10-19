@@ -83,6 +83,8 @@ const route = useRoute()
 const forgotPasswordStore = useForgotPasswordStore()
 const loginStore = useLoginStore()
 
+console.log(route.name)
+
 const newPassword = ref<string>('')
 const showNewPassword = ref<boolean>(false)
 const confirmPassword = ref<string>('')
@@ -142,19 +144,33 @@ const handleResetPassword = async () => {
   }
 
   try {
-    const resetToken = route.query.token as string
-    const vendorEmail = route.query.vendorEmail as string
+    if (route.name === 'setUserNewPassword') {
+      const resetToken = route.query.token as string
+      const userEmail = route.query.userEmail as string
 
-    if (!resetToken || !vendorEmail) {
-      passwordError.value = 'Invalid reset link'
-      return
+      if (!resetToken || !userEmail) {
+        passwordError.value = 'Invalid reset link'
+        return
+      }
+      await forgotPasswordStore.resetEmployeePasswordWithNewPassword({
+        email: userEmail,
+        newPassword: newPassword.value,
+        resetToken,
+      })
+    } else {
+      const resetToken = route.query.token as string
+      const vendorEmail = route.query.vendorEmail as string
+
+      if (!resetToken || !vendorEmail) {
+        passwordError.value = 'Invalid reset link'
+        return
+      }
+      await forgotPasswordStore.resetPasswordWithNewPassword({
+        email: vendorEmail,
+        newPassword: newPassword.value,
+        resetToken,
+      })
     }
-
-    await forgotPasswordStore.resetPasswordWithNewPassword({
-      email: vendorEmail,
-      newPassword: newPassword.value,
-      resetToken,
-    })
 
     // Set success state in login store
     loginStore.isSendNewPassword = true
