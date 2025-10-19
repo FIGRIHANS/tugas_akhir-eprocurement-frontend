@@ -11,6 +11,8 @@ export const useLoginStore = defineStore('login', () => {
   const isSendForgot = ref<boolean>(false)
   const isSendNewPassword = ref<boolean>(false)
 
+  const loginRole = ref<'employee' | 'vendor'>(null)
+
   const clearUserData = () => {
     userData.value = {} as ResponseUser
   }
@@ -27,7 +29,7 @@ export const useLoginStore = defineStore('login', () => {
   const callLoginVendor = async (username: string, password: string) => {
     const response = await api.post('/auth/vendor/sign-in', {
       userName: username,
-      userPassword: password
+      userPassword: password,
     })
 
     return response.data
@@ -47,6 +49,7 @@ export const useLoginStore = defineStore('login', () => {
     isSendForgot,
     isSendNewPassword,
     userData,
+    loginRole,
     clearUserData,
     callLogin,
     callUser,

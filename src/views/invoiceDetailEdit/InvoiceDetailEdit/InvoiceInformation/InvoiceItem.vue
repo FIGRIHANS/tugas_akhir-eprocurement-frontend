@@ -1,7 +1,11 @@
 <template>
   <div class="flex flex-col gap-[16px]">
     <p class="text-base font-semibold">Costs / Expenses</p>
-    <button class="btn btn-outline btn-primary w-fit" @click="addNew">
+    <button
+      v-if="route.query.isSendSap !== 'true'"
+      class="btn btn-outline btn-primary w-fit"
+      @click="addNew"
+    >
       <i class="ki-duotone ki-plus-circle"></i>
       Add Costs / Expenses
     </button>
@@ -19,7 +23,7 @@
                 'cost__field-base--cost': item.toLowerCase() === 'cost center',
                 'cost__field-base--wht-type': item.toLowerCase() === 'wht type',
                 'cost__field-base--wht-code': item.toLowerCase() === 'wht code',
-                'cost__field-base--description': item.toLowerCase() === 'description'
+                'cost__field-base--description': item.toLowerCase() === 'description',
               }"
             >
               {{ item }}
@@ -31,13 +35,17 @@
             <td class="flex items-center justify-around gap-[8px]">
               <button
                 class="btn btn-outline btn-icon btn-primary"
-                :disabled="checkIsEdit() && !item.isEdit"
+                :disabled="(checkIsEdit() && !item.isEdit) || route.query.isSendSap === 'true'"
                 @click="goEdit(item)"
               >
                 <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>
                 <i v-else class="ki-duotone ki-check-circle"></i>
               </button>
-              <button class="btn btn-icon btn-outline btn-danger" @click="resetItem(item, index)">
+              <button
+                class="btn btn-icon btn-outline btn-danger"
+                @click="resetItem(item, index)"
+                :disabled="route.query.isSendSap === 'true'"
+              >
                 <i class="ki-duotone ki-cross-circle"></i>
               </button>
             </td>
@@ -79,13 +87,15 @@
             </td>
             <td>
               <span v-if="!item.isEdit">{{ getDebitCreditName(item.debitCredit) || '-' }}</span>
-              <select v-else v-model="formEdit.debitCredit" class="select" placeholder="" :class="{ 'border-danger': formEdit.isDebitCreditError }">
-                <option value="D">
-                  Debit
-                </option>
-                <option value="K">
-                  Credit
-                </option>
+              <select
+                v-else
+                v-model="formEdit.debitCredit"
+                class="select"
+                placeholder=""
+                :class="{ 'border-danger': formEdit.isDebitCreditError }"
+              >
+                <option value="D">Debit</option>
+                <option value="K">Credit</option>
               </select>
             </td>
             <td>
@@ -179,7 +189,11 @@
               />
             </td>
             <td>
-              <span>{{ form.currCode === 'IDR' ? useFormatIdr(item.isEdit ? formEdit.whtAmount : item.whtAmount) : useFormatUsd(item.isEdit ? formEdit.whtAmount : item.whtAmount) }}</span>
+              <span>{{
+                form.currCode === 'IDR'
+                  ? useFormatIdr(item.isEdit ? formEdit.whtAmount : item.whtAmount)
+                  : useFormatUsd(item.isEdit ? formEdit.whtAmount : item.whtAmount)
+              }}</span>
             </td>
           </tr>
         </tbody>
@@ -233,7 +247,7 @@ const formEdit = reactive({
   whtAmount: 0,
   isActivityError: false,
   isItemAmountError: false,
-  isDebitCreditError: false
+  isDebitCreditError: false,
 })
 
 const listActivity = computed(() => invoiceMasterApi.activityList)
@@ -276,7 +290,7 @@ const addNew = () => {
       whtBaseAmount: 0,
       whtAmount: 0,
       whtCodeList: [],
-      isEdit: false
+      isEdit: false,
     } as invoiceItemTypes
     form.value.invoiceItem.push(data)
   }
@@ -312,11 +326,7 @@ const goEdit = (item: invoiceItemTypes) => {
     if (!formEdit.debitCredit) formEdit.isDebitCreditError = true
     else formEdit.isDebitCreditError = false
   }
-  if (
-    formEdit.isActivityError ||
-    formEdit.isItemAmountError ||
-    formEdit.isDebitCreditError
-  ) return
+  if (formEdit.isActivityError || formEdit.isItemAmountError || formEdit.isDebitCreditError) return
   item.isEdit = !item.isEdit
 
   if (item.isEdit) {
@@ -432,7 +442,8 @@ const getCostCenterName = (costCenter: string) => {
 
 const getActivityName = (id: number) => {
   const getIndex = listActivity.value.findIndex((item) => item.id === id)
-  if (getIndex !== -1) return `${listActivity.value[getIndex].code} - ${listActivity.value[getIndex].name}`
+  if (getIndex !== -1)
+    return `${listActivity.value[getIndex].code} - ${listActivity.value[getIndex].name}`
 }
 
 const getTaxCodeName = (taxCode: string) => {

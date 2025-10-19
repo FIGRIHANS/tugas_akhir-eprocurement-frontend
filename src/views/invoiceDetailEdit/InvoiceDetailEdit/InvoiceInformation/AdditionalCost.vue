@@ -1,7 +1,11 @@
 <template>
   <div class="flex flex-col gap-[16px]">
     <p class="text-base font-semibold">Additional Cost</p>
-    <button v-if="!checkVerifikator1()" class="btn btn-outline btn-primary w-fit" @click="addNew">
+    <button
+      v-if="!checkVerifikator1() && route.query.isSendSap !== 'true'"
+      class="btn btn-outline btn-primary w-fit"
+      @click="addNew"
+    >
       <i class="ki-duotone ki-plus-circle"></i>
       Add Additional Cost
     </button>
@@ -19,7 +23,7 @@
                 'cost__field-base--cost': item.toLowerCase() === 'cost center',
                 'cost__field-base--wht-type': item.toLowerCase() === 'wht type',
                 'cost__field-base--wht-code': item.toLowerCase() === 'wht code',
-                'cost__field-base--description': item.toLowerCase() === 'description'
+                'cost__field-base--description': item.toLowerCase() === 'description',
               }"
             >
               {{ item }}
@@ -29,11 +33,19 @@
         <tbody>
           <tr v-for="(item, index) in form.additionalCosts" :key="index" class="cost__field-items">
             <td class="flex items-center justify-around gap-[8px]">
-              <button class="btn btn-outline btn-icon btn-primary" :disabled="checkIsEdit() && !item.isEdit" @click="goEdit(item)">
+              <button
+                class="btn btn-outline btn-icon btn-primary"
+                :disabled="(checkIsEdit() && !item.isEdit) || route.query.isSendSap === 'true'"
+                @click="goEdit(item)"
+              >
                 <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>
                 <i v-else class="ki-duotone ki-check-circle"></i>
               </button>
-              <button class="btn btn-icon btn-outline btn-danger" @click="resetItem(item, index)">
+              <button
+                class="btn btn-icon btn-outline btn-danger"
+                @click="resetItem(item, index)"
+                :disabled="route.query.isSendSap === 'true'"
+              >
                 <i class="ki-duotone ki-cross-circle"></i>
               </button>
             </td>
@@ -53,7 +65,11 @@
             </td>
             <td>
               <span v-if="!item.isEdit">
-                {{ form.currCode === 'IDR' ? useFormatIdr(item.isEdit ? formEdit.itemAmount : item.itemAmount) : useFormatUsd(item.isEdit ? formEdit.itemAmount : item.itemAmount) }}
+                {{
+                  form.currCode === 'IDR'
+                    ? useFormatIdr(item.isEdit ? formEdit.itemAmount : item.itemAmount)
+                    : useFormatUsd(item.isEdit ? formEdit.itemAmount : item.itemAmount)
+                }}
               </span>
               <input
                 v-else
@@ -67,13 +83,15 @@
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.debitCredit }}</span>
-              <select v-else v-model="formEdit.debitCredit" class="select" placeholder="" :class="{ 'border-danger': formEdit.isDebitCreditError }">
-                <option value="D">
-                  Debit
-                </option>
-                <option value="K">
-                  Credit
-                </option>
+              <select
+                v-else
+                v-model="formEdit.debitCredit"
+                class="select"
+                placeholder=""
+                :class="{ 'border-danger': formEdit.isDebitCreditError }"
+              >
+                <option value="D">Debit</option>
+                <option value="K">Credit</option>
               </select>
             </td>
             <td>
@@ -90,7 +108,11 @@
               ></v-select>
             </td>
             <td>
-              {{ form.currCode === 'IDR' ? useFormatIdr(item.isEdit ? formEdit.vatAmount : item.vatAmount) : useFormatUsd(item.isEdit ? formEdit.vatAmount : item.vatAmount) }}
+              {{
+                form.currCode === 'IDR'
+                  ? useFormatIdr(item.isEdit ? formEdit.vatAmount : item.vatAmount)
+                  : useFormatUsd(item.isEdit ? formEdit.vatAmount : item.vatAmount)
+              }}
             </td>
             <td>
               <span v-if="!item.isEdit">{{ getCostCenterName(item.costCenter) }}</span>
@@ -115,7 +137,7 @@
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.assignment }}</span>
-              <input v-else v-model="formEdit.assignment" class="input" placeholder=""/>
+              <input v-else v-model="formEdit.assignment" class="input" placeholder="" />
             </td>
             <td>
               <span v-if="!item.isEdit">{{ getWhtTypeName(item.whtType) }}</span>
@@ -147,13 +169,34 @@
             </td>
             <td>
               <span v-if="!item.isEdit">
-                {{ form.currCode === 'IDR' ? useFormatIdr(item.whtBaseAmount) : useFormatUsd(item.whtBaseAmount) }}
+                {{
+                  form.currCode === 'IDR'
+                    ? useFormatIdr(item.whtBaseAmount)
+                    : useFormatUsd(item.whtBaseAmount)
+                }}
               </span>
-              <input v-else v-model="formEdit.whtBaseAmount" class="input" type="number" placeholder="" @change="setWhtAmount(item)"/>
+              <input
+                v-else
+                v-model="formEdit.whtBaseAmount"
+                class="input"
+                type="number"
+                placeholder=""
+                @change="setWhtAmount(item)"
+              />
             </td>
             <td>
-              <span v-if="!item.isEdit">{{ form.currCode === 'IDR' ? useFormatIdr(item.isEdit ? formEdit.whtAmount : item.whtAmount) : useFormatUsd(item.isEdit ? formEdit.whtAmount : item.whtAmount) }}</span>
-              <input v-else v-model="formEdit.whtAmount" class="input" type="number" placeholder=""/>
+              <span v-if="!item.isEdit">{{
+                form.currCode === 'IDR'
+                  ? useFormatIdr(item.isEdit ? formEdit.whtAmount : item.whtAmount)
+                  : useFormatUsd(item.isEdit ? formEdit.whtAmount : item.whtAmount)
+              }}</span>
+              <input
+                v-else
+                v-model="formEdit.whtAmount"
+                class="input"
+                type="number"
+                placeholder=""
+              />
             </td>
           </tr>
         </tbody>
@@ -170,7 +213,9 @@ import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 import { useLoginStore } from '@/stores/views/login'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const verificationApi = useInvoiceVerificationStore()
 const loginApi = useLoginStore()
@@ -188,7 +233,7 @@ const columns = ref([
   'WHT Type',
   'WHT Code',
   'WHT Base Amount',
-  'WHT Amount'
+  'WHT Amount',
 ])
 const formEdit = reactive({
   activityExpense: null,
@@ -205,7 +250,7 @@ const formEdit = reactive({
   whtAmount: 0,
   isActivityError: false,
   isItemAmountError: false,
-  isDebitCreditError: false
+  isDebitCreditError: false,
 })
 
 const listActivity = computed(() => invoiceMasterApi.activityList)
@@ -244,7 +289,7 @@ const addNew = () => {
       whtBaseAmount: 0,
       whtAmount: 0,
       whtCodeList: [],
-      isEdit: false
+      isEdit: false,
     }
     form.value.additionalCosts.push(data)
   }
@@ -279,11 +324,7 @@ const goEdit = (item: itemsCostType) => {
     if (!formEdit.debitCredit) formEdit.isDebitCreditError = true
     else formEdit.isDebitCreditError = false
   }
-  if (
-    formEdit.isActivityError ||
-    formEdit.isItemAmountError ||
-    formEdit.isDebitCreditError
-  ) return
+  if (formEdit.isActivityError || formEdit.isItemAmountError || formEdit.isDebitCreditError) return
   item.isEdit = !item.isEdit
 
   if (item.isEdit) {
@@ -347,7 +388,7 @@ const getPercentTax = (code: string) => {
   const getIndex = listTaxCalculation.value.findIndex((item) => item.code === code)
   if (getIndex !== -1) {
     const splitName = listTaxCalculation.value[getIndex].name.split(' - ')
-    return parseFloat(splitName[1].replace(',', '.').replace('%','')) / 100
+    return parseFloat(splitName[1].replace(',', '.').replace('%', '')) / 100
   }
 }
 
@@ -380,7 +421,8 @@ const getCostCenterName = (costCenter: string) => {
 
 const getActivityName = (id: number) => {
   const getIndex = listActivity.value.findIndex((item) => item.id === id)
-  if (getIndex !== -1) return `${listActivity.value[getIndex].code} - ${listActivity.value[getIndex].name}`
+  if (getIndex !== -1)
+    return `${listActivity.value[getIndex].code} - ${listActivity.value[getIndex].name}`
 }
 
 const getTaxCodeName = (taxCode: string) => {
@@ -430,8 +472,8 @@ watch(
   },
   {
     deep: true,
-    immediate: true
-  }
+    immediate: true,
+  },
 )
 
 onMounted(() => {
