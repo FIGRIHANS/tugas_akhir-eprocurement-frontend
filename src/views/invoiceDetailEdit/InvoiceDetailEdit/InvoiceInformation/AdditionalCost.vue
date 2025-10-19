@@ -152,8 +152,8 @@
               <input v-else v-model="formEdit.whtBaseAmount" class="input" type="number" placeholder="" @change="setWhtAmount(item)"/>
             </td>
             <td>
-              <span v-if="!item.isEdit || (item.isEdit && !checkVerifikator2())">{{ form.currCode === 'IDR' ? useFormatIdr(item.isEdit ? formEdit.whtAmount : item.whtAmount) : useFormatUsd(item.isEdit ? formEdit.whtAmount : item.whtAmount) }}</span>
-              <input v-if="(item.isEdit && !checkPoPib()) || (item.isEdit && checkVerifikator2() && checkPoPib())" v-model="formEdit.whtAmount" class="input" type="number" placeholder=""/>
+              <span v-if="!item.isEdit">{{ form.currCode === 'IDR' ? useFormatIdr(item.isEdit ? formEdit.whtAmount : item.whtAmount) : useFormatUsd(item.isEdit ? formEdit.whtAmount : item.whtAmount) }}</span>
+              <input v-else v-model="formEdit.whtAmount" class="input" type="number" placeholder=""/>
             </td>
           </tr>
         </tbody>
@@ -221,16 +221,8 @@ const checkIsEdit = () => {
   return result !== -1
 }
 
-const checkPoPib = () => {
-  return form?.value.invoiceTypeCode === 902
-}
-
 const checkVerifikator1 = () => {
   return userData.value.profile.profileId === 3190
-}
-
-const checkVerifikator2 = () => {
-  return userData.value.profile.profileId === 3002
 }
 
 const addNew = () => {
@@ -333,7 +325,9 @@ const resetItem = (item: itemsCostType, index: number) => {
     resetFormEdit()
   } else {
     if (form) {
-      verificationApi.additionalCostTempDelete?.push(form.value.additionalCosts[index].id)
+      if (form.value.additionalCosts[index].id !== 0) {
+        verificationApi.additionalCostTempDelete?.push(form.value.additionalCosts[index].id)
+      }
       form.value.additionalCosts.splice(index, 1)
     }
   }
@@ -341,6 +335,7 @@ const resetItem = (item: itemsCostType, index: number) => {
 
 const callWhtCode = (data: itemsCostType) => {
   formEdit.whtCode = ''
+  formEdit.whtAmount = 0
   data.whtCodeList = []
   invoiceMasterApi.getWhtCode(formEdit.whtType).then(() => {
     data.whtCodeList = whtCodeList.value

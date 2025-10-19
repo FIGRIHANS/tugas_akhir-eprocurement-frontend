@@ -173,7 +173,7 @@
             class="w-full"
             :placeholder="$t('general.select')"
             :error="information.vendorCommodities.businessFieldError"
-            :options="businessFieldList"
+            :options="translatedBusinessFieldList"
             value-key="businessFieldID"
             text-key="businessFieldName"
             @update:model-value="getSubBusinessList"
@@ -239,6 +239,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 
 import { useRegistrationVendorStore } from '@/stores/views/registration'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
+import tr from '@/composables/translator'
 
 import type {
   CityListType,
@@ -264,6 +265,14 @@ const todayDate = new Date()
 
 const countryList = computed(() => vendorMasterDataStore.countryList)
 const businessFieldList = computed(() => vendorMasterDataStore.businessFieldList)
+const translatedBusinessFieldList = computed(() => {
+  return businessFieldList.value.map((item) => {
+    return {
+      ...item,
+      businessFieldName: tr(item.businessFieldName),
+    }
+  })
+})
 const subBusinessFieldList = ref<SubBusinessType[]>([])
 
 const provinceListCompany = ref<ProvinceListType>([])
@@ -352,7 +361,12 @@ const getSubBusinessList = () => {
     (item) => item.businessFieldID === information.value.vendorCommodities.businessFieldId,
   )
 
-  subBusinessFieldList.value = searchSubBusiness!.subBusiness
+  subBusinessFieldList.value = searchSubBusiness!.subBusiness.map((item) => {
+    return {
+      ...item,
+      subBusinessFieldName: tr(item.subBusinessFieldName),
+    }
+  })
 }
 
 const addVendorCommodities = () => {

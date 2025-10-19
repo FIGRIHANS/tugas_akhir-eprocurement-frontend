@@ -360,7 +360,9 @@ const resetItem = (item: invoiceItemTypes, index: number) => {
     resetFormEdit()
   } else {
     if (form) {
-      verificationApi.costExpenseTempDelete?.push(form.value.invoiceItem[index].id)
+      if (form.value.additionalCosts[index].id !== 0) {
+        verificationApi.costExpenseTempDelete?.push(form.value.invoiceItem[index].id)
+      }
       form.value.invoiceItem.splice(index, 1)
     }
   }
@@ -368,6 +370,7 @@ const resetItem = (item: invoiceItemTypes, index: number) => {
 
 const callWhtCode = (data: invoiceItemTypes) => {
   formEdit.whtCode = ''
+  formEdit.whtAmount = 0
   data.whtCodeList = []
   invoiceMasterApi.getWhtCode(formEdit.whtType).then(() => {
     data.whtCodeList = whtCodeList.value

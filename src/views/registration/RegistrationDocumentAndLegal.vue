@@ -5,7 +5,7 @@
         v-model="documentAndLegal.kategori"
         :label="$t('registration.category')"
         :placeholder="$t('registration.select')"
-        :options="companyCategoryList"
+        :options="translatedCompanyCategoryList"
         text-key="companyCategoryName"
         value-key="companyCategoryId"
       />
@@ -28,7 +28,7 @@
           <tbody v-if="documentAndLegal.kategori">
             <tr v-for="(item, index) in tableItems" :key="item.id">
               <td>
-                {{ item.licenseName }}
+                {{ tr(item.licenseName) }}
                 <span v-if="checkIsRequired(item.licenseId)" class="text-danger">*</span>
               </td>
               <td class="align-top">
@@ -269,6 +269,7 @@ import UiFileUpload from '@/components/ui/atoms/file-upload/UiFileUpload.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
 import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
+import tr from '@/composables/translator'
 
 const registrationVendorStore = useRegistrationVendorStore()
 const vendorMasterDataStore = useVendorMasterDataStore()
@@ -276,6 +277,14 @@ const uploadStore = useUploadStore()
 
 const documentAndLegal = computed(() => registrationVendorStore.documentAndLegal)
 const companyCategoryList = computed(() => vendorMasterDataStore.companyCategoryList)
+const translatedCompanyCategoryList = computed(() => {
+  return companyCategoryList.value.map((item) => {
+    return {
+      ...item,
+      companyCategoryName: tr(item.companyCategoryName),
+    }
+  })
+})
 const selectedCategory = ref<number>(registrationVendorStore.documentAndLegal.kategori)
 const tableItems = computed(() => vendorMasterDataStore.companyLicense)
 

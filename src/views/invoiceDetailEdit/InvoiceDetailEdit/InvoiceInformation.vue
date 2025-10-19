@@ -5,7 +5,7 @@
       <InvoiceCalculation />
     </div>
     <InvoicePoGr v-if="!checkIsNonPo()" class="mt-[24px]" />
-    <AdditionalCost v-if="!checkIsNonPo() && (checkIsWithoutDp() || checkIsPoPib() || checkIsPoCC())" class="mt-[24px]" />
+    <AdditionalCost v-if="!checkIsNonPo() && (checkIsWithoutDp() || checkIsPoPib() || checkIsPoCC() || checkPoWithDp())" class="mt-[24px]" />
     <InvoiceItem v-if="checkIsNonPo()" class="mt-[24px]" />
   </div>
 </template>
@@ -33,6 +33,10 @@ const checkIsWithoutDp = () => {
   return form.value.invoiceDPCode === 9011
 }
 
+const checkPoWithDp = () => {
+  return form.value.invoiceDPCode === 9013
+}
+
 const checkIsPoPib = () => {
   return form.value.invoiceTypeCode === 902
 }
@@ -52,7 +56,10 @@ onMounted(() => {
   invoiceMasterApi.getWhtType()
   invoiceMasterApi.getCostCenter(form?.value.companyCode || '')
   invoiceMasterApi.getMatrixApproval(form.value.invoiceTypeCode.toString() || '', form.value.companyCode || '')
-  if (form.value.companyCode) invoiceMasterApi.getActivity(form.value.companyCode || '')
+  if (form.value.companyCode) {
+    invoiceMasterApi.getActivity(form.value.companyCode || '')
+    invoiceMasterApi.getNpwpReporting(form.value.companyCode || '')
+  }
 })
 </script>
 

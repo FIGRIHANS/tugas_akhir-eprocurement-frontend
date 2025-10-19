@@ -2,7 +2,14 @@
   <div>
     <Breadcrumb title="Add Invoice" :routes="routes" />
     <StepperStatus :active-name="stepperStatus" />
-    <TabInvoice :active-tab="tabNow" @change-tab="setTab" class="-mx-[24px]" />
+    <TabInvoice
+      :active-tab="tabNow"
+      :can-click-data="true"
+      :can-click-information="canClickInformationTab"
+      :can-click-preview="canClickPreviewTab"
+      @change-tab="setTab"
+      class="-mx-[24px]"
+    />
     <!-- <div v-if="form.status !== 0" class="status__box--approved -mt-5 -mx-[24px]">
       <i class="ki-outline ki-shield-tick text-primary text-[36px]"></i>
       <div>
@@ -136,6 +143,7 @@ import type {
   ParamsSubmissionTypes,
   ParamsSubmissionNonPo,
   ParamsCheckBudgetType,
+  ParamsSubmissionCostExpense,
   GlaccountDatum,
   AccountPayable,
   Accounttax,
@@ -177,6 +185,7 @@ const isSubmit = ref<boolean>(false)
 const isCheckBudget = ref<boolean>(false)
 const isClickDraft = ref<boolean>(false)
 const itemNoAcc = ref<number>(0)
+const hasCompletedDataTab = ref<boolean>(false)
 
 const stepperStatus = ref('')
 
@@ -250,6 +259,13 @@ const form = reactive<formTypes>({
   emailAlternative: '',
   vendorNumber: '',
   department: '',
+  reference: '',
+  cashJournalCode: '',
+  cashJournalName: '',
+  pettyCashPeriod: [null, null],
+  casNoCode: '',
+  casNoName: '',
+  proposalAmountVal: '',
 })
 
 const contentComponent = computed(() => {
@@ -272,6 +288,14 @@ const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
 const listActivity = computed(() => invoiceMasterApi.activityList)
 const additionalCostTempDelete = computed(() => verificationApi.additionalCostTempDelete)
 const costExpensesTempDelete = computed(() => verificationApi.costExpenseTempDelete)
+
+const canClickInformationTab = computed(() => {
+  return hasCompletedDataTab.value
+})
+
+const canClickPreviewTab = computed(() => {
+  return isCheckBudget.value
+})
 
 const checkInvoiceView = () => {
   return route.query.type === 'po-view'
@@ -332,9 +356,52 @@ const checkActiveEditInvoiceItem = () => {
 
 const checkInvoiceInformation = () => {
   form.companyCodeError = useCheckEmpty(form.companyCode).isError
-  form.invoiceNoVendorError = useCheckEmpty(form.invoiceNoVendor).isError
-  form.invoiceDateError = useCheckEmpty(form.invoiceDate).isError
-  form.invoiceDocumentError = form.invoiceDocument === null
+
+  const isPettyCash = form.invoiceType === '5'
+
+  const hasAtLeastOneDocument =
+    form.invoiceDocument !== null ||
+    form.tax !== null ||
+    form.referenceDocument !== null ||
+    form.otherDocument !== null
+
+  const isReimbursement = form.invoiceType === '1'
+  const isCreditCard = form.invoiceType === '2'
+  const isCAS = form.invoiceType === '3'
+  const isLBA = form.invoiceType === '4'
+
+  if (!isPettyCash) {
+    form.invoiceDocumentError = !hasAtLeastOneDocument
+
+    if (isReimbursement) {
+      form.invoiceNoVendorError = useCheckEmpty(form.invoiceNoVendor).isError
+      form.invoiceDateError = useCheckEmpty(form.invoiceDate).isError
+      form.taxNoInvoiceError = useCheckEmpty(form.taxNoInvoice).isError
+    } else {
+      form.invoiceNoVendorError = false
+      form.invoiceDateError = false
+    }
+
+    if (isCreditCard) {
+      form.proposalAmountError = useCheckEmpty(form.proposalAmountVal).isError
+    } else {
+      form.proposalAmountError = false
+    }
+
+    if (isCAS) {
+      form.taxNoInvoiceError = useCheckEmpty(form.taxNoInvoice).isError
+    }
+
+    if (isLBA) {
+      form.taxNoInvoiceError = useCheckEmpty(form.taxNoInvoice).isError
+    }
+  } else {
+    form.invoiceNoVendorError = false
+    form.invoiceDateError = false
+    form.taxNoInvoiceError = false
+    form.proposalAmountError = false
+    form.invoiceDocumentError = !hasAtLeastOneDocument
+  }
 
   if (!checkIsNonPo()) {
     form.invoicePoGrError = form.invoicePoGr.length === 0 || checkActiveEditPoGr()
@@ -349,7 +416,7 @@ const checkInvoiceInformation = () => {
   }
 
   if (Number(form.invoiceDp) === 9013) {
-    form.dpAmountDeductionError = Number(form.dpAmountDeduction) > Number(form.remainingDpAmount)
+    form.dpAmountDeductionError = form.dpAmountDeduction > form.remainingDpAmount || (form.remainingDpAmount !== 0 && form.dpAmountDeduction === 0)
   }
 
   if (
@@ -361,13 +428,19 @@ const checkInvoiceInformation = () => {
     form.invoicePoGrError ||
     form.additionalCostError ||
     form.dpAmountDeductionError ||
-    form.departmentError
+    form.departmentError ||
+    form.taxNoInvoiceError ||
+    form.proposalAmountError ||
+    form.invoiceItemError
   )
     return false
   else return true
 }
 
 const setTab = (value: string) => {
+  if (value === 'information' && !canClickInformationTab.value) return
+  if (value === 'preview' && !canClickPreviewTab.value) return
+
   tabNow.value = value
 }
 const goBack = () => {
@@ -460,26 +533,30 @@ const mapAdditionalCost = () => {
 }
 
 const mapInvoiceItem = () => {
-  const cost = []
+  const cost: ParamsSubmissionCostExpense[] = []
+
   for (const item of form.invoiceItem) {
     const itemIndex = listActivity.value.findIndex((sub) => sub.id === item.activity)
-    cost.push({
+    const baseData: ParamsSubmissionCostExpense = {
       id: item.id || 0,
       activityId: item.activity,
-      activityExpenses: listActivity.value[itemIndex].code,
+      activityExpense: listActivity.value[itemIndex].code,
       activityName: listActivity.value[itemIndex].name,
       itemAmount: Number(item.itemAmount),
       itemText: item.itemText,
-      debitCredit: item.debitCredit,
+      debitCredit: item.debitCredit || 'D',
       taxCode: item.taxCode,
       vatAmount: item.vatAmount,
       costCenter: item.costCenter,
       profitCenter: item.profitCenter,
       assignment: item.assignment,
-      whtType: item.whtType,
-      whtCode: item.whtCode,
-      whtBaseAmount: Number(item.whtBaseAmount),
-    })
+      whtType: item.whtType || '',
+      whtCode: item.whtCode || '',
+      whtBaseAmount: Number(item.whtBaseAmount) || 0,
+      whtAmount: Number(item.whtAmount) || 0
+    }
+
+    cost.push(baseData)
   }
   return cost
 }
@@ -543,7 +620,7 @@ const mapDataPost = () => {
     },
     pogr: mapPoGr(),
     additionalCosts:
-      form.invoiceDp === '9012' || form.invoiceDp === '9013' ? [] : mapAdditionalCost(),
+      form.invoiceDp === '9012' ? [] : mapAdditionalCost(),
     isSaveAsDraft: false
   } as ParamsSubmissionTypes
 
@@ -551,36 +628,68 @@ const mapDataPost = () => {
 }
 
 const mapDataPostNonPo = () => {
+  const isReimbursement = form.invoiceType === '1'
+  const isCreditCard = form.invoiceType === '2'
+  const isCAS = form.invoiceType === '3'
+  const isLBA = form.invoiceType === '4'
+  const isPettyCash = form.invoiceType === '5'
+
+  let invoiceDateToUse = null
+  let pettyCashStartDate = null
+  let pettyCashEndDate = null
+
+  if (isPettyCash && Array.isArray(form.pettyCashPeriod) && form.pettyCashPeriod[0]) {
+    pettyCashStartDate = moment(form.pettyCashPeriod[0]).toISOString()
+    pettyCashEndDate = form.pettyCashPeriod[1] ? moment(form.pettyCashPeriod[1]).toISOString() : null
+  } else if (isReimbursement && form.invoiceDate) {
+    invoiceDateToUse = moment(form.invoiceDate).toISOString()
+  }
+
   const data = {
     header: {
-      invoiceUId:
-        form.status === 0 || form.status === 5
-          ? form.invoiceUId
-          : '00000000-0000-0000-0000-000000000000',
       invoiceTypeCode: Number(form.invoiceType),
       invoiceTypeName: form.invoiceTypeName,
       invoiceVendorNo: form.vendorId,
       companyCode: form.companyCode,
       companyName: form.companyName,
       invoiceNo: form.invoiceNo,
-      documentNo: form.invoiceNoVendor,
-      invoiceDate: moment(form.invoiceDate).toISOString(),
+      cashJournal: form.cashJournalCode || '',
+      cashJournalCode: form.cashJournalCode || '',
+      cashJournalName: form.cashJournalName || '',
+      pettyCashStartDate: pettyCashStartDate,
+      pettyCashEndDate: pettyCashEndDate,
+      casNo: form.casNoCode || '',
+      casNoCode: form.casNoCode || '',
+      casNoName: form.casNoName || '',
+      documentNo: isPettyCash ? (form.cashJournalCode || '') :
+                  isReimbursement ? (form.invoiceNoVendor || '') :
+                  isCreditCard ? (form.proposalAmountVal || '') :
+                  (isCAS || isLBA) ? (form.casNoCode || form.taxNoInvoice || '') : '',
+      invoiceNoVendor: form.invoiceNoVendor || '',
+      invoiceDate: invoiceDateToUse,
+      taxNo: form.taxNoInvoice || '',
+      proposalAmount: form.proposalAmountVal || '',
+      currCode: form.currency,
+      department: checkIsNonPo() ? form.department : userData.value.profile.costCenter || '',
+      profileId: userData.value.profile.profileId.toString(),
+      notes: form.description,
+      invoiceUId:
+        form.status === 0 || form.status === 5
+          ? form.invoiceUId
+          : '00000000-0000-0000-0000-000000000000',
       postingDate: null,
       estimatedPaymentDate: null,
       paymentMethodCode: '',
       paymentMethodName: '',
-      taxNo: form.taxNoInvoice,
-      currCode: form.currency,
       creditCardBillingID: '',
-      notes: form.description,
       statusCode: isClickDraft.value ? 0 : 1,
-      statusName: isClickDraft.value ? 'Drafted' : 'Waiting to Verify',
-      department: checkIsNonPo() ? form.department : userData.value.profile.costCenter || '',
-      profileId: userData.value.profile.profileId.toString(),
+      statusName: isClickDraft.value ? 'Drafted' : 'Waiting to Verify'
     },
     vendor: {
       vendorId: Number(form.vendorId),
-      vendorName: getVendorName(),
+      vendorName: getVendorName() || '',
+      vendorBusinessUnit: '',
+      vendorSubBusinessUnit: '',
       npwp: form.npwp,
       vendorAddress: form.address,
     },
@@ -621,7 +730,7 @@ const mapDataPostNonPo = () => {
       isAlternativePayee: form.isAlternativePayee,
       isOneTimeVendor: form.isOneTimeVendor,
     },
-    costExpenses: mapInvoiceItem(),
+    costExpenses: mapInvoiceItem() as ParamsSubmissionCostExpense[],
     isSaveAsDraft: false
   } as ParamsSubmissionNonPo
 
@@ -635,6 +744,7 @@ const goNext = () => {
       if (tabNow.value === 'data') {
         const check = checkInvoiceData()
         if (!check) return
+        hasCompletedDataTab.value = true
       } else {
         const check = checkInvoiceInformation()
         if (!check) return
@@ -647,13 +757,30 @@ const goNext = () => {
   } else {
     isSubmit.value = true
     if (route.query.type === 'nonpo') {
+      const submissionData = mapDataPostNonPo()
+
+      // Debug: Log submission data
+      console.log('=== DEBUG INVOICE NON-PO SUBMISSION ===')
+      console.log('Full Submission Data:', JSON.stringify(submissionData, null, 2))
+      console.log('Header:', submissionData.header)
+      console.log('CostExpenses Count:', submissionData.costExpenses?.length)
+      console.log('CostExpenses:', submissionData.costExpenses)
+      console.log('=======================================')
+
       invoiceApi
-        .postSubmissionNonPo(mapDataPostNonPo())
+        .postSubmissionNonPo(submissionData)
         .then((response) => {
+          console.log('✅ Submission Success:', response)
           setAfterResponsePost(response)
         })
         .catch((error) => {
-          console.error(error)
+          console.error('❌ Submission Error:', error)
+          console.error('Error Response:', error.response)
+          console.error('Error Data:', error.response?.data)
+          invoiceApi.errorMessageSubmission = error.response?.data?.result?.message || error.message || 'An unexpected error occurred'
+          const idModal = document.querySelector('#error_submission_modal')
+          const modal = KTModal.getInstance(idModal as HTMLElement)
+          modal.show()
         })
         .finally(() => {
           isSubmit.value = false
@@ -665,7 +792,10 @@ const goNext = () => {
           setAfterResponsePost(response)
         })
         .catch((error) => {
-          console.error(error)
+          invoiceApi.errorMessageSubmission = error.response?.data?.result?.message || error.message || 'An unexpected error occurred'
+          const idModal = document.querySelector('#error_submission_modal')
+          const modal = KTModal.getInstance(idModal as HTMLElement)
+          modal.show()
         })
         .finally(() => {
           isSubmit.value = false
@@ -696,7 +826,10 @@ const goSaveDraft = () => {
         setAfterResponsePost(response)
       })
       .catch((error) => {
-        console.error(error)
+        invoiceApi.errorMessageSubmission = error.response?.data?.result?.message || error.message || 'Failed to save draft'
+        const idModal = document.querySelector('#error_submission_modal')
+        const modal = KTModal.getInstance(idModal as HTMLElement)
+        modal.show()
       })
       .finally(() => {
         isSubmit.value = false
@@ -712,7 +845,10 @@ const goSaveDraft = () => {
         setAfterResponsePost(response)
       })
       .catch((error) => {
-        console.error(error)
+        invoiceApi.errorMessageSubmission = error.response?.data?.result?.message || error.message || 'Failed to save draft'
+        const idModal = document.querySelector('#error_submission_modal')
+        const modal = KTModal.getInstance(idModal as HTMLElement)
+        modal.show()
       })
       .finally(() => {
         isSubmit.value = false
@@ -720,7 +856,7 @@ const goSaveDraft = () => {
   }
 }
 
-const setAfterResponsePost = (response) => {
+const setAfterResponsePost = (response: { statusCode: number; result: { message: string } }) => {
   if (response.statusCode === 200) {
     const idModal = document.querySelector('#success_invoice_modal')
     const modal = KTModal.getInstance(idModal as HTMLElement)
@@ -767,6 +903,8 @@ const setData = () => {
     form.invoiceDate = detail.header.invoiceDate
     form.taxNoInvoice = detail.header.taxNo
     form.currency = detail.header.currCode
+    form.dpAmountDeduction = detail.header.dpAmountDeduction
+    form.remainingDpAmount = detail.header.remainingDPAmount
     form.description = detail.header.notes
     form.subtotal = detail.calculation.subtotal
     form.vatAmount = detail.calculation.vatAmount
@@ -922,7 +1060,7 @@ const setDataNonPo = () => {
       const data = {
         id: item.id,
         activity: item.activityId,
-        activityCode: item.activityExpenses,
+        activityCode: item.activityExpense,
         activityName: item.activityName,
         itemAmount: item.itemAmount,
         itemText: item.itemText,
@@ -997,28 +1135,56 @@ const mapDataCheck = () => {
       ITEM_TEXT: item.itemText,
       ALLOC_NMBR: '',
       TAX_CODE: item.taxCode,
-      COSTCENTER: item.costCenter,
-      PROFIT_CTR: '',
+      COSTCENTER: item.costCenter || '',
+      PROFIT_CTR: item.profitCenter || '',
     }
     glAccount.push(glData)
   }
 
   itemNoAcc.value += 1
-  const accData = {
-    ITEMNO_ACC: itemNoAcc.value,
-    VENDOR_NO: form.vendorId,
-    REF_KEY_1: form.npwp,
-    REF_KEY_2: '',
-    REF_KEY_3: '',
-    BLINE_DATE: '',
-    PMNTTRMS: '',
-    PYMT_METH: '',
-    ALLOC_NMBR: '',
-    ITEM_TEXT: form.invoiceNoVendor,
-    TAX_CODE: form.invoiceItem[0].taxCode,
-    PAYMT_REF: '',
+
+  if (form.invoiceType === '5') {
+    const accData = {
+      ITEMNO_ACC: itemNoAcc.value,
+      VENDOR_NO: form.vendorId || '',
+      REF_KEY_1: '',
+      REF_KEY_2: '',
+      REF_KEY_3: '',
+      BLINE_DATE: '',
+      PMNTTRMS: '',
+      PYMT_METH: '',
+      ALLOC_NMBR: '',
+      ITEM_TEXT: form.cashJournalCode || '',
+      TAX_CODE: form.invoiceItem.length > 0 ? form.invoiceItem[0].taxCode : '',
+      PAYMT_REF: '',
+    }
+    accountPayable.push(accData)
+  } else {
+    let itemText = ''
+    if (form.invoiceType === '1') {
+      itemText = form.invoiceNoVendor || ''
+    } else if (form.invoiceType === '2') {
+      itemText = form.proposalAmountVal || form.description || ''
+    } else if (form.invoiceType === '3' || form.invoiceType === '4') {
+      itemText = form.casNoCode || form.taxNoInvoice || ''
+    }
+
+    const accData = {
+      ITEMNO_ACC: itemNoAcc.value,
+      VENDOR_NO: form.vendorId,
+      REF_KEY_1: form.npwp,
+      REF_KEY_2: '',
+      REF_KEY_3: '',
+      BLINE_DATE: '',
+      PMNTTRMS: '',
+      PYMT_METH: '',
+      ALLOC_NMBR: '',
+      ITEM_TEXT: itemText,
+      TAX_CODE: form.invoiceItem[0].taxCode,
+      PAYMT_REF: '',
+    }
+    accountPayable.push(accData)
   }
-  accountPayable.push(accData)
 
   for (const item of form.invoiceItem) {
     const checkAccountTax = accountTax.findIndex((sub) => sub.TAX_CODE === item.taxCode)
@@ -1086,12 +1252,39 @@ const mapDataCheck = () => {
     }
   }
 
+  let docDate = moment().format('YYYYMMDD')
+
+  if (form.invoiceType === '5') {
+    if (Array.isArray(form.pettyCashPeriod) && form.pettyCashPeriod[0]) {
+      docDate = moment(form.pettyCashPeriod[0]).format('YYYYMMDD')
+    }
+  } else if (form.invoiceType === '1') {
+    if (form.invoiceDate) {
+      docDate = moment(form.invoiceDate).format('YYYYMMDD')
+    }
+  }
+
+  let refDocNo = ''
+  if (form.invoiceType === '5') {
+    refDocNo = form.cashJournalCode || form.invoiceNo || form.description || 'PETTY_CASH'
+  } else if (form.invoiceType === '1') {
+    refDocNo = form.invoiceNoVendor || form.taxNoInvoice || form.invoiceNo || 'REIMBURSEMENT'
+  } else if (form.invoiceType === '2') {
+    refDocNo = form.proposalAmountVal || form.invoiceNo || form.description || 'CREDIT_CARD'
+  } else if (form.invoiceType === '3' || form.invoiceType === '4') {
+    refDocNo = form.casNoCode || form.taxNoInvoice || form.invoiceNo || (form.invoiceType === '3' ? 'CAS' : 'LBA')
+  }
+
+  if (!refDocNo || refDocNo.trim() === '') {
+    refDocNo = form.invoiceNo || form.description || 'REF_DOC'
+  }
+
   const data = {
     REQUEST: {
-      HEADER_TXT: form.taxNoInvoice,
+      HEADER_TXT: form.taxNoInvoice || '',
       COMP_CODE: form.companyCode,
-      DOC_DATE: moment(form.invoiceDate).format('YYYYMMDD'),
-      REF_DOC_NO: form.invoiceNoVendor,
+      DOC_DATE: docDate,
+      REF_DOC_NO: refDocNo,
       CUSTOMERCPD: {
         NAME: form.nameAlternative,
         NAME_2: form.nameOtherAlternative,
@@ -1135,15 +1328,70 @@ const checkBudget = () => {
 
 const checkFormBudget = () => {
   let status = false
-  if (
-    !form.companyCode ||
-    !form.invoiceNoVendor ||
-    !form.invoiceDate ||
-    !form.description ||
-    !form.invoiceDocument ||
-    form.invoiceItem.length === 0
-  )
-    status = true
+
+  // Check if invoice type is Petty Cash (id = '5')
+  const isPettyCash = form.invoiceType === '5'
+
+  // Check if at least one document is uploaded (Invoice Document, Tax, Reference Document, or Other Document)
+  const hasAtLeastOneDocument =
+    form.invoiceDocument !== null ||
+    form.tax !== null ||
+    form.referenceDocument !== null ||
+    form.otherDocument !== null
+
+  if (isPettyCash) {
+    if (
+      !form.companyCode ||
+      !form.cashJournalCode ||
+      !form.pettyCashPeriod ||
+      (Array.isArray(form.pettyCashPeriod) && (!form.pettyCashPeriod[0] || !form.pettyCashPeriod[1])) ||
+      !form.description ||
+      !form.department ||
+      form.invoiceItem.length === 0 ||
+      !hasAtLeastOneDocument
+    ) {
+      status = true
+    }
+  } else {
+    const isReimbursement = form.invoiceType === '1'
+    const isCreditCard = form.invoiceType === '2'
+    const isCAS = form.invoiceType === '3'
+    const isLBA = form.invoiceType === '4'
+
+    if (
+      !form.companyCode ||
+      !form.description ||
+      !form.department ||
+      form.invoiceItem.length === 0 ||
+      !hasAtLeastOneDocument
+    ) {
+      status = true
+    }
+
+    if (isReimbursement) {
+      if (!form.invoiceNoVendor || !form.invoiceDate || !form.taxNoInvoice) {
+        status = true
+      }
+    }
+
+    if (isCreditCard) {
+      if (!form.proposalAmountVal) {
+        status = true
+      }
+    }
+
+    if (isCAS) {
+      if (!form.taxNoInvoice) {
+        status = true
+      }
+    }
+
+    if (isLBA) {
+      if (!form.taxNoInvoice) {
+        status = true
+      }
+    }
+  }
 
   for (const item of form.invoiceItem) {
     if (item.isEdit || !item.itemAmount || !item.taxCode) status = true
@@ -1177,6 +1425,7 @@ onMounted(() => {
 
   if (route.query.type === 'po-view' || route.query.type === 'non-po-view') {
     tabNow.value = 'preview'
+    hasCompletedDataTab.value = true
   }
 
   if (
@@ -1186,6 +1435,8 @@ onMounted(() => {
       route.query.type !== 'po-view' &&
       route.query.type === 'nonpo')
   ) {
+    hasCompletedDataTab.value = true
+
     invoiceApi.getNonPoDetail(route.query.invoice?.toString() || '').then(() => {
       setStepperStatus()
       setDataNonPo()
@@ -1199,6 +1450,8 @@ onMounted(() => {
       route.query.type !== 'po-view' &&
       route.query.type === 'po')
   ) {
+    hasCompletedDataTab.value = true
+
     invoiceApi.getPoDetail(route.query.invoice?.toString() || '').then(() => {
       setData()
     })

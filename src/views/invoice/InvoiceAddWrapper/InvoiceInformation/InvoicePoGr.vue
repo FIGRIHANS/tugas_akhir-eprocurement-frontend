@@ -62,7 +62,7 @@
                   <div v-if="item.isEdit && checkInvoiceDp()">
                     <div class="input" :class="{ 'border-danger': item.poNoError }">
                       <input v-model="item.poNo" placeholder="" type="number" @keypress="searchEnter" />
-                      <i class="ki-filled ki-magnifier"></i>
+                      <i @click="searchItem" class="ki-filled ki-magnifier"></i>
                     </div>
                     <p v-if="searchError" class="text-danger text-[9px]">*PO Number must be exactly 10 characters long</p>
                     <p v-if="searchDpAvailableError" class="text-danger text-[9px]">*PO Number not available for DP</p>
@@ -79,14 +79,14 @@
                 <td v-if="!checkInvoiceDp()">{{ item.quantity }}</td>
                 <td v-if="!checkInvoiceDp()">{{ item.uom }}</td>
                 <td v-if="!checkInvoiceDp()">{{ item.itemText }}</td>
-                <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.conditionType }}</td>
-                <td v-if="!checkInvoiceDp()">{{ item.conditionTypeDesc || '-' }}</td>
-                <td v-if="form?.invoiceType === '903'">{{ getTaxCodeName(item.taxCode) || '-' }}</td>
+                <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.conditionType || '-' }}</td>
+                <td v-if="!checkInvoiceDp() && form.invoiceType !== '903'">{{ item.conditionTypeDesc || '-' }}</td>
+                <!-- <td v-if="form?.invoiceType === '903'">{{ getTaxCodeName(item.taxCode) || '-' }}</td> -->
                 <td v-if="!checkInvoiceDp() && form?.invoiceType !== '903'">{{ item.qcStatus || '-' }}</td>
-                <td v-if="form?.invoiceType === '903'">
+                <!-- <td v-if="form?.invoiceType === '903'">
                   <span v-if="item.isEdit">{{ form?.currency === item.currencyLC ? useFormatIdr(formEdit.vatAmount) : useFormatUsd(formEdit.vatAmount) }}</span>
                   <span v-else>{{ form?.currency === item.currencyLC ? useFormatIdr(item.vatAmount || 0) : useFormatUsd(item.vatAmount || 0) }}</span>
-                </td>
+                </td> -->
                 <td v-if="checkInvoiceDp()">
                   <span v-if="!item.isEdit">{{ form?.currency === 'IDR' ? useFormatIdr(item.itemAmountLC) : useFormatUsd(item.itemAmountLC) }}</span>
                   <input v-else v-model="formEdit.itemAmountLC" type="number" class="input" />
@@ -108,9 +108,9 @@
                   <span v-if="item.isEdit">{{ form?.currency === item.currencyLC ? useFormatIdr(formEdit.vatAmount) : useFormatUsd(formEdit.vatAmount) }}</span>
                   <span v-else>{{ form?.currency === item.currencyLC ? useFormatIdr(item.vatAmount || 0) : useFormatUsd(item.vatAmount || 0) }}</span>
                 </td>
-                <td v-if="form?.invoiceType !== '903'">-</td>
-                <td v-if="form?.invoiceType !== '903'">-</td>
-                <td v-if="form?.invoiceType !== '903'">{{ form?.currency === item.currencyLC ? useFormatIdr(item.whtBaseAmount) : useFormatUsd(item.whtBaseAmount) }}</td>
+                <td>-</td>
+                <td>-</td>
+                <td>{{ form?.currency === item.currencyLC ? useFormatIdr(item.whtBaseAmount) : useFormatUsd(item.whtBaseAmount) }}</td>
                 <td>-</td>
                 <td>{{ item.department || '-' }}</td>
               </tr>
@@ -162,9 +162,18 @@
                     :class="{ 'border-danger': item.poItemError }" @change="item.poItemError = false" />
                   <p v-if="item.poItemError" class="text-danger text-[9px]">*PO Item must be at least 2 digits</p>
                 </td>
-                <td v-if="!checkInvoiceDp()">{{ form.currency === item.currencyLC ? useFormatIdr(item.itemAmountLC) : useFormatUsd(item.itemAmountTC) }}</td>
-                <td v-if="!checkInvoiceDp()">{{ item.quantity }}</td>
-                <td v-if="!checkInvoiceDp()">{{ item.uom || '-' }}</td>
+                <td v-if="!checkInvoiceDp()">
+                  <span v-if="!item.isEdit">{{ form?.currency === 'IDR' ? useFormatIdr(item.itemAmountLC) : useFormatUsd(item.itemAmountLC) }}</span>
+                  <input v-else v-model="item.itemAmountLC" type="number" class="input" />
+                </td>
+                <td v-if="!checkInvoiceDp()">
+                  <span v-if="!item.isEdit">{{ item.quantity }}</span>
+                  <input v-else v-model="item.quantity" type="number" class="input" />
+                </td>
+                <td v-if="!checkInvoiceDp()">
+                  <span v-if="!item.isEdit">{{ item.uom || '-' }}</span>
+                  <input v-else v-model="item.uom" class="input" />
+                </td>
                 <td v-if="!checkInvoiceDp()">{{ item.itemText || '-' }}</td>
                 <td v-if="!checkInvoiceDp()">
                   <span v-if="!item.isEdit">{{ getCostCenterName(item.department) || '-' }}</span>
@@ -216,7 +225,9 @@ const isDisabledSearch = ref<boolean>(false)
 const formEdit = reactive({
   itemAmountLC: 0,
   taxCode: '',
-  vatAmount: 0
+  vatAmount: 0,
+  quantity: 0,
+  uom: ''
 })
 
 const listTaxCalculation = computed(() => masterDataApi.taxList)
@@ -359,10 +370,12 @@ const resetFormEdit = () => {
   formEdit.taxCode = ''
   formEdit.itemAmountLC = 0
   formEdit.vatAmount = 0
+  formEdit.quantity = 0
+  formEdit.uom = ''
 }
 
 const goEdit = (item: itemsPoGrType) => {
-  if ((checkInvoiceDp() && searchDpAvailableError.value || form?.invoiceType === '903') || (checkInvoiceDp() && !isSearch.value && item.isEdit)) return
+  if ((checkInvoiceDp() && searchDpAvailableError.value) || (checkInvoiceDp() && !isSearch.value && item.isEdit)) return
   item.isEdit = !item.isEdit
   if (item.isEdit) {
     formEdit.taxCode = item.taxCode

@@ -31,7 +31,7 @@ import { ref, computed, onMounted, watch, inject } from 'vue'
 import { useRoute } from 'vue-router'
 import type { listType } from '../../types/invoiceCalculation'
 import type { formTypes } from '../../types/invoiceAddWrapper'
-import { defaultField, dpField, nonPoField } from '@/static/invoiceCalculation'
+import { defaultField, dpField, nonPoField, pettyCashField } from '@/static/invoiceCalculation'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 
@@ -47,6 +47,8 @@ const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
 const checkIsNonPo = () => {
   return route.query.type === 'nonpo'
 }
+
+const isPettyCash = computed(() => form?.invoiceType === '5')
 
 const setCount = (name: string) => {
   const list = {
@@ -225,8 +227,11 @@ const countTotalNetAmount = () => {
 watch(
   () => form,
   () => {
-    if (form?.invoiceDp !== '9011') {
+    if (form?.invoiceDp !== '9011' && form?.invoiceDp !== '9013') {
       listName.value = [...dpField]
+    } else if (isPettyCash.value) {
+      // For Petty Cash, use pettyCashField (without WHT Amount)
+      listName.value = [...pettyCashField]
     } else if (checkIsNonPo()) {
       listName.value = [...nonPoField]
     } else {

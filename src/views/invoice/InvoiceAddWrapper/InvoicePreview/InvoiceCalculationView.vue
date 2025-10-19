@@ -21,11 +21,11 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, watch, inject } from 'vue'
+import { ref, computed, onMounted, watch, inject } from 'vue'
 import { useRoute } from 'vue-router'
 import type { listType } from '../../types/invoiceCalculation'
 import type { formTypes } from '../..//types/invoiceAddWrapper'
-import { defaultField, dpField } from '@/static/invoiceCalculation'
+import { defaultField, dpField, pettyCashField } from '@/static/invoiceCalculation'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 
 const route = useRoute()
@@ -33,6 +33,8 @@ const form = inject<formTypes>('form')
 const typeForm = ref<string>('')
 const listName = ref<string[]>([])
 const listCalculation = ref<listType[]>([])
+
+const isPettyCash = computed(() => form?.invoiceType === '5')
 
 const setCount = (name: string) => {
   const list = {
@@ -67,10 +69,16 @@ const setCalculation = () => {
   }
 }
 
+const checkIsPoPibCc = () => {
+  return (form.invoiceType === '902' || form.invoiceType === '903') && form.status > 0
+}
+
 watch(
-  () => [form?.invoiceDp],
+  () => [form?.invoiceDp, form?.invoiceType],
   () => {
-    if (form?.invoiceDp !== '9011') {
+    if (isPettyCash.value) {
+      listName.value = [...pettyCashField]
+    } else if (form?.invoiceDp !== '9011' && form?.invoiceDp !== '9013' && !checkIsPoPibCc()) {
       listName.value = [...dpField]
     } else {
       listName.value = [...defaultField]
