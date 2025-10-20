@@ -69,15 +69,20 @@ interface ParamsSubmissionHeader {
   proposalAmount?: string
   casNoCode?: string
   casNoName?: string
+  dueDateCas?: string
+  casDateReceipt?: string
+  picFinance?: string
+  npwpReportingName?: string
+  invoicingParty?: string
+  assigment?: string
+  transferNews?: string
 }
 
 interface ParamsSubmissionVendor {
-  vendorId: string
+  vendorId: number
   vendorName: string
-  vendorBusinessUnit: string
-  vendorSubBusinessUnit: string
-  npwp: string
   vendorAddress: string
+  npwp: string
 }
 
 interface ParamsSubmissionPayment {
@@ -287,6 +292,10 @@ export interface ParamsSubmissionHeaderNonPo {
   companyName: string
   invoiceNo: string
   documentNo: string
+  invoicingParty?: string
+  assigment?: string
+  transferNews?: string
+  npwpReporting?: string
   invoiceDate?: string | null
   postingDate?: string | null
   estimatedPaymentDate?: string | null
@@ -300,15 +309,15 @@ export interface ParamsSubmissionHeaderNonPo {
   statusName: string
   department: string
   profileId: string
+  casDateReceipt?: string
+  dueDateCas?: string
+  proposalAmount?: string
+  picFinance?: string
   cashJournalCode?: string
   cashJournalName?: string
   pettyCashStartDate?: string | null
   pettyCashEndDate?: string | null
-  proposalAmount?: string
-  casNo?: string
-  casNoCode?: string
-  casNoName?: string
-  invoiceNoVendor?: string
+  npwpReportingName?: string
 }
 
 interface ParamsSubmissionAlternativePay {
@@ -325,14 +334,14 @@ interface ParamsSubmissionAlternativePay {
   npwp: string
   ktp: string
   email: string
-  isAlternativePayee: boolean
-  isOneTimeVendor: boolean
+  isAlternativePayee: boolean | null
+  isOneTimeVendor: boolean | null
 }
 
 export interface ParamsSubmissionCostExpense {
   id: number
   activityId: number
-  activityExpense: string
+  activityExpenses: string
   activityName: string
   itemAmount: number
   itemText?: string

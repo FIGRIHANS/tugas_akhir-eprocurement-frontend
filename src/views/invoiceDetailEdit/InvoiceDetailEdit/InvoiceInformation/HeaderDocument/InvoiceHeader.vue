@@ -322,7 +322,7 @@
           v-model="form.assigment"
           class="input"
           placeholder=""
-          :class="{ 'border-danger': form.assignmentError }"
+          :class="{ 'border-danger': form.assigmentError }"
           :disabled="checkVerifikator1() || route.query.isSendSap === 'true'"
         />
       </div>

@@ -2,7 +2,7 @@
   <div>
     <p class="mb-[16px] font-semibold text-base">Requisition Header</p>
     <div v-if="form">
-      <!-- Invoice Type -->
+
       <div
         v-if="checkPo() || checkIsNonPo()"
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
@@ -48,7 +48,7 @@
         </select>
         <!-- </template> -->
       </div>
-      <!-- Vendor No -->
+
       <div v-if="checkIsNonPo()" class="flex items-baseline flex-wrap lg:flex-nowrap py-[8px]">
         <label class="form-label">
           Vendor No.
@@ -56,7 +56,7 @@
         </label>
         <input v-model="form.vendorId" class="input" placeholder="" disabled />
       </div>
-      <!-- DP Option -->
+
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Source Type
@@ -72,7 +72,7 @@
           </option>
         </select>
       </div>
-      <!-- Company Code -->
+
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Company Code
@@ -88,7 +88,7 @@
           </option>
         </select>
       </div>
-      <!-- Submitted Document No. -->
+
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label"> Submitted Document No. </label>
         <input
@@ -98,7 +98,7 @@
           disabled
         />
       </div>
-      <!-- Invoice Document No. * -->
+
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Remarks.
@@ -112,7 +112,7 @@
           :class="{ 'border-danger': form.invoiceNoVendorError }"
         />
       </div>
-      <!-- Invoice Date -->
+
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Requisition Date
@@ -157,7 +157,7 @@
           </option>
         </select>
       </div>
-      <!-- Tax Document No. * -->
+
       <div
         v-if="form.invoiceType != '903'"
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
@@ -171,7 +171,7 @@
           :class="{ 'border-danger': form.taxNoInvoiceError }"
         />
       </div>
-      <!-- Currency -->
+
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label"> Currency </label>
         <input
@@ -193,7 +193,6 @@
         </select>
       </div>
 
-      <!-- Description -->
       <div
         v-if="form.invoiceType != '903'"
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"

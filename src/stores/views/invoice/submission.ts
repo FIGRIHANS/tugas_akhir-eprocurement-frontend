@@ -127,18 +127,13 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
   }
 
   const postSubmission = async (data: ParamsSubmissionTypes) => {
-    // Wrap data in payload and ensure vendorId is a number
     const requestBody = {
-      payload: {
-        ...data,
-        vendor: {
-          ...data.vendor,
-          vendorId: data.vendor.vendorId ? Number(data.vendor.vendorId) : 0
-        }
+      ...data,
+      vendor: {
+        ...data.vendor,
+        vendorId: data.vendor.vendorId ? Number(data.vendor.vendorId) : 0
       }
     }
-
-    console.log('🔍 postSubmission Request:', requestBody)
 
     const response: ApiResponse<void> = await invoiceApi.post(`/invoice/submission`, requestBody)
 
@@ -163,16 +158,12 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
 
   const postSubmissionNonPo = async (data: ParamsSubmissionNonPo) => {
     const requestBody = {
-      payload: {
-        ...data,
-        vendor: {
-          ...data.vendor,
-          vendorId: data.vendor.vendorId ? Number(data.vendor.vendorId) : 0
-        }
+      ...data,
+      vendor: {
+        ...data.vendor,
+        vendorId: data.vendor.vendorId ? Number(data.vendor.vendorId) : 0
       }
     }
-
-    console.log('🔍 postSubmissionNonPo Request:', requestBody)
 
     const response: ApiResponse<void> = await invoiceApi.post(`/invoice/submission-non-po`, requestBody)
 
@@ -186,8 +177,6 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
           SUPPLIER_FROM_PORTAL: vendorId
         }
       }
-
-      console.log('🔍 getCasNo Request:', requestBody)
 
       const response = await invoiceApi.post<{
         response: CasNoTypes[]
@@ -207,24 +196,17 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
         }
       )
 
-      console.log('📥 getCasNo Response:', response.data)
-
-      // Check if there's an error message from SAP
       if (response.data.zMessage && response.data.zMessage.TYPE === 'E') {
-        console.warn('⚠️ SAP Error:', response.data.zMessage.MESSAGE)
         casNoCode.value = []
         return []
       }
 
-      // Handle successful response
       const mappedData = response.data.response || []
-      console.log('✅ getCasNo Mapped Data:', mappedData)
-
       casNoCode.value = mappedData
       return mappedData
 
     } catch (error) {
-      console.error('❌ getCasNo Error:', error)
+      console.error('getCasNo Error:', error)
       casNoCode.value = []
       return []
     }
@@ -267,28 +249,20 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
   }
 
   const postCheckBudget = async (data: ParamsCheckBudgetType) => {
-
     try {
       const response: ApiResponse<ResponseCheckBudgetTypes> = await invoiceApi.post(
         `/invoice/invoice/check-budget`,
         data,
       )
 
-      console.log('📥 Budget Check API Raw Response:', response)
-
-      // Safely access nested properties
       if (response?.data?.result?.content) {
         responseCheckBudget.value = response.data.result.content
-        console.log('✅ Budget Check Success:', responseCheckBudget.value)
       } else {
-        console.warn('⚠️ Unexpected response structure:', response)
         responseCheckBudget.value = {} as ResponseCheckBudgetTypes
       }
 
       return response.data
     } catch (err: unknown) {
-      console.error('❌ Budget Check API Error:', err)
-
       const axiosErr = err as {
         response?: {
           status?: number
@@ -298,24 +272,15 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
       }
 
       const errorData = axiosErr.response?.data
-      const status = axiosErr.response?.status
-      const message = axiosErr.message || 'Unknown error'
-
-      console.error(`Budget Check Failed (${status}):`, message)
 
       if (errorData) {
-        console.log('Error response data:', errorData)
-
-        // Safely access error content
         if (errorData.result?.content) {
           responseCheckBudget.value = errorData.result.content
         }
-
         return errorData
       }
 
-      // Re-throw with more context
-      throw new Error(`Budget check failed: ${message}`)
+      throw new Error(`Budget check failed: ${axiosErr.message || 'Unknown error'}`)
     }
   }
 

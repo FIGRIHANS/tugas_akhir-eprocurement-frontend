@@ -265,6 +265,8 @@ const form = reactive<formTypes>({
   pettyCashPeriod: [null, null],
   casNoCode: '',
   casNoName: '',
+  casDateReceipt: '',
+  dueDateCas: '',
   proposalAmountVal: '',
 })
 
@@ -377,18 +379,27 @@ const checkInvoiceInformation = () => {
       form.invoiceVendorNoError = useCheckEmpty(form.invoiceVendorNo).isError
       form.invoiceDateError = useCheckEmpty(form.invoiceDate).isError
       form.taxNoInvoiceError = useCheckEmpty(form.taxNoInvoice).isError
+      form.proposalAmountError = false
+      form.casNoCodeError = false
+      form.dueDateCasError = false
     } else if (isCreditCard) {
       form.proposalAmountError = useCheckEmpty(form.proposalAmountVal).isError
       form.invoiceVendorNoError = false
       form.invoiceDateError = false
       form.taxNoInvoiceError = false
+      form.casNoCodeError = false
+      form.dueDateCasError = false
     } else if (isCAS) {
       form.taxNoInvoiceError = useCheckEmpty(form.taxNoInvoice).isError
+      form.casNoCodeError = false // CAS No. is auto-generated, not required
       form.invoiceVendorNoError = false
       form.invoiceDateError = false
       form.proposalAmountError = false
+      form.dueDateCasError = false
     } else if (isLBA) {
       form.taxNoInvoiceError = useCheckEmpty(form.taxNoInvoice).isError
+      form.dueDateCasError = useCheckEmpty(form.dueDateCas).isError
+      form.casNoCodeError = useCheckEmpty(form.casNoCode).isError // LBA requires CAS No. selection
       form.invoiceVendorNoError = false
       form.invoiceDateError = false
       form.proposalAmountError = false
@@ -397,6 +408,8 @@ const checkInvoiceInformation = () => {
       form.invoiceDateError = false
       form.taxNoInvoiceError = false
       form.proposalAmountError = false
+      form.casNoCodeError = false
+      form.dueDateCasError = false
     }
   } else {
     form.invoiceVendorNoError = false
@@ -434,6 +447,8 @@ const checkInvoiceInformation = () => {
     form.departmentError ||
     form.taxNoInvoiceError ||
     form.proposalAmountError ||
+    form.dueDateCasError ||
+    form.casNoCodeError ||
     form.invoiceItemError
   )
     return false
@@ -543,7 +558,7 @@ const mapInvoiceItem = () => {
     const baseData: ParamsSubmissionCostExpense = {
       id: item.id || 0,
       activityId: item.activity,
-      activityExpense: listActivity.value[itemIndex].code,
+      activityExpenses: listActivity.value[itemIndex].code,
       activityName: listActivity.value[itemIndex].name,
       itemAmount: Number(item.itemAmount),
       itemText: item.itemText,
@@ -600,12 +615,10 @@ const mapDataPost = () => {
       dpAmountDeduction: Number(form.dpAmountDeduction)
     },
     vendor: {
-      vendorId: form.vendorId,
+      vendorId: form.vendorId ? Number(form.vendorId) : 0,
       vendorName: getVendorName() || '',
-      vendorBusinessUnit: '',
-      vendorSubBusinessUnit: '',
-      npwp: form.npwp,
       vendorAddress: form.address,
+      npwp: form.npwp
     },
     payment: {
       paymentId: form.paymentId,
@@ -675,52 +688,54 @@ const mapDataPostNonPo = () => {
 
   const data = {
     header: {
-      invoiceTypeCode: Number(form.invoiceType),
-      invoiceTypeName: invoiceTypeName,
-      companyCode: form.companyCode,
-      companyName: form.companyName,
-      invoiceNo: form.invoiceNo,
-      cashJournalCode: form.cashJournalCode || '',
-      cashJournalName: form.cashJournalName || '',
-      pettyCashStartDate: pettyCashStartDate || '',
-      pettyCashEndDate: pettyCashEndDate || '',
-      casNo: form.casNoCode || '',
-      casNoCode: form.casNoCode || '',
-      casNoName: form.casNoName || '',
-      documentNo: isPettyCash ? (form.cashJournalCode || '') :
-                  isReimbursement ? (form.invoiceVendorNo || '') :
-                  isCreditCard ? (form.proposalAmountVal || '') :
-                  isCAS ? '' :
-                  isLBA ? (form.casNoCode || '') :
-                  '',
-      invoiceVendorNo: form.invoiceVendorNo || '',
-      invoiceNoVendor: form.invoiceVendorNo || '',
-      invoiceDate: invoiceDateToUse || '',
-      taxNo: form.taxNoInvoice || '',
-      proposalAmount: form.proposalAmountVal || '',
-      currCode: form.currency,
-      department: checkIsNonPo() ? form.department : userData.value.profile.costCenter || '',
-      profileId: userData.value.profile.profileId.toString(),
-      notes: form.description,
       invoiceUId:
         form.status === 0 || form.status === 5
           ? form.invoiceUId
           : '00000000-0000-0000-0000-000000000000',
+      invoiceTypeCode: Number(form.invoiceType),
+      invoiceTypeName: invoiceTypeName,
+      invoiceVendorNo: isCAS ? (form.taxNoInvoice || '') : (form.invoiceVendorNo || ''),
+      companyCode: form.companyCode,
+      companyName: form.companyName,
+      invoiceNo: form.invoiceNo,
+      documentNo: isPettyCash ? (form.cashJournalCode || '') :
+                  isReimbursement ? (form.invoiceVendorNo || '') :
+                  isCreditCard ? (form.proposalAmountVal || '') :
+                  isCAS ? (form.taxNoInvoice || '') :
+                  isLBA ? (form.casNoCode || '') :
+                  '',
+      invoicingParty: '',
+      assigment: '',
+      transferNews: '',
+      npwpReporting: '',
+      invoiceDate: invoiceDateToUse || '',
       postingDate: postingDateToUse,
       estimatedPaymentDate: postingDateToUse,
       paymentMethodCode: 'T',
       paymentMethodName: 'Bank Transfer',
+      taxNo: form.taxNoInvoice || '',
+      currCode: form.currency,
       creditCardBillingID: '',
+      notes: form.description,
       statusCode: isClickDraft.value ? 0 : 1,
-      statusName: isClickDraft.value ? 'Drafted' : 'Waiting to Verify'
+      statusName: isClickDraft.value ? 'Drafted' : 'Waiting to Verify',
+      department: checkIsNonPo() ? form.department : userData.value.profile.costCenter || '',
+      profileId: userData.value.profile.profileId.toString(),
+      casDateReceipt: isCAS && form.casDateReceipt ? moment(form.casDateReceipt).toISOString() : '',
+      dueDateCas: isLBA && form.dueDateCas ? moment(form.dueDateCas).toISOString() : '',
+      proposalAmount: isCreditCard ? (form.proposalAmountVal || '') : '',
+      picFinance: '',
+      cashJournalCode: isPettyCash ? (form.cashJournalCode || '') : '',
+      cashJournalName: isPettyCash ? (form.cashJournalName || '') : '',
+      pettyCashStartDate: pettyCashStartDate || '',
+      pettyCashEndDate: pettyCashEndDate || '',
+      npwpReportingName: ''
     },
     vendor: {
-      vendorId: form.vendorId,
+      vendorId: form.vendorId ? Number(form.vendorId) : 0,
       vendorName: getVendorName() || '',
-      vendorBusinessUnit: '',
-      vendorSubBusinessUnit: '',
-      npwp: form.npwp,
       vendorAddress: form.address,
+      npwp: form.npwp
     },
     payment: {
       paymentId: form.paymentId,
@@ -735,9 +750,8 @@ const mapDataPostNonPo = () => {
       subtotal: form.subtotal,
       vatAmount: form.vatAmount,
       whtAmount: form.whtAmount,
-      additionalCost: form.additionalCostCalc,
       totalGrossAmount: form.totalGrossAmount,
-      totalNetAmount: form.totalNetAmount,
+      totalNetAmount: form.totalNetAmount
     },
     alternativePay: {
       id: form.idAlternativePayment,
@@ -756,8 +770,8 @@ const mapDataPostNonPo = () => {
       npwp: form.npwpNumberAlternative,
       ktp: form.ktpNumberAlternative,
       email: form.emailAlternative,
-      isAlternativePayee: form.isAlternativePayee,
-      isOneTimeVendor: form.isOneTimeVendor,
+      isAlternativePayee: form.isAlternativePayee || null,
+      isOneTimeVendor: form.isOneTimeVendor || null
     },
     costExpenses: mapInvoiceItem() as ParamsSubmissionCostExpense[],
     isSaveAsDraft: false
@@ -1089,6 +1103,22 @@ const setDataNonPo = () => {
     form.invoiceNo = detail.header.invoiceNo ? detail.header.invoiceNo.toString() : ''
     form.invoiceDate = detail.header.invoiceDate
     form.taxNoInvoice = detail.header.taxNo
+    form.casNoCode = detail.header.casNoCode || ''
+    form.casNoName = detail.header.casNoName || ''
+    form.casDateReceipt = detail.header.casDateReceipt || ''
+    form.dueDateCas = detail.header.dueDateCas || ''
+    form.cashJournalCode = detail.header.cashJournalCode || ''
+    form.cashJournalName = detail.header.cashJournalName || ''
+    form.proposalAmountVal = detail.header.proposalAmount || ''
+
+    // Load Petty Cash Period
+    if (detail.header.pettyCashStartDate && detail.header.pettyCashEndDate) {
+      form.pettyCashPeriod = [
+        new Date(detail.header.pettyCashStartDate),
+        new Date(detail.header.pettyCashEndDate)
+      ]
+    }
+
     form.currency = detail.header.currCode
     form.description = detail.header.notes
     form.subtotal = detail.calculation.subtotal
@@ -1120,7 +1150,7 @@ const setDataNonPo = () => {
       const data = {
         id: item.id,
         activity: item.activityId,
-        activityCode: item.activityExpense,
+        activityCode: item.activityExpenses,
         activityName: item.activityName,
         itemAmount: item.itemAmount,
         itemText: item.itemText,
@@ -1498,7 +1528,7 @@ const checkFormBudget = () => {
     }
 
     if (isLBA) {
-      if (!form.taxNoInvoice) {
+      if (!form.taxNoInvoice || !form.dueDateCas) {
         status = true
       }
     }

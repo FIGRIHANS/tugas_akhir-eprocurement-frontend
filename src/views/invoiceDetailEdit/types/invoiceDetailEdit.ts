@@ -36,7 +36,7 @@ export interface formTypes extends documentFormTypes {
   paymentMethodName: string
   paymentMethodError?: boolean
   assigment: string
-  assignmentError?: boolean
+  assigmentError?: boolean
   transferNews: string
   transferNewsError?: boolean
   npwpReporting: string
