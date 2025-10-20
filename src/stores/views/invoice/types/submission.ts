@@ -72,7 +72,7 @@ interface ParamsSubmissionHeader {
 }
 
 interface ParamsSubmissionVendor {
-  vendorId: number
+  vendorId: string
   vendorName: string
   vendorBusinessUnit: string
   vendorSubBusinessUnit: string
@@ -300,7 +300,6 @@ export interface ParamsSubmissionHeaderNonPo {
   statusName: string
   department: string
   profileId: string
-  cashJournal?: string
   cashJournalCode?: string
   cashJournalName?: string
   pettyCashStartDate?: string | null

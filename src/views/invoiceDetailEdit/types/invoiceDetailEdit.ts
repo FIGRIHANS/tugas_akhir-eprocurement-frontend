@@ -76,7 +76,7 @@ export interface formTypes extends documentFormTypes {
 
   // Petty Cash fields
   reference: string
-  cashJournal: string
+  cashJournalCode: string
   pettyCashPeriod?: string | Date | Array<string | Date>
 
   subtotal: number

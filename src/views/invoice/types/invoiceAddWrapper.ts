@@ -61,8 +61,8 @@ export interface formTypes extends documentFormTypes {
   casNoCodeError?: boolean
   casNoName: string
   invoiceNo: string
-  invoiceNoVendor: string
-  invoiceNoVendorError?: boolean
+  invoiceVendorNo: string
+  invoiceVendorNoError?: boolean
   invoiceDate: string
   invoiceDateError?: boolean
   taxNumber: string

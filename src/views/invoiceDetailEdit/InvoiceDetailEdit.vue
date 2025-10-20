@@ -143,6 +143,9 @@ const form = ref<formTypes>({
   otherDocument: null,
   creditCardBillingId: '',
   creditCardBillingError: false,
+  reference: '',
+  cashJournalCode: '',
+  pettyCashPeriod: [null, null],
   idAlternative: 0,
   isAlternativePayee: false,
   isOneTimeVendor: false,
@@ -378,7 +381,7 @@ const goNext = () => {
       isLoading.value = true
       if (route.query.invoiceType !== 'no_po') {
         verificationApi
-          .putSubmission(mapDataVerif())
+          .putSubmission(mapDataVerifPo())
           .then(() => {
             verificationApi.resetDetailInvoiceEdit()
             const idModal = document.querySelector('#success_data_edit_modal')
@@ -394,7 +397,7 @@ const goNext = () => {
           })
       } else {
         verificationApi
-          .putSubmissionNonPo(mapDataVerif())
+          .putSubmissionNonPo(mapDataVerifNonPo())
           .then(() => {
             verificationApi.resetDetailInvoiceEdit()
             const idModal = document.querySelector('#success_data_edit_modal')
@@ -526,6 +529,9 @@ const setDataEdit = () => {
     referenceDocument: mapDocument(data?.referenceDocument || null),
     otherDocument: mapDocument(data?.otherDocument || null),
     creditCardBillingId: data?.creditCardBillingId || '',
+    reference: '',
+    cashJournalCode: '',
+    pettyCashPeriod: [null, null],
     idAlternative: data?.idAlternative,
     isAlternativePayee: data?.isAlternativePayee,
     isOneTimeVendor: data?.isOneTimeVendor,
@@ -653,6 +659,9 @@ const setDataDefault = () => {
     referenceDocument: reference,
     otherDocument: other,
     creditCardBillingId: data?.header.creditCardBillingID || '',
+    reference: '',
+    cashJournalCode: '',
+    pettyCashPeriod: [null, null],
     idAlternative: data?.alternativePayee && data?.alternativePayee.length !== 0 ? data?.alternativePayee[0].id : 0,
     isAlternativePayee: data?.alternativePayee && data?.alternativePayee.length !== 0 ? data?.alternativePayee[0].isAlternativePayee : false,
     isOneTimeVendor: data?.alternativePayee && data?.alternativePayee.length !== 0 ? data?.alternativePayee[0].isOneTimeVendor : false,
@@ -670,7 +679,7 @@ const setDataDefault = () => {
   }
 }
 
-const mapDataVerif = () => {
+const mapDataVerifPo = (): PostVerificationTypes => {
   const invoiceDoc = form.value.invoiceDocument || {}
   const taxDoc = form.value.tax || {}
   const referenceDoc = form.value.referenceDocument || {}
@@ -680,12 +689,12 @@ const mapDataVerif = () => {
   if (!isEmpty(taxDoc)) documents.push(taxDoc)
   if (!isEmpty(referenceDoc)) documents.push(referenceDoc)
   if (!isEmpty(otherDoc)) documents.push(otherDoc)
-  if (route.query.invoiceType !== 'no_po') {
-    const data = {
-      statusCode: route.query.type === '1' ? 3 : 4,
-      statusName: route.query.type === '1' ? 'Verified' : 'Approved',
-      statusNotes: '',
-      header: {
+
+  return {
+    statusCode: route.query.type === '1' ? 3 : 4,
+    statusName: route.query.type === '1' ? 'Verified' : 'Approved',
+    statusNotes: '',
+    header: {
         invoiceUId: form.value.invoiceUId,
         documentNo: form.value.documentNo,
         invoiceDate: form.value.invoiceDate,
@@ -721,11 +730,21 @@ const mapDataVerif = () => {
       documents,
       pogr: mapPoGr(),
       additionalCosts: mapAdditionalCost(),
-      } as PostVerificationTypes
+  } as PostVerificationTypes
+}
 
-    return data
-  } else {
-    const data = {
+const mapDataVerifNonPo = (): PostEditApprovalNonPoTypes => {
+  const invoiceDoc = form.value.invoiceDocument || {}
+  const taxDoc = form.value.tax || {}
+  const referenceDoc = form.value.referenceDocument || {}
+  const otherDoc = form.value.otherDocument || {}
+  const documents = []
+  if (!isEmpty(invoiceDoc)) documents.push(invoiceDoc)
+  if (!isEmpty(taxDoc)) documents.push(taxDoc)
+  if (!isEmpty(referenceDoc)) documents.push(referenceDoc)
+  if (!isEmpty(otherDoc)) documents.push(otherDoc)
+
+  return {
       statusCode: route.query.type === '1' ? 3 : 4,
       statusName: route.query.type === '1' ? 'Verified' : 'Approved',
       statusNotes: '',
@@ -789,10 +808,7 @@ const mapDataVerif = () => {
         isOneTimeVendor: form.value.isOneTimeVendor,
       },
       costExpenses: mapCostExpense()
-    } as PostEditApprovalNonPoTypes
-
-    return data
-  }
+  } as PostEditApprovalNonPoTypes
 }
 
 const mapPoGr = () => {

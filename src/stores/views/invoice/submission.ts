@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 import invoiceApi from '@/core/utils/invoiceApi'
 import moment from 'moment'
 
-import type { ApiResponse } from '@/core/type/api'
+import type { ApiResponse, ApiResponseData } from '@/core/type/api'
 import type {
   SubmissionStatusTypes,
   DocumentTypes,
@@ -20,6 +20,8 @@ import type {
   ResponseCheckBudgetTypes,
 } from './types/submission'
 
+import type { CasNoTypes } from '@/stores/master-data/types/invoiceMasterData'
+
 export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => {
   const submissionStatus = ref<SubmissionStatusTypes[]>([])
   const documentTypeList = ref<DocumentTypes[]>([])
@@ -31,6 +33,7 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
   const detailNonPo = ref<ParamsSubmissionTypes>()
   const responseCheckBudget = ref<ResponseCheckBudgetTypes>()
   const errorMessageSubmission = ref<string>('')
+  const casNoCode = ref<CasNoTypes[]>([])
 
   const getSubmissionStatus = async () => {
     const response: ApiResponse<SubmissionStatusTypes[]> = await invoiceApi.get(
@@ -124,7 +127,20 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
   }
 
   const postSubmission = async (data: ParamsSubmissionTypes) => {
-    const response: ApiResponse<void> = await invoiceApi.post(`/invoice/submission`, data)
+    // Wrap data in payload and ensure vendorId is a number
+    const requestBody = {
+      payload: {
+        ...data,
+        vendor: {
+          ...data.vendor,
+          vendorId: data.vendor.vendorId ? Number(data.vendor.vendorId) : 0
+        }
+      }
+    }
+
+    console.log('🔍 postSubmission Request:', requestBody)
+
+    const response: ApiResponse<void> = await invoiceApi.post(`/invoice/submission`, requestBody)
 
     return response.data
   }
@@ -146,15 +162,77 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
   }
 
   const postSubmissionNonPo = async (data: ParamsSubmissionNonPo) => {
-    const response: ApiResponse<void> = await invoiceApi.post(`/invoice/submission-non-po`, data)
+    const requestBody = {
+      payload: {
+        ...data,
+        vendor: {
+          ...data.vendor,
+          vendorId: data.vendor.vendorId ? Number(data.vendor.vendorId) : 0
+        }
+      }
+    }
+
+    console.log('🔍 postSubmissionNonPo Request:', requestBody)
+
+    const response: ApiResponse<void> = await invoiceApi.post(`/invoice/submission-non-po`, requestBody)
 
     return response.data
+  }
+
+  const getCasNo = async (vendorId: string) => {
+    try {
+      const requestBody = {
+        REQUEST: {
+          SUPPLIER_FROM_PORTAL: vendorId
+        }
+      }
+
+      console.log('🔍 getCasNo Request:', requestBody)
+
+      const response = await invoiceApi.post<{
+        response: CasNoTypes[]
+        zMessage?: {
+          TYPE: string
+          ID: string
+          NUMBER: number
+          MESSAGE: string
+        }
+      }>(
+        '/invoice/invoice/check-cas',
+        requestBody,
+        {
+          validateStatus: (status) => {
+            return status === 200 || status === 422
+          }
+        }
+      )
+
+      console.log('📥 getCasNo Response:', response.data)
+
+      // Check if there's an error message from SAP
+      if (response.data.zMessage && response.data.zMessage.TYPE === 'E') {
+        console.warn('⚠️ SAP Error:', response.data.zMessage.MESSAGE)
+        casNoCode.value = []
+        return []
+      }
+
+      // Handle successful response
+      const mappedData = response.data.response || []
+      console.log('✅ getCasNo Mapped Data:', mappedData)
+
+      casNoCode.value = mappedData
+      return mappedData
+
+    } catch (error) {
+      console.error('❌ getCasNo Error:', error)
+      casNoCode.value = []
+      return []
+    }
   }
 
   const getListNonPo = async (data: QueryParamsListPoTypes) => {
     listNonPo.value = []
     const query = {
-      // statusCode: data.statusCode || null,
       companyCode: data.companyCode || null,
       invoiceTypeCode: Number(data.invoiceTypeCode) || null,
       invoiceDate: data.invoiceDate || null,
@@ -189,17 +267,55 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
   }
 
   const postCheckBudget = async (data: ParamsCheckBudgetType) => {
-    let response: ApiResponse<void>
+
     try {
-      response = await invoiceApi.post(`/invoice/invoice/check-budget`, data)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      responseCheckBudget.value = err.response.data
-    } finally {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      responseCheckBudget.value = response.data as any
+      const response: ApiResponse<ResponseCheckBudgetTypes> = await invoiceApi.post(
+        `/invoice/invoice/check-budget`,
+        data,
+      )
+
+      console.log('📥 Budget Check API Raw Response:', response)
+
+      // Safely access nested properties
+      if (response?.data?.result?.content) {
+        responseCheckBudget.value = response.data.result.content
+        console.log('✅ Budget Check Success:', responseCheckBudget.value)
+      } else {
+        console.warn('⚠️ Unexpected response structure:', response)
+        responseCheckBudget.value = {} as ResponseCheckBudgetTypes
+      }
+
       return response.data
+    } catch (err: unknown) {
+      console.error('❌ Budget Check API Error:', err)
+
+      const axiosErr = err as {
+        response?: {
+          status?: number
+          data?: ApiResponseData<ResponseCheckBudgetTypes>
+        }
+        message?: string
+      }
+
+      const errorData = axiosErr.response?.data
+      const status = axiosErr.response?.status
+      const message = axiosErr.message || 'Unknown error'
+
+      console.error(`Budget Check Failed (${status}):`, message)
+
+      if (errorData) {
+        console.log('Error response data:', errorData)
+
+        // Safely access error content
+        if (errorData.result?.content) {
+          responseCheckBudget.value = errorData.result.content
+        }
+
+        return errorData
+      }
+
+      // Re-throw with more context
+      throw new Error(`Budget check failed: ${message}`)
     }
   }
 
@@ -214,6 +330,7 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
     listNonPo,
     responseCheckBudget,
     errorMessageSubmission,
+    casNoCode,
     getSubmissionStatus,
     getDocumentType,
     getTaxCalculation,
@@ -226,6 +343,7 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
     getRemainingDp,
     getListNonPo,
     postSubmissionNonPo,
+    getCasNo,
     postCheckBudget,
   }
 })

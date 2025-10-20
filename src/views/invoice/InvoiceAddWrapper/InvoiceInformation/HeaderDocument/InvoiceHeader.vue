@@ -80,9 +80,9 @@
           Invoice Vendor No.
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
-        <input v-model="form.invoiceNoVendor" class="input" placeholder=""
+        <input v-model="form.invoiceVendorNo" class="input" placeholder=""
           :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
-          :class="{ 'border-danger': form.invoiceNoVendorError }" />
+          :class="{ 'border-danger': form.invoiceVendorNoError }" />
       </div>
 
       <div v-if="checkPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
@@ -110,9 +110,9 @@
         <v-select
           v-model="form.cashJournalCode"
           class="customSelect w-full -ml-[15px]"
-          label="name"
+          label="cashJournalName"
           placeholder="Select"
-          :reduce="(option: any) => option.code"
+          :reduce="(option: any) => option.cashJournalNo"
           :options="listCashJournal"
           :class="{ 'error-select': form.cashJournalCodeError }"
           :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
@@ -147,8 +147,8 @@
           label="name"
           placeholder="Select"
           :reduce="(option: any) => option.code"
-          :options="listCasNo"
-          :class="{ 'error-select': form.casNoCodeError }"
+          :options="casNoCode"
+          :class="{ 'error-select': form.casNoCodeError}"
           :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
           appendToBody
         ></v-select>
@@ -175,12 +175,12 @@
           Invoice Vendor No.
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
-        <input v-model="form.invoiceNoVendor" class="input" placeholder=""
+        <input v-model="form.invoiceVendorNo" class="input" placeholder=""
           :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
-          :class="{ 'border-danger': form.invoiceNoVendorError }" />
+          :class="{ 'border-danger': form.invoiceVendorNoError }" />
       </div>
 
-      <div v-if="isReimbursement" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div v-if="isReimbursement || isCAS" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Invoice Date
           <span class="text-red-500 ml-[4px]">*</span>
@@ -265,11 +265,13 @@ import { useRoute } from 'vue-router'
 import type { formTypes } from '../../../types/invoiceAddWrapper'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
+import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { useLoginStore } from '@/stores/views/login'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const loginApi = useLoginStore()
+const submissionApi = useInvoiceSubmissionStore()
 const form = inject<formTypes>('form')
 const route = useRoute()
 const typeForm = ref<string>('')
@@ -315,8 +317,8 @@ const dpTypeList = computed(() => invoiceMasterApi.dpType)
 const listInvoiceTypePo = computed(() => invoiceMasterApi.invoicePoType)
 const listInvoiceTypeNonPo = computed(() => invoiceMasterApi.invoiceNonPoType)
 const listMatrixApproval = computed(() => invoiceMasterApi.matrixApprovalList)
-const listCashJournal = ref([])
-const listCasNo = ref([])
+const listCashJournal = computed(() => invoiceMasterApi.cashJournalList)
+const casNoCode = computed(() => submissionApi.casNoCode)
 const isReimbursement = computed(() => form?.invoiceType === '1')
 const isCreditCard = computed(() => form?.invoiceType === '2')
 const isCAS = computed(() => form?.invoiceType === '3')
@@ -364,13 +366,13 @@ watch(
     }
 
     if (form?.cashJournalCode && listCashJournal.value.length > 0) {
-      const getIndex = listCashJournal.value.findIndex((item) => item.code === form.cashJournalCode)
-      if (getIndex !== -1) form.cashJournalName = listCashJournal.value[getIndex].name
+      const getIndex = listCashJournal.value.findIndex((item) => item.cashJournalNo === form.cashJournalCode)
+      if (getIndex !== -1) form.cashJournalName = listCashJournal.value[getIndex].cashJournalName
     }
 
-    if (form?.casNoCode && listCasNo.value.length > 0 && form.invoiceType === '4') {
-      const getIndex = listCasNo.value.findIndex((item) => item.code === form.casNoCode)
-      if (getIndex !== -1) form.casNoName = listCasNo.value[getIndex].name
+    if (form?.casNoCode && casNoCode.value.length > 0 && form.invoiceType === '4') {
+      const getIndex = casNoCode.value.findIndex((item) => item.code === form.casNoCode)
+      if (getIndex !== -1) form.casNoName = String((casNoCode.value[getIndex] as Record<string, unknown>).name ?? '')
     }
   },
   {
@@ -378,41 +380,43 @@ watch(
   }
 )
 
-// Watch for invoice type changes to handle CAS No field
-watch(
-  () => form?.invoiceType,
-  (newType, oldType) => {
-    // When changing TO CAS (type 3), reset casNoCode to empty (will show "Auto Generated Number")
-    if (newType === '3' && oldType !== '3') {
-      form.casNoCode = ''
-    }
-    // When changing FROM CAS to LBA (type 4), also reset casNoCode to allow manual input
-    if (newType === '4' && oldType === '3') {
-      form.casNoCode = ''
-    }
-  }
-)
-
 watch(
   () => form?.invoiceType,
   (newType, oldType) => {
     if (newType === '3' && oldType !== '3') {
       form.casNoCode = ''
+      form.invoiceVendorNo = ''
     }
-    if (newType === '4' && oldType === '3') {
+    if (newType === '4' && oldType !== '4') {
       form.casNoCode = ''
+      form.invoiceVendorNo = ''
+      form.invoiceDate = ''
     }
   }
 )
 
 watch(
-  () => [form?.companyCode, form.invoiceType],
+  () => [form?.companyCode, form?.vendorId, form.invoiceType],
   () => {
     if (form.companyCode) invoiceMasterApi.getActivity(form.companyCode || '')
     if (form.companyCode && form.invoiceType) invoiceMasterApi.getMatrixApproval(form.invoiceType || '', form.companyCode || '')
+    if (form.vendorId && form.invoiceType === '4') {
+      const vendorIdStr = String(form.vendorId).trim()
+      if (vendorIdStr && vendorIdStr !== '' && vendorIdStr !== '0') {
+        submissionApi.getCasNo(vendorIdStr).catch((error) => {
+          // Only log actual errors, not "data not found" responses
+          if (error.response?.status !== 422) {
+            console.error('Failed to fetch CAS No:', error)
+          }
+        })
+      }
+    }
+    if (form.companyCode && form.invoiceType === '5') {
+      invoiceMasterApi.getCashJournal(form.companyCode || '')
+    }
   },
   {
-    immediate: true
+    immediate: false
   }
 )
 
@@ -421,5 +425,19 @@ onMounted(() => {
   invoiceMasterApi.getCurrency()
   invoiceMasterApi.getCompanyCode()
   invoiceMasterApi.getDpTypes()
+  if (form?.vendorId && form?.invoiceType === '4') {
+    const vendorIdStr = String(form.vendorId).trim()
+    if (vendorIdStr && vendorIdStr !== '' && vendorIdStr !== '0') {
+      submissionApi.getCasNo(vendorIdStr).catch((error) => {
+        // Only log actual errors, not "data not found" responses
+        if (error.response?.status !== 422) {
+          console.error('Failed to fetch CAS No:', error)
+        }
+      })
+    }
+  }
+  if (form?.companyCode && form?.invoiceType === '5') {
+    invoiceMasterApi.getCashJournal(form.companyCode || '')
+  }
 })
 </script>
