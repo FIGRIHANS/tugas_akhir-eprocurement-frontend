@@ -60,7 +60,10 @@ import { useLoginStore } from '@/stores/views/login'
 import moment from 'moment'
 import { isEmpty } from 'lodash'
 import { KTModal } from '@/metronic/core'
-import type { PostVerificationTypes, PostEditApprovalNonPoTypes } from '@/stores/views/invoice/types/verification'
+import type {
+  PostVerificationTypes,
+  PostEditApprovalNonPoTypes,
+} from '@/stores/views/invoice/types/verification'
 import type { documentDetailTypes as documentDetailTypesStore } from '@/stores/views/invoice/types/verification'
 
 const InvoiceData = defineAsyncComponent(() => import('./InvoiceDetailEdit/InvoiceData.vue'))
@@ -190,12 +193,22 @@ const checkInvoiceInformation = () => {
   let status = true
   form.value.invoiceDateError = useCheckEmpty(form.value.invoiceDate).isError
   form.value.documentNoError = useCheckEmpty(form.value.documentNo).isError
-  form.value.creditCardBillingError = checkVerifikator1() ? useCheckEmpty(form.value.creditCardBillingId).isError : false
+  form.value.creditCardBillingError = checkVerifikator1()
+    ? useCheckEmpty(form.value.creditCardBillingId).isError
+    : false
 
-  form.value.postingDateError = !checkVerifikator1() ? useCheckEmpty(form.value.postingDate).isError : false
-  form.value.estimatedPaymentDateError = !checkVerifikator1() ? useCheckEmpty(form.value.estimatedPaymentDate).isError : false
-  form.value.paymentMethodError = !checkVerifikator1() ? useCheckEmpty(form.value.paymentMethodCode).isError : false
-  form.value.transferNewsError = !checkVerifikator1() ? useCheckEmpty(form.value.transferNews).isError : false
+  form.value.postingDateError = !checkVerifikator1()
+    ? useCheckEmpty(form.value.postingDate).isError
+    : false
+  form.value.estimatedPaymentDateError = !checkVerifikator1()
+    ? useCheckEmpty(form.value.estimatedPaymentDate).isError
+    : false
+  form.value.paymentMethodError = !checkVerifikator1()
+    ? useCheckEmpty(form.value.paymentMethodCode).isError
+    : false
+  form.value.transferNewsError = !checkVerifikator1()
+    ? useCheckEmpty(form.value.transferNews).isError
+    : false
   form.value.notesError = !checkVerifikator1() ? useCheckEmpty(form.value.notes).isError : false
 
   if (Number(form.value.invoiceDPCode) === 9013) {
@@ -268,7 +281,7 @@ const handleAfterSuccess = () => {
   } else {
     if (route.query.invoiceType === 'no_po') {
       router.push({
-        name: 'invoiceApprovalNonPo'
+        name: 'invoiceApprovalNonPo',
       })
     } else {
       router.push({
@@ -283,7 +296,7 @@ const goBack = () => {
   if (tabNow.value === 'data') {
     if (route.query.edit === 'true') {
       router.push({
-        name: route.query.invoiceType === 'no_po' ? 'invoiceApprovalNonPo' : 'invoiceApproval'
+        name: route.query.invoiceType === 'no_po' ? 'invoiceApprovalNonPo' : 'invoiceApproval',
       })
     } else {
       router.push({
@@ -377,7 +390,7 @@ const goNext = () => {
     }
     verificationApi.detailInvoiceEdit = data
 
-    if (form.value.statusCode === 4) {
+    if (form.value.statusCode === 4 || route.query.isSendSap === 'true') {
       isLoading.value = true
       if (route.query.invoiceType !== 'no_po') {
         verificationApi
@@ -662,20 +675,62 @@ const setDataDefault = () => {
     reference: '',
     cashJournalCode: '',
     pettyCashPeriod: [null, null],
-    idAlternative: data?.alternativePayee && data?.alternativePayee.length !== 0 ? data?.alternativePayee[0].id : 0,
-    isAlternativePayee: data?.alternativePayee && data?.alternativePayee.length !== 0 ? data?.alternativePayee[0].isAlternativePayee : false,
-    isOneTimeVendor: data?.alternativePayee && data?.alternativePayee.length !== 0 ? data?.alternativePayee[0].isOneTimeVendor : false,
-    nameAlternative: data?.alternativePayee && data?.alternativePayee.length !== 0 ? data?.alternativePayee[0].name : '',
-    nameOtherAlternative: data?.alternativePayee && data?.alternativePayee.length !== 0 ? data?.alternativePayee[0].name2 : '',
-    streetAltiernative: data?.alternativePayee && data?.alternativePayee.length !== 0 ? data?.alternativePayee[0].street : '',
-    cityAlternative: data?.alternativePayee && data?.alternativePayee.length !== 0 ? data?.alternativePayee[0].city : '',
-    countryAlternative: data?.alternativePayee && data?.alternativePayee.length !== 0 ? data?.alternativePayee[0].country : '',
-    bankAccountNumberAlternative: data?.alternativePayee && data?.alternativePayee.length !== 0 ? data?.alternativePayee[0].bankAccountNumber : '',
-    bankKeyAlternative: data?.alternativePayee && data?.alternativePayee.length !== 0 ? data?.alternativePayee[0].bankKey : '',
-    bankCountryAlternative: data?.alternativePayee && data?.alternativePayee.length !== 0 ? data?.alternativePayee[0].bankCountry : '',
-    npwpNumberAlternative: data?.alternativePayee && data?.alternativePayee.length !== 0 ? data?.alternativePayee[0].npwp : '',
-    ktpNumberAlternative: data?.alternativePayee && data?.alternativePayee.length !== 0 ? data?.alternativePayee[0].ktp : '',
-    emailAlternative: data?.alternativePayee && data?.alternativePayee.length !== 0 ? data?.alternativePayee[0].email : '',
+    idAlternative:
+      data?.alternativePayee && data?.alternativePayee.length !== 0
+        ? data?.alternativePayee[0].id
+        : 0,
+    isAlternativePayee:
+      data?.alternativePayee && data?.alternativePayee.length !== 0
+        ? data?.alternativePayee[0].isAlternativePayee
+        : false,
+    isOneTimeVendor:
+      data?.alternativePayee && data?.alternativePayee.length !== 0
+        ? data?.alternativePayee[0].isOneTimeVendor
+        : false,
+    nameAlternative:
+      data?.alternativePayee && data?.alternativePayee.length !== 0
+        ? data?.alternativePayee[0].name
+        : '',
+    nameOtherAlternative:
+      data?.alternativePayee && data?.alternativePayee.length !== 0
+        ? data?.alternativePayee[0].name2
+        : '',
+    streetAltiernative:
+      data?.alternativePayee && data?.alternativePayee.length !== 0
+        ? data?.alternativePayee[0].street
+        : '',
+    cityAlternative:
+      data?.alternativePayee && data?.alternativePayee.length !== 0
+        ? data?.alternativePayee[0].city
+        : '',
+    countryAlternative:
+      data?.alternativePayee && data?.alternativePayee.length !== 0
+        ? data?.alternativePayee[0].country
+        : '',
+    bankAccountNumberAlternative:
+      data?.alternativePayee && data?.alternativePayee.length !== 0
+        ? data?.alternativePayee[0].bankAccountNumber
+        : '',
+    bankKeyAlternative:
+      data?.alternativePayee && data?.alternativePayee.length !== 0
+        ? data?.alternativePayee[0].bankKey
+        : '',
+    bankCountryAlternative:
+      data?.alternativePayee && data?.alternativePayee.length !== 0
+        ? data?.alternativePayee[0].bankCountry
+        : '',
+    npwpNumberAlternative:
+      data?.alternativePayee && data?.alternativePayee.length !== 0
+        ? data?.alternativePayee[0].npwp
+        : '',
+    ktpNumberAlternative:
+      data?.alternativePayee && data?.alternativePayee.length !== 0
+        ? data?.alternativePayee[0].ktp
+        : '',
+    emailAlternative:
+      data?.alternativePayee && data?.alternativePayee.length !== 0
+        ? data?.alternativePayee[0].email
+        : '',
   }
 }
 
@@ -695,41 +750,41 @@ const mapDataVerifPo = (): PostVerificationTypes => {
     statusName: route.query.type === '1' ? 'Verified' : 'Approved',
     statusNotes: '',
     header: {
-        invoiceUId: form.value.invoiceUId,
-        documentNo: form.value.documentNo,
-        invoiceDate: form.value.invoiceDate,
-        taxNo: form.value.taxNo,
-        currCode: form.value.currCode,
-        notes: form.value.notes,
-        postingDate: form.value.postingDate,
-        invoicingParty: form.value.invoicingParty,
-        estimatedPaymentDate: form.value.estimatedPaymentDate,
-        paymentMethodCode: form.value.paymentMethodCode,
-        paymentMethodName: form.value.paymentMethodName,
-        assigment: form.value.assigment,
-        transferNews: form.value.transferNews,
-        npwpReporting: form.value.npwpReporting,
-        creditCardBillingID: form.value.creditCardBillingId,
-      },
-      payment: {
-        paymentId: form.value.paymentId,
-        bankKey: form.value.bankKey,
-        bankName: form.value.bankName,
-        beneficiaryName: form.value.beneficiaryName,
-        bankAccountNo: form.value.bankAccountNo,
-        bankCountryCode: form.value.bankCountryCode,
-      },
-      calculation: {
-        subtotal: form.value.subtotal,
-        vatAmount: form.value.vatAmount,
-        whtAmount: form.value.whtAmount,
-        additionalCost: form.value.additionalCost,
-        totalGrossAmount: form.value.totalGrossAmount,
-        totalNetAmount: form.value.totalNetAmount,
-      },
-      documents,
-      pogr: mapPoGr(),
-      additionalCosts: mapAdditionalCost(),
+      invoiceUId: form.value.invoiceUId,
+      documentNo: form.value.documentNo,
+      invoiceDate: form.value.invoiceDate,
+      taxNo: form.value.taxNo,
+      currCode: form.value.currCode,
+      notes: form.value.notes,
+      postingDate: form.value.postingDate,
+      invoicingParty: form.value.invoicingParty,
+      estimatedPaymentDate: form.value.estimatedPaymentDate,
+      paymentMethodCode: form.value.paymentMethodCode,
+      paymentMethodName: form.value.paymentMethodName,
+      assigment: form.value.assigment,
+      transferNews: form.value.transferNews,
+      npwpReporting: form.value.npwpReporting,
+      creditCardBillingID: form.value.creditCardBillingId,
+    },
+    payment: {
+      paymentId: form.value.paymentId,
+      bankKey: form.value.bankKey,
+      bankName: form.value.bankName,
+      beneficiaryName: form.value.beneficiaryName,
+      bankAccountNo: form.value.bankAccountNo,
+      bankCountryCode: form.value.bankCountryCode,
+    },
+    calculation: {
+      subtotal: form.value.subtotal,
+      vatAmount: form.value.vatAmount,
+      whtAmount: form.value.whtAmount,
+      additionalCost: form.value.additionalCost,
+      totalGrossAmount: form.value.totalGrossAmount,
+      totalNetAmount: form.value.totalNetAmount,
+    },
+    documents,
+    pogr: mapPoGr(),
+    additionalCosts: mapAdditionalCost(),
   } as PostVerificationTypes
 }
 
@@ -745,69 +800,69 @@ const mapDataVerifNonPo = (): PostEditApprovalNonPoTypes => {
   if (!isEmpty(otherDoc)) documents.push(otherDoc)
 
   return {
+    statusCode: route.query.type === '1' ? 3 : 4,
+    statusName: route.query.type === '1' ? 'Verified' : 'Approved',
+    statusNotes: '',
+    header: {
+      invoiceUId: form.value.invoiceUId,
+      invoiceTypeCode: form.value.invoiceTypeCode,
+      invoiceTypeName: form.value.invoiceTypeName,
+      invoiceVendorNo: form.value.vendorId.toString(),
+      companyCode: form.value.companyCode,
+      companyName: form.value.companyName,
+      invoiceNo: form.value.invoiceNo,
+      documentNo: form.value.documentNo,
+      invoiceDate: form.value.invoiceDate,
+      postingDate: form.value.postingDate,
+      estimatedPaymentDate: form.value.estimatedPaymentDate,
+      paymentMethodCode: form.value.paymentMethodCode,
+      paymentMethodName: form.value.paymentMethodName,
+      taxNo: form.value.taxNo,
+      currCode: form.value.currCode,
+      creditCardBillingID: form.value.creditCardBillingId,
+      notes: form.value.notes,
       statusCode: route.query.type === '1' ? 3 : 4,
       statusName: route.query.type === '1' ? 'Verified' : 'Approved',
-      statusNotes: '',
-      header: {
-        invoiceUId: form.value.invoiceUId,
-        invoiceTypeCode: form.value.invoiceTypeCode,
-        invoiceTypeName: form.value.invoiceTypeName,
-        invoiceVendorNo: form.value.vendorId.toString(),
-        companyCode: form.value.companyCode,
-        companyName: form.value.companyName,
-        invoiceNo: form.value.invoiceNo,
-        documentNo: form.value.documentNo,
-        invoiceDate: form.value.invoiceDate,
-        postingDate: form.value.postingDate,
-        estimatedPaymentDate: form.value.estimatedPaymentDate,
-        paymentMethodCode: form.value.paymentMethodCode,
-        paymentMethodName: form.value.paymentMethodName,
-        taxNo: form.value.taxNo,
-        currCode: form.value.currCode,
-        creditCardBillingID: form.value.creditCardBillingId,
-        notes: form.value.notes,
-        statusCode: route.query.type === '1' ? 3 : 4,
-        statusName: route.query.type === '1' ? 'Verified' : 'Approved',
-        department: form.value.department,
-        profileId: '0',
-        invoicingParty: form.value.invoicingParty,
-        assigment: form.value.assigment,
-        transferNews: form.value.transferNews,
-        npwpReporting: form.value.npwpReporting
-      },
-      payment: {
-        bankKey: form.value.bankKey,
-        bankName: form.value.bankName,
-        beneficiaryName: form.value.beneficiaryName,
-        bankAccountNo: form.value.bankAccountNo,
-        bankCountryCode: form.value.bankCountryCode,
-      },
-      calculation: {
-        subtotal: form.value.subtotal,
-        vatAmount: form.value.vatAmount,
-        whtAmount: form.value.whtAmount,
-        additionalCost: form.value.additionalCost,
-        totalGrossAmount: form.value.totalGrossAmount,
-        totalNetAmount: form.value.totalNetAmount,
-      },
-      documents,
-      alternativePay: {
-        id: form.value.idAlternative,
-        name: form.value.nameAlternative,
-        name2: form.value.nameOtherAlternative,
-        street: form.value.streetAltiernative,
-        city: form.value.cityAlternative,
-        country: form.value.countryAlternative,
-        bankAccountNumber: form.value.bankAccountNumberAlternative,
-        bankKey: form.value.bankKeyAlternative,
-        bankCountry: form.value.bankCountryAlternative,
-        npwp: form.value.npwpNumberAlternative,
-        ktp: form.value.ktpNumberAlternative,
-        email: form.value.emailAlternative,
-        isAlternativePayee: form.value.isAlternativePayee,
-        isOneTimeVendor: form.value.isOneTimeVendor,
-      },
-      costExpenses: mapCostExpense()
+      department: form.value.department,
+      profileId: '0',
+      invoicingParty: form.value.invoicingParty,
+      assigment: form.value.assigment,
+      transferNews: form.value.transferNews,
+      npwpReporting: form.value.npwpReporting,
+    },
+    payment: {
+      bankKey: form.value.bankKey,
+      bankName: form.value.bankName,
+      beneficiaryName: form.value.beneficiaryName,
+      bankAccountNo: form.value.bankAccountNo,
+      bankCountryCode: form.value.bankCountryCode,
+    },
+    calculation: {
+      subtotal: form.value.subtotal,
+      vatAmount: form.value.vatAmount,
+      whtAmount: form.value.whtAmount,
+      additionalCost: form.value.additionalCost,
+      totalGrossAmount: form.value.totalGrossAmount,
+      totalNetAmount: form.value.totalNetAmount,
+    },
+    documents,
+    alternativePay: {
+      id: form.value.idAlternative,
+      name: form.value.nameAlternative,
+      name2: form.value.nameOtherAlternative,
+      street: form.value.streetAltiernative,
+      city: form.value.cityAlternative,
+      country: form.value.countryAlternative,
+      bankAccountNumber: form.value.bankAccountNumberAlternative,
+      bankKey: form.value.bankKeyAlternative,
+      bankCountry: form.value.bankCountryAlternative,
+      npwp: form.value.npwpNumberAlternative,
+      ktp: form.value.ktpNumberAlternative,
+      email: form.value.emailAlternative,
+      isAlternativePayee: form.value.isAlternativePayee,
+      isOneTimeVendor: form.value.isOneTimeVendor,
+    },
+    costExpenses: mapCostExpense(),
   } as PostEditApprovalNonPoTypes
 }
 

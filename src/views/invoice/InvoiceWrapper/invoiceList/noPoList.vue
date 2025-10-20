@@ -58,7 +58,7 @@
                 :class="{
                   'list__long ': index !== 0,
                   'cursor-pointer': item,
-                  '!text-blue-500': item === sortColumnName && sortBy !== ''
+                  '!text-blue-500': item === sortColumnName && sortBy !== '',
                 }"
                 @click="sortColumn(item)"
               >
@@ -93,6 +93,7 @@
               <td>{{ formatDateYearFirst(item.invoiceDate) }}</td>
               <td>{{ useFormatIdr(item.totalGrossAmount) }}</td>
               <td>{{ useFormatIdr(item.totalNetAmount) }}</td>
+              <td>{{ formatDateYearFirst(item.actionerDate) }}</td>
               <td>{{ formatDateYearFirst(item.estimatedPaymentDate) }}</td>
             </tr>
           </tbody>
@@ -131,7 +132,6 @@ import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterDat
 import type { ListPoTypes } from '@/stores/views/invoice/types/submission'
 import { useRouter } from 'vue-router'
 import { cloneDeep } from 'lodash'
-
 
 const invoiceSubmissionApi = useInvoiceSubmissionStore()
 const router = useRouter()
@@ -182,6 +182,7 @@ const columns = ref([
   'Invoice Date',
   'Total Gross Amount',
   'Total Net Amount',
+  'Approval Date',
   'Estimated Payment Date',
 ])
 
@@ -332,7 +333,7 @@ const goToDetail = (data: ListPoTypes) => {
 const sortColumn = (columnName: string | null) => {
   const list = {
     'Submitted Document No': 'invoiceNo',
-    'Status': 'statusName',
+    Status: 'statusName',
     'Vendor Name': 'vendorName',
     'Invoice Vendor No': 'documentNo',
     'Company Code': 'companyCode',
@@ -341,7 +342,7 @@ const sortColumn = (columnName: string | null) => {
     'Total Gross Amount': 'totalGrossAmount',
     'Total Net Amount': 'totalNetAmount',
     'Estimated Payment Date': 'estimatedPaymentDate',
-  } as {[key: string]: string}
+  } as { [key: string]: string }
 
   const roleSort = ['asc', 'desc', '']
 
@@ -355,7 +356,7 @@ const sortColumn = (columnName: string | null) => {
     const indexSort = roleSort.findIndex((item) => item === sortBy.value)
     if (indexSort === -1) return setList(poList.value)
     sortBy.value = indexSort + 1 === roleSort.length ? roleSort[0] : roleSort[indexSort + 1]
-  
+
     if (!sortBy.value) return setList(poList.value)
   }
 
