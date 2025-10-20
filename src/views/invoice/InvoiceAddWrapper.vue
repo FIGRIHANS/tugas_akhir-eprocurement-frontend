@@ -656,7 +656,7 @@ const mapDataPostNonPo = () => {
   const isLBA = form.invoiceType === '4'
   const isPettyCash = form.invoiceType === '5'
 
-  let invoiceTypeName = 'Reimbursement' // default
+  let invoiceTypeName = 'Reimbursement'
   if (isReimbursement) invoiceTypeName = 'Reimbursement'
   else if (isCreditCard) invoiceTypeName = 'Credit Card'
   else if (isCAS) invoiceTypeName = 'CAS'
@@ -673,19 +673,22 @@ const mapDataPostNonPo = () => {
     invoiceDateToUse = moment().toISOString()
   } else if (isReimbursement && form.invoiceDate) {
     invoiceDateToUse = moment(form.invoiceDate).toISOString()
-  } else if (isCAS) {
-    // For CAS: use form.invoiceDate if exists, otherwise use current date
-    invoiceDateToUse = form.invoiceDate ? moment(form.invoiceDate).toISOString() : moment().toISOString()
+  } else if (isCAS && form.invoiceDate) {
+    // For CAS: only use invoiceDate if it exists from form (when editing)
+    invoiceDateToUse = moment(form.invoiceDate).toISOString()
   }
+  // For CAS without invoiceDate: invoiceDateToUse remains null
 
   let postingDateToUse = null
   if (invoiceDateToUse) {
     postingDateToUse = invoiceDateToUse
   } else if (form.invoiceDate) {
     postingDateToUse = moment(form.invoiceDate).toISOString()
-  } else {
+  } else if (!isCAS) {
+    // Only auto-generate postingDate for non-CAS invoices
     postingDateToUse = moment().toISOString()
   }
+  // For CAS without invoiceDate: postingDateToUse remains null
 
   const data = {
     header: {
