@@ -43,13 +43,10 @@
 
       <!-- Cash Journal - only for Petty Cash (active) -->
       <div v-if="isPettyCash" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-        <label class="form-label"> Cash Journal </label>
-        <input
-          v-model="form.cashJournal"
-          class="input"
-          placeholder=""
-          :disabled="route.query.isSendSap === 'true'"
-        />
+        <label class="form-label">
+          Cash Journal
+        </label>
+        <input v-model="form.cashJournalCode" class="input" placeholder="" />
       </div>
 
       <!-- Petty Cash Period - range picker limited to selected month (only for Petty Cash) -->
@@ -325,7 +322,7 @@
           v-model="form.assigment"
           class="input"
           placeholder=""
-          :class="{ 'border-danger': form.assignmentError }"
+          :class="{ 'border-danger': form.assigmentError }"
           :disabled="checkVerifikator1() || route.query.isSendSap === 'true'"
         />
       </div>

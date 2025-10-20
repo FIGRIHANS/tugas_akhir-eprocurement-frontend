@@ -219,7 +219,7 @@ const form = reactive<formTypes>({
   invoiceNo: '',
   companyCode: '',
   companyName: '',
-  invoiceNoVendor: '',
+  invoiceVendorNo: '',
   invoiceDate: '',
   taxNumber: '',
   invoiceDp: '9011',
@@ -265,6 +265,8 @@ const form = reactive<formTypes>({
   pettyCashPeriod: [null, null],
   casNoCode: '',
   casNoName: '',
+  casDateReceipt: '',
+  dueDateCas: '',
   proposalAmountVal: '',
 })
 
@@ -374,29 +376,43 @@ const checkInvoiceInformation = () => {
     form.invoiceDocumentError = !hasAtLeastOneDocument
 
     if (isReimbursement) {
-      form.invoiceNoVendorError = useCheckEmpty(form.invoiceNoVendor).isError
+      form.invoiceVendorNoError = useCheckEmpty(form.invoiceVendorNo).isError
       form.invoiceDateError = useCheckEmpty(form.invoiceDate).isError
       form.taxNoInvoiceError = useCheckEmpty(form.taxNoInvoice).isError
-    } else {
-      form.invoiceNoVendorError = false
-      form.invoiceDateError = false
-    }
-
-    if (isCreditCard) {
-      form.proposalAmountError = useCheckEmpty(form.proposalAmountVal).isError
-    } else {
       form.proposalAmountError = false
-    }
-
-    if (isCAS) {
+      form.casNoCodeError = false
+      form.dueDateCasError = false
+    } else if (isCreditCard) {
+      form.proposalAmountError = useCheckEmpty(form.proposalAmountVal).isError
+      form.invoiceVendorNoError = false
+      form.invoiceDateError = false
+      form.taxNoInvoiceError = false
+      form.casNoCodeError = false
+      form.dueDateCasError = false
+    } else if (isCAS) {
       form.taxNoInvoiceError = useCheckEmpty(form.taxNoInvoice).isError
-    }
-
-    if (isLBA) {
+      form.casNoCodeError = false // CAS No. is auto-generated, not required
+      form.invoiceVendorNoError = false
+      form.invoiceDateError = false
+      form.proposalAmountError = false
+      form.dueDateCasError = false
+    } else if (isLBA) {
       form.taxNoInvoiceError = useCheckEmpty(form.taxNoInvoice).isError
+      form.dueDateCasError = useCheckEmpty(form.dueDateCas).isError
+      form.casNoCodeError = useCheckEmpty(form.casNoCode).isError // LBA requires CAS No. selection
+      form.invoiceVendorNoError = false
+      form.invoiceDateError = false
+      form.proposalAmountError = false
+    } else {
+      form.invoiceVendorNoError = false
+      form.invoiceDateError = false
+      form.taxNoInvoiceError = false
+      form.proposalAmountError = false
+      form.casNoCodeError = false
+      form.dueDateCasError = false
     }
   } else {
-    form.invoiceNoVendorError = false
+    form.invoiceVendorNoError = false
     form.invoiceDateError = false
     form.taxNoInvoiceError = false
     form.proposalAmountError = false
@@ -421,7 +437,7 @@ const checkInvoiceInformation = () => {
 
   if (
     form.companyCodeError ||
-    form.invoiceNoVendorError ||
+    form.invoiceVendorNoError ||
     form.invoiceDateError ||
     form.descriptionError ||
     form.invoiceDocumentError ||
@@ -431,6 +447,8 @@ const checkInvoiceInformation = () => {
     form.departmentError ||
     form.taxNoInvoiceError ||
     form.proposalAmountError ||
+    form.dueDateCasError ||
+    form.casNoCodeError ||
     form.invoiceItemError
   )
     return false
@@ -540,7 +558,7 @@ const mapInvoiceItem = () => {
     const baseData: ParamsSubmissionCostExpense = {
       id: item.id || 0,
       activityId: item.activity,
-      activityExpense: listActivity.value[itemIndex].code,
+      activityExpenses: listActivity.value[itemIndex].code,
       activityName: listActivity.value[itemIndex].name,
       itemAmount: Number(item.itemAmount),
       itemText: item.itemText,
@@ -585,21 +603,22 @@ const mapDataPost = () => {
       companyCode: form.companyCode,
       companyName: form.companyName,
       invoiceNo: form.invoiceNo,
-      documentNo: form.invoiceNoVendor,
+      documentNo: form.invoiceVendorNo,
       invoiceDate: moment(form.invoiceDate).toISOString(),
       taxNo: form.taxNoInvoice,
       currCode: form.currency,
       notes: form.description,
       statusCode: isClickDraft.value ? 0 : 1,
       statusName: isClickDraft.value ? 'Drafted' : 'Waiting to Verify',
+      creditCardBillingId: '',
       remainingDPAmount: Number(form.remainingDpAmount),
       dpAmountDeduction: Number(form.dpAmountDeduction)
     },
     vendor: {
-      vendorId: Number(form.vendorId),
-      vendorName: getVendorName(),
-      npwp: form.npwp,
+      vendorId: form.vendorId ? Number(form.vendorId) : 0,
+      vendorName: getVendorName() || '',
       vendorAddress: form.address,
+      npwp: form.npwp
     },
     payment: {
       paymentId: form.paymentId,
@@ -621,6 +640,9 @@ const mapDataPost = () => {
     pogr: mapPoGr(),
     additionalCosts:
       form.invoiceDp === '9012' ? [] : mapAdditionalCost(),
+    workflow: [],
+    alternativePayee: [],
+    costExpense: [],
     isSaveAsDraft: false
   } as ParamsSubmissionTypes
 
@@ -634,6 +656,13 @@ const mapDataPostNonPo = () => {
   const isLBA = form.invoiceType === '4'
   const isPettyCash = form.invoiceType === '5'
 
+  let invoiceTypeName = 'Reimbursement' // default
+  if (isReimbursement) invoiceTypeName = 'Reimbursement'
+  else if (isCreditCard) invoiceTypeName = 'Credit Card'
+  else if (isCAS) invoiceTypeName = 'CAS'
+  else if (isLBA) invoiceTypeName = 'LBA'
+  else if (isPettyCash) invoiceTypeName = 'Petty Cash'
+
   let invoiceDateToUse = null
   let pettyCashStartDate = null
   let pettyCashEndDate = null
@@ -641,57 +670,72 @@ const mapDataPostNonPo = () => {
   if (isPettyCash && Array.isArray(form.pettyCashPeriod) && form.pettyCashPeriod[0]) {
     pettyCashStartDate = moment(form.pettyCashPeriod[0]).toISOString()
     pettyCashEndDate = form.pettyCashPeriod[1] ? moment(form.pettyCashPeriod[1]).toISOString() : null
+    invoiceDateToUse = moment().toISOString()
   } else if (isReimbursement && form.invoiceDate) {
     invoiceDateToUse = moment(form.invoiceDate).toISOString()
+  } else if (isCAS && form.invoiceDate) {
+    invoiceDateToUse = moment(form.invoiceDate).toISOString()
+  }
+
+  let postingDateToUse = null
+  if (invoiceDateToUse) {
+    postingDateToUse = invoiceDateToUse
+  } else if (form.invoiceDate) {
+    postingDateToUse = moment(form.invoiceDate).toISOString()
+  } else {
+    postingDateToUse = moment().toISOString()
   }
 
   const data = {
     header: {
-      invoiceTypeCode: Number(form.invoiceType),
-      invoiceTypeName: form.invoiceTypeName,
-      invoiceVendorNo: form.vendorId,
-      companyCode: form.companyCode,
-      companyName: form.companyName,
-      invoiceNo: form.invoiceNo,
-      cashJournal: form.cashJournalCode || '',
-      cashJournalCode: form.cashJournalCode || '',
-      cashJournalName: form.cashJournalName || '',
-      pettyCashStartDate: pettyCashStartDate,
-      pettyCashEndDate: pettyCashEndDate,
-      casNo: form.casNoCode || '',
-      casNoCode: form.casNoCode || '',
-      casNoName: form.casNoName || '',
-      documentNo: isPettyCash ? (form.cashJournalCode || '') :
-                  isReimbursement ? (form.invoiceNoVendor || '') :
-                  isCreditCard ? (form.proposalAmountVal || '') :
-                  (isCAS || isLBA) ? (form.casNoCode || form.taxNoInvoice || '') : '',
-      invoiceNoVendor: form.invoiceNoVendor || '',
-      invoiceDate: invoiceDateToUse,
-      taxNo: form.taxNoInvoice || '',
-      proposalAmount: form.proposalAmountVal || '',
-      currCode: form.currency,
-      department: checkIsNonPo() ? form.department : userData.value.profile.costCenter || '',
-      profileId: userData.value.profile.profileId.toString(),
-      notes: form.description,
       invoiceUId:
         form.status === 0 || form.status === 5
           ? form.invoiceUId
           : '00000000-0000-0000-0000-000000000000',
-      postingDate: null,
-      estimatedPaymentDate: null,
-      paymentMethodCode: '',
-      paymentMethodName: '',
+      invoiceTypeCode: Number(form.invoiceType),
+      invoiceTypeName: invoiceTypeName,
+      invoiceVendorNo: isCAS ? (form.taxNoInvoice || '') : (form.invoiceVendorNo || ''),
+      companyCode: form.companyCode,
+      companyName: form.companyName,
+      invoiceNo: form.invoiceNo,
+      documentNo: isPettyCash ? (form.cashJournalCode || '') :
+                  isReimbursement ? (form.invoiceVendorNo || '') :
+                  isCreditCard ? (form.proposalAmountVal || '') :
+                  isCAS ? (form.taxNoInvoice || '') :
+                  isLBA ? (form.casNoCode || '') :
+                  '',
+      invoicingParty: '',
+      assigment: '',
+      transferNews: '',
+      npwpReporting: '',
+      invoiceDate: invoiceDateToUse || '',
+      postingDate: postingDateToUse,
+      estimatedPaymentDate: postingDateToUse,
+      paymentMethodCode: 'T',
+      paymentMethodName: 'Bank Transfer',
+      taxNo: form.taxNoInvoice || '',
+      currCode: form.currency,
       creditCardBillingID: '',
+      notes: form.description,
       statusCode: isClickDraft.value ? 0 : 1,
-      statusName: isClickDraft.value ? 'Drafted' : 'Waiting to Verify'
+      statusName: isClickDraft.value ? 'Drafted' : 'Waiting to Verify',
+      department: checkIsNonPo() ? form.department : userData.value.profile.costCenter || '',
+      profileId: userData.value.profile.profileId.toString(),
+      casDateReceipt: isCAS && form.casDateReceipt ? moment(form.casDateReceipt).toISOString() : '',
+      dueDateCas: isLBA && form.dueDateCas ? moment(form.dueDateCas).toISOString() : '',
+      proposalAmount: isCreditCard ? (form.proposalAmountVal || '') : '',
+      picFinance: '',
+      cashJournalCode: isPettyCash ? (form.cashJournalCode || '') : '',
+      cashJournalName: isPettyCash ? (form.cashJournalName || '') : '',
+      pettyCashStartDate: pettyCashStartDate || '',
+      pettyCashEndDate: pettyCashEndDate || '',
+      npwpReportingName: ''
     },
     vendor: {
-      vendorId: Number(form.vendorId),
+      vendorId: form.vendorId ? Number(form.vendorId) : 0,
       vendorName: getVendorName() || '',
-      vendorBusinessUnit: '',
-      vendorSubBusinessUnit: '',
-      npwp: form.npwp,
       vendorAddress: form.address,
+      npwp: form.npwp
     },
     payment: {
       paymentId: form.paymentId,
@@ -706,9 +750,8 @@ const mapDataPostNonPo = () => {
       subtotal: form.subtotal,
       vatAmount: form.vatAmount,
       whtAmount: form.whtAmount,
-      additionalCost: form.additionalCostCalc,
       totalGrossAmount: form.totalGrossAmount,
-      totalNetAmount: form.totalNetAmount,
+      totalNetAmount: form.totalNetAmount
     },
     alternativePay: {
       id: form.idAlternativePayment,
@@ -727,8 +770,8 @@ const mapDataPostNonPo = () => {
       npwp: form.npwpNumberAlternative,
       ktp: form.ktpNumberAlternative,
       email: form.emailAlternative,
-      isAlternativePayee: form.isAlternativePayee,
-      isOneTimeVendor: form.isOneTimeVendor,
+      isAlternativePayee: form.isAlternativePayee || null,
+      isOneTimeVendor: form.isOneTimeVendor || null
     },
     costExpenses: mapInvoiceItem() as ParamsSubmissionCostExpense[],
     isSaveAsDraft: false
@@ -759,12 +802,24 @@ const goNext = () => {
     if (route.query.type === 'nonpo') {
       const submissionData = mapDataPostNonPo()
 
-      // Debug: Log submission data
+      if (form.invoiceType === '3') {
+        const hdr = (submissionData as unknown as { header?: Record<string, unknown> }).header
+        if (hdr && Object.prototype.hasOwnProperty.call(hdr, 'documentNo')) {
+          delete hdr.documentNo
+        }
+      }
+
       console.log('=== DEBUG INVOICE NON-PO SUBMISSION ===')
+      console.log('Invoice Type:', form.invoiceType)
       console.log('Full Submission Data:', JSON.stringify(submissionData, null, 2))
       console.log('Header:', submissionData.header)
+      console.log('Vendor:', submissionData.vendor)
+      console.log('Payment:', submissionData.payment)
+      console.log('Calculation:', submissionData.calculation)
       console.log('CostExpenses Count:', submissionData.costExpenses?.length)
       console.log('CostExpenses:', submissionData.costExpenses)
+      console.log('Documents Count:', submissionData.documents?.length)
+      console.log('AlternativePay:', submissionData.alternativePay)
       console.log('=======================================')
 
       invoiceApi
@@ -775,9 +830,16 @@ const goNext = () => {
         })
         .catch((error) => {
           console.error('❌ Submission Error:', error)
-          console.error('Error Response:', error.response)
-          console.error('Error Data:', error.response?.data)
-          invoiceApi.errorMessageSubmission = error.response?.data?.result?.message || error.message || 'An unexpected error occurred'
+          console.error('Error Response Status:', error.response?.status)
+          console.error('Error Response Data:', error.response?.data)
+          console.error('Error Result:', error.response?.data?.result)
+          console.error('Error Message:', error.response?.data?.result?.message)
+
+          // Display detailed error message
+          const errorMessage = error.response?.data?.result?.message || error.message || 'An unexpected error occurred'
+          console.error('📋 Error to Display:', errorMessage)
+
+          invoiceApi.errorMessageSubmission = errorMessage
           const idModal = document.querySelector('#error_submission_modal')
           const modal = KTModal.getInstance(idModal as HTMLElement)
           modal.show()
@@ -820,6 +882,14 @@ const goSaveDraft = () => {
     data.header.statusCode = 0
     data.header.statusName = 'Draft'
     data.isSaveAsDraft = true
+
+    if (form.invoiceType === '3') {
+      const hdr = (data as unknown as { header?: Record<string, unknown> }).header
+      if (hdr && Object.prototype.hasOwnProperty.call(hdr, 'documentNo')) {
+        delete hdr.documentNo
+      }
+    }
+
     invoiceApi
       .postSubmissionNonPo(data)
       .then((response) => {
@@ -898,7 +968,7 @@ const setData = () => {
     form.bankCountryCode = detail.payment.bankCountryCode
     form.invoiceDp = detail.header.invoiceDPCode ? detail.header.invoiceDPCode.toString() : ''
     form.companyCode = detail.header.companyCode
-    form.invoiceNoVendor = detail.header.documentNo ? detail.header.documentNo.toString() : ''
+    form.invoiceVendorNo = detail.header.documentNo ? detail.header.documentNo.toString() : ''
     form.invoiceNo = detail.header.invoiceNo ? detail.header.invoiceNo.toString() : ''
     form.invoiceDate = detail.header.invoiceDate
     form.taxNoInvoice = detail.header.taxNo
@@ -1025,10 +1095,30 @@ const setDataNonPo = () => {
     form.bankCountryCode = detail.payment.bankCountryCode
     form.invoiceDp = detail.header.invoiceDPCode ? detail.header.invoiceDPCode.toString() : ''
     form.companyCode = detail.header.companyCode
-    form.invoiceNoVendor = detail.header.documentNo ? detail.header.documentNo.toString() : ''
+    if (detail.header.invoiceTypeCode === 3) {
+      form.invoiceVendorNo = ''
+    } else {
+      form.invoiceVendorNo = detail.header.documentNo ? detail.header.documentNo.toString() : ''
+    }
     form.invoiceNo = detail.header.invoiceNo ? detail.header.invoiceNo.toString() : ''
     form.invoiceDate = detail.header.invoiceDate
     form.taxNoInvoice = detail.header.taxNo
+    form.casNoCode = detail.header.casNoCode || ''
+    form.casNoName = detail.header.casNoName || ''
+    form.casDateReceipt = detail.header.casDateReceipt || ''
+    form.dueDateCas = detail.header.dueDateCas || ''
+    form.cashJournalCode = detail.header.cashJournalCode || ''
+    form.cashJournalName = detail.header.cashJournalName || ''
+    form.proposalAmountVal = detail.header.proposalAmount || ''
+
+    // Load Petty Cash Period
+    if (detail.header.pettyCashStartDate && detail.header.pettyCashEndDate) {
+      form.pettyCashPeriod = [
+        new Date(detail.header.pettyCashStartDate),
+        new Date(detail.header.pettyCashEndDate)
+      ]
+    }
+
     form.currency = detail.header.currCode
     form.description = detail.header.notes
     form.subtotal = detail.calculation.subtotal
@@ -1060,7 +1150,7 @@ const setDataNonPo = () => {
       const data = {
         id: item.id,
         activity: item.activityId,
-        activityCode: item.activityExpense,
+        activityCode: item.activityExpenses,
         activityName: item.activityName,
         itemAmount: item.itemAmount,
         itemText: item.itemText,
@@ -1162,10 +1252,12 @@ const mapDataCheck = () => {
   } else {
     let itemText = ''
     if (form.invoiceType === '1') {
-      itemText = form.invoiceNoVendor || ''
+      itemText = form.invoiceVendorNo || ''
     } else if (form.invoiceType === '2') {
       itemText = form.proposalAmountVal || form.description || ''
-    } else if (form.invoiceType === '3' || form.invoiceType === '4') {
+    } else if (form.invoiceType === '3') {
+      itemText = form.taxNoInvoice || ''
+    } else if (form.invoiceType === '4') {
       itemText = form.casNoCode || form.taxNoInvoice || ''
     }
 
@@ -1180,7 +1272,7 @@ const mapDataCheck = () => {
       PYMT_METH: '',
       ALLOC_NMBR: '',
       ITEM_TEXT: itemText,
-      TAX_CODE: form.invoiceItem[0].taxCode,
+      TAX_CODE: form.invoiceItem.length > 0 ? form.invoiceItem[0].taxCode : '',
       PAYMT_REF: '',
     }
     accountPayable.push(accData)
@@ -1268,7 +1360,7 @@ const mapDataCheck = () => {
   if (form.invoiceType === '5') {
     refDocNo = form.cashJournalCode || form.invoiceNo || form.description || 'PETTY_CASH'
   } else if (form.invoiceType === '1') {
-    refDocNo = form.invoiceNoVendor || form.taxNoInvoice || form.invoiceNo || 'REIMBURSEMENT'
+    refDocNo = form.invoiceVendorNo || form.taxNoInvoice || form.invoiceNo || 'REIMBURSEMENT'
   } else if (form.invoiceType === '2') {
     refDocNo = form.proposalAmountVal || form.invoiceNo || form.description || 'CREDIT_CARD'
   } else if (form.invoiceType === '3' || form.invoiceType === '4') {
@@ -1279,24 +1371,46 @@ const mapDataCheck = () => {
     refDocNo = form.invoiceNo || form.description || 'REF_DOC'
   }
 
+  // Calculate fiscal year and period from document date
+  const fiscalYear = parseInt(docDate.substring(0, 4))
+  const fiscalPeriod = parseInt(docDate.substring(4, 6))
+
+  // Determine document type based on invoice type
+  let docType = 'KR' // Default: Vendor Invoice
+  if (form.invoiceType === '5') {
+    docType = 'SA' // Petty Cash
+  } else if (form.invoiceType === '1') {
+    docType = 'KR' // Reimbursement
+  } else if (form.invoiceType === '2') {
+    docType = 'KR' // Credit Card
+  } else if (form.invoiceType === '3') {
+    docType = 'KR' // CAS
+  } else if (form.invoiceType === '4') {
+    docType = 'KR' // LBA
+  }
+
   const data = {
     REQUEST: {
       HEADER_TXT: form.taxNoInvoice || '',
       COMP_CODE: form.companyCode,
       DOC_DATE: docDate,
+      PSTNG_DATE: docDate, // Posting date same as document date
+      FISC_YEAR: fiscalYear,
+      FIS_PERIOD: fiscalPeriod,
+      DOC_TYPE: docType,
       REF_DOC_NO: refDocNo,
       CUSTOMERCPD: {
-        NAME: form.nameAlternative,
-        NAME_2: form.nameOtherAlternative,
+        NAME: form.nameAlternative || '',
+        NAME_2: form.nameOtherAlternative || '',
         POSTL_CODE: '',
-        CITY: form.cityAlternative,
-        COUNTRY: form.countryAlternative,
-        STREET: form.streetAltiernative,
-        BANK_ACCT: form.bankAccountNumberAlternative,
-        BANK_NO: form.bankKeyAlternative,
-        BANK_CTRY: form.bankCountryAlternative,
-        TAX_NO_1: form.npwpNumberAlternative,
-        TAX_NO_3: form.ktpNumberAlternative,
+        CITY: form.cityAlternative || '',
+        COUNTRY: form.countryAlternative || '',
+        STREET: form.streetAltiernative || '',
+        BANK_ACCT: form.bankAccountNumberAlternative || '',
+        BANK_NO: form.bankKeyAlternative || '',
+        BANK_CTRY: form.bankCountryAlternative || '',
+        TAX_NO_1: form.npwpNumberAlternative || '',
+        TAX_NO_3: form.ktpNumberAlternative || '',
         LANGU_ISO: '',
         GLO_RE1_OT: '',
       },
@@ -1312,17 +1426,44 @@ const mapDataCheck = () => {
 
 const checkBudget = () => {
   const data = mapDataCheck()
+
+  console.log('💰 Starting Budget Check...')
+  console.log('📋 Invoice Type:', form.invoiceType)
+  console.log('🏢 Company Code:', form.companyCode)
+  console.log('📊 Request Data:', JSON.stringify(data, null, 2))
+
   invoiceApi
     .postCheckBudget(data)
-    .then(() => {
+    .then((response) => {
+      console.log('✅ Budget Check Success!')
+      console.log('Response:', response)
+
       const idModal = document.querySelector('#success_budget_check_modal')
       const modal = KTModal.getInstance(idModal as HTMLElement)
-      modal.show()
+      if (modal) {
+        modal.show()
+      } else {
+        console.error('Success modal not found')
+      }
     })
-    .catch(() => {
+    .catch((error) => {
+      console.error('❌ Budget Check Failed!')
+      console.error('Error type:', error?.constructor?.name)
+      console.error('Error message:', error?.message)
+      console.error('Full error:', error)
+
+      if (error?.response) {
+        console.error('Response status:', error.response.status)
+        console.error('Response data:', error.response.data)
+      }
+
       const idModal = document.querySelector('#failed_budget_check_modal')
       const modal = KTModal.getInstance(idModal as HTMLElement)
-      modal.show()
+      if (modal) {
+        modal.show()
+      } else {
+        console.error('Failed modal not found')
+      }
     })
 }
 
@@ -1369,7 +1510,7 @@ const checkFormBudget = () => {
     }
 
     if (isReimbursement) {
-      if (!form.invoiceNoVendor || !form.invoiceDate || !form.taxNoInvoice) {
+      if (!form.invoiceVendorNo || !form.invoiceDate || !form.taxNoInvoice) {
         status = true
       }
     }
@@ -1387,7 +1528,7 @@ const checkFormBudget = () => {
     }
 
     if (isLBA) {
-      if (!form.taxNoInvoice) {
+      if (!form.taxNoInvoice || !form.dueDateCas) {
         status = true
       }
     }
