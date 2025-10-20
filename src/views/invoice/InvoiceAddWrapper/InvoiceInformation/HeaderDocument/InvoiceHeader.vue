@@ -180,7 +180,7 @@
           :class="{ 'border-danger': form.invoiceVendorNoError }" />
       </div>
 
-      <div v-if="isReimbursement || (isCAS && form.status !== 0 && form.status !== -1 && form.status !== 5)" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div v-if="isReimbursement" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Invoice Date
           <span class="text-red-500 ml-[4px]">*</span>
