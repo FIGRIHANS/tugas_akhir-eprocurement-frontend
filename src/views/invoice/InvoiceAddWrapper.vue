@@ -656,7 +656,7 @@ const mapDataPostNonPo = () => {
   const isLBA = form.invoiceType === '4'
   const isPettyCash = form.invoiceType === '5'
 
-  let invoiceTypeName = 'Reimbursement' // default
+  let invoiceTypeName = 'Reimbursement'
   if (isReimbursement) invoiceTypeName = 'Reimbursement'
   else if (isCreditCard) invoiceTypeName = 'Credit Card'
   else if (isCAS) invoiceTypeName = 'CAS'
@@ -674,17 +674,21 @@ const mapDataPostNonPo = () => {
   } else if (isReimbursement && form.invoiceDate) {
     invoiceDateToUse = moment(form.invoiceDate).toISOString()
   } else if (isCAS && form.invoiceDate) {
+    // For CAS: only use invoiceDate if it exists from form (when editing)
     invoiceDateToUse = moment(form.invoiceDate).toISOString()
   }
+  // For CAS without invoiceDate: invoiceDateToUse remains null
 
   let postingDateToUse = null
   if (invoiceDateToUse) {
     postingDateToUse = invoiceDateToUse
   } else if (form.invoiceDate) {
     postingDateToUse = moment(form.invoiceDate).toISOString()
-  } else {
+  } else if (!isCAS) {
+    // Only auto-generate postingDate for non-CAS invoices
     postingDateToUse = moment().toISOString()
   }
+  // For CAS without invoiceDate: postingDateToUse remains null
 
   const data = {
     header: {
@@ -708,9 +712,9 @@ const mapDataPostNonPo = () => {
       assigment: '',
       transferNews: '',
       npwpReporting: '',
-      invoiceDate: invoiceDateToUse || '',
-      postingDate: postingDateToUse,
-      estimatedPaymentDate: postingDateToUse,
+      invoiceDate: invoiceDateToUse || null,
+      postingDate: postingDateToUse || null,
+      estimatedPaymentDate: postingDateToUse || null,
       paymentMethodCode: 'T',
       paymentMethodName: 'Bank Transfer',
       taxNo: form.taxNoInvoice || '',
@@ -721,14 +725,14 @@ const mapDataPostNonPo = () => {
       statusName: isClickDraft.value ? 'Drafted' : 'Waiting to Verify',
       department: checkIsNonPo() ? form.department : userData.value.profile.costCenter || '',
       profileId: userData.value.profile.profileId.toString(),
-      casDateReceipt: isCAS && form.casDateReceipt ? moment(form.casDateReceipt).toISOString() : '',
-      dueDateCas: isLBA && form.dueDateCas ? moment(form.dueDateCas).toISOString() : '',
-      proposalAmount: isCreditCard ? (form.proposalAmountVal || '') : '',
+      casDateReceipt: isCAS && form.casDateReceipt ? moment(form.casDateReceipt).toISOString() : null,
+      dueDateCas: isLBA && form.dueDateCas ? moment(form.dueDateCas).toISOString() : null,
+      proposalAmount: isCreditCard ? Number(form.proposalAmountVal) || 0 : 0,
       picFinance: '',
       cashJournalCode: isPettyCash ? (form.cashJournalCode || '') : '',
       cashJournalName: isPettyCash ? (form.cashJournalName || '') : '',
-      pettyCashStartDate: pettyCashStartDate || '',
-      pettyCashEndDate: pettyCashEndDate || '',
+      pettyCashStartDate: pettyCashStartDate || null,
+      pettyCashEndDate: pettyCashEndDate || null,
       npwpReportingName: ''
     },
     vendor: {
@@ -801,13 +805,6 @@ const goNext = () => {
     isSubmit.value = true
     if (route.query.type === 'nonpo') {
       const submissionData = mapDataPostNonPo()
-
-      if (form.invoiceType === '3') {
-        const hdr = (submissionData as unknown as { header?: Record<string, unknown> }).header
-        if (hdr && Object.prototype.hasOwnProperty.call(hdr, 'documentNo')) {
-          delete hdr.documentNo
-        }
-      }
 
       console.log('=== DEBUG INVOICE NON-PO SUBMISSION ===')
       console.log('Invoice Type:', form.invoiceType)
@@ -882,13 +879,6 @@ const goSaveDraft = () => {
     data.header.statusCode = 0
     data.header.statusName = 'Draft'
     data.isSaveAsDraft = true
-
-    if (form.invoiceType === '3') {
-      const hdr = (data as unknown as { header?: Record<string, unknown> }).header
-      if (hdr && Object.prototype.hasOwnProperty.call(hdr, 'documentNo')) {
-        delete hdr.documentNo
-      }
-    }
 
     invoiceApi
       .postSubmissionNonPo(data)

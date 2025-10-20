@@ -106,6 +106,7 @@ export type NpwpReportingTypes = {
   npwpLocation: string
   npwpDescription: string
 }
+
 export type CasNoTypes = {
   code: string
   name: string

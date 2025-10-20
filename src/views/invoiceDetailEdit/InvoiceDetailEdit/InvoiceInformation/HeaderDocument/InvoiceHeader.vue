@@ -2,10 +2,8 @@
   <div>
     <p class="mb-[16px] font-semibold text-base">Invoice Header</p>
     <div v-if="form">
-      <!-- Invoice Type -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label"> Invoice Type </label>
-        <!-- Invoice Type always enabled textbox -->
         <input
           v-model="invoiceTypeDisplay"
           class="input"
@@ -13,7 +11,7 @@
           :disabled="route.query.isSendSap === 'true'"
         />
       </div>
-      <!-- Vendor No -->
+
       <div
         v-if="showVendorNo"
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
@@ -30,7 +28,6 @@
         />
       </div>
 
-      <!-- Reference - only for Petty Cash (readonly) -->
       <div v-if="isPettyCash" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label"> Reference </label>
         <input
@@ -41,7 +38,6 @@
         />
       </div>
 
-      <!-- Cash Journal - only for Petty Cash (active) -->
       <div v-if="isPettyCash" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Cash Journal
@@ -49,7 +45,6 @@
         <input v-model="form.cashJournalCode" class="input" placeholder="" />
       </div>
 
-      <!-- Petty Cash Period - range picker limited to selected month (only for Petty Cash) -->
       <div v-if="isPettyCash" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label"> Petty Cash Period </label>
         <div class="w-full -ml-[15px]">
@@ -67,7 +62,6 @@
         </div>
       </div>
 
-      <!-- DP Option -->
       <div
         v-if="form.invoiceTypeCode === 901"
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
@@ -75,7 +69,7 @@
         <label class="form-label"> DP Option </label>
         <input :value="getDpName()" class="input" placeholder="" disabled />
       </div>
-      <!-- Submitted Document No. (readonly) for Reimbursement, Credit Card, LBA -->
+
       <div
         v-if="isReimbursement || isCreditCard || isLBA"
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
@@ -89,7 +83,6 @@
         />
       </div>
 
-      <!-- Invoice Vendor No. (active only on Non PO / Reimbursement) -->
       <div
         v-if="showInvoiceVendorNo"
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
@@ -98,7 +91,6 @@
           Invoice Vendor No.
           <span v-if="invoiceVendorNoRequired" class="text-red-500 ml-[4px]">*</span>
         </label>
-        <!-- use existing documentNo field in edit form -->
         <input
           v-model="form.documentNo"
           class="input"
@@ -108,10 +100,8 @@
         />
       </div>
 
-      <!-- Company Code -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label"> Company Code </label>
-        <!-- always active textbox for company code -->
         <input
           v-model="form.companyName"
           class="input"
@@ -119,7 +109,6 @@
           :disabled="route.query.isSendSap === 'true'"
         />
       </div>
-      <!-- Invoice No. -->
       <div
         v-if="showInvoiceNo"
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
@@ -132,7 +121,6 @@
           :disabled="!invoiceNoEditable || route.query.isSendSap === 'true'"
         />
       </div>
-      <!-- CAS No. -->
       <div
         v-if="checkNonPoCas() || checkNonPoLba()"
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
@@ -140,7 +128,6 @@
         <label class="form-label"> CAS No. </label>
         <input v-model="form.invoiceNo" class="input" placeholder="" disabled />
       </div>
-      <!-- Invoice Date -->
       <div
         v-if="showInvoiceDate && !checkNonPoCas()"
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
@@ -160,7 +147,6 @@
           teleport
         />
       </div>
-      <!-- Posting Date -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Posting Date
@@ -183,7 +169,6 @@
           :disabled="route.query.isSendSap === 'true'"
         />
       </div>
-      <!-- Invoicing Party -->
       <div
         v-if="!checkNonPoCas() && !checkNonPoLba()"
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
@@ -197,33 +182,13 @@
           :disabled="checkVerifikator1() || route.query.isSendSap === 'true'"
         />
       </div>
-      <!-- Estimated Payment Date -->
+                :disabled="!invoiceVendorNoEditable || checkIsAccountingTax() || route.query.isSendSap === 'true'"
+        />
+      </div>
       <div
         v-if="!checkNonPoLba()"
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
       >
-        <label class="form-label">
-          Estimated Payment Date
-          <span v-if="!checkVerifikator1()" class="text-red-500 ml-[4px]">*</span>
-        </label>
-        <input
-          v-if="checkVerifikator1()"
-          v-model="form.estimatedPaymentDate"
-          class="input"
-          placeholder=""
-          disabled
-        />
-        <DatePicker
-          v-else
-          v-model="form.estimatedPaymentDate"
-          format="yyyy/MM/dd"
-          :disabled="checkIsAccountingTax() || route.query.isSendSap === 'true'"
-          :error="form.estimatedPaymentDateError"
-          class="w-full -ml-[15px]"
-          teleport
-        />
-      </div>
-      <!-- Due Date CAS -->
       <div
         v-if="checkNonPoCas()"
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
@@ -242,7 +207,7 @@
           teleport
         />
       </div>
-      <!-- Remaning CAS Receipt Date -->
+
       <div
         v-if="checkNonPoLba()"
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
@@ -257,7 +222,7 @@
           teleport
         />
       </div>
-      <!-- Tax Document No.  -->
+
       <div
         v-if="showTaxDocumentNo"
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
@@ -271,7 +236,7 @@
           :disabled="!taxNoEditable || checkVerifikator1() || route.query.isSendSap === 'true'"
         />
       </div>
-      <!-- Invoice Vendor No. -->
+
       <div
         v-if="showInvoiceVendorNo && !checkNonPoCas() && !checkNonPoLba()"
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
@@ -290,7 +255,7 @@
           "
         />
       </div>
-      <!-- Payment Method -->
+
       <div
         v-if="!checkNonPoLba()"
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
@@ -315,7 +280,6 @@
           </option>
         </select>
       </div>
-      <!-- Assignment -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label"> Assignment </label>
         <input
@@ -326,7 +290,6 @@
           :disabled="checkVerifikator1() || route.query.isSendSap === 'true'"
         />
       </div>
-      <!-- Transfer News -->
       <div
         v-if="!checkNonPoLba()"
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
@@ -347,7 +310,7 @@
           "
         />
       </div>
-      <!-- Credit Card Billing ID -->
+
       <div
         v-if="form.invoiceTypeCode === 903"
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
@@ -364,12 +327,10 @@
           :class="{ 'border-danger': form.creditCardBillingError }"
         />
       </div>
-      <!-- Currency -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label"> Currency </label>
         <input :value="form.currCode" class="input" placeholder="" disabled />
       </div>
-      <!-- NPWP Reporting -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label"> NPWP Reporting </label>
         <select
@@ -388,7 +349,6 @@
           </option>
         </select>
       </div>
-      <!-- Remaining DP Amount -->
       <div
         v-if="form.invoiceDPCode === 9013"
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
@@ -396,7 +356,6 @@
         <label class="form-label"> Remaining DP Amount </label>
         <input v-model="remainingDpAmountVal" class="input" placeholder="" disabled />
       </div>
-      <!-- DP Amount Deduction -->
       <div
         v-if="form.invoiceDPCode === 9013"
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
@@ -412,7 +371,6 @@
           :disabled="checkVerifikator1() || checkInvoiceDp() || route.query.isSendSap === 'true'"
         />
       </div>
-      <!-- Department / Requestor -->
       <div
         v-if="showRequestor"
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
@@ -425,7 +383,6 @@
           :disabled="!requestorEditable || route.query.isSendSap === 'true'"
         />
       </div>
-      <!-- Description -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Description
@@ -558,7 +515,6 @@ watch(
 
 onMounted(() => {
   typeForm.value = route.query.type?.toString().toLowerCase() || 'po'
-  // initialize invoice type display text
   invoiceTypeDisplay.value = getInvoiceTypeName() || form?.value.invoiceTypeName || ''
 })
 
@@ -601,11 +557,9 @@ const isPettyCash = computed(
 
 // Visibility / editable rules derived from user request
 const showVendorNo = computed(() => {
-  // Vendor No hidden on Petty Cash; shown otherwise for non-po and others
   return !isPettyCash.value
 })
 const vendorReadonly = computed(() => {
-  // readonly on Reimbursement, Credit Card, CAS, and LBA
   return isReimbursement.value || isCreditCard.value || isCAS.value || isLBA.value
 })
 const vendorRequired = computed(() => isReimbursement.value || isCreditCard.value)
