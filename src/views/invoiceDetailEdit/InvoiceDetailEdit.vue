@@ -389,6 +389,7 @@ const goNext = () => {
         : null,
     }
     verificationApi.detailInvoiceEdit = data
+    console.log(mapDataVerifPo())
 
     if (form.value.statusCode === 4 || route.query.isSendSap === 'true') {
       isLoading.value = true
@@ -740,10 +741,38 @@ const mapDataVerifPo = (): PostVerificationTypes => {
   const referenceDoc = form.value.referenceDocument || {}
   const otherDoc = form.value.otherDocument || {}
   const documents = []
-  if (!isEmpty(invoiceDoc)) documents.push(invoiceDoc)
-  if (!isEmpty(taxDoc)) documents.push(taxDoc)
-  if (!isEmpty(referenceDoc)) documents.push(referenceDoc)
-  if (!isEmpty(otherDoc)) documents.push(otherDoc)
+  if (!isEmpty(invoiceDoc))
+    documents.push({
+      id: form.value.invoiceDocument.id || 0,
+      documentType: 1,
+      documentName: form.value.invoiceDocument.name || '',
+      documentUrl: form.value.invoiceDocument.path,
+      documentSize: Number(form.value.invoiceDocument.fileSize),
+    })
+  if (!isEmpty(taxDoc))
+    documents.push({
+      id: form.value.tax.id || 0,
+      documentType: 2,
+      documentName: form.value.tax.name || '',
+      documentUrl: form.value.tax.path,
+      documentSize: Number(form.value.tax.fileSize),
+    })
+  if (!isEmpty(referenceDoc))
+    documents.push({
+      id: form.value.referenceDocument.id || 0,
+      documentType: 3,
+      documentName: form.value.referenceDocument.name || '',
+      documentUrl: form.value.referenceDocument.path,
+      documentSize: Number(form.value.referenceDocument.fileSize),
+    })
+  if (!isEmpty(otherDoc))
+    documents.push({
+      id: form.value.otherDocument.id || 0,
+      documentType: 4,
+      documentName: form.value.otherDocument.name || '',
+      documentUrl: form.value.otherDocument.path,
+      documentSize: Number(form.value.otherDocument.fileSize),
+    })
 
   return {
     statusCode: route.query.type === '1' ? 3 : 4,
@@ -794,10 +823,38 @@ const mapDataVerifNonPo = (): PostEditApprovalNonPoTypes => {
   const referenceDoc = form.value.referenceDocument || {}
   const otherDoc = form.value.otherDocument || {}
   const documents = []
-  if (!isEmpty(invoiceDoc)) documents.push(invoiceDoc)
-  if (!isEmpty(taxDoc)) documents.push(taxDoc)
-  if (!isEmpty(referenceDoc)) documents.push(referenceDoc)
-  if (!isEmpty(otherDoc)) documents.push(otherDoc)
+  if (!isEmpty(invoiceDoc))
+    documents.push({
+      id: form.value.invoiceDocument.id || 0,
+      documentType: 1,
+      documentName: form.value.invoiceDocument.name || '',
+      documentUrl: form.value.invoiceDocument.path,
+      documentSize: Number(form.value.invoiceDocument.fileSize),
+    })
+  if (!isEmpty(taxDoc))
+    documents.push({
+      id: form.value.tax.id || 0,
+      documentType: 2,
+      documentName: form.value.tax.name || '',
+      documentUrl: form.value.tax.path,
+      documentSize: Number(form.value.tax.fileSize),
+    })
+  if (!isEmpty(referenceDoc))
+    documents.push({
+      id: form.value.referenceDocument.id || 0,
+      documentType: 3,
+      documentName: form.value.referenceDocument.name || '',
+      documentUrl: form.value.referenceDocument.path,
+      documentSize: Number(form.value.referenceDocument.fileSize),
+    })
+  if (!isEmpty(otherDoc))
+    documents.push({
+      id: form.value.otherDocument.id || 0,
+      documentType: 4,
+      documentName: form.value.otherDocument.name || '',
+      documentUrl: form.value.otherDocument.path,
+      documentSize: Number(form.value.otherDocument.fileSize),
+    })
 
   return {
     statusCode: route.query.type === '1' ? 3 : 4,
