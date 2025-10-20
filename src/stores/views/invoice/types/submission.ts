@@ -312,7 +312,7 @@ export interface ParamsSubmissionHeaderNonPo {
   profileId: string
   casDateReceipt?: string
   dueDateCas?: string
-  proposalAmount?: string
+  proposalAmount?: number
   picFinance?: string
   cashJournalCode?: string
   cashJournalName?: string
