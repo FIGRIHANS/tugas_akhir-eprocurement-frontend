@@ -335,6 +335,7 @@ export interface ListNonPoTypes {
   isOpenChild: boolean
   vendorName: string
   department: string
+  actionerDate?: string
 }
 
 export interface PoChildTypes {

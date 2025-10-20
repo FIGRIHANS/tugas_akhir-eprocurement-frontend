@@ -213,6 +213,7 @@ export interface ListPoTypes {
   pOs: PoChildTypes[]
   isOpenChild: boolean
   createdUtcDate: string
+  actionerDate?: string
 }
 
 export interface ListNonPoTypes {

@@ -29,7 +29,11 @@
               <td class="flex items-center justify-around gap-[8px]">
                 <button
                   class="btn btn-outline btn-icon btn-primary"
-                  :disabled="(checkIsEdit() && !item.isEdit) || checkVerifikator1()"
+                  :disabled="
+                    (checkIsEdit() && !item.isEdit) ||
+                    checkVerifikator1() ||
+                    route.query.isSendSap === 'true'
+                  "
                   @click="goEdit(item)"
                 >
                   <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>

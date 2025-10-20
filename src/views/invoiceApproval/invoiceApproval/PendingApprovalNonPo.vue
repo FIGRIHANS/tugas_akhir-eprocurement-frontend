@@ -152,6 +152,9 @@
                 <td>{{ parent.taxNo || '-' }}</td>
                 <td>{{ parent.documentNo || '-' }}</td>
                 <td>
+                  {{ parent.actionerDate ? moment(parent.actionerDate).format('YYYY/MM/DD') : '-' }}
+                </td>
+                <td>
                   {{
                     parent.estimatedPaymentDate
                       ? moment(parent.estimatedPaymentDate).format('YYYY/MM/DD')
@@ -287,6 +290,7 @@ const columns = ref<string[]>([
   'Total Net Amount',
   'No Tax Invoice',
   'Invoice Vendor No.',
+  'Approval Date',
   'Estimated Payment Date',
   'Invoice Submission Date',
 ])
