@@ -11,7 +11,13 @@
       </UiButton>
       <div class="dropdown-content w-auto p-4 space-y-5">
         <div class="flex flex-col space-y-2">
-          <UiButton variant="light" class="border-none" :outline="true" size="md">
+          <UiButton
+            variant="light"
+            class="border-none"
+            :outline="true"
+            size="md"
+            @click="handleDetailUser(props.userData)"
+          >
             <svg
               width="18"
               height="19"
@@ -92,9 +98,26 @@
 </template>
 
 <script setup lang="ts">
-import UiButton from '../ui/atoms/button/UiButton.vue';
-import UiIcon from '../ui/atoms/icon/UiIcon.vue';
+import { useRouter } from 'vue-router'
+import UiButton from '../ui/atoms/button/UiButton.vue'
+import UiIcon from '../ui/atoms/icon/UiIcon.vue'
 
+const router = useRouter()
+
+const props = defineProps<{
+  userData: any
+}>()
+
+console.log(props)
+
+const handleDetailUser = (user: any) => {
+  router.push({
+    name: 'user-management-user-detail',
+    params: {
+      userName: user.userName,
+    },
+  })
+}
 </script>
 
 <style scoped></style>
