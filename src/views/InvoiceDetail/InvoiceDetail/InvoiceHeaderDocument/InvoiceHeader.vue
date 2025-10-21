@@ -167,7 +167,7 @@ const checkNonPoCas = () => {
 }
 
 const checkNonPoLba = () => {
-  return form.value.invoiceTypeCode === 3
+  return form.value.invoiceTypeCode === 4
 }
 
 const checkNonPoCc = () => {
