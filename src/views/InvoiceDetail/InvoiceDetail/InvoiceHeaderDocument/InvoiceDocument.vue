@@ -62,7 +62,7 @@ const download = (path: string) => {
   previewApi.getPreview(path).then((response: any) => {
     const url = window.URL.createObjectURL(response.data)
     window.open(url, '_blank')
-    URL.revokeObjectURL(url)
+  // URL.revokeObjectURL(url)
   //   const a = document.createElement('a')
   //   a.href = url
   //   const splitPath = path.split(/\\/)
