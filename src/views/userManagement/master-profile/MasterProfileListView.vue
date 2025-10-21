@@ -8,10 +8,12 @@ import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import { useUserProfileStore } from '@/stores/user-management/profile'
 import { computed, onMounted, reactive, ref } from 'vue'
 import type { IProfile } from '@/stores/user-management/types/profile'
+import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
 
 const search = ref('')
 const userProfileStore = useUserProfileStore()
 const isModalOpen = ref(false)
+const showSuccessModal = ref(false)
 const profilePayload = reactive<{
   profileId: number
   profileName: string
@@ -93,11 +95,9 @@ const saveProfile = async () => {
   try {
     await userProfileStore.postUserProfile(profilePayload)
     closeProfileModal()
-    alert(
-      profilePayload.profileId === 0
-        ? 'Profile added successfully!'
-        : 'Profile updated successfully!',
-    )
+
+    showSuccessModal.value = true
+
     await userProfileStore.getAllUserProfiles()
   } catch (error: unknown) {
     console.error('Failed to save profile:', error)
@@ -245,6 +245,14 @@ onMounted(() => {
           <span v-if="isSaving">Saving...</span>
           <span v-else>Save</span>
         </UiButton>
+      </div>
+    </UiModal>
+
+    <UiModal v-model="showSuccessModal" size="sm">
+      <div class="text-center mb-6">
+        <ModalSuccessLogo class="mx-auto" />
+        <h3 class="text-center text-lg font-medium">Yeayyy</h3>
+        <p class="text-center text-base text-gray-600 mb-5">Profile successfully created</p>
       </div>
     </UiModal>
   </div>
