@@ -5,15 +5,23 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
+import UiLoading from '@/components/UiLoading.vue'
+import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
+
 import { useUserProfileStore } from '@/stores/user-management/profile'
 import { computed, onMounted, reactive, ref } from 'vue'
 import type { IProfile } from '@/stores/user-management/types/profile'
-import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
 
 const search = ref('')
 const userProfileStore = useUserProfileStore()
+
 const isModalOpen = ref(false)
 const showSuccessModal = ref(false)
+const showDeleteModal = ref(false)
+
+const profileToDelete = ref<IProfile | null>(null)
+const isDeleting = ref(false)
+
 const profilePayload = reactive<{
   profileId: number
   profileName: string
@@ -32,18 +40,10 @@ const modalTitle = computed(() =>
 )
 
 const filteredProfiles = computed(() => {
-  if (!userProfileStore.profiles?.items) {
-    return []
-  }
-  const searchTerm = search.value.toLowerCase()
-  if (searchTerm) {
-    return userProfileStore.profiles.items.filter((profile) =>
-      profile.profileName.toLowerCase().includes(searchTerm),
-    )
-  }
-  return userProfileStore.profiles.items.filter((profile) =>
-    profile.profileName.toLowerCase().includes(searchTerm),
-  )
+  const items = userProfileStore.profiles?.items ?? []
+  const q = search.value.trim().toLowerCase()
+  if (!q) return items
+  return items.filter((p) => p.profileName.toLowerCase().includes(q))
 })
 
 const resetProfilePayload = () => {
@@ -54,11 +54,7 @@ const resetProfilePayload = () => {
 }
 
 const closeAnyOpenDropdown = () => {
-  const event = new MouseEvent('click', {
-    bubbles: true,
-    cancelable: true,
-    view: window,
-  })
+  const event = new MouseEvent('click', { bubbles: true, cancelable: true, view: window })
   document.body.dispatchEvent(event)
 }
 
@@ -87,42 +83,44 @@ const validateProfileName = () => {
 }
 
 const saveProfile = async () => {
-  if (!validateProfileName()) {
-    return
-  }
-
+  if (!validateProfileName()) return
   isSaving.value = true
   try {
     await userProfileStore.postUserProfile(profilePayload)
     closeProfileModal()
-
     showSuccessModal.value = true
-
     await userProfileStore.getAllUserProfiles()
   } catch (error: unknown) {
     console.error('Failed to save profile:', error)
-    alert(`Failed to save profile: ${error || 'Unknown error'}`)
+    alert(`Failed to save profile: ${String(error) || 'Unknown error'}`)
   } finally {
     isSaving.value = false
   }
 }
 
-const deleteProfile = async (profile: IProfile) => {
-  if (!confirm(`Are you sure you want to delete profile "${profile.profileName}"?`)) {
-    return
-  }
+function openDeleteModal(profile: IProfile) {
+  closeAnyOpenDropdown()
+  profileToDelete.value = profile
+  showDeleteModal.value = true
+}
 
+async function handleProcessDelete() {
+  if (!profileToDelete.value) return
+  isDeleting.value = true
   try {
     await userProfileStore.postUserProfile({
-      profileId: profile.profileId,
-      profileName: profile.profileName,
+      profileId: profileToDelete.value.profileId,
+      profileName: profileToDelete.value.profileName,
       isActive: false,
     })
-    alert('Profile deleted successfully!')
+    showDeleteModal.value = false
+    profileToDelete.value = null
     await userProfileStore.getAllUserProfiles()
   } catch (error: unknown) {
     console.error('Failed to delete profile:', error)
-    alert(`Failed to delete profile: ${error || 'Unknown error'}`)
+    alert(`Failed to delete profile: ${String(error) || 'Unknown error'}`)
+  } finally {
+    isDeleting.value = false
   }
 }
 
@@ -149,18 +147,20 @@ onMounted(() => {
             <UiInputSearch v-model="search" placeholder="Search Profile" />
             <UiButton variant="primary" @click="openProfileModal()">
               <UiIcon variant="duotone" name="plus" />
-              Add Profile</UiButton
-            >
+              Add Profile
+            </UiButton>
           </div>
         </div>
       </div>
+
       <div class="card-body">
         <div v-if="userProfileStore.loading" class="text-center py-4">Loading profiles...</div>
         <div v-else-if="userProfileStore.error" class="text-center py-4 text-red-500">
           Error: {{ userProfileStore.error }}
         </div>
+
         <table v-else-if="filteredProfiles.length > 0" class="table align-middle text-gray-700">
-          <thead class="">
+          <thead>
             <tr>
               <th></th>
               <th class="text-nowrap">Profile ID</th>
@@ -204,7 +204,7 @@ onMounted(() => {
                           class="border-none text-red-500 hover:text-red-600"
                           :outline="true"
                           size="md"
-                          @click="deleteProfile(profile)"
+                          @click="openDeleteModal(profile)"
                         >
                           <UiIcon name="trash" class="mr-2" />
                           Delete Profile
@@ -220,10 +220,12 @@ onMounted(() => {
             </tr>
           </tbody>
         </table>
+
         <div v-else class="text-center py-4">No profiles found.</div>
       </div>
     </div>
 
+    <!-- Add/Edit modal -->
     <UiModal
       :title="modalTitle"
       v-model="isModalOpen"
@@ -248,11 +250,51 @@ onMounted(() => {
       </div>
     </UiModal>
 
+    <!-- success modal -->
     <UiModal v-model="showSuccessModal" size="sm">
       <div class="text-center mb-6">
         <ModalSuccessLogo class="mx-auto" />
         <h3 class="text-center text-lg font-medium">Yeayyy</h3>
         <p class="text-center text-base text-gray-600 mb-5">Profile successfully created</p>
+      </div>
+    </UiModal>
+
+    <!-- delete confirm modal -->
+    <UiModal v-model="showDeleteModal" size="sm">
+      <div class="text-center mb-6">
+        <UiIcon
+          name="cross-circle"
+          variant="duotone"
+          class="text-[150px] text-danger text-center"
+        />
+      </div>
+      <h3 class="text-center text-lg font-medium">Are you sure to delete this profile?</h3>
+      <p class="text-center text-base text-gray-600 mb-5">
+        This action will permanently deactivate
+        <strong v-if="profileToDelete">{{ profileToDelete.profileName }}</strong
+        >.
+      </p>
+      <div class="flex gap-3 px-8 mb-3">
+        <UiButton
+          outline
+          @click="showDeleteModal = false"
+          class="flex-1 flex items-center justify-center"
+        >
+          <UiIcon name="black-left-line" />
+          <span>Cancel</span>
+        </UiButton>
+        <UiButton
+          variant="danger"
+          class="flex-1 flex items-center justify-center"
+          @click="handleProcessDelete"
+          :disabled="isDeleting"
+        >
+          <UiLoading v-if="isDeleting" variant="white" />
+          <template v-else>
+            <UiIcon name="cross-circle" variant="duotone" />
+            <span>Delete</span>
+          </template>
+        </UiButton>
       </div>
     </UiModal>
   </div>
