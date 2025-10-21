@@ -23,7 +23,7 @@
             <tr v-for="(item, index) in list?.workflow" :key="index" class="text-sm font-normal">
               <td>{{ index + 1 }}</td>
               <td>{{ item.profileName }}</td>
-              <td v-if="route.name === 'invoiceApprovalNonPo'">{{ item.actionerName || '-' }}</td>
+              <td>{{ item.actionerName || '-' }}</td>
               <td>
                 {{
                   item.actionerDate && item.actioner !== 0
@@ -59,7 +59,14 @@ const emits = defineEmits(['loadDetail', 'setClearId'])
 
 const invoiceApi = useInvoiceSubmissionStore()
 
-const columns = ref<string[]>(['No.', 'Department', 'Approval Date', 'Status', 'Description'])
+const columns = ref<string[]>([
+  'No.',
+  'Department',
+  'Actioner Name',
+  'Approval Date',
+  'Status',
+  'Description',
+])
 
 const list = computed(() => {
   if (route.name === 'invoiceApprovalNonPo') {
@@ -82,11 +89,6 @@ const badgeColor = (status: number) => {
 }
 
 onMounted(() => {
-  const departmentIndex = columns.value.indexOf('Department')
-
-  if (route.name === 'invoiceApprovalNonPo') {
-    columns.value.splice(departmentIndex + 1, 0, 'Actioner Name')
-  }
   const idModal = document.querySelector('#detail_approval_modal')
   const modal = KTModal.getInstance(idModal as HTMLElement)
 

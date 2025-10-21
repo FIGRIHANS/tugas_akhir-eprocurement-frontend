@@ -5,7 +5,7 @@ export default [
     component: () => import('@/views/userManagement/list-user/UserListView.vue'),
   },
   {
-    path: '/user-management/user/:id',
+    path: '/user-management/user/:userName',
     name: 'user-management-user-detail',
     component: () => import('@/views/userManagement/list-user/UserDetailView.vue'),
   },

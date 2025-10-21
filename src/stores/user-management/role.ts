@@ -26,7 +26,7 @@ export const useUserRoleStore = defineStore('userRole', () => {
     error.value = null
 
     try {
-      const response: ApiResponse<IRole[]> = await userApi.post('/role/getall') // Ubah ApiResponse type
+      const response: ApiResponse<IRole[]> = await userApi.get('/role/getall')
 
       if (response.data.result.isError) {
         error.value = response.data.result.message || 'An unknown error occurred.'
@@ -67,7 +67,7 @@ export const useUserRoleStore = defineStore('userRole', () => {
     }
   }
 
-  const getUserRole= async (
+  const getUserRole = async (
     body: { profileId?: number; profileName?: string; page?: number } = {},
   ) => {
     loading.value = true
@@ -115,11 +115,7 @@ export const useUserRoleStore = defineStore('userRole', () => {
     }
   }
 
-  const postUserRole = async (body: {
-    roleId: number
-    roleName: string
-    isActive: boolean
-  }) => {
+  const postUserRole = async (body: { roleId: number; roleName: string; isActive: boolean }) => {
     loading.value = true
     error.value = null
 
