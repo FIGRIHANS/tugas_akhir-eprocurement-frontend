@@ -99,7 +99,7 @@
           Cash Journal
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
-        <input v-model="form.cashJournal" class="input" placeholder="" />
+        <input v-model="form.notes" class="input" placeholder="" />
       </div>
 
       <!-- Petty Cash Period - range picker limited to selected month (only for Petty Cash) -->
