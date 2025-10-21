@@ -22,8 +22,8 @@ export const useUserStore = defineStore('userStore', () => {
   })
 
   const userDetail = ref(null)
-
   const userInformation = ref(null)
+  const userUserName = ref(null)
 
   const getAllUsers = async () => {
     loading.value = true
@@ -68,9 +68,29 @@ export const useUserStore = defineStore('userStore', () => {
     loading.value = true
     error.value = null
     try {
-      const response: ApiResponse<unknown> = await userApi.get(`/user/information/${employeeId}`)
+      const response: ApiResponse<unknown> = await userApi.get(
+        `/user/information?employeeId=${employeeId}`,
+      )
 
-      console.log(response)
+      userInformation.value = response?.data?.result.content
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        error.value = err.message
+      }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const getUserNameByEmployeeId = async (employeeId: number) => {
+    loading.value = true
+    error.value = null
+    try {
+      const response: ApiResponse<unknown> = await userApi.get(
+        `/user/username-by-employeeid?employeeId=${employeeId}`,
+      )
+
+      userUserName.value = response?.data?.result.content
     } catch (err: unknown) {
       if (err instanceof Error) {
         error.value = err.message
@@ -125,11 +145,12 @@ export const useUserStore = defineStore('userStore', () => {
     users,
     loading,
     error,
-
     userDetail,
+    userInformation,
 
     getAllUsers,
     getUserInformation,
+    getUserNameByEmployeeId,
     getUserDetail,
     storeUserData,
   }
