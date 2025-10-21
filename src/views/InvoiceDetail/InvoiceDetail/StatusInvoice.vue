@@ -78,7 +78,7 @@ const getRejectReason = () => {
   const list = checkIsNonPo() ? detailInvoiceNonPo.value : detailInvoice.value
   const index = list?.workflow.findIndex((item) => item.stateCode === 5)
 
-  if (index !== -1) reason.value = list.workflow[index].actionerNotes
+  if (index !== -1) reason.value = list?.workflow[index].actionerNotes
 }
 
 watch(
