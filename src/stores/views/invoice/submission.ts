@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 import invoiceApi from '@/core/utils/invoiceApi'
 import moment from 'moment'
 
-import type { ApiResponse } from '@/core/type/api'
+import type { ApiResponse, ApiResponseData } from '@/core/type/api'
 import type {
   SubmissionStatusTypes,
   DocumentTypes,
@@ -20,6 +20,8 @@ import type {
   ResponseCheckBudgetTypes,
 } from './types/submission'
 
+import type { CasNoTypes } from '@/stores/master-data/types/invoiceMasterData'
+
 export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => {
   const submissionStatus = ref<SubmissionStatusTypes[]>([])
   const documentTypeList = ref<DocumentTypes[]>([])
@@ -31,6 +33,7 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
   const detailNonPo = ref<ParamsSubmissionTypes>()
   const responseCheckBudget = ref<ResponseCheckBudgetTypes>()
   const errorMessageSubmission = ref<string>('')
+  const casNoCode = ref<CasNoTypes[]>([])
 
   const getSubmissionStatus = async () => {
     const response: ApiResponse<SubmissionStatusTypes[]> = await invoiceApi.get(
@@ -124,7 +127,15 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
   }
 
   const postSubmission = async (data: ParamsSubmissionTypes) => {
-    const response: ApiResponse<void> = await invoiceApi.post(`/invoice/submission`, data)
+    const requestBody = {
+      ...data,
+      vendor: {
+        ...data.vendor,
+        vendorId: data.vendor.vendorId ? Number(data.vendor.vendorId) : 0
+      }
+    }
+
+    const response: ApiResponse<void> = await invoiceApi.post(`/invoice/submission`, requestBody)
 
     return response.data
   }
@@ -146,15 +157,64 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
   }
 
   const postSubmissionNonPo = async (data: ParamsSubmissionNonPo) => {
-    const response: ApiResponse<void> = await invoiceApi.post(`/invoice/submission-non-po`, data)
+    const requestBody = {
+      ...data,
+      vendor: {
+        ...data.vendor,
+        vendorId: data.vendor.vendorId ? Number(data.vendor.vendorId) : 0
+      }
+    }
+
+    const response: ApiResponse<void> = await invoiceApi.post(`/invoice/submission-non-po`, requestBody)
 
     return response.data
+  }
+
+  const getCasNo = async (vendorId: string) => {
+    try {
+      const requestBody = {
+        REQUEST: {
+          SUPPLIER_FROM_PORTAL: vendorId
+        }
+      }
+
+      const response = await invoiceApi.post<{
+        response: CasNoTypes[]
+        zMessage?: {
+          TYPE: string
+          ID: string
+          NUMBER: number
+          MESSAGE: string
+        }
+      }>(
+        '/invoice/invoice/check-cas',
+        requestBody,
+        {
+          validateStatus: (status) => {
+            return status === 200 || status === 422
+          }
+        }
+      )
+
+      if (response.data.zMessage && response.data.zMessage.TYPE === 'E') {
+        casNoCode.value = []
+        return []
+      }
+
+      const mappedData = response.data.response || []
+      casNoCode.value = mappedData
+      return mappedData
+
+    } catch (error) {
+      console.error('getCasNo Error:', error)
+      casNoCode.value = []
+      return []
+    }
   }
 
   const getListNonPo = async (data: QueryParamsListPoTypes) => {
     listNonPo.value = []
     const query = {
-      // statusCode: data.statusCode || null,
       companyCode: data.companyCode || null,
       invoiceTypeCode: Number(data.invoiceTypeCode) || null,
       invoiceDate: data.invoiceDate || null,
@@ -189,17 +249,38 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
   }
 
   const postCheckBudget = async (data: ParamsCheckBudgetType) => {
-    let response: ApiResponse<void>
     try {
-      response = await invoiceApi.post(`/invoice/invoice/check-budget`, data)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      responseCheckBudget.value = err.response.data
-    } finally {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      responseCheckBudget.value = response.data as any
+      const response: ApiResponse<ResponseCheckBudgetTypes> = await invoiceApi.post(
+        `/invoice/invoice/check-budget`,
+        data,
+      )
+
+      if (response?.data?.result?.content) {
+        responseCheckBudget.value = response.data.result.content
+      } else {
+        responseCheckBudget.value = {} as ResponseCheckBudgetTypes
+      }
+
       return response.data
+    } catch (err: unknown) {
+      const axiosErr = err as {
+        response?: {
+          status?: number
+          data?: ApiResponseData<ResponseCheckBudgetTypes>
+        }
+        message?: string
+      }
+
+      const errorData = axiosErr.response?.data
+
+      if (errorData) {
+        if (errorData.result?.content) {
+          responseCheckBudget.value = errorData.result.content
+        }
+        return errorData
+      }
+
+      throw new Error(`Budget check failed: ${axiosErr.message || 'Unknown error'}`)
     }
   }
 
@@ -214,6 +295,7 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
     listNonPo,
     responseCheckBudget,
     errorMessageSubmission,
+    casNoCode,
     getSubmissionStatus,
     getDocumentType,
     getTaxCalculation,
@@ -226,6 +308,7 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
     getRemainingDp,
     getListNonPo,
     postSubmissionNonPo,
+    getCasNo,
     postCheckBudget,
   }
 })

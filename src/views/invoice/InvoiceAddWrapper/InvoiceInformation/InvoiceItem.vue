@@ -86,7 +86,7 @@
                 ></v-select>
               </td>
               <td>
-                <span>{{ form?.currency === 'IDR' ? useFormatIdr(item.vatAmount) : useFormatUsd(item.vatAmount) }}</span>
+                <span>{{ form?.currency === 'IDR' ? useFormatIdr(item.vatAmount) : useFormatUsd(item.vatAmount) || '-' }}</span>
               </td>
               <td>
                 <span v-if="!item.isEdit">{{ getCostCenterName(item.costCenter) || '-' }}</span>
@@ -146,15 +146,21 @@ const columns = computed(() => {
     'Action',
     'Activity / Expense',
     'Item Amount',
-    'Item Text',
-    'Debit/Credit',
-    'Tax Code',
-    'VAT Amount',
-    'Cost Center',
-    'Profit Center',
-    'Assignment'
+    'Item Text'
   ]
 
+  // Add Debit/Credit only for non-Petty Cash
+  if (!isPettyCash.value) {
+    baseColumns.push('Debit/Credit')
+  }
+
+  baseColumns.push('Tax Code')
+  baseColumns.push('VAT Amount')
+  baseColumns.push('Cost Center')
+  baseColumns.push('Profit Center')
+  baseColumns.push('Assignment')
+
+  // Add WHT columns only for non-Petty Cash
   if (!isPettyCash.value) {
     baseColumns.push('WHT Type')
     baseColumns.push('WHT Code')

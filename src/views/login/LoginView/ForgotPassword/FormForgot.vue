@@ -40,12 +40,18 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useForgotPasswordStore } from '@/stores/views/forgot-password'
+import { useLoginStore } from '@/stores/views/login'
 
 const email = ref<string>('')
 const emailError = ref<boolean>(false)
 const forgotPasswordStore = useForgotPasswordStore()
+
+const loginStore = useLoginStore()
+const loginRole = computed(() => loginStore.loginRole)
+
+console.log(loginRole.value)
 
 const validateEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -67,11 +73,19 @@ const handleSendResetEmail = async () => {
   }
 
   try {
-    await forgotPasswordStore.sendResetPasswordEmail({
-      vendorId: 'vendorID',
-      email: email.value,
-      vendorName: 'vendorName',
-    })
+    if (loginRole.value === 'employee') {
+      await forgotPasswordStore.sendEmployeeResetPasswordEmail({
+        email: email.value,
+      })
+      return
+    }
+
+    if (loginRole.value === 'vendor') {
+      await forgotPasswordStore.sendResetPasswordEmail({
+        email: email.value,
+      })
+      return
+    }
   } catch (error) {
     console.error('Failed to send reset email:', error)
   }

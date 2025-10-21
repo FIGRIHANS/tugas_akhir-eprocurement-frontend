@@ -49,7 +49,7 @@
 
       <div v-if="isReimbursement" :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
         <p class="text-xs font-normal text-gray-700">Invoice Vendor No.</p>
-        <p class="text-sm font-medium">{{ form.invoiceNoVendor || '-' }}</p>
+        <p class="text-sm font-medium">{{ form.invoiceVendorNo || '-' }}</p>
       </div>
 
       <div v-if="isReimbursement" :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">

@@ -1,7 +1,12 @@
 <template>
   <div class="border border-gray-200 rounded-xl p-[24px]">
     <div class="flex justify-between gap-[8px]">
-      <UiInputSearch v-model="search" placeholder="Cari Invoice" class="w-[250px]" @keypress="goSearch" />
+      <UiInputSearch
+        v-model="search"
+        placeholder="Cari Invoice"
+        class="w-[250px]"
+        @keypress="goSearch"
+      />
       <FilterList :data="filterForm" @setData="setDataFilter" />
     </div>
     <div class="mt-[24px]">
@@ -14,7 +19,7 @@
                 class="pending__column"
                 :key="index"
                 :class="{
-                  'pending__column--auto': index <= 1
+                  'pending__column--auto': index <= 1,
                 }"
               >
                 {{ item }}
@@ -31,14 +36,16 @@
                     </button>
                     <div class="dropdown-content w-full max-w-56 py-2">
                       <div class="menu menu-default flex flex-col w-full">
-                        <div v-if="parent.statusCode === 4" class="menu-item" @click="sendToSap(parent.invoiceUId)">
+                        <div
+                          v-if="parent.statusCode === 4"
+                          class="menu-item"
+                          @click="sendToSap(parent.invoiceUId)"
+                        >
                           <div class="menu-link">
                             <span class="menu-icon">
                               <i class="ki-duotone ki-paper-plane !text-lg"></i>
                             </span>
-                            <span class="menu-title">
-                              Send to SAP
-                            </span>
+                            <span class="menu-title"> Send to SAP </span>
                           </div>
                         </div>
                         <div class="menu-item" @click="openDetailInvoice(parent.invoiceUId)">
@@ -46,9 +53,7 @@
                             <span class="menu-icon">
                               <i class="ki-duotone ki-eye !text-lg"></i>
                             </span>
-                            <span class="menu-title">
-                              Detail
-                            </span>
+                            <span class="menu-title"> Detail </span>
                           </div>
                         </div>
                         <div class="menu-item" @click="openDetailApproval(parent.invoiceUId)">
@@ -56,19 +61,31 @@
                             <span class="menu-icon">
                               <i class="ki-duotone ki-data !text-lg"></i>
                             </span>
-                            <span class="menu-title">
-                              Detail Approval
-                            </span>
+                            <span class="menu-title"> Detail Approval </span>
                           </div>
                         </div>
-                        <div v-if="parent.statusCode === 4" class="menu-item" @click="openDetailInvoiceEdit(parent.invoiceUId)">
+                        <div
+                          v-if="parent.statusCode === 4"
+                          class="menu-item"
+                          @click="openDetailInvoiceEdit(parent.invoiceUId)"
+                        >
                           <div class="menu-link">
                             <span class="menu-icon">
                               <i class="ki-duotone ki-message-edit"></i>
                             </span>
-                            <span class="menu-title">
-                              Edit
+                            <span class="menu-title"> Edit </span>
+                          </div>
+                        </div>
+                        <div
+                          v-if="parent.statusCode === 7"
+                          class="menu-item"
+                          @click="openDetailInvoiceEditSendSap(parent.invoiceUId)"
+                        >
+                          <div class="menu-link">
+                            <span class="menu-icon">
+                              <i class="ki-duotone ki-message-edit"></i>
                             </span>
+                            <span class="menu-title"> Edit </span>
                           </div>
                         </div>
                       </div>
@@ -76,17 +93,22 @@
                   </div>
                 </td>
                 <td>
-                  <button class="btn btn-icon btn-outline btn-primary w-[21px] h-[21px]" @click="parent.isOpenChild = !parent.isOpenChild">
+                  <button
+                    class="btn btn-icon btn-outline btn-primary w-[21px] h-[21px]"
+                    @click="parent.isOpenChild = !parent.isOpenChild"
+                  >
                     <i v-if="!parent.isOpenChild" class="ki-filled ki-right !text-[9px]"></i>
                     <i v-else class="ki-filled ki-down !text-[9px]"></i>
                   </button>
                 </td>
                 <td>{{ parent.invoiceNo || '-' }}</td>
+                <td>{{ parent.notes || '-' }}</td>
                 <td>
                   <span class="badge badge-outline" :class="colorBadge(parent.statusCode)">
                     {{ parent.statusName }}
                   </span>
                 </td>
+
                 <td>{{ parent.invoiceTypeName || '-' }}</td>
                 <td>{{ parent.companyCode || '-' }}</td>
                 <td>{{ useFormatIdr(parent.whtBaseAmount) || '-' }}</td>
@@ -95,9 +117,20 @@
                 <td>{{ useFormatIdr(parent.totalNetAmount) || '-' }}</td>
                 <td>{{ parent.taxNo || '-' }}</td>
                 <td>{{ parent.documentNo || '-' }}</td>
-                <td>{{ parent.estimatedPaymentDate ? moment(parent.estimatedPaymentDate).format('YYYY/MM/DD') : '-' }}</td>
-                <td>{{ parent.invoiceDate ? moment(parent.invoiceDate).format('YYYY/MM/DD HH:mm:ss') : '-' }}</td>
-                <td>{{ parent.notes || '-' }}</td>
+                <td>
+                  {{
+                    parent.estimatedPaymentDate
+                      ? moment(parent.estimatedPaymentDate).format('YYYY/MM/DD')
+                      : '-'
+                  }}
+                </td>
+                <td>
+                  {{
+                    parent.invoiceDate
+                      ? moment(parent.invoiceDate).format('YYYY/MM/DD HH:mm:ss')
+                      : '-'
+                  }}
+                </td>
               </tr>
               <tr v-show="parent.isOpenChild">
                 <td></td>
@@ -129,8 +162,19 @@
         </table>
       </div>
       <div class="flex items-center justify-between mt-[24px]">
-        <p class="m-0 text-sm">Tampilkan {{ pageSize * currentPage > verifList.length ? verifList.length : pageSize * currentPage }} data dari total data {{ verifList.length }}</p>
-        <LPagination :totalItems="verifList.length" :pageSize="pageSize" :currentPage="currentPage" @pageChange="setPage" />
+        <p class="m-0 text-sm">
+          Tampilkan
+          {{
+            pageSize * currentPage > verifList.length ? verifList.length : pageSize * currentPage
+          }}
+          data dari total data {{ verifList.length }}
+        </p>
+        <LPagination
+          :totalItems="verifList.length"
+          :pageSize="pageSize"
+          :currentPage="currentPage"
+          @pageChange="setPage"
+        />
       </div>
     </div>
     <SuccessSendToSap />
@@ -154,7 +198,9 @@ import moment from 'moment'
 
 const ModalDetailApproval = defineAsyncComponent(() => import('./DetailApproval.vue'))
 const FilterList = defineAsyncComponent(() => import('./FilterList.vue'))
-const SuccessSendToSap = defineAsyncComponent(() => import('./pendingApproval/SuccessSendToSap.vue'))
+const SuccessSendToSap = defineAsyncComponent(
+  () => import('./pendingApproval/SuccessSendToSap.vue'),
+)
 const FailedSendToSap = defineAsyncComponent(() => import('./pendingApproval/FailedSendToSap.vue'))
 
 const invoiceApi = useInvoiceSubmissionStore()
@@ -171,13 +217,14 @@ const filterForm = reactive<filterListTypes>({
   status: 2,
   date: '',
   companyCode: '',
-  invoiceType: ''
+  invoiceType: '',
 })
 
 const columns = ref<string[]>([
   '',
   '',
   'Submitted Document No',
+  'Description',
   'Status',
   'Invoice Type',
   'Company Code',
@@ -189,16 +236,9 @@ const columns = ref<string[]>([
   'Invoice Vendor No.',
   'Estimated Payment Date',
   'Invoice Submission Date',
-  'Description'
 ])
 
-const columnsChild = ref([
-  'No PO',
-  'No GR',
-  'Item Description',
-  'Item Amount',
-  'Quantity'
-])
+const columnsChild = ref(['No PO', 'No GR', 'Item Description', 'Item Amount', 'Quantity'])
 
 const verifList = computed(() => verificationApi.listPo)
 
@@ -207,7 +247,7 @@ const colorBadge = (statusCode: number) => {
     2: 'badge-info',
     5: 'badge-danger',
     4: 'badge-success',
-    7: 'badge-primary'
+    7: 'badge-primary',
   } as { [key: number]: string }
   return list[statusCode]
 }
@@ -237,19 +277,38 @@ const openDetailInvoice = (invoiceId: string) => {
     name: 'invoiceDetail',
     query: {
       id: invoiceId,
-      type: '2'
-    }
+      type: '2',
+    },
   })
 }
 
 const openDetailInvoiceEdit = (invoiceId: string) => {
+  const isSendSap = ref(false)
+  if (filterForm.status === 7) {
+    console.log('masuk')
+
+    isSendSap.value = true
+  }
   router.push({
     name: 'invoiceDetailEdit',
-    query : {
+    query: {
       id: invoiceId,
       type: '2',
-      edit: 'true'
-    }
+      edit: 'true',
+      isSendSap: isSendSap.value.toString(),
+    },
+  })
+}
+
+const openDetailInvoiceEditSendSap = (invoiceId: string) => {
+  router.push({
+    name: 'invoiceDetailEdit',
+    query: {
+      id: invoiceId,
+      type: '2',
+      edit: 'true',
+      isSendSap: 'true',
+    },
   })
 }
 
@@ -267,15 +326,17 @@ const setList = () => {
 
 const callList = () => {
   list.value = []
-  verificationApi.getListPo({
-    statusCode: filterForm.status || 2,
-    companyCode: filterForm.companyCode,
-    invoiceTypeCode: Number(filterForm.invoiceType),
-    invoiceDate: filterForm.date,
-    searchText: search.value
-  }).finally(() => {
-    setList()
-  })
+  verificationApi
+    .getListPo({
+      statusCode: filterForm.status || 2,
+      companyCode: filterForm.companyCode,
+      invoiceTypeCode: Number(filterForm.invoiceType),
+      invoiceDate: filterForm.date,
+      searchText: search.value,
+    })
+    .finally(() => {
+      setList()
+    })
 }
 
 const setDataFilter = (data: filterListTypes) => {
@@ -302,17 +363,19 @@ const closeDropdown = () => {
 const sendToSap = (invoiceUId: string) => {
   closeDropdown()
   isLoadingSap.value = true
-  verificationApi.postSap(invoiceUId).then((statusCode: number) => {
-    if (statusCode === 200) {
-      openSuccesSap()
-      callList()
-    } else {
-      openFailedSap()
-    }
-  })
-  .finally(() => {
-    isLoadingSap.value = false
-  })
+  verificationApi
+    .postSap(invoiceUId)
+    .then((statusCode: number) => {
+      if (statusCode === 200) {
+        openSuccesSap()
+        callList()
+      } else {
+        openFailedSap()
+      }
+    })
+    .finally(() => {
+      isLoadingSap.value = false
+    })
 }
 
 const openSuccesSap = () => {

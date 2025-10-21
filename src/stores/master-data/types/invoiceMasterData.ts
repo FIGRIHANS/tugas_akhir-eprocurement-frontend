@@ -29,7 +29,7 @@ export type DocumentTypes = {
 }
 
 export type VendorTypes = {
-  vendorId: number
+  vendorId: string
   vendorCode: string
   vendorName: string
   businessFieldId: number
@@ -105,4 +105,16 @@ export type NpwpReportingTypes = {
   companyCodeName: string
   npwpLocation: string
   npwpDescription: string
+}
+
+export type CasNoTypes = {
+  code: string
+  name: string
+}
+
+export type CashJournalTypes = {
+  id: number
+  companyCodeName: string
+  cashJournalNo: string
+  cashJournalName: string
 }

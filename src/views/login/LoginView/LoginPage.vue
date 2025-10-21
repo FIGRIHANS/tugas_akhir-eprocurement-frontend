@@ -127,6 +127,12 @@ const goRegister = () => {
 }
 
 const goToForgot = () => {
+  if (selectedLogin.value === 'admin') {
+    loginApi.loginRole = 'employee'
+  } else {
+    loginApi.loginRole = 'vendor'
+  }
+
   loginApi.selectedLogin = 'forgot'
 }
 

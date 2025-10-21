@@ -28,7 +28,7 @@
         <tbody>
           <tr v-for="(item, index) in form.invoiceItem" :key="index" class="invoice__field-items">
             <td>{{ index + 1 }}</td>
-            <td>{{ !item.activityCode && !item.activityName ? getActivityName(item.activity) : `${item.activityCode} - ${item.activityName}` || '-' }}</td>
+            <td>{{ getActivityCodeOrExpense(item) && item.activityName ? `${getActivityCodeOrExpense(item)} - ${item.activityName}` : getActivityName(item.activity) || '-' }}</td>
             <td>{{ form.currency === 'IDR' ? useFormatIdr(item.itemAmount) : useFormatUsd(item.itemAmount) || '-' }}</td>
             <td>{{ item.itemText || '-' }}</td>
             <td>{{ getDebitCreditName(item.debitCredit) || '-' }}</td>
@@ -110,6 +110,11 @@ const setAdditionalCostList = async () => {
 
 const callWhtCode = async (whtType: string) => {
   await invoiceMasterApi.getWhtCode(whtType)
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const getActivityCodeOrExpense = (item: any) => {
+  return item.activityCode || item.activityExpense
 }
 
 const getActivityName = (id: number) => {
