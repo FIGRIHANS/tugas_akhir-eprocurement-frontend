@@ -4,13 +4,20 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import IconPlusCircle from '@/assets/svg_icons/ic_plus_circle.svg'
 
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import EmployeeMenuButton from '@/components/userManagement/EmployeeMenuButton.vue'
 import LPagination from '@/components/pagination/LPagination.vue'
 import { useRouter } from 'vue-router'
+import { useEmployeeStore } from '@/stores/user-management/employee'
 
 const searchKeyword = ref('')
 const router = useRouter()
+
+const employeeStore = useEmployeeStore()
+
+onMounted(async () => {
+  await employeeStore.getEmployees()
+})
 
 const handleAddEmployee = () => {
   router.push({
@@ -55,25 +62,25 @@ const handleAddEmployee = () => {
             </tr>
           </thead>
           <tbody>
-            <tr>
+            <tr v-for="item in employeeStore.employees" :key="item.id">
               <td class="flex items-center gap-[24px]">
                 <EmployeeMenuButton id="1" />
               </td>
-              <td>10001</td>
-              <td>Eleanor Pena</td>
-              <td>jvSjI@example.com</td>
-              <td>Node JS Developer</td>
-              <td>COMPANY123</td>
+              <td>{{ item?.employeeId ?? '-' }}</td>
+              <td>{{ item?.employeeName ?? '-' }}</td>
+              <td>{{ item?.employeeEmail ?? '-' }}</td>
+              <td>{{ item?.positionName ?? '-' }}</td>
+              <td>{{ item?.companyCode ?? '-' }}</td>
             </tr>
           </tbody>
         </table>
       </div>
-      <div
+      <!-- <div
         class="card-footer justify-center md:justify-between flex-col md:flex-row gap-3 text-gray-800 text-sm font-medium"
       >
         <div>Showing 1 of 1 entries</div>
         <LPagination :total-items="Number(10)" :current-page="Number(1)" :page-size="Number(10)" />
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
