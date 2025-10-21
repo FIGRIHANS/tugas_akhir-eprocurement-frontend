@@ -59,6 +59,7 @@
                     {{ parent.statusName }}
                   </span>
                 </td>
+                <td>{{ parent.vendorName || '-' }}</td>
                 <td>{{ parent.invoiceTypeName || '-' }}</td>
                 <td>{{ parent.companyCode || '-' }}</td>
                 <td>{{ useFormatIdr(parent.whtBaseAmount) || '-' }}</td>
@@ -189,6 +190,7 @@ const columns = ref<string[]>([
   '',
   'Submitted Document No',
   'Status',
+  'Vendor Name',
   'Invoice Type',
   'Company Code',
   'Base Amount',
