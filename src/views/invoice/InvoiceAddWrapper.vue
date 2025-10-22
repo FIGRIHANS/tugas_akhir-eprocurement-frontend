@@ -391,15 +391,16 @@ const checkInvoiceInformation = () => {
       form.dueDateCasError = false
     } else if (isCAS) {
       form.taxNoInvoiceError = useCheckEmpty(form.taxNoInvoice).isError
-      form.casNoCodeError = false // CAS No. is auto-generated, not required
+      form.casNoCodeError = false
       form.invoiceVendorNoError = false
       form.invoiceDateError = false
       form.proposalAmountError = false
       form.dueDateCasError = false
     } else if (isLBA) {
       form.taxNoInvoiceError = useCheckEmpty(form.taxNoInvoice).isError
-      form.dueDateCasError = useCheckEmpty(form.dueDateCas).isError
-      form.casNoCodeError = useCheckEmpty(form.casNoCode).isError // LBA requires CAS No. selection
+      form.casNoCodeError = useCheckEmpty(form.casNoCode).isError
+      // dueDateCas is optional for LBA during submission/budget check
+      form.dueDateCasError = false
       form.invoiceVendorNoError = false
       form.invoiceDateError = false
       form.proposalAmountError = false
@@ -702,7 +703,7 @@ const mapDataPostNonPo = () => {
       companyCode: form.companyCode,
       companyName: form.companyName,
       invoiceNo: form.invoiceNo,
-      documentNo: isPettyCash ? (form.cashJournalCode || '') :
+      documentNo: isPettyCash ? ('') :
                   isReimbursement ? (form.invoiceVendorNo || '') :
                   isCreditCard ? (form.proposalAmountVal || '') :
                   isCAS ? (form.taxNoInvoice || '') :
@@ -1344,6 +1345,10 @@ const mapDataCheck = () => {
     if (form.invoiceDate) {
       docDate = moment(form.invoiceDate).format('YYYYMMDD')
     }
+  } else if (form.invoiceType === '4') { // LBA
+    if (form.dueDateCas) {
+      docDate = moment(form.dueDateCas).format('YYYYMMDD')
+    }
   }
 
   let refDocNo = ''
@@ -1361,22 +1366,20 @@ const mapDataCheck = () => {
     refDocNo = form.invoiceNo || form.description || 'REF_DOC'
   }
 
-  // Calculate fiscal year and period from document date
   const fiscalYear = parseInt(docDate.substring(0, 4))
   const fiscalPeriod = parseInt(docDate.substring(4, 6))
 
-  // Determine document type based on invoice type
-  let docType = 'KR' // Default: Vendor Invoice
+  let docType = 'KR'
   if (form.invoiceType === '5') {
-    docType = 'SA' // Petty Cash
+    docType = 'SA'
   } else if (form.invoiceType === '1') {
-    docType = 'KR' // Reimbursement
+    docType = 'KR'
   } else if (form.invoiceType === '2') {
-    docType = 'KR' // Credit Card
+    docType = 'KR'
   } else if (form.invoiceType === '3') {
-    docType = 'KR' // CAS
+    docType = 'KR'
   } else if (form.invoiceType === '4') {
-    docType = 'KR' // LBA
+    docType = 'KR'
   }
 
   const data = {
@@ -1384,7 +1387,7 @@ const mapDataCheck = () => {
       HEADER_TXT: form.taxNoInvoice || '',
       COMP_CODE: form.companyCode,
       DOC_DATE: docDate,
-      PSTNG_DATE: docDate, // Posting date same as document date
+      PSTNG_DATE: docDate,
       FISC_YEAR: fiscalYear,
       FIS_PERIOD: fiscalPeriod,
       DOC_TYPE: docType,
@@ -1460,10 +1463,8 @@ const checkBudget = () => {
 const checkFormBudget = () => {
   let status = false
 
-  // Check if invoice type is Petty Cash (id = '5')
   const isPettyCash = form.invoiceType === '5'
 
-  // Check if at least one document is uploaded (Invoice Document, Tax, Reference Document, or Other Document)
   const hasAtLeastOneDocument =
     form.invoiceDocument !== null ||
     form.tax !== null ||
@@ -1518,7 +1519,7 @@ const checkFormBudget = () => {
     }
 
     if (isLBA) {
-      if (!form.taxNoInvoice || !form.dueDateCas) {
+      if (!form.taxNoInvoice || !form.casNoCode || !form.department) {
         status = true
       }
     }
