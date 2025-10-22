@@ -32,7 +32,7 @@
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label"> Company Code </label>
         <!-- always active textbox for company code -->
-        <input v-model="form.companyName" class="input" placeholder="" disabled />
+        <input v-model="form.companyCode" class="input" placeholder="" disabled />
       </div>
 
       <!-- CAS No. / Invoice No. -->
@@ -99,7 +99,20 @@
           Cash Journal
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
-        <input v-model="form.notes" class="input" placeholder="" />
+        <v-select
+          v-model="form.cashJournalCode"
+          class="customSelect w-full -ml-[15px]"
+          placeholder="Select"
+          label="description"
+          :reduce="option => option.cashJournalNo"
+          :options="listCashJournal.map(item => ({
+            ...item,
+            description: `${item.cashJournalNo} - ${item.cashJournalName}`
+          }))"
+          @input="updateCashJournalName"
+          appendToBody
+        />
+        <!-- <input v-model="form.notes" class="input" placeholder="" /> -->
       </div>
 
       <div v-if="checkNonPoPettyCash()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
@@ -366,6 +379,7 @@ import DatePicker from '@/components/datePicker/DatePicker.vue'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useLoginStore } from '@/stores/views/login'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
+import { get } from 'lodash'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const invoiceLoginApi = useLoginStore()
@@ -379,6 +393,9 @@ const listInvoiceTypeNonPo = computed(() => invoiceMasterApi.invoiceNonPoType)
 const paymentMethodList = computed(() => invoiceMasterApi.paymentMethodList)
 const userData = computed(() => invoiceLoginApi.userData)
 const npwpReportingList = computed(() => invoiceMasterApi.npwpReportingList)
+const listCashJournal = computed(() => invoiceMasterApi.cashJournalList)
+
+console.log('listCashJournal', listCashJournal.value)
 
 const remainingDpAmountVal = computed(() => {
   if (form.value.currCode === 'IDR') {
@@ -473,5 +490,9 @@ watch(
 
 onMounted(() => {
   typeForm.value = route.query.type?.toString().toLowerCase() || 'po'
+  invoiceMasterApi.getCompanyCode()
+  // if (form?.companyCode && form?.invoiceType === '5') {
+    invoiceMasterApi.getCashJournal(form.value.companyCode || '')
+  // }
 })
 </script>
