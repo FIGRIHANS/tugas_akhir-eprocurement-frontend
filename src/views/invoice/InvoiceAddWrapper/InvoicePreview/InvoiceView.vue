@@ -170,9 +170,14 @@ const getInvoiceTypeName = () => {
 
 const getCompanyDisplay = () => {
   if (!form?.companyCode) return '-'
-  const idx = companyCodeList.value.findIndex((item) => item.code === form.companyCode)
-  if (idx !== -1) return `${companyCodeList.value[idx].code} - ${companyCodeList.value[idx].name}`
-  return form.companyCode || '-'
+  const companyCodeValue = form.companyCode
+  const item = companyCodeList.value.find((item) => item.code === companyCodeValue)
+  if (item) {
+    const name = item.name || ''
+    if (name.trim().startsWith(item.code)) return name
+    return `${item.code} - ${name}`
+  }
+  return companyCodeValue || '-'
 }
 
 const getCashJournalDisplay = () => {

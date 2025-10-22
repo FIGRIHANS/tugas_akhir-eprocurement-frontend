@@ -51,8 +51,6 @@ export interface formTypes extends documentFormTypes {
   dueDateCasError?: boolean
   proposalAmount: number
   picFinance: string
-  cashJournalCode: string
-  cashJournalName: string
   pettyCashStartDate: string
   pettyCashEndDate: string
   npwpReportingName: string
@@ -91,6 +89,10 @@ export interface formTypes extends documentFormTypes {
   additionalCost: number
   totalGrossAmount: number
   totalNetAmount: number
+
+  cashJournalCodeError?: boolean
+  cashJournalCode: string
+  cashJournalName: string
 
   invoicePoGr: itemsPoGrType[]
   invoicePoGrError?: boolean

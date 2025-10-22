@@ -26,7 +26,7 @@
     </div>
     <div v-if="checkNonPoPettyCash()" class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Cash Journal</p>
-      <p class="font-normal text-sm">{{ '-' }}</p>
+      <p class="font-normal text-sm">{{ `${form.cashJournalCode} - ${form.cashJournalName}` || '-' }}</p>
     </div>
     <div class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">{{ checkNonPoCas() ? 'CAS No.' : 'Submitted Document No.' }}</p>
@@ -53,10 +53,7 @@
     <div v-if="checkNonPoPettyCash()" class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Petty Cash Period</p>
       <p class="font-normal text-sm">
-        -
-        <!-- {{
-          form.estimatedPaymentDate ? moment(form.estimatedPaymentDate).format('YYYY/MM/DD') : '-'
-        }} -->
+        {{ (form.pettyCashStartDate || form.pettyCashEndDate) ? `${form.pettyCashStartDate ? moment(form.pettyCashStartDate).format('YYYY/MM/DD') : '-'} - ${form.pettyCashEndDate ? moment(form.pettyCashEndDate).format('YYYY/MM/DD') : '-'}` : '-' }}
       </p>
     </div>
     <div v-if="!checkNonPoLba()" class="flex items-center justify-between gap-[10px]">
