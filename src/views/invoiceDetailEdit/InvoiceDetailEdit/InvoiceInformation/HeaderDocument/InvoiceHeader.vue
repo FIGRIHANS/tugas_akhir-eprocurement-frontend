@@ -99,7 +99,7 @@
           Cash Journal
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
-        <input v-model="form.notes" class="input" placeholder="" />
+        <input v-model="form.cashJournalCode" class="input" placeholder="" :class="{ 'border-danger': form.cashJournalCodeError }" />
       </div>
 
       <div v-if="checkNonPoPettyCash()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">

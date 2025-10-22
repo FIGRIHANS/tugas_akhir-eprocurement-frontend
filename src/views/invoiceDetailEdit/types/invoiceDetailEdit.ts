@@ -53,6 +53,7 @@ export interface formTypes extends documentFormTypes {
   picFinance: string
   cashJournalCode: string
   cashJournalName: string
+  cashJournalCodeError?: boolean
   pettyCashStartDate: string
   pettyCashEndDate: string
   npwpReportingName: string

@@ -196,15 +196,23 @@ const checkVerifikator1 = () => {
   return userData.value.profile.profileId === 3190
 }
 
+const checkNonPoCas = () => {
+  return form.value.invoiceTypeCode === 3
+}
+
+const checkNonPoPettyCash = () => {
+  return form.value.invoiceTypeCode === 5
+}
+
 const checkInvoiceInformation = () => {
   let status = true
-  form.value.invoiceDateError = useCheckEmpty(form.value.invoiceDate).isError
-  form.value.documentNoError = useCheckEmpty(form.value.documentNo).isError
+  form.value.invoiceDateError = !checkNonPoCas() ? useCheckEmpty(form.value.invoiceDate).isError : false
+  form.value.documentNoError = !checkNonPoCas() ? useCheckEmpty(form.value.documentNo).isError : false
   form.value.creditCardBillingError = checkVerifikator1()
     ? useCheckEmpty(form.value.creditCardBillingId).isError
     : false
 
-  form.value.postingDateError = !checkVerifikator1()
+  form.value.postingDateError = !checkVerifikator1() && !checkNonPoCas()
     ? useCheckEmpty(form.value.postingDate).isError
     : false
   form.value.estimatedPaymentDateError = !checkVerifikator1()
@@ -223,6 +231,16 @@ const checkInvoiceInformation = () => {
       Number(form.value.dpAmountDeduction) > Number(form.value.remainingDpAmount)
   }
 
+  if (checkNonPoCas()) {
+    form.value.dueDateCasError = checkNonPoCas() ? useCheckEmpty(form.value.dueDateCas).isError : false
+    form.value.taxNoError = checkNonPoCas() ? useCheckEmpty(form.value.taxNo).isError : false
+    form.value.npwpReportingError = checkNonPoCas() ? useCheckEmpty(form.value.npwpReporting).isError : false
+  }
+
+  // if (checkNonPoPettyCash()) {
+  //   form.value.cashJournalCodeError = 
+  // }
+
   if (
     form.value.invoiceDateError ||
     form.value.postingDateError ||
@@ -231,7 +249,10 @@ const checkInvoiceInformation = () => {
     form.value.paymentMethodError ||
     form.value.transferNewsError ||
     form.value.notesError ||
-    form.value.dpAmountDeductionError
+    form.value.dpAmountDeductionError ||
+    form.value.dueDateCasError ||
+    form.value.taxNoError ||
+    form.value.npwpReportingError
   )
     status = false
   for (const item of form.value.additionalCosts) {
