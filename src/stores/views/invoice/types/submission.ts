@@ -297,9 +297,9 @@ export interface ParamsSubmissionHeaderNonPo {
   assigment?: string
   transferNews?: string
   npwpReporting?: string
-  invoiceDate?: string | null
-  postingDate?: string | null
-  estimatedPaymentDate?: string | null
+  invoiceDate?: string
+  postingDate?: string
+  estimatedPaymentDate?: string
   paymentMethodCode: string
   paymentMethodName: string
   taxNo: string
