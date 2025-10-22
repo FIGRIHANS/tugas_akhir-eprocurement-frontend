@@ -215,6 +215,22 @@ const checkIsPoCC = () => {
   return form.value.invoiceTypeCode === 903
 }
 
+const checkNonPoCas = () => {
+  return form.value.invoiceTypeCode === 3
+}
+
+// const checkNonPoLba = () => {
+//   return form.value.invoiceTypeCode === 4
+// }
+
+// const checkNonPoCc = () => {
+//   return form.value.invoiceTypeCode === 2
+// }
+
+// const checkNonPoPettyCash = () => {
+//   return form.value.invoiceTypeCode === 5
+// }
+
 const checkStatusCode = () => {
   let status = true
   switch (form.value.statusCode) {
@@ -301,15 +317,19 @@ const checkPo = () => {
 }
 
 const checkVerifHeader = () => {
-  const invoiceDateError = useCheckEmpty(form.value.invoiceDate).isError
-  const documentNoError = useCheckEmpty(form.value.documentNo).isError
+  const invoiceDateError = !checkNonPoCas() ? useCheckEmpty(form.value.invoiceDate).isError : false
+  const documentNoError = !checkNonPoCas() ? useCheckEmpty(form.value.documentNo).isError : false
   const creditCardBillingError = checkVerifikator1() ? useCheckEmpty(form.value.creditCardBillingId).isError : false
   
-  const postingDateError = !checkVerifikator1() ? useCheckEmpty(form.value.postingDate).isError : false
+  const postingDateError = !checkVerifikator1() && !checkNonPoCas() ? useCheckEmpty(form.value.postingDate).isError : false
   const estimatedPaymentDateError = !checkVerifikator1() ? useCheckEmpty(form.value.estimatedPaymentDate).isError : false
   const paymentMethodError = !checkVerifikator1() ? useCheckEmpty(form.value.paymentMethodCode).isError : false
   const transferNewsError = !checkVerifikator1() ? useCheckEmpty(form.value.transferNews).isError : false
   const notesError = !checkVerifikator1() ? useCheckEmpty(form.value.notes).isError : false
+
+  const dueDateCasError = checkNonPoCas() ? useCheckEmpty(form.value.dueDateCas).isError : false
+  const taxInvoiceError = checkNonPoCas() ? useCheckEmpty(form.value.taxNo).isError : false
+  const npwpReportingError = checkNonPoCas() ? useCheckEmpty(form.value.npwpReporting).isError : false
 
   if (
     invoiceDateError ||
@@ -319,7 +339,10 @@ const checkVerifHeader = () => {
     paymentMethodError ||
     transferNewsError ||
     creditCardBillingError ||
-    notesError
+    notesError ||
+    dueDateCasError ||
+    taxInvoiceError ||
+    npwpReportingError
   )
     return false
   return true
@@ -497,6 +520,15 @@ const mapDataVerifNonPo = () => {
       currCode: form.value.currCode,
       npwpReporting: form.value.npwpReporting,
       department: form.value.department,
+      casDateReceipt: form.value.casDateReceipt,
+      dueDateCas: form.value.dueDateCas,
+      proposalAmount: form.value.proposalAmount,
+      picFinance: form.value.picFinance,
+      cashJournalCode: form.value.cashJournalCode,
+      cashJournalName: form.value.cashJournalName,
+      pettyCashStartDate: form.value.pettyCashStartDate,
+      pettyCashEndDate: form.value.pettyCashEndDate,
+      npwpReportingName: form.value.npwpReportingName,
     },
     payment: {
       paymentId: form.value.paymentId,
@@ -769,6 +801,15 @@ const setDataDefault = async () => {
     npwpReporting: data?.header.npwpReporting || '',
     remainingDpAmount: data?.header.remainingDPAmount,
     dpAmountDeduction: data?.header.dpAmountDeduction,
+    casDateReceipt: data?.header.casDateReceipt,
+    dueDateCas: data?.header.dueDateCas,
+    proposalAmount: data?.header.proposalAmount,
+    picFinance: data?.header.picFinance,
+    cashJournalCode: data?.header.cashJournalCode,
+    cashJournalName: data?.header.cashJournalName,
+    pettyCashStartDate: data?.header.pettyCashStartDate,
+    pettyCashEndDate: data?.header.pettyCashEndDate,
+    npwpReportingName: data?.header.npwpReportingName,
     paymentId: data?.payment.paymentId || 0,
     bankKey: data?.payment.bankKey || '',
     bankName: data?.payment.bankName || '',
@@ -894,6 +935,15 @@ const setDataDefaultNonPo = () => {
     department: data?.header.department,
     remainingDpAmount: data?.header.remainingDPAmount,
     dpAmountDeduction: data?.header.dpAmountDeduction,
+    casDateReceipt: data?.header.casDateReceipt,
+    dueDateCas: data?.header.dueDateCas,
+    proposalAmount: data?.header.proposalAmount,
+    picFinance: data?.header.picFinance,
+    cashJournalCode: data?.header.cashJournalCode,
+    cashJournalName: data?.header.cashJournalName,
+    pettyCashStartDate: data?.header.pettyCashStartDate,
+    pettyCashEndDate: data?.header.pettyCashEndDate,
+    npwpReportingName: data?.header.npwpReportingName,
     paymentId: data?.payment.paymentId || 0,
     bankKey: data?.payment.bankKey || '',
     bankName: data?.payment.bankName || '',
