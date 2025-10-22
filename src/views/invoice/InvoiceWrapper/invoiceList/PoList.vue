@@ -3,11 +3,7 @@
     <div class="flex justify-between align-items-center gap-[8px]">
       <h1>Invoice PO</h1>
       <div class="flex align-items-center gap-3">
-        <UiInputSearch
-          v-model="search"
-          placeholder="Search"
-          @keypress="goSearch"
-        />
+        <UiInputSearch v-model="search" placeholder="Search" @keypress="goSearch" />
         <FilterList :data="filterForm" @setData="setDataFilter" />
         <button class="btn btn-primary ml-auto" @click="goAdd()">
           <i class="ki-duotone ki-plus-circle"></i>
@@ -23,9 +19,15 @@
             <th
               v-for="(item, index) in columns"
               :key="index"
-              :class="index !== 0 ? 'list__long' : ''"
+              :class="{
+                'list__long ': index !== 0,
+                'cursor-pointer': item,
+                '!text-blue-500': item === sortColumnName && sortBy !== '',
+              }"
+              @click="sortColumn(item)"
             >
               {{ item }}
+              <i v-if="item" class="ki-filled ki-arrow-up-down"></i>
             </th>
           </tr>
         </thead>
@@ -127,6 +129,7 @@ import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { useFormatIdr } from '@/composables/currency'
 import type { ListPoTypes } from '@/stores/views/invoice/types/submission'
 import moment from 'moment'
+import { cloneDeep } from 'lodash'
 
 const FilterList = defineAsyncComponent(() => import('./FilterList.vue'))
 
@@ -136,9 +139,11 @@ const search = ref<string>('')
 const currentPage = ref<number>(1)
 const pageSize = ref<number>(10)
 const list = ref<ListPoTypes[]>([])
+const sortBy = ref<string>('')
+const sortColumnName = ref<string>('')
 
 const filterForm = reactive<filterListTypes>({
-  status: '1',
+  status: '',
   date: '',
   companyCode: '',
   invoiceType: '',
@@ -174,9 +179,9 @@ const colorBadge = (statusCode: number) => {
   return list[statusCode]
 }
 
-const setListPo = () => {
+const setList = (listData: ListPoTypes[]) => {
   const result: ListPoTypes[] = []
-  for (const [index, item] of poList.value.entries()) {
+  for (const [index, item] of listData.entries()) {
     const start = currentPage.value * pageSize.value - pageSize.value
     const end = currentPage.value * pageSize.value - 1
     if (index >= start && index <= end) {
@@ -188,7 +193,7 @@ const setListPo = () => {
 
 const setPage = (value: number) => {
   currentPage.value = value
-  setListPo()
+  sortColumn(null)
 }
 
 const goView = (data: ListPoTypes) => {
@@ -215,14 +220,14 @@ const callList = () => {
   list.value = []
   invoiceApi
     .getListPo({
-      statusCode: filterForm.status === '0' || filterForm.status ? Number(filterForm.status) : 1,
+      statusCode: filterForm.status === '0' || filterForm.status ? Number(filterForm.status) : null,
       companyCode: filterForm.companyCode,
       invoiceTypeCode: Number(filterForm.invoiceType),
       invoiceDate: filterForm.date,
       searchText: search.value,
     })
     .finally(() => {
-      setListPo()
+      sortColumn(null)
     })
 }
 
@@ -247,6 +252,71 @@ const goAdd = () => {
       type: 'po',
     },
   })
+}
+
+const sortColumn = (columnName: string | null) => {
+  const list = {
+    'Submitted Document No': 'invoiceNo',
+    Status: 'statusName',
+    'Vendor Name': 'vendorName',
+    'Invoice Vendor No': 'documentNo',
+    'Company Code': 'companyCode',
+    'Invoice Non PO Type': 'invoiceTypeName',
+    'Invoice Date': 'invoiceDate',
+    'Total Gross Amount': 'totalGrossAmount',
+    'Total Net Amount': 'totalNetAmount',
+    'Estimated Payment Date': 'estimatedPaymentDate',
+  } as { [key: string]: string }
+
+  const roleSort = ['asc', 'desc', '']
+
+  const listData = cloneDeep(poList.value)
+  let result: ListPoTypes[] = []
+
+  if (columnName) {
+    if (sortColumnName.value !== columnName) sortBy.value = ''
+    sortColumnName.value = columnName
+
+    const indexSort = roleSort.findIndex((item) => item === sortBy.value)
+    if (indexSort === -1) return setList(poList.value)
+    sortBy.value = indexSort + 1 === roleSort.length ? roleSort[0] : roleSort[indexSort + 1]
+
+    if (!sortBy.value) return setList(poList.value)
+  }
+
+  const name = columnName || sortColumnName.value
+
+  if (name === 'Total Gross Amount' || name === 'Total Net Amount') {
+    result = listData.sort((a, b) => {
+      if (sortBy.value === 'asc') {
+        return a[list[name]] - b[list[name]]
+      } else {
+        return b[list[name]] - a[list[name]]
+      }
+    })
+  } else if (name === 'Invoice Date' || name === 'Estimated Payment Date') {
+    result = listData.sort((a, b) => {
+      const convA = a[list[name]] ? new Date(a[list[name]]).getTime() : 0
+      const convB = b[list[name]] ? new Date(b[list[name]]).getTime() : 0
+      if (sortBy.value === 'asc') {
+        return convA - convB
+      } else {
+        return convB - convA
+      }
+    })
+  } else {
+    result = listData.sort((a, b) => {
+      const convA = a[list[name]] ? a[list[name]] : ''
+      const convB = b[list[name]] ? b[list[name]] : ''
+      if (sortBy.value === 'asc') {
+        return convA.localeCompare(convB)
+      } else {
+        return convB.localeCompare(convA)
+      }
+    })
+  }
+
+  return setList(result)
 }
 
 onMounted(() => {

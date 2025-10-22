@@ -17,7 +17,7 @@
 
       <div :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
         <p class="text-xs font-normal text-gray-700">Company Code</p>
-        <p class="text-sm font-medium">{{ getCompanyName() || '-' }}</p>
+        <p class="text-sm font-medium">{{ getCompanyDisplay() }}</p>
       </div>
 
       <div v-if="isPettyCash && form.reference" :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
@@ -27,7 +27,7 @@
 
       <div v-if="isPettyCash" :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
         <p class="text-xs font-normal text-gray-700">Cash Journal</p>
-        <p class="text-sm font-medium">{{ form.cashJournalCode || '-' }}</p>
+        <p class="text-sm font-medium">{{ getCashJournalDisplay() }}</p>
       </div>
 
       <div v-if="isPettyCash" :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
@@ -121,6 +121,7 @@ const typeForm = ref<string>('')
 const dpTypeList = computed(() => invoiceMasterApi.dpType)
 const listInvoiceTypePo = computed(() => invoiceMasterApi.invoicePoType)
 const companyCodeList = computed(() => invoiceMasterApi.companyCode)
+const listCashJournal = computed(() => invoiceMasterApi.cashJournalList)
 const listInvoiceTypeNonPo = computed(() => invoiceMasterApi.invoiceNonPoType)
 
 const isPettyCash = computed(() => form?.invoiceType === '5')
@@ -167,10 +168,23 @@ const getInvoiceTypeName = () => {
   }
 }
 
-const getCompanyName = () => {
-  const getIndex = companyCodeList.value.findIndex((item) => item.code === form?.companyCode)
-  if (getIndex !== -1) return companyCodeList.value[getIndex].name
+const getCompanyDisplay = () => {
+  if (!form?.companyCode) return '-'
+  const idx = companyCodeList.value.findIndex((item) => item.code === form.companyCode)
+  if (idx !== -1) return `${companyCodeList.value[idx].code} - ${companyCodeList.value[idx].name}`
+  return form.companyCode || '-'
 }
+
+const getCashJournalDisplay = () => {
+  if (!form?.cashJournalCode) return '-'
+  const idx = listCashJournal.value.findIndex((item) => item.cashJournalNo === form.cashJournalCode)
+  if (idx !== -1) return `${listCashJournal.value[idx].cashJournalNo} - ${listCashJournal.value[idx].cashJournalName}`
+  return form.cashJournalCode || '-'
+}
+
+// Reference helpers here so TypeScript/compiler knows they're used (template usage isn't detected by static checker)
+void getCompanyDisplay
+void getCashJournalDisplay
 
 onMounted(() => {
   typeForm.value = route.query.type?.toString().toLowerCase() || 'po'

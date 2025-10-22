@@ -26,7 +26,7 @@ export const useUserProfileStore = defineStore('userProfile', () => {
     error.value = null
 
     try {
-      const response: ApiResponse<IProfile[]> = await userApi.post('/profile/getall')
+      const response: ApiResponse<IProfile[]> = await userApi.get('/profile/getall')
 
       if (response.data.result.isError) {
         error.value = response.data.result.message || 'An unknown error occurred.'

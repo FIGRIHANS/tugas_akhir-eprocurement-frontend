@@ -108,8 +108,12 @@ export type NpwpReportingTypes = {
 }
 
 export type CasNoTypes = {
-  code: string
-  name: string
+  documentNo: string
+  documentYear: number
+  companyCode: string
+  casNo: string
+  vendorNo: string
+  amount: number
 }
 
 export type CashJournalTypes = {

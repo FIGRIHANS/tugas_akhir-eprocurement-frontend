@@ -80,7 +80,7 @@ const filteredUsers = computed(() => {
             </tr>
             <tr v-for="user in filteredUsers" :key="user.id">
               <td>
-                <ActionButtonView />
+                <ActionButtonView :user-data="user" />
               </td>
               <td>{{ user.employeeName }}</td>
               <td>{{ user.userName }}</td>

@@ -20,9 +20,13 @@
                 :key="index"
                 :class="{
                   'pending__column--auto': index <= 1,
+                  'cursor-pointer': item,
+                  '!text-blue-500': item === sortColumnName && sortBy !== '',
                 }"
+                @click="sortColumn(item)"
               >
                 {{ item }}
+                <i v-if="item" class="ki-filled ki-arrow-up-down"></i>
               </th>
             </tr>
           </thead>
@@ -108,7 +112,7 @@
                     {{ parent.statusName }}
                   </span>
                 </td>
-
+                <td>{{ parent.vendorName || '-' }}</td>
                 <td>{{ parent.invoiceTypeName || '-' }}</td>
                 <td>{{ parent.companyCode || '-' }}</td>
                 <td>{{ useFormatIdr(parent.whtBaseAmount) || '-' }}</td>
@@ -195,6 +199,7 @@ import type { ListPoTypes } from '@/stores/views/invoice/types/verification'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { useFormatIdr } from '@/composables/currency'
 import moment from 'moment'
+import { cloneDeep } from 'lodash'
 
 const ModalDetailApproval = defineAsyncComponent(() => import('./DetailApproval.vue'))
 const FilterList = defineAsyncComponent(() => import('./FilterList.vue'))
@@ -212,6 +217,8 @@ const pageSize = ref<number>(10)
 const list = ref<ListPoTypes[]>([])
 const viewDetailId = ref<string>('')
 const isLoadingSap = ref<boolean>(false)
+const sortBy = ref<string>('')
+const sortColumnName = ref<string>('')
 
 const filterForm = reactive<filterListTypes>({
   status: 2,
@@ -226,6 +233,7 @@ const columns = ref<string[]>([
   'Submitted Document No',
   'Description',
   'Status',
+  'Vendor Name',
   'Invoice Type',
   'Company Code',
   'Base Amount',
@@ -254,7 +262,7 @@ const colorBadge = (statusCode: number) => {
 
 const setPage = (value: number) => {
   currentPage.value = value
-  setList()
+  sortColumn(null)
 }
 
 const goSearch = (event: KeyboardEvent) => {
@@ -312,9 +320,9 @@ const openDetailInvoiceEditSendSap = (invoiceId: string) => {
   })
 }
 
-const setList = () => {
+const setList = (listData: ListPoTypes[]) => {
   const result: ListPoTypes[] = []
-  for (const [index, item] of verifList.value.entries()) {
+  for (const [index, item] of listData.entries()) {
     const start = currentPage.value * pageSize.value - pageSize.value
     const end = currentPage.value * pageSize.value - 1
     if (index >= start && index <= end) {
@@ -335,7 +343,7 @@ const callList = () => {
       searchText: search.value,
     })
     .finally(() => {
-      setList()
+      sortColumn(null)
     })
 }
 
@@ -388,6 +396,80 @@ const openFailedSap = () => {
   const idModal = document.querySelector('#failed_send_sap_modal')
   const modal = KTModal.getInstance(idModal as HTMLElement)
   modal.show()
+}
+
+const sortColumn = (columnName: string | null) => {
+  const list = {
+    'Submitted Document No': 'invoiceNo',
+    Status: 'statusName',
+    'Vendor Name': 'vendorName',
+    'Invoice Type': 'invoiceTypeName',
+    'Company Code': 'companyCode',
+    'Base Amount': 'whtBaseAmount',
+    'VAT Ammount': 'vatAmount',
+    'WHT Amount': 'whtAmount',
+    'Total Net Amount': 'totalNetAmount',
+    'No Tax Invoice': 'taxNo',
+    'Invoice Vendor No.': 'documentNo',
+    'Estimated Payment Date': 'estimatedPaymentDate',
+    'Invoice Submission Date': 'invoiceDate',
+    Description: 'notes',
+  } as { [key: string]: string }
+
+  const roleSort = ['asc', 'desc', '']
+
+  const listData = cloneDeep(verifList.value)
+  let result: ListPoTypes[] = []
+
+  if (columnName) {
+    if (sortColumnName.value !== columnName) sortBy.value = ''
+    sortColumnName.value = columnName
+
+    const indexSort = roleSort.findIndex((item) => item === sortBy.value)
+    if (indexSort === -1) return setList(verifList.value)
+    sortBy.value = indexSort + 1 === roleSort.length ? roleSort[0] : roleSort[indexSort + 1]
+
+    if (!sortBy.value) return setList(verifList.value)
+  }
+
+  const name = columnName || sortColumnName.value
+
+  if (
+    name === 'Base Amount' ||
+    name === 'VAT Ammount' ||
+    name === 'WHT Amount' ||
+    name === 'Total Net Amount'
+  ) {
+    result = listData.sort((a, b) => {
+      if (sortBy.value === 'asc') {
+        return a[list[name]] - b[list[name]]
+      } else {
+        return b[list[name]] - a[list[name]]
+      }
+    })
+  } else if (name === 'Invoice Submission Date' || name === 'Estimated Payment Date') {
+    result = listData.sort((a, b) => {
+      const convA = a[list[name]] ? new Date(a[list[name]]).getTime() : 0
+      const convB = b[list[name]] ? new Date(b[list[name]]).getTime() : 0
+      if (sortBy.value === 'asc') {
+        return convA - convB
+      } else {
+        return convB - convA
+      }
+    })
+  } else {
+    result = listData.sort((a, b) => {
+      const convA = a[list[name]] ? a[list[name]] : ''
+      const convB = b[list[name]] ? b[list[name]] : ''
+      if (sortBy.value === 'asc') {
+        return convA.localeCompare(convB)
+      } else {
+        return convB.localeCompare(convA)
+      }
+    })
+  }
+
+  return setList(result)
 }
 
 onMounted(() => {

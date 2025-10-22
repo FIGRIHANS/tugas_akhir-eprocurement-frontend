@@ -102,7 +102,6 @@
         <input v-model="form.notes" class="input" placeholder="" />
       </div>
 
-      <!-- Petty Cash Period - range picker limited to selected month (only for Petty Cash) -->
       <div v-if="checkNonPoPettyCash()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Petty Cash Period
@@ -127,7 +126,7 @@
           :disabled="checkVerifikator1() || route.query.isSendSap === 'true'"
         />
       </div>
-  
+
       <!-- Estimated Payment Date -->
       <div
         v-if="!checkNonPoLba()"
