@@ -47,7 +47,7 @@ export const useEmployeeStore = defineStore('employeeStore', () => {
     errorEmployee.value = null
 
     try {
-      const response: ApiResponse<unknown> = await userApi.get(`/employee/${employeeId}`)
+      const response: ApiResponse<unknown> = await userApi.get(`/employee?EmployeeId=${employeeId}`)
 
       if (response.data.result.isError) {
         errorEmployee.value = response.data.result.message
