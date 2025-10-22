@@ -21,7 +21,13 @@
             <UiIcon variant="duotone" name="eye" />
             Detail Employee
           </UiButton>
-          <UiButton variant="light" class="border-none" :outline="true" size="md">
+          <UiButton
+            variant="light"
+            class="border-none"
+            :outline="true"
+            size="md"
+            @click="handleEditEmployee(props.employeeData)"
+          >
             <UiIcon variant="duotone" name="pencil" />
 
             Edit Employee
@@ -124,6 +130,15 @@ const isDeleting = ref(false)
 const handleDetailEmployee = (employee: IEmployee) => {
   router.push({
     name: 'user-management-master-employee-detail',
+    params: {
+      id: employee.employeeId,
+    },
+  })
+}
+
+const handleEditEmployee = (employee: IEmployee) => {
+  router.push({
+    name: 'user-management-master-employee-edit',
     params: {
       id: employee.employeeId,
     },
