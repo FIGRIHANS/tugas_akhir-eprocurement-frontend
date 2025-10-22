@@ -6,7 +6,7 @@ import IconPlusCircle from '@/assets/svg_icons/ic_plus_circle.svg'
 
 import { onMounted, ref } from 'vue'
 import EmployeeMenuButton from '@/components/userManagement/EmployeeMenuButton.vue'
-import LPagination from '@/components/pagination/LPagination.vue'
+// import LPagination from '@/components/pagination/LPagination.vue'
 import { useRouter } from 'vue-router'
 import { useEmployeeStore } from '@/stores/user-management/employee'
 
@@ -64,7 +64,7 @@ const handleAddEmployee = () => {
           <tbody>
             <tr v-for="item in employeeStore.employees" :key="item.id">
               <td class="flex items-center gap-[24px]">
-                <EmployeeMenuButton id="1" />
+                <EmployeeMenuButton :employee-data="item" />
               </td>
               <td>{{ item?.employeeId ?? '-' }}</td>
               <td>{{ item?.employeeName ?? '-' }}</td>
