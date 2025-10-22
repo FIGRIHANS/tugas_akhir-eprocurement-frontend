@@ -5,7 +5,7 @@
       <div v-for="(item, index) in list" :key="index" class="flex items-center flex-wrap lg:flex-nowrap gap-2.5">
         <label class="form-label max-w-32">
           {{ item.title }}
-          <span v-if="index === 0 || (item.varName === 'tax' && (formInject?.invoiceType === '3' || formInject?.invoiceType === '4'))" class="text-red-500 ml-[4px]">*</span>
+          <span v-if="(item.varName === 'invoiceDocument' && formInject?.invoiceType !== '2') || (item.varName === 'tax' && (formInject?.invoiceType === '3' || formInject?.invoiceType === '4'))" class="text-red-500 ml-[4px]">*</span>
         </label>
         <pdfUpload ref="pdfUploadRef" v-show="!form[item.varName as keyof typeof form]"
           :error="index === 0 && !!formInject?.invoiceDocumentError && !hasAnyDocument"

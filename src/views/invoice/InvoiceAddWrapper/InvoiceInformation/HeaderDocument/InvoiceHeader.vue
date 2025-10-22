@@ -165,10 +165,21 @@
       <div v-if="isCreditCard" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Proposal Amount
-          <span class="text-red-500 ml-[4px]">*</span>
+          <span class="text-red-500 ml-[4px]" v-if="(form.status === 0 || form.status === -1 || form.status === 5) && !loginApi.isVendor">*</span>
         </label>
-        <input v-model="form.proposalAmountVal" class="input" placeholder=""
-          :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5" />
+        <!--
+          We keep a formatted display value for the input (proposalAmountDisplay) which shows thousand separators.
+          The actual numeric value (without dots) is stored in form.proposalAmountVal for backend.
+        -->
+        <input
+          v-model="proposalAmountDisplay"
+          @input="onProposalInput"
+          @blur="onProposalBlur"
+          @paste.prevent="onProposalPaste"
+          class="input"
+          placeholder=""
+          :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
+        />
       </div>
 
       <div v-if="isReimbursement" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
@@ -332,6 +343,50 @@ const remainingDpAmountVal = computed(() => {
     return useFormatUsd(form.remainingDpAmount)
   }
 })
+
+// Proposal amount display (with thousand separator) and handlers
+const proposalAmountDisplay = ref('')
+
+const formatWithDots = (value: string | number) => {
+  if (value === null || value === undefined || value === '') return ''
+  const digits = String(value).replace(/\D+/g, '')
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+}
+
+const unformat = (value: string) => {
+  if (!value) return ''
+  return String(value).replace(/\./g, '')
+}
+
+const onProposalInput = (e: Event) => {
+  const target = e.target as HTMLInputElement
+  // allow only digits by filtering non-digit characters
+  const onlyDigits = target.value.replace(/\D+/g, '')
+  proposalAmountDisplay.value = formatWithDots(onlyDigits)
+  // keep raw numeric value in form (no dots) for backend
+  if (form) form.proposalAmountVal = onlyDigits
+}
+
+const onProposalBlur = () => {
+  // ensure display is formatted
+  proposalAmountDisplay.value = formatWithDots(unformat(proposalAmountDisplay.value))
+}
+
+const onProposalPaste = (e: ClipboardEvent) => {
+  const pasted = e.clipboardData?.getData('text') || ''
+  const digits = pasted.replace(/\D+/g, '')
+  proposalAmountDisplay.value = formatWithDots(digits)
+  if (form) form.proposalAmountVal = digits
+}
+
+// initialize display from form value when component mounts or form changes
+watch(
+  () => form?.proposalAmountVal,
+  (val) => {
+    proposalAmountDisplay.value = formatWithDots(val || '')
+  },
+  { immediate: true }
+)
 
 const checkPo = () => {
   return typeForm.value === 'po'
