@@ -35,21 +35,21 @@
         <input v-model="form.companyName" class="input" placeholder="" disabled />
       </div>
 
-      <!-- Invoice No. -->
-      <div v-if="!checkNonPoCas()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <!-- CAS No. / Invoice No. -->
+      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
-          Invoice No.
+          {{ checkNonPoCas() ? 'CAS No.' : 'Invoice No.' }}
         </label>
         <input v-model="form.invoiceNo" class="input" placeholder="" disabled />
       </div>
 
       <!-- CAS No. -->
       <div
-        v-if="checkNonPoCas() || checkNonPoLba()"
+        v-if="checkNonPoLba()"
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
       >
         <label class="form-label"> CAS No. </label>
-        <input v-model="form.invoiceNo" class="input" placeholder="" disabled />
+        <input v-model="form.cashJournalCode" class="input" placeholder="" disabled />
       </div>
 
       <!-- Invoice Date -->
@@ -163,8 +163,8 @@
           Due Date CAS
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
-        <input v-if="checkApproval3()" v-model="form.estimatedPaymentDate" class="input" placeholder="" disabled />
-        <DatePicker v-else v-model="form.estimatedPaymentDate" format="yyyy/MM/dd" :error="form.estimatedPaymentDateError" class="w-full -ml-[15px]" teleport />
+        <input v-if="checkApproval3()" v-model="form.dueDateCas" class="input" placeholder="" disabled />
+        <DatePicker v-else v-model="form.dueDateCas" format="yyyy/MM/dd" :error="form.dueDateCasError" class="w-full -ml-[15px]" teleport />
       </div>
 
       <!-- Remaning CAS Receipt Date -->

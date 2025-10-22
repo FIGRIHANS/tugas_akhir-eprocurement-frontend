@@ -46,6 +46,17 @@ export interface formTypes extends documentFormTypes {
   dpAmountDeductionError?: boolean
   creditCardBillingId: string
   creditCardBillingError?: boolean
+  casDateReceipt: string
+  dueDateCas: string
+  dueDateCasError?: boolean
+  proposalAmount: number
+  picFinance: string
+  cashJournalCode: string
+  cashJournalName: string
+  pettyCashStartDate: string
+  pettyCashEndDate: string
+  npwpReportingName: string
+  pettyCashPeriod?: string | Date | Array<string | Date>
   paymentId: number
   bankKey: string
   bankKeyIdError?: boolean
@@ -73,11 +84,6 @@ export interface formTypes extends documentFormTypes {
   vendorName: string
   npwp: string
   vendorAddress: string
-
-  // Petty Cash fields
-  reference: string
-  cashJournalCode: string
-  pettyCashPeriod?: string | Date | Array<string | Date>
 
   subtotal: number
   vatAmount: number

@@ -38,6 +38,15 @@ export interface formTypes extends documentFormTypes {
   bankAccountNo: string
   bankCountryCode: string
   department?: string
+  casDateReceipt: string
+  dueDateCas: string
+  proposalAmount: number
+  picFinance: string
+  cashJournalCode: string
+  cashJournalName: string
+  pettyCashStartDate: string
+  pettyCashEndDate: string
+  npwpReportingName: string
 
   vendorId: string
   vendorName: string
