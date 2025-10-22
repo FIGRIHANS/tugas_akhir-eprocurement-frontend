@@ -491,8 +491,8 @@ watch(
 onMounted(() => {
   typeForm.value = route.query.type?.toString().toLowerCase() || 'po'
   invoiceMasterApi.getCompanyCode()
-  // if (form?.companyCode && form?.invoiceType === '5') {
+  if (form?.value.companyCode && form?.value.invoiceTypeCode === 5) {
     invoiceMasterApi.getCashJournal(form.value.companyCode || '')
-  // }
+  }
 })
 </script>
