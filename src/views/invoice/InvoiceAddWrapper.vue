@@ -373,7 +373,11 @@ const checkInvoiceInformation = () => {
   const isLBA = form.invoiceType === '4'
 
   if (!isPettyCash) {
-    form.invoiceDocumentError = !hasAtLeastOneDocument
+    if (isCreditCard) {
+      form.invoiceDocumentError = false
+    } else {
+      form.invoiceDocumentError = !hasAtLeastOneDocument
+    }
 
     if (isReimbursement) {
       form.invoiceVendorNoError = useCheckEmpty(form.invoiceVendorNo).isError
@@ -807,18 +811,18 @@ const goNext = () => {
     if (route.query.type === 'nonpo') {
       const submissionData = mapDataPostNonPo()
 
-      console.log('=== DEBUG INVOICE NON-PO SUBMISSION ===')
-      console.log('Invoice Type:', form.invoiceType)
-      console.log('Full Submission Data:', JSON.stringify(submissionData, null, 2))
-      console.log('Header:', submissionData.header)
-      console.log('Vendor:', submissionData.vendor)
-      console.log('Payment:', submissionData.payment)
-      console.log('Calculation:', submissionData.calculation)
-      console.log('CostExpenses Count:', submissionData.costExpenses?.length)
-      console.log('CostExpenses:', submissionData.costExpenses)
-      console.log('Documents Count:', submissionData.documents?.length)
-      console.log('AlternativePay:', submissionData.alternativePay)
-      console.log('=======================================')
+    console.log('=== DEBUG INVOICE NON-PO SUBMISSION ===')
+    console.log('Invoice Type:', form.invoiceType)
+    console.log('Full Submission Data:', JSON.stringify(submissionData, null, 2))
+    console.log('Header:', submissionData.header)
+    console.log('Vendor:', submissionData.vendor)
+    console.log('Payment:', submissionData.payment)
+    console.log('Calculation:', submissionData.calculation)
+    console.log('CostExpenses Count:', submissionData.costExpenses?.length)
+    console.log('CostExpenses:', submissionData.costExpenses)
+    console.log('Documents Count:', submissionData.documents?.length)
+    console.log('AlternativePay:', submissionData.alternativePay)
+    console.log('=======================================')
 
       invoiceApi
         .postSubmissionNonPo(submissionData)
@@ -1428,15 +1432,15 @@ const checkBudget = () => {
   invoiceApi
     .postCheckBudget(data)
     .then((response) => {
-      console.log('✅ Budget Check Success!')
-      console.log('Response:', response)
+  console.log('✅ Budget Check Success!')
+  console.log('Response:', response)
 
       const idModal = document.querySelector('#success_budget_check_modal')
       const modal = KTModal.getInstance(idModal as HTMLElement)
       if (modal) {
         modal.show()
       } else {
-        console.error('Success modal not found')
+    console.error('Success modal not found')
       }
     })
     .catch((error) => {
@@ -1455,7 +1459,7 @@ const checkBudget = () => {
       if (modal) {
         modal.show()
       } else {
-        console.error('Failed modal not found')
+  console.error('Failed modal not found')
       }
     })
 }
@@ -1495,7 +1499,8 @@ const checkFormBudget = () => {
       !form.description ||
       !form.department ||
       form.invoiceItem.length === 0 ||
-      !hasAtLeastOneDocument
+      // skip document requirement for Credit Card
+      (!isCreditCard && !hasAtLeastOneDocument)
     ) {
       status = true
     }
