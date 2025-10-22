@@ -2,7 +2,6 @@ import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import vendorApi from '@/core/utils/vendorApi'
 import generalApi from '@/core/utils/generalApi'
-import invoiceApi from '@/core/utils/invoiceApi'
 
 import type { ApiResponse } from '@/core/type/api'
 import type {
@@ -83,39 +82,6 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
 
     return response.data.result
   }
-
-  const getCasNo = async (companyCode: string, vendorId?: string, searchText?: string) => {
-    const url = `/invoice/invoice/check-cas`
-
-    const requestBody = {
-      REQUEST: {
-        SUPPLIER_FROM_PORTAL: vendorId || companyCode,
-        ...(searchText && { searchText })
-      }
-    }
-
-    try {
-      const response: ApiResponse<CasNoTypes[]> = await invoiceApi.post(url, requestBody)
-      casNoCode.value = response.data.result.content || []
-      return response.data.result
-    } catch (error) {
-      casNoCode.value = []
-
-      if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as { response?: { status?: number; data?: unknown } }
-        if (axiosError.response?.status === 422) {
-          console.warn('CAS No data not found')
-        } else {
-          console.error('Error fetching CAS No:', error)
-        }
-      } else {
-        console.error('Error fetching CAS No:', error)
-      }
-
-      return { content: [], totalElements: 0 }
-    }
-  }
-
 
   const getDpTypes = async () => {
     const response: ApiResponse<DpTypes[]> = await generalApi.get(`/lookup/dp-type`)
@@ -281,7 +247,6 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
     getCostCenter,
     getMatrixApproval,
     getNpwpReporting,
-    getCasNo,
     getCashJournal,
   }
 })

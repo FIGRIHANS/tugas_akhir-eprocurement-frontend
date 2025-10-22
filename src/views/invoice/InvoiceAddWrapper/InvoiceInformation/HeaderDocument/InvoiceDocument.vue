@@ -5,7 +5,10 @@
       <div v-for="(item, index) in list" :key="index" class="flex items-center flex-wrap lg:flex-nowrap gap-2.5">
         <label class="form-label max-w-32">
           {{ item.title }}
-          <span v-if="index === 0" class="text-red-500 ml-[4px]">*</span>
+          <span
+            v-if="(item.varName === 'invoiceDocument' && formInject?.invoiceType !== '2' && formInject?.invoiceType !== '3' && formInject?.invoiceType !== '5') || (item.varName === 'tax' && (formInject?.invoiceType === '3' || formInject?.invoiceType === '4'))"
+            class="text-red-500 ml-[4px]"
+          >*</span>
         </label>
         <pdfUpload ref="pdfUploadRef" v-show="!form[item.varName as keyof typeof form]"
           :error="index === 0 && !!formInject?.invoiceDocumentError && !hasAnyDocument"
@@ -20,7 +23,7 @@
         </div>
       </div>
       <p v-if="formInject?.invoiceDocumentError && !hasAnyDocument" class="text-red-500 text-xs -mt-8">
-        * At least one document must be uploaded
+        {{ getErrorMessage }}
       </p>
     </div>
   </div>
@@ -40,14 +43,29 @@ const form = reactive<documentFormTypes>({
   otherDocument: null
 })
 
-// Check if at least one document is uploaded
 const hasAnyDocument = computed(() => {
+  if (formInject?.invoiceType === '3') {
+    return form.tax !== null
+  }
+  if (formInject?.invoiceType === '4') {
+    return form.invoiceDocument !== null && form.tax !== null
+  }
   return (
     form.invoiceDocument !== null ||
     form.tax !== null ||
     form.referenceDocument !== null ||
     form.otherDocument !== null
   )
+})
+
+const getErrorMessage = computed(() => {
+  if (formInject?.invoiceType === '3') {
+    return '* Tax Document must be uploaded'
+  }
+  if (formInject?.invoiceType === '4') {
+    return '* Both Invoice Document and Tax Document must be uploaded'
+  }
+  return '* At least one document must be uploaded'
 })
 
 const list = ref<listFormTypes[]>([

@@ -170,11 +170,12 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
     return response.data
   }
 
-  const getCasNo = async (vendorId: string) => {
+  const getCasNo = async (vendorId: string, companyCode: string) => {
     try {
       const requestBody = {
         REQUEST: {
-          SUPPLIER_FROM_PORTAL: vendorId
+          SUPPLIER_FROM_PORTAL: vendorId,
+          COMPANY_CODE: companyCode
         }
       }
 
@@ -201,7 +202,7 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
         return []
       }
 
-      const mappedData = response.data.response || []
+      const mappedData = (response.data.response || []).filter(item => item.casNo && item.casNo.trim() !== '')
       casNoCode.value = mappedData
       return mappedData
 
