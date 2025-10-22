@@ -9,7 +9,8 @@
             class="text-red-500 ml-[4px]">*</span>
         </label>
         <template v-if="checkIsNonPo()">
-          <select v-model="form.invoiceType" class="select" :class="{ 'border-danger': form.invoiceTypeError }" >
+          <select v-model="form.invoiceType" class="select" :class="{
+             'border-danger': form.invoiceTypeError }" >
             <option v-for="item of invoiceTypeNonPo" :key="item.id" :value="item.id">
               {{ item.name }}
             </option>
@@ -61,13 +62,6 @@
         </select>
       </div>
 
-      <div v-if="isPettyCash" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-        <label class="form-label">
-          Reference
-        </label>
-        <input v-model="form.reference" class="input" placeholder="Auto Generated Number" disabled />
-      </div>
-
       <div v-if="checkPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Submitted Document No.
@@ -110,10 +104,13 @@
         <v-select
           v-model="form.cashJournalCode"
           class="customSelect w-full -ml-[15px]"
-          label="cashJournalName"
+          label="description"
           placeholder="Select"
           :reduce="(option: any) => option.cashJournalNo"
-          :options="listCashJournal"
+          :options="listCashJournal.map(item => ({
+            ...item,
+            description: `${item.cashJournalNo} - ${item.cashJournalName}`
+          }))"
           :class="{ 'error-select': form.cashJournalCodeError }"
           :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
           appendToBody
@@ -144,17 +141,21 @@
           v-else-if="isLBA"
           v-model="form.casNoCode"
           class="customSelect w-full -ml-[15px]"
-          label="name"
+          label="description"
           placeholder="Select"
-          :reduce="(option: any) => option.code"
-          :options="casNoCode"
+          :reduce="(option: any) => option.casNo"
+          :options="casNoCode.map(item => ({
+            ...item,
+            description: item.casNo
+          }))"
           :class="{ 'error-select': form.casNoCodeError}"
           :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
+          @input="updateCasNoName"
           appendToBody
         ></v-select>
       </div>
 
-      <div v-if="isReimbursement || isCreditCard || isLBA" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div v-if="isReimbursement || isCreditCard || isLBA || isPettyCash" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Submitted Document No.
         </label>
@@ -301,16 +302,6 @@ const invoiceTypeNonPo = ref([
 
 const currencyList = computed(() => {
   return invoiceMasterApi.currency
-  // if (form?.invoicePoGr.length === 0 || !form?.invoicePoGr) {
-  //   return []
-  // } else {
-  //   const result = []
-  //   for (const item of form.invoicePoGr) {
-  //     const check = invoiceMasterApi.currency.findIndex((subItem) => subItem.code === item.currency)
-  //     if (check !== -1) result.push(item.currency)
-  //   }
-  //   return result
-  // }
 })
 const companyCodeList = computed(() => invoiceMasterApi.companyCode)
 const dpTypeList = computed(() => invoiceMasterApi.dpType)
@@ -324,6 +315,15 @@ const isCreditCard = computed(() => form?.invoiceType === '2')
 const isCAS = computed(() => form?.invoiceType === '3')
 const isLBA = computed(() => form?.invoiceType === '4')
 const isPettyCash = computed(() => form?.invoiceType === '5')
+
+const updateCasNoName = (option: string) => {
+  if (option && form) {
+    const selectedItem = casNoCode.value.find(item => item.casNo === option)
+    if (selectedItem) {
+      form.casNoName = selectedItem.casNo
+    }
+  }
+}
 
 const remainingDpAmountVal = computed(() => {
   if (form.currency === 'IDR') {
@@ -367,12 +367,12 @@ watch(
 
     if (form?.cashJournalCode && listCashJournal.value.length > 0) {
       const getIndex = listCashJournal.value.findIndex((item) => item.cashJournalNo === form.cashJournalCode)
-      if (getIndex !== -1) form.cashJournalName = listCashJournal.value[getIndex].cashJournalName
+      if (getIndex !== -1) form.cashJournalName = `${listCashJournal.value[getIndex].cashJournalNo} - ${listCashJournal.value[getIndex].cashJournalName}`
     }
 
     if (form?.casNoCode && casNoCode.value.length > 0 && form.invoiceType === '4') {
-      const getIndex = casNoCode.value.findIndex((item) => item.code === form.casNoCode)
-      if (getIndex !== -1) form.casNoName = String((casNoCode.value[getIndex] as Record<string, unknown>).name ?? '')
+      const getIndex = casNoCode.value.findIndex((item) => item.casNo === form.casNoCode)
+      if (getIndex !== -1) form.casNoName = casNoCode.value[getIndex].casNo
     }
   },
   {
@@ -390,7 +390,6 @@ watch(
     if (newType === '4' && oldType !== '4') {
       form.casNoCode = ''
       form.invoiceVendorNo = ''
-      form.invoiceDate = ''
     }
   }
 )
@@ -400,11 +399,11 @@ watch(
   () => {
     if (form.companyCode) invoiceMasterApi.getActivity(form.companyCode || '')
     if (form.companyCode && form.invoiceType) invoiceMasterApi.getMatrixApproval(form.invoiceType || '', form.companyCode || '')
-    if (form.vendorId && form.invoiceType === '4') {
+    if (form.vendorId && form.invoiceType === '4' && form.companyCode) {
       const vendorIdStr = String(form.vendorId).trim()
-      if (vendorIdStr && vendorIdStr !== '' && vendorIdStr !== '0') {
-        submissionApi.getCasNo(vendorIdStr).catch((error) => {
-          // Only log actual errors, not "data not found" responses
+      const companyCodeStr = String(form.companyCode).trim()
+      if (vendorIdStr && vendorIdStr !== '' && vendorIdStr !== '0' && companyCodeStr && companyCodeStr !== '') {
+        submissionApi.getCasNo(vendorIdStr, companyCodeStr).catch((error) => {
           if (error.response?.status !== 422) {
             console.error('Failed to fetch CAS No:', error)
           }
@@ -425,11 +424,11 @@ onMounted(() => {
   invoiceMasterApi.getCurrency()
   invoiceMasterApi.getCompanyCode()
   invoiceMasterApi.getDpTypes()
-  if (form?.vendorId && form?.invoiceType === '4') {
+  if (form?.vendorId && form?.invoiceType === '4' && form?.companyCode) {
     const vendorIdStr = String(form.vendorId).trim()
-    if (vendorIdStr && vendorIdStr !== '' && vendorIdStr !== '0') {
-      submissionApi.getCasNo(vendorIdStr).catch((error) => {
-        // Only log actual errors, not "data not found" responses
+    const companyCodeStr = String(form.companyCode).trim()
+    if (vendorIdStr && vendorIdStr !== '' && vendorIdStr !== '0' && companyCodeStr && companyCodeStr !== '') {
+      submissionApi.getCasNo(vendorIdStr, companyCodeStr).catch((error) => {
         if (error.response?.status !== 422) {
           console.error('Failed to fetch CAS No:', error)
         }
