@@ -2,7 +2,6 @@
   <div>
     <p class="mb-[16px] font-semibold text-base">Invoice Header</p>
     <div v-if="form">
-      <!-- Invoice Type -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Invoice Type
@@ -10,7 +9,6 @@
         <input :value="getInvoiceTypeName()" class="input" placeholder="" disabled />
       </div>
 
-      <!-- Vendor No -->
       <div v-if="checkIsNonPo() && !checkNonPoPettyCash()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Vendor No.
@@ -19,7 +17,6 @@
         <input v-model="form.vendorId" class="input" placeholder="" disabled />
       </div>
 
-      <!-- DP Option -->
       <div
         v-if="form.invoiceTypeCode === 901"
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
@@ -28,11 +25,9 @@
         <input :value="getDpName()" class="input" placeholder="" disabled />
       </div>
 
-      <!-- Company Code -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label"> Company Code </label>
-        <!-- always active textbox for company code -->
-        <input v-model="form.companyCode" class="input" placeholder="" disabled />
+        <input v-model="form.companyName" class="input" placeholder="" disabled />
       </div>
 
       <!-- CAS No. / Invoice No. -->
@@ -52,7 +47,6 @@
         <input v-model="form.cashJournalCode" class="input" placeholder="" disabled />
       </div>
 
-      <!-- Invoice Date -->
       <div v-if="!checkNonPoCas()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Invoice Date
@@ -70,7 +64,6 @@
         />
       </div>
 
-      <!-- Posting Date -->
       <div v-if="!checkNonPoPettyCash()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Posting Date
@@ -93,26 +86,22 @@
         />
       </div>
 
-      <!-- Cash Journal - only for Petty Cash (active) -->
       <div v-if="checkNonPoPettyCash()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Cash Journal
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
+
         <v-select
           v-model="form.cashJournalCode"
           class="customSelect w-full -ml-[15px]"
-          placeholder="Select"
           label="description"
-          :reduce="option => option.cashJournalNo"
-          :options="listCashJournal.map(item => ({
-            ...item,
-            description: `${item.cashJournalNo} - ${item.cashJournalName}`
-          }))"
-          @input="updateCashJournalName"
+          placeholder="Select"
+          :reduce="(option: any) => option.cashJournalNo"
+          :options="listCashJournal.map(item => ({ ...item, description: `${item.cashJournalNo} - ${item.cashJournalName}` }))"
+          :class="{ 'error-select': form?.cashJournalCodeError }"
           appendToBody
-        />
-        <!-- <input v-model="form.notes" class="input" placeholder="" /> -->
+        ></v-select>
       </div>
 
       <div v-if="checkNonPoPettyCash()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
@@ -121,11 +110,10 @@
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
         <div class="w-full -ml-[15px]">
-          <DatePicker v-model="form.pettyCashPeriod" :range="true" format="yyyy/MM/dd" class="w-full" teleport :disabled="route.query.isSendSap === 'true'" />
+          <DatePicker v-model="pettyCashPeriodDisplay" :range="true" format="yyyy/MM/dd" class="w-full" teleport :disabled="route.query.isSendSap === 'true'" />
         </div>
       </div>
 
-      <!-- Invoicing Party -->
       <div
         v-if="!checkNonPoCas() && !checkNonPoLba() && !checkNonPoPettyCash()"
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
@@ -140,7 +128,6 @@
         />
       </div>
 
-      <!-- Estimated Payment Date -->
       <div
         v-if="!checkNonPoLba()"
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
@@ -167,7 +154,6 @@
         />
       </div>
 
-      <!-- Due Date CAS -->
       <div
         v-if="checkNonPoCas()"
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
@@ -180,7 +166,6 @@
         <DatePicker v-else v-model="form.dueDateCas" format="yyyy/MM/dd" :error="form.dueDateCasError" class="w-full -ml-[15px]" teleport />
       </div>
 
-      <!-- Remaning CAS Receipt Date -->
       <div
         v-if="checkNonPoLba()"
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
@@ -196,7 +181,6 @@
         />
       </div>
 
-      <!-- Tax Document No.  -->
       <div v-if="!checkNonPoPettyCash()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Tax Document No.
@@ -205,7 +189,6 @@
         <input v-model="form.taxNo" class="input" placeholder="" :class="{ 'border-danger': form.taxNoError }" :disabled="checkVerifikator1() || route.query.isSendSap === 'true'" />
       </div>
 
-      <!-- Invoice Vendor No. -->
       <div v-if="!checkNonPoCas() && !checkNonPoLba() && !checkNonPoPettyCash()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Invoice Vendor No.
@@ -222,7 +205,6 @@
         />
       </div>
 
-      <!-- Payment Method -->
       <div v-if="!checkNonPoLba() && !checkNonPoPettyCash()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Payment Method
@@ -245,7 +227,6 @@
         </select>
       </div>
 
-      <!-- Assignment -->
       <div v-if="!checkNonPoPettyCash()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label"> Assignment </label>
         <input
@@ -257,7 +238,6 @@
         />
       </div>
 
-      <!-- Transfer News -->
       <div v-if="!checkNonPoLba() && !checkNonPoPettyCash()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Transfer News
@@ -276,7 +256,6 @@
         />
       </div>
 
-      <!-- Credit Card Billing ID -->
       <div
         v-if="form.invoiceTypeCode === 903"
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
@@ -294,7 +273,6 @@
         />
       </div>
 
-      <!-- Currency -->
       <div v-if="!checkNonPoPettyCash()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Currency
@@ -302,7 +280,6 @@
         <input :value="form.currCode" class="input" placeholder="" disabled />
       </div>
 
-      <!-- NPWP Reporting -->
       <div v-if="!checkNonPoPettyCash()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           NPWP Reporting
@@ -315,7 +292,6 @@
         </select>
       </div>
 
-      <!-- Remaining DP Amount -->
       <div v-if="form.invoiceDPCode === 9013" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Remaining DP Amount
@@ -323,7 +299,6 @@
         <input v-model="remainingDpAmountVal" class="input" placeholder="" disabled/>
       </div>
 
-      <!-- DP Amount Deduction -->
       <div v-if="form.invoiceDPCode === 9013" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           DP Amount Deduction
@@ -337,7 +312,6 @@
         />
       </div>
 
-      <!-- Department / Requestor -->
       <div v-if="checkIsNonPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Requestor
@@ -345,7 +319,6 @@
         <input v-model="form.department" class="input" placeholder="" disabled />
       </div>
 
-      <!-- PIC Finance -->
       <div v-if="checkNonPoPettyCash()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           PIC Finance
@@ -353,7 +326,6 @@
         <input v-model="form.department" class="input" placeholder="" />
       </div>
 
-      <!-- Description -->
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Description
@@ -379,7 +351,6 @@ import DatePicker from '@/components/datePicker/DatePicker.vue'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useLoginStore } from '@/stores/views/login'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
-import { get } from 'lodash'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const invoiceLoginApi = useLoginStore()
@@ -391,11 +362,9 @@ const dpTypeList = computed(() => invoiceMasterApi.dpType)
 const listInvoiceTypePo = computed(() => invoiceMasterApi.invoicePoType)
 const listInvoiceTypeNonPo = computed(() => invoiceMasterApi.invoiceNonPoType)
 const paymentMethodList = computed(() => invoiceMasterApi.paymentMethodList)
+const listCashJournal = computed(() => invoiceMasterApi.cashJournalList)
 const userData = computed(() => invoiceLoginApi.userData)
 const npwpReportingList = computed(() => invoiceMasterApi.npwpReportingList)
-const listCashJournal = computed(() => invoiceMasterApi.cashJournalList)
-
-console.log('listCashJournal', listCashJournal.value)
 
 const remainingDpAmountVal = computed(() => {
   if (form.value.currCode === 'IDR') {
@@ -461,6 +430,17 @@ const getInvoiceTypeName = () => {
   if (getIndex !== -1) return listType[getIndex].name
 }
 
+watch(
+  () => form?.value.cashJournalCode,
+  (code) => {
+    if (!form?.value) return
+    const c = String(code || '')
+    const idx = listCashJournal.value.findIndex((item) => item.cashJournalNo === c)
+    if (idx !== -1) form.value.cashJournalName = `${listCashJournal.value[idx].cashJournalNo} - ${listCashJournal.value[idx].cashJournalName}`
+    else form.value.cashJournalName = ''
+  },
+)
+
 const isNpwrDisabled = () => {
   if (userData.value && userData.value.profile.profileId === 3002) {
     return true
@@ -468,6 +448,23 @@ const isNpwrDisabled = () => {
     return false
   }
 }
+
+const pettyCashPeriodDisplay = computed({
+  get: () => {
+    if (!form?.value) return [null, null]
+    const p = form.value.pettyCashPeriod
+    if (!p || !Array.isArray(p)) return [null, null]
+    const start = p[0] ? (p[0] instanceof Date ? new Date(p[0].getFullYear(), p[0].getMonth(), p[0].getDate()) : (() => { const d = new Date(String(p[0])); return isNaN(d.getTime()) ? null : new Date(d.getFullYear(), d.getMonth(), d.getDate()) })()) : null
+    const end = p[1] ? (p[1] instanceof Date ? new Date(p[1].getFullYear(), p[1].getMonth(), p[1].getDate()) : (() => { const d = new Date(String(p[1])); return isNaN(d.getTime()) ? null : new Date(d.getFullYear(), d.getMonth(), d.getDate()) })()) : null
+    return [start, end]
+  },
+  set: (val: Array<Date | null>) => {
+    if (!form?.value) return
+    const start = Array.isArray(val) ? val[0] : null
+    const end = Array.isArray(val) ? val[1] : null
+    form.value.pettyCashPeriod = [start ? start.toISOString() : null, end ? end.toISOString() : null]
+  },
+})
 
 // const checkPo = () => {
 //   return typeForm.value === 'po'
@@ -490,9 +487,17 @@ watch(
 
 onMounted(() => {
   typeForm.value = route.query.type?.toString().toLowerCase() || 'po'
-  invoiceMasterApi.getCompanyCode()
-  if (form?.value.companyCode && form?.value.invoiceTypeCode === 5) {
+  if (form?.value?.companyCode && form?.value?.invoiceTypeCode === 5) {
     invoiceMasterApi.getCashJournal(form.value.companyCode || '')
   }
 })
+
+watch(
+  () => [form?.value?.companyCode, form?.value?.invoiceTypeCode],
+  () => {
+    if (form?.value?.companyCode && form?.value?.invoiceTypeCode === 5) {
+      invoiceMasterApi.getCashJournal(form.value.companyCode || '')
+    }
+  },
+)
 </script>
