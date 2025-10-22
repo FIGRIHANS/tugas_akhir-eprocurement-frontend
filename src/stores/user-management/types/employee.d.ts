@@ -12,10 +12,10 @@ export interface IEmployee {
   id: number
   employeeId: number
   employeeName: string
-  employeeEmail: null
+  employeeEmail: string | null
   positionName: string
-  companyCode: null
-  costCenter: null
+  companyCode: string | null
+  costCenter: string | null
   isActive: boolean
   createdBy: number
   createdUtcDate: Date

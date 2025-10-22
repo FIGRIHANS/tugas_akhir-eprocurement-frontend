@@ -21,20 +21,20 @@
                 placeholder="Enter Employee ID"
                 row
                 :disabled="true"
-                :model-value="employeeData.employeeId ?? '-'"
+                :model-value="employeeData?.employeeId ?? '-'"
               />
               <UiInput
                 label="Employee Name"
                 placeholder="Enter employee name"
                 row
-                :model-value="employeeData.employeeName ?? '-'"
+                :model-value="employeeData?.employeeName ?? '-'"
                 disabled
               />
               <UiInput
                 label="Employee Email"
                 placeholder="Enter employee email"
                 row
-                :model-value="employeeData.employeeEmail ?? '-'"
+                :model-value="employeeData?.employeeEmail ?? '-'"
                 disabled
               />
             </UiFormGroup>
@@ -43,14 +43,14 @@
                 label="Position Name"
                 placeholder="Enter position name"
                 row
-                :model-value="employeeData.positionName ?? '-'"
+                :model-value="employeeData?.positionName ?? '-'"
                 disabled
               />
               <UiInput
                 label="Company Code"
                 placeholder="Enter company code"
                 row
-                :model-value="employeeData.companyCode ?? '-'"
+                :model-value="employeeData?.companyCode ?? '-'"
                 disabled
               />
             </UiFormGroup>
