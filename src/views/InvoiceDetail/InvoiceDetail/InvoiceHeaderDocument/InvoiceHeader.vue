@@ -53,7 +53,12 @@
     <div v-if="checkNonPoPettyCash()" class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Petty Cash Period</p>
       <p class="font-normal text-sm">
-        {{ (form.pettyCashStartDate || form.pettyCashEndDate) ? `${form.pettyCashStartDate ? moment(form.pettyCashStartDate).format('YYYY/MM/DD') : '-'} - ${form.pettyCashEndDate ? moment(form.pettyCashEndDate).format('YYYY/MM/DD') : '-'}` : '-' }}
+        {{
+          `
+            ${form.pettyCashStartDate ? moment(form.pettyCashStartDate).format('YYYY/MM/DD') : '-'} -
+            ${form.pettyCashEndDate ? moment(form.pettyCashEndDate).format('YYYY/MM/DD') : '-'}
+          `
+        }}
       </p>
     </div>
     <div v-if="!checkNonPoLba()" class="flex items-center justify-between gap-[10px]">
@@ -71,10 +76,17 @@
     <div v-if="checkNonPoLba()" class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Date of Receipt of Remaining CAS</p>
       <p class="font-normal text-sm">
-        -
-        <!-- {{
-          form.estimatedPaymentDate ? moment(form.estimatedPaymentDate).format('YYYY/MM/DD') : '-'
-        }} -->
+        {{
+          form.casDateReceipt ? moment(form.casDateReceipt).format('YYYY/MM/DD') : '-'
+        }}
+      </p>
+    </div>
+    <div v-if="checkNonPoCas()" class="flex items-center justify-between gap-[10px]">
+      <p class="font-normal text-sm text-gray-600">Due Date CAS</p>
+      <p class="font-normal text-sm">
+        {{
+          form.dueDateCas ? moment(form.dueDateCas).format('YYYY/MM/DD') : '-'
+        }}
       </p>
     </div>
     <div v-if="!checkIsNonPo()" class="flex items-center justify-between gap-[10px]">
@@ -87,7 +99,7 @@
     </div>
     <div v-if="checkNonPoCc()" class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Credit Card Billing ID</p>
-      <p class="font-normal text-sm">{{ '-' }}</p>
+      <p class="font-normal text-sm">{{ form.creditCardBillingId || '-' }}</p>
     </div>
     <div v-if="!checkNonPoLba() && !checkNonPoPettyCash()" class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Assignment</p>
@@ -107,7 +119,7 @@
     </div>
     <div v-if="!checkNonPoPettyCash()" class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">NPWP Reporting</p>
-      <p class="font-normal text-sm">{{ form.npwpReporting || '-' }}</p>
+      <p class="font-normal text-sm">{{ form.npwpReportingName || '-' }}</p>
     </div>
     <div v-if="form.invoiceDPCode === 9013" class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Remaining DP Amount</p>
@@ -119,7 +131,7 @@
     </div>
     <div v-if="checkIsNonPo() && !checkNonPoCas() && !checkNonPoLba()" class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">PIC Finance</p>
-      <p class="font-normal text-sm">{{ '-' }}</p>
+      <p class="font-normal text-sm">{{ form.picFinance || '-' }}</p>
     </div>
     <div v-if="checkIsNonPo()" class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Requestor</p>

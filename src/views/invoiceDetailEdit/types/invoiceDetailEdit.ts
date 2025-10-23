@@ -51,10 +51,14 @@ export interface formTypes extends documentFormTypes {
   dueDateCasError?: boolean
   proposalAmount: number
   picFinance: string
+  cashJournalCode: string
+  cashJournalName: string
+  cashJournalCodeError?: boolean
   pettyCashStartDate: string
   pettyCashEndDate: string
+  pettyCashPeriodError?: boolean
   npwpReportingName: string
-  pettyCashPeriod?: string | Date | Array<string | Date>
+  pettyCashPeriod?: string[]
   paymentId: number
   bankKey: string
   bankKeyIdError?: boolean
@@ -89,10 +93,6 @@ export interface formTypes extends documentFormTypes {
   additionalCost: number
   totalGrossAmount: number
   totalNetAmount: number
-
-  cashJournalCodeError?: boolean
-  cashJournalCode: string
-  cashJournalName: string
 
   invoicePoGr: itemsPoGrType[]
   invoicePoGrError?: boolean
