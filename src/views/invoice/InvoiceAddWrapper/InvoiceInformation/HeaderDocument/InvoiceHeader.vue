@@ -107,10 +107,7 @@
           label="description"
           placeholder="Select"
           :reduce="(option: any) => option.cashJournalNo"
-          :options="listCashJournal.map(item => ({
-            ...item,
-            description: `${item.cashJournalNo} - ${item.cashJournalName}`
-          }))"
+          :options="listCashJournal.map(item => ({ ...item, description: `${item.cashJournalNo} - ${item.cashJournalName}`}))"
           :class="{ 'error-select': form.cashJournalCodeError }"
           :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
           appendToBody
@@ -127,7 +124,7 @@
       <div v-if="isCAS || isLBA" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           CAS No.
-          <span v-if="isCAS" class="text-red-500 ml-[4px]">*</span>
+          <span v-if="false" class="text-red-500 ml-[4px]">*</span>
         </label>
 
         <input
@@ -165,10 +162,17 @@
       <div v-if="isCreditCard" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Proposal Amount
-          <span class="text-red-500 ml-[4px]">*</span>
+          <span class="text-red-500 ml-[4px]" v-if="(form.status === 0 || form.status === -1 || form.status === 5) && !loginApi.isVendor">*</span>
         </label>
-        <input v-model="form.proposalAmountVal" class="input" placeholder=""
-          :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5" />
+        <input
+          v-model="proposalAmountDisplay"
+          @input="onProposalInput"
+          @blur="onProposalBlur"
+          @paste.prevent="onProposalPaste"
+          class="input"
+          placeholder=""
+          :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
+        />
       </div>
 
       <div v-if="isReimbursement" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
@@ -332,6 +336,45 @@ const remainingDpAmountVal = computed(() => {
     return useFormatUsd(form.remainingDpAmount)
   }
 })
+
+const proposalAmountDisplay = ref('')
+
+const formatWithDots = (value: string | number) => {
+  if (value === null || value === undefined || value === '') return ''
+  const digits = String(value).replace(/\D+/g, '')
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+}
+
+const unformat = (value: string) => {
+  if (!value) return ''
+  return String(value).replace(/\./g, '')
+}
+
+const onProposalInput = (e: Event) => {
+  const target = e.target as HTMLInputElement
+  const onlyDigits = target.value.replace(/\D+/g, '')
+  proposalAmountDisplay.value = formatWithDots(onlyDigits)
+  if (form) form.proposalAmountVal = onlyDigits
+}
+
+const onProposalBlur = () => {
+  proposalAmountDisplay.value = formatWithDots(unformat(proposalAmountDisplay.value))
+}
+
+const onProposalPaste = (e: ClipboardEvent) => {
+  const pasted = e.clipboardData?.getData('text') || ''
+  const digits = pasted.replace(/\D+/g, '')
+  proposalAmountDisplay.value = formatWithDots(digits)
+  if (form) form.proposalAmountVal = digits
+}
+
+watch(
+  () => form?.proposalAmountVal,
+  (val) => {
+    proposalAmountDisplay.value = formatWithDots(val || '')
+  },
+  { immediate: true }
+)
 
 const checkPo = () => {
   return typeForm.value === 'po'

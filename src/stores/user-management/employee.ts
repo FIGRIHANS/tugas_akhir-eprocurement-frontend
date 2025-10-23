@@ -2,6 +2,7 @@ import type { ApiResponse } from '@/core/type/api'
 import userApi from '@/core/utils/userApi'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import type { IEmployeePayload } from './types/employee'
 
 export const useEmployeeStore = defineStore('employeeStore', () => {
   // state
@@ -46,7 +47,7 @@ export const useEmployeeStore = defineStore('employeeStore', () => {
     errorEmployee.value = null
 
     try {
-      const response: ApiResponse<unknown> = await userApi.get(`/employee/${employeeId}`)
+      const response: ApiResponse<unknown> = await userApi.get(`/employee?EmployeeId=${employeeId}`)
 
       if (response.data.result.isError) {
         errorEmployee.value = response.data.result.message
@@ -65,14 +66,14 @@ export const useEmployeeStore = defineStore('employeeStore', () => {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const storeEmployee = async (payload: any) => {
+  const storeEmployee = async (payload: IEmployeePayload) => {
+    console.log(payload)
     try {
       const response: ApiResponse<unknown> = await userApi.post(`/employee/post`, {
-        payload,
+        ...payload,
       })
 
-      return response
+      return response.data
     } catch (err: unknown) {
       if (err instanceof Error) {
         errorEmployee.value = err.message || 'Something went wrong'

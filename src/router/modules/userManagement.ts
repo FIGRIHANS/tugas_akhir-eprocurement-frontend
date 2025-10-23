@@ -63,6 +63,11 @@ export default [
     component: () => import('@/views/userManagement/master-employee/EmployeeEditView.vue'),
   },
   {
+    path: '/user-management/master-employee/detail/:id',
+    name: 'user-management-master-employee-detail',
+    component: () => import('@/views/userManagement/master-employee/EmployeeDetailView.vue'),
+  },
+  {
     path: '/user-management/report-authorization',
     name: 'user-management-report-authorization',
     component: () =>

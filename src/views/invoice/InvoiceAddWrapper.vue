@@ -373,7 +373,11 @@ const checkInvoiceInformation = () => {
   const isLBA = form.invoiceType === '4'
 
   if (!isPettyCash) {
-    form.invoiceDocumentError = !hasAtLeastOneDocument
+    if (isCreditCard) {
+      form.invoiceDocumentError = false
+    } else {
+      form.invoiceDocumentError = !hasAtLeastOneDocument
+    }
 
     if (isReimbursement) {
       form.invoiceVendorNoError = useCheckEmpty(form.invoiceVendorNo).isError
@@ -399,7 +403,6 @@ const checkInvoiceInformation = () => {
     } else if (isLBA) {
       form.taxNoInvoiceError = useCheckEmpty(form.taxNoInvoice).isError
       form.casNoCodeError = useCheckEmpty(form.casNoCode).isError
-      // dueDateCas is optional for LBA during submission/budget check
       form.dueDateCasError = false
       form.invoiceVendorNoError = false
       form.invoiceDateError = false
@@ -417,7 +420,7 @@ const checkInvoiceInformation = () => {
     form.invoiceDateError = false
     form.taxNoInvoiceError = false
     form.proposalAmountError = false
-    form.invoiceDocumentError = !hasAtLeastOneDocument
+    form.invoiceDocumentError = false
   }
 
   if (!checkIsNonPo()) {
@@ -664,32 +667,20 @@ const mapDataPostNonPo = () => {
   else if (isLBA) invoiceTypeName = 'LBA'
   else if (isPettyCash) invoiceTypeName = 'Petty Cash'
 
-  let invoiceDateToUse = null
-  let pettyCashStartDate = null
-  let pettyCashEndDate = null
+  let invoiceDateToUse: string | null = null
+  let pettyCashStartDate: string | null = null
+  let pettyCashEndDate: string | null = null
 
   if (isPettyCash && Array.isArray(form.pettyCashPeriod) && form.pettyCashPeriod[0]) {
     pettyCashStartDate = moment(form.pettyCashPeriod[0]).toISOString()
     pettyCashEndDate = form.pettyCashPeriod[1] ? moment(form.pettyCashPeriod[1]).toISOString() : null
-    invoiceDateToUse = moment().toISOString()
-  } else if (isReimbursement && form.invoiceDate) {
+  } else if ((isReimbursement || isCAS) && form.invoiceDate) {
     invoiceDateToUse = moment(form.invoiceDate).toISOString()
-  } else if (isCAS && form.invoiceDate) {
-    // For CAS: only use invoiceDate if it exists from form (when editing)
+  } else if (!isReimbursement && !isCreditCard && !isCAS && !isLBA && form.invoiceDate) {
     invoiceDateToUse = moment(form.invoiceDate).toISOString()
   }
-  // For CAS without invoiceDate: invoiceDateToUse remains null
 
-  let postingDateToUse = null
-  if (invoiceDateToUse) {
-    postingDateToUse = invoiceDateToUse
-  } else if (form.invoiceDate) {
-    postingDateToUse = moment(form.invoiceDate).toISOString()
-  } else if (!isCAS) {
-    // Only auto-generate postingDate for non-CAS invoices
-    postingDateToUse = moment().toISOString()
-  }
-  // For CAS without invoiceDate: postingDateToUse remains null
+  const postingDateToUse: string | null = invoiceDateToUse
 
   const data = {
     header: {
@@ -716,8 +707,8 @@ const mapDataPostNonPo = () => {
       invoiceDate: invoiceDateToUse || null,
       postingDate: postingDateToUse || null,
       estimatedPaymentDate: postingDateToUse || null,
-      paymentMethodCode: 'T',
-      paymentMethodName: 'Bank Transfer',
+      paymentMethodCode: '',
+      paymentMethodName: '',
       taxNo: form.taxNoInvoice || '',
       currCode: form.currency,
       creditCardBillingID: '',
@@ -731,7 +722,11 @@ const mapDataPostNonPo = () => {
       proposalAmount: isCreditCard ? Number(form.proposalAmountVal) || 0 : 0,
       picFinance: '',
       cashJournalCode: isPettyCash ? (form.cashJournalCode || '') : '',
-      cashJournalName: isPettyCash ? (form.cashJournalName || '') : '',
+      cashJournalName: isPettyCash
+        ? (typeof form.cashJournalName === 'string'
+            ? form.cashJournalName.replace(new RegExp("^" + (form.cashJournalCode || '') + "\\s*-\\s*"), '').trim()
+            : form.cashJournalName || '')
+        : '',
       pettyCashStartDate: pettyCashStartDate || null,
       pettyCashEndDate: pettyCashEndDate || null,
       npwpReportingName: ''
@@ -807,37 +802,14 @@ const goNext = () => {
     if (route.query.type === 'nonpo') {
       const submissionData = mapDataPostNonPo()
 
-      console.log('=== DEBUG INVOICE NON-PO SUBMISSION ===')
-      console.log('Invoice Type:', form.invoiceType)
-      console.log('Full Submission Data:', JSON.stringify(submissionData, null, 2))
-      console.log('Header:', submissionData.header)
-      console.log('Vendor:', submissionData.vendor)
-      console.log('Payment:', submissionData.payment)
-      console.log('Calculation:', submissionData.calculation)
-      console.log('CostExpenses Count:', submissionData.costExpenses?.length)
-      console.log('CostExpenses:', submissionData.costExpenses)
-      console.log('Documents Count:', submissionData.documents?.length)
-      console.log('AlternativePay:', submissionData.alternativePay)
-      console.log('=======================================')
-
       invoiceApi
         .postSubmissionNonPo(submissionData)
         .then((response) => {
-          console.log('✅ Submission Success:', response)
           setAfterResponsePost(response)
         })
         .catch((error) => {
-          console.error('❌ Submission Error:', error)
-          console.error('Error Response Status:', error.response?.status)
-          console.error('Error Response Data:', error.response?.data)
-          console.error('Error Result:', error.response?.data?.result)
-          console.error('Error Message:', error.response?.data?.result?.message)
-
-          // Display detailed error message
-          const errorMessage = error.response?.data?.result?.message || error.message || 'An unexpected error occurred'
-          console.error('📋 Error to Display:', errorMessage)
-
-          invoiceApi.errorMessageSubmission = errorMessage
+          invoiceApi.errorMessageSubmission =
+            error.response?.data?.result?.message || error.message || 'An unexpected error occurred'
           const idModal = document.querySelector('#error_submission_modal')
           const modal = KTModal.getInstance(idModal as HTMLElement)
           modal.show()
@@ -852,7 +824,8 @@ const goNext = () => {
           setAfterResponsePost(response)
         })
         .catch((error) => {
-          invoiceApi.errorMessageSubmission = error.response?.data?.result?.message || error.message || 'An unexpected error occurred'
+          invoiceApi.errorMessageSubmission =
+            error.response?.data?.result?.message || error.message || 'An unexpected error occurred'
           const idModal = document.querySelector('#error_submission_modal')
           const modal = KTModal.getInstance(idModal as HTMLElement)
           modal.show()
@@ -1102,7 +1075,6 @@ const setDataNonPo = () => {
     form.cashJournalName = detail.header.cashJournalName || ''
     form.proposalAmountVal = detail.header.proposalAmount || ''
 
-    // Load Petty Cash Period
     if (detail.header.pettyCashStartDate && detail.header.pettyCashEndDate) {
       form.pettyCashPeriod = [
         new Date(detail.header.pettyCashStartDate),
@@ -1345,7 +1317,7 @@ const mapDataCheck = () => {
     if (form.invoiceDate) {
       docDate = moment(form.invoiceDate).format('YYYYMMDD')
     }
-  } else if (form.invoiceType === '4') { // LBA
+  } else if (form.invoiceType === '4') {
     if (form.dueDateCas) {
       docDate = moment(form.dueDateCas).format('YYYYMMDD')
     }
@@ -1420,42 +1392,23 @@ const mapDataCheck = () => {
 const checkBudget = () => {
   const data = mapDataCheck()
 
-  console.log('💰 Starting Budget Check...')
-  console.log('📋 Invoice Type:', form.invoiceType)
-  console.log('🏢 Company Code:', form.companyCode)
-  console.log('📊 Request Data:', JSON.stringify(data, null, 2))
-
   invoiceApi
     .postCheckBudget(data)
-    .then((response) => {
-      console.log('✅ Budget Check Success!')
-      console.log('Response:', response)
-
+    .then(() => {
       const idModal = document.querySelector('#success_budget_check_modal')
       const modal = KTModal.getInstance(idModal as HTMLElement)
       if (modal) {
         modal.show()
       } else {
-        console.error('Success modal not found')
       }
     })
     .catch((error) => {
-      console.error('❌ Budget Check Failed!')
-      console.error('Error type:', error?.constructor?.name)
-      console.error('Error message:', error?.message)
-      console.error('Full error:', error)
-
       if (error?.response) {
-        console.error('Response status:', error.response.status)
-        console.error('Response data:', error.response.data)
       }
-
       const idModal = document.querySelector('#failed_budget_check_modal')
       const modal = KTModal.getInstance(idModal as HTMLElement)
       if (modal) {
         modal.show()
-      } else {
-        console.error('Failed modal not found')
       }
     })
 }
@@ -1479,8 +1432,7 @@ const checkFormBudget = () => {
       (Array.isArray(form.pettyCashPeriod) && (!form.pettyCashPeriod[0] || !form.pettyCashPeriod[1])) ||
       !form.description ||
       !form.department ||
-      form.invoiceItem.length === 0 ||
-      !hasAtLeastOneDocument
+      form.invoiceItem.length === 0
     ) {
       status = true
     }
@@ -1495,7 +1447,7 @@ const checkFormBudget = () => {
       !form.description ||
       !form.department ||
       form.invoiceItem.length === 0 ||
-      !hasAtLeastOneDocument
+      (!isCreditCard && !hasAtLeastOneDocument)
     ) {
       status = true
     }

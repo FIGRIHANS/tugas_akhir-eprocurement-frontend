@@ -66,7 +66,7 @@
 
       <div v-if="isCreditCard" :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
         <p class="text-xs font-normal text-gray-700">Proposal Amount</p>
-        <p class="text-sm font-medium">{{ form.proposalAmountVal || '-' }}</p>
+        <p class="text-sm font-medium">{{ formatProposalAmount(form.proposalAmountVal) || '-' }}</p>
       </div>
 
       <div v-if="!isPettyCash" :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
@@ -170,9 +170,14 @@ const getInvoiceTypeName = () => {
 
 const getCompanyDisplay = () => {
   if (!form?.companyCode) return '-'
-  const idx = companyCodeList.value.findIndex((item) => item.code === form.companyCode)
-  if (idx !== -1) return `${companyCodeList.value[idx].code} - ${companyCodeList.value[idx].name}`
-  return form.companyCode || '-'
+  const companyCodeValue = form.companyCode
+  const item = companyCodeList.value.find((item) => item.code === companyCodeValue)
+  if (item) {
+    const name = item.name || ''
+    if (name.trim().startsWith(item.code)) return name
+    return `${item.code} - ${name}`
+  }
+  return companyCodeValue || '-'
 }
 
 const getCashJournalDisplay = () => {
@@ -189,4 +194,10 @@ void getCashJournalDisplay
 onMounted(() => {
   typeForm.value = route.query.type?.toString().toLowerCase() || 'po'
 })
+
+const formatProposalAmount = (val: string | number) => {
+  if (val === null || val === undefined || val === '') return ''
+  const digits = String(val).replace(/\D+/g, '')
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+}
 </script>

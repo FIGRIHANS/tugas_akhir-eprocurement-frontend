@@ -83,6 +83,32 @@ const emits = defineEmits(['update:modelValue', 'change'])
 const date = ref<Date | string | Array<string | Date> | null>('')
 const validationError = ref<string | null>(null)
 
+let isSyncingFromModel = false
+
+function deepEqualDates(a: unknown, b: unknown): boolean {
+  if (a === b) return true
+  if (a == null || b == null) return a === b
+  if (Array.isArray(a) && Array.isArray(b)) {
+    if (a.length !== b.length) return false
+    for (let i = 0; i < a.length; i++) {
+      const ai = a[i] as Date | string | null | undefined
+      const bi = b[i] as Date | string | null | undefined
+      if (ai == null && bi == null) continue
+      if (ai == null || bi == null) return false
+      const an = toMidnightDate(ai as Date | string | null)
+      const bn = toMidnightDate(bi as Date | string | null)
+      if (!an || !bn) {
+        if (String(ai) !== String(bi)) return false
+      } else if (an.getTime() !== bn.getTime()) return false
+    }
+    return true
+  }
+  const na = toMidnightDate(a as Date | string | null)
+  const nb = toMidnightDate(b as Date | string | null)
+  if (!na || !nb) return String(a) === String(b)
+  return na.getTime() === nb.getTime()
+}
+
 const getToday = (): Date => {
   const now = new Date()
   return new Date(now.getFullYear(), now.getMonth(), now.getDate())
@@ -118,11 +144,23 @@ function daysInclusive(start: Date | string | null, end: Date | string | null) {
 
 watch(
   () => props.modelValue,
-  () => {
-    if (props.range && props.minDays > 0) {
-      date.value = toRange(props.modelValue)
-    } else {
-      date.value = props.modelValue
+  (newModel) => {
+    isSyncingFromModel = true
+    try {
+      if (props.range && props.minDays > 0) {
+        const converted = toRange(newModel)
+        // only assign when different to avoid triggering the other watcher
+        if (!deepEqualDates(date.value, converted)) {
+          date.value = converted
+        }
+      } else {
+        if (!deepEqualDates(date.value, newModel)) {
+          date.value = newModel
+        }
+      }
+    } finally {
+      // small tick to ensure other watchers see the change; leave false immediately
+      isSyncingFromModel = false
     }
   },
   {
@@ -133,6 +171,9 @@ watch(
 watch(
   () => date.value,
   (newVal) => {
+    // If this change originated from updating props.modelValue, don't re-emit
+    if (isSyncingFromModel) return
+
     // Validasi untuk range dengan minDays
     if (props.range && props.minDays > 0 && Array.isArray(newVal)) {
       const [start, end] = newVal || [null, null]
@@ -140,30 +181,47 @@ watch(
         const len = daysInclusive(start, end)
         if (len < props.minDays) {
           validationError.value = `Durasi minimal ${props.minDays} hari`
-        } else {
-          validationError.value = null
+          // Still emit partial value so parent can react if desired, but avoid loops
           emits('update:modelValue', [start, end])
           emits('change', [start, end])
+        } else {
+          validationError.value = null
+          // Only emit when different from props.modelValue
+          if (!deepEqualDates(props.modelValue, [start, end])) {
+            emits('update:modelValue', [start, end])
+            emits('change', [start, end])
+          }
         }
       } else {
         validationError.value = null
-        emits('update:modelValue', [start, end])
-        emits('change', [start, end])
+        if (!deepEqualDates(props.modelValue, [start, end])) {
+          emits('update:modelValue', [start, end])
+          emits('change', [start, end])
+        }
       }
     } else {
       validationError.value = null
-      emits('update:modelValue', date.value)
-      emits('change', date.value)
+      if (!deepEqualDates(props.modelValue, newVal)) {
+        emits('update:modelValue', date.value)
+        emits('change', date.value)
+      }
     }
   },
 )
 
 onMounted(() => {
   if (props.range && props.minDays > 0) {
+    // ensure there's always a start date when range + minDays is required
     const rangeVal = Array.isArray(date.value) ? date.value : toRange(date.value)
     const [start, end] = rangeVal
     if (!start) {
-      date.value = [getToday(), end || null]
+      // set without triggering watcher emit loop
+      isSyncingFromModel = true
+      try {
+        date.value = [getToday(), end || null]
+      } finally {
+        isSyncingFromModel = false
+      }
       emits('update:modelValue', date.value)
     }
   }
