@@ -91,15 +91,14 @@
           Cash Journal
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
-
         <v-select
           v-model="form.cashJournalCode"
           class="customSelect w-full -ml-[15px]"
-          label="description"
           placeholder="Select"
+          :get-option-label="(option: any) => `${option.cashJournalNo} - ${option.cashJournalName}`"
           :reduce="(option: any) => option.cashJournalNo"
-          :options="listCashJournal.map(item => ({ ...item, description: `${item.cashJournalNo} - ${item.cashJournalName}` }))"
-          :class="{ 'error-select': form?.cashJournalCodeError }"
+          :options="listCashJournal"
+          :class="{ 'error-select': form.cashJournalCodeError }"
           appendToBody
         ></v-select>
       </div>
@@ -365,6 +364,7 @@ const paymentMethodList = computed(() => invoiceMasterApi.paymentMethodList)
 const listCashJournal = computed(() => invoiceMasterApi.cashJournalList)
 const userData = computed(() => invoiceLoginApi.userData)
 const npwpReportingList = computed(() => invoiceMasterApi.npwpReportingList)
+const listCashJournal = computed(() => invoiceMasterApi.cashJournalList)
 
 const remainingDpAmountVal = computed(() => {
   if (form.value.currCode === 'IDR') {
@@ -379,11 +379,11 @@ const checkIsNonPo = () => {
 }
 
 const checkIsAccountingTax = () => {
-  return userData.value.profile.profileId === 3003 || userData.value.profile.profileId === 3202
+  return userData.value?.profile.profileId === 3003 || userData.value?.profile.profileId === 3202
 }
 
 const checkVerifikator1 = () => {
-  return userData.value.profile.profileId === 3190
+  return userData.value?.profile.profileId === 3190
 }
 
 const checkInvoiceDp = () => {
@@ -391,11 +391,11 @@ const checkInvoiceDp = () => {
 }
 
 const checkApproval1 = () => {
-  return userData.value.profile.profileId === 3002
+  return userData.value?.profile.profileId === 3002
 }
 
 const checkApproval3 = () => {
-  return userData.value.profile.profileId === 3003
+  return userData.value?.profile.profileId === 3003
 }
 
 const checkNonPoCas = () => {
@@ -478,6 +478,18 @@ watch(
         (item) => item.code === form.value.paymentMethodCode,
       )
       if (getIndex !== -1) form.value.paymentMethodName = paymentMethodList.value[getIndex].name
+    }
+    if (form?.value.cashJournalCode) {
+      const getIndex = listCashJournal.value.findIndex(
+        (item) => item.cashJournalNo === form.value.cashJournalCode,
+      )
+      if (getIndex !== -1) form.value.cashJournalName = listCashJournal.value[getIndex].cashJournalName
+    }
+    if (form?.value.npwpReporting) {
+      const getIndex = npwpReportingList.value.findIndex(
+        (item) => item.npwpLocation === form.value.npwpReporting,
+      )
+      if (getIndex !== -1) form.value.npwpReportingName = npwpReportingList.value[getIndex].npwpDescription
     }
   },
   {

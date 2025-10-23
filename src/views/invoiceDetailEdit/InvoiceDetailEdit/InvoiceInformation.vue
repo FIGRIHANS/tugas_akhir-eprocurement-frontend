@@ -59,6 +59,7 @@ onMounted(() => {
   if (form.value.companyCode) {
     invoiceMasterApi.getActivity(form.value.companyCode || '')
     invoiceMasterApi.getNpwpReporting(form.value.companyCode || '')
+    if (checkIsNonPo()) invoiceMasterApi.getCashJournal(form.value.companyCode || '')
   }
 })
 </script>
