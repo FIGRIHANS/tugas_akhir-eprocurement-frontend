@@ -10,6 +10,18 @@ export const useCheckEmpty = (value: string | number | Date | null | undefined) 
   return { status, isError }
 }
 
+export const useCheckRangeDate = (value: string[] | Date[]) => {
+  const valueField = value
+  let status = true
+  let isError = false
+  if (!valueField[0] || !valueField[1]) status = false
+
+  if (!status) isError = true
+  else isError = false
+
+  return { status, isError }
+}
+
 export function checkEmptyValues(obj: Record<string, unknown>): string[] {
   const emptyKeys: string[] = []
 

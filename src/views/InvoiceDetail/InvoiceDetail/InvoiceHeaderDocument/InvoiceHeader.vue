@@ -81,6 +81,14 @@
         }}
       </p>
     </div>
+    <div v-if="checkNonPoCas()" class="flex items-center justify-between gap-[10px]">
+      <p class="font-normal text-sm text-gray-600">Due Date CAS</p>
+      <p class="font-normal text-sm">
+        {{
+          form.dueDateCas ? moment(form.dueDateCas).format('YYYY/MM/DD') : '-'
+        }}
+      </p>
+    </div>
     <div v-if="!checkIsNonPo()" class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Invoice Vendor No.</p>
       <p class="font-normal text-sm">{{ form.documentNo || '-' }}</p>

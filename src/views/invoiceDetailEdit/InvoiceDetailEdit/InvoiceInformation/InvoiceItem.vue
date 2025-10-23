@@ -85,7 +85,7 @@
               <span v-if="!item.isEdit">{{ item.itemText || '-' }}</span>
               <input v-else v-model="formEdit.itemText" class="input" type="text" placeholder="" />
             </td>
-            <td>
+            <td v-if="!checkNonPoPettyCash()">
               <span v-if="!item.isEdit">{{ getDebitCreditName(item.debitCredit) || '-' }}</span>
               <select
                 v-else
@@ -118,7 +118,7 @@
                   : useFormatUsd(item.isEdit ? formEdit.vatAmount : item.vatAmount)
               }}
             </td>
-            <td>
+            <td v-if="!checkNonPoPettyCash()">
               <span v-if="!item.isEdit">{{ getCostCenterName(item.costCenter) }}</span>
               <v-select
                 v-else
@@ -132,7 +132,7 @@
               ></v-select>
             </td>
             <td>
-              <span v-if="!item.isEdit">{{ item.profitCenter }}</span>
+              <span v-if="!item.isEdit">{{ item.profitCenter || '-' }}</span>
               <select v-else v-model="formEdit.profitCenter" class="select" placeholder="">
                 <option v-for="item of profitCenter" :key="item.code" :value="item.code">
                   {{ item.name }}
@@ -140,10 +140,10 @@
               </select>
             </td>
             <td>
-              <span v-if="!item.isEdit">{{ item.assignment }}</span>
+              <span v-if="!item.isEdit">{{ item.assignment || '-' }}</span>
               <input v-else v-model="formEdit.assignment" class="input" placeholder="" />
             </td>
-            <td>
+            <td v-if="!checkNonPoPettyCash()">
               <span v-if="!item.isEdit">{{ getWhtTypeName(item.whtType) }}</span>
               <v-select
                 v-else
@@ -157,7 +157,7 @@
                 @update:modelValue="callWhtCode(item)"
               ></v-select>
             </td>
-            <td>
+            <td v-if="!checkNonPoPettyCash()">
               <span v-if="!item.isEdit">{{ getWhtCodeName(item.whtCode, item) }}</span>
               <v-select
                 v-else
@@ -171,7 +171,7 @@
                 @update:modelValue="setWhtAmount(item)"
               ></v-select>
             </td>
-            <td>
+            <td v-if="!checkNonPoPettyCash()">
               <span v-if="!item.isEdit">
                 {{
                   form.currCode === 'IDR'
@@ -188,7 +188,7 @@
                 @change="setWhtAmount(item)"
               />
             </td>
-            <td>
+            <td v-if="!checkNonPoPettyCash()">
               <span>{{
                 form.currCode === 'IDR'
                   ? useFormatIdr(item.isEdit ? formEdit.whtAmount : item.whtAmount)
@@ -248,6 +248,7 @@ const formEdit = reactive({
   isActivityError: false,
   isItemAmountError: false,
   isDebitCreditError: false,
+  isTaxCodeError: false
 })
 
 const listActivity = computed(() => invoiceMasterApi.activityList)
@@ -268,6 +269,10 @@ const checkPoPib = () => {
 
 const checkIsNonPo = () => {
   return route.query.invoiceType === 'no_po'
+}
+
+const checkNonPoPettyCash = () => {
+  return form.value.invoiceTypeCode === 5
 }
 
 const addNew = () => {
@@ -313,6 +318,7 @@ const resetFormEdit = () => {
   formEdit.isActivityError = false
   formEdit.isItemAmountError = false
   formEdit.isDebitCreditError = false
+  formEdit.isTaxCodeError = false
 }
 
 const goEdit = (item: invoiceItemTypes) => {
@@ -323,10 +329,19 @@ const goEdit = (item: invoiceItemTypes) => {
     if (!formEdit.itemAmount || formEdit.itemAmount < 0) formEdit.isItemAmountError = true
     else formEdit.isItemAmountError = false
 
-    if (!formEdit.debitCredit) formEdit.isDebitCreditError = true
+    if (!formEdit.debitCredit && !checkNonPoPettyCash()) formEdit.isDebitCreditError = true
     else formEdit.isDebitCreditError = false
+
+    if (!formEdit.taxCode && checkNonPoPettyCash()) formEdit.isTaxCodeError = true
+    else formEdit.isTaxCodeError = false
   }
-  if (formEdit.isActivityError || formEdit.isItemAmountError || formEdit.isDebitCreditError) return
+
+  if (
+    formEdit.isActivityError ||
+    formEdit.isItemAmountError ||
+    formEdit.isDebitCreditError ||
+    formEdit.isTaxCodeError
+  ) return
   item.isEdit = !item.isEdit
 
   if (item.isEdit) {
@@ -510,6 +525,19 @@ onMounted(() => {
         item.whtCodeList = whtCodeList.value
       })
     }
+  }
+
+  if (checkNonPoPettyCash()) {
+    columns.value = [
+    'Action',
+    'Activity / Expense',
+    'Item Amount',
+    'Item Text',
+    'Tax Code',
+    'VAT Amount',
+    'Profit Center',
+    'Assignment'
+    ]
   }
 })
 </script>

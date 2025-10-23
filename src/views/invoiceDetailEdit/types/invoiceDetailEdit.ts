@@ -56,8 +56,9 @@ export interface formTypes extends documentFormTypes {
   cashJournalCodeError?: boolean
   pettyCashStartDate: string
   pettyCashEndDate: string
+  pettyCashPeriodError?: boolean
   npwpReportingName: string
-  pettyCashPeriod?: string | Date | Array<string | Date>
+  pettyCashPeriod?: string[]
   paymentId: number
   bankKey: string
   bankKeyIdError?: boolean

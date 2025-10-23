@@ -69,7 +69,7 @@ import type { invoiceItemTypes } from './types/invoiceItem'
 import type { documentDetailTypes } from './types/invoiceDocument'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import { KTModal } from '@/metronic/core'
-import { useCheckEmpty } from '@/composables/validation'
+import { useCheckEmpty, useCheckRangeDate } from '@/composables/validation'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import StepperStatus from '../../components/stepperStatus/StepperStatus.vue'
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
@@ -199,6 +199,10 @@ const checkVerifikator1 = () => {
   return userData.value.profile.profileId === 3190
 }
 
+const checkApprovalNonPo1 = () => {
+  return userData.value?.profile.profileId === 3002
+}
+
 const checkIsWithoutDp = () => {
   return form.value.invoiceDPCode === 9011
 }
@@ -227,9 +231,9 @@ const checkNonPoCas = () => {
 //   return form.value.invoiceTypeCode === 2
 // }
 
-// const checkNonPoPettyCash = () => {
-//   return form.value.invoiceTypeCode === 5
-// }
+const checkNonPoPettyCash = () => {
+  return form.value.invoiceTypeCode === 5
+}
 
 const checkStatusCode = () => {
   let status = true
@@ -317,19 +321,22 @@ const checkPo = () => {
 }
 
 const checkVerifHeader = () => {
-  const invoiceDateError = !checkNonPoCas() ? useCheckEmpty(form.value.invoiceDate).isError : false
-  const documentNoError = !checkNonPoCas() ? useCheckEmpty(form.value.documentNo).isError : false
+  const invoiceDateError = !checkNonPoCas() && !checkNonPoPettyCash() ? useCheckEmpty(form.value.invoiceDate).isError : false
+  const documentNoError = !checkNonPoCas() && !checkNonPoPettyCash() ? useCheckEmpty(form.value.documentNo).isError : false
   const creditCardBillingError = checkVerifikator1() ? useCheckEmpty(form.value.creditCardBillingId).isError : false
   
-  const postingDateError = !checkVerifikator1() && !checkNonPoCas() ? useCheckEmpty(form.value.postingDate).isError : false
-  const estimatedPaymentDateError = !checkVerifikator1() ? useCheckEmpty(form.value.estimatedPaymentDate).isError : false
-  const paymentMethodError = !checkVerifikator1() ? useCheckEmpty(form.value.paymentMethodCode).isError : false
-  const transferNewsError = !checkVerifikator1() ? useCheckEmpty(form.value.transferNews).isError : false
+  const postingDateError = !checkVerifikator1() && !checkNonPoCas() && !checkNonPoPettyCash() ? useCheckEmpty(form.value.postingDate).isError : false
+  const estimatedPaymentDateError = !checkVerifikator1() || (checkNonPoPettyCash() && checkApprovalNonPo1()) ? useCheckEmpty(form.value.estimatedPaymentDate).isError : false
+  const paymentMethodError = !checkVerifikator1() && !checkNonPoPettyCash() ? useCheckEmpty(form.value.paymentMethodCode).isError : false
+  const transferNewsError = !checkVerifikator1() && !checkNonPoPettyCash() ? useCheckEmpty(form.value.transferNews).isError : false
   const notesError = !checkVerifikator1() ? useCheckEmpty(form.value.notes).isError : false
 
   const dueDateCasError = checkNonPoCas() ? useCheckEmpty(form.value.dueDateCas).isError : false
   const taxInvoiceError = checkNonPoCas() ? useCheckEmpty(form.value.taxNo).isError : false
-  const npwpReportingError = checkNonPoCas() ? useCheckEmpty(form.value.npwpReporting).isError : false
+  const npwpReportingError = checkNonPoCas() && !checkApprovalNonPo1() ? useCheckEmpty(form.value.npwpReporting).isError : false
+
+  const cashJournalCodeError = checkNonPoPettyCash() ? useCheckEmpty(form.value.cashJournalCode).isError : false
+  const pettyCashPeriodError = checkNonPoPettyCash() ? useCheckEmpty(form.value.pettyCashStartDate).isError || useCheckEmpty(form.value.pettyCashEndDate).isError : false
 
   if (
     invoiceDateError ||
@@ -342,7 +349,9 @@ const checkVerifHeader = () => {
     notesError ||
     dueDateCasError ||
     taxInvoiceError ||
-    npwpReportingError
+    npwpReportingError ||
+    cashJournalCodeError ||
+    pettyCashPeriodError
   )
     return false
   return true
@@ -451,7 +460,7 @@ const mapDataVerif = () => {
     header: {
       invoiceUId: form.value.invoiceUId,
       documentNo: form.value.documentNo,
-      invoiceDate: form.value.invoiceDate,
+      invoiceDate: form.value.invoiceDate || null,
       taxNo: form.value.taxNo,
       currCode: form.value.currCode,
       notes: form.value.notes,
@@ -506,7 +515,7 @@ const mapDataVerifNonPo = () => {
     statusNotes: '',
     header: {
       invoiceUId: form.value.invoiceUId,
-      invoiceDate: form.value.invoiceDate,
+      invoiceDate: form.value.invoiceDate || null,
       postingDate: form.value.invoiceDate || null,
       documentNo: form.value.documentNo,
       taxNo: form.value.taxNo,
@@ -520,14 +529,14 @@ const mapDataVerifNonPo = () => {
       currCode: form.value.currCode,
       npwpReporting: form.value.npwpReporting,
       department: form.value.department,
-      casDateReceipt: form.value.casDateReceipt,
-      dueDateCas: form.value.dueDateCas,
+      casDateReceipt: form.value.casDateReceipt || null,
+      dueDateCas: form.value.dueDateCas || null,
       proposalAmount: form.value.proposalAmount,
       picFinance: form.value.picFinance,
       cashJournalCode: form.value.cashJournalCode,
       cashJournalName: form.value.cashJournalName,
-      pettyCashStartDate: form.value.pettyCashStartDate,
-      pettyCashEndDate: form.value.pettyCashEndDate,
+      pettyCashStartDate: form.value.pettyCashStartDate || null,
+      pettyCashEndDate: form.value.pettyCashEndDate || null,
       npwpReportingName: form.value.npwpReportingName,
     },
     payment: {
@@ -1003,13 +1012,22 @@ const setDataEdit = () => {
     remainingDpAmount: data?.remainingDpAmount,
     dpAmountDeduction: data?.dpAmountDeduction,
     department: data?.department,
+    creditCardBillingId: data?.creditCardBillingId || '',
+    casDateReceipt: data?.casDateReceipt || '',
+    dueDateCas: data?.dueDateCas || '',
+    proposalAmount: data?.proposalAmount || 0,
+    picFinance: data?.picFinance || '',
+    cashJournalCode: data?.cashJournalCode || '',
+    cashJournalName: data?.cashJournalName || '',
+    pettyCashStartDate: data?.pettyCashStartDate || '',
+    pettyCashEndDate: data?.pettyCashEndDate || '',
+    npwpReportingName: data?.npwpReportingName || '',
     paymentId: data?.paymentId,
     bankKey: data?.bankKey || '',
     bankName: data?.bankName || '',
     beneficiaryName: data?.beneficiaryName || '',
     bankAccountNo: data?.bankAccountNo || '',
     bankCountryCode: data?.bankCountryCode || '',
-    creditCardBillingId: data?.creditCardBillingId || '',
     vendorId: data?.vendorId || '',
     vendorName: data?.vendorName || '',
     npwp: data?.npwp || '',

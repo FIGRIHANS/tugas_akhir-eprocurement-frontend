@@ -53,7 +53,7 @@ import type { documentDetailTypes } from './types/invoiceDocument'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import StepperStatus from '../../components/stepperStatus/StepperStatus.vue'
 import TabInvoice from '@/components/invoice/TabInvoice.vue'
-import { useCheckEmpty } from '@/composables/validation'
+import { useCheckEmpty, useCheckRangeDate } from '@/composables/validation'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 import { useLoginStore } from '@/stores/views/login'
@@ -193,7 +193,11 @@ const checkInvoiceData = () => {
 }
 
 const checkVerifikator1 = () => {
-  return userData.value.profile.profileId === 3190
+  return userData.value?.profile.profileId === 3190
+}
+
+const checkApprovalNonPo1 = () => {
+  return userData.value?.profile.profileId === 3002
 }
 
 const checkNonPoCas = () => {
@@ -206,22 +210,22 @@ const checkNonPoPettyCash = () => {
 
 const checkInvoiceInformation = () => {
   let status = true
-  form.value.invoiceDateError = !checkNonPoCas() ? useCheckEmpty(form.value.invoiceDate).isError : false
-  form.value.documentNoError = !checkNonPoCas() ? useCheckEmpty(form.value.documentNo).isError : false
+  form.value.invoiceDateError = !checkNonPoCas() && !checkNonPoPettyCash() ? useCheckEmpty(form.value.invoiceDate).isError : false
+  form.value.documentNoError = !checkNonPoCas() && !checkNonPoPettyCash() ? useCheckEmpty(form.value.documentNo).isError : false
   form.value.creditCardBillingError = checkVerifikator1()
     ? useCheckEmpty(form.value.creditCardBillingId).isError
     : false
 
-  form.value.postingDateError = !checkVerifikator1() && !checkNonPoCas()
+  form.value.postingDateError = !checkVerifikator1() && !checkNonPoCas() && !checkNonPoPettyCash()
     ? useCheckEmpty(form.value.postingDate).isError
     : false
-  form.value.estimatedPaymentDateError = !checkVerifikator1()
+  form.value.estimatedPaymentDateError = !checkVerifikator1() || (checkNonPoPettyCash() && checkApprovalNonPo1())
     ? useCheckEmpty(form.value.estimatedPaymentDate).isError
     : false
-  form.value.paymentMethodError = !checkVerifikator1()
+  form.value.paymentMethodError = !checkVerifikator1() && !checkNonPoPettyCash()
     ? useCheckEmpty(form.value.paymentMethodCode).isError
     : false
-  form.value.transferNewsError = !checkVerifikator1()
+  form.value.transferNewsError = !checkVerifikator1() && !checkNonPoPettyCash()
     ? useCheckEmpty(form.value.transferNews).isError
     : false
   form.value.notesError = !checkVerifikator1() ? useCheckEmpty(form.value.notes).isError : false
@@ -232,14 +236,15 @@ const checkInvoiceInformation = () => {
   }
 
   if (checkNonPoCas()) {
-    form.value.dueDateCasError = checkNonPoCas() ? useCheckEmpty(form.value.dueDateCas).isError : false
-    form.value.taxNoError = checkNonPoCas() ? useCheckEmpty(form.value.taxNo).isError : false
-    form.value.npwpReportingError = checkNonPoCas() ? useCheckEmpty(form.value.npwpReporting).isError : false
+    form.value.dueDateCasError = useCheckEmpty(form.value.dueDateCas).isError
+    form.value.taxNoError = useCheckEmpty(form.value.taxNo).isError
+    form.value.npwpReportingError = !checkApprovalNonPo1() ? useCheckEmpty(form.value.npwpReporting).isError : false
   }
 
-  // if (checkNonPoPettyCash()) {
-  //   form.value.cashJournalCodeError = 
-  // }
+  if (checkNonPoPettyCash()) {
+    form.value.cashJournalCodeError = useCheckEmpty(form.value.cashJournalCode).isError
+    form.value.pettyCashPeriodError = useCheckRangeDate(form.value.pettyCashPeriod).isError
+  }
 
   if (
     form.value.invoiceDateError ||
@@ -417,7 +422,6 @@ const goNext = () => {
         : null,
     }
     verificationApi.detailInvoiceEdit = data
-    console.log(mapDataVerifPo())
 
     if (form.value.statusCode === 4 || route.query.isSendSap === 'true') {
       isLoading.value = true
