@@ -50,14 +50,19 @@
       <div v-if="!checkNonPoCas()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Invoice Date
-          <span class="text-red-500 ml-[4px]">*</span>
+          <span v-if="!disabledInvoiceDate()" class="text-red-500 ml-[4px]">*</span>
         </label>
+        <input
+          v-if="disabledInvoiceDate()"
+          :value="form.invoiceDate ? moment(form.invoiceDate).format('YYYY/MM/DD') : ''"
+          class="input"
+          placeholder=""
+          disabled
+        />
         <DatePicker
+          v-else
           v-model="form.invoiceDate"
           format="yyyy/MM/dd"
-          :disabled="
-            checkIsAccountingTax() || route.query.isSendSap === 'true'
-          "
           :error="form.invoiceDateError"
           class="w-full -ml-[15px]"
           teleport
@@ -67,11 +72,11 @@
       <div v-if="!checkNonPoPettyCash()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Posting Date
-          <span v-if="!checkVerifikator1() && !checkNonPoCas()" class="text-red-500 ml-[4px]">*</span>
+          <span v-if="!disabledPostingDate() && !checkNonPoCc()" class="text-red-500 ml-[4px]">*</span>
         </label>
         <input
-          v-if="checkVerifikator1() || route.query.isSendSap === 'true'"
-          v-model="form.postingDate"
+          v-if="disabledPostingDate()"
+          :value="form.postingDate ? moment(form.postingDate).format('YYYY/MM/DD') : ''"
           class="input"
           placeholder=""
           disabled
@@ -108,13 +113,26 @@
           Petty Cash Period
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
-        <div class="w-full -ml-[15px]">
-          <DatePicker v-model="form.pettyCashPeriod" :range="true" format="yyyy/MM/dd" class="w-full" teleport :disabled="route.query.isSendSap === 'true'" />
-        </div>
+        <input
+          v-if="route.query.isSendSap === 'true'"
+          :value="form.pettyCashPeriod ? moment(form.pettyCashPeriod).format('YYYY/MM/DD') : ''"
+          class="input"
+          placeholder=""
+          disabled
+        />
+        <DatePicker
+          v-else
+          v-model="form.pettyCashPeriod"
+          format="yyyy/MM/dd"
+          :range="true"
+          :error="form.postingDateError"
+          class="w-full -ml-[15px]"
+          teleport
+        />
       </div>
 
       <div
-        v-if="!checkNonPoCas() && !checkNonPoLba() && !checkNonPoPettyCash()"
+        v-if="!checkNonPoCas() && !checkNonPoLba() && !checkNonPoPettyCash() && !checkNonPoCc()"
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
       >
         <label class="form-label"> Invoicing Party </label>
@@ -123,7 +141,7 @@
           class="input"
           placeholder=""
           :class="{ 'border-danger': form.invoicingPartyError }"
-          :disabled="checkVerifikator1() || route.query.isSendSap === 'true'"
+          :disabled="disabledInvoicingParty()"
         />
       </div>
 
@@ -133,11 +151,11 @@
       >
         <label class="form-label">
           Estimated Payment Date
-          <span v-if="!checkVerifikator1()" class="text-red-500 ml-[4px]">*</span>
+          <span v-if="!disabledEstimatedPaymentDate() && !checkNonPoCc()" class="text-red-500 ml-[4px]">*</span>
         </label>
         <input
-          v-if="checkVerifikator1()"
-          v-model="form.estimatedPaymentDate"
+          v-if="disabledEstimatedPaymentDate()"
+          :value="form.estimatedPaymentDate ? moment(form.estimatedPaymentDate).format('YYYY/MM/DD') : ''"
           class="input"
           placeholder=""
           disabled
@@ -146,7 +164,6 @@
           v-else
           v-model="form.estimatedPaymentDate"
           format="yyyy/MM/dd"
-          :disabled="checkIsAccountingTax() || route.query.isSendSap === 'true'"
           :error="form.estimatedPaymentDateError"
           class="w-full -ml-[15px]"
           teleport
@@ -161,7 +178,7 @@
           Due Date CAS
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
-        <input v-if="checkApproval3()" v-model="form.dueDateCas" class="input" placeholder="" disabled />
+        <input v-if="checkApproval3()" :value="form.dueDateCas ? moment(form.dueDateCas).format('YYYY/MM/DD') : ''" class="input" placeholder="" disabled />
         <DatePicker v-else v-model="form.dueDateCas" format="yyyy/MM/dd" :error="form.dueDateCasError" class="w-full -ml-[15px]" teleport />
       </div>
 
@@ -170,8 +187,9 @@
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
       >
         <label class="form-label"> Remaning CAS Receipt Date </label>
-        <input v-model="form.estimatedPaymentDate" class="input" placeholder="" disabled />
+        <input v-if="checkApprovalNonPoProc()" :value="form.estimatedPaymentDate ? moment(form.estimatedPaymentDate).format('YYYY/MM/DD') : ''" class="input" placeholder="" disabled />
         <DatePicker
+          v-else
           v-model="form.estimatedPaymentDate"
           format="yyyy/MM/dd"
           :error="form.estimatedPaymentDateError"
@@ -183,42 +201,56 @@
       <div v-if="!checkNonPoPettyCash()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Tax Document No.
-          <span v-if="checkNonPoCas()" class="text-red-500 ml-[4px]">*</span>
+          <span v-if="(!disabledTaxDocumentNo() && !checkNonPoCc()) || checkNonPoCas()" class="text-red-500 ml-[4px]">*</span>
         </label>
-        <input v-model="form.taxNo" class="input" placeholder="" :class="{ 'border-danger': form.taxNoError }" :disabled="checkVerifikator1() || route.query.isSendSap === 'true'" />
+        <input
+          v-model="form.taxNo"
+          class="input"
+          placeholder=""
+          :class="{ 'border-danger': form.taxNoError }"
+          :disabled="disabledTaxDocumentNo()"
+        />
       </div>
 
       <div v-if="!checkNonPoCas() && !checkNonPoLba() && !checkNonPoPettyCash()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Invoice Vendor No.
-          <span class="text-red-500 ml-[4px]">*</span>
+          <span v-if="!disabledInvoiceVendorNo()" class="text-red-500 ml-[4px]">*</span>
         </label>
         <input
           v-model="form.documentNo"
           class="input"
           placeholder=""
           :class="{ 'border-danger': form.documentNoError }"
-          :disabled="
-            checkIsAccountingTax() || route.query.isSendSap === 'true'
-          "
+          :disabled="disabledInvoiceVendorNo()"
+        />
+      </div>
+
+      <div v-if="checkNonPoCc()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label">
+          Proposal Amount
+          <span class="text-red-500 ml-[4px]">*</span>
+        </label>
+        <input
+          v-model="form.proposalAmount"
+          class="input"
+          placeholder=""
+          :class="{ 'border-danger': form.proposalAmountError }"
+          :disabled="checkApprovalNonPoProc() || checkApprovalNonPoCcAdmin()"
         />
       </div>
 
       <div v-if="!checkNonPoLba() && !checkNonPoPettyCash()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Payment Method
-          <span v-if="!checkIsAccountingTax() && !checkVerifikator1()" class="text-red-500 ml-[4px]"
-            >*</span
-          >
+          <span v-if="!disabledPaymentMethod()" class="text-red-500 ml-[4px]">*</span>
         </label>
         <select
           v-model="form.paymentMethodCode"
           class="select"
           placeholder=""
           :class="{ 'border-danger': form.paymentMethodError }"
-          :disabled="
-            checkIsAccountingTax() || checkVerifikator1() || route.query.isSendSap === 'true'
-          "
+          :disabled="disabledPaymentMethod()"
         >
           <option v-for="item of paymentMethodList" :key="item.code" :value="item.code">
             {{ item.name }}
@@ -233,30 +265,26 @@
           class="input"
           placeholder=""
           :class="{ 'border-danger': form.assigmentError }"
-          :disabled="checkVerifikator1() || route.query.isSendSap === 'true'"
+          :disabled="disabledAssignment()"
         />
       </div>
 
       <div v-if="!checkNonPoLba() && !checkNonPoPettyCash()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Transfer News
-          <span v-if="!checkIsAccountingTax() && !checkVerifikator1()" class="text-red-500 ml-[4px]"
-            >*</span
-          >
+          <span v-if="!disabledTransferNews() && !checkNonPoCc()" class="text-red-500 ml-[4px]">*</span>
         </label>
         <input
           v-model="form.transferNews"
           class="input"
           placeholder=""
           :class="{ 'border-danger': form.transferNewsError }"
-          :disabled="
-            checkIsAccountingTax() || checkVerifikator1() || route.query.isSendSap === 'true'
-          "
+          :disabled="disabledTransferNews()"
         />
       </div>
 
       <div
-        v-if="form.invoiceTypeCode === 903"
+        v-if="form.invoiceTypeCode === 903 || checkNonPoCc()"
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
       >
         <label class="form-label">
@@ -267,7 +295,7 @@
           v-model="form.creditCardBillingId"
           class="input"
           placeholder=""
-          :disabled="userData?.profile.profileId !== 3190"
+          :disabled="userData?.profile.profileId !== 3190 || checkApprovalNonPoProc()"
           :class="{ 'border-danger': form.creditCardBillingError }"
         />
       </div>
@@ -282,9 +310,15 @@
       <div v-if="!checkNonPoPettyCash()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           NPWP Reporting
-          <span v-if="!checkApproval1()" class="text-red-500 ml-[4px]">*</span>
+          <span v-if="!disabledNpwpReporting() && !checkApproval1()" class="text-red-500 ml-[4px]">*</span>
         </label>
-        <select v-model="form.npwpReporting" class="select" placeholder="" :class="{ 'border-danger': form.npwpReportingError }" :disabled="isNpwrDisabled() || checkVerifikator1() || route.query.isSendSap === 'true'">
+        <select
+          v-model="form.npwpReporting"
+          class="select"
+          placeholder=""
+          :class="{ 'border-danger': form.npwpReportingError }"
+          :disabled="disabledNpwpReporting()"
+        >
           <option v-for="item of npwpReportingList" :key="item.npwpLocation" :value="item.npwpLocation">
             {{ item.npwpDescription }}
           </option>
@@ -301,13 +335,13 @@
       <div v-if="form.invoiceDPCode === 9013" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           DP Amount Deduction
-          <span v-if="!checkVerifikator1()" class="text-red-500 ml-[4px]">*</span>
+          <span v-if="!disabledDpAmountDeduction()" class="text-red-500 ml-[4px]">*</span>
         </label>
         <input
           v-model="form.dpAmountDeduction"
           class="input"
           placeholder=""
-          :disabled="checkVerifikator1() || checkInvoiceDp() || route.query.isSendSap === 'true'"
+          :disabled="disabledDpAmountDeduction()"
         />
       </div>
 
@@ -328,14 +362,14 @@
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Description
-          <span v-if="!checkVerifikator1()" class="text-red-500 ml-[4px]">*</span>
+          <span v-if="!disabledDescription()" class="text-red-500 ml-[4px]">*</span>
         </label>
         <textarea
           v-model="form.notes"
           class="textarea"
           placeholder=""
           :class="{ 'border-danger': form.notesError }"
-          :disabled="checkVerifikator1()"
+          :disabled="disabledDescription()"
         ></textarea>
       </div>
     </div>
@@ -350,6 +384,7 @@ import DatePicker from '@/components/datePicker/DatePicker.vue'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useLoginStore } from '@/stores/views/login'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
+import moment from 'moment'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const invoiceLoginApi = useLoginStore()
@@ -389,6 +424,14 @@ const checkInvoiceDp = () => {
   return form.value.invoiceTypeCode === 9012
 }
 
+const checkApprovalNonPoProc = () => {
+  return checkIsNonPo() && userData.value?.profile.profileId === 3191
+}
+
+const checkApprovalNonPoCcAdmin = () => {
+  return checkIsNonPo() && userData.value?.profile.profileId === 3190
+}
+
 const checkApproval1 = () => {
   return userData.value?.profile.profileId === 3002
 }
@@ -405,12 +448,60 @@ const checkNonPoLba = () => {
   return form.value.invoiceTypeCode === 4
 }
 
-// const checkNonPoCc = () => {
-//   return form.value.invoiceTypeCode === 2
-// }
+const checkNonPoCc = () => {
+  return form.value.invoiceTypeCode === 2
+}
 
 const checkNonPoPettyCash = () => {
   return form.value.invoiceTypeCode === 5
+}
+
+const disabledInvoiceDate = () => {
+  return checkIsAccountingTax() || checkApprovalNonPoProc() || route.query.isSendSap === 'true'
+}
+
+const disabledPostingDate = () => {
+  return checkVerifikator1() || checkApprovalNonPoProc() || checkApprovalNonPoCcAdmin() || route.query.isSendSap === 'true'
+}
+
+const disabledInvoicingParty = () => {
+  return checkVerifikator1() || checkApprovalNonPoProc() || checkApprovalNonPoCcAdmin() || route.query.isSendSap === 'true'
+}
+
+const disabledEstimatedPaymentDate = () => {
+  return checkVerifikator1() || checkIsAccountingTax() || checkApprovalNonPoProc() || checkApprovalNonPoCcAdmin() || route.query.isSendSap === 'true'
+}
+
+const disabledTaxDocumentNo = () => {
+  return checkVerifikator1() || checkApprovalNonPoProc() || checkApprovalNonPoCcAdmin() || route.query.isSendSap === 'true'
+}
+
+const disabledInvoiceVendorNo = () => {
+  return checkIsAccountingTax() || checkApprovalNonPoProc() || route.query.isSendSap === 'true'
+}
+
+const disabledPaymentMethod = () => {
+  return checkIsAccountingTax() || checkVerifikator1() || checkApprovalNonPoProc() || checkApprovalNonPoCcAdmin() || route.query.isSendSap === 'true'
+}
+
+const disabledAssignment = () => {
+  return checkVerifikator1() || checkApprovalNonPoProc() || checkApprovalNonPoCcAdmin() || route.query.isSendSap === 'true'
+}
+
+const disabledTransferNews = () => {
+  return checkIsAccountingTax() || checkVerifikator1() || checkApprovalNonPoProc() || checkApprovalNonPoCcAdmin() || route.query.isSendSap === 'true'
+}
+
+const disabledNpwpReporting = () => {
+  return isNpwrDisabled() || checkVerifikator1() || checkApprovalNonPoProc() || checkApprovalNonPoCcAdmin() || route.query.isSendSap === 'true'
+}
+
+const disabledDpAmountDeduction = () => {
+  return checkVerifikator1() || checkInvoiceDp() || checkApprovalNonPoProc() || route.query.isSendSap === 'true'
+}
+
+const disabledDescription = () => {
+  return checkVerifikator1() || checkApprovalNonPoProc() || checkApprovalNonPoCcAdmin()
 }
 
 const getDpName = () => {
