@@ -2,7 +2,8 @@
   <div class="flex flex-col gap-[20px]">
     <div>
       <p class="font-normal text-sm text-gray-600">Invoice No</p>
-      <div class="flex items-center justify-between mt-[10px]">
+      <div v-if="isEmpty(invoice)">-</div>
+      <div v-else class="flex items-center justify-between mt-[10px]">
         <AttachmentView :file-data="invoice" />
         <button class="btn btn-icon btn-outline btn-primary" @click="download(invoice?.path || '')">
           <i class="ki-duotone ki-file-down"></i>
