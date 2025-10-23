@@ -50,6 +50,7 @@ export interface formTypes extends documentFormTypes {
   dueDateCas: string
   dueDateCasError?: boolean
   proposalAmount: number
+  proposalAmountError?: boolean
   picFinance: string
   cashJournalCode: string
   cashJournalName: string

@@ -69,7 +69,7 @@ import type { invoiceItemTypes } from './types/invoiceItem'
 import type { documentDetailTypes } from './types/invoiceDocument'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import { KTModal } from '@/metronic/core'
-import { useCheckEmpty, useCheckRangeDate } from '@/composables/validation'
+import { useCheckEmpty } from '@/composables/validation'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import StepperStatus from '../../components/stepperStatus/StepperStatus.vue'
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
@@ -156,6 +156,15 @@ const form = ref<formTypes>({
   npwpReporting: '',
   remainingDpAmount: 0,
   dpAmountDeduction: 0,
+  casDateReceipt: '',
+  dueDateCas: '',
+  proposalAmount: 0,
+  picFinance: '',
+  cashJournalCode: '',
+  cashJournalName: '',
+  pettyCashStartDate: '',
+  pettyCashEndDate: '',
+  npwpReportingName: '',
   paymentId: 0,
   bankKey: '',
   bankName: '',
@@ -203,6 +212,14 @@ const checkApprovalNonPo1 = () => {
   return userData.value?.profile.profileId === 3002
 }
 
+const checkApprovalNonPoProc = () => {
+  return route.query.invoiceType === 'no_po' && userData.value?.profile.profileId === 3191
+}
+
+const checkApprovalNonPoCcAdmin = () => {
+  return route.query.invoiceType === 'no_po' && userData.value?.profile.profileId === 3190
+}
+
 const checkIsWithoutDp = () => {
   return form.value.invoiceDPCode === 9011
 }
@@ -227,9 +244,9 @@ const checkNonPoCas = () => {
 //   return form.value.invoiceTypeCode === 4
 // }
 
-// const checkNonPoCc = () => {
-//   return form.value.invoiceTypeCode === 2
-// }
+const checkNonPoCc = () => {
+  return form.value.invoiceTypeCode === 2
+}
 
 const checkNonPoPettyCash = () => {
   return form.value.invoiceTypeCode === 5
@@ -321,22 +338,26 @@ const checkPo = () => {
 }
 
 const checkVerifHeader = () => {
+  if (checkApprovalNonPoProc()) return true
+
   const invoiceDateError = !checkNonPoCas() && !checkNonPoPettyCash() ? useCheckEmpty(form.value.invoiceDate).isError : false
   const documentNoError = !checkNonPoCas() && !checkNonPoPettyCash() ? useCheckEmpty(form.value.documentNo).isError : false
   const creditCardBillingError = checkVerifikator1() ? useCheckEmpty(form.value.creditCardBillingId).isError : false
   
-  const postingDateError = !checkVerifikator1() && !checkNonPoCas() && !checkNonPoPettyCash() ? useCheckEmpty(form.value.postingDate).isError : false
-  const estimatedPaymentDateError = !checkVerifikator1() || (checkNonPoPettyCash() && checkApprovalNonPo1()) ? useCheckEmpty(form.value.estimatedPaymentDate).isError : false
-  const paymentMethodError = !checkVerifikator1() && !checkNonPoPettyCash() ? useCheckEmpty(form.value.paymentMethodCode).isError : false
-  const transferNewsError = !checkVerifikator1() && !checkNonPoPettyCash() ? useCheckEmpty(form.value.transferNews).isError : false
-  const notesError = !checkVerifikator1() ? useCheckEmpty(form.value.notes).isError : false
+  const postingDateError = !checkVerifikator1() && !checkNonPoPettyCash() && !checkNonPoCc() ? useCheckEmpty(form.value.postingDate).isError : false
+  const estimatedPaymentDateError = !checkVerifikator1() || (checkNonPoPettyCash() && checkApprovalNonPo1() && !checkNonPoCc()) ? useCheckEmpty(form.value.estimatedPaymentDate).isError : false
+  const paymentMethodError = !checkVerifikator1() && !checkNonPoPettyCash() && !checkApprovalNonPoCcAdmin() ? useCheckEmpty(form.value.paymentMethodCode).isError : false
+  const transferNewsError = !checkVerifikator1() && !checkNonPoPettyCash() && !checkNonPoCc() ? useCheckEmpty(form.value.transferNews).isError : false
+  const notesError = !checkVerifikator1() && !checkApprovalNonPoCcAdmin() ? useCheckEmpty(form.value.notes).isError : false
 
   const dueDateCasError = checkNonPoCas() ? useCheckEmpty(form.value.dueDateCas).isError : false
   const taxInvoiceError = checkNonPoCas() ? useCheckEmpty(form.value.taxNo).isError : false
-  const npwpReportingError = checkNonPoCas() && !checkApprovalNonPo1() ? useCheckEmpty(form.value.npwpReporting).isError : false
+  const npwpReportingError = (checkNonPoCas() || checkNonPoCc()) && !checkApprovalNonPo1() ? useCheckEmpty(form.value.npwpReporting).isError : false
 
   const cashJournalCodeError = checkNonPoPettyCash() ? useCheckEmpty(form.value.cashJournalCode).isError : false
   const pettyCashPeriodError = checkNonPoPettyCash() ? useCheckEmpty(form.value.pettyCashStartDate).isError || useCheckEmpty(form.value.pettyCashEndDate).isError : false
+
+  const proposalAmountError = !checkApprovalNonPoCcAdmin() ? useCheckEmpty(form.value.proposalAmount).isError :false
 
   if (
     invoiceDateError ||
@@ -351,7 +372,8 @@ const checkVerifHeader = () => {
     taxInvoiceError ||
     npwpReportingError ||
     cashJournalCodeError ||
-    pettyCashPeriodError
+    pettyCashPeriodError ||
+    proposalAmountError
   )
     return false
   return true
