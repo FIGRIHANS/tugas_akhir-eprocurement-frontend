@@ -109,7 +109,7 @@
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
         <div class="w-full -ml-[15px]">
-          <DatePicker v-model="pettyCashPeriodDisplay" :range="true" format="yyyy/MM/dd" class="w-full" teleport :disabled="route.query.isSendSap === 'true'" />
+          <DatePicker v-model="form.pettyCashPeriod" :range="true" format="yyyy/MM/dd" class="w-full" teleport :disabled="route.query.isSendSap === 'true'" />
         </div>
       </div>
 
@@ -364,7 +364,6 @@ const paymentMethodList = computed(() => invoiceMasterApi.paymentMethodList)
 const listCashJournal = computed(() => invoiceMasterApi.cashJournalList)
 const userData = computed(() => invoiceLoginApi.userData)
 const npwpReportingList = computed(() => invoiceMasterApi.npwpReportingList)
-const listCashJournal = computed(() => invoiceMasterApi.cashJournalList)
 
 const remainingDpAmountVal = computed(() => {
   if (form.value.currCode === 'IDR') {
@@ -448,27 +447,6 @@ const isNpwrDisabled = () => {
     return false
   }
 }
-
-const pettyCashPeriodDisplay = computed({
-  get: () => {
-    if (!form?.value) return [null, null]
-    const p = form.value.pettyCashPeriod
-    if (!p || !Array.isArray(p)) return [null, null]
-    const start = p[0] ? (p[0] instanceof Date ? new Date(p[0].getFullYear(), p[0].getMonth(), p[0].getDate()) : (() => { const d = new Date(String(p[0])); return isNaN(d.getTime()) ? null : new Date(d.getFullYear(), d.getMonth(), d.getDate()) })()) : null
-    const end = p[1] ? (p[1] instanceof Date ? new Date(p[1].getFullYear(), p[1].getMonth(), p[1].getDate()) : (() => { const d = new Date(String(p[1])); return isNaN(d.getTime()) ? null : new Date(d.getFullYear(), d.getMonth(), d.getDate()) })()) : null
-    return [start, end]
-  },
-  set: (val: Array<Date | null>) => {
-    if (!form?.value) return
-    const start = Array.isArray(val) ? val[0] : null
-    const end = Array.isArray(val) ? val[1] : null
-    form.value.pettyCashPeriod = [start ? start.toISOString() : null, end ? end.toISOString() : null]
-  },
-})
-
-// const checkPo = () => {
-//   return typeForm.value === 'po'
-// }
 
 watch(
   () => form,
