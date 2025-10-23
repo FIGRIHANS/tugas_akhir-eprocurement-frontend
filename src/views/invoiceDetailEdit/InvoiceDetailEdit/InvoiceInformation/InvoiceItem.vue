@@ -2,7 +2,7 @@
   <div class="flex flex-col gap-[16px]">
     <p class="text-base font-semibold">Costs / Expenses</p>
     <button
-      v-if="route.query.isSendSap !== 'true'"
+      v-if="route.query.isSendSap !== 'true' || checkApprovalNonPoProc() || checkApprovalNonPoCcAdmin()"
       class="btn btn-outline btn-primary w-fit"
       @click="addNew"
     >
@@ -35,7 +35,7 @@
             <td class="flex items-center justify-around gap-[8px]">
               <button
                 class="btn btn-outline btn-icon btn-primary"
-                :disabled="(checkIsEdit() && !item.isEdit) || route.query.isSendSap === 'true'"
+                :disabled="(checkIsEdit() && !item.isEdit) || route.query.isSendSap === 'true' || checkApprovalNonPoProc() || checkApprovalNonPoCcAdmin()"
                 @click="goEdit(item)"
               >
                 <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>
@@ -44,7 +44,7 @@
               <button
                 class="btn btn-icon btn-outline btn-danger"
                 @click="resetItem(item, index)"
-                :disabled="route.query.isSendSap === 'true'"
+                :disabled="route.query.isSendSap === 'true' || checkApprovalNonPoProc() || checkApprovalNonPoCcAdmin()"
               >
                 <i class="ki-duotone ki-cross-circle"></i>
               </button>
@@ -210,9 +210,11 @@ import type { invoiceItemTypes } from '../../types/invoiceItem'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
+import { useLoginStore } from '@/stores/views/login'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const verificationApi = useInvoiceVerificationStore()
+const invoiceLoginApi = useLoginStore()
 const route = useRoute()
 const form = inject<Ref<formTypes>>('form')
 const columns = ref([
@@ -257,6 +259,7 @@ const costCenterList = computed(() => invoiceMasterApi.costCenterList)
 const profitCenter = computed(() => invoiceMasterApi.profilCenterList)
 const whtTypeList = computed(() => invoiceMasterApi.whtTypeList)
 const whtCodeList = computed(() => invoiceMasterApi.whtCodeList)
+const userData = computed(() => invoiceLoginApi.userData)
 
 const checkIsEdit = () => {
   const result = form?.value.invoiceItem.findIndex((item) => item.isEdit)
@@ -271,8 +274,20 @@ const checkIsNonPo = () => {
   return route.query.invoiceType === 'no_po'
 }
 
+const checkNonPoCc = () => {
+  return form.value.invoiceTypeCode === 2
+}
+
 const checkNonPoPettyCash = () => {
   return form.value.invoiceTypeCode === 5
+}
+
+const checkApprovalNonPoProc = () => {
+  return checkIsNonPo() && userData.value?.profile.profileId === 3191
+}
+
+const checkApprovalNonPoCcAdmin = () => {
+  return checkIsNonPo() && userData.value?.profile.profileId === 3190
 }
 
 const addNew = () => {

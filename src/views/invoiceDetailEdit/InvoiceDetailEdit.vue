@@ -200,8 +200,20 @@ const checkApprovalNonPo1 = () => {
   return userData.value?.profile.profileId === 3002
 }
 
+const checkApprovalNonPoProc = () => {
+  return route.query.invoiceType === 'no_po' && userData.value?.profile.profileId === 3191
+}
+
+const checkApprovalNonPoCcAdmin = () => {
+  return route.query.invoiceType === 'no_po' && userData.value?.profile.profileId === 3190
+}
+
 const checkNonPoCas = () => {
   return form.value.invoiceTypeCode === 3
+}
+
+const checkNonPoCc = () => {
+  return form.value.invoiceTypeCode === 2
 }
 
 const checkNonPoPettyCash = () => {
@@ -210,25 +222,27 @@ const checkNonPoPettyCash = () => {
 
 const checkInvoiceInformation = () => {
   let status = true
+  if (checkApprovalNonPoProc()) return false
+
   form.value.invoiceDateError = !checkNonPoCas() && !checkNonPoPettyCash() ? useCheckEmpty(form.value.invoiceDate).isError : false
   form.value.documentNoError = !checkNonPoCas() && !checkNonPoPettyCash() ? useCheckEmpty(form.value.documentNo).isError : false
   form.value.creditCardBillingError = checkVerifikator1()
     ? useCheckEmpty(form.value.creditCardBillingId).isError
     : false
 
-  form.value.postingDateError = !checkVerifikator1() && !checkNonPoCas() && !checkNonPoPettyCash()
+  form.value.postingDateError = !checkVerifikator1() && !checkNonPoPettyCash() && !checkNonPoCc()
     ? useCheckEmpty(form.value.postingDate).isError
     : false
-  form.value.estimatedPaymentDateError = !checkVerifikator1() || (checkNonPoPettyCash() && checkApprovalNonPo1())
+  form.value.estimatedPaymentDateError = !checkVerifikator1() || (checkNonPoPettyCash() && checkApprovalNonPo1() && !checkNonPoCc())
     ? useCheckEmpty(form.value.estimatedPaymentDate).isError
     : false
-  form.value.paymentMethodError = !checkVerifikator1() && !checkNonPoPettyCash()
+  form.value.paymentMethodError = !checkVerifikator1() && !checkNonPoPettyCash() && !checkApprovalNonPoCcAdmin()
     ? useCheckEmpty(form.value.paymentMethodCode).isError
     : false
-  form.value.transferNewsError = !checkVerifikator1() && !checkNonPoPettyCash()
+  form.value.transferNewsError = !checkVerifikator1() && !checkNonPoPettyCash() && !checkNonPoCc()
     ? useCheckEmpty(form.value.transferNews).isError
     : false
-  form.value.notesError = !checkVerifikator1() ? useCheckEmpty(form.value.notes).isError : false
+  form.value.notesError = !checkVerifikator1() && !checkApprovalNonPoCcAdmin() ? useCheckEmpty(form.value.notes).isError : false
 
   if (Number(form.value.invoiceDPCode) === 9013) {
     form.value.dpAmountDeductionError =
@@ -244,6 +258,11 @@ const checkInvoiceInformation = () => {
   if (checkNonPoPettyCash()) {
     form.value.cashJournalCodeError = useCheckEmpty(form.value.cashJournalCode).isError
     form.value.pettyCashPeriodError = useCheckRangeDate(form.value.pettyCashPeriod).isError
+  }
+
+  if (checkNonPoCc()) {
+    form.value.proposalAmountError = !checkApprovalNonPoCcAdmin() ? useCheckEmpty(form.value.proposalAmount).isError :false
+    form.value.npwpReportingError = useCheckEmpty(form.value.npwpReporting).isError
   }
 
   if (

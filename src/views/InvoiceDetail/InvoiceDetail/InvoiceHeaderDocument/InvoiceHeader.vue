@@ -48,7 +48,7 @@
     </div>
     <div v-if="checkIsNonPo() && !checkNonPoCas() && !checkNonPoLba() && !checkNonPoPettyCash()" class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Proposal Amount</p>
-      <p class="font-normal text-sm">{{ form.proposalAmount || '-' }}</p>
+      <p class="font-normal text-sm">{{ form.currCode === 'IDR' ? useFormatIdr(form.proposalAmount) : useFormatUsd(form.proposalAmount) || '-' }}</p>
     </div>
     <div v-if="checkNonPoPettyCash()" class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Petty Cash Period</p>
@@ -89,7 +89,7 @@
         }}
       </p>
     </div>
-    <div v-if="!checkIsNonPo()" class="flex items-center justify-between gap-[10px]">
+    <div v-if="!checkIsNonPo() || (checkIsNonPo() && checkNonPoCc())" class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Invoice Vendor No.</p>
       <p class="font-normal text-sm">{{ form.documentNo || '-' }}</p>
     </div>
@@ -129,7 +129,7 @@
       <p class="font-normal text-sm text-gray-600">DP Amount Deduction</p>
       <p class="font-normal text-sm">{{ form.currCode === 'IDR' ? useFormatIdr(form.dpAmountDeduction) : useFormatUsd(form.dpAmountDeduction) || '-' }}</p>
     </div>
-    <div v-if="checkIsNonPo() && !checkNonPoCas() && !checkNonPoLba()" class="flex items-center justify-between gap-[10px]">
+    <div v-if="checkIsNonPo() && !checkNonPoCas() && !checkNonPoLba() && !checkNonPoCc()" class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">PIC Finance</p>
       <p class="font-normal text-sm">{{ form.picFinance || '-' }}</p>
     </div>
