@@ -357,7 +357,7 @@ const checkVerifHeader = () => {
   const cashJournalCodeError = checkNonPoPettyCash() ? useCheckEmpty(form.value.cashJournalCode).isError : false
   const pettyCashPeriodError = checkNonPoPettyCash() ? useCheckEmpty(form.value.pettyCashStartDate).isError || useCheckEmpty(form.value.pettyCashEndDate).isError : false
 
-  const proposalAmountError = !checkApprovalNonPoCcAdmin() ? useCheckEmpty(form.value.proposalAmount).isError :false
+  const proposalAmountError = !checkApprovalNonPoCcAdmin() && checkIsPoCC() ? useCheckEmpty(form.value.proposalAmount).isError :false
 
   if (
     invoiceDateError ||
