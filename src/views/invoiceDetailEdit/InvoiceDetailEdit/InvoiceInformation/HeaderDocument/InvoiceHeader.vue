@@ -322,7 +322,7 @@
         <label class="form-label">
           PIC Finance
         </label>
-        <input v-model="form.department" class="input" placeholder="" />
+        <input v-model="form.picFinance" class="input" placeholder="" />
       </div>
 
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
