@@ -350,7 +350,9 @@ const checkVerifHeader = () => {
   const notesError = !checkVerifikator1() && !checkApprovalNonPoCcAdmin() ? useCheckEmpty(form.value.notes).isError : false
 
   const taxInvoiceError = checkNonPoCas() ? useCheckEmpty(form.value.taxNo).isError : false
-  const npwpReportingError = (checkNonPoCas() || checkNonPoCc()) && !checkApprovalNonPo1() ? useCheckEmpty(form.value.npwpReporting).isError : false
+  const npwpReportingError =
+    (checkNonPoCas() || (checkNonPoCc() && !checkApprovalNonPoProc() &&!checkApprovalNonPoCcAdmin())) && !checkApprovalNonPo1() ?
+    useCheckEmpty(form.value.npwpReporting).isError : false
 
   const cashJournalCodeError = checkNonPoPettyCash() ? useCheckEmpty(form.value.cashJournalCode).isError : false
   const pettyCashPeriodError = checkNonPoPettyCash() ? useCheckEmpty(form.value.pettyCashStartDate).isError || useCheckEmpty(form.value.pettyCashEndDate).isError : false
