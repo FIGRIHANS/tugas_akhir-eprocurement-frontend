@@ -157,7 +157,6 @@ const form = ref<formTypes>({
   remainingDpAmount: 0,
   dpAmountDeduction: 0,
   casDateReceipt: '',
-  dueDateCas: '',
   proposalAmount: 0,
   picFinance: '',
   cashJournalCode: '',
@@ -340,7 +339,7 @@ const checkPo = () => {
 const checkVerifHeader = () => {
   if (checkApprovalNonPoProc()) return true
 
-  const invoiceDateError = !checkNonPoCas() && !checkNonPoPettyCash() ? useCheckEmpty(form.value.invoiceDate).isError : false
+  const invoiceDateError = !checkNonPoPettyCash() ? useCheckEmpty(form.value.invoiceDate).isError : false
   const documentNoError = !checkNonPoCas() && !checkNonPoPettyCash() ? useCheckEmpty(form.value.documentNo).isError : false
   const creditCardBillingError = checkVerifikator1() ? useCheckEmpty(form.value.creditCardBillingId).isError : false
   
@@ -350,7 +349,6 @@ const checkVerifHeader = () => {
   const transferNewsError = !checkVerifikator1() && !checkNonPoPettyCash() && !checkNonPoCc() ? useCheckEmpty(form.value.transferNews).isError : false
   const notesError = !checkVerifikator1() && !checkApprovalNonPoCcAdmin() ? useCheckEmpty(form.value.notes).isError : false
 
-  const dueDateCasError = checkNonPoCas() ? useCheckEmpty(form.value.dueDateCas).isError : false
   const taxInvoiceError = checkNonPoCas() ? useCheckEmpty(form.value.taxNo).isError : false
   const npwpReportingError = (checkNonPoCas() || checkNonPoCc()) && !checkApprovalNonPo1() ? useCheckEmpty(form.value.npwpReporting).isError : false
 
@@ -368,7 +366,6 @@ const checkVerifHeader = () => {
     transferNewsError ||
     creditCardBillingError ||
     notesError ||
-    dueDateCasError ||
     taxInvoiceError ||
     npwpReportingError ||
     cashJournalCodeError ||
@@ -552,7 +549,6 @@ const mapDataVerifNonPo = () => {
       npwpReporting: form.value.npwpReporting,
       department: form.value.department,
       casDateReceipt: form.value.casDateReceipt || null,
-      dueDateCas: form.value.dueDateCas || null,
       proposalAmount: form.value.proposalAmount,
       picFinance: form.value.picFinance,
       cashJournalCode: form.value.cashJournalCode,
@@ -833,7 +829,6 @@ const setDataDefault = async () => {
     remainingDpAmount: data?.header.remainingDPAmount,
     dpAmountDeduction: data?.header.dpAmountDeduction,
     casDateReceipt: data?.header.casDateReceipt,
-    dueDateCas: data?.header.dueDateCas,
     proposalAmount: data?.header.proposalAmount,
     picFinance: data?.header.picFinance,
     cashJournalCode: data?.header.cashJournalCode,
@@ -967,7 +962,6 @@ const setDataDefaultNonPo = () => {
     remainingDpAmount: data?.header.remainingDPAmount,
     dpAmountDeduction: data?.header.dpAmountDeduction,
     casDateReceipt: data?.header.casDateReceipt,
-    dueDateCas: data?.header.dueDateCas,
     proposalAmount: data?.header.proposalAmount,
     picFinance: data?.header.picFinance,
     cashJournalCode: data?.header.cashJournalCode,

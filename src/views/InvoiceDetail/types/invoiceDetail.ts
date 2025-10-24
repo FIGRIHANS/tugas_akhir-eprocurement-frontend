@@ -39,7 +39,6 @@ export interface formTypes extends documentFormTypes {
   bankCountryCode: string
   department?: string
   casDateReceipt: string
-  dueDateCas: string
   proposalAmount: number
   picFinance: string
   cashJournalCode: string
