@@ -104,7 +104,6 @@ interface ParamsSubmissionHeader {
   creditCardBillingID: string
   department: string
   casDateReceipt: string
-  dueDateCas: string
   proposalAmount: number
   picFinance: string
   cashJournalCode: string
@@ -485,7 +484,6 @@ export interface DetailInvoiceEditTypes {
   bankAccountNo: string
   bankCountryCode: string
   casDateReceipt: string
-  dueDateCas: string
   proposalAmount: number
   picFinance: string
   cashJournalCode: string

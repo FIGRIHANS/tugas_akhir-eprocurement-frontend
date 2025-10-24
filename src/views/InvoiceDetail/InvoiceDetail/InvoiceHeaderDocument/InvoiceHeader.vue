@@ -12,8 +12,8 @@
       <p class="font-normal text-sm text-gray-600">Vendor No.</p>
       <p class="font-normal text-sm">{{ form.vendorId }}</p>
     </div>
-    <div v-if="!checkNonPoCas()" class="flex items-center justify-between gap-[10px]">
-      <p class="font-normal text-sm text-gray-600">Invoice Date</p>
+    <div class="flex items-center justify-between gap-[10px]">
+      <p class="font-normal text-sm text-gray-600">{{ checkNonPoCas() ? 'Due Date CAS' : 'Invoice Date' }}</p>
       <p class="font-normal text-sm">
         {{ form.invoiceDate ? moment(form.invoiceDate).format('YYYY/MM/DD') : '-' }}
       </p>
@@ -78,14 +78,6 @@
       <p class="font-normal text-sm">
         {{
           form.casDateReceipt ? moment(form.casDateReceipt).format('YYYY/MM/DD') : '-'
-        }}
-      </p>
-    </div>
-    <div v-if="checkNonPoCas()" class="flex items-center justify-between gap-[10px]">
-      <p class="font-normal text-sm text-gray-600">Due Date CAS</p>
-      <p class="font-normal text-sm">
-        {{
-          form.dueDateCas ? moment(form.dueDateCas).format('YYYY/MM/DD') : '-'
         }}
       </p>
     </div>

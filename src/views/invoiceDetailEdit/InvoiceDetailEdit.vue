@@ -147,7 +147,6 @@ const form = ref<formTypes>({
   creditCardBillingId: '',
   creditCardBillingError: false,
   casDateReceipt: '',
-  dueDateCas: '',
   proposalAmount: 0,
   picFinance: '',
   cashJournalCode: '',
@@ -224,7 +223,7 @@ const checkInvoiceInformation = () => {
   let status = true
   if (checkApprovalNonPoProc()) return false
 
-  form.value.invoiceDateError = !checkNonPoCas() && !checkNonPoPettyCash() ? useCheckEmpty(form.value.invoiceDate).isError : false
+  form.value.invoiceDateError = !checkNonPoPettyCash() ? useCheckEmpty(form.value.invoiceDate).isError : false
   form.value.documentNoError = !checkNonPoCas() && !checkNonPoPettyCash() ? useCheckEmpty(form.value.documentNo).isError : false
   form.value.creditCardBillingError = checkVerifikator1()
     ? useCheckEmpty(form.value.creditCardBillingId).isError
@@ -250,7 +249,6 @@ const checkInvoiceInformation = () => {
   }
 
   if (checkNonPoCas()) {
-    form.value.dueDateCasError = useCheckEmpty(form.value.dueDateCas).isError
     form.value.taxNoError = useCheckEmpty(form.value.taxNo).isError
     form.value.npwpReportingError = !checkApprovalNonPo1() ? useCheckEmpty(form.value.npwpReporting).isError : false
   }
@@ -274,7 +272,6 @@ const checkInvoiceInformation = () => {
     form.value.transferNewsError ||
     form.value.notesError ||
     form.value.dpAmountDeductionError ||
-    form.value.dueDateCasError ||
     form.value.taxNoError ||
     form.value.npwpReportingError
   )
@@ -595,7 +592,6 @@ const setDataEdit = () => {
     otherDocument: mapDocument(data?.otherDocument || null),
     creditCardBillingId: data?.creditCardBillingId || '',
     casDateReceipt: data?.casDateReceipt || '',
-    dueDateCas: data?.dueDateCas || '',
     proposalAmount: data?.proposalAmount || 0,
     picFinance: data?.picFinance || '',
     cashJournalCode: data?.cashJournalCode || '',
@@ -732,7 +728,6 @@ const setDataDefault = () => {
     otherDocument: other,
     creditCardBillingId: data?.header.creditCardBillingID || '',
     casDateReceipt: data?.header.casDateReceipt || '',
-    dueDateCas: data?.header.dueDateCas || '',
     proposalAmount: data?.header.proposalAmount || 0,
     picFinance: data?.header.picFinance || '',
     cashJournalCode: data?.header.cashJournalCode || '',
@@ -952,7 +947,6 @@ const mapDataVerifNonPo = (): PostEditApprovalNonPoTypes => {
       transferNews: form.value.transferNews,
       npwpReporting: form.value.npwpReporting,
       casDateReceipt: form.value.casDateReceipt,
-      dueDateCas: form.value.dueDateCas,
       proposalAmount: form.value.proposalAmount,
       picFinance: form.value.picFinance,
       cashJournalCode: form.value.cashJournalCode,
