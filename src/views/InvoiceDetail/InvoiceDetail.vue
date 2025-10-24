@@ -1030,7 +1030,6 @@ const setDataEdit = () => {
     department: data?.department,
     creditCardBillingId: data?.creditCardBillingId || '',
     casDateReceipt: data?.casDateReceipt || '',
-    dueDateCas: data?.dueDateCas || '',
     proposalAmount: data?.proposalAmount || 0,
     picFinance: data?.picFinance || '',
     cashJournalCode: data?.cashJournalCode || '',
