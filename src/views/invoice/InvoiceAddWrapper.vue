@@ -696,7 +696,7 @@ const mapDataPostNonPo = () => {
       invoiceNo: form.invoiceNo,
       documentNo: isPettyCash ? ('') :
                   isReimbursement ? (form.invoiceVendorNo || '') :
-                  isCreditCard ? (form.proposalAmountVal || '') :
+                  isCreditCard ? (form.invoiceVendorNo || '') :
                   isCAS ? (form.taxNoInvoice || '') :
                   isLBA ? (form.casNoCode || '') :
                   '',
