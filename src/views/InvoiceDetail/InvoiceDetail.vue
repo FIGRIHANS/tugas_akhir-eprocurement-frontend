@@ -239,9 +239,9 @@ const checkNonPoCas = () => {
   return form.value.invoiceTypeCode === 3
 }
 
-// const checkNonPoLba = () => {
-//   return form.value.invoiceTypeCode === 4
-// }
+const checkNonPoLba = () => {
+  return form.value.invoiceTypeCode === 4
+}
 
 const checkNonPoCc = () => {
   return form.value.invoiceTypeCode === 2
@@ -340,13 +340,13 @@ const checkVerifHeader = () => {
   if (checkApprovalNonPoProc()) return true
 
   const invoiceDateError = !checkNonPoPettyCash() ? useCheckEmpty(form.value.invoiceDate).isError : false
-  const documentNoError = !checkNonPoCas() && !checkNonPoPettyCash() ? useCheckEmpty(form.value.documentNo).isError : false
+  const documentNoError = !checkNonPoCas() && !checkNonPoPettyCash() && !checkNonPoLba() ? useCheckEmpty(form.value.documentNo).isError : false
   const creditCardBillingError = checkVerifikator1() ? useCheckEmpty(form.value.creditCardBillingId).isError : false
   
   const postingDateError = !checkVerifikator1() && !checkNonPoPettyCash() && !checkNonPoCc() ? useCheckEmpty(form.value.postingDate).isError : false
-  const estimatedPaymentDateError = !checkVerifikator1() || (checkNonPoPettyCash() && checkApprovalNonPo1() && !checkNonPoCc()) ? useCheckEmpty(form.value.estimatedPaymentDate).isError : false
-  const paymentMethodError = !checkVerifikator1() && !checkNonPoPettyCash() && !checkApprovalNonPoCcAdmin() ? useCheckEmpty(form.value.paymentMethodCode).isError : false
-  const transferNewsError = !checkVerifikator1() && !checkNonPoPettyCash() && !checkNonPoCc() ? useCheckEmpty(form.value.transferNews).isError : false
+  const estimatedPaymentDateError = !checkVerifikator1() && !checkNonPoLba() || (checkNonPoPettyCash() && checkApprovalNonPo1() && !checkNonPoCc()) ? useCheckEmpty(form.value.estimatedPaymentDate).isError : false
+  const paymentMethodError = !checkVerifikator1() && !checkNonPoPettyCash() && !checkApprovalNonPoCcAdmin() && !checkNonPoLba() ? useCheckEmpty(form.value.paymentMethodCode).isError : false
+  const transferNewsError = !checkVerifikator1() && !checkNonPoPettyCash() && !checkNonPoCc() && !checkNonPoLba() ? useCheckEmpty(form.value.transferNews).isError : false
   const notesError = !checkVerifikator1() && !checkApprovalNonPoCcAdmin() ? useCheckEmpty(form.value.notes).isError : false
 
   const taxInvoiceError = checkNonPoCas() ? useCheckEmpty(form.value.taxNo).isError : false

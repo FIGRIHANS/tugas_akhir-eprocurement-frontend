@@ -239,7 +239,6 @@ interface ParamsNonPoHeaderTypes {
   department: string
   profileId: string
   casDateReceipt: string
-  dueDateCas: string
   proposalAmount: number
   picFinance: string
   cashJournalCode: string
@@ -658,7 +657,6 @@ interface Header {
   npwpReporting: string | null
   department: string | null
   casDateReceipt: string
-  dueDateCas: string
   proposalAmount: number
   picFinance: string
   cashJournalCode: string
