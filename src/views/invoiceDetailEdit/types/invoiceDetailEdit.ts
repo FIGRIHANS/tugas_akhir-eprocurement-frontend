@@ -47,8 +47,6 @@ export interface formTypes extends documentFormTypes {
   creditCardBillingId: string
   creditCardBillingError?: boolean
   casDateReceipt: string
-  dueDateCas: string
-  dueDateCasError?: boolean
   proposalAmount: number
   proposalAmountError?: boolean
   picFinance: string

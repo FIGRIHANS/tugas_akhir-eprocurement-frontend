@@ -47,9 +47,9 @@
         <input v-model="form.cashJournalCode" class="input" placeholder="" disabled />
       </div>
 
-      <div v-if="!checkNonPoCas()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
-          Invoice Date
+          {{ checkNonPoCas() ? 'Due Date CAS' : 'Invoice Date' }}
           <span v-if="!disabledInvoiceDate()" class="text-red-500 ml-[4px]">*</span>
         </label>
         <input
@@ -168,18 +168,6 @@
           class="w-full -ml-[15px]"
           teleport
         />
-      </div>
-
-      <div
-        v-if="checkNonPoCas()"
-        class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
-      >
-        <label class="form-label">
-          Due Date CAS
-          <span class="text-red-500 ml-[4px]">*</span>
-        </label>
-        <input v-if="checkApproval3()" :value="form.dueDateCas ? moment(form.dueDateCas).format('YYYY/MM/DD') : ''" class="input" placeholder="" disabled />
-        <DatePicker v-else v-model="form.dueDateCas" format="yyyy/MM/dd" :error="form.dueDateCasError" class="w-full -ml-[15px]" teleport />
       </div>
 
       <div
@@ -436,9 +424,9 @@ const checkApproval1 = () => {
   return userData.value?.profile.profileId === 3002
 }
 
-const checkApproval3 = () => {
-  return userData.value?.profile.profileId === 3003
-}
+// const checkApproval3 = () => {
+//   return userData.value?.profile.profileId === 3003
+// }
 
 const checkNonPoCas = () => {
   return form.value.invoiceTypeCode === 3

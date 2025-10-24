@@ -57,7 +57,6 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
       dpAmountDeduction: 0,
       creditCardBillingId: '',
       casDateReceipt: '',
-      dueDateCas: '',
       proposalAmount: 0,
       picFinance: '',
       cashJournalCode: '',
