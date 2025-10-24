@@ -656,24 +656,23 @@ const goVerif = () => {
     if (!status) return
 
     isLoading.value = true
-    mapDataVerifNonPo()
-    // verificationApi
-    //   .postSubmissionNonPo(mapDataVerifNonPo())
-    //   .then((response) => {
-    //     if (response.statusCode === 200) {
-    //       verificationApi.resetDetailInvoiceEdit()
-    //       const idModal = document.querySelector('#success_verif_modal')
-    //       const modal = KTModal.getInstance(idModal as HTMLElement)
-    //       modal.show()
-    //       for (const item of costExpensesTempDelete.value) {
-    //         verificationApi.deleteCostExpense(form.value.invoiceUId, item)
-    //       }
-    //     }
-    //   })
-    //   .finally(() => {
-    //     isLoading.value = false
-    //     verificationApi.isFromEdit = false
-    //   })
+    verificationApi
+      .postSubmissionNonPo(mapDataVerifNonPo())
+      .then((response) => {
+        if (response.statusCode === 200) {
+          verificationApi.resetDetailInvoiceEdit()
+          const idModal = document.querySelector('#success_verif_modal')
+          const modal = KTModal.getInstance(idModal as HTMLElement)
+          modal.show()
+          for (const item of costExpensesTempDelete.value) {
+            verificationApi.deleteCostExpense(form.value.invoiceUId, item)
+          }
+        }
+      })
+      .finally(() => {
+        isLoading.value = false
+        verificationApi.isFromEdit = false
+      })
   }
 }
 
