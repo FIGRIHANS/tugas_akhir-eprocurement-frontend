@@ -445,7 +445,7 @@ const checkNonPoPettyCash = () => {
 }
 
 const disabledInvoiceDate = () => {
-  return checkIsAccountingTax() || checkApprovalNonPoProc() || route.query.isSendSap === 'true'
+  return (!checkIsNonPo() && checkIsAccountingTax()) || checkApprovalNonPoProc() || route.query.isSendSap === 'true'
 }
 
 const disabledPostingDate = () => {

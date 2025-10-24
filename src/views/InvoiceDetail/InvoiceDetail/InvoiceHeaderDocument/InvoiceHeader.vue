@@ -74,7 +74,7 @@
       <p class="font-normal text-sm">{{ form.taxNo || '-' }}</p>
     </div>
     <div v-if="checkNonPoLba()" class="flex items-center justify-between gap-[10px]">
-      <p class="font-normal text-sm text-gray-600">Date of Receipt of Remaining CAS</p>
+      <p class="font-normal text-sm text-gray-600">Remaining CAS Receipt Date</p>
       <p class="font-normal text-sm">
         {{
           form.casDateReceipt ? moment(form.casDateReceipt).format('YYYY/MM/DD') : '-'
