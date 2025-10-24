@@ -264,7 +264,7 @@ const checkInvoiceInformation = () => {
 
   if (checkNonPoCc()) {
     form.value.proposalAmountError = !checkApprovalNonPoCcAdmin() ? useCheckEmpty(form.value.proposalAmount).isError :false
-    form.value.npwpReportingError = useCheckEmpty(form.value.npwpReporting).isError
+    form.value.npwpReportingError = !checkApprovalNonPoProc() &&!checkApprovalNonPoCcAdmin() ? useCheckEmpty(form.value.npwpReporting).isError : false
   }
 
   if (checkNonPoLba()) {
