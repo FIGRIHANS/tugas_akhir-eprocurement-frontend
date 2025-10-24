@@ -267,7 +267,7 @@
       >
         <label class="form-label">
           Credit Card Billing ID
-          <span class="text-red-500 ml-[4px]">*</span>
+          <span v-if="!checkApprovalNonPoProc()" class="text-red-500 ml-[4px]">*</span>
         </label>
         <input
           v-model="form.creditCardBillingId"

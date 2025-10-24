@@ -225,7 +225,7 @@ const checkNonPoPettyCash = () => {
 
 const checkInvoiceInformation = () => {
   let status = true
-  if (checkApprovalNonPoProc()) return false
+  if (checkApprovalNonPoProc()) return true
 
   form.value.invoiceDateError = !checkNonPoPettyCash() ? useCheckEmpty(form.value.invoiceDate).isError : false
   form.value.documentNoError = !checkNonPoCas() && !checkNonPoPettyCash() && !checkNonPoLba() ? useCheckEmpty(form.value.documentNo).isError : false
