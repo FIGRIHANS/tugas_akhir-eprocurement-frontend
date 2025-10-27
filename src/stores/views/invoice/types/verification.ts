@@ -664,6 +664,7 @@ interface Header {
   pettyCashStartDate: string
   pettyCashEndDate: string
   npwpReportingName: string
+  creditCardBillingId: string | null
 }
 
 export interface SubmissionNonPoTypes {

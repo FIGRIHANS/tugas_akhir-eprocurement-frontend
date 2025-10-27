@@ -342,7 +342,7 @@ const checkVerifHeader = () => {
   const invoiceDateError = !checkNonPoPettyCash() ? useCheckEmpty(form.value.invoiceDate).isError : false
   const documentNoError = !checkNonPoCas() && !checkNonPoPettyCash() && !checkNonPoLba() ? useCheckEmpty(form.value.documentNo).isError : false
   const creditCardBillingError = checkVerifikator1() ? useCheckEmpty(form.value.creditCardBillingId).isError : false
-  
+
   const postingDateError = !checkVerifikator1() && !checkNonPoPettyCash() && !checkNonPoCc() ? useCheckEmpty(form.value.postingDate).isError : false
   const estimatedPaymentDateError = !checkVerifikator1() && !checkNonPoLba() || (checkNonPoPettyCash() && checkApprovalNonPo1() && !checkNonPoCc()) ? useCheckEmpty(form.value.estimatedPaymentDate).isError : false
   const paymentMethodError = !checkVerifikator1() && !checkNonPoPettyCash() && !checkApprovalNonPoCcAdmin() && !checkNonPoLba() ? useCheckEmpty(form.value.paymentMethodCode).isError : false
@@ -548,6 +548,7 @@ const mapDataVerifNonPo = () => {
       transferNews: form.value.transferNews,
       notes: form.value.notes,
       currCode: form.value.currCode,
+      creditCardBillingId: form.value.creditCardBillingId,
       npwpReporting: form.value.npwpReporting,
       department: form.value.department,
       casDateReceipt: form.value.casDateReceipt || null,
