@@ -288,7 +288,7 @@
       <div v-if="!checkNonPoPettyCash()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           NPWP Reporting
-          <span v-if="!disabledNpwpReporting() && !checkApproval1() || checkNonPoLba()" class="text-red-500 ml-[4px]">*</span>
+          <span v-if="!disabledNpwpReporting() && !checkApproval1AndCas()" class="text-red-500 ml-[4px]">*</span>
         </label>
         <select
           v-model="form.npwpReporting"
@@ -410,8 +410,8 @@ const checkApprovalNonPoCcAdmin = () => {
   return checkIsNonPo() && userData.value?.profile.profileId === 3190
 }
 
-const checkApproval1 = () => {
-  return userData.value?.profile.profileId === 3002
+const checkApproval1AndCas = () => {
+  return userData.value?.profile.profileId === 3002 && checkNonPoCas()
 }
 
 // const checkApproval3 = () => {
@@ -471,7 +471,7 @@ const disabledTransferNews = () => {
 }
 
 const disabledNpwpReporting = () => {
-  return (isNpwrDisabled() && !checkNonPoLba()) || checkVerifikator1() || checkApprovalNonPoProc() || checkApprovalNonPoCcAdmin() || route.query.isSendSap === 'true'
+  return checkVerifikator1() || checkApprovalNonPoProc() || checkApprovalNonPoCcAdmin() || route.query.isSendSap === 'true'
 }
 
 const disabledDpAmountDeduction = () => {
@@ -508,14 +508,6 @@ watch(
     else form.value.cashJournalName = ''
   },
 )
-
-const isNpwrDisabled = () => {
-  if (userData.value && userData.value.profile.profileId === 3002) {
-    return true
-  } else {
-    return false
-  }
-}
 
 watch(
   () => form,
