@@ -1,5 +1,49 @@
 import { defineStore } from 'pinia'
-import type { IUser } from './types/user'
+interface IUser {
+  id: number;
+  userName: string;
+  employeeName: string;
+  employeeId: number;
+  profileId: number;
+  lastLoginDate?: string;
+}
+
+interface IUserInformation {
+  employeeId: number;
+  employeeName: string;
+  email: string;
+  position?: string;
+  departmentName?: string;
+}
+
+interface IUserDetail extends IUser {
+  profile?: {
+    profileId: number;
+    profileName: string;
+    lastLoginDate?: string;
+  };
+  roleAuths?: Array<{
+    role?: {
+      roleId: string;
+      roleName: string;
+    };
+    auths?: Array<{
+      authId: string;
+      authName: string;
+      authDescription?: string;
+    }>;
+  }>;
+}
+
+interface CreateUserRequest {
+  userName: string;
+  userPassword: string;
+  employeeName: string;
+  isActive: boolean;
+  employeeId: number;
+  profileId: number;
+  selectedRoleIds: string[];
+}
 import { ref } from 'vue'
 import type { ApiResponse } from '@/core/type/api'
 import userApi from '@/core/utils/userApi'
@@ -21,9 +65,9 @@ export const useUserStore = defineStore('userStore', () => {
     pageSize: 0,
   })
 
-  const userDetail = ref(null)
-  const userInformation = ref(null)
-  const userUserName = ref(null)
+  const userDetail = ref<IUserDetail | null>(null)
+  const userInformation = ref<IUserInformation | null>(null)
+  const userUserName = ref<string | null>(null)
 
   const getAllUsers = async () => {
     loading.value = true
@@ -68,11 +112,13 @@ export const useUserStore = defineStore('userStore', () => {
     loading.value = true
     error.value = null
     try {
-      const response: ApiResponse<unknown> = await userApi.get(
+      const response: ApiResponse<IUserInformation> = await userApi.get(
         `/user/information?employeeId=${employeeId}`,
       )
 
-      userInformation.value = response?.data?.result.content
+      if (response?.data?.result?.content) {
+        userInformation.value = response.data.result.content
+      }
     } catch (err: unknown) {
       if (err instanceof Error) {
         error.value = err.message
@@ -86,11 +132,15 @@ export const useUserStore = defineStore('userStore', () => {
     loading.value = true
     error.value = null
     try {
-      const response: ApiResponse<unknown> = await userApi.get(
+      const response: ApiResponse<string> = await userApi.get(
         `/user/username-by-employeeid?employeeId=${employeeId}`,
       )
 
-      userUserName.value = response?.data?.result.content
+      if (typeof response?.data?.result.content === 'string') {
+        userUserName.value = response.data.result.content
+      } else {
+        error.value = 'Invalid username response format'
+      }
     } catch (err: unknown) {
       if (err instanceof Error) {
         error.value = err.message
@@ -104,9 +154,11 @@ export const useUserStore = defineStore('userStore', () => {
     loading.value = true
     error.value = null
     try {
-      const response: ApiResponse<unknown> = await userApi.get(`/user?userName=${userName}`)
+      const response: ApiResponse<IUserDetail> = await userApi.get(`/user?userName=${userName}`)
 
-      userDetail.value = response?.data?.result?.content
+      if (response?.data?.result?.content) {
+        userDetail.value = response.data.result.content
+      }
     } catch (err: unknown) {
       if (err instanceof Error) {
         error.value = err.message
@@ -116,11 +168,11 @@ export const useUserStore = defineStore('userStore', () => {
     }
   }
 
-  const storeUserData = async (body: any) => {
+  const storeUserData = async (body: CreateUserRequest) => {
     loading.value = true
     error.value = null
     try {
-      const response: ApiResponse<unknown> = await userApi.post('/auth', {
+      const response: ApiResponse<{ success: boolean; message?: string }> = await userApi.post('/auth', {
         ...body,
       })
 
