@@ -5,7 +5,6 @@ import { ref } from 'vue'
 import type { IEmployeePayload } from './types/employee'
 
 export const useEmployeeStore = defineStore('employeeStore', () => {
-  // state
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const employees = ref<any>([])
   const employee = ref(null)
@@ -16,8 +15,6 @@ export const useEmployeeStore = defineStore('employeeStore', () => {
   const errorEmployees = ref(null)
   const errorEmployee = ref(null)
 
-  // getters
-  // actions
   const getEmployees = async () => {
     loadingEmployees.value = true
     errorEmployees.value = null

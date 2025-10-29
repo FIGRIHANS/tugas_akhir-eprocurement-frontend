@@ -77,6 +77,12 @@
                   <i class="ki-filled ki-eye !text-lg"></i>
                 </button>
                 <button
+                  class="btn btn-outline btn-primary btn-icon w-[32px] h-[32px]"
+                  @click="openDetailVerification(parent.invoiceUId)"
+                >
+                  <i class="ki-duotone ki-data !text-lg"></i>
+                </button>
+                <button
                   class="btn btn-icon btn-outline btn-primary w-[21px] h-[21px]"
                   @click="parent.isOpenChild = !parent.isOpenChild"
                 >
@@ -148,6 +154,11 @@
         @pageChange="setPage"
       />
     </div>
+        <DetailVerificationModal
+      type="po"
+      @loadDetail="loadData"
+      @setClearId="viewDetailId = ''"
+    />
   </div>
 </template>
 
@@ -164,10 +175,12 @@ import type { ListPoTypes } from '@/stores/views/invoice/types/submission'
 import moment from 'moment'
 import { cloneDeep } from 'lodash'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
+import { KTModal } from '@/metronic/core'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
 
 const FilterList = defineAsyncComponent(() => import('./FilterList.vue'))
+const DetailVerificationModal = defineAsyncComponent(() => import('../invoiceList/DetailVerificationModal.vue'))
 
 const companyCodeList = computed(() => invoiceMasterApi.companyCode)
 const invoicePoTypeList = computed(() => invoiceMasterApi.invoicePoType)
@@ -182,6 +195,22 @@ const sortBy = ref<string>('')
 const sortColumnName = ref<string>('')
 const filteredPayload = ref([])
 const filterChild = ref(null)
+const viewDetailId = ref('')
+
+const openDetailVerification = (invoiceId: string) => {
+  viewDetailId.value = invoiceId
+  const idModal = document.querySelector('#detail_verification_modal')
+  const modal = KTModal.getInstance(idModal as HTMLElement)
+  modal.show()
+}
+
+const loadData = async () => {
+  try {
+    await invoiceApi.getPoDetail(viewDetailId.value)
+  } catch (error) {
+    console.error('Error loading PO detail:', error)
+  }
+}
 
 const StatusInvoice = ref([
   { value: '1', label: 'Waiting to Verify' },
