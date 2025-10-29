@@ -34,7 +34,7 @@
     </div>
     <div v-if="checkNonPoLba()" class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">CAS No.</p>
-      <p class="font-normal text-sm">{{ '-' }}</p>
+      <p class="font-normal text-sm">{{ form.documentNo || '-' }}</p>
     </div>
     <div class="flex items-center justify-between gap-[10px]">
       <p class="font-normal text-sm text-gray-600">Company Code</p>
