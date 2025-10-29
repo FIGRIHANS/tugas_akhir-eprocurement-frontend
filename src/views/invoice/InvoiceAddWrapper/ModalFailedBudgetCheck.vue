@@ -5,9 +5,7 @@
         <FailedLogo />
         <div>
           <p class="text-lg font-medium text-center">Budget Checking Failed</p>
-          <p class="text-[13px] mt-[14px] text-center">
-            {{ getResponseMessage() }}
-          </p>
+          <p class="text-[14px] mt-[14px] text-center">{{ getResponseMessage() }}</p>
         </div>
       </div>
     </div>

@@ -5,8 +5,7 @@
         <ModalSuccessLogo />
         <div class="text-center font-inter">
           <p class="text-lg font-medium">Budget Checking Succeed</p>
-          <p class="text-sm text-black-100 mt-1">Budget Available, Invoice can be proceed</p>
-          <p class="text-[13px] font-normal mt-2">{{ getResponseMessage() }}</p>
+          <p class="text-[14px] font-normal mt-2">{{ getResponseMessage() }}</p>
         </div>
       </div>
     </div>
