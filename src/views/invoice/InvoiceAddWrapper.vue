@@ -567,7 +567,7 @@ const mapInvoiceItem = () => {
       itemAmount: Number(item.itemAmount),
       itemText: item.itemText,
       debitCredit: item.debitCredit || 'D',
-      taxCode: item.taxCode,
+      taxCode: form.invoiceType === '5' ? '' : item.taxCode,
       vatAmount: item.vatAmount,
       costCenter: item.costCenter,
       profitCenter: item.profitCenter,
@@ -1187,7 +1187,7 @@ const mapDataCheck = () => {
       GL_ACCOUNT: listActivity.value[itemIndex].code,
       ITEM_TEXT: item.itemText,
       ALLOC_NMBR: '',
-      TAX_CODE: item.taxCode,
+      TAX_CODE: form.invoiceType === '5' ? '' : item.taxCode,
       COSTCENTER: item.costCenter || '',
       PROFIT_CTR: item.profitCenter || '',
     }
@@ -1208,7 +1208,7 @@ const mapDataCheck = () => {
       PYMT_METH: '',
       ALLOC_NMBR: '',
       ITEM_TEXT: form.cashJournalCode || '',
-      TAX_CODE: form.invoiceItem.length > 0 ? form.invoiceItem[0].taxCode : '',
+      TAX_CODE: '',
       PAYMT_REF: '',
     }
     accountPayable.push(accData)
@@ -1241,18 +1241,20 @@ const mapDataCheck = () => {
     accountPayable.push(accData)
   }
 
-  for (const item of form.invoiceItem) {
-    const checkAccountTax = accountTax.findIndex((sub) => sub.TAX_CODE === item.taxCode)
-    if (item.taxCode !== 'V0' && checkAccountTax === -1) {
-      const index = listTaxCalculation.value.findIndex((sub) => sub.code === item.taxCode)
-      if (index !== -1) {
-        itemNoAcc.value += 1
-        const taxData = {
-          ITEMNO_ACC: itemNoAcc.value,
-          TAX_CODE: item.taxCode,
-          TAX_RATE: listTaxCalculation.value[index].value,
+  if (form.invoiceType !== '5') {
+    for (const item of form.invoiceItem) {
+      const checkAccountTax = accountTax.findIndex((sub) => sub.TAX_CODE === item.taxCode)
+      if (item.taxCode !== 'V0' && checkAccountTax === -1) {
+        const index = listTaxCalculation.value.findIndex((sub) => sub.code === item.taxCode)
+        if (index !== -1) {
+          itemNoAcc.value += 1
+          const taxData = {
+            ITEMNO_ACC: itemNoAcc.value,
+            TAX_CODE: item.taxCode,
+            TAX_RATE: listTaxCalculation.value[index].value,
+          }
+          accountTax.push(taxData)
         }
-        accountTax.push(taxData)
       }
     }
   }
@@ -1397,7 +1399,6 @@ const checkBudget = () => {
     .then((response) => {
       if (!response?.result || response?.statusCode !== 200) {
         isCheckBudget.value = false
-        // Safely extract message(s) from the response without adding custom text
         const extractResponseMessages = (resp: unknown): string => {
           if (!resp || typeof resp !== 'object' || resp === null) return ''
           const rObj = resp as Record<string, unknown>
@@ -1436,7 +1437,6 @@ const checkBudget = () => {
     })
     .catch((error) => {
       isCheckBudget.value = false
-      // Reuse safe extraction for error responses
       const extractResponseMessages = (resp: unknown): string => {
         if (!resp || typeof resp !== 'object' || resp === null) return ''
         const rObj = resp as Record<string, unknown>
@@ -1532,7 +1532,7 @@ const checkFormBudget = () => {
   }
 
   for (const item of form.invoiceItem) {
-    if (item.isEdit || !item.itemAmount || !item.taxCode) status = true
+    if (item.isEdit || !item.itemAmount || (!isPettyCash && !item.taxCode)) status = true
   }
 
   return status

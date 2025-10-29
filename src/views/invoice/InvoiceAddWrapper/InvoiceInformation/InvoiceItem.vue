@@ -72,7 +72,7 @@
                   </option>
                 </select>
               </td>
-              <td>
+              <td v-if="!isPettyCash">
                 <span v-if="!item.isEdit">{{ getTaxCodeName(item.taxCode) || '-' }}</span>
                 <v-select
                   v-else
@@ -149,12 +149,14 @@ const columns = computed(() => {
     'Item Text'
   ]
 
-  // Add Debit/Credit only for non-Petty Cash
   if (!isPettyCash.value) {
     baseColumns.push('Debit/Credit')
   }
 
-  baseColumns.push('Tax Code')
+  if (!isPettyCash.value) {
+    baseColumns.push('Tax Code')
+  }
+
   baseColumns.push('VAT Amount')
   if (!isPettyCash.value) {
     baseColumns.push('Cost Center')
@@ -162,7 +164,6 @@ const columns = computed(() => {
   baseColumns.push('Profit Center')
   baseColumns.push('Assignment')
 
-  // Add WHT columns only for non-Petty Cash
   if (!isPettyCash.value) {
     baseColumns.push('WHT Type')
     baseColumns.push('WHT Code')
@@ -285,7 +286,6 @@ watch(
   }
 )
 
-// Clear cost center when invoice type is petty cash
 watch(
   () => form?.invoiceType,
   () => {
