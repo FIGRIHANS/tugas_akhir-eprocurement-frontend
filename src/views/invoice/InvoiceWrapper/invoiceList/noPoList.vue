@@ -72,12 +72,18 @@
               <td colspan="10" class="text-center">No data found.</td>
             </tr>
             <tr v-for="item in list" :key="item.invoiceUId" class="text-nowrap">
-              <td>
+                <td class="flex items-center gap-[16px]">
                 <button
-                  class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]"
+                  class="btn btn-outline btn-primary btn-icon w-[32px] h-[32px]"
                   @click="goToDetail(item)"
                 >
                   <i class="ki-filled ki-eye !text-lg"></i>
+                </button>
+                <button
+                  class="btn btn-outline btn-primary btn-icon w-[32px] h-[32px]"
+                  @click="openDetailVerification(item.invoiceUId)"
+                >
+                  <i class="ki-duotone ki-data !text-lg"></i>
                 </button>
               </td>
               <td>{{ item.invoiceNo }}</td>
@@ -113,7 +119,26 @@
           @page-change="setPage"
         />
       </div>
+      <div class="flex items-center gap-[16px] mt-[24px]">
+        <div class="flex items-center">
+          <div
+            class="bg-primary rounded-md p-[7px] w-[40px] h-[40px] flex items-center justify-center"
+          >
+            <i class="ki-filled ki-eye text-white text-[24px]"></i>
+          </div>
+          <p class="ml-[8px]">: View Detail invoice</p>
+        </div>
+        <div class="flex items-center">
+          <div
+            class="bg-primary-light border border-primary-clarity rounded-md p-[7px] w-[40px] h-[40px] flex items-center justify-center"
+          >
+            <i class="ki-duotone ki-data text-primary text-[24px]"></i>
+          </div>
+          <p class="ml-[8px]">: Verification Detail Invoice</p>
+        </div>
+      </div>
     </section>
+    <DetailVerificationModal @loadDetail="loadData" @setClearId="viewDetailId = ''" />
   </div>
 </template>
 
@@ -122,7 +147,6 @@ import { ref, reactive, defineAsyncComponent, onMounted, computed } from 'vue'
 import LPagination from '@/components/pagination/LPagination.vue'
 import type { filterListTypes } from '../../types/invoiceList'
 import InputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
-const FilterList = defineAsyncComponent(() => import('./FilterList.vue'))
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import { useFormatIdr } from '@/composables/currency'
@@ -132,11 +156,16 @@ import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterDat
 import type { ListPoTypes } from '@/stores/views/invoice/types/submission'
 import { useRouter } from 'vue-router'
 import { cloneDeep } from 'lodash'
+import { KTModal } from '@/metronic/core'
 
 const invoiceSubmissionApi = useInvoiceSubmissionStore()
 const router = useRouter()
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const filterChild = ref(null)
+const viewDetailId = ref('')
+
+const FilterList = defineAsyncComponent(() => import('./FilterList.vue'))
+const DetailVerificationModal = defineAsyncComponent(() => import('../invoiceList/DetailVerificationModal.vue'))
 
 // import UiModal from '@/components/modal/UiModal.vue'
 // import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
@@ -228,6 +257,17 @@ const setList = (listData: ListPoTypes[]) => {
 const setPage = (value: number) => {
   currentPage.value = value
   sortColumn(null)
+}
+
+const openDetailVerification = (invoiceId: string) => {
+  viewDetailId.value = invoiceId
+  const idModal = document.querySelector('#detail_verification_modal')
+  const modal = KTModal.getInstance(idModal as HTMLElement)
+  modal.show()
+}
+
+const loadData = () => {
+  invoiceSubmissionApi.getNonPoDetail(viewDetailId.value)
 }
 
 const deleteFilter = (key: string) => {
