@@ -88,7 +88,7 @@
               <td>
                 <span>{{ form?.currency === 'IDR' ? useFormatIdr(item.vatAmount) : useFormatUsd(item.vatAmount) || '-' }}</span>
               </td>
-              <td>
+              <td v-if="!isPettyCash">
                 <span v-if="!item.isEdit">{{ getCostCenterName(item.costCenter) || '-' }}</span>
                 <v-select
                   v-else
@@ -156,7 +156,9 @@ const columns = computed(() => {
 
   baseColumns.push('Tax Code')
   baseColumns.push('VAT Amount')
-  baseColumns.push('Cost Center')
+  if (!isPettyCash.value) {
+    baseColumns.push('Cost Center')
+  }
   baseColumns.push('Profit Center')
   baseColumns.push('Assignment')
 
@@ -187,7 +189,7 @@ const addNew = () => {
       debitCredit: 'D',
       taxCode: '',
       vatAmount: 0,
-      costCenter: '',
+      costCenter: isPettyCash.value ? '' : '',
       profitCenter: '',
       assignment: '',
       whtType: '',
@@ -277,6 +279,21 @@ watch(
   () => form?.companyCode,
   () => {
     if (form?.companyCode) invoiceMasterApi.getCostCenter(form?.companyCode || '')
+  },
+  {
+    immediate: true
+  }
+)
+
+// Clear cost center when invoice type is petty cash
+watch(
+  () => form?.invoiceType,
+  () => {
+    if (form && form.invoiceType === '5') {
+      form.invoiceItem.forEach(item => {
+        item.costCenter = ''
+      })
+    }
   },
   {
     immediate: true
