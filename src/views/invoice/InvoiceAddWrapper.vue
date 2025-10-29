@@ -1397,8 +1397,46 @@ const checkBudget = () => {
   invoiceApi
     .postCheckBudget(data)
     .then((response) => {
-      if (!response?.result || response?.statusCode !== 200) {
+      // The backend may return the budget check either as
+      // 1) an ApiResponse with result.content (handled by the store), or
+      // 2) a raw object with top-level RESPONSE (e.g. { RESPONSE: [ { TYPE: 'S', MESSAGE: [...] } ] })
+      // If case (2) happens, save it into the store so the modal can read it.
+      if (response) {
+        const respTop = response as unknown as Record<string, unknown>
+        const topRESPONSE = respTop['RESPONSE']
+        if (Array.isArray(topRESPONSE)) {
+          // store it so modal/computed readers can access it
+          invoiceApi.responseCheckBudget = respTop as unknown as typeof invoiceApi.responseCheckBudget
+        }
+      }
+
+      // Prefer store value (postCheckBudget may have set it), fallback to response
+      const respObj = (() => {
+        if (invoiceApi.responseCheckBudget) return invoiceApi.responseCheckBudget
+        if (response && typeof response === 'object') {
+          const r = response as unknown as Record<string, unknown>
+          const result = r['result']
+          if (result && typeof result === 'object') {
+            const resObj = result as Record<string, unknown>
+            if (resObj['content']) return resObj['content']
+          }
+          return response
+        }
+        return undefined
+      })()
+
+      const RESPONSE = respObj && typeof respObj === 'object' ? (respObj as Record<string, unknown>)['RESPONSE'] : undefined
+      const hasSuccess = Array.isArray(RESPONSE) && (RESPONSE as Array<Record<string, unknown>>).some((r) => (r['TYPE'] as string) === 'S')
+
+      if (hasSuccess) {
+        isCheckBudget.value = true
+        const idModal = document.querySelector('#success_budget_check_modal')
+        const modal = KTModal.getInstance(idModal as HTMLElement)
+        if (modal) modal.show()
+      } else {
         isCheckBudget.value = false
+
+        // extract a meaningful message if possible
         const extractResponseMessages = (resp: unknown): string => {
           if (!resp || typeof resp !== 'object' || resp === null) return ''
           const rObj = resp as Record<string, unknown>
@@ -1420,23 +1458,15 @@ const checkBudget = () => {
           return ''
         }
 
-        invoiceApi.errorMessageSubmission = extractResponseMessages(response)
+        invoiceApi.errorMessageSubmission = extractResponseMessages(respObj || response)
         const idModal = document.querySelector('#failed_budget_check_modal')
         const modal = KTModal.getInstance(idModal as HTMLElement)
-        if (modal) {
-          modal.show()
-        }
-      } else {
-        isCheckBudget.value = true
-        const idModal = document.querySelector('#success_budget_check_modal')
-        const modal = KTModal.getInstance(idModal as HTMLElement)
-        if (modal) {
-          modal.show()
-        }
+        if (modal) modal.show()
       }
     })
     .catch((error) => {
       isCheckBudget.value = false
+
       const extractResponseMessages = (resp: unknown): string => {
         if (!resp || typeof resp !== 'object' || resp === null) return ''
         const rObj = resp as Record<string, unknown>
@@ -1458,12 +1488,19 @@ const checkBudget = () => {
         return ''
       }
 
-      invoiceApi.errorMessageSubmission = extractResponseMessages(error?.response?.data)
+      // if axios error contains response.data with content, store it
+      const errData = error?.response?.data
+      if (errData) {
+        const errTop = errData as unknown as Record<string, unknown>
+        if (Array.isArray(errTop['RESPONSE'])) {
+          invoiceApi.responseCheckBudget = errTop as unknown as typeof invoiceApi.responseCheckBudget
+        }
+      }
+
+      invoiceApi.errorMessageSubmission = extractResponseMessages(errData || error)
       const idModal = document.querySelector('#failed_budget_check_modal')
       const modal = KTModal.getInstance(idModal as HTMLElement)
-      if (modal) {
-        modal.show()
-      }
+      if (modal) modal.show()
     })
 }
 
