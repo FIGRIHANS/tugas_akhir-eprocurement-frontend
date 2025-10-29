@@ -1394,17 +1394,71 @@ const checkBudget = () => {
 
   invoiceApi
     .postCheckBudget(data)
-    .then(() => {
-      const idModal = document.querySelector('#success_budget_check_modal')
-      const modal = KTModal.getInstance(idModal as HTMLElement)
-      if (modal) {
-        modal.show()
+    .then((response) => {
+      if (!response?.result || response?.statusCode !== 200) {
+        isCheckBudget.value = false
+        // Safely extract message(s) from the response without adding custom text
+        const extractResponseMessages = (resp: unknown): string => {
+          if (!resp || typeof resp !== 'object' || resp === null) return ''
+          const rObj = resp as Record<string, unknown>
+          const RESPONSE = rObj['RESPONSE']
+          if (Array.isArray(RESPONSE) && RESPONSE.length > 0 && typeof RESPONSE[0] === 'object') {
+            const first = RESPONSE[0] as Record<string, unknown>
+            const MESSAGE = first['MESSAGE']
+            if (Array.isArray(MESSAGE)) return MESSAGE.filter((m) => typeof m === 'string').join('\n')
+            if (typeof MESSAGE === 'string') return MESSAGE
+          }
+          const result = rObj['result']
+          if (result && typeof result === 'object') {
+            const resObj = result as Record<string, unknown>
+            const m = resObj['message']
+            if (typeof m === 'string') return m
+          }
+          const m2 = rObj['message']
+          if (typeof m2 === 'string') return m2
+          return ''
+        }
+
+        invoiceApi.errorMessageSubmission = extractResponseMessages(response)
+        const idModal = document.querySelector('#failed_budget_check_modal')
+        const modal = KTModal.getInstance(idModal as HTMLElement)
+        if (modal) {
+          modal.show()
+        }
       } else {
+        isCheckBudget.value = true
+        const idModal = document.querySelector('#success_budget_check_modal')
+        const modal = KTModal.getInstance(idModal as HTMLElement)
+        if (modal) {
+          modal.show()
+        }
       }
     })
     .catch((error) => {
-      if (error?.response) {
+      isCheckBudget.value = false
+      // Reuse safe extraction for error responses
+      const extractResponseMessages = (resp: unknown): string => {
+        if (!resp || typeof resp !== 'object' || resp === null) return ''
+        const rObj = resp as Record<string, unknown>
+        const RESPONSE = rObj['RESPONSE']
+        if (Array.isArray(RESPONSE) && RESPONSE.length > 0 && typeof RESPONSE[0] === 'object') {
+          const first = RESPONSE[0] as Record<string, unknown>
+          const MESSAGE = first['MESSAGE']
+          if (Array.isArray(MESSAGE)) return MESSAGE.filter((m) => typeof m === 'string').join('\n')
+          if (typeof MESSAGE === 'string') return MESSAGE
+        }
+        const result = rObj['result']
+        if (result && typeof result === 'object') {
+          const resObj = result as Record<string, unknown>
+          const m = resObj['message']
+          if (typeof m === 'string') return m
+        }
+        const m2 = rObj['message']
+        if (typeof m2 === 'string') return m2
+        return ''
       }
+
+      invoiceApi.errorMessageSubmission = extractResponseMessages(error?.response?.data)
       const idModal = document.querySelector('#failed_budget_check_modal')
       const modal = KTModal.getInstance(idModal as HTMLElement)
       if (modal) {
