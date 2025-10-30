@@ -5,9 +5,7 @@
         <FailedLogo />
         <div>
           <p class="text-lg font-medium text-center">Budget Checking Failed</p>
-          <p class="text-[13px] mt-[14px] text-center">
-            {{ getResponseMessage() }}
-          </p>
+          <p class="text-[14px] mt-[14px] text-center">{{ getResponseMessage() }}</p>
         </div>
       </div>
     </div>
@@ -19,23 +17,16 @@ import { computed, onMounted, onUnmounted } from 'vue'
 import { KTModal } from '@/metronic/core'
 import FailedLogo from './ModalFailedBudgetCheck/FailedLogo.vue'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
-import { isEmpty } from 'lodash'
-
 const emits = defineEmits(['afterClose'])
 const invoiceApi = useInvoiceSubmissionStore()
 
-const responseCheckBudget = computed(() => invoiceApi.responseCheckBudget)
+const errorMessage = computed(() => invoiceApi.errorMessageSubmission)
 
-const getResponseMessage = () => {
-  if (!isEmpty(responseCheckBudget.value) && responseCheckBudget.value) {
-    const index = responseCheckBudget.value.RESPONSE.findIndex((item) => item.TYPE === 'E')
-    if (index !== -1) return responseCheckBudget.value.RESPONSE[index].MESSAGE.join(' ')
-  } else {
-    return ''
+  const getResponseMessage = () => {
+    return errorMessage.value || ''
   }
-}
 
-const hideModal = () => {
+  const hideModal = () => {
   const idModal = document.querySelector('#failed_budget_check_modal')
   const modal = KTModal.getInstance(idModal as HTMLElement)
   modal.hide()

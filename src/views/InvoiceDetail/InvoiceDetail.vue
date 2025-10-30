@@ -418,6 +418,9 @@ const mapPoGr = () => {
 const mapAdditionalCost = () => {
   const cost = []
   for (const item of form.value.additionalCosts) {
+    // safely read itemText without using `any`
+    const r = item as unknown as Record<string, unknown>
+    const itemText = typeof r['itemText'] === 'string' ? (r['itemText'] as string) : ''
     cost.push({
       id: item.id,
       activityId: item.activityId,
@@ -426,6 +429,7 @@ const mapAdditionalCost = () => {
       itemAmount: Number(item.itemAmount),
       debitCredit: item.debitCredit,
       taxCode: item.taxCode,
+      itemText: itemText,
       vatAmount: item.vatAmount,
       costCenter: item.costCenter,
       profitCenter: item.profitCenter,
@@ -656,7 +660,7 @@ const goVerif = () => {
 
     isLoading.value = true
     verificationApi
-      .postSubmissionNonPo(mapDataVerifNonPo())
+      .postSubmissionNonPo(mapDataVerifNonPo() as unknown as PostVerificationTypes)
       .then((response) => {
         if (response.statusCode === 200) {
           verificationApi.resetDetailInvoiceEdit()
@@ -857,9 +861,9 @@ const setDataDefault = async () => {
     totalGrossAmount: data?.calculation.totalGrossAmount || 0,
     totalNetAmount: data?.calculation.totalNetAmount || 0,
     invoicePoGr: resultPoGr,
-    additionalCosts: resultAdditional,
+  additionalCosts: resultAdditional,
     invoiceItem: [],
-    costExpense: [],
+  costExpense: [],
     alternativePayee: [],
     invoiceDocument: invoice,
     tax: tax,
@@ -1003,13 +1007,32 @@ const setDataDefaultNonPo = () => {
 
 const setDataEdit = () => {
   const data = verificationApi.detailInvoiceEdit
+  // map incoming edit data to local shapes so view types are satisfied
+  const mappedAdditional = (data?.additionalCosts || []).map((item) => {
+    const r = item as unknown as Record<string, unknown>
+    return {
+      ...item,
+      itemText: typeof r['itemText'] === 'string' ? (r['itemText'] as string) : '',
+      whtCodeList: item.whtType ? whtCodeList.value : [],
+    }
+  })
+
+  const mappedCostExpenses = (data?.costExpenses || []).map((item) => {
+    const r = item as unknown as Record<string, unknown>
+    return {
+      ...item,
+      itemText: typeof r['itemText'] === 'string' ? (r['itemText'] as string) : '',
+      isEdit: false,
+      whtCodeList: item.whtType ? whtCodeList.value : [],
+    }
+  })
   form.value = {
     invoiceUId: data?.invoiceUId || '',
     invoiceTypeCode: data?.invoiceTypeCode || 0,
     invoiceTypeName: data?.invoiceTypeName || '',
     invoiceDPCode: data?.invoiceDPCode || 0,
     invoiceDPName: data?.invoiceDPName || '',
-    invoiceVendorNo: data?.vendorId,
+  // vendorId is stored as `vendorId` in the form type
     companyCode: data?.companyCode || '',
     companyName: data?.companyName || '',
     invoiceNo: data?.invoiceNo || '',
@@ -1057,9 +1080,9 @@ const setDataEdit = () => {
     totalGrossAmount: data?.totalGrossAmount || 0,
     totalNetAmount: data?.totalNetAmount || 0,
     invoicePoGr: data?.invoicePoGr || [],
-    additionalCosts: data?.additionalCosts || [],
+  additionalCosts: mappedAdditional,
     invoiceItem: [],
-    costExpense: data?.costExpenses,
+  costExpense: mappedCostExpenses,
     alternativePayee: [
       {
         id: data?.idAlternative,
