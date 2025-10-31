@@ -59,7 +59,15 @@
               </td>
               <td>
                 <span v-if="!item.isEdit">{{ item.itemText || '-' }}</span>
-                <input v-else v-model="item.itemText" class="input" type="text" placeholder=""/>
+                <input
+                  v-else
+                  v-model="item.itemText"
+                  class="input"
+                  :class="{ 'input-danger': item.isTextLimitExceeded }"
+                  type="text"
+                  placeholder=""
+                  @input="onItemTextInput(item, $event)"
+                />
               </td>
               <td v-if="!isPettyCash">
                 <span v-if="!item.isEdit">{{ getDebitCreditName(item.debitCredit) || '-' }}</span>
@@ -190,7 +198,7 @@ const addNew = () => {
       debitCredit: 'D',
       taxCode: '',
       vatAmount: 0,
-      costCenter: isPettyCash.value ? '' : '',
+        costCenter: isPettyCash.value ? '' : '',
       profitCenter: '',
       assignment: '',
       whtType: '',
@@ -199,6 +207,7 @@ const addNew = () => {
       whtAmount: '',
       whtCodeList: [],
       isEdit: false
+        ,isTextLimitExceeded: false
     }
     form.invoiceItem.push(data)
   }
@@ -263,6 +272,21 @@ const getCostCenterName = (costCenter: string) => {
 const checkIsEdit = () => {
   const checkIndex = form.invoiceItem.findIndex((item) => item.isEdit)
   return checkIndex !== -1
+}
+
+const onItemTextInput = (item: { itemText?: string; isTextLimitExceeded?: boolean }, e: Event) => {
+  const target = e.target as HTMLInputElement
+  if (!target) return
+  // If user attempts to input >50 chars, mark as exceeded and truncate immediately
+  if (target.value && target.value.length > 50) {
+    item.isTextLimitExceeded = true
+    const truncated = target.value.slice(0, 50)
+    target.value = truncated
+    item.itemText = truncated
+  } else {
+    // clear the flag when within limit
+    item.isTextLimitExceeded = false
+  }
 }
 
 watch(
