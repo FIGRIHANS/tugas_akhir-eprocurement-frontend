@@ -26,12 +26,16 @@
       <div class="flex-1">
         <!-- Name -->
         <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-          <label class="form-label max-w-32"> Name </label>
+          <label class="form-label max-w-32">
+            Name
+            <span v-if="form.isAlternativePayee || form.isOneTimeVendor" class="text-red-500 ml-[4px]">*</span>
+          </label>
           <input
             v-model="form.nameAlternative"
             class="input"
             placeholder=""
             :disabled="route.query.isSendSap === 'true'"
+            :class="{ 'border-danger': form.nameAlternativeError }"
           />
         </div>
         <!-- Name 2 -->
@@ -46,12 +50,16 @@
         </div>
         <!-- Street -->
         <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-          <label class="form-label max-w-32"> Street </label>
+          <label class="form-label max-w-32">
+            Street
+            <span v-if="form.isAlternativePayee || form.isOneTimeVendor" class="text-red-500 ml-[4px]">*</span>
+          </label>
           <input
             v-model="form.streetAltiernative"
             class="input"
             placeholder=""
             :disabled="route.query.isSendSap === 'true'"
+            :class="{ 'border-danger': form.streetAltiernativeError }"
           />
         </div>
         <!-- Country -->
@@ -79,24 +87,32 @@
         </div>
         <!-- Bank Account Number -->
         <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-          <label class="form-label max-w-32"> Bank Account Number </label>
+          <label class="form-label max-w-32">
+            Bank Account Number
+            <span v-if="form.isAlternativePayee || form.isOneTimeVendor" class="text-red-500 ml-[4px]">*</span>
+          </label>
           <input
             v-model="form.bankAccountNumberAlternative"
             class="input"
             placeholder=""
             :disabled="route.query.isSendSap === 'true'"
+            :class="{ 'border-danger': form.bankAccountNumberAlternativeError }"
           />
         </div>
       </div>
       <div class="flex-1">
         <!-- Bank Key -->
         <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-          <label class="form-label max-w-32"> Bank Key </label>
+          <label class="form-label max-w-32">
+            Bank Key
+            <span v-if="form.isAlternativePayee || form.isOneTimeVendor" class="text-red-500 ml-[4px]">*</span>
+          </label>
           <input
             v-model="form.bankKeyAlternative"
             class="input"
             placeholder=""
             :disabled="route.query.isSendSap === 'true'"
+            :class="{ 'border-danger': form.bankKeyAlternativeError }"
           />
         </div>
         <!-- Bank Country -->
@@ -134,12 +150,16 @@
         </div>
         <!-- Email -->
         <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-          <label class="form-label max-w-32"> Email </label>
+          <label class="form-label max-w-32">
+            Email
+            <span v-if="form.isAlternativePayee || form.isOneTimeVendor" class="text-red-500 ml-[4px]">*</span>
+          </label>
           <input
             v-model="form.emailAlternative"
             class="input"
             placeholder=""
             :disabled="route.query.isSendSap === 'true'"
+            :class="{ 'border-danger': form.emailAlternativeError }"
           />
         </div>
       </div>

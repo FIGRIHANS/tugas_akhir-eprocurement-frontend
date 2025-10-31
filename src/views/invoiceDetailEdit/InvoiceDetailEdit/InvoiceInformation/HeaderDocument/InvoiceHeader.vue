@@ -256,6 +256,7 @@
           v-model="form.transferNews"
           class="input"
           placeholder=""
+          maxlength="50"
           :class="{ 'border-danger': form.transferNewsError }"
           :disabled="disabledTransferNews()"
         />

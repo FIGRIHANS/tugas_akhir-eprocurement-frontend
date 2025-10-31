@@ -29,7 +29,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, inject, defineAsyncComponent, onMounted, type Ref, type Component } from 'vue'
+import { ref, computed, watch, inject, defineAsyncComponent, onMounted, type Ref, type Component } from 'vue'
 import type { formTypes } from '../../types/invoiceDetailEdit'
 import { useRoute } from 'vue-router'
 
@@ -49,6 +49,23 @@ const contentComponent = computed(() => {
 
   return components[isTabActive.value]
 })
+
+watch(
+  () => form.value,
+  () => {
+    if (
+      form.value.nameAlternativeError ||
+      form.value.streetAltiernativeError ||
+      form.value.bankAccountNumberAlternativeError ||
+      form.value.bankKeyAlternativeError ||
+      form.value.emailAlternativeError
+    ) isTabActive.value = 'alternative'
+  },
+  {
+    deep: true,
+    immediate: true
+  }
+)
 
 onMounted(() => {
   if (route.query.invoiceType === 'no_po') {
