@@ -271,6 +271,15 @@ const checkInvoiceInformation = () => {
     form.value.npwpReportingError = useCheckEmpty(form.value.npwpReporting).isError
   }
 
+  if (form.value.isAlternativePayee || form.value.isOneTimeVendor) {
+    form.value.nameAlternativeError = useCheckEmpty(form.value.nameAlternative).isError
+    form.value.streetAltiernativeError = useCheckEmpty(form.value.streetAltiernative).isError
+    form.value.bankAccountNumberAlternativeError = useCheckEmpty(form.value.bankAccountNumberAlternative).isError
+    form.value.bankKeyAlternativeError = useCheckEmpty(form.value.bankKeyAlternative).isError
+    form.value.emailAlternativeError = useCheckEmpty(form.value.emailAlternative).isError
+    tabNow.value = 'data'
+  }
+
   if (
     form.value.invoiceDateError ||
     form.value.postingDateError ||
@@ -281,7 +290,12 @@ const checkInvoiceInformation = () => {
     form.value.notesError ||
     form.value.dpAmountDeductionError ||
     form.value.taxNoError ||
-    form.value.npwpReportingError
+    form.value.npwpReportingError ||
+    form.value.nameAlternativeError ||
+    form.value.streetAltiernativeError ||
+    form.value.bankAccountNumberAlternativeError ||
+    form.value.bankKeyAlternativeError ||
+    form.value.emailAlternativeError
   )
     status = false
   for (const item of form.value.additionalCosts) {
@@ -308,6 +322,9 @@ const checkTableItem = () => {
 
   for (const item of form.value.invoiceItem) {
     if (item.isEdit) status = false
+    else {
+      if (!item.activityExpenses || !item.itemAmount) status = false
+    }
   }
 
   return status
