@@ -35,7 +35,7 @@
             <td class="flex items-center justify-around gap-[8px]">
               <button
                 class="btn btn-outline btn-icon btn-primary"
-                :disabled="(checkIsEdit() && !item.isEdit) || route.query.isSendSap === 'true' || checkApprovalNonPoProc() || checkApprovalNonPoCcAdmin()"
+                :disabled="(checkIsEdit() && !item.isEdit) || route.query.isSendSap === 'true' || checkApprovalNonPoCcAdmin()"
                 @click="goEdit(item)"
               >
                 <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>
@@ -60,6 +60,7 @@
                 :reduce="(option: any) => option.id"
                 :options="listActivity"
                 :error="{ 'error-select': formEdit.isActivityError }"
+                :disabled="checkApprovalNonPoProc()"
                 appendToBody
               ></v-select>
             </td>
@@ -83,7 +84,7 @@
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.itemText || '-' }}</span>
-              <input v-else v-model="formEdit.itemText" class="input" type="text" placeholder="" maxlength="50" />
+              <input v-else v-model="formEdit.itemText" class="input" type="text" placeholder="" maxlength="50" :disabled="checkApprovalNonPoProc()" />
             </td>
             <td v-if="!checkNonPoPettyCash()">
               <span v-if="!item.isEdit">{{ getDebitCreditName(item.debitCredit) || '-' }}</span>
@@ -92,6 +93,7 @@
                 v-model="formEdit.debitCredit"
                 class="select"
                 placeholder=""
+                :disabled="checkApprovalNonPoProc()"
                 :class="{ 'border-danger': formEdit.isDebitCreditError }"
               >
                 <option value="D">Debit</option>
@@ -108,6 +110,7 @@
                 :get-option-label="(option: any) => `${option.code} - ${option.name}`"
                 :reduce="(option: any) => option.code"
                 :options="listTaxCalculation"
+                :disabled="checkApprovalNonPoProc()"
                 appendToBody
               ></v-select>
             </td>
@@ -128,12 +131,13 @@
                 :get-option-label="(option: any) => `${option.code} - ${option.name}`"
                 :reduce="(option: any) => option.code"
                 :options="costCenterList"
+                :disabled="checkApprovalNonPoProc()"
                 appendToBody
               ></v-select>
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.profitCenter || '-' }}</span>
-              <select v-else v-model="formEdit.profitCenter" class="select" placeholder="">
+              <select v-else v-model="formEdit.profitCenter" class="select" placeholder="" :disabled="checkApprovalNonPoProc()">
                 <option v-for="item of profitCenter" :key="item.code" :value="item.code">
                   {{ item.name }}
                 </option>
@@ -141,7 +145,7 @@
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.assignment || '-' }}</span>
-              <input v-else v-model="formEdit.assignment" class="input" placeholder="" />
+              <input v-else v-model="formEdit.assignment" class="input" placeholder="" :disabled="checkApprovalNonPoProc()" />
             </td>
             <td v-if="!checkNonPoPettyCash()">
               <span v-if="!item.isEdit">{{ getWhtTypeName(item.whtType) }}</span>
@@ -153,6 +157,7 @@
                 :get-option-label="(option: any) => `${option.code} - ${option.name}`"
                 :reduce="(option: any) => option.code"
                 :options="whtTypeList"
+                :disabled="checkApprovalNonPoProc()"
                 appendToBody
                 @update:modelValue="callWhtCode(item)"
               ></v-select>
@@ -167,6 +172,7 @@
                 :get-option-label="(option: any) => `${option.whtCode} - ${option.description}`"
                 :reduce="(option: any) => option.whtCode"
                 :options="whtCodeList"
+                :disabled="checkApprovalNonPoProc()"
                 appendToBody
                 @update:modelValue="setWhtAmount(item)"
               ></v-select>
@@ -185,6 +191,7 @@
                 class="input"
                 type="number"
                 placeholder=""
+                :disabled="checkApprovalNonPoProc()"
                 @change="setWhtAmount(item)"
               />
             </td>
