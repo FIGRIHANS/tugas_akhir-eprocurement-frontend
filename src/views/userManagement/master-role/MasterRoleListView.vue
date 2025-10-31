@@ -9,6 +9,7 @@ import { useUserRoleStore } from '@/stores/user-management/role'
 import type { IRole } from '@/stores/user-management/types/role'
 import { computed, onMounted, reactive, ref } from 'vue'
 import successImg from '@/assets/success.svg'
+import LPagination from '@/components/pagination/LPagination.vue'
 
 const search = ref('')
 const userRoleStore = useUserRoleStore()
@@ -88,7 +89,10 @@ const saveRole = async () => {
     await userRoleStore.postUserRole(rolePayload)
     closeRoleModal()
     showModalSuccess.value = true
-    await userRoleStore.getAllUserRoles()
+    await userRoleStore.getAllUserRoles({
+      page: 1,
+      pageSize: 10,
+    })
   } catch (error: unknown) {
     console.error('Failed to save role:', error)
     alert(`Failed to save role: ${String(error) || 'An unknown error occurred.'}`)
@@ -116,7 +120,10 @@ async function handleProcessDelete() {
     })
     showDeleteModal.value = false
     roleToDelete.value = null
-    await userRoleStore.getAllUserRoles()
+    await userRoleStore.getAllUserRoles({
+      page: 1,
+      pageSize: 10,
+    })
   } catch (error: unknown) {
     console.error('Failed to delete role:', error)
     alert(`Failed to delete role: ${String(error) || 'An unknown error occurred.'}`)
@@ -126,7 +133,10 @@ async function handleProcessDelete() {
 }
 
 onMounted(() => {
-  userRoleStore.getAllUserRoles()
+  userRoleStore.getAllUserRoles({
+    page: 1,
+    pageSize: 10,
+  })
 })
 </script>
 
@@ -223,6 +233,13 @@ onMounted(() => {
         </table>
 
         <div v-else class="text-center py-4">No roles found.</div>
+
+        <LPagination
+          :totalItems="userRoleStore.roles.total"
+          :pageSize="userRoleStore.roles.pageSize"
+          :currentPage="userRoleStore.roles.page"
+          @page-change="userRoleStore.changePage"
+        />
       </div>
     </div>
 
