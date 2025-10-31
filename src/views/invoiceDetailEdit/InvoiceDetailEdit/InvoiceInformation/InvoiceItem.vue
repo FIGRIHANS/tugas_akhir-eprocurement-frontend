@@ -83,7 +83,7 @@
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.itemText || '-' }}</span>
-              <input v-else v-model="formEdit.itemText" class="input" type="text" placeholder="" />
+              <input v-else v-model="formEdit.itemText" class="input" type="text" placeholder="" maxlength="50" />
             </td>
             <td v-if="!checkNonPoPettyCash()">
               <span v-if="!item.isEdit">{{ getDebitCreditName(item.debitCredit) || '-' }}</span>
