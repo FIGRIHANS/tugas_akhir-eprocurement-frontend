@@ -45,6 +45,11 @@ export interface formTypes extends documentFormTypes {
   npwpNumberAlternative: string
   ktpNumberAlternative: string
   emailAlternative: string
+  nameAlternativeError?: boolean
+  streetAltiernativeError?: boolean
+  bankAccountNumberAlternativeError?: boolean
+  bankKeyAlternativeError?: boolean
+  emailAlternativeError?: boolean
 
   // Invoice Information
   companyCode: string
