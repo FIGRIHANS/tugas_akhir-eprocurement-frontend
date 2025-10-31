@@ -308,6 +308,9 @@ const checkTableItem = () => {
 
   for (const item of form.value.invoiceItem) {
     if (item.isEdit) status = false
+    else {
+      if (!item.activityExpenses || !item.itemAmount) status = false
+    }
   }
 
   return status
