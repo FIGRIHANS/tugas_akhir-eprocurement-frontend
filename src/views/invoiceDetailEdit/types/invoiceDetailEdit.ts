@@ -70,16 +70,21 @@ export interface formTypes extends documentFormTypes {
   isAlternativePayee: boolean
   isOneTimeVendor: boolean
   nameAlternative: string
+  nameAlternativeError?: boolean
   nameOtherAlternative: string
   streetAltiernative: string
+  streetAltiernativeError?: boolean
   cityAlternative: string
   countryAlternative: string
   bankAccountNumberAlternative: string
+  bankAccountNumberAlternativeError?: boolean
   bankKeyAlternative: string
+  bankKeyAlternativeError?: boolean
   bankCountryAlternative: string
   npwpNumberAlternative: string
   ktpNumberAlternative: string
   emailAlternative: string
+  emailAlternativeError?: boolean
 
   vendorId: string
   vendorName: string
