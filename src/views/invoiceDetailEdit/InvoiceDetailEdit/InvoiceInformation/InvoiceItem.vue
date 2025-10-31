@@ -400,7 +400,7 @@ const resetItem = (item: invoiceItemTypes, index: number) => {
     resetFormEdit()
   } else {
     if (form) {
-      if (form.value.additionalCosts[index].id !== 0) {
+      if (form.value.invoiceItem[index].id !== 0) {
         verificationApi.costExpenseTempDelete?.push(form.value.invoiceItem[index].id)
       }
       form.value.invoiceItem.splice(index, 1)
