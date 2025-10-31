@@ -49,7 +49,7 @@
           </button>
           <button
             class="btn btn-primary"
-            :disabled="isSubmit || (!isCheckBudget && tabNow === 'information')"
+            :disabled="isSubmit || (!isCheckBudget && tabNow === 'information') || (tabNow === 'information' && !checkInvoiceInformation()) || (tabNow === 'data' && !isAlternativePayeeFilled())"
             @click="goNext"
           >
             {{ tabNow !== 'preview' ? 'Next' : 'Submit' }}
@@ -75,7 +75,7 @@
             <i class="ki-filled ki-arrow-left"></i>
             Back
           </button>
-          <button class="btn btn-primary" :disabled="isSubmit" @click="goNext">
+          <button class="btn btn-primary" :disabled="isSubmit || (tabNow === 'information' && !checkInvoiceInformation()) || (tabNow === 'data' && !isAlternativePayeeFilled())" @click="goNext">
             {{ tabNow !== 'preview' ? 'Next' : 'Submit' }}
             <i v-if="tabNow !== 'preview'" class="ki-duotone ki-black-right"></i>
             <i v-else class="ki-duotone ki-paper-plane"></i>
@@ -95,7 +95,7 @@
         <button
           v-if="tabNow !== 'preview' && !checkInvoiceView() && !checkInvoiceNonPoView()"
           class="btn btn-primary"
-          :disabled="isSubmit"
+          :disabled="isSubmit || (tabNow === 'information' && !checkInvoiceInformation()) || (tabNow === 'data' && !isAlternativePayeeFilled())"
           @click="goNext"
         >
           Next
@@ -125,6 +125,7 @@ import {
   computed,
   onMounted,
   provide,
+  watch,
   type Component,
   defineAsyncComponent,
 } from 'vue'
@@ -257,6 +258,11 @@ const form = reactive<formTypes>({
   npwpNumberAlternative: '',
   ktpNumberAlternative: '',
   emailAlternative: '',
+  nameAlternativeError: false,
+  streetAltiernativeError: false,
+  bankAccountNumberAlternativeError: false,
+  bankKeyAlternativeError: false,
+  emailAlternativeError: false,
   vendorNumber: '',
   department: '',
   reference: '',
@@ -316,8 +322,27 @@ const checkInvoiceData = () => {
   form.bankKeyIdError = useCheckEmpty(form.bankKeyId).isError
   if (route.query.path === 'po') form.invoiceTypeError = useCheckEmpty(form.invoiceType).isError
 
-  if (form.vendorIdError || form.bankKeyIdError || form.invoiceTypeError) return false
+  const isAltValid = !form.isAlternativePayee || (
+    !!form.nameAlternative &&
+    !!form.streetAltiernative &&
+    !!form.bankAccountNumberAlternative &&
+    !!form.bankKeyAlternative &&
+    !!form.emailAlternative
+  )
+
+  if (form.vendorIdError || form.bankKeyIdError || form.invoiceTypeError || !isAltValid) return false
   else return true
+}
+
+const isAlternativePayeeFilled = () => {
+  if (!form.isAlternativePayee) return true
+  return (
+    !!form.nameAlternative &&
+    !!form.streetAltiernative &&
+    !!form.bankAccountNumberAlternative &&
+    !!form.bankKeyAlternative &&
+    !!form.emailAlternative
+  )
 }
 
 const checkActiveEditPoGr = () => {
@@ -342,7 +367,7 @@ const checkFieldAdditional = () => {
   let status = false
   for (const item of form.additionalCost) {
     if (status) return
-    if (!item.activity || !item.itemAmount || !item.debitCredit || !item.taxCode) status = true
+    if (!item.activity || !item.itemAmount || !item.debitCredit) status = true
   }
   return status
 }
@@ -431,6 +456,20 @@ const checkInvoiceInformation = () => {
     form.departmentError = useCheckEmpty(form.department).isError
   }
 
+  if (form.isAlternativePayee) {
+    form.nameAlternativeError = useCheckEmpty(form.nameAlternative).isError
+    form.streetAltiernativeError = useCheckEmpty(form.streetAltiernative).isError
+    form.bankAccountNumberAlternativeError = useCheckEmpty(form.bankAccountNumberAlternative).isError
+    form.bankKeyAlternativeError = useCheckEmpty(form.bankKeyAlternative).isError
+    form.emailAlternativeError = useCheckEmpty(form.emailAlternative).isError
+  } else {
+    form.nameAlternativeError = false
+    form.streetAltiernativeError = false
+    form.bankAccountNumberAlternativeError = false
+    form.bankKeyAlternativeError = false
+    form.emailAlternativeError = false
+  }
+
   if (form.invoiceType !== '903') {
     form.descriptionError = useCheckEmpty(form.description).isError
   }
@@ -453,7 +492,8 @@ const checkInvoiceInformation = () => {
     form.proposalAmountError ||
     form.dueDateCasError ||
     form.casNoCodeError ||
-    form.invoiceItemError
+    form.invoiceItemError ||
+    (form.isAlternativePayee && (form.nameAlternativeError || form.streetAltiernativeError || form.bankAccountNumberAlternativeError || form.bankKeyAlternativeError || form.emailAlternativeError))
   )
     return false
   else return true
@@ -462,6 +502,15 @@ const checkInvoiceInformation = () => {
 const setTab = (value: string) => {
   if (value === 'information' && !canClickInformationTab.value) return
   if (value === 'preview' && !canClickPreviewTab.value) return
+
+  if (value === 'information' && tabNow.value === 'preview') {
+    isCheckBudget.value = false
+    tabNow.value = value
+    try {
+      ;(document.activeElement as HTMLElement)?.blur()
+    } catch {}
+    return
+  }
 
   tabNow.value = value
 }
@@ -478,7 +527,20 @@ const goBack = () => {
     })
   }
   if (checkIndex !== -1 && checkIndex !== 0) {
-    tabNow.value = list[checkIndex - 1]
+    const newTab = list[checkIndex - 1]
+    if (tabNow.value === 'preview' && newTab === 'information') {
+      isCheckBudget.value = false
+      tabNow.value = newTab
+      try {
+        ;(document.activeElement as HTMLElement)?.blur()
+      } catch {}
+      return
+    }
+
+    tabNow.value = newTab
+    try {
+      ;(document.activeElement as HTMLElement)?.blur()
+    } catch {}
   }
 }
 
@@ -1187,7 +1249,7 @@ const mapDataCheck = () => {
       GL_ACCOUNT: listActivity.value[itemIndex].code,
       ITEM_TEXT: item.itemText,
       ALLOC_NMBR: '',
-      TAX_CODE: form.invoiceType === '5' ? '' : item.taxCode,
+      TAX_CODE: form.invoiceType === '5' ? ' ' : (item.taxCode || ' '),
       COSTCENTER: item.costCenter || '',
       PROFIT_CTR: item.profitCenter || '',
     }
@@ -1235,7 +1297,7 @@ const mapDataCheck = () => {
       PYMT_METH: '',
       ALLOC_NMBR: '',
       ITEM_TEXT: itemText,
-      TAX_CODE: form.invoiceItem.length > 0 ? form.invoiceItem[0].taxCode : '',
+      TAX_CODE: form.invoiceItem.length > 0 ? (form.invoiceItem[0].taxCode || ' ') : ' ',
       PAYMT_REF: '',
     }
     accountPayable.push(accData)
@@ -1243,8 +1305,10 @@ const mapDataCheck = () => {
 
   if (form.invoiceType !== '5') {
     for (const item of form.invoiceItem) {
+      if (!item.taxCode) continue
+      if (item.taxCode === 'V0') continue
       const checkAccountTax = accountTax.findIndex((sub) => sub.TAX_CODE === item.taxCode)
-      if (item.taxCode !== 'V0' && checkAccountTax === -1) {
+      if (checkAccountTax === -1) {
         const index = listTaxCalculation.value.findIndex((sub) => sub.code === item.taxCode)
         if (index !== -1) {
           itemNoAcc.value += 1
@@ -1397,20 +1461,14 @@ const checkBudget = () => {
   invoiceApi
     .postCheckBudget(data)
     .then((response) => {
-      // The backend may return the budget check either as
-      // 1) an ApiResponse with result.content (handled by the store), or
-      // 2) a raw object with top-level RESPONSE (e.g. { RESPONSE: [ { TYPE: 'S', MESSAGE: [...] } ] })
-      // If case (2) happens, save it into the store so the modal can read it.
       if (response) {
         const respTop = response as unknown as Record<string, unknown>
         const topRESPONSE = respTop['RESPONSE']
         if (Array.isArray(topRESPONSE)) {
-          // store it so modal/computed readers can access it
           invoiceApi.responseCheckBudget = respTop as unknown as typeof invoiceApi.responseCheckBudget
         }
       }
 
-      // Prefer store value (postCheckBudget may have set it), fallback to response
       const respObj = (() => {
         if (invoiceApi.responseCheckBudget) return invoiceApi.responseCheckBudget
         if (response && typeof response === 'object') {
@@ -1436,7 +1494,6 @@ const checkBudget = () => {
       } else {
         isCheckBudget.value = false
 
-        // extract a meaningful message if possible
         const extractResponseMessages = (resp: unknown): string => {
           if (!resp || typeof resp !== 'object' || resp === null) return ''
           const rObj = resp as Record<string, unknown>
@@ -1488,7 +1545,6 @@ const checkBudget = () => {
         return ''
       }
 
-      // if axios error contains response.data with content, store it
       const errData = error?.response?.data
       if (errData) {
         const errTop = errData as unknown as Record<string, unknown>
@@ -1569,7 +1625,7 @@ const checkFormBudget = () => {
   }
 
   for (const item of form.invoiceItem) {
-    if (item.isEdit || !item.itemAmount || (!isPettyCash && !item.taxCode)) status = true
+    if (item.isEdit || !item.itemAmount) status = true
   }
 
   return status
@@ -1632,6 +1688,30 @@ onMounted(() => {
     })
   }
 })
+
+watch(
+  () => form.invoiceItem,
+  () => {
+    if (isCheckBudget.value) isCheckBudget.value = false
+  },
+  { deep: true },
+)
+
+watch(
+  () => form.additionalCost,
+  () => {
+    if (isCheckBudget.value) isCheckBudget.value = false
+  },
+  { deep: true },
+)
+
+watch(
+  () => form.invoicePoGr,
+  () => {
+    if (isCheckBudget.value) isCheckBudget.value = false
+  },
+  { deep: true },
+)
 
 provide('form', form)
 </script>
