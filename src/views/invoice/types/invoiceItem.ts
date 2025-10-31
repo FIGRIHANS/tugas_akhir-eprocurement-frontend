@@ -17,5 +17,6 @@ export interface invoiceItemTypes {
   whtBaseAmount: string
   whtAmount: string
   whtCodeList?: WhtCodeTypes[]
+  isTextLimitExceeded?: boolean
   isEdit: boolean
 }
