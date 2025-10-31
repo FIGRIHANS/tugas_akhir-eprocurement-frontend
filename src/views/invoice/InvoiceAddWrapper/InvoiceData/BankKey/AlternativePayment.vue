@@ -93,7 +93,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, onMounted } from 'vue'
+import { computed, inject, onMounted, watch } from 'vue'
 import type { formTypes } from '../../../types/invoiceAddWrapper'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
 
@@ -106,4 +106,21 @@ const isAlt = computed(() => !!form?.isAlternativePayee)
 onMounted(() => {
   vendorMasterApi.getVendorCountries()
 })
+
+// Ensure only one of the two options can be selected at a time
+watch(
+  () => form?.isAlternativePayee,
+  (val) => {
+    if (!form) return
+    if (val) form.isOneTimeVendor = false
+  },
+)
+
+watch(
+  () => form?.isOneTimeVendor,
+  (val) => {
+    if (!form) return
+    if (val) form.isAlternativePayee = false
+  },
+)
 </script>
