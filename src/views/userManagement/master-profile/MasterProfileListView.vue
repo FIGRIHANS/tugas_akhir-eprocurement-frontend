@@ -11,6 +11,7 @@ import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
 import { useUserProfileStore } from '@/stores/user-management/profile'
 import { computed, onMounted, reactive, ref } from 'vue'
 import type { IProfile } from '@/stores/user-management/types/profile'
+import LPagination from '@/components/pagination/LPagination.vue'
 
 const search = ref('')
 const userProfileStore = useUserProfileStore()
@@ -89,7 +90,10 @@ const saveProfile = async () => {
     await userProfileStore.postUserProfile(profilePayload)
     closeProfileModal()
     showSuccessModal.value = true
-    await userProfileStore.getAllUserProfiles()
+    await userProfileStore.getAllUserProfiles({
+      page: 1,
+      pageSize: 10,
+    })
   } catch (error: unknown) {
     console.error('Failed to save profile:', error)
     alert(`Failed to save profile: ${String(error) || 'Unknown error'}`)
@@ -115,7 +119,10 @@ async function handleProcessDelete() {
     })
     showDeleteModal.value = false
     profileToDelete.value = null
-    await userProfileStore.getAllUserProfiles()
+    await userProfileStore.getAllUserProfiles({
+      page: 1,
+      pageSize: 10,
+    })
   } catch (error: unknown) {
     console.error('Failed to delete profile:', error)
     alert(`Failed to delete profile: ${String(error) || 'Unknown error'}`)
@@ -125,7 +132,10 @@ async function handleProcessDelete() {
 }
 
 onMounted(() => {
-  userProfileStore.getAllUserProfiles()
+  userProfileStore.getAllUserProfiles({
+    page: 1,
+    pageSize: 10,
+  })
 })
 </script>
 
@@ -222,6 +232,12 @@ onMounted(() => {
         </table>
 
         <div v-else class="text-center py-4">No profiles found.</div>
+        <LPagination
+          :totalItems="userProfileStore.profiles.total"
+          :pageSize="userProfileStore.profiles.pageSize"
+          :currentPage="userProfileStore.profiles.page"
+          @page-change="userProfileStore.changePage"
+        />
       </div>
     </div>
 

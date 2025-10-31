@@ -13,3 +13,10 @@ export interface ApiResponseDataResult<ContentType = unknown> {
   isError: boolean
   content: ContentType
 }
+
+export interface PaginatedContent<T> {
+  items: T[]
+  total: number
+  page: number
+  pageSize: number
+}
