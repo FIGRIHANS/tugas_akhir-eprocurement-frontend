@@ -45,14 +45,33 @@ export interface formTypes extends documentFormTypes {
   npwpNumberAlternative: string
   ktpNumberAlternative: string
   emailAlternative: string
+  nameAlternativeError?: boolean
+  streetAltiernativeError?: boolean
+  bankAccountNumberAlternativeError?: boolean
+  bankKeyAlternativeError?: boolean
+  emailAlternativeError?: boolean
 
   // Invoice Information
   companyCode: string
   companyCodeError?: boolean
   companyName: string
+  reference: string
+  referenceError?: boolean
+  cashJournalCode: string
+  cashJournalCodeError?: boolean
+  cashJournalName: string
+  pettyCashPeriod: [Date | null, Date | null] | null
+  pettyCashPeriodError?: boolean
+  casNoCode: string
+  casNoCodeError?: boolean
+  casNoName: string
+  casDateReceipt: string
+  casDateReceiptError?: boolean
+  dueDateCas: string
+  dueDateCasError?: boolean
   invoiceNo: string
-  invoiceNoVendor: string
-  invoiceNoVendorError?: boolean
+  invoiceVendorNo: string
+  invoiceVendorNoError?: boolean
   invoiceDate: string
   invoiceDateError?: boolean
   taxNumber: string
@@ -66,6 +85,8 @@ export interface formTypes extends documentFormTypes {
   remainingDpAmount: number
   dpAmountDeduction: number
   dpAmountDeductionError?: boolean
+  proposalAmountVal: string
+  proposalAmountError?: boolean
   currency: string
   currencyError?: boolean
   description: string

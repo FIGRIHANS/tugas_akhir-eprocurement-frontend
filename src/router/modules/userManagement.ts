@@ -5,7 +5,7 @@ export default [
     component: () => import('@/views/userManagement/list-user/UserListView.vue'),
   },
   {
-    path: '/user-management/user/:id',
+    path: '/user-management/user/:userName',
     name: 'user-management-user-detail',
     component: () => import('@/views/userManagement/list-user/UserDetailView.vue'),
   },
@@ -61,6 +61,11 @@ export default [
     path: '/user-management/master-employee/edit/:id',
     name: 'user-management-master-employee-edit',
     component: () => import('@/views/userManagement/master-employee/EmployeeEditView.vue'),
+  },
+  {
+    path: '/user-management/master-employee/detail/:id',
+    name: 'user-management-master-employee-detail',
+    component: () => import('@/views/userManagement/master-employee/EmployeeDetailView.vue'),
   },
   {
     path: '/user-management/report-authorization',

@@ -3,9 +3,7 @@ import { defineStore } from 'pinia'
 import api from '@/core/utils/api'
 
 export interface ISendResetPasswordEmailPayload {
-  vendorId: string
   email: string
-  vendorName: string
 }
 
 export interface IResetPasswordPayload {
@@ -37,7 +35,7 @@ export const useForgotPasswordStore = defineStore('forgot-password', () => {
     isEmailSent.value = false
 
     try {
-      const response = await api.post('/auth/vendor/send-reset-password-email', payload)
+      const response = await api.post('/auth/vendor/reset-password', payload)
 
       isEmailSent.value = true
       return response.data
@@ -75,6 +73,50 @@ export const useForgotPasswordStore = defineStore('forgot-password', () => {
     }
   }
 
+  const sendEmployeeResetPasswordEmail = async (payload: ISendResetPasswordEmailPayload) => {
+    loading.value = true
+    error.value = null
+    isEmailSent.value = false
+
+    try {
+      const response = await api.post('/auth/user/reset-password', payload)
+
+      isEmailSent.value = true
+      return response.data
+    } catch (err) {
+      if (err instanceof Error) {
+        error.value = err.message || 'Failed to send reset password email'
+      } else {
+        error.value = 'An unexpected error occurred'
+      }
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const resetEmployeePasswordWithNewPassword = async (payload: IResetPasswordPayload) => {
+    loading.value = true
+    error.value = null
+    isPasswordReset.value = false
+
+    try {
+      const response = await api.post('/auth/user/reset-password-with-new-password', payload)
+
+      isPasswordReset.value = true
+      return response.data
+    } catch (err) {
+      if (err instanceof Error) {
+        error.value = err.message || 'Failed to reset password'
+      } else {
+        error.value = 'An unexpected error occurred'
+      }
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     loading,
     error,
@@ -84,5 +126,7 @@ export const useForgotPasswordStore = defineStore('forgot-password', () => {
     resetState,
     sendResetPasswordEmail,
     resetPasswordWithNewPassword,
+    sendEmployeeResetPasswordEmail,
+    resetEmployeePasswordWithNewPassword,
   }
 })

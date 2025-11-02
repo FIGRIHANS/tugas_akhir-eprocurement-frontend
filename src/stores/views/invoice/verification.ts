@@ -56,6 +56,14 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
       remainingDpAmount: 0,
       dpAmountDeduction: 0,
       creditCardBillingId: '',
+      casDateReceipt: '',
+      proposalAmount: 0,
+      picFinance: '',
+      cashJournalCode: '',
+      cashJournalName: '',
+      pettyCashStartDate: '',
+      pettyCashEndDate: '',
+      npwpReportingName: '',
       paymentId: 0,
       bankKey: '',
       bankName: '',
@@ -129,7 +137,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
       invoiceDate: data.invoiceDate || null,
       searchText: data.searchText || null,
     }
-    const response: ApiResponse<ListPoTypes[]> = await invoiceApi.get(`/invoice/approval/non-po`, {
+    const response: ApiResponse<ListNonPoTypes[]> = await invoiceApi.get(`/invoice/approval/non-po`, {
       params: {
         ...(data.statusCode !== null ? { statuscode: Number(data.statusCode) } : {}),
         ...query,
@@ -153,7 +161,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
       invoiceDate: data.invoiceDate || null,
       searchText: data.searchText || null,
     }
-    const response: ApiResponse<ListPoTypes[]> = await invoiceApi.get(`/invoice/verification/non-po`, {
+    const response: ApiResponse<ListNonPoTypes[]> = await invoiceApi.get(`/invoice/verification/non-po`, {
       params: {
         ...(data.statusCode !== null ? { statuscode: Number(data.statusCode) } : {}),
         ...query,

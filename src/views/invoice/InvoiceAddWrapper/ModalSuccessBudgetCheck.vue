@@ -1,11 +1,11 @@
 <template>
   <div class="modal" data-modal="true" id="success_budget_check_modal">
     <div class="modal-content modal-center-y max-w-[500px]">
-      <div class="modal-body p-[40px] flex flex-col gap-[30px] items-center">
+      <div class="modal-body p-[40px] flex flex-col gap-[20px] items-center">
         <ModalSuccessLogo />
         <div class="text-center font-inter">
           <p class="text-lg font-medium">Budget Checking Succeed</p>
-          <p class="text-[13px] font-normal">{{ getResponseMessage() }}</p>
+          <p class="text-[14px] font-normal mt-2">{{ getResponseMessage() }}</p>
         </div>
       </div>
     </div>

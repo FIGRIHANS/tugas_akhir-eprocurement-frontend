@@ -32,14 +32,14 @@
             <td>{{ item.itemText || '-' }}</td>
             <td>{{ getTaxCodeName(item.taxCode) || '-' }}</td>
             <td>{{ item.vatAmount ? form.currCode === 'IDR' ? useFormatIdr(item.vatAmount) : useFormatUsd(item.vatAmount) : '-' }}</td>
-            <td>{{ item.debitCredit || '-' }}</td>
-            <td>{{ getCostCenterName(item.costCenter) || '-' }}</td>
+            <td v-if="!checkNonPoPettyCash()">{{ item.debitCredit || '-' }}</td>
+            <td v-if="!checkNonPoPettyCash()">{{ getCostCenterName(item.costCenter) || '-' }}</td>
             <td>{{ item.profitCenter || '-' }}</td>
             <td>{{ item.assignment || '-' }}</td>
-            <td>{{ getWhtTypeName(item.whtType) || '-' }}</td>
-            <td>{{ getWhtCodeName(item.whtCode, item) || '-' }}</td>
-            <td>{{ item.whtBaseAmount ? form.currCode === 'IDR' ? useFormatIdr(item.whtBaseAmount) : useFormatUsd(item.whtBaseAmount) : '-' }}</td>
-            <td>{{ item.whtAmount ? form.currCode === 'IDR' ? useFormatIdr(item.whtAmount) : useFormatUsd(item.whtAmount) : '-' }}</td>
+            <td v-if="!checkNonPoPettyCash()">{{ getWhtTypeName(item.whtType) || '-' }}</td>
+            <td v-if="!checkNonPoPettyCash()">{{ getWhtCodeName(item.whtCode, item) || '-' }}</td>
+            <td v-if="!checkNonPoPettyCash()">{{ item.whtBaseAmount ? form.currCode === 'IDR' ? useFormatIdr(item.whtBaseAmount) : useFormatUsd(item.whtBaseAmount) : '-' }}</td>
+            <td v-if="!checkNonPoPettyCash()">{{ item.whtAmount ? form.currCode === 'IDR' ? useFormatIdr(item.whtAmount) : useFormatUsd(item.whtAmount) : '-' }}</td>
           </tr>
         </tbody>
       </table>
@@ -48,7 +48,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, inject, type Ref } from 'vue'
+import { ref, computed, watch, inject, type Ref, onMounted } from 'vue'
 import type { formTypes } from '../types/invoiceDetail'
 import type { invoiceItemTypes } from '../types/invoiceItem'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
@@ -61,7 +61,6 @@ const costExpenseList = ref<invoiceItemTypes[]>([])
 const columns = ref([
   'Line',
   'Activity / Expense',
-  // 'Activity Name',
   'Item Amount',
   'Item Text',
   'Tax Code',
@@ -81,6 +80,10 @@ const whtCodeList = computed(() => invoiceMasterApi.whtCodeList)
 const listActivity = computed(() => invoiceMasterApi.activityList)
 const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
 const costCenterList = computed(() => invoiceMasterApi.costCenterList)
+
+const checkNonPoPettyCash = () => {
+  return form.value.invoiceTypeCode === 5
+}
 
 const setCostExpenseList = async () => {
   const result = [] as invoiceItemTypes[]
@@ -152,6 +155,21 @@ watch(
     immediate: true
   }
 )
+
+onMounted(() => {
+  if (checkNonPoPettyCash()) {
+    columns.value = [
+    'Action',
+    'Activity / Expense',
+    'Item Amount',
+    'Item Text',
+    'Tax Code',
+    'VAT Amount',
+    'Profit Center',
+    'Assignment'
+    ]
+  }
+})
 </script>
 
 <style lang="scss" scoped>

@@ -80,13 +80,19 @@ const filteredUsers = computed(() => {
             </tr>
             <tr v-for="user in filteredUsers" :key="user.id">
               <td>
-                <ActionButtonView />
+                <ActionButtonView :user-data="user" />
               </td>
               <td>{{ user.employeeName }}</td>
               <td>{{ user.userName }}</td>
               <td>{{ user.profileId }}</td>
               <td>{{ user.employeeId }}</td>
-              <td>{{ moment(user.lastLoginDate).format('DD MMMM YYYY') }}</td>
+              <td>
+                {{
+                  moment(user.lastLoginDate).format('YYYY-MM-DD') === '1900-01-01'
+                    ? '-'
+                    : moment(user.lastLoginDate).format('DD MMMM YYYY')
+                }}
+              </td>
             </tr>
           </tbody>
         </table>

@@ -41,25 +41,6 @@ export interface ParamsSubmissionTypes {
   isSaveAsDraft: boolean
 }
 
-interface ParamsSubmissionCostExpense {
-  id: number
-  activityId: number
-  activityExpenses: string
-  activityName: string
-  itemAmount: number
-  itemText: string
-  debitCredit: string
-  taxCode: string
-  vatAmount: number
-  costCenter: string
-  profitCenter: string
-  assignment: string
-  whtType: string
-  whtCode: string
-  whtBaseAmount: number
-  whtAmount: number
-}
-
 interface ParamsSubmissionHeader {
   invoiceUId: string
   invoiceTypeCode: number
@@ -80,15 +61,28 @@ interface ParamsSubmissionHeader {
   department?: string
   remainingDPAmount: number
   dpAmountDeduction: number
+  cashJournalCode?: string
+  cashJournalName?: string
+  npwpReporting?: string
+  pettyCashStartDate?: string
+  pettyCashEndDate?: string
+  proposalAmount?: string
+  casNoCode?: string
+  casNoName?: string
+  dueDateCas?: string
+  casDateReceipt?: string
+  picFinance?: string
+  npwpReportingName?: string
+  invoicingParty?: string
+  assigment?: string
+  transferNews?: string
 }
 
 interface ParamsSubmissionVendor {
   vendorId: number
   vendorName: string
-  vendorBusinessUnit: string
-  vendorSubBusinessUnit: string
-  npwp: string
   vendorAddress: string
+  npwp: string
 }
 
 interface ParamsSubmissionPayment {
@@ -219,6 +213,7 @@ export interface ListPoTypes {
   pOs: PoChildTypes[]
   isOpenChild: boolean
   createdUtcDate: string
+  actionerDate?: string
 }
 
 export interface ListNonPoTypes {
@@ -289,6 +284,7 @@ export interface ParamsSubmissionNonPo {
   costExpenses: ParamsSubmissionCostExpense[]
   isSaveAsDraft: boolean
 }
+
 export interface ParamsSubmissionHeaderNonPo {
   invoiceUId: string
   invoiceTypeCode: number
@@ -298,9 +294,13 @@ export interface ParamsSubmissionHeaderNonPo {
   companyName: string
   invoiceNo: string
   documentNo: string
-  invoiceDate: string
-  postingDate: string
-  estimatedPaymentDate: string
+  invoicingParty?: string
+  assigment?: string
+  transferNews?: string
+  npwpReporting?: string
+  invoiceDate?: string
+  postingDate?: string
+  estimatedPaymentDate?: string
   paymentMethodCode: string
   paymentMethodName: string
   taxNo: string
@@ -311,6 +311,15 @@ export interface ParamsSubmissionHeaderNonPo {
   statusName: string
   department: string
   profileId: string
+  casDateReceipt?: string
+  dueDateCas?: string
+  proposalAmount?: number
+  picFinance?: string
+  cashJournalCode?: string
+  cashJournalName?: string
+  pettyCashStartDate?: string | null
+  pettyCashEndDate?: string | null
+  npwpReportingName?: string
 }
 
 interface ParamsSubmissionAlternativePay {
@@ -327,26 +336,27 @@ interface ParamsSubmissionAlternativePay {
   npwp: string
   ktp: string
   email: string
-  isAlternativePayee: boolean
-  isOneTimeVendor: boolean
+  isAlternativePayee: boolean | null
+  isOneTimeVendor: boolean | null
 }
 
-interface ParamsSubmissionCostExpense {
+export interface ParamsSubmissionCostExpense {
   id: number
   activityId: number
-  activityExpense: string
+  activityExpenses: string
   activityName: string
   itemAmount: number
+  itemText?: string
   debitCredit: string
   taxCode: string
   vatAmount: number
   costCenter: string
   profitCenter: string
   assignment: string
-  whtType: string
-  whtCode: string
-  whtBaseAmount: number
-  whtAmount: number
+  whtType?: string
+  whtCode?: string
+  whtBaseAmount?: number
+  whtAmount?: number
 }
 
 export interface ParamsCheckBudgetType {

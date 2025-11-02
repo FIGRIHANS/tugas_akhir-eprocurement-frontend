@@ -156,6 +156,14 @@ const form = ref<formTypes>({
   npwpReporting: '',
   remainingDpAmount: 0,
   dpAmountDeduction: 0,
+  casDateReceipt: '',
+  proposalAmount: 0,
+  picFinance: '',
+  cashJournalCode: '',
+  cashJournalName: '',
+  pettyCashStartDate: '',
+  pettyCashEndDate: '',
+  npwpReportingName: '',
   paymentId: 0,
   bankKey: '',
   bankName: '',
@@ -199,6 +207,18 @@ const checkVerifikator1 = () => {
   return userData.value.profile.profileId === 3190
 }
 
+const checkApprovalNonPo1 = () => {
+  return userData.value?.profile.profileId === 3002
+}
+
+const checkApprovalNonPoProc = () => {
+  return route.query.invoiceType === 'no_po' && userData.value?.profile.profileId === 3191
+}
+
+const checkApprovalNonPoCcAdmin = () => {
+  return route.query.invoiceType === 'no_po' && userData.value?.profile.profileId === 3190
+}
+
 const checkIsWithoutDp = () => {
   return form.value.invoiceDPCode === 9011
 }
@@ -213,6 +233,22 @@ const checkIsPoPib = () => {
 
 const checkIsPoCC = () => {
   return form.value.invoiceTypeCode === 903
+}
+
+const checkNonPoCas = () => {
+  return form.value.invoiceTypeCode === 3
+}
+
+const checkNonPoLba = () => {
+  return form.value.invoiceTypeCode === 4
+}
+
+const checkNonPoCc = () => {
+  return form.value.invoiceTypeCode === 2
+}
+
+const checkNonPoPettyCash = () => {
+  return form.value.invoiceTypeCode === 5
 }
 
 const checkStatusCode = () => {
@@ -301,15 +337,27 @@ const checkPo = () => {
 }
 
 const checkVerifHeader = () => {
-  const invoiceDateError = useCheckEmpty(form.value.invoiceDate).isError
-  const documentNoError = useCheckEmpty(form.value.documentNo).isError
+  if (checkApprovalNonPoProc()) return true
+
+  const invoiceDateError = !checkNonPoPettyCash() ? useCheckEmpty(form.value.invoiceDate).isError : false
+  const documentNoError = !checkNonPoCas() && !checkNonPoPettyCash() && !checkNonPoLba() ? useCheckEmpty(form.value.documentNo).isError : false
   const creditCardBillingError = checkVerifikator1() ? useCheckEmpty(form.value.creditCardBillingId).isError : false
-  
-  const postingDateError = !checkVerifikator1() ? useCheckEmpty(form.value.postingDate).isError : false
-  const estimatedPaymentDateError = !checkVerifikator1() ? useCheckEmpty(form.value.estimatedPaymentDate).isError : false
-  const paymentMethodError = !checkVerifikator1() ? useCheckEmpty(form.value.paymentMethodCode).isError : false
-  const transferNewsError = !checkVerifikator1() ? useCheckEmpty(form.value.transferNews).isError : false
-  const notesError = !checkVerifikator1() ? useCheckEmpty(form.value.notes).isError : false
+
+  const postingDateError = !checkVerifikator1() && !checkNonPoPettyCash() && !checkNonPoCc() ? useCheckEmpty(form.value.postingDate).isError : false
+  const estimatedPaymentDateError = !checkVerifikator1() && !checkNonPoLba() || (checkNonPoPettyCash() && checkApprovalNonPo1() && !checkNonPoCc()) ? useCheckEmpty(form.value.estimatedPaymentDate).isError : false
+  const paymentMethodError = !checkVerifikator1() && !checkNonPoPettyCash() && !checkApprovalNonPoCcAdmin() && !checkNonPoLba() ? useCheckEmpty(form.value.paymentMethodCode).isError : false
+  const transferNewsError = !checkVerifikator1() && !checkNonPoPettyCash() && !checkNonPoCc() && !checkNonPoLba() ? useCheckEmpty(form.value.transferNews).isError : false
+  const notesError = !checkVerifikator1() && !checkApprovalNonPoCcAdmin() ? useCheckEmpty(form.value.notes).isError : false
+
+  const taxInvoiceError = checkNonPoCas() ? useCheckEmpty(form.value.taxNo).isError : false
+  const npwpReportingError =
+    (checkNonPoCas() || (checkNonPoCc() && !checkApprovalNonPoProc() &&!checkApprovalNonPoCcAdmin())) && !checkApprovalNonPo1() ?
+    useCheckEmpty(form.value.npwpReporting).isError : false
+
+  const cashJournalCodeError = checkNonPoPettyCash() ? useCheckEmpty(form.value.cashJournalCode).isError : false
+  const pettyCashPeriodError = checkNonPoPettyCash() ? useCheckEmpty(form.value.pettyCashStartDate).isError || useCheckEmpty(form.value.pettyCashEndDate).isError : false
+
+  const proposalAmountError = !checkApprovalNonPoCcAdmin() && checkNonPoCc() ? useCheckEmpty(form.value.proposalAmount).isError : false
 
   if (
     invoiceDateError ||
@@ -319,7 +367,12 @@ const checkVerifHeader = () => {
     paymentMethodError ||
     transferNewsError ||
     creditCardBillingError ||
-    notesError
+    notesError ||
+    taxInvoiceError ||
+    npwpReportingError ||
+    cashJournalCodeError ||
+    pettyCashPeriodError ||
+    proposalAmountError
   )
     return false
   return true
@@ -365,6 +418,9 @@ const mapPoGr = () => {
 const mapAdditionalCost = () => {
   const cost = []
   for (const item of form.value.additionalCosts) {
+    // safely read itemText without using `any`
+    const r = item as unknown as Record<string, unknown>
+    const itemText = typeof r['itemText'] === 'string' ? (r['itemText'] as string) : ''
     cost.push({
       id: item.id,
       activityId: item.activityId,
@@ -373,6 +429,7 @@ const mapAdditionalCost = () => {
       itemAmount: Number(item.itemAmount),
       debitCredit: item.debitCredit,
       taxCode: item.taxCode,
+      itemText: itemText,
       vatAmount: item.vatAmount,
       costCenter: item.costCenter,
       profitCenter: item.profitCenter,
@@ -428,7 +485,7 @@ const mapDataVerif = () => {
     header: {
       invoiceUId: form.value.invoiceUId,
       documentNo: form.value.documentNo,
-      invoiceDate: form.value.invoiceDate,
+      invoiceDate: form.value.invoiceDate || null,
       taxNo: form.value.taxNo,
       currCode: form.value.currCode,
       notes: form.value.notes,
@@ -483,8 +540,8 @@ const mapDataVerifNonPo = () => {
     statusNotes: '',
     header: {
       invoiceUId: form.value.invoiceUId,
-      invoiceDate: form.value.invoiceDate,
-      postingDate: form.value.invoiceDate || null,
+      invoiceDate: form.value.invoiceDate || null,
+      postingDate: form.value.postingDate || null,
       documentNo: form.value.documentNo,
       taxNo: form.value.taxNo,
       invoicingParty: form.value.invoicingParty,
@@ -495,8 +552,17 @@ const mapDataVerifNonPo = () => {
       transferNews: form.value.transferNews,
       notes: form.value.notes,
       currCode: form.value.currCode,
+      creditCardBillingId: form.value.creditCardBillingId,
       npwpReporting: form.value.npwpReporting,
       department: form.value.department,
+      casDateReceipt: form.value.casDateReceipt || null,
+      proposalAmount: form.value.proposalAmount,
+      picFinance: form.value.picFinance,
+      cashJournalCode: form.value.cashJournalCode,
+      cashJournalName: form.value.cashJournalName,
+      pettyCashStartDate: form.value.pettyCashStartDate || null,
+      pettyCashEndDate: form.value.pettyCashEndDate || null,
+      npwpReportingName: form.value.npwpReportingName,
     },
     payment: {
       paymentId: form.value.paymentId,
@@ -594,7 +660,7 @@ const goVerif = () => {
 
     isLoading.value = true
     verificationApi
-      .postSubmissionNonPo(mapDataVerifNonPo())
+      .postSubmissionNonPo(mapDataVerifNonPo() as unknown as PostVerificationTypes)
       .then((response) => {
         if (response.statusCode === 200) {
           verificationApi.resetDetailInvoiceEdit()
@@ -769,6 +835,14 @@ const setDataDefault = async () => {
     npwpReporting: data?.header.npwpReporting || '',
     remainingDpAmount: data?.header.remainingDPAmount,
     dpAmountDeduction: data?.header.dpAmountDeduction,
+    casDateReceipt: data?.header.casDateReceipt,
+    proposalAmount: data?.header.proposalAmount,
+    picFinance: data?.header.picFinance,
+    cashJournalCode: data?.header.cashJournalCode,
+    cashJournalName: data?.header.cashJournalName,
+    pettyCashStartDate: data?.header.pettyCashStartDate,
+    pettyCashEndDate: data?.header.pettyCashEndDate,
+    npwpReportingName: data?.header.npwpReportingName,
     paymentId: data?.payment.paymentId || 0,
     bankKey: data?.payment.bankKey || '',
     bankName: data?.payment.bankName || '',
@@ -787,9 +861,9 @@ const setDataDefault = async () => {
     totalGrossAmount: data?.calculation.totalGrossAmount || 0,
     totalNetAmount: data?.calculation.totalNetAmount || 0,
     invoicePoGr: resultPoGr,
-    additionalCosts: resultAdditional,
+  additionalCosts: resultAdditional,
     invoiceItem: [],
-    costExpense: [],
+  costExpense: [],
     alternativePayee: [],
     invoiceDocument: invoice,
     tax: tax,
@@ -894,6 +968,14 @@ const setDataDefaultNonPo = () => {
     department: data?.header.department,
     remainingDpAmount: data?.header.remainingDPAmount,
     dpAmountDeduction: data?.header.dpAmountDeduction,
+    casDateReceipt: data?.header.casDateReceipt,
+    proposalAmount: data?.header.proposalAmount,
+    picFinance: data?.header.picFinance,
+    cashJournalCode: data?.header.cashJournalCode,
+    cashJournalName: data?.header.cashJournalName,
+    pettyCashStartDate: data?.header.pettyCashStartDate,
+    pettyCashEndDate: data?.header.pettyCashEndDate,
+    npwpReportingName: data?.header.npwpReportingName,
     paymentId: data?.payment.paymentId || 0,
     bankKey: data?.payment.bankKey || '',
     bankName: data?.payment.bankName || '',
@@ -925,13 +1007,32 @@ const setDataDefaultNonPo = () => {
 
 const setDataEdit = () => {
   const data = verificationApi.detailInvoiceEdit
+  // map incoming edit data to local shapes so view types are satisfied
+  const mappedAdditional = (data?.additionalCosts || []).map((item) => {
+    const r = item as unknown as Record<string, unknown>
+    return {
+      ...item,
+      itemText: typeof r['itemText'] === 'string' ? (r['itemText'] as string) : '',
+      whtCodeList: item.whtType ? whtCodeList.value : [],
+    }
+  })
+
+  const mappedCostExpenses = (data?.costExpenses || []).map((item) => {
+    const r = item as unknown as Record<string, unknown>
+    return {
+      ...item,
+      itemText: typeof r['itemText'] === 'string' ? (r['itemText'] as string) : '',
+      isEdit: false,
+      whtCodeList: item.whtType ? whtCodeList.value : [],
+    }
+  })
   form.value = {
     invoiceUId: data?.invoiceUId || '',
     invoiceTypeCode: data?.invoiceTypeCode || 0,
     invoiceTypeName: data?.invoiceTypeName || '',
     invoiceDPCode: data?.invoiceDPCode || 0,
     invoiceDPName: data?.invoiceDPName || '',
-    invoiceVendorNo: data?.vendorId,
+  // vendorId is stored as `vendorId` in the form type
     companyCode: data?.companyCode || '',
     companyName: data?.companyName || '',
     invoiceNo: data?.invoiceNo || '',
@@ -953,13 +1054,21 @@ const setDataEdit = () => {
     remainingDpAmount: data?.remainingDpAmount,
     dpAmountDeduction: data?.dpAmountDeduction,
     department: data?.department,
+    creditCardBillingId: data?.creditCardBillingId || '',
+    casDateReceipt: data?.casDateReceipt || '',
+    proposalAmount: data?.proposalAmount || 0,
+    picFinance: data?.picFinance || '',
+    cashJournalCode: data?.cashJournalCode || '',
+    cashJournalName: data?.cashJournalName || '',
+    pettyCashStartDate: data?.pettyCashStartDate || '',
+    pettyCashEndDate: data?.pettyCashEndDate || '',
+    npwpReportingName: data?.npwpReportingName || '',
     paymentId: data?.paymentId,
     bankKey: data?.bankKey || '',
     bankName: data?.bankName || '',
     beneficiaryName: data?.beneficiaryName || '',
     bankAccountNo: data?.bankAccountNo || '',
     bankCountryCode: data?.bankCountryCode || '',
-    creditCardBillingId: data?.creditCardBillingId || '',
     vendorId: data?.vendorId || '',
     vendorName: data?.vendorName || '',
     npwp: data?.npwp || '',
@@ -971,9 +1080,9 @@ const setDataEdit = () => {
     totalGrossAmount: data?.totalGrossAmount || 0,
     totalNetAmount: data?.totalNetAmount || 0,
     invoicePoGr: data?.invoicePoGr || [],
-    additionalCosts: data?.additionalCosts || [],
+  additionalCosts: mappedAdditional,
     invoiceItem: [],
-    costExpense: data?.costExpenses,
+  costExpense: mappedCostExpenses,
     alternativePayee: [
       {
         id: data?.idAlternative,

@@ -103,6 +103,14 @@ interface ParamsSubmissionHeader {
   dpAmountDeduction: number
   creditCardBillingID: string
   department: string
+  casDateReceipt: string
+  proposalAmount: number
+  picFinance: string
+  cashJournalCode: string
+  cashJournalName: string
+  pettyCashStartDate: string
+  pettyCashEndDate: string
+  npwpReportingName: string
 }
 
 interface ParamsSubmissionVendor {
@@ -230,6 +238,14 @@ interface ParamsNonPoHeaderTypes {
   statusName: string
   department: string
   profileId: string
+  casDateReceipt: string
+  proposalAmount: number
+  picFinance: string
+  cashJournalCode: string
+  cashJournalName: string
+  pettyCashStartDate: string
+  pettyCashEndDate: string
+  npwpReportingName: string
 }
 export interface ParamsSubmissionCostExpenseType {
   id: number
@@ -309,6 +325,7 @@ export interface ListPoTypes {
   costCenterCode: string
   costCenterName: string
   isOpenChild: boolean
+  vendorName: string
 }
 
 export interface ListNonPoTypes {
@@ -335,6 +352,7 @@ export interface ListNonPoTypes {
   isOpenChild: boolean
   vendorName: string
   department: string
+  actionerDate?: string
 }
 
 export interface PoChildTypes {
@@ -464,6 +482,14 @@ export interface DetailInvoiceEditTypes {
   beneficiaryName: string
   bankAccountNo: string
   bankCountryCode: string
+  casDateReceipt: string
+  proposalAmount: number
+  picFinance: string
+  cashJournalCode: string
+  cashJournalName: string
+  pettyCashStartDate: string
+  pettyCashEndDate: string
+  npwpReportingName: string
 
   vendorId: string
   vendorName: string
@@ -630,6 +656,15 @@ interface Header {
   currCode: string | null
   npwpReporting: string | null
   department: string | null
+  casDateReceipt: string
+  proposalAmount: number
+  picFinance: string
+  cashJournalCode: string
+  cashJournalName: string
+  pettyCashStartDate: string
+  pettyCashEndDate: string
+  npwpReportingName: string
+  creditCardBillingId: string | null
 }
 
 export interface SubmissionNonPoTypes {

@@ -9,11 +9,18 @@ import { useUserRoleStore } from '@/stores/user-management/role'
 import type { IRole } from '@/stores/user-management/types/role'
 import { computed, onMounted, reactive, ref } from 'vue'
 import successImg from '@/assets/success.svg'
+import LPagination from '@/components/pagination/LPagination.vue'
 
 const search = ref('')
 const userRoleStore = useUserRoleStore()
+
 const isModalOpen = ref(false)
+
 const showModalSuccess = ref(false)
+
+const showDeleteModal = ref(false)
+const roleToDelete = ref<IRole | null>(null)
+const isDeleting = ref(false)
 
 const rolePayload = reactive<{
   roleId: number
@@ -31,24 +38,14 @@ const isSaving = ref(false)
 const modalTitle = computed(() => (rolePayload.roleId === 0 ? 'Add New Role' : 'Edit Role'))
 
 const filteredRoles = computed(() => {
-  if (!userRoleStore.roles?.items) {
-    return []
-  }
-  const searchTerm = search.value.toLowerCase().trim()
-  if (!searchTerm) {
-    return userRoleStore.roles.items
-  }
-  return userRoleStore.roles.items.filter((role) =>
-    role.roleName.toLowerCase().includes(searchTerm),
-  )
+  const items = userRoleStore.roles?.items ?? []
+  const q = search.value.toLowerCase().trim()
+  if (!q) return items
+  return items.filter((r) => r.roleName.toLowerCase().includes(q))
 })
 
 const closeAnyOpenDropdown = () => {
-  const event = new MouseEvent('click', {
-    view: window,
-    bubbles: true,
-    cancelable: true,
-  })
+  const event = new MouseEvent('click', { view: window, bubbles: true, cancelable: true })
   document.body.dispatchEvent(event)
 }
 
@@ -86,47 +83,60 @@ const validateRoleName = () => {
 }
 
 const saveRole = async () => {
-  if (!validateRoleName()) {
-    return
-  }
-
+  if (!validateRoleName()) return
   isSaving.value = true
   try {
     await userRoleStore.postUserRole(rolePayload)
     closeRoleModal()
-    // alert(rolePayload.roleId === 0 ? 'Role added successfully!' : 'Role updated successfully!')
     showModalSuccess.value = true
-    await userRoleStore.getAllUserRoles()
+    await userRoleStore.getAllUserRoles({
+      page: 1,
+      pageSize: 10,
+    })
   } catch (error: unknown) {
     console.error('Failed to save role:', error)
-    alert(`Failed to save role: ${error || 'An unknown error occurred.'}`)
+    alert(`Failed to save role: ${String(error) || 'An unknown error occurred.'}`)
   } finally {
     isSaving.value = false
   }
 }
 
-const deleteRole = async (role: IRole) => {
+/** ===== Delete via UiModal (NEW) ===== */
+function openDeleteModal(role: IRole) {
   closeAnyOpenDropdown()
-  if (!confirm(`Are you sure you want to delete role "${role.roleName}"?`)) {
-    return
-  }
+  roleToDelete.value = role
+  showDeleteModal.value = true
+}
 
+async function handleProcessDelete() {
+  if (!roleToDelete.value) return
+  isDeleting.value = true
   try {
+    // soft delete: set isActive = false
     await userRoleStore.postUserRole({
-      roleId: role.roleId,
-      roleName: role.roleName,
+      roleId: roleToDelete.value.roleId,
+      roleName: roleToDelete.value.roleName,
       isActive: false,
     })
-    alert(`Role "${role.roleName}" deleted successfully!`)
-    await userRoleStore.getAllUserRoles()
+    showDeleteModal.value = false
+    roleToDelete.value = null
+    await userRoleStore.getAllUserRoles({
+      page: 1,
+      pageSize: 10,
+    })
   } catch (error: unknown) {
     console.error('Failed to delete role:', error)
-    alert(`Failed to delete role: ${error || 'An unknown error occurred.'}`)
+    alert(`Failed to delete role: ${String(error) || 'An unknown error occurred.'}`)
+  } finally {
+    isDeleting.value = false
   }
 }
 
 onMounted(() => {
-  userRoleStore.getAllUserRoles()
+  userRoleStore.getAllUserRoles({
+    page: 1,
+    pageSize: 10,
+  })
 })
 </script>
 
@@ -153,11 +163,13 @@ onMounted(() => {
           </div>
         </div>
       </div>
+
       <div class="card-body">
         <div v-if="userRoleStore.loading" class="text-center py-4">Loading roles...</div>
         <div v-else-if="userRoleStore.error" class="text-center py-4 text-red-500">
           Error: {{ userRoleStore.error }}
         </div>
+
         <table v-else-if="filteredRoles.length > 0" class="table align-middle text-gray-700">
           <thead>
             <tr>
@@ -203,7 +215,7 @@ onMounted(() => {
                           class="border-none text-red-500 hover:text-red-600"
                           :outline="true"
                           size="md"
-                          @click="deleteRole(role)"
+                          @click="openDeleteModal(role)"
                         >
                           <UiIcon name="trash" class="mr-2" />
                           Delete Role
@@ -219,9 +231,19 @@ onMounted(() => {
             </tr>
           </tbody>
         </table>
+
         <div v-else class="text-center py-4">No roles found.</div>
+
+        <LPagination
+          :totalItems="userRoleStore.roles.total"
+          :pageSize="userRoleStore.roles.pageSize"
+          :currentPage="userRoleStore.roles.page"
+          @page-change="userRoleStore.changePage"
+        />
       </div>
     </div>
+
+    <!-- Add/Edit modal -->
     <UiModal
       :title="modalTitle"
       v-model="isModalOpen"
@@ -247,15 +269,54 @@ onMounted(() => {
       </div>
     </UiModal>
 
-    <!-- Modal success message -->
-    <UiModal v-model="showModalSuccess" size="sm" @update:model-value="!showModalSuccess">
+    <!-- success modal -->
+    <UiModal v-model="showModalSuccess" size="sm" @update:model-value="showModalSuccess = false">
       <img :src="successImg" alt="success" class="mx-auto mb-3" />
       <h3 class="font-medium text-lg text-gray-800 text-center">
         Role successfully {{ rolePayload.roleId === 0 ? 'Created' : 'Updated' }}
       </h3>
     </UiModal>
 
-    <!-- Modal delete confirm -->
+    <!-- delete confirm modal -->
+    <UiModal v-model="showDeleteModal" size="sm">
+      <div class="text-center mb-6">
+        <UiIcon
+          name="cross-circle"
+          variant="duotone"
+          class="text-[150px] text-danger text-center"
+        />
+      </div>
+      <h3 class="text-center text-lg font-medium">Are you sure to delete this role?</h3>
+      <p class="text-center text-base text-gray-600 mb-5">
+        This action will permanently deactivate
+        <strong v-if="roleToDelete">{{ roleToDelete.roleName }}</strong
+        >.
+      </p>
+      <div class="flex gap-3 px-8 mb-3">
+        <UiButton
+          outline
+          @click="showDeleteModal = false"
+          class="flex-1 flex items-center justify-center"
+        >
+          <UiIcon name="black-left-line" />
+          <span>Cancel</span>
+        </UiButton>
+        <UiButton
+          variant="danger"
+          class="flex-1 flex items-center justify-center"
+          @click="handleProcessDelete"
+          :disabled="isDeleting"
+        >
+          <template v-if="isDeleting">
+            <span>Deleting...</span>
+          </template>
+          <template v-else>
+            <UiIcon name="cross-circle" variant="duotone" />
+            <span>Delete</span>
+          </template>
+        </UiButton>
+      </div>
+    </UiModal>
   </div>
 </template>
 

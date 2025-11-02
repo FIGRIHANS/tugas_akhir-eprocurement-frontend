@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import userApi from '@/core/utils/userApi'
-import type { ApiResponse } from '@/core/type/api'
+import type { ApiResponse, PaginatedContent } from '@/core/type/api'
 import type { IProfile } from './types/profile'
 
 interface ProfileData {
@@ -17,28 +17,36 @@ export const useUserProfileStore = defineStore('userProfile', () => {
   const profiles = ref<ProfileData>({
     items: [],
     total: 0,
-    page: 0,
-    pageSize: 0,
+    page: 1,
+    pageSize: 10,
   })
 
-  const getAllUserProfiles = async () => {
+  const getAllUserProfiles = async (body: { page: number; pageSize?: number }) => {
     loading.value = true
     error.value = null
 
     try {
-      const response: ApiResponse<IProfile[]> = await userApi.post('/profile/getall')
+      const response: ApiResponse<PaginatedContent<IProfile>> = await userApi.get(
+        '/profile/getall',
+        {
+          params: {
+            page: body.page,
+            pageSize: body.pageSize ?? profiles.value.pageSize,
+          },
+        },
+      )
 
       if (response.data.result.isError) {
         error.value = response.data.result.message || 'An unknown error occurred.'
         return
       }
 
-      if (response.data.result.content && Array.isArray(response.data.result.content)) {
+      if (response.data.result.content.items && Array.isArray(response.data.result.content.items)) {
         profiles.value = {
-          items: response.data.result.content,
-          total: response.data.result.content.length,
-          page: 1,
-          pageSize: response.data.result.content.length,
+          items: response.data.result.content.items,
+          total: response.data.result.content.total,
+          page: response.data.result.content.page,
+          pageSize: response.data.result.content.pageSize,
         }
       } else {
         profiles.value = {
@@ -68,35 +76,30 @@ export const useUserProfileStore = defineStore('userProfile', () => {
   }
 
   const getUserProfiles = async (
-    body: { profileId?: number; profileName?: string; page?: number } = {},
+    body: { profileId?: number; profileName?: string; page?: number; pageSize?: number } = {},
   ) => {
     loading.value = true
     error.value = null
 
     try {
-      const response: ApiResponse<IProfile[]> = await userApi.post('/profile', body) // Ubah ApiResponse type
+      const response: ApiResponse<PaginatedContent<IProfile>> = await userApi.post('/profile', {
+        page: body.page ?? profiles.value.page,
+        pageSize: body.pageSize ?? profiles.value.pageSize,
+        profileId: body.profileId,
+        profileName: body.profileName?.trim(),
+      })
 
       if (response.data.result.isError) {
         error.value = response.data.result.message || 'An unknown error occurred.'
         return
       }
 
-      // Periksa apakah content adalah array, lalu bentuk objek ProfileData
-      if (response.data.result.content && Array.isArray(response.data.result.content)) {
-        profiles.value = {
-          items: response.data.result.content,
-          total: response.data.result.content.length,
-          page: body.page || 1, // Gunakan page dari body request jika ada, default ke 1
-          pageSize: response.data.result.content.length, // Atau sesuai ukuran halaman yang Anda inginkan
-        }
-      } else {
-        profiles.value = {
-          items: [],
-          total: 0,
-          page: 0,
-          pageSize: 0,
-        }
-        error.value = 'API response content is malformed or missing expected array of profiles.'
+      const c = response.data.result.content
+      profiles.value = {
+        items: c.items,
+        total: c.total,
+        page: c.page,
+        pageSize: c.pageSize,
       }
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -107,8 +110,8 @@ export const useUserProfileStore = defineStore('userProfile', () => {
       profiles.value = {
         items: [],
         total: 0,
-        page: 0,
-        pageSize: 0,
+        page: 1,
+        pageSize: profiles.value.pageSize,
       }
       throw err
     } finally {
@@ -145,6 +148,14 @@ export const useUserProfileStore = defineStore('userProfile', () => {
     }
   }
 
+  const changePage = (page: number) => {
+    profiles.value.page = page
+    getAllUserProfiles({
+      page,
+      pageSize: profiles.value.pageSize,
+    })
+  }
+
   return {
     profiles,
     loading,
@@ -153,5 +164,7 @@ export const useUserProfileStore = defineStore('userProfile', () => {
     getAllUserProfiles,
     getUserProfiles,
     postUserProfile,
+
+    changePage,
   }
 })

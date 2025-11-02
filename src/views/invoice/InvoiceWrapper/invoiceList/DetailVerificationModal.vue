@@ -9,7 +9,7 @@
       </div>
       <div class="modal-body p-[0px] pb-[16px]">
         <div class="border border-gray-200 text-center text-lg font-semibold text-gray-700">
-          No Invoice : {{ list?.header.invoiceNo }}
+          No Invoice : {{ props.type === 'po' ? invoiceDetail?.header?.invoiceNo : invoiceDetail?.header?.invoiceNo }}
         </div>
         <table class="table align-middle text-gray-700 font-medium text-sm">
           <thead>
@@ -20,24 +20,23 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(item, index) in list?.workflow" :key="index" class="text-sm font-normal">
-              <td>{{ index + 1 }}</td>
-              <td>{{ item.profileName }}</td>
-              <td>{{ item.actionerName || '-' }}</td>
-              <td>
-                {{
-                  item.actionerDate && item.actioner !== 0
-                    ? moment(item.actionerDate).format('YYYY/MM/DD HH:mm:ss')
-                    : '-'
-                }}
-              </td>
-              <td>
-                <span v-if="item.stateCode === 99">-</span>
-                <span v-else class="badge badge-outline" :class="badgeColor(item.stateCode)">
-                  {{ item.stateName }}
-                </span>
-              </td>
-              <td>{{ item.actionerNotes || '-' }}</td>
+            <template v-if="invoiceDetail?.workflow?.length">
+              <tr v-for="(item, index) in invoiceDetail.workflow" :key="index" class="text-sm font-normal">
+                <td>{{ index + 1 }}</td>
+                <td>{{ item.profileName }}</td>
+                <td>{{ item.actionerName || '-' }}</td>
+                <td>{{ formatDateYearFirst(item.actionerDate) }}</td>
+                <td>
+                  <span v-if="item.stateCode === 99">-</span>
+                  <span v-else class="badge badge-outline" :class="badgeColor(item.stateCode)">
+                    {{ item.stateName }}
+                  </span>
+                </td>
+                <td>{{ item.actionerNotes || '-' }}</td>
+              </tr>
+            </template>
+            <tr v-else>
+              <td colspan="6" class="text-center">Loading...</td>
             </tr>
           </tbody>
         </table>
@@ -50,10 +49,12 @@
 import { ref, computed, onMounted } from 'vue'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { KTModal } from '@/metronic/core'
-import moment from 'moment'
-import { useRoute } from 'vue-router'
+import { formatDateYearFirst } from '@/composables/date-format'
+import type { ParamsSubmissionTypes } from '@/stores/views/invoice/types/submission'
 
-const route = useRoute()
+const props = defineProps<{
+  type?: 'po' | 'nonpo'
+}>()
 
 const emits = defineEmits(['loadDetail', 'setClearId'])
 
@@ -68,14 +69,8 @@ const columns = ref<string[]>([
   'Description',
 ])
 
-const list = computed(() => {
-  if (route.name === 'invoiceVerificationNoPo') {
-    // Jika kondisi terpenuhi, kembalikan nilai ini
-    return invoiceApi.detailNonPo
-  } else {
-    // Jika tidak, kembalikan nilai ini
-    return invoiceApi.detailPo
-  }
+const invoiceDetail = computed((): ParamsSubmissionTypes | undefined => {
+  return props.type === 'po' ? invoiceApi.detailPo : invoiceApi.detailNonPo
 })
 
 const badgeColor = (status: number) => {
@@ -91,11 +86,6 @@ const badgeColor = (status: number) => {
 }
 
 onMounted(() => {
-  // const departmentIndex = columns.value.indexOf('Department')
-
-  // if (route.name === 'invoiceVerificationNoPo') {
-  //   columns.value.splice(departmentIndex + 1, 0, 'Actioner Name')
-  // }
   const idModal = document.querySelector('#detail_verification_modal')
   const modal = KTModal.getInstance(idModal as HTMLElement)
 
@@ -110,5 +100,5 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-@use '../styles/detail-verification.scss';
+@use '../../styles/invoice-detail-verification.scss';
 </style>

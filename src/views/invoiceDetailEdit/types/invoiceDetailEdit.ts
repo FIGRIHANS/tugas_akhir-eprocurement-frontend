@@ -36,7 +36,7 @@ export interface formTypes extends documentFormTypes {
   paymentMethodName: string
   paymentMethodError?: boolean
   assigment: string
-  assignmentError?: boolean
+  assigmentError?: boolean
   transferNews: string
   transferNewsError?: boolean
   npwpReporting: string
@@ -46,6 +46,18 @@ export interface formTypes extends documentFormTypes {
   dpAmountDeductionError?: boolean
   creditCardBillingId: string
   creditCardBillingError?: boolean
+  casDateReceipt: string
+  proposalAmount: number
+  proposalAmountError?: boolean
+  picFinance: string
+  cashJournalCode: string
+  cashJournalName: string
+  cashJournalCodeError?: boolean
+  pettyCashStartDate: string
+  pettyCashEndDate: string
+  pettyCashPeriodError?: boolean
+  npwpReportingName: string
+  pettyCashPeriod?: string[]
   paymentId: number
   bankKey: string
   bankKeyIdError?: boolean
@@ -58,16 +70,21 @@ export interface formTypes extends documentFormTypes {
   isAlternativePayee: boolean
   isOneTimeVendor: boolean
   nameAlternative: string
+  nameAlternativeError?: boolean
   nameOtherAlternative: string
   streetAltiernative: string
+  streetAltiernativeError?: boolean
   cityAlternative: string
   countryAlternative: string
   bankAccountNumberAlternative: string
+  bankAccountNumberAlternativeError?: boolean
   bankKeyAlternative: string
+  bankKeyAlternativeError?: boolean
   bankCountryAlternative: string
   npwpNumberAlternative: string
   ktpNumberAlternative: string
   emailAlternative: string
+  emailAlternativeError?: boolean
 
   vendorId: string
   vendorName: string

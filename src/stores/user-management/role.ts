@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import userApi from '@/core/utils/userApi'
-import type { ApiResponse } from '@/core/type/api'
+import type { ApiResponse, PaginatedContent } from '@/core/type/api'
 import type { IRole } from './types/role'
 
-interface ProfileData {
+interface RoleData {
   items: IRole[]
   total: number
   page: number
@@ -14,31 +14,36 @@ interface ProfileData {
 export const useUserRoleStore = defineStore('userRole', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
-  const roles = ref<ProfileData>({
+  const roles = ref<RoleData>({
     items: [],
     total: 0,
-    page: 0,
-    pageSize: 0,
+    page: 1,
+    pageSize: 10,
   })
 
-  const getAllUserRoles = async () => {
+  const getAllUserRoles = async (body: { page: number; pageSize: number }) => {
     loading.value = true
     error.value = null
 
     try {
-      const response: ApiResponse<IRole[]> = await userApi.post('/role/getall') // Ubah ApiResponse type
+      const response: ApiResponse<PaginatedContent<IRole>> = await userApi.get('/role/getall', {
+        params: {
+          page: body.page,
+          pageSize: body.pageSize ?? roles.value.pageSize,
+        },
+      })
 
       if (response.data.result.isError) {
         error.value = response.data.result.message || 'An unknown error occurred.'
         return
       }
 
-      if (response.data.result.content && Array.isArray(response.data.result.content)) {
+      if (response.data.result.content.items && Array.isArray(response.data.result.content.items)) {
         roles.value = {
-          items: response.data.result.content,
-          total: response.data.result.content.length,
-          page: 1,
-          pageSize: response.data.result.content.length,
+          items: response.data.result.content.items,
+          total: response.data.result.content.total,
+          page: response.data.result.content.page,
+          pageSize: response.data.result.content.pageSize,
         }
       } else {
         roles.value = {
@@ -67,35 +72,26 @@ export const useUserRoleStore = defineStore('userRole', () => {
     }
   }
 
-  const getUserRole= async (
+  const getUserRole = async (
     body: { profileId?: number; profileName?: string; page?: number } = {},
   ) => {
     loading.value = true
     error.value = null
 
     try {
-      const response: ApiResponse<IRole[]> = await userApi.post('/role', body)
+      const response: ApiResponse<PaginatedContent<IRole>> = await userApi.post('/role', body)
 
       if (response.data.result.isError) {
         error.value = response.data.result.message || 'An unknown error occurred.'
         return
       }
 
-      if (response.data.result.content && Array.isArray(response.data.result.content)) {
-        roles.value = {
-          items: response.data.result.content,
-          total: response.data.result.content.length,
-          page: body.page || 1,
-          pageSize: response.data.result.content.length,
-        }
-      } else {
-        roles.value = {
-          items: [],
-          total: 0,
-          page: 0,
-          pageSize: 0,
-        }
-        error.value = 'API response content is malformed or missing expected array of profiles.'
+      const c = response.data.result.content
+      roles.value = {
+        items: c.items,
+        total: c.total,
+        page: c.page,
+        pageSize: c.pageSize,
       }
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -106,8 +102,8 @@ export const useUserRoleStore = defineStore('userRole', () => {
       roles.value = {
         items: [],
         total: 0,
-        page: 0,
-        pageSize: 0,
+        page: 1,
+        pageSize: roles.value.pageSize,
       }
       throw err
     } finally {
@@ -115,11 +111,7 @@ export const useUserRoleStore = defineStore('userRole', () => {
     }
   }
 
-  const postUserRole = async (body: {
-    roleId: number
-    roleName: string
-    isActive: boolean
-  }) => {
+  const postUserRole = async (body: { roleId: number; roleName: string; isActive: boolean }) => {
     loading.value = true
     error.value = null
 
@@ -144,6 +136,14 @@ export const useUserRoleStore = defineStore('userRole', () => {
     }
   }
 
+  const changePage = (page: number) => {
+    roles.value.page = page
+    getAllUserRoles({
+      page,
+      pageSize: roles.value.pageSize,
+    })
+  }
+
   return {
     roles,
     loading,
@@ -152,5 +152,7 @@ export const useUserRoleStore = defineStore('userRole', () => {
     getAllUserRoles,
     getUserRole,
     postUserRole,
+
+    changePage,
   }
 })

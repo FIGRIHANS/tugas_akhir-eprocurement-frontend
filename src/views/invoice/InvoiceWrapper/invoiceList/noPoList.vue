@@ -58,7 +58,7 @@
                 :class="{
                   'list__long ': index !== 0,
                   'cursor-pointer': item,
-                  '!text-blue-500': item === sortColumnName && sortBy !== ''
+                  '!text-blue-500': item === sortColumnName && sortBy !== '',
                 }"
                 @click="sortColumn(item)"
               >
@@ -72,12 +72,18 @@
               <td colspan="10" class="text-center">No data found.</td>
             </tr>
             <tr v-for="item in list" :key="item.invoiceUId" class="text-nowrap">
-              <td>
+                <td class="flex items-center gap-[16px]">
                 <button
-                  class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]"
+                  class="btn btn-outline btn-primary btn-icon w-[32px] h-[32px]"
                   @click="goToDetail(item)"
                 >
                   <i class="ki-filled ki-eye !text-lg"></i>
+                </button>
+                <button
+                  class="btn btn-outline btn-primary btn-icon w-[32px] h-[32px]"
+                  @click="openDetailVerification(item.invoiceUId)"
+                >
+                  <i class="ki-duotone ki-data !text-lg"></i>
                 </button>
               </td>
               <td>{{ item.invoiceNo }}</td>
@@ -93,6 +99,7 @@
               <td>{{ formatDateYearFirst(item.invoiceDate) }}</td>
               <td>{{ useFormatIdr(item.totalGrossAmount) }}</td>
               <td>{{ useFormatIdr(item.totalNetAmount) }}</td>
+              <td>{{ formatDateYearFirst(item.actionerDate) }}</td>
               <td>{{ formatDateYearFirst(item.estimatedPaymentDate) }}</td>
             </tr>
           </tbody>
@@ -112,7 +119,26 @@
           @page-change="setPage"
         />
       </div>
+      <div class="flex items-center gap-[16px] mt-[24px]">
+        <div class="flex items-center">
+          <div
+            class="bg-primary rounded-md p-[7px] w-[40px] h-[40px] flex items-center justify-center"
+          >
+            <i class="ki-filled ki-eye text-white text-[24px]"></i>
+          </div>
+          <p class="ml-[8px]">: View Detail invoice</p>
+        </div>
+        <div class="flex items-center">
+          <div
+            class="bg-primary-light border border-primary-clarity rounded-md p-[7px] w-[40px] h-[40px] flex items-center justify-center"
+          >
+            <i class="ki-duotone ki-data text-primary text-[24px]"></i>
+          </div>
+          <p class="ml-[8px]">: Verification Detail Invoice</p>
+        </div>
+      </div>
     </section>
+    <DetailVerificationModal @loadDetail="loadData" @setClearId="viewDetailId = ''" />
   </div>
 </template>
 
@@ -121,7 +147,6 @@ import { ref, reactive, defineAsyncComponent, onMounted, computed } from 'vue'
 import LPagination from '@/components/pagination/LPagination.vue'
 import type { filterListTypes } from '../../types/invoiceList'
 import InputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
-const FilterList = defineAsyncComponent(() => import('./FilterList.vue'))
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import { useFormatIdr } from '@/composables/currency'
@@ -131,12 +156,16 @@ import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterDat
 import type { ListPoTypes } from '@/stores/views/invoice/types/submission'
 import { useRouter } from 'vue-router'
 import { cloneDeep } from 'lodash'
-
+import { KTModal } from '@/metronic/core'
 
 const invoiceSubmissionApi = useInvoiceSubmissionStore()
 const router = useRouter()
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const filterChild = ref(null)
+const viewDetailId = ref('')
+
+const FilterList = defineAsyncComponent(() => import('./FilterList.vue'))
+const DetailVerificationModal = defineAsyncComponent(() => import('../invoiceList/DetailVerificationModal.vue'))
 
 // import UiModal from '@/components/modal/UiModal.vue'
 // import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
@@ -182,6 +211,7 @@ const columns = ref([
   'Invoice Date',
   'Total Gross Amount',
   'Total Net Amount',
+  'Approval Date',
   'Estimated Payment Date',
 ])
 
@@ -227,6 +257,17 @@ const setList = (listData: ListPoTypes[]) => {
 const setPage = (value: number) => {
   currentPage.value = value
   sortColumn(null)
+}
+
+const openDetailVerification = (invoiceId: string) => {
+  viewDetailId.value = invoiceId
+  const idModal = document.querySelector('#detail_verification_modal')
+  const modal = KTModal.getInstance(idModal as HTMLElement)
+  modal.show()
+}
+
+const loadData = () => {
+  invoiceSubmissionApi.getNonPoDetail(viewDetailId.value)
 }
 
 const deleteFilter = (key: string) => {
@@ -332,7 +373,7 @@ const goToDetail = (data: ListPoTypes) => {
 const sortColumn = (columnName: string | null) => {
   const list = {
     'Submitted Document No': 'invoiceNo',
-    'Status': 'statusName',
+    Status: 'statusName',
     'Vendor Name': 'vendorName',
     'Invoice Vendor No': 'documentNo',
     'Company Code': 'companyCode',
@@ -341,7 +382,7 @@ const sortColumn = (columnName: string | null) => {
     'Total Gross Amount': 'totalGrossAmount',
     'Total Net Amount': 'totalNetAmount',
     'Estimated Payment Date': 'estimatedPaymentDate',
-  } as {[key: string]: string}
+  } as { [key: string]: string }
 
   const roleSort = ['asc', 'desc', '']
 
@@ -355,7 +396,7 @@ const sortColumn = (columnName: string | null) => {
     const indexSort = roleSort.findIndex((item) => item === sortBy.value)
     if (indexSort === -1) return setList(poList.value)
     sortBy.value = indexSort + 1 === roleSort.length ? roleSort[0] : roleSort[indexSort + 1]
-  
+
     if (!sortBy.value) return setList(poList.value)
   }
 

@@ -56,7 +56,7 @@ watch(
   () => form,
   () => {
     if (form) {
-      const headerError = form.companyCodeError || form.invoiceNoVendorError || form.invoiceDateError || form.taxNoInvoiceError || form.descriptionError
+      const headerError = form.companyCodeError || form.invoiceVendorNoError || form.invoiceDateError || form.taxNoInvoiceError || form.descriptionError
       if (!headerError && form.invoiceDocumentError) {
         invoiceTypeTab.value = 'document'
       }

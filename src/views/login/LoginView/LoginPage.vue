@@ -33,9 +33,13 @@
       <div>
         <div class="flex justify-between gap-[8px]">
           <label class="font-normal text-[13px]">{{ $t('login.form.password') }}</label>
-          <a v-if="checkVendor()" href="#" class="text-primary text-[13px]" @click="goToForgot">{{
-            $t('login.form.forgotPassword')
-          }}</a>
+          <a
+            v-if="checkVendor() || checkAdmin()"
+            href="#"
+            class="text-primary text-[13px]"
+            @click="goToForgot"
+            >{{ $t('login.form.forgotPassword') }}</a
+          >
         </div>
         <div class="input max-w-72" :class="{ 'border-danger': isError }">
           <input
@@ -108,6 +112,10 @@ const checkVendor = () => {
   return selectedLogin.value === 'vendor'
 }
 
+const checkAdmin = () => {
+  return selectedLogin.value === 'admin'
+}
+
 const togglePassword = () => {
   showPassword.value = !showPassword.value
 }
@@ -119,6 +127,12 @@ const goRegister = () => {
 }
 
 const goToForgot = () => {
+  if (selectedLogin.value === 'admin') {
+    loginApi.loginRole = 'employee'
+  } else {
+    loginApi.loginRole = 'vendor'
+  }
+
   loginApi.selectedLogin = 'forgot'
 }
 

@@ -27,7 +27,7 @@
         </thead>
         <tbody>
           <tr v-if="form.invoiceItem.length === 0">
-            <td colspan="11" class="text-center text-[13px]">No Data Available</td>
+            <td :colspan="columns.length" class="text-center text-[13px]">No Data Available</td>
           </tr>
           <template v-else>
             <tr v-for="(item, index) in form.invoiceItem" :key="index" class="cost__field-items">
@@ -59,9 +59,17 @@
               </td>
               <td>
                 <span v-if="!item.isEdit">{{ item.itemText || '-' }}</span>
-                <input v-else v-model="item.itemText" class="input" type="text" placeholder=""/>
+                <input
+                  v-else
+                  v-model="item.itemText"
+                  class="input"
+                  :class="{ 'input-danger': item.isTextLimitExceeded }"
+                  type="text"
+                  placeholder=""
+                  @input="onItemTextInput(item, $event)"
+                />
               </td>
-              <td>
+              <td v-if="!isPettyCash">
                 <span v-if="!item.isEdit">{{ getDebitCreditName(item.debitCredit) || '-' }}</span>
                 <select v-else v-model="item.debitCredit" class="select" placeholder="">
                   <option value="D">
@@ -72,7 +80,7 @@
                   </option>
                 </select>
               </td>
-              <td>
+              <td v-if="!isPettyCash">
                 <span v-if="!item.isEdit">{{ getTaxCodeName(item.taxCode) || '-' }}</span>
                 <v-select
                   v-else
@@ -86,9 +94,9 @@
                 ></v-select>
               </td>
               <td>
-                <span>{{ form?.currency === 'IDR' ? useFormatIdr(item.vatAmount) : useFormatUsd(item.vatAmount) }}</span>
+                <span>{{ form?.currency === 'IDR' ? useFormatIdr(item.vatAmount) : useFormatUsd(item.vatAmount) || '-' }}</span>
               </td>
-              <td>
+              <td v-if="!isPettyCash">
                 <span v-if="!item.isEdit">{{ getCostCenterName(item.costCenter) || '-' }}</span>
                 <v-select
                   v-else
@@ -107,16 +115,16 @@
               <td>
                 <span>{{ item.assignment || '-' }}</span>
               </td>
-              <td>
+              <td v-if="!isPettyCash">
                 <span>{{ item.whtType || '-' }}</span>
               </td>
-              <td>
+              <td v-if="!isPettyCash">
                 <span>{{ item.whtCode || '-' }}</span>
               </td>
-              <td>
+              <td v-if="!isPettyCash">
                 <span>{{ form?.currency === 'IDR' ? useFormatIdr(item.whtBaseAmount) : useFormatUsd(item.whtBaseAmount) || '-' }}</span>
               </td>
-              <td>
+              <td v-if="!isPettyCash">
                 <span>{{ form?.currency === 'IDR' ? useFormatIdr(item.whtAmount) : useFormatUsd(item.whtAmount) || '-' }}</span>
               </td>
             </tr>
@@ -128,7 +136,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, inject } from 'vue'
+import { computed, watch, inject } from 'vue'
 import type { formTypes } from '../../types/invoiceAddWrapper'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
@@ -136,24 +144,43 @@ import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const verificationApi = useInvoiceVerificationStore()
-const columns = ref([
-  'Action',
-  'Activity / Expense',
-  'Item Amount',
-  'Item Text',
-  'Debit/Credit',
-  'Tax Code',
-  'VAT Amount',
-  'Cost Center',
-  'Profit Center',
-  'Assignment',
-  'WHT Type',
-  'WHT Code',
-  'WHT Base Amount',
-  'WHT Amount'
-])
 
 const form = inject<formTypes>('form')
+
+const isPettyCash = computed(() => form?.invoiceType === '5')
+
+const columns = computed(() => {
+  const baseColumns = [
+    'Action',
+    'Activity / Expense',
+    'Item Amount',
+    'Item Text'
+  ]
+
+  if (!isPettyCash.value) {
+    baseColumns.push('Debit/Credit')
+  }
+
+  if (!isPettyCash.value) {
+    baseColumns.push('Tax Code')
+  }
+
+  baseColumns.push('VAT Amount')
+  if (!isPettyCash.value) {
+    baseColumns.push('Cost Center')
+  }
+  baseColumns.push('Profit Center')
+  baseColumns.push('Assignment')
+
+  if (!isPettyCash.value) {
+    baseColumns.push('WHT Type')
+    baseColumns.push('WHT Code')
+    baseColumns.push('WHT Base Amount')
+    baseColumns.push('WHT Amount')
+  }
+
+  return baseColumns
+})
 
 const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
 const listActivity = computed(() => invoiceMasterApi.activityList)
@@ -171,7 +198,7 @@ const addNew = () => {
       debitCredit: 'D',
       taxCode: '',
       vatAmount: 0,
-      costCenter: '',
+        costCenter: isPettyCash.value ? '' : '',
       profitCenter: '',
       assignment: '',
       whtType: '',
@@ -180,6 +207,7 @@ const addNew = () => {
       whtAmount: '',
       whtCodeList: [],
       isEdit: false
+        ,isTextLimitExceeded: false
     }
     form.invoiceItem.push(data)
   }
@@ -246,6 +274,21 @@ const checkIsEdit = () => {
   return checkIndex !== -1
 }
 
+const onItemTextInput = (item: { itemText?: string; isTextLimitExceeded?: boolean }, e: Event) => {
+  const target = e.target as HTMLInputElement
+  if (!target) return
+  // If user attempts to input >50 chars, mark as exceeded and truncate immediately
+  if (target.value && target.value.length > 50) {
+    item.isTextLimitExceeded = true
+    const truncated = target.value.slice(0, 50)
+    target.value = truncated
+    item.itemText = truncated
+  } else {
+    // clear the flag when within limit
+    item.isTextLimitExceeded = false
+  }
+}
+
 watch(
   () => [form?.invoiceItem, form?.currency],
   () => {
@@ -261,6 +304,20 @@ watch(
   () => form?.companyCode,
   () => {
     if (form?.companyCode) invoiceMasterApi.getCostCenter(form?.companyCode || '')
+  },
+  {
+    immediate: true
+  }
+)
+
+watch(
+  () => form?.invoiceType,
+  () => {
+    if (form && form.invoiceType === '5') {
+      form.invoiceItem.forEach(item => {
+        item.costCenter = ''
+      })
+    }
   },
   {
     immediate: true

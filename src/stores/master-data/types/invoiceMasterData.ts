@@ -29,7 +29,7 @@ export type DocumentTypes = {
 }
 
 export type VendorTypes = {
-  vendorId: number
+  vendorId: string
   vendorCode: string
   vendorName: string
   businessFieldId: number
@@ -98,4 +98,27 @@ export type MatrixApprovalTypes = {
   invoiceTypeName: string
   workflowCode: string
   workflowDescription: string
+}
+
+export type NpwpReportingTypes = {
+  id: number
+  companyCodeName: string
+  npwpLocation: string
+  npwpDescription: string
+}
+
+export type CasNoTypes = {
+  documentNo: string
+  documentYear: number
+  companyCode: string
+  casNo: string
+  vendorNo: string
+  amount: number
+}
+
+export type CashJournalTypes = {
+  id: number
+  companyCodeName: string
+  cashJournalNo: string
+  cashJournalName: string
 }

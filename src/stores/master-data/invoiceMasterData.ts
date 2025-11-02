@@ -9,6 +9,8 @@ import type {
   InvoiceNonPoTypes,
   CurrencyTypes,
   CompanyCodeTypes,
+  CasNoTypes,
+  CashJournalTypes,
   DpTypes,
   DocumentTypes,
   VendorTypes,
@@ -19,7 +21,8 @@ import type {
   WhtTypes,
   WhtCodeTypes,
   CostCenterTypes,
-  MatrixApprovalTypes
+  MatrixApprovalTypes,
+  NpwpReportingTypes
 } from './types/invoiceMasterData'
 
 export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => {
@@ -38,6 +41,9 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
   const whtCodeList = ref<WhtCodeTypes[]>([])
   const costCenterList = ref<CostCenterTypes[]>([])
   const matrixApprovalList = ref<MatrixApprovalTypes[]>([])
+  const npwpReportingList = ref<NpwpReportingTypes[]>([])
+  const casNoCode = ref<CasNoTypes[]>([])
+  const cashJournalList = ref<CashJournalTypes[]>([])
 
   const getInvoicePoType = async () => {
     const response: ApiResponse<InvoicePoTypes[]> = await generalApi.get(`/lookup/invoice-po-type`)
@@ -188,6 +194,24 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
     return response.data.result
   }
 
+  const getNpwpReporting = async (companyCode: string) => {
+    const url = `/lookup/npwp-reporting?companyCode=${companyCode}`
+    const response: ApiResponse<NpwpReportingTypes[]> = await generalApi.get(url)
+
+    npwpReportingList.value = response.data.result.content
+  }
+
+  const getCashJournal = async (companyCode: string, searchText?: string) => {
+    const url = searchText
+      ? `/lookup/cash-journal?companyCode=${companyCode}&searchText=${searchText}`
+      : `/lookup/cash-journal?companyCode=${companyCode}`
+    const response: ApiResponse<CashJournalTypes[]> = await generalApi.get(url)
+
+    cashJournalList.value = response.data.result.content
+
+    return response.data.result
+  }
+
   return {
     invoicePoType,
     invoiceNonPoType,
@@ -204,6 +228,9 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
     whtCodeList,
     costCenterList,
     matrixApprovalList,
+    npwpReportingList,
+    casNoCode,
+    cashJournalList,
     getInvoicePoType,
     getInvoiceNonPoType,
     getCurrency,
@@ -219,5 +246,7 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
     getWhtCode,
     getCostCenter,
     getMatrixApproval,
+    getNpwpReporting,
+    getCashJournal,
   }
 })

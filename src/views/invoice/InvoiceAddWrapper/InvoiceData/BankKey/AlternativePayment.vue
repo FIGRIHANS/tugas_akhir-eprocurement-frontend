@@ -14,7 +14,7 @@
       <div class="flex-1">
         <!-- Name -->
         <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-          <label class="form-label max-w-32"> Name </label>
+          <label class="form-label max-w-32"> Name <span v-if="isAlt" class="text-danger">*</span> </label>
           <input v-model="form.nameAlternative" class="input" placeholder="" />
         </div>
         <!-- Name 2 -->
@@ -24,7 +24,7 @@
         </div>
         <!-- Street -->
         <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-          <label class="form-label max-w-32"> Street </label>
+          <label class="form-label max-w-32"> Street <span v-if="isAlt" class="text-danger">*</span> </label>
           <input v-model="form.streetAltiernative" class="input" placeholder="" />
         </div>
         <!-- Country -->
@@ -46,14 +46,14 @@
         </div>
         <!-- Bank Account Number -->
         <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-          <label class="form-label max-w-32"> Bank Account Number </label>
+          <label class="form-label max-w-32"> Bank Account Number <span v-if="isAlt" class="text-danger">*</span> </label>
           <input v-model="form.bankAccountNumberAlternative" class="input" placeholder="" />
         </div>
       </div>
       <div class="flex-1">
         <!-- Bank Key -->
         <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-          <label class="form-label max-w-32"> Bank Key </label>
+          <label class="form-label max-w-32"> Bank Key <span v-if="isAlt" class="text-danger">*</span> </label>
           <input v-model="form.bankKeyAlternative" class="input" placeholder="" />
         </div>
         <!-- Bank Country -->
@@ -84,7 +84,7 @@
         </div>
         <!-- Email -->
         <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-          <label class="form-label max-w-32"> Email </label>
+          <label class="form-label max-w-32"> Email <span v-if="isAlt" class="text-danger">*</span> </label>
           <input v-model="form.emailAlternative" class="input" placeholder="" />
         </div>
       </div>
@@ -93,7 +93,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, onMounted } from 'vue'
+import { computed, inject, onMounted, watch } from 'vue'
 import type { formTypes } from '../../../types/invoiceAddWrapper'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
 
@@ -101,8 +101,26 @@ const form = inject<formTypes>('form')
 const vendorMasterApi = useVendorMasterDataStore()
 
 const listCountry = computed(() => vendorMasterApi.countryList)
+const isAlt = computed(() => !!form?.isAlternativePayee)
 
 onMounted(() => {
   vendorMasterApi.getVendorCountries()
 })
+
+// Ensure only one of the two options can be selected at a time
+watch(
+  () => form?.isAlternativePayee,
+  (val) => {
+    if (!form) return
+    if (val) form.isOneTimeVendor = false
+  },
+)
+
+watch(
+  () => form?.isOneTimeVendor,
+  (val) => {
+    if (!form) return
+    if (val) form.isAlternativePayee = false
+  },
+)
 </script>

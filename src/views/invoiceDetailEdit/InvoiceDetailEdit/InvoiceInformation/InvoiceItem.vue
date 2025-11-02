@@ -1,7 +1,11 @@
 <template>
   <div class="flex flex-col gap-[16px]">
     <p class="text-base font-semibold">Costs / Expenses</p>
-    <button class="btn btn-outline btn-primary w-fit" @click="addNew">
+    <button
+      v-if="route.query.isSendSap !== 'true' || checkApprovalNonPoProc() || checkApprovalNonPoCcAdmin()"
+      class="btn btn-outline btn-primary w-fit"
+      @click="addNew"
+    >
       <i class="ki-duotone ki-plus-circle"></i>
       Add Costs / Expenses
     </button>
@@ -19,7 +23,7 @@
                 'cost__field-base--cost': item.toLowerCase() === 'cost center',
                 'cost__field-base--wht-type': item.toLowerCase() === 'wht type',
                 'cost__field-base--wht-code': item.toLowerCase() === 'wht code',
-                'cost__field-base--description': item.toLowerCase() === 'description'
+                'cost__field-base--description': item.toLowerCase() === 'description',
               }"
             >
               {{ item }}
@@ -31,13 +35,17 @@
             <td class="flex items-center justify-around gap-[8px]">
               <button
                 class="btn btn-outline btn-icon btn-primary"
-                :disabled="checkIsEdit() && !item.isEdit"
+                :disabled="(checkIsEdit() && !item.isEdit) || route.query.isSendSap === 'true' || checkApprovalNonPoCcAdmin()"
                 @click="goEdit(item)"
               >
                 <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>
                 <i v-else class="ki-duotone ki-check-circle"></i>
               </button>
-              <button class="btn btn-icon btn-outline btn-danger" @click="resetItem(item, index)">
+              <button
+                class="btn btn-icon btn-outline btn-danger"
+                @click="resetItem(item, index)"
+                :disabled="route.query.isSendSap === 'true' || checkApprovalNonPoProc() || checkApprovalNonPoCcAdmin()"
+              >
                 <i class="ki-duotone ki-cross-circle"></i>
               </button>
             </td>
@@ -52,6 +60,7 @@
                 :reduce="(option: any) => option.id"
                 :options="listActivity"
                 :error="{ 'error-select': formEdit.isActivityError }"
+                :disabled="checkApprovalNonPoProc()"
                 appendToBody
               ></v-select>
             </td>
@@ -75,17 +84,20 @@
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.itemText || '-' }}</span>
-              <input v-else v-model="formEdit.itemText" class="input" type="text" placeholder="" />
+              <input v-else v-model="formEdit.itemText" class="input" type="text" placeholder="" maxlength="50" :disabled="checkApprovalNonPoProc()" />
             </td>
-            <td>
+            <td v-if="!checkNonPoPettyCash()">
               <span v-if="!item.isEdit">{{ getDebitCreditName(item.debitCredit) || '-' }}</span>
-              <select v-else v-model="formEdit.debitCredit" class="select" placeholder="" :class="{ 'border-danger': formEdit.isDebitCreditError }">
-                <option value="D">
-                  Debit
-                </option>
-                <option value="K">
-                  Credit
-                </option>
+              <select
+                v-else
+                v-model="formEdit.debitCredit"
+                class="select"
+                placeholder=""
+                :disabled="checkApprovalNonPoProc()"
+                :class="{ 'border-danger': formEdit.isDebitCreditError }"
+              >
+                <option value="D">Debit</option>
+                <option value="K">Credit</option>
               </select>
             </td>
             <td>
@@ -98,6 +110,7 @@
                 :get-option-label="(option: any) => `${option.code} - ${option.name}`"
                 :reduce="(option: any) => option.code"
                 :options="listTaxCalculation"
+                :disabled="checkApprovalNonPoProc()"
                 appendToBody
               ></v-select>
             </td>
@@ -108,7 +121,7 @@
                   : useFormatUsd(item.isEdit ? formEdit.vatAmount : item.vatAmount)
               }}
             </td>
-            <td>
+            <td v-if="!checkNonPoPettyCash()">
               <span v-if="!item.isEdit">{{ getCostCenterName(item.costCenter) }}</span>
               <v-select
                 v-else
@@ -118,22 +131,23 @@
                 :get-option-label="(option: any) => `${option.code} - ${option.name}`"
                 :reduce="(option: any) => option.code"
                 :options="costCenterList"
+                :disabled="checkApprovalNonPoProc()"
                 appendToBody
               ></v-select>
             </td>
             <td>
-              <span v-if="!item.isEdit">{{ item.profitCenter }}</span>
-              <select v-else v-model="formEdit.profitCenter" class="select" placeholder="">
+              <span v-if="!item.isEdit">{{ item.profitCenter || '-' }}</span>
+              <select v-else v-model="formEdit.profitCenter" class="select" placeholder="" :disabled="checkApprovalNonPoProc()">
                 <option v-for="item of profitCenter" :key="item.code" :value="item.code">
                   {{ item.name }}
                 </option>
               </select>
             </td>
             <td>
-              <span v-if="!item.isEdit">{{ item.assignment }}</span>
-              <input v-else v-model="formEdit.assignment" class="input" placeholder="" />
+              <span v-if="!item.isEdit">{{ item.assignment || '-' }}</span>
+              <input v-else v-model="formEdit.assignment" class="input" placeholder="" :disabled="checkApprovalNonPoProc()" />
             </td>
-            <td>
+            <td v-if="!checkNonPoPettyCash()">
               <span v-if="!item.isEdit">{{ getWhtTypeName(item.whtType) }}</span>
               <v-select
                 v-else
@@ -143,11 +157,12 @@
                 :get-option-label="(option: any) => `${option.code} - ${option.name}`"
                 :reduce="(option: any) => option.code"
                 :options="whtTypeList"
+                :disabled="checkApprovalNonPoProc()"
                 appendToBody
                 @update:modelValue="callWhtCode(item)"
               ></v-select>
             </td>
-            <td>
+            <td v-if="!checkNonPoPettyCash()">
               <span v-if="!item.isEdit">{{ getWhtCodeName(item.whtCode, item) }}</span>
               <v-select
                 v-else
@@ -157,11 +172,12 @@
                 :get-option-label="(option: any) => `${option.whtCode} - ${option.description}`"
                 :reduce="(option: any) => option.whtCode"
                 :options="whtCodeList"
+                :disabled="checkApprovalNonPoProc()"
                 appendToBody
                 @update:modelValue="setWhtAmount(item)"
               ></v-select>
             </td>
-            <td>
+            <td v-if="!checkNonPoPettyCash()">
               <span v-if="!item.isEdit">
                 {{
                   form.currCode === 'IDR'
@@ -175,11 +191,16 @@
                 class="input"
                 type="number"
                 placeholder=""
+                :disabled="checkApprovalNonPoProc()"
                 @change="setWhtAmount(item)"
               />
             </td>
-            <td>
-              <span>{{ form.currCode === 'IDR' ? useFormatIdr(item.isEdit ? formEdit.whtAmount : item.whtAmount) : useFormatUsd(item.isEdit ? formEdit.whtAmount : item.whtAmount) }}</span>
+            <td v-if="!checkNonPoPettyCash()">
+              <span>{{
+                form.currCode === 'IDR'
+                  ? useFormatIdr(item.isEdit ? formEdit.whtAmount : item.whtAmount)
+                  : useFormatUsd(item.isEdit ? formEdit.whtAmount : item.whtAmount)
+              }}</span>
             </td>
           </tr>
         </tbody>
@@ -196,9 +217,11 @@ import type { invoiceItemTypes } from '../../types/invoiceItem'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
+import { useLoginStore } from '@/stores/views/login'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const verificationApi = useInvoiceVerificationStore()
+const invoiceLoginApi = useLoginStore()
 const route = useRoute()
 const form = inject<Ref<formTypes>>('form')
 const columns = ref([
@@ -233,7 +256,8 @@ const formEdit = reactive({
   whtAmount: 0,
   isActivityError: false,
   isItemAmountError: false,
-  isDebitCreditError: false
+  isDebitCreditError: false,
+  isTaxCodeError: false
 })
 
 const listActivity = computed(() => invoiceMasterApi.activityList)
@@ -242,6 +266,7 @@ const costCenterList = computed(() => invoiceMasterApi.costCenterList)
 const profitCenter = computed(() => invoiceMasterApi.profilCenterList)
 const whtTypeList = computed(() => invoiceMasterApi.whtTypeList)
 const whtCodeList = computed(() => invoiceMasterApi.whtCodeList)
+const userData = computed(() => invoiceLoginApi.userData)
 
 const checkIsEdit = () => {
   const result = form?.value.invoiceItem.findIndex((item) => item.isEdit)
@@ -254,6 +279,22 @@ const checkPoPib = () => {
 
 const checkIsNonPo = () => {
   return route.query.invoiceType === 'no_po'
+}
+
+const checkNonPoCc = () => {
+  return form.value.invoiceTypeCode === 2
+}
+
+const checkNonPoPettyCash = () => {
+  return form.value.invoiceTypeCode === 5
+}
+
+const checkApprovalNonPoProc = () => {
+  return checkIsNonPo() && userData.value?.profile.profileId === 3191
+}
+
+const checkApprovalNonPoCcAdmin = () => {
+  return checkIsNonPo() && userData.value?.profile.profileId === 3190
 }
 
 const addNew = () => {
@@ -276,7 +317,7 @@ const addNew = () => {
       whtBaseAmount: 0,
       whtAmount: 0,
       whtCodeList: [],
-      isEdit: false
+      isEdit: false,
     } as invoiceItemTypes
     form.value.invoiceItem.push(data)
   }
@@ -299,6 +340,7 @@ const resetFormEdit = () => {
   formEdit.isActivityError = false
   formEdit.isItemAmountError = false
   formEdit.isDebitCreditError = false
+  formEdit.isTaxCodeError = false
 }
 
 const goEdit = (item: invoiceItemTypes) => {
@@ -309,13 +351,18 @@ const goEdit = (item: invoiceItemTypes) => {
     if (!formEdit.itemAmount || formEdit.itemAmount < 0) formEdit.isItemAmountError = true
     else formEdit.isItemAmountError = false
 
-    if (!formEdit.debitCredit) formEdit.isDebitCreditError = true
+    if (!formEdit.debitCredit && !checkNonPoPettyCash()) formEdit.isDebitCreditError = true
     else formEdit.isDebitCreditError = false
+
+    if (!formEdit.taxCode && checkNonPoPettyCash()) formEdit.isTaxCodeError = true
+    else formEdit.isTaxCodeError = false
   }
+
   if (
     formEdit.isActivityError ||
     formEdit.isItemAmountError ||
-    formEdit.isDebitCreditError
+    formEdit.isDebitCreditError ||
+    formEdit.isTaxCodeError
   ) return
   item.isEdit = !item.isEdit
 
@@ -360,7 +407,7 @@ const resetItem = (item: invoiceItemTypes, index: number) => {
     resetFormEdit()
   } else {
     if (form) {
-      if (form.value.additionalCosts[index].id !== 0) {
+      if (form.value.invoiceItem[index].id !== 0) {
         verificationApi.costExpenseTempDelete?.push(form.value.invoiceItem[index].id)
       }
       form.value.invoiceItem.splice(index, 1)
@@ -432,7 +479,8 @@ const getCostCenterName = (costCenter: string) => {
 
 const getActivityName = (id: number) => {
   const getIndex = listActivity.value.findIndex((item) => item.id === id)
-  if (getIndex !== -1) return `${listActivity.value[getIndex].code} - ${listActivity.value[getIndex].name}`
+  if (getIndex !== -1)
+    return `${listActivity.value[getIndex].code} - ${listActivity.value[getIndex].name}`
 }
 
 const getTaxCodeName = (taxCode: string) => {
@@ -499,6 +547,19 @@ onMounted(() => {
         item.whtCodeList = whtCodeList.value
       })
     }
+  }
+
+  if (checkNonPoPettyCash()) {
+    columns.value = [
+    'Action',
+    'Activity / Expense',
+    'Item Amount',
+    'Item Text',
+    'Tax Code',
+    'VAT Amount',
+    'Profit Center',
+    'Assignment'
+    ]
   }
 })
 </script>
