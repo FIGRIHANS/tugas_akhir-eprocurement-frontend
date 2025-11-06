@@ -453,6 +453,11 @@ const getWhtCodeName = (code: string, data: itemsCostType) => {
 }
 
 const setWhtAmount = (data: itemsCostType) => {
+  verificationApi
+    .getpph21({ startDate: '2025-01-01', endDate: '2025-12-31', vendorId: form.value.vendorId })
+    .then((res) => {
+      console.log(res)
+    })
   if (formEdit.whtCode) {
     const whtlist = data.whtCodeList || []
     const indexWht = whtlist.findIndex((item) => item.whtCode === formEdit.whtCode)
