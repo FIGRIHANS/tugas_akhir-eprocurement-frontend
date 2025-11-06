@@ -49,7 +49,12 @@
           </button>
           <button
             class="btn btn-primary"
-            :disabled="isSubmit || (!isCheckBudget && tabNow === 'information') || (tabNow === 'information' && !checkInvoiceInformation()) || (tabNow === 'data' && !isAlternativePayeeFilled())"
+            :disabled="
+              isSubmit ||
+              (!isCheckBudget && tabNow === 'information') ||
+              (tabNow === 'information' && !checkInvoiceInformation()) ||
+              (tabNow === 'data' && !isAlternativePayeeFilled())
+            "
             @click="goNext"
           >
             {{ tabNow !== 'preview' ? 'Next' : 'Submit' }}
@@ -75,7 +80,11 @@
             <i class="ki-filled ki-arrow-left"></i>
             Back
           </button>
-          <button class="btn btn-primary" :disabled="isSubmit || (tabNow === 'information' && !checkInvoiceInformation()) || (tabNow === 'data' && !isAlternativePayeeFilled())" @click="goNext">
+          <button
+            class="btn btn-primary"
+            :disabled="isSubmit || (tabNow === 'data' && !isAlternativePayeeFilled())"
+            @click="goNext"
+          >
             {{ tabNow !== 'preview' ? 'Next' : 'Submit' }}
             <i v-if="tabNow !== 'preview'" class="ki-duotone ki-black-right"></i>
             <i v-else class="ki-duotone ki-paper-plane"></i>
@@ -95,7 +104,11 @@
         <button
           v-if="tabNow !== 'preview' && !checkInvoiceView() && !checkInvoiceNonPoView()"
           class="btn btn-primary"
-          :disabled="isSubmit || (tabNow === 'information' && !checkInvoiceInformation()) || (tabNow === 'data' && !isAlternativePayeeFilled())"
+          :disabled="
+            isSubmit ||
+            (tabNow === 'information' && !checkInvoiceInformation()) ||
+            (tabNow === 'data' && !isAlternativePayeeFilled())
+          "
           @click="goNext"
         >
           Next
@@ -322,15 +335,16 @@ const checkInvoiceData = () => {
   form.bankKeyIdError = useCheckEmpty(form.bankKeyId).isError
   if (route.query.path === 'po') form.invoiceTypeError = useCheckEmpty(form.invoiceType).isError
 
-  const isAltValid = !form.isAlternativePayee || (
-    !!form.nameAlternative &&
-    !!form.streetAltiernative &&
-    !!form.bankAccountNumberAlternative &&
-    !!form.bankKeyAlternative &&
-    !!form.emailAlternative
-  )
+  const isAltValid =
+    !form.isAlternativePayee ||
+    (!!form.nameAlternative &&
+      !!form.streetAltiernative &&
+      !!form.bankAccountNumberAlternative &&
+      !!form.bankKeyAlternative &&
+      !!form.emailAlternative)
 
-  if (form.vendorIdError || form.bankKeyIdError || form.invoiceTypeError || !isAltValid) return false
+  if (form.vendorIdError || form.bankKeyIdError || form.invoiceTypeError || !isAltValid)
+    return false
   else return true
 }
 
@@ -459,7 +473,9 @@ const checkInvoiceInformation = () => {
   if (form.isAlternativePayee) {
     form.nameAlternativeError = useCheckEmpty(form.nameAlternative).isError
     form.streetAltiernativeError = useCheckEmpty(form.streetAltiernative).isError
-    form.bankAccountNumberAlternativeError = useCheckEmpty(form.bankAccountNumberAlternative).isError
+    form.bankAccountNumberAlternativeError = useCheckEmpty(
+      form.bankAccountNumberAlternative,
+    ).isError
     form.bankKeyAlternativeError = useCheckEmpty(form.bankKeyAlternative).isError
     form.emailAlternativeError = useCheckEmpty(form.emailAlternative).isError
   } else {
@@ -475,7 +491,9 @@ const checkInvoiceInformation = () => {
   }
 
   if (Number(form.invoiceDp) === 9013) {
-    form.dpAmountDeductionError = form.dpAmountDeduction > form.remainingDpAmount || (form.remainingDpAmount !== 0 && form.dpAmountDeduction === 0)
+    form.dpAmountDeductionError =
+      form.dpAmountDeduction > form.remainingDpAmount ||
+      (form.remainingDpAmount !== 0 && form.dpAmountDeduction === 0)
   }
 
   if (
@@ -493,7 +511,12 @@ const checkInvoiceInformation = () => {
     form.dueDateCasError ||
     form.casNoCodeError ||
     form.invoiceItemError ||
-    (form.isAlternativePayee && (form.nameAlternativeError || form.streetAltiernativeError || form.bankAccountNumberAlternativeError || form.bankKeyAlternativeError || form.emailAlternativeError))
+    (form.isAlternativePayee &&
+      (form.nameAlternativeError ||
+        form.streetAltiernativeError ||
+        form.bankAccountNumberAlternativeError ||
+        form.bankKeyAlternativeError ||
+        form.emailAlternativeError))
   )
     return false
   else return true
@@ -637,7 +660,7 @@ const mapInvoiceItem = () => {
       whtType: item.whtType || '',
       whtCode: item.whtCode || '',
       whtBaseAmount: Number(item.whtBaseAmount) || 0,
-      whtAmount: Number(item.whtAmount) || 0
+      whtAmount: Number(item.whtAmount) || 0,
     }
 
     cost.push(baseData)
@@ -678,13 +701,13 @@ const mapDataPost = () => {
       statusName: isClickDraft.value ? 'Drafted' : 'Waiting to Verify',
       creditCardBillingId: '',
       remainingDPAmount: Number(form.remainingDpAmount),
-      dpAmountDeduction: Number(form.dpAmountDeduction)
+      dpAmountDeduction: Number(form.dpAmountDeduction),
     },
     vendor: {
       vendorId: form.vendorId ? Number(form.vendorId) : 0,
       vendorName: getVendorName() || '',
       vendorAddress: form.address,
-      npwp: form.npwp
+      npwp: form.npwp,
     },
     payment: {
       paymentId: form.paymentId,
@@ -704,12 +727,11 @@ const mapDataPost = () => {
       totalNetAmount: form.totalNetAmount,
     },
     pogr: mapPoGr(),
-    additionalCosts:
-      form.invoiceDp === '9012' ? [] : mapAdditionalCost(),
+    additionalCosts: form.invoiceDp === '9012' ? [] : mapAdditionalCost(),
     workflow: [],
     alternativePayee: [],
     costExpense: [],
-    isSaveAsDraft: false
+    isSaveAsDraft: false,
   } as ParamsSubmissionTypes
 
   return data
@@ -735,7 +757,9 @@ const mapDataPostNonPo = () => {
 
   if (isPettyCash && Array.isArray(form.pettyCashPeriod) && form.pettyCashPeriod[0]) {
     pettyCashStartDate = moment(form.pettyCashPeriod[0]).toISOString()
-    pettyCashEndDate = form.pettyCashPeriod[1] ? moment(form.pettyCashPeriod[1]).toISOString() : null
+    pettyCashEndDate = form.pettyCashPeriod[1]
+      ? moment(form.pettyCashPeriod[1]).toISOString()
+      : null
   } else if ((isReimbursement || isCAS) && form.invoiceDate) {
     invoiceDateToUse = moment(form.invoiceDate).toISOString()
   } else if (!isReimbursement && !isCreditCard && !isCAS && !isLBA && form.invoiceDate) {
@@ -752,16 +776,21 @@ const mapDataPostNonPo = () => {
           : '00000000-0000-0000-0000-000000000000',
       invoiceTypeCode: Number(form.invoiceType),
       invoiceTypeName: invoiceTypeName,
-      invoiceVendorNo: isCAS ? (form.taxNoInvoice || '') : (form.invoiceVendorNo || ''),
+      invoiceVendorNo: isCAS ? form.taxNoInvoice || '' : form.invoiceVendorNo || '',
       companyCode: form.companyCode,
       companyName: form.companyName,
       invoiceNo: form.invoiceNo,
-      documentNo: isPettyCash ? ('') :
-                  isReimbursement ? (form.invoiceVendorNo || '') :
-                  isCreditCard ? (form.invoiceVendorNo || '') :
-                  isCAS ? ('') :
-                  isLBA ? (form.casNoCode || '') :
-                  '',
+      documentNo: isPettyCash
+        ? ''
+        : isReimbursement
+          ? form.invoiceVendorNo || ''
+          : isCreditCard
+            ? form.invoiceVendorNo || ''
+            : isCAS
+              ? ''
+              : isLBA
+                ? form.casNoCode || ''
+                : '',
       invoicingParty: '',
       assigment: '',
       transferNews: '',
@@ -779,25 +808,28 @@ const mapDataPostNonPo = () => {
       statusName: isClickDraft.value ? 'Drafted' : 'Waiting to Verify',
       department: checkIsNonPo() ? form.department : userData.value.profile.costCenter || '',
       profileId: userData.value.profile.profileId.toString(),
-      casDateReceipt: isCAS && form.casDateReceipt ? moment(form.casDateReceipt).toISOString() : null,
+      casDateReceipt:
+        isCAS && form.casDateReceipt ? moment(form.casDateReceipt).toISOString() : null,
       dueDateCas: isLBA && form.dueDateCas ? moment(form.dueDateCas).toISOString() : null,
       proposalAmount: isCreditCard ? Number(form.proposalAmountVal) || 0 : 0,
       picFinance: '',
-      cashJournalCode: isPettyCash ? (form.cashJournalCode || '') : '',
+      cashJournalCode: isPettyCash ? form.cashJournalCode || '' : '',
       cashJournalName: isPettyCash
-        ? (typeof form.cashJournalName === 'string'
-            ? form.cashJournalName.replace(new RegExp("^" + (form.cashJournalCode || '') + "\\s*-\\s*"), '').trim()
-            : form.cashJournalName || '')
+        ? typeof form.cashJournalName === 'string'
+          ? form.cashJournalName
+              .replace(new RegExp('^' + (form.cashJournalCode || '') + '\\s*-\\s*'), '')
+              .trim()
+          : form.cashJournalName || ''
         : '',
       pettyCashStartDate: pettyCashStartDate || null,
       pettyCashEndDate: pettyCashEndDate || null,
-      npwpReportingName: ''
+      npwpReportingName: '',
     },
     vendor: {
       vendorId: form.vendorId ? Number(form.vendorId) : 0,
       vendorName: getVendorName() || '',
       vendorAddress: form.address,
-      npwp: form.npwp
+      npwp: form.npwp,
     },
     payment: {
       paymentId: form.paymentId,
@@ -813,7 +845,7 @@ const mapDataPostNonPo = () => {
       vatAmount: form.vatAmount,
       whtAmount: form.whtAmount,
       totalGrossAmount: form.totalGrossAmount,
-      totalNetAmount: form.totalNetAmount
+      totalNetAmount: form.totalNetAmount,
     },
     alternativePay: {
       id: form.idAlternativePayment,
@@ -833,10 +865,10 @@ const mapDataPostNonPo = () => {
       ktp: form.ktpNumberAlternative,
       email: form.emailAlternative,
       isAlternativePayee: form.isAlternativePayee || null,
-      isOneTimeVendor: form.isOneTimeVendor || null
+      isOneTimeVendor: form.isOneTimeVendor || null,
     },
     costExpenses: mapInvoiceItem() as ParamsSubmissionCostExpense[],
-    isSaveAsDraft: false
+    isSaveAsDraft: false,
   } as ParamsSubmissionNonPo
 
   return data
@@ -922,7 +954,8 @@ const goSaveDraft = () => {
         setAfterResponsePost(response)
       })
       .catch((error) => {
-        invoiceApi.errorMessageSubmission = error.response?.data?.result?.message || error.message || 'Failed to save draft'
+        invoiceApi.errorMessageSubmission =
+          error.response?.data?.result?.message || error.message || 'Failed to save draft'
         const idModal = document.querySelector('#error_submission_modal')
         const modal = KTModal.getInstance(idModal as HTMLElement)
         modal.show()
@@ -941,7 +974,8 @@ const goSaveDraft = () => {
         setAfterResponsePost(response)
       })
       .catch((error) => {
-        invoiceApi.errorMessageSubmission = error.response?.data?.result?.message || error.message || 'Failed to save draft'
+        invoiceApi.errorMessageSubmission =
+          error.response?.data?.result?.message || error.message || 'Failed to save draft'
         const idModal = document.querySelector('#error_submission_modal')
         const modal = KTModal.getInstance(idModal as HTMLElement)
         modal.show()
@@ -1140,7 +1174,7 @@ const setDataNonPo = () => {
     if (detail.header.pettyCashStartDate && detail.header.pettyCashEndDate) {
       form.pettyCashPeriod = [
         new Date(detail.header.pettyCashStartDate),
-        new Date(detail.header.pettyCashEndDate)
+        new Date(detail.header.pettyCashEndDate),
       ]
     }
 
@@ -1249,7 +1283,7 @@ const mapDataCheck = () => {
       GL_ACCOUNT: listActivity.value[itemIndex].code,
       ITEM_TEXT: item.itemText,
       ALLOC_NMBR: '',
-      TAX_CODE: form.invoiceType === '5' ? ' ' : (item.taxCode || ' '),
+      TAX_CODE: form.invoiceType === '5' ? ' ' : item.taxCode || ' ',
       COSTCENTER: item.costCenter || '',
       PROFIT_CTR: item.profitCenter || '',
     }
@@ -1297,7 +1331,7 @@ const mapDataCheck = () => {
       PYMT_METH: '',
       ALLOC_NMBR: '',
       ITEM_TEXT: itemText,
-      TAX_CODE: form.invoiceItem.length > 0 ? (form.invoiceItem[0].taxCode || ' ') : ' ',
+      TAX_CODE: form.invoiceItem.length > 0 ? form.invoiceItem[0].taxCode || ' ' : ' ',
       PAYMT_REF: '',
     }
     accountPayable.push(accData)
@@ -1397,7 +1431,11 @@ const mapDataCheck = () => {
   } else if (form.invoiceType === '2') {
     refDocNo = form.proposalAmountVal || form.invoiceNo || form.description || 'CREDIT_CARD'
   } else if (form.invoiceType === '3' || form.invoiceType === '4') {
-    refDocNo = form.casNoCode || form.taxNoInvoice || form.invoiceNo || (form.invoiceType === '3' ? 'CAS' : 'LBA')
+    refDocNo =
+      form.casNoCode ||
+      form.taxNoInvoice ||
+      form.invoiceNo ||
+      (form.invoiceType === '3' ? 'CAS' : 'LBA')
   }
 
   if (!refDocNo || refDocNo.trim() === '') {
@@ -1465,7 +1503,8 @@ const checkBudget = () => {
         const respTop = response as unknown as Record<string, unknown>
         const topRESPONSE = respTop['RESPONSE']
         if (Array.isArray(topRESPONSE)) {
-          invoiceApi.responseCheckBudget = respTop as unknown as typeof invoiceApi.responseCheckBudget
+          invoiceApi.responseCheckBudget =
+            respTop as unknown as typeof invoiceApi.responseCheckBudget
         }
       }
 
@@ -1483,8 +1522,13 @@ const checkBudget = () => {
         return undefined
       })()
 
-      const RESPONSE = respObj && typeof respObj === 'object' ? (respObj as Record<string, unknown>)['RESPONSE'] : undefined
-      const hasSuccess = Array.isArray(RESPONSE) && (RESPONSE as Array<Record<string, unknown>>).some((r) => (r['TYPE'] as string) === 'S')
+      const RESPONSE =
+        respObj && typeof respObj === 'object'
+          ? (respObj as Record<string, unknown>)['RESPONSE']
+          : undefined
+      const hasSuccess =
+        Array.isArray(RESPONSE) &&
+        (RESPONSE as Array<Record<string, unknown>>).some((r) => (r['TYPE'] as string) === 'S')
 
       if (hasSuccess) {
         isCheckBudget.value = true
@@ -1501,7 +1545,8 @@ const checkBudget = () => {
           if (Array.isArray(RESPONSE) && RESPONSE.length > 0 && typeof RESPONSE[0] === 'object') {
             const first = RESPONSE[0] as Record<string, unknown>
             const MESSAGE = first['MESSAGE']
-            if (Array.isArray(MESSAGE)) return MESSAGE.filter((m) => typeof m === 'string').join('\n')
+            if (Array.isArray(MESSAGE))
+              return MESSAGE.filter((m) => typeof m === 'string').join('\n')
             if (typeof MESSAGE === 'string') return MESSAGE
           }
           const result = rObj['result']
@@ -1549,7 +1594,8 @@ const checkBudget = () => {
       if (errData) {
         const errTop = errData as unknown as Record<string, unknown>
         if (Array.isArray(errTop['RESPONSE'])) {
-          invoiceApi.responseCheckBudget = errTop as unknown as typeof invoiceApi.responseCheckBudget
+          invoiceApi.responseCheckBudget =
+            errTop as unknown as typeof invoiceApi.responseCheckBudget
         }
       }
 
@@ -1576,7 +1622,8 @@ const checkFormBudget = () => {
       !form.companyCode ||
       !form.cashJournalCode ||
       !form.pettyCashPeriod ||
-      (Array.isArray(form.pettyCashPeriod) && (!form.pettyCashPeriod[0] || !form.pettyCashPeriod[1])) ||
+      (Array.isArray(form.pettyCashPeriod) &&
+        (!form.pettyCashPeriod[0] || !form.pettyCashPeriod[1])) ||
       !form.description ||
       !form.department ||
       form.invoiceItem.length === 0
