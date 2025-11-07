@@ -12,7 +12,7 @@ import type {
   PostVerificationTypes,
   ParamsRejectTypes,
   ListNonPoTypes,
-  PostEditApprovalNonPoTypes
+  PostEditApprovalNonPoTypes,
 } from './types/verification'
 
 export const useInvoiceVerificationStore = defineStore('invoiceVerification', () => {
@@ -137,12 +137,15 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
       invoiceDate: data.invoiceDate || null,
       searchText: data.searchText || null,
     }
-    const response: ApiResponse<ListNonPoTypes[]> = await invoiceApi.get(`/invoice/approval/non-po`, {
-      params: {
-        ...(data.statusCode !== null ? { statuscode: Number(data.statusCode) } : {}),
-        ...query,
+    const response: ApiResponse<ListNonPoTypes[]> = await invoiceApi.get(
+      `/invoice/approval/non-po`,
+      {
+        params: {
+          ...(data.statusCode !== null ? { statuscode: Number(data.statusCode) } : {}),
+          ...query,
+        },
       },
-    })
+    )
     listNonPo.value =
       response.data.result.content.length !== 0
         ? response.data.result.content.sort(
@@ -161,12 +164,15 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
       invoiceDate: data.invoiceDate || null,
       searchText: data.searchText || null,
     }
-    const response: ApiResponse<ListNonPoTypes[]> = await invoiceApi.get(`/invoice/verification/non-po`, {
-      params: {
-        ...(data.statusCode !== null ? { statuscode: Number(data.statusCode) } : {}),
-        ...query,
+    const response: ApiResponse<ListNonPoTypes[]> = await invoiceApi.get(
+      `/invoice/verification/non-po`,
+      {
+        params: {
+          ...(data.statusCode !== null ? { statuscode: Number(data.statusCode) } : {}),
+          ...query,
+        },
       },
-    })
+    )
     listNonPo.value =
       response.data.result.content.length !== 0
         ? response.data.result.content.sort(
@@ -276,6 +282,18 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     return response.data
   }
 
+  const getpph21 = async (payload: { startDate: string; endDate: string; vendorId: string }) => {
+    const response: ApiResponse<void> = await invoiceApi.get(
+      `/invoice/pph21/${payload.startDate}/${payload.endDate}`,
+      {
+        params: {
+          vendorId: payload.vendorId,
+        },
+      },
+    )
+    return response.data
+  }
+
   return {
     listPo,
     listNonPo,
@@ -305,5 +323,6 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     verifyInvoiceNonPo,
     putEditInvoice,
     putSubmissionNonPo,
+    getpph21,
   }
 })
