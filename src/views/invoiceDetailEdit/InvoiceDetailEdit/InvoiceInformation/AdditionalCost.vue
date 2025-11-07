@@ -214,6 +214,7 @@ import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterDat
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 import { useLoginStore } from '@/stores/views/login'
 import { useRoute } from 'vue-router'
+import moment from 'moment'
 
 const route = useRoute()
 const invoiceMasterApi = useInvoiceMasterDataStore()
@@ -355,7 +356,7 @@ const goEdit = (item: itemsCostType) => {
     item.whtType = formEdit.whtType
     item.whtCode = formEdit.whtCode
     item.whtBaseAmount = formEdit.whtBaseAmount
-    item.whtAmount = formEdit.whtAmount
+    item.whtAmount = Number(formEdit.whtAmount)
     resetFormEdit()
   }
 }
@@ -453,6 +454,9 @@ const getWhtCodeName = (code: string, data: itemsCostType) => {
 }
 
 const setWhtAmount = (data: itemsCostType) => {
+  // const pph21whtAmmount = 0
+  // console.log(formEdit.whtCode, 'data')
+
   if (formEdit.whtCode) {
     const whtlist = data.whtCodeList || []
     const indexWht = whtlist.findIndex((item) => item.whtCode === formEdit.whtCode)
@@ -462,6 +466,18 @@ const setWhtAmount = (data: itemsCostType) => {
     }
   } else {
     formEdit.whtAmount = 0
+  }
+
+  if (formEdit.whtCode === 'A1' || formEdit.whtCode === 'Z1') {
+    verificationApi
+      .getpph21({
+        startDate: moment().format('YYYY-MM-DD'),
+        endDate: moment().format('YYYY-MM-DD'),
+        vendorId: form.value.vendorId,
+      })
+      .then((res) => {
+        formEdit.whtAmount = res.result.content.pph21Summaries[0].pPh21Dipotong.replace(/\./g, '')
+      })
   }
 }
 

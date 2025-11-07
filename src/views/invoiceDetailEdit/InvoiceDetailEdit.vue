@@ -227,25 +227,41 @@ const checkInvoiceInformation = () => {
   let status = true
   if (checkApprovalNonPoProc()) return true
 
-  form.value.invoiceDateError = !checkNonPoPettyCash() ? useCheckEmpty(form.value.invoiceDate).isError : false
-  form.value.documentNoError = !checkNonPoCas() && !checkNonPoPettyCash() && !checkNonPoLba() ? useCheckEmpty(form.value.documentNo).isError : false
+  form.value.invoiceDateError = !checkNonPoPettyCash()
+    ? useCheckEmpty(form.value.invoiceDate).isError
+    : false
+  form.value.documentNoError =
+    !checkNonPoCas() && !checkNonPoPettyCash() && !checkNonPoLba()
+      ? useCheckEmpty(form.value.documentNo).isError
+      : false
   form.value.creditCardBillingError = checkVerifikator1()
     ? useCheckEmpty(form.value.creditCardBillingId).isError
     : false
 
-  form.value.postingDateError = !checkVerifikator1() && !checkNonPoPettyCash() && !checkNonPoCc()
-    ? useCheckEmpty(form.value.postingDate).isError
-    : false
-  form.value.estimatedPaymentDateError = !checkVerifikator1() && !checkNonPoLba() || (checkNonPoPettyCash() && checkApprovalNonPo1() && !checkNonPoCc())
-    ? useCheckEmpty(form.value.estimatedPaymentDate).isError
-    : false
-  form.value.paymentMethodError = !checkVerifikator1() && !checkNonPoPettyCash() && !checkApprovalNonPoCcAdmin() && !checkNonPoLba()
-    ? useCheckEmpty(form.value.paymentMethodCode).isError
-    : false
-  form.value.transferNewsError = !checkVerifikator1() && !checkNonPoPettyCash() && !checkNonPoCc() && !checkNonPoLba()
-    ? useCheckEmpty(form.value.transferNews).isError
-    : false
-  form.value.notesError = !checkVerifikator1() && !checkApprovalNonPoCcAdmin() ? useCheckEmpty(form.value.notes).isError : false
+  form.value.postingDateError =
+    !checkVerifikator1() && !checkNonPoPettyCash() && !checkNonPoCc()
+      ? useCheckEmpty(form.value.postingDate).isError
+      : false
+  form.value.estimatedPaymentDateError =
+    (!checkVerifikator1() && !checkNonPoLba()) ||
+    (checkNonPoPettyCash() && checkApprovalNonPo1() && !checkNonPoCc())
+      ? useCheckEmpty(form.value.estimatedPaymentDate).isError
+      : false
+  form.value.paymentMethodError =
+    !checkVerifikator1() &&
+    !checkNonPoPettyCash() &&
+    !checkApprovalNonPoCcAdmin() &&
+    !checkNonPoLba()
+      ? useCheckEmpty(form.value.paymentMethodCode).isError
+      : false
+  form.value.transferNewsError =
+    !checkVerifikator1() && !checkNonPoPettyCash() && !checkNonPoCc() && !checkNonPoLba()
+      ? useCheckEmpty(form.value.transferNews).isError
+      : false
+  form.value.notesError =
+    !checkVerifikator1() && !checkApprovalNonPoCcAdmin()
+      ? useCheckEmpty(form.value.notes).isError
+      : false
 
   if (Number(form.value.invoiceDPCode) === 9013) {
     form.value.dpAmountDeductionError =
@@ -254,7 +270,9 @@ const checkInvoiceInformation = () => {
 
   if (checkNonPoCas()) {
     form.value.taxNoError = useCheckEmpty(form.value.taxNo).isError
-    form.value.npwpReportingError = !checkApprovalNonPo1() ? useCheckEmpty(form.value.npwpReporting).isError : false
+    form.value.npwpReportingError = !checkApprovalNonPo1()
+      ? useCheckEmpty(form.value.npwpReporting).isError
+      : false
   }
 
   if (checkNonPoPettyCash()) {
@@ -263,8 +281,13 @@ const checkInvoiceInformation = () => {
   }
 
   if (checkNonPoCc()) {
-    form.value.proposalAmountError = !checkApprovalNonPoCcAdmin() ? useCheckEmpty(form.value.proposalAmount).isError :false
-    form.value.npwpReportingError = !checkApprovalNonPoProc() &&!checkApprovalNonPoCcAdmin() ? useCheckEmpty(form.value.npwpReporting).isError : false
+    form.value.proposalAmountError = !checkApprovalNonPoCcAdmin()
+      ? useCheckEmpty(form.value.proposalAmount).isError
+      : false
+    form.value.npwpReportingError =
+      !checkApprovalNonPoProc() && !checkApprovalNonPoCcAdmin()
+        ? useCheckEmpty(form.value.npwpReporting).isError
+        : false
   }
 
   if (checkNonPoLba()) {
@@ -274,7 +297,9 @@ const checkInvoiceInformation = () => {
   if (form.value.isAlternativePayee || form.value.isOneTimeVendor) {
     form.value.nameAlternativeError = useCheckEmpty(form.value.nameAlternative).isError
     form.value.streetAltiernativeError = useCheckEmpty(form.value.streetAltiernative).isError
-    form.value.bankAccountNumberAlternativeError = useCheckEmpty(form.value.bankAccountNumberAlternative).isError
+    form.value.bankAccountNumberAlternativeError = useCheckEmpty(
+      form.value.bankAccountNumberAlternative,
+    ).isError
     form.value.bankKeyAlternativeError = useCheckEmpty(form.value.bankKeyAlternative).isError
     form.value.emailAlternativeError = useCheckEmpty(form.value.emailAlternative).isError
     tabNow.value = 'data'
@@ -760,7 +785,10 @@ const setDataDefault = () => {
     pettyCashStartDate: data?.header.pettyCashStartDate || '',
     pettyCashEndDate: data?.header.pettyCashEndDate || '',
     npwpReportingName: data?.header.npwpReportingName || '',
-    pettyCashPeriod: [data?.header.pettyCashStartDate || null, data?.header.pettyCashEndDate || null],
+    pettyCashPeriod: [
+      data?.header.pettyCashStartDate || null,
+      data?.header.pettyCashEndDate || null,
+    ],
     idAlternative:
       data?.alternativePayee && data?.alternativePayee.length !== 0
         ? data?.alternativePayee[0].id
@@ -978,7 +1006,7 @@ const mapDataVerifNonPo = (): PostEditApprovalNonPoTypes => {
       cashJournalName: form.value.cashJournalName,
       pettyCashStartDate: form.value.pettyCashStartDate || null,
       pettyCashEndDate: form.value.pettyCashEndDate || null,
-      npwpReportingName: form.value.npwpReportingName
+      npwpReportingName: form.value.npwpReportingName,
     },
     payment: {
       bankKey: form.value.bankKey,

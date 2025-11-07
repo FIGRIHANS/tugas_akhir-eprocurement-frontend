@@ -5,7 +5,13 @@
       <InvoiceCalculation />
     </div>
     <InvoicePoGr v-if="!checkIsNonPo()" class="mt-[24px]" />
-    <AdditionalCost v-if="!checkIsNonPo() && (checkIsWithoutDp() || checkIsPoPib() || checkIsPoCC() || checkPoWithDp())" class="mt-[24px]" />
+    <AdditionalCost
+      v-if="
+        !checkIsNonPo() &&
+        (checkIsWithoutDp() || checkIsPoPib() || checkIsPoCC() || checkPoWithDp())
+      "
+      class="mt-[24px]"
+    />
     <InvoiceItem v-if="checkIsNonPo()" class="mt-[24px]" />
   </div>
 </template>
@@ -55,7 +61,10 @@ onMounted(() => {
   invoiceMasterApi.getProfitCenter()
   invoiceMasterApi.getWhtType()
   invoiceMasterApi.getCostCenter(form?.value.companyCode || '')
-  invoiceMasterApi.getMatrixApproval(form.value.invoiceTypeCode.toString() || '', form.value.companyCode || '')
+  invoiceMasterApi.getMatrixApproval(
+    form.value.invoiceTypeCode.toString() || '',
+    form.value.companyCode || '',
+  )
   if (form.value.companyCode) {
     invoiceMasterApi.getActivity(form.value.companyCode || '')
     invoiceMasterApi.getNpwpReporting(form.value.companyCode || '')
