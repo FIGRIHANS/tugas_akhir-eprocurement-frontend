@@ -10,11 +10,16 @@
     <div class="card-body p-[0px]">
       <div class="flex">
         <div class="flex flex-col flex-1">
-          <div v-for="(item, index) in listCalculation" :key="index"
+          <div
+            v-for="(item, index) in listCalculation"
+            :key="index"
             class="border-b border-gray-200 py-[31px] px-[20px] text-xs flex"
-            :class="index === listCalculation.length - 1 ? 'calculation__last-field' : ''">
+            :class="index === listCalculation.length - 1 ? 'calculation__last-field' : ''"
+          >
             <div class="flex-1">{{ item.name }}</div>
-            <div class="flex-1">{{ form?.currCode === 'IDR' ? useFormatIdr(item.amount) : useFormatUsd(item.amount) }}</div>
+            <div class="flex-1">
+              {{ form?.currCode === 'IDR' ? useFormatIdr(item.amount) : useFormatUsd(item.amount) }}
+            </div>
             <div>{{ form?.currCode }}</div>
           </div>
         </div>
@@ -39,18 +44,17 @@ const typeForm = ref<string>('')
 const listName = ref<string[]>([])
 const listCalculation = ref<listType[]>([])
 
-
 const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
 const whtCodeList = computed(() => invoiceMasterApi.whtCodeList)
 
 const setCount = (name: string) => {
   const list = {
-    'subtotal': countSubtotal(),
+    subtotal: countSubtotal(),
     'vat amount': countVatAmount(),
     'wht amount': countWhtAmount(),
     'additional cost': countAdditionalCost(),
     'total gross amount': countTotalGrossAmount(),
-    'total net amount': countTotalNetAmount()
+    'total net amount': countTotalNetAmount(),
   } as { [key: string]: number }
 
   return list[name.toLowerCase()]
@@ -93,7 +97,7 @@ const setCalculation = () => {
     const data = {
       name: item,
       amount: amount.toString(),
-      currency: form.value.currCode || ''
+      currency: form.value.currCode || '',
     }
     listCalculation.value.push(data)
     setToForm(item, amount)
@@ -143,23 +147,23 @@ const countVatAmount = () => {
   if (!checkIsNonPo()) {
     for (const item of form.value.invoicePoGr) {
       const percentTax = getPercentTax(item.taxCode) || 0
-      totalPo = totalPo + (percentTax * item.itemAmount)
+      totalPo = totalPo + percentTax * item.itemAmount
     }
     for (const item of form.value.additionalCosts) {
       const percentTax = getPercentTax(item.taxCode) || 0
       if (item.debitCredit === 'D') {
-        totalAddDebit = totalAddDebit + (percentTax * Number(item.itemAmount))
+        totalAddDebit = totalAddDebit + percentTax * Number(item.itemAmount)
       } else {
-        totalAddCredit = totalAddCredit + (percentTax * Number(item.itemAmount))
+        totalAddCredit = totalAddCredit + percentTax * Number(item.itemAmount)
       }
     }
   } else {
     for (const item of form.value.invoiceItem) {
       const percentTax = getPercentTax(item.taxCode) || 0
       if (item.debitCredit === 'D') {
-        totalAddDebit = totalAddDebit + (percentTax * Number(item.itemAmount))
+        totalAddDebit = totalAddDebit + percentTax * Number(item.itemAmount)
       } else {
-        totalAddCredit = totalAddCredit + (percentTax * Number(item.itemAmount))
+        totalAddCredit = totalAddCredit + percentTax * Number(item.itemAmount)
       }
     }
   }
@@ -191,21 +195,24 @@ const countWhtAmount = () => {
   let totalPo = 0
   let totalAddDebit = 0
   let totalAddCredit = 0
+  let totalWhtAmount = 0
   if (!checkIsNonPo()) {
     for (const item of form.value.invoicePoGr) {
       const percentTax = getPercentWht(item.whtCode) || 0
-      totalPo = totalPo + (percentTax * item.whtBaseAmount)
+      totalPo = totalPo + percentTax * item.whtBaseAmount
     }
     for (const item of form.value.additionalCosts) {
       const percentTax = getPercentWht(item.whtCode) || 0
       if (item.debitCredit === 'D') {
-        totalAddDebit = totalAddDebit + (percentTax * Number(item.whtBaseAmount))
+        totalAddDebit = totalAddDebit + percentTax * Number(item.whtBaseAmount)
       } else {
-        totalAddCredit = totalAddCredit + (percentTax * Number(item.whtBaseAmount))
+        totalAddCredit = totalAddCredit + percentTax * Number(item.whtBaseAmount)
       }
+      totalWhtAmount = totalWhtAmount + (Number(item.whtAmount) || 0)
     }
   } else {
     for (const item of form.value.invoiceItem) {
+      console.log(item)
       if (item.debitCredit === 'D') {
         totalAddDebit = totalAddDebit + item.whtAmount
       } else {
@@ -213,7 +220,8 @@ const countWhtAmount = () => {
       }
     }
   }
-  return totalPo + totalAddDebit - totalAddCredit
+
+  return totalPo + totalAddDebit + totalWhtAmount - totalAddCredit
 }
 
 const countTotalNetAmount = () => {
@@ -227,7 +235,12 @@ const countTotalNetAmount = () => {
 watch(
   () => form.value,
   () => {
-    if (form.value.invoiceDPCode !== 9011 && form.value.invoiceDPCode !== 9013 && form.value.invoiceTypeCode !== 902 && form.value.invoiceTypeCode !== 903) {
+    if (
+      form.value.invoiceDPCode !== 9011 &&
+      form.value.invoiceDPCode !== 9013 &&
+      form.value.invoiceTypeCode !== 902 &&
+      form.value.invoiceTypeCode !== 903
+    ) {
       listName.value = [...dpField]
     } else if (checkIsNonPo()) {
       listName.value = [...nonPoField]
@@ -238,8 +251,8 @@ watch(
   },
   {
     deep: true,
-    immediate: true
-  }
+    immediate: true,
+  },
 )
 
 watch(
@@ -249,8 +262,8 @@ watch(
   },
   {
     deep: true,
-    immediate: true
-  }
+    immediate: true,
+  },
 )
 
 onMounted(() => {

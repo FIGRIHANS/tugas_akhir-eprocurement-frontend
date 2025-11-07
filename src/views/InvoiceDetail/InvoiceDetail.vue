@@ -16,7 +16,9 @@
       <InvoicePoGr v-if="checkPo() && !isNonPo" class="mt-[24px]" />
       <InvoiceItem v-if="isNonPo" class="mt-[24px]" />
       <AdditionalCost
-        v-if="!isNonPo && (checkIsWithoutDp() || checkIsPoPib() || checkIsPoCC() || checkPoWithDp())"
+        v-if="
+          !isNonPo && (checkIsWithoutDp() || checkIsPoPib() || checkIsPoCC() || checkPoWithDp())
+        "
         class="mt-[24px]"
       />
     </div>
@@ -339,25 +341,62 @@ const checkPo = () => {
 const checkVerifHeader = () => {
   if (checkApprovalNonPoProc()) return true
 
-  const invoiceDateError = !checkNonPoPettyCash() ? useCheckEmpty(form.value.invoiceDate).isError : false
-  const documentNoError = !checkNonPoCas() && !checkNonPoPettyCash() && !checkNonPoLba() ? useCheckEmpty(form.value.documentNo).isError : false
-  const creditCardBillingError = checkVerifikator1() ? useCheckEmpty(form.value.creditCardBillingId).isError : false
+  const invoiceDateError = !checkNonPoPettyCash()
+    ? useCheckEmpty(form.value.invoiceDate).isError
+    : false
+  const documentNoError =
+    !checkNonPoCas() && !checkNonPoPettyCash() && !checkNonPoLba()
+      ? useCheckEmpty(form.value.documentNo).isError
+      : false
+  const creditCardBillingError = checkVerifikator1()
+    ? useCheckEmpty(form.value.creditCardBillingId).isError
+    : false
 
-  const postingDateError = !checkVerifikator1() && !checkNonPoPettyCash() && !checkNonPoCc() ? useCheckEmpty(form.value.postingDate).isError : false
-  const estimatedPaymentDateError = !checkVerifikator1() && !checkNonPoLba() || (checkNonPoPettyCash() && checkApprovalNonPo1() && !checkNonPoCc()) ? useCheckEmpty(form.value.estimatedPaymentDate).isError : false
-  const paymentMethodError = !checkVerifikator1() && !checkNonPoPettyCash() && !checkApprovalNonPoCcAdmin() && !checkNonPoLba() ? useCheckEmpty(form.value.paymentMethodCode).isError : false
-  const transferNewsError = !checkVerifikator1() && !checkNonPoPettyCash() && !checkNonPoCc() && !checkNonPoLba() ? useCheckEmpty(form.value.transferNews).isError : false
-  const notesError = !checkVerifikator1() && !checkApprovalNonPoCcAdmin() ? useCheckEmpty(form.value.notes).isError : false
+  const postingDateError =
+    !checkVerifikator1() && !checkNonPoPettyCash() && !checkNonPoCc()
+      ? useCheckEmpty(form.value.postingDate).isError
+      : false
+  const estimatedPaymentDateError =
+    (!checkVerifikator1() && !checkNonPoLba()) ||
+    (checkNonPoPettyCash() && checkApprovalNonPo1() && !checkNonPoCc())
+      ? useCheckEmpty(form.value.estimatedPaymentDate).isError
+      : false
+  const paymentMethodError =
+    !checkVerifikator1() &&
+    !checkNonPoPettyCash() &&
+    !checkApprovalNonPoCcAdmin() &&
+    !checkNonPoLba()
+      ? useCheckEmpty(form.value.paymentMethodCode).isError
+      : false
+  const transferNewsError =
+    !checkVerifikator1() && !checkNonPoPettyCash() && !checkNonPoCc() && !checkNonPoLba()
+      ? useCheckEmpty(form.value.transferNews).isError
+      : false
+  const notesError =
+    !checkVerifikator1() && !checkApprovalNonPoCcAdmin()
+      ? useCheckEmpty(form.value.notes).isError
+      : false
 
   const taxInvoiceError = checkNonPoCas() ? useCheckEmpty(form.value.taxNo).isError : false
   const npwpReportingError =
-    (checkNonPoCas() || (checkNonPoCc() && !checkApprovalNonPoProc() &&!checkApprovalNonPoCcAdmin())) && !checkApprovalNonPo1() ?
-    useCheckEmpty(form.value.npwpReporting).isError : false
+    (checkNonPoCas() ||
+      (checkNonPoCc() && !checkApprovalNonPoProc() && !checkApprovalNonPoCcAdmin())) &&
+    !checkApprovalNonPo1()
+      ? useCheckEmpty(form.value.npwpReporting).isError
+      : false
 
-  const cashJournalCodeError = checkNonPoPettyCash() ? useCheckEmpty(form.value.cashJournalCode).isError : false
-  const pettyCashPeriodError = checkNonPoPettyCash() ? useCheckEmpty(form.value.pettyCashStartDate).isError || useCheckEmpty(form.value.pettyCashEndDate).isError : false
+  const cashJournalCodeError = checkNonPoPettyCash()
+    ? useCheckEmpty(form.value.cashJournalCode).isError
+    : false
+  const pettyCashPeriodError = checkNonPoPettyCash()
+    ? useCheckEmpty(form.value.pettyCashStartDate).isError ||
+      useCheckEmpty(form.value.pettyCashEndDate).isError
+    : false
 
-  const proposalAmountError = !checkApprovalNonPoCcAdmin() && checkNonPoCc() ? useCheckEmpty(form.value.proposalAmount).isError : false
+  const proposalAmountError =
+    !checkApprovalNonPoCcAdmin() && checkNonPoCc()
+      ? useCheckEmpty(form.value.proposalAmount).isError
+      : false
 
   if (
     invoiceDateError ||
@@ -861,9 +900,9 @@ const setDataDefault = async () => {
     totalGrossAmount: data?.calculation.totalGrossAmount || 0,
     totalNetAmount: data?.calculation.totalNetAmount || 0,
     invoicePoGr: resultPoGr,
-  additionalCosts: resultAdditional,
+    additionalCosts: resultAdditional,
     invoiceItem: [],
-  costExpense: [],
+    costExpense: [],
     alternativePayee: [],
     invoiceDocument: invoice,
     tax: tax,
@@ -920,7 +959,7 @@ const setDataDefaultNonPo = () => {
       whtBaseAmount: item.whtBaseAmount,
       whtAmount: item.whtAmount,
       whtCodeList: [],
-      isEdit: false
+      isEdit: false,
     })
   }
 
@@ -1032,7 +1071,7 @@ const setDataEdit = () => {
     invoiceTypeName: data?.invoiceTypeName || '',
     invoiceDPCode: data?.invoiceDPCode || 0,
     invoiceDPName: data?.invoiceDPName || '',
-  // vendorId is stored as `vendorId` in the form type
+    // vendorId is stored as `vendorId` in the form type
     companyCode: data?.companyCode || '',
     companyName: data?.companyName || '',
     invoiceNo: data?.invoiceNo || '',
@@ -1080,9 +1119,9 @@ const setDataEdit = () => {
     totalGrossAmount: data?.totalGrossAmount || 0,
     totalNetAmount: data?.totalNetAmount || 0,
     invoicePoGr: data?.invoicePoGr || [],
-  additionalCosts: mappedAdditional,
+    additionalCosts: mappedAdditional,
     invoiceItem: [],
-  costExpense: mappedCostExpenses,
+    costExpense: mappedCostExpenses,
     alternativePayee: [
       {
         id: data?.idAlternative,
@@ -1098,8 +1137,8 @@ const setDataEdit = () => {
         ktp: data?.ktp,
         email: data?.email,
         isAlternativePayee: data?.isAlternativePayee,
-        isOneTimeVendor: data?.isOneTimeVendor
-      }
+        isOneTimeVendor: data?.isOneTimeVendor,
+      },
     ],
     invoiceDocument: data?.invoiceDocument || null,
     tax: data?.tax || null,
@@ -1160,7 +1199,7 @@ watch(
   },
   {
     deep: true,
-    immediate: true
+    immediate: true,
   },
 )
 

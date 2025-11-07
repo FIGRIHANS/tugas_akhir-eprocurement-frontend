@@ -4,8 +4,12 @@
       <h3 class="card-title text-base font-semibold">Invoice Calculation</h3>
     </div>
     <div class="card-body flex flex-col p-0">
-      <div v-for="(item, index) in listCalculation" :key="index" class="flex"
-        :class="index === listCalculation.length - 1 ? 'calculation__last-field' : ''">
+      <div
+        v-for="(item, index) in listCalculation"
+        :key="index"
+        class="flex"
+        :class="index === listCalculation.length - 1 ? 'calculation__last-field' : ''"
+      >
         <p class="flex-1 py-[25px] px-[20px] text-xs">{{ item.name }}</p>
         <p class="flex-1 py-[25px] px-[20px] text-xs">{{ item.amount }}</p>
         <p class="flex-1 py-[25px] px-[20px] text-xs">{{ item.currency }}</p>
@@ -65,8 +69,11 @@ const setCalculation = () => {
   for (const item of listName.value) {
     const data = {
       name: item,
-      amount: props.formInvoice.currCode === 'IDR' ? useFormatIdr(setValue(item) || 0) : useFormatUsd(setValue(item) || 0),
-      currency: props.formInvoice.currCode || ''
+      amount:
+        props.formInvoice.currCode === 'IDR'
+          ? useFormatIdr(setValue(item) || 0)
+          : useFormatUsd(setValue(item) || 0),
+      currency: props.formInvoice.currCode || '',
     }
     listCalculation.value.push(data)
   }
@@ -79,14 +86,19 @@ watch(
   },
   {
     deep: true,
-    immediate: true
-  }
+    immediate: true,
+  },
 )
 
 watch(
   () => form,
   () => {
-    if (form.value.invoiceDPCode !== 9011 && form.value.invoiceDPCode !== 9013 && form.value.invoiceTypeCode !== 902 && form.value.invoiceTypeCode !== 903) {
+    if (
+      form.value.invoiceDPCode !== 9011 &&
+      form.value.invoiceDPCode !== 9013 &&
+      form.value.invoiceTypeCode !== 902 &&
+      form.value.invoiceTypeCode !== 903
+    ) {
       listName.value = [...dpField]
     } else if (checkIsNonPo()) {
       listName.value = [...nonPoField]
@@ -97,8 +109,8 @@ watch(
   },
   {
     deep: true,
-    immediate: true
-  }
+    immediate: true,
+  },
 )
 </script>
 

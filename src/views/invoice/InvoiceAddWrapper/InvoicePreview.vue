@@ -18,7 +18,9 @@
     <InvoicePoGrView v-if="checkPo()" />
     <InvoiceItemView v-if="checkIsNonPo()" />
     <hr class="border-gray-300" />
-    <AdditionalCostView v-if="(checkIsWithoutDp() || checkPoWithDp() || checkIsPoPibCc()) && !checkIsNonPo()" />
+    <AdditionalCostView
+      v-if="(checkIsWithoutDp() || checkPoWithDp() || checkIsPoPibCc()) && !checkIsNonPo()"
+    />
   </div>
 </template>
 
@@ -75,7 +77,7 @@ watch(
   },
   {
     deep: true,
-    immediate: true
+    immediate: true,
   },
 )
 
