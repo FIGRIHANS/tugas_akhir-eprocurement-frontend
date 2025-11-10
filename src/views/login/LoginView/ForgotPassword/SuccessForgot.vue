@@ -25,9 +25,16 @@ const loginStore = useLoginStore()
 const forgotPasswordStore = useForgotPasswordStore()
 
 const goBack = () => {
+  // console.log(loginStore.selectedLogin, 'selected login')
+  // console.log(loginStore.loginRole, 'selected login role')
   forgotPasswordStore.resetState()
 
   loginStore.isSendForgot = false
-  loginStore.selectedLogin = 'vendor'
+
+  if (loginStore.loginRole === 'vendor') {
+    loginStore.selectedLogin = 'vendor'
+  } else {
+    loginStore.selectedLogin = 'admin'
+  }
 }
 </script>
