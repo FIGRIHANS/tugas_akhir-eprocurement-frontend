@@ -108,7 +108,11 @@ const checkForgot = () => {
 
 const goBack = () => {
   if (loginApi.selectedLogin === 'forgot') {
-    return (loginApi.selectedLogin = 'vendor')
+    if (loginApi.loginRole === 'vendor') {
+      return (loginApi.selectedLogin = 'vendor')
+    } else {
+      return (loginApi.selectedLogin = 'admin')
+    }
   }
   loginApi.selectedLogin = ''
 }
