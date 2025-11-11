@@ -49,6 +49,11 @@ export const login = {
         'We have sent a link to create a new password to your email address, please open your email and follow the instructions in your email!',
       backButton: 'Back',
     },
+    failed: {
+      title: 'Failed to Send Email',
+      message: 'Email not found, please check the email you used for your first registration.',
+      backButton: 'Back',
+    },
   },
   reset: {
     title: 'Enter New password',
