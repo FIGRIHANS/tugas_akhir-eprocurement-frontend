@@ -99,7 +99,8 @@ const goBack = () => {
   // Reset states when going back
   loginApi.isSendNewPassword = false
   forgotPasswordStore.resetState()
-  loginApi.selectedLogin = 'vendor'
+
+  loginApi.selectedLogin = ''
   router.push({
     name: 'login',
   })
