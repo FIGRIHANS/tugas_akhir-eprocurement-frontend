@@ -29,8 +29,14 @@ const router = useRouter()
 const goBack = () => {
   // Reset all states
   loginApi.isSendNewPassword = false
-  loginApi.selectedLogin = 'vendor'
+  // loginApi.selectedLogin = 'vendor'
   forgotPasswordStore.resetState()
+
+  if (loginApi.loginRole === 'vendor') {
+    loginApi.selectedLogin = 'vendor'
+  } else {
+    loginApi.selectedLogin = 'admin'
+  }
 
   router.push({
     name: 'login',
