@@ -80,5 +80,10 @@ export const login = {
       message: 'You have just changed your password, please log in again using the new password!',
       loginButton: 'login',
     },
+    failed: {
+      title: 'Failed to Change Password',
+      message: 'An error occurred while changing the password, please try again later.',
+      loginButton: 'Back',
+    },
   },
 }
