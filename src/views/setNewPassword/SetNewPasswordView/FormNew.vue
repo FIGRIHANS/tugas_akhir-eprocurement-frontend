@@ -83,8 +83,6 @@ const route = useRoute()
 const forgotPasswordStore = useForgotPasswordStore()
 const loginStore = useLoginStore()
 
-console.log(route.name)
-
 const newPassword = ref<string>('')
 const showNewPassword = ref<boolean>(false)
 const confirmPassword = ref<string>('')
