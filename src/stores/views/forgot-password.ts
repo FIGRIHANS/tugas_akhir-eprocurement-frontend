@@ -25,7 +25,7 @@ export const useForgotPasswordStore = defineStore('forgot-password', () => {
   const isEmailSent = ref<boolean>(false)
   const isPasswordReset = ref<boolean>(false)
   const resetPasswordResponse = ref<IResetPasswordResponse | null>(null)
-
+  const sendNewPasswordResponse = ref<IResetPasswordResponse | null>(null)
   const clearError = () => {
     error.value = null
   }
@@ -36,6 +36,7 @@ export const useForgotPasswordStore = defineStore('forgot-password', () => {
     isEmailSent.value = false
     isPasswordReset.value = false
     resetPasswordResponse.value = null
+    sendNewPasswordResponse.value = null
   }
 
   const sendResetPasswordEmail = async (payload: ISendResetPasswordEmailPayload) => {
@@ -72,7 +73,7 @@ export const useForgotPasswordStore = defineStore('forgot-password', () => {
 
       isPasswordReset.value = true
 
-      resetPasswordResponse.value = response.data
+      sendNewPasswordResponse.value = response.data
       return response.data
     } catch (err) {
       console.log(err, 'err')
@@ -121,7 +122,7 @@ export const useForgotPasswordStore = defineStore('forgot-password', () => {
 
       isPasswordReset.value = true
 
-      resetPasswordResponse.value = response.data
+      sendNewPasswordResponse.value = response.data
       return response.data
     } catch (err) {
       if (err instanceof Error) {
@@ -141,6 +142,7 @@ export const useForgotPasswordStore = defineStore('forgot-password', () => {
     isEmailSent,
     isPasswordReset,
     resetPasswordResponse,
+    sendNewPasswordResponse,
     clearError,
     resetState,
     sendResetPasswordEmail,
