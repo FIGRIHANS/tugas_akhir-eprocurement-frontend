@@ -32,11 +32,13 @@ const goBack = () => {
   // loginApi.selectedLogin = 'vendor'
   forgotPasswordStore.resetState()
 
-  if (loginApi.loginRole === 'vendor') {
-    loginApi.selectedLogin = 'vendor'
-  } else {
-    loginApi.selectedLogin = 'admin'
-  }
+  // if (loginApi.loginRole === 'vendor') {
+  //   loginApi.selectedLogin = 'vendor'
+  // } else {
+  //   loginApi.selectedLogin = 'admin'
+  // }
+
+  loginApi.selectedLogin = ''
 
   router.push({
     name: 'login',
