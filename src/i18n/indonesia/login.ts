@@ -82,5 +82,10 @@ export const login = {
       message: 'Anda baru saja mengubah password, silakan login kembali menggunakan password baru!',
       loginButton: 'login',
     },
+    failed: {
+      title: 'Gagal Mengubah Password',
+      message: 'Terjadi kesalahan saat mengubah password, silakan coba lagi nanti.',
+      loginButton: 'Kembali',
+    },
   },
 }
