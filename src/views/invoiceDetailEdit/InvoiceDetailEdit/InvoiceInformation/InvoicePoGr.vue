@@ -271,9 +271,11 @@ import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import type { itemsPoGrType } from '../../types/invoicePoGr'
 import moment from 'moment'
 import { useRoute } from 'vue-router'
+import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 
 const route = useRoute()
 const invoiceMasterApi = useInvoiceMasterDataStore()
+const verificationApi = useInvoiceVerificationStore()
 const loginApi = useLoginStore()
 const form = inject<Ref<formTypes>>('form')
 const columns = ref<string[]>([])
@@ -409,6 +411,18 @@ const setWhtAmount = (data: itemsPoGrType) => {
     }
   } else {
     formEdit.whtAmount = 0
+  }
+
+  if (formEdit.whtCode === 'A1' || formEdit.whtCode === 'Z1') {
+    verificationApi
+      .getpph21({
+        startDate: moment().format('YYYY-MM-DD'),
+        endDate: moment().format('YYYY-MM-DD'),
+        vendorId: form.value.vendorId,
+      })
+      .then((res) => {
+        formEdit.whtAmount = res.result.content.pph21Summaries[0].pPh21Dipotong.replace(/\./g, '')
+      })
   }
 }
 

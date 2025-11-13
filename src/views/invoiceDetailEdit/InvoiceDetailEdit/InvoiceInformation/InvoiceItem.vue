@@ -218,6 +218,7 @@ import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 import { useLoginStore } from '@/stores/views/login'
+import moment from 'moment'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const verificationApi = useInvoiceVerificationStore()
@@ -526,6 +527,18 @@ const setWhtAmount = (data: invoiceItemTypes) => {
     }
   } else {
     formEdit.whtAmount = 0
+  }
+
+  if (formEdit.whtCode === 'A1' || formEdit.whtCode === 'Z1') {
+    verificationApi
+      .getpph21({
+        startDate: moment().format('YYYY-MM-DD'),
+        endDate: moment().format('YYYY-MM-DD'),
+        vendorId: form.value.vendorId,
+      })
+      .then((res) => {
+        formEdit.whtAmount = res.result.content.pph21Summaries[0].pPh21Dipotong.replace(/\./g, '')
+      })
   }
 }
 
