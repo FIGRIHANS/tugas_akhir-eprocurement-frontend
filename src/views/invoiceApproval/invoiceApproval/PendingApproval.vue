@@ -342,8 +342,6 @@ const openDetailInvoice = (invoiceId: string) => {
 const openDetailInvoiceEdit = (invoiceId: string) => {
   const isSendSap = ref(false)
   if (filterForm.status === 7) {
-    console.log('masuk')
-
     isSendSap.value = true
   }
   router.push({
