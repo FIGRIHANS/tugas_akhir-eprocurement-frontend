@@ -454,9 +454,6 @@ const getWhtCodeName = (code: string, data: itemsCostType) => {
 }
 
 const setWhtAmount = (data: itemsCostType) => {
-  // const pph21whtAmmount = 0
-  // console.log(formEdit.whtCode, 'data')
-
   if (formEdit.whtCode) {
     const whtlist = data.whtCodeList || []
     const indexWht = whtlist.findIndex((item) => item.whtCode === formEdit.whtCode)

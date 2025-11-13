@@ -212,7 +212,6 @@ const countWhtAmount = () => {
     }
   } else {
     for (const item of form.value.invoiceItem) {
-      console.log(item)
       if (item.debitCredit === 'D') {
         totalAddDebit = totalAddDebit + item.whtAmount
       } else {
