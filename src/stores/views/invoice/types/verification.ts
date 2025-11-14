@@ -679,3 +679,24 @@ export interface SubmissionNonPoTypes {
   alternativePayee: AlternativePay[]
   costExpenses: CostExpenses[]
 }
+
+export interface ParamsPph21Types {
+  vendorId: string
+  invoiceDate: string
+  brutoAmount: number
+  isNpwp: number
+  useDpp: number
+}
+
+export interface ResponsePph21Types {
+  vendorId: number
+  invoiceDate: string
+  brutoAmount: number
+  dppCurrent: number
+  prevCumulativeDPP: number
+  newCumulativeDPP: number
+  totalTaxBefore: number
+  totalTaxAfter: number
+  pPh21Current: number
+
+}
