@@ -468,12 +468,14 @@ const setWhtAmount = (data: itemsCostType) => {
   if (formEdit.whtCode === 'A1' || formEdit.whtCode === 'Z1') {
     verificationApi
       .getpph21({
-        startDate: moment().format('YYYY-MM-DD'),
-        endDate: moment().format('YYYY-MM-DD'),
         vendorId: form.value.vendorId,
+        invoiceDate: moment().format('YYYY-MM-DD'),
+        brutoAmount: formEdit.whtBaseAmount,
+        isNpwp: form.value.npwp ? 1 : 0,
+        useDpp: 1
       })
       .then((res) => {
-        formEdit.whtAmount = res.result.content.pph21Summaries[0].pPh21Dipotong.replace(/\./g, '')
+        formEdit.whtAmount = res.result.content.pPh21Current
       })
   }
 }
