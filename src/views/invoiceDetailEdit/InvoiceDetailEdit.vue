@@ -5,7 +5,6 @@
     <TabInvoice
       :active-tab="tabNow"
       :with-preview="false"
-      @change-tab="setTab"
       class="-mx-[24px]"
     />
     <div>
