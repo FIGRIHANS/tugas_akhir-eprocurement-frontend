@@ -7,7 +7,6 @@
       :can-click-data="true"
       :can-click-information="canClickInformationTab"
       :can-click-preview="canClickPreviewTab"
-      @change-tab="setTab"
       class="-mx-[24px]"
     />
     <!-- <div v-if="form.status !== 0" class="status__box--approved -mt-5 -mx-[24px]">
