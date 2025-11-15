@@ -122,3 +122,19 @@ export type CashJournalTypes = {
   cashJournalNo: string
   cashJournalName: string
 }
+
+export type BankAlternativeTypes = {
+  id: number
+  bankCountryCode: string
+  bankKey: string
+  bankNameAccount: string
+  street: string
+  swiftCode: string
+  addressNumber: string
+  bankBranch: string
+  isActive: boolean
+  createdBy: string
+  createdUtcDate: string
+  updatedBy: string
+  updatedUtcDate: string
+}

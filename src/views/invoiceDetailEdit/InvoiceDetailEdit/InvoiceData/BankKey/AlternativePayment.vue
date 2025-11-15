@@ -107,13 +107,15 @@
             Bank Key
             <span v-if="form.isAlternativePayee || form.isOneTimeVendor" class="text-red-500 ml-[4px]">*</span>
           </label>
-          <input
+          <v-select
             v-model="form.bankKeyAlternative"
-            class="input"
-            placeholder=""
-            :disabled="route.query.isSendSap === 'true'"
-            :class="{ 'border-danger': form.bankKeyAlternativeError }"
-          />
+            class="customSelect w-full"
+            placeholder="Select"
+            :get-option-label="(option: any) => `${option.bankKey} - ${option.bankNameAccount}`"
+            :reduce="(option: any) => option.bankKey"
+            :options="listBankAlternative"
+            :class="{ 'error-select': form.bankKeyAlternativeError }"
+          ></v-select>
         </div>
         <!-- Bank Country -->
         <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
@@ -168,16 +170,26 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, onMounted } from 'vue'
+import { computed, inject, watch, onMounted } from 'vue'
 import type { formTypes } from '../../../types/invoiceDetailEdit'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
+import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const form = inject<formTypes>('form')
 const vendorMasterApi = useVendorMasterDataStore()
+const invoiceMasterApi = useInvoiceMasterDataStore()
 
 const listCountry = computed(() => vendorMasterApi.countryList)
+const listBankAlternative = computed(() => invoiceMasterApi.bankAlternative)
+
+watch(
+  () => form.bankCountryAlternative,
+  () => {
+    invoiceMasterApi.getBankAlternative(form.bankCountryAlternative)
+  }
+)
 
 onMounted(() => {
   vendorMasterApi.getVendorCountries()
