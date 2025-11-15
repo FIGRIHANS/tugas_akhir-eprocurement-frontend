@@ -54,14 +54,17 @@
         <!-- Bank Key -->
         <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
           <label class="form-label max-w-32"> Bank Key <span v-if="isAlt" class="text-danger">*</span> </label>
-          <input v-model="form.bankKeyAlternative" class="input" placeholder="" />
+          <v-select
+            v-model="form.bankKeyAlternative"
+            class="customSelect w-full"
+            placeholder="Select"
+            :get-option-label="(option: any) => `${option.bankKey} - ${option.bankNameAccount}`"
+            :reduce="(option: any) => option.bankKey"
+            :options="listBankAlternative"
+          ></v-select>
         </div>
         <!-- Bank Country -->
         <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-          <!-- <label class="form-label max-w-32">
-            Bank Country
-          </label>
-          <input v-model="form.bankCountryAlternative" class="input" placeholder=""/> -->
           <label class="form-label max-w-32"> Bank Country </label>
           <v-select
             v-model="form.bankCountryAlternative"
@@ -96,16 +99,26 @@
 import { computed, inject, onMounted, watch } from 'vue'
 import type { formTypes } from '../../../types/invoiceAddWrapper'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
+import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 
 const form = inject<formTypes>('form')
 const vendorMasterApi = useVendorMasterDataStore()
+const invoiceMasterApi = useInvoiceMasterDataStore()
 
 const listCountry = computed(() => vendorMasterApi.countryList)
 const isAlt = computed(() => !!form?.isAlternativePayee)
+const listBankAlternative = computed(() => invoiceMasterApi.bankAlternative)
 
 onMounted(() => {
   vendorMasterApi.getVendorCountries()
 })
+
+watch(
+  () => form.bankCountryAlternative,
+  () => {
+    invoiceMasterApi.getBankAlternative(form.bankCountryAlternative)
+  }
+)
 
 // Ensure only one of the two options can be selected at a time
 watch(
