@@ -10,14 +10,34 @@
         <p class="text-sm font-medium">{{ getInvoiceTypeName() || '-' }}</p>
       </div>
 
-      <div v-if="checkIsNonPo() && !isPettyCash" :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
-        <p class="text-xs font-normal text-gray-700">Vendor No.</p>
-        <p class="text-sm font-medium">{{ form.vendorId || '-' }}</p>
+      <div
+        v-if="form.invoiceType === '901' && !checkIsNonPo()"
+        :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }"
+      >
+        <p class="text-xs font-normal text-gray-700">DP Option</p>
+        <p class="text-sm font-medium">{{ getDpName() || '-' }}</p>
       </div>
 
       <div :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
         <p class="text-xs font-normal text-gray-700">Company Code</p>
         <p class="text-sm font-medium">{{ getCompanyDisplay() }}</p>
+      </div>
+
+      <div v-if="checkIsNonPo() && !isPettyCash" :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
+        <p class="text-xs font-normal text-gray-700">Vendor No.</p>
+        <p class="text-sm font-medium">{{ form.vendorId || '-' }}</p>
+      </div>
+
+      <div v-if="!checkIsNonPo() || isCreditCard || isReimbursement" :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
+        <p class="text-xs font-normal text-gray-700">Invoice Document No.</p>
+        <p class="text-sm font-medium">{{ form.invoiceVendorNo || '-' }}</p>
+      </div>
+
+      <div v-if="!checkIsNonPo() || isCreditCard || isReimbursement" :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
+        <p class="text-xs font-normal text-gray-700">Invoice Date</p>
+        <p class="text-sm font-medium whitespace-nowrap">
+          {{ form.invoiceDate ? moment(form.invoiceDate).format('YYYY/MM/DD') : '-' }}
+        </p>
       </div>
 
       <div v-if="isPettyCash && form.reference" :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
@@ -47,19 +67,7 @@
         <p class="text-sm font-medium">{{ form.invoiceNo }}</p>
       </div>
 
-      <div v-if="isReimbursement" :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
-        <p class="text-xs font-normal text-gray-700">Invoice Vendor No.</p>
-        <p class="text-sm font-medium">{{ form.invoiceVendorNo || '-' }}</p>
-      </div>
-
-      <div v-if="isReimbursement" :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
-        <p class="text-xs font-normal text-gray-700">Invoice Date</p>
-        <p class="text-sm font-medium whitespace-nowrap">
-          {{ form.invoiceDate ? moment(form.invoiceDate).format('YYYY/MM/DD') : '-' }}
-        </p>
-      </div>
-
-      <div v-if="isReimbursement || isCAS || isLBA" :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
+      <div v-if="!isPettyCash" :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
         <p class="text-xs font-normal text-gray-700">Tax Document No.</p>
         <p class="text-sm font-medium">{{ form.taxNoInvoice || '-' }}</p>
       </div>
@@ -92,14 +100,6 @@
       <div v-if="form.invoiceType !== '903'" :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }">
         <p class="text-xs font-normal text-gray-700">Description</p>
         <p class="text-sm font-medium">{{ form.description || '-' }}</p>
-      </div>
-
-      <div
-        v-if="form.invoiceType === '901' && !checkIsNonPo()"
-        :class="{ 'w-[calc(50%-10px)]': !checkIsNonPo() }"
-      >
-        <p class="text-xs font-normal text-gray-700">DP Option</p>
-        <p class="text-sm font-medium">{{ getDpName() || '-' }}</p>
       </div>
     </div>
   </div>

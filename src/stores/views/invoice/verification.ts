@@ -13,6 +13,8 @@ import type {
   ParamsRejectTypes,
   ListNonPoTypes,
   PostEditApprovalNonPoTypes,
+  ParamsPph21Types,
+  ResponsePph21Types
 } from './types/verification'
 
 export const useInvoiceVerificationStore = defineStore('invoiceVerification', () => {
@@ -282,14 +284,14 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     return response.data
   }
 
-  const getpph21 = async (payload: { startDate: string; endDate: string; vendorId: string }) => {
-    const response: ApiResponse<void> = await invoiceApi.get(
-      `/invoice/pph21/${payload.startDate}/${payload.endDate}`,
+  const getpph21 = async (payload: ParamsPph21Types) => {
+    const response: ApiResponse<ResponsePph21Types> = await invoiceApi.get(
+      `/invoice/pph21`,
       {
         params: {
-          vendorId: payload.vendorId,
-        },
-      },
+          ...payload
+        }
+      }
     )
     return response.data
   }

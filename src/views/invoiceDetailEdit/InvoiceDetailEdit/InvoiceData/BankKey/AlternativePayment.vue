@@ -101,20 +101,6 @@
         </div>
       </div>
       <div class="flex-1">
-        <!-- Bank Key -->
-        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-          <label class="form-label max-w-32">
-            Bank Key
-            <span v-if="form.isAlternativePayee || form.isOneTimeVendor" class="text-red-500 ml-[4px]">*</span>
-          </label>
-          <input
-            v-model="form.bankKeyAlternative"
-            class="input"
-            placeholder=""
-            :disabled="route.query.isSendSap === 'true'"
-            :class="{ 'border-danger': form.bankKeyAlternativeError }"
-          />
-        </div>
         <!-- Bank Country -->
         <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
           <label class="form-label max-w-32"> Bank Country </label>
@@ -126,6 +112,22 @@
             :reduce="(option: any) => option.countryCode"
             :options="listCountry"
             :disabled="route.query.isSendSap === 'true'"
+          ></v-select>
+        </div>
+        <!-- Bank Key -->
+        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
+          <label class="form-label max-w-32">
+            Bank Key
+            <span v-if="form.isAlternativePayee || form.isOneTimeVendor" class="text-red-500 ml-[4px]">*</span>
+          </label>
+          <v-select
+            v-model="form.bankKeyAlternative"
+            class="customSelect w-full"
+            placeholder="Select"
+            :get-option-label="(option: any) => `${option.bankKey} - ${option.bankNameAccount}`"
+            :reduce="(option: any) => option.bankKey"
+            :options="listBankAlternative"
+            :class="{ 'error-select': form.bankKeyAlternativeError }"
           ></v-select>
         </div>
         <!-- No. NPWP -->
@@ -168,16 +170,26 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, onMounted } from 'vue'
+import { computed, inject, watch, onMounted } from 'vue'
 import type { formTypes } from '../../../types/invoiceDetailEdit'
 import { useVendorMasterDataStore } from '@/stores/master-data/vendor-master-data'
+import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const form = inject<formTypes>('form')
 const vendorMasterApi = useVendorMasterDataStore()
+const invoiceMasterApi = useInvoiceMasterDataStore()
 
 const listCountry = computed(() => vendorMasterApi.countryList)
+const listBankAlternative = computed(() => invoiceMasterApi.bankAlternative)
+
+watch(
+  () => form.bankCountryAlternative,
+  () => {
+    invoiceMasterApi.getBankAlternative(form.bankCountryAlternative)
+  }
+)
 
 onMounted(() => {
   vendorMasterApi.getVendorCountries()

@@ -218,6 +218,7 @@ import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 import { useLoginStore } from '@/stores/views/login'
+import moment from 'moment'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const verificationApi = useInvoiceVerificationStore()
@@ -279,10 +280,6 @@ const checkPoPib = () => {
 
 const checkIsNonPo = () => {
   return route.query.invoiceType === 'no_po'
-}
-
-const checkNonPoCc = () => {
-  return form.value.invoiceTypeCode === 2
 }
 
 const checkNonPoPettyCash = () => {
@@ -526,6 +523,20 @@ const setWhtAmount = (data: invoiceItemTypes) => {
     }
   } else {
     formEdit.whtAmount = 0
+  }
+
+  if (formEdit.whtCode === 'A1' || formEdit.whtCode === 'Z1') {
+    verificationApi
+      .getpph21({
+        vendorId: form.value.vendorId,
+        invoiceDate: moment().format('YYYY-MM-DD'),
+        brutoAmount: formEdit.whtBaseAmount,
+        isNpwp: form.value.npwp ? 1 : 0,
+        useDpp: 1
+      })
+      .then((res) => {
+        formEdit.whtAmount = res.result.content.pPh21Current
+      })
   }
 }
 
