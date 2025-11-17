@@ -101,6 +101,19 @@
         </div>
       </div>
       <div class="flex-1">
+        <!-- Bank Country -->
+        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
+          <label class="form-label max-w-32"> Bank Country </label>
+          <v-select
+            v-model="form.bankCountryAlternative"
+            class="customSelect w-full"
+            label="countryName"
+            placeholder="Select"
+            :reduce="(option: any) => option.countryCode"
+            :options="listCountry"
+            :disabled="route.query.isSendSap === 'true'"
+          ></v-select>
+        </div>
         <!-- Bank Key -->
         <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
           <label class="form-label max-w-32">
@@ -115,19 +128,6 @@
             :reduce="(option: any) => option.bankKey"
             :options="listBankAlternative"
             :class="{ 'error-select': form.bankKeyAlternativeError }"
-          ></v-select>
-        </div>
-        <!-- Bank Country -->
-        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-          <label class="form-label max-w-32"> Bank Country </label>
-          <v-select
-            v-model="form.bankCountryAlternative"
-            class="customSelect w-full"
-            label="countryName"
-            placeholder="Select"
-            :reduce="(option: any) => option.countryCode"
-            :options="listCountry"
-            :disabled="route.query.isSendSap === 'true'"
           ></v-select>
         </div>
         <!-- No. NPWP -->
