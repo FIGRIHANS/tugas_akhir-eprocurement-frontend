@@ -51,18 +51,6 @@
         </div>
       </div>
       <div class="flex-1">
-        <!-- Bank Key -->
-        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-          <label class="form-label max-w-32"> Bank Key <span v-if="isAlt" class="text-danger">*</span> </label>
-          <v-select
-            v-model="form.bankKeyAlternative"
-            class="customSelect w-full"
-            placeholder="Select"
-            :get-option-label="(option: any) => `${option.bankKey} - ${option.bankNameAccount}`"
-            :reduce="(option: any) => option.bankKey"
-            :options="listBankAlternative"
-          ></v-select>
-        </div>
         <!-- Bank Country -->
         <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
           <label class="form-label max-w-32"> Bank Country </label>
@@ -73,6 +61,18 @@
             placeholder="Select"
             :reduce="(option: any) => option.countryCode"
             :options="listCountry"
+          ></v-select>
+        </div>
+        <!-- Bank Key -->
+        <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
+          <label class="form-label max-w-32"> Bank Key <span v-if="isAlt" class="text-danger">*</span> </label>
+          <v-select
+            v-model="form.bankKeyAlternative"
+            class="customSelect w-full"
+            placeholder="Select"
+            :get-option-label="(option: any) => `${option.bankKey} - ${option.bankNameAccount}`"
+            :reduce="(option: any) => option.bankKey"
+            :options="listBankAlternative"
           ></v-select>
         </div>
         <!-- No. NPWP -->
