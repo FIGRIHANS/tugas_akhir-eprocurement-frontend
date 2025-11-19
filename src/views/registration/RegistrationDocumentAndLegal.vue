@@ -371,6 +371,10 @@ watch(
       registrationVendorStore.documentAndLegal.anotherDocuments = []
 
       selectedCategory.value = documentAndLegal.value.kategori
+      console.log(tableItems.value, 'table items')
+
+      console.log(documentAndLegal.value.kategori, 'cat')
+
       registrationVendorStore.documentAndLegal.fields = tableItems.value.map((item) => ({
         licenseId: item.licenseId,
         licenseNo: '',
