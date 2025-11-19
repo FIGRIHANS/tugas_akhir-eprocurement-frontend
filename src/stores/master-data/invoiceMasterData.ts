@@ -22,7 +22,8 @@ import type {
   WhtCodeTypes,
   CostCenterTypes,
   MatrixApprovalTypes,
-  NpwpReportingTypes
+  NpwpReportingTypes,
+  BankAlternativeTypes
 } from './types/invoiceMasterData'
 
 export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => {
@@ -44,6 +45,7 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
   const npwpReportingList = ref<NpwpReportingTypes[]>([])
   const casNoCode = ref<CasNoTypes[]>([])
   const cashJournalList = ref<CashJournalTypes[]>([])
+  const bankAlternative = ref<BankAlternativeTypes[]>([])
 
   const getInvoicePoType = async () => {
     const response: ApiResponse<InvoicePoTypes[]> = await generalApi.get(`/lookup/invoice-po-type`)
@@ -212,6 +214,13 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
     return response.data.result
   }
 
+  const getBankAlternative = async (bankCountry: string) => {
+    const url = `/public/vendor/registration/getbank?bankCountryCode=${bankCountry}`
+    const response: ApiResponse<BankAlternativeTypes[]> = await vendorApi.get(url)
+
+    bankAlternative.value = response.data.result.content
+  }
+
   return {
     invoicePoType,
     invoiceNonPoType,
@@ -231,6 +240,7 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
     npwpReportingList,
     casNoCode,
     cashJournalList,
+    bankAlternative,
     getInvoicePoType,
     getInvoiceNonPoType,
     getCurrency,
@@ -248,5 +258,6 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
     getMatrixApproval,
     getNpwpReporting,
     getCashJournal,
+    getBankAlternative
   }
 })
