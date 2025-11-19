@@ -9,6 +9,7 @@ interface ProfileData {
   total: number
   page: number
   pageSize: number
+  searchText?: string
 }
 
 export const useUserProfileStore = defineStore('userProfile', () => {
@@ -19,9 +20,14 @@ export const useUserProfileStore = defineStore('userProfile', () => {
     total: 0,
     page: 1,
     pageSize: 10,
+    searchText: '',
   })
 
-  const getAllUserProfiles = async (body: { page: number; pageSize?: number }) => {
+  const getAllUserProfiles = async (body: {
+    page: number
+    pageSize?: number
+    searchText: string
+  }) => {
     loading.value = true
     error.value = null
 
@@ -32,6 +38,7 @@ export const useUserProfileStore = defineStore('userProfile', () => {
           params: {
             page: body.page,
             pageSize: body.pageSize ?? profiles.value.pageSize,
+            searchText: body.searchText,
           },
         },
       )
@@ -153,6 +160,7 @@ export const useUserProfileStore = defineStore('userProfile', () => {
     getAllUserProfiles({
       page,
       pageSize: profiles.value.pageSize,
+      searchText: '',
     })
   }
 
