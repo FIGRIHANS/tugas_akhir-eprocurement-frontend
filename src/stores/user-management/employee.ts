@@ -27,7 +27,7 @@ export const useEmployeeStore = defineStore('employeeStore', () => {
   const errorEmployees = ref(null)
   const errorEmployee = ref(null)
 
-  const getEmployees = async (body: { page: number; pageSize: number }) => {
+  const getEmployees = async (body: { page: number; pageSize: number; searchText: string }) => {
     loadingEmployees.value = true
     errorEmployees.value = null
 
@@ -38,6 +38,7 @@ export const useEmployeeStore = defineStore('employeeStore', () => {
           params: {
             page: body.page,
             pageSize: body.pageSize ?? employees.value.pageSize,
+            searchText: body.searchText,
           },
         },
       )
