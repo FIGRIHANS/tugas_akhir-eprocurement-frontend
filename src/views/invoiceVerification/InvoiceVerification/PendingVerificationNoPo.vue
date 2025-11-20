@@ -85,7 +85,9 @@
                   </button>
                 </td>
                 <td>{{ parent.invoiceNo || '-' }}</td>
-                <td>{{ parent.notes || '-' }}</td>
+                <td class="max-w-[200px] truncate" :title="parent.notes">
+                  {{ parent.notes || '-' }}
+                </td>
                 <td>
                   <span class="badge badge-outline" :class="colorBadge(parent.statusCode)">
                     {{ parent.statusName }}

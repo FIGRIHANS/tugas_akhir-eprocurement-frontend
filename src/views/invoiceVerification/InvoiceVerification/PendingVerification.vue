@@ -115,7 +115,9 @@
                       : '-'
                   }}
                 </td>
-                <td>{{ parent.notes || '-' }}</td>
+                <td class="max-w-[200px] truncate" :title="parent.notes">
+                  {{ parent.notes || '-' }}
+                </td>
               </tr>
               <tr v-show="parent.isOpenChild">
                 <td></td>
