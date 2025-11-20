@@ -44,8 +44,38 @@
                 emit('update:userPayload', { ...userPayload, isActive: value === 'active' })
             "
           />
+          <UiSearchSelect
+            label="Employee"
+            placeholder="Pilih"
+            :options="employeeStore.employees.items"
+            row
+            required
+            value-key="employeeId"
+            text-key="employeeName"
+            :model-value="userPayload.employeeId"
+            @search="getEmployeAfter"
+            @update:model-value="
+              (value: any) => emit('update:userPayload', { ...userPayload, employeeId: value })
+            "
+            searchable
+          />
         </UiFormGroup>
         <UiFormGroup hide-border>
+          <UiSearchSelect
+            label="Profile"
+            placeholder="Pilih"
+            :options="userProfileStore.profiles.items"
+            row
+            required
+            value-key="profileId"
+            text-key="profileName"
+            :model-value="userPayload.profileId"
+            @search="getProfileAfter"
+            @update:model-value="
+              (value: any) => emit('update:userPayload', { ...userPayload, profileId: value })
+            "
+            searchable
+          />
           <UiInput
             label="Password"
             type="password"
@@ -88,12 +118,77 @@
 import UiFormGroup from '@/components/ui/atoms/form-group/UiFormGroup.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
-import { defineProps, defineEmits } from 'vue'
+import UiSearchSelect from '@/components/ui/atoms/select/UiSearchSelect.vue'
+import { defineProps, defineEmits, onMounted } from 'vue'
+// import { computed } from 'vue'
+import { useUserProfileStore } from '@/stores/user-management/profile'
+// import logger from '@/utils/logger'
+import { useEmployeeStore } from '@/stores/user-management/employee'
+
+const userProfileStore = useUserProfileStore()
+
+const employeeStore = useEmployeeStore()
 
 const statusOptions = [
   { label: 'Active', value: 'active' },
   { label: 'Inactive', value: 'inactive' },
 ]
+
+// const profile = ref('')
+
+let profileTimeoutId: ReturnType<typeof setTimeout>
+
+const getProfileAfter = (query: string) => {
+  // 1. Batalkan timer sebelumnya jika user mengetik lagi sebelum waktu habis
+  clearTimeout(profileTimeoutId)
+
+  // 2. Buat timer baru
+  profileTimeoutId = setTimeout(() => {
+    // Logic Anda dijalankan di sini setelah delay selesai
+    if (query.length > 3) {
+      const body = {
+        page: 1,
+        pageSize: 10,
+        searchText: query,
+      }
+      userProfileStore.getAllUserProfiles(body)
+    }
+  }, 500)
+}
+
+const getEmployeAfter = (query: string) => {
+  // 1. Batalkan timer sebelumnya jika user mengetik lagi sebelum waktu habis
+  clearTimeout(profileTimeoutId)
+
+  // 2. Buat timer baru
+  profileTimeoutId = setTimeout(() => {
+    // Logic Anda dijalankan di sini setelah delay selesai
+    if (query.length > 3) {
+      const body = {
+        page: 1,
+        pageSize: 10,
+        searchText: query,
+      }
+      employeeStore.getEmployees(body)
+    }
+  }, 500)
+}
+
+// const filteredProfiles = computed(() => {
+//   if (!userProfileStore.profiles?.items) {
+//     return []
+//   }
+
+//   const searchTerm = searchKeyword.value.toLowerCase()
+
+//   if (searchTerm) {
+//     return userProfileStore.profiles.items.filter((profile) =>
+//       profile.profileName.toLowerCase().includes(searchTerm),
+//     )
+//   }
+
+//   return userProfileStore.profiles.items
+// })
 
 defineProps({
   userPayload: {
@@ -103,6 +198,16 @@ defineProps({
 })
 
 const emit = defineEmits(['update:userPayload'])
+
+onMounted(() => {
+  const body = {
+    page: 1,
+    pageSize: 10,
+    searchText: '',
+  }
+  employeeStore.getEmployees(body)
+  userProfileStore.getAllUserProfiles(body)
+})
 </script>
 
 <style scoped></style>

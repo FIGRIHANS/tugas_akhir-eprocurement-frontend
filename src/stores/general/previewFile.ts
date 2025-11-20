@@ -5,14 +5,10 @@ import type { ApiResponse } from '@/core/type/api'
 
 export const usePreviewFileStore = defineStore('previewFile', () => {
   const getPreview = async (path: string) => {
-    const params = new URLSearchParams(`fullFilePath=${path}`)
-    const response: ApiResponse<Blob> = await generalApi.get(
-      `/api/file/preview`,
-      {
-        params,
-        responseType: 'blob'
-      }
-    )
+    const response: ApiResponse<Blob> = await generalApi.get(`/api/file/preview`, {
+      params: { fullFilePath: path },
+      responseType: 'blob',
+    })
     return response
   }
 
