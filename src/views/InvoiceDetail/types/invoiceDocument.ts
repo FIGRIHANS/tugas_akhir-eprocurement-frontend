@@ -15,6 +15,7 @@ export interface documentDetailTypes {
 export interface documentViewTypes {
   name: string
   path: string
+  url?: string
 }
 
 export interface listFormTypes {
