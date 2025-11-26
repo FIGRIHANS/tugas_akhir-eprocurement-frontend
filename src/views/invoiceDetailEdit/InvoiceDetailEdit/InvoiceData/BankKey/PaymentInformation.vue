@@ -7,12 +7,12 @@
         <span class="text-red-500 ml-[4px]">*</span>
       </label>
       <select
-        v-model="form.bankKey"
+        v-model="form.bankAccountNo"
         class="select"
         :class="{ 'border-danger': form.bankKeyIdError }"
         :disabled="route.query.isSendSap === 'true'"
       >
-        <option v-for="item of bankList" :key="item.bankId" :value="item.bankKey">
+        <option v-for="item of bankList" :key="item.bankId" :value="item.accountNumber">
           {{ item.bankKey + ' - ' + item.accountNumber }}
         </option>
       </select>
@@ -55,10 +55,13 @@ const bankList = ref<PaymentTypes[]>([])
 const vendorList = computed(() => invoiceMasterApi.vendorList)
 
 const checkBank = () => {
+  console.log(form.value, 'isi form')
+
   if (form) {
     const getIndex = vendorList.value.findIndex(
       (item) => item.sapCode === form.value.vendorId.toString(),
     )
+
     if (getIndex !== -1) {
       bankList.value = vendorList.value[getIndex].payment
       if (bankList.value.length === 1) {
@@ -68,11 +71,13 @@ const checkBank = () => {
         form.value.bankAccountNo = bankList.value[0].accountNumber
         form.value.bankCountryCode = bankList.value[0].bankCountryCode
       } else {
-        form.value.bankKey = ''
-        form.value.bankName = ''
-        form.value.beneficiaryName = ''
-        form.value.bankAccountNo = ''
-        form.value.bankCountryCode = ''
+        if (form.value.bankAccountNo === '') {
+          form.value.bankKey = ''
+          form.value.bankName = ''
+          form.value.beneficiaryName = ''
+          form.value.bankAccountNo = ''
+          form.value.bankCountryCode = ''
+        }
       }
     }
   }
@@ -81,6 +86,7 @@ const checkBank = () => {
 watch(
   () => vendorList.value,
   () => {
+    console.log('jalan 2')
     checkBank()
   },
   {
@@ -91,6 +97,8 @@ watch(
 watch(
   () => form?.value,
   () => {
+    console.log('jalan 1')
+
     checkBank()
   },
   {
@@ -100,15 +108,18 @@ watch(
 )
 
 watch(
-  () => form?.value.bankKey,
+  () => form?.value.bankAccountNo,
   () => {
     if (form) {
-      const getIndex = bankList.value.findIndex((item) => item.bankKey === form.value.bankKey)
+      const getIndex = bankList.value.findIndex(
+        (item) => item.accountNumber === form.value.bankAccountNo,
+      )
       if (getIndex !== -1) {
         form.value.bankName = bankList.value[getIndex].bankName
         form.value.beneficiaryName = bankList.value[getIndex].beneficiaryName
-        form.value.bankAccountNo = bankList.value[getIndex].accountNumber
+        // form.value.bankAccountNo = bankList.value[getIndex].accountNumber
         form.value.bankCountryCode = bankList.value[getIndex].bankCountryCode
+        form.value.bankKey = bankList.value[getIndex].bankKey
       }
     }
   },
