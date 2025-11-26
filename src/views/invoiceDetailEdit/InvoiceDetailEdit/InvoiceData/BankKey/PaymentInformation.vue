@@ -55,8 +55,6 @@ const bankList = ref<PaymentTypes[]>([])
 const vendorList = computed(() => invoiceMasterApi.vendorList)
 
 const checkBank = () => {
-  console.log(form.value, 'isi form')
-
   if (form) {
     const getIndex = vendorList.value.findIndex(
       (item) => item.sapCode === form.value.vendorId.toString(),
