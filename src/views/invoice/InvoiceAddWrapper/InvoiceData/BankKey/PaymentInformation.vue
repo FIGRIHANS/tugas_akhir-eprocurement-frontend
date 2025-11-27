@@ -6,40 +6,43 @@
         Bank Key
         <span class="text-red-500 ml-[4px]">*</span>
       </label>
-      <input v-if="form.status !== 0 && form.status !== -1 && form.status !== 5" v-model="form.bankKeyId" class="input" placeholder="" disabled />
-      <select v-else v-model="form.bankKeyId" class="select" :class="{ 'border-danger': form.bankKeyIdError }">
-        <option v-for="item of bankList" :key="item.bankId" :value="item.bankKey">
+      <input
+        v-if="form.status !== 0 && form.status !== -1 && form.status !== 5"
+        v-model="form.bankKeyId"
+        class="input"
+        placeholder=""
+        disabled
+      />
+      <select
+        v-else
+        v-model="form.bankAccountNumber"
+        class="select"
+        :class="{ 'border-danger': form.bankKeyIdError }"
+      >
+        <option v-for="item of bankList" :key="item.bankId" :value="item.accountNumber">
           {{ item.bankKey + ' - ' + item.accountNumber }}
         </option>
       </select>
     </div>
     <!-- Bank Name -->
     <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-      <label class="form-label max-w-32">
-        Bank Name
-      </label>
-      <input v-model="form.bankNameId" class="input" placeholder="" disabled/>
+      <label class="form-label max-w-32"> Bank Name </label>
+      <input v-model="form.bankNameId" class="input" placeholder="" disabled />
     </div>
     <!-- Beneficiary Name -->
     <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-      <label class="form-label max-w-32">
-        Beneficiary Name
-      </label>
-      <input v-model="form.beneficiaryName" class="input" placeholder="" disabled/>
+      <label class="form-label max-w-32"> Beneficiary Name </label>
+      <input v-model="form.beneficiaryName" class="input" placeholder="" disabled />
     </div>
     <!-- Bank Account Number -->
     <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-      <label class="form-label max-w-32">
-        Bank Account Number
-      </label>
-      <input v-model="form.bankAccountNumber" class="input" placeholder="" disabled/>
+      <label class="form-label max-w-32"> Bank Account Number </label>
+      <input v-model="form.bankAccountNumber" class="input" placeholder="" disabled />
     </div>
     <!-- Bank Country -->
     <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
-      <label class="form-label max-w-32">
-        Bank Country
-      </label>
-      <input v-model="form.bankCountryCode" class="input" placeholder="" disabled/>
+      <label class="form-label max-w-32"> Bank Country </label>
+      <input v-model="form.bankCountryCode" class="input" placeholder="" disabled />
     </div>
   </div>
 </template>
@@ -88,22 +91,27 @@ watch(
   () => {
     checkBank()
     setBank()
-  }
+  },
 )
 
 watch(
-  () => form?.bankKeyId,
+  () => form?.bankAccountNumber,
   () => {
     if (form) {
-      const getIndex = bankList.value.findIndex((item) => item.bankKey === form.bankKeyId)
+      console.log(bankList.value, 'masuk')
+
+      const getIndex = bankList.value.findIndex(
+        (item) => item.accountNumber === form.bankAccountNumber,
+      )
       if (getIndex !== -1) {
         form.bankNameId = bankList.value[getIndex].bankName
         form.beneficiaryName = bankList.value[getIndex].beneficiaryName
-        form.bankAccountNumber = bankList.value[getIndex].accountNumber
+        // form.bankAccountNumber = bankList.value[getIndex].accountNumber
         form.bankCountryCode = bankList.value[getIndex].bankCountryCode
+        form.bankKeyId = bankList.value[getIndex].bankKey
       }
     }
-  }
+  },
 )
 
 onMounted(() => {
