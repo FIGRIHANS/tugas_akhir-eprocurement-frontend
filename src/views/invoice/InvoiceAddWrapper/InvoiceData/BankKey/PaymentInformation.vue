@@ -98,8 +98,6 @@ watch(
   () => form?.bankAccountNumber,
   () => {
     if (form) {
-      console.log(bankList.value, 'masuk')
-
       const getIndex = bankList.value.findIndex(
         (item) => item.accountNumber === form.bankAccountNumber,
       )
