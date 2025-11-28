@@ -143,18 +143,36 @@ const filteredSidebarMenu = computed(() => {
         })
     }
 
-    if (userStore.userData?.profile?.vendorCode) {
+    if (userStore.userData?.profile?.vendorCode && userStore.userData?.profile?.profileId === 3200) {
       return sidebarMenu
         .filter(
           (menu) =>
-            menu.id !== 'vendor-management' && menu.id !== 'userManagement' && menu.id !== 'tender',
+            menu.id === 'dashboard' || menu.id === 'e-invoice',
         )
         .map((menu) => {
           return {
             ...menu,
             child: menu.child
               ? menu.child.filter(
-                  (child) => child.id !== 'invoice-verification' && child.id !== 'invoice-approval',
+                  (child) => child.id === 'invoice-list-non-po',
+                )
+              : [],
+          }
+        })
+    }
+
+    if (userStore.userData?.profile?.vendorCode) {
+      return sidebarMenu
+        .filter(
+          (menu) =>
+            menu.id === 'dashboard' || menu.id === 'e-invoice',
+        )
+        .map((menu) => {
+          return {
+            ...menu,
+            child: menu.child
+              ? menu.child.filter(
+                  (child) => child.id === 'invoice-list',
                 )
               : [],
           }
@@ -187,6 +205,7 @@ const filteredSidebarMenu = computed(() => {
           child: menu.child ? menu.child.filter((child) => child.id !== 'vendor-blacklist') : [],
         }))
     }
+
 
     // non po
     if (
