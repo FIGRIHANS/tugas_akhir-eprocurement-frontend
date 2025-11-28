@@ -1,12 +1,19 @@
 <template>
   <div class="flex flex-col gap-[16px]">
     <p class="text-base font-semibold">Costs / Expenses</p>
-    <button v-if="form?.status === 0 || form?.status === -1 || form?.status === 5" class="btn btn-outline btn-primary w-fit" @click="addNew">
+    <button
+      v-if="form?.status === 0 || form?.status === -1 || form?.status === 5"
+      class="btn btn-outline btn-primary w-fit"
+      @click="addNew"
+    >
       <i class="ki-duotone ki-plus-circle"></i>
       Add Costs / Expenses
     </button>
     <div v-if="form" class="overflow-x-auto cost__table">
-      <table class="table table-xs table-border" :class="{ 'border-danger': form?.invoiceItemError }">
+      <table
+        class="table table-xs table-border"
+        :class="{ 'border-danger': form?.invoiceItemError }"
+      >
         <thead>
           <tr>
             <th
@@ -18,7 +25,7 @@
                 'cost__field-base--item-amount': item.toLowerCase() === 'item amount',
                 'cost__field-base--tax': item.toLowerCase() === 'tax code',
                 'cost__field-base--cost': item.toLowerCase() === 'cost center',
-                'cost__field-base--description': item.toLowerCase() === 'description'
+                'cost__field-base--description': item.toLowerCase() === 'description',
               }"
             >
               {{ item }}
@@ -32,11 +39,20 @@
           <template v-else>
             <tr v-for="(item, index) in form.invoiceItem" :key="index" class="cost__field-items">
               <td class="flex items-center justify-around gap-[8px]">
-                <button v-if="form.status === 0 || form.status === -1 || form.status === 5" class="btn btn-icon btn-primary" :disabled="checkIsEdit() && !item.isEdit" @click="item.isEdit = !item.isEdit">
+                <button
+                  v-if="form.status === 0 || form.status === -1 || form.status === 5"
+                  class="btn btn-icon btn-primary"
+                  :disabled="checkIsEdit() && !item.isEdit"
+                  @click="item.isEdit = !item.isEdit"
+                >
                   <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>
                   <i v-else class="ki-duotone ki-check-circle"></i>
                 </button>
-                <button v-if="form.status === 0 || form.status === -1 || form.status === 5" class="btn btn-icon btn-outline btn-danger" @click="deleteItem(index)">
+                <button
+                  v-if="form.status === 0 || form.status === -1 || form.status === 5"
+                  class="btn btn-icon btn-outline btn-danger"
+                  @click="deleteItem(index)"
+                >
                   <i class="ki-duotone ki-cross-circle"></i>
                 </button>
               </td>
@@ -54,8 +70,19 @@
                 ></v-select>
               </td>
               <td>
-                <span v-if="!item.isEdit">{{ form?.currency === 'IDR' ? useFormatIdr(item.itemAmount) : useFormatUsd(item.itemAmount) || '-' }}</span>
-                <input v-else v-model="item.itemAmount" class="input" type="number" placeholder="" @change="item.whtBaseAmount = item.itemAmount.toString()"/>
+                <span v-if="!item.isEdit">{{
+                  form?.currency === 'IDR'
+                    ? useFormatIdr(item.itemAmount)
+                    : useFormatUsd(item.itemAmount) || '-'
+                }}</span>
+                <input
+                  v-else
+                  v-model="item.itemAmount"
+                  class="input"
+                  type="number"
+                  placeholder=""
+                  @change="item.whtBaseAmount = item.itemAmount.toString()"
+                />
               </td>
               <td>
                 <span v-if="!item.isEdit">{{ item.itemText || '-' }}</span>
@@ -72,12 +99,8 @@
               <td v-if="!isPettyCash">
                 <span v-if="!item.isEdit">{{ getDebitCreditName(item.debitCredit) || '-' }}</span>
                 <select v-else v-model="item.debitCredit" class="select" placeholder="">
-                  <option value="D">
-                    Debit
-                  </option>
-                  <option value="K">
-                    Credit
-                  </option>
+                  <option value="D">Debit</option>
+                  <option value="K">Credit</option>
                 </select>
               </td>
               <td v-if="!isPettyCash">
@@ -94,7 +117,11 @@
                 ></v-select>
               </td>
               <td>
-                <span>{{ form?.currency === 'IDR' ? useFormatIdr(item.vatAmount) : useFormatUsd(item.vatAmount) || '-' }}</span>
+                <span>{{
+                  form?.currency === 'IDR'
+                    ? useFormatIdr(item.vatAmount)
+                    : useFormatUsd(item.vatAmount) || '-'
+                }}</span>
               </td>
               <td v-if="!isPettyCash">
                 <span v-if="!item.isEdit">{{ getCostCenterName(item.costCenter) || '-' }}</span>
@@ -122,10 +149,18 @@
                 <span>{{ item.whtCode || '-' }}</span>
               </td>
               <td v-if="!isPettyCash">
-                <span>{{ form?.currency === 'IDR' ? useFormatIdr(item.whtBaseAmount) : useFormatUsd(item.whtBaseAmount) || '-' }}</span>
+                <span>{{
+                  form?.currency === 'IDR'
+                    ? useFormatIdr(item.whtBaseAmount)
+                    : useFormatUsd(item.whtBaseAmount) || '-'
+                }}</span>
               </td>
               <td v-if="!isPettyCash">
-                <span>{{ form?.currency === 'IDR' ? useFormatIdr(item.whtAmount) : useFormatUsd(item.whtAmount) || '-' }}</span>
+                <span>{{
+                  form?.currency === 'IDR'
+                    ? useFormatIdr(item.whtAmount)
+                    : useFormatUsd(item.whtAmount) || '-'
+                }}</span>
               </td>
             </tr>
           </template>
@@ -150,12 +185,7 @@ const form = inject<formTypes>('form')
 const isPettyCash = computed(() => form?.invoiceType === '5')
 
 const columns = computed(() => {
-  const baseColumns = [
-    'Action',
-    'Activity / Expense',
-    'Item Amount',
-    'Item Text'
-  ]
+  const baseColumns = ['Action', 'Activity / Expense', 'Item Amount', 'Item Text']
 
   if (!isPettyCash.value) {
     baseColumns.push('Debit/Credit')
@@ -198,7 +228,7 @@ const addNew = () => {
       debitCredit: 'D',
       taxCode: '',
       vatAmount: 0,
-        costCenter: isPettyCash.value ? '' : '',
+      costCenter: isPettyCash.value ? '' : '',
       profitCenter: '',
       assignment: '',
       whtType: '',
@@ -206,8 +236,8 @@ const addNew = () => {
       whtBaseAmount: '',
       whtAmount: '',
       whtCodeList: [],
-      isEdit: false
-        ,isTextLimitExceeded: false
+      isEdit: false,
+      isTextLimitExceeded: false,
     }
     form.invoiceItem.push(data)
   }
@@ -222,7 +252,8 @@ const deleteItem = (index: number) => {
 
 const getActivityName = (id: number) => {
   const getIndex = listActivity.value.findIndex((item) => item.id === id)
-  if (getIndex !== -1) return `${listActivity.value[getIndex].code} - ${listActivity.value[getIndex].name}`
+  if (getIndex !== -1)
+    return `${listActivity.value[getIndex].code} - ${listActivity.value[getIndex].name}`
 }
 
 const getDebitCreditName = (code: string) => {
@@ -236,7 +267,7 @@ const getPercentTax = (code: string) => {
   const getIndex = listTaxCalculation.value.findIndex((item) => item.code === code)
   if (getIndex !== -1) {
     const splitName = listTaxCalculation.value[getIndex].name.split(' - ')
-    return parseFloat(splitName[1].replace(',', '.').replace('%','')) / 100
+    return parseFloat(splitName[1].replace(',', '.').replace('%', '')) / 100
   }
 }
 
@@ -296,8 +327,8 @@ watch(
   },
   {
     deep: true,
-    immediate: true
-  }
+    immediate: true,
+  },
 )
 
 watch(
@@ -306,22 +337,35 @@ watch(
     if (form?.companyCode) invoiceMasterApi.getCostCenter(form?.companyCode || '')
   },
   {
-    immediate: true
-  }
+    immediate: true,
+  },
+)
+
+watch(
+  () => form,
+  () => {
+    if (form) {
+      if (form.companyCode) invoiceMasterApi.getActivity(form.companyCode)
+    }
+  },
+  {
+    deep: true,
+    immediate: true,
+  },
 )
 
 watch(
   () => form?.invoiceType,
   () => {
     if (form && form.invoiceType === '5') {
-      form.invoiceItem.forEach(item => {
+      form.invoiceItem.forEach((item) => {
         item.costCenter = ''
       })
     }
   },
   {
-    immediate: true
-  }
+    immediate: true,
+  },
 )
 </script>
 

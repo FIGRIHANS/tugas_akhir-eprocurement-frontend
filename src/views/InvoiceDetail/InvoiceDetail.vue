@@ -46,9 +46,34 @@
           <i class="ki-duotone ki-cross-circle"></i>
           Reject
         </button>
-        <button class="btn btn-primary" :disabled="isLoading" @click="goVerif">
-          <i class="ki-duotone ki-check-circle"></i>
-          {{ route.query.type === '1' ? 'Verify' : 'Approve' }}
+        <button
+          class="btn btn-primary flex items-center gap-2"
+          :disabled="isLoading"
+          @click="goVerif"
+        >
+          <template v-if="isLoading">
+            <svg class="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+                fill="none"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+              ></path>
+            </svg>
+            Processing...
+          </template>
+          <template v-else>
+            <i class="ki-duotone ki-check-circle"></i>
+            {{ route.query.type === '1' ? 'Verify' : 'Approve' }}
+          </template>
         </button>
       </div>
     </div>

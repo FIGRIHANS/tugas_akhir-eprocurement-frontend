@@ -50,6 +50,12 @@ export const login = {
         'Kami telah mengirimkan link untuk membuat password baru ke alamat email Anda, silakan buka email Anda dan ikuti petunjuk di email Anda!',
       backButton: 'Kembali',
     },
+    failed: {
+      title: 'Gagal Mengirim Email',
+      message:
+        'Email tidak ditemukan, silakan periksa email yang Anda gunakan untuk registrasi pertama.',
+      backButton: 'Kembali',
+    },
   },
   reset: {
     title: 'Masukkan password baru',
@@ -75,6 +81,11 @@ export const login = {
       title: 'Berhasil!',
       message: 'Anda baru saja mengubah password, silakan login kembali menggunakan password baru!',
       loginButton: 'login',
+    },
+    failed: {
+      title: 'Gagal Mengubah Password',
+      message: 'Terjadi kesalahan saat mengubah password, silakan coba lagi nanti.',
+      loginButton: 'Kembali',
     },
   },
 }

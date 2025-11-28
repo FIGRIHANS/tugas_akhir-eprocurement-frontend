@@ -203,6 +203,18 @@
       </table>
     </div>
   </div>
+  <ModalConfirmation
+    :open="showDeleteModal"
+    id="other-doc-upload-error"
+    type="confirm"
+    title="Confirmation"
+    text="Apakah Anda yakin akan menghapus item berikut ?"
+    cancelButtonText="Batal"
+    submitButtonText="Hapus"
+    :submit="confirmDelete"
+    static
+    :cancel="closeDeleteModal"
+  />
 </template>
 
 <script lang="ts" setup>
@@ -215,6 +227,7 @@ import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification
 import { useLoginStore } from '@/stores/views/login'
 import { useRoute } from 'vue-router'
 import moment from 'moment'
+import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 
 const route = useRoute()
 const invoiceMasterApi = useInvoiceMasterDataStore()
@@ -253,6 +266,10 @@ const formEdit = reactive({
   isItemAmountError: false,
   isDebitCreditError: false,
 })
+
+const showDeleteModal = ref(false)
+const deleteIndex = ref<number | null>(null)
+const deleteItem = ref<itemsCostType | null>(null)
 
 const listActivity = computed(() => invoiceMasterApi.activityList)
 const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
@@ -361,18 +378,48 @@ const goEdit = (item: itemsCostType) => {
   }
 }
 
+// const resetItem = (item: itemsCostType, index: number) => {
+//   if (item.isEdit) {
+//     item.isEdit = !item.isEdit
+//     resetFormEdit()
+//   } else {
+//     if (form) {
+//       if (form.value.additionalCosts[index].id !== 0) {
+//         verificationApi.additionalCostTempDelete?.push(form.value.additionalCosts[index].id)
+//       }
+//       form.value.additionalCosts.splice(index, 1)
+//     }
+//   }
+// }
+
 const resetItem = (item: itemsCostType, index: number) => {
   if (item.isEdit) {
     item.isEdit = !item.isEdit
     resetFormEdit()
-  } else {
-    if (form) {
-      if (form.value.additionalCosts[index].id !== 0) {
-        verificationApi.additionalCostTempDelete?.push(form.value.additionalCosts[index].id)
-      }
-      form.value.additionalCosts.splice(index, 1)
-    }
+    return
   }
+
+  // Simpan item yang akan dihapus
+  deleteItem.value = item
+  deleteIndex.value = index
+  showDeleteModal.value = true
+}
+
+const confirmDelete = () => {
+  if (deleteIndex.value !== null && form) {
+    const index = deleteIndex.value
+    if (form.value.invoiceItem[index].id !== 0) {
+      verificationApi.costExpenseTempDelete?.push(form.value.invoiceItem[index].id)
+    }
+    form.value.invoiceItem.splice(index, 1)
+  }
+  closeDeleteModal()
+}
+
+const closeDeleteModal = () => {
+  showDeleteModal.value = false
+  deleteIndex.value = null
+  deleteItem.value = null
 }
 
 const callWhtCode = (data: itemsCostType) => {
@@ -454,9 +501,6 @@ const getWhtCodeName = (code: string, data: itemsCostType) => {
 }
 
 const setWhtAmount = (data: itemsCostType) => {
-  // const pph21whtAmmount = 0
-  // console.log(formEdit.whtCode, 'data')
-
   if (formEdit.whtCode) {
     const whtlist = data.whtCodeList || []
     const indexWht = whtlist.findIndex((item) => item.whtCode === formEdit.whtCode)
@@ -471,12 +515,14 @@ const setWhtAmount = (data: itemsCostType) => {
   if (formEdit.whtCode === 'A1' || formEdit.whtCode === 'Z1') {
     verificationApi
       .getpph21({
-        startDate: moment().format('YYYY-MM-DD'),
-        endDate: moment().format('YYYY-MM-DD'),
         vendorId: form.value.vendorId,
+        invoiceDate: moment().format('YYYY-MM-DD'),
+        brutoAmount: formEdit.whtBaseAmount,
+        isNpwp: form.value.npwp ? 1 : 0,
+        useDpp: 1,
       })
       .then((res) => {
-        formEdit.whtAmount = res.result.content.pph21Summaries[0].pPh21Dipotong.replace(/\./g, '')
+        formEdit.whtAmount = res.result.content.pPh21Current
       })
   }
 }

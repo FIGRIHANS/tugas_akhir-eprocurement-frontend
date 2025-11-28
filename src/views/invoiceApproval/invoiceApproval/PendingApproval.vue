@@ -139,7 +139,9 @@
                   </button>
                 </td>
                 <td>{{ parent.invoiceNo || '-' }}</td>
-                <td>{{ parent.notes || '-' }}</td>
+                <td class="max-w-[200px] truncate" :title="parent.notes">
+                  {{ parent.notes || '-' }}
+                </td>
                 <td>
                   <span class="badge badge-outline" :class="colorBadge(parent.statusCode)">
                     {{ parent.statusName }}
@@ -342,8 +344,6 @@ const openDetailInvoice = (invoiceId: string) => {
 const openDetailInvoiceEdit = (invoiceId: string) => {
   const isSendSap = ref(false)
   if (filterForm.status === 7) {
-    console.log('masuk')
-
     isSendSap.value = true
   }
   router.push({

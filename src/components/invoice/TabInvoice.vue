@@ -3,11 +3,9 @@
     <button
       class="tab pl-[4px]"
       :class="[
-        activeTab === 'data' ? 'active' : '',
-        canClickData ? 'cursor-pointer' : 'cursor-default'
+        activeTab === 'data' ? 'active' : ''
       ]"
-      :disabled="!canClickData"
-      @click="canClickData && handleTabClick('data')"
+      disabled
     >
       Invoice Data
     </button>
@@ -15,11 +13,9 @@
     <button
       class="tab pl-[4px]"
       :class="[
-        activeTab === 'information' ? 'active' : '',
-        canClickInformation ? 'cursor-pointer' : 'cursor-default opacity-50'
+        activeTab === 'information' ? 'active' : ''
       ]"
-      :disabled="!canClickInformation"
-      @click="canClickInformation && handleTabClick('information')"
+      disabled
     >
       Invoice Information
     </button>
@@ -28,11 +24,9 @@
       v-if="withPreview"
       class="tab pl-[4px]"
       :class="[
-        activeTab === 'preview' ? 'active' : '',
-        canClickPreview ? 'cursor-pointer' : 'cursor-default opacity-50'
+        activeTab === 'preview' ? 'active' : ''
       ]"
-      :disabled="!canClickPreview"
-      @click="canClickPreview && handleTabClick('preview')"
+      disabled
     >
       Invoice Preview
     </button>
@@ -55,12 +49,4 @@ withDefaults(
     canClickPreview: false
   }
 )
-
-const emit = defineEmits<{
-  (e: 'change-tab', tab: string): void
-}>()
-
-const handleTabClick = (tab: string) => {
-  emit('change-tab', tab)
-}
 </script>

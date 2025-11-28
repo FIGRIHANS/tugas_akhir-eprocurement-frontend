@@ -4,14 +4,22 @@
       class="card-header gap-[8px]"
       :class="{
         'px-[16px] py-[22px] justify-start': !isNonPo,
-        'px-[20px] py-[8px] justify-center': isNonPo
+        'px-[20px] py-[8px] justify-center': isNonPo,
       }"
     >
       <div v-if="isNonPo" class="flex-1 flex gap-4">
-        <button class="btn btn-primary btn-clear flex-1 justify-center" :class="{ 'active': isTabActive === 'payment' }" @click="isTabActive = 'payment'">
+        <button
+          class="btn btn-primary btn-clear flex-1 justify-center"
+          :class="{ active: isTabActive === 'payment' }"
+          @click="isTabActive = 'payment'"
+        >
           Payment Information
         </button>
-        <button class="btn btn-primary btn-clear flex-1 justify-center" :class="{ 'active': isTabActive === 'alternative' }" @click="isTabActive = 'alternative'">
+        <button
+          class="btn btn-primary btn-clear flex-1 justify-center"
+          :class="{ active: isTabActive === 'alternative' }"
+          @click="isTabActive = 'alternative'"
+        >
           Alternative Payment
         </button>
       </div>
@@ -29,7 +37,16 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, inject, defineAsyncComponent, onMounted, type Ref, type Component } from 'vue'
+import {
+  ref,
+  computed,
+  watch,
+  inject,
+  defineAsyncComponent,
+  onMounted,
+  type Ref,
+  type Component,
+} from 'vue'
 import type { formTypes } from '../../types/invoiceDetailEdit'
 import { useRoute } from 'vue-router'
 
@@ -44,7 +61,7 @@ const isNonPo = ref<boolean>(false)
 const contentComponent = computed(() => {
   const components = {
     payment: PaymentInformation,
-    alternative: AlternativePayment
+    alternative: AlternativePayment,
   } as { [key: string]: Component }
 
   return components[isTabActive.value]
@@ -59,12 +76,13 @@ watch(
       form.value.bankAccountNumberAlternativeError ||
       form.value.bankKeyAlternativeError ||
       form.value.emailAlternativeError
-    ) isTabActive.value = 'alternative'
+    )
+      isTabActive.value = 'alternative'
   },
   {
     deep: true,
-    immediate: true
-  }
+    immediate: true,
+  },
 )
 
 onMounted(() => {

@@ -2,7 +2,9 @@
   <div class="flex flex-col gap-[16px]">
     <p class="text-base font-semibold">Costs / Expenses</p>
     <button
-      v-if="route.query.isSendSap !== 'true' || checkApprovalNonPoProc() || checkApprovalNonPoCcAdmin()"
+      v-if="
+        route.query.isSendSap !== 'true' || checkApprovalNonPoProc() || checkApprovalNonPoCcAdmin()
+      "
       class="btn btn-outline btn-primary w-fit"
       @click="addNew"
     >
@@ -35,7 +37,11 @@
             <td class="flex items-center justify-around gap-[8px]">
               <button
                 class="btn btn-outline btn-icon btn-primary"
-                :disabled="(checkIsEdit() && !item.isEdit) || route.query.isSendSap === 'true' || checkApprovalNonPoCcAdmin()"
+                :disabled="
+                  (checkIsEdit() && !item.isEdit) ||
+                  route.query.isSendSap === 'true' ||
+                  checkApprovalNonPoCcAdmin()
+                "
                 @click="goEdit(item)"
               >
                 <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>
@@ -44,7 +50,11 @@
               <button
                 class="btn btn-icon btn-outline btn-danger"
                 @click="resetItem(item, index)"
-                :disabled="route.query.isSendSap === 'true' || checkApprovalNonPoProc() || checkApprovalNonPoCcAdmin()"
+                :disabled="
+                  route.query.isSendSap === 'true' ||
+                  checkApprovalNonPoProc() ||
+                  checkApprovalNonPoCcAdmin()
+                "
               >
                 <i class="ki-duotone ki-cross-circle"></i>
               </button>
@@ -84,7 +94,15 @@
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.itemText || '-' }}</span>
-              <input v-else v-model="formEdit.itemText" class="input" type="text" placeholder="" maxlength="50" :disabled="checkApprovalNonPoProc()" />
+              <input
+                v-else
+                v-model="formEdit.itemText"
+                class="input"
+                type="text"
+                placeholder=""
+                maxlength="50"
+                :disabled="checkApprovalNonPoProc()"
+              />
             </td>
             <td v-if="!checkNonPoPettyCash()">
               <span v-if="!item.isEdit">{{ getDebitCreditName(item.debitCredit) || '-' }}</span>
@@ -137,7 +155,13 @@
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.profitCenter || '-' }}</span>
-              <select v-else v-model="formEdit.profitCenter" class="select" placeholder="" :disabled="checkApprovalNonPoProc()">
+              <select
+                v-else
+                v-model="formEdit.profitCenter"
+                class="select"
+                placeholder=""
+                :disabled="checkApprovalNonPoProc()"
+              >
                 <option v-for="item of profitCenter" :key="item.code" :value="item.code">
                   {{ item.name }}
                 </option>
@@ -145,7 +169,13 @@
             </td>
             <td>
               <span v-if="!item.isEdit">{{ item.assignment || '-' }}</span>
-              <input v-else v-model="formEdit.assignment" class="input" placeholder="" :disabled="checkApprovalNonPoProc()" />
+              <input
+                v-else
+                v-model="formEdit.assignment"
+                class="input"
+                placeholder=""
+                :disabled="checkApprovalNonPoProc()"
+              />
             </td>
             <td v-if="!checkNonPoPettyCash()">
               <span v-if="!item.isEdit">{{ getWhtTypeName(item.whtType) }}</span>
@@ -207,6 +237,19 @@
       </table>
     </div>
   </div>
+
+  <ModalConfirmation
+    :open="showDeleteModal"
+    id="other-doc-upload-error"
+    type="confirm"
+    title="Confirmation"
+    text="Apakah Anda yakin akan menghapus item berikut ?"
+    cancelButtonText="Batal"
+    submitButtonText="Hapus"
+    :submit="confirmDelete"
+    static
+    :cancel="closeDeleteModal"
+  />
 </template>
 
 <script lang="ts" setup>
@@ -218,6 +261,8 @@ import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 import { useLoginStore } from '@/stores/views/login'
+import moment from 'moment'
+import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const verificationApi = useInvoiceVerificationStore()
@@ -257,7 +302,7 @@ const formEdit = reactive({
   isActivityError: false,
   isItemAmountError: false,
   isDebitCreditError: false,
-  isTaxCodeError: false
+  isTaxCodeError: false,
 })
 
 const listActivity = computed(() => invoiceMasterApi.activityList)
@@ -267,6 +312,10 @@ const profitCenter = computed(() => invoiceMasterApi.profilCenterList)
 const whtTypeList = computed(() => invoiceMasterApi.whtTypeList)
 const whtCodeList = computed(() => invoiceMasterApi.whtCodeList)
 const userData = computed(() => invoiceLoginApi.userData)
+
+const showDeleteModal = ref(false)
+const deleteIndex = ref<number | null>(null)
+const deleteItem = ref<invoiceItemTypes | null>(null)
 
 const checkIsEdit = () => {
   const result = form?.value.invoiceItem.findIndex((item) => item.isEdit)
@@ -279,10 +328,6 @@ const checkPoPib = () => {
 
 const checkIsNonPo = () => {
   return route.query.invoiceType === 'no_po'
-}
-
-const checkNonPoCc = () => {
-  return form.value.invoiceTypeCode === 2
 }
 
 const checkNonPoPettyCash = () => {
@@ -363,7 +408,8 @@ const goEdit = (item: invoiceItemTypes) => {
     formEdit.isItemAmountError ||
     formEdit.isDebitCreditError ||
     formEdit.isTaxCodeError
-  ) return
+  )
+    return
   item.isEdit = !item.isEdit
 
   if (item.isEdit) {
@@ -401,18 +447,54 @@ const goEdit = (item: invoiceItemTypes) => {
   }
 }
 
+// const resetItem = (item: invoiceItemTypes, index: number) => {
+//   if (item.isEdit) {
+//     item.isEdit = !item.isEdit
+//     resetFormEdit()
+//     return
+//   }
+
+//   // ⛔ Tampilkan popup konfirmasi sebelum delete
+//   const ask = confirm('Are you sure want to delete this item?')
+//   if (!ask) return
+
+//   // Jika user klik OK → lanjutkan delete
+//   if (form) {
+//     if (form.value.invoiceItem[index].id !== 0) {
+//       verificationApi.costExpenseTempDelete?.push(form.value.invoiceItem[index].id)
+//     }
+//     form.value.invoiceItem.splice(index, 1)
+//   }
+// }
+
 const resetItem = (item: invoiceItemTypes, index: number) => {
   if (item.isEdit) {
     item.isEdit = !item.isEdit
     resetFormEdit()
-  } else {
-    if (form) {
-      if (form.value.invoiceItem[index].id !== 0) {
-        verificationApi.costExpenseTempDelete?.push(form.value.invoiceItem[index].id)
-      }
-      form.value.invoiceItem.splice(index, 1)
-    }
+    return
   }
+
+  // Simpan item yang akan dihapus
+  deleteItem.value = item
+  deleteIndex.value = index
+  showDeleteModal.value = true
+}
+
+const confirmDelete = () => {
+  if (deleteIndex.value !== null && form) {
+    const index = deleteIndex.value
+    if (form.value.invoiceItem[index].id !== 0) {
+      verificationApi.costExpenseTempDelete?.push(form.value.invoiceItem[index].id)
+    }
+    form.value.invoiceItem.splice(index, 1)
+  }
+  closeDeleteModal()
+}
+
+const closeDeleteModal = () => {
+  showDeleteModal.value = false
+  deleteIndex.value = null
+  deleteItem.value = null
 }
 
 const callWhtCode = (data: invoiceItemTypes) => {
@@ -527,6 +609,20 @@ const setWhtAmount = (data: invoiceItemTypes) => {
   } else {
     formEdit.whtAmount = 0
   }
+
+  if (formEdit.whtCode === 'A1' || formEdit.whtCode === 'Z1') {
+    verificationApi
+      .getpph21({
+        vendorId: form.value.vendorId,
+        invoiceDate: moment().format('YYYY-MM-DD'),
+        brutoAmount: formEdit.whtBaseAmount,
+        isNpwp: form.value.npwp ? 1 : 0,
+        useDpp: 1,
+      })
+      .then((res) => {
+        formEdit.whtAmount = res.result.content.pPh21Current
+      })
+  }
 }
 
 watch(
@@ -551,14 +647,14 @@ onMounted(() => {
 
   if (checkNonPoPettyCash()) {
     columns.value = [
-    'Action',
-    'Activity / Expense',
-    'Item Amount',
-    'Item Text',
-    'Tax Code',
-    'VAT Amount',
-    'Profit Center',
-    'Assignment'
+      'Action',
+      'Activity / Expense',
+      'Item Amount',
+      'Item Text',
+      'Tax Code',
+      'VAT Amount',
+      'Profit Center',
+      'Assignment',
     ]
   }
 })

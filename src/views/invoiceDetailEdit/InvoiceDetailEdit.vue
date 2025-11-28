@@ -2,12 +2,7 @@
   <div>
     <Breadcrumb title="Add Invoice" :routes="routes" />
     <StepperStatus :active-name="activeStep" />
-    <TabInvoice
-      :active-tab="tabNow"
-      :with-preview="false"
-      @change-tab="setTab"
-      class="-mx-[24px]"
-    />
+    <TabInvoice :active-tab="tabNow" :with-preview="false" class="-mx-[24px]" />
     <div>
       <Transition mode="out-in">
         <component :is="contentComponent" />
@@ -433,8 +428,8 @@ const goNext = () => {
     const data = {
       ...form.value,
       costExpenses: form.value.invoiceItem,
-      postingDate: moment(form.value.postingDate).toISOString(),
-      estimatedPaymentDate: moment(form.value.estimatedPaymentDate).toISOString(),
+      postingDate: moment(form.value.postingDate).format('YYYY-MM-DD'),
+      estimatedPaymentDate: moment(form.value.estimatedPaymentDate).format('YYYY-MM-DD'),
 
       idAlternative: form.value.idAlternative,
       name: form.value.nameAlternative,
@@ -671,6 +666,7 @@ const setDataDefault = () => {
   const invoiceType = route.query.invoiceType
 
   const data = invoiceType === 'no_po' ? detailInvoiceNonPO.value : detailInvoice.value
+
   const resultPoGr: itemsPoGrType[] = []
   const resultAdditional: itemsCostType[] = []
   const resultCostExpense: invoiceItemTypes[] = []

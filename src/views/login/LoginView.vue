@@ -35,14 +35,9 @@
         </div>
       </div>
     </div>
-
     <!-- left -->
     <div class="flex-1 flex flex-col gap-[8px] relative">
-      <div
-        v-if="checkSelected()"
-        class="absolute flex items-center gap-[2px] cursor-pointer"
-        @click="goBack"
-      >
+      <div class="absolute flex items-center gap-[2px] cursor-pointer" @click="goBack">
         <i class="ki-filled ki-left text-gray-500"></i>
         {{ $t('login.back') }}
       </div>
@@ -79,7 +74,9 @@ import { useLoginStore } from '@/stores/views/login'
 import loginView from '@/assets/svg/LoginImage.vue'
 import logoLogin from '@/assets/svg/LogoLogin.vue'
 import IconEN from '@/components/icons/IconEN.vue'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const BranchLogin = defineAsyncComponent(() => import('./LoginView/BranchLogin.vue'))
 const LoginPage = defineAsyncComponent(() => import('./LoginView/LoginPage.vue'))
 const ForgotPasswordPage = defineAsyncComponent(() => import('./LoginView/ForgotPassword.vue'))
@@ -107,10 +104,21 @@ const checkForgot = () => {
 }
 
 const goBack = () => {
-  if (loginApi.selectedLogin === 'forgot') {
-    return (loginApi.selectedLogin = 'vendor')
+  if (checkSelected()) {
+    if (loginApi.selectedLogin === 'forgot') {
+      if (loginApi.loginRole === 'vendor') {
+        return (loginApi.selectedLogin = 'vendor')
+      } else {
+        return (loginApi.selectedLogin = 'admin')
+      }
+    }
+
+    loginApi.selectedLogin = ''
+  } else {
+    router.push({
+      name: 'landing-page',
+    })
   }
-  loginApi.selectedLogin = ''
 }
 
 onUnmounted(() => {

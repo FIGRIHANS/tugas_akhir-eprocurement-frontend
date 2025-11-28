@@ -111,11 +111,13 @@
                 <td>
                   {{
                     parent.invoiceDate
-                      ? moment(parent.invoiceDate).format('YYYY/MM/DD HH:mm:ss')
+                      ? moment.utc(parent.invoiceDate).local().format('YYYY/MM/DD HH:mm:ss ')
                       : '-'
                   }}
                 </td>
-                <td>{{ parent.notes || '-' }}</td>
+                <td class="max-w-[200px] truncate" :title="parent.notes">
+                  {{ parent.notes || '-' }}
+                </td>
               </tr>
               <tr v-show="parent.isOpenChild">
                 <td></td>
