@@ -9,7 +9,12 @@
       </div>
       <div class="modal-body p-[0px] pb-[16px]">
         <div class="border border-gray-200 text-center text-lg font-semibold text-gray-700">
-          No Invoice : {{ props.type === 'po' ? invoiceDetail?.header?.invoiceNo : invoiceDetail?.header?.invoiceNo }}
+          No Invoice :
+          {{
+            props.type === 'po'
+              ? invoiceDetail?.header?.invoiceNo
+              : invoiceDetail?.header?.invoiceNo
+          }}
         </div>
         <table class="table align-middle text-gray-700 font-medium text-sm">
           <thead>
@@ -21,7 +26,11 @@
           </thead>
           <tbody>
             <template v-if="invoiceDetail?.workflow?.length">
-              <tr v-for="(item, index) in invoiceDetail.workflow" :key="index" class="text-sm font-normal">
+              <tr
+                v-for="(item, index) in invoiceDetail.workflow"
+                :key="index"
+                class="text-sm font-normal"
+              >
                 <td>{{ index + 1 }}</td>
                 <td>{{ item.profileName }}</td>
                 <td>{{ item.actionerName || '-' }}</td>
