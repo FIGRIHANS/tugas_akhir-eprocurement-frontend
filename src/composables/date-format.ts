@@ -31,7 +31,7 @@ export const formatDateYear = (value: Date | string) => {
 }
 
 export const formatDateYearFirst = (value: Date | string) => {
-  if (!value) return '-'
+  if (!value || value === '1900-01-01T00:00:00') return '-'
   return moment(value).format('YYYY/MM/DD')
 }
 

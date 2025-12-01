@@ -154,7 +154,11 @@
                 <td>{{ parent.taxNo || '-' }}</td>
                 <td>{{ parent.documentNo || '-' }}</td>
                 <td>
-                  {{ parent.actionerDate ? moment(parent.actionerDate).format('YYYY/MM/DD') : '-' }}
+                  {{
+                    parent.actionerDate && parent.actionerDate !== '1900-01-01T00:00:00'
+                      ? moment(parent.actionerDate).format('YYYY/MM/DD')
+                      : '-'
+                  }}
                 </td>
                 <td>
                   {{

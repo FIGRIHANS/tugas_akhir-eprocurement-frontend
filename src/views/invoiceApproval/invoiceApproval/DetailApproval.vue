@@ -26,7 +26,7 @@
               <td>{{ item.actionerName || '-' }}</td>
               <td>
                 {{
-                  item.actionerDate && item.actioner !== 0
+                  item.actionerDate && item.actionerDate !== '1900-01-01T00:00:00'
                     ? moment(item.actionerDate).format('YYYY/MM/DD HH:mm:ss')
                     : '-'
                 }}
