@@ -28,7 +28,11 @@
         <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
           <label class="form-label max-w-32">
             Name
-            <span v-if="form.isAlternativePayee || form.isOneTimeVendor" class="text-red-500 ml-[4px]">*</span>
+            <span
+              v-if="form.isAlternativePayee || form.isOneTimeVendor"
+              class="text-red-500 ml-[4px]"
+              >*</span
+            >
           </label>
           <input
             v-model="form.nameAlternative"
@@ -52,7 +56,11 @@
         <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
           <label class="form-label max-w-32">
             Street
-            <span v-if="form.isAlternativePayee || form.isOneTimeVendor" class="text-red-500 ml-[4px]">*</span>
+            <span
+              v-if="form.isAlternativePayee || form.isOneTimeVendor"
+              class="text-red-500 ml-[4px]"
+              >*</span
+            >
           </label>
           <input
             v-model="form.streetAltiernative"
@@ -89,7 +97,11 @@
         <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
           <label class="form-label max-w-32">
             Bank Account Number
-            <span v-if="form.isAlternativePayee || form.isOneTimeVendor" class="text-red-500 ml-[4px]">*</span>
+            <span
+              v-if="form.isAlternativePayee || form.isOneTimeVendor"
+              class="text-red-500 ml-[4px]"
+              >*</span
+            >
           </label>
           <input
             v-model="form.bankAccountNumberAlternative"
@@ -118,7 +130,11 @@
         <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
           <label class="form-label max-w-32">
             Bank Key
-            <span v-if="form.isAlternativePayee || form.isOneTimeVendor" class="text-red-500 ml-[4px]">*</span>
+            <span
+              v-if="form.isAlternativePayee || form.isOneTimeVendor"
+              class="text-red-500 ml-[4px]"
+              >*</span
+            >
           </label>
           <v-select
             v-model="form.bankKeyAlternative"
@@ -154,7 +170,11 @@
         <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
           <label class="form-label max-w-32">
             Email
-            <span v-if="form.isAlternativePayee || form.isOneTimeVendor" class="text-red-500 ml-[4px]">*</span>
+            <span
+              v-if="form.isAlternativePayee || form.isOneTimeVendor"
+              class="text-red-500 ml-[4px]"
+              >*</span
+            >
           </label>
           <input
             v-model="form.emailAlternative"
@@ -184,11 +204,18 @@ const invoiceMasterApi = useInvoiceMasterDataStore()
 const listCountry = computed(() => vendorMasterApi.countryList)
 const listBankAlternative = computed(() => invoiceMasterApi.bankAlternative)
 
+// const getBankAlternativeData = () => {
+//   // console.log(form.value.bankCountryAlternative, 'masuk bank awaowkaowkoa')
+//   invoiceMasterApi.getBankAlternative(form.value.bankCountryAlternative)
+// }
+
 watch(
-  () => form.bankCountryAlternative,
+  () => form.value.bankCountryAlternative,
   () => {
-    invoiceMasterApi.getBankAlternative(form.bankCountryAlternative)
-  }
+    // console.log(form.bankCountryAlternative, 'masuk bank')
+
+    invoiceMasterApi.getBankAlternative(form.value.bankCountryAlternative)
+  },
 )
 
 onMounted(() => {
