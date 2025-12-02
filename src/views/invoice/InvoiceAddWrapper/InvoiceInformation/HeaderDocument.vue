@@ -5,7 +5,7 @@
         <button
           class="btn btn-primary"
           :class="{
-            'btn-clear info__header' : invoiceTypeTab !== 'header'
+            'btn-clear info__header': invoiceTypeTab !== 'header',
           }"
           @click="setTab('header')"
         >
@@ -14,11 +14,20 @@
         <button
           class="btn btn-primary"
           :class="{
-            'btn-clear info__header' : invoiceTypeTab !== 'document'
+            'btn-clear info__header': invoiceTypeTab !== 'document',
           }"
           @click="setTab('document')"
         >
           Invoice Document
+        </button>
+        <button
+          class="btn btn-primary"
+          :class="{
+            'btn-clear info__header': invoiceTypeTab !== 'tax',
+          }"
+          @click="setTab('tax')"
+        >
+          Tax Document
         </button>
       </div>
     </div>
@@ -35,6 +44,7 @@ import { ref, computed, watch, inject, type Component } from 'vue'
 import type { formTypes } from '../../types/invoiceAddWrapper'
 import InvoiceHeader from './HeaderDocument/InvoiceHeader.vue'
 import InvoiceDocument from './HeaderDocument/InvoiceDocument.vue'
+import InvoiceTax from './HeaderDocument/InvoiceTax.vue'
 
 const form = inject<formTypes>('form')
 const invoiceTypeTab = ref<string>('header')
@@ -42,7 +52,8 @@ const invoiceTypeTab = ref<string>('header')
 const contentComponent = computed(() => {
   const components = {
     header: InvoiceHeader,
-    document: InvoiceDocument
+    document: InvoiceDocument,
+    tax: InvoiceTax,
   } as { [key: string]: Component }
 
   return components[invoiceTypeTab.value]
@@ -56,14 +67,19 @@ watch(
   () => form,
   () => {
     if (form) {
-      const headerError = form.companyCodeError || form.invoiceVendorNoError || form.invoiceDateError || form.taxNoInvoiceError || form.descriptionError
+      const headerError =
+        form.companyCodeError ||
+        form.invoiceVendorNoError ||
+        form.invoiceDateError ||
+        form.taxNoInvoiceError ||
+        form.descriptionError
       if (!headerError && form.invoiceDocumentError) {
         invoiceTypeTab.value = 'document'
       }
     }
   },
   {
-    deep: true
-  }
+    deep: true,
+  },
 )
 </script>
