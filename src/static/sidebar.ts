@@ -219,6 +219,11 @@ export default [
         title: 'Invoice Approval Non PO',
         to: 'invoiceApprovalNonPo',
       },
+      {
+        id: 'ftp-invoice-integration',
+        title: 'FTP Invoice Integration',
+        to: 'ftpInvoiceIntegration',
+      },
       // {
       //   id: 'schedule-payment',
       //   title: 'Schedule Payment',

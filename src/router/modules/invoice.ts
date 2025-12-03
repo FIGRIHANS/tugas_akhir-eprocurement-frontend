@@ -57,4 +57,9 @@ export default [
     name: 'invoiceDetailEdit',
     component: () => import('@/views/invoiceDetailEdit/InvoiceDetailEdit.vue'),
   },
+  {
+    path: '/invoice/ftp-integration',
+    name: 'ftpInvoiceIntegration',
+    component: () => import('@/views/ftpInvoiceIntegration/FtpInvoiceIntegration.vue'),
+  },
 ]
