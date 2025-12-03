@@ -290,7 +290,7 @@ const setPage = (value: number) => {
 const goView = (data: ListPoTypes) => {
   if (data.statusCode === 0 || data.statusCode === 5) {
     router.push({
-      name: 'invoiceAdd',
+      name: 'ftpInvoiceAdd',
       query: {
         type: 'po',
         invoice: data.invoiceUId,
@@ -298,7 +298,7 @@ const goView = (data: ListPoTypes) => {
     })
   } else {
     router.push({
-      name: 'invoiceAdd',
+      name: 'ftpInvoiceAdd',
       query: {
         type: 'po-view',
         invoice: data.invoiceUId,
@@ -369,7 +369,7 @@ const goSearch = (event: KeyboardEvent) => {
 
 const goAdd = () => {
   router.push({
-    name: 'invoiceAdd',
+    name: 'ftpInvoiceAdd',
     query: {
       type: 'po',
     },
@@ -474,4 +474,13 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 @use '../invoice/styles/invoice-list.scss';
+
+// Custom width for Submitted Document No column in FTP Invoice Integration
+:deep(.list__table) {
+  th:nth-child(2),
+  td:nth-child(2) {
+    min-width: 250px;
+    white-space: nowrap;
+  }
+}
 </style>

@@ -154,11 +154,7 @@
         @pageChange="setPage"
       />
     </div>
-        <DetailVerificationModal
-      type="po"
-      @loadDetail="loadData"
-      @setClearId="viewDetailId = ''"
-    />
+    <DetailVerificationModal type="po" @loadDetail="loadData" @setClearId="viewDetailId = ''" />
   </div>
 </template>
 
@@ -180,7 +176,9 @@ import { KTModal } from '@/metronic/core'
 const invoiceMasterApi = useInvoiceMasterDataStore()
 
 const FilterList = defineAsyncComponent(() => import('./FilterList.vue'))
-const DetailVerificationModal = defineAsyncComponent(() => import('../invoiceList/DetailVerificationModal.vue'))
+const DetailVerificationModal = defineAsyncComponent(
+  () => import('../invoiceList/DetailVerificationModal.vue'),
+)
 
 const companyCodeList = computed(() => invoiceMasterApi.companyCode)
 const invoicePoTypeList = computed(() => invoiceMasterApi.invoicePoType)
@@ -459,3 +457,14 @@ onMounted(() => {
   callList()
 })
 </script>
+
+<style lang="scss" scoped>
+// Custom width for Submitted Document No column
+:deep(.list__table) {
+  th:nth-child(2),
+  td:nth-child(2) {
+    min-width: 250px;
+    white-space: nowrap;
+  }
+}
+</style>
