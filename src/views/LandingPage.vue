@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import LogoAN from '@/assets/svg/LogoAN.vue'
+// import LogoAN from '@/assets/svg/LogoAN.vue'
 import IconEfficient from '@/components/icons/IconEfficient.vue'
 import IconEye from '@/components/icons/IconEye.vue'
 import IconHeadOffice from '@/components/icons/IconHeadOffice.vue'
@@ -9,6 +9,7 @@ import moment from 'moment'
 import IconPhone from '../components/icons/IconPhone.vue'
 import IconEmail from '../components/icons/IconEmail.vue'
 import IconUserFriendly from '@/components/icons/IconUserFriendly.vue'
+import LogoEPOQ from '@/assets/svg/EpoqLogo.vue'
 
 const year = moment().format('YYYY')
 </script>
@@ -29,7 +30,7 @@ const year = moment().format('YYYY')
           <IconPDF />
         </UiButton>
       </div>
-      <LogoAN class="w-full h-auto" />
+      <LogoEPOQ class="w-full h-auto" />
     </div>
   </section>
 
@@ -90,7 +91,7 @@ const year = moment().format('YYYY')
         <h1 class="font-semibold text-4xl text-[#283841] mt-4">About Us</h1>
       </div>
       <div class="flex flex-col lg:flex-row gap-6 lg:items-center">
-        <LogoAN class="w-full" />
+        <LogoEPOQ class="w-full" />
         <div class="col-span-2 card bg-secondary shadow-none">
           <div class="card-body p-4">
             <p class="font-light text-lg text-gray-800">
@@ -155,7 +156,7 @@ const year = moment().format('YYYY')
       <div class="card bg-secondary shadow-none">
         <div class="card-body p-6">
           <div class="flex items-center justify-between mb-8">
-            <LogoAN class="w-[81px] h-auto" />
+            <LogoEPOQ class="w-[81px] h-auto" />
             <div class="space-x-6">
               <a href="#" class="text-lg font-semibold text-gray-900">Terms & Conditions</a>
               <a href="#" class="text-lg font-semibold text-gray-900">Privacy Policy</a>

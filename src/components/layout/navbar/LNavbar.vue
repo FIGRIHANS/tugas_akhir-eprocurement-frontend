@@ -7,7 +7,7 @@
       >
         <div class="logo">
           <RouterLink to="/">
-            <LogoAN class="w-[81px] h-auto" />
+            <LogoEPOQ class="w-[81px] h-auto" />
           </RouterLink>
         </div>
 
@@ -32,7 +32,8 @@ import LNavbarProfile from './LNavbar/LNavbarProfile.vue'
 
 /**Atoms components */
 // import UiLogo from '@/components/ui/atoms/logo/UiLogo.vue'
-import LogoAN from '@/assets/svg/LogoAN.vue'
+// import LogoAN from '@/assets/svg/LogoAN.vue's
+import LogoEPOQ from '@/assets/svg/EpoqLogo.vue'
 
 const props = withDefaults(defineProps<INavbarProps>(), {
   full: false,

@@ -17,7 +17,7 @@ export const defaultColumn = [
   'WHT Code',
   'WHT Base Amount',
   'WHT Amount',
-  'Department'
+  'Department',
 ]
 
 export const poCCColumn = [
@@ -37,7 +37,7 @@ export const poCCColumn = [
   'WHT Code',
   'WHT Base Amount',
   'WHT Amount',
-  'Department'
+  'Department',
 ]
 
 export const invoiceDpColumn = [
@@ -49,7 +49,7 @@ export const invoiceDpColumn = [
   'WHT Code',
   'WHT Base Amount',
   'WHT Amount',
-  'Department'
+  'Department',
 ]
 
 export const PoPibColumn = [
@@ -59,7 +59,7 @@ export const PoPibColumn = [
   'Quantity',
   'Unit',
   'Item Text',
-  'Department'
+  'Department',
   // 'Category',
   // 'Total Net Amount'
 ]
@@ -78,22 +78,12 @@ export const searchDefaultColumn = [
   'Condition Type Description',
   'QC Status',
   'Tax Code',
-  'Department'
+  'Department',
 ]
 
-export const searchInvoiceDpColumn = [
-  'PO Number',
-  'Amount Invoice',
-  'Description'
-]
+export const searchInvoiceDpColumn = ['PO Number', 'Amount Invoice', 'Description']
 
-export const searchPoPibColumn = [
-  'PO Number',
-  'QTY',
-  'Unit',
-  'Item',
-  'Item Amount'
-]
+export const searchPoPibColumn = ['PO Number', 'QTY', 'Unit', 'Item', 'Item Amount']
 
 export const manualAddColumn = [
   'PO Number',
