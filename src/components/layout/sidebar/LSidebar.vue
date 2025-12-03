@@ -4,7 +4,9 @@
   >
     <div class="h-[80px] flex items-center mb-5 px-[25px]">
       <RouterLink to="/dashboard">
-        <LogoAN class="w-[83px]" />
+        <!-- <LogoAN class="w-[83px]" /> -->
+
+        <LogoEPOQ class="w-[180px]" />
       </RouterLink>
     </div>
 
@@ -46,7 +48,8 @@
 import sidebarMenu from '@/static/sidebar'
 import { useRouter } from 'vue-router'
 
-import LogoAN from '@/assets/svg/LogoAN.vue'
+// import LogoAN from '@/assets/svg/LogoAN.vue'
+import LogoEPOQ from '@/assets/svg/EpoqLogo.vue'
 import { computed } from 'vue'
 import { useLoginStore } from '@/stores/views/login'
 import { isEmpty } from 'lodash'
@@ -143,19 +146,17 @@ const filteredSidebarMenu = computed(() => {
         })
     }
 
-    if (userStore.userData?.profile?.vendorCode && userStore.userData?.profile?.profileId === 3200) {
+    if (
+      userStore.userData?.profile?.vendorCode &&
+      userStore.userData?.profile?.profileId === 3200
+    ) {
       return sidebarMenu
-        .filter(
-          (menu) =>
-            menu.id === 'dashboard' || menu.id === 'e-invoice',
-        )
+        .filter((menu) => menu.id === 'dashboard' || menu.id === 'e-invoice')
         .map((menu) => {
           return {
             ...menu,
             child: menu.child
-              ? menu.child.filter(
-                  (child) => child.id === 'invoice-list-non-po',
-                )
+              ? menu.child.filter((child) => child.id === 'invoice-list-non-po')
               : [],
           }
         })
@@ -163,18 +164,11 @@ const filteredSidebarMenu = computed(() => {
 
     if (userStore.userData?.profile?.vendorCode) {
       return sidebarMenu
-        .filter(
-          (menu) =>
-            menu.id === 'dashboard' || menu.id === 'e-invoice',
-        )
+        .filter((menu) => menu.id === 'dashboard' || menu.id === 'e-invoice')
         .map((menu) => {
           return {
             ...menu,
-            child: menu.child
-              ? menu.child.filter(
-                  (child) => child.id === 'invoice-list',
-                )
-              : [],
+            child: menu.child ? menu.child.filter((child) => child.id === 'invoice-list') : [],
           }
         })
     }
@@ -205,7 +199,6 @@ const filteredSidebarMenu = computed(() => {
           child: menu.child ? menu.child.filter((child) => child.id !== 'vendor-blacklist') : [],
         }))
     }
-
 
     // non po
     if (

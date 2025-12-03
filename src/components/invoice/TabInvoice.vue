@@ -1,31 +1,26 @@
 <template>
   <div class="tabs mb-5 text-gray-500 bg-gray-200">
-    <button
-      class="tab pl-[4px]"
-      :class="[
-        activeTab === 'data' ? 'active' : ''
-      ]"
-      disabled
-    >
+    <button class="tab pl-[4px]" :class="[activeTab === 'data' ? 'active' : '']" disabled>
       Invoice Data
     </button>
     <i class="ki-duotone ki-right"></i>
+    <button class="tab pl-[4px]" :class="[activeTab === 'information' ? 'active' : '']" disabled>
+      Invoice Information
+    </button>
+    <!-- OCR & AI Verification -->
+    <i class="ki-duotone ki-right"></i>
     <button
       class="tab pl-[4px]"
-      :class="[
-        activeTab === 'information' ? 'active' : ''
-      ]"
+      :class="[activeTab === 'ocrAiVerification' ? 'active' : '']"
       disabled
     >
-      Invoice Information
+      Invoice OCR & AI Verification
     </button>
     <i v-if="withPreview" class="ki-duotone ki-right"></i>
     <button
       v-if="withPreview"
       class="tab pl-[4px]"
-      :class="[
-        activeTab === 'preview' ? 'active' : ''
-      ]"
+      :class="[activeTab === 'preview' ? 'active' : '']"
       disabled
     >
       Invoice Preview
@@ -46,7 +41,7 @@ withDefaults(
     withPreview: true,
     canClickData: true,
     canClickInformation: false,
-    canClickPreview: false
-  }
+    canClickPreview: false,
+  },
 )
 </script>

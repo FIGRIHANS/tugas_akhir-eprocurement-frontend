@@ -177,6 +177,9 @@ const InvoicePreview = defineAsyncComponent(() => import('./InvoiceAddWrapper/In
 const ModalSuccess = defineAsyncComponent(
   () => import('./InvoiceAddWrapper/InvoicePreview/ModalSuccess.vue'),
 )
+const InvoiceOcrAiVerification = defineAsyncComponent(
+  () => import('./InvoiceAddWrapper/InvoiceOcrAiVerification.vue'),
+)
 const ErrorSubmissionModal = defineAsyncComponent(
   () => import('./InvoiceAddWrapper/ErrorSubmissionModal.vue'),
 )
@@ -292,6 +295,7 @@ const contentComponent = computed(() => {
   const components = {
     data: InvoiceData,
     information: InvoiceInformation,
+    ocrAiVerification: InvoiceOcrAiVerification,
     preview: InvoicePreview,
   } as { [key: string]: Component }
 
@@ -537,7 +541,7 @@ const setTab = (value: string) => {
   tabNow.value = value
 }
 const goBack = () => {
-  const list = ['data', 'information', 'preview']
+  const list = ['data', 'information', 'ocrAiVerification', 'preview']
   const checkIndex = list.findIndex((item) => item === tabNow.value)
   if (checkIndex === 0 || checkInvoiceView() || checkInvoiceNonPoView()) {
     const nameRoute =
@@ -874,7 +878,7 @@ const mapDataPostNonPo = () => {
 }
 
 const goNext = () => {
-  const list = ['data', 'information', 'preview']
+  const list = ['data', 'information', 'ocrAiVerification', 'preview']
   if (tabNow.value !== 'preview') {
     if (form.status === 0 || form.status === -1 || form.status === 5) {
       if (tabNow.value === 'data') {
