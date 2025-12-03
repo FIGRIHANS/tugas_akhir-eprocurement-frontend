@@ -60,7 +60,8 @@
       <div
         class="rounded-xl bg-primary-light h-full flex flex-col justify-between items-center gap-[8px]"
       >
-        <logoLogin class="mt-[30px]" />
+        <!-- <logoLogin class="mt-[30px]" /> -->
+        <LogoEPOQ class="mt-[30px] h-16" />
         <loginView />
       </div>
     </div>
@@ -72,7 +73,8 @@ import { defineAsyncComponent, onUnmounted, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useLoginStore } from '@/stores/views/login'
 import loginView from '@/assets/svg/LoginImage.vue'
-import logoLogin from '@/assets/svg/LogoLogin.vue'
+// import logoLogin from '@/assets/svg/LogoLogin.vue'
+import LogoEPOQ from '@/assets/svg/EpoqLogo.vue'
 import IconEN from '@/components/icons/IconEN.vue'
 import { useRouter } from 'vue-router'
 
