@@ -4,8 +4,39 @@
     <div class="grid grid-cols-12 gap-4">
       <!-- ==================== KIRI ==================== -->
       <div class="col-span-7 space-y-4">
+        <div class="card-header py-[8px] px-[20px]">
+          <div class="border rounded-lg border-gray-300 p-[4px] flex items-center gap-[4px]">
+            <button
+              class="btn btn-primary"
+              :class="{
+                'btn-clear info__header': tabOcrTab !== 'general',
+              }"
+              @click="setTabOcr('general')"
+            >
+              General Data
+            </button>
+            <button
+              class="btn btn-primary"
+              :class="{
+                'btn-clear info__header': tabOcrTab !== 'tax',
+              }"
+              @click="setTabOcr('tax')"
+            >
+              Tax & Invoice Verification
+            </button>
+            <button
+              class="btn btn-primary"
+              :class="{
+                'btn-clear info__header': tabOcrTab !== 'ai',
+              }"
+              @click="setTabOcr('ai')"
+            >
+              AI Action
+            </button>
+          </div>
+        </div>
         <!-- GENERAL DATA -->
-        <div class="bg-white shadow rounded-xl p-4">
+        <div v-if="tabOcrTab === 'general'" class="bg-white shadow rounded-xl p-4">
           <h2 class="font-semibold text-lg mb-3">General Data</h2>
 
           <div class="grid grid-cols-2 gap-4 text-sm">
@@ -17,7 +48,7 @@
         </div>
 
         <!-- GENERAL STATUS -->
-        <div class="bg-white shadow rounded-xl p-4">
+        <div v-if="tabOcrTab === 'general'" class="bg-white shadow rounded-xl p-4">
           <h2 class="font-semibold text-lg mb-3">General Status</h2>
           <div class="grid grid-cols-2 gap-4 text-sm">
             <div v-for="(row, i) in generalStatus" :key="i">
@@ -36,79 +67,8 @@
           </div>
         </div>
 
-        <div class="bg-white shadow rounded-xl p-4">
-          <h2 class="font-semibold text-lg mb-3">Detail Item</h2>
-
-          <div class="max-h-[350px] overflow-auto border rounded-lg">
-            <table class="w-full text-sm">
-              <thead class="bg-gray-100 text-xs">
-                <tr>
-                  <th class="p-2">QTY MATCH</th>
-                  <th class="p-2">UNIT PRICE MATCH</th>
-                  <th class="p-2">VAT MATCH</th>
-                  <th class="p-2">WHT MATCH</th>
-                  <th class="p-2">PRICE</th>
-                  <th class="p-2">TOTAL AMOUNT</th>
-                  <th class="p-2">VAT RATE</th>
-                  <th class="p-2">VAT</th>
-                  <th class="p-2">INVOICE AMOUNT</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                <tr v-for="(row, i) in detailItems" :key="i" class="border-b">
-                  <!-- MATCH ICONS -->
-                  <td class="p-2 text-center">
-                    <i
-                      :class="
-                        row.qtyMatch
-                          ? 'ki-filled ki-check text-green-600'
-                          : 'ki-filled ki-cross text-red-500'
-                      "
-                    ></i>
-                  </td>
-                  <td class="p-2 text-center">
-                    <i
-                      :class="
-                        row.unitMatch
-                          ? 'ki-filled ki-check text-green-600'
-                          : 'ki-filled ki-cross text-red-500'
-                      "
-                    ></i>
-                  </td>
-                  <td class="p-2 text-center">
-                    <i
-                      :class="
-                        row.vatMatch
-                          ? 'ki-filled ki-check text-green-600'
-                          : 'ki-filled ki-cross text-red-500'
-                      "
-                    ></i>
-                  </td>
-                  <td class="p-2 text-center">
-                    <i
-                      :class="
-                        row.whtMatch
-                          ? 'ki-filled ki-check text-green-600'
-                          : 'ki-filled ki-cross text-red-500'
-                      "
-                    ></i>
-                  </td>
-
-                  <!-- NUMBERS -->
-                  <td class="p-2">{{ row.price }}</td>
-                  <td class="p-2">{{ row.totalAmount }}</td>
-                  <td class="p-2">{{ row.vatRate }}</td>
-                  <td class="p-2">{{ row.vat }}</td>
-                  <td class="p-2 font-semibold">{{ row.invoiceAmount }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
         <!-- TABLE VERIFIKASI -->
-        <div class="bg-white shadow rounded-xl p-4">
+        <div v-if="tabOcrTab === 'tax'" class="bg-white shadow rounded-xl p-4">
           <div class="flex justify-between mb-3">
             <h2 class="font-semibold text-lg">Invoice Verification</h2>
             <button
@@ -119,7 +79,7 @@
             </button>
           </div>
 
-          <div class="max-h-[300px] overflow-auto border rounded-lg">
+          <div class="overflow-auto border rounded-lg">
             <table class="w-full text-sm">
               <thead class="bg-gray-100">
                 <tr>
@@ -150,46 +110,68 @@
         </div>
 
         <!-- AI ACTION (MUNCUL SETELAH VERIFIKASI) -->
-        <div v-if="showAiAction" class="bg-white shadow rounded-xl p-4 mt-4 border border-blue-300">
-          <h2 class="font-semibold text-lg mb-3">AI Action</h2>
+        <div
+          v-if="tabOcrTab === 'ai'"
+          class="bg-white shadow-xl rounded-xl p-6 mt-4 border border-red-400"
+        >
+          <h2 class="font-bold text-xl text-red-700 mb-4 flex items-center gap-2">AI Action 🤖</h2>
 
-          <div class="flex gap-4">
-            <!-- Avatar AI -->
+          <hr class="mb-4" />
+
+          <div class="flex gap-5 p-4 bg-red-50 border border-red-300 rounded-lg items-start">
             <img
               src="https://cdnai.iconscout.com/ai-image/premium/thumb/ai-female-customer-care-agent-3d-illustration-png-download-jpg-13152628.png"
               alt="AI Assistant"
-              class="w-20 h-20 object-contain"
+              class="w-20 h-20 object-contain flex-shrink-0"
             />
 
-            <!-- Text -->
-            <div class="text-sm">
-              <p class="font-semibold text-red-500">Terdapat mismatch pada:</p>
-              <ul class="list-disc ml-5">
-                <li>Invoice amount</li>
-                <li>Tax base (DPP)</li>
-                <li>PPN amount</li>
+            <div class="flex-grow">
+              <p class="font-extrabold text-lg text-red-800 mb-3">Terdapat mismatch pada:</p>
+              <ul class="list-disc ml-6 space-y-1 text-base text-gray-800">
+                <li class="font-semibold">Invoice amount</li>
+                <li class="font-semibold">Tax base (DPP)</li>
+                <li class="font-semibold">PPN amount</li>
               </ul>
 
-              <div class="flex gap-3 mt-3">
-                <button class="px-4 py-2 bg-blue-600 text-white rounded-lg">
+              <div class="flex gap-0 mt-5 border border-gray-300 rounded-lg overflow-hidden w-fit">
+                <button
+                  class="px-5 py-2 bg-gray-100 text-blue-600 font-semibold hover:bg-gray-200 transition duration-150 border-r border-gray-300"
+                >
                   Send Back to Vendor
                 </button>
-                <button class="px-4 py-2 bg-green-600 text-white rounded-lg">Proceed</button>
+                <button
+                  class="px-5 py-2 bg-green-600 text-white font-semibold hover:bg-green-700 transition duration-150"
+                >
+                  Proceed
+                </button>
               </div>
             </div>
           </div>
 
-          <!-- Pesan AI -->
-          <div class="mt-4 p-3 bg-gray-50 rounded-lg text-sm leading-relaxed">
-            Yth. PT Sinar Packaging, <br />
-            Terkait Invoice <strong>INV-0924-3321</strong>, terdapat ketidaksesuaian berikut:
-            <br /><br />
-            1. Harga per unit pada line item 10 tidak sesuai dengan PO (Rp 2.750 ≠ Rp 2.500). <br />
-            2. Faktur pajak yang terdaftar tidak sesuai dengan nilai invoice. <br /><br />
-            Mohon dilakukan revisi invoice dan pembetulan faktur pajak agar proses dapat
-            dilanjutkan.
-            <br />
-            Terima kasih.
+          <div
+            class="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg text-sm leading-relaxed shadow-inner"
+          >
+            <p class="font-bold text-base mb-2 text-gray-700 border-b pb-2 border-gray-200">
+              Pesan Revisi Otomatis:
+            </p>
+            <p>Yth. PT Sinar Packaging,</p>
+            <p class="mt-2">
+              Terkait Invoice <strong>INV-0924-3321</strong>, terdapat ketidaksesuaian berikut:
+            </p>
+
+            <ul class="list-decimal ml-6 mt-2 text-gray-700 space-y-1">
+              <li>
+                Harga per unit pada line item 10 tidak sesuai dengan PO (Rp 2.750
+                <span class="text-red-600 font-semibold">≠</span> Rp 2.500).
+              </li>
+              <li>Faktur pajak yang terdaftar tidak sesuai dengan nilai invoice.</li>
+            </ul>
+
+            <p class="mt-3 font-medium">
+              Mohon dilakukan revisi invoice dan pembetulan faktur pajak agar proses dapat
+              dilanjutkan.
+            </p>
+            <p class="mt-1">Terima kasih.</p>
           </div>
         </div>
 
@@ -228,19 +210,238 @@
           </div>
         </div>
       </div>
+      <div class="bg-white shadow rounded-xl p-4 col-span-12">
+        <h2 class="font-semibold text-lg mb-3">Detail Item</h2>
+
+        <!-- Invoice PO & GR Item By Search Table  -->
+
+        <div v-if="form?.invoiceType !== '902'">
+          <div v-if="form" class="overflow-x-auto pogr__table">
+            <table
+              class="table table-xs table-border"
+              :class="{ 'border-danger': form?.invoicePoGrError }"
+            >
+              <thead>
+                <tr>
+                  <th
+                    v-for="(item, index) in columns"
+                    :key="index"
+                    class="pogr__field-base"
+                    :class="{
+                      'pogr__field-base--po-item': item.toLowerCase() === 'item text',
+                      'pogr__field-base--tax': item.toLowerCase() === 'tax code',
+                    }"
+                  >
+                    {{ item }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-if="form.invoicePoGr.length === 0">
+                  <td colspan="11" class="text-center text-[13px]">No Data Available</td>
+                </tr>
+                <template v-else>
+                  <tr
+                    v-for="(item, index) in form.invoicePoGr"
+                    :key="index"
+                    class="pogr__field-items"
+                  >
+                    <td>
+                      <span v-if="(!item.isEdit && checkInvoiceDp()) || !checkInvoiceDp()">{{
+                        item.poNo
+                      }}</span>
+                    </td>
+                    <td v-if="!checkInvoiceDp()">{{ item.poItem }}</td>
+                    <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentNo }}</td>
+                    <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentItem }}</td>
+                    <td v-if="!checkInvoiceDp() && !checkPoPib()">
+                      {{
+                        form.status === 5
+                          ? moment(item.grDocumentDate).format('YYYY')
+                          : item.grDocumentDate
+                            ? moment(item.grDocumentDate).format('YYYY/MM/DD')
+                            : item.grDocumentDate
+                      }}
+                    </td>
+                    <td v-if="!checkInvoiceDp()">
+                      {{
+                        form.currency === item.currencyLC
+                          ? useFormatIdr(item.itemAmountLC)
+                          : useFormatUsd(item.itemAmountTC)
+                      }}
+                    </td>
+                    <td v-if="!checkInvoiceDp()">{{ item.quantity }}</td>
+                    <td v-if="!checkInvoiceDp()">{{ item.uom }}</td>
+                    <td v-if="!checkInvoiceDp()">{{ item.itemText }}</td>
+                    <td v-if="!checkInvoiceDp() && !checkPoPib()">
+                      {{ item.conditionType || '-' }}
+                    </td>
+                    <td v-if="!checkInvoiceDp() && form.invoiceType !== '903'">
+                      {{ item.conditionTypeDesc || '-' }}
+                    </td>
+                    <td v-if="!checkInvoiceDp() && form?.invoiceType !== '903'">
+                      {{ item.qcStatus || '-' }}
+                    </td>
+                    <td v-if="form?.invoiceType === '903'">
+                      <span>{{
+                        form?.currency === item.currencyLC
+                          ? useFormatIdr(item.vatAmount || 0)
+                          : useFormatUsd(item.vatAmount || 0)
+                      }}</span>
+                    </td>
+                    <td v-if="checkInvoiceDp()">
+                      <span v-if="!item.isEdit">{{
+                        form?.currency === 'IDR'
+                          ? useFormatIdr(item.itemAmountLC)
+                          : useFormatUsd(item.itemAmountLC)
+                      }}</span>
+                    </td>
+                    <td>
+                      <span v-if="!item.isEdit">{{ getTaxCodeName(item.taxCode) || '-' }}</span>
+                    </td>
+                    <td v-if="!checkPoPib()">
+                      <!-- <span v-if="item.isEdit">{{ form?.currency === item.currencyLC ? useFormatIdr(formEdit.vatAmount) : useFormatUsd(formEdit.vatAmount) }}</span> -->
+                      <span>{{
+                        form?.currency === item.currencyLC
+                          ? useFormatIdr(item.vatAmount || 0)
+                          : useFormatUsd(item.vatAmount || 0)
+                      }}</span>
+                    </td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>
+                      {{
+                        form?.currency === item.currencyLC
+                          ? useFormatIdr(item.whtBaseAmount)
+                          : useFormatUsd(item.whtBaseAmount)
+                      }}
+                    </td>
+                    <td>-</td>
+                    <td>{{ item.department || '-' }}</td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Invoice PO & Gr Add Item Manual -->
+        <div v-else>
+          <div v-if="form" class="overflow-x-auto pogr__table">
+            <table
+              class="table table-xs table-border"
+              :class="{ 'border-danger': form?.invoicePoGrError }"
+            >
+              <thead>
+                <tr>
+                  <th
+                    v-for="(item, index) in columns"
+                    :key="index"
+                    class="pogr__field-base"
+                    :class="{
+                      'pogr__field-base--po-number': item.toLowerCase() === 'po number',
+                      'pogr__field-base--po-item': item.toLowerCase() === 'po item',
+                      'pogr__field-base--department': item.toLowerCase() === 'department',
+                    }"
+                  >
+                    {{ item }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-if="form.invoicePoGr.length === 0">
+                  <td colspan="11" class="text-center text-[13px]">No Data Available</td>
+                </tr>
+                <template v-else>
+                  <tr
+                    v-for="(item, index) in form.invoicePoGr"
+                    :key="index"
+                    class="pogr__field-items"
+                  >
+                    <td>
+                      <span>{{ item.poNo }} </span>
+                    </td>
+                    <td v-if="!checkInvoiceDp()">
+                      <span>{{ item.poItem }}</span>
+                    </td>
+                    <td v-if="!checkInvoiceDp()">
+                      <span>{{
+                        form?.currency === 'IDR'
+                          ? useFormatIdr(item.itemAmountLC)
+                          : useFormatUsd(item.itemAmountLC)
+                      }}</span>
+                    </td>
+                    <td v-if="!checkInvoiceDp()">
+                      <span>{{ item.quantity }}</span>
+                    </td>
+                    <td v-if="!checkInvoiceDp()">
+                      <span>{{ item.uom || '-' }}</span>
+                    </td>
+                    <td v-if="!checkInvoiceDp()">{{ item.itemText || '-' }}</td>
+                    <td>
+                      <p>
+                        <i
+                          class="flex items-center justify-center ki-filled ki-check-circle text-green-500"
+                        ></i>
+                      </p>
+                    </td>
+                    <td>
+                      <p>
+                        <i
+                          class="flex items-center justify-center ki-filled ki-cross-circle text-red-500"
+                        ></i>
+                      </p>
+                    </td>
+                    <td>
+                      <p>
+                        <i
+                          class="flex items-center justify-center ki-filled ki-check-circle text-green-500"
+                        ></i>
+                      </p>
+                    </td>
+                    <td>
+                      <p>
+                        <i
+                          class="flex items-center justify-center ki-filled ki-cross-circle text-red-500"
+                        ></i>
+                      </p>
+                    </td>
+                    <td v-if="!checkInvoiceDp()">
+                      <span>{{ getCostCenterName(item.department) || '-' }}</span>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, inject, onMounted, watch } from 'vue'
+import { ref, inject, onMounted, watch, computed } from 'vue'
 import { usePreviewFileStore } from '@/stores/general/previewFile'
 import type { formTypes } from '../types/invoiceAddWrapper'
+import { useFormatIdr, useFormatUsd } from '@/composables/currency'
+import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
+import moment from 'moment'
+import { defaultColumn, invoiceDpColumn, poCCColumn, manualAddColumn } from '@/static/invoicePoGr'
+// import type { itemsCostType } from '../../types/additionalCost'
+// import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
+
+const invoiceMasterApi = useInvoiceMasterDataStore()
+// const verificationApi = useInvoiceVerificationStore()
+
+const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
+const costCenterList = computed(() => invoiceMasterApi.costCenterList)
 
 const form = inject<formTypes>('form')
 const previewApi = usePreviewFileStore()
 
 const previewUrl = ref<string>(form.tax.path)
+const tabOcrTab = ref<string>('general')
 
 const showAiAction = ref(false)
 
@@ -254,9 +455,31 @@ const getPreviewUrl = async () => {
   previewUrl.value = url
 }
 
-onMounted(() => {
-  getPreviewUrl()
-})
+const checkInvoiceDp = () => {
+  return form?.invoiceDp === '9012'
+}
+
+const checkPoPib = () => {
+  return form?.invoiceType === '902'
+}
+
+const getCostCenterName = (costCenter: string) => {
+  const index = costCenterList.value.findIndex((item) => item.code === costCenter)
+  if (index !== -1) {
+    const data = costCenterList.value[index]
+    return `${data.code} - ${data.name}`
+  }
+  return '-'
+}
+
+const getTaxCodeName = (taxCode: string) => {
+  const index = listTaxCalculation.value.findIndex((item) => item.code === taxCode)
+  if (index !== -1) {
+    const data = listTaxCalculation.value[index]
+    return `${data.code} - ${data.name}`
+  }
+  return '-'
+}
 
 const documentTypeList = ref([
   { code: '1', name: 'Tax Document' },
@@ -286,70 +509,77 @@ const generalStatus = ref([
 
 /* -------------------- Table Data -------------------- */
 const tableData = ref([
-  { header: 'Nama Vendor', data: 'CIPTA PIRANTI', validation: 'Verified', isVerified: true },
-  { header: 'NPWP Vendor', data: '0754067980829000', validation: 'OK', isVerified: true },
-  { header: 'Perusahaan', data: 'ACARYA DATA ESA', validation: 'Verified', isVerified: false },
-  { header: 'NPWP', data: '040338237508000', validation: 'OK', isVerified: true },
-  { header: 'Nilai Penjualan', data: '370,000', validation: 'Hitung manual', highlight: true },
+  {
+    header: 'Nama Vendor',
+    data: 'CIPTA PIRANTI SEJAHTERA',
+    validation: '',
+    isVerified: true,
+  },
+  { header: 'NPWP Vendor', data: '0754067908029000', validation: '', isVerified: true },
+  { header: 'Perusahaan', data: 'ACARYA DATA ESA', validation: '', isVerified: true },
+  { header: 'NPWP', data: '0430383257068000', validation: '', isVerified: true },
+  {
+    header: 'No Faktur Pajak',
+    data: '04002500350159095',
+    validation: ' ',
+    isVerified: true,
+  }, // Baris Tambahan 1
+  { header: 'Tanggal Faktur Pajak', data: '29/10/2025', validation: '', isVerified: true }, // Baris Tambahan 2
+  { header: 'Nilai Penjualan', data: '370,000.00', validation: ' ', highlight: true },
+  { header: 'DPP Lainnya', data: '339,167.00', validation: '', isVerified: true }, // Baris Tambahan 3
+  { header: 'PPN', data: '40,700.00', validation: '', isVerified: true }, // Baris Tambahan 4
+  { header: 'PPN BM', data: '0.00', validation: '', isVerified: true }, // Baris Tambahan 5
+  { header: 'Status Approve FP', data: 'APPROVED', validation: '', isVerified: true }, // Baris Tambahan 6
+  { header: 'Reference', data: '(Referensi: 3544N5E1N6)', validation: '', isVerified: true }, // Baris Tambahan 7
 ])
 
-const detailItems = ref([
-  {
-    qtyMatch: true,
-    unitMatch: true,
-    vatMatch: true,
-    whtMatch: true,
-    price: '540',
-    totalAmount: '129.600.000',
-    vatRate: '10%',
-    vat: '12.960.000',
-    invoiceAmount: '116.640.000',
-  },
-  {
-    qtyMatch: true,
-    unitMatch: true,
-    vatMatch: true,
-    whtMatch: true,
-    price: '670',
-    totalAmount: '192.000.000',
-    vatRate: '10%',
-    vat: '19.200.000',
-    invoiceAmount: '172.800.000',
-  },
-  {
-    qtyMatch: true,
-    unitMatch: true,
-    vatMatch: true,
-    whtMatch: true,
-    price: '214.000',
-    totalAmount: '85.600.000',
-    vatRate: '10%',
-    vat: '8.560.000',
-    invoiceAmount: '77.040.000',
-  },
-  {
-    qtyMatch: false,
-    unitMatch: false,
-    vatMatch: false,
-    whtMatch: false,
-    price: '1.500',
-    totalAmount: '432.000.000',
-    vatRate: '10%',
-    vat: '43.200.000',
-    invoiceAmount: '388.800.000',
-  },
-  {
-    qtyMatch: true,
-    unitMatch: true,
-    vatMatch: true,
-    whtMatch: false,
-    price: '1.500',
-    totalAmount: '180.000.000',
-    vatRate: '10%',
-    vat: '18.000.000',
-    invoiceAmount: '162.000.000',
-  },
+const columns = ref([
+  'Activity / Expense',
+  'Item Amount',
+  'Qty Match',
+  'Unit Price Match',
+  'VAT Match',
+  'WHT Match',
+  'Debit/Credit',
+  'Tax Code',
+  'VAT Amount',
+  'Cost Center',
+  'Profit Center',
+  'Assignment',
+  'WHT Type',
+  'WHT Code',
+  'WHT Base Amount',
+  'WHT Amount',
 ])
+
+const setTabOcr = (type: string) => {
+  tabOcrTab.value = type
+}
+
+const setColumn = () => {
+  let sourceColumns // Array sumber (belum dimodifikasi)
+
+  // 1. Tentukan array sumber
+  if (form?.invoiceType === '903') {
+    sourceColumns = poCCColumn
+  } else if (form?.invoiceDp === '9012') {
+    sourceColumns = invoiceDpColumn
+  } else if (form?.invoiceType === '902') {
+    sourceColumns = manualAddColumn
+  } else {
+    sourceColumns = defaultColumn
+  }
+
+  // **PERUBAHAN UTAMA: Buat salinan (baseColumns) dari array sumber**
+  const baseColumns = [...sourceColumns]
+
+  // 2. Lakukan penyisipan (splice) pada salinan (baseColumns)
+  // baseColumns adalah array baru, jadi penyisipan tidak akan terulang pada sumber.
+  baseColumns.splice(6, 0, 'Qty Match', 'Unit Price Match', 'VAT Match', 'WHT Match')
+
+  // 3. Tetapkan hasil ke columns.value
+  columns.value = baseColumns
+}
 
 watch(selectedDocumentType, async (newVal) => {
   let path = ''
@@ -368,5 +598,10 @@ watch(selectedDocumentType, async (newVal) => {
   const response = await previewApi.getPreview(path)
   const url = window.URL.createObjectURL(response.data)
   previewUrl.value = url
+})
+
+onMounted(() => {
+  getPreviewUrl()
+  setColumn()
 })
 </script>

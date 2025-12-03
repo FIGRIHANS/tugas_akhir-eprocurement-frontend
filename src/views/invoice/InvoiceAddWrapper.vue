@@ -878,17 +878,19 @@ const mapDataPostNonPo = () => {
 }
 
 const goNext = () => {
+  console.log(form)
+
   const list = ['data', 'information', 'ocrAiVerification', 'preview']
   if (tabNow.value !== 'preview') {
     if (form.status === 0 || form.status === -1 || form.status === 5) {
-      if (tabNow.value === 'data') {
-        const check = checkInvoiceData()
-        if (!check) return
-        hasCompletedDataTab.value = true
-      } else {
-        const check = checkInvoiceInformation()
-        if (!check) return
-      }
+      // if (tabNow.value === 'data') {
+      //   const check = checkInvoiceData()
+      //   if (!check) return
+      //   hasCompletedDataTab.value = true
+      // } else {
+      //   const check = checkInvoiceInformation()
+      //   if (!check) return
+      // }
     }
     const checkIndex = list.findIndex((item) => item === tabNow.value)
     if (checkIndex !== -1) {
