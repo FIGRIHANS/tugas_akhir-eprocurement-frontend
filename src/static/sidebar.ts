@@ -13,13 +13,13 @@ export interface IChildSidebarMenu {
 }
 
 export default [
-  {
-    id: 'dashboard',
-    title: 'Home',
-    icon: 'element-11',
-    to: 'dashboard',
-    child: [],
-  },
+  // {
+  //   id: 'dashboard',
+  //   title: 'Beranda',
+  //   icon: 'element-11',
+  //   to: 'dashboard',
+  //   child: [],
+  // },
   {
     id: 'company-information',
     title: 'Company Information',
@@ -27,91 +27,23 @@ export default [
     to: 'company information',
     child: [],
   },
-  {
-    id: 'analytic-dashboard',
-    title: 'Analytic Dashboard',
-    icon: 'rocket',
-    child: [
-      {
-        id: 'scorecard-performance',
-        title: 'Scorecard Performance',
-        to: 'scorecard-performance',
-      },
-      {
-        id: 'invoiceAnalytic',
-        title: 'Invoice Analytic',
-        to: 'invoiceAnalytic',
-      },
-    ],
-  },
-  {
-    id: 'tender',
-    title: 'Tender Management',
-    icon: 'rocket',
-    child: [
-      {
-        id: 'pr-central-monitoring',
-        title: 'PR Central Monitoring',
-        to: 'tenderCentral',
-      },
-      {
-        id: 'tender-report-list',
-        title: 'Tender Report List',
-        to: 'tenderReportList',
-      },
-      {
-        id: 'create-tender-request',
-        title: 'Create Tender Request',
-        to: 'tenderCreate',
-      },
-    ],
-  },
-  {
-    id: 'vendor-tender',
-    title: 'Tender Vendor Management',
-    icon: 'rocket',
-    child: [
-      {
-        id: 'vendor-tender-submission',
-        title: 'Tender Submission',
-        to: 'tenderSubmission',
-      },
-    ],
-  },
-  {
-    id: 'requisition',
-    title: 'Requisition',
-    icon: 'rocket',
-    child: [
-      {
-        id: 'requission-list',
-        title: 'Requisition List',
-        to: 'requissionList',
-      },
-      {
-        id: 'requission-add',
-        title: 'Create Requisition',
-        to: 'requisitionAdd',
-      },
-    ],
-  },
-  {
-    id: 'contract',
-    title: 'Contract Lifecycle Management',
-    icon: 'rocket',
-    child: [
-      {
-        id: 'contract-list',
-        title: 'Contract List',
-        to: 'contractList',
-      },
-      {
-        id: 'contract-request',
-        title: 'Contract Request',
-        to: 'contractCreate',
-      },
-    ],
-  },
+  // {
+  //   id: 'requisition',
+  //   title: 'Requisition',
+  //   icon: 'rocket',
+  //   child: [
+  //     {
+  //       id: 'requission-list',
+  //       title: 'Requisition List',
+  //       to: 'requissionList',
+  //     },
+  //     {
+  //       id: 'requission-add',
+  //       title: 'Create Requisition',
+  //       to: 'requisitionAdd',
+  //     },
+  //   ],
+  // },
   {
     id: 'vendor-management',
     title: 'Vendor Management',
@@ -252,43 +184,43 @@ export default [
       // },
     ],
   },
-  {
-    id: 'userManagement',
-    title: 'User Management',
-    icon: 'user',
-    child: [
-      {
-        id: 'List User',
-        title: 'List User',
-        to: 'user-management-user-list',
-      },
-      {
-        id: 'Master Profile',
-        title: 'Master Profile',
-        to: 'user-management-master-profile',
-      },
-      {
-        id: 'Master Role',
-        title: 'Master Role',
-        to: 'user-management-master-role',
-      },
-      {
-        id: 'Master Employee',
-        title: 'Master Employee',
-        to: 'user-management-master-employee',
-      },
-      {
-        id: 'Report User Authorization',
-        title: 'Report User Authorization',
-        to: 'user-management-report-authorization',
-      },
-    ],
-  },
-  {
-    id: 'Workflow Configuration',
-    title: 'Workflow Configuration',
-    icon: 'check',
-    to: 'workflow-configuration',
-    child: [],
-  },
+  // {
+  //   id: 'userManagement',
+  //   title: 'User Management',
+  //   icon: 'user',
+  //   child: [
+  //     {
+  //       id: 'List User',
+  //       title: 'List User',
+  //       to: 'user-management-user-list',
+  //     },
+  //     {
+  //       id: 'Master Profile',
+  //       title: 'Master Profile',
+  //       to: 'user-management-master-profile',
+  //     },
+  //     {
+  //       id: 'Master Role',
+  //       title: 'Master Role',
+  //       to: 'user-management-master-role',
+  //     },
+  //     {
+  //       id: 'Master Employee',
+  //       title: 'Master Employee',
+  //       to: 'user-management-master-employee',
+  //     },
+  //     {
+  //       id: 'Report User Authorization',
+  //       title: 'Report User Authorization',
+  //       to: 'user-management-report-authorization',
+  //     },
+  //   ],
+  // },
+  // {
+  //   id: 'Workflow Configuration',
+  //   title: 'Workflow Configuration',
+  //   icon: 'check',
+  //   to: 'workflow-configuration',
+  //   child: [],
+  // },
 ]

@@ -15,8 +15,6 @@ import dashboard from './modules/dashboard'
 import userManagement from './modules/userManagement'
 import companyInfomartion from './modules/companyInfomartion'
 import workflowConfig from './modules/workflowConfig'
-import tender from './modules/tender'
-import contract from './modules/contract'
 import requisition from './modules/requisition'
 import analyticDashboard from './modules/analyticDashboard'
 
@@ -46,8 +44,6 @@ const router = createRouter({
         ...userManagement,
         ...companyInfomartion,
         ...workflowConfig,
-        ...tender,
-        ...contract,
         ...requisition,
         ...analyticDashboard,
       ],

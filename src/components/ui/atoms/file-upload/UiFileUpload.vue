@@ -90,4 +90,11 @@ watch(
     }
   },
 )
+
+watch(
+  () => props.placeholder,
+  (newVal) => {
+    selectedFile.value = newVal
+  },
+)
 </script>
