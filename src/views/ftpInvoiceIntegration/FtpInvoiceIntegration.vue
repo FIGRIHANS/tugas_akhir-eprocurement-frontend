@@ -1,167 +1,174 @@
 <template>
-  <div class="border border-gray-200 rounded-xl p-[24px]">
-    <div class="flex justify-between align-items-center gap-[8px]">
-      <h1>Invoice PO</h1>
-      <div class="flex align-items-center gap-3">
-        <UiInputSearch v-model="search" placeholder="Search" @keypress="goSearch" />
-        <FilterList :data="filterForm" @setData="setDataFilter" ref="filterChild" />
-        <button class="btn btn-primary ml-auto" @click="goAdd()">
-          <i class="ki-duotone ki-plus-circle"></i>
-          Add Invoice
-        </button>
-      </div>
-    </div>
-    <div class="flex overflow-x-auto gap-3 mb-5 items-center" v-if="filteredPayload.length > 0">
-      <div class="font-medium text-lg text-gray-800">Filter</div>
-      <div v-for="items in filteredPayload" :key="items.key">
-        <div class="btn btn-light btn-sm" v-if="items.value !== ''">
-          <span class="text-gray-500"> {{ items.key }} </span>
-          <span class="font-semibold">
-            <p v-if="items.key === 'Status'">
-              {{
-                StatusInvoice.find((item) => item.value.toString() === items.value.toString())
-                  ?.label
-              }}
-            </p>
-            <p v-else-if="items.key === 'Company Code'">
-              {{
-                companyCodeList.find((item) => item.code.toString() === filterForm.companyCode)
-                  ?.name
-              }}
-            </p>
-            <p v-else-if="items.key === 'Invoice Type'">
-              {{
-                invoicePoTypeList.find((item) => item.code.toString() === filterForm.invoiceType)
-                  ?.name
-              }}
-            </p>
-            <p v-else>{{ filterForm.date }}</p>
-          </span>
-          <i class="ki-filled ki-cross" @click="deleteFilter(items.key)"></i>
+  <div>
+    <Breadcrumb title="FTP Invoice Integration" :routes="routes" />
+    <hr class="-mx-[24px] mb-[24px]" />
+
+    <div class="border border-gray-200 rounded-xl p-[24px]">
+      <div class="flex justify-between align-items-center gap-[8px]">
+        <h1>FTP Invoice Integration</h1>
+        <div class="flex align-items-center gap-3">
+          <UiInputSearch v-model="search" placeholder="Search" @keypress="goSearch" />
+          <FilterList :data="filterForm" @setData="setDataFilter" ref="filterChild" />
+          <button class="btn btn-primary ml-auto" @click="goAdd()">
+            <i class="ki-duotone ki-plus-circle"></i>
+            Add Invoice
+          </button>
         </div>
       </div>
-      <UiButton variant="light" size="sm" class="btn-clear" @click="resetFilter()">
-        {{ $t('vendor.masterFilters.reset') }}
-      </UiButton>
-    </div>
-    <div class="overflow-x-auto list__table mt-[24px]">
-      <table class="table align-middle text-gray-700 font-medium text-sm">
-        <thead>
-          <tr>
-            <th
-              v-for="(item, index) in columns"
-              :key="index"
-              :class="{
-                'list__long ': index !== 0,
-                'cursor-pointer': item,
-                '!text-blue-500': item === sortColumnName && sortBy !== '',
-              }"
-              @click="sortColumn(item)"
-            >
-              {{ item }}
-              <i v-if="item" class="ki-filled ki-arrow-up-down"></i>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="poList?.length === 0">
-            <td colspan="10" class="text-center">No data found.</td>
-          </tr>
-          <template v-for="(parent, index) in list" :key="index">
-            <tr>
-              <td class="flex items-center gap-[24px]">
-                <button
-                  class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]"
-                  @click="goView(parent)"
-                >
-                  <i class="ki-filled ki-eye !text-lg"></i>
-                </button>
-                <button
-                  class="btn btn-outline btn-primary btn-icon w-[32px] h-[32px]"
-                  @click="openDetailVerification(parent.invoiceUId)"
-                >
-                  <i class="ki-duotone ki-data !text-lg"></i>
-                </button>
-                <button
-                  class="btn btn-icon btn-outline btn-primary w-[21px] h-[21px]"
-                  @click="parent.isOpenChild = !parent.isOpenChild"
-                >
-                  <i v-if="!parent.isOpenChild" class="ki-filled ki-right !text-[9px]"></i>
-                  <i v-else class="ki-filled ki-down !text-[9px]"></i>
-                </button>
-              </td>
-              <td>{{ parent.invoiceNo }}</td>
-              <td>
-                <span class="badge badge-outline" :class="colorBadge(parent.statusCode)">
-                  {{ parent.statusName }}
-                </span>
-              </td>
-              <td>{{ parent.vendorName }}</td>
-              <td>{{ parent.documentNo }}</td>
-              <td>{{ parent.companyCode }}</td>
-              <td>{{ parent.invoiceTypeName }}</td>
-              <td>{{ moment(parent.invoiceDate).format('YYYY/MM/DD') }}</td>
-              <td>{{ useFormatIdr(parent.totalGrossAmount) }}</td>
-              <td>{{ useFormatIdr(parent.totalNetAmount) }}</td>
-              <td>
+      <div class="flex overflow-x-auto gap-3 mb-5 items-center" v-if="filteredPayload.length > 0">
+        <div class="font-medium text-lg text-gray-800">Filter</div>
+        <div v-for="items in filteredPayload" :key="items.key">
+          <div class="btn btn-light btn-sm" v-if="items.value !== ''">
+            <span class="text-gray-500"> {{ items.key }} </span>
+            <span class="font-semibold">
+              <p v-if="items.key === 'Status'">
                 {{
-                  parent.estimatedPaymentDate
-                    ? moment(parent.estimatedPaymentDate).format('YYYY/MM/DD')
-                    : '-'
+                  StatusInvoice.find((item) => item.value.toString() === items.value.toString())
+                    ?.label
                 }}
-              </td>
+              </p>
+              <p v-else-if="items.key === 'Company Code'">
+                {{
+                  companyCodeList.find((item) => item.code.toString() === filterForm.companyCode)
+                    ?.name
+                }}
+              </p>
+              <p v-else-if="items.key === 'Invoice Type'">
+                {{
+                  invoicePoTypeList.find((item) => item.code.toString() === filterForm.invoiceType)
+                    ?.name
+                }}
+              </p>
+              <p v-else>{{ filterForm.date }}</p>
+            </span>
+            <i class="ki-filled ki-cross" @click="deleteFilter(items.key)"></i>
+          </div>
+        </div>
+        <UiButton variant="light" size="sm" class="btn-clear" @click="resetFilter()">
+          {{ $t('vendor.masterFilters.reset') }}
+        </UiButton>
+      </div>
+      <div class="overflow-x-auto list__table mt-[24px]">
+        <table class="table align-middle text-gray-700 font-medium text-sm">
+          <thead>
+            <tr>
+              <th
+                v-for="(item, index) in columns"
+                :key="index"
+                :class="{
+                  'list__long ': index !== 0,
+                  'cursor-pointer': item,
+                  '!text-blue-500': item === sortColumnName && sortBy !== '',
+                }"
+                @click="sortColumn(item)"
+              >
+                {{ item }}
+                <i v-if="item" class="ki-filled ki-arrow-up-down"></i>
+              </th>
             </tr>
-            <tr v-show="parent.isOpenChild">
-              <td></td>
-              <td colspan="5" class="!pt-[0px]">
-                <table class="table table-bordered table-sm mb-0">
-                  <thead>
-                    <tr class="border-b">
-                      <th v-for="(item, index) in columnsChild" :key="index">
-                        {{ item }}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <template v-for="(sub, index) in parent.pOs" :key="index">
-                      <tr>
-                        <td>{{ sub.poNo || '-' }}</td>
-                        <td>{{ sub.grDocumentNo || '-' }}</td>
-                        <td>{{ sub.itemText || '-' }}</td>
-                        <td>{{ useFormatIdr(sub.itemAmount) || '-' }}</td>
-                        <td>{{ sub.quantity || '-' }}</td>
+          </thead>
+          <tbody>
+            <tr v-if="poList?.length === 0">
+              <td colspan="10" class="text-center">No data found.</td>
+            </tr>
+            <template v-for="(parent, index) in list" :key="index">
+              <tr>
+                <td class="flex items-center gap-[24px]">
+                  <button
+                    class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]"
+                    @click="goView(parent)"
+                  >
+                    <i class="ki-filled ki-eye !text-lg"></i>
+                  </button>
+                  <button
+                    class="btn btn-outline btn-primary btn-icon w-[32px] h-[32px]"
+                    @click="openDetailVerification(parent.invoiceUId)"
+                  >
+                    <i class="ki-duotone ki-data !text-lg"></i>
+                  </button>
+                  <button
+                    class="btn btn-icon btn-outline btn-primary w-[21px] h-[21px]"
+                    @click="parent.isOpenChild = !parent.isOpenChild"
+                  >
+                    <i v-if="!parent.isOpenChild" class="ki-filled ki-right !text-[9px]"></i>
+                    <i v-else class="ki-filled ki-down !text-[9px]"></i>
+                  </button>
+                </td>
+                <td>{{ parent.invoiceNo }}</td>
+                <td>
+                  <span class="badge badge-outline" :class="colorBadge(parent.statusCode)">
+                    {{ parent.statusName }}
+                  </span>
+                </td>
+                <td>{{ parent.vendorName }}</td>
+                <td>{{ parent.documentNo }}</td>
+                <td>{{ parent.companyCode }}</td>
+                <td>{{ parent.invoiceTypeName }}</td>
+                <td>{{ moment(parent.invoiceDate).format('YYYY/MM/DD') }}</td>
+                <td>{{ useFormatIdr(parent.totalGrossAmount) }}</td>
+                <td>{{ useFormatIdr(parent.totalNetAmount) }}</td>
+                <td>
+                  {{
+                    parent.estimatedPaymentDate
+                      ? moment(parent.estimatedPaymentDate).format('YYYY/MM/DD')
+                      : '-'
+                  }}
+                </td>
+              </tr>
+              <tr v-show="parent.isOpenChild">
+                <td></td>
+                <td colspan="5" class="!pt-[0px]">
+                  <table class="table table-bordered table-sm mb-0">
+                    <thead>
+                      <tr class="border-b">
+                        <th v-for="(item, index) in columnsChild" :key="index">
+                          {{ item }}
+                        </th>
                       </tr>
-                    </template>
-                  </tbody>
-                </table>
-              </td>
-            </tr>
-          </template>
-        </tbody>
-      </table>
-    </div>
+                    </thead>
+                    <tbody>
+                      <template v-for="(sub, index) in parent.pOs" :key="index">
+                        <tr>
+                          <td>{{ sub.poNo || '-' }}</td>
+                          <td>{{ sub.grDocumentNo || '-' }}</td>
+                          <td>{{ sub.itemText || '-' }}</td>
+                          <td>{{ useFormatIdr(sub.itemAmount) || '-' }}</td>
+                          <td>{{ sub.quantity || '-' }}</td>
+                        </tr>
+                      </template>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
 
-    <div class="flex items-center justify-between mt-[24px]">
-      <p class="m-0 text-sm">
-        Tampilkan
-        {{ pageSize * currentPage > poList.length ? poList.length : pageSize * currentPage }} data
-        dari total data {{ poList.length }}
-      </p>
-      <LPagination
-        :totalItems="poList.length"
-        :pageSize="pageSize"
-        :currentPage="currentPage"
-        @pageChange="setPage"
-      />
+      <div class="flex items-center justify-between mt-[24px]">
+        <p class="m-0 text-sm">
+          Tampilkan
+          {{ pageSize * currentPage > poList.length ? poList.length : pageSize * currentPage }} data
+          dari total data {{ poList.length }}
+        </p>
+        <LPagination
+          :totalItems="poList.length"
+          :pageSize="pageSize"
+          :currentPage="currentPage"
+          @pageChange="setPage"
+        />
+      </div>
+      <DetailVerificationModal type="po" @loadDetail="loadData" @setClearId="viewDetailId = ''" />
     </div>
-    <DetailVerificationModal type="po" @loadDetail="loadData" @setClearId="viewDetailId = ''" />
   </div>
 </template>
 
 <script lang="ts" setup>
 import { ref, reactive, computed, onMounted, defineAsyncComponent } from 'vue'
 import { useRouter } from 'vue-router'
-import type { filterListTypes } from '../../types/invoiceList'
+import { type routeTypes } from '@/core/type/components/breadcrumb'
+import Breadcrumb from '@/components/BreadcrumbView.vue'
+import type { filterListTypes } from '../invoice/types/invoiceList'
 import LPagination from '@/components/pagination/LPagination.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
@@ -175,10 +182,17 @@ import { KTModal } from '@/metronic/core'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
 
-const FilterList = defineAsyncComponent(() => import('./FilterList.vue'))
+const FilterList = defineAsyncComponent(() => import('./FtpFilterList.vue'))
 const DetailVerificationModal = defineAsyncComponent(
-  () => import('../invoiceList/DetailVerificationModal.vue'),
+  () => import('./FtpDetailVerificationModal.vue'),
 )
+
+const routes = ref<routeTypes[]>([
+  {
+    name: 'FTP Invoice Integration',
+    to: '/invoice/ftp-integration',
+  },
+])
 
 const companyCodeList = computed(() => invoiceMasterApi.companyCode)
 const invoicePoTypeList = computed(() => invoiceMasterApi.invoicePoType)
@@ -276,7 +290,7 @@ const setPage = (value: number) => {
 const goView = (data: ListPoTypes) => {
   if (data.statusCode === 0 || data.statusCode === 5) {
     router.push({
-      name: 'invoiceAdd',
+      name: 'ftpInvoiceAdd',
       query: {
         type: 'po',
         invoice: data.invoiceUId,
@@ -284,7 +298,7 @@ const goView = (data: ListPoTypes) => {
     })
   } else {
     router.push({
-      name: 'invoiceAdd',
+      name: 'ftpInvoiceAdd',
       query: {
         type: 'po-view',
         invoice: data.invoiceUId,
@@ -355,7 +369,7 @@ const goSearch = (event: KeyboardEvent) => {
 
 const goAdd = () => {
   router.push({
-    name: 'invoiceAdd',
+    name: 'ftpInvoiceAdd',
     query: {
       type: 'po',
     },
@@ -459,7 +473,9 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-// Custom width for Submitted Document No column
+@use '../invoice/styles/invoice-list.scss';
+
+// Custom width for Submitted Document No column in FTP Invoice Integration
 :deep(.list__table) {
   th:nth-child(2),
   td:nth-child(2) {
