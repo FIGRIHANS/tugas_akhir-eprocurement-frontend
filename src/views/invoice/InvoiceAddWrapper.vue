@@ -46,16 +46,13 @@
             Budget Checking
             <i class="ki-duotone ki-dollar"></i>
           </button>
-          <button
-            class="btn btn-primary"
-            :disabled="
+          <!-- :disabled="
               isSubmit ||
               (!isCheckBudget && tabNow === 'information') ||
               (tabNow === 'information' && !checkInvoiceInformation()) ||
               (tabNow === 'data' && !isAlternativePayeeFilled())
-            "
-            @click="goNext"
-          >
+            " -->
+          <button class="btn btn-primary" @click="goNext">
             {{ tabNow !== 'preview' ? 'Next' : 'Submit' }}
             <i v-if="tabNow !== 'preview'" class="ki-duotone ki-black-right"></i>
             <i v-else class="ki-duotone ki-paper-plane"></i>
@@ -878,19 +875,19 @@ const mapDataPostNonPo = () => {
 }
 
 const goNext = () => {
-  console.log(form)
+  console.log(form, 'ini formnya')
 
   const list = ['data', 'information', 'ocrAiVerification', 'preview']
   if (tabNow.value !== 'preview') {
     if (form.status === 0 || form.status === -1 || form.status === 5) {
-      // if (tabNow.value === 'data') {
-      //   const check = checkInvoiceData()
-      //   if (!check) return
-      //   hasCompletedDataTab.value = true
-      // } else {
-      //   const check = checkInvoiceInformation()
-      //   if (!check) return
-      // }
+      if (tabNow.value === 'data') {
+        const check = checkInvoiceData()
+        if (!check) return
+        hasCompletedDataTab.value = true
+      } else {
+        const check = checkInvoiceInformation()
+        if (!check) return
+      }
     }
     const checkIndex = list.findIndex((item) => item === tabNow.value)
     if (checkIndex !== -1) {

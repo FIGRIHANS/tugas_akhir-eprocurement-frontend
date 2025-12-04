@@ -134,13 +134,28 @@
               </ul>
 
               <div class="flex gap-0 mt-5 border border-gray-300 rounded-lg overflow-hidden w-fit">
+                <!-- Button Send Back -->
                 <button
-                  class="px-5 py-2 bg-gray-100 text-blue-600 font-semibold hover:bg-gray-200 transition duration-150 border-r border-gray-300"
+                  @click="setActive('back')"
+                  :class="[
+                    'px-5 py-2 font-semibold transition duration-150 border-r border-gray-300',
+                    activeButton === 'back'
+                      ? 'bg-green-600 text-white hover:bg-green-700'
+                      : 'bg-gray-100 text-blue-600 hover:bg-gray-200',
+                  ]"
                 >
                   Send Back to Vendor
                 </button>
+
+                <!-- Button Proceed -->
                 <button
-                  class="px-5 py-2 bg-green-600 text-white font-semibold hover:bg-green-700 transition duration-150"
+                  @click="setActive('proceed')"
+                  :class="[
+                    'px-5 py-2 font-semibold transition duration-150',
+                    activeButton === 'proceed'
+                      ? 'bg-green-600 text-white hover:bg-green-700'
+                      : 'bg-gray-100 text-blue-600 hover:bg-gray-200',
+                  ]"
                 >
                   Proceed
                 </button>
@@ -211,11 +226,18 @@
         </div>
       </div>
       <div class="bg-white shadow rounded-xl p-4 col-span-12">
-        <h2 class="font-semibold text-lg mb-3">Detail Item</h2>
+        <!-- <h2 class="font-semibold text-lg mb-3">Detail Item</h2> -->
+
+        <InvoicePoGrView v-if="checkPo()" />
+        <InvoiceItemView v-if="checkIsNonPo()" />
+        <!-- <hr class="border-gray-300" /> -->
+        <AdditionalCostView
+          v-if="(checkIsWithoutDp() || checkPoWithDp() || checkIsPoPibCc()) && !checkIsNonPo()"
+        />
 
         <!-- Invoice PO & GR Item By Search Table  -->
 
-        <div v-if="form?.invoiceType !== '902'">
+        <!-- <div v-if="form?.invoiceType !== '902'">
           <div v-if="form" class="overflow-x-auto pogr__table">
             <table
               class="table table-xs table-border"
@@ -300,7 +322,6 @@
                       <span v-if="!item.isEdit">{{ getTaxCodeName(item.taxCode) || '-' }}</span>
                     </td>
                     <td v-if="!checkPoPib()">
-                      <!-- <span v-if="item.isEdit">{{ form?.currency === item.currencyLC ? useFormatIdr(formEdit.vatAmount) : useFormatUsd(formEdit.vatAmount) }}</span> -->
                       <span>{{
                         form?.currency === item.currencyLC
                           ? useFormatIdr(item.vatAmount || 0)
@@ -323,10 +344,10 @@
               </tbody>
             </table>
           </div>
-        </div>
+        </div> -->
 
         <!-- Invoice PO & Gr Add Item Manual -->
-        <div v-else>
+        <!-- <div v-else>
           <div v-if="form" class="overflow-x-auto pogr__table">
             <table
               class="table table-xs table-border"
@@ -414,36 +435,75 @@
               </tbody>
             </table>
           </div>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, inject, onMounted, watch, computed } from 'vue'
+import { ref, inject, onMounted, watch, defineAsyncComponent } from 'vue'
 import { usePreviewFileStore } from '@/stores/general/previewFile'
 import type { formTypes } from '../types/invoiceAddWrapper'
-import { useFormatIdr, useFormatUsd } from '@/composables/currency'
-import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
-import moment from 'moment'
+// import { useFormatIdr, useFormatUsd } from '@/composables/currency'
+// import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
+// import moment from 'moment'
 import { defaultColumn, invoiceDpColumn, poCCColumn, manualAddColumn } from '@/static/invoicePoGr'
+const InvoicePoGrView = defineAsyncComponent(
+  () => import('./InvoicePreview/InvoicePoGrViewOcr.vue'),
+)
+const InvoiceItemView = defineAsyncComponent(
+  () => import('./InvoicePreview/InvoiceItemViewOcr.vue'),
+)
+const AdditionalCostView = defineAsyncComponent(
+  () => import('./InvoicePreview/AdditionalCostViewOcr.vue'),
+)
+import { useRoute } from 'vue-router'
+const route = useRoute()
+
 // import type { itemsCostType } from '../../types/additionalCost'
 // import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 
-const invoiceMasterApi = useInvoiceMasterDataStore()
+// const invoiceMasterApi = useInvoiceMasterDataStore()
 // const verificationApi = useInvoiceVerificationStore()
 
-const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
-const costCenterList = computed(() => invoiceMasterApi.costCenterList)
+// const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
+// const costCenterList = computed(() => invoiceMasterApi.costCenterList)
 
 const form = inject<formTypes>('form')
 const previewApi = usePreviewFileStore()
 
 const previewUrl = ref<string>(form.tax.path)
 const tabOcrTab = ref<string>('general')
+const typeForm = ref<string>('')
 
 const showAiAction = ref(false)
+
+const activeButton = ref<'back' | 'proceed'>('proceed')
+
+const setActive = (btn: 'back' | 'proceed') => {
+  activeButton.value = btn
+}
+
+const checkPo = () => {
+  return typeForm.value === 'po' || typeForm.value === 'po-view'
+}
+
+const checkIsNonPo = () => {
+  return typeForm.value === 'nonpo'
+}
+
+const checkIsWithoutDp = () => {
+  return form.invoiceDp === '9011'
+}
+
+const checkPoWithDp = () => {
+  return form.invoiceDp === '9013'
+}
+
+const checkIsPoPibCc = () => {
+  return (form.invoiceType === '902' || form.invoiceType === '903') && form.status > 0
+}
 
 const handleVerifyInvoice = () => {
   showAiAction.value = true
@@ -455,31 +515,31 @@ const getPreviewUrl = async () => {
   previewUrl.value = url
 }
 
-const checkInvoiceDp = () => {
-  return form?.invoiceDp === '9012'
-}
+// const checkInvoiceDp = () => {
+//   return form?.invoiceDp === '9012'
+// }
 
-const checkPoPib = () => {
-  return form?.invoiceType === '902'
-}
+// const checkPoPib = () => {
+//   return form?.invoiceType === '902'
+// }
 
-const getCostCenterName = (costCenter: string) => {
-  const index = costCenterList.value.findIndex((item) => item.code === costCenter)
-  if (index !== -1) {
-    const data = costCenterList.value[index]
-    return `${data.code} - ${data.name}`
-  }
-  return '-'
-}
+// const getCostCenterName = (costCenter: string) => {
+//   const index = costCenterList.value.findIndex((item) => item.code === costCenter)
+//   if (index !== -1) {
+//     const data = costCenterList.value[index]
+//     return `${data.code} - ${data.name}`
+//   }
+//   return '-'
+// }
 
-const getTaxCodeName = (taxCode: string) => {
-  const index = listTaxCalculation.value.findIndex((item) => item.code === taxCode)
-  if (index !== -1) {
-    const data = listTaxCalculation.value[index]
-    return `${data.code} - ${data.name}`
-  }
-  return '-'
-}
+// const getTaxCodeName = (taxCode: string) => {
+//   const index = listTaxCalculation.value.findIndex((item) => item.code === taxCode)
+//   if (index !== -1) {
+//     const data = listTaxCalculation.value[index]
+//     return `${data.code} - ${data.name}`
+//   }
+//   return '-'
+// }
 
 const documentTypeList = ref([
   { code: '1', name: 'Tax Document' },
@@ -603,5 +663,7 @@ watch(selectedDocumentType, async (newVal) => {
 onMounted(() => {
   getPreviewUrl()
   setColumn()
+
+  typeForm.value = route.query.type?.toString().toLowerCase() || 'po'
 })
 </script>
