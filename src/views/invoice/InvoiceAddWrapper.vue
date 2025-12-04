@@ -879,8 +879,6 @@ const mapDataPostNonPo = () => {
 }
 
 const goNext = () => {
-  console.log(form, 'ini formnya')
-
   const list = ['data', 'information', 'ocrAiVerification', 'preview']
   if (tabNow.value !== 'preview') {
     if (form.status === 0 || form.status === -1 || form.status === 5) {

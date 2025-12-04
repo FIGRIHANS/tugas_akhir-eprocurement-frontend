@@ -69,7 +69,7 @@
           </thead>
           <tbody>
             <tr v-if="poList?.length === 0">
-              <td colspan="10" class="text-center">No data found.</td>
+              <td colspan="14" class="text-center">No data found.</td>
             </tr>
             <template v-for="(parent, index) in list" :key="index">
               <tr>
@@ -113,6 +113,27 @@
                       ? moment(parent.estimatedPaymentDate).format('YYYY/MM/DD')
                       : '-'
                   }}
+                </td>
+                <!-- FTP Verification Status Columns -->
+                <td>
+                  <span class="badge" :class="getStatusBadgeClass(parent.fpStatus || 'Warning')">
+                    {{ parent.fpStatus || 'Warning' }}
+                  </span>
+                </td>
+                <td>
+                  <span class="badge" :class="getStatusBadgeClass(parent.vatStatus || 'Error')">
+                    {{ parent.vatStatus || 'Error' }}
+                  </span>
+                </td>
+                <td>
+                  <span class="badge" :class="getStatusBadgeClass(parent.whtStatus || 'Warning')">
+                    {{ parent.whtStatus || 'Warning' }}
+                  </span>
+                </td>
+                <td>
+                  <span class="badge" :class="getStatusBadgeClass(parent.poPrice || 'Warning')">
+                    {{ parent.poPrice || 'Warning' }}
+                  </span>
                 </td>
               </tr>
               <tr v-show="parent.isOpenChild">
@@ -240,7 +261,7 @@ const filterForm = reactive<filterListTypes>({
   invoiceType: '',
 })
 
-const columns = ref([
+const columns = ref<string[]>([
   '',
   'Submitted Document No',
   'Status',
@@ -252,22 +273,31 @@ const columns = ref([
   'Total Gross Amount',
   'Total Net Amount',
   'Estimated Payment Date',
+  'FP Status',
+  'VAT Status',
+  'WHT Status',
+  'PO Price',
 ])
 
 const columnsChild = ref(['No PO', 'No GR', 'Item Description', 'Item Amount', 'Quantity'])
 
 const poList = computed(() => invoiceApi.listPo)
 
-const colorBadge = (statusCode: number) => {
-  const list = {
-    0: 'badge-primary',
-    1: 'badge-warning',
-    2: 'badge-info',
-    4: 'badge-success',
-    5: 'badge-danger',
-    7: 'badge-primary',
-  } as { [key: number]: string }
-  return list[statusCode]
+const colorBadge = (status: number) => {
+  if (status === 0) return 'badge-secondary'
+  if (status === 1) return 'badge-warning'
+  if (status === 2) return 'badge-info'
+  if (status === 3) return 'badge-success'
+  if (status === 4) return 'badge-danger'
+  if (status === 5) return 'badge-danger'
+}
+
+// Helper function for verification status badge colors
+const getStatusBadgeClass = (status: string) => {
+  if (status === 'Verified') return 'badge-success'
+  if (status === 'Warning') return 'badge-warning'
+  if (status === 'Error') return 'badge-danger'
+  return 'badge-secondary'
 }
 
 const setList = (listData: ListPoTypes[]) => {
@@ -290,7 +320,7 @@ const setPage = (value: number) => {
 const goView = (data: ListPoTypes) => {
   if (data.statusCode === 0 || data.statusCode === 5) {
     router.push({
-      name: 'ftpInvoiceAdd',
+      name: 'invoiceAdd',
       query: {
         type: 'po',
         invoice: data.invoiceUId,
@@ -298,7 +328,7 @@ const goView = (data: ListPoTypes) => {
     })
   } else {
     router.push({
-      name: 'ftpInvoiceAdd',
+      name: 'invoiceAdd',
       query: {
         type: 'po-view',
         invoice: data.invoiceUId,
@@ -369,7 +399,7 @@ const goSearch = (event: KeyboardEvent) => {
 
 const goAdd = () => {
   router.push({
-    name: 'ftpInvoiceAdd',
+    name: 'invoiceAdd',
     query: {
       type: 'po',
     },
