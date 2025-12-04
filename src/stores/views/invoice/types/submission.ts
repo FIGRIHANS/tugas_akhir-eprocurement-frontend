@@ -214,6 +214,11 @@ export interface ListPoTypes {
   isOpenChild: boolean
   createdUtcDate: string
   actionerDate?: string
+  // FTP Invoice Integration verification status columns
+  fpStatus?: string
+  vatStatus?: string
+  whtStatus?: string
+  poPrice?: string
 }
 
 export interface ListNonPoTypes {
