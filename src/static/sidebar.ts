@@ -27,6 +27,23 @@ export default [
     to: 'company information',
     child: [],
   },
+  {
+    id: 'analytic-dashboard',
+    title: 'Analytic Dashboard',
+    icon: 'rocket',
+    child: [
+      {
+        id: 'scorecard-performance',
+        title: 'Scorecard Performance',
+        to: 'scorecard-performance',
+      },
+      {
+        id: 'invoiceAnalytic',
+        title: 'Invoice Analytic',
+        to: 'invoiceAnalytic',
+      },
+    ],
+  },
   // {
   //   id: 'requisition',
   //   title: 'Requisition',
