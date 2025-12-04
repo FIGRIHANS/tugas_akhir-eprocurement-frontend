@@ -62,4 +62,9 @@ export default [
     name: 'ftpInvoiceIntegration',
     component: () => import('@/views/ftpInvoiceIntegration/FtpInvoiceIntegration.vue'),
   },
+  {
+    path: '/invoice/email-integration',
+    name: 'emailInvoiceIntegration',
+    component: () => import('@/views/emailInvoiceIntegration/EmailInvoiceIntegration.vue'),
+  },
 ]
