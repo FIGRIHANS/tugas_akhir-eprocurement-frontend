@@ -272,7 +272,8 @@ const filteredSidebarMenu = computed(() => {
                     child.id === 'invoice-list-non-po' ||
                     child.id === 'ftp-invoice-integration' ||
                     child.id === 'scorecard-performance' ||
-                    child.id === 'invoiceAnalytic',
+                    child.id === 'invoiceAnalytic' ||
+                    child.id === 'email-invoice-integration',
                 )
               : [],
           }
