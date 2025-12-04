@@ -256,7 +256,10 @@ const filteredSidebarMenu = computed(() => {
       return sidebarMenu
         .filter(
           (menu) =>
-            menu.id === 'e-invoice' || menu.id === 'vendor-management' || menu.id === 'dashboard',
+            menu.id === 'e-invoice' ||
+            menu.id === 'vendor-management' ||
+            menu.id === 'dashboard' ||
+            menu.id === 'analytic-dashboard',
         )
         .map((menu) => {
           return {
@@ -267,7 +270,9 @@ const filteredSidebarMenu = computed(() => {
                     child.id === 'vendor-master' ||
                     child.id === 'invoice-list' ||
                     child.id === 'invoice-list-non-po' ||
-                    child.id === 'ftp-invoice-integration',
+                    child.id === 'ftp-invoice-integration' ||
+                    child.id === 'scorecard-performance' ||
+                    child.id === 'invoiceAnalytic',
                 )
               : [],
           }

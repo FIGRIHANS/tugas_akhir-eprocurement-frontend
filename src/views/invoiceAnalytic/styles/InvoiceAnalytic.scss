@@ -1,0 +1,355 @@
+.invoice-analytic {
+  padding: 1.5rem;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.analytics-metrics-container {
+  .bar-chart-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    block-size: 100%;
+    padding: 1rem;
+    overflow: hidden;
+  }
+
+  .bar-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    position: relative;
+    margin-inline: 4px;
+  }
+
+  .bar {
+    inline-size: 40px;
+    min-block-size: 4px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    overflow: hidden;
+  }
+
+  .bar-dot {
+    inline-size: 8px;
+    block-size: 8px;
+    background-color: #fbbf24;
+    border-radius: 50%;
+    position: absolute;
+    inset-inline-start: 50%;
+    transform: translateX(-50%);
+  }
+
+  .bar-label {
+    margin-block-start: 0.5rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+
+  .bar-value {
+    font-size: 0.75rem;
+    color: #374151;
+    margin-block-start: 0.25rem;
+  }
+
+  .bar-count {
+    font-size: 0.75rem;
+    color: #6b7280;
+  }
+
+  .metric-card {
+    display: flex;
+    flex-direction: column;
+    block-size: 100%;
+    padding: 1rem;
+  }
+
+  .metric-header {
+    margin-block-end: 1rem;
+  }
+
+  .metric-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .metric-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin-block-start: 1.5rem;
+  }
+
+  .metric-label {
+    color: #6b7280;
+    margin-block-start: 0.25rem;
+  }
+
+  .metric-divider {
+    inline-size: 60%;
+    block-size: 1px;
+    background-color: #e5e7eb;
+    margin-block: 2rem;
+    margin-inline: auto;
+  }
+
+  .writing-vertical {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    text-align: center;
+    padding: 10px 0;
+    font-size: 0.875rem;
+  }
+
+  .line-chart-wrapper {
+    position: relative;
+    inline-size: 100%;
+    
+    .line-chart {
+      inline-size: 100%;
+      block-size: 100%;
+    }
+    
+    .chart-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-block-start: 8px;
+      padding: 0 10px;
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+  }
+
+  .revenue-label {
+    inline-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .metric-secondary {
+    margin-block-start: auto;
+  }
+
+  .line-chart-wrapper {
+    position: relative;
+    block-size: 100%;
+    padding-block-start: 2rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .line-chart {
+    inline-size: 100%;
+    block-size: calc(100% - 2rem);
+    margin-block-end: 0.5rem;
+  }
+
+  .line-path {
+    transition: all 0.3s ease;
+  }
+
+  .area-path {
+    transition: all 0.3s ease;
+  }
+
+  .stacked-chart-wrapper {
+    block-size: 100%;
+    padding: 1rem;
+  }
+
+  .stacked-bars {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    block-size: 100%;
+    gap: 0.5rem;
+  }
+
+  .stacked-bar-group {
+    flex: 1;
+    block-size: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .stacked-bar {
+    inline-size: 100%;
+    block-size: 33.33%;
+    border-radius: 4px;
+    opacity: 0.8;
+  }
+
+  .mini-trend-chart {
+    block-size: 100%;
+    padding: 1rem;
+  }
+
+  .trend-bars {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    block-size: 100%;
+    gap: 2px;
+  }
+
+  .trend-bar {
+    flex: 1;
+    block-size: 100%;
+    background-color: transparent;
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+    margin-inline: 1px;
+  }
+
+  .trend-bar-fill, .trend-bar-base {
+    position: absolute;
+    inline-size: 100%;
+    transition: block-size 0.3s ease;
+  }
+
+  .trend-bar-label {
+    font-size: 0.75rem;
+    color: #6b7280;
+    position: absolute;
+    inset-block-start: -1.5rem;
+    inset-inline-start: 50%;
+    transform: translateX(-50%);
+    white-space: pre-line;
+    text-align: center;
+  }
+
+  .value-label {
+    position: absolute;
+    /* move label slightly inside the top-right and make it smaller so it doesn't cover the chart */
+    inset-inline-end: 0.75rem;
+    inset-block-start: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #111827;
+    z-index: 2;
+    background: transparent;
+    padding: 0.125rem 0.25rem;
+    border-radius: 4px;
+    pointer-events: none;
+    /* ensure the label can't grow too wide on small charts */
+    max-inline-size: 3.5rem;
+  text-align: end;
+  }
+
+  /* if the chart is very narrow, hide the label to avoid overlap */
+  @media (max-inline-size: 420px) {
+    .value-label { display: none; }
+  }
+
+  .chart-labels {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+    padding-block-end: 0;
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-block-end: 1rem;
+  }
+
+  .chart-legend {
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+
+    .legend-color {
+      inline-size: 12px;
+      block-size: 12px;
+      border-radius: 3px;
+    }
+  }
+}
+.invoice-analytic {
+  background-color: #ffffff;
+  min-block-size: 100vh;
+  
+  .header-section {
+    border-color: #e5e7eb;
+  }
+
+  .grid {
+    > div {
+      border-color: #e5e7eb;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      }
+    }
+  }
+
+  // Chart containers
+  .ap-aging-chart,
+  .upcoming-payments-chart,
+  .paid-ontime-chart,
+  .avg-age-chart,
+  .ap-summary-chart,
+  .aging-trend-count-chart,
+  .aging-trend-amount-chart {
+    position: relative;
+  }
+
+  // Total AP Outstanding card
+  .total-ap {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 2rem;
+
+    .value {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #1e40af;
+    }
+
+    .label {
+      color: #6b7280;
+      margin-block-start: 0.5rem;
+    }
+  }
+
+  // Filter styles
+  .filter-group {
+    label {
+      color: #4b5563;
+      margin-block-end: 0.25rem;
+    }
+
+    select {
+      min-inline-size: 200px;
+      background-color: white;
+      border-color: #d1d5db;
+      
+      &:focus {
+        border-color: #3b82f6;
+        outline: none;
+        /* replace Tailwind 'ring' utilities with a cross-browser box-shadow */
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.08);
+      }
+    }
+  }
+
+  // Chart title styles
+  h3 {
+    color: #111827;
+  }
+}
