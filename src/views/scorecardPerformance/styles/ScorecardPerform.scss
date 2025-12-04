@@ -1,0 +1,1276 @@
+// Variables
+$primary-color: #3b82f6;
+$secondary-color: #64748b;
+$success-color: #10b981;
+$warning-color: #f59e0b;
+$error-color: #ef4444;
+$background-color: #ffffff;
+$card-background: #ffffff;
+$border-color: #e2e8f0;
+$text-primary: #1e293b;
+$text-secondary: #64748b;
+$text-muted: #94a3b8;
+
+// Mixins
+@mixin card-shadow {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid $border-color;
+}
+
+@mixin button-base {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  font-size: 0.875rem;
+  
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+  }
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin truncate-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Animations
+@keyframes fadeInScale {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -120%) scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -120%) scale(1);
+  }
+}
+
+// Main Dashboard Layout
+.dashboard {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background-color: $background-color;
+
+  // Add spacing after breadcrumb
+  :deep(.breadcrumb-container) {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid $border-color;
+  }
+}
+
+// Dashboard Grid Layout
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr); // Using 12-column grid for more precise control
+  grid-template-rows: auto auto auto auto;
+  gap: 16px;
+  
+  // Exact grid positioning based on reference image with better balance
+  .card:nth-child(1) { grid-area: 1 / 1 / 2 / 4; }
+  .card:nth-child(2) { grid-area: 1 / 4 / 2 / 7; }
+  .card:nth-child(3) { grid-area: 2 / 1 / 3 / 4; }
+  .card:nth-child(4) { grid-area: 2 / 4 / 3 / 7; }
+  .card:nth-child(5) { grid-area: 1 / 7 / 3 / 13; }
+  .card:nth-child(7) { grid-area: 3 / 1 / 4 / 7; }
+  .card:nth-child(6) { grid-area: 3 / 7 / 4 / 13; }
+  .card:nth-child(8) { grid-area: 4 / 1 / 5 / 4; }
+  .card:nth-child(9) { grid-area: 4 / 4 / 5 / 13; }
+}
+
+// Card Components
+.card {
+  background: $card-background;
+  border-radius: 12px;
+  padding: 24px;
+  @include card-shadow;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  height: 100%;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  h3 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: $text-primary;
+    margin-bottom: 4px;
+    line-height: 1.2;
+    text-align: left !important;
+    padding-left: 0 !important;
+    
+    &.text-left {
+      text-align: left !important;
+      margin-right: auto;
+    }
+  }
+
+  h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: darken($text-secondary, 10%);
+    margin-bottom: 16px;
+  }
+
+  &-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    min-height: 60px;
+    width: 100%;
+    padding: 0;
+    
+    h3 {
+      text-align: left !important;
+      margin-right: 0;
+      padding-left: 0;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+    }
+    
+    .percentage {
+      margin-left: 8px;
+      margin-right: 0;
+      padding-right: 0;
+      flex-shrink: 0;
+      align-self: center;
+      margin-top: 0;
+    }
+  }
+
+  &-subtitle {
+    color: $text-secondary;
+    font-size: 0.875rem;
+    margin-bottom: 12px;
+    font-weight: 500;
+  }
+}
+
+// Card sizing classes - Now handled by explicit grid positioning above
+.small-card {
+  min-height: 280px;
+  
+  .card-header {
+    min-height: 60px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0;
+
+    h3 {
+      text-align: left !important;
+      flex-shrink: 0;
+      padding-left: 0;
+      margin-left: 0;
+    }
+    
+    .percentage {
+      margin-left: auto;
+      padding-right: 0;
+      margin-right: 0;
+    }
+  }
+}
+
+.invoice-card {
+  min-height: 300px;
+}
+
+// Percentage Indicators
+.percentage {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 6px;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  block-size: 24px;
+  margin-inline-start: 4px;
+  margin-inline-end: 0;
+  align-self: center;
+  min-inline-size: 60px;
+  border: none;
+  // Make sure percentages are right aligned - Addressing requirement #3
+  text-align: end !important;
+
+  &.positive {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: darken($success-color, 15%);
+  }
+
+  &.negative {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: darken($error-color, 10%);
+    font-weight: 600;
+    border: none;
+    box-shadow: none;
+  }
+}
+
+// Expected Earnings specific layout
+.earnings-main {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+
+  .earnings-amount-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  h3 {
+    margin-bottom: 0;
+    font-size: 1.5rem;
+  }
+}
+
+.circular-progress {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: scale(0.85);
+}
+
+// Earnings Breakdown
+.earnings-breakdown {
+  margin-top: 16px;
+  display: flex;
+  gap: 12px;
+
+  .breakdown-left {
+    width: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-right: 8px;
+  }
+
+  .breakdown-list {
+    flex: 1;
+    width: calc(100% - 60px);
+    min-width: 0;
+
+    .breakdown-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 6px;
+      font-size: 0.75rem;
+      padding: 1px 0;
+
+      .breakdown-indicator {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+
+        &.short-term-contract { background-color: $primary-color; }
+        &.gaming { background-color: $warning-color; }
+        &.others { background-color: #e2e8f0; }
+      }
+
+      .breakdown-text {
+        display: flex;
+        flex: 1;
+        justify-content: space-between;
+        align-items: center;
+        min-width: 0;
+      }
+
+      span:nth-child(1) {
+        flex: 1;
+        white-space: nowrap;
+        padding-right: 4px;
+        font-size: 0.7rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .amount {
+        margin-left: 4px;
+        white-space: nowrap;
+        font-weight: 600;
+        color: $text-primary;
+        font-size: 0.7rem;
+      }
+    }
+  }
+}
+
+.chart-container {
+  height: 80px;
+  display: flex;
+  align-items: end;
+  margin-top: 4px;
+}
+
+.bar-chart {
+  display: flex;
+  align-items: end;
+  gap: 8px;
+  height: 60px;
+  width: 100%;
+  margin-top: -15px;
+
+  .bar {
+    background: linear-gradient(to top, $primary-color, lighten($primary-color, 15%));
+    border-radius: 4px 4px 0 0;
+    flex: 1;
+    min-height: 20px;
+    transition: all 0.3s ease;
+    position: relative;
+    
+    .bar-label {
+      position: absolute;
+      bottom: -24px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.65rem;
+      color: $text-secondary;
+      white-space: nowrap;
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+      background: linear-gradient(to top, darken($primary-color, 10%), $primary-color);
+    }
+  }
+}
+
+.sales-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  
+  .sales-header {
+    margin-bottom: 12px;
+    position: relative;
+
+    h4 {
+      font-size: 0.875rem;
+      color: $text-secondary;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    h3 {
+      font-size: 2rem;
+      margin-bottom: 4px;
+      
+      &.amount-left {
+        margin-left: -8px;
+      }
+    }
+
+    .sales-main {
+      display: flex;
+      align-items: center;
+      margin-bottom: 4px;
+      padding: 0;
+      width: 100%;
+      
+      h3 {
+        text-align: left !important;
+        margin: 0;
+        padding-left: 0;
+        margin-left: 0;
+        flex-shrink: 0;
+        display: inline-flex;
+      }
+      
+      .percentage {
+        margin-left: 4px;
+        padding-right: 0;
+        margin-right: auto;
+        flex-shrink: 0;
+        align-self: flex-start;
+        margin-top: 4px;
+      }
+    }
+
+    .goal-text-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-block-end: 16px;
+
+      .goal-text-label {
+        color: $text-secondary;
+        font-size: 0.875rem;
+        font-weight: 500;
+      }
+
+      .zoom-hint {
+        font-size: 0.75rem;
+        color: $text-muted;
+        background-color: #F5F6F8;
+        padding-block: 4px;
+        padding-inline: 8px;
+        border-radius: 4px;
+        font-weight: normal;
+        white-space: nowrap;
+        margin-inline-start: auto;
+      }
+    }
+  }
+
+  .sales-chart,
+  .discount-chart {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-block-start: 8px;
+    flex: 1;
+    block-size: calc(100% - 40px);
+
+    .chart-controls {
+      position: absolute;
+      inset-block-start: 0;
+      inset-inline-end: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-inline-end: 12px;
+      z-index: 10;
+      
+      .zoom-btn {
+        inline-size: 24px;
+        block-size: 24px;
+        border-radius: 50%;
+        border: 1px solid $border-color;
+        background-color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        padding: 0;
+        
+        &:hover {
+          background-color: $primary-color;
+          color: white;
+          border-color: $primary-color;
+        }
+        
+        .zoom-icon {
+          font-size: 16px;
+          font-weight: bold;
+          line-height: 1;
+        }
+      }
+      
+      .zoom-level {
+        font-size: 0.75rem;
+        color: $text-secondary;
+        padding-inline: 6px;
+        padding-block: 2px;
+        border-radius: 4px;
+        background-color: rgba(255, 255, 255, 0.7);
+        border: 1px solid $border-color;
+      }
+    }
+
+    .chart-labels-y {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      block-size: 320px; // Further increased chart height to fill space
+      font-size: 0.75rem;
+      color: $text-muted;
+      padding-block-start: 8px;
+      padding-block-end: 8px;
+      inline-size: 50px;
+      text-align: end;
+      z-index: 1;
+    }
+
+    .chart-area {
+      flex: 1;
+      inline-size: 100%;
+      block-size: 320px;
+      position: relative;
+      padding-block-end: 20px;
+      cursor: zoom-in;
+      
+      svg {
+        inline-size: 100%;
+        block-size: 100%;
+        overflow: visible;
+      }
+
+      .chart-point {
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover {
+          r: 6;
+          filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+      }
+    }
+
+    .chart-labels-x {
+      position: absolute;
+      inset-block-end: 5px;
+      inset-inline-start: 62px;
+      inset-inline-end: 20px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: $text-muted;
+      padding-block-start: 4px;
+      
+      &.tender-chart-labels {
+        inset-block-end: 5px;
+        inset-inline-start: 40px;
+        inset-inline-end: 20px;
+      }
+      
+      &.discount-chart-labels {
+        inset-block-end: 5px;
+        inset-inline-start: 40px;
+        inset-inline-end: 20px;
+      }
+    }
+  }
+}
+
+// Chart Tooltips
+.chart-tooltip {
+  position: absolute;
+  background: white;
+  color: $text-primary;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  pointer-events: auto;
+  z-index: 1000;
+  box-shadow: 0 8px 24px rgba(16,24,40,0.08);
+  border: 1px solid rgba(15, 23, 42, 0.04);
+  transform: translate(-50%, -120%);
+  animation: fadeInScale 0.2s ease-out;
+
+  .tooltip-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .tooltip-date {
+    font-weight: 500;
+    opacity: 0.8;
+  }
+
+  .tooltip-value {
+    font-weight: 700;
+    color: #10b981;
+  }
+
+  &.discount-tooltip .tooltip-value {
+    color: #3b82f6;
+  }
+}
+
+// Progress Components
+.progress-container {
+  margin-top: 16px;
+
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 0.875rem;
+    color: $text-secondary;
+
+    .progress-percent {
+      font-weight: 700;
+      color: $text-primary;
+      background-color: rgba(16, 185, 129, 0.08);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+    }
+  }
+
+  .progress-bar {
+    width: 100%;
+    height: 8px;
+    background-color: $border-color;
+    border-radius: 4px;
+    overflow: hidden;
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(to right, #10b981, #34d399);
+      border-radius: 4px;
+      transition: width 0.3s ease;
+      box-shadow: 0 1px 3px rgba(16, 185, 129, 0.3);
+      position: relative;
+      
+      &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(to bottom, rgba(255,255,255,0.2), rgba(255,255,255,0));
+        border-radius: 4px;
+      }
+    }
+  }
+}
+
+// Heroes Section
+.heroes-section {
+  margin-top: 16px;
+
+  .heroes-title {
+    font-size: 0.875rem;
+    color: $text-secondary;
+    margin-bottom: 12px;
+    font-weight: 500;
+  }
+
+  .heroes-avatars {
+    display: flex;
+    gap: -4px;
+
+    .hero-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      @include flex-center;
+      color: white;
+      font-weight: 600;
+      font-size: 0.875rem;
+      margin-left: -4px;
+      border: 2px solid white;
+      transition: transform 0.2s ease;
+
+      &:hover {
+        transform: translateY(-2px);
+        z-index: 10;
+        position: relative;
+      }
+
+      &.more {
+        background-color: $text-secondary;
+        font-size: 0.75rem;
+      }
+    }
+  }
+}
+
+// Recent Orders
+.recent-orders {
+  .product-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+
+    .tab {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border: 1px solid $border-color;
+      border-radius: 8px;
+      background: white;
+      color: $text-secondary;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &.active {
+        border-color: $primary-color;
+        color: $primary-color;
+        background-color: lighten($primary-color, 48%);
+      }
+
+      &:hover:not(.active) {
+        background-color: lighten($border-color, 3%);
+        border-color: $primary-color;
+        color: $primary-color;
+      }
+
+      .tab-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 4px;
+        @include flex-center;
+        font-size: 12px;
+      }
+    }
+  }
+}
+
+// Table Components
+.orders-table {
+  .table-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid $border-color;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: $text-secondary;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .table-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid lighten($border-color, 3%);
+    align-items: center;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: lighten($background-color, 2%);
+    }
+
+    .item-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      .item-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        @include flex-center;
+      }
+
+      .item-name {
+        font-weight: 600;
+        color: $text-primary;
+        margin-bottom: 2px;
+        @include truncate-text;
+      }
+
+      .item-code {
+        font-size: 0.75rem;
+        color: $text-secondary;
+      }
+    }
+  }
+}
+
+// Status Components
+.status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 6px;
+  text-transform: capitalize;
+
+  .status-icon {
+    flex-shrink: 0;
+  }
+
+  &.pending {
+    background-color: lighten($warning-color, 40%);
+    color: darken($warning-color, 20%);
+  }
+
+  &.confirmed {
+    background-color: lighten($success-color, 45%);
+    color: darken($success-color, 20%);
+  }
+
+  &.shipped {
+    background-color: lighten($primary-color, 40%);
+    color: darken($primary-color, 20%);
+  }
+}
+
+// Button Components
+.btn-primary,
+.btn-secondary {
+  @include button-base;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+  margin: 4px;
+}
+
+.btn-primary {
+  background-color: $primary-color;
+  color: white;
+
+  &:hover {
+    background-color: darken($primary-color, 10%);
+  }
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: $text-secondary;
+  border: 1px solid $border-color;
+
+  &:hover {
+    background-color: $background-color;
+    border-color: $text-secondary;
+  }
+}
+
+// Invoice Components
+.invoice-illustration {
+  margin: 24px 0;
+  text-align: center;
+
+  .invoice-graphic {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+
+    // Styles for the SVG illustrations
+    .py-8 {
+      padding-top: 2rem;
+      padding-bottom: 2rem;
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    :deep(.w-200px) {
+      width: 200px;
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .theme-light-show {
+      display: block; // Show in light theme
+    }
+
+    .theme-dark-show {
+      display: none; // Hidden in light theme (default)
+    }
+
+    // This would be activated by your theme system when dark mode is active
+    .dark-mode & {
+      .theme-light-show {
+        display: none;
+      }
+      .theme-dark-show {
+        display: block;
+      }
+    }
+
+    .invoice-steps {
+      display: flex;
+      gap: 8px;
+
+      .step {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: $border-color;
+        transition: background-color 0.2s ease;
+
+        &.active {
+          background-color: $primary-color;
+        }
+      }
+    }
+  }
+
+  .illustration-bg {
+    background: radial-gradient(closest-side, rgba(59,130,246,0.06), transparent 70%);
+    border-radius: 12px;
+  }
+}
+
+.invoice-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+// Orders Header
+.orders-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+
+  .orders-subtitle {
+    color: $text-secondary;
+    font-size: 0.875rem;
+    margin-top: 4px;
+  }
+}
+
+// Filters
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .filter-select {
+    padding: 8px 12px;
+    border: 1px solid $border-color;
+    border-radius: 6px;
+    background-color: white;
+    color: $text-primary;
+    font-size: 0.875rem;
+    cursor: pointer;
+
+    &:focus {
+      outline: none;
+      border-color: $primary-color;
+      box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+    }
+  }
+
+  .search-container {
+    position: relative;
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: $text-muted;
+    }
+
+    .search-input {
+      padding: 8px 12px 8px 36px;
+      border: 1px solid $border-color;
+      border-radius: 6px;
+      background-color: white;
+      color: $text-primary;
+      font-size: 0.875rem;
+      width: 200px;
+
+      &:focus {
+        outline: none;
+        border-color: $primary-color;
+        box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+      }
+
+      &::placeholder {
+        color: $text-muted;
+      }
+    }
+  }
+}
+
+// Order ID styling
+.order-id {
+  font-weight: normal;
+  color: $text-primary;
+}
+
+// Product Orders table adjustments
+.product-orders {
+  .orders-table {
+    .table-header {
+      grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+    }
+
+    .table-row {
+      grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+    }
+  }
+}
+
+// Table card container specific styles - Addressing requirement #1 and #2
+section[name="table"] {
+  border-radius: 12px;
+  margin-block-start: 24px;
+  padding: 0 !important;
+  border: 1px solid $border-color;
+  
+  // Ensure the left border aligns with Fleet Availability card (requirement #1)
+  margin-inline-start: 0;
+  margin-inline-end: 0;
+}
+
+// Supplier card slider - Addressing requirement #2
+.supplier-card-slider {
+  display: flex;
+  gap: 16px;
+  padding: 16px 0;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  margin-block-end: 24px;
+  
+  // Hide scrollbar but keep functionality
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer and Edge */
+  
+  &::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+  }
+  
+  // Container for all cards with increased padding (requirement #2)
+  .slider-content {
+    display: flex;
+    gap: 20px;
+    padding-inline-start: 20px !important;
+    padding-inline-end: 20px !important;
+  }
+}
+
+// Percentage change indicators - Addressing requirement #3
+.percentage-change {
+  text-align: end !important; 
+  min-inline-size: 60px !important;
+  padding: 4px 8px;
+  border-radius: 16px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-block;
+  margin-inline-start: auto !important;
+  
+  &.positive {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+  }
+  
+  &.negative {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+  }
+}
+
+// Responsive Design
+@media (max-width: 1200px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(9, 1fr);
+    grid-template-rows: auto auto auto auto auto;
+    
+    // Adjust grid positioning for medium screens
+    .card:nth-child(1) { grid-area: 1 / 1 / 2 / 4; } // Spend Analysis vs Contracted
+    .card:nth-child(2) { grid-area: 1 / 4 / 2 / 7; } // Spend Analysis by Department
+    .card:nth-child(3) { grid-area: 1 / 7 / 2 / 10; } // Delivery On Time
+    .card:nth-child(4) { grid-area: 2 / 1 / 3 / 4; } // New Customers
+    .card:nth-child(5) { grid-area: 2 / 4 / 3 / 10; } // Tender Negotiation - spans 6 cols
+    .card:nth-child(6) { grid-area: 3 / 5 / 4 / 10; } // Discounted Product Sales
+    .card:nth-child(7) { grid-area: 3 / 1 / 4 / 5; } // Recent Orders
+    .card:nth-child(8) { grid-area: 4 / 1 / 5 / 4; } // Invoice Manager
+    .card:nth-child(9) { grid-area: 4 / 4 / 5 / 10; } // Product Orders
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard {
+    padding: 16px;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(9, auto);
+    gap: 16px;
+    
+    // Stack all cards vertically on mobile
+    .card:nth-child(1) { grid-area: 1 / 1 / 2 / 2; }
+    .card:nth-child(2) { grid-area: 2 / 1 / 3 / 2; }
+    .card:nth-child(3) { grid-area: 3 / 1 / 4 / 2; }
+    .card:nth-child(4) { grid-area: 4 / 1 / 5 / 2; }
+    .card:nth-child(5) { grid-area: 5 / 1 / 6 / 2; }
+    .card:nth-child(6) { grid-area: 6 / 1 / 7 / 2; }
+    .card:nth-child(7) { grid-area: 7 / 1 / 8 / 2; }
+    .card:nth-child(8) { grid-area: 8 / 1 / 9 / 2; }
+    .card:nth-child(9) { grid-area: 9 / 1 / 10 / 2; }
+  }
+
+  .small-card,
+  .invoice-card {
+    min-height: auto;
+  }
+
+  .card {
+    padding: 16px;
+
+    &-header {
+      min-height: auto;
+    }
+  }
+
+  .orders-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .filters {
+    width: 100%;
+    flex-wrap: wrap;
+
+    .search-container .search-input {
+      width: 100%;
+    }
+  }
+
+  .table-row,
+  .table-header {
+    font-size: 0.75rem;
+    gap: 8px;
+  }
+
+  .product-tabs {
+    flex-wrap: wrap;
+  }
+
+  .sales-chart .chart-labels-x,
+  .discount-chart .chart-labels-x {
+    font-size: 0.65rem;
+    left: 60px;
+  }
+
+  .sales-chart,
+  .discount-chart {
+    .chart-area {
+      height: 120px;
+    }
+    
+    .chart-labels-y {
+      height: 120px;
+    }
+  }
+
+  .earnings-main {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
+// App shell: sidebar + main area
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+.sidebar {
+  width: 220px;
+  background: white;
+  border-right: 1px solid $border-color;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 1px 8px rgba(16,24,40,0.03);
+
+  .sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    img { width: 36px; height: 36px; }
+    h3 { margin: 0; font-size: 1.1rem; color: $text-primary; }
+  }
+
+  .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .nav-item {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: transparent;
+      color: $text-secondary;
+      border: none;
+      cursor: pointer;
+
+      &.active {
+        background: lighten($primary-color, 46%);
+        color: $primary-color;
+      }
+    }
+  }
+
+  .sidebar-footer { margin-top: auto; color: $text-muted; }
+}
+
+.main-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background: transparent;
+  border-bottom: 1px solid transparent;
+
+  .page-title { margin: 0; font-size: 1.25rem; color: $text-primary; }
+
+  .topbar-right {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+
+    .topbar-btn {
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid $border-color;
+      background: white;
+      cursor: pointer;
+    }
+
+    .timestamp { color: $text-secondary; font-size: 0.875rem; }
+
+    .topbar-icon { background: transparent; border: none; cursor: pointer; }
+
+    .topbar-cta {
+      display: inline-flex;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: $primary-color;
+      color: white;
+      align-items: center;
+      border: none;
+      cursor: pointer;
+    }
+  }
+}

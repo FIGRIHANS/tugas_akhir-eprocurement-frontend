@@ -18,6 +18,7 @@ import workflowConfig from './modules/workflowConfig'
 import tender from './modules/tender'
 import contract from './modules/contract'
 import requisition from './modules/requisition'
+import analyticDashboard from './modules/analyticDashboard'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -48,6 +49,7 @@ const router = createRouter({
         ...tender,
         ...contract,
         ...requisition,
+        ...analyticDashboard,
       ],
       meta: {
         middleware: 'auth',
