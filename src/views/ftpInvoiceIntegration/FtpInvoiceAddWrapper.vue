@@ -46,13 +46,16 @@
             Budget Checking
             <i class="ki-duotone ki-dollar"></i>
           </button>
-          <!-- :disabled="
+          <button
+            class="btn btn-primary"
+            :disabled="
               isSubmit ||
               (!isCheckBudget && tabNow === 'information') ||
               (tabNow === 'information' && !checkInvoiceInformation()) ||
               (tabNow === 'data' && !isAlternativePayeeFilled())
-            " -->
-          <button class="btn btn-primary" @click="goNext">
+            "
+            @click="goNext"
+          >
             {{ tabNow !== 'preview' ? 'Next' : 'Submit' }}
             <i v-if="tabNow !== 'preview'" class="ki-duotone ki-black-right"></i>
             <i v-else class="ki-duotone ki-paper-plane"></i>
@@ -140,9 +143,9 @@ import {
 } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
-import type { formTypes } from './types/invoiceAddWrapper'
+import type { formTypes } from '@/views/invoice/types/invoiceAddWrapper'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
-import StepperStatus from '../../components/stepperStatus/StepperStatus.vue'
+import StepperStatus from '@/components/stepperStatus/StepperStatus.vue'
 import TabInvoice from '@/components/invoice/TabInvoice.vue'
 import iconPDF from '@/components/icons/iconPDF.vue'
 import { KTModal } from '@/metronic/core'
@@ -161,30 +164,34 @@ import type {
 } from '@/stores/views/invoice/types/submission'
 import { useLoginStore } from '@/stores/views/login'
 import moment from 'moment'
-import type { itemsPoGrType } from './types/invoicePoGr'
-import type { itemsCostType } from './types/additionalCost'
-import type { invoiceItemTypes } from './types/invoiceItem'
+import type { itemsPoGrType } from '@/views/invoice/types/invoicePoGr'
+import type { itemsCostType } from '@/views/invoice/types/additionalCost'
+import type { invoiceItemTypes } from '@/views/invoice/types/invoiceItem'
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 
-const InvoiceData = defineAsyncComponent(() => import('./InvoiceAddWrapper/InvoiceData.vue'))
-const InvoiceInformation = defineAsyncComponent(
-  () => import('./InvoiceAddWrapper/InvoiceInformation.vue'),
+const InvoiceData = defineAsyncComponent(
+  () => import('../invoice/InvoiceAddWrapper/InvoiceData.vue'),
 )
-const InvoicePreview = defineAsyncComponent(() => import('./InvoiceAddWrapper/InvoicePreview.vue'))
+const InvoiceInformation = defineAsyncComponent(
+  () => import('../invoice/InvoiceAddWrapper/InvoiceInformation.vue'),
+)
+const InvoicePreview = defineAsyncComponent(
+  () => import('../ftpInvoiceIntegration/FtpInvoiceAddWrapper/InvoicePreview.vue'),
+)
 const ModalSuccess = defineAsyncComponent(
-  () => import('./InvoiceAddWrapper/InvoicePreview/ModalSuccess.vue'),
+  () => import('../invoice/InvoiceAddWrapper/InvoicePreview/ModalSuccess.vue'),
 )
 const InvoiceOcrAiVerification = defineAsyncComponent(
-  () => import('./InvoiceAddWrapper/InvoiceOcrAiVerification.vue'),
+  () => import('../invoice/InvoiceAddWrapper/InvoiceOcrAiVerification.vue'),
 )
 const ErrorSubmissionModal = defineAsyncComponent(
-  () => import('./InvoiceAddWrapper/ErrorSubmissionModal.vue'),
+  () => import('../invoice/InvoiceAddWrapper/ErrorSubmissionModal.vue'),
 )
 const ModalSuccessBudgetCheck = defineAsyncComponent(
-  () => import('./InvoiceAddWrapper/ModalSuccessBudgetCheck.vue'),
+  () => import('../invoice/InvoiceAddWrapper/ModalSuccessBudgetCheck.vue'),
 )
 const ModalFailedBudgetCheck = defineAsyncComponent(
-  () => import('./InvoiceAddWrapper/ModalFailedBudgetCheck.vue'),
+  () => import('../invoice/InvoiceAddWrapper/ModalFailedBudgetCheck.vue'),
 )
 
 const invoiceApi = useInvoiceSubmissionStore()
@@ -204,12 +211,12 @@ const stepperStatus = ref('')
 
 const routes = ref<routeTypes[]>([
   {
-    name: 'E-invoice',
-    to: '/invoice',
+    name: 'FTP Invoice Integration',
+    to: '/invoice/ftp-integration',
   },
   {
-    name: 'Add E-invoice',
-    to: '/invoice/add',
+    name: 'Add FTP Invoice',
+    to: '/invoice/ftp-integration/add',
   },
 ])
 
@@ -330,23 +337,6 @@ const checkIsNonPo = () => {
   return route.query.type === 'nonpo'
 }
 
-const checkInvoiceData = () => {
-  form.vendorIdError = useCheckEmpty(form.vendorId).isError
-  form.bankKeyIdError = useCheckEmpty(form.bankKeyId).isError
-  if (route.query.path === 'po') form.invoiceTypeError = useCheckEmpty(form.invoiceType).isError
-
-  const isAltValid =
-    !form.isAlternativePayee ||
-    (!!form.nameAlternative &&
-      !!form.streetAltiernative &&
-      !!form.bankAccountNumberAlternative &&
-      !!form.bankKeyAlternative &&
-      !!form.emailAlternative)
-
-  if (form.vendorIdError || form.bankKeyIdError || form.invoiceTypeError || !isAltValid)
-    return false
-  else return true
-}
 
 const isAlternativePayeeFilled = () => {
   if (!form.isAlternativePayee) return true
@@ -522,28 +512,13 @@ const checkInvoiceInformation = () => {
   else return true
 }
 
-const setTab = (value: string) => {
-  if (value === 'information' && !canClickInformationTab.value) return
-  if (value === 'preview' && !canClickPreviewTab.value) return
-
-  if (value === 'information' && tabNow.value === 'preview') {
-    isCheckBudget.value = false
-    tabNow.value = value
-    try {
-      ;(document.activeElement as HTMLElement)?.blur()
-    } catch {}
-    return
-  }
-
-  tabNow.value = value
-}
 const goBack = () => {
   const list = ['data', 'information', 'ocrAiVerification', 'preview']
   const checkIndex = list.findIndex((item) => item === tabNow.value)
   if (checkIndex === 0 || checkInvoiceView() || checkInvoiceNonPoView()) {
     const nameRoute =
       checkInvoiceView() || (!checkIsNonPo() && !checkInvoiceNonPoView())
-        ? 'invoice'
+        ? 'ftpInvoiceIntegration'
         : 'invoice-list-non-po'
     router.push({
       name: nameRoute,
@@ -875,19 +850,19 @@ const mapDataPostNonPo = () => {
 }
 
 const goNext = () => {
-  console.log(form, 'ini formnya')
+  console.log(form)
 
   const list = ['data', 'information', 'ocrAiVerification', 'preview']
   if (tabNow.value !== 'preview') {
     if (form.status === 0 || form.status === -1 || form.status === 5) {
-      if (tabNow.value === 'data') {
-        const check = checkInvoiceData()
-        if (!check) return
-        hasCompletedDataTab.value = true
-      } else {
-        const check = checkInvoiceInformation()
-        if (!check) return
-      }
+      // if (tabNow.value === 'data') {
+      //   const check = checkInvoiceData()
+      //   if (!check) return
+      //   hasCompletedDataTab.value = true
+      // } else {
+      //   const check = checkInvoiceInformation()
+      //   if (!check) return
+      // }
     }
     const checkIndex = list.findIndex((item) => item === tabNow.value)
     if (checkIndex !== -1) {
@@ -1766,5 +1741,5 @@ provide('form', form)
 </script>
 
 <style lang="scss" scoped>
-@use './styles/invoice-submission.scss';
+@use '@/views/invoice/styles/invoice-submission.scss';
 </style>
