@@ -241,6 +241,11 @@ export default [
         title: 'FTP Invoice Integration',
         to: 'ftpInvoiceIntegration',
       },
+      {
+        id: 'email-invoice-integration',
+        title: 'Email Invoice Integration',
+        to: 'emailInvoiceIntegration',
+      },
       // {
       //   id: 'schedule-payment',
       //   title: 'Schedule Payment',
