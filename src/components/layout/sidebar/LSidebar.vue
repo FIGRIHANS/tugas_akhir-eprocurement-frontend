@@ -259,7 +259,8 @@ const filteredSidebarMenu = computed(() => {
             menu.id === 'e-invoice' ||
             menu.id === 'vendor-management' ||
             menu.id === 'dashboard' ||
-            menu.id === 'analytic-dashboard',
+            menu.id === 'analytic-dashboard' ||
+            menu.id === 'digital-receiving-confirmation',
         )
         .map((menu) => {
           return {
@@ -273,7 +274,8 @@ const filteredSidebarMenu = computed(() => {
                     child.id === 'ftp-invoice-integration' ||
                     child.id === 'scorecard-performance' ||
                     child.id === 'invoiceAnalytic' ||
-                    child.id === 'email-invoice-integration',
+                    child.id === 'email-invoice-integration' ||
+                    child.id === 'dispatch-list',
                 )
               : [],
           }

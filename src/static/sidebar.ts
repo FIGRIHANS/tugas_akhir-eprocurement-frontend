@@ -201,6 +201,18 @@ export default [
       // },
     ],
   },
+  {
+    id: 'digital-receiving-confirmation',
+    title: 'Digital Receiving Confirmation',
+    icon: 'package',
+    child: [
+      {
+        id: 'dispatch-list',
+        title: 'Dispatch List',
+        to: 'dispatchList',
+      },
+    ],
+  },
   // {
   //   id: 'userManagement',
   //   title: 'User Management',
