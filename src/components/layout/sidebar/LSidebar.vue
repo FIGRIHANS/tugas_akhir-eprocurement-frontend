@@ -278,7 +278,8 @@ const filteredSidebarMenu = computed(() => {
                     child.id === 'email-invoice-integration' ||
                     child.id === 'dispatch-list' ||
                     child.id === 'vat-reconciliation' ||
-                    child.id === 'wht-reconciliation',
+                    child.id === 'wht-reconciliation' ||
+                    child.id === 'invoice-type',
                 )
               : [],
           }

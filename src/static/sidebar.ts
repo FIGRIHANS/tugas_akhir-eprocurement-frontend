@@ -88,6 +88,7 @@ export default [
       },
     ],
   },
+
   // {
   //   id: 'e-procurement-report',
   //   title: 'Laporan e-Procurement',
@@ -194,6 +195,11 @@ export default [
         id: 'email-invoice-integration',
         title: 'Email Invoice Integration',
         to: 'emailInvoiceIntegration',
+      },
+      {
+        id: 'invoice-type',
+        title: 'Invoice Type',
+        to: 'invoice-type',
       },
       // {
       //   id: 'schedule-payment',
