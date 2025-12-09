@@ -67,4 +67,9 @@ export default [
     name: 'emailInvoiceIntegration',
     component: () => import('@/views/emailInvoiceIntegration/EmailInvoiceIntegration.vue'),
   },
+  {
+    path: '/invoice/type',
+    name: 'invoice-type',
+    component: () => import('@/views/invoice/invoiceType.vue'),
+  },
 ]
