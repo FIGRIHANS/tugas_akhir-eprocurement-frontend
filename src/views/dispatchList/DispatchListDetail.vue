@@ -220,14 +220,6 @@ const routes = ref<routeTypes[]>([
     name: 'Digital Receiving Confirmation',
     to: '/digital-receiving-confirmation',
   },
-  {
-    name: 'Dispatch List',
-    to: '/dispatch-list',
-  },
-  {
-    name: 'Detail',
-    to: '',
-  },
 ])
 
 const searchTable = ref<string>('')
