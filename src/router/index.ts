@@ -17,6 +17,7 @@ import companyInfomartion from './modules/companyInfomartion'
 import workflowConfig from './modules/workflowConfig'
 import requisition from './modules/requisition'
 import analyticDashboard from './modules/analyticDashboard'
+import digitalReceiving from './modules/digitalReceiving'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -46,6 +47,7 @@ const router = createRouter({
         ...workflowConfig,
         ...requisition,
         ...analyticDashboard,
+        ...digitalReceiving,
       ],
       meta: {
         middleware: 'auth',

@@ -79,13 +79,16 @@
             </button>
           </div>
 
-          <div class="overflow-auto border rounded-lg">
-            <table class="w-full text-sm">
+          <div class="border rounded-lg">
+            <table class="w-full overflow-x-auto text-sm">
               <thead class="bg-gray-100">
                 <tr>
                   <th class="p-2 text-left">Header</th>
-                  <th class="p-2 text-left">Data</th>
-                  <th class="p-2 text-left">Validasi</th>
+                  <th class="p-2 text-left">QR Faktur Data</th>
+                  <th class="p-2 text-left">FP Verifikasi</th>
+                  <th class="p-2 text-left">Invoice OCR</th>
+                  <th class="p-2 text-left">Invoice Verifikasi</th>
+                  <th class="p-2 text-left">Remarks</th>
                 </tr>
               </thead>
 
@@ -93,15 +96,31 @@
                 <tr
                   v-for="(row, index) in tableData"
                   :key="index"
-                  :class="{ 'bg-yellow-100': row.highlight }"
-                  class="border-b"
+                  :class="[{ 'bg-red-100': row.remarks === 'Invoice Not Match' }, 'border-b']"
                 >
                   <td class="p-2">{{ row.header }}</td>
-                  <td class="p-2">{{ row.data }}</td>
-                  <td class="p-2 flex items-center gap-2">
-                    {{ row.validation }}
-                    <i v-if="row.isVerified" class="ki-filled ki-check-circle text-green-500"></i>
-                    <i v-else class="ki-filled ki-cross-circle text-red-500"></i>
+                  <td class="p-2">{{ row.qr }}</td>
+                  <td class="p-2">
+                    <i class="ki-filled ki-check-circle text-green-500" v-if="row.fpVerified"></i>
+                  </td>
+
+                  <td class="p-2">{{ row.ocr }}</td>
+
+                  <td class="p-2">
+                    <i
+                      class="ki-filled ki-check-circle text-green-500"
+                      v-if="row.invoiceVerified"
+                    ></i>
+                  </td>
+
+                  <td
+                    class="p-2"
+                    :class="{
+                      'text-green-600': row.remarks === 'Matched',
+                      'text-red-600 font-semibold': row.remarks !== 'Matched',
+                    }"
+                  >
+                    {{ row.remarks }}
                   </td>
                 </tr>
               </tbody>
@@ -571,26 +590,100 @@ const generalStatus = ref([
 const tableData = ref([
   {
     header: 'Nama Vendor',
-    data: 'CIPTA PIRANTI SEJAHTERA',
-    validation: '',
-    isVerified: true,
+    qr: 'CIPTA PIRANTI SEJAHTERA',
+    fpVerified: true,
+    ocr: 'CIPTA PIRANTI SEJAHTERA',
+    invoiceVerified: true,
+    remarks: 'Matched',
   },
-  { header: 'NPWP Vendor', data: '0754067908029000', validation: '', isVerified: true },
-  { header: 'Perusahaan', data: 'ACARYA DATA ESA', validation: '', isVerified: true },
-  { header: 'NPWP', data: '0430383257068000', validation: '', isVerified: true },
+  {
+    header: 'NPWP Vendor',
+    qr: '754067908029000',
+    fpVerified: true,
+    ocr: 'Non Validation',
+    invoiceVerified: true,
+    remarks: 'Matched',
+  },
+  {
+    header: 'Perusahaan',
+    qr: 'ACARYA DATA ESA',
+    fpVerified: true,
+    ocr: 'Non Validation',
+    invoiceVerified: true,
+    remarks: 'Matched',
+  },
+  {
+    header: 'NPWP',
+    qr: '430383256068000',
+    fpVerified: true,
+    ocr: 'Non Validation',
+    invoiceVerified: true,
+    remarks: 'Matched',
+  },
   {
     header: 'No Faktur Pajak',
-    data: '04002500350159095',
-    validation: ' ',
-    isVerified: true,
-  }, // Baris Tambahan 1
-  { header: 'Tanggal Faktur Pajak', data: '29/10/2025', validation: '', isVerified: true }, // Baris Tambahan 2
-  { header: 'Nilai Penjualan', data: '370,000.00', validation: ' ', highlight: true },
-  { header: 'DPP Lainnya', data: '339,167.00', validation: '', isVerified: true }, // Baris Tambahan 3
-  { header: 'PPN', data: '40,700.00', validation: '', isVerified: true }, // Baris Tambahan 4
-  { header: 'PPN BM', data: '0.00', validation: '', isVerified: true }, // Baris Tambahan 5
-  { header: 'Status Approve FP', data: 'APPROVED', validation: '', isVerified: true }, // Baris Tambahan 6
-  { header: 'Reference', data: '(Referensi: 3544N5E1N6)', validation: '', isVerified: true }, // Baris Tambahan 7
+    qr: '4002500330159090',
+    fpVerified: true,
+    ocr: '4002500330159090',
+    invoiceVerified: true,
+    remarks: 'Matched',
+  },
+  {
+    header: 'Tanggal Faktur Pajak',
+    qr: '29/10/2025',
+    fpVerified: true,
+    ocr: '29/10/2025',
+    invoiceVerified: true,
+    remarks: 'Matched',
+  },
+  {
+    header: 'Nilai Penjualan',
+    qr: '370,000.00',
+    fpVerified: true,
+    ocr: '370,000.00',
+    invoiceVerified: false,
+    remarks: 'Invoice Not Match selisih 39.123',
+  },
+  {
+    header: 'DPP Lainnya',
+    qr: '339,167.00',
+    fpVerified: true,
+    ocr: '300,000.00',
+    invoiceVerified: false,
+    remarks: 'Invoice Not Match',
+  },
+  {
+    header: 'PPN',
+    qr: '40,700.00',
+    fpVerified: true,
+    ocr: '40,700.00',
+    invoiceVerified: true,
+    remarks: 'Matched',
+  },
+  {
+    header: 'PPN BM',
+    qr: '0',
+    fpVerified: true,
+    ocr: '0',
+    invoiceVerified: true,
+    remarks: 'Matched',
+  },
+  {
+    header: 'Status Approve FP',
+    qr: 'APPROVED',
+    fpVerified: true,
+    ocr: 'APPROVED',
+    invoiceVerified: true,
+    remarks: 'Matched',
+  },
+  {
+    header: 'Reference',
+    qr: '(Referensi: 3544N5E1N6)',
+    fpVerified: true,
+    ocr: '(Referensi: 3544N5E1N6)',
+    invoiceVerified: true,
+    remarks: 'Matched',
+  },
 ])
 
 const columns = ref([

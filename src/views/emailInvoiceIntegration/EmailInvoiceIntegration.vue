@@ -196,12 +196,15 @@ import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useFormatIdr } from '@/composables/currency'
 import type { ListPoTypes } from '@/stores/views/invoice/types/submission'
-import moment from 'moment'
+import momentLib from 'moment'
 import { cloneDeep } from 'lodash'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import { KTModal } from '@/metronic/core'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
+
+// Expose moment to template
+const moment = momentLib
 
 const FilterList = defineAsyncComponent(() => import('./EmailFilterList.vue'))
 const DetailVerificationModal = defineAsyncComponent(
