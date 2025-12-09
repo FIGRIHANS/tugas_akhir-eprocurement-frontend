@@ -30,18 +30,15 @@
             <label class="form-label">Status</label>
             <select v-model="filterForm.status" class="form-select">
               <option value="">All Status</option>
-              <option value="Completed">Completed</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Pending">Pending</option>
+              <option value="Quantity Confirmed">Quantity Confirmed</option>
             </select>
           </div>
           <div>
             <label class="form-label">Discrepancy Status</label>
             <select v-model="filterForm.discrepancyStatus" class="form-select">
               <option value="">All Discrepancy</option>
-              <option value="No Discrepancy">No Discrepancy</option>
-              <option value="Minor Discrepancy">Minor Discrepancy</option>
-              <option value="Major Discrepancy">Major Discrepancy</option>
+              <option value="Plus">Plus</option>
+              <option value="Mix">Mix</option>
             </select>
           </div>
           <div>
@@ -112,13 +109,13 @@
             <tr v-for="(item, index) in list" :key="index">
               <td>{{ item.loadSheet }}</td>
               <td>{{ item.faktur }}</td>
-              <td>
+              <td class="text-center">
                 <span class="badge badge-outline" :class="getStatusBadgeClass(item.status)">
                   {{ item.status }}
                 </span>
               </td>
               <td>{{ formatDate(item.deliveryDate) }}</td>
-              <td>
+              <td class="text-center">
                 <span
                   class="badge badge-outline"
                   :class="getDiscrepancyBadgeClass(item.discrepancyStatus)"
@@ -202,10 +199,6 @@ const routes = ref<routeTypes[]>([
     name: 'Digital Receiving Confirmation',
     to: '/digital-receiving-confirmation',
   },
-  {
-    name: 'Dispatch List',
-    to: '/dispatch-list',
-  },
 ])
 
 const search = ref<string>('')
@@ -241,9 +234,9 @@ const dataList = ref<ReceivingData[]>([
   {
     loadSheet: 'LS-2024-001',
     faktur: 'FKT-001',
-    status: 'Completed',
+    status: 'Quantity Confirmed',
     deliveryDate: '2024-12-01',
-    discrepancyStatus: 'No Discrepancy',
+    discrepancyStatus: 'Plus',
     transporter: 'PT Trans Jaya',
     distributor: 'PT Distributor A',
     regionFrom: 'Jakarta',
@@ -252,9 +245,9 @@ const dataList = ref<ReceivingData[]>([
   {
     loadSheet: 'LS-2024-002',
     faktur: 'FKT-002',
-    status: 'In Progress',
+    status: 'Quantity Confirmed',
     deliveryDate: '2024-12-05',
-    discrepancyStatus: 'Minor Discrepancy',
+    discrepancyStatus: 'Mix',
     transporter: 'PT Trans Sejahtera',
     distributor: 'PT Distributor B',
     regionFrom: 'Surabaya',
@@ -263,9 +256,9 @@ const dataList = ref<ReceivingData[]>([
   {
     loadSheet: 'LS-2024-003',
     faktur: 'FKT-003',
-    status: 'Pending',
+    status: 'Quantity Confirmed',
     deliveryDate: '2024-12-08',
-    discrepancyStatus: 'Major Discrepancy',
+    discrepancyStatus: 'Plus',
     transporter: 'PT Trans Mandiri',
     distributor: 'PT Distributor C',
     regionFrom: 'Semarang',
@@ -274,9 +267,9 @@ const dataList = ref<ReceivingData[]>([
   {
     loadSheet: 'LS-2024-004',
     faktur: 'FKT-004',
-    status: 'Completed',
+    status: 'Quantity Confirmed',
     deliveryDate: '2024-12-02',
-    discrepancyStatus: 'No Discrepancy',
+    discrepancyStatus: 'Mix',
     transporter: 'PT Trans Express',
     distributor: 'PT Distributor D',
     regionFrom: 'Medan',
@@ -285,9 +278,9 @@ const dataList = ref<ReceivingData[]>([
   {
     loadSheet: 'LS-2024-005',
     faktur: 'FKT-005',
-    status: 'In Progress',
+    status: 'Quantity Confirmed',
     deliveryDate: '2024-12-06',
-    discrepancyStatus: 'Minor Discrepancy',
+    discrepancyStatus: 'Plus',
     transporter: 'PT Trans Logistik',
     distributor: 'PT Distributor E',
     regionFrom: 'Makassar',
@@ -296,9 +289,9 @@ const dataList = ref<ReceivingData[]>([
   {
     loadSheet: 'LS-2024-006',
     faktur: 'FKT-006',
-    status: 'Completed',
+    status: 'Quantity Confirmed',
     deliveryDate: '2024-12-03',
-    discrepancyStatus: 'No Discrepancy',
+    discrepancyStatus: 'Mix',
     transporter: 'PT Trans Cargo',
     distributor: 'PT Distributor F',
     regionFrom: 'Denpasar',
@@ -307,9 +300,9 @@ const dataList = ref<ReceivingData[]>([
   {
     loadSheet: 'LS-2024-007',
     faktur: 'FKT-007',
-    status: 'Pending',
+    status: 'Quantity Confirmed',
     deliveryDate: '2024-12-09',
-    discrepancyStatus: 'Major Discrepancy',
+    discrepancyStatus: 'Plus',
     transporter: 'PT Trans Global',
     distributor: 'PT Distributor G',
     regionFrom: 'Palembang',
@@ -318,9 +311,9 @@ const dataList = ref<ReceivingData[]>([
   {
     loadSheet: 'LS-2024-008',
     faktur: 'FKT-008',
-    status: 'In Progress',
+    status: 'Quantity Confirmed',
     deliveryDate: '2024-12-07',
-    discrepancyStatus: 'No Discrepancy',
+    discrepancyStatus: 'Mix',
     transporter: 'PT Trans Nusantara',
     distributor: 'PT Distributor H',
     regionFrom: 'Pontianak',
@@ -329,9 +322,9 @@ const dataList = ref<ReceivingData[]>([
   {
     loadSheet: 'LS-2024-009',
     faktur: 'FKT-009',
-    status: 'Completed',
+    status: 'Quantity Confirmed',
     deliveryDate: '2024-12-04',
-    discrepancyStatus: 'Minor Discrepancy',
+    discrepancyStatus: 'Plus',
     transporter: 'PT Trans Utama',
     distributor: 'PT Distributor I',
     regionFrom: 'Balikpapan',
@@ -340,9 +333,9 @@ const dataList = ref<ReceivingData[]>([
   {
     loadSheet: 'LS-2024-010',
     faktur: 'FKT-010',
-    status: 'Pending',
+    status: 'Quantity Confirmed',
     deliveryDate: '2024-12-10',
-    discrepancyStatus: 'Major Discrepancy',
+    discrepancyStatus: 'Mix',
     transporter: 'PT Trans Prima',
     distributor: 'PT Distributor J',
     regionFrom: 'Padang',
@@ -384,16 +377,13 @@ const filteredDataList = computed(() => {
 })
 
 const getStatusBadgeClass = (status: string) => {
-  if (status === 'Completed') return 'badge-success'
-  if (status === 'In Progress') return 'badge-warning'
-  if (status === 'Pending') return 'badge-info'
+  if (status === 'Quantity Confirmed') return 'badge-success'
   return 'badge-secondary'
 }
 
 const getDiscrepancyBadgeClass = (status: string) => {
-  if (status === 'No Discrepancy') return 'badge-success'
-  if (status === 'Minor Discrepancy') return 'badge-warning'
-  if (status === 'Major Discrepancy') return 'badge-danger'
+  if (status === 'Plus') return 'badge-primary'
+  if (status === 'Mix') return 'badge-info'
   return 'badge-secondary'
 }
 
