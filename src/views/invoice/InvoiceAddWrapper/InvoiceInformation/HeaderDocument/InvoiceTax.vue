@@ -11,13 +11,14 @@
           {{ item.title }}
           <span v-if="index === 0" class="text-red-500 ml-[4px]">*</span>
         </label>
-        <pdfUpload
+        <pdfUploadTax
           ref="pdfUploadRef"
           v-show="!form[item.varName as keyof typeof form]"
           :error="!!form[item.varErrorName as keyof documentFormTypes]"
           :disabled="
             formInject?.status !== 0 && formInject?.status !== -1 && formInject?.status !== 5
           "
+          @setFileQr="setFileQr($event)"
           @setFile="setFile($event, item.varName as keyof documentFormTypes)"
         />
         <div
@@ -51,8 +52,10 @@ import type {
   listFormTypes,
 } from '../../../types/invoiceDocument'
 import type { formTypes } from '../../../types/invoiceAddWrapper'
-import pdfUpload from '@/components/ui/pdfUpload/pdfUpload.vue'
+import pdfUploadTax from '@/components/ui/pdfUpload/pdfUploadTaxDoc.vue'
 import AttachmentView from '@/components/ui/attachment/AttachmentView.vue'
+import type { invoiceQrData } from '@/views/invoice/types/invoiceQrdata'
+const qrData = inject<invoiceQrData>('qrData')
 
 const form = reactive<documentFormTypes>({
   invoiceDocument: null,
@@ -86,6 +89,19 @@ const list = ref<listFormTypes[]>([
 
 const formInject = inject<formTypes>('form')
 const pdfUploadRef = ref()
+
+const setFileQr = (data: invoiceQrData) => {
+  qrData.vendorBuyer = data.vendorBuyer
+  qrData.npwppBuyer = data.npwppBuyer
+  qrData.vendorSupplier = data.vendorSupplier
+  qrData.npwpSupplier = data.npwpSupplier
+  qrData.taxDocumentNumber = data.taxDocumentNumber
+  qrData.taxDocumentDate = data.taxDocumentDate
+  qrData.dpp = data.dpp
+  qrData.ppn = data.ppn
+  qrData.ppnbm = data.ppnbm
+  qrData.status = data.status
+}
 
 const setFile = (file: responseFileTypes, name: keyof documentFormTypes) => {
   const reftProperty = toRef(form, name)

@@ -179,6 +179,8 @@ import type { itemsPoGrType } from './types/invoicePoGr'
 import type { itemsCostType } from './types/additionalCost'
 import type { invoiceItemTypes } from './types/invoiceItem'
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
+import type { invoiceQrData } from './types/invoiceQrdata'
+import type { invoiceOcrData } from './types/invoiceOcrData'
 
 const InvoiceData = defineAsyncComponent(() => import('./InvoiceAddWrapper/InvoiceData.vue'))
 const InvoiceInformation = defineAsyncComponent(
@@ -300,6 +302,30 @@ const form = reactive<formTypes>({
   casDateReceipt: '',
   dueDateCas: '',
   proposalAmountVal: '',
+})
+
+const qrData = reactive<invoiceQrData>({
+  vendorBuyer: '',
+  npwppBuyer: '',
+  vendorSupplier: '',
+  npwpSupplier: '',
+  taxDocumentNumber: '',
+  taxDocumentDate: '',
+  dpp: '',
+  ppn: '',
+  ppnbm: '',
+  status: '',
+})
+
+const ocrData = reactive<invoiceOcrData>({
+  FakturPajak: '',
+  buyerNpwp: '',
+  dpp: '',
+  ppn: '',
+  total: '',
+  transactionDate: '',
+  vendorName: '',
+  vendorNpwp: '',
 })
 
 const contentComponent = computed(() => {
@@ -1779,6 +1805,10 @@ watch(
 )
 
 provide('form', form)
+
+provide('qrData', qrData)
+
+provide('ocrData', ocrData)
 </script>
 
 <style lang="scss" scoped>

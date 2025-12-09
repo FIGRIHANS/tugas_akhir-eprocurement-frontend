@@ -71,14 +71,28 @@
         <div v-if="tabOcrTab === 'tax'" class="bg-white shadow rounded-xl p-4">
           <div class="flex justify-between mb-3">
             <h2 class="font-semibold text-lg">Invoice Verification</h2>
-            <button
+            <div class="flex gap-2">
+              <UiButton
+                class="px-3 py-1 bg-blue-600 text-white rounded-lg"
+                @click="isVerify = true"
+              >
+                Verify By PJAP
+              </UiButton>
+              <UiButton
+                class="px-3 py-1 bg-blue-600 text-white rounded-lg"
+                :disabled="!isVerify"
+                @click="openModalSuccess()"
+              >
+                VAT Credit Posting
+              </UiButton>
+            </div>
+            <!-- <button
               class="px-3 py-1 bg-blue-600 text-white rounded-lg"
               @click="handleVerifyInvoice"
             >
               Verify Invoice
-            </button>
+            </button> -->
           </div>
-
           <div class="border rounded-lg">
             <table class="w-full overflow-x-auto text-sm">
               <thead class="bg-gray-100">
@@ -102,6 +116,7 @@
                   <td class="p-2">{{ row.qr }}</td>
                   <td class="p-2">
                     <i class="ki-filled ki-check-circle text-green-500" v-if="row.fpVerified"></i>
+                    <i class="ki-filled ki-cross-circle text-red-500" v-else></i>
                   </td>
 
                   <td class="p-2">{{ row.ocr }}</td>
@@ -111,16 +126,17 @@
                       class="ki-filled ki-check-circle text-green-500"
                       v-if="row.invoiceVerified"
                     ></i>
+                    <i class="ki-filled ki-cross-circle text-red-500" v-else></i>
                   </td>
 
-                  <td
-                    class="p-2"
-                    :class="{
-                      'text-green-600': row.remarks === 'Matched',
-                      'text-red-600 font-semibold': row.remarks !== 'Matched',
-                    }"
-                  >
-                    {{ row.remarks }}
+                  <td class="p-2">
+                    <p
+                      class="text-green-600"
+                      v-if="row.remarks === true || row.remarks === 'Matched'"
+                    >
+                      Matched
+                    </p>
+                    <p class="text-red-600 font-semibold" v-else>Didn't Matched</p>
                   </td>
                 </tr>
               </tbody>
@@ -208,8 +224,6 @@
             <p class="mt-1">Terima kasih.</p>
           </div>
         </div>
-
-        <!-- TABLE DETAIL INVOICE -->
       </div>
 
       <!-- ==================== KANAN ==================== -->
@@ -222,15 +236,6 @@
                 {{ item.name }}
               </option>
             </select>
-
-            <!-- <div class="flex items-center gap-2 text-gray-500">
-              <button class="p-1 hover:text-blue-600">
-                <i class="ki-filled ki-zoom-in"></i>
-              </button>
-              <button class="p-1 hover:text-blue-600">
-                <i class="ki-filled ki-zoom-out"></i>
-              </button>
-            </div> -->
           </div>
 
           <div class="flex-1 border rounded-lg overflow-hidden">
@@ -245,228 +250,28 @@
         </div>
       </div>
       <div class="bg-white shadow rounded-xl p-4 col-span-12">
-        <!-- <h2 class="font-semibold text-lg mb-3">Detail Item</h2> -->
-
         <InvoicePoGrView v-if="checkPo()" />
         <InvoiceItemView v-if="checkIsNonPo()" />
-        <!-- <hr class="border-gray-300" /> -->
         <AdditionalCostView
           v-if="(checkIsWithoutDp() || checkPoWithDp() || checkIsPoPibCc()) && !checkIsNonPo()"
         />
-
-        <!-- Invoice PO & GR Item By Search Table  -->
-
-        <!-- <div v-if="form?.invoiceType !== '902'">
-          <div v-if="form" class="overflow-x-auto pogr__table">
-            <table
-              class="table table-xs table-border"
-              :class="{ 'border-danger': form?.invoicePoGrError }"
-            >
-              <thead>
-                <tr>
-                  <th
-                    v-for="(item, index) in columns"
-                    :key="index"
-                    class="pogr__field-base"
-                    :class="{
-                      'pogr__field-base--po-item': item.toLowerCase() === 'item text',
-                      'pogr__field-base--tax': item.toLowerCase() === 'tax code',
-                    }"
-                  >
-                    {{ item }}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-if="form.invoicePoGr.length === 0">
-                  <td colspan="11" class="text-center text-[13px]">No Data Available</td>
-                </tr>
-                <template v-else>
-                  <tr
-                    v-for="(item, index) in form.invoicePoGr"
-                    :key="index"
-                    class="pogr__field-items"
-                  >
-                    <td>
-                      <span v-if="(!item.isEdit && checkInvoiceDp()) || !checkInvoiceDp()">{{
-                        item.poNo
-                      }}</span>
-                    </td>
-                    <td v-if="!checkInvoiceDp()">{{ item.poItem }}</td>
-                    <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentNo }}</td>
-                    <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentItem }}</td>
-                    <td v-if="!checkInvoiceDp() && !checkPoPib()">
-                      {{
-                        form.status === 5
-                          ? moment(item.grDocumentDate).format('YYYY')
-                          : item.grDocumentDate
-                            ? moment(item.grDocumentDate).format('YYYY/MM/DD')
-                            : item.grDocumentDate
-                      }}
-                    </td>
-                    <td v-if="!checkInvoiceDp()">
-                      {{
-                        form.currency === item.currencyLC
-                          ? useFormatIdr(item.itemAmountLC)
-                          : useFormatUsd(item.itemAmountTC)
-                      }}
-                    </td>
-                    <td v-if="!checkInvoiceDp()">{{ item.quantity }}</td>
-                    <td v-if="!checkInvoiceDp()">{{ item.uom }}</td>
-                    <td v-if="!checkInvoiceDp()">{{ item.itemText }}</td>
-                    <td v-if="!checkInvoiceDp() && !checkPoPib()">
-                      {{ item.conditionType || '-' }}
-                    </td>
-                    <td v-if="!checkInvoiceDp() && form.invoiceType !== '903'">
-                      {{ item.conditionTypeDesc || '-' }}
-                    </td>
-                    <td v-if="!checkInvoiceDp() && form?.invoiceType !== '903'">
-                      {{ item.qcStatus || '-' }}
-                    </td>
-                    <td v-if="form?.invoiceType === '903'">
-                      <span>{{
-                        form?.currency === item.currencyLC
-                          ? useFormatIdr(item.vatAmount || 0)
-                          : useFormatUsd(item.vatAmount || 0)
-                      }}</span>
-                    </td>
-                    <td v-if="checkInvoiceDp()">
-                      <span v-if="!item.isEdit">{{
-                        form?.currency === 'IDR'
-                          ? useFormatIdr(item.itemAmountLC)
-                          : useFormatUsd(item.itemAmountLC)
-                      }}</span>
-                    </td>
-                    <td>
-                      <span v-if="!item.isEdit">{{ getTaxCodeName(item.taxCode) || '-' }}</span>
-                    </td>
-                    <td v-if="!checkPoPib()">
-                      <span>{{
-                        form?.currency === item.currencyLC
-                          ? useFormatIdr(item.vatAmount || 0)
-                          : useFormatUsd(item.vatAmount || 0)
-                      }}</span>
-                    </td>
-                    <td>-</td>
-                    <td>-</td>
-                    <td>
-                      {{
-                        form?.currency === item.currencyLC
-                          ? useFormatIdr(item.whtBaseAmount)
-                          : useFormatUsd(item.whtBaseAmount)
-                      }}
-                    </td>
-                    <td>-</td>
-                    <td>{{ item.department || '-' }}</td>
-                  </tr>
-                </template>
-              </tbody>
-            </table>
-          </div>
-        </div> -->
-
-        <!-- Invoice PO & Gr Add Item Manual -->
-        <!-- <div v-else>
-          <div v-if="form" class="overflow-x-auto pogr__table">
-            <table
-              class="table table-xs table-border"
-              :class="{ 'border-danger': form?.invoicePoGrError }"
-            >
-              <thead>
-                <tr>
-                  <th
-                    v-for="(item, index) in columns"
-                    :key="index"
-                    class="pogr__field-base"
-                    :class="{
-                      'pogr__field-base--po-number': item.toLowerCase() === 'po number',
-                      'pogr__field-base--po-item': item.toLowerCase() === 'po item',
-                      'pogr__field-base--department': item.toLowerCase() === 'department',
-                    }"
-                  >
-                    {{ item }}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-if="form.invoicePoGr.length === 0">
-                  <td colspan="11" class="text-center text-[13px]">No Data Available</td>
-                </tr>
-                <template v-else>
-                  <tr
-                    v-for="(item, index) in form.invoicePoGr"
-                    :key="index"
-                    class="pogr__field-items"
-                  >
-                    <td>
-                      <span>{{ item.poNo }} </span>
-                    </td>
-                    <td v-if="!checkInvoiceDp()">
-                      <span>{{ item.poItem }}</span>
-                    </td>
-                    <td v-if="!checkInvoiceDp()">
-                      <span>{{
-                        form?.currency === 'IDR'
-                          ? useFormatIdr(item.itemAmountLC)
-                          : useFormatUsd(item.itemAmountLC)
-                      }}</span>
-                    </td>
-                    <td v-if="!checkInvoiceDp()">
-                      <span>{{ item.quantity }}</span>
-                    </td>
-                    <td v-if="!checkInvoiceDp()">
-                      <span>{{ item.uom || '-' }}</span>
-                    </td>
-                    <td v-if="!checkInvoiceDp()">{{ item.itemText || '-' }}</td>
-                    <td>
-                      <p>
-                        <i
-                          class="flex items-center justify-center ki-filled ki-check-circle text-green-500"
-                        ></i>
-                      </p>
-                    </td>
-                    <td>
-                      <p>
-                        <i
-                          class="flex items-center justify-center ki-filled ki-cross-circle text-red-500"
-                        ></i>
-                      </p>
-                    </td>
-                    <td>
-                      <p>
-                        <i
-                          class="flex items-center justify-center ki-filled ki-check-circle text-green-500"
-                        ></i>
-                      </p>
-                    </td>
-                    <td>
-                      <p>
-                        <i
-                          class="flex items-center justify-center ki-filled ki-cross-circle text-red-500"
-                        ></i>
-                      </p>
-                    </td>
-                    <td v-if="!checkInvoiceDp()">
-                      <span>{{ getCostCenterName(item.department) || '-' }}</span>
-                    </td>
-                  </tr>
-                </template>
-              </tbody>
-            </table>
-          </div>
-        </div> -->
       </div>
     </div>
   </div>
+  <UiModal v-model="showModalSuccess" size="sm">
+    <div class="text-center mb-6">
+      <ModalSuccessLogo class="mx-auto" />
+      <h3 class="text-center text-lg font-medium">Yeayyy</h3>
+      <p class="text-center text-base text-gray-600 mb-5">Success</p>
+    </div>
+  </UiModal>
 </template>
 
 <script lang="ts" setup>
 import { ref, inject, onMounted, watch, defineAsyncComponent } from 'vue'
 import { usePreviewFileStore } from '@/stores/general/previewFile'
 import type { formTypes } from '../types/invoiceAddWrapper'
-// import { useFormatIdr, useFormatUsd } from '@/composables/currency'
-// import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
-// import moment from 'moment'
+import type { invoiceQrData } from '../types/invoiceQrdata'
 import { defaultColumn, invoiceDpColumn, poCCColumn, manualAddColumn } from '@/static/invoicePoGr'
 const InvoicePoGrView = defineAsyncComponent(
   () => import('./InvoicePreview/InvoicePoGrViewOcr.vue'),
@@ -478,25 +283,27 @@ const AdditionalCostView = defineAsyncComponent(
   () => import('./InvoicePreview/AdditionalCostViewOcr.vue'),
 )
 import { useRoute } from 'vue-router'
+import UiButton from '@/components/ui/atoms/button/UiButton.vue'
+import UiModal from '@/components/modal/UiModal.vue'
+import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
+import type { invoiceOcrData } from '../types/invoiceOcrData'
+
 const route = useRoute()
 
-// import type { itemsCostType } from '../../types/additionalCost'
-// import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
+const showModalSuccess = ref(false)
 
-// const invoiceMasterApi = useInvoiceMasterDataStore()
-// const verificationApi = useInvoiceVerificationStore()
-
-// const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
-// const costCenterList = computed(() => invoiceMasterApi.costCenterList)
+const qrData = inject<invoiceQrData>('qrData')
+const ocrData = inject<invoiceOcrData>('ocrData')
 
 const form = inject<formTypes>('form')
 const previewApi = usePreviewFileStore()
 
-const previewUrl = ref<string>(form.tax.path)
+const previewUrl = ref<string>(form.tax?.path ?? '')
 const tabOcrTab = ref<string>('general')
 const typeForm = ref<string>('')
 
-const showAiAction = ref(false)
+// const showAiAction = ref(false)
+const isVerify = ref(false)
 
 const activeButton = ref<'back' | 'proceed'>('proceed')
 
@@ -524,47 +331,21 @@ const checkIsPoPibCc = () => {
   return (form.invoiceType === '902' || form.invoiceType === '903') && form.status > 0
 }
 
-const handleVerifyInvoice = () => {
-  showAiAction.value = true
-}
-
 const getPreviewUrl = async () => {
-  const response = await previewApi.getPreview(form.tax.path)
-  const url = window.URL.createObjectURL(response.data)
-  previewUrl.value = url
+  if (form.tax.path) {
+    const response = await previewApi.getPreview(form.tax.path)
+    const url = window.URL.createObjectURL(response.data)
+    previewUrl.value = url
+  }
 }
 
-// const checkInvoiceDp = () => {
-//   return form?.invoiceDp === '9012'
-// }
-
-// const checkPoPib = () => {
-//   return form?.invoiceType === '902'
-// }
-
-// const getCostCenterName = (costCenter: string) => {
-//   const index = costCenterList.value.findIndex((item) => item.code === costCenter)
-//   if (index !== -1) {
-//     const data = costCenterList.value[index]
-//     return `${data.code} - ${data.name}`
-//   }
-//   return '-'
-// }
-
-// const getTaxCodeName = (taxCode: string) => {
-//   const index = listTaxCalculation.value.findIndex((item) => item.code === taxCode)
-//   if (index !== -1) {
-//     const data = listTaxCalculation.value[index]
-//     return `${data.code} - ${data.name}`
-//   }
-//   return '-'
-// }
+const openModalSuccess = () => {
+  showModalSuccess.value = true
+}
 
 const documentTypeList = ref([
   { code: '1', name: 'Tax Document' },
   { code: '2', name: 'Invoice Document' },
-  // { code: '3', name: 'Delivery Order' },
-  // { code: '4', name: 'Other' },
 ])
 
 const selectedDocumentType = ref<string>('1')
@@ -590,31 +371,31 @@ const generalStatus = ref([
 const tableData = ref([
   {
     header: 'Nama Vendor',
-    qr: 'CIPTA PIRANTI SEJAHTERA',
-    fpVerified: true,
-    ocr: 'CIPTA PIRANTI SEJAHTERA',
-    invoiceVerified: true,
-    remarks: 'Matched',
+    qr: qrData.vendorBuyer,
+    fpVerified: form.companyName === qrData.vendorBuyer,
+    ocr: ocrData.vendorName,
+    invoiceVerified: form.companyName === ocrData.vendorName,
+    remarks: qrData.vendorBuyer === ocrData.vendorName,
   },
   {
     header: 'NPWP Vendor',
-    qr: '754067908029000',
-    fpVerified: true,
-    ocr: 'Non Validation',
-    invoiceVerified: true,
-    remarks: 'Matched',
+    qr: qrData.npwppBuyer,
+    fpVerified: form.npwpNumber === qrData.npwppBuyer,
+    ocr: ocrData.buyerNpwp,
+    invoiceVerified: form.npwpNumber === ocrData.buyerNpwp,
+    remarks: ocrData.buyerNpwp === qrData.npwppBuyer,
   },
   {
     header: 'Perusahaan',
-    qr: 'ACARYA DATA ESA',
+    qr: qrData.vendorSupplier,
     fpVerified: true,
-    ocr: 'Non Validation',
+    ocr: '-',
     invoiceVerified: true,
     remarks: 'Matched',
   },
   {
     header: 'NPWP',
-    qr: '430383256068000',
+    qr: ocrData.buyerNpwp,
     fpVerified: true,
     ocr: 'Non Validation',
     invoiceVerified: true,
@@ -622,16 +403,16 @@ const tableData = ref([
   },
   {
     header: 'No Faktur Pajak',
-    qr: '4002500330159090',
-    fpVerified: true,
+    qr: qrData.taxDocumentNumber,
+    fpVerified: form.taxNumber,
     ocr: '4002500330159090',
     invoiceVerified: true,
     remarks: 'Matched',
   },
   {
     header: 'Tanggal Faktur Pajak',
-    qr: '29/10/2025',
-    fpVerified: true,
+    qr: qrData.taxDocumentDate,
+    fpVerified: form.invoiceDate === qrData.taxDocumentDate,
     ocr: '29/10/2025',
     invoiceVerified: true,
     remarks: 'Matched',
@@ -646,23 +427,23 @@ const tableData = ref([
   },
   {
     header: 'DPP Lainnya',
-    qr: '339,167.00',
-    fpVerified: true,
-    ocr: '300,000.00',
+    qr: qrData.dpp,
+    fpVerified: form.subtotal === Number(qrData.dpp),
+    ocr: ocrData.dpp,
     invoiceVerified: false,
     remarks: 'Invoice Not Match',
   },
   {
     header: 'PPN',
-    qr: '40,700.00',
+    qr: qrData.ppn,
     fpVerified: true,
-    ocr: '40,700.00',
+    ocr: ocrData.ppn,
     invoiceVerified: true,
     remarks: 'Matched',
   },
   {
     header: 'PPN BM',
-    qr: '0',
+    qr: qrData.ppnbm,
     fpVerified: true,
     ocr: '0',
     invoiceVerified: true,
@@ -670,7 +451,7 @@ const tableData = ref([
   },
   {
     header: 'Status Approve FP',
-    qr: 'APPROVED',
+    qr: qrData.status,
     fpVerified: true,
     ocr: 'APPROVED',
     invoiceVerified: true,
@@ -678,9 +459,9 @@ const tableData = ref([
   },
   {
     header: 'Reference',
-    qr: '(Referensi: 3544N5E1N6)',
+    qr: '3544N5E1N6',
     fpVerified: true,
-    ocr: '(Referensi: 3544N5E1N6)',
+    ocr: '3544N5E1N6',
     invoiceVerified: true,
     remarks: 'Matched',
   },
@@ -710,9 +491,8 @@ const setTabOcr = (type: string) => {
 }
 
 const setColumn = () => {
-  let sourceColumns // Array sumber (belum dimodifikasi)
+  let sourceColumns
 
-  // 1. Tentukan array sumber
   if (form?.invoiceType === '903') {
     sourceColumns = poCCColumn
   } else if (form?.invoiceDp === '9012') {
@@ -723,14 +503,10 @@ const setColumn = () => {
     sourceColumns = defaultColumn
   }
 
-  // **PERUBAHAN UTAMA: Buat salinan (baseColumns) dari array sumber**
   const baseColumns = [...sourceColumns]
 
-  // 2. Lakukan penyisipan (splice) pada salinan (baseColumns)
-  // baseColumns adalah array baru, jadi penyisipan tidak akan terulang pada sumber.
   baseColumns.splice(6, 0, 'Qty Match', 'Unit Price Match', 'VAT Match', 'WHT Match')
 
-  // 3. Tetapkan hasil ke columns.value
   columns.value = baseColumns
 }
 

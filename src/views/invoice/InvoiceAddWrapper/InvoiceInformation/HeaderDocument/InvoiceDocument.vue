@@ -23,16 +23,17 @@
           >
         </label>
         <pdfUpload
-          v-if="!form[item.varName as keyof typeof form] && !checkIsView()"
           ref="pdfUploadRef"
-          v-show="!form[item.varName as keyof typeof form]"
+          v-show="!form[item.varName as keyof typeof form] && !checkIsView()"
           :error="index === 0 && !!formInject?.invoiceDocumentError && !hasAnyDocument"
           :disabled="
             formInject?.status !== 0 && formInject?.status !== -1 && formInject?.status !== 5
           "
+          :varName="item.varName"
+          @setFileOcr="setFileOcr($event)"
           @setFile="setFile($event, item.varName as keyof documentFormTypes)"
         />
-        <div v-if="!form[item.varName as keyof typeof form] && checkIsView()">
+        <div v-show="!form[item.varName as keyof typeof form] && checkIsView()">
           <p>-</p>
         </div>
         <div
@@ -80,8 +81,10 @@ import type { formTypes } from '../../../types/invoiceAddWrapper'
 import pdfUpload from '@/components/ui/pdfUpload/pdfUpload.vue'
 import AttachmentView from '@/components/ui/attachment/AttachmentView.vue'
 import { useRoute } from 'vue-router'
+import type { invoiceOcrData } from '@/views/invoice/types/invoiceOcrData'
 
 const route = useRoute()
+const ocrData = inject<invoiceOcrData>('ocrData')
 
 const form = reactive<documentFormTypes>({
   invoiceDocument: null,
@@ -150,6 +153,18 @@ const changeFile = (index: number) => {
   pdfUploadRef.value[index].triggerFileInput()
 }
 
+const setFileOcr = (data: invoiceOcrData) => {
+  console.log(data, 'ini data')
+
+  ocrData.buyerNpwp = data.buyerNpwp
+  ocrData.dpp = data.dpp
+  ocrData.ppn = data.ppn
+  ocrData.total = data.total
+  ocrData.transactionDate = data.transactionDate
+  ocrData.vendorName = data.vendorName
+  ocrData.vendorNpwp = data.vendorNpwp
+  ocrData.FakturPajak = data.FakturPajak
+}
 // const download = (index: string) => {
 //   console.log(index)
 //   console.log(formInject)
