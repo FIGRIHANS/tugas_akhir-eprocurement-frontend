@@ -213,6 +213,23 @@ export default [
       },
     ],
   },
+  {
+    id: 'tax-reconciliation',
+    title: 'Tax Reconciliation',
+    icon: 'calculator',
+    child: [
+      {
+        id: 'vat-reconciliation',
+        title: 'VAT Reconciliation',
+        to: 'vatReconciliation',
+      },
+      {
+        id: 'wht-reconciliation',
+        title: 'WHT Reconciliation',
+        to: 'whtReconciliation',
+      },
+    ],
+  },
   // {
   //   id: 'userManagement',
   //   title: 'User Management',

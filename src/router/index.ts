@@ -18,6 +18,7 @@ import workflowConfig from './modules/workflowConfig'
 import requisition from './modules/requisition'
 import analyticDashboard from './modules/analyticDashboard'
 import digitalReceiving from './modules/digitalReceiving'
+import taxReconciliation from './modules/taxReconciliation'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -48,6 +49,7 @@ const router = createRouter({
         ...requisition,
         ...analyticDashboard,
         ...digitalReceiving,
+        ...taxReconciliation,
       ],
       meta: {
         middleware: 'auth',

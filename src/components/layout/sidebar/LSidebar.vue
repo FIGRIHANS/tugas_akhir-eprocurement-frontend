@@ -260,7 +260,8 @@ const filteredSidebarMenu = computed(() => {
             menu.id === 'vendor-management' ||
             menu.id === 'dashboard' ||
             menu.id === 'analytic-dashboard' ||
-            menu.id === 'digital-receiving-confirmation',
+            menu.id === 'digital-receiving-confirmation' ||
+            menu.id === 'tax-reconciliation',
         )
         .map((menu) => {
           return {
@@ -275,7 +276,9 @@ const filteredSidebarMenu = computed(() => {
                     child.id === 'scorecard-performance' ||
                     child.id === 'invoiceAnalytic' ||
                     child.id === 'email-invoice-integration' ||
-                    child.id === 'dispatch-list',
+                    child.id === 'dispatch-list' ||
+                    child.id === 'vat-reconciliation' ||
+                    child.id === 'wht-reconciliation',
                 )
               : [],
           }
