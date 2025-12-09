@@ -33,10 +33,9 @@ const props = defineProps<{
   error?: boolean
   disabled?: boolean
   isHoldUpload?: boolean
-  varName?: string
 }>()
 
-const emits = defineEmits(['setFile', 'setFileOcr'])
+const emits = defineEmits(['setFile', 'setFileQr'])
 
 const uploadApi = useUploadStore()
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -59,18 +58,15 @@ const handleFileUpload = async (event: Event) => {
   try {
     const response = await uploadApi.uploadFile(file, 0)
 
-    if (props.varName === 'invoiceDocument') {
-      const responseOcr = await uploadApi.uploadFileOcr(file, 0)
-
-      emits('setFileOcr', responseOcr)
-    }
-
     emits('setFile', {
       id: 0,
       name: response.name,
       path: response.path,
       fileSize: file.size,
     })
+
+    const responseQr = await uploadApi.uploadFileQr(file, 0)
+    emits('setFileQr', responseQr)
   } catch {}
 }
 

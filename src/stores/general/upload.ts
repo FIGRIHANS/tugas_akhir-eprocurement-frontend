@@ -4,6 +4,7 @@ import generalApi from '@/core/utils/generalApi'
 
 import type { ApiResponse } from '@/core/type/api'
 import type { UploadFileResponse } from './types/upload'
+import invoiceApi from '@/core/utils/invoiceApi'
 
 export const useUploadStore = defineStore('upload', () => {
   const errorMessageUpload = ref<string>('')
@@ -19,6 +20,36 @@ export const useUploadStore = defineStore('upload', () => {
     )
 
     errorMessageUpload.value = response.data.result.message
+
+    return response.data.result.content
+  }
+
+  const uploadFileQr = async (FormFile: File, Actioner: number) => {
+    const formData = new FormData()
+    formData.append('FormFile', FormFile)
+    formData.append('Actioner', String(Actioner))
+
+    const response: ApiResponse<UploadFileResponse> = await invoiceApi.post(
+      '/ocr/invoice/scan-qr',
+      formData,
+    )
+
+    // errorMessageUpload.value = response.data.result.message
+
+    return response.data.invoiceDetail
+  }
+
+  const uploadFileOcr = async (FormFile: File, Actioner: number) => {
+    const formData = new FormData()
+    formData.append('FormFile', FormFile)
+    formData.append('Actioner', String(Actioner))
+
+    const response: ApiResponse<UploadFileResponse> = await invoiceApi.post(
+      '/ocr/read-text',
+      formData,
+    )
+
+    // errorMessageUpload.value = response.data.result.message
 
     return response.data.result.content
   }
@@ -41,5 +72,7 @@ export const useUploadStore = defineStore('upload', () => {
     errorMessageUpload,
     uploadFile,
     previewFile,
+    uploadFileQr,
+    uploadFileOcr,
   }
 })
