@@ -3,7 +3,7 @@
     <Breadcrumb title="Add Invoice" :routes="routes" />
     <StepperStatus :active-name="stepperStatus" />
     <TabInvoice
-      :active-tab="tabNow"
+      v-model:activeTab="tabNow"
       :can-click-data="true"
       :can-click-information="canClickInformationTab"
       :can-click-preview="canClickPreviewTab"
@@ -91,7 +91,7 @@
           </button>
         </div>
       </div>
-      <div v-else class="flex justify-end items-center mt-[24px]">
+      <div v-else class="flex justify-end items-center mt-[24px] gap-3">
         <button
           v-if="tabNow !== 'preview' || checkInvoiceView() || checkInvoiceNonPoView()"
           class="btn btn-outline btn-primary"
@@ -101,6 +101,16 @@
           <i class="ki-filled ki-arrow-left"></i>
           Back
         </button>
+
+        <button
+          v-if="tabNow !== 'preview' || checkInvoiceView() || checkInvoiceNonPoView()"
+          class="btn btn-primary"
+          @click="goNext"
+        >
+          Next
+          <i class="ki-duotone ki-black-right"></i>
+        </button>
+
         <button
           v-if="tabNow !== 'preview' && !checkInvoiceView() && !checkInvoiceNonPoView()"
           class="btn btn-primary"
@@ -544,7 +554,7 @@ const checkInvoiceInformation = () => {
 const goBack = () => {
   const list = ['data', 'information', 'ocrAiVerification', 'preview']
   const checkIndex = list.findIndex((item) => item === tabNow.value)
-  if (checkIndex === 0 || checkInvoiceView() || checkInvoiceNonPoView()) {
+  if (checkIndex === 0) {
     const nameRoute =
       checkInvoiceView() || (!checkIsNonPo() && !checkInvoiceNonPoView())
         ? 'invoice'
@@ -1739,6 +1749,10 @@ onMounted(() => {
     })
   }
 })
+
+const checkPreview = () => {
+  return route.query.type === 'po-view' || route.query.type === 'non-po-view'
+}
 
 watch(
   () => form.invoiceItem,
