@@ -1,3 +1,5 @@
+<!-- eslint-disable @typescript-eslint/no-unused-vars -->
+<!-- eslint-disable @typescript-eslint/no-unused-vars -->
 <template>
   <div>
     <Breadcrumb title="Add Invoice" :routes="routes" />
@@ -1750,6 +1752,7 @@ onMounted(() => {
   }
 })
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const checkPreview = () => {
   return route.query.type === 'po-view' || route.query.type === 'non-po-view'
 }
