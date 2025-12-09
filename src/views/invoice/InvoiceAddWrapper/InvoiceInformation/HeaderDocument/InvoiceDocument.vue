@@ -23,7 +23,7 @@
           >
         </label>
         <pdfUpload
-          v-if="!form[item.varName as keyof typeof form] && !checkIsView"
+          v-if="!form[item.varName as keyof typeof form] && !checkIsView()"
           ref="pdfUploadRef"
           v-show="!form[item.varName as keyof typeof form]"
           :error="index === 0 && !!formInject?.invoiceDocumentError && !hasAnyDocument"
@@ -32,7 +32,7 @@
           "
           @setFile="setFile($event, item.varName as keyof documentFormTypes)"
         />
-        <div v-if="!form[item.varName as keyof typeof form] && checkIsView">
+        <div v-if="!form[item.varName as keyof typeof form] && checkIsView()">
           <p>-</p>
         </div>
         <div
