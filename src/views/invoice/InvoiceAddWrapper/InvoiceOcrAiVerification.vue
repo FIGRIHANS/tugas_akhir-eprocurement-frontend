@@ -80,7 +80,7 @@
               </UiButton>
               <UiButton
                 class="px-3 py-1 bg-blue-600 text-white rounded-lg"
-                :disabled="!isVerify"
+                :disabled="!isVerify && !isApproved()"
                 @click="openModalSuccess()"
               >
                 VAT Credit Posting
@@ -257,14 +257,16 @@
         />
       </div>
     </div>
+    <UiModal v-model="showModalSuccess" size="sm">
+      <div class="text-center mb-6">
+        <ModalSuccessLogo class="mx-auto" />
+        <h3 class="text-center text-lg font-medium">VAT Credit Posted Successfully</h3>
+        <p class="text-center text-base text-gray-600 mb-5">
+          VAT credit has been posted to the system.
+        </p>
+      </div>
+    </UiModal>
   </div>
-  <UiModal v-model="showModalSuccess" size="sm">
-    <div class="text-center mb-6">
-      <ModalSuccessLogo class="mx-auto" />
-      <h3 class="text-center text-lg font-medium">Yeayyy</h3>
-      <p class="text-center text-base text-gray-600 mb-5">Success</p>
-    </div>
-  </UiModal>
 </template>
 
 <script lang="ts" setup>
@@ -372,23 +374,23 @@ const tableData = ref([
   {
     header: 'Nama Vendor',
     qr: qrData.vendorBuyer,
-    fpVerified: form.companyName === qrData.vendorBuyer,
+    fpVerified: form.companyName == qrData.vendorBuyer,
     ocr: ocrData.vendorName,
-    invoiceVerified: form.companyName === ocrData.vendorName,
-    remarks: qrData.vendorBuyer === ocrData.vendorName,
+    invoiceVerified: form.companyName == ocrData.vendorName,
+    remarks: qrData.vendorBuyer == ocrData.vendorName,
   },
   {
     header: 'NPWP Vendor',
     qr: qrData.npwppBuyer,
-    fpVerified: form.npwpNumber === qrData.npwppBuyer,
+    fpVerified: form.npwpNumber == qrData.npwppBuyer,
     ocr: ocrData.buyerNpwp,
-    invoiceVerified: form.npwpNumber === ocrData.buyerNpwp,
-    remarks: ocrData.buyerNpwp === qrData.npwppBuyer,
+    invoiceVerified: form.npwpNumber == ocrData.buyerNpwp,
+    remarks: ocrData.buyerNpwp == qrData.npwppBuyer,
   },
   {
     header: 'Perusahaan',
     qr: qrData.vendorSupplier,
-    fpVerified: true,
+    fpVerified: form.vendorName == qrData.vendorSupplier,
     ocr: '-',
     invoiceVerified: true,
     remarks: 'Matched',
@@ -396,7 +398,7 @@ const tableData = ref([
   {
     header: 'NPWP',
     qr: ocrData.buyerNpwp,
-    fpVerified: true,
+    fpVerified: form.npwp == ocrData.buyerNpwp,
     ocr: 'Non Validation',
     invoiceVerified: true,
     remarks: 'Matched',
@@ -404,33 +406,33 @@ const tableData = ref([
   {
     header: 'No Faktur Pajak',
     qr: qrData.taxDocumentNumber,
-    fpVerified: form.taxNumber,
-    ocr: '4002500330159090',
-    invoiceVerified: true,
+    fpVerified: form.taxNumber == qrData.taxDocumentNumber,
+    ocr: ocrData.FakturPajak,
+    invoiceVerified: ocrData.FakturPajak == form.taxNumber,
     remarks: 'Matched',
   },
   {
     header: 'Tanggal Faktur Pajak',
     qr: qrData.taxDocumentDate,
-    fpVerified: form.invoiceDate === qrData.taxDocumentDate,
+    fpVerified: false,
     ocr: '29/10/2025',
     invoiceVerified: true,
-    remarks: 'Matched',
+    remarks: false,
   },
   {
     header: 'Nilai Penjualan',
     qr: '370,000.00',
     fpVerified: true,
-    ocr: '370,000.00',
+    ocr: '330,000.00',
     invoiceVerified: false,
     remarks: 'Invoice Not Match selisih 39.123',
   },
   {
     header: 'DPP Lainnya',
     qr: qrData.dpp,
-    fpVerified: form.subtotal === Number(qrData.dpp),
+    fpVerified: form.subtotal == Number(qrData.dpp),
     ocr: ocrData.dpp,
-    invoiceVerified: false,
+    invoiceVerified: Number(ocrData.dpp.replace(/[^0-9]/g, '')) == form.subtotal,
     remarks: 'Invoice Not Match',
   },
   {
@@ -485,6 +487,10 @@ const columns = ref([
   'WHT Base Amount',
   'WHT Amount',
 ])
+
+const isApproved = () => {
+  return qrData.status === 'APPROVED'
+}
 
 const setTabOcr = (type: string) => {
   tabOcrTab.value = type
