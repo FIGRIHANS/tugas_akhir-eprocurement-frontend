@@ -23,6 +23,7 @@
           >
         </label>
         <pdfUpload
+          v-if="!form[item.varName as keyof typeof form] && !checkIsView"
           ref="pdfUploadRef"
           v-show="!form[item.varName as keyof typeof form]"
           :error="index === 0 && !!formInject?.invoiceDocumentError && !hasAnyDocument"
@@ -31,6 +32,9 @@
           "
           @setFile="setFile($event, item.varName as keyof documentFormTypes)"
         />
+        <div v-if="!form[item.varName as keyof typeof form] && checkIsView">
+          <p>-</p>
+        </div>
         <div
           v-if="form[item.varName as keyof typeof form]"
           class="flex justify-between items-center gap-[8px] flex-1"
@@ -49,6 +53,11 @@
             >Edit</span
           >
         </div>
+        <!-- <span
+          v-if="checkIsView()"
+          class="border-b border-dashed border-primary text-primary cursor-pointer text-xs font-medium"
+          >Download</span
+        > -->
       </div>
       <p
         v-if="formInject?.invoiceDocumentError && !hasAnyDocument"
@@ -70,6 +79,9 @@ import type {
 import type { formTypes } from '../../../types/invoiceAddWrapper'
 import pdfUpload from '@/components/ui/pdfUpload/pdfUpload.vue'
 import AttachmentView from '@/components/ui/attachment/AttachmentView.vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
 
 const form = reactive<documentFormTypes>({
   invoiceDocument: null,
@@ -136,6 +148,15 @@ const setFile = (file: responseFileTypes, name: keyof documentFormTypes) => {
 
 const changeFile = (index: number) => {
   pdfUploadRef.value[index].triggerFileInput()
+}
+
+// const download = (index: string) => {
+//   console.log(index)
+//   console.log(formInject)
+// }
+
+const checkIsView = () => {
+  return route.query.type === 'po-view' || route.query.type === 'non-po-view'
 }
 
 watch(
