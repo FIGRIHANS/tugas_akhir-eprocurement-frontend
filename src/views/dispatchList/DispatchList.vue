@@ -543,5 +543,18 @@ onMounted(() => {
   td {
     white-space: nowrap;
   }
+
+  &::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    width: 10px;
+    height: 10px;
+    border-radius: 15px;
+    background-color: #dbdfe9;
+  }
 }
 </style>
