@@ -74,6 +74,12 @@
             <div class="flex gap-2">
               <UiButton
                 class="px-3 py-1 bg-blue-600 text-white rounded-lg"
+                @click="isVerifyData = true"
+              >
+                Tax Verification
+              </UiButton>
+              <UiButton
+                class="px-3 py-1 bg-blue-600 text-white rounded-lg"
                 @click="isVerify = true"
               >
                 Verify By PJAP
@@ -106,7 +112,7 @@
                 </tr>
               </thead>
 
-              <tbody>
+              <tbody v-if="isVerifyData">
                 <tr
                   v-for="(row, index) in tableData"
                   :key="index"
@@ -306,6 +312,8 @@ const typeForm = ref<string>('')
 
 // const showAiAction = ref(false)
 const isVerify = ref(false)
+
+const isVerifyData = ref(false)
 
 const activeButton = ref<'back' | 'proceed'>('proceed')
 
