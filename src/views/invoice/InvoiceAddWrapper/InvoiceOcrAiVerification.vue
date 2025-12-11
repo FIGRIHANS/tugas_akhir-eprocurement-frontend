@@ -74,6 +74,12 @@
             <div class="flex gap-2">
               <UiButton
                 class="px-3 py-1 bg-blue-600 text-white rounded-lg"
+                @click="isVerifyData = true"
+              >
+                Tax Verification
+              </UiButton>
+              <UiButton
+                class="px-3 py-1 bg-blue-600 text-white rounded-lg"
                 @click="isVerify = true"
               >
                 Verify By PJAP
@@ -106,7 +112,7 @@
                 </tr>
               </thead>
 
-              <tbody>
+              <tbody v-if="isVerifyData">
                 <tr
                   v-for="(row, index) in tableData"
                   :key="index"
@@ -137,6 +143,42 @@
                       Matched
                     </p>
                     <p class="text-red-600 font-semibold" v-else>Didn't Matched</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <h2 class="font-semibold text-lg mt-4">PJAP Verification</h2>
+          <div class="border rounded-lg mt-5">
+            <table class="w-full overflow-x-auto text-sm">
+              <thead class="bg-gray-100">
+                <tr>
+                  <th class="p-2 text-left">Feild</th>
+                  <th class="p-2 text-left">QR Faktur Status</th>
+                  <th class="p-2 text-left">PJAP Status</th>
+                  <th class="p-2 text-left">Remark</th>
+                </tr>
+              </thead>
+
+              <tbody v-if="isVerify">
+                <tr
+                  v-for="(row, index) in bjapVerify"
+                  :key="index"
+                  :class="[{ 'bg-red-100': row.remarks === false }, 'border-b']"
+                >
+                  <td class="p-2">{{ row.header }}</td>
+                  <td class="p-2">{{ row.qr }}</td>
+                  <td class="p-2">
+                    {{ row.fpVerified }}
+                  </td>
+
+                  <td class="p-2">
+                    <div class="flex gap-2 items-center">
+                      <i class="ki-filled ki-check-circle text-green-500" v-if="row.remarks"></i>
+                      <i class="ki-filled ki-cross-circle text-red-500" v-else></i>
+                      <p class="text-green-600" v-if="row.remarks === true">Matched</p>
+                      <p class="text-red-600 font-semibold" v-else>Didn't Matched</p>
+                    </div>
                   </td>
                 </tr>
               </tbody>
@@ -307,6 +349,8 @@ const typeForm = ref<string>('')
 // const showAiAction = ref(false)
 const isVerify = ref(false)
 
+const isVerifyData = ref(false)
+
 const activeButton = ref<'back' | 'proceed'>('proceed')
 
 const setActive = (btn: 'back' | 'proceed') => {
@@ -377,7 +421,7 @@ const tableData = ref([
     fpVerified: form.companyName == qrData.vendorBuyer,
     ocr: ocrData.vendorName,
     invoiceVerified: form.companyName == ocrData.vendorName,
-    remarks: qrData.vendorBuyer == ocrData.vendorName,
+    remarks: form.companyName == qrData.vendorBuyer && form.companyName == ocrData.vendorName,
   },
   {
     header: 'NPWP Vendor',
@@ -385,7 +429,7 @@ const tableData = ref([
     fpVerified: form.npwpNumber == qrData.npwppBuyer,
     ocr: ocrData.buyerNpwp,
     invoiceVerified: form.npwpNumber == ocrData.buyerNpwp,
-    remarks: ocrData.buyerNpwp == qrData.npwppBuyer,
+    remarks: form.npwpNumber == qrData.npwppBuyer && form.npwpNumber == ocrData.buyerNpwp,
   },
   {
     header: 'Perusahaan',
@@ -393,7 +437,7 @@ const tableData = ref([
     fpVerified: form.vendorName == qrData.vendorSupplier,
     ocr: '-',
     invoiceVerified: true,
-    remarks: 'Matched',
+    remarks: false,
   },
   {
     header: 'NPWP',
@@ -401,7 +445,7 @@ const tableData = ref([
     fpVerified: form.npwp == ocrData.buyerNpwp,
     ocr: 'Non Validation',
     invoiceVerified: true,
-    remarks: 'Matched',
+    remarks: false,
   },
   {
     header: 'No Faktur Pajak',
@@ -409,13 +453,13 @@ const tableData = ref([
     fpVerified: form.taxNumber == qrData.taxDocumentNumber,
     ocr: ocrData.FakturPajak,
     invoiceVerified: ocrData.FakturPajak == form.taxNumber,
-    remarks: 'Matched',
+    remarks: form.taxNumber == qrData.taxDocumentNumber && ocrData.FakturPajak == form.taxNumber,
   },
   {
     header: 'Tanggal Faktur Pajak',
     qr: qrData.taxDocumentDate,
     fpVerified: false,
-    ocr: '29/10/2025',
+    ocr: ocrData.transactionDate || '-',
     invoiceVerified: true,
     remarks: false,
   },
@@ -466,6 +510,23 @@ const tableData = ref([
     ocr: '3544N5E1N6',
     invoiceVerified: true,
     remarks: 'Matched',
+  },
+  {
+    header: 'Status FP PJAP',
+    qr: qrData.status,
+    fpVerified: '',
+    ocr: '',
+    invoiceVerified: '',
+    remarks: 'Matched',
+  },
+])
+
+const bjapVerify = ref([
+  {
+    header: 'Status FP PJAP',
+    qr: qrData.status,
+    fpVerified: 'Approved',
+    remarks: true,
   },
 ])
 
