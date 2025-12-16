@@ -5,14 +5,8 @@
 
     <div class="border border-gray-200 rounded-xl p-[24px]">
       <!-- Header Section -->
-      <div class="flex justify-between align-items-center mb-[24px]">
-        <h1>LOAD SHEET : {{ loadSheetData.loadSheet }}</h1>
-        <div class="flex gap-3">
-          <button class="btn btn-danger" @click="printDocument()">
-            <i class="ki-duotone ki-printer"></i>
-            Print
-          </button>
-        </div>
+      <div class="mb-[24px]">
+        <h1>Receiving Confirmation Request</h1>
       </div>
 
       <!-- Transporter Confirmation Card -->
@@ -360,10 +354,6 @@ const filterTableData = () => {
 
 const setPage = (page: number) => {
   currentPage.value = page
-}
-
-const printDocument = () => {
-  window.print()
 }
 
 const goBack = () => {

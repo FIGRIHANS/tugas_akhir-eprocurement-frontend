@@ -17,7 +17,7 @@
           </button>
 
           <button class="btn btn-primary" @click="createNew()">
-            <i class="ki-duotone ki-plus"></i>
+            <i class="ki-duotone ki-plus-circle"></i>
             Create
           </button>
         </div>
