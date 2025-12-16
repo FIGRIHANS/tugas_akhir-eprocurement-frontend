@@ -6,7 +6,7 @@
     <div class="border border-gray-200 rounded-xl p-[24px]">
       <!-- Header Section -->
       <div class="flex justify-between align-items-center gap-[8px] mb-[24px]">
-        <h1>List Data</h1>
+        <h3 class="text-lg font-semibold">List Data</h3>
         <div class="flex align-items-center gap-3">
           <UiInputSearch v-model="search" placeholder="Search" @keypress="goSearch" />
 

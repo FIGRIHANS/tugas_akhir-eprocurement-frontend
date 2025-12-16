@@ -6,7 +6,7 @@
     <div class="border border-gray-200 rounded-xl p-[24px]">
       <!-- Header Section -->
       <div class="flex justify-between align-items-center gap-[8px] mb-[24px]">
-        <h1>List Data</h1>
+        <h3 class="text-lg font-semibold">List Data</h3>
         <div class="flex align-items-center gap-3">
           <UiInputSearch v-model="search" placeholder="Search" @keypress="goSearch" />
 
@@ -90,7 +90,7 @@
           </thead>
           <tbody>
             <tr v-if="filteredDataList?.length === 0">
-              <td colspan="17" class="text-center">No data found.</td>
+              <td colspan="18" class="text-center">No data found.</td>
             </tr>
             <tr v-for="(item, index) in list" :key="index">
               <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
@@ -121,6 +121,15 @@
               <td>{{ item.createdBy }}</td>
               <td>{{ formatDate(item.updateDate) }}</td>
               <td>{{ item.updateBy }}</td>
+              <td class="text-center">
+                <button
+                  class="btn btn-sm btn-icon btn-primary"
+                  @click="viewDetail(item.beritaAcaraId)"
+                  title="View Detail"
+                >
+                  <i class="ki-filled ki-eye"></i>
+                </button>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -227,6 +236,7 @@ const columns = ref<string[]>([
   'Created By',
   'Update Date',
   'Update By',
+  'Action',
 ])
 
 // 10 Dummy data for demonstration
@@ -593,6 +603,10 @@ const sortColumn = (columnName: string | null) => {
 
 const createNew = () => {
   router.push({ name: 'receivingConfirmationCreate' })
+}
+
+const viewDetail = (id: string) => {
+  router.push({ name: 'receivingConfirmationDetail', params: { id } })
 }
 
 onMounted(() => {

@@ -14,4 +14,9 @@ export default [
     name: 'receivingConfirmationCreate',
     component: () => import('@/views/receivingConfirmation/ReceivingConfirmationCreate.vue'),
   },
+  {
+    path: '/receiving-confirmation/detail/:id',
+    name: 'receivingConfirmationDetail',
+    component: () => import('@/views/receivingConfirmation/ReceivingConfirmationDetail.vue'),
+  },
 ]

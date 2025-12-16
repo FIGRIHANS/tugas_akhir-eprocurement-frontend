@@ -1,17 +1,12 @@
 <template>
   <div>
-    <Breadcrumb title="Create Receiving Confirmation" :routes="routes" />
+    <Breadcrumb title="Receiving Confirmation Detail" :routes="routes" />
     <hr class="-mx-[24px] mb-[24px]" />
 
     <div class="border border-gray-200 rounded-xl p-[24px]">
-      <!-- Header Section -->
-      <div class="mb-[24px]">
-        <h3 class="text-lg font-semibold">Receiving Confirmation Request</h3>
-      </div>
-
-      <!-- Form Konfirmasi Card -->
-      <div class="border border-gray-200 rounded-xl p-[24px] mb-[24px]">
-        <h3 class="text-lg font-semibold mb-4">Payment Confirmation</h3>
+      <!-- Form Section -->
+      <div class="mb-6">
+        <h3 class="text-lg font-semibold mb-4">Receiving Confirmation Information</h3>
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <!-- Left and Middle Columns - Form Fields (8 columns) -->
           <div class="lg:col-span-8">
@@ -19,67 +14,67 @@
               <!-- Left Column -->
               <div class="space-y-3">
                 <!-- Order No -->
-                <div class="flex items-center gap-4">
-                  <label class="form-label text-sm font-medium text-gray-600 w-40 mb-0"
+                <div class="flex items-center gap-3">
+                  <label class="form-label text-sm font-medium text-gray-600 w-36 mb-0"
                     >Order No</label
                   >
                   <input
                     v-model="formData.orderNo"
                     type="text"
-                    class="input flex-1"
-                    placeholder="Enter Order No"
+                    class="input flex-1 bg-gray-50"
+                    disabled
                   />
                 </div>
 
                 <!-- Employee Name -->
-                <div class="flex items-center gap-4">
-                  <label class="form-label text-sm font-medium text-gray-600 w-40 mb-0"
+                <div class="flex items-center gap-3">
+                  <label class="form-label text-sm font-medium text-gray-600 w-36 mb-0"
                     >Employee Name</label
                   >
                   <input
                     v-model="formData.namaKaryawan"
                     type="text"
-                    class="input flex-1"
-                    placeholder="Enter Employee Name"
+                    class="input flex-1 bg-gray-50"
+                    disabled
                   />
                 </div>
 
                 <!-- Driver Name -->
-                <div class="flex items-center gap-4">
-                  <label class="form-label text-sm font-medium text-gray-600 w-40 mb-0"
+                <div class="flex items-center gap-3">
+                  <label class="form-label text-sm font-medium text-gray-600 w-36 mb-0"
                     >Driver Name</label
                   >
                   <input
                     v-model="formData.namaSopir"
                     type="text"
-                    class="input flex-1"
-                    placeholder="Enter Driver Name"
+                    class="input flex-1 bg-gray-50"
+                    disabled
                   />
                 </div>
 
                 <!-- License Plate -->
-                <div class="flex items-center gap-4">
-                  <label class="form-label text-sm font-medium text-gray-600 w-40 mb-0"
+                <div class="flex items-center gap-3">
+                  <label class="form-label text-sm font-medium text-gray-600 w-36 mb-0"
                     >License Plate</label
                   >
                   <input
                     v-model="formData.noPolisi"
                     type="text"
-                    class="input flex-1"
-                    placeholder="Enter License Plate"
+                    class="input flex-1 bg-gray-50"
+                    disabled
                   />
                 </div>
 
                 <!-- Transporter -->
-                <div class="flex items-center gap-4">
-                  <label class="form-label text-sm font-medium text-gray-600 w-40 mb-0"
+                <div class="flex items-center gap-3">
+                  <label class="form-label text-sm font-medium text-gray-600 w-36 mb-0"
                     >Transporter</label
                   >
                   <input
                     v-model="formData.transporter"
                     type="text"
-                    class="input flex-1"
-                    placeholder="Enter Transporter"
+                    class="input flex-1 bg-gray-50"
+                    disabled
                   />
                 </div>
               </div>
@@ -87,79 +82,74 @@
               <!-- Right Column -->
               <div class="space-y-3">
                 <!-- Pickup -->
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3">
                   <label class="form-label text-sm font-medium text-gray-600 w-36 mb-0"
                     >Pickup</label
                   >
                   <input
                     v-model="formData.pickup"
                     type="text"
-                    class="input flex-1"
-                    placeholder="Enter Pickup Location"
+                    class="input flex-1 bg-gray-50"
+                    disabled
                   />
                 </div>
 
                 <!-- Destination -->
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3">
                   <label class="form-label text-sm font-medium text-gray-600 w-36 mb-0"
                     >Destination</label
                   >
                   <input
                     v-model="formData.destination"
                     type="text"
-                    class="input flex-1"
-                    placeholder="Enter Destination"
+                    class="input flex-1 bg-gray-50"
+                    disabled
                   />
                 </div>
 
                 <!-- Order Date -->
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3">
                   <label class="form-label text-sm font-medium text-gray-600 w-36 mb-0"
                     >Order Date</label
                   >
                   <input
                     v-model="formData.orderDate"
                     type="text"
-                    class="input flex-1"
-                    placeholder="Enter Order Date"
+                    class="input flex-1 bg-gray-50"
+                    disabled
                   />
                 </div>
 
                 <!-- Received Date -->
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3">
                   <label class="form-label text-sm font-medium text-gray-600 w-36 mb-0"
                     >Received Date</label
                   >
-                  <input v-model="formData.receivedDate" type="date" class="input flex-1" />
+                  <input
+                    v-model="formData.receivedDate"
+                    type="date"
+                    class="input flex-1 bg-gray-50"
+                    disabled
+                  />
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Right Column - Signature Box (4 columns) -->
+          <!-- Right Column - Signature Display (4 columns) -->
           <div class="lg:col-span-4">
-            <label class="form-label text-sm font-medium text-gray-600">Signature</label>
-            <div class="border border-gray-300 rounded-lg p-4 mt-2 bg-gray-50">
-              <!-- Signature Pad -->
-              <VueSignature
-                ref="signaturePad"
-                :sigOption="signatureOptions"
-                :w="'100%'"
-                :h="'200px'"
-                class="signature-pad"
-              />
-
-              <!-- Clear Button (Vertical) -->
-              <div class="mt-3">
-                <button class="btn btn-sm btn-danger w-full" @click="clearSignature">
-                  <i class="ki-duotone ki-trash"></i>
-                  Clear
-                </button>
-              </div>
-
-              <!-- Label -->
-              <div class="text-center mt-3">
-                <p class="text-sm font-semibold text-gray-700">Employee Signature</p>
+            <div class="border border-gray-200 rounded-lg p-4 h-full flex flex-col">
+              <h3 class="text-sm font-semibold mb-3">Employee Signature</h3>
+              <div
+                class="flex-1 border border-gray-300 rounded bg-gray-50 flex items-center justify-center"
+              >
+                <img
+                  v-if="formData.signature"
+                  :src="formData.signature"
+                  alt="Signature"
+                  class="max-w-full max-h-full"
+                />
+                <span v-else class="text-gray-400 text-sm">No signature available</span>
               </div>
             </div>
           </div>
@@ -167,13 +157,8 @@
       </div>
 
       <!-- Table Section -->
-      <div class="border border-gray-200 rounded-xl p-[24px] mt-[24px]">
-        <!-- Table Header -->
-        <div class="mb-4">
-          <h3 class="text-lg font-semibold">List Receiving Confirmation Request</h3>
-        </div>
-
-        <!-- Table -->
+      <div class="mb-6">
+        <h3 class="text-lg font-semibold mb-4">List Receiving Confirmation Request</h3>
         <div class="overflow-x-auto list__table">
           <table class="table align-middle text-gray-700 font-medium text-sm">
             <thead>
@@ -232,15 +217,44 @@
       </div>
 
       <!-- Action Buttons -->
-      <div class="mt-[24px] flex gap-3 justify-end">
+      <div class="flex gap-3 justify-end">
         <button class="btn btn-light" @click="goBack()">
           <i class="ki-duotone ki-arrow-left"></i>
           Back to List
         </button>
-        <button class="btn btn-primary" @click="submitForm()">
-          <i class="ki-duotone ki-save-2"></i>
-          Submit
+        <button class="btn btn-danger" @click="openRejectModal()">
+          <i class="ki-duotone ki-cross-circle"></i>
+          Reject
         </button>
+        <button class="btn btn-success" @click="approveConfirmation()">
+          <i class="ki-duotone ki-check-circle"></i>
+          Approve
+        </button>
+      </div>
+
+      <!-- Rejection Modal -->
+      <div
+        v-if="showRejectModal"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        @click.self="closeRejectModal()"
+      >
+        <div class="bg-white rounded-lg p-6 w-full max-w-md">
+          <h3 class="text-lg font-semibold mb-4">Rejection Reason</h3>
+          <div class="mb-4">
+            <label class="form-label text-sm font-medium text-gray-600 mb-2"
+              >Please provide a reason for rejection</label
+            >
+            <textarea
+              v-model="rejectionReason"
+              class="input w-full h-32 resize-none"
+              placeholder="Enter rejection reason..."
+            ></textarea>
+          </div>
+          <div class="flex gap-3 justify-end">
+            <button class="btn btn-light" @click="closeRejectModal()">Cancel</button>
+            <button class="btn btn-danger" @click="confirmReject()">Confirm Reject</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -248,12 +262,12 @@
 
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
-import VueSignature from 'vue3-signature'
 
 const router = useRouter()
+const route = useRoute()
 
 interface FormData {
   orderNo: string
@@ -288,31 +302,27 @@ const routes = ref<routeTypes[]>([
     name: 'Digital Receiving Confirmation',
     to: '/digital-receiving-confirmation',
   },
+  {
+    name: 'Detail',
+    to: '',
+  },
 ])
 
-const signaturePad = ref<any>(null)
-
-// Signature options
-const signatureOptions = {
-  penColor: '#000000',
-  backgroundColor: '#ffffff',
-}
-
-// Form Data
+// Form Data (Read-only)
 const formData = ref<FormData>({
-  orderNo: '',
-  namaKaryawan: '',
-  namaSopir: '',
-  noPolisi: '',
-  transporter: '',
-  pickup: '',
-  destination: '',
-  orderDate: '',
-  receivedDate: '',
+  orderNo: 'ORD-2024-001',
+  namaKaryawan: 'John Doe',
+  namaSopir: 'Driver Name',
+  noPolisi: 'B 1234 XYZ',
+  transporter: 'PT Trans Jaya',
+  pickup: 'Jakarta Warehouse',
+  destination: 'Bandung Store',
+  orderDate: '2024-12-01',
+  receivedDate: '2024-12-05',
   signature: null,
 })
 
-// Table Data
+// Table Data (Read-only)
 const tableData = ref<TableData[]>([
   {
     pickSlip: 'PS-001',
@@ -344,104 +354,72 @@ const tableData = ref<TableData[]>([
   },
 ])
 
+// Rejection Modal State
+const showRejectModal = ref<boolean>(false)
+const rejectionReason = ref<string>('')
+
+// Functions
 const goBack = () => {
   router.push({ name: 'receivingConfirmation' })
-}
-
-const clearSignature = () => {
-  if (signaturePad.value) {
-    signaturePad.value.clear()
-  }
 }
 
 const viewItem = (index: number) => {
   const item = tableData.value[index]
   console.log('Viewing item:', item)
-  // TODO: Open modal or navigate to detail page
   alert(`Viewing details for: ${item.pickSlip} - ${item.description}`)
 }
 
-const submitForm = () => {
-  // Save signature data
-  if (signaturePad.value) {
-    const { isEmpty, data } = signaturePad.value.save()
-    if (!isEmpty) {
-      formData.value.signature = data
-    }
-  }
+const openRejectModal = () => {
+  showRejectModal.value = true
+  rejectionReason.value = ''
+}
 
-  // Validate form
-  if (!formData.value.orderNo || !formData.value.namaKaryawan || !formData.value.namaSopir) {
-    alert('Please fill in all required fields')
-    return
-  }
+const closeRejectModal = () => {
+  showRejectModal.value = false
+  rejectionReason.value = ''
+}
 
-  // Validate table data
-  if (tableData.value.length === 0) {
-    alert('Please add at least one item to the table')
+const confirmReject = () => {
+  // Validate rejection reason
+  if (!rejectionReason.value.trim()) {
+    alert('Please provide a rejection reason')
     return
   }
 
   console.log('Form Data:', formData.value)
   console.log('Table Data:', tableData.value)
-  // TODO: Send data to API
-  alert('Receiving confirmation submitted successfully!')
+  console.log('Rejection Reason:', rejectionReason.value)
+  // TODO: Send rejection data to API with status "Rejected"
+  alert(`Receiving confirmation rejected!\nReason: ${rejectionReason.value}`)
+
+  // Close modal and redirect
+  closeRejectModal()
+  router.push({ name: 'receivingConfirmation' })
+}
+
+const approveConfirmation = () => {
+  console.log('Form Data:', formData.value)
+  console.log('Table Data:', tableData.value)
+  // TODO: Send approval data to API with status "Approved"
+  alert('Receiving confirmation approved successfully!')
 
   // Redirect to list
   router.push({ name: 'receivingConfirmation' })
 }
 
 onMounted(() => {
-  // Load existing signature if available
-  if (formData.value.signature && signaturePad.value) {
-    signaturePad.value.fromDataURL(formData.value.signature)
-  }
-  // TODO: Load data based on route params if editing
+  // TODO: Load data based on route.params.id
+  const id = route.params.id
+  console.log('Loading receiving confirmation with ID:', id)
+  // Load data from API
 })
 </script>
 
 <style lang="scss" scoped>
-@media print {
-  .btn,
-  button {
-    display: none;
-  }
-}
-
-.form-control[readonly] {
-  background-color: #f5f5f5;
-  cursor: not-allowed;
-}
-
-.signature-pad {
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
-  background: white;
-
-  :deep(canvas) {
-    border-radius: 0.5rem;
-  }
-}
-
 .list__table {
   th,
   td {
     white-space: nowrap;
-    padding: 12px 16px;
-  }
-
-  th {
-    background-color: #f8f9fa;
-    font-weight: 600;
-    border: 1px solid #dee2e6;
-  }
-
-  td {
-    border: 1px solid #dee2e6;
-  }
-
-  tbody tr:hover {
-    background-color: #f8f9fa;
   }
 
   &::-webkit-scrollbar {
