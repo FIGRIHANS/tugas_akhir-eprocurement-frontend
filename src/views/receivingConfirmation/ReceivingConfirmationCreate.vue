@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Breadcrumb title="Receiving Confirmation Detail" :routes="routes" />
+    <Breadcrumb title="Create Receiving Confirmation" :routes="routes" />
     <hr class="-mx-[24px] mb-[24px]" />
 
     <div class="border border-gray-200 rounded-xl p-[24px]">

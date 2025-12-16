@@ -10,8 +10,8 @@ export default [
     component: () => import('@/views/receivingConfirmation/ReceivingConfirmationList.vue'),
   },
   {
-    path: '/receiving-confirmation/:id',
-    name: 'receivingConfirmationDetail',
-    component: () => import('@/views/receivingConfirmation/ReceivingConfirmationDetail.vue'),
+    path: '/receiving-confirmation/create',
+    name: 'receivingConfirmationCreate',
+    component: () => import('@/views/receivingConfirmation/ReceivingConfirmationCreate.vue'),
   },
 ]

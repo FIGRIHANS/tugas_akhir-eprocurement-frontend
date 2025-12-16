@@ -16,9 +16,9 @@
             Filter
           </button>
 
-          <button class="btn btn-primary" @click="exportData()">
-            <i class="ki-duotone ki-exit-down"></i>
-            Export Data
+          <button class="btn btn-primary" @click="createNew()">
+            <i class="ki-duotone ki-plus"></i>
+            Create
           </button>
         </div>
       </div>
@@ -168,6 +168,7 @@
 
 <script lang="ts" setup>
 import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import LPagination from '@/components/pagination/LPagination.vue'
@@ -177,6 +178,7 @@ import { cloneDeep } from 'lodash'
 
 // Expose moment to template
 const moment = momentLib
+const router = useRouter()
 
 interface ReceivingData {
   beritaAcaraId: string
@@ -607,10 +609,8 @@ const sortColumn = (columnName: string | null) => {
   return setList(result)
 }
 
-const exportData = () => {
-  console.log('Export data')
-  // TODO: Implement export functionality
-  alert('Export functionality will be implemented')
+const createNew = () => {
+  router.push({ name: 'receivingConfirmationCreate' })
 }
 
 onMounted(() => {
