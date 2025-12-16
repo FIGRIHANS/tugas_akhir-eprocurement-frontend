@@ -15,93 +15,127 @@
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <!-- Left and Middle Columns - Form Fields (8 columns) -->
           <div class="lg:col-span-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-              <!-- Left Column Fields -->
-              <div>
-                <label class="form-label text-sm font-medium text-gray-600 mb-2">Order No</label>
-                <input
-                  v-model="formData.orderNo"
-                  type="text"
-                  class="input"
-                  placeholder="Enter Order No"
-                />
-              </div>
-              <div>
-                <label class="form-label text-sm font-medium text-gray-600 mb-2">Pickup</label>
-                <input
-                  v-model="formData.pickup"
-                  type="text"
-                  class="input"
-                  placeholder="Enter Pickup Location"
-                />
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
+              <!-- Left Column -->
+              <div class="space-y-3">
+                <!-- Order No -->
+                <div class="flex items-center gap-4">
+                  <label class="form-label text-sm font-medium text-gray-600 w-40 mb-0"
+                    >Order No</label
+                  >
+                  <input
+                    v-model="formData.orderNo"
+                    type="text"
+                    class="input flex-1"
+                    placeholder="Enter Order No"
+                  />
+                </div>
+
+                <!-- Employee Name -->
+                <div class="flex items-center gap-4">
+                  <label class="form-label text-sm font-medium text-gray-600 w-40 mb-0"
+                    >Employee Name</label
+                  >
+                  <input
+                    v-model="formData.namaKaryawan"
+                    type="text"
+                    class="input flex-1"
+                    placeholder="Enter Employee Name"
+                  />
+                </div>
+
+                <!-- Driver Name -->
+                <div class="flex items-center gap-4">
+                  <label class="form-label text-sm font-medium text-gray-600 w-40 mb-0"
+                    >Driver Name</label
+                  >
+                  <input
+                    v-model="formData.namaSopir"
+                    type="text"
+                    class="input flex-1"
+                    placeholder="Enter Driver Name"
+                  />
+                </div>
+
+                <!-- License Plate -->
+                <div class="flex items-center gap-4">
+                  <label class="form-label text-sm font-medium text-gray-600 w-40 mb-0"
+                    >License Plate</label
+                  >
+                  <input
+                    v-model="formData.noPolisi"
+                    type="text"
+                    class="input flex-1"
+                    placeholder="Enter License Plate"
+                  />
+                </div>
+
+                <!-- Transporter -->
+                <div class="flex items-center gap-4">
+                  <label class="form-label text-sm font-medium text-gray-600 w-40 mb-0"
+                    >Transporter</label
+                  >
+                  <input
+                    v-model="formData.transporter"
+                    type="text"
+                    class="input flex-1"
+                    placeholder="Enter Transporter"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label class="form-label text-sm font-medium text-gray-600 mb-2"
-                  >Employee Name</label
-                >
-                <input
-                  v-model="formData.namaKaryawan"
-                  type="text"
-                  class="input"
-                  placeholder="Enter Employee Name"
-                />
-              </div>
-              <div>
-                <label class="form-label text-sm font-medium text-gray-600 mb-2">Destination</label>
-                <input
-                  v-model="formData.destination"
-                  type="text"
-                  class="input"
-                  placeholder="Enter Destination"
-                />
-              </div>
+              <!-- Right Column -->
+              <div class="space-y-3">
+                <!-- Pickup -->
+                <div class="flex items-center gap-4">
+                  <label class="form-label text-sm font-medium text-gray-600 w-36 mb-0"
+                    >Pickup</label
+                  >
+                  <input
+                    v-model="formData.pickup"
+                    type="text"
+                    class="input flex-1"
+                    placeholder="Enter Pickup Location"
+                  />
+                </div>
 
-              <div>
-                <label class="form-label text-sm font-medium text-gray-600 mb-2">Driver Name</label>
-                <input
-                  v-model="formData.namaSopir"
-                  type="text"
-                  class="input"
-                  placeholder="Enter Driver Name"
-                />
-              </div>
-              <div>
-                <label class="form-label text-sm font-medium text-gray-600 mb-2">Order Date</label>
-                <input
-                  v-model="formData.orderDate"
-                  type="text"
-                  class="input"
-                  placeholder="Enter Order Date"
-                />
-              </div>
+                <!-- Destination -->
+                <div class="flex items-center gap-4">
+                  <label class="form-label text-sm font-medium text-gray-600 w-36 mb-0"
+                    >Destination</label
+                  >
+                  <input
+                    v-model="formData.destination"
+                    type="text"
+                    class="input flex-1"
+                    placeholder="Enter Destination"
+                  />
+                </div>
 
-              <div>
-                <label class="form-label text-sm font-medium text-gray-600 mb-2"
-                  >License Plate</label
-                >
-                <input
-                  v-model="formData.noPolisi"
-                  type="text"
-                  class="input"
-                  placeholder="Enter License Plate"
-                />
-              </div>
-              <div>
-                <label class="form-label text-sm font-medium text-gray-600 mb-2"
-                  >Received Date</label
-                >
-                <input v-model="formData.receivedDate" type="datetime-local" class="input" />
-              </div>
+                <!-- Order Date -->
+                <div class="flex items-center gap-4">
+                  <label class="form-label text-sm font-medium text-gray-600 w-36 mb-0"
+                    >Order Date</label
+                  >
+                  <input
+                    v-model="formData.orderDate"
+                    type="text"
+                    class="input flex-1"
+                    placeholder="Enter Order Date"
+                  />
+                </div>
 
-              <div>
-                <label class="form-label text-sm font-medium text-gray-600 mb-2">Transporter</label>
-                <input
-                  v-model="formData.transporter"
-                  type="text"
-                  class="input"
-                  placeholder="Enter Transporter"
-                />
+                <!-- Received Date -->
+                <div class="flex items-center gap-4">
+                  <label class="form-label text-sm font-medium text-gray-600 w-36 mb-0"
+                    >Received Date</label
+                  >
+                  <input
+                    v-model="formData.receivedDate"
+                    type="date"
+                    class="input flex-1"
+                  />
+                </div>
               </div>
             </div>
           </div>
