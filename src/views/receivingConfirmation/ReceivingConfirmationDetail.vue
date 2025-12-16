@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Breadcrumb title="Dispatch List Detail" :routes="routes" />
+    <Breadcrumb title="Receiving Confirmation Detail" :routes="routes" />
     <hr class="-mx-[24px] mb-[24px]" />
 
     <div class="border border-gray-200 rounded-xl p-[24px]">
@@ -367,7 +367,7 @@ const printDocument = () => {
 }
 
 const goBack = () => {
-  router.push({ name: 'dispatchList' })
+  router.push({ name: 'receivingConfirmation' })
 }
 
 const clearSignature = () => {

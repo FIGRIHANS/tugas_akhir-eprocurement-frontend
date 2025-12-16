@@ -213,9 +213,14 @@ export default [
     icon: 'package',
     child: [
       {
-        id: 'dispatch-list',
-        title: 'Dispatch List',
-        to: 'dispatchList',
+        id: 'receiving-confirmation',
+        title: 'Create Receiving Confirmation',
+        to: 'receivingConfirmation',
+      },
+      {
+        id: 'receiving-confirmation-list',
+        title: 'Receiving Confirmation List',
+        to: 'receivingConfirmationList',
       },
     ],
   },

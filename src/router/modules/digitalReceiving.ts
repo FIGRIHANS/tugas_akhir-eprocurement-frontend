@@ -1,12 +1,17 @@
 export default [
   {
-    path: '/dispatch-list',
-    name: 'dispatchList',
-    component: () => import('@/views/dispatchList/DispatchList.vue'),
+    path: '/receiving-confirmation',
+    name: 'receivingConfirmation',
+    component: () => import('@/views/receivingConfirmation/ReceivingConfirmation.vue'),
   },
   {
-    path: '/dispatch-list/:id',
-    name: 'dispatchListDetail',
-    component: () => import('@/views/dispatchList/DispatchListDetail.vue'),
+    path: '/receiving-confirmation-list',
+    name: 'receivingConfirmationList',
+    component: () => import('@/views/receivingConfirmation/ReceivingConfirmationList.vue'),
+  },
+  {
+    path: '/receiving-confirmation/:id',
+    name: 'receivingConfirmationDetail',
+    component: () => import('@/views/receivingConfirmation/ReceivingConfirmationDetail.vue'),
   },
 ]
