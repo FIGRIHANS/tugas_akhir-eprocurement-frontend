@@ -9,56 +9,107 @@
         <h1>Receiving Confirmation Request</h1>
       </div>
 
-      <!-- Transporter Confirmation Card -->
+      <!-- Form Konfirmasi Card -->
       <div class="border border-gray-200 rounded-xl p-[24px] mb-[24px]">
-        <h3 class="text-lg font-semibold mb-[16px]">Transporter Confirmation</h3>
+        <h1 class="mb-[24px]">Payment Confirmation</h1>
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <!-- Left Column - Form Fields -->
+          <!-- Left and Middle Columns - Form Fields (8 columns) -->
           <div class="lg:col-span-8">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+              <!-- Left Column Fields -->
               <div>
-                <label class="form-label text-sm font-medium text-gray-600">Driver Name</label>
-                <div class="text-gray-900 font-medium py-2">
-                  {{ loadSheetData.driverName }}
-                </div>
+                <label class="form-label text-sm font-medium text-gray-600 mb-2">Order No</label>
+                <input
+                  v-model="formData.orderNo"
+                  type="text"
+                  class="input"
+                  placeholder="Enter Order No"
+                />
               </div>
               <div>
-                <label class="form-label text-sm font-medium text-gray-600">Transporter</label>
-                <div class="text-gray-900 font-medium py-2">
-                  {{ loadSheetData.transporter }}
-                </div>
+                <label class="form-label text-sm font-medium text-gray-600 mb-2">Pickup</label>
+                <input
+                  v-model="formData.pickup"
+                  type="text"
+                  class="input"
+                  placeholder="Enter Pickup Location"
+                />
+              </div>
+
+              <div>
+                <label class="form-label text-sm font-medium text-gray-600 mb-2"
+                  >Employee Name</label
+                >
+                <input
+                  v-model="formData.namaKaryawan"
+                  type="text"
+                  class="input"
+                  placeholder="Enter Employee Name"
+                />
               </div>
               <div>
-                <label class="form-label text-sm font-medium text-gray-600">Distributor</label>
-                <div class="text-gray-900 font-medium py-2">
-                  {{ loadSheetData.distributor }}
-                </div>
+                <label class="form-label text-sm font-medium text-gray-600 mb-2">Destination</label>
+                <input
+                  v-model="formData.destination"
+                  type="text"
+                  class="input"
+                  placeholder="Enter Destination"
+                />
+              </div>
+
+              <div>
+                <label class="form-label text-sm font-medium text-gray-600 mb-2">Driver Name</label>
+                <input
+                  v-model="formData.namaSopir"
+                  type="text"
+                  class="input"
+                  placeholder="Enter Driver Name"
+                />
               </div>
               <div>
-                <label class="form-label text-sm font-medium text-gray-600">Region From</label>
-                <div class="text-gray-900 font-medium py-2">
-                  {{ loadSheetData.regionFrom }}
-                </div>
+                <label class="form-label text-sm font-medium text-gray-600 mb-2">Order Date</label>
+                <input
+                  v-model="formData.orderDate"
+                  type="text"
+                  class="input"
+                  placeholder="Enter Order Date"
+                />
+              </div>
+
+              <div>
+                <label class="form-label text-sm font-medium text-gray-600 mb-2"
+                  >License Plate</label
+                >
+                <input
+                  v-model="formData.noPolisi"
+                  type="text"
+                  class="input"
+                  placeholder="Enter License Plate"
+                />
               </div>
               <div>
-                <label class="form-label text-sm font-medium text-gray-600">Region To</label>
-                <div class="text-gray-900 font-medium py-2">
-                  {{ loadSheetData.regionTo }}
-                </div>
+                <label class="form-label text-sm font-medium text-gray-600 mb-2"
+                  >Received Date</label
+                >
+                <input v-model="formData.receivedDate" type="datetime-local" class="input" />
               </div>
+
               <div>
-                <label class="form-label text-sm font-medium text-gray-600">Arrival Date</label>
-                <div class="text-gray-900 font-medium py-2">
-                  {{ formatDate(loadSheetData.arrivalDate) }}
-                </div>
+                <label class="form-label text-sm font-medium text-gray-600 mb-2">Transporter</label>
+                <input
+                  v-model="formData.transporter"
+                  type="text"
+                  class="input"
+                  placeholder="Enter Transporter"
+                />
               </div>
             </div>
           </div>
 
-          <!-- Right Column - Signature Box -->
+          <!-- Right Column - Signature Box (4 columns) -->
           <div class="lg:col-span-4">
-            <label class="form-label text-sm font-medium text-gray-600">Driver Signature</label>
-            <div class="border border-gray-300 rounded-lg p-4 mt-3 bg-gray-50">
+            <label class="form-label text-sm font-medium text-gray-600">Signature</label>
+            <div class="border border-gray-300 rounded-lg p-4 mt-2 bg-gray-50">
               <!-- Signature Pad -->
               <VueSignature
                 ref="signaturePad"
@@ -68,107 +119,97 @@
                 class="signature-pad"
               />
 
-              <!-- Signature Actions -->
-              <div class="flex gap-2 mt-3">
-                <button class="btn btn-sm btn-light flex-1" @click="clearSignature">
+              <!-- Clear Button (Vertical) -->
+              <div class="mt-3">
+                <button class="btn btn-sm btn-danger w-full" @click="clearSignature">
                   <i class="ki-duotone ki-trash"></i>
                   Clear
                 </button>
-                <button class="btn btn-sm btn-primary flex-1" @click="saveSignature">
-                  <i class="ki-duotone ki-check"></i>
-                  Save
-                </button>
+              </div>
+
+              <!-- Label -->
+              <div class="text-center mt-3">
+                <p class="text-sm font-semibold text-gray-700">Employee Signature</p>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Table Detail Section -->
-      <div class="border border-gray-200 rounded-xl p-[24px]">
-        <h3 class="text-lg font-semibold mb-[16px]">Detail Items</h3>
-
-        <!-- Table Controls -->
-        <div class="flex justify-between items-center mb-4">
-          <div class="flex items-center gap-2">
-            <span class="text-sm text-gray-700">Show</span>
-            <select
-              v-model="pageSize"
-              class="form-select form-select-sm w-auto"
-              @change="setPage(1)"
-            >
-              <option :value="5">5</option>
-              <option :value="10">10</option>
-              <option :value="25">25</option>
-              <option :value="50">50</option>
-            </select>
-            <span class="text-sm text-gray-700">entries</span>
-          </div>
-          <div>
-            <UiInputSearch v-model="searchTable" placeholder="Search" @keypress="handleSearch" />
-          </div>
+      <!-- Table Section -->
+      <div class="border border-gray-200 rounded-xl p-[24px] mt-[24px]">
+        <!-- Table Header -->
+        <div class="flex justify-between items-center mb-[24px]">
+          <h1>List Receiving Confirmation Request</h1>
         </div>
 
         <!-- Table -->
         <div class="overflow-x-auto list__table">
           <table class="table align-middle text-gray-700 font-medium text-sm">
             <thead>
+              <!-- First Header Row -->
               <tr>
-                <th>Faktur</th>
-                <th>SKU</th>
-                <th>SKU Description</th>
-                <th>Invoice Qty</th>
-                <th>Received</th>
-                <th>Discrepancy</th>
-                <th>Remark</th>
+                <th rowspan="2" class="text-center border-r">No Pick Slip</th>
+                <th rowspan="2" class="text-center border-r">SKU Description</th>
+                <th colspan="2" class="text-center border-r">LOT. NO</th>
+                <th colspan="3" class="text-center border-r">FG Receipt Confirmation</th>
+                <th colspan="2" class="text-center border-r">Loading Difference</th>
+                <th colspan="2" class="text-center border-r">Transporter Claim</th>
+                <th rowspan="2" class="text-center">Action</th>
+              </tr>
+              <!-- Second Header Row -->
+              <tr>
+                <th class="text-center border-r">Delivery Note</th>
+                <th class="text-center border-r">Actual</th>
+                <th class="text-center border-r">Delivery Note</th>
+                <th class="text-center border-r">Received</th>
+                <th class="text-center border-r">Difference</th>
+                <th class="text-center border-r">More</th>
+                <th class="text-center border-r">Less</th>
+                <th class="text-center border-r">Repack Qty</th>
+                <th class="text-center border-r">Damage Qty</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-if="paginatedItems.length === 0">
-                <td colspan="7" class="text-center">No data found.</td>
+              <tr v-if="tableData.length === 0">
+                <td colspan="14" class="text-center">No data available</td>
               </tr>
-              <tr v-for="(item, index) in paginatedItems" :key="index">
-                <td>{{ item.faktur }}</td>
-                <td>{{ item.sku }}</td>
-                <td>{{ item.skuDescription }}</td>
-                <td>{{ item.invoiceQty }}</td>
-                <td>{{ item.received }}</td>
-                <td>
-                  <span class="badge badge-outline" :class="getDiscrepancyBadge(item.discrepancy)">
-                    {{ item.discrepancy }}
-                  </span>
+              <tr v-for="(item, index) in tableData" :key="index">
+                <td>{{ item.pickSlip }}</td>
+                <td>{{ item.description }}</td>
+                <td class="text-right">{{ item.diSuratJalan }}</td>
+                <td class="text-right">{{ item.actual }}</td>
+                <td class="text-right">{{ item.diSuratJalanKonfirmasi }}</td>
+                <td class="text-right">{{ item.diterima }}</td>
+                <td class="text-right">{{ item.selisih }}</td>
+                <td class="text-right">{{ item.lebih }}</td>
+                <td class="text-right">{{ item.kurang }}</td>
+                <td class="text-right">{{ item.repackQty }}</td>
+                <td class="text-right">{{ item.damageQty }}</td>
+                <td class="text-center">
+                  <button
+                    class="btn btn-sm btn-icon btn-primary"
+                    @click="viewItem(index)"
+                    title="View Details"
+                  >
+                    <i class="ki-filled ki-eye"></i>
+                  </button>
                 </td>
-                <td>{{ item.remark || '-' }}</td>
               </tr>
             </tbody>
           </table>
         </div>
-
-        <!-- Pagination -->
-        <div class="flex items-center justify-between mt-[24px]">
-          <p class="m-0 text-sm">
-            Showing
-            {{
-              pageSize * currentPage > filteredItems.length
-                ? filteredItems.length
-                : pageSize * currentPage
-            }}
-            of {{ filteredItems.length }} entries
-          </p>
-          <LPagination
-            :totalItems="filteredItems.length"
-            :pageSize="pageSize"
-            :currentPage="currentPage"
-            @pageChange="setPage"
-          />
-        </div>
       </div>
 
-      <!-- Back Button -->
-      <div class="mt-[24px]">
+      <!-- Action Buttons -->
+      <div class="mt-[24px] flex gap-3 justify-end">
         <button class="btn btn-light" @click="goBack()">
           <i class="ki-duotone ki-arrow-left"></i>
           Back to List
+        </button>
+        <button class="btn btn-primary" @click="submitForm()">
+          <i class="ki-duotone ki-save-2"></i>
+          Submit
         </button>
       </div>
     </div>
@@ -176,37 +217,40 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
-import LPagination from '@/components/pagination/LPagination.vue'
-import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import VueSignature from 'vue3-signature'
-import momentLib from 'moment'
 
-const moment = momentLib
 const router = useRouter()
 
-interface DetailItem {
-  faktur: string
-  sku: string
-  skuDescription: string
-  invoiceQty: number
-  received: number
-  discrepancy: number
-  remark: string
+interface FormData {
+  orderNo: string
+  namaKaryawan: string
+  namaSopir: string
+  noPolisi: string
+  transporter: string
+  pickup: string
+  destination: string
+  orderDate: string
+  receivedDate: string
+  signature: string | null
 }
 
-interface LoadSheetData {
-  loadSheet: string
-  driverName: string
-  transporter: string
-  distributor: string
-  regionFrom: string
-  regionTo: string
-  arrivalDate: string
-  signature: string | null
+interface TableData {
+  pickSlip: string
+  sku: string
+  description: string
+  diSuratJalan: number
+  actual: number
+  diSuratJalanKonfirmasi: number
+  diterima: number
+  selisih: number
+  lebih: number
+  kurang: number
+  repackQty: number
+  damageQty: number
 }
 
 const routes = ref<routeTypes[]>([
@@ -216,9 +260,6 @@ const routes = ref<routeTypes[]>([
   },
 ])
 
-const searchTable = ref<string>('')
-const currentPage = ref<number>(1)
-const pageSize = ref<number>(10)
 const signaturePad = ref<any>(null)
 
 // Signature options
@@ -227,134 +268,51 @@ const signatureOptions = {
   backgroundColor: '#ffffff',
 }
 
-// Dummy Load Sheet Data
-const loadSheetData = ref<LoadSheetData>({
-  loadSheet: 'LS-2024-001',
-  driverName: 'Budi Santoso',
-  transporter: 'PT Trans Jaya',
-  distributor: 'PT Distributor A',
-  regionFrom: 'Jakarta',
-  regionTo: 'Bandung',
-  arrivalDate: '2024-12-08',
-  signature: null, // You can add signature image URL here
+// Form Data
+const formData = ref<FormData>({
+  orderNo: '',
+  namaKaryawan: '',
+  namaSopir: '',
+  noPolisi: '',
+  transporter: '',
+  pickup: '',
+  destination: '',
+  orderDate: '',
+  receivedDate: '',
+  signature: null,
 })
 
-// Dummy Detail Items
-const detailItems = ref<DetailItem[]>([
+// Table Data
+const tableData = ref<TableData[]>([
   {
-    faktur: 'FKT-001',
-    sku: 'SKU-001',
-    skuDescription: 'Product A - Size M',
-    invoiceQty: 100,
-    received: 100,
-    discrepancy: 0,
-    remark: 'Complete',
+    pickSlip: 'PS-001',
+    sku: 'SKU-12345',
+    description: 'Product Sample A',
+    diSuratJalan: 100,
+    actual: 100,
+    diSuratJalanKonfirmasi: 100,
+    diterima: 98,
+    selisih: -2,
+    lebih: 0,
+    kurang: 2,
+    repackQty: 0,
+    damageQty: 2,
   },
   {
-    faktur: 'FKT-001',
-    sku: 'SKU-002',
-    skuDescription: 'Product B - Size L',
-    invoiceQty: 50,
-    received: 48,
-    discrepancy: -2,
-    remark: 'Minor shortage',
-  },
-  {
-    faktur: 'FKT-002',
-    sku: 'SKU-003',
-    skuDescription: 'Product C - Size XL',
-    invoiceQty: 75,
-    received: 75,
-    discrepancy: 0,
-    remark: 'Complete',
-  },
-  {
-    faktur: 'FKT-002',
-    sku: 'SKU-004',
-    skuDescription: 'Product D - Size S',
-    invoiceQty: 120,
-    received: 115,
-    discrepancy: -5,
-    remark: 'Damaged items',
-  },
-  {
-    faktur: 'FKT-003',
-    sku: 'SKU-005',
-    skuDescription: 'Product E - Size M',
-    invoiceQty: 80,
-    received: 82,
-    discrepancy: 2,
-    remark: 'Excess delivery',
-  },
-  {
-    faktur: 'FKT-003',
-    sku: 'SKU-006',
-    skuDescription: 'Product F - Size L',
-    invoiceQty: 60,
-    received: 60,
-    discrepancy: 0,
-    remark: 'Complete',
-  },
-  {
-    faktur: 'FKT-004',
-    sku: 'SKU-007',
-    skuDescription: 'Product G - Size XL',
-    invoiceQty: 90,
-    received: 88,
-    discrepancy: -2,
-    remark: 'Minor shortage',
-  },
-  {
-    faktur: 'FKT-004',
-    sku: 'SKU-008',
-    skuDescription: 'Product H - Size S',
-    invoiceQty: 110,
-    received: 110,
-    discrepancy: 0,
-    remark: 'Complete',
+    pickSlip: 'PS-002',
+    sku: 'SKU-67890',
+    description: 'Product Sample B',
+    diSuratJalan: 50,
+    actual: 50,
+    diSuratJalanKonfirmasi: 50,
+    diterima: 52,
+    selisih: 2,
+    lebih: 2,
+    kurang: 0,
+    repackQty: 0,
+    damageQty: 0,
   },
 ])
-
-const filteredItems = ref<DetailItem[]>([...detailItems.value])
-
-const paginatedItems = computed(() => {
-  const start = (currentPage.value - 1) * pageSize.value
-  const end = start + pageSize.value
-  return filteredItems.value.slice(start, end)
-})
-
-const formatDate = (date: string) => {
-  return moment(date).format('DD MMMM YYYY')
-}
-
-const getDiscrepancyBadge = (discrepancy: number) => {
-  if (discrepancy === 0) return 'badge-success'
-  if (discrepancy > 0) return 'badge-info'
-  return 'badge-danger'
-}
-
-const handleSearch = (event: KeyboardEvent) => {
-  if (event.key === 'Enter') {
-    filterTableData()
-  }
-}
-
-const filterTableData = () => {
-  if (searchTable.value) {
-    filteredItems.value = detailItems.value.filter((item) =>
-      Object.values(item).some((val) =>
-        String(val).toLowerCase().includes(searchTable.value.toLowerCase()),
-      ),
-    )
-  } else {
-    filteredItems.value = [...detailItems.value]
-  }
-  currentPage.value = 1
-}
-
-const setPage = (page: number) => {
-  currentPage.value = page
-}
 
 const goBack = () => {
   router.push({ name: 'receivingConfirmation' })
@@ -366,29 +324,49 @@ const clearSignature = () => {
   }
 }
 
-const saveSignature = () => {
+const viewItem = (index: number) => {
+  const item = tableData.value[index]
+  console.log('Viewing item:', item)
+  // TODO: Open modal or navigate to detail page
+  alert(`Viewing details for: ${item.pickSlip} - ${item.description}`)
+}
+
+const submitForm = () => {
+  // Save signature data
   if (signaturePad.value) {
     const { isEmpty, data } = signaturePad.value.save()
     if (!isEmpty) {
-      // Save signature data (base64 image)
-      loadSheetData.value.signature = data
-      console.log('Signature saved:', data)
-      // TODO: Send signature to API
-      alert('Signature saved successfully!')
-    } else {
-      alert('Please draw a signature first')
+      formData.value.signature = data
     }
   }
+
+  // Validate form
+  if (!formData.value.orderNo || !formData.value.namaKaryawan || !formData.value.namaSopir) {
+    alert('Please fill in all required fields')
+    return
+  }
+
+  // Validate table data
+  if (tableData.value.length === 0) {
+    alert('Please add at least one item to the table')
+    return
+  }
+
+  console.log('Form Data:', formData.value)
+  console.log('Table Data:', tableData.value)
+  // TODO: Send data to API
+  alert('Receiving confirmation submitted successfully!')
+
+  // Redirect to list
+  router.push({ name: 'receivingConfirmation' })
 }
 
 onMounted(() => {
   // Load existing signature if available
-  if (loadSheetData.value.signature && signaturePad.value) {
-    signaturePad.value.fromDataURL(loadSheetData.value.signature)
+  if (formData.value.signature && signaturePad.value) {
+    signaturePad.value.fromDataURL(formData.value.signature)
   }
-  // TODO: Load data based on route params
-  // const id = route.params.id
-  // Load actual data from API
+  // TODO: Load data based on route params if editing
 })
 </script>
 
@@ -419,6 +397,34 @@ onMounted(() => {
   th,
   td {
     white-space: nowrap;
+    padding: 12px 16px;
+  }
+
+  th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    border: 1px solid #dee2e6;
+  }
+
+  td {
+    border: 1px solid #dee2e6;
+  }
+
+  tbody tr:hover {
+    background-color: #f8f9fa;
+  }
+
+  &::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    width: 10px;
+    height: 10px;
+    border-radius: 15px;
+    background-color: #dbdfe9;
   }
 }
 </style>

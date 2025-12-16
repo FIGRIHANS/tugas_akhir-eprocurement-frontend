@@ -71,24 +71,6 @@
 
       <!-- Table Section -->
       <div class="overflow-x-auto list__table mt-[24px]">
-        <div class="flex justify-between items-center mb-4">
-          <div class="flex items-center gap-2">
-            <span class="text-sm text-gray-700">Show</span>
-            <select
-              v-model="pageSize"
-              class="form-select form-select-sm w-auto"
-              @change="setPage(1)"
-            >
-              <option :value="5">5</option>
-              <option :value="10">10</option>
-              <option :value="25">25</option>
-              <option :value="50">50</option>
-              <option :value="100">100</option>
-            </select>
-            <span class="text-sm text-gray-700">entries</span>
-          </div>
-        </div>
-
         <table class="table align-middle text-gray-700 font-medium text-sm">
           <thead>
             <tr>
