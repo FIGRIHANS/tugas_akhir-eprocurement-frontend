@@ -9,6 +9,7 @@
       :can-click-data="true"
       :can-click-information="canClickInformationTab"
       :can-click-preview="canClickPreviewTab"
+      :can-click-payment-status="true"
       class="-mx-[24px]"
     />
     <!-- <div v-if="form.status !== 0" class="status__box--approved -mt-5 -mx-[24px]">
@@ -189,6 +190,7 @@ const InvoiceInformation = defineAsyncComponent(
   () => import('./InvoiceAddWrapper/InvoiceInformation.vue'),
 )
 const InvoicePreview = defineAsyncComponent(() => import('./InvoiceAddWrapper/InvoicePreview.vue'))
+const PaymentStatus = defineAsyncComponent(() => import('./InvoiceAddWrapper/PaymentStatus.vue'))
 const ModalSuccess = defineAsyncComponent(
   () => import('./InvoiceAddWrapper/InvoicePreview/ModalSuccess.vue'),
 )
@@ -336,6 +338,7 @@ const contentComponent = computed(() => {
     information: InvoiceInformation,
     ocrAiVerification: InvoiceOcrAiVerification,
     preview: InvoicePreview,
+    paymentStatus: PaymentStatus,
   } as { [key: string]: Component }
 
   return components[tabNow.value]

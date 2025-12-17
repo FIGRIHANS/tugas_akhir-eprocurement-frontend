@@ -41,6 +41,18 @@
     >
       Invoice Preview
     </button>
+
+    <i v-if="withPreview" class="ki-duotone ki-right"></i>
+
+    <button
+      v-if="withPreview"
+      class="tab pl-[4px]"
+      :class="[activeTab === 'paymentStatus' ? 'active' : '']"
+      :disabled="!canClickPaymentStatus"
+      @click="activeTab = 'paymentStatus'"
+    >
+      Payment Status
+    </button>
   </div>
 </template>
 
@@ -53,12 +65,14 @@ withDefaults(
     canClickData?: boolean
     canClickInformation?: boolean
     canClickPreview?: boolean
+    canClickPaymentStatus?: boolean
   }>(),
   {
     withPreview: true,
     canClickData: true,
     canClickInformation: false,
     canClickPreview: false,
+    canClickPaymentStatus: false,
   },
 )
 </script>
