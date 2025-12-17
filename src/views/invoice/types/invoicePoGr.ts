@@ -1,4 +1,4 @@
-import type { WhtCodeTypes } from '@/stores/master-data/types/invoiceMasterData' 
+import type { WhtCodeTypes } from '@/stores/master-data/types/invoiceMasterData'
 export interface itemsPoGrType {
   id: number
   poNo: string
@@ -56,7 +56,8 @@ export interface PoGrSearchTypes {
   currencyTC: string
   itemAmountLC: number
   itemAmountTC: number
+  itemAmount: number
+  uom: string
+  materialDescription: string
   isActive?: boolean
-
 }
-
