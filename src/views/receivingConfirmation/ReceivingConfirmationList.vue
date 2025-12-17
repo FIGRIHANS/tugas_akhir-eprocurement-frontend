@@ -90,7 +90,7 @@
           </thead>
           <tbody>
             <tr v-if="filteredDataList?.length === 0">
-              <td colspan="17" class="text-center">No data found.</td>
+              <td colspan="18" class="text-center">No data found.</td>
             </tr>
             <tr v-for="(item, index) in list" :key="index">
               <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
@@ -121,6 +121,15 @@
               <td>{{ item.createdBy }}</td>
               <td>{{ formatDate(item.updateDate) }}</td>
               <td>{{ item.updateBy }}</td>
+              <td class="text-center">
+                <button
+                  class="btn btn-sm btn-icon btn-primary"
+                  @click="viewDetail(item.beritaAcaraId)"
+                  title="View Detail"
+                >
+                  <i class="ki-filled ki-eye"></i>
+                </button>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -225,6 +234,7 @@ const columns = ref<string[]>([
   'Created By',
   'Update Date',
   'Update By',
+  'Action',
 ])
 
 // 10 Dummy data for demonstration
@@ -593,6 +603,12 @@ const exportData = () => {
   console.log('Export data')
   // TODO: Implement export functionality
   alert('Export functionality will be implemented')
+}
+
+const viewDetail = (id: string) => {
+  console.log('View detail for:', id)
+  // TODO: Navigate to detail page
+  alert(`View detail for: ${id}`)
 }
 
 onMounted(() => {
