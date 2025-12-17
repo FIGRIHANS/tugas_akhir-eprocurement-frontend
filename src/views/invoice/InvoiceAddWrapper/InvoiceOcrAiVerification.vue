@@ -331,6 +331,7 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiModal from '@/components/modal/UiModal.vue'
 import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
 import type { invoiceOcrData } from '../types/invoiceOcrData'
+import moment from 'moment'
 
 const route = useRoute()
 
@@ -398,12 +399,12 @@ const selectedDocumentType = ref<string>('1')
 
 /* -------------------- Dummy General Data -------------------- */
 const generalData = ref([
-  { label: 'Vendor Invoice', value: '902205180001' },
-  { label: 'Invoice Date', value: '8 Mei 2022' },
+  { label: 'Vendor Invoice', value: form.invoiceVendorNo },
+  { label: 'Invoice Date', value: moment(form.invoiceDate).format('DD MMMM YYYY') },
   { label: 'Posting Date', value: '10 Mei 2022' },
-  { label: 'Amount', value: '1.028.200.000' },
-  { label: 'Tax Amount', value: '102.820.000' },
-  { label: 'Currency', value: 'IDR' },
+  { label: 'Amount', value: form.vatAmount },
+  { label: 'Tax Amount', value: form.subtotal },
+  { label: 'Currency', value: form.currency },
 ])
 
 const generalStatus = ref([
@@ -418,34 +419,34 @@ const tableData = ref([
   {
     header: 'Nama Vendor',
     qr: qrData.vendorBuyer,
-    fpVerified: form.companyName == qrData.vendorBuyer,
-    ocr: ocrData.vendorName,
-    invoiceVerified: form.companyName == ocrData.vendorName,
-    remarks: form.companyName == qrData.vendorBuyer && form.companyName == ocrData.vendorName,
+    fpVerified: form.vendorName == qrData.vendorBuyer,
+    ocr: '-',
+    invoiceVerified: '-',
+    remarks: form.vendorName == qrData.vendorBuyer,
   },
   {
     header: 'NPWP Vendor',
     qr: qrData.npwppBuyer,
     fpVerified: form.npwpNumber == qrData.npwppBuyer,
-    ocr: ocrData.buyerNpwp,
+    ocr: '-',
     invoiceVerified: form.npwpNumber == ocrData.buyerNpwp,
-    remarks: form.npwpNumber == qrData.npwppBuyer && form.npwpNumber == ocrData.buyerNpwp,
+    remarks: form.npwpNumber == qrData.npwppBuyer,
   },
   {
     header: 'Perusahaan',
     qr: qrData.vendorSupplier,
-    fpVerified: form.vendorName == qrData.vendorSupplier,
-    ocr: '-',
+    fpVerified: form.companyName == qrData.vendorSupplier,
+    ocr: ocrData.vendorName,
     invoiceVerified: true,
     remarks: false,
   },
   {
     header: 'NPWP',
-    qr: ocrData.buyerNpwp,
-    fpVerified: form.npwp == ocrData.buyerNpwp,
-    ocr: 'Non Validation',
-    invoiceVerified: true,
-    remarks: false,
+    qr: qrData.npwpSupplier,
+    fpVerified: form.npwp == qrData.npwpSupplier,
+    ocr: ocrData.buyerNpwp,
+    invoiceVerified: form.npwp == ocrData.buyerNpwp,
+    remarks: form.npwp == qrData.npwpSupplier && form.npwp == ocrData.buyerNpwp,
   },
   {
     header: 'No Faktur Pajak',
@@ -458,25 +459,25 @@ const tableData = ref([
   {
     header: 'Tanggal Faktur Pajak',
     qr: qrData.taxDocumentDate,
-    fpVerified: false,
+    fpVerified: true,
     ocr: ocrData.transactionDate || '-',
-    invoiceVerified: true,
-    remarks: false,
+    invoiceVerified: 'none',
+    remarks: true,
   },
   {
     header: 'Nilai Penjualan',
-    qr: '370,000.00',
-    fpVerified: true,
-    ocr: '330,000.00',
-    invoiceVerified: false,
-    remarks: 'Invoice Not Match selisih 39.123',
-  },
-  {
-    header: 'DPP Lainnya',
     qr: qrData.dpp,
     fpVerified: form.subtotal == Number(qrData.dpp),
     ocr: ocrData.dpp,
-    invoiceVerified: Number(ocrData.dpp.replace(/[^0-9]/g, '')) == form.subtotal,
+    invoiceVerified: form.subtotal == Number(ocrData.dpp),
+    remarks: form.subtotal == Number(qrData.dpp) && form.subtotal == Number(ocrData.dpp),
+  },
+  {
+    header: 'DPP Lainnya',
+    qr: '-',
+    fpVerified: 'none',
+    ocr: '-',
+    invoiceVerified: 'none',
     remarks: 'Invoice Not Match',
   },
   {
@@ -491,7 +492,7 @@ const tableData = ref([
     header: 'PPN BM',
     qr: qrData.ppnbm,
     fpVerified: true,
-    ocr: '0',
+    ocr: '-',
     invoiceVerified: true,
     remarks: 'Matched',
   },
@@ -499,26 +500,26 @@ const tableData = ref([
     header: 'Status Approve FP',
     qr: qrData.status,
     fpVerified: true,
-    ocr: 'APPROVED',
-    invoiceVerified: true,
-    remarks: 'Matched',
+    ocr: '-',
+    invoiceVerified: false,
+    remarks: 'none',
   },
   {
     header: 'Reference',
-    qr: '3544N5E1N6',
-    fpVerified: true,
-    ocr: '3544N5E1N6',
+    qr: '-',
+    fpVerified: 'none',
+    ocr: ocrData.FakturPajak || '-',
     invoiceVerified: true,
-    remarks: 'Matched',
+    remarks: 'none',
   },
-  {
-    header: 'Status FP PJAP',
-    qr: qrData.status,
-    fpVerified: '',
-    ocr: '',
-    invoiceVerified: '',
-    remarks: 'Matched',
-  },
+  // {
+  //   header: 'Status FP PJAP',
+  //   qr: qrData.status,
+  //   fpVerified: '',
+  //   ocr: '',
+  //   invoiceVerified: '',
+  //   remarks: 'Matched',
+  // },
 ])
 
 const bjapVerify = ref([
@@ -597,6 +598,8 @@ watch(selectedDocumentType, async (newVal) => {
 })
 
 onMounted(() => {
+  console.log(form, 'ini form')
+
   getPreviewUrl()
   setColumn()
 
