@@ -5,7 +5,7 @@
 
     <div class="border border-gray-200 rounded-xl p-[24px]">
       <!-- Form Section -->
-      <div class="mb-6">
+      <div class="border border-gray-200 rounded-xl p-[24px] mb-[24px]">
         <h3 class="text-lg font-semibold mb-4">Receiving Confirmation Information</h3>
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <!-- Left and Middle Columns - Form Fields (8 columns) -->
@@ -157,7 +157,7 @@
       </div>
 
       <!-- Table Section -->
-      <div class="mb-6">
+      <div class="border border-gray-200 rounded-xl p-[24px]">
         <h3 class="text-lg font-semibold mb-4">List Receiving Confirmation Request</h3>
         <div class="overflow-x-auto list__table">
           <table class="table align-middle text-gray-700 font-medium text-sm">
@@ -217,7 +217,7 @@
       </div>
 
       <!-- Action Buttons -->
-      <div class="flex gap-3 justify-end">
+      <div class="flex gap-3 justify-end mt-6">
         <button class="btn btn-light" @click="goBack()">
           <i class="ki-duotone ki-arrow-left"></i>
           Back to List
@@ -226,7 +226,7 @@
           <i class="ki-duotone ki-cross-circle"></i>
           Reject
         </button>
-        <button class="btn btn-success" @click="approveConfirmation()">
+        <button class="btn btn-primary" @click="approveConfirmation()">
           <i class="ki-duotone ki-check-circle"></i>
           Approve
         </button>
@@ -246,8 +246,8 @@
             >
             <textarea
               v-model="rejectionReason"
-              class="input w-full h-32 resize-none"
-              placeholder="Enter rejection reason..."
+              class="input w-full h-32 resize-none p-3"
+              placeholder="Please enter the reason for rejection..."
             ></textarea>
           </div>
           <div class="flex gap-3 justify-end">
@@ -301,10 +301,6 @@ const routes = ref<routeTypes[]>([
   {
     name: 'Digital Receiving Confirmation',
     to: '/digital-receiving-confirmation',
-  },
-  {
-    name: 'Detail',
-    to: '',
   },
 ])
 
@@ -420,6 +416,21 @@ onMounted(() => {
   th,
   td {
     white-space: nowrap;
+    padding: 12px 16px;
+  }
+
+  th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    border: 1px solid #dee2e6;
+  }
+
+  td {
+    border: 1px solid #dee2e6;
+  }
+
+  tbody tr:hover {
+    background-color: #f8f9fa;
   }
 
   &::-webkit-scrollbar {
