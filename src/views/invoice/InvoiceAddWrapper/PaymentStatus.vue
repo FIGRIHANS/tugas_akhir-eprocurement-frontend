@@ -1,15 +1,10 @@
 <template>
   <div v-if="form">
     <div class="flex gap-[24px]">
-      <HeaderDocument />
-      <InvoiceCalculation />
+      <PaymentInformation />
+      <PaymentCalculation />
     </div>
-    <InvoicePoGr v-if="!checkNonPo()" class="mt-[24px]" />
-    <InvoiceItem v-if="checkNonPo()" class="mt-[24px]" />
-    <AdditionalCost
-      v-if="(checkPoWithoutDp() || checkPoWithDp()) && !checkNonPo()"
-      class="mt-[24px]"
-    />
+    <PaymentDetails class="mt-[24px]" />
   </div>
 </template>
 
@@ -18,29 +13,15 @@ import { ref, onMounted, inject, defineAsyncComponent } from 'vue'
 import { useRoute } from 'vue-router'
 import type { formTypes } from '../types/invoiceAddWrapper'
 
-const HeaderDocument = defineAsyncComponent(() => import('./InvoiceInformation/HeaderDocument.vue'))
-const InvoiceCalculation = defineAsyncComponent(
-  () => import('./InvoiceInformation/InvoiceCalculation.vue'),
+const PaymentInformation = defineAsyncComponent(() => import('./PaymentStatus/PaymentInformation.vue'))
+const PaymentCalculation = defineAsyncComponent(
+  () => import('./PaymentStatus/PaymentCalculation.vue'),
 )
-const InvoicePoGr = defineAsyncComponent(() => import('./InvoiceInformation/InvoicePoGr.vue'))
-const InvoiceItem = defineAsyncComponent(() => import('./InvoiceInformation/InvoiceItem.vue'))
-const AdditionalCost = defineAsyncComponent(() => import('./InvoiceInformation/AdditionalCost.vue'))
+const PaymentDetails = defineAsyncComponent(() => import('./PaymentStatus/PaymentDetails.vue'))
 
 const form = inject<formTypes>('form')
 const route = useRoute()
 const typeForm = ref<string>('')
-
-const checkNonPo = () => {
-  return typeForm.value === 'nonpo'
-}
-
-const checkPoWithoutDp = () => {
-  return form.invoiceDp === '9011'
-}
-
-const checkPoWithDp = () => {
-  return form.invoiceDp === '9013'
-}
 
 onMounted(() => {
   typeForm.value = route.query.type?.toString().toLowerCase() || 'po'
