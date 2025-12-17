@@ -174,6 +174,7 @@ export interface PoGrItemTypes {
   taxCode: string
   quantity: number
   unit: string
+  uom: string
   itemText: string
   material: string
   materialDescription: string
@@ -189,6 +190,7 @@ export interface PoGrItemTypes {
   currencyTC: string
   itemAmountLC: number
   itemAmountTC: number
+  itemAmount: number
 }
 
 export interface ListPoTypes {
