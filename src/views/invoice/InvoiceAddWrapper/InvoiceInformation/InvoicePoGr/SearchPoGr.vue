@@ -1,6 +1,6 @@
 <template>
   <div class="modal" data-modal="true" id="add_po_gr_item_modal">
-    <div class="modal-content modal-center-y max-w-[1000px]">
+    <div class="modal-content modal-center-y max-w-[70%]">
       <div class="modal-header py-[20px] px-[16px]">
         <h3 class="modal-title text-lg font-semibold p-[0px]">Add PO & GR Item</h3>
         <button class="btn btn-xs btn-clear btn-light" data-modal-dismiss="true">
@@ -8,7 +8,7 @@
         </button>
       </div>
       <div class="modal-body py-[16px] px-[16px] flex flex-col gap-[20px]">
-        <div class="overflow-x-auto pogr__table">
+        <div class="overflow-x-scroll overflow-y-scroll h-[600px] pogr__table">
           <table class="table table-border text-sm" data-datatable-table="true">
             <thead>
               <tr>
