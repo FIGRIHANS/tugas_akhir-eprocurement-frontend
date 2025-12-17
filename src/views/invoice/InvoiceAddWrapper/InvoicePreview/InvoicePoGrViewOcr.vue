@@ -161,7 +161,7 @@ const setColumn = () => {
 
   const baseColumns = ['Line', ...sourceColumns]
 
-  baseColumns.splice(6, 0, 'Qty Match', 'Unit Price Match', 'VAT Match', 'WHT Match')
+  baseColumns.push('Qty Match', 'Unit Price Match', 'VAT Match', 'WHT Match')
 
   columns.value = baseColumns
 }

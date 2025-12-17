@@ -22,22 +22,29 @@
             >*</span
           >
         </label>
+
         <pdfUpload
           ref="pdfUploadRef"
-          v-show="!form[item.varName as keyof typeof form] && !checkIsView()"
+          v-show="
+            (!form[item.varName as keyof documentFormTypes] || isEditingField[item.varName]) &&
+            !checkIsView()
+          "
           :error="index === 0 && !!formInject?.invoiceDocumentError && !hasAnyDocument"
           :disabled="
             formInject?.status !== 0 && formInject?.status !== -1 && formInject?.status !== 5
           "
           :varName="item.varName"
+          @onLoading="(status) => handleChildLoading(status, item.varName)"
           @setFileOcr="setFileOcr($event)"
-          @setFile="setFile($event, item.varName as keyof documentFormTypes)"
+          @setFile="setFile($event, item.varName as FileFieldKeys)"
         />
+
         <div v-show="!form[item.varName as keyof typeof form] && checkIsView()">
           <p>-</p>
         </div>
+
         <div
-          v-if="form[item.varName as keyof typeof form]"
+          v-if="form[item.varName as keyof documentFormTypes] && !isEditingField[item.varName]"
           class="flex justify-between items-center gap-[8px] flex-1"
         >
           <AttachmentView
@@ -54,24 +61,13 @@
             >Edit</span
           >
         </div>
-        <!-- <span
-          v-if="checkIsView()"
-          class="border-b border-dashed border-primary text-primary cursor-pointer text-xs font-medium"
-          >Download</span
-        > -->
       </div>
-      <p
-        v-if="formInject?.invoiceDocumentError && !hasAnyDocument"
-        class="text-red-500 text-xs -mt-8"
-      >
-        {{ getErrorMessage }}
-      </p>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, inject, watch, toRef, computed } from 'vue'
+import { ref, reactive, inject, watch, computed } from 'vue'
 import type {
   documentFormTypes,
   responseFileTypes,
@@ -83,8 +79,19 @@ import AttachmentView from '@/components/ui/attachment/AttachmentView.vue'
 import { useRoute } from 'vue-router'
 import type { invoiceOcrData } from '@/views/invoice/types/invoiceOcrData'
 
+type FileFieldKeys = 'invoiceDocument' | 'tax' | 'referenceDocument' | 'otherDocument'
+
 const route = useRoute()
 const ocrData = inject<invoiceOcrData>('ocrData')
+const formInject = inject<formTypes>('form')
+const pdfUploadRef = ref()
+
+const isEditingField = reactive<Record<string, boolean>>({
+  invoiceDocument: false,
+  tax: false,
+  referenceDocument: false,
+  otherDocument: false,
+})
 
 const form = reactive<documentFormTypes>({
   invoiceDocument: null,
@@ -94,59 +101,26 @@ const form = reactive<documentFormTypes>({
 })
 
 const hasAnyDocument = computed(() => {
-  if (formInject?.invoiceType === '3') {
-    return form.tax !== null
-  }
-  if (formInject?.invoiceType === '4') {
-    return form.invoiceDocument !== null && form.tax !== null
-  }
-  return (
-    form.invoiceDocument !== null ||
-    form.tax !== null ||
-    form.referenceDocument !== null ||
-    form.otherDocument !== null
-  )
+  return !!(form.invoiceDocument || form.tax || form.referenceDocument || form.otherDocument)
 })
 
-const getErrorMessage = computed(() => {
-  if (formInject?.invoiceType === '3') {
-    return '* Tax Document must be uploaded'
-  }
-  if (formInject?.invoiceType === '4') {
-    return '* Both Invoice Document and Tax Document must be uploaded'
-  }
-  return '* At least one document must be uploaded'
-})
+const handleChildLoading = (status: boolean, varName: string) => {
+  isEditingField[varName] = status
+}
 
 const list = ref<listFormTypes[]>([
-  {
-    title: 'Invoice Document',
-    varName: 'invoiceDocument',
-    varErrorName: 'invoiceDocumentError',
-  },
-  // {
-  //   title: 'Tax Document',
-  //   varName: 'tax',
-  //   varErrorName: 'taxError'
-  // },
+  { title: 'Invoice Document', varName: 'invoiceDocument', varErrorName: 'invoiceDocumentError' },
   {
     title: 'Reference Document',
     varName: 'referenceDocument',
     varErrorName: 'referenceDocumentError',
   },
-  {
-    title: 'Other Document',
-    varName: 'otherDocument',
-    varErrorName: 'otherDocumentError',
-  },
+  { title: 'Other Document', varName: 'otherDocument', varErrorName: 'otherDocumentError' },
 ])
 
-const formInject = inject<formTypes>('form')
-const pdfUploadRef = ref()
-
-const setFile = (file: responseFileTypes, name: keyof documentFormTypes) => {
-  const reftProperty = toRef(form, name)
-  reftProperty.value = file
+const setFile = (file: responseFileTypes, name: FileFieldKeys) => {
+  form[name] = file
+  isEditingField[name] = false
 }
 
 const changeFile = (index: number) => {
@@ -154,39 +128,18 @@ const changeFile = (index: number) => {
 }
 
 const setFileOcr = (data: invoiceOcrData) => {
-  console.log(data, 'ini data')
-
-  ocrData.buyerNpwp = data.buyerNpwp
-  ocrData.dpp = data.dpp
-  ocrData.ppn = data.ppn
-  ocrData.total = data.total
-  ocrData.transactionDate = data.transactionDate
-  ocrData.vendorName = data.vendorName
-  ocrData.vendorNpwp = data.vendorNpwp
-  ocrData.FakturPajak = data.FakturPajak
-}
-// const download = (index: string) => {
-//   console.log(index)
-//   console.log(formInject)
-// }
-
-const checkIsView = () => {
-  return route.query.type === 'po-view' || route.query.type === 'non-po-view'
+  if (ocrData) Object.assign(ocrData, data)
 }
 
+const checkIsView = () => route.query.type?.toString().includes('view')
+
+// Sync with formInject
 watch(
   () => form,
   () => {
-    if (formInject) {
-      formInject.invoiceDocument = form.invoiceDocument
-      formInject.tax = form.tax
-      formInject.referenceDocument = form.referenceDocument
-      formInject.otherDocument = form.otherDocument
-    }
+    if (formInject) Object.assign(formInject, form)
   },
-  {
-    deep: true,
-  },
+  { deep: true },
 )
 
 watch(
@@ -199,9 +152,6 @@ watch(
       form.otherDocument = formInject.otherDocument
     }
   },
-  {
-    deep: true,
-    immediate: true,
-  },
+  { deep: true, immediate: true },
 )
 </script>

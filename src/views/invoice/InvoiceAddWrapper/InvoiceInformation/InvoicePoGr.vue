@@ -132,7 +132,7 @@
                   {{
                     form.currency === item.currencyLC
                       ? useFormatIdr(item.itemAmountLC)
-                      : useFormatUsd(item.itemAmountTC)
+                      : useFormatIdr(item.itemAmountTC)
                   }}
                 </td>
                 <td v-if="!checkInvoiceDp()">{{ item.quantity }}</td>
@@ -154,7 +154,7 @@
                   <span v-if="!item.isEdit">{{
                     form?.currency === 'IDR'
                       ? useFormatIdr(item.itemAmountLC)
-                      : useFormatUsd(item.itemAmountLC)
+                      : useFormatIdr(item.itemAmountLC)
                   }}</span>
                   <input v-else v-model="formEdit.itemAmountLC" type="number" class="input" />
                 </td>
@@ -175,12 +175,12 @@
                   <span v-if="item.isEdit">{{
                     form?.currency === item.currencyLC
                       ? useFormatIdr(formEdit.vatAmount)
-                      : useFormatUsd(formEdit.vatAmount)
+                      : useFormatIdr(formEdit.vatAmount)
                   }}</span>
                   <span v-else>{{
                     form?.currency === item.currencyLC
                       ? useFormatIdr(item.vatAmount || 0)
-                      : useFormatUsd(item.vatAmount || 0)
+                      : useFormatIdr(item.vatAmount || 0)
                   }}</span>
                 </td>
                 <td>-</td>
@@ -188,8 +188,8 @@
                 <td>
                   {{
                     form?.currency === item.currencyLC
-                      ? useFormatIdr(item.whtBaseAmount)
-                      : useFormatUsd(item.whtBaseAmount)
+                      ? useFormatIdr(item.itemAmountLC)
+                      : useFormatIdr(item.itemAmountLC)
                   }}
                 </td>
                 <td>-</td>
@@ -273,7 +273,7 @@
                   <span v-if="!item.isEdit">{{
                     form?.currency === 'IDR'
                       ? useFormatIdr(item.itemAmountLC)
-                      : useFormatUsd(item.itemAmountLC)
+                      : useFormatIdr(item.itemAmountLC)
                   }}</span>
                   <input v-else v-model="item.itemAmountLC" type="number" class="input" />
                 </td>
@@ -325,7 +325,7 @@ import { defaultColumn, invoiceDpColumn, poCCColumn, manualAddColumn } from '@/s
 import SearchPoGr from './InvoicePoGr/SearchPoGr.vue'
 import moment from 'moment'
 import type { PoGrSearchTypes, itemsPoGrType } from '../../types/invoicePoGr'
-import { useFormatIdr, useFormatUsd } from '@/composables/currency'
+import { useFormatIdr } from '@/composables/currency'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 

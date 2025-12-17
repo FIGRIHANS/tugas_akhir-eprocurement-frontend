@@ -1,5 +1,5 @@
 <template>
-  <div class="file-upload relative">
+  <div class="file-upload relative w-full">
     <input
       type="file"
       ref="fileInput"
@@ -9,24 +9,20 @@
       :disabled="disabled || isLoading"
     />
 
-    <!-- Upload Button -->
     <div
       class="flex items-center cursor-pointer relative"
       :class="{ 'border-danger': error, 'opacity-50 cursor-not-allowed': isLoading }"
-      @click="!isLoading && triggerFileInput()"
+      @click="!isLoading && !disabled && triggerFileInput()"
     >
       <slot>
-        <div class="upload__left">
-          <IconUpload />
-        </div>
+        <div class="upload__left"><IconUpload /></div>
         <div class="upload__right">Select file - Pdf (Max 16 mb)</div>
       </slot>
     </div>
 
-    <!-- Loading overlay -->
     <div
       v-if="isLoading"
-      class="absolute inset-0 bg-white/70 backdrop-blur-sm flex items-center justify-center rounded"
+      class="absolute inset-0 bg-white/70 backdrop-blur-sm flex items-center justify-center rounded z-20"
     >
       <svg
         class="animate-spin h-6 w-6 text-blue-600"
@@ -65,7 +61,7 @@ const props = defineProps<{
   varName?: string
 }>()
 
-const emits = defineEmits(['setFile', 'setFileOcr'])
+const emits = defineEmits(['setFile', 'setFileOcr', 'onLoading'])
 
 const uploadApi = useUploadStore()
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -78,22 +74,23 @@ const triggerFileInput = () => {
 }
 
 const handleFileUpload = async (event: Event) => {
-  if (props.isHoldUpload) return emits('setFile')
-
-  isLoading.value = true
-
   const target = event.target as HTMLInputElement
-  if (!target.files || target.files.length === 0) {
-    isLoading.value = false
-    return
-  }
+  if (!target.files || target.files.length === 0) return
 
   const file = target.files[0]
-
   if (file.size > 16 * 1024 * 1024) {
-    isLoading.value = false
+    if (fileInput.value) fileInput.value.value = ''
     return
   }
+
+  if (props.isHoldUpload) {
+    emits('setFile')
+    return
+  }
+
+  // MULAI LOADING: Di sini parent akan menyembunyikan AttachmentView dan menampilkan spinner
+  isLoading.value = true
+  emits('onLoading', true)
 
   try {
     const response = await uploadApi.uploadFile(file, 0)
@@ -110,9 +107,11 @@ const handleFileUpload = async (event: Event) => {
       fileSize: file.size,
     })
   } catch (err) {
-    console.error(err)
+    console.error('Upload Failed:', err)
   } finally {
     isLoading.value = false
+    emits('onLoading', false) // SELESAI: Parent mengembalikan tampilan normal
+    if (fileInput.value) fileInput.value.value = '' // Reset input agar event @change jalan lagi
   }
 }
 
@@ -120,18 +119,21 @@ watch(
   () => errorMessageUpload.value,
   () => {
     if (errorMessageUpload.value) {
-      const idModal = document.querySelector('#error_upload_modal')
-      const modal = KTModal.getInstance(idModal as HTMLElement)
+      const modal = KTModal.getInstance(
+        document.querySelector('#error_upload_modal') as HTMLElement,
+      )
       modal?.show()
     }
   },
 )
 
-defineExpose({
-  triggerFileInput,
-})
+defineExpose({ triggerFileInput })
 </script>
 
 <style lang="scss" scoped>
 @use './styles/upload.scss';
+
+.file-upload {
+  width: 100%;
+}
 </style>
