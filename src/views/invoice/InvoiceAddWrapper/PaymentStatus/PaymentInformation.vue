@@ -39,8 +39,12 @@ const setPaymentInfo = () => {
             value: '31.01.2025'
         },
         {
+            label: 'Payment Method',
+            value: 'Transfer Outgoing'
+        },
+        {
             label: 'Payment Status',
-            value: 'Partial'
+            value: 'Partially Paid '
         }
     ]
 }

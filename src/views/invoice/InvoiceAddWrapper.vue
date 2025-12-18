@@ -4,8 +4,14 @@
   <div>
     <Breadcrumb title="Add Invoice" :routes="routes" />
     <StepperStatus :active-name="stepperStatus" />
-    <TabInvoice v-model:activeTab="tabNow" :can-click-data="true" :can-click-information="canClickInformationTab"
-      :can-click-preview="canClickPreviewTab" :can-click-payment-status="canClickPaymentStatusTab" class="-mx-[24px]" />
+    <TabInvoice
+      v-model:activeTab="tabNow"
+      :can-click-data="true"
+      :can-click-information="canClickInformationTab"
+      :can-click-preview="canClickPreviewTab"
+      :can-click-payment-status="canClickPaymentStatusTab"
+      class="-mx-[24px]"
+    />
     <!-- <div v-if="form.status !== 0" class="status__box--approved -mt-5 -mx-[24px]">
       <i class="ki-outline ki-shield-tick text-primary text-[36px]"></i>
       <div>
@@ -20,13 +26,19 @@
         <component :is="contentComponent" />
       </Transition>
       <!-- Payment Status tab: Only show Back button -->
-      <div v-if="tabNow === 'paymentStatus'" class="flex justify-start items-center mt-[24px] gap-3">
+      <div
+        v-if="tabNow === 'paymentStatus'"
+        class="flex justify-start items-center mt-[24px] gap-3"
+      >
         <button class="btn btn-outline btn-primary" @click="goBack">
           <i class="ki-filled ki-arrow-left"></i>
           Back
         </button>
       </div>
-      <div v-else-if="checkIsNonPo()" class="flex align-items-center justify-between gap-[8px] mt-[24px]">
+      <div
+        v-else-if="checkIsNonPo()"
+        class="flex align-items-center justify-between gap-[8px] mt-[24px]"
+      >
         <div class="flex-1 flex gap-[8px]">
           <button class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goBack">
             <i class="ki-filled ki-arrow-left"></i>
@@ -38,28 +50,40 @@
           </button>
         </div>
         <div class="flex-1 flex gap-[8px] justify-end">
-          <button v-if="tabNow === 'information'" class="btn btn-primary" :disabled="isSubmit || checkFormBudget()"
-            @click="checkBudget">
+          <button
+            v-if="tabNow === 'information'"
+            class="btn btn-primary"
+            :disabled="isSubmit || checkFormBudget()"
+            @click="checkBudget"
+          >
             Budget Checking
             <i class="ki-duotone ki-dollar"></i>
           </button>
 
-          <button class="btn btn-primary" @click="goNext" :disabled="isSubmit ||
-            (!isCheckBudget && tabNow === 'information') ||
-            (tabNow === 'information' && !checkInvoiceInformation()) ||
-            (tabNow === 'data' && !isAlternativePayeeFilled())
-            ">
+          <button
+            class="btn btn-primary"
+            @click="goNext"
+            :disabled="
+              isSubmit ||
+              (!isCheckBudget && tabNow === 'information') ||
+              (tabNow === 'information' && !checkInvoiceInformation()) ||
+              (tabNow === 'data' && !isAlternativePayeeFilled())
+            "
+          >
             {{ tabNow !== 'preview' ? 'Next' : 'Submit' }}
             <i v-if="tabNow !== 'preview'" class="ki-duotone ki-black-right"></i>
             <i v-else class="ki-duotone ki-paper-plane"></i>
           </button>
         </div>
       </div>
-      <div v-else-if="
-        (form.status === 0 || form.status === -1 || form.status === 5) &&
-        !checkInvoiceView() &&
-        !checkInvoiceNonPoView()
-      " class="flex justify-between items-center gap-[8px] mt-[24px]">
+      <div
+        v-else-if="
+          (form.status === 0 || form.status === -1 || form.status === 5) &&
+          !checkInvoiceView() &&
+          !checkInvoiceNonPoView()
+        "
+        class="flex justify-between items-center gap-[8px] mt-[24px]"
+      >
         <button class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goSaveDraft">
           Save as Draft
           <i class="ki-duotone ki-bookmark"></i>
@@ -69,8 +93,11 @@
             <i class="ki-filled ki-arrow-left"></i>
             Back
           </button>
-          <button class="btn btn-primary" :disabled="isSubmit || (tabNow === 'data' && !isAlternativePayeeFilled())"
-            @click="goNext">
+          <button
+            class="btn btn-primary"
+            :disabled="isSubmit || (tabNow === 'data' && !isAlternativePayeeFilled())"
+            @click="goNext"
+          >
             {{ tabNow !== 'preview' ? 'Next' : 'Submit' }}
             <i v-if="tabNow !== 'preview'" class="ki-duotone ki-black-right"></i>
             <i v-else class="ki-duotone ki-paper-plane"></i>
@@ -78,28 +105,43 @@
         </div>
       </div>
       <div v-else class="flex justify-end items-center mt-[24px] gap-3">
-        <button v-if="tabNow !== 'preview' || checkInvoiceView() || checkInvoiceNonPoView()"
-          class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goBack">
+        <button
+          v-if="tabNow !== 'preview' || checkInvoiceView() || checkInvoiceNonPoView()"
+          class="btn btn-outline btn-primary"
+          :disabled="isSubmit"
+          @click="goBack"
+        >
           <i class="ki-filled ki-arrow-left"></i>
           Back
         </button>
 
-        <button v-if="tabNow !== 'preview' || checkInvoiceView() || checkInvoiceNonPoView()" class="btn btn-primary"
-          @click="goNext">
+        <button
+          v-if="tabNow !== 'preview' || checkInvoiceView() || checkInvoiceNonPoView()"
+          class="btn btn-primary"
+          @click="goNext"
+        >
           Next
           <i class="ki-duotone ki-black-right"></i>
         </button>
 
-        <button v-if="tabNow !== 'preview' && !checkInvoiceView() && !checkInvoiceNonPoView()" class="btn btn-primary"
-          :disabled="isSubmit ||
+        <button
+          v-if="tabNow !== 'preview' && !checkInvoiceView() && !checkInvoiceNonPoView()"
+          class="btn btn-primary"
+          :disabled="
+            isSubmit ||
             (tabNow === 'information' && !checkInvoiceInformation()) ||
             (tabNow === 'data' && !isAlternativePayeeFilled())
-            " @click="goNext">
+          "
+          @click="goNext"
+        >
           Next
           <i class="ki-duotone ki-black-right"></i>
         </button>
-        <button v-if="tabNow === 'preview' && !checkInvoiceView() && !checkInvoiceNonPoView()" class="btn btn-primary"
-          :disabled="isSubmit">
+        <button
+          v-if="tabNow === 'preview' && !checkInvoiceView() && !checkInvoiceNonPoView()"
+          class="btn btn-primary"
+          :disabled="isSubmit"
+        >
           Save as PDF
           <iconPDF />
         </button>
@@ -332,12 +374,8 @@ const canClickPreviewTab = computed(() => {
 })
 
 const canClickPaymentStatusTab = computed(() => {
-  // TODO: Update this condition when backend implements payment status
-  // For now, always show the tab for testing purposes
-  return true
-
-  // Future implementation when backend is ready:
-  // return form.status >= 7 || form.paymentStatus === 'Paid'
+  // Only show Payment Status tab when invoice has been sent to SAP (statusCode = 7)
+  return form.status === 7
 })
 
 const checkInvoiceView = () => {
@@ -577,15 +615,15 @@ const goBack = () => {
       isCheckBudget.value = false
       tabNow.value = newTab
       try {
-        ; (document.activeElement as HTMLElement)?.blur()
-      } catch { }
+        ;(document.activeElement as HTMLElement)?.blur()
+      } catch {}
       return
     }
 
     tabNow.value = newTab
     try {
-      ; (document.activeElement as HTMLElement)?.blur()
-    } catch { }
+      ;(document.activeElement as HTMLElement)?.blur()
+    } catch {}
   }
 }
 
@@ -839,8 +877,8 @@ const mapDataPostNonPo = () => {
       cashJournalName: isPettyCash
         ? typeof form.cashJournalName === 'string'
           ? form.cashJournalName
-            .replace(new RegExp('^' + (form.cashJournalCode || '') + '\\s*-\\s*'), '')
-            .trim()
+              .replace(new RegExp('^' + (form.cashJournalCode || '') + '\\s*-\\s*'), '')
+              .trim()
           : form.cashJournalName || ''
         : '',
       pettyCashStartDate: pettyCashStartDate || null,
