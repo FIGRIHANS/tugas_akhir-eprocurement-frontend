@@ -61,7 +61,8 @@ const handleFileUpload = async (event: Event) => {
     emits('setFile', {
       id: 0,
       name: response.name,
-      path: response.path,
+      path: response.url,
+      previewPath: response.urlWithToken,
       fileSize: file.size,
     })
 

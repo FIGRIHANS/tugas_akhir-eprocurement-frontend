@@ -1,44 +1,35 @@
 <template>
   <div class="p-4 w-full">
-    <!-- GRID UTAMA -->
     <div class="grid grid-cols-12 gap-4">
-      <!-- ==================== KIRI ==================== -->
       <div class="col-span-7 space-y-4">
         <div class="card-header py-[8px] px-[20px]">
           <div class="border rounded-lg border-gray-300 p-[4px] flex items-center gap-[4px]">
             <button
               class="btn btn-primary"
-              :class="{
-                'btn-clear info__header': tabOcrTab !== 'general',
-              }"
+              :class="{ 'btn-clear info__header': tabOcrTab !== 'general' }"
               @click="setTabOcr('general')"
             >
               General Data
             </button>
             <button
               class="btn btn-primary"
-              :class="{
-                'btn-clear info__header': tabOcrTab !== 'tax',
-              }"
+              :class="{ 'btn-clear info__header': tabOcrTab !== 'tax' }"
               @click="setTabOcr('tax')"
             >
               Tax & Invoice Verification
             </button>
             <button
               class="btn btn-primary"
-              :class="{
-                'btn-clear info__header': tabOcrTab !== 'ai',
-              }"
+              :class="{ 'btn-clear info__header': tabOcrTab !== 'ai' }"
               @click="setTabOcr('ai')"
             >
               AI Action
             </button>
           </div>
         </div>
-        <!-- GENERAL DATA -->
+
         <div v-if="tabOcrTab === 'general'" class="bg-white shadow rounded-xl p-4">
           <h2 class="font-semibold text-lg mb-3">General Data</h2>
-
           <div class="grid grid-cols-2 gap-4 text-sm">
             <div v-for="(row, i) in generalData" :key="i">
               <p class="text-gray-500 text-xs">{{ row.label }}</p>
@@ -47,7 +38,6 @@
           </div>
         </div>
 
-        <!-- GENERAL STATUS -->
         <div v-if="tabOcrTab === 'general'" class="bg-white shadow rounded-xl p-4">
           <h2 class="font-semibold text-lg mb-3">General Status</h2>
           <div class="grid grid-cols-2 gap-4 text-sm">
@@ -67,7 +57,6 @@
           </div>
         </div>
 
-        <!-- TABLE VERIFIKASI -->
         <div v-if="tabOcrTab === 'tax'" class="bg-white shadow rounded-xl p-4">
           <div class="flex justify-between mb-3">
             <h2 class="font-semibold text-lg">Invoice Verification</h2>
@@ -92,12 +81,6 @@
                 VAT Credit Posting
               </UiButton>
             </div>
-            <!-- <button
-              class="px-3 py-1 bg-blue-600 text-white rounded-lg"
-              @click="handleVerifyInvoice"
-            >
-              Verify Invoice
-            </button> -->
           </div>
           <div class="border rounded-lg">
             <table class="w-full overflow-x-auto text-sm">
@@ -116,23 +99,43 @@
                 <tr
                   v-for="(row, index) in tableData"
                   :key="index"
-                  :class="[{ 'bg-red-100': row.remarks === 'Invoice Not Match' }, 'border-b']"
+                  :class="[
+                    {
+                      'bg-red-100':
+                        row.remarks === false ||
+                        row.remarks === 'Didn\'t Matched' ||
+                        row.remarks === 'Invoice Not Match',
+                    },
+                    'border-b',
+                  ]"
                 >
                   <td class="p-2">{{ row.header }}</td>
                   <td class="p-2">{{ row.qr }}</td>
                   <td class="p-2">
-                    <i class="ki-filled ki-check-circle text-green-500" v-if="row.fpVerified"></i>
-                    <i class="ki-filled ki-cross-circle text-red-500" v-else></i>
+                    <i
+                      class="ki-filled ki-check-circle text-green-500"
+                      v-if="row.fpVerified === true"
+                    ></i>
+                    <i
+                      class="ki-filled ki-cross-circle text-red-500"
+                      v-else-if="row.fpVerified === false"
+                    ></i>
+                    <i class="ki-filled ki-minus-circle text-gray-500" v-else></i>
                   </td>
 
                   <td class="p-2">{{ row.ocr }}</td>
 
                   <td class="p-2">
-                    <i
-                      class="ki-filled ki-check-circle text-green-500"
-                      v-if="row.invoiceVerified"
-                    ></i>
-                    <i class="ki-filled ki-cross-circle text-red-500" v-else></i>
+                    <span v-if="row.invoiceVerified === '-'">
+                      <i class="ki-filled ki-minus-circle text-gray-500"></i>
+                    </span>
+                    <template v-else>
+                      <i
+                        class="ki-filled ki-check-circle text-green-500"
+                        v-if="row.invoiceVerified === true"
+                      ></i>
+                      <i class="ki-filled ki-cross-circle text-red-500" v-else></i>
+                    </template>
                   </td>
 
                   <td class="p-2">
@@ -142,7 +145,17 @@
                     >
                       Matched
                     </p>
-                    <p class="text-red-600 font-semibold" v-else>Didn't Matched</p>
+                    <p
+                      class="text-red-600 font-semibold"
+                      v-else-if="
+                        row.remarks === false ||
+                        row.remarks === 'Didn\'t Matched' ||
+                        row.remarks === 'Invoice Not Match'
+                      "
+                    >
+                      Didn't Matched
+                    </p>
+                    <p v-else>-</p>
                   </td>
                 </tr>
               </tbody>
@@ -153,7 +166,7 @@
             <table class="w-full overflow-x-auto text-sm">
               <thead class="bg-gray-100">
                 <tr>
-                  <th class="p-2 text-left">Feild</th>
+                  <th class="p-2 text-left">Field</th>
                   <th class="p-2 text-left">QR Faktur Status</th>
                   <th class="p-2 text-left">PJAP Status</th>
                   <th class="p-2 text-left">Remark</th>
@@ -168,9 +181,7 @@
                 >
                   <td class="p-2">{{ row.header }}</td>
                   <td class="p-2">{{ row.qr }}</td>
-                  <td class="p-2">
-                    {{ row.fpVerified }}
-                  </td>
+                  <td class="p-2">{{ row.fpVerified }}</td>
 
                   <td class="p-2">
                     <div class="flex gap-2 items-center">
@@ -186,22 +197,18 @@
           </div>
         </div>
 
-        <!-- AI ACTION (MUNCUL SETELAH VERIFIKASI) -->
         <div
           v-if="tabOcrTab === 'ai'"
           class="bg-white shadow-xl rounded-xl p-6 mt-4 border border-red-400"
         >
           <h2 class="font-bold text-xl text-red-700 mb-4 flex items-center gap-2">AI Action 🤖</h2>
-
           <hr class="mb-4" />
-
           <div class="flex gap-5 p-4 bg-red-50 border border-red-300 rounded-lg items-start">
             <img
               src="https://cdnai.iconscout.com/ai-image/premium/thumb/ai-female-customer-care-agent-3d-illustration-png-download-jpg-13152628.png"
               alt="AI Assistant"
               class="w-20 h-20 object-contain flex-shrink-0"
             />
-
             <div class="flex-grow">
               <p class="font-extrabold text-lg text-red-800 mb-3">Terdapat mismatch pada:</p>
               <ul class="list-disc ml-6 space-y-1 text-base text-gray-800">
@@ -209,9 +216,7 @@
                 <li class="font-semibold">Tax base (DPP)</li>
                 <li class="font-semibold">PPN amount</li>
               </ul>
-
               <div class="flex gap-0 mt-5 border border-gray-300 rounded-lg overflow-hidden w-fit">
-                <!-- Button Send Back -->
                 <button
                   @click="setActive('back')"
                   :class="[
@@ -223,8 +228,6 @@
                 >
                   Send Back to Vendor
                 </button>
-
-                <!-- Button Proceed -->
                 <button
                   @click="setActive('proceed')"
                   :class="[
@@ -239,7 +242,6 @@
               </div>
             </div>
           </div>
-
           <div
             class="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg text-sm leading-relaxed shadow-inner"
           >
@@ -250,7 +252,6 @@
             <p class="mt-2">
               Terkait Invoice <strong>INV-0924-3321</strong>, terdapat ketidaksesuaian berikut:
             </p>
-
             <ul class="list-decimal ml-6 mt-2 text-gray-700 space-y-1">
               <li>
                 Harga per unit pada line item 10 tidak sesuai dengan PO (Rp 2.750
@@ -258,7 +259,6 @@
               </li>
               <li>Faktur pajak yang terdaftar tidak sesuai dengan nilai invoice.</li>
             </ul>
-
             <p class="mt-3 font-medium">
               Mohon dilakukan revisi invoice dan pembetulan faktur pajak agar proses dapat
               dilanjutkan.
@@ -268,7 +268,6 @@
         </div>
       </div>
 
-      <!-- ==================== KANAN ==================== -->
       <div class="col-span-5">
         <div class="bg-white shadow rounded-xl p-4 h-[90vh] flex flex-col">
           <div class="flex justify-between items-center mb-3">
@@ -279,7 +278,6 @@
               </option>
             </select>
           </div>
-
           <div class="flex-1 border rounded-lg overflow-hidden">
             <iframe
               v-if="previewUrl"
@@ -316,7 +314,14 @@ import { ref, inject, onMounted, watch, defineAsyncComponent } from 'vue'
 import { usePreviewFileStore } from '@/stores/general/previewFile'
 import type { formTypes } from '../types/invoiceAddWrapper'
 import type { invoiceQrData } from '../types/invoiceQrdata'
+import type { invoiceOcrData } from '../types/invoiceOcrData'
 import { defaultColumn, invoiceDpColumn, poCCColumn, manualAddColumn } from '@/static/invoicePoGr'
+import { useRoute } from 'vue-router'
+import UiButton from '@/components/ui/atoms/button/UiButton.vue'
+import UiModal from '@/components/modal/UiModal.vue'
+import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
+import moment from 'moment'
+
 const InvoicePoGrView = defineAsyncComponent(
   () => import('./InvoicePreview/InvoicePoGrViewOcr.vue'),
 )
@@ -326,65 +331,42 @@ const InvoiceItemView = defineAsyncComponent(
 const AdditionalCostView = defineAsyncComponent(
   () => import('./InvoicePreview/AdditionalCostViewOcr.vue'),
 )
-import { useRoute } from 'vue-router'
-import UiButton from '@/components/ui/atoms/button/UiButton.vue'
-import UiModal from '@/components/modal/UiModal.vue'
-import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
-import type { invoiceOcrData } from '../types/invoiceOcrData'
-import moment from 'moment'
 
 const route = useRoute()
-
 const showModalSuccess = ref(false)
 
 const qrData = inject<invoiceQrData>('qrData')
 const ocrData = inject<invoiceOcrData>('ocrData')
-
 const form = inject<formTypes>('form')
 const previewApi = usePreviewFileStore()
 
-const previewUrl = ref<string>(form.tax?.path ?? '')
+const previewUrl = ref<string>(form?.tax?.previewPath ?? '')
 const tabOcrTab = ref<string>('general')
 const typeForm = ref<string>('')
-
-// const showAiAction = ref(false)
 const isVerify = ref(false)
-
 const isVerifyData = ref(false)
-
 const activeButton = ref<'back' | 'proceed'>('proceed')
+const selectedDocumentType = ref<string>('1')
+
+// --- Helper untuk pengecekan data OCR kosong ---
+const isOcrEmpty = (val: any) => !val || val === '-' || val === ''
 
 const setActive = (btn: 'back' | 'proceed') => {
   activeButton.value = btn
 }
+const checkPo = () => typeForm.value === 'po' || typeForm.value === 'po-view'
+const checkIsNonPo = () => typeForm.value === 'nonpo'
+const checkIsWithoutDp = () => form?.invoiceDp === '9011'
+const checkPoWithDp = () => form?.invoiceDp === '9013'
+const checkIsPoPibCc = () =>
+  (form?.invoiceType === '902' || form?.invoiceType === '903') && form?.status > 0
 
-const checkPo = () => {
-  return typeForm.value === 'po' || typeForm.value === 'po-view'
-}
-
-const checkIsNonPo = () => {
-  return typeForm.value === 'nonpo'
-}
-
-const checkIsWithoutDp = () => {
-  return form.invoiceDp === '9011'
-}
-
-const checkPoWithDp = () => {
-  return form.invoiceDp === '9013'
-}
-
-const checkIsPoPibCc = () => {
-  return (form.invoiceType === '902' || form.invoiceType === '903') && form.status > 0
-}
-
-const getPreviewUrl = async () => {
-  if (form.tax.path) {
-    const response = await previewApi.getPreview(form.tax.path)
-    const url = window.URL.createObjectURL(response.data)
-    previewUrl.value = url
-  }
-}
+// const getPreviewUrl = async () => {
+//   if (form?.tax?.path) {
+//     const response = await previewApi.getPreview(form.tax.path)
+//     previewUrl.value = window.URL.createObjectURL(response.data)
+//   }
+// }
 
 const openModalSuccess = () => {
   showModalSuccess.value = true
@@ -395,16 +377,13 @@ const documentTypeList = ref([
   { code: '2', name: 'Invoice Document' },
 ])
 
-const selectedDocumentType = ref<string>('1')
-
-/* -------------------- Dummy General Data -------------------- */
 const generalData = ref([
-  { label: 'Vendor Invoice', value: form.invoiceVendorNo },
-  { label: 'Invoice Date', value: moment(form.invoiceDate).format('DD MMMM YYYY') },
+  { label: 'Vendor Invoice', value: form?.invoiceVendorNo },
+  { label: 'Invoice Date', value: moment(form?.invoiceDate).format('DD MMMM YYYY') },
   { label: 'Posting Date', value: '10 Mei 2022' },
-  { label: 'Amount', value: form.vatAmount },
-  { label: 'Tax Amount', value: form.subtotal },
-  { label: 'Currency', value: form.currency },
+  { label: 'Amount', value: form?.vatAmount },
+  { label: 'Tax Amount', value: form?.subtotal },
+  { label: 'Currency', value: form?.currency },
 ])
 
 const generalStatus = ref([
@@ -414,118 +393,126 @@ const generalStatus = ref([
   { label: 'DJP Status', value: 'Approved', status: 'success' },
 ])
 
-/* -------------------- Table Data -------------------- */
+/* -------------------- Table Data (LOGIKA REQUEST USER) -------------------- */
 const tableData = ref([
   {
     header: 'Nama Vendor',
-    qr: qrData.vendorBuyer,
-    fpVerified: form.vendorName == qrData.vendorBuyer,
+    qr: qrData?.vendorBuyer,
+    fpVerified: form?.vendorName == qrData?.vendorBuyer,
     ocr: '-',
     invoiceVerified: '-',
-    remarks: form.vendorName == qrData.vendorBuyer,
+    remarks: isOcrEmpty(ocrData?.vendorName)
+      ? form?.vendorName == qrData?.vendorBuyer
+      : form?.vendorName == qrData?.vendorBuyer && form?.vendorName == ocrData?.vendorName,
   },
   {
     header: 'NPWP Vendor',
-    qr: qrData.npwppBuyer,
-    fpVerified: form.npwpNumber == qrData.npwppBuyer,
+    qr: qrData?.npwppBuyer,
+    fpVerified: form?.npwpNumber == qrData?.npwppBuyer,
     ocr: '-',
-    invoiceVerified: form.npwpNumber == ocrData.buyerNpwp,
-    remarks: form.npwpNumber == qrData.npwppBuyer,
+    invoiceVerified: '-',
+    remarks: isOcrEmpty(ocrData?.buyerNpwp)
+      ? form?.npwpNumber == qrData?.npwppBuyer
+      : form?.npwpNumber == qrData?.npwppBuyer && form?.npwpNumber == ocrData?.buyerNpwp,
   },
   {
     header: 'Perusahaan',
-    qr: qrData.vendorSupplier,
-    fpVerified: form.companyName == qrData.vendorSupplier,
-    ocr: ocrData.vendorName,
-    invoiceVerified: true,
-    remarks: false,
+    qr: qrData?.vendorSupplier,
+    fpVerified: form?.companyName == qrData?.vendorSupplier,
+    ocr: ocrData?.vendorName || '-',
+    invoiceVerified: isOcrEmpty(ocrData?.vendorName)
+      ? '-'
+      : form?.companyName == ocrData?.vendorName,
+    remarks: isOcrEmpty(ocrData?.vendorName)
+      ? form?.companyName == qrData?.vendorSupplier
+      : form?.companyName == qrData?.vendorSupplier && form?.companyName == ocrData?.vendorName,
   },
   {
     header: 'NPWP',
-    qr: qrData.npwpSupplier,
-    fpVerified: form.npwp == qrData.npwpSupplier,
-    ocr: ocrData.buyerNpwp,
-    invoiceVerified: form.npwp == ocrData.buyerNpwp,
-    remarks: form.npwp == qrData.npwpSupplier && form.npwp == ocrData.buyerNpwp,
+    qr: qrData?.npwpSupplier,
+    fpVerified: form?.npwp == qrData?.npwpSupplier,
+    ocr: ocrData?.buyerNpwp || '-',
+    invoiceVerified: isOcrEmpty(ocrData?.buyerNpwp) ? '-' : form?.npwp == ocrData?.buyerNpwp,
+    remarks: isOcrEmpty(ocrData?.buyerNpwp)
+      ? form?.npwp == qrData?.npwpSupplier
+      : form?.npwp == qrData?.npwpSupplier && form?.npwp == ocrData?.buyerNpwp,
   },
   {
     header: 'No Faktur Pajak',
-    qr: qrData.taxDocumentNumber,
-    fpVerified: form.taxNumber == qrData.taxDocumentNumber,
-    ocr: ocrData.FakturPajak,
-    invoiceVerified: ocrData.FakturPajak == form.taxNumber,
-    remarks: form.taxNumber == qrData.taxDocumentNumber && ocrData.FakturPajak == form.taxNumber,
+    qr: qrData?.taxDocumentNumber,
+    fpVerified: form?.taxNumber == qrData?.taxDocumentNumber,
+    ocr: ocrData?.FakturPajak || '-',
+    invoiceVerified: isOcrEmpty(ocrData?.FakturPajak)
+      ? '-'
+      : ocrData?.FakturPajak == form?.taxNumber,
+    remarks: isOcrEmpty(ocrData?.FakturPajak)
+      ? form?.taxNumber == qrData?.taxDocumentNumber
+      : form?.taxNumber == qrData?.taxDocumentNumber && ocrData?.FakturPajak == form?.taxNumber,
   },
   {
     header: 'Tanggal Faktur Pajak',
-    qr: qrData.taxDocumentDate,
+    qr: qrData?.taxDocumentDate,
     fpVerified: true,
-    ocr: ocrData.transactionDate || '-',
-    invoiceVerified: 'none',
+    ocr: ocrData?.transactionDate || '-',
+    invoiceVerified: isOcrEmpty(ocrData?.transactionDate) ? '-' : 'none',
     remarks: true,
   },
   {
     header: 'Nilai Penjualan',
-    qr: qrData.dpp,
-    fpVerified: form.subtotal == Number(qrData.dpp),
-    ocr: ocrData.dpp,
-    invoiceVerified: form.subtotal == Number(ocrData.dpp),
-    remarks: form.subtotal == Number(qrData.dpp) && form.subtotal == Number(ocrData.dpp),
+    qr: qrData?.dpp,
+    fpVerified: form?.subtotal == Number(qrData?.dpp),
+    ocr: ocrData?.dpp || '-',
+    invoiceVerified: isOcrEmpty(ocrData?.dpp) ? '-' : form?.subtotal == Number(ocrData?.dpp),
+    remarks: isOcrEmpty(ocrData?.dpp)
+      ? form?.subtotal == Number(qrData?.dpp)
+      : form?.subtotal == Number(qrData?.dpp) && form?.subtotal == Number(ocrData?.dpp),
   },
   {
     header: 'DPP Lainnya',
     qr: '-',
     fpVerified: 'none',
     ocr: '-',
-    invoiceVerified: 'none',
+    invoiceVerified: '-',
     remarks: 'Invoice Not Match',
   },
   {
     header: 'PPN',
-    qr: qrData.ppn,
+    qr: qrData?.ppn,
     fpVerified: true,
-    ocr: ocrData.ppn,
-    invoiceVerified: true,
+    ocr: ocrData?.ppn || '-',
+    invoiceVerified: isOcrEmpty(ocrData?.ppn) ? '-' : true,
     remarks: 'Matched',
   },
   {
     header: 'PPN BM',
-    qr: qrData.ppnbm,
+    qr: qrData?.ppnbm,
     fpVerified: true,
     ocr: '-',
-    invoiceVerified: true,
+    invoiceVerified: '-',
     remarks: 'Matched',
   },
   {
     header: 'Status Approve FP',
-    qr: qrData.status,
+    qr: qrData?.status,
     fpVerified: true,
     ocr: '-',
-    invoiceVerified: false,
+    invoiceVerified: '-',
     remarks: 'none',
   },
   {
     header: 'Reference',
     qr: '-',
     fpVerified: 'none',
-    ocr: ocrData.FakturPajak || '-',
-    invoiceVerified: true,
+    ocr: ocrData?.FakturPajak || '-',
+    invoiceVerified: isOcrEmpty(ocrData?.FakturPajak) ? '-' : true,
     remarks: 'none',
   },
-  // {
-  //   header: 'Status FP PJAP',
-  //   qr: qrData.status,
-  //   fpVerified: '',
-  //   ocr: '',
-  //   invoiceVerified: '',
-  //   remarks: 'Matched',
-  // },
 ])
 
 const bjapVerify = ref([
   {
     header: 'Status FP PJAP',
-    qr: qrData.status,
+    qr: qrData?.status,
     fpVerified: 'Approved',
     remarks: true,
   },
@@ -550,59 +537,37 @@ const columns = ref([
   'WHT Amount',
 ])
 
-const isApproved = () => {
-  return qrData.status === 'APPROVED'
-}
-
+const isApproved = () => qrData?.status === 'APPROVED'
 const setTabOcr = (type: string) => {
   tabOcrTab.value = type
 }
 
 const setColumn = () => {
-  let sourceColumns
-
-  if (form?.invoiceType === '903') {
-    sourceColumns = poCCColumn
-  } else if (form?.invoiceDp === '9012') {
-    sourceColumns = invoiceDpColumn
-  } else if (form?.invoiceType === '902') {
-    sourceColumns = manualAddColumn
-  } else {
-    sourceColumns = defaultColumn
-  }
-
+  let sourceColumns =
+    form?.invoiceType === '903'
+      ? poCCColumn
+      : form?.invoiceDp === '9012'
+        ? invoiceDpColumn
+        : form?.invoiceType === '902'
+          ? manualAddColumn
+          : defaultColumn
   const baseColumns = [...sourceColumns]
-
   baseColumns.splice(6, 0, 'Qty Match', 'Unit Price Match', 'VAT Match', 'WHT Match')
-
   columns.value = baseColumns
 }
 
 watch(selectedDocumentType, async (newVal) => {
-  let path = ''
-
-  if (newVal === '1') {
-    path = form?.tax.path
-  } else if (newVal === '2') {
-    path = form?.invoiceDocument.path
-  }
-
+  const path = newVal === '1' ? form?.tax?.previewPath : form?.invoiceDocument?.previewPath
   if (!path) {
     previewUrl.value = ''
     return
   }
-
-  const response = await previewApi.getPreview(path)
-  const url = window.URL.createObjectURL(response.data)
-  previewUrl.value = url
+  previewUrl.value = path
 })
 
 onMounted(() => {
-  console.log(form, 'ini form')
-
-  getPreviewUrl()
+  // getPreviewUrl()
   setColumn()
-
   typeForm.value = route.query.type?.toString().toLowerCase() || 'po'
 })
 </script>
