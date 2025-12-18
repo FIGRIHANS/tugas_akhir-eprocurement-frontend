@@ -230,7 +230,7 @@ const isClickDraft = ref<boolean>(false)
 const itemNoAcc = ref<number>(0)
 const hasCompletedDataTab = ref<boolean>(false)
 
-const stepperStatus = ref('')
+const stepperStatus = ref('Submission')
 
 const routes = ref<routeTypes[]>([
   {
@@ -1739,10 +1739,55 @@ const checkFormBudget = () => {
 }
 
 const setStepperStatus = () => {
-  if (detailNonPo.value.header.statusCode === 1) {
+  // Get status from either PO or Non-PO detail
+  const statusCode = !checkIsNonPo()
+    ? detailPo.value?.header?.statusCode
+    : detailNonPo.value?.header?.statusCode
+
+  // Map status codes to stepper labels
+  // Note: StepperStatus component matches the SECOND word of the label
+  // Labels: 'Invoice Submission', 'Invoice Verification', 'Invoice Approval', 'Invoice Posting', 'Payment Status'
+  // So we use: 'Submission', 'Verification', 'Approval', 'Posting', 'Status'
+
+  // Status codes:
+  // 0 = Draft
+  // 1 = Waiting to Verify / Submitted
+  // 2 = Verified
+  // 3 = Waiting for Approval
+  // 4 = Approved
+  // 5 = Rejected
+  // 6 = Posted to SAP
+  // 7 = Sent to SAP / Payment Status
+
+  if (statusCode === 0 || statusCode === 1) {
     stepperStatus.value = 'Submission'
-  } else if (detailNonPo.value.header.statusCode === 2) {
+  } else if (statusCode === 2) {
+    stepperStatus.value = 'Verification'
+  } else if (statusCode === 3 || statusCode === 4) {
     stepperStatus.value = 'Approval'
+  } else if (statusCode === 6) {
+    stepperStatus.value = 'Posting'
+  } else if (statusCode === 7) {
+    stepperStatus.value = 'Status' // Matches 'Payment Status'
+  } else {
+    stepperStatus.value = 'Submission' // Default fallback
+  }
+}
+
+const updateStepperByTab = () => {
+  // Update stepper based on current tab when creating/editing invoice
+  // This makes the stepper reflect the current workflow step as user navigates
+  // Note: Use second word of step labels to match StepperStatus component logic
+  if (tabNow.value === 'data') {
+    stepperStatus.value = 'Submission'
+  } else if (tabNow.value === 'information') {
+    stepperStatus.value = 'Submission'
+  } else if (tabNow.value === 'ocrAiVerification') {
+    stepperStatus.value = 'Verification'
+  } else if (tabNow.value === 'preview') {
+    stepperStatus.value = 'Approval'
+  } else if (tabNow.value === 'paymentStatus') {
+    stepperStatus.value = 'Status' // Matches 'Payment Status'
   }
 }
 
@@ -1791,15 +1836,45 @@ onMounted(() => {
     hasCompletedDataTab.value = true
 
     invoiceApi.getPoDetail(route.query.invoice?.toString() || '').then(() => {
+      setStepperStatus()
       setData()
     })
   }
 })
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const checkPreview = () => {
   return route.query.type === 'po-view' || route.query.type === 'non-po-view'
 }
+
+// Watch for tab changes to update stepper
+watch(
+  () => tabNow.value,
+  () => {
+    const isViewMode = checkPreview()
+
+    // For create/edit mode: update stepper based on current tab
+    if (!isViewMode) {
+      updateStepperByTab()
+    }
+    // For view mode: stepper will be updated by form.status watcher below
+  },
+  { immediate: true },
+)
+
+// Watch for status changes to update stepper (for viewing existing invoices)
+watch(
+  () => form.status,
+  (newStatus) => {
+    const isViewMode = checkPreview()
+
+    // Only update stepper from status when in view mode
+    // This ensures stepper shows correct progress for invoices with status 1-7
+    if (isViewMode && newStatus !== undefined && newStatus >= 0) {
+      setStepperStatus()
+    }
+  },
+  { immediate: true },
+)
 
 watch(
   () => form.invoiceItem,
