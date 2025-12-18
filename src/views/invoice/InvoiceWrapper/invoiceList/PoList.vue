@@ -217,6 +217,7 @@ const StatusInvoice = ref([
   { value: '4', label: 'Approved' },
   { value: '5', label: 'Rejected' },
   { value: '7', label: 'Sent to SAP' },
+  { value: '8', label: 'Partially Paid' },
 ])
 
 const filterForm = reactive<filterListTypes>({

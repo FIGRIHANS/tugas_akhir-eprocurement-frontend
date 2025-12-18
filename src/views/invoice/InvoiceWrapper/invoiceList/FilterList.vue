@@ -18,6 +18,7 @@
             <option value="4">Approved</option>
             <option value="5">Rejected</option>
             <option value="7">Sent to SAP</option>
+            <option value="8">Partially Paid</option>
           </select>
         </div>
         <div class="relative">
