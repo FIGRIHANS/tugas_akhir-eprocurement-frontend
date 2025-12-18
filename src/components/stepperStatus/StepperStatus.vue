@@ -43,6 +43,7 @@ const steps = ref<listStepTypes[]>([
   { label: 'Invoice Verification', icon: 'ki-duotone ki-shield-tick', active: false },
   { label: 'Invoice Approval', icon: 'ki-duotone ki-double-check-circle', active: false },
   { label: 'Invoice Posting', icon: 'ki-duotone ki-paper-plane', active: false },
+  { label: 'Payment Status', icon: 'ki-duotone ki-dollar', active: false },
 ])
 
 watch(

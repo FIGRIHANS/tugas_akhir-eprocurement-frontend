@@ -19,5 +19,6 @@ export interface responseFileTypes {
   id: number
   name: string
   path: string
+  previewPath?: string
   fileSize: string
 }
