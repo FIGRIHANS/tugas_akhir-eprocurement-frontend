@@ -1823,6 +1823,11 @@ onMounted(() => {
     invoiceApi.getNonPoDetail(route.query.invoice?.toString() || '').then(() => {
       setStepperStatus()
       setDataNonPo()
+
+      // If invoice status is 7 (Sent to SAP), navigate to Payment Status tab
+      if (form.status === 7) {
+        tabNow.value = 'paymentStatus'
+      }
     })
   }
 
@@ -1838,6 +1843,11 @@ onMounted(() => {
     invoiceApi.getPoDetail(route.query.invoice?.toString() || '').then(() => {
       setStepperStatus()
       setData()
+
+      // If invoice status is 7 (Sent to SAP), navigate to Payment Status tab
+      if (form.status === 7) {
+        tabNow.value = 'paymentStatus'
+      }
     })
   }
 })
