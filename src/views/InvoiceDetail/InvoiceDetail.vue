@@ -61,7 +61,13 @@
           Edit
         </button>
       </div>
-      <div v-if="checkStatusCode()" class="flex items-center justify-end gap-[10px]">
+      <!-- Right side actions: show Update Payment Status on Payment Status tab; otherwise default actions -->
+      <div v-if="activeTabDetail === 'paymentStatus'" class="flex items-center justify-end gap-[10px]">
+        <button class="btn btn-primary" :disabled="isLoading" @click="handleUpdatePaymentStatus">
+          Update Payment Status
+        </button>
+      </div>
+      <div v-else-if="checkStatusCode()" class="flex items-center justify-end gap-[10px]">
         <button class="btn btn-outline btn-danger" :disabled="isLoading" @click="openReject">
           <i class="ki-duotone ki-cross-circle"></i>
           Reject
@@ -243,6 +249,12 @@ const form = ref<formTypes>({
   referenceDocument: null,
   otherDocument: null,
 })
+
+// Handle click from footer when on Payment Status tab
+const handleUpdatePaymentStatus = () => {
+  // Delegate to Payment Status module if needed; placeholder for now
+  console.log('Update Payment Status clicked')
+}
 
 // Provide form data for child components (Payment Status components)
 provide('form', form)

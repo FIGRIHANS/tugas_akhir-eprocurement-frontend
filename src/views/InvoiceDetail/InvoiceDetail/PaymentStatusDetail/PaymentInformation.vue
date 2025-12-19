@@ -9,7 +9,21 @@
           class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
         >
           <label class="form-label">{{ item.label }}</label>
-          <input :value="item.value" class="input" disabled />
+          <input
+            v-if="item.editable"
+            v-model="item.value"
+            class="input"
+            type="number"
+            :placeholder="item.placeholder || ''"
+            @input="handleNumericInput($event, index)"
+            @keypress="validateNumberInput"
+          />
+          <input
+            v-else
+            :value="item.value"
+            class="input"
+            disabled
+          />
         </div>
       </div>
     </div>
@@ -25,6 +39,8 @@ import { formatDate } from '@/composables/date-format'
 interface PaymentInfoItem {
   label: string
   value: string
+  editable?: boolean
+  placeholder?: string
 }
 
 const form = inject<Ref<formTypes>>('form')
@@ -35,24 +51,41 @@ const setPaymentInfo = () => {
   if (form?.value) {
     paymentInfo.value = [
       {
+        label: 'SAP Invoice No.',
+        value: form.value.sapInvoiceNo || '',
+        editable: true,
+        placeholder: '',
+      },
+      {
         label: 'Invoice Posting Date',
         value: form.value.postingDate ? formatDate(form.value.postingDate) : '-',
+        editable: false,
       },
       {
         label: 'Term of Payment',
         value: form.value.paymentMethodName || '-',
+        editable: false,
       },
       {
         label: 'Estimate Payment Date',
         value: form.value.estimatedPaymentDate ? formatDate(form.value.estimatedPaymentDate) : '-',
+        editable: false,
       },
       {
         label: 'Payment Method',
         value: form.value.paymentMethodName || '-',
+        editable: false,
+      },
+      {
+        label: 'Clearing Document No.',
+        value: form.value.clearingDocumentNo || '',
+        editable: true,
+        placeholder: '',
       },
       {
         label: 'Payment Status',
         value: form.value.statusName || '-',
+        editable: false,
       },
     ]
   }
@@ -65,6 +98,33 @@ watch(
   },
   { deep: true, immediate: true },
 )
+
+const handleNumericInput = (event: Event, index: number) => {
+  const target = event.target as HTMLInputElement
+  const value = target.value
+
+  // Remove any non-numeric characters except dots for decimals
+  const numericValue = value.replace(/[^0-9.]/g, '')
+
+  // Ensure only one decimal point
+  const parts = numericValue.split('.')
+  let cleanValue = parts[0]
+  if (parts.length > 1) {
+    cleanValue += '.' + parts.slice(1).join('')
+  }
+
+  // Update the value
+  paymentInfo.value[index].value = cleanValue
+  target.value = cleanValue
+}
+
+const validateNumberInput = (event: KeyboardEvent) => {
+  const charCode = event.which ? event.which : event.keyCode
+  // Allow numbers (48-57), decimal point (46), and backspace (8)
+  if (charCode > 31 && (charCode < 48 || charCode > 57) && charCode !== 46) {
+    event.preventDefault()
+  }
+}
 
 onMounted(() => {
   setPaymentInfo()

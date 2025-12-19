@@ -38,6 +38,8 @@ export interface formTypes extends documentFormTypes {
   bankAccountNo: string
   bankCountryCode: string
   department?: string
+  sapInvoiceNo: string
+  clearingDocumentNo: string
   casDateReceipt: string
   proposalAmount: number
   picFinance: string

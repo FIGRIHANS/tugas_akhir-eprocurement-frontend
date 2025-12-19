@@ -2,7 +2,9 @@
   <div v-if="form">
     <div class="flex gap-[24px]">
       <PaymentInformation class="flex-1" />
-      <PaymentCalculation class="flex-1" />
+      <div class="flex-1 flex flex-col">
+        <PaymentCalculation />
+      </div>
     </div>
     <PaymentDetails class="mt-[24px]" />
   </div>
@@ -23,4 +25,9 @@ const PaymentDetails = defineAsyncComponent(
 )
 
 const form = inject<formTypes>('form')
+
+const handleSapSync = () => {
+  // TODO: Implement SAP Sync logic
+  console.log('SAP Synchronize clicked')
+}
 </script>
