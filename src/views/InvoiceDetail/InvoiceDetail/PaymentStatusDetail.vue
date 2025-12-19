@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, defineAsyncComponent } from 'vue'
+import { inject, defineAsyncComponent, type Ref } from 'vue'
 import type { formTypes } from '../types/invoiceDetail'
 
 const PaymentInformation = defineAsyncComponent(
@@ -24,10 +24,6 @@ const PaymentDetails = defineAsyncComponent(
   () => import('./PaymentStatusDetail/PaymentDetails.vue'),
 )
 
-const form = inject<formTypes>('form')
-
-const handleSapSync = () => {
-  // TODO: Implement SAP Sync logic
-  console.log('SAP Synchronize clicked')
-}
+// `form` diprovide sebagai Ref<formTypes> dari InvoiceDetail.vue
+const form = inject<Ref<formTypes>>('form')
 </script>

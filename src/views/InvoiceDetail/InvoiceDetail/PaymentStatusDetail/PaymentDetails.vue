@@ -100,7 +100,6 @@
         </tbody>
       </table>
     </div>
-    <!-- Footer actions moved to parent for alignment with Back button -->
   </div>
 </template>
 
