@@ -4,27 +4,47 @@
     <StepperStatus :active-name="activeStep" />
     <hr class="-mx-[24px] mb-[24px]" />
     <StatusInvoice :statusCode="form.statusCode" class="mb-[24px]" />
-    <div class="flex gap-[24px]">
-      <GeneralData class="flex-1" />
-      <BankKey class="flex-1" />
+
+    <!-- Tab Navigation for ProfileId 3002 (Verifikator) -->
+    <TabInvoiceDetail
+      v-if="checkApprovalNonPo1()"
+      v-model:activeTab="activeTabDetail"
+      :show-payment-status="form.statusCode >= 7"
+    />
+
+    <!-- Content for Invoice Data Tab -->
+    <div v-if="!checkApprovalNonPo1() || activeTabDetail === 'data'">
+      <div class="flex gap-[24px]">
+        <GeneralData class="flex-1" />
+        <BankKey class="flex-1" />
+      </div>
+      <div class="flex gap-[24px] mt-[24px] max-h-[457px]">
+        <InvoiceHeaderDocument class="flex-1" />
+        <InvoiceCalculation class="flex-1" :formInvoice="form" />
+      </div>
+      <div v-if="!checkIsNonPo()">
+        <InvoicePoGr v-if="checkPo() && !isNonPo" class="mt-[24px]" />
+        <InvoiceItem v-if="isNonPo" class="mt-[24px]" />
+        <AdditionalCost
+          v-if="
+            !isNonPo && (checkIsWithoutDp() || checkIsPoPib() || checkIsPoCC() || checkPoWithDp())
+          "
+          class="mt-[24px]"
+        />
+      </div>
+      <div v-else>
+        <ConstExpenses class="mt-[24px]" />
+      </div>
     </div>
-    <div class="flex gap-[24px] mt-[24px] max-h-[457px]">
-      <InvoiceHeaderDocument class="flex-1" />
-      <InvoiceCalculation class="flex-1" :formInvoice="form" />
+
+    <!-- Content for Payment Status Tab (only for user 3002 and statusCode >= 7) -->
+    <div
+      v-if="checkApprovalNonPo1() && form.statusCode >= 7 && activeTabDetail === 'paymentStatus'"
+    >
+      <PaymentStatusDetail />
     </div>
-    <div v-if="!checkIsNonPo()">
-      <InvoicePoGr v-if="checkPo() && !isNonPo" class="mt-[24px]" />
-      <InvoiceItem v-if="isNonPo" class="mt-[24px]" />
-      <AdditionalCost
-        v-if="
-          !isNonPo && (checkIsWithoutDp() || checkIsPoPib() || checkIsPoCC() || checkPoWithDp())
-        "
-        class="mt-[24px]"
-      />
-    </div>
-    <div v-else>
-      <ConstExpenses class="mt-[24px]" />
-    </div>
+
+    <!-- Navigation Buttons -->
     <div class="flex items-center justify-between gap-[8px] mt-[24px]">
       <div class="flex items-center gap-[10px]">
         <button class="btn btn-outline btn-primary" :disabled="isLoading" @click="goBack">
@@ -109,7 +129,11 @@ import type {
 import { isEmpty } from 'lodash'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 
+const TabInvoiceDetail = defineAsyncComponent(() => import('./InvoiceDetail/TabInvoiceDetail.vue'))
 const StatusInvoice = defineAsyncComponent(() => import('./InvoiceDetail/StatusInvoice.vue'))
+const PaymentStatusDetail = defineAsyncComponent(
+  () => import('./InvoiceDetail/PaymentStatusDetail.vue'),
+)
 const GeneralData = defineAsyncComponent(() => import('./InvoiceDetail/GeneralData.vue'))
 const BankKey = defineAsyncComponent(() => import('./InvoiceDetail/BankKey.vue'))
 const InvoiceHeaderDocument = defineAsyncComponent(
@@ -133,6 +157,7 @@ const SuccessRejectModal = defineAsyncComponent(
 )
 
 const activeStep = ref<string>('')
+const activeTabDetail = ref<string>('data')
 const router = useRouter()
 const route = useRoute()
 const invoiceMasterApi = useInvoiceMasterDataStore()
@@ -218,6 +243,9 @@ const form = ref<formTypes>({
   referenceDocument: null,
   otherDocument: null,
 })
+
+// Provide form data for child components (Payment Status components)
+provide('form', form)
 
 const detailInvoice = computed(() => verificationApi.detailInvoice)
 const detailInvoiceNonPo = computed(() => verificationApi.detailNonPoInvoice)
