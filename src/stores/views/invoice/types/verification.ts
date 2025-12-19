@@ -85,6 +85,8 @@ interface ParamsSubmissionHeader {
   companyName: string
   invoiceNo: string
   documentNo: string
+  sapInvoiceNo?: string
+  clearingDocumentNo?: string
   invoiceDate: string
   taxNo: string
   currCode: string
@@ -458,6 +460,8 @@ export interface DetailInvoiceEditTypes {
   companyName: string
   invoiceNo: string
   documentNo: string
+  sapInvoiceNo?: string
+  clearingDocumentNo?: string
   invoiceDate: string
   taxNo: string
   currCode: string

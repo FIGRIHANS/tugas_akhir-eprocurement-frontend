@@ -4,27 +4,47 @@
     <StepperStatus :active-name="activeStep" />
     <hr class="-mx-[24px] mb-[24px]" />
     <StatusInvoice :statusCode="form.statusCode" class="mb-[24px]" />
-    <div class="flex gap-[24px]">
-      <GeneralData class="flex-1" />
-      <BankKey class="flex-1" />
+
+    <!-- Tab Navigation for ProfileId 3002 (Verifikator) -->
+    <TabInvoiceDetail
+      v-if="checkApprovalNonPo1()"
+      v-model:activeTab="activeTabDetail"
+      :show-payment-status="form.statusCode >= 7"
+    />
+
+    <!-- Content for Invoice Data Tab -->
+    <div v-if="!checkApprovalNonPo1() || activeTabDetail === 'data'">
+      <div class="flex gap-[24px]">
+        <GeneralData class="flex-1" />
+        <BankKey class="flex-1" />
+      </div>
+      <div class="flex gap-[24px] mt-[24px] max-h-[457px]">
+        <InvoiceHeaderDocument class="flex-1" />
+        <InvoiceCalculation class="flex-1" :formInvoice="form" />
+      </div>
+      <div v-if="!checkIsNonPo()">
+        <InvoicePoGr v-if="checkPo() && !isNonPo" class="mt-[24px]" />
+        <InvoiceItem v-if="isNonPo" class="mt-[24px]" />
+        <AdditionalCost
+          v-if="
+            !isNonPo && (checkIsWithoutDp() || checkIsPoPib() || checkIsPoCC() || checkPoWithDp())
+          "
+          class="mt-[24px]"
+        />
+      </div>
+      <div v-else>
+        <ConstExpenses class="mt-[24px]" />
+      </div>
     </div>
-    <div class="flex gap-[24px] mt-[24px] max-h-[457px]">
-      <InvoiceHeaderDocument class="flex-1" />
-      <InvoiceCalculation class="flex-1" :formInvoice="form" />
+
+    <!-- Content for Payment Status Tab (only for user 3002 and statusCode >= 7) -->
+    <div
+      v-if="checkApprovalNonPo1() && form.statusCode >= 7 && activeTabDetail === 'paymentStatus'"
+    >
+      <PaymentStatusDetail />
     </div>
-    <div v-if="!checkIsNonPo()">
-      <InvoicePoGr v-if="checkPo() && !isNonPo" class="mt-[24px]" />
-      <InvoiceItem v-if="isNonPo" class="mt-[24px]" />
-      <AdditionalCost
-        v-if="
-          !isNonPo && (checkIsWithoutDp() || checkIsPoPib() || checkIsPoCC() || checkPoWithDp())
-        "
-        class="mt-[24px]"
-      />
-    </div>
-    <div v-else>
-      <ConstExpenses class="mt-[24px]" />
-    </div>
+
+    <!-- Navigation Buttons -->
     <div class="flex items-center justify-between gap-[8px] mt-[24px]">
       <div class="flex items-center gap-[10px]">
         <button class="btn btn-outline btn-primary" :disabled="isLoading" @click="goBack">
@@ -41,7 +61,13 @@
           Edit
         </button>
       </div>
-      <div v-if="checkStatusCode()" class="flex items-center justify-end gap-[10px]">
+      <!-- Right side actions: show Update Payment Status on Payment Status tab; otherwise default actions -->
+      <div v-if="activeTabDetail === 'paymentStatus'" class="flex items-center justify-end gap-[10px]">
+        <button class="btn btn-primary" :disabled="isLoading" @click="handleUpdatePaymentStatus">
+          Update Payment Status
+        </button>
+      </div>
+      <div v-else-if="checkStatusCode()" class="flex items-center justify-end gap-[10px]">
         <button class="btn btn-outline btn-danger" :disabled="isLoading" @click="openReject">
           <i class="ki-duotone ki-cross-circle"></i>
           Reject
@@ -104,12 +130,15 @@ import { useLoginStore } from '@/stores/views/login'
 import type {
   PostVerificationTypes,
   SubmissionNonPoTypes,
-  itemsAlternativePayee,
 } from '@/stores/views/invoice/types/verification'
 import { isEmpty } from 'lodash'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 
+const TabInvoiceDetail = defineAsyncComponent(() => import('./InvoiceDetail/TabInvoiceDetail.vue'))
 const StatusInvoice = defineAsyncComponent(() => import('./InvoiceDetail/StatusInvoice.vue'))
+const PaymentStatusDetail = defineAsyncComponent(
+  () => import('./InvoiceDetail/PaymentStatusDetail.vue'),
+)
 const GeneralData = defineAsyncComponent(() => import('./InvoiceDetail/GeneralData.vue'))
 const BankKey = defineAsyncComponent(() => import('./InvoiceDetail/BankKey.vue'))
 const InvoiceHeaderDocument = defineAsyncComponent(
@@ -133,6 +162,7 @@ const SuccessRejectModal = defineAsyncComponent(
 )
 
 const activeStep = ref<string>('')
+const activeTabDetail = ref<string>('data')
 const router = useRouter()
 const route = useRoute()
 const invoiceMasterApi = useInvoiceMasterDataStore()
@@ -167,6 +197,8 @@ const form = ref<formTypes>({
   companyName: '',
   invoiceNo: '',
   documentNo: '',
+  sapInvoiceNo: '',
+  clearingDocumentNo: '',
   invoiceDate: '',
   taxNo: '',
   currCode: '',
@@ -219,6 +251,15 @@ const form = ref<formTypes>({
   otherDocument: null,
 })
 
+// Handle click from footer when on Payment Status tab
+const handleUpdatePaymentStatus = () => {
+  // Delegate to Payment Status module if needed; placeholder for now
+  console.log('Update Payment Status clicked')
+}
+
+// Provide form data for child components (Payment Status components)
+provide('form', form)
+
 const detailInvoice = computed(() => verificationApi.detailInvoice)
 const detailInvoiceNonPo = computed(() => verificationApi.detailNonPoInvoice)
 const userData = computed(() => loginApi.userData)
@@ -231,7 +272,7 @@ const checkIsNonPo = () => {
 }
 
 const checkVerifikator1 = () => {
-  return userData.value.profile.profileId === 3190
+  return userData.value?.profile?.profileId === 3190
 }
 
 const checkApprovalNonPo1 = () => {
@@ -598,6 +639,8 @@ const mapDataVerifNonPo = () => {
   if (!isEmpty(referenceDoc)) documents.push(referenceDoc)
   if (!isEmpty(otherDoc)) documents.push(otherDoc)
 
+  const alt = form.value.alternativePayee?.[0] // FIX: aman saat array kosong
+
   const data = {
     statusCode: route.query.type === '1' ? 3 : 4,
     statusName: route.query.type === '1' ? 'Verified' : 'Approved',
@@ -644,29 +687,28 @@ const mapDataVerifNonPo = () => {
       totalGrossAmount: form.value.totalGrossAmount,
       totalNetAmount: form.value.totalNetAmount,
     },
-    alternativePay: {
-      id: form.value.alternativePayee[0].id,
-      invoiceUId: form.value.invoiceUId,
-      name: form.value.alternativePayee[0].name,
-      name2: form.value.alternativePayee[0].name2,
-      street: form.value.alternativePayee[0].street,
-      city: form.value.alternativePayee[0].city,
-      country: form.value.alternativePayee[0].country,
-      bankAccountNumber: form.value.alternativePayee[0].bankAccountNumber,
-      bankKey: form.value.alternativePayee[0].bankKey,
-      bankCountry: form.value.alternativePayee[0].bankCountry,
-      npwp: form.value.alternativePayee[0].npwp,
-      ktp: form.value.alternativePayee[0].ktp,
-      email: form.value.alternativePayee[0].email,
-      isAlternativePayee: form.value.alternativePayee[0].isAlternativePayee,
-      isOneTimeVendor: form.value.alternativePayee[0].isOneTimeVendor,
-      // isActive: form.value.alternativePayee[0].isActive,
-      // isDeleted: form.value.alternativePayee[0].isDeleted,
-      // createdBy: form.value.alternativePayee[0].createdBy,
-      // createdUtcDate: form.value.alternativePayee[0].createdUtcDate,
-      // modifiedBy: form.value.alternativePayee[0].modifiedBy,
-      // modifiedUtcDate: form.value.alternativePayee[0].modifiedUtcDate,
-    },
+    // FIX: hanya set alternativePay kalau ada datanya (hindari akses [0] undefined)
+    ...(alt
+      ? {
+          alternativePay: {
+            id: alt.id,
+            invoiceUId: form.value.invoiceUId,
+            name: alt.name,
+            name2: alt.name2,
+            street: alt.street,
+            city: alt.city,
+            country: alt.country,
+            bankAccountNumber: alt.bankAccountNumber,
+            bankKey: alt.bankKey,
+            bankCountry: alt.bankCountry,
+            npwp: alt.npwp,
+            ktp: alt.ktp,
+            email: alt.email,
+            isAlternativePayee: alt.isAlternativePayee,
+            isOneTimeVendor: alt.isOneTimeVendor,
+          },
+        }
+      : {}),
     costExpenses: mapCostExpenses(),
     documents,
   } as SubmissionNonPoTypes
@@ -883,6 +925,8 @@ const setDataDefault = async () => {
     companyName: data?.header.companyName || '',
     invoiceNo: data?.header.invoiceNo || '',
     documentNo: data?.header.documentNo || '',
+    sapInvoiceNo: data?.header.sapInvoiceNo || '',
+    clearingDocumentNo: data?.header.clearingDocumentNo || '',
     invoiceDate: data?.header.invoiceDate || '',
     taxNo: data?.header.taxNo || '',
     currCode: data?.header.currCode || '',
@@ -897,16 +941,16 @@ const setDataDefault = async () => {
     assigment: data?.header.assigment || '',
     transferNews: data?.header.transferNews || '',
     npwpReporting: data?.header.npwpReporting || '',
-    remainingDpAmount: data?.header.remainingDPAmount,
-    dpAmountDeduction: data?.header.dpAmountDeduction,
-    casDateReceipt: data?.header.casDateReceipt,
-    proposalAmount: data?.header.proposalAmount,
-    picFinance: data?.header.picFinance,
-    cashJournalCode: data?.header.cashJournalCode,
-    cashJournalName: data?.header.cashJournalName,
-    pettyCashStartDate: data?.header.pettyCashStartDate,
-    pettyCashEndDate: data?.header.pettyCashEndDate,
-    npwpReportingName: data?.header.npwpReportingName,
+    remainingDpAmount: data?.header.remainingDPAmount || 0,
+    dpAmountDeduction: data?.header.dpAmountDeduction || 0,
+    casDateReceipt: data?.header.casDateReceipt || '',
+    proposalAmount: data?.header.proposalAmount || 0,
+    picFinance: data?.header.picFinance || '',
+    cashJournalCode: data?.header.cashJournalCode || '',
+    cashJournalName: data?.header.cashJournalName || '',
+    pettyCashStartDate: data?.header.pettyCashStartDate || '',
+    pettyCashEndDate: data?.header.pettyCashEndDate || '',
+    npwpReportingName: data?.header.npwpReportingName || '',
     paymentId: data?.payment.paymentId || 0,
     bankKey: data?.payment.bankKey || '',
     bankName: data?.payment.bankName || '',
@@ -914,7 +958,7 @@ const setDataDefault = async () => {
     beneficiaryName: data?.payment.beneficiaryName || '',
     bankAccountNo: data?.payment.bankAccountNo || '',
     bankCountryCode: data?.payment.bankCountryCode || '',
-    vendorId: data?.vendor.vendorId || '',
+    vendorId: data?.vendor.vendorId != null ? String(data.vendor.vendorId) : '',
     vendorName: data?.vendor.vendorName || '',
     npwp: data?.vendor.npwp || '',
     vendorAddress: data?.vendor.vendorAddress || '',
@@ -939,31 +983,29 @@ const setDataDefault = async () => {
 const setDataDefaultNonPo = () => {
   const data = detailInvoiceNonPo.value
   const resultAdditional: invoiceItemTypes[] = []
-  let alternativePaeeValue: itemsAlternativePayee | null = null
 
-  if (data?.alternativePayee.length > 0) {
+  // FIX: pakai tipe yang konsisten dengan formTypes (tanpa import type lain)
+  let alternativePaeeValue: formTypes['alternativePayee'][number] | null = null
+
+  const alt = data?.alternativePayee?.[0]
+  if (alt) {
     alternativePaeeValue = {
-      id: data?.alternativePayee[0]?.id,
-      name: data?.alternativePayee[0]?.name,
-      name2: data?.alternativePayee[0]?.name2,
-      street: data?.alternativePayee[0]?.street,
-      city: data?.alternativePayee[0]?.city,
-      country: data?.alternativePayee[0]?.country,
-      bankAccountNumber: data?.alternativePayee[0].bankAccountNumber,
-      bankKey: data?.alternativePayee[0]?.bankKey,
-      bankCountry: data?.alternativePayee[0]?.bankCountry,
-      npwp: data?.alternativePayee[0]?.npwp,
-      ktp: data?.alternativePayee[0]?.ktp,
-      email: data?.alternativePayee[0]?.email,
-      isAlternativePayee: data?.alternativePayee[0]?.isAlternativePayee,
-      isOneTimeVendor: data?.alternativePayee[0]?.isOneTimeVendor,
+      id: alt.id,
+      name: alt.name,
+      name2: alt.name2,
+      street: alt.street,
+      city: alt.city,
+      country: alt.country,
+      bankAccountNumber: alt.bankAccountNumber,
+      bankKey: alt.bankKey,
+      bankCountry: alt.bankCountry,
+      npwp: alt.npwp,
+      ktp: alt.ktp,
+      email: alt.email,
+      isAlternativePayee: alt.isAlternativePayee,
+      isOneTimeVendor: alt.isOneTimeVendor,
     }
   }
-
-  let invoice = {} as documentDetailTypes
-  let tax = {} as documentDetailTypes
-  let reference = {} as documentDetailTypes
-  let other = {} as documentDetailTypes
 
   for (const item of data?.costExpense || []) {
     resultAdditional.push({
@@ -987,6 +1029,11 @@ const setDataDefaultNonPo = () => {
       isEdit: false,
     })
   }
+
+  let invoice = {} as documentDetailTypes
+  let tax = {} as documentDetailTypes
+  let reference = {} as documentDetailTypes
+  let other = {} as documentDetailTypes
 
   for (const item of data?.documents || []) {
     switch (item.documentType) {
@@ -1015,31 +1062,33 @@ const setDataDefaultNonPo = () => {
     companyName: data?.header.companyName || '',
     invoiceNo: data?.header.invoiceNo || '',
     documentNo: data?.header.documentNo || '',
-    invoiceDate: data?.header.invoiceDate || null,
+    sapInvoiceNo: data?.header.sapInvoiceNo || '',
+    clearingDocumentNo: data?.header.clearingDocumentNo || '',
+    invoiceDate: data?.header.invoiceDate || '',
     taxNo: data?.header.taxNo || '',
     currCode: data?.header.currCode || '',
     notes: data?.header.notes || '',
     statusCode: data?.header.statusCode || 0,
     statusName: data?.header.statusName || '',
-    postingDate: data?.header.postingDate || null,
+    postingDate: data?.header.postingDate || '',
     invoicingParty: data?.header.invoicingParty || '',
-    estimatedPaymentDate: data?.header.estimatedPaymentDate || null,
+    estimatedPaymentDate: data?.header.estimatedPaymentDate || '',
     paymentMethodCode: data?.header.paymentMethodCode || '',
     paymentMethodName: data?.header.paymentMethodName || '',
     assigment: data?.header.assigment || '',
     transferNews: data?.header.transferNews || '',
     npwpReporting: data?.header.npwpReporting || '',
     department: data?.header.department,
-    remainingDpAmount: data?.header.remainingDPAmount,
-    dpAmountDeduction: data?.header.dpAmountDeduction,
-    casDateReceipt: data?.header.casDateReceipt,
-    proposalAmount: data?.header.proposalAmount,
-    picFinance: data?.header.picFinance,
-    cashJournalCode: data?.header.cashJournalCode,
-    cashJournalName: data?.header.cashJournalName,
-    pettyCashStartDate: data?.header.pettyCashStartDate,
-    pettyCashEndDate: data?.header.pettyCashEndDate,
-    npwpReportingName: data?.header.npwpReportingName,
+    remainingDpAmount: data?.header.remainingDPAmount || 0,
+    dpAmountDeduction: data?.header.dpAmountDeduction || 0,
+    casDateReceipt: data?.header.casDateReceipt || '',
+    proposalAmount: data?.header.proposalAmount || 0,
+    picFinance: data?.header.picFinance || '',
+    cashJournalCode: data?.header.cashJournalCode || '',
+    cashJournalName: data?.header.cashJournalName || '',
+    pettyCashStartDate: data?.header.pettyCashStartDate || '',
+    pettyCashEndDate: data?.header.pettyCashEndDate || '',
+    npwpReportingName: data?.header.npwpReportingName || '',
     paymentId: data?.payment.paymentId || 0,
     bankKey: data?.payment.bankKey || '',
     bankName: data?.payment.bankName || '',
@@ -1047,7 +1096,7 @@ const setDataDefaultNonPo = () => {
     beneficiaryName: data?.payment.beneficiaryName || '',
     bankAccountNo: data?.payment.bankAccountNo || '',
     bankCountryCode: data?.payment.bankCountryCode || '',
-    vendorId: data?.vendor.vendorId || '',
+    vendorId: data?.vendor.vendorId != null ? String(data.vendor.vendorId) : '',
     vendorName: data?.vendor.vendorName || '',
     npwp: data?.vendor.npwp || '',
     vendorAddress: data?.vendor.vendorAddress || '',
@@ -1071,7 +1120,6 @@ const setDataDefaultNonPo = () => {
 
 const setDataEdit = () => {
   const data = verificationApi.detailInvoiceEdit
-  // map incoming edit data to local shapes so view types are satisfied
   const mappedAdditional = (data?.additionalCosts || []).map((item) => {
     const r = item as unknown as Record<string, unknown>
     return {
@@ -1090,17 +1138,19 @@ const setDataEdit = () => {
       whtCodeList: item.whtType ? whtCodeList.value : [],
     }
   })
+
   form.value = {
     invoiceUId: data?.invoiceUId || '',
     invoiceTypeCode: data?.invoiceTypeCode || 0,
     invoiceTypeName: data?.invoiceTypeName || '',
     invoiceDPCode: data?.invoiceDPCode || 0,
     invoiceDPName: data?.invoiceDPName || '',
-    // vendorId is stored as `vendorId` in the form type
     companyCode: data?.companyCode || '',
     companyName: data?.companyName || '',
     invoiceNo: data?.invoiceNo || '',
     documentNo: data?.documentNo || '',
+    sapInvoiceNo: data?.sapInvoiceNo || '',
+    clearingDocumentNo: data?.clearingDocumentNo || '',
     invoiceDate: data?.invoiceDate || '',
     taxNo: data?.taxNo || '',
     currCode: data?.currCode || '',
@@ -1115,8 +1165,8 @@ const setDataEdit = () => {
     assigment: data?.assigment || '',
     transferNews: data?.transferNews || '',
     npwpReporting: data?.npwpReporting || '',
-    remainingDpAmount: data?.remainingDpAmount,
-    dpAmountDeduction: data?.dpAmountDeduction,
+    remainingDpAmount: data?.remainingDpAmount || 0,
+    dpAmountDeduction: data?.dpAmountDeduction || 0,
     department: data?.department,
     creditCardBillingId: data?.creditCardBillingId || '',
     casDateReceipt: data?.casDateReceipt || '',
@@ -1127,7 +1177,7 @@ const setDataEdit = () => {
     pettyCashStartDate: data?.pettyCashStartDate || '',
     pettyCashEndDate: data?.pettyCashEndDate || '',
     npwpReportingName: data?.npwpReportingName || '',
-    paymentId: data?.paymentId,
+    paymentId: data?.paymentId || 0,
     bankKey: data?.bankKey || '',
     bankName: data?.bankName || '',
     beneficiaryName: data?.beneficiaryName || '',
@@ -1147,24 +1197,27 @@ const setDataEdit = () => {
     additionalCosts: mappedAdditional,
     invoiceItem: [],
     costExpense: mappedCostExpenses,
-    alternativePayee: [
-      {
-        id: data?.idAlternative,
-        name: data?.name,
-        name2: data?.name2,
-        street: data?.street,
-        city: data?.city,
-        country: data?.country,
-        bankAccountNumber: data?.bankAccountNumber,
-        bankKey: data?.bankKeyAlternative,
-        bankCountry: data?.bankCountry,
-        npwp: data?.npwpAlternative,
-        ktp: data?.ktp,
-        email: data?.email,
-        isAlternativePayee: data?.isAlternativePayee,
-        isOneTimeVendor: data?.isOneTimeVendor,
-      },
-    ],
+    alternativePayee:
+      data && data.isAlternativePayee
+        ? [
+            {
+              id: data.idAlternative || 0,
+              name: data.name || '',
+              name2: data.name2 || '',
+              street: data.street || '',
+              city: data.city || '',
+              country: data.country || '',
+              bankAccountNumber: data.bankAccountNumber || '',
+              bankKey: data.bankKeyAlternative || '',
+              bankCountry: data.bankCountry || '',
+              npwp: data.npwpAlternative || '',
+              ktp: data.ktp || '',
+              email: data.email || '',
+              isAlternativePayee: !!data.isAlternativePayee,
+              isOneTimeVendor: !!data.isOneTimeVendor,
+            },
+          ]
+        : [],
     invoiceDocument: data?.invoiceDocument || null,
     tax: data?.tax || null,
     referenceDocument: data?.referenceDocument || null,
@@ -1266,6 +1319,4 @@ onMounted(async () => {
     })
   }
 })
-
-provide('form', form)
 </script>
