@@ -5,36 +5,43 @@
     </p>
 
     <div v-if="form?.invoiceType !== '902' && !checkInvoiceDp()">
-      <div class="flex items-center gap-[10px]">
-        <div class="relative max-w-[250px]">
-          <label
-            class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px]"
-          >
-            Reference Number
-          </label>
-          <div class="input">
-            <input
-              v-model="search"
-              placeholder=""
-              type="number"
-              @keypress="searchEnter"
-              @disabled="form.invoicePoGr.length > 0"
-            />
-            <i class="ki-outline ki-magnifier"></i>
+      <div class="flex items-center gap-[10px] justify-between">
+        <div class="flex items-center gap-[10px]">
+          <div class="relative max-w-[250px]">
+            <label
+              class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px]"
+            >
+              Reference Number
+            </label>
+            <div class="input">
+              <input
+                v-model="search"
+                placeholder=""
+                type="number"
+                @keypress="searchEnter"
+                @disabled="form.invoicePoGr.length > 0"
+              />
+              <i class="ki-outline ki-magnifier"></i>
+            </div>
           </div>
+          <button
+            class="btn btn-outline btn-primary"
+            @click="searchItem"
+            :disabled="isDisabledSearch"
+          >
+            Search
+          </button>
         </div>
-        <button
-          class="btn btn-outline btn-primary"
-          @click="searchItem"
-          :disabled="isDisabledSearch"
-        >
-          Search
+        <button class="btn btn-outline btn-primary" @click="openUploadModal">
+          <i class="ki-duotone ki-exit-up"></i>
+          Upload
         </button>
       </div>
       <p v-if="searchError" class="text-danger text-[9px]">
         *PO Number must be exactly 10 characters long
       </p>
     </div>
+
     <div v-if="form.invoiceType === '902'">
       <button class="btn btn-outline btn-primary" @click="addNewPodata">
         <i class="ki-duotone ki-plus-circle"></i>
@@ -314,6 +321,12 @@
       :is-po-pib="form?.invoiceType === 'pib'"
       @setItem="setItemPoGr"
     />
+    <UploadPoGr
+      :currency="form?.currency || ''"
+      :is-invoice-dp="form?.invoiceDp"
+      :is-po-pib="form?.invoiceType === 'pib'"
+      @setItem="setItemPoGr"
+    />
   </div>
 </template>
 
@@ -323,6 +336,7 @@ import type { formTypes } from '../../types/invoiceAddWrapper'
 import { KTModal } from '@/metronic/core'
 import { defaultColumn, invoiceDpColumn, poCCColumn, manualAddColumn } from '@/static/invoicePoGr'
 import SearchPoGr from './InvoicePoGr/SearchPoGr.vue'
+import UploadPoGr from './InvoicePoGr/UploadPoGr.vue'
 import moment from 'moment'
 import type { PoGrSearchTypes, itemsPoGrType } from '../../types/invoicePoGr'
 import { useFormatIdr } from '@/composables/currency'
@@ -395,6 +409,12 @@ const addItemInvoiceDp = () => {
       isSearch.value = true
       isDisabledSearch.value = false
     })
+}
+
+const openUploadModal = () => {
+  const idModal = document.querySelector('#upload_po_gr_item_modal')
+  const modal = KTModal.getInstance(idModal as HTMLElement)
+  modal.show()
 }
 
 const openAddItem = () => {
