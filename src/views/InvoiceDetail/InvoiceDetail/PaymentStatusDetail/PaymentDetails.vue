@@ -2,9 +2,8 @@
   <div class="flex flex-col gap-[24px]">
     <p class="text-lg font-semibold m-[0px]">Payment Details</p>
     <div class="flex justify-start mb-4">
-      <button class="btn btn-outline btn-primary" @click="handleSapSync">
-        <i class="ki-duotone ki-plus-circle"></i>
-        SAP Synchronize
+      <button class="btn btn-primary" @click="handleSapSync">
+        SAP Synchronize <i class="ki-duotone ki-arrows-circle"></i>
       </button>
     </div>
     <div class="overflow-x-auto invoice__table">
@@ -23,23 +22,22 @@
           <template v-else>
             <tr v-for="(item, index) in paymentDetails" :key="index" class="invoice__field-items">
               <!-- Actions column (left of No) -->
-              <td class="text-center">
-                <div class="flex gap-2 justify-center items-center">
-                  <button
-                    class="btn btn-sm btn-icon btn-primary action-btn"
-                    @click="editingIndex === index ? saveEdit(index) : startEdit(index)"
-                    :title="editingIndex === index ? 'Save' : 'Edit'"
-                  >
-                    <i class="ki-duotone ki-pencil fs-4"></i>
-                  </button>
-                  <button
-                    class="btn btn-sm btn-icon btn-danger action-btn"
-                    @click="editingIndex === index ? cancelEdit() : deleteRow(index)"
-                    :title="editingIndex === index ? 'Cancel' : 'Delete'"
-                  >
-                    <i class="ki-duotone ki-cross fs-4"></i>
-                  </button>
-                </div>
+              <td class="flex items-center justify-center gap-[6px]">
+                <button
+                  class="btn btn-icon btn-primary"
+                  @click="editingIndex === index ? saveEdit(index) : startEdit(index)"
+                  :title="editingIndex === index ? 'Save' : 'Edit'"
+                >
+                  <i v-if="editingIndex !== index" class="ki-duotone ki-notepad-edit"></i>
+                  <i v-else class="ki-duotone ki-check-circle"></i>
+                </button>
+                <button
+                  class="btn btn-icon btn-outline btn-danger"
+                  @click="editingIndex === index ? cancelEdit() : deleteRow(index)"
+                  :title="editingIndex === index ? 'Cancel' : 'Delete'"
+                >
+                  <i class="ki-duotone ki-cross-circle"></i>
+                </button>
               </td>
 
               <td>{{ item.no }}</td>
@@ -202,7 +200,7 @@ const handleSapSync = () => {
     status: 'Plan',
     bankAccount: 'BRI -XXX',
     remarks: '',
-    attachmentDocument: ''
+    attachmentDocument: '',
   }
   paymentDetails.value.push(newItem)
   console.log('SAP Synchronize - New payment detail added:', newItem)
