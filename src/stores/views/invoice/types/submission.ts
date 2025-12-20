@@ -51,6 +51,8 @@ interface ParamsSubmissionHeader {
   companyName: string
   invoiceNo: string
   documentNo: string
+  sapInvoiceNo?: string
+  clearingDocumentNo?: string
   invoiceDate: string
   taxNo: string
   currCode: string

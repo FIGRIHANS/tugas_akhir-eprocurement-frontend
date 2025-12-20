@@ -4,8 +4,14 @@
   <div>
     <Breadcrumb title="Add Invoice" :routes="routes" />
     <StepperStatus :active-name="stepperStatus" />
-    <TabInvoice v-model:activeTab="tabNow" :can-click-data="true" :can-click-information="canClickInformationTab"
-      :can-click-preview="canClickPreviewTab" :can-click-payment-status="canClickPaymentStatusTab" class="-mx-[24px]" />
+    <TabInvoice
+      v-model:activeTab="tabNow"
+      :can-click-data="true"
+      :can-click-information="canClickInformationTab"
+      :can-click-preview="canClickPreviewTab"
+      :can-click-payment-status="canClickPaymentStatusTab"
+      class="-mx-[24px]"
+    />
     <!-- <div v-if="form.status !== 0" class="status__box--approved -mt-5 -mx-[24px]">
       <i class="ki-outline ki-shield-tick text-primary text-[36px]"></i>
       <div>
@@ -20,13 +26,19 @@
         <component :is="contentComponent" />
       </Transition>
       <!-- Payment Status tab: Only show Back button -->
-      <div v-if="tabNow === 'paymentStatus'" class="flex justify-start items-center mt-[24px] gap-3">
+      <div
+        v-if="tabNow === 'paymentStatus'"
+        class="flex justify-start items-center mt-[24px] gap-3"
+      >
         <button class="btn btn-outline btn-primary" @click="goBack">
           <i class="ki-filled ki-arrow-left"></i>
           Back
         </button>
       </div>
-      <div v-else-if="checkIsNonPo()" class="flex align-items-center justify-between gap-[8px] mt-[24px]">
+      <div
+        v-else-if="checkIsNonPo()"
+        class="flex align-items-center justify-between gap-[8px] mt-[24px]"
+      >
         <div class="flex-1 flex gap-[8px]">
           <button class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goBack">
             <i class="ki-filled ki-arrow-left"></i>
@@ -38,28 +50,40 @@
           </button>
         </div>
         <div class="flex-1 flex gap-[8px] justify-end">
-          <button v-if="tabNow === 'information'" class="btn btn-primary" :disabled="isSubmit || checkFormBudget()"
-            @click="checkBudget">
+          <button
+            v-if="tabNow === 'information'"
+            class="btn btn-primary"
+            :disabled="isSubmit || checkFormBudget()"
+            @click="checkBudget"
+          >
             Budget Checking
             <i class="ki-duotone ki-dollar"></i>
           </button>
 
-          <button class="btn btn-primary" @click="goNext" :disabled="isSubmit ||
-            (!isCheckBudget && tabNow === 'information') ||
-            (tabNow === 'information' && !checkInvoiceInformation()) ||
-            (tabNow === 'data' && !isAlternativePayeeFilled())
-            ">
+          <button
+            class="btn btn-primary"
+            @click="goNext"
+            :disabled="
+              isSubmit ||
+              (!isCheckBudget && tabNow === 'information') ||
+              (tabNow === 'information' && !checkInvoiceInformation()) ||
+              (tabNow === 'data' && !isAlternativePayeeFilled())
+            "
+          >
             {{ tabNow !== 'preview' ? 'Next' : 'Submit' }}
             <i v-if="tabNow !== 'preview'" class="ki-duotone ki-black-right"></i>
             <i v-else class="ki-duotone ki-paper-plane"></i>
           </button>
         </div>
       </div>
-      <div v-else-if="
-        (form.status === 0 || form.status === -1 || form.status === 5) &&
-        !checkInvoiceView() &&
-        !checkInvoiceNonPoView()
-      " class="flex justify-between items-center gap-[8px] mt-[24px]">
+      <div
+        v-else-if="
+          (form.status === 0 || form.status === -1 || form.status === 5) &&
+          !checkInvoiceView() &&
+          !checkInvoiceNonPoView()
+        "
+        class="flex justify-between items-center gap-[8px] mt-[24px]"
+      >
         <button class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goSaveDraft">
           Save as Draft
           <i class="ki-duotone ki-bookmark"></i>
@@ -69,8 +93,11 @@
             <i class="ki-filled ki-arrow-left"></i>
             Back
           </button>
-          <button class="btn btn-primary" :disabled="isSubmit || (tabNow === 'data' && !isAlternativePayeeFilled())"
-            @click="goNext">
+          <button
+            class="btn btn-primary"
+            :disabled="isSubmit || (tabNow === 'data' && !isAlternativePayeeFilled())"
+            @click="goNext"
+          >
             {{ tabNow !== 'preview' ? 'Next' : 'Submit' }}
             <i v-if="tabNow !== 'preview'" class="ki-duotone ki-black-right"></i>
             <i v-else class="ki-duotone ki-paper-plane"></i>
@@ -78,28 +105,43 @@
         </div>
       </div>
       <div v-else class="flex justify-end items-center mt-[24px] gap-3">
-        <button v-if="tabNow !== 'preview' || checkInvoiceView() || checkInvoiceNonPoView()"
-          class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goBack">
+        <button
+          v-if="tabNow !== 'preview' || checkInvoiceView() || checkInvoiceNonPoView()"
+          class="btn btn-outline btn-primary"
+          :disabled="isSubmit"
+          @click="goBack"
+        >
           <i class="ki-filled ki-arrow-left"></i>
           Back
         </button>
 
-        <button v-if="tabNow !== 'preview' || checkInvoiceView() || checkInvoiceNonPoView()" class="btn btn-primary"
-          @click="goNext">
+        <button
+          v-if="tabNow !== 'preview' || checkInvoiceView() || checkInvoiceNonPoView()"
+          class="btn btn-primary"
+          @click="goNext"
+        >
           Next
           <i class="ki-duotone ki-black-right"></i>
         </button>
 
-        <button v-if="tabNow !== 'preview' && !checkInvoiceView() && !checkInvoiceNonPoView()" class="btn btn-primary"
-          :disabled="isSubmit ||
+        <button
+          v-if="tabNow !== 'preview' && !checkInvoiceView() && !checkInvoiceNonPoView()"
+          class="btn btn-primary"
+          :disabled="
+            isSubmit ||
             (tabNow === 'information' && !checkInvoiceInformation()) ||
             (tabNow === 'data' && !isAlternativePayeeFilled())
-            " @click="goNext">
+          "
+          @click="goNext"
+        >
           Next
           <i class="ki-duotone ki-black-right"></i>
         </button>
-        <button v-if="tabNow === 'preview' && !checkInvoiceView() && !checkInvoiceNonPoView()" class="btn btn-primary"
-          :disabled="isSubmit">
+        <button
+          v-if="tabNow === 'preview' && !checkInvoiceView() && !checkInvoiceNonPoView()"
+          class="btn btn-primary"
+          :disabled="isSubmit"
+        >
           Save as PDF
           <iconPDF />
         </button>
@@ -188,7 +230,7 @@ const isClickDraft = ref<boolean>(false)
 const itemNoAcc = ref<number>(0)
 const hasCompletedDataTab = ref<boolean>(false)
 
-const stepperStatus = ref('')
+const stepperStatus = ref('Submission')
 
 const routes = ref<routeTypes[]>([
   {
@@ -332,12 +374,8 @@ const canClickPreviewTab = computed(() => {
 })
 
 const canClickPaymentStatusTab = computed(() => {
-  // TODO: Update this condition when backend implements payment status
-  // For now, always show the tab for testing purposes
-  return true
-
-  // Future implementation when backend is ready:
-  // return form.status >= 7 || form.paymentStatus === 'Paid'
+  // Only show Payment Status tab when invoice has been sent to SAP (statusCode = 7)
+  return form.status === 7
 })
 
 const checkInvoiceView = () => {
@@ -577,15 +615,15 @@ const goBack = () => {
       isCheckBudget.value = false
       tabNow.value = newTab
       try {
-        ; (document.activeElement as HTMLElement)?.blur()
-      } catch { }
+        ;(document.activeElement as HTMLElement)?.blur()
+      } catch {}
       return
     }
 
     tabNow.value = newTab
     try {
-      ; (document.activeElement as HTMLElement)?.blur()
-    } catch { }
+      ;(document.activeElement as HTMLElement)?.blur()
+    } catch {}
   }
 }
 
@@ -839,8 +877,8 @@ const mapDataPostNonPo = () => {
       cashJournalName: isPettyCash
         ? typeof form.cashJournalName === 'string'
           ? form.cashJournalName
-            .replace(new RegExp('^' + (form.cashJournalCode || '') + '\\s*-\\s*'), '')
-            .trim()
+              .replace(new RegExp('^' + (form.cashJournalCode || '') + '\\s*-\\s*'), '')
+              .trim()
           : form.cashJournalName || ''
         : '',
       pettyCashStartDate: pettyCashStartDate || null,
@@ -1701,10 +1739,55 @@ const checkFormBudget = () => {
 }
 
 const setStepperStatus = () => {
-  if (detailNonPo.value.header.statusCode === 1) {
+  // Get status from either PO or Non-PO detail
+  const statusCode = !checkIsNonPo()
+    ? detailPo.value?.header?.statusCode
+    : detailNonPo.value?.header?.statusCode
+
+  // Map status codes to stepper labels
+  // Note: StepperStatus component matches the SECOND word of the label
+  // Labels: 'Invoice Submission', 'Invoice Verification', 'Invoice Approval', 'Invoice Posting', 'Payment Status'
+  // So we use: 'Submission', 'Verification', 'Approval', 'Posting', 'Status'
+
+  // Status codes:
+  // 0 = Draft
+  // 1 = Waiting to Verify / Submitted
+  // 2 = Verified
+  // 3 = Waiting for Approval
+  // 4 = Approved
+  // 5 = Rejected
+  // 6 = Posted to SAP
+  // 7 = Sent to SAP / Payment Status
+
+  if (statusCode === 0 || statusCode === 1) {
     stepperStatus.value = 'Submission'
-  } else if (detailNonPo.value.header.statusCode === 2) {
+  } else if (statusCode === 2) {
+    stepperStatus.value = 'Verification'
+  } else if (statusCode === 3 || statusCode === 4) {
     stepperStatus.value = 'Approval'
+  } else if (statusCode === 6) {
+    stepperStatus.value = 'Posting'
+  } else if (statusCode === 7) {
+    stepperStatus.value = 'Status' // Matches 'Payment Status'
+  } else {
+    stepperStatus.value = 'Submission' // Default fallback
+  }
+}
+
+const updateStepperByTab = () => {
+  // Update stepper based on current tab when creating/editing invoice
+  // This makes the stepper reflect the current workflow step as user navigates
+  // Note: Use second word of step labels to match StepperStatus component logic
+  if (tabNow.value === 'data') {
+    stepperStatus.value = 'Submission'
+  } else if (tabNow.value === 'information') {
+    stepperStatus.value = 'Submission'
+  } else if (tabNow.value === 'ocrAiVerification') {
+    stepperStatus.value = 'Verification'
+  } else if (tabNow.value === 'preview') {
+    stepperStatus.value = 'Approval'
+  } else if (tabNow.value === 'paymentStatus') {
+    stepperStatus.value = 'Status' // Matches 'Payment Status'
   }
 }
 
@@ -1740,6 +1823,11 @@ onMounted(() => {
     invoiceApi.getNonPoDetail(route.query.invoice?.toString() || '').then(() => {
       setStepperStatus()
       setDataNonPo()
+
+      // If invoice status is 7 (Sent to SAP), navigate to Payment Status tab
+      if (form.status === 7) {
+        tabNow.value = 'paymentStatus'
+      }
     })
   }
 
@@ -1753,15 +1841,50 @@ onMounted(() => {
     hasCompletedDataTab.value = true
 
     invoiceApi.getPoDetail(route.query.invoice?.toString() || '').then(() => {
+      setStepperStatus()
       setData()
+
+      // If invoice status is 7 (Sent to SAP), navigate to Payment Status tab
+      if (form.status === 7) {
+        tabNow.value = 'paymentStatus'
+      }
     })
   }
 })
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const checkPreview = () => {
   return route.query.type === 'po-view' || route.query.type === 'non-po-view'
 }
+
+// Watch for tab changes to update stepper
+watch(
+  () => tabNow.value,
+  () => {
+    const isViewMode = checkPreview()
+
+    // For create/edit mode: update stepper based on current tab
+    if (!isViewMode) {
+      updateStepperByTab()
+    }
+    // For view mode: stepper will be updated by form.status watcher below
+  },
+  { immediate: true },
+)
+
+// Watch for status changes to update stepper (for viewing existing invoices)
+watch(
+  () => form.status,
+  (newStatus) => {
+    const isViewMode = checkPreview()
+
+    // Only update stepper from status when in view mode
+    // This ensures stepper shows correct progress for invoices with status 1-7
+    if (isViewMode && newStatus !== undefined && newStatus >= 0) {
+      setStepperStatus()
+    }
+  },
+  { immediate: true },
+)
 
 watch(
   () => form.invoiceItem,

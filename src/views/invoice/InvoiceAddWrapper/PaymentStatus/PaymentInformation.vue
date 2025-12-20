@@ -1,71 +1,78 @@
 <template>
-    <div class="card flex-1">
-        <div class="card-body py-[8px] px-[16px] max-h-[380px] overflow-y-auto scroll mr-[16px]">
-            <p class="mb-[16px] font-semibold text-base">Payment Information</p>
-            <div>
-                <div v-for="(item, index) in paymentInfo" :key="index"
-                    class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                    <label class="form-label">{{ item.label }}</label>
-                    <input :value="item.value" class="input" disabled />
-                </div>
-            </div>
+  <div class="card flex-1">
+    <div class="card-body py-[8px] px-[16px] max-h-[380px] overflow-y-auto scroll mr-[16px]">
+      <p class="text-base font-semibold mb-[16px]">Payment Information</p>
+      <div>
+        <div
+          v-for="(item, index) in paymentInfo"
+          :key="index"
+          class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+        >
+          <label class="form-label">{{ item.label }}</label>
+          <input :value="item.value" class="input" disabled />
         </div>
+      </div>
     </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
 
 interface PaymentInfoItem {
-    label: string
-    value: string
+  label: string
+  value: string
 }
 
 const paymentInfo = ref<PaymentInfoItem[]>([])
 
 const setPaymentInfo = () => {
-    // Mock data for payment information
-    paymentInfo.value = [
-        {
-            label: 'Invoice Posting Date',
-            value: '01.01.2025'
-        },
-        {
-            label: 'Term of Payment',
-            value: '30 Days'
-        },
-        {
-            label: 'Estimate Payment Date',
-            value: '31.01.2025'
-        },
-        {
-            label: 'Payment Status',
-            value: 'Partial'
-        }
-    ]
+  // Mock data for payment information
+  paymentInfo.value = [
+    {
+      label: 'Invoice Posting Date',
+      value: '01.01.2025',
+    },
+    {
+      label: 'Term of Payment',
+      value: '30 Days',
+    },
+    {
+      label: 'Estimate Payment Date',
+      value: '31.01.2025',
+    },
+    {
+      label: 'Payment Method',
+      value: 'Transfer Outgoing',
+    },
+    {
+      label: 'Payment Status',
+      value: 'Partially Paid ',
+    },
+  ]
 }
 
 onMounted(() => {
-    setPaymentInfo()
+  setPaymentInfo()
 })
 </script>
 
 <style lang="scss" scoped>
 .scroll {
-    scrollbar-width: thin;
-    scrollbar-color: #cbd5e0 #f7fafc;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e0 #f7fafc;
 }
 
 .scroll::-webkit-scrollbar {
-    width: 6px;
+  width: 6px;
 }
 
 .scroll::-webkit-scrollbar-track {
-    background: #f7fafc;
+  background: #f7fafc;
 }
 
 .scroll::-webkit-scrollbar-thumb {
-    background-color: #cbd5e0;
-    border-radius: 3px;
+  background-color: #cbd5e0;
+  border-radius: 3px;
 }
 </style>
