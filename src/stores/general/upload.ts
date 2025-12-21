@@ -24,36 +24,6 @@ export const useUploadStore = defineStore('upload', () => {
     return response.data.result.content
   }
 
-  const uploadFileQr = async (FormFile: File, Actioner: number) => {
-    const formData = new FormData()
-    formData.append('FormFile', FormFile)
-    formData.append('Actioner', String(Actioner))
-
-    const response: ApiResponse<UploadFileResponse> = await invoiceApi.post(
-      '/ocr/invoice/scan-qr',
-      formData,
-    )
-
-    // errorMessageUpload.value = response.data.result.message
-
-    return response.data.invoiceDetail
-  }
-
-  const uploadFileOcr = async (FormFile: File, Actioner: number) => {
-    const formData = new FormData()
-    formData.append('FormFile', FormFile)
-    formData.append('Actioner', String(Actioner))
-
-    const response: ApiResponse<UploadFileResponse> = await invoiceApi.post(
-      '/ocr/read-text',
-      formData,
-    )
-
-    // errorMessageUpload.value = response.data.result.message
-
-    return response.data.result.content
-  }
-
   const previewFile = async (fullFilePath: string) => {
     try {
       const response = await generalApi.get('/api/file/preview', {
@@ -72,7 +42,5 @@ export const useUploadStore = defineStore('upload', () => {
     errorMessageUpload,
     uploadFile,
     previewFile,
-    uploadFileQr,
-    uploadFileOcr,
   }
 })

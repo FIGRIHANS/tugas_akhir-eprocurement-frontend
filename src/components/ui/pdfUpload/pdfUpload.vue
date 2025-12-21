@@ -95,10 +95,10 @@ const handleFileUpload = async (event: Event) => {
   try {
     const response = await uploadApi.uploadFile(file, 0)
 
-    if (props.varName === 'invoiceDocument') {
-      const responseOcr = await uploadApi.uploadFileOcr(file, 0)
-      emits('setFileOcr', responseOcr)
-    }
+    // if (props.varName === 'invoiceDocument') {
+    //   const responseOcr = await uploadApi.uploadFileOcr(file, 0)
+    //   emits('setFileOcr', responseOcr)
+    // }
 
     emits('setFile', {
       id: 0,

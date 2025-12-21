@@ -1,100 +1,139 @@
 <template>
-  <div v-if="form" class="flex flex-col gap-[24px]">
-    <p class="text-lg font-semibold m-[0px]">Invoice PO & GR Item</p>
-    <div class="invoice__table overflow-y-auto">
-      <table class="table table-xs table-border">
-        <thead>
+  <div v-if="form" class="flex flex-col gap-6">
+    <p class="text-lg font-semibold">Invoice PO & GR Item</p>
+
+    <!-- TABLE WRAPPER -->
+    <div class="relative overflow-x-auto rounded-lg border border-gray-300">
+      <table class="table table-xs table-border w-full whitespace-nowrap">
+        <!-- HEADER -->
+        <thead class="bg-gray-100">
           <tr>
             <th
               v-for="(item, index) in columns"
               :key="index"
-              :class="{
-                'invoice__field-base--line': item.toLowerCase() === 'line',
-                'invoice__field-base--tax': item.toLowerCase() === 'tax code',
-                'invoice__field-base--wht-type': item.toLowerCase() === 'wht type',
-                'invoice__field-base--wht-code': item.toLowerCase() === 'wht code',
-              }"
-              class="invoice__field-base"
+              class="px-3 py-2 text-left text-xs font-semibold text-gray-700"
             >
               {{ item }}
             </th>
           </tr>
         </thead>
+
+        <!-- BODY -->
         <tbody>
-          <tr v-for="(item, index) in pogrLsit" :key="index" class="invoice__field-items">
-            <td>{{ index + 1 }}</td>
-            <td>{{ item.poNo }}</td>
-            <td v-if="!checkInvoiceDp()">{{ item.poItem }}</td>
-            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentNo || '-' }}</td>
-            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentItem || '-' }}</td>
-            <td v-if="!checkInvoiceDp() && !checkPoPib()">
+          <tr v-for="(item, index) in pogrLsit" :key="index" class="border-t hover:bg-gray-50">
+            <td class="px-3 py-2">{{ index + 1 }}</td>
+            <td class="px-3 py-2">{{ item.poNo }}</td>
+
+            <td v-if="!checkInvoiceDp()" class="px-3 py-2">
+              {{ item.poItem }}
+            </td>
+
+            <td v-if="!checkInvoiceDp() && !checkPoPib()" class="px-3 py-2">
+              {{ item.grDocumentNo || '-' }}
+            </td>
+
+            <td v-if="!checkInvoiceDp() && !checkPoPib()" class="px-3 py-2">
+              {{ item.grDocumentItem || '-' }}
+            </td>
+
+            <td v-if="!checkInvoiceDp() && !checkPoPib()" class="px-3 py-2">
               {{ moment(item.grDocumentDate).format('YYYY/MM/DD') }}
             </td>
-            <td>
+
+            <td class="px-3 py-2 text-right">
               {{
                 form.currency === 'IDR'
                   ? useFormatIdr(item.itemAmountLC)
                   : useFormatUsd(item.itemAmountTC)
               }}
             </td>
-            <td v-if="!checkInvoiceDp()">{{ useFormatIdr(item.quantity) }}</td>
-            <td v-if="!checkInvoiceDp()">{{ item.uom || '-' }}</td>
-            <td v-if="!checkInvoiceDp()">{{ item.itemText || '-' }}</td>
-            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.conditionType || '-' }}</td>
-            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.conditionTypeDesc || '-' }}</td>
-            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.qcStatus || '-' }}</td>
-            <td v-if="!checkPoPib()">{{ getTaxCodeName(item.taxCode) || '-' }}</td>
-            <td v-if="!checkPoPib()">
+
+            <td v-if="!checkInvoiceDp()" class="px-3 py-2 text-right">
+              {{ useFormatIdr(item.quantity) }}
+            </td>
+
+            <td v-if="!checkInvoiceDp()" class="px-3 py-2">
+              {{ item.uom || '-' }}
+            </td>
+
+            <td v-if="!checkInvoiceDp()" class="px-3 py-2 max-w-[360px]">
+              <div class="group relative">
+                <span class="block truncate whitespace-nowrap">
+                  {{ item.itemText || '-' }}
+                </span>
+
+                <div
+                  class="absolute z-50 hidden group-hover:block max-w-md rounded bg-gray-900 px-3 py-2 text-xs text-white shadow-lg top-2 left-0 -translate-y-full"
+                >
+                  {{ item.itemText }}
+                </div>
+              </div>
+            </td>
+
+            <td v-if="!checkInvoiceDp() && !checkPoPib()" class="px-3 py-2">
+              {{ item.conditionType || '-' }}
+            </td>
+
+            <td v-if="!checkInvoiceDp() && !checkPoPib()" class="px-3 py-2">
+              {{ item.conditionTypeDesc || '-' }}
+            </td>
+
+            <td v-if="!checkInvoiceDp() && !checkPoPib()" class="px-3 py-2">
+              {{ item.qcStatus || '-' }}
+            </td>
+
+            <td v-if="!checkPoPib()" class="px-3 py-2">
+              {{ getTaxCodeName(item.taxCode) || '-' }}
+            </td>
+
+            <td v-if="!checkPoPib()" class="px-3 py-2 text-right">
               {{
                 form.currency === 'IDR'
                   ? useFormatIdr(item.vatAmount || 0)
                   : useFormatUsd(item.vatAmount || 0)
               }}
             </td>
-            <td v-if="!checkPoPib()">{{ getWhtTypeName(item.whtType) || '-' }}</td>
-            <td v-if="!checkPoPib()">{{ getWhtCodeName(item.whtCode, item) || '-' }}</td>
-            <td v-if="!checkPoPib()">
+
+            <td v-if="!checkPoPib()" class="px-3 py-2">
+              {{ getWhtTypeName(item.whtType) || '-' }}
+            </td>
+
+            <td v-if="!checkPoPib()" class="px-3 py-2">
+              {{ getWhtCodeName(item.whtCode, item) || '-' }}
+            </td>
+
+            <td v-if="!checkPoPib()" class="px-3 py-2 text-right">
               {{
                 form.currency === 'IDR'
-                  ? useFormatIdr(item.whtBaseAmount?.toString() || '')
-                  : useFormatUsd(item.whtBaseAmount?.toString() || '')
+                  ? useFormatIdr(item.whtBaseAmount || 0)
+                  : useFormatUsd(item.whtBaseAmount || 0)
               }}
             </td>
-            <td v-if="!checkPoPib()">
+
+            <td v-if="!checkPoPib()" class="px-3 py-2 text-right">
               {{
                 form.currency === 'IDR'
-                  ? useFormatIdr(item.whtAmount?.toString() || '')
-                  : useFormatUsd(item.whtAmount?.toString() || '')
+                  ? useFormatIdr(item.whtAmount || 0)
+                  : useFormatUsd(item.whtAmount || 0)
               }}
             </td>
-            <td>{{ item.department }}</td>
-            <td>
-              <p>
-                <i
-                  class="flex items-center justify-center ki-filled ki-check-circle text-green-500"
-                ></i>
-              </p>
+
+            <td class="px-3 py-2">
+              {{ item.department }}
             </td>
-            <td>
-              <p>
-                <i
-                  class="flex items-center justify-center ki-filled ki-cross-circle text-red-500"
-                ></i>
-              </p>
+
+            <!-- MATCH ICONS -->
+            <td class="px-3 py-2 text-center">
+              <i class="ki-filled ki-check-circle text-green-500"></i>
             </td>
-            <td>
-              <p>
-                <i
-                  class="flex items-center justify-center ki-filled ki-check-circle text-green-500"
-                ></i>
-              </p>
+            <td class="px-3 py-2 text-center">
+              <i class="ki-filled ki-cross-circle text-red-500"></i>
             </td>
-            <td>
-              <p>
-                <i
-                  class="flex items-center justify-center ki-filled ki-cross-circle text-red-500"
-                ></i>
-              </p>
+            <td class="px-3 py-2 text-center">
+              <i class="ki-filled ki-check-circle text-green-500"></i>
+            </td>
+            <td class="px-3 py-2 text-center">
+              <i class="ki-filled ki-cross-circle text-red-500"></i>
             </td>
           </tr>
         </tbody>
