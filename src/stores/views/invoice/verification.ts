@@ -14,8 +14,10 @@ import type {
   ListNonPoTypes,
   PostEditApprovalNonPoTypes,
   ParamsPph21Types,
-  ResponsePph21Types
+  ResponsePph21Types,
 } from './types/verification'
+import type { invoiceOcrData } from '@/views/invoice/types/invoiceOcrData'
+import type { invoiceQrData } from '@/views/invoice/types/invoiceQrdata'
 
 export const useInvoiceVerificationStore = defineStore('invoiceVerification', () => {
   const listPo = ref<ListPoTypes[]>([])
@@ -285,15 +287,39 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
   }
 
   const getpph21 = async (payload: ParamsPph21Types) => {
-    const response: ApiResponse<ResponsePph21Types> = await invoiceApi.get(
-      `/invoice/pph21`,
-      {
-        params: {
-          ...payload
-        }
-      }
-    )
+    const response: ApiResponse<void> = await invoiceApi.get(`/invoice/pph21`, {
+      params: {
+        ...payload,
+      },
+    })
     return response.data
+  }
+
+  const uploadFileQr = async (data: string) => {
+    const payload = {
+      documentUrl: data,
+    }
+
+    const response: ApiResponse<void> = await invoiceApi.post(
+      '/ocr/invoice/scan-qr-from-blob',
+      payload,
+    )
+
+    // errorMessageUpload.value = response.data.result.message
+
+    return response.data.invoiceDetail
+  }
+
+  const uploadFileOcr = async (data: string) => {
+    const payload = {
+      documentUrl: data,
+    }
+
+    const response: ApiResponse<void> = await invoiceApi.post('/ocr/read-text-from-blob', payload)
+
+    // errorMessageUpload.value = response.data.result.message
+
+    return response.data.result.content
   }
 
   return {
@@ -326,5 +352,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     putEditInvoice,
     putSubmissionNonPo,
     getpph21,
+    uploadFileQr,
+    uploadFileOcr,
   }
 })

@@ -318,30 +318,6 @@ const form = reactive<formTypes>({
   proposalAmountVal: '',
 })
 
-const qrData = reactive<invoiceQrData>({
-  vendorBuyer: '',
-  npwppBuyer: '',
-  vendorSupplier: '',
-  npwpSupplier: '',
-  taxDocumentNumber: '',
-  taxDocumentDate: '',
-  dpp: '',
-  ppn: '',
-  ppnbm: '',
-  status: '',
-})
-
-const ocrData = reactive<invoiceOcrData>({
-  FakturPajak: '',
-  buyerNpwp: '',
-  dpp: '',
-  ppn: '',
-  total: '',
-  transactionDate: '',
-  vendorName: '',
-  vendorNpwp: '',
-})
-
 const contentComponent = computed(() => {
   const components = {
     data: InvoiceData,
@@ -1167,6 +1143,7 @@ const setData = () => {
             name: doc.documentName,
             fileSize: doc.documentSize.toString(),
             path: doc.documentUrl,
+            previewPath: doc.documentUrl,
           }
           break
         case 2:
@@ -1175,6 +1152,7 @@ const setData = () => {
             name: doc.documentName,
             fileSize: doc.documentSize.toString(),
             path: doc.documentUrl,
+            previewPath: doc.documentUrl,
           }
           break
         case 3:
@@ -1183,6 +1161,7 @@ const setData = () => {
             name: doc.documentName,
             fileSize: doc.documentSize.toString(),
             path: doc.documentUrl,
+            previewPath: doc.documentUrl,
           }
           break
         case 4:
@@ -1191,6 +1170,7 @@ const setData = () => {
             name: doc.documentName,
             fileSize: doc.documentSize.toString(),
             path: doc.documentUrl,
+            previewPath: doc.documentUrl,
           }
           break
       }
@@ -1297,6 +1277,7 @@ const setDataNonPo = () => {
             name: doc.documentName,
             fileSize: doc.documentSize.toString(),
             path: doc.documentUrl,
+            previewPath: doc.documentUrl,
           }
           break
         case 2:
@@ -1305,6 +1286,7 @@ const setDataNonPo = () => {
             name: doc.documentName,
             fileSize: doc.documentSize.toString(),
             path: doc.documentUrl,
+            previewPath: doc.documentUrl,
           }
           break
         case 3:
@@ -1313,6 +1295,7 @@ const setDataNonPo = () => {
             name: doc.documentName,
             fileSize: doc.documentSize.toString(),
             path: doc.documentUrl,
+            previewPath: doc.documentUrl,
           }
           break
         case 4:
@@ -1321,6 +1304,7 @@ const setDataNonPo = () => {
             name: doc.documentName,
             fileSize: doc.documentSize.toString(),
             path: doc.documentUrl,
+            previewPath: doc.documentUrl,
           }
           break
       }
@@ -1912,9 +1896,9 @@ watch(
 
 provide('form', form)
 
-provide('qrData', qrData)
+// provide('qrData', qrData)
 
-provide('ocrData', ocrData)
+// provide('ocrData', ocrData)
 </script>
 
 <style lang="scss" scoped>

@@ -35,7 +35,6 @@
           "
           :varName="item.varName"
           @onLoading="(status) => handleChildLoading(status, item.varName)"
-          @setFileOcr="setFileOcr($event)"
           @setFile="setFile($event, item.varName as FileFieldKeys)"
         />
 
@@ -77,12 +76,12 @@ import type { formTypes } from '../../../types/invoiceAddWrapper'
 import pdfUpload from '@/components/ui/pdfUpload/pdfUpload.vue'
 import AttachmentView from '@/components/ui/attachment/AttachmentView.vue'
 import { useRoute } from 'vue-router'
-import type { invoiceOcrData } from '@/views/invoice/types/invoiceOcrData'
+// import type { invoiceOcrData } from '@/views/invoice/types/invoiceOcrData'
 
 type FileFieldKeys = 'invoiceDocument' | 'tax' | 'referenceDocument' | 'otherDocument'
 
 const route = useRoute()
-const ocrData = inject<invoiceOcrData>('ocrData')
+// const ocrData = inject<invoiceOcrData>('ocrData')
 const formInject = inject<formTypes>('form')
 const pdfUploadRef = ref()
 
@@ -127,9 +126,9 @@ const changeFile = (index: number) => {
   pdfUploadRef.value[index].triggerFileInput()
 }
 
-const setFileOcr = (data: invoiceOcrData) => {
-  if (ocrData) Object.assign(ocrData, data)
-}
+// const setFileOcr = (data: invoiceOcrData) => {
+//   if (ocrData) Object.assign(ocrData, data)
+// }
 
 const checkIsView = () => route.query.type?.toString().includes('view')
 

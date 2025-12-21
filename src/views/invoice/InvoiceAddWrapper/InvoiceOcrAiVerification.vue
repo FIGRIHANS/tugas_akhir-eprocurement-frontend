@@ -63,7 +63,7 @@
             <div class="flex gap-2">
               <UiButton
                 class="px-3 py-1 bg-blue-600 text-white rounded-lg"
-                @click="isVerifyData = true"
+                @click="verifyInvoice()"
               >
                 Tax Verification
               </UiButton>
@@ -156,6 +156,35 @@
                       Didn't Matched
                     </p>
                     <p v-else>-</p>
+                  </td>
+                </tr>
+              </tbody>
+              <tbody v-if="isLoadUpload">
+                <tr>
+                  <td>
+                    <div class="flex justify-center items-center py-6">
+                      <svg
+                        class="animate-spin h-6 w-6 text-blue-600"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          class="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          stroke-width="4"
+                        />
+                        <path
+                          class="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                        />
+                      </svg>
+                      <span class="ml-3 text-sm text-gray-600">Verifying document...</span>
+                    </div>
                   </td>
                 </tr>
               </tbody>
@@ -310,8 +339,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, inject, onMounted, watch, defineAsyncComponent } from 'vue'
-import { usePreviewFileStore } from '@/stores/general/previewFile'
+import { ref, inject, onMounted, watch, defineAsyncComponent, reactive, computed } from 'vue'
+// import { usePreviewFileStore } from '@/stores/general/previewFile'
 import type { formTypes } from '../types/invoiceAddWrapper'
 import type { invoiceQrData } from '../types/invoiceQrdata'
 import type { invoiceOcrData } from '../types/invoiceOcrData'
@@ -321,6 +350,7 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiModal from '@/components/modal/UiModal.vue'
 import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
 import moment from 'moment'
+import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 
 const InvoicePoGrView = defineAsyncComponent(
   () => import('./InvoicePreview/InvoicePoGrViewOcr.vue'),
@@ -334,11 +364,34 @@ const AdditionalCostView = defineAsyncComponent(
 
 const route = useRoute()
 const showModalSuccess = ref(false)
+const invoiceVerificationStore = useInvoiceVerificationStore()
 
-const qrData = inject<invoiceQrData>('qrData')
-const ocrData = inject<invoiceOcrData>('ocrData')
+const qrData = reactive<invoiceQrData>({
+  vendorBuyer: '',
+  npwppBuyer: '',
+  vendorSupplier: '',
+  npwpSupplier: '',
+  taxDocumentNumber: '',
+  taxDocumentDate: '',
+  dpp: '',
+  ppn: '',
+  ppnbm: '',
+  status: '',
+})
+
+const ocrData = reactive<invoiceOcrData>({
+  FakturPajak: '',
+  buyerNpwp: '',
+  dpp: '',
+  ppn: '',
+  total: '',
+  transactionDate: '',
+  vendorName: '',
+  vendorNpwp: '',
+})
 const form = inject<formTypes>('form')
-const previewApi = usePreviewFileStore()
+const isLoadUpload = ref<boolean>(false)
+// const previewApi = usePreviewFileStore()
 
 const previewUrl = ref<string>(form?.tax?.previewPath ?? '')
 const tabOcrTab = ref<string>('general')
@@ -349,7 +402,7 @@ const activeButton = ref<'back' | 'proceed'>('proceed')
 const selectedDocumentType = ref<string>('1')
 
 // --- Helper untuk pengecekan data OCR kosong ---
-const isOcrEmpty = (val: any) => !val || val === '-' || val === ''
+const isOcrEmpty = (val: any) => val === undefined || val === null || val === '-' || val === ''
 
 const setActive = (btn: 'back' | 'proceed') => {
   activeButton.value = btn
@@ -394,78 +447,74 @@ const generalStatus = ref([
 ])
 
 /* -------------------- Table Data (LOGIKA REQUEST USER) -------------------- */
-const tableData = ref([
+const tableData = computed(() => [
   {
     header: 'Nama Vendor',
-    qr: qrData?.vendorBuyer,
-    fpVerified: form?.vendorName == qrData?.vendorBuyer,
-    ocr: '-',
-    invoiceVerified: '-',
-    remarks: isOcrEmpty(ocrData?.vendorName)
-      ? form?.vendorName == qrData?.vendorBuyer
-      : form?.vendorName == qrData?.vendorBuyer && form?.vendorName == ocrData?.vendorName,
+    qr: qrData.vendorBuyer || '-',
+    fpVerified: form?.vendorName == qrData.vendorBuyer,
+    ocr: ocrData.vendorName || '-',
+    invoiceVerified: isOcrEmpty(ocrData.vendorName) ? '-' : form?.vendorName == ocrData.vendorName,
+    remarks: isOcrEmpty(ocrData.vendorName)
+      ? form?.vendorName == qrData.vendorBuyer
+      : form?.vendorName == qrData.vendorBuyer && form?.vendorName == ocrData.vendorName,
   },
   {
     header: 'NPWP Vendor',
-    qr: qrData?.npwppBuyer,
-    fpVerified: form?.npwpNumber == qrData?.npwppBuyer,
-    ocr: '-',
-    invoiceVerified: '-',
-    remarks: isOcrEmpty(ocrData?.buyerNpwp)
-      ? form?.npwpNumber == qrData?.npwppBuyer
-      : form?.npwpNumber == qrData?.npwppBuyer && form?.npwpNumber == ocrData?.buyerNpwp,
+    qr: qrData.npwppBuyer || '-',
+    fpVerified: form?.npwpNumber == qrData.npwppBuyer,
+    ocr: ocrData.buyerNpwp || '-',
+    invoiceVerified: isOcrEmpty(ocrData.buyerNpwp) ? '-' : form?.npwpNumber == ocrData.buyerNpwp,
+    remarks: isOcrEmpty(ocrData.buyerNpwp)
+      ? form?.npwpNumber == qrData.npwppBuyer
+      : form?.npwpNumber == qrData.npwppBuyer && form?.npwpNumber == ocrData.buyerNpwp,
   },
   {
     header: 'Perusahaan',
-    qr: qrData?.vendorSupplier,
-    fpVerified: form?.companyName == qrData?.vendorSupplier,
-    ocr: ocrData?.vendorName || '-',
-    invoiceVerified: isOcrEmpty(ocrData?.vendorName)
-      ? '-'
-      : form?.companyName == ocrData?.vendorName,
-    remarks: isOcrEmpty(ocrData?.vendorName)
-      ? form?.companyName == qrData?.vendorSupplier
-      : form?.companyName == qrData?.vendorSupplier && form?.companyName == ocrData?.vendorName,
+    qr: qrData.vendorSupplier || '-',
+    fpVerified: form?.companyName == qrData.vendorSupplier,
+    ocr: '-',
+    invoiceVerified: isOcrEmpty(ocrData.vendorName) ? '-' : form?.companyName == ocrData.vendorName,
+    remarks: isOcrEmpty(ocrData.vendorName)
+      ? form?.companyName == qrData.vendorSupplier
+      : form?.companyName == qrData.vendorSupplier && form?.companyName == ocrData.vendorName,
   },
   {
     header: 'NPWP',
-    qr: qrData?.npwpSupplier,
-    fpVerified: form?.npwp == qrData?.npwpSupplier,
-    ocr: ocrData?.buyerNpwp || '-',
-    invoiceVerified: isOcrEmpty(ocrData?.buyerNpwp) ? '-' : form?.npwp == ocrData?.buyerNpwp,
-    remarks: isOcrEmpty(ocrData?.buyerNpwp)
-      ? form?.npwp == qrData?.npwpSupplier
-      : form?.npwp == qrData?.npwpSupplier && form?.npwp == ocrData?.buyerNpwp,
+    qr: qrData.npwpSupplier || '-',
+    fpVerified: form?.npwp == qrData.npwpSupplier,
+    ocr: '-',
+    invoiceVerified: isOcrEmpty(ocrData.buyerNpwp) ? '-' : form?.npwp == ocrData.buyerNpwp,
+    remarks: isOcrEmpty(ocrData.buyerNpwp)
+      ? form?.npwp == qrData.npwpSupplier
+      : form?.npwp == qrData.npwpSupplier && form?.npwp == ocrData.buyerNpwp,
   },
   {
     header: 'No Faktur Pajak',
-    qr: qrData?.taxDocumentNumber,
-    fpVerified: form?.taxNumber == qrData?.taxDocumentNumber,
-    ocr: ocrData?.FakturPajak || '-',
-    invoiceVerified: isOcrEmpty(ocrData?.FakturPajak)
-      ? '-'
-      : ocrData?.FakturPajak == form?.taxNumber,
-    remarks: isOcrEmpty(ocrData?.FakturPajak)
-      ? form?.taxNumber == qrData?.taxDocumentNumber
-      : form?.taxNumber == qrData?.taxDocumentNumber && ocrData?.FakturPajak == form?.taxNumber,
+    qr: qrData.taxDocumentNumber || '-',
+    fpVerified: form?.taxNumber == qrData.taxDocumentNumber,
+    ocr: ocrData.FakturPajak || '-',
+    invoiceVerified: isOcrEmpty(ocrData.FakturPajak) ? '-' : ocrData.FakturPajak == form?.taxNumber,
+    remarks: isOcrEmpty(ocrData.FakturPajak)
+      ? form?.taxNumber == qrData.taxDocumentNumber
+      : form?.taxNumber == qrData.taxDocumentNumber && ocrData.FakturPajak == form?.taxNumber,
   },
   {
     header: 'Tanggal Faktur Pajak',
-    qr: qrData?.taxDocumentDate,
+    qr: qrData.taxDocumentDate || '-',
     fpVerified: true,
-    ocr: ocrData?.transactionDate || '-',
-    invoiceVerified: isOcrEmpty(ocrData?.transactionDate) ? '-' : 'none',
+    ocr: ocrData.transactionDate || '-',
+    invoiceVerified: isOcrEmpty(ocrData.transactionDate) ? '-' : 'none',
     remarks: true,
   },
   {
     header: 'Nilai Penjualan',
-    qr: qrData?.dpp,
-    fpVerified: form?.subtotal == Number(qrData?.dpp),
-    ocr: ocrData?.dpp || '-',
-    invoiceVerified: isOcrEmpty(ocrData?.dpp) ? '-' : form?.subtotal == Number(ocrData?.dpp),
-    remarks: isOcrEmpty(ocrData?.dpp)
-      ? form?.subtotal == Number(qrData?.dpp)
-      : form?.subtotal == Number(qrData?.dpp) && form?.subtotal == Number(ocrData?.dpp),
+    qr: qrData.dpp || '-',
+    fpVerified: form?.subtotal == Number(qrData.dpp),
+    ocr: ocrData.dpp || '-',
+    invoiceVerified: isOcrEmpty(ocrData.dpp) ? '-' : form?.subtotal == Number(ocrData.dpp),
+    remarks: isOcrEmpty(ocrData.dpp)
+      ? form?.subtotal == Number(qrData.dpp)
+      : form?.subtotal == Number(qrData.dpp) && form?.subtotal == Number(ocrData.dpp),
   },
   {
     header: 'DPP Lainnya',
@@ -477,15 +526,15 @@ const tableData = ref([
   },
   {
     header: 'PPN',
-    qr: qrData?.ppn,
+    qr: qrData.ppn || '-',
     fpVerified: true,
-    ocr: ocrData?.ppn || '-',
-    invoiceVerified: isOcrEmpty(ocrData?.ppn) ? '-' : true,
+    ocr: ocrData.ppn || '-',
+    invoiceVerified: isOcrEmpty(ocrData.ppn) ? '-' : true,
     remarks: 'Matched',
   },
   {
     header: 'PPN BM',
-    qr: qrData?.ppnbm,
+    qr: qrData.ppnbm || '-',
     fpVerified: true,
     ocr: '-',
     invoiceVerified: '-',
@@ -493,7 +542,7 @@ const tableData = ref([
   },
   {
     header: 'Status Approve FP',
-    qr: qrData?.status,
+    qr: qrData.status || '-',
     fpVerified: true,
     ocr: '-',
     invoiceVerified: '-',
@@ -503,18 +552,18 @@ const tableData = ref([
     header: 'Reference',
     qr: '-',
     fpVerified: 'none',
-    ocr: ocrData?.FakturPajak || '-',
-    invoiceVerified: isOcrEmpty(ocrData?.FakturPajak) ? '-' : true,
+    ocr: ocrData.FakturPajak || '-',
+    invoiceVerified: isOcrEmpty(ocrData.FakturPajak) ? '-' : true,
     remarks: 'none',
   },
 ])
 
-const bjapVerify = ref([
+const bjapVerify = computed(() => [
   {
     header: 'Status FP PJAP',
-    qr: qrData?.status,
+    qr: qrData.status || '-',
     fpVerified: 'Approved',
-    remarks: true,
+    remarks: qrData.status === 'APPROVED',
   },
 ])
 
@@ -537,9 +586,36 @@ const columns = ref([
   'WHT Amount',
 ])
 
-const isApproved = () => qrData?.status === 'APPROVED'
+const isApproved = () => qrData.status === 'APPROVED'
 const setTabOcr = (type: string) => {
   tabOcrTab.value = type
+}
+
+const sendUploadFile = async () => {
+  const ocrResponse = await invoiceVerificationStore.uploadFileOcr(
+    form?.invoiceDocument?.previewPath,
+  )
+  const qrResponse = await invoiceVerificationStore.uploadFileQr(form?.tax?.previewPath)
+  console.log(qrResponse)
+  await setFileOcr(ocrResponse)
+  await setFileQr(qrResponse)
+}
+
+const setFileQr = async (data: invoiceQrData) => {
+  Object.assign(qrData, data)
+}
+
+const setFileOcr = async (data: invoiceOcrData) => {
+  Object.assign(ocrData, data)
+}
+
+const verifyInvoice = async () => {
+  isLoadUpload.value = true
+
+  await sendUploadFile()
+
+  isLoadUpload.value = false
+  isVerifyData.value = true
 }
 
 const setColumn = () => {

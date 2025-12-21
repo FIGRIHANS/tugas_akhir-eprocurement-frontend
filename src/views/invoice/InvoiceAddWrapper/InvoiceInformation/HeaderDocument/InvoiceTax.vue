@@ -18,7 +18,6 @@
           :disabled="
             formInject?.status !== 0 && formInject?.status !== -1 && formInject?.status !== 5
           "
-          @setFileQr="setFileQr($event)"
           @setFile="setFile($event, item.varName as keyof documentFormTypes)"
         />
         <div
@@ -90,18 +89,18 @@ const list = ref<listFormTypes[]>([
 const formInject = inject<formTypes>('form')
 const pdfUploadRef = ref()
 
-const setFileQr = (data: invoiceQrData) => {
-  qrData.vendorBuyer = data.vendorBuyer
-  qrData.npwppBuyer = data.npwppBuyer
-  qrData.vendorSupplier = data.vendorSupplier
-  qrData.npwpSupplier = data.npwpSupplier
-  qrData.taxDocumentNumber = data.taxDocumentNumber
-  qrData.taxDocumentDate = data.taxDocumentDate
-  qrData.dpp = data.dpp
-  qrData.ppn = data.ppn
-  qrData.ppnbm = data.ppnbm
-  qrData.status = data.status
-}
+// const setFileQr = (data: invoiceQrData) => {
+//   qrData.vendorBuyer = data.vendorBuyer
+//   qrData.npwppBuyer = data.npwppBuyer
+//   qrData.vendorSupplier = data.vendorSupplier
+//   qrData.npwpSupplier = data.npwpSupplier
+//   qrData.taxDocumentNumber = data.taxDocumentNumber
+//   qrData.taxDocumentDate = data.taxDocumentDate
+//   qrData.dpp = data.dpp
+//   qrData.ppn = data.ppn
+//   qrData.ppnbm = data.ppnbm
+//   qrData.status = data.status
+// }
 
 const setFile = (file: responseFileTypes, name: keyof documentFormTypes) => {
   const reftProperty = toRef(form, name)
