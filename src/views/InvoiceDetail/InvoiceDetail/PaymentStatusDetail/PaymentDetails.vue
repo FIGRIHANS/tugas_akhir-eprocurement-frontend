@@ -102,7 +102,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, inject, onMounted } from 'vue'
+import { ref, inject, onMounted, watch } from 'vue'
 import type { Ref } from 'vue'
 import type { formTypes } from '../../types/invoiceDetail'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
@@ -164,6 +164,20 @@ interface PaymentDetail {
 const paymentDetails = ref<PaymentDetail[]>([])
 const editingIndex = ref<number | null>(null)
 const backupRow = ref<PaymentDetail | null>(null)
+
+// Inject paymentDetailsData to sync with parent
+const paymentDetailsData = inject<Ref<PaymentDetail[]>>('paymentDetailsData')
+
+// Watch paymentDetails and sync with parent
+watch(
+  paymentDetails,
+  (newVal) => {
+    if (paymentDetailsData) {
+      paymentDetailsData.value = newVal
+    }
+  },
+  { deep: true },
+)
 
 const setPaymentDetails = () => {
   // Initialize empty payment details array
@@ -240,7 +254,7 @@ const updatePaymentDetailsFromSap = (sapData: SapDataResponse) => {
     status: mapSapStatus(sapData.paymentStatus),
     bankAccount: formatBankAccount(sapData.payment?.bankKey, sapData.payment?.bankAccountNo),
     remarks: `SAP Invoice: ${sapData.sapInvoiceNo || 'N/A'} | Vendor: ${sapData.vendorName || 'N/A'}`,
-    attachmentDocument: undefined
+    attachmentDocument: undefined,
   }
 
   // Replace entire array with new data
@@ -269,7 +283,7 @@ const formatSapDate = (dateString: string | number) => {
     return date.toLocaleDateString('en-GB', {
       day: '2-digit',
       month: '2-digit',
-      year: 'numeric'
+      year: 'numeric',
     })
   } catch {
     return getCurrentDate()
@@ -281,7 +295,7 @@ const getCurrentDate = () => {
   return today.toLocaleDateString('en-GB', {
     day: '2-digit',
     month: '2-digit',
-    year: 'numeric'
+    year: 'numeric',
   })
 }
 
@@ -306,7 +320,6 @@ const formatBankAccount = (bankKey: string | null, bankAccountNo: string | null)
   }
   return 'BRI01 - 56464564'
 }
-
 
 const downloadDocument = (documentName: string) => {
   console.log('Downloading document:', documentName)

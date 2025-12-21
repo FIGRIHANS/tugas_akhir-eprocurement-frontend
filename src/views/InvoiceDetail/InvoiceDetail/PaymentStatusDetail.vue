@@ -60,4 +60,18 @@ const paymentInfoRef = ref<PaymentInformationComponent | null>(null)
 
 // Provide PaymentInformation ref to PaymentDetails for SAP sync
 provide('paymentInformationRef', paymentInfoRef)
+
+interface PaymentDetail {
+  no: number
+  paymentDate: string
+  amount: string
+  status: string
+  bankAccount: string
+  remarks: string
+  attachmentDocument?: string
+}
+
+// Provide paymentDetails array to PaymentCalculation for Payment Received calculation
+const paymentDetailsData = ref<PaymentDetail[]>([])
+provide('paymentDetailsData', paymentDetailsData)
 </script>
