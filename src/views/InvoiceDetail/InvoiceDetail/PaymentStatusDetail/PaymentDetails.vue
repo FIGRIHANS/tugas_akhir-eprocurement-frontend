@@ -76,20 +76,29 @@
                     :id="`attach-input-${index}`"
                     @change="onFileChange(index, $event)"
                   />
-                  <UiButton icon size="sm" @click="triggerUpload(index)" aria-label="Upload">
-                    <UiIcon name="cloud-upload" variant="duotone" />
-                  </UiButton>
+                  <button
+                    class="btn btn-icon btn-sm btn-primary"
+                    @click="triggerUpload(index)"
+                    title="Upload File"
+                  >
+                    <i class="ki-duotone ki-cloud-add">
+                      <span class="path1"></span>
+                      <span class="path2"></span>
+                    </i>
+                  </button>
                 </template>
                 <template v-else>
-                  <UiButton
-                    icon
-                    outline
-                    size="sm"
+                  <button
+                    class="btn btn-icon btn-sm btn-outline btn-outline-primary"
                     v-if="item.attachmentDocument"
                     @click="downloadDocument(item.attachmentDocument)"
+                    title="Download File"
                   >
-                    <UiIcon name="cloud-download" variant="duotone" />
-                  </UiButton>
+                    <i class="ki-duotone ki-cloud-download">
+                      <span class="path1"></span>
+                      <span class="path2"></span>
+                    </i>
+                  </button>
                   <span v-else>-</span>
                 </template>
               </td>
@@ -106,8 +115,6 @@ import { ref, inject, onMounted, watch } from 'vue'
 import type { Ref } from 'vue'
 import type { formTypes } from '../../types/invoiceDetail'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
-import UiButton from '@/components/ui/atoms/button/UiButton.vue'
-import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 
 interface SapDataResponse {
   id: number
