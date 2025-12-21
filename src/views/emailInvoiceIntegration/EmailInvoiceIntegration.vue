@@ -13,6 +13,42 @@
             <i class="ki-duotone ki-plus-circle"></i>
             Add Invoice
           </button>
+          <button
+            class="btn btn-primary ml-auto d-flex align-items-center gap-2"
+            @click="syncEmailInvoice"
+            :disabled="isSyncLoading"
+          >
+            <!-- SVG Spinner -->
+            <svg
+              v-if="isSyncLoading"
+              class="animate-spin h-6 w-6 text-white-600"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+              ></path>
+            </svg>
+
+            <!-- Icon normal -->
+            <i v-else class="ki-duotone ki-arrows-circle"></i>
+
+            <!-- Text -->
+            <span>
+              {{ isSyncLoading ? 'Syncing...' : 'Sync Invoice From Email' }}
+            </span>
+          </button>
         </div>
       </div>
       <div class="flex overflow-x-auto gap-3 mb-5 items-center" v-if="filteredPayload.length > 0">
@@ -232,6 +268,7 @@ const sortColumnName = ref<string>('')
 const filteredPayload = ref([])
 const filterChild = ref(null)
 const viewDetailId = ref('')
+const isSyncLoading = ref(false)
 
 const openDetailVerification = (invoiceId: string) => {
   viewDetailId.value = invoiceId
@@ -498,6 +535,13 @@ const resetFilter = () => {
   filterChild.value.goFilter()
 
   callList()
+}
+
+const syncEmailInvoice = async () => {
+  isSyncLoading.value = true
+  await invoiceApi.syncInvoicFromEmail()
+  callList()
+  isSyncLoading.value = false
 }
 
 onMounted(() => {

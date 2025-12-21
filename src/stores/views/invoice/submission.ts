@@ -16,7 +16,6 @@ import type {
   AvailableDpTypes,
   RemainingDpTypes,
   ParamsSubmissionNonPo,
-  
   ParamsCheckBudgetType,
   ResponseCheckBudgetTypes,
 } from './types/submission'
@@ -132,8 +131,8 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
       ...data,
       vendor: {
         ...data.vendor,
-        vendorId: data.vendor.vendorId ? Number(data.vendor.vendorId) : 0
-      }
+        vendorId: data.vendor.vendorId ? Number(data.vendor.vendorId) : 0,
+      },
     }
 
     const response: ApiResponse<void> = await invoiceApi.post(`/invoice/submission`, requestBody)
@@ -162,11 +161,14 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
       ...data,
       vendor: {
         ...data.vendor,
-        vendorId: data.vendor.vendorId ? Number(data.vendor.vendorId) : 0
-      }
+        vendorId: data.vendor.vendorId ? Number(data.vendor.vendorId) : 0,
+      },
     }
 
-    const response: ApiResponse<void> = await invoiceApi.post(`/invoice/submission-non-po`, requestBody)
+    const response: ApiResponse<void> = await invoiceApi.post(
+      `/invoice/submission-non-po`,
+      requestBody,
+    )
 
     return response.data
   }
@@ -176,8 +178,8 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
       const requestBody = {
         REQUEST: {
           SUPPLIER_FROM_PORTAL: vendorId,
-          COMPANY_CODE: companyCode
-        }
+          COMPANY_CODE: companyCode,
+        },
       }
 
       const response = await invoiceApi.post<{
@@ -188,25 +190,22 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
           NUMBER: number
           MESSAGE: string
         }
-      }>(
-        '/invoice/invoice/check-cas',
-        requestBody,
-        {
-          validateStatus: (status) => {
-            return status === 200 || status === 422
-          }
-        }
-      )
+      }>('/invoice/invoice/check-cas', requestBody, {
+        validateStatus: (status) => {
+          return status === 200 || status === 422
+        },
+      })
 
       if (response.data.zMessage && response.data.zMessage.TYPE === 'E') {
         casNoCode.value = []
         return []
       }
 
-      const mappedData = (response.data.response || []).filter(item => item.casNo && item.casNo.trim() !== '')
+      const mappedData = (response.data.response || []).filter(
+        (item) => item.casNo && item.casNo.trim() !== '',
+      )
       casNoCode.value = mappedData
       return mappedData
-
     } catch (error) {
       console.error('getCasNo Error:', error)
       casNoCode.value = []
@@ -285,6 +284,18 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
       throw new Error(`Budget check failed: ${axiosErr.message || 'Unknown error'}`)
     }
   }
+  const syncInvoicFromEmail = async () => {
+    const payload = {
+      isActive: false,
+    }
+
+    const response: ApiResponse<void> = await invoiceApi.post(
+      `/invoice/submission-invoice-email`,
+      payload,
+    )
+
+    return response.data
+  }
 
   return {
     submissionStatus,
@@ -312,5 +323,6 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
     postSubmissionNonPo,
     getCasNo,
     postCheckBudget,
+    syncInvoicFromEmail,
   }
 })
