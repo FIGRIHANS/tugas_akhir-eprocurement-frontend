@@ -1,7 +1,7 @@
 <template>
   <div v-if="form">
     <div class="flex gap-[24px]">
-      <PaymentInformation class="flex-1" />
+      <PaymentInformation ref="paymentInfoRef" class="flex-1" />
       <div class="flex-1 flex flex-col">
         <PaymentCalculation />
       </div>
@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, defineAsyncComponent, type Ref } from 'vue'
+import { inject, provide, ref, defineAsyncComponent, type Ref } from 'vue'
 import type { formTypes } from '../types/invoiceDetail'
 
 const PaymentInformation = defineAsyncComponent(
@@ -26,4 +26,16 @@ const PaymentDetails = defineAsyncComponent(
 
 // `form` diprovide sebagai Ref<formTypes> dari InvoiceDetail.vue
 const form = inject<Ref<formTypes>>('form')
+
+const paymentInfoRef = ref<unknown>(null)
+
+// Provide function to trigger SAP sync from PaymentDetails
+provide('triggerSapSync', () => {
+  if (
+    paymentInfoRef.value &&
+    typeof (paymentInfoRef.value as { fetchSapStatus?: () => void }).fetchSapStatus === 'function'
+  ) {
+    ;(paymentInfoRef.value as { fetchSapStatus: () => void }).fetchSapStatus()
+  }
+})
 </script>

@@ -2,6 +2,7 @@
   <div class="card flex-1">
     <div class="card-body py-[8px] px-[16px] max-h-[380px] overflow-y-auto scroll mr-[16px]">
       <p class="text-base font-semibold mb-[16px]">Payment Information</p>
+
       <div>
         <div
           v-for="(item, index) in paymentInfo"
@@ -101,12 +102,19 @@ const setPaymentInfo = () => {
 
 const fetchSapStatus = async () => {
   if (!form?.value?.companyCode || !form?.value?.postingDate || !submittedDocNo.value) {
+    console.log('SAP Sync: Missing required fields')
     return
   }
 
   try {
     const fiscalYear = new Date(form.value.postingDate).getFullYear().toString()
     const documentNumber = submittedDocNo.value.replace(/\D/g, '')
+
+    console.log('SAP Sync: Fetching...', {
+      fiscalYear,
+      companyCode: form.value.companyCode,
+      documentNumber,
+    })
 
     const response = await verificationApi.getSapStatus({
       fiscalYear: fiscalYear,
@@ -120,24 +128,26 @@ const fetchSapStatus = async () => {
       response.result.content.length > 0
     ) {
       sapStatusData.value = response.result.content[0]
+      console.log('SAP Sync: Success', sapStatusData.value)
       setPaymentInfo()
     } else {
+      console.log('SAP Sync: No data found')
       sapStatusData.value = null
       setPaymentInfo()
     }
   } catch (error: unknown) {
-    console.error('SAP API Error:', error)
+    console.error('SAP Sync: Error', error)
     sapStatusData.value = null
     setPaymentInfo()
   }
 }
 
-watch(submittedDocNo, () => {
-  if (submittedDocNo.value && form?.value?.companyCode && form?.value?.postingDate) {
-    fetchSapStatus()
-  }
+// Expose fetchSapStatus to parent
+defineExpose({
+  fetchSapStatus,
 })
 
+// Sync submittedDocNo with paymentInfo
 watch(
   () => paymentInfo.value.find((item) => item.label === 'Submitted Document No.')?.value,
   (newVal) => {

@@ -191,19 +191,14 @@ const saveEdit = (index: number) => {
   console.log('Saved row:', paymentDetails.value[index])
 }
 
+const triggerSapSync = inject<() => void>('triggerSapSync')
+
 const handleSapSync = () => {
-  // Add new row to Payment Details table
-  const newItem: PaymentDetail = {
-    no: paymentDetails.value.length + 1,
-    paymentDate: new Date().toLocaleDateString('id-ID'),
-    amount: '0',
-    status: 'Plan',
-    bankAccount: 'BRI -XXX',
-    remarks: '',
-    attachmentDocument: '',
+  // Trigger SAP sync in PaymentInformation component
+  if (triggerSapSync) {
+    triggerSapSync()
   }
-  paymentDetails.value.push(newItem)
-  console.log('SAP Synchronize - New payment detail added:', newItem)
+  console.log('SAP Synchronize button clicked')
 }
 
 const deleteRow = (index: number) => {
@@ -365,6 +360,4 @@ onMounted(() => {
     }
   }
 }
-
-
 </style>
