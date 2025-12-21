@@ -12,7 +12,7 @@ export const formatDate = (value: string) => {
   if (!value) return '-'
   return momentTz(value + 'Z')
     .tz('Asia/Jakarta')
-    .format('MMMM DD, YYYY')
+    .format('DD/MM/YYYY')
 }
 
 export const formatDateTime = (value: string) => {

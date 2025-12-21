@@ -702,5 +702,37 @@ export interface ResponsePph21Types {
   totalTaxBefore: number
   totalTaxAfter: number
   pPh21Current: number
+}
 
+// SAP Status API Types
+export interface SapStatusParams {
+  fiscalYear: string
+  companyCode: string
+  documentNumber: string
+}
+
+export interface SapStatusItem {
+  id: number
+  companyCode: string
+  documentNumber: number
+  sapInvoiceNo: string
+  fiscalYear: string
+  vendorName: string
+  invoiceAmount: number
+  paidAmount: number
+  openAmount: number
+  paymentStatus: string
+  statusOutgoing: string
+  clearingDate: string | null
+  clearingDocumentNo: string | null
+}
+
+export interface SapStatusResponse {
+  title: string
+  statusCode: number
+  result: {
+    message: string
+    isError: boolean
+    content: SapStatusItem[]
+  }
 }

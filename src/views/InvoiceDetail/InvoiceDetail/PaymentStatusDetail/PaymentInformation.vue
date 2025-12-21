@@ -13,17 +13,11 @@
             v-if="item.editable"
             v-model="item.value"
             class="input"
-            type="number"
+            :type="item.type || 'text'"
             :placeholder="item.placeholder || ''"
-            @input="handleNumericInput($event, index)"
-            @keypress="validateNumberInput"
+            @input="handleInput($event, index)"
           />
-          <input
-            v-else
-            :value="item.value"
-            class="input"
-            disabled
-          />
+          <input v-else :value="item.value" class="input" disabled />
         </div>
       </div>
     </div>
@@ -35,26 +29,41 @@ import { ref, inject, onMounted, watch } from 'vue'
 import type { Ref } from 'vue'
 import type { formTypes } from '../../types/invoiceDetail'
 import { formatDate } from '@/composables/date-format'
+import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
+import type { SapStatusItem } from '@/stores/views/invoice/types/verification'
 
 interface PaymentInfoItem {
   label: string
   value: string
   editable?: boolean
+  type?: string
   placeholder?: string
 }
 
 const form = inject<Ref<formTypes>>('form')
+const verificationApi = useInvoiceVerificationStore()
 
 const paymentInfo = ref<PaymentInfoItem[]>([])
+const sapStatusData = ref<SapStatusItem | null>(null)
+const submittedDocNo = ref<string>('')
 
 const setPaymentInfo = () => {
   if (form?.value) {
     paymentInfo.value = [
       {
-        label: 'SAP Invoice No.',
-        value: form.value.sapInvoiceNo || '',
+        label: 'Submitted Document No.',
+        value: submittedDocNo.value,
         editable: true,
-        placeholder: '',
+        type: 'text',
+        placeholder: 'e.g., 4000000001',
+      },
+      {
+        label: 'Company Code',
+        value:
+          form.value.companyCode && form.value.companyName
+            ? `${form.value.companyCode} - ${form.value.companyName}`
+            : form.value.companyCode || '-',
+        editable: false,
       },
       {
         label: 'Invoice Posting Date',
@@ -78,18 +87,65 @@ const setPaymentInfo = () => {
       },
       {
         label: 'Clearing Document No.',
-        value: form.value.clearingDocumentNo || '',
-        editable: true,
-        placeholder: '',
+        value: sapStatusData.value?.clearingDocumentNo || '-',
+        editable: false,
       },
       {
         label: 'Payment Status',
-        value: form.value.statusName || '-',
+        value: sapStatusData.value?.paymentStatus || '-',
         editable: false,
       },
     ]
   }
 }
+
+const fetchSapStatus = async () => {
+  if (!form?.value?.companyCode || !form?.value?.postingDate || !submittedDocNo.value) {
+    return
+  }
+
+  try {
+    const fiscalYear = new Date(form.value.postingDate).getFullYear().toString()
+    const documentNumber = submittedDocNo.value.replace(/\D/g, '')
+
+    const response = await verificationApi.getSapStatus({
+      fiscalYear: fiscalYear,
+      companyCode: form.value.companyCode,
+      documentNumber: documentNumber,
+    })
+
+    if (
+      response?.result?.content &&
+      Array.isArray(response.result.content) &&
+      response.result.content.length > 0
+    ) {
+      sapStatusData.value = response.result.content[0]
+      setPaymentInfo()
+    } else {
+      sapStatusData.value = null
+      setPaymentInfo()
+    }
+  } catch (error: unknown) {
+    console.error('SAP API Error:', error)
+    sapStatusData.value = null
+    setPaymentInfo()
+  }
+}
+
+watch(submittedDocNo, () => {
+  if (submittedDocNo.value && form?.value?.companyCode && form?.value?.postingDate) {
+    fetchSapStatus()
+  }
+})
+
+watch(
+  () => paymentInfo.value.find((item) => item.label === 'Submitted Document No.')?.value,
+  (newVal) => {
+    if (newVal !== undefined && newVal !== submittedDocNo.value) {
+      submittedDocNo.value = newVal
+    }
+  },
+)
 
 watch(
   () => form?.value,
@@ -99,31 +155,9 @@ watch(
   { deep: true, immediate: true },
 )
 
-const handleNumericInput = (event: Event, index: number) => {
+const handleInput = (event: Event, index: number) => {
   const target = event.target as HTMLInputElement
-  const value = target.value
-
-  // Remove any non-numeric characters except dots for decimals
-  const numericValue = value.replace(/[^0-9.]/g, '')
-
-  // Ensure only one decimal point
-  const parts = numericValue.split('.')
-  let cleanValue = parts[0]
-  if (parts.length > 1) {
-    cleanValue += '.' + parts.slice(1).join('')
-  }
-
-  // Update the value
-  paymentInfo.value[index].value = cleanValue
-  target.value = cleanValue
-}
-
-const validateNumberInput = (event: KeyboardEvent) => {
-  const charCode = event.which ? event.which : event.keyCode
-  // Allow numbers (48-57), decimal point (46), and backspace (8)
-  if (charCode > 31 && (charCode < 48 || charCode > 57) && charCode !== 46) {
-    event.preventDefault()
-  }
+  paymentInfo.value[index].value = target.value
 }
 
 onMounted(() => {
