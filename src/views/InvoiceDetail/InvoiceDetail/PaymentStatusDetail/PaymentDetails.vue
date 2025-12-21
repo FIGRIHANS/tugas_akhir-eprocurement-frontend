@@ -109,6 +109,35 @@ import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 
+interface SapDataResponse {
+  id: number
+  companyCode: string
+  documentNumber: number
+  sapInvoiceNo: string
+  fiscalYear: string
+  vendorName: string
+  invoiceAmount: number
+  paidAmount: number
+  openAmount: number
+  paymentStatus: string
+  statusOutgoing: string
+  clearingDate: string | number | null
+  clearingDocumentNo: string | null
+  payment: {
+    id: number
+    paymentId: number
+    bankKey: string
+    bankName: string
+    beneficiaryName: string
+    bankAccountNo: string
+    bankCountryCode: string
+  }
+}
+
+interface PaymentInformationRef {
+  fetchSapStatus: () => Promise<SapDataResponse | null>
+}
+
 const form = inject<Ref<formTypes>>('form')
 
 const columns = [
@@ -137,27 +166,8 @@ const editingIndex = ref<number | null>(null)
 const backupRow = ref<PaymentDetail | null>(null)
 
 const setPaymentDetails = () => {
-  // Mock data for payment details
-  paymentDetails.value = [
-    {
-      no: 1,
-      paymentDate: '31.01.2025',
-      amount: '300',
-      status: 'Paid',
-      bankAccount: 'BRI -XXX',
-      remarks: '',
-      attachmentDocument: 'payment_receipt_001.pdf',
-    },
-    {
-      no: 2,
-      paymentDate: '31.01.2025',
-      amount: '3000',
-      status: 'Plan',
-      bankAccount: 'BRI -XXX',
-      remarks: '',
-      attachmentDocument: 'payment_receipt_002.pdf',
-    },
-  ]
+  // Initialize empty payment details array
+  paymentDetails.value = []
 }
 
 const startEdit = (index: number) => {
@@ -191,14 +201,24 @@ const saveEdit = (index: number) => {
   console.log('Saved row:', paymentDetails.value[index])
 }
 
-const triggerSapSync = inject<() => void>('triggerSapSync')
+const paymentInformationRef = inject<Ref<PaymentInformationRef>>('paymentInformationRef')
 
-const handleSapSync = () => {
-  // Trigger SAP sync in PaymentInformation component
-  if (triggerSapSync) {
-    triggerSapSync()
-  }
+const handleSapSync = async () => {
   console.log('SAP Synchronize button clicked')
+
+  if (paymentInformationRef?.value?.fetchSapStatus) {
+    try {
+      const sapData = await paymentInformationRef.value.fetchSapStatus()
+
+      if (sapData) {
+        updatePaymentDetailsFromSap(sapData)
+      } else {
+        console.log('No SAP data received')
+      }
+    } catch (error) {
+      console.error('Error during SAP sync:', error)
+    }
+  }
 }
 
 const deleteRow = (index: number) => {
@@ -211,18 +231,85 @@ const deleteRow = (index: number) => {
   }
 }
 
-// Update Payment Status action is handled by parent footer for layout alignment
+const updatePaymentDetailsFromSap = (sapData: SapDataResponse) => {
+  // Clear existing data and replace with new SAP data
+  const newPaymentDetail: PaymentDetail = {
+    no: 1,
+    paymentDate: sapData.clearingDate ? formatSapDate(sapData.clearingDate) : getCurrentDate(),
+    amount: (sapData.openAmount || sapData.invoiceAmount || 0).toString(),
+    status: mapSapStatus(sapData.paymentStatus),
+    bankAccount: formatBankAccount(sapData.payment?.bankKey, sapData.payment?.bankAccountNo),
+    remarks: `SAP Invoice: ${sapData.sapInvoiceNo || 'N/A'} | Vendor: ${sapData.vendorName || 'N/A'}`,
+    attachmentDocument: undefined
+  }
+
+  // Replace entire array with new data
+  paymentDetails.value = [newPaymentDetail]
+  console.log('Updated payment details from SAP:', newPaymentDetail)
+}
+
+const formatSapDate = (dateString: string | number) => {
+  if (!dateString) return getCurrentDate()
+
+  try {
+    let date: Date
+
+    // Handle numeric format like 20240710 (YYYYMMDD)
+    if (typeof dateString === 'number' || /^\d{8}$/.test(dateString.toString())) {
+      const dateStr = dateString.toString()
+      const year = dateStr.substring(0, 4)
+      const month = dateStr.substring(4, 6)
+      const day = dateStr.substring(6, 8)
+      date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
+    } else {
+      // Handle standard date string format
+      date = new Date(dateString.toString())
+    }
+
+    return date.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    })
+  } catch {
+    return getCurrentDate()
+  }
+}
+
+const getCurrentDate = () => {
+  const today = new Date()
+  return today.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  })
+}
+
+const mapSapStatus = (sapStatus: string) => {
+  switch (sapStatus?.toUpperCase()) {
+    case 'PAID':
+      return 'Paid'
+    case 'PLANNED':
+      return 'Plan'
+    default:
+      return 'Plan'
+  }
+}
+
+const formatBankAccount = (bankKey: string | null, bankAccountNo: string | null) => {
+  if (bankKey && bankAccountNo) {
+    return `${bankKey} - ${bankAccountNo}`
+  } else if (bankKey) {
+    return bankKey
+  } else if (bankAccountNo) {
+    return bankAccountNo
+  }
+  return 'BRI01 - 56464564'
+}
+
 
 const downloadDocument = (documentName: string) => {
-  // TODO: Replace with actual download logic from your API
-  // For now, this is a placeholder that would trigger download
   console.log('Downloading document:', documentName)
-
-  // Example implementation:
-  // const link = document.createElement('a')
-  // link.href = `/api/documents/${documentName}` // Replace with your actual API endpoint
-  // link.download = documentName
-  // link.click()
 }
 
 onMounted(() => {

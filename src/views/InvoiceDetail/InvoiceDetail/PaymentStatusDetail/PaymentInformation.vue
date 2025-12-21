@@ -31,7 +31,6 @@ import type { Ref } from 'vue'
 import type { formTypes } from '../../types/invoiceDetail'
 import { formatDate } from '@/composables/date-format'
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
-import type { SapStatusItem } from '@/stores/views/invoice/types/verification'
 
 interface PaymentInfoItem {
   label: string
@@ -41,11 +40,36 @@ interface PaymentInfoItem {
   placeholder?: string
 }
 
+interface SapDataResponse {
+  id: number
+  companyCode: string
+  documentNumber: number
+  sapInvoiceNo: string
+  fiscalYear: string
+  vendorName: string
+  invoiceAmount: number
+  paidAmount: number
+  openAmount: number
+  paymentStatus: string
+  statusOutgoing: string
+  clearingDate: string | null
+  clearingDocumentNo: string | null
+  payment: {
+    id: number
+    paymentId: number
+    bankKey: string
+    bankName: string
+    beneficiaryName: string
+    bankAccountNo: string
+    bankCountryCode: string
+  }
+}
+
 const form = inject<Ref<formTypes>>('form')
 const verificationApi = useInvoiceVerificationStore()
 
 const paymentInfo = ref<PaymentInfoItem[]>([])
-const sapStatusData = ref<SapStatusItem | null>(null)
+const sapStatusData = ref<SapDataResponse | null>(null)
 const submittedDocNo = ref<string>('')
 
 const setPaymentInfo = () => {
@@ -100,10 +124,10 @@ const setPaymentInfo = () => {
   }
 }
 
-const fetchSapStatus = async () => {
+const fetchSapStatus = async (): Promise<SapDataResponse | null> => {
   if (!form?.value?.companyCode || !form?.value?.postingDate || !submittedDocNo.value) {
     console.log('SAP Sync: Missing required fields')
-    return
+    return null
   }
 
   try {
@@ -127,18 +151,21 @@ const fetchSapStatus = async () => {
       Array.isArray(response.result.content) &&
       response.result.content.length > 0
     ) {
-      sapStatusData.value = response.result.content[0]
+      sapStatusData.value = response.result.content[0] as SapDataResponse
       console.log('SAP Sync: Success', sapStatusData.value)
       setPaymentInfo()
+      return sapStatusData.value
     } else {
       console.log('SAP Sync: No data found')
       sapStatusData.value = null
       setPaymentInfo()
+      return null
     }
   } catch (error: unknown) {
     console.error('SAP Sync: Error', error)
     sapStatusData.value = null
     setPaymentInfo()
+    return null
   }
 }
 
