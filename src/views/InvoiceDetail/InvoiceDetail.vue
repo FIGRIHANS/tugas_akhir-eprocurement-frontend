@@ -9,11 +9,17 @@
     <TabInvoiceDetail
       v-if="checkApprovalNonPo1() || checkShowPaymentForProfile3200()"
       v-model:activeTab="activeTabDetail"
-      :show-payment-status="form.statusCode >= 7 || (form.statusCode === 10 && userData?.profile.profileId === 3200)"
+      :show-payment-status="
+        form.statusCode >= 7 || (form.statusCode === 10 && userData?.profile.profileId === 3200)
+      "
     />
 
     <!-- Content for Invoice Data Tab -->
-    <div v-if="(!checkApprovalNonPo1() && !checkShowPaymentForProfile3200()) || activeTabDetail === 'data'">
+    <div
+      v-if="
+        (!checkApprovalNonPo1() && !checkShowPaymentForProfile3200()) || activeTabDetail === 'data'
+      "
+    >
       <div class="flex gap-[24px]">
         <GeneralData class="flex-1" />
         <BankKey class="flex-1" />
@@ -39,7 +45,12 @@
 
     <!-- Content for Payment Status Tab (only for user 3002 and statusCode >= 7, or user 3200 with paid status) -->
     <div
-      v-if="(checkApprovalNonPo1() && form.statusCode >= 7 && activeTabDetail === 'paymentStatus') || (checkShowPaymentForProfile3200() && form.statusCode === 10 && activeTabDetail === 'paymentStatus')"
+      v-if="
+        (checkApprovalNonPo1() && form.statusCode >= 7 && activeTabDetail === 'paymentStatus') ||
+        (checkShowPaymentForProfile3200() &&
+          form.statusCode === 10 &&
+          activeTabDetail === 'paymentStatus')
+      "
     >
       <PaymentStatusDetail ref="paymentStatusDetailRef" />
     </div>
@@ -113,6 +124,7 @@
     />
     <SuccessRejectModal @afterClose="goToList" />
     <UpdatePaymentStatusModal :isLoading="isUpdatingPaymentStatus" />
+    <SapSyncRequiredModal />
   </div>
 </template>
 
@@ -138,6 +150,7 @@ import type {
 import { isEmpty } from 'lodash'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import UpdatePaymentStatusModal from './InvoiceDetail/PaymentStatusDetail/UpdatePaymentStatusModal.vue'
+import SapSyncRequiredModal from './InvoiceDetail/PaymentStatusDetail/SapSyncRequiredModal.vue'
 
 const TabInvoiceDetail = defineAsyncComponent(() => import('./InvoiceDetail/TabInvoiceDetail.vue'))
 const StatusInvoice = defineAsyncComponent(() => import('./InvoiceDetail/StatusInvoice.vue'))
@@ -290,13 +303,19 @@ const hasSapSynced = ref<boolean>(false)
 
 // Handle click from footer when on Payment Status tab
 const handleUpdatePaymentStatus = async () => {
-  console.log('=== Update Payment Status Clicked ===')
-
   // Get payment details from child component via template ref
   const paymentDetailsDataRef = paymentStatusDetailRef.value?.getPaymentDetailsData()
   const paymentDetailsData = paymentDetailsDataRef?.value || []
 
-  console.log('paymentDetailsData:', paymentDetailsData)
+  // Check if payment details table has data
+  if (paymentDetailsData.length === 0) {
+    const modalElement = document.querySelector('#sap_sync_required_modal')
+    if (modalElement) {
+      const modal = KTModal.getInstance(modalElement as HTMLElement)
+      modal.show()
+    }
+    return
+  }
 
   // Calculate payment summary from form data
   const totalInvoice = form.value.totalNetAmount || 0
@@ -332,8 +351,6 @@ const handleUpdatePaymentStatus = async () => {
     statusName,
   }
 
-  console.log('Payment Summary:', paymentSummary.value)
-
   // Call API to update payment status directly
   await handleConfirmPaymentStatus()
 }
@@ -345,8 +362,6 @@ const handleConfirmPaymentStatus = async () => {
     // Get payment details from child component via template ref
     const paymentDetailsDataRef = paymentStatusDetailRef.value?.getPaymentDetailsData()
     const paymentDetailsData = paymentDetailsDataRef?.value || []
-
-    console.log('Confirming payment status with data:', paymentDetailsData)
 
     // Prepare payment details for API
     const paymentDetails = paymentDetailsData.map((item) => ({
@@ -380,7 +395,6 @@ const handleConfirmPaymentStatus = async () => {
       `paymentStatus_${form.value.invoiceUId}`,
       JSON.stringify(paymentStatusSessionData),
     )
-    console.log('💾 Saved payment status to sessionStorage:', paymentStatusSessionData)
 
     // Prepare payment status data with all required header fields
     const paymentStatusData = {
@@ -410,12 +424,8 @@ const handleConfirmPaymentStatus = async () => {
       detail: paymentDetails,
     }
 
-    console.log('Sending payment status update:', JSON.stringify(paymentStatusData, null, 2))
-
     // Call API to update payment status
     const response = await verificationApi.updatePaymentStatus(paymentStatusData)
-
-    console.log('POST Payment Status Response:', response)
 
     if (!response.result.isError) {
       const content = response.result.content
@@ -426,12 +436,9 @@ const handleConfirmPaymentStatus = async () => {
         form.value.statusName = content.header.statusName
       }
 
-      console.log('Payment status updated successfully')
-
       // Fetch latest payment status data from GET endpoint
       try {
         const latestData = await verificationApi.getPaymentStatus(form.value.invoiceUId)
-        console.log('Latest payment status data:', latestData)
 
         // Update form and payment summary with latest data
         if (latestData?.result?.content?.header) {
@@ -463,7 +470,6 @@ const handleConfirmPaymentStatus = async () => {
         // Update payment details in child component if needed
         if (latestData?.result?.content?.detail && paymentStatusDetailRef.value) {
           // The child component will automatically refresh when we show the modal
-          console.log('Payment details updated:', latestData.result.content.detail)
         }
       } catch (fetchError) {
         console.error('Error fetching latest payment status:', fetchError)
@@ -1523,6 +1529,45 @@ const afterGetDetailNonPo = () => {
 }
 
 watch(
+  () => activeTabDetail.value,
+  async (newTab) => {
+    if (
+      newTab === 'paymentStatus' &&
+      (checkApprovalNonPo1() || checkShowPaymentForProfile3200()) &&
+      form.value.statusCode >= 7
+    ) {
+      try {
+        const response = await verificationApi.getPaymentStatus(form.value.invoiceUId)
+        if (response?.result?.content) {
+          const { header, detail } = response.result.content
+
+          if (header.submittedDocumentNo) {
+            submittedDocumentNo.value = header.submittedDocumentNo
+          }
+          if (header.clearingDocumentNo) {
+            form.value.clearingDocumentNo = header.clearingDocumentNo
+          }
+          if (detail && detail.length > 0) {
+            savedPaymentDetailsFromSession.value = detail.map((item, index) => ({
+              no: index + 1,
+              paymentDate: item.paymentDate,
+              amount: item.amount.toString(),
+              status: item.paymentStatus,
+              bankAccount: item.bankAccount,
+              remarks: item.remarks,
+              attachmentDocument: item.documentUrl || '',
+              invoicePaymentDetailId: item.invoicePaymentDetailId,
+            }))
+          }
+        }
+      } catch (error) {
+        console.error('Error reloading payment status:', error)
+      }
+    }
+  },
+)
+
+watch(
   () => form.value,
   () => {
     if (form.value.companyCode) {
@@ -1574,15 +1619,12 @@ onMounted(async () => {
           const response = await verificationApi.getPaymentStatus(form.value.invoiceUId)
           if (response?.result?.content) {
             const { header, detail } = response.result.content
-            console.log('📂 Loaded from API:', { header, detail })
 
             if (header.submittedDocumentNo) {
               submittedDocumentNo.value = header.submittedDocumentNo
-              console.log('✅ Restored Submitted Doc:', header.submittedDocumentNo)
             }
             if (header.clearingDocumentNo) {
               form.value.clearingDocumentNo = header.clearingDocumentNo
-              console.log('✅ Restored Clearing Doc:', header.clearingDocumentNo)
             }
             if (detail && detail.length > 0) {
               // Map PaymentStatusDetail to PaymentDetail format
@@ -1596,7 +1638,6 @@ onMounted(async () => {
                 attachmentDocument: item.documentUrl || '',
                 invoicePaymentDetailId: item.invoicePaymentDetailId,
               }))
-              console.log('✅ Restored Payment Details:', detail.length, 'rows')
             }
           }
         } catch (error) {
@@ -1614,15 +1655,12 @@ onMounted(async () => {
           const response = await verificationApi.getPaymentStatus(form.value.invoiceUId)
           if (response?.result?.content) {
             const { header, detail } = response.result.content
-            console.log('📂 Loaded from API:', { header, detail })
 
             if (header.submittedDocumentNo) {
               submittedDocumentNo.value = header.submittedDocumentNo
-              console.log('✅ Restored Submitted Doc:', header.submittedDocumentNo)
             }
             if (header.clearingDocumentNo) {
               form.value.clearingDocumentNo = header.clearingDocumentNo
-              console.log('✅ Restored Clearing Doc:', header.clearingDocumentNo)
             }
             if (detail && detail.length > 0) {
               // Map PaymentStatusDetail to PaymentDetail format
@@ -1636,7 +1674,6 @@ onMounted(async () => {
                 attachmentDocument: item.documentUrl || '',
                 invoicePaymentDetailId: item.invoicePaymentDetailId,
               }))
-              console.log('✅ Restored Payment Details:', detail.length, 'rows')
             }
           }
         } catch (error) {

@@ -25,7 +25,7 @@
               <td class="flex items-center justify-center gap-[6px]">
                 <button
                   class="btn btn-icon btn-primary"
-                  @click="editingIndex === index ? saveEdit(index) : startEdit(index)"
+                  @click="editingIndex === index ? saveEdit() : startEdit(index)"
                   :title="editingIndex === index ? 'Save' : 'Edit'"
                 >
                   <i v-if="editingIndex !== index" class="ki-duotone ki-notepad-edit"></i>
@@ -226,11 +226,10 @@ const onFileChange = (index: number, e: Event) => {
   if (file) paymentDetails.value[index].attachmentDocument = file.name
 }
 
-const saveEdit = (index: number) => {
+const saveEdit = () => {
   // Save the edited data (you can add validation here if needed)
   editingIndex.value = null
   backupRow.value = null
-  console.log('Saved row:', paymentDetails.value[index])
 }
 
 const paymentInformationRef = inject<Ref<PaymentInformationRef>>('paymentInformationRef')
@@ -248,7 +247,7 @@ const savedPaymentDetailsFromSession = inject<Ref<PaymentDetail[]>>(
 watch(
   () => savedPaymentDetailsFromSession.value,
   (newData) => {
-    if (newData && newData.length > 0 && paymentDetails.value.length === 0) {
+    if (newData && newData.length > 0) {
       // Only take the LAST row to avoid showing duplicates
       const lastRow = newData[newData.length - 1]
       paymentDetails.value = [lastRow]
@@ -258,8 +257,6 @@ watch(
 )
 
 const handleSapSync = async () => {
-  console.log('SAP Synchronize button clicked')
-
   if (paymentInformationRef?.value?.fetchSapStatus) {
     try {
       const sapData = await paymentInformationRef.value.fetchSapStatus()
@@ -268,9 +265,7 @@ const handleSapSync = async () => {
         updatePaymentDetailsFromSap(sapData)
         // Set hasSapSynced to true after successful sync
         hasSapSynced.value = true
-        console.log('SAP Sync completed successfully')
       } else {
-        console.log('No SAP data received')
       }
     } catch (error) {
       console.error('Error during SAP sync:', error)
