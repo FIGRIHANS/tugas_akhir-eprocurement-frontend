@@ -68,13 +68,13 @@
                 Tax Verification
               </UiButton>
 
-              <!-- <UiButton
+              <UiButton
                 class="px-3 py-1 bg-blue-600 text-white rounded-lg"
                 @click="isVerify = true"
               >
                 Verify By PJAP
               </UiButton>
-              <UiButton
+              <!-- <UiButton
                 class="px-3 py-1 bg-blue-600 text-white rounded-lg"
                 :disabled="!isVerify && !isApproved()"
                 @click="openModalSuccess()"
@@ -475,19 +475,15 @@ const tableData = computed(() => [
     fpVerified: form?.companyName == qrData.vendorSupplier,
     ocr: '-',
     invoiceVerified: '-',
-    remarks: isOcrEmpty(ocrData.vendorName)
-      ? form?.companyName == qrData.vendorSupplier
-      : form?.companyName == qrData.vendorSupplier && form?.companyName == ocrData.vendorName,
+    remarks: form?.companyName == qrData.vendorSupplier,
   },
   {
     header: 'NPWP',
     qr: qrData.npwpSupplier || '-',
     fpVerified: true,
-    ocr: ocrData.vendorNpwp,
-    invoiceVerified: form?.npwp == ocrData.vendorNpwp,
-    remarks: isOcrEmpty(ocrData.vendorNpwp)
-      ? form?.npwp == qrData.npwpSupplier
-      : form?.npwp == qrData.npwpSupplier && form?.npwp == ocrData.buyerNpwp,
+    ocr: '-',
+    invoiceVerified: '-',
+    remarks: true,
   },
   {
     header: 'No Faktur Pajak',
