@@ -666,38 +666,49 @@ watch(
 watch(
   () => form?.invoiceDp,
   () => {
-    if (form) {
-      form.invoicePoGr = []
-      if (checkInvoiceDp()) {
-        const data = {
-          poNo: '',
-          poItem: 0,
-          grDocumentNo: '',
-          grDocumentItem: 0,
-          grDocumentDate: '',
-          taxCode: '',
-          currencyLC: '',
-          currencyTC: '',
-          itemAmountLC: 0,
-          itemAmountTC: 0,
-          quantity: 0,
-          uom: '',
-          itemText: '',
-          currency: '',
-          conditionType: '',
-          conditionTypeDesc: '',
-          qcStatus: '',
-          postingDate: '',
-          enteredOn: '',
-          purchasingOrg: '',
-          department: '',
-          whtBaseAmount: 0,
-          whtAmount: 0,
-          isEdit: false,
-        } as itemsPoGrType
+    if (!form) return
 
-        form.invoicePoGr.push(data)
-      }
+    /**
+     * Sebelumnya setiap perubahan `invoiceDp` akan:
+     *  - mengosongkan `form.invoicePoGr`
+     *  - menambahkan 1 baris default jika tipe DP (9012)
+     *
+     * Akibatnya semua data yang sudah diinput hilang.
+     *
+     * Sekarang: kita TIDAK mengosongkan data yang sudah ada.
+     * Untuk kasus DP (9012), kita hanya memastikan minimal ada 1 baris
+     * jika saat ini belum ada data sama sekali.
+     */
+
+    if (checkInvoiceDp() && form.invoicePoGr.length === 0) {
+      const data = {
+        poNo: '',
+        poItem: 0,
+        grDocumentNo: '',
+        grDocumentItem: 0,
+        grDocumentDate: '',
+        taxCode: '',
+        currencyLC: '',
+        currencyTC: '',
+        itemAmountLC: 0,
+        itemAmountTC: 0,
+        quantity: 0,
+        uom: '',
+        itemText: '',
+        currency: '',
+        conditionType: '',
+        conditionTypeDesc: '',
+        qcStatus: '',
+        postingDate: '',
+        enteredOn: '',
+        purchasingOrg: '',
+        department: '',
+        whtBaseAmount: 0,
+        whtAmount: 0,
+        isEdit: false,
+      } as itemsPoGrType
+
+      form.invoicePoGr.push(data)
     }
   },
 )
