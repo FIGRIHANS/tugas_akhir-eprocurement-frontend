@@ -15,9 +15,16 @@ import type {
   PostEditApprovalNonPoTypes,
   ParamsPph21Types,
   ResponsePph21Types,
+  SapStatusParams,
+  SapStatusResponse,
+  UpdatePaymentStatusRequest,
+  UpdatePaymentStatusResponse,
 } from './types/verification'
 import type { invoiceOcrData } from '@/views/invoice/types/invoiceOcrData'
 import type { invoiceQrData } from '@/views/invoice/types/invoiceQrdata'
+
+const PAYMENT_STATUS_ENDPOINT =
+  'https://invoice-management-dev.azurewebsites.net/api/invoice/payment-status'
 
 export const useInvoiceVerificationStore = defineStore('invoiceVerification', () => {
   const listPo = ref<ListPoTypes[]>([])
@@ -322,6 +329,32 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     return response.data.result.content
   }
 
+  const getSapStatus = async (params: SapStatusParams) => {
+    const response: ApiResponse<SapStatusResponse> = await invoiceApi.get(`/invoice/status-sap`, {
+      params: {
+        fiscalYear: params.fiscalYear,
+        companyCode: params.companyCode,
+        DocumentNumber: params.documentNumber,
+      },
+    })
+    return response.data
+  }
+
+  const updatePaymentStatus = async (data: UpdatePaymentStatusRequest) => {
+    const response: ApiResponse<UpdatePaymentStatusResponse> = await invoiceApi.post(
+      PAYMENT_STATUS_ENDPOINT,
+      data,
+    )
+    return response.data
+  }
+
+  const getPaymentStatus = async (invoiceUId: string) => {
+    const response: ApiResponse<UpdatePaymentStatusResponse> = await invoiceApi.get(
+      `${PAYMENT_STATUS_ENDPOINT}/${invoiceUId}`,
+    )
+    return response.data
+  }
+
   return {
     listPo,
     listNonPo,
@@ -354,5 +387,8 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     getpph21,
     uploadFileQr,
     uploadFileOcr,
+    getSapStatus,
+    updatePaymentStatus,
+    getPaymentStatus,
   }
 })

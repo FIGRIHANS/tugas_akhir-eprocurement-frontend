@@ -8,7 +8,11 @@
         v-for="(item, index) in listPaymentStatus"
         :key="index"
         class="status-row py-[22px] px-[20px] text-xs flex"
-        :class="index === listPaymentStatus.length - 1 ? 'calculation__last-field last-row' : 'border-b border-gray-200'"
+        :class="
+          index === listPaymentStatus.length - 1
+            ? 'calculation__last-field last-row'
+            : 'border-b border-gray-200'
+        "
       >
         <div class="flex-1">{{ item.name }}</div>
         <div class="flex-1">
@@ -28,6 +32,18 @@ import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 
 const form = inject<Ref<formTypes>>('form')
 
+interface PaymentDetail {
+  no: number
+  paymentDate: string
+  amount: string
+  status: string
+  bankAccount: string
+  remarks: string
+  attachmentDocument?: string
+}
+
+const paymentDetailsData = inject<Ref<PaymentDetail[]>>('paymentDetailsData')
+
 interface PaymentStatusItem {
   name: string
   amount: string
@@ -38,8 +54,15 @@ const listPaymentStatus = ref<PaymentStatusItem[]>([])
 
 const setPaymentStatus = () => {
   if (form?.value) {
-    const totalInvoice = form.value.totalGrossAmount || 0
-    const paymentReceived = 300 // Default value
+    const totalInvoice = form.value.totalNetAmount || 0
+
+    // Calculate Payment Received from Payment Details where status is 'Paid'
+    const paymentReceived = paymentDetailsData?.value
+      ? paymentDetailsData.value
+          .filter((item) => item.status === 'Paid')
+          .reduce((sum, item) => sum + parseFloat(item.amount || '0'), 0)
+      : 0
+
     const outstandingPayment = totalInvoice - paymentReceived
 
     listPaymentStatus.value = [
@@ -61,6 +84,15 @@ const setPaymentStatus = () => {
     ]
   }
 }
+
+// Watch paymentDetailsData changes to recalculate
+watch(
+  () => paymentDetailsData?.value,
+  () => {
+    setPaymentStatus()
+  },
+  { deep: true },
+)
 
 watch(
   () => form?.value,
@@ -134,5 +166,3 @@ onMounted(() => {
   display: none !important;
 }
 </style>
-
-

@@ -2,6 +2,7 @@
   <div class="card flex-1">
     <div class="card-body py-[8px] px-[16px] max-h-[380px] overflow-y-auto scroll mr-[16px]">
       <p class="text-base font-semibold mb-[16px]">Payment Information</p>
+
       <div>
         <div
           v-for="(item, index) in paymentInfo"
@@ -13,17 +14,11 @@
             v-if="item.editable"
             v-model="item.value"
             class="input"
-            type="number"
+            :type="item.type || 'text'"
             :placeholder="item.placeholder || ''"
-            @input="handleNumericInput($event, index)"
-            @keypress="validateNumberInput"
+            @input="handleInput($event, index)"
           />
-          <input
-            v-else
-            :value="item.value"
-            class="input"
-            disabled
-          />
+          <input v-else :value="item.value" class="input" disabled />
         </div>
       </div>
     </div>
@@ -31,30 +26,72 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, inject, onMounted, watch } from 'vue'
+import { ref, inject, provide, onMounted, watch } from 'vue'
 import type { Ref } from 'vue'
 import type { formTypes } from '../../types/invoiceDetail'
 import { formatDate } from '@/composables/date-format'
+import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 
 interface PaymentInfoItem {
   label: string
   value: string
   editable?: boolean
+  type?: string
   placeholder?: string
 }
 
+interface SapDataResponse {
+  id: number
+  companyCode: string
+  documentNumber: number
+  sapInvoiceNo: string
+  fiscalYear: string
+  vendorName: string
+  invoiceAmount: number
+  paidAmount: number
+  openAmount: number
+  paymentStatus: string
+  statusOutgoing: string
+  clearingDate: string | null
+  clearingDocumentNo: string | null
+  payment: {
+    id: number
+    paymentId: number
+    bankKey: string
+    bankName: string
+    beneficiaryName: string
+    bankAccountNo: string
+    bankCountryCode: string
+  }
+}
+
 const form = inject<Ref<formTypes>>('form')
+const verificationApi = useInvoiceVerificationStore()
 
 const paymentInfo = ref<PaymentInfoItem[]>([])
+const sapStatusData = ref<SapDataResponse | null>(null)
+const submittedDocNo = ref<string>('')
+
+// Provide SAP status data to parent for API payload
+provide('sapStatusData', sapStatusData)
 
 const setPaymentInfo = () => {
   if (form?.value) {
     paymentInfo.value = [
       {
-        label: 'SAP Invoice No.',
-        value: form.value.sapInvoiceNo || '',
+        label: 'Submitted Document No.',
+        value: submittedDocNo.value,
         editable: true,
-        placeholder: '',
+        type: 'text',
+        placeholder: 'e.g., 4000000001',
+      },
+      {
+        label: 'Company Code',
+        value:
+          form.value.companyCode && form.value.companyName
+            ? `${form.value.companyCode} - ${form.value.companyName}`
+            : form.value.companyCode || '-',
+        editable: false,
       },
       {
         label: 'Invoice Posting Date',
@@ -78,18 +115,77 @@ const setPaymentInfo = () => {
       },
       {
         label: 'Clearing Document No.',
-        value: form.value.clearingDocumentNo || '',
-        editable: true,
-        placeholder: '',
+        value: sapStatusData.value?.clearingDocumentNo || '-',
+        editable: false,
       },
       {
         label: 'Payment Status',
-        value: form.value.statusName || '-',
+        value: sapStatusData.value?.paymentStatus || '-',
         editable: false,
       },
     ]
   }
 }
+
+const fetchSapStatus = async (): Promise<SapDataResponse | null> => {
+  if (!form?.value?.companyCode || !form?.value?.postingDate || !submittedDocNo.value) {
+    console.log('SAP Sync: Missing required fields')
+    return null
+  }
+
+  try {
+    const fiscalYear = new Date(form.value.postingDate).getFullYear().toString()
+    const documentNumber = submittedDocNo.value.replace(/\D/g, '')
+
+    console.log('SAP Sync: Fetching...', {
+      fiscalYear,
+      companyCode: form.value.companyCode,
+      documentNumber,
+    })
+
+    const response = await verificationApi.getSapStatus({
+      fiscalYear: fiscalYear,
+      companyCode: form.value.companyCode,
+      documentNumber: documentNumber,
+    })
+
+    if (
+      response?.result?.content &&
+      Array.isArray(response.result.content) &&
+      response.result.content.length > 0
+    ) {
+      sapStatusData.value = response.result.content[0] as SapDataResponse
+      console.log('SAP Sync: Success', sapStatusData.value)
+      setPaymentInfo()
+      return sapStatusData.value
+    } else {
+      console.log('SAP Sync: No data found')
+      sapStatusData.value = null
+      setPaymentInfo()
+      return null
+    }
+  } catch (error: unknown) {
+    console.error('SAP Sync: Error', error)
+    sapStatusData.value = null
+    setPaymentInfo()
+    return null
+  }
+}
+
+// Expose fetchSapStatus to parent
+defineExpose({
+  fetchSapStatus,
+})
+
+// Sync submittedDocNo with paymentInfo
+watch(
+  () => paymentInfo.value.find((item) => item.label === 'Submitted Document No.')?.value,
+  (newVal) => {
+    if (newVal !== undefined && newVal !== submittedDocNo.value) {
+      submittedDocNo.value = newVal
+    }
+  },
+)
 
 watch(
   () => form?.value,
@@ -99,31 +195,9 @@ watch(
   { deep: true, immediate: true },
 )
 
-const handleNumericInput = (event: Event, index: number) => {
+const handleInput = (event: Event, index: number) => {
   const target = event.target as HTMLInputElement
-  const value = target.value
-
-  // Remove any non-numeric characters except dots for decimals
-  const numericValue = value.replace(/[^0-9.]/g, '')
-
-  // Ensure only one decimal point
-  const parts = numericValue.split('.')
-  let cleanValue = parts[0]
-  if (parts.length > 1) {
-    cleanValue += '.' + parts.slice(1).join('')
-  }
-
-  // Update the value
-  paymentInfo.value[index].value = cleanValue
-  target.value = cleanValue
-}
-
-const validateNumberInput = (event: KeyboardEvent) => {
-  const charCode = event.which ? event.which : event.keyCode
-  // Allow numbers (48-57), decimal point (46), and backspace (8)
-  if (charCode > 31 && (charCode < 48 || charCode > 57) && charCode !== 46) {
-    event.preventDefault()
-  }
+  paymentInfo.value[index].value = target.value
 }
 
 onMounted(() => {
