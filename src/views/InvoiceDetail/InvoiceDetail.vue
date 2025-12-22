@@ -278,6 +278,7 @@ const paymentSummary = ref({
   currency: 'IDR',
   statusCode: 8,
   statusName: 'Planned',
+  clearingDocumentNo: '-',
 })
 
 // Ref to collect payment details data from child component
@@ -349,6 +350,7 @@ const handleUpdatePaymentStatus = async () => {
     currency: form.value.currCode || 'IDR',
     statusCode,
     statusName,
+    clearingDocumentNo: form.value.clearingDocumentNo || '-',
   }
 
   // Call API to update payment status directly
@@ -446,12 +448,13 @@ const handleConfirmPaymentStatus = async () => {
 
           // Update payment summary
           paymentSummary.value = {
-            statusCode: header.statusCode,
-            statusName: header.statusName,
             totalInvoice: header.totalAmountInvoice,
             paymentReceived: header.paymentReceivedAmount,
             outstanding: header.outstandingAmount,
             currency: header.currency,
+            statusCode: header.statusCode,
+            statusName: header.statusName,
+            clearingDocumentNo: header.clearingDocumentNo || '-',
           }
 
           // Update form fields if they exist
@@ -467,9 +470,19 @@ const handleConfirmPaymentStatus = async () => {
           }
         }
 
-        // Update payment details in child component if needed
-        if (latestData?.result?.content?.detail && paymentStatusDetailRef.value) {
-          // The child component will automatically refresh when we show the modal
+        // Update payment details in child component after update success
+        if (latestData?.result?.content?.detail) {
+          const detail = latestData.result.content.detail
+          savedPaymentDetailsFromSession.value = detail.map((item, index) => ({
+            no: index + 1,
+            paymentDate: item.paymentDate,
+            amount: item.amount.toString(),
+            status: item.paymentStatus,
+            bankAccount: item.bankAccount,
+            remarks: item.remarks,
+            attachmentDocument: item.documentUrl || '',
+            invoicePaymentDetailId: item.invoicePaymentDetailId,
+          }))
         }
       } catch (fetchError) {
         console.error('Error fetching latest payment status:', fetchError)
@@ -509,6 +522,9 @@ provide('submittedDocumentNo', submittedDocumentNo)
 
 // Provide hasSapSynced for PaymentDetails component
 provide('hasSapSynced', hasSapSynced)
+
+// Provide paymentSummary for child components
+provide('paymentSummary', paymentSummary)
 
 // Provide savedPaymentDetailsFromSession for PaymentDetails component to restore table
 const savedPaymentDetailsFromSession = ref<PaymentDetail[]>([])
@@ -1546,6 +1562,7 @@ watch(
           }
           if (header.clearingDocumentNo) {
             form.value.clearingDocumentNo = header.clearingDocumentNo
+            console.log('Tab Switch - Clearing Doc updated:', header.clearingDocumentNo)
           }
 
           // Fully sync status and payment summary
@@ -1561,7 +1578,9 @@ watch(
             paymentReceived: header.paymentReceivedAmount,
             outstanding: header.outstandingAmount,
             currency: header.currency,
+            clearingDocumentNo: header.clearingDocumentNo || '-',
           }
+          console.log('Tab Switch - Payment Summary updated:', paymentSummary.value)
 
           if (detail && detail.length > 0) {
             savedPaymentDetailsFromSession.value = detail.map((item, index) => ({
@@ -1656,6 +1675,7 @@ onMounted(async () => {
               paymentReceived: header.paymentReceivedAmount,
               outstanding: header.outstandingAmount,
               currency: header.currency,
+              clearingDocumentNo: header.clearingDocumentNo || '-',
             }
 
             if (detail && detail.length > 0) {
@@ -1708,6 +1728,7 @@ onMounted(async () => {
               paymentReceived: header.paymentReceivedAmount,
               outstanding: header.outstandingAmount,
               currency: header.currency,
+              clearingDocumentNo: header.clearingDocumentNo || '-',
             }
 
             if (detail && detail.length > 0) {

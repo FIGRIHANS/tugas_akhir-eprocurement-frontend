@@ -246,8 +246,9 @@ watch(
   () => savedPaymentDetailsFromSession.value,
   (newData) => {
     if (newData && newData.length > 0) {
-      // Show all rows returned by the API
-      paymentDetails.value = newData
+      // Show only the LAST row from the API results (most recent)
+      const lastRow = newData[newData.length - 1]
+      paymentDetails.value = [lastRow]
     }
   },
   { immediate: true },

@@ -74,6 +74,30 @@ const sapStatusData = ref<SapDataResponse | null>(null)
 // Inject submittedDocumentNo from parent (InvoiceDetail.vue)
 const submittedDocNo = inject<Ref<string>>('submittedDocumentNo', ref(''))
 
+// Inject paymentSummary from parent (InvoiceDetail.vue)
+const paymentSummary = inject<
+  Ref<{
+    totalInvoice: number
+    paymentReceived: number
+    outstanding: number
+    currency: string
+    statusCode: number
+    statusName: string
+    clearingDocumentNo: string
+  }>
+>(
+  'paymentSummary',
+  ref({
+    totalInvoice: 0,
+    paymentReceived: 0,
+    outstanding: 0,
+    currency: 'IDR',
+    statusCode: 8,
+    statusName: 'Planned',
+    clearingDocumentNo: '-',
+  }),
+)
+
 // Provide SAP status data to parent for API payload
 provide('sapStatusData', sapStatusData)
 
@@ -117,12 +141,17 @@ const setPaymentInfo = () => {
       },
       {
         label: 'Clearing Document No.',
-        value: sapStatusData.value?.clearingDocumentNo || '-',
+        value:
+          sapStatusData.value?.clearingDocumentNo ||
+          form.value.clearingDocumentNo ||
+          (paymentSummary.value.clearingDocumentNo !== '-'
+            ? paymentSummary.value.clearingDocumentNo
+            : '-'),
         editable: false,
       },
       {
         label: 'Payment Status',
-        value: sapStatusData.value?.paymentStatus || '-',
+        value: sapStatusData.value?.paymentStatus || paymentSummary.value.statusName || '-',
         editable: false,
       },
     ]
@@ -158,6 +187,17 @@ const fetchSapStatus = async (): Promise<SapDataResponse | null> => {
     ) {
       sapStatusData.value = response.result.content[0] as SapDataResponse
       console.log('SAP Sync: Success', sapStatusData.value)
+
+      // Sync SAP result back to parent form and summary
+      if (sapStatusData.value.clearingDocumentNo) {
+        if (form?.value) form.value.clearingDocumentNo = sapStatusData.value.clearingDocumentNo
+        if (paymentSummary?.value)
+          paymentSummary.value.clearingDocumentNo = sapStatusData.value.clearingDocumentNo
+      }
+      if (sapStatusData.value.paymentStatus && paymentSummary?.value) {
+        paymentSummary.value.statusName = sapStatusData.value.paymentStatus
+      }
+
       setPaymentInfo()
       return sapStatusData.value
     } else {
@@ -209,6 +249,56 @@ watch(
       submittedDocItem.value = newVal
     }
   },
+)
+
+watch(
+  () => paymentSummary.value,
+  () => {
+    setPaymentInfo()
+  },
+  { deep: true },
+)
+
+// Watch Clearing Document No. from parent/SAP sync result
+watch(
+  () => [
+    sapStatusData.value?.clearingDocumentNo,
+    form?.value?.clearingDocumentNo,
+    paymentSummary.value.clearingDocumentNo,
+  ],
+  () => {
+    const clearingDocItem = paymentInfo.value.find((item) => item.label === 'Clearing Document No.')
+    const newValue =
+      sapStatusData.value?.clearingDocumentNo ||
+      form?.value?.clearingDocumentNo ||
+      (paymentSummary.value.clearingDocumentNo !== '-'
+        ? paymentSummary.value.clearingDocumentNo
+        : '-')
+    console.log('Watch Clearing Doc - Sources:', {
+      sap: sapStatusData.value?.clearingDocumentNo,
+      form: form?.value?.clearingDocumentNo,
+      summary: paymentSummary.value.clearingDocumentNo,
+      final: newValue,
+    })
+    if (clearingDocItem && clearingDocItem.value !== newValue) {
+      clearingDocItem.value = newValue
+      console.log('Clearing Doc updated in UI:', newValue)
+    }
+  },
+  { deep: true },
+)
+
+// Watch Payment Status from parent/SAP sync result
+watch(
+  () => [sapStatusData.value?.paymentStatus, paymentSummary.value.statusName],
+  () => {
+    const paymentStatusItem = paymentInfo.value.find((item) => item.label === 'Payment Status')
+    const newValue = sapStatusData.value?.paymentStatus || paymentSummary.value.statusName || '-'
+    if (paymentStatusItem && paymentStatusItem.value !== newValue) {
+      paymentStatusItem.value = newValue
+    }
+  },
+  { deep: true },
 )
 
 const handleInput = (event: Event, index: number) => {
