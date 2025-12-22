@@ -1508,18 +1508,26 @@ const afterGetDetail = () => {
   } else {
     setDataDefault()
   }
-  switch (detailInvoice.value?.header.statusCode) {
-    case 1:
-    case 3:
-      activeStep.value = 'Verification'
-      break
-    case 2:
-    case 4:
-      activeStep.value = 'Approval'
-      break
-    case 7:
-      activeStep.value = 'Posting'
-      break
+
+  const statusCode = detailInvoice.value?.header.statusCode ?? -1
+
+  if (statusCode === 0 || statusCode === 1 || statusCode === 5) {
+    // Draft / Submitted / Rejected
+    activeStep.value = 'Submission'
+  } else if (statusCode === 2) {
+    // Verified
+    activeStep.value = 'Verification'
+  } else if (statusCode === 3 || statusCode === 4) {
+    // Waiting for Approval / Approved
+    activeStep.value = 'Approval'
+  } else if (statusCode === 6) {
+    // Posted to SAP
+    activeStep.value = 'Posting'
+  } else if (statusCode >= 7) {
+    // Sent to SAP dan status Payment Status (7,8,9,10,...)
+    activeStep.value = 'Status'
+  } else {
+    activeStep.value = 'Submission'
   }
 }
 
@@ -1529,18 +1537,21 @@ const afterGetDetailNonPo = () => {
   } else {
     setDataDefaultNonPo()
   }
-  switch (detailInvoiceNonPo.value?.header.statusCode) {
-    case 1:
-    case 3:
-      activeStep.value = 'Verification'
-      break
-    case 2:
-    case 4:
-      activeStep.value = 'Approval'
-      break
-    case 7:
-      activeStep.value = 'Posting'
-      break
+
+  const statusCode = detailInvoiceNonPo.value?.header.statusCode ?? -1
+
+  if (statusCode === 0 || statusCode === 1 || statusCode === 5) {
+    activeStep.value = 'Submission'
+  } else if (statusCode === 2) {
+    activeStep.value = 'Verification'
+  } else if (statusCode === 3 || statusCode === 4) {
+    activeStep.value = 'Approval'
+  } else if (statusCode === 6) {
+    activeStep.value = 'Posting'
+  } else if (statusCode >= 7) {
+    activeStep.value = 'Status'
+  } else {
+    activeStep.value = 'Submission'
   }
 }
 
