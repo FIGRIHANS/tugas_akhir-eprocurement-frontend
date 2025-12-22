@@ -72,7 +72,7 @@
               <td colspan="10" class="text-center">No data found.</td>
             </tr>
             <tr v-for="item in list" :key="item.invoiceUId" class="text-nowrap">
-                <td class="flex items-center gap-[16px]">
+              <td class="flex items-center gap-[16px]">
                 <button
                   class="btn btn-outline btn-primary btn-icon w-[32px] h-[32px]"
                   @click="goToDetail(item)"
@@ -165,7 +165,9 @@ const filterChild = ref(null)
 const viewDetailId = ref('')
 
 const FilterList = defineAsyncComponent(() => import('./FilterList.vue'))
-const DetailVerificationModal = defineAsyncComponent(() => import('../invoiceList/DetailVerificationModal.vue'))
+const DetailVerificationModal = defineAsyncComponent(
+  () => import('../invoiceList/DetailVerificationModal.vue'),
+)
 
 // import UiModal from '@/components/modal/UiModal.vue'
 // import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
