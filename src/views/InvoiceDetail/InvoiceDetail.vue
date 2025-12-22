@@ -41,7 +41,7 @@
     <div
       v-if="checkApprovalNonPo1() && form.statusCode >= 7 && activeTabDetail === 'paymentStatus'"
     >
-      <PaymentStatusDetail />
+      <PaymentStatusDetail ref="paymentStatusDetailRef" />
     </div>
 
     <!-- Navigation Buttons -->
@@ -62,7 +62,10 @@
         </button>
       </div>
       <!-- Right side actions: show Update Payment Status on Payment Status tab; otherwise default actions -->
-      <div v-if="activeTabDetail === 'paymentStatus'" class="flex items-center justify-end gap-[10px]">
+      <div
+        v-if="activeTabDetail === 'paymentStatus'"
+        class="flex items-center justify-end gap-[10px]"
+      >
         <button class="btn btn-primary" :disabled="isLoading" @click="handleUpdatePaymentStatus">
           Update Payment Status
         </button>
@@ -109,11 +112,21 @@
       @afterClose="goToList"
     />
     <SuccessRejectModal @afterClose="goToList" />
+    <UpdatePaymentStatusModal :isLoading="isUpdatingPaymentStatus" />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, provide, defineAsyncComponent, onMounted } from 'vue'
+import {
+  ref,
+  computed,
+  watch,
+  provide,
+  inject,
+  defineAsyncComponent,
+  onMounted,
+  type Ref,
+} from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import type { formTypes } from './types/invoiceDetail'
 import type { itemsPoGrType } from './types/invoicePoGr'
@@ -133,6 +146,7 @@ import type {
 } from '@/stores/views/invoice/types/verification'
 import { isEmpty } from 'lodash'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
+import UpdatePaymentStatusModal from './InvoiceDetail/PaymentStatusDetail/UpdatePaymentStatusModal.vue'
 
 const TabInvoiceDetail = defineAsyncComponent(() => import('./InvoiceDetail/TabInvoiceDetail.vue'))
 const StatusInvoice = defineAsyncComponent(() => import('./InvoiceDetail/StatusInvoice.vue'))
@@ -251,10 +265,173 @@ const form = ref<formTypes>({
   otherDocument: null,
 })
 
+// Payment Status Modal State
+const isUpdatingPaymentStatus = ref(false)
+const paymentSummary = ref({
+  totalInvoice: 0,
+  paymentReceived: 0,
+  outstanding: 0,
+  currency: 'IDR',
+  statusCode: 8,
+  statusName: 'Planned',
+})
+
+// Ref to collect payment details data from child component
+interface PaymentDetail {
+  no: number
+  paymentDate: string
+  amount: string
+  status: string
+  bankAccount: string
+  remarks: string
+  attachmentDocument?: string
+  invoicePaymentDetailId?: number
+}
+
+// Template ref to PaymentStatusDetail component
+const paymentStatusDetailRef = ref<{ getPaymentDetailsData: () => Ref<PaymentDetail[]> } | null>(
+  null,
+)
+
 // Handle click from footer when on Payment Status tab
-const handleUpdatePaymentStatus = () => {
-  // Delegate to Payment Status module if needed; placeholder for now
-  console.log('Update Payment Status clicked')
+const handleUpdatePaymentStatus = async () => {
+  console.log('=== Update Payment Status Clicked ===')
+
+  // Get payment details from child component via template ref
+  const paymentDetailsDataRef = paymentStatusDetailRef.value?.getPaymentDetailsData()
+  const paymentDetailsData = paymentDetailsDataRef?.value || []
+
+  console.log('paymentDetailsData:', paymentDetailsData)
+
+  // Calculate payment summary from form data
+  const totalInvoice = form.value.totalNetAmount || 0
+
+  // Calculate payment received from payment details where status is 'Paid'
+  const paymentReceived =
+    paymentDetailsData.length > 0
+      ? paymentDetailsData
+          .filter((item) => item.status === 'Paid')
+          .reduce((sum, item) => sum + parseFloat(item.amount || '0'), 0)
+      : 0
+
+  const outstanding = totalInvoice - paymentReceived
+
+  // Determine status code based on payment amounts
+  let statusCode = 8 // Planned
+  let statusName = 'Planned'
+
+  if (paymentReceived >= totalInvoice && totalInvoice > 0) {
+    statusCode = 10 // Paid
+    statusName = 'Paid'
+  } else if (paymentReceived > 0 && paymentReceived < totalInvoice) {
+    statusCode = 9 // Partially Paid
+    statusName = 'Partially Paid'
+  }
+
+  paymentSummary.value = {
+    totalInvoice,
+    paymentReceived,
+    outstanding,
+    currency: form.value.currCode || 'IDR',
+    statusCode,
+    statusName,
+  }
+
+  console.log('Payment Summary:', paymentSummary.value)
+
+  // Call API to update payment status directly
+  await handleConfirmPaymentStatus()
+}
+
+const handleConfirmPaymentStatus = async () => {
+  try {
+    isUpdatingPaymentStatus.value = true
+
+    // Get payment details from child component via template ref
+    const paymentDetailsDataRef = paymentStatusDetailRef.value?.getPaymentDetailsData()
+    const paymentDetailsData = paymentDetailsDataRef?.value || []
+
+    console.log('Confirming payment status with data:', paymentDetailsData)
+
+    // Prepare payment details for API
+    const paymentDetails = paymentDetailsData.map((item) => ({
+      invoicePaymentDetailId: item.invoicePaymentDetailId || 0,
+      invoiceUId: form.value.invoiceUId,
+      paymentDate: item.paymentDate
+        ? new Date(item.paymentDate).toISOString()
+        : new Date().toISOString(),
+      amount: parseFloat(item.amount || '0'),
+      paymentStatus: item.status || 'Plan',
+      bankAccount: item.bankAccount || '',
+      remarks: item.remarks || '',
+      documentUrl: item.attachmentDocument || '',
+      documentName: item.attachmentDocument || '',
+      documentSize: 0,
+    }))
+
+    // Prepare payment status data with all required header fields
+    const paymentStatusData = {
+      header: {
+        id: 0,
+        invoiceUId: form.value.invoiceUId,
+        companyCode: form.value.companyCode || '',
+        sapInvoiceNo: form.value.sapInvoiceNo || '',
+        invoicePostingDate: form.value.postingDate
+          ? new Date(form.value.postingDate).toISOString()
+          : new Date().toISOString(),
+        termOfPayment: form.value.paymentMethodName || '',
+        estimatedPaymentDate: form.value.estimatedPaymentDate
+          ? new Date(form.value.estimatedPaymentDate).toISOString()
+          : new Date().toISOString(),
+        paymentMethod: form.value.paymentMethodName || '',
+        clearingDocumentNo: form.value.clearingDocumentNo || '',
+        paymentStatus: paymentSummary.value.statusName,
+        statusCode: paymentSummary.value.statusCode,
+        statusName: paymentSummary.value.statusName,
+        totalAmountInvoice: paymentSummary.value.totalInvoice,
+        paymentReceivedAmount: paymentSummary.value.paymentReceived,
+        outstandingAmount: paymentSummary.value.outstanding,
+        currency: paymentSummary.value.currency,
+      },
+      detail: paymentDetails,
+    }
+
+    console.log('Sending payment status update:', JSON.stringify(paymentStatusData, null, 2))
+
+    // Call API to update payment status
+    const response = await verificationApi.updatePaymentStatus(paymentStatusData)
+
+    console.log('POST Payment Status Response:', response)
+
+    if (!response.result.isError) {
+      const content = response.result.content
+
+      // Update invoice status if changed
+      if (content?.header) {
+        form.value.statusCode = content.header.statusCode
+        form.value.statusName = content.header.statusName
+      }
+
+      console.log('Payment status updated successfully')
+
+      // Show success modal
+      const modalElement = document.querySelector('#update_payment_status_modal')
+      if (modalElement) {
+        const modal = KTModal.getInstance(modalElement as HTMLElement)
+        modal.show()
+      }
+    } else {
+      console.error('Failed to update payment status:', response.result.message)
+    }
+  } catch (error: any) {
+    const backendMessage = error?.response?.data?.result?.message || error?.response?.data?.message
+    const errorDetail = error?.response?.data
+    console.error('Error updating payment status:', errorDetail || error)
+    console.error('Full error object:', error)
+    if (backendMessage) console.error('Backend message:', backendMessage)
+  } finally {
+    isUpdatingPaymentStatus.value = false
+  }
 }
 
 // Provide form data for child components (Payment Status components)
