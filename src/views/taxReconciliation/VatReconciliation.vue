@@ -16,9 +16,16 @@
             Filter
           </button>
 
-          <button class="btn btn-primary" @click="exportData()">
+          <button
+            class="btn btn-primary"
+            @click="exportData()"
+            :disabled="selectedItems.length === 0"
+          >
             <i class="ki-duotone ki-plus-circle"></i>
             VAT Credit Posting
+            <span v-if="selectedItems.length > 0" class="badge badge-sm badge-light-primary ms-2">
+              {{ selectedItems.length }}
+            </span>
           </button>
         </div>
       </div>
@@ -76,6 +83,16 @@
         <table class="table align-middle text-gray-700 font-medium text-sm">
           <thead>
             <tr>
+              <!-- Checkbox Column Header -->
+              <th class="w-[50px]">
+                <input
+                  type="checkbox"
+                  class="checkbox checkbox-sm"
+                  :checked="isAllSelected"
+                  :indeterminate="isSomeSelected && !isAllSelected"
+                  @change="toggleSelectAll"
+                />
+              </th>
               <th
                 v-for="(item, index) in columns"
                 :key="index"
@@ -95,6 +112,15 @@
               <td colspan="13" class="text-center">No data found.</td>
             </tr>
             <tr v-for="(item, index) in list" :key="index">
+              <!-- Checkbox Column -->
+              <td>
+                <input
+                  type="checkbox"
+                  class="checkbox checkbox-sm"
+                  :checked="isItemSelected(item)"
+                  @change="toggleSelectItem(item)"
+                />
+              </td>
               <td>{{ item.npwpVendor }}</td>
               <td>{{ formatDate(item.tglInvoice) }}</td>
               <td>{{ formatDate(item.tglFP) }}</td>
@@ -334,12 +360,24 @@ const statusOptions = ref<string[]>([
   'UNCREDITED',
 ])
 
+// Checkbox selection state
+const selectedItems = ref<VATReconciliationData[]>([])
+
 // Filtered status options based on search
 const filteredStatusOptions = computed(() => {
   if (!statusSearch.value) return statusOptions.value
   return statusOptions.value.filter((status) =>
     status.toLowerCase().includes(statusSearch.value.toLowerCase()),
   )
+})
+
+// Checkbox computed properties
+const isAllSelected = computed(() => {
+  return list.value.length > 0 && selectedItems.value.length === list.value.length
+})
+
+const isSomeSelected = computed(() => {
+  return selectedItems.value.length > 0 && selectedItems.value.length < list.value.length
 })
 
 const columns = ref<string[]>([
@@ -571,11 +609,13 @@ const setPage = (value: number) => {
 }
 
 const goDetail = (data: VATReconciliationData) => {
-  currentSelectedItem.value = data
-  selectedStatus.value = ''
-  statusSearch.value = ''
-  showStatusDropdown.value = false
-  showStatusModal.value = true
+  // Navigate to detail page using NSFP as ID
+  router.push({
+    name: 'vatReconciliationDetail',
+    params: {
+      id: data.nsfp,
+    },
+  })
 }
 
 const toggleStatusDropdown = () => {
@@ -736,6 +776,31 @@ const exportData = () => {
       type: 'po-view',
     },
   })
+}
+
+// Checkbox selection methods
+const toggleSelectAll = () => {
+  if (isAllSelected.value) {
+    selectedItems.value = []
+  } else {
+    selectedItems.value = [...list.value]
+  }
+}
+
+const toggleSelectItem = (item: VATReconciliationData) => {
+  const index = selectedItems.value.findIndex(
+    (selected) => selected.nsfp === item.nsfp, // Using nsfp as unique identifier
+  )
+
+  if (index > -1) {
+    selectedItems.value.splice(index, 1)
+  } else {
+    selectedItems.value.push(item)
+  }
+}
+
+const isItemSelected = (item: VATReconciliationData) => {
+  return selectedItems.value.some((selected) => selected.nsfp === item.nsfp)
 }
 
 onMounted(() => {
