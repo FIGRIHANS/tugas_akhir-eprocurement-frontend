@@ -52,7 +52,9 @@
             <option value="4">Approved</option>
             <option value="5">Rejected</option>
             <option value="7">Sent to SAP</option>
-            <option value="8">Partially Paid</option>
+            <option value="8">Planned</option>
+            <option value="9">Partially Paid</option>
+            <option value="10">Paid</option>
           </select>
           <select v-else v-model="status" class="select" name="select">
             <option value="1">Waiting for Verify</option>
@@ -60,7 +62,9 @@
             <option value="4">Approved</option>
             <option value="5">Rejected</option>
             <option value="7">Sent to SAP</option>
-            <option value="8">Partially Paid</option>
+            <option value="8">Planned</option>
+            <option value="9">Partially Paid</option>
+            <option value="10">Paid</option>
           </select>
         </div>
         <div class="relative">
