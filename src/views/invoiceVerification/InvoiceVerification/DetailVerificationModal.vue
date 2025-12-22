@@ -80,12 +80,17 @@ const list = computed(() => {
 
 const badgeColor = (status: number) => {
   const list = {
+    0: 'badge-light',
     1: 'badge-info',
-    2: 'badge-info',
+    2: 'badge-primary',
     3: 'badge-success',
     4: 'badge-success',
     5: 'badge-danger',
-    7: 'badge-primary',
+    6: 'badge-dark',
+    7: 'badge-secondary',
+    8: 'badge-warning',
+    9: 'badge-info',
+    10: 'badge-warning',
   } as { [key: number]: string }
   return list[status]
 }

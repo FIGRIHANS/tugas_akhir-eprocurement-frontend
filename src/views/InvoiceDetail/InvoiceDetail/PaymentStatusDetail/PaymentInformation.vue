@@ -70,7 +70,9 @@ const verificationApi = useInvoiceVerificationStore()
 
 const paymentInfo = ref<PaymentInfoItem[]>([])
 const sapStatusData = ref<SapDataResponse | null>(null)
-const submittedDocNo = ref<string>('')
+
+// Inject submittedDocumentNo from parent (InvoiceDetail.vue)
+const submittedDocNo = inject<Ref<string>>('submittedDocumentNo', ref(''))
 
 // Provide SAP status data to parent for API payload
 provide('sapStatusData', sapStatusData)
@@ -81,7 +83,7 @@ const setPaymentInfo = () => {
       {
         label: 'Submitted Document No.',
         value: submittedDocNo.value,
-        editable: true,
+        editable: true, // Always editable
         type: 'text',
         placeholder: 'e.g., 4000000001',
       },
@@ -172,9 +174,10 @@ const fetchSapStatus = async (): Promise<SapDataResponse | null> => {
   }
 }
 
-// Expose fetchSapStatus to parent
+// Expose fetchSapStatus and getSubmittedDocumentNo to parent
 defineExpose({
   fetchSapStatus,
+  getSubmittedDocumentNo: () => submittedDocNo.value,
 })
 
 // Sync submittedDocNo with paymentInfo
@@ -193,6 +196,19 @@ watch(
     setPaymentInfo()
   },
   { deep: true, immediate: true },
+)
+
+// Watch submittedDocNo changes from parent and update paymentInfo
+watch(
+  () => submittedDocNo.value,
+  (newVal) => {
+    const submittedDocItem = paymentInfo.value.find(
+      (item) => item.label === 'Submitted Document No.',
+    )
+    if (submittedDocItem && submittedDocItem.value !== newVal) {
+      submittedDocItem.value = newVal
+    }
+  },
 )
 
 const handleInput = (event: Event, index: number) => {

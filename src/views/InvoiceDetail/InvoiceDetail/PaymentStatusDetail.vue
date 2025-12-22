@@ -54,6 +54,7 @@ interface SapDataResponse {
 
 interface PaymentInformationComponent {
   fetchSapStatus: () => Promise<SapDataResponse | null>
+  getSubmittedDocumentNo: () => string
 }
 
 const paymentInfoRef = ref<PaymentInformationComponent | null>(null)
@@ -75,8 +76,9 @@ interface PaymentDetail {
 const paymentDetailsData = ref<PaymentDetail[]>([])
 provide('paymentDetailsData', paymentDetailsData)
 
-// Expose getter function to return the ref (not unwrapped)
+// Expose getter functions to return the refs (not unwrapped)
 defineExpose({
   getPaymentDetailsData: () => paymentDetailsData,
+  getSubmittedDocumentNo: () => paymentInfoRef.value?.getSubmittedDocumentNo() || '',
 })
 </script>
