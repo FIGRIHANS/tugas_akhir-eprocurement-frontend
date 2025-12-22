@@ -613,6 +613,10 @@ watch(
     if (form.companyCode && form.invoiceType === '5') {
       invoiceMasterApi.getCashJournal(form.companyCode || '')
     }
+    if (form?.companyCode) {
+      const getIndex = companyCodeList.value.findIndex((item) => item.code === form.companyCode)
+      if (getIndex !== -1) form.companyName = companyCodeList.value[getIndex].name.split(' - ')[1]
+    }
   },
   {
     immediate: false,
@@ -644,5 +648,11 @@ onMounted(() => {
   if (form?.companyCode && form?.invoiceType === '5') {
     invoiceMasterApi.getCashJournal(form.companyCode || '')
   }
+  if (form?.companyCode) {
+    const getIndex = companyCodeList.value.findIndex((item) => item.code === form.companyCode)
+    if (getIndex !== -1) form.companyName = companyCodeList.value[getIndex].name.split(' - ')[1]
+  }
+
+  console.log(form)
 })
 </script>
