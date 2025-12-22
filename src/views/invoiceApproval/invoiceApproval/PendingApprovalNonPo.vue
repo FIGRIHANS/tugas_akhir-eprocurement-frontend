@@ -307,17 +307,17 @@ const verifList = computed(() => verificationApi.listNonPo)
 
 const colorBadge = (statusCode: number) => {
   const list = {
-    0: 'badge-light',
-    1: 'badge-info',
-    2: 'badge-primary',
-    3: 'badge-success',
-    4: 'badge-success',
-    5: 'badge-danger',
-    6: 'badge-dark',
-    7: 'badge-secondary',
-    8: 'badge-warning',
-    9: 'badge-info',
-    10: 'badge-warning',
+    0: 'bg-gray-50 text-gray-600',
+    1: 'bg-blue-50 text-blue-600',
+    2: 'bg-purple-50 text-purple-600',
+    3: 'bg-emerald-50 text-emerald-600',
+    4: 'bg-emerald-100 text-emerald-700',
+    5: 'bg-red-50 text-red-600',
+    6: 'bg-gray-100 text-gray-600',
+    7: 'bg-slate-50 text-slate-600',
+    8: 'bg-yellow-50 text-yellow-700',
+    9: 'bg-cyan-50 text-cyan-600',
+    10: 'bg-emerald-500 text-white',
   } as { [key: number]: string }
   return list[statusCode]
 }
