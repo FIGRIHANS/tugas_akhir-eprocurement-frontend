@@ -238,6 +238,25 @@ const paymentInformationRef = inject<Ref<PaymentInformationRef>>('paymentInforma
 // Inject hasSapSynced from parent to track SAP sync status
 const hasSapSynced = inject<Ref<boolean>>('hasSapSynced', ref(false))
 
+// Inject savedPaymentDetailsFromSession to load data from API
+const savedPaymentDetailsFromSession = inject<Ref<PaymentDetail[]>>(
+  'savedPaymentDetailsFromSession',
+  ref([]),
+)
+
+// Watch and load saved payment details into table (only last row to avoid duplicates)
+watch(
+  () => savedPaymentDetailsFromSession.value,
+  (newData) => {
+    if (newData && newData.length > 0 && paymentDetails.value.length === 0) {
+      // Only take the LAST row to avoid showing duplicates
+      const lastRow = newData[newData.length - 1]
+      paymentDetails.value = [lastRow]
+    }
+  },
+  { immediate: true },
+)
+
 const handleSapSync = async () => {
   console.log('SAP Synchronize button clicked')
 
@@ -371,13 +390,16 @@ onMounted(() => {
   }
 
   .invoice__field-base {
-    background-color: #f1f3f6;
-    border: 1px solid #e1e5e9;
+    background-color: #dbeafe; /* bg-blue-100 */
+    border-bottom: 1px solid #3b82f6; /* border-b-blue-500 */
+    border-top: 1px solid #e1e5e9;
+    border-left: 1px solid #e1e5e9;
+    border-right: 1px solid #e1e5e9;
     padding: 12px 16px;
-    font-weight: 500;
+    font-weight: 600;
     font-size: 12px;
     text-align: left;
-    color: #7e8299;
+    color: #3b82f6; /* text-blue-500 */
     vertical-align: middle;
 
     &:first-child {
@@ -393,7 +415,7 @@ onMounted(() => {
     background-color: #ffffff;
 
     &:hover {
-      background-color: rgba(241, 243, 246, 0.3);
+      background-color: rgba(37, 99, 235, 0.05);
     }
 
     &:last-child {
