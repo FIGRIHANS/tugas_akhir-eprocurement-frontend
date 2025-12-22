@@ -186,6 +186,17 @@ watch(
   { deep: true },
 )
 
+// Watch paymentDetailsData and sync from parent (for API response updates)
+watch(
+  () => paymentDetailsData?.value,
+  (newVal) => {
+    if (newVal && JSON.stringify(newVal) !== JSON.stringify(paymentDetails.value)) {
+      paymentDetails.value = newVal
+    }
+  },
+  { deep: true },
+)
+
 const setPaymentDetails = () => {
   // Initialize empty payment details array
   paymentDetails.value = []

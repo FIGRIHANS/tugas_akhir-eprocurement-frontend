@@ -26,7 +26,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, inject, onMounted, watch } from 'vue'
+import { ref, inject, provide, onMounted, watch } from 'vue'
 import type { Ref } from 'vue'
 import type { formTypes } from '../../types/invoiceDetail'
 import { formatDate } from '@/composables/date-format'
@@ -71,6 +71,9 @@ const verificationApi = useInvoiceVerificationStore()
 const paymentInfo = ref<PaymentInfoItem[]>([])
 const sapStatusData = ref<SapDataResponse | null>(null)
 const submittedDocNo = ref<string>('')
+
+// Provide SAP status data to parent for API payload
+provide('sapStatusData', sapStatusData)
 
 const setPaymentInfo = () => {
   if (form?.value) {

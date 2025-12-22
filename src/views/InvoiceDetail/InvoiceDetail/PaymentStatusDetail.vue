@@ -74,4 +74,9 @@ interface PaymentDetail {
 // Provide paymentDetails array to PaymentCalculation for Payment Received calculation
 const paymentDetailsData = ref<PaymentDetail[]>([])
 provide('paymentDetailsData', paymentDetailsData)
+
+// Expose getter function to return the ref (not unwrapped)
+defineExpose({
+  getPaymentDetailsData: () => paymentDetailsData,
+})
 </script>
