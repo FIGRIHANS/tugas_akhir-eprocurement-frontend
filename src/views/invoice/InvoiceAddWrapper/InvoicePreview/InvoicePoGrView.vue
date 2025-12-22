@@ -5,12 +5,17 @@
       <table class="table table-xs table-border">
         <thead>
           <tr>
-            <th v-for="(item, index) in columns" :key="index" :class="{
-              'invoice__field-base--line': item.toLowerCase() === 'line',
-              'invoice__field-base--tax': item.toLowerCase() === 'tax code',
-              'invoice__field-base--wht-type': item.toLowerCase() === 'wht type',
-              'invoice__field-base--wht-code': item.toLowerCase() === 'wht code',
-            }" class="invoice__field-base">
+            <th
+              v-for="(item, index) in columns"
+              :key="index"
+              :class="{
+                'invoice__field-base--line': item.toLowerCase() === 'line',
+                'invoice__field-base--tax': item.toLowerCase() === 'tax code',
+                'invoice__field-base--wht-type': item.toLowerCase() === 'wht type',
+                'invoice__field-base--wht-code': item.toLowerCase() === 'wht code',
+              }"
+              class="invoice__field-base"
+            >
               {{ item }}
             </th>
           </tr>
@@ -22,8 +27,16 @@
             <td v-if="!checkInvoiceDp()">{{ item.poItem }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentNo || '-' }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentItem || '-' }}</td>
-            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ moment(item.grDocumentDate).format('YYYY/MM/DD') }}</td>
-            <td>{{ form.currency === 'IDR' ? useFormatIdr(item.itemAmountLC) : useFormatUsd(item.itemAmountTC) }}</td>
+            <td v-if="!checkInvoiceDp() && !checkPoPib()">
+              {{ moment(item.grDocumentDate).format('YYYY/MM/DD') }}
+            </td>
+            <td>
+              {{
+                form.currency === 'IDR'
+                  ? useFormatIdr(item.itemAmountLC)
+                  : useFormatUsd(item.itemAmountTC)
+              }}
+            </td>
             <td v-if="!checkInvoiceDp()">{{ useFormatIdr(item.quantity) }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.uom || '-' }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.itemText || '-' }}</td>
@@ -31,11 +44,29 @@
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.conditionTypeDesc || '-' }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.qcStatus || '-' }}</td>
             <td v-if="!checkPoPib()">{{ getTaxCodeName(item.taxCode) || '-' }}</td>
-            <td v-if="!checkPoPib()">{{ form.currency === 'IDR' ? useFormatIdr(item.vatAmount || 0) : useFormatUsd(item.vatAmount || 0) }}</td>           
+            <td v-if="!checkPoPib()">
+              {{
+                form.currency === 'IDR'
+                  ? useFormatIdr(item.vatAmount || 0)
+                  : useFormatUsd(item.vatAmount || 0)
+              }}
+            </td>
             <td v-if="!checkPoPib()">{{ getWhtTypeName(item.whtType) || '-' }}</td>
             <td v-if="!checkPoPib()">{{ getWhtCodeName(item.whtCode, item) || '-' }}</td>
-            <td v-if="!checkPoPib()">{{ form.currency === 'IDR' ? useFormatIdr(item.whtBaseAmount?.toString() || '') : useFormatUsd(item.whtBaseAmount?.toString() || '') }}</td>
-            <td v-if="!checkPoPib()">{{ form.currency === 'IDR' ? useFormatIdr(item.whtAmount?.toString() || '') : useFormatUsd(item.whtAmount?.toString() || '') }}</td>
+            <td v-if="!checkPoPib()">
+              {{
+                form.currency === 'IDR'
+                  ? useFormatIdr(item.whtBaseAmount?.toString() || '')
+                  : useFormatUsd(item.whtBaseAmount?.toString() || '')
+              }}
+            </td>
+            <td v-if="!checkPoPib()">
+              {{
+                form.currency === 'IDR'
+                  ? useFormatIdr(item.whtAmount?.toString() || '')
+                  : useFormatUsd(item.whtAmount?.toString() || '')
+              }}
+            </td>
             <td>{{ item.department }}</td>
           </tr>
         </tbody>
@@ -69,7 +100,7 @@ const setPoGrList = async () => {
       if (item.whtType) await callWhtCode(item.whtType)
       const data = {
         ...item,
-        whtCodeList: whtCodeList.value
+        whtCodeList: whtCodeList.value,
       }
       result.push(data)
     }
@@ -128,8 +159,8 @@ watch(
     setColumn()
   },
   {
-    immediate: true
-  }
+    immediate: true,
+  },
 )
 
 watch(
@@ -139,8 +170,8 @@ watch(
   },
   {
     deep: true,
-    immediate: true
-  }
+    immediate: true,
+  },
 )
 
 onMounted(() => {
