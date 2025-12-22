@@ -78,6 +78,7 @@ interface ParamsSubmissionHeader {
   invoicingParty?: string
   assigment?: string
   transferNews?: string
+  invoiceSourceName?: string
 }
 
 interface ParamsSubmissionVendor {
@@ -218,11 +219,12 @@ export interface ListPoTypes {
   isOpenChild: boolean
   createdUtcDate: string
   actionerDate?: string
+  invoiceSourceName: string
   // FTP Invoice Integration verification status columns
-  fpStatus?: string
-  vatStatus?: string
-  whtStatus?: string
-  poPrice?: string
+  fpStatus?: boolean
+  vatStatus?: boolean
+  whtStatus?: boolean
+  poPrice?: boolean
 }
 
 export interface ListNonPoTypes {
@@ -281,6 +283,7 @@ export interface QueryParamsListPoTypes {
   invoiceTypeCode?: number | null
   invoiceDate?: string | null
   searchText?: string | null
+  invoiceSource?: number
 }
 
 export interface ParamsSubmissionNonPo {

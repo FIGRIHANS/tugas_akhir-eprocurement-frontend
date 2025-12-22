@@ -17,7 +17,7 @@
                 'invoice__field-base--wht-type': item.toLowerCase() === 'wht type',
                 'invoice__field-base--wht-code': item.toLowerCase() === 'wht code',
               }"
-              class="invoice__field-base"
+              class="invoice__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"
             >
               {{ item }}
             </th>
@@ -26,11 +26,29 @@
         <tbody>
           <tr v-for="(item, index) in additionalList" :key="index" class="invoice__field-items">
             <td>{{ index + 1 }}</td>
-            <td>{{ !item.activityCode && !item.activityName ? getActivityName(item.activity) : `${item.activityCode} - ${item.activityName}` || '-' }}</td>
-            <td>{{ form.currency === 'IDR' ? useFormatIdr(item.itemAmount) : useFormatUsd(item.itemAmount) || '-' }}</td>
+            <td>
+              {{
+                !item.activityCode && !item.activityName
+                  ? getActivityName(item.activity)
+                  : `${item.activityCode} - ${item.activityName}` || '-'
+              }}
+            </td>
+            <td>
+              {{
+                form.currency === 'IDR'
+                  ? useFormatIdr(item.itemAmount)
+                  : useFormatUsd(item.itemAmount) || '-'
+              }}
+            </td>
             <td>{{ getDebitCreditName(item.debitCredit) || '-' }}</td>
             <td>{{ getTaxCodeName(item.taxCode) || '-' }}</td>
-            <td>{{ form.currency === 'IDR' ? useFormatIdr(item.vatAmount) : useFormatUsd(item.vatAmount) }}</td>
+            <td>
+              {{
+                form.currency === 'IDR'
+                  ? useFormatIdr(item.vatAmount)
+                  : useFormatUsd(item.vatAmount)
+              }}
+            </td>
             <td>{{ getCostCenterName(item.costCenter) || '-' }}</td>
             <td>{{ item.profitCenter || '-' }}</td>
             <td>{{ item.assignment || '-' }}</td>
@@ -67,7 +85,7 @@ const columns = ref([
   'Assignment',
   'WHT Type',
   'WHT Code',
-  'WHT Base Amount'
+  'WHT Base Amount',
 ])
 
 const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
@@ -83,7 +101,7 @@ const setAdditionalCostList = async () => {
       if (item.whtType) await callWhtCode(item.whtType)
       const data = {
         ...item,
-        whtCodeList: whtCodeList.value
+        whtCodeList: whtCodeList.value,
       }
       result.push(data)
     }
@@ -97,7 +115,8 @@ const callWhtCode = async (whtType: string) => {
 
 const getActivityName = (id: number) => {
   const getIndex = listActivity.value.findIndex((item) => item.id === id)
-  if (getIndex !== -1) return `${listActivity.value[getIndex].code} - ${listActivity.value[getIndex].name}`
+  if (getIndex !== -1)
+    return `${listActivity.value[getIndex].code} - ${listActivity.value[getIndex].name}`
 }
 
 const getDebitCreditName = (code: string) => {
@@ -149,7 +168,7 @@ watch(
   },
   {
     deep: true,
-    immediate: true
-  }
+    immediate: true,
+  },
 )
 </script>

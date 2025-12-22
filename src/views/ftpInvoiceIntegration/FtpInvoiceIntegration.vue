@@ -55,10 +55,11 @@
               <th
                 v-for="(item, index) in columns"
                 :key="index"
+                class="!border-b-blue-500 !bg-blue-100 !text-blue-500 whitespace-nowrap"
                 :class="{
                   'list__long ': index !== 0,
                   'cursor-pointer': item,
-                  '!text-blue-500': item === sortColumnName && sortBy !== '',
+                  '!text-blue-700': item === sortColumnName && sortBy !== '',
                 }"
                 @click="sortColumn(item)"
               >
@@ -94,7 +95,7 @@
                     <i v-else class="ki-filled ki-down !text-[9px]"></i>
                   </button>
                 </td>
-                <td>{{ parent.invoiceNo }}</td>
+
                 <td>
                   <span class="badge badge-outline" :class="colorBadge(parent.statusCode)">
                     {{ parent.statusName }}
@@ -114,24 +115,26 @@
                       : '-'
                   }}
                 </td>
+                <td>{{ parent.invoiceNo }}</td>
+                <td>{{ parent.invoiceSourceName }}</td>
                 <!-- FTP Verification Status Columns -->
                 <td>
-                  <span class="badge" :class="getStatusBadgeClass(parent.fpStatus || 'Warning')">
+                  <span class="badge" :class="getStatusBadgeClass(parent.fpStatus)">
                     {{ parent.fpStatus || 'Warning' }}
                   </span>
                 </td>
                 <td>
-                  <span class="badge" :class="getStatusBadgeClass(parent.vatStatus || 'Error')">
-                    {{ parent.vatStatus || 'Error' }}
+                  <span class="badge" :class="getStatusBadgeClass(parent.vatStatus)">
+                    {{ parent.vatStatus || 'Warning' }}
                   </span>
                 </td>
                 <td>
-                  <span class="badge" :class="getStatusBadgeClass(parent.whtStatus || 'Warning')">
+                  <span class="badge" :class="getStatusBadgeClass(parent.whtStatus)">
                     {{ parent.whtStatus || 'Warning' }}
                   </span>
                 </td>
                 <td>
-                  <span class="badge" :class="getStatusBadgeClass(parent.poPrice || 'Warning')">
+                  <span class="badge" :class="getStatusBadgeClass(parent.poPrice)">
                     {{ parent.poPrice || 'Warning' }}
                   </span>
                 </td>
@@ -263,7 +266,6 @@ const filterForm = reactive<filterListTypes>({
 
 const columns = ref<string[]>([
   '',
-  'Submitted Document No',
   'Status',
   'Vendor Name',
   'Invoice Vendor No',
@@ -273,6 +275,8 @@ const columns = ref<string[]>([
   'Total Gross Amount',
   'Total Net Amount',
   'Estimated Payment Date',
+  'Submitted Document No',
+  'Invoice Source',
   'FP Status',
   'VAT Status',
   'WHT Status',
@@ -298,11 +302,11 @@ const colorBadge = (status: number) => {
 }
 
 // Helper function for verification status badge colors
-const getStatusBadgeClass = (status: string) => {
-  if (status === 'Verified') return 'badge-success'
-  if (status === 'Warning') return 'badge-warning'
-  if (status === 'Error') return 'badge-danger'
-  return 'badge-secondary'
+const getStatusBadgeClass = (status: boolean) => {
+  if (status === true) return 'badge-success'
+  if (status === false) return 'badge-warning'
+  // if (status === 'Error') return 'badge-danger'
+  // return 'badge-secondary'
 }
 
 const setList = (listData: ListPoTypes[]) => {
@@ -351,6 +355,7 @@ const callList = () => {
       invoiceTypeCode: Number(filterForm.invoiceType),
       invoiceDate: filterForm.date,
       searchText: search.value,
+      invoiceSource: 2,
     })
     .finally(() => {
       sortColumn(null)

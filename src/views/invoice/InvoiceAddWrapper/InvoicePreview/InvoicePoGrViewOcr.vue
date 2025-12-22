@@ -14,7 +14,7 @@
                 'invoice__field-base--wht-type': item.toLowerCase() === 'wht type',
                 'invoice__field-base--wht-code': item.toLowerCase() === 'wht code',
               }"
-              class="invoice__field-base"
+              class="invoice__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"
             >
               {{ item }}
             </th>

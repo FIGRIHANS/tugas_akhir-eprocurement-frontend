@@ -422,9 +422,9 @@ const checkIsPoPibCc = () =>
 //   }
 // }
 
-const openModalSuccess = () => {
-  showModalSuccess.value = true
-}
+// const openModalSuccess = () => {
+//   showModalSuccess.value = true
+// }
 
 const documentTypeList = ref([
   { code: '1', name: 'Tax Document' },

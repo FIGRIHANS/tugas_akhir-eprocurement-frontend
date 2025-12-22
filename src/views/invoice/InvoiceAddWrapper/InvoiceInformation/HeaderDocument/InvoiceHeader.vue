@@ -405,6 +405,11 @@
           :class="{ 'border-danger': form.descriptionError }"
         ></textarea>
       </div>
+
+      <div v-if="checkPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+        <label class="form-label"> Invoice Source </label>
+        <input v-model="form.invoiceSource" class="input" placeholder="" :disabled="true" />
+      </div>
     </div>
   </div>
 </template>

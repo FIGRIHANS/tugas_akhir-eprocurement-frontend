@@ -224,7 +224,8 @@ const ModalFailedBudgetCheck = defineAsyncComponent(
   () => import('./InvoiceAddWrapper/ModalFailedBudgetCheck.vue'),
 )
 const UpdatePaymentStatusModal = defineAsyncComponent(
-  () => import('@/views/InvoiceDetail/InvoiceDetail/PaymentStatusDetail/UpdatePaymentStatusModal.vue'),
+  () =>
+    import('@/views/InvoiceDetail/InvoiceDetail/PaymentStatusDetail/UpdatePaymentStatusModal.vue'),
 )
 
 const invoiceApi = useInvoiceSubmissionStore()
@@ -326,6 +327,7 @@ const form = reactive<formTypes>({
   casDateReceipt: '',
   dueDateCas: '',
   proposalAmountVal: '',
+  invoiceSource: '',
 })
 
 const contentComponent = computed(() => {
@@ -1129,6 +1131,7 @@ const setData = () => {
     form.status = detail.header.statusCode
     form.invoiceUId = detail.header.invoiceUId
     form.invoiceType = detail.header.invoiceTypeCode ? detail.header.invoiceTypeCode.toString() : ''
+    form.invoiceSource = detail.header.invoiceSourceName
     form.vendorId = detail.vendor.vendorId ? detail.vendor.vendorId.toString() : ''
     form.npwp = detail.vendor.npwp
     form.address = detail.vendor.vendorAddress
@@ -1939,7 +1942,11 @@ watch(
     // For view mode: stepper will be updated by form.status watcher below
 
     // Load invoice detail for payment status when profileId 3200 accesses payment status tab
-    if (tabNow.value === 'paymentStatus' && userData.value?.profile.profileId === 3200 && form.status === 10) {
+    if (
+      tabNow.value === 'paymentStatus' &&
+      userData.value?.profile.profileId === 3200 &&
+      form.status === 10
+    ) {
       await loadInvoiceDetailForPaymentStatus()
     }
   },

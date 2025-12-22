@@ -13,6 +13,7 @@
         placeholder=""
         disabled
       />
+
       <select
         v-else
         v-model="form.bankAccountNumber"
@@ -60,6 +61,8 @@ const bankList = ref<PaymentTypes[]>([])
 const vendorList = computed(() => invoiceMasterApi.vendorList)
 
 const checkBank = () => {
+  console.log(form, 'masuk 1')
+
   if (form) {
     const getIndex = vendorList.value.findIndex((item) => item.sapCode === form?.vendorId)
     if (getIndex !== -1) {
@@ -76,13 +79,14 @@ const setBank = () => {
       form.beneficiaryName = bankList.value[0].beneficiaryName
       form.bankAccountNumber = bankList.value[0].accountNumber
       form.bankCountryCode = bankList.value[0].bankCountryCode
-    } else {
-      form.bankKeyId = ''
-      form.bankNameId = ''
-      form.beneficiaryName = ''
-      form.bankAccountNumber = ''
-      form.bankCountryCode = ''
     }
+    // } else {
+    //   form.bankKeyId = ''
+    //   form.bankNameId = ''
+    //   form.beneficiaryName = ''
+    //   form.bankAccountNumber = ''
+    //   form.bankCountryCode = ''
+    // }
   }
 }
 
