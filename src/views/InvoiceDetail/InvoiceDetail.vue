@@ -117,15 +117,7 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  ref,
-  computed,
-  watch,
-  provide,
-  defineAsyncComponent,
-  onMounted,
-  type Ref,
-} from 'vue'
+import { ref, computed, watch, provide, defineAsyncComponent, onMounted, type Ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import type { formTypes } from './types/invoiceDetail'
 import type { itemsPoGrType } from './types/invoicePoGr'
@@ -423,8 +415,12 @@ const handleConfirmPaymentStatus = async () => {
       console.error('Failed to update payment status:', response.result.message)
     }
   } catch (error: unknown) {
-    const errorWithResponse = error as { response?: { data?: { result?: { message?: string }; message?: string } } }
-    const backendMessage = errorWithResponse?.response?.data?.result?.message || errorWithResponse?.response?.data?.message
+    const errorWithResponse = error as {
+      response?: { data?: { result?: { message?: string }; message?: string } }
+    }
+    const backendMessage =
+      errorWithResponse?.response?.data?.result?.message ||
+      errorWithResponse?.response?.data?.message
     const errorDetail = errorWithResponse?.response?.data
     console.error('Error updating payment status:', errorDetail || error)
     console.error('Full error object:', error)
@@ -702,7 +698,8 @@ const mapAdditionalCost = () => {
   for (const item of form.value.additionalCosts) {
     // Safe type casting untuk mengakses itemText property
     const itemRecord = item as unknown as Record<string, unknown>
-    const itemText = typeof itemRecord['itemText'] === 'string' ? (itemRecord['itemText'] as string) : ''
+    const itemText =
+      typeof itemRecord['itemText'] === 'string' ? (itemRecord['itemText'] as string) : ''
     cost.push({
       id: item.id,
       activityId: item.activityId,
@@ -1301,7 +1298,8 @@ const setDataEdit = () => {
     const itemRecord = item as unknown as Record<string, unknown>
     return {
       ...item,
-      itemText: typeof itemRecord['itemText'] === 'string' ? (itemRecord['itemText'] as string) : '',
+      itemText:
+        typeof itemRecord['itemText'] === 'string' ? (itemRecord['itemText'] as string) : '',
       whtCodeList: item.whtType ? whtCodeList.value : [],
     }
   })
@@ -1310,7 +1308,8 @@ const setDataEdit = () => {
     const itemRecord = item as unknown as Record<string, unknown>
     return {
       ...item,
-      itemText: typeof itemRecord['itemText'] === 'string' ? (itemRecord['itemText'] as string) : '',
+      itemText:
+        typeof itemRecord['itemText'] === 'string' ? (itemRecord['itemText'] as string) : '',
       isEdit: false,
       whtCodeList: item.whtType ? whtCodeList.value : [],
     }

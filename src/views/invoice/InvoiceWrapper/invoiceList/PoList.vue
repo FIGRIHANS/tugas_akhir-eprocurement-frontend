@@ -257,7 +257,7 @@ const colorBadge = (statusCode: number) => {
     7: 'badge-primary',
     8: 'badge-warning', // Planned
     9: 'badge-info', // Partially Paid
-    10: 'badge-success', // Paid
+    10: 'badge-warning', // Paid
   } as { [key: number]: string }
   return list[statusCode]
 }

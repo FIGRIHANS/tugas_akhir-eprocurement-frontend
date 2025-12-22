@@ -3,13 +3,14 @@
     <p class="mb-[16px] font-semibold text-base">Invoice Header</p>
     <div v-if="form">
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-        <label class="form-label">
-          Invoice Type
-        </label>
+        <label class="form-label"> Invoice Type </label>
         <input :value="getInvoiceTypeName()" class="input" placeholder="" disabled />
       </div>
 
-      <div v-if="checkIsNonPo() && !checkNonPoPettyCash()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div
+        v-if="checkIsNonPo() && !checkNonPoPettyCash()"
+        class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+      >
         <label class="form-label">
           Vendor No.
           <!-- <span class="text-red-500 ml-[4px]">*</span> -->
@@ -60,10 +61,15 @@
         />
       </div>
 
-      <div v-if="!checkNonPoPettyCash()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div
+        v-if="!checkNonPoPettyCash()"
+        class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+      >
         <label class="form-label">
           Posting Date
-          <span v-if="!disabledPostingDate() && !checkNonPoCc()" class="text-red-500 ml-[4px]">*</span>
+          <span v-if="!disabledPostingDate() && !checkNonPoCc()" class="text-red-500 ml-[4px]"
+            >*</span
+          >
         </label>
         <input
           v-if="disabledPostingDate()"
@@ -82,7 +88,10 @@
         />
       </div>
 
-      <div v-if="checkNonPoPettyCash()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div
+        v-if="checkNonPoPettyCash()"
+        class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+      >
         <label class="form-label">
           Cash Journal
           <span class="text-red-500 ml-[4px]">*</span>
@@ -99,7 +108,10 @@
         ></v-select>
       </div>
 
-      <div v-if="checkNonPoPettyCash()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div
+        v-if="checkNonPoPettyCash()"
+        class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+      >
         <label class="form-label">
           Petty Cash Period
           <span class="text-red-500 ml-[4px]">*</span>
@@ -142,11 +154,17 @@
       >
         <label class="form-label">
           Estimated Payment Date
-          <span v-if="!disabledEstimatedPaymentDate() && !checkNonPoCc()" class="text-red-500 ml-[4px]">*</span>
+          <span
+            v-if="!disabledEstimatedPaymentDate() && !checkNonPoCc()"
+            class="text-red-500 ml-[4px]"
+            >*</span
+          >
         </label>
         <input
           v-if="disabledEstimatedPaymentDate()"
-          :value="form.estimatedPaymentDate ? moment(form.estimatedPaymentDate).format('YYYY/MM/DD') : ''"
+          :value="
+            form.estimatedPaymentDate ? moment(form.estimatedPaymentDate).format('YYYY/MM/DD') : ''
+          "
           class="input"
           placeholder=""
           disabled
@@ -166,7 +184,13 @@
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
       >
         <label class="form-label"> Remaning CAS Receipt Date </label>
-        <input v-if="checkApprovalNonPoProc()" :value="form.casDateReceipt ? moment(form.casDateReceipt).format('YYYY/MM/DD') : ''" class="input" placeholder="" disabled />
+        <input
+          v-if="checkApprovalNonPoProc()"
+          :value="form.casDateReceipt ? moment(form.casDateReceipt).format('YYYY/MM/DD') : ''"
+          class="input"
+          placeholder=""
+          disabled
+        />
         <DatePicker
           v-else
           v-model="form.casDateReceipt"
@@ -176,10 +200,19 @@
         />
       </div>
 
-      <div v-if="!checkNonPoPettyCash()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div
+        v-if="!checkNonPoPettyCash()"
+        class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+      >
         <label class="form-label">
           Tax Document No.
-          <span v-if="(!disabledTaxDocumentNo() && !checkNonPoCc() && !checkNonPoLba()) || checkNonPoCas()" class="text-red-500 ml-[4px]">*</span>
+          <span
+            v-if="
+              (!disabledTaxDocumentNo() && !checkNonPoCc() && !checkNonPoLba()) || checkNonPoCas()
+            "
+            class="text-red-500 ml-[4px]"
+            >*</span
+          >
         </label>
         <input
           v-model="form.taxNo"
@@ -190,7 +223,10 @@
         />
       </div>
 
-      <div v-if="!checkNonPoCas() && !checkNonPoPettyCash()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div
+        v-if="!checkNonPoCas() && !checkNonPoPettyCash()"
+        class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+      >
         <label class="form-label">
           {{ checkNonPoLba() ? 'CAS No.' : 'Invoice Vendor No.' }}
           <span v-if="!disabledInvoiceVendorNo()" class="text-red-500 ml-[4px]">*</span>
@@ -204,7 +240,10 @@
         />
       </div>
 
-      <div v-if="checkNonPoCc()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div
+        v-if="checkNonPoCc()"
+        class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+      >
         <label class="form-label">
           Proposal Amount
           <span class="text-red-500 ml-[4px]">*</span>
@@ -218,7 +257,10 @@
         />
       </div>
 
-      <div v-if="!checkNonPoLba() && !checkNonPoPettyCash()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div
+        v-if="!checkNonPoLba() && !checkNonPoPettyCash()"
+        class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+      >
         <label class="form-label">
           Payment Method
           <span v-if="!disabledPaymentMethod()" class="text-red-500 ml-[4px]">*</span>
@@ -236,7 +278,10 @@
         </select>
       </div>
 
-      <div v-if="!checkNonPoPettyCash()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div
+        v-if="!checkNonPoPettyCash()"
+        class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+      >
         <label class="form-label"> Assignment </label>
         <input
           v-model="form.assigment"
@@ -247,10 +292,15 @@
         />
       </div>
 
-      <div v-if="!checkNonPoLba() && !checkNonPoPettyCash()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div
+        v-if="!checkNonPoLba() && !checkNonPoPettyCash()"
+        class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+      >
         <label class="form-label">
           Transfer News
-          <span v-if="!disabledTransferNews() && !checkNonPoCc()" class="text-red-500 ml-[4px]">*</span>
+          <span v-if="!disabledTransferNews() && !checkNonPoCc()" class="text-red-500 ml-[4px]"
+            >*</span
+          >
         </label>
         <input
           v-model="form.transferNews"
@@ -279,17 +329,25 @@
         />
       </div>
 
-      <div v-if="!checkNonPoPettyCash()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-        <label class="form-label">
-          Currency
-        </label>
+      <div
+        v-if="!checkNonPoPettyCash()"
+        class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+      >
+        <label class="form-label"> Currency </label>
         <input :value="form.currCode" class="input" placeholder="" disabled />
       </div>
 
-      <div v-if="!checkNonPoPettyCash()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div
+        v-if="!checkNonPoPettyCash()"
+        class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+      >
         <label class="form-label">
           NPWP Reporting
-          <span v-if="!disabledNpwpReporting() && !checkApproval1AndCas()" class="text-red-500 ml-[4px]">*</span>
+          <span
+            v-if="!disabledNpwpReporting() && !checkApproval1AndCas()"
+            class="text-red-500 ml-[4px]"
+            >*</span
+          >
         </label>
         <select
           v-model="form.npwpReporting"
@@ -298,20 +356,28 @@
           :class="{ 'border-danger': form.npwpReportingError }"
           :disabled="disabledNpwpReporting()"
         >
-          <option v-for="item of npwpReportingList" :key="item.npwpLocation" :value="item.npwpLocation">
+          <option
+            v-for="item of npwpReportingList"
+            :key="item.npwpLocation"
+            :value="item.npwpLocation"
+          >
             {{ item.npwpDescription }}
           </option>
         </select>
       </div>
 
-      <div v-if="form.invoiceDPCode === 9013" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-        <label class="form-label">
-          Remaining DP Amount
-        </label>
-        <input v-model="remainingDpAmountVal" class="input" placeholder="" disabled/>
+      <div
+        v-if="form.invoiceDPCode === 9013"
+        class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+      >
+        <label class="form-label"> Remaining DP Amount </label>
+        <input v-model="remainingDpAmountVal" class="input" placeholder="" disabled />
       </div>
 
-      <div v-if="form.invoiceDPCode === 9013" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div
+        v-if="form.invoiceDPCode === 9013"
+        class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+      >
         <label class="form-label">
           DP Amount Deduction
           <span v-if="!disabledDpAmountDeduction()" class="text-red-500 ml-[4px]">*</span>
@@ -324,17 +390,19 @@
         />
       </div>
 
-      <div v-if="checkIsNonPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-        <label class="form-label">
-          Requestor
-        </label>
+      <div
+        v-if="checkIsNonPo()"
+        class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+      >
+        <label class="form-label"> Requestor </label>
         <input v-model="form.department" class="input" placeholder="" disabled />
       </div>
 
-      <div v-if="checkNonPoPettyCash()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-        <label class="form-label">
-          PIC Finance
-        </label>
+      <div
+        v-if="checkNonPoPettyCash()"
+        class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+      >
+        <label class="form-label"> PIC Finance </label>
         <input v-model="form.picFinance" class="input" placeholder="" />
       </div>
 
@@ -436,47 +504,104 @@ const checkNonPoPettyCash = () => {
 }
 
 const disabledInvoiceDate = () => {
-  return (!checkIsNonPo() && checkIsAccountingTax()) || checkApprovalNonPoProc() || route.query.isSendSap === 'true'
+  return (
+    (!checkIsNonPo() && checkIsAccountingTax()) ||
+    checkApprovalNonPoProc() ||
+    route.query.isSendSap === 'true'
+  )
 }
 
 const disabledPostingDate = () => {
-  return checkVerifikator1() || checkApprovalNonPoProc() || checkApprovalNonPoCcAdmin() || route.query.isSendSap === 'true'
+  return (
+    checkVerifikator1() ||
+    checkApprovalNonPoProc() ||
+    checkApprovalNonPoCcAdmin() ||
+    route.query.isSendSap === 'true'
+  )
 }
 
 const disabledInvoicingParty = () => {
-  return checkVerifikator1() || checkApprovalNonPoProc() || checkApprovalNonPoCcAdmin() || route.query.isSendSap === 'true'
+  return (
+    checkVerifikator1() ||
+    checkApprovalNonPoProc() ||
+    checkApprovalNonPoCcAdmin() ||
+    route.query.isSendSap === 'true'
+  )
 }
 
 const disabledEstimatedPaymentDate = () => {
-  return checkVerifikator1() || checkIsAccountingTax() || checkApprovalNonPoProc() || checkApprovalNonPoCcAdmin() || route.query.isSendSap === 'true'
+  return (
+    checkVerifikator1() ||
+    checkIsAccountingTax() ||
+    checkApprovalNonPoProc() ||
+    checkApprovalNonPoCcAdmin() ||
+    route.query.isSendSap === 'true'
+  )
 }
 
 const disabledTaxDocumentNo = () => {
-  return checkVerifikator1() || checkApprovalNonPoProc() || checkApprovalNonPoCcAdmin() || route.query.isSendSap === 'true'
+  return (
+    checkVerifikator1() ||
+    checkApprovalNonPoProc() ||
+    checkApprovalNonPoCcAdmin() ||
+    route.query.isSendSap === 'true'
+  )
 }
 
 const disabledInvoiceVendorNo = () => {
-  return checkIsAccountingTax() || checkApprovalNonPoProc() || checkNonPoLba() || route.query.isSendSap === 'true'
+  return (
+    checkIsAccountingTax() ||
+    checkApprovalNonPoProc() ||
+    checkNonPoLba() ||
+    route.query.isSendSap === 'true'
+  )
 }
 
 const disabledPaymentMethod = () => {
-  return checkIsAccountingTax() || checkVerifikator1() || checkApprovalNonPoProc() || checkApprovalNonPoCcAdmin() || route.query.isSendSap === 'true'
+  return (
+    checkIsAccountingTax() ||
+    checkVerifikator1() ||
+    checkApprovalNonPoProc() ||
+    checkApprovalNonPoCcAdmin() ||
+    route.query.isSendSap === 'true'
+  )
 }
 
 const disabledAssignment = () => {
-  return checkVerifikator1() || checkApprovalNonPoProc() || checkApprovalNonPoCcAdmin() || route.query.isSendSap === 'true'
+  return (
+    checkVerifikator1() ||
+    checkApprovalNonPoProc() ||
+    checkApprovalNonPoCcAdmin() ||
+    route.query.isSendSap === 'true'
+  )
 }
 
 const disabledTransferNews = () => {
-  return checkIsAccountingTax() || checkVerifikator1() || checkApprovalNonPoProc() || checkApprovalNonPoCcAdmin() || route.query.isSendSap === 'true'
+  return (
+    checkIsAccountingTax() ||
+    checkVerifikator1() ||
+    checkApprovalNonPoProc() ||
+    checkApprovalNonPoCcAdmin() ||
+    route.query.isSendSap === 'true'
+  )
 }
 
 const disabledNpwpReporting = () => {
-  return checkVerifikator1() || checkApprovalNonPoProc() || checkApprovalNonPoCcAdmin() || route.query.isSendSap === 'true'
+  return (
+    checkVerifikator1() ||
+    checkApprovalNonPoProc() ||
+    checkApprovalNonPoCcAdmin() ||
+    route.query.isSendSap === 'true'
+  )
 }
 
 const disabledDpAmountDeduction = () => {
-  return checkVerifikator1() || checkInvoiceDp() || checkApprovalNonPoProc() || route.query.isSendSap === 'true'
+  return (
+    checkVerifikator1() ||
+    checkInvoiceDp() ||
+    checkApprovalNonPoProc() ||
+    route.query.isSendSap === 'true'
+  )
 }
 
 const disabledDescription = () => {
@@ -505,7 +630,8 @@ watch(
     if (!form?.value) return
     const c = String(code || '')
     const idx = listCashJournal.value.findIndex((item) => item.cashJournalNo === c)
-    if (idx !== -1) form.value.cashJournalName = `${listCashJournal.value[idx].cashJournalNo} - ${listCashJournal.value[idx].cashJournalName}`
+    if (idx !== -1)
+      form.value.cashJournalName = `${listCashJournal.value[idx].cashJournalNo} - ${listCashJournal.value[idx].cashJournalName}`
     else form.value.cashJournalName = ''
   },
 )
@@ -523,13 +649,15 @@ watch(
       const getIndex = listCashJournal.value.findIndex(
         (item) => item.cashJournalNo === form.value.cashJournalCode,
       )
-      if (getIndex !== -1) form.value.cashJournalName = listCashJournal.value[getIndex].cashJournalName
+      if (getIndex !== -1)
+        form.value.cashJournalName = listCashJournal.value[getIndex].cashJournalName
     }
     if (form?.value.npwpReporting) {
       const getIndex = npwpReportingList.value.findIndex(
         (item) => item.npwpLocation === form.value.npwpReporting,
       )
-      if (getIndex !== -1) form.value.npwpReportingName = npwpReportingList.value[getIndex].npwpDescription
+      if (getIndex !== -1)
+        form.value.npwpReportingName = npwpReportingList.value[getIndex].npwpDescription
     }
   },
   {

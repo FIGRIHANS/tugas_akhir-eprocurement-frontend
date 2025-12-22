@@ -303,10 +303,17 @@ const verifList = computed(() => verificationApi.listPo)
 
 const colorBadge = (statusCode: number) => {
   const list = {
-    2: 'badge-info',
-    5: 'badge-danger',
+    0: 'badge-light',
+    1: 'badge-info',
+    2: 'badge-primary',
+    3: 'badge-success',
     4: 'badge-success',
-    7: 'badge-primary',
+    5: 'badge-danger',
+    6: 'badge-dark',
+    7: 'badge-secondary',
+    8: 'badge-warning',
+    9: 'badge-info',
+    10: 'badge-warning',
   } as { [key: number]: string }
   return list[statusCode]
 }
