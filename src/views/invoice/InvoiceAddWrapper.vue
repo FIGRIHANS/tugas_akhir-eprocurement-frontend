@@ -159,7 +159,7 @@
     <ErrorSubmissionModal />
     <ModalSuccessBudgetCheck @afterClose="isCheckBudget = true" />
     <ModalFailedBudgetCheck @afterClose="isCheckBudget = false" />
-    <UpdatePaymentStatusModal :isLoading="false" @close="goToInvoiceList" />
+    <UpdatePaymentStatusModal :isLoading="false" @close="goToList" />
   </div>
 </template>
 
@@ -224,7 +224,8 @@ const ModalFailedBudgetCheck = defineAsyncComponent(
   () => import('./InvoiceAddWrapper/ModalFailedBudgetCheck.vue'),
 )
 const UpdatePaymentStatusModal = defineAsyncComponent(
-  () => import('@/views/InvoiceDetail/InvoiceDetail/PaymentStatusDetail/UpdatePaymentStatusModal.vue'),
+  () =>
+    import('../InvoiceDetail/InvoiceDetail/PaymentStatusDetail/UpdatePaymentStatusModal.vue'),
 )
 
 const invoiceApi = useInvoiceSubmissionStore()
@@ -668,15 +669,11 @@ const goBack = () => {
 // Update payment status function for profileId 3200
 const updatePaymentStatus = () => {
   console.log('Update payment status clicked for profileId 3200')
-  // Show update payment status modal
-  const idModal = document.querySelector('#update_payment_status_modal')
-  const modal = KTModal.getInstance(idModal as HTMLElement)
-  modal.show()
-}
-
-// Navigate to invoice list after payment status update success
-const goToInvoiceList = () => {
-  router.push('/invoice')
+  const modalElement = document.querySelector('#update_payment_status_modal')
+  if (modalElement) {
+    const modal = KTModal.getInstance(modalElement as HTMLElement)
+    if (modal) modal.show()
+  }
 }
 
 const mapDocument = () => {

@@ -1,11 +1,11 @@
 <template>
   <div class="flex flex-col gap-[16px]">
     <p class="text-base font-semibold">Payment Details</p>
-    <div class="overflow-x-auto cost__table">
+    <div class="overflow-x-auto invoice__table">
       <table class="table table-xs table-border">
         <thead>
           <tr>
-            <th v-for="(item, index) in columns" :key="index" class="cost__field-base">
+            <th v-for="(item, index) in columns" :key="index" class="invoice__field-base">
               {{ item }}
             </th>
           </tr>
@@ -15,7 +15,7 @@
             <td :colspan="columns.length" class="text-center text-[13px]">No Data Available</td>
           </tr>
           <template v-else>
-            <tr v-for="(item, index) in paymentDetails" :key="index" class="cost__field-items">
+            <tr v-for="(item, index) in paymentDetails" :key="index" class="invoice__field-items">
               <td>{{ item.no }}</td>
               <td>{{ item.paymentDate }}</td>
               <td>
@@ -37,29 +37,17 @@
               <td>{{ item.bankAccount }}</td>
               <td>{{ item.remarks || '-' }}</td>
               <td class="text-center">
-                <!-- Single button that handles both upload and download -->
+                <!-- Download button for attachment document -->
                 <UiButton
+                  v-if="item.attachmentDocument"
                   icon
                   size="sm"
-                  @click="handleAttachmentAction(index, item.attachmentDocument)"
-                  :title="item.attachmentDocument ? 'Download File' : 'Upload File'"
+                  @click="downloadDocument(item.attachmentDocument)"
+                  title="Download File"
                 >
-                  <i
-                    :class="item.attachmentDocument ? 'ki-duotone ki-cloud-download' : 'ki-duotone ki-cloud-add'"
-                  >
-                    <span class="path1"></span>
-                    <span class="path2"></span>
-                  </i>
+                  <i class="ki-outline ki-arrow-down text-white"></i>
                 </UiButton>
-
-                <!-- Hidden file input -->
-                <input
-                  type="file"
-                  :id="`file-input-${index}`"
-                  @change="handleFileUpload($event, index)"
-                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                  class="hidden"
-                />
+                <span v-else>-</span>
               </td>
             </tr>
           </template>
@@ -160,61 +148,8 @@ const formatClearingDate = (clearingDate: number) => {
   const year = dateStr.substring(0, 4)
   const month = dateStr.substring(4, 6)
   const day = dateStr.substring(6, 8)
-  return `${day}.${month}.${year}`
+  return `${day}/${month}/${year}`
 }
-
-const handleAttachmentAction = (index: number, attachmentDocument?: string) => {
-  if (attachmentDocument) {
-    downloadDocument(attachmentDocument)
-  } else {
-    triggerFileUpload(index)
-  }
-}
-
-// Trigger file upload dialog
-const triggerFileUpload = (index: number) => {
-  const fileInput = document.getElementById(`file-input-${index}`) as HTMLInputElement
-  if (fileInput) {
-    fileInput.click()
-  }
-}
-
-// Handle file upload
-const handleFileUpload = (event: Event, index: number) => {
-  const target = event.target as HTMLInputElement
-  const file = target.files?.[0]
-
-  if (file) {
-    const maxSize = 10 * 1024 * 1024
-    if (file.size > maxSize) {
-      alert('File size must be less than 10MB')
-      return
-    }
-
-    // Update the payment detail with the uploaded file name
-    if (paymentDetails.value[index]) {
-      paymentDetails.value[index].attachmentDocument = file.name
-    }
-
-    console.log('File uploaded successfully:', {
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      rowIndex: index
-    })
-
-    alert(`File "${file.name}" uploaded successfully!`)
-
-    target.value = ''
-
-  }
-}
-
-// Update payment status function (moved to parent InvoiceAddWrapper)
-// const updatePaymentStatus = () => {
-//   console.log('Update payment status clicked')
-//
-// }
 
 const setPaymentDetails = () => {
   if (!form) {
@@ -231,7 +166,7 @@ const setPaymentDetails = () => {
         status: sapPaymentData.value.paymentStatus || 'Paid',
         bankAccount: 'BRI01 - 56464564',
         remarks: `SAP Invoice: ${sapPaymentData.value.sapInvoiceNo || 'N/A'}`,
-        attachmentDocument: undefined,
+        attachmentDocument: 'SAP_Payment_Receipt.pdf',
       },
     ]
   } else {
@@ -242,6 +177,28 @@ const setPaymentDetails = () => {
 const downloadDocument = (documentName: string) => {
   console.log('Downloading document:', documentName)
 
+  // Create a temporary link element for download
+  const link = document.createElement('a')
+
+  // For demo purposes, we'll simulate download with a blob
+  // In real implementation, you would fetch the actual file from server
+  const sampleContent = `Sample document content for: ${documentName}`
+  const blob = new Blob([sampleContent], { type: 'text/plain' })
+  const url = window.URL.createObjectURL(blob)
+
+  link.href = url
+  link.download = documentName
+  link.style.display = 'none'
+
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+
+  // Clean up the URL object
+  window.URL.revokeObjectURL(url)
+
+  // Show success message
+  alert(`Document "${documentName}" downloaded successfully!`)
 }
 
 watch(
@@ -270,6 +227,68 @@ onMounted(async () => {
 <style lang="scss" scoped>
 @use '../../styles/additional-cost.scss';
 
+.invoice__table {
+  border-radius: 0.5rem;
+  overflow: hidden;
+
+  .table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 0;
+    background: #ffffff;
+    border: 1px solid #e1e5e9;
+    border-radius: 0.5rem;
+  }
+
+  .invoice__field-base {
+    background-color: #dbeafe; /* bg-blue-100 */
+    border-bottom: 1px solid #3b82f6; /* border-b-blue-500 */
+    border-top: 1px solid #e1e5e9;
+    border-left: 1px solid #e1e5e9;
+    border-right: 1px solid #e1e5e9;
+    padding: 12px 16px;
+    font-weight: 600;
+    font-size: 12px;
+    text-align: left;
+    color: #3b82f6; /* text-blue-500 */
+    vertical-align: middle;
+
+    &:first-child {
+      border-top-left-radius: 0.5rem;
+    }
+
+    &:last-child {
+      border-top-right-radius: 0.5rem;
+    }
+  }
+
+  .invoice__field-items {
+    background-color: #ffffff;
+
+    &:hover {
+      background-color: rgba(37, 99, 235, 0.05);
+    }
+
+    &:last-child {
+      td:first-child {
+        border-bottom-left-radius: 0.5rem;
+      }
+
+      td:last-child {
+        border-bottom-right-radius: 0.5rem;
+      }
+    }
+
+    td {
+      border: 1px solid #e1e5e9;
+      padding: 12px 16px;
+      font-size: 13px;
+      vertical-align: middle;
+      color: #181c32;
+    }
+  }
+}
+
 .badge {
   padding: 4px 8px;
   border-radius: 4px;
@@ -278,21 +297,12 @@ onMounted(async () => {
 }
 
 .badge-success {
-  background-color: #d4edda;
-  color: #155724;
+  background-color: #50cd89;
+  color: #ffffff;
 }
 
 .badge-warning {
   background-color: #fff3cd;
   color: #856404;
-}
-
-// White header for payment details table to match profileId 3002
-.cost__field-base {
-  background-color: white !important;
-}
-
-.table thead th {
-  background-color: white !important;
 }
 </style>

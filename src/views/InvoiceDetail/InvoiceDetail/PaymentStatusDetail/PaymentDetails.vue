@@ -22,10 +22,11 @@
           <template v-else>
             <tr v-for="(item, index) in paymentDetails" :key="index" class="invoice__field-items">
               <!-- Actions column (left of No) -->
-              <td class="flex items-center justify-center gap-[6px]">
+              <td class="text-center">
+                <div class="flex items-center justify-center gap-[6px]">
                 <button
                   class="btn btn-icon btn-primary"
-                  @click="editingIndex === index ? saveEdit() : startEdit(index)"
+                  @click="editingIndex === index ? saveEdit(index) : startEdit(index)"
                   :title="editingIndex === index ? 'Save' : 'Edit'"
                 >
                   <i v-if="editingIndex !== index" class="ki-duotone ki-notepad-edit"></i>
@@ -38,6 +39,7 @@
                 >
                   <i class="ki-duotone ki-cross-circle"></i>
                 </button>
+                </div>
               </td>
 
               <td>{{ item.no }}</td>
@@ -173,10 +175,8 @@ const paymentDetails = ref<PaymentDetail[]>([])
 const editingIndex = ref<number | null>(null)
 const backupRow = ref<PaymentDetail | null>(null)
 
-// Inject paymentDetailsData to sync with parent
 const paymentDetailsData = inject<Ref<PaymentDetail[]>>('paymentDetailsData')
 
-// Watch paymentDetails and sync with parent
 watch(
   paymentDetails,
   (newVal) => {
@@ -187,7 +187,6 @@ watch(
   { deep: true },
 )
 
-// Watch paymentDetailsData and sync from parent (for API response updates)
 watch(
   () => paymentDetailsData?.value,
   (newVal) => {
@@ -199,7 +198,6 @@ watch(
 )
 
 const setPaymentDetails = () => {
-  // Initialize empty payment details array
   paymentDetails.value = []
 }
 
@@ -227,15 +225,14 @@ const onFileChange = (index: number, e: Event) => {
   if (file) paymentDetails.value[index].attachmentDocument = file.name
 }
 
-const saveEdit = () => {
-  // Save the edited data (you can add validation here if needed)
+const saveEdit = (index: number) => {
+  console.log('Saved row:', paymentDetails.value[index])
   editingIndex.value = null
   backupRow.value = null
 }
 
 const paymentInformationRef = inject<Ref<PaymentInformationRef>>('paymentInformationRef')
 
-// Inject hasSapSynced from parent to track SAP sync status
 const hasSapSynced = inject<Ref<boolean>>('hasSapSynced', ref(false))
 
 // Inject savedPaymentDetailsFromSession to load data from API
@@ -263,7 +260,7 @@ const handleSapSync = async () => {
 
       if (sapData) {
         updatePaymentDetailsFromSap(sapData)
-        // Set hasSapSynced to true after successful sync
+
         hasSapSynced.value = true
       } else {
       }
@@ -276,17 +273,13 @@ const handleSapSync = async () => {
 const deleteRow = (index: number) => {
   if (confirm('Are you sure you want to delete this payment detail?')) {
     paymentDetails.value.splice(index, 1)
-    // Reorder the numbers
     paymentDetails.value.forEach((item, idx) => {
       item.no = idx + 1
     })
   }
 }
 const updatePaymentDetailsFromSap = (sapData: SapDataResponse) => {
-  // Preserve existing ID if any to prevent duplicates on update
-  const existingId =
-    paymentDetails.value.length > 0 ? paymentDetails.value[0].invoicePaymentDetailId : 0
-
+  // Clear existing data and replace with new SAP data
   const newPaymentDetail: PaymentDetail = {
     no: 1,
     paymentDate: sapData.clearingDate ? formatSapDate(sapData.clearingDate) : getCurrentDate(),
@@ -295,10 +288,8 @@ const updatePaymentDetailsFromSap = (sapData: SapDataResponse) => {
     bankAccount: formatBankAccount(sapData.payment?.bankKey, sapData.payment?.bankAccountNo),
     remarks: `SAP Invoice: ${sapData.sapInvoiceNo || 'N/A'} | Vendor: ${sapData.vendorName || 'N/A'}`,
     attachmentDocument: undefined,
-    invoicePaymentDetailId: existingId || undefined,
   }
 
-  // Replace entire array with new data
   paymentDetails.value = [newPaymentDetail]
   console.log('Updated payment details from SAP:', newPaymentDetail)
 }
@@ -309,7 +300,6 @@ const formatSapDate = (dateString: string | number) => {
   try {
     let date: Date
 
-    // Handle numeric format like 20240710 (YYYYMMDD)
     if (typeof dateString === 'number' || /^\d{8}$/.test(dateString.toString())) {
       const dateStr = dateString.toString()
       const year = dateStr.substring(0, 4)
@@ -317,15 +307,14 @@ const formatSapDate = (dateString: string | number) => {
       const day = dateStr.substring(6, 8)
       date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
     } else {
-      // Handle standard date string format
       date = new Date(dateString.toString())
     }
 
-    return date.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    })
+    const day = date.getDate().toString().padStart(2, '0')
+    const month = (date.getMonth() + 1).toString().padStart(2, '0')
+    const year = date.getFullYear()
+
+    return `${day}/${month}/${year}`
   } catch {
     return getCurrentDate()
   }
@@ -333,11 +322,11 @@ const formatSapDate = (dateString: string | number) => {
 
 const getCurrentDate = () => {
   const today = new Date()
-  return today.toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  })
+  const day = today.getDate().toString().padStart(2, '0')
+  const month = (today.getMonth() + 1).toString().padStart(2, '0')
+  const year = today.getFullYear()
+
+  return `${day}/${month}/${year}`
 }
 
 const mapSapStatus = (sapStatus: string) => {
@@ -444,8 +433,8 @@ onMounted(() => {
 }
 
 .badge-success {
-  background-color: #d4edda;
-  color: #155724;
+  background-color: #50cd89;
+  color: #ffffff;
 }
 
 .badge-warning {
