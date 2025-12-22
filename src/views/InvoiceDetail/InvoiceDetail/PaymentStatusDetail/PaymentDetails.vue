@@ -235,6 +235,9 @@ const saveEdit = (index: number) => {
 
 const paymentInformationRef = inject<Ref<PaymentInformationRef>>('paymentInformationRef')
 
+// Inject hasSapSynced from parent to track SAP sync status
+const hasSapSynced = inject<Ref<boolean>>('hasSapSynced', ref(false))
+
 const handleSapSync = async () => {
   console.log('SAP Synchronize button clicked')
 
@@ -244,6 +247,9 @@ const handleSapSync = async () => {
 
       if (sapData) {
         updatePaymentDetailsFromSap(sapData)
+        // Set hasSapSynced to true after successful sync
+        hasSapSynced.value = true
+        console.log('SAP Sync completed successfully')
       } else {
         console.log('No SAP data received')
       }
