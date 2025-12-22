@@ -19,7 +19,7 @@
                 'invoice__field-base--wht-base': item.toLowerCase() === 'wht base amount',
                 'invoice__field-base--wht-amount': item.toLowerCase() === 'wht amount',
               }"
-              class="invoice__field-base"
+              class="invoice__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"
             >
               {{ item }}
             </th>
@@ -28,19 +28,49 @@
         <tbody>
           <tr v-for="(item, index) in form.invoiceItem" :key="index" class="invoice__field-items">
             <td>{{ index + 1 }}</td>
-            <td>{{ getActivityCodeOrExpense(item) && item.activityName ? `${getActivityCodeOrExpense(item)} - ${item.activityName}` : getActivityName(item.activity) || '-' }}</td>
-            <td>{{ form.currency === 'IDR' ? useFormatIdr(item.itemAmount) : useFormatUsd(item.itemAmount) || '-' }}</td>
+            <td>
+              {{
+                getActivityCodeOrExpense(item) && item.activityName
+                  ? `${getActivityCodeOrExpense(item)} - ${item.activityName}`
+                  : getActivityName(item.activity) || '-'
+              }}
+            </td>
+            <td>
+              {{
+                form.currency === 'IDR'
+                  ? useFormatIdr(item.itemAmount)
+                  : useFormatUsd(item.itemAmount) || '-'
+              }}
+            </td>
             <td>{{ item.itemText || '-' }}</td>
             <td>{{ getDebitCreditName(item.debitCredit) || '-' }}</td>
             <td>{{ getTaxCodeName(item.taxCode) || '-' }}</td>
-            <td>{{ form.currency === 'IDR' ? useFormatIdr(item.vatAmount) : useFormatUsd(item.vatAmount) || '-' }}</td>
+            <td>
+              {{
+                form.currency === 'IDR'
+                  ? useFormatIdr(item.vatAmount)
+                  : useFormatUsd(item.vatAmount) || '-'
+              }}
+            </td>
             <td>{{ getCostCenterName(item.costCenter) || '-' }}</td>
             <td>{{ item.profitCenter || '-' }}</td>
             <td>{{ item.assignment || '-' }}</td>
             <td v-if="!isPettyCash">{{ item.whtType || '-' }}</td>
             <td v-if="!isPettyCash">{{ item.whtCode || '-' }}</td>
-            <td v-if="!isPettyCash">{{ form.currency === 'IDR' ? useFormatIdr(item.whtBaseAmount) : useFormatUsd(item.whtBaseAmount) || '-' }}</td>
-            <td v-if="!isPettyCash">{{ form.currency === 'IDR' ? useFormatIdr(item.whtAmount) : useFormatUsd(item.whtAmount) || '-' }}</td>
+            <td v-if="!isPettyCash">
+              {{
+                form.currency === 'IDR'
+                  ? useFormatIdr(item.whtBaseAmount)
+                  : useFormatUsd(item.whtBaseAmount) || '-'
+              }}
+            </td>
+            <td v-if="!isPettyCash">
+              {{
+                form.currency === 'IDR'
+                  ? useFormatIdr(item.whtAmount)
+                  : useFormatUsd(item.whtAmount) || '-'
+              }}
+            </td>
           </tr>
         </tbody>
       </table>
@@ -74,7 +104,7 @@ const columns = computed(() => {
     'VAT Amount',
     'Cost Center',
     'Profit Center',
-    'Assignment'
+    'Assignment',
   ]
 
   // Hide WHT columns for Petty Cash
@@ -100,7 +130,7 @@ const setAdditionalCostList = async () => {
       if (item.whtType) await callWhtCode(item.whtType)
       const data = {
         ...item,
-        whtCodeList: whtCodeList.value
+        whtCodeList: whtCodeList.value,
       }
       result.push(data)
     }
@@ -119,7 +149,8 @@ const getActivityCodeOrExpense = (item: any) => {
 
 const getActivityName = (id: number) => {
   const getIndex = listActivity.value.findIndex((item) => item.id === id)
-  if (getIndex !== -1) return `${listActivity.value[getIndex].code} - ${listActivity.value[getIndex].name}`
+  if (getIndex !== -1)
+    return `${listActivity.value[getIndex].code} - ${listActivity.value[getIndex].name}`
 }
 
 const getDebitCreditName = (code: string) => {
@@ -154,7 +185,7 @@ watch(
   },
   {
     deep: true,
-    immediate: true
-  }
+    immediate: true,
+  },
 )
 </script>

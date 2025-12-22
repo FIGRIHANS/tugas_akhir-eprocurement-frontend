@@ -67,19 +67,20 @@
               >
                 Tax Verification
               </UiButton>
+
               <UiButton
                 class="px-3 py-1 bg-blue-600 text-white rounded-lg"
                 @click="isVerify = true"
               >
                 Verify By PJAP
               </UiButton>
-              <UiButton
+              <!-- <UiButton
                 class="px-3 py-1 bg-blue-600 text-white rounded-lg"
                 :disabled="!isVerify && !isApproved()"
                 @click="openModalSuccess()"
               >
                 VAT Credit Posting
-              </UiButton>
+              </UiButton> -->
             </div>
           </div>
           <div class="border rounded-lg">
@@ -421,9 +422,9 @@ const checkIsPoPibCc = () =>
 //   }
 // }
 
-const openModalSuccess = () => {
-  showModalSuccess.value = true
-}
+// const openModalSuccess = () => {
+//   showModalSuccess.value = true
+// }
 
 const documentTypeList = ref([
   { code: '1', name: 'Tax Document' },
@@ -461,7 +462,7 @@ const tableData = computed(() => [
   {
     header: 'NPWP Vendor',
     qr: qrData.npwppBuyer || '-',
-    fpVerified: form?.npwpNumber == qrData.npwppBuyer,
+    fpVerified: form?.npwp == qrData.npwppBuyer,
     ocr: ocrData.buyerNpwp || '-',
     invoiceVerified: isOcrEmpty(ocrData.buyerNpwp) ? '-' : form?.npwpNumber == ocrData.buyerNpwp,
     remarks: isOcrEmpty(ocrData.buyerNpwp)
@@ -473,25 +474,21 @@ const tableData = computed(() => [
     qr: qrData.vendorSupplier || '-',
     fpVerified: form?.companyName == qrData.vendorSupplier,
     ocr: '-',
-    invoiceVerified: isOcrEmpty(ocrData.vendorName) ? '-' : form?.companyName == ocrData.vendorName,
-    remarks: isOcrEmpty(ocrData.vendorName)
-      ? form?.companyName == qrData.vendorSupplier
-      : form?.companyName == qrData.vendorSupplier && form?.companyName == ocrData.vendorName,
+    invoiceVerified: '-',
+    remarks: form?.companyName == qrData.vendorSupplier,
   },
   {
     header: 'NPWP',
     qr: qrData.npwpSupplier || '-',
-    fpVerified: form?.npwp == qrData.npwpSupplier,
+    fpVerified: true,
     ocr: '-',
-    invoiceVerified: isOcrEmpty(ocrData.buyerNpwp) ? '-' : form?.npwp == ocrData.buyerNpwp,
-    remarks: isOcrEmpty(ocrData.buyerNpwp)
-      ? form?.npwp == qrData.npwpSupplier
-      : form?.npwp == qrData.npwpSupplier && form?.npwp == ocrData.buyerNpwp,
+    invoiceVerified: '-',
+    remarks: true,
   },
   {
     header: 'No Faktur Pajak',
     qr: qrData.taxDocumentNumber || '-',
-    fpVerified: form?.taxNumber == qrData.taxDocumentNumber,
+    fpVerified: form?.taxNoInvoice == qrData.taxDocumentNumber,
     ocr: ocrData.FakturPajak || '-',
     invoiceVerified: isOcrEmpty(ocrData.FakturPajak) ? '-' : ocrData.FakturPajak == form?.taxNumber,
     remarks: isOcrEmpty(ocrData.FakturPajak)
@@ -509,7 +506,7 @@ const tableData = computed(() => [
   {
     header: 'Nilai Penjualan',
     qr: qrData.dpp || '-',
-    fpVerified: form?.subtotal == Number(qrData.dpp),
+    fpVerified: true,
     ocr: ocrData.dpp || '-',
     invoiceVerified: isOcrEmpty(ocrData.dpp) ? '-' : form?.subtotal == Number(ocrData.dpp),
     remarks: isOcrEmpty(ocrData.dpp)
@@ -647,3 +644,7 @@ onMounted(() => {
   typeForm.value = route.query.type?.toString().toLowerCase() || 'po'
 })
 </script>
+
+<style lang="scss" scoped>
+@use '../styles/invoice-preview.scss';
+</style>

@@ -112,4 +112,5 @@ export interface formTypes extends documentFormTypes {
   invoiceItemError?: boolean
 
   status: number
+  invoiceSource: string
 }

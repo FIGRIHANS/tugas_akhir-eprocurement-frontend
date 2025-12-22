@@ -13,6 +13,42 @@
             <i class="ki-duotone ki-plus-circle"></i>
             Add Invoice
           </button>
+          <button
+            class="btn btn-primary ml-auto d-flex align-items-center gap-2"
+            @click="syncEmailInvoice"
+            :disabled="isSyncLoading"
+          >
+            <!-- SVG Spinner -->
+            <svg
+              v-if="isSyncLoading"
+              class="animate-spin h-6 w-6 text-white-600"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+              ></path>
+            </svg>
+
+            <!-- Icon normal -->
+            <i v-else class="ki-duotone ki-arrows-circle"></i>
+
+            <!-- Text -->
+            <span>
+              {{ isSyncLoading ? 'Syncing...' : 'Sync Invoice From Email' }}
+            </span>
+          </button>
         </div>
       </div>
       <div class="flex overflow-x-auto gap-3 mb-5 items-center" v-if="filteredPayload.length > 0">
@@ -55,10 +91,11 @@
               <th
                 v-for="(item, index) in columns"
                 :key="index"
+                class="!border-b-blue-500 !bg-blue-100 !text-blue-500 whitespace-nowrap"
                 :class="{
                   'list__long ': index !== 0,
                   'cursor-pointer': item,
-                  '!text-blue-500': item === sortColumnName && sortBy !== '',
+                  '!text-blue-700': item === sortColumnName && sortBy !== '',
                 }"
                 @click="sortColumn(item)"
               >
@@ -94,7 +131,7 @@
                     <i v-else class="ki-filled ki-down !text-[9px]"></i>
                   </button>
                 </td>
-                <td>{{ parent.invoiceNo }}</td>
+
                 <td>
                   <span class="badge badge-outline" :class="colorBadge(parent.statusCode)">
                     {{ parent.statusName }}
@@ -115,23 +152,26 @@
                   }}
                 </td>
                 <!-- FTP Verification Status Columns -->
+                <td>{{ parent.invoiceNo }}</td>
+                <td>{{ parent.invoiceSourceName }}</td>
+                <!-- FTP Verification Status Columns -->
                 <td>
-                  <span class="badge" :class="getStatusBadgeClass(parent.fpStatus || 'Warning')">
+                  <span class="badge" :class="getStatusBadgeClass(parent.fpStatus)">
                     {{ parent.fpStatus || 'Warning' }}
                   </span>
                 </td>
                 <td>
-                  <span class="badge" :class="getStatusBadgeClass(parent.vatStatus || 'Error')">
-                    {{ parent.vatStatus || 'Error' }}
+                  <span class="badge" :class="getStatusBadgeClass(parent.vatStatus)">
+                    {{ parent.vatStatus || 'Warning' }}
                   </span>
                 </td>
                 <td>
-                  <span class="badge" :class="getStatusBadgeClass(parent.whtStatus || 'Warning')">
+                  <span class="badge" :class="getStatusBadgeClass(parent.whtStatus)">
                     {{ parent.whtStatus || 'Warning' }}
                   </span>
                 </td>
                 <td>
-                  <span class="badge" :class="getStatusBadgeClass(parent.poPrice || 'Warning')">
+                  <span class="badge" :class="getStatusBadgeClass(parent.poPrice)">
                     {{ parent.poPrice || 'Warning' }}
                   </span>
                 </td>
@@ -232,6 +272,7 @@ const sortColumnName = ref<string>('')
 const filteredPayload = ref([])
 const filterChild = ref(null)
 const viewDetailId = ref('')
+const isSyncLoading = ref(false)
 
 const openDetailVerification = (invoiceId: string) => {
   viewDetailId.value = invoiceId
@@ -266,7 +307,6 @@ const filterForm = reactive<filterListTypes>({
 
 const columns = ref<string[]>([
   '',
-  'Submitted Document No',
   'Status',
   'Vendor Name',
   'Invoice Vendor No',
@@ -276,6 +316,8 @@ const columns = ref<string[]>([
   'Total Gross Amount',
   'Total Net Amount',
   'Estimated Payment Date',
+  'Submitted Document No',
+  'Invoice Source',
   'FP Status',
   'VAT Status',
   'WHT Status',
@@ -301,11 +343,11 @@ const colorBadge = (status: number) => {
 }
 
 // Helper function for verification status badge colors
-const getStatusBadgeClass = (status: string) => {
-  if (status === 'Verified') return 'badge-success'
-  if (status === 'Warning') return 'badge-warning'
-  if (status === 'Error') return 'badge-danger'
-  return 'badge-secondary'
+const getStatusBadgeClass = (status: boolean) => {
+  if (status === true) return 'badge-success'
+  if (status === false) return 'badge-warning'
+  // if (status === 'Error') return 'badge-danger'
+  // return 'badge-secondary'
 }
 
 const setList = (listData: ListPoTypes[]) => {
@@ -354,6 +396,7 @@ const callList = () => {
       invoiceTypeCode: Number(filterForm.invoiceType),
       invoiceDate: filterForm.date,
       searchText: search.value,
+      invoiceSource: 2,
     })
     .finally(() => {
       sortColumn(null)
@@ -503,6 +546,13 @@ const resetFilter = () => {
   filterChild.value.goFilter()
 
   callList()
+}
+
+const syncEmailInvoice = async () => {
+  isSyncLoading.value = true
+  await invoiceApi.syncInvoicFromEmail()
+  callList()
+  isSyncLoading.value = false
 }
 
 onMounted(() => {
