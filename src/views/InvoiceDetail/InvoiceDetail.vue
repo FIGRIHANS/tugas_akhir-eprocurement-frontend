@@ -1547,6 +1547,22 @@ watch(
           if (header.clearingDocumentNo) {
             form.value.clearingDocumentNo = header.clearingDocumentNo
           }
+
+          // Fully sync status and payment summary
+          if (header.statusCode) {
+            form.value.statusCode = header.statusCode
+            form.value.statusName = header.statusName
+          }
+
+          paymentSummary.value = {
+            statusCode: header.statusCode,
+            statusName: header.statusName,
+            totalInvoice: header.totalAmountInvoice,
+            paymentReceived: header.paymentReceivedAmount,
+            outstanding: header.outstandingAmount,
+            currency: header.currency,
+          }
+
           if (detail && detail.length > 0) {
             savedPaymentDetailsFromSession.value = detail.map((item, index) => ({
               no: index + 1,
@@ -1626,6 +1642,22 @@ onMounted(async () => {
             if (header.clearingDocumentNo) {
               form.value.clearingDocumentNo = header.clearingDocumentNo
             }
+
+            // Sync status and payment summary on page load
+            if (header.statusCode) {
+              form.value.statusCode = header.statusCode
+              form.value.statusName = header.statusName
+            }
+
+            paymentSummary.value = {
+              statusCode: header.statusCode,
+              statusName: header.statusName,
+              totalInvoice: header.totalAmountInvoice,
+              paymentReceived: header.paymentReceivedAmount,
+              outstanding: header.outstandingAmount,
+              currency: header.currency,
+            }
+
             if (detail && detail.length > 0) {
               // Map PaymentStatusDetail to PaymentDetail format
               savedPaymentDetailsFromSession.value = detail.map((item, index) => ({
@@ -1662,6 +1694,22 @@ onMounted(async () => {
             if (header.clearingDocumentNo) {
               form.value.clearingDocumentNo = header.clearingDocumentNo
             }
+
+            // Sync status and payment summary on page load (Non-PO)
+            if (header.statusCode) {
+              form.value.statusCode = header.statusCode
+              form.value.statusName = header.statusName
+            }
+
+            paymentSummary.value = {
+              statusCode: header.statusCode,
+              statusName: header.statusName,
+              totalInvoice: header.totalAmountInvoice,
+              paymentReceived: header.paymentReceivedAmount,
+              outstanding: header.outstandingAmount,
+              currency: header.currency,
+            }
+
             if (detail && detail.length > 0) {
               // Map PaymentStatusDetail to PaymentDetail format
               savedPaymentDetailsFromSession.value = detail.map((item, index) => ({

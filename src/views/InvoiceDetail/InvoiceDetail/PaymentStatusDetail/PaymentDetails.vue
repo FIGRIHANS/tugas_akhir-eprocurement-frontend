@@ -166,6 +166,7 @@ interface PaymentDetail {
   bankAccount: string
   remarks: string
   attachmentDocument?: string
+  invoicePaymentDetailId?: number
 }
 
 const paymentDetails = ref<PaymentDetail[]>([])
@@ -248,9 +249,8 @@ watch(
   () => savedPaymentDetailsFromSession.value,
   (newData) => {
     if (newData && newData.length > 0) {
-      // Only take the LAST row to avoid showing duplicates
-      const lastRow = newData[newData.length - 1]
-      paymentDetails.value = [lastRow]
+      // Show all rows returned by the API
+      paymentDetails.value = newData
     }
   },
   { immediate: true },
@@ -282,9 +282,11 @@ const deleteRow = (index: number) => {
     })
   }
 }
-
 const updatePaymentDetailsFromSap = (sapData: SapDataResponse) => {
-  // Clear existing data and replace with new SAP data
+  // Preserve existing ID if any to prevent duplicates on update
+  const existingId =
+    paymentDetails.value.length > 0 ? paymentDetails.value[0].invoicePaymentDetailId : 0
+
   const newPaymentDetail: PaymentDetail = {
     no: 1,
     paymentDate: sapData.clearingDate ? formatSapDate(sapData.clearingDate) : getCurrentDate(),
@@ -293,6 +295,7 @@ const updatePaymentDetailsFromSap = (sapData: SapDataResponse) => {
     bankAccount: formatBankAccount(sapData.payment?.bankKey, sapData.payment?.bankAccountNo),
     remarks: `SAP Invoice: ${sapData.sapInvoiceNo || 'N/A'} | Vendor: ${sapData.vendorName || 'N/A'}`,
     attachmentDocument: undefined,
+    invoicePaymentDetailId: existingId || undefined,
   }
 
   // Replace entire array with new data
