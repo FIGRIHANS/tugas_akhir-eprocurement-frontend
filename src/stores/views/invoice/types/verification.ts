@@ -743,6 +743,7 @@ export interface PaymentStatusHeader {
   invoiceUId: string
   companyCode: string
   sapInvoiceNo: string
+  submittedDocumentNo?: string
   invoicePostingDate: string
   termOfPayment: string
   estimatedPaymentDate: string

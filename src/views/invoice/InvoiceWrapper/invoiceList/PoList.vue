@@ -217,7 +217,9 @@ const StatusInvoice = ref([
   { value: '4', label: 'Approved' },
   { value: '5', label: 'Rejected' },
   { value: '7', label: 'Sent to SAP' },
-  { value: '8', label: 'Partially Paid' },
+  { value: '8', label: 'Planned' },
+  { value: '9', label: 'Partially Paid' },
+  { value: '10', label: 'Paid' },
 ])
 
 const filterForm = reactive<filterListTypes>({
@@ -253,6 +255,9 @@ const colorBadge = (statusCode: number) => {
     4: 'badge-success',
     5: 'badge-danger',
     7: 'badge-primary',
+    8: 'badge-warning', // Planned
+    9: 'badge-info', // Partially Paid
+    10: 'badge-warning', // Paid
   } as { [key: number]: string }
   return list[statusCode]
 }

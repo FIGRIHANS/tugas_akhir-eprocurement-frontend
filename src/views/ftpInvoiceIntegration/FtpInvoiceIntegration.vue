@@ -284,12 +284,17 @@ const columnsChild = ref(['No PO', 'No GR', 'Item Description', 'Item Amount', '
 const poList = computed(() => invoiceApi.listPo)
 
 const colorBadge = (status: number) => {
-  if (status === 0) return 'badge-secondary'
-  if (status === 1) return 'badge-warning'
-  if (status === 2) return 'badge-info'
+  if (status === 0) return 'badge-light'
+  if (status === 1) return 'badge-info'
+  if (status === 2) return 'badge-primary'
   if (status === 3) return 'badge-success'
-  if (status === 4) return 'badge-danger'
+  if (status === 4) return 'badge-success'
   if (status === 5) return 'badge-danger'
+  if (status === 6) return 'badge-dark'
+  if (status === 7) return 'badge-secondary'
+  if (status === 8) return 'badge-warning'
+  if (status === 9) return 'badge-info'
+  if (status === 10) return 'badge-warning'
 }
 
 // Helper function for verification status badge colors

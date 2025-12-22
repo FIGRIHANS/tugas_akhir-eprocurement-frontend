@@ -9,6 +9,7 @@
           class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
         >
           <label class="form-label">{{ item.label }}</label>
+          <!-- All fields are disabled for profileId 3200 since it's read-only -->
           <input :value="item.value" class="input" disabled />
         </div>
       </div>
@@ -17,42 +18,149 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, inject, watch } from 'vue'
+import moment from 'moment'
+import type { formTypes } from '../../types/invoiceAddWrapper'
+
+const form = inject<formTypes>('form')
+// const userData = inject<{ profile?: { profileId?: number; costCenter?: string } }>('userData') // Add userData injection for profile info
 
 interface PaymentInfoItem {
   label: string
   value: string
 }
 
+interface SapPaymentData {
+  id: number
+  companyCode: string
+  documentNumber: number
+  sapInvoiceNo: string
+  fiscalYear: string
+  vendorName: string
+  invoiceAmount: number
+  paidAmount: number
+  openAmount: number
+  paymentStatus: string
+  statusOutgoing: string
+  clearingDate: number
+  clearingDocumentNo: string
+}
+
 const paymentInfo = ref<PaymentInfoItem[]>([])
+const sapPaymentData = ref<SapPaymentData | null>(null)
+
+const formatDate = (date: string | Date | null | number) => {
+  if (!date) return '-'
+
+  if (typeof date === 'number') {
+    const dateStr = date.toString()
+    const year = dateStr.substring(0, 4)
+    const month = dateStr.substring(4, 6)
+    const day = dateStr.substring(6, 8)
+    return `${day}/${month}/${year}`
+  }
+
+  return moment(date).format('DD/MM/YYYY')
+}
+
+const fetchSapPaymentData = async () => {
+  try {
+    // Mock API response data (replace with real API call)
+    const mockApiResponse = {
+      "title": "Success",
+      "statusCode": 200,
+      "result": {
+        "message": "",
+        "isError": false,
+        "content": [
+          {
+            "id": 5,
+            "companyCode": "GNGR",
+            "documentNumber": 4000000005,
+            "sapInvoiceNo": "1900020005",
+            "fiscalYear": "2025",
+            "vendorName": "ACARYA DATA ESA",
+            "invoiceAmount": 999000,
+            "paidAmount": 999000,
+            "openAmount": 0,
+            "paymentStatus": "Paid",
+            "statusOutgoing": "Paid",
+            "clearingDate": 20240711,
+            "clearingDocumentNo": "1500021112"
+          }
+        ]
+      }
+    }
+
+    if (mockApiResponse.result.content && mockApiResponse.result.content.length > 0) {
+      sapPaymentData.value = mockApiResponse.result.content[0]
+    }
+  } catch (error) {
+    console.error('Error fetching SAP payment data:', error)
+  }
+}
 
 const setPaymentInfo = () => {
-  // Mock data for payment information
+  if (!form) return
+
   paymentInfo.value = [
     {
+      label: 'Submitted Document No.',
+      value: sapPaymentData.value?.documentNumber?.toString() || '-',
+    },
+    {
+      label: 'Company Code',
+      value: form.companyCode && form.companyName
+        ? `${form.companyCode} - ${form.companyName}`
+        : form.companyCode || '-',
+    },
+    {
       label: 'Invoice Posting Date',
-      value: '01.01.2025',
+      value: form.invoiceDate ? formatDate(form.invoiceDate) : '-',
     },
     {
       label: 'Term of Payment',
-      value: '30 Days',
+      value: '30 Days', // Default for profileId 3200
     },
     {
       label: 'Estimate Payment Date',
-      value: '31.01.2025',
+      value: form.invoiceDate ? formatDate(form.invoiceDate) : '-',
     },
     {
       label: 'Payment Method',
-      value: 'Transfer Outgoing',
+      value: 'Bank Transfer', // Default for profileId 3200
+    },
+    {
+      label: 'Clearing Document No.',
+      value: sapPaymentData.value?.clearingDocumentNo || '-',
     },
     {
       label: 'Payment Status',
-      value: 'Partially Paid ',
+      value: sapPaymentData.value?.paymentStatus || '-',
     },
   ]
 }
 
-onMounted(() => {
+// Watch for form changes and update payment info
+watch(
+  () => form,
+  () => {
+    setPaymentInfo()
+  },
+  { deep: true, immediate: true }
+)
+
+// Watch for SAP payment data changes
+watch(
+  () => sapPaymentData.value,
+  () => {
+    setPaymentInfo()
+  },
+  { deep: true }
+)
+
+onMounted(async () => {
+  await fetchSapPaymentData()
   setPaymentInfo()
 })
 </script>

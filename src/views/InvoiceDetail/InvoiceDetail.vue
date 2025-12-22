@@ -5,15 +5,15 @@
     <hr class="-mx-[24px] mb-[24px]" />
     <StatusInvoice :statusCode="form.statusCode" class="mb-[24px]" />
 
-    <!-- Tab Navigation for ProfileId 3002 (Verifikator) -->
+    <!-- Tab Navigation for ProfileId 3002 (Verifikator) or ProfileId 3200 with Paid status -->
     <TabInvoiceDetail
-      v-if="checkApprovalNonPo1()"
+      v-if="checkApprovalNonPo1() || checkShowPaymentForProfile3200()"
       v-model:activeTab="activeTabDetail"
-      :show-payment-status="form.statusCode >= 7"
+      :show-payment-status="form.statusCode >= 7 || (form.statusCode === 10 && userData?.profile.profileId === 3200)"
     />
 
     <!-- Content for Invoice Data Tab -->
-    <div v-if="!checkApprovalNonPo1() || activeTabDetail === 'data'">
+    <div v-if="(!checkApprovalNonPo1() && !checkShowPaymentForProfile3200()) || activeTabDetail === 'data'">
       <div class="flex gap-[24px]">
         <GeneralData class="flex-1" />
         <BankKey class="flex-1" />
@@ -37,9 +37,9 @@
       </div>
     </div>
 
-    <!-- Content for Payment Status Tab (only for user 3002 and statusCode >= 7) -->
+    <!-- Content for Payment Status Tab (only for user 3002 and statusCode >= 7, or user 3200 with paid status) -->
     <div
-      v-if="checkApprovalNonPo1() && form.statusCode >= 7 && activeTabDetail === 'paymentStatus'"
+      v-if="(checkApprovalNonPo1() && form.statusCode >= 7 && activeTabDetail === 'paymentStatus') || (checkShowPaymentForProfile3200() && form.statusCode === 10 && activeTabDetail === 'paymentStatus')"
     >
       <PaymentStatusDetail ref="paymentStatusDetailRef" />
     </div>
@@ -117,16 +117,7 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  ref,
-  computed,
-  watch,
-  provide,
-  inject,
-  defineAsyncComponent,
-  onMounted,
-  type Ref,
-} from 'vue'
+import { ref, computed, watch, provide, defineAsyncComponent, onMounted, type Ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import type { formTypes } from './types/invoiceDetail'
 import type { itemsPoGrType } from './types/invoicePoGr'
@@ -289,9 +280,13 @@ interface PaymentDetail {
 }
 
 // Template ref to PaymentStatusDetail component
-const paymentStatusDetailRef = ref<{ getPaymentDetailsData: () => Ref<PaymentDetail[]> } | null>(
-  null,
-)
+const paymentStatusDetailRef = ref<{
+  getPaymentDetailsData: () => Ref<PaymentDetail[]>
+  getSubmittedDocumentNo: () => string
+} | null>(null)
+
+// Track if SAP Synchronize has been performed
+const hasSapSynced = ref<boolean>(false)
 
 // Handle click from footer when on Payment Status tab
 const handleUpdatePaymentStatus = async () => {
@@ -369,6 +364,24 @@ const handleConfirmPaymentStatus = async () => {
       documentSize: 0,
     }))
 
+    // Get submitted document number from child component
+    const submittedDocumentNo = paymentStatusDetailRef.value?.getSubmittedDocumentNo() || ''
+
+    // Save ALL payment status data to sessionStorage for temporary persistence
+    const paymentStatusSessionData = {
+      submittedDocumentNo: submittedDocumentNo,
+      clearingDocumentNo: form.value.clearingDocumentNo || '',
+      paymentStatus: paymentSummary.value.statusName,
+      statusCode: paymentSummary.value.statusCode,
+      paymentDetails: paymentDetailsData,
+    }
+
+    sessionStorage.setItem(
+      `paymentStatus_${form.value.invoiceUId}`,
+      JSON.stringify(paymentStatusSessionData),
+    )
+    console.log('💾 Saved payment status to sessionStorage:', paymentStatusSessionData)
+
     // Prepare payment status data with all required header fields
     const paymentStatusData = {
       header: {
@@ -376,6 +389,7 @@ const handleConfirmPaymentStatus = async () => {
         invoiceUId: form.value.invoiceUId,
         companyCode: form.value.companyCode || '',
         sapInvoiceNo: form.value.sapInvoiceNo || '',
+        submittedDocumentNo: submittedDocumentNo,
         invoicePostingDate: form.value.postingDate
           ? new Date(form.value.postingDate).toISOString()
           : new Date().toISOString(),
@@ -414,6 +428,47 @@ const handleConfirmPaymentStatus = async () => {
 
       console.log('Payment status updated successfully')
 
+      // Fetch latest payment status data from GET endpoint
+      try {
+        const latestData = await verificationApi.getPaymentStatus(form.value.invoiceUId)
+        console.log('Latest payment status data:', latestData)
+
+        // Update form and payment summary with latest data
+        if (latestData?.result?.content?.header) {
+          const header = latestData.result.content.header
+
+          // Update payment summary
+          paymentSummary.value = {
+            statusCode: header.statusCode,
+            statusName: header.statusName,
+            totalInvoice: header.totalAmountInvoice,
+            paymentReceived: header.paymentReceivedAmount,
+            outstanding: header.outstandingAmount,
+            currency: header.currency,
+          }
+
+          // Update form fields if they exist
+          if (header.estimatedPaymentDate) {
+            form.value.estimatedPaymentDate = header.estimatedPaymentDate
+          }
+          if (header.paymentMethod) {
+            form.value.paymentMethodName = header.paymentMethod
+          }
+          if (header.statusCode) {
+            form.value.statusCode = header.statusCode
+            form.value.statusName = header.statusName
+          }
+        }
+
+        // Update payment details in child component if needed
+        if (latestData?.result?.content?.detail && paymentStatusDetailRef.value) {
+          // The child component will automatically refresh when we show the modal
+          console.log('Payment details updated:', latestData.result.content.detail)
+        }
+      } catch (fetchError) {
+        console.error('Error fetching latest payment status:', fetchError)
+      }
+
       // Show success modal
       const modalElement = document.querySelector('#update_payment_status_modal')
       if (modalElement) {
@@ -423,9 +478,14 @@ const handleConfirmPaymentStatus = async () => {
     } else {
       console.error('Failed to update payment status:', response.result.message)
     }
-  } catch (error: any) {
-    const backendMessage = error?.response?.data?.result?.message || error?.response?.data?.message
-    const errorDetail = error?.response?.data
+  } catch (error: unknown) {
+    const errorWithResponse = error as {
+      response?: { data?: { result?: { message?: string }; message?: string } }
+    }
+    const backendMessage =
+      errorWithResponse?.response?.data?.result?.message ||
+      errorWithResponse?.response?.data?.message
+    const errorDetail = errorWithResponse?.response?.data
     console.error('Error updating payment status:', errorDetail || error)
     console.error('Full error object:', error)
     if (backendMessage) console.error('Backend message:', backendMessage)
@@ -436,6 +496,17 @@ const handleConfirmPaymentStatus = async () => {
 
 // Provide form data for child components (Payment Status components)
 provide('form', form)
+
+// Provide submittedDocumentNo for PaymentInformation component
+const submittedDocumentNo = ref<string>('')
+provide('submittedDocumentNo', submittedDocumentNo)
+
+// Provide hasSapSynced for PaymentDetails component
+provide('hasSapSynced', hasSapSynced)
+
+// Provide savedPaymentDetailsFromSession for PaymentDetails component to restore table
+const savedPaymentDetailsFromSession = ref<PaymentDetail[]>([])
+provide('savedPaymentDetailsFromSession', savedPaymentDetailsFromSession)
 
 const detailInvoice = computed(() => verificationApi.detailInvoice)
 const detailInvoiceNonPo = computed(() => verificationApi.detailNonPoInvoice)
@@ -454,6 +525,10 @@ const checkVerifikator1 = () => {
 
 const checkApprovalNonPo1 = () => {
   return userData.value?.profile.profileId === 3002
+}
+
+const checkShowPaymentForProfile3200 = () => {
+  return userData.value?.profile.profileId === 3200 && form.value.statusCode === 10
 }
 
 const checkApprovalNonPoProc = () => {
@@ -700,9 +775,10 @@ const mapPoGr = () => {
 const mapAdditionalCost = () => {
   const cost = []
   for (const item of form.value.additionalCosts) {
-    // safely read itemText without using `any`
-    const r = item as unknown as Record<string, unknown>
-    const itemText = typeof r['itemText'] === 'string' ? (r['itemText'] as string) : ''
+    // Safe type casting untuk mengakses itemText property
+    const itemRecord = item as unknown as Record<string, unknown>
+    const itemText =
+      typeof itemRecord['itemText'] === 'string' ? (itemRecord['itemText'] as string) : ''
     cost.push({
       id: item.id,
       activityId: item.activityId,
@@ -1298,19 +1374,21 @@ const setDataDefaultNonPo = () => {
 const setDataEdit = () => {
   const data = verificationApi.detailInvoiceEdit
   const mappedAdditional = (data?.additionalCosts || []).map((item) => {
-    const r = item as unknown as Record<string, unknown>
+    const itemRecord = item as unknown as Record<string, unknown>
     return {
       ...item,
-      itemText: typeof r['itemText'] === 'string' ? (r['itemText'] as string) : '',
+      itemText:
+        typeof itemRecord['itemText'] === 'string' ? (itemRecord['itemText'] as string) : '',
       whtCodeList: item.whtType ? whtCodeList.value : [],
     }
   })
 
   const mappedCostExpenses = (data?.costExpenses || []).map((item) => {
-    const r = item as unknown as Record<string, unknown>
+    const itemRecord = item as unknown as Record<string, unknown>
     return {
       ...item,
-      itemText: typeof r['itemText'] === 'string' ? (r['itemText'] as string) : '',
+      itemText:
+        typeof itemRecord['itemText'] === 'string' ? (itemRecord['itemText'] as string) : '',
       isEdit: false,
       whtCodeList: item.whtType ? whtCodeList.value : [],
     }
@@ -1487,12 +1565,84 @@ onMounted(async () => {
   invoiceMasterApi.getWhtType()
   invoiceMasterApi.getTaxCode()
   if (!checkIsNonPo()) {
-    await verificationApi.getInvoiceDetail(route.query.id?.toString() || '').then(() => {
+    await verificationApi.getInvoiceDetail(route.query.id?.toString() || '').then(async () => {
       afterGetDetail()
+
+      // Load payment status data from backend API
+      if (checkApprovalNonPo1() && form.value.statusCode >= 7) {
+        try {
+          const response = await verificationApi.getPaymentStatus(form.value.invoiceUId)
+          if (response?.result?.content) {
+            const { header, detail } = response.result.content
+            console.log('📂 Loaded from API:', { header, detail })
+
+            if (header.submittedDocumentNo) {
+              submittedDocumentNo.value = header.submittedDocumentNo
+              console.log('✅ Restored Submitted Doc:', header.submittedDocumentNo)
+            }
+            if (header.clearingDocumentNo) {
+              form.value.clearingDocumentNo = header.clearingDocumentNo
+              console.log('✅ Restored Clearing Doc:', header.clearingDocumentNo)
+            }
+            if (detail && detail.length > 0) {
+              // Map PaymentStatusDetail to PaymentDetail format
+              savedPaymentDetailsFromSession.value = detail.map((item, index) => ({
+                no: index + 1,
+                paymentDate: item.paymentDate,
+                amount: item.amount.toString(),
+                status: item.paymentStatus,
+                bankAccount: item.bankAccount,
+                remarks: item.remarks,
+                attachmentDocument: item.documentUrl || '',
+                invoicePaymentDetailId: item.invoicePaymentDetailId,
+              }))
+              console.log('✅ Restored Payment Details:', detail.length, 'rows')
+            }
+          }
+        } catch (error) {
+          console.error('Error loading payment status:', error)
+        }
+      }
     })
   } else {
-    await verificationApi.getInvoiceNonPoDetail(route.query.id?.toString() || '').then(() => {
+    await verificationApi.getInvoiceNonPoDetail(route.query.id?.toString() || '').then(async () => {
       afterGetDetailNonPo()
+
+      // Load payment status data from backend API
+      if (checkApprovalNonPo1() && form.value.statusCode >= 7) {
+        try {
+          const response = await verificationApi.getPaymentStatus(form.value.invoiceUId)
+          if (response?.result?.content) {
+            const { header, detail } = response.result.content
+            console.log('📂 Loaded from API:', { header, detail })
+
+            if (header.submittedDocumentNo) {
+              submittedDocumentNo.value = header.submittedDocumentNo
+              console.log('✅ Restored Submitted Doc:', header.submittedDocumentNo)
+            }
+            if (header.clearingDocumentNo) {
+              form.value.clearingDocumentNo = header.clearingDocumentNo
+              console.log('✅ Restored Clearing Doc:', header.clearingDocumentNo)
+            }
+            if (detail && detail.length > 0) {
+              // Map PaymentStatusDetail to PaymentDetail format
+              savedPaymentDetailsFromSession.value = detail.map((item, index) => ({
+                no: index + 1,
+                paymentDate: item.paymentDate,
+                amount: item.amount.toString(),
+                status: item.paymentStatus,
+                bankAccount: item.bankAccount,
+                remarks: item.remarks,
+                attachmentDocument: item.documentUrl || '',
+                invoicePaymentDetailId: item.invoicePaymentDetailId,
+              }))
+              console.log('✅ Restored Payment Details:', detail.length, 'rows')
+            }
+          }
+        } catch (error) {
+          console.error('Error loading payment status:', error)
+        }
+      }
     })
   }
 })
