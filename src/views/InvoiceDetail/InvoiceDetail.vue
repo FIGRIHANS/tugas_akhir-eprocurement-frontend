@@ -5,15 +5,15 @@
     <hr class="-mx-[24px] mb-[24px]" />
     <StatusInvoice :statusCode="form.statusCode" class="mb-[24px]" />
 
-    <!-- Tab Navigation for ProfileId 3002 (Verifikator) -->
+    <!-- Tab Navigation for ProfileId 3002 (Verifikator) or ProfileId 3200 with Paid status -->
     <TabInvoiceDetail
-      v-if="checkApprovalNonPo1()"
+      v-if="checkApprovalNonPo1() || checkShowPaymentForProfile3200()"
       v-model:activeTab="activeTabDetail"
-      :show-payment-status="form.statusCode >= 7"
+      :show-payment-status="form.statusCode >= 7 || (form.statusCode === 10 && userData?.profile.profileId === 3200)"
     />
 
     <!-- Content for Invoice Data Tab -->
-    <div v-if="!checkApprovalNonPo1() || activeTabDetail === 'data'">
+    <div v-if="(!checkApprovalNonPo1() && !checkShowPaymentForProfile3200()) || activeTabDetail === 'data'">
       <div class="flex gap-[24px]">
         <GeneralData class="flex-1" />
         <BankKey class="flex-1" />
@@ -37,9 +37,9 @@
       </div>
     </div>
 
-    <!-- Content for Payment Status Tab (only for user 3002 and statusCode >= 7) -->
+    <!-- Content for Payment Status Tab (only for user 3002 and statusCode >= 7, or user 3200 with paid status) -->
     <div
-      v-if="checkApprovalNonPo1() && form.statusCode >= 7 && activeTabDetail === 'paymentStatus'"
+      v-if="(checkApprovalNonPo1() && form.statusCode >= 7 && activeTabDetail === 'paymentStatus') || (checkShowPaymentForProfile3200() && form.statusCode === 10 && activeTabDetail === 'paymentStatus')"
     >
       <PaymentStatusDetail ref="paymentStatusDetailRef" />
     </div>
@@ -450,6 +450,10 @@ const checkVerifikator1 = () => {
 
 const checkApprovalNonPo1 = () => {
   return userData.value?.profile.profileId === 3002
+}
+
+const checkShowPaymentForProfile3200 = () => {
+  return userData.value?.profile.profileId === 3200 && form.value.statusCode === 10
 }
 
 const checkApprovalNonPoProc = () => {

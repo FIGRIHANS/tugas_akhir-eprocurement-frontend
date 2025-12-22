@@ -25,14 +25,22 @@
       <Transition mode="out-in">
         <component :is="contentComponent" />
       </Transition>
-      <!-- Payment Status tab: Only show Back button -->
+      <!-- Payment Status tab: Back button and Update Payment Status button -->
       <div
         v-if="tabNow === 'paymentStatus'"
-        class="flex justify-start items-center mt-[24px] gap-3"
+        class="flex justify-between items-center mt-[24px] gap-3"
       >
         <button class="btn btn-outline btn-primary" @click="goBack">
           <i class="ki-filled ki-arrow-left"></i>
           Back
+        </button>
+        <!-- Show Update Payment Status button only for profileId 3200 -->
+        <button
+          v-if="userData?.profile?.profileId === 3200"
+          class="btn btn-primary"
+          @click="updatePaymentStatus"
+        >
+          Update Payment Status
         </button>
       </div>
       <div
@@ -151,6 +159,7 @@
     <ErrorSubmissionModal />
     <ModalSuccessBudgetCheck @afterClose="isCheckBudget = true" />
     <ModalFailedBudgetCheck @afterClose="isCheckBudget = false" />
+    <UpdatePaymentStatusModal :isLoading="false" @close="goToInvoiceList" />
   </div>
 </template>
 
@@ -192,8 +201,6 @@ import type { itemsPoGrType } from './types/invoicePoGr'
 import type { itemsCostType } from './types/additionalCost'
 import type { invoiceItemTypes } from './types/invoiceItem'
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
-import type { invoiceQrData } from './types/invoiceQrdata'
-import type { invoiceOcrData } from './types/invoiceOcrData'
 
 const InvoiceData = defineAsyncComponent(() => import('./InvoiceAddWrapper/InvoiceData.vue'))
 const InvoiceInformation = defineAsyncComponent(
@@ -215,6 +222,9 @@ const ModalSuccessBudgetCheck = defineAsyncComponent(
 )
 const ModalFailedBudgetCheck = defineAsyncComponent(
   () => import('./InvoiceAddWrapper/ModalFailedBudgetCheck.vue'),
+)
+const UpdatePaymentStatusModal = defineAsyncComponent(
+  () => import('@/views/InvoiceDetail/InvoiceDetail/PaymentStatusDetail/UpdatePaymentStatusModal.vue'),
 )
 
 const invoiceApi = useInvoiceSubmissionStore()
@@ -351,8 +361,60 @@ const canClickPreviewTab = computed(() => {
 
 const canClickPaymentStatusTab = computed(() => {
   // Only show Payment Status tab when invoice has been sent to SAP (statusCode = 7)
-  return form.status === 7
+  // OR when status code is 10 (paid) and profileId is 3200
+  return form.status === 7 || (form.status === 10 && userData.value?.profile.profileId === 3200)
 })
+
+// Load invoice detail data for payment status (specifically for profileId 3200)
+const loadInvoiceDetailForPaymentStatus = async () => {
+  try {
+    if (!route.query.invoice) {
+      console.error('Invoice ID not found in route')
+      return
+    }
+
+    const invoiceId = route.query.invoice.toString()
+    console.log('Loading invoice detail for payment status, invoiceId:', invoiceId)
+
+    // Use the existing getInvoiceDetail from verification API to load full invoice data
+    const response = await verificationApi.getInvoiceDetail(invoiceId)
+
+    if (response && !response.isError && response.content) {
+      const data = response.content
+      console.log('Invoice detail loaded for payment status:', data)
+
+      // Update form with the loaded data to ensure payment status components have access
+      if (data.header) {
+        form.status = data.header.statusCode
+        form.invoiceUId = data.header.invoiceUId
+        form.totalNetAmount = data.calculation?.totalNetAmount || 0
+        form.currency = data.header.currCode
+
+        // Map company information from API response
+        form.companyCode = data.header.companyCode
+        form.companyName = data.header.companyName
+        form.invoiceDate = data.header.invoiceDate
+
+        // Update vendor information
+        if (data.vendor) {
+          form.vendorId = data.vendor.vendorId
+          form.vendorName = data.vendor.vendorName
+        }
+
+        // Update payment information
+        if (data.payment) {
+          form.bankKeyId = data.payment.bankKey
+          form.bankNameId = data.payment.bankName
+          form.beneficiaryName = data.payment.beneficiaryName
+          form.bankAccountNumber = data.payment.bankAccountNo
+          form.bankCountryCode = data.payment.bankCountryCode
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error loading invoice detail for payment status:', error)
+  }
+}
 
 const checkInvoiceView = () => {
   return route.query.type === 'po-view'
@@ -601,6 +663,20 @@ const goBack = () => {
       ;(document.activeElement as HTMLElement)?.blur()
     } catch {}
   }
+}
+
+// Update payment status function for profileId 3200
+const updatePaymentStatus = () => {
+  console.log('Update payment status clicked for profileId 3200')
+  // Show update payment status modal
+  const idModal = document.querySelector('#update_payment_status_modal')
+  const modal = KTModal.getInstance(idModal as HTMLElement)
+  modal.show()
+}
+
+// Navigate to invoice list after payment status update success
+const goToInvoiceList = () => {
+  router.push('/invoice')
 }
 
 const mapDocument = () => {
@@ -1812,6 +1888,11 @@ onMounted(() => {
       if (form.status === 7) {
         tabNow.value = 'paymentStatus'
       }
+
+      // If invoice status is 10 (Paid) and profileId is 3200, navigate to Payment Status tab
+      if (form.status === 10 && userData.value?.profile.profileId === 3200) {
+        tabNow.value = 'paymentStatus'
+      }
     })
   }
 
@@ -1832,6 +1913,11 @@ onMounted(() => {
       if (form.status === 7) {
         tabNow.value = 'paymentStatus'
       }
+
+      // If invoice status is 10 (Paid) and profileId is 3200, navigate to Payment Status tab
+      if (form.status === 10 && userData.value?.profile.profileId === 3200) {
+        tabNow.value = 'paymentStatus'
+      }
     })
   }
 })
@@ -1843,7 +1929,7 @@ const checkPreview = () => {
 // Watch for tab changes to update stepper
 watch(
   () => tabNow.value,
-  () => {
+  async () => {
     const isViewMode = checkPreview()
 
     // For create/edit mode: update stepper based on current tab
@@ -1851,6 +1937,11 @@ watch(
       updateStepperByTab()
     }
     // For view mode: stepper will be updated by form.status watcher below
+
+    // Load invoice detail for payment status when profileId 3200 accesses payment status tab
+    if (tabNow.value === 'paymentStatus' && userData.value?.profile.profileId === 3200 && form.status === 10) {
+      await loadInvoiceDetailForPaymentStatus()
+    }
   },
   { immediate: true },
 )
@@ -1895,6 +1986,7 @@ watch(
 )
 
 provide('form', form)
+provide('userData', userData)
 
 // provide('qrData', qrData)
 
