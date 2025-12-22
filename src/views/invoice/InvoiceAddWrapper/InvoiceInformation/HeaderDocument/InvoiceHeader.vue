@@ -644,6 +644,7 @@ onMounted(() => {
         }
       })
     }
+    ;-mode
   }
   if (form?.companyCode && form?.invoiceType === '5') {
     invoiceMasterApi.getCashJournal(form.companyCode || '')
