@@ -122,7 +122,6 @@ import {
   computed,
   watch,
   provide,
-  inject,
   defineAsyncComponent,
   onMounted,
   type Ref,
@@ -423,9 +422,10 @@ const handleConfirmPaymentStatus = async () => {
     } else {
       console.error('Failed to update payment status:', response.result.message)
     }
-  } catch (error: any) {
-    const backendMessage = error?.response?.data?.result?.message || error?.response?.data?.message
-    const errorDetail = error?.response?.data
+  } catch (error: unknown) {
+    const errorWithResponse = error as { response?: { data?: { result?: { message?: string }; message?: string } } }
+    const backendMessage = errorWithResponse?.response?.data?.result?.message || errorWithResponse?.response?.data?.message
+    const errorDetail = errorWithResponse?.response?.data
     console.error('Error updating payment status:', errorDetail || error)
     console.error('Full error object:', error)
     if (backendMessage) console.error('Backend message:', backendMessage)
@@ -700,9 +700,9 @@ const mapPoGr = () => {
 const mapAdditionalCost = () => {
   const cost = []
   for (const item of form.value.additionalCosts) {
-    // safely read itemText without using `any`
-    const r = item as unknown as Record<string, unknown>
-    const itemText = typeof r['itemText'] === 'string' ? (r['itemText'] as string) : ''
+    // Safe type casting untuk mengakses itemText property
+    const itemRecord = item as unknown as Record<string, unknown>
+    const itemText = typeof itemRecord['itemText'] === 'string' ? (itemRecord['itemText'] as string) : ''
     cost.push({
       id: item.id,
       activityId: item.activityId,
@@ -1298,19 +1298,19 @@ const setDataDefaultNonPo = () => {
 const setDataEdit = () => {
   const data = verificationApi.detailInvoiceEdit
   const mappedAdditional = (data?.additionalCosts || []).map((item) => {
-    const r = item as unknown as Record<string, unknown>
+    const itemRecord = item as unknown as Record<string, unknown>
     return {
       ...item,
-      itemText: typeof r['itemText'] === 'string' ? (r['itemText'] as string) : '',
+      itemText: typeof itemRecord['itemText'] === 'string' ? (itemRecord['itemText'] as string) : '',
       whtCodeList: item.whtType ? whtCodeList.value : [],
     }
   })
 
   const mappedCostExpenses = (data?.costExpenses || []).map((item) => {
-    const r = item as unknown as Record<string, unknown>
+    const itemRecord = item as unknown as Record<string, unknown>
     return {
       ...item,
-      itemText: typeof r['itemText'] === 'string' ? (r['itemText'] as string) : '',
+      itemText: typeof itemRecord['itemText'] === 'string' ? (itemRecord['itemText'] as string) : '',
       isEdit: false,
       whtCodeList: item.whtType ? whtCodeList.value : [],
     }
