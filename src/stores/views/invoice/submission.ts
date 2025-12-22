@@ -79,6 +79,7 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
       invoiceTypeCode: Number(data.invoiceTypeCode) || null,
       invoiceDate: data.invoiceDate || null,
       searchText: data.searchText || null,
+      invoiceSource: data.invoiceSource,
     }
     const response: ApiResponse<ListPoTypes[]> = await invoiceApi.get(`/invoice/submission`, {
       params: {
