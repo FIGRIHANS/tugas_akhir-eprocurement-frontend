@@ -314,7 +314,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
 
     // errorMessageUpload.value = response.data.result.message
 
-    return response.data.invoiceDetail
+    return response.data.result.content
   }
 
   const uploadFileOcr = async (data: string) => {
