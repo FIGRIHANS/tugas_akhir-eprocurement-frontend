@@ -169,11 +169,13 @@ interface PaymentDetail {
   remarks: string
   attachmentDocument?: string
   invoicePaymentDetailId?: number
+  isModified?: boolean
 }
 
 const paymentDetails = ref<PaymentDetail[]>([])
 const editingIndex = ref<number | null>(null)
 const backupRow = ref<PaymentDetail | null>(null)
+const editedRowIndices = ref<Set<number>>(new Set())
 
 const paymentDetailsData = inject<Ref<PaymentDetail[]>>('paymentDetailsData')
 
@@ -194,19 +196,13 @@ watch(
   { deep: true },
 )
 
-watch(
-  () => paymentDetailsData?.value,
-  (newVal) => {
-    if (newVal && JSON.stringify(newVal) !== JSON.stringify(paymentDetails.value)) {
-      paymentDetails.value = newVal
-    }
-  },
-  { deep: true },
-)
+// REMOVED: Circular watch that was causing race conditions
+// watch(() => paymentDetailsData?.value, ...) is removed
 
-const setPaymentDetails = () => {
-  paymentDetails.value = []
-}
+// REMOVED: setPaymentDetails - was clearing data unnecessarily
+// const setPaymentDetails = () => {
+//   paymentDetails.value = []
+// }
 
 const startEdit = (index: number) => {
   editingIndex.value = index
@@ -233,7 +229,10 @@ const onFileChange = (index: number, e: Event) => {
 }
 
 const saveEdit = (index: number) => {
-  console.log('Saved row:', paymentDetails.value[index])
+  // Mark this row as edited
+  paymentDetails.value[index].isModified = true
+  editedRowIndices.value.add(index)
+
   editingIndex.value = null
   backupRow.value = null
 }
@@ -253,14 +252,20 @@ watch(
   () => savedPaymentDetailsFromSession.value,
   (newData) => {
     if (newData && newData.length > 0) {
-      // Show ALL rows from the API results
+      // Show ALL rows from the API results and reset isModified flags
       paymentDetails.value = newData.map((item) => ({
         ...item,
         remarks: sanitizeRemark(item.remarks),
+        isModified: false, // Reset modified flag when loading fresh data
       }))
+
+      // Clear edited row indices
+      editedRowIndices.value.clear()
+    } else if (newData && newData.length === 0) {
+      paymentDetails.value = []
     }
   },
-  { immediate: true },
+  { immediate: true, deep: true },
 )
 
 const handleSapSync = async () => {
@@ -366,8 +371,24 @@ const downloadDocument = (documentName: string) => {
   console.log('Downloading document:', documentName)
 }
 
+// Expose methods to parent component
+const getPaymentDetailsData = () => {
+  return paymentDetails
+}
+
+const getEditedPaymentDetails = () => {
+  // Return only payment details that have been edited
+  return paymentDetails.value.filter((item) => item.isModified === true)
+}
+
+defineExpose({
+  getPaymentDetailsData,
+  getEditedPaymentDetails,
+})
+
 onMounted(() => {
-  setPaymentDetails()
+  // REMOVED: setPaymentDetails() call - was clearing data on mount
+  // Data will be loaded from savedPaymentDetailsFromSession watch
 })
 </script>
 

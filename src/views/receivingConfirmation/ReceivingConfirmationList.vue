@@ -77,7 +77,9 @@
               <th
                 v-for="(item, index) in columns"
                 :key="index"
+                class="!border-b-blue-500 !bg-blue-100 !text-blue-500"
                 :class="{
+                  list__long: index !== 0,
                   'cursor-pointer': item !== 'Action',
                   '!text-blue-500': item === sortColumnName && sortBy !== '',
                 }"
@@ -93,6 +95,17 @@
               <td colspan="18" class="text-center">No data found.</td>
             </tr>
             <tr v-for="(item, index) in list" :key="index">
+              <!-- Action Column - MOVED TO FRONT -->
+              <td class="text-center">
+                <button
+                  class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]"
+                  @click="viewDetail(item.beritaAcaraId)"
+                  title="View Detail"
+                >
+                  <i class="ki-filled ki-eye !text-lg"></i>
+                </button>
+              </td>
+              <!-- Other Columns -->
               <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
               <td>{{ item.beritaAcaraId }}</td>
               <td>{{ item.tripId }}</td>
@@ -121,15 +134,6 @@
               <td>{{ item.createdBy }}</td>
               <td>{{ formatDate(item.updateDate) }}</td>
               <td>{{ item.updateBy }}</td>
-              <td class="text-center">
-                <button
-                  class="btn btn-sm btn-icon btn-primary"
-                  @click="viewDetail(item.beritaAcaraId)"
-                  title="View Detail"
-                >
-                  <i class="ki-filled ki-eye"></i>
-                </button>
-              </td>
             </tr>
           </tbody>
         </table>
@@ -217,6 +221,7 @@ const filterForm = ref<FilterForm>({
 })
 
 const columns = ref<string[]>([
+  'Action', // MOVED TO FRONT
   'No',
   'Report ID',
   'Trip ID',
@@ -234,7 +239,6 @@ const columns = ref<string[]>([
   'Created By',
   'Update Date',
   'Update By',
-  'Action',
 ])
 
 // 10 Dummy data for demonstration
