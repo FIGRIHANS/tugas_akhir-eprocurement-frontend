@@ -177,6 +177,13 @@ const backupRow = ref<PaymentDetail | null>(null)
 
 const paymentDetailsData = inject<Ref<PaymentDetail[]>>('paymentDetailsData')
 
+const sanitizeRemark = (remark?: string) => {
+  if (!remark) return ''
+  const trimmed = remark.trim()
+  if (trimmed.toUpperCase().startsWith('SAP INVOICE:')) return ''
+  return trimmed
+}
+
 watch(
   paymentDetails,
   (newVal) => {
@@ -247,7 +254,10 @@ watch(
   (newData) => {
     if (newData && newData.length > 0) {
       // Show ALL rows from the API results
-      paymentDetails.value = newData
+      paymentDetails.value = newData.map((item) => ({
+        ...item,
+        remarks: sanitizeRemark(item.remarks),
+      }))
     }
   },
   { immediate: true },
@@ -279,15 +289,15 @@ const deleteRow = (index: number) => {
   }
 }
 const updatePaymentDetailsFromSap = (sapDataArray: SapDataResponse[]) => {
-  const existingRemarks = paymentDetails.value.map((item) => item.remarks || '')
+  const existingRemarks = paymentDetails.value.map((item) => sanitizeRemark(item.remarks))
 
   const newPaymentDetails: PaymentDetail[] = sapDataArray.map((sapData, index) => ({
     no: index + 1,
     paymentDate: sapData.clearingDate ? formatSapDate(sapData.clearingDate) : getCurrentDate(),
     amount: (sapData.paidAmount || sapData.openAmount || sapData.invoiceAmount || 0).toString(),
-    status: mapSapStatus(sapData.paymentStatus || sapData.statusOutgoing),
+    status: mapSapStatus(sapData.statusOutgoing || sapData.paymentStatus),
     bankAccount: formatBankAccount(sapData.payment?.bankKey, sapData.payment?.bankAccountNo),
-    remarks: existingRemarks[index] || `SAP Invoice: ${sapData.sapInvoiceNo || 'N/A'} | Vendor: ${sapData.vendorName || 'N/A'}`,
+    remarks: existingRemarks[index] || '',
     attachmentDocument: undefined,
   }))
 
