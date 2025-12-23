@@ -76,7 +76,6 @@
               </UiButton>
             </div>
           </div>
-
           <div class="border rounded-lg">
             <table class="w-full overflow-x-auto text-sm">
               <thead class="bg-gray-100">
@@ -117,12 +116,13 @@
                       v-model="ocrData[getOcrKey(row.header)]"
                       type="text"
                       class="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                      :disabled="ocrData[getOcrKey(row.header)] == ''"
                     />
                     <span v-else class="text-gray-400">-</span>
                   </td>
 
                   <td class="p-2">
-                    <span v-if="row.invoiceVerified === '-'">
+                    <span v-if="row.invoiceVerified === '-' || row.invoiceVerified === 'none'">
                       <i class="ki-filled ki-minus-circle text-gray-500"></i>
                     </span>
                     <template v-else>
@@ -138,9 +138,11 @@
                     <select
                       v-model="editableRemarks[index]"
                       class="border border-gray-300 rounded px-2 py-1 text-sm w-full"
+                      :disabled="editableRemarks[index] === '1' || editableRemarks[index] === '4'"
                     >
-                      <option value="Matched">Matched</option>
-                      <option value="Didn't Matched">Didn't Matched</option>
+                      <option v-if="editableRemarks[index] === '1'" value="1">Auto Verified</option>
+                      <option value="2">Not match</option>
+                      <option value="3">Manual Verified</option>
                     </select>
                   </td>
                 </tr>
@@ -333,7 +335,7 @@ const selectedDocumentType = ref<string>('1')
 
 const editableRemarks = reactive<Record<number, string>>({})
 
-const NOT_MATCHED = "Didn't Matched"
+const NOT_MATCHED = '2'
 const checkPo = () => typeForm.value === 'po' || typeForm.value === 'po-view'
 const checkIsNonPo = () => typeForm.value === 'nonpo'
 const checkIsWithoutDp = () => form?.invoiceDp === '9011'
@@ -362,95 +364,118 @@ const generalStatus = ref([
   { label: 'DJP Status', value: 'Approved', status: 'success' },
 ])
 
+const isEmpty = (val: any) => val === undefined || val === null || val === '' || val === '-'
+
 const tableData = computed(() => [
   {
     header: 'Nama Vendor',
-    qr: qrData.vendorBuyer || '-',
-    fpVerified: form?.vendorName == qrData.vendorBuyer,
-    ocr: ocrData.vendorBuyer || '-',
-    invoiceVerified: form?.vendorName == ocrData.vendorBuyer,
-    remarks: form?.vendorName == qrData.vendorBuyer && form?.vendorName == ocrData.vendorBuyer,
+    qr: qrData.vendorSupplier || '-',
+    fpVerified: isEmpty(qrData.vendorSupplier) ? 'none' : form?.vendorName == qrData.vendorSupplier,
+    ocr: ocrData.vendorSupplier || '-',
+    invoiceVerified: isEmpty(ocrData.vendorSupplier)
+      ? 'none'
+      : form?.vendorName == ocrData.vendorSupplier,
+    remarks:
+      isEmpty(qrData.vendorSupplier) || isEmpty(ocrData.vendorSupplier)
+        ? 'none'
+        : form?.vendorName == qrData.vendorSupplier && form?.vendorName == ocrData.vendorSupplier,
   },
   {
     header: 'NPWP Vendor',
-    qr: qrData.npwpBuyer || '-',
-    fpVerified: form?.npwpNumber == qrData.npwpBuyer,
-    ocr: ocrData.npwpBuyer || '-',
-    invoiceVerified: form?.npwpNumber == ocrData.npwpBuyer,
-    remarks: form?.npwpNumber == qrData.npwpBuyer && form?.npwpNumber == ocrData.npwpBuyer,
+    qr: qrData.npwpSupplier || '-',
+    fpVerified: isEmpty(qrData.npwpSupplier) ? 'none' : form?.npwpNumber == qrData.npwpSupplier,
+    ocr: ocrData.npwpSupplier || '-',
+    invoiceVerified: isEmpty(ocrData.npwpSupplier)
+      ? 'none'
+      : form?.npwpNumber == ocrData.npwpSupplier,
+    remarks:
+      isEmpty(qrData.npwpSupplier) || isEmpty(ocrData.npwpSupplier)
+        ? 'none'
+        : form?.npwpNumber == qrData.npwpSupplier && form?.npwpNumber == ocrData.npwpSupplier,
   },
   {
     header: 'Perusahaan',
-    qr: qrData.vendorSupplier || '-',
-    fpVerified: form?.companyName == qrData.vendorSupplier,
-    ocr: ocrData.vendorSupplier || '-',
-    invoiceVerified: form?.companyName == ocrData.vendorSupplier,
+    qr: qrData.vendorBuyer || '-',
+    fpVerified: isEmpty(qrData.vendorBuyer) ? 'none' : form?.companyName == qrData.vendorBuyer,
+    ocr: ocrData.vendorBuyer || '-',
+    invoiceVerified: isEmpty(ocrData.vendorBuyer)
+      ? 'none'
+      : form?.companyName == ocrData.vendorBuyer,
     remarks:
-      form?.companyName == qrData.vendorSupplier && form?.companyName == ocrData.vendorSupplier,
+      isEmpty(qrData.vendorBuyer) || isEmpty(ocrData.vendorBuyer)
+        ? 'none'
+        : form?.companyName == qrData.vendorBuyer && form?.companyName == ocrData.vendorBuyer,
   },
   {
     header: 'NPWP',
-    qr: qrData.npwpSupplier || '-',
-    fpVerified: true,
-    ocr: ocrData.npwpSupplier || '-',
-    invoiceVerified: true,
+    qr: qrData.npwpBuyer || '-',
+    fpVerified: isEmpty(qrData.npwpBuyer) ? 'none' : true,
+    ocr: ocrData.npwpBuyer || '-',
+    invoiceVerified: isEmpty(ocrData.npwpBuyer) ? 'none' : true,
     remarks: true,
   },
   {
     header: 'No Faktur Pajak',
     qr: qrData.taxDocumentNumber || '-',
-    fpVerified: form?.taxNoInvoice == qrData.taxDocumentNumber,
+    fpVerified: isEmpty(qrData.taxDocumentNumber)
+      ? 'none'
+      : form?.taxNoInvoice == qrData.taxDocumentNumber,
     ocr: ocrData.taxDocumentNumber || '-',
-    invoiceVerified: form?.taxNoInvoice == ocrData.taxDocumentNumber,
+    invoiceVerified: isEmpty(ocrData.taxDocumentNumber)
+      ? 'none'
+      : form?.taxNoInvoice == ocrData.taxDocumentNumber,
     remarks:
-      form?.taxNumber == qrData.taxDocumentNumber && ocrData.taxDocumentNumber == form?.taxNumber,
+      isEmpty(qrData.taxDocumentNumber) || isEmpty(ocrData.taxDocumentNumber)
+        ? 'none'
+        : form?.taxNoInvoice == qrData.taxDocumentNumber &&
+          form?.taxNoInvoice == ocrData.taxDocumentNumber,
   },
   {
     header: 'Tanggal Faktur Pajak',
     qr: qrData.taxDocumentDate || '-',
-    fpVerified: !!qrData.taxDocumentDate,
+    fpVerified: isEmpty(qrData.taxDocumentDate) ? 'none' : true,
     ocr: ocrData.taxDocumentDate || '-',
-    invoiceVerified: !!ocrData.taxDocumentDate,
-    remarks: true,
+    invoiceVerified: isEmpty(ocrData.taxDocumentDate) ? 'none' : true,
+    remarks: isEmpty(qrData.taxDocumentDate) || isEmpty(ocrData.taxDocumentDate) ? 'none' : true,
   },
   {
     header: 'Nilai Penjualan',
     qr: qrData.dpp || '-',
-    fpVerified: true,
+    fpVerified: isEmpty(qrData.dpp) ? 'none' : true,
     ocr: ocrData.dpp || '-',
-    invoiceVerified: true,
-    remarks: form?.subtotal == Number(qrData.dpp) && form?.subtotal == Number(ocrData.dpp),
+    invoiceVerified: isEmpty(ocrData.dpp) ? 'none' : true,
+    remarks: true,
   },
   {
     header: 'DPP Lainnya',
     qr: '-',
     fpVerified: 'none',
     ocr: '-',
-    invoiceVerified: '-',
-    remarks: 'Invoice Not Match',
+    invoiceVerified: 'none',
+    remarks: 'none',
   },
   {
     header: 'PPN',
     qr: qrData.ppn || '-',
-    fpVerified: true,
+    fpVerified: isEmpty(qrData.ppn) ? 'none' : true,
     ocr: ocrData.ppn || '-',
-    invoiceVerified: true,
+    invoiceVerified: isEmpty(ocrData.ppn) ? 'none' : true,
     remarks: true,
   },
   {
     header: 'PPN BM',
     qr: qrData.ppnbm || '-',
-    fpVerified: true,
+    fpVerified: isEmpty(qrData.ppnbm) ? 'none' : true,
     ocr: ocrData.ppnbm || '-',
-    invoiceVerified: true,
+    invoiceVerified: isEmpty(ocrData.ppnbm) ? 'none' : true,
     remarks: true,
   },
   {
     header: 'Status Approve FP',
     qr: qrData.status || '-',
-    fpVerified: true,
+    fpVerified: isEmpty(qrData.status) ? 'none' : true,
     ocr: ocrData.status || '-',
-    invoiceVerified: true,
+    invoiceVerified: isEmpty(ocrData.status) ? 'none' : true,
     remarks: true,
   },
   {
@@ -458,7 +483,7 @@ const tableData = computed(() => [
     qr: '-',
     fpVerified: 'none',
     ocr: '-',
-    invoiceVerified: '-',
+    invoiceVerified: 'none',
     remarks: 'none',
   },
 ])
@@ -538,10 +563,10 @@ const setColumn = () => {
 
 const getOcrKey = (header: string): keyof invoiceOcrData | null => {
   const map: Record<string, keyof invoiceOcrData> = {
-    'Nama Vendor': 'vendorBuyer',
-    'NPWP Vendor': 'npwpBuyer',
-    Perusahaan: 'vendorSupplier',
-    NPWP: 'npwpSupplier',
+    'Nama Vendor': 'vendorSupplier',
+    'NPWP Vendor': 'npwpSupplier',
+    Perusahaan: 'vendorBuyer',
+    NPWP: 'npwpBuyer',
     'No Faktur Pajak': 'taxDocumentNumber',
     'Tanggal Faktur Pajak': 'taxDocumentDate',
     'Nilai Penjualan': 'dpp',
@@ -557,8 +582,13 @@ watch(isVerifyData, (val) => {
 
   tableData.value.forEach((row, index) => {
     if (editableRemarks[index] === undefined) {
-      editableRemarks[index] =
-        row.remarks === true || row.remarks === 'Matched' ? 'Matched' : "Didn't Matched"
+      if (row.remarks === true || row.remarks === '1') {
+        editableRemarks[index] = '1'
+      } else if (row.remarks === false || row.remarks === '2') {
+        editableRemarks[index] = '2'
+      } else if (row.remarks === 'none') {
+        editableRemarks[index] = '4'
+      }
     }
   })
 })
