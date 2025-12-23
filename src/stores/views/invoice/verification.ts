@@ -14,7 +14,6 @@ import type {
   ListNonPoTypes,
   PostEditApprovalNonPoTypes,
   ParamsPph21Types,
-  ResponsePph21Types,
   SapStatusParams,
   SapStatusResponse,
   UpdatePaymentStatusRequest,
@@ -307,14 +306,14 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
       documentUrl: data,
     }
 
-    const response: ApiResponse<void> = await invoiceApi.post(
+    const response: ApiResponse<invoiceQrData> = await invoiceApi.post(
       '/ocr/invoice/scan-qr-from-blob',
       payload,
     )
 
     // errorMessageUpload.value = response.data.result.message
 
-    return response.data.invoiceDetail
+    return response.data.result.content
   }
 
   const uploadFileOcr = async (data: string) => {
@@ -322,7 +321,10 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
       documentUrl: data,
     }
 
-    const response: ApiResponse<void> = await invoiceApi.post('/ocr/read-text-from-blob', payload)
+    const response: ApiResponse<invoiceOcrData> = await invoiceApi.post(
+      '/ocr/read-text-from-blob',
+      payload,
+    )
 
     // errorMessageUpload.value = response.data.result.message
 
