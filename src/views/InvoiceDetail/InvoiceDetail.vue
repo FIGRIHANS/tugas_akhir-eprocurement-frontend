@@ -1587,8 +1587,7 @@ watch(
   async (newTab) => {
     if (
       newTab === 'paymentStatus' &&
-      route.query.type === '2' &&
-      (checkApprovalNonPo1() || checkShowPaymentForProfile3200()) &&
+      (route.query.type === '1' || route.query.type === '2') &&
       form.value.statusCode >= 7
     ) {
       try {
@@ -1601,7 +1600,6 @@ watch(
           }
           if (header.clearingDocumentNo) {
             form.value.clearingDocumentNo = header.clearingDocumentNo
-            console.log('Tab Switch - Clearing Doc updated:', header.clearingDocumentNo)
           }
 
           // Fully sync status and payment summary
@@ -1619,7 +1617,6 @@ watch(
             currency: header.currency,
             clearingDocumentNo: header.clearingDocumentNo || '-',
           }
-          console.log('Tab Switch - Payment Summary updated:', paymentSummary.value)
 
           if (detail && detail.length > 0) {
             // For user 3002, show only the latest record
@@ -1692,8 +1689,8 @@ onMounted(async () => {
     await verificationApi.getInvoiceDetail(route.query.id?.toString() || '').then(async () => {
       afterGetDetail()
 
-      // Load payment status data from backend API
-      if (route.query.type === '2' && checkApprovalNonPo1() && form.value.statusCode >= 7) {
+      // Load payment status data from backend API for both type 1 (Verification) and type 2 (Approval)
+      if ((route.query.type === '1' || route.query.type === '2') && form.value.statusCode >= 7) {
         try {
           const response = await verificationApi.getPaymentStatus(form.value.invoiceUId)
           if (response?.result?.content) {
