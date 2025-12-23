@@ -75,13 +75,13 @@
       <div class="overflow-x-auto list__table mt-[24px]">
         <table class="table align-middle text-gray-700 font-medium text-sm">
           <thead>
-            <tr>
+            <tr class="bg-blue-500 text-white">
               <th
                 v-for="(item, index) in columns"
                 :key="index"
                 :class="{
                   'cursor-pointer': item !== 'Action',
-                  '!text-blue-500': item === sortColumnName && sortBy !== '',
+                  '!text-yellow-300 font-bold': item === sortColumnName && sortBy !== '',
                 }"
                 @click="item !== 'Action' ? sortColumn(item) : null"
               >
@@ -95,6 +95,16 @@
               <td colspan="13" class="text-center">No data found.</td>
             </tr>
             <tr v-for="(item, index) in list" :key="index">
+              <!-- Action Column - MOVED TO FRONT -->
+              <td>
+                <button
+                  class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]"
+                  @click="goDetail(item)"
+                >
+                  <i class="ki-filled ki-eye !text-lg"></i>
+                </button>
+              </td>
+              <!-- Other Columns -->
               <td>{{ item.npwpVendor }}</td>
               <td>{{ formatDate(item.tglInvoice) }}</td>
               <td>{{ formatDate(item.tglFP) }}</td>
@@ -124,14 +134,6 @@
               </td>
               <td>{{ item.masaPajakKredit }}</td>
               <td>{{ item.issue }}</td>
-              <td>
-                <button
-                  class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]"
-                  @click="goDetail(item)"
-                >
-                  <i class="ki-filled ki-eye !text-lg"></i>
-                </button>
-              </td>
             </tr>
           </tbody>
         </table>
@@ -343,6 +345,7 @@ const filteredStatusOptions = computed(() => {
 })
 
 const columns = ref<string[]>([
+  'Action', // MOVED TO FRONT
   'NPWP Vendor',
   'Tgl Invoice',
   'Tgl FP',
@@ -354,7 +357,6 @@ const columns = ref<string[]>([
   'Credit Status',
   'Masa Pajak Kredit',
   'Issue',
-  'Action',
 ])
 
 // Sample data

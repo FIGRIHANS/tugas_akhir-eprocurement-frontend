@@ -73,13 +73,13 @@
       <div class="overflow-x-auto list__table mt-[24px]">
         <table class="table align-middle text-gray-700 font-medium text-sm">
           <thead>
-            <tr>
+            <tr class="bg-blue-500 text-white">
               <th
                 v-for="(item, index) in columns"
                 :key="index"
                 :class="{
                   'cursor-pointer': item !== 'Action',
-                  '!text-blue-500': item === sortColumnName && sortBy !== '',
+                  '!text-yellow-300 font-bold': item === sortColumnName && sortBy !== '',
                 }"
                 @click="item !== 'Action' ? sortColumn(item) : null"
               >
@@ -93,6 +93,17 @@
               <td colspan="18" class="text-center">No data found.</td>
             </tr>
             <tr v-for="(item, index) in list" :key="index">
+              <!-- Action Column - MOVED TO FRONT -->
+              <td class="text-center">
+                <button
+                  class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]"
+                  @click="viewDetail(item.beritaAcaraId)"
+                  title="View Detail"
+                >
+                  <i class="ki-filled ki-eye !text-lg"></i>
+                </button>
+              </td>
+              <!-- Other Columns -->
               <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
               <td>{{ item.beritaAcaraId }}</td>
               <td>{{ item.tripId }}</td>
@@ -121,15 +132,6 @@
               <td>{{ item.createdBy }}</td>
               <td>{{ formatDate(item.updateDate) }}</td>
               <td>{{ item.updateBy }}</td>
-              <td class="text-center">
-                <button
-                  class="btn btn-sm btn-icon btn-primary"
-                  @click="viewDetail(item.beritaAcaraId)"
-                  title="View Detail"
-                >
-                  <i class="ki-filled ki-eye"></i>
-                </button>
-              </td>
             </tr>
           </tbody>
         </table>
@@ -217,6 +219,7 @@ const filterForm = ref<FilterForm>({
 })
 
 const columns = ref<string[]>([
+  'Action', // MOVED TO FRONT
   'No',
   'Report ID',
   'Trip ID',
@@ -234,7 +237,6 @@ const columns = ref<string[]>([
   'Created By',
   'Update Date',
   'Update By',
-  'Action',
 ])
 
 // 10 Dummy data for demonstration

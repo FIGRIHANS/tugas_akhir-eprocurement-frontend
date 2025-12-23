@@ -6,7 +6,7 @@
     <div class="border border-gray-200 rounded-xl p-[24px]">
       <!-- Header Section -->
       <div class="flex justify-between align-items-center gap-[8px] mb-[24px]">
-        <h1>VAT Reconciliation</h1>
+        <h3 class="text-lg font-semibold">VAT Reconciliation</h3>
         <div class="flex align-items-center gap-3">
           <UiInputSearch v-model="search" placeholder="Search" @keypress="goSearch" />
 
@@ -16,6 +16,7 @@
             Filter
           </button>
 
+          <!-- Update Status Button -->
           <button
             class="btn btn-light"
             @click="openStatusModal()"
@@ -25,11 +26,7 @@
             Update Status
           </button>
 
-          <button
-            class="btn btn-primary"
-            @click="exportData()"
-            :disabled="selectedItems.length === 0"
-          >
+          <button class="btn btn-primary" @click="exportData()">
             <i class="ki-duotone ki-plus-circle"></i>
             VAT Credit Posting
             <span v-if="selectedItems.length > 0" class="badge badge-sm badge-light-primary ms-2">
@@ -91,9 +88,10 @@
       <div class="overflow-x-auto list__table mt-[24px]">
         <table class="table align-middle text-gray-700 font-medium text-sm">
           <thead>
-            <tr>
+            <!-- Blue header styling -->
+            <tr class="bg-blue-500 text-white">
               <!-- Checkbox & Action Column Header -->
-              <th class="w-[120px] text-center">
+              <th>
                 <div class="flex items-center justify-center gap-3">
                   <input
                     type="checkbox"
@@ -105,11 +103,12 @@
                   <span class="text-xs font-semibold">Action</span>
                 </div>
               </th>
+              <!-- Other Column Headers -->
               <th
                 v-for="(item, index) in columns"
                 :key="index"
                 class="cursor-pointer"
-                :class="{ '!text-blue-500': item === sortColumnName && sortBy !== '' }"
+                :class="{ '!text-yellow-300 font-bold': item === sortColumnName && sortBy !== '' }"
                 @click="sortColumn(item)"
               >
                 {{ item }}
@@ -132,20 +131,21 @@
                     @change="toggleSelectItem(item)"
                   />
                   <button
-                    class="btn btn-outline btn-icon btn-primary w-[26px] h-[26px] p-0 min-h-0"
+                    class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]"
                     @click="goDetail(item)"
                     title="View Detail"
                   >
-                    <i class="ki-filled ki-eye text-xs"></i>
+                    <i class="ki-filled ki-eye !text-lg"></i>
                   </button>
                 </div>
               </td>
-              <td class="whitespace-nowrap">{{ item.npwpVendor }}</td>
-              <td class="whitespace-nowrap">{{ formatDate(item.tglInvoice) }}</td>
-              <td class="whitespace-nowrap">{{ formatDate(item.tglFP) }}</td>
-              <td class="whitespace-nowrap">{{ item.nsfp }}</td>
-              <td class="text-right whitespace-nowrap">{{ formatCurrency(item.dpp) }}</td>
-              <td class="text-right whitespace-nowrap">{{ formatCurrency(item.ppn) }}</td>
+              <!-- Other Columns -->
+              <td>{{ item.npwpVendor }}</td>
+              <td>{{ formatDate(item.tglInvoice) }}</td>
+              <td>{{ formatDate(item.tglFP) }}</td>
+              <td>{{ item.nsfp }}</td>
+              <td class="text-right">{{ formatCurrency(item.dpp) }}</td>
+              <td class="text-right">{{ formatCurrency(item.ppn) }}</td>
               <td class="text-center">
                 <span class="badge badge-outline" :class="getStatusFPBadgeClass(item.statusFP)">
                   {{ item.statusFP }}
@@ -167,8 +167,8 @@
                   {{ item.creditStatus }}
                 </span>
               </td>
-              <td class="whitespace-nowrap">{{ item.masaPajakKredit }}</td>
-              <td class="whitespace-nowrap">{{ item.issue || '-' }}</td>
+              <td>{{ item.masaPajakKredit }}</td>
+              <td>{{ item.issue }}</td>
             </tr>
           </tbody>
         </table>
@@ -234,7 +234,6 @@
               <i class="ki-filled ki-down text-sm text-gray-400"></i>
             </button>
 
-            <!-- Dropdown Panel -->
             <!-- Dropdown Panel -->
             <div
               v-if="showStatusDropdown"
@@ -361,6 +360,9 @@ const filterForm = ref<FilterForm>({
   creditStatus: '',
 })
 
+// Checkbox selection state
+const selectedItems = ref<VATReconciliationData[]>([])
+
 // Modal state
 const showStatusModal = ref<boolean>(false)
 const selectedStatus = ref<string>('')
@@ -375,9 +377,6 @@ const statusOptions = ref<string[]>([
   'CREDITED',
   'UNCREDITED',
 ])
-
-// Checkbox selection state
-const selectedItems = ref<VATReconciliationData[]>([])
 
 // Filtered status options based on search
 const filteredStatusOptions = computed(() => {
@@ -624,7 +623,6 @@ const setPage = (value: number) => {
 }
 
 const goDetail = (data: VATReconciliationData) => {
-  // Navigate to detail page using NSFP as ID
   router.push({
     name: 'vatReconciliationDetail',
     params: {
@@ -671,6 +669,31 @@ const saveStatus = () => {
     selectedItems.value = [] // Clear selection after save
     closeStatusModal()
   }
+}
+
+// Checkbox selection methods
+const toggleSelectAll = () => {
+  if (isAllSelected.value) {
+    selectedItems.value = []
+  } else {
+    selectedItems.value = [...list.value]
+  }
+}
+
+const toggleSelectItem = (item: VATReconciliationData) => {
+  const index = selectedItems.value.findIndex(
+    (selected) => selected.nsfp === item.nsfp, // Using nsfp as unique identifier
+  )
+
+  if (index > -1) {
+    selectedItems.value.splice(index, 1)
+  } else {
+    selectedItems.value.push(item)
+  }
+}
+
+const isItemSelected = (item: VATReconciliationData) => {
+  return selectedItems.value.some((selected) => selected.nsfp === item.nsfp)
 }
 
 const goSearch = (event: KeyboardEvent) => {
@@ -807,31 +830,6 @@ const exportData = () => {
   })
 }
 
-// Checkbox selection methods
-const toggleSelectAll = () => {
-  if (isAllSelected.value) {
-    selectedItems.value = []
-  } else {
-    selectedItems.value = [...list.value]
-  }
-}
-
-const toggleSelectItem = (item: VATReconciliationData) => {
-  const index = selectedItems.value.findIndex(
-    (selected) => selected.nsfp === item.nsfp, // Using nsfp as unique identifier
-  )
-
-  if (index > -1) {
-    selectedItems.value.splice(index, 1)
-  } else {
-    selectedItems.value.push(item)
-  }
-}
-
-const isItemSelected = (item: VATReconciliationData) => {
-  return selectedItems.value.some((selected) => selected.nsfp === item.nsfp)
-}
-
 onMounted(() => {
   setList(filteredDataList.value)
 })
@@ -842,20 +840,6 @@ onMounted(() => {
   th,
   td {
     white-space: nowrap;
-    vertical-align: middle;
-    padding: 12px 16px;
-  }
-
-  th {
-    font-weight: 600;
-    background-color: #f9fafb;
-    border-bottom: 2px solid #e5e7eb;
-  }
-
-  tbody tr {
-    &:hover {
-      background-color: #f9fafb;
-    }
   }
 
   &::-webkit-scrollbar {

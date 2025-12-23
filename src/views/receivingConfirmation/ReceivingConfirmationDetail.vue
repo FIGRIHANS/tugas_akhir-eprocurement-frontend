@@ -163,17 +163,17 @@
           <table class="table align-middle text-gray-700 font-medium text-sm">
             <thead>
               <!-- First Header Row -->
-              <tr>
+              <tr class="bg-blue-500 text-white">
+                <th rowspan="2" class="text-center border-r">Action</th>
                 <th rowspan="2" class="text-center border-r">No Pick Slip</th>
                 <th rowspan="2" class="text-center border-r">SKU Description</th>
                 <th colspan="2" class="text-center border-r">LOT. NO</th>
                 <th colspan="3" class="text-center border-r">FG Receipt Confirmation</th>
                 <th colspan="2" class="text-center border-r">Loading Difference</th>
                 <th colspan="2" class="text-center border-r">Transporter Claim</th>
-                <th rowspan="2" class="text-center">Action</th>
               </tr>
               <!-- Second Header Row -->
-              <tr>
+              <tr class="bg-blue-500 text-white">
                 <th class="text-center border-r">Delivery Note</th>
                 <th class="text-center border-r">Actual</th>
                 <th class="text-center border-r">Delivery Note</th>
@@ -187,9 +187,18 @@
             </thead>
             <tbody>
               <tr v-if="tableData.length === 0">
-                <td colspan="14" class="text-center">No data available</td>
+                <td colspan="15" class="text-center">No data available</td>
               </tr>
               <tr v-for="(item, index) in tableData" :key="index">
+                <td class="text-center border-r">
+                  <button
+                    class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]"
+                    @click="viewItem(index)"
+                    title="View Details"
+                  >
+                    <i class="ki-filled ki-eye !text-lg"></i>
+                  </button>
+                </td>
                 <td>{{ item.pickSlip }}</td>
                 <td>{{ item.description }}</td>
                 <td class="text-right">{{ item.diSuratJalan }}</td>
@@ -201,15 +210,6 @@
                 <td class="text-right">{{ item.kurang }}</td>
                 <td class="text-right">{{ item.repackQty }}</td>
                 <td class="text-right">{{ item.damageQty }}</td>
-                <td class="text-center">
-                  <button
-                    class="btn btn-sm btn-icon btn-primary"
-                    @click="viewItem(index)"
-                    title="View Details"
-                  >
-                    <i class="ki-filled ki-eye"></i>
-                  </button>
-                </td>
               </tr>
             </tbody>
           </table>
@@ -416,21 +416,6 @@ onMounted(() => {
   th,
   td {
     white-space: nowrap;
-    padding: 12px 16px;
-  }
-
-  th {
-    background-color: #f8f9fa;
-    font-weight: 600;
-    border: 1px solid #dee2e6;
-  }
-
-  td {
-    border: 1px solid #dee2e6;
-  }
-
-  tbody tr:hover {
-    background-color: #f8f9fa;
   }
 
   &::-webkit-scrollbar {
