@@ -175,6 +175,9 @@
                     {{ parent.poPrice || 'Warning' }}
                   </span>
                 </td>
+                <td>
+                  {{ parent.emailSender || '-' }}
+                </td>
               </tr>
               <tr v-show="parent.isOpenChild">
                 <td></td>
@@ -322,6 +325,7 @@ const columns = ref<string[]>([
   'VAT Status',
   'WHT Status',
   'PO Price',
+  'Email Sender',
 ])
 
 const columnsChild = ref(['No PO', 'No GR', 'Item Description', 'Item Amount', 'Quantity'])
