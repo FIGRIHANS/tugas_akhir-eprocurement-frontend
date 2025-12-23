@@ -89,9 +89,9 @@
         <table class="table align-middle text-gray-700 font-medium text-sm">
           <thead>
             <!-- Blue header styling -->
-            <tr class="bg-blue-500 text-white">
+            <tr>
               <!-- Checkbox & Action Column Header -->
-              <th>
+              <th class="!border-b-blue-500 !bg-blue-100 !text-blue-500">
                 <div class="flex items-center justify-center gap-3">
                   <input
                     type="checkbox"
@@ -107,8 +107,11 @@
               <th
                 v-for="(item, index) in columns"
                 :key="index"
-                class="cursor-pointer"
-                :class="{ '!text-yellow-300 font-bold': item === sortColumnName && sortBy !== '' }"
+                class="!border-b-blue-500 !bg-blue-100 !text-blue-500 cursor-pointer"
+                :class="{
+                  list__long: index !== 0,
+                  '!text-blue-500': item === sortColumnName && sortBy !== '',
+                }"
                 @click="sortColumn(item)"
               >
                 {{ item }}

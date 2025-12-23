@@ -75,13 +75,15 @@
       <div class="overflow-x-auto list__table mt-[24px]">
         <table class="table align-middle text-gray-700 font-medium text-sm">
           <thead>
-            <tr class="bg-blue-500 text-white">
+            <tr>
               <th
                 v-for="(item, index) in columns"
                 :key="index"
+                class="!border-b-blue-500 !bg-blue-100 !text-blue-500"
                 :class="{
+                  list__long: index !== 0,
                   'cursor-pointer': item !== 'Action',
-                  '!text-yellow-300 font-bold': item === sortColumnName && sortBy !== '',
+                  '!text-blue-500': item === sortColumnName && sortBy !== '',
                 }"
                 @click="item !== 'Action' ? sortColumn(item) : null"
               >
