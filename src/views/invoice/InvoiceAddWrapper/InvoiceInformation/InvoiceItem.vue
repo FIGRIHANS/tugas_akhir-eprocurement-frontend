@@ -19,7 +19,7 @@
             <th
               v-for="(item, index) in columns"
               :key="index"
-              class="cost__field-base"
+              class="cost__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"
               :class="{
                 'cost__field-base--activity': item.toLowerCase() === 'activity / expense',
                 'cost__field-base--item-amount': item.toLowerCase() === 'item amount',

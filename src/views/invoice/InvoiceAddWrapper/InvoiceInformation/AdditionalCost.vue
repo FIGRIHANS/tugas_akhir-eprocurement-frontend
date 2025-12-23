@@ -1,23 +1,30 @@
 <template>
   <div class="flex flex-col gap-[16px]">
     <p class="text-base font-semibold">Additional Cost</p>
-    <button v-if="form?.status === 0 || form?.status === -1 || form?.status === 5" class="btn btn-outline btn-primary w-fit" @click="addNew">
+    <button
+      v-if="form?.status === 0 || form?.status === -1 || form?.status === 5"
+      class="btn btn-outline btn-primary w-fit"
+      @click="addNew"
+    >
       <i class="ki-duotone ki-plus-circle"></i>
       Add Additional Cost
     </button>
     <div v-if="form" class="overflow-x-auto cost__table">
-      <table class="table table-xs table-border" :class="{ 'border-danger': form?.additionalCostError }">
+      <table
+        class="table table-xs table-border"
+        :class="{ 'border-danger': form?.additionalCostError }"
+      >
         <thead>
           <tr>
             <th
               v-for="(item, index) in columns"
               :key="index"
-              class="cost__field-base"
+              class="cost__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"
               :class="{
                 'cost__field-base--activity': item.toLowerCase() === 'activity / expense',
                 'cost__field-base--tax': item.toLowerCase() === 'tax code',
                 'cost__field-base--item-amount': item.toLowerCase() === 'item amount',
-                'cost__field-base--description': item.toLowerCase() === 'description'
+                'cost__field-base--description': item.toLowerCase() === 'description',
               }"
             >
               {{ item }}
@@ -31,11 +38,19 @@
           <template v-else>
             <tr v-for="(item, index) in form.additionalCost" :key="index" class="cost__field-items">
               <td class="flex items-center justify-around gap-[8px]">
-                <button v-if="form.status === 0 || form.status === -1 || form.status === 5" class="btn btn-icon btn-primary" @click="goEdit(item)">
+                <button
+                  v-if="form.status === 0 || form.status === -1 || form.status === 5"
+                  class="btn btn-icon btn-primary"
+                  @click="goEdit(item)"
+                >
                   <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>
                   <i v-else class="ki-duotone ki-check-circle"></i>
                 </button>
-                <button v-if="form.status === 0 || form.status === -1 || form.status === 5" class="btn btn-icon btn-outline btn-danger" @click="deleteItem(index)">
+                <button
+                  v-if="form.status === 0 || form.status === -1 || form.status === 5"
+                  class="btn btn-icon btn-outline btn-danger"
+                  @click="deleteItem(index)"
+                >
                   <i class="ki-duotone ki-cross-circle"></i>
                 </button>
               </td>
@@ -54,7 +69,11 @@
                 ></v-select>
               </td>
               <td>
-                <span v-if="!item.isEdit">{{ form?.currency === 'IDR' ? useFormatIdr(item.itemAmount) : useFormatUsd(item.itemAmount) || '-' }}</span>
+                <span v-if="!item.isEdit">{{
+                  form?.currency === 'IDR'
+                    ? useFormatIdr(item.itemAmount)
+                    : useFormatUsd(item.itemAmount) || '-'
+                }}</span>
                 <input
                   v-else
                   v-model="item.itemAmount"
@@ -67,13 +86,15 @@
               </td>
               <td>
                 <span v-if="!item.isEdit">{{ getDebitCreditName(item.debitCredit) || '-' }}</span>
-                <select v-else v-model="item.debitCredit" class="select" placeholder="" :class="{ 'border-danger': item.isDebitCreditError }">
-                  <option value="D">
-                    Debit
-                  </option>
-                  <option value="K">
-                    Credit
-                  </option>
+                <select
+                  v-else
+                  v-model="item.debitCredit"
+                  class="select"
+                  placeholder=""
+                  :class="{ 'border-danger': item.isDebitCreditError }"
+                >
+                  <option value="D">Debit</option>
+                  <option value="K">Credit</option>
                 </select>
               </td>
               <td>
@@ -90,7 +111,11 @@
                 ></v-select>
               </td>
               <td>
-                <span>{{ form?.currency === 'IDR' ? useFormatIdr(item.vatAmount) : useFormatUsd(item.vatAmount) }}</span>
+                <span>{{
+                  form?.currency === 'IDR'
+                    ? useFormatIdr(item.vatAmount)
+                    : useFormatUsd(item.vatAmount)
+                }}</span>
               </td>
               <td>
                 <span>{{ item.costCenter || '-' }}</span>
@@ -108,10 +133,18 @@
                 <span>{{ item.whtCode || '-' }}</span>
               </td>
               <td>
-                <span>{{ form?.currency === 'IDR' ? useFormatIdr(item.whtBaseAmount) : useFormatUsd(item.whtBaseAmount) || '-' }}</span>
+                <span>{{
+                  form?.currency === 'IDR'
+                    ? useFormatIdr(item.whtBaseAmount)
+                    : useFormatUsd(item.whtBaseAmount) || '-'
+                }}</span>
               </td>
               <td>
-                <span>{{ form?.currency === 'IDR' ? useFormatIdr(item.whtAmount) : useFormatUsd(item.whtAmount) || '-' }}</span>
+                <span>{{
+                  form?.currency === 'IDR'
+                    ? useFormatIdr(item.whtAmount)
+                    : useFormatUsd(item.whtAmount) || '-'
+                }}</span>
               </td>
             </tr>
           </template>
@@ -144,7 +177,7 @@ const columns = ref([
   'WHT Type',
   'WHT Code',
   'WHT Base Amount',
-  'WHT Amount'
+  'WHT Amount',
 ])
 
 const form = inject<formTypes>('form')
@@ -170,7 +203,7 @@ const addNew = () => {
       whtCode: '',
       whtBaseAmount: 0,
       whtAmount: 0,
-      isEdit: false
+      isEdit: false,
     }
     form.additionalCost.push(data)
   }
@@ -185,7 +218,8 @@ const deleteItem = (index: number) => {
 
 const getActivityName = (id: number) => {
   const getIndex = listActivity.value.findIndex((item) => item.id === id)
-  if (getIndex !== -1) return `${listActivity.value[getIndex].code} - ${listActivity.value[getIndex].name}`
+  if (getIndex !== -1)
+    return `${listActivity.value[getIndex].code} - ${listActivity.value[getIndex].name}`
 }
 
 const getDebitCreditName = (code: string) => {
@@ -199,7 +233,7 @@ const getPercentTax = (code: string) => {
   const getIndex = listTaxCalculation.value.findIndex((item) => item.code === code)
   if (getIndex !== -1) {
     const splitName = listTaxCalculation.value[getIndex].name.split(' - ')
-    return parseFloat(splitName[1].replace(',', '.').replace('%','')) / 100
+    return parseFloat(splitName[1].replace(',', '.').replace('%', '')) / 100
   }
 }
 
@@ -228,18 +262,14 @@ const goEdit = (item: itemsCostType) => {
     for (const data of form.additionalCost) {
       if (!data.activity) data.isActivityError = true
       else data.isActivityError = false
-  
+
       if (!data.itemAmount || data.itemAmount < 0) data.isItemAmountError = true
       else data.isItemAmountError = false
-  
+
       if (!data.debitCredit) data.isDebitCreditError = true
       else data.isDebitCreditError = false
     }
-    if (
-      item.isActivityError ||
-      item.isItemAmountError ||
-      item.isDebitCreditError
-    ) return
+    if (item.isActivityError || item.isItemAmountError || item.isDebitCreditError) return
   }
   item.isEdit = !item.isEdit
 }
@@ -251,8 +281,8 @@ watch(
   },
   {
     deep: true,
-    immediate: true
-  }
+    immediate: true,
+  },
 )
 </script>
 

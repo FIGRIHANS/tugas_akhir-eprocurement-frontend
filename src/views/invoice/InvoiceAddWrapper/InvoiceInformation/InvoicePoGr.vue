@@ -62,7 +62,7 @@
               <th
                 v-for="(item, index) in columns"
                 :key="index"
-                class="pogr__field-base"
+                class="pogr__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"
                 :class="{
                   'pogr__field-base--po-item': item.toLowerCase() === 'item text',
                   'pogr__field-base--tax': item.toLowerCase() === 'tax code',
@@ -220,7 +220,7 @@
               <th
                 v-for="(item, index) in columns"
                 :key="index"
-                class="pogr__field-base"
+                class="pogr__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"
                 :class="{
                   'pogr__field-base--po-number': item.toLowerCase() === 'po number',
                   'pogr__field-base--po-item': item.toLowerCase() === 'po item',
