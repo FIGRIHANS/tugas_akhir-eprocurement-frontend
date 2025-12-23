@@ -355,7 +355,7 @@ const callList = () => {
       invoiceTypeCode: Number(filterForm.invoiceType),
       invoiceDate: filterForm.date,
       searchText: search.value,
-      invoiceSource: 2,
+      invoiceSource: 3,
     })
     .finally(() => {
       sortColumn(null)
