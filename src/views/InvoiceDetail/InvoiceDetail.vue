@@ -1560,6 +1560,7 @@ watch(
   async (newTab) => {
     if (
       newTab === 'paymentStatus' &&
+      route.query.type === '2' &&
       (checkApprovalNonPo1() || checkShowPaymentForProfile3200()) &&
       form.value.statusCode >= 7
     ) {
@@ -1660,7 +1661,7 @@ onMounted(async () => {
       afterGetDetail()
 
       // Load payment status data from backend API
-      if (checkApprovalNonPo1() && form.value.statusCode >= 7) {
+      if (route.query.type === '2' && checkApprovalNonPo1() && form.value.statusCode >= 7) {
         try {
           const response = await verificationApi.getPaymentStatus(form.value.invoiceUId)
           if (response?.result?.content) {
@@ -1713,7 +1714,7 @@ onMounted(async () => {
       afterGetDetailNonPo()
 
       // Load payment status data from backend API
-      if (checkApprovalNonPo1() && form.value.statusCode >= 7) {
+      if (route.query.type === '2' && checkApprovalNonPo1() && form.value.statusCode >= 7) {
         try {
           const response = await verificationApi.getPaymentStatus(form.value.invoiceUId)
           if (response?.result?.content) {
