@@ -17,6 +17,15 @@
           </button>
 
           <button
+            class="btn btn-light"
+            @click="openStatusModal()"
+            :disabled="selectedItems.length === 0"
+          >
+            <i class="ki-duotone ki-setting-2"></i>
+            Update Status
+          </button>
+
+          <button
             class="btn btn-primary"
             @click="exportData()"
             :disabled="selectedItems.length === 0"
@@ -83,27 +92,28 @@
         <table class="table align-middle text-gray-700 font-medium text-sm">
           <thead>
             <tr>
-              <!-- Checkbox Column Header -->
-              <th class="w-[50px]">
-                <input
-                  type="checkbox"
-                  class="checkbox checkbox-sm"
-                  :checked="isAllSelected"
-                  :indeterminate="isSomeSelected && !isAllSelected"
-                  @change="toggleSelectAll"
-                />
+              <!-- Checkbox & Action Column Header -->
+              <th class="w-[120px] text-center">
+                <div class="flex items-center justify-center gap-3">
+                  <input
+                    type="checkbox"
+                    class="checkbox checkbox-sm"
+                    :checked="isAllSelected"
+                    :indeterminate="isSomeSelected && !isAllSelected"
+                    @change="toggleSelectAll"
+                  />
+                  <span class="text-xs font-semibold">Detail</span>
+                </div>
               </th>
               <th
                 v-for="(item, index) in columns"
                 :key="index"
-                :class="{
-                  'cursor-pointer': item !== 'Action',
-                  '!text-blue-500': item === sortColumnName && sortBy !== '',
-                }"
-                @click="item !== 'Action' ? sortColumn(item) : null"
+                class="cursor-pointer"
+                :class="{ '!text-blue-500': item === sortColumnName && sortBy !== '' }"
+                @click="sortColumn(item)"
               >
                 {{ item }}
-                <i v-if="item !== 'Action'" class="ki-filled ki-arrow-up-down"></i>
+                <i class="ki-filled ki-arrow-up-down"></i>
               </th>
             </tr>
           </thead>
@@ -112,21 +122,30 @@
               <td colspan="13" class="text-center">No data found.</td>
             </tr>
             <tr v-for="(item, index) in list" :key="index">
-              <!-- Checkbox Column -->
-              <td>
-                <input
-                  type="checkbox"
-                  class="checkbox checkbox-sm"
-                  :checked="isItemSelected(item)"
-                  @change="toggleSelectItem(item)"
-                />
+              <!-- Checkbox & Eye Icon Column -->
+              <td class="text-center">
+                <div class="flex items-center justify-center gap-3">
+                  <input
+                    type="checkbox"
+                    class="checkbox checkbox-sm"
+                    :checked="isItemSelected(item)"
+                    @change="toggleSelectItem(item)"
+                  />
+                  <button
+                    class="btn btn-outline btn-icon btn-primary w-[26px] h-[26px] p-0 min-h-0"
+                    @click="goDetail(item)"
+                    title="View Detail"
+                  >
+                    <i class="ki-filled ki-eye text-xs"></i>
+                  </button>
+                </div>
               </td>
-              <td>{{ item.npwpVendor }}</td>
-              <td>{{ formatDate(item.tglInvoice) }}</td>
-              <td>{{ formatDate(item.tglFP) }}</td>
-              <td>{{ item.nsfp }}</td>
-              <td class="text-right">{{ formatCurrency(item.dpp) }}</td>
-              <td class="text-right">{{ formatCurrency(item.ppn) }}</td>
+              <td class="whitespace-nowrap">{{ item.npwpVendor }}</td>
+              <td class="whitespace-nowrap">{{ formatDate(item.tglInvoice) }}</td>
+              <td class="whitespace-nowrap">{{ formatDate(item.tglFP) }}</td>
+              <td class="whitespace-nowrap">{{ item.nsfp }}</td>
+              <td class="text-right whitespace-nowrap">{{ formatCurrency(item.dpp) }}</td>
+              <td class="text-right whitespace-nowrap">{{ formatCurrency(item.ppn) }}</td>
               <td class="text-center">
                 <span class="badge badge-outline" :class="getStatusFPBadgeClass(item.statusFP)">
                   {{ item.statusFP }}
@@ -148,16 +167,8 @@
                   {{ item.creditStatus }}
                 </span>
               </td>
-              <td>{{ item.masaPajakKredit }}</td>
-              <td>{{ item.issue }}</td>
-              <td>
-                <button
-                  class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]"
-                  @click="goDetail(item)"
-                >
-                  <i class="ki-filled ki-eye !text-lg"></i>
-                </button>
-              </td>
+              <td class="whitespace-nowrap">{{ item.masaPajakKredit }}</td>
+              <td class="whitespace-nowrap">{{ item.issue || '-' }}</td>
             </tr>
           </tbody>
         </table>
@@ -192,7 +203,12 @@
       <div class="bg-white rounded-xl shadow-2xl w-[450px]">
         <!-- Modal Header -->
         <div class="flex justify-between items-center px-6 py-4 border-b border-gray-200">
-          <h3 class="text-xl font-semibold text-gray-800">Invoice Status</h3>
+          <h3 class="text-xl font-semibold text-gray-800">
+            Update Invoice Status
+            <span v-if="selectedItems.length > 1" class="text-sm text-gray-500">
+              ({{ selectedItems.length }} items selected)
+            </span>
+          </h3>
           <button
             @click="closeStatusModal"
             class="text-gray-400 hover:text-gray-600 transition-colors"
@@ -392,7 +408,6 @@ const columns = ref<string[]>([
   'Credit Status',
   'Masa Pajak Kredit',
   'Issue',
-  'Action',
 ])
 
 // Sample data
@@ -618,6 +633,17 @@ const goDetail = (data: VATReconciliationData) => {
   })
 }
 
+const openStatusModal = () => {
+  if (selectedItems.value.length > 0) {
+    // Use first selected item for modal display
+    currentSelectedItem.value = selectedItems.value[0]
+    selectedStatus.value = ''
+    statusSearch.value = ''
+    showStatusDropdown.value = false
+    showStatusModal.value = true
+  }
+}
+
 const toggleStatusDropdown = () => {
   showStatusDropdown.value = !showStatusDropdown.value
 }
@@ -636,10 +662,13 @@ const closeStatusModal = () => {
 }
 
 const saveStatus = () => {
-  if (selectedStatus.value && currentSelectedItem.value) {
-    console.log('Saving status:', selectedStatus.value, 'for item:', currentSelectedItem.value)
-    // TODO: Implement API call to save status
-    alert(`Status "${selectedStatus.value}" saved successfully!`)
+  if (selectedStatus.value && selectedItems.value.length > 0) {
+    console.log('Saving status:', selectedStatus.value, 'for items:', selectedItems.value)
+    // TODO: Implement API call to save status for all selected items
+    alert(
+      `Status "${selectedStatus.value}" saved successfully for ${selectedItems.value.length} item(s)!`,
+    )
+    selectedItems.value = [] // Clear selection after save
     closeStatusModal()
   }
 }
@@ -813,6 +842,20 @@ onMounted(() => {
   th,
   td {
     white-space: nowrap;
+    vertical-align: middle;
+    padding: 12px 16px;
+  }
+
+  th {
+    font-weight: 600;
+    background-color: #f9fafb;
+    border-bottom: 2px solid #e5e7eb;
+  }
+
+  tbody tr {
+    &:hover {
+      background-color: #f9fafb;
+    }
   }
 
   &::-webkit-scrollbar {
