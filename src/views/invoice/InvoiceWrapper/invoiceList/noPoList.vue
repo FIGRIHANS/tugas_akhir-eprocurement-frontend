@@ -100,7 +100,7 @@
               <td>{{ formatDateYearFirst(item.invoiceDate) }}</td>
               <td>{{ useFormatIdr(item.totalGrossAmount) }}</td>
               <td>{{ useFormatIdr(item.totalNetAmount) }}</td>
-              <td>{{ formatDateYearFirst(item.actionerDate) }}</td>
+              <td>{{ formatDateYearFirst((item as any).actionerDate) }}</td>
               <td>{{ formatDateYearFirst(item.estimatedPaymentDate) }}</td>
             </tr>
           </tbody>
@@ -154,7 +154,7 @@ import { useFormatIdr } from '@/composables/currency'
 import { formatDateYearFirst } from '@/composables/date-format'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 // import moment from 'moment'
-import type { ListPoTypes } from '@/stores/views/invoice/types/submission'
+import type { ListNonPoTypes } from '@/stores/views/invoice/types/submission'
 import { useRouter } from 'vue-router'
 import { cloneDeep } from 'lodash'
 import { KTModal } from '@/metronic/core'
@@ -191,7 +191,7 @@ const invoiceNonPoTypeList = computed(() => invoiceMasterApi.invoiceNonPoType)
 const search = ref<string>('')
 const currentPage = ref<number>(1)
 const pageSize = ref<number>(10)
-const list = ref<ListPoTypes[]>([])
+const list = ref<ListNonPoTypes[]>([])
 const sortBy = ref<string>('')
 const sortColumnName = ref<string>('')
 
@@ -253,8 +253,8 @@ const colorBadge = (statusCode: number) => {
   return list[statusCode]
 }
 
-const setList = (listData: ListPoTypes[]) => {
-  const result: ListPoTypes[] = []
+const setList = (listData: ListNonPoTypes[]) => {
+  const result: ListNonPoTypes[] = []
   for (const [index, item] of listData.entries()) {
     const start = currentPage.value * pageSize.value - pageSize.value
     const end = currentPage.value * pageSize.value - 1
@@ -361,7 +361,7 @@ const goAdd = (isPo: boolean) => {
   })
 }
 
-const goToDetail = (data: ListPoTypes) => {
+const goToDetail = (data: ListNonPoTypes) => {
   if (data.statusCode === 0 || data.statusCode === 5) {
     router.push({
       name: 'invoiceAdd',
@@ -398,7 +398,7 @@ const sortColumn = (columnName: string | null) => {
   const roleSort = ['asc', 'desc', '']
 
   const listData = cloneDeep(poList.value)
-  let result: ListPoTypes[] = []
+  let result: ListNonPoTypes[] = []
 
   if (columnName) {
     if (sortColumnName.value !== columnName) sortBy.value = ''

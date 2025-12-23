@@ -24,21 +24,21 @@
               <!-- Actions column (left of No) -->
               <td class="text-center">
                 <div class="flex items-center justify-center gap-[6px]">
-                <button
-                  class="btn btn-icon btn-primary"
-                  @click="editingIndex === index ? saveEdit(index) : startEdit(index)"
-                  :title="editingIndex === index ? 'Save' : 'Edit'"
-                >
-                  <i v-if="editingIndex !== index" class="ki-duotone ki-notepad-edit"></i>
-                  <i v-else class="ki-duotone ki-check-circle"></i>
-                </button>
-                <button
-                  class="btn btn-icon btn-outline btn-danger"
-                  @click="editingIndex === index ? cancelEdit() : deleteRow(index)"
-                  :title="editingIndex === index ? 'Cancel' : 'Delete'"
-                >
-                  <i class="ki-duotone ki-cross-circle"></i>
-                </button>
+                  <button
+                    class="btn btn-icon btn-primary"
+                    @click="editingIndex === index ? saveEdit(index) : startEdit(index)"
+                    :title="editingIndex === index ? 'Save' : 'Edit'"
+                  >
+                    <i v-if="editingIndex !== index" class="ki-duotone ki-notepad-edit"></i>
+                    <i v-else class="ki-duotone ki-check-circle"></i>
+                  </button>
+                  <button
+                    class="btn btn-icon btn-outline btn-danger"
+                    @click="editingIndex === index ? cancelEdit() : deleteRow(index)"
+                    :title="editingIndex === index ? 'Cancel' : 'Delete'"
+                  >
+                    <i class="ki-duotone ki-cross-circle"></i>
+                  </button>
                 </div>
               </td>
 
@@ -144,7 +144,7 @@ interface SapDataResponse {
 }
 
 interface PaymentInformationRef {
-  fetchSapStatus: () => Promise<SapDataResponse | null>
+  fetchSapStatus: () => Promise<SapDataResponse[] | null>
 }
 
 const form = inject<Ref<formTypes>>('form')
@@ -241,14 +241,13 @@ const savedPaymentDetailsFromSession = inject<Ref<PaymentDetail[]>>(
   ref([]),
 )
 
-// Watch and load saved payment details into table (only last row to avoid duplicates)
+// Watch and load saved payment details into table (show all rows)
 watch(
   () => savedPaymentDetailsFromSession.value,
   (newData) => {
     if (newData && newData.length > 0) {
-      // Show only the LAST row from the API results (most recent)
-      const lastRow = newData[newData.length - 1]
-      paymentDetails.value = [lastRow]
+      // Show ALL rows from the API results
+      paymentDetails.value = newData
     }
   },
   { immediate: true },
@@ -257,10 +256,10 @@ watch(
 const handleSapSync = async () => {
   if (paymentInformationRef?.value?.fetchSapStatus) {
     try {
-      const sapData = await paymentInformationRef.value.fetchSapStatus()
+      const sapDataArray = await paymentInformationRef.value.fetchSapStatus()
 
-      if (sapData) {
-        updatePaymentDetailsFromSap(sapData)
+      if (sapDataArray && sapDataArray.length > 0) {
+        updatePaymentDetailsFromSap(sapDataArray)
 
         hasSapSynced.value = true
       } else {
@@ -279,20 +278,21 @@ const deleteRow = (index: number) => {
     })
   }
 }
-const updatePaymentDetailsFromSap = (sapData: SapDataResponse) => {
-  // Clear existing data and replace with new SAP data
-  const newPaymentDetail: PaymentDetail = {
-    no: 1,
-    paymentDate: sapData.clearingDate ? formatSapDate(sapData.clearingDate) : getCurrentDate(),
-    amount: (sapData.openAmount || sapData.invoiceAmount || 0).toString(),
-    status: mapSapStatus(sapData.paymentStatus),
-    bankAccount: formatBankAccount(sapData.payment?.bankKey, sapData.payment?.bankAccountNo),
-    remarks: `SAP Invoice: ${sapData.sapInvoiceNo || 'N/A'} | Vendor: ${sapData.vendorName || 'N/A'}`,
-    attachmentDocument: undefined,
-  }
+const updatePaymentDetailsFromSap = (sapDataArray: SapDataResponse[]) => {
+  const existingRemarks = paymentDetails.value.map((item) => item.remarks || '')
 
-  paymentDetails.value = [newPaymentDetail]
-  console.log('Updated payment details from SAP:', newPaymentDetail)
+  const newPaymentDetails: PaymentDetail[] = sapDataArray.map((sapData, index) => ({
+    no: index + 1,
+    paymentDate: sapData.clearingDate ? formatSapDate(sapData.clearingDate) : getCurrentDate(),
+    amount: (sapData.paidAmount || sapData.openAmount || sapData.invoiceAmount || 0).toString(),
+    status: mapSapStatus(sapData.paymentStatus || sapData.statusOutgoing),
+    bankAccount: formatBankAccount(sapData.payment?.bankKey, sapData.payment?.bankAccountNo),
+    remarks: existingRemarks[index] || `SAP Invoice: ${sapData.sapInvoiceNo || 'N/A'} | Vendor: ${sapData.vendorName || 'N/A'}`,
+    attachmentDocument: undefined,
+  }))
+
+  paymentDetails.value = newPaymentDetails
+  console.log('Updated payment details from SAP:', newPaymentDetails)
 }
 
 const formatSapDate = (dateString: string | number) => {

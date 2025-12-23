@@ -74,15 +74,9 @@
               >
                 Verify By PJAP
               </UiButton>
-              <!-- <UiButton
-                class="px-3 py-1 bg-blue-600 text-white rounded-lg"
-                :disabled="!isVerify && !isApproved()"
-                @click="openModalSuccess()"
-              >
-                VAT Credit Posting
-              </UiButton> -->
             </div>
           </div>
+
           <div class="border rounded-lg">
             <table class="w-full overflow-x-auto text-sm">
               <thead class="bg-gray-100">
@@ -100,18 +94,11 @@
                 <tr
                   v-for="(row, index) in tableData"
                   :key="index"
-                  :class="[
-                    {
-                      'bg-red-100':
-                        row.remarks === false ||
-                        row.remarks === 'Didn\'t Matched' ||
-                        row.remarks === 'Invoice Not Match',
-                    },
-                    'border-b',
-                  ]"
+                  :class="[editableRemarks[index] === NOT_MATCHED && 'bg-red-100', 'border-b']"
                 >
                   <td class="p-2">{{ row.header }}</td>
                   <td class="p-2">{{ row.qr }}</td>
+
                   <td class="p-2">
                     <i
                       class="ki-filled ki-check-circle text-green-500"
@@ -124,7 +111,15 @@
                     <i class="ki-filled ki-minus-circle text-gray-500" v-else></i>
                   </td>
 
-                  <td class="p-2">{{ row.ocr }}</td>
+                  <td class="p-2">
+                    <input
+                      v-if="getOcrKey(row.header)"
+                      v-model="ocrData[getOcrKey(row.header)]"
+                      type="text"
+                      class="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                    />
+                    <span v-else class="text-gray-400">-</span>
+                  </td>
 
                   <td class="p-2">
                     <span v-if="row.invoiceVerified === '-'">
@@ -140,26 +135,17 @@
                   </td>
 
                   <td class="p-2">
-                    <p
-                      class="text-green-600"
-                      v-if="row.remarks === true || row.remarks === 'Matched'"
+                    <select
+                      v-model="editableRemarks[index]"
+                      class="border border-gray-300 rounded px-2 py-1 text-sm w-full"
                     >
-                      Matched
-                    </p>
-                    <p
-                      class="text-red-600 font-semibold"
-                      v-else-if="
-                        row.remarks === false ||
-                        row.remarks === 'Didn\'t Matched' ||
-                        row.remarks === 'Invoice Not Match'
-                      "
-                    >
-                      Didn't Matched
-                    </p>
-                    <p v-else>-</p>
+                      <option value="Matched">Matched</option>
+                      <option value="Didn't Matched">Didn't Matched</option>
+                    </select>
                   </td>
                 </tr>
               </tbody>
+
               <tbody v-if="isLoadUpload">
                 <tr>
                   <td>
@@ -184,13 +170,14 @@
                           d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
                         />
                       </svg>
-                      <span class="ml-3 text-sm text-gray-600">Verifying document...</span>
+                      <span class="ml-3 text-sm text-gray-600"> Verifying document... </span>
                     </div>
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
+
           <h2 class="font-semibold text-lg mt-4">PJAP Verification</h2>
           <div class="border rounded-lg mt-5">
             <table class="w-full overflow-x-auto text-sm">
@@ -232,69 +219,6 @@
           class="bg-white shadow-xl rounded-xl p-6 mt-4 border border-red-400"
         >
           <h2 class="font-bold text-xl text-red-700 mb-4 flex items-center gap-2">AI Action 🤖</h2>
-          <hr class="mb-4" />
-          <div class="flex gap-5 p-4 bg-red-50 border border-red-300 rounded-lg items-start">
-            <img
-              src="https://cdnai.iconscout.com/ai-image/premium/thumb/ai-female-customer-care-agent-3d-illustration-png-download-jpg-13152628.png"
-              alt="AI Assistant"
-              class="w-20 h-20 object-contain flex-shrink-0"
-            />
-            <div class="flex-grow">
-              <p class="font-extrabold text-lg text-red-800 mb-3">Terdapat mismatch pada:</p>
-              <ul class="list-disc ml-6 space-y-1 text-base text-gray-800">
-                <li class="font-semibold">Invoice amount</li>
-                <li class="font-semibold">Tax base (DPP)</li>
-                <li class="font-semibold">PPN amount</li>
-              </ul>
-              <div class="flex gap-0 mt-5 border border-gray-300 rounded-lg overflow-hidden w-fit">
-                <button
-                  @click="setActive('back')"
-                  :class="[
-                    'px-5 py-2 font-semibold transition duration-150 border-r border-gray-300',
-                    activeButton === 'back'
-                      ? 'bg-green-600 text-white hover:bg-green-700'
-                      : 'bg-gray-100 text-blue-600 hover:bg-gray-200',
-                  ]"
-                >
-                  Send Back to Vendor
-                </button>
-                <button
-                  @click="setActive('proceed')"
-                  :class="[
-                    'px-5 py-2 font-semibold transition duration-150',
-                    activeButton === 'proceed'
-                      ? 'bg-green-600 text-white hover:bg-green-700'
-                      : 'bg-gray-100 text-blue-600 hover:bg-gray-200',
-                  ]"
-                >
-                  Proceed
-                </button>
-              </div>
-            </div>
-          </div>
-          <div
-            class="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg text-sm leading-relaxed shadow-inner"
-          >
-            <p class="font-bold text-base mb-2 text-gray-700 border-b pb-2 border-gray-200">
-              Pesan Revisi Otomatis:
-            </p>
-            <p>Yth. PT Sinar Packaging,</p>
-            <p class="mt-2">
-              Terkait Invoice <strong>INV-0924-3321</strong>, terdapat ketidaksesuaian berikut:
-            </p>
-            <ul class="list-decimal ml-6 mt-2 text-gray-700 space-y-1">
-              <li>
-                Harga per unit pada line item 10 tidak sesuai dengan PO (Rp 2.750
-                <span class="text-red-600 font-semibold">≠</span> Rp 2.500).
-              </li>
-              <li>Faktur pajak yang terdaftar tidak sesuai dengan nilai invoice.</li>
-            </ul>
-            <p class="mt-3 font-medium">
-              Mohon dilakukan revisi invoice dan pembetulan faktur pajak agar proses dapat
-              dilanjutkan.
-            </p>
-            <p class="mt-1">Terima kasih.</p>
-          </div>
         </div>
       </div>
 
@@ -308,6 +232,7 @@
               </option>
             </select>
           </div>
+
           <div class="flex-1 border rounded-lg overflow-hidden">
             <iframe
               v-if="previewUrl"
@@ -319,6 +244,7 @@
           </div>
         </div>
       </div>
+
       <div class="bg-white shadow rounded-xl p-4 col-span-12">
         <InvoicePoGrView v-if="checkPo()" />
         <InvoiceItemView v-if="checkIsNonPo()" />
@@ -327,6 +253,7 @@
         />
       </div>
     </div>
+
     <UiModal v-model="showModalSuccess" size="sm">
       <div class="text-center mb-6">
         <ModalSuccessLogo class="mx-auto" />
@@ -369,7 +296,7 @@ const invoiceVerificationStore = useInvoiceVerificationStore()
 
 const qrData = reactive<invoiceQrData>({
   vendorBuyer: '',
-  npwppBuyer: '',
+  npwpBuyer: '',
   vendorSupplier: '',
   npwpSupplier: '',
   taxDocumentNumber: '',
@@ -381,15 +308,18 @@ const qrData = reactive<invoiceQrData>({
 })
 
 const ocrData = reactive<invoiceOcrData>({
-  FakturPajak: '',
-  buyerNpwp: '',
+  vendorBuyer: '',
+  npwpBuyer: '',
+  vendorSupplier: '',
+  npwpSupplier: '',
+  taxDocumentNumber: '',
+  taxDocumentDate: '',
   dpp: '',
   ppn: '',
-  total: '',
-  transactionDate: '',
-  vendorName: '',
-  vendorNpwp: '',
+  ppnbm: '',
+  status: '',
 })
+
 const form = inject<formTypes>('form')
 const isLoadUpload = ref<boolean>(false)
 // const previewApi = usePreviewFileStore()
@@ -399,32 +329,17 @@ const tabOcrTab = ref<string>('general')
 const typeForm = ref<string>('')
 const isVerify = ref(false)
 const isVerifyData = ref(false)
-const activeButton = ref<'back' | 'proceed'>('proceed')
 const selectedDocumentType = ref<string>('1')
 
-// --- Helper untuk pengecekan data OCR kosong ---
-const isOcrEmpty = (val: any) => val === undefined || val === null || val === '-' || val === ''
+const editableRemarks = reactive<Record<number, string>>({})
 
-const setActive = (btn: 'back' | 'proceed') => {
-  activeButton.value = btn
-}
+const NOT_MATCHED = "Didn't Matched"
 const checkPo = () => typeForm.value === 'po' || typeForm.value === 'po-view'
 const checkIsNonPo = () => typeForm.value === 'nonpo'
 const checkIsWithoutDp = () => form?.invoiceDp === '9011'
 const checkPoWithDp = () => form?.invoiceDp === '9013'
 const checkIsPoPibCc = () =>
   (form?.invoiceType === '902' || form?.invoiceType === '903') && form?.status > 0
-
-// const getPreviewUrl = async () => {
-//   if (form?.tax?.path) {
-//     const response = await previewApi.getPreview(form.tax.path)
-//     previewUrl.value = window.URL.createObjectURL(response.data)
-//   }
-// }
-
-// const openModalSuccess = () => {
-//   showModalSuccess.value = true
-// }
 
 const documentTypeList = ref([
   { code: '1', name: 'Tax Document' },
@@ -447,60 +362,55 @@ const generalStatus = ref([
   { label: 'DJP Status', value: 'Approved', status: 'success' },
 ])
 
-/* -------------------- Table Data (LOGIKA REQUEST USER) -------------------- */
 const tableData = computed(() => [
   {
     header: 'Nama Vendor',
     qr: qrData.vendorBuyer || '-',
     fpVerified: form?.vendorName == qrData.vendorBuyer,
-    ocr: ocrData.vendorName || '-',
-    invoiceVerified: isOcrEmpty(ocrData.vendorName) ? '-' : form?.vendorName == ocrData.vendorName,
-    remarks: isOcrEmpty(ocrData.vendorName)
-      ? form?.vendorName == qrData.vendorBuyer
-      : form?.vendorName == qrData.vendorBuyer && form?.vendorName == ocrData.vendorName,
+    ocr: ocrData.vendorBuyer || '-',
+    invoiceVerified: form?.vendorName == ocrData.vendorBuyer,
+    remarks: form?.vendorName == qrData.vendorBuyer && form?.vendorName == ocrData.vendorBuyer,
   },
   {
     header: 'NPWP Vendor',
-    qr: qrData.npwppBuyer || '-',
-    fpVerified: form?.npwp == qrData.npwppBuyer,
-    ocr: ocrData.buyerNpwp || '-',
-    invoiceVerified: isOcrEmpty(ocrData.buyerNpwp) ? '-' : form?.npwpNumber == ocrData.buyerNpwp,
-    remarks: isOcrEmpty(ocrData.buyerNpwp)
-      ? form?.npwpNumber == qrData.npwppBuyer
-      : form?.npwpNumber == qrData.npwppBuyer && form?.npwpNumber == ocrData.buyerNpwp,
+    qr: qrData.npwpBuyer || '-',
+    fpVerified: form?.npwpNumber == qrData.npwpBuyer,
+    ocr: ocrData.npwpBuyer || '-',
+    invoiceVerified: form?.npwpNumber == ocrData.npwpBuyer,
+    remarks: form?.npwpNumber == qrData.npwpBuyer && form?.npwpNumber == ocrData.npwpBuyer,
   },
   {
     header: 'Perusahaan',
     qr: qrData.vendorSupplier || '-',
     fpVerified: form?.companyName == qrData.vendorSupplier,
-    ocr: '-',
-    invoiceVerified: '-',
-    remarks: form?.companyName == qrData.vendorSupplier,
+    ocr: ocrData.vendorSupplier,
+    invoiceVerified: form?.companyName == ocrData.vendorSupplier,
+    remarks:
+      form?.companyName == qrData.vendorSupplier && form?.companyName == ocrData.vendorSupplier,
   },
   {
     header: 'NPWP',
     qr: qrData.npwpSupplier || '-',
     fpVerified: true,
-    ocr: '-',
-    invoiceVerified: '-',
+    ocr: ocrData.npwpSupplier || '-',
+    invoiceVerified: true,
     remarks: true,
   },
   {
     header: 'No Faktur Pajak',
     qr: qrData.taxDocumentNumber || '-',
     fpVerified: form?.taxNoInvoice == qrData.taxDocumentNumber,
-    ocr: ocrData.FakturPajak || '-',
-    invoiceVerified: isOcrEmpty(ocrData.FakturPajak) ? '-' : ocrData.FakturPajak == form?.taxNumber,
-    remarks: isOcrEmpty(ocrData.FakturPajak)
-      ? form?.taxNumber == qrData.taxDocumentNumber
-      : form?.taxNumber == qrData.taxDocumentNumber && ocrData.FakturPajak == form?.taxNumber,
+    ocr: ocrData.taxDocumentNumber || '-',
+    invoiceVerified: form?.taxNoInvoice == ocrData.taxDocumentNumber,
+    remarks:
+      form?.taxNumber == qrData.taxDocumentNumber && ocrData.taxDocumentNumber == form?.taxNumber,
   },
   {
     header: 'Tanggal Faktur Pajak',
     qr: qrData.taxDocumentDate || '-',
-    fpVerified: true,
-    ocr: ocrData.transactionDate || '-',
-    invoiceVerified: isOcrEmpty(ocrData.transactionDate) ? '-' : 'none',
+    fpVerified: !!qrData.taxDocumentDate,
+    ocr: ocrData.taxDocumentDate || '-',
+    invoiceVerified: !!ocrData.taxDocumentDate,
     remarks: true,
   },
   {
@@ -508,10 +418,8 @@ const tableData = computed(() => [
     qr: qrData.dpp || '-',
     fpVerified: true,
     ocr: ocrData.dpp || '-',
-    invoiceVerified: isOcrEmpty(ocrData.dpp) ? '-' : form?.subtotal == Number(ocrData.dpp),
-    remarks: isOcrEmpty(ocrData.dpp)
-      ? form?.subtotal == Number(qrData.dpp)
-      : form?.subtotal == Number(qrData.dpp) && form?.subtotal == Number(ocrData.dpp),
+    invoiceVerified: true,
+    remarks: form?.subtotal == Number(qrData.dpp) && form?.subtotal == Number(ocrData.dpp),
   },
   {
     header: 'DPP Lainnya',
@@ -526,31 +434,31 @@ const tableData = computed(() => [
     qr: qrData.ppn || '-',
     fpVerified: true,
     ocr: ocrData.ppn || '-',
-    invoiceVerified: isOcrEmpty(ocrData.ppn) ? '-' : true,
-    remarks: 'Matched',
+    invoiceVerified: true,
+    remarks: true,
   },
   {
     header: 'PPN BM',
     qr: qrData.ppnbm || '-',
     fpVerified: true,
-    ocr: '-',
-    invoiceVerified: '-',
-    remarks: 'Matched',
+    ocr: ocrData.ppnbm || '-',
+    invoiceVerified: true,
+    remarks: true,
   },
   {
     header: 'Status Approve FP',
     qr: qrData.status || '-',
     fpVerified: true,
-    ocr: '-',
-    invoiceVerified: '-',
-    remarks: 'none',
+    ocr: ocrData.status || '-',
+    invoiceVerified: true,
+    remarks: true,
   },
   {
     header: 'Reference',
     qr: '-',
     fpVerified: 'none',
-    ocr: ocrData.FakturPajak || '-',
-    invoiceVerified: isOcrEmpty(ocrData.FakturPajak) ? '-' : true,
+    ocr: '-',
+    invoiceVerified: '-',
     remarks: 'none',
   },
 ])
@@ -583,17 +491,18 @@ const columns = ref([
   'WHT Amount',
 ])
 
-const isApproved = () => qrData.status === 'APPROVED'
 const setTabOcr = (type: string) => {
   tabOcrTab.value = type
 }
 
 const sendUploadFile = async () => {
-  const ocrResponse = await invoiceVerificationStore.uploadFileOcr(
-    form?.invoiceDocument?.previewPath,
-  )
-  const qrResponse = await invoiceVerificationStore.uploadFileQr(form?.tax?.previewPath)
-  console.log(qrResponse)
+  const ocrResponse = (await invoiceVerificationStore.uploadFileOcr(
+    form?.tax?.previewPath,
+  )) as unknown as invoiceOcrData
+  const qrResponse = (await invoiceVerificationStore.uploadFileQr(
+    form?.tax?.previewPath,
+  )) as unknown as invoiceQrData
+
   await setFileOcr(ocrResponse)
   await setFileQr(qrResponse)
 }
@@ -608,15 +517,13 @@ const setFileOcr = async (data: invoiceOcrData) => {
 
 const verifyInvoice = async () => {
   isLoadUpload.value = true
-
   await sendUploadFile()
-
   isLoadUpload.value = false
   isVerifyData.value = true
 }
 
 const setColumn = () => {
-  let sourceColumns =
+  const sourceColumns =
     form?.invoiceType === '903'
       ? poCCColumn
       : form?.invoiceDp === '9012'
@@ -629,6 +536,33 @@ const setColumn = () => {
   columns.value = baseColumns
 }
 
+const getOcrKey = (header: string): keyof invoiceOcrData | null => {
+  const map: Record<string, keyof invoiceOcrData> = {
+    'Nama Vendor': 'vendorBuyer',
+    'NPWP Vendor': 'npwpBuyer',
+    Perusahaan: 'vendorSupplier',
+    NPWP: 'npwpSupplier',
+    'No Faktur Pajak': 'taxDocumentNumber',
+    'Tanggal Faktur Pajak': 'taxDocumentDate',
+    'Nilai Penjualan': 'dpp',
+    PPN: 'ppn',
+    'PPN BM': 'ppnbm',
+    'Status Approve FP': 'status',
+  }
+  return map[header] ?? null
+}
+
+watch(isVerifyData, (val) => {
+  if (!val) return
+
+  tableData.value.forEach((row, index) => {
+    if (editableRemarks[index] === undefined) {
+      editableRemarks[index] =
+        row.remarks === true || row.remarks === 'Matched' ? 'Matched' : "Didn't Matched"
+    }
+  })
+})
+
 watch(selectedDocumentType, async (newVal) => {
   const path = newVal === '1' ? form?.tax?.previewPath : form?.invoiceDocument?.previewPath
   if (!path) {
@@ -639,7 +573,6 @@ watch(selectedDocumentType, async (newVal) => {
 })
 
 onMounted(() => {
-  // getPreviewUrl()
   setColumn()
   typeForm.value = route.query.type?.toString().toLowerCase() || 'po'
 })

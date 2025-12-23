@@ -1,6 +1,6 @@
 export interface invoiceQrData {
   vendorBuyer: string
-  npwppBuyer: string
+  npwpBuyer: string
   vendorSupplier: string
   npwpSupplier: string
   taxDocumentNumber: string
