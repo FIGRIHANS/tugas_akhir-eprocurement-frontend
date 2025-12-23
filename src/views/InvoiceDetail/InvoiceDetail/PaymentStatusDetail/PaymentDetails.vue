@@ -295,7 +295,8 @@ const updatePaymentDetailsFromSap = (sapDataArray: SapDataResponse[]) => {
     no: index + 1,
     paymentDate: sapData.clearingDate ? formatSapDate(sapData.clearingDate) : getCurrentDate(),
     amount: (sapData.paidAmount || sapData.openAmount || sapData.invoiceAmount || 0).toString(),
-    status: mapSapStatus(sapData.paymentStatus || sapData.statusOutgoing),
+    // Status harus mengikuti statusOutgoing dari SAP (Paid / Planned)
+    status: mapSapStatus(sapData.statusOutgoing || sapData.paymentStatus),
     bankAccount: formatBankAccount(sapData.payment?.bankKey, sapData.payment?.bankAccountNo),
     remarks: existingRemarks[index] || '',
     attachmentDocument: undefined,
