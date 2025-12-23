@@ -102,7 +102,7 @@
                     :indeterminate="isSomeSelected && !isAllSelected"
                     @change="toggleSelectAll"
                   />
-                  <span class="text-xs font-semibold">Detail</span>
+                  <span class="text-xs font-semibold">Action</span>
                 </div>
               </th>
               <th
