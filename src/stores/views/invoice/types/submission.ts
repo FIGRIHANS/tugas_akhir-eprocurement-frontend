@@ -251,6 +251,7 @@ export interface ListNonPoTypes {
   pOs: PoChildTypes[]
   isOpenChild: boolean
   createdUtcDate: string
+  actionerDate?: string
 }
 
 export interface itemsAlternativePayee {

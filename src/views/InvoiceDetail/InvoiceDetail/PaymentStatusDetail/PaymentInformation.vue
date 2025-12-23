@@ -69,7 +69,7 @@ const form = inject<Ref<formTypes>>('form')
 const verificationApi = useInvoiceVerificationStore()
 
 const paymentInfo = ref<PaymentInfoItem[]>([])
-const sapStatusData = ref<SapDataResponse | null>(null)
+const sapStatusData = ref<SapDataResponse[]>([])
 
 // Inject submittedDocumentNo from parent (InvoiceDetail.vue)
 const submittedDocNo = inject<Ref<string>>('submittedDocumentNo', ref(''))
@@ -103,6 +103,9 @@ provide('sapStatusData', sapStatusData)
 
 const setPaymentInfo = () => {
   if (form?.value) {
+    // Use the first SAP status data item for display (if available)
+    const firstSapData = sapStatusData.value.length > 0 ? sapStatusData.value[0] : null
+
     paymentInfo.value = [
       {
         label: 'Submitted Document No.',
@@ -142,7 +145,7 @@ const setPaymentInfo = () => {
       {
         label: 'Clearing Document No.',
         value:
-          sapStatusData.value?.clearingDocumentNo ||
+          firstSapData?.clearingDocumentNo ||
           form.value.clearingDocumentNo ||
           (paymentSummary.value.clearingDocumentNo !== '-'
             ? paymentSummary.value.clearingDocumentNo
@@ -151,14 +154,14 @@ const setPaymentInfo = () => {
       },
       {
         label: 'Payment Status',
-        value: sapStatusData.value?.paymentStatus || paymentSummary.value.statusName || '-',
+        value: firstSapData?.paymentStatus || paymentSummary.value.statusName || '-',
         editable: false,
       },
     ]
   }
 }
 
-const fetchSapStatus = async (): Promise<SapDataResponse | null> => {
+const fetchSapStatus = async (): Promise<SapDataResponse[] | null> => {
   if (!form?.value?.companyCode || !form?.value?.postingDate || !submittedDocNo.value) {
     console.log('SAP Sync: Missing required fields')
     return null
@@ -185,30 +188,37 @@ const fetchSapStatus = async (): Promise<SapDataResponse | null> => {
       Array.isArray(response.result.content) &&
       response.result.content.length > 0
     ) {
-      sapStatusData.value = response.result.content[0] as SapDataResponse
-      console.log('SAP Sync: Success', sapStatusData.value)
+      // Store ALL SAP status items
+      sapStatusData.value = response.result.content as SapDataResponse[]
+      console.log(
+        'SAP Sync: Success - Found',
+        sapStatusData.value.length,
+        'records',
+        sapStatusData.value,
+      )
 
-      // Sync SAP result back to parent form and summary
-      if (sapStatusData.value.clearingDocumentNo) {
-        if (form?.value) form.value.clearingDocumentNo = sapStatusData.value.clearingDocumentNo
+      // Use first item for syncing to parent form and summary
+      const firstItem = sapStatusData.value[0]
+      if (firstItem.clearingDocumentNo) {
+        if (form?.value) form.value.clearingDocumentNo = firstItem.clearingDocumentNo
         if (paymentSummary?.value)
-          paymentSummary.value.clearingDocumentNo = sapStatusData.value.clearingDocumentNo
+          paymentSummary.value.clearingDocumentNo = firstItem.clearingDocumentNo
       }
-      if (sapStatusData.value.paymentStatus && paymentSummary?.value) {
-        paymentSummary.value.statusName = sapStatusData.value.paymentStatus
+      if (firstItem.paymentStatus && paymentSummary?.value) {
+        paymentSummary.value.statusName = firstItem.paymentStatus
       }
 
       setPaymentInfo()
       return sapStatusData.value
     } else {
       console.log('SAP Sync: No data found')
-      sapStatusData.value = null
+      sapStatusData.value = []
       setPaymentInfo()
       return null
     }
   } catch (error: unknown) {
     console.error('SAP Sync: Error', error)
-    sapStatusData.value = null
+    sapStatusData.value = []
     setPaymentInfo()
     return null
   }
@@ -262,20 +272,21 @@ watch(
 // Watch Clearing Document No. from parent/SAP sync result
 watch(
   () => [
-    sapStatusData.value?.clearingDocumentNo,
+    sapStatusData.value.length > 0 ? sapStatusData.value[0]?.clearingDocumentNo : null,
     form?.value?.clearingDocumentNo,
     paymentSummary.value.clearingDocumentNo,
   ],
   () => {
     const clearingDocItem = paymentInfo.value.find((item) => item.label === 'Clearing Document No.')
+    const firstSapData = sapStatusData.value.length > 0 ? sapStatusData.value[0] : null
     const newValue =
-      sapStatusData.value?.clearingDocumentNo ||
+      firstSapData?.clearingDocumentNo ||
       form?.value?.clearingDocumentNo ||
       (paymentSummary.value.clearingDocumentNo !== '-'
         ? paymentSummary.value.clearingDocumentNo
         : '-')
     console.log('Watch Clearing Doc - Sources:', {
-      sap: sapStatusData.value?.clearingDocumentNo,
+      sap: firstSapData?.clearingDocumentNo,
       form: form?.value?.clearingDocumentNo,
       summary: paymentSummary.value.clearingDocumentNo,
       final: newValue,
@@ -290,10 +301,14 @@ watch(
 
 // Watch Payment Status from parent/SAP sync result
 watch(
-  () => [sapStatusData.value?.paymentStatus, paymentSummary.value.statusName],
+  () => [
+    sapStatusData.value.length > 0 ? sapStatusData.value[0]?.paymentStatus : null,
+    paymentSummary.value.statusName,
+  ],
   () => {
     const paymentStatusItem = paymentInfo.value.find((item) => item.label === 'Payment Status')
-    const newValue = sapStatusData.value?.paymentStatus || paymentSummary.value.statusName || '-'
+    const firstSapData = sapStatusData.value.length > 0 ? sapStatusData.value[0] : null
+    const newValue = firstSapData?.paymentStatus || paymentSummary.value.statusName || '-'
     if (paymentStatusItem && paymentStatusItem.value !== newValue) {
       paymentStatusItem.value = newValue
     }
