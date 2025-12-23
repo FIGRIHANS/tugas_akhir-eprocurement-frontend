@@ -102,40 +102,40 @@ interface SapPaymentData {
 }
 
 const paymentDetails = ref<PaymentDetail[]>([])
-const sapPaymentData = ref<SapPaymentData | null>(null)
+const sapPaymentData = ref<SapPaymentData[]>([])
 
 // Fetch SAP payment data from API
 const fetchSapPaymentData = async () => {
   try {
     // Mock API response data (replace with real API call)
     const mockApiResponse = {
-      "title": "Success",
-      "statusCode": 200,
-      "result": {
-        "message": "",
-        "isError": false,
-        "content": [
+      title: 'Success',
+      statusCode: 200,
+      result: {
+        message: '',
+        isError: false,
+        content: [
           {
-            "id": 5,
-            "companyCode": "GNGR",
-            "documentNumber": 4000000005,
-            "sapInvoiceNo": "1900020005",
-            "fiscalYear": "2025",
-            "vendorName": "ACARYA DATA ESA",
-            "invoiceAmount": 999000,
-            "paidAmount": 999000,
-            "openAmount": 0,
-            "paymentStatus": "Paid",
-            "statusOutgoing": "Paid",
-            "clearingDate": 20240711,
-            "clearingDocumentNo": "1500021112"
-          }
-        ]
-      }
+            id: 5,
+            companyCode: 'GNGR',
+            documentNumber: 4000000005,
+            sapInvoiceNo: '1900020005',
+            fiscalYear: '2025',
+            vendorName: 'ACARYA DATA ESA',
+            invoiceAmount: 999000,
+            paidAmount: 999000,
+            openAmount: 0,
+            paymentStatus: 'Paid',
+            statusOutgoing: 'Paid',
+            clearingDate: 20240711,
+            clearingDocumentNo: '1500021112',
+          },
+        ],
+      },
     }
 
     if (mockApiResponse.result.content && mockApiResponse.result.content.length > 0) {
-      sapPaymentData.value = mockApiResponse.result.content[0]
+      sapPaymentData.value = mockApiResponse.result.content
     }
   } catch (error) {
     console.error('Error fetching SAP payment data:', error)
@@ -157,18 +157,16 @@ const setPaymentDetails = () => {
     return
   }
 
-  if (form.status === 10 && sapPaymentData.value) {
-    paymentDetails.value = [
-      {
-        no: 1,
-        paymentDate: formatClearingDate(sapPaymentData.value.clearingDate),
-        amount: sapPaymentData.value.paidAmount?.toString() || '0',
-        status: sapPaymentData.value.paymentStatus || 'Paid',
-        bankAccount: 'BRI01 - 56464564',
-        remarks: `SAP Invoice: ${sapPaymentData.value.sapInvoiceNo || 'N/A'}`,
-        attachmentDocument: 'SAP_Payment_Receipt.pdf',
-      },
-    ]
+  if (form.status === 10 && sapPaymentData.value.length > 0) {
+    paymentDetails.value = sapPaymentData.value.map((item, index) => ({
+      no: index + 1,
+      paymentDate: formatClearingDate(item.clearingDate),
+      amount: item.paidAmount?.toString() || '0',
+      status: item.statusOutgoing === 'Paid' ? 'Paid' : 'Plan',
+      bankAccount: 'BRI01 - 56464564',
+      remarks: `SAP Invoice: ${item.sapInvoiceNo || 'N/A'} - ${item.statusOutgoing}`,
+      attachmentDocument: item.statusOutgoing === 'Paid' ? 'SAP_Payment_Receipt.pdf' : undefined,
+    }))
   } else {
     paymentDetails.value = []
   }
@@ -206,7 +204,7 @@ watch(
   () => {
     setPaymentDetails()
   },
-  { deep: true, immediate: true }
+  { deep: true, immediate: true },
 )
 
 // Watch for SAP payment data changes
@@ -215,7 +213,7 @@ watch(
   () => {
     setPaymentDetails()
   },
-  { deep: true }
+  { deep: true },
 )
 
 onMounted(async () => {
