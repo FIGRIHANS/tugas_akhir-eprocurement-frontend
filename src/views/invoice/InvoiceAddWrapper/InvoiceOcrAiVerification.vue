@@ -116,7 +116,9 @@
                       v-model="ocrData[getOcrKey(row.header)]"
                       type="text"
                       class="w-full border border-gray-300 rounded px-2 py-1 text-sm"
-                      :disabled="ocrData[getOcrKey(row.header)] == ''"
+                      :disabled="
+                        ocrData[getOcrKey(row.header)] == '' || editableRemarks[index] === '1'
+                      "
                     />
                     <span v-else class="text-gray-400">-</span>
                   </td>
@@ -383,15 +385,13 @@ const tableData = computed(() => [
   {
     header: 'NPWP Vendor',
     qr: qrData.npwpSupplier || '-',
-    fpVerified: isEmpty(qrData.npwpSupplier) ? 'none' : form?.npwpNumber == qrData.npwpSupplier,
+    fpVerified: isEmpty(qrData.npwpSupplier) ? 'none' : form?.npwp == qrData.npwpSupplier,
     ocr: ocrData.npwpSupplier || '-',
-    invoiceVerified: isEmpty(ocrData.npwpSupplier)
-      ? 'none'
-      : form?.npwpNumber == ocrData.npwpSupplier,
+    invoiceVerified: isEmpty(ocrData.npwpSupplier) ? 'none' : form?.npwp == ocrData.npwpSupplier,
     remarks:
       isEmpty(qrData.npwpSupplier) || isEmpty(ocrData.npwpSupplier)
         ? 'none'
-        : form?.npwpNumber == qrData.npwpSupplier && form?.npwpNumber == ocrData.npwpSupplier,
+        : form?.npwp == qrData.npwpSupplier && form?.npwp == ocrData.npwpSupplier,
   },
   {
     header: 'Perusahaan',
