@@ -175,6 +175,9 @@
                     {{ parent.poPrice || 'Warning' }}
                   </span>
                 </td>
+                <td>
+                  {{ parent.emailSender || '-' }}
+                </td>
               </tr>
               <tr v-show="parent.isOpenChild">
                 <td></td>
@@ -322,6 +325,7 @@ const columns = ref<string[]>([
   'VAT Status',
   'WHT Status',
   'PO Price',
+  'Email Sender',
 ])
 
 const columnsChild = ref(['No PO', 'No GR', 'Item Description', 'Item Amount', 'Quantity'])
@@ -329,17 +333,17 @@ const columnsChild = ref(['No PO', 'No GR', 'Item Description', 'Item Amount', '
 const poList = computed(() => invoiceApi.listPo)
 
 const colorBadge = (status: number) => {
-  if (status === 0) return 'badge-light'
-  if (status === 1) return 'badge-info'
-  if (status === 2) return 'badge-primary'
-  if (status === 3) return 'badge-success'
-  if (status === 4) return 'badge-success'
-  if (status === 5) return 'badge-danger'
-  if (status === 6) return 'badge-dark'
-  if (status === 7) return 'badge-secondary'
-  if (status === 8) return 'badge-warning'
-  if (status === 9) return 'badge-info'
-  if (status === 10) return 'badge-warning'
+  if (status === 0) return 'bg-gray-50 text-gray-600'
+  if (status === 1) return 'bg-blue-50 text-blue-600'
+  if (status === 2) return 'bg-purple-50 text-purple-600'
+  if (status === 3) return 'bg-emerald-50 text-emerald-600'
+  if (status === 4) return 'bg-emerald-100 text-emerald-700'
+  if (status === 5) return 'bg-red-50 text-red-600'
+  if (status === 6) return 'bg-gray-100 text-gray-600'
+  if (status === 7) return 'bg-slate-50 text-slate-600'
+  if (status === 8) return 'bg-yellow-50 text-yellow-700'
+  if (status === 9) return 'bg-cyan-50 text-cyan-600'
+  if (status === 10) return 'bg-emerald-500 text-white'
 }
 
 // Helper function for verification status badge colors

@@ -48,18 +48,23 @@ const steps = ref<listStepTypes[]>([
 
 watch(
   () => props.activeName,
-  () => {
-    for (const item of steps.value) {
-      const splitName = item.label.split(' ')
-      if (splitName[1].toLowerCase() === props.activeName.toLowerCase()) {
-        const getIndex = steps.value.findIndex((subItem) => subItem.label === item.label)
-        if (getIndex !== -1) {
-          for (let index = 0; index <= getIndex; index++) {
-            steps.value[index].active = true
-          }
-        }
+  (newActiveName) => {
+    const targetName = newActiveName ? newActiveName.toLowerCase() : ''
+
+    const targetIndex = steps.value.findIndex((step) => {
+      const splitName = step.label.split(' ')
+      const key = (splitName[1] || splitName[0]).toLowerCase()
+      return key === targetName
+    })
+
+    steps.value.forEach((step, index) => {
+      if (targetIndex === -1) {
+        // Default ke step pertama kalau tidak ada yang cocok
+        step.active = index === 0
+      } else {
+        step.active = index <= targetIndex
       }
-    }
+    })
   },
   {
     immediate: true,

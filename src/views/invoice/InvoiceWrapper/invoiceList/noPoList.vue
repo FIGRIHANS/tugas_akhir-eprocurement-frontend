@@ -238,15 +238,17 @@ const goSearch = (event: KeyboardEvent) => {
 
 const colorBadge = (statusCode: number) => {
   const list = {
-    0: 'badge-primary',
-    1: 'badge-warning',
-    2: 'badge-info',
-    4: 'badge-success',
-    5: 'badge-danger',
-    7: 'badge-primary',
-    8: 'badge-warning', // Planned
-    9: 'badge-info', // Partially Paid
-    10: 'badge-warning', // Paid
+    0: 'bg-gray-50 text-gray-600', // Draft
+    1: 'bg-blue-50 text-blue-600', // Waiting to Verify
+    2: 'bg-purple-50 text-purple-600', // Waiting for Approval
+    3: 'bg-emerald-50 text-emerald-600', // Verified
+    4: 'bg-emerald-100 text-emerald-700', // Approved
+    5: 'bg-red-50 text-red-600', // Rejected
+    6: 'bg-gray-100 text-gray-600', // Cancelled
+    7: 'bg-slate-50 text-slate-600', // Sent to SAP
+    8: 'bg-yellow-50 text-yellow-700', // Planned
+    9: 'bg-cyan-50 text-cyan-600', // Partially Paid
+    10: 'bg-emerald-500 text-white', // Paid (solid)
   } as { [key: number]: string }
   return list[statusCode]
 }

@@ -21,8 +21,10 @@
 import { ref, onMounted, inject, watch } from 'vue'
 import moment from 'moment'
 import type { formTypes } from '../../types/invoiceAddWrapper'
+import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 
 const form = inject<formTypes>('form')
+const verificationApi = useInvoiceVerificationStore()
 // const userData = inject<{ profile?: { profileId?: number; costCenter?: string } }>('userData') // Add userData injection for profile info
 
 interface PaymentInfoItem {
@@ -46,8 +48,28 @@ interface SapPaymentData {
   clearingDocumentNo: string
 }
 
+interface PaymentStatusHeader {
+  id: number
+  invoiceUId: string
+  companyCode: string
+  sapInvoiceNo: string
+  invoicePostingDate: string
+  termOfPayment: string
+  estimatedPaymentDate: string
+  paymentMethod: string
+  clearingDocumentNo: string
+  paymentStatus: string
+  statusCode: number
+  statusName: string
+  totalAmountInvoice: number
+  paymentReceivedAmount: number
+  outstandingAmount: number
+  currency: string
+}
+
 const paymentInfo = ref<PaymentInfoItem[]>([])
 const sapPaymentData = ref<SapPaymentData | null>(null)
+const paymentStatusHeader = ref<PaymentStatusHeader | null>(null)
 
 const formatDate = (date: string | Date | null | number) => {
   if (!date) return '-'
@@ -100,6 +122,20 @@ const fetchSapPaymentData = async () => {
   }
 }
 
+const fetchPaymentStatus = async () => {
+  try {
+    if (!form || !form.invoiceUId) return
+
+    const response = await verificationApi.getPaymentStatus(form.invoiceUId)
+
+    if (response?.result?.content?.header) {
+      paymentStatusHeader.value = response.result.content.header as PaymentStatusHeader
+    }
+  } catch (error) {
+    console.error('Error fetching payment status data:', error)
+  }
+}
+
 const setPaymentInfo = () => {
   if (!form) return
 
@@ -120,7 +156,7 @@ const setPaymentInfo = () => {
     },
     {
       label: 'Term of Payment',
-      value: '30 Days', // Default for profileId 3200
+      value: paymentStatusHeader.value?.termOfPayment || '30 Days',
     },
     {
       label: 'Estimate Payment Date',
@@ -128,15 +164,19 @@ const setPaymentInfo = () => {
     },
     {
       label: 'Payment Method',
-      value: 'Bank Transfer', // Default for profileId 3200
+      value: paymentStatusHeader.value?.paymentMethod || 'Bank Transfer',
     },
     {
       label: 'Clearing Document No.',
-      value: sapPaymentData.value?.clearingDocumentNo || '-',
+      value: paymentStatusHeader.value?.clearingDocumentNo || sapPaymentData.value?.clearingDocumentNo || '-',
     },
     {
       label: 'Payment Status',
-      value: sapPaymentData.value?.paymentStatus || '-',
+      value:
+        paymentStatusHeader.value?.paymentStatus ||
+        paymentStatusHeader.value?.statusName ||
+        sapPaymentData.value?.paymentStatus ||
+        '-',
     },
   ]
 }
@@ -160,7 +200,7 @@ watch(
 )
 
 onMounted(async () => {
-  await fetchSapPaymentData()
+  await Promise.all([fetchSapPaymentData(), fetchPaymentStatus()])
   setPaymentInfo()
 })
 </script>

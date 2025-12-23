@@ -225,6 +225,8 @@ export interface ListPoTypes {
   vatStatus?: boolean
   whtStatus?: boolean
   poPrice?: boolean
+
+  emailSender?: string
 }
 
 export interface ListNonPoTypes {

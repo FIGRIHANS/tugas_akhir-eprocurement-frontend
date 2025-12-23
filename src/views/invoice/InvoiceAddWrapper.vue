@@ -1,5 +1,3 @@
-<!-- eslint-disable @typescript-eslint/no-unused-vars -->
-<!-- eslint-disable @typescript-eslint/no-unused-vars -->
 <template>
   <div>
     <Breadcrumb title="Add Invoice" :routes="routes" />
@@ -30,7 +28,7 @@
         v-if="tabNow === 'paymentStatus'"
         class="flex justify-between items-center mt-[24px] gap-3"
       >
-        <button class="btn btn-outline btn-primary" @click="goBack">
+        <button class="btn btn-outline btn-primary" @click="goToList">
           <i class="ki-filled ki-arrow-left"></i>
           Back
         </button>
@@ -159,7 +157,7 @@
     <ErrorSubmissionModal />
     <ModalSuccessBudgetCheck @afterClose="isCheckBudget = true" />
     <ModalFailedBudgetCheck @afterClose="isCheckBudget = false" />
-    <UpdatePaymentStatusModal :isLoading="false" @close="goToInvoiceList" />
+    <UpdatePaymentStatusModal :isLoading="false" @close="goToList" />
   </div>
 </template>
 
@@ -224,8 +222,7 @@ const ModalFailedBudgetCheck = defineAsyncComponent(
   () => import('./InvoiceAddWrapper/ModalFailedBudgetCheck.vue'),
 )
 const UpdatePaymentStatusModal = defineAsyncComponent(
-  () =>
-    import('@/views/InvoiceDetail/InvoiceDetail/PaymentStatusDetail/UpdatePaymentStatusModal.vue'),
+  () => import('@/views/InvoiceDetail/InvoiceDetail/PaymentStatusDetail/UpdatePaymentStatusModal.vue'),
 )
 
 const invoiceApi = useInvoiceSubmissionStore()
@@ -670,15 +667,11 @@ const goBack = () => {
 // Update payment status function for profileId 3200
 const updatePaymentStatus = () => {
   console.log('Update payment status clicked for profileId 3200')
-  // Show update payment status modal
-  const idModal = document.querySelector('#update_payment_status_modal')
-  const modal = KTModal.getInstance(idModal as HTMLElement)
-  modal.show()
-}
-
-// Navigate to invoice list after payment status update success
-const goToInvoiceList = () => {
-  router.push('/invoice')
+  const modalElement = document.querySelector('#update_payment_status_modal')
+  if (modalElement) {
+    const modal = KTModal.getInstance(modalElement as HTMLElement)
+    if (modal) modal.show()
+  }
 }
 
 const mapDocument = () => {
@@ -1803,16 +1796,18 @@ const checkFormBudget = () => {
 
 const setStepperStatus = () => {
   // Get status from either PO or Non-PO detail
-  const statusCode = !checkIsNonPo()
+  const rawStatusCode = !checkIsNonPo()
     ? detailPo.value?.header?.statusCode
     : detailNonPo.value?.header?.statusCode
+
+  const statusCode = typeof rawStatusCode === 'number' ? rawStatusCode : -1
 
   // Map status codes to stepper labels
   // Note: StepperStatus component matches the SECOND word of the label
   // Labels: 'Invoice Submission', 'Invoice Verification', 'Invoice Approval', 'Invoice Posting', 'Payment Status'
   // So we use: 'Submission', 'Verification', 'Approval', 'Posting', 'Status'
 
-  // Status codes:
+  // Status codes (header):
   // 0 = Draft
   // 1 = Waiting to Verify / Submitted
   // 2 = Verified
@@ -1820,20 +1815,29 @@ const setStepperStatus = () => {
   // 4 = Approved
   // 5 = Rejected
   // 6 = Posted to SAP
-  // 7 = Sent to SAP / Payment Status
+  // 7 = Sent to SAP (Payment Status available)
+  // 8 = Planned (Payment Status detail)
+  // 9 = Partially Paid (Payment Status detail)
+  // 10 = Paid (Payment Status detail)
 
-  if (statusCode === 0 || statusCode === 1) {
+  if (statusCode === 0 || statusCode === 1 || statusCode === 5) {
+    // Draft, Submitted, Rejected → masih di tahap submission
     stepperStatus.value = 'Submission'
   } else if (statusCode === 2) {
+    // Verified
     stepperStatus.value = 'Verification'
   } else if (statusCode === 3 || statusCode === 4) {
+    // Waiting for Approval / Approved
     stepperStatus.value = 'Approval'
   } else if (statusCode === 6) {
+    // Posted to SAP
     stepperStatus.value = 'Posting'
-  } else if (statusCode === 7) {
-    stepperStatus.value = 'Status' // Matches 'Payment Status'
+  } else if (statusCode >= 7) {
+    // Sent to SAP dan seluruh status Payment Status (7,8,9,10,...) → step terakhir
+    stepperStatus.value = 'Status'
   } else {
-    stepperStatus.value = 'Submission' // Default fallback
+    // Default fallback
+    stepperStatus.value = 'Submission'
   }
 }
 
