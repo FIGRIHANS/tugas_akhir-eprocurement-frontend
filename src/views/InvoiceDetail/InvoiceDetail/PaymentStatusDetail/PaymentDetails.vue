@@ -278,17 +278,17 @@ const deleteRow = (index: number) => {
     })
   }
 }
-const updatePaymentDetailsFromSap = (sapDataArray: SapDataResponse[]) => {
-  // Map all SAP data items to payment details
-  const newPaymentDetails: PaymentDetail[] = sapDataArray.map((sapData, index) => ({
-    no: index + 1,
+const updatePaymentDetailsFromSap = (sapData: SapDataResponse) => {
+  // Clear existing data and replace with new SAP data
+  const newPaymentDetail: PaymentDetail = {
+    no: 1,
     paymentDate: sapData.clearingDate ? formatSapDate(sapData.clearingDate) : getCurrentDate(),
     amount: (sapData.paidAmount || sapData.openAmount || sapData.invoiceAmount || 0).toString(),
     status: mapSapStatus(sapData.statusOutgoing),
     bankAccount: formatBankAccount(sapData.payment?.bankKey, sapData.payment?.bankAccountNo),
-    remarks: `SAP Invoice: ${sapData.sapInvoiceNo || 'N/A'} | Status: ${sapData.statusOutgoing} | Vendor: ${sapData.vendorName || 'N/A'}`,
-    attachmentDocument: sapData.statusOutgoing === 'Paid' ? 'SAP_Payment_Receipt.pdf' : undefined,
-  }))
+    remarks: `SAP Invoice: ${sapData.sapInvoiceNo || 'N/A'} | Vendor: ${sapData.vendorName || 'N/A'}`,
+    attachmentDocument: undefined,
+  }
 
   paymentDetails.value = newPaymentDetails
   console.log('Updated payment details from SAP:', newPaymentDetails)
