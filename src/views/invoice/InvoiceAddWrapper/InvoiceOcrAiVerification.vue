@@ -383,7 +383,7 @@ const tableData = computed(() => [
     header: 'Perusahaan',
     qr: qrData.vendorSupplier || '-',
     fpVerified: form?.companyName == qrData.vendorSupplier,
-    ocr: ocrData.vendorSupplier,
+    ocr: ocrData.vendorSupplier || '-',
     invoiceVerified: form?.companyName == ocrData.vendorSupplier,
     remarks:
       form?.companyName == qrData.vendorSupplier && form?.companyName == ocrData.vendorSupplier,
