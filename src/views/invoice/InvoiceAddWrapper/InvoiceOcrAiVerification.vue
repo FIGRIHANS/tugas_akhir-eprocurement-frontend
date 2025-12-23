@@ -369,7 +369,7 @@ const invoiceVerificationStore = useInvoiceVerificationStore()
 
 const qrData = reactive<invoiceQrData>({
   vendorBuyer: '',
-  npwppBuyer: '',
+  npwpBuyer: '',
   vendorSupplier: '',
   npwpSupplier: '',
   taxDocumentNumber: '',
@@ -381,14 +381,16 @@ const qrData = reactive<invoiceQrData>({
 })
 
 const ocrData = reactive<invoiceOcrData>({
-  FakturPajak: '',
-  buyerNpwp: '',
+  vendorBuyer: '',
+  npwpBuyer: '',
+  vendorSupplier: '',
+  npwpSupplier: '',
+  taxDocumentNumber: '',
+  taxDocumentDate: '',
   dpp: '',
   ppn: '',
-  total: '',
-  transactionDate: '',
-  vendorName: '',
-  vendorNpwp: '',
+  ppnbm: '',
+  status: '',
 })
 const form = inject<formTypes>('form')
 const isLoadUpload = ref<boolean>(false)
@@ -403,7 +405,7 @@ const activeButton = ref<'back' | 'proceed'>('proceed')
 const selectedDocumentType = ref<string>('1')
 
 // --- Helper untuk pengecekan data OCR kosong ---
-const isOcrEmpty = (val: any) => val === undefined || val === null || val === '-' || val === ''
+// const isOcrEmpty = (val: any) => val === undefined || val === null || val === '-' || val === ''
 
 const setActive = (btn: 'back' | 'proceed') => {
   activeButton.value = btn
@@ -453,54 +455,50 @@ const tableData = computed(() => [
     header: 'Nama Vendor',
     qr: qrData.vendorBuyer || '-',
     fpVerified: form?.vendorName == qrData.vendorBuyer,
-    ocr: ocrData.vendorName || '-',
-    invoiceVerified: isOcrEmpty(ocrData.vendorName) ? '-' : form?.vendorName == ocrData.vendorName,
-    remarks: isOcrEmpty(ocrData.vendorName)
-      ? form?.vendorName == qrData.vendorBuyer
-      : form?.vendorName == qrData.vendorBuyer && form?.vendorName == ocrData.vendorName,
+    ocr: ocrData.vendorBuyer || '-',
+    invoiceVerified: form?.vendorName == ocrData.vendorBuyer,
+    remarks: form?.vendorName == qrData.vendorBuyer && form?.vendorName == ocrData.vendorBuyer,
   },
   {
     header: 'NPWP Vendor',
-    qr: qrData.npwppBuyer || '-',
-    fpVerified: form?.npwp == qrData.npwppBuyer,
-    ocr: ocrData.buyerNpwp || '-',
-    invoiceVerified: isOcrEmpty(ocrData.buyerNpwp) ? '-' : form?.npwpNumber == ocrData.buyerNpwp,
-    remarks: isOcrEmpty(ocrData.buyerNpwp)
-      ? form?.npwpNumber == qrData.npwppBuyer
-      : form?.npwpNumber == qrData.npwppBuyer && form?.npwpNumber == ocrData.buyerNpwp,
+    qr: qrData.npwpBuyer || '-',
+    fpVerified: form?.npwp == qrData.npwpBuyer,
+    ocr: ocrData.npwpBuyer || '-',
+    invoiceVerified: form?.npwp == ocrData.npwpBuyer,
+    remarks: form?.npwpNumber == qrData.npwpBuyer && form?.npwpNumber == ocrData.npwpBuyer,
   },
   {
     header: 'Perusahaan',
     qr: qrData.vendorSupplier || '-',
     fpVerified: form?.companyName == qrData.vendorSupplier,
-    ocr: '-',
-    invoiceVerified: '-',
-    remarks: form?.companyName == qrData.vendorSupplier,
+    ocr: ocrData.vendorSupplier,
+    invoiceVerified: form?.companyName == ocrData.vendorSupplier,
+    remarks:
+      form?.companyName == qrData.vendorSupplier && form?.companyName == ocrData.vendorSupplier,
   },
   {
     header: 'NPWP',
     qr: qrData.npwpSupplier || '-',
     fpVerified: true,
-    ocr: '-',
-    invoiceVerified: '-',
+    ocr: ocrData.npwpSupplier || '-',
+    invoiceVerified: true,
     remarks: true,
   },
   {
     header: 'No Faktur Pajak',
     qr: qrData.taxDocumentNumber || '-',
     fpVerified: form?.taxNoInvoice == qrData.taxDocumentNumber,
-    ocr: ocrData.FakturPajak || '-',
-    invoiceVerified: isOcrEmpty(ocrData.FakturPajak) ? '-' : ocrData.FakturPajak == form?.taxNumber,
-    remarks: isOcrEmpty(ocrData.FakturPajak)
-      ? form?.taxNumber == qrData.taxDocumentNumber
-      : form?.taxNumber == qrData.taxDocumentNumber && ocrData.FakturPajak == form?.taxNumber,
+    ocr: ocrData.taxDocumentNumber || '-',
+    invoiceVerified: form?.taxNoInvoice == ocrData.taxDocumentNumber,
+    remarks:
+      form?.taxNumber == qrData.taxDocumentNumber && ocrData.taxDocumentNumber == form?.taxNumber,
   },
   {
     header: 'Tanggal Faktur Pajak',
     qr: qrData.taxDocumentDate || '-',
-    fpVerified: true,
-    ocr: ocrData.transactionDate || '-',
-    invoiceVerified: isOcrEmpty(ocrData.transactionDate) ? '-' : 'none',
+    fpVerified: !!qrData.taxDocumentDate,
+    ocr: ocrData.taxDocumentDate || '-',
+    invoiceVerified: !!ocrData.taxDocumentDate,
     remarks: true,
   },
   {
@@ -508,10 +506,8 @@ const tableData = computed(() => [
     qr: qrData.dpp || '-',
     fpVerified: true,
     ocr: ocrData.dpp || '-',
-    invoiceVerified: isOcrEmpty(ocrData.dpp) ? '-' : form?.subtotal == Number(ocrData.dpp),
-    remarks: isOcrEmpty(ocrData.dpp)
-      ? form?.subtotal == Number(qrData.dpp)
-      : form?.subtotal == Number(qrData.dpp) && form?.subtotal == Number(ocrData.dpp),
+    invoiceVerified: true,
+    remarks: form?.subtotal == Number(qrData.dpp) && form?.subtotal == Number(ocrData.dpp),
   },
   {
     header: 'DPP Lainnya',
@@ -526,31 +522,31 @@ const tableData = computed(() => [
     qr: qrData.ppn || '-',
     fpVerified: true,
     ocr: ocrData.ppn || '-',
-    invoiceVerified: isOcrEmpty(ocrData.ppn) ? '-' : true,
-    remarks: 'Matched',
+    invoiceVerified: true,
+    remarks: true,
   },
   {
     header: 'PPN BM',
     qr: qrData.ppnbm || '-',
     fpVerified: true,
-    ocr: '-',
-    invoiceVerified: '-',
-    remarks: 'Matched',
+    ocr: ocrData.ppnbm || '-',
+    invoiceVerified: true,
+    remarks: true,
   },
   {
     header: 'Status Approve FP',
     qr: qrData.status || '-',
     fpVerified: true,
-    ocr: '-',
-    invoiceVerified: '-',
-    remarks: 'none',
+    ocr: ocrData.status || '-',
+    invoiceVerified: true,
+    remarks: true,
   },
   {
     header: 'Reference',
     qr: '-',
     fpVerified: 'none',
-    ocr: ocrData.FakturPajak || '-',
-    invoiceVerified: isOcrEmpty(ocrData.FakturPajak) ? '-' : true,
+    ocr: '-',
+    invoiceVerified: '-',
     remarks: 'none',
   },
 ])
@@ -583,17 +579,16 @@ const columns = ref([
   'WHT Amount',
 ])
 
-const isApproved = () => qrData.status === 'APPROVED'
+// const isApproved = () => qrData.status === 'APPROVED'
+
 const setTabOcr = (type: string) => {
   tabOcrTab.value = type
 }
 
 const sendUploadFile = async () => {
-  const ocrResponse = await invoiceVerificationStore.uploadFileOcr(
-    form?.invoiceDocument?.previewPath,
-  )
+  const ocrResponse = await invoiceVerificationStore.uploadFileOcr(form?.tax?.previewPath)
   const qrResponse = await invoiceVerificationStore.uploadFileQr(form?.tax?.previewPath)
-  console.log(qrResponse)
+
   await setFileOcr(ocrResponse)
   await setFileQr(qrResponse)
 }
