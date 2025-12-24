@@ -366,19 +366,10 @@ const handleConfirmPaymentStatus = async () => {
     const paymentDetailsDataRef = paymentStatusDetailRef.value?.getPaymentDetailsData()
     const allPaymentDetails = paymentDetailsDataRef?.value || []
 
-    // Get only edited payment details if the method exists
-    const editedPaymentDetails = paymentStatusDetailRef.value?.getEditedPaymentDetails?.() || []
-
-    console.log('🔍 Update Payment Status - Debug Info:')
-    console.log('  📦 All payment details:', allPaymentDetails.length, 'records')
-    console.log('  ✏️ Edited payment details:', editedPaymentDetails.length, 'records')
-
     // IMPORTANT: Always send ALL payment details to avoid duplication
     // If we send empty array, backend will keep old records and create duplicates
     // By sending all details with their IDs, backend can properly update existing records
     const paymentDetailsToSend = allPaymentDetails
-
-    console.log('  📤 Sending to API:', paymentDetailsToSend.length, 'records')
 
     // WORKAROUND: Fetch existing payment details from database to get their IDs
     // This is needed because SAP sync data doesn't have invoicePaymentDetailId
@@ -389,12 +380,11 @@ const handleConfirmPaymentStatus = async () => {
     }
     let existingPaymentDetails: ExistingPaymentDetail[] = []
     try {
-      console.log('  🔍 Fetching existing payment details from database...')
       const existingData = await verificationApi.getPaymentStatus(form.value.invoiceUId)
 
       if (existingData?.result?.content?.detail) {
-        existingPaymentDetails = existingData.result.content.detail
-        console.log('  ✅ Found', existingPaymentDetails.length, 'existing records in database')
+        existingPaymentDetails = existingData.result.content
+          .detail as unknown as ExistingPaymentDetail[]
       }
     } catch (error) {
       console.warn('  ⚠️ Could not fetch existing payment details:', error)
@@ -404,6 +394,16 @@ const handleConfirmPaymentStatus = async () => {
     const toISOStringSafe = (dateValue: string | number | Date | null | undefined): string => {
       if (!dateValue) {
         return new Date().toISOString()
+      }
+
+      // If it's a string in DD/MM/YYYY format, convert to YYYY-MM-DD
+      if (typeof dateValue === 'string' && dateValue.includes('/')) {
+        const parts = dateValue.split('/')
+        if (parts.length === 3) {
+          // Convert DD/MM/YYYY to YYYY-MM-DD
+          const [day, month, year] = parts
+          dateValue = `${year}-${month}-${day}`
+        }
       }
 
       const date = new Date(dateValue)
@@ -421,8 +421,6 @@ const handleConfirmPaymentStatus = async () => {
       const existingRecord = existingPaymentDetails[index]
       const invoicePaymentDetailId = existingRecord?.invoicePaymentDetailId || 0
 
-      console.log(`  🔗 Mapping record ${index + 1}: ID = ${invoicePaymentDetailId}`)
-
       return {
         invoicePaymentDetailId: invoicePaymentDetailId,
         invoiceUId: form.value.invoiceUId,
@@ -437,13 +435,10 @@ const handleConfirmPaymentStatus = async () => {
       }
     })
 
-    console.log('  📋 Mapped payment details for API:', paymentDetails)
-
     // Save the IDs we're sending to sessionStorage
     // This will be used to filter records on tab switch
     const updatedIds = paymentDetails.map((p) => p.invoicePaymentDetailId)
     sessionStorage.setItem(`paymentDetailsIds_${form.value.invoiceUId}`, JSON.stringify(updatedIds))
-    console.log('💾 Saved updated IDs to sessionStorage:', updatedIds)
 
     // Get submitted document number from child component
     const submittedDocumentNo = paymentStatusDetailRef.value?.getSubmittedDocumentNo() || ''
@@ -489,8 +484,6 @@ const handleConfirmPaymentStatus = async () => {
       },
       detail: paymentDetails,
     }
-
-    console.log('  🚀 Final payload to API:', JSON.stringify(paymentStatusData, null, 2))
 
     // Call API to update payment status
     const response = await verificationApi.updatePaymentStatus(paymentStatusData)
@@ -540,25 +533,12 @@ const handleConfirmPaymentStatus = async () => {
         if (latestData?.result?.content?.detail) {
           const detail = latestData.result.content.detail
 
-          console.log('📊 Payment Details from API after update:', detail.length, 'records')
-          console.log('📋 Detail data:', detail)
-
           // IMPORTANT: Backend returns ALL historical records (10+)
-          // We only want to display the records we just sent (2 records with IDs 70, 71)
+          // We only want to display the records we just sent
           // Filter to show only records that match the IDs we sent
           const sentIds = paymentDetails.map((p) => p.invoicePaymentDetailId)
-          console.log('🎯 IDs we sent to API:', sentIds)
-
           const filteredDetail = detail.filter((item) =>
             sentIds.includes(item.invoicePaymentDetailId),
-          )
-
-          console.log(
-            '✂️ Filtered to show only sent records:',
-            filteredDetail.length,
-            'records (from',
-            detail.length,
-            'total)',
           )
 
           // Map filtered details
@@ -574,8 +554,6 @@ const handleConfirmPaymentStatus = async () => {
             isModified: false, // Reset modified flag
           }))
 
-          console.log('✅ Mapped payment details to display:', mappedDetails.length, 'records')
-
           // Update savedPaymentDetailsFromSession
           savedPaymentDetailsFromSession.value = mappedDetails
 
@@ -584,7 +562,6 @@ const handleConfirmPaymentStatus = async () => {
           const paymentDetailsDataRef = paymentStatusDetailRef.value?.getPaymentDetailsData()
           if (paymentDetailsDataRef) {
             paymentDetailsDataRef.value = [...mappedDetails]
-            console.log('🔄 Updated paymentDetailsData ref with', mappedDetails.length, 'records')
           }
         }
       } catch (fetchError) {
