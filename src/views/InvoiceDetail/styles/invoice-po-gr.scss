@@ -8,16 +8,19 @@
       height: 10px;
       background: transparent;
     }
-    
+
     &::-webkit-scrollbar-thumb {
       width: 10px;
       height: 10px;
       border-radius: 15px;
-      background-color: #DBDFE9;
+      background-color: #dbdfe9;
     }
   }
 
   &__column {
+    background-color: #dbeafe; /* bg-blue-100 */
+    border-bottom: 1px solid #3b82f6; /* border-b-blue-500 */
+    color: #3b82f6; /* text-blue-500 */
     padding: 13px 20px;
     font-size: 13px;
     font-weight: 500;
@@ -28,7 +31,7 @@
       @extend .po__column;
       min-width: 80px;
     }
-    
+
     &--tax {
       @extend .po__column;
       min-width: 350px;
