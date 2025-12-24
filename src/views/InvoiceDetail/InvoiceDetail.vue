@@ -366,27 +366,79 @@ const handleConfirmPaymentStatus = async () => {
     const paymentDetailsDataRef = paymentStatusDetailRef.value?.getPaymentDetailsData()
     const allPaymentDetails = paymentDetailsDataRef?.value || []
 
-    // Get only edited payment details if the method exists
-    const editedPaymentDetails = paymentStatusDetailRef.value?.getEditedPaymentDetails?.() || []
+    // IMPORTANT: Always send ALL payment details to avoid duplication
+    // If we send empty array, backend will keep old records and create duplicates
+    // By sending all details with their IDs, backend can properly update existing records
+    const paymentDetailsToSend = allPaymentDetails
 
-    // IMPORTANT: Only send edited details. If no edits, send empty array to avoid creating duplicates
-    const paymentDetailsToSend = editedPaymentDetails
+    // WORKAROUND: Fetch existing payment details from database to get their IDs
+    // This is needed because SAP sync data doesn't have invoicePaymentDetailId
+    // Without proper IDs, backend will create duplicates instead of updating
+    interface ExistingPaymentDetail {
+      invoicePaymentDetailId?: number
+      [key: string]: unknown
+    }
+    let existingPaymentDetails: ExistingPaymentDetail[] = []
+    try {
+      const existingData = await verificationApi.getPaymentStatus(form.value.invoiceUId)
 
-    // Prepare payment details for API
-    const paymentDetails = paymentDetailsToSend.map((item) => ({
-      invoicePaymentDetailId: item.invoicePaymentDetailId || 0,
-      invoiceUId: form.value.invoiceUId,
-      paymentDate: item.paymentDate
-        ? new Date(item.paymentDate).toISOString()
-        : new Date().toISOString(),
-      amount: parseFloat(item.amount || '0'),
-      paymentStatus: item.status || 'Plan',
-      bankAccount: item.bankAccount || '',
-      remarks: item.remarks || '',
-      documentUrl: item.attachmentDocument || '',
-      documentName: item.attachmentDocument || '',
-      documentSize: 0,
-    }))
+      if (existingData?.result?.content?.detail) {
+        existingPaymentDetails = existingData.result.content
+          .detail as unknown as ExistingPaymentDetail[]
+      }
+    } catch (error) {
+      console.warn('  ⚠️ Could not fetch existing payment details:', error)
+    }
+
+    // Helper function to safely convert date to ISO string
+    const toISOStringSafe = (dateValue: string | number | Date | null | undefined): string => {
+      if (!dateValue) {
+        return new Date().toISOString()
+      }
+
+      // If it's a string in DD/MM/YYYY format, convert to YYYY-MM-DD
+      if (typeof dateValue === 'string' && dateValue.includes('/')) {
+        const parts = dateValue.split('/')
+        if (parts.length === 3) {
+          // Convert DD/MM/YYYY to YYYY-MM-DD
+          const [day, month, year] = parts
+          dateValue = `${year}-${month}-${day}`
+        }
+      }
+
+      const date = new Date(dateValue)
+      if (isNaN(date.getTime())) {
+        console.warn('⚠️ Invalid date value:', dateValue, '- using current date')
+        return new Date().toISOString()
+      }
+
+      return date.toISOString()
+    }
+
+    // Prepare payment details for API with proper IDs
+    const paymentDetails = paymentDetailsToSend.map((item, index) => {
+      // Try to match with existing record by index or amount to get the ID
+      const existingRecord = existingPaymentDetails[index]
+      const invoicePaymentDetailId = existingRecord?.invoicePaymentDetailId || 0
+
+      return {
+        invoicePaymentDetailId: invoicePaymentDetailId,
+        invoiceUId: form.value.invoiceUId,
+        paymentDate: toISOStringSafe(item.paymentDate),
+        amount: parseFloat(item.amount || '0'),
+        paymentStatus: item.status || 'Plan',
+        bankAccount: item.bankAccount || '',
+        remarks: item.remarks || '',
+        documentUrl: item.attachmentDocument || '',
+        documentName: item.attachmentDocument || '',
+        documentSize: 0,
+      }
+    })
+
+    // Save the IDs we're sending to sessionStorage
+    // This will be used to filter records on tab switch
+    const updatedIds = paymentDetails.map((p) => p.invoicePaymentDetailId)
+    sessionStorage.setItem(`paymentDetailsIds_${form.value.invoiceUId}`, JSON.stringify(updatedIds))
 
     // Get submitted document number from child component
     const submittedDocumentNo = paymentStatusDetailRef.value?.getSubmittedDocumentNo() || ''
@@ -481,14 +533,15 @@ const handleConfirmPaymentStatus = async () => {
         if (latestData?.result?.content?.detail) {
           const detail = latestData.result.content.detail
 
-          // For user 3002 (Invoice Approval Non PO), show only the latest record
-          // For user 3190 (Invoice Verification), show all records
-          const filteredDetail =
-            checkApprovalNonPo1() && detail.length > 0
-              ? [detail[detail.length - 1]] // Only last record for user 3002
-              : detail // All records for others
+          // IMPORTANT: Backend returns ALL historical records (10+)
+          // We only want to display the records we just sent
+          // Filter to show only records that match the IDs we sent
+          const sentIds = paymentDetails.map((p) => p.invoicePaymentDetailId)
+          const filteredDetail = detail.filter((item) =>
+            sentIds.includes(item.invoicePaymentDetailId),
+          )
 
-          // Map and clear isModified flags to show fresh data
+          // Map filtered details
           const mappedDetails = filteredDetail.map((item, index) => ({
             no: index + 1,
             paymentDate: item.paymentDate,
@@ -1619,9 +1672,60 @@ watch(
           }
 
           if (detail && detail.length > 0) {
-            // For user 3002, show only the latest record
-            const filteredDetail =
-              checkApprovalNonPo1() && detail.length > 0 ? [detail[detail.length - 1]] : detail
+            console.log('📊 Initial load - Payment Details from API:', detail.length, 'records')
+
+            // Check if we have saved IDs from previous update
+            const savedIdsJson = sessionStorage.getItem(
+              `paymentDetailsIds_${form.value.invoiceUId}`,
+            )
+            let filteredDetail = detail
+
+            if (savedIdsJson) {
+              try {
+                const savedIds = JSON.parse(savedIdsJson)
+                console.log('🔍 Found saved IDs from previous update:', savedIds)
+
+                // Filter to show only records with saved IDs
+                filteredDetail = detail.filter((item) =>
+                  savedIds.includes(item.invoicePaymentDetailId),
+                )
+
+                console.log(
+                  '✂️ Filtered to show only updated records:',
+                  filteredDetail.length,
+                  'records (from',
+                  detail.length,
+                  'total)',
+                )
+              } catch (error) {
+                console.warn('⚠️ Could not parse saved IDs:', error)
+              }
+            } else {
+              // No saved IDs - show only 2 most recent records
+              console.log('ℹ️ No saved IDs found, showing 2 most recent records')
+
+              // Sort by ID descending and take first 2
+              const sortedDetail = [...detail].sort(
+                (a, b) => (b.invoicePaymentDetailId || 0) - (a.invoicePaymentDetailId || 0),
+              )
+              filteredDetail = sortedDetail.slice(0, 2)
+
+              console.log(
+                '✂️ Filtered to 2 most recent:',
+                filteredDetail.length,
+                'records (from',
+                detail.length,
+                'total)',
+              )
+
+              // Save these IDs for future tab switches
+              const recentIds = filteredDetail.map((item) => item.invoicePaymentDetailId)
+              sessionStorage.setItem(
+                `paymentDetailsIds_${form.value.invoiceUId}`,
+                JSON.stringify(recentIds),
+              )
+              console.log('💾 Saved recent IDs to sessionStorage:', recentIds)
+            }
 
             savedPaymentDetailsFromSession.value = filteredDetail.map((item, index) => ({
               no: index + 1,
@@ -1634,6 +1738,12 @@ watch(
               invoicePaymentDetailId: item.invoicePaymentDetailId,
               isModified: false, // Reset modified flag on tab switch
             }))
+
+            console.log(
+              '✅ Initial load - Displaying',
+              savedPaymentDetailsFromSession.value.length,
+              'records',
+            )
           }
         }
       } catch (error) {
@@ -1720,9 +1830,60 @@ onMounted(async () => {
             }
 
             if (detail && detail.length > 0) {
-              // For user 3002, show only the latest record
-              const filteredDetail =
-                checkApprovalNonPo1() && detail.length > 0 ? [detail[detail.length - 1]] : detail
+              console.log('📊 Page load - Payment Details from API:', detail.length, 'records')
+
+              // Check if we have saved IDs from previous update
+              const savedIdsJson = sessionStorage.getItem(
+                `paymentDetailsIds_${form.value.invoiceUId}`,
+              )
+              let filteredDetail = detail
+
+              if (savedIdsJson) {
+                try {
+                  const savedIds = JSON.parse(savedIdsJson)
+                  console.log('🔍 Found saved IDs from previous update:', savedIds)
+
+                  // Filter to show only records with saved IDs
+                  filteredDetail = detail.filter((item) =>
+                    savedIds.includes(item.invoicePaymentDetailId),
+                  )
+
+                  console.log(
+                    '✂️ Filtered to show only updated records:',
+                    filteredDetail.length,
+                    'records (from',
+                    detail.length,
+                    'total)',
+                  )
+                } catch (error) {
+                  console.warn('⚠️ Could not parse saved IDs:', error)
+                }
+              } else {
+                // No saved IDs - show only 2 most recent records
+                console.log('ℹ️ No saved IDs found, showing 2 most recent records')
+
+                // Sort by ID descending and take first 2
+                const sortedDetail = [...detail].sort(
+                  (a, b) => (b.invoicePaymentDetailId || 0) - (a.invoicePaymentDetailId || 0),
+                )
+                filteredDetail = sortedDetail.slice(0, 2)
+
+                console.log(
+                  '✂️ Filtered to 2 most recent:',
+                  filteredDetail.length,
+                  'records (from',
+                  detail.length,
+                  'total)',
+                )
+
+                // Save these IDs for future tab switches
+                const recentIds = filteredDetail.map((item) => item.invoicePaymentDetailId)
+                sessionStorage.setItem(
+                  `paymentDetailsIds_${form.value.invoiceUId}`,
+                  JSON.stringify(recentIds),
+                )
+                console.log('💾 Saved recent IDs to sessionStorage:', recentIds)
+              }
 
               savedPaymentDetailsFromSession.value = filteredDetail.map((item, index) => ({
                 no: index + 1,
@@ -1735,6 +1896,12 @@ onMounted(async () => {
                 invoicePaymentDetailId: item.invoicePaymentDetailId,
                 isModified: false, // Reset modified flag on page load
               }))
+
+              console.log(
+                '✅ Page load - Displaying',
+                savedPaymentDetailsFromSession.value.length,
+                'records',
+              )
             }
           }
         } catch (error) {
