@@ -297,6 +297,7 @@ interface PaymentDetail {
 const paymentStatusDetailRef = ref<{
   getPaymentDetailsData: () => Ref<PaymentDetail[]>
   getSubmittedDocumentNo: () => string
+  getEditedPaymentDetails?: () => PaymentDetail[]
 } | null>(null)
 
 // Track if SAP Synchronize has been performed
@@ -363,10 +364,16 @@ const handleConfirmPaymentStatus = async () => {
 
     // Get payment details from child component via template ref
     const paymentDetailsDataRef = paymentStatusDetailRef.value?.getPaymentDetailsData()
-    const paymentDetailsData = paymentDetailsDataRef?.value || []
+    const allPaymentDetails = paymentDetailsDataRef?.value || []
+
+    // Get only edited payment details if the method exists
+    const editedPaymentDetails = paymentStatusDetailRef.value?.getEditedPaymentDetails?.() || []
+
+    // IMPORTANT: Only send edited details. If no edits, send empty array to avoid creating duplicates
+    const paymentDetailsToSend = editedPaymentDetails
 
     // Prepare payment details for API
-    const paymentDetails = paymentDetailsData.map((item) => ({
+    const paymentDetails = paymentDetailsToSend.map((item) => ({
       invoicePaymentDetailId: item.invoicePaymentDetailId || 0,
       invoiceUId: form.value.invoiceUId,
       paymentDate: item.paymentDate
@@ -390,7 +397,7 @@ const handleConfirmPaymentStatus = async () => {
       clearingDocumentNo: form.value.clearingDocumentNo || '',
       paymentStatus: paymentSummary.value.statusName,
       statusCode: paymentSummary.value.statusCode,
-      paymentDetails: paymentDetailsData,
+      paymentDetails: allPaymentDetails,
     }
 
     sessionStorage.setItem(
@@ -473,7 +480,16 @@ const handleConfirmPaymentStatus = async () => {
         // Update payment details in child component after update success
         if (latestData?.result?.content?.detail) {
           const detail = latestData.result.content.detail
-          savedPaymentDetailsFromSession.value = detail.map((item, index) => ({
+
+          // For user 3002 (Invoice Approval Non PO), show only the latest record
+          // For user 3190 (Invoice Verification), show all records
+          const filteredDetail =
+            checkApprovalNonPo1() && detail.length > 0
+              ? [detail[detail.length - 1]] // Only last record for user 3002
+              : detail // All records for others
+
+          // Map and clear isModified flags to show fresh data
+          const mappedDetails = filteredDetail.map((item, index) => ({
             no: index + 1,
             paymentDate: item.paymentDate,
             amount: item.amount.toString(),
@@ -482,7 +498,18 @@ const handleConfirmPaymentStatus = async () => {
             remarks: item.remarks,
             attachmentDocument: item.documentUrl || '',
             invoicePaymentDetailId: item.invoicePaymentDetailId,
+            isModified: false, // Reset modified flag
           }))
+
+          // Update savedPaymentDetailsFromSession
+          savedPaymentDetailsFromSession.value = mappedDetails
+
+          // IMPORTANT: Also directly update paymentDetailsData to force reactivity
+          // This is the ref that's injected to child components
+          const paymentDetailsDataRef = paymentStatusDetailRef.value?.getPaymentDetailsData()
+          if (paymentDetailsDataRef) {
+            paymentDetailsDataRef.value = [...mappedDetails]
+          }
         }
       } catch (fetchError) {
         console.error('Error fetching latest payment status:', fetchError)
@@ -1560,8 +1587,7 @@ watch(
   async (newTab) => {
     if (
       newTab === 'paymentStatus' &&
-      route.query.type === '2' &&
-      (checkApprovalNonPo1() || checkShowPaymentForProfile3200()) &&
+      (route.query.type === '1' || route.query.type === '2') &&
       form.value.statusCode >= 7
     ) {
       try {
@@ -1574,7 +1600,6 @@ watch(
           }
           if (header.clearingDocumentNo) {
             form.value.clearingDocumentNo = header.clearingDocumentNo
-            console.log('Tab Switch - Clearing Doc updated:', header.clearingDocumentNo)
           }
 
           // Fully sync status and payment summary
@@ -1592,10 +1617,13 @@ watch(
             currency: header.currency,
             clearingDocumentNo: header.clearingDocumentNo || '-',
           }
-          console.log('Tab Switch - Payment Summary updated:', paymentSummary.value)
 
           if (detail && detail.length > 0) {
-            savedPaymentDetailsFromSession.value = detail.map((item, index) => ({
+            // For user 3002, show only the latest record
+            const filteredDetail =
+              checkApprovalNonPo1() && detail.length > 0 ? [detail[detail.length - 1]] : detail
+
+            savedPaymentDetailsFromSession.value = filteredDetail.map((item, index) => ({
               no: index + 1,
               paymentDate: item.paymentDate,
               amount: item.amount.toString(),
@@ -1604,6 +1632,7 @@ watch(
               remarks: item.remarks,
               attachmentDocument: item.documentUrl || '',
               invoicePaymentDetailId: item.invoicePaymentDetailId,
+              isModified: false, // Reset modified flag on tab switch
             }))
           }
         }
@@ -1660,8 +1689,8 @@ onMounted(async () => {
     await verificationApi.getInvoiceDetail(route.query.id?.toString() || '').then(async () => {
       afterGetDetail()
 
-      // Load payment status data from backend API
-      if (route.query.type === '2' && checkApprovalNonPo1() && form.value.statusCode >= 7) {
+      // Load payment status data from backend API for both type 1 (Verification) and type 2 (Approval)
+      if ((route.query.type === '1' || route.query.type === '2') && form.value.statusCode >= 7) {
         try {
           const response = await verificationApi.getPaymentStatus(form.value.invoiceUId)
           if (response?.result?.content) {
@@ -1691,8 +1720,11 @@ onMounted(async () => {
             }
 
             if (detail && detail.length > 0) {
-              // Map PaymentStatusDetail to PaymentDetail format
-              savedPaymentDetailsFromSession.value = detail.map((item, index) => ({
+              // For user 3002, show only the latest record
+              const filteredDetail =
+                checkApprovalNonPo1() && detail.length > 0 ? [detail[detail.length - 1]] : detail
+
+              savedPaymentDetailsFromSession.value = filteredDetail.map((item, index) => ({
                 no: index + 1,
                 paymentDate: item.paymentDate,
                 amount: item.amount.toString(),
@@ -1701,6 +1733,7 @@ onMounted(async () => {
                 remarks: item.remarks,
                 attachmentDocument: item.documentUrl || '',
                 invoicePaymentDetailId: item.invoicePaymentDetailId,
+                isModified: false, // Reset modified flag on page load
               }))
             }
           }
@@ -1754,6 +1787,7 @@ onMounted(async () => {
                 remarks: item.remarks,
                 attachmentDocument: item.documentUrl || '',
                 invoicePaymentDetailId: item.invoicePaymentDetailId,
+                isModified: false, // Reset modified flag on page load
               }))
             }
           }

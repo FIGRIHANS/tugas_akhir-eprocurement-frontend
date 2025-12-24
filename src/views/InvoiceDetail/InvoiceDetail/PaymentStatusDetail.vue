@@ -6,7 +6,7 @@
         <PaymentCalculation />
       </div>
     </div>
-    <PaymentDetails class="mt-[24px]" />
+    <PaymentDetails ref="paymentDetailsRef" class="mt-[24px]" />
   </div>
 </template>
 
@@ -70,7 +70,16 @@ interface PaymentDetail {
   bankAccount: string
   remarks: string
   attachmentDocument?: string
+  invoicePaymentDetailId?: number
+  isModified?: boolean
 }
+
+interface PaymentDetailsComponent {
+  getPaymentDetailsData: () => Ref<PaymentDetail[]>
+  getEditedPaymentDetails: () => PaymentDetail[]
+}
+
+const paymentDetailsRef = ref<PaymentDetailsComponent | null>(null)
 
 // Provide paymentDetails array to PaymentCalculation for Payment Received calculation
 const paymentDetailsData = ref<PaymentDetail[]>([])
@@ -80,5 +89,10 @@ provide('paymentDetailsData', paymentDetailsData)
 defineExpose({
   getPaymentDetailsData: () => paymentDetailsData,
   getSubmittedDocumentNo: () => paymentInfoRef.value?.getSubmittedDocumentNo() || '',
+  getEditedPaymentDetails: () => {
+    // Get edited payment details from PaymentDetails child component
+    const edited = paymentDetailsData.value.filter((item) => item.isModified === true)
+    return edited
+  },
 })
 </script>
