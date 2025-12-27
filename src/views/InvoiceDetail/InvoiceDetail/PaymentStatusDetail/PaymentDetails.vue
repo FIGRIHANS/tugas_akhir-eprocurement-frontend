@@ -229,7 +229,6 @@ const onFileChange = (index: number, e: Event) => {
 }
 
 const saveEdit = (index: number) => {
-  // Mark this row as edited
   paymentDetails.value[index].isModified = true
   editedRowIndices.value.add(index)
 
@@ -241,25 +240,22 @@ const paymentInformationRef = inject<Ref<PaymentInformationRef>>('paymentInforma
 
 const hasSapSynced = inject<Ref<boolean>>('hasSapSynced', ref(false))
 
-// Inject savedPaymentDetailsFromSession to load data from API
 const savedPaymentDetailsFromSession = inject<Ref<PaymentDetail[]>>(
   'savedPaymentDetailsFromSession',
   ref([]),
 )
 
-// Watch and load saved payment details into table (show all rows)
 watch(
   () => savedPaymentDetailsFromSession.value,
   (newData) => {
     if (newData && newData.length > 0) {
-      // Show ALL rows from the API results and reset isModified flags
       paymentDetails.value = newData.map((item) => ({
         ...item,
+        paymentDate: item.paymentDate ? formatSapDate(item.paymentDate) : getCurrentDate(),
         remarks: sanitizeRemark(item.remarks),
-        isModified: false, // Reset modified flag when loading fresh data
+        isModified: false,
       }))
 
-      // Clear edited row indices
       editedRowIndices.value.clear()
     } else if (newData && newData.length === 0) {
       paymentDetails.value = []
@@ -377,7 +373,6 @@ const getPaymentDetailsData = () => {
 }
 
 const getEditedPaymentDetails = () => {
-  // Return only payment details that have been edited
   return paymentDetails.value.filter((item) => item.isModified === true)
 }
 

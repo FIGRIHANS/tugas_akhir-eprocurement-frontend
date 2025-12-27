@@ -408,7 +408,18 @@
 
       <div v-if="checkPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label"> Invoice Source </label>
-        <input v-model="form.invoiceSource" class="input" placeholder="" :disabled="true" />
+        <input
+          v-if="form.status !== 0 && form.status !== -1 && form.status !== 5"
+          v-model="form.invoiceSource"
+          class="input"
+          placeholder=""
+          disabled
+        />
+        <select v-else v-model="form.invoiceSource" class="select">
+          <option v-for="item of invoiceSourceList" :key="item.code" :value="item.code">
+            {{ item.name }}
+          </option>
+        </select>
       </div>
     </div>
   </div>
@@ -464,6 +475,11 @@ const listInvoiceTypeNonPo = computed(() => invoiceMasterApi.invoiceNonPoType)
 const listMatrixApproval = computed(() => invoiceMasterApi.matrixApprovalList)
 const listCashJournal = computed(() => invoiceMasterApi.cashJournalList)
 const casNoCode = computed(() => submissionApi.casNoCode)
+const invoiceSourceList = ref([
+  { code: 'SRC1', name: '9801827192' },
+  { code: 'SRC2', name: '9712648081' },
+  { code: 'SRC3', name: '9312901872' },
+])
 const isReimbursement = computed(() => form?.invoiceType === '1')
 const isCreditCard = computed(() => form?.invoiceType === '2')
 const isCAS = computed(() => form?.invoiceType === '3')
