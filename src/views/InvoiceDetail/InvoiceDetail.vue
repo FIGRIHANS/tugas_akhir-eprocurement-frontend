@@ -380,7 +380,7 @@ const handleConfirmPaymentStatus = async () => {
     }
     let existingPaymentDetails: ExistingPaymentDetail[] = []
     try {
-      const existingData = await verificationApi.getPaymentStatus(form.value.invoiceUId)
+      const existingData = await getPaymentStatusApi()(form.value.invoiceUId)
 
       if (existingData?.result?.content?.detail) {
         existingPaymentDetails = existingData.result.content
@@ -486,7 +486,7 @@ const handleConfirmPaymentStatus = async () => {
     }
 
     // Call API to update payment status
-    const response = await verificationApi.updatePaymentStatus(paymentStatusData)
+    const response = await updatePaymentStatusApi()(paymentStatusData)
 
     if (!response.result.isError) {
       const content = response.result.content
@@ -499,7 +499,7 @@ const handleConfirmPaymentStatus = async () => {
 
       // Fetch latest payment status data from GET endpoint
       try {
-        const latestData = await verificationApi.getPaymentStatus(form.value.invoiceUId)
+        const latestData = await getPaymentStatusApi()(form.value.invoiceUId)
 
         // Update form and payment summary with latest data
         if (latestData?.result?.content?.header) {
@@ -619,6 +619,16 @@ const whtCodeList = computed(() => invoiceMasterApi.whtCodeList)
 
 const checkIsNonPo = () => {
   return route.query.invoiceType === 'no_po'
+}
+
+const getPaymentStatusApi = () => {
+  return checkIsNonPo() ? verificationApi.getPaymentStatusNonPo : verificationApi.getPaymentStatus
+}
+
+const updatePaymentStatusApi = () => {
+  return checkIsNonPo()
+    ? verificationApi.updatePaymentStatusNonPo
+    : verificationApi.updatePaymentStatus
 }
 
 const checkVerifikator1 = () => {
@@ -1644,7 +1654,7 @@ watch(
       form.value.statusCode >= 7
     ) {
       try {
-        const response = await verificationApi.getPaymentStatus(form.value.invoiceUId)
+        const response = await getPaymentStatusApi()(form.value.invoiceUId)
         if (response?.result?.content) {
           const { header, detail } = response.result.content
 
@@ -1802,7 +1812,7 @@ onMounted(async () => {
       // Load payment status data from backend API for both type 1 (Verification) and type 2 (Approval)
       if ((route.query.type === '1' || route.query.type === '2') && form.value.statusCode >= 7) {
         try {
-          const response = await verificationApi.getPaymentStatus(form.value.invoiceUId)
+          const response = await getPaymentStatusApi()(form.value.invoiceUId)
           if (response?.result?.content) {
             const { header, detail } = response.result.content
 
@@ -1916,7 +1926,7 @@ onMounted(async () => {
       // Load payment status data from backend API
       if (route.query.type === '2' && checkApprovalNonPo1() && form.value.statusCode >= 7) {
         try {
-          const response = await verificationApi.getPaymentStatus(form.value.invoiceUId)
+          const response = await getPaymentStatusApi()(form.value.invoiceUId)
           if (response?.result?.content) {
             const { header, detail } = response.result.content
 
