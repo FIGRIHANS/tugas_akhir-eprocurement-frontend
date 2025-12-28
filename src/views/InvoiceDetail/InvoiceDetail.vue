@@ -9,9 +9,7 @@
     <TabInvoiceDetail
       v-if="checkApprovalNonPo1() || checkShowPaymentForProfile3200()"
       v-model:activeTab="activeTabDetail"
-      :show-payment-status="
-        form.statusCode >= 7 || (form.statusCode === 10 && userData?.profile.profileId === 3200)
-      "
+      :show-payment-status="form.statusCode >= 7"
     />
 
     <!-- Content for Invoice Data Tab -->
@@ -43,13 +41,11 @@
       </div>
     </div>
 
-    <!-- Content for Payment Status Tab (only for user 3002 and statusCode >= 7, or user 3200 with paid status) -->
+    <!-- Content for Payment Status Tab (for statusCode >= 7) -->
     <div
       v-if="
         (checkApprovalNonPo1() && form.statusCode >= 7 && activeTabDetail === 'paymentStatus') ||
-        (checkShowPaymentForProfile3200() &&
-          form.statusCode === 10 &&
-          activeTabDetail === 'paymentStatus')
+        (checkShowPaymentForProfile3200() && activeTabDetail === 'paymentStatus')
       "
     >
       <PaymentStatusDetail ref="paymentStatusDetailRef" />
@@ -640,7 +636,7 @@ const checkApprovalNonPo1 = () => {
 }
 
 const checkShowPaymentForProfile3200 = () => {
-  return userData.value?.profile.profileId === 3200 && form.value.statusCode === 10
+  return userData.value?.profile.profileId === 3200 && form.value.statusCode >= 7
 }
 
 const checkApprovalNonPoProc = () => {
@@ -1777,6 +1773,25 @@ watch(
   },
 )
 
+// Auto-navigate to Payment Status tab when statusCode is 8 (Planned), 9 (Partially Paid), or 10 (Paid)
+// This watch is needed because statusCode is set asynchronously after data is loaded
+const hasAutoNavigated = ref(false)
+watch(
+  () => form.value.statusCode,
+  (newStatusCode) => {
+    // Only auto-navigate once and if user is 3002 or 3200
+    if (
+      !hasAutoNavigated.value &&
+      (newStatusCode === 8 || newStatusCode === 9 || newStatusCode === 10) &&
+      (checkApprovalNonPo1() || checkShowPaymentForProfile3200())
+    ) {
+      activeTabDetail.value = 'paymentStatus'
+      hasAutoNavigated.value = true
+    }
+  },
+  { immediate: true },
+)
+
 onMounted(async () => {
   if (route.query.type === '1') {
     activeStep.value = 'Verification'
@@ -1918,6 +1933,15 @@ onMounted(async () => {
           console.error('Error loading payment status:', error)
         }
       }
+
+      // Auto-navigate to Payment Status tab for status 8 (Planned), 9 (Partially Paid), 10 (Paid)
+      if (
+        form.value.statusCode === 8 ||
+        form.value.statusCode === 9 ||
+        form.value.statusCode === 10
+      ) {
+        activeTabDetail.value = 'paymentStatus'
+      }
     })
   } else {
     await verificationApi.getInvoiceNonPoDetail(route.query.id?.toString() || '').then(async () => {
@@ -1971,6 +1995,15 @@ onMounted(async () => {
         } catch (error) {
           console.error('Error loading payment status:', error)
         }
+      }
+
+      // Auto-navigate to Payment Status tab for status 8 (Planned), 9 (Partially Paid), 10 (Paid)
+      if (
+        form.value.statusCode === 8 ||
+        form.value.statusCode === 9 ||
+        form.value.statusCode === 10
+      ) {
+        activeTabDetail.value = 'paymentStatus'
       }
     })
   }

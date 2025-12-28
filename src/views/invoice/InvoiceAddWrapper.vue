@@ -222,7 +222,8 @@ const ModalFailedBudgetCheck = defineAsyncComponent(
   () => import('./InvoiceAddWrapper/ModalFailedBudgetCheck.vue'),
 )
 const UpdatePaymentStatusModal = defineAsyncComponent(
-  () => import('@/views/InvoiceDetail/InvoiceDetail/PaymentStatusDetail/UpdatePaymentStatusModal.vue'),
+  () =>
+    import('@/views/InvoiceDetail/InvoiceDetail/PaymentStatusDetail/UpdatePaymentStatusModal.vue'),
 )
 
 const invoiceApi = useInvoiceSubmissionStore()
@@ -359,9 +360,9 @@ const canClickPreviewTab = computed(() => {
 })
 
 const canClickPaymentStatusTab = computed(() => {
-  // Only show Payment Status tab when invoice has been sent to SAP (statusCode = 7)
-  // OR when status code is 10 (paid) and profileId is 3200
-  return form.status === 7 || (form.status === 10 && userData.value?.profile.profileId === 3200)
+  // Show Payment Status tab when invoice status is >= 7
+  // Status 7 = Sent to SAP, 8 = Planned, 9 = Partially Paid, 10 = Paid
+  return form.status === 7 || form.status === 8 || form.status === 9 || form.status === 10
 })
 
 // Load invoice detail data for payment status (specifically for profileId 3200)
@@ -1891,13 +1892,8 @@ onMounted(() => {
       setStepperStatus()
       setDataNonPo()
 
-      // If invoice status is 7 (Sent to SAP), navigate to Payment Status tab
-      if (form.status === 7) {
-        tabNow.value = 'paymentStatus'
-      }
-
-      // If invoice status is 10 (Paid) and profileId is 3200, navigate to Payment Status tab
-      if (form.status === 10 && userData.value?.profile.profileId === 3200) {
+      // If invoice status is 7 (Sent to SAP), 8 (Planned), 9 (Partially Paid), or 10 (Paid), navigate to Payment Status tab
+      if (form.status === 7 || form.status === 8 || form.status === 9 || form.status === 10) {
         tabNow.value = 'paymentStatus'
       }
     })
@@ -1916,13 +1912,8 @@ onMounted(() => {
       setStepperStatus()
       setData()
 
-      // If invoice status is 7 (Sent to SAP), navigate to Payment Status tab
-      if (form.status === 7) {
-        tabNow.value = 'paymentStatus'
-      }
-
-      // If invoice status is 10 (Paid) and profileId is 3200, navigate to Payment Status tab
-      if (form.status === 10 && userData.value?.profile.profileId === 3200) {
+      // If invoice status is 7 (Sent to SAP), 8 (Planned), 9 (Partially Paid), or 10 (Paid), navigate to Payment Status tab
+      if (form.status === 7 || form.status === 8 || form.status === 9 || form.status === 10) {
         tabNow.value = 'paymentStatus'
       }
     })
