@@ -24,6 +24,8 @@ import type { invoiceQrData } from '@/views/invoice/types/invoiceQrdata'
 
 const PAYMENT_STATUS_ENDPOINT =
   'https://invoice-management-dev.azurewebsites.net/api/invoice/payment-status'
+const PAYMENT_STATUS_NON_PO_ENDPOINT =
+  'https://invoice-management-dev.azurewebsites.net/api/invoice/payment-status-non-po'
 
 export const useInvoiceVerificationStore = defineStore('invoiceVerification', () => {
   const listPo = ref<ListPoTypes[]>([])
@@ -357,6 +359,21 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     return response.data
   }
 
+  const updatePaymentStatusNonPo = async (data: UpdatePaymentStatusRequest) => {
+    const response: ApiResponse<UpdatePaymentStatusResponse> = await invoiceApi.post(
+      PAYMENT_STATUS_NON_PO_ENDPOINT,
+      data,
+    )
+    return response.data
+  }
+
+  const getPaymentStatusNonPo = async (invoiceUId: string) => {
+    const response: ApiResponse<UpdatePaymentStatusResponse> = await invoiceApi.get(
+      `${PAYMENT_STATUS_NON_PO_ENDPOINT}/${invoiceUId}`,
+    )
+    return response.data
+  }
+
   return {
     listPo,
     listNonPo,
@@ -392,5 +409,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     getSapStatus,
     updatePaymentStatus,
     getPaymentStatus,
+    updatePaymentStatusNonPo,
+    getPaymentStatusNonPo,
   }
 })

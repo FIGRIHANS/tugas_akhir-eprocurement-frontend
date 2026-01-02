@@ -14,6 +14,11 @@ export default [
     name: 'invoiceAnalytic',
     component: () => import('@/views/invoiceAnalytic/InvoiceAnalytic.vue'),
   },
+  {
+    path: '/tax-analytic',
+    name: 'taxAnalytic',
+    component: () => import('@/views/taxAnalytic/taxAnalytic.vue'),
+  },
   // {
   //   path: '/tender-analytic',
   //   name: 'tender-analytic',
