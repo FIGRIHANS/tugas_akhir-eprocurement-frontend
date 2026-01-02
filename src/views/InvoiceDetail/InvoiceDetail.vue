@@ -9,9 +9,7 @@
     <TabInvoiceDetail
       v-if="checkApprovalNonPo1() || checkShowPaymentForProfile3200()"
       v-model:activeTab="activeTabDetail"
-      :show-payment-status="
-        form.statusCode >= 7 || (form.statusCode === 10 && userData?.profile.profileId === 3200)
-      "
+      :show-payment-status="form.statusCode >= 7"
     />
 
     <!-- Content for Invoice Data Tab -->
@@ -43,13 +41,11 @@
       </div>
     </div>
 
-    <!-- Content for Payment Status Tab (only for user 3002 and statusCode >= 7, or user 3200 with paid status) -->
+    <!-- Content for Payment Status Tab (for statusCode >= 7) -->
     <div
       v-if="
         (checkApprovalNonPo1() && form.statusCode >= 7 && activeTabDetail === 'paymentStatus') ||
-        (checkShowPaymentForProfile3200() &&
-          form.statusCode === 10 &&
-          activeTabDetail === 'paymentStatus')
+        (checkShowPaymentForProfile3200() && activeTabDetail === 'paymentStatus')
       "
     >
       <PaymentStatusDetail ref="paymentStatusDetailRef" />
@@ -380,7 +376,7 @@ const handleConfirmPaymentStatus = async () => {
     }
     let existingPaymentDetails: ExistingPaymentDetail[] = []
     try {
-      const existingData = await verificationApi.getPaymentStatus(form.value.invoiceUId)
+      const existingData = await getPaymentStatusApi()(form.value.invoiceUId)
 
       if (existingData?.result?.content?.detail) {
         existingPaymentDetails = existingData.result.content
@@ -486,7 +482,7 @@ const handleConfirmPaymentStatus = async () => {
     }
 
     // Call API to update payment status
-    const response = await verificationApi.updatePaymentStatus(paymentStatusData)
+    const response = await updatePaymentStatusApi()(paymentStatusData)
 
     if (!response.result.isError) {
       const content = response.result.content
@@ -499,7 +495,7 @@ const handleConfirmPaymentStatus = async () => {
 
       // Fetch latest payment status data from GET endpoint
       try {
-        const latestData = await verificationApi.getPaymentStatus(form.value.invoiceUId)
+        const latestData = await getPaymentStatusApi()(form.value.invoiceUId)
 
         // Update form and payment summary with latest data
         if (latestData?.result?.content?.header) {
@@ -621,6 +617,16 @@ const checkIsNonPo = () => {
   return route.query.invoiceType === 'no_po'
 }
 
+const getPaymentStatusApi = () => {
+  return checkIsNonPo() ? verificationApi.getPaymentStatusNonPo : verificationApi.getPaymentStatus
+}
+
+const updatePaymentStatusApi = () => {
+  return checkIsNonPo()
+    ? verificationApi.updatePaymentStatusNonPo
+    : verificationApi.updatePaymentStatus
+}
+
 const checkVerifikator1 = () => {
   return userData.value?.profile?.profileId === 3190
 }
@@ -630,7 +636,7 @@ const checkApprovalNonPo1 = () => {
 }
 
 const checkShowPaymentForProfile3200 = () => {
-  return userData.value?.profile.profileId === 3200 && form.value.statusCode === 10
+  return userData.value?.profile.profileId === 3200 && form.value.statusCode >= 7
 }
 
 const checkApprovalNonPoProc = () => {
@@ -1644,7 +1650,7 @@ watch(
       form.value.statusCode >= 7
     ) {
       try {
-        const response = await verificationApi.getPaymentStatus(form.value.invoiceUId)
+        const response = await getPaymentStatusApi()(form.value.invoiceUId)
         if (response?.result?.content) {
           const { header, detail } = response.result.content
 
@@ -1767,6 +1773,25 @@ watch(
   },
 )
 
+// Auto-navigate to Payment Status tab when statusCode is 8 (Planned), 9 (Partially Paid), or 10 (Paid)
+// This watch is needed because statusCode is set asynchronously after data is loaded
+const hasAutoNavigated = ref(false)
+watch(
+  () => form.value.statusCode,
+  (newStatusCode) => {
+    // Only auto-navigate once and if user is 3002 or 3200
+    if (
+      !hasAutoNavigated.value &&
+      (newStatusCode === 8 || newStatusCode === 9 || newStatusCode === 10) &&
+      (checkApprovalNonPo1() || checkShowPaymentForProfile3200())
+    ) {
+      activeTabDetail.value = 'paymentStatus'
+      hasAutoNavigated.value = true
+    }
+  },
+  { immediate: true },
+)
+
 onMounted(async () => {
   if (route.query.type === '1') {
     activeStep.value = 'Verification'
@@ -1802,7 +1827,7 @@ onMounted(async () => {
       // Load payment status data from backend API for both type 1 (Verification) and type 2 (Approval)
       if ((route.query.type === '1' || route.query.type === '2') && form.value.statusCode >= 7) {
         try {
-          const response = await verificationApi.getPaymentStatus(form.value.invoiceUId)
+          const response = await getPaymentStatusApi()(form.value.invoiceUId)
           if (response?.result?.content) {
             const { header, detail } = response.result.content
 
@@ -1908,6 +1933,15 @@ onMounted(async () => {
           console.error('Error loading payment status:', error)
         }
       }
+
+      // Auto-navigate to Payment Status tab for status 8 (Planned), 9 (Partially Paid), 10 (Paid)
+      if (
+        form.value.statusCode === 8 ||
+        form.value.statusCode === 9 ||
+        form.value.statusCode === 10
+      ) {
+        activeTabDetail.value = 'paymentStatus'
+      }
     })
   } else {
     await verificationApi.getInvoiceNonPoDetail(route.query.id?.toString() || '').then(async () => {
@@ -1916,7 +1950,7 @@ onMounted(async () => {
       // Load payment status data from backend API
       if (route.query.type === '2' && checkApprovalNonPo1() && form.value.statusCode >= 7) {
         try {
-          const response = await verificationApi.getPaymentStatus(form.value.invoiceUId)
+          const response = await getPaymentStatusApi()(form.value.invoiceUId)
           if (response?.result?.content) {
             const { header, detail } = response.result.content
 
@@ -1961,6 +1995,15 @@ onMounted(async () => {
         } catch (error) {
           console.error('Error loading payment status:', error)
         }
+      }
+
+      // Auto-navigate to Payment Status tab for status 8 (Planned), 9 (Partially Paid), 10 (Paid)
+      if (
+        form.value.statusCode === 8 ||
+        form.value.statusCode === 9 ||
+        form.value.statusCode === 10
+      ) {
+        activeTabDetail.value = 'paymentStatus'
       }
     })
   }
