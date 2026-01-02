@@ -42,6 +42,11 @@ export default [
         title: 'Invoice Analytic',
         to: 'invoiceAnalytic',
       },
+      {
+        id: 'taxAnalytic',
+        title: 'Tax Analytic',
+        to: 'taxAnalytic',
+      },
     ],
   },
   // {

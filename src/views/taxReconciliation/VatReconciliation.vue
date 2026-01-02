@@ -29,9 +29,9 @@
           <button class="btn btn-primary" @click="exportData()">
             <i class="ki-duotone ki-plus-circle"></i>
             VAT Credit Posting
-            <span v-if="selectedItems.length > 0" class="badge badge-sm badge-light-primary ms-2">
+            <!-- <span v-if="selectedItems.length > 0" class="badge badge-sm badge-light-primary ms-2">
               {{ selectedItems.length }}
-            </span>
+            </span> -->
           </button>
         </div>
       </div>
@@ -43,8 +43,9 @@
             <label class="form-label">Status FP</label>
             <select v-model="filterForm.statusFP" class="form-select">
               <option value="">All Status</option>
-              <option value="Valid">Valid</option>
-              <option value="Invalid">Invalid</option>
+              <option value="Approved">Approved</option>
+              <option value="Credited">Credited</option>
+              <option value="Rejected">Rejected</option>
             </select>
           </div>
           <div>
@@ -123,8 +124,9 @@
             <tr v-if="filteredDataList?.length === 0">
               <td colspan="13" class="text-center">No data found.</td>
             </tr>
+
             <tr v-for="(item, index) in list" :key="index">
-              <!-- Checkbox & Eye Icon Column -->
+              <!-- ACTION -->
               <td class="text-center">
                 <div class="flex items-center justify-center gap-3">
                   <input
@@ -136,32 +138,51 @@
                   <button
                     class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]"
                     @click="goDetail(item)"
-                    title="View Detail"
                   >
                     <i class="ki-filled ki-eye !text-lg"></i>
                   </button>
                 </div>
               </td>
-              <!-- Other Columns -->
+
+              <!-- Vendor Name -->
+              <td>{{ item.vendorName }}</td>
+
+              <!-- NPWP Vendor -->
               <td>{{ item.npwpVendor }}</td>
-              <td>{{ formatDate(item.tglInvoice) }}</td>
-              <td>{{ formatDate(item.tglFP) }}</td>
-              <td>{{ item.nsfp }}</td>
+
+              <!-- Tgl Faktur Pajak -->
+              <td>{{ formatDate(item.tglFakturPajak) }}</td>
+
+              <!-- No Faktur Pajak -->
+              <td>{{ item.noFakturPajak }}</td>
+
+              <!-- Amount -->
+              <td class="text-right">{{ formatCurrency(item.amount) }}</td>
+
+              <!-- DPP -->
               <td class="text-right">{{ formatCurrency(item.dpp) }}</td>
+
+              <!-- PPN -->
               <td class="text-right">{{ formatCurrency(item.ppn) }}</td>
+
+              <!-- Status FP -->
               <td class="text-center">
                 <span class="badge badge-outline" :class="getStatusFPBadgeClass(item.statusFP)">
                   {{ item.statusFP }}
                 </span>
               </td>
+
+              <!-- Status AP vs FP -->
               <td class="text-center">
                 <span
                   class="badge badge-outline"
-                  :class="getMatchStatusBadgeClass(item.matchAPvsFP)"
+                  :class="getMatchStatusBadgeClass(item.statusAPvsFP)"
                 >
-                  {{ item.matchAPvsFP }}
+                  {{ item.statusAPvsFP }}
                 </span>
               </td>
+
+              <!-- Credit Status -->
               <td class="text-center">
                 <span
                   class="badge badge-outline"
@@ -170,8 +191,12 @@
                   {{ item.creditStatus }}
                 </span>
               </td>
-              <td>{{ item.masaPajakKredit }}</td>
-              <td>{{ item.issue }}</td>
+
+              <!-- VAT Credit Expiry Date -->
+              <td>{{ formatDate(item.vatCreditExpiryDate) }}</td>
+
+              <!-- Remark -->
+              <td>{{ item.remark || '-' }}</td>
             </tr>
           </tbody>
         </table>
@@ -304,6 +329,66 @@
         </div>
       </div>
     </div>
+
+    <div
+      v-if="showVatCreditPostingModal"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      @click.self="closeVatCreditPostingModal"
+    >
+      <div class="bg-white rounded-xl shadow-2xl w-[450px]">
+        <!-- Modal Header -->
+        <div class="flex justify-between items-center px-6 py-4 border-b border-gray-200">
+          <h3 class="text-xl font-semibold text-gray-800">
+            Enter The Code For VAT Credit Posting
+            <span v-if="selectedItems.length > 1" class="text-sm text-gray-500">
+              ({{ selectedItems.length }} items selected)
+            </span>
+          </h3>
+          <button
+            @click="closeVatCreditPostingModal"
+            class="text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <i class="ki-filled ki-cross text-xl"></i>
+          </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="px-6 py-6">
+          <label class="form-label text-sm font-medium text-gray-700 mb-2"> Input Code </label>
+          <div class="relative">
+            <!-- Dropdown Panel -->
+            <div class="w-full mt-2 rounded-lg">
+              <!-- Search Box -->
+              <UiInput v-model="codeVatCreditPosting" placeholder="Input Code" />
+
+              <!-- Status Options -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="flex gap-3 justify-end px-6 py-4 bg-gray-50 rounded-b-xl">
+          <button class="btn btn-light px-6" @click="closeVatCreditPostingModal">Cancel</button>
+          <button
+            class="btn btn-primary px-6"
+            @click="saveVatCreditPosting"
+            :disabled="codeVatCreditPosting.length === 0"
+            :class="{ 'opacity-50 cursor-not-allowed': codeVatCreditPosting.length === 0 }"
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <UiModal v-model="showModalSuccess" size="sm">
+      <div class="text-center mb-6">
+        <ModalSuccessLogo class="mx-auto" />
+        <h3 class="text-center text-lg font-medium">Yeayyy</h3>
+        <p class="text-center text-base text-gray-600 mb-5">VAT credit posting successfully</p>
+        <button class="btn btn-primary px-6" @click="closeModalSuccessPosting">Close</button>
+      </div>
+    </UiModal>
   </div>
 </template>
 
@@ -316,23 +401,27 @@ import LPagination from '@/components/pagination/LPagination.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import momentLib from 'moment'
 import { cloneDeep } from 'lodash'
+import UiInput from '@/components/ui/atoms/input/UiInput.vue'
+import UiModal from '@/components/modal/UiModal.vue'
+import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
 
 // Expose moment to template
 const moment = momentLib
 const router = useRouter()
 
 interface VATReconciliationData {
+  vendorName: string
   npwpVendor: string
-  tglInvoice: string
-  tglFP: string
-  nsfp: string
+  tglFakturPajak: string
+  noFakturPajak: string
+  amount: number
   dpp: number
   ppn: number
   statusFP: string
-  matchAPvsFP: string
+  statusAPvsFP: string
   creditStatus: string
-  masaPajakKredit: string
-  issue: string
+  vatCreditExpiryDate: string
+  remark: string
 }
 
 interface FilterForm {
@@ -350,7 +439,7 @@ const routes = ref<routeTypes[]>([
 
 const search = ref<string>('')
 const currentPage = ref<number>(1)
-const pageSize = ref<number>(5)
+const pageSize = ref<number>(10)
 const list = ref<VATReconciliationData[]>([])
 const sortBy = ref<string>('')
 const sortColumnName = ref<string>('')
@@ -367,6 +456,8 @@ const filterForm = ref<FilterForm>({
 const selectedItems = ref<VATReconciliationData[]>([])
 
 // Modal state
+const showModalSuccess = ref<boolean>(false)
+const showVatCreditPostingModal = ref<boolean>(false)
 const showStatusModal = ref<boolean>(false)
 const selectedStatus = ref<string>('')
 const statusSearch = ref<string>('')
@@ -398,151 +489,136 @@ const isSomeSelected = computed(() => {
   return selectedItems.value.length > 0 && selectedItems.value.length < list.value.length
 })
 
+const codeVatCreditPosting = ref<string>('')
+
 const columns = ref<string[]>([
+  'Vendor Name',
   'NPWP Vendor',
-  'Tgl Invoice',
-  'Tgl FP',
-  'NSFP',
+  'Tgl Faktur Pajak',
+  'No. Faktur Pajak',
+  'Amount',
   'DPP',
   'PPN',
   'Status FP',
-  'Match AP vs FP',
+  'Status AP vs FP',
   'Credit Status',
-  'Masa Pajak Kredit',
-  'Issue',
+  'VAT Credit Expiry Date',
+  'Remark',
 ])
 
 // Sample data
 const dataList = ref<VATReconciliationData[]>([
   {
-    npwpVendor: '01.234.567.8-901.000',
-    tglInvoice: '2025-01-03',
-    tglFP: '2025-01-03',
-    nsfp: '010.001-25.00000001',
-    dpp: 10000000,
-    ppn: 1100000,
-    statusFP: 'Valid',
-    matchAPvsFP: 'Match',
-    creditStatus: 'Creditable',
-    masaPajakKredit: 'Januari 2025',
-    issue: '',
-  },
-  {
-    npwpVendor: '02.345.678.9-012.000',
-    tglInvoice: '2025-01-05',
-    tglFP: '2025-01-05',
-    nsfp: '010.001-25.00000002',
-    dpp: 15000000,
-    ppn: 1650000,
-    statusFP: 'Valid',
-    matchAPvsFP: 'Mismatch',
-    creditStatus: 'Hold',
-    masaPajakKredit: 'Januari 2025',
-    issue: 'DPP tidak sesuai',
-  },
-  {
-    npwpVendor: '-',
-    tglInvoice: '2025-01-07',
-    tglFP: '2025-01-07',
-    nsfp: '010.001-25.00000003',
-    dpp: 5000000,
+    vendorName: 'United Tractor TB',
+    npwpVendor: '111111111111110',
+    tglFakturPajak: '2025-09-01',
+    noFakturPajak: '40211111111101',
+    amount: 5000000,
+    dpp: 4583333,
     ppn: 550000,
-    statusFP: 'Valid',
-    matchAPvsFP: 'Match',
-    creditStatus: 'Not Creditable',
-    masaPajakKredit: 'Januari 2025',
-    issue: 'Vendor non-NPWP',
-  },
-  {
-    npwpVendor: '03.456.789.0-123.000',
-    tglInvoice: '2025-01-10',
-    tglFP: '2025-02-05',
-    nsfp: '010.001-25.00000004',
-    dpp: 20000000,
-    ppn: 2200000,
-    statusFP: 'Valid',
-    matchAPvsFP: 'Match',
+    statusFP: 'Approved',
+    statusAPvsFP: 'Match',
     creditStatus: 'Creditable',
-    masaPajakKredit: 'Februari 2025',
-    issue: 'FP diterima bulan berikut',
+    vatCreditExpiryDate: '2025-12-01',
+    remark: '',
   },
   {
-    npwpVendor: '04.567.890.1-234.000',
-    tglInvoice: '2025-01-12',
-    tglFP: '2025-01-12',
-    nsfp: '010.001-25.00000005',
-    dpp: 8000000,
-    ppn: 880000,
-    statusFP: 'Invalid',
-    matchAPvsFP: 'Mismatch',
-    creditStatus: 'Not Creditable',
-    masaPajakKredit: '-',
-    issue: 'QR Code tidak valid',
-  },
-  {
-    npwpVendor: '05.678.901.2-345.000',
-    tglInvoice: '2025-01-15',
-    tglFP: '2025-01-15',
-    nsfp: '010.001-25.00000006',
-    dpp: 12000000,
-    ppn: 1320000,
-    statusFP: 'Valid',
-    matchAPvsFP: 'Match',
-    creditStatus: 'Creditable',
-    masaPajakKredit: 'Januari 2025',
-    issue: '',
-  },
-  {
-    npwpVendor: '06.789.012.3-456.000',
-    tglInvoice: '2025-01-18',
-    tglFP: '2025-01-18',
-    nsfp: '010.001-25.00000007',
-    dpp: 25000000,
-    ppn: 2750000,
-    statusFP: 'Valid',
-    matchAPvsFP: 'Mismatch',
+    vendorName: 'Astra Otoparts Tbk',
+    npwpVendor: '222222222222220',
+    tglFakturPajak: '2025-09-03',
+    noFakturPajak: '40211111111102',
+    amount: 7500000,
+    dpp: 6875000,
+    ppn: 825000,
+    statusFP: 'Approved',
+    statusAPvsFP: 'Mismatch',
     creditStatus: 'Hold',
-    masaPajakKredit: 'Januari 2025',
-    issue: 'PPN tidak sesuai',
+    vatCreditExpiryDate: '2025-12-03',
+    remark: 'Amount mismatch',
   },
   {
-    npwpVendor: '07.890.123.4-567.000',
-    tglInvoice: '2025-01-20',
-    tglFP: '2025-01-20',
-    nsfp: '010.001-25.00000008',
-    dpp: 18000000,
-    ppn: 1980000,
-    statusFP: 'Valid',
-    matchAPvsFP: 'Match',
-    creditStatus: 'Creditable',
-    masaPajakKredit: 'Januari 2025',
-    issue: '',
-  },
-  {
-    npwpVendor: '-',
-    tglInvoice: '2025-01-22',
-    tglFP: '2025-01-22',
-    nsfp: '010.001-25.00000009',
-    dpp: 3000000,
+    vendorName: 'Indofood CBP',
+    npwpVendor: '333333333333330',
+    tglFakturPajak: '2025-09-05',
+    noFakturPajak: '40211111111103',
+    amount: 3000000,
+    dpp: 2750000,
     ppn: 330000,
-    statusFP: 'Valid',
-    matchAPvsFP: 'Match',
+    statusFP: 'Rejected',
+    statusAPvsFP: 'Mismatch',
     creditStatus: 'Not Creditable',
-    masaPajakKredit: 'Januari 2025',
-    issue: 'Vendor non-PKP',
+    vatCreditExpiryDate: '2025-12-05',
+    remark: 'Invalid FP',
   },
   {
-    npwpVendor: '08.901.234.5-678.000',
-    tglInvoice: '2025-01-25',
-    tglFP: '2025-01-25',
-    nsfp: '010.001-25.00000010',
-    dpp: 30000000,
-    ppn: 3300000,
-    statusFP: 'Valid',
-    matchAPvsFP: 'Match',
+    vendorName: 'Telkom Indonesia',
+    npwpVendor: '444444444444440',
+    tglFakturPajak: '2025-09-07',
+    noFakturPajak: '40211111111104',
+    amount: 12000000,
+    dpp: 11000000,
+    ppn: 1320000,
+    statusFP: 'Approved',
+    statusAPvsFP: 'Match',
     creditStatus: 'Creditable',
-    masaPajakKredit: 'Januari 2025',
-    issue: '',
+    vatCreditExpiryDate: '2025-12-07',
+    remark: '',
+  },
+  {
+    vendorName: 'PLN Persero',
+    npwpVendor: '555555555555550',
+    tglFakturPajak: '2025-09-09',
+    noFakturPajak: '40211111111105',
+    amount: 9500000,
+    dpp: 8727273,
+    ppn: 1047273,
+    statusFP: 'Credited',
+    statusAPvsFP: 'Match',
+    creditStatus: 'Credited',
+    vatCreditExpiryDate: '2025-12-09',
+    remark: 'Already credited',
+  },
+  {
+    vendorName: 'Pertamina Patra Niaga',
+    npwpVendor: '666666666666660',
+    tglFakturPajak: '2025-09-11',
+    noFakturPajak: '40211111111106',
+    amount: 20000000,
+    dpp: 18333333,
+    ppn: 2200000,
+    statusFP: 'Approved',
+    statusAPvsFP: 'Match',
+    creditStatus: 'Creditable',
+    vatCreditExpiryDate: '2025-12-11',
+    remark: '',
+  },
+  {
+    vendorName: 'Bank Mandiri',
+    npwpVendor: '777777777777770',
+    tglFakturPajak: '2025-09-13',
+    noFakturPajak: '40211111111107',
+    amount: 6500000,
+    dpp: 5963303,
+    ppn: 715697,
+    statusFP: 'Approved',
+    statusAPvsFP: 'Mismatch',
+    creditStatus: 'Hold',
+    vatCreditExpiryDate: '2025-12-13',
+    remark: 'PPN difference',
+  },
+  {
+    vendorName: 'BCA Finance',
+    npwpVendor: '888888888888880',
+    tglFakturPajak: '2025-09-15',
+    noFakturPajak: '40211111111108',
+    amount: 4000000,
+    dpp: 3669725,
+    ppn: 440275,
+    statusFP: 'Rejected',
+    statusAPvsFP: 'Mismatch',
+    creditStatus: 'Not Creditable',
+    vatCreditExpiryDate: '2025-12-15',
+    remark: 'FP not valid',
   },
 ])
 
@@ -566,7 +642,7 @@ const filteredDataList = computed(() => {
 
   // Apply match status filter
   if (filterForm.value.matchStatus) {
-    filtered = filtered.filter((item) => item.matchAPvsFP.includes(filterForm.value.matchStatus))
+    filtered = filtered.filter((item) => item.statusAPvsFP.includes(filterForm.value.matchStatus))
   }
 
   // Apply credit status filter
@@ -578,8 +654,9 @@ const filteredDataList = computed(() => {
 })
 
 const getStatusFPBadgeClass = (status: string) => {
-  if (status === 'Valid') return 'badge-success'
-  if (status === 'Invalid') return 'badge-danger'
+  if (status === 'Approved') return 'badge-success'
+  if (status === 'Credited') return 'badge-primary'
+  if (status === 'Rejected') return 'badge-danger'
   return 'badge-secondary'
 }
 
@@ -629,9 +706,23 @@ const goDetail = (data: VATReconciliationData) => {
   router.push({
     name: 'vatReconciliationDetail',
     params: {
-      id: data.nsfp,
+      id: data.noFakturPajak,
     },
   })
+}
+
+const saveVatCreditPosting = () => {
+  closeVatCreditPostingModal()
+  showModalSuccess.value = true
+}
+
+const closeVatCreditPostingModal = () => {
+  showVatCreditPostingModal.value = false
+  codeVatCreditPosting.value = ''
+}
+
+const closeModalSuccessPosting = () => {
+  showModalSuccess.value = false
 }
 
 const openStatusModal = () => {
@@ -685,7 +776,7 @@ const toggleSelectAll = () => {
 
 const toggleSelectItem = (item: VATReconciliationData) => {
   const index = selectedItems.value.findIndex(
-    (selected) => selected.nsfp === item.nsfp, // Using nsfp as unique identifier
+    (selected) => selected.noFakturPajak === item.noFakturPajak, // Using nsfp as unique identifier
   )
 
   if (index > -1) {
@@ -696,7 +787,7 @@ const toggleSelectItem = (item: VATReconciliationData) => {
 }
 
 const isItemSelected = (item: VATReconciliationData) => {
-  return selectedItems.value.some((selected) => selected.nsfp === item.nsfp)
+  return selectedItems.value.some((selected) => selected.noFakturPajak === item.noFakturPajak)
 }
 
 const goSearch = (event: KeyboardEvent) => {
@@ -726,6 +817,8 @@ const applyFilter = () => {
   }
 
   filteredPayload.value = payload
+
+  // 🔥 INI WAJIB
   currentPage.value = 1
   setList(filteredDataList.value)
 }
@@ -756,18 +849,19 @@ const deleteFilter = (key: string) => {
 }
 
 const sortColumn = (columnName: string | null) => {
-  const columnMap = {
+  const columnMap: Record<string, string> = {
+    'Vendor Name': 'vendorName',
     'NPWP Vendor': 'npwpVendor',
-    'Tgl Invoice': 'tglInvoice',
-    'Tgl FP': 'tglFP',
-    NSFP: 'nsfp',
+    'Tgl Faktur Pajak': 'tglFakturPajak',
+    'No. Faktur Pajak': 'noFakturPajak',
+    Amount: 'amount',
     DPP: 'dpp',
     PPN: 'ppn',
     'Status FP': 'statusFP',
-    'Match AP vs FP': 'matchAPvsFP',
+    'Status AP vs FP': 'statusAPvsFP',
     'Credit Status': 'creditStatus',
-    'Masa Pajak Kredit': 'masaPajakKredit',
-    Issue: 'issue',
+    'VAT Credit Expiry Date': 'vatCreditExpiryDate',
+    Remark: 'remark',
   } as { [key: string]: string }
 
   const roleSort = ['asc', 'desc', '']
@@ -823,14 +917,15 @@ const sortColumn = (columnName: string | null) => {
 }
 
 const exportData = () => {
+  showVatCreditPostingModal.value = true
   // Navigate to invoice add page with preview tab
-  router.push({
-    name: 'invoiceAdd',
-    query: {
-      tab: 'preview',
-      type: 'po-view',
-    },
-  })
+  // router.push({
+  //   name: 'invoiceAdd',
+  //   query: {
+  //     tab: 'preview',
+  //     type: 'po-view',
+  //   },
+  // })
 }
 
 onMounted(() => {
