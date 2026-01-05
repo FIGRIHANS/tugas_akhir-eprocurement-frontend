@@ -62,8 +62,11 @@ import { ref, inject, onMounted, watch } from 'vue'
 import type { formTypes } from '../../types/invoiceAddWrapper'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
+import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
+import moment from 'moment'
 
 const form = inject<formTypes>('form')
+const verificationApi = useInvoiceVerificationStore()
 
 const columns = [
   'No',
@@ -85,155 +88,101 @@ interface PaymentDetail {
   attachmentDocument?: string
 }
 
-interface SapPaymentData {
-  id: number
-  companyCode: string
-  documentNumber: number
-  sapInvoiceNo: string
-  fiscalYear: string
-  vendorName: string
-  invoiceAmount: number
-  paidAmount: number
-  openAmount: number
+interface PaymentDetailFromApi {
+  invoicePaymentDetailId: number
+  invoiceUId: string
+  paymentDate: string
+  amount: number
   paymentStatus: string
-  statusOutgoing: string
-  clearingDate: number
-  clearingDocumentNo: string
+  bankAccount: string
+  remarks: string
+  documentUrl: string
+  documentName: string
+  documentSize: number
 }
 
 const paymentDetails = ref<PaymentDetail[]>([])
-const sapPaymentData = ref<SapPaymentData[]>([])
 
-// Fetch SAP payment data from API
-const fetchSapPaymentData = async () => {
+const formatDate = (date: string | null) => {
+  if (!date) return '-'
+  return moment(date).format('DD/MM/YYYY')
+}
+
+const fetchPaymentDetails = async () => {
   try {
-    // Mock API response data (replace with real API call)
-    const mockApiResponse = {
-      title: 'Success',
-      statusCode: 200,
-      result: {
-        message: '',
-        isError: false,
-        content: [
-          {
-            id: 5,
-            companyCode: 'GNGR',
-            documentNumber: 4000000005,
-            sapInvoiceNo: '1900020005',
-            fiscalYear: '2025',
-            vendorName: 'ACARYA DATA ESA',
-            invoiceAmount: 999000,
-            paidAmount: 999000,
-            openAmount: 0,
-            paymentStatus: 'Paid',
-            statusOutgoing: 'Paid',
-            clearingDate: 20240711,
-            clearingDocumentNo: '1500021112',
-          },
-          {
-            id: 7,
-            companyCode: 'GNGR',
-            documentNumber: 1900020007,
-            sapInvoiceNo: '1900020007',
-            fiscalYear: '2025',
-            vendorName: 'ACARYA DATA ESA',
-            invoiceAmount: 500000,
-            paidAmount: 500000,
-            openAmount: 0,
-            paymentStatus: 'Paid',
-            statusOutgoing: 'Paid',
-            clearingDate: 20240715,
-            clearingDocumentNo: '1500021115',
-          },
-        ],
-      },
+    if (!form || !form.invoiceUId) {
+      console.log('No invoiceUId found, skipping payment details fetch')
+      return
     }
 
-    if (mockApiResponse.result.content && mockApiResponse.result.content.length > 0) {
-      sapPaymentData.value = mockApiResponse.result.content
+    console.log('Fetching payment details for invoiceUId:', form.invoiceUId)
+
+    const response = await verificationApi.getPaymentStatus(form.invoiceUId)
+
+    console.log('Payment status API response:', response)
+
+    if (response?.result?.content?.detail && Array.isArray(response.result.content.detail)) {
+      const detailData = response.result.content.detail as PaymentDetailFromApi[]
+
+      console.log('Payment details from API:', detailData)
+
+      paymentDetails.value = detailData.map((item, index) => ({
+        no: index + 1,
+        paymentDate: formatDate(item.paymentDate),
+        amount: item.amount?.toString() || '0',
+        status: item.paymentStatus || '-',
+        bankAccount: item.bankAccount || '-',
+        remarks: item.remarks || '-',
+        attachmentDocument: item.documentUrl || undefined,
+      }))
+
+      console.log('Mapped payment details:', paymentDetails.value)
+    } else {
+      console.log('No payment details in API response')
+      paymentDetails.value = []
     }
   } catch (error) {
-    console.error('Error fetching SAP payment data:', error)
-  }
-}
-
-const formatClearingDate = (clearingDate: number) => {
-  if (!clearingDate) return '-'
-  const dateStr = clearingDate.toString()
-  const year = dateStr.substring(0, 4)
-  const month = dateStr.substring(4, 6)
-  const day = dateStr.substring(6, 8)
-  return `${day}/${month}/${year}`
-}
-
-const setPaymentDetails = () => {
-  if (!form) {
+    console.error('Error fetching payment details:', error)
     paymentDetails.value = []
-    return
   }
+}
 
-  if (form.status === 10 && sapPaymentData.value.length > 0) {
-    paymentDetails.value = sapPaymentData.value.map((item, index) => ({
-      no: index + 1,
-      paymentDate: formatClearingDate(item.clearingDate),
-      amount: item.paidAmount?.toString() || '0',
-      status: item.statusOutgoing === 'Paid' ? 'Paid' : 'Plan',
-      bankAccount: 'BRI01 - 56464564',
-      remarks: `SAP Invoice: ${item.sapInvoiceNo || 'N/A'} - ${item.statusOutgoing}`,
-      attachmentDocument: item.statusOutgoing === 'Paid' ? 'SAP_Payment_Receipt.pdf' : undefined,
-    }))
+const downloadDocument = (documentUrl: string) => {
+  console.log('Downloading document:', documentUrl)
+
+  if (documentUrl && documentUrl.startsWith('http')) {
+    window.open(documentUrl, '_blank')
   } else {
-    paymentDetails.value = []
+    const link = document.createElement('a')
+    const sampleContent = `Sample document content`
+    const blob = new Blob([sampleContent], { type: 'text/plain' })
+    const url = window.URL.createObjectURL(blob)
+
+    link.href = url
+    link.download = documentUrl || 'document.txt'
+    link.style.display = 'none'
+
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+
+    window.URL.revokeObjectURL(url)
   }
 }
 
-const downloadDocument = (documentName: string) => {
-  console.log('Downloading document:', documentName)
-
-  // Create a temporary link element for download
-  const link = document.createElement('a')
-
-  // For demo purposes, we'll simulate download with a blob
-  // In real implementation, you would fetch the actual file from server
-  const sampleContent = `Sample document content for: ${documentName}`
-  const blob = new Blob([sampleContent], { type: 'text/plain' })
-  const url = window.URL.createObjectURL(blob)
-
-  link.href = url
-  link.download = documentName
-  link.style.display = 'none'
-
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-
-  // Clean up the URL object
-  window.URL.revokeObjectURL(url)
-
-  // Show success message
-  alert(`Document "${documentName}" downloaded successfully!`)
-}
-
+// Watch for form.invoiceUId changes and fetch payment details
 watch(
-  () => form,
-  () => {
-    setPaymentDetails()
+  () => form?.invoiceUId,
+  async (newInvoiceUId) => {
+    if (newInvoiceUId) {
+      await fetchPaymentDetails()
+    }
   },
-  { deep: true, immediate: true },
-)
-
-// Watch for SAP payment data changes
-watch(
-  () => sapPaymentData.value,
-  () => {
-    setPaymentDetails()
-  },
-  { deep: true },
+  { immediate: true },
 )
 
 onMounted(async () => {
-  await fetchSapPaymentData()
-  setPaymentDetails()
+  await fetchPaymentDetails()
 })
 </script>
 
