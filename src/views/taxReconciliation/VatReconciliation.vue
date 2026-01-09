@@ -346,7 +346,6 @@ const router = useRouter()
 interface VATReconciliationData {
   vendorName: string
   npwpVendor: string
-  vendorName: string
   tglInvoice: string // kept for potential backend compat, though not shown
   tglFP: string
   nsfp: string
@@ -392,8 +391,6 @@ const filterForm = ref<FilterForm>({
 const selectedItems = ref<VATReconciliationData[]>([])
 
 // Modal state
-const showModalSuccess = ref<boolean>(false)
-const showVatCreditPostingModal = ref<boolean>(false)
 const showStatusModal = ref<boolean>(false)
 const selectedStatus = ref<string>('')
 const statusSearch = ref<string>('')
@@ -432,8 +429,6 @@ const isSomeSelected = computed(() => {
   return selectedItems.value.length > 0 && selectedItems.value.length < list.value.length
 })
 
-const codeVatCreditPosting = ref<string>('')
-
 const columns = ref<string[]>([
   'Vendor Name',
   'NPWP Vendor',
@@ -461,7 +456,7 @@ const dataList = ref<VATReconciliationData[]>([
     dpp: 4583333.33,
     ppn: 550000,
     statusFP: 'Approved',
-    matchAPvsFP: 'Match',
+    statusAPvsFP: 'Match',
     creditStatus: 'Creditable',
     vatCreditExpiryDate: '26/12/2025',
     remark: '',
@@ -476,7 +471,7 @@ const dataList = ref<VATReconciliationData[]>([
     dpp: 4583333.33,
     ppn: 550000,
     statusFP: 'Credited',
-    matchAPvsFP: 'Match',
+    statusAPvsFP: 'Match',
     creditStatus: 'Credited',
     vatCreditExpiryDate: '26/12/2025',
     remark: '',
@@ -567,23 +562,9 @@ const goDetail = (data: VATReconciliationData) => {
   router.push({
     name: 'vatReconciliationDetail',
     params: {
-      id: data.noFakturPajak,
+      id: data.nsfp,
     },
   })
-}
-
-const saveVatCreditPosting = () => {
-  closeVatCreditPostingModal()
-  showModalSuccess.value = true
-}
-
-const closeVatCreditPostingModal = () => {
-  showVatCreditPostingModal.value = false
-  codeVatCreditPosting.value = ''
-}
-
-const closeModalSuccessPosting = () => {
-  showModalSuccess.value = false
 }
 
 const openStatusModal = () => {
