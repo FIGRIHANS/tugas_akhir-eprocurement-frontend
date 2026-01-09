@@ -121,7 +121,7 @@
           </thead>
           <tbody>
             <tr v-if="filteredDataList?.length === 0">
-              <td colspan="13" class="text-center">No data found.</td>
+              <td colspan="14" class="text-center">No data found.</td>
             </tr>
             <tr v-for="(item, index) in list" :key="index">
               <!-- Checkbox & Eye Icon Column -->
@@ -143,10 +143,11 @@
                 </div>
               </td>
               <!-- Other Columns -->
+              <td>{{ item.vendorName }}</td>
               <td>{{ item.npwpVendor }}</td>
-              <td>{{ formatDate(item.tglInvoice) }}</td>
               <td>{{ formatDate(item.tglFP) }}</td>
               <td>{{ item.nsfp }}</td>
+              <td class="text-right">{{ formatCurrency(item.amount) }}</td>
               <td class="text-right">{{ formatCurrency(item.dpp) }}</td>
               <td class="text-right">{{ formatCurrency(item.ppn) }}</td>
               <td class="text-center">
@@ -170,8 +171,8 @@
                   {{ item.creditStatus }}
                 </span>
               </td>
-              <td>{{ item.masaPajakKredit }}</td>
-              <td>{{ item.issue }}</td>
+              <td>{{ item.vatCreditExpiryDate }}</td>
+              <td>{{ item.remark }}</td>
             </tr>
           </tbody>
         </table>
@@ -304,6 +305,16 @@
         </div>
       </div>
     </div>
+
+    <!-- Authentication Required Modal -->
+    <AuthenticationModal :show="showAuthModal" @close="closeAuthModal" @verify="handleAuthVerify" />
+
+    <!-- Successfully Credited Modal -->
+    <SuccessCreditedModal
+      :show="showSuccessModal"
+      :fpNumber="successFpNumber"
+      @close="closeSuccessModal"
+    />
   </div>
 </template>
 
@@ -316,6 +327,8 @@ import LPagination from '@/components/pagination/LPagination.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import momentLib from 'moment'
 import { cloneDeep } from 'lodash'
+import AuthenticationModal from './VatReconciliation/AuthenticationModal.vue'
+import SuccessCreditedModal from './VatReconciliation/SuccessCreditedModal.vue'
 
 // Expose moment to template
 const moment = momentLib
@@ -323,16 +336,18 @@ const router = useRouter()
 
 interface VATReconciliationData {
   npwpVendor: string
-  tglInvoice: string
+  vendorName: string
+  tglInvoice: string // kept for potential backend compat, though not shown
   tglFP: string
   nsfp: string
+  amount: number
   dpp: number
   ppn: number
   statusFP: string
   matchAPvsFP: string
   creditStatus: string
-  masaPajakKredit: string
-  issue: string
+  vatCreditExpiryDate: string
+  remark: string
 }
 
 interface FilterForm {
@@ -373,6 +388,13 @@ const statusSearch = ref<string>('')
 const showStatusDropdown = ref<boolean>(false)
 const currentSelectedItem = ref<VATReconciliationData | null>(null)
 
+// Authentication Modal state
+const showAuthModal = ref<boolean>(false)
+
+// Success Modal state
+const showSuccessModal = ref<boolean>(false)
+const successFpNumber = ref<string>('')
+
 // Status options
 const statusOptions = ref<string[]>([
   'WAITING_FOR_AMENDMENT',
@@ -399,150 +421,51 @@ const isSomeSelected = computed(() => {
 })
 
 const columns = ref<string[]>([
+  'Vendor Name',
   'NPWP Vendor',
-  'Tgl Invoice',
-  'Tgl FP',
-  'NSFP',
+  'Tgl Faktur Pajak',
+  'No. Faktur Pajak',
+  'Amount',
   'DPP',
   'PPN',
   'Status FP',
-  'Match AP vs FP',
+  'Status AP vs FP',
   'Credit Status',
-  'Masa Pajak Kredit',
-  'Issue',
+  'VAT Credit Expiry Date',
+  'Remark',
 ])
 
 // Sample data
 const dataList = ref<VATReconciliationData[]>([
   {
-    npwpVendor: '01.234.567.8-901.000',
+    npwpVendor: '111111111111110',
+    vendorName: 'United Tractor TBK',
     tglInvoice: '2025-01-03',
-    tglFP: '2025-01-03',
-    nsfp: '010.001-25.00000001',
-    dpp: 10000000,
-    ppn: 1100000,
-    statusFP: 'Valid',
-    matchAPvsFP: 'Match',
-    creditStatus: 'Creditable',
-    masaPajakKredit: 'Januari 2025',
-    issue: '',
-  },
-  {
-    npwpVendor: '02.345.678.9-012.000',
-    tglInvoice: '2025-01-05',
-    tglFP: '2025-01-05',
-    nsfp: '010.001-25.00000002',
-    dpp: 15000000,
-    ppn: 1650000,
-    statusFP: 'Valid',
-    matchAPvsFP: 'Mismatch',
-    creditStatus: 'Hold',
-    masaPajakKredit: 'Januari 2025',
-    issue: 'DPP tidak sesuai',
-  },
-  {
-    npwpVendor: '-',
-    tglInvoice: '2025-01-07',
-    tglFP: '2025-01-07',
-    nsfp: '010.001-25.00000003',
-    dpp: 5000000,
+    tglFP: '2025-09-26',
+    nsfp: '402111111111111',
+    amount: 5000000,
+    dpp: 4583333.33,
     ppn: 550000,
-    statusFP: 'Valid',
-    matchAPvsFP: 'Match',
-    creditStatus: 'Not Creditable',
-    masaPajakKredit: 'Januari 2025',
-    issue: 'Vendor non-NPWP',
-  },
-  {
-    npwpVendor: '03.456.789.0-123.000',
-    tglInvoice: '2025-01-10',
-    tglFP: '2025-02-05',
-    nsfp: '010.001-25.00000004',
-    dpp: 20000000,
-    ppn: 2200000,
-    statusFP: 'Valid',
+    statusFP: 'Approved',
     matchAPvsFP: 'Match',
     creditStatus: 'Creditable',
-    masaPajakKredit: 'Februari 2025',
-    issue: 'FP diterima bulan berikut',
+    vatCreditExpiryDate: '26/12/2025',
+    remark: '',
   },
   {
-    npwpVendor: '04.567.890.1-234.000',
-    tglInvoice: '2025-01-12',
-    tglFP: '2025-01-12',
-    nsfp: '010.001-25.00000005',
-    dpp: 8000000,
-    ppn: 880000,
-    statusFP: 'Invalid',
-    matchAPvsFP: 'Mismatch',
-    creditStatus: 'Not Creditable',
-    masaPajakKredit: '-',
-    issue: 'QR Code tidak valid',
-  },
-  {
-    npwpVendor: '05.678.901.2-345.000',
-    tglInvoice: '2025-01-15',
-    tglFP: '2025-01-15',
-    nsfp: '010.001-25.00000006',
-    dpp: 12000000,
-    ppn: 1320000,
-    statusFP: 'Valid',
+    npwpVendor: '111111111111110',
+    vendorName: 'United Tractor TBK',
+    tglInvoice: '2025-01-07',
+    tglFP: '2025-09-26',
+    nsfp: '402111111111112',
+    amount: 5000000,
+    dpp: 4583333.33,
+    ppn: 550000,
+    statusFP: 'Credited',
     matchAPvsFP: 'Match',
-    creditStatus: 'Creditable',
-    masaPajakKredit: 'Januari 2025',
-    issue: '',
-  },
-  {
-    npwpVendor: '06.789.012.3-456.000',
-    tglInvoice: '2025-01-18',
-    tglFP: '2025-01-18',
-    nsfp: '010.001-25.00000007',
-    dpp: 25000000,
-    ppn: 2750000,
-    statusFP: 'Valid',
-    matchAPvsFP: 'Mismatch',
-    creditStatus: 'Hold',
-    masaPajakKredit: 'Januari 2025',
-    issue: 'PPN tidak sesuai',
-  },
-  {
-    npwpVendor: '07.890.123.4-567.000',
-    tglInvoice: '2025-01-20',
-    tglFP: '2025-01-20',
-    nsfp: '010.001-25.00000008',
-    dpp: 18000000,
-    ppn: 1980000,
-    statusFP: 'Valid',
-    matchAPvsFP: 'Match',
-    creditStatus: 'Creditable',
-    masaPajakKredit: 'Januari 2025',
-    issue: '',
-  },
-  {
-    npwpVendor: '-',
-    tglInvoice: '2025-01-22',
-    tglFP: '2025-01-22',
-    nsfp: '010.001-25.00000009',
-    dpp: 3000000,
-    ppn: 330000,
-    statusFP: 'Valid',
-    matchAPvsFP: 'Match',
-    creditStatus: 'Not Creditable',
-    masaPajakKredit: 'Januari 2025',
-    issue: 'Vendor non-PKP',
-  },
-  {
-    npwpVendor: '08.901.234.5-678.000',
-    tglInvoice: '2025-01-25',
-    tglFP: '2025-01-25',
-    nsfp: '010.001-25.00000010',
-    dpp: 30000000,
-    ppn: 3300000,
-    statusFP: 'Valid',
-    matchAPvsFP: 'Match',
-    creditStatus: 'Creditable',
-    masaPajakKredit: 'Januari 2025',
-    issue: '',
+    creditStatus: 'Credited',
+    vatCreditExpiryDate: '26/12/2025',
+    remark: '',
   },
 ])
 
@@ -578,8 +501,9 @@ const filteredDataList = computed(() => {
 })
 
 const getStatusFPBadgeClass = (status: string) => {
-  if (status === 'Valid') return 'badge-success'
+  if (status === 'Approved' || status === 'Valid') return 'badge-success'
   if (status === 'Invalid') return 'badge-danger'
+  if (status === 'Credited') return 'badge-primary'
   return 'badge-secondary'
 }
 
@@ -590,7 +514,7 @@ const getMatchStatusBadgeClass = (status: string) => {
 }
 
 const getCreditStatusBadgeClass = (status: string) => {
-  if (status === 'Creditable') return 'badge-success'
+  if (status === 'Creditable' || status === 'Credited') return 'badge-success'
   if (status === 'Not Creditable') return 'badge-danger'
   if (status === 'Hold') return 'badge-secondary'
   return 'badge-secondary'
@@ -604,7 +528,7 @@ const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
     currency: 'IDR',
-    minimumFractionDigits: 0,
+    minimumFractionDigits: 2,
   }).format(amount)
 }
 
@@ -685,7 +609,7 @@ const toggleSelectAll = () => {
 
 const toggleSelectItem = (item: VATReconciliationData) => {
   const index = selectedItems.value.findIndex(
-    (selected) => selected.nsfp === item.nsfp, // Using nsfp as unique identifier
+    (selected) => selected.nsfp === item.nsfp && selected.tglInvoice === item.tglInvoice,
   )
 
   if (index > -1) {
@@ -696,7 +620,9 @@ const toggleSelectItem = (item: VATReconciliationData) => {
 }
 
 const isItemSelected = (item: VATReconciliationData) => {
-  return selectedItems.value.some((selected) => selected.nsfp === item.nsfp)
+  return selectedItems.value.some(
+    (selected) => selected.nsfp === item.nsfp && selected.tglInvoice === item.tglInvoice,
+  )
 }
 
 const goSearch = (event: KeyboardEvent) => {
@@ -757,17 +683,19 @@ const deleteFilter = (key: string) => {
 
 const sortColumn = (columnName: string | null) => {
   const columnMap = {
+    'Vendor Name': 'vendorName',
     'NPWP Vendor': 'npwpVendor',
     'Tgl Invoice': 'tglInvoice',
-    'Tgl FP': 'tglFP',
-    NSFP: 'nsfp',
+    'Tgl Faktur Pajak': 'tglFP',
+    'No. Faktur Pajak': 'nsfp',
+    Amount: 'amount',
     DPP: 'dpp',
     PPN: 'ppn',
     'Status FP': 'statusFP',
-    'Match AP vs FP': 'matchAPvsFP',
+    'Status AP vs FP': 'matchAPvsFP',
     'Credit Status': 'creditStatus',
-    'Masa Pajak Kredit': 'masaPajakKredit',
-    Issue: 'issue',
+    'VAT Credit Expiry Date': 'vatCreditExpiryDate',
+    Remark: 'remark',
   } as { [key: string]: string }
 
   const roleSort = ['asc', 'desc', '']
@@ -787,20 +715,38 @@ const sortColumn = (columnName: string | null) => {
 
   const name = columnName || sortColumnName.value
 
-  if (name === 'Tgl Invoice' || name === 'Tgl FP') {
+  if (name === 'Tgl Invoice' || name === 'Tgl Faktur Pajak' || name === 'VAT Credit Expiry Date') {
     result = listData.sort((a, b) => {
-      const convA = a[columnMap[name]] ? new Date(a[columnMap[name]]).getTime() : 0
-      const convB = b[columnMap[name]] ? new Date(b[columnMap[name]]).getTime() : 0
+      // Handle potential date format DD/MM/YYYY or YYYY-MM-DD
+      const parseDate = (dateStr: string) => {
+        if (!dateStr || dateStr === '-') return 0
+        if (dateStr.includes('/')) {
+          const [d, m, y] = dateStr.split('/')
+          return new Date(`${y}-${m}-${d}`).getTime()
+        }
+        return new Date(dateStr).getTime()
+      }
+
+      const valA = a[columnMap[name] as keyof VATReconciliationData]
+      const valB = b[columnMap[name] as keyof VATReconciliationData]
+
+      const convA = parseDate(String(valA))
+      const convB = parseDate(String(valB))
+
       if (sortBy.value === 'asc') {
         return convA - convB
       } else {
         return convB - convA
       }
     })
-  } else if (name === 'DPP' || name === 'PPN') {
+  } else if (name === 'DPP' || name === 'PPN' || name === 'Amount') {
     result = listData.sort((a, b) => {
-      const convA = a[columnMap[name]] || 0
-      const convB = b[columnMap[name]] || 0
+      const valA = a[columnMap[name] as keyof VATReconciliationData]
+      const valB = b[columnMap[name] as keyof VATReconciliationData]
+
+      const convA = Number(valA) || 0
+      const convB = Number(valB) || 0
+
       if (sortBy.value === 'asc') {
         return convA - convB
       } else {
@@ -809,8 +755,12 @@ const sortColumn = (columnName: string | null) => {
     })
   } else {
     result = listData.sort((a, b) => {
-      const convA = a[columnMap[name]] ? String(a[columnMap[name]]) : ''
-      const convB = b[columnMap[name]] ? String(b[columnMap[name]]) : ''
+      const valA = a[columnMap[name] as keyof VATReconciliationData]
+      const valB = b[columnMap[name] as keyof VATReconciliationData]
+
+      const convA = valA ? String(valA) : ''
+      const convB = valB ? String(valB) : ''
+
       if (sortBy.value === 'asc') {
         return convA.localeCompare(convB)
       } else {
@@ -823,14 +773,33 @@ const sortColumn = (columnName: string | null) => {
 }
 
 const exportData = () => {
-  // Navigate to invoice add page with preview tab
-  router.push({
-    name: 'invoiceAdd',
-    query: {
-      tab: 'preview',
-      type: 'po-view',
-    },
-  })
+  if (selectedItems.value.length === 0) {
+    alert('Please select at least one item to proceed with VAT Credit Posting.')
+    return
+  }
+  // Open authentication modal
+  showAuthModal.value = true
+}
+
+// Authentication Modal handlers
+const closeAuthModal = () => {
+  showAuthModal.value = false
+}
+
+const handleAuthVerify = (code: string) => {
+  console.log('Verification code received:', code)
+  // TODO: Add API call to verify the code here
+  // For now, show success modal after verification
+  closeAuthModal()
+  successFpNumber.value = selectedItems.value[0]?.nsfp || 'FP293429993'
+  showSuccessModal.value = true
+}
+
+// Success Modal handlers
+const closeSuccessModal = () => {
+  showSuccessModal.value = false
+  successFpNumber.value = ''
+  selectedItems.value = [] // Clear selection after success
 }
 
 onMounted(() => {
