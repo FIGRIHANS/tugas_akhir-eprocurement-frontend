@@ -298,6 +298,12 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
     return response.data
   }
 
+  const syncInvoicFromFtp = async () => {
+    const response: ApiResponse<void> = await invoiceApi.get(`/invoice/post-invoice-ftp`)
+
+    return response.data
+  }
+
   return {
     submissionStatus,
     documentTypeList,
@@ -325,5 +331,6 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
     getCasNo,
     postCheckBudget,
     syncInvoicFromEmail,
+    syncInvoicFromFtp,
   }
 })

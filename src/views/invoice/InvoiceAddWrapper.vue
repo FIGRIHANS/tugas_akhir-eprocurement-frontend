@@ -23,7 +23,7 @@
       <Transition mode="out-in">
         <component :is="contentComponent" />
       </Transition>
-      <!-- Payment Status tab: Back button and Update Payment Status button -->
+
       <div
         v-if="tabNow === 'paymentStatus'"
         class="flex justify-between items-center mt-[24px] gap-3"
@@ -32,9 +32,9 @@
           <i class="ki-filled ki-arrow-left"></i>
           Back
         </button>
-        <!-- Show Update Payment Status button only for profileId 3200 -->
+
         <button
-          v-if="userData?.profile?.profileId === 3200"
+          v-if="String(userData?.profile?.profileId) === '3002'"
           class="btn btn-primary"
           @click="updatePaymentStatus"
         >
@@ -360,12 +360,9 @@ const canClickPreviewTab = computed(() => {
 })
 
 const canClickPaymentStatusTab = computed(() => {
-  // Show Payment Status tab when invoice status is >= 7
-  // Status 7 = Sent to SAP, 8 = Planned, 9 = Partially Paid, 10 = Paid
   return form.status === 7 || form.status === 8 || form.status === 9 || form.status === 10
 })
 
-// Load invoice detail data for payment status (specifically for profileId 3200)
 const loadInvoiceDetailForPaymentStatus = async () => {
   try {
     if (!route.query.invoice) {
@@ -376,32 +373,27 @@ const loadInvoiceDetailForPaymentStatus = async () => {
     const invoiceId = route.query.invoice.toString()
     console.log('Loading invoice detail for payment status, invoiceId:', invoiceId)
 
-    // Use the existing getInvoiceDetail from verification API to load full invoice data
     const response = await verificationApi.getInvoiceDetail(invoiceId)
 
     if (response && !response.isError && response.content) {
       const data = response.content
       console.log('Invoice detail loaded for payment status:', data)
 
-      // Update form with the loaded data to ensure payment status components have access
       if (data.header) {
         form.status = data.header.statusCode
         form.invoiceUId = data.header.invoiceUId
         form.totalNetAmount = data.calculation?.totalNetAmount || 0
         form.currency = data.header.currCode
 
-        // Map company information from API response
         form.companyCode = data.header.companyCode
         form.companyName = data.header.companyName
         form.invoiceDate = data.header.invoiceDate
 
-        // Update vendor information
         if (data.vendor) {
           form.vendorId = data.vendor.vendorId
           form.vendorName = data.vendor.vendorName
         }
 
-        // Update payment information
         if (data.payment) {
           form.bankKeyId = data.payment.bankKey
           form.bankNameId = data.payment.bankName
@@ -665,9 +657,12 @@ const goBack = () => {
   }
 }
 
-// Update payment status function for profileId 3200
+// Update payment status function (allowed only for profileId 3002)
 const updatePaymentStatus = () => {
-  console.log('Update payment status clicked for profileId 3200')
+  const profileId = String(userData.value?.profile?.profileId ?? '')
+  if (profileId !== '3002') return
+
+  console.log('Update payment status clicked for profileId 3002')
   const modalElement = document.querySelector('#update_payment_status_modal')
   if (modalElement) {
     const modal = KTModal.getInstance(modalElement as HTMLElement)
@@ -1803,38 +1798,15 @@ const setStepperStatus = () => {
 
   const statusCode = typeof rawStatusCode === 'number' ? rawStatusCode : -1
 
-  // Map status codes to stepper labels
-  // Note: StepperStatus component matches the SECOND word of the label
-  // Labels: 'Invoice Submission', 'Invoice Verification', 'Invoice Approval', 'Invoice Posting', 'Payment Status'
-  // So we use: 'Submission', 'Verification', 'Approval', 'Posting', 'Status'
-
-  // Status codes (header):
-  // 0 = Draft
-  // 1 = Waiting to Verify / Submitted
-  // 2 = Verified
-  // 3 = Waiting for Approval
-  // 4 = Approved
-  // 5 = Rejected
-  // 6 = Posted to SAP
-  // 7 = Sent to SAP (Payment Status available)
-  // 8 = Planned (Payment Status detail)
-  // 9 = Partially Paid (Payment Status detail)
-  // 10 = Paid (Payment Status detail)
-
   if (statusCode === 0 || statusCode === 1 || statusCode === 5) {
-    // Draft, Submitted, Rejected → masih di tahap submission
     stepperStatus.value = 'Submission'
   } else if (statusCode === 2) {
-    // Verified
     stepperStatus.value = 'Verification'
   } else if (statusCode === 3 || statusCode === 4) {
-    // Waiting for Approval / Approved
     stepperStatus.value = 'Approval'
   } else if (statusCode === 6) {
-    // Posted to SAP
     stepperStatus.value = 'Posting'
   } else if (statusCode >= 7) {
-    // Sent to SAP dan seluruh status Payment Status (7,8,9,10,...) → step terakhir
     stepperStatus.value = 'Status'
   } else {
     // Default fallback
@@ -1843,9 +1815,6 @@ const setStepperStatus = () => {
 }
 
 const updateStepperByTab = () => {
-  // Update stepper based on current tab when creating/editing invoice
-  // This makes the stepper reflect the current workflow step as user navigates
-  // Note: Use second word of step labels to match StepperStatus component logic
   if (tabNow.value === 'data') {
     stepperStatus.value = 'Submission'
   } else if (tabNow.value === 'information') {
@@ -1855,7 +1824,7 @@ const updateStepperByTab = () => {
   } else if (tabNow.value === 'preview') {
     stepperStatus.value = 'Approval'
   } else if (tabNow.value === 'paymentStatus') {
-    stepperStatus.value = 'Status' // Matches 'Payment Status'
+    stepperStatus.value = 'Status'
   }
 }
 
@@ -1892,7 +1861,6 @@ onMounted(() => {
       setStepperStatus()
       setDataNonPo()
 
-      // If invoice status is 7 (Sent to SAP), 8 (Planned), 9 (Partially Paid), or 10 (Paid), navigate to Payment Status tab
       if (form.status === 7 || form.status === 8 || form.status === 9 || form.status === 10) {
         tabNow.value = 'paymentStatus'
       }
@@ -1912,7 +1880,6 @@ onMounted(() => {
       setStepperStatus()
       setData()
 
-      // If invoice status is 7 (Sent to SAP), 8 (Planned), 9 (Partially Paid), or 10 (Paid), navigate to Payment Status tab
       if (form.status === 7 || form.status === 8 || form.status === 9 || form.status === 10) {
         tabNow.value = 'paymentStatus'
       }
@@ -1924,22 +1891,18 @@ const checkPreview = () => {
   return route.query.type === 'po-view' || route.query.type === 'non-po-view'
 }
 
-// Watch for tab changes to update stepper
 watch(
   () => tabNow.value,
   async () => {
     const isViewMode = checkPreview()
 
-    // For create/edit mode: update stepper based on current tab
     if (!isViewMode) {
       updateStepperByTab()
     }
-    // For view mode: stepper will be updated by form.status watcher below
 
-    // Load invoice detail for payment status when profileId 3200 accesses payment status tab
     if (
       tabNow.value === 'paymentStatus' &&
-      userData.value?.profile.profileId === 3200 &&
+      String(userData.value?.profile.profileId) === '3200' &&
       form.status === 10
     ) {
       await loadInvoiceDetailForPaymentStatus()
@@ -1948,14 +1911,11 @@ watch(
   { immediate: true },
 )
 
-// Watch for status changes to update stepper (for viewing existing invoices)
 watch(
   () => form.status,
   (newStatus) => {
     const isViewMode = checkPreview()
 
-    // Only update stepper from status when in view mode
-    // This ensures stepper shows correct progress for invoices with status 1-7
     if (isViewMode && newStatus !== undefined && newStatus >= 0) {
       setStepperStatus()
     }
@@ -1990,9 +1950,6 @@ watch(
 provide('form', form)
 provide('userData', userData)
 
-// provide('qrData', qrData)
-
-// provide('ocrData', ocrData)
 </script>
 
 <style lang="scss" scoped>
