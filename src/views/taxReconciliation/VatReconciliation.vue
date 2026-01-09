@@ -29,9 +29,9 @@
           <button class="btn btn-primary" @click="exportData()">
             <i class="ki-duotone ki-plus-circle"></i>
             VAT Credit Posting
-            <span v-if="selectedItems.length > 0" class="badge badge-sm badge-light-primary ms-2">
+            <!-- <span v-if="selectedItems.length > 0" class="badge badge-sm badge-light-primary ms-2">
               {{ selectedItems.length }}
-            </span>
+            </span> -->
           </button>
         </div>
       </div>
@@ -43,8 +43,9 @@
             <label class="form-label">Status FP</label>
             <select v-model="filterForm.statusFP" class="form-select">
               <option value="">All Status</option>
-              <option value="Valid">Valid</option>
-              <option value="Invalid">Invalid</option>
+              <option value="Approved">Approved</option>
+              <option value="Credited">Credited</option>
+              <option value="Rejected">Rejected</option>
             </select>
           </div>
           <div>
@@ -123,8 +124,9 @@
             <tr v-if="filteredDataList?.length === 0">
               <td colspan="14" class="text-center">No data found.</td>
             </tr>
+
             <tr v-for="(item, index) in list" :key="index">
-              <!-- Checkbox & Eye Icon Column -->
+              <!-- ACTION -->
               <td class="text-center">
                 <div class="flex items-center justify-center gap-3">
                   <input
@@ -136,7 +138,6 @@
                   <button
                     class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]"
                     @click="goDetail(item)"
-                    title="View Detail"
                   >
                     <i class="ki-filled ki-eye !text-lg"></i>
                   </button>
@@ -149,20 +150,28 @@
               <td>{{ item.nsfp }}</td>
               <td class="text-right">{{ formatCurrency(item.amount) }}</td>
               <td class="text-right">{{ formatCurrency(item.dpp) }}</td>
+
+              <!-- PPN -->
               <td class="text-right">{{ formatCurrency(item.ppn) }}</td>
+
+              <!-- Status FP -->
               <td class="text-center">
                 <span class="badge badge-outline" :class="getStatusFPBadgeClass(item.statusFP)">
                   {{ item.statusFP }}
                 </span>
               </td>
+
+              <!-- Status AP vs FP -->
               <td class="text-center">
                 <span
                   class="badge badge-outline"
-                  :class="getMatchStatusBadgeClass(item.matchAPvsFP)"
+                  :class="getMatchStatusBadgeClass(item.statusAPvsFP)"
                 >
-                  {{ item.matchAPvsFP }}
+                  {{ item.statusAPvsFP }}
                 </span>
               </td>
+
+              <!-- Credit Status -->
               <td class="text-center">
                 <span
                   class="badge badge-outline"
@@ -335,6 +344,7 @@ const moment = momentLib
 const router = useRouter()
 
 interface VATReconciliationData {
+  vendorName: string
   npwpVendor: string
   vendorName: string
   tglInvoice: string // kept for potential backend compat, though not shown
@@ -344,7 +354,7 @@ interface VATReconciliationData {
   dpp: number
   ppn: number
   statusFP: string
-  matchAPvsFP: string
+  statusAPvsFP: string
   creditStatus: string
   vatCreditExpiryDate: string
   remark: string
@@ -365,7 +375,7 @@ const routes = ref<routeTypes[]>([
 
 const search = ref<string>('')
 const currentPage = ref<number>(1)
-const pageSize = ref<number>(5)
+const pageSize = ref<number>(10)
 const list = ref<VATReconciliationData[]>([])
 const sortBy = ref<string>('')
 const sortColumnName = ref<string>('')
@@ -382,6 +392,8 @@ const filterForm = ref<FilterForm>({
 const selectedItems = ref<VATReconciliationData[]>([])
 
 // Modal state
+const showModalSuccess = ref<boolean>(false)
+const showVatCreditPostingModal = ref<boolean>(false)
 const showStatusModal = ref<boolean>(false)
 const selectedStatus = ref<string>('')
 const statusSearch = ref<string>('')
@@ -419,6 +431,8 @@ const isAllSelected = computed(() => {
 const isSomeSelected = computed(() => {
   return selectedItems.value.length > 0 && selectedItems.value.length < list.value.length
 })
+
+const codeVatCreditPosting = ref<string>('')
 
 const columns = ref<string[]>([
   'Vendor Name',
@@ -489,7 +503,7 @@ const filteredDataList = computed(() => {
 
   // Apply match status filter
   if (filterForm.value.matchStatus) {
-    filtered = filtered.filter((item) => item.matchAPvsFP.includes(filterForm.value.matchStatus))
+    filtered = filtered.filter((item) => item.statusAPvsFP.includes(filterForm.value.matchStatus))
   }
 
   // Apply credit status filter
@@ -553,9 +567,23 @@ const goDetail = (data: VATReconciliationData) => {
   router.push({
     name: 'vatReconciliationDetail',
     params: {
-      id: data.nsfp,
+      id: data.noFakturPajak,
     },
   })
+}
+
+const saveVatCreditPosting = () => {
+  closeVatCreditPostingModal()
+  showModalSuccess.value = true
+}
+
+const closeVatCreditPostingModal = () => {
+  showVatCreditPostingModal.value = false
+  codeVatCreditPosting.value = ''
+}
+
+const closeModalSuccessPosting = () => {
+  showModalSuccess.value = false
 }
 
 const openStatusModal = () => {
@@ -652,6 +680,8 @@ const applyFilter = () => {
   }
 
   filteredPayload.value = payload
+
+  // 🔥 INI WAJIB
   currentPage.value = 1
   setList(filteredDataList.value)
 }
