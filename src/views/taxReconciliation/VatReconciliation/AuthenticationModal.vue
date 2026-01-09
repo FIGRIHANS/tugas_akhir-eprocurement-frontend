@@ -4,7 +4,15 @@
     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
     @click.self="handleClose"
   >
-    <div class="bg-white rounded-xl shadow-2xl w-[400px]">
+    <div class="bg-white rounded-xl shadow-2xl w-[400px] relative">
+      <!-- Close Button -->
+      <button
+        @click="handleClose"
+        class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+      >
+        <i class="ki-filled ki-cross text-xl"></i>
+      </button>
+
       <!-- Modal Body -->
       <div class="p-8 flex flex-col items-center">
         <!-- Shield Icon -->
@@ -52,7 +60,7 @@
               }
             "
             v-model="verificationCode[index]"
-            type="text"
+            type="password"
             maxlength="1"
             class="w-12 h-14 text-center text-2xl font-semibold border-2 border-gray-300 rounded-lg focus:border-primary focus:outline-none transition-colors"
             @input="handleCodeInput(index, $event)"
@@ -61,18 +69,15 @@
           />
         </div>
 
-        <!-- Action Buttons -->
-        <div class="flex gap-3 w-full">
-          <button class="btn btn-light flex-1 font-inter" @click="handleClose">Cancel</button>
-          <button
-            class="btn btn-primary flex-1 font-inter"
-            @click="handleVerify"
-            :disabled="!isCodeComplete"
-            :class="{ 'opacity-50 cursor-not-allowed': !isCodeComplete }"
-          >
-            Verify
-          </button>
-        </div>
+        <!-- Verify Button (Full Width) -->
+        <button
+          class="btn btn-primary w-full font-inter"
+          @click="handleVerify"
+          :disabled="!isCodeComplete"
+          :class="{ 'opacity-50 cursor-not-allowed': !isCodeComplete }"
+        >
+          Verify
+        </button>
       </div>
     </div>
   </div>
