@@ -1,0 +1,27 @@
+import axios from 'axios'
+import { getToken } from '@/composables/token'
+
+const vatApi = axios.create({
+  baseURL: import.meta.env.VITE_API_VAT_BASE_URL || 'https://localhost:7243',
+})
+
+vatApi.interceptors.request.use((config) => {
+  let token = getToken()
+  if (!token) {
+    try {
+      const sessionData = localStorage.getItem('session_data')
+      if (sessionData) {
+        const params = new URLSearchParams(sessionData)
+        const t = params.get('token_dts')
+        if (t) token = t
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  if (token) config.headers.Authorization = token
+  return config
+})
+
+export default vatApi

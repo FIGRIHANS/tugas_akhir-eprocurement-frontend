@@ -121,7 +121,15 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-if="filteredDataList?.length === 0">
+            <!-- Loading State -->
+            <tr v-if="isLoading">
+              <td colspan="14" class="text-center py-8">
+                <span class="loading loading-spinner loading-md"></span>
+                <span class="ml-2">Loading data...</span>
+              </td>
+            </tr>
+            <!-- No Data State -->
+            <tr v-else-if="filteredDataList?.length === 0">
               <td colspan="14" class="text-center">No data found.</td>
             </tr>
 
@@ -146,8 +154,8 @@
               <!-- Other Columns -->
               <td>{{ item.vendorName }}</td>
               <td>{{ item.npwpVendor }}</td>
-              <td>{{ formatDate(item.tglFP) }}</td>
-              <td>{{ item.nsfp }}</td>
+              <td>{{ formatDate(item.tglFakturPajak) }}</td>
+              <td>{{ item.noFakturPajak }}</td>
               <td class="text-right">{{ formatCurrency(item.amount) }}</td>
               <td class="text-right">{{ formatCurrency(item.dpp) }}</td>
 
@@ -156,8 +164,8 @@
 
               <!-- Status FP -->
               <td class="text-center">
-                <span class="badge badge-outline" :class="getStatusFPBadgeClass(item.statusFP)">
-                  {{ item.statusFP }}
+                <span class="badge badge-outline" :class="getStatusFPBadgeClass(item.statusFp)">
+                  {{ item.statusFp || '-' }}
                 </span>
               </td>
 
@@ -165,9 +173,9 @@
               <td class="text-center">
                 <span
                   class="badge badge-outline"
-                  :class="getMatchStatusBadgeClass(item.statusAPvsFP)"
+                  :class="getMatchStatusBadgeClass(item.statusApVsFp)"
                 >
-                  {{ item.statusAPvsFP }}
+                  {{ item.statusApVsFp || '-' }}
                 </span>
               </td>
 
@@ -180,8 +188,8 @@
                   {{ item.creditStatus }}
                 </span>
               </td>
-              <td>{{ item.vatCreditExpiryDate }}</td>
-              <td>{{ item.remark }}</td>
+              <td>{{ formatDate(item.vatCreditExpiryDate) }}</td>
+              <td>{{ item.remark || '-' }}</td>
             </tr>
           </tbody>
         </table>
@@ -328,7 +336,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
@@ -338,6 +346,7 @@ import momentLib from 'moment'
 import { cloneDeep } from 'lodash'
 import AuthenticationModal from './VatReconciliation/AuthenticationModal.vue'
 import SuccessCreditedModal from './VatReconciliation/SuccessCreditedModal.vue'
+import vatApi from '@/core/utils/vatApi'
 
 // Expose moment to template
 const moment = momentLib
@@ -346,17 +355,17 @@ const router = useRouter()
 interface VATReconciliationData {
   vendorName: string
   npwpVendor: string
-  tglInvoice: string // kept for potential backend compat, though not shown
-  tglFP: string
-  nsfp: string
+  tglFakturPajak: string // Date string from API
+  noFakturPajak: string // Tax invoice number
   amount: number
   dpp: number
   ppn: number
-  statusFP: string
-  statusAPvsFP: string
+  statusFp: string | null // API returns 'statusFp' (camelCase)
+  statusApVsFp: string | null // Match status from API (camelCase)
   creditStatus: string
   vatCreditExpiryDate: string
   remark: string
+  action: string | null
 }
 
 interface FilterForm {
@@ -376,6 +385,8 @@ const search = ref<string>('')
 const currentPage = ref<number>(1)
 const pageSize = ref<number>(10)
 const list = ref<VATReconciliationData[]>([])
+const isLoading = ref<boolean>(false)
+const vatData = ref<VATReconciliationData[]>([])
 const sortBy = ref<string>('')
 const sortColumnName = ref<string>('')
 const showFilter = ref<boolean>(false)
@@ -444,39 +455,31 @@ const columns = ref<string[]>([
   'Remark',
 ])
 
-// Sample data
-const dataList = ref<VATReconciliationData[]>([
-  {
-    npwpVendor: '111111111111110',
-    vendorName: 'United Tractor TBK',
-    tglInvoice: '2025-01-03',
-    tglFP: '2025-09-26',
-    nsfp: '402111111111111',
-    amount: 5000000,
-    dpp: 4583333.33,
-    ppn: 550000,
-    statusFP: 'Approved',
-    statusAPvsFP: 'Match',
-    creditStatus: 'Creditable',
-    vatCreditExpiryDate: '26/12/2025',
-    remark: '',
-  },
-  {
-    npwpVendor: '111111111111110',
-    vendorName: 'United Tractor TBK',
-    tglInvoice: '2025-01-07',
-    tglFP: '2025-09-26',
-    nsfp: '402111111111112',
-    amount: 5000000,
-    dpp: 4583333.33,
-    ppn: 550000,
-    statusFP: 'Credited',
-    statusAPvsFP: 'Match',
-    creditStatus: 'Credited',
-    vatCreditExpiryDate: '26/12/2025',
-    remark: '',
-  },
-])
+// Data list now populated from API
+const dataList = ref<VATReconciliationData[]>([])
+
+/**
+ * Fetches VAT reconciliation data from the API
+ */
+const fetchVatData = async () => {
+  isLoading.value = true
+  try {
+    const response = await vatApi.get('/api/vat/vat-reconciliation')
+    // API returns { result: { content: [...] } }
+    const content = response.data.result?.content || []
+    console.log('API Response content:', content)
+    vatData.value = content
+    dataList.value = content
+    console.log('VAT Data fetched successfully:', content.length, 'records')
+    console.log('dataList.value:', dataList.value)
+  } catch (error) {
+    console.error('Error fetching VAT reconciliation data:', error)
+    vatData.value = []
+    dataList.value = []
+  } finally {
+    isLoading.value = false
+  }
+}
 
 // Computed property for filtered data
 const filteredDataList = computed(() => {
@@ -493,47 +496,65 @@ const filteredDataList = computed(() => {
 
   // Apply status FP filter
   if (filterForm.value.statusFP) {
-    filtered = filtered.filter((item) => item.statusFP === filterForm.value.statusFP)
+    filtered = filtered.filter((item) => item.statusFp === filterForm.value.statusFP)
   }
 
   // Apply match status filter
   if (filterForm.value.matchStatus) {
-    filtered = filtered.filter((item) => item.statusAPvsFP.includes(filterForm.value.matchStatus))
+    filtered = filtered.filter((item) => item.statusApVsFp?.includes(filterForm.value.matchStatus))
   }
 
   // Apply credit status filter
   if (filterForm.value.creditStatus) {
-    filtered = filtered.filter((item) => item.creditStatus.includes(filterForm.value.creditStatus))
+    filtered = filtered.filter((item) => item.creditStatus?.includes(filterForm.value.creditStatus))
   }
 
   return filtered
 })
 
-const getStatusFPBadgeClass = (status: string) => {
+const getStatusFPBadgeClass = (status: string | null) => {
+  if (!status) return 'badge-secondary'
   if (status === 'Approved' || status === 'Valid') return 'badge-success'
   if (status === 'Invalid') return 'badge-danger'
   if (status === 'Credited') return 'badge-primary'
   return 'badge-secondary'
 }
 
-const getMatchStatusBadgeClass = (status: string) => {
+const getMatchStatusBadgeClass = (status: string | null) => {
+  if (!status) return 'badge-secondary'
   if (status === 'Match') return 'badge-success'
   if (status.includes('Mismatch')) return 'badge-warning'
   return 'badge-secondary'
 }
 
-const getCreditStatusBadgeClass = (status: string) => {
-  if (status === 'Creditable' || status === 'Credited') return 'badge-success'
+const getCreditStatusBadgeClass = (status: string | null) => {
+  if (!status) return 'badge-secondary'
+  if (status === 'Creditable' || status === 'Credited' || status === 'Approved')
+    return 'badge-success'
   if (status === 'Not Creditable') return 'badge-danger'
   if (status === 'Hold') return 'badge-secondary'
   return 'badge-secondary'
 }
 
-const formatDate = (date: string) => {
-  return moment(date).format('DD/MM/YYYY')
+/**
+ * Formats a date string to 'dd/MM/yyyy' format
+ * @param date - Date string from API (ISO format or similar)
+ * @returns Formatted date string
+ */
+const formatDate = (date: string): string => {
+  if (!date) return '-'
+  const parsedDate = moment(date)
+  if (!parsedDate.isValid()) return '-'
+  return parsedDate.format('DD/MM/YYYY')
 }
 
-const formatCurrency = (amount: number) => {
+/**
+ * Formats a number to Indonesian Rupiah (IDR) currency format
+ * @param amount - Number to format
+ * @returns Formatted currency string (e.g., "Rp 1.000.000,00")
+ */
+const formatCurrency = (amount: number): string => {
+  if (amount === null || amount === undefined) return 'Rp 0,00'
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
     currency: 'IDR',
@@ -562,7 +583,7 @@ const goDetail = (data: VATReconciliationData) => {
   router.push({
     name: 'vatReconciliationDetail',
     params: {
-      id: data.nsfp,
+      id: data.noFakturPajak,
     },
   })
 }
@@ -618,7 +639,7 @@ const toggleSelectAll = () => {
 
 const toggleSelectItem = (item: VATReconciliationData) => {
   const index = selectedItems.value.findIndex(
-    (selected) => selected.nsfp === item.nsfp && selected.tglInvoice === item.tglInvoice,
+    (selected) => selected.noFakturPajak === item.noFakturPajak,
   )
 
   if (index > -1) {
@@ -629,9 +650,7 @@ const toggleSelectItem = (item: VATReconciliationData) => {
 }
 
 const isItemSelected = (item: VATReconciliationData) => {
-  return selectedItems.value.some(
-    (selected) => selected.nsfp === item.nsfp && selected.tglInvoice === item.tglInvoice,
-  )
+  return selectedItems.value.some((selected) => selected.noFakturPajak === item.noFakturPajak)
 }
 
 const goSearch = (event: KeyboardEvent) => {
@@ -696,14 +715,13 @@ const sortColumn = (columnName: string | null) => {
   const columnMap = {
     'Vendor Name': 'vendorName',
     'NPWP Vendor': 'npwpVendor',
-    'Tgl Invoice': 'tglInvoice',
-    'Tgl Faktur Pajak': 'tglFP',
-    'No. Faktur Pajak': 'nsfp',
+    'Tgl Faktur Pajak': 'tglFakturPajak',
+    'No. Faktur Pajak': 'noFakturPajak',
     Amount: 'amount',
     DPP: 'dpp',
     PPN: 'ppn',
     'Status FP': 'statusFP',
-    'Status AP vs FP': 'matchAPvsFP',
+    'Status AP vs FP': 'statusApVsFp',
     'Credit Status': 'creditStatus',
     'VAT Credit Expiry Date': 'vatCreditExpiryDate',
     Remark: 'remark',
@@ -802,7 +820,7 @@ const handleAuthVerify = (code: string) => {
   // TODO: Add API call to verify the code here
   // For now, show success modal after verification
   closeAuthModal()
-  successFpNumber.value = selectedItems.value[0]?.nsfp || 'FP293429993'
+  successFpNumber.value = selectedItems.value[0]?.noFakturPajak || 'FP293429993'
   showSuccessModal.value = true
 }
 
@@ -813,9 +831,19 @@ const closeSuccessModal = () => {
   selectedItems.value = [] // Clear selection after success
 }
 
-onMounted(() => {
-  setList(filteredDataList.value)
+onMounted(async () => {
+  await fetchVatData()
 })
+
+// Watch for changes in filtered data and update list
+watch(
+  filteredDataList,
+  (newData) => {
+    console.log('filteredDataList updated:', newData.length, 'items')
+    setList(newData)
+  },
+  { immediate: true },
+)
 </script>
 
 <style lang="scss" scoped>
