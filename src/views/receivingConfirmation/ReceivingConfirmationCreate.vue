@@ -18,59 +18,98 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
               <!-- Left Column -->
               <div class="space-y-3">
-                <!-- Order No -->
+                <!-- PO Number with Search -->
                 <div class="flex items-center gap-4">
                   <label class="form-label text-sm font-medium text-gray-600 w-40 mb-0"
-                    >Order No</label
+                    >PO Number <span class="text-red-500">*</span></label
                   >
-                  <input
-                    v-model="formData.orderNo"
-                    type="text"
-                    class="input flex-1"
-                    placeholder="Enter Order No"
-                  />
+                  <div class="flex-1 relative">
+                    <div class="flex gap-2">
+                      <input
+                        v-model="poNumberSearch"
+                        type="text"
+                        class="input flex-1"
+                        placeholder="Enter PO Number"
+                        @keypress.enter="searchDeliveryNotes"
+                      />
+                      <button
+                        class="btn btn-primary"
+                        @click="searchDeliveryNotes"
+                        :disabled="isSearching"
+                      >
+                        <i class="ki-duotone ki-search" v-if="!isSearching"></i>
+                        <span v-if="isSearching">Loading...</span>
+                        <span v-else>Search</span>
+                      </button>
+                    </div>
+                    <!-- Dropdown for delivery notes selection -->
+                    <div
+                      v-if="deliveryNotesOptions.length > 0 && showDropdown"
+                      class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+                    >
+                      <div
+                        v-for="dn in deliveryNotesOptions"
+                        :key="dn.id"
+                        class="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b last:border-b-0"
+                        @click="selectDeliveryNote(dn)"
+                      >
+                        <div class="font-medium">{{ dn.deliveryNoteNumber }}</div>
+                        <div class="text-sm text-gray-500">
+                          PO: {{ dn.poNumber }} | {{ dn.vendorName }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <!-- Employee Name -->
+                <!-- Selected Delivery Note Info -->
+                <div v-if="selectedDeliveryNote" class="bg-blue-50 p-3 rounded-lg text-sm">
+                  <div class="font-medium text-blue-700">
+                    Selected: {{ selectedDeliveryNote.deliveryNoteNumber }}
+                  </div>
+                </div>
+
+                <!-- Employee Name (Editable) -->
                 <div class="flex items-center gap-4">
                   <label class="form-label text-sm font-medium text-gray-600 w-40 mb-0"
-                    >Employee Name</label
+                    >Employee Name <span class="text-red-500">*</span></label
                   >
                   <input
-                    v-model="formData.namaKaryawan"
+                    v-model="formData.whCheckerName"
                     type="text"
                     class="input flex-1"
                     placeholder="Enter Employee Name"
                   />
                 </div>
 
-                <!-- Driver Name -->
+                <!-- Driver Name (Editable) -->
                 <div class="flex items-center gap-4">
                   <label class="form-label text-sm font-medium text-gray-600 w-40 mb-0"
-                    >Driver Name</label
+                    >Driver Name <span class="text-red-500">*</span></label
                   >
                   <input
-                    v-model="formData.namaSopir"
+                    v-model="formData.driverName"
                     type="text"
                     class="input flex-1"
                     placeholder="Enter Driver Name"
                   />
                 </div>
 
-                <!-- License Plate -->
+                <!-- License Plate (Read-only from DN) -->
                 <div class="flex items-center gap-4">
                   <label class="form-label text-sm font-medium text-gray-600 w-40 mb-0"
                     >License Plate</label
                   >
                   <input
-                    v-model="formData.noPolisi"
+                    v-model="formData.licensePlate"
                     type="text"
-                    class="input flex-1"
-                    placeholder="Enter License Plate"
+                    class="input flex-1 bg-gray-100"
+                    placeholder="Auto-filled from Delivery Note"
+                    readonly
                   />
                 </div>
 
-                <!-- Transporter -->
+                <!-- Transporter (Read-only from DN) -->
                 <div class="flex items-center gap-4">
                   <label class="form-label text-sm font-medium text-gray-600 w-40 mb-0"
                     >Transporter</label
@@ -78,15 +117,16 @@
                   <input
                     v-model="formData.transporter"
                     type="text"
-                    class="input flex-1"
-                    placeholder="Enter Transporter"
+                    class="input flex-1 bg-gray-100"
+                    placeholder="Auto-filled from Delivery Note"
+                    readonly
                   />
                 </div>
               </div>
 
               <!-- Right Column -->
               <div class="space-y-3">
-                <!-- Pickup -->
+                <!-- Pickup (Read-only from DN) -->
                 <div class="flex items-center gap-4">
                   <label class="form-label text-sm font-medium text-gray-600 w-36 mb-0"
                     >Pickup</label
@@ -94,12 +134,13 @@
                   <input
                     v-model="formData.pickup"
                     type="text"
-                    class="input flex-1"
-                    placeholder="Enter Pickup Location"
+                    class="input flex-1 bg-gray-100"
+                    placeholder="Auto-filled from Delivery Note"
+                    readonly
                   />
                 </div>
 
-                <!-- Destination -->
+                <!-- Destination (Read-only from DN) -->
                 <div class="flex items-center gap-4">
                   <label class="form-label text-sm font-medium text-gray-600 w-36 mb-0"
                     >Destination</label
@@ -107,28 +148,30 @@
                   <input
                     v-model="formData.destination"
                     type="text"
-                    class="input flex-1"
-                    placeholder="Enter Destination"
+                    class="input flex-1 bg-gray-100"
+                    placeholder="Auto-filled from Delivery Note"
+                    readonly
                   />
                 </div>
 
-                <!-- Order Date -->
+                <!-- Truck Type (Read-only from DN) -->
                 <div class="flex items-center gap-4">
                   <label class="form-label text-sm font-medium text-gray-600 w-36 mb-0"
-                    >Order Date</label
+                    >Truck Type</label
                   >
                   <input
-                    v-model="formData.orderDate"
+                    v-model="formData.truckType"
                     type="text"
-                    class="input flex-1"
-                    placeholder="Enter Order Date"
+                    class="input flex-1 bg-gray-100"
+                    placeholder="Auto-filled from Delivery Note"
+                    readonly
                   />
                 </div>
 
-                <!-- Received Date -->
+                <!-- Received Date (Editable) -->
                 <div class="flex items-center gap-4">
                   <label class="form-label text-sm font-medium text-gray-600 w-36 mb-0"
-                    >Received Date</label
+                    >Received Date <span class="text-red-500">*</span></label
                   >
                   <input v-model="formData.receivedDate" type="date" class="input flex-1" />
                 </div>
@@ -138,7 +181,9 @@
 
           <!-- Right Column - Signature Box (4 columns) -->
           <div class="lg:col-span-4">
-            <label class="form-label text-sm font-medium text-gray-600">Signature</label>
+            <label class="form-label text-sm font-medium text-gray-600"
+              >Signature <span class="text-red-500">*</span></label
+            >
             <div class="border border-gray-300 rounded-lg p-4 mt-2 bg-gray-50">
               <!-- Signature Pad -->
               <VueSignature
@@ -171,6 +216,11 @@
         <!-- Table Header -->
         <div class="mb-4">
           <h3 class="text-lg font-semibold">List Receiving Confirmation Request</h3>
+          <p class="text-sm text-gray-500 mt-1">
+            Only <strong>Received</strong>, <strong>Repack Qty</strong>, and
+            <strong>Damage Qty</strong> can be edited. Difference, More, and Less are calculated
+            automatically.
+          </p>
         </div>
 
         <!-- Table -->
@@ -179,9 +229,10 @@
             <thead>
               <!-- First Header Row -->
               <tr class="bg-blue-500 text-white">
-                <th rowspan="2" class="text-center border-r">Action</th>
+                <th rowspan="2" class="text-center border-r">No</th>
                 <th rowspan="2" class="text-center border-r">No Pick Slip</th>
-                <th rowspan="2" class="text-center border-r">SKU Description</th>
+                <th rowspan="2" class="text-center border-r">SKU</th>
+                <th rowspan="2" class="text-center border-r">Description</th>
                 <th colspan="2" class="text-center border-r">LOT. NO</th>
                 <th colspan="3" class="text-center border-r">FG Receipt Confirmation</th>
                 <th colspan="2" class="text-center border-r">Loading Difference</th>
@@ -192,39 +243,67 @@
                 <th class="text-center border-r">Delivery Note</th>
                 <th class="text-center border-r">Actual</th>
                 <th class="text-center border-r">Delivery Note</th>
-                <th class="text-center border-r">Received</th>
+                <th class="text-center border-r bg-green-600">Received</th>
                 <th class="text-center border-r">Difference</th>
                 <th class="text-center border-r">More</th>
                 <th class="text-center border-r">Less</th>
-                <th class="text-center border-r">Repack Qty</th>
-                <th class="text-center border-r">Damage Qty</th>
+                <th class="text-center border-r bg-green-600">Repack Qty</th>
+                <th class="text-center border-r bg-green-600">Damage Qty</th>
               </tr>
             </thead>
             <tbody>
               <tr v-if="tableData.length === 0">
-                <td colspan="15" class="text-center">No data available</td>
+                <td colspan="13" class="text-center py-8">
+                  <div class="text-gray-400">
+                    <i class="ki-duotone ki-information text-3xl mb-2"></i>
+                    <p>No data available. Search for a PO Number first.</p>
+                  </div>
+                </td>
               </tr>
               <tr v-for="(item, index) in tableData" :key="index">
-                <td class="text-center border-r">
-                  <button
-                    class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]"
-                    @click="viewItem(index)"
-                    title="View Details"
-                  >
-                    <i class="ki-filled ki-eye !text-lg"></i>
-                  </button>
+                <td class="text-center">{{ index + 1 }}</td>
+                <td>{{ item.noPickSlip }}</td>
+                <td>{{ item.sku }}</td>
+                <td>{{ item.deskripsi }}</td>
+                <td class="text-right">{{ item.lotNoDeliveryNote }}</td>
+                <td class="text-right">{{ item.lotNoActual }}</td>
+                <td class="text-right">{{ item.qtySuratJalan }}</td>
+                <!-- Received - Editable -->
+                <td class="text-center">
+                  <input
+                    v-model.number="item.qtyActual"
+                    type="number"
+                    min="0"
+                    class="input input-sm w-20 text-center"
+                    @input="calculateDifference(index)"
+                  />
                 </td>
-                <td>{{ item.pickSlip }}</td>
-                <td>{{ item.description }}</td>
-                <td class="text-right">{{ item.diSuratJalan }}</td>
-                <td class="text-right">{{ item.actual }}</td>
-                <td class="text-right">{{ item.diSuratJalanKonfirmasi }}</td>
-                <td class="text-right">{{ item.diterima }}</td>
-                <td class="text-right">{{ item.selisih }}</td>
-                <td class="text-right">{{ item.lebih }}</td>
-                <td class="text-right">{{ item.kurang }}</td>
-                <td class="text-right">{{ item.repackQty }}</td>
-                <td class="text-right">{{ item.damageQty }}</td>
+                <!-- Difference - Calculated -->
+                <td class="text-right" :class="getDifferenceClass(item.qtySelisih)">
+                  {{ item.qtySelisih }}
+                </td>
+                <!-- More - Calculated -->
+                <td class="text-right text-green-600">{{ item.more }}</td>
+                <!-- Less - Calculated -->
+                <td class="text-right text-red-600">{{ item.less }}</td>
+                <!-- Repack Qty - Editable -->
+                <td class="text-center">
+                  <input
+                    v-model.number="item.repackQty"
+                    type="number"
+                    min="0"
+                    class="input input-sm w-20 text-center"
+                  />
+                </td>
+                <!-- Damage Qty - Editable -->
+                <td class="text-center">
+                  <input
+                    v-model.number="item.damageQty"
+                    type="number"
+                    min="0"
+                    class="input input-sm w-20 text-center"
+                  />
+                </td>
               </tr>
             </tbody>
           </table>
@@ -237,9 +316,10 @@
           <i class="ki-duotone ki-arrow-left"></i>
           Back to List
         </button>
-        <button class="btn btn-primary" @click="submitForm()">
-          <i class="ki-duotone ki-save-2"></i>
-          Submit
+        <button class="btn btn-primary" @click="submitForm()" :disabled="isSubmitting">
+          <i class="ki-duotone ki-save-2" v-if="!isSubmitting"></i>
+          <span v-if="isSubmitting">Submitting...</span>
+          <span v-else>Submit</span>
         </button>
       </div>
     </div>
@@ -252,43 +332,61 @@ import { useRouter } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import VueSignature from 'vue3-signature'
+import DeliveryNotesService, { type DeliveryNotesData } from '@/services/deliveryNotes.service'
+import ReceivingConfirmationService, {
+  type ReceivingConfirmationCreatePayload,
+  type ReceivingConfirmationDetailPayload,
+} from '@/services/receivingConfirmation.service'
 
 const router = useRouter()
 
+// Interfaces
 interface FormData {
-  orderNo: string
-  namaKaryawan: string
-  namaSopir: string
-  noPolisi: string
+  poNumber: string
+  tripID: string
+  orderNumber: string
+  whCheckerName: string
+  driverName: string
+  licensePlate: string
   transporter: string
+  truckType: string
   pickup: string
   destination: string
-  orderDate: string
   receivedDate: string
-  signature: string | null
+  digitalSignaturePath: string | null
 }
 
-interface TableData {
-  pickSlip: string
+interface TableDataItem {
   sku: string
-  description: string
-  diSuratJalan: number
-  actual: number
-  diSuratJalanKonfirmasi: number
-  diterima: number
-  selisih: number
-  lebih: number
-  kurang: number
+  deskripsi: string
+  noPickSlip: string
+  lotNoDeliveryNote: string
+  lotNoActual: string
+  qtySuratJalan: number
+  qtyActual: number
+  qtySelisih: number
+  more: number
+  less: number
   repackQty: number
   damageQty: number
+  rejectReason: string
 }
 
+// Breadcrumb
 const routes = ref<routeTypes[]>([
   {
     name: 'Digital Receiving Confirmation',
-    to: '/digital-receiving-confirmation',
+    to: '/test/receiving-confirmation-list',
   },
 ])
+
+// States
+const poNumberSearch = ref<string>('')
+const isSearching = ref<boolean>(false)
+const isSubmitting = ref<boolean>(false)
+const showDropdown = ref<boolean>(false)
+const deliveryNotesOptions = ref<DeliveryNotesData[]>([])
+const selectedDeliveryNote = ref<DeliveryNotesData | null>(null)
 
 interface SignaturePadInstance {
   clear: () => void
@@ -306,52 +404,106 @@ const signatureOptions = {
 
 // Form Data
 const formData = ref<FormData>({
-  orderNo: '',
-  namaKaryawan: '',
-  namaSopir: '',
-  noPolisi: '',
+  poNumber: '',
+  tripID: '',
+  orderNumber: '',
+  whCheckerName: '',
+  driverName: '',
+  licensePlate: '',
   transporter: '',
+  truckType: '',
   pickup: '',
   destination: '',
-  orderDate: '',
-  receivedDate: '',
-  signature: null,
+  receivedDate: new Date().toISOString().split('T')[0], // Default to today
+  digitalSignaturePath: null,
 })
 
 // Table Data
-const tableData = ref<TableData[]>([
-  {
-    pickSlip: 'PS-001',
-    sku: 'SKU-12345',
-    description: 'Product Sample A',
-    diSuratJalan: 100,
-    actual: 100,
-    diSuratJalanKonfirmasi: 100,
-    diterima: 98,
-    selisih: -2,
-    lebih: 0,
-    kurang: 2,
-    repackQty: 0,
-    damageQty: 2,
-  },
-  {
-    pickSlip: 'PS-002',
-    sku: 'SKU-67890',
-    description: 'Product Sample B',
-    diSuratJalan: 50,
-    actual: 50,
-    diSuratJalanKonfirmasi: 50,
-    diterima: 52,
-    selisih: 2,
-    lebih: 2,
-    kurang: 0,
-    repackQty: 0,
-    damageQty: 0,
-  },
-])
+const tableData = ref<TableDataItem[]>([])
+
+// Methods
+const searchDeliveryNotes = async () => {
+  if (!poNumberSearch.value.trim()) {
+    alert('Please enter a PO Number')
+    return
+  }
+
+  isSearching.value = true
+  showDropdown.value = false
+
+  try {
+    const results = await DeliveryNotesService.getByPoNumber(poNumberSearch.value)
+    deliveryNotesOptions.value = results
+
+    if (results.length === 0) {
+      alert('No Delivery Notes found for this PO Number')
+    } else if (results.length === 1) {
+      // Auto-select if only one result
+      selectDeliveryNote(results[0])
+    } else {
+      showDropdown.value = true
+    }
+  } catch (error) {
+    console.error('Error searching delivery notes:', error)
+    alert('Failed to search Delivery Notes. Please try again.')
+  } finally {
+    isSearching.value = false
+  }
+}
+
+const selectDeliveryNote = (dn: DeliveryNotesData) => {
+  selectedDeliveryNote.value = dn
+  showDropdown.value = false
+
+  // Auto-fill form data from selected Delivery Note
+  formData.value.poNumber = dn.poNumber
+  formData.value.tripID = dn.tripId || ''
+  formData.value.orderNumber = dn.poNumber // Using PO Number as Order Number
+  formData.value.driverName = dn.driverName || ''
+  formData.value.licensePlate = dn.licensePlate || ''
+  formData.value.transporter = dn.transporter || ''
+  formData.value.truckType = dn.truckType || ''
+  formData.value.pickup = dn.pickupAddress || ''
+  formData.value.destination = dn.destinationAddress || ''
+
+  // Populate table data from Delivery Note items
+  if (dn.items && dn.items.length > 0) {
+    tableData.value = dn.items.map((item) => ({
+      sku: item.sku,
+      deskripsi: item.description,
+      noPickSlip: '', // User can fill this
+      lotNoDeliveryNote: item.lotNo,
+      lotNoActual: item.lotNo, // Default same as delivery note
+      qtySuratJalan: item.qtyShipped,
+      qtyActual: item.qtyShipped, // Default same as delivery note, user can edit
+      qtySelisih: 0,
+      more: 0,
+      less: 0,
+      repackQty: 0,
+      damageQty: 0,
+      rejectReason: '',
+    }))
+  } else {
+    tableData.value = []
+  }
+}
+
+const calculateDifference = (index: number) => {
+  const item = tableData.value[index]
+  const diff = item.qtyActual - item.qtySuratJalan
+  item.qtySelisih = diff
+  item.more = diff > 0 ? diff : 0
+  item.less = diff < 0 ? Math.abs(diff) : 0
+}
+
+const getDifferenceClass = (diff: number) => {
+  if (diff > 0) return 'text-green-600 font-semibold'
+  if (diff < 0) return 'text-red-600 font-semibold'
+  return ''
+}
 
 const goBack = () => {
-  router.push({ name: 'receivingConfirmation' })
+  router.push({ name: 'testReceivingConfirmationList' })
 }
 
 const clearSignature = () => {
@@ -360,49 +512,106 @@ const clearSignature = () => {
   }
 }
 
-const viewItem = (index: number) => {
-  const item = tableData.value[index]
-  console.log('Viewing item:', item)
-  // TODO: Open modal or navigate to detail page
-  alert(`Viewing details for: ${item.pickSlip} - ${item.description}`)
-}
+const validateForm = (): boolean => {
+  if (!formData.value.poNumber) {
+    alert('Please select a Delivery Note first')
+    return false
+  }
 
-const submitForm = () => {
-  // Save signature data
+  if (!formData.value.whCheckerName.trim()) {
+    alert('Please enter Employee Name')
+    return false
+  }
+
+  if (!formData.value.driverName.trim()) {
+    alert('Please enter Driver Name')
+    return false
+  }
+
+  if (!formData.value.receivedDate) {
+    alert('Please enter Received Date')
+    return false
+  }
+
+  if (tableData.value.length === 0) {
+    alert('No items to submit. Please select a Delivery Note with items.')
+    return false
+  }
+
+  // Check signature
   if (signaturePad.value) {
-    const { isEmpty, data } = signaturePad.value.save()
-    if (!isEmpty) {
-      formData.value.signature = data
+    const { isEmpty } = signaturePad.value.save()
+    if (isEmpty) {
+      alert('Please provide a signature')
+      return false
     }
   }
 
-  // Validate form
-  if (!formData.value.orderNo || !formData.value.namaKaryawan || !formData.value.namaSopir) {
-    alert('Please fill in all required fields')
-    return
+  return true
+}
+
+const submitForm = async () => {
+  if (!validateForm()) return
+
+  isSubmitting.value = true
+
+  try {
+    // Save signature data
+    let signatureData = ''
+    if (signaturePad.value) {
+      const { isEmpty, data } = signaturePad.value.save()
+      if (!isEmpty) {
+        signatureData = data
+      }
+    }
+
+    // Prepare items payload
+    const items: ReceivingConfirmationDetailPayload[] = tableData.value.map((item) => ({
+      sku: item.sku,
+      deskripsi: item.deskripsi,
+      noPickSlip: item.noPickSlip,
+      lotNo: item.lotNoActual,
+      qtySuratJalan: item.qtySuratJalan,
+      qtyActual: item.qtyActual,
+      repackQty: item.repackQty,
+      damageQty: item.damageQty,
+      rejectReason: item.rejectReason || undefined,
+    }))
+
+    // Prepare payload
+    const payload: ReceivingConfirmationCreatePayload = {
+      poNumber: formData.value.poNumber,
+      tripID: formData.value.tripID || undefined,
+      orderNumber: formData.value.orderNumber || undefined,
+      receivedDate: formData.value.receivedDate,
+      whCheckerName: formData.value.whCheckerName,
+      driverName: formData.value.driverName,
+      pickup: formData.value.pickup || undefined,
+      destination: formData.value.destination || undefined,
+      transporter: formData.value.transporter || undefined,
+      truckType: formData.value.truckType || undefined,
+      licensePlate: formData.value.licensePlate || undefined,
+      digitalSignaturePath: signatureData || undefined,
+      items: items,
+    }
+
+    console.log('Submitting payload:', payload)
+
+    await ReceivingConfirmationService.create(payload)
+
+    alert('Receiving confirmation submitted successfully!')
+    router.push({ name: 'testReceivingConfirmationList' })
+  } catch (error) {
+    console.error('Error submitting form:', error)
+    alert('Failed to submit. Please try again.')
+  } finally {
+    isSubmitting.value = false
   }
-
-  // Validate table data
-  if (tableData.value.length === 0) {
-    alert('Please add at least one item to the table')
-    return
-  }
-
-  console.log('Form Data:', formData.value)
-  console.log('Table Data:', tableData.value)
-  // TODO: Send data to API
-  alert('Receiving confirmation submitted successfully!')
-
-  // Redirect to list
-  router.push({ name: 'receivingConfirmation' })
 }
 
 onMounted(() => {
-  // Load existing signature if available
-  if (formData.value.signature && signaturePad.value) {
-    signaturePad.value.fromDataURL(formData.value.signature)
-  }
-  // TODO: Load data based on route params if editing
+  // Set default received date to today
+  formData.value.receivedDate = new Date().toISOString().split('T')[0]
 })
 </script>
 
@@ -414,7 +623,8 @@ onMounted(() => {
   }
 }
 
-.form-control[readonly] {
+.form-control[readonly],
+.input[readonly] {
   background-color: #f5f5f5;
   cursor: not-allowed;
 }
@@ -447,5 +657,10 @@ onMounted(() => {
     border-radius: 15px;
     background-color: #dbdfe9;
   }
+}
+
+.input-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
 }
 </style>

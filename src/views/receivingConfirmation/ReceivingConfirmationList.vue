@@ -25,29 +25,32 @@
 
       <!-- Filter Section -->
       <div v-if="showFilter" class="border border-gray-200 rounded-lg p-4 mb-4">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label class="form-label">Status</label>
             <select v-model="filterForm.status" class="form-select">
               <option value="">All Status</option>
-              <option value="Completed">Completed</option>
-              <option value="Pending">Pending</option>
+              <option value="Draft">Draft</option>
+              <option value="Waiting Approval">Waiting Approval</option>
+              <option value="Received">Received</option>
               <option value="Rejected">Rejected</option>
             </select>
           </div>
           <div>
-            <label class="form-label">Discrepancy</label>
-            <select v-model="filterForm.discrepancy" class="form-select">
-              <option value="">All Discrepancy</option>
-              <option value="No Discrepancy">No Discrepancy</option>
-              <option value="Quantity Mismatch">Quantity Mismatch</option>
-              <option value="Partial Delivery">Partial Delivery</option>
-              <option value="Quality Issue">Quality Issue</option>
+            <label class="form-label">Has Discrepancy</label>
+            <select v-model="filterForm.hasDiscrepancy" class="form-select">
+              <option value="">All</option>
+              <option value="true">Yes</option>
+              <option value="false">No</option>
             </select>
           </div>
           <div>
-            <label class="form-label">Received Date</label>
-            <input type="date" v-model="filterForm.receivedDate" class="form-control" />
+            <label class="form-label">Received Date From</label>
+            <input type="date" v-model="filterForm.receivedDateFrom" class="form-control" />
+          </div>
+          <div>
+            <label class="form-label">Received Date To</label>
+            <input type="date" v-model="filterForm.receivedDateTo" class="form-control" />
           </div>
         </div>
         <div class="flex gap-2 mt-4">
@@ -92,36 +95,40 @@
           </thead>
           <tbody>
             <tr v-if="filteredDataList?.length === 0">
-              <td colspan="18" class="text-center">No data found.</td>
+              <td colspan="18" class="text-center">
+                <span v-if="isLoading">Loading...</span>
+                <span v-else-if="errorMessage">{{ errorMessage }}</span>
+                <span v-else>No data found.</span>
+              </td>
             </tr>
             <tr v-for="(item, index) in list" :key="index">
-              <!-- Action Column - MOVED TO FRONT -->
+              <!-- Action Column -->
               <td class="text-center">
                 <button
                   class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]"
-                  @click="viewDetail(item.beritaAcaraId)"
+                  @click="viewDetail(item.reportID)"
                   title="View Detail"
                 >
                   <i class="ki-filled ki-eye !text-lg"></i>
                 </button>
               </td>
-              <!-- Other Columns -->
+              <!-- Other Columns - sesuai dengan backend field names -->
               <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
-              <td>{{ item.beritaAcaraId }}</td>
-              <td>{{ item.tripId }}</td>
-              <td>{{ item.noOrder }}</td>
+              <td>{{ item.reportID }}</td>
+              <td>{{ item.tripID }}</td>
+              <td>{{ item.orderNumber }}</td>
               <td>
                 <span class="badge badge-outline" :class="getStatusBadgeClass(item.status)">
                   {{ item.status }}
                 </span>
               </td>
-              <td>{{ item.rejectReason }}</td>
+              <td>{{ item.rejectReason || '-' }}</td>
               <td>
                 <span
                   class="badge badge-outline"
-                  :class="getDiscrepancyBadgeClass(item.discrepancy)"
+                  :class="item.hasDiscrepancy ? 'badge-warning' : 'badge-success'"
                 >
-                  {{ item.discrepancy }}
+                  {{ item.hasDiscrepancy ? 'Yes' : 'No' }}
                 </span>
               </td>
               <td>{{ formatDate(item.receivedDate) }}</td>
@@ -129,11 +136,11 @@
               <td>{{ item.destination }}</td>
               <td>{{ item.transporter }}</td>
               <td>{{ item.truckType }}</td>
-              <td>{{ item.noPolisi }}</td>
-              <td>{{ formatDate(item.createdDate) }}</td>
+              <td>{{ item.licensePlate }}</td>
+              <td>{{ formatDate(item.createdUtcDate) }}</td>
               <td>{{ item.createdBy }}</td>
-              <td>{{ formatDate(item.updateDate) }}</td>
-              <td>{{ item.updateBy }}</td>
+              <td>{{ formatDate(item.updatedUtcDate) }}</td>
+              <td>{{ item.updatedBy }}</td>
             </tr>
           </tbody>
         </table>
@@ -169,33 +176,24 @@ import LPagination from '@/components/pagination/LPagination.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import momentLib from 'moment'
 import { cloneDeep } from 'lodash'
+import ReceivingConfirmationService, {
+  type ReceivingConfirmationData,
+} from '@/services/receivingConfirmation.service'
+
+// Loading and error states
+const isLoading = ref<boolean>(false)
+const errorMessage = ref<string>('')
 
 // Expose moment to template
 const moment = momentLib
 
-interface ReceivingData {
-  beritaAcaraId: string
-  tripId: string
-  noOrder: string
-  status: string
-  rejectReason: string
-  discrepancy: string
-  receivedDate: string
-  pickup: string
-  destination: string
-  transporter: string
-  truckType: string
-  noPolisi: string
-  createdDate: string
-  createdBy: string
-  updateDate: string
-  updateBy: string
-}
+// Interface ReceivingConfirmationData sudah di-import dari service
 
 interface FilterForm {
   status: string
-  discrepancy: string
-  receivedDate: string
+  hasDiscrepancy: string
+  receivedDateFrom: string
+  receivedDateTo: string
 }
 
 const routes = ref<routeTypes[]>([
@@ -208,7 +206,7 @@ const routes = ref<routeTypes[]>([
 const search = ref<string>('')
 const currentPage = ref<number>(1)
 const pageSize = ref<number>(5)
-const list = ref<ReceivingData[]>([])
+const list = ref<ReceivingConfirmationData[]>([])
 const sortBy = ref<string>('')
 const sortColumnName = ref<string>('')
 const showFilter = ref<boolean>(false)
@@ -216,8 +214,9 @@ const filteredPayload = ref<{ key: string; value: string }[]>([])
 
 const filterForm = ref<FilterForm>({
   status: '',
-  discrepancy: '',
-  receivedDate: '',
+  hasDiscrepancy: '',
+  receivedDateFrom: '',
+  receivedDateTo: '',
 })
 
 const columns = ref<string[]>([
@@ -241,195 +240,43 @@ const columns = ref<string[]>([
   'Update By',
 ])
 
-// 10 Dummy data for demonstration
-const dataList = ref<ReceivingData[]>([
-  {
-    beritaAcaraId: 'BA-2024-001',
-    tripId: 'TRP-001',
-    noOrder: 'ORD-2024-001',
-    status: 'Completed',
-    rejectReason: '-',
-    discrepancy: 'No Discrepancy',
-    receivedDate: '2024-12-01',
-    pickup: 'Jakarta Warehouse',
-    destination: 'Bandung Store',
-    transporter: 'PT Trans Jaya',
-    truckType: 'Box Truck',
-    noPolisi: 'B 1234 XYZ',
-    createdDate: '2024-11-28',
-    createdBy: 'Admin User',
-    updateDate: '2024-12-01',
-    updateBy: 'System',
-  },
-  {
-    beritaAcaraId: 'BA-2024-002',
-    tripId: 'TRP-002',
-    noOrder: 'ORD-2024-002',
-    status: 'Pending',
-    rejectReason: '-',
-    discrepancy: 'Quantity Mismatch',
-    receivedDate: '2024-12-05',
-    pickup: 'Surabaya Warehouse',
-    destination: 'Malang Store',
-    transporter: 'PT Trans Sejahtera',
-    truckType: 'Flatbed',
-    noPolisi: 'L 5678 ABC',
-    createdDate: '2024-12-02',
-    createdBy: 'John Doe',
-    updateDate: '2024-12-05',
-    updateBy: 'Jane Smith',
-  },
-  {
-    beritaAcaraId: 'BA-2024-003',
-    tripId: 'TRP-003',
-    noOrder: 'ORD-2024-003',
-    status: 'Completed',
-    rejectReason: '-',
-    discrepancy: 'No Discrepancy',
-    receivedDate: '2024-12-08',
-    pickup: 'Semarang Warehouse',
-    destination: 'Yogyakarta Store',
-    transporter: 'PT Trans Mandiri',
-    truckType: 'Container',
-    noPolisi: 'H 9012 DEF',
-    createdDate: '2024-12-05',
-    createdBy: 'Admin User',
-    updateDate: '2024-12-08',
-    updateBy: 'System',
-  },
-  {
-    beritaAcaraId: 'BA-2024-004',
-    tripId: 'TRP-004',
-    noOrder: 'ORD-2024-004',
-    status: 'Rejected',
-    rejectReason: 'Damaged Goods',
-    discrepancy: 'Quality Issue',
-    receivedDate: '2024-12-02',
-    pickup: 'Medan Warehouse',
-    destination: 'Pekanbaru Store',
-    transporter: 'PT Trans Express',
-    truckType: 'Box Truck',
-    noPolisi: 'BK 3456 GHI',
-    createdDate: '2024-11-30',
-    createdBy: 'Supervisor',
-    updateDate: '2024-12-02',
-    updateBy: 'Quality Control',
-  },
-  {
-    beritaAcaraId: 'BA-2024-005',
-    tripId: 'TRP-005',
-    noOrder: 'ORD-2024-005',
-    status: 'Completed',
-    rejectReason: '-',
-    discrepancy: 'No Discrepancy',
-    receivedDate: '2024-12-06',
-    pickup: 'Makassar Warehouse',
-    destination: 'Manado Store',
-    transporter: 'PT Trans Logistik',
-    truckType: 'Refrigerated',
-    noPolisi: 'DD 7890 JKL',
-    createdDate: '2024-12-03',
-    createdBy: 'Admin User',
-    updateDate: '2024-12-06',
-    updateBy: 'System',
-  },
-  {
-    beritaAcaraId: 'BA-2024-006',
-    tripId: 'TRP-006',
-    noOrder: 'ORD-2024-006',
-    status: 'Pending',
-    rejectReason: '-',
-    discrepancy: 'Partial Delivery',
-    receivedDate: '2024-12-03',
-    pickup: 'Denpasar Warehouse',
-    destination: 'Mataram Store',
-    transporter: 'PT Trans Cargo',
-    truckType: 'Box Truck',
-    noPolisi: 'DK 2345 MNO',
-    createdDate: '2024-12-01',
-    createdBy: 'John Doe',
-    updateDate: '2024-12-03',
-    updateBy: 'Warehouse Staff',
-  },
-  {
-    beritaAcaraId: 'BA-2024-007',
-    tripId: 'TRP-007',
-    noOrder: 'ORD-2024-007',
-    status: 'Completed',
-    rejectReason: '-',
-    discrepancy: 'No Discrepancy',
-    receivedDate: '2024-12-09',
-    pickup: 'Palembang Warehouse',
-    destination: 'Lampung Store',
-    transporter: 'PT Trans Global',
-    truckType: 'Flatbed',
-    noPolisi: 'BG 6789 PQR',
-    createdDate: '2024-12-06',
-    createdBy: 'Admin User',
-    updateDate: '2024-12-09',
-    updateBy: 'System',
-  },
-  {
-    beritaAcaraId: 'BA-2024-008',
-    tripId: 'TRP-008',
-    noOrder: 'ORD-2024-008',
-    status: 'Completed',
-    rejectReason: '-',
-    discrepancy: 'No Discrepancy',
-    receivedDate: '2024-12-07',
-    pickup: 'Pontianak Warehouse',
-    destination: 'Banjarmasin Store',
-    transporter: 'PT Trans Nusantara',
-    truckType: 'Container',
-    noPolisi: 'KB 0123 STU',
-    createdDate: '2024-12-04',
-    createdBy: 'Admin User',
-    updateDate: '2024-12-07',
-    updateBy: 'System',
-  },
-  {
-    beritaAcaraId: 'BA-2024-009',
-    tripId: 'TRP-009',
-    noOrder: 'ORD-2024-009',
-    status: 'Pending',
-    rejectReason: '-',
-    discrepancy: 'Quantity Mismatch',
-    receivedDate: '2024-12-04',
-    pickup: 'Balikpapan Warehouse',
-    destination: 'Samarinda Store',
-    transporter: 'PT Trans Utama',
-    truckType: 'Box Truck',
-    noPolisi: 'KT 4567 VWX',
-    createdDate: '2024-12-01',
-    createdBy: 'Supervisor',
-    updateDate: '2024-12-04',
-    updateBy: 'Warehouse Manager',
-  },
-  {
-    beritaAcaraId: 'BA-2024-010',
-    tripId: 'TRP-010',
-    noOrder: 'ORD-2024-010',
-    status: 'Completed',
-    rejectReason: '-',
-    discrepancy: 'No Discrepancy',
-    receivedDate: '2024-12-10',
-    pickup: 'Padang Warehouse',
-    destination: 'Jambi Store',
-    transporter: 'PT Trans Prima',
-    truckType: 'Refrigerated',
-    noPolisi: 'BA 8901 YZA',
-    createdDate: '2024-12-07',
-    createdBy: 'Admin User',
-    updateDate: '2024-12-10',
-    updateBy: 'System',
-  },
-])
+// Data dari API (tidak lagi menggunakan dummy data)
+const dataList = ref<ReceivingConfirmationData[]>([])
+
+/**
+ * Fetch data dari API backend
+ * Endpoint: /receiving-confirmation/list
+ */
+const fetchData = async () => {
+  isLoading.value = true
+  errorMessage.value = ''
+
+  try {
+    const response = await ReceivingConfirmationService.getList({
+      searchText: search.value || undefined,
+      status: filterForm.value.status || undefined,
+      hasDiscrepancy: filterForm.value.hasDiscrepancy
+        ? filterForm.value.hasDiscrepancy === 'true'
+        : undefined,
+      receivedDateFrom: filterForm.value.receivedDateFrom || undefined,
+      receivedDateTo: filterForm.value.receivedDateTo || undefined,
+    })
+
+    dataList.value = response
+    setList(filteredDataList.value)
+  } catch (error: unknown) {
+    console.error('Failed to fetch data:', error)
+    errorMessage.value = 'Gagal mengambil data. Silakan coba lagi.'
+  } finally {
+    isLoading.value = false
+  }
+}
 
 // Computed property for filtered data
 const filteredDataList = computed(() => {
   let filtered = cloneDeep(dataList.value)
 
-  // Apply search filter
+  // Apply search filter (client-side untuk pencarian lokal)
   if (search.value) {
     filtered = filtered.filter((item) =>
       Object.values(item).some((val) =>
@@ -438,27 +285,24 @@ const filteredDataList = computed(() => {
     )
   }
 
-  // Apply status filter
+  // Apply status filter (jika belum dikirim ke server)
   if (filterForm.value.status) {
     filtered = filtered.filter((item) => item.status === filterForm.value.status)
   }
 
-  // Apply discrepancy filter
-  if (filterForm.value.discrepancy) {
-    filtered = filtered.filter((item) => item.discrepancy === filterForm.value.discrepancy)
-  }
-
-  // Apply received date filter
-  if (filterForm.value.receivedDate) {
-    filtered = filtered.filter((item) => item.receivedDate === filterForm.value.receivedDate)
+  // Apply hasDiscrepancy filter
+  if (filterForm.value.hasDiscrepancy) {
+    const hasDiscrepancy = filterForm.value.hasDiscrepancy === 'true'
+    filtered = filtered.filter((item) => item.hasDiscrepancy === hasDiscrepancy)
   }
 
   return filtered
 })
 
 const getStatusBadgeClass = (status: string) => {
-  if (status === 'Completed') return 'badge-success'
-  if (status === 'Pending') return 'badge-warning'
+  if (status === 'Received') return 'badge-success'
+  if (status === 'Waiting Approval') return 'badge-warning'
+  if (status === 'Draft') return 'badge-info'
   if (status === 'Rejected') return 'badge-danger'
   return 'badge-secondary'
 }
@@ -475,8 +319,8 @@ const formatDate = (date: string) => {
   return moment(date).format('YYYY/MM/DD')
 }
 
-const setList = (listData: ReceivingData[]) => {
-  const result: ReceivingData[] = []
+const setList = (listData: ReceivingConfirmationData[]) => {
+  const result: ReceivingConfirmationData[] = []
   for (const [index, item] of listData.entries()) {
     const start = currentPage.value * pageSize.value - pageSize.value
     const end = currentPage.value * pageSize.value - 1
@@ -510,42 +354,54 @@ const applyFilter = () => {
     payload.push({ key: 'Status', value: filterForm.value.status })
   }
 
-  if (filterForm.value.discrepancy) {
-    payload.push({ key: 'Discrepancy', value: filterForm.value.discrepancy })
+  if (filterForm.value.hasDiscrepancy) {
+    payload.push({
+      key: 'Has Discrepancy',
+      value: filterForm.value.hasDiscrepancy === 'true' ? 'Yes' : 'No',
+    })
   }
 
-  if (filterForm.value.receivedDate) {
-    payload.push({ key: 'Received Date', value: filterForm.value.receivedDate })
+  if (filterForm.value.receivedDateFrom) {
+    payload.push({ key: 'Date From', value: filterForm.value.receivedDateFrom })
+  }
+
+  if (filterForm.value.receivedDateTo) {
+    payload.push({ key: 'Date To', value: filterForm.value.receivedDateTo })
   }
 
   filteredPayload.value = payload
   currentPage.value = 1
-  setList(filteredDataList.value)
+
+  // Fetch data dengan filter dari server
+  fetchData()
 }
 
 const resetFilter = () => {
   filterForm.value = {
     status: '',
-    discrepancy: '',
-    receivedDate: '',
+    hasDiscrepancy: '',
+    receivedDateFrom: '',
+    receivedDateTo: '',
   }
   filteredPayload.value = []
   currentPage.value = 1
-  setList(filteredDataList.value)
+  fetchData()
 }
 
 const deleteFilter = (key: string) => {
   if (key === 'Status') {
     filterForm.value.status = ''
-  } else if (key === 'Discrepancy') {
-    filterForm.value.discrepancy = ''
-  } else if (key === 'Received Date') {
-    filterForm.value.receivedDate = ''
+  } else if (key === 'Has Discrepancy') {
+    filterForm.value.hasDiscrepancy = ''
+  } else if (key === 'Date From') {
+    filterForm.value.receivedDateFrom = ''
+  } else if (key === 'Date To') {
+    filterForm.value.receivedDateTo = ''
   }
 
   filteredPayload.value = filteredPayload.value.filter((item) => item.key !== key)
   currentPage.value = 1
-  setList(filteredDataList.value)
+  fetchData()
 }
 
 const sortColumn = (columnName: string | null) => {
@@ -563,7 +419,7 @@ const sortColumn = (columnName: string | null) => {
 
   const roleSort = ['asc', 'desc', '']
   const listData = cloneDeep(filteredDataList.value)
-  let result: ReceivingData[] = []
+  let result: ReceivingConfirmationData[] = []
 
   if (columnName) {
     if (sortColumnName.value !== columnName) sortBy.value = ''
@@ -609,14 +465,14 @@ const exportData = () => {
   alert('Export functionality will be implemented')
 }
 
-const viewDetail = (id: string) => {
+const viewDetail = (id: number) => {
   console.log('View detail for:', id)
   // TODO: Navigate to detail page
-  alert(`View detail for: ${id}`)
+  alert(`View detail for Report ID: ${id}`)
 }
 
 onMounted(() => {
-  setList(filteredDataList.value)
+  fetchData()
 })
 </script>
 

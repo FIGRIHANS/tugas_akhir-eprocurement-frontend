@@ -50,10 +50,53 @@ const router = createRouter({
         ...analyticDashboard,
         ...digitalReceiving,
         ...taxReconciliation,
+        {
+          path: '/health-check',
+          name: 'health-check',
+          component: () => import('@/views/HealthCheck.vue'),
+          meta: {
+            pageTitle: 'Health Check',
+          },
+        },
       ],
       meta: {
         middleware: 'auth',
       },
+    },
+
+    // ==============================
+    // PUBLIC ROUTES (No Auth Required) - For Testing
+    // ==============================
+    {
+      path: '/test',
+      component: LayoutWithSidebar,
+      children: [
+        {
+          path: 'receiving-confirmation-list',
+          name: 'testReceivingConfirmationList',
+          component: () => import('@/views/receivingConfirmation/ReceivingConfirmationList.vue'),
+          meta: {
+            pageTitle: 'Receiving Confirmation List (Test)',
+          },
+        },
+        {
+          path: 'receiving-confirmation-detail/:id',
+          name: 'testReceivingConfirmationDetail',
+          component: () => import('@/views/receivingConfirmation/ReceivingConfirmationDetail.vue'),
+          meta: {
+            pageTitle: 'Receiving Confirmation Detail (Test)',
+          },
+        },
+        {
+          path: 'receiving-confirmation-create',
+          name: 'testReceivingConfirmationCreate',
+          component: () => import('@/views/receivingConfirmation/ReceivingConfirmationCreate.vue'),
+          meta: {
+            pageTitle: 'Receiving Confirmation Create (Test)',
+          },
+        },
+      ],
+      // Tidak ada middleware: 'auth'
     },
 
     // Empty State
