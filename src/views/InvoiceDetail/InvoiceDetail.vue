@@ -529,12 +529,31 @@ const handleConfirmPaymentStatus = async () => {
         if (latestData?.result?.content?.detail) {
           const detail = latestData.result.content.detail
 
-          // IMPORTANT: Backend returns ALL historical records (10+)
-          // We only want to display the records we just sent
-          // Filter to show only records that match the IDs we sent
-          const sentIds = paymentDetails.map((p) => p.invoicePaymentDetailId)
-          const filteredDetail = detail.filter((item) =>
-            sentIds.includes(item.invoicePaymentDetailId),
+          // IMPORTANT: Backend returns ALL historical records
+          // We want to display the same number of records we just sent
+          // SAP sync data may have invoicePaymentDetailId = 0, so we can't filter by ID
+          // Instead, take the N most recent records where N = number of records we sent
+          const recordCountSent = paymentDetails.length
+
+          // Sort by invoicePaymentDetailId descending to get latest records first
+          const sortedDetail = [...detail].sort(
+            (a, b) => (b.invoicePaymentDetailId || 0) - (a.invoicePaymentDetailId || 0),
+          )
+
+          // Take the same number of records we sent
+          const filteredDetail = sortedDetail.slice(0, recordCountSent)
+
+          // Re-sort by ID ascending for display order
+          filteredDetail.sort(
+            (a, b) => (a.invoicePaymentDetailId || 0) - (b.invoicePaymentDetailId || 0),
+          )
+
+          console.log(
+            '📊 After update - Taking',
+            recordCountSent,
+            'latest records from',
+            detail.length,
+            'total',
           )
 
           // Map filtered details
@@ -550,6 +569,14 @@ const handleConfirmPaymentStatus = async () => {
             isModified: false, // Reset modified flag
           }))
 
+          // Save the NEW IDs to sessionStorage for future tab switches
+          const newIds = filteredDetail.map((item) => item.invoicePaymentDetailId)
+          sessionStorage.setItem(
+            `paymentDetailsIds_${form.value.invoiceUId}`,
+            JSON.stringify(newIds),
+          )
+          console.log('💾 Saved new IDs to sessionStorage:', newIds)
+
           // Update savedPaymentDetailsFromSession
           savedPaymentDetailsFromSession.value = mappedDetails
 
@@ -559,6 +586,8 @@ const handleConfirmPaymentStatus = async () => {
           if (paymentDetailsDataRef) {
             paymentDetailsDataRef.value = [...mappedDetails]
           }
+
+          console.log('✅ Payment details updated with', mappedDetails.length, 'records')
         }
       } catch (fetchError) {
         console.error('Error fetching latest payment status:', fetchError)
