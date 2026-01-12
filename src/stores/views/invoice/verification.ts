@@ -368,18 +368,9 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
   }
 
   const getPaymentStatusNonPo = async (invoiceUId: string) => {
-    // NOTE: Backend doesn't have GET endpoint for payment-status-non-po
-    // Use POST with minimal body to fetch existing data
-    // Empty detail array prevents creating new records
-    const minimalBody = {
-      header: {
-        invoiceUId: invoiceUId,
-      },
-      detail: [],
-    }
-    const response: ApiResponse<UpdatePaymentStatusResponse> = await invoiceApi.post(
-      PAYMENT_STATUS_NON_PO_ENDPOINT,
-      minimalBody,
+    // NOTE: Non-PO uses the same GET endpoint as PO for fetching payment status
+    const response: ApiResponse<UpdatePaymentStatusResponse> = await invoiceApi.get(
+      `${PAYMENT_STATUS_ENDPOINT}/${invoiceUId}`,
     )
     return response.data
   }
