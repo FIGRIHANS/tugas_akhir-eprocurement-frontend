@@ -8,7 +8,7 @@
         </button>
       </div>
       <div class="modal-body py-[16px] px-[16px] flex flex-col gap-[20px]">
-        <div class="overflow-x-scroll overflow-y-scroll h-[600px] pogr__table">
+        <div class="overflow-x-scroll overflow-y-scroll max-h-[600px] pogr__table">
           <table class="table table-border text-sm" data-datatable-table="true">
             <thead>
               <tr>
