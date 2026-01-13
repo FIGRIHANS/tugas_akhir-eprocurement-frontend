@@ -227,6 +227,21 @@ export default [
         title: 'Receiving Confirmation List',
         to: 'receivingConfirmationList',
       },
+      {
+        id: 'delivery-notes',
+        title: 'Create Delivery Notes',
+        to: 'deliveryNotes',
+      },
+      {
+        id: 'delivery-notes-create',
+        title: 'Create Delivery Notes',
+        to: 'deliveryNotesCreate',
+      },
+      {
+        id: 'delivery-notes-list',
+        title: 'Delivery Notes List',
+        to: 'deliveryNotesList',
+      },
     ],
   },
   {
