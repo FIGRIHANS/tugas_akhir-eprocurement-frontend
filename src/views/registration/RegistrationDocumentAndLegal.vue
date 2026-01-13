@@ -24,9 +24,8 @@
               <th>{{ $t('general.action') }}</th>
             </tr>
           </thead>
-
           <tbody v-if="documentAndLegal.kategori">
-            <tr v-for="(item, index) in tableItems" :key="item.id">
+            <tr v-for="(item, index) in safeTableItems" :key="item.licenseId">
               <td>
                 {{ tr(item.licenseName) }}
                 <span v-if="checkIsRequired(item.licenseId)" class="text-danger">*</span>
@@ -277,6 +276,13 @@ const uploadStore = useUploadStore()
 
 const documentAndLegal = computed(() => registrationVendorStore.documentAndLegal)
 const companyCategoryList = computed(() => vendorMasterDataStore.companyCategoryList)
+
+const safeTableItems = computed(() => {
+  return tableItems.value.filter((_, index) => {
+    return !!documentAndLegal.value.fields[index]
+  })
+})
+
 const translatedCompanyCategoryList = computed(() => {
   return companyCategoryList.value.map((item) => {
     return {
@@ -321,7 +327,7 @@ const addFile = async (index: number, type: 'default' | 'other doc') => {
 
       const response = await uploadStore.uploadFile(fileList.value[index].file, 0)
 
-      registrationVendorStore.documentAndLegal.fields[index].uploadUrl = response.path
+      registrationVendorStore.documentAndLegal.fields[index].uploadUrl = response.url
 
       registrationVendorStore.fileList[index].status = 'success'
     } else if (typeOther) {
@@ -329,7 +335,7 @@ const addFile = async (index: number, type: 'default' | 'other doc') => {
 
       const response = await uploadStore.uploadFile(fileOtherDocumentList.value[index].file, 0)
 
-      registrationVendorStore.documentAndLegal.anotherDocuments[index].uploadUrl = response.path
+      registrationVendorStore.documentAndLegal.anotherDocuments[index].uploadUrl = response.url
 
       registrationVendorStore.fileOtherDocumentList[index].status = 'success'
     }
@@ -371,9 +377,6 @@ watch(
       registrationVendorStore.documentAndLegal.anotherDocuments = []
 
       selectedCategory.value = documentAndLegal.value.kategori
-      console.log(tableItems.value, 'table items')
-
-      console.log(documentAndLegal.value.kategori, 'cat')
 
       registrationVendorStore.documentAndLegal.fields = tableItems.value.map((item) => ({
         licenseId: item.licenseId,

@@ -113,8 +113,16 @@ const tab = reactive({
 const tabItems = computed(() => [
   { label: t('registration.information'), value: 'registration__information', disabled: true },
   { label: t('registration.contact'), value: 'registration__contact', disabled: true },
-  { label: t('registration.documentAndLegal'), value: 'registration__document-and-legal', disabled: true },
-  { label: t('registration.paymentDetailTab'), value: 'registration__payment-detail', disabled: true },
+  {
+    label: t('registration.documentAndLegal'),
+    value: 'registration__document-and-legal',
+    disabled: true,
+  },
+  {
+    label: t('registration.paymentDetailTab'),
+    value: 'registration__payment-detail',
+    disabled: true,
+  },
 ])
 
 const tabPosition = computed(() => {
@@ -243,7 +251,6 @@ const checkFieldNotEmpty = () => {
       const checkingField = registrationVendorStore.documentAndLegal.fields.map((item) =>
         Object.values(item).some((value) => value === true),
       )
-
       return !checkingField.some((value) => value === true)
 
     case 'registration__payment-detail':
@@ -399,6 +406,8 @@ const previous = () => {
 
 const next = async () => {
   const index = tabPosition.value + 1
+
+  console.log(checkFieldNotEmpty(), 'Check Is Empty')
 
   if (checkFieldNotEmpty()) {
     if (index >= tabItems.value.length) {

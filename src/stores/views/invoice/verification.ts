@@ -368,8 +368,9 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
   }
 
   const getPaymentStatusNonPo = async (invoiceUId: string) => {
+    // NOTE: Non-PO uses the same GET endpoint as PO for fetching payment status
     const response: ApiResponse<UpdatePaymentStatusResponse> = await invoiceApi.get(
-      `${PAYMENT_STATUS_NON_PO_ENDPOINT}/${invoiceUId}`,
+      `${PAYMENT_STATUS_ENDPOINT}/${invoiceUId}`,
     )
     return response.data
   }

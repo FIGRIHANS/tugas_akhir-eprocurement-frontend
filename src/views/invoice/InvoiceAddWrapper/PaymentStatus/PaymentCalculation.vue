@@ -4,19 +4,14 @@
       <span class="font-semibold text-base whitespace-nowrap">Payment Status</span>
     </div>
     <div class="card-body payment-table">
-      <div
-        v-for="(item, index) in listPaymentStatus"
-        :key="index"
-        class="status-row py-[22px] px-[20px] text-xs flex"
-        :class="
-          index === listPaymentStatus.length - 1
-            ? 'calculation__last-field last-row'
-            : 'border-b border-gray-200'
-        "
-      >
+      <div v-for="(item, index) in listPaymentStatus" :key="index" class="status-row py-[22px] px-[20px] text-xs flex"
+        :class="index === listPaymentStatus.length - 1
+          ? 'calculation__last-field last-row'
+          : 'border-b border-gray-200'
+          ">
         <div class="flex-1">{{ item.name }}</div>
         <div class="flex-1">
-          {{ form?.currency === 'IDR' ? useFormatIdr(item.amount) : useFormatUsd(item.amount) }}
+          {{ item.currency === 'IDR' ? useFormatIdr(item.amount) : useFormatUsd(item.amount) }}
         </div>
         <div>{{ item.currency }}</div>
       </div>
@@ -28,8 +23,10 @@
 import { ref, inject, onMounted, watch } from 'vue'
 import type { formTypes } from '../../types/invoiceAddWrapper'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
+import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 
 const form = inject<formTypes>('form')
+const verificationApi = useInvoiceVerificationStore()
 
 interface PaymentStatusItem {
   name: string
@@ -37,46 +34,95 @@ interface PaymentStatusItem {
   currency: string
 }
 
+interface PaymentStatusHeader {
+  id: number
+  invoiceUId: string
+  companyCode: string
+  sapInvoiceNo: string
+  invoicePostingDate: string
+  termOfPayment: string
+  estimatedPaymentDate: string
+  paymentMethod: string
+  clearingDocumentNo: string
+  paymentStatus: string
+  statusCode: number
+  statusName: string
+  totalAmountInvoice: number
+  paymentReceivedAmount: number
+  outstandingAmount: number
+  currency: string
+}
+
 const listPaymentStatus = ref<PaymentStatusItem[]>([])
+const paymentStatusHeader = ref<PaymentStatusHeader | null>(null)
+
+const fetchPaymentStatus = async () => {
+  try {
+    if (!form || !form.invoiceUId) return
+
+    const response = await verificationApi.getPaymentStatus(form.invoiceUId)
+
+    if (response?.result?.content?.header) {
+      paymentStatusHeader.value = response.result.content.header as PaymentStatusHeader
+      setPaymentStatus()
+    }
+  } catch (error) {
+    console.error('Error fetching payment status data:', error)
+    // Fallback to form data if API fails
+    setPaymentStatus()
+  }
+}
 
 const setPaymentStatus = () => {
   if (!form) return
 
-  const totalInvoice = form.totalNetAmount || 0
-  // For now, assume all invoices with status 10 are fully paid
-  const paymentReceived = form.status === 10 ? totalInvoice : 0
-  const outstandingPayment = totalInvoice - paymentReceived
+  // Use API data if available, otherwise fallback to form data
+  const totalInvoice = paymentStatusHeader.value?.totalAmountInvoice || form.totalNetAmount || 0
+  const paymentReceived = paymentStatusHeader.value?.paymentReceivedAmount || 0
+  const outstandingPayment = paymentStatusHeader.value?.outstandingAmount || (totalInvoice - paymentReceived)
+  const currency = paymentStatusHeader.value?.currency || form.currency
 
   listPaymentStatus.value = [
     {
       name: 'Total Invoice',
       amount: totalInvoice.toString(),
-      currency: form.currency || 'IDR',
+      currency: currency,
     },
     {
       name: 'Payment Received',
       amount: paymentReceived.toString(),
-      currency: form.currency || 'IDR',
+      currency: currency,
     },
     {
       name: 'Outstanding Payment',
       amount: outstandingPayment.toString(),
-      currency: form.currency || 'IDR',
+      currency: currency,
     },
   ]
 }
 
-// Watch for form changes and recalculate
+// Watch for form changes and refetch payment status
 watch(
-  () => form,
+  () => form?.invoiceUId,
+  (newInvoiceUId) => {
+    if (newInvoiceUId) {
+      fetchPaymentStatus()
+    }
+  },
+  { immediate: true }
+)
+
+// Watch for payment status header changes
+watch(
+  () => paymentStatusHeader.value,
   () => {
     setPaymentStatus()
   },
-  { deep: true, immediate: true }
+  { deep: true }
 )
 
-onMounted(() => {
-  setPaymentStatus()
+onMounted(async () => {
+  await fetchPaymentStatus()
 })
 </script>
 

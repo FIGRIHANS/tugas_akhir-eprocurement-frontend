@@ -464,7 +464,7 @@ const dataList = ref<VATReconciliationData[]>([])
 const fetchVatData = async () => {
   isLoading.value = true
   try {
-    const response = await vatApi.get('/api/vat/vat-reconciliation')
+    const response = await vatApi.get('/vat/vat-reconciliation')
     // API returns { result: { content: [...] } }
     const content = response.data.result?.content || []
     console.log('API Response content:', content)

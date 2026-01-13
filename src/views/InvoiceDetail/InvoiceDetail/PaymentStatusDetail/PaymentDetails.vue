@@ -186,6 +186,42 @@ const sanitizeRemark = (remark?: string) => {
   return trimmed
 }
 
+// Moved above watch to fix: Cannot access 'formatSapDate' before initialization
+const getCurrentDate = () => {
+  const today = new Date()
+  const day = today.getDate().toString().padStart(2, '0')
+  const month = (today.getMonth() + 1).toString().padStart(2, '0')
+  const year = today.getFullYear()
+
+  return `${day}/${month}/${year}`
+}
+
+const formatSapDate = (dateString: string | number) => {
+  if (!dateString) return getCurrentDate()
+
+  try {
+    let date: Date
+
+    if (typeof dateString === 'number' || /^\d{8}$/.test(dateString.toString())) {
+      const dateStr = dateString.toString()
+      const year = dateStr.substring(0, 4)
+      const month = dateStr.substring(4, 6)
+      const day = dateStr.substring(6, 8)
+      date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
+    } else {
+      date = new Date(dateString.toString())
+    }
+
+    const day = date.getDate().toString().padStart(2, '0')
+    const month = (date.getMonth() + 1).toString().padStart(2, '0')
+    const year = date.getFullYear()
+
+    return `${day}/${month}/${year}`
+  } catch {
+    return getCurrentDate()
+  }
+}
+
 watch(
   paymentDetails,
   (newVal) => {
@@ -306,40 +342,7 @@ const updatePaymentDetailsFromSap = (sapDataArray: SapDataResponse[]) => {
   console.log('Updated payment details from SAP:', newPaymentDetails)
 }
 
-const formatSapDate = (dateString: string | number) => {
-  if (!dateString) return getCurrentDate()
-
-  try {
-    let date: Date
-
-    if (typeof dateString === 'number' || /^\d{8}$/.test(dateString.toString())) {
-      const dateStr = dateString.toString()
-      const year = dateStr.substring(0, 4)
-      const month = dateStr.substring(4, 6)
-      const day = dateStr.substring(6, 8)
-      date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
-    } else {
-      date = new Date(dateString.toString())
-    }
-
-    const day = date.getDate().toString().padStart(2, '0')
-    const month = (date.getMonth() + 1).toString().padStart(2, '0')
-    const year = date.getFullYear()
-
-    return `${day}/${month}/${year}`
-  } catch {
-    return getCurrentDate()
-  }
-}
-
-const getCurrentDate = () => {
-  const today = new Date()
-  const day = today.getDate().toString().padStart(2, '0')
-  const month = (today.getMonth() + 1).toString().padStart(2, '0')
-  const year = today.getFullYear()
-
-  return `${day}/${month}/${year}`
-}
+// formatSapDate and getCurrentDate moved above watch (line ~188)
 
 const mapSapStatus = (sapStatus: string) => {
   switch (sapStatus?.toUpperCase()) {
