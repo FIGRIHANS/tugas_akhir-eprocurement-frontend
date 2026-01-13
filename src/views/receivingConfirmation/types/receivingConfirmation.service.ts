@@ -33,7 +33,7 @@ export interface ReceivingConfirmationCreatePayload {
   items: ReceivingConfirmationDetailPayload[]
 }
 
-// Interface untuk data Receiving Confirmation
+// Interface untuk data Receiving Confirmation - sesuai dengan response backend
 export interface ReceivingConfirmationData {
   reportID: number
   tripID: string
@@ -88,7 +88,7 @@ export interface ApiResponse<T> {
   }
 }
 
-// Interface untuk parameter filter/query
+// Interface untuk parameter filter/query - sesuai dengan backend controller
 export interface ReceivingConfirmationQueryParams {
   searchText?: string
   orderNumber?: string

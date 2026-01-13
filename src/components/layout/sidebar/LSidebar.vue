@@ -279,6 +279,8 @@ const filteredSidebarMenu = computed(() => {
                     child.id === 'email-invoice-integration' ||
                     child.id === 'receiving-confirmation' ||
                     child.id === 'receiving-confirmation-list' ||
+                    child.id === 'delivery-notes' ||
+                    child.id === 'delivery-notes-list' ||
                     child.id === 'vat-reconciliation' ||
                     child.id === 'wht-reconciliation' ||
                     child.id === 'invoice-type',

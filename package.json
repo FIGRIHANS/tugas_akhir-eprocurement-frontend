@@ -25,6 +25,7 @@
     "moment-timezone": "^0.6.0",
     "pinia": "^3.0.3",
     "save": "^2.9.0",
+    "sweetalert2": "^11.26.17",
     "vee-validate": "^4.15.1",
     "vue": "^3.5.20",
     "vue-i18n": "11",

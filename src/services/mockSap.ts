@@ -57,55 +57,14 @@ export interface DeliveryNotesQueryParams {
   estimatedArrivalTo?: string
 }
 
-// Interface untuk Mock SAP PO Item
-export interface MockSapPoItem {
-  id: number
-  poNumber: string
-  sku: string
-  itemName: string
-  uom: string
-  qtyOrdered: number
-}
-
-// Interface untuk Mock SAP PO Data
-export interface MockSapPoData {
-  poNumber: string
-  vendorCode: string
-  vendorName: string
-  poDate: string
-  totalAmount: number | null
-  createdBy: string
-  updatedBy: string
-  createdUtcDate: string
-  updatedUtcDate: string
-  items: MockSapPoItem[]
-}
-
-// Interface untuk Create Delivery Note Payload
-export interface DeliveryNoteCreatePayload {
-  deliveryNoteNumber: string
-  poNumber: string
-  vendorCode: string
-  tripID?: string
-  transporter: string
-  licensePlate: string
-  driverName: string
-  pickupAddress: string
-  destinationAddress: string
-  driverSignature: string
-  truckType?: string
-  shippingDate: string
-  status: string
-  details: Array<{
-    sku: string
-    description: string
-    uom: string
-    lotNo: string
-    qtyShipped: number
-  }>
-}
-
+/**
+ * Service untuk mengelola API Delivery Notes
+ */
 const DeliveryNotesService = {
+  /**
+   * Get list of delivery notes
+   * Endpoint: api/delivery-notes/list
+   */
   async getList(params?: DeliveryNotesQueryParams): Promise<DeliveryNotesData[]> {
     try {
       const response = await invoiceApi.get<ApiResponse<DeliveryNotesData[]>>(
@@ -165,46 +124,6 @@ const DeliveryNotesService = {
       return null
     } catch (error) {
       console.error('Error fetching delivery notes detail:', error)
-      throw error
-    }
-  },
-
-  /**
-   * Search PO from Mock SAP
-   * Endpoint: api/mock-sap/list
-   */
-  async searchPoFromSap(poNumber?: string): Promise<MockSapPoData[]> {
-    try {
-      const response = await invoiceApi.get<ApiResponse<MockSapPoData[]>>('/mock-sap/list', {
-        params: poNumber ? { poNumber } : {},
-      })
-
-      if (response.data?.result?.content) {
-        return response.data.result.content
-      }
-
-      return []
-    } catch (error) {
-      console.error('Error fetching PO from Mock SAP:', error)
-      throw error
-    }
-  },
-
-  /**
-   * Create new delivery note
-   * Endpoint: api/delivery-notes/create
-   */
-  async create(payload: DeliveryNoteCreatePayload): Promise<any> {
-    try {
-      const response = await invoiceApi.post<ApiResponse<any>>('/delivery-notes/create', payload)
-
-      if (response.data?.result) {
-        return response.data.result
-      }
-
-      return response.data
-    } catch (error) {
-      console.error('Error creating delivery note:', error)
       throw error
     }
   },

@@ -332,6 +332,7 @@ import { useRouter } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import VueSignature from 'vue3-signature'
+import Swal from 'sweetalert2'
 import DeliveryNotesService, { type DeliveryNotesData } from '@/services/deliveryNotes.service'
 import ReceivingConfirmationService, {
   type ReceivingConfirmationCreatePayload,
@@ -424,7 +425,11 @@ const tableData = ref<TableDataItem[]>([])
 // Methods
 const searchDeliveryNotes = async () => {
   if (!poNumberSearch.value.trim()) {
-    alert('Please enter a PO Number')
+    Swal.fire({
+      icon: 'warning',
+      title: 'Validation Error',
+      text: 'Please enter a PO Number',
+    })
     return
   }
 
@@ -436,7 +441,11 @@ const searchDeliveryNotes = async () => {
     deliveryNotesOptions.value = results
 
     if (results.length === 0) {
-      alert('No Delivery Notes found for this PO Number')
+      Swal.fire({
+        icon: 'info',
+        title: 'Not Found',
+        text: 'No Delivery Notes found for this PO Number',
+      })
     } else if (results.length === 1) {
       // Auto-select if only one result
       selectDeliveryNote(results[0])
@@ -445,7 +454,11 @@ const searchDeliveryNotes = async () => {
     }
   } catch (error) {
     console.error('Error searching delivery notes:', error)
-    alert('Failed to search Delivery Notes. Please try again.')
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Failed to search Delivery Notes. Please try again.',
+    })
   } finally {
     isSearching.value = false
   }
@@ -514,27 +527,47 @@ const clearSignature = () => {
 
 const validateForm = (): boolean => {
   if (!formData.value.poNumber) {
-    alert('Please select a Delivery Note first')
+    Swal.fire({
+      icon: 'warning',
+      title: 'Validation Error',
+      text: 'Please select a Delivery Note first',
+    })
     return false
   }
 
   if (!formData.value.whCheckerName.trim()) {
-    alert('Please enter Employee Name')
+    Swal.fire({
+      icon: 'warning',
+      title: 'Validation Error',
+      text: 'Please enter Employee Name',
+    })
     return false
   }
 
   if (!formData.value.driverName.trim()) {
-    alert('Please enter Driver Name')
+    Swal.fire({
+      icon: 'warning',
+      title: 'Validation Error',
+      text: 'Please enter Driver Name',
+    })
     return false
   }
 
   if (!formData.value.receivedDate) {
-    alert('Please enter Received Date')
+    Swal.fire({
+      icon: 'warning',
+      title: 'Validation Error',
+      text: 'Please enter Received Date',
+    })
     return false
   }
 
   if (tableData.value.length === 0) {
-    alert('No items to submit. Please select a Delivery Note with items.')
+    Swal.fire({
+      icon: 'warning',
+      title: 'Validation Error',
+      text: 'No items to submit. Please select a Delivery Note with items.',
+    })
     return false
   }
 
@@ -542,7 +575,11 @@ const validateForm = (): boolean => {
   if (signaturePad.value) {
     const { isEmpty } = signaturePad.value.save()
     if (isEmpty) {
-      alert('Please provide a signature')
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation Error',
+        text: 'Please provide a signature',
+      })
       return false
     }
   }
@@ -599,11 +636,19 @@ const submitForm = async () => {
 
     await ReceivingConfirmationService.create(payload)
 
-    alert('Receiving confirmation submitted successfully!')
+    Swal.fire({
+      icon: 'success',
+      title: 'Success',
+      text: 'Receiving confirmation submitted successfully!',
+    })
     router.push({ name: 'testReceivingConfirmationList' })
   } catch (error) {
     console.error('Error submitting form:', error)
-    alert('Failed to submit. Please try again.')
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Failed to submit. Please try again.',
+    })
   } finally {
     isSubmitting.value = false
   }
