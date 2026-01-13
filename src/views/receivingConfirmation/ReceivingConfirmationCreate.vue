@@ -81,6 +81,18 @@
                     placeholder="Enter Employee Name"
                   />
                 </div>
+                <!-- Trip ID -->
+                <div class="flex items-center gap-4">
+                  <label class="form-label text-sm font-medium text-gray-600 w-40 mb-0"
+                    >Trip ID <span class="text-red-500">*</span></label
+                  >
+                  <input
+                    v-model="formData.tripID"
+                    type="text"
+                    class="input flex-1"
+                    placeholder="Enter Trip ID"
+                  />
+                </div>
 
                 <!-- Driver Name (Editable) -->
                 <div class="flex items-center gap-4">
@@ -470,7 +482,7 @@ const selectDeliveryNote = (dn: DeliveryNotesData) => {
 
   // Auto-fill form data from selected Delivery Note
   formData.value.poNumber = dn.poNumber
-  formData.value.tripID = dn.tripId || ''
+  formData.value.tripID = dn.tripID || ''
   formData.value.orderNumber = dn.poNumber // Using PO Number as Order Number
   formData.value.driverName = dn.driverName || ''
   formData.value.licensePlate = dn.licensePlate || ''
@@ -516,7 +528,7 @@ const getDifferenceClass = (diff: number) => {
 }
 
 const goBack = () => {
-  router.push({ name: 'testReceivingConfirmationList' })
+  router.push({ name: 'receivingConfirmationList' })
 }
 
 const clearSignature = () => {
@@ -641,7 +653,7 @@ const submitForm = async () => {
       title: 'Success',
       text: 'Receiving confirmation submitted successfully!',
     })
-    router.push({ name: 'testReceivingConfirmationList' })
+    router.push({ name: 'receivingConfirmationList' })
   } catch (error) {
     console.error('Error submitting form:', error)
     Swal.fire({
