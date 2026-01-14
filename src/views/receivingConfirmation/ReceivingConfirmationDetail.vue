@@ -265,6 +265,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
+import ReceivingConfirmationService from '@/services/receivingConfirmation.service'
 
 const router = useRouter()
 const route = useRoute()
@@ -404,10 +405,52 @@ const approveConfirmation = () => {
 }
 
 onMounted(() => {
-  // TODO: Load data based on route.params.id
   const id = route.params.id
   console.log('Loading receiving confirmation with ID:', id)
+
   // Load data from API
+  ReceivingConfirmationService.getDetail(Number(id))
+    .then((data) => {
+      if (data) {
+        // Map API response to FormData structure
+        formData.value = {
+          orderNo: data.orderNumber || '',
+          namaKaryawan: data.whCheckerName || '',
+          namaSopir: data.driverName || '',
+          noPolisi: data.licensePlate || '',
+          transporter: data.transporter || '',
+          pickup: data.pickup || '',
+          destination: data.destination || '',
+          orderDate: data.receivedDate
+            ? new Date(data.receivedDate).toISOString().split('T')[0]
+            : '',
+          receivedDate: data.receivedDate
+            ? new Date(data.receivedDate).toISOString().split('T')[0]
+            : '',
+          signature: data.digitalSignaturePath || null,
+        }
+
+        // Map API items to TableData structure
+        tableData.value = data.items.map((item) => ({
+          pickSlip: item.noPickSlip || '',
+          sku: item.sku || '',
+          description: item.deskripsi || '',
+          diSuratJalan: item.qtySuratJalan || 0,
+          actual: item.qtyActual || 0,
+          diSuratJalanKonfirmasi: item.qtySuratJalan || 0,
+          diterima: item.qtyActual || 0,
+          selisih: item.qtySelisih || 0,
+          lebih: item.qtySelisih > 0 ? item.qtySelisih : 0,
+          kurang: item.qtySelisih < 0 ? Math.abs(item.qtySelisih) : 0,
+          repackQty: item.repackQty || 0,
+          damageQty: item.damageQty || 0,
+        }))
+      }
+    })
+    .catch((error) => {
+      console.error('Error loading receiving confirmation:', error)
+      alert('Failed to load receiving confirmation data')
+    })
 })
 </script>
 
