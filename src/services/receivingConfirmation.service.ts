@@ -133,10 +133,15 @@ const ReceivingConfirmationService = {
    * Get detail of a receiving confirmation by ID
    * Endpoint: api/receiving-confirmation/{id}
    */
-  async getDetail(id: number): Promise<ReceivingConfirmationData | null> {
+  async getDetail(reportID: number): Promise<ReceivingConfirmationData | null> {
     try {
       const response = await invoiceApi.get<ApiResponse<ReceivingConfirmationData>>(
-        `/receiving-confirmation/${id}`,
+        `/receiving-confirmation/detail`,
+        {
+          params: {
+            reportID: reportID,
+          },
+        },
       )
 
       if (response.data?.result?.content) {

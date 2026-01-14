@@ -661,11 +661,26 @@ const submitForm = async () => {
     // Save signature data
     let signatureData = ''
     if (signaturePad.value) {
-      const { isEmpty, data } = signaturePad.value.save()
-      if (!isEmpty) {
-        signatureData = data
+      const saveResult = signaturePad.value.save()
+      console.log('Signature save result:', saveResult)
+      console.log('Type of save result:', typeof saveResult)
+
+      // vue3-signature returns the Base64 string directly (not an object)
+      if (saveResult && typeof saveResult === 'string' && saveResult.length > 0) {
+        signatureData = saveResult
+        console.log('✅ Signature data captured successfully!')
+        console.log('Signature data length:', signatureData.length)
+        console.log('First 100 chars:', signatureData.substring(0, 100))
+      } else if (!saveResult || saveResult.length === 0) {
+        console.warn('⚠️ Signature pad is empty - user did not draw anything')
+      } else {
+        console.error('❌ Unexpected save result type:', typeof saveResult)
       }
+    } else {
+      console.error('❌ Signature pad ref is null')
     }
+
+    console.log('Final signature data length:', signatureData?.length || 0)
 
     // Convert estimatedArrival to shippingDate (YYYY-MM-DD format)
     const shippingDate = formData.value.estimatedArrival
@@ -683,7 +698,7 @@ const submitForm = async () => {
       driverName: formData.value.driverName,
       pickupAddress: formData.value.pickupAddress,
       destinationAddress: formData.value.destinationAddress,
-      driverSignature: signatureData,
+      driverSignature: signatureData || '', // Ensure always included
       truckType: formData.value.truckType || undefined,
       shippingDate: shippingDate,
       status: 'Submitted', // Always set to Submitted on create
@@ -691,6 +706,7 @@ const submitForm = async () => {
     }
 
     console.log('Submitting delivery note:', payload)
+    console.log('Signature in payload:', payload.driverSignature ? 'YES' : 'NO (empty)')
 
     await DeliveryNotesService.create(payload)
 

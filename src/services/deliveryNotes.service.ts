@@ -17,6 +17,7 @@ export interface DeliveryNotesData {
   vendorCode: string
   // vendorName?: string
   estimatedArrival: string
+  shippingDate?: string // Backend sends this in detail response
   pickupAddress: string
   status: string
   destinationAddress: string
@@ -156,7 +157,12 @@ const DeliveryNotesService = {
    */
   async getDetail(id: number): Promise<DeliveryNotesData | null> {
     try {
-      const response = await invoiceApi.get<ApiResponse<DeliveryNotesData>>(`/delivery-notes/${id}`)
+      const response = await invoiceApi.get<ApiResponse<DeliveryNotesData>>(
+        `/delivery-notes/detail`,
+        {
+          params: { id },
+        },
+      )
 
       if (response.data?.result?.content) {
         return response.data.result.content

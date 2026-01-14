@@ -54,9 +54,7 @@
                         @click="selectDeliveryNote(dn)"
                       >
                         <div class="font-medium">{{ dn.deliveryNoteNumber }}</div>
-                        <div class="text-sm text-gray-500">
-                          PO: {{ dn.poNumber }} | {{ dn.vendorName }}
-                        </div>
+                        <div class="text-sm text-gray-500">PO: {{ dn.poNumber }}</div>
                       </div>
                     </div>
                   </div>
@@ -403,7 +401,7 @@ const selectedDeliveryNote = ref<DeliveryNotesData | null>(null)
 
 interface SignaturePadInstance {
   clear: () => void
-  save: () => { isEmpty: boolean; data: string }
+  save: () => string // Returns Base64 string directly
   fromDataURL: (data: string) => void
 }
 
@@ -585,8 +583,8 @@ const validateForm = (): boolean => {
 
   // Check signature
   if (signaturePad.value) {
-    const { isEmpty } = signaturePad.value.save()
-    if (isEmpty) {
+    const saveResult = signaturePad.value.save()
+    if (!saveResult || saveResult.trim().length === 0) {
       Swal.fire({
         icon: 'warning',
         title: 'Validation Error',
@@ -608,11 +606,29 @@ const submitForm = async () => {
     // Save signature data
     let signatureData = ''
     if (signaturePad.value) {
-      const { isEmpty, data } = signaturePad.value.save()
-      if (!isEmpty) {
-        signatureData = data
+      const saveResult = signaturePad.value.save()
+      console.log('Signature save result:', saveResult)
+      console.log('Type of save result:', typeof saveResult)
+
+      // vue3-signature returns the Base64 string directly
+      if (saveResult && saveResult.trim().length > 0) {
+        signatureData = saveResult
+      } else {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Validation Error',
+          text: 'Please provide a signature',
+        })
+        isSubmitting.value = false
+        return
       }
+    } else {
+      console.error('❌ Signature pad ref is null')
+      isSubmitting.value = false
+      return
     }
+
+    console.log('Final signature data length:', signatureData?.length || 0)
 
     // Prepare items payload
     const items: ReceivingConfirmationDetailPayload[] = tableData.value.map((item) => ({
@@ -640,11 +656,12 @@ const submitForm = async () => {
       transporter: formData.value.transporter || undefined,
       truckType: formData.value.truckType || undefined,
       licensePlate: formData.value.licensePlate || undefined,
-      digitalSignaturePath: signatureData || undefined,
+      digitalSignaturePath: signatureData || '', // Always send, even if empty
       items: items,
     }
 
     console.log('Submitting payload:', payload)
+    console.log('Signature in payload:', payload.digitalSignaturePath ? 'YES' : 'NO (empty)')
 
     await ReceivingConfirmationService.create(payload)
 
