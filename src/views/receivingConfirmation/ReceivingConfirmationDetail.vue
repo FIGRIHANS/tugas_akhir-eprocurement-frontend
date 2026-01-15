@@ -222,14 +222,26 @@
           <i class="ki-duotone ki-arrow-left"></i>
           Back to List
         </button>
-        <button class="btn btn-danger" @click="openRejectModal()">
-          <i class="ki-duotone ki-cross-circle"></i>
-          Reject
-        </button>
-        <button class="btn btn-primary" @click="approveConfirmation()">
-          <i class="ki-duotone ki-check-circle"></i>
-          Approve
-        </button>
+
+        <!-- Show Approve/Reject buttons only if status is NOT Completed -->
+        <template v-if="currentStatus !== 'Completed'">
+          <button class="btn btn-danger" @click="openRejectModal()">
+            <i class="ki-duotone ki-cross-circle"></i>
+            Reject
+          </button>
+          <button class="btn btn-primary" @click="approveConfirmation()">
+            <i class="ki-duotone ki-check-circle"></i>
+            Approve
+          </button>
+        </template>
+
+        <!-- Show Print to PDF button only if status is Completed -->
+        <template v-else>
+          <button class="btn btn-success" @click="printToPDF()">
+            <i class="ki-duotone ki-printer"></i>
+            Print to PDF
+          </button>
+        </template>
       </div>
 
       <!-- Rejection Modal -->
@@ -266,6 +278,9 @@ import { useRouter, useRoute } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import ReceivingConfirmationService from '@/services/receivingConfirmation.service'
+import Swal from 'sweetalert2'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 
 const router = useRouter()
 const route = useRoute()
@@ -354,6 +369,7 @@ const tableData = ref<TableData[]>([
 // Rejection Modal State
 const showRejectModal = ref<boolean>(false)
 const rejectionReason = ref<string>('')
+const currentStatus = ref<string>('')
 
 // Functions
 const goBack = () => {
@@ -363,7 +379,12 @@ const goBack = () => {
 const viewItem = (index: number) => {
   const item = tableData.value[index]
   console.log('Viewing item:', item)
-  alert(`Viewing details for: ${item.pickSlip} - ${item.description}`)
+  Swal.fire({
+    title: 'Item Details',
+    text: `${item.pickSlip} - ${item.description}`,
+    icon: 'info',
+    confirmButtonText: 'OK',
+  })
 }
 
 const openRejectModal = () => {
@@ -376,32 +397,345 @@ const closeRejectModal = () => {
   rejectionReason.value = ''
 }
 
-const confirmReject = () => {
+const printToPDF = () => {
+  const doc = new jsPDF()
+  const pageWidth = doc.internal.pageSize.getWidth()
+  const pageHeight = doc.internal.pageSize.getHeight()
+  let yPos = 20
+
+  // Header - Company Info
+  doc.setFontSize(20)
+  doc.setFont('helvetica', 'bold')
+  doc.text('GOODS RECEIPT INVOICE', pageWidth / 2, yPos, { align: 'center' })
+  yPos += 8
+
+  doc.setFontSize(10)
+  doc.setFont('helvetica', 'normal')
+  doc.text('Receiving Confirmation Report', pageWidth / 2, yPos, { align: 'center' })
+  yPos += 15
+
+  // Horizontal line
+  doc.setLineWidth(0.5)
+  doc.line(14, yPos, pageWidth - 14, yPos)
+  yPos += 10
+
+  // Document Info - Two Columns
+  doc.setFontSize(9)
+  doc.setFont('helvetica', 'bold')
+
+  // Left Column
+  const leftX = 14
+  const rightX = pageWidth / 2 + 10
+  const labelWidth = 35
+
+  // Report Information
+  doc.text('Report ID:', leftX, yPos)
+  doc.setFont('helvetica', 'normal')
+  doc.text(String(formData.value.orderNo || '-'), leftX + labelWidth, yPos)
+
+  doc.setFont('helvetica', 'bold')
+  doc.text('Trip ID:', rightX, yPos)
+  doc.setFont('helvetica', 'normal')
+  doc.text(tableData.value[0]?.pickSlip || '-', rightX + labelWidth, yPos)
+  yPos += 6
+
+  doc.setFont('helvetica', 'bold')
+  doc.text('Order Number:', leftX, yPos)
+  doc.setFont('helvetica', 'normal')
+  doc.text(formData.value.orderNo || '-', leftX + labelWidth, yPos)
+
+  doc.setFont('helvetica', 'bold')
+  doc.text('Status:', rightX, yPos)
+  doc.setFont('helvetica', 'normal')
+  // Status with color
+  if (currentStatus.value === 'Completed') {
+    doc.setTextColor(34, 197, 94) // Green
+  } else if (currentStatus.value === 'Rejected') {
+    doc.setTextColor(239, 68, 68) // Red
+  }
+  doc.text(currentStatus.value || '-', rightX + labelWidth, yPos)
+  doc.setTextColor(0, 0, 0) // Reset to black
+  yPos += 6
+
+  doc.setFont('helvetica', 'bold')
+  doc.text('Received Date:', leftX, yPos)
+  doc.setFont('helvetica', 'normal')
+  doc.text(formData.value.receivedDate || '-', leftX + labelWidth, yPos)
+
+  doc.setFont('helvetica', 'bold')
+  doc.text('Has Discrepancy:', rightX, yPos)
+  doc.setFont('helvetica', 'normal')
+  const hasDiscrepancy = tableData.value.some((item) => item.selisih !== 0)
+  doc.text(hasDiscrepancy ? 'Yes' : 'No', rightX + labelWidth, yPos)
+  yPos += 10
+
+  // Location & Transport Information
+  doc.setFontSize(10)
+  doc.setFont('helvetica', 'bold')
+  doc.setFillColor(59, 130, 246) // Blue background
+  doc.rect(leftX, yPos, pageWidth - 28, 6, 'F')
+  doc.setTextColor(255, 255, 255)
+  doc.text('TRANSPORT INFORMATION', leftX + 2, yPos + 4)
+  doc.setTextColor(0, 0, 0)
+  yPos += 10
+
+  doc.setFontSize(9)
+  doc.setFont('helvetica', 'bold')
+  doc.text('Pickup:', leftX, yPos)
+  doc.setFont('helvetica', 'normal')
+  doc.text(formData.value.pickup || '-', leftX + labelWidth, yPos)
+
+  doc.setFont('helvetica', 'bold')
+  doc.text('Transporter:', rightX, yPos)
+  doc.setFont('helvetica', 'normal')
+  doc.text(formData.value.transporter || '-', rightX + labelWidth, yPos)
+  yPos += 6
+
+  doc.setFont('helvetica', 'bold')
+  doc.text('Destination:', leftX, yPos)
+  doc.setFont('helvetica', 'normal')
+  doc.text(formData.value.destination || '-', leftX + labelWidth, yPos)
+
+  doc.setFont('helvetica', 'bold')
+  doc.text('License Plate:', rightX, yPos)
+  doc.setFont('helvetica', 'normal')
+  doc.text(formData.value.noPolisi || '-', rightX + labelWidth, yPos)
+  yPos += 6
+
+  doc.setFont('helvetica', 'bold')
+  doc.text('Driver Name:', leftX, yPos)
+  doc.setFont('helvetica', 'normal')
+  doc.text(formData.value.namaSopir || '-', leftX + labelWidth, yPos)
+
+  doc.setFont('helvetica', 'bold')
+  doc.text('WH Checker:', rightX, yPos)
+  doc.setFont('helvetica', 'normal')
+  doc.text(formData.value.namaKaryawan || '-', rightX + labelWidth, yPos)
+  yPos += 12
+
+  // Items Table
+  doc.setFontSize(10)
+  doc.setFont('helvetica', 'bold')
+  doc.setFillColor(59, 130, 246)
+  doc.rect(leftX, yPos, pageWidth - 28, 6, 'F')
+  doc.setTextColor(255, 255, 255)
+  doc.text('ITEMS DETAILS', leftX + 2, yPos + 4)
+  doc.setTextColor(0, 0, 0)
+  yPos += 10
+
+  // Prepare table data
+  const tableHeaders = [
+    'No',
+    'SKU',
+    'Description',
+    'Lot No',
+    'Surat Jalan',
+    'Actual',
+    'Difference',
+    'Repack',
+    'Damage',
+  ]
+
+  const tableRows = tableData.value.map((item, index) => [
+    String(index + 1),
+    item.sku,
+    item.description,
+    item.pickSlip || '-',
+    String(item.diSuratJalan),
+    String(item.diterima),
+    String(item.selisih),
+    String(item.repackQty),
+    String(item.damageQty),
+  ])
+
+  autoTable(doc, {
+    startY: yPos,
+    head: [tableHeaders],
+    body: tableRows,
+    theme: 'grid',
+    styles: {
+      fontSize: 8,
+      cellPadding: 2,
+    },
+    headStyles: {
+      fillColor: [59, 130, 246],
+      textColor: [255, 255, 255],
+      fontStyle: 'bold',
+      halign: 'center',
+    },
+    columnStyles: {
+      0: { halign: 'center', cellWidth: 10 },
+      1: { cellWidth: 25 },
+      2: { cellWidth: 45 },
+      3: { cellWidth: 20 },
+      4: { halign: 'right', cellWidth: 18 },
+      5: { halign: 'right', cellWidth: 18 },
+      6: { halign: 'right', cellWidth: 18 },
+      7: { halign: 'right', cellWidth: 15 },
+      8: { halign: 'right', cellWidth: 15 },
+    },
+    didParseCell: (data) => {
+      // Highlight rows with discrepancies
+      if (data.section === 'body' && data.column.index === 6) {
+        const diff = Number(data.cell.text[0])
+        if (diff !== 0) {
+          data.cell.styles.textColor = diff > 0 ? [34, 197, 94] : [239, 68, 68]
+          data.cell.styles.fontStyle = 'bold'
+        }
+      }
+    },
+  })
+
+  // Get Y position after table
+  const finalY = (doc as any).lastAutoTable.finalY + 15
+
+  // Signature Section
+  if (finalY < pageHeight - 50) {
+    yPos = finalY
+  } else {
+    doc.addPage()
+    yPos = 20
+  }
+
+  // Signature boxes
+  const signatureBoxWidth = 60
+  const signatureBoxHeight = 35
+  const sigLeftX = leftX
+  const sigRightX = pageWidth - 14 - signatureBoxWidth
+
+  // WH Checker Signature
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(9)
+  doc.text('Warehouse Checker', sigLeftX, yPos)
+  doc.rect(sigLeftX, yPos + 2, signatureBoxWidth, signatureBoxHeight)
+
+  // Add signature image if available
+  if (formData.value.signature) {
+    try {
+      doc.addImage(
+        formData.value.signature,
+        'PNG',
+        sigLeftX + 5,
+        yPos + 5,
+        signatureBoxWidth - 10,
+        signatureBoxHeight - 15,
+      )
+    } catch (error) {
+      console.error('Error adding signature to PDF:', error)
+    }
+  }
+
+  doc.setFont('helvetica', 'normal')
+  doc.text(
+    formData.value.namaKaryawan || '-',
+    sigLeftX + signatureBoxWidth / 2,
+    yPos + signatureBoxHeight + 6,
+    {
+      align: 'center',
+    },
+  )
+
+  // Driver Signature
+  doc.setFont('helvetica', 'bold')
+  doc.text('Driver', sigRightX, yPos)
+  doc.rect(sigRightX, yPos + 2, signatureBoxWidth, signatureBoxHeight)
+  doc.setFont('helvetica', 'normal')
+  doc.text(
+    formData.value.namaSopir || '-',
+    sigRightX + signatureBoxWidth / 2,
+    yPos + signatureBoxHeight + 6,
+    {
+      align: 'center',
+    },
+  )
+
+  // Footer
+  doc.setFontSize(8)
+  doc.setTextColor(128, 128, 128)
+  doc.text(`Generated on ${new Date().toLocaleString('id-ID')}`, pageWidth / 2, pageHeight - 10, {
+    align: 'center',
+  })
+
+  // Save PDF
+  const fileName = `Receiving_Confirmation_${formData.value.orderNo}_${new Date().getTime()}.pdf`
+  doc.save(fileName)
+}
+
+const confirmReject = async () => {
   // Validate rejection reason
   if (!rejectionReason.value.trim()) {
-    alert('Please provide a rejection reason')
+    await Swal.fire({
+      title: 'Error',
+      text: 'Please provide a rejection reason',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    })
     return
   }
 
   console.log('Form Data:', formData.value)
   console.log('Table Data:', tableData.value)
   console.log('Rejection Reason:', rejectionReason.value)
-  // TODO: Send rejection data to API with status "Rejected"
-  alert(`Receiving confirmation rejected!\nReason: ${rejectionReason.value}`)
 
-  // Close modal and redirect
-  closeRejectModal()
-  router.push({ name: 'receivingConfirmation' })
+  try {
+    // Send rejection data to API with status "Rejected"
+    await ReceivingConfirmationService.updateStatus(Number(route.params.id), {
+      reportID: Number(route.params.id),
+      status: 3, // Rejected = 3 (from enum)
+      generalRejectReason: rejectionReason.value,
+    })
+
+    await Swal.fire({
+      title: 'Rejected!',
+      text: `Receiving confirmation rejected!\nReason: ${rejectionReason.value}`,
+      icon: 'success',
+      confirmButtonText: 'OK',
+    })
+
+    // Close modal and redirect
+    closeRejectModal()
+    router.push({ name: 'receivingConfirmation' })
+  } catch (error) {
+    console.error('Error rejecting receiving confirmation:', error)
+    await Swal.fire({
+      title: 'Error',
+      text: 'Failed to reject receiving confirmation',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    })
+  }
 }
 
-const approveConfirmation = () => {
+const approveConfirmation = async () => {
   console.log('Form Data:', formData.value)
   console.log('Table Data:', tableData.value)
-  // TODO: Send approval data to API with status "Approved"
-  alert('Receiving confirmation approved successfully!')
 
-  // Redirect to list
-  router.push({ name: 'receivingConfirmation' })
+  try {
+    // Send approval data to API with status "Completed"
+    await ReceivingConfirmationService.updateStatus(Number(route.params.id), {
+      reportID: Number(route.params.id),
+      status: 2, // Completed = 2 (from enum)
+      generalRejectReason: '',
+    })
+
+    await Swal.fire({
+      title: 'Approved!',
+      text: 'Receiving confirmation approved successfully!',
+      icon: 'success',
+      confirmButtonText: 'OK',
+    })
+
+    // Redirect to list
+    router.push({ name: 'receivingConfirmation' })
+  } catch (error) {
+    console.error('Error approving receiving confirmation:', error)
+    await Swal.fire({
+      title: 'Error',
+      text: 'Failed to approve receiving confirmation',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    })
+  }
 }
 
 onMounted(() => {
@@ -430,6 +764,9 @@ onMounted(() => {
           signature: data.digitalSignaturePath || null,
         }
 
+        // Set current status
+        currentStatus.value = data.status || ''
+
         // Map API items to TableData structure
         tableData.value = data.items.map((item) => ({
           pickSlip: item.noPickSlip || '',
@@ -449,7 +786,12 @@ onMounted(() => {
     })
     .catch((error) => {
       console.error('Error loading receiving confirmation:', error)
-      alert('Failed to load receiving confirmation data')
+      Swal.fire({
+        title: 'Error',
+        text: 'Failed to load receiving confirmation data',
+        icon: 'error',
+        confirmButtonText: 'OK',
+      })
     })
 })
 </script>

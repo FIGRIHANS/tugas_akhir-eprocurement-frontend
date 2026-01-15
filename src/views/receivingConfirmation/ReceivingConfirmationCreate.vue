@@ -387,7 +387,7 @@ interface TableDataItem {
 const routes = ref<routeTypes[]>([
   {
     name: 'Digital Receiving Confirmation',
-    to: '/test/receiving-confirmation-list',
+    to: '/receiving-confirmation-list',
   },
 ])
 
@@ -481,7 +481,7 @@ const selectDeliveryNote = (dn: DeliveryNotesData) => {
   // Auto-fill form data from selected Delivery Note
   formData.value.poNumber = dn.poNumber
   formData.value.tripID = dn.tripID || ''
-  formData.value.orderNumber = dn.poNumber // Using PO Number as Order Number
+  formData.value.orderNumber = dn.poNumber
   formData.value.driverName = dn.driverName || ''
   formData.value.licensePlate = dn.licensePlate || ''
   formData.value.transporter = dn.transporter || ''
@@ -494,11 +494,11 @@ const selectDeliveryNote = (dn: DeliveryNotesData) => {
     tableData.value = dn.items.map((item) => ({
       sku: item.sku,
       deskripsi: item.description,
-      noPickSlip: '', // User can fill this
+      noPickSlip: '',
       lotNoDeliveryNote: item.lotNo,
-      lotNoActual: item.lotNo, // Default same as delivery note
+      lotNoActual: item.lotNo,
       qtySuratJalan: item.qtyShipped,
-      qtyActual: item.qtyShipped, // Default same as delivery note, user can edit
+      qtyActual: item.qtyShipped,
       qtySelisih: 0,
       more: 0,
       less: 0,
@@ -610,7 +610,6 @@ const submitForm = async () => {
       console.log('Signature save result:', saveResult)
       console.log('Type of save result:', typeof saveResult)
 
-      // vue3-signature returns the Base64 string directly
       if (saveResult && saveResult.trim().length > 0) {
         signatureData = saveResult
       } else {
@@ -684,7 +683,6 @@ const submitForm = async () => {
 }
 
 onMounted(() => {
-  // Set default received date to today
   formData.value.receivedDate = new Date().toISOString().split('T')[0]
 })
 </script>
