@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Breadcrumb title="Create Receiving Confirmation" :routes="routes" />
+    <Breadcrumb title="Create Delivery Notes" :routes="routes" />
     <hr class="-mx-[24px] mb-[24px]" />
 
     <div class="border border-gray-200 rounded-xl p-[24px]">
@@ -37,20 +37,21 @@
             </select>
           </div>
           <div>
-            <label class="form-label">Has Discrepancy</label>
-            <select v-model="filterForm.hasDiscrepancy" class="form-select">
-              <option value="">All</option>
-              <option value="true">Yes</option>
-              <option value="false">No</option>
-            </select>
+            <label class="form-label">Vendor Code</label>
+            <input
+              type="text"
+              v-model="filterForm.vendorCode"
+              class="form-control"
+              placeholder="Enter vendor code"
+            />
           </div>
           <div>
-            <label class="form-label">Received Date From</label>
-            <input type="date" v-model="filterForm.receivedDateFrom" class="form-control" />
+            <label class="form-label">Estimated Arrival From</label>
+            <input type="date" v-model="filterForm.estimatedArrivalFrom" class="form-control" />
           </div>
           <div>
-            <label class="form-label">Received Date To</label>
-            <input type="date" v-model="filterForm.receivedDateTo" class="form-control" />
+            <label class="form-label">Estimated Arrival To</label>
+            <input type="date" v-model="filterForm.estimatedArrivalTo" class="form-control" />
           </div>
         </div>
         <div class="flex gap-2 mt-4">
@@ -101,35 +102,27 @@
               <td class="text-center">
                 <button
                   class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]"
-                  @click="viewDetail(item.reportID)"
+                  @click="viewDetail(item.id)"
                   title="View Detail"
                 >
                   <i class="ki-filled ki-eye !text-lg"></i>
                 </button>
               </td>
               <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
-              <td>{{ item.reportID }}</td>
+              <td>{{ item.deliveryNoteNumber }}</td>
               <td>{{ item.tripID }}</td>
-              <td>{{ item.orderNumber }}</td>
+              <td>{{ item.poNumber }}</td>
               <td>
                 <span class="badge badge-outline" :class="getStatusBadgeClass(item.status)">
                   {{ item.status }}
                 </span>
               </td>
-              <td>{{ item.rejectReason }}</td>
-              <td>
-                <span
-                  class="badge badge-outline"
-                  :class="item.hasDiscrepancy ? 'badge-warning' : 'badge-success'"
-                >
-                  {{ item.hasDiscrepancy ? 'Yes' : 'No' }}
-                </span>
-              </td>
-              <td>{{ formatDate(item.receivedDate) }}</td>
-              <td>{{ item.pickup }}</td>
-              <td>{{ item.destination }}</td>
+              <td>{{ item.vendorCode }}</td>
+              <td>{{ formatDate(item.estimatedArrival) }}</td>
+              <td>{{ item.pickupAddress }}</td>
+              <td>{{ item.destinationAddress }}</td>
               <td>{{ item.transporter }}</td>
-              <td>{{ item.truckType }}</td>
+              <td>{{ item.truckType || '-' }}</td>
               <td>{{ item.licensePlate }}</td>
               <td>{{ formatDate(item.createdUtcDate) }}</td>
               <td>{{ item.createdBy }}</td>
@@ -171,31 +164,29 @@ import LPagination from '@/components/pagination/LPagination.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import momentLib from 'moment'
 import { cloneDeep } from 'lodash'
-import ReceivingConfirmationService, {
-  type ReceivingConfirmationData,
-} from '@/services/receivingConfirmation.service'
+import DeliveryNotesService, { type DeliveryNotesData } from '@/services/deliveryNotes.service'
 // Expose moment to template
 const moment = momentLib
 const router = useRouter()
 
 interface FilterForm {
   status: string
-  hasDiscrepancy: string
-  receivedDateFrom: string
-  receivedDateTo: string
+  vendorCode: string
+  estimatedArrivalFrom: string
+  estimatedArrivalTo: string
 }
 
 const routes = ref<routeTypes[]>([
   {
-    name: 'Digital Receiving Confirmation',
-    to: '/digital-receiving-confirmation',
+    name: 'Digital Delivery Notes',
+    to: '/digital-delivery-notes',
   },
 ])
 
 const search = ref<string>('')
 const currentPage = ref<number>(1)
 const pageSize = ref<number>(5)
-const list = ref<ReceivingConfirmationData[]>([])
+const list = ref<DeliveryNotesData[]>([])
 const sortBy = ref<string>('')
 const sortColumnName = ref<string>('')
 const showFilter = ref<boolean>(false)
@@ -205,23 +196,22 @@ const errorMessage = ref<string>('')
 
 const filterForm = ref<FilterForm>({
   status: '',
-  hasDiscrepancy: '',
-  receivedDateFrom: '',
-  receivedDateTo: '',
+  vendorCode: '',
+  estimatedArrivalFrom: '',
+  estimatedArrivalTo: '',
 })
 
 const columns = ref<string[]>([
   'Action',
   'No',
-  'Report ID',
+  'Delivery Note Number',
   'Trip ID',
-  'Order Number',
+  'PO Number',
   'Status',
-  'Reject Reason',
-  'Discrepancy',
-  'Received Date',
-  'Pickup',
-  'Destination',
+  'Vendor Code',
+  'Estimated Arrival',
+  'Pickup Address',
+  'Destination Address',
   'Transporter',
   'Truck Type',
   'License Plate',
@@ -231,20 +221,18 @@ const columns = ref<string[]>([
   'Update By',
 ])
 
-const dataList = ref<ReceivingConfirmationData[]>([])
+const dataList = ref<DeliveryNotesData[]>([])
 const fetchData = async () => {
   isLoading.value = true
   errorMessage.value = ''
 
   try {
-    const response = await ReceivingConfirmationService.getList({
+    const response = await DeliveryNotesService.getList({
       searchText: search.value || undefined,
       status: filterForm.value.status || undefined,
-      hasDiscrepancy: filterForm.value.hasDiscrepancy
-        ? filterForm.value.hasDiscrepancy === 'true'
-        : undefined,
-      receivedDateFrom: filterForm.value.receivedDateFrom || undefined,
-      receivedDateTo: filterForm.value.receivedDateTo || undefined,
+      vendorCode: filterForm.value.vendorCode || undefined,
+      estimatedArrivalFrom: filterForm.value.estimatedArrivalFrom || undefined,
+      estimatedArrivalTo: filterForm.value.estimatedArrivalTo || undefined,
     })
 
     dataList.value = response
@@ -459,11 +447,12 @@ const filteredDataList = computed(() => {
     filtered = filtered.filter((item) => item.status === filterForm.value.status)
   }
 
-  // Apply hasDiscrepancy filter
-  if (filterForm.value.hasDiscrepancy) {
-    const hasDiscrepancy = filterForm.value.hasDiscrepancy === 'true'
-    filtered = filtered.filter((item) => item.hasDiscrepancy === hasDiscrepancy)
-  }
+  // Note: hasDiscrepancy is not in DeliveryNotesData interface
+  // This filter is commented out until the backend adds this field
+  // if (filterForm.value.hasDiscrepancy) {
+  //   const hasDiscrepancy = filterForm.value.hasDiscrepancy === 'true'
+  //   filtered = filtered.filter((item) => item.hasDiscrepancy === hasDiscrepancy)
+  // }
 
   return filtered
 })
@@ -488,8 +477,8 @@ const formatDate = (date: string) => {
   return moment(date).format('YYYY/MM/DD')
 }
 
-const setList = (listData: ReceivingConfirmationData[]) => {
-  const result: ReceivingConfirmationData[] = []
+const setList = (listData: DeliveryNotesData[]) => {
+  const result: DeliveryNotesData[] = []
   for (const [index, item] of listData.entries()) {
     const start = currentPage.value * pageSize.value - pageSize.value
     const end = currentPage.value * pageSize.value - 1
@@ -523,16 +512,16 @@ const applyFilter = () => {
     payload.push({ key: 'Status', value: filterForm.value.status })
   }
 
-  if (filterForm.value.hasDiscrepancy) {
-    payload.push({ key: 'Discrepancy', value: filterForm.value.hasDiscrepancy })
+  if (filterForm.value.vendorCode) {
+    payload.push({ key: 'Vendor Code', value: filterForm.value.vendorCode })
   }
 
-  if (filterForm.value.receivedDateFrom) {
-    payload.push({ key: 'Received Date From', value: filterForm.value.receivedDateFrom })
+  if (filterForm.value.estimatedArrivalFrom) {
+    payload.push({ key: 'Estimated Arrival From', value: filterForm.value.estimatedArrivalFrom })
   }
 
-  if (filterForm.value.receivedDateTo) {
-    payload.push({ key: 'Received Date To', value: filterForm.value.receivedDateTo })
+  if (filterForm.value.estimatedArrivalTo) {
+    payload.push({ key: 'Estimated Arrival To', value: filterForm.value.estimatedArrivalTo })
   }
 
   filteredPayload.value = payload
@@ -543,9 +532,9 @@ const applyFilter = () => {
 const resetFilter = () => {
   filterForm.value = {
     status: '',
-    hasDiscrepancy: '',
-    receivedDateFrom: '',
-    receivedDateTo: '',
+    vendorCode: '',
+    estimatedArrivalFrom: '',
+    estimatedArrivalTo: '',
   }
   filteredPayload.value = []
   currentPage.value = 1
@@ -555,12 +544,12 @@ const resetFilter = () => {
 const deleteFilter = (key: string) => {
   if (key === 'Status') {
     filterForm.value.status = ''
-  } else if (key === 'Discrepancy') {
-    filterForm.value.hasDiscrepancy = ''
-  } else if (key === 'Received Date From') {
-    filterForm.value.receivedDateFrom = ''
-  } else if (key === 'Received Date To') {
-    filterForm.value.receivedDateTo = ''
+  } else if (key === 'Vendor Code') {
+    filterForm.value.vendorCode = ''
+  } else if (key === 'Estimated Arrival From') {
+    filterForm.value.estimatedArrivalFrom = ''
+  } else if (key === 'Estimated Arrival To') {
+    filterForm.value.estimatedArrivalTo = ''
   }
 
   filteredPayload.value = filteredPayload.value.filter((item) => item.key !== key)
@@ -583,7 +572,7 @@ const sortColumn = (columnName: string | null) => {
 
   const roleSort = ['asc', 'desc', '']
   const listData = cloneDeep(filteredDataList.value)
-  let result: ReceivingConfirmationData[] = []
+  let result: DeliveryNotesData[] = []
 
   if (columnName) {
     if (sortColumnName.value !== columnName) sortBy.value = ''
@@ -624,11 +613,11 @@ const sortColumn = (columnName: string | null) => {
 }
 
 const createNew = () => {
-  router.push({ name: 'receivingConfirmationCreate' })
+  router.push({ name: 'deliveryNotesCreate' })
 }
 
 const viewDetail = (id: number) => {
-  router.push({ name: 'receivingConfirmationDetail', params: { id } })
+  router.push({ name: 'deliveryNotesDetail', params: { id } })
 }
 
 onMounted(() => {
