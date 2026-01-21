@@ -56,6 +56,7 @@ export interface ReceivingConfirmationData {
   whCheckerName: string
   driverName: string
   digitalSignaturePath: string
+  driverSignature?: string | null
   createdBy: string
   updatedBy: string
   createdUtcDate: string

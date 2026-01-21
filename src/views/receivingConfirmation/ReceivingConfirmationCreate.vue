@@ -333,6 +333,20 @@
         </button>
       </div>
     </div>
+
+    <!-- Notification Modal -->
+    <ModalNotification
+      :open="showNotificationModal"
+      :id="'notification-modal'"
+      :type="notificationModal.type"
+      :title="notificationModal.title"
+      :text="notificationModal.text"
+      :onClose="
+        () => {
+          showNotificationModal = false
+        }
+      "
+    />
   </div>
 </template>
 
@@ -342,7 +356,7 @@ import { useRouter } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import VueSignature from 'vue3-signature'
-import Swal from 'sweetalert2'
+import ModalNotification from '@/components/modal/ModalNotification.vue'
 import DeliveryNotesService, { type DeliveryNotesData } from '@/services/deliveryNotes.service'
 import ReceivingConfirmationService, {
   type ReceivingConfirmationCreatePayload,
@@ -432,14 +446,23 @@ const formData = ref<FormData>({
 // Table Data
 const tableData = ref<TableDataItem[]>([])
 
+// Modal state
+const showNotificationModal = ref<boolean>(false)
+const notificationModal = ref({
+  type: 'info' as 'info' | 'success' | 'error' | 'warning',
+  title: '',
+  text: '',
+})
+
 // Methods
 const searchDeliveryNotes = async () => {
   if (!poNumberSearch.value.trim()) {
-    Swal.fire({
-      icon: 'warning',
+    notificationModal.value = {
+      type: 'warning',
       title: 'Validation Error',
       text: 'Please enter a PO Number',
-    })
+    }
+    showNotificationModal.value = true
     return
   }
 
@@ -451,11 +474,12 @@ const searchDeliveryNotes = async () => {
     deliveryNotesOptions.value = results
 
     if (results.length === 0) {
-      Swal.fire({
-        icon: 'info',
+      notificationModal.value = {
+        type: 'info',
         title: 'Not Found',
         text: 'No Delivery Notes found for this PO Number',
-      })
+      }
+      showNotificationModal.value = true
     } else if (results.length === 1) {
       // Auto-select if only one result
       selectDeliveryNote(results[0])
@@ -464,11 +488,12 @@ const searchDeliveryNotes = async () => {
     }
   } catch (error) {
     console.error('Error searching delivery notes:', error)
-    Swal.fire({
-      icon: 'error',
+    notificationModal.value = {
+      type: 'error',
       title: 'Error',
       text: 'Failed to search Delivery Notes. Please try again.',
-    })
+    }
+    showNotificationModal.value = true
   } finally {
     isSearching.value = false
   }
@@ -537,47 +562,52 @@ const clearSignature = () => {
 
 const validateForm = (): boolean => {
   if (!formData.value.poNumber) {
-    Swal.fire({
-      icon: 'warning',
+    notificationModal.value = {
+      type: 'warning',
       title: 'Validation Error',
       text: 'Please select a Delivery Note first',
-    })
+    }
+    showNotificationModal.value = true
     return false
   }
 
   if (!formData.value.whCheckerName.trim()) {
-    Swal.fire({
-      icon: 'warning',
+    notificationModal.value = {
+      type: 'warning',
       title: 'Validation Error',
       text: 'Please enter Employee Name',
-    })
+    }
+    showNotificationModal.value = true
     return false
   }
 
   if (!formData.value.driverName.trim()) {
-    Swal.fire({
-      icon: 'warning',
+    notificationModal.value = {
+      type: 'warning',
       title: 'Validation Error',
       text: 'Please enter Driver Name',
-    })
+    }
+    showNotificationModal.value = true
     return false
   }
 
   if (!formData.value.receivedDate) {
-    Swal.fire({
-      icon: 'warning',
+    notificationModal.value = {
+      type: 'warning',
       title: 'Validation Error',
       text: 'Please enter Received Date',
-    })
+    }
+    showNotificationModal.value = true
     return false
   }
 
   if (tableData.value.length === 0) {
-    Swal.fire({
-      icon: 'warning',
+    notificationModal.value = {
+      type: 'warning',
       title: 'Validation Error',
       text: 'No items to submit. Please select a Delivery Note with items.',
-    })
+    }
+    showNotificationModal.value = true
     return false
   }
 
@@ -585,11 +615,12 @@ const validateForm = (): boolean => {
   if (signaturePad.value) {
     const saveResult = signaturePad.value.save()
     if (!saveResult || saveResult.trim().length === 0) {
-      Swal.fire({
-        icon: 'warning',
+      notificationModal.value = {
+        type: 'warning',
         title: 'Validation Error',
         text: 'Please provide a signature',
-      })
+      }
+      showNotificationModal.value = true
       return false
     }
   }
@@ -613,11 +644,12 @@ const submitForm = async () => {
       if (saveResult && saveResult.trim().length > 0) {
         signatureData = saveResult
       } else {
-        Swal.fire({
-          icon: 'warning',
+        notificationModal.value = {
+          type: 'warning',
           title: 'Validation Error',
           text: 'Please provide a signature',
-        })
+        }
+        showNotificationModal.value = true
         isSubmitting.value = false
         return
       }
@@ -664,19 +696,24 @@ const submitForm = async () => {
 
     await ReceivingConfirmationService.create(payload)
 
-    Swal.fire({
-      icon: 'success',
+    notificationModal.value = {
+      type: 'success',
       title: 'Success',
       text: 'Receiving confirmation submitted successfully!',
-    })
+    }
+    showNotificationModal.value = true
+
+    // Wait before redirect
+    await new Promise((resolve) => setTimeout(resolve, 1500))
     router.push({ name: 'receivingConfirmationList' })
   } catch (error) {
     console.error('Error submitting form:', error)
-    Swal.fire({
-      icon: 'error',
+    notificationModal.value = {
+      type: 'error',
       title: 'Error',
       text: 'Failed to submit. Please try again.',
-    })
+    }
+    showNotificationModal.value = true
   } finally {
     isSubmitting.value = false
   }

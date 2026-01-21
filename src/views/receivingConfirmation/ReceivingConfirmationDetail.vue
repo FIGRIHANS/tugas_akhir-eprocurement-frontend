@@ -141,10 +141,14 @@
             <div class="border border-gray-200 rounded-lg p-4 h-full flex flex-col">
               <h3 class="text-sm font-semibold mb-3">Employee Signature</h3>
               <div
-                class="flex-1 border border-gray-300 rounded bg-gray-50 flex items-center justify-center"
+                class="flex-1 border border-gray-300 rounded bg-gray-50 flex items-center justify-center min-h-[200px]"
               >
                 <img
-                  v-if="formData.signature"
+                  v-if="
+                    formData.signature &&
+                    formData.signature.trim() &&
+                    formData.signature.startsWith('data:image')
+                  "
                   :src="formData.signature"
                   alt="Signature"
                   class="max-w-full max-h-full"
@@ -269,6 +273,20 @@
         </div>
       </div>
     </div>
+
+    <!-- Notification Modal -->
+    <ModalNotification
+      :open="showNotificationModal"
+      :id="'notification-modal'"
+      :type="notificationModal.type"
+      :title="notificationModal.title"
+      :text="notificationModal.text"
+      :onClose="
+        () => {
+          showNotificationModal = false
+        }
+      "
+    />
   </div>
 </template>
 
@@ -278,7 +296,8 @@ import { useRouter, useRoute } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import ReceivingConfirmationService from '@/services/receivingConfirmation.service'
-import Swal from 'sweetalert2'
+import DeliveryNotesService from '@/services/deliveryNotes.service'
+import ModalNotification from '@/components/modal/ModalNotification.vue'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
@@ -296,6 +315,7 @@ interface FormData {
   orderDate: string
   receivedDate: string
   signature: string | null
+  driverSignature: string | null
 }
 
 interface TableData {
@@ -332,6 +352,7 @@ const formData = ref<FormData>({
   orderDate: '2024-12-01',
   receivedDate: '2024-12-05',
   signature: null,
+  driverSignature: null,
 })
 
 // Table Data (Read-only)
@@ -371,6 +392,14 @@ const showRejectModal = ref<boolean>(false)
 const rejectionReason = ref<string>('')
 const currentStatus = ref<string>('')
 
+// Modal state
+const showNotificationModal = ref<boolean>(false)
+const notificationModal = ref({
+  type: 'info' as 'info' | 'success' | 'error' | 'warning',
+  title: '',
+  text: '',
+})
+
 // Functions
 const goBack = () => {
   router.push({ name: 'receivingConfirmation' })
@@ -379,12 +408,12 @@ const goBack = () => {
 const viewItem = (index: number) => {
   const item = tableData.value[index]
   console.log('Viewing item:', item)
-  Swal.fire({
+  notificationModal.value = {
+    type: 'info',
     title: 'Item Details',
     text: `${item.pickSlip} - ${item.description}`,
-    icon: 'info',
-    confirmButtonText: 'OK',
-  })
+  }
+  showNotificationModal.value = true
 }
 
 const openRejectModal = () => {
@@ -397,7 +426,27 @@ const closeRejectModal = () => {
   rejectionReason.value = ''
 }
 
-const printToPDF = () => {
+const printToPDF = async () => {
+  // Fetch driver signature from delivery notes based on PO number
+  let driverSignatureFromDN: string | null = null
+
+  try {
+    if (formData.value.orderNo) {
+      const deliveryNotes = await DeliveryNotesService.getByPoNumber(formData.value.orderNo)
+      if (deliveryNotes && deliveryNotes.length > 0) {
+        // Get driver signature from the first matching delivery note
+        driverSignatureFromDN = deliveryNotes[0].driverSignature || null
+        console.log(
+          'Driver signature fetched from delivery notes:',
+          driverSignatureFromDN ? 'YES' : 'NO',
+        )
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching driver signature from delivery notes:', error)
+    // Continue with PDF generation even if fetch fails
+  }
+
   const doc = new jsPDF()
   const pageWidth = doc.internal.pageSize.getWidth()
   const pageHeight = doc.internal.pageSize.getHeight()
@@ -526,7 +575,7 @@ const printToPDF = () => {
   // Prepare table data
   const tableHeaders = [
     'No',
-    'SKU',
+    'Material Number',
     'Description',
     'Lot No',
     'Surat Jalan',
@@ -639,6 +688,27 @@ const printToPDF = () => {
   doc.setFont('helvetica', 'bold')
   doc.text('Driver', sigRightX, yPos)
   doc.rect(sigRightX, yPos + 2, signatureBoxWidth, signatureBoxHeight)
+
+  // Add driver signature image if available (from delivery notes)
+  if (
+    driverSignatureFromDN &&
+    driverSignatureFromDN.trim() &&
+    driverSignatureFromDN.startsWith('data:image')
+  ) {
+    try {
+      doc.addImage(
+        driverSignatureFromDN,
+        'PNG',
+        sigRightX + 5,
+        yPos + 5,
+        signatureBoxWidth - 10,
+        signatureBoxHeight - 15,
+      )
+    } catch (error) {
+      console.error('Error adding driver signature to PDF:', error)
+    }
+  }
+
   doc.setFont('helvetica', 'normal')
   doc.text(
     formData.value.namaSopir || '-',
@@ -664,12 +734,12 @@ const printToPDF = () => {
 const confirmReject = async () => {
   // Validate rejection reason
   if (!rejectionReason.value.trim()) {
-    await Swal.fire({
+    notificationModal.value = {
+      type: 'error',
       title: 'Error',
       text: 'Please provide a rejection reason',
-      icon: 'error',
-      confirmButtonText: 'OK',
-    })
+    }
+    showNotificationModal.value = true
     return
   }
 
@@ -685,24 +755,27 @@ const confirmReject = async () => {
       generalRejectReason: rejectionReason.value,
     })
 
-    await Swal.fire({
+    notificationModal.value = {
+      type: 'success',
       title: 'Rejected!',
       text: `Receiving confirmation rejected!\nReason: ${rejectionReason.value}`,
-      icon: 'success',
-      confirmButtonText: 'OK',
-    })
+    }
+    showNotificationModal.value = true
+
+    // Wait for modal to be acknowledged before redirecting
+    await new Promise((resolve) => setTimeout(resolve, 1500))
 
     // Close modal and redirect
     closeRejectModal()
     router.push({ name: 'receivingConfirmation' })
   } catch (error) {
     console.error('Error rejecting receiving confirmation:', error)
-    await Swal.fire({
+    notificationModal.value = {
+      type: 'error',
       title: 'Error',
       text: 'Failed to reject receiving confirmation',
-      icon: 'error',
-      confirmButtonText: 'OK',
-    })
+    }
+    showNotificationModal.value = true
   }
 }
 
@@ -718,23 +791,26 @@ const approveConfirmation = async () => {
       generalRejectReason: '',
     })
 
-    await Swal.fire({
+    notificationModal.value = {
+      type: 'success',
       title: 'Approved!',
       text: 'Receiving confirmation approved successfully!',
-      icon: 'success',
-      confirmButtonText: 'OK',
-    })
+    }
+    showNotificationModal.value = true
+
+    // Wait for modal to be acknowledged before redirecting
+    await new Promise((resolve) => setTimeout(resolve, 1500))
 
     // Redirect to list
     router.push({ name: 'receivingConfirmation' })
   } catch (error) {
     console.error('Error approving receiving confirmation:', error)
-    await Swal.fire({
+    notificationModal.value = {
+      type: 'error',
       title: 'Error',
       text: 'Failed to approve receiving confirmation',
-      icon: 'error',
-      confirmButtonText: 'OK',
-    })
+    }
+    showNotificationModal.value = true
   }
 }
 
@@ -762,6 +838,7 @@ onMounted(() => {
             ? new Date(data.receivedDate).toISOString().split('T')[0]
             : '',
           signature: data.digitalSignaturePath || null,
+          driverSignature: data.driverSignature || null,
         }
 
         // Set current status
@@ -786,12 +863,12 @@ onMounted(() => {
     })
     .catch((error) => {
       console.error('Error loading receiving confirmation:', error)
-      Swal.fire({
+      notificationModal.value = {
+        type: 'error',
         title: 'Error',
         text: 'Failed to load receiving confirmation data',
-        icon: 'error',
-        confirmButtonText: 'OK',
-      })
+      }
+      showNotificationModal.value = true
     })
 })
 </script>

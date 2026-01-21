@@ -202,10 +202,14 @@
             <div class="border border-gray-200 rounded-lg p-4 h-full flex flex-col">
               <h3 class="text-sm font-semibold mb-3">Driver Signature</h3>
               <div
-                class="flex-1 border border-gray-300 rounded bg-gray-50 flex items-center justify-center"
+                class="flex-1 border border-gray-300 rounded bg-gray-50 flex items-center justify-center min-h-[200px]"
               >
                 <img
-                  v-if="detailData.driverSignature"
+                  v-if="
+                    detailData.driverSignature &&
+                    detailData.driverSignature.trim() &&
+                    detailData.driverSignature.startsWith('data:image')
+                  "
                   :src="detailData.driverSignature"
                   alt="Driver Signature"
                   class="max-w-full max-h-full"
@@ -262,6 +266,20 @@
         </button>
       </div>
     </div>
+
+    <!-- Notification Modal -->
+    <ModalNotification
+      :open="showNotificationModal"
+      :id="'notification-modal'"
+      :type="notificationModal.type"
+      :title="notificationModal.title"
+      :text="notificationModal.text"
+      :onClose="
+        () => {
+          showNotificationModal = false
+        }
+      "
+    />
   </div>
 </template>
 
@@ -270,7 +288,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
-import Swal from 'sweetalert2'
+import ModalNotification from '@/components/modal/ModalNotification.vue'
 import DeliveryNotesService, { type DeliveryNotesData } from '@/services/deliveryNotes.service'
 
 const router = useRouter()
@@ -288,6 +306,14 @@ const routes = ref<routeTypes[]>([
 const isLoading = ref<boolean>(true)
 const error = ref<string | null>(null)
 const detailData = ref<DeliveryNotesData | null>(null)
+
+// Modal state
+const showNotificationModal = ref<boolean>(false)
+const notificationModal = ref({
+  type: 'info' as 'info' | 'success' | 'error' | 'warning',
+  title: '',
+  text: '',
+})
 
 // Computed property for formatted shipping date
 const formattedShippingDate = computed(() => {
@@ -335,11 +361,12 @@ const fetchDetail = async () => {
     console.error('Error fetching delivery note detail:', err)
     error.value = 'Failed to load delivery note details. Please try again.'
 
-    Swal.fire({
-      icon: 'error',
+    notificationModal.value = {
+      type: 'error',
       title: 'Error',
       text: 'Failed to load delivery note details',
-    })
+    }
+    showNotificationModal.value = true
   } finally {
     isLoading.value = false
   }
