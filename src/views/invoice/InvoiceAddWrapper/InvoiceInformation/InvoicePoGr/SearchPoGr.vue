@@ -67,6 +67,7 @@
                   <td>{{ item.qcStatus || '-' }}</td>
                   <td>{{ item.taxCode || '-' }}</td>
                   <td>{{ item.department || '-' }}</td>
+                  <td>-</td>
                 </tr>
               </template>
             </tbody>
