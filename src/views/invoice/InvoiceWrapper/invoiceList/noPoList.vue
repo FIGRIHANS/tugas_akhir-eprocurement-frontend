@@ -102,6 +102,7 @@
               <td>{{ useFormatIdr(item.totalNetAmount) }}</td>
               <td>{{ formatDateYearFirst((item as any).actionerDate) }}</td>
               <td>{{ formatDateYearFirst(item.estimatedPaymentDate) }}</td>
+              <td>-</td>
             </tr>
           </tbody>
         </table>
@@ -219,6 +220,7 @@ const columns = ref([
   'Total Net Amount',
   'Approval Date',
   'Estimated Payment Date',
+  'SAP Docuemnt No'
 ])
 
 const resetFilter = () => {
