@@ -227,6 +227,7 @@ export interface ListPoTypes {
   poPrice?: boolean
 
   emailSender?: string
+  sapPostingCode: string
 }
 
 export interface ListNonPoTypes {
@@ -252,6 +253,7 @@ export interface ListNonPoTypes {
   isOpenChild: boolean
   createdUtcDate: string
   actionerDate?: string
+  sapPostingCode: string
 }
 
 export interface itemsAlternativePayee {

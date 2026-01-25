@@ -102,7 +102,7 @@
               <td>{{ useFormatIdr(item.totalNetAmount) }}</td>
               <td>{{ formatDateYearFirst((item as any).actionerDate) }}</td>
               <td>{{ formatDateYearFirst(item.estimatedPaymentDate) }}</td>
-              <td>-</td>
+              <td>{{ item.sapPostingCode ||  '-' }}</td>
             </tr>
           </tbody>
         </table>
