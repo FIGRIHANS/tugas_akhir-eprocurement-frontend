@@ -112,7 +112,7 @@
                 }}
               </td>
               <td>
-                -
+                {{ parent.sapPostingCode ||  '-' }}
               </td>
             </tr>
             <tr v-show="parent.isOpenChild">
