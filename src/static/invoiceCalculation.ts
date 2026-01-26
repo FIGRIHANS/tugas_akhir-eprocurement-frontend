@@ -1,6 +1,7 @@
 export const defaultField = [
   'Subtotal',
   'VAT Amount',
+  'Dpp Lainya',
   'Additional Cost',
   'Total Gross Amount',
   'WHT Amount',

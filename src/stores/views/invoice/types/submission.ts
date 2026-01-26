@@ -194,6 +194,7 @@ export interface PoGrItemTypes {
   itemAmountLC: number
   itemAmountTC: number
   itemAmount: number
+  deliveryOrderNo: string
 }
 
 export interface ListPoTypes {

@@ -82,6 +82,8 @@ export interface formTypes extends documentFormTypes {
   amountInvoiceError?: boolean
   taxNoInvoice: string
   taxNoInvoiceError?: boolean
+  taxDate: string
+  taxDateError?:  boolean
   remainingDpAmount: number
   dpAmountDeduction: number
   dpAmountDeductionError?: boolean
@@ -103,6 +105,7 @@ export interface formTypes extends documentFormTypes {
   additionalCostCalc: number
   totalGrossAmount: number
   totalNetAmount: number
+  dppLainnya: number
 
   invoicePoGr: itemsPoGrType[]
   invoicePoGrError?: boolean
