@@ -277,6 +277,7 @@ const form = reactive<formTypes>({
   invoiceDp: '9011',
   amountInvoice: '',
   taxNoInvoice: '',
+  taxDate:'',
   remainingDpAmount: 0,
   dpAmountDeduction: 0,
   currency: 'IDR',
@@ -291,6 +292,7 @@ const form = reactive<formTypes>({
   additionalCostCalc: 0,
   totalGrossAmount: 0,
   totalNetAmount: 0,
+  dppLainnya: 0,
   invoicePoGr: [],
   invoiceItem: [],
   additionalCost: [],
@@ -326,6 +328,7 @@ const form = reactive<formTypes>({
   dueDateCas: '',
   proposalAmountVal: '',
   invoiceSource: '',
+
 })
 
 const contentComponent = computed(() => {

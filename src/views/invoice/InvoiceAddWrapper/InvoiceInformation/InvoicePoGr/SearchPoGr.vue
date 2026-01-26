@@ -52,6 +52,7 @@
                   <td>{{ item.grDocumentNo || '-' }}</td>
                   <td>{{ item.grDocumentItem || '-' }}</td>
                   <td>{{ item.grDocumentDate || '-' }}</td>
+                  <td>{{ item.deliveryOrderNo }}</td>
                   <td class="text-right">
                     {{
                       currency === item.currency

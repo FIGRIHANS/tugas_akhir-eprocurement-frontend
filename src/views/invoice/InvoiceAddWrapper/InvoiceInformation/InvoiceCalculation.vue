@@ -51,16 +51,17 @@ const checkIsNonPo = () => {
 const isPettyCash = computed(() => form?.invoiceType === '5')
 
 const setCount = (name: string) => {
-  const list = {
+  const list: Record<string, number> = {
     'subtotal': countSubtotal(),
+    'dpp lainya': countDppLainnya(),
     'vat amount': countVatAmount(),
     'wht amount': countWhtAmount(),
     'additional cost': countAdditionalCost(),
     'total gross amount': countTotalGrossAmount(),
     'total net amount': countTotalNetAmount()
-  } as { [key: string]: number }
+  }
 
-  return list[name.toLowerCase()]
+  return list[name.toLowerCase()] ?? 0
 }
 
 const setToForm = (name: string, value: number) => {
@@ -68,6 +69,9 @@ const setToForm = (name: string, value: number) => {
     switch (name.toLowerCase()) {
       case 'subtotal':
         form.subtotal = value
+        break
+      case 'dpp lainnya':
+        form.dppLainnya = value
         break
       case 'vat amount':
         form.vatAmount = value
@@ -88,17 +92,26 @@ const setToForm = (name: string, value: number) => {
   }
 }
 
+const countDppLainnya = () => {
+  const subtotal = countSubtotal() || 0
+  return subtotal * 11 / 12
+}
+
 const setCalculation = () => {
   listCalculation.value = []
   for (const item of listName.value) {
     if (typeForm.value === 'nonpo' && item === 'Additional Cost') break
-    const amount = setCount(item)
+    const amount = setCount(item) || 0
+
     const data = {
       name: item,
       amount: amount.toString(),
       currency: form?.currency || ''
     }
     listCalculation.value.push(data)
+
+    console.log(listCalculation.value, 'value');
+    
     setToForm(item, amount)
   }
 }

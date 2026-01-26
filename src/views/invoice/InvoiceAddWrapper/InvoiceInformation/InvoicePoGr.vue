@@ -135,6 +135,7 @@
                         : item.grDocumentDate
                   }}
                 </td>
+                <td> {{ item.deliveryOrderNo }} </td>
                 <td v-if="!checkInvoiceDp()">
                   {{
                     form.currency === item.currencyLC
@@ -467,6 +468,8 @@ const setColumn = () => {
 }
 
 const setItemPoGr = (items: PoGrSearchTypes[]) => {
+  console.log(items);
+  
   for (const item of items) {
     const data = {
       poNo: item.poNo,
@@ -491,6 +494,7 @@ const setItemPoGr = (items: PoGrSearchTypes[]) => {
       purchasingOrg: item.purchasingOrg,
       department: item.department,
       whtBaseAmount: form.currency === 'IDR' ? item.itemAmountLC : item.itemAmountTC,
+      deliveryOrderNo: item.deliveryOrderNo,
       isEdit: false,
     } as itemsPoGrType
 

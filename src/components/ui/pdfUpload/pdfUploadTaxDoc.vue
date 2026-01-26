@@ -65,7 +65,6 @@ const handleFileUpload = async (event: Event) => {
       previewPath: response.urlWithToken,
       fileSize: file.size,
     })
-
     // const responseQr = await uploadApi.uploadFileQr(file, 0)
     // emits('setFileQr', responseQr)
   } catch {}
