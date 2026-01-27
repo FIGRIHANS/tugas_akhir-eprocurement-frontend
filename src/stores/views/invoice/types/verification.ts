@@ -780,3 +780,19 @@ export interface UpdatePaymentStatusResponse {
   header: PaymentStatusHeader
   detail: PaymentStatusDetail[]
 }
+
+export interface SyncManualPayload {
+  noFaktur: string
+  npwpVendor: string
+  masaPajak: number
+  tahunPajak: number
+}
+
+export interface SyncManualResult {
+  taxInvoiceStatus: string
+  sellerTaxpayerName: string
+  taxInvoiceDate: string
+  sellingPrice: number
+  vat: number
+  valid: boolean
+}
