@@ -338,6 +338,7 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiModal from '@/components/modal/UiModal.vue'
 import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
 import moment from 'moment'
+import { parseIndoDate } from '@/composables/parseIndoDate'
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 
 /* ---------------- async components ---------------- */
@@ -839,8 +840,31 @@ const sendUploadFile = async () => {
 const verifyInvoice = async () => {
   isLoadUpload.value = true
   await sendUploadFile()
+
+  await setOcrPayload()
+
   isLoadUpload.value = false
   isVerifyData.value = true
+}
+
+const setOcrPayload = async () => {
+  // Map OCR payload into flattened form fields
+  form.ocrVendorName = ocrData.vendorSupplier;
+  form.vendorNPWP = ocrData.npwpSupplier;
+  form.ocrCompanyName = ocrData.vendorBuyer;
+  form.npwpCompany = ocrData.npwpBuyer;
+  form.taxInvoiceNumber = ocrData.taxDocumentNumber;
+  form.taxInvoiceDate = parseIndoDate(ocrData.taxDocumentDate);
+  form.salesAmount = parseFloat(ocrData.dpp) || 0;
+  form.otherDPP = 0;
+  form.ocrVatAmount = parseFloat(ocrData.ppn) || 0;
+  form.ocrVatbmAmount = parseFloat(ocrData.ppnbm) || 0;
+  form.taxInvoiceStatus = ocrData.status;
+  form.referenceNo = '';
+  form.createdBy = '';
+  form.createdUtcDate = moment();
+  form.modifiedBy = '';
+  form.modifiedUtcDate = moment();
 }
 
 /* ---------------- mount ---------------- */
