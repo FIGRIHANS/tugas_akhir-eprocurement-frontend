@@ -53,7 +53,7 @@ const isPettyCash = computed(() => form?.invoiceType === '5')
 const setCount = (name: string) => {
   const list: Record<string, number> = {
     'subtotal': countSubtotal(),
-    'dpp lainya': countDppLainnya(),
+    'dpp': countDppLainnya(),
     'vat amount': countVatAmount(),
     'wht amount': countWhtAmount(),
     'additional cost': countAdditionalCost(),
@@ -70,7 +70,7 @@ const setToForm = (name: string, value: number) => {
       case 'subtotal':
         form.subtotal = value
         break
-      case 'dpp lainnya':
+      case 'dpp':
         form.dppLainnya = value
         break
       case 'vat amount':
@@ -97,8 +97,6 @@ const countDppLainnya = () => {
 if (!form) return
 let total = 0
 
-console.log(form)
-
 if (!checkIsNonPo()) {
   for (const item of form.invoicePoGr) {
     // ⬇️ skip item yang taxCode = null
@@ -113,16 +111,16 @@ if (!checkIsNonPo()) {
   }
 } else {
   for (const item of form.invoiceItem) {
-    if (item.debitCredit === 'D') {
-      total = total + item.itemAmount
-    } else {
-      total = total - item.itemAmount
+    if (item.taxCode !== null) {
+      if (item.debitCredit === 'D') {
+        total = total + item.itemAmount
+      } else {
+        total = total - item.itemAmount
+      }
     }
   }
 }
 
-
-  
   // const subtotal = countSubtotal() || 0
   return total * 11 / 12
 }
