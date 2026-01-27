@@ -261,7 +261,10 @@ const filteredSidebarMenu = computed(() => {
             menu.id === 'dashboard' ||
             menu.id === 'analytic-dashboard' ||
             menu.id === 'digital-receiving-confirmation' ||
-            menu.id === 'tax-reconciliation',
+            menu.id === 'tax-reconciliation' ||
+            menu.id === 'userManagement' ||
+            menu.id === 'workflow-configuration'
+            
         )
         .map((menu) => {
           return {
@@ -283,7 +286,12 @@ const filteredSidebarMenu = computed(() => {
                     child.id === 'delivery-notes-list' ||
                     child.id === 'vat-reconciliation' ||
                     child.id === 'wht-reconciliation' ||
-                    child.id === 'invoice-type',
+                    child.id === 'invoice-type' ||
+                    child.id === 'list-user' ||
+                    child.id === 'master-profile' ||
+                    child.id === 'master-role' ||
+                    child.id === 'master-employee' ||
+                    child.id === 'report-user-authorization' 
                 )
               : [],
           }

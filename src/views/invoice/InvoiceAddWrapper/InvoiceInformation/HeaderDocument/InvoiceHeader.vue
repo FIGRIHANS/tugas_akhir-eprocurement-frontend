@@ -168,7 +168,7 @@
         v-if="checkPo() && form.invoiceType != '903'"
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
       >
-        <label class="form-label"> Tax Date </label>
+        <label class="form-label"> Tax Document Date </label>
         <DatePicker
           v-model="form.taxDate"
           format="yyyy/MM/dd"

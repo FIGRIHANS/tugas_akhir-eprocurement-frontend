@@ -110,7 +110,6 @@ const setCalculation = () => {
     }
     listCalculation.value.push(data)
 
-    console.log(listCalculation.value, 'value');
     
     setToForm(item, amount)
   }
