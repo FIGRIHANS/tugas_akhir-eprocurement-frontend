@@ -93,8 +93,38 @@ const setToForm = (name: string, value: number) => {
 }
 
 const countDppLainnya = () => {
-  const subtotal = countSubtotal() || 0
-  return subtotal * 11 / 12
+
+if (!form) return
+let total = 0
+
+console.log(form)
+
+if (!checkIsNonPo()) {
+  for (const item of form.invoicePoGr) {
+    // ⬇️ skip item yang taxCode = null
+    if (item.taxCode === null) continue
+
+    const itemAmount =
+      form.currency === 'IDR'
+        ? item.itemAmountLC
+        : item.itemAmountTC
+
+    total = total + Number(itemAmount)
+  }
+} else {
+  for (const item of form.invoiceItem) {
+    if (item.debitCredit === 'D') {
+      total = total + item.itemAmount
+    } else {
+      total = total - item.itemAmount
+    }
+  }
+}
+
+
+  
+  // const subtotal = countSubtotal() || 0
+  return total * 11 / 12
 }
 
 const setCalculation = () => {
