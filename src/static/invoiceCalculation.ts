@@ -10,6 +10,7 @@ export const defaultField = [
 
 export const dpField = [
   'Subtotal',
+  'Dpp',
   'VAT Amount',
   'WHT Amount',
   'Total Gross Amount',
@@ -27,6 +28,7 @@ export const nonPoField = [
 
 export const pettyCashField = [
   'Subtotal',
+  'Dpp',
   'VAT Amount',
   'Total Gross Amount',
   'Total Net Amount',

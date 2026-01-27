@@ -342,7 +342,7 @@ watch(
 )
 
 watch(
-  () => form,
+  () => form.companyCode,
   () => {
     if (form) {
       if (form.companyCode) invoiceMasterApi.getActivity(form.companyCode)

@@ -35,6 +35,7 @@ const form = inject<Ref<formTypes>>('form')
 const listName = ref<string[]>([])
 const listCalculation = ref<listTypes[]>([])
 
+
 const checkIsNonPo = () => {
   return route.query.type === 'nonpo'
 }
@@ -45,6 +46,9 @@ const setValue = (key: string) => {
     case 'subtotal':
       result = props.formInvoice.subtotal
       break
+    case 'dpp':
+      result = countDpp()
+        break
     case 'vat amount':
       result = props.formInvoice.vatAmount
       break
@@ -62,6 +66,46 @@ const setValue = (key: string) => {
       break
   }
   return result
+}
+
+const countDpp = () => {
+  let total = 0
+  if (!checkIsNonPo()) {
+    for (const item of props.formInvoice.invoicePoGr) {
+      if (item.taxCode !== null) {
+        total = total + Number(item.itemAmount)
+      }
+    }
+
+    for (const item of props.formInvoice.costExpense) {
+      if (item.taxCode !== null) {
+        total = total + Number(item.itemAmount)
+      }
+    }
+    
+    for (const item of props.formInvoice.additionalCosts) {
+      if (item.taxCode !== null) {
+        if (item.debitCredit === 'D') {
+          total = total + Number(item.itemAmount)
+        } else {
+          total = total + Number(item.itemAmount)
+        }
+      }
+    }
+  } else {
+
+    for (const item of props.formInvoice.invoiceItem) {
+      if (item.taxCode !== null) {
+        if (item.debitCredit === 'D') {
+          total = total + item.itemAmount
+        } else {
+          total = total - item.itemAmount
+        }
+      }
+    }
+  }
+
+  return total * 11 / 12
 }
 
 const setCalculation = () => {
