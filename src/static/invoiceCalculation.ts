@@ -1,7 +1,7 @@
 export const defaultField = [
   'Subtotal',
+  'Dpp',
   'VAT Amount',
-  'Dpp Lainya',
   'Additional Cost',
   'Total Gross Amount',
   'WHT Amount',
@@ -18,6 +18,7 @@ export const dpField = [
 
 export const nonPoField = [
   'Subtotal',
+  'Dpp',
   'VAT Amount',
   'Total Gross Amount',
   'WHT Amount',
