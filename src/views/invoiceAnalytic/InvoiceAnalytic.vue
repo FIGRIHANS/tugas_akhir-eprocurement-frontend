@@ -20,6 +20,59 @@
               </option>
             </select>
           </div>
+          <div class="filter-group">
+            <label class="text-sm text-gray-600">Vendor</label>
+            <select v-model="vendor" class="select">
+              <option v-for="item of vendorList" :key="item.vendorId" :value="item.vendorCode">
+                {{ item.vendorName }}
+              </option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="text-sm text-gray-600">Po Type</label>
+            <select v-model="poType" class="select">
+              <option v-for="item of poList" :key="item.code" :value="item.code">
+                {{ item.name }}
+              </option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="text-sm text-gray-600">Invoice Type</label>
+            <select v-model="invoiceType" class="select">
+              <option v-for="item of invoiceTypeList" :key="item.code" :value="item.code">
+                {{ item.name }}
+              </option>
+            </select>
+          </div>
+          <div class="filter-group" v-if="invoiceType === '901'">
+            <label class="text-sm text-gray-600">Dp Option</label>
+            <select v-model="dpOption" class="select">
+              <option v-for="item of dpOptionList" :key="item.code" :value="item.code">
+                {{ item.name }}
+              </option>
+            </select>
+          </div>
+
+
+          <div class="filter-group">
+            <label class="text-sm text-gray-600">Department</label>
+            <select v-model="departement" class="select">
+              <option v-for="item of constCenterList" :key="item.code" :value="item.code">
+                {{ item.name }}
+              </option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="text-sm text-gray-600">Date Range</label>
+            <DatePicker
+              v-model="date"
+              format="yyyy/MM/dd"
+              class=""
+              teleport
+              :min-days="7"
+              :range="true"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -324,17 +377,44 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import BreadcrumbView from '@/components/BreadcrumbView.vue'
 import type { AgingPeriod, UpcomingPayment } from './types/InvoiceAnalytic'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { format } from 'date-fns'
+import DatePicker from '@/components/datePicker/DatePicker.vue'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
 
-const companyCodeList = computed(() => invoiceMasterApi.companyCode)
+const companyCode = ref('MF00')
+const vendor = ref('')
+const poType = ref(1)
+const invoiceType = ref('')
+const dpOption = ref('')
+const departement = ref('')
+const date = ref<[Date | null, Date | null] | null>([null, null])
 
-const companyCode = ref('GNGR')
+const invoiceTypeList = ref([])
+
+const companyCodeList = computed(() => invoiceMasterApi.companyCode)
+const vendorList = computed(() => invoiceMasterApi.vendorList)
+const invoiceNonPoType = computed(() => invoiceMasterApi.invoiceNonPoType)
+const invoicePoType = computed(() => invoiceMasterApi.invoicePoType)
+const dpOptionList = computed(() => invoiceMasterApi.dpType)
+const constCenterList = computed(() => invoiceMasterApi.costCenterList)
+
+const poList = ref([
+  {
+    name: "invoice PO",
+    code: 1
+  },
+  {
+    name: "invoice Non PO",
+    code: 2
+  }
+])
+
+
 
 // Data and computed values
 const apAgingData = ref<AgingPeriod[]>([
@@ -610,9 +690,39 @@ const formatLabel = (label: string): string => {
 
 onMounted(async () => {
   await invoiceMasterApi.getCompanyCode()
+  await invoiceMasterApi.getVendorList()
+  await invoiceMasterApi.getInvoicePoType()
+  await invoiceMasterApi.getDpTypes()
+  
+
+  invoiceTypeList.value = invoicePoType.value
   // Initialize charts here using chart library of choice
   // (e.g., Chart.js, ApexCharts, or other preferred library)
 })
+
+watch(
+  () => poType.value,
+  async () => {
+    if (poType.value === 1) {
+      await invoiceMasterApi.getInvoicePoType()
+      invoiceTypeList.value = invoicePoType.value
+    }else{
+      await invoiceMasterApi.getInvoiceNonPoType()
+      invoiceTypeList.value = invoiceNonPoType.value
+    }
+  },
+  { deep: true },
+)
+
+watch(
+  () => companyCode.value,
+  () => {
+    if (companyCode.value) invoiceMasterApi.getCostCenter(companyCode.value || '')
+  },
+  {
+    immediate: true,
+  },
+)
 </script>
 
 <style lang="scss" scoped>
