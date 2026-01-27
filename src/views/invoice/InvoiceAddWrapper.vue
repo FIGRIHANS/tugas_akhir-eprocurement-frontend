@@ -850,7 +850,7 @@ const mapDataPost = () => {
     },
     ocr:{
       vendorName: form.ocrVendorName,
-      vendorNPW: form.vendorNPWP,
+      vendorNPWP: form.vendorNPWP,
       companyName: form.ocrCompanyName,
       npwpCompany: form.npwpCompany,
       taxInvoiceNumber: form.taxInvoiceNumber,
