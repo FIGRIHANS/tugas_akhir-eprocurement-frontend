@@ -331,10 +331,8 @@
       <div class="flex flex-col items-center gap-4 py-6">
         <UiLoading size="lg" variant="primary" class="mx-auto" />
         <div class="text-center">
-          <h3 class="text-lg font-medium text-gray-900 mb-2">Memverifikasi ke DJP...</h3>
-          <p class="text-sm text-gray-700">
-            Mohon tunggu sebentar, sedang mencocokkan data faktur pajak.
-          </p>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">Verifying with DJP...</h3>
+          <p class="text-sm text-gray-700">Please wait, matching tax invoice data.</p>
         </div>
       </div>
     </UiModal>
@@ -868,15 +866,15 @@ const verifyInvoice = async () => {
 }
 
 const verifyByPjap = async () => {
-  if (!ocrData.taxDocumentNumber || !ocrData.npwpSupplier || !ocrData.taxDocumentDate) {
-    // Basic validation, maybe show alert if needed
-    console.warn('Missing OCR data for PJAP Sync')
-    return
-  }
+  // User request: Hit API even if data is missing, to show "Not Match" in UI
+  // if (!ocrData.taxDocumentNumber || !ocrData.npwpSupplier || !ocrData.taxDocumentDate) {
+  //   console.warn('Missing OCR data for PJAP Sync')
+  //   return
+  // }
 
   console.log('Starting PJAP Sync...') // FORCE UPDATE
   isSyncLoading.value = true
-  const parts = ocrData.taxDocumentDate.split(' ')
+  const parts = (ocrData.taxDocumentDate || '').split(' ')
   let month = 0
   let year = 0
 
@@ -920,29 +918,27 @@ const verifyByPjap = async () => {
   }
 
   if (month && year) {
-    try {
-      const res = await invoiceVerificationStore.sync({
-        noFaktur: ocrData.taxDocumentNumber,
-        npwpVendor: ocrData.npwpSupplier,
-        masaPajak: month,
-        tahunPajak: year,
-      })
-      // The API response structure: { content: { taxInvoiceStatus: 'APPROVED', ... } } based on usage,
-      // but based on user request example:
-      // "result": { "message": "", "isError": false, "content": { "taxInvoiceStatus": "APPROVED", ... } }
-      // The store returns response.data which is the 'result' object typically if using standard wrapper,
-      // let's check store implementation.
-      // Store: return response.data.
-      // Api Result type SyncManualResult has taxInvoiceStatus.
-      pjapSyncStatus.value = res.taxInvoiceStatus
-      isVerify.value = true
-    } catch (error) {
-      console.error('PJAP Sync failed', error)
-    }
+    // Normal case
   } else {
-    console.warn('Could not parse date for PJAP Sync')
+    // Fallback if date parsing fails: send 0 or valid defaults if needed
+    // User wants to hit API anyway
   }
-  isSyncLoading.value = false
+
+  try {
+    const res = await invoiceVerificationStore.sync({
+      noFaktur: ocrData.taxDocumentNumber || '',
+      npwpVendor: ocrData.npwpSupplier || '',
+      masaPajak: month || 0,
+      tahunPajak: year || 0,
+    })
+    pjapSyncStatus.value = res?.taxInvoiceStatus || 'NOT MATCHED'
+  } catch (error) {
+    console.error('PJAP Sync failed', error)
+    pjapSyncStatus.value = 'ERROR' // Will show as Not Match in UI
+  } finally {
+    isVerify.value = true
+    isSyncLoading.value = false
+  }
 }
 
 const setOcrPayload = async () => {
@@ -969,6 +965,21 @@ const setOcrPayload = async () => {
 onMounted(() => {
   setColumn()
   typeForm.value = route.query.type?.toString().toLowerCase() || 'po'
+
+  // If form has data (Edit Mode), populate ocrData so verifyByPjap works
+  if (form?.taxInvoiceNumber) {
+    ocrData.vendorSupplier = form.ocrVendorName || ''
+    ocrData.npwpSupplier = form.vendorNPWP || ''
+    ocrData.vendorBuyer = form.ocrCompanyName || ''
+    ocrData.npwpBuyer = form.npwpCompany || ''
+    ocrData.taxDocumentNumber = form.taxInvoiceNumber || ''
+    // taxInvoiceDate usually YYYY-MM-DD from DB, verifyByPjap handles it via fallback
+    ocrData.taxDocumentDate = form.taxInvoiceDate ? String(form.taxInvoiceDate) : ''
+    ocrData.dpp = form.salesAmount?.toString() || ''
+    ocrData.ppn = form.ocrVatAmount?.toString() || ''
+    ocrData.ppnbm = form.ocrVatbmAmount?.toString() || ''
+    ocrData.status = form.taxInvoiceStatus || ''
+  }
 })
 </script>
 

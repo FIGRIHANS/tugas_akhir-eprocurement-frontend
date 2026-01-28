@@ -46,38 +46,41 @@
         <!-- Title -->
         <h3 class="text-xl font-semibold text-gray-800 mb-2 font-inter">Authentication Required</h3>
         <p class="text-gray-500 text-sm mb-6 font-inter text-center">
-          Enter the 6-digit verification code
+          Enter your password to verify
         </p>
 
-        <!-- Verification Code Input -->
-        <div class="flex gap-3 mb-6 justify-center">
+        <!-- Password Input -->
+        <div class="relative w-full mb-6">
           <input
-            v-for="(digit, index) in 6"
-            :key="index"
-            :ref="
-              (el) => {
-                if (el) codeInputs[index] = el as HTMLInputElement
-              }
-            "
-            v-model="verificationCode[index]"
-            type="password"
-            maxlength="1"
-            class="w-12 h-14 text-center text-2xl font-semibold border-2 border-gray-300 rounded-lg focus:border-primary focus:outline-none transition-colors"
-            @input="handleCodeInput(index, $event)"
-            @keydown="handleKeyDown(index, $event)"
-            @paste="handlePaste"
+            v-model="password"
+            :type="showPassword ? 'text' : 'password'"
+            class="input w-full pr-10 border-gray-300 focus:border-primary px-4 py-3 rounded-lg border-2"
+            placeholder="Password"
+            @keyup.enter="handleVerify"
           />
+          <button
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-primary transition-colors cursor-pointer"
+            @click="showPassword = !showPassword"
+            tabindex="-1"
+          >
+            <UiIcon :name="showPassword ? 'eye' : 'eye-slash'" variant="duotone" class="text-2xl" />
+          </button>
         </div>
 
-        <!-- Verify Button (Full Width) -->
-        <button
-          class="btn btn-primary w-full font-inter"
-          @click="handleVerify"
-          :disabled="!isCodeComplete"
-          :class="{ 'opacity-50 cursor-not-allowed': !isCodeComplete }"
-        >
-          Verify
-        </button>
+        <!-- Buttons -->
+        <div class="flex gap-3 w-full">
+          <UiButton variant="light" class="w-full justify-center font-inter" @click="handleClose">
+            Cancel
+          </UiButton>
+          <UiButton
+            variant="primary"
+            class="w-full justify-center font-inter"
+            @click="handleVerify"
+            :disabled="!isCodeComplete"
+          >
+            Verify
+          </UiButton>
+        </div>
       </div>
     </div>
   </div>
@@ -85,6 +88,8 @@
 
 <script lang="ts" setup>
 import { ref, computed, watch } from 'vue'
+import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
+import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 
 const props = defineProps<{
   show: boolean
@@ -95,60 +100,23 @@ const emit = defineEmits<{
   (e: 'verify', code: string): void
 }>()
 
-const verificationCode = ref<string[]>(['', '', '', '', '', ''])
-const codeInputs = ref<HTMLInputElement[]>([])
+const password = ref<string>('')
+const showPassword = ref<boolean>(false)
 
 const isCodeComplete = computed(() => {
-  return verificationCode.value.every((digit) => digit !== '')
+  return password.value.length > 0
 })
 
 const handleClose = () => {
-  verificationCode.value = ['', '', '', '', '', '']
+  password.value = ''
+  showPassword.value = false
   emit('close')
-}
-
-const handleCodeInput = (index: number, event: Event) => {
-  const target = event.target as HTMLInputElement
-  const value = target.value.replace(/[^0-9]/g, '')
-
-  verificationCode.value[index] = value
-
-  if (value && index < 5) {
-    codeInputs.value[index + 1]?.focus()
-  }
-}
-
-const handleKeyDown = (index: number, event: KeyboardEvent) => {
-  if (event.key === 'Backspace' && !verificationCode.value[index] && index > 0) {
-    codeInputs.value[index - 1]?.focus()
-  }
-}
-
-const handlePaste = (event: ClipboardEvent) => {
-  event.preventDefault()
-  const pastedData = event.clipboardData
-    ?.getData('text')
-    .replace(/[^0-9]/g, '')
-    .slice(0, 6)
-
-  if (pastedData) {
-    const digits = pastedData.split('')
-    digits.forEach((digit, index) => {
-      if (index < 6) {
-        verificationCode.value[index] = digit
-      }
-    })
-
-    const nextEmptyIndex = digits.length < 6 ? digits.length : 5
-    codeInputs.value[nextEmptyIndex]?.focus()
-  }
 }
 
 const handleVerify = () => {
   if (isCodeComplete.value) {
-    const code = verificationCode.value.join('')
-    emit('verify', code)
-    verificationCode.value = ['', '', '', '', '', '']
+    emit('verify', password.value)
+    password.value = ''
   }
 }
 
@@ -157,7 +125,8 @@ watch(
   () => props.show,
   (newVal) => {
     if (newVal) {
-      verificationCode.value = ['', '', '', '', '', '']
+      password.value = ''
+      showPassword.value = false
     }
   },
 )
