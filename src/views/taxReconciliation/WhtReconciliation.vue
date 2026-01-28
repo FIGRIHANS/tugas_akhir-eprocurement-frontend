@@ -133,7 +133,16 @@
               <td>{{ item.tahunPajak }}</td>
               <td>{{ item.npwp }}</td>
               <td>{{ item.idTku }}</td>
-              <td>{{ item.fasilitas }}</td>
+              <td>
+                <select
+                  v-model="item.fasilitas"
+                  class="form-select form-select-sm min-w-[150px] bg-transparent border-transparent hover:border-gray-300 focus:border-blue-500 transition-colors"
+                >
+                  <option v-for="opt in facilityOptions" :key="opt" :value="opt">
+                    {{ opt }}
+                  </option>
+                </select>
+              </td>
               <td>{{ item.kodeObjek }}</td>
               <td class="text-right">{{ formatCurrency(item.dpp) }}</td>
               <td class="text-right">{{ item.tarif }}%</td>
@@ -409,6 +418,19 @@ const showAuthModal = ref(false)
 const showSuccessModal = ref(false)
 const showWarningModal = ref(false)
 
+// Facility Options
+const facilityOptions = [
+  'N/A',
+  'TaxExAr22',
+  'TaxExAr23',
+  'TaxExIntDep',
+  'TaxExIntPhtb',
+  'DTP',
+  'PPh',
+  'PP23',
+  'ETC',
+]
+
 // Selection Logic
 const selectedItems = ref<WHTReconciliationData[]>([])
 
@@ -443,21 +465,21 @@ const isSelected = (item: WHTReconciliationData) => {
   )
 }
 
-// Columns based on user request
+// Columns based on user request (Translated to English)
 const columns = ref<string[]>([
   'Action',
-  'Masa Pajak',
-  'Tahun Pajak',
+  'Tax Period Month',
+  'Tax Period Year',
   'NPWP',
-  'ID TKU Penerima Penghasilan',
-  'Fasilitas',
-  'Kode Objek',
-  'DPP',
-  'Tarif (%)', // Added unit for clarity
-  'Jenis Dok. Referensi',
-  'Nomor Dok. Referensi',
-  'Tanggal Dokumen',
-  'Status WHT',
+  'Income Recipient ID',
+  'Facility',
+  'Tax Object Code',
+  'Tax Base (DPP)',
+  'Rate (%)',
+  'Document Type',
+  'Document Number',
+  'Document Date',
+  'WHT Status',
   'Match Status',
   'Credit Status',
 ])
@@ -473,7 +495,7 @@ const dataList = ref<WHTReconciliationData[]>([
     fasilitas: 'N/A',
     kodeObjek: '22-100-07',
     dpp: 10000000,
-    tarif: 0.25,
+    tarif: 2, // Fixed to 2%
     jenisDokRef: 'CommercialInvoice',
     nomorDokRef: '0100012292489165',
     tanggalDok: '2024-01-13',
@@ -489,7 +511,7 @@ const dataList = ref<WHTReconciliationData[]>([
     fasilitas: 'DTP',
     kodeObjek: '22-405-01',
     dpp: 10000000,
-    tarif: 0.1,
+    tarif: 2, // Fixed to 2%
     jenisDokRef: 'CommercialInvoice',
     nomorDokRef: '0100012292489165', // Same Invoice
     tanggalDok: '2024-01-13',
@@ -507,7 +529,7 @@ const dataList = ref<WHTReconciliationData[]>([
     fasilitas: 'N/A',
     kodeObjek: '23-100-01', // Jasa
     dpp: 5000000,
-    tarif: 2,
+    tarif: 2, // Fixed to 2%
     jenisDokRef: 'CommercialInvoice',
     nomorDokRef: 'INV/2025/001',
     tanggalDok: '2025-01-15',
@@ -525,7 +547,7 @@ const dataList = ref<WHTReconciliationData[]>([
     fasilitas: 'N/A',
     kodeObjek: '22-100-07',
     dpp: 15000000,
-    tarif: 0.25,
+    tarif: 2, // Fixed to 2%
     jenisDokRef: 'CommercialInvoice',
     nomorDokRef: 'INV/2025/002',
     tanggalDok: '2025-01-16',
@@ -543,7 +565,7 @@ const dataList = ref<WHTReconciliationData[]>([
     fasilitas: 'N/A',
     kodeObjek: '24-104-08',
     dpp: 25000000,
-    tarif: 2,
+    tarif: 2, // Fixed to 2%
     jenisDokRef: 'CommercialInvoice',
     nomorDokRef: 'INV/2025/MIXED',
     tanggalDok: '2025-01-20',
@@ -559,7 +581,7 @@ const dataList = ref<WHTReconciliationData[]>([
     fasilitas: 'N/A',
     kodeObjek: '23-100-02',
     dpp: 5000000,
-    tarif: 2,
+    tarif: 2, // Fixed to 2%
     jenisDokRef: 'CommercialInvoice',
     nomorDokRef: 'INV/2025/MIXED', // Same Invoice
     tanggalDok: '2025-01-20',
@@ -709,18 +731,18 @@ const deleteFilter = (key: string) => {
 
 const sortColumn = (columnName: string | null) => {
   const columnMap = {
-    'Masa Pajak': 'masaPajak',
-    'Tahun Pajak': 'tahunPajak',
+    'Tax Period Month': 'masaPajak',
+    'Tax Period Year': 'tahunPajak',
     NPWP: 'npwp',
-    'ID TKU Penerima Penghasilan': 'idTku',
-    Fasilitas: 'fasilitas',
-    'Kode Objek': 'kodeObjek',
-    DPP: 'dpp',
-    'Tarif (%)': 'tarif',
-    'Jenis Dok. Referensi': 'jenisDokRef',
-    'Nomor Dok. Referensi': 'nomorDokRef',
-    'Tanggal Dokumen': 'tanggalDok',
-    'Status WHT': 'statusWht',
+    'Income Recipient ID': 'idTku',
+    Facility: 'fasilitas',
+    'Tax Object Code': 'kodeObjek',
+    'Tax Base (DPP)': 'dpp',
+    'Rate (%)': 'tarif',
+    'Document Type': 'jenisDokRef',
+    'Document Number': 'nomorDokRef',
+    'Document Date': 'tanggalDok',
+    'WHT Status': 'statusWht',
     'Match Status': 'matchStatus',
     'Credit Status': 'creditStatus',
   } as { [key: string]: string }
@@ -742,7 +764,7 @@ const sortColumn = (columnName: string | null) => {
 
   const name = columnName || sortColumnName.value
 
-  if (name === 'Tanggal Dokumen') {
+  if (name === 'Document Date') {
     result = listData.sort((a, b) => {
       const convA = a[columnMap[name]] ? new Date(a[columnMap[name]]).getTime() : 0
       const convB = b[columnMap[name]] ? new Date(b[columnMap[name]]).getTime() : 0
@@ -752,7 +774,7 @@ const sortColumn = (columnName: string | null) => {
         return convB - convA
       }
     })
-  } else if (name === 'DPP' || name === 'Tarif (%)') {
+  } else if (name === 'Tax Base (DPP)' || name === 'Rate (%)') {
     result = listData.sort((a, b) => {
       const convA = (a as Record<string, any>)[columnMap[name]] || 0
       const convB = (b as Record<string, any>)[columnMap[name]] || 0
