@@ -24,7 +24,7 @@
               'border-danger': form.invoiceTypeError,
             }"
           >
-            <option v-for="item of invoiceTypeNonPo" :key="item.id" :value="item.id">
+            <option v-for="item of listInvoiceTypeNonPo" :key="item.code" :value="item.code">
               {{ item.name }}
             </option>
           </select>
@@ -485,28 +485,29 @@ const form = inject<formTypes>('form')
 const route = useRoute()
 const typeForm = ref<string>('')
 
-const invoiceTypeNonPo = ref([
-  {
-    id: '1',
-    name: 'Non PO/Reimbursement',
-  },
-  {
-    id: '2',
-    name: 'Credit Card',
-  },
-  {
-    id: '3',
-    name: 'CAS',
-  },
-  {
-    id: '4',
-    name: 'LBA',
-  },
-  {
-    id: '5',
-    name: 'Petty Cash',
-  },
-])
+
+// const invoiceTypeNonPo = ref([
+//   {
+//     id: '1',
+//     name: 'Non PO/Reimbursement',
+//   },
+//   {
+//     id: '2',
+//     name: 'Credit Card',
+//   },
+//   {
+//     id: '3',
+//     name: 'CAS',
+//   },
+//   {
+//     id: '4',
+//     name: 'LBA',
+//   },
+//   {
+//     id: '5',
+//     name: 'Petty Cash',
+//   },
+// ])
 
 const currencyList = computed(() => {
   return invoiceMasterApi.currency
