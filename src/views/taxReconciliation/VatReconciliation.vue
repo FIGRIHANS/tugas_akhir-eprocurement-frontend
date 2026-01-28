@@ -190,7 +190,11 @@
                 </span>
               </td>
               <td>{{ formatDate(item.vatCreditExpiryDate) }}</td>
-              <td>{{ item.remark || '-' }}</td>
+              <td>
+                <div class="whitespace-normal break-words w-[800px]">
+                  {{ item.remark || '-' }}
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -649,17 +653,6 @@ const goDetail = (data: VATReconciliationData) => {
       id: data.noFakturPajak,
     },
   })
-}
-
-const openStatusModal = () => {
-  if (selectedItems.value.length > 0) {
-    // Use first selected item for modal display
-    currentSelectedItem.value = selectedItems.value[0]
-    selectedStatus.value = ''
-    statusSearch.value = ''
-    showStatusDropdown.value = false
-    showStatusModal.value = true
-  }
 }
 
 const toggleStatusDropdown = () => {
