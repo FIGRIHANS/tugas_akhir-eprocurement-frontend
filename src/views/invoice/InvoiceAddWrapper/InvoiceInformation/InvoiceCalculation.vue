@@ -26,7 +26,7 @@
         </div>
       </div>
     </div>
-    <div class="card mt-5 p-5" v-if="countVariance()">
+    <div class="card mt-5 p-5" >
       <div
         class="p-4 rounded-lg border"
         :class="varianceResult.border"
