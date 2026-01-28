@@ -70,9 +70,10 @@
 
               <UiButton
                 class="px-3 py-1 bg-blue-600 text-white rounded-lg"
-                @click="isVerify = true"
+                @click="verifyByPjap"
+                :disabled="isSyncLoading"
               >
-                Verify By PJAP
+                {{ isSyncLoading ? 'Verifying...' : 'Verify By PJAP' }}
               </UiButton>
             </div>
           </div>
@@ -324,6 +325,19 @@
         </p>
       </div>
     </UiModal>
+
+    <!-- Loading Modal -->
+    <UiModal v-model="isSyncLoading" size="sm" hide-header hide-close static>
+      <div class="flex flex-col items-center gap-4 py-6">
+        <UiLoading size="lg" variant="primary" class="mx-auto" />
+        <div class="text-center">
+          <h3 class="text-lg font-medium text-gray-900 mb-2">Memverifikasi ke DJP...</h3>
+          <p class="text-sm text-gray-700">
+            Mohon tunggu sebentar, sedang mencocokkan data faktur pajak.
+          </p>
+        </div>
+      </div>
+    </UiModal>
   </div>
 </template>
 
@@ -337,11 +351,13 @@ import { useRoute } from 'vue-router'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiModal from '@/components/modal/UiModal.vue'
 import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
+import UiLoading from '@/components/UiLoading.vue'
 import moment from 'moment'
 import { parseIndoDate } from '@/composables/parseIndoDate'
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 
 /* ---------------- async components ---------------- */
+
 const InvoicePoGrView = defineAsyncComponent(
   () => import('./InvoicePreview/InvoicePoGrViewOcr.vue'),
 )
@@ -745,12 +761,13 @@ const tableData = computed(() => {
 })
 
 /* ---------------- PJAP ---------------- */
+/* ---------------- PJAP ---------------- */
 const bjapVerify = computed(() => [
   {
-    header: 'Status FP PJAP',
+    header: 'FP PJAP Status',
     qr: qrData.status || '-',
-    fpVerified: 'Approved',
-    remarks: qrData.status === 'APPROVED',
+    fpVerified: pjapSyncStatus.value || '-',
+    remarks: pjapSyncStatus.value === 'APPROVED',
   },
 ])
 
@@ -782,6 +799,9 @@ const triggerAiMismatch = () => {
 const setTabOcr = (tab: 'general' | 'tax' | 'ai') => {
   tabOcrTab.value = tab
 }
+
+const isSyncLoading = ref(false)
+const pjapSyncStatus = ref<string | null>(null)
 
 /* ---------------- watchers ---------------- */
 watch(isVerifyData, (val) => {
@@ -847,24 +867,102 @@ const verifyInvoice = async () => {
   isVerifyData.value = true
 }
 
+const verifyByPjap = async () => {
+  if (!ocrData.taxDocumentNumber || !ocrData.npwpSupplier || !ocrData.taxDocumentDate) {
+    // Basic validation, maybe show alert if needed
+    console.warn('Missing OCR data for PJAP Sync')
+    return
+  }
+
+  console.log('Starting PJAP Sync...') // FORCE UPDATE
+  isSyncLoading.value = true
+  const parts = ocrData.taxDocumentDate.split(' ')
+  let month = 0
+  let year = 0
+
+  const monthMap: Record<string, number> = {
+    januari: 1,
+    februari: 2,
+    maret: 3,
+    april: 4,
+    mei: 5,
+    juni: 6,
+    juli: 7,
+    agustus: 8,
+    september: 9,
+    oktober: 10,
+    november: 11,
+    desember: 12,
+    january: 1,
+    february: 2,
+    march: 3,
+    may: 5,
+    june: 6,
+    july: 7,
+    august: 8,
+    october: 10,
+    december: 12,
+  }
+
+  if (parts.length >= 3) {
+    const mStr = parts[1].toLowerCase()
+    month = monthMap[mStr] || 0
+    year = parseInt(parts[2])
+  }
+
+  // Fallback
+  if (!month || !year) {
+    const m = moment(ocrData.taxDocumentDate)
+    if (m.isValid()) {
+      month = m.month() + 1
+      year = m.year()
+    }
+  }
+
+  if (month && year) {
+    try {
+      const res = await invoiceVerificationStore.sync({
+        noFaktur: ocrData.taxDocumentNumber,
+        npwpVendor: ocrData.npwpSupplier,
+        masaPajak: month,
+        tahunPajak: year,
+      })
+      // The API response structure: { content: { taxInvoiceStatus: 'APPROVED', ... } } based on usage,
+      // but based on user request example:
+      // "result": { "message": "", "isError": false, "content": { "taxInvoiceStatus": "APPROVED", ... } }
+      // The store returns response.data which is the 'result' object typically if using standard wrapper,
+      // let's check store implementation.
+      // Store: return response.data.
+      // Api Result type SyncManualResult has taxInvoiceStatus.
+      pjapSyncStatus.value = res.taxInvoiceStatus
+      isVerify.value = true
+    } catch (error) {
+      console.error('PJAP Sync failed', error)
+    }
+  } else {
+    console.warn('Could not parse date for PJAP Sync')
+  }
+  isSyncLoading.value = false
+}
+
 const setOcrPayload = async () => {
   // Map OCR payload into flattened form fields
-  form.ocrVendorName = ocrData.vendorSupplier;
-  form.vendorNPWP = ocrData.npwpSupplier;
-  form.ocrCompanyName = ocrData.vendorBuyer;
-  form.npwpCompany = ocrData.npwpBuyer;
-  form.taxInvoiceNumber = ocrData.taxDocumentNumber;
-  form.taxInvoiceDate = parseIndoDate(ocrData.taxDocumentDate);
-  form.salesAmount = parseFloat(ocrData.dpp) || 0;
-  form.otherDPP = 0;
-  form.ocrVatAmount = parseFloat(ocrData.ppn) || 0;
-  form.ocrVatbmAmount = parseFloat(ocrData.ppnbm) || 0;
-  form.taxInvoiceStatus = ocrData.status;
-  form.referenceNo = '';
-  form.createdBy = '';
-  form.createdUtcDate = moment();
-  form.modifiedBy = '';
-  form.modifiedUtcDate = moment();
+  form.ocrVendorName = ocrData.vendorSupplier
+  form.vendorNPWP = ocrData.npwpSupplier
+  form.ocrCompanyName = ocrData.vendorBuyer
+  form.npwpCompany = ocrData.npwpBuyer
+  form.taxInvoiceNumber = ocrData.taxDocumentNumber
+  form.taxInvoiceDate = parseIndoDate(ocrData.taxDocumentDate)
+  form.salesAmount = parseFloat(ocrData.dpp) || 0
+  form.otherDPP = 0
+  form.ocrVatAmount = parseFloat(ocrData.ppn) || 0
+  form.ocrVatbmAmount = parseFloat(ocrData.ppnbm) || 0
+  form.taxInvoiceStatus = ocrData.status
+  form.referenceNo = ''
+  form.createdBy = ''
+  form.createdUtcDate = moment().format()
+  form.modifiedBy = ''
+  form.modifiedUtcDate = moment().format()
 }
 
 /* ---------------- mount ---------------- */

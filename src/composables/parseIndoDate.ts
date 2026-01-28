@@ -1,34 +1,39 @@
 import moment from 'moment'
 
-const INDO_MONTH_MAP: Record<string, string> = {
-  januari: '01',
-  februari: '02',
-  maret: '03',
-  april: '04',
-  mei: '05',
-  juni: '06',
-  juli: '07',
-  agustus: '08',
-  september: '09',
-  oktober: '10',
-  november: '11',
-  desember: '12'
-}
-
-export function parseIndoDate(dateStr: string) {
+export const parseIndoDate = (dateStr: string) => {
   if (!dateStr) return null
 
-  // contoh: "29 Oktober 2025"
-  const parts = dateStr.trim().split(' ')
-  if (parts.length !== 3) return null
+  const monthMap: Record<string, string> = {
+    januari: '01',
+    februari: '02',
+    maret: '03',
+    april: '04',
+    mei: '05',
+    juni: '06',
+    juli: '07',
+    agustus: '08',
+    september: '09',
+    oktober: '10',
+    november: '11',
+    desember: '12',
+    january: '01',
+    february: '02',
+    march: '03',
+    may: '05',
+    june: '06',
+    july: '07',
+    august: '08',
+    october: '10',
+    december: '12',
+  }
 
-  const [day, monthText, year] = parts
-  const month = INDO_MONTH_MAP[monthText.toLowerCase()]
+  const parts = dateStr.split(' ')
+  if (parts.length >= 3) {
+    const day = parts[0].padStart(2, '0')
+    const month = monthMap[parts[1].toLowerCase()] || '01'
+    const year = parts[2]
+    return moment(`${year}-${month}-${day}`).format('YYYY-MM-DD')
+  }
 
-  if (!month) return null
-
-  const isoDate = `${year}-${month}-${day.padStart(2, '0')}`
-
-  const m = moment(isoDate, 'YYYY-MM-DD', true)
-  return m.isValid() ? isoDate : null
+  return moment(dateStr).format('YYYY-MM-DD')
 }

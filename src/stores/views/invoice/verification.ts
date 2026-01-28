@@ -18,6 +18,8 @@ import type {
   SapStatusResponse,
   UpdatePaymentStatusRequest,
   UpdatePaymentStatusResponse,
+  SyncManualPayload,
+  SyncManualResult,
 } from './types/verification'
 import type { invoiceOcrData } from '@/views/invoice/types/invoiceOcrData'
 import type { invoiceQrData } from '@/views/invoice/types/invoiceQrdata'
@@ -375,6 +377,11 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     return response.data
   }
 
+  const sync = async (data: SyncManualPayload): Promise<SyncManualResult> => {
+    const response: any = await invoiceApi.post(`/TaxSync/sync-pjap`, data)
+    return response.data?.result?.content
+  }
+
   return {
     listPo,
     listNonPo,
@@ -412,5 +419,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     getPaymentStatus,
     updatePaymentStatusNonPo,
     getPaymentStatusNonPo,
+
+    sync,
   }
 })
