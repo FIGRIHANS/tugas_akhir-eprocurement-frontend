@@ -1,12 +1,7 @@
 <template>
-  <div class="invoice-analytic">
-    <BreadcrumbView
-      :routes="[
-        { name: 'Supply Chain Analytic', to: '#' },
-        { name: 'Invoice Analytic', to: '/invoice-analytic' },
-      ]"
-      title="Invoice Analytic"
-    />
+  <div>
+    <Breadcrumb title="Invoice Analytic" :routes="routes" />
+    <hr class="-mx-[24px] mb-[24px]" />
 
     <!-- Header Section -->
     <div class="header-section bg-white border rounded-lg p-4 mb-6">
@@ -37,7 +32,7 @@
             </select>
           </div>
           <div class="filter-group">
-            <label class="text-sm text-gray-600">Invoice Type</label>
+            <label class="text-sm text-gray-600 whitespace-nowrap">Invoice Type</label>
             <select v-model="invoiceType" class="select">
               <option v-for="item of invoiceTypeList" :key="item.code" :value="item.code">
                 {{ item.name }}
@@ -64,14 +59,7 @@
           </div>
           <div class="filter-group">
             <label class="text-sm text-gray-600">Date Range</label>
-            <DatePicker
-              v-model="date"
-              format="yyyy/MM/dd"
-              class=""
-              teleport
-              :min-days="7"
-              :range="true"
-            />
+            <DatePicker v-model="date" format="yyyy/MM/dd" class="" teleport :min-days="7" :range="true" />
           </div>
         </div>
       </div>
@@ -90,18 +78,15 @@
             <div class="bar-chart-container">
               <div v-for="item in apAgingData" :key="item.period" class="bar-group">
                 <div class="bar-container" style="position: relative; block-size: 200px">
-                  <div
-                    class="bar"
-                    :style="{
-                      'block-size': `${(item.amount / maxAmount) * 100}%`,
-                      'background-color': '#3b82f6',
-                      position: 'absolute',
-                      'inset-block-end': '0',
-                      'inset-inline-start': '50%',
-                      transform: 'translateX(-50%)',
-                      'inline-size': '40px',
-                    }"
-                  ></div>
+                  <div class="bar" :style="{
+                    'block-size': `${(item.amount / maxAmount) * 100}%`,
+                    'background-color': '#3b82f6',
+                    position: 'absolute',
+                    'inset-block-end': '0',
+                    'inset-inline-start': '50%',
+                    transform: 'translateX(-50%)',
+                    'inline-size': '40px',
+                  }"></div>
                 </div>
                 <span class="bar-label">{{ item.period }}</span>
                 <div class="bar-value">{{ formatCurrency(item.amount) }}</div>
@@ -142,18 +127,15 @@
             <div class="bar-chart-container">
               <div v-for="payment in upcomingPayments" :key="payment.period" class="bar-group">
                 <div class="bar-container" style="position: relative; block-size: 200px">
-                  <div
-                    class="bar"
-                    :style="{
-                      'block-size': (payment.amount / maxUpcomingAmount) * 100 + '%',
-                      'background-color': '#10b981',
-                      position: 'absolute',
-                      'inset-block-end': '0',
-                      'inset-inline-start': '50%',
-                      transform: 'translateX(-50%)',
-                      'inline-size': '40px',
-                    }"
-                  ></div>
+                  <div class="bar" :style="{
+                    'block-size': (payment.amount / maxUpcomingAmount) * 100 + '%',
+                    'background-color': '#10b981',
+                    position: 'absolute',
+                    'inset-block-end': '0',
+                    'inset-inline-start': '50%',
+                    transform: 'translateX(-50%)',
+                    'inline-size': '40px',
+                  }"></div>
                 </div>
                 <span class="bar-label">{{ formatLabel(payment.period) }}</span>
                 <div class="bar-value">{{ formatCurrency(payment.amount) }}</div>
@@ -182,11 +164,8 @@
           </div>
           <div class="flex">
             <div class="revenue-label writing-vertical text-gray-500 mr-2">Revenue</div>
-            <div
-              class="line-chart-wrapper flex-grow"
-              style="block-size: 200px"
-              @wheel.passive.prevent="handleWheelPaidOnTime($event)"
-            >
+            <div class="line-chart-wrapper flex-grow" style="block-size: 200px"
+              @wheel.passive.prevent="handleWheelPaidOnTime($event)">
               <svg class="line-chart" preserveAspectRatio="none" viewBox="0 0 300 100">
                 <defs>
                   <linearGradient id="paidOnTimeGradient" x1="0" y1="0" x2="0" y2="1">
@@ -195,20 +174,10 @@
                   </linearGradient>
                 </defs>
                 <path :d="paidOnTimeAreaPath" fill="url(#paidOnTimeGradient)" class="area-path" />
-                <path
-                  :d="paidOnTimeLinePath"
-                  fill="none"
-                  stroke="#10b981"
-                  stroke-width="2"
-                  class="line-path"
-                />
+                <path :d="paidOnTimeLinePath" fill="none" stroke="#10b981" stroke-width="2" class="line-path" />
               </svg>
               <div class="chart-labels">
-                <div
-                  v-for="(data, index) in paidOnTimeVisibleLabels"
-                  :key="index"
-                  class="chart-label"
-                >
+                <div v-for="(data, index) in paidOnTimeVisibleLabels" :key="index" class="chart-label">
                   {{ data }}
                 </div>
               </div>
@@ -231,11 +200,8 @@
           </div>
           <div class="flex">
             <div class="revenue-label writing-vertical text-gray-500 mr-2">Revenue</div>
-            <div
-              class="line-chart-wrapper flex-grow"
-              style="block-size: 200px"
-              @wheel.passive.prevent="handleWheelAvgAge($event)"
-            >
+            <div class="line-chart-wrapper flex-grow" style="block-size: 200px"
+              @wheel.passive.prevent="handleWheelAvgAge($event)">
               <svg class="line-chart" preserveAspectRatio="none" viewBox="0 0 300 100">
                 <defs>
                   <linearGradient id="avgAgeGradient" x1="0" y1="0" x2="0" y2="1">
@@ -244,13 +210,7 @@
                   </linearGradient>
                 </defs>
                 <path :d="avgAgeAreaPath" fill="url(#avgAgeGradient)" class="area-path" />
-                <path
-                  :d="avgAgeLinePath"
-                  fill="none"
-                  stroke="#f59e0b"
-                  stroke-width="2"
-                  class="line-path"
-                />
+                <path :d="avgAgeLinePath" fill="none" stroke="#f59e0b" stroke-width="2" class="line-path" />
               </svg>
               <div class="chart-labels">
                 <div v-for="(data, index) in avgAgeVisibleLabels" :key="index" class="chart-label">
@@ -280,12 +240,36 @@
               <span>Overdue</span>
             </div>
           </div>
-          <div class="stacked-chart-wrapper" style="block-size: 220px">
-            <div class="stacked-bars">
-              <div v-for="(item, index) in timeSeriesData" :key="index" class="stacked-bar-group">
-                <div class="stacked-bar" style="background-color: #3b82f6"></div>
-                <div class="stacked-bar" style="background-color: #f59e0b"></div>
-                <div class="stacked-bar" style="background-color: #ef4444"></div>
+          <div class="mini-trend-chart" style="block-size: 220px">
+            <div class="trend-bars">
+              <div v-for="(data, index) in timeSeriesData" :key="index" class="trend-bar">
+                <div class="trend-bar-base" :style="{
+                  'block-size': (data.current / (data.current + data.processing + data.overdue)) * 100 + '%',
+                  'background-color': '#3b82f6',
+                  position: 'absolute',
+                  'inset-block-end': '0',
+                  'inset-inline-start': '0',
+                  'inset-inline-end': '0',
+                  'z-index': 1
+                }"></div>
+                <div class="trend-bar-base" :style="{
+                  'block-size': (data.processing / (data.current + data.processing + data.overdue)) * 100 + '%',
+                  'background-color': '#f59e0b',
+                  position: 'absolute',
+                  'inset-block-end': (data.current / (data.current + data.processing + data.overdue)) * 100 + '%',
+                  'inset-inline-start': '0',
+                  'inset-inline-end': '0',
+                  'z-index': 2
+                }"></div>
+                <div class="trend-bar-base" :style="{
+                  'block-size': (data.overdue / (data.current + data.processing + data.overdue)) * 100 + '%',
+                  'background-color': '#ef4444',
+                  position: 'absolute',
+                  'inset-block-end': ((data.current + data.processing) / (data.current + data.processing + data.overdue)) * 100 + '%',
+                  'inset-inline-start': '0',
+                  'inset-inline-end': '0',
+                  'z-index': 3
+                }"></div>
               </div>
             </div>
           </div>
@@ -305,28 +289,15 @@
           <div class="mini-trend-chart" style="block-size: 220px">
             <div class="trend-bars">
               <div v-for="(data, index) in timeSeriesData" :key="index" class="trend-bar">
-                <div
-                  class="trend-bar-fill"
-                  style="
-                    background-color: #e5e7eb;
-                    block-size: 100%;
-                    position: absolute;
-                    inset-block-start: 0;
-                    inset-inline-start: 0;
-                    inset-inline-end: 0;
-                  "
-                ></div>
-                <div
-                  class="trend-bar-base"
-                  :style="{
-                    'block-size': data.paidOnTime + '%',
-                    'background-color': '#3b82f6',
-                    position: 'absolute',
-                    'inset-block-end': '0',
-                    'inset-inline-start': '0',
-                    'inset-inline-end': '0',
-                  }"
-                ></div>
+
+                <div class="trend-bar-base" :style="{
+                  'block-size': data.paidOnTime + '%',
+                  'background-color': '#3b82f6',
+                  position: 'absolute',
+                  'inset-block-end': '0',
+                  'inset-inline-start': '0',
+                  'inset-inline-end': '0',
+                }"></div>
               </div>
             </div>
           </div>
@@ -345,28 +316,15 @@
           <div class="mini-trend-chart" style="block-size: 220px">
             <div class="trend-bars">
               <div v-for="(data, index) in timeSeriesData" :key="index" class="trend-bar">
-                <div
-                  class="trend-bar-fill"
-                  style="
-                    background-color: #e5e7eb;
-                    block-size: 100%;
-                    position: absolute;
-                    inset-block-start: 0;
-                    inset-inline-start: 0;
-                    inset-inline-end: 0;
-                  "
-                ></div>
-                <div
-                  class="trend-bar-base"
-                  :style="{
-                    'block-size': (data.avgAge / maxAge) * 100 + '%',
-                    'background-color': '#3b82f6',
-                    position: 'absolute',
-                    'inset-block-end': '0',
-                    'inset-inline-start': '0',
-                    'inset-inline-end': '0',
-                  }"
-                ></div>
+
+                <div class="trend-bar-base" :style="{
+                  'block-size': (data.avgAge / maxAge) * 100 + '%',
+                  'background-color': '#3b82f6',
+                  position: 'absolute',
+                  'inset-block-end': '0',
+                  'inset-inline-start': '0',
+                  'inset-inline-end': '0',
+                }"></div>
               </div>
             </div>
           </div>
@@ -378,13 +336,21 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
-import BreadcrumbView from '@/components/BreadcrumbView.vue'
+import { type routeTypes } from '@/core/type/components/breadcrumb'
+import Breadcrumb from '@/components/BreadcrumbView.vue'
 import type { AgingPeriod, UpcomingPayment } from './types/InvoiceAnalytic'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { format } from 'date-fns'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
+
+const routes = ref<routeTypes[]>([
+  {
+    name: 'Analytic Dashboard',
+    to: '#',
+  },
+])
 
 const companyCode = ref('MF00')
 const vendor = ref('')
@@ -438,6 +404,9 @@ const generateData = () => {
     label: `Week ${weekIndex + 1}`,
     paidOnTime: Math.random() * 100 + 50,
     avgAge: Math.random() * 30 + 10,
+    current: Math.random() * 30 + 10,
+    processing: Math.random() * 30 + 10,
+    overdue: Math.random() * 20 + 5,
   }))
 
   // Generate monthly data
@@ -446,6 +415,9 @@ const generateData = () => {
     label: format(new Date(2025, monthIndex, 1), 'MMM'),
     paidOnTime: Math.random() * 100 + 50,
     avgAge: Math.random() * 30 + 10,
+    current: Math.random() * 30 + 10,
+    processing: Math.random() * 30 + 10,
+    overdue: Math.random() * 20 + 5,
   }))
 
   // Generate quarterly data
@@ -454,6 +426,9 @@ const generateData = () => {
     label: `Q${quarterIndex + 1}`,
     paidOnTime: Math.random() * 100 + 50,
     avgAge: Math.random() * 30 + 10,
+    current: Math.random() * 30 + 10,
+    processing: Math.random() * 30 + 10,
+    overdue: Math.random() * 20 + 5,
   }))
 
   return {
@@ -693,7 +668,7 @@ onMounted(async () => {
   await invoiceMasterApi.getVendorList()
   await invoiceMasterApi.getInvoicePoType()
   await invoiceMasterApi.getDpTypes()
-  
+
 
   invoiceTypeList.value = invoicePoType.value
   // Initialize charts here using chart library of choice
@@ -706,7 +681,7 @@ watch(
     if (poType.value === 1) {
       await invoiceMasterApi.getInvoicePoType()
       invoiceTypeList.value = invoicePoType.value
-    }else{
+    } else {
       await invoiceMasterApi.getInvoiceNonPoType()
       invoiceTypeList.value = invoiceNonPoType.value
     }

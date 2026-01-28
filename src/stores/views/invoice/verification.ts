@@ -20,6 +20,7 @@ import type {
   UpdatePaymentStatusResponse,
   SyncManualPayload,
   SyncManualResult,
+  ResponsePph21Types,
 } from './types/verification'
 import type { invoiceOcrData } from '@/views/invoice/types/invoiceOcrData'
 import type { invoiceQrData } from '@/views/invoice/types/invoiceQrdata'
@@ -297,7 +298,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
   }
 
   const getpph21 = async (payload: ParamsPph21Types) => {
-    const response: ApiResponse<void> = await invoiceApi.get(`/invoice/pph21`, {
+    const response: ApiResponse<ResponsePph21Types> = await invoiceApi.get(`/invoice/pph21`, {
       params: {
         ...payload,
       },

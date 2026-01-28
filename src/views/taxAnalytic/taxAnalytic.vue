@@ -1,21 +1,12 @@
 <template>
-  <div class="invoice-analytic">
-    <BreadcrumbView
-      :routes="[
-        { name: 'Supply Chain Analytic', to: '#' },
-        { name: 'Tax Analytic', to: '/invoice-analytic' },
-      ]"
-      title="Tax Analytic"
-    />
+  <div>
+    <Breadcrumb title="Tax Analytic" :routes="routes" />
+    <hr class="-mx-[24px] mb-[24px]" />
 
     <div class="analytics-metrics-container">
       <div class="grid grid-cols-12 gap-6">
         <!-- METRIC CARDS -->
-        <div
-          v-for="item in metricCards"
-          :key="item.title"
-          class="col-span-3 bg-white border rounded-lg p-4"
-        >
+        <div v-for="item in metricCards" :key="item.title" class="col-span-3 bg-white border rounded-lg p-4">
           <h3 class="text-lg font-semibold">{{ item.title }}</h3>
 
           <div class="mt-6 text-center">
@@ -56,7 +47,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import ApexCharts from 'apexcharts'
-import BreadcrumbView from '@/components/BreadcrumbView.vue'
+import { type routeTypes } from '@/core/type/components/breadcrumb'
+import Breadcrumb from '@/components/BreadcrumbView.vue'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 
 /* =======================
@@ -64,25 +56,21 @@ import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterDat
  * ======================= */
 const invoiceMasterApi = useInvoiceMasterDataStore()
 
+const routes = ref<routeTypes[]>([
+  {
+    name: 'Analytic Dashboard',
+    to: '#',
+  },
+])
+
 /* =======================
  * TYPES
  * ======================= */
-type AgingPeriod = {
-  period: string
-  amount: number
-  count: number
-}
+
 
 /* =======================
  * DATA
  * ======================= */
-const apAgingData = ref<AgingPeriod[]>([
-  { period: 'Current', amount: 9500000, count: 150 },
-  { period: '1-30', amount: 6500000, count: 100 },
-  { period: '31-60', amount: 2500000, count: 40 },
-  { period: '> 60', amount: 7000000, count: 90 },
-])
-
 const taxDashboardData = {
   series: [200, 600, 200, 20],
   labels: ['FPM Approved', 'FPM Credited', 'FPM UnCredited', 'Tax Invoice Defect'],
@@ -117,41 +105,23 @@ const metricCards = computed(() => [
 ])
 
 /* =======================
- * COMPUTED
- * ======================= */
-const totalOutstanding = computed(() => apAgingData.value.reduce((s, i) => s + i.amount, 0))
-
-const overduePercentage = computed(() => {
-  const overdue = apAgingData.value
-    .filter((i) => i.period !== 'Current')
-    .reduce((s, i) => s + i.amount, 0)
-
-  return Math.round((overdue / totalOutstanding.value) * 100)
-})
-
-const apSeries = computed(() => apAgingData.value.map((i) => i.amount))
-const apLabels = computed(() => apAgingData.value.map((i) => i.period))
-
-/* =======================
  * FORMATTER
  * ======================= */
 const formatMetricCurrency = (value: number) =>
   value >= 1_000_000
     ? `$ ${(value / 1_000_000).toFixed(2)}M`
     : new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        maximumFractionDigits: 0,
-      }).format(value)
+      style: 'currency',
+      currency: 'USD',
+      maximumFractionDigits: 0,
+    }).format(value)
 
 /* =======================
  * CHART REFS
  * ======================= */
-const apPieRef = ref<HTMLElement | null>(null)
 const taxPieRef = ref<HTMLElement | null>(null)
 const vatPieRef = ref<HTMLElement | null>(null)
 
-let apPie: ApexCharts | null = null
 let taxPie: ApexCharts | null = null
 let vatPie: ApexCharts | null = null
 
@@ -161,7 +131,6 @@ let vatPie: ApexCharts | null = null
 onMounted(async () => {
   await invoiceMasterApi.getCompanyCode()
 
-  apPie = new ApexCharts(apPieRef.value!, donutOption(apSeries.value, apLabels.value))
   taxPie = new ApexCharts(
     taxPieRef.value!,
     donutOption(taxDashboardData.series, taxDashboardData.labels),
@@ -171,13 +140,11 @@ onMounted(async () => {
     donutOption(vatApprovedData.series, vatApprovedData.labels),
   )
 
-  apPie.render()
   taxPie.render()
   vatPie.render()
 })
 
 onBeforeUnmount(() => {
-  apPie?.destroy()
   taxPie?.destroy()
   vatPie?.destroy()
 })
