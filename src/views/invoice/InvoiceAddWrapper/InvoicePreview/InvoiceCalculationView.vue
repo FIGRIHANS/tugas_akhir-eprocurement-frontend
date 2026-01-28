@@ -1,6 +1,7 @@
 <template>
   <div>
-    <p class="text-lg font-semibold m-[0px]">Invoice Calculation</p>
+    <p class="text-lg font-semibold m-[0px]" v-if="form.invoiceType !== '4'">Invoice Calculation</p>
+    <p class="text-lg font-semibold m-[0px]" v-else>Realization Invoice Calculation</p>
     <div class="flex flex-col mt-[16px]">
       <div
         v-for="(item, index) in listCalculation"
@@ -25,7 +26,7 @@ import { ref, computed, onMounted, watch, inject } from 'vue'
 import { useRoute } from 'vue-router'
 import type { listType } from '../../types/invoiceCalculation'
 import type { formTypes } from '../..//types/invoiceAddWrapper'
-import { defaultField, dpField, pettyCashField } from '@/static/invoiceCalculation'
+import { defaultField, dpField, lbaField, pettyCashField } from '@/static/invoiceCalculation'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 
 const route = useRoute()
@@ -45,6 +46,19 @@ const setCount = (name: string) => {
     'additional cost': form?.additionalCostCalc,
     'total gross amount': form?.totalGrossAmount,
     'total net amount': form?.totalNetAmount,
+  } as { [key: string]: number }
+
+  return list[name.toLowerCase()]
+}
+
+const setCountLba = (name: string) => {
+  const list = {
+    'variance subtotal': form?.subtotal,
+    'vat amount': form?.vatAmount,
+    'wht amount': form?.whtAmount,
+    'additional cost': form?.additionalCostCalc,
+    'variance gross amount': form?.totalGrossAmount,
+    'variance total net amount': form?.totalNetAmount,
   } as { [key: string]: number }
 
   return list[name.toLowerCase()]
@@ -106,7 +120,25 @@ const setCalculation = () => {
         listCalculation.value.push(data)
       }
     }
+  }else{
+    for (const item of listName.value) {
+      if (
+        (typeForm.value === 'nonpo' && item !== 'Additional Cost') ||
+        typeForm.value === 'po' ||
+        typeForm.value === 'po-view' ||
+        typeForm.value === 'non-po-view'
+      ) {
+        const amount = setCountLba(item)
+        const data = {
+          name: item,
+          amount: amount ? amount.toString() : '0',
+          currency: form?.currency || '',
+        }
+        listCalculation.value.push(data)
+      }
+    }
   }
+
 }
 
 const checkIsPoPibCc = () => {
@@ -118,7 +150,10 @@ watch(
   () => {
     if (isPettyCash.value) {
       listName.value = [...pettyCashField]
-    } else if (form?.invoiceDp !== '9011' && form?.invoiceDp !== '9013' && !checkIsPoPibCc()) {
+    }  else if (form?.invoiceType === '4') {
+      listName.value = [...lbaField]
+    }
+    else if (form?.invoiceDp !== '9011' && form?.invoiceDp !== '9013' && !checkIsPoPibCc()) {
       listName.value = [...dpField]
     } else {
       listName.value = [...defaultField]
