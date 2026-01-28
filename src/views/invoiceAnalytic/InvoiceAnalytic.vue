@@ -70,24 +70,22 @@
           <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-semibold">Accounts Payable Aging</h3>
           </div>
-          <div class="chart-wrapper ap-aging-chart" style="block-size: 300px">
-            <div class="bar-chart-container">
-              <div v-for="(item, idx) in filteredApAgingData" :key="`aging-${idx}-${totalOutstanding}`"
-                class="bar-group">
-                <div class="bar-container" style="position: relative; block-size: 200px">
-                  <div class="bar" :style="{
-                    height: `${(item.amount / maxAmount) * 100}%`,
-                    'background-color': '#3b82f6',
-                    position: 'absolute',
-                    bottom: '0',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    width: '40px',
-                  }"></div>
+          <div class="mini-trend-chart" style="block-size: 300px">
+            <div class="trend-bars">
+              <div v-for="(item, idx) in filteredApAgingData" :key="`aging-${idx}`" class="trend-bar">
+                <div class="trend-bar-base" :style="{
+                  'block-size': (item.amount / maxAmount) * 100 + '%',
+                  'background-color': '#3b82f6',
+                  position: 'absolute',
+                  'inset-block-end': '0',
+                  'inset-inline-start': '0',
+                  'inset-inline-end': '0',
+                }"></div>
+                <div class="trend-bar-label" style="inset-block-start: -3rem;">
+                  <div style="font-weight: 500; color: #111827;">{{ item.period }}</div>
+                  <div style="font-size: 0.7rem; margin-top: 2px;">{{ formatCurrency(item.amount) }}</div>
+                  <div style="font-size: 0.7rem; color: #6b7280;">{{ formatNumber(item.count) }} inv</div>
                 </div>
-                <span class="bar-label">{{ item.period }}</span>
-                <div class="bar-value">{{ formatCurrency(item.amount) }}</div>
-                <div class="bar-count">{{ formatNumber(item.count) }} inv</div>
               </div>
             </div>
           </div>
@@ -120,24 +118,22 @@
           <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-semibold">Upcoming Payments</h3>
           </div>
-          <div class="chart-wrapper" style="block-size: 300px">
-            <div class="bar-chart-container">
-              <div v-for="(payment, idx) in filteredUpcomingPayments" :key="`upcoming-${idx}-${totalOutstanding}`"
-                class="bar-group">
-                <div class="bar-container" style="position: relative; block-size: 200px">
-                  <div class="bar" :style="{
-                    height: (payment.amount / maxUpcomingAmount) * 100 + '%',
-                    'background-color': '#10b981',
-                    position: 'absolute',
-                    bottom: '0',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    width: '40px',
-                  }"></div>
+          <div class="mini-trend-chart" style="block-size: 300px">
+            <div class="trend-bars">
+              <div v-for="(payment, idx) in filteredUpcomingPayments" :key="`upcoming-${idx}`" class="trend-bar">
+                <div class="trend-bar-base" :style="{
+                  'block-size': (payment.amount / maxUpcomingAmount) * 100 + '%',
+                  'background-color': '#10b981',
+                  position: 'absolute',
+                  'inset-block-end': '0',
+                  'inset-inline-start': '0',
+                  'inset-inline-end': '0',
+                }"></div>
+                <div class="trend-bar-label" style="inset-block-start: -3rem;">
+                  <div style="font-weight: 500; color: #111827;">{{ formatLabel(payment.period) }}</div>
+                  <div style="font-size: 0.7rem; margin-top: 2px;">{{ formatCurrency(payment.amount) }}</div>
+                  <div style="font-size: 0.7rem; color: #6b7280;">{{ formatNumber(payment.count) }} inv</div>
                 </div>
-                <span class="bar-label">{{ formatLabel(payment.period) }}</span>
-                <div class="bar-value">{{ formatCurrency(payment.amount) }}</div>
-                <div class="bar-count">{{ formatNumber(payment.count) }} inv</div>
               </div>
             </div>
           </div>
@@ -395,20 +391,30 @@ const upcomingPayments = ref<UpcomingPayment[]>([
 ])
 
 // Filter applied data
+// Filter applied data with random jitter for animation effect
 const filteredApAgingData = computed(() => {
-  return apAgingData.value.map(item => ({
-    ...item,
-    amount: Math.round(item.amount * getFilterMultiplier()),
-    count: Math.round(item.count * getFilterMultiplier())
-  }))
+  // Use filterUpdateKey to trigger re-calculation with fresh random values
+  void filterUpdateKey.value
+  return apAgingData.value.map(item => {
+    const jitter = 0.9 + Math.random() * 0.2 // Random between 0.9 and 1.1
+    return {
+      ...item,
+      amount: Math.round(item.amount * getFilterMultiplier() * jitter),
+      count: Math.round(item.count * getFilterMultiplier() * jitter)
+    }
+  })
 })
 
 const filteredUpcomingPayments = computed(() => {
-  return upcomingPayments.value.map(item => ({
-    ...item,
-    amount: Math.round(item.amount * getFilterMultiplier()),
-    count: Math.round(item.count * getFilterMultiplier())
-  }))
+  void filterUpdateKey.value
+  return upcomingPayments.value.map(item => {
+    const jitter = 0.85 + Math.random() * 0.3 // Random between 0.85 and 1.15
+    return {
+      ...item,
+      amount: Math.round(item.amount * getFilterMultiplier() * jitter),
+      count: Math.round(item.count * getFilterMultiplier() * jitter)
+    }
+  })
 })
 
 // Helper function to calculate multiplier based on filters
@@ -450,7 +456,6 @@ const generateData = () => {
     overdue: Math.random() * 20 + 5,
   }))
 
-  // Generate monthly data
   const monthlyData = Array.from({ length: 12 }, (_, monthIndex) => ({
     id: `month-${monthIndex}`,
     label: format(new Date(2025, monthIndex, 1), 'MMM'),
@@ -461,7 +466,6 @@ const generateData = () => {
     overdue: Math.random() * 20 + 5,
   }))
 
-  // Generate quarterly data
   const quarterlyData = Array.from({ length: 4 }, (_, quarterIndex) => ({
     id: `quarter-${quarterIndex}`,
     label: `Q${quarterIndex + 1}`,
@@ -479,14 +483,11 @@ const generateData = () => {
   }
 }
 
-// Generate initial data
 const chartData = generateData()
 
 const timeSeriesData = computed(() => {
   const zoom = Math.max(paidOnTimeZoom.value, avgAgeZoom.value)
   const baseData = zoom <= 1.5 ? chartData.quarterlyData : zoom <= 2.3 ? chartData.monthlyData : chartData.weeklyData
-
-  // Apply filter multiplier to time series data
   const multiplier = getFilterMultiplier()
   return baseData.map(item => ({
     ...item,
@@ -498,32 +499,31 @@ const timeSeriesData = computed(() => {
   }))
 })
 
-// Computed properties
 const totalOutstanding = computed(() => {
   return filteredApAgingData.value.reduce((sum, item) => sum + item.amount, 0)
 })
 
 const overduePercentage = computed(() => {
+  const total = totalOutstanding.value
+  if (!total) return 0
   const overdue = filteredApAgingData.value
     .filter((item) => item.period !== 'Current')
     .reduce((sum, item) => sum + item.amount, 0)
-  return Math.round((overdue / totalOutstanding.value) * 100)
+  return Math.round((overdue / total) * 100)
 })
 
 const maxAmount = computed(() => {
-  return Math.max(...filteredApAgingData.value.map((item) => item.amount))
+  return Math.max(...filteredApAgingData.value.map((item) => item.amount)) || 1
 })
 
-// Computed values for charts
 const maxUpcomingAmount = computed(() => {
-  return Math.max(...filteredUpcomingPayments.value.map((item) => item.amount))
+  return Math.max(...filteredUpcomingPayments.value.map((item) => item.amount)) || 1
 })
 
 const maxAge = computed(() => {
-  return Math.max(...timeSeriesData.value.map((item) => item.avgAge))
+  return Math.max(...timeSeriesData.value.map((item) => item.avgAge)) || 1
 })
 
-// Filtered trending data
 const agingTrendCountData = computed(() => {
   const totalCount = filteredApAgingData.value.reduce((sum, item) => sum + item.count, 0)
   return timeSeriesData.value.map(item => ({
@@ -541,19 +541,16 @@ const agingTrendAmountData = computed(() => {
 })
 
 const maxTrendCountValue = computed(() => {
-  return Math.max(...agingTrendCountData.value.map(item => item.trendValue))
+  return Math.max(...agingTrendCountData.value.map(item => item.trendValue)) || 1
 })
 
 const maxTrendAmountValue = computed(() => {
-  return Math.max(...agingTrendAmountData.value.map(item => item.trendValue))
+  return Math.max(...agingTrendAmountData.value.map(item => item.trendValue)) || 1
 })
 
-// SVG path generators for line charts
-// Zoom state (1 = default, >1 zoomed in)
 const paidOnTimeZoom = ref(1)
 const avgAgeZoom = ref(1)
 
-// Helper: Catmull-Rom to Bezier conversion for smooth curves
 function catmullRom2bezier(points: { x: number; y: number }[]) {
   const d = [] as string[]
   for (let i = 0; i < points.length - 1; i++) {
@@ -561,13 +558,10 @@ function catmullRom2bezier(points: { x: number; y: number }[]) {
     const p1 = points[i]
     const p2 = points[i + 1]
     const p3 = points[i + 2] || p2
-
     const bp1x = p1.x + (p2.x - p0.x) / 6
     const bp1y = p1.y + (p2.y - p0.y) / 6
-
     const bp2x = p2.x - (p3.x - p1.x) / 6
     const bp2y = p2.y - (p3.y - p1.y) / 6
-
     d.push(`C ${bp1x},${bp1y} ${bp2x},${bp2y} ${p2.x},${p2.y}`)
   }
   return d.join(' ')
@@ -578,17 +572,14 @@ function buildPointsForSeries(values: number[], normalizeTo = 100, zoom = 1) {
   const center = 0.5
   return values.map((v, i) => {
     const t = i / (n - 1)
-    // scale around center
     const x = (t - center) * 300 * zoom + 150
     let y = 100 - (v / normalizeTo) * 100
-    // clamp to viewBox (0..100) so curves don't draw outside and get clipped
     if (y < 0) y = 0
     if (y > 100) y = 100
     return { x, y }
   })
 }
 
-// Paid on time computed points and smooth paths
 const maxPaidOnTime = computed(() => Math.max(...timeSeriesData.value.map((d) => d.paidOnTime)))
 const paidOnTimePoints = computed(() =>
   buildPointsForSeries(
@@ -614,7 +605,6 @@ const paidOnTimeAreaPath = computed(() => {
 })
 const paidOnTimeVisibleLabels = computed(() => timeSeriesData.value.map((d) => formatDate(d)))
 
-// Avg age computed points and smooth paths
 const avgAgePoints = computed(() =>
   buildPointsForSeries(
     timeSeriesData.value.map((d) => d.avgAge),
@@ -639,80 +629,44 @@ const avgAgeAreaPath = computed(() => {
 })
 const avgAgeVisibleLabels = computed(() => timeSeriesData.value.map((d) => formatDate(d)))
 
-// Zoom handlers
 const zoomInPaidOnTime = () => {
   let newZoom = paidOnTimeZoom.value
-  if (newZoom <= 1.5) {
-    // Transitioning from quarters to months
-    newZoom = 1.6
-  } else if (newZoom <= 2.3) {
-    // Transitioning from months to weeks
-    newZoom = 2.4
-  }
+  if (newZoom <= 1.5) newZoom = 1.6
+  else if (newZoom <= 2.3) newZoom = 2.4
   paidOnTimeZoom.value = Math.min(3, newZoom)
 }
-
 const zoomOutPaidOnTime = () => {
   let newZoom = paidOnTimeZoom.value
-  if (newZoom >= 2.4) {
-    // Transitioning from weeks to months
-    newZoom = 2.3
-  } else if (newZoom >= 1.6) {
-    // Transitioning from months to quarters
-    newZoom = 1.5
-  }
+  if (newZoom >= 2.4) newZoom = 2.3
+  else if (newZoom >= 1.6) newZoom = 1.5
   paidOnTimeZoom.value = Math.max(1, newZoom)
 }
-
 const handleWheelPaidOnTime = (e: WheelEvent) => {
   if (e.deltaY < 0) zoomInPaidOnTime()
   else zoomOutPaidOnTime()
 }
-
 const zoomInAvgAge = () => {
   let newZoom = avgAgeZoom.value
-  if (newZoom <= 1.5) {
-    // Transitioning from quarters to months
-    newZoom = 1.6
-  } else if (newZoom <= 2.3) {
-    // Transitioning from months to weeks
-    newZoom = 2.4
-  }
+  if (newZoom <= 1.5) newZoom = 1.6
+  else if (newZoom <= 2.3) newZoom = 2.4
   avgAgeZoom.value = Math.min(3, newZoom)
 }
-
 const zoomOutAvgAge = () => {
   let newZoom = avgAgeZoom.value
-  if (newZoom >= 2.4) {
-    // Transitioning from weeks to months
-    newZoom = 2.3
-  } else if (newZoom >= 1.6) {
-    // Transitioning from months to quarters
-    newZoom = 1.5
-  }
+  if (newZoom >= 2.4) newZoom = 2.3
+  else if (newZoom >= 1.6) newZoom = 1.5
   avgAgeZoom.value = Math.max(1, newZoom)
 }
-
 const handleWheelAvgAge = (e: WheelEvent) => {
   if (e.deltaY < 0) zoomInAvgAge()
   else zoomOutAvgAge()
 }
 
-// Already defined above
-
-// Methods
-const formatDate = (item: { label: string }): string => {
-  return item.label
-}
-
-// Format currency using the metric value display format
+const formatDate = (item: { label: string }): string => item.label
 const formatMetricCurrency = (value: number): string => {
-  if (value >= 1000000) {
-    return `$ ${(value / 1000000).toFixed(2)}M`
-  }
+  if (value >= 1000000) return `$ ${(value / 1000000).toFixed(2)}M`
   return formatCurrency(value)
 }
-
 const formatCurrency = (value: number): string => {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -721,15 +675,9 @@ const formatCurrency = (value: number): string => {
     maximumFractionDigits: 0,
   }).format(value)
 }
-
-const formatNumber = (value: number): string => {
-  return new Intl.NumberFormat('en-US').format(value)
-}
-
+const formatNumber = (value: number): string => new Intl.NumberFormat('en-US').format(value)
 const formatLabel = (label: string): string => {
-  if (label === 'Within 15 Days' || label === 'Within 30 Days') {
-    return label.replace('Within ', 'W/in\n')
-  }
+  if (label === 'Within 15 Days' || label === 'Within 30 Days') return label.replace('Within ', 'W/in\n')
   return label
 }
 
@@ -738,11 +686,7 @@ onMounted(async () => {
   await invoiceMasterApi.getVendorList()
   await invoiceMasterApi.getInvoicePoType()
   await invoiceMasterApi.getDpTypes()
-
-
   invoiceTypeList.value = invoicePoType.value
-  // Initialize charts here using chart library of choice
-  // (e.g., Chart.js, ApexCharts, or other preferred library)
 })
 
 watch(
@@ -764,22 +708,21 @@ watch(
   () => {
     if (companyCode.value) invoiceMasterApi.getCostCenter(companyCode.value || '')
   },
-  {
-    immediate: true,
-  },
+  { immediate: true },
 )
 
-// Watch for filter changes to ensure reactivity
+// Watch for filter changes to ensure reactivity and trigger animations
 watch(
-  [() => vendor.value, () => invoiceType.value, () => departement.value, () => date.value],
+  [
+    () => vendor.value,
+    () => invoiceType.value,
+    () => departement.value,
+    () => date.value,
+    () => poType.value,
+    () => companyCode.value
+  ],
   () => {
     filterUpdateKey.value++
-    // Force chart update by accessing computed values
-    void filteredApAgingData.value
-    void filteredUpcomingPayments.value
-    void totalOutstanding.value
-    void maxAmount.value
-    void maxUpcomingAmount.value
   }
 )
 </script>
