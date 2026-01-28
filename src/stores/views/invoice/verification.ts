@@ -377,7 +377,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     return response.data
   }
 
-  const sync = async (data: SyncManualPayload) => {
+  const sync = async (data: SyncManualPayload): Promise<SyncManualResult> => {
     const response: any = await invoiceApi.post(`/TaxSync/sync-pjap`, data)
     return response.data?.result?.content
   }

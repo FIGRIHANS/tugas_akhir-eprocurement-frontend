@@ -268,6 +268,19 @@
         </p>
       </div>
     </UiModal>
+
+    <!-- Loading Modal -->
+    <UiModal v-model="isSyncLoading" size="sm" hide-header hide-close static>
+      <div class="flex flex-col items-center gap-4 py-6">
+        <UiLoading size="lg" variant="primary" class="mx-auto" />
+        <div class="text-center">
+          <h3 class="text-lg font-medium text-gray-900 mb-2">Memverifikasi ke DJP...</h3>
+          <p class="text-sm text-gray-700">
+            Mohon tunggu sebentar, sedang mencocokkan data faktur pajak.
+          </p>
+        </div>
+      </div>
+    </UiModal>
   </div>
 </template>
 
@@ -281,7 +294,9 @@ import { useRoute } from 'vue-router'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiModal from '@/components/modal/UiModal.vue'
 import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
+import UiLoading from '@/components/UiLoading.vue'
 import moment from 'moment'
+import { parseIndoDate } from '@/composables/parseIndoDate'
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 
 /* ---------------- async components ---------------- */
@@ -735,6 +750,9 @@ const sendUploadFile = async () => {
 const verifyInvoice = async () => {
   isLoadUpload.value = true
   await sendUploadFile()
+
+  await setOcrPayload()
+
   isLoadUpload.value = false
   isVerifyData.value = true
 }
@@ -815,6 +833,26 @@ const verifyByPjap = async () => {
     console.warn('Could not parse date for PJAP Sync')
   }
   isSyncLoading.value = false
+}
+
+const setOcrPayload = async () => {
+  // Map OCR payload into flattened form fields
+  form.ocrVendorName = ocrData.vendorSupplier
+  form.vendorNPWP = ocrData.npwpSupplier
+  form.ocrCompanyName = ocrData.vendorBuyer
+  form.npwpCompany = ocrData.npwpBuyer
+  form.taxInvoiceNumber = ocrData.taxDocumentNumber
+  form.taxInvoiceDate = parseIndoDate(ocrData.taxDocumentDate)
+  form.salesAmount = parseFloat(ocrData.dpp) || 0
+  form.otherDPP = 0
+  form.ocrVatAmount = parseFloat(ocrData.ppn) || 0
+  form.ocrVatbmAmount = parseFloat(ocrData.ppnbm) || 0
+  form.taxInvoiceStatus = ocrData.status
+  form.referenceNo = ''
+  form.createdBy = ''
+  form.createdUtcDate = moment().format()
+  form.modifiedBy = ''
+  form.modifiedUtcDate = moment().format()
 }
 
 /* ---------------- mount ---------------- */

@@ -35,9 +35,10 @@ const classes = computed(() => [
   <div v-if="open" class="fixed inset-0 z-50">
     <div class="modal block open z-50" data-modal="true" @click="handleClose">
       <div :class="classes">
-        <div class="modal-header">
+        <div class="modal-header" v-if="!hideHeader">
           <h3 class="modal-title">{{ title }}</h3>
           <button
+            v-if="!hideClose"
             class="btn btn-xs btn-icon btn-light"
             data-modal-dismiss="true"
             @click="open = !open"
