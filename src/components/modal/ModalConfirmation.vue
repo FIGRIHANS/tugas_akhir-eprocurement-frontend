@@ -16,6 +16,12 @@
             variant="duotone"
             class="text-danger text-[135px]"
           />
+          <UiIcon
+            v-else-if="type === 'warning'"
+            name="information-2"
+            variant="duotone"
+            class="text-warning text-[135px]"
+          />
           <img v-else-if="type === 'confirm'" :src="ConfirmLogo" alt="confirm logo" />
           <img v-else-if="type === 'success'" :src="SuccessLogo" alt="success logo" />
 
