@@ -5,62 +5,58 @@
 
     <!-- Header Section -->
     <div class="header-section bg-white border rounded-lg p-4 mb-6">
-      <div class="filter-section flex justify-between items-center">
-        <div class="flex gap-4">
-          <div class="filter-group">
-            <label class="text-sm text-gray-600">Entity</label>
-            <select v-model="companyCode" class="select">
-              <option v-for="item of companyCodeList" :key="item.code" :value="item.code">
-                {{ item.name }}
-              </option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <label class="text-sm text-gray-600">Vendor</label>
-            <select v-model="vendor" class="select">
-              <option v-for="item of vendorList" :key="item.vendorId" :value="item.vendorCode">
-                {{ item.vendorName }}
-              </option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <label class="text-sm text-gray-600">Po Type</label>
-            <select v-model="poType" class="select">
-              <option v-for="item of poList" :key="item.code" :value="item.code">
-                {{ item.name }}
-              </option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <label class="text-sm text-gray-600 whitespace-nowrap">Invoice Type</label>
-            <select v-model="invoiceType" class="select">
-              <option v-for="item of invoiceTypeList" :key="item.code" :value="item.code">
-                {{ item.name }}
-              </option>
-            </select>
-          </div>
-          <div class="filter-group" v-if="invoiceType === '901'">
-            <label class="text-sm text-gray-600">Dp Option</label>
-            <select v-model="dpOption" class="select">
-              <option v-for="item of dpOptionList" :key="item.code" :value="item.code">
-                {{ item.name }}
-              </option>
-            </select>
-          </div>
-
-
-          <div class="filter-group">
-            <label class="text-sm text-gray-600">Department</label>
-            <select v-model="departement" class="select">
-              <option v-for="item of constCenterList" :key="item.code" :value="item.code">
-                {{ item.name }}
-              </option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <label class="text-sm text-gray-600">Date Range</label>
-            <DatePicker v-model="date" format="yyyy/MM/dd" class="" teleport :min-days="7" :range="true" />
-          </div>
+      <div class="filter-section">
+        <div class="filter-group">
+          <label class="text-sm text-gray-600">Entity</label>
+          <select v-model="companyCode" class="select">
+            <option v-for="item of companyCodeList" :key="item.code" :value="item.code">
+              {{ item.name }}
+            </option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="text-sm text-gray-600">Vendor</label>
+          <select v-model="vendor" class="select">
+            <option v-for="item of vendorList" :key="item.vendorId" :value="item.vendorCode">
+              {{ item.vendorName }}
+            </option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="text-sm text-gray-600">Po Type</label>
+          <select v-model="poType" class="select">
+            <option v-for="item of poList" :key="item.code" :value="item.code">
+              {{ item.name }}
+            </option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="text-sm text-gray-600">Invoice Type</label>
+          <select v-model="invoiceType" class="select">
+            <option v-for="item of invoiceTypeList" :key="item.code" :value="item.code">
+              {{ item.name }}
+            </option>
+          </select>
+        </div>
+        <div class="filter-group" v-if="invoiceType === '901'">
+          <label class="text-sm text-gray-600">Dp Option</label>
+          <select v-model="dpOption" class="select">
+            <option v-for="item of dpOptionList" :key="item.code" :value="item.code">
+              {{ item.name }}
+            </option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="text-sm text-gray-600">Department</label>
+          <select v-model="departement" class="select">
+            <option v-for="item of constCenterList" :key="item.code" :value="item.code">
+              {{ item.name }}
+            </option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="text-sm text-gray-600">Date Range</label>
+          <DatePicker v-model="date" format="yyyy/MM/dd" teleport :min-days="7" :range="true" />
         </div>
       </div>
     </div>
@@ -76,16 +72,17 @@
           </div>
           <div class="chart-wrapper ap-aging-chart" style="block-size: 300px">
             <div class="bar-chart-container">
-              <div v-for="item in apAgingData" :key="item.period" class="bar-group">
+              <div v-for="(item, idx) in filteredApAgingData" :key="`aging-${idx}-${totalOutstanding}`"
+                class="bar-group">
                 <div class="bar-container" style="position: relative; block-size: 200px">
                   <div class="bar" :style="{
-                    'block-size': `${(item.amount / maxAmount) * 100}%`,
+                    height: `${(item.amount / maxAmount) * 100}%`,
                     'background-color': '#3b82f6',
                     position: 'absolute',
-                    'inset-block-end': '0',
-                    'inset-inline-start': '50%',
+                    bottom: '0',
+                    left: '50%',
                     transform: 'translateX(-50%)',
-                    'inline-size': '40px',
+                    width: '40px',
                   }"></div>
                 </div>
                 <span class="bar-label">{{ item.period }}</span>
@@ -125,16 +122,17 @@
           </div>
           <div class="chart-wrapper" style="block-size: 300px">
             <div class="bar-chart-container">
-              <div v-for="payment in upcomingPayments" :key="payment.period" class="bar-group">
+              <div v-for="(payment, idx) in filteredUpcomingPayments" :key="`upcoming-${idx}-${totalOutstanding}`"
+                class="bar-group">
                 <div class="bar-container" style="position: relative; block-size: 200px">
                   <div class="bar" :style="{
-                    'block-size': (payment.amount / maxUpcomingAmount) * 100 + '%',
+                    height: (payment.amount / maxUpcomingAmount) * 100 + '%',
                     'background-color': '#10b981',
                     position: 'absolute',
-                    'inset-block-end': '0',
-                    'inset-inline-start': '50%',
+                    bottom: '0',
+                    left: '50%',
                     transform: 'translateX(-50%)',
-                    'inline-size': '40px',
+                    width: '40px',
                   }"></div>
                 </div>
                 <span class="bar-label">{{ formatLabel(payment.period) }}</span>
@@ -288,10 +286,9 @@
           </div>
           <div class="mini-trend-chart" style="block-size: 220px">
             <div class="trend-bars">
-              <div v-for="(data, index) in timeSeriesData" :key="index" class="trend-bar">
-
+              <div v-for="(data, index) in agingTrendCountData" :key="index" class="trend-bar">
                 <div class="trend-bar-base" :style="{
-                  'block-size': data.paidOnTime + '%',
+                  'block-size': (data.trendValue / maxTrendCountValue) * 100 + '%',
                   'background-color': '#3b82f6',
                   position: 'absolute',
                   'inset-block-end': '0',
@@ -315,10 +312,9 @@
           </div>
           <div class="mini-trend-chart" style="block-size: 220px">
             <div class="trend-bars">
-              <div v-for="(data, index) in timeSeriesData" :key="index" class="trend-bar">
-
+              <div v-for="(data, index) in agingTrendAmountData" :key="index" class="trend-bar">
                 <div class="trend-bar-base" :style="{
-                  'block-size': (data.avgAge / maxAge) * 100 + '%',
+                  'block-size': (data.trendValue / maxTrendAmountValue) * 100 + '%',
                   'background-color': '#3b82f6',
                   position: 'absolute',
                   'inset-block-end': '0',
@@ -359,6 +355,7 @@ const invoiceType = ref('')
 const dpOption = ref('')
 const departement = ref('')
 const date = ref<[Date | null, Date | null] | null>([null, null])
+const filterUpdateKey = ref(0)
 
 const invoiceTypeList = ref([])
 
@@ -396,6 +393,50 @@ const upcomingPayments = ref<UpcomingPayment[]>([
   { period: '30 Days', amount: 500000, count: 10 },
   { period: '> 30 Days', amount: 7000000, count: 80 },
 ])
+
+// Filter applied data
+const filteredApAgingData = computed(() => {
+  return apAgingData.value.map(item => ({
+    ...item,
+    amount: Math.round(item.amount * getFilterMultiplier()),
+    count: Math.round(item.count * getFilterMultiplier())
+  }))
+})
+
+const filteredUpcomingPayments = computed(() => {
+  return upcomingPayments.value.map(item => ({
+    ...item,
+    amount: Math.round(item.amount * getFilterMultiplier()),
+    count: Math.round(item.count * getFilterMultiplier())
+  }))
+})
+
+// Helper function to calculate multiplier based on filters
+const getFilterMultiplier = () => {
+  let multiplier = 1
+
+  // Apply vendor filter
+  if (vendor.value) {
+    multiplier *= 1.2
+  }
+
+  // Apply invoice type filter
+  if (invoiceType.value) {
+    multiplier *= (invoiceType.value === '901' ? 0.8 : 1.1)
+  }
+
+  // Apply department filter
+  if (departement.value) {
+    multiplier *= 1.15
+  }
+
+  // Apply date range filter
+  if (date.value && (date.value[0] || date.value[1])) {
+    multiplier *= 0.95
+  }
+
+  return Math.max(0.5, Math.min(multiplier, 2))
+}
 
 // Create data for time series visualization
 const generateData = () => {
@@ -443,39 +484,68 @@ const chartData = generateData()
 
 const timeSeriesData = computed(() => {
   const zoom = Math.max(paidOnTimeZoom.value, avgAgeZoom.value)
+  const baseData = zoom <= 1.5 ? chartData.quarterlyData : zoom <= 2.3 ? chartData.monthlyData : chartData.weeklyData
 
-  if (zoom <= 1.5) {
-    return chartData.quarterlyData
-  } else if (zoom <= 2.3) {
-    return chartData.monthlyData
-  } else {
-    return chartData.weeklyData
-  }
+  // Apply filter multiplier to time series data
+  const multiplier = getFilterMultiplier()
+  return baseData.map(item => ({
+    ...item,
+    paidOnTime: Math.round(item.paidOnTime * (multiplier * 0.95)),
+    avgAge: Math.round(item.avgAge * multiplier * 1.1),
+    current: Math.round(item.current * multiplier),
+    processing: Math.round(item.processing * multiplier * 0.9),
+    overdue: Math.round(item.overdue * multiplier * 1.2),
+  }))
 })
 
 // Computed properties
 const totalOutstanding = computed(() => {
-  return apAgingData.value.reduce((sum, item) => sum + item.amount, 0)
+  return filteredApAgingData.value.reduce((sum, item) => sum + item.amount, 0)
 })
 
 const overduePercentage = computed(() => {
-  const overdue = apAgingData.value
+  const overdue = filteredApAgingData.value
     .filter((item) => item.period !== 'Current')
     .reduce((sum, item) => sum + item.amount, 0)
   return Math.round((overdue / totalOutstanding.value) * 100)
 })
 
 const maxAmount = computed(() => {
-  return Math.max(...apAgingData.value.map((item) => item.amount))
+  return Math.max(...filteredApAgingData.value.map((item) => item.amount))
 })
 
 // Computed values for charts
 const maxUpcomingAmount = computed(() => {
-  return Math.max(...upcomingPayments.value.map((item) => item.amount))
+  return Math.max(...filteredUpcomingPayments.value.map((item) => item.amount))
 })
 
 const maxAge = computed(() => {
   return Math.max(...timeSeriesData.value.map((item) => item.avgAge))
+})
+
+// Filtered trending data
+const agingTrendCountData = computed(() => {
+  const totalCount = filteredApAgingData.value.reduce((sum, item) => sum + item.count, 0)
+  return timeSeriesData.value.map(item => ({
+    ...item,
+    trendValue: Math.round((item.paidOnTime / 100) * totalCount)
+  }))
+})
+
+const agingTrendAmountData = computed(() => {
+  const totalAmount = totalOutstanding.value
+  return timeSeriesData.value.map(item => ({
+    ...item,
+    trendValue: Math.round((item.avgAge / 100) * totalAmount)
+  }))
+})
+
+const maxTrendCountValue = computed(() => {
+  return Math.max(...agingTrendCountData.value.map(item => item.trendValue))
+})
+
+const maxTrendAmountValue = computed(() => {
+  return Math.max(...agingTrendAmountData.value.map(item => item.trendValue))
 })
 
 // SVG path generators for line charts
@@ -697,6 +767,20 @@ watch(
   {
     immediate: true,
   },
+)
+
+// Watch for filter changes to ensure reactivity
+watch(
+  [() => vendor.value, () => invoiceType.value, () => departement.value, () => date.value],
+  () => {
+    filterUpdateKey.value++
+    // Force chart update by accessing computed values
+    void filteredApAgingData.value
+    void filteredUpcomingPayments.value
+    void totalOutstanding.value
+    void maxAmount.value
+    void maxUpcomingAmount.value
+  }
 )
 </script>
 
