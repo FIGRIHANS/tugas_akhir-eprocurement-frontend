@@ -10,7 +10,7 @@ export interface IModalProps {
 export type ModalConfirmationType = {
   open: boolean
   id: string
-  type: 'danger' | 'confirm' | 'success'
+  type: 'danger' | 'confirm' | 'success' | 'warning'
   title?: string
   text?: string
   static?: boolean
