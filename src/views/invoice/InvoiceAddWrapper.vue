@@ -293,6 +293,7 @@ const form = reactive<formTypes>({
   totalGrossAmount: 0,
   totalNetAmount: 0,
   dppLainnya: 0,
+  variance: 0,
   invoicePoGr: [],
   invoiceItem: [],
   additionalCost: [],

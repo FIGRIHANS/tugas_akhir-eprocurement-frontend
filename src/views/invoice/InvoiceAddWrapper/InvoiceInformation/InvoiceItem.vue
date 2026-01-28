@@ -57,7 +57,7 @@
                 </button>
               </td>
               <td>
-                <span v-if="!item.isEdit">{{ getActivityName(item.activity) || '-' }}</span>
+                <span v-if="!item.isEdit || form.invoiceType === '4'">{{ getActivityName(item.activity) || '-' }}</span>
                 <v-select
                   v-else
                   v-model="item.activity"
@@ -70,7 +70,7 @@
                 ></v-select>
               </td>
               <td>
-                <span v-if="!item.isEdit">{{
+                <span v-if="!item.isEdit || form.invoiceType === '4'">{{
                   form?.currency === 'IDR'
                     ? useFormatIdr(item.itemAmount)
                     : useFormatUsd(item.itemAmount) || '-'
@@ -84,8 +84,33 @@
                   @change="item.whtBaseAmount = item.itemAmount.toString()"
                 />
               </td>
+              <td v-if="form.invoiceType === '4'">
+                <span v-if="!item.isEdit">{{ item.realizationAmount || '-' }}</span>
+                <input
+                  v-else
+                  v-model="item.realizationAmount"
+                  class="input"
+                  :class="{ 'input-danger': item.isTextLimitExceeded }"
+                  type="text"
+                  placeholder=""
+                  @input="onItemTextInput(item, $event)"
+                  @change="editVariance(index)"
+                />
+              </td>
+              <td v-if="form.invoiceType === '4' ">
+                <span v-if="!item.isEdit || form.invoiceType === '4'">{{ item.variance || '-' }}</span>
+                <input
+                  v-else
+                  v-model="item.variance"
+                  class="input"
+                  :class="{ 'input-danger': item.isTextLimitExceeded }"
+                  type="text"
+                  placeholder=""
+                  @input="onItemTextInput(item, $event)"
+                />
+              </td>
               <td>
-                <span v-if="!item.isEdit">{{ item.itemText || '-' }}</span>
+                <span v-if="!item.isEdit || form.invoiceType === '4'">{{ item.itemText || '-' }}</span>
                 <input
                   v-else
                   v-model="item.itemText"
@@ -96,15 +121,16 @@
                   @input="onItemTextInput(item, $event)"
                 />
               </td>
+              
               <td v-if="!isPettyCash">
-                <span v-if="!item.isEdit">{{ getDebitCreditName(item.debitCredit) || '-' }}</span>
+                <span v-if="!item.isEdit || form.invoiceType === '4'">{{ getDebitCreditName(item.debitCredit) || '-' }}</span>
                 <select v-else v-model="item.debitCredit" class="select" placeholder="">
                   <option value="D">Debit</option>
                   <option value="K">Credit</option>
                 </select>
               </td>
               <td v-if="!isPettyCash">
-                <span v-if="!item.isEdit">{{ getTaxCodeName(item.taxCode) || '-' }}</span>
+                <span v-if="!item.isEdit || form.invoiceType === '4'">{{ getTaxCodeName(item.taxCode) || '-' }}</span>
                 <v-select
                   v-else
                   v-model="item.taxCode"
@@ -124,7 +150,7 @@
                 }}</span>
               </td>
               <td v-if="!isPettyCash">
-                <span v-if="!item.isEdit">{{ getCostCenterName(item.costCenter) || '-' }}</span>
+                <span v-if="!item.isEdit || form.invoiceType === '4'">{{ getCostCenterName(item.costCenter) || '-' }}</span>
                 <v-select
                   v-else
                   v-model="item.costCenter"
@@ -187,6 +213,14 @@ const isPettyCash = computed(() => form?.invoiceType === '5')
 const columns = computed(() => {
   const baseColumns = ['Action', 'Activity / Expense', 'Item Amount', 'Item Text']
 
+  if (form.invoiceType === '4') {
+  const index = baseColumns.indexOf('Item Text')
+
+  if (index !== -1) {
+    baseColumns.splice(index, 0, 'Realization Amount', 'Variance')
+  }
+}
+
   if (!isPettyCash.value) {
     baseColumns.push('Debit/Credit')
   }
@@ -238,6 +272,8 @@ const addNew = () => {
       whtCodeList: [],
       isEdit: false,
       isTextLimitExceeded: false,
+      realizationAmount: 0,
+      variance: 0
     }
     form.invoiceItem.push(data)
   }
@@ -320,6 +356,37 @@ const onItemTextInput = (item: { itemText?: string; isTextLimitExceeded?: boolea
   }
 }
 
+const pushCasDummyData = () => {
+  const data = {
+    id: 1,
+    activity: 2,
+    activityCode: "",
+    activityName: "",
+    itemAmount: 3000000,
+    itemText: "item text ",
+    debitCredit: "D",
+    taxCode: "V1",
+    vatAmount: 13.42,
+    costCenter: "GN01010001",
+    profitCenter: "",
+    assignment: "",
+    whtType: "",
+    whtCode: "",
+    whtBaseAmount: '3000000',
+    whtAmount: "",
+    whtCodeList: [],
+    isEdit: false,
+    isTextLimitExceeded: false,
+    realizationAmount: 0,
+    variance: 0
+  }
+    form.invoiceItem.push(data)
+}
+
+const editVariance = (index: number) => {
+ form.invoiceItem[index].variance = form.invoiceItem[index].itemAmount - form.invoiceItem[index].realizationAmount
+}
+
 watch(
   () => [form?.invoiceItem, form?.currency],
   () => {
@@ -365,6 +432,13 @@ watch(
   },
   {
     immediate: true,
+  },
+)
+
+watch(
+  () => form?.casNoCode,
+  () => {
+    pushCasDummyData() 
   },
 )
 </script>

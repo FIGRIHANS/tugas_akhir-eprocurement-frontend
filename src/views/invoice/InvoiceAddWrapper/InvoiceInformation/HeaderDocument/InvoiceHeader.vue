@@ -211,7 +211,7 @@
         />
       </div>
 
-      <div
+      <!-- <div
         v-if="isCAS || isLBA"
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
       >
@@ -245,6 +245,34 @@
           @input="updateCasNoName"
           appendToBody
         ></v-select>
+      </div> -->
+
+      <div
+        v-if="isCAS || isLBA"
+        class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+      >
+        <label class="form-label">
+          CAS No.
+          <span v-if="false" class="text-red-500 ml-[4px]">*</span>
+        </label>
+
+        <input
+          v-if="isCAS"
+          v-model="form.casNoCode"
+          class="input"
+          placeholder="Auto Generated Number"
+          disabled
+        />
+        <select
+          v-else
+          v-model="form.casNoCode"
+          class="select"
+          :class="{ 'border-danger': form.companyCodeError }"
+        >
+          <option v-for="item of casNoCodeList" :key="item.casNo" :value="item.casNo">
+            {{ item.casNo }}
+          </option>
+        </select>
       </div>
 
       <div
@@ -495,6 +523,53 @@ const invoiceSourceList = ref([
   { code: 'SRC2', name: '9712648081' },
   { code: 'SRC3', name: '9312901872' },
 ])
+const casNoCodeList = [
+  {
+    casNo: 'TRX-202401-001',
+    transactionId: 'TX001',
+    transactionDate: '2024-01-05',
+    customerName: 'PT Maju Jaya Abadi',
+    amount: 12500000,
+    currency: 'IDR',
+    status: 'SUCCESS',
+  },
+  {
+    casNo: 'TRX-202401-002',
+    transactionId: 'TX002',
+    transactionDate: '2024-01-08',
+    customerName: 'CV Sinar Terang',
+    amount: 8750000,
+    currency: 'IDR',
+    status: 'PENDING',
+  },
+  {
+    casNo: 'TRX-202401-003',
+    transactionId: 'TX003',
+    transactionDate: '2024-01-10',
+    customerName: 'PT Global Nusantara',
+    amount: 21500000,
+    currency: 'IDR',
+    status: 'FAILED',
+  },
+  {
+    casNo: 'TRX-202401-004',
+    transactionId: 'TX004',
+    transactionDate: '2024-01-15',
+    customerName: 'PT Cahaya Timur',
+    amount: 5400000,
+    currency: 'IDR',
+    status: 'SUCCESS',
+  },
+  {
+    casNo: 'TRX-202401-005',
+    transactionId: 'TX005',
+    transactionDate: '2024-01-18',
+    customerName: 'CV Anugerah Sejahtera',
+    amount: 13200000,
+    currency: 'IDR',
+    status: 'SUCCESS',
+  },
+]
 const isReimbursement = computed(() => form?.invoiceType === '1')
 const isCreditCard = computed(() => form?.invoiceType === '2')
 const isCAS = computed(() => form?.invoiceType === '3')
