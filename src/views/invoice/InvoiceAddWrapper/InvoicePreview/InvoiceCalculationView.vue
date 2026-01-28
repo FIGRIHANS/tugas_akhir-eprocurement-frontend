@@ -88,20 +88,23 @@ const countDpp = () => {
 
 const setCalculation = () => {
   listCalculation.value = []
-  for (const item of listName.value) {
-    if (
-      (typeForm.value === 'nonpo' && item !== 'Additional Cost') ||
-      typeForm.value === 'po' ||
-      typeForm.value === 'po-view' ||
-      typeForm.value === 'non-po-view'
-    ) {
-      const amount = setCount(item)
-      const data = {
-        name: item,
-        amount: amount ? amount.toString() : '0',
-        currency: form?.currency || '',
+
+  if(form.invoiceType !== '4'){
+    for (const item of listName.value) {
+      if (
+        (typeForm.value === 'nonpo' && item !== 'Additional Cost') ||
+        typeForm.value === 'po' ||
+        typeForm.value === 'po-view' ||
+        typeForm.value === 'non-po-view'
+      ) {
+        const amount = setCount(item)
+        const data = {
+          name: item,
+          amount: amount ? amount.toString() : '0',
+          currency: form?.currency || '',
+        }
+        listCalculation.value.push(data)
       }
-      listCalculation.value.push(data)
     }
   }
 }
@@ -130,7 +133,7 @@ watch(
 
 watch(
   () => form,
-  () => {
+  () => {    
     setCalculation()
   },
   {

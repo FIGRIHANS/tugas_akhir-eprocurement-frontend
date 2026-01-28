@@ -174,45 +174,103 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
     return response.data
   }
 
+  // const getCasNo = async (vendorId: string, companyCode: string) => {
+  //   try {
+  //     const requestBody = {
+  //       REQUEST: {
+  //         SUPPLIER_FROM_PORTAL: vendorId,
+  //         COMPANY_CODE: companyCode,
+  //       },
+  //     }
+
+  //     const response = await invoiceApi.post<{
+  //       response: CasNoTypes[]
+  //       zMessage?: {
+  //         TYPE: string
+  //         ID: string
+  //         NUMBER: number
+  //         MESSAGE: string
+  //       }
+  //     }>('/invoice/invoice/check-cas', requestBody, {
+  //       validateStatus: (status) => {
+  //         return status === 200 || status === 422
+  //       },
+  //     })
+
+  //     if (response.data.zMessage && response.data.zMessage.TYPE === 'E') {
+  //       casNoCode.value = []
+  //       return []
+  //     }
+
+  //     const mappedData = (response.data.response || []).filter(
+  //       (item) => item.casNo && item.casNo.trim() !== '',
+  //     )
+  //     casNoCode.value = mappedData
+  //     return mappedData
+  //   } catch (error) {
+  //     console.error('getCasNo Error:', error)
+  //     casNoCode.value = []
+  //     return []
+  //   }
+  // }
+
   const getCasNo = async (vendorId: string, companyCode: string) => {
     try {
-      const requestBody = {
-        REQUEST: {
-          SUPPLIER_FROM_PORTAL: vendorId,
-          COMPANY_CODE: companyCode,
-        },
-      }
-
-      const response = await invoiceApi.post<{
-        response: CasNoTypes[]
-        zMessage?: {
-          TYPE: string
-          ID: string
-          NUMBER: number
-          MESSAGE: string
-        }
-      }>('/invoice/invoice/check-cas', requestBody, {
-        validateStatus: (status) => {
-          return status === 200 || status === 422
-        },
-      })
-
-      if (response.data.zMessage && response.data.zMessage.TYPE === 'E') {
-        casNoCode.value = []
-        return []
-      }
-
-      const mappedData = (response.data.response || []).filter(
-        (item) => item.casNo && item.casNo.trim() !== '',
+      // Opsi 1: Menggunakan query string langsung di URL (seperti getPoGr)
+      const response: ApiResponse<void> = await invoiceApi.get(
+        `/invoice/invoice/check-cas?vendorCode=${vendorId}&companyCOde=${companyCode}`,
       )
-      casNoCode.value = mappedData
-      return mappedData
+  
+      // Opsi 2: Menggunakan params object (axios akan convert ke query string)
+      // const response: ApiResponse<void> = await invoiceApi.get(
+      //   `/invoice/invoice/check-cas`,
+      //   {
+      //     params: {
+      //       vendorCode: vendorId,
+      //       companyCOde: companyCode
+      //     },
+      //   },
+      // )
+  
+      return response.data
+      // const requestBody = {
+      //   REQUEST: {
+      //     SUPPLIER_FROM_PORTAL: vendorId,
+      //     COMPANY_CODE: companyCode,
+      //   },
+      // }
+
+      // const response = await invoiceApi.post<{
+      //   response: CasNoTypes[]
+      //   zMessage?: {
+      //     TYPE: string
+      //     ID: string
+      //     NUMBER: number
+      //     MESSAGE: string
+      //   }
+      // }>('/invoice/invoice/check-cas', requestBody, {
+      //   validateStatus: (status) => {
+      //     return status === 200 || status === 422
+      //   },
+      // })
+
+      // if (response.data.zMessage && response.data.zMessage.TYPE === 'E') {
+      //   casNoCode.value = []
+      //   return []
+      // }
+
+      // const mappedData = (response.data.response || []).filter(
+      //   (item) => item.casNo && item.casNo.trim() !== '',
+      // )
+      // casNoCode.value = mappedData
+      // return mappedData
     } catch (error) {
       console.error('getCasNo Error:', error)
       casNoCode.value = []
       return []
     }
   }
+  
 
   const getListNonPo = async (data: QueryParamsListPoTypes) => {
     listNonPo.value = []

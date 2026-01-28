@@ -29,9 +29,18 @@
         >
           Tax Document
         </button>
+        <button
+          class="btn btn-primary"
+          :class="{
+            'btn-clear info__header': invoiceTypeTab !== 'chat',
+          }"
+          @click="setTab('chat')"
+        >
+          <i class="ki-filled ki-message-text-2"></i>
+        </button>
       </div>
     </div>
-    <div class="card-body py-[8px] px-[16px] max-h-[380px] overflow-y-auto scroll mr-[16px]">
+    <div class="card-body py-[8px] px-[16px] max-h-[500px] overflow-y-auto scroll mr-[16px]">
       <Transition mode="out-in">
         <component :is="contentComponent" />
       </Transition>
@@ -45,6 +54,7 @@ import type { formTypes } from '../../types/invoiceAddWrapper'
 import InvoiceHeader from './HeaderDocument/InvoiceHeader.vue'
 import InvoiceDocument from './HeaderDocument/InvoiceDocument.vue'
 import InvoiceTax from './HeaderDocument/InvoiceTax.vue'
+import InvoiceChat from './HeaderDocument/InvoiceChat.vue'
 
 const form = inject<formTypes>('form')
 const invoiceTypeTab = ref<string>('header')
@@ -54,6 +64,7 @@ const contentComponent = computed(() => {
     header: InvoiceHeader,
     document: InvoiceDocument,
     tax: InvoiceTax,
+    chat: InvoiceChat
   } as { [key: string]: Component }
 
   return components[invoiceTypeTab.value]
