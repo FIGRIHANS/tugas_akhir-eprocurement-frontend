@@ -26,7 +26,7 @@
         </div>
       </div>
     </div>
-    <div class="card mt-5 p-5" >
+    <div class="card mt-5 p-5" v-if="form.invoiceType === '4' && checkIsNonPo()">
       <div
         class="p-4 rounded-lg border"
         :class="varianceResult.border"
