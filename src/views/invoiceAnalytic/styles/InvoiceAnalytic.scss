@@ -115,12 +115,12 @@
   .line-chart-wrapper {
     position: relative;
     inline-size: 100%;
-    
+
     .line-chart {
       inline-size: 100%;
       block-size: 100%;
     }
-    
+
     .chart-labels {
       display: flex;
       justify-content: space-between;
@@ -215,7 +215,8 @@
     margin-inline: 1px;
   }
 
-  .trend-bar-fill, .trend-bar-base {
+  .trend-bar-fill,
+  .trend-bar-base {
     position: absolute;
     inline-size: 100%;
     transition: block-size 0.3s ease;
@@ -247,12 +248,14 @@
     pointer-events: none;
     /* ensure the label can't grow too wide on small charts */
     max-inline-size: 3.5rem;
-  text-align: end;
+    text-align: end;
   }
 
   /* if the chart is very narrow, hide the label to avoid overlap */
   @media (max-inline-size: 420px) {
-    .value-label { display: none; }
+    .value-label {
+      display: none;
+    }
   }
 
   .chart-labels {
@@ -284,7 +287,7 @@
 .invoice-analytic {
   background-color: #ffffff;
   min-block-size: 100vh;
-  
+
   .header-section {
     border-color: #e5e7eb;
   }
@@ -293,9 +296,11 @@
     > div {
       border-color: #e5e7eb;
       transition: all 0.3s ease;
-      
+
       &:hover {
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        box-shadow:
+          0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06);
       }
     }
   }
@@ -341,9 +346,14 @@
 
     select {
       min-inline-size: 200px;
+      max-inline-size: 100%;
       background-color: white;
       border-color: #d1d5db;
-      
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      padding-inline-end: 2.5rem; /* Space for the arrow */
+
       &:focus {
         border-color: #3b82f6;
         outline: none;

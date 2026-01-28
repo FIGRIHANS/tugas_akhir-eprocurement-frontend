@@ -2,14 +2,8 @@
   <div>
     <Breadcrumb title="Add Invoice" :routes="routes" />
     <StepperStatus :active-name="stepperStatus" />
-    <TabInvoice
-      v-model:activeTab="tabNow"
-      :can-click-data="true"
-      :can-click-information="canClickInformationTab"
-      :can-click-preview="canClickPreviewTab"
-      :can-click-payment-status="canClickPaymentStatusTab"
-      class="-mx-[24px]"
-    />
+    <TabInvoice v-model:activeTab="tabNow" :can-click-data="true" :can-click-information="canClickInformationTab"
+      :can-click-preview="canClickPreviewTab" :can-click-payment-status="canClickPaymentStatusTab" class="-mx-[24px]" />
     <!-- <div v-if="form.status !== 0" class="status__box--approved -mt-5 -mx-[24px]">
       <i class="ki-outline ki-shield-tick text-primary text-[36px]"></i>
       <div>
@@ -24,27 +18,18 @@
         <component :is="contentComponent" />
       </Transition>
 
-      <div
-        v-if="tabNow === 'paymentStatus'"
-        class="flex justify-between items-center mt-[24px] gap-3"
-      >
+      <div v-if="tabNow === 'paymentStatus'" class="flex justify-between items-center mt-[24px] gap-3">
         <button class="btn btn-outline btn-primary" @click="goToList">
           <i class="ki-filled ki-arrow-left"></i>
           Back
         </button>
 
-        <button
-          v-if="String(userData?.profile?.profileId) === '3002'"
-          class="btn btn-primary"
-          @click="updatePaymentStatus"
-        >
+        <button v-if="String(userData?.profile?.profileId) === '3002'" class="btn btn-primary"
+          @click="updatePaymentStatus">
           Update Payment Status
         </button>
       </div>
-      <div
-        v-else-if="checkIsNonPo()"
-        class="flex align-items-center justify-between gap-[8px] mt-[24px]"
-      >
+      <div v-else-if="checkIsNonPo()" class="flex align-items-center justify-between gap-[8px] mt-[24px]">
         <div class="flex-1 flex gap-[8px]">
           <button class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goBack">
             <i class="ki-filled ki-arrow-left"></i>
@@ -56,40 +41,28 @@
           </button>
         </div>
         <div class="flex-1 flex gap-[8px] justify-end">
-          <button
-            v-if="tabNow === 'information'"
-            class="btn btn-primary"
-            :disabled="isSubmit || checkFormBudget()"
-            @click="checkBudget"
-          >
+          <button v-if="tabNow === 'information'" class="btn btn-primary" :disabled="isSubmit || checkFormBudget()"
+            @click="checkBudget">
             Budget Checking
             <i class="ki-duotone ki-dollar"></i>
           </button>
 
-          <button
-            class="btn btn-primary"
-            @click="goNext"
-            :disabled="
-              isSubmit ||
-              (!isCheckBudget && tabNow === 'information') ||
-              (tabNow === 'information' && !checkInvoiceInformation()) ||
-              (tabNow === 'data' && !isAlternativePayeeFilled())
-            "
-          >
+          <button class="btn btn-primary" @click="goNext" :disabled="isSubmit ||
+            (!isCheckBudget && tabNow === 'information') ||
+            (tabNow === 'information' && !checkInvoiceInformation()) ||
+            (tabNow === 'data' && !isAlternativePayeeFilled())
+            ">
             {{ tabNow !== 'preview' ? 'Next' : 'Submit' }}
             <i v-if="tabNow !== 'preview'" class="ki-duotone ki-black-right"></i>
             <i v-else class="ki-duotone ki-paper-plane"></i>
           </button>
         </div>
       </div>
-      <div
-        v-else-if="
-          (form.status === 0 || form.status === -1 || form.status === 5) &&
-          !checkInvoiceView() &&
-          !checkInvoiceNonPoView()
-        "
-        class="flex justify-between items-center gap-[8px] mt-[24px]"
-      >
+      <div v-else-if="
+        (form.status === 0 || form.status === -1 || form.status === 5) &&
+        !checkInvoiceView() &&
+        !checkInvoiceNonPoView()
+      " class="flex justify-between items-center gap-[8px] mt-[24px]">
         <button class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goSaveDraft">
           Save as Draft
           <i class="ki-duotone ki-bookmark"></i>
@@ -99,11 +72,8 @@
             <i class="ki-filled ki-arrow-left"></i>
             Back
           </button>
-          <button
-            class="btn btn-primary"
-            :disabled="isSubmit || (tabNow === 'data' && !isAlternativePayeeFilled())"
-            @click="goNext"
-          >
+          <button class="btn btn-primary" :disabled="isSubmit || (tabNow === 'data' && !isAlternativePayeeFilled())"
+            @click="goNext">
             {{ tabNow !== 'preview' ? 'Next' : 'Submit' }}
             <i v-if="tabNow !== 'preview'" class="ki-duotone ki-black-right"></i>
             <i v-else class="ki-duotone ki-paper-plane"></i>
@@ -111,43 +81,28 @@
         </div>
       </div>
       <div v-else class="flex justify-end items-center mt-[24px] gap-3">
-        <button
-          v-if="tabNow !== 'preview' || checkInvoiceView() || checkInvoiceNonPoView()"
-          class="btn btn-outline btn-primary"
-          :disabled="isSubmit"
-          @click="goBack"
-        >
+        <button v-if="tabNow !== 'preview' || checkInvoiceView() || checkInvoiceNonPoView()"
+          class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goBack">
           <i class="ki-filled ki-arrow-left"></i>
           Back
         </button>
 
-        <button
-          v-if="tabNow !== 'preview' || checkInvoiceView() || checkInvoiceNonPoView()"
-          class="btn btn-primary"
-          @click="goNext"
-        >
+        <button v-if="tabNow !== 'preview' || checkInvoiceView() || checkInvoiceNonPoView()" class="btn btn-primary"
+          @click="goNext">
           Next
           <i class="ki-duotone ki-black-right"></i>
         </button>
 
-        <button
-          v-if="tabNow !== 'preview' && !checkInvoiceView() && !checkInvoiceNonPoView()"
-          class="btn btn-primary"
-          :disabled="
-            isSubmit ||
+        <button v-if="tabNow !== 'preview' && !checkInvoiceView() && !checkInvoiceNonPoView()" class="btn btn-primary"
+          :disabled="isSubmit ||
             (tabNow === 'information' && !checkInvoiceInformation()) ||
             (tabNow === 'data' && !isAlternativePayeeFilled())
-          "
-          @click="goNext"
-        >
+            " @click="goNext">
           Next
           <i class="ki-duotone ki-black-right"></i>
         </button>
-        <button
-          v-if="tabNow === 'preview' && !checkInvoiceView() && !checkInvoiceNonPoView()"
-          class="btn btn-primary"
-          :disabled="isSubmit"
-        >
+        <button v-if="tabNow === 'preview' && !checkInvoiceView() && !checkInvoiceNonPoView()" class="btn btn-primary"
+          :disabled="isSubmit">
           Save as PDF
           <iconPDF />
         </button>
@@ -186,19 +141,15 @@ import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterDat
 import type {
   ParamsSubmissionTypes,
   ParamsSubmissionNonPo,
-  ParamsCheckBudgetType,
   ParamsSubmissionCostExpense,
-  GlaccountDatum,
-  AccountPayable,
-  Accounttax,
-  Currencyamount,
 } from '@/stores/views/invoice/types/submission'
+
 import { useLoginStore } from '@/stores/views/login'
 import moment from 'moment'
+import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 import type { itemsPoGrType } from './types/invoicePoGr'
 import type { itemsCostType } from './types/additionalCost'
 import type { invoiceItemTypes } from './types/invoiceItem'
-import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 
 const InvoiceData = defineAsyncComponent(() => import('./InvoiceAddWrapper/InvoiceData.vue'))
 const InvoiceInformation = defineAsyncComponent(
@@ -236,7 +187,7 @@ const tabNow = ref<string>('data')
 const isSubmit = ref<boolean>(false)
 const isCheckBudget = ref<boolean>(false)
 const isClickDraft = ref<boolean>(false)
-const itemNoAcc = ref<number>(0)
+
 const hasCompletedDataTab = ref<boolean>(false)
 
 const stepperStatus = ref('Submission')
@@ -277,7 +228,7 @@ const form = reactive<formTypes>({
   invoiceDp: '9011',
   amountInvoice: '',
   taxNoInvoice: '',
-  taxDate:'',
+  taxDate: '',
   remainingDpAmount: 0,
   dpAmountDeduction: 0,
   currency: 'IDR',
@@ -365,7 +316,7 @@ const invoiceDpList = computed(() => invoiceMasterApi.dpType)
 const detailPo = computed(() => invoiceApi.detailPo)
 const detailNonPo = computed(() => invoiceApi.detailNonPo)
 const userData = computed(() => loginApi.userData)
-const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
+
 const listActivity = computed(() => invoiceMasterApi.activityList)
 const additionalCostTempDelete = computed(() => verificationApi.additionalCostTempDelete)
 const costExpensesTempDelete = computed(() => verificationApi.costExpenseTempDelete)
@@ -664,15 +615,15 @@ const goBack = () => {
       isCheckBudget.value = false
       tabNow.value = newTab
       try {
-        ;(document.activeElement as HTMLElement)?.blur()
-      } catch {}
+        ; (document.activeElement as HTMLElement)?.blur()
+      } catch { }
       return
     }
 
     tabNow.value = newTab
     try {
-      ;(document.activeElement as HTMLElement)?.blur()
-    } catch {}
+      ; (document.activeElement as HTMLElement)?.blur()
+    } catch { }
   }
 }
 
@@ -848,7 +799,7 @@ const mapDataPost = () => {
       totalGrossAmount: form.totalGrossAmount,
       totalNetAmount: form.totalNetAmount,
     },
-    ocr:{
+    ocr: {
       vendorName: form.ocrVendorName,
       vendorNPWP: form.vendorNPWP,
       companyName: form.ocrCompanyName,
@@ -957,8 +908,8 @@ const mapDataPostNonPo = () => {
       cashJournalName: isPettyCash
         ? typeof form.cashJournalName === 'string'
           ? form.cashJournalName
-              .replace(new RegExp('^' + (form.cashJournalCode || '') + '\\s*-\\s*'), '')
-              .trim()
+            .replace(new RegExp('^' + (form.cashJournalCode || '') + '\\s*-\\s*'), '')
+            .trim()
           : form.cashJournalName || ''
         : '',
       pettyCashStartDate: pettyCashStartDate || null,
@@ -1417,230 +1368,7 @@ const setDataNonPo = () => {
   }
 }
 
-const mapDataCheck = () => {
-  itemNoAcc.value = 0
-  const glAccount = [] as GlaccountDatum[]
-  const accountPayable = [] as AccountPayable[]
-  const accountTax = [] as Accounttax[]
-  const currencyAmount = [] as Currencyamount[]
 
-  for (const item of form.invoiceItem) {
-    itemNoAcc.value += 1
-    const itemIndex = listActivity.value.findIndex((sub) => sub.id === item.activity)
-    const glData = {
-      ITEMNO_ACC: itemNoAcc.value,
-      GL_ACCOUNT: listActivity.value[itemIndex].code,
-      ITEM_TEXT: item.itemText,
-      ALLOC_NMBR: '',
-      TAX_CODE: form.invoiceType === '5' ? ' ' : item.taxCode || ' ',
-      COSTCENTER: item.costCenter || '',
-      PROFIT_CTR: item.profitCenter || '',
-    }
-    glAccount.push(glData)
-  }
-
-  itemNoAcc.value += 1
-
-  if (form.invoiceType === '5') {
-    const accData = {
-      ITEMNO_ACC: itemNoAcc.value,
-      VENDOR_NO: form.vendorId || '',
-      REF_KEY_1: '',
-      REF_KEY_2: '',
-      REF_KEY_3: '',
-      BLINE_DATE: '',
-      PMNTTRMS: '',
-      PYMT_METH: '',
-      ALLOC_NMBR: '',
-      ITEM_TEXT: form.cashJournalCode || '',
-      TAX_CODE: '',
-      PAYMT_REF: '',
-    }
-    accountPayable.push(accData)
-  } else {
-    let itemText = ''
-    if (form.invoiceType === '1') {
-      itemText = form.invoiceVendorNo || ''
-    } else if (form.invoiceType === '2') {
-      itemText = form.proposalAmountVal || form.description || ''
-    } else if (form.invoiceType === '3') {
-      itemText = form.taxNoInvoice || ''
-    } else if (form.invoiceType === '4') {
-      itemText = form.casNoCode || form.taxNoInvoice || ''
-    }
-
-    const accData = {
-      ITEMNO_ACC: itemNoAcc.value,
-      VENDOR_NO: form.vendorId,
-      REF_KEY_1: form.npwp,
-      REF_KEY_2: '',
-      REF_KEY_3: '',
-      BLINE_DATE: '',
-      PMNTTRMS: '',
-      PYMT_METH: '',
-      ALLOC_NMBR: '',
-      ITEM_TEXT: itemText,
-      TAX_CODE: form.invoiceItem.length > 0 ? form.invoiceItem[0].taxCode || ' ' : ' ',
-      PAYMT_REF: '',
-    }
-    accountPayable.push(accData)
-  }
-
-  if (form.invoiceType !== '5') {
-    for (const item of form.invoiceItem) {
-      if (!item.taxCode) continue
-      if (item.taxCode === 'V0') continue
-      const checkAccountTax = accountTax.findIndex((sub) => sub.TAX_CODE === item.taxCode)
-      if (checkAccountTax === -1) {
-        const index = listTaxCalculation.value.findIndex((sub) => sub.code === item.taxCode)
-        if (index !== -1) {
-          itemNoAcc.value += 1
-          const taxData = {
-            ITEMNO_ACC: itemNoAcc.value,
-            TAX_CODE: item.taxCode,
-            TAX_RATE: listTaxCalculation.value[index].value,
-          }
-          accountTax.push(taxData)
-        }
-      }
-    }
-  }
-
-  itemNoAcc.value = 0
-
-  for (const item of form.invoiceItem) {
-    itemNoAcc.value += 1
-    const currData = {
-      ITEMNO_ACC: itemNoAcc.value,
-      CURRENCY: form.currency,
-      AMT_DOCCUR: item.itemAmount,
-      AMT_BASE: 0,
-    }
-    currencyAmount.push(currData)
-  }
-
-  let totalItemAmountCurr = 0
-  let totalVatAmountCurr = 0
-  for (const item of form.invoiceItem) {
-    totalItemAmountCurr += item.itemAmount
-    totalVatAmountCurr += item.vatAmount
-  }
-  itemNoAcc.value += 1
-  const currData = {
-    ITEMNO_ACC: itemNoAcc.value,
-    CURRENCY: form.currency,
-    AMT_DOCCUR: (totalItemAmountCurr + totalVatAmountCurr) * -1,
-    AMT_BASE: 0,
-  }
-  currencyAmount.push(currData)
-
-  for (const item of accountTax) {
-    if (item.TAX_CODE !== 'V0') {
-      const filterTax = form.invoiceItem.filter((sub) => sub.taxCode === item.TAX_CODE)
-      if (filterTax.length !== 0) {
-        itemNoAcc.value += 1
-        let totalVat = 0
-        let totalAmount = 0
-        for (const subItem of filterTax) {
-          totalVat += subItem.vatAmount
-          totalAmount += subItem.itemAmount
-        }
-        const currData = {
-          ITEMNO_ACC: itemNoAcc.value,
-          CURRENCY: form.currency,
-          AMT_DOCCUR: totalVat,
-          AMT_BASE: totalAmount,
-        }
-        currencyAmount.push(currData)
-      }
-    }
-  }
-
-  let docDate = moment().format('YYYYMMDD')
-
-  if (form.invoiceType === '5') {
-    if (Array.isArray(form.pettyCashPeriod) && form.pettyCashPeriod[0]) {
-      docDate = moment(form.pettyCashPeriod[0]).format('YYYYMMDD')
-    }
-  } else if (form.invoiceType === '1') {
-    if (form.invoiceDate) {
-      docDate = moment(form.invoiceDate).format('YYYYMMDD')
-    }
-  } else if (form.invoiceType === '4') {
-    if (form.dueDateCas) {
-      docDate = moment(form.dueDateCas).format('YYYYMMDD')
-    }
-  }
-
-  let refDocNo = ''
-  if (form.invoiceType === '5') {
-    refDocNo = form.cashJournalCode || form.invoiceNo || form.description || 'PETTY_CASH'
-  } else if (form.invoiceType === '1') {
-    refDocNo = form.invoiceVendorNo || form.taxNoInvoice || form.invoiceNo || 'REIMBURSEMENT'
-  } else if (form.invoiceType === '2') {
-    refDocNo = form.proposalAmountVal || form.invoiceNo || form.description || 'CREDIT_CARD'
-  } else if (form.invoiceType === '3' || form.invoiceType === '4') {
-    refDocNo =
-      form.casNoCode ||
-      form.taxNoInvoice ||
-      form.invoiceNo ||
-      (form.invoiceType === '3' ? 'CAS' : 'LBA')
-  }
-
-  if (!refDocNo || refDocNo.trim() === '') {
-    refDocNo = form.invoiceNo || form.description || 'REF_DOC'
-  }
-
-  const fiscalYear = parseInt(docDate.substring(0, 4))
-  const fiscalPeriod = parseInt(docDate.substring(4, 6))
-
-  let docType = 'KR'
-  if (form.invoiceType === '5') {
-    docType = 'SA'
-  } else if (form.invoiceType === '1') {
-    docType = 'KR'
-  } else if (form.invoiceType === '2') {
-    docType = 'KR'
-  } else if (form.invoiceType === '3') {
-    docType = 'KR'
-  } else if (form.invoiceType === '4') {
-    docType = 'KR'
-  }
-
-  const data = {
-    REQUEST: {
-      HEADER_TXT: form.taxNoInvoice || '',
-      COMP_CODE: form.companyCode,
-      DOC_DATE: docDate,
-      PSTNG_DATE: docDate,
-      FISC_YEAR: fiscalYear,
-      FIS_PERIOD: fiscalPeriod,
-      DOC_TYPE: docType,
-      REF_DOC_NO: refDocNo,
-      CUSTOMERCPD: {
-        NAME: form.nameAlternative || '',
-        NAME_2: form.nameOtherAlternative || '',
-        POSTL_CODE: '',
-        CITY: form.cityAlternative || '',
-        COUNTRY: form.countryAlternative || '',
-        STREET: form.streetAltiernative || '',
-        BANK_ACCT: form.bankAccountNumberAlternative || '',
-        BANK_NO: form.bankKeyAlternative || '',
-        BANK_CTRY: form.bankCountryAlternative || '',
-        TAX_NO_1: form.npwpNumberAlternative || '',
-        TAX_NO_3: form.ktpNumberAlternative || '',
-        LANGU_ISO: '',
-        GLO_RE1_OT: '',
-      },
-      GLACCOUNT_DATA: glAccount,
-      ACCOUNT_PAYABLE: accountPayable,
-      ACCOUNTTAX: accountTax,
-      CURRENCYAMOUNT: currencyAmount,
-    },
-  } as ParamsCheckBudgetType
-
-  return data
-}
 
 // const checkBudget = () => {
 //   const data = mapDataCheck()
