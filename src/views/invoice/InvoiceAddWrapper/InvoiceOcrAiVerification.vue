@@ -963,24 +963,6 @@ const setOcrPayload = async () => {
   form.createdUtcDate = moment().format()
   form.modifiedBy = ''
   form.modifiedUtcDate = moment().format()
-const setOcrPayload = async () => {
-  // Map OCR payload into flattened form fields
-  form.ocrVendorName = ocrData.vendorSupplier;
-  form.vendorNPWP = ocrData.npwpSupplier;
-  form.ocrCompanyName = ocrData.vendorBuyer;
-  form.npwpCompany = ocrData.npwpBuyer;
-  form.taxInvoiceNumber = ocrData.taxDocumentNumber;
-  form.taxInvoiceDate = parseIndoDate(ocrData.taxDocumentDate);
-  form.salesAmount = parseFloat(ocrData.dpp) || 0;
-  form.otherDPP = 0;
-  form.ocrVatAmount = parseFloat(ocrData.ppn) || 0;
-  form.ocrVatbmAmount = parseFloat(ocrData.ppnbm) || 0;
-  form.taxInvoiceStatus = ocrData.status;
-  form.referenceNo = '';
-  form.createdBy = '';
-  form.createdUtcDate = moment();
-  form.modifiedBy = '';
-  form.modifiedUtcDate = moment();
 }
 
 /* ---------------- mount ---------------- */
