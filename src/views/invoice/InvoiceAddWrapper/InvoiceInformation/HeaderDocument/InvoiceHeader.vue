@@ -164,6 +164,21 @@
         />
       </div>
 
+      <div
+        v-if="checkPo() && form.invoiceType != '903'"
+        class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+      >
+        <label class="form-label"> Tax Document Date </label>
+        <DatePicker
+          v-model="form.taxDate"
+          format="yyyy/MM/dd"
+          :error="form.taxDateError"
+          :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
+          class="w-full -ml-[15px]"
+          teleport
+        />
+      </div>
+
       <div v-if="isPettyCash" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label"> Cash Journal </label>
         <v-select

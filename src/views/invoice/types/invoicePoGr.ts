@@ -32,6 +32,7 @@ export interface itemsPoGrType {
   poItemError: boolean
   departementError: boolean
   whtCodeList?: WhtCodeTypes[]
+  deliveryOrderNo: string
 }
 
 export interface PoGrSearchTypes {
@@ -59,5 +60,6 @@ export interface PoGrSearchTypes {
   itemAmount: number
   uom: string
   materialDescription: string
+  deliveryOrderNo: string
   isActive?: boolean
 }

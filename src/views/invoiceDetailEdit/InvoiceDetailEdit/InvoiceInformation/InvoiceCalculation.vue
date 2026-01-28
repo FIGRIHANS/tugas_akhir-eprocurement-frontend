@@ -51,6 +51,7 @@ const setCount = (name: string) => {
   const list = {
     subtotal: countSubtotal(),
     'vat amount': countVatAmount(),
+    'dpp': countDppLainnya(),
     'wht amount': countWhtAmount(),
     'additional cost': countAdditionalCost(),
     'total gross amount': countTotalGrossAmount(),
@@ -65,6 +66,9 @@ const setToForm = (name: string, value: number) => {
     switch (name.toLowerCase()) {
       case 'subtotal':
         form.value.subtotal = value
+        break
+      case 'dpp':
+        form.value.dppLainnya = value
         break
       case 'vat amount':
         form.value.vatAmount = value
@@ -83,6 +87,30 @@ const setToForm = (name: string, value: number) => {
         break
     }
   }
+}
+
+const countDppLainnya = () => {
+  if (!form) return
+  let total = 0
+  if (!checkIsNonPo()) {
+    for (const item of form.value.invoicePoGr) {
+      if (item.taxCode === null) continue
+      total = total + Number(item.itemAmount)
+    }
+  } else {
+    for (const item of form.value.invoiceItem) {
+      if (item.taxCode !== null) {
+        if (item.debitCredit === 'D') {
+          total = total + item.itemAmount
+        } else {
+          total = total - item.itemAmount
+        }
+      }
+    }
+  }
+
+  return total * 11 / 12
+
 }
 
 const checkIsNonPo = () => {

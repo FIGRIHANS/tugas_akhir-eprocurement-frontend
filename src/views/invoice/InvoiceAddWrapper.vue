@@ -277,6 +277,7 @@ const form = reactive<formTypes>({
   invoiceDp: '9011',
   amountInvoice: '',
   taxNoInvoice: '',
+  taxDate:'',
   remainingDpAmount: 0,
   dpAmountDeduction: 0,
   currency: 'IDR',
@@ -291,6 +292,7 @@ const form = reactive<formTypes>({
   additionalCostCalc: 0,
   totalGrossAmount: 0,
   totalNetAmount: 0,
+  dppLainnya: 0,
   invoicePoGr: [],
   invoiceItem: [],
   additionalCost: [],
@@ -326,6 +328,23 @@ const form = reactive<formTypes>({
   dueDateCas: '',
   proposalAmountVal: '',
   invoiceSource: '',
+  ocrVendorName: '',
+  vendorNPWP: '',
+  ocrCompanyName: '',
+  npwpCompany: '',
+  taxInvoiceNumber: '',
+  taxInvoiceDate: '',
+  salesAmount: 0,
+  otherDPP: 0,
+  ocrVatAmount: 0,
+  ocrVatbmAmount: 0,
+  taxInvoiceStatus: '',
+  referenceNo: '',
+  createdBy: '',
+  createdUtcDate: '',
+  modifiedBy: '',
+  modifiedUtcDate: ''
+
 })
 
 const contentComponent = computed(() => {
@@ -828,6 +847,24 @@ const mapDataPost = () => {
       additionalCost: form.additionalCostCalc,
       totalGrossAmount: form.totalGrossAmount,
       totalNetAmount: form.totalNetAmount,
+    },
+    ocr:{
+      vendorName: form.ocrVendorName,
+      vendorNPWP: form.vendorNPWP,
+      companyName: form.ocrCompanyName,
+      npwpCompany: form.npwpCompany,
+      taxInvoiceNumber: form.taxInvoiceNumber,
+      taxInvoiceDate: form.taxInvoiceDate,
+      salesAmount: form.salesAmount,
+      otherDPP: form.otherDPP,
+      vatAmount: form.vatAmount,
+      vatbmAmount: form.ocrVatbmAmount,
+      taxInvoiceStatus: form.taxInvoiceStatus,
+      referenceNo: form.invoiceNo,
+      createdBy: form.createdBy,
+      createdUtcDate: form.createdUtcDate,
+      modifiedBy: form.modifiedBy,
+      modifiedUtcDate: form.modifiedUtcDate
     },
     pogr: mapPoGr(),
     additionalCosts: form.invoiceDp === '9012' ? [] : mapAdditionalCost(),
@@ -1605,118 +1642,128 @@ const mapDataCheck = () => {
   return data
 }
 
+// const checkBudget = () => {
+//   const data = mapDataCheck()
+
+//   invoiceApi
+//     .postCheckBudget(data)
+//     .then((response) => {
+//       if (response) {
+//         const respTop = response as unknown as Record<string, unknown>
+//         const topRESPONSE = respTop['RESPONSE']
+//         if (Array.isArray(topRESPONSE)) {
+//           invoiceApi.responseCheckBudget =
+//             respTop as unknown as typeof invoiceApi.responseCheckBudget
+//         }
+//       }
+
+//       const respObj = (() => {
+//         if (invoiceApi.responseCheckBudget) return invoiceApi.responseCheckBudget
+//         if (response && typeof response === 'object') {
+//           const r = response as unknown as Record<string, unknown>
+//           const result = r['result']
+//           if (result && typeof result === 'object') {
+//             const resObj = result as Record<string, unknown>
+//             if (resObj['content']) return resObj['content']
+//           }
+//           return response
+//         }
+//         return undefined
+//       })()
+
+//       const RESPONSE =
+//         respObj && typeof respObj === 'object'
+//           ? (respObj as Record<string, unknown>)['RESPONSE']
+//           : undefined
+//       const hasSuccess =
+//         Array.isArray(RESPONSE) &&
+//         (RESPONSE as Array<Record<string, unknown>>).some((r) => (r['TYPE'] as string) === 'S')
+
+//       if (hasSuccess) {
+//         isCheckBudget.value = true
+//         const idModal = document.querySelector('#success_budget_check_modal')
+//         const modal = KTModal.getInstance(idModal as HTMLElement)
+//         if (modal) modal.show()
+//       } else {
+//         isCheckBudget.value = false
+
+//         const extractResponseMessages = (resp: unknown): string => {
+//           if (!resp || typeof resp !== 'object' || resp === null) return ''
+//           const rObj = resp as Record<string, unknown>
+//           const RESPONSE = rObj['RESPONSE']
+//           if (Array.isArray(RESPONSE) && RESPONSE.length > 0 && typeof RESPONSE[0] === 'object') {
+//             const first = RESPONSE[0] as Record<string, unknown>
+//             const MESSAGE = first['MESSAGE']
+//             if (Array.isArray(MESSAGE))
+//               return MESSAGE.filter((m) => typeof m === 'string').join('\n')
+//             if (typeof MESSAGE === 'string') return MESSAGE
+//           }
+//           const result = rObj['result']
+//           if (result && typeof result === 'object') {
+//             const resObj = result as Record<string, unknown>
+//             const m = resObj['message']
+//             if (typeof m === 'string') return m
+//           }
+//           const m2 = rObj['message']
+//           if (typeof m2 === 'string') return m2
+//           return ''
+//         }
+
+//         invoiceApi.errorMessageSubmission = extractResponseMessages(respObj || response)
+//         const idModal = document.querySelector('#failed_budget_check_modal')
+//         const modal = KTModal.getInstance(idModal as HTMLElement)
+//         if (modal) modal.show()
+//       }
+//     })
+//     .catch((error) => {
+//       isCheckBudget.value = false
+
+//       const extractResponseMessages = (resp: unknown): string => {
+//         if (!resp || typeof resp !== 'object' || resp === null) return ''
+//         const rObj = resp as Record<string, unknown>
+//         const RESPONSE = rObj['RESPONSE']
+//         if (Array.isArray(RESPONSE) && RESPONSE.length > 0 && typeof RESPONSE[0] === 'object') {
+//           const first = RESPONSE[0] as Record<string, unknown>
+//           const MESSAGE = first['MESSAGE']
+//           if (Array.isArray(MESSAGE)) return MESSAGE.filter((m) => typeof m === 'string').join('\n')
+//           if (typeof MESSAGE === 'string') return MESSAGE
+//         }
+//         const result = rObj['result']
+//         if (result && typeof result === 'object') {
+//           const resObj = result as Record<string, unknown>
+//           const m = resObj['message']
+//           if (typeof m === 'string') return m
+//         }
+//         const m2 = rObj['message']
+//         if (typeof m2 === 'string') return m2
+//         return ''
+//       }
+
+//       const errData = error?.response?.data
+//       if (errData) {
+//         const errTop = errData as unknown as Record<string, unknown>
+//         if (Array.isArray(errTop['RESPONSE'])) {
+//           invoiceApi.responseCheckBudget =
+//             errTop as unknown as typeof invoiceApi.responseCheckBudget
+//         }
+//       }
+
+//       invoiceApi.errorMessageSubmission = extractResponseMessages(errData || error)
+//       const idModal = document.querySelector('#failed_budget_check_modal')
+//       const modal = KTModal.getInstance(idModal as HTMLElement)
+//       if (modal) modal.show()
+//     })
+// }
+
 const checkBudget = () => {
-  const data = mapDataCheck()
 
-  invoiceApi
-    .postCheckBudget(data)
-    .then((response) => {
-      if (response) {
-        const respTop = response as unknown as Record<string, unknown>
-        const topRESPONSE = respTop['RESPONSE']
-        if (Array.isArray(topRESPONSE)) {
-          invoiceApi.responseCheckBudget =
-            respTop as unknown as typeof invoiceApi.responseCheckBudget
-        }
-      }
-
-      const respObj = (() => {
-        if (invoiceApi.responseCheckBudget) return invoiceApi.responseCheckBudget
-        if (response && typeof response === 'object') {
-          const r = response as unknown as Record<string, unknown>
-          const result = r['result']
-          if (result && typeof result === 'object') {
-            const resObj = result as Record<string, unknown>
-            if (resObj['content']) return resObj['content']
-          }
-          return response
-        }
-        return undefined
-      })()
-
-      const RESPONSE =
-        respObj && typeof respObj === 'object'
-          ? (respObj as Record<string, unknown>)['RESPONSE']
-          : undefined
-      const hasSuccess =
-        Array.isArray(RESPONSE) &&
-        (RESPONSE as Array<Record<string, unknown>>).some((r) => (r['TYPE'] as string) === 'S')
-
-      if (hasSuccess) {
-        isCheckBudget.value = true
-        const idModal = document.querySelector('#success_budget_check_modal')
-        const modal = KTModal.getInstance(idModal as HTMLElement)
-        if (modal) modal.show()
-      } else {
-        isCheckBudget.value = false
-
-        const extractResponseMessages = (resp: unknown): string => {
-          if (!resp || typeof resp !== 'object' || resp === null) return ''
-          const rObj = resp as Record<string, unknown>
-          const RESPONSE = rObj['RESPONSE']
-          if (Array.isArray(RESPONSE) && RESPONSE.length > 0 && typeof RESPONSE[0] === 'object') {
-            const first = RESPONSE[0] as Record<string, unknown>
-            const MESSAGE = first['MESSAGE']
-            if (Array.isArray(MESSAGE))
-              return MESSAGE.filter((m) => typeof m === 'string').join('\n')
-            if (typeof MESSAGE === 'string') return MESSAGE
-          }
-          const result = rObj['result']
-          if (result && typeof result === 'object') {
-            const resObj = result as Record<string, unknown>
-            const m = resObj['message']
-            if (typeof m === 'string') return m
-          }
-          const m2 = rObj['message']
-          if (typeof m2 === 'string') return m2
-          return ''
-        }
-
-        invoiceApi.errorMessageSubmission = extractResponseMessages(respObj || response)
-        const idModal = document.querySelector('#failed_budget_check_modal')
-        const modal = KTModal.getInstance(idModal as HTMLElement)
-        if (modal) modal.show()
-      }
-    })
-    .catch((error) => {
-      isCheckBudget.value = false
-
-      const extractResponseMessages = (resp: unknown): string => {
-        if (!resp || typeof resp !== 'object' || resp === null) return ''
-        const rObj = resp as Record<string, unknown>
-        const RESPONSE = rObj['RESPONSE']
-        if (Array.isArray(RESPONSE) && RESPONSE.length > 0 && typeof RESPONSE[0] === 'object') {
-          const first = RESPONSE[0] as Record<string, unknown>
-          const MESSAGE = first['MESSAGE']
-          if (Array.isArray(MESSAGE)) return MESSAGE.filter((m) => typeof m === 'string').join('\n')
-          if (typeof MESSAGE === 'string') return MESSAGE
-        }
-        const result = rObj['result']
-        if (result && typeof result === 'object') {
-          const resObj = result as Record<string, unknown>
-          const m = resObj['message']
-          if (typeof m === 'string') return m
-        }
-        const m2 = rObj['message']
-        if (typeof m2 === 'string') return m2
-        return ''
-      }
-
-      const errData = error?.response?.data
-      if (errData) {
-        const errTop = errData as unknown as Record<string, unknown>
-        if (Array.isArray(errTop['RESPONSE'])) {
-          invoiceApi.responseCheckBudget =
-            errTop as unknown as typeof invoiceApi.responseCheckBudget
-        }
-      }
-
-      invoiceApi.errorMessageSubmission = extractResponseMessages(errData || error)
-      const idModal = document.querySelector('#failed_budget_check_modal')
-      const modal = KTModal.getInstance(idModal as HTMLElement)
-      if (modal) modal.show()
-    })
+  isCheckBudget.value = true
+  // tampilkan modal success
+  const idModal = document.querySelector('#success_budget_check_modal')
+  const modal = KTModal.getInstance(idModal as HTMLElement)
+  if (modal) modal.show()
 }
+
 
 const checkFormBudget = () => {
   let status = false

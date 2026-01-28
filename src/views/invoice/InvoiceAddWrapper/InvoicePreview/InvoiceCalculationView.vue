@@ -40,6 +40,7 @@ const setCount = (name: string) => {
   const list = {
     subtotal: form?.subtotal,
     'vat amount': form?.vatAmount,
+    'dpp': countDpp(),
     'wht amount': form?.whtAmount,
     'additional cost': form?.additionalCostCalc,
     'total gross amount': form?.totalGrossAmount,
@@ -48,6 +49,42 @@ const setCount = (name: string) => {
 
   return list[name.toLowerCase()]
 }
+
+const checkIsNonPo = () => {
+  return route.query.type === 'nonpo' || typeForm.value === 'non-po-view'
+}
+
+
+const countDpp = () => {
+  let total = 0  
+  
+  if (!checkIsNonPo()) {
+    for (const item of form.invoicePoGr) {
+    // ⬇️ skip item yang taxCode = null
+    if (item.taxCode === null) continue
+
+    const itemAmount =
+      form.currency === 'IDR'
+        ? item.itemAmountLC
+        : item.itemAmountTC
+
+    total = total + Number(itemAmount)
+  }
+  } else {
+    for (const item of form.invoiceItem) {
+      if (item.taxCode !== null) {
+        if (item.debitCredit === 'D') {
+          total = total + item.itemAmount
+        } else {
+          total = total - item.itemAmount
+        }
+      }
+    }
+  }
+
+  return total * 11 / 12
+}
+
 
 const setCalculation = () => {
   listCalculation.value = []

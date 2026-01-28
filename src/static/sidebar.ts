@@ -227,6 +227,21 @@ export default [
         title: 'Receiving Confirmation List',
         to: 'receivingConfirmationList',
       },
+      {
+        id: 'delivery-notes',
+        title: 'Create Delivery Notes',
+        to: 'deliveryNotes',
+      },
+      {
+        id: 'delivery-notes-create',
+        title: 'Create Delivery Notes',
+        to: 'deliveryNotesCreate',
+      },
+      {
+        id: 'delivery-notes-list',
+        title: 'Delivery Notes List',
+        to: 'deliveryNotesList',
+      },
     ],
   },
   {
@@ -246,43 +261,43 @@ export default [
       },
     ],
   },
-  // {
-  //   id: 'userManagement',
-  //   title: 'User Management',
-  //   icon: 'user',
-  //   child: [
-  //     {
-  //       id: 'List User',
-  //       title: 'List User',
-  //       to: 'user-management-user-list',
-  //     },
-  //     {
-  //       id: 'Master Profile',
-  //       title: 'Master Profile',
-  //       to: 'user-management-master-profile',
-  //     },
-  //     {
-  //       id: 'Master Role',
-  //       title: 'Master Role',
-  //       to: 'user-management-master-role',
-  //     },
-  //     {
-  //       id: 'Master Employee',
-  //       title: 'Master Employee',
-  //       to: 'user-management-master-employee',
-  //     },
-  //     {
-  //       id: 'Report User Authorization',
-  //       title: 'Report User Authorization',
-  //       to: 'user-management-report-authorization',
-  //     },
-  //   ],
-  // },
-  // {
-  //   id: 'Workflow Configuration',
-  //   title: 'Workflow Configuration',
-  //   icon: 'check',
-  //   to: 'workflow-configuration',
-  //   child: [],
-  // },
+  {
+    id: 'userManagement',
+    title: 'User Management',
+    icon: 'user',
+    child: [
+      {
+        id: 'list-user',
+        title: 'List User',
+        to: 'user-management-user-list',
+      },
+      {
+        id: 'master-profile',
+        title: 'Master Profile',
+        to: 'user-management-master-profile',
+      },
+      {
+        id: 'master-role',
+        title: 'Master Role',
+        to: 'user-management-master-role',
+      },
+      {
+        id: 'master-employee',
+        title: 'Master Employee',
+        to: 'user-management-master-employee',
+      },
+      {
+        id: 'report-user-authorization',
+        title: 'Report User Authorization',
+        to: 'user-management-report-authorization',
+      },
+    ],
+  },
+  {
+    id: 'workflow-configuration',
+    title: 'Workflow Configuration',
+    icon: 'check',
+    to: 'workflow-configuration',
+    child: [],
+  },
 ]

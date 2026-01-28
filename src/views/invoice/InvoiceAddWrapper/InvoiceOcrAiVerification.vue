@@ -221,9 +221,66 @@
 
         <div
           v-if="tabOcrTab === 'ai'"
-          class="bg-white shadow-xl rounded-xl p-6 mt-4 border border-red-400"
+          :class="[
+            'bg-white shadow-xl rounded-xl p-6 mt-4 border',
+            aiMismatches.length === 0 ? 'border-green-600' : 'border-red-400',
+          ]"
         >
-          <h2 class="font-bold text-xl text-red-700 mb-4 flex items-center gap-2">AI Action 🤖</h2>
+          <h2 class="font-bold text-xl mb-4 flex items-center gap-2">AI Action 🤖</h2>
+          <hr class="mb-4" />
+          <div
+            :class="[
+              'flex gap-5 p-4 border rounded-lg items-start',
+              aiMismatches.length === 0
+                ? 'bg-green-50 border-green-300'
+                : 'bg-red-50 border-red-300',
+            ]"
+          >
+            <img
+              src="https://cdnai.iconscout.com/ai-image/premium/thumb/ai-female-customer-care-agent-3d-illustration-png-download-jpg-13152628.png"
+              alt="AI Assistant"
+              class="w-20 h-20 object-contain flex-shrink-0"
+            />
+            <div class="flex-grow">
+              <p
+                v-if="aiMismatches.length === 0"
+                class="font-extrabold text-lg text-green-600 mb-3"
+              >
+                Tidak ada mismatch
+              </p>
+              <p v-else class="font-extrabold text-lg text-red-800 mb-3">Terdapat mismatch pada:</p>
+
+              <ul class="list-disc ml-6 space-y-1 text-base text-gray-800">
+                <li v-for="(item, index) in aiMismatches" :key="index" class="font-semibold">
+                  {{ item }}
+                </li>
+              </ul>
+              <div class="flex gap-0 mt-5 border border-gray-300 rounded-lg overflow-hidden w-fit">
+                <button
+                  @click="setActive('back')"
+                  :class="[
+                    'px-5 py-2 font-semibold transition duration-150 border-r border-gray-300',
+                    activeButton === 'back'
+                      ? 'bg-green-600 text-white hover:bg-green-700'
+                      : 'bg-gray-100 text-blue-600 hover:bg-gray-200',
+                  ]"
+                >
+                  Send Back to Vendor
+                </button>
+                <button
+                  @click="setActive('proceed')"
+                  :class="[
+                    'px-5 py-2 font-semibold transition duration-150',
+                    activeButton === 'proceed'
+                      ? 'bg-green-600 text-white hover:bg-green-700'
+                      : 'bg-gray-100 text-blue-600 hover:bg-gray-200',
+                  ]"
+                >
+                  Proceed
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -324,12 +381,17 @@ const isLoadUpload = ref(false)
 const showModalSuccess = ref(false)
 const selectedDocumentType = ref('1')
 const previewUrl = ref(form?.tax?.previewPath ?? '')
+const activeButton = ref('')
 
 const manualApprove = reactive<Record<number, boolean>>({})
 const manualReject = reactive<Record<number, boolean>>({})
 
 /* ---------------- helpers ---------------- */
 const isEmpty = (val: any) => val === undefined || val === null || val === '' || val === '-'
+
+const setActive = (btn: 'back' | 'proceed') => {
+  activeButton.value = btn
+}
 
 /* ---------------- qr & ocr ---------------- */
 const qrData = reactive<invoiceQrData>({
@@ -424,9 +486,24 @@ const getOcrKey = (header: string): keyof invoiceOcrData | null => {
 }
 
 /* ---------------- remarks & override ---------------- */
-const editableRemarks = reactive<Record<number, string>>({})
+const editableRemarks = ref<Record<number, string>>({})
 const manualOverride = reactive<Record<number, boolean>>({})
 const NOT_MATCHED = '2'
+
+const aiLabelMap: Record<string, string> = {
+  'Nama Vendor': 'Nama Vendor',
+  'NPWP Vendor': 'NPWP Vendor',
+  Perusahaan: 'Perusahaan',
+  NPWP: 'NPWP',
+  'No Faktur Pajak': 'No Faktur Pajak',
+  'Tanggal Faktur Pajak': 'Tanggal Faktur Pajak',
+  'Nilai Penjualan': 'Nilai Penjualan',
+  'DPP Lainnya': 'DPP Lainnya',
+  PPN: 'PPN',
+  'PPN BM': 'PPN BM',
+  'Status Approve FP': 'Status Approve FP',
+  Reference: 'Reference',
+}
 
 /* ---------------- TABLE DATA (FIXED, FULL) ---------------- */
 const tableData = computed(() => {
@@ -435,18 +512,18 @@ const tableData = computed(() => {
       header: 'Nama Vendor',
       qr: qrData.vendorSupplier || '-',
       fpVerified:
-        editableRemarks[0] === '3'
+        editableRemarks.value[0] === '3'
           ? true
-          : editableRemarks[0] === '2'
+          : editableRemarks.value[0] === '2'
             ? false
             : isEmpty(qrData.vendorSupplier)
               ? 'none'
               : form?.vendorName == qrData.vendorSupplier,
       ocr: ocrData.vendorSupplier || '-',
       invoiceVerified:
-        editableRemarks[0] === '3'
+        editableRemarks.value[0] === '3'
           ? true
-          : editableRemarks[0] === '2'
+          : editableRemarks.value[0] === '2'
             ? false
             : isEmpty(ocrData.vendorSupplier)
               ? 'none'
@@ -460,18 +537,18 @@ const tableData = computed(() => {
       header: 'NPWP Vendor',
       qr: qrData.npwpSupplier || '-',
       fpVerified:
-        editableRemarks[1] === '3'
+        editableRemarks.value[1] === '3'
           ? true
-          : editableRemarks[1] === '2'
+          : editableRemarks.value[1] === '2'
             ? false
             : isEmpty(qrData.npwpSupplier)
               ? 'none'
               : form?.npwp == qrData.npwpSupplier,
       ocr: ocrData.npwpSupplier || '-',
       invoiceVerified:
-        editableRemarks[1] === '3'
+        editableRemarks.value[1] === '3'
           ? true
-          : editableRemarks[1] === '2'
+          : editableRemarks.value[1] === '2'
             ? false
             : isEmpty(ocrData.npwpSupplier)
               ? 'none'
@@ -485,18 +562,18 @@ const tableData = computed(() => {
       header: 'Perusahaan',
       qr: qrData.vendorBuyer || '-',
       fpVerified:
-        editableRemarks[2] === '3'
+        editableRemarks.value[2] === '3'
           ? true
-          : editableRemarks[2] === '2'
+          : editableRemarks.value[2] === '2'
             ? false
             : isEmpty(qrData.vendorBuyer)
               ? 'none'
               : form?.companyName == qrData.vendorBuyer,
       ocr: ocrData.vendorBuyer || '-',
       invoiceVerified:
-        editableRemarks[2] === '3'
+        editableRemarks.value[2] === '3'
           ? true
-          : editableRemarks[2] === '2'
+          : editableRemarks.value[2] === '2'
             ? false
             : isEmpty(ocrData.vendorBuyer)
               ? 'none'
@@ -510,18 +587,18 @@ const tableData = computed(() => {
       header: 'NPWP',
       qr: qrData.npwpBuyer || '-',
       fpVerified:
-        editableRemarks[3] === '3'
+        editableRemarks.value[3] === '3'
           ? true
-          : editableRemarks[3] === '2'
+          : editableRemarks.value[3] === '2'
             ? false
             : isEmpty(qrData.npwpBuyer)
               ? 'none'
               : true,
       ocr: ocrData.npwpBuyer || '-',
       invoiceVerified:
-        editableRemarks[3] === '3'
+        editableRemarks.value[3] === '3'
           ? true
-          : editableRemarks[3] === '2'
+          : editableRemarks.value[3] === '2'
             ? false
             : isEmpty(ocrData.npwpBuyer)
               ? 'none'
@@ -532,18 +609,18 @@ const tableData = computed(() => {
       header: 'No Faktur Pajak',
       qr: qrData.taxDocumentNumber || '-',
       fpVerified:
-        editableRemarks[4] === '3'
+        editableRemarks.value[4] === '3'
           ? true
-          : editableRemarks[4] === '2'
+          : editableRemarks.value[4] === '2'
             ? false
             : isEmpty(qrData.taxDocumentNumber)
               ? 'none'
               : form?.taxNoInvoice == qrData.taxDocumentNumber,
       ocr: ocrData.taxDocumentNumber || '-',
       invoiceVerified:
-        editableRemarks[4] === '3'
+        editableRemarks.value[4] === '3'
           ? true
-          : editableRemarks[4] === '2'
+          : editableRemarks.value[4] === '2'
             ? false
             : isEmpty(ocrData.taxDocumentNumber)
               ? 'none'
@@ -558,18 +635,18 @@ const tableData = computed(() => {
       header: 'Tanggal Faktur Pajak',
       qr: qrData.taxDocumentDate || '-',
       fpVerified:
-        editableRemarks[5] === '3'
+        editableRemarks.value[5] === '3'
           ? true
-          : editableRemarks[5] === '2'
+          : editableRemarks.value[5] === '2'
             ? false
             : isEmpty(qrData.taxDocumentDate)
               ? 'none'
               : true,
       ocr: ocrData.taxDocumentDate || '-',
       invoiceVerified:
-        editableRemarks[5] === '3'
+        editableRemarks.value[5] === '3'
           ? true
-          : editableRemarks[5] === '2'
+          : editableRemarks.value[5] === '2'
             ? false
             : isEmpty(ocrData.taxDocumentDate)
               ? 'none'
@@ -580,18 +657,18 @@ const tableData = computed(() => {
       header: 'Nilai Penjualan',
       qr: qrData.dpp || '-',
       fpVerified:
-        editableRemarks[6] === '3'
+        editableRemarks.value[6] === '3'
           ? true
-          : editableRemarks[6] === '2'
+          : editableRemarks.value[6] === '2'
             ? false
             : isEmpty(qrData.dpp)
               ? 'none'
               : true,
       ocr: ocrData.dpp || '-',
       invoiceVerified:
-        editableRemarks[6] === '3'
+        editableRemarks.value[6] === '3'
           ? true
-          : editableRemarks[6] === '2'
+          : editableRemarks.value[6] === '2'
             ? false
             : isEmpty(ocrData.dpp)
               ? 'none'
@@ -610,18 +687,18 @@ const tableData = computed(() => {
       header: 'PPN',
       qr: qrData.ppn || '-',
       fpVerified:
-        editableRemarks[8] === '3'
+        editableRemarks.value[8] === '3'
           ? true
-          : editableRemarks[8] === '2'
+          : editableRemarks.value[8] === '2'
             ? false
             : isEmpty(qrData.ppn)
               ? 'none'
               : true,
       ocr: ocrData.ppn || '-',
       invoiceVerified:
-        editableRemarks[8] === '3'
+        editableRemarks.value[8] === '3'
           ? true
-          : editableRemarks[8] === '2'
+          : editableRemarks.value[8] === '2'
             ? false
             : isEmpty(ocrData.ppn)
               ? 'none'
@@ -632,18 +709,18 @@ const tableData = computed(() => {
       header: 'PPN BM',
       qr: qrData.ppnbm || '-',
       fpVerified:
-        editableRemarks[9] === '3'
+        editableRemarks.value[9] === '3'
           ? true
-          : editableRemarks[9] === '2'
+          : editableRemarks.value[9] === '2'
             ? false
             : isEmpty(qrData.ppnbm)
               ? 'none'
               : true,
       ocr: ocrData.ppnbm || '-',
       invoiceVerified:
-        editableRemarks[9] === '3'
+        editableRemarks.value[9] === '3'
           ? true
-          : editableRemarks[9] === '2'
+          : editableRemarks.value[9] === '2'
             ? false
             : isEmpty(ocrData.ppnbm)
               ? 'none'
@@ -654,18 +731,18 @@ const tableData = computed(() => {
       header: 'Status Approve FP',
       qr: qrData.status || '-',
       fpVerified:
-        editableRemarks[10] === '3'
+        editableRemarks.value[10] === '3'
           ? true
-          : editableRemarks[10] === '2'
+          : editableRemarks.value[10] === '2'
             ? false
             : isEmpty(qrData.status)
               ? 'none'
               : true,
       ocr: ocrData.status || '-',
       invoiceVerified:
-        editableRemarks[10] === '3'
+        editableRemarks.value[10] === '3'
           ? true
-          : editableRemarks[10] === '2'
+          : editableRemarks.value[10] === '2'
             ? false
             : isEmpty(ocrData.status)
               ? 'none'
@@ -694,6 +771,31 @@ const bjapVerify = computed(() => [
   },
 ])
 
+const isRowMismatch = (row: any, index: number) => {
+  const remark = editableRemarks.value[index]
+
+  // Not Match manual
+  if (remark === '2') return true
+
+  // Manual Verified
+  if (remark === '3') return false
+
+  // Auto → pakai hasil sistem
+  return row.remarks === false
+}
+
+const aiMismatches = computed(() => {
+  return tableData.value
+    .map((row, index) => ({ row, index }))
+    .filter(({ row, index }) => isRowMismatch(row, index))
+    .map(({ row }) => aiLabelMap[row.header] || row.header)
+})
+
+const triggerAiMismatch = () => {
+  // jika ingin auto pindah tab AI
+  // tabOcrTab.value = 'ai'
+}
+
 const setTabOcr = (tab: 'general' | 'tax' | 'ai') => {
   tabOcrTab.value = tab
 }
@@ -705,10 +807,10 @@ const pjapSyncStatus = ref<string | null>(null)
 watch(isVerifyData, (val) => {
   if (!val) return
   tableData.value.forEach((row, i) => {
-    if (editableRemarks[i] === undefined) {
-      editableRemarks[i] = row.remarks === true ? '1' : row.remarks === false ? '2' : '4'
+    if (editableRemarks.value[i] === undefined) {
+      editableRemarks.value[i] = row.remarks === true ? '1' : row.remarks === false ? '2' : '4'
     }
-    if (editableRemarks[i] === '3') manualOverride[i] = true
+    if (editableRemarks.value[i] === '3') manualOverride[i] = true
   })
 })
 
@@ -718,7 +820,7 @@ watch(selectedDocumentType, (val) => {
 })
 
 watch(
-  editableRemarks,
+  editableRemarks.value,
   (val) => {
     Object.entries(val).forEach(([key, remark]) => {
       const index = Number(key)
@@ -737,6 +839,14 @@ watch(
         manualReject[index] = false
       }
     })
+  },
+  { deep: true },
+)
+
+watch(
+  () => editableRemarks.value,
+  () => {
+    triggerAiMismatch()
   },
   { deep: true },
 )
@@ -853,6 +963,24 @@ const setOcrPayload = async () => {
   form.createdUtcDate = moment().format()
   form.modifiedBy = ''
   form.modifiedUtcDate = moment().format()
+const setOcrPayload = async () => {
+  // Map OCR payload into flattened form fields
+  form.ocrVendorName = ocrData.vendorSupplier;
+  form.vendorNPWP = ocrData.npwpSupplier;
+  form.ocrCompanyName = ocrData.vendorBuyer;
+  form.npwpCompany = ocrData.npwpBuyer;
+  form.taxInvoiceNumber = ocrData.taxDocumentNumber;
+  form.taxInvoiceDate = parseIndoDate(ocrData.taxDocumentDate);
+  form.salesAmount = parseFloat(ocrData.dpp) || 0;
+  form.otherDPP = 0;
+  form.ocrVatAmount = parseFloat(ocrData.ppn) || 0;
+  form.ocrVatbmAmount = parseFloat(ocrData.ppnbm) || 0;
+  form.taxInvoiceStatus = ocrData.status;
+  form.referenceNo = '';
+  form.createdBy = '';
+  form.createdUtcDate = moment();
+  form.modifiedBy = '';
+  form.modifiedUtcDate = moment();
 }
 
 /* ---------------- mount ---------------- */

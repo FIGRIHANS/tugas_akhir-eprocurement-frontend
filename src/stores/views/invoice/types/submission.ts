@@ -194,6 +194,7 @@ export interface PoGrItemTypes {
   itemAmountLC: number
   itemAmountTC: number
   itemAmount: number
+  deliveryOrderNo: string
 }
 
 export interface ListPoTypes {
@@ -227,6 +228,7 @@ export interface ListPoTypes {
   poPrice?: boolean
 
   emailSender?: string
+  sapPostingCode: string
 }
 
 export interface ListNonPoTypes {
@@ -252,6 +254,7 @@ export interface ListNonPoTypes {
   isOpenChild: boolean
   createdUtcDate: string
   actionerDate?: string
+  sapPostingCode: string
 }
 
 export interface itemsAlternativePayee {

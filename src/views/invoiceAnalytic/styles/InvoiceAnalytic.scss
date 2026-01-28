@@ -1,11 +1,16 @@
 .invoice-analytic {
   padding: 1.5rem;
 }
-
-.filter-group {
+.filter-section {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  margin: 12px;
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
 }
 
 .analytics-metrics-container {

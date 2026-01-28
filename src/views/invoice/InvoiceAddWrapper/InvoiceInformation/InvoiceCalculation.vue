@@ -51,16 +51,17 @@ const checkIsNonPo = () => {
 const isPettyCash = computed(() => form?.invoiceType === '5')
 
 const setCount = (name: string) => {
-  const list = {
+  const list: Record<string, number> = {
     'subtotal': countSubtotal(),
+    'dpp': countDppLainnya(),
     'vat amount': countVatAmount(),
     'wht amount': countWhtAmount(),
     'additional cost': countAdditionalCost(),
     'total gross amount': countTotalGrossAmount(),
     'total net amount': countTotalNetAmount()
-  } as { [key: string]: number }
+  }
 
-  return list[name.toLowerCase()]
+  return list[name.toLowerCase()] ?? 0
 }
 
 const setToForm = (name: string, value: number) => {
@@ -68,6 +69,9 @@ const setToForm = (name: string, value: number) => {
     switch (name.toLowerCase()) {
       case 'subtotal':
         form.subtotal = value
+        break
+      case 'dpp':
+        form.dppLainnya = value
         break
       case 'vat amount':
         form.vatAmount = value
@@ -88,17 +92,53 @@ const setToForm = (name: string, value: number) => {
   }
 }
 
+const countDppLainnya = () => {
+
+if (!form) return
+let total = 0
+
+if (!checkIsNonPo()) {
+  for (const item of form.invoicePoGr) {
+    // ⬇️ skip item yang taxCode = null
+    if (item.taxCode === null) continue
+
+    const itemAmount =
+      form.currency === 'IDR'
+        ? item.itemAmountLC
+        : item.itemAmountTC
+
+    total = total + Number(itemAmount)
+  }
+} else {
+  for (const item of form.invoiceItem) {
+    if (item.taxCode !== null) {
+      if (item.debitCredit === 'D') {
+        total = total + item.itemAmount
+      } else {
+        total = total - item.itemAmount
+      }
+    }
+  }
+}
+
+  // const subtotal = countSubtotal() || 0
+  return total * 11 / 12
+}
+
 const setCalculation = () => {
   listCalculation.value = []
   for (const item of listName.value) {
     if (typeForm.value === 'nonpo' && item === 'Additional Cost') break
-    const amount = setCount(item)
+    const amount = setCount(item) || 0
+
     const data = {
       name: item,
       amount: amount.toString(),
       currency: form?.currency || ''
     }
     listCalculation.value.push(data)
+
+    
     setToForm(item, amount)
   }
 }

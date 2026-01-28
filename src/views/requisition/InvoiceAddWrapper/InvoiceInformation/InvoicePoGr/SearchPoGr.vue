@@ -45,6 +45,7 @@
                   <td>{{ item.grDocumentNo }}</td>
                   <td>{{ item.grDocumentItem }}</td>
                   <td>{{ item.grDocumentDate }}</td>
+                  <td>{{ item.deliveryOrderNo }}</td>
                   <td class="text-right">{{ currency === item.currencyLC ? useFormatIdr(item.itemAmountLC) : useFormatUsd(item.itemAmountTC) }}</td>
                   <td>{{ item.quantity }}</td>
                   <td>{{ item.unit }}</td>
