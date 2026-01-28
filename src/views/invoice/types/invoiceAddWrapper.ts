@@ -84,7 +84,7 @@ export interface formTypes extends documentFormTypes {
   taxNoInvoice: string
   taxNoInvoiceError?: boolean
   taxDate: string
-  taxDateError?:  boolean
+  taxDateError?: boolean
   remainingDpAmount: number
   dpAmountDeduction: number
   dpAmountDeductionError?: boolean
@@ -114,23 +114,6 @@ export interface formTypes extends documentFormTypes {
   additionalCostError?: boolean
   invoiceItem: invoiceItemTypes[]
   invoiceItemError?: boolean
-
-  ocrVendorName: string,
-  vendorNPWP: string,
-  ocrCompanyName: string,
-  npwpCompany: string,
-  taxInvoiceNumber: string,
-  taxInvoiceDate: string,
-  salesAmount: number,
-  otherDPP: number,
-  ocrVatAmount: number,
-  ocrVatbmAmount: number,
-  taxInvoiceStatus: string,
-  referenceNo: string,
-  createdBy: string,
-  createdUtcDate: string,
-  modifiedBy: string,
-  modifiedUtcDate: string
 
   status: number
   invoiceSource: string
