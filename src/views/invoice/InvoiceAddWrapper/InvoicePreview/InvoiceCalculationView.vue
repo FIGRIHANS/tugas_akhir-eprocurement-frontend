@@ -53,7 +53,7 @@ const setCount = (name: string) => {
 
 const setCountLba = (name: string) => {
   const list = {
-    'variance subtotal': form?.subtotal,
+    'variance subtotal': countVariance(),
     'vat amount': form?.vatAmount,
     'wht amount': form?.whtAmount,
     'additional cost': form?.additionalCostCalc,
@@ -62,6 +62,17 @@ const setCountLba = (name: string) => {
   } as { [key: string]: number }
 
   return list[name.toLowerCase()]
+}
+
+const countVariance = () => {
+  let totalRealization = 0
+  let totalAmount = 0
+  for (const item of form.invoiceItem) {
+    totalRealization = totalRealization + Number(item.realizationAmount)
+    totalAmount = totalAmount + Number(item.itemAmount)
+  }
+  return totalAmount - totalRealization
+
 }
 
 const checkIsNonPo = () => {

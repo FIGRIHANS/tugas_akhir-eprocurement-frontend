@@ -365,7 +365,7 @@ const pushCasDummyData = () => {
     itemAmount: 3000000,
     itemText: "item text ",
     debitCredit: "D",
-    taxCode: "V1",
+    taxCode: "V0",
     vatAmount: 13.42,
     costCenter: "GN01010001",
     profitCenter: "",
