@@ -73,7 +73,7 @@
                 @click="verifyByPjap"
                 :disabled="isSyncLoading"
               >
-                Verify By PJAP
+                {{ isSyncLoading ? 'Verifying...' : 'Verify By PJAP' }}
               </UiButton>
             </div>
           </div>

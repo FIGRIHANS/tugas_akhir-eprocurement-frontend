@@ -377,14 +377,6 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     return response.data
   }
 
-  const syncManual = async (data: SyncManualPayload) => {
-    const response: ApiResponse<SyncManualResult> = await invoiceApi.post(
-      `/TaxSync/sync-manual`,
-      data,
-    )
-    return response.data
-  }
-
   const sync = async (data: SyncManualPayload) => {
     const response: any = await invoiceApi.post(`/TaxSync/sync-pjap`, data)
     return response.data?.result?.content
@@ -427,7 +419,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     getPaymentStatus,
     updatePaymentStatusNonPo,
     getPaymentStatusNonPo,
-    syncManual,
+
     sync,
   }
 })
