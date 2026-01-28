@@ -134,4 +134,22 @@ export interface formTypes extends documentFormTypes {
 
   status: number
   invoiceSource: string
+
+  // OCR Data
+  ocrVendorName?: string
+  vendorNPWP?: string
+  ocrCompanyName?: string
+  npwpCompany?: string
+  taxInvoiceNumber?: string
+  taxInvoiceDate?: string | Date
+  salesAmount?: number
+  otherDPP?: number
+  ocrVatAmount?: number
+  ocrVatbmAmount?: number
+  taxInvoiceStatus?: string
+  referenceNo?: string
+  createdBy?: string
+  createdUtcDate?: string
+  modifiedBy?: string
+  modifiedUtcDate?: string
 }
