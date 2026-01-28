@@ -1,13 +1,8 @@
 <template>
-  <div class="dashboard">
+  <div>
     <!-- Breadcrumb -->
-    <BreadcrumbView
-      :routes="[
-        { name: 'Supply Chain Analytic', to: '#' },
-        { name: 'Scorecard Performance', to: '#' },
-      ]"
-      title="Scorecard Performance"
-    />
+    <Breadcrumb title="Scorecard Performance" :routes="routes" />
+    <hr class="-mx-[24px] mb-[24px]" />
 
     <!-- Dashboard Grid -->
     <div class="dashboard-grid">
@@ -59,12 +54,7 @@
         <p class="card-subtitle">Spend Analysis by Department</p>
         <div class="chart-container">
           <div class="bar-chart">
-            <div
-              v-for="(value, index) in dailySalesData"
-              :key="index"
-              class="bar"
-              :style="{ blockSize: value + '%' }"
-            >
+            <div v-for="(value, index) in dailySalesData" :key="index" class="bar" :style="{ blockSize: value + '%' }">
               <span class="bar-label">{{ departmentLabels[index] }}</span>
             </div>
           </div>
@@ -98,12 +88,8 @@
         <div class="heroes-section">
           <p class="heroes-title">Today's Heroes</p>
           <div class="heroes-avatars">
-            <div
-              v-for="hero in todaysHeroes"
-              :key="hero.id"
-              class="hero-avatar"
-              :style="{ backgroundColor: hero.color }"
-            >
+            <div v-for="hero in todaysHeroes" :key="hero.id" class="hero-avatar"
+              :style="{ backgroundColor: hero.color }">
               {{ hero.initial }}
             </div>
             <div class="hero-avatar more">+12</div>
@@ -128,10 +114,8 @@
         </div>
         <div class="invoice-illustration">
           <div class="py-8 text-center illustration-bg">
-            <InvoiceManagerPict
-              class="w-200px"
-              style="inline-size: 200px; block-size: auto; display: block; margin: 0 auto"
-            />
+            <InvoiceManagerPict class="w-200px"
+              style="inline-size: 200px; block-size: auto; display: block; margin: 0 auto" />
           </div>
         </div>
         <div class="invoice-actions">
@@ -148,7 +132,8 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import BreadcrumbView from '@/components/BreadcrumbView.vue'
+import { type routeTypes } from '@/core/type/components/breadcrumb'
+import Breadcrumb from '@/components/BreadcrumbView.vue'
 import DualSegmentProgress from '../../components/scorecard/DualSegmentProgress.vue'
 import InvoiceManagerPict from './ScorecardPerformance/InvoiceManagerPict.vue'
 import TenderNegotiation from './ScorecardPerformance/TenderNegotiation.vue'
@@ -157,6 +142,13 @@ import RecentOrders from './ScorecardPerformance/ProcurementPlanning.vue'
 import ProductOrders from './ScorecardPerformance/ProcurementTransactions.vue'
 import type { Hero, RecentOrder, ProductOrder } from './types/ScorecardPerform'
 import { PackagePlus, Briefcase, MonitorSmartphone } from 'lucide-vue-next'
+
+const routes = ref<routeTypes[]>([
+  {
+    name: 'Analytic Dashboard',
+    to: '#',
+  },
+])
 
 // Sample data
 const dailySalesData = ref<number[]>([60, 80, 75, 70, 85, 90, 75])
