@@ -56,6 +56,7 @@
             :type="showPassword ? 'text' : 'password'"
             class="input w-full pr-10 border-gray-300 focus:border-primary px-4 py-3 rounded-lg border-2"
             placeholder="Password"
+            autocomplete="new-password"
             @keyup.enter="handleVerify"
           />
           <button
