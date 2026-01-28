@@ -131,7 +131,7 @@ const varianceResult = computed(() => {
 
 const setCountLba = (name: string) => {
   const list: Record<string, number> = {
-    'variance subtotal': countSubtotal(),
+    'variance subtotal': countVariance(),
     'vat amount': countVatAmount(),
     'wht amount': countWhtAmount(),
     'additional cost': countAdditionalCost(),
