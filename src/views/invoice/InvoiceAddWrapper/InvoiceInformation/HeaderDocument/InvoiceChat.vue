@@ -1,34 +1,35 @@
 <template>
     <div class="mx-auto">
-      <div
-        class="bg-white flex flex-col "
-      >
-        <!-- Header -->
-        <!-- <div
-          class="px-4 py-3 border-b font-semibold text-gray-700 flex items-center gap-2"
-        >
-          <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-          Dummy Chat (Demo)
-        </div> -->
-  
+      <div class="bg-white flex flex-col h-[500px] rounded-lg shadow">
         <!-- Chat Body -->
         <div
           ref="chatBody"
-          class="flex-1 p-4 space-y-3 overflow-y-auto bg-gray-50"
+          class="flex-1 p-4 space-y-4 overflow-y-auto bg-gray-50"
         >
           <div
             v-for="(msg, index) in messages"
             :key="index"
-            class="max-w-[75%] px-3 py-2 rounded-lg text-sm"
-            :class="
-              msg.sender === 'me'
-                ? 'ml-auto bg-primary text-white'
-                : 'bg-white border'
-            "
+            class="max-w-[75%]"
+            :class="msg.sender === 'me' ? 'ml-auto text-right' : ''"
           >
-            <div>{{ msg.text }}</div>
-            <div class="text-[10px] mt-1 opacity-70">
-              {{ msg.time }}
+            <!-- Nama + Tanggal -->
+            <div class="text-[11px] mb-1 text-gray-500">
+              {{ msg.senderName }} • {{ msg.date }}
+            </div>
+  
+            <!-- Bubble -->
+            <div
+              class="px-3 py-2 rounded-lg text-sm inline-block"
+              :class="
+                msg.sender === 'me'
+                  ? 'bg-primary text-white'
+                  : 'bg-white border'
+              "
+            >
+              <div>{{ msg.text }}</div>
+              <div class="text-[10px] mt-1 opacity-70">
+                {{ msg.time }}
+              </div>
             </div>
           </div>
         </div>
@@ -61,8 +62,10 @@
   ====================== */
   interface ChatMessage {
     sender: 'me' | 'other'
+    senderName: string
     text: string
     time: string
+    date: string
   }
   
   /* ======================
@@ -75,6 +78,22 @@
   const messages = ref<ChatMessage[]>(
     JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
   )
+  
+  /* ======================
+    HELPERS
+  ====================== */
+  const getCurrentTime = () =>
+    new Date().toLocaleTimeString('id-ID', {
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  
+  const getCurrentDate = () =>
+    new Date().toLocaleDateString('id-ID', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    })
   
   /* ======================
     METHODS
@@ -95,11 +114,10 @@
   
     messages.value.push({
       sender: 'me',
+      senderName: 'User A',
       text: input.value,
-      time: new Date().toLocaleTimeString('id-ID', {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
+      time: getCurrentTime(),
+      date: getCurrentDate(),
     })
   
     input.value = ''
@@ -112,11 +130,10 @@
   const simulateReply = (): void => {
     messages.value.push({
       sender: 'other',
+      senderName: 'User B',
       text: 'Pesan diterima 👍',
-      time: new Date().toLocaleTimeString('id-ID', {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
+      time: getCurrentTime(),
+      date: getCurrentDate(),
     })
   
     saveMessages()
@@ -141,11 +158,10 @@
     if (messages.value.length === 0) {
       messages.value.push({
         sender: 'other',
-        text: 'Halo 👋 Ada yang bisa dibantu?',
-        time: new Date().toLocaleTimeString('id-ID', {
-          hour: '2-digit',
-          minute: '2-digit',
-        }),
+        senderName: 'User B',
+        text: 'Halo 👋 Ini dummy chat',
+        time: getCurrentTime(),
+        date: getCurrentDate(),
       })
       saveMessages()
     }
@@ -156,7 +172,7 @@
   
   <style scoped>
   .bg-primary {
-    background-color: #1b84ff; /* Metronic primary */
+    background-color: #1b84ff;
   }
   .bg-primary-dark {
     background-color: #1667c0;
