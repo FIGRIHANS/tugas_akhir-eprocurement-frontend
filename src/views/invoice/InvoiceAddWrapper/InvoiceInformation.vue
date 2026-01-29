@@ -29,9 +29,9 @@ const checkNonPo = () => {
   return typeForm.value === 'nonpo'
 }
 
-const checkPoPib = () => {
-  return form.invoiceType === '902'
-}
+// const checkPoPib = () => {
+//   return form.invoiceType === '902'
+// }
 
 const checkPoWithoutDp = () => {
   return form.invoiceDp === '9011'

@@ -1,6 +1,6 @@
 export default [
   {
-    path: '/erp-integratione',
+    path: '/erp-integration',
     name: 'erp-integration',
     component: () => import('@/views/sytemIntegration/erpList.vue'),
   },
