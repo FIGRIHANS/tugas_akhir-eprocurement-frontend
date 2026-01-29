@@ -1,14 +1,12 @@
 <template>
   <BreadcrumbView
     :routes="[
-      { name: 'Workflow Configuration', to: '/workflow-configuration' },
-      { name: 'Add New Workflow', to: '#' },
+      { name: 'ERP Integration List', to: '/erp-integratione' },
+      { name: 'ERP Detail', to: '#' },
     ]"
-    title="Add New Workflow"
+    title="ERP Integration Detail"
   />
 
-  <!-- WF Header Configuration -->
-  <!-- Table -->
   <div class="card">
     <div class="card-header">
       <h3 class="card-title">ERP Header Configuration</h3>
@@ -31,6 +29,16 @@
                 required
                 class="flex-1"
               />
+            </div>
+          </div>
+
+          <!-- Company Code -->
+          <div class="px-2 py-1">
+            <div class="flex items-center gap-3">
+              <label class="text-sm font-medium text-gray-700 w-[140px] flex-shrink-0">
+                Company Code
+              </label>
+              <UiInput v-model="wfHeader.companyCode" placeholder="e.g. MF00" row class="flex-1" />
             </div>
           </div>
 
@@ -63,11 +71,11 @@
             </div>
           </div>
 
-          <!-- Client -->
+          <!-- System Client -->
           <div class="px-2 py-1">
             <div class="flex items-center gap-3">
               <label class="text-sm font-medium text-gray-700 w-[140px] flex-shrink-0">
-                Client
+                System Client
               </label>
               <UiSelect
                 v-model="wfHeader.client"
@@ -128,9 +136,6 @@
           </div>
         </div>
 
-        <!-- RIGHT COLUMN -->
-        <!-- RIGHT COLUMN -->
-        <!-- RIGHT COLUMN -->
         <!-- RIGHT COLUMN -->
         <div class="space-y-2">
           <!-- Connection Method -->
@@ -285,178 +290,19 @@
           </div>
         </div>
       </div>
-
-      <!-- Generate -->
-      <div class="flex justify-end mt-6 pr-4">
-        <UiButton type="button" class="btn btn-primary" @click="handleGenerateWFStep">
-          <span>Generate WF Step</span>
-          <UiIcon name="arrows-circle" variant="duotone" class="w-4 h-1" />
-        </UiButton>
-      </div>
     </div>
   </div>
 
-  <!-- Render kondisional berdasarkan apakah tombol “Generate WF Step” telah diklik -->
-  <!-- Workflow Config Components (Hidden for now as requested flow is different) -->
-  <!-- <div v-if="isGenerated">
-    <WorkflowProfileTable />
-    ...
-  </div> -->
-
-  <!-- Display Integration List -->
+  <!-- Table Section (Placeholder for now, or similar to Workflow Config) -->
   <div class="mt-6">
-    <div class="border border-gray-200 rounded-xl p-[24px]">
-      <div class="flex justify-between items-center gap-[8px]">
-        <h3 class="font-bold text-lg text-slate-800">Integration List</h3>
-        <div class="flex gap-3 items-center">
-          <UiInputSearch v-model="search" placeholder="Search..." />
-          <button class="dropdown-toggle btn btn-primary">
-            <i class="ki-filled ki-filter"></i>
-            Filter
-          </button>
-          <button class="btn btn-primary">
-            <i class="ki-duotone ki-plus-circle"></i>
-            Add New
-          </button>
-        </div>
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">ERP Details Table</h3>
       </div>
-      <div class="overflow-x-auto integration__table mt-[24px]">
-        <table class="table align-middle text-gray-700 font-medium text-sm">
-          <thead>
-            <tr>
-              <th
-                class="integration__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"
-              ></th>
-              <th class="integration__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500">
-                Code
-              </th>
-              <th class="integration__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500">
-                Client
-              </th>
-              <th
-                class="integration__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500 integration__field-base--long"
-              >
-                Process Integration
-              </th>
-              <th class="integration__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500">
-                Services
-              </th>
-              <th class="integration__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500">
-                Type
-              </th>
-              <th class="integration__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500">
-                Source
-              </th>
-              <th class="integration__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500">
-                Destination
-              </th>
-              <th class="integration__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500">
-                Transaction Code
-              </th>
-              <th class="integration__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500">
-                Connection
-              </th>
-              <th
-                class="integration__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500 integration__field-base--tech"
-              >
-                Technical Object
-              </th>
-              <th class="integration__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500">
-                Field Mapping
-              </th>
-              <th class="integration__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500">
-                Integration Status
-              </th>
-              <th class="integration__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500">
-                Connection Test
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="(item, index) in integrationList"
-              :key="index"
-              class="integration__field-items hover:bg-blue-50"
-            >
-              <td class="flex items-center gap-[24px]">
-                <button
-                  class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]"
-                  title="View Detail"
-                >
-                  <i class="ki-filled ki-eye !text-lg"></i>
-                </button>
-                <button
-                  class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]"
-                  title="Field Mapping"
-                >
-                  <i class="ki-duotone ki-data !text-lg"></i>
-                </button>
-              </td>
-              <td class="whitespace-nowrap font-medium">
-                {{ item.code }}
-              </td>
-              <td class="whitespace-nowrap">{{ item.client }}</td>
-              <td class="whitespace-nowrap">{{ item.processIntegration }}</td>
-              <td class="whitespace-nowrap">{{ item.services }}</td>
-              <td class="text-center">
-                <span
-                  class="badge badge-outline"
-                  :class="
-                    item.type === 'Outbound'
-                      ? 'bg-blue-50 text-blue-600'
-                      : 'bg-orange-50 text-orange-600'
-                  "
-                >
-                  {{ item.type }}
-                </span>
-              </td>
-              <td class="whitespace-nowrap font-medium">{{ item.source }}</td>
-              <td class="whitespace-nowrap font-medium">{{ item.destination }}</td>
-              <td class="whitespace-nowrap">{{ item.transactionCode }}</td>
-              <td class="whitespace-nowrap">{{ item.connection }}</td>
-              <td class="whitespace-nowrap font-mono text-xs">{{ item.technicalObject }}</td>
-              <td class="text-center">
-                <span
-                  class="badge badge-outline"
-                  :class="
-                    item.fieldMapping === 'Active'
-                      ? 'bg-green-50 text-green-600'
-                      : 'bg-gray-100 text-gray-500'
-                  "
-                >
-                  {{ item.fieldMapping }}
-                </span>
-              </td>
-              <td class="text-center">
-                <span
-                  class="badge badge-outline"
-                  :class="
-                    item.integrationStatus === 'Active'
-                      ? 'bg-green-50 text-green-600'
-                      : 'bg-gray-100 text-gray-500'
-                  "
-                >
-                  {{ item.integrationStatus }}
-                </span>
-              </td>
-              <td class="text-center">
-                <span
-                  class="badge badge-outline"
-                  :class="
-                    item.connectionTest === 'Success'
-                      ? 'bg-emerald-50 text-emerald-600'
-                      : 'bg-red-50 text-red-600'
-                  "
-                >
-                  {{ item.connectionTest }}
-                </span>
-              </td>
-            </tr>
-            <tr v-if="integrationList.length === 0">
-              <td colspan="14" class="text-center py-8 text-gray-500">No data found</td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="card-body">
+        <div class="text-center text-gray-500 py-8">
+          Details will appear here based on configuration.
+        </div>
       </div>
     </div>
   </div>
@@ -465,21 +311,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import BreadcrumbView from '@/components/BreadcrumbView.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import UiRadio from '@/components/ui/atoms/radio/UiRadio.vue'
-import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
+
 // Reactive state
+// const bracketAmount = ref<'yes' | 'no' | undefined>(undefined)
+// const showBracketModal = ref(false)
+// const showProfileModal = ref(false)
+// const showAuthModal = ref(false)
+
 const showPassword = ref(false)
-const search = ref('')
 
 // Interface for WF Header
 interface WfHeader {
   connectionCode: string
+  companyCode: string
   description: string
   erp: string | undefined
   client: string | undefined
@@ -497,6 +349,7 @@ interface WfHeader {
 
 const wfHeader = ref<WfHeader>({
   connectionCode: '',
+  companyCode: '',
   description: '',
   erp: undefined,
   client: undefined,
@@ -540,137 +393,84 @@ const processGroupOptions = [
   { text: 'Warehouse Management', value: 'Warehouse Management' },
 ]
 
-// Handlers for AddNewTable actions
-const handleGenerateWFStep = () => {
-  integrationList.value = dummyIntegrationList
-}
+// Handlers for modals (empty for now or log)
+// const handleBracketSubmit = (formData: BracketForm) => {
+//   console.log('Bracket submitted', formData)
+//   showBracketModal.value = false
+// }
+// const handleProfileSubmit = (formData: ProfileForm) => {
+//   console.log('Profile submitted', formData)
+//   showProfileModal.value = false
+// }
+// const handleAuthSubmit = (formData: AuthForm) => {
+//   console.log('Auth submitted', formData)
+//   showAuthModal.value = false
+// }
 
-const dummyIntegrationList = [
-  {
-    code: 'IV01',
-    client: 'PRD',
-    processIntegration: 'Invoice Posting With PO',
-    services: 'Transaction',
-    type: 'Outbound',
-    source: 'EVOQ',
-    destination: 'SAP',
-    transactionCode: 'MIRO',
-    connection: 'RFC',
-    technicalObject: 'ZFM_INVPO_MIRO',
-    fieldMapping: 'Active',
-    integrationStatus: 'Active',
-    connectionTest: 'Success',
-  },
-  {
-    code: 'IV02',
-    client: 'PRD',
-    processIntegration: 'Invoice Without PO GL Master',
-    services: 'Master Data',
-    type: 'Inbound',
-    source: 'SAP',
-    destination: 'EVOQ',
-    transactionCode: 'FS00',
-    connection: 'RFC',
-    technicalObject: 'ZFM_INVNONPO_GLMASTER',
-    fieldMapping: 'Active',
-    integrationStatus: 'Active',
-    connectionTest: 'Success',
-  },
-  {
-    code: 'IV03',
-    client: 'PRD',
-    processIntegration: 'Invoice Posting Without PO',
-    services: 'Transaction',
-    type: 'Outbound',
-    source: 'EVOQ',
-    destination: 'SAP',
-    transactionCode: 'FB60',
-    connection: 'RFC',
-    technicalObject: 'ZFM_INVPO_FB60',
-    fieldMapping: 'Active',
-    integrationStatus: 'Active',
-    connectionTest: 'Success',
-  },
-  {
-    code: 'IV04',
-    client: 'PRD',
-    processIntegration: 'GR Posted for Invoice',
-    services: 'Transaction',
-    type: 'Outbound',
-    source: 'EVOQ',
-    destination: 'SAP',
-    transactionCode: 'MB51',
-    connection: 'RFC',
-    technicalObject: 'ZFM_MATDOC_GRLIST',
-    fieldMapping: 'Active',
-    integrationStatus: 'Active',
-    connectionTest: 'Success',
-  },
-  {
-    code: 'IV05',
-    client: 'PRD',
-    processIntegration: 'Invoice With PO Reversal',
-    services: 'Transaction',
-    type: 'Outbound',
-    source: 'EVOQ',
-    destination: 'SAP',
-    transactionCode: 'MR8M',
-    connection: 'RFC',
-    technicalObject: 'ZFM_INVPO_REVERSAL',
-    fieldMapping: 'Not Active',
-    integrationStatus: 'Not Active',
-    connectionTest: 'Not Active',
-  },
-  {
-    code: 'IV06',
-    client: 'PRD',
-    processIntegration: 'Payment Terms',
-    services: 'Master Data',
-    type: 'Inbound',
-    source: 'SAP',
-    destination: 'EVOQ',
-    transactionCode: 'OBB8',
-    connection: 'RFC',
-    technicalObject: 'ZFM_INVNONPO_GLMASTER',
-    fieldMapping: 'Active',
-    integrationStatus: 'Active',
-    connectionTest: 'Success',
-  },
-  {
-    code: 'IV07',
-    client: 'PRD',
-    processIntegration: 'Payment Method',
-    services: 'Master Data',
-    type: 'Inbound',
-    source: 'SAP',
-    destination: 'EVOQ',
-    transactionCode: 'OBB8',
-    connection: 'RFC',
-    technicalObject: 'ZFM_INVNONPO_GLMASTER',
-    fieldMapping: 'Active',
-    integrationStatus: 'Active',
-    connectionTest: 'Success',
-  },
-  {
-    code: 'IV08',
-    client: 'PRD',
-    processIntegration: 'Employee Master Role',
-    services: 'Master Data',
-    type: 'Inbound',
-    source: 'SAP',
-    destination: 'EVOQ',
-    transactionCode: 'PPOME',
-    connection: 'RFC',
-    technicalObject: 'ZFM_EMPLOYEE_ORGSTRUCTURE',
-    fieldMapping: 'Active',
-    integrationStatus: 'Active',
-    connectionTest: 'Success',
-  },
-]
+// On Mounted to fetch data
+onMounted(() => {
+  const route = useRoute()
+  const id = route.params.id as string
 
-const integrationList = ref([])
+  // Mock data fetching based on ID
+  console.log('Fetching details for:', id)
+
+  // define mock data
+  const mockDB: Record<string, any> = {
+    EVOSAP01: {
+      connectionCode: 'EVOSAP01',
+      companyCode: 'MF00',
+      description: 'SAP PRD Connection MF00',
+      erp: 'sap_hana_2020',
+      client: 'PRD',
+      clientId: '120',
+      status: 'Active',
+      processGroup: 'Invoice Management',
+      connectionMethod: 'RFC',
+      connectorDriver: '.net connector Versi XX121',
+      destinationName: 'IDES-NEW',
+      appServerHost: '192.168.5.50',
+      user: 'TMS_EVOQ',
+      password: 'Teamwork2026!!!',
+      language: 'EN',
+    },
+    EVOSAP02: {
+      connectionCode: 'EVOSAP02',
+      companyCode: 'MF00',
+      description: 'SAP PRD Connection MF00',
+      erp: 'sap_hana_2020',
+      client: 'PRD',
+      clientId: '120',
+      status: 'Active',
+      processGroup: 'Invoice Management',
+      connectionMethod: 'RFC',
+      connectorDriver: '.net connector Versi XX121',
+      destinationName: 'IDES-NEW',
+      appServerHost: '192.168.5.50',
+      user: 'TMS_EVOQ',
+      password: 'Teamwork2026!!!',
+      language: 'EN',
+    },
+  }
+
+  const data = mockDB[id] || {
+    connectionCode: id,
+    companyCode: '',
+    description: '',
+    erp: undefined,
+    client: undefined,
+    clientId: '',
+    status: undefined,
+    processGroup: undefined,
+    connectionMethod: 'RFC',
+    connectorDriver: '',
+    destinationName: '',
+    appServerHost: '',
+    user: '',
+    password: '',
+    language: '',
+  }
+
+  wfHeader.value = data
+})
 </script>
-
-<style lang="scss" scoped>
-@use './styles/integration-list.scss';
-</style>
