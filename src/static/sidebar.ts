@@ -300,4 +300,16 @@ export default [
     to: 'workflow-configuration',
     child: [],
   },
+  {
+    id: 'system-integration',
+    title: 'System Integration',
+    icon: 'message-programming',
+    child: [
+      {
+        id: 'erp-integration',
+        title: 'ERP Integration List',
+        to: 'erp-integration',
+      },
+    ]
+  }
 ]

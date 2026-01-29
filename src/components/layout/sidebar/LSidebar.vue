@@ -263,7 +263,8 @@ const filteredSidebarMenu = computed(() => {
             menu.id === 'digital-receiving-confirmation' ||
             menu.id === 'tax-reconciliation' ||
             menu.id === 'userManagement' ||
-            menu.id === 'workflow-configuration'
+            menu.id === 'workflow-configuration' ||
+            menu.id === 'system-integration'
             
         )
         .map((menu) => {
@@ -291,7 +292,8 @@ const filteredSidebarMenu = computed(() => {
                     child.id === 'master-profile' ||
                     child.id === 'master-role' ||
                     child.id === 'master-employee' ||
-                    child.id === 'report-user-authorization' 
+                    child.id === 'report-user-authorization' ||
+                    child.id === 'erp-integration' 
                 )
               : [],
           }

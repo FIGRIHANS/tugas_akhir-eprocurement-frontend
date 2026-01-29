@@ -20,6 +20,7 @@ import analyticDashboard from './modules/analyticDashboard'
 import digitalReceiving from './modules/digitalReceiving'
 import deliveryNotes from './modules/deliveryNotes'
 import taxReconciliation from './modules/taxReconciliation'
+import systemIntegration from './modules/systemIntegration'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -52,6 +53,7 @@ const router = createRouter({
         ...digitalReceiving,
         ...deliveryNotes,
         ...taxReconciliation,
+        ...systemIntegration
         // {
         //   path: '/health-check',
         //   name: 'health-check',
