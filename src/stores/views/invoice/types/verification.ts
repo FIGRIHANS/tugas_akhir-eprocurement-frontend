@@ -113,6 +113,7 @@ interface ParamsSubmissionHeader {
   pettyCashStartDate: string
   pettyCashEndDate: string
   npwpReportingName: string
+  casNoCode: string
 }
 
 interface ParamsSubmissionVendor {
@@ -487,6 +488,7 @@ export interface DetailInvoiceEditTypes {
   bankAccountNo: string
   bankCountryCode: string
   casDateReceipt: string
+  casNoCode?: string
   proposalAmount: number
   picFinance: string
   cashJournalCode: string
