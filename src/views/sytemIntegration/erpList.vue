@@ -14,6 +14,80 @@
           <h2 class="text-lg font-bold text-slate-800">ERP Integration List</h2>
           <div class="flex gap-2">
             <UiInputSearch v-model="search" placeholder="Search Role" />
+            <!-- Filter Dropdown -->
+            <div class="dropdown" data-dropdown="true" data-dropdown-trigger="click">
+              <button class="dropdown-toggle btn btn-primary">
+                <i class="ki-filled ki-filter"></i>
+                Filter
+              </button>
+              <div class="dropdown-content w-full max-w-[305px] p-[16px]">
+                <p class="text-lg font-semibold mb-[8px]">Filter</p>
+                <div class="flex flex-col gap-[24px] py-[16px]">
+                  <div class="relative">
+                    <label
+                      class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
+                      >Company Code</label
+                    >
+                    <select v-model="filters.companyCode" class="select" name="select">
+                      <option value="">All</option>
+                      <option v-for="item of companyOptions" :key="item.value" :value="item.value">
+                        {{ item.text }}
+                      </option>
+                    </select>
+                  </div>
+                  <div class="relative">
+                    <label
+                      class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
+                      >ERP</label
+                    >
+                    <select v-model="filters.erp" class="select" name="select">
+                      <option value="">All</option>
+                      <option v-for="item of erpOptions" :key="item.value" :value="item.value">
+                        {{ item.text }}
+                      </option>
+                    </select>
+                  </div>
+                  <div class="relative">
+                    <label
+                      class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
+                      >Process Group</label
+                    >
+                    <select v-model="filters.processGroup" class="select" name="select">
+                      <option value="">All</option>
+                      <option
+                        v-for="item of processGroupOptions"
+                        :key="item.value"
+                        :value="item.value"
+                      >
+                        {{ item.text }}
+                      </option>
+                    </select>
+                  </div>
+                  <div class="relative">
+                    <label
+                      class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
+                      >Status</label
+                    >
+                    <select v-model="filters.status" class="select" name="select">
+                      <option value="">All</option>
+                      <option v-for="item of statusOptions" :key="item.value" :value="item.value">
+                        {{ item.text }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+                <div class="flex align-center justify-between gap-[16px]">
+                  <button class="btn btn-outline btn-primary btn-lg" @click="resetFilters">
+                    <i class="ki-duotone ki-arrows-circle"></i>
+                    Reset
+                  </button>
+                  <button class="btn btn-primary btn-lg" data-dropdown-dismiss="true">
+                    <i class="ki-filled ki-check-circle"></i>
+                    Apply
+                  </button>
+                </div>
+              </div>
+            </div>
             <UiButton variant="primary" @click="addErp()">
               <UiIcon variant="duotone" name="plus" />
               Add ERP
@@ -21,88 +95,113 @@
           </div>
         </div>
       </div>
+      <div class="card-body integration">
+        <div>
+          <div v-if="userRoleStore.loading" class="text-center py-4">Loading roles...</div>
+          <div v-else-if="userRoleStore.error" class="text-center py-4 text-red-500">
+            Error: {{ userRoleStore.error }}
+          </div>
 
-      <div class="card-body">
-        <div v-if="userRoleStore.loading" class="text-center py-4">Loading roles...</div>
-        <div v-else-if="userRoleStore.error" class="text-center py-4 text-red-500">
-          Error: {{ userRoleStore.error }}
-        </div>
-
-        <table v-else-if="filteredRoles.length > 0" class="table align-middle text-gray-700 border-gray-100">
-          <thead>
-            <tr>
-              <th></th>
-              <th class="text-nowrap" v-for="item in Columns" :key="item.name">{{ item.name }}</th>
-              <!-- <th class="text-nowrap">Company Code</th>
-              <th class="text-nowrap">System Client</th>
-              <th class="text-nowrap">System Client</th>
-              <th class="text-nowrap">System Client</th>
-              <th class="text-nowrap">System Client</th>
-              <th class="text-nowrap">System Client</th>
-              <th class="text-nowrap">System Client</th>
-              <th class="text-nowrap">System Client</th> -->
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="role in erpList" :key="role.companyCode">
-              <td>
-                <div class="flex items-center space-x-3">
-                  <div
-                    class="dropdown"
-                    data-dropdown="true"
-                    data-dropdown-trigger="click"
-                    data-dropdown-placement="bottom-end"
+          <div
+            v-else-if="filteredRoles.length > 0"
+            class="integration__table border border-gray-200 rounded-xl overflow-x-auto"
+          >
+            <table class="table align-middle text-gray-700 font-medium text-sm min-w-[1200px]">
+              <thead>
+                <tr>
+                  <th
+                    class="integration__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"
+                  ></th>
+                  <th
+                    class="text-nowrap integration__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"
+                    v-for="item in Columns"
+                    :key="item.name"
                   >
-                    <UiButton
-                      class="dropdown-toggle"
-                      variant="light"
-                      :outline="true"
-                      :icon="true"
-                      size="sm"
-                    >
-                      <UiIcon name="dots-vertical" />
-                    </UiButton>
-                    <div class="dropdown-content w-auto p-4 space-y-2">
-                      <div class="flex flex-col space-y-2">
+                    {{ item.name }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="role in filteredErpList"
+                  :key="role.connectionCode"
+                  class="integration__field-items hover:bg-blue-50"
+                >
+                  <td>
+                    <div class="flex items-center space-x-3">
+                      <div
+                        class="dropdown"
+                        data-dropdown="true"
+                        data-dropdown-trigger="click"
+                        data-dropdown-placement="bottom-end"
+                      >
                         <UiButton
+                          class="dropdown-toggle"
                           variant="light"
-                          class="border-none"
                           :outline="true"
-                          size="md"
+                          :icon="true"
+                          size="sm"
                         >
-                          <UiIcon name="pencil" class="mr-2" />
-                          Edit Role
+                          <UiIcon name="dots-vertical" />
                         </UiButton>
-                        <UiButton
-                          variant="light"
-                          class="border-none text-red-500 hover:text-red-600"
-                          :outline="true"
-                          size="md"
-                        >
-                          <UiIcon name="trash" class="mr-2" />
-                          Delete Role
-                        </UiButton>
+                        <div class="dropdown-content w-auto p-4 space-y-2">
+                          <div class="flex flex-col space-y-2">
+                            <UiButton
+                              variant="light"
+                              class="border-none"
+                              :outline="true"
+                              size="md"
+                              @click="viewDetail(role.connectionCode)"
+                            >
+                              <UiIcon name="eye" class="mr-2" />
+                              View Detail
+                            </UiButton>
+                            <UiButton variant="light" class="border-none" :outline="true" size="md">
+                              <UiIcon name="pencil" class="mr-2" />
+                              Edit Role
+                            </UiButton>
+                            <UiButton
+                              variant="light"
+                              class="border-none text-red-500 hover:text-red-600"
+                              :outline="true"
+                              size="md"
+                            >
+                              <UiIcon name="trash" class="mr-2" />
+                              Delete Role
+                            </UiButton>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              </td>
-              <td>{{ role.connectionCode }}</td>
-              <td>{{ role.companyCode }}</td>
-              <td>{{ role.systemClient }}</td>
-              <td>{{ role.erp }}</td>
-              <td>{{ role.status }}</td>
-              <td>{{ role.totalIntegration }}</td>
-              <td>{{ role.inbound }}</td>
-              <td>{{ role.outBound }}</td>
-              <td>{{ new Date(role.lastChange).toLocaleString() }}</td>
-            </tr>
-          </tbody>
-        </table>
+                  </td>
+                  <td>
+                    <span class="font-medium">{{ role.connectionCode }}</span>
+                  </td>
+                  <td>{{ role.companyCode }}</td>
+                  <td>{{ role.companyName }}</td>
+                  <td>{{ role.systemClient }}</td>
+                  <td>{{ role.erp }}</td>
+                  <td>{{ role.processGroup }}</td>
+                  <td>
+                    <span
+                      class="badge badge-outline border-transparent bg-green-50 text-green-600"
+                      >{{ role.status }}</span
+                    >
+                  </td>
+                  <td class="text-center">{{ role.totalIntegration }}</td>
+                  <td class="text-center">{{ role.inbound }}</td>
+                  <td class="text-center">{{ role.outBound }}</td>
+                  <td>{{ role.lastChange }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
 
-        <div v-else class="text-center py-4">No roles found.</div>
+          <div v-else class="text-center py-4">No roles found.</div>
+        </div>
 
         <LPagination
+          class="mt-4"
           :totalItems="userRoleStore.roles.total"
           :pageSize="userRoleStore.roles.pageSize"
           :currentPage="userRoleStore.roles.page"
@@ -223,59 +322,106 @@ const rolePayload = reactive<{
   isActive: true,
 })
 
+const filters = reactive({
+  companyCode: undefined,
+  erp: undefined,
+  processGroup: undefined,
+  status: undefined,
+})
+
+const companyOptions = [
+  { text: 'MF00', value: 'MF00' },
+  { text: 'MF01', value: 'MF01' },
+]
+
+const erpOptions = [
+  { text: 'SAP HANA 2020', value: 'SAP HANA 2020' },
+  { text: 'SAP HANA 2023', value: 'SAP HANA 2023' },
+  { text: 'SAP ECC 6 EHP 7', value: 'SAP ECC 6 EHP 7' },
+  { text: 'Odoo 17', value: 'Odoo 17' },
+]
+
+const processGroupOptions = [
+  { text: 'Invoice Management', value: 'Invoice Management' },
+  { text: 'Vendor Management', value: 'Vendor Management' },
+  { text: 'Procurement Management', value: 'Procurement Management' },
+]
+
+const statusOptions = [
+  { text: 'Active', value: 'Active' },
+  { text: 'Inactive', value: 'Inactive' },
+]
+
+const resetFilters = () => {
+  filters.companyCode = undefined
+  filters.erp = undefined
+  filters.processGroup = undefined
+  filters.status = undefined
+}
+
 const Columns = ref([
-    {
-        name: 'Connection Code'
-    },
-    {
-        name: 'Company Code'
-    },
-    {
-        name: 'System Client'
-    },
-    {
-        name: 'ERP'
-    },
-    {
-        name: 'Status'
-    },
-    {
-        name: 'Total Integration'
-    },
-    {
-        name: 'Inbound'
-    },
-    {
-        name: 'Outbound'
-    },
-    {
-        name: 'Last Changed'
-    },
+  {
+    name: 'Connection Code',
+  },
+  {
+    name: 'Company Code',
+  },
+  {
+    name: 'Company Name',
+  },
+  {
+    name: 'System Client',
+  },
+  {
+    name: 'ERP',
+  },
+  {
+    name: 'Process Group',
+  },
+  {
+    name: 'Status',
+  },
+  {
+    name: 'Total Integration',
+  },
+  {
+    name: 'Inbound',
+  },
+  {
+    name: 'Outbound',
+  },
+  {
+    name: 'Last Changed',
+  },
 ])
 
 const erpList = ref([
-    {
-        connectionCode: 'EVOSAP01',
-        companyCode: 'MF00',
-        systemClient: 'PRD',
-        erp: 'SAP',
-        status: 'Active',
-        totalIntegration: 10,
-        inbound: 5,
-        outBound: 3,
-        lastChange: '03-06-2025'
-    },
-    {
-        connectionCode: 'EVOSAP02',
-        companyCode: 'MF00',
-        systemClient: 'PRD',
-        erp: 'SAP',
-        status: 'Active',
-        totalIntegration: 10,
-        inbound: 5,
-        outBound: 3,
-        lastChange: '03-06-2025'
-    },
+  {
+    connectionCode: 'EVOSAP01',
+    companyCode: 'MF00',
+    companyName: 'Petrosea',
+    systemClient: 'PRD',
+    erp: 'SAP',
+    processGroup: 'Invoice Management',
+    status: 'Active',
+    totalIntegration: 10,
+    inbound: 5,
+    outBound: 3,
+    lastChange: '03/06/2025 11/10/15',
+  },
+  {
+    connectionCode: 'EVOSAP02',
+    companyCode: 'MF00',
+    companyName: 'Petrosea',
+    systemClient: 'PRD',
+    erp: 'SAP',
+    processGroup: 'Vendor Management',
+    status: 'Active',
+    totalIntegration: 10,
+    inbound: 5,
+    outBound: 3,
+    lastChange: '03/06/2025 11/10/15',
+  },
 ])
 
 const roleNameError = ref('')
@@ -288,6 +434,37 @@ const filteredRoles = computed(() => {
   const q = search.value.toLowerCase().trim()
   if (!q) return items
   return items.filter((r) => r.roleName.toLowerCase().includes(q))
+})
+
+const filteredErpList = computed(() => {
+  let list = erpList.value
+
+  // Global search
+  const q = search.value.toLowerCase().trim()
+  if (q) {
+    list = list.filter(
+      (item) =>
+        item.connectionCode.toLowerCase().includes(q) ||
+        item.companyName.toLowerCase().includes(q) ||
+        item.processGroup.toLowerCase().includes(q),
+    )
+  }
+
+  // Column filters
+  if (filters.companyCode) {
+    list = list.filter((item) => item.companyCode === filters.companyCode)
+  }
+  if (filters.erp) {
+    list = list.filter((item) => item.erp === filters.erp)
+  }
+  if (filters.processGroup) {
+    list = list.filter((item) => item.processGroup === filters.processGroup)
+  }
+  if (filters.status) {
+    list = list.filter((item) => item.status === filters.status)
+  }
+
+  return list
 })
 
 // const closeAnyOpenDropdown = () => {
@@ -303,9 +480,16 @@ const resetRolePayload = () => {
 }
 
 const addErp = () => {
-    router.push({
-      name: 'add-erp',
-    })
+  router.push({
+    name: 'add-erp',
+  })
+}
+
+const viewDetail = (id: string) => {
+  router.push({
+    name: 'erp-integration-detail',
+    params: { id },
+  })
 }
 
 // const openRoleModal = (role?: IRole) => {
@@ -392,4 +576,6 @@ onMounted(() => {
 })
 </script>
 
-<style scoped></style>
+<style lang="scss" scoped>
+@use '../workflowConfiguration/styles/integration-list.scss';
+</style>

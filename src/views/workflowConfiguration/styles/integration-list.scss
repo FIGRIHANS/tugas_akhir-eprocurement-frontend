@@ -1,0 +1,33 @@
+:deep() {
+  .integration {
+    &__table {
+      padding-bottom: 4px;
+
+      &::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+        background: transparent;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        width: 10px;
+        height: 10px;
+        border-radius: 15px;
+        background-color: #dbdfe9;
+      }
+    }
+
+    &__field-base {
+      min-width: 100px;
+      white-space: nowrap;
+
+      &--long {
+        min-width: 200px;
+      }
+
+      &--tech {
+        min-width: 220px;
+      }
+    }
+  }
+}
