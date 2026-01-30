@@ -1,3 +1,7 @@
+// Helper: apakah semua filter kosong?
+const isAllFilterEmpty = computed(() => {
+  return !companyCode.value && !vendor.value && !poType.value && !invoiceType.value && !departement.value && (!date.value || (!date.value[0] && !date.value[1]))
+})
 <template>
   <div>
     <Breadcrumb title="Invoice Analytic" :routes="routes" />
@@ -7,52 +11,130 @@
     <div class="header-section bg-white border rounded-lg p-4 mb-6">
       <div class="filter-section">
         <div class="filter-group">
-          <label class="text-sm text-gray-600">Entity</label>
-          <select v-model="companyCode" class="select">
-            <option v-for="item of companyCodeList" :key="item.code" :value="item.code">
-              {{ item.name }}
-            </option>
-          </select>
+          <label class="text-sm text-gray-600">Company Code</label>
+          <div class="filter-select-wrapper">
+            <v-select
+              v-model="companyCode"
+              :options="companyCodeList"
+              label="name"
+              :reduce="(option: any) => option.code"
+              placeholder="Select"
+              :clearable="true"
+              class="filter-vselect"
+            >
+              <template #open-indicator>
+                <i class="ki-outline ki-down text-gray-500"></i>
+              </template>
+              <template #deselect="{ deselect }">
+                <svg @click="deselect" class="cursor-pointer" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#6b7280" stroke-width="1" stroke-linecap="round"><path d="M2 2L12 12M12 2L2 12"/></svg>
+              </template>
+            </v-select>
+          </div>
         </div>
         <div class="filter-group">
           <label class="text-sm text-gray-600">Vendor</label>
-          <select v-model="vendor" class="select">
-            <option v-for="item of vendorList" :key="item.vendorId" :value="item.vendorCode">
-              {{ item.vendorName }}
-            </option>
-          </select>
+          <div class="filter-select-wrapper">
+            <v-select
+              v-model="vendor"
+              :options="vendorList"
+              label="vendorName"
+              :reduce="(option: any) => option.vendorCode"
+              placeholder="Select"
+              :clearable="true"
+              class="filter-vselect"
+            >
+              <template #open-indicator>
+                <i class="ki-outline ki-down text-gray-500"></i>
+              </template>
+              <template #deselect="{ deselect }">
+                <svg @click="deselect" class="cursor-pointer" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#6b7280" stroke-width="1" stroke-linecap="round"><path d="M2 2L12 12M12 2L2 12"/></svg>
+              </template>
+            </v-select>
+          </div>
         </div>
         <div class="filter-group">
           <label class="text-sm text-gray-600">Po Type</label>
-          <select v-model="poType" class="select">
-            <option v-for="item of poList" :key="item.code" :value="item.code">
-              {{ item.name }}
-            </option>
-          </select>
+          <div class="filter-select-wrapper">
+            <v-select
+              v-model="poType"
+              :options="poList"
+              label="name"
+              :reduce="(option: any) => option.code"
+              placeholder="Select"
+              :clearable="true"
+              class="filter-vselect"
+            >
+              <template #open-indicator>
+                <i class="ki-outline ki-down text-gray-500"></i>
+              </template>
+              <template #deselect="{ deselect }">
+                <svg @click="deselect" class="cursor-pointer" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#6b7280" stroke-width="1" stroke-linecap="round"><path d="M2 2L12 12M12 2L2 12"/></svg>
+              </template>
+            </v-select>
+          </div>
         </div>
         <div class="filter-group">
           <label class="text-sm text-gray-600">Invoice Type</label>
-          <select v-model="invoiceType" class="select">
-            <option v-for="item of invoiceTypeList" :key="item.code" :value="item.code">
-              {{ item.name }}
-            </option>
-          </select>
+          <div class="filter-select-wrapper">
+            <v-select
+              v-model="invoiceType"
+              :options="invoiceTypeList"
+              label="name"
+              :reduce="(option: any) => option.code"
+              placeholder="Select"
+              :clearable="true"
+              class="filter-vselect"
+            >
+              <template #open-indicator>
+                <i class="ki-outline ki-down text-gray-500"></i>
+              </template>
+              <template #deselect="{ deselect }">
+                <svg @click="deselect" class="cursor-pointer" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#6b7280" stroke-width="1" stroke-linecap="round"><path d="M2 2L12 12M12 2L2 12"/></svg>
+              </template>
+            </v-select>
+          </div>
         </div>
         <div class="filter-group" v-if="invoiceType === '901'">
           <label class="text-sm text-gray-600">Dp Option</label>
-          <select v-model="dpOption" class="select">
-            <option v-for="item of dpOptionList" :key="item.code" :value="item.code">
-              {{ item.name }}
-            </option>
-          </select>
+          <div class="filter-select-wrapper">
+            <v-select
+              v-model="dpOption"
+              :options="dpOptionList"
+              label="name"
+              :reduce="(option: any) => option.code"
+              placeholder="Select"
+              :clearable="true"
+              class="filter-vselect"
+            >
+              <template #open-indicator>
+                <i class="ki-outline ki-down text-gray-500"></i>
+              </template>
+              <template #deselect="{ deselect }">
+                <svg @click="deselect" class="cursor-pointer" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#6b7280" stroke-width="1" stroke-linecap="round"><path d="M2 2L12 12M12 2L2 12"/></svg>
+              </template>
+            </v-select>
+          </div>
         </div>
         <div class="filter-group">
           <label class="text-sm text-gray-600">Department</label>
-          <select v-model="departement" class="select">
-            <option v-for="item of constCenterList" :key="item.code" :value="item.code">
-              {{ item.name }}
-            </option>
-          </select>
+          <div class="filter-select-wrapper">
+            <v-select
+              v-model="departement"
+              :options="constCenterList"
+              label="name"
+              :reduce="(option: any) => option.code"
+              placeholder="Select"
+              :clearable="true"
+              class="filter-vselect"
+            >
+              <template #open-indicator>
+                <i class="ki-outline ki-down text-gray-500"></i>
+              </template>
+              <template #deselect="{ deselect }">
+                <svg @click="deselect" class="cursor-pointer" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#6b7280" stroke-width="1" stroke-linecap="round"><path d="M2 2L12 12M12 2L2 12"/></svg>
+              </template>
+            </v-select>
+          </div>
         </div>
         <div class="filter-group">
           <label class="text-sm text-gray-600">Date Range</label>
@@ -65,75 +147,81 @@
     <div class="analytics-metrics-container">
       <!-- Main Grid -->
       <div class="grid grid-cols-12 gap-6">
-        <!-- Row 1: AP Aging, Total Outstanding, Upcoming Payments -->
+        <!-- Row 1: AP Aging, Total Outstanding, Invoice Status Monitoring -->
         <div class="col-span-5 bg-white border rounded-lg p-4">
           <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-semibold">Accounts Payable Aging</h3>
           </div>
-          <div class="mini-trend-chart" style="block-size: 300px">
-            <div class="trend-bars">
-              <div v-for="(item, idx) in filteredApAgingData" :key="`aging-${idx}`" class="trend-bar">
-                <div class="trend-bar-base" :style="{
-                  'block-size': (item.amount / maxAmount) * 100 + '%',
-                  'background-color': '#3b82f6',
-                  position: 'absolute',
-                  'inset-block-end': '0',
-                  'inset-inline-start': '0',
-                  'inset-inline-end': '0',
-                }"></div>
-                <div class="trend-bar-label" style="inset-block-start: -3rem;">
-                  <div style="font-weight: 500; color: #111827;">{{ item.period }}</div>
-                  <div style="font-size: 0.7rem; margin-top: 2px;">{{ formatCurrency(item.amount) }}</div>
-                  <div style="font-size: 0.7rem; color: #6b7280;">{{ formatNumber(item.count) }} inv</div>
+          <div class="chart-with-labels">
+            <div class="mini-trend-chart" style="block-size: 220px">
+              <div class="trend-bars aging-bars">
+                <div v-for="(item, idx) in filteredApAgingData" :key="`aging-${idx}`" class="trend-bar">
+                  <div class="trend-bar-base" :style="{
+                    'block-size': (item.amount / maxAmount) * 100 + '%',
+                    'background-color': '#3b82f6',
+                    position: 'absolute',
+                    'inset-block-end': '0',
+                    'inset-inline-start': '0',
+                    'inset-inline-end': '0',
+                  }"></div>
                 </div>
+              </div>
+            </div>
+            <div class="chart-bottom-labels aging-labels">
+              <div v-for="(item, idx) in filteredApAgingData" :key="`aging-label-${idx}`" class="chart-bottom-label">
+                <div class="font-medium text-gray-900 text-xs">{{ item.period }}</div>
+                <div class="text-xs text-gray-700">{{ formatCurrency(item.amount) }}</div>
+                <div class="text-xs text-gray-500">{{ formatNumber(item.count) }} inv</div>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Total AP Outstanding -->
-        <div class="col-span-3 bg-white border rounded-lg p-4">
+        <div class="col-span-2 bg-white border rounded-lg p-4">
           <div class="metric-card h-full">
             <div class="metric-header">
-              <h3 class="text-lg font-semibold">Total AP Outstanding</h3>
+              <h3 class="text-sm font-semibold text-center">Total AP Outstanding</h3>
             </div>
-            <div class="metric-content flex-grow flex flex-col items-center text-center">
-              <div class="mt-6 mb-2">
-                <div class="metric-value text-4xl font-bold text-gray-900">
+            <div class="metric-content flex-grow flex flex-col items-center text-center justify-center">
+              <div class="mb-3">
+                <div class="text-2xl font-bold text-gray-900">
                   {{ formatMetricCurrency(totalOutstanding) }}
                 </div>
-                <div class="metric-label text-xl text-gray-600">Invoice SUM</div>
+                <div class="text-xs text-gray-600 mt-1">Invoice SUM</div>
               </div>
-              <div class="metric-divider my-4"></div>
-              <div class="mb-6">
+              <div class="metric-divider my-2"></div>
+              <div class="mt-2">
                 <div class="text-2xl font-semibold text-red-500">{{ overduePercentage }}%</div>
-                <div class="text-gray-600">Invoice Overdue</div>
+                <div class="text-xs text-gray-600 mt-1">Invoice Overdue</div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Upcoming Payments Chart -->
-        <div class="col-span-4 bg-white border rounded-lg p-4">
+        <!-- Invoice Status Monitoring -->
+        <div class="col-span-5 bg-white border rounded-lg p-4">
           <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold">Upcoming Payments</h3>
+            <h3 class="text-lg font-semibold">Invoice Status Monitoring</h3>
           </div>
-          <div class="mini-trend-chart" style="block-size: 300px">
-            <div class="trend-bars">
-              <div v-for="(payment, idx) in filteredUpcomingPayments" :key="`upcoming-${idx}`" class="trend-bar">
-                <div class="trend-bar-base" :style="{
-                  'block-size': (payment.amount / maxUpcomingAmount) * 100 + '%',
-                  'background-color': '#10b981',
-                  position: 'absolute',
-                  'inset-block-end': '0',
-                  'inset-inline-start': '0',
-                  'inset-inline-end': '0',
-                }"></div>
-                <div class="trend-bar-label" style="inset-block-start: -3rem;">
-                  <div style="font-weight: 500; color: #111827;">{{ formatLabel(payment.period) }}</div>
-                  <div style="font-size: 0.7rem; margin-top: 2px;">{{ formatCurrency(payment.amount) }}</div>
-                  <div style="font-size: 0.7rem; color: #6b7280;">{{ formatNumber(payment.count) }} inv</div>
+          <div class="chart-with-labels">
+            <div class="mini-trend-chart" style="block-size: 220px">
+              <div class="trend-bars status-bars">
+                <div v-for="(status, idx) in invoiceStatusData" :key="`status-${idx}`" class="trend-bar">
+                  <div class="trend-bar-base" :style="{
+                    'block-size': (status.amount / maxStatusAmount) * 100 + '%',
+                    'background-color': status.color,
+                    position: 'absolute',
+                    'inset-block-end': '0',
+                    'inset-inline-start': '0',
+                    'inset-inline-end': '0',
+                  }"></div>
                 </div>
+              </div>
+            </div>
+            <div class="chart-bottom-labels status-labels">
+              <div v-for="(status, idx) in invoiceStatusData" :key="`status-label-${idx}`" class="chart-bottom-label">
+                <div class="font-medium text-gray-900 text-xs">{{ status.label }}</div>
               </div>
             </div>
           </div>
@@ -223,46 +311,19 @@
           <div class="chart-legend mb-3 flex gap-4">
             <div class="legend-item">
               <div class="legend-color" style="background-color: #3b82f6"></div>
-              <span>Current</span>
-            </div>
-            <div class="legend-item">
-              <div class="legend-color" style="background-color: #f59e0b"></div>
-              <span>Processing</span>
-            </div>
-            <div class="legend-item">
-              <div class="legend-color" style="background-color: #ef4444"></div>
-              <span>Overdue</span>
+              <span>Summary Trend</span>
             </div>
           </div>
           <div class="mini-trend-chart" style="block-size: 220px">
             <div class="trend-bars">
-              <div v-for="(data, index) in timeSeriesData" :key="index" class="trend-bar">
+              <div v-for="(data, index) in agingTrendCountData" :key="index" class="trend-bar">
                 <div class="trend-bar-base" :style="{
-                  'block-size': (data.current / (data.current + data.processing + data.overdue)) * 100 + '%',
+                  'block-size': (data.trendValue / maxTrendCountValue) * 100 + '%',
                   'background-color': '#3b82f6',
                   position: 'absolute',
                   'inset-block-end': '0',
                   'inset-inline-start': '0',
                   'inset-inline-end': '0',
-                  'z-index': 1
-                }"></div>
-                <div class="trend-bar-base" :style="{
-                  'block-size': (data.processing / (data.current + data.processing + data.overdue)) * 100 + '%',
-                  'background-color': '#f59e0b',
-                  position: 'absolute',
-                  'inset-block-end': (data.current / (data.current + data.processing + data.overdue)) * 100 + '%',
-                  'inset-inline-start': '0',
-                  'inset-inline-end': '0',
-                  'z-index': 2
-                }"></div>
-                <div class="trend-bar-base" :style="{
-                  'block-size': (data.overdue / (data.current + data.processing + data.overdue)) * 100 + '%',
-                  'background-color': '#ef4444',
-                  position: 'absolute',
-                  'inset-block-end': ((data.current + data.processing) / (data.current + data.processing + data.overdue)) * 100 + '%',
-                  'inset-inline-start': '0',
-                  'inset-inline-end': '0',
-                  'z-index': 3
                 }"></div>
               </div>
             </div>
@@ -327,10 +388,14 @@
 </template>
 
 <script setup lang="ts">
+// Helper: apakah semua filter kosong?
+const isAllFilterEmpty = computed(() => {
+  return !companyCode.value && !vendor.value && !poType.value && !invoiceType.value && !departement.value && (!date.value || (!date.value[0] && !date.value[1]))
+})
 import { ref, onMounted, computed, watch } from 'vue'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
-import type { AgingPeriod, UpcomingPayment } from './types/InvoiceAnalytic'
+import type { AgingPeriod } from './types/InvoiceAnalytic'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { format } from 'date-fns'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
@@ -346,7 +411,7 @@ const routes = ref<routeTypes[]>([
 
 const companyCode = ref('MF00')
 const vendor = ref('')
-const poType = ref(1)
+const poType = ref<number | null>(1)
 const invoiceType = ref('')
 const dpOption = ref('')
 const departement = ref('')
@@ -364,16 +429,14 @@ const constCenterList = computed(() => invoiceMasterApi.costCenterList)
 
 const poList = ref([
   {
-    name: "invoice PO",
+    name: "Invoice PO",
     code: 1
   },
   {
-    name: "invoice Non PO",
+    name: "Invoice Non PO",
     code: 2
   }
 ])
-
-
 
 // Data and computed values
 const apAgingData = ref<AgingPeriod[]>([
@@ -383,32 +446,44 @@ const apAgingData = ref<AgingPeriod[]>([
   { period: '> 60', amount: 7000000, count: 90 },
 ])
 
-const upcomingPayments = ref<UpcomingPayment[]>([
-  { period: 'Now', amount: 9500000, count: 120 },
-  { period: '15 Days', amount: 1500000, count: 30 },
-  { period: '30 Days', amount: 500000, count: 10 },
-  { period: '> 30 Days', amount: 7000000, count: 80 },
-])
+// Invoice Status Data for monitoring chart
+const invoiceStatusData = computed(() => {
+  void filterUpdateKey.value
+  const multiplier = getFilterMultiplier()
+  if (isAllFilterEmpty.value) {
+    return [
+      { label: 'Submitted', amount: 0, count: 0, color: '#3b82f6' },
+      { label: 'In Approval', amount: 0, count: 0, color: '#f97316' },
+      { label: 'Approved', amount: 0, count: 0, color: '#22c55e' },
+      { label: 'Rejected', amount: 0, count: 0, color: '#f472b6' },
+      { label: 'Paid', amount: 0, count: 0, color: '#06b6d4' },
+      { label: 'Overdue', amount: 0, count: 0, color: '#ef4444' },
+    ]
+  }
+  return [
+    { label: 'Submitted', amount: Math.round(10000000 * multiplier * (0.5 + Math.random() * 1.5)), count: Math.round(150 * multiplier * (0.5 + Math.random() * 1.5)), color: '#3b82f6' },
+    { label: 'In Approval', amount: Math.round(4000000 * multiplier * (0.5 + Math.random() * 1.5)), count: Math.round(60 * multiplier * (0.5 + Math.random() * 1.5)), color: '#f97316' },
+    { label: 'Approved', amount: Math.round(8000000 * multiplier * (0.5 + Math.random() * 1.5)), count: Math.round(120 * multiplier * (0.5 + Math.random() * 1.5)), color: '#22c55e' },
+    { label: 'Rejected', amount: Math.round(1000000 * multiplier * (0.5 + Math.random() * 1.5)), count: Math.round(15 * multiplier * (0.5 + Math.random() * 1.5)), color: '#f472b6' },
+    { label: 'Paid', amount: Math.round(6000000 * multiplier * (0.5 + Math.random() * 1.5)), count: Math.round(90 * multiplier * (0.5 + Math.random() * 1.5)), color: '#06b6d4' },
+    { label: 'Overdue', amount: Math.round(3000000 * multiplier * (0.5 + Math.random() * 1.5)), count: Math.round(45 * multiplier * (0.5 + Math.random() * 1.5)), color: '#ef4444' },
+  ]
+})
+
+const maxStatusAmount = computed(() => {
+  return Math.max(...invoiceStatusData.value.map(item => item.amount)) || 1
+})
 
 // Filter applied data
 // Filter applied data with random jitter for animation effect
 const filteredApAgingData = computed(() => {
   // Use filterUpdateKey to trigger re-calculation with fresh random values
   void filterUpdateKey.value
+  if (isAllFilterEmpty.value) {
+    return apAgingData.value.map(item => ({ ...item, amount: 0, count: 0 }))
+  }
   return apAgingData.value.map(item => {
-    const jitter = 0.9 + Math.random() * 0.2 // Random between 0.9 and 1.1
-    return {
-      ...item,
-      amount: Math.round(item.amount * getFilterMultiplier() * jitter),
-      count: Math.round(item.count * getFilterMultiplier() * jitter)
-    }
-  })
-})
-
-const filteredUpcomingPayments = computed(() => {
-  void filterUpdateKey.value
-  return upcomingPayments.value.map(item => {
-    const jitter = 0.85 + Math.random() * 0.3 // Random between 0.85 and 1.15
+    const jitter = 0.5 + Math.random() * 1.5 // Random between 0.5 and 2.0
     return {
       ...item,
       amount: Math.round(item.amount * getFilterMultiplier() * jitter),
@@ -423,25 +498,36 @@ const getFilterMultiplier = () => {
 
   // Apply vendor filter
   if (vendor.value) {
-    multiplier *= 1.2
+    multiplier *= 10
   }
 
   // Apply invoice type filter
   if (invoiceType.value) {
-    multiplier *= (invoiceType.value === '901' ? 0.8 : 1.1)
+    multiplier *= (invoiceType.value === '901' ? 0.05 : 10)
   }
 
   // Apply department filter
   if (departement.value) {
-    multiplier *= 1.15
+    multiplier *= 10
   }
 
   // Apply date range filter
   if (date.value && (date.value[0] || date.value[1])) {
-    multiplier *= 0.95
+    multiplier *= 0.05
   }
 
-  return Math.max(0.5, Math.min(multiplier, 2))
+  // Apply poType filter
+  if (poType.value) {
+    multiplier *= (poType.value === 1 ? 10 : 0.1)
+  }
+
+  // Apply companyCode filter
+  if (companyCode.value) {
+    multiplier *= 10
+  }
+
+  // Clamp multiplier to a much wider range for more significant effect
+  return Math.max(0.01, Math.min(multiplier, 1000))
 }
 
 // Create data for time series visualization
@@ -489,14 +575,27 @@ const timeSeriesData = computed(() => {
   const zoom = Math.max(paidOnTimeZoom.value, avgAgeZoom.value)
   const baseData = zoom <= 1.5 ? chartData.quarterlyData : zoom <= 2.3 ? chartData.monthlyData : chartData.weeklyData
   const multiplier = getFilterMultiplier()
-  return baseData.map(item => ({
-    ...item,
-    paidOnTime: Math.round(item.paidOnTime * (multiplier * 0.95)),
-    avgAge: Math.round(item.avgAge * multiplier * 1.1),
-    current: Math.round(item.current * multiplier),
-    processing: Math.round(item.processing * multiplier * 0.9),
-    overdue: Math.round(item.overdue * multiplier * 1.2),
-  }))
+  if (isAllFilterEmpty.value) {
+    return baseData.map(item => ({
+      ...item,
+      paidOnTime: 0,
+      avgAge: 0,
+      current: 0,
+      processing: 0,
+      overdue: 0,
+    }))
+  }
+  return baseData.map(item => {
+    const jitter = 0.5 + Math.random() * 1.5 // Random between 0.5 and 2.0
+    return {
+      ...item,
+      paidOnTime: Math.round(item.paidOnTime * multiplier * jitter),
+      avgAge: Math.round(item.avgAge * multiplier * jitter),
+      current: Math.round(item.current * multiplier * jitter),
+      processing: Math.round(item.processing * multiplier * jitter),
+      overdue: Math.round(item.overdue * multiplier * jitter),
+    }
+  })
 })
 
 const totalOutstanding = computed(() => {
@@ -514,10 +613,6 @@ const overduePercentage = computed(() => {
 
 const maxAmount = computed(() => {
   return Math.max(...filteredApAgingData.value.map((item) => item.amount)) || 1
-})
-
-const maxUpcomingAmount = computed(() => {
-  return Math.max(...filteredUpcomingPayments.value.map((item) => item.amount)) || 1
 })
 
 const maxAge = computed(() => {
@@ -664,22 +759,22 @@ const handleWheelAvgAge = (e: WheelEvent) => {
 
 const formatDate = (item: { label: string }): string => item.label
 const formatMetricCurrency = (value: number): string => {
-  if (value >= 1000000) return `$ ${(value / 1000000).toFixed(2)}M`
+  if (value >= 1000000000) return `Rp ${(value / 1000000000).toFixed(2)} M`
+  if (value >= 1000000) return `Rp ${(value / 1000000).toFixed(2)} Jt`
   return formatCurrency(value)
 }
 const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat('en-US', {
+  // Add random jitter to currency for demo effect
+  const jitter = 0.9 + Math.random() * 0.2 // 0.9 - 1.1
+  const displayValue = value * jitter
+  return new Intl.NumberFormat('id-ID', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'IDR',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
-  }).format(value)
+  }).format(displayValue)
 }
 const formatNumber = (value: number): string => new Intl.NumberFormat('en-US').format(value)
-const formatLabel = (label: string): string => {
-  if (label === 'Within 15 Days' || label === 'Within 30 Days') return label.replace('Within ', 'W/in\n')
-  return label
-}
 
 onMounted(async () => {
   await invoiceMasterApi.getCompanyCode()
@@ -692,7 +787,9 @@ onMounted(async () => {
 watch(
   () => poType.value,
   async () => {
-    if (poType.value === 1) {
+    if (poType.value === null) {
+      invoiceTypeList.value = []
+    } else if (poType.value === 1) {
       await invoiceMasterApi.getInvoicePoType()
       invoiceTypeList.value = invoicePoType.value
     } else {
@@ -728,5 +825,5 @@ watch(
 </script>
 
 <style lang="scss" scoped>
-@import './styles/InvoiceAnalytic.scss';
+@use './styles/InvoiceAnalytic.scss';
 </style>
