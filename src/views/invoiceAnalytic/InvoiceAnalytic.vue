@@ -1,7 +1,3 @@
-// Helper: apakah semua filter kosong?
-const isAllFilterEmpty = computed(() => {
-  return !companyCode.value && !vendor.value && !poType.value && !invoiceType.value && !departement.value && (!date.value || (!date.value[0] && !date.value[1]))
-})
 <template>
   <div>
     <Breadcrumb title="Invoice Analytic" :routes="routes" />
@@ -13,20 +9,17 @@ const isAllFilterEmpty = computed(() => {
         <div class="filter-group">
           <label class="text-sm text-gray-600">Company Code</label>
           <div class="filter-select-wrapper">
-            <v-select
-              v-model="companyCode"
-              :options="companyCodeList"
-              label="name"
-              :reduce="(option: any) => option.code"
-              placeholder="Select"
-              :clearable="true"
-              class="filter-vselect"
-            >
+            <v-select v-model="companyCode" :options="companyCodeList" label="name"
+              :reduce="(option: { code: string }) => option.code" placeholder="Select" :clearable="true"
+              class="filter-vselect">
               <template #open-indicator>
                 <i class="ki-outline ki-down text-gray-500"></i>
               </template>
               <template #deselect="{ deselect }">
-                <svg @click="deselect" class="cursor-pointer" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#6b7280" stroke-width="1" stroke-linecap="round"><path d="M2 2L12 12M12 2L2 12"/></svg>
+                <svg @click="deselect" class="cursor-pointer" width="14" height="14" viewBox="0 0 14 14" fill="none"
+                  stroke="#6b7280" stroke-width="1" stroke-linecap="round">
+                  <path d="M2 2L12 12M12 2L2 12" />
+                </svg>
               </template>
             </v-select>
           </div>
@@ -34,20 +27,17 @@ const isAllFilterEmpty = computed(() => {
         <div class="filter-group">
           <label class="text-sm text-gray-600">Vendor</label>
           <div class="filter-select-wrapper">
-            <v-select
-              v-model="vendor"
-              :options="vendorList"
-              label="vendorName"
-              :reduce="(option: any) => option.vendorCode"
-              placeholder="Select"
-              :clearable="true"
-              class="filter-vselect"
-            >
+            <v-select v-model="vendor" :options="vendorList" label="vendorName"
+              :reduce="(option: { vendorCode: string }) => option.vendorCode" placeholder="Select" :clearable="true"
+              class="filter-vselect">
               <template #open-indicator>
                 <i class="ki-outline ki-down text-gray-500"></i>
               </template>
               <template #deselect="{ deselect }">
-                <svg @click="deselect" class="cursor-pointer" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#6b7280" stroke-width="1" stroke-linecap="round"><path d="M2 2L12 12M12 2L2 12"/></svg>
+                <svg @click="deselect" class="cursor-pointer" width="14" height="14" viewBox="0 0 14 14" fill="none"
+                  stroke="#6b7280" stroke-width="1" stroke-linecap="round">
+                  <path d="M2 2L12 12M12 2L2 12" />
+                </svg>
               </template>
             </v-select>
           </div>
@@ -55,20 +45,17 @@ const isAllFilterEmpty = computed(() => {
         <div class="filter-group">
           <label class="text-sm text-gray-600">Po Type</label>
           <div class="filter-select-wrapper">
-            <v-select
-              v-model="poType"
-              :options="poList"
-              label="name"
-              :reduce="(option: any) => option.code"
-              placeholder="Select"
-              :clearable="true"
-              class="filter-vselect"
-            >
+            <v-select v-model="poType" :options="poList" label="name"
+              :reduce="(option: { code: number }) => option.code" placeholder="Select" :clearable="true"
+              class="filter-vselect">
               <template #open-indicator>
                 <i class="ki-outline ki-down text-gray-500"></i>
               </template>
               <template #deselect="{ deselect }">
-                <svg @click="deselect" class="cursor-pointer" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#6b7280" stroke-width="1" stroke-linecap="round"><path d="M2 2L12 12M12 2L2 12"/></svg>
+                <svg @click="deselect" class="cursor-pointer" width="14" height="14" viewBox="0 0 14 14" fill="none"
+                  stroke="#6b7280" stroke-width="1" stroke-linecap="round">
+                  <path d="M2 2L12 12M12 2L2 12" />
+                </svg>
               </template>
             </v-select>
           </div>
@@ -76,20 +63,17 @@ const isAllFilterEmpty = computed(() => {
         <div class="filter-group">
           <label class="text-sm text-gray-600">Invoice Type</label>
           <div class="filter-select-wrapper">
-            <v-select
-              v-model="invoiceType"
-              :options="invoiceTypeList"
-              label="name"
-              :reduce="(option: any) => option.code"
-              placeholder="Select"
-              :clearable="true"
-              class="filter-vselect"
-            >
+            <v-select v-model="invoiceType" :options="invoiceTypeList" label="name"
+              :reduce="(option: { code: string }) => option.code" placeholder="Select" :clearable="true"
+              class="filter-vselect">
               <template #open-indicator>
                 <i class="ki-outline ki-down text-gray-500"></i>
               </template>
               <template #deselect="{ deselect }">
-                <svg @click="deselect" class="cursor-pointer" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#6b7280" stroke-width="1" stroke-linecap="round"><path d="M2 2L12 12M12 2L2 12"/></svg>
+                <svg @click="deselect" class="cursor-pointer" width="14" height="14" viewBox="0 0 14 14" fill="none"
+                  stroke="#6b7280" stroke-width="1" stroke-linecap="round">
+                  <path d="M2 2L12 12M12 2L2 12" />
+                </svg>
               </template>
             </v-select>
           </div>
@@ -97,20 +81,17 @@ const isAllFilterEmpty = computed(() => {
         <div class="filter-group" v-if="invoiceType === '901'">
           <label class="text-sm text-gray-600">Dp Option</label>
           <div class="filter-select-wrapper">
-            <v-select
-              v-model="dpOption"
-              :options="dpOptionList"
-              label="name"
-              :reduce="(option: any) => option.code"
-              placeholder="Select"
-              :clearable="true"
-              class="filter-vselect"
-            >
+            <v-select v-model="dpOption" :options="dpOptionList" label="name"
+              :reduce="(option: { code: string }) => option.code" placeholder="Select" :clearable="true"
+              class="filter-vselect">
               <template #open-indicator>
                 <i class="ki-outline ki-down text-gray-500"></i>
               </template>
               <template #deselect="{ deselect }">
-                <svg @click="deselect" class="cursor-pointer" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#6b7280" stroke-width="1" stroke-linecap="round"><path d="M2 2L12 12M12 2L2 12"/></svg>
+                <svg @click="deselect" class="cursor-pointer" width="14" height="14" viewBox="0 0 14 14" fill="none"
+                  stroke="#6b7280" stroke-width="1" stroke-linecap="round">
+                  <path d="M2 2L12 12M12 2L2 12" />
+                </svg>
               </template>
             </v-select>
           </div>
@@ -118,20 +99,17 @@ const isAllFilterEmpty = computed(() => {
         <div class="filter-group">
           <label class="text-sm text-gray-600">Department</label>
           <div class="filter-select-wrapper">
-            <v-select
-              v-model="departement"
-              :options="constCenterList"
-              label="name"
-              :reduce="(option: any) => option.code"
-              placeholder="Select"
-              :clearable="true"
-              class="filter-vselect"
-            >
+            <v-select v-model="departement" :options="constCenterList" label="name"
+              :reduce="(option: { code: string }) => option.code" placeholder="Select" :clearable="true"
+              class="filter-vselect">
               <template #open-indicator>
                 <i class="ki-outline ki-down text-gray-500"></i>
               </template>
               <template #deselect="{ deselect }">
-                <svg @click="deselect" class="cursor-pointer" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#6b7280" stroke-width="1" stroke-linecap="round"><path d="M2 2L12 12M12 2L2 12"/></svg>
+                <svg @click="deselect" class="cursor-pointer" width="14" height="14" viewBox="0 0 14 14" fill="none"
+                  stroke="#6b7280" stroke-width="1" stroke-linecap="round">
+                  <path d="M2 2L12 12M12 2L2 12" />
+                </svg>
               </template>
             </v-select>
           </div>
@@ -155,9 +133,9 @@ const isAllFilterEmpty = computed(() => {
           <div class="chart-with-labels">
             <div class="mini-trend-chart" style="block-size: 220px">
               <div class="trend-bars aging-bars">
-                <div v-for="(item, idx) in filteredApAgingData" :key="`aging-${idx}`" class="trend-bar">
+                <div v-for="(item, idx) in visualApAgingData" :key="`aging-${idx}`" class="trend-bar">
                   <div class="trend-bar-base" :style="{
-                    'block-size': (item.amount / maxAmount) * 100 + '%',
+                    'block-size': (item.amount / (Math.max(...lastFilteredApAgingData.map(i => i.amount)) || 1)) * 100 + '%',
                     'background-color': '#3b82f6',
                     position: 'absolute',
                     'inset-block-end': '0',
@@ -168,7 +146,8 @@ const isAllFilterEmpty = computed(() => {
               </div>
             </div>
             <div class="chart-bottom-labels aging-labels">
-              <div v-for="(item, idx) in filteredApAgingData" :key="`aging-label-${idx}`" class="chart-bottom-label">
+              <div v-for="(item, idx) in lastFilteredApAgingData" :key="`aging-label-${idx}`"
+                class="chart-bottom-label">
                 <div class="font-medium text-gray-900 text-xs">{{ item.period }}</div>
                 <div class="text-xs text-gray-700">{{ formatCurrency(item.amount) }}</div>
                 <div class="text-xs text-gray-500">{{ formatNumber(item.count) }} inv</div>
@@ -207,9 +186,9 @@ const isAllFilterEmpty = computed(() => {
           <div class="chart-with-labels">
             <div class="mini-trend-chart" style="block-size: 220px">
               <div class="trend-bars status-bars">
-                <div v-for="(status, idx) in invoiceStatusData" :key="`status-${idx}`" class="trend-bar">
+                <div v-for="(status, idx) in visualInvoiceStatusData" :key="`status-${idx}`" class="trend-bar">
                   <div class="trend-bar-base" :style="{
-                    'block-size': (status.amount / maxStatusAmount) * 100 + '%',
+                    'block-size': (status.amount / (Math.max(...lastInvoiceStatusData.map(i => i.amount)) || 1)) * 100 + '%',
                     'background-color': status.color,
                     position: 'absolute',
                     'inset-block-end': '0',
@@ -220,7 +199,8 @@ const isAllFilterEmpty = computed(() => {
               </div>
             </div>
             <div class="chart-bottom-labels status-labels">
-              <div v-for="(status, idx) in invoiceStatusData" :key="`status-label-${idx}`" class="chart-bottom-label">
+              <div v-for="(status, idx) in lastInvoiceStatusData" :key="`status-label-${idx}`"
+                class="chart-bottom-label">
                 <div class="font-medium text-gray-900 text-xs">{{ status.label }}</div>
               </div>
             </div>
@@ -388,14 +368,18 @@ const isAllFilterEmpty = computed(() => {
 </template>
 
 <script setup lang="ts">
-// Helper: apakah semua filter kosong?
 const isAllFilterEmpty = computed(() => {
-  return !companyCode.value && !vendor.value && !poType.value && !invoiceType.value && !departement.value && (!date.value || (!date.value[0] && !date.value[1]))
+  // Hanya filter selain date yang dicek
+  return (companyCode.value === '' || companyCode.value === null) &&
+    (vendor.value === '' || vendor.value === null) &&
+    (poType.value === null) &&
+    (invoiceType.value === '' || invoiceType.value === null) &&
+    (departement.value === '' || departement.value === null)
 })
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed, watch, shallowRef } from 'vue'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
-import type { AgingPeriod } from './types/InvoiceAnalytic'
+import type { AgingPeriod, InvoiceStatusItem, TimeSeriesChartItem } from './types/InvoiceAnalytic'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { format } from 'date-fns'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
@@ -409,9 +393,9 @@ const routes = ref<routeTypes[]>([
   },
 ])
 
-const companyCode = ref('MF00')
+const companyCode = ref('')
 const vendor = ref('')
-const poType = ref<number | null>(1)
+const poType = ref<number | null>(null)
 const invoiceType = ref('')
 const dpOption = ref('')
 const departement = ref('')
@@ -438,59 +422,114 @@ const poList = ref([
   }
 ])
 
-// Data and computed values
-const apAgingData = ref<AgingPeriod[]>([
-  { period: 'Current', amount: 9500000, count: 150 },
-  { period: '1-30', amount: 6500000, count: 100 },
-  { period: '31-60', amount: 2500000, count: 40 },
-  { period: '> 60', amount: 7000000, count: 90 },
-])
 
-// Invoice Status Data for monitoring chart
-const invoiceStatusData = computed(() => {
-  void filterUpdateKey.value
+// Data statis berdasarkan companyCode dan vendor
+// MF00 base total: ~1,560K (1,560,000)
+// Total (All) base total: ~9,990K (9,990,000)
+const staticDataMap: Record<string, Record<string, AgingPeriod[]>> = {
+  'MF00': {
+    '': [
+      { period: 'Current', amount: 500000, count: 50 },
+      { period: '1-30', amount: 400000, count: 40 },
+      { period: '31-60', amount: 300000, count: 30 },
+      { period: '> 60', amount: 360000, count: 36 },
+    ],
+    'VEND01': [
+      { period: 'Current', amount: 200000, count: 20 },
+      { period: '1-30', amount: 150000, count: 15 },
+      { period: '31-60', amount: 100000, count: 10 },
+      { period: '> 60', amount: 50000, count: 5 },
+    ],
+  },
+  'MF01': {
+    '': [
+      { period: 'Current', amount: 2500000, count: 250 },
+      { period: '1-30', amount: 1500000, count: 150 },
+      { period: '31-60', amount: 1000000, count: 100 },
+      { period: '> 60', amount: 800000, count: 80 },
+    ],
+  },
+  'MF02': {
+    '': [
+      { period: 'Current', amount: 1000000, count: 100 },
+      { period: '1-30', amount: 800000, count: 80 },
+      { period: '31-60', amount: 430000, count: 43 },
+      { period: '> 60', amount: 400000, count: 40 },
+    ],
+  }
+}
+
+const apAgingData = computed<AgingPeriod[]>(() => {
+  if (!companyCode.value) {
+    // Sum all company codes for "All" case (~9,990K target)
+    const periods = ['Current', '1-30', '31-60', '> 60']
+    return periods.map(p => {
+      let totalAmount = 0
+      let totalCount = 0
+      Object.keys(staticDataMap).forEach(cc => {
+        const item = staticDataMap[cc]['']?.find(i => i.period === p)
+        if (item) {
+          totalAmount += item.amount
+          totalCount += item.count
+        }
+      })
+      return { period: p, amount: totalAmount, count: totalCount }
+    })
+  }
+
+  const company = companyCode.value
+  const vendorVal = vendor.value || ''
+  if (staticDataMap[company] && staticDataMap[company][vendorVal]) {
+    return staticDataMap[company][vendorVal]
+  }
+  // fallback if vendor specific not found
+  if (staticDataMap[company] && staticDataMap[company]['']) {
+    return staticDataMap[company]['']
+  }
+  return staticDataMap['MF00']['']
+})
+
+
+
+function computeInvoiceStatusData(isVisual = false) {
   const multiplier = getFilterMultiplier()
-  if (isAllFilterEmpty.value) {
-    return [
-      { label: 'Submitted', amount: 0, count: 0, color: '#3b82f6' },
-      { label: 'In Approval', amount: 0, count: 0, color: '#f97316' },
-      { label: 'Approved', amount: 0, count: 0, color: '#22c55e' },
-      { label: 'Rejected', amount: 0, count: 0, color: '#f472b6' },
-      { label: 'Paid', amount: 0, count: 0, color: '#06b6d4' },
-      { label: 'Overdue', amount: 0, count: 0, color: '#ef4444' },
-    ]
-  }
-  return [
-    { label: 'Submitted', amount: Math.round(10000000 * multiplier * (0.5 + Math.random() * 1.5)), count: Math.round(150 * multiplier * (0.5 + Math.random() * 1.5)), color: '#3b82f6' },
-    { label: 'In Approval', amount: Math.round(4000000 * multiplier * (0.5 + Math.random() * 1.5)), count: Math.round(60 * multiplier * (0.5 + Math.random() * 1.5)), color: '#f97316' },
-    { label: 'Approved', amount: Math.round(8000000 * multiplier * (0.5 + Math.random() * 1.5)), count: Math.round(120 * multiplier * (0.5 + Math.random() * 1.5)), color: '#22c55e' },
-    { label: 'Rejected', amount: Math.round(1000000 * multiplier * (0.5 + Math.random() * 1.5)), count: Math.round(15 * multiplier * (0.5 + Math.random() * 1.5)), color: '#f472b6' },
-    { label: 'Paid', amount: Math.round(6000000 * multiplier * (0.5 + Math.random() * 1.5)), count: Math.round(90 * multiplier * (0.5 + Math.random() * 1.5)), color: '#06b6d4' },
-    { label: 'Overdue', amount: Math.round(3000000 * multiplier * (0.5 + Math.random() * 1.5)), count: Math.round(45 * multiplier * (0.5 + Math.random() * 1.5)), color: '#ef4444' },
+  const base = [
+    { label: 'Submitted', amount: 10000000, count: 150, color: '#3b82f6' },
+    { label: 'In Approval', amount: 4000000, count: 60, color: '#f97316' },
+    { label: 'Approved', amount: 8000000, count: 120, color: '#22c55e' },
+    { label: 'Rejected', amount: 1000000, count: 15, color: '#f472b6' },
+    { label: 'Paid', amount: 6000000, count: 90, color: '#06b6d4' },
+    { label: 'Overdue', amount: 3000000, count: 45, color: '#ef4444' },
   ]
-})
+  const appliedMultiplier = isAllFilterEmpty.value ? 1 : multiplier
 
-const maxStatusAmount = computed(() => {
-  return Math.max(...invoiceStatusData.value.map(item => item.amount)) || 1
-})
-
-// Filter applied data
-// Filter applied data with random jitter for animation effect
-const filteredApAgingData = computed(() => {
-  // Use filterUpdateKey to trigger re-calculation with fresh random values
-  void filterUpdateKey.value
-  if (isAllFilterEmpty.value) {
-    return apAgingData.value.map(item => ({ ...item, amount: 0, count: 0 }))
-  }
-  return apAgingData.value.map(item => {
-    const jitter = 0.5 + Math.random() * 1.5 // Random between 0.5 and 2.0
+  return base.map(item => {
+    const jitter = isVisual ? (0.5 + Math.random() * 1.0) : 1
     return {
       ...item,
-      amount: Math.round(item.amount * getFilterMultiplier() * jitter),
-      count: Math.round(item.count * getFilterMultiplier() * jitter)
+      amount: Math.round(item.amount * appliedMultiplier * jitter),
+      count: Math.round(item.count * appliedMultiplier * jitter)
     }
   })
-})
+}
+
+
+
+
+
+function computeFilteredApAgingData(isVisual = false) {
+  const multiplier = getFilterMultiplier()
+  const appliedMultiplier = isAllFilterEmpty.value ? 1 : multiplier
+
+  return apAgingData.value.map(item => {
+    const jitter = isVisual ? (0.5 + Math.random() * 1.0) : 1
+    return {
+      ...item,
+      amount: Math.round(item.amount * appliedMultiplier * jitter),
+      count: Math.round(item.count * appliedMultiplier * jitter)
+    }
+  })
+}
 
 // Helper function to calculate multiplier based on filters
 const getFilterMultiplier = () => {
@@ -498,36 +537,28 @@ const getFilterMultiplier = () => {
 
   // Apply vendor filter
   if (vendor.value) {
-    multiplier *= 10
+    multiplier *= 1.5
   }
 
   // Apply invoice type filter
   if (invoiceType.value) {
-    multiplier *= (invoiceType.value === '901' ? 0.05 : 10)
+    multiplier *= (invoiceType.value === '901' ? 0.05 : 1.2)
   }
 
   // Apply department filter
   if (departement.value) {
-    multiplier *= 10
+    multiplier *= 1.1
   }
 
-  // Apply date range filter
-  if (date.value && (date.value[0] || date.value[1])) {
-    multiplier *= 0.05
-  }
+  // Date range filter is ignored per requirement
 
   // Apply poType filter
   if (poType.value) {
-    multiplier *= (poType.value === 1 ? 10 : 0.1)
+    multiplier *= (poType.value === 1 ? 1.1 : 0.9)
   }
 
-  // Apply companyCode filter
-  if (companyCode.value) {
-    multiplier *= 10
-  }
-
-  // Clamp multiplier to a much wider range for more significant effect
-  return Math.max(0.01, Math.min(multiplier, 1000))
+  // Clamp multiplier
+  return Math.max(0.01, Math.min(multiplier, 10))
 }
 
 // Create data for time series visualization
@@ -571,57 +602,48 @@ const generateData = () => {
 
 const chartData = generateData()
 
-const timeSeriesData = computed(() => {
+
+
+function computeTimeSeriesData(isVisual = false) {
   const zoom = Math.max(paidOnTimeZoom.value, avgAgeZoom.value)
   const baseData = zoom <= 1.5 ? chartData.quarterlyData : zoom <= 2.3 ? chartData.monthlyData : chartData.weeklyData
   const multiplier = getFilterMultiplier()
-  if (isAllFilterEmpty.value) {
-    return baseData.map(item => ({
-      ...item,
-      paidOnTime: 0,
-      avgAge: 0,
-      current: 0,
-      processing: 0,
-      overdue: 0,
-    }))
-  }
+  const appliedMultiplier = isAllFilterEmpty.value ? 1 : multiplier
+
   return baseData.map(item => {
-    const jitter = 0.5 + Math.random() * 1.5 // Random between 0.5 and 2.0
+    const jitter = isVisual ? (0.5 + Math.random() * 1.0) : 1
     return {
       ...item,
-      paidOnTime: Math.round(item.paidOnTime * multiplier * jitter),
-      avgAge: Math.round(item.avgAge * multiplier * jitter),
-      current: Math.round(item.current * multiplier * jitter),
-      processing: Math.round(item.processing * multiplier * jitter),
-      overdue: Math.round(item.overdue * multiplier * jitter),
+      paidOnTime: Math.round(item.paidOnTime * appliedMultiplier * jitter),
+      avgAge: Math.round(item.avgAge * appliedMultiplier * jitter),
+      current: Math.round(item.current * appliedMultiplier * jitter),
+      processing: Math.round(item.processing * appliedMultiplier * jitter),
+      overdue: Math.round(item.overdue * appliedMultiplier * jitter),
     }
   })
-})
+}
 
 const totalOutstanding = computed(() => {
-  return filteredApAgingData.value.reduce((sum, item) => sum + item.amount, 0)
+  return lastFilteredApAgingData.value.reduce((sum, item) => sum + item.amount, 0)
 })
 
 const overduePercentage = computed(() => {
   const total = totalOutstanding.value
   if (!total) return 0
-  const overdue = filteredApAgingData.value
+  const overdue = lastFilteredApAgingData.value
     .filter((item) => item.period !== 'Current')
     .reduce((sum, item) => sum + item.amount, 0)
   return Math.round((overdue / total) * 100)
 })
 
-const maxAmount = computed(() => {
-  return Math.max(...filteredApAgingData.value.map((item) => item.amount)) || 1
-})
 
 const maxAge = computed(() => {
-  return Math.max(...timeSeriesData.value.map((item) => item.avgAge)) || 1
+  return Math.max(...lastTimeSeriesData.value.map((item) => item.avgAge)) || 1
 })
 
 const agingTrendCountData = computed(() => {
-  const totalCount = filteredApAgingData.value.reduce((sum, item) => sum + item.count, 0)
-  return timeSeriesData.value.map(item => ({
+  const totalCount = lastFilteredApAgingData.value.reduce((sum, item) => sum + item.count, 0)
+  return visualTimeSeriesData.value.map(item => ({
     ...item,
     trendValue: Math.round((item.paidOnTime / 100) * totalCount)
   }))
@@ -629,18 +651,20 @@ const agingTrendCountData = computed(() => {
 
 const agingTrendAmountData = computed(() => {
   const totalAmount = totalOutstanding.value
-  return timeSeriesData.value.map(item => ({
+  return visualTimeSeriesData.value.map(item => ({
     ...item,
     trendValue: Math.round((item.avgAge / 100) * totalAmount)
   }))
 })
 
 const maxTrendCountValue = computed(() => {
-  return Math.max(...agingTrendCountData.value.map(item => item.trendValue)) || 1
+  const totalCount = lastFilteredApAgingData.value.reduce((sum, item) => sum + item.count, 0)
+  return Math.max(...lastTimeSeriesData.value.map(item => Math.round((item.paidOnTime / 100) * totalCount))) || 1
 })
 
 const maxTrendAmountValue = computed(() => {
-  return Math.max(...agingTrendAmountData.value.map(item => item.trendValue)) || 1
+  const totalAmount = lastFilteredApAgingData.value.reduce((sum, item) => sum + item.amount, 0)
+  return Math.max(...lastTimeSeriesData.value.map(item => Math.round((item.avgAge / 100) * totalAmount))) || 1
 })
 
 const paidOnTimeZoom = ref(1)
@@ -675,10 +699,10 @@ function buildPointsForSeries(values: number[], normalizeTo = 100, zoom = 1) {
   })
 }
 
-const maxPaidOnTime = computed(() => Math.max(...timeSeriesData.value.map((d) => d.paidOnTime)))
+const maxPaidOnTime = computed(() => Math.max(...lastTimeSeriesData.value.map((d) => d.paidOnTime)) || 1)
 const paidOnTimePoints = computed(() =>
   buildPointsForSeries(
-    timeSeriesData.value.map((d) => d.paidOnTime),
+    visualTimeSeriesData.value.map((d) => d.paidOnTime),
     Math.max(100, maxPaidOnTime.value),
     paidOnTimeZoom.value,
   ),
@@ -698,11 +722,11 @@ const paidOnTimeAreaPath = computed(() => {
   const first = pts[0]
   return `${line} L ${last.x},100 L ${first.x},100 Z`
 })
-const paidOnTimeVisibleLabels = computed(() => timeSeriesData.value.map((d) => formatDate(d)))
+const paidOnTimeVisibleLabels = computed(() => lastTimeSeriesData.value.map((d) => formatDate(d)))
 
 const avgAgePoints = computed(() =>
   buildPointsForSeries(
-    timeSeriesData.value.map((d) => d.avgAge),
+    visualTimeSeriesData.value.map((d) => d.avgAge),
     maxAge.value || 1,
     avgAgeZoom.value,
   ),
@@ -722,7 +746,7 @@ const avgAgeAreaPath = computed(() => {
   const first = pts[0]
   return `${line} L ${last.x},100 L ${first.x},100 Z`
 })
-const avgAgeVisibleLabels = computed(() => timeSeriesData.value.map((d) => formatDate(d)))
+const avgAgeVisibleLabels = computed(() => lastTimeSeriesData.value.map((d) => formatDate(d)))
 
 const zoomInPaidOnTime = () => {
   let newZoom = paidOnTimeZoom.value
@@ -758,21 +782,17 @@ const handleWheelAvgAge = (e: WheelEvent) => {
 }
 
 const formatDate = (item: { label: string }): string => item.label
+// Format Total AP Outstanding: X.XXXK (4 digit, dibulatkan ke atas)
 const formatMetricCurrency = (value: number): string => {
-  if (value >= 1000000000) return `Rp ${(value / 1000000000).toFixed(2)} M`
-  if (value >= 1000000) return `Rp ${(value / 1000000).toFixed(2)} Jt`
-  return formatCurrency(value)
+  if (!value) return '0K'
+  const kValue = Math.ceil(value / 1000)
+  return `${kValue.toLocaleString('id-ID')}K`
 }
+// Format bar chart AP Aging: Rp. XXXK
 const formatCurrency = (value: number): string => {
-  // Add random jitter to currency for demo effect
-  const jitter = 0.9 + Math.random() * 0.2 // 0.9 - 1.1
-  const displayValue = value * jitter
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(displayValue)
+  if (!value) return 'Rp 0K'
+  const kValue = Math.ceil(value / 1000)
+  return `Rp ${kValue.toLocaleString('id-ID')}K`
 }
 const formatNumber = (value: number): string => new Intl.NumberFormat('en-US').format(value)
 
@@ -808,20 +828,46 @@ watch(
   { immediate: true },
 )
 
-// Watch for filter changes to ensure reactivity and trigger animations
+// Watch for filter changes untuk trigger animasi, kecuali date (date tidak trigger data random baru)
 watch(
   [
     () => vendor.value,
     () => invoiceType.value,
     () => departement.value,
-    () => date.value,
     () => poType.value,
     () => companyCode.value
   ],
-  () => {
-    filterUpdateKey.value++
+  (newVals, oldVals) => {
+    // Only increment if any non-date filter actually changed
+    let changed = false
+    for (let i = 0; i < newVals.length; i++) {
+      if (newVals[i] !== oldVals[i]) changed = true
+    }
+    if (changed) filterUpdateKey.value++
   }
 )
+
+// --- Stable Data State for Charts (For Metrics & Labels) ---
+const lastFilteredApAgingData = shallowRef<AgingPeriod[]>([])
+const lastInvoiceStatusData = shallowRef<InvoiceStatusItem[]>([])
+const lastTimeSeriesData = shallowRef<TimeSeriesChartItem[]>([])
+
+// --- Visual Data State (With Jitter for Animation) ---
+const visualApAgingData = shallowRef<AgingPeriod[]>([])
+const visualInvoiceStatusData = shallowRef<InvoiceStatusItem[]>([])
+const visualTimeSeriesData = shallowRef<TimeSeriesChartItem[]>([])
+
+watch(filterUpdateKey, () => {
+  // Update stable data (no randomness)
+  lastFilteredApAgingData.value = computeFilteredApAgingData(false)
+  lastInvoiceStatusData.value = computeInvoiceStatusData(false)
+  lastTimeSeriesData.value = computeTimeSeriesData(false)
+
+  // Update visual data with "drastic" independent jitter per item
+  visualApAgingData.value = computeFilteredApAgingData(true)
+  visualInvoiceStatusData.value = computeInvoiceStatusData(true)
+  visualTimeSeriesData.value = computeTimeSeriesData(true)
+}, { immediate: true })
 </script>
 
 <style lang="scss" scoped>
