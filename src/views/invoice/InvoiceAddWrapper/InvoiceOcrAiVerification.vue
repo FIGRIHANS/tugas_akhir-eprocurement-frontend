@@ -104,10 +104,22 @@
                       class="ki-filled ki-check-circle text-green-500"
                       v-if="row.fpVerified === true"
                     ></i>
-                    <i
-                      class="ki-filled ki-cross-circle text-red-500"
+                    <div
+                      class="relative group flex items-center w-fit"
                       v-else-if="row.fpVerified === false"
-                    ></i>
+                    >
+                      <i class="ki-filled ki-cross-circle text-red-500 cursor-help"></i>
+                      <!-- Tooltip -->
+                      <div
+                        class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block w-max px-2 py-1 bg-red-600 text-white text-xs rounded shadow-lg z-10"
+                      >
+                        {{ row.header }} Mismatch
+                        <!-- Arrow -->
+                        <div
+                          class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-red-600"
+                        ></div>
+                      </div>
+                    </div>
                     <i class="ki-filled ki-minus-circle text-gray-500" v-else></i>
                   </td>
 
@@ -133,7 +145,19 @@
                         class="ki-filled ki-check-circle text-green-500"
                         v-if="row.invoiceVerified === true"
                       ></i>
-                      <i class="ki-filled ki-cross-circle text-red-500" v-else></i>
+                      <div class="relative group flex items-center w-fit" v-else>
+                        <i class="ki-filled ki-cross-circle text-red-500 cursor-help"></i>
+                        <!-- Tooltip -->
+                        <div
+                          class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block w-max px-2 py-1 bg-red-600 text-white text-xs rounded shadow-lg z-10"
+                        >
+                          {{ row.header }} Mismatch
+                          <!-- Arrow -->
+                          <div
+                            class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-red-600"
+                          ></div>
+                        </div>
+                      </div>
                     </template>
                   </td>
 
