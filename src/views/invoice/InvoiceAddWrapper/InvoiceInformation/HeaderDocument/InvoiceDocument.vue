@@ -59,9 +59,20 @@
             @click="changeFile(index)"
             >Edit</span
           >
+
+          <span
+            v-if="
+              (formInject?.status === 0 || formInject?.status === -1 || formInject?.status === 5) &&
+              item.varName === 'invoiceDocument'
+            "
+            class="border-b border-dashed border-primary text-primary cursor-pointer text-xs font-medium"
+            @click="sendUploadFile"
+            >Fill Invoice Data</span
+          >
         </div>
       </div>
     </div>
+    <UiLoading v-model="isLoading"></UiLoading>
   </div>
 </template>
 
@@ -76,14 +87,19 @@ import type { formTypes } from '../../../types/invoiceAddWrapper'
 import pdfUpload from '@/components/ui/pdfUpload/pdfUpload.vue'
 import AttachmentView from '@/components/ui/attachment/AttachmentView.vue'
 import { useRoute } from 'vue-router'
+import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
+import UiLoading from '@/components/modal/UiLoading.vue'
+import { parseIndoDate } from '@/composables/parseIndoDate'
 // import type { invoiceOcrData } from '@/views/invoice/types/invoiceOcrData'
 
 type FileFieldKeys = 'invoiceDocument' | 'tax' | 'referenceDocument' | 'otherDocument'
 
 const route = useRoute()
+const invoiceVerificationStore = useInvoiceVerificationStore()
 // const ocrData = inject<invoiceOcrData>('ocrData')
 const formInject = inject<formTypes>('form')
 const pdfUploadRef = ref()
+const isLoading = ref<boolean>(false)
 
 const isEditingField = reactive<Record<string, boolean>>({
   invoiceDocument: false,
@@ -126,9 +142,26 @@ const changeFile = (index: number) => {
   pdfUploadRef.value[index].triggerFileInput()
 }
 
-// const setFileOcr = (data: invoiceOcrData) => {
-//   if (ocrData) Object.assign(ocrData, data)
-// }
+const sendUploadFile = async () => {
+  isLoading.value = true
+  try {
+    if (form?.invoiceDocument?.previewPath) {
+      const response = await invoiceVerificationStore.uploadFileOcr(
+        form.invoiceDocument.previewPath,
+      )
+
+      if (formInject && response) {
+        // Map OCR data to Invoice Header fields as requested
+        formInject.invoiceNo = response.taxDocumentNumber // Using taxDocumentNumber as generic document number from OCR
+        formInject.invoiceDate = parseIndoDate(response.taxDocumentDate)
+      }
+    }
+  } catch (error) {
+    console.error('Error filling invoice data:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
 
 const checkIsView = () => route.query.type?.toString().includes('view')
 

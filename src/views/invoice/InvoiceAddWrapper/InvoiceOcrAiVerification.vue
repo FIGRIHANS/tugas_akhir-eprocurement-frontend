@@ -111,9 +111,10 @@
                       <i class="ki-filled ki-cross-circle text-red-500 cursor-help"></i>
                       <!-- Tooltip -->
                       <div
-                        class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block w-max px-2 py-1 bg-red-600 text-white text-xs rounded shadow-lg z-10"
+                        v-if="shouldShowTooltip(row.header)"
+                        class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block w-max px-2 py-1 bg-red-600 text-white text-center text-xs rounded shadow-lg z-10 whitespace-pre-line"
                       >
-                        {{ row.header }} Mismatch
+                        {{ getTooltipMessage(row.header, row.qr, 'QR') }}
                         <!-- Arrow -->
                         <div
                           class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-red-600"
@@ -149,9 +150,10 @@
                         <i class="ki-filled ki-cross-circle text-red-500 cursor-help"></i>
                         <!-- Tooltip -->
                         <div
-                          class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block w-max px-2 py-1 bg-red-600 text-white text-xs rounded shadow-lg z-10"
+                          v-if="shouldShowTooltip(row.header)"
+                          class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block w-max px-2 py-1 bg-red-600 text-white text-center text-xs rounded shadow-lg z-10 whitespace-pre-line"
                         >
-                          {{ row.header }} Mismatch
+                          {{ getTooltipMessage(row.header, row.ocr, 'OCR') }}
                           <!-- Arrow -->
                           <div
                             class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-red-600"
@@ -410,6 +412,46 @@ const manualReject = reactive<Record<number, boolean>>({})
 
 /* ---------------- helpers ---------------- */
 const isEmpty = (val: any) => val === undefined || val === null || val === '' || val === '-'
+
+const parseCurrency = (value: string | number): number => {
+  if (typeof value === 'number') return value
+  if (!value || value === '-') return 0
+  // Remove currency symbol, dots, and replace comma with dot for decimals (Indonesian format assumption)
+  const clean = value.toString().replace(/[^0-9,-]+/g, '')
+  // If it has comma, likely decimal separator in ID format
+  return parseFloat(clean.replace(/\./g, '').replace(',', '.'))
+}
+
+const formatCurrency = (value: number) => {
+  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value)
+}
+
+const getDifference = (header: string, docValue: string) => {
+  let formValue = 0
+  const docNum = parseCurrency(docValue)
+
+  if (header === 'Nilai Penjualan') formValue = Number(form?.subtotal || 0)
+  if (header === 'PPN') formValue = Number(form?.vatAmount || 0)
+  //  if (header === 'PPN BM') formValue = Number(form?.ppnbm || 0) // Assuming usage
+
+  const diff = formValue - docNum
+  return diff
+}
+
+const TOOLTIP_HEADERS = ['Nilai Penjualan', 'DPP Lainnya', 'PPN', 'PPN BM']
+const shouldShowTooltip = (header: string) => TOOLTIP_HEADERS.includes(header)
+
+const getTooltipMessage = (header: string, docValue: string, source: 'QR' | 'OCR') => {
+  const diff = getDifference(header, docValue)
+  const formattedDiff = formatCurrency(Math.abs(diff))
+
+  // Mapping header name to form field name for better clarity
+  let formField = 'Input Form'
+  if (header === 'Nilai Penjualan') formField = 'Subtotal Form'
+  if (header === 'PPN') formField = 'VAT Amount Form'
+
+  return `Terdapat selisih antara\n${formField} dengan ${source}\nsebesar ${formattedDiff}`
+}
 
 const setActive = (btn: 'back' | 'proceed') => {
   activeButton.value = btn
@@ -685,7 +727,7 @@ const tableData = computed(() => {
             ? false
             : isEmpty(qrData.dpp)
               ? 'none'
-              : true,
+              : Math.abs(getDifference('Nilai Penjualan', qrData.dpp)) < 1,
       ocr: ocrData.dpp || '-',
       invoiceVerified:
         editableRemarks.value[6] === '3'
@@ -694,7 +736,7 @@ const tableData = computed(() => {
             ? false
             : isEmpty(ocrData.dpp)
               ? 'none'
-              : true,
+              : Math.abs(getDifference('Nilai Penjualan', ocrData.dpp)) < 1,
       remarks: isEmpty(qrData.dpp) || isEmpty(ocrData.dpp) ? 'none' : true,
     },
     {
@@ -715,7 +757,7 @@ const tableData = computed(() => {
             ? false
             : isEmpty(qrData.ppn)
               ? 'none'
-              : true,
+              : Math.abs(getDifference('PPN', qrData.ppn)) < 1,
       ocr: ocrData.ppn || '-',
       invoiceVerified:
         editableRemarks.value[8] === '3'
@@ -724,7 +766,7 @@ const tableData = computed(() => {
             ? false
             : isEmpty(ocrData.ppn)
               ? 'none'
-              : true,
+              : Math.abs(getDifference('PPN', ocrData.ppn)) < 1,
       remarks: isEmpty(qrData.ppn) || isEmpty(ocrData.ppn) ? 'none' : true,
     },
     {

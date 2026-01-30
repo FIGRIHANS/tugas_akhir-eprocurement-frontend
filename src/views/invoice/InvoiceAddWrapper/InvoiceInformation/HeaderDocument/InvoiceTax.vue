@@ -32,16 +32,19 @@
             "
           />
           <div class="flex gap-5">
-
             <span
-              v-if="formInject?.status === 0 || formInject?.status === -1 || formInject?.status === 5"
+              v-if="
+                formInject?.status === 0 || formInject?.status === -1 || formInject?.status === 5
+              "
               class="border-b border-dashed border-primary text-primary cursor-pointer text-xs font-medium"
               @click="changeFile(index)"
               >Edit</span
             >
-  
+
             <span
-              v-if="formInject?.status === 0 || formInject?.status === -1 || formInject?.status === 5"
+              v-if="
+                formInject?.status === 0 || formInject?.status === -1 || formInject?.status === 5
+              "
               class="border-b border-dashed border-primary text-primary cursor-pointer text-xs font-medium"
               @click="sendUploadFile"
               >Fill Tax Data</span
@@ -133,7 +136,7 @@ const changeFile = (index: number) => {
 const sendUploadFile = async () => {
   isLoading.value = true
   // Object.assign(ocrData, await invoiceVerificationStore.uploadFileOcr(form?.tax?.previewPath))
-  const response =  await invoiceVerificationStore.uploadFileQr(form?.tax?.previewPath)
+  const response = await invoiceVerificationStore.uploadFileQr(form?.tax?.previewPath)
 
   formInject.taxNoInvoice = response.taxDocumentNumber
   formInject.taxDate = parseIndoDate(response.taxDocumentDate)
