@@ -227,20 +227,21 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import { reactive, ref, computed, onMounted, toRaw } from 'vue'
-import { useIntegrationStore } from '@/stores/system-integration/systemIntegration'
+import { useSystemIntegrationStore } from '@/stores/system-integration/systemIntegration'
 import { useRouter } from 'vue-router'
 import { useRoute } from 'vue-router'
 import type { IntegrationItem } from '@/stores/system-integration/types/integration-item'
 
 const route = useRoute()
-const code = route.params.id as string
+const id = route.params.id as string
+const defId = route.params.definitionId as string
 
 const router = useRouter()
 
-const integrationStore = useIntegrationStore()
+const integrationStore = useSystemIntegrationStore()
 
 const integrationDetail = computed(() =>
-    integrationStore.integrationList.find(i => i.code === code)
+    integrationStore.getIntegrationByCode(id, defId)
 )
 
 type MappingRow = {
@@ -262,20 +263,19 @@ type MappingGroup = {
 
 /* ================= HEADER FORM ================= */
 const form = reactive<IntegrationItem>({
-    code: '',
-    client: '',
-    processIntegration: '',
-    services: '',
-    type: '',
-    source: '',
-    destination: '',
-    transactionCode: '',
-    connection: '',
-    technicalObject: '',
-    fieldMapping: '',
-    integrationStatus: '',
-    connectionTest: '',
-    definition: [],
+    code: integrationDetail.value.code,
+    client: integrationDetail.value.client,
+    processIntegration: integrationDetail.value.processIntegration,
+    services: integrationDetail.value.services,
+    type: integrationDetail.value.type,
+    source: integrationDetail.value.source,
+    destination: integrationDetail.value.destination,
+    transactionCode: integrationDetail.value.transactionCode,
+    connection: integrationDetail.value.connection,
+    technicalObject: integrationDetail.value.technicalObject,
+    fieldMapping: integrationDetail.value.fieldMapping,
+    integrationStatus: integrationDetail.value.integrationStatus,
+    connectionTest: integrationDetail.value.connectionTest,
 })
 
 
@@ -384,10 +384,20 @@ const submit = () => {
     }
 
     // 2. simpan ke Pinia store
-    integrationStore.updateIntegration(integrationItem)
+    integrationStore.updateIntegration(id, integrationItem)
 
     // 3. redirect ke halaman list
-    router.push({ name: 'add-erp' })
+
+    if (route.query.routeFrom === 'detail') {
+
+        router.push({
+            name: 'erp-integration-detail',
+            params: {
+                id: id
+            }
+        })
+    }
+    router.back()
 }
 
 onMounted(() => {
@@ -403,9 +413,6 @@ onMounted(() => {
         ...JSON.parse(JSON.stringify(raw.definition ?? []))
     )
 
-    console.log(integrationDetail.value, 'ini integrationDetail');
-
-    console.log(mappingGroups, 'ini mappingGroupss');
 
 })
 </script>

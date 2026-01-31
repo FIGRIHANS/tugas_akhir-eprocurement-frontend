@@ -219,6 +219,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import successImg from '@/assets/success.svg'
 import LPagination from '@/components/pagination/LPagination.vue'
 import router from '@/router'
+import { useSystemIntegrationStore } from '@/stores/system-integration/systemIntegration'
 
 const search = ref('')
 const userRoleStore = useUserRoleStore()
@@ -230,6 +231,10 @@ const showModalSuccess = ref(false)
 const showDeleteModal = ref(false)
 const roleToDelete = ref<IRole | null>(null)
 const isDeleting = ref(false)
+
+const systemIntegrationStore = useSystemIntegrationStore()
+
+const data = computed(() => systemIntegrationStore.erpList)
 
 const rolePayload = reactive<{
   roleId: number
@@ -315,32 +320,32 @@ const Columns = ref([
 ])
 
 const erpList = ref([
-  {
-    connectionCode: 'EVOSAP01',
-    companyCode: 'MF00',
-    companyName: 'Petrosea',
-    systemClient: 'PRD',
-    erp: 'SAP',
-    processGroup: 'Invoice Management',
-    status: 'Active',
-    totalIntegration: 10,
-    inbound: 5,
-    outBound: 3,
-    lastChange: '03/06/2025 11/10/15',
-  },
-  {
-    connectionCode: 'EVOSAP02',
-    companyCode: 'MF00',
-    companyName: 'Petrosea',
-    systemClient: 'PRD',
-    erp: 'SAP',
-    processGroup: 'Vendor Management',
-    status: 'Active',
-    totalIntegration: 10,
-    inbound: 5,
-    outBound: 3,
-    lastChange: '03/06/2025 11/10/15',
-  },
+  // {
+  //   connectionCode: 'EVOSAP01',
+  //   companyCode: 'MF00',
+  //   companyName: 'Petrosea',
+  //   systemClient: 'PRD',
+  //   erp: 'SAP',
+  //   processGroup: 'Invoice Management',
+  //   status: 'Active',
+  //   totalIntegration: 10,
+  //   inbound: 5,
+  //   outBound: 3,
+  //   lastChange: '03/06/2025 11/10/15',
+  // },
+  // {
+  //   connectionCode: 'EVOSAP02',
+  //   companyCode: 'MF00',
+  //   companyName: 'Petrosea',
+  //   systemClient: 'PRD',
+  //   erp: 'SAP',
+  //   processGroup: 'Vendor Management',
+  //   status: 'Active',
+  //   totalIntegration: 10,
+  //   inbound: 5,
+  //   outBound: 3,
+  //   lastChange: '03/06/2025 11/10/15',
+  // },
 ])
 
 const roleNameError = ref('')
@@ -488,6 +493,10 @@ async function handleProcessDelete() {
 }
 
 onMounted(() => {
+  console.log(data.value, 'ini data');
+
+  erpList.value = data.value
+
   userRoleStore.getAllUserRoles({
     page: 1,
     pageSize: 10,

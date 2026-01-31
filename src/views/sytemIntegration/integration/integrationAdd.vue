@@ -228,12 +228,16 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import { reactive, ref } from 'vue'
-import { useIntegrationStore } from '@/stores/system-integration/systemIntegration'
+import { useSystemIntegrationStore } from '@/stores/system-integration/systemIntegration'
 import { useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 
 const router = useRouter()
+const route = useRoute()
 
-const integrationStore = useIntegrationStore()
+const integrationStore = useSystemIntegrationStore()
+
+const id = route.params.id as string
 
 type MappingRow = {
     id: string
@@ -517,10 +521,20 @@ const submit = () => {
     }
 
     // 2. simpan ke Pinia store
-    integrationStore.addIntegration(integrationItem)
+    integrationStore.addIntegration(id, integrationItem)
 
-    // 3. redirect ke halaman list
-    router.push({ name: 'add-erp' })
+    if (route.query.routeFrom === 'detail') {
+
+        router.push({
+            name: 'erp-integration-detail',
+            params: {
+                id: id
+            }
+        })
+    } else {
+        router.back()
+    }
+
 }
 </script>
 
