@@ -29,7 +29,9 @@
               <label class="text-sm font-medium text-gray-700 w-[140px] flex-shrink-0">
                 Company Code
               </label>
-              <UiInput v-model="wfHeader.companyCode" placeholder="e.g. MF00" row class="flex-1" />
+              <!-- <UiInput v-model="wfHeader.companyCode" placeholder="e.g. MF00" row class="flex-1" /> -->
+              <UiSelect v-model="wfHeader.companyCode" placeholder="Select Company Code" row text-key="name"
+                value-key="code" :options="companyCodeList" class="flex-1" />
             </div>
           </div>
 
@@ -228,7 +230,7 @@
             <i class="ki-filled ki-filter"></i>
             Filter
           </button>
-          <button class="btn btn-primary" @click="showAddIntegrationModal = true">
+          <button class="btn btn-primary" @click="goToAddIntegrationPage()">
             <i class="ki-duotone ki-plus-circle"></i>
             Add New
           </button>
@@ -286,11 +288,12 @@
             <tr v-for="(item, index) in integrationList" :key="index" class="integration__field-items hover:bg-blue-50">
               <td class="flex items-center gap-[24px]">
                 <button class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]" title="View Detail"
-                  @click="showAddIntegrationModal = true">
+                  @click="goToDetail(item.code)">
                   <i class="ki-filled ki-eye !text-lg"></i>
                 </button>
-                <button class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]" title="Field Mapping">
-                  <i class="ki-duotone ki-data !text-lg"></i>
+                <button class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]" title="Field Mapping"
+                  @click="goToEdit(item.code)">
+                  <i class="ki-duotone ki-pencil !text-lg"></i>
                 </button>
               </td>
               <td class="whitespace-nowrap font-medium">
@@ -344,7 +347,7 @@
         </table>
       </div>
     </div>
-    <IntegrationAddModal v-model="showAddIntegrationModal" @submit="handleAddIntegration" />
+    <!-- <IntegrationAddModal v-model="showAddIntegrationModal" @submit="handleAddIntegration" /> -->
   </div>
 
 
@@ -353,8 +356,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, onMounted, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import BreadcrumbView from '@/components/BreadcrumbView.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
@@ -362,8 +365,24 @@ import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import UiRadio from '@/components/ui/atoms/radio/UiRadio.vue'
+import { useIntegrationStore } from '@/stores/system-integration/systemIntegration'
+import { storeToRefs } from 'pinia'
 
-import IntegrationAddModal from './erpModal/erpAddModal.vue'
+import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
+const integrationStore = useIntegrationStore()
+const { integrationList } = storeToRefs(integrationStore)
+
+// import IntegrationAddModal from './erpModal/erpAddModal.vue'
+
+const invoiceMasterApi = useInvoiceMasterDataStore()
+
+
+const companyCodeList = computed(() => invoiceMasterApi.companyCode)
+
+const route = useRoute()
+const router = useRouter()
+const id = route.params.id as string
+
 
 // Reactive state
 // const bracketAmount = ref<'yes' | 'no' | undefined>(undefined)
@@ -371,23 +390,31 @@ import IntegrationAddModal from './erpModal/erpAddModal.vue'
 // const showProfileModal = ref(false)
 // const showAuthModal = ref(false)
 
+const goToAddIntegrationPage = () => {
+  router.push({
+    name: 'add-integration',
+  })
+}
+
+
+
 
 // Interface for Integration Item
-interface IntegrationItem {
-  code: string
-  client: string
-  processIntegration: string
-  services: string
-  type: string
-  source: string
-  destination: string
-  transactionCode: string
-  connection: string
-  technicalObject: string
-  fieldMapping: string
-  integrationStatus: string
-  connectionTest: string
-}
+// interface IntegrationItem {
+//   code: string
+//   client: string
+//   processIntegration: string
+//   services: string
+//   type: string
+//   source: string
+//   destination: string
+//   transactionCode: string
+//   connection: string
+//   technicalObject: string
+//   fieldMapping: string
+//   integrationStatus: string
+//   connectionTest: string
+// }
 
 // Interface for WF Header
 interface WfHeader {
@@ -408,8 +435,8 @@ interface WfHeader {
   language: string
 }
 
-const showAddIntegrationModal = ref(false)
-const integrationList = ref<IntegrationItem[]>([])
+
+// const integrationList = ref<IntegrationItem[]>([])
 const showPassword = ref(false)
 const search = ref('')
 
@@ -475,17 +502,37 @@ const processGroupOptions = [
 //   showAuthModal.value = false
 // }
 
-const handleAddIntegration = (data: IntegrationItem) => {
-  integrationList.value.push(data)
+// const handleAddIntegration = (data: IntegrationItem) => {
+//   integrationList.value.push(data)
+// }
+
+const goToDetail = (code: string) => {
+  router.push(
+    {
+      name: 'detail-integration',
+      params: { id: code }
+    }
+  )
 }
 
+const goToEdit = (code: string) => {
+  router.push(
+    {
+      name: 'edit-integration',
+      params: { id: code }
+    }
+  )
+}
+
+
+
 // On Mounted to fetch data
-onMounted(() => {
-  const route = useRoute()
-  const id = route.params.id as string
+onMounted(async () => {
+
+  await invoiceMasterApi.getCompanyCode()
 
   // Mock data fetching based on ID
-  console.log('Fetching details for:', id)
+  // console.log('Fetching details for:', id)
 
   // define mock data
   const mockDB: Record<string, WfHeader> = {

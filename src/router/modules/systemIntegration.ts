@@ -14,4 +14,19 @@ export default [
     name: 'erp-integration-detail',
     component: () => import('@/views/sytemIntegration/erpDetail.vue'),
   },
+  {
+    path: '/add-integration',
+    name: 'add-integration',
+    component: () => import('@/views/sytemIntegration/integration/integrationAdd.vue'),
+  },
+  {
+    path: '/detail-integration/:id',
+    name: 'detail-integration',
+    component: () => import('@/views/sytemIntegration/integration/integrationDetail.vue'),
+  },
+  {
+    path: '/edit-integration/:id',
+    name: 'edit-integration',
+    component: () => import('@/views/sytemIntegration/integration/integrationEdit.vue'),
+  },
 ]
