@@ -19,7 +19,8 @@
               <label class="text-sm font-medium text-gray-700 w-[140px] flex-shrink-0">
                 Connection Code <span class="text-red-500">*</span>
               </label>
-              <UiInput v-model="wfHeader.connectionCode" placeholder="e.g. EVOSAP01" row required class="flex-1" />
+              <UiInput v-model="wfHeader.connectionCode" placeholder="e.g. EVOSAP01" row required class="flex-1"
+                :error="isCodeEmpty" />
             </div>
           </div>
 
@@ -211,7 +212,7 @@
         </div>
       </div>
       <div class="flex justify-end mt-6 pr-4">
-        <UiButton type="button" class="btn btn-primary">
+        <UiButton type="button" class="btn btn-primary" @click="submitErp()">
           <span>Save</span>
           <UiIcon name="arrows-circle" variant="duotone" class="w-4 h-1" />
         </UiButton>
@@ -230,7 +231,7 @@
             <i class="ki-filled ki-filter"></i>
             Filter
           </button>
-          <button class="btn btn-primary" @click="goToAddIntegrationPage()">
+          <button class="btn btn-primary" @click="goToAddIntegrationPage()" :disabled="!isCreate">
             <i class="ki-duotone ki-plus-circle"></i>
             Add New
           </button>
@@ -293,7 +294,7 @@
                 </button>
                 <button class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]" title="Field Mapping"
                   @click="goToEdit(item.code)">
-                  <i class="ki-duotone ki-pencil !text-lg"></i>
+                  <i class="ki-filled ki-pencil !text-lg"></i>
                 </button>
               </td>
               <td class="whitespace-nowrap font-medium">
@@ -365,12 +366,12 @@ import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import UiRadio from '@/components/ui/atoms/radio/UiRadio.vue'
-import { useIntegrationStore } from '@/stores/system-integration/systemIntegration'
-import { storeToRefs } from 'pinia'
+import { useSystemIntegrationStore } from '@/stores/system-integration/systemIntegration'
+
 
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
-const integrationStore = useIntegrationStore()
-const { integrationList } = storeToRefs(integrationStore)
+const systemIntegrationStore = useSystemIntegrationStore()
+const integrationList = ref([])
 
 // import IntegrationAddModal from './erpModal/erpAddModal.vue'
 
@@ -389,11 +390,26 @@ const id = route.params.id as string
 // const showBracketModal = ref(false)
 // const showProfileModal = ref(false)
 // const showAuthModal = ref(false)
+const isCodeEmpty = ref(false)
+const isCreate = ref(false)
 
 const goToAddIntegrationPage = () => {
-  router.push({
-    name: 'add-integration',
-  })
+
+  console.log(wfHeader.value.connectionCode);
+
+
+  if (wfHeader.value.connectionCode !== '') {
+    isCodeEmpty.value = false
+    router.push({
+      name: 'add-integration',
+      params: {
+        id: wfHeader.value.connectionCode
+      }
+    })
+  } else {
+    isCodeEmpty.value = true
+  }
+
 }
 
 
@@ -524,73 +540,56 @@ const goToEdit = (code: string) => {
   )
 }
 
+const submitErp = () => {
+  systemIntegrationStore.addErp(wfHeader)
+
+  const getData = systemIntegrationStore.erpList
+  console.log(getData, 'ini getData');
+
+
+
+  isCreate.value = true
+}
+
 
 
 // On Mounted to fetch data
-onMounted(async () => {
+onMounted(() => {
 
-  await invoiceMasterApi.getCompanyCode()
+  invoiceMasterApi.getCompanyCode(wfHeader.value.connectionCode)
 
-  // Mock data fetching based on ID
-  // console.log('Fetching details for:', id)
 
-  // define mock data
-  const mockDB: Record<string, WfHeader> = {
-    EVOSAP01: {
-      connectionCode: 'EVOSAP01',
-      companyCode: 'MF00',
-      description: 'SAP PRD Connection MF00',
-      erp: 'sap_hana_2020',
-      client: 'PRD',
-      clientId: '120',
-      status: 'Active',
-      processGroup: 'Invoice Management',
-      connectionMethod: 'RFC',
-      connectorDriver: '.net connector Versi XX121',
-      destinationName: 'IDES-NEW',
-      appServerHost: '192.168.5.50',
-      user: 'TMS_EVOQ',
-      password: 'Teamwork2026!!!',
-      language: 'EN',
-    },
-    EVOSAP02: {
-      connectionCode: 'EVOSAP02',
-      companyCode: 'MF00',
-      description: 'SAP PRD Connection MF00',
-      erp: 'sap_hana_2020',
-      client: 'PRD',
-      clientId: '120',
-      status: 'Active',
-      processGroup: 'Invoice Management',
-      connectionMethod: 'RFC',
-      connectorDriver: '.net connector Versi XX121',
-      destinationName: 'IDES-NEW',
-      appServerHost: '192.168.5.50',
-      user: 'TMS_EVOQ',
-      password: 'Teamwork2026!!!',
-      language: 'EN',
-    },
+  const getData = systemIntegrationStore.getErpById(wfHeader.value.connectionCode)
+
+  if (getData) {
+
+    const header = getData.header
+    const definition = getData.integrations
+
+    const data = {
+      connectionCode: wfHeader.value.connectionCode,
+      companyCode: header.companyCode,
+      description: header.description,
+      erp: header.erp,
+      client: header.client,
+      clientId: header.clientId,
+      status: header.status,
+      processGroup: header.processGroup,
+      connectionMethod: header.connectionMethod,
+      connectorDriver: header.connectorDriver,
+      destinationName: header.destinationName,
+      appServerHost: header.appServerHost,
+      user: header.user,
+      password: header.password,
+      language: header.language,
+    }
+    integrationList.value = definition
+
+    wfHeader.value = data
   }
 
-  const data = mockDB[id] || {
-    connectionCode: id,
-    companyCode: '',
-    description: '',
-    erp: undefined,
-    client: undefined,
-    clientId: '',
-    status: undefined,
-    processGroup: undefined,
-    connectionMethod: 'RFC',
-    connectorDriver: '',
-    destinationName: '',
-    appServerHost: '',
-    user: '',
-    password: '',
-    language: '',
-  }
 
-  wfHeader.value = data
+  // handleGenerateWFStep()
 })
 
 // const handleGenerateWFStep = () => {

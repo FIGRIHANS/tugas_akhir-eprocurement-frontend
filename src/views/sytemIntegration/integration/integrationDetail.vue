@@ -232,23 +232,40 @@
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import { ref, computed } from 'vue'
-import { useIntegrationStore } from '@/stores/system-integration/systemIntegration'
+import { useSystemIntegrationStore } from '@/stores/system-integration/systemIntegration'
 import { useRouter } from 'vue-router'
 import { useRoute } from 'vue-router'
-import type { IntegrationItem } from '@/stores/system-integration/types/integration-item'
+
 
 const route = useRoute()
 const router = useRouter()
 
-const integrationStore = useIntegrationStore()
+const integrationStore = useSystemIntegrationStore()
 
-const code = route.params.id
+const id = route.params.id as string
+const defId = route.params.definitionId as string
 
 const integrationDetail = computed(() =>
-    integrationStore.integrationList.find(i => i.code === code)
+    integrationStore.getIntegrationByCode(id, defId)
 )
 
-const form = computed<IntegrationItem>(() => (integrationDetail.value ?? {}) as IntegrationItem)
+
+
+const form = ref({
+    code: integrationDetail.value.code,
+    client: integrationDetail.value.client,
+    processIntegration: integrationDetail.value.processIntegration,
+    services: integrationDetail.value.services,
+    type: integrationDetail.value.type,
+    source: integrationDetail.value.source,
+    destination: integrationDetail.value.destination,
+    transactionCode: integrationDetail.value.transactionCode,
+    connection: integrationDetail.value.connection,
+    technicalObject: integrationDetail.value.technicalObject,
+    fieldMapping: integrationDetail.value.fieldMapping,
+    integrationStatus: integrationDetail.value.integrationStatus,
+    connectionTest: integrationDetail.value.connectionTest,
+})
 
 const invoiceTypeTab = ref<'header' | 'definition'>('header')
 
@@ -291,6 +308,8 @@ const connectionTestOptions = [
 const goBack = () => {
     router.back()
 }
+
+
 
 </script>
 
