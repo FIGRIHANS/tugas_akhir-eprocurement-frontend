@@ -296,9 +296,14 @@ export default [
   {
     id: 'workflow-configuration',
     title: 'Workflow Configuration',
-    icon: 'check',
-    to: 'workflow-configuration',
-    child: [],
+    icon: 'arrows-loop',
+    child: [
+      {
+        id: 'workflow-list',
+        title: 'Workflow Config List',
+        to: 'workflow-list',
+      },
+    ],
   },
   {
     id: 'system-integration',

@@ -422,10 +422,6 @@ const poList = ref([
   }
 ])
 
-
-// Data statis berdasarkan companyCode dan vendor
-// MF00 base total: ~1,560K (1,560,000)
-// Total (All) base total: ~9,990K (9,990,000)
 const staticDataMap: Record<string, Record<string, AgingPeriod[]>> = {
   'MF00': {
     '': [
@@ -461,7 +457,6 @@ const staticDataMap: Record<string, Record<string, AgingPeriod[]>> = {
 
 const apAgingData = computed<AgingPeriod[]>(() => {
   if (!companyCode.value) {
-    // Sum all company codes for "All" case (~9,990K target)
     const periods = ['Current', '1-30', '31-60', '> 60']
     return periods.map(p => {
       let totalAmount = 0

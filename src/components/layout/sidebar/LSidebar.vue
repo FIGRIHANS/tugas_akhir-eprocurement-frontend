@@ -252,7 +252,7 @@ const filteredSidebarMenu = computed(() => {
           }
         })
     }
-    if (userStore.userData?.profile.profileId === 3200) {
+    if (userStore.userData?.profile?.profileId === 3200) {
       return sidebarMenu
         .filter(
           (menu) =>
@@ -265,9 +265,12 @@ const filteredSidebarMenu = computed(() => {
             menu.id === 'userManagement' ||
             menu.id === 'workflow-configuration' ||
             menu.id === 'system-integration'
-            
         )
         .map((menu) => {
+          // Untuk workflow-configuration dan system-integration, jangan filter child
+          if (menu.id === 'workflow-configuration' || menu.id === 'system-integration') {
+            return { ...menu };
+          }
           return {
             ...menu,
             child: menu.child
@@ -293,7 +296,7 @@ const filteredSidebarMenu = computed(() => {
                     child.id === 'master-role' ||
                     child.id === 'master-employee' ||
                     child.id === 'report-user-authorization' ||
-                    child.id === 'erp-integration' 
+                    child.id === 'erp-integration'
                 )
               : [],
           }
