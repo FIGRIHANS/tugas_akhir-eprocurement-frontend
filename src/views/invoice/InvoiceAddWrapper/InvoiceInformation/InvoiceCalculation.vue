@@ -2,7 +2,9 @@
   <div class="flex-1 h-fit">
     <div class="card flex-1 h-fit">
       <div class="card-header flex justify-between items-center gap-[10px] py-[16px] px-[20px]">
-        <span class="font-semibold text-base whitespace-nowrap" v-if="isLba">Realization Invoice Calculation</span>
+        <span class="font-semibold text-base whitespace-nowrap" v-if="isLba"
+          >Realization Invoice Calculation</span
+        >
         <span class="font-semibold text-base whitespace-nowrap" v-else>Invoice Calculation</span>
         <button class="btn btn-primary" @click="setCalculation">
           Recalculate
@@ -19,7 +21,11 @@
               :class="index === listCalculation.length - 1 ? 'calculation__last-field' : ''"
             >
               <div class="flex-1">{{ item.name }}</div>
-              <div class="flex-1">{{ form?.currency === 'IDR' ? useFormatIdr(item.amount) : useFormatUsd(item.amount) }}</div>
+              <div class="flex-1">
+                {{
+                  form?.currency === 'IDR' ? useFormatIdr(item.amount) : useFormatUsd(item.amount)
+                }}
+              </div>
               <div>{{ item.currency }}</div>
             </div>
           </div>
@@ -28,20 +34,31 @@
     </div>
     <div class="card mt-5 p-5" v-if="form.invoiceType === '4' && checkIsNonPo()">
       <div
-        class="p-4 rounded-lg border"
-        :class="varianceResult.border"
+        class="p-4 rounded-xl border transition-all duration-300"
+        :class="varianceResult.containerClass"
       >
-        <p class="font-medium">
-          {{ varianceResult.text }}
-        </p>
+        <div>
+          <p class="font-bold text-gray-800 text-base">
+            {{ varianceResult.text }}
+          </p>
 
-        <p v-if="varianceResult.amount !== 0" class="text-sm mt-1">
-          Due Date: H+ 30
-        </p>
+          <p v-if="varianceResult.amount !== 0" class="text-sm text-gray-600 mt-1">
+            Due Date: <span class="font-medium text-gray-800">H+ 30</span>
+          </p>
 
-        <p v-if="varianceResult.posting" class="text-xs text-gray-500 mt-1">
-          Posting SAP: {{ varianceResult.posting }}
-        </p>
+          <p
+            v-if="varianceResult.posting"
+            class="text-sm font-semibold text-gray-700 mt-3 flex items-center gap-2"
+          >
+            Posting SAP:
+            <span
+              class="px-2.5 py-1 rounded-md text-xs font-bold shadow-sm"
+              :class="varianceResult.badgeClass"
+            >
+              {{ varianceResult.posting }}
+            </span>
+          </p>
+        </div>
       </div>
     </div>
   </div>
@@ -52,7 +69,13 @@ import { ref, computed, onMounted, watch, inject } from 'vue'
 import { useRoute } from 'vue-router'
 import type { listType } from '../../types/invoiceCalculation'
 import type { formTypes } from '../../types/invoiceAddWrapper'
-import { defaultField, dpField, lbaField, nonPoField, pettyCashField } from '@/static/invoiceCalculation'
+import {
+  defaultField,
+  dpField,
+  lbaField,
+  nonPoField,
+  pettyCashField,
+} from '@/static/invoiceCalculation'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 
@@ -74,45 +97,47 @@ const isPettyCash = computed(() => form?.invoiceType === '5')
 
 const setCount = (name: string) => {
   const list: Record<string, number> = {
-    'subtotal': countSubtotal(),
-    'dpp': countDppLainnya(),
+    subtotal: countSubtotal(),
+    dpp: countDppLainnya(),
     'vat amount': countVatAmount(),
     'wht amount': countWhtAmount(),
     'additional cost': countAdditionalCost(),
     'total gross amount': countTotalGrossAmount(),
-    'total net amount': countTotalNetAmount()
+    'total net amount': countTotalNetAmount(),
   }
 
   return list[name.toLowerCase()] ?? 0
 }
-
 
 const varianceResult = computed(() => {
   const variance = countVariance()
 
   if (variance > 0) {
     return {
-      border: 'border-yellow-400',
+      containerClass: 'bg-yellow-50 border-yellow-400',
       text: `Employee reimbursement amount of ${form.currency} ${variance.toLocaleString('id-ID')}`,
       amount: variance,
       posting: 'FB60',
+      badgeClass: 'bg-yellow-100 text-yellow-800 border border-yellow-200',
     }
   }
 
   if (variance < 0) {
     return {
-      border: 'border-green-400',
+      containerClass: 'bg-green-50 border-green-400',
       text: `Company transfer amount of ${form.currency} ${Math.abs(variance).toLocaleString('id-ID')}`,
       amount: Math.abs(variance),
       posting: 'F-02',
+      badgeClass: 'bg-green-100 text-green-800 border border-green-200',
     }
   }
 
   return {
-    border: 'border-gray-300',
+    containerClass: 'bg-gray-50 border-gray-300',
     text: 'The realization matches the cash advance (No SAP posting required)',
     amount: 0,
     posting: null,
+    badgeClass: '',
   }
 })
 
@@ -130,14 +155,21 @@ const varianceResult = computed(() => {
 // })
 
 const setCountLba = (name: string) => {
+  const varianceSubtotal = countVariance()
+  const vatAmount = countVatAmount() || 0
+  const whtAmount = countWhtAmount() || 0
+  const additionalCost = countAdditionalCost() || 0
+
+  const varianceGrossAmount = varianceSubtotal + vatAmount
+  const varianceTotalNetAmount = varianceGrossAmount - whtAmount
+
   const list: Record<string, number> = {
-    'variance subtotal': countVariance(),
-    'vat amount': countVatAmount(),
-    'wht amount': countWhtAmount(),
-    'additional cost': countAdditionalCost(),
-    'variance gross amount': countTotalGrossAmount(),
-    'variance total net amount': countTotalNetAmount(),
-    // 'variance' : countVariance()
+    'variance subtotal': varianceSubtotal,
+    'vat amount': vatAmount,
+    'wht amount': whtAmount,
+    'additional cost': additionalCost,
+    'variance gross amount': varianceGrossAmount,
+    'variance total net amount': varianceTotalNetAmount,
   }
 
   return list[name.toLowerCase()] ?? 0
@@ -195,69 +227,64 @@ const setToFormLba = (name: string, value: number) => {
       case 'variance total net amount':
         form.totalNetAmount = value
         break
-      
     }
   }
 }
 
 const countDppLainnya = () => {
+  if (!form) return
+  let total = 0
 
-if (!form) return
-let total = 0
+  if (!checkIsNonPo()) {
+    for (const item of form.invoicePoGr) {
+      // ⬇️ skip item yang taxCode = null
+      if (item.taxCode === null) continue
 
-if (!checkIsNonPo()) {
-  for (const item of form.invoicePoGr) {
-    // ⬇️ skip item yang taxCode = null
-    if (item.taxCode === null) continue
+      const itemAmount = form.currency === 'IDR' ? item.itemAmountLC : item.itemAmountTC
 
-    const itemAmount =
-      form.currency === 'IDR'
-        ? item.itemAmountLC
-        : item.itemAmountTC
-
-    total = total + Number(itemAmount)
-  }
-} else {
-  for (const item of form.invoiceItem) {
-    if (item.taxCode !== null) {
-      if (item.debitCredit === 'D') {
-        total = total + item.itemAmount
-      } else {
-        total = total - item.itemAmount
+      total = total + Number(itemAmount)
+    }
+  } else {
+    for (const item of form.invoiceItem) {
+      if (item.taxCode !== null) {
+        if (item.debitCredit === 'D') {
+          total = total + item.itemAmount
+        } else {
+          total = total - item.itemAmount
+        }
       }
     }
   }
-}
 
   // const subtotal = countSubtotal() || 0
-  return total * 11 / 12
+  return (total * 11) / 12
 }
 
 const setCalculation = () => {
   listCalculation.value = []
 
-  if(form.invoiceType === '4'){
+  if (form.invoiceType === '4') {
     for (const item of listName.value) {
       if (typeForm.value === 'nonpo' && item === 'Additional Cost') break
       const amount = setCountLba(item) || 0
-  
+
       const data = {
         name: item,
         amount: amount.toString(),
-        currency: form?.currency || ''
+        currency: form?.currency || '',
       }
       listCalculation.value.push(data)
       setToFormLba(item, amount)
     }
-  }else {
+  } else {
     for (const item of listName.value) {
       if (typeForm.value === 'nonpo' && item === 'Additional Cost') break
       const amount = setCount(item) || 0
-  
+
       const data = {
         name: item,
         amount: amount.toString(),
-        currency: form?.currency || ''
+        currency: form?.currency || '',
       }
       listCalculation.value.push(data)
       setToForm(item, amount)
@@ -270,7 +297,7 @@ const getPercentTax = (code: string) => {
   const getIndex = listTaxCalculation.value.findIndex((item) => item.code === code)
   if (getIndex !== -1) {
     const splitName = listTaxCalculation.value[getIndex].name.split(' - ')
-    return parseFloat(splitName[1].replace(',', '.').replace('%','')) / 100
+    return parseFloat(splitName[1].replace(',', '.').replace('%', '')) / 100
   }
 }
 
@@ -303,23 +330,23 @@ const countVatAmount = () => {
     for (const item of form.invoicePoGr) {
       const percentTax = getPercentTax(item.taxCode) || 0
       const itemAmount = form.currency === 'IDR' ? item.itemAmountLC : item.itemAmountTC
-      totalPo = totalPo + (percentTax * itemAmount)
+      totalPo = totalPo + percentTax * itemAmount
     }
     for (const item of form.additionalCost) {
       const percentTax = getPercentTax(item.taxCode) || 0
       if (item.debitCredit === 'D') {
-        totalAddDebit = totalAddDebit + (percentTax * Number(item.itemAmount))
+        totalAddDebit = totalAddDebit + percentTax * Number(item.itemAmount)
       } else {
-        totalAddCredit = totalAddCredit + (percentTax * Number(item.itemAmount))
+        totalAddCredit = totalAddCredit + percentTax * Number(item.itemAmount)
       }
     }
   } else {
     for (const item of form.invoiceItem) {
       const percentTax = getPercentTax(item.taxCode) || 0
       if (item.debitCredit === 'D') {
-        totalAddDebit = totalAddDebit + (percentTax * Number(item.itemAmount))
+        totalAddDebit = totalAddDebit + percentTax * Number(item.itemAmount)
       } else {
-        totalAddCredit = totalAddCredit + (percentTax * Number(item.itemAmount))
+        totalAddCredit = totalAddCredit + percentTax * Number(item.itemAmount)
       }
     }
   }
@@ -354,7 +381,6 @@ const countVariance = () => {
     totalAmount = totalAmount + Number(item.itemAmount)
   }
   return totalAmount - totalRealization
-
 }
 
 const countWhtAmount = () => {
@@ -366,23 +392,23 @@ const countWhtAmount = () => {
     for (const item of form.invoicePoGr) {
       const percentTax = 0
       const itemAmount = form.currency === 'IDR' ? item.itemAmountLC : item.itemAmountTC
-      totalPo = totalPo + (percentTax * itemAmount)
+      totalPo = totalPo + percentTax * itemAmount
     }
     for (const item of form.additionalCost) {
       const percentTax = 0
       if (item.debitCredit === 'D') {
-        totalAddDebit = totalAddDebit + (percentTax * Number(item.itemAmount))
+        totalAddDebit = totalAddDebit + percentTax * Number(item.itemAmount)
       } else {
-        totalAddCredit = totalAddCredit + (percentTax * Number(item.itemAmount))
+        totalAddCredit = totalAddCredit + percentTax * Number(item.itemAmount)
       }
     }
   } else {
     for (const item of form.invoiceItem) {
       const percentTax = 0
       if (item.debitCredit === 'D') {
-        totalAddDebit = totalAddDebit + (percentTax * Number(item.itemAmount))
+        totalAddDebit = totalAddDebit + percentTax * Number(item.itemAmount)
       } else {
-        totalAddCredit = totalAddCredit + (percentTax * Number(item.itemAmount))
+        totalAddCredit = totalAddCredit + percentTax * Number(item.itemAmount)
       }
     }
   }
@@ -405,23 +431,20 @@ watch(
     } else if (isPettyCash.value) {
       // For Petty Cash, use pettyCashField (without WHT Amount)
       listName.value = [...pettyCashField]
-    } else if (form.invoiceType === '4'){
+    } else if (form.invoiceType === '4') {
       isLba.value = true
       listName.value = [...lbaField]
     } else if (checkIsNonPo()) {
       listName.value = [...nonPoField]
-    } 
-    else {
+    } else {
       listName.value = [...defaultField]
     }
     setCalculation()
-
-    
   },
   {
     deep: true,
-    immediate: true
-  }
+    immediate: true,
+  },
 )
 
 watch(
@@ -431,8 +454,8 @@ watch(
   },
   {
     deep: true,
-    immediate: true
-  }
+    immediate: true,
+  },
 )
 
 onMounted(() => {
