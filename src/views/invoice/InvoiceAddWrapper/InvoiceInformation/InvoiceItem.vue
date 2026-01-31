@@ -57,13 +57,15 @@
                 </button>
               </td>
               <td>
-                <span v-if="!item.isEdit || form.invoiceType === '4'">{{ getActivityName(item.activity) || '-' }}</span>
+                <span v-if="!item.isEdit || form.invoiceType === '4'">{{
+                  getActivityName(item.activity) || '-'
+                }}</span>
                 <v-select
                   v-else
                   v-model="item.activity"
                   class="customSelect"
                   placeholder="Select"
-                  :get-option-label="(option: any) => `${option.code} - ${option.name}`"
+                  :get-option-label="(option: any) => option.name"
                   :reduce="(option: any) => option.id"
                   :options="listActivity"
                   appendToBody
@@ -97,8 +99,10 @@
                   @change="editVariance(index)"
                 />
               </td>
-              <td v-if="form.invoiceType === '4' ">
-                <span v-if="!item.isEdit || form.invoiceType === '4'">{{ item.variance || '-' }}</span>
+              <td v-if="form.invoiceType === '4'">
+                <span v-if="!item.isEdit || form.invoiceType === '4'">{{
+                  item.variance || '-'
+                }}</span>
                 <input
                   v-else
                   v-model="item.variance"
@@ -110,7 +114,9 @@
                 />
               </td>
               <td>
-                <span v-if="!item.isEdit || form.invoiceType === '4'">{{ item.itemText || '-' }}</span>
+                <span v-if="!item.isEdit || form.invoiceType === '4'">{{
+                  item.itemText || '-'
+                }}</span>
                 <input
                   v-else
                   v-model="item.itemText"
@@ -121,16 +127,20 @@
                   @input="onItemTextInput(item, $event)"
                 />
               </td>
-              
+
               <td v-if="!isPettyCash">
-                <span v-if="!item.isEdit || form.invoiceType === '4'">{{ getDebitCreditName(item.debitCredit) || '-' }}</span>
+                <span v-if="!item.isEdit || form.invoiceType === '4'">{{
+                  getDebitCreditName(item.debitCredit) || '-'
+                }}</span>
                 <select v-else v-model="item.debitCredit" class="select" placeholder="">
                   <option value="D">Debit</option>
                   <option value="K">Credit</option>
                 </select>
               </td>
               <td v-if="!isPettyCash">
-                <span v-if="!item.isEdit || form.invoiceType === '4'">{{ getTaxCodeName(item.taxCode) || '-' }}</span>
+                <span v-if="!item.isEdit || form.invoiceType === '4'">{{
+                  getTaxCodeName(item.taxCode) || '-'
+                }}</span>
                 <v-select
                   v-else
                   v-model="item.taxCode"
@@ -150,7 +160,9 @@
                 }}</span>
               </td>
               <td v-if="!isPettyCash">
-                <span v-if="!item.isEdit || form.invoiceType === '4'">{{ getCostCenterName(item.costCenter) || '-' }}</span>
+                <span v-if="!item.isEdit || form.invoiceType === '4'">{{
+                  getCostCenterName(item.costCenter) || '-'
+                }}</span>
                 <v-select
                   v-else
                   v-model="item.costCenter"
@@ -214,12 +226,12 @@ const columns = computed(() => {
   const baseColumns = ['Action', 'Activity / Expense', 'Item Amount', 'Item Text']
 
   if (form.invoiceType === '4') {
-  const index = baseColumns.indexOf('Item Text')
+    const index = baseColumns.indexOf('Item Text')
 
-  if (index !== -1) {
-    baseColumns.splice(index, 0, 'Realization Amount', 'Variance')
+    if (index !== -1) {
+      baseColumns.splice(index, 0, 'Realization Amount', 'Variance')
+    }
   }
-}
 
   if (!isPettyCash.value) {
     baseColumns.push('Debit/Credit')
@@ -273,7 +285,7 @@ const addNew = () => {
       isEdit: false,
       isTextLimitExceeded: false,
       realizationAmount: 0,
-      variance: 0
+      variance: 0,
     }
     form.invoiceItem.push(data)
   }
@@ -288,8 +300,7 @@ const deleteItem = (index: number) => {
 
 const getActivityName = (id: number) => {
   const getIndex = listActivity.value.findIndex((item) => item.id === id)
-  if (getIndex !== -1)
-    return `${listActivity.value[getIndex].code} - ${listActivity.value[getIndex].name}`
+  if (getIndex !== -1) return listActivity.value[getIndex].name
 }
 
 const getDebitCreditName = (code: string) => {
@@ -355,92 +366,6 @@ const onItemTextInput = (item: { itemText?: string; isTextLimitExceeded?: boolea
     item.isTextLimitExceeded = false
   }
 }
-
-const pushCasDummyData = () => {
-  const data = {
-    id: 1,
-    activity: 2,
-    activityCode: "",
-    activityName: "",
-    itemAmount: 3000000,
-    itemText: "item text ",
-    debitCredit: "D",
-    taxCode: "V0",
-    vatAmount: 13.42,
-    costCenter: "GN01010001",
-    profitCenter: "",
-    assignment: "",
-    whtType: "",
-    whtCode: "",
-    whtBaseAmount: '3000000',
-    whtAmount: "",
-    whtCodeList: [],
-    isEdit: false,
-    isTextLimitExceeded: false,
-    realizationAmount: 0,
-    variance: 0
-  }
-    form.invoiceItem.push(data)
-}
-
-const editVariance = (index: number) => {
- form.invoiceItem[index].variance = form.invoiceItem[index].itemAmount - form.invoiceItem[index].realizationAmount
-}
-
-watch(
-  () => [form?.invoiceItem, form?.currency],
-  () => {
-    getVatAmount()
-  },
-  {
-    deep: true,
-    immediate: true,
-  },
-)
-
-watch(
-  () => form?.companyCode,
-  () => {
-    if (form?.companyCode) invoiceMasterApi.getCostCenter(form?.companyCode || '')
-  },
-  {
-    immediate: true,
-  },
-)
-
-watch(
-  () => form.companyCode,
-  () => {
-    if (form) {
-      if (form.companyCode) invoiceMasterApi.getActivity(form.companyCode)
-    }
-  },
-  {
-    deep: true,
-    immediate: true,
-  },
-)
-
-watch(
-  () => form?.invoiceType,
-  () => {
-    if (form && form.invoiceType === '5') {
-      form.invoiceItem.forEach((item) => {
-        item.costCenter = ''
-      })
-    }
-  },
-  {
-    immediate: true,
-  },
-)
-
-watch(
-  () => form?.casNoCode,
-  () => {
-    pushCasDummyData() 
-  },
-)
 </script>
 
 <style lang="scss" scoped>

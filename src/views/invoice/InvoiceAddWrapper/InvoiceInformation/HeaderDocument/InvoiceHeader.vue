@@ -269,7 +269,7 @@
           class="select"
           :class="{ 'border-danger': form.companyCodeError }"
         >
-          <option v-for="item of casNoCodeList" :key="item.casNo" :value="item.casNo">
+          <option v-for="item of mergedCasList" :key="item.casNo" :value="item.casNo">
             {{ item.casNo }}
           </option>
         </select>
@@ -485,7 +485,6 @@ const form = inject<formTypes>('form')
 const route = useRoute()
 const typeForm = ref<string>('')
 
-
 // const invoiceTypeNonPo = ref([
 //   {
 //     id: '1',
@@ -579,12 +578,20 @@ const isPettyCash = computed(() => form?.invoiceType === '5')
 
 const updateCasNoName = (option: string) => {
   if (option && form) {
-    const selectedItem = casNoCode.value.find((item) => item.casNo === option)
+    const selectedItem = mergedCasList.value.find((item) => item.casNo === option)
     if (selectedItem) {
       form.casNoName = selectedItem.casNo
     }
   }
 }
+
+const mergedCasList = computed(() => {
+  const apiList = casNoCode.value || []
+  // Map hardcoded list to match API structure if needed, or just use as is if compatible
+  // Here we assume simple structure compatibility for display
+  const hardcoded = casNoCodeList
+  return [...hardcoded, ...apiList]
+})
 
 const remainingDpAmountVal = computed(() => {
   if (form.currency === 'IDR') {
@@ -675,9 +682,9 @@ watch(
         form.cashJournalName = `${listCashJournal.value[getIndex].cashJournalNo} - ${listCashJournal.value[getIndex].cashJournalName}`
     }
 
-    if (form?.casNoCode && casNoCode.value.length > 0 && form.invoiceType === '4') {
-      const getIndex = casNoCode.value.findIndex((item) => item.casNo === form.casNoCode)
-      if (getIndex !== -1) form.casNoName = casNoCode.value[getIndex].casNo
+    if (form?.casNoCode && mergedCasList.value.length > 0) {
+      const getIndex = mergedCasList.value.findIndex((item) => item.casNo === form.casNoCode)
+      if (getIndex !== -1) form.casNoName = mergedCasList.value[getIndex].casNo
     }
   },
   {
@@ -705,7 +712,7 @@ watch(
     if (form.companyCode) invoiceMasterApi.getActivity(form.companyCode || '')
     if (form.companyCode && form.invoiceType)
       invoiceMasterApi.getMatrixApproval(form.invoiceType || '', form.companyCode || '')
-    if (form.vendorId && form.invoiceType === '4' && form.companyCode) {
+    if (form.vendorId && form.companyCode) {
       const vendorIdStr = String(form.vendorId).trim()
       const companyCodeStr = String(form.companyCode).trim()
       if (
@@ -735,12 +742,47 @@ watch(
   },
 )
 
+watch(
+  () => form?.casNoCode,
+  async (newVal) => {
+    if (newVal && form) {
+      const response = await submissionApi.getCasItem(newVal)
+      if (response.result && response.result.content) {
+        // Map response to invoiceItemTypes
+        const newItems = response.result.content.map((item: any, index: number) => ({
+          id: index + 1, // Temporary ID or based on logic
+          activity: item.activityId || null,
+          activityCode: item.activityExpenses || '',
+          activityName: item.activityName || '',
+          itemAmount: item.itemAmount || 0,
+          itemText: item.itemText || '',
+          debitCredit: item.debitCredit || '',
+          taxCode: item.taxCode || '',
+          vatAmount: item.vatAmount || 0,
+          costCenter: item.costCenter || '',
+          profitCenter: item.profitCenter || '',
+          assignment: item.assignment || '',
+          whtType: item.whtType || '',
+          whtCode: item.whtCode || '',
+          whtBaseAmount: String(item.whtBaseAmount || 0),
+          whtAmount: String(item.whtAmount || 0),
+          realizationAmount: 0,
+          variance: 0,
+          isEdit: false,
+        }))
+
+        form.invoiceItem = newItems
+      }
+    }
+  },
+)
+
 onMounted(() => {
   typeForm.value = route.query.type?.toString().toLowerCase() || 'po'
   invoiceMasterApi.getCurrency()
   invoiceMasterApi.getCompanyCode()
   invoiceMasterApi.getDpTypes()
-  if (form?.vendorId && form?.invoiceType === '4' && form?.companyCode) {
+  if (form?.vendorId && form?.companyCode) {
     const vendorIdStr = String(form.vendorId).trim()
     const companyCodeStr = String(form.companyCode).trim()
     if (

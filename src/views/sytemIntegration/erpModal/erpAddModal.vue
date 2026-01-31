@@ -67,79 +67,134 @@
                     <h3 class="card-title">Integration Mapping Form</h3>
                 </div>
 
-                <div class=" space-y-4">
+                <div class="space-y-4">
 
-                    <!-- CUSTOMER -->
-                    <div class="accordion-item">
-                        <button class="accordion-header" @click="toggle('customer')">
-                            <span>Customer</span>
-                            <i class="ki-filled ki-down" :class="{ 'rotate-180': open.customer }"></i>
+                    <!-- ========================= -->
+                    <!--        IS_HEADER         -->
+                    <!-- ========================= -->
+                    <div class="accordion-item border rounded-lg">
+                        <button class="accordion-header" @click="toggle('isHeader')">
+                            <span class="font-semibold">IS_HEADER (1 to 1)</span>
+                            <i class="ki-filled ki-down" :class="{ 'rotate-180': open.isHeader }"></i>
                         </button>
 
-                        <div v-show="open.customer" class="accordion-body">
-                            <div class="grid grid-cols-2 gap-4">
-                                <UiInput v-model="definition.customer.firstName" label="First Name" />
-                                <UiInput v-model="definition.customer.lastName" label="Last Name" />
+                        <div v-show="open.isHeader" class="accordion-body p-4 space-y-5">
+
+                            <!-- ROW: Invoice Date -->
+                            <div class="grid grid-cols-12 gap-4 items-center">
+                                <div class="col-span-3 font-semibold">Invoice Date</div>
+                                <UiInput class="col-span-3" label="Invoice Data"
+                                    v-model="definition.header.invoiceDate" />
+                                <UiInput class="col-span-3" label="EVOQ" value="InvoiceDate" disabled />
+                                <UiInput class="col-span-2" label="SAP Field" value="DOC_DATE" disabled />
+                                <span class="col-span-1 text-success font-semibold">Active</span>
                             </div>
+
+                            <!-- ROW: Posting Date -->
+                            <div class="grid grid-cols-12 gap-4 items-center">
+                                <div class="col-span-3 font-semibold">Posting Date</div>
+                                <UiInput class="col-span-3" v-model="definition.header.postingDate"
+                                    label="Invoice Data" />
+                                <UiInput class="col-span-3" value="PostingDate" label="EVOQ" disabled />
+                                <UiInput class="col-span-2" value="PSTNG_DATE" label="SAP Field" disabled />
+                                <span class="col-span-1 text-success font-semibold">Active</span>
+                            </div>
+
+                            <!-- ROW: Company Code -->
+                            <div class="grid grid-cols-12 gap-4 items-center">
+                                <div class="col-span-3 font-semibold">Company Code</div>
+                                <UiInput class="col-span-3" label="Invoice Data"
+                                    v-model="definition.header.companyCode" />
+                                <UiInput class="col-span-3" label="EVOQ" value="CompanyCode" disabled />
+                                <UiInput class="col-span-2" label="SAP Field" value="COMP_CODE" disabled />
+                                <span class="col-span-1 text-success font-semibold">Active</span>
+                            </div>
+
+                            <!-- ROW: Vendor Master -->
+                            <div class="grid grid-cols-12 gap-4 items-center">
+                                <div class="col-span-3 font-semibold">Vendor Master</div>
+                                <UiInput class="col-span-3" v-model="definition.header.vendorMaster"
+                                    label="Invoice Data" />
+                                <UiInput class="col-span-3" value="VendorId" label="EVOQ" disabled />
+                                <UiInput class="col-span-2" value="VENDOR_NO" label="SAP Field" disabled />
+                                <span class="col-span-1 text-success font-semibold">Active</span>
+                            </div>
+
+                            <!-- ROW: Subtotal -->
+                            <div class="grid grid-cols-12 gap-4 items-center">
+                                <div class="col-span-3 font-semibold">Subtotal</div>
+                                <UiInput class="col-span-3" v-model="definition.header.subtotal" label="Invoice Data" />
+                                <UiInput class="col-span-3" value="TotalGrossAmount" label="EVOQ" disabled />
+                                <UiInput class="col-span-2" value="GROSS_AMOUNT" label="SAP Field" disabled />
+                                <span class="col-span-1 text-success font-semibold">Active</span>
+                            </div>
+
+                            <!-- ROW: Currency -->
+                            <div class="grid grid-cols-12 gap-4 items-center">
+                                <div class="col-span-3 font-semibold">Currency</div>
+                                <UiInput class="col-span-3" v-model="definition.header.currency" label="Invoice Data" />
+                                <UiInput class="col-span-3" value="CurrCode" label="EVOQ" disabled />
+                                <UiInput class="col-span-2" value="CURRENCY" label="SAP Field" disabled />
+                                <span class="col-span-1 text-success font-semibold">Active</span>
+                            </div>
+
                         </div>
                     </div>
 
-                    <!-- ORDER -->
-                    <div class="accordion-item">
-                        <button class="accordion-header" @click="toggle('order')">
-                            <span>Order</span>
-                            <i class="ki-filled ki-down" :class="{ 'rotate-180': open.order }"></i>
+                    <!-- ========================= -->
+                    <!--        IT_ITEM           -->
+                    <!-- ========================= -->
+                    <div class="accordion-item border rounded-lg">
+                        <button class="accordion-header" @click="toggle('itItem')">
+                            <span class="font-semibold">IT_ITEM (1 to N)</span>
+                            <i class="ki-filled ki-down" :class="{ 'rotate-180': open.itItem }"></i>
                         </button>
 
-                        <div v-show="open.order" class="accordion-body">
-                            <div class="grid grid-cols-3 gap-4">
-                                <UiInput v-model="definition.order.itemNo" label="Item No" />
-                                <UiInput v-model="definition.order.price" label="Price" type="number" />
-                                <UiInput v-model="definition.order.noOfItems" label="No Of Items" type="number" />
+                        <div v-show="open.itItem" class="accordion-body p-4 space-y-5">
+
+                            <!-- ROW: PO Number -->
+                            <div class="grid grid-cols-12 gap-4 items-center">
+                                <div class="col-span-3 font-semibold">PO Number</div>
+                                <UiInput class="col-span-3" v-model="definition.item.poNumber" label="Invoice Data" />
+                                <UiInput class="col-span-3" value="PONo" label="EVOQ" disabled />
+                                <UiInput class="col-span-2" value="EBELN" label="SAP Field" disabled />
+                                <span class="col-span-1 text-success font-semibold">Active</span>
                             </div>
-                        </div>
-                    </div>
 
-                    <!-- BILLING ADDRESS -->
-                    <div class="accordion-item">
-                        <button class="accordion-header" @click="toggle('billing')">
-                            <span>Billing Address</span>
-                            <i class="ki-filled ki-down" :class="{ 'rotate-180': open.billing }"></i>
-                        </button>
-
-                        <div v-show="open.billing" class="accordion-body">
-                            <div class="grid grid-cols-2 gap-4">
-                                <UiInput v-model="definition.billing.street" label="Street" />
-                                <UiInput v-model="definition.billing.city" label="City" />
-                                <UiInput v-model="definition.billing.state" label="State" />
-                                <UiInput v-model="definition.billing.zip" label="Zip Code" />
-                                <UiInput v-model="definition.billing.country" label="Country" />
+                            <!-- ROW: Quantity -->
+                            <div class="grid grid-cols-12 gap-4 items-center">
+                                <div class="col-span-3 font-semibold">Quantity</div>
+                                <UiInput class="col-span-3" v-model="definition.item.quantity" label="Invoice Data" />
+                                <UiInput class="col-span-3" value="Quantity" label="EVOQ" disabled />
+                                <UiInput class="col-span-2" value="MENGE" label="SAP Field" disabled />
+                                <span class="col-span-1 text-success font-semibold">Active</span>
                             </div>
-                        </div>
-                    </div>
 
-                    <!-- DELIVERY ADDRESS -->
-                    <div class="accordion-item">
-                        <button class="accordion-header" @click="toggle('delivery')">
-                            <span>Delivery Address</span>
-                            <i class="ki-filled ki-down" :class="{ 'rotate-180': open.delivery }"></i>
-                        </button>
-
-                        <div v-show="open.delivery" class="accordion-body">
-                            <div class="grid grid-cols-2 gap-4">
-                                <UiInput v-model="definition.delivery.street" label="Street" />
-                                <UiInput v-model="definition.delivery.city" label="City" />
-                                <UiInput v-model="definition.delivery.state" label="State" />
-                                <UiInput v-model="definition.delivery.zip" label="Zip Code" />
-                                <UiInput v-model="definition.delivery.country" label="Country" />
+                            <!-- ROW: Item Amount -->
+                            <div class="grid grid-cols-12 gap-4 items-center">
+                                <div class="col-span-3 font-semibold">Item Amount</div>
+                                <UiInput class="col-span-3" v-model="definition.item.amount" label="Invoice Data" />
+                                <UiInput class="col-span-3" value="ItemAmount" label="EVOQ" disabled />
+                                <UiInput class="col-span-2" value="WRBTR" label="SAP Field" disabled />
+                                <span class="col-span-1 text-success font-semibold">Active</span>
                             </div>
+
+                            <!-- ROW: Unit -->
+                            <div class="grid grid-cols-12 gap-4 items-center">
+                                <div class="col-span-3 font-semibold">Unit</div>
+                                <UiInput class="col-span-3" v-model="definition.item.unit" label="Invoice Data" />
+                                <UiInput class="col-span-3" value="Uom" label="EVOQ" disabled />
+                                <UiInput class="col-span-2" value="PO_UNIT" label="SAP Field" disabled />
+                                <span class="col-span-1 text-success font-semibold">Active</span>
+                            </div>
+
                         </div>
                     </div>
 
                 </div>
             </div>
 
-            <!-- Footer -->
+            <!-- FOOTER -->
             <div class="flex justify-end gap-3 px-6 py-4 border-t">
                 <button class="btn btn-light" @click="close">Cancel</button>
                 <button class="btn btn-primary" @click="submit">
@@ -182,44 +237,40 @@ const emit = defineEmits<{
 
 const invoiceTypeTab = ref<'header' | 'definition'>('header')
 
-const setTab = (tab: 'header' | 'definition') => {
-    invoiceTypeTab.value = tab
-}
+
 
 const open = ref({
-    customer: true,
-    order: false,
-    billing: false,
-    delivery: false,
+    isHeader: true,
+    itItem: false,
 })
 
-const toggle = (key: keyof typeof open.value) => {
-    open.value[key] = !open.value[key]
-}
+const mappingStatusOptions = [
+    { text: 'Active', value: 'Active' },
+    { text: 'Inactive', value: 'Inactive' },
+]
 
 const definition = ref({
-    customer: {
-        firstName: '',
-        lastName: '',
+    header: {
+        invoiceDate: '',
+        postingDate: '',
+        companyCode: '',
+        vendorMaster: '',
+        subtotal: '',
+        currency: '',
+        invoiceVendorNo: '',
+        paymentTerm: '',
     },
-    order: {
-        itemNo: '',
-        price: '',
-        noOfItems: '',
-    },
-    billing: {
-        street: '',
-        city: '',
-        state: '',
-        zip: '',
-        country: '',
-    },
-    delivery: {
-        street: '',
-        city: '',
-        state: '',
-        zip: '',
-        country: '',
+    item: {
+        poNumber: '',
+        poItem: '',
+        quantity: '',
+        amount: '',
+        unit: '',
+        currency: '',
+        grDocumentNo: '',
+        grDocumentDate: '',
+        grDocumentItem: '',
+        taxCode: '',
     },
 })
 
@@ -238,6 +289,14 @@ const form = ref<IntegrationItem>({
     integrationStatus: 'Active',
     connectionTest: 'Success',
 })
+
+const toggle = (key: keyof typeof open.value) => {
+    open.value[key] = !open.value[key]
+}
+
+const setTab = (tab: 'header' | 'definition') => {
+    invoiceTypeTab.value = tab
+}
 
 const close = () => {
     emit('update:modelValue', false)

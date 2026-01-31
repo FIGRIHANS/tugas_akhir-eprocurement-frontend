@@ -216,61 +216,41 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
 
   const getCasNo = async (vendorId: string, companyCode: string) => {
     try {
-      // Opsi 1: Menggunakan query string langsung di URL (seperti getPoGr)
-      const response: ApiResponse<void> = await invoiceApi.get(
+      const response: ApiResponse<CasNoTypes[]> = await invoiceApi.get(
         `/invoice/invoice/check-cas?vendorCode=${vendorId}&companyCOde=${companyCode}`,
       )
-  
-      // Opsi 2: Menggunakan params object (axios akan convert ke query string)
-      // const response: ApiResponse<void> = await invoiceApi.get(
-      //   `/invoice/invoice/check-cas`,
-      //   {
-      //     params: {
-      //       vendorCode: vendorId,
-      //       companyCOde: companyCode
-      //     },
-      //   },
-      // )
-  
+
+      if (response.data && response.data.result && response.data.result.content) {
+        casNoCode.value = response.data.result.content
+      } else {
+        casNoCode.value = []
+      }
+
       return response.data
-      // const requestBody = {
-      //   REQUEST: {
-      //     SUPPLIER_FROM_PORTAL: vendorId,
-      //     COMPANY_CODE: companyCode,
-      //   },
-      // }
-
-      // const response = await invoiceApi.post<{
-      //   response: CasNoTypes[]
-      //   zMessage?: {
-      //     TYPE: string
-      //     ID: string
-      //     NUMBER: number
-      //     MESSAGE: string
-      //   }
-      // }>('/invoice/invoice/check-cas', requestBody, {
-      //   validateStatus: (status) => {
-      //     return status === 200 || status === 422
-      //   },
-      // })
-
-      // if (response.data.zMessage && response.data.zMessage.TYPE === 'E') {
-      //   casNoCode.value = []
-      //   return []
-      // }
-
-      // const mappedData = (response.data.response || []).filter(
-      //   (item) => item.casNo && item.casNo.trim() !== '',
-      // )
-      // casNoCode.value = mappedData
-      // return mappedData
     } catch (error) {
       console.error('getCasNo Error:', error)
       casNoCode.value = []
       return []
     }
   }
-  
+
+  const getCasItem = async (casNo: string) => {
+    try {
+      // Encode CAS No to handle slashes (e.g., INV/002/00/2025 -> INV%2F002%2F00%2F2025)
+      // Actually axios params usually handle encoding, but user shared encoded example.
+      // Let's use params object to be safe and let axios handle it.
+      const response: ApiResponse<any[]> = await invoiceApi.get(`/invoice/invoice/check-cas-item`, {
+        params: {
+          CasNo: casNo,
+        },
+      })
+
+      return response.data
+    } catch (error) {
+      console.error('getCasItem Error:', error)
+      return { result: { content: [] } }
+    }
+  }
 
   const getListNonPo = async (data: QueryParamsListPoTypes) => {
     listNonPo.value = []
@@ -387,6 +367,7 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
     getListNonPo,
     postSubmissionNonPo,
     getCasNo,
+    getCasItem,
     postCheckBudget,
     syncInvoicFromEmail,
     syncInvoicFromFtp,

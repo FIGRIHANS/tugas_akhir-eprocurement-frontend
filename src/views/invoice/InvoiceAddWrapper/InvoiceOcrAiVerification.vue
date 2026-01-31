@@ -4,25 +4,16 @@
       <div class="col-span-7 space-y-4">
         <div class="card-header py-[8px] px-[20px]">
           <div class="border rounded-lg border-gray-300 p-[4px] flex items-center gap-[4px]">
-            <button
-              class="btn btn-primary"
-              :class="{ 'btn-clear info__header': tabOcrTab !== 'general' }"
-              @click="setTabOcr('general')"
-            >
+            <button class="btn btn-primary" :class="{ 'btn-clear info__header': tabOcrTab !== 'general' }"
+              @click="setTabOcr('general')">
               General Data
             </button>
-            <button
-              class="btn btn-primary"
-              :class="{ 'btn-clear info__header': tabOcrTab !== 'tax' }"
-              @click="setTabOcr('tax')"
-            >
+            <button class="btn btn-primary" :class="{ 'btn-clear info__header': tabOcrTab !== 'tax' }"
+              @click="setTabOcr('tax')">
               Tax & Invoice Verification
             </button>
-            <button
-              class="btn btn-primary"
-              :class="{ 'btn-clear info__header': tabOcrTab !== 'ai' }"
-              @click="setTabOcr('ai')"
-            >
+            <button class="btn btn-primary" :class="{ 'btn-clear info__header': tabOcrTab !== 'ai' }"
+              @click="setTabOcr('ai')">
               AI Action
             </button>
           </div>
@@ -43,14 +34,12 @@
           <div class="grid grid-cols-2 gap-4 text-sm">
             <div v-for="(row, i) in generalStatus" :key="i">
               <p class="text-gray-500 text-xs">{{ row.label }}</p>
-              <p
-                :class="[
-                  'font-semibold',
-                  row.status === 'success' && 'text-green-600',
-                  row.status === 'warning' && 'text-yellow-500',
-                  row.status === 'error' && 'text-red-500',
-                ]"
-              >
+              <p :class="[
+                'font-semibold',
+                row.status === 'success' && 'text-green-600',
+                row.status === 'warning' && 'text-yellow-500',
+                row.status === 'error' && 'text-red-500',
+              ]">
                 {{ row.value }}
               </p>
             </div>
@@ -61,18 +50,12 @@
           <div class="flex justify-between mb-3">
             <h2 class="font-semibold text-lg">Invoice Verification</h2>
             <div class="flex gap-2">
-              <UiButton
-                class="px-3 py-1 bg-blue-600 text-white rounded-lg"
-                @click="verifyInvoice()"
-              >
+              <UiButton class="px-3 py-1 bg-blue-600 text-white rounded-lg" @click="verifyInvoice()">
                 Tax Verification
               </UiButton>
 
-              <UiButton
-                class="px-3 py-1 bg-blue-600 text-white rounded-lg"
-                @click="verifyByPjap"
-                :disabled="isSyncLoading"
-              >
+              <UiButton class="px-3 py-1 bg-blue-600 text-white rounded-lg" @click="verifyByPjap"
+                :disabled="isSyncLoading">
                 {{ isSyncLoading ? 'Verifying...' : 'Verify By PJAP' }}
               </UiButton>
             </div>
@@ -91,36 +74,32 @@
               </thead>
 
               <tbody v-if="isVerifyData">
-                <tr
-                  v-for="(row, index) in tableData"
-                  :key="index"
-                  :class="[editableRemarks[index] === NOT_MATCHED && 'bg-red-100', 'border-b']"
-                >
+                <tr v-for="(row, index) in tableData" :key="index"
+                  :class="[editableRemarks[index] === NOT_MATCHED && 'bg-red-100', 'border-b']">
                   <td class="p-2">{{ row.header }}</td>
                   <td class="p-2">{{ row.qr }}</td>
 
                   <td class="p-2">
-                    <i
-                      class="ki-filled ki-check-circle text-green-500"
-                      v-if="row.fpVerified === true"
-                    ></i>
-                    <i
-                      class="ki-filled ki-cross-circle text-red-500"
-                      v-else-if="row.fpVerified === false"
-                    ></i>
+                    <i class="ki-filled ki-check-circle text-green-500" v-if="row.fpVerified === true"></i>
+                    <div class="relative group flex items-center w-fit" v-else-if="row.fpVerified === false">
+                      <i class="ki-filled ki-cross-circle text-red-500 cursor-help"></i>
+                      <!-- Tooltip -->
+                      <div v-if="shouldShowTooltip(row.header)"
+                        class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block w-max px-2 py-1 bg-red-600 text-white text-center text-xs rounded shadow-lg z-10 whitespace-pre-line">
+                        {{ getTooltipMessage(row.header, row.qr, 'QR') }}
+                        <!-- Arrow -->
+                        <div
+                          class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-red-600">
+                        </div>
+                      </div>
+                    </div>
                     <i class="ki-filled ki-minus-circle text-gray-500" v-else></i>
                   </td>
 
                   <td class="p-2">
-                    <input
-                      v-if="getOcrKey(row.header)"
-                      v-model="ocrData[getOcrKey(row.header)]"
-                      type="text"
-                      class="w-full border border-gray-300 rounded px-2 py-1 text-sm"
-                      :disabled="
-                        ocrData[getOcrKey(row.header)] == '' || editableRemarks[index] === '1'
-                      "
-                    />
+                    <input v-if="getOcrKey(row.header)" v-model="ocrData[getOcrKey(row.header)]" type="text"
+                      class="w-full border border-gray-300 rounded px-2 py-1 text-sm" :disabled="ocrData[getOcrKey(row.header)] == '' || editableRemarks[index] === '1'
+                        " />
                     <span v-else class="text-gray-400">-</span>
                   </td>
 
@@ -129,20 +108,26 @@
                       <i class="ki-filled ki-minus-circle text-gray-500"></i>
                     </span>
                     <template v-else>
-                      <i
-                        class="ki-filled ki-check-circle text-green-500"
-                        v-if="row.invoiceVerified === true"
-                      ></i>
-                      <i class="ki-filled ki-cross-circle text-red-500" v-else></i>
+                      <i class="ki-filled ki-check-circle text-green-500" v-if="row.invoiceVerified === true"></i>
+                      <div class="relative group flex items-center w-fit" v-else>
+                        <i class="ki-filled ki-cross-circle text-red-500 cursor-help"></i>
+                        <!-- Tooltip -->
+                        <div v-if="shouldShowTooltip(row.header)"
+                          class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block w-max px-2 py-1 bg-red-600 text-white text-center text-xs rounded shadow-lg z-10 whitespace-pre-line">
+                          {{ getTooltipMessage(row.header, row.ocr, 'OCR') }}
+                          <!-- Arrow -->
+                          <div
+                            class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-red-600">
+                          </div>
+                        </div>
+                      </div>
                     </template>
                   </td>
 
                   <td class="p-2">
-                    <select
-                      v-model="editableRemarks[index]"
+                    <select v-model="editableRemarks[index]"
                       class="border border-gray-300 rounded px-2 py-1 text-sm w-full"
-                      :disabled="editableRemarks[index] === '1' || editableRemarks[index] === '4'"
-                    >
+                      :disabled="editableRemarks[index] === '1' || editableRemarks[index] === '4'">
                       <option v-if="editableRemarks[index] === '1'" value="1">Auto Verified</option>
                       <option value="2">Not match</option>
                       <option value="3">Manual Verified</option>
@@ -155,25 +140,10 @@
                 <tr>
                   <td>
                     <div class="flex justify-center items-center py-6">
-                      <svg
-                        class="animate-spin h-6 w-6 text-blue-600"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          class="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          stroke-width="4"
-                        />
-                        <path
-                          class="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                        />
+                      <svg class="animate-spin h-6 w-6 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
                       </svg>
                       <span class="ml-3 text-sm text-gray-600"> Verifying document... </span>
                     </div>
@@ -196,11 +166,8 @@
               </thead>
 
               <tbody v-if="isVerify">
-                <tr
-                  v-for="(row, index) in bjapVerify"
-                  :key="index"
-                  :class="[{ 'bg-red-100': row.remarks === false }, 'border-b']"
-                >
+                <tr v-for="(row, index) in bjapVerify" :key="index"
+                  :class="[{ 'bg-red-100': row.remarks === false }, 'border-b']">
                   <td class="p-2">{{ row.header }}</td>
                   <td class="p-2">{{ row.qr }}</td>
                   <td class="p-2">{{ row.fpVerified }}</td>
@@ -219,33 +186,23 @@
           </div>
         </div>
 
-        <div
-          v-if="tabOcrTab === 'ai'"
-          :class="[
-            'bg-white shadow-xl rounded-xl p-6 mt-4 border',
-            aiMismatches.length === 0 ? 'border-green-600' : 'border-red-400',
-          ]"
-        >
+        <div v-if="tabOcrTab === 'ai'" :class="[
+          'bg-white shadow-xl rounded-xl p-6 mt-4 border',
+          aiMismatches.length === 0 ? 'border-green-600' : 'border-red-400',
+        ]">
           <h2 class="font-bold text-xl mb-4 flex items-center gap-2">AI Action 🤖</h2>
           <hr class="mb-4" />
-          <div
-            :class="[
-              'flex gap-5 p-4 border rounded-lg items-start',
-              aiMismatches.length === 0
-                ? 'bg-green-50 border-green-300'
-                : 'bg-red-50 border-red-300',
-            ]"
-          >
+          <div :class="[
+            'flex gap-5 p-4 border rounded-lg items-start',
+            aiMismatches.length === 0
+              ? 'bg-green-50 border-green-300'
+              : 'bg-red-50 border-red-300',
+          ]">
             <img
               src="https://cdnai.iconscout.com/ai-image/premium/thumb/ai-female-customer-care-agent-3d-illustration-png-download-jpg-13152628.png"
-              alt="AI Assistant"
-              class="w-20 h-20 object-contain flex-shrink-0"
-            />
+              alt="AI Assistant" class="w-20 h-20 object-contain flex-shrink-0" />
             <div class="flex-grow">
-              <p
-                v-if="aiMismatches.length === 0"
-                class="font-extrabold text-lg text-green-600 mb-3"
-              >
+              <p v-if="aiMismatches.length === 0" class="font-extrabold text-lg text-green-600 mb-3">
                 Tidak ada mismatch
               </p>
               <p v-else class="font-extrabold text-lg text-red-800 mb-3">Terdapat mismatch pada:</p>
@@ -256,26 +213,20 @@
                 </li>
               </ul>
               <div class="flex gap-0 mt-5 border border-gray-300 rounded-lg overflow-hidden w-fit">
-                <button
-                  @click="setActive('back')"
-                  :class="[
-                    'px-5 py-2 font-semibold transition duration-150 border-r border-gray-300',
-                    activeButton === 'back'
-                      ? 'bg-green-600 text-white hover:bg-green-700'
-                      : 'bg-gray-100 text-blue-600 hover:bg-gray-200',
-                  ]"
-                >
+                <button @click="setActive('back')" :class="[
+                  'px-5 py-2 font-semibold transition duration-150 border-r border-gray-300',
+                  activeButton === 'back'
+                    ? 'bg-green-600 text-white hover:bg-green-700'
+                    : 'bg-gray-100 text-blue-600 hover:bg-gray-200',
+                ]">
                   Send Back to Vendor
                 </button>
-                <button
-                  @click="setActive('proceed')"
-                  :class="[
-                    'px-5 py-2 font-semibold transition duration-150',
-                    activeButton === 'proceed'
-                      ? 'bg-green-600 text-white hover:bg-green-700'
-                      : 'bg-gray-100 text-blue-600 hover:bg-gray-200',
-                  ]"
-                >
+                <button @click="setActive('proceed')" :class="[
+                  'px-5 py-2 font-semibold transition duration-150',
+                  activeButton === 'proceed'
+                    ? 'bg-green-600 text-white hover:bg-green-700'
+                    : 'bg-gray-100 text-blue-600 hover:bg-gray-200',
+                ]">
                   Proceed
                 </button>
               </div>
@@ -296,12 +247,8 @@
           </div>
 
           <div class="flex-1 border rounded-lg overflow-hidden">
-            <iframe
-              v-if="previewUrl"
-              :src="`${previewUrl}#navpanes=0&toolbar=0&statusbar=0&messages=0&view=FitH`"
-              class="w-full h-full"
-              style="border: none"
-            ></iframe>
+            <iframe v-if="previewUrl" :src="`${previewUrl}#navpanes=0&toolbar=0&statusbar=0&messages=0&view=FitH`"
+              class="w-full h-full" style="border: none"></iframe>
             <div v-else class="text-gray-500 italic p-4">Tidak ada URL dokumen</div>
           </div>
         </div>
@@ -310,9 +257,7 @@
       <div class="bg-white shadow rounded-xl p-4 col-span-12">
         <InvoicePoGrView v-if="checkPo()" />
         <InvoiceItemView v-if="checkIsNonPo()" />
-        <AdditionalCostView
-          v-if="(checkIsWithoutDp() || checkPoWithDp() || checkIsPoPibCc()) && !checkIsNonPo()"
-        />
+        <AdditionalCostView v-if="(checkIsWithoutDp() || checkPoWithDp() || checkIsPoPibCc()) && !checkIsNonPo()" />
       </div>
     </div>
 
@@ -386,6 +331,46 @@ const manualReject = reactive<Record<number, boolean>>({})
 
 /* ---------------- helpers ---------------- */
 const isEmpty = (val: any) => val === undefined || val === null || val === '' || val === '-'
+
+const parseCurrency = (value: string | number): number => {
+  if (typeof value === 'number') return value
+  if (!value || value === '-') return 0
+  // Remove currency symbol, dots, and replace comma with dot for decimals (Indonesian format assumption)
+  const clean = value.toString().replace(/[^0-9,-]+/g, '')
+  // If it has comma, likely decimal separator in ID format
+  return parseFloat(clean.replace(/\./g, '').replace(',', '.'))
+}
+
+const formatCurrency = (value: number) => {
+  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value)
+}
+
+const getDifference = (header: string, docValue: string) => {
+  let formValue = 0
+  const docNum = parseCurrency(docValue)
+
+  if (header === 'Nilai Penjualan') formValue = Number(form?.subtotal || 0)
+  if (header === 'PPN') formValue = Number(form?.vatAmount || 0)
+  //  if (header === 'PPN BM') formValue = Number(form?.ppnbm || 0) // Assuming usage
+
+  const diff = formValue - docNum
+  return diff
+}
+
+const TOOLTIP_HEADERS = ['Nilai Penjualan', 'DPP Lainnya', 'PPN', 'PPN BM']
+const shouldShowTooltip = (header: string) => TOOLTIP_HEADERS.includes(header)
+
+const getTooltipMessage = (header: string, docValue: string, source: 'QR' | 'OCR') => {
+  const diff = getDifference(header, docValue)
+  const formattedDiff = formatCurrency(Math.abs(diff))
+
+  // Mapping header name to form field name for better clarity
+  let formField = 'Input Form'
+  if (header === 'Nilai Penjualan') formField = 'Subtotal Form'
+  if (header === 'PPN') formField = 'VAT Amount Form'
+
+  return `Terdapat selisih antara\n${formField} dengan ${source}\nsebesar ${formattedDiff}`
+}
 
 const setActive = (btn: 'back' | 'proceed') => {
   activeButton.value = btn
@@ -627,7 +612,7 @@ const tableData = computed(() => {
         isEmpty(qrData.taxDocumentNumber) || isEmpty(ocrData.taxDocumentNumber)
           ? 'none'
           : form?.taxNoInvoice == qrData.taxDocumentNumber &&
-            form?.taxNoInvoice == ocrData.taxDocumentNumber,
+          form?.taxNoInvoice == ocrData.taxDocumentNumber,
     },
     {
       header: 'Tanggal Faktur Pajak',
@@ -661,7 +646,7 @@ const tableData = computed(() => {
             ? false
             : isEmpty(qrData.dpp)
               ? 'none'
-              : true,
+              : Math.abs(getDifference('Nilai Penjualan', qrData.dpp)) < 1,
       ocr: ocrData.dpp || '-',
       invoiceVerified:
         editableRemarks.value[6] === '3'
@@ -670,7 +655,7 @@ const tableData = computed(() => {
             ? false
             : isEmpty(ocrData.dpp)
               ? 'none'
-              : true,
+              : Math.abs(getDifference('Nilai Penjualan', ocrData.dpp)) < 1,
       remarks: isEmpty(qrData.dpp) || isEmpty(ocrData.dpp) ? 'none' : true,
     },
     {
@@ -691,7 +676,7 @@ const tableData = computed(() => {
             ? false
             : isEmpty(qrData.ppn)
               ? 'none'
-              : true,
+              : Math.abs(getDifference('PPN', qrData.ppn)) < 1,
       ocr: ocrData.ppn || '-',
       invoiceVerified:
         editableRemarks.value[8] === '3'
@@ -700,7 +685,7 @@ const tableData = computed(() => {
             ? false
             : isEmpty(ocrData.ppn)
               ? 'none'
-              : true,
+              : Math.abs(getDifference('PPN', ocrData.ppn)) < 1,
       remarks: isEmpty(qrData.ppn) || isEmpty(ocrData.ppn) ? 'none' : true,
     },
     {

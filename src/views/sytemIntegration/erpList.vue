@@ -1,12 +1,9 @@
 <template>
   <div>
-    <BreadcrumbView
-      title="Master Role"
-      :routes="[
-        { name: 'User Management', to: '/user-management/user' },
-        { name: 'Master Role', to: '#' },
-      ]"
-    />
+    <BreadcrumbView title="Master Role" :routes="[
+      { name: 'User Management', to: '/user-management/user' },
+      { name: 'Master Role', to: '#' },
+    ]" />
 
     <div class="card">
       <div class="card-header">
@@ -24,10 +21,8 @@
                 <p class="text-lg font-semibold mb-[8px]">Filter</p>
                 <div class="flex flex-col gap-[24px] py-[16px]">
                   <div class="relative">
-                    <label
-                      class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
-                      >Company Code</label
-                    >
+                    <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white">Company
+                      Code</label>
                     <select v-model="filters.companyCode" class="select" name="select">
                       <option value="">All</option>
                       <option v-for="item of companyOptions" :key="item.value" :value="item.value">
@@ -37,9 +32,7 @@
                   </div>
                   <div class="relative">
                     <label
-                      class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
-                      >ERP</label
-                    >
+                      class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white">ERP</label>
                     <select v-model="filters.erp" class="select" name="select">
                       <option value="">All</option>
                       <option v-for="item of erpOptions" :key="item.value" :value="item.value">
@@ -48,26 +41,18 @@
                     </select>
                   </div>
                   <div class="relative">
-                    <label
-                      class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
-                      >Process Group</label
-                    >
+                    <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white">Process
+                      Group</label>
                     <select v-model="filters.processGroup" class="select" name="select">
                       <option value="">All</option>
-                      <option
-                        v-for="item of processGroupOptions"
-                        :key="item.value"
-                        :value="item.value"
-                      >
+                      <option v-for="item of processGroupOptions" :key="item.value" :value="item.value">
                         {{ item.text }}
                       </option>
                     </select>
                   </div>
                   <div class="relative">
                     <label
-                      class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
-                      >Status</label
-                    >
+                      class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white">Status</label>
                     <select v-model="filters.status" class="select" name="select">
                       <option value="">All</option>
                       <option v-for="item of statusOptions" :key="item.value" :value="item.value">
@@ -102,72 +87,39 @@
             Error: {{ userRoleStore.error }}
           </div>
 
-          <div
-            v-else-if="filteredRoles.length > 0"
-            class="integration__table border border-gray-200 rounded-xl overflow-x-auto"
-          >
+          <div v-else-if="filteredRoles.length > 0"
+            class="integration__table border border-gray-200 rounded-xl overflow-x-auto">
             <table class="table align-middle text-gray-700 font-medium text-sm min-w-[1200px]">
               <thead>
                 <tr>
-                  <th
-                    class="integration__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"
-                  ></th>
-                  <th
-                    class="text-nowrap integration__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"
-                    v-for="item in Columns"
-                    :key="item.name"
-                  >
+                  <th class="integration__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"></th>
+                  <th class="text-nowrap integration__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"
+                    v-for="item in Columns" :key="item.name">
                     {{ item.name }}
                   </th>
                 </tr>
               </thead>
               <tbody>
-                <tr
-                  v-for="role in filteredErpList"
-                  :key="role.connectionCode"
-                  class="integration__field-items hover:bg-blue-50"
-                >
+                <tr v-for="role in filteredErpList" :key="role.connectionCode"
+                  class="integration__field-items hover:bg-blue-50">
                   <td>
                     <div class="flex items-center space-x-3">
-                      <div
-                        class="dropdown"
-                        data-dropdown="true"
-                        data-dropdown-trigger="click"
-                        data-dropdown-placement="bottom-end"
-                      >
-                        <UiButton
-                          class="dropdown-toggle"
-                          variant="light"
-                          :outline="true"
-                          :icon="true"
-                          size="sm"
-                        >
+                      <div class="dropdown" data-dropdown="true" data-dropdown-trigger="click"
+                        data-dropdown-placement="bottom-end">
+                        <UiButton class="dropdown-toggle" variant="light" :outline="true" :icon="true" size="sm">
                           <UiIcon name="dots-vertical" />
                         </UiButton>
                         <div class="dropdown-content w-auto p-4 space-y-2">
                           <div class="flex flex-col space-y-2">
-                            <UiButton
-                              variant="light"
-                              class="border-none"
-                              :outline="true"
-                              size="md"
-                              @click="viewDetail(role.connectionCode)"
-                            >
-                              <UiIcon name="eye" class="mr-2" />
-                              View Detail
-                            </UiButton>
-                            <UiButton variant="light" class="border-none" :outline="true" size="md">
+                            <UiButton variant="light" class="border-none" :outline="true" size="md"
+                              @click="viewDetail(role.connectionCode)">
                               <UiIcon name="pencil" class="mr-2" />
-                              Edit Role
+                              Edit Realization
                             </UiButton>
-                            <UiButton
-                              variant="light"
-                              class="border-none text-red-500 hover:text-red-600"
-                              :outline="true"
-                              size="md"
-                            >
+                            <UiButton variant="light" class="border-none text-red-500 hover:text-red-600"
+                              :outline="true" size="md">
                               <UiIcon name="trash" class="mr-2" />
-                              Delete Role
+                              Delete Realization
                             </UiButton>
                           </div>
                         </div>
@@ -183,10 +135,8 @@
                   <td>{{ role.erp }}</td>
                   <td>{{ role.processGroup }}</td>
                   <td>
-                    <span
-                      class="badge badge-outline border-transparent bg-green-50 text-green-600"
-                      >{{ role.status }}</span
-                    >
+                    <span class="badge badge-outline border-transparent bg-green-50 text-green-600">{{ role.status
+                    }}</span>
                   </td>
                   <td class="text-center">{{ role.totalIntegration }}</td>
                   <td class="text-center">{{ role.inbound }}</td>
@@ -200,33 +150,15 @@
           <div v-else class="text-center py-4">No roles found.</div>
         </div>
 
-        <LPagination
-          class="mt-4"
-          :totalItems="userRoleStore.roles.total"
-          :pageSize="userRoleStore.roles.pageSize"
-          :currentPage="userRoleStore.roles.page"
-          @page-change="userRoleStore.changePage"
-        />
+        <LPagination class="mt-4" :totalItems="userRoleStore.roles.total" :pageSize="userRoleStore.roles.pageSize"
+          :currentPage="userRoleStore.roles.page" @page-change="userRoleStore.changePage" />
       </div>
     </div>
 
     <!-- Add/Edit modal -->
-    <UiModal
-      :title="modalTitle"
-      v-model="isModalOpen"
-      @update:model-value="closeRoleModal"
-      size="sm"
-    >
-      <UiInput
-        label="Role Name"
-        placeholder="Enter role name"
-        row
-        required
-        v-model="rolePayload.roleName"
-        :error="roleNameError !== ''"
-        :hint-text="roleNameError"
-        @input="validateRoleName()"
-      />
+    <UiModal :title="modalTitle" v-model="isModalOpen" @update:model-value="closeRoleModal" size="sm">
+      <UiInput label="Role Name" placeholder="Enter role name" row required v-model="rolePayload.roleName"
+        :error="roleNameError !== ''" :hint-text="roleNameError" @input="validateRoleName()" />
       <div class="mt-4 w-full gap-2 justify-end items-center flex">
         <UiButton outline @click="closeRoleModal">Cancel</UiButton>
         <UiButton variant="primary" @click="saveRole" :disabled="isSaving">
@@ -247,33 +179,20 @@
     <!-- delete confirm modal -->
     <UiModal v-model="showDeleteModal" size="sm">
       <div class="text-center mb-6">
-        <UiIcon
-          name="cross-circle"
-          variant="duotone"
-          class="text-[150px] text-danger text-center"
-        />
+        <UiIcon name="cross-circle" variant="duotone" class="text-[150px] text-danger text-center" />
       </div>
       <h3 class="text-center text-lg font-medium">Are you sure to delete this role?</h3>
       <p class="text-center text-base text-gray-600 mb-5">
         This action will permanently deactivate
-        <strong v-if="roleToDelete">{{ roleToDelete.roleName }}</strong
-        >.
+        <strong v-if="roleToDelete">{{ roleToDelete.roleName }}</strong>.
       </p>
       <div class="flex gap-3 px-8 mb-3">
-        <UiButton
-          outline
-          @click="showDeleteModal = false"
-          class="flex-1 flex items-center justify-center"
-        >
+        <UiButton outline @click="showDeleteModal = false" class="flex-1 flex items-center justify-center">
           <UiIcon name="black-left-line" />
           <span>Cancel</span>
         </UiButton>
-        <UiButton
-          variant="danger"
-          class="flex-1 flex items-center justify-center"
-          @click="handleProcessDelete"
-          :disabled="isDeleting"
-        >
+        <UiButton variant="danger" class="flex-1 flex items-center justify-center" @click="handleProcessDelete"
+          :disabled="isDeleting">
           <template v-if="isDeleting">
             <span>Deleting...</span>
           </template>
