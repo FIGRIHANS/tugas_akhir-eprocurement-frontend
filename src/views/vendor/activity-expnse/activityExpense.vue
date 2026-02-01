@@ -140,7 +140,7 @@ import type { filterListTypes } from '../types/activity'
 
 
 const search = ref('')
-const userRoleStore = useUserRoleStore()
+// const userRoleStore = useUserRoleStore()
 const invoiceMasterData = useInvoiceMasterDataStore()
 
 const isModalOpen = ref(false)
@@ -272,6 +272,14 @@ const saveRole = async () => {
     // } finally {
     //     isSaving.value = false
     // }
+
+    isSaving.value = false
+    isModalOpen.value = false
+    activityPayload.id = ''
+    activityPayload.name = ''
+    activityPayload.isActive = true
+    roleNameError.value = ''
+    showModalSuccess.value = true
 }
 
 function openDeleteModal(role: IRole) {
@@ -283,21 +291,25 @@ function openDeleteModal(role: IRole) {
 async function handleProcessDelete() {
     if (!roleToDelete.value) return
     isDeleting.value = true
-    try {
-        await userRoleStore.postUserRole({
-            roleId: roleToDelete.value.roleId,
-            roleName: roleToDelete.value.roleName,
-            isActive: false,
-        })
-        showDeleteModal.value = false
-        roleToDelete.value = null
-        await userRoleStore.getAllUserRoles({
-            page: 1,
-            pageSize: 10,
-        })
-    } finally {
-        isDeleting.value = false
-    }
+    // try {
+    //     await userRoleStore.postUserRole({
+    //         roleId: roleToDelete.value.roleId,
+    //         roleName: roleToDelete.value.roleName,
+    //         isActive: false,
+    //     })
+    //     showDeleteModal.value = false
+    //     roleToDelete.value = null
+    //     await userRoleStore.getAllUserRoles({
+    //         page: 1,
+    //         pageSize: 10,
+    //     })
+    // } finally {
+    //     isDeleting.value = false
+    // }
+
+    isDeleting.value = false
+    showDeleteModal.value = false
+    roleToDelete.value = null
 }
 
 const setDataFilter = async (data: filterListTypes) => {
