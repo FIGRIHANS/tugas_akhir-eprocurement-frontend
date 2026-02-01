@@ -23,16 +23,16 @@
               <label class="text-sm font-medium text-gray-700 w-[140px] flex-shrink-0">
                 Company Code <span class="text-red-500">*</span>
               </label>
-              <UiSelect 
-                v-model="wfHeader.companyCode" 
-                placeholder="Select" 
-                row 
-                valueKey="code" 
-                textKey="name" 
-                required 
+              <UiSelect
+                v-model="wfHeader.companyCode"
+                placeholder="Select"
+                row
+                valueKey="code"
+                textKey="name"
+                required
                 :options="companyCodeList"
                 :disabled="isReadOnly"
-                class="flex-1 max-w-[400px]" 
+                class="flex-1 max-w-[400px]"
               />
             </div>
           </div>
@@ -43,16 +43,16 @@
               <label class="text-sm font-medium text-gray-700 w-[140px] flex-shrink-0">
                 Invoice Type <span class="text-red-500">*</span>
               </label>
-              <UiSelect 
-                v-model="wfHeader.invoiceType" 
-                placeholder="Select" 
-                row 
-                valueKey="code" 
-                textKey="name" 
-                required 
+              <UiSelect
+                v-model="wfHeader.invoiceType"
+                placeholder="Select"
+                row
+                valueKey="code"
+                textKey="name"
+                required
                 :options="invoiceTypeList"
                 :disabled="isReadOnly"
-                class="flex-1 max-w-[400px]" 
+                class="flex-1 max-w-[400px]"
               />
             </div>
           </div>
@@ -63,16 +63,16 @@
               <label class="text-sm font-medium text-gray-700 w-[140px] flex-shrink-0">
                 PO Type <span class="text-red-500">*</span>
               </label>
-              <UiSelect 
-                v-model="wfHeader.poType" 
-                placeholder="Select" 
-                row 
-                valueKey="code" 
-                textKey="name" 
-                required 
+              <UiSelect
+                v-model="wfHeader.poType"
+                placeholder="Select"
+                row
+                valueKey="code"
+                textKey="name"
+                required
                 :options="poOptions"
                 :disabled="isReadOnly"
-                class="flex-1 max-w-[400px]" 
+                class="flex-1 max-w-[400px]"
               />
             </div>
           </div>
@@ -83,16 +83,16 @@
               <label class="text-sm font-medium text-gray-700 w-[140px] flex-shrink-0">
                 DP Option <span class="text-red-500">*</span>
               </label>
-              <UiSelect 
-                v-model="wfHeader.dpOption" 
-                placeholder="Select" 
-                row 
-                valueKey="code" 
-                textKey="name" 
-                required 
+              <UiSelect
+                v-model="wfHeader.dpOption"
+                placeholder="Select"
+                row
+                valueKey="code"
+                textKey="name"
+                required
                 :options="dpOptionList"
                 :disabled="isReadOnly"
-                class="flex-1 max-w-[400px]" 
+                class="flex-1 max-w-[400px]"
               />
             </div>
           </div>
@@ -103,13 +103,13 @@
               <label class="text-sm font-medium text-gray-700 w-[140px] flex-shrink-0">
                 WF Name <span class="text-red-500">*</span>
               </label>
-              <UiInput 
-                v-model="wfHeader.wfName" 
-                placeholder="" 
-                row 
-                required 
+              <UiInput
+                v-model="wfHeader.wfName"
+                placeholder=""
+                row
+                required
                 :disabled="isReadOnly"
-                class="flex-1 max-w-[400px]" 
+                class="flex-1 max-w-[400px]"
               />
             </div>
           </div>
@@ -120,14 +120,14 @@
               <label class="text-sm font-medium text-gray-700 w-[140px] flex-shrink-0">
                 WF Step <span class="text-red-500">*</span>
               </label>
-              <UiInput 
-                v-model="wfHeader.wfStep" 
-                type="number" 
-                placeholder="" 
-                row 
-                required 
+              <UiInput
+                v-model="wfHeader.wfStep"
+                type="number"
+                placeholder=""
+                row
+                required
                 :disabled="isReadOnly"
-                class="flex-1 max-w-[400px]" 
+                class="flex-1 max-w-[400px]"
               />
             </div>
           </div>
@@ -143,18 +143,18 @@
               </label>
               <div class="flex items-center gap-6 ml-4">
                 <label class="flex items-center gap-2">
-                  <UiRadio 
-                    v-model="bracketAmount" 
-                    name="bracketAmount" 
+                  <UiRadio
+                    v-model="bracketAmount"
+                    name="bracketAmount"
                     :value="'yes'"
                     :disabled="isReadOnly"
                   />
                   <span class="text-sm text-gray-700">Yes</span>
                 </label>
                 <label class="flex items-center gap-2">
-                  <UiRadio 
-                    v-model="bracketAmount" 
-                    name="bracketAmount" 
+                  <UiRadio
+                    v-model="bracketAmount"
+                    name="bracketAmount"
                     :value="'no'"
                     :disabled="isReadOnly"
                   />
@@ -653,7 +653,7 @@ onMounted(async () => {
   // Check if editing or viewing existing workflow
   const wfCode = route.query.wfCode as string
   const viewMode = route.query.mode as string
-  
+
   if (wfCode) {
     // Set mode based on query parameter
     if (viewMode === 'view') {
@@ -663,9 +663,9 @@ onMounted(async () => {
       mode.value = 'edit'
       isReadOnly.value = false
     }
-    
+
     editingWfCode.value = wfCode
-    
+
     const stored = localStorage.getItem('workflowDummyList')
     if (stored) {
       try {
