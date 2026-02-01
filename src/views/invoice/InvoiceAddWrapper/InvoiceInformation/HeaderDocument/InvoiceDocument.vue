@@ -152,7 +152,7 @@ const sendUploadFile = async () => {
 
       if (formInject && response) {
         // Map OCR data to Invoice Header fields as requested
-        formInject.invoiceNo = response.taxDocumentNumber // Using taxDocumentNumber as generic document number from OCR
+        formInject.invoiceVendorNo = response.taxDocumentNumber // Map to Invoice Vendor No
         formInject.invoiceDate = parseIndoDate(response.taxDocumentDate)
       }
     }
