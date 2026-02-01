@@ -146,7 +146,8 @@
                               <UiIcon name="eye" class="mr-2" />
                               View Detail
                             </UiButton>
-                            <UiButton variant="light" class="border-none" :outline="true" size="md">
+                            <UiButton variant="light" class="border-none" :outline="true" size="md"
+                              @click="editWorkflow(workflow.wfCode)">
                               <UiIcon name="pencil" class="mr-2" />
                               Edit Workflow
                             </UiButton>
@@ -358,8 +359,15 @@ const addWorkflow = () => {
 
 const viewDetail = (id: string) => {
   router.push({
-    name: 'workflow-detail',
-    params: { id },
+    name: 'workflow-configuration',
+    query: { wfCode: id, mode: 'view' }
+  })
+}
+
+const editWorkflow = (wfCode: string) => {
+  router.push({
+    name: 'workflow-configuration',
+    query: { wfCode }
   })
 }
 

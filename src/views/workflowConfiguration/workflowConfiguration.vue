@@ -1,8 +1,8 @@
 <template>
   <BreadcrumbView :routes="[
     { name: 'Workflow Configuration', to: '/workflow-configuration' },
-    { name: 'Add New Workflow', to: '#' }
-  ]" title="Add New Workflow" />
+    { name: isReadOnly ? 'View Workflow' : 'Add New Workflow', to: '#' }
+  ]" :title="isReadOnly ? 'View Workflow' : 'Add New Workflow'" />
 
   <!-- Back button removed from top; moved below PG001 card -->
 
@@ -23,8 +23,17 @@
               <label class="text-sm font-medium text-gray-700 w-[140px] flex-shrink-0">
                 Company Code <span class="text-red-500">*</span>
               </label>
-              <UiSelect v-model="wfHeader.companyCode" placeholder="Select" row valueKey="code" textKey="name" required :options="companyCodeList"
-                class="flex-1 max-w-[400px]" />
+              <UiSelect 
+                v-model="wfHeader.companyCode" 
+                placeholder="Select" 
+                row 
+                valueKey="code" 
+                textKey="name" 
+                required 
+                :options="companyCodeList"
+                :disabled="isReadOnly"
+                class="flex-1 max-w-[400px]" 
+              />
             </div>
           </div>
 
@@ -34,8 +43,17 @@
               <label class="text-sm font-medium text-gray-700 w-[140px] flex-shrink-0">
                 Invoice Type <span class="text-red-500">*</span>
               </label>
-              <UiSelect v-model="wfHeader.invoiceType" placeholder="Select" row valueKey="code" textKey="name" required :options="invoiceTypeList"
-                class="flex-1 max-w-[400px]" />
+              <UiSelect 
+                v-model="wfHeader.invoiceType" 
+                placeholder="Select" 
+                row 
+                valueKey="code" 
+                textKey="name" 
+                required 
+                :options="invoiceTypeList"
+                :disabled="isReadOnly"
+                class="flex-1 max-w-[400px]" 
+              />
             </div>
           </div>
 
@@ -45,8 +63,17 @@
               <label class="text-sm font-medium text-gray-700 w-[140px] flex-shrink-0">
                 PO Type <span class="text-red-500">*</span>
               </label>
-              <UiSelect v-model="wfHeader.poType" placeholder="Select" row valueKey="code" textKey="name" required :options="poOptions"
-                class="flex-1 max-w-[400px]" />
+              <UiSelect 
+                v-model="wfHeader.poType" 
+                placeholder="Select" 
+                row 
+                valueKey="code" 
+                textKey="name" 
+                required 
+                :options="poOptions"
+                :disabled="isReadOnly"
+                class="flex-1 max-w-[400px]" 
+              />
             </div>
           </div>
 
@@ -56,8 +83,17 @@
               <label class="text-sm font-medium text-gray-700 w-[140px] flex-shrink-0">
                 DP Option <span class="text-red-500">*</span>
               </label>
-              <UiSelect v-model="wfHeader.dpOption" placeholder="Select" row valueKey="code" textKey="name" required :options="dpOptionList"
-                class="flex-1 max-w-[400px]" />
+              <UiSelect 
+                v-model="wfHeader.dpOption" 
+                placeholder="Select" 
+                row 
+                valueKey="code" 
+                textKey="name" 
+                required 
+                :options="dpOptionList"
+                :disabled="isReadOnly"
+                class="flex-1 max-w-[400px]" 
+              />
             </div>
           </div>
 
@@ -67,7 +103,14 @@
               <label class="text-sm font-medium text-gray-700 w-[140px] flex-shrink-0">
                 WF Name <span class="text-red-500">*</span>
               </label>
-              <UiInput v-model="wfHeader.wfName" placeholder="" row required class="flex-1 max-w-[400px]" />
+              <UiInput 
+                v-model="wfHeader.wfName" 
+                placeholder="" 
+                row 
+                required 
+                :disabled="isReadOnly"
+                class="flex-1 max-w-[400px]" 
+              />
             </div>
           </div>
 
@@ -77,7 +120,15 @@
               <label class="text-sm font-medium text-gray-700 w-[140px] flex-shrink-0">
                 WF Step <span class="text-red-500">*</span>
               </label>
-              <UiInput v-model="wfHeader.wfStep" type="number" placeholder="" row required class="flex-1 max-w-[400px]" />
+              <UiInput 
+                v-model="wfHeader.wfStep" 
+                type="number" 
+                placeholder="" 
+                row 
+                required 
+                :disabled="isReadOnly"
+                class="flex-1 max-w-[400px]" 
+              />
             </div>
           </div>
         </div>
@@ -92,11 +143,21 @@
               </label>
               <div class="flex items-center gap-6 ml-4">
                 <label class="flex items-center gap-2">
-                  <UiRadio v-model="bracketAmount" name="bracketAmount" :value="'yes'" />
+                  <UiRadio 
+                    v-model="bracketAmount" 
+                    name="bracketAmount" 
+                    :value="'yes'"
+                    :disabled="isReadOnly"
+                  />
                   <span class="text-sm text-gray-700">Yes</span>
                 </label>
                 <label class="flex items-center gap-2">
-                  <UiRadio v-model="bracketAmount" name="bracketAmount" :value="'no'" />
+                  <UiRadio 
+                    v-model="bracketAmount" 
+                    name="bracketAmount" 
+                    :value="'no'"
+                    :disabled="isReadOnly"
+                  />
                   <span class="text-sm text-gray-700">No</span>
                 </label>
               </div>
@@ -214,7 +275,7 @@
       </div>
 
       <!-- Generate button (restored under Auth Object ID) -->
-      <div class="flex justify-end mt-6 pr-4">
+      <div v-if="!isReadOnly" class="flex justify-end mt-6 pr-4">
         <UiButton
           class="bg-blue-500 hover:bg-blue-600 text-white font-medium rounded h-12 px-5 shadow-sm flex items-center gap-2"
           @click="handleGenerateWFStep"
@@ -290,6 +351,7 @@
     </UiButton>
 
     <UiButton
+      v-if="!isReadOnly"
       class="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl h-12 px-5 shadow-lg flex items-center gap-2"
       @click="saveWorkflow"
     >
@@ -310,7 +372,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import type { BracketForm, AuthForm, ProfileForm } from '@/views/workflowConfiguration/types/Workflow'
 import AddBracketModal from '@/views/workflowConfiguration/PopUpButtonAdd/AddBracketModal.vue'
 import AddProfileModal from '@/views/workflowConfiguration/PopUpButtonAdd/AddProfileModal.vue'
@@ -325,9 +388,30 @@ import UiRadio from '@/components/ui/atoms/radio/UiRadio.vue'
 import WorkflowProfileTable from '@/components/workflowConfigTable/WorkflowProfileTable.vue'
 import AddNewTable from '@/components/workflowConfigTable/AddNewTable.vue'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
+import router from '@/router'
+
+// Interface for workflow data
+interface Workflow {
+  wfCode: string
+  wfName: string
+  companyCode: string
+  invoiceType: string
+  poType: string
+  dpOption: string
+  wfStep: string
+  bracketAmount: string
+  status: string
+  lastChange: string
+}
 
 // API Store
 const invoiceMasterApi = useInvoiceMasterDataStore()
+const route = useRoute()
+
+// Mode: 'add', 'edit', or 'view'
+const mode = ref<'add' | 'edit' | 'view'>('add')
+const isReadOnly = ref(false)
+const editingWfCode = ref<string | null>(null)
 
 // Reactive state
 const bracketAmount = ref<'yes' | 'no' | undefined>(undefined)
@@ -338,6 +422,7 @@ const isGenerated = ref(false)
 
 // Header form values for saving dummy workflow
 const wfHeader = ref({
+  wfCode: '',
   companyCode: '',
   invoiceType: '',
   poType: '',
@@ -490,20 +575,17 @@ const handleGenerateWFStep = () => {
   isGenerated.value = true
 }
 
-// Save dummy workflow to localStorage and navigate back to workflow list
-import router from '@/router'
-
 const saveWorkflow = () => {
   const listStr = localStorage.getItem('workflowDummyList')
-  let list = []
+  let list: Workflow[] = []
   try {
     list = listStr ? JSON.parse(listStr) : []
   } catch {
     list = []
   }
 
-  const newItem = {
-    wfCode: `WF${Date.now()}`,
+  const newItem: Workflow = {
+    wfCode: editingWfCode.value || `WF${Date.now()}`,
     wfName: wfHeader.value.wfName || 'New Workflow',
     companyCode: wfHeader.value.companyCode || (companyCodeList.value[0]?.code ?? ''),
     invoiceType: wfHeader.value.invoiceType || (invoiceTypeList.value[0]?.code ?? ''),
@@ -515,7 +597,17 @@ const saveWorkflow = () => {
     lastChange: new Date().toLocaleString(),
   }
 
-  list.unshift(newItem)
+  if (mode.value === 'edit' && editingWfCode.value) {
+    // Update existing workflow
+    const index = list.findIndex((item: Workflow) => item.wfCode === editingWfCode.value)
+    if (index > -1) {
+      list[index] = newItem
+    }
+  } else {
+    // Create new workflow
+    list.unshift(newItem)
+  }
+
   localStorage.setItem('workflowDummyList', JSON.stringify(list))
   router.push({ name: 'workflow-list' })
 }
@@ -544,10 +636,55 @@ const goBack = () => {
   router.push({ name: 'workflow-list' })
 }
 
+// Watcher: Clear DP Option when PO Type changes to non-PO
+watch(() => wfHeader.value.poType, (newPoType) => {
+  if (newPoType !== 'PO') {
+    wfHeader.value.dpOption = ''
+    bracketAmount.value = undefined
+  }
+})
+
 // Initialize API data on component mount
 onMounted(async () => {
   await invoiceMasterApi.getCompanyCode()
   await invoiceMasterApi.getInvoicePoType()
   await invoiceMasterApi.getDpTypes()
+
+  // Check if editing or viewing existing workflow
+  const wfCode = route.query.wfCode as string
+  const viewMode = route.query.mode as string
+  
+  if (wfCode) {
+    // Set mode based on query parameter
+    if (viewMode === 'view') {
+      mode.value = 'view'
+      isReadOnly.value = true
+    } else {
+      mode.value = 'edit'
+      isReadOnly.value = false
+    }
+    
+    editingWfCode.value = wfCode
+    
+    const stored = localStorage.getItem('workflowDummyList')
+    if (stored) {
+      try {
+        const list: Workflow[] = JSON.parse(stored)
+        const workflow = list.find((item: Workflow) => item.wfCode === wfCode)
+        if (workflow) {
+          wfHeader.value.wfCode = workflow.wfCode
+          wfHeader.value.wfName = workflow.wfName
+          wfHeader.value.companyCode = workflow.companyCode
+          wfHeader.value.invoiceType = workflow.invoiceType
+          wfHeader.value.poType = workflow.poType
+          wfHeader.value.dpOption = workflow.dpOption
+          wfHeader.value.wfStep = workflow.wfStep
+          bracketAmount.value = workflow.bracketAmount === 'Yes' ? 'yes' : 'no'
+        }
+      } catch {
+        // ignore parse errors
+      }
+    }
+  }
 })
 </script>
