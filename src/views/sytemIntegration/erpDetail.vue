@@ -208,9 +208,13 @@
           </div>
         </div>
       </div>
+      <div class="flex justify-end mt-10">
+        <UiButton>
+          Edit
+        </UiButton>
+      </div>
     </div>
   </div>
-
   <!-- Table Section (Placeholder for now, or similar to Workflow Config) -->
   <div class="mt-6">
     <div class="border border-gray-200 rounded-xl p-[24px]">
@@ -222,7 +226,7 @@
             <i class="ki-filled ki-filter"></i>
             Filter
           </button>
-          <button class="btn btn-primary" @click="showAddIntegrationModal = true">
+          <button class="btn btn-primary" @click="goToAdd">
             <i class="ki-duotone ki-plus-circle"></i>
             Add New
           </button>
@@ -277,14 +281,16 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(item, index) in integrationList" :key="index" class="integration__field-items hover:bg-blue-50">
+            <tr v-for="(item, index) in dummyIntegrationList" :key="index"
+              class="integration__field-items hover:bg-blue-50">
               <td class="flex items-center gap-[24px]">
                 <button class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]" title="View Detail"
-                  @click="showAddIntegrationModal = true">
+                  @click="goToDetail(item.code)">
                   <i class="ki-filled ki-eye !text-lg"></i>
                 </button>
-                <button class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]" title="Field Mapping">
-                  <i class="ki-duotone ki-data !text-lg"></i>
+                <button class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]" title="Field Mapping"
+                  @click="goToEdit(item.code)">
+                  <i class="ki-filled ki-pencil !text-lg"></i>
                 </button>
               </td>
               <td class="whitespace-nowrap font-medium">
@@ -331,14 +337,14 @@
                 </span>
               </td>
             </tr>
-            <tr v-if="integrationList.length === 0">
+            <tr v-if="dummyIntegrationList.length === 0">
               <td colspan="14" class="text-center py-8 text-gray-500">No data found</td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
-    <IntegrationAddModal v-model="showAddIntegrationModal" @submit="handleAddIntegration" />
+    <!-- <IntegrationAddModal v-model="showAddIntegrationModal" @submit="handleAddIntegration" /> -->
   </div>
   <!-- Modals -->
 </template>
@@ -346,6 +352,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 import BreadcrumbView from '@/components/BreadcrumbView.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
@@ -353,7 +360,15 @@ import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import UiRadio from '@/components/ui/atoms/radio/UiRadio.vue'
-import IntegrationAddModal from './erpModal/erpAddModal.vue'
+import { useSystemIntegrationStore } from '@/stores/system-integration/systemIntegration'
+
+const route = useRoute()
+const router = useRouter()
+
+const systemIntegrationStore = useSystemIntegrationStore()
+
+
+const id = route.params.id as string
 
 // Reactive state
 // const bracketAmount = ref<'yes' | 'no' | undefined>(undefined)
@@ -361,21 +376,21 @@ import IntegrationAddModal from './erpModal/erpAddModal.vue'
 // const showProfileModal = ref(false)
 // const showAuthModal = ref(false)
 
-interface IntegrationItem {
-  code: string
-  client: string
-  processIntegration: string
-  services: string
-  type: string
-  source: string
-  destination: string
-  transactionCode: string
-  connection: string
-  technicalObject: string
-  fieldMapping: string
-  integrationStatus: string
-  connectionTest: string
-}
+// interface IntegrationItem {
+//   code: string
+//   client: string
+//   processIntegration: string
+//   services: string
+//   type: string
+//   source: string
+//   destination: string
+//   transactionCode: string
+//   connection: string
+//   technicalObject: string
+//   fieldMapping: string
+//   integrationStatus: string
+//   connectionTest: string
+// }
 
 interface WfHeader {
   connectionCode: string
@@ -395,21 +410,51 @@ interface WfHeader {
   language: string
 }
 
-const integrationList = ref<IntegrationItem[]>([])
+// const integrationList = ref<IntegrationItem[]>([])
 const showPassword = ref(false)
-const showAddIntegrationModal = ref(false)
 const search = ref('')
 
 // Interface for WF Header
 
-const handleAddIntegration = (data: IntegrationItem) => {
-  integrationList.value.push(data)
+const goToDetail = (item: string) => {
+  router.push({
+    name: 'detail-integration',
+    params: { id: id, definitionId: item }
+  })
+}
+
+const goToAdd = () => {
+  router.push({
+    name: 'add-integration',
+    params: { id: id },
+    query: {
+      routeFrom: 'detail',
+    }
+  })
+}
+
+const goToEdit = (item: string) => {
+  router.push({
+    name: 'edit-integration',
+    params: { id: id, definitionId: item },
+    query: {
+      routeFrom: 'detail',
+    }
+  })
 }
 
 
-const handleGenerateWFStep = () => {
-  integrationList.value = dummyIntegrationList
-}
+
+
+// const handleAddIntegration = (data: IntegrationItem) => {
+//   systemIntegrationStore.updateIntegration()
+//   integrationList.value.push(data)
+// }
+
+
+// const handleGenerateWFStep = () => {
+//   integrationList.value = dummyIntegrationList
+// }
 
 const wfHeader = ref<WfHeader>({
   connectionCode: '',
@@ -457,210 +502,41 @@ const processGroupOptions = [
   { text: 'Warehouse Management', value: 'Warehouse Management' },
 ]
 
-// Handlers for modals (empty for now or log)
-// const handleBracketSubmit = (formData: BracketForm) => {
-//   console.log('Bracket submitted', formData)
-//   showBracketModal.value = false
-// }
-// const handleProfileSubmit = (formData: ProfileForm) => {
-//   console.log('Profile submitted', formData)
-//   showProfileModal.value = false
-// }
-// const handleAuthSubmit = (formData: AuthForm) => {
-//   console.log('Auth submitted', formData)
-//   showAuthModal.value = false
-// }
+const dummyIntegrationList = ref<any>([])
 
 // On Mounted to fetch data
 onMounted(() => {
-  const route = useRoute()
-  const id = route.params.id as string
 
-  // Mock data fetching based on ID
+  const getData = systemIntegrationStore.getErpById(id)
 
-  // define mock data
-  const mockDB: Record<string, WfHeader> = {
-    EVOSAP01: {
-      connectionCode: 'EVOSAP01',
-      companyCode: 'MF00',
-      description: 'SAP PRD Connection MF00',
-      erp: 'sap_hana_2020',
-      client: 'PRD',
-      clientId: '120',
-      status: 'Active',
-      processGroup: 'Invoice Management',
-      connectionMethod: 'RFC',
-      connectorDriver: '.net connector Versi XX121',
-      destinationName: 'IDES-NEW',
-      appServerHost: '192.168.5.50',
-      user: 'TMS_EVOQ',
-      password: 'Teamwork2026!!!',
-      language: 'EN',
-    },
-    EVOSAP02: {
-      connectionCode: 'EVOSAP02',
-      companyCode: 'MF00',
-      description: 'SAP PRD Connection MF00',
-      erp: 'sap_hana_2020',
-      client: 'PRD',
-      clientId: '120',
-      status: 'Active',
-      processGroup: 'Invoice Management',
-      connectionMethod: 'RFC',
-      connectorDriver: '.net connector Versi XX121',
-      destinationName: 'IDES-NEW',
-      appServerHost: '192.168.5.50',
-      user: 'TMS_EVOQ',
-      password: 'Teamwork2026!!!',
-      language: 'EN',
-    },
-  }
+  const header = getData.header
+  const definition = getData.integrations
 
-  const data = mockDB[id] || {
+  const data = {
     connectionCode: id,
-    companyCode: '',
-    description: '',
-    erp: undefined,
-    client: undefined,
-    clientId: '',
-    status: undefined,
-    processGroup: undefined,
-    connectionMethod: 'RFC',
-    connectorDriver: '',
-    destinationName: '',
-    appServerHost: '',
-    user: '',
-    password: '',
-    language: '',
+    companyCode: header.companyCode,
+    description: header.description,
+    erp: header.erp,
+    client: header.client,
+    clientId: header.clientId,
+    status: header.status,
+    processGroup: header.processGroup,
+    connectionMethod: header.connectionMethod,
+    connectorDriver: header.connectorDriver,
+    destinationName: header.destinationName,
+    appServerHost: header.appServerHost,
+    user: header.user,
+    password: header.password,
+    language: header.language,
   }
+  dummyIntegrationList.value = definition
 
   wfHeader.value = data
 
-  handleGenerateWFStep()
+  // handleGenerateWFStep()
 })
 
 
 
-const dummyIntegrationList = [
-  {
-    code: 'IV01',
-    client: 'PRD',
-    processIntegration: 'Invoice Posting With PO',
-    services: 'Transaction',
-    type: 'Outbound',
-    source: 'EVOQ',
-    destination: 'SAP',
-    transactionCode: 'MIRO',
-    connection: 'RFC',
-    technicalObject: 'ZFM_INVPO_MIRO',
-    fieldMapping: 'Active',
-    integrationStatus: 'Active',
-    connectionTest: 'Success',
-  },
-  {
-    code: 'IV02',
-    client: 'PRD',
-    processIntegration: 'Invoice Without PO GL Master',
-    services: 'Master Data',
-    type: 'Inbound',
-    source: 'SAP',
-    destination: 'EVOQ',
-    transactionCode: 'FS00',
-    connection: 'RFC',
-    technicalObject: 'ZFM_INVNONPO_GLMASTER',
-    fieldMapping: 'Active',
-    integrationStatus: 'Active',
-    connectionTest: 'Success',
-  },
-  {
-    code: 'IV03',
-    client: 'PRD',
-    processIntegration: 'Invoice Posting Without PO',
-    services: 'Transaction',
-    type: 'Outbound',
-    source: 'EVOQ',
-    destination: 'SAP',
-    transactionCode: 'FB60',
-    connection: 'RFC',
-    technicalObject: 'ZFM_INVPO_FB60',
-    fieldMapping: 'Active',
-    integrationStatus: 'Active',
-    connectionTest: 'Success',
-  },
-  {
-    code: 'IV04',
-    client: 'PRD',
-    processIntegration: 'GR Posted for Invoice',
-    services: 'Transaction',
-    type: 'Outbound',
-    source: 'EVOQ',
-    destination: 'SAP',
-    transactionCode: 'MB51',
-    connection: 'RFC',
-    technicalObject: 'ZFM_MATDOC_GRLIST',
-    fieldMapping: 'Active',
-    integrationStatus: 'Active',
-    connectionTest: 'Success',
-  },
-  {
-    code: 'IV05',
-    client: 'PRD',
-    processIntegration: 'Invoice With PO Reversal',
-    services: 'Transaction',
-    type: 'Outbound',
-    source: 'EVOQ',
-    destination: 'SAP',
-    transactionCode: 'MR8M',
-    connection: 'RFC',
-    technicalObject: 'ZFM_INVPO_REVERSAL',
-    fieldMapping: 'Not Active',
-    integrationStatus: 'Not Active',
-    connectionTest: 'Not Active',
-  },
-  {
-    code: 'IV06',
-    client: 'PRD',
-    processIntegration: 'Payment Terms',
-    services: 'Master Data',
-    type: 'Inbound',
-    source: 'SAP',
-    destination: 'EVOQ',
-    transactionCode: 'OBB8',
-    connection: 'RFC',
-    technicalObject: 'ZFM_INVNONPO_GLMASTER',
-    fieldMapping: 'Active',
-    integrationStatus: 'Active',
-    connectionTest: 'Success',
-  },
-  {
-    code: 'IV07',
-    client: 'PRD',
-    processIntegration: 'Payment Method',
-    services: 'Master Data',
-    type: 'Inbound',
-    source: 'SAP',
-    destination: 'EVOQ',
-    transactionCode: 'OBB8',
-    connection: 'RFC',
-    technicalObject: 'ZFM_INVNONPO_GLMASTER',
-    fieldMapping: 'Active',
-    integrationStatus: 'Active',
-    connectionTest: 'Success',
-  },
-  {
-    code: 'IV08',
-    client: 'PRD',
-    processIntegration: 'Employee Master Role',
-    services: 'Master Data',
-    type: 'Inbound',
-    source: 'SAP',
-    destination: 'EVOQ',
-    transactionCode: 'PPOME',
-    connection: 'RFC',
-    technicalObject: 'ZFM_EMPLOYEE_ORGSTRUCTURE',
-    fieldMapping: 'Active',
-    integrationStatus: 'Active',
-    connectionTest: 'Success',
-  },
-]
+
 </script>

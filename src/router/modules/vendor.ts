@@ -52,4 +52,9 @@ export default [
     name: 'vendor-company-information',
     component: () => import('@/views/vendor/companyInformation/VendorCompanyInformation.vue'),
   },
+  {
+    path: '/vendor/activity-expense',
+    name: 'activity-expenses',
+    component: () => import('@/views/vendor/activity-expnse/activityExpense.vue'),
+  },
 ]

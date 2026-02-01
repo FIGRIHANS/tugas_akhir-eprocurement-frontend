@@ -19,7 +19,8 @@
               <label class="text-sm font-medium text-gray-700 w-[140px] flex-shrink-0">
                 Connection Code <span class="text-red-500">*</span>
               </label>
-              <UiInput v-model="wfHeader.connectionCode" placeholder="e.g. EVOSAP01" row required class="flex-1" />
+              <UiInput v-model="header.connectionCode" placeholder="e.g. EVOSAP01" row required class="flex-1"
+                :error="isCodeEmpty" />
             </div>
           </div>
 
@@ -29,7 +30,9 @@
               <label class="text-sm font-medium text-gray-700 w-[140px] flex-shrink-0">
                 Company Code
               </label>
-              <UiInput v-model="wfHeader.companyCode" placeholder="e.g. MF00" row class="flex-1" />
+              <!-- <UiInput v-model="header.companyCode" placeholder="e.g. MF00" row class="flex-1" /> -->
+              <UiSelect v-model="header.companyCode" placeholder="Select Company Code" row text-key="name"
+                value-key="code" :options="companyCodeList" class="flex-1" />
             </div>
           </div>
 
@@ -39,7 +42,7 @@
               <label class="text-sm font-medium text-gray-700 w-[140px] flex-shrink-0">
                 Description
               </label>
-              <UiInput v-model="wfHeader.description" placeholder="e.g. SAP PRD Connection MF00" row class="flex-1" />
+              <UiInput v-model="header.description" placeholder="e.g. SAP PRD Connection MF00" row class="flex-1" />
             </div>
           </div>
 
@@ -47,7 +50,7 @@
           <div class="px-2 py-1">
             <div class="flex items-center gap-3">
               <label class="text-sm font-medium text-gray-700 w-[140px] flex-shrink-0"> ERP </label>
-              <UiSelect v-model="wfHeader.erp" placeholder="Select ERP" row :options="erpOptions" class="flex-1" />
+              <UiSelect v-model="header.erp" placeholder="Select ERP" row :options="erpOptions" class="flex-1" />
             </div>
           </div>
 
@@ -57,7 +60,7 @@
               <label class="text-sm font-medium text-gray-700 w-[140px] flex-shrink-0">
                 System Client
               </label>
-              <UiSelect v-model="wfHeader.client" placeholder="Select Client" row :options="clientOptions"
+              <UiSelect v-model="header.client" placeholder="Select Client" row :options="clientOptions"
                 class="flex-1" />
             </div>
           </div>
@@ -68,7 +71,7 @@
               <label class="text-sm font-medium text-gray-700 w-[140px] flex-shrink-0">
                 Client ID
               </label>
-              <UiInput v-model="wfHeader.clientId" type="number" placeholder="e.g. 120" row class="flex-1" />
+              <UiInput v-model="header.clientId" type="number" placeholder="e.g. 120" row class="flex-1" />
             </div>
           </div>
 
@@ -78,7 +81,7 @@
               <label class="text-sm font-medium text-gray-700 w-[140px] flex-shrink-0">
                 Status
               </label>
-              <UiSelect v-model="wfHeader.status" placeholder="Select Status" row :options="statusOptions"
+              <UiSelect v-model="header.status" placeholder="Select Status" row :options="statusOptions"
                 class="flex-1" />
             </div>
           </div>
@@ -89,7 +92,7 @@
               <label class="text-sm font-medium text-gray-700 w-[140px] flex-shrink-0">
                 Process Group
               </label>
-              <UiSelect v-model="wfHeader.processGroup" placeholder="Select Process Group" row
+              <UiSelect v-model="header.processGroup" placeholder="Select Process Group" row
                 :options="processGroupOptions" class="flex-1" />
             </div>
           </div>
@@ -104,11 +107,11 @@
                 Connection Method
               </label>
               <div class="flex-1 flex gap-4 items-center">
-                <UiRadio v-model="wfHeader.connectionMethod" value="RFC" label="RFC" name="connectionMethod" />
-                <UiRadio v-model="wfHeader.connectionMethod" value="API" label="API" name="connectionMethod" />
-                <UiRadio v-model="wfHeader.connectionMethod" value="Integration Suite" label="Integration Suite"
+                <UiRadio v-model="header.connectionMethod" value="RFC" label="RFC" name="connectionMethod" />
+                <UiRadio v-model="header.connectionMethod" value="API" label="API" name="connectionMethod" />
+                <UiRadio v-model="header.connectionMethod" value="Integration Suite" label="Integration Suite"
                   name="connectionMethod" />
-                <UiRadio v-model="wfHeader.connectionMethod" value="RPA" label="RPA" name="connectionMethod" />
+                <UiRadio v-model="header.connectionMethod" value="RPA" label="RPA" name="connectionMethod" />
               </div>
             </div>
           </div>
@@ -120,7 +123,7 @@
                 Connector Driver
               </label>
               <div class="flex-1 flex gap-2">
-                <UiInput v-model="wfHeader.connectorDriver" placeholder="e.g. .net connector Versi XX121" row
+                <UiInput v-model="header.connectorDriver" placeholder="e.g. .net connector Versi XX121" row
                   class="flex-1" />
                 <UiButton
                   class="w-[160px] flex items-center pl-4 gap-2 bg-blue-50 border border-blue-400 text-blue-600 text-xs font-medium rounded h-10 px-3 hover:bg-blue-100 flex-shrink-0"
@@ -141,7 +144,7 @@
                 Destination Name
               </label>
               <div class="flex-1 flex gap-2">
-                <UiInput v-model="wfHeader.destinationName" placeholder="e.g. IDES-NEW" row class="flex-1" />
+                <UiInput v-model="header.destinationName" placeholder="e.g. IDES-NEW" row class="flex-1" />
                 <div class="w-[160px] flex-shrink-0"></div>
               </div>
             </div>
@@ -154,7 +157,7 @@
                 App Server Host
               </label>
               <div class="flex-1 flex gap-2">
-                <UiInput v-model="wfHeader.appServerHost" placeholder="e.g. 192.168.5.50" row class="flex-1" />
+                <UiInput v-model="header.appServerHost" placeholder="e.g. 192.168.5.50" row class="flex-1" />
                 <div class="w-[160px] flex-shrink-0"></div>
               </div>
             </div>
@@ -167,7 +170,7 @@
                 User
               </label>
               <div class="flex-1 flex gap-2">
-                <UiInput v-model="wfHeader.user" placeholder="e.g. TMS_EVOQ" row class="flex-1" />
+                <UiInput v-model="header.user" placeholder="e.g. TMS_EVOQ" row class="flex-1" />
                 <div class="w-[160px] flex-shrink-0"></div>
               </div>
             </div>
@@ -181,7 +184,7 @@
               </label>
               <div class="flex-1 flex gap-2">
                 <div class="flex-1 relative">
-                  <UiInput v-model="wfHeader.password" :type="showPassword ? 'text' : 'password'"
+                  <UiInput v-model="header.password" :type="showPassword ? 'text' : 'password'"
                     placeholder="Enter Password" row class="w-full" />
                   <button type="button"
                     class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
@@ -201,7 +204,7 @@
                 Language
               </label>
               <div class="flex-1 flex gap-2">
-                <UiInput v-model="wfHeader.language" placeholder="e.g. EN" row class="flex-1" />
+                <UiInput v-model="header.language" placeholder="e.g. EN" row class="flex-1" />
                 <div class="w-[160px] flex-shrink-0"></div>
               </div>
             </div>
@@ -209,7 +212,7 @@
         </div>
       </div>
       <div class="flex justify-end mt-6 pr-4">
-        <UiButton type="button" class="btn btn-primary">
+        <UiButton type="button" class="btn btn-primary" @click="submitErp()">
           <span>Save</span>
           <UiIcon name="arrows-circle" variant="duotone" class="w-4 h-1" />
         </UiButton>
@@ -218,7 +221,7 @@
   </div>
 
   <!-- Table Section (Placeholder for now, or similar to Workflow Config) -->
-  <div class="mt-6">
+  <!-- <div class="mt-6">
     <div class="border border-gray-200 rounded-xl p-[24px]">
       <div class="flex justify-between items-center gap-[8px]">
         <h3 class="font-bold text-lg text-slate-800">Integration List</h3>
@@ -228,7 +231,7 @@
             <i class="ki-filled ki-filter"></i>
             Filter
           </button>
-          <button class="btn btn-primary" @click="showAddIntegrationModal = true">
+          <button class="btn btn-primary" @click="goToAddIntegrationPage()" :disabled="!isCreate">
             <i class="ki-duotone ki-plus-circle"></i>
             Add New
           </button>
@@ -286,11 +289,12 @@
             <tr v-for="(item, index) in integrationList" :key="index" class="integration__field-items hover:bg-blue-50">
               <td class="flex items-center gap-[24px]">
                 <button class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]" title="View Detail"
-                  @click="showAddIntegrationModal = true">
+                  @click="goToDetail(item.code)">
                   <i class="ki-filled ki-eye !text-lg"></i>
                 </button>
-                <button class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]" title="Field Mapping">
-                  <i class="ki-duotone ki-data !text-lg"></i>
+                <button class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]" title="Field Mapping"
+                  @click="goToEdit(item.code)">
+                  <i class="ki-filled ki-pencil !text-lg"></i>
                 </button>
               </td>
               <td class="whitespace-nowrap font-medium">
@@ -344,8 +348,7 @@
         </table>
       </div>
     </div>
-    <IntegrationAddModal v-model="showAddIntegrationModal" @submit="handleAddIntegration" />
-  </div>
+  </div> -->
 
 
 
@@ -353,44 +356,39 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import BreadcrumbView from '@/components/BreadcrumbView.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
-import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
+// import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import UiRadio from '@/components/ui/atoms/radio/UiRadio.vue'
-
-import IntegrationAddModal from './erpModal/erpAddModal.vue'
-
-// Reactive state
-// const bracketAmount = ref<'yes' | 'no' | undefined>(undefined)
-// const showBracketModal = ref(false)
-// const showProfileModal = ref(false)
-// const showAuthModal = ref(false)
+import { useSystemIntegrationStore } from '@/stores/system-integration/systemIntegration'
 
 
-// Interface for Integration Item
-interface IntegrationItem {
-  code: string
-  client: string
-  processIntegration: string
-  services: string
-  type: string
-  source: string
-  destination: string
-  transactionCode: string
-  connection: string
-  technicalObject: string
-  fieldMapping: string
-  integrationStatus: string
-  connectionTest: string
-}
+import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
+const systemIntegrationStore = useSystemIntegrationStore()
+// const integrationList = ref([])
+
+// import IntegrationAddModal from './erpModal/erpAddModal.vue'
+
+const invoiceMasterApi = useInvoiceMasterDataStore()
+
+
+const companyCodeList = computed(() => invoiceMasterApi.companyCode)
+
+// const route = useRoute()
+const router = useRouter()
+// const id = route.params.id as string
+
+
+const isCodeEmpty = ref(false)
+
 
 // Interface for WF Header
-interface WfHeader {
+interface header {
   connectionCode: string
   companyCode: string
   description: string
@@ -408,30 +406,37 @@ interface WfHeader {
   language: string
 }
 
-const showAddIntegrationModal = ref(false)
-const integrationList = ref<IntegrationItem[]>([])
+
+// const integrationList = ref<IntegrationItem[]>([])
 const showPassword = ref(false)
-const search = ref('')
+// const search = ref('')
 
 
 
-const wfHeader = ref<WfHeader>({
+const header = ref({
+  id: '',           // WAJIB
   connectionCode: '',
   companyCode: '',
-  description: '',
-  erp: undefined,
-  client: undefined,
+  companyName: '',
+  systemClient: 'PRD',
+
+  erp: '',                           // jangan undefined
+  client: 'PRD',
   clientId: '',
-  status: undefined,
-  processGroup: undefined,
-  // New fields
+
+  processGroup: '',
+  status: 'Draft',                   // atau Active
+  lastChange: new Date().toLocaleString(),
+
+  description: '',
+
   connectionMethod: 'RFC',
   connectorDriver: '',
   destinationName: '',
   appServerHost: '',
   user: '',
   password: '',
-  language: '',
+  language: 'EN',
 })
 
 const erpOptions = [
@@ -461,217 +466,37 @@ const processGroupOptions = [
   { text: 'Warehouse Management', value: 'Warehouse Management' },
 ]
 
-// Handlers for modals (empty for now or log)
-// const handleBracketSubmit = (formData: BracketForm) => {
-//   console.log('Bracket submitted', formData)
-//   showBracketModal.value = false
-// }
-// const handleProfileSubmit = (formData: ProfileForm) => {
-//   console.log('Profile submitted', formData)
-//   showProfileModal.value = false
-// }
-// const handleAuthSubmit = (formData: AuthForm) => {
-//   console.log('Auth submitted', formData)
-//   showAuthModal.value = false
-// }
+const getCompanyName = () => {
+  const company = companyCodeList.value.find(
+    (item) => item.code === header.value.companyCode
+  )
 
-const handleAddIntegration = (data: IntegrationItem) => {
-  integrationList.value.push(data)
+  if (!company?.name) return ''
+
+  // ambil teks setelah " - "
+  return company.name.split(' - ').slice(1).join(' - ')
 }
+
+const submitErp = () => {
+
+  header.value.id = header.value.connectionCode
+  header.value.companyName = getCompanyName()
+  systemIntegrationStore.addErp({ ...header.value })
+
+
+  router.push({
+    name: 'erp-integration'
+  })
+}
+
+
 
 // On Mounted to fetch data
 onMounted(() => {
-  const route = useRoute()
-  const id = route.params.id as string
 
-  // Mock data fetching based on ID
-  console.log('Fetching details for:', id)
-
-  // define mock data
-  const mockDB: Record<string, WfHeader> = {
-    EVOSAP01: {
-      connectionCode: 'EVOSAP01',
-      companyCode: 'MF00',
-      description: 'SAP PRD Connection MF00',
-      erp: 'sap_hana_2020',
-      client: 'PRD',
-      clientId: '120',
-      status: 'Active',
-      processGroup: 'Invoice Management',
-      connectionMethod: 'RFC',
-      connectorDriver: '.net connector Versi XX121',
-      destinationName: 'IDES-NEW',
-      appServerHost: '192.168.5.50',
-      user: 'TMS_EVOQ',
-      password: 'Teamwork2026!!!',
-      language: 'EN',
-    },
-    EVOSAP02: {
-      connectionCode: 'EVOSAP02',
-      companyCode: 'MF00',
-      description: 'SAP PRD Connection MF00',
-      erp: 'sap_hana_2020',
-      client: 'PRD',
-      clientId: '120',
-      status: 'Active',
-      processGroup: 'Invoice Management',
-      connectionMethod: 'RFC',
-      connectorDriver: '.net connector Versi XX121',
-      destinationName: 'IDES-NEW',
-      appServerHost: '192.168.5.50',
-      user: 'TMS_EVOQ',
-      password: 'Teamwork2026!!!',
-      language: 'EN',
-    },
-  }
-
-  const data = mockDB[id] || {
-    connectionCode: id,
-    companyCode: '',
-    description: '',
-    erp: undefined,
-    client: undefined,
-    clientId: '',
-    status: undefined,
-    processGroup: undefined,
-    connectionMethod: 'RFC',
-    connectorDriver: '',
-    destinationName: '',
-    appServerHost: '',
-    user: '',
-    password: '',
-    language: '',
-  }
-
-  wfHeader.value = data
+  invoiceMasterApi.getCompanyCode(header.value.connectionCode)
 })
 
-// const handleGenerateWFStep = () => {
-//     integrationList.value = dummyIntegrationList
-// }
-
-// const dummyIntegrationList = [
-// {
-//     code: 'IV01',
-//     client: 'PRD',
-//     processIntegration: 'Invoice Posting With PO',
-//     services: 'Transaction',
-//     type: 'Outbound',
-//     source: 'EVOQ',
-//     destination: 'SAP',
-//     transactionCode: 'MIRO',
-//     connection: 'RFC',
-//     technicalObject: 'ZFM_INVPO_MIRO',
-//     fieldMapping: 'Active',
-//     integrationStatus: 'Active',
-//     connectionTest: 'Success',
-// },
-// {
-//     code: 'IV02',
-//     client: 'PRD',
-//     processIntegration: 'Invoice Without PO GL Master',
-//     services: 'Master Data',
-//     type: 'Inbound',
-//     source: 'SAP',
-//     destination: 'EVOQ',
-//     transactionCode: 'FS00',
-//     connection: 'RFC',
-//     technicalObject: 'ZFM_INVNONPO_GLMASTER',
-//     fieldMapping: 'Active',
-//     integrationStatus: 'Active',
-//     connectionTest: 'Success',
-// },
-// {
-//     code: 'IV03',
-//     client: 'PRD',
-//     processIntegration: 'Invoice Posting Without PO',
-//     services: 'Transaction',
-//     type: 'Outbound',
-//     source: 'EVOQ',
-//     destination: 'SAP',
-//     transactionCode: 'FB60',
-//     connection: 'RFC',
-//     technicalObject: 'ZFM_INVPO_FB60',
-//     fieldMapping: 'Active',
-//     integrationStatus: 'Active',
-//     connectionTest: 'Success',
-// },
-// {
-//     code: 'IV04',
-//     client: 'PRD',
-//     processIntegration: 'GR Posted for Invoice',
-//     services: 'Transaction',
-//     type: 'Outbound',
-//     source: 'EVOQ',
-//     destination: 'SAP',
-//     transactionCode: 'MB51',
-//     connection: 'RFC',
-//     technicalObject: 'ZFM_MATDOC_GRLIST',
-//     fieldMapping: 'Active',
-//     integrationStatus: 'Active',
-//     connectionTest: 'Success',
-// },
-// {
-//     code: 'IV05',
-//     client: 'PRD',
-//     processIntegration: 'Invoice With PO Reversal',
-//     services: 'Transaction',
-//     type: 'Outbound',
-//     source: 'EVOQ',
-//     destination: 'SAP',
-//     transactionCode: 'MR8M',
-//     connection: 'RFC',
-//     technicalObject: 'ZFM_INVPO_REVERSAL',
-//     fieldMapping: 'Not Active',
-//     integrationStatus: 'Not Active',
-//     connectionTest: 'Not Active',
-// },
-// {
-//     code: 'IV06',
-//     client: 'PRD',
-//     processIntegration: 'Payment Terms',
-//     services: 'Master Data',
-//     type: 'Inbound',
-//     source: 'SAP',
-//     destination: 'EVOQ',
-//     transactionCode: 'OBB8',
-//     connection: 'RFC',
-//     technicalObject: 'ZFM_INVNONPO_GLMASTER',
-//     fieldMapping: 'Active',
-//     integrationStatus: 'Active',
-//     connectionTest: 'Success',
-// },
-// {
-//     code: 'IV07',
-//     client: 'PRD',
-//     processIntegration: 'Payment Method',
-//     services: 'Master Data',
-//     type: 'Inbound',
-//     source: 'SAP',
-//     destination: 'EVOQ',
-//     transactionCode: 'OBB8',
-//     connection: 'RFC',
-//     technicalObject: 'ZFM_INVNONPO_GLMASTER',
-//     fieldMapping: 'Active',
-//     integrationStatus: 'Active',
-//     connectionTest: 'Success',
-// },
-// {
-//     code: 'IV08',
-//     client: 'PRD',
-//     processIntegration: 'Employee Master Role',
-//     services: 'Master Data',
-//     type: 'Inbound',
-//     source: 'SAP',
-//     destination: 'EVOQ',
-//     transactionCode: 'PPOME',
-//     connection: 'RFC',
-//     technicalObject: 'ZFM_EMPLOYEE_ORGSTRUCTURE',
-//     fieldMapping: 'Active',
-//     integrationStatus: 'Active',
-//     connectionTest: 'Success',
-// },
-// ]
 
 
 
