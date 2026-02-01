@@ -507,9 +507,7 @@ const dummyIntegrationList = ref<any>([])
 // On Mounted to fetch data
 onMounted(() => {
 
-
   const getData = systemIntegrationStore.getErpById(id)
-  console.log(getData);
 
   const header = getData.header
   const definition = getData.integrations

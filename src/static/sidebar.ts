@@ -91,6 +91,11 @@ export default [
         title: 'Vendor Blacklist',
         to: 'vendor-blacklist',
       },
+      {
+        id: 'activity-expenses',
+        title: 'Activity Expenses',
+        to: 'activity-expenses',
+      },
     ],
   },
 
@@ -310,6 +315,6 @@ export default [
         title: 'ERP Integration List',
         to: 'erp-integration',
       },
-    ]
-  }
+    ],
+  },
 ]
