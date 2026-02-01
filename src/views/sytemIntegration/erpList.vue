@@ -1,8 +1,8 @@
 <template>
   <div>
-    <BreadcrumbView title="Master Role" :routes="[
-      { name: 'User Management', to: '/user-management/user' },
-      { name: 'Master Role', to: '#' },
+    <BreadcrumbView title="ERP Integration List" :routes="[
+      { name: 'ERP Integration List', to: '#' },
+      // { name: 'Master Role', to: '#' },
     ]" />
 
     <div class="card">
@@ -10,7 +10,7 @@
         <div class="flex w-full justify-between items-center">
           <h2 class="text-lg font-bold text-slate-800">ERP Integration List</h2>
           <div class="flex gap-2">
-            <UiInputSearch v-model="search" placeholder="Search Role" />
+            <UiInputSearch v-model="search" placeholder="Search ERP" />
             <!-- Filter Dropdown -->
             <div class="dropdown" data-dropdown="true" data-dropdown-trigger="click">
               <button class="dropdown-toggle btn btn-primary">
@@ -136,7 +136,7 @@
                   <td>{{ role.processGroup }}</td>
                   <td>
                     <span class="badge badge-outline border-transparent bg-green-50 text-green-600">{{ role.status
-                    }}</span>
+                      }}</span>
                   </td>
                   <td class="text-center">{{ role.totalIntegration }}</td>
                   <td class="text-center">{{ role.inbound }}</td>

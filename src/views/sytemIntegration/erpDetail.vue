@@ -509,6 +509,8 @@ onMounted(() => {
 
 
   const getData = systemIntegrationStore.getErpById(id)
+  console.log(getData);
+
   const header = getData.header
   const definition = getData.integrations
 
