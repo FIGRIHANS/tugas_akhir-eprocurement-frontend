@@ -155,6 +155,7 @@
                               class="border-none text-red-500 hover:text-red-600"
                               :outline="true"
                               size="md"
+                              @click="deleteWorkflow(workflow.wfCode)"
                             >
                               <UiIcon name="trash" class="mr-2" />
                               Delete Workflow
@@ -364,6 +365,16 @@ const viewDetail = (id: string) => {
 
 const changePage = (page: number) => {
   currentPage.value = page
+}
+
+const deleteWorkflow = (wfCode: string) => {
+  const index = workflowList.value.findIndex((item) => item.wfCode === wfCode)
+  if (index > -1) {
+    workflowList.value.splice(index, 1)
+    totalItems.value = workflowList.value.length
+    // Update localStorage
+    localStorage.setItem('workflowDummyList', JSON.stringify(workflowList.value))
+  }
 }
 
 onMounted(() => {

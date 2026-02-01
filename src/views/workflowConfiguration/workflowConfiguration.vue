@@ -4,18 +4,7 @@
     { name: 'Add New Workflow', to: '#' }
   ]" title="Add New Workflow" />
 
-  <!-- Back button -->
-  <div class="mt-4 ml-3">
-    <UiButton
-      class="bg-white border border-blue-200 text-blue-600 rounded-lg h-10 px-3 flex items-center gap-2 shadow-sm"
-      @click="() => $router.go(-1)"
-    >
-      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="15 18 9 12 15 6"></polyline>
-      </svg>
-      <span class="text-sm font-medium">Back</span>
-    </UiButton>
-  </div>
+  <!-- Back button removed from top; moved below PG001 card -->
 
   <!-- WF Header Configuration -->
   <!-- Table -->
@@ -224,22 +213,14 @@
         </div>
       </div>
 
-      <!-- Generate -->
+      <!-- Generate button (restored under Auth Object ID) -->
       <div class="flex justify-end mt-6 pr-4">
         <UiButton
           class="bg-blue-500 hover:bg-blue-600 text-white font-medium rounded h-12 px-5 shadow-sm flex items-center gap-2"
-          @click="handleGenerateWFStep">
+          @click="handleGenerateWFStep"
+        >
           <span>Generate WF Step</span>
           <UiIcon name="arrows-circle" variant="duotone" class="w-4 h-1" />
-        </UiButton>
-        <UiButton
-          class="ml-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl h-12 px-5 shadow-lg flex items-center gap-2"
-          @click="saveWorkflow">
-          <span>Submit</span>
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M22 2L11 13" />
-            <polygon points="22 2 15 22 11 13 2 9 22 2" />
-          </svg>
         </UiButton>
       </div>
     </div>
@@ -259,6 +240,8 @@
     <!-- Table -->
     <WorkflowConfig :isDataEmpty="isDataEmpty" :data="workflowData" />
   </div>
+
+  <!-- Back/Submit placeholder removed (will be rendered inside PG001 v-else) -->
 
   <!-- Display when Generate WF Step hasn't been clicked -->
   <div v-else class="mt-6">
@@ -291,6 +274,31 @@
         </table>
       </div>
     </div>
+  </div>
+
+  <!-- Persistent Back and Submit buttons (outside v-if/v-else, always visible) -->
+  <div class="mt-6 flex justify-between items-center px-2">
+    <UiButton
+      class="bg-white border border-blue-200 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg h-10 px-3 flex items-center gap-2 shadow-sm"
+      @click="goBack"
+    >
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H6" />
+        <path d="M12 19l-7-7 7-7" />
+      </svg>
+      <span class="text-sm font-medium">Back</span>
+    </UiButton>
+
+    <UiButton
+      class="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl h-12 px-5 shadow-lg flex items-center gap-2"
+      @click="saveWorkflow"
+    >
+      <span>Submit</span>
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 2L11 13" />
+        <polygon points="22 2 15 22 11 13 2 9 22 2" />
+      </svg>
+    </UiButton>
   </div>
 
   <!-- Modals -->
@@ -530,6 +538,10 @@ const handleSave = (index: number) => {
   const tableData = tables.value[index]
   // implementasi save logic
   console.log('Saving table data:', tableData)
+}
+
+const goBack = () => {
+  router.push({ name: 'workflow-list' })
 }
 
 // Initialize API data on component mount
