@@ -62,29 +62,49 @@
               (value: any) => emit('update:userPayload', { ...userPayload, userName: value })
             "
           />
-          <UiInput
-            label="Password"
-            type="password"
-            placeholder="Enter password"
-            row
-            required
-            :model-value="userPayload.userPassword"
-            @update:model-value="
-              (value: any) => emit('update:userPayload', { ...userPayload, userPassword: value })
-            "
-          />
-          <UiInput
-            label="Confirm Password"
-            type="password"
-            placeholder="Enter password"
-            row
-            required
-            :model-value="userPayload.userPasswordConfirm"
-            @update:model-value="
-              (value: any) =>
-                emit('update:userPayload', { ...userPayload, userPasswordConfirm: value })
-            "
-          />
+          <div class="relative">
+            <UiInput
+              label="Password"
+              :type="passwordType"
+              placeholder="Enter password"
+              row
+              required
+              :model-value="userPayload.userPassword"
+              @update:model-value="
+                (value: any) => emit('update:userPayload', { ...userPayload, userPassword: value })
+              "
+            />
+            <button
+              type="button"
+              class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 cursor-pointer"
+              @click="showPassword = !showPassword"
+            >
+              <span v-if="showPassword" class="ki-outline ki-eye-slash text-lg"></span>
+              <span v-else class="ki-outline ki-eye text-lg"></span>
+            </button>
+          </div>
+          <div class="relative">
+            <UiInput
+              label="Confirm Password"
+              :type="confirmPasswordType"
+              placeholder="Enter password"
+              row
+              required
+              :model-value="userPayload.userPasswordConfirm"
+              @update:model-value="
+                (value: any) =>
+                  emit('update:userPayload', { ...userPayload, userPasswordConfirm: value })
+              "
+            />
+            <button
+              type="button"
+              class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 cursor-pointer"
+              @click="showConfirmPassword = !showConfirmPassword"
+            >
+              <span v-if="showConfirmPassword" class="ki-outline ki-eye-slash text-lg"></span>
+              <span v-else class="ki-outline ki-eye text-lg"></span>
+            </button>
+          </div>
           <div class="text-sm text-gray-700">
             <p>The password must contain</p>
             <ul class="list-disc list-inside">
@@ -105,7 +125,7 @@ import UiFormGroup from '@/components/ui/atoms/form-group/UiFormGroup.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import UiSearchSelect from '@/components/ui/atoms/select/UiSearchSelect.vue'
-import { onMounted, computed, watch } from 'vue'
+import { onMounted, computed, watch, ref } from 'vue'
 // import { computed } from 'vue'
 import { useUserProfileStore } from '@/stores/user-management/profile'
 // import logger from '@/utils/logger'
@@ -114,6 +134,12 @@ import { useEmployeeStore } from '@/stores/user-management/employee'
 const userProfileStore = useUserProfileStore()
 
 const employeeStore = useEmployeeStore()
+
+const showPassword = ref(false)
+const showConfirmPassword = ref(false)
+
+const passwordType = computed(() => (showPassword.value ? 'text' : 'password'))
+const confirmPasswordType = computed(() => (showConfirmPassword.value ? 'text' : 'password'))
 
 const statusOptions = [
   { label: 'Active', value: 'active' },

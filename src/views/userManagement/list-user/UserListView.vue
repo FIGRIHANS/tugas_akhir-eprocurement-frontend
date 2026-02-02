@@ -18,15 +18,15 @@ const router = useRouter()
 const userStore = useUserStore()
 
 const filterForm = reactive({
-  profile: '',
   status: '',
+  profileId: '',
 })
 
 const columns = ref([
   '',
   'User Name',
   'Email',
-  'Profile',
+  'Profile Id',
   'Employee Id',
   'Last Login',
 ])
@@ -52,8 +52,9 @@ const filteredUsers = computed(() => {
   const searchTerm = search.value.toLowerCase()
   return userStore.users.items.filter(
     (user) =>
-      user.userName.toLowerCase().includes(searchTerm) ||
-      user.employeeName.toLowerCase().includes(searchTerm),
+      (user.userName.toLowerCase().includes(searchTerm) ||
+        user.employeeName.toLowerCase().includes(searchTerm)) &&
+      (filterForm.profileId === '' || user.profileId.toString() === filterForm.profileId),
   )
 })
 
@@ -68,10 +69,21 @@ const setPage = (page: number) => {
 }
 
 const handleFilterReset = () => {
-  filterForm.profile = ''
   filterForm.status = ''
+  filterForm.profileId = ''
   search.value = ''
 }
+
+const uniqueProfileIds = computed(() => {
+  if (!userStore.users || userStore.users.items.length === 0) {
+    return []
+  }
+  const profileIds = userStore.users.items
+    .map((user) => user.profileId)
+    .filter((value, index, self) => self.indexOf(value) === index)
+    .sort((a, b) => a - b)
+  return profileIds
+})
 </script>
 
 <template>
@@ -90,7 +102,7 @@ const handleFilterReset = () => {
         <div class="flex align-items-center gap-3">
           <UiInputSearch v-model="search" placeholder="Search Profile" />
           <div class="dropdown" data-dropdown="true" data-dropdown-trigger="click">
-            <button class="btn btn-outline btn-primary">
+            <button class="dropdown-toggle btn btn-outline btn-primary">
               <UiIcon variant="duotone" name="filter" />
               Filter
             </button>
@@ -99,12 +111,13 @@ const handleFilterReset = () => {
               <div class="flex flex-col gap-[24px] py-[16px]">
                 <div class="relative">
                   <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
-                    >Profile</label
+                    >Profile Id</label
                   >
-                  <select v-model="filterForm.profile" class="select" name="select">
-                    <option value="">All Profiles</option>
-                    <option value="admin">Admin</option>
-                    <option value="user">User</option>
+                  <select v-model="filterForm.profileId" class="select" name="select">
+                    <option value="">All Profile Id</option>
+                    <option v-for="profileId in uniqueProfileIds" :key="profileId" :value="profileId.toString()">
+                      {{ profileId }}
+                    </option>
                   </select>
                 </div>
                 <div class="relative">
