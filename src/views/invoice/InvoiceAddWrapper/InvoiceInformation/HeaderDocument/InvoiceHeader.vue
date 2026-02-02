@@ -669,9 +669,6 @@ watch(
     if (form?.companyCode) {
       const getIndex = companyCodeList.value.findIndex((item) => item.code === form.companyCode)
       if (getIndex !== -1) form.companyName = companyCodeList.value[getIndex].name.split(' - ')[1]
-
-      // Fetch Cost Center
-      invoiceMasterApi.getCostCenter(form.companyCode)
     }
 
     if (form?.cashJournalCode && listCashJournal.value.length > 0) {
@@ -709,7 +706,10 @@ watch(
 watch(
   () => [form?.companyCode, form?.vendorId, form.invoiceType],
   () => {
-    if (form.companyCode) invoiceMasterApi.getActivity(form.companyCode || '')
+    if (form.companyCode) {
+      invoiceMasterApi.getActivity(form.companyCode || '')
+      invoiceMasterApi.getCostCenter(form.companyCode || '')
+    }
     if (form.companyCode && form.invoiceType)
       invoiceMasterApi.getMatrixApproval(form.invoiceType || '', form.companyCode || '')
     if (form.vendorId && form.companyCode) {
