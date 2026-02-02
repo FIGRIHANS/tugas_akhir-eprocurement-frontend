@@ -6,44 +6,6 @@
     <div class="card-body">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-12 mb-[24px]">
         <UiFormGroup hide-border>
-          <UiInput
-            label="Full Name"
-            placeholder="Enter full name"
-            row
-            required
-            :model-value="userPayload.employeeName"
-            @update:model-value="
-              (value: any) =>
-                emit('update:userPayload', {
-                  ...userPayload,
-                  employeeName: value,
-                })
-            "
-          />
-          <UiInput
-            label="User Email"
-            placeholder="Enter email"
-            row
-            required
-            :model-value="userPayload.userName"
-            @update:model-value="
-              (value: any) => emit('update:userPayload', { ...userPayload, userName: value })
-            "
-          />
-          <UiSelect
-            label="Status"
-            placeholder="Pilih"
-            :options="statusOptions"
-            row
-            required
-            value-key="value"
-            text-key="label"
-            :model-value="userPayload.isActive ? 'active' : 'inactive'"
-            @update:model-value="
-              (value: string | number) =>
-                emit('update:userPayload', { ...userPayload, isActive: value === 'active' })
-            "
-          />
           <UiSearchSelect
             label="Employee"
             placeholder="Pilih"
@@ -59,8 +21,6 @@
             "
             searchable
           />
-        </UiFormGroup>
-        <UiFormGroup hide-border>
           <UiSearchSelect
             label="Profile"
             placeholder="Pilih"
@@ -75,6 +35,32 @@
               (value: any) => emit('update:userPayload', { ...userPayload, profileId: value })
             "
             searchable
+          />
+          <UiSelect
+            label="Status"
+            placeholder="Pilih"
+            :options="statusOptions"
+            row
+            required
+            value-key="value"
+            text-key="label"
+            :model-value="userPayload.isActive ? 'active' : 'inactive'"
+            @update:model-value="
+              (value: string | number) =>
+                emit('update:userPayload', { ...userPayload, isActive: value === 'active' })
+            "
+          />
+        </UiFormGroup>
+        <UiFormGroup hide-border>
+          <UiInput
+            label="User Email"
+            placeholder="Enter email"
+            row
+            required
+            :model-value="userPayload.userName"
+            @update:model-value="
+              (value: any) => emit('update:userPayload', { ...userPayload, userName: value })
+            "
           />
           <UiInput
             label="Password"
@@ -119,7 +105,7 @@ import UiFormGroup from '@/components/ui/atoms/form-group/UiFormGroup.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import UiSearchSelect from '@/components/ui/atoms/select/UiSearchSelect.vue'
-import { defineProps, defineEmits, onMounted } from 'vue'
+import { onMounted, computed, watch } from 'vue'
 // import { computed } from 'vue'
 import { useUserProfileStore } from '@/stores/user-management/profile'
 // import logger from '@/utils/logger'
@@ -190,14 +176,44 @@ const getEmployeAfter = (query: string) => {
 //   return userProfileStore.profiles.items
 // })
 
-defineProps({
-  userPayload: {
-    type: Object,
-    required: true,
-  },
+interface UserPayloadInterface {
+  userName: string
+  userPassword: string
+  userPasswordConfirm: string
+  employeeName: string
+  isActive: boolean
+  employeeId: number
+  profileId: number
+  selectedRoleIds: string[]
+}
+
+const props = defineProps<{
+  userPayload: UserPayloadInterface
+}>()
+
+const emit = defineEmits<{
+  'update:userPayload': [payload: UserPayloadInterface]
+  'update:isFormValid': [isValid: boolean]
+}>()
+
+const isFormValid = computed(() => {
+  return (
+    props.userPayload.employeeId > 0 &&
+    props.userPayload.profileId > 0 &&
+    props.userPayload.userName?.trim() !== '' &&
+    props.userPayload.userPassword?.trim() !== '' &&
+    props.userPayload.userPasswordConfirm?.trim() !== '' &&
+    props.userPayload.userPassword === props.userPayload.userPasswordConfirm
+  )
 })
 
-const emit = defineEmits(['update:userPayload'])
+watch(
+  isFormValid,
+  (newVal) => {
+    emit('update:isFormValid', newVal)
+  },
+  { immediate: true },
+)
 
 onMounted(() => {
   const body = {
