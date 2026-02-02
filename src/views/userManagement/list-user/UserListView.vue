@@ -40,9 +40,12 @@ const handleShowUserForm = () => {
 }
 
 const getTomorrowDateTime = () => {
-  const tomorrow = new Date()
-  tomorrow.setDate(tomorrow.getDate() + 1)
-  return moment(tomorrow).format('dddd, DD MMMM YYYY HH:mm:ss')
+  const date = new Date(2026, 1, 2) // Tuesday, 2 Feb 2026
+  const randomHour = Math.floor(Math.random() * 24)
+  const randomMinute = Math.floor(Math.random() * 60)
+  const randomSecond = Math.floor(Math.random() * 60)
+  date.setHours(randomHour, randomMinute, randomSecond)
+  return moment(date).format('dddd, DD MMMM YYYY HH:mm:ss')
 }
 
 const filteredUsers = computed(() => {
