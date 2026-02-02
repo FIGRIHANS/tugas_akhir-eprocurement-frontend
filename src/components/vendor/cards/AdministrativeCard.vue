@@ -3,14 +3,16 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import { useVendorAdministrationStore } from '@/stores/vendor/vendor'
 import { ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+// import { useRoute } from 'vue-router'
 import UiLoading from '@/components/UiLoading.vue'
 import { useVendorUploadStore } from '@/stores/vendor/upload'
 
 const administrasiStore = useVendorAdministrationStore()
 const uploadStore = useVendorUploadStore()
-const route = useRoute()
-
+// const route = useRoute()
+const props = defineProps<{
+  vendorId: string
+}>()
 const loading = ref<boolean>(false)
 const error = ref<string>('')
 
@@ -32,7 +34,7 @@ const download = async (path: string) => {
 }
 
 watch(
-  () => route.params.id,
+  () => props.vendorId,
   (id) => {
     administrasiStore.getData(id as string)
   },
@@ -46,10 +48,7 @@ watch(
     <div class="card-header">
       <div class="card-title">{{ $t('vendorVerification.administration.administration') }}</div>
     </div>
-    <div
-      v-if="administrasiStore.loading"
-      class="flex items-center justify-center text-xl text-primary py-5"
-    >
+    <div v-if="administrasiStore.loading" class="flex items-center justify-center text-xl text-primary py-5">
       <UiLoading size="md" />
     </div>
     <div v-else-if="administrasiStore.error" class="flex items-center justify-center py-5">
@@ -118,12 +117,8 @@ watch(
                   {{ $t('vendorVerification.administration.npwpdoc') }}
                 </td>
                 <td class="text-sm font-bold text-gray-700">
-                  <UiButton
-                    :outline="true"
-                    size="sm"
-                    @click="download(administrasiStore.data.npwpUrl)"
-                    :disabled="loading"
-                  >
+                  <UiButton :outline="true" size="sm" @click="download(administrasiStore.data.npwpUrl)"
+                    :disabled="loading">
                     <span v-if="loading">
                       <UiLoading />
                     </span>
@@ -134,8 +129,7 @@ watch(
                           $t('general.download', {
                             field: $t('vendorVerification.administration.npwpdoc'),
                           })
-                        }}</span
-                      >
+                        }}</span>
                     </template>
                   </UiButton>
                 </td>
@@ -223,10 +217,7 @@ watch(
               </td>
               <td class="text-sm text-gray-700">
                 <ul>
-                  <li
-                    v-for="(bf, index) in administrasiStore.data.businessFieldName?.split(',')"
-                    :key="bf"
-                  >
+                  <li v-for="(bf, index) in administrasiStore.data.businessFieldName?.split(',')" :key="bf">
                     <strong> {{ index + 1 }}. {{ bf.split('(')[0]?.trim() ?? bf }}, </strong>
                     <span>{{ bf.split('(')[1]?.trim()?.replace(')', '') ?? '' }}</span>
                   </li>

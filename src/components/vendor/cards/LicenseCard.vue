@@ -7,15 +7,20 @@ import { type ILicense } from '@/stores/vendor/types/vendor'
 import { useVendorUploadStore } from '@/stores/vendor/upload'
 import { useVendorIzinUsahaStore } from '@/stores/vendor/vendor'
 import { computed, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+// import { useRoute } from 'vue-router'
 
 const izinUsahaStore = useVendorIzinUsahaStore()
 const uploadStore = useVendorUploadStore()
 
-const route = useRoute()
+// const route = useRoute()
 
 const loading = ref<boolean>(false)
 const error = ref<string>('')
+
+
+const props = defineProps<{
+  vendorId: string
+}>()
 
 const download = async (path: string) => {
   loading.value = true
@@ -44,8 +49,10 @@ const sortedLicenses = computed<ILicense[]>(() => {
 })
 
 watch(
-  () => route.params.id,
+  () => props.vendorId,
   (id) => {
+
+    console.log('id', id);
     izinUsahaStore.getData(id as string)
   },
   { immediate: true },
@@ -97,12 +104,7 @@ watch(
               }}
             </td>
             <td>
-              <UiButton
-                :disabled="loading"
-                :outline="true"
-                size="sm"
-                @click="download(item.documentUrl)"
-              >
+              <UiButton :disabled="loading" :outline="true" size="sm" @click="download(item.documentUrl)">
                 <UiIcon name="cloud-download" variant="duotone" />
                 <span>{{
                   $t('general.download', {

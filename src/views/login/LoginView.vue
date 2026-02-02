@@ -3,13 +3,8 @@
     <!-- Language Toggle -->
     <div class="absolute top-[20px] right-[20px] z-10">
       <div class="menu menu-default p-0" data-menu="true">
-        <div
-          class="menu-item"
-          data-menu-item-placement="bottom-end"
-          data-menu-item-toggle="dropdown"
-          data-menu-item-trigger="click"
-          data-menu-item-permanent="true"
-        >
+        <div class="menu-item" data-menu-item-placement="bottom-end" data-menu-item-toggle="dropdown"
+          data-menu-item-trigger="click" data-menu-item-permanent="true">
           <button class="menu-toggle btn btn-light text-gray-600 border-0 flex items-center">
             <span class="text-base font-semibold"> {{ selectedLanguage }} </span>
             <i class="ki-filled ki-down text-[20px]"></i>
@@ -57,11 +52,14 @@
 
     <!-- right -->
     <div class="flex-1">
-      <div
-        class="rounded-xl bg-primary-light h-full flex flex-col justify-between items-center gap-[8px]"
-      >
+      <div class="rounded-xl bg-primary-light h-full flex flex-col justify-between items-center gap-[8px]">
         <!-- <logoLogin class="mt-[30px]" /> -->
-        <LogoEPOQ class="mt-[30px] h-16" />
+        <div class="mt-[30px] flex items-center justify-center">
+          <LogoEPOQ class=" w-[260px] h-16" />
+          <div class="ml-2">
+            <img src="@/assets/tms.png" class="h-[60px] w-max" alt="">
+          </div>
+        </div>
         <loginView />
       </div>
     </div>

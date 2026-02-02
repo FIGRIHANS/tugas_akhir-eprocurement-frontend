@@ -10,6 +10,11 @@ export default [
     component: () => import('@/views/vendor/master/VendorMasterDetail.vue'),
   },
   {
+    path: '/vendor/detail',
+    name: 'vendor-detail',
+    component: () => import('@/views/vendor/master/VendorMasterDetail.vue'),
+  },
+  {
     path: '/vendor/verification',
     name: 'vendor-verification',
     component: () => import('@/views/vendor/verification/VendorVerification.vue'),

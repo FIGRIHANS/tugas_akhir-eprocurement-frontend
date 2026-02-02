@@ -96,6 +96,11 @@ export default [
         title: 'Activity Expenses',
         to: 'activity-expenses',
       },
+      {
+        id: 'vendor-detail',
+        title: 'Vendor Detail',
+        to: 'vendor-detail',
+      },
     ],
   },
 

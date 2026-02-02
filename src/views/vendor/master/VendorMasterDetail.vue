@@ -10,6 +10,9 @@ import SummaryInformation from '../detail/SummaryInformation.vue'
 import AdministrativeData from '../detail/AdministrativeData.vue'
 import BusinessLicense from '../detail/BusinessLicense.vue'
 import PaymentInformation from '../detail/PaymentInformation.vue'
+import { useLoginStore } from '@/stores/views/login'
+
+const userStore = useLoginStore()
 
 const route = useRoute()
 const { t } = useI18n()
@@ -47,14 +50,24 @@ const tabsItem = computed<ITabClosable[]>(() => [
   },
 ])
 const currentTab = ref<string>('summary-information')
+
+const vendorId = ref('')
+
+if (route.params.id) {
+  vendorId.value = route.params.id as string
+} else {
+  vendorId.value = userStore.userData?.profile?.profileId.toString()
+}
+
+
 </script>
 
 <template>
   <BreadcrumbView :title="$t('vendorMaster.title')" :routes="bcRoutes" />
   <UiTabClosable :tabs="tabsItem" v-model="currentTab" />
 
-  <SummaryInformation v-if="currentTab === 'summary-information'" />
-  <AdministrativeData v-if="currentTab === 'administrative-data'" />
-  <BusinessLicense v-if="currentTab === 'business-license-data'" />
-  <PaymentInformation v-if="currentTab === 'payment-information-data'" />
+  <SummaryInformation :vendorId="vendorId" v-if="currentTab === 'summary-information'" />
+  <AdministrativeData :vendorId="vendorId" v-if="currentTab === 'administrative-data'" />
+  <BusinessLicense :vendorId="vendorId" v-if="currentTab === 'business-license-data'" />
+  <PaymentInformation :vendorId="vendorId" v-if="currentTab === 'payment-information-data'" />
 </template>
