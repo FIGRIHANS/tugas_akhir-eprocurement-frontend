@@ -169,8 +169,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from 'vue'
+import { defineComponent, ref, computed, onMounted } from 'vue'
 import { Save as SaveIcon } from 'lucide-vue-next'
+import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 
 type BracketForm = {
   bracketCode: string
@@ -197,6 +198,9 @@ export default defineComponent({
   components: { Save: SaveIcon },
   emits: ['close', 'submit'],
   setup(_, { emit }) {
+    // API Store
+    const invoiceMasterApi = useInvoiceMasterDataStore()
+
     const form = ref<BracketForm>({
       bracketCode: '',
       amountFrom: '',
@@ -207,9 +211,13 @@ export default defineComponent({
       level: '',
     })
 
-    const companyOptions = [
-      { value: 'GNRO', text: 'GNRO' }
-    ]
+    // Computed properties from API store
+    const companyOptions = computed(() =>
+      invoiceMasterApi.companyCode.map(item => ({
+        value: item.code,
+        text: item.name
+      }))
+    )
 
     const bracketTypeOptions = [
       { value: 'PO Amount', text: 'PO Amount' }
@@ -262,6 +270,11 @@ export default defineComponent({
     }
 
     const close = () => emit('close')
+
+    // Initialize API data on component mount
+    onMounted(async () => {
+      await invoiceMasterApi.getCompanyCode()
+    })
 
     return {
       form,
