@@ -211,7 +211,10 @@
           </div>
         </div>
       </div>
-      <div class="flex justify-end mt-6 pr-4">
+      <div class="flex justify-end mt-6 pr-4 gap-2">
+        <UiButton @click="goBack()">
+          <span>Back</span>
+        </UiButton>
         <UiButton type="button" class="btn btn-primary" @click="submitErp()">
           <span>Save</span>
           <UiIcon name="arrows-circle" variant="duotone" class="w-4 h-1" />
@@ -484,6 +487,12 @@ const submitErp = () => {
   systemIntegrationStore.addErp({ ...header.value })
 
 
+  router.push({
+    name: 'erp-integration'
+  })
+}
+
+const goBack = () => {
   router.push({
     name: 'erp-integration'
   })

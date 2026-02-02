@@ -284,9 +284,29 @@ export const useSystemIntegrationStore = defineStore('systemIntegration', {
       })
     },
 
-    updateErp(header: any) {
-      const erp = this.erps.find((e) => e.header.id === header.id)
-      if (erp) erp.header = header
+    updateErp(erpId: string, payload: any) {
+      const erp = this.erps.find((e) => e.header.id === erpId)
+      if (!erp) return
+
+      erp.header = {
+        ...erp.header,
+        ...payload,
+        lastChange: new Date().toLocaleString(),
+      }
+    },
+    deleteErp(erpId: string) {
+      console.log('DELETE ERP ID:', erpId)
+      console.log(
+        'BEFORE:',
+        this.erps.map((e) => e.header.id),
+      )
+
+      this.erps = this.erps.filter((e) => e.header.id !== erpId)
+
+      console.log(
+        'AFTER:',
+        this.erps.map((e) => e.header.id),
+      )
     },
 
     addIntegration(erpId: string, integration: any) {

@@ -5,12 +5,12 @@
       <RouterLink to="/dashboard">
         <!-- <LogoAN class="w-[83px]" /> -->
 
-        <LogoEPOQ class="w-[180px]" />
+        <LogoEPOQ class="w-[120px]" />
 
 
       </RouterLink>
-      <div class="">
-        <img src="@/assets/tms.png" class="h-[20px] w-max" alt="">
+      <div class="ml-2">
+        <img src="@/assets/tms.png" class="h-[35px] w-max" alt="">
       </div>
     </div>
 
@@ -159,11 +159,19 @@ const filteredSidebarMenu = computed(() => {
 
     if (userStore.userData?.profile?.vendorCode) {
       return sidebarMenu
-        .filter((menu) => menu.id === 'dashboard' || menu.id === 'e-invoice')
+        .filter((menu) => menu.id === 'dashboard' || menu.id === 'e-invoice' || menu.id === 'vendor-management')
+
         .map((menu) => {
           return {
             ...menu,
-            child: menu.child ? menu.child.filter((child) => child.id === 'invoice-list') : [],
+            child: menu.child
+              ? menu.child.filter(
+                (child) =>
+                  child.id === 'invoice-list' ||
+                  child.id === 'invoice-list-non-po' ||
+                  child.id === 'vendor-management',
+              )
+              : [],
           }
         })
     }
@@ -271,29 +279,30 @@ const filteredSidebarMenu = computed(() => {
             ...menu,
             child: menu.child
               ? menu.child.filter(
-                  (child) =>
-                    child.id === 'vendor-master' ||
-                    child.id === 'invoice-list' ||
-                    child.id === 'invoice-list-non-po' ||
-                    child.id === 'ftp-invoice-integration' ||
-                    child.id === 'scorecard-performance' ||
-                    child.id === 'invoiceAnalytic' ||
-                    child.id === 'taxAnalytic' ||
-                    child.id === 'email-invoice-integration' ||
-                    child.id === 'receiving-confirmation' ||
-                    child.id === 'receiving-confirmation-list' ||
-                    child.id === 'delivery-notes' ||
-                    child.id === 'delivery-notes-list' ||
-                    child.id === 'vat-reconciliation' ||
-                    child.id === 'wht-reconciliation' ||
-                    child.id === 'invoice-type' ||
-                    child.id === 'list-user' ||
-                    child.id === 'master-profile' ||
-                    child.id === 'master-role' ||
-                    child.id === 'master-employee' ||
-                    child.id === 'report-user-authorization' ||
-                    child.id === 'erp-integration'
-                )
+                (child) =>
+                  child.id === 'vendor-master' ||
+                  child.id === 'invoice-list' ||
+                  child.id === 'invoice-list-non-po' ||
+                  child.id === 'ftp-invoice-integration' ||
+                  child.id === 'scorecard-performance' ||
+                  child.id === 'invoiceAnalytic' ||
+                  child.id === 'taxAnalytic' ||
+                  child.id === 'email-invoice-integration' ||
+                  child.id === 'receiving-confirmation' ||
+                  child.id === 'receiving-confirmation-list' ||
+                  child.id === 'delivery-notes' ||
+                  child.id === 'delivery-notes-list' ||
+                  child.id === 'vat-reconciliation' ||
+                  child.id === 'wht-reconciliation' ||
+                  child.id === 'invoice-type' ||
+                  child.id === 'list-user' ||
+                  child.id === 'master-profile' ||
+                  child.id === 'master-role' ||
+                  child.id === 'master-employee' ||
+                  child.id === 'report-user-authorization' ||
+                  child.id === 'erp-integration' ||
+                  child.id === 'activity-expenses'
+              )
               : [],
           }
         })
