@@ -83,6 +83,7 @@
                   class="input"
                   type="number"
                   placeholder=""
+                  @input="editVariance(index)"
                   @change="item.whtBaseAmount = item.itemAmount.toString()"
                 />
               </td>
@@ -95,8 +96,7 @@
                   :class="{ 'input-danger': item.isTextLimitExceeded }"
                   type="text"
                   placeholder=""
-                  @input="onItemTextInput(item, $event)"
-                  @change="editVariance(index)"
+                  @input="handleRealizationInput(item, $event, index)"
                 />
               </td>
               <td v-if="form.invoiceType === '4'">
@@ -108,9 +108,9 @@
                   v-model="item.variance"
                   class="input"
                   :class="{ 'input-danger': item.isTextLimitExceeded }"
-                  type="text"
+                  type="number"
                   placeholder=""
-                  @input="onItemTextInput(item, $event)"
+                  disabled
                 />
               </td>
               <td>
@@ -160,9 +160,7 @@
                 }}</span>
               </td>
               <td v-if="!isPettyCash">
-                <span v-if="!item.isEdit || form.invoiceType === '4'">{{
-                  getCostCenterName(item.costCenter) || '-'
-                }}</span>
+                <span v-if="!item.isEdit">{{ getCostCenterName(item.costCenter) || '-' }}</span>
                 <v-select
                   v-else
                   v-model="item.costCenter"
@@ -365,6 +363,17 @@ const onItemTextInput = (item: { itemText?: string; isTextLimitExceeded?: boolea
     // clear the flag when within limit
     item.isTextLimitExceeded = false
   }
+}
+const editVariance = (index: number) => {
+  const item = form.invoiceItem[index]
+  const itemAmount = Number(item.itemAmount) || 0
+  const realizationAmount = Number(item.realizationAmount) || 0
+  item.variance = itemAmount - realizationAmount
+}
+const handleRealizationInput = (item: any, e: Event, index: number) => {
+  item.hasRealizationInput = true
+  onItemTextInput(item, e)
+  editVariance(index)
 }
 </script>
 

@@ -587,10 +587,7 @@ const updateCasNoName = (option: string) => {
 
 const mergedCasList = computed(() => {
   const apiList = casNoCode.value || []
-  // Map hardcoded list to match API structure if needed, or just use as is if compatible
-  // Here we assume simple structure compatibility for display
-  const hardcoded = casNoCodeList
-  return [...hardcoded, ...apiList]
+  return [...apiList]
 })
 
 const remainingDpAmountVal = computed(() => {
@@ -709,7 +706,10 @@ watch(
 watch(
   () => [form?.companyCode, form?.vendorId, form.invoiceType],
   () => {
-    if (form.companyCode) invoiceMasterApi.getActivity(form.companyCode || '')
+    if (form.companyCode) {
+      invoiceMasterApi.getActivity(form.companyCode || '')
+      invoiceMasterApi.getCostCenter(form.companyCode || '')
+    }
     if (form.companyCode && form.invoiceType)
       invoiceMasterApi.getMatrixApproval(form.invoiceType || '', form.companyCode || '')
     if (form.vendorId && form.companyCode) {
@@ -767,7 +767,8 @@ watch(
           whtBaseAmount: String(item.whtBaseAmount || 0),
           whtAmount: String(item.whtAmount || 0),
           realizationAmount: 0,
-          variance: 0,
+          variance: (item.itemAmount || 0) - 0,
+          hasRealizationInput: false,
           isEdit: false,
         }))
 

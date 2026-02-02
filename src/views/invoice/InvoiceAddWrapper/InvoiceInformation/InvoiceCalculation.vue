@@ -32,7 +32,10 @@
         </div>
       </div>
     </div>
-    <div class="card mt-5 p-5" v-if="form.invoiceType === '4' && checkIsNonPo()">
+    <div
+      class="card mt-5 p-5"
+      v-if="form.invoiceType === '4' && checkIsNonPo() && varianceResult.amount !== 0"
+    >
       <div
         class="p-4 rounded-xl border transition-all duration-300"
         :class="varianceResult.containerClass"
@@ -115,9 +118,9 @@ const varianceResult = computed(() => {
   if (variance > 0) {
     return {
       containerClass: 'bg-yellow-50 border-yellow-400',
-      text: `Employee reimbursement amount of ${form.currency} ${variance.toLocaleString('id-ID')}`,
+      text: `Company Must Pay to Employee ${form.currency} ${variance.toLocaleString('id-ID')}`,
       amount: variance,
-      posting: 'FB60',
+      posting: 'F-53/Outgoing Payment',
       badgeClass: 'bg-yellow-100 text-yellow-800 border border-yellow-200',
     }
   }
@@ -125,9 +128,9 @@ const varianceResult = computed(() => {
   if (variance < 0) {
     return {
       containerClass: 'bg-green-50 border-green-400',
-      text: `Company transfer amount of ${form.currency} ${Math.abs(variance).toLocaleString('id-ID')}`,
+      text: `Employee Pay to Company ${form.currency} ${Math.abs(variance).toLocaleString('id-ID')}`,
       amount: Math.abs(variance),
-      posting: 'F-02',
+      posting: 'F-28/Incoming Payment',
       badgeClass: 'bg-green-100 text-green-800 border border-green-200',
     }
   }
@@ -165,7 +168,7 @@ const setCountLba = (name: string) => {
 
   const list: Record<string, number> = {
     'variance subtotal': varianceSubtotal,
-    'vat amount': vatAmount,
+    'vat amount variance': vatAmount,
     'wht amount': whtAmount,
     'additional cost': additionalCost,
     'variance gross amount': varianceGrossAmount,
@@ -209,7 +212,7 @@ const setToFormLba = (name: string, value: number) => {
       case 'variance subtotal':
         form.subtotal = value
         break
-      case 'vat amount':
+      case 'vat amount variance':
         form.vatAmount = value
         break
       case 'wht amount':
@@ -374,13 +377,23 @@ const countTotalGrossAmount = () => {
 }
 
 const countVariance = () => {
-  let totalRealization = 0
-  let totalAmount = 0
-  for (const item of form.invoiceItem) {
-    totalRealization = totalRealization + Number(item.realizationAmount)
-    totalAmount = totalAmount + Number(item.itemAmount)
+  // Check if ANY item has realization input
+  const hasAnyRealizationInput = form.invoiceItem.some((item) => item.hasRealizationInput)
+
+  if (!hasAnyRealizationInput) {
+    return 0 // Don't show calculation if no realization input yet
   }
-  return totalAmount - totalRealization
+
+  let totalItemAmount = 0
+  let totalRealizationAmount = 0
+
+  // Sum ALL items (not just those with input)
+  for (const item of form.invoiceItem) {
+    totalItemAmount += Number(item.itemAmount || 0)
+    totalRealizationAmount += Number(item.realizationAmount || 0)
+  }
+
+  return totalItemAmount - totalRealizationAmount
 }
 
 const countWhtAmount = () => {

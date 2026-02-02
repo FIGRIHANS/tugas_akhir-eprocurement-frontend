@@ -168,7 +168,7 @@
           <div class="p-4">
             <div class="flex items-center gap-3">
               <label class="text-sm font-medium text-gray-700 w-[140px] flex-shrink-0">
-                Bracket Code <span class="text-red-500">*</span>
+                Requestor Code <span class="text-red-500">*</span>
               </label>
 
               <div class="flex-1 max-w-[400px]">
@@ -182,7 +182,7 @@
                     </svg>
                   </div>
                   <input type="text" class="flex-1 h-10 px-3 text-sm border-0 bg-white focus:outline-none focus:ring-0"
-                    placeholder="Search Bracket Code" />
+                    placeholder="Search Request Code" />
                 </div>
               </div>
 
@@ -195,7 +195,7 @@
                       d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                   </svg>
                 </div>
-                Add New Bracket
+                Add Req Code
               </UiButton>
             </div>
           </div>
@@ -204,7 +204,7 @@
           <div class="p-4">
             <div class="flex items-center gap-3">
               <label class="text-sm font-medium text-gray-700 w-[140px] flex-shrink-0">
-                WF Profile Group <span class="text-red-500">*</span>
+                Profile Group Id <span class="text-red-500">*</span>
               </label>
 
               <div class="flex-1 max-w-[400px]">
@@ -218,7 +218,7 @@
                     </svg>
                   </div>
                   <input type="text" class="flex-1 h-10 px-3 text-sm border-0 bg-white focus:outline-none focus:ring-0"
-                    placeholder="Search WF Profile" />
+                    placeholder="Search Profile Group Id" />
                 </div>
               </div>
 
@@ -231,7 +231,7 @@
                       d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                   </svg>
                 </div>
-                Add New Profile
+                Add Profile Group
               </UiButton>
             </div>
           </div>
@@ -240,7 +240,7 @@
           <div class="p-4">
             <div class="flex items-center gap-3">
               <label class="text-sm font-medium text-gray-700 w-[140px] flex-shrink-0">
-                Auth Object ID <span class="text-red-500">*</span>
+                AuthObject Group <span class="text-red-500">*</span>
               </label>
 
               <div class="flex-1 max-w-[400px]">
@@ -254,7 +254,7 @@
                     </svg>
                   </div>
                   <input type="text" class="flex-1 h-10 px-3 text-sm border-0 bg-white focus:outline-none focus:ring-0"
-                    placeholder="Search Auth Object" />
+                    placeholder="Search AuthObject Group" />
                 </div>
               </div>
 
@@ -267,7 +267,7 @@
                       d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                   </svg>
                 </div>
-                Add New Auth
+                Add AuthObject Id
               </UiButton>
             </div>
           </div>

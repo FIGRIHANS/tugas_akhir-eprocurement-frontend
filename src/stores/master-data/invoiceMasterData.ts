@@ -23,7 +23,7 @@ import type {
   CostCenterTypes,
   MatrixApprovalTypes,
   NpwpReportingTypes,
-  BankAlternativeTypes
+  BankAlternativeTypes,
 } from './types/invoiceMasterData'
 
 export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => {
@@ -182,7 +182,10 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
     }
     const response: ApiResponse<CostCenterTypes[]> = await generalApi.get(url, { params })
 
-    costCenterList.value = response.data.result.content
+    const allData = response.data.result.content
+    // Deduplicate based on code
+    const uniqueData = Array.from(new Map(allData.map((item) => [item.code, item])).values())
+    costCenterList.value = uniqueData
 
     return response.data.result
   }
@@ -258,6 +261,6 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
     getMatrixApproval,
     getNpwpReporting,
     getCashJournal,
-    getBankAlternative
+    getBankAlternative,
   }
 })
