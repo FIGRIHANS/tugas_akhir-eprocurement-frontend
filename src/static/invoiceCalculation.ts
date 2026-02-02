@@ -36,7 +36,7 @@ export const pettyCashField = [
 
 export const lbaField = [
   'Variance Subtotal',
-  'VAT Amount',
+  'VAT Amount Variance',
   'Variance Gross Amount',
   'WHT Amount',
   //  'Variance',

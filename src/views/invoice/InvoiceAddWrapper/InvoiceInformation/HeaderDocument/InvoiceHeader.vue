@@ -587,10 +587,7 @@ const updateCasNoName = (option: string) => {
 
 const mergedCasList = computed(() => {
   const apiList = casNoCode.value || []
-  // Map hardcoded list to match API structure if needed, or just use as is if compatible
-  // Here we assume simple structure compatibility for display
-  const hardcoded = casNoCodeList
-  return [...hardcoded, ...apiList]
+  return [...apiList]
 })
 
 const remainingDpAmountVal = computed(() => {
@@ -672,6 +669,9 @@ watch(
     if (form?.companyCode) {
       const getIndex = companyCodeList.value.findIndex((item) => item.code === form.companyCode)
       if (getIndex !== -1) form.companyName = companyCodeList.value[getIndex].name.split(' - ')[1]
+
+      // Fetch Cost Center
+      invoiceMasterApi.getCostCenter(form.companyCode)
     }
 
     if (form?.cashJournalCode && listCashJournal.value.length > 0) {
