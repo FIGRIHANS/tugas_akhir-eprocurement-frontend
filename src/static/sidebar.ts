@@ -330,7 +330,7 @@ export default [
   {
     id: 'system-configuration',
     title: 'System Configuration',
-    icon: 'message-programming',
+    icon: 'setting-2',
     child: [
       {
         id: 'invoice-configuration',

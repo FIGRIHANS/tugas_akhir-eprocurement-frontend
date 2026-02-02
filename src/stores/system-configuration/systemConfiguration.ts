@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 // import type { ErpHeader } from './types/erp'
 
-export const useSystemConfigurationStore = defineStore('systemIntegration', {
+export const useSystemConfigurationStore = defineStore('systemConfiguration', {
   state: () => ({
     configurations: [
       {
