@@ -208,8 +208,11 @@
           </div>
         </div>
       </div>
-      <div class="flex justify-end mt-10">
-        <UiButton>
+      <div class="flex justify-end mt-10 gap-2">
+        <UiButton @click="goBack">
+          <span>Back</span>
+        </UiButton>
+        <UiButton @click="editErp(wfHeader.connectionCode)">
           Edit
         </UiButton>
       </div>
@@ -415,6 +418,21 @@ const showPassword = ref(false)
 const search = ref('')
 
 // Interface for WF Header
+
+const editErp = (id: string) => {
+
+  systemIntegrationStore.updateErp(id, wfHeader.value)
+
+  router.push({
+    name: 'erp-integration'
+  })
+}
+
+const goBack = () => {
+  router.push({
+    name: 'erp-integration'
+  })
+}
 
 const goToDetail = (item: string) => {
   router.push({

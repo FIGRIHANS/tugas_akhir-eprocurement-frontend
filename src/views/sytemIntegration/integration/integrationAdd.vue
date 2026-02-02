@@ -218,6 +218,9 @@
 
         <!-- FOOTER -->
         <div class="bg-white border-t px-6 py-4 flex justify-end gap-3">
+            <UiButton class="btn btn-light" @click="goBack">
+                <span>Back</span>
+            </UiButton>
             <button class="btn btn-light" @click="submit">Save Integration</button>
         </div>
     </div>
@@ -392,6 +395,10 @@ const submit = () => {
         router.back()
     }
 
+}
+
+const goBack = () => {
+    router.back()
 }
 </script>
 
