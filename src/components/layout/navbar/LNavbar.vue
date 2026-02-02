@@ -1,14 +1,15 @@
 <template>
   <header class="w-full bg-white border border-gray-200">
     <div class="flex justify-center">
-      <nav
-        class="flex lg:w-[1440px] justify-between items-center py-[20px] px-[40px]"
-        :class="{ full: isFull }"
-      >
-        <div class="logo">
+      <nav class="flex lg:w-[1440px] justify-between items-center py-[20px] px-[40px]" :class="{ full: isFull }">
+        <div class="logo flex items-center gap-2">
           <RouterLink to="/">
-            <LogoEPOQ class="w-[81px] h-auto" />
+            <LogoEPOQ class="w-[120px] h-auto" />
+
           </RouterLink>
+          <div class="ml-2">
+            <img src="@/assets/tms.png" class="h-[35px] w-max" alt="">
+          </div>
         </div>
 
         <div class="flex items-center gap-3.5">
