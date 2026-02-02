@@ -114,12 +114,12 @@
                             <UiButton variant="light" class="border-none" :outline="true" size="md"
                               @click="viewDetail(role.connectionCode)">
                               <UiIcon name="pencil" class="mr-2" />
-                              Edit Realization
+                              Edit Integration
                             </UiButton>
                             <UiButton variant="light" class="border-none text-red-500 hover:text-red-600"
-                              :outline="true" size="md">
+                              :outline="true" size="md" @click="deleteErp(role.connectionCode)">
                               <UiIcon name="trash" class="mr-2" />
-                              Delete Realization
+                              Delete Integration
                             </UiButton>
                           </div>
                         </div>
@@ -170,10 +170,14 @@
 
     <!-- success modal -->
     <UiModal v-model="showModalSuccess" size="sm" @update:model-value="showModalSuccess = false">
-      <img :src="successImg" alt="success" class="mx-auto mb-3" />
-      <h3 class="font-medium text-lg text-gray-800 text-center">
-        Role successfully {{ rolePayload.roleId === 0 ? 'Created' : 'Updated' }}
-      </h3>
+      <div class="m-5">
+        <img :src="successImg" alt="success" class="mx-auto mb-3" />
+        <h3 class="font-medium text-lg text-gray-800 text-center">
+          Integration successfully Deleted
+        </h3>
+
+        <!-- <UiButton variant="primary" @click="showModalSuccess = false">Close</UiButton> -->
+      </div>
     </UiModal>
 
     <!-- delete confirm modal -->
@@ -461,6 +465,19 @@ const saveRole = async () => {
   }
 }
 
+const deleteErp = async (erpId: string) => {
+
+  console.log(erpId, 'ini erpId');
+
+  systemIntegrationStore.deleteErp(erpId)
+
+  erpList.value = data.value
+
+  showModalSuccess.value = true
+
+
+}
+
 /** ===== Delete via UiModal (NEW) ===== */
 // function openDeleteModal(role: IRole) {
 //   closeAnyOpenDropdown()
@@ -493,7 +510,6 @@ async function handleProcessDelete() {
 }
 
 onMounted(() => {
-  console.log(data.value, 'ini data');
 
   erpList.value = data.value
 
