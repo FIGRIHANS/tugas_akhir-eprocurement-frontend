@@ -371,6 +371,7 @@ const editVariance = (index: number) => {
   item.variance = itemAmount - realizationAmount
 }
 const handleRealizationInput = (item: any, e: Event, index: number) => {
+  item.hasRealizationInput = true
   onItemTextInput(item, e)
   editVariance(index)
 }

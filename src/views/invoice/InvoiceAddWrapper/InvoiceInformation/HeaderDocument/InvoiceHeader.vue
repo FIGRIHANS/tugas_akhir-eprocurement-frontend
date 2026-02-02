@@ -767,7 +767,8 @@ watch(
           whtBaseAmount: String(item.whtBaseAmount || 0),
           whtAmount: String(item.whtAmount || 0),
           realizationAmount: 0,
-          variance: 0,
+          variance: (item.itemAmount || 0) - 0,
+          hasRealizationInput: false,
           isEdit: false,
         }))
 

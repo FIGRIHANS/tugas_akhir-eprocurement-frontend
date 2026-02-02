@@ -159,7 +159,7 @@ const varianceResult = computed(() => {
 
 const setCountLba = (name: string) => {
   const varianceSubtotal = countVariance()
-  const vatAmount = countVatVariance() || 0
+  const vatAmount = countVatAmount() || 0
   const whtAmount = countWhtAmount() || 0
   const additionalCost = countAdditionalCost() || 0
 
@@ -356,15 +356,6 @@ const countVatAmount = () => {
   return totalPo + totalAddDebit - totalAddCredit
 }
 
-const countVatVariance = () => {
-  let totalVat = 0
-  for (const item of form.invoiceItem) {
-    const percentTax = getPercentTax(item.taxCode) || 0
-    totalVat += percentTax * Number(item.variance || 0)
-  }
-  return totalVat
-}
-
 const countAdditionalCost = () => {
   if (!form) return
   let total = 0
@@ -386,11 +377,23 @@ const countTotalGrossAmount = () => {
 }
 
 const countVariance = () => {
-  let totalVariance = 0
-  for (const item of form.invoiceItem) {
-    totalVariance += Number(item.variance || 0)
+  // Check if ANY item has realization input
+  const hasAnyRealizationInput = form.invoiceItem.some((item) => item.hasRealizationInput)
+
+  if (!hasAnyRealizationInput) {
+    return 0 // Don't show calculation if no realization input yet
   }
-  return totalVariance
+
+  let totalItemAmount = 0
+  let totalRealizationAmount = 0
+
+  // Sum ALL items (not just those with input)
+  for (const item of form.invoiceItem) {
+    totalItemAmount += Number(item.itemAmount || 0)
+    totalRealizationAmount += Number(item.realizationAmount || 0)
+  }
+
+  return totalItemAmount - totalRealizationAmount
 }
 
 const countWhtAmount = () => {
