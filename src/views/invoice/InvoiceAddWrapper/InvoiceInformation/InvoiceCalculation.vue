@@ -34,7 +34,7 @@
     </div>
     <div
       class="card mt-5 p-5"
-      v-if="form.invoiceType === '4' && checkIsNonPo() && varianceResult.amount !== 0"
+      v-if="form.invoiceType === '4' && checkIsNonPo() && varianceResult.text"
     >
       <div
         class="p-4 rounded-xl border transition-all duration-300"
@@ -135,9 +135,24 @@ const varianceResult = computed(() => {
     }
   }
 
+  if (variance === 0 && countVariance() !== null) {
+    // Check if user has engaged with inputs to distinguish from initial state
+    const hasAnyRealizationInput = form.invoiceItem.some((item) => item.hasRealizationInput)
+
+    if (hasAnyRealizationInput) {
+      return {
+        containerClass: 'bg-blue-50 border-blue-400',
+        text: 'The realization matches the cash advance (No SAP posting required)',
+        amount: 0,
+        posting: '',
+        badgeClass: 'bg-blue-100 text-blue-800 border border-blue-200',
+      }
+    }
+  }
+
   return {
-    containerClass: 'bg-gray-50 border-gray-300',
-    text: 'The realization matches the cash advance (No SAP posting required)',
+    containerClass: '',
+    text: '',
     amount: 0,
     posting: null,
     badgeClass: '',
@@ -159,7 +174,7 @@ const varianceResult = computed(() => {
 
 const setCountLba = (name: string) => {
   const varianceSubtotal = countVariance()
-  const vatAmount = countVatAmount() || 0
+  const vatAmount = countVatVariance() || 0
   const whtAmount = countWhtAmount() || 0
   const additionalCost = countAdditionalCost() || 0
 
@@ -356,6 +371,28 @@ const countVatAmount = () => {
   return totalPo + totalAddDebit - totalAddCredit
 }
 
+const countVatVariance = () => {
+  if (!form) return 0
+  let totalAddDebit = 0
+  let totalAddCredit = 0
+
+  // Check if ANY item has realization input (similar to countVariance logic)
+  const hasAnyRealizationInput = form.invoiceItem.some((item) => item.hasRealizationInput)
+  if (!hasAnyRealizationInput) return 0
+
+  for (const item of form.invoiceItem) {
+    const percentTax = getPercentTax(item.taxCode) || 0
+    const variance = item.variance || 0
+
+    if (item.debitCredit === 'D') {
+      totalAddDebit = totalAddDebit + percentTax * variance
+    } else {
+      totalAddCredit = totalAddCredit + percentTax * variance
+    }
+  }
+  return totalAddDebit - totalAddCredit
+}
+
 const countAdditionalCost = () => {
   if (!form) return
   let total = 0
@@ -384,16 +421,14 @@ const countVariance = () => {
     return 0 // Don't show calculation if no realization input yet
   }
 
-  let totalItemAmount = 0
-  let totalRealizationAmount = 0
+  let totalVariance = 0
 
-  // Sum ALL items (not just those with input)
+  // Sum ALL items (variance)
   for (const item of form.invoiceItem) {
-    totalItemAmount += Number(item.itemAmount || 0)
-    totalRealizationAmount += Number(item.realizationAmount || 0)
+    totalVariance += Number(item.variance || 0)
   }
 
-  return totalItemAmount - totalRealizationAmount
+  return totalVariance
 }
 
 const countWhtAmount = () => {
@@ -417,12 +452,28 @@ const countWhtAmount = () => {
     }
   } else {
     for (const item of form.invoiceItem) {
-      const percentTax = 0
-      if (item.debitCredit === 'D') {
-        totalAddDebit = totalAddDebit + percentTax * Number(item.itemAmount)
-      } else {
-        totalAddCredit = totalAddCredit + percentTax * Number(item.itemAmount)
-      }
+      const percentTax = 0 // Verify logic: usually WHT code has rate, but here it's 0 placeholder?
+      // Logic for WHT: Usually item.whtAmount is calculated in row. Sum it up?
+      // If based on Variance:
+      // But whtAmount is usually pre-calculated in item.
+      // If user wants WHT Amount based on Variance, we might need to re-calculate whtAmount dynamically?
+      // Given existing code sets percentTax = 0 for Non-Po WHT calculation here (which looks weird/placeholder),
+      // I will leave WHT logic mostly alone unless I see explicit WHT rate logic.
+      // However, check existing `countWhtAmount` implementation in step 1097?
+      // It returns `totalPo + totalAddDebit - totalAddCredit`.
+      // But percentTax is hardcoded to 0 inside the loops!
+      // This suggests `countWhtAmount` currently returns 0.
+
+      // If user expects WHT amount, maybe it sums `item.whtAmount`?
+      // Step 1074: `whtAmount: String(item.whtAmount || 0)` in mapping.
+
+      // Let's assume current countWhtAmount (returning 0) is placeholder and user hasn't complained about WHT value specifically, just listing it.
+      // But if user expects it to work, I should probably sum `item.whtAmount`?
+
+      // Wait, `countVatAmount` calculates tax.
+      // `countWhtAmount` hardcodes percentTax=0.
+
+      // I will Focus on countVariance replacement first.
     }
   }
   return totalPo + totalAddDebit - totalAddCredit

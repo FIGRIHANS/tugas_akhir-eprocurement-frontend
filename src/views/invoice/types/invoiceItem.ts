@@ -19,6 +19,7 @@ export interface invoiceItemTypes {
   whtCodeList?: WhtCodeTypes[]
   realizationAmount: number
   variance: number
+  hasRealizationInput?: boolean
   isTextLimitExceeded?: boolean
   isEdit: boolean
 }

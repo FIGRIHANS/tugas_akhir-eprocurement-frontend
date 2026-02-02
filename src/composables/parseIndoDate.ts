@@ -27,7 +27,8 @@ export const parseIndoDate = (dateStr: string) => {
     december: '12',
   }
 
-  const parts = dateStr.split(' ')
+  const cleanedDateStr = dateStr.replace(/\n/g, ' ').trim()
+  const parts = cleanedDateStr.split(/\s+/) // Split by any whitespace including multiple spaces
   if (parts.length >= 3) {
     const day = parts[0].padStart(2, '0')
     const month = monthMap[parts[1].toLowerCase()] || '01'

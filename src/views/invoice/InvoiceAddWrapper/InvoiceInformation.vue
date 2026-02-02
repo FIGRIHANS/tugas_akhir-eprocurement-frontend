@@ -6,7 +6,10 @@
     </div>
     <InvoicePoGr v-if="!checkNonPo()" class="mt-[24px]" />
     <InvoiceItem v-if="checkNonPo()" class="mt-[24px]" />
-    <AdditionalCost v-if="(checkPoWithoutDp() || checkPoWithDp()) && !checkNonPo()" class="mt-[24px]" />
+    <AdditionalCost
+      v-if="(checkPoWithoutDp() || checkPoWithDp()) && !checkNonPo()"
+      class="mt-[24px]"
+    />
   </div>
 </template>
 
@@ -16,7 +19,9 @@ import { useRoute } from 'vue-router'
 import type { formTypes } from '../types/invoiceAddWrapper'
 
 const HeaderDocument = defineAsyncComponent(() => import('./InvoiceInformation/HeaderDocument.vue'))
-const InvoiceCalculation = defineAsyncComponent(() => import('./InvoiceInformation/InvoiceCalculation.vue'))
+const InvoiceCalculation = defineAsyncComponent(
+  () => import('./InvoiceInformation/InvoiceCalculation.vue'),
+)
 const InvoicePoGr = defineAsyncComponent(() => import('./InvoiceInformation/InvoicePoGr.vue'))
 const InvoiceItem = defineAsyncComponent(() => import('./InvoiceInformation/InvoiceItem.vue'))
 const AdditionalCost = defineAsyncComponent(() => import('./InvoiceInformation/AdditionalCost.vue'))
@@ -26,7 +31,7 @@ const route = useRoute()
 const typeForm = ref<string>('')
 
 const checkNonPo = () => {
-  return typeForm.value === 'nonpo'
+  return typeForm.value === 'nonpo' || typeForm.value === 'non-po-view'
 }
 
 // const checkPoPib = () => {

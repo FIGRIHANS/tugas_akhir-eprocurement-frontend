@@ -523,67 +523,11 @@ const invoiceSourceList = ref([
   { code: 'SRC2', name: '9712648081' },
   { code: 'SRC3', name: '9312901872' },
 ])
-const casNoCodeList = [
-  {
-    casNo: 'TRX-202401-001',
-    transactionId: 'TX001',
-    transactionDate: '2024-01-05',
-    customerName: 'PT Maju Jaya Abadi',
-    amount: 12500000,
-    currency: 'IDR',
-    status: 'SUCCESS',
-  },
-  {
-    casNo: 'TRX-202401-002',
-    transactionId: 'TX002',
-    transactionDate: '2024-01-08',
-    customerName: 'CV Sinar Terang',
-    amount: 8750000,
-    currency: 'IDR',
-    status: 'PENDING',
-  },
-  {
-    casNo: 'TRX-202401-003',
-    transactionId: 'TX003',
-    transactionDate: '2024-01-10',
-    customerName: 'PT Global Nusantara',
-    amount: 21500000,
-    currency: 'IDR',
-    status: 'FAILED',
-  },
-  {
-    casNo: 'TRX-202401-004',
-    transactionId: 'TX004',
-    transactionDate: '2024-01-15',
-    customerName: 'PT Cahaya Timur',
-    amount: 5400000,
-    currency: 'IDR',
-    status: 'SUCCESS',
-  },
-  {
-    casNo: 'TRX-202401-005',
-    transactionId: 'TX005',
-    transactionDate: '2024-01-18',
-    customerName: 'CV Anugerah Sejahtera',
-    amount: 13200000,
-    currency: 'IDR',
-    status: 'SUCCESS',
-  },
-]
 const isReimbursement = computed(() => form?.invoiceType === '1')
 const isCreditCard = computed(() => form?.invoiceType === '2')
 const isCAS = computed(() => form?.invoiceType === '3')
 const isLBA = computed(() => form?.invoiceType === '4')
 const isPettyCash = computed(() => form?.invoiceType === '5')
-
-const updateCasNoName = (option: string) => {
-  if (option && form) {
-    const selectedItem = mergedCasList.value.find((item) => item.casNo === option)
-    if (selectedItem) {
-      form.casNoName = selectedItem.casNo
-    }
-  }
-}
 
 const mergedCasList = computed(() => {
   const apiList = casNoCode.value || []
@@ -749,7 +693,7 @@ watch(
       const response = await submissionApi.getCasItem(newVal)
       if (response.result && response.result.content) {
         // Map response to invoiceItemTypes
-        const newItems = response.result.content.map((item: any, index: number) => ({
+        const newItems = response.result.content.map((item, index: number) => ({
           id: index + 1, // Temporary ID or based on logic
           activity: item.activityId || null,
           activityCode: item.activityExpenses || '',
@@ -767,7 +711,7 @@ watch(
           whtBaseAmount: String(item.whtBaseAmount || 0),
           whtAmount: String(item.whtAmount || 0),
           realizationAmount: 0,
-          variance: (item.itemAmount || 0) - 0,
+          variance: 0,
           hasRealizationInput: false,
           isEdit: false,
         }))
