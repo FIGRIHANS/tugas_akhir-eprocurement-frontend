@@ -267,12 +267,13 @@ const filteredSidebarMenu = computed(() => {
             menu.id === 'tax-reconciliation' ||
             menu.id === 'userManagement' ||
             menu.id === 'workflow-configuration' ||
-            menu.id === 'system-integration'
+            menu.id === 'system-integration' ||
+            menu.id === 'system-configuration'
 
         )
         .map((menu) => {
           // Untuk workflow-configuration dan system-integration, jangan filter child
-          if (menu.id === 'workflow-configuration' || menu.id === 'system-integration') {
+          if (menu.id === 'workflow-configuration' || menu.id === 'system-integration' || menu.id === 'system-configuration') {
             return { ...menu };
           }
           return {
@@ -301,7 +302,8 @@ const filteredSidebarMenu = computed(() => {
                   child.id === 'master-employee' ||
                   child.id === 'report-user-authorization' ||
                   child.id === 'erp-integration' ||
-                  child.id === 'activity-expenses'
+                  child.id === 'activity-expenses' ||
+                  child.id === 'invoice-configuration'
               )
               : [],
           }

@@ -327,4 +327,16 @@ export default [
       },
     ],
   },
+  {
+    id: 'system-configuration',
+    title: 'System Configuration',
+    icon: 'message-programming',
+    child: [
+      {
+        id: 'invoice-configuration',
+        title: 'Invoice Configuration List',
+        to: 'invoice-configuration',
+      },
+    ],
+  },
 ]
