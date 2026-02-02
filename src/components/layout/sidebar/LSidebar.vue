@@ -247,7 +247,7 @@ const filteredSidebarMenu = computed(() => {
           }
         })
     }
-    if (userStore.userData?.profile.profileId === 3200) {
+    if (userStore.userData?.profile?.profileId === 3200) {
       return sidebarMenu
         .filter(
           (menu) =>
@@ -263,34 +263,37 @@ const filteredSidebarMenu = computed(() => {
 
         )
         .map((menu) => {
+          // Untuk workflow-configuration dan system-integration, jangan filter child
+          if (menu.id === 'workflow-configuration' || menu.id === 'system-integration') {
+            return { ...menu };
+          }
           return {
             ...menu,
             child: menu.child
               ? menu.child.filter(
-                (child) =>
-                  child.id === 'vendor-master' ||
-                  child.id === 'invoice-list' ||
-                  child.id === 'invoice-list-non-po' ||
-                  child.id === 'ftp-invoice-integration' ||
-                  child.id === 'scorecard-performance' ||
-                  child.id === 'invoiceAnalytic' ||
-                  child.id === 'taxAnalytic' ||
-                  child.id === 'email-invoice-integration' ||
-                  child.id === 'receiving-confirmation' ||
-                  child.id === 'receiving-confirmation-list' ||
-                  child.id === 'delivery-notes' ||
-                  child.id === 'delivery-notes-list' ||
-                  child.id === 'vat-reconciliation' ||
-                  child.id === 'wht-reconciliation' ||
-                  child.id === 'invoice-type' ||
-                  child.id === 'list-user' ||
-                  child.id === 'master-profile' ||
-                  child.id === 'master-role' ||
-                  child.id === 'master-employee' ||
-                  child.id === 'report-user-authorization' ||
-                  child.id === 'erp-integration' ||
-                  child.id === 'activity-expenses'
-              )
+                  (child) =>
+                    child.id === 'vendor-master' ||
+                    child.id === 'invoice-list' ||
+                    child.id === 'invoice-list-non-po' ||
+                    child.id === 'ftp-invoice-integration' ||
+                    child.id === 'scorecard-performance' ||
+                    child.id === 'invoiceAnalytic' ||
+                    child.id === 'taxAnalytic' ||
+                    child.id === 'email-invoice-integration' ||
+                    child.id === 'receiving-confirmation' ||
+                    child.id === 'receiving-confirmation-list' ||
+                    child.id === 'delivery-notes' ||
+                    child.id === 'delivery-notes-list' ||
+                    child.id === 'vat-reconciliation' ||
+                    child.id === 'wht-reconciliation' ||
+                    child.id === 'invoice-type' ||
+                    child.id === 'list-user' ||
+                    child.id === 'master-profile' ||
+                    child.id === 'master-role' ||
+                    child.id === 'master-employee' ||
+                    child.id === 'report-user-authorization' ||
+                    child.id === 'erp-integration'
+                )
               : [],
           }
         })
