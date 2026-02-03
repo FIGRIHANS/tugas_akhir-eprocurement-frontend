@@ -12,7 +12,7 @@ export interface IChildSidebarMenu {
   to?: string
 }
 
-export default [
+const sidebarMenuData: ISidebarMenu[] = [
   // {
   //   id: 'dashboard',
   //   title: 'Beranda',
@@ -345,3 +345,5 @@ export default [
     ],
   },
 ]
+
+export default sidebarMenuData

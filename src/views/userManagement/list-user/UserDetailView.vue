@@ -3,156 +3,127 @@
     <BreadcrumbView title="Detail" :routes="breadCrumbItems" />
     <hr class="-mx-[24px] mb-[24px]" />
 
-    <!-- Tab Content: Detail User -->
-    <div v-if="tabNow === 'detail'">
-      <div class="grid grid-cols-12 gap-4">
-        <div class="col-span-12">
-          <div class="card">
-            <div class="card-header">
-              <h2 class="font-bold text-base text-slate-700">User Detail</h2>
+    <div class="grid grid-cols-12 gap-4">
+      <!-- Left Column - User Detail (Extended) -->
+      <div class="col-span-12 lg:col-span-6">
+        <div class="card h-full">
+          <div class="card-header">
+            <h2 class="font-bold text-base text-slate-700">User Detail</h2>
+          </div>
+          <div class="card-body">
+            <div class="card-group flex justify-between">
+              <p class="text-sm font-medium text-slate-500">Employee Name</p>
+              <p class="text-sm font-medium text-slate-700">{{ userDetail?.employeeName || '-' }}</p>
             </div>
-            <div class="card-body">
-              <div class="card-group flex justify-between">
-                <p class="text-sm font-medium text-slate-500">User Name</p>
-                <p class="text-sm font-medium text-slate-700">
-                  {{ userDetail?.employeeName }}
-                </p>
-              </div>
-              <div class="card-group flex justify-between">
-                <p class="text-sm font-medium text-slate-500">Email</p>
-                <p class="text-sm font-medium text-slate-700">
-                  {{ userDetail?.userName }}
-                </p>
-              </div>
-              <div class="card-group flex justify-between">
-                <p class="text-sm font-medium text-slate-500">Profile Id</p>
-                <p class="text-sm font-medium text-slate-700">
-                  {{ userDetail?.profileId }}
-                </p>
-              </div>
-              <div class="card-group flex justify-between">
-                <p class="text-sm font-medium text-slate-500">Employee Id</p>
-                <p class="text-sm font-medium text-slate-700">
-                  {{ userDetail?.employeeId }}
-                </p>
-              </div>
+            <div class="card-group flex justify-between">
+              <p class="text-sm font-medium text-slate-500">Email</p>
+              <p class="text-sm font-medium text-slate-700">{{ userDetail?.userName || '-' }}</p>
+            </div>
+            <div class="card-group flex justify-between">
+              <p class="text-sm font-medium text-slate-500">Profile Id</p>
+              <p class="text-sm font-medium text-slate-700">{{ userDetail?.profileId || '-' }}</p>
+            </div>
+            <div class="card-group flex justify-between">
+              <p class="text-sm font-medium text-slate-500">Employee Id</p>
+              <p class="text-sm font-medium text-slate-700">{{ userDetail?.employeeId || '-' }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
+      <!-- Right Column - Authorization & Role Detail (Shrunk) -->
+      <div class="col-span-12 lg:col-span-6">
+        <!-- Role Detail Section -->
+        <div class="card mb-6">
+          <div class="card-header">
+            <h3 class="text-base font-bold text-slate-700">Role Detail</h3>
+          </div>
+          <div class="card-body">
+            <table class="table align-middle text-gray-700 w-full" v-if="roleRows.length > 0">
+              <thead>
+                <tr>
+                  <th class="text-nowrap text-left">Role ID</th>
+                  <th class="text-nowrap text-left">Position / Role</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="role in roleRows" :key="role.roleId">
+                  <td class="py-2">{{ role.roleId }}</td>
+                  <td class="py-2">{{ role.roleName }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <div v-else class="py-6 text-center">
+              <p class="text-sm text-slate-500">No role found</p>
             </div>
+          </div>
+        </div>
+
+        <!-- Authorization Section -->
+        <div class="card">
+          <div class="card-body">
+            <table class="table align-middle text-gray-700 w-full" v-if="authRows.length > 0">
+              <thead>
+                <tr>
+                  <th class="text-nowrap text-left">Auth Object Code</th>
+                  <th class="text-nowrap text-left">Auth Object Name</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in authRows" :key="item.authId">
+                  <td class="py-2">{{ item.authValue }}</td>
+                  <td class="py-2">{{ item.authName }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <div v-else class="py-6 text-center">
+              <p class="text-sm text-slate-500">No authorization found</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Menu Section - Full Width -->
+      <div class="col-span-12">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="text-base font-bold text-slate-700">Menu</h3>
+          </div>
+          <div class="card-body">
+            <table class="table align-middle text-gray-700 w-full">
+              <thead>
+                <tr>
+                  <th class="text-nowrap text-left">Profile Id</th>
+                  <th class="text-nowrap text-left">Profile Name</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="py-2">{{ userDetail?.profileId || '-' }}</td>
+                  <td class="py-2">{{ userDetail?.profile?.profileName || '-' }}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Tab Content: Profile -->
-    <div v-if="tabNow === 'profile'">
-      <div class="grid grid-cols-12 gap-4">
-        <div class="col-span-12">
-          <div class="card">
-            <div class="card-header">
-              <h2 class="font-bold text-base text-slate-700">Profile Information</h2>
-            </div>
-            <div class="card-body">
-              <div class="card-group flex justify-between">
-                <p class="text-sm font-medium text-slate-500">Position</p>
-                <p class="text-sm font-medium text-slate-700">
-                  {{ userDetail?.profile?.profileName }}
-                </p>
-              </div>
-              <div class="card-group flex justify-between">
-                <p class="text-sm font-medium text-slate-500">Full Name</p>
-                <p class="text-sm font-medium text-slate-700">
-                  {{ userDetail?.employeeName }}
-                </p>
-              </div>
-              <div class="card-group flex justify-between">
-                <p class="text-sm font-medium text-slate-500">Email</p>
-                <p class="text-sm font-medium text-slate-700">
-                  {{ userDetail?.userName }}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tab Content: Authorization -->
-    <div v-if="tabNow === 'authorization'">
-      <div class="grid grid-cols-12 gap-4">
-        <div class="col-span-12">
-          <div class="card">
-            <div class="card-header">
-              <h3 class="text-base font-bold text-slate-700">Authorization</h3>
-            </div>
-            <div class="card-body">
-              <table class="table align-middle text-gray-700 w-full">
-                <thead>
-                  <tr>
-                    <th class="text-nowrap text-left">Auth Object Code</th>
-                    <th class="text-nowrap text-left">Auth Object Name</th>
-                  </tr>
-                </thead>
-                <tbody v-if="authRows.length">
-                  <tr v-for="item in authRows" :key="item.authId">
-                    <td class="py-2">{{ item.authValue }}</td>
-                    <td class="py-2">{{ item.authName }}</td>
-                  </tr>
-                </tbody>
-                <tbody v-else>
-                  <tr>
-                    <td class="py-3 text-center text-slate-500" colspan="2">
-                      No authorization found
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tab Content: Role -->
-    <div v-if="tabNow === 'role'">
-      <div class="grid grid-cols-12 gap-4">
-        <div class="col-span-12">
-          <div class="card">
-            <div class="card-header">
-              <h3 class="text-base font-bold text-slate-700">Role Detail</h3>
-            </div>
-            <div class="card-body">
-              <table class="table align-middle text-gray-700 w-full">
-                <thead>
-                  <tr>
-                    <th class="text-nowrap text-left">Role ID</th>
-                    <th class="text-nowrap text-left">Position / Role</th>
-                  </tr>
-                </thead>
-                <tbody v-if="roleRows.length">
-                  <tr v-for="role in roleRows" :key="role.roleId">
-                    <td class="py-2">{{ role.roleId }}</td>
-                    <td class="py-2">{{ role.roleName }}</td>
-                  </tr>
-                </tbody>
-                <tbody v-else>
-                  <tr>
-                    <td class="py-3 text-center text-slate-500" colspan="2">No role found</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div class="flex justify-start items-center mt-8 mb-8">
+      <UiButton :disabled="false" @click="handleBack" outline>
+        <span class="ki-outline ki-arrow-left mr-2 align-middle inline-block"></span>
+        Back
+      </UiButton>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import BreadcrumbView from '@/components/BreadcrumbView.vue'
+import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import { useUserStore } from '@/stores/user-management/user'
-import { computed, onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 const breadCrumbItems = [
   { name: 'User Management', to: '/user-management/user' },
@@ -162,8 +133,11 @@ const breadCrumbItems = [
 
 const userStore = useUserStore()
 const route = useRoute()
-// follow InvoiceDetailEdit pattern: `tabNow` is a ref passed directly to the Tab component
-const tabNow = ref<string>('detail')
+const router = useRouter()
+
+const handleBack = () => {
+  router.push('/user-management/user')
+}
 
 const userDetail = computed(() => userStore.userDetail)
 

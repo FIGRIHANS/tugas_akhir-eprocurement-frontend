@@ -124,6 +124,7 @@ const availableAuths = ref<AuthObject[]>([
   { code: 'CC004', name: 'Order Processing' },
   { code: 'CC005', name: 'Reporting Access' },
   { code: 'CC006', name: 'Admin Tools' },
+  { code: 'CC010', name: 'Company Code' },
   { code: 'CC007', name: 'User Management' },
   { code: 'CC008', name: 'Financial Records' },
 ]);

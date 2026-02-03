@@ -16,8 +16,8 @@
           <table class="table align-middle text-gray-700 w-full">
             <thead>
               <tr>
-                <th class="text-nowrap">Role ID</th>
-                <th class="text-nowrap">Employee Id</th>
+                <th class="text-nowrap">Role Code</th>
+                <th class="text-nowrap">Role Name</th>
               </tr>
             </thead>
             <tbody>
@@ -35,7 +35,7 @@
               <tr v-else v-for="role in filteredAvailableRoles" :key="role.code"
                 @click="toggleAvailableSelection(role.code)" class="cursor-pointer hover:bg-gray-50"
                 :class="{ 'bg-blue-100': isAvailableSelected(role.code) }">
-                <td>{{ role.code }}</td>
+                <td>{{ role.roleCode }}</td>
                 <td>{{ role.name }}</td>
               </tr>
             </tbody>
@@ -68,8 +68,8 @@
           <table class="table align-middle text-gray-700 w-full">
             <thead>
               <tr>
-                <th class="text-nowrap">Role ID</th>
-                <th class="text-nowrap">Employee Id</th>
+                <th class="text-nowrap">Role Code</th>
+                <th class="text-nowrap">Role Name</th>
               </tr>
             </thead>
             <tbody>
@@ -80,7 +80,7 @@
               </tr>
               <tr v-for="role in assignedRoles" :key="role.code" @click="toggleAssignedSelection(role.code)"
                 class="cursor-pointer hover:bg-gray-50" :class="{ 'bg-blue-100': isAssignedSelected(role.code) }">
-                <td>{{ role.code }}</td>
+                <td>{{ role.roleCode }}</td>
                 <td>{{ role.name }}</td>
               </tr>
             </tbody>
@@ -103,6 +103,7 @@ import { useUserRoleStore } from '@/stores/user-management/role'
 interface RoleObject {
   code: string
   name: string
+  roleCode?: string
 }
 
 interface RolePayload {
@@ -138,6 +139,7 @@ const availableRoles = computed<RoleObject[]>(() => {
     .map((role) => ({
       code: role.roleId ? role.roleId.toString() : 'N/A',
       name: role.roleName || 'N/A',
+      roleCode: role.roleId ? role.roleId.toString() : 'N/A',
     }))
 })
 

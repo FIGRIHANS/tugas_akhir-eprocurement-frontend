@@ -10,6 +10,12 @@
             required value-key="employeeId" text-key="employeeName" :model-value="userPayload.employeeId"
             @search="getEmployeAfter" @update:model-value="handleEmployeeChange"
             searchable />
+          <UiSearchSelect label="Profile Id" placeholder="Pilih" :options="profileDisplayOptions" row required
+            value-key="profileId" text-key="displayName" :model-value="userPayload.profileId"
+            @update:model-value="
+              (value: string | number) =>
+                emit('update:userPayload', { ...userPayload, profileId: typeof value === 'string' ? parseInt(value, 10) : value })
+            " />
           <UiSelect label="Status" placeholder="Pilih" :options="statusOptions" row required value-key="value"
             text-key="label" :model-value="userPayload.isActive ? 'active' : 'inactive'" @update:model-value="
               (value: string | number) =>
@@ -67,11 +73,8 @@ import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import UiSearchSelect from '@/components/ui/atoms/select/UiSearchSelect.vue'
 import { onMounted, computed, watch, ref } from 'vue'
-// import { computed } from 'vue'
 import { useUserProfileStore } from '@/stores/user-management/profile'
-// import logger from '@/utils/logger'
 import { useEmployeeStore } from '@/stores/user-management/employee'
-import type { IEmployee } from '@/stores/user-management/types/employee'
 
 const userProfileStore = useUserProfileStore()
 
@@ -88,7 +91,12 @@ const statusOptions = [
   { label: 'Inactive', value: 'inactive' },
 ]
 
-// const profile = ref('')
+const profileDisplayOptions = computed(() => {
+  return userProfileStore.profiles.items.map((profile) => ({
+    ...profile,
+    displayName: `${profile.profileId} - ${profile.profileName}`,
+  }))
+})
 
 let profileTimeoutId: ReturnType<typeof setTimeout>
 
@@ -108,87 +116,9 @@ const getEmployeAfter = (query: string) => {
   }, 500)
 }
 
-const handleEmployeeChange = async (value: string | number) => {
+const handleEmployeeChange = (value: string | number) => {
   const employeeId = typeof value === 'string' ? parseInt(value, 10) : value
-  console.log('[handleEmployeeChange] Employee selected:', employeeId)
-
-  // First emit the employee ID change
   emit('update:userPayload', { ...props.userPayload, employeeId })
-
-  // Then handle auto-fill profile
-  if (employeeId > 0) {
-    // Find in currently loaded employees
-    let selectedEmployee: IEmployee | undefined = employeeStore.employees.items.find(
-      (emp) => emp.employeeId === employeeId,
-    )
-    console.log('[handleEmployeeChange] Selected employee from list:', selectedEmployee)
-
-    // If not found, fetch it individually
-    if (!selectedEmployee) {
-      console.log('[handleEmployeeChange] Employee not in list, fetching individually...')
-      try {
-        await employeeStore.getEmployee(employeeId)
-        selectedEmployee = employeeStore.employee as IEmployee
-        console.log('[handleEmployeeChange] Fetched employee:', selectedEmployee)
-      } catch (error) {
-        console.error('[handleEmployeeChange] Error fetching employee:', error)
-        return
-      }
-    }
-
-    // Get position name
-    const positionName = selectedEmployee?.positionName
-    if (!positionName) {
-      console.log('[handleEmployeeChange] No positionName found in employee data')
-      return
-    }
-
-    console.log('[handleEmployeeChange] Position name:', positionName)
-    console.log('[handleEmployeeChange] Available profiles count:', userProfileStore.profiles.items.length)
-    console.log('[handleEmployeeChange] Available profiles:', userProfileStore.profiles.items.map(p => p.profileName))
-
-    // Find matching profile
-    const matchingProfile = userProfileStore.profiles.items.find(
-      (profile) => profile.profileName === positionName,
-    )
-
-    if (matchingProfile) {
-      console.log('[handleEmployeeChange] Found matching profile:', matchingProfile)
-      emit('update:userPayload', {
-        ...props.userPayload,
-        employeeId,
-        profileId: matchingProfile.profileId,
-      })
-    } else {
-      console.log('[handleEmployeeChange] No matching profile, trying to search...')
-      // Try searching profiles by position name
-      try {
-        await userProfileStore.getAllUserProfiles({
-          page: 1,
-          pageSize: 500,
-          searchText: positionName,
-        })
-
-        const retryProfile = userProfileStore.profiles.items.find(
-          (profile) => profile.profileName === positionName,
-        )
-
-        if (retryProfile) {
-          console.log('[handleEmployeeChange] Found profile after search:', retryProfile)
-          emit('update:userPayload', {
-            ...props.userPayload,
-            employeeId,
-            profileId: retryProfile.profileId,
-          })
-        } else {
-          console.log('[handleEmployeeChange] Still no matching profile after search')
-          console.log('[handleEmployeeChange] Profiles after search:', userProfileStore.profiles.items.map(p => p.profileName))
-        }
-      } catch (error) {
-        console.error('[handleEmployeeChange] Error searching profiles:', error)
-      }
-    }
-  }
 }
 
 // const filteredProfiles = computed(() => {

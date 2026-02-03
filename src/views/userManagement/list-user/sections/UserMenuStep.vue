@@ -2,7 +2,7 @@
   <div class="card">
     <div class="card-header">
       <div class="w-full flex items-center justify-between">
-        <h2 class="text-xl font-bold text-gray-800">Select Profile</h2>
+        <h2 class="text-xl font-bold text-gray-800">Select Menu</h2>
         <UiInputSearch placeholder="Search" v-model="searchKeyword" />
       </div>
     </div>
