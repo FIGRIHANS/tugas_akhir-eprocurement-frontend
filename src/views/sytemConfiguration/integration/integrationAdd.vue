@@ -211,14 +211,14 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import { reactive, ref } from 'vue'
-import { useSystemIntegrationStore } from '@/stores/system-integration/systemIntegration'
+import { useSystemConfigurationStore } from '@/stores/system-configuration/systemConfiguration'
 import { useRouter } from 'vue-router'
 import { useRoute } from 'vue-router'
 
 const router = useRouter()
 const route = useRoute()
 
-const integrationStore = useSystemIntegrationStore()
+const systemConfigurationStore = useSystemConfigurationStore()
 
 const id = route.params.id as string
 
@@ -338,7 +338,8 @@ const submit = () => {
         definition: mappingGroups,
     }
 
-    integrationStore.addIntegration(id, integrationItem)
+    systemConfigurationStore.addIntegration(id, integrationItem)
+
 
     if (route.query.routeFrom === 'detail') {
         router.push({
