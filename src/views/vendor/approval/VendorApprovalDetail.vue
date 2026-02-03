@@ -14,8 +14,10 @@ import { useApprovalStore } from '@/stores/vendor/approval'
 import axios from 'axios'
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import { useLoginStore } from '@/stores/views/login'
 
 const route = useRoute()
+const userStore = useLoginStore()
 const approvalStore = useApprovalStore()
 const loading = ref<boolean>(false)
 const error = ref<string | null>(null)
@@ -36,6 +38,13 @@ const getVendor = async () => {
   }
 }
 
+const vendorId = ref('')
+
+if (route.params.id) {
+  vendorId.value = route.params.id as string
+} else {
+  vendorId.value = userStore.userData?.profile?.profileId.toString()
+}
 onMounted(() => {
   approvalStore.getMatrix({
     vendorId: Number(route.params.id),
@@ -44,18 +53,11 @@ onMounted(() => {
 })
 </script>
 <template>
-  <BreadcrumbView
-    title="Approval Verifikasi Vendor"
-    :routes="[
-      { name: 'Approval', to: '/vendor-approval' },
-      { name: 'Approval Verifikasi Vendor', to: '/vendor-approval' },
-    ]"
-  />
-  <UiTab
-    :items="[{ label: 'Detail Information Vendor ', value: 'detail' }]"
-    model-value=""
-    item-class="text-primary"
-  />
+  <BreadcrumbView title="Approval Verifikasi Vendor" :routes="[
+    { name: 'Approval', to: '/vendor-approval' },
+    { name: 'Approval Verifikasi Vendor', to: '/vendor-approval' },
+  ]" />
+  <UiTab :items="[{ label: 'Detail Information Vendor ', value: 'detail' }]" model-value="" item-class="text-primary" />
   <!-- Loading -->
   <div class="flex my-5 items-center justify-center" v-if="loading">
     <UiLoading size="lg" />
@@ -67,19 +69,14 @@ onMounted(() => {
   </div>
 
   <!-- No data -->
-  <div
-    class="flex my-5 items-center justify-center"
-    v-else-if="approvalStore.vendorDetail.length === 0"
-  >
+  <div class="flex my-5 items-center justify-center" v-else-if="approvalStore.vendorDetail.length === 0">
     <span class="text-gray-700 font-medium text-lg">No data</span>
   </div>
 
   <!-- show data -->
   <div class="space-y-5" v-else>
-    <div
-      v-if="approvalStore.vendorDetail[0].approvalStatus === 1"
-      class="rounded-lg border border-blue-200 bg-blue-50 p-4 flex items-center gap-4"
-    >
+    <div v-if="approvalStore.vendorDetail[0].approvalStatus === 1"
+      class="rounded-lg border border-blue-200 bg-blue-50 p-4 flex items-center gap-4">
       <LogoApproved />
       <div>
         <h2 class="font-semibold text-base text-gray-800">Successfully Approved</h2>
@@ -89,10 +86,8 @@ onMounted(() => {
       </div>
     </div>
 
-    <div
-      v-if="approvalStore.vendorDetail[0].approvalStatus === 3"
-      class="rounded-lg border border-blue-200 bg-blue-50 p-4 flex items-center gap-4"
-    >
+    <div v-if="approvalStore.vendorDetail[0].approvalStatus === 3"
+      class="rounded-lg border border-blue-200 bg-blue-50 p-4 flex items-center gap-4">
       <LogoSAP class="w-16 h-auto" />
       <div>
         <h2 class="font-semibold text-base text-gray-800">Successfully Send to SAP</h2>
@@ -100,10 +95,8 @@ onMounted(() => {
       </div>
     </div>
 
-    <div
-      v-if="approvalStore.vendorDetail[0].approvalStatus === 2"
-      class="rounded-lg border border-red-500 bg-red-50 p-4 flex items-center gap-4"
-    >
+    <div v-if="approvalStore.vendorDetail[0].approvalStatus === 2"
+      class="rounded-lg border border-red-500 bg-red-50 p-4 flex items-center gap-4">
       <LogoRejected class="w-[34px]" />
       <div>
         <h2 class="font-semibold text-base text-gray-800">Rejected</h2>
@@ -112,9 +105,9 @@ onMounted(() => {
         </p>
       </div>
     </div>
-    <AdministrativeCard />
-    <LicenseCard />
-    <PaymentCard />
+    <AdministrativeCard :vendorId="vendorId" />
+    <LicenseCard :vendorId="vendorId" />
+    <PaymentCard :vendorId="vendorId" />
     <div class="flex justify-end">
       <UiButton :outline="true" @click="$router.back()">
         <UiIcon name="black-left" variant="duotone" />
