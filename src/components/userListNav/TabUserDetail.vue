@@ -7,19 +7,19 @@
     <i class="ki-duotone ki-right"></i>
 
     <button class="tab pl-[4px]" :class="[activeTab === 'profile' ? 'active' : '']" :disabled="!canClickProfile" @click="activeTab = 'profile'">
-      Profile
+      Role
     </button>
 
     <i class="ki-duotone ki-right"></i>
 
     <button class="tab pl-[4px]" :class="[activeTab === 'authorization' ? 'active' : '']" :disabled="!canClickAuthorization" @click="activeTab = 'authorization'">
-      Authorization
+      Auth
     </button>
 
     <i class="ki-duotone ki-right"></i>
 
     <button class="tab pl-[4px]" :class="[activeTab === 'role' ? 'active' : '']" :disabled="!canClickRole" @click="activeTab = 'role'">
-      Role
+      Menu
     </button>
   </div>
 </template>

@@ -10,11 +10,6 @@
             required value-key="employeeId" text-key="employeeName" :model-value="userPayload.employeeId"
             @search="getEmployeAfter" @update:model-value="handleEmployeeChange"
             searchable />
-          <UiSearchSelect label="Profile" placeholder="Pilih" :options="formattedProfiles" row required
-            value-key="profileId" text-key="display" :model-value="userPayload.profileId" @search="getProfileAfter"
-            @update:model-value="
-              (value: any) => emit('update:userPayload', { ...userPayload, profileId: value })
-            " searchable />
           <UiSelect label="Status" placeholder="Pilih" :options="statusOptions" row required value-key="value"
             text-key="label" :model-value="userPayload.isActive ? 'active' : 'inactive'" @update:model-value="
               (value: string | number) =>
@@ -93,32 +88,9 @@ const statusOptions = [
   { label: 'Inactive', value: 'inactive' },
 ]
 
-const formattedProfiles = computed(() => {
-  return userProfileStore.profiles.items.map((profile) => ({
-    ...profile,
-    display: `${profile.profileId} - ${profile.profileName}`,
-  }))
-})
-
 // const profile = ref('')
 
 let profileTimeoutId: ReturnType<typeof setTimeout>
-
-const getProfileAfter = (query: string) => {
-  // 1. Batalkan timer sebelumnya jika user mengetik lagi sebelum waktu habis
-  clearTimeout(profileTimeoutId)
-
-  // 2. Buat timer baru
-  profileTimeoutId = setTimeout(() => {
-    // Logic Anda dijalankan di sini setelah delay selesai
-    const body = {
-      page: 1,
-      pageSize: 100,
-      searchText: query,
-    }
-    userProfileStore.getAllUserProfiles(body)
-  }, 500)
-}
 
 const getEmployeAfter = (query: string) => {
   // 1. Batalkan timer sebelumnya jika user mengetik lagi sebelum waktu habis
