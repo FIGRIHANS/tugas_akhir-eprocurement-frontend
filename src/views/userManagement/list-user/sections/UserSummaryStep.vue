@@ -12,17 +12,21 @@
             <p class="text-sm font-medium text-slate-700">{{ userPayload.employeeName || '-' }}</p>
           </div>
           <div class="card-group flex justify-between">
+            <p class="text-sm font-medium text-slate-500">Profile ID</p>
+            <p class="text-sm font-medium text-slate-700">{{ userPayload.profileId || '-' }}</p>
+          </div>
+          <div class="card-group flex justify-between">
             <p class="text-sm font-medium text-slate-500">Email</p>
             <p class="text-sm font-medium text-slate-700">{{ userPayload.userName || '-' }}</p>
           </div>
           <div class="card-group flex justify-between">
             <p class="text-sm font-medium text-slate-500">Status</p>
-            <span :class="[
-              'px-2 py-1 text-xs font-medium rounded',
-              userPayload.isActive
-                ? 'bg-green-100 text-green-700'
-                : 'bg-red-100 text-red-700'
-            ]">
+            <span
+              :class="[
+                'px-2 py-1 text-xs font-medium rounded',
+                userPayload.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700',
+              ]"
+            >
               {{ userPayload.isActive ? 'Active' : 'Inactive' }}
             </span>
           </div>
@@ -64,9 +68,9 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="val in assignedObjectValues" :key="val">
-                    <td class="py-2">{{ val }}</td>
-                    <td class="py-2">{{ getObjectValueName(val) }}</td>
+                  <tr v-for="val in assignedObjectValues" :key="val.code">
+                    <td class="py-2">{{ val.code }}</td>
+                    <td class="py-2">{{ val.name }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -84,7 +88,10 @@
           <h3 class="text-base font-bold text-slate-700">Role Detail</h3>
         </div>
         <div class="card-body">
-          <table class="table align-middle text-gray-700 w-full" v-if="rolePayload.selectedRoleIds.length > 0">
+          <table
+            class="table align-middle text-gray-700 w-full"
+            v-if="rolePayload.selectedRoleIds.length > 0"
+          >
             <thead>
               <tr>
                 <th class="text-nowrap text-left">Role ID</th>
@@ -133,7 +140,7 @@
 </template>
 
 <script setup lang="ts">
-import { inject, ref, watch } from 'vue'
+import { inject, ref, watch, onMounted } from 'vue'
 
 interface UserPayload {
   userName: string
@@ -161,7 +168,12 @@ interface AuthObject {
   name: string
 }
 
-const assignedObjectValues = ref<string[]>([])
+interface ObjectValueDetail {
+  code: string
+  name: string
+}
+
+const assignedObjectValues = ref<ObjectValueDetail[]>([])
 
 defineProps<{
   userPayload: UserPayload
@@ -175,20 +187,46 @@ const assignedAuths = ref<AuthObject[]>([])
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const allFormData = inject<Record<string, any>>('allFormData')
 
-watch(
-  () => allFormData?.['authorization-step'],
-  (authData) => {
-    if (authData && authData.selectedAuthObjects) {
-      // Map auth codes to auth objects
+// Function to load auth data from allFormData
+const loadAuthData = () => {
+  const authData = allFormData?.['authorization-step']
+  if (authData) {
+    // Use authDetails if available (includes name directly)
+    if (authData.authDetails && authData.authDetails.length > 0) {
+      assignedAuths.value = authData.authDetails
+    } else if (authData.selectedAuthObjects) {
+      // Fallback: map codes to objects with names
       assignedAuths.value = authData.selectedAuthObjects.map((code: string) => ({
         code,
         name: getAuthName(code),
       }))
-      // Map object values (codes) if present
-      assignedObjectValues.value = authData.selectedObjectValues || []
     }
+
+    // Use objectValueDetails if available
+    if (authData.objectValueDetails && authData.objectValueDetails.length > 0) {
+      assignedObjectValues.value = authData.objectValueDetails
+    } else if (authData.selectedObjectValues) {
+      // Fallback: map codes to objects with names
+      assignedObjectValues.value = authData.selectedObjectValues.map((code: string) => ({
+        code,
+        name: getObjectValueName(code),
+      }))
+    }
+  }
+}
+
+// Load auth data on mount
+onMounted(() => {
+  loadAuthData()
+})
+
+// Watch for changes to auth data
+watch(
+  () => allFormData?.['authorization-step'],
+  () => {
+    loadAuthData()
   },
-  { deep: true },
+  { deep: true, immediate: true },
 )
 
 const getAuthName = (code: string): string => {
@@ -199,10 +237,11 @@ const getAuthName = (code: string): string => {
     CC004: 'Order Processing',
     CC005: 'Reporting Access',
     CC006: 'Admin Tools',
+    CCODE1: 'Company Code Area 1',
     CC007: 'User Management',
     CC008: 'Financial Records',
   }
-  return authMap[code] || 'Unknown'
+  return authMap[code] || code
 }
 
 const getObjectValueName = (code: string): string => {
@@ -211,7 +250,7 @@ const getObjectValueName = (code: string): string => {
     MF01: 'Globalindo EV',
     MF02: 'Globalindo Retails',
   }
-  return map[code] || 'Unknown'
+  return map[code] || code
 }
 </script>
 
@@ -219,7 +258,9 @@ const getObjectValueName = (code: string): string => {
 .card {
   background-color: white;
   border-radius: 0.5rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 1px 3px 0 rgba(0, 0, 0, 0.1),
+    0 1px 2px 0 rgba(0, 0, 0, 0.06);
 }
 
 .card-header {

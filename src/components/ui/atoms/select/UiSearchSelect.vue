@@ -1,31 +1,59 @@
 <template>
-  <div ref="target" :class="[
-    'relative',
-    {
-      'flex items-center flex-wrap lg:flex-nowrap gap-2.5': row,
-    },
-  ]">
-    <label v-if="label && !row"
-      class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px] z-10">
+  <div
+    ref="target"
+    :class="[
+      'relative',
+      {
+        'flex items-center flex-wrap lg:flex-nowrap gap-2.5': row,
+      },
+    ]"
+  >
+    <label
+      v-if="label && !row"
+      class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px] z-10"
+    >
       {{ label }}
       <span v-if="required" class="text-danger"> * </span>
     </label>
-    <label v-else-if="label && row" class="form-label w-2/5" :class="{ 'flex items-center gap-1': required }">
+    <label
+      v-else-if="label && row"
+      class="form-label w-2/5"
+      :class="{ 'flex items-center gap-1': required }"
+    >
       {{ label }}
       <span v-if="required" class="text-danger"> * </span>
     </label>
 
     <div class="relative w-full">
-      <input ref="inputRef" type="text" :value="displayValue" @input="handleInput" @click="toggleDropdown"
-        class="select w-full pr-8 truncate" :class="[
+      <input
+        ref="inputRef"
+        type="text"
+        :value="displayValue"
+        @input="handleInput"
+        @click="toggleDropdown"
+        class="select w-full pr-8 truncate"
+        :class="[
           { 'border-danger': error },
           // Jika tidak searchable, cursor jadi pointer (seperti select biasa)
           searchable ? 'cursor-text' : 'cursor-pointer',
-        ]" :placeholder="placeholder" :readonly="readonly || !searchable" :disabled="disabled" autocomplete="off" />
+        ]"
+        :placeholder="placeholder"
+        :readonly="readonly || !searchable"
+        :disabled="disabled"
+        autocomplete="off"
+      />
 
-      <div class="absolute inset-y-0 right-0 flex items-center px-2 cursor-pointer" @click="toggleDropdown">
-        <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="{ 'rotate-180': isOpen }"
-          fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div
+        class="absolute inset-y-0 right-0 flex items-center px-2 cursor-pointer"
+        @click="toggleDropdown"
+      >
+        <svg
+          class="w-4 h-4 text-gray-400 transition-transform duration-200"
+          :class="{ 'rotate-180': isOpen }"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
           <!-- <path
             stroke-linecap="round"
             stroke-linejoin="round"
@@ -35,21 +63,32 @@
         </svg>
       </div>
 
-      <ul v-show="isOpen && !disabled"
-        class="absolute z-50 w-full py-1 mt-1 overflow-auto text-base bg-white shadow-lg max-h-60 ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm rounded-md">
-        <li v-if="filteredOptions.length === 0"
-          class="cursor-default select-none relative py-2 pl-3 pr-9 text-gray-500">
+      <ul
+        v-show="isOpen && !disabled"
+        class="absolute z-50 w-full py-1 mt-1 overflow-auto text-base bg-white shadow-lg max-h-60 ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm rounded-md"
+      >
+        <li
+          v-if="filteredOptions.length === 0"
+          class="cursor-default select-none relative py-2 pl-3 pr-9 text-gray-500"
+        >
           Tidak ada data
         </li>
 
-        <li v-for="option in filteredOptions" :key="option[valueKey]" @click="selectOption(option)"
-          class="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-blue-100 text-gray-900">
+        <li
+          v-for="option in filteredOptions"
+          :key="option[valueKey]"
+          @click="selectOption(option)"
+          class="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-blue-100 text-gray-900"
+        >
           <span class="block truncate">
             {{ option[textKey] }}
           </span>
 
-          <span v-if="model === option[valueKey]"
-            class="absolute inset-y-0 right-0 flex items-center pr-4 text-blue-600" style="display: none">
+          <span
+            v-if="model === option[valueKey]"
+            class="absolute inset-y-0 right-0 flex items-center pr-4 text-blue-600"
+            style="display: none"
+          >
             ✓
           </span>
         </li>
@@ -93,7 +132,7 @@ const props = withDefaults(defineProps<ISelectProps>(), {
 })
 
 // Emits untuk mentrigger event search ke parent
-const emit = defineEmits(['search'])
+const emit = defineEmits(['search', 'select'])
 
 const model = defineModel<string | number | null>({ default: '' })
 
@@ -156,6 +195,7 @@ const selectOption = (option: any) => {
   model.value = option[props.valueKey]
   searchQuery.value = option[props.textKey] // Update tampilan
   isOpen.value = false
+  emit('select', option) // Emit full option object
   emit('search', '') // Reset search event jika perlu
 }
 

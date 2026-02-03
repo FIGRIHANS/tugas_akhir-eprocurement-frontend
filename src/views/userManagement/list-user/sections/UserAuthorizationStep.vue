@@ -23,7 +23,9 @@
             </thead>
             <tbody>
               <tr v-if="filteredAvailableAuths.length === 0">
-                <td colspan="2" class="text-center text-gray-500 py-4">No available authorization objects.</td>
+                <td colspan="2" class="text-center text-gray-500 py-4">
+                  No available authorization objects.
+                </td>
               </tr>
               <tr
                 v-for="auth in filteredAvailableAuths"
@@ -42,7 +44,11 @@
 
       <!-- Middle: Action Buttons -->
       <div class="flex flex-col gap-4 justify-center items-center h-full pt-10">
-        <UiButton variant="primary" @click="addSelectedAuths" :disabled="selectedAvailableAuths.length === 0">
+        <UiButton
+          variant="primary"
+          @click="addSelectedAuths"
+          :disabled="selectedAvailableAuths.length === 0"
+        >
           <svg
             width="24"
             height="24"
@@ -56,7 +62,11 @@
             />
           </svg>
         </UiButton>
-        <UiButton variant="primary" @click="removeSelectedAuths" :disabled="selectedAssignedAuths.length === 0">
+        <UiButton
+          variant="primary"
+          @click="removeSelectedAuths"
+          :disabled="selectedAssignedAuths.length === 0"
+        >
           <svg
             width="24"
             height="24"
@@ -89,7 +99,9 @@
               </thead>
               <tbody>
                 <tr v-if="assignedAuths.length === 0">
-                  <td colspan="2" class="text-center text-gray-500 py-4">No authorization objects selected.</td>
+                  <td colspan="2" class="text-center text-gray-500 py-4">
+                    No authorization objects selected.
+                  </td>
                 </tr>
                 <tr
                   v-for="auth in assignedAuths"
@@ -123,7 +135,10 @@
           </div>
           <div class="card-body">
             <!-- Available Object Values Section -->
-            <div v-if="showAvailableValues && assignedAuths.length > 0" class="mb-4 available-values-scroll">
+            <div
+              v-if="showAvailableValues && assignedAuths.length > 0"
+              class="mb-4 available-values-scroll"
+            >
               <table class="table align-middle text-gray-700 w-full">
                 <thead>
                   <tr>
@@ -148,7 +163,11 @@
                 </tbody>
               </table>
               <div class="flex justify-center mt-4">
-                <UiButton variant="primary" @click="addSelectedObjectValues" :disabled="selectedModalObjectValues.length === 0">
+                <UiButton
+                  variant="primary"
+                  @click="addSelectedObjectValues"
+                  :disabled="selectedModalObjectValues.length === 0"
+                >
                   Add Selected
                 </UiButton>
               </div>
@@ -194,24 +213,24 @@
     </div>
 
     <p v-if="errors.assignedAuths" class="text-red-500 text-sm mt-4 text-center">
-        {{ errors.assignedAuths }}
+      {{ errors.assignedAuths }}
     </p>
   </div>
 </template>
 
 <script setup lang="ts">
-import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue';
-import UiButton from '@/components/ui/atoms/button/UiButton.vue';
-import { ref, reactive, computed, watch, inject, type Ref } from 'vue';
+import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
+import UiButton from '@/components/ui/atoms/button/UiButton.vue'
+import { ref, reactive, computed, watch, inject, type Ref } from 'vue'
 
 interface AuthObject {
-  code: string;
-  name: string;
+  code: string
+  name: string
 }
 
 interface ObjectCodeValue {
-  code: string;
-  name: string;
+  code: string
+  name: string
 }
 
 const availableAuths = ref<AuthObject[]>([
@@ -224,230 +243,260 @@ const availableAuths = ref<AuthObject[]>([
   { code: 'CCODE1', name: 'Company Code Area 1' },
   { code: 'CC007', name: 'User Management' },
   { code: 'CC008', name: 'Financial Records' },
-]);
+])
 
 const availableObjectValues = ref<ObjectCodeValue[]>([
   { code: 'MF00', name: 'Globalindo Express' },
   { code: 'MF01', name: 'Globalindo EV' },
   { code: 'MF02', name: 'Globalindo Retails' },
-]);
+])
 
-const assignedAuths = reactive<AuthObject[]>([]);
-const assignedObjectValues = reactive<ObjectCodeValue[]>([]);
+const assignedAuths = reactive<AuthObject[]>([])
+const assignedObjectValues = reactive<ObjectCodeValue[]>([])
 
-const searchCodeKeyword = ref('');
-const showAvailableValues = ref(false);
+const searchCodeKeyword = ref('')
+const showAvailableValues = ref(false)
 
 const canAddObjectValues = computed(() => {
-  return assignedAuths.length === 1 && assignedAuths[0]?.code?.toString().startsWith('CCODE');
-});
+  return assignedAuths.length === 1 && assignedAuths[0]?.code?.toString().startsWith('CCODE')
+})
 
 const filteredAvailableAuths = computed(() => {
   if (!searchCodeKeyword.value) {
-    return availableAuths.value;
+    return availableAuths.value
   }
-  const lowerCaseKeyword = searchCodeKeyword.value.toLowerCase();
+  const lowerCaseKeyword = searchCodeKeyword.value.toLowerCase()
   return availableAuths.value.filter(
     (auth) =>
       auth.code.toLowerCase().includes(lowerCaseKeyword) ||
-      auth.name.toLowerCase().includes(lowerCaseKeyword)
-  );
-});
+      auth.name.toLowerCase().includes(lowerCaseKeyword),
+  )
+})
 
-const selectedAvailableAuths = ref<string[]>([]);
-const selectedAssignedAuths = ref<string[]>([]);
-const selectedModalObjectValues = ref<string[]>([]);
-const selectedAssignedObjectValues = ref<string[]>([]);
+const selectedAvailableAuths = ref<string[]>([])
+const selectedAssignedAuths = ref<string[]>([])
+const selectedModalObjectValues = ref<string[]>([])
+const selectedAssignedObjectValues = ref<string[]>([])
 
 const toggleAvailableSelection = (code: string) => {
-  const index = selectedAvailableAuths.value.indexOf(code);
+  const index = selectedAvailableAuths.value.indexOf(code)
   if (index === -1) {
-    selectedAvailableAuths.value.push(code);
+    selectedAvailableAuths.value.push(code)
   } else {
-    selectedAvailableAuths.value.splice(index, 1);
+    selectedAvailableAuths.value.splice(index, 1)
   }
-};
+}
 
 const toggleAssignedSelection = (code: string) => {
-  const index = selectedAssignedAuths.value.indexOf(code);
+  const index = selectedAssignedAuths.value.indexOf(code)
   if (index === -1) {
-    selectedAssignedAuths.value.push(code);
+    selectedAssignedAuths.value.push(code)
   } else {
-    selectedAssignedAuths.value.splice(index, 1);
+    selectedAssignedAuths.value.splice(index, 1)
   }
-};
+}
 
 const toggleObjectValueModalSelection = (code: string) => {
-  const index = selectedModalObjectValues.value.indexOf(code);
+  const index = selectedModalObjectValues.value.indexOf(code)
   if (index === -1) {
-    selectedModalObjectValues.value.push(code);
+    selectedModalObjectValues.value.push(code)
   } else {
-    selectedModalObjectValues.value.splice(index, 1);
+    selectedModalObjectValues.value.splice(index, 1)
   }
-};
+}
 
 const toggleAssignedObjectValueSelection = (code: string) => {
-  const index = selectedAssignedObjectValues.value.indexOf(code);
+  const index = selectedAssignedObjectValues.value.indexOf(code)
   if (index === -1) {
-    selectedAssignedObjectValues.value.push(code);
+    selectedAssignedObjectValues.value.push(code)
   } else {
-    selectedAssignedObjectValues.value.splice(index, 1);
+    selectedAssignedObjectValues.value.splice(index, 1)
   }
-};
+}
 
 const isAvailableSelected = (code: string) => {
-  return selectedAvailableAuths.value.includes(code);
-};
+  return selectedAvailableAuths.value.includes(code)
+}
 
 const isAssignedSelected = (code: string) => {
-  return selectedAssignedAuths.value.includes(code);
-};
+  return selectedAssignedAuths.value.includes(code)
+}
 
 const isModalObjectValueSelected = (code: string) => {
-  return selectedModalObjectValues.value.includes(code);
-};
+  return selectedModalObjectValues.value.includes(code)
+}
 
 const isAssignedObjectValueSelected = (code: string) => {
-  return selectedAssignedObjectValues.value.includes(code);
-};
+  return selectedAssignedObjectValues.value.includes(code)
+}
 
 const addSelectedAuths = () => {
   const itemsToAdd = availableAuths.value.filter((auth) =>
-    selectedAvailableAuths.value.includes(auth.code)
-  );
+    selectedAvailableAuths.value.includes(auth.code),
+  )
 
   itemsToAdd.forEach((item) => {
     if (!assignedAuths.some((auth) => auth.code === item.code)) {
-      assignedAuths.push(item);
+      assignedAuths.push(item)
     }
-  });
+  })
 
   availableAuths.value = availableAuths.value.filter(
-    (auth) => !selectedAvailableAuths.value.includes(auth.code)
-  );
+    (auth) => !selectedAvailableAuths.value.includes(auth.code),
+  )
 
-  selectedAvailableAuths.value = [];
-};
+  selectedAvailableAuths.value = []
+}
 
 const removeSelectedAuths = () => {
   const itemsToRemove = assignedAuths.filter((auth) =>
-    selectedAssignedAuths.value.includes(auth.code)
-  );
+    selectedAssignedAuths.value.includes(auth.code),
+  )
 
   itemsToRemove.forEach((item) => {
     if (!availableAuths.value.some((auth) => auth.code === item.code)) {
-      availableAuths.value.push(item);
+      availableAuths.value.push(item)
     }
-  });
+  })
 
-  const currentAssignedAuths = [...assignedAuths];
-  assignedAuths.splice(0, assignedAuths.length, ...currentAssignedAuths.filter(
-    (auth) => !selectedAssignedAuths.value.includes(auth.code)
-  ));
-  availableAuths.value.sort((a, b) => a.code.localeCompare(b.code));
+  const currentAssignedAuths = [...assignedAuths]
+  assignedAuths.splice(
+    0,
+    assignedAuths.length,
+    ...currentAssignedAuths.filter((auth) => !selectedAssignedAuths.value.includes(auth.code)),
+  )
+  availableAuths.value.sort((a, b) => a.code.localeCompare(b.code))
 
-  selectedAssignedAuths.value = [];
-};
+  selectedAssignedAuths.value = []
+}
 
 const addSelectedObjectValues = () => {
   const itemsToAdd = availableObjectValues.value.filter((value) =>
-    selectedModalObjectValues.value.includes(value.code)
-  );
+    selectedModalObjectValues.value.includes(value.code),
+  )
 
   itemsToAdd.forEach((item) => {
     if (!assignedObjectValues.some((value) => value.code === item.code)) {
-      assignedObjectValues.push(item);
+      assignedObjectValues.push(item)
     }
-  });
+  })
 
   availableObjectValues.value = availableObjectValues.value.filter(
-    (value) => !selectedModalObjectValues.value.includes(value.code)
-  );
+    (value) => !selectedModalObjectValues.value.includes(value.code),
+  )
 
-  selectedModalObjectValues.value = [];
-};
+  selectedModalObjectValues.value = []
+}
 
 // Keep the available-values panel closed if Add is not allowed
 watch(
   () => canAddObjectValues.value,
   (newVal) => {
-    if (!newVal) showAvailableValues.value = false;
-  }
-);
+    if (!newVal) showAvailableValues.value = false
+  },
+)
 
 // Note: previously CCODE items were auto-moved on mount. That behavior was removed so
 // CCODE stays in Available Auths until the user explicitly moves it.
 
 const removeSelectedObjectValues = () => {
   const itemsToRemove = assignedObjectValues.filter((value) =>
-    selectedAssignedObjectValues.value.includes(value.code)
-  );
+    selectedAssignedObjectValues.value.includes(value.code),
+  )
 
   itemsToRemove.forEach((item) => {
     if (!availableObjectValues.value.some((value) => value.code === item.code)) {
-      availableObjectValues.value.push(item);
+      availableObjectValues.value.push(item)
     }
-  });
+  })
 
-  const currentAssignedValues = [...assignedObjectValues];
-  assignedObjectValues.splice(0, assignedObjectValues.length, ...currentAssignedValues.filter(
-    (value) => !selectedAssignedObjectValues.value.includes(value.code)
-  ));
-  availableObjectValues.value.sort((a, b) => a.code.localeCompare(b.code));
+  const currentAssignedValues = [...assignedObjectValues]
+  assignedObjectValues.splice(
+    0,
+    assignedObjectValues.length,
+    ...currentAssignedValues.filter(
+      (value) => !selectedAssignedObjectValues.value.includes(value.code),
+    ),
+  )
+  availableObjectValues.value.sort((a, b) => a.code.localeCompare(b.code))
 
-  selectedAssignedObjectValues.value = [];
-};
+  selectedAssignedObjectValues.value = []
+}
 
 const errors = reactive({
   assignedAuths: '',
-});
+})
 
 const validateForm = () => {
-  let isValid = true;
-  errors.assignedAuths = '';
+  let isValid = true
+  errors.assignedAuths = ''
 
   if (assignedAuths.length === 0) {
-    errors.assignedAuths = 'Please select at least one authorization object.';
-    isValid = false;
+    errors.assignedAuths = 'Please select at least one authorization object.'
+    isValid = false
   }
-  return isValid;
-};
+  return isValid
+}
 
-const validationTrigger = inject<Ref<number>>('validationTrigger', ref(0));
+const validationTrigger = inject<Ref<number>>('validationTrigger', ref(0))
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const allFormData = inject<Record<string, any>>('allFormData');
+const allFormData = inject<Record<string, any>>('allFormData')
 
-const emit = defineEmits(['validation-result']);
+const emit = defineEmits(['validation-result'])
 
 watch(validationTrigger, (newVal, oldVal) => {
   if (newVal !== oldVal) {
-    const isValid = validateForm();
+    const isValid = validateForm()
     if (allFormData) {
-        allFormData['authorization-step'] = {
-          selectedAuthObjects: assignedAuths.map(auth => auth.code),
-          selectedObjectValues: assignedObjectValues.map(value => value.code)
-        };
+      allFormData['authorization-step'] = {
+        selectedAuthObjects: assignedAuths.map((auth) => auth.code),
+        selectedObjectValues: assignedObjectValues.map((value) => value.code),
+      }
     }
     emit('validation-result', {
       isValid: isValid,
       formData: {
-        selectedAuthObjects: assignedAuths.map(auth => auth.code),
-        selectedObjectValues: assignedObjectValues.map(value => value.code)
-      }
-    });
+        selectedAuthObjects: assignedAuths.map((auth) => auth.code),
+        selectedObjectValues: assignedObjectValues.map((value) => value.code),
+      },
+    })
   }
-});
+})
 
 watch(
-  () => assignedObjectValues.map(v => v.code),
+  () => assignedObjectValues.map((v) => v.code),
   () => {
     if (allFormData) {
       allFormData['authorization-step'] = {
-        selectedAuthObjects: assignedAuths.map(auth => auth.code),
-        selectedObjectValues: assignedObjectValues.map(value => value.code)
-      };
+        selectedAuthObjects: assignedAuths.map((auth) => auth.code),
+        selectedObjectValues: assignedObjectValues.map((value) => value.code),
+        authDetails: assignedAuths.map((auth) => ({ code: auth.code, name: auth.name })),
+        objectValueDetails: assignedObjectValues.map((value) => ({
+          code: value.code,
+          name: value.name,
+        })),
+      }
     }
   },
+)
+
+// Watch assignedAuths to sync immediately when user selects auth objects
+watch(
+  () => assignedAuths.map((a) => a.code),
+  () => {
+    if (allFormData) {
+      allFormData['authorization-step'] = {
+        selectedAuthObjects: assignedAuths.map((auth) => auth.code),
+        selectedObjectValues: assignedObjectValues.map((value) => value.code),
+        authDetails: assignedAuths.map((auth) => ({ code: auth.code, name: auth.name })),
+        objectValueDetails: assignedObjectValues.map((value) => ({
+          code: value.code,
+          name: value.name,
+        })),
+      }
+    }
+  },
+  { immediate: true },
 )
 </script>
 
@@ -455,7 +504,9 @@ watch(
 .card {
   background-color: white;
   border-radius: 0.5rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 1px 3px 0 rgba(0, 0, 0, 0.1),
+    0 1px 2px 0 rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
   height: 100%;

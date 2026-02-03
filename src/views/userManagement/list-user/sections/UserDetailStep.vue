@@ -6,48 +6,101 @@
     <div class="card-body">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-12 mb-[24px]">
         <UiFormGroup hide-border>
-          <UiSearchSelect label="Employee Name" placeholder="Pilih" :options="employeeStore.employees.items" row
-            required value-key="employeeId" text-key="employeeName" :model-value="userPayload.employeeId"
-            @search="getEmployeAfter" @update:model-value="handleEmployeeChange"
-            searchable />
-          <UiSearchSelect label="Profile Id" placeholder="Pilih" :options="profileDisplayOptions" row required
-            value-key="profileId" text-key="displayName" :model-value="userPayload.profileId"
+          <UiSearchSelect
+            label="Employee Name"
+            placeholder="Pilih"
+            :options="employeeStore.employees.items"
+            row
+            required
+            value-key="employeeId"
+            text-key="employeeName"
+            :model-value="userPayload.employeeId"
+            @search="getEmployeAfter"
+            @select="handleEmployeeSelect"
+            searchable
+          />
+          <UiSearchSelect
+            label="Profile Id"
+            placeholder="Pilih"
+            :options="profileDisplayOptions"
+            row
+            required
+            value-key="profileId"
+            text-key="displayName"
+            :model-value="userPayload.profileId"
             @update:model-value="
               (value: string | number) =>
-                emit('update:userPayload', { ...userPayload, profileId: typeof value === 'string' ? parseInt(value, 10) : value })
-            " />
-          <UiSelect label="Status" placeholder="Pilih" :options="statusOptions" row required value-key="value"
-            text-key="label" :model-value="userPayload.isActive ? 'active' : 'inactive'" @update:model-value="
+                emit('update:userPayload', {
+                  ...userPayload,
+                  profileId: typeof value === 'string' ? parseInt(value, 10) : value,
+                })
+            "
+          />
+          <UiSelect
+            label="Status"
+            placeholder="Pilih"
+            :options="statusOptions"
+            row
+            required
+            value-key="value"
+            text-key="label"
+            :model-value="userPayload.isActive ? 'active' : 'inactive'"
+            @update:model-value="
               (value: string | number) =>
                 emit('update:userPayload', { ...userPayload, isActive: value === 'active' })
-            " />
+            "
+          />
         </UiFormGroup>
         <UiFormGroup hide-border>
-          <UiInput label="User Email" placeholder="Enter email" row required :model-value="userPayload.userName"
+          <UiInput
+            label="User Email"
+            placeholder="Enter email"
+            row
+            required
+            :model-value="userPayload.userName"
             @update:model-value="
               (value: any) => emit('update:userPayload', { ...userPayload, userName: value })
-            " />
+            "
+          />
           <div class="relative">
-            <UiInput label="Password" :type="passwordType" placeholder="Enter password" row required
-              :model-value="userPayload.userPassword" @update:model-value="
+            <UiInput
+              label="Password"
+              :type="passwordType"
+              placeholder="Enter password"
+              row
+              required
+              :model-value="userPayload.userPassword"
+              @update:model-value="
                 (value: any) => emit('update:userPayload', { ...userPayload, userPassword: value })
-              " />
-            <button type="button"
+              "
+            />
+            <button
+              type="button"
               class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 cursor-pointer"
-              @click="showPassword = !showPassword">
+              @click="showPassword = !showPassword"
+            >
               <span v-if="showPassword" class="ki-outline ki-eye-slash text-lg"></span>
               <span v-else class="ki-outline ki-eye text-lg"></span>
             </button>
           </div>
           <div class="relative">
-            <UiInput label="Confirm Password" :type="confirmPasswordType" placeholder="Enter password" row required
-              :model-value="userPayload.userPasswordConfirm" @update:model-value="
+            <UiInput
+              label="Confirm Password"
+              :type="confirmPasswordType"
+              placeholder="Enter password"
+              row
+              required
+              :model-value="userPayload.userPasswordConfirm"
+              @update:model-value="
                 (value: any) =>
                   emit('update:userPayload', { ...userPayload, userPasswordConfirm: value })
-              " />
-            <button type="button"
+              "
+            />
+            <button
+              type="button"
               class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 cursor-pointer"
-              @click="showConfirmPassword = !showConfirmPassword">
+              @click="showConfirmPassword = !showConfirmPassword"
+            >
               <span v-if="showConfirmPassword" class="ki-outline ki-eye-slash text-lg"></span>
               <span v-else class="ki-outline ki-eye text-lg"></span>
             </button>
@@ -115,10 +168,15 @@ const getEmployeAfter = (query: string) => {
     employeeStore.getEmployees(body)
   }, 500)
 }
-
-const handleEmployeeChange = (value: string | number) => {
-  const employeeId = typeof value === 'string' ? parseInt(value, 10) : value
-  emit('update:userPayload', { ...props.userPayload, employeeId })
+// Handle employee selection with full object from @select event
+const handleEmployeeSelect = (employee: { employeeId: number; employeeName: string }) => {
+  if (employee) {
+    emit('update:userPayload', {
+      ...props.userPayload,
+      employeeId: employee.employeeId,
+      employeeName: employee.employeeName,
+    })
+  }
 }
 
 // const filteredProfiles = computed(() => {
@@ -160,13 +218,14 @@ const emit = defineEmits<{
 const isFormValid = computed(() => {
   // employee selection is optional — Next should be enabled even if employee wasn't changed,
   // as long as required fields (profile, username, matching passwords) are valid.
-  const passwordsFilled = props.userPayload.userPassword?.trim() !== '' && props.userPayload.userPasswordConfirm?.trim() !== ''
-  const passwordMatch = passwordsFilled && props.userPayload.userPassword === props.userPayload.userPasswordConfirm
+  const passwordsFilled =
+    props.userPayload.userPassword?.trim() !== '' &&
+    props.userPayload.userPasswordConfirm?.trim() !== ''
+  const passwordMatch =
+    passwordsFilled && props.userPayload.userPassword === props.userPayload.userPasswordConfirm
 
   return (
-    props.userPayload.profileId > 0 &&
-    props.userPayload.userName?.trim() !== '' &&
-    passwordMatch
+    props.userPayload.profileId > 0 && props.userPayload.userName?.trim() !== '' && passwordMatch
   )
 })
 
@@ -178,6 +237,26 @@ watch(
   { immediate: true },
 )
 
+// Watch employeeId changes to sync employeeName
+watch(
+  () => props.userPayload.employeeId,
+  (newEmployeeId) => {
+    if (newEmployeeId && newEmployeeId > 0) {
+      // Find the employee name from store
+      const selectedEmployee = employeeStore.employees.items.find(
+        (emp) => emp.employeeId === newEmployeeId,
+      )
+      if (selectedEmployee && props.userPayload.employeeName !== selectedEmployee.employeeName) {
+        emit('update:userPayload', {
+          ...props.userPayload,
+          employeeName: selectedEmployee.employeeName,
+        })
+      }
+    }
+  },
+  { immediate: true },
+)
+
 onMounted(() => {
   console.log('UserDetailStep mounted - loading initial data')
   const body = {
@@ -185,12 +264,16 @@ onMounted(() => {
     pageSize: 500, // Load more profiles initially
     searchText: '',
   }
-  Promise.all([
-    employeeStore.getEmployees(body),
-    userProfileStore.getAllUserProfiles(body),
-  ]).then(() => {
-    console.log('Initial data loaded - employees:', employeeStore.employees.items.length, 'profiles:', userProfileStore.profiles.items.length)
-  })
+  Promise.all([employeeStore.getEmployees(body), userProfileStore.getAllUserProfiles(body)]).then(
+    () => {
+      console.log(
+        'Initial data loaded - employees:',
+        employeeStore.employees.items.length,
+        'profiles:',
+        userProfileStore.profiles.items.length,
+      )
+    },
+  )
 })
 </script>
 
