@@ -19,11 +19,11 @@ export default [
         name: 'form-user-detail',
         component: () => import('@/views/userManagement/list-user/sections/UserDetailStep.vue'),
       },
-      {
-        path: 'user-profile',
-        name: 'form-user-profile',
-        component: () => import('@/views/userManagement/list-user/sections/UserProfileStep.vue'),
-      },
+      // {
+      //   path: 'user-profile',
+      //   name: 'form-user-profile',
+      //   component: () => import('@/views/userManagement/list-user/sections/UserProfileStep.vue'),
+      // },
       {
         path: 'user-authorization',
         name: 'form-user-authorization',
