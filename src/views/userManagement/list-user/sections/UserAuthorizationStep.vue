@@ -4,7 +4,7 @@
       <h2 class="text-xl font-bold text-gray-800">User Authorization</h2>
     </div>
 
-    <div class="grid grid-cols-[1fr_auto_1fr] gap-6 mt-4 items-start">
+    <div class="grid grid-cols-[1fr_auto_1fr] gap-6 mt-4 items-stretch">
       <!-- Left: Available Auth Object Codes -->
       <div class="card">
         <div class="card-header">
@@ -107,66 +107,56 @@
         </div>
 
         <!-- Object Code Values -->
-        <div class="card card-fixed-height">
+        <div class="card">
           <div class="card-header">
             <div class="w-full justify-between items-center flex">
               <p>Object Code Values</p>
               <UiButton
                 variant="primary"
                 @click="showAvailableValues = !showAvailableValues"
+                :disabled="!canAddObjectValues"
                 size="sm"
               >
                 Add
               </UiButton>
             </div>
           </div>
-          <div class="card-body-wrapper">
-            <!-- Available Object Values Section - Toggle visibility -->
-            <div v-if="showAvailableValues" class="card-body">
-              <div class="mb-4">
-                <h4 class="text-sm font-semibold text-gray-700 mb-2">Available Values</h4>
-                <table class="table align-middle text-gray-700 w-full">
-                  <thead>
-                    <tr>
-                      <th class="text-nowrap">Object Code Value</th>
-                      <th class="text-nowrap">Object Name</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-if="availableObjectValues.length === 0">
-                      <td colspan="2" class="text-center text-gray-500 py-4">No available values.</td>
-                    </tr>
-                    <tr
-                      v-for="value in availableObjectValues"
-                      :key="value.code"
-                      @click="toggleObjectValueModalSelection(value.code)"
-                      class="cursor-pointer hover:bg-gray-50"
-                      :class="{ 'bg-blue-100': isModalObjectValueSelected(value.code) }"
-                    >
-                      <td>{{ value.code }}</td>
-                      <td>{{ value.name }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <!-- Action Button -->
-              <div class="flex justify-center py-2 border-y">
-                <UiButton
-                  variant="primary"
-                  @click="addSelectedObjectValues"
-                  :disabled="selectedModalObjectValues.length === 0"
-                >
+          <div class="card-body">
+            <!-- Available Object Values Section -->
+            <div v-if="showAvailableValues && assignedAuths.length > 0" class="mb-4 available-values-scroll">
+              <table class="table align-middle text-gray-700 w-full">
+                <thead>
+                  <tr>
+                    <th class="text-nowrap">Object Code Value</th>
+                    <th class="text-nowrap">Object Name</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-if="availableObjectValues.length === 0">
+                    <td colspan="2" class="text-center text-gray-500 py-4">No available values.</td>
+                  </tr>
+                  <tr
+                    v-for="value in availableObjectValues"
+                    :key="value.code"
+                    @click="toggleObjectValueModalSelection(value.code)"
+                    class="cursor-pointer hover:bg-gray-50"
+                    :class="{ 'bg-blue-100': isModalObjectValueSelected(value.code) }"
+                  >
+                    <td>{{ value.code }}</td>
+                    <td>{{ value.name }}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="flex justify-center mt-4">
+                <UiButton variant="primary" @click="addSelectedObjectValues" :disabled="selectedModalObjectValues.length === 0">
                   Add Selected
                 </UiButton>
               </div>
             </div>
 
             <!-- Assigned Object Values Section -->
-            <div class="card-body">
-              <div v-if="assignedObjectValues.length === 0" class="text-center text-gray-500 py-4">
-              </div>
-              <table v-if="assignedObjectValues.length > 0" class="table align-middle text-gray-700 w-full">
+            <div v-if="assignedObjectValues.length > 0">
+              <table class="table align-middle text-gray-700 w-full">
                 <thead>
                   <tr>
                     <th class="text-nowrap">Object Code Value</th>
@@ -188,7 +178,7 @@
               </table>
 
               <!-- Remove Button -->
-              <div v-if="assignedObjectValues.length > 0" class="flex justify-center py-2 mt-2 border-t">
+              <div class="flex justify-center py-2 mt-2 border-t">
                 <UiButton
                   variant="primary"
                   @click="removeSelectedObjectValues"
@@ -231,7 +221,7 @@ const availableAuths = ref<AuthObject[]>([
   { code: 'CC004', name: 'Order Processing' },
   { code: 'CC005', name: 'Reporting Access' },
   { code: 'CC006', name: 'Admin Tools' },
-  { code: 'CCODE1', name: 'Company Code' },
+  { code: 'CCODE1', name: 'Company Code Area 1' },
   { code: 'CC007', name: 'User Management' },
   { code: 'CC008', name: 'Financial Records' },
 ]);
@@ -247,6 +237,10 @@ const assignedObjectValues = reactive<ObjectCodeValue[]>([]);
 
 const searchCodeKeyword = ref('');
 const showAvailableValues = ref(false);
+
+const canAddObjectValues = computed(() => {
+  return assignedAuths.length === 1 && assignedAuths[0]?.code?.toString().startsWith('CCODE');
+});
 
 const filteredAvailableAuths = computed(() => {
   if (!searchCodeKeyword.value) {
@@ -373,6 +367,17 @@ const addSelectedObjectValues = () => {
   selectedModalObjectValues.value = [];
 };
 
+// Keep the available-values panel closed if Add is not allowed
+watch(
+  () => canAddObjectValues.value,
+  (newVal) => {
+    if (!newVal) showAvailableValues.value = false;
+  }
+);
+
+// Note: previously CCODE items were auto-moved on mount. That behavior was removed so
+// CCODE stays in Available Auths until the user explicitly moves it.
+
 const removeSelectedObjectValues = () => {
   const itemsToRemove = assignedObjectValues.filter((value) =>
     selectedAssignedObjectValues.value.includes(value.code)
@@ -432,6 +437,18 @@ watch(validationTrigger, (newVal, oldVal) => {
     });
   }
 });
+
+watch(
+  () => assignedObjectValues.map(v => v.code),
+  () => {
+    if (allFormData) {
+      allFormData['authorization-step'] = {
+        selectedAuthObjects: assignedAuths.map(auth => auth.code),
+        selectedObjectValues: assignedObjectValues.map(value => value.code)
+      };
+    }
+  },
+)
 </script>
 
 <style scoped>
@@ -441,16 +458,20 @@ watch(validationTrigger, (newVal, oldVal) => {
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
-}
-
-.card-fixed-height {
-  max-height: 600px;
-  overflow: hidden;
+  height: 100%;
 }
 
 .card-header {
   padding: 1.5rem;
-  border-bottom: 1px solid #eee;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.available-values-scroll {
+  max-height: 250px;
+  overflow-y: auto;
+  /* removed border and inner padding so it doesn't create a separate visual "box" */
+  border: none;
+  padding: 0;
 }
 
 .card-body {
@@ -458,19 +479,6 @@ watch(validationTrigger, (newVal, oldVal) => {
   overflow-y: auto;
   flex-grow: 1;
   max-height: 400px;
-}
-
-.card-body-wrapper {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  overflow-y: auto;
-  max-height: 550px;
-}
-
-.card-body-wrapper .card-body {
-  padding: 1.5rem;
-  overflow-y: auto;
 }
 
 .table {

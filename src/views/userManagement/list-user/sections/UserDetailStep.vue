@@ -158,13 +158,15 @@ const emit = defineEmits<{
 }>()
 
 const isFormValid = computed(() => {
+  // employee selection is optional — Next should be enabled even if employee wasn't changed,
+  // as long as required fields (profile, username, matching passwords) are valid.
+  const passwordsFilled = props.userPayload.userPassword?.trim() !== '' && props.userPayload.userPasswordConfirm?.trim() !== ''
+  const passwordMatch = passwordsFilled && props.userPayload.userPassword === props.userPayload.userPasswordConfirm
+
   return (
-    props.userPayload.employeeId > 0 &&
     props.userPayload.profileId > 0 &&
     props.userPayload.userName?.trim() !== '' &&
-    props.userPayload.userPassword?.trim() !== '' &&
-    props.userPayload.userPasswordConfirm?.trim() !== '' &&
-    props.userPayload.userPassword === props.userPayload.userPasswordConfirm
+    passwordMatch
   )
 })
 

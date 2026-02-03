@@ -1,7 +1,7 @@
 <template>
   <div class="grid grid-cols-12 gap-4">
     <!-- Left Column - User Detail -->
-    <div class="col-span-12 lg:col-span-6">
+    <div class="col-span-12 lg:col-span-6 left-column">
       <div class="card">
         <div class="card-header">
           <h2 class="font-bold text-base text-slate-700">User Detail</h2>
@@ -38,20 +38,40 @@
           <h3 class="text-base font-bold text-slate-700">Authorization</h3>
         </div>
         <div class="card-body">
-          <table class="table align-middle text-gray-700 w-full" v-if="assignedAuths.length > 0">
-            <thead>
-              <tr>
-                <th class="text-nowrap text-left">Auth Object Code</th>
-                <th class="text-nowrap text-left">Auth Object Name</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="auth in assignedAuths" :key="auth.code">
-                <td class="py-2">{{ auth.code }}</td>
-                <td class="py-2">{{ auth.name }}</td>
-              </tr>
-            </tbody>
-          </table>
+          <div v-if="assignedAuths.length > 0">
+            <table class="table align-middle text-gray-700 w-full">
+              <thead>
+                <tr>
+                  <th class="text-nowrap text-left">Auth Object Code</th>
+                  <th class="text-nowrap text-left">Auth Object Name</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="auth in assignedAuths" :key="auth.code">
+                  <td class="py-2">{{ auth.code }}</td>
+                  <td class="py-2">{{ auth.name }}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div v-if="assignedObjectValues.length > 0" class="mt-4">
+              <h4 class="text-sm font-medium text-slate-500 mb-2">Object Code Values</h4>
+              <table class="table align-middle text-gray-700 w-full">
+                <thead>
+                  <tr>
+                    <th class="text-nowrap text-left">Object Code Value</th>
+                    <th class="text-nowrap text-left">Object Name</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="val in assignedObjectValues" :key="val">
+                    <td class="py-2">{{ val }}</td>
+                    <td class="py-2">{{ getObjectValueName(val) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
           <div v-else class="py-6 text-center">
             <p class="text-sm text-slate-500">No authorization found</p>
           </div>
@@ -141,6 +161,8 @@ interface AuthObject {
   name: string
 }
 
+const assignedObjectValues = ref<string[]>([])
+
 defineProps<{
   userPayload: UserPayload
   profilePayload: ProfilePayload
@@ -162,6 +184,8 @@ watch(
         code,
         name: getAuthName(code),
       }))
+      // Map object values (codes) if present
+      assignedObjectValues.value = authData.selectedObjectValues || []
     }
   },
   { deep: true },
@@ -179,6 +203,15 @@ const getAuthName = (code: string): string => {
     CC008: 'Financial Records',
   }
   return authMap[code] || 'Unknown'
+}
+
+const getObjectValueName = (code: string): string => {
+  const map: Record<string, string> = {
+    MF00: 'Globalindo Express',
+    MF01: 'Globalindo EV',
+    MF02: 'Globalindo Retails',
+  }
+  return map[code] || 'Unknown'
 }
 </script>
 
@@ -222,5 +255,16 @@ const getAuthName = (code: string): string => {
 
 .sticky {
   position: sticky;
+}
+
+/* Make left column card stretch to match right column total height */
+.left-column .card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.left-column .card-body {
+  flex: 1 1 auto;
 }
 </style>

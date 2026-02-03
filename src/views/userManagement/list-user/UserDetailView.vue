@@ -61,6 +61,9 @@
 
         <!-- Authorization Section -->
         <div class="card">
+          <div class="card-header">
+            <h3 class="text-base font-bold text-slate-700">Authorization Detail</h3>
+          </div>
           <div class="card-body">
             <table class="table align-middle text-gray-700 w-full" v-if="authRows.length > 0">
               <thead>

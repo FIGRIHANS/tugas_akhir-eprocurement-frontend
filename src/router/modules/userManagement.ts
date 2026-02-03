@@ -22,7 +22,7 @@ export default [
       {
         path: 'user-profile',
         name: 'form-user-profile',
-        component: () => import('@/views/userManagement/list-user/sections/UserProfileStep.vue'),
+        component: () => import('@/views/userManagement/list-user/sections/UserMenuStep.vue'),
       },
       {
         path: 'user-authorization',

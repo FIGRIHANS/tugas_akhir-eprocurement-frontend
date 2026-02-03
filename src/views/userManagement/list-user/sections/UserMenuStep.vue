@@ -16,10 +16,10 @@
           >
             <input
               class="form-check-input mr-2"
-              type="radio"
+              type="checkbox"
               :value="profile.id"
-              :id="profile.profileName"
-              v-model="selectedProfileId"
+              :id="profile.profileName + '_c1'"
+              v-model="selectedProfileIds"
               @change="updateProfilePayload"
             />
             <label class="form-check-label" :for="profile.profileName">{{
@@ -36,10 +36,10 @@
           >
             <input
               class="form-check-input mr-2"
-              type="radio"
+              type="checkbox"
               :value="profile.id"
-              :id="profile.profileName + '_col2'"
-              v-model="selectedProfileId"
+              :id="profile.profileName + '_c2'"
+              v-model="selectedProfileIds"
               @change="updateProfilePayload"
             />
             <label class="form-check-label" :for="profile.profileName + '_col2'">{{
@@ -55,20 +55,28 @@
 <script setup lang="ts">
 import UiFormGroup from '@/components/ui/atoms/form-group/UiFormGroup.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
-import { useUserProfileStore } from '@/stores/user-management/profile'
 import { computed, onMounted, ref, watch } from 'vue'
 
 const searchKeyword = ref('')
 // Ganti selectedProfile menjadi selectedProfileId untuk menyimpan ID
-const selectedProfileId = ref<number | null>(null)
+const selectedProfileIds = ref<number[]>([])
 
-const userProfileStore = useUserProfileStore()
+// Dummy menu/profile list (replacing API)
+const dummyProfiles = ref([
+  { id: 1, profileName: 'Dashboard', isActive: true },
+  { id: 2, profileName: 'Bill / Invoice', isActive: true },
+  { id: 3, profileName: 'User Profile', isActive: true },
+  { id: 4, profileName: 'Vendor Manage', isActive: true },
+  { id: 5, profileName: 'Reporting', isActive: true },
+])
 
 // Mendefinisikan interface untuk prop profilePayload
 interface ProfilePayload {
   profileId: number
   profileName: string
   isActive: boolean
+  // optional array when multiple menus selected
+  profileIds?: number[]
 }
 
 const props = defineProps<{
@@ -80,38 +88,26 @@ const emit = defineEmits<{
 }>()
 
 onMounted(() => {
-  const body = {
-    page: 1,
-    pageSize: 100,
-    searchText: '',
-  }
-  userProfileStore.getAllUserProfiles(body)
-  // Inisialisasi selectedProfileId dari prop saat komponen dimuat
-  selectedProfileId.value = props.profilePayload.profileId
+  // Inisialisasi selectedProfileIds dari prop saat komponen dimuat
+  selectedProfileIds.value = props.profilePayload?.profileId ? [props.profilePayload.profileId] : []
 })
 
 // Gunakan watch untuk memperbarui selectedProfileId saat prop profilePayload.profileId berubah
 watch(
   () => props.profilePayload.profileId,
   (newVal) => {
-    selectedProfileId.value = newVal
+    selectedProfileIds.value = newVal ? [newVal] : []
   },
 )
 
 const filteredProfiles = computed(() => {
-  if (!userProfileStore.profiles?.items) {
-    return []
-  }
-
+  const profiles = dummyProfiles.value
+  if (!profiles) return []
   const searchTerm = searchKeyword.value.toLowerCase()
-
   if (searchTerm) {
-    return userProfileStore.profiles.items.filter((profile) =>
-      profile.profileName.toLowerCase().includes(searchTerm),
-    )
+    return profiles.filter((profile) => profile.profileName.toLowerCase().includes(searchTerm))
   }
-
-  return userProfileStore.profiles.items
+  return profiles
 })
 
 const profilesColumn1 = computed(() => {
@@ -126,19 +122,20 @@ const profilesColumn2 = computed(() => {
   return profiles.slice(mid)
 })
 
-// Fungsi untuk memperbarui profilePayload saat radio button diubah
+// Fungsi untuk memperbarui profilePayload saat checkbox diubah (multiple selection)
 const updateProfilePayload = () => {
-  const selectedProfileData = filteredProfiles.value.find(
-    (profile) => profile.id === selectedProfileId.value,
-  )
-  if (selectedProfileData) {
-    const newProfilePayload: ProfilePayload = {
-      profileId: selectedProfileData.id,
-      profileName: selectedProfileData.profileName,
-      isActive: selectedProfileData.isActive, // Asumsi isActive ada di data profil
-    }
-    emit('update:profile-payload', newProfilePayload)
+  const selected = filteredProfiles.value.filter((p) => selectedProfileIds.value.includes(p.id))
+  const profileIds = selectedProfileIds.value.slice()
+  const firstId = profileIds.length > 0 ? profileIds[0] : 0
+  const profileName = selected.length === 1 ? selected[0].profileName : profileIds.length > 1 ? selected.map(s => s.profileName).join(', ') : ''
+
+  const newProfilePayload: ProfilePayload = {
+    profileId: firstId,
+    profileName: profileName,
+    isActive: selected.length > 0 ? selected[0].isActive : true,
+    profileIds: profileIds,
   }
+  emit('update:profile-payload', newProfilePayload)
 }
 </script>
 
