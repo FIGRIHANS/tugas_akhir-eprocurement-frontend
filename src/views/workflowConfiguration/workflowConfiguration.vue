@@ -668,8 +668,17 @@ onMounted(async () => {
   await invoiceMasterApi.getDpTypes()
 
   // Check if editing or viewing existing workflow
-  const wfCode = route.query.wfCode as string
-  const viewMode = route.query.mode as string
+  const wfCode = sessionStorage.getItem('wfCode') || ''
+  const viewMode = sessionStorage.getItem('wfMode') || ''
+  const detailParam = sessionStorage.getItem('wfDetail')
+  let detailFromQuery: Workflow | null = null
+  if (detailParam) {
+    try {
+      detailFromQuery = JSON.parse(detailParam) as Workflow
+    } catch {
+      detailFromQuery = null
+    }
+  }
 
   if (wfCode) {
     // Set mode based on query parameter
@@ -688,17 +697,18 @@ onMounted(async () => {
       try {
         const list: Workflow[] = JSON.parse(stored)
         const workflow = list.find((item: Workflow) => item.wfCode === wfCode)
-        if (workflow) {
-          wfHeader.value.wfCode = workflow.wfCode
-          wfHeader.value.wfName = workflow.wfName
-          wfHeader.value.companyCode = workflow.companyCode
-          wfHeader.value.invoiceType = workflow.invoiceType
-          wfHeader.value.poType = workflow.poType
-          wfHeader.value.dpOption = workflow.dpOption
-          wfHeader.value.wfStep = workflow.wfStep
-          bracketAmount.value = workflow.bracketAmount === 'Yes' ? 'yes' : 'no'
+        const resolvedWorkflow = workflow || detailFromQuery
+        if (resolvedWorkflow) {
+          wfHeader.value.wfCode = resolvedWorkflow.wfCode
+          wfHeader.value.wfName = resolvedWorkflow.wfName
+          wfHeader.value.companyCode = resolvedWorkflow.companyCode
+          wfHeader.value.invoiceType = resolvedWorkflow.invoiceType
+          wfHeader.value.poType = resolvedWorkflow.poType
+          wfHeader.value.dpOption = resolvedWorkflow.dpOption
+          wfHeader.value.wfStep = resolvedWorkflow.wfStep
+          bracketAmount.value = resolvedWorkflow.bracketAmount === 'Yes' ? 'yes' : 'no'
           // fill dummy selections based on list data (view/edit)
-          const stepKey = workflow.wfStep || '1'
+          const stepKey = resolvedWorkflow.wfStep || '1'
           const profileMap: Record<string, ProfileForm> = {
             '1': {
               profileGroupId: '3001',
@@ -729,7 +739,7 @@ onMounted(async () => {
             '1': {
               bracketCode: 'BR001',
               amountFrom: '0',
-              companyCode: workflow.companyCode,
+              companyCode: resolvedWorkflow.companyCode,
               amountTo: '10000000',
               bracketType: 'PO Amount',
               currency: 'IDR',
@@ -738,7 +748,7 @@ onMounted(async () => {
             '2': {
               bracketCode: 'BR002',
               amountFrom: '10000001',
-              companyCode: workflow.companyCode,
+              companyCode: resolvedWorkflow.companyCode,
               amountTo: '50000000',
               bracketType: 'PO Amount',
               currency: 'IDR',
@@ -747,7 +757,7 @@ onMounted(async () => {
             '3': {
               bracketCode: 'BR003',
               amountFrom: '50000001',
-              companyCode: workflow.companyCode,
+              companyCode: resolvedWorkflow.companyCode,
               amountTo: '100000000',
               bracketType: 'PO Amount',
               currency: 'IDR',
@@ -758,7 +768,7 @@ onMounted(async () => {
           selectedProfile.value = profileMap[stepKey] || profileMap['1']
           selectedBracket.value = bracketMap[stepKey] || bracketMap['1']
           if (!wfHeader.value.notificationGroup) {
-            wfHeader.value.notificationGroup = `NG-${workflow.wfCode}`
+            wfHeader.value.notificationGroup = `NG-${resolvedWorkflow.wfCode}`
           }
 
           const profileRows = Object.values(profileMap).map((profileItem) => {
@@ -784,6 +794,16 @@ onMounted(async () => {
       } catch {
         // ignore parse errors
       }
+    }
+    if (!stored && detailFromQuery) {
+      wfHeader.value.wfCode = detailFromQuery.wfCode
+      wfHeader.value.wfName = detailFromQuery.wfName
+      wfHeader.value.companyCode = detailFromQuery.companyCode
+      wfHeader.value.invoiceType = detailFromQuery.invoiceType
+      wfHeader.value.poType = detailFromQuery.poType
+      wfHeader.value.dpOption = detailFromQuery.dpOption
+      wfHeader.value.wfStep = detailFromQuery.wfStep
+      bracketAmount.value = detailFromQuery.bracketAmount === 'Yes' ? 'yes' : 'no'
     }
   }
 })

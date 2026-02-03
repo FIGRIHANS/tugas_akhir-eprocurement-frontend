@@ -138,7 +138,7 @@
                   <td>{{ workflow.bracketAmount }}</td>
                   <td>
                     <span class="badge badge-outline border-transparent bg-green-50 text-green-600">{{ workflow.status
-                    }}</span>
+                      }}</span>
                   </td>
                   <td>{{ workflow.lastChange }}</td>
                 </tr>
@@ -366,20 +366,33 @@ const filteredWorkflowList = computed(() => {
 })
 
 const addWorkflow = () => {
+  sessionStorage.removeItem('wfDetail')
+  sessionStorage.removeItem('wfMode')
+  sessionStorage.removeItem('wfCode')
   router.push({ name: 'workflow-configuration' })
 }
 
 const viewDetail = (id: string) => {
+  const item = workflowList.value.find((w) => w.wfCode === id)
+  if (item) {
+    sessionStorage.setItem('wfDetail', JSON.stringify(item))
+    sessionStorage.setItem('wfMode', 'view')
+    sessionStorage.setItem('wfCode', item.wfCode)
+  }
   router.push({
     name: 'workflow-configuration',
-    query: { wfCode: id, mode: 'view' }
   })
 }
 
 const editWorkflow = (wfCode: string) => {
+  const item = workflowList.value.find((w) => w.wfCode === wfCode)
+  if (item) {
+    sessionStorage.setItem('wfDetail', JSON.stringify(item))
+    sessionStorage.setItem('wfMode', 'edit')
+    sessionStorage.setItem('wfCode', item.wfCode)
+  }
   router.push({
     name: 'workflow-configuration',
-    query: { wfCode }
   })
 }
 
