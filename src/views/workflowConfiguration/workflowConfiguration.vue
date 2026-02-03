@@ -340,8 +340,8 @@ import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
 import UiRadio from '@/components/ui/atoms/radio/UiRadio.vue'
 import WorkflowProfileTable from '@/components/workflowConfigTable/WorkflowProfileTable.vue'
-import AddNewTable from '@/components/workflowConfigTable/AddNewTable.vue'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
+import { useWorkflowConfigurationStore } from '@/stores/workflow-configurantion/wokrflowConfiguration'
 import router from '@/router'
 
 // Interface for workflow data
@@ -356,10 +356,22 @@ interface Workflow {
   bracketAmount: string
   status: string
   lastChange: string
+  workflow?: Array<{
+    step: string
+    category: string
+    bracketAmount: string
+    stepName: string
+    profileId: string
+    profileName: string
+    approverGroupId: string
+    notificationGroupId: string
+    remarks: string
+  }>
 }
 
 // API Store
 const invoiceMasterApi = useInvoiceMasterDataStore()
+const workflowStore = useWorkflowConfigurationStore()
 const route = useRoute()
 
 const selectedBracket = ref<BracketForm | null>(null)
@@ -391,38 +403,6 @@ const wfHeader = ref({
 })
 
 // Interface for table data
-interface TableData {
-  type: 'bracket' | 'profile' | 'auth'
-  profileGroupName: string
-  approveProfileId: string
-  bracketData?: BracketForm
-  profileData?: ProfileForm
-  authData?: AuthForm
-  steps: Array<{
-    step: string
-    category: string
-    bracketAmount: string
-    stepName: string
-    profileId: string
-    profileName: string
-    approveProfileId: string
-  }>
-  approvers: Array<{
-    approveProfileId: string
-    profileId: string
-    employeeId: string
-    employeeName: string
-  }>
-  notifications: Array<{
-    approveProfileId: string
-    profileId: string
-    employeeId: string
-    employeeName: string
-  }>
-}
-
-// State for tables
-const tables = ref<TableData[]>([])
 const isDataEmpty = ref(true)
 const workflowData = ref<
   Array<{
@@ -476,9 +456,6 @@ const poOptions = computed(() => {
 
 // Submit handlers for modals
 const handleBracketSelect = (bracket: BracketForm) => {
-
-  console.log(bracket, 'ini bracketg');
-
   selectedBracket.value = bracket
 
   // isi ke header workflow
@@ -494,49 +471,11 @@ const handleBracketSelect = (bracket: BracketForm) => {
 
 const handleProfileSubmit = (formData: ProfileForm) => {
   selectedProfile.value = formData
-  tables.value.push({
-    type: 'profile',
-    profileGroupName: formData.profileGroupId,
-    approveProfileId: formData.approverGroupId,
-    profileData: formData,
-    steps: [
-      {
-        step: formData.step,
-        category: formData.category,
-        bracketAmount: formData.profileId,
-        stepName: formData.profileName,
-        profileId: formData.profileId,
-        profileName: formData.profileName,
-        approveProfileId: formData.approverGroupId
-      }
-    ],
-    approvers: [],
-    notifications: []
-  })
   isDataEmpty.value = false
   showProfileModal.value = false
 }
 
 const handleAuthSubmit = (formData: AuthForm) => {
-  tables.value.push({
-    type: 'auth',
-    profileGroupName: formData.authObjectGroup,
-    approveProfileId: formData.authObjectCode,
-    authData: formData,
-    steps: [
-      {
-        step: '1',
-        category: 'A',
-        bracketAmount: formData.authObjectCode,
-        stepName: formData.authObjectName,
-        profileId: formData.authObjectCode,
-        profileName: formData.authObjectName,
-        approveProfileId: formData.authObjectGroup
-      }
-    ],
-    approvers: [],
-    notifications: []
-  })
   showAuthModal.value = false
 }
 
@@ -545,28 +484,6 @@ const handleGenerateWFStep = () => {
   if (bracketAmount.value === 'yes' && !selectedBracket.value) {
     alert('Please select Bracket Code first')
     return
-  }
-
-  if (bracketAmount.value === 'yes' && selectedBracket.value) {
-    tables.value.push({
-      type: 'bracket',
-      profileGroupName: `Bracket ${selectedBracket.value.bracketCode}`,
-      approveProfileId: selectedBracket.value.bracketCode,
-      bracketData: selectedBracket.value,
-      steps: [
-        {
-          step: wfHeader.value.wfStep || '1',
-          category: 'B',
-          bracketAmount: selectedBracket.value.bracketCode,
-          stepName: `Bracket Level ${selectedBracket.value.level}`,
-          profileId: selectedBracket.value.bracketCode,
-          profileName: `Amount ${selectedBracket.value.amountFrom} - ${selectedBracket.value.amountTo}`,
-          approveProfileId: selectedBracket.value.bracketCode
-        }
-      ],
-      approvers: [],
-      notifications: []
-    })
   }
 
   workflowData.value = [
@@ -589,17 +506,14 @@ const handleGenerateWFStep = () => {
 }
 
 const saveWorkflow = () => {
-  const listStr = localStorage.getItem('workflowDummyList')
-  let list: Workflow[] = []
-  try {
-    list = listStr ? JSON.parse(listStr) : []
-  } catch {
-    list = []
-  }
-
   const resolvedPoType = wfHeader.value.poType || (poOptions.value?.[0]?.code ?? '')
   const resolvedDpOption =
     resolvedPoType === 'PO' ? wfHeader.value.dpOption || (dpOptionList.value?.[0]?.code ?? '') : '-'
+
+  const resolvedBracketAmount =
+    bracketAmount.value === 'yes'
+      ? selectedBracket.value?.bracketCode || wfHeader.value.bracketCode || '-'
+      : '-'
 
   const newItem: Workflow = {
     wfCode: editingWfCode.value || `WF${Date.now()}`,
@@ -609,44 +523,32 @@ const saveWorkflow = () => {
     poType: resolvedPoType,
     dpOption: resolvedDpOption,
     wfStep: wfHeader.value.wfStep || '1',
-    bracketAmount: bracketAmount.value === 'yes' ? 'Yes' : 'No',
+    bracketAmount: resolvedBracketAmount,
     status: 'Active',
     lastChange: new Date().toLocaleString(),
+    workflow: workflowData.value.map((row) => ({
+      step: String(row.step),
+      category: row.category,
+      bracketAmount: row.bracketAmount,
+      stepName: row.stepName,
+      profileId: row.profileId,
+      profileName: row.profileName,
+      approverGroupId: row.approverGroupId,
+      notificationGroupId: row.notificationGroupId,
+      remarks: row.remarks,
+    })),
   }
 
   if (mode.value === 'edit' && editingWfCode.value) {
-    // Update existing workflow
-    const index = list.findIndex((item: Workflow) => item.wfCode === editingWfCode.value)
-    if (index > -1) {
-      list[index] = newItem
-    }
+    workflowStore.updateWorkflow(editingWfCode.value, newItem)
   } else {
-    // Create new workflow
-    list.unshift(newItem)
+    const added = workflowStore.addWorkflow(newItem)
+    if (!added) {
+      alert('WF Code sudah digunakan. Silakan gunakan kode lain.')
+      return
+    }
   }
-
-  localStorage.setItem('workflowDummyList', JSON.stringify(list))
   router.push({ name: 'workflow-list' })
-}
-
-const handleAddApprover = () => {
-}
-
-const handleAddNotification = () => {
-}
-
-const handleCancel = (index: number) => {
-  tables.value.splice(index, 1)
-}
-
-const handleBack = (index: number) => {
-  tables.value.splice(index, 1)
-}
-
-const handleSave = (index: number) => {
-  const tableData = tables.value[index]
-  // implementasi save logic
-  console.log('Saving table data:', tableData)
 }
 
 const goBack = () => {
@@ -668,19 +570,10 @@ onMounted(async () => {
   await invoiceMasterApi.getDpTypes()
 
   // Check if editing or viewing existing workflow
-  const wfCode = sessionStorage.getItem('wfCode') || ''
-  const viewMode = sessionStorage.getItem('wfMode') || ''
-  const detailParam = sessionStorage.getItem('wfDetail')
-  let detailFromQuery: Workflow | null = null
-  if (detailParam) {
-    try {
-      detailFromQuery = JSON.parse(detailParam) as Workflow
-    } catch {
-      detailFromQuery = null
-    }
-  }
+  const wfCode = (route.params.id as string) || ''
+  const viewMode = (route.query.mode as string) || ''
 
-  if (wfCode) {
+  if (wfCode && wfCode !== 'new') {
     // Set mode based on query parameter
     if (viewMode === 'view') {
       mode.value = 'view'
@@ -692,118 +585,115 @@ onMounted(async () => {
 
     editingWfCode.value = wfCode
 
-    const stored = localStorage.getItem('workflowDummyList')
-    if (stored) {
-      try {
-        const list: Workflow[] = JSON.parse(stored)
-        const workflow = list.find((item: Workflow) => item.wfCode === wfCode)
-        const resolvedWorkflow = workflow || detailFromQuery
-        if (resolvedWorkflow) {
-          wfHeader.value.wfCode = resolvedWorkflow.wfCode
-          wfHeader.value.wfName = resolvedWorkflow.wfName
-          wfHeader.value.companyCode = resolvedWorkflow.companyCode
-          wfHeader.value.invoiceType = resolvedWorkflow.invoiceType
-          wfHeader.value.poType = resolvedWorkflow.poType
-          wfHeader.value.dpOption = resolvedWorkflow.dpOption
-          wfHeader.value.wfStep = resolvedWorkflow.wfStep
-          bracketAmount.value = resolvedWorkflow.bracketAmount === 'Yes' ? 'yes' : 'no'
-          // fill dummy selections based on list data (view/edit)
-          const stepKey = resolvedWorkflow.wfStep || '1'
-          const profileMap: Record<string, ProfileForm> = {
-            '1': {
-              profileGroupId: '3001',
-              approverGroupId: 'AG01',
-              profileName: 'Sr. Management',
-              category: 'Verification',
-              profileId: 'GR001',
-              step: '1',
-            },
-            '2': {
-              profileGroupId: '3002',
-              approverGroupId: 'AG01',
-              profileName: 'Sr. Management',
-              category: 'Approval',
-              profileId: 'GR002',
-              step: '2',
-            },
-            '3': {
-              profileGroupId: '3003',
-              approverGroupId: 'AG01',
-              profileName: 'Finance Team',
-              category: 'Verification',
-              profileId: 'GR003',
-              step: '3',
-            },
-          }
-          const bracketMap: Record<string, BracketForm> = {
-            '1': {
-              bracketCode: 'BR001',
-              amountFrom: '0',
-              companyCode: resolvedWorkflow.companyCode,
-              amountTo: '10000000',
-              bracketType: 'PO Amount',
-              currency: 'IDR',
-              level: '1',
-            },
-            '2': {
-              bracketCode: 'BR002',
-              amountFrom: '10000001',
-              companyCode: resolvedWorkflow.companyCode,
-              amountTo: '50000000',
-              bracketType: 'PO Amount',
-              currency: 'IDR',
-              level: '2',
-            },
-            '3': {
-              bracketCode: 'BR003',
-              amountFrom: '50000001',
-              companyCode: resolvedWorkflow.companyCode,
-              amountTo: '100000000',
-              bracketType: 'PO Amount',
-              currency: 'IDR',
-              level: '3',
-            },
-          }
-
-          selectedProfile.value = profileMap[stepKey] || profileMap['1']
-          selectedBracket.value = bracketMap[stepKey] || bracketMap['1']
-          if (!wfHeader.value.notificationGroup) {
-            wfHeader.value.notificationGroup = `NG-${resolvedWorkflow.wfCode}`
-          }
-
-          const profileRows = Object.values(profileMap).map((profileItem) => {
-            const bracketItem = bracketMap[profileItem.step] || bracketMap['1']
-            return {
-              step: profileItem.step,
-              category: profileItem.category || '-',
-              bracketAmount: bracketItem.bracketCode,
-              stepName: profileItem.profileName || '-',
-              profileId: profileItem.profileId,
-              profileName: profileItem.profileName,
-              approverGroupId: profileItem.approverGroupId,
-              notificationGroupId: wfHeader.value.notificationGroup || '-',
-              poType: wfHeader.value.poType || '-',
-              dpOption: wfHeader.value.poType === 'PO' ? wfHeader.value.dpOption || '-' : '-',
-              remarks: '-',
-            }
-          })
-          workflowData.value = profileRows
-          isDataEmpty.value = false
-          isGenerated.value = true
-        }
-      } catch {
-        // ignore parse errors
+    const workflow = workflowStore.getByCode(wfCode)
+    const resolvedWorkflow = workflow || null
+    if (resolvedWorkflow) {
+      workflowStore.setCurrentWorkflow(resolvedWorkflow)
+      wfHeader.value.wfCode = resolvedWorkflow.wfCode
+      wfHeader.value.wfName = resolvedWorkflow.wfName
+      wfHeader.value.companyCode = resolvedWorkflow.companyCode
+      wfHeader.value.invoiceType = resolvedWorkflow.invoiceType
+      wfHeader.value.poType = resolvedWorkflow.poType
+      wfHeader.value.dpOption = resolvedWorkflow.dpOption
+      wfHeader.value.wfStep = resolvedWorkflow.wfStep
+      bracketAmount.value = resolvedWorkflow.bracketAmount === 'Yes' ? 'yes' : 'no'
+      // fill dummy selections based on list data (view/edit)
+      const stepKey = resolvedWorkflow.wfStep || '1'
+      const profileMap: Record<string, ProfileForm> = {
+        '1': {
+          profileGroupId: '3001',
+          approverGroupId: 'AG01',
+          profileName: 'Sr. Management',
+          category: 'Verification',
+          profileId: 'GR001',
+          step: '1',
+        },
+        '2': {
+          profileGroupId: '3002',
+          approverGroupId: 'AG01',
+          profileName: 'Sr. Management',
+          category: 'Approval',
+          profileId: 'GR002',
+          step: '2',
+        },
+        '3': {
+          profileGroupId: '3003',
+          approverGroupId: 'AG01',
+          profileName: 'Finance Team',
+          category: 'Verification',
+          profileId: 'GR003',
+          step: '3',
+        },
       }
-    }
-    if (!stored && detailFromQuery) {
-      wfHeader.value.wfCode = detailFromQuery.wfCode
-      wfHeader.value.wfName = detailFromQuery.wfName
-      wfHeader.value.companyCode = detailFromQuery.companyCode
-      wfHeader.value.invoiceType = detailFromQuery.invoiceType
-      wfHeader.value.poType = detailFromQuery.poType
-      wfHeader.value.dpOption = detailFromQuery.dpOption
-      wfHeader.value.wfStep = detailFromQuery.wfStep
-      bracketAmount.value = detailFromQuery.bracketAmount === 'Yes' ? 'yes' : 'no'
+      const bracketMap: Record<string, BracketForm> = {
+        '1': {
+          bracketCode: 'BR001',
+          amountFrom: '0',
+          companyCode: resolvedWorkflow.companyCode,
+          amountTo: '10000000',
+          bracketType: 'PO Amount',
+          currency: 'IDR',
+          level: '1',
+        },
+        '2': {
+          bracketCode: 'BR002',
+          amountFrom: '10000001',
+          companyCode: resolvedWorkflow.companyCode,
+          amountTo: '50000000',
+          bracketType: 'PO Amount',
+          currency: 'IDR',
+          level: '2',
+        },
+        '3': {
+          bracketCode: 'BR003',
+          amountFrom: '50000001',
+          companyCode: resolvedWorkflow.companyCode,
+          amountTo: '100000000',
+          bracketType: 'PO Amount',
+          currency: 'IDR',
+          level: '3',
+        },
+      }
+
+      selectedProfile.value = profileMap[stepKey] || profileMap['1']
+      selectedBracket.value = bracketMap[stepKey] || bracketMap['1']
+      if (!wfHeader.value.notificationGroup) {
+        wfHeader.value.notificationGroup = `NG-${resolvedWorkflow.wfCode}`
+      }
+
+      if (resolvedWorkflow.workflow && resolvedWorkflow.workflow.length > 0) {
+        workflowData.value = resolvedWorkflow.workflow.map((row) => ({
+          step: row.step,
+          category: row.category,
+          bracketAmount: row.bracketAmount,
+          stepName: row.stepName,
+          profileId: row.profileId,
+          profileName: row.profileName,
+          approverGroupId: row.approverGroupId,
+          notificationGroupId: row.notificationGroupId,
+          remarks: row.remarks,
+        }))
+      } else {
+        const profileRows = Object.values(profileMap).map((profileItem) => {
+          const bracketItem = bracketMap[profileItem.step] || bracketMap['1']
+          return {
+            step: profileItem.step,
+            category: profileItem.category || '-',
+            bracketAmount: bracketItem.bracketCode,
+            stepName: profileItem.profileName || '-',
+            profileId: profileItem.profileId,
+            profileName: profileItem.profileName,
+            approverGroupId: profileItem.approverGroupId,
+            notificationGroupId: wfHeader.value.notificationGroup || '-',
+            poType: wfHeader.value.poType || '-',
+            dpOption: wfHeader.value.poType === 'PO' ? wfHeader.value.dpOption || '-' : '-',
+            remarks: '-',
+          }
+        })
+        workflowData.value = profileRows
+      }
+      isDataEmpty.value = false
+      isGenerated.value = true
     }
   }
 })

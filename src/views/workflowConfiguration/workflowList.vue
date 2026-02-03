@@ -133,12 +133,12 @@
                   <td>{{ workflow.companyCode }}</td>
                   <td>{{ workflow.invoiceType }}</td>
                   <td>{{ workflow.poType || '-' }}</td>
-                  <td>{{ workflow.poType === 'PO' ? (workflow.dpOption || '-') : '-' }}</td>
+                  <td>{{ workflow.poType === 'PO' ? getDpOptionName(workflow.dpOption) : '-' }}</td>
                   <td>{{ workflow.wfStep }}</td>
                   <td>{{ workflow.bracketAmount }}</td>
                   <td>
                     <span class="badge badge-outline border-transparent bg-green-50 text-green-600">{{ workflow.status
-                      }}</span>
+                    }}</span>
                   </td>
                   <td>{{ workflow.lastChange }}</td>
                 </tr>
@@ -162,9 +162,10 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import LPagination from '@/components/pagination/LPagination.vue'
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import router from '@/router'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
+import { useWorkflowConfigurationStore } from '@/stores/workflow-configurantion/wokrflowConfiguration'
 
 const search = ref('')
 const currentPage = ref(1)
@@ -193,6 +194,7 @@ const invoiceMasterApi = useInvoiceMasterDataStore()
 const companyOptions = computed(() =>
   invoiceMasterApi.companyCode.map((c) => ({ text: c.name, value: c.code })),
 )
+const dpOptionList = computed(() => invoiceMasterApi.dpType)
 
 // Invoice Type options: only two choices shown in the filter UI
 const invoiceTypeOptions = computed(() => [
@@ -245,92 +247,8 @@ const Columns = ref([
   { name: 'Last Changed' },
 ])
 
-const workflowList = ref([
-  {
-    wfCode: 'WF001',
-    wfName: 'Sr. Management',
-    companyCode: 'WF00',
-    invoiceType: 'Invoice PO',
-    poType: 'PO',
-    dpOption: 'Yes',
-    wfStep: '1',
-    bracketAmount: 'Yes',
-    status: 'Active',
-    lastChange: '03/06/2025 11/10/15',
-  },
-  {
-    wfCode: 'WF002',
-    wfName: 'Finance Team',
-    companyCode: 'WF00',
-    invoiceType: 'Invoice Non PO',
-    poType: 'Reimbursement',
-    dpOption: 'No',
-    wfStep: '2',
-    bracketAmount: 'No',
-    status: 'Active',
-    lastChange: '03/06/2025 11/10/15',
-  },
-  {
-    wfCode: 'WF003',
-    wfName: 'Finance Team',
-    companyCode: 'WF01',
-    invoiceType: 'Invoice PO',
-    poType: 'PO-PIB',
-    dpOption: 'Yes',
-    wfStep: '3',
-    bracketAmount: 'Yes',
-    status: 'Active',
-    lastChange: '03/06/2025 11/10/15',
-  },
-  {
-    wfCode: 'WF004',
-    wfName: 'Sr. Management',
-    companyCode: 'WF01',
-    invoiceType: 'Invoice PO',
-    poType: 'PO-CC',
-    dpOption: 'No',
-    wfStep: '1',
-    bracketAmount: 'No',
-    status: 'Active',
-    lastChange: '03/06/2025 11/10/15',
-  },
-  {
-    wfCode: 'WF005',
-    wfName: 'Finance Team',
-    companyCode: 'WF02',
-    invoiceType: 'Invoice PO',
-    poType: 'PO',
-    dpOption: 'Yes',
-    wfStep: '2',
-    bracketAmount: 'Yes',
-    status: 'Active',
-    lastChange: '03/06/2025 11/10/15',
-  },
-  {
-    wfCode: 'WF006',
-    wfName: 'Sr. Management',
-    companyCode: 'WF02',
-    invoiceType: 'Invoice PO',
-    poType: 'PO-PIB',
-    dpOption: 'No',
-    wfStep: '3',
-    bracketAmount: 'Yes',
-    status: 'Active',
-    lastChange: '03/06/2025 11/10/15',
-  },
-  {
-    wfCode: 'WF007',
-    wfName: 'Finance Team',
-    companyCode: 'WF02',
-    invoiceType: 'Invoice PO',
-    poType: 'PO-CC',
-    dpOption: 'Yes',
-    wfStep: '1',
-    bracketAmount: 'No',
-    status: 'Active',
-    lastChange: '03/06/2025 11/10/15',
-  },
-])
+const workflowStore = useWorkflowConfigurationStore()
+const workflowList = computed(() => workflowStore.workflowList)
 
 totalItems.value = workflowList.value.length
 
@@ -366,33 +284,24 @@ const filteredWorkflowList = computed(() => {
 })
 
 const addWorkflow = () => {
-  sessionStorage.removeItem('wfDetail')
-  sessionStorage.removeItem('wfMode')
-  sessionStorage.removeItem('wfCode')
-  router.push({ name: 'workflow-configuration' })
+  router.push({ name: 'workflow-configuration', params: { id: 'new' } })
 }
 
 const viewDetail = (id: string) => {
-  const item = workflowList.value.find((w) => w.wfCode === id)
-  if (item) {
-    sessionStorage.setItem('wfDetail', JSON.stringify(item))
-    sessionStorage.setItem('wfMode', 'view')
-    sessionStorage.setItem('wfCode', item.wfCode)
-  }
   router.push({
     name: 'workflow-configuration',
+    params: {
+      id: id
+    },
+    query: { mode: 'view' },
   })
 }
 
 const editWorkflow = (wfCode: string) => {
-  const item = workflowList.value.find((w) => w.wfCode === wfCode)
-  if (item) {
-    sessionStorage.setItem('wfDetail', JSON.stringify(item))
-    sessionStorage.setItem('wfMode', 'edit')
-    sessionStorage.setItem('wfCode', item.wfCode)
-  }
   router.push({
     name: 'workflow-configuration',
+    params: { id: wfCode },
+    query: { mode: 'edit' },
   })
 }
 
@@ -401,14 +310,22 @@ const changePage = (page: number) => {
 }
 
 const deleteWorkflow = (wfCode: string) => {
-  const index = workflowList.value.findIndex((item) => item.wfCode === wfCode)
-  if (index > -1) {
-    workflowList.value.splice(index, 1)
-    totalItems.value = workflowList.value.length
-    // Update localStorage
-    localStorage.setItem('workflowDummyList', JSON.stringify(workflowList.value))
-  }
+  workflowStore.removeByCode(wfCode)
+  totalItems.value = workflowList.value.length
 }
+
+const getDpOptionName = (code: string) => {
+  const found = dpOptionList.value.find((item) => item.code === code)
+  return found?.name || '-'
+}
+
+watch(
+  () => workflowList.value.length,
+  (len) => {
+    totalItems.value = len
+  },
+  { immediate: true },
+)
 
 onMounted(() => {
   // load master data for filters
@@ -416,19 +333,6 @@ onMounted(() => {
   invoiceMasterApi.getInvoicePoType()
   invoiceMasterApi.getInvoiceNonPoType()
   invoiceMasterApi.getDpTypes()
-  // load persisted dummy workflows if present
-  const stored = localStorage.getItem('workflowDummyList')
-  if (stored) {
-    try {
-      const parsed = JSON.parse(stored)
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        workflowList.value = parsed
-        totalItems.value = workflowList.value.length
-      }
-    } catch {
-      // ignore parse errors
-    }
-  }
 })
 </script>
 
