@@ -205,14 +205,14 @@ const clientOptions = [
 
 
 const invoiceGroupOptions = [
-  { text: 'Invoice With PO', value: '1' },
-  { text: 'Invoice Without PO', value: '2' },
+  { text: 'Invoice With PO', value: 'Invoice With PO' },
+  { text: 'Invoice Without PO', value: 'Invoice Without PO' },
 ]
 
 const invoiceTypeOptions = [
-  { text: 'PO Normal', value: '1' },
-  { text: 'PO Credit Card', value: '2' },
-  { text: 'PO Asset', value: '3' },
+  { text: 'PO Normal', value: 'PO Normal' },
+  { text: 'PO Credit Card', value: 'PO Credit Card' },
+  { text: 'PO Asset', value: 'PO Asset' },
 ]
 
 const booleanOptions = [
@@ -221,10 +221,10 @@ const booleanOptions = [
 ]
 
 const sourceOptions = [
-  { text: 'Multi Channel', value: '1' },
-  { text: 'FTP Integration', value: '2' },
-  { text: 'Email Integration', value: '3' },
-  { text: 'VSS Integration', value: '4' },
+  { text: 'Multi Channel', value: 'Multi Channel' },
+  { text: 'FTP Integration', value: 'FTP Integration' },
+  { text: 'Email Integration', value: 'Email Integration' },
+  { text: 'VSS Integration', value: 'VSS Integration' },
 ]
 
 const workflowOptions = [

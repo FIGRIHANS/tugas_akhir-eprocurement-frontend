@@ -210,7 +210,6 @@ import { reactive, ref, computed, onMounted, toRaw } from 'vue'
 import { useSystemConfigurationStore } from '@/stores/system-configuration/systemConfiguration'
 import { useRouter } from 'vue-router'
 import { useRoute } from 'vue-router'
-import type { IntegrationItem } from '@/stores/system-integration/types/integration-item'
 
 const route = useRoute()
 const id = route.params.id as string
@@ -308,7 +307,8 @@ const addRow = (group: MappingGroup) => {
 }
 
 const removeRow = (group: MappingGroup, rowId: string) => {
-    group.rows = group.rows.filter(r => r.id !== rowId)
+    const index = group.rows.findIndex(r => r.id === rowId)
+    if (index !== -1) group.rows.splice(index, 1)
 }
 
 // const submit = () => {
@@ -352,21 +352,39 @@ const submit = () => {
 onMounted(() => {
     if (!integrationDetail.value) return
 
-    const raw = structuredClone(integrationDetail.value)
+    const raw = toRaw(integrationDetail.value)
 
+    // HEADER
     Object.assign(form, {
-        code: raw.code,
-        client: raw.client,
-        processIntegration: raw.processIntegration,
-        poType: raw.poType,
-        poDescription: raw.poDescription,
-        technicalObject: raw.technicalObject,
-        fieldMapping: raw.fieldMapping,
-        integrationStatus: raw.integrationStatus,
-        connectionTest: raw.connectionTest,
+        code: raw.code ?? '',
+        client: raw.client ?? '',
+        processIntegration: raw.processIntegration ?? '',
+        poType: raw.poType ?? '',
+        poDescription: raw.poDescription ?? '',
+        technicalObject: raw.technicalObject ?? '',
+        fieldMapping: raw.fieldMapping ?? '',
+        integrationStatus: raw.integrationStatus ?? '',
+        connectionTest: raw.connectionTest ?? '',
     })
 
-    mappingGroups.splice(0, mappingGroups.length, ...raw.definition)
+    // DEFINITION (clone manual)
+    mappingGroups.splice(0)
+
+    raw.definition?.forEach((group: any) => {
+        mappingGroups.push({
+            id: group.id,
+            name: group.name,
+            relation: group.relation,
+            open: true,
+            rows: group.rows?.map((row: any) => ({
+                id: row.id,
+                label: row.label,
+                evoq: row.evoq,
+                sap: row.sap,
+                status: row.status,
+            })) ?? [],
+        })
+    })
 })
 </script>
 

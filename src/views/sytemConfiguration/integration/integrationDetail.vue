@@ -274,9 +274,6 @@ watchEffect(() => {
 
     const i = integrationDetail.value
 
-    console.log(i, 'i');
-
-
     form.value = {
         code: i.code,
         client: i.client,
