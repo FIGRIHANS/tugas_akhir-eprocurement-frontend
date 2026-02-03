@@ -33,15 +33,18 @@ const tabs = [
     value: 'report-authorization-profile',
   },
   {
-    label: 'Report Role',
-    value: 'report-authorization-role',
+    label: 'Report Role Auth',
+    value: 'report-authorization-role-auth',
+  },
+  {
+    label: 'Report Role Menu',
+    value: 'report-authorization-role-menu',
   },
 ]
 
 const handleChange = (value: string) => {
   router.push({ name: value })
 }
-
 
 onMounted(() => {
   currentTab.value = route.name as string

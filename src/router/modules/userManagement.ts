@@ -68,6 +68,21 @@ export default [
     component: () => import('@/views/userManagement/master-employee/EmployeeDetailView.vue'),
   },
   {
+    path: '/user-management/master-menu',
+    name: 'user-management-master-menu',
+    component: () => import('@/views/userManagement/master-menu/MasterMenuListView.vue'),
+  },
+  {
+    path: '/user-management/master-menu/add',
+    name: 'user-management-master-menu-add',
+    component: () => import('@/views/userManagement/master-menu/MasterMenuAddView.vue'),
+  },
+  {
+    path: '/user-management/master-menu/detail/:id',
+    name: 'user-management-master-menu-detail',
+    component: () => import('@/views/userManagement/master-menu/MasterMenuDetailView.vue'),
+  },
+  {
     path: '/user-management/report-authorization',
     name: 'user-management-report-authorization',
     component: () =>
@@ -81,10 +96,16 @@ export default [
           import('@/views/userManagement/report-user-authorization/ReportProfileView.vue'),
       },
       {
-        path: 'role',
-        name: 'report-authorization-role',
+        path: 'role-auth',
+        name: 'report-authorization-role-auth',
         component: () =>
-          import('@/views/userManagement/report-user-authorization/ReportRoleView.vue'),
+          import('@/views/userManagement/report-user-authorization/ReportRoleAuthView.vue'),
+      },
+      {
+        path: 'role-menu',
+        name: 'report-authorization-role-menu',
+        component: () =>
+          import('@/views/userManagement/report-user-authorization/ReportRoleMenuView.vue'),
       },
     ],
   },
