@@ -27,7 +27,7 @@
             <td v-if="!checkInvoiceDp() && !checkPoPib()">
               {{ moment(item.grDocumentDate).format('YYYY/MM/DD') || '-' }}
             </td>
-            <td>{{ item.deliveryOrder || '-' }}</td>
+            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.deliveryOrderNo || '-' }}</td>
             <td>{{ form.currCode === 'IDR' ? useFormatIdr(item.itemAmount) : useFormatUsd(item.itemAmount) || '-' }}
             </td>
             <td v-if="!checkInvoiceDp()">{{ useFormatIdr(item.quantity) || '-' }}</td>
