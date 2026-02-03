@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 // import type { ErpHeader } from './types/erp'
 
-export const useSystemConfigurationStore = defineStore('systemIntegration', {
+export const useSystemConfigurationStore = defineStore('systemConfiguration', {
   state: () => ({
     configurations: [
       {
@@ -11,13 +11,13 @@ export const useSystemConfigurationStore = defineStore('systemIntegration', {
           companyName: 'Petrosea',
           description: 'Invoice Configuration - PO Normal Head Office',
           systemClient: 'PRD',
-          invoiceGroup: '1',
-          invoiceType: '3',
+          invoiceGroup: 'Invoice With PO',
+          invoiceType: 'PO Normal',
           isOcr: true,
           isQr: true,
           isPjap: true,
           is3WayMatching: true,
-          source: '4',
+          source: 'Multi Channel',
           workflowId: 'WF001',
           erpIntegration: '',
           pogrIntegration: '',

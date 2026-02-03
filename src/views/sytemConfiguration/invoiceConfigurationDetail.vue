@@ -1,12 +1,12 @@
 <template>
   <BreadcrumbView :routes="[
-    { name: 'ERP Integration List', to: '/erp-integratione' },
-    { name: 'ERP Detail', to: '#' },
-  ]" title="ERP Integration Detail" />
+    { name: 'Invoice Configuration List', to: '/invoice-configuratione' },
+    { name: 'Invoice Configuration Detail', to: '#' },
+  ]" title="Invoice Configuration Detail" />
 
   <div class="card">
     <div class="card-header">
-      <h3 class="card-title">ERP Header Configuration</h3>
+      <h3 class="card-title">Invoice Configuration Header</h3>
     </div>
 
     <div class="card-body">
@@ -129,7 +129,7 @@
   <div class="mt-6">
     <div class="border border-gray-200 rounded-xl p-[24px]">
       <div class="flex justify-between items-center gap-[8px]">
-        <h3 class="font-bold text-lg text-slate-800">Integration List</h3>
+        <h3 class="font-bold text-lg text-slate-800">PO & GR Data Condition</h3>
         <div class="flex gap-3 items-center">
           <UiInputSearch v-model="search" placeholder="Search..." />
           <button class="dropdown-toggle btn btn-primary">
@@ -276,13 +276,13 @@ const editErp = (id: string) => {
   systemConfigurationStore.updateErp(id, header.value)
 
   router.push({
-    name: 'configuration-detail'
+    name: 'invoice-configuration',
   })
 }
 
 const goBack = () => {
   router.push({
-    name: 'erp-integration'
+    name: 'invoice-configuration'
   })
 }
 
@@ -341,14 +341,14 @@ const clientOptions = [
 
 
 const invoiceGroupOptions = [
-  { text: 'Invoice With PO', value: '1' },
-  { text: 'Invoice Without PO', value: '2' },
+  { text: 'Invoice With PO', value: 'Invoice With PO' },
+  { text: 'Invoice Without PO', value: 'Invoice Without PO' },
 ]
 
 const invoiceTypeOptions = [
-  { text: 'PO Normal', value: '1' },
-  { text: 'PO Credit Card', value: '2' },
-  { text: 'PO Asset', value: '3' },
+  { text: 'PO Normal', value: 'PO Normal' },
+  { text: 'PO Credit Card', value: 'PO Credit Card' },
+  { text: 'PO Asset', value: 'PO Asset' },
 ]
 
 const booleanOptions = [
@@ -357,10 +357,10 @@ const booleanOptions = [
 ]
 
 const sourceOptions = [
-  { text: 'Multi Channel', value: '1' },
-  { text: 'FTP Integration', value: '2' },
-  { text: 'Email Integration', value: '3' },
-  { text: 'VSS Integration', value: '4' },
+  { text: 'Multi Channel', value: 'Multi Channel' },
+  { text: 'FTP Integration', value: 'FTP Integration' },
+  { text: 'Email Integration', value: 'Email Integration' },
+  { text: 'VSS Integration', value: 'VSS Integration' },
 ]
 
 const workflowOptions = [

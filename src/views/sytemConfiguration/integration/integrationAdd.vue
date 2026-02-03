@@ -33,7 +33,7 @@
                     <!-- LEFT -->
                     <div class="space-y-5">
                         <div>
-                            <label class="form-label">Code</label>
+                            <label class="form-label">Integration Code</label>
                             <UiInput v-model="form.code" />
                         </div>
 
@@ -48,38 +48,18 @@
                         </div>
 
                         <div>
-                            <label class="form-label">Services</label>
-                            <UiSelect v-model="form.services" :options="serviceOptions" />
+                            <label class="form-label">PO Type</label>
+                            <UiSelect v-model="form.poType" :options="poTypeOptions" />
                         </div>
 
                         <div>
-                            <label class="form-label">Type</label>
-                            <UiSelect v-model="form.type" :options="typeOptions" />
-                        </div>
-
-                        <div>
-                            <label class="form-label">Source</label>
-                            <UiInput v-model="form.source" />
-                        </div>
-
-                        <div>
-                            <label class="form-label">Destination</label>
-                            <UiInput v-model="form.destination" />
+                            <label class="form-label">PO Description</label>
+                            <UiInput v-model="form.poDescription" />
                         </div>
                     </div>
 
                     <!-- RIGHT -->
                     <div class="space-y-5">
-                        <div>
-                            <label class="form-label">Transaction Code</label>
-                            <UiInput v-model="form.transactionCode" />
-                        </div>
-
-                        <div>
-                            <label class="form-label">Connection</label>
-                            <UiSelect v-model="form.connection" :options="connectionOptions" />
-                        </div>
-
                         <div>
                             <label class="form-label">Technical Object</label>
                             <UiInput v-model="form.technicalObject" />
@@ -97,7 +77,7 @@
 
                         <div>
                             <label class="form-label">Connection Test</label>
-                            <UiSelect v-model="form.connectionTest" :options="connectionTestOptions" />
+                            <UiSelect v-model="form.connectionTest" :options="statusOptions" />
                         </div>
                     </div>
 
@@ -255,24 +235,28 @@ type MappingGroup = {
     name: string
     relation: '1 to 1' | '1 to N'
     open: boolean
-    rows: MappingRow[]
+    rows: {
+        id: string
+        label: string
+        evoq: string
+        sap: string
+        status: 'Active' | 'Inactive'
+    }[]
 }
-
 /* ================= HEADER FORM ================= */
 const form = reactive({
     code: '',
-    client: '',
+    client: 'PRD',
+
     processIntegration: '',
-    services: '',
-    type: '',
-    source: '',
-    destination: '',
-    transactionCode: '',
-    connection: 'RFC',
+    poType: 'Transaction',
+    poDescription: '',
+
     technicalObject: '',
+
     fieldMapping: 'Active',
     integrationStatus: 'Active',
-    connectionTest: 'Success',
+    connectionTest: 'Active',
 })
 
 
@@ -286,29 +270,16 @@ const clientOptions = [
     { text: 'QA', value: 'QA' },
 ]
 
-const serviceOptions = [
-    { text: 'Transaction', value: 'Transaction' },
-    { text: 'Master Data', value: 'Master Data' },
-]
-
-const typeOptions = [
-    { text: 'Outbound', value: 'Outbound' },
-    { text: 'Inbound', value: 'Inbound' },
-]
-
-const connectionOptions = [
-    { text: 'RFC', value: 'RFC' },
-    { text: 'API', value: 'API' },
+const poTypeOptions = [
+    { text: 'ZP01', value: 'ZP01' },
+    { text: 'ZP02', value: 'ZP02' },
+    { text: 'ZP03', value: 'ZP03' },
+    { text: 'ZP04', value: 'ZP04' },
 ]
 
 const statusOptions = [
     { text: 'Active', value: 'Active' },
-    { text: 'Not Active', value: 'Not Active' },
-]
-
-const connectionTestOptions = [
-    { text: 'Success', value: 'Success' },
-    { text: 'Failed', value: 'Failed' },
+    { text: 'Inactive', value: 'Inactive' },
 ]
 
 
@@ -353,48 +324,30 @@ const removeRow = (group: MappingGroup, rowId: string) => {
 
 //     console.log('SUBMIT PAYLOAD', payload)
 // }
-
 const submit = () => {
-    // 1. mapping header → item table Integration List
     const integrationItem = {
         code: form.code,
         client: form.client,
         processIntegration: form.processIntegration,
-        services: form.services,
-        type: form.type,
-        source: form.source,
-        destination: form.destination,
-        transactionCode: form.transactionCode,
-        connection: form.connection,
+        poType: form.poType,
+        poDescription: form.poDescription,
         technicalObject: form.technicalObject,
         fieldMapping: form.fieldMapping,
         integrationStatus: form.integrationStatus,
         connectionTest: form.connectionTest,
-
-        // OPTIONAL: simpan definition kalau nanti mau dipakai detail view
-        definition: mappingGroups.map(group => ({
-            id: group.id,
-            name: group.name,
-            relation: group.relation,
-            rows: group.rows,
-        })),
+        definition: mappingGroups,
     }
 
-    // 2. simpan ke Pinia store
     integrationStore.addIntegration(id, integrationItem)
 
     if (route.query.routeFrom === 'detail') {
-
         router.push({
-            name: 'erp-integration-detail',
-            params: {
-                id: id
-            }
+            name: 'invoice-configuration-detail',
+            params: { id },
         })
     } else {
         router.back()
     }
-
 }
 
 const goBack = () => {
