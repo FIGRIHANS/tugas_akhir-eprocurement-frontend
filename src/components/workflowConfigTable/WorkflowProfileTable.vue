@@ -12,10 +12,7 @@
       <div class="card-body p-0">
         <div v-show="showTable" class="px-4 py-4">
           <div ref="tableWrapper" class="table-wrapper overflow-x-auto">
-            <table
-              class="min-w-[1800px] w-full border-collapse"
-              aria-label="Workflow profile table"
-            >
+            <table class="min-w-[1800px] w-full border-collapse" aria-label="Workflow profile table">
               <thead>
                 <tr class="bg-gray-50">
                   <th class="py-4 px-6 text-sm font-medium text-left whitespace-nowrap">Step</th>
@@ -32,11 +29,7 @@
 
               <tbody>
                 <template v-if="!isDataEmpty">
-                  <tr
-                    v-for="(row, idx) in workflowData"
-                    :key="idx"
-                    class="hover:bg-gray-50 border-b"
-                  >
+                  <tr v-for="(row, idx) in workflowData" :key="idx" class="hover:bg-gray-50 border-b">
                     <td class="py-3 px-6 text-sm whitespace-nowrap">{{ row.step }}</td>
                     <td class="py-3 px-6 text-sm whitespace-nowrap">{{ row.category }}</td>
                     <td class="py-3 px-6 text-sm whitespace-nowrap">{{ row.bracketAmount }}</td>
@@ -60,92 +53,48 @@
             </table>
           </div>
 
-          <div
-            ref="customScrollbar"
-            class="custom-scrollbar mt-3 overflow-x-auto"
-          >
-            <div :style="{ width: tableScrollWidth + 'px', height: '1px' }"></div>
-          </div>
         </div>
       </div>
     </div>
   </section>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref, onMounted, nextTick } from 'vue'
+<script lang="ts" setup>
+import { ref, onMounted, nextTick, toRefs } from 'vue'
+import type { PropType } from 'vue'
 
-import type { WorkflowProfileTableRow } from '@/components/workflowConfigTable/types/WorkflowTable'
+type WorkflowRow = {
+  step: string | number
+  category: string
+  bracketAmount: string
+  stepName: string
+  profileId: string
+  profileName: string
+  approverGroupId: string
+  notificationGroupId: string
+  remarks: string
+}
 
-export default defineComponent({
-  name: 'WorkflowProfileTable',
-  setup() {
-    const isDataEmpty = ref(false)
-    const tableWrapper = ref<HTMLDivElement | null>(null)
-    const customScrollbar = ref<HTMLDivElement | null>(null)
-    const tableScrollWidth = ref(1200)
-    const showTable = ref(true)
+const props = defineProps({
+  isDataEmpty: {
+    type: Boolean,
+    default: true,
+  },
+  workflowData: {
+    type: Array as PropType<WorkflowRow[]>,
+    default: () => [],
+  },
+})
 
-    const workflowData = ref<WorkflowProfileTableRow[]>([
-      {
-        step: 1,
-        category: 'V',
-        bracketAmount: 'B1',
-        stepName: 'Invoice Verification 1',
-        profileId: '3002',
-        profileName: 'Finance AP Officer',
-        approverGroupId: 'AG001',
-        notificationGroupId: 'NG001',
-        remarks: '-'
-      },
-      {
-        step: 2,
-        category: 'A',
-        bracketAmount: 'B2',
-        stepName: 'Approval Manager',
-        profileId: '3003',
-        profileName: 'Finance Manager',
-        approverGroupId: 'AG002',
-        notificationGroupId: 'NG002',
-        remarks: '-'
-      },
-      {
-        step: 3,
-        category: 'A',
-        bracketAmount: 'B3',
-        stepName: 'Approval Director',
-        profileId: '3004',
-        profileName: 'Finance Director',
-        approverGroupId: 'AG003',
-        notificationGroupId: 'NG003',
-        remarks: '-'
-      }
-    ])
+const { isDataEmpty, workflowData } = toRefs(props)
+const tableWrapper = ref<HTMLDivElement | null>(null)
+const tableScrollWidth = ref(1200)
+const showTable = ref(true)
 
-    onMounted(async () => {
-      await nextTick()
-      if (tableWrapper.value && customScrollbar.value) {
-        tableScrollWidth.value = tableWrapper.value.scrollWidth
-
-        // sync scroll
-        tableWrapper.value.addEventListener('scroll', () => {
-          customScrollbar.value!.scrollLeft = tableWrapper.value!.scrollLeft
-        })
-        customScrollbar.value.addEventListener('scroll', () => {
-          tableWrapper.value!.scrollLeft = customScrollbar.value!.scrollLeft
-        })
-      }
-    })
-
-    return {
-      isDataEmpty,
-      tableWrapper,
-      customScrollbar,
-      tableScrollWidth,
-      workflowData,
-      showTable,
-      toggleTable: () => { showTable.value = !showTable.value }
-    }
+onMounted(async () => {
+  await nextTick()
+  if (tableWrapper.value) {
+    tableScrollWidth.value = tableWrapper.value.scrollWidth
   }
 })
 </script>
@@ -159,35 +108,26 @@ export default defineComponent({
   scroll-behavior: smooth;
 }
 
-.custom-scrollbar {
-  height: 16px;
-  border-radius: 5px;
-  background-color: #ffffff;
-}
-
-.custom-scrollbar::-webkit-scrollbar {
+.table-wrapper::-webkit-scrollbar {
   height: 10px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-track {
+.table-wrapper {
+  scrollbar-width: thin;
+  scrollbar-color: #e8e9ef #ffffff;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
   background: #ffffff;
   border-radius: 10px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb {
+.table-wrapper::-webkit-scrollbar-thumb {
   background: #e8e9ef;
   border-radius: 10px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+.table-wrapper::-webkit-scrollbar-thumb:hover {
   background: #6b7280;
-}
-
-.table-wrapper::-webkit-scrollbar {
-  display: none;
-}
-.table-wrapper {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
 }
 </style>
