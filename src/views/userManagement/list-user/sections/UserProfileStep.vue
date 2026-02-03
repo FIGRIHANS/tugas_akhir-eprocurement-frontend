@@ -56,7 +56,7 @@
 import UiFormGroup from '@/components/ui/atoms/form-group/UiFormGroup.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import { useUserProfileStore } from '@/stores/user-management/profile'
-import { computed, onMounted, ref, defineProps, defineEmits, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 
 const searchKeyword = ref('')
 // Ganti selectedProfile menjadi selectedProfileId untuk menyimpan ID
@@ -71,17 +71,21 @@ interface ProfilePayload {
   isActive: boolean
 }
 
-const props = defineProps({
-  profilePayload: {
-    type: Object as () => ProfilePayload,
-    required: true,
-  },
-})
+const props = defineProps<{
+  profilePayload: ProfilePayload
+}>()
 
-const emit = defineEmits(['update:profile-payload'])
+const emit = defineEmits<{
+  'update:profile-payload': [payload: ProfilePayload]
+}>()
 
 onMounted(() => {
-  userProfileStore.getAllUserProfiles()
+  const body = {
+    page: 1,
+    pageSize: 100,
+    searchText: '',
+  }
+  userProfileStore.getAllUserProfiles(body)
   // Inisialisasi selectedProfileId dari prop saat komponen dimuat
   selectedProfileId.value = props.profilePayload.profileId
 })

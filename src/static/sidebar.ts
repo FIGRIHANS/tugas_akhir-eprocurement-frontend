@@ -297,6 +297,11 @@ export default [
         to: 'user-management-master-employee',
       },
       {
+        id: 'master-menu',
+        title: 'Master Menu',
+        to: 'user-management-master-menu',
+      },
+      {
         id: 'report-user-authorization',
         title: 'Report User Authorization',
         to: 'user-management-report-authorization',
