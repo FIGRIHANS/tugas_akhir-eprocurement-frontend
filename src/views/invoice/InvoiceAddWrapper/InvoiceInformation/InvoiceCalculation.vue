@@ -115,21 +115,21 @@ const setCount = (name: string) => {
 const varianceResult = computed(() => {
   const variance = countVariance()
 
-  if (variance > 0) {
+  if (variance < 0) {
     return {
       containerClass: 'bg-yellow-50 border-yellow-400',
-      text: `Company Must Pay to Employee ${form.currency} ${variance.toLocaleString('id-ID')}`,
-      amount: variance,
+      text: `Company Must Pay to Employee ${form.currency} ${Math.abs(variance).toLocaleString('id-ID')}`,
+      amount: Math.abs(variance),
       posting: 'F-53/Outgoing Payment',
       badgeClass: 'bg-yellow-100 text-yellow-800 border border-yellow-200',
     }
   }
 
-  if (variance < 0) {
+  if (variance > 0) {
     return {
       containerClass: 'bg-green-50 border-green-400',
-      text: `Employee Pay to Company ${form.currency} ${Math.abs(variance).toLocaleString('id-ID')}`,
-      amount: Math.abs(variance),
+      text: `Employee Pay to Company ${form.currency} ${variance.toLocaleString('id-ID')}`,
+      amount: variance,
       posting: 'F-28/Incoming Payment',
       badgeClass: 'bg-green-100 text-green-800 border border-green-200',
     }
