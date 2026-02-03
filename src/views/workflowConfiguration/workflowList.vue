@@ -1,12 +1,9 @@
 <template>
   <div>
-    <BreadcrumbView
-      title="Workflow List"
-      :routes="[
-        { name: 'Workflow Configuration', to: '/workflow-list' },
-        { name: 'Workflow List', to: '#' },
-      ]"
-    />
+    <BreadcrumbView title="Workflow List" :routes="[
+      { name: 'Workflow Configuration', to: '/workflow-list' },
+      { name: 'Workflow List', to: '#' },
+    ]" />
 
     <div class="card">
       <div class="card-header">
@@ -24,10 +21,8 @@
                 <p class="text-lg font-semibold mb-[8px]">Filter</p>
                 <div class="flex flex-col gap-[24px] py-[16px]">
                   <div class="relative">
-                    <label
-                      class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
-                      >Company Code</label
-                    >
+                    <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white">Company
+                      Code</label>
                     <select v-model="tempFilters.companyCode" class="select" name="select">
                       <option value="">All</option>
                       <option v-for="item of companyOptions" :key="item.value" :value="item.value">
@@ -36,10 +31,8 @@
                     </select>
                   </div>
                   <div class="relative">
-                    <label
-                      class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
-                      >Invoice Type</label
-                    >
+                    <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white">Invoice
+                      Type</label>
                     <select v-model="tempFilters.invoiceType" class="select" name="select">
                       <option value="">All</option>
                       <option v-for="item of invoiceTypeOptions" :key="item.value" :value="item.value">
@@ -48,10 +41,8 @@
                     </select>
                   </div>
                   <div class="relative">
-                    <label
-                      class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
-                      >PO Type</label
-                    >
+                    <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white">PO
+                      Type</label>
                     <select v-model="tempFilters.poType" class="select" name="select">
                       <option value="">All</option>
                       <option v-for="item of poTypeOptions" :key="item.value" :value="item.value">
@@ -61,9 +52,7 @@
                   </div>
                   <div class="relative">
                     <label
-                      class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
-                      >Status</label
-                    >
+                      class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white">Status</label>
                     <select v-model="tempFilters.status" class="select" name="select">
                       <option value="">All</option>
                       <option v-for="item of statusOptions" :key="item.value" :value="item.value">
@@ -94,55 +83,31 @@
       <div class="card-body integration">
         <div>
           <div v-if="workflowList.length > 0"
-            class="integration__table border border-gray-200 rounded-xl overflow-x-auto"
-          >
+            class="integration__table border border-gray-200 rounded-xl overflow-x-auto">
             <table class="table align-middle text-gray-700 font-medium text-sm min-w-[1200px]">
               <thead>
                 <tr>
-                  <th
-                    class="integration__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"
-                  ></th>
-                  <th
-                    class="text-nowrap integration__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"
-                    v-for="item in Columns"
-                    :key="item.name"
-                  >
+                  <th class="integration__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"></th>
+                  <th class="text-nowrap integration__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"
+                    v-for="item in Columns" :key="item.name">
                     {{ item.name }}
                   </th>
                 </tr>
               </thead>
               <tbody>
-                <tr
-                  v-for="workflow in filteredWorkflowList"
-                  :key="workflow.wfCode"
-                  class="integration__field-items hover:bg-blue-50"
-                >
+                <tr v-for="workflow in filteredWorkflowList" :key="workflow.wfCode"
+                  class="integration__field-items hover:bg-blue-50">
                   <td>
                     <div class="flex items-center space-x-3">
-                      <div
-                        class="dropdown"
-                        data-dropdown="true"
-                        data-dropdown-trigger="click"
-                        data-dropdown-placement="bottom-end"
-                      >
-                        <UiButton
-                          class="dropdown-toggle"
-                          variant="light"
-                          :outline="true"
-                          :icon="true"
-                          size="sm"
-                        >
+                      <div class="dropdown" data-dropdown="true" data-dropdown-trigger="click"
+                        data-dropdown-placement="bottom-end">
+                        <UiButton class="dropdown-toggle" variant="light" :outline="true" :icon="true" size="sm">
                           <UiIcon name="dots-vertical" />
                         </UiButton>
                         <div class="dropdown-content w-auto p-4 space-y-2">
                           <div class="flex flex-col space-y-2">
-                            <UiButton
-                              variant="light"
-                              class="border-none"
-                              :outline="true"
-                              size="md"
-                              @click="viewDetail(workflow.wfCode)"
-                            >
+                            <UiButton variant="light" class="border-none" :outline="true" size="md"
+                              @click="viewDetail(workflow.wfCode)">
                               <UiIcon name="eye" class="mr-2" />
                               View Detail
                             </UiButton>
@@ -151,13 +116,8 @@
                               <UiIcon name="pencil" class="mr-2" />
                               Edit Workflow
                             </UiButton>
-                            <UiButton
-                              variant="light"
-                              class="border-none text-red-500 hover:text-red-600"
-                              :outline="true"
-                              size="md"
-                              @click="deleteWorkflow(workflow.wfCode)"
-                            >
+                            <UiButton variant="light" class="border-none text-red-500 hover:text-red-600"
+                              :outline="true" size="md" @click="deleteWorkflow(workflow.wfCode)">
                               <UiIcon name="trash" class="mr-2" />
                               Delete Workflow
                             </UiButton>
@@ -172,15 +132,13 @@
                   <td>{{ workflow.wfName }}</td>
                   <td>{{ workflow.companyCode }}</td>
                   <td>{{ workflow.invoiceType }}</td>
-                  <td>{{ workflow.poType }}</td>
-                  <td>{{ workflow.dpOption }}</td>
+                  <td>{{ workflow.poType || '-' }}</td>
+                  <td>{{ workflow.poType === 'PO' ? (workflow.dpOption || '-') : '-' }}</td>
                   <td>{{ workflow.wfStep }}</td>
                   <td>{{ workflow.bracketAmount }}</td>
                   <td>
-                    <span
-                      class="badge badge-outline border-transparent bg-green-50 text-green-600"
-                      >{{ workflow.status }}</span
-                    >
+                    <span class="badge badge-outline border-transparent bg-green-50 text-green-600">{{ workflow.status
+                    }}</span>
                   </td>
                   <td>{{ workflow.lastChange }}</td>
                 </tr>
@@ -191,14 +149,8 @@
           <div v-else class="text-center py-4">No workflows found.</div>
         </div>
 
-        <LPagination
-          v-if="workflowList.length > 0"
-          class="mt-4"
-          :totalItems="totalItems"
-          :pageSize="pageSize"
-          :currentPage="currentPage"
-          @page-change="changePage"
-        />
+        <LPagination v-if="workflowList.length > 0" class="mt-4" :totalItems="totalItems" :pageSize="pageSize"
+          :currentPage="currentPage" @page-change="changePage" />
       </div>
     </div>
   </div>
@@ -296,24 +248,84 @@ const Columns = ref([
 const workflowList = ref([
   {
     wfCode: 'WF001',
-    wfName: 'Standard Invoice PO',
-    companyCode: 'MF00',
+    wfName: 'Sr. Management',
+    companyCode: 'WF00',
     invoiceType: 'Invoice PO',
     poType: 'PO',
     dpOption: 'Yes',
-    wfStep: '5',
+    wfStep: '1',
     bracketAmount: 'Yes',
     status: 'Active',
     lastChange: '03/06/2025 11/10/15',
   },
   {
     wfCode: 'WF002',
-    wfName: 'Simple Invoice Non PO',
-    companyCode: 'MF00',
+    wfName: 'Finance Team',
+    companyCode: 'WF00',
     invoiceType: 'Invoice Non PO',
     poType: 'Reimbursement',
     dpOption: 'No',
+    wfStep: '2',
+    bracketAmount: 'No',
+    status: 'Active',
+    lastChange: '03/06/2025 11/10/15',
+  },
+  {
+    wfCode: 'WF003',
+    wfName: 'Finance Team',
+    companyCode: 'WF01',
+    invoiceType: 'Invoice PO',
+    poType: 'PO-PIB',
+    dpOption: 'Yes',
     wfStep: '3',
+    bracketAmount: 'Yes',
+    status: 'Active',
+    lastChange: '03/06/2025 11/10/15',
+  },
+  {
+    wfCode: 'WF004',
+    wfName: 'Sr. Management',
+    companyCode: 'WF01',
+    invoiceType: 'Invoice PO',
+    poType: 'PO-CC',
+    dpOption: 'No',
+    wfStep: '1',
+    bracketAmount: 'No',
+    status: 'Active',
+    lastChange: '03/06/2025 11/10/15',
+  },
+  {
+    wfCode: 'WF005',
+    wfName: 'Finance Team',
+    companyCode: 'WF02',
+    invoiceType: 'Invoice PO',
+    poType: 'PO',
+    dpOption: 'Yes',
+    wfStep: '2',
+    bracketAmount: 'Yes',
+    status: 'Active',
+    lastChange: '03/06/2025 11/10/15',
+  },
+  {
+    wfCode: 'WF006',
+    wfName: 'Sr. Management',
+    companyCode: 'WF02',
+    invoiceType: 'Invoice PO',
+    poType: 'PO-PIB',
+    dpOption: 'No',
+    wfStep: '3',
+    bracketAmount: 'Yes',
+    status: 'Active',
+    lastChange: '03/06/2025 11/10/15',
+  },
+  {
+    wfCode: 'WF007',
+    wfName: 'Finance Team',
+    companyCode: 'WF02',
+    invoiceType: 'Invoice PO',
+    poType: 'PO-CC',
+    dpOption: 'Yes',
+    wfStep: '1',
     bracketAmount: 'No',
     status: 'Active',
     lastChange: '03/06/2025 11/10/15',

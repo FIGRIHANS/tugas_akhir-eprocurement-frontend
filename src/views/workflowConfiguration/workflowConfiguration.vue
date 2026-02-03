@@ -222,12 +222,8 @@
               </label>
 
               <div class="flex-1 max-w-[400px]">
-                <UiInput
-                  v-model="wfHeader.notificationGroup"
-                  placeholder="Notification Group"
-                  row
-                  :disabled="isReadOnly"
-                />
+                <UiInput v-model="wfHeader.notificationGroup" placeholder="Notification Group" row
+                  :disabled="isReadOnly" />
               </div>
             </div>
           </div>
@@ -454,16 +450,17 @@ const invoiceTypeList = computed(() => [
 
 // PO Type options dependent on selected invoice type
 const poOptions = computed(() => {
+  let options: Array<{ name: string; code: string }> = []
   const t = wfHeader.value.invoiceType
   if (t === 'Invoice PO') {
-    return [
+    options = [
       { name: 'PO', code: 'PO' },
       { name: 'PO-PIB', code: 'PO-PIB' },
       { name: 'PO-CC', code: 'PO-CC' },
     ]
   }
   if (t === 'Invoice Non PO') {
-    return [
+    options = [
       { name: 'Reimbursement', code: 'Reimbursement' },
       { name: 'Credit Card', code: 'Credit Card' },
       { name: 'CAS', code: 'CAS' },
@@ -471,7 +468,10 @@ const poOptions = computed(() => {
       { name: 'Petty Cash', code: 'Petty Cash' },
     ]
   }
-  return []
+  if (wfHeader.value.poType && !options.some((item) => item.code === wfHeader.value.poType)) {
+    options = [...options, { name: wfHeader.value.poType, code: wfHeader.value.poType }]
+  }
+  return options
 })
 
 // Submit handlers for modals
@@ -579,6 +579,8 @@ const handleGenerateWFStep = () => {
       profileName: selectedProfile.value?.profileName || '-',
       approverGroupId: selectedProfile.value?.approverGroupId || '-',
       notificationGroupId: wfHeader.value.notificationGroup || '-',
+      poType: wfHeader.value.poType || '-',
+      dpOption: wfHeader.value.poType === 'PO' ? wfHeader.value.dpOption || '-' : '-',
       remarks: '-',
     },
   ]
@@ -595,13 +597,17 @@ const saveWorkflow = () => {
     list = []
   }
 
+  const resolvedPoType = wfHeader.value.poType || (poOptions.value?.[0]?.code ?? '')
+  const resolvedDpOption =
+    resolvedPoType === 'PO' ? wfHeader.value.dpOption || (dpOptionList.value?.[0]?.code ?? '') : '-'
+
   const newItem: Workflow = {
     wfCode: editingWfCode.value || `WF${Date.now()}`,
     wfName: wfHeader.value.wfName || 'New Workflow',
     companyCode: wfHeader.value.companyCode || (companyCodeList.value[0]?.code ?? ''),
     invoiceType: wfHeader.value.invoiceType || (invoiceTypeList.value[0]?.code ?? ''),
-    poType: wfHeader.value.poType || (poOptions.value?.[0]?.code ?? ''),
-    dpOption: wfHeader.value.dpOption || '',
+    poType: resolvedPoType,
+    dpOption: resolvedDpOption,
     wfStep: wfHeader.value.wfStep || '1',
     bracketAmount: bracketAmount.value === 'yes' ? 'Yes' : 'No',
     status: 'Active',
@@ -691,6 +697,89 @@ onMounted(async () => {
           wfHeader.value.dpOption = workflow.dpOption
           wfHeader.value.wfStep = workflow.wfStep
           bracketAmount.value = workflow.bracketAmount === 'Yes' ? 'yes' : 'no'
+          // fill dummy selections based on list data (view/edit)
+          const stepKey = workflow.wfStep || '1'
+          const profileMap: Record<string, ProfileForm> = {
+            '1': {
+              profileGroupId: '3001',
+              approverGroupId: 'AG01',
+              profileName: 'Sr. Management',
+              category: 'Verification',
+              profileId: 'GR001',
+              step: '1',
+            },
+            '2': {
+              profileGroupId: '3002',
+              approverGroupId: 'AG01',
+              profileName: 'Sr. Management',
+              category: 'Approval',
+              profileId: 'GR002',
+              step: '2',
+            },
+            '3': {
+              profileGroupId: '3003',
+              approverGroupId: 'AG01',
+              profileName: 'Finance Team',
+              category: 'Verification',
+              profileId: 'GR003',
+              step: '3',
+            },
+          }
+          const bracketMap: Record<string, BracketForm> = {
+            '1': {
+              bracketCode: 'BR001',
+              amountFrom: '0',
+              companyCode: workflow.companyCode,
+              amountTo: '10000000',
+              bracketType: 'PO Amount',
+              currency: 'IDR',
+              level: '1',
+            },
+            '2': {
+              bracketCode: 'BR002',
+              amountFrom: '10000001',
+              companyCode: workflow.companyCode,
+              amountTo: '50000000',
+              bracketType: 'PO Amount',
+              currency: 'IDR',
+              level: '2',
+            },
+            '3': {
+              bracketCode: 'BR003',
+              amountFrom: '50000001',
+              companyCode: workflow.companyCode,
+              amountTo: '100000000',
+              bracketType: 'PO Amount',
+              currency: 'IDR',
+              level: '3',
+            },
+          }
+
+          selectedProfile.value = profileMap[stepKey] || profileMap['1']
+          selectedBracket.value = bracketMap[stepKey] || bracketMap['1']
+          if (!wfHeader.value.notificationGroup) {
+            wfHeader.value.notificationGroup = `NG-${workflow.wfCode}`
+          }
+
+          const profileRows = Object.values(profileMap).map((profileItem) => {
+            const bracketItem = bracketMap[profileItem.step] || bracketMap['1']
+            return {
+              step: profileItem.step,
+              category: profileItem.category || '-',
+              bracketAmount: bracketItem.bracketCode,
+              stepName: profileItem.profileName || '-',
+              profileId: profileItem.profileId,
+              profileName: profileItem.profileName,
+              approverGroupId: profileItem.approverGroupId,
+              notificationGroupId: wfHeader.value.notificationGroup || '-',
+              poType: wfHeader.value.poType || '-',
+              dpOption: wfHeader.value.poType === 'PO' ? wfHeader.value.dpOption || '-' : '-',
+              remarks: '-',
+            }
+          })
+          workflowData.value = profileRows
+          isDataEmpty.value = false
+          isGenerated.value = true
         }
       } catch {
         // ignore parse errors

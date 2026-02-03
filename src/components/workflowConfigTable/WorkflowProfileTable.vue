@@ -72,6 +72,8 @@ type WorkflowRow = {
   profileName: string
   approverGroupId: string
   notificationGroupId: string
+  poType: string
+  dpOption: string
   remarks: string
 }
 
