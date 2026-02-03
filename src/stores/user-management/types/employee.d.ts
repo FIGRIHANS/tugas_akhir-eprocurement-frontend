@@ -17,6 +17,7 @@ export interface IEmployee {
   companyCode: string | null
   costCenter: string | null
   isActive: boolean
+  profileId?: number
   createdBy: number
   createdUtcDate: Date
   updatedBy: number
