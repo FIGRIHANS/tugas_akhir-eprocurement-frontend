@@ -13,11 +13,7 @@
             </div>
             <div class="card-body">
               <div class="card-group flex justify-between">
-                <p class="text-sm font-medium text-slate-500">User ID</p>
-                <p class="text-sm font-medium text-slate-700">{{ userDetail?.profileId }}</p>
-              </div>
-              <div class="card-group flex justify-between">
-                <p class="text-sm font-medium text-slate-500">Full Name</p>
+                <p class="text-sm font-medium text-slate-500">User Name</p>
                 <p class="text-sm font-medium text-slate-700">
                   {{ userDetail?.employeeName }}
                 </p>
@@ -29,15 +25,18 @@
                 </p>
               </div>
               <div class="card-group flex justify-between">
-                <p class="text-sm font-medium text-slate-500">Status</p>
-                <p class="text-sm font-medium text-slate-700">-</p>
-              </div>
-              <div class="card-group flex justify-between">
-                <p class="text-sm font-medium text-slate-500">Last Log In</p>
+                <p class="text-sm font-medium text-slate-500">Profile Id</p>
                 <p class="text-sm font-medium text-slate-700">
-                  {{ formattedLastLogin }}
+                  {{ userDetail?.profileId }}
                 </p>
               </div>
+              <div class="card-group flex justify-between">
+                <p class="text-sm font-medium text-slate-500">Employee Id</p>
+                <p class="text-sm font-medium text-slate-700">
+                  {{ userDetail?.employeeId }}
+                </p>
+              </div>
+
             </div>
           </div>
         </div>
@@ -152,7 +151,6 @@
 <script setup lang="ts">
 import BreadcrumbView from '@/components/BreadcrumbView.vue'
 import { useUserStore } from '@/stores/user-management/user'
-import moment from 'moment'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 
@@ -186,16 +184,11 @@ const roleRows = computed(() => {
   )
 })
 
-const formattedLastLogin = computed(() => {
-  const raw = userDetail.value?.lastLoginDate
-  if (!raw) return '-'
-  const m = moment(raw)
-  if (!m.isValid() || m.year() <= 1900) return '-'
-  return m.format('YYYY-MM-DD')
-})
-
 onMounted(async () => {
-  await userStore.getUserDetail(route.params.userName as string)
+  const userName = route.params.userName as string
+  console.log('Loading user detail for:', userName)
+  await userStore.getUserDetail(userName)
+  console.log('User detail loaded:', userStore.userDetail)
 })
 </script>
 

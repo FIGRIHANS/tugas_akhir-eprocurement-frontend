@@ -157,7 +157,24 @@ export const useUserStore = defineStore('userStore', () => {
       const response: ApiResponse<IUserDetail> = await userApi.get(`/user?userName=${userName}`)
 
       if (response?.data?.result?.content) {
-        userDetail.value = response.data.result.content
+        const content = response.data.result.content
+        // API returns data nested in profile object, we need to flatten it
+        if (content.profile) {
+          userDetail.value = {
+            id: content.profile.employeeId,
+            userName: content.profile.userName,
+            employeeName: content.profile.employeeName,
+            employeeId: content.profile.employeeId,
+            profileId: content.profile.profileId,
+            lastLoginDate: content.profile.lastLoginDate,
+            profile: {
+              profileId: content.profile.profileId,
+              profileName: content.profile.profileName,
+              lastLoginDate: content.profile.lastLoginDate,
+            },
+            roleAuths: content.roleAuths,
+          }
+        }
       }
     } catch (err: unknown) {
       if (err instanceof Error) {
