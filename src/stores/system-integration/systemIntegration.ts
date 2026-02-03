@@ -312,7 +312,15 @@ export const useSystemIntegrationStore = defineStore('systemIntegration', {
     addIntegration(erpId: string, integration: any) {
       const erp = this.erps.find((e) => e.header.id === erpId)
       if (!erp) return
+
+      const exists = erp.integrations.some((i) => i.code === integration.code)
+      if (exists) {
+        console.warn(`Integration ${integration.code} already exists`)
+        return
+      }
+
       erp.integrations.push(integration)
+      erp.header.lastChange = new Date().toLocaleString()
     },
 
     updateIntegration(erpId: string, integration: any) {
@@ -320,7 +328,17 @@ export const useSystemIntegrationStore = defineStore('systemIntegration', {
       if (!erp) return
 
       const idx = erp.integrations.findIndex((i) => i.code === integration.code)
-      if (idx !== -1) erp.integrations[idx] = integration
+      if (idx === -1) {
+        console.warn(`Integration ${integration.code} not found`)
+        return
+      }
+
+      erp.integrations[idx] = {
+        ...erp.integrations[idx],
+        ...integration,
+      }
+
+      erp.header.lastChange = new Date().toLocaleString()
     },
   },
 })
