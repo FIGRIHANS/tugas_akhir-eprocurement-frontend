@@ -424,6 +424,8 @@ const generalStatus = ref([
 const documentTypeList = ref([
   { code: '1', name: 'Tax Document' },
   { code: '2', name: 'Invoice Document' },
+  { code: '3', name: 'Reference Document' },
+  { code: '4', name: 'Other Document' },
 ])
 
 /* ---------------- PO logic ---------------- */
@@ -798,8 +800,17 @@ watch(isVerifyData, (val) => {
 })
 
 watch(selectedDocumentType, (val) => {
-  previewUrl.value =
-    val === '1' ? (form?.tax?.previewPath ?? '') : (form?.invoiceDocument?.previewPath ?? '')
+  if (val === '1') {
+    previewUrl.value = form?.tax?.previewPath ?? ''
+  } else if (val === '2') {
+    previewUrl.value = form?.invoiceDocument?.previewPath ?? ''
+  } else if (val === '3') {
+    previewUrl.value = form?.referenceDocument?.previewPath ?? ''
+  } else if (val === '4') {
+    previewUrl.value = form?.otherDocument?.previewPath ?? ''
+  }
+  // previewUrl.value =
+  //   val === '1' ? (form?.tax?.previewPath ?? '') : (form?.invoiceDocument?.previewPath ?? '')
 })
 
 watch(

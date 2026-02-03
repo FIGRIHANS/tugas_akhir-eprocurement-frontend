@@ -7,17 +7,12 @@
       <table class="table table-xs table-border">
         <thead>
           <tr>
-            <th 
-              v-for="(item, index) in columns"
-              :key="index"
-              class="po__column"
-              :class="{
-                'po__column--line': item.toLowerCase() === 'Line'.toLowerCase(),
-                'po__column--tax': item.toLowerCase() === 'tax code',
-                'po__column--wht-type': item.toLowerCase() === 'wht type',
-                'po__column--wht-code': item.toLowerCase() === 'wht code',
-              }"
-            >
+            <th v-for="(item, index) in columns" :key="index" class="po__column" :class="{
+              'po__column--line': item.toLowerCase() === 'Line'.toLowerCase(),
+              'po__column--tax': item.toLowerCase() === 'tax code',
+              'po__column--wht-type': item.toLowerCase() === 'wht type',
+              'po__column--wht-code': item.toLowerCase() === 'wht code',
+            }">
               {{ item }}
             </th>
           </tr>
@@ -32,7 +27,9 @@
             <td v-if="!checkInvoiceDp() && !checkPoPib()">
               {{ moment(item.grDocumentDate).format('YYYY/MM/DD') || '-' }}
             </td>
-            <td>{{ form.currCode === 'IDR' ? useFormatIdr(item.itemAmount) : useFormatUsd(item.itemAmount) || '-' }}</td>
+            <td>{{ item.deliveryOrder || '-' }}</td>
+            <td>{{ form.currCode === 'IDR' ? useFormatIdr(item.itemAmount) : useFormatUsd(item.itemAmount) || '-' }}
+            </td>
             <td v-if="!checkInvoiceDp()">{{ useFormatIdr(item.quantity) || '-' }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.uom || '-' }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.itemText || '-' }}</td>
@@ -45,8 +42,10 @@
             </td>
             <td v-if="!checkPoPib()">{{ getWhtTypeName(item.whtType) || '-' }}</td>
             <td v-if="!checkPoPib()">{{ getWhtCodeName(item.whtCode, item) || '-' }}</td>
-            <td v-if="!checkPoPib()">{{ item.whtBaseAmount ? form.currCode === 'IDR' ? useFormatIdr(item.whtBaseAmount) : useFormatUsd(item.whtBaseAmount) : '-' }}</td>
-            <td v-if="!checkPoPib()">{{ item.whtAmount ? form.currCode === 'IDR' ? useFormatIdr(item.whtAmount) : useFormatUsd(item.whtAmount) : '-' }}</td>
+            <td v-if="!checkPoPib()">{{ item.whtBaseAmount ? form.currCode === 'IDR' ? useFormatIdr(item.whtBaseAmount)
+              : useFormatUsd(item.whtBaseAmount) : '-' }}</td>
+            <td v-if="!checkPoPib()">{{ item.whtAmount ? form.currCode === 'IDR' ? useFormatIdr(item.whtAmount) :
+              useFormatUsd(item.whtAmount) : '-' }}</td>
             <td>{{ item.department || '-' }}</td>
           </tr>
         </tbody>
