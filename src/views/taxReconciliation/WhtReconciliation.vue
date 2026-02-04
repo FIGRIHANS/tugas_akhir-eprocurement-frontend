@@ -23,37 +23,20 @@
 
           <button class="btn btn-primary" @click="exportData()">
             <i class="ki-duotone ki-plus-circle"></i>
-            WHT Credit Posting
+            WHT Created Slips
           </button>
         </div>
       </div>
 
       <!-- Filter Section -->
       <div v-if="showFilter" class="border border-gray-200 rounded-lg p-4 mb-4">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-1 gap-4">
           <div>
             <label class="form-label">Status WHT</label>
             <select v-model="filterForm.statusWht" class="form-select">
               <option value="">All Status</option>
-              <option value="Valid">Valid</option>
-              <option value="Invalid">Invalid</option>
-            </select>
-          </div>
-          <div>
-            <label class="form-label">Match Status</label>
-            <select v-model="filterForm.matchStatus" class="form-select">
-              <option value="">All Match Status</option>
-              <option value="Match">Match</option>
-              <option value="Mismatch">Mismatch</option>
-            </select>
-          </div>
-          <div>
-            <label class="form-label">Credit Status</label>
-            <select v-model="filterForm.creditStatus" class="form-select">
-              <option value="">All Credit Status</option>
-              <option value="Creditable">Creditable</option>
-              <option value="Not Creditable">Not Creditable</option>
-              <option value="Hold">Hold</option>
+              <option value="Export to XML">Export to XML</option>
+              <option value="Created">Created</option>
             </select>
           </div>
         </div>
@@ -107,7 +90,7 @@
           </thead>
           <tbody>
             <tr v-if="filteredDataList?.length === 0">
-              <td colspan="15" class="text-center">No data found.</td>
+              <td colspan="14" class="text-center">No data found.</td>
             </tr>
             <tr v-for="(item, index) in list" :key="index">
               <!-- Checkbox Column -->
@@ -154,22 +137,7 @@
                   {{ item.statusWht }}
                 </span>
               </td>
-              <td class="text-center">
-                <span
-                  class="badge badge-outline"
-                  :class="getMatchStatusBadgeClass(item.matchStatus)"
-                >
-                  {{ item.matchStatus }}
-                </span>
-              </td>
-              <td class="text-center">
-                <span
-                  class="badge badge-outline"
-                  :class="getCreditStatusBadgeClass(item.creditStatus)"
-                >
-                  {{ item.creditStatus }}
-                </span>
-              </td>
+              <td>{{ item.slipsNumber || '-' }}</td>
             </tr>
           </tbody>
         </table>
@@ -358,14 +326,11 @@ interface WHTReconciliationData {
   nomorDokRef: string
   tanggalDok: string
   statusWht: string
-  matchStatus: string
-  creditStatus: string
+  slipsNumber: string
 }
 
 interface FilterForm {
   statusWht: string
-  matchStatus: string
-  creditStatus: string
 }
 
 const routes = ref<routeTypes[]>([
@@ -386,8 +351,6 @@ const filteredPayload = ref<{ key: string; value: string }[]>([])
 
 const filterForm = ref<FilterForm>({
   statusWht: '',
-  matchStatus: '',
-  creditStatus: '',
 })
 
 // Modal state
@@ -471,7 +434,7 @@ const columns = ref<string[]>([
   'Tax Period Month',
   'Tax Period Year',
   'NPWP',
-  'Income Recipient ID',
+  'ID TKU',
   'Facility',
   'Tax Object Code',
   'Tax Base (DPP)',
@@ -480,8 +443,7 @@ const columns = ref<string[]>([
   'Document Number',
   'Document Date',
   'WHT Status',
-  'Match Status',
-  'Credit Status',
+  'Slips Number (Bupot No.)',
 ])
 
 // Sample data logic: One invoice -> Multiple Tax Rows
@@ -499,9 +461,8 @@ const dataList = ref<WHTReconciliationData[]>([
     jenisDokRef: 'CommercialInvoice',
     nomorDokRef: '0100012292489165',
     tanggalDok: '2024-01-13',
-    statusWht: 'Valid',
-    matchStatus: 'Match',
-    creditStatus: 'Creditable',
+    statusWht: 'Created',
+    slipsNumber: 'BPT-2025-00001',
   },
   {
     masaPajak: '1',
@@ -515,9 +476,8 @@ const dataList = ref<WHTReconciliationData[]>([
     jenisDokRef: 'CommercialInvoice',
     nomorDokRef: '0100012292489165', // Same Invoice
     tanggalDok: '2024-01-13',
-    statusWht: 'Valid',
-    matchStatus: 'Match',
-    creditStatus: 'Creditable',
+    statusWht: 'Export to XML',
+    slipsNumber: '',
   },
 
   // Invoice 2: Single Tax Object
@@ -533,12 +493,11 @@ const dataList = ref<WHTReconciliationData[]>([
     jenisDokRef: 'CommercialInvoice',
     nomorDokRef: 'INV/2025/001',
     tanggalDok: '2025-01-15',
-    statusWht: 'Valid',
-    matchStatus: 'Match',
-    creditStatus: 'Creditable',
+    statusWht: 'Created',
+    slipsNumber: 'BPT-2025-00002',
   },
 
-  // Invoice 3: Mismatch Example
+  // Invoice 3: Example
   {
     masaPajak: '1',
     tahunPajak: '2025',
@@ -551,9 +510,8 @@ const dataList = ref<WHTReconciliationData[]>([
     jenisDokRef: 'CommercialInvoice',
     nomorDokRef: 'INV/2025/002',
     tanggalDok: '2025-01-16',
-    statusWht: 'Invalid',
-    matchStatus: 'Mismatch', // Trigger red badge
-    creditStatus: 'Hold',
+    statusWht: 'Export to XML',
+    slipsNumber: '',
   },
 
   // Invoice 4: Another Shared Invoice
@@ -569,9 +527,8 @@ const dataList = ref<WHTReconciliationData[]>([
     jenisDokRef: 'CommercialInvoice',
     nomorDokRef: 'INV/2025/MIXED',
     tanggalDok: '2025-01-20',
-    statusWht: 'Valid',
-    matchStatus: 'Match',
-    creditStatus: 'Creditable',
+    statusWht: 'Created',
+    slipsNumber: 'BPT-2025-00003',
   },
   {
     masaPajak: '1',
@@ -585,9 +542,8 @@ const dataList = ref<WHTReconciliationData[]>([
     jenisDokRef: 'CommercialInvoice',
     nomorDokRef: 'INV/2025/MIXED', // Same Invoice
     tanggalDok: '2025-01-20',
-    statusWht: 'Valid',
-    matchStatus: 'Mismatch',
-    creditStatus: 'Not Creditable',
+    statusWht: 'Export to XML',
+    slipsNumber: '',
   },
 ])
 
@@ -609,33 +565,12 @@ const filteredDataList = computed(() => {
     filtered = filtered.filter((item) => item.statusWht === filterForm.value.statusWht)
   }
 
-  if (filterForm.value.matchStatus) {
-    filtered = filtered.filter((item) => item.matchStatus.includes(filterForm.value.matchStatus))
-  }
-
-  if (filterForm.value.creditStatus) {
-    filtered = filtered.filter((item) => item.creditStatus.includes(filterForm.value.creditStatus))
-  }
-
   return filtered
 })
 
 const getStatusWhtBadgeClass = (status: string) => {
-  if (status === 'Valid') return 'badge-success'
-  if (status === 'Invalid') return 'badge-danger'
-  return 'badge-secondary'
-}
-
-const getMatchStatusBadgeClass = (status: string) => {
-  if (status === 'Match') return 'badge-success'
-  if (status.includes('Mismatch')) return 'badge-danger' // Red for mismatch
-  return 'badge-secondary'
-}
-
-const getCreditStatusBadgeClass = (status: string) => {
-  if (status === 'Creditable') return 'badge-success'
-  if (status === 'Not Creditable') return 'badge-danger'
-  if (status === 'Hold') return 'badge-secondary'
+  if (status === 'Created') return 'badge-success'
+  if (status === 'Export to XML') return 'badge-warning'
   return 'badge-secondary'
 }
 
@@ -691,14 +626,6 @@ const applyFilter = () => {
     payload.push({ key: 'Status WHT', value: filterForm.value.statusWht })
   }
 
-  if (filterForm.value.matchStatus) {
-    payload.push({ key: 'Match Status', value: filterForm.value.matchStatus })
-  }
-
-  if (filterForm.value.creditStatus) {
-    payload.push({ key: 'Credit Status', value: filterForm.value.creditStatus })
-  }
-
   filteredPayload.value = payload
   currentPage.value = 1
   setList(filteredDataList.value)
@@ -707,8 +634,6 @@ const applyFilter = () => {
 const resetFilter = () => {
   filterForm.value = {
     statusWht: '',
-    matchStatus: '',
-    creditStatus: '',
   }
   filteredPayload.value = []
   currentPage.value = 1
@@ -718,10 +643,6 @@ const resetFilter = () => {
 const deleteFilter = (key: string) => {
   if (key === 'Status WHT') {
     filterForm.value.statusWht = ''
-  } else if (key === 'Match Status') {
-    filterForm.value.matchStatus = ''
-  } else if (key === 'Credit Status') {
-    filterForm.value.creditStatus = ''
   }
 
   filteredPayload.value = filteredPayload.value.filter((item) => item.key !== key)
@@ -734,7 +655,7 @@ const sortColumn = (columnName: string | null) => {
     'Tax Period Month': 'masaPajak',
     'Tax Period Year': 'tahunPajak',
     NPWP: 'npwp',
-    'Income Recipient ID': 'idTku',
+    'ID TKU': 'idTku',
     Facility: 'fasilitas',
     'Tax Object Code': 'kodeObjek',
     'Tax Base (DPP)': 'dpp',
@@ -743,8 +664,7 @@ const sortColumn = (columnName: string | null) => {
     'Document Number': 'nomorDokRef',
     'Document Date': 'tanggalDok',
     'WHT Status': 'statusWht',
-    'Match Status': 'matchStatus',
-    'Credit Status': 'creditStatus',
+    'Slips Number (Bupot No.)': 'slipsNumber',
   } as { [key: string]: string }
 
   const roleSort = ['asc', 'desc', '']
