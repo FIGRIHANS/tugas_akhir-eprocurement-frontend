@@ -38,23 +38,6 @@
                         <span v-else>Search</span>
                       </button>
                     </div>
-                    <!-- Dropdown for PO selection -->
-                    <div
-                      v-if="poOptions.length > 0 && showDropdown"
-                      class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
-                    >
-                      <div
-                        v-for="po in poOptions"
-                        :key="po.poNumber"
-                        class="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b last:border-b-0"
-                        @click="selectPO(po)"
-                      >
-                        <div class="font-medium">{{ po.poNumber }}</div>
-                        <div class="text-sm text-gray-500">
-                          Vendor: {{ po.vendorCode }} - {{ po.vendorName }}
-                        </div>
-                      </div>
-                    </div>
                   </div>
                 </div>
 
@@ -198,7 +181,7 @@
                 </div>
 
                 <!-- Status -->
-                <div class="flex items-center gap-4">
+                <!-- <div class="flex items-center gap-4">
                   <label class="form-label text-sm font-medium text-gray-600 w-36 mb-0"
                     >Status <span class="text-red-500">*</span></label
                   >
@@ -207,7 +190,7 @@
                     <option value="Waiting Approval">Waiting Approval</option>
                     <option value="Received">Received</option>
                   </select>
-                </div>
+                </div> -->
               </div>
             </div>
           </div>
@@ -320,6 +303,7 @@
                     v-model.number="item.qtyShipped"
                     type="number"
                     min="0"
+                    max="item.qty"
                     class="input input-sm w-24 text-center"
                     placeholder="Qty"
                   />
@@ -405,6 +389,7 @@ interface TableDataItem {
   description: string
   uom: string
   lotNo: string
+  qtyOrdered: number
   qtyShipped: number
 }
 
@@ -419,9 +404,7 @@ const routes = ref<routeTypes[]>([
 // States
 const isSubmitting = ref<boolean>(false)
 const isSearching = ref<boolean>(false)
-const showDropdown = ref<boolean>(false)
 const poNumberSearch = ref<string>('')
-const poOptions = ref<MockSapPoData[]>([])
 const selectedPO = ref<MockSapPoData | null>(null)
 
 interface SignaturePadInstance {
@@ -445,7 +428,7 @@ const formData = ref<FormData>({
   vendorCode: '',
   estimatedArrival: '',
   pickupAddress: '',
-  status: 'Draft',
+  status: 'On Delivery',
   destinationAddress: '',
   transporter: '',
   truckType: '',
@@ -479,25 +462,22 @@ const searchPO = async () => {
   }
 
   isSearching.value = true
-  showDropdown.value = false
 
   try {
-    const results = await DeliveryNotesService.searchPoFromSap(poNumberSearch.value)
-    poOptions.value = results
+    const result = await DeliveryNotesService.searchPoFromSap(poNumberSearch.value)
 
-    if (results.length === 0) {
+    if (!result) {
       notificationModal.value = {
         type: 'info',
         title: 'Not Found',
         text: 'No PO found in SAP system',
       }
       showNotificationModal.value = true
-    } else if (results.length === 1) {
-      // Auto-select if only one result
-      selectPO(results[0])
-    } else {
-      showDropdown.value = true
+      return
     }
+
+    // Auto-select the result (single object from detail endpoint)
+    selectPO(result)
   } catch (error) {
     console.error('Error searching PO:', error)
     notificationModal.value = {
@@ -513,7 +493,6 @@ const searchPO = async () => {
 
 const selectPO = (po: MockSapPoData) => {
   selectedPO.value = po
-  showDropdown.value = false
 
   // Auto-fill form data from selected PO
   formData.value.poNumber = po.poNumber
@@ -526,6 +505,7 @@ const selectPO = (po: MockSapPoData) => {
       description: item.itemName,
       uom: item.uom,
       lotNo: '', // User needs to fill this
+      qtyOrdered: item.qtyOrdered ?? 0,
       qtyShipped: item.qtyOrdered, // Default to ordered qty, user can edit
     }))
   } else {
@@ -539,6 +519,7 @@ const addNewItem = () => {
     description: '',
     uom: '',
     lotNo: '',
+    qtyOrdered: 0,
     qtyShipped: 0,
   })
 }
@@ -666,6 +647,17 @@ const validateForm = (): boolean => {
         type: 'warning',
         title: 'Validation Error',
         text: `Please complete all fields for item #${i + 1}`,
+      }
+      showNotificationModal.value = true
+      return false
+    }
+
+    // Qty shipped must not exceed ordered qty (from GET/selected PO)
+    if (item.qtyOrdered > 0 && item.qtyShipped > item.qtyOrdered) {
+      notificationModal.value = {
+        type: 'warning',
+        title: 'Validation Error',
+        text: `Qty Shipped for item #${i + 1} must not exceed Qty Ordered (${item.qtyOrdered})`,
       }
       showNotificationModal.value = true
       return false

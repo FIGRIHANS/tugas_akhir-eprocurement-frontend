@@ -21,15 +21,15 @@
                 <!-- PO Number with Search -->
                 <div class="flex items-center gap-4">
                   <label class="form-label text-sm font-medium text-gray-600 w-40 mb-0"
-                    >PO Number <span class="text-red-500">*</span></label
+                    >Delivery Note Number <span class="text-red-500">*</span></label
                   >
                   <div class="flex-1 relative">
                     <div class="flex gap-2">
                       <input
-                        v-model="poNumberSearch"
+                        v-model="deliveryNoteNumberSearch"
                         type="text"
                         class="input flex-1"
-                        placeholder="Enter PO Number"
+                        placeholder="Enter Delivery Note Number"
                         @keypress.enter="searchDeliveryNotes"
                       />
                       <button
@@ -406,7 +406,7 @@ const routes = ref<routeTypes[]>([
 ])
 
 // States
-const poNumberSearch = ref<string>('')
+const deliveryNoteNumberSearch = ref<string>('')
 const isSearching = ref<boolean>(false)
 const isSubmitting = ref<boolean>(false)
 const showDropdown = ref<boolean>(false)
@@ -456,11 +456,11 @@ const notificationModal = ref({
 
 // Methods
 const searchDeliveryNotes = async () => {
-  if (!poNumberSearch.value.trim()) {
+  if (!deliveryNoteNumberSearch.value.trim()) {
     notificationModal.value = {
       type: 'warning',
       title: 'Validation Error',
-      text: 'Please enter a PO Number',
+      text: 'Please enter a Delivery Note Number',
     }
     showNotificationModal.value = true
     return
@@ -470,22 +470,22 @@ const searchDeliveryNotes = async () => {
   showDropdown.value = false
 
   try {
-    const results = await DeliveryNotesService.getByPoNumber(poNumberSearch.value)
-    deliveryNotesOptions.value = results
+    const result = await DeliveryNotesService.getByDeliveryNoteNumber(
+      deliveryNoteNumberSearch.value,
+    )
 
-    if (results.length === 0) {
+    if (!result) {
       notificationModal.value = {
         type: 'info',
         title: 'Not Found',
-        text: 'No Delivery Notes found for this PO Number',
+        text: 'No Delivery Note found for this Delivery Note Number',
       }
       showNotificationModal.value = true
-    } else if (results.length === 1) {
-      // Auto-select if only one result
-      selectDeliveryNote(results[0])
-    } else {
-      showDropdown.value = true
+      return
     }
+
+    // langsung auto-fill
+    selectDeliveryNote(result)
   } catch (error) {
     console.error('Error searching delivery notes:', error)
     notificationModal.value = {

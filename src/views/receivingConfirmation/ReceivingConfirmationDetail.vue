@@ -427,14 +427,12 @@ const closeRejectModal = () => {
 }
 
 const printToPDF = async () => {
-  // Fetch driver signature from delivery notes based on PO number
   let driverSignatureFromDN: string | null = null
 
   try {
     if (formData.value.orderNo) {
       const deliveryNotes = await DeliveryNotesService.getByPoNumber(formData.value.orderNo)
       if (deliveryNotes && deliveryNotes.length > 0) {
-        // Get driver signature from the first matching delivery note
         driverSignatureFromDN = deliveryNotes[0].driverSignature || null
         console.log(
           'Driver signature fetched from delivery notes:',
