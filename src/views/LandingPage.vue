@@ -30,7 +30,12 @@ const year = moment().format('YYYY')
           <IconPDF />
         </UiButton>
       </div>
-      <LogoEPOQ class="w-full h-auto" />
+      <div class="flex items-start gap-2">
+        <LogoEPOQ class="w-[240px] h-auto" />
+        <div class="ml-2">
+          <img src="@/assets/tms.png" class="h-[60px] w-max" alt="">
+        </div>
+      </div>
     </div>
   </section>
 

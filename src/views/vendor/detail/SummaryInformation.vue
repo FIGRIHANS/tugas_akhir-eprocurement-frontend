@@ -36,6 +36,10 @@ const isVerified = computed(() => vendorStore.vendors?.items[0]?.isVerified === 
 
 const isRejected = computed(() => vendorStore.vendors?.items[0]?.isVerified === 2)
 
+const props = defineProps<{
+  vendorId: string
+}>()
+
 const handleVerify = async () => {
   if (!notes.value) {
     inputError.value.push('notes')
@@ -47,7 +51,7 @@ const handleVerify = async () => {
 
   try {
     await vendorStore.verifyLegal({
-      vendorId: Number(route.params.id),
+      vendorId: Number(props.vendorId),
       isVerified: true,
       verifiedNote: notes.value,
       isReject: false,
@@ -84,7 +88,7 @@ const handleReject = async () => {
 
   try {
     await vendorStore.verifyLegal({
-      vendorId: Number(route.params.id),
+      vendorId: Number(props.vendorId),
       isVerified: false,
       verifiedNote: '',
       isReject: true,
@@ -116,20 +120,20 @@ const handleError = () => {
 }
 
 onMounted(() => {
-  verifStore.getData(Number(route.params.id))
-  vendorStore.getVendors({ vendorId: route.params.id })
+  verifStore.getData(Number(props.vendorId))
+  vendorStore.getVendors({ vendorId: props.vendorId })
 })
 </script>
 <template>
   <div class="space-y-5">
     <!-- Card administrasi -->
-    <AdministrativeCard />
+    <AdministrativeCard :vendorId="props.vendorId" />
 
     <!-- card data izin usaha -->
-    <LicenseCard />
+    <LicenseCard :vendorId="props.vendorId" />
 
     <!-- card payment information -->
-    <PaymentCard />
+    <PaymentCard :vendorId="props.vendorId" />
 
     <div class="flex justify-end space-x-3">
       <UiButton :outline="true" @click="router.go(-1)">
@@ -137,17 +141,8 @@ onMounted(() => {
         <span> {{ $t('general.back') }} </span>
       </UiButton>
 
-      <div
-        v-if="route.name === 'vendor-verification-detail' && !isRejected"
-        class="space-x-3 flex-1 flex justify-end"
-      >
-        <UiButton
-          :outline="true"
-          variant="danger"
-          class="ml-auto"
-          @click="modalReject = true"
-          :disabled="isVerified"
-        >
+      <div v-if="route.name === 'vendor-verification-detail' && !isRejected" class="space-x-3 flex-1 flex justify-end">
+        <UiButton :outline="true" variant="danger" class="ml-auto" @click="modalReject = true" :disabled="isVerified">
           <UiIcon name="cross-circle" variant="duotone" />
           <span> {{ $t('general.reject') }} </span>
         </UiButton>
@@ -162,10 +157,7 @@ onMounted(() => {
   <UiModal v-if="modalReject" v-model="modalReject" title="Reject Vendor" size="sm">
     <form @submit.prevent="handleReject">
       <div class="relative mb-3">
-        <label
-          for="reason"
-          class="absolute bg-white top-0 left-0 ml-2 -mt-2 text-sm text-gray-600 px-1"
-        >
+        <label for="reason" class="absolute bg-white top-0 left-0 ml-2 -mt-2 text-sm text-gray-600 px-1">
           Reason <span class="text-danger">*</span>
         </label>
         <textarea id="reason" class="textarea" rows="6" v-model="reason" required></textarea>
@@ -178,12 +170,7 @@ onMounted(() => {
       </div>
 
       <div class="flex gap-3">
-        <UiButton
-          class="flex-1 justify-center"
-          :outline="true"
-          type="button"
-          @click="modalReject = !modalReject"
-        >
+        <UiButton class="flex-1 justify-center" :outline="true" type="button" @click="modalReject = !modalReject">
           <UiIcon name="black-left-line" variant="duotone" />
           <span>{{ $t('general.cancle') }}</span>
         </UiButton>
@@ -201,22 +188,14 @@ onMounted(() => {
   <UiModal v-if="modalVerify" v-model="modalVerify" title="Verify Vendor" size="sm">
     <form @submit.prevent="handleVerify">
       <div class="relative mb-3">
-        <label
-          for="notes"
-          class="absolute bg-white top-0 left-0 ml-2 -mt-2 text-sm text-gray-600 px-1"
-        >
+        <label for="notes" class="absolute bg-white top-0 left-0 ml-2 -mt-2 text-sm text-gray-600 px-1">
           Notes <span class="text-danger">*</span>
         </label>
         <textarea id="notes" class="textarea" rows="6" v-model="notes"></textarea>
         <div v-if="inputError.includes('notes')" class="text-xs text-danger">Notes is required</div>
       </div>
       <div class="flex gap-3">
-        <UiButton
-          class="flex-1 justify-center"
-          :outline="true"
-          type="button"
-          @click="modalVerify = !modalVerify"
-        >
+        <UiButton class="flex-1 justify-center" :outline="true" type="button" @click="modalVerify = !modalVerify">
           <UiIcon name="black-left-line" variant="duotone" />
           <span>{{ $t('general.cancel') }}</span>
         </UiButton>
@@ -231,23 +210,13 @@ onMounted(() => {
     </form>
   </UiModal>
 
-  <UiModal
-    v-if="modalRejectSuccess"
-    v-model="modalRejectSuccess"
-    size="sm"
-    @update:model-value="$router.go(-1)"
-  >
+  <UiModal v-if="modalRejectSuccess" v-model="modalRejectSuccess" size="sm" @update:model-value="$router.go(-1)">
     <img :src="successImg" alt="success" class="mx-auto mb-3" />
     <h3 class="font-medium text-lg text-gray-800 text-center">Vendor Data Rejected</h3>
     <p class="text-gray-600 text-center mb-3">Vendor Data has been successfully rejected.</p>
   </UiModal>
 
-  <UiModal
-    v-if="modalVerifySuccess"
-    v-model="modalVerifySuccess"
-    size="sm"
-    @update:model-value="$router.go(-1)"
-  >
+  <UiModal v-if="modalVerifySuccess" v-model="modalVerifySuccess" size="sm" @update:model-value="$router.go(-1)">
     <img :src="successImg" alt="success" class="mx-auto mb-3" />
     <h3 class="font-medium text-lg text-gray-800 text-center">Vendor Verification Completed</h3>
     <p class="text-gray-600 text-center mb-3">

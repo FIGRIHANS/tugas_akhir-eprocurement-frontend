@@ -41,6 +41,7 @@ export interface formTypes extends documentFormTypes {
   sapInvoiceNo: string
   clearingDocumentNo: string
   casDateReceipt: string
+  casNoCode: string
   proposalAmount: number
   picFinance: string
   cashJournalCode: string

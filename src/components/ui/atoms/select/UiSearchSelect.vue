@@ -80,13 +80,14 @@
           @click="selectOption(option)"
           class="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-blue-100 text-gray-900"
         >
-          <span :class="['block truncate', { 'font-semibold': model === option[valueKey] }]">
+          <span class="block truncate">
             {{ option[textKey] }}
           </span>
 
           <span
             v-if="model === option[valueKey]"
             class="absolute inset-y-0 right-0 flex items-center pr-4 text-blue-600"
+            style="display: none"
           >
             ✓
           </span>
@@ -131,7 +132,7 @@ const props = withDefaults(defineProps<ISelectProps>(), {
 })
 
 // Emits untuk mentrigger event search ke parent
-const emit = defineEmits(['search'])
+const emit = defineEmits(['search', 'select'])
 
 const model = defineModel<string | number | null>({ default: '' })
 
@@ -194,6 +195,7 @@ const selectOption = (option: any) => {
   model.value = option[props.valueKey]
   searchQuery.value = option[props.textKey] // Update tampilan
   isOpen.value = false
+  emit('select', option) // Emit full option object
   emit('search', '') // Reset search event jika perlu
 }
 

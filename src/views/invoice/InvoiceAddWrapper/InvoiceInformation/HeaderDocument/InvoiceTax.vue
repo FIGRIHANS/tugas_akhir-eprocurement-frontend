@@ -31,15 +31,29 @@
                 : null
             "
           />
-          <span
-            v-if="formInject?.status === 0 || formInject?.status === -1 || formInject?.status === 5"
-            class="border-b border-dashed border-primary text-primary cursor-pointer text-xs font-medium"
-            @click="changeFile(index)"
-            >Edit</span
-          >
+          <div class="flex gap-5">
+            <span
+              v-if="
+                formInject?.status === 0 || formInject?.status === -1 || formInject?.status === 5
+              "
+              class="border-b border-dashed border-primary text-primary cursor-pointer text-xs font-medium"
+              @click="changeFile(index)"
+              >Edit</span
+            >
+
+            <span
+              v-if="
+                formInject?.status === 0 || formInject?.status === -1 || formInject?.status === 5
+              "
+              class="border-b border-dashed border-primary text-primary cursor-pointer text-xs font-medium"
+              @click="sendUploadFile"
+              >Fill Tax Data</span
+            >
+          </div>
         </div>
       </div>
     </div>
+    <UiLoading v-model="isLoading"></UiLoading>
   </div>
 </template>
 
@@ -52,9 +66,17 @@ import type {
 } from '../../../types/invoiceDocument'
 import type { formTypes } from '../../../types/invoiceAddWrapper'
 import pdfUploadTax from '@/components/ui/pdfUpload/pdfUploadTaxDoc.vue'
+import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 import AttachmentView from '@/components/ui/attachment/AttachmentView.vue'
 import type { invoiceQrData } from '@/views/invoice/types/invoiceQrdata'
+import UiLoading from '@/components/modal/UiLoading.vue'
+import { parseIndoDate } from '@/composables/parseIndoDate'
+
+const invoiceVerificationStore = useInvoiceVerificationStore()
+
 const qrData = inject<invoiceQrData>('qrData')
+
+const isLoading = ref<boolean>(false)
 
 const form = reactive<documentFormTypes>({
   invoiceDocument: null,
@@ -110,6 +132,24 @@ const setFile = (file: responseFileTypes, name: keyof documentFormTypes) => {
 const changeFile = (index: number) => {
   pdfUploadRef.value[index].triggerFileInput()
 }
+
+const sendUploadFile = async () => {
+  isLoading.value = true
+  // Object.assign(ocrData, await invoiceVerificationStore.uploadFileOcr(form?.tax?.previewPath))
+  const response = await invoiceVerificationStore.uploadFileQr(form?.tax?.previewPath)
+
+  formInject.taxNoInvoice = response.taxDocumentNumber
+  formInject.taxDate = parseIndoDate(response.taxDocumentDate)
+
+  isLoading.value = false
+}
+
+// const verifyInvoice = async () => {
+//   isLoadUpload.value = true
+//   await sendUploadFile()
+//   isLoadUpload.value = false
+//   isVerifyData.value = true
+// }
 
 watch(
   () => form,

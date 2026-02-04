@@ -24,7 +24,7 @@
               'border-danger': form.invoiceTypeError,
             }"
           >
-            <option v-for="item of invoiceTypeNonPo" :key="item.id" :value="item.id">
+            <option v-for="item of listInvoiceTypeNonPo" :key="item.code" :value="item.code">
               {{ item.name }}
             </option>
           </select>
@@ -164,6 +164,21 @@
         />
       </div>
 
+      <div
+        v-if="checkPo() && form.invoiceType != '903'"
+        class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+      >
+        <label class="form-label"> Tax Document Date </label>
+        <DatePicker
+          v-model="form.taxDate"
+          format="yyyy/MM/dd"
+          :error="form.taxDateError"
+          :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
+          class="w-full -ml-[15px]"
+          teleport
+        />
+      </div>
+
       <div v-if="isPettyCash" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label"> Cash Journal </label>
         <v-select
@@ -196,7 +211,7 @@
         />
       </div>
 
-      <div
+      <!-- <div
         v-if="isCAS || isLBA"
         class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
       >
@@ -230,6 +245,34 @@
           @input="updateCasNoName"
           appendToBody
         ></v-select>
+      </div> -->
+
+      <div
+        v-if="isCAS || isLBA"
+        class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+      >
+        <label class="form-label">
+          CAS No.
+          <span v-if="false" class="text-red-500 ml-[4px]">*</span>
+        </label>
+
+        <input
+          v-if="isCAS"
+          v-model="form.casNoCode"
+          class="input"
+          placeholder="Auto Generated Number"
+          disabled
+        />
+        <select
+          v-else
+          v-model="form.casNoCode"
+          class="select"
+          :class="{ 'border-danger': form.companyCodeError }"
+        >
+          <option v-for="item of mergedCasList" :key="item.casNo" :value="item.casNo">
+            {{ item.casNo }}
+          </option>
+        </select>
       </div>
 
       <div
@@ -442,28 +485,28 @@ const form = inject<formTypes>('form')
 const route = useRoute()
 const typeForm = ref<string>('')
 
-const invoiceTypeNonPo = ref([
-  {
-    id: '1',
-    name: 'Non PO/Reimbursement',
-  },
-  {
-    id: '2',
-    name: 'Credit Card',
-  },
-  {
-    id: '3',
-    name: 'CAS',
-  },
-  {
-    id: '4',
-    name: 'LBA',
-  },
-  {
-    id: '5',
-    name: 'Petty Cash',
-  },
-])
+// const invoiceTypeNonPo = ref([
+//   {
+//     id: '1',
+//     name: 'Non PO/Reimbursement',
+//   },
+//   {
+//     id: '2',
+//     name: 'Credit Card',
+//   },
+//   {
+//     id: '3',
+//     name: 'CAS',
+//   },
+//   {
+//     id: '4',
+//     name: 'LBA',
+//   },
+//   {
+//     id: '5',
+//     name: 'Petty Cash',
+//   },
+// ])
 
 const currencyList = computed(() => {
   return invoiceMasterApi.currency
@@ -486,14 +529,10 @@ const isCAS = computed(() => form?.invoiceType === '3')
 const isLBA = computed(() => form?.invoiceType === '4')
 const isPettyCash = computed(() => form?.invoiceType === '5')
 
-const updateCasNoName = (option: string) => {
-  if (option && form) {
-    const selectedItem = casNoCode.value.find((item) => item.casNo === option)
-    if (selectedItem) {
-      form.casNoName = selectedItem.casNo
-    }
-  }
-}
+const mergedCasList = computed(() => {
+  const apiList = casNoCode.value || []
+  return [...apiList]
+})
 
 const remainingDpAmountVal = computed(() => {
   if (form.currency === 'IDR') {
@@ -584,9 +623,9 @@ watch(
         form.cashJournalName = `${listCashJournal.value[getIndex].cashJournalNo} - ${listCashJournal.value[getIndex].cashJournalName}`
     }
 
-    if (form?.casNoCode && casNoCode.value.length > 0 && form.invoiceType === '4') {
-      const getIndex = casNoCode.value.findIndex((item) => item.casNo === form.casNoCode)
-      if (getIndex !== -1) form.casNoName = casNoCode.value[getIndex].casNo
+    if (form?.casNoCode && mergedCasList.value.length > 0) {
+      const getIndex = mergedCasList.value.findIndex((item) => item.casNo === form.casNoCode)
+      if (getIndex !== -1) form.casNoName = mergedCasList.value[getIndex].casNo
     }
   },
   {
@@ -611,10 +650,13 @@ watch(
 watch(
   () => [form?.companyCode, form?.vendorId, form.invoiceType],
   () => {
-    if (form.companyCode) invoiceMasterApi.getActivity(form.companyCode || '')
+    if (form.companyCode) {
+      invoiceMasterApi.getActivity(form.companyCode || '')
+      invoiceMasterApi.getCostCenter(form.companyCode || '')
+    }
     if (form.companyCode && form.invoiceType)
       invoiceMasterApi.getMatrixApproval(form.invoiceType || '', form.companyCode || '')
-    if (form.vendorId && form.invoiceType === '4' && form.companyCode) {
+    if (form.vendorId && form.companyCode) {
       const vendorIdStr = String(form.vendorId).trim()
       const companyCodeStr = String(form.companyCode).trim()
       if (
@@ -644,12 +686,48 @@ watch(
   },
 )
 
+watch(
+  () => form?.casNoCode,
+  async (newVal) => {
+    if (newVal && form) {
+      const response = await submissionApi.getCasItem(newVal)
+      if (response.result && response.result.content) {
+        // Map response to invoiceItemTypes
+        const newItems = response.result.content.map((item, index: number) => ({
+          id: index + 1, // Temporary ID or based on logic
+          activity: item.activityId || null,
+          activityCode: item.activityExpenses || '',
+          activityName: item.activityName || '',
+          itemAmount: item.itemAmount || 0,
+          itemText: item.itemText || '',
+          debitCredit: item.debitCredit || '',
+          taxCode: item.taxCode || '',
+          vatAmount: item.vatAmount || 0,
+          costCenter: item.costCenter || '',
+          profitCenter: item.profitCenter || '',
+          assignment: item.assignment || '',
+          whtType: item.whtType || '',
+          whtCode: item.whtCode || '',
+          whtBaseAmount: String(item.whtBaseAmount || 0),
+          whtAmount: String(item.whtAmount || 0),
+          realizationAmount: 0,
+          variance: 0,
+          hasRealizationInput: false,
+          isEdit: false,
+        }))
+
+        form.invoiceItem = newItems
+      }
+    }
+  },
+)
+
 onMounted(() => {
   typeForm.value = route.query.type?.toString().toLowerCase() || 'po'
   invoiceMasterApi.getCurrency()
   invoiceMasterApi.getCompanyCode()
   invoiceMasterApi.getDpTypes()
-  if (form?.vendorId && form?.invoiceType === '4' && form?.companyCode) {
+  if (form?.vendorId && form?.companyCode) {
     const vendorIdStr = String(form.vendorId).trim()
     const companyCodeStr = String(form.companyCode).trim()
     if (

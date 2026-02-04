@@ -97,6 +97,7 @@ export interface formTypes extends documentFormTypes {
   additionalCost: number
   totalGrossAmount: number
   totalNetAmount: number
+  dppLainnya: number
 
   invoicePoGr: itemsPoGrType[]
   invoicePoGrError?: boolean

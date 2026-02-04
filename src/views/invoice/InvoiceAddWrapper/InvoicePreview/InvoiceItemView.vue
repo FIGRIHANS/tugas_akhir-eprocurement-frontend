@@ -42,6 +42,20 @@
                   : useFormatUsd(item.itemAmount) || '-'
               }}
             </td>
+            <td v-if="form.invoiceType === '4'">
+              {{
+                form.currency === 'IDR'
+                  ? useFormatIdr(item.realizationAmount)
+                  : useFormatUsd(item.realizationAmount) || '-'
+              }}
+            </td>
+            <td v-if="form.invoiceType === '4'">
+              {{
+                form.currency === 'IDR'
+                  ? useFormatIdr(item.variance)
+                  : useFormatUsd(item.variance) || '-'
+              }}
+            </td>
             <td>{{ item.itemText || '-' }}</td>
             <td>{{ getDebitCreditName(item.debitCredit) || '-' }}</td>
             <td>{{ getTaxCodeName(item.taxCode) || '-' }}</td>
@@ -106,7 +120,13 @@ const columns = computed(() => {
     'Profit Center',
     'Assignment',
   ]
+  if (form.invoiceType === '4') {
+  const index = baseColumns.indexOf('Item Text')
 
+  if (index !== -1) {
+    baseColumns.splice(index, 0, 'Realization Amount', 'Variance')
+  }
+ }
   // Hide WHT columns for Petty Cash
   if (!isPettyCash.value) {
     baseColumns.push('WHT Type')

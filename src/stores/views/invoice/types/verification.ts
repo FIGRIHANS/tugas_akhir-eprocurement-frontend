@@ -113,6 +113,7 @@ interface ParamsSubmissionHeader {
   pettyCashStartDate: string
   pettyCashEndDate: string
   npwpReportingName: string
+  casNoCode: string
 }
 
 interface ParamsSubmissionVendor {
@@ -487,6 +488,7 @@ export interface DetailInvoiceEditTypes {
   bankAccountNo: string
   bankCountryCode: string
   casDateReceipt: string
+  casNoCode?: string
   proposalAmount: number
   picFinance: string
   cashJournalCode: string
@@ -779,4 +781,20 @@ export interface UpdatePaymentStatusRequest {
 export interface UpdatePaymentStatusResponse {
   header: PaymentStatusHeader
   detail: PaymentStatusDetail[]
+}
+
+export interface SyncManualPayload {
+  noFaktur: string
+  npwpVendor: string
+  masaPajak: number
+  tahunPajak: number
+}
+
+export interface SyncManualResult {
+  taxInvoiceStatus: string
+  sellerTaxpayerName: string
+  taxInvoiceDate: string
+  sellingPrice: number
+  vat: number
+  valid: boolean
 }

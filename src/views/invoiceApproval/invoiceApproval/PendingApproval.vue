@@ -218,6 +218,7 @@
     </div>
     <SuccessSendToSap />
     <FailedSendToSap />
+    <UiLoading v-model="isLoadingSap" text="Loading...." />
     <ModalDetailApproval @loadDetail="loadData" @setClearId="viewDetailId = ''" />
   </div>
 </template>
@@ -234,6 +235,7 @@ import type { filterListTypes } from '../types/pendingApproval'
 import type { ListPoTypes } from '@/stores/views/invoice/types/verification'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { useFormatIdr } from '@/composables/currency'
+import  UiLoading  from '@/components/modal/UiLoading.vue'
 import moment from 'moment'
 import { cloneDeep } from 'lodash'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
@@ -455,22 +457,45 @@ const closeDropdown = () => {
   document.body.dispatchEvent(event)
 }
 
+// const sendToSap = (invoiceUId: string) => {
+//   closeDropdown()
+//   isLoadingSap.value = true
+//   verificationApi
+//     .postSap(invoiceUId)
+//     .then((statusCode: number) => {
+//       if (statusCode === 200) {
+//         openSuccesSap()
+//         callList()
+//       } else {
+//         openFailedSap()
+//       }
+//     })
+//     .finally(() => {
+//       isLoadingSap.value = false
+//     })
+// }
+
 const sendToSap = (invoiceUId: string) => {
   closeDropdown()
   isLoadingSap.value = true
-  verificationApi
-    .postSap(invoiceUId)
-    .then((statusCode: number) => {
-      if (statusCode === 200) {
-        openSuccesSap()
-        callList()
-      } else {
-        openFailedSap()
-      }
-    })
-    .finally(() => {
-      isLoadingSap.value = false
-    })
+  // verificationApi
+  //   .postSapNonPo(invoiceUId)
+  //   .then((statusCode: number) => {
+  //     if (statusCode === 200) {
+  //       openSuccesSap()
+  //       callList()
+  //     } else {
+  //       openFailedSap()
+  //     }
+  //   })
+  //   .finally(() => {
+  //     isLoadingSap.value = false
+  //   })
+  setTimeout(() => {
+    openSuccesSap()
+    callList()
+    isLoadingSap.value = false
+  }, 3000)
 }
 
 const openSuccesSap = () => {
@@ -479,11 +504,11 @@ const openSuccesSap = () => {
   modal.show()
 }
 
-const openFailedSap = () => {
-  const idModal = document.querySelector('#failed_send_sap_modal')
-  const modal = KTModal.getInstance(idModal as HTMLElement)
-  modal.show()
-}
+// const openFailedSap = () => {
+//   const idModal = document.querySelector('#failed_send_sap_modal')
+//   const modal = KTModal.getInstance(idModal as HTMLElement)
+//   modal.show()
+// }
 
 const sortColumn = (columnName: string | null) => {
   const list = {

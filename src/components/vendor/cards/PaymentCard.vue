@@ -5,14 +5,18 @@ import UiLoading from '@/components/UiLoading.vue'
 import { useVendorUploadStore } from '@/stores/vendor/upload'
 import { useVendorPaymentStore } from '@/stores/vendor/vendor'
 import { ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+// import { useRoute } from 'vue-router'
 
 const paymentStore = useVendorPaymentStore()
 const uploadStore = useVendorUploadStore()
-const route = useRoute()
+// const route = useRoute()
 
 const loading = ref<boolean>(false)
 const error = ref<string>('')
+
+const props = defineProps<{
+  vendorId: string
+}>()
 
 const download = async (path: string) => {
   loading.value = true
@@ -32,7 +36,7 @@ const download = async (path: string) => {
 }
 
 watch(
-  () => route.params.id,
+  () => props.vendorId,
   (id) => {
     paymentStore.getData(id as string)
   },
@@ -76,12 +80,8 @@ watch(
           <tr>
             <td class="text-sm text-gray-600 font-medium"></td>
             <td class="text-sm font-bold text-gray-500">
-              <input
-                type="checkbox"
-                class="checkbox checkbox-sm mr-1"
-                :checked="paymentStore.data[0].isHolderNameDifferent"
-                disabled
-              />
+              <input type="checkbox" class="checkbox checkbox-sm mr-1"
+                :checked="paymentStore.data[0].isHolderNameDifferent" disabled />
               {{ $t('vendorVerification.paymentinfo.holdernamedifferent') }}
             </td>
           </tr>
@@ -90,12 +90,8 @@ watch(
               {{ $t('vendorVerification.paymentinfo.accountdiscrepancystatement') }}
             </td>
             <td class="text-sm font-bold text-gray-700">
-              <UiButton
-                :disabled="loading || !paymentStore.data[0].urlAccountDifferences"
-                :outline="true"
-                size="sm"
-                @click="download(paymentStore.data[0].urlAccountDifferences as string)"
-              >
+              <UiButton :disabled="loading || !paymentStore.data[0].urlAccountDifferences" :outline="true" size="sm"
+                @click="download(paymentStore.data[0].urlAccountDifferences as string)">
                 <UiIcon name="cloud-download" variant="duotone" />
                 <span>{{
                   $t('general.download', {
@@ -111,12 +107,8 @@ watch(
               {{ $t('vendorVerification.paymentinfo.accountcover') }}
             </td>
             <td class="text-sm font-bold text-gray-700">
-              <UiButton
-                :disabled="loading || !paymentStore.data[0].urlFirstPage"
-                :outline="true"
-                size="sm"
-                @click="download(paymentStore.data[0].urlFirstPage as string)"
-              >
+              <UiButton :disabled="loading || !paymentStore.data[0].urlFirstPage" :outline="true" size="sm"
+                @click="download(paymentStore.data[0].urlFirstPage as string)">
                 <UiIcon name="cloud-download" variant="duotone" />
                 <span>{{
                   $t('general.download', {
@@ -143,12 +135,8 @@ watch(
           <tr>
             <td class="text-sm text-gray-600 font-medium"></td>
             <td class="text-sm font-bold text-gray-500">
-              <input
-                type="checkbox"
-                class="checkbox checkbox-sm mr-1"
-                :checked="!paymentStore.data[0].isBankRegistered"
-                disabled
-              />
+              <input type="checkbox" class="checkbox checkbox-sm mr-1" :checked="!paymentStore.data[0].isBankRegistered"
+                disabled />
               {{ $t('vendorVerification.paymentinfo.banknotregistered') }}
             </td>
           </tr>

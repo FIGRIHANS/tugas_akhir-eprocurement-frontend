@@ -17,14 +17,15 @@
           </button>
 
           <!-- Update Status Button -->
-          <button
+          <!-- Update Status Button (Hidden as requested) -->
+          <!-- <button
             class="btn btn-light"
             @click="openStatusModal()"
             :disabled="selectedItems.length === 0"
           >
             <i class="ki-duotone ki-setting-2"></i>
             Update Status
-          </button>
+          </button> -->
 
           <button class="btn btn-primary" @click="exportData()">
             <i class="ki-duotone ki-plus-circle"></i>
@@ -189,7 +190,11 @@
                 </span>
               </td>
               <td>{{ formatDate(item.vatCreditExpiryDate) }}</td>
-              <td>{{ item.remark || '-' }}</td>
+              <td>
+                <div class="whitespace-normal break-words w-[800px]">
+                  {{ item.remark || '-' }}
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -327,10 +332,31 @@
     <AuthenticationModal :show="showAuthModal" @close="closeAuthModal" @verify="handleAuthVerify" />
 
     <!-- Successfully Credited Modal -->
-    <SuccessCreditedModal
-      :show="showSuccessModal"
-      :fpNumber="successFpNumber"
-      @close="closeSuccessModal"
+    <ModalConfirmation
+      :open="showSuccessModal"
+      id="success-modal"
+      type="success"
+      title="Successfully Credited"
+      text="Tax Invoice successfully credited"
+      submit-button-text="Close"
+      :no-cancel="true"
+      :no-submit="true"
+      :submit="closeSuccessModal"
+      :cancel="closeSuccessModal"
+    />
+
+    <!-- Warning Modal -->
+    <ModalConfirmation
+      :open="showWarningModal"
+      id="warning-modal"
+      type="warning"
+      title="Action Required"
+      text="Please select at least one item to proceed with VAT Credit Posting."
+      submit-button-text="Close"
+      :no-cancel="true"
+      :no-submit="true"
+      :submit="closeWarningModal"
+      :cancel="closeWarningModal"
     />
   </div>
 </template>
@@ -345,7 +371,7 @@ import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import momentLib from 'moment'
 import { cloneDeep } from 'lodash'
 import AuthenticationModal from './VatReconciliation/AuthenticationModal.vue'
-import SuccessCreditedModal from './VatReconciliation/SuccessCreditedModal.vue'
+import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 import vatApi from '@/core/utils/vatApi'
 
 // Expose moment to template
@@ -411,6 +437,12 @@ const currentSelectedItem = ref<VATReconciliationData | null>(null)
 // Authentication Modal state
 const showAuthModal = ref<boolean>(false)
 
+// Warning Modal state
+const showWarningModal = ref<boolean>(false)
+const closeWarningModal = () => {
+  showWarningModal.value = false
+}
+
 // Success Modal state
 const showSuccessModal = ref<boolean>(false)
 const successFpNumber = ref<string>('')
@@ -466,8 +498,36 @@ const fetchVatData = async () => {
   try {
     const response = await vatApi.get('/vat/vat-reconciliation')
     // API returns { result: { content: [...] } }
-    const content = response.data.result?.content || []
-    console.log('API Response content:', content)
+    let content = response.data.result?.content || []
+
+    // TODO: Remove this dummy logic once backend provides real status
+    content = content.map((item: VATReconciliationData) => {
+      // Randomly assign Status FP
+      const fpStatuses = ['Approved', 'Rejected', 'Approved', 'Approved'] // Weighted to Approved
+      const randomFp = fpStatuses[Math.floor(Math.random() * fpStatuses.length)]
+
+      // Randomly assign Match Status
+      const matchStatuses = ['Match', 'Mismatch', 'Match', 'Match'] // Weighted to Match
+      const randomMatch = matchStatuses[Math.floor(Math.random() * matchStatuses.length)]
+
+      // Calculate Credit Status based on logic:
+      // If everything is okay (Approved & Match) -> Ready to Credit (UNCREDITED)
+      let credit = 'WAITING_FOR_AMENDMENT'
+      if (randomFp === 'Approved' && randomMatch === 'Match') {
+        credit = 'UNCREDITED'
+      } else {
+        credit = 'WAITING_FOR_AMENDMENT'
+      }
+
+      return {
+        ...item,
+        statusFp: randomFp,
+        statusApVsFp: randomMatch,
+        creditStatus: credit,
+      }
+    })
+
+    console.log('API Response content (Enriched):', content)
     vatData.value = content
     dataList.value = content
     console.log('VAT Data fetched successfully:', content.length, 'records')
@@ -476,6 +536,13 @@ const fetchVatData = async () => {
     console.error('Error fetching VAT reconciliation data:', error)
     vatData.value = []
     dataList.value = []
+
+    // Fallback Dummy Data if API Fails/Empty (Optional, for demo)
+    if (dataList.value.length === 0) {
+      // Generate some dummy rows if needed, or leave empty.
+      // User asked to "add dummy data", assuming enrichment of existing or full dummy.
+      // Let's stick to enrichment first. If they want full dummy rows even with no API, I can add that.
+    }
   } finally {
     isLoading.value = false
   }
@@ -515,7 +582,7 @@ const filteredDataList = computed(() => {
 const getStatusFPBadgeClass = (status: string | null) => {
   if (!status) return 'badge-secondary'
   if (status === 'Approved' || status === 'Valid') return 'badge-success'
-  if (status === 'Invalid') return 'badge-danger'
+  if (status === 'Invalid' || status === 'Rejected') return 'badge-danger'
   if (status === 'Credited') return 'badge-primary'
   return 'badge-secondary'
 }
@@ -523,16 +590,16 @@ const getStatusFPBadgeClass = (status: string | null) => {
 const getMatchStatusBadgeClass = (status: string | null) => {
   if (!status) return 'badge-secondary'
   if (status === 'Match') return 'badge-success'
-  if (status.includes('Mismatch')) return 'badge-warning'
+  if (status.includes('Mismatch')) return 'badge-danger'
   return 'badge-secondary'
 }
 
 const getCreditStatusBadgeClass = (status: string | null) => {
   if (!status) return 'badge-secondary'
-  if (status === 'Creditable' || status === 'Credited' || status === 'Approved')
-    return 'badge-success'
-  if (status === 'Not Creditable') return 'badge-danger'
-  if (status === 'Hold') return 'badge-secondary'
+  if (status === 'CREDITED') return 'badge-primary'
+  if (status === 'UNCREDITED') return 'badge-success'
+  if (status === 'WAITING_FOR_AMENDMENT' || status === 'WAITING_FOR_CANCELLATION')
+    return 'badge-warning'
   return 'badge-secondary'
 }
 
@@ -586,17 +653,6 @@ const goDetail = (data: VATReconciliationData) => {
       id: data.noFakturPajak,
     },
   })
-}
-
-const openStatusModal = () => {
-  if (selectedItems.value.length > 0) {
-    // Use first selected item for modal display
-    currentSelectedItem.value = selectedItems.value[0]
-    selectedStatus.value = ''
-    statusSearch.value = ''
-    showStatusDropdown.value = false
-    showStatusModal.value = true
-  }
 }
 
 const toggleStatusDropdown = () => {
@@ -803,7 +859,7 @@ const sortColumn = (columnName: string | null) => {
 
 const exportData = () => {
   if (selectedItems.value.length === 0) {
-    alert('Please select at least one item to proceed with VAT Credit Posting.')
+    showWarningModal.value = true
     return
   }
   // Open authentication modal
@@ -820,7 +876,7 @@ const handleAuthVerify = (code: string) => {
   // TODO: Add API call to verify the code here
   // For now, show success modal after verification
   closeAuthModal()
-  successFpNumber.value = selectedItems.value[0]?.noFakturPajak || 'FP293429993'
+  // successFpNumber.value = selectedItems.value[0]?.noFakturPajak || 'FP293429993' // No longer needed
   showSuccessModal.value = true
 }
 

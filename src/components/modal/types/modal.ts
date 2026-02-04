@@ -3,12 +3,14 @@ export interface IModalProps {
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'full'
   static?: boolean
   center?: boolean
+  hideHeader?: boolean
+  hideClose?: boolean
 }
 
 export type ModalConfirmationType = {
   open: boolean
   id: string
-  type: 'danger' | 'confirm' | 'success'
+  type: 'danger' | 'confirm' | 'success' | 'warning'
   title?: string
   text?: string
   static?: boolean

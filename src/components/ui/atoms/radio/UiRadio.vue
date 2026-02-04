@@ -1,16 +1,19 @@
 <template>
-  <label class="inline-flex items-center cursor-pointer select-none">
-    <input
-      type="radio"
-      :value="value"
-      :name="name"
-      :checked="modelValue === value"
-      :disabled="disabled"
-      @change="handleChange"
-      class="form-radio h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-      :class="{ 'opacity-50 cursor-not-allowed': disabled }"
-    />
-    <span v-if="label" class="ml-2 text-gray-700 text-sm">
+  <label class="inline-flex items-center gap-3 cursor-pointer select-none"
+    :class="{ 'opacity-50 cursor-not-allowed': disabled }">
+    <!-- Hidden Native Input -->
+    <input type="radio" class="sr-only" :value="value" :name="name" :checked="modelValue === value" :disabled="disabled"
+      @change="handleChange" />
+
+    <!-- Custom Circle -->
+    <span class="w-4 h-4 rounded-full border border-gray-400 flex items-center justify-center transition" :class="modelValue === value
+      ? 'border-blue-600'
+      : 'border-gray-300'">
+      <span v-if="modelValue === value" class="w-2 h-2 bg-blue-600 rounded-full"></span>
+    </span>
+
+    <!-- Label -->
+    <span class="text-sm text-gray-700">
       {{ label }}
     </span>
   </label>
@@ -82,10 +85,12 @@ const handleChange = (event: Event) => {
   background-color: #fff;
   margin: 0;
   font: inherit;
-  color: currentColor; /* Inherit color from parent for consistency */
+  color: currentColor;
+  /* Inherit color from parent for consistency */
   width: 1em;
   height: 1em;
-  border: 0.15em solid currentColor; /* Use currentColor for border */
+  border: 0.15em solid currentColor;
+  /* Use currentColor for border */
   border-radius: 50%;
   transform: translateY(-0.075em);
   display: grid;
@@ -100,8 +105,10 @@ const handleChange = (event: Event) => {
   transform: scale(0);
   transition: transform 120ms ease-in-out;
   /* Use Tailwind color variable - adjust if your setup doesn't parse it here */
-  box-shadow: inset 1em 1em var(--tw-text-blue-600, #2563eb); /* Fallback to a blue color */
-  background-color: CanvasText; /* Fallback */
+  box-shadow: inset 1em 1em var(--tw-text-blue-600, #2563eb);
+  /* Fallback to a blue color */
+  background-color: CanvasText;
+  /* Fallback */
 }
 
 .form-radio:checked::before {
@@ -109,12 +116,14 @@ const handleChange = (event: Event) => {
 }
 
 .form-radio:focus-visible {
-  outline: max(2px, 0.15em) solid currentColor; /* Focus ring */
+  outline: max(2px, 0.15em) solid currentColor;
+  /* Focus ring */
   outline-offset: max(2px, 0.15em);
 }
 
 .form-radio:disabled {
-  color: #ccc; /* Lighter color for disabled state */
+  color: #ccc;
+  /* Lighter color for disabled state */
   cursor: not-allowed;
 }
 </style>

@@ -111,6 +111,9 @@
                     : '-'
                 }}
               </td>
+              <td>
+                {{ parent.sapPostingCode ||  '-' }}
+              </td>
             </tr>
             <tr v-show="parent.isOpenChild">
               <td></td>
@@ -242,6 +245,7 @@ const columns = ref([
   'Total Gross Amount',
   'Total Net Amount',
   'Estimated Payment Date',
+  'SAP Docuemnt No'
 ])
 
 const columnsChild = ref(['No PO', 'No GR', 'Item Description', 'Item Amount', 'Quantity'])

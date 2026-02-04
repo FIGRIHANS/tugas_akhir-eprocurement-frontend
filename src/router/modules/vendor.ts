@@ -10,6 +10,11 @@ export default [
     component: () => import('@/views/vendor/master/VendorMasterDetail.vue'),
   },
   {
+    path: '/vendor/detail',
+    name: 'vendor-detail',
+    component: () => import('@/views/vendor/master/VendorMasterDetail.vue'),
+  },
+  {
     path: '/vendor/verification',
     name: 'vendor-verification',
     component: () => import('@/views/vendor/verification/VendorVerification.vue'),
@@ -51,5 +56,10 @@ export default [
     path: '/vendor/information/:id',
     name: 'vendor-company-information',
     component: () => import('@/views/vendor/companyInformation/VendorCompanyInformation.vue'),
+  },
+  {
+    path: '/vendor/activity-expense',
+    name: 'activity-expenses',
+    component: () => import('@/views/vendor/activity-expnse/activityExpense.vue'),
   },
 ]

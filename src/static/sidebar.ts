@@ -12,7 +12,7 @@ export interface IChildSidebarMenu {
   to?: string
 }
 
-export default [
+const sidebarMenuData: ISidebarMenu[] = [
   // {
   //   id: 'dashboard',
   //   title: 'Beranda',
@@ -90,6 +90,16 @@ export default [
         id: 'vendor-blacklist',
         title: 'Vendor Blacklist',
         to: 'vendor-blacklist',
+      },
+      {
+        id: 'activity-expenses',
+        title: 'Activity Expenses',
+        to: 'activity-expenses',
+      },
+      {
+        id: 'vendor-detail',
+        title: 'Vendor Detail',
+        to: 'vendor-detail',
       },
     ],
   },
@@ -261,43 +271,79 @@ export default [
       },
     ],
   },
-  // {
-  //   id: 'userManagement',
-  //   title: 'User Management',
-  //   icon: 'user',
-  //   child: [
-  //     {
-  //       id: 'List User',
-  //       title: 'List User',
-  //       to: 'user-management-user-list',
-  //     },
-  //     {
-  //       id: 'Master Profile',
-  //       title: 'Master Profile',
-  //       to: 'user-management-master-profile',
-  //     },
-  //     {
-  //       id: 'Master Role',
-  //       title: 'Master Role',
-  //       to: 'user-management-master-role',
-  //     },
-  //     {
-  //       id: 'Master Employee',
-  //       title: 'Master Employee',
-  //       to: 'user-management-master-employee',
-  //     },
-  //     {
-  //       id: 'Report User Authorization',
-  //       title: 'Report User Authorization',
-  //       to: 'user-management-report-authorization',
-  //     },
-  //   ],
-  // },
-  // {
-  //   id: 'Workflow Configuration',
-  //   title: 'Workflow Configuration',
-  //   icon: 'check',
-  //   to: 'workflow-configuration',
-  //   child: [],
-  // },
+  {
+    id: 'userManagement',
+    title: 'User Management',
+    icon: 'user',
+    child: [
+      {
+        id: 'list-user',
+        title: 'List User',
+        to: 'user-management-user-list',
+      },
+      {
+        id: 'master-profile',
+        title: 'Master Profile',
+        to: 'user-management-master-profile',
+      },
+      {
+        id: 'master-role',
+        title: 'Master Role',
+        to: 'user-management-master-role',
+      },
+      {
+        id: 'master-employee',
+        title: 'Master Employee',
+        to: 'user-management-master-employee',
+      },
+      {
+        id: 'master-menu',
+        title: 'Master Menu',
+        to: 'user-management-master-menu',
+      },
+      {
+        id: 'report-user-authorization',
+        title: 'Report User Authorization',
+        to: 'user-management-report-authorization',
+      },
+    ],
+  },
+  {
+    id: 'workflow-configuration',
+    title: 'Workflow Configuration',
+    icon: 'arrows-loop',
+    child: [
+      {
+        id: 'workflow-list',
+        title: 'Workflow Config List',
+        to: 'workflow-list',
+      },
+    ],
+  },
+  {
+    id: 'system-integration',
+    title: 'System Integration',
+    icon: 'message-programming',
+    child: [
+      {
+        id: 'erp-integration',
+        title: 'ERP Integration List',
+        to: 'erp-integration',
+      },
+    ],
+  },
+  {
+    id: 'system-configuration',
+    title: 'System Configuration',
+    icon: 'setting-2',
+    child: [
+      {
+        id: 'invoice-configuration',
+        title: 'Invoice Configuration List',
+        to: 'invoice-configuration',
+      },
+    ],
+  },
 ]
+
+export default sidebarMenuData

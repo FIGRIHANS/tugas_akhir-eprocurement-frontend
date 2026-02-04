@@ -12,21 +12,21 @@
           <thead>
             <tr>
               <th>Profile ID</th>
-              <th>Profile</th>
+              <th>Profile Name</th>
             </tr>
           </thead>
           <tbody>
             <tr
               v-for="profile in filteredProfiles"
-              :key="profile.id"
-              @click="selectProfile(profile.id)"
+              :key="profile.profileId"
+              @click="selectProfile(profile.profileId)"
               :class="{
                 'cursor-pointer': true,
-                'bg-blue-600 text-white': profile.id === selectedProfileId,
+                'bg-blue-600 text-white': profile.profileId === selectedProfileId,
               }"
             >
-              <td>{{ profile.id }}</td>
-              <td>{{ profile.name }}</td>
+              <td>{{ profile.profileId }}</td>
+              <td>{{ profile.profileName }}</td>
             </tr>
             <tr v-if="filteredProfiles.length === 0">
               <td colspan="2" class="text-center">Tidak ada profil ditemukan.</td>
@@ -38,7 +38,7 @@
     <div class="card">
       <div class="card-header">
         <div class="flex w-full justify-between items-center">
-          <h2 class="text-lg font-semibold">List of User</h2>
+          <h2 class="text-lg font-semibold">List of Role</h2>
           <span v-if="selectedProfileName" class="text-sm text-gray-500">
             (Profile: {{ selectedProfileName }})
           </span>
@@ -48,15 +48,15 @@
         <table class="table">
           <thead>
             <tr>
-              <th>User ID</th>
-              <th>User Name</th>
+              <th style="width: 20%">Role ID</th>
+              <th style="width: 80%">Role Name</th>
             </tr>
           </thead>
           <tbody>
-            <template v-if="filteredUsers.length > 0">
-              <tr v-for="user in filteredUsers" :key="user.id">
-                <td>{{ user.id }}</td>
-                <td>{{ user.name }}</td>
+            <template v-if="filteredRoles.length > 0">
+              <tr v-for="role in filteredRoles" :key="role.roleId">
+                <td>{{ role.roleId }}</td>
+                <td>{{ role.roleName }}</td>
               </tr>
             </template>
             <template v-else>
@@ -64,8 +64,8 @@
                 <td colspan="2" class="text-center">
                   {{
                     selectedProfileId
-                      ? 'Tidak ada pengguna untuk profil ini.'
-                      : 'Pilih profil untuk melihat daftar pengguna.'
+                      ? 'Tidak ada role untuk profil ini.'
+                      : 'Pilih profil untuk melihat daftar role.'
                   }}
                 </td>
               </tr>
@@ -79,25 +79,21 @@
 
 <script setup lang="ts">
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useUserProfileStore } from '@/stores/user-management/profile'
 
-// Data dummy untuk profil
-const profiles = ref([
-  { id: 1, name: 'Administrator' },
-  { id: 2, name: 'Editor' },
-  { id: 3, name: 'Viewer' },
-  { id: 4, name: 'Developer' },
-])
+const profileStore = useUserProfileStore()
 
-// Data dummy untuk pengguna
-const users = ref([
-  { id: 101, name: 'Alice', profileId: 1 },
-  { id: 102, name: 'Bob', profileId: 1 },
-  { id: 103, name: 'Charlie', profileId: 2 },
-  { id: 104, name: 'David', profileId: 2 },
-  { id: 105, name: 'Eve', profileId: 3 },
-  { id: 106, name: 'Frank', profileId: 4 },
-  { id: 107, name: 'Grace', profileId: 1 },
+// Dummy Roles Data as requested
+const dummyRoles = ref([
+  { roleId: '80021', roleName: 'Invoice Admin', profileId: 1 },
+  { roleId: '80022', roleName: 'Invoice Verification PO', profileId: 1 },
+  { roleId: '80023', roleName: 'Invoice Approver PO', profileId: 2 },
+  { roleId: '80024', roleName: 'User Review', profileId: 2 },
+  { roleId: '80025', roleName: 'Submitter Invoice', profileId: 3 },
+  { roleId: '80026', roleName: 'System Admin', profileId: 1 },
+  { roleId: '80027', roleName: 'Invoice Verification Non PO', profileId: 4 },
+  { roleId: '80028', roleName: 'Invoice Approver Non PO', profileId: 4 },
 ])
 
 const searchKeyword = ref('')
@@ -105,35 +101,48 @@ const selectedProfileId = ref<number | null>(null)
 
 // Computed property untuk memfilter profil berdasarkan keyword pencarian
 const filteredProfiles = computed(() => {
+  const items = profileStore.profiles.items
   if (!searchKeyword.value) {
-    return profiles.value
+    return items
   }
   const lowerCaseKeyword = searchKeyword.value.toLowerCase()
-  return profiles.value.filter(
+  return items.filter(
     (profile) =>
-      profile.name.toLowerCase().includes(lowerCaseKeyword) ||
-      profile.id.toString().includes(lowerCaseKeyword),
+      profile.profileName.toLowerCase().includes(lowerCaseKeyword) ||
+      profile.profileId.toString().includes(lowerCaseKeyword),
   )
 })
 
-// Computed property untuk memfilter pengguna berdasarkan profil yang dipilih
-const filteredUsers = computed(() => {
+// Computed property untuk memfilter roles berdasarkan profil yang dipilih
+// Note: Karena ini dummy, kita asumsikan mapping sederhana atau tampilkan semua jika belum ada mapping real
+const filteredRoles = computed(() => {
   if (selectedProfileId.value === null) {
     return []
   }
-  return users.value.filter((user) => user.profileId === selectedProfileId.value)
+  // Simple simulation: Distribute roles based on simulated profileId match
+  // In real app, this would filter based on actual profile-role relation
+  // For now, let's just show some roles for demo matching the requested data structure (assuming profileId matches)
+  return dummyRoles.value.filter((role) => role.profileId === (selectedProfileId.value! % 4) + 1)
+  // Modulo used to ensure data shows up for various profile IDs since we don't know real IDs
 })
 
 // Computed property untuk mendapatkan nama profil yang dipilih
 const selectedProfileName = computed(() => {
-  const profile = profiles.value.find((p) => p.id === selectedProfileId.value)
-  return profile ? profile.name : ''
+  const profile = profileStore.profiles.items.find((p) => p.profileId === selectedProfileId.value)
+  return profile ? profile.profileName : ''
 })
 
 // Fungsi untuk memilih profil
 const selectProfile = (profileId: number) => {
   selectedProfileId.value = profileId
 }
+
+onMounted(async () => {
+  // Fetch Profiles
+  if (profileStore.profiles.items.length === 0) {
+    await profileStore.getAllUserProfiles({ page: 1, pageSize: 100, searchText: '' })
+  }
+})
 </script>
 
 <style scoped></style>

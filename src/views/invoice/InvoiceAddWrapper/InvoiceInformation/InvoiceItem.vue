@@ -57,20 +57,22 @@
                 </button>
               </td>
               <td>
-                <span v-if="!item.isEdit">{{ getActivityName(item.activity) || '-' }}</span>
+                <span v-if="!item.isEdit || form.invoiceType === '4'">{{
+                  getActivityName(item.activity) || '-'
+                }}</span>
                 <v-select
                   v-else
                   v-model="item.activity"
                   class="customSelect"
                   placeholder="Select"
-                  :get-option-label="(option: any) => `${option.code} - ${option.name}`"
+                  :get-option-label="(option: any) => option.name"
                   :reduce="(option: any) => option.id"
                   :options="listActivity"
                   appendToBody
                 ></v-select>
               </td>
               <td>
-                <span v-if="!item.isEdit">{{
+                <span v-if="!item.isEdit || form.invoiceType === '4'">{{
                   form?.currency === 'IDR'
                     ? useFormatIdr(item.itemAmount)
                     : useFormatUsd(item.itemAmount) || '-'
@@ -81,11 +83,40 @@
                   class="input"
                   type="number"
                   placeholder=""
+                  @input="editVariance(index)"
                   @change="item.whtBaseAmount = item.itemAmount.toString()"
                 />
               </td>
+              <td v-if="form.invoiceType === '4'">
+                <span v-if="!item.isEdit">{{ item.realizationAmount || '-' }}</span>
+                <input
+                  v-else
+                  v-model="item.realizationAmount"
+                  class="input"
+                  :class="{ 'input-danger': item.isTextLimitExceeded }"
+                  type="text"
+                  placeholder=""
+                  @input="handleRealizationInput(item, $event, index)"
+                />
+              </td>
+              <td v-if="form.invoiceType === '4'">
+                <span v-if="!item.isEdit || form.invoiceType === '4'">{{
+                  item.variance || '-'
+                }}</span>
+                <input
+                  v-else
+                  v-model="item.variance"
+                  class="input"
+                  :class="{ 'input-danger': item.isTextLimitExceeded }"
+                  type="number"
+                  placeholder=""
+                  disabled
+                />
+              </td>
               <td>
-                <span v-if="!item.isEdit">{{ item.itemText || '-' }}</span>
+                <span v-if="!item.isEdit || form.invoiceType === '4'">{{
+                  item.itemText || '-'
+                }}</span>
                 <input
                   v-else
                   v-model="item.itemText"
@@ -96,15 +127,20 @@
                   @input="onItemTextInput(item, $event)"
                 />
               </td>
+
               <td v-if="!isPettyCash">
-                <span v-if="!item.isEdit">{{ getDebitCreditName(item.debitCredit) || '-' }}</span>
+                <span v-if="!item.isEdit || form.invoiceType === '4'">{{
+                  getDebitCreditName(item.debitCredit) || '-'
+                }}</span>
                 <select v-else v-model="item.debitCredit" class="select" placeholder="">
                   <option value="D">Debit</option>
                   <option value="K">Credit</option>
                 </select>
               </td>
               <td v-if="!isPettyCash">
-                <span v-if="!item.isEdit">{{ getTaxCodeName(item.taxCode) || '-' }}</span>
+                <span v-if="!item.isEdit || form.invoiceType === '4'">{{
+                  getTaxCodeName(item.taxCode) || '-'
+                }}</span>
                 <v-select
                   v-else
                   v-model="item.taxCode"
@@ -187,6 +223,14 @@ const isPettyCash = computed(() => form?.invoiceType === '5')
 const columns = computed(() => {
   const baseColumns = ['Action', 'Activity / Expense', 'Item Amount', 'Item Text']
 
+  if (form.invoiceType === '4') {
+    const index = baseColumns.indexOf('Item Text')
+
+    if (index !== -1) {
+      baseColumns.splice(index, 0, 'Realization Amount', 'Variance')
+    }
+  }
+
   if (!isPettyCash.value) {
     baseColumns.push('Debit/Credit')
   }
@@ -238,6 +282,8 @@ const addNew = () => {
       whtCodeList: [],
       isEdit: false,
       isTextLimitExceeded: false,
+      realizationAmount: 0,
+      variance: 0,
     }
     form.invoiceItem.push(data)
   }
@@ -252,8 +298,7 @@ const deleteItem = (index: number) => {
 
 const getActivityName = (id: number) => {
   const getIndex = listActivity.value.findIndex((item) => item.id === id)
-  if (getIndex !== -1)
-    return `${listActivity.value[getIndex].code} - ${listActivity.value[getIndex].name}`
+  if (getIndex !== -1) return listActivity.value[getIndex].name
 }
 
 const getDebitCreditName = (code: string) => {
@@ -319,54 +364,17 @@ const onItemTextInput = (item: { itemText?: string; isTextLimitExceeded?: boolea
     item.isTextLimitExceeded = false
   }
 }
-
-watch(
-  () => [form?.invoiceItem, form?.currency],
-  () => {
-    getVatAmount()
-  },
-  {
-    deep: true,
-    immediate: true,
-  },
-)
-
-watch(
-  () => form?.companyCode,
-  () => {
-    if (form?.companyCode) invoiceMasterApi.getCostCenter(form?.companyCode || '')
-  },
-  {
-    immediate: true,
-  },
-)
-
-watch(
-  () => form,
-  () => {
-    if (form) {
-      if (form.companyCode) invoiceMasterApi.getActivity(form.companyCode)
-    }
-  },
-  {
-    deep: true,
-    immediate: true,
-  },
-)
-
-watch(
-  () => form?.invoiceType,
-  () => {
-    if (form && form.invoiceType === '5') {
-      form.invoiceItem.forEach((item) => {
-        item.costCenter = ''
-      })
-    }
-  },
-  {
-    immediate: true,
-  },
-)
+const editVariance = (index: number) => {
+  const item = form.invoiceItem[index]
+  const itemAmount = Number(item.itemAmount) || 0
+  const realizationAmount = Number(item.realizationAmount) || 0
+  item.variance = itemAmount - realizationAmount
+}
+const handleRealizationInput = (item: any, e: Event, index: number) => {
+  item.hasRealizationInput = true
+  onItemTextInput(item, e)
+  editVariance(index)
+}
 </script>
 
 <style lang="scss" scoped>

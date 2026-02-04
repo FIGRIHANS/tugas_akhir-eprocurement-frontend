@@ -6,8 +6,11 @@
       <RouterLink to="/dashboard">
         <!-- <LogoAN class="w-[83px]" /> -->
 
-        <LogoEPOQ class="w-[180px]" />
+        <LogoEPOQ class="w-[120px]" />
       </RouterLink>
+      <div class="ml-2">
+        <img src="@/assets/tms.png" class="h-[35px] w-max" alt="" />
+      </div>
     </div>
 
     <div
@@ -164,11 +167,22 @@ const filteredSidebarMenu = computed(() => {
 
     if (userStore.userData?.profile?.vendorCode) {
       return sidebarMenu
-        .filter((menu) => menu.id === 'dashboard' || menu.id === 'e-invoice')
+        .filter(
+          (menu) =>
+            menu.id === 'dashboard' || menu.id === 'e-invoice' || menu.id === 'vendor-management',
+        )
+
         .map((menu) => {
           return {
             ...menu,
-            child: menu.child ? menu.child.filter((child) => child.id === 'invoice-list') : [],
+            child: menu.child
+              ? menu.child.filter(
+                  (child) =>
+                    child.id === 'invoice-list' ||
+                    child.id === 'invoice-list-non-po' ||
+                    child.id === 'vendor-detail',
+                )
+              : [],
           }
         })
     }
@@ -252,7 +266,7 @@ const filteredSidebarMenu = computed(() => {
           }
         })
     }
-    if (userStore.userData?.profile.profileId === 3200) {
+    if (userStore.userData?.profile?.profileId === 3200) {
       return sidebarMenu
         .filter(
           (menu) =>
@@ -261,9 +275,21 @@ const filteredSidebarMenu = computed(() => {
             menu.id === 'dashboard' ||
             menu.id === 'analytic-dashboard' ||
             menu.id === 'digital-receiving-confirmation' ||
-            menu.id === 'tax-reconciliation',
+            menu.id === 'tax-reconciliation' ||
+            menu.id === 'userManagement' ||
+            menu.id === 'workflow-configuration' ||
+            menu.id === 'system-integration' ||
+            menu.id === 'system-configuration',
         )
         .map((menu) => {
+          // Untuk workflow-configuration dan system-integration, jangan filter child
+          if (
+            menu.id === 'workflow-configuration' ||
+            menu.id === 'system-integration' ||
+            menu.id === 'system-configuration'
+          ) {
+            return { ...menu }
+          }
           return {
             ...menu,
             child: menu.child
@@ -283,7 +309,16 @@ const filteredSidebarMenu = computed(() => {
                     child.id === 'delivery-notes-list' ||
                     child.id === 'vat-reconciliation' ||
                     child.id === 'wht-reconciliation' ||
-                    child.id === 'invoice-type',
+                    child.id === 'invoice-type' ||
+                    child.id === 'list-user' ||
+                    child.id === 'master-profile' ||
+                    child.id === 'master-role' ||
+                    child.id === 'master-employee' ||
+                    child.id === 'master-menu' ||
+                    child.id === 'report-user-authorization' ||
+                    child.id === 'erp-integration' ||
+                    child.id === 'activity-expenses' ||
+                    child.id === 'invoice-configuration',
                 )
               : [],
           }

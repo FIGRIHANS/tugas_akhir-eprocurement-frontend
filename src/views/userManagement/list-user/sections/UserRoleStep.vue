@@ -16,8 +16,8 @@
           <table class="table align-middle text-gray-700 w-full">
             <thead>
               <tr>
-                <th class="text-nowrap">Role ID</th>
-                <th class="text-nowrap">Position/Role</th>
+                <th class="text-nowrap">Role Code</th>
+                <th class="text-nowrap">Role Name</th>
               </tr>
             </thead>
             <tbody>
@@ -35,7 +35,7 @@
               <tr v-else v-for="role in filteredAvailableRoles" :key="role.code"
                 @click="toggleAvailableSelection(role.code)" class="cursor-pointer hover:bg-gray-50"
                 :class="{ 'bg-blue-100': isAvailableSelected(role.code) }">
-                <td>{{ role.code }}</td>
+                <td>{{ role.roleCode }}</td>
                 <td>{{ role.name }}</td>
               </tr>
             </tbody>
@@ -44,14 +44,14 @@
       </div>
 
       <div class="flex flex-col gap-4 justify-center items-center h-full pt-10">
-        <UiButton variant="primary" @click="addSelectedAuths" :disabled="selectedAvailableRoles.length === 0">
+        <UiButton variant="primary" @click="addSelectedRoles" :disabled="selectedAvailableRoles.length === 0">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path
               d="M13.7929 11.2071C14.1834 10.8166 14.8166 10.8166 15.2071 11.2071C15.5976 11.5976 15.5976 12.2309 15.2071 12.6213L10.2071 17.6213C9.81658 18.0118 9.18342 18.0118 8.79289 17.6213C8.40237 17.2309 8.40237 16.5976 8.79289 16.2071L12.9858 12L8.79289 7.79289C8.40237 7.40237 8.40237 6.76921 8.79289 6.37868C9.18342 5.98815 9.81658 5.98815 10.2071 6.37868L15.2071 11.3787L13.7929 11.2071Z"
               fill="white" />
           </svg>
         </UiButton>
-        <UiButton variant="primary" @click="removeSelectedAuths" :disabled="selectedAssignedAuths.length === 0">
+        <UiButton variant="primary" @click="removeSelectedRoles" :disabled="selectedAssignedRoles.length === 0">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path
               d="M10.2071 11.2071C9.81658 10.8166 9.18342 10.8166 8.79289 11.2071C8.40237 11.5976 8.40237 12.2309 8.79289 12.6213L13.7929 17.6213C14.1834 18.0118 14.8166 18.0118 15.2071 17.6213C15.5976 17.2309 15.5976 16.5976 15.2071 16.2071L11.0142 12L15.2071 7.79289C15.5976 7.40237 15.5976 6.76921 15.2071 6.37868C14.8166 5.98815 14.1834 5.98815 13.7929 6.37868L8.79289 11.3787L10.2071 11.2071Z"
@@ -68,8 +68,8 @@
           <table class="table align-middle text-gray-700 w-full">
             <thead>
               <tr>
-                <th class="text-nowrap">Role ID</th>
-                <th class="text-nowrap">Position/Role</th>
+                <th class="text-nowrap">Role Code</th>
+                <th class="text-nowrap">Role Name</th>
               </tr>
             </thead>
             <tbody>
@@ -80,7 +80,7 @@
               </tr>
               <tr v-for="role in assignedRoles" :key="role.code" @click="toggleAssignedSelection(role.code)"
                 class="cursor-pointer hover:bg-gray-50" :class="{ 'bg-blue-100': isAssignedSelected(role.code) }">
-                <td>{{ role.code }}</td>
+                <td>{{ role.roleCode }}</td>
                 <td>{{ role.name }}</td>
               </tr>
             </tbody>
@@ -103,20 +103,20 @@ import { useUserRoleStore } from '@/stores/user-management/role'
 interface RoleObject {
   code: string
   name: string
+  roleCode?: string
 }
 
 interface RolePayload {
   selectedRoleIds: string[]
 }
 
-const props = defineProps({
-  rolePayload: {
-    type: Object as () => RolePayload,
-    required: true,
-  },
-})
+const props = defineProps<{
+  rolePayload: RolePayload
+}>()
 
-const emit = defineEmits(['update:role-payload'])
+const emit = defineEmits<{
+  'update:role-payload': [payload: RolePayload]
+}>()
 
 const userRoleStore = useUserRoleStore()
 
@@ -125,7 +125,7 @@ const assignedRoles = ref<RoleObject[]>([])
 
 const searchCodeKeyword = ref('')
 const selectedAvailableRoles = ref<string[]>([])
-const selectedAssignedAuths = ref<string[]>([]) // Masih menggunakan 'Auths' di sini, sebaiknya diganti menjadi 'Roles'
+const selectedAssignedRoles = ref<string[]>([])
 const errors = reactive({
   assignedRoles: '',
 })
@@ -135,10 +135,11 @@ const availableRoles = computed<RoleObject[]>(() => {
   const assignedCodes = new Set(assignedRoles.value.map((r) => r.code))
 
   return allStoreRoles
-    .filter((role) => !assignedCodes.has(role.roleId))
+    .filter((role) => !assignedCodes.has(role.roleId?.toString()))
     .map((role) => ({
       code: role.roleId ? role.roleId.toString() : 'N/A',
       name: role.roleName || 'N/A',
+      roleCode: role.roleId ? role.roleId.toString() : 'N/A',
     }))
 })
 
@@ -164,11 +165,11 @@ const toggleAvailableSelection = (code: string) => {
 }
 
 const toggleAssignedSelection = (code: string) => {
-  const index = selectedAssignedAuths.value.indexOf(code) // Perhatikan: masih 'Auths'
+  const index = selectedAssignedRoles.value.indexOf(code)
   if (index === -1) {
-    selectedAssignedAuths.value.push(code)
+    selectedAssignedRoles.value.push(code)
   } else {
-    selectedAssignedAuths.value.splice(index, 1)
+    selectedAssignedRoles.value.splice(index, 1)
   }
 }
 
@@ -177,11 +178,10 @@ const isAvailableSelected = (code: string) => {
 }
 
 const isAssignedSelected = (code: string) => {
-  return selectedAssignedAuths.value.includes(code) // Perhatikan: masih 'Auths'
+  return selectedAssignedRoles.value.includes(code)
 }
 
-const addSelectedAuths = () => {
-  // Sebaiknya diganti namanya menjadi addSelectedRoles
+const addSelectedRoles = () => {
   const itemsToAdd = availableRoles.value.filter((role) =>
     selectedAvailableRoles.value.includes(role.code),
   )
@@ -193,17 +193,16 @@ const addSelectedAuths = () => {
   })
 
   selectedAvailableRoles.value = []
-  updateRolePayload() // Panggil fungsi untuk meng-emit perubahan
+  updateRolePayload()
 }
 
-const removeSelectedAuths = () => {
-  // Sebaiknya diganti namanya menjadi removeSelectedRoles
-  const codesToRemove = selectedAssignedAuths.value // Perhatikan: masih 'Auths'
+const removeSelectedRoles = () => {
+  const codesToRemove = selectedAssignedRoles.value
 
   assignedRoles.value = assignedRoles.value.filter((role) => !codesToRemove.includes(role.code))
 
-  selectedAssignedAuths.value = [] // Perhatikan: masih 'Auths'
-  updateRolePayload() // Panggil fungsi untuk meng-emit perubahan
+  selectedAssignedRoles.value = []
+  updateRolePayload()
 }
 
 // Fungsi baru untuk meng-emit payload role
@@ -237,7 +236,7 @@ watch(
       const allRoles = userRoleStore.roles.items
       assignedRoles.value = newRoleIds
         .map((id) => {
-          const foundRole = allRoles.find((r) => r.roleId === id)
+          const foundRole = allRoles.find((r) => r.roleId?.toString() === id)
           return {
             code: id,
             name: foundRole ? foundRole.roleName : 'Unknown Role',
@@ -251,13 +250,18 @@ watch(
 
 // Data fetching on mount
 onMounted(async () => {
-  await userRoleStore.getAllUserRoles()
+  const body = {
+    page: 1,
+    pageSize: 10,
+    searchText: '',
+  }
+  await userRoleStore.getAllUserRoles(body)
   // Setelah peran dimuat, inisialisasi assignedRoles dari props
   if (props.rolePayload.selectedRoleIds.length > 0) {
     const allRoles = userRoleStore.roles.items
     assignedRoles.value = props.rolePayload.selectedRoleIds
       .map((id) => {
-        const foundRole = allRoles.find((r) => r.roleId === id)
+        const foundRole = allRoles.find((r) => r.roleId?.toString() === id)
         return {
           code: id,
           name: foundRole ? foundRole.roleName : 'Unknown Role',
@@ -273,14 +277,12 @@ const allFormData = inject<Record<string, any>>('allFormData')
 
 watch(validationTrigger, (newVal, oldVal) => {
   if (newVal !== oldVal) {
-    const isValid = validateForm()
+    validateForm()
     const formData: RolePayload = { selectedRoleIds: assignedRoles.value.map((role) => role.code) }
 
     if (allFormData) {
       allFormData['role-step'] = formData
     }
-
-    emit('validation-result', { isValid: isValid, formData: formData })
   }
 })
 </script>
@@ -299,7 +301,7 @@ watch(validationTrigger, (newVal, oldVal) => {
 
 .card-header {
   padding: 1.5rem;
-  border-bottom: 1px solid #eee;
+  border-block-end: 1px solid #eee;
 }
 
 .card-body {
@@ -309,22 +311,22 @@ watch(validationTrigger, (newVal, oldVal) => {
 }
 
 .table {
-  min-width: 100%;
+  min-inline-size: 100%;
   border-collapse: collapse;
 }
 
 .table th,
 .table td {
   padding: 0.75rem;
-  text-align: left;
-  border-bottom: 1px solid #e2e8f0;
+  text-align: start;
+  border-block-end: 1px solid #e2e8f0;
 }
 
 .table thead th {
   background-color: #f8fafc;
   font-weight: 600;
   color: #4a5568;
-  border-bottom: 2px solid #e2e8f0;
+  border-block-end: 2px solid #e2e8f0;
 }
 
 .bg-blue-100 {

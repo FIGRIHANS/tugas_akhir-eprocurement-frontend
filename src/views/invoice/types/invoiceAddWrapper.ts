@@ -2,6 +2,7 @@ import type { documentFormTypes } from './invoiceDocument'
 import type { itemsPoGrType } from './invoicePoGr'
 import type { itemsCostType } from './additionalCost'
 import type { invoiceItemTypes } from './invoiceItem'
+import type { ocrItemTypes } from './ocrItem'
 
 export interface formTypes extends documentFormTypes {
   // Invoice Data
@@ -82,6 +83,8 @@ export interface formTypes extends documentFormTypes {
   amountInvoiceError?: boolean
   taxNoInvoice: string
   taxNoInvoiceError?: boolean
+  taxDate: string
+  taxDateError?: boolean
   remainingDpAmount: number
   dpAmountDeduction: number
   dpAmountDeductionError?: boolean
@@ -103,6 +106,8 @@ export interface formTypes extends documentFormTypes {
   additionalCostCalc: number
   totalGrossAmount: number
   totalNetAmount: number
+  dppLainnya: number
+  variance: number
 
   invoicePoGr: itemsPoGrType[]
   invoicePoGrError?: boolean
@@ -113,4 +118,22 @@ export interface formTypes extends documentFormTypes {
 
   status: number
   invoiceSource: string
+
+  // OCR Data
+  ocrVendorName?: string
+  vendorNPWP?: string
+  ocrCompanyName?: string
+  npwpCompany?: string
+  taxInvoiceNumber?: string
+  taxInvoiceDate?: string | Date
+  salesAmount?: number
+  otherDPP?: number
+  ocrVatAmount?: number
+  ocrVatbmAmount?: number
+  taxInvoiceStatus?: string
+  referenceNo?: string
+  createdBy?: string
+  createdUtcDate?: string
+  modifiedBy?: string
+  modifiedUtcDate?: string
 }

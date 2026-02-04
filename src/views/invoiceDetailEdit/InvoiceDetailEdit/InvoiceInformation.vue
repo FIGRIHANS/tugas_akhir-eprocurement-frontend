@@ -48,7 +48,11 @@ const checkIsPoPib = () => {
 }
 
 const checkIsNonPo = () => {
-  return route.query.invoiceType === 'no_po'
+  return (
+    route.query.invoiceType === 'no_po' ||
+    route.query.type === 'nonpo' ||
+    route.query.type === 'non-po-view'
+  )
 }
 
 const checkIsPoCC = () => {
