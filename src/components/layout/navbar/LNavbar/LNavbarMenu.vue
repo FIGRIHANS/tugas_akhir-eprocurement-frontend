@@ -7,7 +7,8 @@
     <i class="ki-duotone ki-book-open text-[20px]"> </i>
     Download Manual Book
   </a>
-  <a href="#" class="px-2.5 py-1.5"><i class="ki-outline ki-notification text-[20px]"> </i></a>
+  <!-- Notification Bell with Dropdown -->
+  <NotificationBell />
 
   <div class="menu menu-default p-0" data-menu="true">
     <div
@@ -50,6 +51,7 @@ import { useDictionaryStore } from '@/stores/general/dictionary'
 import moment from 'moment'
 
 import IconEN from '@/components/icons/IconEN.vue'
+import NotificationBell from '@/components/notification/NotificationBell.vue'
 
 const { locale } = useI18n({ useScope: 'global' })
 const dictionaryStore = useDictionaryStore()
