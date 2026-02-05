@@ -17,6 +17,7 @@ export interface DeliveryNotesData {
   vendorCode: string
   // vendorName?: string
   estimatedArrival: string
+  shippingDate?: string // Backend sends this in detail response
   pickupAddress: string
   status: string
   destinationAddress: string
@@ -128,24 +129,24 @@ const DeliveryNotesService = {
 
   /**
    * Get delivery notes by PO Number for creating Receiving Confirmation
-   * @param poNumber - PO Number to search
+   * @param deliveryNoteNumber - Delivery Note Number to search
    */
-  async getByPoNumber(poNumber: string): Promise<DeliveryNotesData[]> {
+  async getByDeliveryNoteNumber(deliveryNoteNumber: string): Promise<DeliveryNotesData | null> {
     try {
-      const response = await invoiceApi.get<ApiResponse<DeliveryNotesData[]>>(
-        '/delivery-notes/list',
+      const response = await invoiceApi.get<ApiResponse<DeliveryNotesData>>(
+        '/delivery-notes/detail/delivery-note-number',
         {
-          params: { poNumber },
+          params: { deliveryNoteNumber },
         },
       )
-
+  
       if (response.data?.result?.content) {
         return response.data.result.content
       }
-
-      return []
+  
+      return null
     } catch (error) {
-      console.error('Error fetching delivery notes by PO Number:', error)
+      console.error('Error fetching delivery notes by Delivery Note Number:', error)
       throw error
     }
   },
@@ -156,7 +157,12 @@ const DeliveryNotesService = {
    */
   async getDetail(id: number): Promise<DeliveryNotesData | null> {
     try {
-      const response = await invoiceApi.get<ApiResponse<DeliveryNotesData>>(`/delivery-notes/${id}`)
+      const response = await invoiceApi.get<ApiResponse<DeliveryNotesData>>(
+        `/delivery-notes/detail`,
+        {
+          params: { id },
+        },
+      )
 
       if (response.data?.result?.content) {
         return response.data.result.content
@@ -170,12 +176,13 @@ const DeliveryNotesService = {
   },
 
   /**
-   * Search PO from Mock SAP
-   * Endpoint: api/mock-sap/list
+   * Search PO from Mock SAP by PO Number
+   * Endpoint: api/mock-sap/detail
+   * Returns single PO object or null if not found
    */
-  async searchPoFromSap(poNumber?: string): Promise<MockSapPoData[]> {
+  async searchPoFromSap(poNumber?: string): Promise<MockSapPoData | null> {
     try {
-      const response = await invoiceApi.get<ApiResponse<MockSapPoData[]>>('/mock-sap/list', {
+      const response = await invoiceApi.get<ApiResponse<MockSapPoData>>('/mock-sap/detail', {
         params: poNumber ? { poNumber } : {},
       })
 
@@ -183,7 +190,7 @@ const DeliveryNotesService = {
         return response.data.result.content
       }
 
-      return []
+      return null
     } catch (error) {
       console.error('Error fetching PO from Mock SAP:', error)
       throw error
