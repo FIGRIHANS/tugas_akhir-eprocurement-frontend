@@ -179,6 +179,7 @@ import { cloneDeep } from 'lodash'
 import ReceivingConfirmationService, {
   type ReceivingConfirmationData,
 } from '@/services/receivingConfirmation.service'
+import router from '@/router'
 
 // Loading and error states
 const isLoading = ref<boolean>(false)
@@ -467,8 +468,7 @@ const exportData = () => {
 
 const viewDetail = (id: number) => {
   console.log('View detail for:', id)
-  // TODO: Navigate to detail page
-  alert(`View detail for Report ID: ${id}`)
+  router.push({ name: 'receivingConfirmationDetail', params: { id } })
 }
 
 onMounted(() => {

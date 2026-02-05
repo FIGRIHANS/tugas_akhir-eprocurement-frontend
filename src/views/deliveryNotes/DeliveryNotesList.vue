@@ -429,11 +429,11 @@ const sortColumn = (columnName: string | null) => {
 }
 
 const createNew = () => {
-  router.push({ name: 'receivingConfirmationCreate' })
+  router.push({ name: 'deliveryNotesCreate' })
 }
 
 const viewDetail = (id: number) => {
-  router.push({ name: 'receivingConfirmationDetail', params: { id } })
+  router.push({ name: 'deliveryNotesDetail', params: { id } })
 }
 
 onMounted(() => {
