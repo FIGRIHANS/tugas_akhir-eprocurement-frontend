@@ -24,3 +24,14 @@ export type ModalConfirmationType = {
   submit?: (...args: any[]) => void
   loading?: boolean
 }
+
+export type ModalNotificationType = {
+  open: boolean
+  id: string
+  type: 'info' | 'success' | 'error' | 'warning'
+  title: string
+  text: string
+  buttonText?: string
+  static?: boolean
+  onClose?: () => void
+}

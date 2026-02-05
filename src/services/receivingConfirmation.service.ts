@@ -33,6 +33,12 @@ export interface ReceivingConfirmationCreatePayload {
   items: ReceivingConfirmationDetailPayload[]
 }
 
+export interface ReceivingConfirmationUpdatePayload {
+  reportID: number
+  status: number
+  generalRejectReason?: string
+}
+
 // Interface untuk data Receiving Confirmation
 export interface ReceivingConfirmationData {
   reportID: number
@@ -50,6 +56,7 @@ export interface ReceivingConfirmationData {
   whCheckerName: string
   driverName: string
   digitalSignaturePath: string
+  driverSignature?: string | null
   createdBy: string
   updatedBy: string
   createdUtcDate: string
@@ -133,10 +140,15 @@ const ReceivingConfirmationService = {
    * Get detail of a receiving confirmation by ID
    * Endpoint: api/receiving-confirmation/{id}
    */
-  async getDetail(id: number): Promise<ReceivingConfirmationData | null> {
+  async getDetail(reportID: number): Promise<ReceivingConfirmationData | null> {
     try {
       const response = await invoiceApi.get<ApiResponse<ReceivingConfirmationData>>(
-        `/receiving-confirmation/${id}`,
+        `/receiving-confirmation/detail`,
+        {
+          params: {
+            reportID: reportID,
+          },
+        },
       )
 
       if (response.data?.result?.content) {
@@ -163,6 +175,28 @@ const ReceivingConfirmationService = {
       return response.data.result.content
     } catch (error) {
       console.error('Error creating receiving confirmation:', error)
+      throw error
+    }
+  },
+
+  async updateStatus(
+    reportID: number,
+    data: ReceivingConfirmationUpdatePayload,
+  ): Promise<ReceivingConfirmationData> {
+    try {
+      // Axios PUT signature: put(url, data, config)
+      const response = await invoiceApi.put<ApiResponse<ReceivingConfirmationData>>(
+        '/receiving-confirmation/update-status',
+        data, // Request body
+        {
+          params: {
+            reportID: reportID,
+          },
+        },
+      )
+      return response.data.result.content
+    } catch (error) {
+      console.error('Error approving/rejecting receiving confirmation:', error)
       throw error
     }
   },
