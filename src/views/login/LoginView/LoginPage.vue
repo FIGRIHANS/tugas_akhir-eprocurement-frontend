@@ -86,15 +86,42 @@
         </button>
       </div>
     </div>
+    <UiModal v-model="showFtpModal" size="sm" title="OTP Code">
+      <div class="text-center space-y-2">
+        <p class="text-sm font-medium text-gray-900">Check your email</p>
+        <p class="text-xs text-gray-500">We sent a verification code to your email.</p>
+      </div>
+      <div class="mt-4 flex justify-center gap-2">
+        <input
+          v-for="(digit, idx) in otpDigits"
+          :key="idx"
+          ref="otpInputs"
+          v-model="otpDigits[idx]"
+          inputmode="numeric"
+          maxlength="1"
+          class="h-12 w-12 rounded-lg border border-blue-300 text-center text-lg font-semibold text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+          @input="onOtpInput(idx, $event)"
+          @keydown.backspace="onOtpBackspace(idx, $event)"
+        />
+      </div>
+      <div class="flex items-center justify-center gap-2 border-t mt-4 pt-3">
+        <button class="btn btn-light" @click="showFtpModal = false">Cancel</button>
+        <button class="btn btn-primary" @click="submitFtpCode">Submit</button>
+      </div>
+      <div class="mt-3 text-center text-xs text-gray-500">
+        Didn't receive the email? <span class="text-primary cursor-pointer">Click to resend</span>
+      </div>
+    </UiModal>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import moment from 'moment'
 import { useLoginStore } from '@/stores/views/login'
 import type { ApiResponseData, ApiResponseDataResult } from '@/core/type/api'
+import UiModal from '@/components/modal/UiModal.vue'
 
 const loginApi = useLoginStore()
 const router = useRouter()
@@ -105,6 +132,9 @@ const rememberMe = ref<boolean>(false)
 const showPassword = ref<boolean>(false)
 const isLoading = ref<boolean>(false)
 const isError = ref<boolean>(false)
+const showFtpModal = ref(false)
+const otpDigits = ref(['', '', '', ''])
+const otpInputs = ref<HTMLInputElement[]>([])
 
 const selectedLogin = computed(() => loginApi.selectedLogin)
 
@@ -167,7 +197,7 @@ const nextStepLogin = (response: ApiResponseData<string>) => {
   }
 }
 
-const goLogin = () => {
+const doLogin = () => {
   isLoading.value = true
   if (!email.value && !password.value) return (isLoading.value = false)
   saveAccount()
@@ -189,6 +219,42 @@ const goLogin = () => {
       .finally(() => {
         isLoading.value = false
       })
+  }
+}
+
+const goLogin = () => {
+  showFtpModal.value = true
+  otpDigits.value = ['', '', '', '']
+  focusOtp(0)
+}
+
+const submitFtpCode = () => {
+  if (otpDigits.value.some((d) => d === '')) return
+  showFtpModal.value = false
+  doLogin()
+}
+
+const focusOtp = (index: number) => {
+  nextTick(() => {
+    const input = otpInputs.value?.[index]
+    if (input) input.focus()
+  })
+}
+
+const onOtpInput = (index: number, event: Event) => {
+  const target = event.target as HTMLInputElement
+  const value = target.value.replace(/\D/g, '')
+  otpDigits.value[index] = value.slice(-1)
+  if (value && index < otpDigits.value.length - 1) {
+    focusOtp(index + 1)
+  }
+}
+
+const onOtpBackspace = (index: number, event: KeyboardEvent) => {
+  const target = event.target as HTMLInputElement
+  if (target.value) return
+  if (index > 0) {
+    focusOtp(index - 1)
   }
 }
 

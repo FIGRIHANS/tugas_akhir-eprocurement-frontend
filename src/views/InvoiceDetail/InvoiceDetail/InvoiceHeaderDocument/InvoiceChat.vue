@@ -12,8 +12,8 @@
 
           <!-- Bubble -->
           <div class="px-3 py-2 rounded-lg text-sm inline-block" :class="msg.sender === 'me'
-              ? 'bg-primary text-white'
-              : 'bg-white border'
+            ? 'bg-primary text-white'
+            : 'bg-white border'
             ">
             <div>{{ msg.text }}</div>
             <div class="text-[10px] mt-1 opacity-70">

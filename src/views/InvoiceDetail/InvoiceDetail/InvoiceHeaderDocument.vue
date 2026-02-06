@@ -8,9 +8,12 @@
         <button class="tab p-[8px]" :class="{ 'active': tabNow === 'document' }" @click="setTab('document')">
           Invoice Document
         </button>
+        <button class="tab p-[8px]" :class="{ 'active': tabNow === 'chat' }" @click="setTab('chat')">
+          Chat
+        </button>
       </div>
     </div>
-    <div class="card-body overflow-y-scroll invoice-header" :class="{ 'document': tabNow === 'document' }">
+    <div class=" py-[8px] px-[16px]  overflow-y-auto " :class="{ 'document': tabNow === 'document' }">
       <Transition mode="out-in">
         <component :is="contentComponent" />
       </Transition>
@@ -24,6 +27,7 @@ import type { formTypes } from '../types/invoiceDetail'
 
 const InvoiceHeader = defineAsyncComponent(() => import('./InvoiceHeaderDocument/InvoiceHeader.vue'))
 const InvoiceDocument = defineAsyncComponent(() => import('./InvoiceHeaderDocument/InvoiceDocument.vue'))
+const InvoiceChat = defineAsyncComponent(() => import('./InvoiceHeaderDocument/InvoiceChat.vue'))
 
 const form = inject<formTypes>('form')
 const tabNow = ref<string>('header')
@@ -31,7 +35,8 @@ const tabNow = ref<string>('header')
 const contentComponent = computed(() => {
   const components = {
     header: InvoiceHeader,
-    document: InvoiceDocument
+    document: InvoiceDocument,
+    chat: InvoiceChat,
   } as { [key: string]: Component }
 
   return components[tabNow.value]
