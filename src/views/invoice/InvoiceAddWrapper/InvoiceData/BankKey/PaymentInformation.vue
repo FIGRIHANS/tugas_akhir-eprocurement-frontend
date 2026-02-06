@@ -50,6 +50,7 @@
 
 <script lang="ts" setup>
 import { ref, computed, watch, onMounted, inject } from 'vue'
+import { useRoute } from 'vue-router'
 import type { formTypes } from '../../../types/invoiceAddWrapper'
 import type { PaymentTypes } from '@/stores/master-data/types/invoiceMasterData'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
@@ -57,6 +58,7 @@ import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterDat
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const form = inject<formTypes>('form')
 const bankList = ref<PaymentTypes[]>([])
+const route = useRoute()
 
 const vendorList = computed(() => invoiceMasterApi.vendorList)
 
@@ -95,11 +97,17 @@ watch(
   () => {
     checkBank()
     setBank()
+    if (route.query.type === 'cas' && form) {
+      form.bankAccountNumber = '1234567890'
+    }
+  },
+  {
+    immediate: true,
   },
 )
 
 watch(
-  () => form?.bankAccountNumber,
+  () => [form?.bankAccountNumber, bankList.value],
   () => {
     if (form) {
       const getIndex = bankList.value.findIndex(
@@ -114,9 +122,16 @@ watch(
       }
     }
   },
+  {
+    immediate: true,
+  },
 )
 
 onMounted(() => {
   checkBank()
+  setBank()
+  if (route.query.type === 'cas' && form) {
+    form.bankAccountNumber = '1234567890'
+  }
 })
 </script>

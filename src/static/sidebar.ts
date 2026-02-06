@@ -212,6 +212,11 @@ const sidebarMenuData: ISidebarMenu[] = [
         to: 'emailInvoiceIntegration',
       },
       {
+        id: 'cash-advance',
+        title: 'Cash Advance',
+        to: 'cash-advance',
+      },
+      {
         id: 'invoice-type',
         title: 'Invoice Type',
         to: 'invoice-type',

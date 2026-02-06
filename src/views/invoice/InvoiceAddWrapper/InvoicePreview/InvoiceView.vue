@@ -131,7 +131,11 @@ const isCAS = computed(() => form?.invoiceType === '3')
 const isLBA = computed(() => form?.invoiceType === '4')
 
 const checkIsNonPo = () => {
-  return route.query.type === 'nonpo' || route.query.type === 'non-po-view'
+  return (
+    route.query.type === 'nonpo' ||
+    route.query.type === 'non-po-view' ||
+    route.query.type === 'cas'
+  )
 }
 
 const getPettyCashPeriod = () => {

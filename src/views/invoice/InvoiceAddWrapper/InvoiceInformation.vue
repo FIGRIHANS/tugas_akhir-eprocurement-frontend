@@ -6,10 +6,7 @@
     </div>
     <InvoicePoGr v-if="!checkNonPo()" class="mt-[24px]" />
     <InvoiceItem v-if="checkNonPo()" class="mt-[24px]" />
-    <AdditionalCost
-      v-if="(checkPoWithoutDp() || checkPoWithDp()) && !checkNonPo()"
-      class="mt-[24px]"
-    />
+    <AdditionalCost v-if="(checkPoWithoutDp() || checkPoWithDp()) && !checkNonPo()" class="mt-[24px]" />
   </div>
 </template>
 
@@ -31,7 +28,7 @@ const route = useRoute()
 const typeForm = ref<string>('')
 
 const checkNonPo = () => {
-  return typeForm.value === 'nonpo' || typeForm.value === 'non-po-view'
+  return typeForm.value === 'nonpo' || typeForm.value === 'non-po-view' || typeForm.value === 'cas'
 }
 
 // const checkPoPib = () => {

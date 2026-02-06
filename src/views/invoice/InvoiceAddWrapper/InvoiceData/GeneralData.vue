@@ -9,19 +9,14 @@
       <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
         <label class="form-label max-w-32">
           Vendor Name
-          <span v-if="(form.status === 0 || form.status === -1 || form.status === 5) && !loginApi.isVendor" class="text-red-500 ml-[4px]">*</span>
+          <span v-if="(form.status === 0 || form.status === -1 || form.status === 5) && !loginApi.isVendor"
+            class="text-red-500 ml-[4px]">*</span>
         </label>
-        <input v-if="(form.status !== 0 && form.status !== -1 && form.status !== 5) || loginApi.isVendor" v-model="form.vendorName" class="input" placeholder="" disabled />
-        <v-select
-          v-else
-          v-model="form.vendorId"
-          class="customSelect w-full"
-          label="vendorName"
-          placeholder="Select"
-          :reduce="(option: any) => option.sapCode"
-          :options="vendorList"
-          :class="{ 'error-select': form.vendorIdError }"
-        ></v-select>
+        <input v-if="(form.status !== 0 && form.status !== -1 && form.status !== 5) || loginApi.isVendor"
+          v-model="form.vendorName" class="input" placeholder="" disabled />
+        <v-select v-else v-model="form.vendorId" class="customSelect w-full" label="vendorName" placeholder="Select"
+          :reduce="(option: any) => option.sapCode" :options="vendorList"
+          :class="{ 'error-select': form.vendorIdError }"></v-select>
         <!-- <select v-else v-model="form.vendorId" class="select" :class="{ 'border-danger': form.vendorIdError }">
           <option v-for="item of vendorList" :key="item.vendorId" :value="item.sapCode">
             {{ item.vendorName }}
@@ -33,7 +28,7 @@
         <label class="form-label max-w-32">
           NPWP
         </label>
-        <input v-model="form.npwp" class="input" placeholder="" disabled/>
+        <input v-model="form.npwp" class="input" placeholder="" disabled />
       </div>
       <!-- Address -->
       <div class="flex items-center flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
@@ -89,6 +84,8 @@ watch(
 watch(
   () => isVendor.value,
   () => {
+    console.log(form.vendorId);
+
     if (isVendor.value && form) {
       form.vendorId = userData.value?.profile.sapCode || ''
       form.vendorName = userData.value?.profile.vendorName || ''
@@ -101,5 +98,8 @@ watch(
 
 onMounted(() => {
   typeForm.value = route.query.type?.toString().toLowerCase() || 'po'
+  if (typeForm.value === 'cas' && form) {
+    form.vendorId = '3000010'
+  }
 })
 </script>
