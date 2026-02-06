@@ -318,6 +318,16 @@ const sidebarMenuData: ISidebarMenu[] = [
         title: 'Workflow Config List',
         to: 'workflow-list',
       },
+      {
+        id: 'list-organization',
+        title: 'List Organization',
+        to: 'list-organization',
+      },
+      {
+        id: 'requisitioner-master',
+        title: 'Requisitioner Master',
+        to: 'requisitioner-master',
+      },
     ],
   },
   {

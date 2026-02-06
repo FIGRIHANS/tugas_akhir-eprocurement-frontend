@@ -373,6 +373,7 @@ import { cloneDeep } from 'lodash'
 import AuthenticationModal from './VatReconciliation/AuthenticationModal.vue'
 import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 import vatApi from '@/core/utils/vatApi'
+import { useNotificationStore } from '@/stores/notification/notificationStore'
 
 // Expose moment to template
 const moment = momentLib
@@ -501,7 +502,7 @@ const fetchVatData = async () => {
     let content = response.data.result?.content || []
 
     // TODO: Remove this dummy logic once backend provides real status
-    content = content.map((item: VATReconciliationData) => {
+    content = content.map((item: VATReconciliationData, index: number) => {
       // Randomly assign Status FP
       const fpStatuses = ['Approved', 'Rejected', 'Approved', 'Approved'] // Weighted to Approved
       const randomFp = fpStatuses[Math.floor(Math.random() * fpStatuses.length)]
@@ -519,11 +520,18 @@ const fetchVatData = async () => {
         credit = 'WAITING_FOR_AMENDMENT'
       }
 
+      // Generate dummy vatCreditExpiryDate for notification testing
+      // Some near expiry (for notifications), some far
+      const expiryDaysOptions = [2, 5, 10, 25, 45, 60, 90] // Days from now
+      const daysFromNow = expiryDaysOptions[index % expiryDaysOptions.length]
+      const expiryDate = momentLib().add(daysFromNow, 'days').format('YYYY-MM-DD')
+
       return {
         ...item,
         statusFp: randomFp,
         statusApVsFp: randomMatch,
         creditStatus: credit,
+        vatCreditExpiryDate: item.vatCreditExpiryDate || expiryDate,
       }
     })
 
@@ -531,7 +539,13 @@ const fetchVatData = async () => {
     vatData.value = content
     dataList.value = content
     console.log('VAT Data fetched successfully:', content.length, 'records')
-    console.log('dataList.value:', dataList.value)
+
+    // Check for VAT expiry notifications
+    const notificationStore = useNotificationStore()
+    const newNotifications = notificationStore.checkVatExpiryNotifications(content)
+    if (newNotifications > 0) {
+      console.log(`Created ${newNotifications} VAT expiry notifications`)
+    }
   } catch (error) {
     console.error('Error fetching VAT reconciliation data:', error)
     vatData.value = []
