@@ -15,7 +15,9 @@
             <table class="min-w-[1800px] w-full border-collapse" aria-label="Workflow profile table">
               <thead>
                 <tr class="bg-gray-50">
+                  <th class="py-4 px-6 text-sm font-medium text-left whitespace-nowrap">Action</th>
                   <th class="py-4 px-6 text-sm font-medium text-left whitespace-nowrap">Step</th>
+                  <th class="py-4 px-6 text-sm font-medium text-left whitespace-nowrap">Workflow ID</th>
                   <th class="py-4 px-6 text-sm font-medium text-left whitespace-nowrap">Category</th>
                   <th class="py-4 px-6 text-sm font-medium text-left whitespace-nowrap">Bracket Amount</th>
                   <th class="py-4 px-6 text-sm font-medium text-left whitespace-nowrap">Step Name</th>
@@ -30,7 +32,19 @@
               <tbody>
                 <template v-if="!isDataEmpty">
                   <tr v-for="(row, idx) in workflowData" :key="idx" class="hover:bg-gray-50 border-b">
+                    <td class="py-3 px-6 text-sm whitespace-nowrap">
+                      <UiButton class="btn-icon btn btn-light" @click="emit('edit-row', idx, row)">
+                        <i class="ki-filled ki-pencil"></i>
+                      </UiButton>
+                    </td>
                     <td class="py-3 px-6 text-sm whitespace-nowrap">{{ row.step }}</td>
+                    <td class="py-3 px-6 text-sm whitespace-nowrap">
+                      {{
+                        row.notificationGroupId?.startsWith('NG-')
+                          ? row.notificationGroupId.replace('NG-', '')
+                          : '-'
+                      }}
+                    </td>
                     <td class="py-3 px-6 text-sm whitespace-nowrap">{{ row.category }}</td>
                     <td class="py-3 px-6 text-sm whitespace-nowrap">{{ row.bracketAmount }}</td>
                     <td class="py-3 px-6 text-sm whitespace-nowrap">{{ row.stepName }}</td>
@@ -43,7 +57,7 @@
                 </template>
 
                 <tr v-else>
-                  <td colspan="9" class="text-center py-16">
+                  <td colspan="11" class="text-center py-16">
                     <div class="text-gray-500 text-sm">
                       Data will display after generate WF Step
                     </div>
@@ -62,6 +76,7 @@
 <script lang="ts" setup>
 import { ref, onMounted, nextTick, toRefs } from 'vue'
 import type { PropType } from 'vue'
+import UiButton from '../ui/atoms/button/UiButton.vue'
 
 type WorkflowRow = {
   step: string | number
@@ -87,6 +102,10 @@ const props = defineProps({
     default: () => [],
   },
 })
+
+const emit = defineEmits<{
+  (e: 'edit-row', index: number, row: WorkflowRow): void
+}>()
 
 const { isDataEmpty, workflowData } = toRefs(props)
 const tableWrapper = ref<HTMLDivElement | null>(null)
