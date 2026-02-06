@@ -17,7 +17,7 @@ export default [
   {
     path: '/log-activity',
     name: 'log-activity',
-    component: () => import('@/views/sytemConfiguration/logActivityList.vue'),
+    component: () => import('@/views/sytemConfiguration/log-activity/LogActivityListView.vue'),
   },
   {
     path: '/add-integration/:id',

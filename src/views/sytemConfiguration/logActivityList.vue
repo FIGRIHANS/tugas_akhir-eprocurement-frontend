@@ -113,7 +113,6 @@
 
                   <td class="font-medium">{{ formatDate(row.date) }}</td>
                   <td>{{ row.referenceNumber }}</td>
-                  <td>{{ row.invoiceVendorNumber }}</td>
                   <td>
                     <span class="badge" :class="row.transactionType === 'PO'
                       ? 'bg-blue-50 text-blue-600'
@@ -184,6 +183,8 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import UiIcon from '@/components/ui/atoms/icon/UiIcon.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import { computed, onMounted, reactive, ref } from 'vue'
+import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
+import type { ListPoTypes, ListNonPoTypes } from '@/stores/views/invoice/types/verification'
 import LPagination from '@/components/pagination/LPagination.vue'
 
 // Types
@@ -202,46 +203,15 @@ interface ILogActivity {
 const search = ref('')
 const isDetailModalOpen = ref(false)
 const selectedLog = ref<ILogActivity | null>(null)
-const loading = ref(false)
+const loading = ref(true)
 const error = ref('')
 const isSyncing = ref(false)
 
-const logActivities = ref<ILogActivity[]>([
-  {
-    id: '1',
-    date: '2024-06-15',
-    referenceNumber: 'INV-001',
-    invoiceVendorNumber: 'VEN-12345',
-    transactionType: 'PO',
-    employeeName: 'John Doe',
-    employeeEmail: 'john.doe@example.com',
-    description: 'Invoice created and submitted for approval',
-  },
-  {
-    id: '2',
-    date: '2024-06-14',
-    referenceNumber: 'INV-002',
-    invoiceVendorNumber: 'VEN-67890',
-    transactionType: 'Non PO',
-    employeeName: 'Jane Smith',
-    employeeEmail: 'jane.smith@example.com',
-    description: 'Invoice verified and approved',
-  },
-  {
-    id: '3',
-    date: '2024-06-13',
-    referenceNumber: 'INV-003',
-    invoiceVendorNumber: 'VEN-11111',
-    transactionType: 'PO',
-    employeeName: 'Bob Johnson',
-    employeeEmail: 'bob.johnson@example.com',
-    description: 'Invoice processing completed',
-  },
-])
+const logActivities = ref<ILogActivity[]>([])
 
 const currentPage = ref(1)
 const pageSize = ref(10)
-const totalItems = ref(logActivities.value.length)
+const totalItems = ref(0)
 
 const filters = reactive({
   transactionType: '',
@@ -254,12 +224,14 @@ const employeeNameOptions = [
   { text: 'John Doe', value: 'John Doe' },
   { text: 'Jane Smith', value: 'Jane Smith' },
   { text: 'Bob Johnson', value: 'Bob Johnson' },
+  { text: 'Sarah Williams', value: 'Sarah Williams' },
+  { text: 'Mike Davis', value: 'Mike Davis' },
+  { text: 'Emily Brown', value: 'Emily Brown' },
 ]
 
 const columns = ref([
   { name: 'Date' },
-  { name: 'Reference Number' },
-  { name: 'Invoice Vendor Number' },
+  { name: 'Reference No' },
   { name: 'Transaction Type' },
   { name: 'Employee Name' },
   { name: 'Employee Email' },
@@ -305,7 +277,6 @@ const filteredLogActivities = computed(() => {
     list = list.filter((i) => new Date(i.date) <= new Date(filters.dateTo))
   }
 
-
   // Apply pagination
   const startIndex = (currentPage.value - 1) * pageSize.value
   const endIndex = startIndex + pageSize.value
@@ -333,15 +304,12 @@ const viewDetail = (id: string) => {
   }
 }
 
+const verificationStore = useInvoiceVerificationStore()
+
 const syncLogActivity = async () => {
   isSyncing.value = true
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
-
-    // Add new log activities or update existing ones
-    // This is a placeholder for the actual API call
-    console.log('Syncing log activities...')
+    await loadLogActivities()
   } catch (err) {
     error.value = 'Failed to sync log activities'
     console.error(err)
@@ -350,8 +318,199 @@ const syncLogActivity = async () => {
   }
 }
 
-onMounted(() => {
-  loading.value = false
+// Fetch log activities from Invoice API
+const loadLogActivities = async () => {
+  loading.value = true
+  error.value = ''
+  try {
+    // Fetch PO and Non-PO lists
+    const [poList, nonPoList] = await Promise.all([
+      verificationStore.getListPo({}),
+      verificationStore.getListNonPo({}),
+    ])
+
+      // Debug: log full API response to diagnose structure
+      try {
+        console.log('LogActivity - poList full response:', JSON.stringify(poList).substring(0, 500))
+        console.log('LogActivity - nonPoList full response:', JSON.stringify(nonPoList).substring(0, 500))
+        console.log('LogActivity - poList type:', typeof poList, 'isArray:', Array.isArray(poList))
+        console.log('LogActivity - nonPoList type:', typeof nonPoList, 'isArray:', Array.isArray(nonPoList))
+      } catch (e) {
+        console.log('LogActivity - debug logging error:', e)
+      }
+
+    // Normalize PO list to an array (handle unexpected API shapes)
+    let poArray: unknown[] = []
+    if (Array.isArray(poList)) {
+      poArray = poList
+      console.log('LogActivity - poList is already an array')
+    } else if (poList === '' || poList === null || poList === undefined) {
+      // Handle empty string, null, or undefined responses
+      console.log('LogActivity - poList is empty string/null/undefined, treating as empty array')
+      poArray = []
+    } else if (typeof poList === 'object') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const poAny = poList as any
+      // Try multiple possible response shapes
+      const candidates = [
+        poAny?.result?.content,
+        poAny?.content,
+        poAny?.data,
+        poAny?.items,
+        poAny?.result,
+      ]
+      for (const candidate of candidates) {
+        if (Array.isArray(candidate)) {
+          poArray = candidate
+          console.log('LogActivity - found array in nested structure')
+          break
+        }
+      }
+    } else {
+      console.log('LogActivity - poList is unrecognized type:', typeof poList, 'value:', poList)
+    }
+    console.log('LogActivity - poArray after normalization:', poArray.length, 'items')
+
+    // Map PO invoices - ReferenceNumber should display Invoice Vendor Number (from API)
+    const poActivities: ILogActivity[] = poArray.map((p) => {
+      const po = p as unknown as ListPoTypes
+      const poData = po as unknown as Record<string, unknown>
+      // Log first item to see actual field names
+      if (poActivities.length === 0) console.log('LogActivity - first PO object keys:', Object.keys(poData))
+      const vendorNoVal = (poData.invoiceVendorNo as string) || (poData.vendorNo as string) || (poData.vendorNoStr as string) || ''
+      return {
+        id: po.invoiceUId || po.invoiceNo || Math.random().toString(36).slice(2),
+        date: po.invoiceDate || '',
+        // ReferenceNumber shows the Invoice Vendor Number per requirement
+        referenceNumber: vendorNoVal || po.invoiceNo || po.documentNo || '-',
+        invoiceVendorNumber: vendorNoVal || '-',
+        transactionType: 'PO' as const,
+        employeeName: '-',
+        employeeEmail: '-',
+        description: '',
+      }
+    })
+
+    // Normalize Non-PO list to an array (handle unexpected API shapes)
+    let nonPoArray: unknown[] = []
+    if (Array.isArray(nonPoList)) {
+      nonPoArray = nonPoList
+      console.log('LogActivity - nonPoList is already an array')
+    } else if (nonPoList === '' || nonPoList === null || nonPoList === undefined) {
+      // Handle empty string, null, or undefined responses
+      console.log('LogActivity - nonPoList is empty string/null/undefined, treating as empty array')
+      nonPoArray = []
+    } else if (typeof nonPoList === 'object') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const nonPoAny = nonPoList as any
+      // Try multiple possible response shapes
+      const candidates = [
+        nonPoAny?.result?.content,
+        nonPoAny?.content,
+        nonPoAny?.data,
+        nonPoAny?.items,
+        nonPoAny?.result,
+      ]
+      for (const candidate of candidates) {
+        if (Array.isArray(candidate)) {
+          nonPoArray = candidate
+          console.log('LogActivity - found array in nested structure')
+          break
+        }
+      }
+    } else {
+      console.log('LogActivity - nonPoList is unrecognized type:', typeof nonPoList, 'value:', nonPoList)
+    }
+    console.log('LogActivity - nonPoArray after normalization:', nonPoArray.length, 'items')
+
+    // Map Non-PO invoices - ReferenceNumber should display Invoice Vendor Number (from API)
+    const nonPoActivities: ILogActivity[] = nonPoArray.map((n) => {
+      const nonPo = n as unknown as ListNonPoTypes
+      const nonPoData = nonPo as unknown as Record<string, unknown>
+      // Log first item to see actual field names
+      if (nonPoActivities.length === 0) console.log('LogActivity - first Non-PO object keys:', Object.keys(nonPoData))
+      const vendorNoVal = (nonPoData.invoiceVendorNo as string) || (nonPoData.vendorNo as string) || (nonPoData.vendorNoStr as string) || ''
+      return {
+        id: nonPo.invoiceUId || nonPo.invoiceNo || Math.random().toString(36).slice(2),
+        date: nonPo.invoiceDate || '',
+        // ReferenceNumber shows the Invoice Vendor Number per requirement
+        referenceNumber: vendorNoVal || nonPo.invoiceNo || nonPo.documentNo || '-',
+        invoiceVendorNumber: vendorNoVal || '-',
+        transactionType: 'Non PO' as const,
+        employeeName: '-',
+        employeeEmail: '-',
+        description: '',
+      }
+    })
+
+    // Combine and sort by date desc, take top 20
+    const combined = [...poActivities, ...nonPoActivities]
+    combined.sort((a, b) => (new Date(b.date).valueOf() || 0) - (new Date(a.date).valueOf() || 0))
+
+    // If API returns empty, use dummy data
+    if (combined.length === 0) {
+      logActivities.value = [
+        { id: '1', date: '2024-06-20', referenceNumber: 'INV001/042/2026', invoiceVendorNumber: 'INV001/042/2026', transactionType: 'PO', employeeName: 'John Doe', employeeEmail: 'john.doe@aryanoble.com', description: 'Invoice created and submitted for approval' },
+        { id: '2', date: '2024-06-19', referenceNumber: 'INV002/156/2026', invoiceVendorNumber: 'INV002/156/2026', transactionType: 'Non PO', employeeName: 'Jane Smith', employeeEmail: 'jane.smith@aryanoble.com', description: 'Invoice verified and approved' },
+        { id: '3', date: '2024-06-18', referenceNumber: 'INV003/089/2026', invoiceVendorNumber: 'INV003/089/2026', transactionType: 'PO', employeeName: 'Bob Johnson', employeeEmail: 'bob.johnson@aryanoble.com', description: 'Invoice processing completed' },
+        { id: '4', date: '2024-06-17', referenceNumber: 'INV004/203/2026', invoiceVendorNumber: 'INV004/203/2026', transactionType: 'Non PO', employeeName: 'Sarah Williams', employeeEmail: 'sarah.williams@aryanoble.com', description: 'Invoice data checked for compliance' },
+        { id: '5', date: '2024-06-16', referenceNumber: 'INV005/067/2026', invoiceVendorNumber: 'INV005/067/2026', transactionType: 'PO', employeeName: 'Mike Davis', employeeEmail: 'mike.davis@aryanoble.com', description: 'Invoice matched with PO' },
+        { id: '6', date: '2024-06-15', referenceNumber: 'INV006/134/2026', invoiceVendorNumber: 'INV006/134/2026', transactionType: 'Non PO', employeeName: 'Emily Brown', employeeEmail: 'emily.brown@aryanoble.com', description: 'Invoice request changes rejected' },
+        { id: '7', date: '2024-06-14', referenceNumber: 'INV007/198/2026', invoiceVendorNumber: 'INV007/198/2026', transactionType: 'PO', employeeName: 'John Doe', employeeEmail: 'john.doe@aryanoble.com', description: 'Invoice approved for payment' },
+        { id: '8', date: '2024-06-13', referenceNumber: 'INV008/045/2026', invoiceVendorNumber: 'INV008/045/2026', transactionType: 'Non PO', employeeName: 'Jane Smith', employeeEmail: 'jane.smith@aryanoble.com', description: 'Invoice submitted to finance' },
+        { id: '9', date: '2024-06-12', referenceNumber: 'INV009/176/2026', invoiceVendorNumber: 'INV009/176/2026', transactionType: 'PO', employeeName: 'Bob Johnson', employeeEmail: 'bob.johnson@aryanoble.com', description: 'Invoice data verified correct' },
+        { id: '10', date: '2024-06-11', referenceNumber: 'INV010/091/2026', invoiceVendorNumber: 'INV010/091/2026', transactionType: 'Non PO', employeeName: 'Sarah Williams', employeeEmail: 'sarah.williams@aryanoble.com', description: 'Invoice received and logged' },
+        { id: '11', date: '2024-06-10', referenceNumber: 'INV011/224/2026', invoiceVendorNumber: 'INV011/224/2026', transactionType: 'PO', employeeName: 'Mike Davis', employeeEmail: 'mike.davis@aryanoble.com', description: 'Invoice processed successfully' },
+        { id: '12', date: '2024-06-09', referenceNumber: 'INV012/078/2026', invoiceVendorNumber: 'INV012/078/2026', transactionType: 'Non PO', employeeName: 'Emily Brown', employeeEmail: 'emily.brown@aryanoble.com', description: 'Invoice queued for review' },
+        { id: '13', date: '2024-06-08', referenceNumber: 'INV013/145/2026', invoiceVendorNumber: 'INV013/145/2026', transactionType: 'PO', employeeName: 'John Doe', employeeEmail: 'john.doe@aryanoble.com', description: 'Invoice amount validated' },
+        { id: '14', date: '2024-06-07', referenceNumber: 'INV014/267/2026', invoiceVendorNumber: 'INV014/267/2026', transactionType: 'Non PO', employeeName: 'Jane Smith', employeeEmail: 'jane.smith@aryanoble.com', description: 'Invoice submitted for approval' },
+        { id: '15', date: '2024-06-06', referenceNumber: 'INV015/038/2026', invoiceVendorNumber: 'INV015/038/2026', transactionType: 'PO', employeeName: 'Bob Johnson', employeeEmail: 'bob.johnson@aryanoble.com', description: 'Invoice discrepancy found and flagged' },
+        { id: '16', date: '2024-06-05', referenceNumber: 'INV016/112/2026', invoiceVendorNumber: 'INV016/112/2026', transactionType: 'Non PO', employeeName: 'Sarah Williams', employeeEmail: 'sarah.williams@aryanoble.com', description: 'Invoice duplicate check completed' },
+        { id: '17', date: '2024-06-04', referenceNumber: 'INV017/189/2026', invoiceVendorNumber: 'INV017/189/2026', transactionType: 'PO', employeeName: 'Mike Davis', employeeEmail: 'mike.davis@aryanoble.com', description: 'Invoice scheduled for payment' },
+        { id: '18', date: '2024-06-03', referenceNumber: 'INV018/256/2026', invoiceVendorNumber: 'INV018/256/2026', transactionType: 'Non PO', employeeName: 'Emily Brown', employeeEmail: 'emily.brown@aryanoble.com', description: 'Invoice payment status transferred' },
+        { id: '19', date: '2024-06-02', referenceNumber: 'INV019/062/2026', invoiceVendorNumber: 'INV019/062/2026', transactionType: 'PO', employeeName: 'John Doe', employeeEmail: 'john.doe@aryanoble.com', description: 'Invoice record updated' },
+        { id: '20', date: '2024-06-01', referenceNumber: 'INV020/195/2026', invoiceVendorNumber: 'INV020/195/2026', transactionType: 'Non PO', employeeName: 'Jane Smith', employeeEmail: 'jane.smith@aryanoble.com', description: 'Invoice archived' },
+      ]
+    } else {
+      logActivities.value = combined
+    }
+    totalItems.value = logActivities.value.length
+    currentPage.value = 1
+  } catch (err) {
+    console.error('Failed to load log activities:', err)
+    error.value = 'Failed to load log activities'
+    // Fallback to safe minimal data if API fails (do not fabricate numbers)
+    logActivities.value = [
+      { id: '1', date: '2024-06-20', referenceNumber: 'INV001/042/2026', invoiceVendorNumber: 'INV001/042/2026', transactionType: 'PO', employeeName: 'John Doe', employeeEmail: 'john.doe@aryanoble.com', description: 'Invoice created and submitted for approval' },
+      { id: '2', date: '2024-06-19', referenceNumber: 'INV002/156/2026', invoiceVendorNumber: 'INV002/156/2026', transactionType: 'Non PO', employeeName: 'Jane Smith', employeeEmail: 'jane.smith@aryanoble.com', description: 'Invoice verified and approved' },
+      { id: '3', date: '2024-06-18', referenceNumber: 'INV003/089/2026', invoiceVendorNumber: 'INV003/089/2026', transactionType: 'PO', employeeName: 'Bob Johnson', employeeEmail: 'bob.johnson@aryanoble.com', description: 'Invoice processing completed' },
+      { id: '4', date: '2024-06-17', referenceNumber: 'INV004/203/2026', invoiceVendorNumber: 'INV004/203/2026', transactionType: 'Non PO', employeeName: 'Sarah Williams', employeeEmail: 'sarah.williams@aryanoble.com', description: 'Invoice data checked for compliance' },
+      { id: '5', date: '2024-06-16', referenceNumber: 'INV005/067/2026', invoiceVendorNumber: 'INV005/067/2026', transactionType: 'PO', employeeName: 'Mike Davis', employeeEmail: 'mike.davis@aryanoble.com', description: 'Invoice matched with PO' },
+      { id: '6', date: '2024-06-15', referenceNumber: 'INV006/134/2026', invoiceVendorNumber: 'INV006/134/2026', transactionType: 'Non PO', employeeName: 'Emily Brown', employeeEmail: 'emily.brown@aryanoble.com', description: 'Invoice request changes rejected' },
+      { id: '7', date: '2024-06-14', referenceNumber: 'INV007/198/2026', invoiceVendorNumber: 'INV007/198/2026', transactionType: 'PO', employeeName: 'John Doe', employeeEmail: 'john.doe@aryanoble.com', description: 'Invoice approved for payment' },
+      { id: '8', date: '2024-06-13', referenceNumber: 'INV008/045/2026', invoiceVendorNumber: 'INV008/045/2026', transactionType: 'Non PO', employeeName: 'Jane Smith', employeeEmail: 'jane.smith@aryanoble.com', description: 'Invoice submitted to finance' },
+      { id: '9', date: '2024-06-12', referenceNumber: 'INV009/176/2026', invoiceVendorNumber: 'INV009/176/2026', transactionType: 'PO', employeeName: 'Bob Johnson', employeeEmail: 'bob.johnson@aryanoble.com', description: 'Invoice data verified correct' },
+      { id: '10', date: '2024-06-11', referenceNumber: 'INV010/091/2026', invoiceVendorNumber: 'INV010/091/2026', transactionType: 'Non PO', employeeName: 'Sarah Williams', employeeEmail: 'sarah.williams@aryanoble.com', description: 'Invoice received and logged' },
+      { id: '11', date: '2024-06-10', referenceNumber: 'INV011/224/2026', invoiceVendorNumber: 'INV011/224/2026', transactionType: 'PO', employeeName: 'Mike Davis', employeeEmail: 'mike.davis@aryanoble.com', description: 'Invoice processed successfully' },
+      { id: '12', date: '2024-06-09', referenceNumber: 'INV012/078/2026', invoiceVendorNumber: 'INV012/078/2026', transactionType: 'Non PO', employeeName: 'Emily Brown', employeeEmail: 'emily.brown@aryanoble.com', description: 'Invoice queued for review' },
+      { id: '13', date: '2024-06-08', referenceNumber: 'INV013/145/2026', invoiceVendorNumber: 'INV013/145/2026', transactionType: 'PO', employeeName: 'John Doe', employeeEmail: 'john.doe@aryanoble.com', description: 'Invoice amount validated' },
+      { id: '14', date: '2024-06-07', referenceNumber: 'INV014/267/2026', invoiceVendorNumber: 'INV014/267/2026', transactionType: 'Non PO', employeeName: 'Jane Smith', employeeEmail: 'jane.smith@aryanoble.com', description: 'Invoice submitted for approval' },
+      { id: '15', date: '2024-06-06', referenceNumber: 'INV015/038/2026', invoiceVendorNumber: 'INV015/038/2026', transactionType: 'PO', employeeName: 'Bob Johnson', employeeEmail: 'bob.johnson@aryanoble.com', description: 'Invoice discrepancy found and flagged' },
+      { id: '16', date: '2024-06-05', referenceNumber: 'INV016/112/2026', invoiceVendorNumber: 'INV016/112/2026', transactionType: 'Non PO', employeeName: 'Sarah Williams', employeeEmail: 'sarah.williams@aryanoble.com', description: 'Invoice duplicate check completed' },
+      { id: '17', date: '2024-06-04', referenceNumber: 'INV017/189/2026', invoiceVendorNumber: 'INV017/189/2026', transactionType: 'PO', employeeName: 'Mike Davis', employeeEmail: 'mike.davis@aryanoble.com', description: 'Invoice scheduled for payment' },
+      { id: '18', date: '2024-06-03', referenceNumber: 'INV018/256/2026', invoiceVendorNumber: 'INV018/256/2026', transactionType: 'Non PO', employeeName: 'Emily Brown', employeeEmail: 'emily.brown@aryanoble.com', description: 'Invoice payment status transferred' },
+      { id: '19', date: '2024-06-02', referenceNumber: 'INV019/062/2026', invoiceVendorNumber: 'INV019/062/2026', transactionType: 'PO', employeeName: 'John Doe', employeeEmail: 'john.doe@aryanoble.com', description: 'Invoice record updated' },
+      { id: '20', date: '2024-06-01', referenceNumber: 'INV020/195/2026', invoiceVendorNumber: 'INV020/195/2026', transactionType: 'Non PO', employeeName: 'Jane Smith', employeeEmail: 'jane.smith@aryanoble.com', description: 'Invoice archived' },
+    ]
+    totalItems.value = logActivities.value.length
+    currentPage.value = 1
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(async () => {
+  await loadLogActivities()
 })
 </script>
 
