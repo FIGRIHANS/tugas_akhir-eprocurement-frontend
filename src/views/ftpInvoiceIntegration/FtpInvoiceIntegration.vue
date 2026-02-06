@@ -284,7 +284,7 @@ const columns = ref<string[]>([
   'Estimated Payment Date',
   'Submitted Document No',
   'Invoice Source',
-  'Error Message',
+  'Invoice Status',
   'FP Status',
   'VAT Status',
   'WHT Status',

@@ -14,64 +14,21 @@
         <!-- FILTER FORM (STYLING LAMA) -->
         <div class="p-6">
           <div class="grid grid-cols-2 gap-6">
-
-            <!-- LEFT -->
-            <div class="space-y-6 pl-12">
-              <div class="flex items-center gap-4">
-                <label class="w-32 text-sm font-medium text-gray-700">Bracket Code</label>
-                <div class="flex-1">
-                  <UiInput v-model="form.bracketCode" />
-                </div>
-              </div>
-
-              <div class="flex items-center gap-4">
-                <label class="w-32 text-sm font-medium text-gray-700">Company Code</label>
-                <div class="flex-1">
-                  <UiSelect v-model="form.companyCode" :options="companyOptions" />
-                </div>
-              </div>
-
-              <div class="flex items-center gap-4">
-                <label class="w-32 text-sm font-medium text-gray-700">Bracket Type</label>
-                <div class="flex-1">
-                  <UiSelect v-model="form.bracketType" :options="bracketTypeOptions" />
-                </div>
-              </div>
-
-              <div class="flex items-center gap-4">
-                <label class="w-32 text-sm font-medium text-gray-700">Level</label>
-                <div class="flex-1">
-                  <UiInput type="number" v-model="form.level" />
-                </div>
+            <div class="flex items-center gap-4">
+              <label class="w-32 text-sm font-medium text-gray-700">Bracket Group</label>
+              <div class="flex-1">
+                <UiInput v-model="form.bracketGroup" />
               </div>
             </div>
 
-            <!-- RIGHT -->
-            <div class="space-y-6 pr-12">
-              <div class="flex items-center gap-4">
-                <label class="w-32 text-sm font-medium text-gray-700">Amount From</label>
-                <div class="flex-1">
-                  <UiInput type="number" v-model="form.amountFrom" />
-                </div>
-              </div>
-
-              <div class="flex items-center gap-4">
-                <label class="w-32 text-sm font-medium text-gray-700">Amount To</label>
-                <div class="flex-1">
-                  <UiInput type="number" v-model="form.amountTo" />
-                </div>
-              </div>
-
-              <div class="flex items-center gap-4">
-                <label class="w-32 text-sm font-medium text-gray-700">Currency</label>
-                <div class="flex-1">
-                  <UiSelect v-model="form.currency" :options="currencyOptions" />
-                </div>
+            <div class="flex items-center gap-4">
+              <label class="w-32 text-sm font-medium text-gray-700">Bracket Code</label>
+              <div class="flex-1">
+                <UiInput v-model="form.bracketCode" />
               </div>
             </div>
-
           </div>
-          <div class="flex justify-end">
+          <div class="flex justify-end mt-5">
             <UiButton class="btn btn-primary" @click="handleFilter()">Filter</UiButton>
           </div>
         </div>
@@ -80,11 +37,11 @@
         <div class="p-6 border-t">
           <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-50">
+              <thead>
                 <tr>
                   <th class="px-4 py-3 w-10"></th>
                   <th v-for="header in headers" :key="header"
-                    class="px-4 py-3 text-left text-sm font-medium text-gray-600">
+                    class="px-4 py-3 text-left text-sm font-medium text-gray-800">
                     {{ header }}
                   </th>
                 </tr>
@@ -98,20 +55,25 @@
                 <!-- DATA ROW -->
                 <tr v-for="item in filteredExampleData" :key="item.bracketCode" class="hover:bg-blue-50 transition">
                   <td class="px-4 py-2 text-center">
-                    <UiCheckbox label="" :checked="selectedBracket?.bracketCode === item.bracketCode"
-                      @change="selectedBracket = item" />
+                    <UiRadio
+                      v-model="selectedBracket"
+                      :value="item"
+                      name="bracketSelect"
+                    />
                   </td>
-                  <td class="px-4 py-2 text-sm">{{ item.bracketCode }}</td>
                   <td class="px-4 py-2 text-sm">{{ item.companyCode }}</td>
+                  <td class="px-4 py-2 text-sm">{{ item.bracketGroup }}</td>
+                  <td class="px-4 py-2 text-sm">{{ item.bracketCode }}</td>
                   <td class="px-4 py-2 text-sm">{{ item.bracketType }}</td>
                   <td class="px-4 py-2 text-sm">{{ item.level }}</td>
                   <td class="px-4 py-2 text-sm">{{ item.amountFrom }}</td>
                   <td class="px-4 py-2 text-sm">{{ item.amountTo }}</td>
                   <td class="px-4 py-2 text-sm">{{ item.currency }}</td>
+                  <td class="px-4 py-2 text-sm">{{ item.status }}</td>
                 </tr>
 
                 <!-- NO RESULT -->
-                <tr v-if="hasFilter && filteredExampleData.length === 0">
+                <tr v-if="filteredExampleData.length === 0">
                   <td colspan="8" class="py-6 text-center text-gray-400">
                     No data found
                   </td>
@@ -146,7 +108,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import UiInput from '@/components/ui/atoms/input/UiInput.vue'
 import UiSelect from '@/components/ui/atoms/select/UiSelect.vue'
-import UiCheckbox from '@/components/ui/atoms/checkbox/UiCheckbox.vue'
+import UiRadio from '@/components/ui/atoms/radio/UiRadio.vue'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 
 /* =======================
@@ -154,12 +116,14 @@ import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 ======================= */
 type BracketForm = {
   bracketCode: string
+  bracketGroup: string
   companyCode: string
   bracketType: string
   currency: string
   level: string | number
   amountFrom: string | number
   amountTo: string | number
+  status: string
 }
 
 type ExampleBracket = BracketForm
@@ -182,12 +146,14 @@ const invoiceMasterApi = useInvoiceMasterDataStore()
 ======================= */
 const form = ref<BracketForm>({
   bracketCode: '',
+  bracketGroup: '',
   companyCode: '',
   bracketType: '',
   currency: '',
   level: '',
   amountFrom: '',
-  amountTo: ''
+  amountTo: '',
+  status: ''
 })
 
 /** filter yang SUDAH di-apply */
@@ -200,11 +166,10 @@ const selectedBracket = ref<ExampleBracket | null>(null)
    DUMMY DATA
 ======================= */
 const exampleData: ExampleBracket[] = [
-  { bracketCode: 'BR001', companyCode: 'MF00', bracketType: 'PO Amount', level: 1, amountFrom: 0, amountTo: 10000000, currency: 'IDR' },
-  { bracketCode: 'BR002', companyCode: 'MF00', bracketType: 'PO Amount', level: 2, amountFrom: 10000001, amountTo: 50000000, currency: 'IDR' },
-  { bracketCode: 'BR003', companyCode: 'MF00', bracketType: 'PO Amount', level: 3, amountFrom: 50000001, amountTo: 100000000, currency: 'IDR' },
-  { bracketCode: 'BR004', companyCode: 'MF00', bracketType: 'Non PO Amount', level: 1, amountFrom: 0, amountTo: 15000, currency: 'USD' },
-  { bracketCode: 'BR005', companyCode: 'MF00', bracketType: 'Non PO Amount', level: 2, amountFrom: 15001, amountTo: 60000, currency: 'USD' }
+  { bracketCode: 'BR001', bracketGroup: 'BG001', companyCode: 'MF00', bracketType: 'Invoice Amount', level: 1, amountFrom: '-', amountTo: '1,000,000', currency: 'IDR', status: 'Active' },
+  { bracketCode: 'BR002', bracketGroup: 'BG001', companyCode: 'MF00', bracketType: 'Invoice Amount', level: 2, amountFrom: '1,000,001', amountTo: '10,000,000', currency: 'IDR', status: 'Active' },
+  { bracketCode: 'BR003', bracketGroup: 'BG001', companyCode: 'MF00', bracketType: 'Invoice Amount', level: 3, amountFrom: '10,000,001', amountTo: '100,000,000', currency: 'IDR', status: 'Active' },
+  { bracketCode: 'BR003', bracketGroup: 'BG001', companyCode: 'MF00', bracketType: 'Invoice Amount', level: 4, amountFrom: '##########', amountTo: '100,000,000,000', currency: 'IDR', status: 'Active' }
 ]
 
 /* =======================
@@ -237,6 +202,7 @@ const filteredExampleData = computed(() => {
 
   return exampleData.filter(item => {
     if (f.bracketCode && !item.bracketCode.toLowerCase().includes(f.bracketCode.toLowerCase())) return false
+    if (f.bracketGroup && !item.bracketGroup.toLowerCase().includes(f.bracketGroup.toLowerCase())) return false
     if (f.companyCode && item.companyCode !== f.companyCode) return false
     if (f.bracketType && item.bracketType !== f.bracketType) return false
     if (f.currency && item.currency !== f.currency) return false
@@ -266,13 +232,15 @@ const currencyOptions = [
 ]
 
 const headers = [
-  'Bracket Code',
   'Company Code',
-  'Bracket Type',
+  'Bracket Group',
+  'Bracket Code',
+  'Braket Type',
   'Level',
   'Amount From',
   'Amount To',
-  'Currency'
+  'Currency',
+  'Status'
 ]
 
 /* =======================
