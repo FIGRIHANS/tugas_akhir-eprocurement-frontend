@@ -76,7 +76,6 @@
             <table class="table align-middle text-gray-700 font-medium text-sm min-w-[1400px]">
               <thead>
                 <tr>
-                  <th class="integration__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"></th>
                   <th class="text-nowrap integration__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"
                     v-for="item in columns" :key="item.name">
                     {{ item.name }}
@@ -89,27 +88,7 @@
                 </tr>
                 <tr v-else v-for="row in filteredLogActivities" :key="row.id"
                   class="integration__field-items hover:bg-blue-50">
-                  <!-- ACTION -->
-                  <td>
-                    <div class="dropdown" data-dropdown="true" data-dropdown-trigger="click"
-                      data-dropdown-placement="bottom-end">
-                      <UiButton class="dropdown-toggle" variant="light" :outline="true" :icon="true" size="sm">
-                        <UiIcon name="dots-vertical" />
-                      </UiButton>
-
-                      <div class="dropdown-content w-auto p-4 space-y-2">
-                        <div class="flex flex-col space-y-2">
-                          <UiButton variant="light" class="border-none" :outline="true" size="md"
-                            @click="viewDetail(row.id)">
-                            <UiIcon name="eye" class="mr-2" />
-                            View Details
-                          </UiButton>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-
-                  <td class="font-medium">{{ formatDate(row.transactionDate) }}</td>
+                  <td class="font-medium pl-8">{{ formatDate(row.transactionDate) }}</td>
                   <td>{{ row.referenceNo }}</td>
                   <td>
                     <span class="badge" :class="getActionTypeBadgeClass(row.actionType)">
@@ -235,7 +214,7 @@ const columns = ref([
   { name: 'Employee Email' },
 ])
 
-// Helper function to format date/time as "HH:MM:SS DD/MM/YYYY"
+// Helper function to format date/time as "yyyy/mm/dd HH:MM:SS"
 const formatDate = (dateString: string): string => {
   if (!dateString) return '-'
   const date = new Date(dateString)
@@ -248,7 +227,7 @@ const formatDate = (dateString: string): string => {
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const year = date.getFullYear()
 
-  return `${hh}:${mm}:${ss} ${day}/${month}/${year}`
+  return `${year}/${month}/${day} ${hh}:${mm}:${ss}`
 }
 
 // Get badge color based on action type
@@ -488,26 +467,26 @@ const loadLogActivities = async () => {
     // If API returns empty, use the provided sample real-like data (with varied times)
     if (combined.length === 0) {
       logActivities.value = [
-        { id: '1', transactionDate: '2024-06-20T11:13:30', referenceNo: 'INV100/001/2026', actionType: 'Create', transactionType: 'PO', employeeName: 'Laelani Rusydina Sabila', employeeEmail: 'laelani-rusydina-sabila@yopmail.com', description: 'Invoice created and logged in system' },
-        { id: '2', transactionDate: '2024-06-19T15:11:49', referenceNo: 'INV100/002/2026', actionType: 'Create', transactionType: 'Non PO', employeeName: 'Putri Nathasya Suryansyah', employeeEmail: 'putri-nathasya-suryansyah@yopmail.com', description: 'Non-PO invoice submitted' },
-        { id: '3', transactionDate: '2024-06-18T09:05:12', referenceNo: 'INV100/003/2026', actionType: 'Verified', transactionType: 'PO', employeeName: 'Athaya Kamila Matanra', employeeEmail: 'athaya-kamila-matanra@yopmail.com', description: 'Invoice verified against PO' },
-        { id: '4', transactionDate: '2024-06-17T14:27:03', referenceNo: 'INV100/004/2026', actionType: 'Update', transactionType: 'Non PO', employeeName: 'Edit Setiantono', employeeEmail: 'edit-setiantono@yopmail.com', description: 'Invoice details updated' },
-        { id: '5', transactionDate: '2024-06-16T08:45:00', referenceNo: 'INV100/005/2026', actionType: 'Approved', transactionType: 'PO', employeeName: 'Yusrita', employeeEmail: 'yusrita@yopmail.com', description: 'Invoice approved for payment processing' },
-        { id: '6', transactionDate: '2024-06-15T17:02:10', referenceNo: 'INV100/006/2026', actionType: 'Rejected', transactionType: 'PO', employeeName: 'Dwi Santoso', employeeEmail: 'dwi.santoso@yopmail.com', description: 'Invoice rejected due to mismatch' },
-        { id: '7', transactionDate: '2024-06-14T10:22:33', referenceNo: 'INV100/007/2026', actionType: 'Submitted', transactionType: 'Non PO', employeeName: 'Rina Marlina', employeeEmail: 'rina.marlina@yopmail.com', description: 'Invoice submitted for approval' },
-        { id: '8', transactionDate: '2024-06-13T12:30:00', referenceNo: 'INV100/008/2026', actionType: 'Create', transactionType: 'PO', employeeName: 'Agus Wijaya', employeeEmail: 'agus.wijaya@yopmail.com', description: 'New invoice created' },
-        { id: '9', transactionDate: '2024-06-12T16:55:44', referenceNo: 'INV100/009/2026', actionType: 'Verified', transactionType: 'Non PO', employeeName: 'Siti Nurhaliza', employeeEmail: 'siti.nurhaliza@yopmail.com', description: 'Non-PO invoice matched and verified' },
-        { id: '10', transactionDate: '2024-06-11T07:19:05', referenceNo: 'INV100/010/2026', actionType: 'Update', transactionType: 'PO', employeeName: 'Rudi Hartono', employeeEmail: 'rudi.hartono@yopmail.com', description: 'Amount adjusted per vendor request' },
-        { id: '11', transactionDate: '2024-06-10T13:40:21', referenceNo: 'INV100/011/2026', actionType: 'Approved', transactionType: 'Non PO', employeeName: 'Maya Putri', employeeEmail: 'maya.putri@yopmail.com', description: 'Approved for payment' },
-        { id: '12', transactionDate: '2024-06-09T18:08:59', referenceNo: 'INV100/012/2026', actionType: 'Rejected', transactionType: 'Non PO', employeeName: 'Fajar Pratama', employeeEmail: 'fajar.pratama@yopmail.com', description: 'Rejected: missing attachment' },
-        { id: '13', transactionDate: '2024-06-08T11:11:11', referenceNo: 'INV100/013/2026', actionType: 'Create', transactionType: 'PO', employeeName: 'Indah Lestari', employeeEmail: 'indah.lestari@yopmail.com', description: 'Invoice created with PO reference' },
-        { id: '14', transactionDate: '2024-06-07T09:09:09', referenceNo: 'INV100/014/2026', actionType: 'Verified', transactionType: 'PO', employeeName: 'Budi Santoso', employeeEmail: 'budi.santoso@yopmail.com', description: 'Verified and ready for approval' },
-        { id: '15', transactionDate: '2024-06-06T20:20:20', referenceNo: 'INV100/015/2026', actionType: 'Update', transactionType: 'Non PO', employeeName: 'Nita Kusuma', employeeEmail: 'nita.kusuma@yopmail.com', description: 'Updated vendor billing details' },
-        { id: '16', transactionDate: '2024-06-05T06:06:06', referenceNo: 'INV100/016/2026', actionType: 'Submitted', transactionType: 'PO', employeeName: 'Rika Permata', employeeEmail: 'rika.permata@yopmail.com', description: 'Submitted to approver' },
-        { id: '17', transactionDate: '2024-06-04T22:22:22', referenceNo: 'INV100/017/2026', actionType: 'Approved', transactionType: 'PO', employeeName: 'Dedi Kurniawan', employeeEmail: 'dedi.kurniawan@yopmail.com', description: 'Approved without changes' },
-        { id: '18', transactionDate: '2024-06-03T03:03:03', referenceNo: 'INV100/018/2026', actionType: 'Create', transactionType: 'Non PO', employeeName: 'Wulan Sari', employeeEmail: 'wulan.sari@yopmail.com', description: 'Created new non-PO invoice' },
-        { id: '19', transactionDate: '2024-06-02T19:45:15', referenceNo: 'INV100/019/2026', actionType: 'Verified', transactionType: 'PO', employeeName: 'Rian Aditya', employeeEmail: 'rian.aditya@yopmail.com', description: 'Verification successful' },
-        { id: '20', transactionDate: '2024-06-01T23:59:59', referenceNo: 'INV100/020/2026', actionType: 'Rejected', transactionType: 'Non PO', employeeName: 'Lestari Dewi', employeeEmail: 'lestari.dewi@yopmail.com', description: 'Rejected for duplicate record' },
+        { id: '1', transactionDate: '2026-06-20T11:13:30', referenceNo: 'INV100/001/2026', actionType: 'Create', transactionType: 'PO', employeeName: 'Laelani Rusydina Sabila', employeeEmail: 'laelani-rusydina-sabila@yopmail.com', description: 'Invoice created and logged in system' },
+        { id: '2', transactionDate: '2026-06-19T15:11:49', referenceNo: 'INV100/002/2026', actionType: 'Create', transactionType: 'Non PO', employeeName: 'Putri Nathasya Suryansyah', employeeEmail: 'putri-nathasya-suryansyah@yopmail.com', description: 'Non-PO invoice submitted' },
+        { id: '3', transactionDate: '2026-06-18T09:05:12', referenceNo: 'INV100/003/2026', actionType: 'Verified', transactionType: 'PO', employeeName: 'Athaya Kamila Matanra', employeeEmail: 'athaya-kamila-matanra@yopmail.com', description: 'Invoice verified against PO' },
+        { id: '4', transactionDate: '2026-06-17T14:27:03', referenceNo: 'INV100/004/2026', actionType: 'Update', transactionType: 'Non PO', employeeName: 'Edit Setiantono', employeeEmail: 'edit-setiantono@yopmail.com', description: 'Invoice details updated' },
+        { id: '5', transactionDate: '2026-06-16T08:45:00', referenceNo: 'INV100/005/2026', actionType: 'Approved', transactionType: 'PO', employeeName: 'Yusrita', employeeEmail: 'yusrita@yopmail.com', description: 'Invoice approved for payment processing' },
+        { id: '6', transactionDate: '2026-06-15T17:02:10', referenceNo: 'INV100/006/2026', actionType: 'Rejected', transactionType: 'PO', employeeName: 'Dwi Santoso', employeeEmail: 'dwi.santoso@yopmail.com', description: 'Invoice rejected due to mismatch' },
+        { id: '7', transactionDate: '2026-06-14T10:22:33', referenceNo: 'INV100/007/2026', actionType: 'Submitted', transactionType: 'Non PO', employeeName: 'Rina Marlina', employeeEmail: 'rina.marlina@yopmail.com', description: 'Invoice submitted for approval' },
+        { id: '8', transactionDate: '2026-06-13T12:30:00', referenceNo: 'INV100/008/2026', actionType: 'Create', transactionType: 'PO', employeeName: 'Agus Wijaya', employeeEmail: 'agus.wijaya@yopmail.com', description: 'New invoice created' },
+        { id: '9', transactionDate: '2026-06-12T16:55:44', referenceNo: 'INV100/009/2026', actionType: 'Verified', transactionType: 'Non PO', employeeName: 'Siti Nurhaliza', employeeEmail: 'siti.nurhaliza@yopmail.com', description: 'Non-PO invoice matched and verified' },
+        { id: '10', transactionDate: '2026-06-11T07:19:05', referenceNo: 'INV100/010/2026', actionType: 'Update', transactionType: 'PO', employeeName: 'Rudi Hartono', employeeEmail: 'rudi.hartono@yopmail.com', description: 'Amount adjusted per vendor request' },
+        { id: '11', transactionDate: '2026-06-10T13:40:21', referenceNo: 'INV100/011/2026', actionType: 'Approved', transactionType: 'Non PO', employeeName: 'Maya Putri', employeeEmail: 'maya.putri@yopmail.com', description: 'Approved for payment' },
+        { id: '12', transactionDate: '2026-06-09T18:08:59', referenceNo: 'INV100/012/2026', actionType: 'Rejected', transactionType: 'Non PO', employeeName: 'Fajar Pratama', employeeEmail: 'fajar.pratama@yopmail.com', description: 'Rejected: missing attachment' },
+        { id: '13', transactionDate: '2026-06-08T11:11:11', referenceNo: 'INV100/013/2026', actionType: 'Create', transactionType: 'PO', employeeName: 'Indah Lestari', employeeEmail: 'indah.lestari@yopmail.com', description: 'Invoice created with PO reference' },
+        { id: '14', transactionDate: '2026-06-07T09:09:09', referenceNo: 'INV100/014/2026', actionType: 'Verified', transactionType: 'PO', employeeName: 'Budi Santoso', employeeEmail: 'budi.santoso@yopmail.com', description: 'Verified and ready for approval' },
+        { id: '15', transactionDate: '2026-06-06T20:20:20', referenceNo: 'INV100/015/2026', actionType: 'Update', transactionType: 'Non PO', employeeName: 'Nita Kusuma', employeeEmail: 'nita.kusuma@yopmail.com', description: 'Updated vendor billing details' },
+        { id: '16', transactionDate: '2026-06-05T06:06:06', referenceNo: 'INV100/016/2026', actionType: 'Submitted', transactionType: 'PO', employeeName: 'Rika Permata', employeeEmail: 'rika.permata@yopmail.com', description: 'Submitted to approver' },
+        { id: '17', transactionDate: '2026-06-04T22:22:22', referenceNo: 'INV100/017/2026', actionType: 'Approved', transactionType: 'PO', employeeName: 'Dedi Kurniawan', employeeEmail: 'dedi.kurniawan@yopmail.com', description: 'Approved without changes' },
+        { id: '18', transactionDate: '2026-06-03T03:03:03', referenceNo: 'INV100/018/2026', actionType: 'Create', transactionType: 'Non PO', employeeName: 'Wulan Sari', employeeEmail: 'wulan.sari@yopmail.com', description: 'Created new non-PO invoice' },
+        { id: '19', transactionDate: '2026-06-02T19:45:15', referenceNo: 'INV100/019/2026', actionType: 'Verified', transactionType: 'PO', employeeName: 'Rian Aditya', employeeEmail: 'rian.aditya@yopmail.com', description: 'Verification successful' },
+        { id: '20', transactionDate: '2026-06-01T23:59:59', referenceNo: 'INV100/020/2026', actionType: 'Rejected', transactionType: 'Non PO', employeeName: 'Lestari Dewi', employeeEmail: 'lestari.dewi@yopmail.com', description: 'Rejected for duplicate record' },
       ]
     } else {
       logActivities.value = combined
@@ -518,17 +497,17 @@ const loadLogActivities = async () => {
     console.error('Failed to load log activities:', err)
     // Fallback to safer sample data (real-like names/emails sampled) with varied times
     logActivities.value = [
-      { id: '1', transactionDate: '2024-06-20T11:13:30', referenceNo: 'INV100/001/2026', actionType: 'Create', transactionType: 'PO', employeeName: 'Laelani Rusydina Sabila', employeeEmail: 'laelani-rusydina-sabila@yopmail.com', description: 'Invoice created and logged in system' },
-      { id: '2', transactionDate: '2024-06-19T15:11:49', referenceNo: 'INV100/002/2026', actionType: 'Create', transactionType: 'Non PO', employeeName: 'Putri Nathasya Suryansyah', employeeEmail: 'putri-nathasya-suryansyah@yopmail.com', description: 'Non-PO invoice submitted' },
-      { id: '3', transactionDate: '2024-06-18T09:05:12', referenceNo: 'INV100/003/2026', actionType: 'Verified', transactionType: 'PO', employeeName: 'Athaya Kamila Matanra', employeeEmail: 'athaya-kamila-matanra@yopmail.com', description: 'Invoice verified against PO' },
-      { id: '4', transactionDate: '2024-06-17T14:27:03', referenceNo: 'INV100/004/2026', actionType: 'Update', transactionType: 'Non PO', employeeName: 'Edit Setiantono', employeeEmail: 'edit-setiantono@yopmail.com', description: 'Invoice details updated' },
-      { id: '5', transactionDate: '2024-06-16T08:45:00', referenceNo: 'INV100/005/2026', actionType: 'Approved', transactionType: 'PO', employeeName: 'Yusrita', employeeEmail: 'yusrita@yopmail.com', description: 'Invoice approved for payment processing' },
-      { id: '6', transactionDate: '2024-06-15T17:02:10', referenceNo: 'INV100/006/2026', actionType: 'Rejected', transactionType: 'PO', employeeName: 'Dwi Santoso', employeeEmail: 'dwi.santoso@yopmail.com', description: 'Invoice rejected due to mismatch' },
-      { id: '7', transactionDate: '2024-06-14T10:22:33', referenceNo: 'INV100/007/2026', actionType: 'Submitted', transactionType: 'Non PO', employeeName: 'Rina Marlina', employeeEmail: 'rina.marlina@yopmail.com', description: 'Invoice submitted for approval' },
-      { id: '8', transactionDate: '2024-06-13T12:30:00', referenceNo: 'INV100/008/2026', actionType: 'Create', transactionType: 'PO', employeeName: 'Agus Wijaya', employeeEmail: 'agus.wijaya@yopmail.com', description: 'New invoice created' },
-      { id: '9', transactionDate: '2024-06-12T16:55:44', referenceNo: 'INV100/009/2026', actionType: 'Verified', transactionType: 'Non PO', employeeName: 'Siti Nurhaliza', employeeEmail: 'siti.nurhaliza@yopmail.com', description: 'Non-PO invoice matched and verified' },
-      { id: '10', transactionDate: '2024-06-11T07:19:05', referenceNo: 'INV100/010/2026', actionType: 'Update', transactionType: 'PO', employeeName: 'Rudi Hartono', employeeEmail: 'rudi.hartono@yopmail.com', description: 'Amount adjusted per vendor request' },
-      { id: '11', transactionDate: '2024-06-10T13:40:21', referenceNo: 'INV100/011/2026', actionType: 'Approved', transactionType: 'Non PO', employeeName: 'Maya Putri', employeeEmail: 'maya.putri@yopmail.com', description: 'Approved for payment' },
+      { id: '1', transactionDate: '2026-06-20T11:13:30', referenceNo: 'INV100/001/2026', actionType: 'Create', transactionType: 'PO', employeeName: 'Laelani Rusydina Sabila', employeeEmail: 'laelani-rusydina-sabila@yopmail.com', description: 'Invoice created and logged in system' },
+      { id: '2', transactionDate: '2026-06-19T15:11:49', referenceNo: 'INV100/002/2026', actionType: 'Create', transactionType: 'Non PO', employeeName: 'Putri Nathasya Suryansyah', employeeEmail: 'putri-nathasya-suryansyah@yopmail.com', description: 'Non-PO invoice submitted' },
+      { id: '3', transactionDate: '2026-06-18T09:05:12', referenceNo: 'INV100/003/2026', actionType: 'Verified', transactionType: 'PO', employeeName: 'Athaya Kamila Matanra', employeeEmail: 'athaya-kamila-matanra@yopmail.com', description: 'Invoice verified against PO' },
+      { id: '4', transactionDate: '2026-06-17T14:27:03', referenceNo: 'INV100/004/2026', actionType: 'Update', transactionType: 'Non PO', employeeName: 'Edit Setiantono', employeeEmail: 'edit-setiantono@yopmail.com', description: 'Invoice details updated' },
+      { id: '5', transactionDate: '2026-06-16T08:45:00', referenceNo: 'INV100/005/2026', actionType: 'Approved', transactionType: 'PO', employeeName: 'Yusrita', employeeEmail: 'yusrita@yopmail.com', description: 'Invoice approved for payment processing' },
+      { id: '6', transactionDate: '2026-06-15T17:02:10', referenceNo: 'INV100/006/2026', actionType: 'Rejected', transactionType: 'PO', employeeName: 'Dwi Santoso', employeeEmail: 'dwi.santoso@yopmail.com', description: 'Invoice rejected due to mismatch' },
+      { id: '7', transactionDate: '2026-06-14T10:22:33', referenceNo: 'INV100/007/2026', actionType: 'Submitted', transactionType: 'Non PO', employeeName: 'Rina Marlina', employeeEmail: 'rina.marlina@yopmail.com', description: 'Invoice submitted for approval' },
+      { id: '8', transactionDate: '2026-06-13T12:30:00', referenceNo: 'INV100/008/2026', actionType: 'Create', transactionType: 'PO', employeeName: 'Agus Wijaya', employeeEmail: 'agus.wijaya@yopmail.com', description: 'New invoice created' },
+      { id: '9', transactionDate: '2026-06-12T16:55:44', referenceNo: 'INV100/009/2026', actionType: 'Verified', transactionType: 'Non PO', employeeName: 'Siti Nurhaliza', employeeEmail: 'siti.nurhaliza@yopmail.com', description: 'Non-PO invoice matched and verified' },
+      { id: '10', transactionDate: '2026-06-11T07:19:05', referenceNo: 'INV100/010/2026', actionType: 'Update', transactionType: 'PO', employeeName: 'Rudi Hartono', employeeEmail: 'rudi.hartono@yopmail.com', description: 'Amount adjusted per vendor request' },
+      { id: '11', transactionDate: '2026-06-10T13:40:21', referenceNo: 'INV100/011/2026', actionType: 'Approved', transactionType: 'Non PO', employeeName: 'Maya Putri', employeeEmail: 'maya.putri@yopmail.com', description: 'Approved for payment' },
       { id: '12', transactionDate: '2024-06-09T18:08:59', referenceNo: 'INV100/012/2026', actionType: 'Rejected', transactionType: 'Non PO', employeeName: 'Fajar Pratama', employeeEmail: 'fajar.pratama@yopmail.com', description: 'Rejected: missing attachment' },
       { id: '13', transactionDate: '2024-06-08T11:11:11', referenceNo: 'INV100/013/2026', actionType: 'Create', transactionType: 'PO', employeeName: 'Indah Lestari', employeeEmail: 'indah.lestari@yopmail.com', description: 'Invoice created with PO reference' },
       { id: '14', transactionDate: '2024-06-07T09:09:09', referenceNo: 'INV100/014/2026', actionType: 'Verified', transactionType: 'PO', employeeName: 'Budi Santoso', employeeEmail: 'budi.santoso@yopmail.com', description: 'Verified and ready for approval' },
