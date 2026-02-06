@@ -76,7 +76,12 @@ const countVariance = () => {
 }
 
 const checkIsNonPo = () => {
-  return route.query.type === 'nonpo' || typeForm.value === 'non-po-view'
+  return (
+    route.query.type === 'nonpo' ||
+    typeForm.value === 'non-po-view' ||
+    route.query.type === 'cas' ||
+    typeForm.value === 'cas'
+  )
 }
 
 
@@ -114,13 +119,16 @@ const countDpp = () => {
 const setCalculation = () => {
   listCalculation.value = []
 
-  if(form.invoiceType !== '4'){
+  const isNonPoLike = typeForm.value === 'nonpo' || typeForm.value === 'cas'
+  const isPoLike = typeForm.value === 'po' || typeForm.value === 'po-view'
+  const isNonPoView = typeForm.value === 'non-po-view'
+
+  if (form.invoiceType !== '4') {
     for (const item of listName.value) {
       if (
-        (typeForm.value === 'nonpo' && item !== 'Additional Cost') ||
-        typeForm.value === 'po' ||
-        typeForm.value === 'po-view' ||
-        typeForm.value === 'non-po-view'
+        (isNonPoLike && item !== 'Additional Cost') ||
+        isPoLike ||
+        isNonPoView
       ) {
         const amount = setCount(item)
         const data = {
@@ -134,10 +142,9 @@ const setCalculation = () => {
   }else{
     for (const item of listName.value) {
       if (
-        (typeForm.value === 'nonpo' && item !== 'Additional Cost') ||
-        typeForm.value === 'po' ||
-        typeForm.value === 'po-view' ||
-        typeForm.value === 'non-po-view'
+        (isNonPoLike && item !== 'Additional Cost') ||
+        isPoLike ||
+        isNonPoView
       ) {
         const amount = setCountLba(item)
         const data = {

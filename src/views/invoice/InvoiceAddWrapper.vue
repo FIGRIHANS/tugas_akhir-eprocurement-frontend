@@ -388,7 +388,7 @@ const checkInvoiceNonPoView = () => {
 }
 
 const checkIsNonPo = () => {
-  return route.query.type === 'nonpo'
+  return route.query.type === 'nonpo' || route.query.type === 'cas'
 }
 
 const checkInvoiceData = () => {
@@ -471,6 +471,9 @@ const checkInvoiceInformation = () => {
   const isCreditCard = form.invoiceType === '2'
   const isCAS = form.invoiceType === '3'
   const isLBA = form.invoiceType === '4'
+  const isCasRoute = route.query.type === 'cas'
+  const isReimbursementLike = isReimbursement || isCasRoute
+  const isCasLike = isCAS && !isCasRoute
 
   if (!isPettyCash) {
     if (isCreditCard) {
@@ -479,7 +482,7 @@ const checkInvoiceInformation = () => {
       form.invoiceDocumentError = !hasAtLeastOneDocument
     }
 
-    if (isReimbursement) {
+    if (isReimbursementLike) {
       form.invoiceVendorNoError = useCheckEmpty(form.invoiceVendorNo).isError
       form.invoiceDateError = useCheckEmpty(form.invoiceDate).isError
       form.taxNoInvoiceError = useCheckEmpty(form.taxNoInvoice).isError
@@ -493,14 +496,14 @@ const checkInvoiceInformation = () => {
       form.taxNoInvoiceError = false
       form.casNoCodeError = false
       form.dueDateCasError = false
-    } else if (isCAS) {
+    } else if (isCasLike) {
       form.taxNoInvoiceError = useCheckEmpty(form.taxNoInvoice).isError
       form.casNoCodeError = false
       form.invoiceVendorNoError = false
       form.invoiceDateError = false
       form.proposalAmountError = false
       form.dueDateCasError = false
-    } else if (isLBA) {
+    } else if (isLBA && !isCasRoute) {
       form.taxNoInvoiceError = useCheckEmpty(form.taxNoInvoice).isError
       form.casNoCodeError = useCheckEmpty(form.casNoCode).isError
       form.dueDateCasError = false
@@ -602,10 +605,15 @@ const goBack = () => {
   const list = ['data', 'information', 'ocrAiVerification', 'preview']
   const checkIndex = list.findIndex((item) => item === tabNow.value)
   if (checkIndex === 0) {
+    const from = route.query.from
     const nameRoute =
-      checkInvoiceView() || (!checkIsNonPo() && !checkInvoiceNonPoView())
-        ? 'invoice'
-        : 'invoice-list-non-po'
+      from === 'ftp'
+        ? 'ftpInvoiceIntegration'
+        : from === 'cas'
+          ? 'cash-advance'
+          : checkInvoiceView() || (!checkIsNonPo() && !checkInvoiceNonPoView())
+            ? 'invoice'
+            : 'invoice-list-non-po'
     router.push({
       name: nameRoute,
     })
@@ -985,7 +993,7 @@ const goNext = () => {
     }
   } else {
     isSubmit.value = true
-    if (route.query.type === 'nonpo') {
+    if (checkIsNonPo()) {
       const submissionData = mapDataPostNonPo()
 
       invoiceApi
@@ -1025,7 +1033,15 @@ const goNext = () => {
 
 const goToList = () => {
   isClickDraft.value = false
-  const nameRoute = !checkIsNonPo() ? 'invoice' : 'invoice-list-non-po'
+  const from = route.query.from
+  const nameRoute =
+    from === 'ftp'
+      ? 'ftpInvoiceIntegration'
+      : from === 'cas'
+        ? 'cash-advance'
+        : !checkIsNonPo()
+          ? 'invoice'
+          : 'invoice-list-non-po'
   router.push({
     name: nameRoute,
   })
@@ -1034,7 +1050,7 @@ const goToList = () => {
 const goSaveDraft = () => {
   isSubmit.value = true
   isClickDraft.value = true
-  if (route.query.type === 'nonpo') {
+  if (checkIsNonPo()) {
     const data = mapDataPostNonPo()
     data.header.statusCode = 0
     data.header.statusName = 'Draft'
@@ -1084,7 +1100,7 @@ const setAfterResponsePost = (response: { statusCode: number; result: { message:
     const modal = KTModal.getInstance(idModal as HTMLElement)
     modal.show()
     if (form.invoiceUId) {
-      if (route.query.type === 'nonpo') {
+      if (checkIsNonPo()) {
         for (const item of costExpensesTempDelete.value) {
           verificationApi.deleteCostExpense(form.invoiceUId, item)
         }
@@ -1369,6 +1385,280 @@ const setDataNonPo = () => {
   }
 }
 
+const casDummyMap: Record<
+  string,
+  {
+    casNo: string
+    companyCode: string
+    companyName: string
+    vendorId: string
+    vendorName: string
+    npwp: string
+    address: string
+    paymentDateCas: string
+    casRealizationNo: string
+    realizationDate: string
+    totalGrossAmount: number
+    totalNetAmount: number
+    currency: string
+    department: string
+    description: string
+    bank: {
+      bankKeyId: string
+      bankNameId: string
+      beneficiaryName: string
+      bankAccountNumber: string
+      bankCountryCode: string
+    }
+    items: Array<{
+      id: number
+      activity: string
+      activityCode: string
+      activityName: string
+      itemAmount: number
+      itemText: string
+      debitCredit: 'D' | 'C'
+      taxCode: string
+      vatAmount: number
+      costCenter: string
+      profitCenter: string
+      assignment: string
+      whtType: string
+      whtCode: string
+      whtBaseAmount: number
+      whtAmount: number
+    }>
+  }
+> = {
+  MF00CA2026000006: {
+    casNo: 'MF00CA2026000006',
+    companyCode: 'MF00',
+    companyName: 'Mitra Fasilitas',
+    vendorId: '3000010',
+    vendorName: 'PT GOLDEN RAMA EXPRESS',
+    npwp: '01.234.567.8-999.000',
+    address: 'Jl. Sudirman No. 10, Jakarta',
+    paymentDateCas: '2026-02-01',
+    casRealizationNo: 'MF00LB2026000101',
+    realizationDate: '2026-02-06',
+    totalGrossAmount: 2000000,
+    totalNetAmount: 2000000,
+    currency: 'IDR',
+    department: 'Finance AP Officer',
+    description: 'CAS Realization for operational expenses',
+    bank: {
+      bankKeyId: 'BCA01',
+      bankNameId: 'Bank Central Asia',
+      beneficiaryName: 'PT GOLDEN RAMA EXPRESS',
+      bankAccountNumber: '1234567890',
+      bankCountryCode: 'ID',
+    },
+    items: [
+      {
+        id: 1,
+        activity: 'ACT-001',
+        activityCode: 'TRV',
+        activityName: 'Travel Expense',
+        itemAmount: 1200000,
+        itemText: 'Flight and transport',
+        debitCredit: 'D',
+        taxCode: 'V1',
+        vatAmount: 120000,
+        costCenter: 'CC-1001',
+        profitCenter: 'PC-1001',
+        assignment: 'ASG-01',
+        whtType: '23',
+        whtCode: 'WHT23',
+        whtBaseAmount: 1200000,
+        whtAmount: 24000,
+      },
+      {
+        id: 2,
+        activity: 'ACT-002',
+        activityCode: 'HSP',
+        activityName: 'Hospitality',
+        itemAmount: 800000,
+        itemText: 'Meeting and meals',
+        debitCredit: 'D',
+        taxCode: 'V1',
+        vatAmount: 80000,
+        costCenter: 'CC-1001',
+        profitCenter: 'PC-1001',
+        assignment: 'ASG-02',
+        whtType: '23',
+        whtCode: 'WHT23',
+        whtBaseAmount: 800000,
+        whtAmount: 16000,
+      },
+    ],
+  },
+  MF00CA2026000005: {
+    casNo: 'MF00CA2026000005',
+    companyCode: 'MF00',
+    companyName: 'Mitra Fasilitas',
+    vendorId: '3000010',
+    vendorName: 'PT GOLDEN RAMA EXPRESS',
+    npwp: '01.234.567.8-999.000',
+    address: 'Jl. Thamrin No. 20, Jakarta',
+    paymentDateCas: '2026-02-01',
+    casRealizationNo: 'MF00LB2026000001',
+    realizationDate: '2026-02-06',
+    totalGrossAmount: 2000000,
+    totalNetAmount: 2000000,
+    currency: 'IDR',
+    department: 'Accounting & Tax',
+    description: 'CAS Realization for accounting service',
+    bank: {
+      bankKeyId: 'BNI01',
+      bankNameId: 'Bank Negara Indonesia',
+      beneficiaryName: 'PT GOLDEN RAMA EXPRESS',
+      bankAccountNumber: '1234567890',
+      bankCountryCode: 'ID',
+    },
+    items: [
+      {
+        id: 1,
+        activity: 'ACT-010',
+        activityCode: 'ACC',
+        activityName: 'Accounting Fee',
+        itemAmount: 1500000,
+        itemText: 'Accounting service fee',
+        debitCredit: 'D',
+        taxCode: 'V1',
+        vatAmount: 150000,
+        costCenter: 'CC-2001',
+        profitCenter: 'PC-2001',
+        assignment: 'ASG-10',
+        whtType: '23',
+        whtCode: 'WHT23',
+        whtBaseAmount: 1500000,
+        whtAmount: 30000,
+      },
+      {
+        id: 2,
+        activity: 'ACT-011',
+        activityCode: 'ADM',
+        activityName: 'Admin Expense',
+        itemAmount: 500000,
+        itemText: 'Administrative cost',
+        debitCredit: 'D',
+        taxCode: 'V1',
+        vatAmount: 50000,
+        costCenter: 'CC-2001',
+        profitCenter: 'PC-2001',
+        assignment: 'ASG-11',
+        whtType: '23',
+        whtCode: 'WHT23',
+        whtBaseAmount: 500000,
+        whtAmount: 10000,
+      },
+    ],
+  },
+  MF00CA2026000004: {
+    casNo: 'MF00CA2026000004',
+    companyCode: 'MF00',
+    companyName: 'Mitra Fasilitas',
+    vendorId: '3000010',
+    vendorName: 'PT GOLDEN RAMA EXPRESS',
+    npwp: '01.234.567.8-999.000',
+    address: 'Jl. Gatot Subroto No. 30, Jakarta',
+    paymentDateCas: '2026-02-01',
+    casRealizationNo: '',
+    realizationDate: '-',
+    totalGrossAmount: 2000000,
+    totalNetAmount: 2000000,
+    currency: 'IDR',
+    department: 'Finance AP Supervisor',
+    description: 'CAS Realization for operational support',
+    bank: {
+      bankKeyId: 'BRI01',
+      bankNameId: 'Bank Rakyat Indonesia',
+      beneficiaryName: 'PT GOLDEN RAMA EXPRESS',
+      bankAccountNumber: '1234567890',
+      bankCountryCode: 'ID',
+    },
+    items: [
+      {
+        id: 1,
+        activity: 'ACT-020',
+        activityCode: 'OPS',
+        activityName: 'Operational',
+        itemAmount: 2000000,
+        itemText: 'Operational support',
+        debitCredit: 'D',
+        taxCode: 'V1',
+        vatAmount: 200000,
+        costCenter: 'CC-3001',
+        profitCenter: 'PC-3001',
+        assignment: 'ASG-20',
+        whtType: '23',
+        whtCode: 'WHT23',
+        whtBaseAmount: 2000000,
+        whtAmount: 40000,
+      },
+    ],
+  },
+}
+
+const setDummyCasView = () => {
+  const casNo = (route.query.casNo as string) || 'MF00CA2026000006'
+  const data = casDummyMap[casNo] || casDummyMap['MF00CA2026000006']
+
+  form.status = 2
+  form.invoiceUId = ''
+  form.invoiceType = '4'
+  form.invoiceTypeName = 'CAS Realization'
+  form.vendorId = data.vendorId
+  form.vendorName = data.vendorName
+  form.npwp = data.npwp
+  form.address = data.address
+  form.companyCode = data.companyCode
+  form.companyName = data.companyName
+  form.invoiceDate = data.paymentDateCas
+  form.invoiceNo = data.casRealizationNo
+  form.casNoCode = data.casNo
+  form.casNoName = data.casNo
+  form.currency = data.currency
+  form.department = data.department
+  form.description = data.description
+  form.totalGrossAmount = data.totalGrossAmount
+  form.totalNetAmount = data.totalNetAmount
+  form.subtotal = data.totalGrossAmount
+  form.vatAmount = Math.round(data.totalGrossAmount * 0.1)
+  form.whtAmount = 0
+  form.additionalCostCalc = 0
+
+  form.bankKeyId = data.bank.bankKeyId
+  form.bankNameId = data.bank.bankNameId
+  form.beneficiaryName = data.bank.beneficiaryName
+  form.bankAccountNumber = data.bank.bankAccountNumber
+  form.bankCountryCode = data.bank.bankCountryCode
+
+  form.invoiceItem = data.items.map((item) => ({
+    id: item.id,
+    activity: item.activity,
+    activityCode: item.activityCode,
+    activityName: item.activityName,
+    itemAmount: item.itemAmount,
+    itemText: item.itemText,
+    debitCredit: item.debitCredit,
+    taxCode: item.taxCode,
+    vatAmount: item.vatAmount,
+    costCenter: item.costCenter,
+    profitCenter: item.profitCenter,
+    assignment: item.assignment,
+    whtType: item.whtType,
+    whtCode: item.whtCode,
+    whtBaseAmount: item.whtBaseAmount,
+    whtAmount: item.whtAmount,
+    whtCodeList: [],
+    isEdit: false,
+  }))
+
+  form.additionalCost = []
+  form.invoicePoGr = []
+  stepperStatus.value = 'Approval'
+}
 
 
 // const checkBudget = () => {
@@ -1523,6 +1813,9 @@ const checkFormBudget = () => {
     const isCreditCard = form.invoiceType === '2'
     const isCAS = form.invoiceType === '3'
     const isLBA = form.invoiceType === '4'
+    const isCasRoute = route.query.type === 'cas'
+    const isReimbursementLike = isReimbursement || isCasRoute
+    const isCasLike = isCAS && !isCasRoute
 
     if (
       !form.companyCode ||
@@ -1534,7 +1827,7 @@ const checkFormBudget = () => {
       status = true
     }
 
-    if (isReimbursement) {
+    if (isReimbursementLike) {
       if (!form.invoiceVendorNo || !form.invoiceDate || !form.taxNoInvoice) {
         status = true
       }
@@ -1546,13 +1839,13 @@ const checkFormBudget = () => {
       }
     }
 
-    if (isCAS) {
+    if (isCasLike) {
       if (!form.taxNoInvoice) {
         status = true
       }
     }
 
-    if (isLBA) {
+    if (isLBA && !isCasRoute) {
       if (!form.taxNoInvoice || !form.casNoCode || !form.department) {
         status = true
       }
@@ -1632,15 +1925,20 @@ onMounted(() => {
       route.query.type === 'nonpo')
   ) {
     hasCompletedDataTab.value = true
+    const isCasDummyView = route.query.type === 'non-po-view' && route.query.casType === 'cas'
+    if (isCasDummyView) {
+      setDummyCasView()
+      tabNow.value = 'preview'
+    } else {
+      invoiceApi.getNonPoDetail(route.query.invoice?.toString() || '').then(() => {
+        setStepperStatus()
+        setDataNonPo()
 
-    invoiceApi.getNonPoDetail(route.query.invoice?.toString() || '').then(() => {
-      setStepperStatus()
-      setDataNonPo()
-
-      if (form.status === 7 || form.status === 8 || form.status === 9 || form.status === 10) {
-        tabNow.value = 'paymentStatus'
-      }
-    })
+        if (form.status === 7 || form.status === 8 || form.status === 9 || form.status === 10) {
+          tabNow.value = 'paymentStatus'
+        }
+      })
+    }
   }
 
   if (

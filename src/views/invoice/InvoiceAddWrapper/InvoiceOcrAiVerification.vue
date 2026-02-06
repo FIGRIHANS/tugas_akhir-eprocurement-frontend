@@ -430,7 +430,10 @@ const documentTypeList = ref([
 
 /* ---------------- PO logic ---------------- */
 const checkPo = () => typeForm.value === 'po' || typeForm.value === 'po-view'
-const checkIsNonPo = () => typeForm.value === 'nonpo'
+const checkIsNonPo = () =>
+  typeForm.value === 'nonpo' ||
+  typeForm.value === 'cas' ||
+  (route.query.type === 'non-po-view' && route.query.casType === 'cas')
 const checkIsWithoutDp = () => form?.invoiceDp === '9011'
 const checkPoWithDp = () => form?.invoiceDp === '9013'
 const checkIsPoPibCc = () =>

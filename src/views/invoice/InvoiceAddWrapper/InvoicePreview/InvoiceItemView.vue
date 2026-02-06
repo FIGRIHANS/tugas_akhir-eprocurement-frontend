@@ -45,15 +45,15 @@
             <td v-if="form.invoiceType === '4'">
               {{
                 form.currency === 'IDR'
-                  ? useFormatIdr(item.realizationAmount)
-                  : useFormatUsd(item.realizationAmount) || '-'
+                  ? useFormatIdr(normalizeAmount(item.realizationAmount))
+                  : useFormatUsd(normalizeAmount(item.realizationAmount)) || '-'
               }}
             </td>
             <td v-if="form.invoiceType === '4'">
               {{
                 form.currency === 'IDR'
-                  ? useFormatIdr(item.variance)
-                  : useFormatUsd(item.variance) || '-'
+                  ? useFormatIdr(normalizeAmount(item.variance))
+                  : useFormatUsd(normalizeAmount(item.variance)) || '-'
               }}
             </td>
             <td>{{ item.itemText || '-' }}</td>
@@ -195,6 +195,11 @@ const getCostCenterName = (costCenter: string) => {
     return `${data.code} - ${data.name}`
   }
   return '-'
+}
+
+const normalizeAmount = (value: unknown) => {
+  const num = Number(value)
+  return Number.isFinite(num) ? num : 0
 }
 
 watch(

@@ -346,6 +346,7 @@ const goView = (data: ListPoTypes) => {
       query: {
         type: 'po',
         invoice: data.invoiceUId,
+        from: 'ftp',
       },
     })
   } else {
@@ -354,6 +355,7 @@ const goView = (data: ListPoTypes) => {
       query: {
         type: 'po-view',
         invoice: data.invoiceUId,
+        from: 'ftp',
       },
     })
   }
@@ -425,6 +427,7 @@ const goAdd = () => {
     name: 'invoiceAdd',
     query: {
       type: 'po',
+      from: 'ftp',
     },
   })
 }

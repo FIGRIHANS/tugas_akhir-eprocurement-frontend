@@ -53,7 +53,7 @@ const checkPo = () => {
 }
 
 const checkIsNonPo = () => {
-  return typeForm.value === 'nonpo'
+  return typeForm.value === 'nonpo' || typeForm.value === 'cas'
 }
 
 const checkIsWithoutDp = () => {

@@ -72,4 +72,9 @@ export default [
     name: 'invoice-type',
     component: () => import('@/views/invoice/invoiceType.vue'),
   },
+  {
+    path: '/invoice/cash-advance',
+    name: 'cash-advance',
+    component: () => import('@/views/cashAdvance/casAdvanceList.vue'),
+  },
 ]
