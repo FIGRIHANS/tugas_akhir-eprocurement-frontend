@@ -15,6 +15,11 @@ export default [
     component: () => import('@/views/sytemConfiguration/invoiceConfigurationDetail.vue'),
   },
   {
+    path: '/log-activity',
+    name: 'log-activity',
+    component: () => import('@/views/sytemConfiguration/logActivityList.vue'),
+  },
+  {
     path: '/add-integration/:id',
     name: 'add-integration-invoice',
     component: () => import('@/views/sytemConfiguration/integration/integrationAdd.vue'),
