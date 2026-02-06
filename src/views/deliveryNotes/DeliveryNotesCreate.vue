@@ -38,23 +38,6 @@
                         <span v-else>Search</span>
                       </button>
                     </div>
-                    <!-- Dropdown for PO selection -->
-                    <div
-                      v-if="poOptions.length > 0 && showDropdown"
-                      class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
-                    >
-                      <div
-                        v-for="po in poOptions"
-                        :key="po.poNumber"
-                        class="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b last:border-b-0"
-                        @click="selectPO(po)"
-                      >
-                        <div class="font-medium">{{ po.poNumber }}</div>
-                        <div class="text-sm text-gray-500">
-                          Vendor: {{ po.vendorCode }} - {{ po.vendorName }}
-                        </div>
-                      </div>
-                    </div>
                   </div>
                 </div>
 
@@ -198,7 +181,7 @@
                 </div>
 
                 <!-- Status -->
-                <div class="flex items-center gap-4">
+                <!-- <div class="flex items-center gap-4">
                   <label class="form-label text-sm font-medium text-gray-600 w-36 mb-0"
                     >Status <span class="text-red-500">*</span></label
                   >
@@ -207,7 +190,7 @@
                     <option value="Waiting Approval">Waiting Approval</option>
                     <option value="Received">Received</option>
                   </select>
-                </div>
+                </div> -->
               </div>
             </div>
           </div>
@@ -320,6 +303,7 @@
                     v-model.number="item.qtyShipped"
                     type="number"
                     min="0"
+                    max="item.qty"
                     class="input input-sm w-24 text-center"
                     placeholder="Qty"
                   />
@@ -352,6 +336,20 @@
         </button>
       </div>
     </div>
+
+    <!-- Notification Modal -->
+    <ModalNotification
+      :open="showNotificationModal"
+      :id="'notification-modal'"
+      :type="notificationModal.type"
+      :title="notificationModal.title"
+      :text="notificationModal.text"
+      :onClose="
+        () => {
+          showNotificationModal = false
+        }
+      "
+    />
   </div>
 </template>
 
@@ -361,7 +359,7 @@ import { useRouter } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import VueSignature from 'vue3-signature'
-import Swal from 'sweetalert2'
+import ModalNotification from '@/components/modal/ModalNotification.vue'
 import DeliveryNotesService, {
   type MockSapPoData,
   type DeliveryNoteCreatePayload,
@@ -391,6 +389,7 @@ interface TableDataItem {
   description: string
   uom: string
   lotNo: string
+  qtyOrdered: number
   qtyShipped: number
 }
 
@@ -405,9 +404,7 @@ const routes = ref<routeTypes[]>([
 // States
 const isSubmitting = ref<boolean>(false)
 const isSearching = ref<boolean>(false)
-const showDropdown = ref<boolean>(false)
 const poNumberSearch = ref<string>('')
-const poOptions = ref<MockSapPoData[]>([])
 const selectedPO = ref<MockSapPoData | null>(null)
 
 interface SignaturePadInstance {
@@ -431,7 +428,7 @@ const formData = ref<FormData>({
   vendorCode: '',
   estimatedArrival: '',
   pickupAddress: '',
-  status: 'Draft',
+  status: 'On Delivery',
   destinationAddress: '',
   transporter: '',
   truckType: '',
@@ -444,43 +441,51 @@ const formData = ref<FormData>({
 // Table Data
 const tableData = ref<TableDataItem[]>([])
 
+// Modal state
+const showNotificationModal = ref<boolean>(false)
+const notificationModal = ref({
+  type: 'info' as 'info' | 'success' | 'error' | 'warning',
+  title: '',
+  text: '',
+})
+
 // Methods
 const searchPO = async () => {
   if (!poNumberSearch.value.trim()) {
-    Swal.fire({
-      icon: 'warning',
+    notificationModal.value = {
+      type: 'warning',
       title: 'Validation Error',
       text: 'Please enter a PO Number',
-    })
+    }
+    showNotificationModal.value = true
     return
   }
 
   isSearching.value = true
-  showDropdown.value = false
 
   try {
-    const results = await DeliveryNotesService.searchPoFromSap(poNumberSearch.value)
-    poOptions.value = results
+    const result = await DeliveryNotesService.searchPoFromSap(poNumberSearch.value)
 
-    if (results.length === 0) {
-      Swal.fire({
-        icon: 'info',
+    if (!result) {
+      notificationModal.value = {
+        type: 'info',
         title: 'Not Found',
         text: 'No PO found in SAP system',
-      })
-    } else if (results.length === 1) {
-      // Auto-select if only one result
-      selectPO(results[0])
-    } else {
-      showDropdown.value = true
+      }
+      showNotificationModal.value = true
+      return
     }
+
+    // Auto-select the result (single object from detail endpoint)
+    selectPO(result)
   } catch (error) {
     console.error('Error searching PO:', error)
-    Swal.fire({
-      icon: 'error',
+    notificationModal.value = {
+      type: 'error',
       title: 'Error',
       text: 'Failed to search PO. Please try again.',
-    })
+    }
+    showNotificationModal.value = true
   } finally {
     isSearching.value = false
   }
@@ -488,7 +493,6 @@ const searchPO = async () => {
 
 const selectPO = (po: MockSapPoData) => {
   selectedPO.value = po
-  showDropdown.value = false
 
   // Auto-fill form data from selected PO
   formData.value.poNumber = po.poNumber
@@ -501,6 +505,7 @@ const selectPO = (po: MockSapPoData) => {
       description: item.itemName,
       uom: item.uom,
       lotNo: '', // User needs to fill this
+      qtyOrdered: item.qtyOrdered ?? 0,
       qtyShipped: item.qtyOrdered, // Default to ordered qty, user can edit
     }))
   } else {
@@ -514,6 +519,7 @@ const addNewItem = () => {
     description: '',
     uom: '',
     lotNo: '',
+    qtyOrdered: 0,
     qtyShipped: 0,
   })
 }
@@ -534,92 +540,102 @@ const clearSignature = () => {
 
 const validateForm = (): boolean => {
   if (!formData.value.poNumber.trim()) {
-    Swal.fire({
-      icon: 'warning',
+    notificationModal.value = {
+      type: 'warning',
       title: 'Validation Error',
       text: 'Please enter PO Number',
-    })
+    }
+    showNotificationModal.value = true
     return false
   }
 
   if (!formData.value.deliveryNoteNumber.trim()) {
-    Swal.fire({
-      icon: 'warning',
+    notificationModal.value = {
+      type: 'warning',
       title: 'Validation Error',
       text: 'Please enter Delivery Note Number',
-    })
+    }
+    showNotificationModal.value = true
     return false
   }
 
   if (!formData.value.vendorCode.trim()) {
-    Swal.fire({
-      icon: 'warning',
+    notificationModal.value = {
+      type: 'warning',
       title: 'Validation Error',
       text: 'Please enter Vendor Code',
-    })
+    }
+    showNotificationModal.value = true
     return false
   }
 
   if (!formData.value.driverName.trim()) {
-    Swal.fire({
-      icon: 'warning',
+    notificationModal.value = {
+      type: 'warning',
       title: 'Validation Error',
       text: 'Please enter Driver Name',
-    })
+    }
+    showNotificationModal.value = true
     return false
   }
 
   if (!formData.value.licensePlate.trim()) {
-    Swal.fire({
-      icon: 'warning',
+    notificationModal.value = {
+      type: 'warning',
       title: 'Validation Error',
       text: 'Please enter License Plate',
-    })
+    }
+    showNotificationModal.value = true
     return false
   }
 
   if (!formData.value.transporter.trim()) {
-    Swal.fire({
-      icon: 'warning',
+    notificationModal.value = {
+      type: 'warning',
       title: 'Validation Error',
       text: 'Please enter Transporter',
-    })
+    }
+    showNotificationModal.value = true
     return false
   }
 
   if (!formData.value.pickupAddress.trim()) {
-    Swal.fire({
-      icon: 'warning',
+    notificationModal.value = {
+      type: 'warning',
       title: 'Validation Error',
       text: 'Please enter Pickup Address',
-    })
+    }
+    showNotificationModal.value = true
     return false
   }
 
   if (!formData.value.destinationAddress.trim()) {
-    Swal.fire({
-      icon: 'warning',
+    notificationModal.value = {
+      type: 'warning',
       title: 'Validation Error',
       text: 'Please enter Destination Address',
-    })
+    }
+    showNotificationModal.value = true
     return false
   }
 
   if (!formData.value.estimatedArrival) {
-    Swal.fire({
-      icon: 'warning',
+    notificationModal.value = {
+      type: 'warning',
       title: 'Validation Error',
       text: 'Please enter Estimated Arrival',
-    })
+    }
+    showNotificationModal.value = true
     return false
   }
 
   if (tableData.value.length === 0) {
-    Swal.fire({
-      icon: 'warning',
+    notificationModal.value = {
+      type: 'warning',
       title: 'Validation Error',
       text: 'Please add at least one item',
-    })
+    }
+    showNotificationModal.value = true
     return false
   }
 
@@ -627,11 +643,23 @@ const validateForm = (): boolean => {
   for (let i = 0; i < tableData.value.length; i++) {
     const item = tableData.value[i]
     if (!item.sku || !item.description || !item.uom || !item.lotNo || item.qtyShipped <= 0) {
-      Swal.fire({
-        icon: 'warning',
+      notificationModal.value = {
+        type: 'warning',
         title: 'Validation Error',
         text: `Please complete all fields for item #${i + 1}`,
-      })
+      }
+      showNotificationModal.value = true
+      return false
+    }
+
+    // Qty shipped must not exceed ordered qty (from GET/selected PO)
+    if (item.qtyOrdered > 0 && item.qtyShipped > item.qtyOrdered) {
+      notificationModal.value = {
+        type: 'warning',
+        title: 'Validation Error',
+        text: `Qty Shipped for item #${i + 1} must not exceed Qty Ordered (${item.qtyOrdered})`,
+      }
+      showNotificationModal.value = true
       return false
     }
   }
@@ -640,11 +668,12 @@ const validateForm = (): boolean => {
   if (signaturePad.value) {
     const { isEmpty } = signaturePad.value.save()
     if (isEmpty) {
-      Swal.fire({
-        icon: 'warning',
+      notificationModal.value = {
+        type: 'warning',
         title: 'Validation Error',
         text: 'Please provide driver signature',
-      })
+      }
+      showNotificationModal.value = true
       return false
     }
   }
@@ -661,11 +690,26 @@ const submitForm = async () => {
     // Save signature data
     let signatureData = ''
     if (signaturePad.value) {
-      const { isEmpty, data } = signaturePad.value.save()
-      if (!isEmpty) {
-        signatureData = data
+      const saveResult = signaturePad.value.save()
+      console.log('Signature save result:', saveResult)
+      console.log('Type of save result:', typeof saveResult)
+
+      // vue3-signature returns the Base64 string directly (not an object)
+      if (saveResult && typeof saveResult === 'string' && saveResult.length > 0) {
+        signatureData = saveResult
+        console.log('✅ Signature data captured successfully!')
+        console.log('Signature data length:', signatureData.length)
+        console.log('First 100 chars:', signatureData.substring(0, 100))
+      } else if (!saveResult || saveResult.length === 0) {
+        console.warn('⚠️ Signature pad is empty - user did not draw anything')
+      } else {
+        console.error('❌ Unexpected save result type:', typeof saveResult)
       }
+    } else {
+      console.error('❌ Signature pad ref is null')
     }
+
+    console.log('Final signature data length:', signatureData?.length || 0)
 
     // Convert estimatedArrival to shippingDate (YYYY-MM-DD format)
     const shippingDate = formData.value.estimatedArrival
@@ -683,7 +727,7 @@ const submitForm = async () => {
       driverName: formData.value.driverName,
       pickupAddress: formData.value.pickupAddress,
       destinationAddress: formData.value.destinationAddress,
-      driverSignature: signatureData,
+      driverSignature: signatureData || '', // Ensure always included
       truckType: formData.value.truckType || undefined,
       shippingDate: shippingDate,
       status: 'Submitted', // Always set to Submitted on create
@@ -691,23 +735,29 @@ const submitForm = async () => {
     }
 
     console.log('Submitting delivery note:', payload)
+    console.log('Signature in payload:', payload.driverSignature ? 'YES' : 'NO (empty)')
 
     await DeliveryNotesService.create(payload)
 
-    Swal.fire({
-      icon: 'success',
+    notificationModal.value = {
+      type: 'success',
       title: 'Success',
       text: 'Delivery note created successfully!',
-    })
+    }
+    showNotificationModal.value = true
+
+    // Wait before redirect
+    await new Promise((resolve) => setTimeout(resolve, 1500))
 
     router.push({ name: 'deliveryNotesList' })
   } catch (error) {
     console.error('Error submitting form:', error)
-    Swal.fire({
-      icon: 'error',
+    notificationModal.value = {
+      type: 'error',
       title: 'Error',
       text: 'Failed to create delivery note. Please try again.',
-    })
+    }
+    showNotificationModal.value = true
   } finally {
     isSubmitting.value = false
   }

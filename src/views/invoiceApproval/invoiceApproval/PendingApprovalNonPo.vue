@@ -1,25 +1,17 @@
 <template>
   <div class="border border-gray-200 rounded-xl p-[24px]">
     <div class="flex justify-between gap-[8px]">
-      <UiInputSearch
-        v-model="search"
-        placeholder="Cari Invoice"
-        class="w-[250px]"
-        @keypress="goSearch"
-      />
+      <UiInputSearch v-model="search" placeholder="Cari Invoice" class="w-[250px]" @keypress="goSearch" />
       <FilterList :data="filterForm" @setData="setDataFilter" ref="filterChild" />
     </div>
-    <div
-      v-if="filteredPayload.length > 0"
-      class="flex overflow-x-auto gap-3 mb-5 items-center mt-5"
-    >
+    <div v-if="filteredPayload.length > 0" class="flex overflow-x-auto gap-3 mb-5 items-center mt-5">
       <div class="font-medium text-lg text-gray-800">Filter</div>
       <div v-for="items in filteredPayload" :key="items.key">
         <div class="btn btn-light btn-sm" v-if="items.value !== '' || items.value !== null">
           <span class="text-gray-500"> {{ items.key }} </span>
           <span class="font-semibold">
             <p v-if="items.key === 'Status'">
-              {{ StatusInvoice.find((item) => item.value === Number(items.value))?.label }}
+              {{StatusInvoice.find((item) => item.value === Number(items.value))?.label}}
             </p>
             <p v-if="items.key === 'Company Code'">
               {{
@@ -47,17 +39,11 @@
         <table class="table align-middle text-gray-700 rounded-xl font-medium text-sm">
           <thead>
             <tr>
-              <th
-                v-for="(item, index) in columns"
-                class="pending__column"
-                :key="index"
-                :class="{
-                  'pending__column--auto': index <= 1,
-                  'cursor-pointer': item,
-                  '!text-blue-500': item === sortColumnName && sortBy !== '',
-                }"
-                @click="sortColumn(item)"
-              >
+              <th v-for="(item, index) in columns" class="pending__column" :key="index" :class="{
+                'pending__column--auto': index <= 1,
+                'cursor-pointer': item,
+                '!text-blue-500': item === sortColumnName && sortBy !== '',
+              }" @click="sortColumn(item)">
                 {{ item }}
                 <i v-if="item" class="ki-filled ki-arrow-up-down"></i>
               </th>
@@ -73,11 +59,7 @@
                     </button>
                     <div class="dropdown-content w-full max-w-56 py-2">
                       <div class="menu menu-default flex flex-col w-full">
-                        <div
-                          v-if="parent.statusCode === 4"
-                          class="menu-item"
-                          @click="sendToSap(parent.invoiceUId)"
-                        >
+                        <div v-if="parent.statusCode === 4" class="menu-item" @click="sendToSap(parent.invoiceUId)">
                           <div class="menu-link">
                             <span class="menu-icon">
                               <i class="ki-duotone ki-paper-plane !text-lg"></i>
@@ -101,11 +83,8 @@
                             <span class="menu-title"> Detail Approval </span>
                           </div>
                         </div>
-                        <div
-                          v-if="parent.statusCode === 4"
-                          class="menu-item"
-                          @click="openDetailInvoiceEdit(parent.invoiceUId)"
-                        >
+                        <div v-if="parent.statusCode === 4" class="menu-item"
+                          @click="openDetailInvoiceEdit(parent.invoiceUId)">
                           <div class="menu-link">
                             <span class="menu-icon">
                               <i class="ki-duotone ki-message-edit"></i>
@@ -113,11 +92,8 @@
                             <span class="menu-title"> Edit </span>
                           </div>
                         </div>
-                        <div
-                          v-if="parent.statusCode === 7"
-                          class="menu-item"
-                          @click="openDetailInvoiceEditSendSap(parent.invoiceUId)"
-                        >
+                        <div v-if="parent.statusCode === 7" class="menu-item"
+                          @click="openDetailInvoiceEditSendSap(parent.invoiceUId)">
                           <div class="menu-link">
                             <span class="menu-icon">
                               <i class="ki-duotone ki-message-edit"></i>
@@ -212,12 +188,8 @@
           }}
           data dari total data {{ verifList.length }}
         </p>
-        <LPagination
-          :totalItems="verifList.length"
-          :pageSize="pageSize"
-          :currentPage="currentPage"
-          @pageChange="setPage"
-        />
+        <LPagination :totalItems="verifList.length" :pageSize="pageSize" :currentPage="currentPage"
+          @pageChange="setPage" />
       </div>
     </div>
     <SuccessSendToSap />
@@ -240,7 +212,7 @@ import type { ListNonPoTypes } from '@/stores/views/invoice/types/verification'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { useFormatIdr } from '@/composables/currency'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
-import  UiLoading  from '@/components/modal/UiLoading.vue'
+import UiLoading from '@/components/modal/UiLoading.vue'
 import moment from 'moment'
 import { cloneDeep } from 'lodash'
 
@@ -504,7 +476,7 @@ const sendToSap = (invoiceUId: string) => {
     openSuccesSap()
     callList()
     isLoadingSap.value = false
-  }, 3000)
+  }, 5000)
 }
 
 const openSuccesSap = () => {

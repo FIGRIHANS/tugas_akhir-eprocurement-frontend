@@ -21,15 +21,15 @@
                 <!-- PO Number with Search -->
                 <div class="flex items-center gap-4">
                   <label class="form-label text-sm font-medium text-gray-600 w-40 mb-0"
-                    >PO Number <span class="text-red-500">*</span></label
+                    >Delivery Note Number <span class="text-red-500">*</span></label
                   >
                   <div class="flex-1 relative">
                     <div class="flex gap-2">
                       <input
-                        v-model="poNumberSearch"
+                        v-model="deliveryNoteNumberSearch"
                         type="text"
                         class="input flex-1"
-                        placeholder="Enter PO Number"
+                        placeholder="Enter Delivery Note Number"
                         @keypress.enter="searchDeliveryNotes"
                       />
                       <button
@@ -54,9 +54,7 @@
                         @click="selectDeliveryNote(dn)"
                       >
                         <div class="font-medium">{{ dn.deliveryNoteNumber }}</div>
-                        <div class="text-sm text-gray-500">
-                          PO: {{ dn.poNumber }} | {{ dn.vendorName }}
-                        </div>
+                        <div class="text-sm text-gray-500">PO: {{ dn.poNumber }}</div>
                       </div>
                     </div>
                   </div>
@@ -335,6 +333,20 @@
         </button>
       </div>
     </div>
+
+    <!-- Notification Modal -->
+    <ModalNotification
+      :open="showNotificationModal"
+      :id="'notification-modal'"
+      :type="notificationModal.type"
+      :title="notificationModal.title"
+      :text="notificationModal.text"
+      :onClose="
+        () => {
+          showNotificationModal = false
+        }
+      "
+    />
   </div>
 </template>
 
@@ -344,7 +356,7 @@ import { useRouter } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import VueSignature from 'vue3-signature'
-import Swal from 'sweetalert2'
+import ModalNotification from '@/components/modal/ModalNotification.vue'
 import DeliveryNotesService, { type DeliveryNotesData } from '@/services/deliveryNotes.service'
 import ReceivingConfirmationService, {
   type ReceivingConfirmationCreatePayload,
@@ -389,12 +401,12 @@ interface TableDataItem {
 const routes = ref<routeTypes[]>([
   {
     name: 'Digital Receiving Confirmation',
-    to: '/test/receiving-confirmation-list',
+    to: '/receiving-confirmation-list',
   },
 ])
 
 // States
-const poNumberSearch = ref<string>('')
+const deliveryNoteNumberSearch = ref<string>('')
 const isSearching = ref<boolean>(false)
 const isSubmitting = ref<boolean>(false)
 const showDropdown = ref<boolean>(false)
@@ -403,7 +415,7 @@ const selectedDeliveryNote = ref<DeliveryNotesData | null>(null)
 
 interface SignaturePadInstance {
   clear: () => void
-  save: () => { isEmpty: boolean; data: string }
+  save: () => string // Returns Base64 string directly
   fromDataURL: (data: string) => void
 }
 
@@ -434,14 +446,23 @@ const formData = ref<FormData>({
 // Table Data
 const tableData = ref<TableDataItem[]>([])
 
+// Modal state
+const showNotificationModal = ref<boolean>(false)
+const notificationModal = ref({
+  type: 'info' as 'info' | 'success' | 'error' | 'warning',
+  title: '',
+  text: '',
+})
+
 // Methods
 const searchDeliveryNotes = async () => {
-  if (!poNumberSearch.value.trim()) {
-    Swal.fire({
-      icon: 'warning',
+  if (!deliveryNoteNumberSearch.value.trim()) {
+    notificationModal.value = {
+      type: 'warning',
       title: 'Validation Error',
-      text: 'Please enter a PO Number',
-    })
+      text: 'Please enter a Delivery Note Number',
+    }
+    showNotificationModal.value = true
     return
   }
 
@@ -449,28 +470,30 @@ const searchDeliveryNotes = async () => {
   showDropdown.value = false
 
   try {
-    const results = await DeliveryNotesService.getByPoNumber(poNumberSearch.value)
-    deliveryNotesOptions.value = results
+    const result = await DeliveryNotesService.getByDeliveryNoteNumber(
+      deliveryNoteNumberSearch.value,
+    )
 
-    if (results.length === 0) {
-      Swal.fire({
-        icon: 'info',
+    if (!result) {
+      notificationModal.value = {
+        type: 'info',
         title: 'Not Found',
-        text: 'No Delivery Notes found for this PO Number',
-      })
-    } else if (results.length === 1) {
-      // Auto-select if only one result
-      selectDeliveryNote(results[0])
-    } else {
-      showDropdown.value = true
+        text: 'No Delivery Note found for this Delivery Note Number',
+      }
+      showNotificationModal.value = true
+      return
     }
+
+    // langsung auto-fill
+    selectDeliveryNote(result)
   } catch (error) {
     console.error('Error searching delivery notes:', error)
-    Swal.fire({
-      icon: 'error',
+    notificationModal.value = {
+      type: 'error',
       title: 'Error',
       text: 'Failed to search Delivery Notes. Please try again.',
-    })
+    }
+    showNotificationModal.value = true
   } finally {
     isSearching.value = false
   }
@@ -483,7 +506,7 @@ const selectDeliveryNote = (dn: DeliveryNotesData) => {
   // Auto-fill form data from selected Delivery Note
   formData.value.poNumber = dn.poNumber
   formData.value.tripID = dn.tripID || ''
-  formData.value.orderNumber = dn.poNumber // Using PO Number as Order Number
+  formData.value.orderNumber = dn.poNumber
   formData.value.driverName = dn.driverName || ''
   formData.value.licensePlate = dn.licensePlate || ''
   formData.value.transporter = dn.transporter || ''
@@ -496,11 +519,11 @@ const selectDeliveryNote = (dn: DeliveryNotesData) => {
     tableData.value = dn.items.map((item) => ({
       sku: item.sku,
       deskripsi: item.description,
-      noPickSlip: '', // User can fill this
+      noPickSlip: '',
       lotNoDeliveryNote: item.lotNo,
-      lotNoActual: item.lotNo, // Default same as delivery note
+      lotNoActual: item.lotNo,
       qtySuratJalan: item.qtyShipped,
-      qtyActual: item.qtyShipped, // Default same as delivery note, user can edit
+      qtyActual: item.qtyShipped,
       qtySelisih: 0,
       more: 0,
       less: 0,
@@ -539,59 +562,65 @@ const clearSignature = () => {
 
 const validateForm = (): boolean => {
   if (!formData.value.poNumber) {
-    Swal.fire({
-      icon: 'warning',
+    notificationModal.value = {
+      type: 'warning',
       title: 'Validation Error',
       text: 'Please select a Delivery Note first',
-    })
+    }
+    showNotificationModal.value = true
     return false
   }
 
   if (!formData.value.whCheckerName.trim()) {
-    Swal.fire({
-      icon: 'warning',
+    notificationModal.value = {
+      type: 'warning',
       title: 'Validation Error',
       text: 'Please enter Employee Name',
-    })
+    }
+    showNotificationModal.value = true
     return false
   }
 
   if (!formData.value.driverName.trim()) {
-    Swal.fire({
-      icon: 'warning',
+    notificationModal.value = {
+      type: 'warning',
       title: 'Validation Error',
       text: 'Please enter Driver Name',
-    })
+    }
+    showNotificationModal.value = true
     return false
   }
 
   if (!formData.value.receivedDate) {
-    Swal.fire({
-      icon: 'warning',
+    notificationModal.value = {
+      type: 'warning',
       title: 'Validation Error',
       text: 'Please enter Received Date',
-    })
+    }
+    showNotificationModal.value = true
     return false
   }
 
   if (tableData.value.length === 0) {
-    Swal.fire({
-      icon: 'warning',
+    notificationModal.value = {
+      type: 'warning',
       title: 'Validation Error',
       text: 'No items to submit. Please select a Delivery Note with items.',
-    })
+    }
+    showNotificationModal.value = true
     return false
   }
 
   // Check signature
   if (signaturePad.value) {
-    const { isEmpty } = signaturePad.value.save()
-    if (isEmpty) {
-      Swal.fire({
-        icon: 'warning',
+    const saveResult = signaturePad.value.save()
+    if (!saveResult || saveResult.trim().length === 0) {
+      notificationModal.value = {
+        type: 'warning',
         title: 'Validation Error',
         text: 'Please provide a signature',
-      })
+      }
+      showNotificationModal.value = true
       return false
     }
   }
@@ -608,11 +637,29 @@ const submitForm = async () => {
     // Save signature data
     let signatureData = ''
     if (signaturePad.value) {
-      const { isEmpty, data } = signaturePad.value.save()
-      if (!isEmpty) {
-        signatureData = data
+      const saveResult = signaturePad.value.save()
+      console.log('Signature save result:', saveResult)
+      console.log('Type of save result:', typeof saveResult)
+
+      if (saveResult && saveResult.trim().length > 0) {
+        signatureData = saveResult
+      } else {
+        notificationModal.value = {
+          type: 'warning',
+          title: 'Validation Error',
+          text: 'Please provide a signature',
+        }
+        showNotificationModal.value = true
+        isSubmitting.value = false
+        return
       }
+    } else {
+      console.error('❌ Signature pad ref is null')
+      isSubmitting.value = false
+      return
     }
+
+    console.log('Final signature data length:', signatureData?.length || 0)
 
     // Prepare items payload
     const items: ReceivingConfirmationDetailPayload[] = tableData.value.map((item) => ({
@@ -640,34 +687,39 @@ const submitForm = async () => {
       transporter: formData.value.transporter || undefined,
       truckType: formData.value.truckType || undefined,
       licensePlate: formData.value.licensePlate || undefined,
-      digitalSignaturePath: signatureData || undefined,
+      digitalSignaturePath: signatureData || '', // Always send, even if empty
       items: items,
     }
 
     console.log('Submitting payload:', payload)
+    console.log('Signature in payload:', payload.digitalSignaturePath ? 'YES' : 'NO (empty)')
 
     await ReceivingConfirmationService.create(payload)
 
-    Swal.fire({
-      icon: 'success',
+    notificationModal.value = {
+      type: 'success',
       title: 'Success',
       text: 'Receiving confirmation submitted successfully!',
-    })
+    }
+    showNotificationModal.value = true
+
+    // Wait before redirect
+    await new Promise((resolve) => setTimeout(resolve, 1500))
     router.push({ name: 'receivingConfirmationList' })
   } catch (error) {
     console.error('Error submitting form:', error)
-    Swal.fire({
-      icon: 'error',
+    notificationModal.value = {
+      type: 'error',
       title: 'Error',
       text: 'Failed to submit. Please try again.',
-    })
+    }
+    showNotificationModal.value = true
   } finally {
     isSubmitting.value = false
   }
 }
 
 onMounted(() => {
-  // Set default received date to today
   formData.value.receivedDate = new Date().toISOString().split('T')[0]
 })
 </script>
