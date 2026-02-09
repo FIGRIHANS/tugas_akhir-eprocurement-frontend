@@ -121,54 +121,79 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
 
   const getListPo = async (data: QueryParamsListPoTypes) => {
     listPo.value = []
-    const query = {
-      companyCode: data.companyCode || null,
-      invoiceTypeCode: Number(data.invoiceTypeCode) || null,
-      invoiceDate: data.invoiceDate || null,
-      searchText: data.searchText || null,
+    try {
+      const query = {
+        companyCode: data.companyCode || null,
+        invoiceTypeCode: Number(data.invoiceTypeCode) || null,
+        invoiceDate: data.invoiceDate || null,
+        searchText: data.searchText || null,
+      }
+      const response: ApiResponse<ListPoTypes[]> = await invoiceApi.get(`/invoice/approval`, {
+        params: {
+          // only include statuscode when it's not null/undefined to avoid Number(undefined) => NaN
+          ...(data.statusCode != null ? { statuscode: Number(data.statusCode) } : {}),
+          ...query,
+        },
+      })
+
+      // Safely extract content array from response
+      const content = response?.data?.result?.content
+      const resultArray = Array.isArray(content) ? content : []
+
+      listPo.value =
+        resultArray.length !== 0
+          ? resultArray.sort(
+              (a, b) => moment(b.invoiceDate).valueOf() - moment(a.invoiceDate).valueOf(),
+            )
+          : []
+
+      console.log('getListPo - success, returned', listPo.value.length, 'items')
+      return listPo.value
+    } catch (err) {
+      console.error('getListPo - error:', err)
+      listPo.value = []
+      return []
     }
-    const response: ApiResponse<ListPoTypes[]> = await invoiceApi.get(`/invoice/approval`, {
-      params: {
-        ...(data.statusCode !== null ? { statuscode: Number(data.statusCode) } : {}),
-        ...query,
-      },
-    })
-
-    listPo.value =
-      response.data.result.content.length !== 0
-        ? response.data.result.content.sort(
-            (a, b) => moment(b.invoiceDate).valueOf() - moment(a.invoiceDate).valueOf(),
-          )
-        : []
-
-    return response.data.result.content
   }
 
   const getListNonPo = async (data: QueryParamsListPoTypes) => {
     listNonPo.value = []
-    const query = {
-      companyCode: data.companyCode || null,
-      invoiceTypeCode: Number(data.invoiceTypeCode) || null,
-      invoiceDate: data.invoiceDate || null,
-      searchText: data.searchText || null,
-    }
-    const response: ApiResponse<ListNonPoTypes[]> = await invoiceApi.get(
-      `/invoice/approval/non-po`,
-      {
-        params: {
-          ...(data.statusCode !== null ? { statuscode: Number(data.statusCode) } : {}),
-          ...query,
+    try {
+      const query = {
+        companyCode: data.companyCode || null,
+        invoiceTypeCode: Number(data.invoiceTypeCode) || null,
+        invoiceDate: data.invoiceDate || null,
+        searchText: data.searchText || null,
+      }
+      const response: ApiResponse<ListNonPoTypes[]> = await invoiceApi.get(
+        `/invoice/approval/non-po`,
+        {
+          params: {
+            // only include statuscode when it's not null/undefined to avoid Number(undefined) => NaN
+            ...(data.statusCode != null ? { statuscode: Number(data.statusCode) } : {}),
+            ...query,
+          },
         },
-      },
-    )
-    listNonPo.value =
-      response.data.result.content.length !== 0
-        ? response.data.result.content.sort(
-            (a, b) => moment(b.invoiceDate).valueOf() - moment(a.invoiceDate).valueOf(),
-          )
-        : []
+      )
 
-    return response.data.result.content
+      // Safely extract content array from response
+      const content = response?.data?.result?.content
+      const resultArray = Array.isArray(content) ? content : []
+
+      listNonPo.value =
+        resultArray.length !== 0
+          ? resultArray.sort(
+              (a, b) => moment(b.invoiceDate).valueOf() - moment(a.invoiceDate).valueOf(),
+            )
+          : []
+
+      console.log('getListNonPo - success, returned', listNonPo.value.length, 'items')
+      return listNonPo.value
+    } catch (err) {
+      console.error('getListNonPo - error:', err)
+      listNonPo.value = []
+      return []
+    }
   }
 
   const getListVerifNonPo = async (data: QueryParamsListPoTypes) => {
@@ -183,7 +208,8 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
       `/invoice/verification/non-po`,
       {
         params: {
-          ...(data.statusCode !== null ? { statuscode: Number(data.statusCode) } : {}),
+          // only include statuscode when it's not null/undefined to avoid Number(undefined) => NaN
+          ...(data.statusCode != null ? { statuscode: Number(data.statusCode) } : {}),
           ...query,
         },
       },

@@ -357,6 +357,11 @@ const sidebarMenuData: ISidebarMenu[] = [
         title: 'Invoice Configuration List',
         to: 'invoice-configuration',
       },
+      {
+        id: 'log-activity',
+        title: 'Log Activity',
+        to: 'log-activity',
+      },
     ],
   },
 ]
