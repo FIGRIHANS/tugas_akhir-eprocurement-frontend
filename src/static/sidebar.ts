@@ -217,6 +217,11 @@ const sidebarMenuData: ISidebarMenu[] = [
         to: 'cash-advance',
       },
       {
+        id: 'recurring-invoice-reminder',
+        title: 'Recurring Invoice Reminder',
+        to: 'recurring-invoice-reminder',
+      },
+      {
         id: 'invoice-type',
         title: 'Invoice Type',
         to: 'invoice-type',
