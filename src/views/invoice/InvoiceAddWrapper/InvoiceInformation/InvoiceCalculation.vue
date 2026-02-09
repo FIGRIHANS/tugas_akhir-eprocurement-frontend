@@ -27,7 +27,11 @@
         </div>
       </div>
     </div>
-    <div class="card mt-5 p-5" v-if="form.invoiceType === '4' && checkIsNonPo() && varianceResult.text">
+    <div class="card mt-5 p-5" v-if="
+      form.invoiceType === '4' &&
+      (checkIsNonPo() || route.query.type === 'cas') &&
+      varianceResult.text
+    ">
       <div class="p-4 rounded-xl border transition-all duration-300" :class="varianceResult.containerClass">
         <div>
           <p class="font-bold text-gray-800 text-base">
@@ -442,30 +446,9 @@ const countWhtAmount = () => {
       }
     }
   } else {
-    for (const item of form.invoiceItem) {
-      const percentTax = 0 // Verify logic: usually WHT code has rate, but here it's 0 placeholder?
-      // Logic for WHT: Usually item.whtAmount is calculated in row. Sum it up?
-      // If based on Variance:
-      // But whtAmount is usually pre-calculated in item.
-      // If user wants WHT Amount based on Variance, we might need to re-calculate whtAmount dynamically?
-      // Given existing code sets percentTax = 0 for Non-Po WHT calculation here (which looks weird/placeholder),
-      // I will leave WHT logic mostly alone unless I see explicit WHT rate logic.
-      // However, check existing `countWhtAmount` implementation in step 1097?
-      // It returns `totalPo + totalAddDebit - totalAddCredit`.
-      // But percentTax is hardcoded to 0 inside the loops!
-      // This suggests `countWhtAmount` currently returns 0.
-
-      // If user expects WHT amount, maybe it sums `item.whtAmount`?
-      // Step 1074: `whtAmount: String(item.whtAmount || 0)` in mapping.
-
-      // Let's assume current countWhtAmount (returning 0) is placeholder and user hasn't complained about WHT value specifically, just listing it.
-      // But if user expects it to work, I should probably sum `item.whtAmount`?
-
-      // Wait, `countVatAmount` calculates tax.
-      // `countWhtAmount` hardcodes percentTax=0.
-
-      // I will Focus on countVariance replacement first.
-    }
+    // for (const item of form.invoiceItem) {
+    //   const percentTax = 0 
+    // }
   }
   return totalPo + totalAddDebit - totalAddCredit
 }

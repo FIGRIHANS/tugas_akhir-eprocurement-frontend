@@ -37,14 +37,17 @@
         </label>
         <input v-model="form.vendorId" class="input" placeholder="" disabled />
       </div>
-      <div v-if="isCasRoute || isCasView" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <!-- <div v-if="isCasRoute || isCasView" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           CAS No.
           <span class="text-red-500 ml-[4px]">*</span>
         </label>
         <input v-model="form.casNoCode" class="input" placeholder="" disabled />
-      </div>
-      <div v-if="form.invoiceType === '901'" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      </div> -->
+      <div
+        v-if="form.invoiceType === '901' && !isCasRoute"
+        class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+      >
         <label class="form-label">
           DP Option
           <span class="text-red-500 ml-[4px]">*</span>
@@ -111,7 +114,7 @@
           :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5" class="w-full -ml-[15px]" teleport />
       </div>
 
-      <div v-if="isPettyCash" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div v-if="isPettyCash && !isCasRoute" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label"> Cash Journal </label>
         <v-select v-model="form.cashJournalCode" class="customSelect w-full -ml-[15px]" label="description"
           placeholder="Select" :reduce="(option: any) => option.cashJournalNo" :options="listCashJournal.map((item) => ({
@@ -122,7 +125,7 @@
           :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5" appendToBody></v-select>
       </div>
 
-      <div v-if="isPettyCash" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div v-if="isPettyCash && !isCasRoute" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label"> Petty Cash Period </label>
         <DatePicker v-model="form.pettyCashPeriod" format="yyyy/MM/dd" class="w-full -ml-[15px]" teleport :min-days="7"
           :range="true" />
@@ -164,16 +167,39 @@
         ></v-select>
       </div> -->
 
-      <div v-if="isCasLike || isLBA" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div
+        v-if="isCasRoute || isCasLike || isLBA"
+        class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+      >
         <label class="form-label">
           CAS No.
           <span v-if="false" class="text-red-500 ml-[4px]">*</span>
         </label>
 
-        <input v-if="isCasRoute || isCasView" v-model="form.casNoCode" class="input" placeholder="Auto Generated Number" disabled />
+        <input v-if="isCasRoute || isCasView" v-model="form.casNoCode" class="input" placeholder="Auto Generated Number"
+          disabled />
         <select v-else v-model="form.casNoCode" class="select" :class="{ 'border-danger': form.companyCodeError }">
           <option v-for="item of mergedCasList" :key="item.casNo" :value="item.casNo">
             {{ item.casNo }}
+          </option>
+        </select>
+      </div>
+
+      <div
+        v-if="isCasRoute || form?.invoiceType === '4'"
+        class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+      >
+        <label class="form-label"> HRIS Travel Request No. </label>
+        <input
+          v-if="isCasRoute"
+          v-model="form.hrisTravelRequestNo"
+          class="input"
+          placeholder=""
+          disabled
+        />
+        <select v-else v-model="form.hrisTravelRequestNo" class="select">
+          <option v-for="item of hrisTravelRequestList" :key="item" :value="item">
+            {{ item }}
           </option>
         </select>
       </div>
@@ -184,7 +210,7 @@
         <input v-model="form.invoiceNo" class="input" placeholder="Auto Generated Number" disabled />
       </div>
 
-      <div v-if="isCreditCard" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div v-if="isCreditCard && !isCasRoute" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label">
           Proposal Amount
           <span class="text-red-500 ml-[4px]" v-if="
@@ -196,7 +222,10 @@
           :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5" />
       </div>
 
-      <div v-if="isReimbursementLike" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div
+        v-if="isReimbursementLike && !isCasRoute"
+        class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+      >
         <label class="form-label">
           Invoice Vendor No.
           <span class="text-red-500 ml-[4px]">*</span>
@@ -206,7 +235,10 @@
           :class="{ 'border-danger': form.invoiceVendorNoError }" />
       </div>
 
-      <div v-if="isReimbursementLike" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div
+        v-if="isReimbursementLike && !isCasRoute"
+        class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+      >
         <label class="form-label">
           Invoice Date
           <span class="text-red-500 ml-[4px]">*</span>
@@ -237,12 +269,18 @@
         </select>
       </div>
 
-      <div v-if="form.invoiceDp === '9013'" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div
+        v-if="form.invoiceDp === '9013' && !isCasRoute"
+        class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+      >
         <label class="form-label"> Remaining DP Amount </label>
         <input v-model="remainingDpAmountVal" class="input" placeholder="" disabled />
       </div>
 
-      <div v-if="form.invoiceDp === '9013'" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div
+        v-if="form.invoiceDp === '9013' && !isCasRoute"
+        class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+      >
         <label class="form-label">
           DP Amount Deduction
           <span class="text-red-500 ml-[4px]">*</span>
@@ -272,7 +310,7 @@
           :class="{ 'border-danger': form.descriptionError }"></textarea>
       </div>
 
-      <div v-if="checkPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div v-if="checkPo() && !isCasRoute" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
         <label class="form-label"> Invoice Source </label>
         <input v-if="form.status !== 0 && form.status !== -1 && form.status !== 5" v-model="form.invoiceSource"
           class="input" placeholder="" disabled />
@@ -350,6 +388,10 @@ const isCasRoute = computed(() => route.query.type === 'cas')
 const isCasView = computed(() => route.query.type === 'non-po-view' && route.query.casType === 'cas')
 const isReimbursementLike = computed(() => isReimbursement.value || isCasRoute.value)
 const isCasLike = computed(() => isCAS.value && !isCasRoute.value)
+
+const hrisTravelRequestList = ref(
+  Array.from({ length: 10 }, (_, index) => `HR-TVL-${String(index + 1).padStart(6, '0')}`),
+)
 
 const mergedCasList = computed(() => {
   const apiList = casNoCode.value || []
@@ -463,28 +505,33 @@ const loadCasItems = async (casNo: string) => {
   const response = await submissionApi.getCasItem(casNo)
   if (response.result && response.result.content) {
     // Map response to invoiceItemTypes
-    const newItems = response.result.content.map((item, index: number) => ({
-      id: index + 1, // Temporary ID or based on logic
-      activity: item.activityId || null,
-      activityCode: item.activityExpenses || '',
-      activityName: item.activityName || '',
-      itemAmount: item.itemAmount || 0,
-      itemText: item.itemText || '',
-      debitCredit: item.debitCredit || '',
-      taxCode: item.taxCode || '',
-      vatAmount: item.vatAmount || 0,
-      costCenter: item.costCenter || '',
-      profitCenter: item.profitCenter || '',
-      assignment: item.assignment || '',
-      whtType: item.whtType || '',
-      whtCode: item.whtCode || '',
-      whtBaseAmount: String(item.whtBaseAmount || 0),
-      whtAmount: String(item.whtAmount || 0),
-      realizationAmount: 0,
-      variance: 0,
-      hasRealizationInput: false,
-      isEdit: false,
-    }))
+    const newItems = response.result.content.map((item, index: number) => {
+      const itemAmount = Number(item.itemAmount || 0)
+      const realizationAmount = 0
+      const variance = itemAmount - realizationAmount
+      return {
+        id: index + 1, // Temporary ID or based on logic
+        activity: item.activityId || null,
+        activityCode: item.activityExpenses || '',
+        activityName: item.activityName || '',
+        itemAmount: itemAmount,
+        itemText: item.itemText || '',
+        debitCredit: item.debitCredit || '',
+        taxCode: item.taxCode || '',
+        vatAmount: item.vatAmount || 0,
+        costCenter: item.costCenter || '',
+        profitCenter: item.profitCenter || '',
+        assignment: item.assignment || '',
+        whtType: item.whtType || '',
+        whtCode: item.whtCode || '',
+        whtBaseAmount: String(item.whtBaseAmount || 0),
+        whtAmount: String(item.whtAmount || 0),
+        realizationAmount: realizationAmount,
+        variance: variance,
+        hasRealizationInput: true,
+        isEdit: false,
+      }
+    })
 
     form.invoiceItem = newItems
   }

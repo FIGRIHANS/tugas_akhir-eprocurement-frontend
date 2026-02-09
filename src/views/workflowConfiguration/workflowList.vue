@@ -287,17 +287,19 @@ const addWorkflow = () => {
   router.push({ name: 'workflow-configuration', params: { id: 'new' } })
 }
 
-const viewDetail = (id: string) => {
+const viewDetail = (id?: string) => {
+  if (!id) return
   router.push({
     name: 'workflow-configuration',
     params: {
-      id: id
+      id: id,
     },
     query: { mode: 'view' },
   })
 }
 
-const editWorkflow = (wfCode: string) => {
+const editWorkflow = (wfCode?: string) => {
+  if (!wfCode) return
   router.push({
     name: 'workflow-configuration',
     params: { id: wfCode },
