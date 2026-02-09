@@ -1,119 +1,303 @@
 <template>
   <div class="flex flex-col gap-[24px]">
-    <p class="text-lg font-semibold m-[0px]">Payment Details</p>
-    <div class="flex justify-start mb-4">
+    <p class="text-lg font-semibold m-[0px]">
+      {{ isRealizationDetail ? 'Realization Detail' : 'Payment Details' }}
+    </p>
+    <!-- SAP Synchronize button for Payment Details -->
+    <div v-if="!isRealizationDetail" class="flex justify-start mb-4">
       <button class="btn btn-primary" @click="handleSapSync">
         SAP Synchronize <i class="ki-duotone ki-arrows-circle"></i>
+      </button>
+    </div>
+    <!-- Add Row button for Realization Detail -->
+    <div v-else class="flex justify-start mb-4">
+      <button class="btn btn-primary" @click="addNewRow">
+        <i class="ki-duotone ki-plus"></i> Add Row
       </button>
     </div>
     <div class="overflow-x-auto invoice__table">
       <table class="table table-xs table-border">
         <thead>
           <tr>
-            <th v-for="(item, index) in columns" :key="index" class="invoice__field-base">
+            <th v-for="(item, index) in currentColumns" :key="index" class="invoice__field-base">
               {{ item }}
             </th>
           </tr>
         </thead>
         <tbody>
           <tr v-if="paymentDetails.length === 0">
-            <td :colspan="columns.length" class="text-center text-[13px]">No Data Available</td>
+            <td :colspan="currentColumns.length" class="text-center text-[13px]">
+              No Data Available
+            </td>
           </tr>
           <template v-else>
-            <tr v-for="(item, index) in paymentDetails" :key="index" class="invoice__field-items">
-              <!-- Actions column (left of No) -->
-              <td class="text-center">
-                <div class="flex items-center justify-center gap-[6px]">
-                  <button
-                    class="btn btn-icon btn-primary"
-                    @click="editingIndex === index ? saveEdit(index) : startEdit(index)"
-                    :title="editingIndex === index ? 'Save' : 'Edit'"
-                  >
-                    <i v-if="editingIndex !== index" class="ki-duotone ki-notepad-edit"></i>
-                    <i v-else class="ki-duotone ki-check-circle"></i>
-                  </button>
-                  <button
-                    class="btn btn-icon btn-outline btn-danger"
-                    @click="editingIndex === index ? cancelEdit() : deleteRow(index)"
-                    :title="editingIndex === index ? 'Cancel' : 'Delete'"
-                  >
-                    <i class="ki-duotone ki-cross-circle"></i>
-                  </button>
-                </div>
-              </td>
+            <!-- Realization Detail Row (Paid + LBA) - with Actions and Edit mode -->
+            <template v-if="isRealizationDetail">
+              <tr
+                v-for="(item, index) in paymentDetails"
+                :key="`realization-${index}`"
+                class="invoice__field-items"
+              >
+                <!-- Actions column -->
+                <td class="text-center">
+                  <div class="flex items-center justify-center gap-[6px]">
+                    <button
+                      class="btn btn-icon btn-primary"
+                      @click="editingIndex === index ? saveEdit(index) : startEdit(index)"
+                      :title="editingIndex === index ? 'Save' : 'Edit'"
+                    >
+                      <i v-if="editingIndex !== index" class="ki-duotone ki-notepad-edit"></i>
+                      <i v-else class="ki-duotone ki-check-circle"></i>
+                    </button>
+                    <button
+                      class="btn btn-icon btn-outline btn-danger"
+                      @click="editingIndex === index ? cancelEdit() : deleteRow(index)"
+                      :title="editingIndex === index ? 'Cancel' : 'Delete'"
+                    >
+                      <i class="ki-duotone ki-cross-circle"></i>
+                    </button>
+                  </div>
+                </td>
 
-              <td>{{ item.no }}</td>
-              <td>{{ item.paymentDate }}</td>
-              <td>
-                {{
-                  form?.currCode === 'IDR' ? useFormatIdr(item.amount) : useFormatUsd(item.amount)
-                }}
-              </td>
-              <td>
-                <span
-                  class="badge"
-                  :class="{
-                    'badge-success': item.status === 'Paid',
-                    'badge-warning': item.status === 'Plan',
-                  }"
-                >
-                  {{ item.status }}
-                </span>
-              </td>
-              <td>{{ item.bankAccount }}</td>
-              <!-- Remarks editable when in edit mode -->
-              <td>
-                <template v-if="editingIndex === index">
-                  <input v-model="item.remarks" class="input w-full" placeholder="Remarks" />
-                </template>
-                <template v-else>
-                  {{ item.remarks || '-' }}
-                </template>
-              </td>
-              <td class="text-center">
-                <template v-if="editingIndex === index">
-                  <input
-                    type="file"
-                    class="hidden"
-                    :id="`attach-input-${index}`"
-                    @change="onFileChange(index, $event)"
-                  />
-                  <button
-                    class="btn btn-icon btn-sm btn-primary"
-                    @click="triggerUpload(index)"
-                    title="Upload File"
+                <td>{{ item.no }}</td>
+
+                <!-- Payment Date - editable in edit mode -->
+                <td>
+                  <template v-if="editingIndex === index">
+                    <input v-model="item.paymentDate" type="date" class="input w-full" />
+                  </template>
+                  <template v-else>
+                    {{ item.paymentDate }}
+                  </template>
+                </td>
+
+                <!-- Amount - editable in edit mode -->
+                <td>
+                  <template v-if="editingIndex === index">
+                    <input
+                      v-model="item.amount"
+                      type="number"
+                      class="input w-full"
+                      placeholder="Amount"
+                    />
+                  </template>
+                  <template v-else>
+                    {{
+                      form?.currCode === 'IDR'
+                        ? useFormatIdr(item.amount)
+                        : useFormatUsd(item.amount)
+                    }}
+                  </template>
+                </td>
+
+                <!-- Status - dropdown in edit mode -->
+                <td>
+                  <template v-if="editingIndex === index">
+                    <select v-model="item.status" class="input w-full">
+                      <option value="Paid">Paid</option>
+                      <option value="Plan">Plan</option>
+                      <option value="Returned">Returned</option>
+                      <option value="Partially Returned">Partially Returned</option>
+                    </select>
+                  </template>
+                  <template v-else>
+                    <span
+                      class="badge"
+                      :class="{
+                        'badge-success': item.status === 'Paid',
+                        'badge-warning': item.status === 'Plan',
+                        'badge-danger': item.status === 'Returned',
+                        'badge-info': item.status === 'Partially Returned',
+                      }"
+                    >
+                      {{ item.status }}
+                    </span>
+                  </template>
+                </td>
+
+                <!-- Bank Holder Name - editable in edit mode -->
+                <td>
+                  <template v-if="editingIndex === index">
+                    <input
+                      v-model="item.bankHolderName"
+                      class="input w-full"
+                      placeholder="Bank Holder Name"
+                    />
+                  </template>
+                  <template v-else>
+                    {{ item.bankHolderName || '-' }}
+                  </template>
+                </td>
+
+                <!-- Bank Account - editable in edit mode -->
+                <td>
+                  <template v-if="editingIndex === index">
+                    <input
+                      v-model="item.bankAccount"
+                      class="input w-full"
+                      placeholder="Bank Account"
+                    />
+                  </template>
+                  <template v-else>
+                    {{ item.bankAccount || '-' }}
+                  </template>
+                </td>
+
+                <!-- Remark - editable in edit mode -->
+                <td>
+                  <template v-if="editingIndex === index">
+                    <input v-model="item.remarks" class="input w-full" placeholder="Remark" />
+                  </template>
+                  <template v-else>
+                    {{ item.remarks || '-' }}
+                  </template>
+                </td>
+
+                <!-- Attachment - upload in edit mode -->
+                <td class="text-center">
+                  <template v-if="editingIndex === index">
+                    <input
+                      type="file"
+                      class="hidden"
+                      :id="`attach-input-${index}`"
+                      @change="onFileChange(index, $event)"
+                    />
+                    <button
+                      class="btn btn-icon btn-sm btn-primary"
+                      @click="triggerUpload(index)"
+                      title="Upload File"
+                    >
+                      <i class="ki-duotone ki-cloud-add">
+                        <span class="path1"></span>
+                        <span class="path2"></span>
+                      </i>
+                    </button>
+                  </template>
+                  <template v-else>
+                    <button
+                      class="btn btn-icon btn-sm btn-outline btn-outline-primary"
+                      v-if="item.attachmentDocument"
+                      @click="downloadDocument(item.attachmentDocument)"
+                      title="Download File"
+                    >
+                      <i class="ki-duotone ki-cloud-download">
+                        <span class="path1"></span>
+                        <span class="path2"></span>
+                      </i>
+                    </button>
+                    <span v-else>-</span>
+                  </template>
+                </td>
+              </tr>
+            </template>
+
+            <!-- Payment Details Row (Normal) -->
+            <template v-else>
+              <tr
+                v-for="(item, index) in paymentDetails"
+                :key="`payment-${index}`"
+                class="invoice__field-items"
+              >
+                <!-- Actions column (left of No) -->
+                <td class="text-center">
+                  <div class="flex items-center justify-center gap-[6px]">
+                    <button
+                      class="btn btn-icon btn-primary"
+                      @click="editingIndex === index ? saveEdit(index) : startEdit(index)"
+                      :title="editingIndex === index ? 'Save' : 'Edit'"
+                    >
+                      <i v-if="editingIndex !== index" class="ki-duotone ki-notepad-edit"></i>
+                      <i v-else class="ki-duotone ki-check-circle"></i>
+                    </button>
+                    <button
+                      class="btn btn-icon btn-outline btn-danger"
+                      @click="editingIndex === index ? cancelEdit() : deleteRow(index)"
+                      :title="editingIndex === index ? 'Cancel' : 'Delete'"
+                    >
+                      <i class="ki-duotone ki-cross-circle"></i>
+                    </button>
+                  </div>
+                </td>
+
+                <td>{{ item.no }}</td>
+                <td>{{ item.paymentDate }}</td>
+                <td>
+                  {{
+                    form?.currCode === 'IDR' ? useFormatIdr(item.amount) : useFormatUsd(item.amount)
+                  }}
+                </td>
+                <td>
+                  <span
+                    class="badge"
+                    :class="{
+                      'badge-success': item.status === 'Paid',
+                      'badge-warning': item.status === 'Plan',
+                    }"
                   >
-                    <i class="ki-duotone ki-cloud-add">
-                      <span class="path1"></span>
-                      <span class="path2"></span>
-                    </i>
-                  </button>
-                </template>
-                <template v-else>
-                  <button
-                    class="btn btn-icon btn-sm btn-outline btn-outline-primary"
-                    v-if="item.attachmentDocument"
-                    @click="downloadDocument(item.attachmentDocument)"
-                    title="Download File"
-                  >
-                    <i class="ki-duotone ki-cloud-download">
-                      <span class="path1"></span>
-                      <span class="path2"></span>
-                    </i>
-                  </button>
-                  <span v-else>-</span>
-                </template>
-              </td>
-            </tr>
+                    {{ item.status }}
+                  </span>
+                </td>
+                <td>{{ item.bankAccount }}</td>
+                <!-- Remarks editable when in edit mode -->
+                <td>
+                  <template v-if="editingIndex === index">
+                    <input v-model="item.remarks" class="input w-full" placeholder="Remarks" />
+                  </template>
+                  <template v-else>
+                    {{ item.remarks || '-' }}
+                  </template>
+                </td>
+                <td class="text-center">
+                  <template v-if="editingIndex === index">
+                    <input
+                      type="file"
+                      class="hidden"
+                      :id="`attach-input-${index}`"
+                      @change="onFileChange(index, $event)"
+                    />
+                    <button
+                      class="btn btn-icon btn-sm btn-primary"
+                      @click="triggerUpload(index)"
+                      title="Upload File"
+                    >
+                      <i class="ki-duotone ki-cloud-add">
+                        <span class="path1"></span>
+                        <span class="path2"></span>
+                      </i>
+                    </button>
+                  </template>
+                  <template v-else>
+                    <button
+                      class="btn btn-icon btn-sm btn-outline btn-outline-primary"
+                      v-if="item.attachmentDocument"
+                      @click="downloadDocument(item.attachmentDocument)"
+                      title="Download File"
+                    >
+                      <i class="ki-duotone ki-cloud-download">
+                        <span class="path1"></span>
+                        <span class="path2"></span>
+                      </i>
+                    </button>
+                    <span v-else>-</span>
+                  </template>
+                </td>
+              </tr>
+            </template>
           </template>
         </tbody>
       </table>
+    </div>
+    <!-- Update Status button for Realization Detail (bottom right) -->
+    <div v-if="isRealizationDetail" class="flex justify-end mt-4">
+      <button class="btn btn-primary" @click="handleUpdateStatus">
+        Update Status <i class="ki-duotone ki-check-circle"></i>
+      </button>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, inject, onMounted, watch } from 'vue'
+import { ref, inject, onMounted, watch, computed } from 'vue'
 import type { Ref } from 'vue'
 import type { formTypes } from '../../types/invoiceDetail'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
@@ -149,7 +333,12 @@ interface PaymentInformationRef {
 
 const form = inject<Ref<formTypes>>('form')
 
-const columns = [
+// Check if this is Realization Detail (Paid + LBA)
+const isRealizationDetail = computed(() => {
+  return form?.value?.statusCode === 10 && form?.value?.invoiceTypeCode === 4
+})
+
+const columnsPaymentDetails = [
   'Actions',
   'No',
   'Payment Date',
@@ -160,11 +349,28 @@ const columns = [
   'Attachment Document',
 ]
 
+const columnsRealizationDetail = [
+  'Actions',
+  'No',
+  'Payment Date',
+  'Amount',
+  'Status',
+  'Bank Holder Name',
+  'Bank Account',
+  'Remark',
+  'Attachment Document',
+]
+
+const currentColumns = computed(() => {
+  return isRealizationDetail.value ? columnsRealizationDetail : columnsPaymentDetails
+})
+
 interface PaymentDetail {
   no: number
   paymentDate: string
   amount: string
   status: string
+  bankHolderName?: string
   bankAccount: string
   remarks: string
   attachmentDocument?: string
@@ -333,6 +539,11 @@ const updatePaymentDetailsFromSap = (sapDataArray: SapDataResponse[]) => {
     paymentDate: sapData.clearingDate ? formatSapDate(sapData.clearingDate) : getCurrentDate(),
     amount: (sapData.paidAmount || sapData.openAmount || sapData.invoiceAmount || 0).toString(),
     status: mapSapStatus(sapData.statusOutgoing || sapData.paymentStatus),
+    bankHolderName:
+      sapData.payment?.beneficiaryName ||
+      form?.value?.beneficiaryName ||
+      form?.value?.vendorName ||
+      '-',
     bankAccount: formatBankAccount(sapData.payment?.bankKey, sapData.payment?.bankAccountNo),
     remarks: existingRemarks[index] || '',
     attachmentDocument: undefined,
@@ -340,6 +551,29 @@ const updatePaymentDetailsFromSap = (sapDataArray: SapDataResponse[]) => {
 
   paymentDetails.value = newPaymentDetails
   console.log('Updated payment details from SAP:', newPaymentDetails)
+}
+
+const handleUpdateStatus = async () => {
+  // For Realization Detail, Update Status does the same as SAP Sync
+  await handleSapSync()
+}
+
+const addNewRow = () => {
+  const newRow: PaymentDetail = {
+    no: paymentDetails.value.length + 1,
+    paymentDate: getCurrentDate(),
+    amount: '0',
+    status: 'Returned',
+    bankHolderName: '',
+    bankAccount: '',
+    remarks: '',
+    attachmentDocument: undefined,
+    isModified: true,
+  }
+  paymentDetails.value.push(newRow)
+
+  // Automatically enter edit mode for new row
+  startEdit(paymentDetails.value.length - 1)
 }
 
 // formatSapDate and getCurrentDate moved above watch (line ~188)
