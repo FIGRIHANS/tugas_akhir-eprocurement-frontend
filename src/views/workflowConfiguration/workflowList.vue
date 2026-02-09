@@ -107,12 +107,12 @@
                         <div class="dropdown-content w-auto p-4 space-y-2">
                           <div class="flex flex-col space-y-2">
                             <UiButton variant="light" class="border-none" :outline="true" size="md"
-                              @click="viewDetail(workflow.wfCode)">
+                              @click="viewDetail(workflow)">
                               <UiIcon name="eye" class="mr-2" />
                               View Detail
                             </UiButton>
                             <UiButton variant="light" class="border-none" :outline="true" size="md"
-                              @click="editWorkflow(workflow.wfCode)">
+                              @click="editWorkflow(workflow)">
                               <UiIcon name="pencil" class="mr-2" />
                               Edit Workflow
                             </UiButton>
@@ -284,27 +284,28 @@ const filteredWorkflowList = computed(() => {
 })
 
 const addWorkflow = () => {
-  sessionStorage.removeItem('wfDetail')
-  sessionStorage.removeItem('wfMode')
-  sessionStorage.removeItem('wfCode')
   router.push({ name: 'workflow-configuration' })
 }
 
-const viewDetail = (id?: string) => {
-  if (!id) return
+const viewDetail = (workflow?: any) => {
+  if (!workflow?.wfCode) return
+  console.log(workflow.wfCode);
+
   router.push({
     name: 'workflow-configuration',
     params: {
-      id: id,
+      id: workflow.wfCode,
     },
     query: { mode: 'view' },
   })
 }
 
-const editWorkflow = (wfCode?: string) => {
-  if (!wfCode) return
+const editWorkflow = (workflow?: any) => {
+  if (!workflow?.wfCode) return
   router.push({
     name: 'workflow-configuration',
+    params: { id: workflow.wfCode },
+    query: { mode: 'edit' },
   })
 }
 
