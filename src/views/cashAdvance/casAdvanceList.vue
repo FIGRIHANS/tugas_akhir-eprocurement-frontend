@@ -1,11 +1,11 @@
 <template>
     <div>
-        <Breadcrumb title="Cas Advance" :routes="routes" />
+        <Breadcrumb title="Cash Advance" :routes="routes" />
         <hr class="-mx-[24px] mb-[24px]" />
 
         <div class="border border-gray-200 rounded-xl p-[24px]">
             <div class="flex justify-between align-items-center gap-[8px]">
-                <h1>Cas Advance</h1>
+                <h1>Cash Advance</h1>
                 <div class="flex align-items-center gap-3">
                     <UiInputSearch v-model="search" placeholder="Search" @keypress="goSearch" />
                     <FilterList :data="filterForm" @setData="setDataFilter" ref="filterChild" />
@@ -132,7 +132,7 @@
         <div class="modal-content max-w-[900px] modal-center-y">
             <div class="modal-header">
                 <h3 class="modal-title text-lg font-semibold text-gray-700">
-                    Cas Advance - Verification Detail
+                    Cash Advance - Verification Detail
                 </h3>
                 <button class="btn btn-xs btn-icon btn-light btn-clear" data-modal-dismiss="true">
                     <i class="ki-duotone ki-cross"></i>
