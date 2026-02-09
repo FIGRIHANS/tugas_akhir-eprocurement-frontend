@@ -77,4 +77,9 @@ export default [
     name: 'cash-advance',
     component: () => import('@/views/cashAdvance/casAdvanceList.vue'),
   },
+  {
+    path: '/invoice/recurring-invoice-reminder',
+    name: 'recurring-invoice-reminder',
+    component: () => import('@/views/recurringInvoiceReminder/recurringInvoiceReminderList.vue'),
+  },
 ]

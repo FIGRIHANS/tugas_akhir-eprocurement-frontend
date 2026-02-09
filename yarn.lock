@@ -1904,11 +1904,11 @@ __metadata:
   linkType: hard
 
 "@types/node@npm:^22.10.7":
-  version: 22.19.9
-  resolution: "@types/node@npm:22.19.9"
+  version: 22.19.10
+  resolution: "@types/node@npm:22.19.10"
   dependencies:
     undici-types: "npm:~6.21.0"
-  checksum: 10c0/7a15c8f6c5e3ce000f5e3589f6e30d3296899fb9f6bf502057d105e19b20e70ca560b4526e032cc6187524aee5593c0a092c21c23845d19dd3185977c83582f3
+  checksum: 10c0/fb1484f68c259abb73b018e6a521dba2ffe7846128d3aacc7fba5672f354ddb364cb4c81b5a0e686cf58ea0067df4d68d4159f668c864238a0c3fe7fee603341
   languageName: node
   linkType: hard
 
@@ -2592,13 +2592,13 @@ __metadata:
   linkType: hard
 
 "axios@npm:^1.7.9":
-  version: 1.13.4
-  resolution: "axios@npm:1.13.4"
+  version: 1.13.5
+  resolution: "axios@npm:1.13.5"
   dependencies:
-    follow-redirects: "npm:^1.15.6"
-    form-data: "npm:^4.0.4"
+    follow-redirects: "npm:^1.15.11"
+    form-data: "npm:^4.0.5"
     proxy-from-env: "npm:^1.1.0"
-  checksum: 10c0/474c00b7d71f4de4ad562589dae6b615149df7c2583bbc5ebba96229f3f85bfb0775d23705338df072f12e48d3e85685c065a3cf6855d58968a672d19214c728
+  checksum: 10c0/abf468c34f2d145f3dc7dbc0f1be67e520630624307bda69a41bbe8d386bd672d87b4405c4ee77f9ff54b235ab02f96a9968fb00e75b13ce64706e352a3068fd
   languageName: node
   linkType: hard
 
@@ -2742,9 +2742,9 @@ __metadata:
   linkType: hard
 
 "caniuse-lite@npm:^1.0.30001759, caniuse-lite@npm:^1.0.30001766":
-  version: 1.0.30001768
-  resolution: "caniuse-lite@npm:1.0.30001768"
-  checksum: 10c0/16808cb39f9563098deab6d45bcd0642a79fc5ace8dbcea8106b008b179820353e3ec089ed7e54f1f3c8bb84f2c2835b451f308212d8f36c2b7942f879e91955
+  version: 1.0.30001769
+  resolution: "caniuse-lite@npm:1.0.30001769"
+  checksum: 10c0/161b8c30ab967371807d45d361f0d5bc06e38ef2dbf811493d70cd97c21e1522f5b91fd944c419a00047ee09c931ca64627f125a9ffa7a17a9fdff8dad9765b0
   languageName: node
   linkType: hard
 
@@ -3722,7 +3722,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"follow-redirects@npm:^1.15.6":
+"follow-redirects@npm:^1.15.11":
   version: 1.15.11
   resolution: "follow-redirects@npm:1.15.11"
   peerDependenciesMeta:
@@ -3732,7 +3732,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"form-data@npm:^4.0.4":
+"form-data@npm:^4.0.5":
   version: 4.0.5
   resolution: "form-data@npm:4.0.5"
   dependencies:
@@ -4199,9 +4199,9 @@ __metadata:
   linkType: hard
 
 "isexe@npm:^3.1.1":
-  version: 3.1.2
-  resolution: "isexe@npm:3.1.2"
-  checksum: 10c0/1081adb0e9d8dd6d313916e39c81b683ab0e304bcec388b7bb400da988180dc576be7b298e6cd55d89fc5e98f32c1d73c2e04d2454c6115f58b28a8040d421ed
+  version: 3.1.4
+  resolution: "isexe@npm:3.1.4"
+  checksum: 10c0/6e1f78dd794118d263319c27c26a339eda6855b43e11e1a9013cb68578ce0396b74f11ea635e52b9466fb48a60abe70f3c9faf682f67988be092cf89b7c0dc1c
   languageName: node
   linkType: hard
 

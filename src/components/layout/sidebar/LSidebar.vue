@@ -90,6 +90,7 @@ const filteredSidebarMenu = computed(() => {
                   child.id === 'invoice-list-non-po' ||
                   child.id === 'invoice-verification' ||
                   child.id === 'invoice-approval-no-po' ||
+                  child.id === 'recurring-invoice-reminder' ||
                   child.id === 'vendor-master',
                 // child.id === 'invoice-verification-no-po' ||
                 // child.id === 'invoice-list-non-po',
@@ -131,6 +132,7 @@ const filteredSidebarMenu = computed(() => {
                 (child) =>
                   child.id === 'invoice-approval' ||
                   child.id === 'invoice-approval-no-po' ||
+                  child.id === 'recurring-invoice-reminder' ||
                   child.id === 'vendor-master',
               )
               : [],
@@ -169,6 +171,7 @@ const filteredSidebarMenu = computed(() => {
                 (child) =>
                   child.id === 'invoice-list' ||
                   child.id === 'invoice-list-non-po' ||
+                  child.id === 'recurring-invoice-reminder' ||
                   child.id === 'vendor-detail',
               )
               : [],
@@ -308,7 +311,8 @@ const filteredSidebarMenu = computed(() => {
                   child.id === 'erp-integration' ||
                   child.id === 'activity-expenses' ||
                   child.id === 'invoice-configuration' ||
-                  child.id === 'cash-advance'
+                  child.id === 'cash-advance' ||
+                  child.id === 'recurring-invoice-reminder'
               )
               : [],
           }

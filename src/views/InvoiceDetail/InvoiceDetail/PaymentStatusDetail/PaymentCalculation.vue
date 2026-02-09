@@ -1,7 +1,9 @@
 <template>
   <div class="card flex-1 payment-status-card">
     <div class="card-header py-[16px] px-[20px]">
-      <span class="font-semibold text-base whitespace-nowrap">Payment Status</span>
+      <span class="font-semibold text-base whitespace-nowrap">
+        {{ isRealizationCalculation ? 'Realization Calculation' : 'Payment Status' }}
+      </span>
     </div>
     <div class="card-body payment-table">
       <div
@@ -25,12 +27,17 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, inject, onMounted, watch } from 'vue'
+import { ref, inject, onMounted, watch, computed } from 'vue'
 import type { Ref } from 'vue'
 import type { formTypes } from '../../types/invoiceDetail'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 
 const form = inject<Ref<formTypes>>('form')
+
+// Check if this is Realization Calculation (Paid + LBA)
+const isRealizationCalculation = computed(() => {
+  return form?.value?.statusCode === 10 && form?.value?.invoiceTypeCode === 4
+})
 
 interface PaymentDetail {
   no: number

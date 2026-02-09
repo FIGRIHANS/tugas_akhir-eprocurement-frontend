@@ -1,7 +1,9 @@
 <template>
   <div class="card flex-1">
     <div class="card-body py-[8px] px-[16px] max-h-[380px] overflow-y-auto scroll mr-[16px]">
-      <p class="text-base font-semibold mb-[16px]">Payment Information</p>
+      <p class="text-base font-semibold mb-[16px]">
+        {{ isRealizationInfo ? 'Realization Information' : 'Payment Information' }}
+      </p>
 
       <div>
         <div
@@ -26,7 +28,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, inject, provide, onMounted, watch } from 'vue'
+import { ref, inject, provide, onMounted, watch, computed } from 'vue'
 import type { Ref } from 'vue'
 import type { formTypes } from '../../types/invoiceDetail'
 import { formatDate } from '@/composables/date-format'
@@ -67,6 +69,11 @@ interface SapDataResponse {
 
 const form = inject<Ref<formTypes>>('form')
 const verificationApi = useInvoiceVerificationStore()
+
+// Check if this is Realization Information (Paid + LBA)
+const isRealizationInfo = computed(() => {
+  return form?.value?.statusCode === 10 && form?.value?.invoiceTypeCode === 4
+})
 
 const paymentInfo = ref<PaymentInfoItem[]>([])
 const sapStatusData = ref<SapDataResponse[]>([])
