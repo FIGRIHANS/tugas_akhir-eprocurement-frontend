@@ -33,7 +33,7 @@ const year = moment().format('YYYY')
       <div class="flex items-start gap-2">
         <LogoEPOQ class="w-[240px] h-auto" />
         <div class="ml-2">
-          <img src="@/assets/tms.png" class="h-[60px] w-max" alt="">
+          <img src="@/assets/TMS.png" class="h-[60px] w-max" alt="">
         </div>
       </div>
     </div>

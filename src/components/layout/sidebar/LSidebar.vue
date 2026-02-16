@@ -3,11 +3,10 @@
     <div class="h-[80px] flex items-center mb-5 px-[25px]">
       <RouterLink to="/dashboard">
         <!-- <LogoAN class="w-[83px]" /> -->
-
         <LogoEPOQ class="w-[120px]" />
       </RouterLink>
       <div class="ml-2">
-        <img src="@/assets/tms.png" class="h-[35px] w-max" alt="" />
+        <img src="@/assets/TMS.png" class="h-[35px] w-max" alt="" />
       </div>
     </div>
 
