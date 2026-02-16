@@ -93,7 +93,7 @@
             <!-- Blue header styling -->
             <tr>
               <!-- Checkbox & Action Column Header -->
-              <th class="!border-b-blue-500 !bg-blue-100 !text-blue-500">
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">
                 <div class="flex items-center justify-center gap-3">
                   <input
                     type="checkbox"
@@ -109,7 +109,7 @@
               <th
                 v-for="(item, index) in columns"
                 :key="index"
-                class="!border-b-blue-500 !bg-blue-100 !text-blue-500 cursor-pointer"
+                class="!border-b-teal-500 !bg-teal-100 !text-teal-500 cursor-pointer"
                 :class="{
                   list__long: index !== 0,
                   '!text-blue-500': item === sortColumnName && sortBy !== '',

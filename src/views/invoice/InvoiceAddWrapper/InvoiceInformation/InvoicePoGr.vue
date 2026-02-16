@@ -62,7 +62,7 @@
               <th
                 v-for="(item, index) in columns"
                 :key="index"
-                class="pogr__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"
+                class="pogr__field-base !border-b-teal-500 !bg-teal-100 !text-teal-500"
                 :class="{
                   'pogr__field-base--po-item': item.toLowerCase() === 'item text',
                   'pogr__field-base--tax': item.toLowerCase() === 'tax code',
@@ -135,7 +135,7 @@
                         : item.grDocumentDate
                   }}
                 </td>
-                <td> {{ item.deliveryOrderNo }} </td>
+                <td>{{ item.deliveryOrderNo }}</td>
                 <td v-if="!checkInvoiceDp()">
                   {{
                     form.currency === item.currencyLC
@@ -221,7 +221,7 @@
               <th
                 v-for="(item, index) in columns"
                 :key="index"
-                class="pogr__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"
+                class="pogr__field-base !border-b-teal-500 !bg-teal-100 !text-teal-500"
                 :class="{
                   'pogr__field-base--po-number': item.toLowerCase() === 'po number',
                   'pogr__field-base--po-item': item.toLowerCase() === 'po item',
@@ -468,8 +468,8 @@ const setColumn = () => {
 }
 
 const setItemPoGr = (items: PoGrSearchTypes[]) => {
-  console.log(items);
-  
+  console.log(items)
+
   for (const item of items) {
     const data = {
       poNo: item.poNo,

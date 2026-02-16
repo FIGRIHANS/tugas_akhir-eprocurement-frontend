@@ -19,7 +19,7 @@
                 'invoice__field-base--wht-base': item.toLowerCase() === 'wht base amount',
                 'invoice__field-base--wht-amount': item.toLowerCase() === 'wht amount',
               }"
-              class="invoice__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"
+              class="invoice__field-base !border-b-teal-500 !bg-teal-100 !text-teal-500"
             >
               {{ item }}
             </th>

@@ -1,23 +1,33 @@
 <template>
   <div class="flex flex-col gap-[16px]">
     <p class="text-base font-semibold">Costs / Expenses</p>
-    <button v-if="form?.status === 0 || form?.status === -1 || form?.status === 5"
-      class="btn btn-outline btn-primary w-fit" @click="addNew">
+    <button
+      v-if="form?.status === 0 || form?.status === -1 || form?.status === 5"
+      class="btn btn-outline btn-primary w-fit"
+      @click="addNew"
+    >
       <i class="ki-duotone ki-plus-circle"></i>
       Add Costs / Expenses
     </button>
     <div v-if="form" class="overflow-x-auto cost__table">
-      <table class="table table-xs table-border" :class="{ 'border-danger': form?.invoiceItemError }">
+      <table
+        class="table table-xs table-border"
+        :class="{ 'border-danger': form?.invoiceItemError }"
+      >
         <thead>
           <tr>
-            <th v-for="(item, index) in columns" :key="index"
-              class="cost__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500" :class="{
+            <th
+              v-for="(item, index) in columns"
+              :key="index"
+              class="cost__field-base !border-b-teal-500 !bg-teal-100 !text-teal-500"
+              :class="{
                 'cost__field-base--activity': item.toLowerCase() === 'activity / expense',
                 'cost__field-base--item-amount': item.toLowerCase() === 'item amount',
                 'cost__field-base--tax': item.toLowerCase() === 'tax code',
                 'cost__field-base--cost': item.toLowerCase() === 'cost center',
                 'cost__field-base--description': item.toLowerCase() === 'description',
-              }">
+              }"
+            >
               {{ item }}
             </th>
           </tr>
@@ -29,24 +39,37 @@
           <template v-else>
             <tr v-for="(item, index) in form.invoiceItem" :key="index" class="cost__field-items">
               <td class="flex items-center justify-around gap-[8px]">
-                <button v-if="form.status === 0 || form.status === -1 || form.status === 5"
-                  class="btn btn-icon btn-primary" :disabled="checkIsEdit() && !item.isEdit"
-                  @click="item.isEdit = !item.isEdit">
+                <button
+                  v-if="form.status === 0 || form.status === -1 || form.status === 5"
+                  class="btn btn-icon btn-primary"
+                  :disabled="checkIsEdit() && !item.isEdit"
+                  @click="item.isEdit = !item.isEdit"
+                >
                   <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>
                   <i v-else class="ki-duotone ki-check-circle"></i>
                 </button>
-                <button v-if="form.status === 0 || form.status === -1 || form.status === 5"
-                  class="btn btn-icon btn-outline btn-danger" @click="deleteItem(index)">
+                <button
+                  v-if="form.status === 0 || form.status === -1 || form.status === 5"
+                  class="btn btn-icon btn-outline btn-danger"
+                  @click="deleteItem(index)"
+                >
                   <i class="ki-duotone ki-cross-circle"></i>
                 </button>
               </td>
               <td>
                 <span v-if="!item.isEdit || form.invoiceType === '4'">{{
                   getActivityName(item.activity) || '-'
-                  }}</span>
-                <v-select v-else v-model="item.activity" class="customSelect" placeholder="Select"
-                  :get-option-label="(option: any) => option.name" :reduce="(option: any) => option.id"
-                  :options="listActivity" appendToBody></v-select>
+                }}</span>
+                <v-select
+                  v-else
+                  v-model="item.activity"
+                  class="customSelect"
+                  placeholder="Select"
+                  :get-option-label="(option: any) => option.name"
+                  :reduce="(option: any) => option.id"
+                  :options="listActivity"
+                  appendToBody
+                ></v-select>
               </td>
               <td>
                 <span v-if="!item.isEdit || form.invoiceType === '4'">{{
@@ -54,16 +77,31 @@
                     ? useFormatIdr(item.itemAmount)
                     : useFormatUsd(item.itemAmount) || '-'
                 }}</span>
-                <input v-else v-model="item.itemAmount" class="input" type="number" placeholder=""
-                  @input="editVariance(index)" @change="item.whtBaseAmount = item.itemAmount.toString()" />
+                <input
+                  v-else
+                  v-model="item.itemAmount"
+                  class="input"
+                  type="number"
+                  placeholder=""
+                  @input="editVariance(index)"
+                  @change="item.whtBaseAmount = item.itemAmount.toString()"
+                />
               </td>
               <td v-if="form.invoiceType === '4'">
-                <span v-if="!item.isEdit">{{ form?.currency === 'IDR'
-                  ? useFormatIdr(item.realizationAmount)
-                  : useFormatUsd(item.realizationAmount) }}</span>
-                <input v-else v-model="item.realizationAmount" class="input"
-                  :class="{ 'input-danger': item.isTextLimitExceeded }" type="text" placeholder=""
-                  @input="handleRealizationInput(item, $event, index)" />
+                <span v-if="!item.isEdit">{{
+                  form?.currency === 'IDR'
+                    ? useFormatIdr(item.realizationAmount)
+                    : useFormatUsd(item.realizationAmount)
+                }}</span>
+                <input
+                  v-else
+                  v-model="item.realizationAmount"
+                  class="input"
+                  :class="{ 'input-danger': item.isTextLimitExceeded }"
+                  type="text"
+                  placeholder=""
+                  @input="handleRealizationInput(item, $event, index)"
+                />
               </td>
               <td v-if="form.invoiceType === '4'">
                 <span v-if="!item.isEdit || form.invoiceType === '4'">{{
@@ -71,22 +109,35 @@
                     ? useFormatIdr(item.variance)
                     : useFormatUsd(item.variance)
                 }}</span>
-                <input v-else v-model="item.variance" class="input"
-                  :class="{ 'input-danger': item.isTextLimitExceeded }" type="number" placeholder="" disabled />
+                <input
+                  v-else
+                  v-model="item.variance"
+                  class="input"
+                  :class="{ 'input-danger': item.isTextLimitExceeded }"
+                  type="number"
+                  placeholder=""
+                  disabled
+                />
               </td>
               <td>
                 <span v-if="!item.isEdit || form.invoiceType === '4'">{{
                   item.itemText || '-'
-                  }}</span>
-                <input v-else v-model="item.itemText" class="input"
-                  :class="{ 'input-danger': item.isTextLimitExceeded }" type="text" placeholder=""
-                  @input="onItemTextInput(item, $event)" />
+                }}</span>
+                <input
+                  v-else
+                  v-model="item.itemText"
+                  class="input"
+                  :class="{ 'input-danger': item.isTextLimitExceeded }"
+                  type="text"
+                  placeholder=""
+                  @input="onItemTextInput(item, $event)"
+                />
               </td>
 
               <td v-if="!isPettyCash">
                 <span v-if="!item.isEdit || form.invoiceType === '4'">{{
                   getDebitCreditName(item.debitCredit) || '-'
-                  }}</span>
+                }}</span>
                 <select v-else v-model="item.debitCredit" class="select" placeholder="">
                   <option value="D">Debit</option>
                   <option value="K">Credit</option>
@@ -95,10 +146,17 @@
               <td v-if="!isPettyCash">
                 <span v-if="!item.isEdit || form.invoiceType === '4'">{{
                   getTaxCodeName(item.taxCode) || '-'
-                  }}</span>
-                <v-select v-else v-model="item.taxCode" class="customSelect" placeholder="Select"
+                }}</span>
+                <v-select
+                  v-else
+                  v-model="item.taxCode"
+                  class="customSelect"
+                  placeholder="Select"
                   :get-option-label="(option: any) => `${option.code} - ${option.name}`"
-                  :reduce="(option: any) => option.code" :options="listTaxCalculation" appendToBody></v-select>
+                  :reduce="(option: any) => option.code"
+                  :options="listTaxCalculation"
+                  appendToBody
+                ></v-select>
               </td>
               <td>
                 <span>{{
@@ -109,9 +167,16 @@
               </td>
               <td v-if="!isPettyCash">
                 <span v-if="!item.isEdit">{{ getCostCenterName(item.costCenter) || '-' }}</span>
-                <v-select v-else v-model="item.costCenter" class="customSelect" placeholder="Select"
+                <v-select
+                  v-else
+                  v-model="item.costCenter"
+                  class="customSelect"
+                  placeholder="Select"
                   :get-option-label="(option: any) => `${option.code} - ${option.name}`"
-                  :reduce="(option: any) => option.code" :options="costCenterList" appendToBody></v-select>
+                  :reduce="(option: any) => option.code"
+                  :options="costCenterList"
+                  appendToBody
+                ></v-select>
               </td>
               <td>
                 <span>{{ item.profitCenter || '-' }}</span>

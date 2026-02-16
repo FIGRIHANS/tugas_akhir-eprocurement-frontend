@@ -3,18 +3,20 @@
     <div class="bg-white flex flex-col h-[500px] rounded-lg shadow">
       <!-- Chat Body -->
       <div ref="chatBody" class="flex-1 p-4 space-y-4 overflow-y-auto bg-gray-50">
-        <div v-for="(msg, index) in messages" :key="index" class="max-w-[75%]"
-          :class="msg.sender === 'me' ? 'ml-auto text-right' : ''">
+        <div
+          v-for="(msg, index) in messages"
+          :key="index"
+          class="max-w-[75%]"
+          :class="msg.sender === 'me' ? 'ml-auto text-right' : ''"
+        >
           <!-- Nama + Tanggal -->
-          <div class="text-[11px] mb-1 text-gray-500">
-            {{ msg.senderName }} • {{ msg.date }}
-          </div>
+          <div class="text-[11px] mb-1 text-gray-500">{{ msg.senderName }} • {{ msg.date }}</div>
 
           <!-- Bubble -->
-          <div class="px-3 py-2 rounded-lg text-sm inline-block" :class="msg.sender === 'me'
-              ? 'bg-primary text-white'
-              : 'bg-white border'
-            ">
+          <div
+            class="px-3 py-2 rounded-lg text-sm inline-block"
+            :class="msg.sender === 'me' ? 'bg-primary text-white' : 'bg-white border'"
+          >
             <div>{{ msg.text }}</div>
             <div class="text-[10px] mt-1 opacity-70">
               {{ msg.time }}
@@ -25,11 +27,17 @@
 
       <!-- Input -->
       <div class="p-3 border-t flex gap-2">
-        <input v-model="input" type="text" placeholder="Type a message..."
+        <input
+          v-model="input"
+          type="text"
+          placeholder="Type a message..."
           class="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-primary/20"
-          @keydown.enter="sendMessage" />
-        <button class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition"
-          @click="sendMessage">
+          @keydown.enter="sendMessage"
+        />
+        <button
+          class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition"
+          @click="sendMessage"
+        >
           Send
         </button>
       </div>
@@ -58,9 +66,7 @@ const STORAGE_KEY = 'dummy_chat_vue'
 const input = ref('')
 const chatBody = ref<HTMLDivElement | null>(null)
 
-const messages = ref<ChatMessage[]>(
-  JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
-)
+const messages = ref<ChatMessage[]>(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'))
 
 /* ======================
   HELPERS
@@ -131,7 +137,7 @@ watch(
   () => {
     saveMessages()
   },
-  { deep: true }
+  { deep: true },
 )
 
 /* ======================
@@ -155,10 +161,10 @@ onMounted(() => {
 
 <style scoped>
 .bg-primary {
-  background-color: #1b84ff;
+  background-color: #14b8a6;
 }
 
 .bg-primary-dark {
-  background-color: #1667c0;
+  background-color: #0f766e;
 }
 </style>

@@ -211,23 +211,7 @@ const sidebarMenuData: ISidebarMenu[] = [
         title: 'Email Invoice Integration',
         to: 'emailInvoiceIntegration',
       },
-      {
-        id: 'cash-advance',
-        title: 'Cash Advance',
-        to: 'cash-advance',
-      },
-      {
-        id: 'recurring-invoice-reminder',
-        title: 'Recurring Invoice Reminder',
-        to: 'recurring-invoice-reminder',
-      },
-      {
-        id: 'invoice-type',
-        title: 'Invoice Type',
-        to: 'invoice-type',
-      },
-      // {
-      //   id: 'schedule-payment',
+      // {\n      //   id: 'schedule-payment',
       //   title: 'Schedule Payment',
       // },
     ],

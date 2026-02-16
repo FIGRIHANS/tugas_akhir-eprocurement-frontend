@@ -13,13 +13,32 @@
             <i class="ki-duotone ki-plus-circle"></i>
             Add Invoice
           </button>
-          <button class="btn btn-primary ml-auto d-flex align-items-center gap-2" @click="syncFtpInvoice"
-            :disabled="isSyncLoading">
+          <button
+            class="btn btn-primary ml-auto d-flex align-items-center gap-2"
+            @click="syncFtpInvoice"
+            :disabled="isSyncLoading"
+          >
             <!-- SVG Spinner -->
-            <svg v-if="isSyncLoading" class="animate-spin h-6 w-6 text-white-600" xmlns="http://www.w3.org/2000/svg"
-              fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+            <svg
+              v-if="isSyncLoading"
+              class="animate-spin h-6 w-6 text-white-600"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+              ></path>
             </svg>
 
             <!-- Icon normal -->
@@ -69,12 +88,17 @@
         <table class="table align-middle text-gray-700 font-medium text-sm">
           <thead>
             <tr>
-              <th v-for="(item, index) in columns" :key="index"
-                class="!border-b-blue-500 !bg-blue-100 !text-blue-500 whitespace-nowrap" :class="{
+              <th
+                v-for="(item, index) in columns"
+                :key="index"
+                class="!border-b-teal-500 !bg-teal-100 !text-teal-500 whitespace-nowrap"
+                :class="{
                   'list__long ': index !== 0,
                   'cursor-pointer': item,
-                  '!text-blue-700': item === sortColumnName && sortBy !== '',
-                }" @click="sortColumn(item)">
+                  '!text-teal-500': item === sortColumnName && sortBy !== '',
+                }"
+                @click="sortColumn(item)"
+              >
                 {{ item }}
                 <i v-if="item" class="ki-filled ki-arrow-up-down"></i>
               </th>
@@ -87,15 +111,22 @@
             <template v-for="(parent, index) in list" :key="index">
               <tr>
                 <td class="flex items-center gap-[24px]">
-                  <button class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]" @click="goView(parent)">
+                  <button
+                    class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]"
+                    @click="goView(parent)"
+                  >
                     <i class="ki-filled ki-eye !text-lg"></i>
                   </button>
-                  <button class="btn btn-outline btn-primary btn-icon w-[32px] h-[32px]"
-                    @click="openDetailVerification(parent.invoiceUId)">
+                  <button
+                    class="btn btn-outline btn-primary btn-icon w-[32px] h-[32px]"
+                    @click="openDetailVerification(parent.invoiceUId)"
+                  >
                     <i class="ki-duotone ki-data !text-lg"></i>
                   </button>
-                  <button class="btn btn-icon btn-outline btn-primary w-[21px] h-[21px]"
-                    @click="parent.isOpenChild = !parent.isOpenChild">
+                  <button
+                    class="btn btn-icon btn-outline btn-primary w-[21px] h-[21px]"
+                    @click="parent.isOpenChild = !parent.isOpenChild"
+                  >
                     <i v-if="!parent.isOpenChild" class="ki-filled ki-right !text-[9px]"></i>
                     <i v-else class="ki-filled ki-down !text-[9px]"></i>
                   </button>
@@ -185,8 +216,12 @@
           {{ pageSize * currentPage > poList.length ? poList.length : pageSize * currentPage }} data
           dari total data {{ poList.length }}
         </p>
-        <LPagination :totalItems="poList.length" :pageSize="pageSize" :currentPage="currentPage"
-          @pageChange="setPage" />
+        <LPagination
+          :totalItems="poList.length"
+          :pageSize="pageSize"
+          :currentPage="currentPage"
+          @pageChange="setPage"
+        />
       </div>
       <DetailVerificationModal type="po" @loadDetail="loadData" @setClearId="viewDetailId = ''" />
     </div>
@@ -296,17 +331,17 @@ const columnsChild = ref(['No PO', 'No GR', 'Item Description', 'Item Amount', '
 const poList = computed(() => invoiceApi.listPo)
 
 const colorBadge = (status: number) => {
-  if (status === 0) return 'bg-gray-50 text-gray-600'
-  if (status === 1) return 'bg-blue-50 text-blue-600'
-  if (status === 2) return 'bg-purple-50 text-purple-600'
-  if (status === 3) return 'bg-emerald-50 text-emerald-600'
-  if (status === 4) return 'bg-emerald-100 text-emerald-700'
-  if (status === 5) return 'bg-red-50 text-red-600'
-  if (status === 6) return 'bg-gray-100 text-gray-600'
-  if (status === 7) return 'bg-slate-50 text-slate-600'
-  if (status === 8) return 'bg-yellow-50 text-yellow-700'
-  if (status === 9) return 'bg-cyan-50 text-cyan-600'
-  if (status === 10) return 'bg-emerald-500 text-white'
+  if (status === 0) return 'badge-secondary'
+  if (status === 1) return 'badge-primary'
+  if (status === 2) return 'badge-info'
+  if (status === 3) return 'badge-success'
+  if (status === 4) return 'badge-success'
+  if (status === 5) return 'badge-danger'
+  if (status === 6) return 'badge-secondary'
+  if (status === 7) return 'badge-primary'
+  if (status === 8) return 'badge-warning'
+  if (status === 9) return 'badge-info'
+  if (status === 10) return 'badge-success'
 }
 
 // Helper function for verification status badge colors
@@ -540,7 +575,6 @@ onMounted(() => {
 
 // Custom width for Submitted Document No column in FTP Invoice Integration
 :deep(.list__table) {
-
   th:nth-child(2),
   td:nth-child(2) {
     min-width: 250px;

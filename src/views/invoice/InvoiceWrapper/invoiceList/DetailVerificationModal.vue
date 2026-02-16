@@ -85,7 +85,7 @@ const invoiceDetail = computed((): ParamsSubmissionTypes | undefined => {
 const badgeColor = (status: number) => {
   const list = {
     0: 'bg-gray-50 text-gray-600',
-    1: 'bg-blue-50 text-blue-600',
+    1: 'bg-teal-50 text-teal-600',
     2: 'bg-purple-50 text-purple-600',
     3: 'bg-emerald-50 text-emerald-600',
     4: 'bg-emerald-100 text-emerald-700',

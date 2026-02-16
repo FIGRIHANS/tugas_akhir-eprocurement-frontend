@@ -9,25 +9,25 @@
     }
   }
 
-  .header-document  {
+  .header-document {
     &::-webkit-scrollbar {
       width: 10px;
       height: 10px;
       background: transparent;
     }
-    
+
     &::-webkit-scrollbar-thumb {
       width: 10px;
       height: 10px;
       border-radius: 15px;
-      background-color: #DBDFE9;
+      background-color: #dbdfe9;
     }
   }
 
   .calculation {
     &__last-field {
-      background-color: #EFF6FF;
-      color: #006AE6;
+      background-color: #ccfbf1;
+      color: #0f766e;
       border-bottom-right-radius: 12px;
       border-bottom-left-radius: 12px;
       @apply font-bold;

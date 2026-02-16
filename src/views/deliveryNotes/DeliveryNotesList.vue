@@ -81,7 +81,7 @@
               <th
                 v-for="(item, index) in columns"
                 :key="index"
-                class="!border-b-blue-500 !bg-blue-100 !text-blue-500"
+                class="!border-b-teal-500 !bg-teal-100 !text-teal-500"
                 :class="{
                   list__long: index !== 0,
                   'cursor-pointer': item !== 'Action',
