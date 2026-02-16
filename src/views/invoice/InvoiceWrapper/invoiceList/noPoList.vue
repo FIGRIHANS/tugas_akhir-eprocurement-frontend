@@ -1,12 +1,16 @@
 <template>
   <div>
-    <section name="table" class="border rounded-md p-[24px] flex flex-col gap-[24px] justify-center bg-white">
+    <section
+      name="table"
+      class="border rounded-md p-[24px] flex flex-col gap-[24px] justify-center bg-white"
+    >
       <div class="flex flex-row gap-4 justify-between w-full">
         <h1>Invoice Non PO</h1>
         <div class="flex flex-row gap-3">
           <InputSearch placeholder="Search" v-model="search" @keypress="goSearch" />
           <FilterList type="non-po" :data="filterForm" @setData="setDataFilter" ref="filterChild" />
-          <UiButton variant="primary" @click="goAdd(false)"><i class="ki-duotone ki-plus-circle"></i>Add invoice
+          <UiButton variant="primary" @click="goAdd(false)"
+            ><i class="ki-duotone ki-plus-circle"></i>Add invoice
           </UiButton>
         </div>
       </div>
@@ -48,12 +52,17 @@
         <table class="table align-middle">
           <thead>
             <tr class="text-nowrap border-b border-primary">
-              <th v-for="(item, index) in columns" :key="index" class="!border-b-blue-500 !bg-blue-100 !text-blue-500"
+              <th
+                v-for="(item, index) in columns"
+                :key="index"
+                class="!border-b-teal-500 !bg-teal-100 !text-teal-500"
                 :class="{
                   'list__long ': index !== 0,
                   'cursor-pointer': item,
-                  '!text-blue-500': item === sortColumnName && sortBy !== '',
-                }" @click="sortColumn(item)">
+                  '!text-teal-500': item === sortColumnName && sortBy !== '',
+                }"
+                @click="sortColumn(item)"
+              >
                 {{ item }}
                 <i v-if="item" class="ki-filled ki-arrow-up-down"></i>
               </th>
@@ -65,11 +74,16 @@
             </tr>
             <tr v-for="item in list" :key="item.invoiceUId" class="text-nowrap">
               <td class="flex items-center gap-[16px]">
-                <button class="btn btn-outline btn-primary btn-icon w-[32px] h-[32px]" @click="goToDetail(item)">
+                <button
+                  class="btn btn-outline btn-primary btn-icon w-[32px] h-[32px]"
+                  @click="goToDetail(item)"
+                >
                   <i class="ki-filled ki-eye !text-lg"></i>
                 </button>
-                <button class="btn btn-outline btn-primary btn-icon w-[32px] h-[32px]"
-                  @click="openDetailVerification(item.invoiceUId)">
+                <button
+                  class="btn btn-outline btn-primary btn-icon w-[32px] h-[32px]"
+                  @click="openDetailVerification(item.invoiceUId)"
+                >
                   <i class="ki-duotone ki-data !text-lg"></i>
                 </button>
               </td>
@@ -100,19 +114,26 @@
           data dari total data
           {{ poList?.length }}
         </p>
-        <LPagination :totalItems="poList?.length || 0" :pageSize="pageSize" :currentPage="currentPage"
-          @page-change="setPage" />
+        <LPagination
+          :totalItems="poList?.length || 0"
+          :pageSize="pageSize"
+          :currentPage="currentPage"
+          @page-change="setPage"
+        />
       </div>
       <div class="flex items-center gap-[16px] mt-[24px]">
         <div class="flex items-center">
-          <div class="bg-primary rounded-md p-[7px] w-[40px] h-[40px] flex items-center justify-center">
+          <div
+            class="bg-primary rounded-md p-[7px] w-[40px] h-[40px] flex items-center justify-center"
+          >
             <i class="ki-filled ki-eye text-white text-[24px]"></i>
           </div>
           <p class="ml-[8px]">: View Detail invoice</p>
         </div>
         <div class="flex items-center">
           <div
-            class="bg-primary-light border border-primary-clarity rounded-md p-[7px] w-[40px] h-[40px] flex items-center justify-center">
+            class="bg-primary-light border border-primary-clarity rounded-md p-[7px] w-[40px] h-[40px] flex items-center justify-center"
+          >
             <i class="ki-duotone ki-data text-primary text-[24px]"></i>
           </div>
           <p class="ml-[8px]">: Verification Detail Invoice</p>
@@ -199,7 +220,7 @@ const columns = ref([
   'Total Net Amount',
   'Approval Date',
   'Estimated Payment Date',
-  'SAP Document No'
+  'SAP Document No',
 ])
 
 const resetFilter = () => {

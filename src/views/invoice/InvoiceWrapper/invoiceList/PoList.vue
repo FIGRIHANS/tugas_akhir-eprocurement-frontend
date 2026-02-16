@@ -51,11 +51,11 @@
             <th
               v-for="(item, index) in columns"
               :key="index"
-              class="!border-b-blue-500 !bg-blue-100 !text-blue-500"
+              class="!border-b-teal-500 !bg-teal-100 !text-teal-500"
               :class="{
                 'list__long ': index !== 0,
                 'cursor-pointer': item,
-                '!text-blue-500': item === sortColumnName && sortBy !== '',
+                '!text-teal-500': item === sortColumnName && sortBy !== '',
               }"
               @click="sortColumn(item)"
             >
@@ -112,7 +112,7 @@
                 }}
               </td>
               <td>
-                {{ parent.sapPostingCode ||  '-' }}
+                {{ parent.sapPostingCode || '-' }}
               </td>
             </tr>
             <tr v-show="parent.isOpenChild">
@@ -245,7 +245,7 @@ const columns = ref([
   'Total Gross Amount',
   'Total Net Amount',
   'Estimated Payment Date',
-  'SAP Docuemnt No'
+  'SAP Docuemnt No',
 ])
 
 const columnsChild = ref(['No PO', 'No GR', 'Item Description', 'Item Amount', 'Quantity'])

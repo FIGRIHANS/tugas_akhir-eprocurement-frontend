@@ -24,11 +24,7 @@
         <span>TOTAL PRICE</span>
       </div>
 
-      <div
-        v-for="order in recentOrders"
-        :key="order.id"
-        class="table-row"
-      >
+      <div v-for="order in recentOrders" :key="order.id" class="table-row">
         <div class="item-info">
           <div class="item-icon" :style="{ backgroundColor: order.color }">
             <component :is="order.icon" :size="16" color="white" />
@@ -62,11 +58,11 @@ defineProps<{
 const activeTab = ref<string>('') // No default selected tab
 
 const productTabs = ref<ProductTab[]>([
-  { name: 'Human Cap. Management', icon: Users, color: '#3b82f6' },
+  { name: 'Human Cap. Management', icon: Users, color: '#14B8A6' },
   { name: 'Asset Management', icon: Building, color: '#8b5cf6' },
   { name: 'Information & Technology', icon: MonitorSmartphone, color: '#10b981' },
   { name: 'Finance', icon: CreditCard, color: '#f59e0b' },
-  { name: 'Supply Chain Management', icon: Boxes, color: '#ef4444' }
+  { name: 'Supply Chain Management', icon: Boxes, color: '#ef4444' },
 ])
 </script>
 
@@ -91,8 +87,8 @@ const productTabs = ref<ProductTab[]>([
   transition: background 0.2s;
 }
 .product-tabs .tab.active {
-  background: #e0e7ff;
-  border-color: #3b82f6;
+  background: #ccfbf1;
+  border-color: #14b8a6;
 }
 .tab-icon {
   display: flex;

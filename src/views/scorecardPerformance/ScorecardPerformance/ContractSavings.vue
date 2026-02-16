@@ -6,14 +6,30 @@
 
     <div class="sales-main sales-main-horizontal">
       <div class="sales-main-row sales-main-row-tight">
-        <h3 class="text-left" style="display:inline-block; margin-right:0.25rem;">$ {{ formatNumber(3706) }}</h3>
-        <span class="percentage positive" style="display:inline-block; vertical-align:middle;">+4.3%</span>
+        <h3 class="text-left" style="display: inline-block; margin-right: 0.25rem">
+          $ {{ formatNumber(3706) }}
+        </h3>
+        <span class="percentage positive" style="display: inline-block; vertical-align: middle"
+          >+4.3%</span
+        >
       </div>
     </div>
 
-    <div style="display: flex; align-items: center; gap: 8px;">
+    <div style="display: flex; align-items: center; gap: 8px">
       <span>Total Discounted Sales This Month</span>
-      <div style="background-color: #F5F6F8; padding: 4px 8px; border-radius: 4px; font-size: 12px; color: #64748B; margin-left: 4px; white-space: nowrap;">(Use mouse wheel to zoom)</div>
+      <div
+        style="
+          background-color: #f5f6f8;
+          padding: 4px 8px;
+          border-radius: 4px;
+          font-size: 12px;
+          color: #64748b;
+          margin-left: 4px;
+          white-space: nowrap;
+        "
+      >
+        (Use mouse wheel to zoom)
+      </div>
     </div>
 
     <div class="discount-chart">
@@ -25,21 +41,13 @@
       </div>
 
       <div class="chart-controls">
-        <button
-          @click="zoomOutDiscount"
-          class="zoom-btn"
-          title="Zoom Out (or use mouse wheel)"
-        >
+        <button @click="zoomOutDiscount" class="zoom-btn" title="Zoom Out (or use mouse wheel)">
           <span class="zoom-icon">-</span>
         </button>
 
         <div class="zoom-level">{{ currentDiscountZoomLevel }}</div>
 
-        <button
-          @click="zoomInDiscount"
-          class="zoom-btn"
-          title="Zoom In (or use mouse wheel)"
-        >
+        <button @click="zoomInDiscount" class="zoom-btn" title="Zoom In (or use mouse wheel)">
           <span class="zoom-icon">+</span>
         </button>
       </div>
@@ -48,34 +56,28 @@
         <svg width="100%" height="320" viewBox="0 0 400 320">
           <defs>
             <linearGradient id="discountGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.3" />
-              <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.1" />
+              <stop offset="0%" stop-color="#14B8A6" stop-opacity="0.3" />
+              <stop offset="100%" stop-color="#14B8A6" stop-opacity="0.1" />
             </linearGradient>
           </defs>
 
           <!-- Grid lines -->
-          <line v-for="y in [40, 80, 120, 160, 200, 240, 280]"
-                :key="y"
-                :x1="0"
-                :y1="y"
-                :x2="400"
-                :y2="y"
-                stroke="#e5e7eb"
-                stroke-width="1"
-                stroke-dasharray="4,4" />
+          <line
+            v-for="y in [40, 80, 120, 160, 200, 240, 280]"
+            :key="y"
+            :x1="0"
+            :y1="y"
+            :x2="400"
+            :y2="y"
+            stroke="#e5e7eb"
+            stroke-width="1"
+            stroke-dasharray="4,4"
+          />
 
           <!-- Chart line -->
-          <path
-            :d="currentDiscountChartPath"
-            stroke="#3b82f6"
-            stroke-width="3"
-            fill="none"
-          />
+          <path :d="currentDiscountChartPath" stroke="#14B8A6" stroke-width="3" fill="none" />
           <!-- Chart area -->
-          <path
-            :d="currentDiscountChartAreaPath"
-            fill="url(#discountGradient)"
-          />
+          <path :d="currentDiscountChartAreaPath" fill="url(#discountGradient)" />
 
           <!-- Data points -->
           <template v-for="(point, index) in visibleDiscountDataPoints" :key="index">
@@ -83,7 +85,7 @@
               :cx="point.x"
               :cy="point.y"
               r="4"
-              fill="#3b82f6"
+              fill="#14B8A6"
               stroke="white"
               stroke-width="2"
               @click="showDiscountTooltip($event, point.label, point.value)"
@@ -100,7 +102,10 @@
         <div
           v-if="discountTooltip.show"
           class="chart-tooltip discount-tooltip"
-          :style="{ 'inset-inline-start': discountTooltip.x + 'px', 'inset-block-start': discountTooltip.y + 'px' }"
+          :style="{
+            'inset-inline-start': discountTooltip.x + 'px',
+            'inset-block-start': discountTooltip.y + 'px',
+          }"
         >
           <div class="tooltip-content">
             <div class="tooltip-date">{{ discountTooltip.date }}</div>
@@ -137,7 +142,7 @@ const weeklyDiscountChartData = ref<ChartDataPoint[]>([
   { x: 120, y: 100, label: 'Week 2', value: '$ 300K' },
   { x: 200, y: 140, label: 'Week 3', value: '$ 260K' },
   { x: 280, y: 120, label: 'Week 4', value: '$ 280K' },
-  { x: 380, y: 90, label: 'Week 5', value: '$ 320K' }
+  { x: 380, y: 90, label: 'Week 5', value: '$ 320K' },
 ])
 
 const monthlyDiscountChartData = ref<ChartDataPoint[]>([
@@ -150,35 +155,40 @@ const monthlyDiscountChartData = ref<ChartDataPoint[]>([
   { x: 260, y: 110, label: 'Jul', value: '$ 290K' },
   { x: 300, y: 105, label: 'Aug', value: '$ 300K' },
   { x: 340, y: 130, label: 'Sep', value: '$ 270K' },
-  { x: 380, y: 95, label: 'Oct', value: '$ 315K' }
+  { x: 380, y: 95, label: 'Oct', value: '$ 315K' },
 ])
 
 const quarterlyDiscountChartData = ref<ChartDataPoint[]>([
   { x: 60, y: 130, label: 'Q1', value: '$ 270K' },
   { x: 160, y: 90, label: 'Q2', value: '$ 320K' },
   { x: 260, y: 110, label: 'Q3', value: '$ 290K' },
-  { x: 360, y: 95, label: 'Q4', value: '$ 310K' }
+  { x: 360, y: 95, label: 'Q4', value: '$ 310K' },
 ])
 
 const yearlyDiscountChartData = ref<ChartDataPoint[]>([
   { x: 60, y: 120, label: '2022', value: '$ 280K' },
   { x: 160, y: 90, label: '2023', value: '$ 320K' },
   { x: 260, y: 130, label: '2024', value: '$ 265K' },
-  { x: 360, y: 100, label: '2025', value: '$ 305K' }
+  { x: 360, y: 100, label: '2025', value: '$ 305K' },
 ])
 
 // Computed
 const visibleDiscountDataPoints = computed(() => {
   switch (currentDiscountZoomLevel.value) {
-    case 'Week': return weeklyDiscountChartData.value
-    case 'Month': return monthlyDiscountChartData.value
-    case 'Quarter': return quarterlyDiscountChartData.value
-    case 'Year': return yearlyDiscountChartData.value
-    default: return weeklyDiscountChartData.value
+    case 'Week':
+      return weeklyDiscountChartData.value
+    case 'Month':
+      return monthlyDiscountChartData.value
+    case 'Quarter':
+      return quarterlyDiscountChartData.value
+    case 'Year':
+      return yearlyDiscountChartData.value
+    default:
+      return weeklyDiscountChartData.value
   }
 })
 
-const visibleDiscountXLabels = computed(() => visibleDiscountDataPoints.value.map(p => p.label))
+const visibleDiscountXLabels = computed(() => visibleDiscountDataPoints.value.map((p) => p.label))
 
 const currentDiscountChartPath = computed(() => {
   const points = visibleDiscountDataPoints.value
@@ -186,8 +196,8 @@ const currentDiscountChartPath = computed(() => {
 
   let path = `M ${points[0].x} ${points[0].y}`
   for (let i = 0; i < points.length - 1; i++) {
-    const xc = (points[i].x + points[i+1].x) / 2
-    const yc = (points[i].y + points[i+1].y) / 2
+    const xc = (points[i].x + points[i + 1].x) / 2
+    const yc = (points[i].y + points[i + 1].y) / 2
     path += ` Q ${points[i].x} ${points[i].y}, ${xc} ${yc}`
   }
   const last = points[points.length - 1]
@@ -229,8 +239,14 @@ const showDiscountTooltip = (e: MouseEvent, date: string, value: string) => {
   const offsetX = rect ? e.clientX - rect.left : 100
   const offsetY = rect ? e.clientY - rect.top - 40 : 50
 
-  discountTooltip.value = { show: true, x: Math.max(8, offsetX), y: Math.max(8, offsetY), date, value }
-  setTimeout(() => discountTooltip.value.show = false, 3000)
+  discountTooltip.value = {
+    show: true,
+    x: Math.max(8, offsetX),
+    y: Math.max(8, offsetY),
+    date,
+    value,
+  }
+  setTimeout(() => (discountTooltip.value.show = false), 3000)
 }
 </script>
 

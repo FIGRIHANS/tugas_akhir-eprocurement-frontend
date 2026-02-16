@@ -54,7 +54,12 @@
         <p class="card-subtitle">Spend Analysis by Department</p>
         <div class="chart-container">
           <div class="bar-chart">
-            <div v-for="(value, index) in dailySalesData" :key="index" class="bar" :style="{ blockSize: value + '%' }">
+            <div
+              v-for="(value, index) in dailySalesData"
+              :key="index"
+              class="bar"
+              :style="{ blockSize: value + '%' }"
+            >
               <span class="bar-label">{{ departmentLabels[index] }}</span>
             </div>
           </div>
@@ -88,8 +93,12 @@
         <div class="heroes-section">
           <p class="heroes-title">Today's Heroes</p>
           <div class="heroes-avatars">
-            <div v-for="hero in todaysHeroes" :key="hero.id" class="hero-avatar"
-              :style="{ backgroundColor: hero.color }">
+            <div
+              v-for="hero in todaysHeroes"
+              :key="hero.id"
+              class="hero-avatar"
+              :style="{ backgroundColor: hero.color }"
+            >
               {{ hero.initial }}
             </div>
             <div class="hero-avatar more">+12</div>
@@ -114,8 +123,10 @@
         </div>
         <div class="invoice-illustration">
           <div class="py-8 text-center illustration-bg">
-            <InvoiceManagerPict class="w-200px"
-              style="inline-size: 200px; block-size: auto; display: block; margin: 0 auto" />
+            <InvoiceManagerPict
+              class="w-200px"
+              style="inline-size: 200px; block-size: auto; display: block; margin: 0 auto"
+            />
           </div>
         </div>
         <div class="invoice-actions">
@@ -174,7 +185,7 @@ const recentOrders = ref<RecentOrder[]>([
     qty: 1,
     price: 72000,
     total: 72000,
-    color: '#3b82f6',
+    color: '#14B8A6',
     icon: PackagePlus,
   },
   {
