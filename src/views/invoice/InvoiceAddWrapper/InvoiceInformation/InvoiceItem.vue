@@ -9,11 +9,8 @@
       <i class="ki-duotone ki-plus-circle"></i>
       Add Costs / Expenses
     </button>
-    <div v-if="form" class="overflow-x-auto cost__table">
-      <table
-        class="table table-xs table-border"
-        :class="{ 'border-danger': form?.invoiceItemError }"
-      >
+    <div v-if="form" class="overflow-x-auto cost__table rounded-lg border border-gray-200">
+      <table class="table table-xs" :class="{ 'border-danger': form?.invoiceItemError }">
         <thead>
           <tr>
             <th

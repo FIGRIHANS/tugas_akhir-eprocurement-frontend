@@ -33,6 +33,8 @@
       white-space: nowrap;
       @apply px-[20px] !important;
       @apply py-[13px] !important;
+      border: none !important;
+      outline: none !important;
 
       &--line {
         @extend .invoice__field-base;

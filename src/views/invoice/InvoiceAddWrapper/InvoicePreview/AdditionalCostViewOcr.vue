@@ -1,8 +1,8 @@
 <template>
   <div v-if="form" class="flex flex-col gap-[24px]">
     <p class="text-lg font-semibold m-[0px]">Additional Cost</p>
-    <div class="invoice__table overflow-y-auto">
-      <table class="table table-xs table-border">
+    <div class="invoice__table overflow-y-auto rounded-lg border border-gray-200">
+      <table class="table table-xs">
         <thead>
           <tr>
             <th

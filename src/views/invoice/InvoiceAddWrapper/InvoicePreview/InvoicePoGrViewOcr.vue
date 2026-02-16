@@ -1,8 +1,8 @@
 <template>
   <div v-if="form" class="flex flex-col gap-6">
     <p class="text-lg font-semibold m-[0px]">Invoice PO & GR Item</p>
-    <div class="invoice__table">
-      <table class="table table-xs table-border">
+    <div class="invoice__table rounded-lg border border-gray-200">
+      <table class="table table-xs">
         <thead>
           <tr>
             <th

@@ -68,7 +68,7 @@
               :key="notification.id"
               @click="handleNotificationClick(notification)"
               class="px-4 py-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
-              :class="{ 'bg-blue-50/50': !notification.read }"
+              :class="{ 'bg-teal-50/50': !notification.read }"
             >
               <div class="flex gap-3">
                 <!-- Icon -->
@@ -213,7 +213,7 @@ const getSeverityBgClass = (severity: NotificationSeverity): string => {
       return 'bg-yellow-100'
     case 'info':
     default:
-      return 'bg-blue-100'
+      return 'bg-teal-100'
   }
 }
 
@@ -225,7 +225,7 @@ const getSeverityIconClass = (severity: NotificationSeverity): string => {
       return 'ki-filled ki-notification text-yellow-600 text-lg'
     case 'info':
     default:
-      return 'ki-outline ki-notification text-blue-600 text-lg'
+      return 'ki-outline ki-notification text-teal-600 text-lg'
   }
 }
 

@@ -6,7 +6,7 @@
           class="flex items-center justify-center w-10 h-10 rounded-full border-2"
           :class="
             step.active
-              ? 'bg-blue-500 text-white border-blue-500'
+              ? 'bg-teal-600 text-white border-teal-600'
               : 'bg-gray-200 text-gray-500 border-gray-300'
           "
         >
@@ -15,7 +15,7 @@
         <div
           v-if="index < steps.length - 1"
           class="w-[160px] h-[5px]"
-          :class="steps[index + 1].active ? 'bg-blue-500' : 'bg-gray-300'"
+          :class="steps[index + 1].active ? 'bg-teal-600' : 'bg-gray-300'"
         ></div>
       </div>
       <span

@@ -257,60 +257,52 @@
 
         <div
           v-if="tabOcrTab === 'ai'"
-          :class="[
-            'bg-white shadow-xl rounded-xl p-6 mt-4 border',
-            aiMismatches.length === 0 ? 'border-green-600' : 'border-red-400',
-          ]"
+          :class="['bg-white shadow rounded-xl p-6 border border-gray-200']"
         >
-          <h2 class="font-bold text-xl mb-4 flex items-center gap-2">AI Action</h2>
-          <hr class="mb-4" />
-          <div
-            :class="[
-              'flex gap-5 p-4 border rounded-lg items-start',
-              aiMismatches.length === 0
-                ? 'bg-green-50 border-green-300'
-                : 'bg-red-50 border-red-300',
-            ]"
-          >
-            <img
-              src="https://cdnai.iconscout.com/ai-image/premium/thumb/ai-female-customer-care-agent-3d-illustration-png-download-jpg-13152628.png"
-              alt="AI Assistant"
-              class="w-20 h-20 object-contain flex-shrink-0"
-            />
-            <div class="flex-grow">
-              <p
-                v-if="aiMismatches.length === 0"
-                class="font-extrabold text-lg text-green-600 mb-3"
-              >
-                Tidak ada mismatch
-              </p>
-              <p v-else class="font-extrabold text-lg text-red-800 mb-3">Terdapat mismatch pada:</p>
-
-              <ul class="list-disc ml-6 space-y-1 text-base text-gray-800">
-                <li v-for="(item, index) in aiMismatches" :key="index" class="font-semibold">
-                  {{ item }}
-                </li>
-              </ul>
-              <div class="flex gap-3 mt-5">
-                <button
-                  @click="setActive('back')"
-                  class="btn"
-                  :class="[
-                    activeButton === 'back' ? 'btn-primary' : 'btn-outline btn-outline-primary',
-                  ]"
-                >
-                  Send Back to Vendor
-                </button>
-                <button
-                  @click="setActive('proceed')"
-                  class="btn"
-                  :class="[
-                    activeButton === 'proceed' ? 'btn-primary' : 'btn-outline btn-outline-primary',
-                  ]"
-                >
-                  Proceed
-                </button>
+          <h2 class="font-semibold text-lg mb-4">AI Verification Result</h2>
+          <div class="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+            <div v-if="aiMismatches.length === 0" class="mb-4">
+              <div class="flex items-center gap-2 mb-2">
+                <i class="ki-filled ki-check-circle text-green-600 text-xl"></i>
+                <p class="font-semibold text-base text-gray-800">Verification Passed</p>
               </div>
+              <p class="text-sm text-gray-600">All data matched successfully</p>
+            </div>
+
+            <div v-else class="mb-4">
+              <div class="flex items-center gap-2 mb-2">
+                <i class="ki-filled ki-cross-circle text-red-600 text-xl"></i>
+                <p class="font-semibold text-base text-gray-800">Mismatch Detected</p>
+              </div>
+              <p class="text-sm text-gray-600 mb-3">The following fields have mismatches:</p>
+              <ul class="list-disc ml-6 space-y-1 text-sm text-gray-700">
+                <li v-for="(item, index) in aiMismatches" :key="index">{{ item }}</li>
+              </ul>
+            </div>
+
+            <div class="flex gap-3 pt-3 border-t border-gray-200">
+              <button
+                @click="setActive('back')"
+                :class="[
+                  'btn',
+                  activeButton === 'back'
+                    ? 'btn-primary'
+                    : 'bg-white text-teal-600 border-2 border-teal-600 hover:bg-teal-50',
+                ]"
+              >
+                Send Back to Vendor
+              </button>
+              <button
+                @click="setActive('proceed')"
+                :class="[
+                  'btn',
+                  activeButton === 'proceed'
+                    ? 'btn-primary'
+                    : 'bg-white text-teal-600 border-2 border-teal-600 hover:bg-teal-50',
+                ]"
+              >
+                Proceed
+              </button>
             </div>
           </div>
         </div>

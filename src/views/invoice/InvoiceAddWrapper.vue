@@ -2,8 +2,14 @@
   <div>
     <Breadcrumb title="Add Invoice" :routes="routes" />
     <StepperStatus :active-name="stepperStatus" />
-    <TabInvoice v-model:activeTab="tabNow" :can-click-data="true" :can-click-information="canClickInformationTab"
-      :can-click-preview="canClickPreviewTab" :can-click-payment-status="canClickPaymentStatusTab" class="-mx-[24px]" />
+    <TabInvoice
+      v-model:activeTab="tabNow"
+      :can-click-data="true"
+      :can-click-information="canClickInformationTab"
+      :can-click-preview="canClickPreviewTab"
+      :can-click-payment-status="canClickPaymentStatusTab"
+      class="-mx-[24px]"
+    />
     <!-- <div v-if="form.status !== 0" class="status__box--approved -mt-5 -mx-[24px]">
       <i class="ki-outline ki-shield-tick text-primary text-[36px]"></i>
       <div>
@@ -18,18 +24,27 @@
         <component :is="contentComponent" />
       </Transition>
 
-      <div v-if="tabNow === 'paymentStatus'" class="flex justify-between items-center mt-[24px] gap-3">
+      <div
+        v-if="tabNow === 'paymentStatus'"
+        class="flex justify-between items-center mt-[24px] gap-3"
+      >
         <button class="btn btn-outline btn-primary" @click="goToList">
           <i class="ki-filled ki-arrow-left"></i>
           Back
         </button>
 
-        <button v-if="String(userData?.profile?.profileId) === '3002'" class="btn btn-primary"
-          @click="updatePaymentStatus">
+        <button
+          v-if="String(userData?.profile?.profileId) === '3002'"
+          class="btn btn-primary"
+          @click="updatePaymentStatus"
+        >
           Update Payment Status
         </button>
       </div>
-      <div v-else-if="checkIsNonPo()" class="flex align-items-center justify-between gap-[8px] mt-[24px]">
+      <div
+        v-else-if="checkIsNonPo()"
+        class="flex align-items-center justify-between gap-[8px] mt-[24px]"
+      >
         <div class="flex-1 flex gap-[8px]">
           <button class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goBack">
             <i class="ki-filled ki-arrow-left"></i>
@@ -41,28 +56,40 @@
           </button>
         </div>
         <div class="flex-1 flex gap-[8px] justify-end">
-          <button v-if="tabNow === 'information'" class="btn btn-primary" :disabled="isSubmit || checkFormBudget()"
-            @click="checkBudget">
+          <button
+            v-if="tabNow === 'information'"
+            class="btn btn-primary"
+            :disabled="isSubmit || checkFormBudget()"
+            @click="checkBudget"
+          >
             Budget Checking
             <i class="ki-duotone ki-dollar"></i>
           </button>
 
-          <button class="btn btn-primary" @click="goNext" :disabled="isSubmit ||
-            (!isCheckBudget && tabNow === 'information') ||
-            (tabNow === 'information' && !checkInvoiceInformation()) ||
-            (tabNow === 'data' && !isAlternativePayeeFilled())
-            ">
+          <button
+            class="btn btn-primary"
+            @click="goNext"
+            :disabled="
+              isSubmit ||
+              (!isCheckBudget && tabNow === 'information') ||
+              (tabNow === 'information' && !checkInvoiceInformation()) ||
+              (tabNow === 'data' && !isAlternativePayeeFilled())
+            "
+          >
             {{ tabNow !== 'preview' ? 'Next' : 'Submit' }}
             <i v-if="tabNow !== 'preview'" class="ki-duotone ki-black-right"></i>
             <i v-else class="ki-duotone ki-paper-plane"></i>
           </button>
         </div>
       </div>
-      <div v-else-if="
-        (form.status === 0 || form.status === -1 || form.status === 5) &&
-        !checkInvoiceView() &&
-        !checkInvoiceNonPoView()
-      " class="flex justify-between items-center gap-[8px] mt-[24px]">
+      <div
+        v-else-if="
+          (form.status === 0 || form.status === -1 || form.status === 5) &&
+          !checkInvoiceView() &&
+          !checkInvoiceNonPoView()
+        "
+        class="flex justify-between items-center gap-[8px] mt-[24px]"
+      >
         <button class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goSaveDraft">
           Save as Draft
           <i class="ki-duotone ki-bookmark"></i>
@@ -72,8 +99,11 @@
             <i class="ki-filled ki-arrow-left"></i>
             Back
           </button>
-          <button class="btn btn-primary" :disabled="isSubmit || (tabNow === 'data' && !isAlternativePayeeFilled())"
-            @click="goNext">
+          <button
+            class="btn btn-primary"
+            :disabled="isSubmit || (tabNow === 'data' && !isAlternativePayeeFilled())"
+            @click="goNext"
+          >
             {{ tabNow !== 'preview' ? 'Next' : 'Submit' }}
             <i v-if="tabNow !== 'preview'" class="ki-duotone ki-black-right"></i>
             <i v-else class="ki-duotone ki-paper-plane"></i>
@@ -81,28 +111,43 @@
         </div>
       </div>
       <div v-else class="flex justify-end items-center mt-[24px] gap-3">
-        <button v-if="tabNow !== 'preview' || checkInvoiceView() || checkInvoiceNonPoView()"
-          class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goBack">
+        <button
+          v-if="tabNow !== 'preview' || checkInvoiceView() || checkInvoiceNonPoView()"
+          class="btn btn-outline btn-primary"
+          :disabled="isSubmit"
+          @click="goBack"
+        >
           <i class="ki-filled ki-arrow-left"></i>
           Back
         </button>
 
-        <button v-if="tabNow !== 'preview' || checkInvoiceView() || checkInvoiceNonPoView()" class="btn btn-primary"
-          @click="goNext">
+        <button
+          v-if="tabNow !== 'preview' || checkInvoiceView() || checkInvoiceNonPoView()"
+          class="btn btn-primary"
+          @click="goNext"
+        >
           Next
           <i class="ki-duotone ki-black-right"></i>
         </button>
 
-        <button v-if="tabNow !== 'preview' && !checkInvoiceView() && !checkInvoiceNonPoView()" class="btn btn-primary"
-          :disabled="isSubmit ||
+        <button
+          v-if="tabNow !== 'preview' && !checkInvoiceView() && !checkInvoiceNonPoView()"
+          class="btn btn-primary"
+          :disabled="
+            isSubmit ||
             (tabNow === 'information' && !checkInvoiceInformation()) ||
             (tabNow === 'data' && !isAlternativePayeeFilled())
-            " @click="goNext">
+          "
+          @click="goNext"
+        >
           Next
           <i class="ki-duotone ki-black-right"></i>
         </button>
-        <button v-if="tabNow === 'preview' && !checkInvoiceView() && !checkInvoiceNonPoView()" class="btn btn-primary"
-          :disabled="isSubmit">
+        <button
+          v-if="tabNow === 'preview' && !checkInvoiceView() && !checkInvoiceNonPoView()"
+          class="btn btn-primary"
+          :disabled="isSubmit"
+        >
           Save as PDF
           <iconPDF />
         </button>
@@ -295,8 +340,7 @@ const form = reactive<formTypes>({
   createdBy: '',
   createdUtcDate: '',
   modifiedBy: '',
-  modifiedUtcDate: ''
-
+  modifiedUtcDate: '',
 })
 
 const contentComponent = computed(() => {
@@ -342,13 +386,11 @@ const loadInvoiceDetailForPaymentStatus = async () => {
     }
 
     const invoiceId = route.query.invoice.toString()
-    console.log('Loading invoice detail for payment status, invoiceId:', invoiceId)
 
     const response = await verificationApi.getInvoiceDetail(invoiceId)
 
     if (response && !response.isError && response.content) {
       const data = response.content
-      console.log('Invoice detail loaded for payment status:', data)
 
       if (data.header) {
         form.status = data.header.statusCode
@@ -624,15 +666,15 @@ const goBack = () => {
       isCheckBudget.value = false
       tabNow.value = newTab
       try {
-        ; (document.activeElement as HTMLElement)?.blur()
-      } catch { }
+        ;(document.activeElement as HTMLElement)?.blur()
+      } catch {}
       return
     }
 
     tabNow.value = newTab
     try {
-      ; (document.activeElement as HTMLElement)?.blur()
-    } catch { }
+      ;(document.activeElement as HTMLElement)?.blur()
+    } catch {}
   }
 }
 
@@ -824,7 +866,7 @@ const mapDataPost = () => {
       createdBy: form.createdBy,
       createdUtcDate: form.createdUtcDate,
       modifiedBy: form.modifiedBy,
-      modifiedUtcDate: form.modifiedUtcDate
+      modifiedUtcDate: form.modifiedUtcDate,
     },
     pogr: mapPoGr(),
     additionalCosts: form.invoiceDp === '9012' ? [] : mapAdditionalCost(),
@@ -917,8 +959,8 @@ const mapDataPostNonPo = () => {
       cashJournalName: isPettyCash
         ? typeof form.cashJournalName === 'string'
           ? form.cashJournalName
-            .replace(new RegExp('^' + (form.cashJournalCode || '') + '\\s*-\\s*'), '')
-            .trim()
+              .replace(new RegExp('^' + (form.cashJournalCode || '') + '\\s*-\\s*'), '')
+              .trim()
           : form.cashJournalName || ''
         : '',
       pettyCashStartDate: pettyCashStartDate || null,
@@ -1412,7 +1454,7 @@ const casDummyMap: Record<
     }
     items: Array<{
       id: number
-      activity: string
+      activity: number
       activityCode: string
       activityName: string
       itemAmount: number
@@ -1456,7 +1498,7 @@ const casDummyMap: Record<
     items: [
       {
         id: 1,
-        activity: 'ACT-001',
+        activity: 1,
         activityCode: 'TRV',
         activityName: 'Travel Expense',
         itemAmount: 1200000,
@@ -1474,7 +1516,7 @@ const casDummyMap: Record<
       },
       {
         id: 2,
-        activity: 'ACT-002',
+        activity: 2,
         activityCode: 'HSP',
         activityName: 'Hospitality',
         itemAmount: 800000,
@@ -1518,7 +1560,7 @@ const casDummyMap: Record<
     items: [
       {
         id: 1,
-        activity: 'ACT-010',
+        activity: 10,
         activityCode: 'ACC',
         activityName: 'Accounting Fee',
         itemAmount: 1500000,
@@ -1536,7 +1578,7 @@ const casDummyMap: Record<
       },
       {
         id: 2,
-        activity: 'ACT-011',
+        activity: 11,
         activityCode: 'ADM',
         activityName: 'Admin Expense',
         itemAmount: 500000,
@@ -1580,7 +1622,7 @@ const casDummyMap: Record<
     items: [
       {
         id: 1,
-        activity: 'ACT-020',
+        activity: 20,
         activityCode: 'OPS',
         activityName: 'Operational',
         itemAmount: 2000000,
@@ -1649,9 +1691,11 @@ const setDummyCasView = () => {
     assignment: item.assignment,
     whtType: item.whtType,
     whtCode: item.whtCode,
-    whtBaseAmount: item.whtBaseAmount,
-    whtAmount: item.whtAmount,
+    whtBaseAmount: item.whtBaseAmount.toString(),
+    whtAmount: item.whtAmount.toString(),
     whtCodeList: [],
+    realizationAmount: 0,
+    variance: 0,
     isEdit: false,
   }))
 
@@ -1659,7 +1703,6 @@ const setDummyCasView = () => {
   form.invoicePoGr = []
   stepperStatus.value = 'Approval'
 }
-
 
 // const checkBudget = () => {
 //   const data = mapDataCheck()
@@ -1775,14 +1818,12 @@ const setDummyCasView = () => {
 // }
 
 const checkBudget = () => {
-
   isCheckBudget.value = true
   // tampilkan modal success
   const idModal = document.querySelector('#success_budget_check_modal')
   const modal = KTModal.getInstance(idModal as HTMLElement)
   if (modal) modal.show()
 }
-
 
 const checkFormBudget = () => {
   let status = false
@@ -1861,7 +1902,8 @@ const checkFormBudget = () => {
 
 const setStepperStatus = () => {
   // Get status from either PO or Non-PO detail
-  const rawStatusCode = !checkIsNonPo()
+  const isNonPo = checkIsNonPo() || checkInvoiceNonPoView()
+  const rawStatusCode = !isNonPo
     ? detailPo.value?.header?.statusCode
     : detailNonPo.value?.header?.statusCode
 
@@ -1880,20 +1922,6 @@ const setStepperStatus = () => {
   } else {
     // Default fallback
     stepperStatus.value = 'Submission'
-  }
-}
-
-const updateStepperByTab = () => {
-  if (tabNow.value === 'data') {
-    stepperStatus.value = 'Submission'
-  } else if (tabNow.value === 'information') {
-    stepperStatus.value = 'Submission'
-  } else if (tabNow.value === 'ocrAiVerification') {
-    stepperStatus.value = 'Verification'
-  } else if (tabNow.value === 'preview') {
-    stepperStatus.value = 'Approval'
-  } else if (tabNow.value === 'paymentStatus') {
-    stepperStatus.value = 'Status'
   }
 }
 
@@ -1961,19 +1989,9 @@ onMounted(() => {
   }
 })
 
-const checkPreview = () => {
-  return route.query.type === 'po-view' || route.query.type === 'non-po-view'
-}
-
 watch(
   () => tabNow.value,
   async () => {
-    const isViewMode = checkPreview()
-
-    if (!isViewMode) {
-      updateStepperByTab()
-    }
-
     if (
       tabNow.value === 'paymentStatus' &&
       String(userData.value?.profile.profileId) === '3200' &&
@@ -1988,9 +2006,7 @@ watch(
 watch(
   () => form.status,
   (newStatus) => {
-    const isViewMode = checkPreview()
-
-    if (isViewMode && newStatus !== undefined && newStatus >= 0) {
+    if (newStatus !== undefined && newStatus >= -1) {
       setStepperStatus()
     }
   },
@@ -2023,7 +2039,6 @@ watch(
 
 provide('form', form)
 provide('userData', userData)
-
 </script>
 
 <style lang="scss" scoped>
