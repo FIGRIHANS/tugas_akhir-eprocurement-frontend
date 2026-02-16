@@ -324,7 +324,7 @@ const getStatusFPBadgeClass = (status: string) => {
 
 const getMatchStatusBadgeClass = (status: string) => {
   if (status === 'Match') return 'badge-success'
-  if (status.includes('Mismatch')) return 'badge-warning'
+  if (status.includes('Mismatch')) return 'badge-danger'
   return 'badge-secondary'
 }
 

@@ -109,19 +109,18 @@ const handleAction = (action: string, menu: IMenu) => {
         <table class="table align-middle text-gray-700">
           <thead>
             <tr>
-              <th></th>
-              <!-- Action Column -->
-              <th class="text-nowrap">Menu Name</th>
-              <th class="text-nowrap">Menu Icon</th>
-              <th class="text-nowrap">Menu Url</th>
-              <th class="text-nowrap">Parent ID</th>
-              <th class="text-nowrap">Sequential</th>
-              <th class="text-nowrap">Tier</th>
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500"></th>
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Menu Name</th>
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Menu Icon</th>
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Menu Url</th>
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Parent ID</th>
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Sequential</th>
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Tier</th>
             </tr>
           </thead>
           <tbody>
             <tr v-if="filteredMenus.length === 0">
-              <td colspan="7" class="text-center py-4">No menus found.</td>
+              <td colspan="9" class="text-center py-4">No menus found.</td>
             </tr>
             <tr
               v-for="menu in filteredMenus"
@@ -153,7 +152,7 @@ const handleAction = (action: string, menu: IMenu) => {
                         size="md"
                         @click="handleAction('Detail', menu)"
                       >
-                        <UiIcon name="eye" class="mr-2 text-blue-500" />
+                        <UiIcon name="eye" class="mr-2 text-teal-500" />
                         Detail
                       </UiButton>
                       <UiButton

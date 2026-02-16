@@ -58,7 +58,7 @@
                 :key="index"
                 :class="{
                   'cursor-pointer': item,
-                  '!text-blue-500': item === sortColumnName && sortBy !== '',
+                  '!text-teal-500': item === sortColumnName && sortBy !== '',
                 }"
                 @click="sortColumn(item)"
               >
@@ -267,7 +267,7 @@ const verifList = computed(() => verificationApi.listNonPo)
 const colorBadge = (statusCode: number) => {
   const list = {
     0: 'bg-gray-50 text-gray-600',
-    1: 'bg-blue-50 text-blue-600',
+    1: 'bg-primary-light text-primary',
     2: 'bg-purple-50 text-purple-600',
     3: 'bg-emerald-50 text-emerald-600',
     4: 'bg-emerald-100 text-emerald-700',
@@ -275,7 +275,7 @@ const colorBadge = (statusCode: number) => {
     6: 'bg-gray-100 text-gray-600',
     7: 'bg-slate-50 text-slate-600',
     8: 'bg-yellow-50 text-yellow-700',
-    9: 'bg-cyan-50 text-cyan-600',
+    9: 'bg-primary-light text-primary',
     10: 'bg-emerald-500 text-white',
   } as { [key: number]: string }
   return list[statusCode]

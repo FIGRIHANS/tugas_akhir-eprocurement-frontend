@@ -85,7 +85,7 @@
                 :class="{
                   list__long: index !== 0,
                   'cursor-pointer': item !== 'Action',
-                  '!text-blue-500': item === sortColumnName && sortBy !== '',
+                  '!text-teal-500': item === sortColumnName && sortBy !== '',
                 }"
                 @click="item !== 'Action' ? sortColumn(item) : null"
               >

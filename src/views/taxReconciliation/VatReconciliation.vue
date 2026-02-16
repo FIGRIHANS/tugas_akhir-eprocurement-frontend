@@ -163,15 +163,13 @@
               <!-- PPN -->
               <td class="text-right">{{ formatCurrency(item.ppn) }}</td>
 
-              <!-- Status FP -->
-              <td class="text-center">
+              <td>
                 <span class="badge badge-outline" :class="getStatusFPBadgeClass(item.statusFp)">
                   {{ item.statusFp || '-' }}
                 </span>
               </td>
 
-              <!-- Status AP vs FP -->
-              <td class="text-center">
+              <td>
                 <span
                   class="badge badge-outline"
                   :class="getMatchStatusBadgeClass(item.statusApVsFp)"
@@ -180,8 +178,7 @@
                 </span>
               </td>
 
-              <!-- Credit Status -->
-              <td class="text-center">
+              <td>
                 <span
                   class="badge badge-outline"
                   :class="getCreditStatusBadgeClass(item.creditStatus)"

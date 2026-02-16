@@ -22,7 +22,7 @@
               @click="selectRole(role.roleId)"
               :class="{
                 'cursor-pointer': true,
-                'bg-blue-600 text-white': role.roleId === selectedRoleId,
+                'bg-primary text-white': role.roleId === selectedRoleId,
               }"
             >
               <td>{{ role.roleId }}</td>

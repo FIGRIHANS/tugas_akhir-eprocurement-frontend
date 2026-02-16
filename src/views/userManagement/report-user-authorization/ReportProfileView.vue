@@ -22,7 +22,7 @@
               @click="selectProfile(profile.profileId)"
               :class="{
                 'cursor-pointer': true,
-                'bg-blue-600 text-white': profile.profileId === selectedProfileId,
+                'bg-primary text-white': profile.profileId === selectedProfileId,
               }"
             >
               <td>{{ profile.profileId }}</td>

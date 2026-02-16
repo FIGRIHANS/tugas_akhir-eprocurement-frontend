@@ -79,7 +79,7 @@
                 :class="{
                   list__long: index !== 0,
                   'cursor-pointer': item !== 'Action',
-                  '!text-primary': item === sortColumnName && sortBy !== '',
+                  '!text-teal-500': item === sortColumnName && sortBy !== '',
                 }"
                 @click="item !== 'Action' ? sortColumn(item) : null"
               >
@@ -132,7 +132,7 @@
               <td>{{ item.jenisDokRef }}</td>
               <td>{{ item.nomorDokRef }}</td>
               <td>{{ formatDate(item.tanggalDok) }}</td>
-              <td class="text-center">
+              <td>
                 <span class="badge badge-outline" :class="getStatusWhtBadgeClass(item.statusWht)">
                   {{ item.statusWht }}
                 </span>
@@ -567,7 +567,7 @@ const filteredDataList = computed(() => {
 
 const getStatusWhtBadgeClass = (status: string) => {
   if (status === 'Created') return 'badge-success'
-  if (status === 'Export to XML') return 'badge-warning'
+  if (status === 'Export to XML') return 'badge-primary'
   return 'badge-secondary'
 }
 
@@ -693,8 +693,8 @@ const sortColumn = (columnName: string | null) => {
     })
   } else if (name === 'Tax Base (DPP)' || name === 'Rate (%)') {
     result = listData.sort((a, b) => {
-      const convA = (a as Record<string, any>)[columnMap[name]] || 0
-      const convB = (b as Record<string, any>)[columnMap[name]] || 0
+      const convA = (a as unknown as Record<string, number>)[columnMap[name]] || 0
+      const convB = (b as unknown as Record<string, number>)[columnMap[name]] || 0
       if (sortBy.value === 'asc') {
         return convA - convB
       } else {
@@ -703,11 +703,11 @@ const sortColumn = (columnName: string | null) => {
     })
   } else {
     result = listData.sort((a, b) => {
-      const convA = (a as Record<string, any>)[columnMap[name]]
-        ? String((a as Record<string, any>)[columnMap[name]])
+      const convA = (a as unknown as Record<string, string>)[columnMap[name]]
+        ? String((a as unknown as Record<string, string>)[columnMap[name]])
         : ''
-      const convB = (b as Record<string, any>)[columnMap[name]]
-        ? String((b as Record<string, any>)[columnMap[name]])
+      const convB = (b as unknown as Record<string, string>)[columnMap[name]]
+        ? String((b as unknown as Record<string, string>)[columnMap[name]])
         : ''
       if (sortBy.value === 'asc') {
         return convA.localeCompare(convB)

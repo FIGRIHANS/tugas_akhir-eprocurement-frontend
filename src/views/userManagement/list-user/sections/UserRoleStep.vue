@@ -32,9 +32,14 @@
                   No available role objects.
                 </td>
               </tr>
-              <tr v-else v-for="role in filteredAvailableRoles" :key="role.code"
-                @click="toggleAvailableSelection(role.code)" class="cursor-pointer hover:bg-gray-50"
-                :class="{ 'bg-blue-100': isAvailableSelected(role.code) }">
+              <tr
+                v-else
+                v-for="role in filteredAvailableRoles"
+                :key="role.code"
+                @click="toggleAvailableSelection(role.code)"
+                class="cursor-pointer hover:bg-gray-50"
+                :class="{ 'bg-teal-100': isAvailableSelected(role.code) }"
+              >
                 <td>{{ role.roleCode }}</td>
                 <td>{{ role.name }}</td>
               </tr>
@@ -44,18 +49,40 @@
       </div>
 
       <div class="flex flex-col gap-4 justify-center items-center h-full pt-10">
-        <UiButton variant="primary" @click="addSelectedRoles" :disabled="selectedAvailableRoles.length === 0">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <UiButton
+          variant="primary"
+          @click="addSelectedRoles"
+          :disabled="selectedAvailableRoles.length === 0"
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <path
               d="M13.7929 11.2071C14.1834 10.8166 14.8166 10.8166 15.2071 11.2071C15.5976 11.5976 15.5976 12.2309 15.2071 12.6213L10.2071 17.6213C9.81658 18.0118 9.18342 18.0118 8.79289 17.6213C8.40237 17.2309 8.40237 16.5976 8.79289 16.2071L12.9858 12L8.79289 7.79289C8.40237 7.40237 8.40237 6.76921 8.79289 6.37868C9.18342 5.98815 9.81658 5.98815 10.2071 6.37868L15.2071 11.3787L13.7929 11.2071Z"
-              fill="white" />
+              fill="white"
+            />
           </svg>
         </UiButton>
-        <UiButton variant="primary" @click="removeSelectedRoles" :disabled="selectedAssignedRoles.length === 0">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <UiButton
+          variant="primary"
+          @click="removeSelectedRoles"
+          :disabled="selectedAssignedRoles.length === 0"
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <path
               d="M10.2071 11.2071C9.81658 10.8166 9.18342 10.8166 8.79289 11.2071C8.40237 11.5976 8.40237 12.2309 8.79289 12.6213L13.7929 17.6213C14.1834 18.0118 14.8166 18.0118 15.2071 17.6213C15.5976 17.2309 15.5976 16.5976 15.2071 16.2071L11.0142 12L15.2071 7.79289C15.5976 7.40237 15.5976 6.76921 15.2071 6.37868C14.8166 5.98815 14.1834 5.98815 13.7929 6.37868L8.79289 11.3787L10.2071 11.2071Z"
-              fill="white" />
+              fill="white"
+            />
           </svg>
         </UiButton>
       </div>
@@ -78,8 +105,13 @@
                   No role objects selected.
                 </td>
               </tr>
-              <tr v-for="role in assignedRoles" :key="role.code" @click="toggleAssignedSelection(role.code)"
-                class="cursor-pointer hover:bg-gray-50" :class="{ 'bg-blue-100': isAssignedSelected(role.code) }">
+              <tr
+                v-for="role in assignedRoles"
+                :key="role.code"
+                @click="toggleAssignedSelection(role.code)"
+                class="cursor-pointer hover:bg-gray-50"
+                :class="{ 'bg-blue-100': isAssignedSelected(role.code) }"
+              >
                 <td>{{ role.roleCode }}</td>
                 <td>{{ role.name }}</td>
               </tr>

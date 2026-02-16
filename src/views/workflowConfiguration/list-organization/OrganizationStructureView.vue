@@ -57,11 +57,11 @@
                 </div>
                 <!-- Add Button -->
                 <UiButton
-                  class="w-[160px] flex items-center pl-4 gap-2 bg-blue-50 border border-blue-400 text-blue-600 text-xs font-medium rounded h-10 px-3 hover:bg-blue-100 flex-shrink-0"
-                  @click="addHierarchy(level)"
+                  class="w-[160px] flex items-center pl-4 gap-2 bg-primary-light border border-primary-clarity text-primary text-xs font-medium rounded h-10 px-3 hover:bg-teal-50 flex-shrink-0"
+                  @click="addHierarchy('1')"
                 >
-                  <div class="w-4 h-4 flex items-center justify-center rounded-full bg-blue-100">
-                    <UiIcon name="plus" class="text-blue-600" size="xs" />
+                  <div class="w-4 h-4 flex items-center justify-center rounded-full bg-teal-100">
+                    <UiIcon name="plus" class="text-primary" size="xs" />
                   </div>
                   Add New
                 </UiButton>
