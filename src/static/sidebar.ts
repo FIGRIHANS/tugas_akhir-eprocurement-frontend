@@ -66,43 +66,43 @@ const sidebarMenuData: ISidebarMenu[] = [
   //     },
   //   ],
   // },
-  {
-    id: 'vendor-management',
-    title: 'Vendor Management',
-    icon: 'users',
-    child: [
-      {
-        id: 'vendor-master',
-        title: 'Vendor Master',
-        to: 'vendor-master',
-      },
-      {
-        id: 'vendor-verification',
-        title: 'Vendor Verification',
-        to: 'vendor-verification',
-      },
-      {
-        id: 'vendor-approval',
-        title: 'Vendor Approval',
-        to: 'vendor-approval',
-      },
-      {
-        id: 'vendor-blacklist',
-        title: 'Vendor Blacklist',
-        to: 'vendor-blacklist',
-      },
-      {
-        id: 'activity-expenses',
-        title: 'Activity Expenses',
-        to: 'activity-expenses',
-      },
-      {
-        id: 'vendor-detail',
-        title: 'Vendor Detail',
-        to: 'vendor-detail',
-      },
-    ],
-  },
+  // {
+  //   id: 'vendor-management',
+  //   title: 'Vendor Management',
+  //   icon: 'users',
+  //   child: [
+  //     {
+  //       id: 'vendor-master',
+  //       title: 'Vendor Master',
+  //       to: 'vendor-master',
+  //     },
+  //     {
+  //       id: 'vendor-verification',
+  //       title: 'Vendor Verification',
+  //       to: 'vendor-verification',
+  //     },
+  //     {
+  //       id: 'vendor-approval',
+  //       title: 'Vendor Approval',
+  //       to: 'vendor-approval',
+  //     },
+  //     {
+  //       id: 'vendor-blacklist',
+  //       title: 'Vendor Blacklist',
+  //       to: 'vendor-blacklist',
+  //     },
+  //     {
+  //       id: 'activity-expenses',
+  //       title: 'Activity Expenses',
+  //       to: 'activity-expenses',
+  //     },
+  //     {
+  //       id: 'vendor-detail',
+  //       title: 'Vendor Detail',
+  //       to: 'vendor-detail',
+  //     },
+  //   ],
+  // },
 
   // {
   //   id: 'e-procurement-report',

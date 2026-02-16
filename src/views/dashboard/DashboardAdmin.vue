@@ -21,36 +21,56 @@
             <div class="text-gray-500 text-sm font-medium">Verified</div>
             <div class="flex items-center gap-3">
               <div class="progress progress-success h-4">
-                <div class="progress-bar" :style="getProgressStyle(dashboardData.totalVerified || 0)"></div>
+                <div
+                  class="progress-bar"
+                  :style="getProgressStyle(dashboardData.totalVerified || 0)"
+                ></div>
               </div>
-              <span class="text-sm font-medium text-gray-500">{{ dashboardData.totalVerified || 0 }}</span>
+              <span class="text-sm font-medium text-gray-500">{{
+                dashboardData.totalVerified || 0
+              }}</span>
             </div>
           </li>
           <li class="space-y-1">
             <div class="text-gray-500 text-sm font-medium">On Progress Verification</div>
             <div class="flex items-center gap-3">
               <div class="progress progress-warning h-4">
-                <div class="progress-bar" :style="getProgressStyle(dashboardData.totalOnProgressVerification || 0)"></div>
+                <div
+                  class="progress-bar"
+                  :style="getProgressStyle(dashboardData.totalOnProgressVerification || 0)"
+                ></div>
               </div>
-              <span class="text-sm font-medium text-gray-500">{{ dashboardData.totalOnProgressVerification || 0 }}</span>
+              <span class="text-sm font-medium text-gray-500">{{
+                dashboardData.totalOnProgressVerification || 0
+              }}</span>
             </div>
           </li>
           <li class="space-y-1">
             <div class="text-gray-500 text-sm font-medium">Rejected</div>
             <div class="flex items-center gap-3">
               <div class="progress progress-danger h-4">
-                <div class="progress-bar" :style="getProgressStyle(dashboardData.totalRejected || 0)"></div>
+                <div
+                  class="progress-bar"
+                  :style="getProgressStyle(dashboardData.totalRejected || 0)"
+                ></div>
               </div>
-              <span class="text-sm font-medium text-gray-500">{{ dashboardData.totalRejected || 0 }}</span>
+              <span class="text-sm font-medium text-gray-500">{{
+                dashboardData.totalRejected || 0
+              }}</span>
             </div>
           </li>
           <li class="space-y-1">
             <div class="text-gray-500 text-sm font-medium">Blacklist</div>
             <div class="flex items-center gap-3">
               <div class="progress progress-dark h-4">
-                <div class="progress-bar bg-indigo-950" :style="getProgressStyle(dashboardData.totalBlacklistVendor || 0)"></div>
+                <div
+                  class="progress-bar bg-indigo-950"
+                  :style="getProgressStyle(dashboardData.totalBlacklistVendor || 0)"
+                ></div>
               </div>
-              <span class="text-sm font-medium text-gray-500">{{ dashboardData.totalBlacklistVendor || 0 }}</span>
+              <span class="text-sm font-medium text-gray-500">{{
+                dashboardData.totalBlacklistVendor || 0
+              }}</span>
             </div>
           </li>
         </ul>
@@ -64,28 +84,62 @@
         <div class="flex flex-col gap-0.5">
           <span class="text-sm font-medium text-gray-500"> Total Vendor </span>
           <div class="flex items-center gap-2.5">
-            <span class="text-3xl font-semibold text-gray-900">{{ dashboardData.totalVendor || 0 }}</span>
+            <span class="text-3xl font-semibold text-gray-900">{{
+              dashboardData.totalVendor || 0
+            }}</span>
           </div>
         </div>
         <div class="flex items-center gap-1 mb-1.5">
-          <div class="bg-success h-2 rounded-sm relative group cursor-pointer" :style="getProgressStyle(dashboardData.totalVendorPKP || 0)">
-            <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-success text-white text-xs rounded opacity-0 group-hover:opacity-100 whitespace-nowrap">
-              PKP: {{ dashboardData.totalVendorPKP || 0 }} vendor{{ (dashboardData.totalVendorPKP || 0) > 1 ? 's' : '' }} ({{ getPercentage(dashboardData.totalVendorPKP || 0) }}%)
+          <div
+            class="bg-success h-2 rounded-sm relative group cursor-pointer"
+            :style="getProgressStyle(dashboardData.totalVendorPKP || 0)"
+          >
+            <div
+              class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-success text-white text-xs rounded opacity-0 group-hover:opacity-100 whitespace-nowrap"
+            >
+              PKP: {{ dashboardData.totalVendorPKP || 0 }} vendor{{
+                (dashboardData.totalVendorPKP || 0) > 1 ? 's' : ''
+              }}
+              ({{ getPercentage(dashboardData.totalVendorPKP || 0) }}%)
             </div>
           </div>
-          <div class="bg-danger h-2 rounded-sm relative group cursor-pointer" :style="getProgressStyle(dashboardData.totalVendorNonPKP || 0)">
-            <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-danger text-white text-xs rounded opacity-0 group-hover:opacity-100 whitespace-nowrap">
-              Non-PKP: {{ dashboardData.totalVendorNonPKP || 0 }} vendor{{ (dashboardData.totalVendorNonPKP || 0) > 1 ? 's' : '' }} ({{ getPercentage(dashboardData.totalVendorNonPKP || 0) }}%)
+          <div
+            class="bg-danger h-2 rounded-sm relative group cursor-pointer"
+            :style="getProgressStyle(dashboardData.totalVendorNonPKP || 0)"
+          >
+            <div
+              class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-danger text-white text-xs rounded opacity-0 group-hover:opacity-100 whitespace-nowrap"
+            >
+              Non-PKP: {{ dashboardData.totalVendorNonPKP || 0 }} vendor{{
+                (dashboardData.totalVendorNonPKP || 0) > 1 ? 's' : ''
+              }}
+              ({{ getPercentage(dashboardData.totalVendorNonPKP || 0) }}%)
             </div>
           </div>
-          <div class="bg-info h-2 rounded-sm relative group cursor-pointer" :style="getProgressStyle(dashboardData.totalVendorPersonal || 0)">
-            <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-info text-white text-xs rounded opacity-0 group-hover:opacity-100 whitespace-nowrap">
-              Personal: {{ dashboardData.totalVendorPersonal || 0 }} vendor{{ (dashboardData.totalVendorPersonal || 0) > 1 ? 's' : '' }} ({{ getPercentage(dashboardData.totalVendorPersonal || 0) }}%)
+          <div
+            class="bg-info h-2 rounded-sm relative group cursor-pointer"
+            :style="getProgressStyle(dashboardData.totalVendorPersonal || 0)"
+          >
+            <div
+              class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-info text-white text-xs rounded opacity-0 group-hover:opacity-100 whitespace-nowrap"
+            >
+              Personal: {{ dashboardData.totalVendorPersonal || 0 }} vendor{{
+                (dashboardData.totalVendorPersonal || 0) > 1 ? 's' : ''
+              }}
+              ({{ getPercentage(dashboardData.totalVendorPersonal || 0) }}%)
             </div>
           </div>
-          <div class="bg-warning h-2 rounded-sm relative group cursor-pointer" :style="getProgressStyle(dashboardData.totalVendorForeign || 0)">
-            <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-warning text-white text-xs rounded opacity-0 group-hover:opacity-100 whitespace-nowrap">
-              Foreign: {{ dashboardData.totalVendorForeign || 0 }} vendor{{ (dashboardData.totalVendorForeign || 0) > 1 ? 's' : '' }} ({{ getPercentage(dashboardData.totalVendorForeign || 0) }}%)
+          <div
+            class="bg-warning h-2 rounded-sm relative group cursor-pointer"
+            :style="getProgressStyle(dashboardData.totalVendorForeign || 0)"
+          >
+            <div
+              class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-warning text-white text-xs rounded opacity-0 group-hover:opacity-100 whitespace-nowrap"
+            >
+              Foreign: {{ dashboardData.totalVendorForeign || 0 }} vendor{{
+                (dashboardData.totalVendorForeign || 0) > 1 ? 's' : ''
+              }}
+              ({{ getPercentage(dashboardData.totalVendorForeign || 0) }}%)
             </div>
           </div>
         </div>
@@ -155,5 +209,6 @@ const chartOptions = {
       },
     },
   ],
+  colors: ['#0d9488', '#f59e0b', '#ef4444', '#3b82f6', '#6366f1'], // Teal, Orange, Red, Blue, Indigo
 }
 </script>

@@ -31,24 +31,35 @@
                 : null
             "
           />
-          <div class="flex gap-5">
+          <div class="flex items-center gap-[8px]">
             <span
               v-if="
                 formInject?.status === 0 || formInject?.status === -1 || formInject?.status === 5
               "
-              class="border-b border-dashed border-primary text-primary cursor-pointer text-xs font-medium"
-              @click="changeFile(index)"
-              >Edit</span
-            >
-
-            <span
-              v-if="
-                formInject?.status === 0 || formInject?.status === -1 || formInject?.status === 5
-              "
-              class="border-b border-dashed border-primary text-primary cursor-pointer text-xs font-medium"
+              class="border-b border-dashed border-primary text-primary cursor-pointer text-xs font-medium mr-2"
               @click="sendUploadFile"
               >Fill Tax Data</span
             >
+            <button
+              v-if="
+                formInject?.status === 0 || formInject?.status === -1 || formInject?.status === 5
+              "
+              class="btn btn-icon btn-sm btn-active-light-primary text-primary"
+              @click="changeFile(index)"
+              title="Edit"
+            >
+              <i class="ki-outline ki-pencil fs-2"></i>
+            </button>
+            <button
+              v-if="
+                formInject?.status === 0 || formInject?.status === -1 || formInject?.status === 5
+              "
+              class="btn btn-icon btn-sm btn-active-light-danger text-danger"
+              @click="removeFile(item.varName as keyof documentFormTypes)"
+              title="Delete"
+            >
+              <i class="ki-outline ki-trash fs-2"></i>
+            </button>
           </div>
         </div>
       </div>
@@ -131,6 +142,11 @@ const setFile = (file: responseFileTypes, name: keyof documentFormTypes) => {
 
 const changeFile = (index: number) => {
   pdfUploadRef.value[index].triggerFileInput()
+}
+
+const removeFile = (name: keyof documentFormTypes) => {
+  const reftProperty = toRef(form, name)
+  reftProperty.value = null
 }
 
 const sendUploadFile = async () => {

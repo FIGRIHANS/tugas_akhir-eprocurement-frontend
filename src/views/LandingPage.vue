@@ -25,7 +25,7 @@ const year = moment().format('YYYY')
           We support long-term business sustainability through transparent, standardized, and
           value-oriented e-Procurement designed to deliver mutual benefits for all stakeholders.
         </p>
-        <UiButton variant="light" size="lg" class="self-start">
+        <UiButton variant="light" size="lg" class="self-start flex items-center gap-2">
           <span class="text-gray-900">Download Manual Book</span>
           <IconPDF />
         </UiButton>
@@ -33,7 +33,7 @@ const year = moment().format('YYYY')
       <div class="flex items-start gap-2">
         <LogoEPOQ class="w-[240px] h-auto" />
         <div class="ml-2">
-          <img src="@/assets/tms.png" class="h-[60px] w-max" alt="">
+          <img src="@/assets/tms.png" class="h-[60px] w-max" alt="" />
         </div>
       </div>
     </div>

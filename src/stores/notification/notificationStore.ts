@@ -4,7 +4,7 @@ import moment from 'moment'
 import type { TaxNotification, NotificationState, NotificationSeverity } from './types'
 import { generateNotificationId } from './types'
 
-const STORAGE_KEY = 'tax-notifications'
+const STORAGE_KEY = 'tax-notifications-v2'
 
 export const useNotificationStore = defineStore('notification', () => {
   // State
@@ -142,15 +142,15 @@ export const useNotificationStore = defineStore('notification', () => {
       if (daysLeft <= 3) {
         severity = 'critical'
         title = `VAT Credit Expiring in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}!`
-        message = `Faktur Pajak ${item.noFakturPajak} dari ${item.vendorName} akan hangus. Segera kreditkan!`
+        message = `Tax Invoice ${item.noFakturPajak} from ${item.vendorName} will expire. Credit it immediately!`
       } else if (daysLeft <= 7) {
         severity = 'warning'
         title = `VAT Credit Expiring Soon (${daysLeft} days)`
-        message = `Faktur Pajak ${item.noFakturPajak} dari ${item.vendorName} akan expired dalam ${daysLeft} hari.`
+        message = `Tax Invoice ${item.noFakturPajak} from ${item.vendorName} will expire in ${daysLeft} days.`
       } else if (daysLeft <= 30) {
         severity = 'info'
         title = `VAT Credit Reminder (${daysLeft} days left)`
-        message = `Faktur Pajak ${item.noFakturPajak} perlu dikreditkan sebelum ${expiry.format('DD/MM/YYYY')}.`
+        message = `Tax Invoice ${item.noFakturPajak} needs to be credited before ${expiry.format('DD/MM/YYYY')}.`
       }
 
       const notification = addNotification({
