@@ -54,7 +54,7 @@
                 :class="{
                   'pending__column--auto': index <= 1,
                   'cursor-pointer': item,
-                  '!text-blue-500': item === sortColumnName && sortBy !== '',
+                  '!text-teal-500': item === sortColumnName && sortBy !== '',
                 }"
                 @click="sortColumn(item)"
               >
@@ -73,11 +73,7 @@
                     </button>
                     <div class="dropdown-content w-full max-w-56 py-2">
                       <div class="menu menu-default flex flex-col w-full">
-                        <div
-                          v-if="parent.statusCode === 4"
-                          class="menu-item"
-                          @click="sendToSap(parent.invoiceUId)"
-                        >
+                        <div v-if="parent.statusCode === 4" class="menu-item" @click="sendToSap()">
                           <div class="menu-link">
                             <span class="menu-icon">
                               <i class="ki-duotone ki-paper-plane !text-lg"></i>
@@ -235,7 +231,7 @@ import type { filterListTypes } from '../types/pendingApproval'
 import type { ListPoTypes } from '@/stores/views/invoice/types/verification'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { useFormatIdr } from '@/composables/currency'
-import  UiLoading  from '@/components/modal/UiLoading.vue'
+import UiLoading from '@/components/modal/UiLoading.vue'
 import moment from 'moment'
 import { cloneDeep } from 'lodash'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
@@ -306,7 +302,7 @@ const verifList = computed(() => verificationApi.listPo)
 const colorBadge = (statusCode: number) => {
   const list = {
     0: 'bg-gray-50 text-gray-600',
-    1: 'bg-blue-50 text-blue-600',
+    1: 'bg-primary-light text-primary',
     2: 'bg-purple-50 text-purple-600',
     3: 'bg-emerald-50 text-emerald-600',
     4: 'bg-emerald-100 text-emerald-700',
@@ -475,7 +471,7 @@ const closeDropdown = () => {
 //     })
 // }
 
-const sendToSap = (invoiceUId: string) => {
+const sendToSap = () => {
   closeDropdown()
   isLoadingSap.value = true
   // verificationApi

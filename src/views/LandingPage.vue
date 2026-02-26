@@ -25,15 +25,15 @@ const year = moment().format('YYYY')
           We support long-term business sustainability through transparent, standardized, and
           value-oriented e-Procurement designed to deliver mutual benefits for all stakeholders.
         </p>
-        <UiButton variant="light" size="lg" class="self-start">
-          <span class="text-gray-900">Download Manual Book</span>
-          <IconPDF />
+        <UiButton variant="primary" size="lg" class="self-start flex items-center gap-2">
+          <span class="text-white">Download Manual Book</span>
+          <IconPDF class="text-white" />
         </UiButton>
       </div>
       <div class="flex items-start gap-2">
         <LogoEPOQ class="w-[240px] h-auto" />
         <div class="ml-2">
-          <img src="@/assets/TMS.png" class="h-[60px] w-max" alt="">
+          <img src="@/assets/tms.png" class="h-[60px] w-max" alt="" />
         </div>
       </div>
     </div>
@@ -45,8 +45,8 @@ const year = moment().format('YYYY')
         <div class="card bg-secondary shadow-none">
           <div class="card-body p-4 space-y-4">
             <div class="inline-flex items-center gap-4">
-              <div class="bg-gray-200 rounded-lg p-2">
-                <IconEye />
+              <div class="bg-primary-light rounded-lg p-2">
+                <IconEye class="text-primary" />
               </div>
               <span class="text-xl text-gray-900 font-semibold"> Transparent </span>
             </div>
@@ -59,8 +59,8 @@ const year = moment().format('YYYY')
         <div class="card bg-secondary shadow-none">
           <div class="card-body p-4 space-y-4">
             <div class="inline-flex items-center gap-4">
-              <div class="bg-gray-200 rounded-lg p-2">
-                <IconEfficient />
+              <div class="bg-primary-light rounded-lg p-2">
+                <IconEfficient class="text-primary" />
               </div>
               <span class="text-xl text-gray-900 font-semibold"> Efficient </span>
             </div>
@@ -74,8 +74,8 @@ const year = moment().format('YYYY')
         <div class="card bg-secondary shadow-none">
           <div class="card-body p-4 space-y-4">
             <div class="inline-flex items-center gap-4">
-              <div class="bg-gray-200 rounded-lg p-2">
-                <IconUserFriendly />
+              <div class="bg-primary-light rounded-lg p-2">
+                <IconUserFriendly class="text-primary" />
               </div>
               <span class="text-xl font-semibold text-gray-900"> User-Friendly </span>
             </div>
@@ -92,7 +92,9 @@ const year = moment().format('YYYY')
   <section id="about" class="py-16">
     <div class="max-w-[1440px] lg:px-[40px] px-5 mx-auto">
       <div class="mb-6">
-        <span class="rounded-full py-1 px-3 bg-gray-200 text-base text-gray-900"> About Us </span>
+        <span class="rounded-full py-1 px-3 bg-primary-light text-base text-primary">
+          About Us
+        </span>
         <h1 class="font-semibold text-4xl text-[#283841] mt-4">About Us</h1>
       </div>
       <div class="flex flex-col lg:flex-row gap-6 lg:items-center">

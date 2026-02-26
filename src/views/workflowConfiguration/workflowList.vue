@@ -1,9 +1,12 @@
 <template>
   <div>
-    <BreadcrumbView title="Workflow List" :routes="[
-      { name: 'Workflow Configuration', to: '/workflow-list' },
-      { name: 'Workflow List', to: '#' },
-    ]" />
+    <BreadcrumbView
+      title="Workflow List"
+      :routes="[
+        { name: 'Workflow Configuration', to: '/workflow-list' },
+        { name: 'Workflow List', to: '#' },
+      ]"
+    />
 
     <div class="card">
       <div class="card-header">
@@ -21,8 +24,10 @@
                 <p class="text-lg font-semibold mb-[8px]">Filter</p>
                 <div class="flex flex-col gap-[24px] py-[16px]">
                   <div class="relative">
-                    <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white">Company
-                      Code</label>
+                    <label
+                      class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
+                      >Company Code</label
+                    >
                     <select v-model="tempFilters.companyCode" class="select" name="select">
                       <option value="">All</option>
                       <option v-for="item of companyOptions" :key="item.value" :value="item.value">
@@ -31,18 +36,26 @@
                     </select>
                   </div>
                   <div class="relative">
-                    <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white">Invoice
-                      Type</label>
+                    <label
+                      class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
+                      >Invoice Type</label
+                    >
                     <select v-model="tempFilters.invoiceType" class="select" name="select">
                       <option value="">All</option>
-                      <option v-for="item of invoiceTypeOptions" :key="item.value" :value="item.value">
+                      <option
+                        v-for="item of invoiceTypeOptions"
+                        :key="item.value"
+                        :value="item.value"
+                      >
                         {{ item.text }}
                       </option>
                     </select>
                   </div>
                   <div class="relative">
-                    <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white">PO
-                      Type</label>
+                    <label
+                      class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
+                      >PO Type</label
+                    >
                     <select v-model="tempFilters.poType" class="select" name="select">
                       <option value="">All</option>
                       <option v-for="item of poTypeOptions" :key="item.value" :value="item.value">
@@ -52,7 +65,9 @@
                   </div>
                   <div class="relative">
                     <label
-                      class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white">Status</label>
+                      class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
+                      >Status</label
+                    >
                     <select v-model="tempFilters.status" class="select" name="select">
                       <option value="">All</option>
                       <option v-for="item of statusOptions" :key="item.value" :value="item.value">
@@ -66,7 +81,11 @@
                     <i class="ki-duotone ki-arrows-circle"></i>
                     Reset
                   </button>
-                  <button class="btn btn-primary btn-lg" @click="applyFilters" data-dropdown-dismiss="true">
+                  <button
+                    class="btn btn-primary btn-lg"
+                    @click="applyFilters"
+                    data-dropdown-dismiss="true"
+                  >
                     <i class="ki-filled ki-check-circle"></i>
                     Apply
                   </button>
@@ -82,42 +101,77 @@
       </div>
       <div class="card-body integration">
         <div>
-          <div v-if="workflowList.length > 0"
-            class="integration__table border border-gray-200 rounded-xl overflow-x-auto">
+          <div
+            v-if="workflowList.length > 0"
+            class="integration__table border border-gray-200 rounded-xl overflow-x-auto"
+          >
             <table class="table align-middle text-gray-700 font-medium text-sm min-w-[1200px]">
               <thead>
                 <tr>
-                  <th class="integration__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"></th>
-                  <th class="text-nowrap integration__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"
-                    v-for="item in Columns" :key="item.name">
+                  <th
+                    class="integration__field-base !border-b-teal-500 !bg-teal-100 !text-teal-500"
+                  ></th>
+                  <th
+                    class="text-nowrap integration__field-base !border-b-teal-500 !bg-teal-100 !text-teal-500"
+                    v-for="item in Columns"
+                    :key="item.name"
+                  >
                     {{ item.name }}
                   </th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="workflow in filteredWorkflowList" :key="workflow.wfCode"
-                  class="integration__field-items hover:bg-blue-50">
+                <tr
+                  v-for="workflow in filteredWorkflowList"
+                  :key="workflow.wfCode"
+                  class="integration__field-items hover:bg-primary-light"
+                >
                   <td>
                     <div class="flex items-center space-x-3">
-                      <div class="dropdown" data-dropdown="true" data-dropdown-trigger="click"
-                        data-dropdown-placement="bottom-end">
-                        <UiButton class="dropdown-toggle" variant="light" :outline="true" :icon="true" size="sm">
+                      <div
+                        class="dropdown"
+                        data-dropdown="true"
+                        data-dropdown-trigger="click"
+                        data-dropdown-placement="bottom-end"
+                      >
+                        <UiButton
+                          class="dropdown-toggle"
+                          variant="light"
+                          :outline="true"
+                          :icon="true"
+                          size="sm"
+                        >
                           <UiIcon name="dots-vertical" />
                         </UiButton>
                         <div class="dropdown-content w-auto p-4 space-y-2">
                           <div class="flex flex-col space-y-2">
-                            <UiButton variant="light" class="border-none" :outline="true" size="md"
-                              @click="viewDetail(workflow)">
+                            <UiButton
+                              variant="light"
+                              class="border-none"
+                              :outline="true"
+                              size="md"
+                              @click="viewDetail(workflow)"
+                            >
                               <UiIcon name="eye" class="mr-2" />
                               View Detail
                             </UiButton>
-                            <UiButton variant="light" class="border-none" :outline="true" size="md"
-                              @click="editWorkflow(workflow)">
+                            <UiButton
+                              variant="light"
+                              class="border-none"
+                              :outline="true"
+                              size="md"
+                              @click="editWorkflow(workflow)"
+                            >
                               <UiIcon name="pencil" class="mr-2" />
                               Edit Workflow
                             </UiButton>
-                            <UiButton variant="light" class="border-none text-red-500 hover:text-red-600"
-                              :outline="true" size="md" @click="deleteWorkflow(workflow.wfCode)">
+                            <UiButton
+                              variant="light"
+                              class="border-none text-red-500 hover:text-red-600"
+                              :outline="true"
+                              size="md"
+                              @click="deleteWorkflow(workflow.wfCode)"
+                            >
                               <UiIcon name="trash" class="mr-2" />
                               Delete Workflow
                             </UiButton>
@@ -137,8 +191,10 @@
                   <td>{{ workflow.wfStep }}</td>
                   <td>{{ workflow.bracketAmount }}</td>
                   <td>
-                    <span class="badge badge-outline border-transparent bg-green-50 text-green-600">{{ workflow.status
-                      }}</span>
+                    <span
+                      class="badge badge-outline border-transparent bg-green-50 text-green-600"
+                      >{{ workflow.status }}</span
+                    >
                   </td>
                   <td>{{ workflow.lastChange }}</td>
                 </tr>
@@ -149,8 +205,14 @@
           <div v-else class="text-center py-4">No workflows found.</div>
         </div>
 
-        <LPagination v-if="workflowList.length > 0" class="mt-4" :totalItems="totalItems" :pageSize="pageSize"
-          :currentPage="currentPage" @page-change="changePage" />
+        <LPagination
+          v-if="workflowList.length > 0"
+          class="mt-4"
+          :totalItems="totalItems"
+          :pageSize="pageSize"
+          :currentPage="currentPage"
+          @page-change="changePage"
+        />
       </div>
     </div>
   </div>
@@ -186,7 +248,6 @@ const tempFilters = reactive({
   poType: '',
   status: '',
 })
-
 
 // Master data store for invoice/company lookup
 const invoiceMasterApi = useInvoiceMasterDataStore()
@@ -289,7 +350,7 @@ const addWorkflow = () => {
 
 const viewDetail = (workflow?: any) => {
   if (!workflow?.wfCode) return
-  console.log(workflow.wfCode);
+  console.log(workflow.wfCode)
 
   router.push({
     name: 'workflow-configuration',

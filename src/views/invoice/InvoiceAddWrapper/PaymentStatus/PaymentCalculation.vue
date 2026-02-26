@@ -4,11 +4,16 @@
       <span class="font-semibold text-base whitespace-nowrap">Payment Status</span>
     </div>
     <div class="card-body payment-table">
-      <div v-for="(item, index) in listPaymentStatus" :key="index" class="status-row py-[22px] px-[20px] text-xs flex"
-        :class="index === listPaymentStatus.length - 1
-          ? 'calculation__last-field last-row'
-          : 'border-b border-gray-200'
-          ">
+      <div
+        v-for="(item, index) in listPaymentStatus"
+        :key="index"
+        class="status-row py-[22px] px-[20px] text-xs flex"
+        :class="
+          index === listPaymentStatus.length - 1
+            ? 'calculation__last-field last-row'
+            : 'border-b border-gray-200'
+        "
+      >
         <div class="flex-1">{{ item.name }}</div>
         <div class="flex-1">
           {{ item.currency === 'IDR' ? useFormatIdr(item.amount) : useFormatUsd(item.amount) }}
@@ -79,7 +84,8 @@ const setPaymentStatus = () => {
   // Use API data if available, otherwise fallback to form data
   const totalInvoice = paymentStatusHeader.value?.totalAmountInvoice || form.totalNetAmount || 0
   const paymentReceived = paymentStatusHeader.value?.paymentReceivedAmount || 0
-  const outstandingPayment = paymentStatusHeader.value?.outstandingAmount || (totalInvoice - paymentReceived)
+  const outstandingPayment =
+    paymentStatusHeader.value?.outstandingAmount || totalInvoice - paymentReceived
   const currency = paymentStatusHeader.value?.currency || form.currency
 
   listPaymentStatus.value = [
@@ -109,7 +115,7 @@ watch(
       fetchPaymentStatus()
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 // Watch for payment status header changes
@@ -118,7 +124,7 @@ watch(
   () => {
     setPaymentStatus()
   },
-  { deep: true }
+  { deep: true },
 )
 
 onMounted(async () => {
@@ -138,9 +144,9 @@ onMounted(async () => {
 }
 
 .calculation__last-field {
-  background-color: #dbeafe;
+  background-color: #ccfbf1;
   font-weight: 600;
-  color: #2563eb;
+  color: #0f766e;
   border-bottom-left-radius: 0.5rem !important;
   border-bottom-right-radius: 0.5rem !important;
   margin-bottom: 0 !important;

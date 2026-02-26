@@ -9,15 +9,30 @@
         <div class="filter-group">
           <label class="text-sm text-gray-600">Company Code</label>
           <div class="filter-select-wrapper">
-            <v-select v-model="companyCode" :options="companyCodeList" label="name"
-              :reduce="(option: { code: string }) => option.code" placeholder="Select" :clearable="true"
-              class="filter-vselect">
+            <v-select
+              v-model="companyCode"
+              :options="companyCodeList"
+              label="name"
+              :reduce="(option: { code: string }) => option.code"
+              placeholder="Select"
+              :clearable="true"
+              class="filter-vselect"
+            >
               <template #open-indicator>
                 <i class="ki-outline ki-down text-gray-500"></i>
               </template>
               <template #deselect="{ deselect }">
-                <svg @click="deselect" class="cursor-pointer" width="14" height="14" viewBox="0 0 14 14" fill="none"
-                  stroke="#6b7280" stroke-width="1" stroke-linecap="round">
+                <svg
+                  @click="deselect"
+                  class="cursor-pointer"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  stroke="#6b7280"
+                  stroke-width="1"
+                  stroke-linecap="round"
+                >
                   <path d="M2 2L12 12M12 2L2 12" />
                 </svg>
               </template>
@@ -27,15 +42,30 @@
         <div class="filter-group">
           <label class="text-sm text-gray-600">Vendor</label>
           <div class="filter-select-wrapper">
-            <v-select v-model="vendor" :options="vendorList" label="vendorName"
-              :reduce="(option: { vendorCode: string }) => option.vendorCode" placeholder="Select" :clearable="true"
-              class="filter-vselect">
+            <v-select
+              v-model="vendor"
+              :options="vendorList"
+              label="vendorName"
+              :reduce="(option: { vendorCode: string }) => option.vendorCode"
+              placeholder="Select"
+              :clearable="true"
+              class="filter-vselect"
+            >
               <template #open-indicator>
                 <i class="ki-outline ki-down text-gray-500"></i>
               </template>
               <template #deselect="{ deselect }">
-                <svg @click="deselect" class="cursor-pointer" width="14" height="14" viewBox="0 0 14 14" fill="none"
-                  stroke="#6b7280" stroke-width="1" stroke-linecap="round">
+                <svg
+                  @click="deselect"
+                  class="cursor-pointer"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  stroke="#6b7280"
+                  stroke-width="1"
+                  stroke-linecap="round"
+                >
                   <path d="M2 2L12 12M12 2L2 12" />
                 </svg>
               </template>
@@ -45,15 +75,30 @@
         <div class="filter-group">
           <label class="text-sm text-gray-600">Po Type</label>
           <div class="filter-select-wrapper">
-            <v-select v-model="poType" :options="poList" label="name"
-              :reduce="(option: { code: number }) => option.code" placeholder="Select" :clearable="true"
-              class="filter-vselect">
+            <v-select
+              v-model="poType"
+              :options="poList"
+              label="name"
+              :reduce="(option: { code: number }) => option.code"
+              placeholder="Select"
+              :clearable="true"
+              class="filter-vselect"
+            >
               <template #open-indicator>
                 <i class="ki-outline ki-down text-gray-500"></i>
               </template>
               <template #deselect="{ deselect }">
-                <svg @click="deselect" class="cursor-pointer" width="14" height="14" viewBox="0 0 14 14" fill="none"
-                  stroke="#6b7280" stroke-width="1" stroke-linecap="round">
+                <svg
+                  @click="deselect"
+                  class="cursor-pointer"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  stroke="#6b7280"
+                  stroke-width="1"
+                  stroke-linecap="round"
+                >
                   <path d="M2 2L12 12M12 2L2 12" />
                 </svg>
               </template>
@@ -63,15 +108,30 @@
         <div class="filter-group">
           <label class="text-sm text-gray-600">Invoice Type</label>
           <div class="filter-select-wrapper">
-            <v-select v-model="invoiceType" :options="invoiceTypeList" label="name"
-              :reduce="(option: { code: string }) => option.code" placeholder="Select" :clearable="true"
-              class="filter-vselect">
+            <v-select
+              v-model="invoiceType"
+              :options="invoiceTypeList"
+              label="name"
+              :reduce="(option: { code: string }) => option.code"
+              placeholder="Select"
+              :clearable="true"
+              class="filter-vselect"
+            >
               <template #open-indicator>
                 <i class="ki-outline ki-down text-gray-500"></i>
               </template>
               <template #deselect="{ deselect }">
-                <svg @click="deselect" class="cursor-pointer" width="14" height="14" viewBox="0 0 14 14" fill="none"
-                  stroke="#6b7280" stroke-width="1" stroke-linecap="round">
+                <svg
+                  @click="deselect"
+                  class="cursor-pointer"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  stroke="#6b7280"
+                  stroke-width="1"
+                  stroke-linecap="round"
+                >
                   <path d="M2 2L12 12M12 2L2 12" />
                 </svg>
               </template>
@@ -81,15 +141,30 @@
         <div class="filter-group" v-if="invoiceType === '901'">
           <label class="text-sm text-gray-600">Dp Option</label>
           <div class="filter-select-wrapper">
-            <v-select v-model="dpOption" :options="dpOptionList" label="name"
-              :reduce="(option: { code: string }) => option.code" placeholder="Select" :clearable="true"
-              class="filter-vselect">
+            <v-select
+              v-model="dpOption"
+              :options="dpOptionList"
+              label="name"
+              :reduce="(option: { code: string }) => option.code"
+              placeholder="Select"
+              :clearable="true"
+              class="filter-vselect"
+            >
               <template #open-indicator>
                 <i class="ki-outline ki-down text-gray-500"></i>
               </template>
               <template #deselect="{ deselect }">
-                <svg @click="deselect" class="cursor-pointer" width="14" height="14" viewBox="0 0 14 14" fill="none"
-                  stroke="#6b7280" stroke-width="1" stroke-linecap="round">
+                <svg
+                  @click="deselect"
+                  class="cursor-pointer"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  stroke="#6b7280"
+                  stroke-width="1"
+                  stroke-linecap="round"
+                >
                   <path d="M2 2L12 12M12 2L2 12" />
                 </svg>
               </template>
@@ -99,15 +174,30 @@
         <div class="filter-group">
           <label class="text-sm text-gray-600">Department</label>
           <div class="filter-select-wrapper">
-            <v-select v-model="departement" :options="constCenterList" label="name"
-              :reduce="(option: { code: string }) => option.code" placeholder="Select" :clearable="true"
-              class="filter-vselect">
+            <v-select
+              v-model="departement"
+              :options="constCenterList"
+              label="name"
+              :reduce="(option: { code: string }) => option.code"
+              placeholder="Select"
+              :clearable="true"
+              class="filter-vselect"
+            >
               <template #open-indicator>
                 <i class="ki-outline ki-down text-gray-500"></i>
               </template>
               <template #deselect="{ deselect }">
-                <svg @click="deselect" class="cursor-pointer" width="14" height="14" viewBox="0 0 14 14" fill="none"
-                  stroke="#6b7280" stroke-width="1" stroke-linecap="round">
+                <svg
+                  @click="deselect"
+                  class="cursor-pointer"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  stroke="#6b7280"
+                  stroke-width="1"
+                  stroke-linecap="round"
+                >
                   <path d="M2 2L12 12M12 2L2 12" />
                 </svg>
               </template>
@@ -133,21 +223,35 @@
           <div class="chart-with-labels">
             <div class="mini-trend-chart" style="block-size: 220px">
               <div class="trend-bars aging-bars">
-                <div v-for="(item, idx) in visualApAgingData" :key="`aging-${idx}`" class="trend-bar">
-                  <div class="trend-bar-base" :style="{
-                    'block-size': (item.amount / (Math.max(...lastFilteredApAgingData.map(i => i.amount)) || 1)) * 100 + '%',
-                    'background-color': '#3b82f6',
-                    position: 'absolute',
-                    'inset-block-end': '0',
-                    'inset-inline-start': '0',
-                    'inset-inline-end': '0',
-                  }"></div>
+                <div
+                  v-for="(item, idx) in visualApAgingData"
+                  :key="`aging-${idx}`"
+                  class="trend-bar"
+                >
+                  <div
+                    class="trend-bar-base"
+                    :style="{
+                      'block-size':
+                        (item.amount /
+                          (Math.max(...lastFilteredApAgingData.map((i) => i.amount)) || 1)) *
+                          100 +
+                        '%',
+                      'background-color': '#14B8A6',
+                      position: 'absolute',
+                      'inset-block-end': '0',
+                      'inset-inline-start': '0',
+                      'inset-inline-end': '0',
+                    }"
+                  ></div>
                 </div>
               </div>
             </div>
             <div class="chart-bottom-labels aging-labels">
-              <div v-for="(item, idx) in lastFilteredApAgingData" :key="`aging-label-${idx}`"
-                class="chart-bottom-label">
+              <div
+                v-for="(item, idx) in lastFilteredApAgingData"
+                :key="`aging-label-${idx}`"
+                class="chart-bottom-label"
+              >
                 <div class="font-medium text-gray-900 text-xs">{{ item.period }}</div>
                 <div class="text-xs text-gray-700">{{ formatCurrency(item.amount) }}</div>
                 <div class="text-xs text-gray-500">{{ formatNumber(item.count) }} inv</div>
@@ -162,7 +266,9 @@
             <div class="metric-header">
               <h3 class="text-sm font-semibold text-center">Total AP Outstanding</h3>
             </div>
-            <div class="metric-content flex-grow flex flex-col items-center text-center justify-center">
+            <div
+              class="metric-content flex-grow flex flex-col items-center text-center justify-center"
+            >
               <div class="mb-3">
                 <div class="text-2xl font-bold text-gray-900">
                   {{ formatMetricCurrency(totalOutstanding) }}
@@ -186,21 +292,35 @@
           <div class="chart-with-labels">
             <div class="mini-trend-chart" style="block-size: 220px">
               <div class="trend-bars status-bars">
-                <div v-for="(status, idx) in visualInvoiceStatusData" :key="`status-${idx}`" class="trend-bar">
-                  <div class="trend-bar-base" :style="{
-                    'block-size': (status.amount / (Math.max(...lastInvoiceStatusData.map(i => i.amount)) || 1)) * 100 + '%',
-                    'background-color': status.color,
-                    position: 'absolute',
-                    'inset-block-end': '0',
-                    'inset-inline-start': '0',
-                    'inset-inline-end': '0',
-                  }"></div>
+                <div
+                  v-for="(status, idx) in visualInvoiceStatusData"
+                  :key="`status-${idx}`"
+                  class="trend-bar"
+                >
+                  <div
+                    class="trend-bar-base"
+                    :style="{
+                      'block-size':
+                        (status.amount /
+                          (Math.max(...lastInvoiceStatusData.map((i) => i.amount)) || 1)) *
+                          100 +
+                        '%',
+                      'background-color': status.color,
+                      position: 'absolute',
+                      'inset-block-end': '0',
+                      'inset-inline-start': '0',
+                      'inset-inline-end': '0',
+                    }"
+                  ></div>
                 </div>
               </div>
             </div>
             <div class="chart-bottom-labels status-labels">
-              <div v-for="(status, idx) in lastInvoiceStatusData" :key="`status-label-${idx}`"
-                class="chart-bottom-label">
+              <div
+                v-for="(status, idx) in lastInvoiceStatusData"
+                :key="`status-label-${idx}`"
+                class="chart-bottom-label"
+              >
                 <div class="font-medium text-gray-900 text-xs">{{ status.label }}</div>
               </div>
             </div>
@@ -226,8 +346,11 @@
           </div>
           <div class="flex">
             <div class="revenue-label writing-vertical text-gray-500 mr-2">Revenue</div>
-            <div class="line-chart-wrapper flex-grow" style="block-size: 200px"
-              @wheel.passive.prevent="handleWheelPaidOnTime($event)">
+            <div
+              class="line-chart-wrapper flex-grow"
+              style="block-size: 200px"
+              @wheel.passive.prevent="handleWheelPaidOnTime($event)"
+            >
               <svg class="line-chart" preserveAspectRatio="none" viewBox="0 0 300 100">
                 <defs>
                   <linearGradient id="paidOnTimeGradient" x1="0" y1="0" x2="0" y2="1">
@@ -236,10 +359,20 @@
                   </linearGradient>
                 </defs>
                 <path :d="paidOnTimeAreaPath" fill="url(#paidOnTimeGradient)" class="area-path" />
-                <path :d="paidOnTimeLinePath" fill="none" stroke="#10b981" stroke-width="2" class="line-path" />
+                <path
+                  :d="paidOnTimeLinePath"
+                  fill="none"
+                  stroke="#10b981"
+                  stroke-width="2"
+                  class="line-path"
+                />
               </svg>
               <div class="chart-labels">
-                <div v-for="(data, index) in paidOnTimeVisibleLabels" :key="index" class="chart-label">
+                <div
+                  v-for="(data, index) in paidOnTimeVisibleLabels"
+                  :key="index"
+                  class="chart-label"
+                >
                   {{ data }}
                 </div>
               </div>
@@ -262,8 +395,11 @@
           </div>
           <div class="flex">
             <div class="revenue-label writing-vertical text-gray-500 mr-2">Revenue</div>
-            <div class="line-chart-wrapper flex-grow" style="block-size: 200px"
-              @wheel.passive.prevent="handleWheelAvgAge($event)">
+            <div
+              class="line-chart-wrapper flex-grow"
+              style="block-size: 200px"
+              @wheel.passive.prevent="handleWheelAvgAge($event)"
+            >
               <svg class="line-chart" preserveAspectRatio="none" viewBox="0 0 300 100">
                 <defs>
                   <linearGradient id="avgAgeGradient" x1="0" y1="0" x2="0" y2="1">
@@ -272,7 +408,13 @@
                   </linearGradient>
                 </defs>
                 <path :d="avgAgeAreaPath" fill="url(#avgAgeGradient)" class="area-path" />
-                <path :d="avgAgeLinePath" fill="none" stroke="#f59e0b" stroke-width="2" class="line-path" />
+                <path
+                  :d="avgAgeLinePath"
+                  fill="none"
+                  stroke="#f59e0b"
+                  stroke-width="2"
+                  class="line-path"
+                />
               </svg>
               <div class="chart-labels">
                 <div v-for="(data, index) in avgAgeVisibleLabels" :key="index" class="chart-label">
@@ -290,21 +432,24 @@
           </div>
           <div class="chart-legend mb-3 flex gap-4">
             <div class="legend-item">
-              <div class="legend-color" style="background-color: #3b82f6"></div>
+              <div class="legend-color" style="background-color: #14b8a6"></div>
               <span>Summary Trend</span>
             </div>
           </div>
           <div class="mini-trend-chart" style="block-size: 220px">
             <div class="trend-bars">
               <div v-for="(data, index) in agingTrendCountData" :key="index" class="trend-bar">
-                <div class="trend-bar-base" :style="{
-                  'block-size': (data.trendValue / maxTrendCountValue) * 100 + '%',
-                  'background-color': '#3b82f6',
-                  position: 'absolute',
-                  'inset-block-end': '0',
-                  'inset-inline-start': '0',
-                  'inset-inline-end': '0',
-                }"></div>
+                <div
+                  class="trend-bar-base"
+                  :style="{
+                    'block-size': (data.trendValue / maxTrendCountValue) * 100 + '%',
+                    'background-color': '#14B8A6',
+                    position: 'absolute',
+                    'inset-block-end': '0',
+                    'inset-inline-start': '0',
+                    'inset-inline-end': '0',
+                  }"
+                ></div>
               </div>
             </div>
           </div>
@@ -317,21 +462,24 @@
           </div>
           <div class="chart-legend mb-3 flex gap-4">
             <div class="legend-item">
-              <div class="legend-color" style="background-color: #3b82f6"></div>
+              <div class="legend-color" style="background-color: #14b8a6"></div>
               <span>Invoice Count</span>
             </div>
           </div>
           <div class="mini-trend-chart" style="block-size: 220px">
             <div class="trend-bars">
               <div v-for="(data, index) in agingTrendCountData" :key="index" class="trend-bar">
-                <div class="trend-bar-base" :style="{
-                  'block-size': (data.trendValue / maxTrendCountValue) * 100 + '%',
-                  'background-color': '#3b82f6',
-                  position: 'absolute',
-                  'inset-block-end': '0',
-                  'inset-inline-start': '0',
-                  'inset-inline-end': '0',
-                }"></div>
+                <div
+                  class="trend-bar-base"
+                  :style="{
+                    'block-size': (data.trendValue / maxTrendCountValue) * 100 + '%',
+                    'background-color': '#14B8A6',
+                    position: 'absolute',
+                    'inset-block-end': '0',
+                    'inset-inline-start': '0',
+                    'inset-inline-end': '0',
+                  }"
+                ></div>
               </div>
             </div>
           </div>
@@ -343,21 +491,24 @@
           </div>
           <div class="chart-legend mb-3 flex gap-4">
             <div class="legend-item">
-              <div class="legend-color" style="background-color: #3b82f6"></div>
+              <div class="legend-color" style="background-color: #14b8a6"></div>
               <span>Invoice Amount</span>
             </div>
           </div>
           <div class="mini-trend-chart" style="block-size: 220px">
             <div class="trend-bars">
               <div v-for="(data, index) in agingTrendAmountData" :key="index" class="trend-bar">
-                <div class="trend-bar-base" :style="{
-                  'block-size': (data.trendValue / maxTrendAmountValue) * 100 + '%',
-                  'background-color': '#3b82f6',
-                  position: 'absolute',
-                  'inset-block-end': '0',
-                  'inset-inline-start': '0',
-                  'inset-inline-end': '0',
-                }"></div>
+                <div
+                  class="trend-bar-base"
+                  :style="{
+                    'block-size': (data.trendValue / maxTrendAmountValue) * 100 + '%',
+                    'background-color': '#14B8A6',
+                    position: 'absolute',
+                    'inset-block-end': '0',
+                    'inset-inline-start': '0',
+                    'inset-inline-end': '0',
+                  }"
+                ></div>
               </div>
             </div>
           </div>
@@ -370,11 +521,13 @@
 <script setup lang="ts">
 const isAllFilterEmpty = computed(() => {
   // Hanya filter selain date yang dicek
-  return (companyCode.value === '' || companyCode.value === null) &&
+  return (
+    (companyCode.value === '' || companyCode.value === null) &&
     (vendor.value === '' || vendor.value === null) &&
-    (poType.value === null) &&
+    poType.value === null &&
     (invoiceType.value === '' || invoiceType.value === null) &&
     (departement.value === '' || departement.value === null)
+  )
 })
 import { ref, onMounted, computed, watch, shallowRef } from 'vue'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
@@ -413,31 +566,31 @@ const constCenterList = computed(() => invoiceMasterApi.costCenterList)
 
 const poList = ref([
   {
-    name: "Invoice PO",
-    code: 1
+    name: 'Invoice PO',
+    code: 1,
   },
   {
-    name: "Invoice Non PO",
-    code: 2
-  }
+    name: 'Invoice Non PO',
+    code: 2,
+  },
 ])
 
 const staticDataMap: Record<string, Record<string, AgingPeriod[]>> = {
-  'MF00': {
+  MF00: {
     '': [
       { period: 'Current', amount: 500000, count: 50 },
       { period: '1-30', amount: 400000, count: 40 },
       { period: '31-60', amount: 300000, count: 30 },
       { period: '> 60', amount: 360000, count: 36 },
     ],
-    'VEND01': [
+    VEND01: [
       { period: 'Current', amount: 200000, count: 20 },
       { period: '1-30', amount: 150000, count: 15 },
       { period: '31-60', amount: 100000, count: 10 },
       { period: '> 60', amount: 50000, count: 5 },
     ],
   },
-  'MF01': {
+  MF01: {
     '': [
       { period: 'Current', amount: 2500000, count: 250 },
       { period: '1-30', amount: 1500000, count: 150 },
@@ -445,24 +598,24 @@ const staticDataMap: Record<string, Record<string, AgingPeriod[]>> = {
       { period: '> 60', amount: 800000, count: 80 },
     ],
   },
-  'MF02': {
+  MF02: {
     '': [
       { period: 'Current', amount: 1000000, count: 100 },
       { period: '1-30', amount: 800000, count: 80 },
       { period: '31-60', amount: 430000, count: 43 },
       { period: '> 60', amount: 400000, count: 40 },
     ],
-  }
+  },
 }
 
 const apAgingData = computed<AgingPeriod[]>(() => {
   if (!companyCode.value) {
     const periods = ['Current', '1-30', '31-60', '> 60']
-    return periods.map(p => {
+    return periods.map((p) => {
       let totalAmount = 0
       let totalCount = 0
-      Object.keys(staticDataMap).forEach(cc => {
-        const item = staticDataMap[cc]['']?.find(i => i.period === p)
+      Object.keys(staticDataMap).forEach((cc) => {
+        const item = staticDataMap[cc]['']?.find((i) => i.period === p)
         if (item) {
           totalAmount += item.amount
           totalCount += item.count
@@ -484,12 +637,10 @@ const apAgingData = computed<AgingPeriod[]>(() => {
   return staticDataMap['MF00']['']
 })
 
-
-
 function computeInvoiceStatusData(isVisual = false) {
   const multiplier = getFilterMultiplier()
   const base = [
-    { label: 'Submitted', amount: 10000000, count: 150, color: '#3b82f6' },
+    { label: 'Submitted', amount: 10000000, count: 150, color: '#14B8A6' },
     { label: 'In Approval', amount: 4000000, count: 60, color: '#f97316' },
     { label: 'Approved', amount: 8000000, count: 120, color: '#22c55e' },
     { label: 'Rejected', amount: 1000000, count: 15, color: '#f472b6' },
@@ -498,30 +649,26 @@ function computeInvoiceStatusData(isVisual = false) {
   ]
   const appliedMultiplier = isAllFilterEmpty.value ? 1 : multiplier
 
-  return base.map(item => {
-    const jitter = isVisual ? (0.5 + Math.random() * 1.0) : 1
+  return base.map((item) => {
+    const jitter = isVisual ? 0.5 + Math.random() * 1.0 : 1
     return {
       ...item,
       amount: Math.round(item.amount * appliedMultiplier * jitter),
-      count: Math.round(item.count * appliedMultiplier * jitter)
+      count: Math.round(item.count * appliedMultiplier * jitter),
     }
   })
 }
-
-
-
-
 
 function computeFilteredApAgingData(isVisual = false) {
   const multiplier = getFilterMultiplier()
   const appliedMultiplier = isAllFilterEmpty.value ? 1 : multiplier
 
-  return apAgingData.value.map(item => {
-    const jitter = isVisual ? (0.5 + Math.random() * 1.0) : 1
+  return apAgingData.value.map((item) => {
+    const jitter = isVisual ? 0.5 + Math.random() * 1.0 : 1
     return {
       ...item,
       amount: Math.round(item.amount * appliedMultiplier * jitter),
-      count: Math.round(item.count * appliedMultiplier * jitter)
+      count: Math.round(item.count * appliedMultiplier * jitter),
     }
   })
 }
@@ -537,7 +684,7 @@ const getFilterMultiplier = () => {
 
   // Apply invoice type filter
   if (invoiceType.value) {
-    multiplier *= (invoiceType.value === '901' ? 0.05 : 1.2)
+    multiplier *= invoiceType.value === '901' ? 0.05 : 1.2
   }
 
   // Apply department filter
@@ -549,7 +696,7 @@ const getFilterMultiplier = () => {
 
   // Apply poType filter
   if (poType.value) {
-    multiplier *= (poType.value === 1 ? 1.1 : 0.9)
+    multiplier *= poType.value === 1 ? 1.1 : 0.9
   }
 
   // Clamp multiplier
@@ -597,16 +744,19 @@ const generateData = () => {
 
 const chartData = generateData()
 
-
-
 function computeTimeSeriesData(isVisual = false) {
   const zoom = Math.max(paidOnTimeZoom.value, avgAgeZoom.value)
-  const baseData = zoom <= 1.5 ? chartData.quarterlyData : zoom <= 2.3 ? chartData.monthlyData : chartData.weeklyData
+  const baseData =
+    zoom <= 1.5
+      ? chartData.quarterlyData
+      : zoom <= 2.3
+        ? chartData.monthlyData
+        : chartData.weeklyData
   const multiplier = getFilterMultiplier()
   const appliedMultiplier = isAllFilterEmpty.value ? 1 : multiplier
 
-  return baseData.map(item => {
-    const jitter = isVisual ? (0.5 + Math.random() * 1.0) : 1
+  return baseData.map((item) => {
+    const jitter = isVisual ? 0.5 + Math.random() * 1.0 : 1
     return {
       ...item,
       paidOnTime: Math.round(item.paidOnTime * appliedMultiplier * jitter),
@@ -631,35 +781,42 @@ const overduePercentage = computed(() => {
   return Math.round((overdue / total) * 100)
 })
 
-
 const maxAge = computed(() => {
   return Math.max(...lastTimeSeriesData.value.map((item) => item.avgAge)) || 1
 })
 
 const agingTrendCountData = computed(() => {
   const totalCount = lastFilteredApAgingData.value.reduce((sum, item) => sum + item.count, 0)
-  return visualTimeSeriesData.value.map(item => ({
+  return visualTimeSeriesData.value.map((item) => ({
     ...item,
-    trendValue: Math.round((item.paidOnTime / 100) * totalCount)
+    trendValue: Math.round((item.paidOnTime / 100) * totalCount),
   }))
 })
 
 const agingTrendAmountData = computed(() => {
   const totalAmount = totalOutstanding.value
-  return visualTimeSeriesData.value.map(item => ({
+  return visualTimeSeriesData.value.map((item) => ({
     ...item,
-    trendValue: Math.round((item.avgAge / 100) * totalAmount)
+    trendValue: Math.round((item.avgAge / 100) * totalAmount),
   }))
 })
 
 const maxTrendCountValue = computed(() => {
   const totalCount = lastFilteredApAgingData.value.reduce((sum, item) => sum + item.count, 0)
-  return Math.max(...lastTimeSeriesData.value.map(item => Math.round((item.paidOnTime / 100) * totalCount))) || 1
+  return (
+    Math.max(
+      ...lastTimeSeriesData.value.map((item) => Math.round((item.paidOnTime / 100) * totalCount)),
+    ) || 1
+  )
 })
 
 const maxTrendAmountValue = computed(() => {
   const totalAmount = lastFilteredApAgingData.value.reduce((sum, item) => sum + item.amount, 0)
-  return Math.max(...lastTimeSeriesData.value.map(item => Math.round((item.avgAge / 100) * totalAmount))) || 1
+  return (
+    Math.max(
+      ...lastTimeSeriesData.value.map((item) => Math.round((item.avgAge / 100) * totalAmount)),
+    ) || 1
+  )
 })
 
 const paidOnTimeZoom = ref(1)
@@ -694,7 +851,9 @@ function buildPointsForSeries(values: number[], normalizeTo = 100, zoom = 1) {
   })
 }
 
-const maxPaidOnTime = computed(() => Math.max(...lastTimeSeriesData.value.map((d) => d.paidOnTime)) || 1)
+const maxPaidOnTime = computed(
+  () => Math.max(...lastTimeSeriesData.value.map((d) => d.paidOnTime)) || 1,
+)
 const paidOnTimePoints = computed(() =>
   buildPointsForSeries(
     visualTimeSeriesData.value.map((d) => d.paidOnTime),
@@ -830,7 +989,7 @@ watch(
     () => invoiceType.value,
     () => departement.value,
     () => poType.value,
-    () => companyCode.value
+    () => companyCode.value,
   ],
   (newVals, oldVals) => {
     // Only increment if any non-date filter actually changed
@@ -839,7 +998,7 @@ watch(
       if (newVals[i] !== oldVals[i]) changed = true
     }
     if (changed) filterUpdateKey.value++
-  }
+  },
 )
 
 // --- Stable Data State for Charts (For Metrics & Labels) ---
@@ -852,17 +1011,21 @@ const visualApAgingData = shallowRef<AgingPeriod[]>([])
 const visualInvoiceStatusData = shallowRef<InvoiceStatusItem[]>([])
 const visualTimeSeriesData = shallowRef<TimeSeriesChartItem[]>([])
 
-watch(filterUpdateKey, () => {
-  // Update stable data (no randomness)
-  lastFilteredApAgingData.value = computeFilteredApAgingData(false)
-  lastInvoiceStatusData.value = computeInvoiceStatusData(false)
-  lastTimeSeriesData.value = computeTimeSeriesData(false)
+watch(
+  filterUpdateKey,
+  () => {
+    // Update stable data (no randomness)
+    lastFilteredApAgingData.value = computeFilteredApAgingData(false)
+    lastInvoiceStatusData.value = computeInvoiceStatusData(false)
+    lastTimeSeriesData.value = computeTimeSeriesData(false)
 
-  // Update visual data with "drastic" independent jitter per item
-  visualApAgingData.value = computeFilteredApAgingData(true)
-  visualInvoiceStatusData.value = computeInvoiceStatusData(true)
-  visualTimeSeriesData.value = computeTimeSeriesData(true)
-}, { immediate: true })
+    // Update visual data with "drastic" independent jitter per item
+    visualApAgingData.value = computeFilteredApAgingData(true)
+    visualInvoiceStatusData.value = computeInvoiceStatusData(true)
+    visualTimeSeriesData.value = computeTimeSeriesData(true)
+  },
+  { immediate: true },
+)
 </script>
 
 <style lang="scss" scoped>

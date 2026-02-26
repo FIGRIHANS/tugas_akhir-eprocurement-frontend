@@ -4,7 +4,7 @@
       <div class="card-body flex gap-5">
         <img :src="informationImg" alt="information" />
         <div>
-          <h1 class="font-semibold text-2xl mb-3">What Is Vendor Management ?</h1>
+          <h1 class="font-semibold text-2xl mb-3">What Is Vendor Management?</h1>
           <p class="text-gray-600 text-sm">
             A system or software used by companies to manage suppliers or vendors efficiently. This
             system helps in the process of selecting, contracting, monitoring performance, and
@@ -20,7 +20,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           <div class="card" v-for="data in vmData" :key="data.title">
             <div class="card-body space-y-3">
-              <UiIcon :name="data.icon" class="text-sky-600 text-2xl" variant="filled" />
+              <UiIcon :name="data.icon" class="text-primary text-2xl" variant="filled" />
               <h2 class="font-semibold text-base">{{ data.title }}</h2>
               <p class="text-gray-500 text-sm">
                 {{ data.description }}
@@ -33,7 +33,7 @@
 
     <div class="card bg-[#F9F9F933]">
       <div class="card-body">
-        <h1 class="text-xl font-semibold mb-5">How process vendor management?</h1>
+        <h1 class="text-xl font-semibold mb-5">Vendor Management Process</h1>
         <div class="flex items-start relative" v-for="(step, index) in stepAct" :key="step.title">
           <div
             v-show="index < stepAct.length - 1"
@@ -115,7 +115,7 @@ const stepAct = [
   },
   {
     icon: 'files',
-    title: 'Vendor completes the data',
+    title: 'Vendor completes data',
     date: 'Today, 9:00 AM',
   },
 ]

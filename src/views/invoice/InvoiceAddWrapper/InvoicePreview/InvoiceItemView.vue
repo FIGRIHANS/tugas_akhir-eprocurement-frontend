@@ -1,8 +1,8 @@
 <template>
   <div v-if="form" class="flex flex-col gap-[24px]">
     <p class="text-lg font-semibold m-[0px]">Costs / Expenses</p>
-    <div class="invoice__table">
-      <table class="table table-xs table-border">
+    <div class="invoice__table rounded-lg border border-gray-200">
+      <table class="table table-xs">
         <thead>
           <tr>
             <th
@@ -19,7 +19,7 @@
                 'invoice__field-base--wht-base': item.toLowerCase() === 'wht base amount',
                 'invoice__field-base--wht-amount': item.toLowerCase() === 'wht amount',
               }"
-              class="invoice__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"
+              class="invoice__field-base !border-b-teal-500 !bg-teal-100 !text-teal-500"
             >
               {{ item }}
             </th>
@@ -121,12 +121,12 @@ const columns = computed(() => {
     'Assignment',
   ]
   if (form.invoiceType === '4') {
-  const index = baseColumns.indexOf('Item Text')
+    const index = baseColumns.indexOf('Item Text')
 
-  if (index !== -1) {
-    baseColumns.splice(index, 0, 'Realization Amount', 'Variance')
+    if (index !== -1) {
+      baseColumns.splice(index, 0, 'Realization Amount', 'Variance')
+    }
   }
- }
   // Hide WHT columns for Petty Cash
   if (!isPettyCash.value) {
     baseColumns.push('WHT Type')

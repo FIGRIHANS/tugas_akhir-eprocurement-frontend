@@ -25,7 +25,7 @@
       class="absolute inset-0 bg-white/70 backdrop-blur-sm flex items-center justify-center rounded z-20"
     >
       <svg
-        class="animate-spin h-6 w-6 text-blue-600"
+        class="animate-spin h-6 w-6 text-teal-600"
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
         viewBox="0 0 24 24"

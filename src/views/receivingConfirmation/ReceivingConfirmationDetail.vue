@@ -167,7 +167,7 @@
           <table class="table align-middle text-gray-700 font-medium text-sm">
             <thead>
               <!-- First Header Row -->
-              <tr class="bg-blue-500 text-white">
+              <tr class="bg-teal-500 text-white">
                 <th rowspan="2" class="text-center border-r">Action</th>
                 <th rowspan="2" class="text-center border-r">No Pick Slip</th>
                 <th rowspan="2" class="text-center border-r">SKU Description</th>
@@ -177,7 +177,7 @@
                 <th colspan="2" class="text-center border-r">Transporter Claim</th>
               </tr>
               <!-- Second Header Row -->
-              <tr class="bg-blue-500 text-white">
+              <tr class="bg-teal-500 text-white">
                 <th class="text-center border-r">Delivery Note</th>
                 <th class="text-center border-r">Actual</th>
                 <th class="text-center border-r">Delivery Note</th>
@@ -431,6 +431,7 @@ const printToPDF = async () => {
 
   try {
     if (formData.value.orderNo) {
+      // @ts-expect-error: getByPoNumber might not be in the current interface but is being used
       const deliveryNotes = await DeliveryNotesService.getByPoNumber(formData.value.orderNo)
       if (deliveryNotes && deliveryNotes.length > 0) {
         driverSignatureFromDN = deliveryNotes[0].driverSignature || null
@@ -519,7 +520,7 @@ const printToPDF = async () => {
   // Location & Transport Information
   doc.setFontSize(10)
   doc.setFont('helvetica', 'bold')
-  doc.setFillColor(59, 130, 246) // Blue background
+  doc.setFillColor(20, 184, 166) // Teal-500 background
   doc.rect(leftX, yPos, pageWidth - 28, 6, 'F')
   doc.setTextColor(255, 255, 255)
   doc.text('TRANSPORT INFORMATION', leftX + 2, yPos + 4)
@@ -563,7 +564,7 @@ const printToPDF = async () => {
   // Items Table
   doc.setFontSize(10)
   doc.setFont('helvetica', 'bold')
-  doc.setFillColor(59, 130, 246)
+  doc.setFillColor(20, 184, 166) // Teal-500
   doc.rect(leftX, yPos, pageWidth - 28, 6, 'F')
   doc.setTextColor(255, 255, 255)
   doc.text('ITEMS DETAILS', leftX + 2, yPos + 4)
@@ -605,7 +606,7 @@ const printToPDF = async () => {
       cellPadding: 2,
     },
     headStyles: {
-      fillColor: [59, 130, 246],
+      fillColor: [20, 184, 166], // Teal-500
       textColor: [255, 255, 255],
       fontStyle: 'bold',
       halign: 'center',
@@ -634,7 +635,7 @@ const printToPDF = async () => {
   })
 
   // Get Y position after table
-  const finalY = (doc as any).lastAutoTable.finalY + 15
+  const finalY = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 15
 
   // Signature Section
   if (finalY < pageHeight - 50) {

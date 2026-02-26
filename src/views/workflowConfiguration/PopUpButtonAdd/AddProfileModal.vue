@@ -1,8 +1,9 @@
 <template>
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto">
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto"
+  >
     <div class="relative w-full max-w-6xl mx-auto px-8">
       <div class="bg-white rounded-lg shadow">
-
         <!-- HEADER -->
         <div class="flex items-center justify-between p-4 border-b">
           <h5 class="text-xl font-medium">Add WF Profile Group</h5>
@@ -14,31 +15,28 @@
         <!-- FILTER FORM -->
         <div class="p-6">
           <div class="grid grid-cols-2 gap-x-20 gap-y-6">
-
             <!-- LEFT -->
             <div class="space-y-6">
               <div class="flex items-center gap-4">
-                <label class="w-32 text-sm font-medium text-gray-700">
-                  Profile Group ID
-                </label>
+                <label class="w-32 text-sm font-medium text-gray-700"> Profile Group ID </label>
                 <div class="flex-1">
                   <UiInput v-model="form.profileGroupId" />
                 </div>
               </div>
 
               <div class="flex items-center gap-4">
-                <label class="w-32 text-sm font-medium text-gray-700">
-                  Profile Name
-                </label>
+                <label class="w-32 text-sm font-medium text-gray-700"> Profile Name </label>
                 <div class="flex-1">
-                  <UiSelect v-model="form.profileName" :options="profileOptions" placeholder="Select" />
+                  <UiSelect
+                    v-model="form.profileName"
+                    :options="profileOptions"
+                    placeholder="Select"
+                  />
                 </div>
               </div>
 
               <div class="flex items-center gap-4">
-                <label class="w-32 text-sm font-medium text-gray-700">
-                  Profile ID
-                </label>
+                <label class="w-32 text-sm font-medium text-gray-700"> Profile ID </label>
                 <div class="flex-1">
                   <UiInput v-model="form.profileId" />
                 </div>
@@ -48,18 +46,18 @@
             <!-- RIGHT -->
             <div class="space-y-6">
               <div class="flex items-center gap-4">
-                <label class="w-36 text-sm font-medium text-gray-700">
-                  Approver Group ID
-                </label>
+                <label class="w-36 text-sm font-medium text-gray-700"> Approver Group ID </label>
                 <div class="flex-1">
-                  <UiSelect v-model="form.approverGroupId" :options="approverOptions" placeholder="Select" />
+                  <UiSelect
+                    v-model="form.approverGroupId"
+                    :options="approverOptions"
+                    placeholder="Select"
+                  />
                 </div>
               </div>
 
               <div class="flex items-center gap-4">
-                <label class="w-32 text-sm font-medium text-gray-700">
-                  Category
-                </label>
+                <label class="w-32 text-sm font-medium text-gray-700"> Category </label>
                 <div class="flex gap-6">
                   <label class="flex items-center gap-2">
                     <UiRadio v-model="form.category" name="category" value="Verification" />
@@ -73,9 +71,7 @@
               </div>
 
               <div class="flex items-center gap-4">
-                <label class="w-32 text-sm font-medium text-gray-700">
-                  Step
-                </label>
+                <label class="w-32 text-sm font-medium text-gray-700"> Step </label>
                 <div class="flex-1">
                   <UiInput type="number" v-model="form.step" />
                 </div>
@@ -85,9 +81,7 @@
 
           <!-- FILTER BUTTON -->
           <div class="flex justify-end mt-6">
-            <UiButton c @click="handleFilter">
-              Filter
-            </UiButton>
+            <UiButton c @click="handleFilter"> Filter </UiButton>
           </div>
         </div>
 
@@ -105,28 +99,29 @@
                   <th class="px-6 py-3 text-left text-sm font-medium text-gray-600">
                     Profile Name
                   </th>
-                  <th class="px-6 py-3 text-left text-sm font-medium text-gray-600">
-                    Profile ID
-                  </th>
+                  <th class="px-6 py-3 text-left text-sm font-medium text-gray-600">Profile ID</th>
                   <th class="px-6 py-3 text-left text-sm font-medium text-gray-600">
                     Approver Group ID
                   </th>
-                  <th class="px-6 py-3 text-left text-sm font-medium text-gray-600">
-                    Category
-                  </th>
-                  <th class="px-6 py-3 text-left text-sm font-medium text-gray-600">
-                    Step
-                  </th>
+                  <th class="px-6 py-3 text-left text-sm font-medium text-gray-600">Category</th>
+                  <th class="px-6 py-3 text-left text-sm font-medium text-gray-600">Step</th>
                 </tr>
               </thead>
 
               <tbody>
-                <tr v-for="item in tableData" :key="rowKey(item)" class="hover:bg-blue-50 cursor-pointer"
-                  @click="selectRow(item)">
+                <tr
+                  v-for="item in tableData"
+                  :key="rowKey(item)"
+                  class="hover:bg-primary-light cursor-pointer"
+                  @click="selectRow(item)"
+                >
                   <!-- CHECKBOX -->
                   <td class="px-4 py-2 text-center">
-                    <UiCheckbox :model-value="selectedRow !== null && rowKey(selectedRow) === rowKey(item)"
-                      @update:modelValue="selectRow(item)" @click.stop="selectRow(item)" />
+                    <UiCheckbox
+                      :model-value="selectedRow !== null && rowKey(selectedRow) === rowKey(item)"
+                      @update:modelValue="selectRow(item)"
+                      @click.stop="selectRow(item)"
+                    />
                   </td>
 
                   <td class="px-6 py-3 text-sm">{{ item.profileGroupId }}</td>
@@ -143,23 +138,17 @@
 
         <!-- FOOTER -->
         <div class="flex items-center justify-end gap-3 p-4 border-t">
-          <UiButton variant="secondary" @click="emit('close')">
-            Cancel
-          </UiButton>
+          <UiButton variant="secondary" @click="emit('close')"> Cancel </UiButton>
 
           <UiButton variant="primary" @click="handleSubmit">
             <SaveIcon class="w-4 h-4 mr-2" />
             Save
           </UiButton>
         </div>
-
       </div>
     </div>
   </div>
 </template>
-
-
-
 
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
@@ -215,7 +204,7 @@ const form = ref<ProfileData>({
   profileName: '',
   category: '',
   profileId: '',
-  step: ''
+  step: '',
 })
 
 /* =====================
@@ -234,7 +223,7 @@ const dummyData: ProfileData[] = [
     profileId: 'GR001',
     approverGroupId: 'AG01',
     category: 'Verification',
-    step: '1'
+    step: '1',
   },
   {
     profileGroupId: '3002',
@@ -242,7 +231,7 @@ const dummyData: ProfileData[] = [
     profileId: 'GR002',
     approverGroupId: 'AG01',
     category: 'Approval',
-    step: '2'
+    step: '2',
   },
   {
     profileGroupId: '3003',
@@ -250,8 +239,8 @@ const dummyData: ProfileData[] = [
     profileId: 'GR003',
     approverGroupId: 'AG01',
     category: 'Verification',
-    step: '3'
-  }
+    step: '3',
+  },
 ]
 
 /* =====================
@@ -271,7 +260,7 @@ const tableData = computed(() => {
 
   const f = appliedFilter.value
 
-  return dummyData.filter(item => {
+  return dummyData.filter((item) => {
     if (f.profileGroupId && !item.profileGroupId.includes(f.profileGroupId)) return false
     if (f.profileName && item.profileName !== f.profileName) return false
     if (f.profileId && item.profileId !== f.profileId) return false
@@ -287,21 +276,17 @@ const rowKey = (row: ProfileData) => `${row.profileGroupId}-${row.profileId}`
 /* =====================
    OPTIONS
 ===================== */
-const approverOptions = [
-  { value: 'AG01', text: 'AG01' }
-]
+const approverOptions = [{ value: 'AG01', text: 'AG01' }]
 
 const profileOptions = [
   { value: 'Sr. Management', text: 'Sr. Management' },
-  { value: 'Finance Team', text: 'Finance Team' }
+  { value: 'Finance Team', text: 'Finance Team' },
 ]
 
 /* =====================
    FORM VALIDATION
 ===================== */
-const isFormValid = computed(() =>
-  Object.values(form.value).some(v => String(v).trim() !== '')
-)
+const isFormValid = computed(() => Object.values(form.value).some((v) => String(v).trim() !== ''))
 
 /* =====================
    SUBMIT (SAVE)

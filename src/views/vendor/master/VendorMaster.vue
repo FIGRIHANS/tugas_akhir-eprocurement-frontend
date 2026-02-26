@@ -78,7 +78,7 @@ watch(
     title="Vendor Master"
     :routes="[{ name: 'Vendor Master', to: '/vendor/master' }]"
   />
-  <div class="card">
+  <div class="card rounded-lg">
     <div class="card-header p-6">
       <UiInputSearch v-model="search" :placeholder="$t('general.search', { field: 'Vendor' })" />
       <div class="flex gap-3">
@@ -88,95 +88,103 @@ watch(
     <div class="card-body scrollable-x-auto p-6">
       <!-- <FilterButton /> -->
       <VendorListFilters />
-      <table class="table align-middle text-gray-700">
-        <thead class="border-b-2 border-b-primary text-nowrap">
-          <tr>
-            <th v-for="(col, index) in tableCols" :key="index">{{ col }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- show loading -->
-          <tr v-if="vendor.loading">
-            <td :colspan="tableCols.length" class="text-center">
-              <UiLoading size="md" />
-            </td>
-          </tr>
-
-          <!-- show error -->
-          <tr v-else-if="vendor.error">
-            <td :colspan="tableCols.length">
-              {{ vendor.error }}
-            </td>
-          </tr>
-
-          <!-- show message if there are no data -->
-          <tr v-else-if="!vendor.vendors.items.length">
-            <td :colspan="tableCols.length" class="text-center">No data</td>
-          </tr>
-
-          <!-- show data -->
-          <tr
-            v-else
-            v-for="vendor in vendor.vendors.items"
-            :key="vendor.vendorId"
-            class="font-normal text-sm"
-          >
-            <td>
-              <div class="flex items-center gap-3">
-                <VendorMenu
-                  :id="vendor.vendorId"
-                  :name="vendor.vendorName"
-                  :email="vendor.vendorEmail"
-                  :status="vendor.isVerified"
-                />
-                <StatusToggle
-                  v-if="isAdmin"
-                  :id="vendor.vendorId"
-                  :name="vendor.vendorName"
-                  :status="vendor.isActive"
-                />
-              </div>
-            </td>
-            <td class="text-nowrap">{{ vendor.vendorName }}</td>
-            <td>
-              <span
-                class="badge badge-outline text-nowrap"
-                :class="{
-                  'badge-success': vendor.isVerified === 1,
-                  'badge-danger': vendor.isVerified === 2,
-                }"
+      <div class="border border-gray-200 rounded-lg overflow-hidden">
+        <table class="table align-middle text-gray-700">
+          <thead class="border-b-2 border-b-teal-500 text-nowrap">
+            <tr>
+              <th
+                v-for="(col, index) in tableCols"
+                :key="index"
+                class="!bg-teal-100 !text-teal-500"
               >
-                {{ getStatus(vendor.isVerified?.toString()) || 'Waiting to Verify' }}
-              </span>
-            </td>
-            <td>{{ vendor.companyCategoryName }}</td>
-            <td>
-              <div
-                v-for="(item, index) in vendor.businessFields"
-                :key="item.vendorId"
-                class="text-nowrap"
-              >
-                {{ index + 1 }}. {{ item.businessFieldName }}
-              </div>
-            </td>
-            <td>{{ formatDate(vendor.createdUTCDate) }}</td>
-            <td>{{ formatDate(vendor.verifiedSendUTCDate || '') }}</td>
-            <td>{{ formatDate(vendor.verifiedUTCDate || '') }}</td>
-            <td>
-              <div
-                v-for="(license, index) in vendor.licenses"
-                :key="license.licenseName"
-                class="text-nowrap"
-              >
-                {{ index + 1 }}. {{ license.licenseName }} :
-                {{ formatDate(license.expiredUTCDate!) }}
-              </div>
-            </td>
-            <td>{{ vendor.vendorCode }}</td>
-            <td>{{ vendor.vendorId }}</td>
-          </tr>
-        </tbody>
-      </table>
+                {{ col }}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- show loading -->
+            <tr v-if="vendor.loading">
+              <td :colspan="tableCols.length" class="text-center">
+                <UiLoading size="md" />
+              </td>
+            </tr>
+
+            <!-- show error -->
+            <tr v-else-if="vendor.error">
+              <td :colspan="tableCols.length">
+                {{ vendor.error }}
+              </td>
+            </tr>
+
+            <!-- show message if there are no data -->
+            <tr v-else-if="!vendor.vendors.items.length">
+              <td :colspan="tableCols.length" class="text-center">No data</td>
+            </tr>
+
+            <!-- show data -->
+            <tr
+              v-else
+              v-for="vendor in vendor.vendors.items"
+              :key="vendor.vendorId"
+              class="font-normal text-sm"
+            >
+              <td>
+                <div class="flex items-center gap-3">
+                  <VendorMenu
+                    :id="vendor.vendorId"
+                    :name="vendor.vendorName"
+                    :email="vendor.vendorEmail"
+                    :status="vendor.isVerified"
+                  />
+                  <StatusToggle
+                    v-if="isAdmin"
+                    :id="vendor.vendorId"
+                    :name="vendor.vendorName"
+                    :status="vendor.isActive"
+                  />
+                </div>
+              </td>
+              <td class="text-nowrap">{{ vendor.vendorName }}</td>
+              <td>
+                <span
+                  class="badge badge-outline text-nowrap"
+                  :class="{
+                    'badge-success': vendor.isVerified === 1,
+                    'badge-danger': vendor.isVerified === 2,
+                  }"
+                >
+                  {{ getStatus(vendor.isVerified?.toString()) || 'Waiting to Verify' }}
+                </span>
+              </td>
+              <td>{{ vendor.companyCategoryName }}</td>
+              <td>
+                <div
+                  v-for="(item, index) in vendor.businessFields"
+                  :key="item.vendorId"
+                  class="text-nowrap"
+                >
+                  {{ index + 1 }}. {{ item.businessFieldName }}
+                </div>
+              </td>
+              <td>{{ formatDate(vendor.createdUTCDate) }}</td>
+              <td>{{ formatDate(vendor.verifiedSendUTCDate || '') }}</td>
+              <td>{{ formatDate(vendor.verifiedUTCDate || '') }}</td>
+              <td>
+                <div
+                  v-for="(license, index) in vendor.licenses"
+                  :key="license.licenseName"
+                  class="text-nowrap"
+                >
+                  {{ index + 1 }}. {{ license.licenseName }} :
+                  {{ formatDate(license.expiredUTCDate!) }}
+                </div>
+              </td>
+              <td>{{ vendor.vendorCode }}</td>
+              <td>{{ vendor.vendorId }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
     <div
       class="card-footer justify-center md:justify-between flex-col md:flex-row gap-3 text-gray-800 text-sm font-medium"

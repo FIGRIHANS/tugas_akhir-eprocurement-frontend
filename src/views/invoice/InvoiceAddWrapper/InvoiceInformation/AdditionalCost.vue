@@ -9,17 +9,14 @@
       <i class="ki-duotone ki-plus-circle"></i>
       Add Additional Cost
     </button>
-    <div v-if="form" class="overflow-x-auto cost__table">
-      <table
-        class="table table-xs table-border"
-        :class="{ 'border-danger': form?.additionalCostError }"
-      >
+    <div v-if="form" class="overflow-x-auto cost__table rounded-lg border border-gray-200">
+      <table class="table table-xs" :class="{ 'border-danger': form?.additionalCostError }">
         <thead>
           <tr>
             <th
               v-for="(item, index) in columns"
               :key="index"
-              class="cost__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"
+              class="cost__field-base !border-b-teal-500 !bg-teal-100 !text-teal-500"
               :class="{
                 'cost__field-base--activity': item.toLowerCase() === 'activity / expense',
                 'cost__field-base--tax': item.toLowerCase() === 'tax code',

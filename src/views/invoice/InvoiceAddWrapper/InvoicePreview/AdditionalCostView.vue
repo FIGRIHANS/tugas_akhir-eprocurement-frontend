@@ -1,8 +1,8 @@
 <template>
   <div v-if="form" class="flex flex-col gap-[24px]">
     <p class="text-lg font-semibold m-[0px]">Additional Cost</p>
-    <div class="invoice__table">
-      <table class="table table-xs table-border">
+    <div class="invoice__table rounded-lg border border-gray-200">
+      <table class="table table-xs">
         <thead>
           <tr>
             <th
@@ -17,7 +17,7 @@
                 'invoice__field-base--wht-type': item.toLowerCase() === 'wht type',
                 'invoice__field-base--wht-code': item.toLowerCase() === 'wht code',
               }"
-              class="invoice__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"
+              class="invoice__field-base !border-b-teal-500 !bg-teal-100 !text-teal-500"
             >
               {{ item }}
             </th>

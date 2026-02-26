@@ -2,7 +2,7 @@
   <div class="flex flex-col gap-[16px]">
     <p class="text-base font-semibold">Payment Details</p>
     <div class="overflow-x-auto invoice__table">
-      <table class="table table-xs table-border">
+      <table class="table table-xs">
         <thead>
           <tr>
             <th v-for="(item, index) in columns" :key="index" class="invoice__field-base">
@@ -203,16 +203,14 @@ onMounted(async () => {
   }
 
   .invoice__field-base {
-    background-color: #dbeafe; /* bg-blue-100 */
-    border-bottom: 1px solid #3b82f6; /* border-b-blue-500 */
+    background-color: #ccfbf1; /* bg-teal-100 */
+    border-bottom: 1px solid #14b8a6; /* border-b-teal-500 */
     border-top: 1px solid #e1e5e9;
-    border-left: 1px solid #e1e5e9;
-    border-right: 1px solid #e1e5e9;
     padding: 12px 16px;
     font-weight: 600;
     font-size: 12px;
     text-align: left;
-    color: #3b82f6; /* text-blue-500 */
+    color: #14b8a6; /* text-teal-500 */
     vertical-align: middle;
 
     &:first-child {

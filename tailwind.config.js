@@ -51,10 +51,10 @@ module.exports = {
                 inverse: '#ffffff',
               },
               primary: {
-                default: '#1B84FF',
-                active: '#056EE9',
-                light: '#EFF6FF',
-                clarity: 'rgba(27, 132, 255, 0.20)',
+                default: '#14B8A6',
+                active: '#0D9488',
+                light: '#F0FDFA',
+                clarity: 'rgba(20, 184, 166, 0.20)',
                 inverse: '#ffffff',
               },
               success: {
@@ -116,10 +116,10 @@ module.exports = {
                 inverse: '#ffffff',
               },
               primary: {
-                default: '#006AE6',
-                active: '#107EFF',
-                light: '#172331',
-                clarity: 'rgba(0, 106, 230, 0.20)',
+                default: '#14B8A6',
+                active: '#2DD4BF',
+                light: '#134E4A',
+                clarity: 'rgba(20, 184, 166, 0.20)',
                 inverse: '#ffffff',
               },
               success: {

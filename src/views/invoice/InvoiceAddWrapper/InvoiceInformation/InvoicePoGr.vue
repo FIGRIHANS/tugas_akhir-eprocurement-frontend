@@ -5,41 +5,31 @@
     </p>
 
     <div v-if="form?.invoiceType !== '902' && !checkInvoiceDp()">
-      <div class="flex items-center gap-[10px] justify-between">
-        <div class="flex items-center gap-[10px]">
-          <div class="relative max-w-[250px]">
-            <label
-              class="text-[11px] px-[3px] text-gray-500 bg-white absolute -top-[6px] left-[7px] leading-[12px]"
-            >
-              Reference Number
-            </label>
-            <div class="input">
-              <input
-                v-model="search"
-                placeholder=""
-                type="number"
-                @keypress="searchEnter"
-                @disabled="form.invoicePoGr.length > 0"
-              />
+      <div class="flex flex-col gap-1 mb-4">
+        <div class="flex items-center gap-3">
+          <div class="flex gap-2 w-full max-w-md">
+            <input
+              v-model="search"
+              placeholder="Reference Number"
+              type="number"
+              class="input w-full"
+              @keypress="searchEnter"
+              :disabled="form.invoicePoGr.length > 0"
+            />
+            <button class="btn btn-primary" @click="searchItem" :disabled="isDisabledSearch">
               <i class="ki-outline ki-magnifier"></i>
-            </div>
+              Search
+            </button>
           </div>
-          <button
-            class="btn btn-outline btn-primary"
-            @click="searchItem"
-            :disabled="isDisabledSearch"
-          >
-            Search
+          <button class="btn btn-outline btn-primary" @click="openUploadModal">
+            <i class="ki-duotone ki-exit-up"></i>
+            Upload
           </button>
         </div>
-        <button class="btn btn-outline btn-primary" @click="openUploadModal">
-          <i class="ki-duotone ki-exit-up"></i>
-          Upload
-        </button>
+        <p v-if="searchError" class="text-danger text-[11px]">
+          *PO Number must be exactly 10 characters long
+        </p>
       </div>
-      <p v-if="searchError" class="text-danger text-[9px]">
-        *PO Number must be exactly 10 characters long
-      </p>
     </div>
 
     <div v-if="form.invoiceType === '902'">
@@ -52,17 +42,14 @@
     <!-- Invoice PO & GR Item By Search Table  -->
 
     <div v-if="form?.invoiceType !== '902'">
-      <div v-if="form" class="overflow-x-auto pogr__table">
-        <table
-          class="table table-xs table-border"
-          :class="{ 'border-danger': form?.invoicePoGrError }"
-        >
+      <div v-if="form" class="overflow-x-auto pogr__table rounded-lg border border-gray-200">
+        <table class="table table-xs" :class="{ 'border-danger': form?.invoicePoGrError }">
           <thead>
             <tr>
               <th
                 v-for="(item, index) in columns"
                 :key="index"
-                class="pogr__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"
+                class="pogr__field-base !border-b-teal-500 !bg-teal-100 !text-teal-500"
                 :class="{
                   'pogr__field-base--po-item': item.toLowerCase() === 'item text',
                   'pogr__field-base--tax': item.toLowerCase() === 'tax code',
@@ -135,7 +122,7 @@
                         : item.grDocumentDate
                   }}
                 </td>
-                <td> {{ item.deliveryOrderNo }} </td>
+                <td>{{ item.deliveryOrderNo }}</td>
                 <td v-if="!checkInvoiceDp()">
                   {{
                     form.currency === item.currencyLC
@@ -211,17 +198,14 @@
 
     <!-- Invoice PO & Gr Add Item Manual -->
     <div v-else>
-      <div v-if="form" class="overflow-x-auto pogr__table">
-        <table
-          class="table table-xs table-border"
-          :class="{ 'border-danger': form?.invoicePoGrError }"
-        >
+      <div v-if="form" class="overflow-x-auto pogr__table rounded-lg border border-gray-200">
+        <table class="table table-xs" :class="{ 'border-danger': form?.invoicePoGrError }">
           <thead>
             <tr>
               <th
                 v-for="(item, index) in columns"
                 :key="index"
-                class="pogr__field-base !border-b-blue-500 !bg-blue-100 !text-blue-500"
+                class="pogr__field-base !border-b-teal-500 !bg-teal-100 !text-teal-500"
                 :class="{
                   'pogr__field-base--po-number': item.toLowerCase() === 'po number',
                   'pogr__field-base--po-item': item.toLowerCase() === 'po item',
@@ -468,8 +452,8 @@ const setColumn = () => {
 }
 
 const setItemPoGr = (items: PoGrSearchTypes[]) => {
-  console.log(items);
-  
+  console.log(items)
+
   for (const item of items) {
     const data = {
       poNo: item.poNo,
@@ -582,6 +566,7 @@ const addNewPodata = () => {
       poItemError: false,
       poNoError: false,
       departementError: false,
+      deliveryOrderNo: '',
     }
     form.invoicePoGr.push(data)
   }

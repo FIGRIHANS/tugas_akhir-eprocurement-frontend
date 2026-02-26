@@ -2,32 +2,34 @@
   .pogr {
     &__table {
       padding-bottom: 4px;
-  
+
       &::-webkit-scrollbar {
         width: 10px;
         height: 10px;
         background: transparent;
       }
-      
+
       &::-webkit-scrollbar-thumb {
         width: 10px;
         height: 10px;
         border-radius: 15px;
-        background-color: #DBDFE9;
+        background-color: #dbdfe9;
       }
     }
-  
+
     &__field-base {
       min-width: 130px;
       white-space: nowrap;
       @apply px-[20px] !important;
       @apply py-[13px] !important;
+      border: none !important;
+      outline: none !important;
 
       &--po-select {
         @extend .pogr__field-base;
         min-width: 130px;
       }
-      
+
       &--po-item {
         @extend .pogr__field-base;
         min-width: 250px;
@@ -37,18 +39,18 @@
         @extend .pogr__field-base;
         min-width: 250px;
       }
-    
+
       &--tax {
         @extend .pogr__field-base;
         min-width: 350px;
       }
-    
+
       &--department {
         @extend .pogr__field-base;
         min-width: 400px;
       }
     }
-  
+
     &__field-items {
       td {
         @apply px-[16px] !important;

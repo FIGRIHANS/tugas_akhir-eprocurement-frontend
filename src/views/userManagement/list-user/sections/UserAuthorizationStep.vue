@@ -32,7 +32,7 @@
                 :key="auth.code"
                 @click="toggleAvailableSelection(auth.code)"
                 class="cursor-pointer hover:bg-gray-50"
-                :class="{ 'bg-blue-100': isAvailableSelected(auth.code) }"
+                :class="{ 'bg-teal-100': isAvailableSelected(auth.code) }"
               >
                 <td>{{ auth.code }}</td>
                 <td>{{ auth.name }}</td>
@@ -108,7 +108,7 @@
                   :key="auth.code"
                   @click="toggleAssignedSelection(auth.code)"
                   class="cursor-pointer hover:bg-gray-50"
-                  :class="{ 'bg-blue-100': isAssignedSelected(auth.code) }"
+                  :class="{ 'bg-teal-100': isAssignedSelected(auth.code) }"
                 >
                   <td>{{ auth.code }}</td>
                   <td>{{ auth.name }}</td>
@@ -155,7 +155,7 @@
                     :key="value.code"
                     @click="toggleObjectValueModalSelection(value.code)"
                     class="cursor-pointer hover:bg-gray-50"
-                    :class="{ 'bg-blue-100': isModalObjectValueSelected(value.code) }"
+                    :class="{ 'bg-teal-100': isModalObjectValueSelected(value.code) }"
                   >
                     <td>{{ value.code }}</td>
                     <td>{{ value.name }}</td>
@@ -188,7 +188,7 @@
                     :key="value.code"
                     @click="toggleAssignedObjectValueSelection(value.code)"
                     class="cursor-pointer hover:bg-gray-50"
-                    :class="{ 'bg-blue-100': isAssignedObjectValueSelected(value.code) }"
+                    :class="{ 'bg-teal-100': isAssignedObjectValueSelected(value.code) }"
                   >
                     <td>{{ value.code }}</td>
                     <td>{{ value.name }}</td>
@@ -551,7 +551,7 @@ watch(
   border-bottom: 2px solid #e2e8f0;
 }
 
-.bg-blue-100 {
-  background-color: #ebf8ff;
+.bg-teal-100 {
+  background-color: #f0fdfa;
 }
 </style>

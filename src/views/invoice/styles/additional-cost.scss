@@ -7,12 +7,12 @@
       height: 10px;
       background: transparent;
     }
-    
+
     &::-webkit-scrollbar-thumb {
       width: 10px;
       height: 10px;
       border-radius: 15px;
-      background-color: #DBDFE9;
+      background-color: #dbdfe9;
     }
   }
 
@@ -21,27 +21,29 @@
     white-space: nowrap;
     @apply px-[20px] !important;
     @apply py-[13px] !important;
-    
+    border: none !important;
+    outline: none !important;
+
     &--activity {
       @extend .cost__field-base;
       min-width: 350px;
     }
-    
+
     &--tax {
       @extend .cost__field-base;
       min-width: 350px;
     }
-    
+
     &--cost {
       @extend .cost__field-base;
       min-width: 400px;
     }
-    
+
     &--item-amount {
       @extend .cost__field-base;
       min-width: 200px;
     }
-    
+
     &--description {
       @extend .cost__field-base;
       min-width: 300px;

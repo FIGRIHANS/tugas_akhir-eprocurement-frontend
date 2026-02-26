@@ -64,7 +64,7 @@
         <table class="table align-middle text-gray-700 font-medium text-sm">
           <thead>
             <tr>
-              <th class="!border-b-blue-500 !bg-blue-100 !w-[50px] text-center">
+              <th class="!border-b-teal-500 !bg-teal-100 !w-[50px] text-center">
                 <input
                   type="checkbox"
                   class="checkbox"
@@ -75,11 +75,11 @@
               <th
                 v-for="(item, index) in columns"
                 :key="index"
-                class="!border-b-blue-500 !bg-blue-100 !text-blue-500"
+                class="!border-b-teal-500 !bg-teal-100 !text-teal-500"
                 :class="{
                   list__long: index !== 0,
                   'cursor-pointer': item !== 'Action',
-                  '!text-blue-500': item === sortColumnName && sortBy !== '',
+                  '!text-teal-500': item === sortColumnName && sortBy !== '',
                 }"
                 @click="item !== 'Action' ? sortColumn(item) : null"
               >
@@ -119,7 +119,7 @@
               <td>
                 <select
                   v-model="item.fasilitas"
-                  class="form-select form-select-sm min-w-[150px] bg-transparent border-transparent hover:border-gray-300 focus:border-blue-500 transition-colors"
+                  class="form-select form-select-sm min-w-[150px] bg-transparent border-transparent hover:border-gray-300 focus:border-primary transition-colors"
                 >
                   <option v-for="opt in facilityOptions" :key="opt" :value="opt">
                     {{ opt }}
@@ -132,7 +132,7 @@
               <td>{{ item.jenisDokRef }}</td>
               <td>{{ item.nomorDokRef }}</td>
               <td>{{ formatDate(item.tanggalDok) }}</td>
-              <td class="text-center">
+              <td>
                 <span class="badge badge-outline" :class="getStatusWhtBadgeClass(item.statusWht)">
                   {{ item.statusWht }}
                 </span>
@@ -220,8 +220,8 @@
           <div class="relative">
             <button
               @click="toggleStatusDropdown"
-              class="w-full px-4 py-3 text-left bg-white border border-gray-300 rounded-lg hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all flex justify-between items-center"
-              :class="{ 'border-blue-500 ring-2 ring-blue-200': showStatusDropdown }"
+              class="w-full px-4 py-3 text-left bg-white border border-gray-300 rounded-lg hover:border-primary-clarity focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all flex justify-between items-center"
+              :class="{ 'border-primary ring-2 ring-primary-clarity': showStatusDropdown }"
             >
               <span :class="selectedStatus ? 'text-gray-800 font-medium' : 'text-gray-400'">
                 {{ selectedStatus || 'Select Invoice Status' }}
@@ -243,7 +243,7 @@
                   <input
                     v-model="statusSearch"
                     type="text"
-                    class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
                     placeholder="Search status..."
                     @click.stop
                   />
@@ -256,18 +256,15 @@
                   v-for="status in filteredStatusOptions"
                   :key="status"
                   @click="selectStatus(status)"
-                  class="px-4 py-3 hover:bg-blue-50 cursor-pointer transition-colors text-sm font-medium"
+                  class="px-4 py-3 hover:bg-primary-light cursor-pointer transition-colors text-sm font-medium"
                   :class="{
-                    'bg-blue-100 text-blue-700': selectedStatus === status,
+                    'bg-primary-light text-primary': selectedStatus === status,
                     'text-gray-700': selectedStatus !== status,
                   }"
                 >
                   <div class="flex items-center justify-between">
                     <span>{{ status }}</span>
-                    <i
-                      v-if="selectedStatus === status"
-                      class="ki-filled ki-check text-blue-600"
-                    ></i>
+                    <i v-if="selectedStatus === status" class="ki-filled ki-check text-primary"></i>
                   </div>
                 </div>
                 <div
@@ -570,7 +567,7 @@ const filteredDataList = computed(() => {
 
 const getStatusWhtBadgeClass = (status: string) => {
   if (status === 'Created') return 'badge-success'
-  if (status === 'Export to XML') return 'badge-warning'
+  if (status === 'Export to XML') return 'badge-primary'
   return 'badge-secondary'
 }
 
@@ -696,8 +693,8 @@ const sortColumn = (columnName: string | null) => {
     })
   } else if (name === 'Tax Base (DPP)' || name === 'Rate (%)') {
     result = listData.sort((a, b) => {
-      const convA = (a as Record<string, any>)[columnMap[name]] || 0
-      const convB = (b as Record<string, any>)[columnMap[name]] || 0
+      const convA = (a as unknown as Record<string, number>)[columnMap[name]] || 0
+      const convB = (b as unknown as Record<string, number>)[columnMap[name]] || 0
       if (sortBy.value === 'asc') {
         return convA - convB
       } else {
@@ -706,11 +703,11 @@ const sortColumn = (columnName: string | null) => {
     })
   } else {
     result = listData.sort((a, b) => {
-      const convA = (a as Record<string, any>)[columnMap[name]]
-        ? String((a as Record<string, any>)[columnMap[name]])
+      const convA = (a as unknown as Record<string, string>)[columnMap[name]]
+        ? String((a as unknown as Record<string, string>)[columnMap[name]])
         : ''
-      const convB = (b as Record<string, any>)[columnMap[name]]
-        ? String((b as Record<string, any>)[columnMap[name]])
+      const convB = (b as unknown as Record<string, string>)[columnMap[name]]
+        ? String((b as unknown as Record<string, string>)[columnMap[name]])
         : ''
       if (sortBy.value === 'asc') {
         return convA.localeCompare(convB)

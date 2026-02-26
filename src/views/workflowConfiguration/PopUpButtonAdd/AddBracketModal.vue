@@ -2,7 +2,6 @@
   <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
     <div class="relative w-full max-w-6xl mx-auto">
       <div class="bg-white rounded-lg shadow">
-
         <!-- HEADER -->
         <div class="flex items-center justify-between p-4 border-b">
           <h5 class="text-xl font-medium">Add Bracket List</h5>
@@ -40,26 +39,27 @@
               <thead>
                 <tr>
                   <th class="px-4 py-3 w-10"></th>
-                  <th v-for="header in headers" :key="header"
-                    class="px-4 py-3 text-left text-sm font-medium text-gray-800">
+                  <th
+                    v-for="header in headers"
+                    :key="header"
+                    class="px-4 py-3 text-left text-sm font-medium text-gray-800"
+                  >
                     {{ header }}
                   </th>
                 </tr>
               </thead>
 
               <tbody class="bg-white divide-y divide-gray-200">
-
                 <!-- EMPTY STATE -->
 
-
                 <!-- DATA ROW -->
-                <tr v-for="item in filteredExampleData" :key="item.bracketCode" class="hover:bg-blue-50 transition">
+                <tr
+                  v-for="item in filteredExampleData"
+                  :key="item.bracketCode"
+                  class="hover:bg-primary-light transition"
+                >
                   <td class="px-4 py-2 text-center">
-                    <UiRadio
-                      v-model="selectedBracket"
-                      :value="item"
-                      name="bracketSelect"
-                    />
+                    <UiRadio v-model="selectedBracket" :value="item" name="bracketSelect" />
                   </td>
                   <td class="px-4 py-2 text-sm">{{ item.companyCode }}</td>
                   <td class="px-4 py-2 text-sm">{{ item.bracketGroup }}</td>
@@ -74,11 +74,8 @@
 
                 <!-- NO RESULT -->
                 <tr v-if="filteredExampleData.length === 0">
-                  <td colspan="8" class="py-6 text-center text-gray-400">
-                    No data found
-                  </td>
+                  <td colspan="8" class="py-6 text-center text-gray-400">No data found</td>
                 </tr>
-
               </tbody>
             </table>
           </div>
@@ -86,22 +83,25 @@
 
         <!-- FOOTER -->
         <div class="flex items-center justify-end gap-3 p-4 border-t">
-          <button class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800" @click="$emit('close')">
+          <button
+            class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800"
+            @click="$emit('close')"
+          >
             Cancel
           </button>
 
-          <button class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md
-                   hover:bg-blue-700 disabled:opacity-50" :disabled="!selectedBracket"
-            @click="handleSelect(selectedBracket!)">
+          <button
+            class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-teal-600 disabled:opacity-50"
+            :disabled="!selectedBracket"
+            @click="handleSelect(selectedBracket!)"
+          >
             Save
           </button>
         </div>
-
       </div>
     </div>
   </div>
 </template>
-
 
 <script lang="ts" setup>
 import { ref, computed, onMounted } from 'vue'
@@ -153,7 +153,7 @@ const form = ref<BracketForm>({
   level: '',
   amountFrom: '',
   amountTo: '',
-  status: ''
+  status: '',
 })
 
 /** filter yang SUDAH di-apply */
@@ -166,17 +166,56 @@ const selectedBracket = ref<ExampleBracket | null>(null)
    DUMMY DATA
 ======================= */
 const exampleData: ExampleBracket[] = [
-  { bracketCode: 'BR001', bracketGroup: 'BG001', companyCode: 'MF00', bracketType: 'Invoice Amount', level: 1, amountFrom: '-', amountTo: '1,000,000', currency: 'IDR', status: 'Active' },
-  { bracketCode: 'BR002', bracketGroup: 'BG001', companyCode: 'MF00', bracketType: 'Invoice Amount', level: 2, amountFrom: '1,000,001', amountTo: '10,000,000', currency: 'IDR', status: 'Active' },
-  { bracketCode: 'BR003', bracketGroup: 'BG001', companyCode: 'MF00', bracketType: 'Invoice Amount', level: 3, amountFrom: '10,000,001', amountTo: '100,000,000', currency: 'IDR', status: 'Active' },
-  { bracketCode: 'BR003', bracketGroup: 'BG001', companyCode: 'MF00', bracketType: 'Invoice Amount', level: 4, amountFrom: '##########', amountTo: '100,000,000,000', currency: 'IDR', status: 'Active' }
+  {
+    bracketCode: 'BR001',
+    bracketGroup: 'BG001',
+    companyCode: 'MF00',
+    bracketType: 'Invoice Amount',
+    level: 1,
+    amountFrom: '-',
+    amountTo: '1,000,000',
+    currency: 'IDR',
+    status: 'Active',
+  },
+  {
+    bracketCode: 'BR002',
+    bracketGroup: 'BG001',
+    companyCode: 'MF00',
+    bracketType: 'Invoice Amount',
+    level: 2,
+    amountFrom: '1,000,001',
+    amountTo: '10,000,000',
+    currency: 'IDR',
+    status: 'Active',
+  },
+  {
+    bracketCode: 'BR003',
+    bracketGroup: 'BG001',
+    companyCode: 'MF00',
+    bracketType: 'Invoice Amount',
+    level: 3,
+    amountFrom: '10,000,001',
+    amountTo: '100,000,000',
+    currency: 'IDR',
+    status: 'Active',
+  },
+  {
+    bracketCode: 'BR003',
+    bracketGroup: 'BG001',
+    companyCode: 'MF00',
+    bracketType: 'Invoice Amount',
+    level: 4,
+    amountFrom: '##########',
+    amountTo: '100,000,000,000',
+    currency: 'IDR',
+    status: 'Active',
+  },
 ]
 
 /* =======================
    HELPERS
 ======================= */
-const toNumber = (v: string | number) =>
-  v === '' || v === null ? null : Number(v)
+const toNumber = (v: string | number) => (v === '' || v === null ? null : Number(v))
 
 /* =======================
    ACTIONS
@@ -200,9 +239,11 @@ const filteredExampleData = computed(() => {
 
   const f = appliedFilter.value
 
-  return exampleData.filter(item => {
-    if (f.bracketCode && !item.bracketCode.toLowerCase().includes(f.bracketCode.toLowerCase())) return false
-    if (f.bracketGroup && !item.bracketGroup.toLowerCase().includes(f.bracketGroup.toLowerCase())) return false
+  return exampleData.filter((item) => {
+    if (f.bracketCode && !item.bracketCode.toLowerCase().includes(f.bracketCode.toLowerCase()))
+      return false
+    if (f.bracketGroup && !item.bracketGroup.toLowerCase().includes(f.bracketGroup.toLowerCase()))
+      return false
     if (f.companyCode && item.companyCode !== f.companyCode) return false
     if (f.bracketType && item.bracketType !== f.bracketType) return false
     if (f.currency && item.currency !== f.currency) return false
@@ -217,18 +258,18 @@ const filteredExampleData = computed(() => {
    OPTIONS
 ======================= */
 const companyOptions = computed(() =>
-  invoiceMasterApi.companyCode.map(c => ({ value: c.code, text: c.name }))
+  invoiceMasterApi.companyCode.map((c) => ({ value: c.code, text: c.name })),
 )
 
 const bracketTypeOptions = [
   { value: 'PO Amount', text: 'PO Amount' },
   { value: 'Non PO Amount', text: 'Non PO Amount' },
-  { value: 'GR Amount', text: 'GR Amount' }
+  { value: 'GR Amount', text: 'GR Amount' },
 ]
 
 const currencyOptions = [
   { value: 'IDR', text: 'IDR' },
-  { value: 'USD', text: 'USD' }
+  { value: 'USD', text: 'USD' },
 ]
 
 const headers = [
@@ -240,7 +281,7 @@ const headers = [
   'Amount From',
   'Amount To',
   'Currency',
-  'Status'
+  'Status',
 ]
 
 /* =======================

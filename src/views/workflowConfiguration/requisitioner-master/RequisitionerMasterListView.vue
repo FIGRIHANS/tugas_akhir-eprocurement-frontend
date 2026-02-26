@@ -66,19 +66,19 @@
           <table class="table align-middle text-gray-700 font-medium text-sm min-w-[1000px]">
             <thead>
               <tr>
-                <th class="!border-b-blue-500 !bg-blue-100 !text-blue-500"></th>
-                <th class="!border-b-blue-500 !bg-blue-100 !text-blue-500">Company Code</th>
-                <th class="!border-b-blue-500 !bg-blue-100 !text-blue-500">Company Name</th>
-                <th class="!border-b-blue-500 !bg-blue-100 !text-blue-500">Department</th>
-                <th class="!border-b-blue-500 !bg-blue-100 !text-blue-500">Requisitioner Code</th>
-                <th class="!border-b-blue-500 !bg-blue-100 !text-blue-500">Requisitioner Name</th>
+                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500"></th>
+                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Company Code</th>
+                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Company Name</th>
+                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Department</th>
+                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Requisitioner Code</th>
+                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Requisitioner Name</th>
               </tr>
             </thead>
             <tbody>
               <tr
                 v-for="item in pagedList"
                 :key="item.id"
-                class="integration__field-items hover:bg-blue-50"
+                class="integration__field-items hover:bg-primary-light"
               >
                 <td>
                   <div class="flex items-center space-x-3">

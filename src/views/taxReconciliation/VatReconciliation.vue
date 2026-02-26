@@ -93,7 +93,7 @@
             <!-- Blue header styling -->
             <tr>
               <!-- Checkbox & Action Column Header -->
-              <th class="!border-b-blue-500 !bg-blue-100 !text-blue-500">
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">
                 <div class="flex items-center justify-center gap-3">
                   <input
                     type="checkbox"
@@ -109,10 +109,10 @@
               <th
                 v-for="(item, index) in columns"
                 :key="index"
-                class="!border-b-blue-500 !bg-blue-100 !text-blue-500 cursor-pointer"
+                class="!border-b-teal-500 !bg-teal-100 !text-teal-500 cursor-pointer"
                 :class="{
                   list__long: index !== 0,
-                  '!text-blue-500': item === sortColumnName && sortBy !== '',
+                  '!text-primary': item === sortColumnName && sortBy !== '',
                 }"
                 @click="sortColumn(item)"
               >
@@ -163,15 +163,13 @@
               <!-- PPN -->
               <td class="text-right">{{ formatCurrency(item.ppn) }}</td>
 
-              <!-- Status FP -->
-              <td class="text-center">
+              <td>
                 <span class="badge badge-outline" :class="getStatusFPBadgeClass(item.statusFp)">
                   {{ item.statusFp || '-' }}
                 </span>
               </td>
 
-              <!-- Status AP vs FP -->
-              <td class="text-center">
+              <td>
                 <span
                   class="badge badge-outline"
                   :class="getMatchStatusBadgeClass(item.statusApVsFp)"
@@ -180,8 +178,7 @@
                 </span>
               </td>
 
-              <!-- Credit Status -->
-              <td class="text-center">
+              <td>
                 <span
                   class="badge badge-outline"
                   :class="getCreditStatusBadgeClass(item.creditStatus)"
@@ -251,8 +248,8 @@
           <div class="relative">
             <button
               @click="toggleStatusDropdown"
-              class="w-full px-4 py-3 text-left bg-white border border-gray-300 rounded-lg hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all flex justify-between items-center"
-              :class="{ 'border-blue-500 ring-2 ring-blue-200': showStatusDropdown }"
+              class="w-full px-4 py-3 text-left bg-white border border-gray-300 rounded-lg hover:border-primary-clarity focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all flex justify-between items-center"
+              :class="{ 'border-primary ring-2 ring-primary-clarity': showStatusDropdown }"
             >
               <span :class="selectedStatus ? 'text-gray-800 font-medium' : 'text-gray-400'">
                 {{ selectedStatus || 'Select Invoice Status' }}
@@ -274,7 +271,7 @@
                   <input
                     v-model="statusSearch"
                     type="text"
-                    class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
                     placeholder="Search status..."
                     @click.stop
                   />
@@ -287,18 +284,15 @@
                   v-for="status in filteredStatusOptions"
                   :key="status"
                   @click="selectStatus(status)"
-                  class="px-4 py-3 hover:bg-blue-50 cursor-pointer transition-colors text-sm font-medium"
+                  class="px-4 py-3 hover:bg-primary-light cursor-pointer transition-colors text-sm font-medium"
                   :class="{
-                    'bg-blue-100 text-blue-700': selectedStatus === status,
+                    'bg-primary-light text-primary': selectedStatus === status,
                     'text-gray-700': selectedStatus !== status,
                   }"
                 >
                   <div class="flex items-center justify-between">
                     <span>{{ status }}</span>
-                    <i
-                      v-if="selectedStatus === status"
-                      class="ki-filled ki-check text-blue-600"
-                    ></i>
+                    <i v-if="selectedStatus === status" class="ki-filled ki-check text-primary"></i>
                   </div>
                 </div>
                 <div

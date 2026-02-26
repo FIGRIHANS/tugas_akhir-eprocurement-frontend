@@ -51,11 +51,11 @@
             <th
               v-for="(item, index) in columns"
               :key="index"
-              class="!border-b-blue-500 !bg-blue-100 !text-blue-500"
+              class="!border-b-teal-500 !bg-teal-100 !text-teal-500"
               :class="{
                 'list__long ': index !== 0,
                 'cursor-pointer': item,
-                '!text-blue-500': item === sortColumnName && sortBy !== '',
+                '!text-teal-500': item === sortColumnName && sortBy !== '',
               }"
               @click="sortColumn(item)"
             >
@@ -112,7 +112,7 @@
                 }}
               </td>
               <td>
-                {{ parent.sapPostingCode ||  '-' }}
+                {{ parent.sapPostingCode || '-' }}
               </td>
             </tr>
             <tr v-show="parent.isOpenChild">
@@ -245,7 +245,7 @@ const columns = ref([
   'Total Gross Amount',
   'Total Net Amount',
   'Estimated Payment Date',
-  'SAP Docuemnt No'
+  'SAP Docuemnt No',
 ])
 
 const columnsChild = ref(['No PO', 'No GR', 'Item Description', 'Item Amount', 'Quantity'])
@@ -254,17 +254,17 @@ const poList = computed(() => invoiceApi.listPo)
 
 const colorBadge = (statusCode: number) => {
   const list = {
-    0: 'bg-gray-50 text-gray-600', // Draft
-    1: 'bg-blue-50 text-blue-600', // Waiting to Verify
-    2: 'bg-purple-50 text-purple-600', // Waiting for Approval
-    3: 'bg-emerald-50 text-emerald-600', // Verified
-    4: 'bg-emerald-100 text-emerald-700', // Approved
-    5: 'bg-red-50 text-red-600', // Rejected
-    6: 'bg-gray-100 text-gray-600', // Cancelled
-    7: 'bg-slate-50 text-slate-600', // Sent to SAP
-    8: 'bg-yellow-50 text-yellow-700', // Planned
-    9: 'bg-cyan-50 text-cyan-600', // Partially Paid
-    10: 'bg-emerald-500 text-white', // Paid (solid)
+    0: 'badge-secondary', // Draft
+    1: 'badge-primary', // Waiting to Verify
+    2: 'badge-info', // Waiting for Approval
+    3: 'badge-success', // Verified
+    4: 'badge-success', // Approved
+    5: 'badge-danger', // Rejected
+    6: 'badge-secondary', // Cancelled
+    7: 'badge-primary', // Sent to SAP
+    8: 'badge-warning', // Planned
+    9: 'badge-info', // Partially Paid
+    10: 'badge-success', // Paid
   } as { [key: number]: string }
   return list[statusCode]
 }

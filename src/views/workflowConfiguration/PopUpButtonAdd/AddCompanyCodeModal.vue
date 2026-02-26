@@ -20,7 +20,7 @@
                 <input
                   type="text"
                   v-model="form.companyCode"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
                   required
                 />
               </div>
@@ -57,29 +57,29 @@
           <h6 class="text-lg font-medium mb-4">List Table Company Code</h6>
           <div class="overflow-x-auto border rounded-lg">
             <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-blue-100">
+              <thead class="bg-teal-100">
                 <tr>
                   <th
                     scope="col"
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b border-blue-200"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b border-primary-clarity"
                   >
                     Company Code
                   </th>
                   <th
                     scope="col"
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b border-blue-200"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b border-primary-clarity"
                   >
                     Company Name
                   </th>
                   <th
                     scope="col"
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b border-blue-200"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b border-primary-clarity"
                   >
                     Status
                   </th>
                   <th
                     scope="col"
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b border-blue-200"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b border-primary-clarity"
                   >
                     Created Date
                   </th>

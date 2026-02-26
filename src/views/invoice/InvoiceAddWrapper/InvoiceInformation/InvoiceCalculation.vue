@@ -2,7 +2,9 @@
   <div class="flex-1 h-fit">
     <div class="card flex-1 h-fit">
       <div class="card-header flex justify-between items-center gap-[10px] py-[16px] px-[20px]">
-        <span class="font-semibold text-base whitespace-nowrap" v-if="isLba">Realization Invoice Calculation</span>
+        <span class="font-semibold text-base whitespace-nowrap" v-if="isLba"
+          >Realization Invoice Calculation</span
+        >
         <span class="font-semibold text-base whitespace-nowrap" v-else>Invoice Calculation</span>
         <button class="btn btn-primary" @click="setCalculation">
           Recalculate
@@ -12,9 +14,12 @@
       <div class="card-body p-[0px]">
         <div class="flex">
           <div class="flex flex-col flex-1">
-            <div v-for="(item, index) in listCalculation" :key="index"
+            <div
+              v-for="(item, index) in listCalculation"
+              :key="index"
               class="border-b border-gray-200 py-[22px] px-[20px] text-xs flex"
-              :class="index === listCalculation.length - 1 ? 'calculation__last-field' : ''">
+              :class="index === listCalculation.length - 1 ? 'calculation__last-field' : ''"
+            >
               <div class="flex-1">{{ item.name }}</div>
               <div class="flex-1">
                 {{
@@ -27,12 +32,18 @@
         </div>
       </div>
     </div>
-    <div class="card mt-5 p-5" v-if="
-      form.invoiceType === '4' &&
-      (checkIsNonPo() || route.query.type === 'cas') &&
-      varianceResult.text
-    ">
-      <div class="p-4 rounded-xl border transition-all duration-300" :class="varianceResult.containerClass">
+    <div
+      class="card mt-5 p-5"
+      v-if="
+        form.invoiceType === '4' &&
+        (checkIsNonPo() || route.query.type === 'cas') &&
+        varianceResult.text
+      "
+    >
+      <div
+        class="p-4 rounded-xl border transition-all duration-300"
+        :class="varianceResult.containerClass"
+      >
         <div>
           <p class="font-bold text-gray-800 text-base">
             {{ varianceResult.text }}
@@ -42,9 +53,15 @@
             Due Date: <span class="font-medium text-gray-800">H+ 30</span>
           </p>
 
-          <p v-if="varianceResult.posting" class="text-sm font-semibold text-gray-700 mt-3 flex items-center gap-2">
+          <p
+            v-if="varianceResult.posting"
+            class="text-sm font-semibold text-gray-700 mt-3 flex items-center gap-2"
+          >
             Posting SAP:
-            <span class="px-2.5 py-1 rounded-md text-xs font-bold shadow-sm" :class="varianceResult.badgeClass">
+            <span
+              class="px-2.5 py-1 rounded-md text-xs font-bold shadow-sm"
+              :class="varianceResult.badgeClass"
+            >
               {{ varianceResult.posting }}
             </span>
           </p>
@@ -128,11 +145,11 @@ const varianceResult = computed(() => {
 
     if (hasAnyRealizationInput) {
       return {
-        containerClass: 'bg-blue-50 border-blue-400',
+        containerClass: 'bg-teal-50 border-teal-400',
         text: 'The realization matches the cash advance (No SAP posting required)',
         amount: 0,
         posting: '',
-        badgeClass: 'bg-blue-100 text-blue-800 border border-blue-200',
+        badgeClass: 'bg-teal-100 text-teal-800 border border-teal-200',
       }
     }
   }
@@ -447,7 +464,7 @@ const countWhtAmount = () => {
     }
   } else {
     // for (const item of form.invoiceItem) {
-    //   const percentTax = 0 
+    //   const percentTax = 0
     // }
   }
   return totalPo + totalAddDebit - totalAddCredit

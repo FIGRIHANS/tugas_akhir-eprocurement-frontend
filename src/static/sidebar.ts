@@ -66,43 +66,43 @@ const sidebarMenuData: ISidebarMenu[] = [
   //     },
   //   ],
   // },
-  {
-    id: 'vendor-management',
-    title: 'Vendor Management',
-    icon: 'users',
-    child: [
-      {
-        id: 'vendor-master',
-        title: 'Vendor Master',
-        to: 'vendor-master',
-      },
-      {
-        id: 'vendor-verification',
-        title: 'Vendor Verification',
-        to: 'vendor-verification',
-      },
-      {
-        id: 'vendor-approval',
-        title: 'Vendor Approval',
-        to: 'vendor-approval',
-      },
-      {
-        id: 'vendor-blacklist',
-        title: 'Vendor Blacklist',
-        to: 'vendor-blacklist',
-      },
-      {
-        id: 'activity-expenses',
-        title: 'Activity Expenses',
-        to: 'activity-expenses',
-      },
-      {
-        id: 'vendor-detail',
-        title: 'Vendor Detail',
-        to: 'vendor-detail',
-      },
-    ],
-  },
+  // {
+  //   id: 'vendor-management',
+  //   title: 'Vendor Management',
+  //   icon: 'users',
+  //   child: [
+  //     {
+  //       id: 'vendor-master',
+  //       title: 'Vendor Master',
+  //       to: 'vendor-master',
+  //     },
+  //     {
+  //       id: 'vendor-verification',
+  //       title: 'Vendor Verification',
+  //       to: 'vendor-verification',
+  //     },
+  //     {
+  //       id: 'vendor-approval',
+  //       title: 'Vendor Approval',
+  //       to: 'vendor-approval',
+  //     },
+  //     {
+  //       id: 'vendor-blacklist',
+  //       title: 'Vendor Blacklist',
+  //       to: 'vendor-blacklist',
+  //     },
+  //     {
+  //       id: 'activity-expenses',
+  //       title: 'Activity Expenses',
+  //       to: 'activity-expenses',
+  //     },
+  //     {
+  //       id: 'vendor-detail',
+  //       title: 'Vendor Detail',
+  //       to: 'vendor-detail',
+  //     },
+  //   ],
+  // },
 
   // {
   //   id: 'e-procurement-report',
@@ -211,23 +211,7 @@ const sidebarMenuData: ISidebarMenu[] = [
         title: 'Email Invoice Integration',
         to: 'emailInvoiceIntegration',
       },
-      {
-        id: 'cash-advance',
-        title: 'Cash Advance',
-        to: 'cash-advance',
-      },
-      {
-        id: 'recurring-invoice-reminder',
-        title: 'Recurring Invoice Reminder',
-        to: 'recurring-invoice-reminder',
-      },
-      {
-        id: 'invoice-type',
-        title: 'Invoice Type',
-        to: 'invoice-type',
-      },
-      // {
-      //   id: 'schedule-payment',
+      // {\n      //   id: 'schedule-payment',
       //   title: 'Schedule Payment',
       // },
     ],
@@ -278,94 +262,6 @@ const sidebarMenuData: ISidebarMenu[] = [
         id: 'wht-reconciliation',
         title: 'WHT Reconciliation',
         to: 'whtReconciliation',
-      },
-    ],
-  },
-  {
-    id: 'userManagement',
-    title: 'User Management',
-    icon: 'user',
-    child: [
-      {
-        id: 'list-user',
-        title: 'List User',
-        to: 'user-management-user-list',
-      },
-      {
-        id: 'master-profile',
-        title: 'Master Profile',
-        to: 'user-management-master-profile',
-      },
-      {
-        id: 'master-role',
-        title: 'Master Role',
-        to: 'user-management-master-role',
-      },
-      {
-        id: 'master-employee',
-        title: 'Master Employee',
-        to: 'user-management-master-employee',
-      },
-      {
-        id: 'master-menu',
-        title: 'Master Menu',
-        to: 'user-management-master-menu',
-      },
-      {
-        id: 'report-user-authorization',
-        title: 'Report User Authorization',
-        to: 'user-management-report-authorization',
-      },
-    ],
-  },
-  {
-    id: 'workflow-configuration',
-    title: 'Workflow Configuration',
-    icon: 'arrows-loop',
-    child: [
-      {
-        id: 'workflow-list',
-        title: 'Workflow Config List',
-        to: 'workflow-list',
-      },
-      {
-        id: 'list-organization',
-        title: 'List Organization',
-        to: 'list-organization',
-      },
-      {
-        id: 'requisitioner-master',
-        title: 'Requisitioner Master',
-        to: 'requisitioner-master',
-      },
-    ],
-  },
-  {
-    id: 'system-integration',
-    title: 'System Integration',
-    icon: 'message-programming',
-    child: [
-      {
-        id: 'erp-integration',
-        title: 'ERP Integration List',
-        to: 'erp-integration',
-      },
-    ],
-  },
-  {
-    id: 'system-configuration',
-    title: 'System Configuration',
-    icon: 'setting-2',
-    child: [
-      {
-        id: 'invoice-configuration',
-        title: 'Invoice Configuration List',
-        to: 'invoice-configuration',
-      },
-      {
-        id: 'log-activity',
-        title: 'Log Activity',
-        to: 'log-activity',
       },
     ],
   },

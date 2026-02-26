@@ -22,14 +22,7 @@ const filterForm = reactive({
   profileId: '',
 })
 
-const columns = ref([
-  '',
-  'User Name',
-  'Email',
-  'Profile Id',
-  'Employee Id',
-  'Last Login',
-])
+const columns = ref(['', 'User Name', 'Email', 'Profile Id', 'Employee Id', 'Last Login'])
 
 onMounted(async () => {
   await userStore.getAllUsers()
@@ -110,21 +103,27 @@ const uniqueProfileIds = computed(() => {
               Filter
             </button>
             <div class="dropdown-content w-full max-w-[305px] p-[16px]">
-              <p class="text-lg font-semibold mb-[8px]">Filter</p>
+              <p class="text-primary hover:text-teal-800 font-semibold cursor-pointer">Filter</p>
               <div class="flex flex-col gap-[24px] py-[16px]">
                 <div class="relative">
-                  <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
+                  <label
+                    class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
                     >Profile Id</label
                   >
                   <select v-model="filterForm.profileId" class="select" name="select">
                     <option value="">All Profile Id</option>
-                    <option v-for="profileId in uniqueProfileIds" :key="profileId" :value="profileId.toString()">
+                    <option
+                      v-for="profileId in uniqueProfileIds"
+                      :key="profileId"
+                      :value="profileId.toString()"
+                    >
                       {{ profileId }}
                     </option>
                   </select>
                 </div>
                 <div class="relative">
-                  <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
+                  <label
+                    class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
                     >Status</label
                   >
                   <select v-model="filterForm.status" class="select" name="select">
@@ -160,8 +159,8 @@ const uniqueProfileIds = computed(() => {
               <th
                 v-for="(item, index) in columns"
                 :key="index"
-                class="!border-b-blue-500 !bg-blue-100 !text-blue-500"
-                :class="{ 'list__long': index !== 0 }"
+                class="!border-b-teal-500 !bg-teal-100 !text-teal-500"
+                :class="{ list__long: index !== 0 }"
               >
                 {{ item }}
               </th>
@@ -190,8 +189,12 @@ const uniqueProfileIds = computed(() => {
       <div class="flex items-center justify-between mt-[24px]">
         <p class="m-0 text-sm">
           Tampilkan
-          {{ pageSize * currentPage > filteredUsers.length ? filteredUsers.length : pageSize * currentPage }} data
-          dari total data {{ filteredUsers.length }}
+          {{
+            pageSize * currentPage > filteredUsers.length
+              ? filteredUsers.length
+              : pageSize * currentPage
+          }}
+          data dari total data {{ filteredUsers.length }}
         </p>
         <LPagination
           :totalItems="filteredUsers.length"
