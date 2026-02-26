@@ -5,10 +5,9 @@
         <div class="logo flex items-center gap-2">
           <RouterLink to="/">
             <LogoEPOQ class="w-[120px] h-auto" />
-
           </RouterLink>
           <div class="ml-2">
-            <img src="@/assets/tms.png" class="h-[35px] w-max" alt="">
+            <img src="@/assets/TMS.png" class="h-[35px] w-max" alt="">
           </div>
         </div>
 

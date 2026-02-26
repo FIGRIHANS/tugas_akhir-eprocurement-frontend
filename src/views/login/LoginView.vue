@@ -57,7 +57,7 @@
         <div class="mt-[30px] flex items-center justify-center">
           <LogoEPOQ class=" w-[260px] h-16" />
           <div class="ml-2">
-            <img src="@/assets/tms.png" class="h-[60px] w-max" alt="">
+            <img src="@/assets/TMS.png" class="h-[60px] w-max" alt="">
           </div>
         </div>
         <loginView />
