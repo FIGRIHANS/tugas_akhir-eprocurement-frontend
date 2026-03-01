@@ -34,5 +34,5 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd /home/datasea/eprocurement/config
-            docker compose pull
-            docker compose up -d
+            docker compose -f docker-compose.multi-repo.yml pull frontend
+            docker compose -f docker-compose.multi-repo.yml up -d frontend
