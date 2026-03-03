@@ -222,14 +222,9 @@ const sidebarMenuData: ISidebarMenu[] = [
     icon: 'package',
     child: [
       {
-        id: 'receiving-confirmation',
-        title: 'Create Receiving Confirmation',
-        to: 'receivingConfirmation',
-      },
-      {
-        id: 'receiving-confirmation-list',
-        title: 'Receiving Confirmation List',
-        to: 'receivingConfirmationList',
+        id: 'mock-sap-list',
+        title: 'Mock SAP List',
+        to: 'mockSapList',
       },
       {
         id: 'delivery-notes',
@@ -245,6 +240,16 @@ const sidebarMenuData: ISidebarMenu[] = [
         id: 'delivery-notes-list',
         title: 'Delivery Notes List',
         to: 'deliveryNotesList',
+      },
+      {
+        id: 'receiving-confirmation',
+        title: 'Create Receiving Confirmation',
+        to: 'receivingConfirmation',
+      },
+      {
+        id: 'receiving-confirmation-list',
+        title: 'Receiving Confirmation List',
+        to: 'receivingConfirmationList',
       },
     ],
   },

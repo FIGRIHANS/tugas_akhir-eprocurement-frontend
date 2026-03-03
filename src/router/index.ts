@@ -22,6 +22,7 @@ import deliveryNotes from './modules/deliveryNotes'
 import taxReconciliation from './modules/taxReconciliation'
 import systemIntegration from './modules/systemIntegration'
 import systemConfiguration from './modules/systemConfiguration'
+import mockSap from './modules/mockSap'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -56,6 +57,7 @@ const router = createRouter({
         ...taxReconciliation,
         ...systemIntegration,
         ...systemConfiguration,
+        ...mockSap,
         // {
         //   path: '/health-check',
         //   name: 'health-check',
