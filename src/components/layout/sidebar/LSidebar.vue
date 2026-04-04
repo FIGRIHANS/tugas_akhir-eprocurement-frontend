@@ -299,7 +299,8 @@ const filteredSidebarMenu = computed(() => {
                   child.id === 'delivery-notes' ||
                   child.id === 'delivery-notes-list' ||
                   child.id === 'vat-reconciliation' ||
-                  child.id === 'wht-reconciliation' ||
+                  child.id === 'wht-unifikasi' ||
+                  child.id === 'wht-pasal-21' ||
                   child.id === 'invoice-type' ||
                   child.id === 'list-user' ||
                   child.id === 'master-profile' ||

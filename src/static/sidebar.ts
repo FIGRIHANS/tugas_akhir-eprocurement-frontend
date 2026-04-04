@@ -259,9 +259,14 @@ const sidebarMenuData: ISidebarMenu[] = [
         to: 'vatReconciliation',
       },
       {
-        id: 'wht-reconciliation',
-        title: 'WHT Reconciliation',
-        to: 'whtReconciliation',
+        id: 'wht-unifikasi',
+        title: 'WHT - Unifikasi (BPU)',
+        to: 'whtUnifikasi',
+      },
+      {
+        id: 'wht-pasal-21',
+        title: 'WHT - Pasal 21',
+        to: 'whtPasal21',
       },
     ],
   },

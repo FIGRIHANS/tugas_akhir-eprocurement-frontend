@@ -30,13 +30,15 @@
             <p class="text-center text-sm text-gray-700">{{ text }}</p>
           </div>
 
+          <slot />
+
           <div class="flex flex-row items-center gap-4 w-full">
             <UiButton
               v-if="!noCancel"
               :variant="type === 'danger' ? 'danger' : 'primary'"
               outline
               class="w-full justify-center"
-              @click="cancel"
+              @click="$emit('cancel')"
             >
               <UiIcon v-if="cancelButtonIcon" :name="cancelButtonIcon" variant="duotone" />
               {{ cancelButtonText }}
@@ -46,7 +48,7 @@
               :variant="type === 'danger' ? 'danger' : 'primary'"
               class="w-full justify-center"
               :disabled="loading"
-              @click="submit"
+              @click="$emit('submit')"
             >
               <UiIcon v-if="loading" name="loading" variant="filled" class="animate-spin" />
               <UiIcon
@@ -80,9 +82,11 @@ const props = withDefaults(defineProps<ModalConfirmationType>(), {
   submitButtonText: 'Submit',
 })
 
+const emit = defineEmits(['submit', 'cancel'])
+
 const clickBackground = () => {
   if (!props.static) {
-    props.cancel?.()
+    emit('cancel')
   }
 }
 </script>

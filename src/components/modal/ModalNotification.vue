@@ -39,7 +39,7 @@
             <UiButton
               :variant="type === 'error' ? 'danger' : 'primary'"
               class="w-full justify-center"
-              @click="close"
+              @click="$emit('on-close')"
             >
               {{ buttonText }}
             </UiButton>
@@ -65,15 +65,11 @@ const props = withDefaults(defineProps<ModalNotificationType>(), {
   buttonText: 'OK',
 })
 
+const emit = defineEmits(['on-close'])
+
 const clickBackground = () => {
   if (!props.static) {
-    close()
-  }
-}
-
-const close = () => {
-  if (props.onClose) {
-    props.onClose()
+    emit('on-close')
   }
 }
 </script>
