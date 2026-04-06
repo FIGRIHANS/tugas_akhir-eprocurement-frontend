@@ -126,17 +126,6 @@
                       </th>
                     </tr>
                   </thead>
-                  <tbody>
-                    <template v-for="(sub, index) in parent.pOs" :key="index">
-                      <tr>
-                        <td>{{ sub.poNo || '-' }}</td>
-                        <td>{{ sub.grDocumentNo || '-' }}</td>
-                        <td>{{ sub.itemText || '-' }}</td>
-                        <td>{{ useFormatIdr(sub.itemAmount) || '-' }}</td>
-                        <td>{{ sub.quantity || '-' }}</td>
-                      </tr>
-                    </template>
-                  </tbody>
                 </table>
               </td>
             </tr>
