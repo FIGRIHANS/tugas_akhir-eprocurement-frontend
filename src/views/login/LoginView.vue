@@ -72,7 +72,7 @@ import { useI18n } from 'vue-i18n'
 import { useLoginStore } from '@/stores/views/login'
 import loginView from '@/assets/svg/LoginImage.vue'
 // import logoLogin from '@/assets/svg/LogoLogin.vue'
-import LogoEPOQ from '@/assets/svg/EpoqLogo.vue'
+import LogoEPOQ from '@/assets/svg/EvoxLogo.vue'
 import IconEN from '@/components/icons/IconEN.vue'
 import { useRouter } from 'vue-router'
 

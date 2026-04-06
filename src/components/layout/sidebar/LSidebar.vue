@@ -1,11 +1,10 @@
 <template>
   <aside class="w-[280px] bg-white border border-gray-200 border-t-0 h-full -mt-[80px] fixed scrollable-y-auto">
     <div class="h-[80px] flex items-center mb-5 px-[25px]">
-      <RouterLink to="/dashboard">
-        <!-- <LogoAN class="w-[83px]" /> -->
-        <LogoEPOQ class="w-[120px]" />
+      <RouterLink to="/" class="mt-2.5">
+        <LogoEPOQ class="h-[35px] w-auto" />
       </RouterLink>
-      <div class="ml-2">
+    <div class="ml-2">
         <img src="@/assets/TMS.png" class="h-[35px] w-max" alt="" />
       </div>
     </div>
@@ -40,7 +39,7 @@ import sidebarMenu from '@/static/sidebar'
 import { useRouter } from 'vue-router'
 
 // import LogoAN from '@/assets/svg/LogoAN.vue'
-import LogoEPOQ from '@/assets/svg/EpoqLogo.vue'
+import LogoEPOQ from '@/assets/svg/EvoxLogo.vue'
 import { computed } from 'vue'
 import { useLoginStore } from '@/stores/views/login'
 import { isEmpty } from 'lodash'
