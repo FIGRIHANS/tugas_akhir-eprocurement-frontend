@@ -324,7 +324,14 @@ const handleUploadSubmit = async () => {
 
 const handleVerify = async (item: Pph21Content) => {
   try {
-    await Pph21Service.verify({ id: item.pxId })
+    await Pph21Service.verify({ 
+      id: item.pxId,
+      npwpPemotong: npwpPemotong.value,
+      tahunPajak: item.tahunPajak || moment().format('YYYY'),
+      noBupot: item.nomorBuktiPotong || '',
+      idBupot: item.idBupot || '',
+      fgJnsBupot: 'PASAL21'
+    })
     fetchPphList()
     
     notifTitle.value = 'DJP Sync Success'
@@ -348,7 +355,7 @@ const handleDelete = async () => {
   if (!selectedItem.value) return
   submitting.value = true
   try {
-    await Pph21Service.deleteDraft(npwpPemotong.value, { id: selectedItem.value.pxId })
+    await Pph21Service.deleteDraft({ id: selectedItem.value.pxId })
     showDeleteModal.value = false
     fetchPphList()
     
@@ -374,7 +381,7 @@ const handleBatal = async () => {
   if (!selectedItem.value) return
   submitting.value = true
   try {
-    await Pph21Service.batalkan(npwpPemotong.value, { 
+    await Pph21Service.batalkan({ 
       id: selectedItem.value.pxId, 
       tglPembatalan: moment().format('DDMMYYYY'),
       npwpNikPenandatangan: nikSigner

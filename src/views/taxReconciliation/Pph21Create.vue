@@ -172,17 +172,17 @@ const initialForm: Pph21CreatePayload = {
   invoiceId: 0,
   npwpPemotong: npwpPemotong,
   fgNpwpNik: true,
-  npwp: '',
-  nama: '',
+  npwp: '3602172704980004',
+  nama: 'Dave Navarro',
   fgJnsBupot: 'PASAL21',
   tglPemotongan: moment().format('YYYY-MM-DD'),
   dataDetilPph21: {
     kodeObjekPajak: '21-100-01',
     pasalPPh: 'Pasal 21',
-    dpp: 0,
+    dpp: 10000000,
     tarif: 5,
-    pphDipotong: 0,
-    dokReferensi: [{ dokReferensi: 'COMMERCIALINVOICE', nomorDokumen: 'DUMMY-RECON-21', tanggal_Dokumen: moment().format('DDMMYYYY') }]
+    pphDipotong: 500000,
+    dokReferensi: [{ dokReferensi: 'COMMERCIALINVOICE', nomorDokumen: 'INV-PENGUJIAN-21', tanggal_Dokumen: moment().format('DDMMYYYY') }]
   }
 }
 const form = ref<Pph21CreatePayload>(JSON.parse(JSON.stringify(initialForm)))

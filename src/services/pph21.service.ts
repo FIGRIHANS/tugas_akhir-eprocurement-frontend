@@ -78,17 +78,24 @@ const Pph21Service = {
     return res.data
   },
 
-  deleteDraft: async (npwpPemotong: string, payload: { id: string }) => {
-    const res = await invoiceApi.post(`/tax/pph21/delete?npwpPemotong=${npwpPemotong}`, payload)
+  deleteDraft: async (payload: { id: string }) => {
+    const res = await invoiceApi.post(`/tax/pph21/delete`, payload)
     return res.data
   },
 
-  batalkan: async (npwpPemotong: string, payload: { id: string; tglPembatalan: string; npwpNikPenandatangan: string }) => {
-    const res = await invoiceApi.post(`/tax/pph21/batal?npwpPemotong=${npwpPemotong}`, payload)
+  batalkan: async (payload: { id: string; tglPembatalan: string; npwpNikPenandatangan: string }) => {
+    const res = await invoiceApi.post(`/tax/pph21/batal`, payload)
     return res.data
   },
 
-  verify: async (payload: { id: string }): Promise<unknown> => {
+  verify: async (payload: {
+    id: string
+    npwpPemotong: string
+    tahunPajak: string
+    noBupot?: string
+    idBupot?: string
+    fgJnsBupot: string
+  }): Promise<unknown> => {
     const res = await invoiceApi.post('/tax/pph21/verify', payload)
     return res.data
   },

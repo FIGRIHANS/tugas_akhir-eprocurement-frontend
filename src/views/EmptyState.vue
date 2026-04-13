@@ -21,7 +21,7 @@
           <li>Ensure you have the necessary permissions to access the resource.</li>
           <li>Possible issues with network connectivity or API endpoints.</li>
         </ul>
-      </div> 
+      </div>
 
       <div class="bg-blue-50 p-4 rounded-lg shadow-md">
         <h2 class="font-semibold mb-2">Debugging Tips</h2>
