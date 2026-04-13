@@ -132,24 +132,38 @@ const BpuService = {
     return response.data
   },
 
-  async deleteDraft(npwpPemotong: string, payload: { id: string }): Promise<ResponseData<unknown>> {
+  async deleteDraft(payload: { id: string }): Promise<ResponseData<unknown>> {
     const response = await invoiceApi.post<ResponseData<unknown>>(
-      `/tax/bpu/delete?npwpPemotong=${npwpPemotong}`,
+      '/tax/bpu/delete',
       payload
     )
     return response.data
   },
 
-  async batalkan(npwpPemotong: string, payload: { id: string; tglPembatalan: string; npwpNikPenandatangan: string }): Promise<ResponseData<unknown>> {
+  async batalkan(payload: {
+    id: string
+    tglPembatalan: string
+    npwpNikPenandatangan: string
+  }): Promise<ResponseData<unknown>> {
     const response = await invoiceApi.post<ResponseData<unknown>>(
-      `/tax/bpu/batal?npwpPemotong=${npwpPemotong}`,
+      '/tax/bpu/batal',
       payload
     )
     return response.data
   },
 
-  async verify(payload: { id: string }): Promise<ResponseData<unknown>> {
-    const response = await invoiceApi.post<ResponseData<unknown>>('/tax/bpu/verify', payload)
+  async verify(payload: {
+    id: string
+    npwpPemotong: string
+    tahunPajak: string
+    noBupot?: string
+    idBupot?: string
+    fgJnsBupot: string
+  }): Promise<ResponseData<unknown>> {
+    const response = await invoiceApi.post<ResponseData<unknown>>(
+      '/tax/bpu/verify',
+      payload
+    )
     return response.data
   },
 

@@ -27,14 +27,32 @@
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
                 <label class="form-label w-full lg:max-w-xs">Tax ID / Number</label>
                 <div class="flex-1">
-                  <input v-model="form.npwp" class="input" :placeholder="form.fgNpwpNik === 'true' ? 'Enter NPWP' : 'Enter NIK'" required>
+                  <input 
+                    v-model="form.npwp" 
+                    :class="['input', { 'border-danger !placeholder-red-400': wasValidated && !form.npwp }]" 
+                    :placeholder="form.fgNpwpNik === 'true' ? 'Enter NPWP' : 'Enter NIK'" 
+                    required
+                  >
+                  <p v-if="wasValidated && !form.npwp" class="text-danger text-[11px] mt-1.5 font-medium ml-1 flex items-center gap-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                    <i class="ki-filled ki-information-2 text-[13px]"></i>
+                    {{ form.fgNpwpNik === 'true' ? 'NPWP' : 'NIK' }} is required
+                  </p>
                 </div>
               </div>
 
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
                 <label class="form-label w-full lg:max-w-xs">Counterpart Name</label>
                 <div class="flex-1">
-                  <input v-model="form.nama" class="input" placeholder="Enter recipient name" required>
+                  <input 
+                    v-model="form.nama" 
+                    :class="['input', { 'border-danger !placeholder-red-400': wasValidated && !form.nama }]" 
+                    placeholder="Enter recipient name" 
+                    required
+                  >
+                  <p v-if="wasValidated && !form.nama" class="text-danger text-[11px] mt-1.5 font-medium ml-1 flex items-center gap-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                    <i class="ki-filled ki-information-2 text-[13px]"></i>
+                    Counterpart name is required
+                  </p>
                 </div>
               </div>
             </div>
@@ -47,10 +65,18 @@
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
                 <label class="form-label w-full lg:max-w-xs">Tax Object Code</label>
                 <div class="flex-1">
-                  <select v-model="form.dataDetilBpu.kodeObjekPajak" class="select" required>
+                  <select 
+                    v-model="form.dataDetilBpu.kodeObjekPajak" 
+                    :class="['select', { 'border-danger': wasValidated && !form.dataDetilBpu.kodeObjekPajak }]" 
+                    required
+                  >
                     <option value="28-402-01">28-402-01 (Pasal 4 Ayat 2)</option>
                     <option value="24-104-01">24-104-01 (Pasal 23)</option>
                   </select>
+                  <p v-if="wasValidated && !form.dataDetilBpu.kodeObjekPajak" class="text-danger text-[11px] mt-1.5 font-medium ml-1 flex items-center gap-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                    <i class="ki-filled ki-information-2 text-[13px]"></i>
+                    Tax object code is required
+                  </p>
                 </div>
               </div>
 
@@ -59,6 +85,7 @@
                   v-model="form.tglPemotongan" 
                   label="Withholding Date" 
                   placeholder="Select Date"
+                  :error="wasValidated && !form.tglPemotongan"
                   required
                 />
               </div>
@@ -66,7 +93,13 @@
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
                 <label class="form-label w-full lg:max-w-xs">Tax Rate (%)</label>
                 <div class="flex-1 relative">
-                  <input type="number" step="0.1" v-model="form.dataDetilBpu.tarif" @input="calculatePPh" class="input text-right pr-8" required>
+                  <input 
+                    type="number" step="0.1" 
+                    v-model="form.dataDetilBpu.tarif" 
+                    @input="calculatePPh" 
+                    :class="['input pr-8', { 'border-danger': wasValidated && !form.dataDetilBpu.tarif }]" 
+                    required
+                  >
                   <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
                 </div>
               </div>
@@ -75,7 +108,18 @@
                 <label class="form-label w-full lg:max-w-xs">Tax Base (DPP)</label>
                 <div class="flex-1 relative">
                   <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">Rp</span>
-                  <input type="number" v-model="form.dataDetilBpu.dpp" @input="calculatePPh" class="input pl-10 text-right" required>
+                  <input 
+                    type="text" 
+                    v-model="formattedDpp" 
+                    @input="calculatePPh" 
+                    :class="['input pl-10 font-semibold', { 'border-danger': wasValidated && (!form.dataDetilBpu.dpp || form.dataDetilBpu.dpp <= 0) }]" 
+                    placeholder="0"
+                    required
+                  >
+                  <p v-if="wasValidated && (!form.dataDetilBpu.dpp || form.dataDetilBpu.dpp <= 0)" class="text-danger text-[11px] mt-1.5 font-medium ml-1 flex items-center gap-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                    <i class="ki-filled ki-information-2 text-[13px]"></i>
+                    Tax base amount is required
+                  </p>
                 </div>
               </div>
             </div>
@@ -176,7 +220,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import ModalNotification from '@/components/modal/ModalNotification.vue'
@@ -196,6 +240,7 @@ const npwpPemotong = '1091031210969728'
 
 // State
 const submitting = ref(false)
+const wasValidated = ref(false)
 const showNotif = ref(false)
 const notifTitle = ref('')
 const notifText = ref('')
@@ -210,21 +255,21 @@ const initialForm: BpuCreatePayload = {
   masaPajak: '',
   tahunPajak: '',
   fgNpwpNik: 'true',
-  npwp: '',
+  npwp: '3602172704980004',
   nik: '',
-  nama: '',
+  nama: 'Dave Navarro',
   fgJnsBupot: 'BPU',
   tglPemotongan: moment().format('YYYY-MM-DD'),
-  glAccount: '',
+  glAccount: '511010100',
   dataDetilBpu: {
     sertifikatInsentifDipotong: '9',
     nomorSertifikatInsentif: '',
     kodeObjekPajak: '28-402-01',
     pasalPPh: 'Pasal 4 Ayat 2',
     statusPPh: 'Final',
-    dpp: 0,
+    dpp: 10000000,
     tarif: 2.5,
-    pphDipotong: 0,
+    pphDipotong: 250000,
     kap: '411128',
     kjs: '100',
     dokReferensi: [
@@ -239,6 +284,18 @@ const initialForm: BpuCreatePayload = {
   },
 }
 const form = ref<BpuCreatePayload>(JSON.parse(JSON.stringify(initialForm)))
+
+// Computed for IDR Formatting in Input
+const formattedDpp = computed({
+  get() {
+    if (!form.value.dataDetilBpu.dpp) return ''
+    return new Intl.NumberFormat('id-ID').format(Number(form.value.dataDetilBpu.dpp))
+  },
+  set(newValue) {
+    const numericValue = newValue.replace(/[^0-9]/g, '')
+    form.value.dataDetilBpu.dpp = numericValue ? Number(numericValue) : 0
+  }
+})
 
 // Methods
 const calculatePPh = () => {
@@ -257,6 +314,13 @@ const formatCurrency = (val: number | string) => {
 }
 
 const submitCreateBpu = async () => {
+  wasValidated.value = true
+  
+  // Basic Validation
+  if (!form.value.npwp || !form.value.nama || !form.value.dataDetilBpu.kodeObjekPajak || !form.value.tglPemotongan) {
+    return
+  }
+
   submitting.value = true
   try {
     const payload = JSON.parse(JSON.stringify(form.value))
@@ -276,10 +340,12 @@ const submitCreateBpu = async () => {
       payload.dataDetilBpu.dokReferensi[0].tanggal_Dokumen = payload.tglPemotongan
     }
 
-    // Clear conflicting identifier
+    // Map identifier to correct field
     if (form.value.fgNpwpNik === 'true') {
+      payload.npwp = form.value.npwp
       payload.nik = ''
     } else {
+      payload.nik = form.value.npwp
       payload.npwp = ''
     }
 
@@ -329,5 +395,15 @@ const goBack = () => {
 <style scoped>
 .text-danger {
   color: #f1416c;
+}
+
+.input::placeholder,
+.select::placeholder {
+  transition: color 0.2s ease;
+}
+
+.border-danger::placeholder {
+  color: #f1416c !important;
+  opacity: 1;
 }
 </style>

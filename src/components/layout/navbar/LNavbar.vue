@@ -25,6 +25,7 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import type { INavbarProps } from './types/navbar'
 import { useNavbarUtilsStore } from '@/stores/navbar'
+import { useSidebarStore } from '@/stores/sidebar'
 
 /**Layout components */
 import LNavbarMenu from './LNavbar/LNavbarMenu.vue'
@@ -43,6 +44,7 @@ const route = useRoute()
 
 /**SECTION - Navbar utils */
 const navbarUtils = useNavbarUtilsStore()
+const sidebarStore = useSidebarStore()
 const isFull = computed(() => navbarUtils.isFull || props.full)
 /**!SECTION */
 </script>
