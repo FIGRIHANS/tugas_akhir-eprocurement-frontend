@@ -9,44 +9,24 @@
         <div class="flex align-items-center gap-3">
           <UiInputSearch v-model="search" placeholder="Search" @keypress="goSearch" />
           <FilterList :data="filterForm" @setData="setDataFilter" ref="filterChild" />
-          <button class="btn btn-primary ml-auto" @click="goAdd()">
-            <i class="ki-duotone ki-plus-circle"></i>
-            Add Invoice
-          </button>
+          <input
+            ref="fileInput"
+            type="file"
+            multiple
+            accept=".xlsx,.xls,.pdf,.csv"
+            class="hidden"
+            @change="handleFileUpload"
+          />
           <button
             class="btn btn-primary ml-auto d-flex align-items-center gap-2"
-            @click="syncFtpInvoice"
-            :disabled="isSyncLoading"
+            @click="openFileExplorer"
           >
-            <!-- SVG Spinner -->
-            <svg
-              v-if="isSyncLoading"
-              class="animate-spin h-6 w-6 text-white-600"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                class="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                stroke-width="4"
-              ></circle>
-              <path
-                class="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-              ></path>
-            </svg>
-
-            <!-- Icon normal -->
-            <i v-else class="ki-duotone ki-arrows-circle"></i>
+            <!-- Icon -->
+            <i class="ki-duotone ki-exit-up"></i>
 
             <!-- Text -->
             <span>
-              {{ isSyncLoading ? 'Syncing...' : 'Sync Invoice Ftp' }}
+              Upload Invoice FTP
             </span>
           </button>
         </div>
@@ -241,7 +221,7 @@ const sortColumnName = ref<string>('')
 const filteredPayload = ref([])
 const filterChild = ref(null)
 const viewDetailId = ref('')
-const isSyncLoading = ref(false)
+const fileInput = ref<HTMLInputElement | null>(null)
 
 const openDetailVerification = (invoiceId: string) => {
   viewDetailId.value = invoiceId
@@ -423,16 +403,6 @@ const goSearch = (event: KeyboardEvent) => {
   }
 }
 
-const goAdd = () => {
-  router.push({
-    name: 'invoiceAdd',
-    query: {
-      type: 'po',
-      from: 'ftp',
-    },
-  })
-}
-
 const sortColumn = (columnName: string | null) => {
   const list = {
     'Submitted Document No': 'invoiceNo',
@@ -524,11 +494,56 @@ const resetFilter = () => {
   callList()
 }
 
-const syncFtpInvoice = async () => {
-  isSyncLoading.value = true
-  await invoiceApi.syncInvoicFromFtp()
-  callList()
-  isSyncLoading.value = false
+/**
+ * NOTES FOR BACKEND IMPLEMENTATION:
+ *
+ * The uploadInvoiceFromFtp() API method should:
+ * 1. Accept FormData with multiple file uploads (.xlsx, .xls, .pdf, .csv)
+ * 2. Parse the files and extract invoice data
+ * 3. Create new invoice records with:
+ *    - statusCode: 0 (Draft status)
+ *    - invoiceSource: 3 (FTP source)
+ *    - Other required fields from file data
+ * 4. Return the newly created invoice records
+ * 5. The invoices should be visible immediately in the list with Draft status
+ */
+
+const openFileExplorer = () => {
+  fileInput.value?.click()
+}
+
+const handleFileUpload = async (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const files = target.files
+
+  if (files && files.length > 0) {
+    try {
+      // Create FormData to send file to backend
+      const formData = new FormData()
+
+      // Add all selected files to FormData
+      for (let i = 0; i < files.length; i++) {
+        formData.append('files', files[i])
+      }
+
+      // Call API to upload invoice files from FTP
+      // The API should process the files and create new invoice records with Draft status
+      await invoiceApi.uploadInvoiceFromFtp(formData)
+
+      // Show success message
+      console.log('Files uploaded successfully')
+
+      // Reload the list to show newly added invoices with Draft status
+      currentPage.value = 1 // Reset to first page to see new data
+      callList()
+
+      // Reset file input
+      target.value = ''
+    } catch (error) {
+      console.error('Error uploading files:', error)
+      // You can add error notification here if you have a toast/notification service
+    }
+  }
 }
 
 onMounted(() => {
