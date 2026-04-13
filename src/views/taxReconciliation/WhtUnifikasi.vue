@@ -371,7 +371,14 @@ const handleUploadSubmit = async () => {
 
 const handleVerify = async (item: BpuContent) => {
   try {
-    await BpuService.verify({ id: item.pxId })
+    await BpuService.verify({ 
+      id: item.pxId,
+      npwpPemotong: npwpPemotong.value,
+      tahunPajak: item.tahunPajak || moment().format('YYYY'),
+      noBupot: item.nomorBuktiPotong || '',
+      idBupot: item.idBupot || '',
+      fgJnsBupot: 'BPU'
+    })
     fetchBpuList()
     
     notifTitle.value = 'DJP Sync Success'
@@ -396,7 +403,7 @@ const handleDelete = async () => {
   if (!selectedItem.value) return
   submitting.value = true
   try {
-    await BpuService.deleteDraft(npwpPemotong.value, { id: selectedItem.value.pxId })
+    await BpuService.deleteDraft({ id: selectedItem.value.pxId })
     showDeleteModal.value = false
     fetchBpuList()
     
@@ -423,7 +430,7 @@ const handleBatal = async () => {
   if (!selectedItem.value) return
   submitting.value = true
   try {
-    await BpuService.batalkan(npwpPemotong.value, {
+    await BpuService.batalkan({
       id: selectedItem.value.pxId,
       tglPembatalan: moment().format('DDMMYYYY'),
       npwpNikPenandatangan: nikSigner,

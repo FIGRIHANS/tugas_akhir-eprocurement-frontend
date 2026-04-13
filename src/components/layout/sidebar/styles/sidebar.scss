@@ -1,5 +1,65 @@
 .menu-default .menu-link {
-  @apply py-[12px] mb-2.5;
+  @apply py-[12px] mb-2.5 rounded-lg transition-all duration-150;
+
+  &:hover {
+    background-color: #f0fdfa !important;
+
+    .menu-title {
+      color: #14B8A6 !important;
+    }
+
+    .menu-icon i {
+      color: #14B8A6 !important;
+    }
+  }
+
+  &.menu-link--active {
+    background-color: #f0fdfa !important;
+
+    .menu-title {
+      color: #14B8A6 !important;
+      font-weight: 600;
+    }
+
+    .menu-icon i {
+      color: #14B8A6 !important;
+    }
+  }
+}
+
+/* Sub-menu items */
+.menu-accordion .menu-item .menu-link {
+  @apply transition-all duration-150 rounded-lg;
+
+  &:hover {
+    background-color: #f0fdfa !important;
+
+    .menu-title {
+      color: #14B8A6 !important;
+    }
+  }
+
+  &.menu-link--active {
+    background-color: #f0fdfa !important;
+
+    .menu-title {
+      color: #14B8A6 !important;
+      font-weight: 600;
+      position: relative;
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: -12px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 3px;
+        height: 16px;
+        background-color: #14B8A6;
+        border-radius: 2px;
+      }
+    }
+  }
 }
 
 .menu-icon i {
