@@ -8,9 +8,20 @@
       <div class="flex justify-between items-center mb-[24px]">
         <div class="flex flex-col gap-1">
           <h1 class="text-2xl font-bold text-gray-800">WHT - Pasal 21</h1>
-          <p class="text-xs text-gray-500 font-medium italic">Manage PPh 21 drafts and DJP synchronization.</p>
+          <p class="text-xs text-gray-500 font-medium italic">Manage PPh 21 Non-Employee (Final & Non-Final) drafts and DJP synchronization.</p>
         </div>
-        <div class="flex gap-3 text-gray-800">
+        <div class="flex gap-3">
+          <!-- Feature Toggle -->
+          <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden text-sm">
+            <button
+              :class="['px-3 py-2 font-medium transition-colors', feature === 'tdkfinal' ? 'bg-primary text-white' : 'bg-white text-gray-500 hover:bg-gray-50']"
+              @click="setFeature('tdkfinal')"
+            >Non-Final</button>
+            <button
+              :class="['px-3 py-2 font-medium transition-colors', feature === 'final' ? 'bg-primary text-white' : 'bg-white text-gray-500 hover:bg-gray-50']"
+              @click="setFeature('final')"
+            >Final</button>
+          </div>
           <UiInputSearch v-model="search" placeholder="Search Counterpart/Bupot" @search="onSearch" />
           <button class="btn btn-primary" @click="router.push('/wht-pasal-21/create')">
             <i class="ki-filled ki-plus-circle !text-lg"></i>
@@ -29,8 +40,8 @@
               <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[200px]">Counterpart Name</th>
               <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px]">NPWP/NIK</th>
               <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px]">Tax Object Code</th>
-              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px] text-right">Tax Base (DPP)</th>
-              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px] text-right">PPh Amount</th>
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px] text-right">Gross Income</th>
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px] text-right">PPh Withheld</th>
               <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px]">Status</th>
               <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[180px]">No. Bupot</th>
             </tr>
@@ -50,29 +61,49 @@
                 <div class="flex gap-1 justify-center">
                   <!-- DRAFT Actions -->
                   <template v-if="(item.status || item.fgStatus)?.toUpperCase() === 'DRAFT'">
-                    <button class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px] tooltip tooltip-right" data-tip="Upload to DJP" @click="handleUpload(item)">
+                    <button
+                      class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px] tooltip tooltip-right"
+                      data-tip="Upload to DJP"
+                      @click="handleUpload(item)"
+                    >
                       <i class="ki-filled ki-cloud-change !text-lg"></i>
                     </button>
-                    <button class="btn btn-outline btn-icon btn-danger w-[32px] h-[32px] tooltip tooltip-right" data-tip="Delete Draft" @click="confirmDelete(item)">
+                    <button
+                      class="btn btn-outline btn-icon btn-danger w-[32px] h-[32px] tooltip tooltip-right"
+                      data-tip="Delete Draft"
+                      @click="confirmDelete(item)"
+                    >
                       <i class="ki-filled ki-trash !text-lg"></i>
                     </button>
                   </template>
 
                   <!-- IN PROGRESS Actions -->
                   <template v-if="isInProgress(item.status || item.fgStatus)">
-                    <button class="btn btn-outline btn-icon btn-warning w-[32px] h-[32px] tooltip tooltip-right" data-tip="Verify Status" @click="handleVerify(item)">
+                    <button
+                      class="btn btn-outline btn-icon btn-warning w-[32px] h-[32px] tooltip tooltip-right"
+                      data-tip="Verify Status"
+                      @click="handleVerify(item)"
+                    >
                       <i class="ki-filled ki-arrow-circle-right !text-lg"></i>
                     </button>
                   </template>
 
                   <!-- DONE Actions -->
                   <template v-if="(item.status || item.fgStatus)?.toUpperCase() === 'NORMAL-DONE'">
-                    <button class="btn btn-outline btn-icon btn-danger w-[32px] h-[32px] tooltip tooltip-right" data-tip="Cancel Bupot" @click="confirmBatal(item)">
+                    <button
+                      class="btn btn-outline btn-icon btn-danger w-[32px] h-[32px] tooltip tooltip-right"
+                      data-tip="Cancel Bupot"
+                      @click="confirmBatal(item)"
+                    >
                       <i class="ki-filled ki-cross-circle !text-lg"></i>
                     </button>
                   </template>
 
-                  <button class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px] tooltip tooltip-right" data-tip="View Details" @click="viewDetail(item)">
+                  <button
+                    class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px] tooltip tooltip-right"
+                    data-tip="View Details"
+                    @click="viewDetail(item)"
+                  >
                     <i class="ki-filled ki-eye !text-lg"></i>
                   </button>
                 </div>
@@ -81,22 +112,26 @@
               <td>{{ item.namaPenerima || item.nama || '-' }}</td>
               <td>{{ item.npwpPenerima || item.npwp || '-' }}</td>
               <td>{{ item.kodeObjekPajak || '-' }}</td>
-              <td class="text-right">{{ formatCurrency(item.dpp || 0) }}</td>
+              <td class="text-right">{{ formatCurrency(Number(item.penghasilanKotor) || 0) }}</td>
               <td class="text-right text-danger">
-                {{ formatCurrency(item.pphDipotong || 0) }}
-                <div v-if="item.tarif && item.tarif > 0" class="text-[10px] text-gray-500 italic">Rate: {{ item.tarif }}%</div>
+                {{ formatCurrency(Number(item.pphDipotong) || 0) }}
+                <div v-if="item.tarif && Number(item.tarif) > 0" class="text-[10px] text-gray-500 italic">
+                  Rate: {{ item.tarif }}%
+                </div>
               </td>
               <td>
                 <div class="flex flex-col gap-1 items-start">
                   <span :class="getStatusBadge(item.status || item.fgStatus)">
-                    {{ item.status || item.fgStatus || 'NO STATUS' }}
+                    {{ item.status || item.fgStatus || 'UNKNOWN' }}
                   </span>
-                  <span v-if="item.errorMsg" class="text-[10px] text-danger italic max-w-[150px] truncate" :title="item.errorMsg">
-                    {{ item.errorMsg }}
-                  </span>
+                  <span
+                    v-if="item.errorMessage || item.errorMsg"
+                    class="text-[10px] text-danger italic max-w-[150px] truncate"
+                    :title="item.errorMessage || item.errorMsg || ''"
+                  >{{ item.errorMessage || item.errorMsg }}</span>
                 </div>
               </td>
-              <td class="font-bold text-primary">{{ item.nomorBuktiPotong || item.noBupot || '-' }}</td>
+              <td class="font-bold text-primary">{{ item.nomorBupot || item.nomorBuktiPotong || item.noBupot || '-' }}</td>
             </tr>
           </tbody>
         </table>
@@ -115,6 +150,7 @@
       </div>
     </div>
 
+    <!-- Delete Modal -->
     <ModalConfirmation
       :open="showDeleteModal"
       id="delete-pph-modal"
@@ -126,6 +162,7 @@
       :loading="submitting"
     />
 
+    <!-- Cancel Modal -->
     <ModalConfirmation
       :open="showBatalModal"
       id="cancel-pph-modal"
@@ -137,6 +174,7 @@
       :loading="submitting"
     />
 
+    <!-- Upload Modal -->
     <ModalConfirmation
       :open="showUploadConfirmModal"
       id="upload-pph-modal"
@@ -149,9 +187,7 @@
     >
       <div class="w-full flex flex-col gap-4 mt-2">
         <div class="flex flex-col gap-2">
-          <label class="form-label text-xs uppercase text-gray-500 font-bold"
-            >Passphrase (PX-Internal)</label
-          >
+          <label class="form-label text-xs uppercase text-gray-500 font-bold">Passphrase (PX-Internal)</label>
           <div class="relative">
             <input
               v-model="passphrase"
@@ -164,13 +200,7 @@
               class="btn btn-icon btn-sm absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8"
               @click="showPassphrase = !showPassphrase"
             >
-              <i
-                :class="[
-                  'ki-filled',
-                  showPassphrase ? 'ki-eye-slash' : 'ki-eye',
-                  'text-gray-500',
-                ]"
-              ></i>
+              <i :class="['ki-filled', showPassphrase ? 'ki-eye-slash' : 'ki-eye', 'text-gray-500']"></i>
             </button>
           </div>
         </div>
@@ -180,19 +210,17 @@
     <!-- Notifications -->
     <ModalNotification
       :open="showNotificationModal"
-      :id="'pph-notif-modal'"
+      id="pph-notif-modal"
       :title="notifTitle"
       :text="notifText"
       :type="notifType"
       @on-close="showNotificationModal = false"
     />
-
-    <!-- Detail View removed in favor of full-page navigation -->
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
@@ -210,8 +238,8 @@ const routes = ref<routeTypes[]>([
   { name: 'WHT - Pasal 21', to: '/wht-pasal-21' },
 ])
 
-const npwpPemotong = computed(() => '1091031210969728') // Static for now as per docs
-const nikSigner = '3172022407830008' // From appsettings/docs
+const npwpPemotong = '1091031210912281'
+const nikSigner = '3172022407830008'
 
 // State
 const pphList = ref<Pph21Content[]>([])
@@ -221,6 +249,7 @@ const submitting = ref(false)
 const search = ref('')
 const page = ref(1)
 const limit = ref(10)
+const feature = ref<'tdkfinal' | 'final'>('tdkfinal')
 const selectedItem = ref<Pph21Content | null>(null)
 const passphrase = ref('Pajak123@@')
 const showPassphrase = ref(false)
@@ -236,15 +265,27 @@ const notifTitle = ref('')
 const notifText = ref('')
 const notifType = ref<'success' | 'error' | 'warning' | 'info'>('success')
 
+// Auto-close success modal after 2.5s
+const showSuccessNotif = (title: string, text: string) => {
+  notifTitle.value = title
+  notifText.value = text
+  notifType.value = 'success'
+  showNotificationModal.value = true
+  setTimeout(() => {
+    showNotificationModal.value = false
+  }, 2500)
+}
+
 // Methods
 const fetchPphList = async () => {
   loading.value = true
   try {
-    const res = await Pph21Service.getList({ 
-      npwpPemotong: npwpPemotong.value, 
-      page: page.value, 
+    const res = await Pph21Service.getList({
+      npwpPemotong,
+      page: page.value,
       limit: limit.value,
-      search: search.value 
+      search: search.value,
+      feature: feature.value,
     })
     pphList.value = res.result.content.items || []
     totalPph.value = res.result.content.total || 0
@@ -253,6 +294,12 @@ const fetchPphList = async () => {
   } finally {
     loading.value = false
   }
+}
+
+const setFeature = (val: 'tdkfinal' | 'final') => {
+  feature.value = val
+  page.value = 1
+  fetchPphList()
 }
 
 const onSearch = () => {
@@ -273,7 +320,7 @@ const formatCurrency = (val: number) => {
   }).format(val)
 }
 
-const getStatusBadge = (status: string) => {
+const getStatusBadge = (status: string | null | undefined) => {
   if (!status) return 'badge badge-light px-2 font-semibold'
   const s = status.toUpperCase()
   if (s === 'DRAFT') return 'badge badge-light-primary px-2 font-semibold'
@@ -283,7 +330,7 @@ const getStatusBadge = (status: string) => {
   return 'badge badge-light px-2'
 }
 
-const isInProgress = (status: string) => {
+const isInProgress = (status: string | null | undefined) => {
   if (!status) return false
   const s = status.toUpperCase()
   return s === 'SUBMITTED' || s.includes('SIGNING_IN_PROGRESS') || s.includes('SUBMITTED-')
@@ -292,7 +339,7 @@ const isInProgress = (status: string) => {
 // Actions
 const handleUpload = (item: Pph21Content) => {
   selectedItem.value = item
-  passphrase.value = ''
+  passphrase.value = 'Pajak123@@'
   showUploadConfirmModal.value = true
 }
 
@@ -300,21 +347,18 @@ const handleUploadSubmit = async () => {
   if (!selectedItem.value) return
   submitting.value = true
   try {
-    await Pph21Service.upload({ 
-      id: selectedItem.value.pxId, 
+    await Pph21Service.upload({
+      id: selectedItem.value.pxId,
       npwpNikPenandatangan: nikSigner,
-      passphrase: passphrase.value 
+      passphrase: passphrase.value,
     })
     showUploadConfirmModal.value = false
     fetchPphList()
-    
-    notifTitle.value = 'Upload Success'
-    notifText.value = 'PPh21 has been uploaded and is being processed by DJP.'
-    notifType.value = 'success'
-    showNotificationModal.value = true
+    showSuccessNotif('Upload Success', 'PPh21 has been uploaded and is being processed by DJP.')
   } catch (err) {
     console.error(err)
     notifTitle.value = 'Upload Failed'
+    notifText.value = 'Failed to submit the PPh21 to DJP. Please check the error message.'
     notifType.value = 'error'
     showNotificationModal.value = true
   } finally {
@@ -324,23 +368,17 @@ const handleUploadSubmit = async () => {
 
 const handleVerify = async (item: Pph21Content) => {
   try {
-    await Pph21Service.verify({ 
+    await Pph21Service.verify({
       id: item.pxId,
-      npwpPemotong: npwpPemotong.value,
-      tahunPajak: item.tahunPajak || moment().format('YYYY'),
-      noBupot: item.nomorBuktiPotong || '',
-      idBupot: item.idBupot || '',
-      fgJnsBupot: 'PASAL21'
+      npwpPemotong,
+      feature: item.feature || feature.value,
     })
     fetchPphList()
-    
-    notifTitle.value = 'DJP Sync Success'
-    notifText.value = 'Status have been synchronized. The Bupot is now official.'
-    notifType.value = 'success'
-    showNotificationModal.value = true
+    showSuccessNotif('DJP Sync Success', 'Status has been synchronized successfully.')
   } catch (err) {
     console.error(err)
     notifTitle.value = 'Sync Failed'
+    notifText.value = 'Could not synchronize status with DJP at this time.'
     notifType.value = 'error'
     showNotificationModal.value = true
   }
@@ -358,13 +396,11 @@ const handleDelete = async () => {
     await Pph21Service.deleteDraft({ id: selectedItem.value.pxId })
     showDeleteModal.value = false
     fetchPphList()
-    
-    notifTitle.value = 'Draft Deleted'
-    notifType.value = 'success'
-    showNotificationModal.value = true
+    showSuccessNotif('Draft Deleted', 'The draft record has been removed.')
   } catch (err) {
     console.error(err)
     notifTitle.value = 'Delete Failed'
+    notifText.value = 'Failed to delete the draft. Please try again.'
     notifType.value = 'error'
     showNotificationModal.value = true
   } finally {
@@ -381,20 +417,18 @@ const handleBatal = async () => {
   if (!selectedItem.value) return
   submitting.value = true
   try {
-    await Pph21Service.batalkan({ 
-      id: selectedItem.value.pxId, 
+    await Pph21Service.batalkan({
+      id: selectedItem.value.pxId,
       tglPembatalan: moment().format('DDMMYYYY'),
-      npwpNikPenandatangan: nikSigner
+      npwpNikPenandatangan: nikSigner,
     })
     showBatalModal.value = false
     fetchPphList()
-    
-    notifTitle.value = 'Document Cancelled'
-    notifType.value = 'success'
-    showNotificationModal.value = true
+    showSuccessNotif('Document Cancelled', 'The tax document has been officially cancelled on DJP.')
   } catch (err) {
     console.error(err)
     notifTitle.value = 'Cancellation Failed'
+    notifText.value = 'Could not cancel the document. Please try again.'
     notifType.value = 'error'
     showNotificationModal.value = true
   } finally {
@@ -403,7 +437,11 @@ const handleBatal = async () => {
 }
 
 const viewDetail = (item: Pph21Content) => {
-  router.push(`/wht-pasal-21/detail/${item.id}`)
+  sessionStorage.setItem('pph21_detail_item', JSON.stringify(item))
+  router.push({
+    name: 'whtPasal21Detail',
+    params: { id: item.id },
+  })
 }
 
 let searchTimeout: ReturnType<typeof setTimeout> | null = null

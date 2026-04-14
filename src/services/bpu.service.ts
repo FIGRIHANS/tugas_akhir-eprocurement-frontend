@@ -168,17 +168,20 @@ const BpuService = {
   },
 
   async getDetail(id: string, npwpPemotong: string): Promise<ResponseData<BpuContent>> {
+    // There is no direct detail endpoint, so we fetch the full list and find by internal ID.
+    // We do NOT pass a search param because the search filters by name/bupot, not internal ID.
     const params = {
       npwpPemotong,
-      search: id, // Fallback to searching since no direct detail endpoint exists
       page: 1,
-      limit: 10 // Get a few matches to ensure we find the exact ID
+      limit: 200, // Fetch enough records to guarantee finding the item
     }
     const response = await invoiceApi.get<ResponseData<BpuListResponse>>('/tax/bpu', { params })
-    
-    // Find the exact record by internal ID to avoid "same data" bug
-    const content = response.data.result.content.items?.find((i: BpuContent) => String(i.id) === id) || null
-    
+
+    // Find the exact record by internal DB ID
+    const content = response.data.result.content.items?.find(
+      (i: BpuContent) => String(i.id) === String(id)
+    ) || null
+
     return {
       ...response.data,
       result: {
