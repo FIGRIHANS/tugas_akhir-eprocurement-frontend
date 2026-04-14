@@ -12,6 +12,9 @@ import type {
   PoGrItemTypes,
   ListPoTypes,
   ListNonPoTypes,
+  ListPoRawResponse,
+  ListNonPoRawResponse,
+  CasItemTypes,
   QueryParamsListPoTypes,
   AvailableDpTypes,
   RemainingDpTypes,
@@ -90,11 +93,37 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
 
     const newList = !response.data.result.content
       ? []
-      : response.data.result.content.map((item) => {
-          return {
-            ...item,
+      : (response.data.result.content as ListPoRawResponse[]).map((item: ListPoRawResponse) => {
+          const cleanItem: ListPoTypes = {
+            invoiceUId: item.invoiceUId,
+            invoiceTypeCode: item.invoiceTypeCode,
+            invoiceTypeName: item.invoiceTypeName,
+            invoiceDPCode: item.invoiceDPCode,
+            invoiceDPName: item.invoiceDPName,
+            companyCode: item.companyCode,
+            companyName: item.companyName,
+            documentNo: item.documentNo,
+            invoiceNo: item.invoiceNo,
+            invoiceDate: item.invoiceDate,
+            statusCode: item.statusCode,
+            statusName: item.statusName,
+            poNo: item.poNo ?? null,
+            grDocumentNo: item.grDocumentNo,
+            estimatedPaymentDate: item.estimatedPaymentDate ?? null,
+            totalGrossAmount: item.totalGrossAmount,
+            totalNetAmount: item.totalNetAmount,
+            vendorName: item.vendorName,
             isOpenChild: false,
+            createdUtcDate: item.createdUtcDate,
+            invoiceSourceName: item.invoiceSourceName ?? null,
+            emailSender: item.emailSender ?? null,
+            sapPostingCode: item.sapPostingCode ?? null,
+            fpStatus: item.fpStatus ?? null,
+            vatStatus: item.vatStatus ?? null,
+            whtStatus: item.whtStatus ?? null,
+            poPrice: item.poPrice ?? null,
           }
+          return cleanItem
         })
 
     listPo.value =
@@ -239,11 +268,14 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
       // Encode CAS No to handle slashes (e.g., INV/002/00/2025 -> INV%2F002%2F00%2F2025)
       // Actually axios params usually handle encoding, but user shared encoded example.
       // Let's use params object to be safe and let axios handle it.
-      const response: ApiResponse<any[]> = await invoiceApi.get(`/invoice/invoice/check-cas-item`, {
-        params: {
-          CasNo: casNo,
+      const response: ApiResponse<CasItemTypes[]> = await invoiceApi.get(
+        `/invoice/invoice/check-cas-item`,
+        {
+          params: {
+            CasNo: casNo,
+          },
         },
-      })
+      )
 
       return response.data
     } catch (error) {
@@ -254,29 +286,65 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
 
   const getListNonPo = async (data: QueryParamsListPoTypes) => {
     listNonPo.value = []
-    const query = {
-      companyCode: data.companyCode || null,
-      invoiceTypeCode: Number(data.invoiceTypeCode) || null,
-      invoiceDate: data.invoiceDate || null,
-      searchText: data.searchText || null,
+    const params: Record<string, number | string> = {}
+
+    if (data.statusCode !== null && data.statusCode !== undefined) {
+      params.statuscode = Number(data.statusCode)
     }
-    const response: ApiResponse<ListPoTypes[]> = await invoiceApi.get(
-      `/invoice/submission/non-po`,
+    if (data.companyCode) {
+      params.companyCode = data.companyCode
+    }
+    if (data.invoiceTypeCode) {
+      params.invoiceTypeCode = Number(data.invoiceTypeCode)
+    }
+    if (data.invoiceDate) {
+      params.invoiceDate = data.invoiceDate
+    }
+    if (data.searchText) {
+      params.searchText = data.searchText
+    }
+
+    const response: ApiResponse<ListNonPoTypes[]> = await invoiceApi.get(
+      `/invoice/submission`,
       {
-        params: {
-          ...(data.statusCode !== null ? { statuscode: Number(data.statusCode) } : {}),
-          ...query,
-        },
+        params,
       },
     )
 
-    const newList = !response.data.result.content
+    const contentData = response.data.result.content || []
+    const newList = !contentData
       ? []
-      : response.data.result.content.map((item) => {
-          return {
-            ...item,
+      : (contentData as ListNonPoRawResponse[]).map((item: ListNonPoRawResponse) => {
+          // Explicitly construct object without pOs field
+          const cleanItem: ListNonPoTypes = {
+            invoiceUId: item.invoiceUId,
+            invoiceTypeCode: item.invoiceTypeCode,
+            invoiceTypeName: item.invoiceTypeName,
+            invoiceDPCode: item.invoiceDPCode,
+            invoiceDPName: item.invoiceDPName,
+            companyCode: item.companyCode,
+            companyName: item.companyName,
+            documentNo: item.documentNo,
+            invoiceNo: item.invoiceNo,
+            invoiceDate: item.invoiceDate,
+            statusCode: item.statusCode,
+            statusName: item.statusName,
+            poNo: item.poNo ?? null,
+            grDocumentNo: item.grDocumentNo,
+            estimatedPaymentDate: item.estimatedPaymentDate ?? null,
+            totalGrossAmount: item.totalGrossAmount,
+            totalNetAmount: item.totalNetAmount,
+            vendorName: item.vendorName,
             isOpenChild: false,
+            createdUtcDate: item.createdUtcDate,
+            sapPostingCode: item.sapPostingCode ?? null,
+            invoiceSourceName: item.invoiceSourceName ?? null,
+            fpStatus: item.fpStatus ?? null,
+            vatStatus: item.vatStatus ?? null,
+            whtStatus: item.whtStatus ?? null,
+            poPrice: item.poPrice ?? null,
           }
+          return cleanItem
         })
     listNonPo.value =
       newList.length !== 0

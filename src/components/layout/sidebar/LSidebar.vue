@@ -1,19 +1,23 @@
 <template>
-  <aside class="w-[280px] bg-white border border-gray-200 border-t-0 h-full -mt-[80px] fixed scrollable-y-auto">
+<aside 
+    class="w-[280px] bg-white border border-gray-200 border-t-0 h-full -mt-[80px] fixed scrollable-y-auto transition-transform duration-300 ease-in-out z-[99]"
+    :class="{ '-translate-x-full': sidebarStore.isCollapsed }"
+  >
     <div class="h-[80px] flex items-center mb-5 px-[25px]">
-      <RouterLink to="/dashboard">
-        <!-- <LogoAN class="w-[83px]" /> -->
-        <LogoEPOQ class="w-[120px]" />
-      </RouterLink>
-      <div class="ml-2">
-        <img src="@/assets/TMS.png" class="h-[35px] w-max" alt="" />
+      <div class="flex items-center">
+        <RouterLink to="/" class="mt-2.5">
+          <LogoEPOQ class="h-[35px] w-auto" />
+        </RouterLink>
+        <div class="ml-2">
+          <img src="@/assets/TMS.png" class="h-[35px] w-max" alt="" />
+        </div>
       </div>
     </div>
 
     <div class="menu menu-default flex flex-col border-0 rounded-lg w-full py-0 px-1.5" data-menu="true">
       <div v-for="menu in filteredSidebarMenu" :key="menu.id" class="menu-item" data-menu-item-placement=""
         data-menu-item-toggle="accordion" data-menu-item-trigger="click">
-        <a class="menu-link" href="#" @click.prevent="redirectTo(menu.to)">
+        <a class="menu-link" href="#" :class="{ 'menu-link--active': isMenuActive(menu) }" @click.prevent="redirectTo(menu.to)">
           <span class="menu-icon">
             <i class="ki-duotone" :class="`ki-${menu.icon}`"> </i>
           </span>
@@ -25,7 +29,12 @@
         </a>
         <div v-if="menu.child.length > 0" class="menu-accordion">
           <div v-for="subMenu in menu.child" :key="subMenu.id" class="menu-item">
-            <a class="menu-link" href="#" @click.prevent="redirectTo(subMenu.to)">
+            <a 
+              class="menu-link" 
+              href="#" 
+              :class="{ 'menu-link--active': isSubMenuActive(subMenu.to) }"
+              @click.prevent="redirectTo(subMenu.to)"
+            >
               <span class="menu-title">{{ subMenu.title }}</span>
             </a>
           </div>
@@ -37,16 +46,31 @@
 
 <script lang="ts" setup>
 import sidebarMenu from '@/static/sidebar'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
 // import LogoAN from '@/assets/svg/LogoAN.vue'
-import LogoEPOQ from '@/assets/svg/EpoqLogo.vue'
+import LogoEPOQ from '@/assets/svg/EvoxLogo.vue'
 import { computed } from 'vue'
 import { useLoginStore } from '@/stores/views/login'
+import { useSidebarStore } from '@/stores/sidebar'
 import { isEmpty } from 'lodash'
 
 const router = useRouter()
+const route = useRoute()
 const userStore = useLoginStore()
+const sidebarStore = useSidebarStore()
+
+const isSubMenuActive = (path?: string) => {
+  return route.name === path
+}
+
+const isMenuActive = (menu: any) => {
+  if (menu.to && route.name === menu.to) return true
+  if (menu.child?.length > 0) {
+    return menu.child.some((child: any) => route.name === child.to)
+  }
+  return false
+}
 
 const redirectTo = (path?: string) => {
   if (path) {
@@ -300,7 +324,8 @@ const filteredSidebarMenu = computed(() => {
                   child.id === 'delivery-notes' ||
                   child.id === 'delivery-notes-list' ||
                   child.id === 'vat-reconciliation' ||
-                  child.id === 'wht-reconciliation' ||
+                  child.id === 'wht-unifikasi' ||
+                  child.id === 'wht-pasal-21' ||
                   child.id === 'invoice-type' ||
                   child.id === 'list-user' ||
                   child.id === 'master-profile' ||
@@ -329,6 +354,66 @@ const filteredSidebarMenu = computed(() => {
 })
 </script>
 
-<style lang="scss" scoped>
-@use './styles/sidebar.scss';
+<style lang="scss">
+/* ──── Sidebar menu ──── */
+.menu-default .menu-link {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    background-color: #f0fdfa !important;
+
+    .menu-title { color: #14B8A6 !important; }
+    .menu-icon i { color: #14B8A6 !important; }
+  }
+
+  &.menu-link--active {
+    background-color: #f0fdfa !important;
+
+    .menu-title { color: #14B8A6 !important; font-weight: 600; }
+    .menu-icon i { color: #14B8A6 !important; }
+  }
+}
+
+/* ──── Sub-menu items ──── */
+.menu-sub-accordion .menu-item .menu-link {
+  border-radius: 8px;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    background-color: #f0fdfa !important;
+    .menu-title { color: #14B8A6 !important; }
+  }
+
+  &.menu-link--active {
+    background-color: #f0fdfa !important;
+
+    .menu-title {
+      color: #14B8A6 !important;
+      font-weight: 600;
+      position: relative;
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: -12px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 3px;
+        height: 16px;
+        background-color: #14B8A6;
+        border-radius: 2px;
+      }
+    }
+  }
+}
+
+/* ──── Icon size ──── */
+.menu-icon i {
+  font-size: 20px;
+  margin-right: 12px;
+}
 </style>

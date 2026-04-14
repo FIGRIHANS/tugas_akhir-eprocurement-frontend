@@ -3,10 +3,10 @@
     <div class="flex justify-center">
       <nav class="flex lg:w-[1440px] justify-between items-center py-[20px] px-[40px]" :class="{ full: isFull }">
         <div class="logo flex items-center gap-2">
-          <RouterLink to="/">
-            <LogoEPOQ class="w-[120px] h-auto" />
+          <RouterLink to="/" class="mt-2.5">
+            <LogoEPOQ class="h-[35px] w-auto" />
           </RouterLink>
-          <div class="ml-2">
+          <div>
             <img src="@/assets/TMS.png" class="h-[35px] w-max" alt="">
           </div>
         </div>
@@ -25,6 +25,7 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import type { INavbarProps } from './types/navbar'
 import { useNavbarUtilsStore } from '@/stores/navbar'
+import { useSidebarStore } from '@/stores/sidebar'
 
 /**Layout components */
 import LNavbarMenu from './LNavbar/LNavbarMenu.vue'
@@ -33,7 +34,7 @@ import LNavbarProfile from './LNavbar/LNavbarProfile.vue'
 /**Atoms components */
 // import UiLogo from '@/components/ui/atoms/logo/UiLogo.vue'
 // import LogoAN from '@/assets/svg/LogoAN.vue's
-import LogoEPOQ from '@/assets/svg/EpoqLogo.vue'
+import LogoEPOQ from '@/assets/svg/EvoxLogo.vue'
 
 const props = withDefaults(defineProps<INavbarProps>(), {
   full: false,
@@ -43,6 +44,7 @@ const route = useRoute()
 
 /**SECTION - Navbar utils */
 const navbarUtils = useNavbarUtilsStore()
+const sidebarStore = useSidebarStore()
 const isFull = computed(() => navbarUtils.isFull || props.full)
 /**!SECTION */
 </script>

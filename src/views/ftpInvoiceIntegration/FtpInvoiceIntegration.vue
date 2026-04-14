@@ -123,13 +123,6 @@
                   >
                     <i class="ki-duotone ki-data !text-lg"></i>
                   </button>
-                  <button
-                    class="btn btn-icon btn-outline btn-primary w-[21px] h-[21px]"
-                    @click="parent.isOpenChild = !parent.isOpenChild"
-                  >
-                    <i v-if="!parent.isOpenChild" class="ki-filled ki-right !text-[9px]"></i>
-                    <i v-else class="ki-filled ki-down !text-[9px]"></i>
-                  </button>
                 </td>
 
                 <td>
@@ -180,31 +173,6 @@
                   </span>
                 </td>
               </tr>
-              <tr v-show="parent.isOpenChild">
-                <td></td>
-                <td colspan="5" class="!pt-[0px]">
-                  <table class="table table-bordered table-sm mb-0">
-                    <thead>
-                      <tr class="border-b">
-                        <th v-for="(item, index) in columnsChild" :key="index">
-                          {{ item }}
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <template v-for="(sub, index) in parent.pOs" :key="index">
-                        <tr>
-                          <td>{{ sub.poNo || '-' }}</td>
-                          <td>{{ sub.grDocumentNo || '-' }}</td>
-                          <td>{{ sub.itemText || '-' }}</td>
-                          <td>{{ useFormatIdr(sub.itemAmount) || '-' }}</td>
-                          <td>{{ sub.quantity || '-' }}</td>
-                        </tr>
-                      </template>
-                    </tbody>
-                  </table>
-                </td>
-              </tr>
             </template>
           </tbody>
         </table>
@@ -239,7 +207,7 @@ import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useFormatIdr } from '@/composables/currency'
-import type { ListPoTypes } from '@/stores/views/invoice/types/submission'
+import type { ListNonPoTypes } from '@/stores/views/invoice/types/submission'
 import moment from 'moment'
 import { cloneDeep } from 'lodash'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
@@ -267,7 +235,7 @@ const router = useRouter()
 const search = ref<string>('')
 const currentPage = ref<number>(1)
 const pageSize = ref<number>(10)
-const list = ref<ListPoTypes[]>([])
+const list = ref<ListNonPoTypes[]>([])
 const sortBy = ref<string>('')
 const sortColumnName = ref<string>('')
 const filteredPayload = ref([])
@@ -284,9 +252,9 @@ const openDetailVerification = (invoiceId: string) => {
 
 const loadData = async () => {
   try {
-    await invoiceApi.getPoDetail(viewDetailId.value)
+    await invoiceApi.getNonPoDetail(viewDetailId.value)
   } catch (error) {
-    console.error('Error loading PO detail:', error)
+    console.error('Error loading Non-PO detail:', error)
   }
 }
 
@@ -326,9 +294,7 @@ const columns = ref<string[]>([
   'PO Price',
 ])
 
-const columnsChild = ref(['No PO', 'No GR', 'Item Description', 'Item Amount', 'Quantity'])
-
-const poList = computed(() => invoiceApi.listPo)
+const poList = computed(() => invoiceApi.listNonPo || [])
 
 const colorBadge = (status: number) => {
   if (status === 0) return 'badge-secondary'
@@ -357,8 +323,8 @@ const getStatusBadgeClass = (status: boolean) => {
 //   return pool[Math.floor(Math.random() * pool.length)]
 // }
 
-const setList = (listData: ListPoTypes[]) => {
-  const result: ListPoTypes[] = []
+const setList = (listData: ListNonPoTypes[]) => {
+  const result: ListNonPoTypes[] = []
   for (const [index, item] of listData.entries()) {
     const start = currentPage.value * pageSize.value - pageSize.value
     const end = currentPage.value * pageSize.value - 1
@@ -374,7 +340,7 @@ const setPage = (value: number) => {
   sortColumn(null)
 }
 
-const goView = (data: ListPoTypes) => {
+const goView = (data: ListNonPoTypes) => {
   if (data.statusCode === 0 || data.statusCode === 5) {
     router.push({
       name: 'invoiceAdd',
@@ -399,7 +365,7 @@ const goView = (data: ListPoTypes) => {
 const callList = () => {
   list.value = []
   invoiceApi
-    .getListPo({
+    .getListNonPo({
       statusCode: filterForm.status === '0' || filterForm.status ? Number(filterForm.status) : null,
       companyCode: filterForm.companyCode,
       invoiceTypeCode: Number(filterForm.invoiceType),
@@ -484,7 +450,7 @@ const sortColumn = (columnName: string | null) => {
   const roleSort = ['asc', 'desc', '']
 
   const listData = cloneDeep(poList.value)
-  let result: ListPoTypes[] = []
+  let result: ListNonPoTypes[] = []
 
   if (columnName) {
     if (sortColumnName.value !== columnName) sortBy.value = ''

@@ -9,7 +9,7 @@ import moment from 'moment'
 import IconPhone from '../components/icons/IconPhone.vue'
 import IconEmail from '../components/icons/IconEmail.vue'
 import IconUserFriendly from '@/components/icons/IconUserFriendly.vue'
-import LogoEPOQ from '@/assets/svg/EpoqLogo.vue'
+import LogoEPOQ from '@/assets/svg/EvoxLogo.vue'
 
 const year = moment().format('YYYY')
 </script>

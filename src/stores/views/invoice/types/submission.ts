@@ -210,25 +210,21 @@ export interface ListPoTypes {
   invoiceDate: string
   statusCode: number
   statusName: string
-  poNo: string
+  poNo: string | null
   grDocumentNo: string
-  estimatedPaymentDate: string
+  estimatedPaymentDate: string | null
   totalGrossAmount: number
   totalNetAmount: number
   vendorName: string
-  pOs: PoChildTypes[]
   isOpenChild: boolean
   createdUtcDate: string
-  actionerDate?: string
-  invoiceSourceName: string
-  // FTP Invoice Integration verification status columns
-  fpStatus?: boolean
-  vatStatus?: boolean
-  whtStatus?: boolean
-  poPrice?: boolean
-
-  emailSender?: string
-  sapPostingCode: string
+  invoiceSourceName?: string | null
+  fpStatus?: boolean | null
+  vatStatus?: boolean | null
+  whtStatus?: boolean | null
+  poPrice?: boolean | null
+  emailSender?: string | null
+  sapPostingCode: string | null
 }
 
 export interface ListNonPoTypes {
@@ -244,17 +240,33 @@ export interface ListNonPoTypes {
   invoiceDate: string
   statusCode: number
   statusName: string
-  poNo: string
+  poNo: string | null
   grDocumentNo: string
-  estimatedPaymentDate: string
+  estimatedPaymentDate: string | null
   totalGrossAmount: number
   totalNetAmount: number
   vendorName: string
-  pOs: PoChildTypes[]
   isOpenChild: boolean
   createdUtcDate: string
-  actionerDate?: string
-  sapPostingCode: string
+  sapPostingCode: string | null
+  invoiceSourceName?: string | null
+  fpStatus?: boolean | null
+  vatStatus?: boolean | null
+  whtStatus?: boolean | null
+  poPrice?: boolean | null
+}
+
+// Raw API response types (include pOs field from API before cleaning)
+export interface ListPoRawResponse extends ListPoTypes {
+  pOs: PoChildTypes[]
+}
+
+export interface ListNonPoRawResponse extends ListNonPoTypes {
+  pOs: PoChildTypes[]
+}
+
+export interface CasItemTypes {
+  [key: string]: unknown
 }
 
 export interface itemsAlternativePayee {
