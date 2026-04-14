@@ -3,37 +3,36 @@
     <Breadcrumb title="WHT - Unifikasi (BPU) Detail" :routes="routes" />
     <hr class="-mx-[24px] mb-[24px]" />
 
-    <!-- No reload spinner if data is already in state -->
+    <!-- Loading -->
     <div
-      v-if="loading && !item"
+      v-if="loading"
       class="flex flex-col items-center justify-center py-20 bg-white rounded-xl border border-dashed border-gray-300"
     >
       <span class="loading loading-spinner loading-lg text-primary"></span>
       <p class="mt-4 text-gray-500 font-medium italic">Fetching tax record details...</p>
     </div>
 
-    <div
-      v-else-if="!item && !loading"
-      class="p-10 text-center bg-red-50 rounded-xl border border-red-100"
-    >
+    <!-- Not Found -->
+    <div v-else-if="!item" class="p-10 text-center bg-red-50 rounded-xl border border-red-100">
       <i class="ki-filled ki-information-2 text-4xl text-danger mb-4"></i>
       <h3 class="text-lg font-bold text-gray-800">Record Not Found</h3>
       <p class="text-gray-500 mb-6">The requested BPU record could not be retrieved.</p>
-      <button class="btn btn-primary shadow-sm" @click="router.push('/wht-unifikasi')">
+      <button class="btn btn-primary" @click="router.push('/wht-unifikasi')">
         <i class="ki-filled ki-arrow-left"></i>
-        Return to Dashboard
+        Back to List
       </button>
     </div>
 
+    <!-- Content -->
     <div v-else class="space-y-6 animate-in fade-in duration-500">
-      <!-- Standard Header with Status -->
+      <!-- Status Header -->
       <div
         class="flex flex-wrap items-center justify-between gap-6 p-6 bg-white rounded-xl border border-gray-200 shadow-sm text-gray-800"
       >
         <div class="flex items-center gap-4">
           <div
             :class="[
-              'w-12 h-12 rounded-lg flex items-center justify-center text-white shadow-sm',
+              'w-12 h-12 rounded-lg flex items-center justify-center text-white shadow-sm font-bold',
               statusColorClass,
             ]"
           >
@@ -43,47 +42,46 @@
             <div class="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-0.5">
               Tax Record Status
             </div>
-            <div class="flex items-center gap-2">
-              <span class="text-xl font-bold text-gray-800 uppercase">{{
-                item?.status || item?.fgStatus || 'NO STATUS'
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-xl font-bold text-gray-800">{{
+                item.status || item.fgStatus || 'NO STATUS'
               }}</span>
               <span
-                v-if="item?.nomorBuktiPotong || item?.noBupot"
-                class="badge badge-primary badge-outline font-mono text-[10px] h-5 px-2"
+                v-if="item.nomorBuktiPotong || item.noBupot"
+                class="badge badge-primary badge-outline font-mono text-[10px] h-5"
               >
-                {{ item?.nomorBuktiPotong || item?.noBupot }}
+                {{ item.nomorBuktiPotong || item.noBupot }}
               </span>
+            </div>
+            <div v-if="item.errorMsg" class="mt-1 text-xs text-danger font-medium">
+              {{ item.errorMsg }}
             </div>
           </div>
         </div>
 
-        <div class>
-          <template v-if="(item?.status || item?.fgStatus)?.toUpperCase() === 'DRAFT'">
-            <button class="btn btn-sm btn-primary" @click="showUploadConfirmModal = true">
-              <i class="ki-filled ki-cloud-change"></i>
-              Upload to DJP
+        <div class="flex gap-2">
+          <template v-if="(item.status || item.fgStatus)?.toUpperCase() === 'DRAFT'">
+            <button class="btn btn-primary" @click="showUploadConfirmModal = true">
+              <i class="ki-filled ki-cloud-change"></i> Upload to DJP
             </button>
           </template>
-
-          <template v-if="isInProgress(item?.status || item?.fgStatus)">
-            <button class="btn btn-sm btn-warning" @click="handleVerify">
-              <i class="ki-filled ki-arrows-loop"></i>
-              Verify Status
+          <template v-if="isInProgress(item.status || item.fgStatus)">
+            <button class="btn btn-warning" :disabled="submitting" @click="handleVerify">
+              <span v-if="submitting" class="loading loading-spinner loading-xs"></span>
+              <i v-else class="ki-filled ki-arrow-circle-right"></i> Verify Status
             </button>
           </template>
-
-          <template v-if="(item?.status || item?.fgStatus)?.toUpperCase() === 'NORMAL-DONE'">
-            <button class="btn btn-sm btn-danger" @click="handleBatal">
-              <i class="ki-filled ki-cross-circle"></i>
-              Cancel Bupot
+          <template v-if="(item.status || item.fgStatus)?.toUpperCase() === 'NORMAL-DONE'">
+            <button class="btn btn-danger shadow-sm" @click="handleBatal" :disabled="submitting">
+              <i class="ki-filled ki-cross-circle"></i> Cancel Bupot
             </button>
           </template>
         </div>
       </div>
 
-      <!-- Detail Content Cards -->
+      <!-- Main Layout -->
       <div class="flex flex-col lg:flex-row gap-[24px] items-start">
-        <div class="flex-1 space-y-6 w-full">
+        <div class="flex-1 space-y-6">
           <!-- Section 1: Recipient Information -->
           <div class="card p-[20px] shadow-sm">
             <p
@@ -92,29 +90,44 @@
               Recipient Information
             </p>
             <div class="space-y-1">
-              <div class="flex items-baseline flex-wrap lg:flex-nowrap py-[8px]">
+              <div
+                v-if="item.namaPenerima || item.nama"
+                class="flex items-baseline flex-wrap lg:flex-nowrap py-[8px]"
+              >
                 <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600"
                   >Recipient Name</label
                 >
-                <div class="flex-1">
-                  <input
-                    class="input bg-gray-50 border-gray-200 font-semibold text-sm text-gray-800"
-                    :value="item?.namaPenerima || item?.nama || '-'"
-                    disabled
-                  />
-                </div>
+                <input
+                  class="input flex-1 bg-gray-50 border-gray-200 font-semibold text-sm text-gray-800"
+                  :value="item.namaPenerima || item.nama"
+                  disabled
+                />
               </div>
-              <div class="flex items-baseline flex-wrap lg:flex-nowrap py-[8px]">
+              <div
+                v-if="item.npwpPenerima || item.npwp"
+                class="flex items-baseline flex-wrap lg:flex-nowrap py-[8px]"
+              >
                 <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600"
                   >NPWP / NIK</label
                 >
-                <div class="flex-1">
-                  <input
-                    class="input bg-gray-50 border-gray-200 font-mono text-sm text-primary font-semibold"
-                    :value="item?.npwpPenerima || item?.npwp || '-'"
-                    disabled
-                  />
-                </div>
+                <input
+                  class="input flex-1 bg-gray-50 border-gray-200 font-mono text-sm text-primary font-semibold"
+                  :value="item.npwpPenerima || item.npwp"
+                  disabled
+                />
+              </div>
+              <div
+                v-if="item.alamatPenerima"
+                class="flex items-baseline flex-wrap lg:flex-nowrap py-[8px]"
+              >
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600"
+                  >Address</label
+                >
+                <input
+                  class="input flex-1 bg-gray-50 border-gray-200 text-sm text-gray-700"
+                  :value="item.alamatPenerima"
+                  disabled
+                />
               </div>
             </div>
           </div>
@@ -124,55 +137,125 @@
             <p
               class="font-bold text-sm mb-[16px] uppercase tracking-tight text-gray-700 flex items-center gap-2 border-b pb-2 border-gray-100"
             >
-              Financial & Tax Details
+              Financial &amp; Tax Details
             </p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-1">
-              <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+              <div
+                v-if="item.kodeObjekPajak"
+                class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+              >
                 <label class="form-label min-w-[120px] text-sm font-medium text-gray-600"
                   >Object Code</label
                 >
                 <input
                   class="input bg-gray-50 border-gray-200 font-semibold text-sm text-gray-800"
-                  :value="item?.kodeObjekPajak || '-'"
+                  :value="item.kodeObjekPajak"
                   disabled
                 />
               </div>
-              <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label min-w-[120px] text-sm font-medium text-gray-600"
-                  >Date</label
-                >
+              <div
+                v-if="item.tglPemotongan"
+                class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+              >
+                <label class="form-label min-w-[120px] text-gray-500">Withholding Date</label>
                 <input
-                  class="input bg-gray-50 border-gray-200 font-semibold text-sm text-gray-800"
-                  :value="item?.tglPemotongan || '-'"
+                  class="input bg-gray-50 border-gray-200"
+                  :value="item.tglPemotongan"
                   disabled
                 />
               </div>
-              <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label min-w-[120px] text-sm font-medium text-gray-600"
-                  >Pasal PPh</label
-                >
+              <div
+                v-if="item.pasalPPh"
+                class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+              >
+                <label class="form-label min-w-[120px] text-gray-500">Pasal PPh</label>
                 <input
-                  class="input bg-gray-50 border-gray-200 font-semibold text-sm text-gray-800"
-                  :value="item?.pasalPPh || '-'"
+                  class="input bg-gray-50 border-gray-200"
+                  :value="item.pasalPPh"
                   disabled
                 />
               </div>
-              <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label min-w-[120px] text-sm font-medium text-gray-600"
-                  >Status PPh</label
-                >
+              <div
+                v-if="item.statusPPh"
+                class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+              >
+                <label class="form-label min-w-[120px] text-gray-500">Status PPh</label>
                 <input
-                  class="input bg-gray-50 border-gray-200 font-semibold text-sm text-gray-800"
-                  :value="item?.statusPPh || '-'"
+                  class="input bg-gray-50 border-gray-200"
+                  :value="item.statusPPh"
+                  disabled
+                />
+              </div>
+              <div
+                v-if="item.masaPajak"
+                class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+              >
+                <label class="form-label min-w-[120px] text-gray-500">Tax Period</label>
+                <input
+                  class="input bg-gray-50 border-gray-200"
+                  :value="item.masaPajak"
+                  disabled
+                />
+              </div>
+              <div
+                v-if="item.tahunPajak"
+                class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+              >
+                <label class="form-label min-w-[120px] text-gray-500">Tax Year</label>
+                <input
+                  class="input bg-gray-50 border-gray-200"
+                  :value="item.tahunPajak"
                   disabled
                 />
               </div>
             </div>
           </div>
 
-          <!-- Section 3: Reference Documents -->
+          <!-- Section 3: Classification (only if any field exists) -->
           <div
-            v-if="item?.dokReferensi && item.dokReferensi.length > 0"
+            v-if="item.kap || item.kjs || item.glAccount || item.idTku"
+            class="card p-[20px] shadow-sm"
+          >
+            <p
+              class="font-bold text-sm mb-[16px] uppercase tracking-tight text-gray-700 flex items-center gap-2 border-b pb-2 border-gray-100"
+            >
+              Classification &amp; Internal Codes
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-1">
+              <div
+                v-if="item.kap"
+                class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+              >
+                <label class="form-label min-w-[120px] text-gray-500">KAP</label>
+                <input class="input bg-gray-50 border-gray-200" :value="item.kap" disabled />
+              </div>
+              <div
+                v-if="item.kjs"
+                class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+              >
+                <label class="form-label min-w-[120px] text-gray-500">KJS</label>
+                <input class="input bg-gray-50 border-gray-200" :value="item.kjs" disabled />
+              </div>
+              <div
+                v-if="item.glAccount"
+                class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+              >
+                <label class="form-label min-w-[120px] text-gray-500">GL Account</label>
+                <input class="input bg-gray-50 border-gray-200" :value="item.glAccount" disabled />
+              </div>
+              <div
+                v-if="item.idTku"
+                class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+              >
+                <label class="form-label min-w-[120px] text-gray-500">TKU ID</label>
+                <input class="input bg-gray-50 border-gray-200" :value="item.idTku" disabled />
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 4: Reference Documents -->
+          <div
+            v-if="item.dokReferensi && item.dokReferensi.length > 0"
             class="card p-[20px] shadow-sm"
           >
             <p
@@ -205,13 +288,15 @@
           </div>
         </div>
 
-        <!-- Sidebar / Right Panel: Calculation Summary -->
+        <!-- Right Panel -->
         <div class="w-full lg:max-w-sm space-y-6 lg:sticky lg:top-0">
-          <div class="card shadow-sm border border-gray-100">
-            <div class="card-header py-[16px] px-[20px] border-b border-gray-100 bg-gray-50/50">
+          <!-- Tax Summary -->
+          <div class="card shadow-sm">
+            <div class="card-header py-[16px] px-[20px] border-b border-gray-100 bg-gray-50">
               <span
                 class="font-bold text-sm uppercase tracking-tight text-gray-700 flex items-center gap-2"
               >
+                <i class="ki-filled ki-wallet text-danger"></i>
                 Tax Summary
               </span>
             </div>
@@ -223,7 +308,7 @@
                   <span class="text-gray-500 font-medium uppercase tracking-tight text-[11px]"
                     >Tax Base (DPP)</span
                   >
-                  <span class="font-bold text-gray-800">{{ formatCurrency(item?.dpp || 0) }}</span>
+                  <span class="font-bold text-gray-800">{{ formatCurrency(item.dpp || 0) }}</span>
                 </div>
                 <div
                   class="border-b border-gray-100 py-[15px] px-[20px] text-sm flex justify-between"
@@ -231,7 +316,7 @@
                   <span class="text-gray-500 font-medium uppercase tracking-tight text-[11px]"
                     >Tax Rate</span
                   >
-                  <span class="font-bold text-gray-800">{{ item?.tarif || 0 }}%</span>
+                  <span class="font-bold text-gray-800">{{ item.tarif || 0 }}%</span>
                 </div>
                 <div
                   class="py-[20px] px-[20px] text-sm flex justify-between items-center bg-red-50/30"
@@ -240,98 +325,60 @@
                     >Withheld PPh</span
                   >
                   <span class="text-xl font-black text-danger">{{
-                    formatCurrency(item?.pphDipotong || 0)
+                    formatCurrency(item.pphDipotong || 0)
                   }}</span>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Metadata Card -->
+          <!-- System Metadata -->
           <div class="card p-[20px] shadow-sm bg-gray-50/50">
             <p class="font-bold text-[11px] mb-[16px] uppercase tracking-[0.15em] text-gray-400">
               System Metadata
             </p>
             <div class="space-y-4">
-              <div class="flex flex-col gap-1">
+              <div v-if="item.pxId" class="flex flex-col gap-1">
                 <label class="text-[11px] uppercase font-bold text-gray-400">PX-Internal ID</label>
-                <div class="text-sm font-mono text-gray-600 font-semibold">
-                  {{ item?.pxId || '-' }}
+                <div class="text-sm text-gray-600 font-semibold">{{ item.pxId }}</div>
+              </div>
+              <div v-if="item.nomorBuktiPotong || item.noBupot" class="flex flex-col gap-1">
+                <label class="text-[11px] uppercase font-bold text-gray-400">No. Bupot</label>
+                <div class="text-sm font-bold text-primary">
+                  {{ item.nomorBuktiPotong || item.noBupot }}
                 </div>
               </div>
-              <div class="grid grid-cols-2 gap-4">
-                <div class="flex flex-col gap-1">
-                  <label class="text-[11px] uppercase font-bold text-gray-400">KAP Code</label>
-                  <div class="text-sm font-bold text-gray-800">{{ item?.kap || '-' }}</div>
-                </div>
-                <div class="flex flex-col gap-1">
-                  <label class="text-[11px] uppercase font-bold text-gray-400">KJS Code</label>
-                  <div class="text-sm font-bold text-gray-800">{{ item?.kjs || '-' }}</div>
-                </div>
+              <div v-if="item.idBupot" class="flex flex-col gap-1">
+                <label class="text-[11px] uppercase font-bold text-gray-400">ID Bupot (DJP)</label>
+                <div class="text-sm text-gray-800 font-bold break-all">{{ item.idBupot }}</div>
               </div>
-              <div class="flex flex-col gap-1">
-                <label class="text-[11px] uppercase font-bold text-gray-400">GL Account</label>
-                <div class="text-sm font-bold text-gray-800">
-                  {{ item?.glAccount || 'Internal Account' }}
-                </div>
-              </div>
-              <div class="flex flex-col gap-1">
-                <label class="text-[11px] uppercase font-bold text-gray-400"
-                  >Masa / Tahun Pajak</label
-                >
-                <div class="text-sm font-bold text-gray-800">
-                  {{ item?.masaPajak || '-' }} / {{ item?.tahunPajak || '-' }}
-                </div>
+              <div v-if="item.createdAt" class="flex flex-col gap-1">
+                <label class="text-[11px] uppercase font-bold text-gray-400">Created On</label>
+                <div class="text-sm text-gray-600">{{ formatDate(item.createdAt) }}</div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Action Footer -->
+      <!-- Footer -->
       <div class="pt-8 border-t border-gray-200 flex items-center justify-between">
         <button
           class="btn btn-outline btn-primary shadow-sm"
           @click="goBack"
           :disabled="submitting"
         >
-          <i class="ki-filled ki-arrow-left"></i>
-          Back to List
+          <i class="ki-filled ki-arrow-left"></i> Back to List
         </button>
-
-        <div v-if="item?.createdAt" class="text-right">
-          <p class="text-[10px] text-gray-400 uppercase font-bold">Created On</p>
-          <p class="text-xs text-gray-600 italic">{{ formatDate(item.createdAt) }}</p>
-        </div>
       </div>
     </div>
 
-    <!-- Modals -->
-    <ModalConfirmation
-      :open="showBatalModal"
-      id="bpu-detail-batal-modal"
-      title="Cancel Official Bupot"
-      text="This will officially invalidate the certificate in DJP. Continue?"
-      type="danger"
-      @submit="handleBatalSubmit"
-      @cancel="showBatalModal = false"
-      :loading="submitting"
-    />
-
-    <ModalNotification
-      :open="showNotif"
-      id="bpu-detail-notif"
-      :title="notifTitle"
-      :text="notifText"
-      :type="notifType"
-      @on-close="onNotifClose"
-    />
-
+    <!-- Modal Upload -->
     <ModalConfirmation
       :open="showUploadConfirmModal"
-      id="upload-bpu-modal"
+      id="bpu-detail-upload-modal"
       title="Upload to DJP"
-      :text="`Ready to submit BPU for ${item?.namaPenerima || item?.nama || item?.name || 'this record'} to DJP? This will officially record the tax withholding.`"
+      :text="`Ready to submit BPU for ${item?.namaPenerima || item?.nama || 'this record'} to DJP? This will officially record the tax withholding.`"
       type="confirm"
       @submit="handleUpload"
       @cancel="showUploadConfirmModal = false"
@@ -355,17 +402,35 @@
               @click="showPassphrase = !showPassphrase"
             >
               <i
-                :class="[
-                  'ki-filled',
-                  showPassphrase ? 'ki-eye-slash' : 'ki-eye',
-                  'text-gray-500',
-                ]"
+                :class="['ki-filled', showPassphrase ? 'ki-eye-slash' : 'ki-eye', 'text-gray-500']"
               ></i>
             </button>
           </div>
         </div>
       </div>
     </ModalConfirmation>
+
+    <!-- Modal Cancel -->
+    <ModalConfirmation
+      :open="showBatalModal"
+      id="bpu-detail-batal-modal"
+      title="Cancel Official Bupot"
+      text="This will officially invalidate the certificate in DJP. Continue?"
+      type="danger"
+      @submit="handleBatalSubmit"
+      @cancel="showBatalModal = false"
+      :loading="submitting"
+    />
+
+    <!-- Notification -->
+    <ModalNotification
+      :open="showNotif"
+      id="bpu-detail-notif"
+      :title="notifTitle"
+      :text="notifText"
+      :type="notifType"
+      @on-close="showNotif = false"
+    />
   </div>
 </template>
 
@@ -381,6 +446,7 @@ import moment from 'moment'
 const router = useRouter()
 const route = useRoute()
 const npwpPemotong = '1091031210969728'
+const nikSigner = '3172022407830008'
 
 const routes = [
   { name: 'Tax Reconciliation', to: '/tax-reconciliation' },
@@ -388,102 +454,31 @@ const routes = [
   { name: 'Detail', to: '#' },
 ]
 
-// State
+// ── State ──────────────────────────────────────────────────────────────
 const item = ref<BpuContent | null>(null)
-const loading = ref(false) // Start as false to avoid flicker if state exists
+const loading = ref(false)
 const submitting = ref(false)
 const showBatalModal = ref(false)
 const showUploadConfirmModal = ref(false)
 const passphrase = ref('Pajak123@@')
 const showPassphrase = ref(false)
-
 const showNotif = ref(false)
 const notifTitle = ref('')
 const notifText = ref('')
 const notifType = ref<'success' | 'error'>('success')
 
-// Lifecycle
-const fetchDetail = async (id: string) => {
-  loading.value = true
-  try {
-    const res = await BpuService.getDetail(id, npwpPemotong)
-    if (res.result && res.result.content) {
-      item.value = res.result.content as BpuContent
-    }
-  } catch (err) {
-    console.error('Error fetching BPU detail:', err)
-  } finally {
-    loading.value = false
-  }
-}
-
-// SYNCHRONOUS INITIALIZATION
-// This runs once when the component setup starts
-const initFromState = () => {
-  const state = window.history.state
-  const currentId = route.params.id as string
-
-  if (state && state.item && String(state.item.id) === currentId) {
-    item.value = state.item as BpuContent
-    // No need to fetch or show loading
-  } else if (currentId) {
-    fetchDetail(currentId)
-  }
-}
-
-initFromState()
-
-// Watch for route changes (if user clicks another row without unmounting)
-watch(
-  () => route.params.id,
-  (newId) => {
-    if (newId) {
-      const state = window.history.state
-      if (state && state.item && String(state.item.id) === String(newId)) {
-        item.value = state.item as BpuContent
-        loading.value = false
-      } else {
-        fetchDetail(newId as string)
-      }
-    }
-  },
-)
-
-// Methods
-const formatCurrency = (val: number | string) => {
-  const num = Number(val) || 0
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0,
-  }).format(num)
-}
-
-const formatDate = (date: string | Date | undefined) => {
-  if (!date) return '-'
-  return moment(date).format('DD MMM YYYY, HH:mm')
-}
-
-const isInProgress = (status: string | null | undefined) => {
-  if (!status) return false
-  const s = status.toUpperCase()
-  return s === 'SUBMITTED' || s.includes('SIGNING_IN_PROGRESS') || s.includes('SUBMITTED-')
-}
-
+// ── Computed ───────────────────────────────────────────────────────────
 const statusColorClass = computed(() => {
-  if (!item.value) return 'bg-gray-400'
-  const s = (item.value.status || item.value.fgStatus || '').toUpperCase()
+  const s = (item.value?.status || item.value?.fgStatus || '').toUpperCase()
   if (s === 'DRAFT') return 'bg-primary'
-  if (s === 'NORMAL-DONE') return 'bg-success font-bold text-white shadow-sm'
-  if (s.includes('PROGRESS') || s === 'SUBMITTED')
-    return 'bg-warning text-yellow-900 border-yellow-200 border'
-  if (s === 'ERROR') return 'bg-danger font-bold text-white shadow-sm'
-  return 'bg-gray-500 shadow-sm'
+  if (s === 'NORMAL-DONE') return 'bg-success font-bold'
+  if (s.includes('PROGRESS') || s === 'SUBMITTED') return 'bg-warning text-yellow-900'
+  if (s === 'ERROR') return 'bg-danger font-bold'
+  return 'bg-gray-500'
 })
 
 const statusIcon = computed(() => {
-  if (!item.value) return 'ki-information-2'
-  const s = (item.value.status || item.value.fgStatus || '').toUpperCase()
+  const s = (item.value?.status || item.value?.fgStatus || '').toUpperCase()
   if (s === 'DRAFT') return 'ki-notepad-edit'
   if (s === 'NORMAL-DONE') return 'ki-check-circle'
   if (s.includes('PROGRESS') || s === 'SUBMITTED') return 'ki-arrows-loop'
@@ -491,24 +486,87 @@ const statusIcon = computed(() => {
   return 'ki-information-2'
 })
 
-// Actions Handlers
+// ── Lifecycle ──────────────────────────────────────────────────────────
+const fetchDetail = async (id: string) => {
+  loading.value = true
+  try {
+    const res = await BpuService.getDetail(id, npwpPemotong)
+    item.value = res.result?.content ?? null
+  } catch (err) {
+    console.error(err)
+  } finally {
+    loading.value = false
+  }
+}
+
+const init = () => {
+  const currentId = route.params.id as string
+  const stored = sessionStorage.getItem('bpu_detail_item')
+  if (stored) {
+    try {
+      item.value = JSON.parse(stored) as BpuContent
+      sessionStorage.removeItem('bpu_detail_item')
+      return
+    } catch {
+      /* ignore */
+    }
+  }
+  if (currentId) fetchDetail(currentId)
+}
+
+init()
+
+watch(
+  () => route.params.id,
+  (newId) => {
+    if (!newId) return
+    const stored = sessionStorage.getItem('bpu_detail_item')
+    if (stored) {
+      try {
+        item.value = JSON.parse(stored) as BpuContent
+        sessionStorage.removeItem('bpu_detail_item')
+        return
+      } catch {
+        /* ignore */
+      }
+    }
+    fetchDetail(newId as string)
+  },
+)
+
+// ── Helpers ────────────────────────────────────────────────────────────
+const formatCurrency = (val: number | string) =>
+  new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+  }).format(Number(val) || 0)
+
+const formatDate = (date: string | Date | undefined) =>
+  date ? moment(date).format('DD MMM YYYY, HH:mm') : '-'
+
+const isInProgress = (status: string | null | undefined) => {
+  if (!status) return false
+  const s = status.toUpperCase()
+  return s === 'SUBMITTED' || s.includes('SIGNING_IN_PROGRESS') || s.includes('SUBMITTED-')
+}
+
+// ── Actions ────────────────────────────────────────────────────────────
 const handleUpload = async () => {
   submitting.value = true
   try {
     await BpuService.upload({
       id: item.value!.pxId,
-      npwpNikPenandatangan: '3172022407830008',
+      npwpNikPenandatangan: nikSigner,
       passphrase: passphrase.value,
     })
     showUploadConfirmModal.value = false
-    passphrase.value = ''
     notifTitle.value = 'Upload Success'
     notifText.value = 'BPU has been submitted to DJP for processing.'
     notifType.value = 'success'
     showNotif.value = true
     fetchDetail(route.params.id as string)
-  } catch (err) {
-    console.error(err)
+  } catch {
     notifTitle.value = 'Upload Failed'
     notifText.value = 'Could not submit to DJP. Please check your credentials.'
     notifType.value = 'error'
@@ -523,12 +581,13 @@ const handleVerify = async () => {
   try {
     await BpuService.verify({ id: item.value!.pxId })
     notifTitle.value = 'Status Synchronized'
+    notifText.value = 'Status has been updated from DJP.'
     notifType.value = 'success'
     showNotif.value = true
     fetchDetail(route.params.id as string)
-  } catch (err) {
-    console.error(err)
+  } catch {
     notifTitle.value = 'Sync Failed'
+    notifText.value = 'Could not synchronize status with DJP.'
     notifType.value = 'error'
     showNotif.value = true
   } finally {
@@ -543,19 +602,20 @@ const handleBatal = () => {
 const handleBatalSubmit = async () => {
   submitting.value = true
   try {
-    await BpuService.batalkan(npwpPemotong, {
+    await BpuService.batalkan({
       id: item.value!.pxId,
       tglPembatalan: moment().format('DDMMYYYY'),
-      npwpNikPenandatangan: '3172022407830008',
+      npwpNikPenandatangan: nikSigner,
     })
     showBatalModal.value = false
     notifTitle.value = 'BPU Cancelled'
+    notifText.value = 'The tax document has been officially cancelled on DJP.'
     notifType.value = 'success'
     showNotif.value = true
     fetchDetail(route.params.id as string)
-  } catch (err) {
-    console.error(err)
+  } catch {
     notifTitle.value = 'Cancellation Failed'
+    notifText.value = 'Could not cancel the document. Please try again.'
     notifType.value = 'error'
     showNotif.value = true
   } finally {
@@ -563,13 +623,7 @@ const handleBatalSubmit = async () => {
   }
 }
 
-const onNotifClose = () => {
-  showNotif.value = false
-}
-
-const goBack = () => {
-  router.push('/wht-unifikasi')
-}
+const goBack = () => router.push('/wht-unifikasi')
 </script>
 
 <style scoped>

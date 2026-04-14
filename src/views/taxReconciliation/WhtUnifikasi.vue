@@ -453,10 +453,12 @@ const handleBatal = async () => {
 }
 
 const viewDetail = (item: BpuContent) => {
+  // Vue Router 4 does not support custom state in router.push()
+  // so we use sessionStorage to pass the item to the detail page
+  sessionStorage.setItem('bpu_detail_item', JSON.stringify(item))
   router.push({
     name: 'whtUnifikasiDetail',
     params: { id: item.id },
-    state: { item: item as any }
   })
 }
 
