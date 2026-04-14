@@ -15,14 +15,14 @@
       <i class="ki-filled ki-information-2 text-4xl text-danger mb-4"></i>
       <h3 class="text-lg font-bold text-gray-800">Record Not Found</h3>
       <p class="text-gray-500 mb-6">The requested PPh 21 record could not be retrieved.</p>
-      <button class="btn btn-primary" @click="router.push('/pph21-reconciliation')">
+      <button class="btn btn-primary" @click="goBack">
         <i class="ki-filled ki-arrow-left"></i>
-        Return to Dashboard
+        Return to List
       </button>
     </div>
 
     <div v-else class="space-y-6 animate-in fade-in duration-500">
-      <!-- Standard Header with Status -->
+      <!-- Header with Status Banner -->
       <div
         class="flex flex-wrap items-center justify-between gap-6 p-6 bg-white rounded-xl border border-gray-200 shadow-sm text-gray-800"
       >
@@ -37,17 +37,20 @@
           </div>
           <div>
             <div class="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-0.5">
-              Tax Record Status
+              PPh 21 — {{ featureLabel }}
             </div>
-            <div class="flex items-center gap-2">
-              <span class="text-xl font-bold text-gray-800">{{
-                item.status || item.fgStatus || 'NO STATUS'
-              }}</span>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-xl font-bold text-gray-800">
+                {{ item.status || item.fgStatus || 'NO STATUS' }}
+              </span>
               <span
-                v-if="item.nomorBuktiPotong || item.noBupot"
+                v-if="item.nomorBupot || item.nomorBuktiPotong || item.noBupot"
                 class="badge badge-primary badge-outline font-mono text-[10px] h-5"
               >
-                {{ item.nomorBuktiPotong || item.noBupot }}
+                {{ item.nomorBupot || item.nomorBuktiPotong || item.noBupot }}
+              </span>
+              <span class="text-gray-400 text-sm">
+                {{ item.masaPajak ? `Period ${item.masaPajak}/${item.tahunPajak}` : '' }}
               </span>
             </div>
           </div>
@@ -67,8 +70,9 @@
           </template>
 
           <template v-if="isInProgress(item.status || item.fgStatus)">
-            <button class="btn btn-sm btn-warning" @click="handleVerify">
-              <i class="ki-filled ki-arrow-circle-right"></i>
+            <button class="btn btn-sm btn-warning" @click="handleVerify" :disabled="submitting">
+              <span v-if="submitting" class="loading loading-spinner loading-xs"></span>
+              <i v-else class="ki-filled ki-arrow-circle-right"></i>
               Verify Status
             </button>
           </template>
@@ -82,21 +86,17 @@
         </div>
       </div>
 
-      <!-- Detail Content Cards -->
+      <!-- Detail Content -->
       <div class="flex flex-col lg:flex-row gap-[24px] items-start">
         <div class="flex-1 space-y-6">
-          <!-- Section 1: Recipient Information -->
+          <!-- Recipient Information -->
           <div class="card p-[20px] shadow-sm">
-            <p
-              class="font-bold text-sm mb-[16px] uppercase tracking-tight text-gray-700 flex items-center gap-2 border-b pb-2 border-gray-100"
-            >
+            <p class="font-bold text-sm mb-[16px] uppercase tracking-tight text-gray-700 border-b pb-2 border-gray-100">
               Recipient Information
             </p>
             <div class="space-y-1">
               <div class="flex items-baseline flex-wrap lg:flex-nowrap py-[8px]">
-                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600"
-                  >Recipient Name</label
-                >
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">Recipient Name</label>
                 <input
                   class="input flex-1 bg-gray-50 border-gray-200 font-semibold text-sm text-gray-800"
                   :value="item.namaPenerima || item.nama || '-'"
@@ -104,9 +104,7 @@
                 />
               </div>
               <div class="flex items-baseline flex-wrap lg:flex-nowrap py-[8px]">
-                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600"
-                  >NPWP / NIK</label
-                >
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">NPWP / NIK</label>
                 <input
                   class="input flex-1 bg-gray-50 border-gray-200 font-mono text-sm text-primary font-semibold"
                   :value="item.npwpPenerima || item.npwp || '-'"
@@ -116,45 +114,41 @@
             </div>
           </div>
 
-          <!-- Section 2: Financial & Tax Details -->
+          <!-- Tax & Financial Details -->
           <div class="card p-[20px] shadow-sm">
-            <p
-              class="font-bold text-sm mb-[16px] uppercase tracking-tight text-gray-700 flex items-center gap-2 border-b pb-2 border-gray-100"
-            >
-              Financial & Tax Details
+            <p class="font-bold text-sm mb-[16px] uppercase tracking-tight text-gray-700 border-b pb-2 border-gray-100">
+              Tax & Financial Details
             </p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-1">
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label min-w-[120px] text-sm font-medium text-gray-600"
-                  >Object Code</label
-                >
+                <label class="form-label min-w-[140px] text-sm font-medium text-gray-600">Object Code</label>
+                <input class="input bg-gray-50 border-gray-200 font-semibold text-sm text-gray-800" :value="item.kodeObjekPajak || '-'" disabled />
+              </div>
+              <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+                <label class="form-label min-w-[140px] text-gray-500">Withholding Date</label>
+                <input class="input bg-gray-50 border-gray-200" :value="item.tglPemotongan || '-'" disabled />
+              </div>
+              <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+                <label class="form-label min-w-[140px] text-gray-500">Pasal PPh</label>
+                <input class="input bg-gray-50 border-gray-200" :value="item.pasalPPh || '-'" disabled />
+              </div>
+              <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+                <label class="form-label min-w-[140px] text-gray-500">PPh Status</label>
+                <input class="input bg-gray-50 border-gray-200 font-semibold" :value="item.statusPPh || '-'" disabled />
+              </div>
+              <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+                <label class="form-label min-w-[140px] text-gray-500">Tax Type</label>
                 <input
-                  class="input bg-gray-50 border-gray-200 font-semibold text-sm text-gray-800"
-                  :value="item.kodeObjekPajak || '-'"
+                  class="input bg-gray-50 border-gray-200 font-semibold text-primary"
+                  :value="item.feature === 'final' ? 'Final' : 'Tidak Final (Non-Final)'"
                   disabled
                 />
               </div>
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label min-w-[120px] text-gray-500">Date</label>
+                <label class="form-label min-w-[140px] text-gray-500">Tax Period</label>
                 <input
                   class="input bg-gray-50 border-gray-200"
-                  :value="item.tglPemotongan || '-'"
-                  disabled
-                />
-              </div>
-              <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label min-w-[120px] text-gray-500">Pasal PPh</label>
-                <input
-                  class="input bg-gray-50 border-gray-200"
-                  :value="item.pasalPPh || '-'"
-                  disabled
-                />
-              </div>
-              <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label min-w-[120px] text-gray-500">Tax Type</label>
-                <input
-                  class="input bg-gray-50 border-gray-200"
-                  :value="item.fgPPh21Final ? 'Final' : 'Non-Final'"
+                  :value="item.masaPajak && item.tahunPajak ? `${item.masaPajak}/${item.tahunPajak}` : '-'"
                   disabled
                 />
               </div>
@@ -162,89 +156,73 @@
           </div>
         </div>
 
-        <!-- Sidebar / Right Panel: Calculation Summary -->
+        <!-- Right Panel -->
         <div class="w-full lg:max-w-sm space-y-6 lg:sticky lg:top-0">
+          <!-- Tax Summary -->
           <div class="card shadow-sm">
             <div class="card-header py-[16px] px-[20px] border-b border-gray-100 bg-gray-50">
-              <span
-                class="font-bold text-sm uppercase tracking-tight text-gray-700 flex items-center gap-2"
-              >
+              <span class="font-bold text-sm uppercase tracking-tight text-gray-700 flex items-center gap-2">
                 <i class="ki-filled ki-wallet text-danger"></i>
                 Tax Summary
               </span>
             </div>
             <div class="card-body p-0">
               <div class="flex flex-col">
-                <div
-                  class="border-b border-gray-100 py-[15px] px-[20px] text-sm flex justify-between"
-                >
-                  <span class="text-gray-500 font-medium uppercase tracking-tight text-[11px]"
-                    >Tax Base (DPP)</span
-                  >
-                  <span class="font-bold text-gray-800">{{ formatCurrency(item.dpp || 0) }}</span>
+                <div class="border-b border-gray-100 py-[15px] px-[20px] text-sm flex justify-between">
+                  <span class="text-gray-500 font-medium uppercase tracking-tight text-[11px]">Gross Income</span>
+                  <span class="font-bold text-gray-800">{{ formatCurrency(Number(item.penghasilanKotor) || 0) }}</span>
                 </div>
-                <div
-                  class="border-b border-gray-100 py-[15px] px-[20px] text-sm flex justify-between"
-                >
-                  <span class="text-gray-500 font-medium uppercase tracking-tight text-[11px]"
-                    >Tax Rate</span
-                  >
-                  <span class="font-bold text-gray-800">{{ item.tarif || 0 }}%</span>
+                <div class="border-b border-gray-100 py-[15px] px-[20px] text-sm flex justify-between">
+                  <span class="text-gray-500 font-medium uppercase tracking-tight text-[11px]">Gross (Previous)</span>
+                  <span class="font-bold text-gray-800">{{ formatCurrency(Number(item.penghasilanKotorSebelumnya) || 0) }}</span>
                 </div>
-                <div
-                  class="py-[20px] px-[20px] text-sm flex justify-between items-center bg-red-50/30"
-                >
-                  <span class="uppercase font-bold text-danger tracking-wider text-[11px]"
-                    >Withheld PPh 21</span
-                  >
-                  <span class="text-xl font-black text-danger">{{
-                    formatCurrency(item.pphDipotong || 0)
-                  }}</span>
+                <div class="border-b border-gray-100 py-[15px] px-[20px] text-sm flex justify-between">
+                  <span class="text-gray-500 font-medium uppercase tracking-tight text-[11px]">Tax Rate</span>
+                  <span class="font-bold text-gray-800">{{ Number(item.tarif) || 0 }}%</span>
+                </div>
+                <div class="py-[20px] px-[20px] text-sm flex justify-between items-center bg-red-50/30">
+                  <span class="uppercase font-bold text-danger tracking-wider text-[11px]">Withheld PPh 21</span>
+                  <span class="text-xl font-black text-danger">{{ formatCurrency(Number(item.pphDipotong) || 0) }}</span>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Metadata Card -->
+          <!-- System Metadata -->
           <div class="card p-[20px] shadow-sm bg-gray-50/50">
-            <p class="font-bold text-[11px] mb-[16px] uppercase tracking-[0.15em] text-gray-400">
-              System Metadata
-            </p>
+            <p class="font-bold text-[11px] mb-[16px] uppercase tracking-[0.15em] text-gray-400">System Metadata</p>
             <div class="space-y-4">
               <div class="flex flex-col gap-1">
-                <label class="text-[11px] uppercase font-bold text-gray-400">PX-Internal ID</label>
-                <div class="text-sm font-mono text-gray-600 font-semibold">
-                  {{ item.pxId || '-' }}
-                </div>
+                <label class="text-[11px] uppercase font-bold text-gray-400">Local DB ID</label>
+                <div class="text-sm font-mono text-gray-600"># {{ item.id || '-' }}</div>
               </div>
               <div class="flex flex-col gap-1">
-                <label class="text-[11px] uppercase font-bold text-gray-400">Reference No</label>
+                <label class="text-[11px] uppercase font-bold text-gray-400">PX ID (Pajak Express)</label>
+                <div class="text-sm font-mono text-gray-600 font-semibold">{{ item.pxId || '-' }}</div>
+              </div>
+              <div class="flex flex-col gap-1">
+                <label class="text-[11px] uppercase font-bold text-gray-400">Bupot ID</label>
                 <div class="text-sm font-bold text-gray-800">{{ item.idBupot || '-' }}</div>
+              </div>
+              <div v-if="item.createdAt" class="flex flex-col gap-1">
+                <label class="text-[11px] uppercase font-bold text-gray-400">Created On</label>
+                <div class="text-xs text-gray-600 italic">{{ formatDate(item.createdAt) }}</div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Action Footer -->
+      <!-- Footer -->
       <div class="pt-8 border-t border-gray-200 flex items-center justify-between">
-        <button
-          class="btn btn-outline btn-primary shadow-sm"
-          @click="goBack"
-          :disabled="submitting"
-        >
+        <button class="btn btn-outline btn-primary shadow-sm" @click="goBack" :disabled="submitting">
           <i class="ki-filled ki-arrow-left"></i>
           Back to List
         </button>
-
-        <div v-if="item.createdAt" class="text-right">
-          <p class="text-[10px] text-gray-400 uppercase font-bold">Created On</p>
-          <p class="text-xs text-gray-600 italic">{{ formatDate(item.createdAt) }}</p>
-        </div>
       </div>
     </div>
 
-    <!-- Modals -->
+    <!-- Cancel Modal -->
     <ModalConfirmation
       :open="showBatalModal"
       id="pph21-detail-batal-modal"
@@ -256,20 +234,12 @@
       :loading="submitting"
     />
 
-    <ModalNotification
-      :open="showNotif"
-      id="pph21-detail-notif"
-      :title="notifTitle"
-      :text="notifText"
-      :type="notifType"
-      @on-close="onNotifClose"
-    />
-
+    <!-- Upload Modal -->
     <ModalConfirmation
       :open="showUploadConfirmModal"
       id="upload-pph21-modal"
       title="Upload to DJP"
-      :text="`Ready to submit PPh 21 for ${item?.namaPenerima || item?.nama || 'this record'} to DJP? This will officially record the tax withholding.`"
+      :text="`Ready to submit PPh 21 for ${item?.namaPenerima || item?.nama || 'this record'} to DJP?`"
       type="confirm"
       @submit="handleUpload"
       @cancel="showUploadConfirmModal = false"
@@ -277,9 +247,7 @@
     >
       <div class="w-full flex flex-col gap-4 mt-2">
         <div class="flex flex-col gap-2">
-          <label class="form-label text-xs uppercase text-gray-500 font-bold"
-            >Passphrase (PX-Internal)</label
-          >
+          <label class="form-label text-xs uppercase text-gray-500 font-bold">Passphrase (PX-Internal)</label>
           <div class="relative">
             <input
               v-model="passphrase"
@@ -292,18 +260,22 @@
               class="btn btn-icon btn-sm absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8"
               @click="showPassphrase = !showPassphrase"
             >
-              <i
-                :class="[
-                  'ki-filled',
-                  showPassphrase ? 'ki-eye-slash' : 'ki-eye',
-                  'text-gray-500',
-                ]"
-              ></i>
+              <i :class="['ki-filled', showPassphrase ? 'ki-eye-slash' : 'ki-eye', 'text-gray-500']"></i>
             </button>
           </div>
         </div>
       </div>
     </ModalConfirmation>
+
+    <!-- Notification -->
+    <ModalNotification
+      :open="showNotif"
+      id="pph21-detail-notif"
+      :title="notifTitle"
+      :text="notifText"
+      :type="notifType"
+      @on-close="showNotif = false"
+    />
   </div>
 </template>
 
@@ -320,10 +292,11 @@ const router = useRouter()
 const route = useRoute()
 const idNumeric = route.params.id as string
 const nikSigner = '3172022407830008'
+const npwpPemotong = '1091031210912281'
 
 const routes = [
   { name: 'Tax Reconciliation', to: '/tax-reconciliation' },
-  { name: 'PPh 21 (Reconciliation)', to: '/pph21-reconciliation' },
+  { name: 'WHT - Pasal 21', to: '/wht-pasal-21' },
   { name: 'Detail', to: '#' },
 ]
 
@@ -341,59 +314,19 @@ const notifTitle = ref('')
 const notifText = ref('')
 const notifType = ref<'success' | 'error'>('success')
 
-// Lifecycle
-const fetchDetail = async () => {
-  loading.value = true
-  try {
-    const res = await Pph21Service.getDetail(idNumeric)
-    if (res.result && 'content' in res.result) {
-      item.value = res.result.content as Pph21Content
-    }
-  } catch (err) {
-    console.error('Error fetching PPh 21 detail:', err)
-  } finally {
-    loading.value = false
-  }
-}
-
-onMounted(() => {
-  const state = window.history.state
-  if (state && state.item) {
-    item.value = state.item as Pph21Content
-    loading.value = false
-  } else {
-    fetchDetail()
-  }
+// Computed
+const featureLabel = computed(() => {
+  if (!item.value?.feature) return 'Non-Final'
+  return item.value.feature === 'final' ? 'Final' : 'Non-Final'
 })
-
-// Methods
-const formatCurrency = (val: number | string) => {
-  const num = Number(val) || 0
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0,
-  }).format(num)
-}
-
-const formatDate = (date: string | Date | undefined) => {
-  if (!date) return '-'
-  return moment(date).format('DD MMM YYYY, HH:mm')
-}
-
-const isInProgress = (status: string | null | undefined) => {
-  if (!status) return false
-  const s = status.toUpperCase()
-  return s === 'SUBMITTED' || s.includes('SIGNING_IN_PROGRESS') || s.includes('SUBMITTED-')
-}
 
 const statusColorClass = computed(() => {
   if (!item.value) return 'bg-gray-400'
   const s = (item.value.status || item.value.fgStatus || '').toUpperCase()
   if (s === 'DRAFT') return 'bg-primary'
-  if (s === 'NORMAL-DONE') return 'bg-success font-bold'
-  if (s.includes('PROGRESS') || s === 'SUBMITTED') return 'bg-warning text-yellow-900'
-  if (s === 'ERROR') return 'bg-danger font-bold'
+  if (s === 'NORMAL-DONE') return 'bg-success'
+  if (s.includes('PROGRESS') || s === 'SUBMITTED') return 'bg-warning'
+  if (s === 'ERROR') return 'bg-danger'
   return 'bg-gray-500'
 })
 
@@ -407,25 +340,73 @@ const statusIcon = computed(() => {
   return 'ki-information-2'
 })
 
-// Actions Handlers
+// Helpers
+const formatCurrency = (val: number | string) => {
+  const num = Number(val) || 0
+  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num)
+}
+
+const formatDate = (date: string | Date | undefined) => {
+  if (!date) return '-'
+  return moment(date).format('DD MMM YYYY, HH:mm')
+}
+
+const isInProgress = (status: string | null | undefined) => {
+  if (!status) return false
+  const s = status.toUpperCase()
+  return s === 'SUBMITTED' || s.includes('SIGNING_IN_PROGRESS') || s.includes('SUBMITTED-')
+}
+
+// Data Fetch
+const fetchDetail = async () => {
+  loading.value = true
+  try {
+    const res = await Pph21Service.getDetail(idNumeric)
+    const content = (res as any)?.result?.content
+    if (content) item.value = content as Pph21Content
+  } catch (err) {
+    console.error('Error fetching PPh 21 detail:', err)
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  // Try sessionStorage first (set by list page viewDetail)
+  const stored = sessionStorage.getItem('pph21_detail_item')
+  if (stored) {
+    try {
+      item.value = JSON.parse(stored) as Pph21Content
+      loading.value = false
+    } catch {
+      fetchDetail()
+    }
+  } else {
+    fetchDetail()
+  }
+})
+
+// Action Handlers
 const handleUpload = async () => {
+  if (!item.value) return
   submitting.value = true
   try {
     await Pph21Service.upload({
-      id: item.value!.pxId,
+      id: item.value.pxId,
       npwpNikPenandatangan: nikSigner,
       passphrase: passphrase.value,
     })
     showUploadConfirmModal.value = false
     passphrase.value = ''
     notifTitle.value = 'Upload Success'
-    notifText.value = 'PPh 21 record has been submitted to DJP.'
+    notifText.value = 'PPh 21 record has been submitted to DJP for processing.'
     notifType.value = 'success'
     showNotif.value = true
     fetchDetail()
   } catch (err) {
     console.error(err)
     notifTitle.value = 'Upload Failed'
+    notifText.value = 'Failed to submit to DJP. Please check the passphrase or try again.'
     notifType.value = 'error'
     showNotif.value = true
   } finally {
@@ -434,16 +415,23 @@ const handleUpload = async () => {
 }
 
 const handleVerify = async () => {
+  if (!item.value) return
   submitting.value = true
   try {
-    await Pph21Service.verify({ id: item.value!.pxId })
+    await Pph21Service.verify({
+      id: item.value.pxId,
+      npwpPemotong,
+      feature: item.value.feature || 'tdkfinal',
+    })
     notifTitle.value = 'Status Synchronized'
+    notifText.value = 'The status has been updated from DJP.'
     notifType.value = 'success'
     showNotif.value = true
     fetchDetail()
   } catch (err) {
     console.error(err)
     notifTitle.value = 'Sync Failed'
+    notifText.value = 'Could not synchronize status with DJP at this time.'
     notifType.value = 'error'
     showNotif.value = true
   } finally {
@@ -456,22 +444,24 @@ const handleBatal = () => {
 }
 
 const handleBatalSubmit = async () => {
+  if (!item.value) return
   submitting.value = true
   try {
-    const npwpPemotong = '1091031210969728'
-    await Pph21Service.batalkan(npwpPemotong, {
-      id: item.value!.pxId,
+    await Pph21Service.batalkan({
+      id: item.value.pxId,
       tglPembatalan: moment().format('DDMMYYYY'),
       npwpNikPenandatangan: nikSigner,
     })
     showBatalModal.value = false
     notifTitle.value = 'Record Cancelled'
+    notifText.value = 'The PPh 21 certificate has been officially cancelled on DJP.'
     notifType.value = 'success'
     showNotif.value = true
     fetchDetail()
   } catch (err) {
     console.error(err)
     notifTitle.value = 'Cancellation Failed'
+    notifText.value = 'Could not cancel this record. Please try again.'
     notifType.value = 'error'
     showNotif.value = true
   } finally {
@@ -479,16 +469,13 @@ const handleBatalSubmit = async () => {
   }
 }
 
-const onNotifClose = () => {
-  showNotif.value = false
-}
-
 const goBack = () => {
-  router.push('/pph21-reconciliation')
+  router.push('/wht-pasal-21')
 }
 </script>
 
 <style scoped>
+.text-danger { color: #f1416c; }
 .badge-outline {
   border: 1px solid currentColor;
   background-color: transparent;
