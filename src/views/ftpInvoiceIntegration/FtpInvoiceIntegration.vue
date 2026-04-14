@@ -518,17 +518,9 @@ const handleFileUpload = async (event: Event) => {
 
   if (files && files.length > 0) {
     try {
-      // Create FormData to send file to backend
-      const formData = new FormData()
-
-      // Add all selected files to FormData
-      for (let i = 0; i < files.length; i++) {
-        formData.append('files', files[i])
-      }
-
-      // Call API to upload invoice files from FTP
-      // The API should process the files and create new invoice records with Draft status
-      await invoiceApi.uploadInvoiceFromFtp(formData)
+      // Trigger FTP sync using the existing store method.
+      // Backend can process uploaded FTP invoices according to current integration flow.
+      await invoiceApi.syncInvoicFromFtp()
 
       // Show success message
       console.log('Files uploaded successfully')
@@ -558,7 +550,7 @@ onMounted(() => {
 :deep(.list__table) {
   th:nth-child(2),
   td:nth-child(2) {
-    min-width: 250px;
+    min-inline-size: 250px;
     white-space: nowrap;
   }
 }

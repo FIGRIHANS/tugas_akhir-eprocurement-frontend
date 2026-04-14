@@ -25,6 +25,32 @@ import type {
 
 import type { CasNoTypes } from '@/stores/master-data/types/invoiceMasterData'
 
+interface MockSapPoItemTypes {
+  id: number
+  poNumber: string
+  sku: string
+  itemName: string
+  uom: string
+  qtyOrdered: number
+  unitPrice?: number
+  qtyInTransit?: number
+  qtyDelivered?: number
+}
+
+interface MockSapPoDetailTypes {
+  poNumber: string
+  vendorCode: string
+  vendorName: string
+  poDate: string
+  totalAmount: number | null
+  status?: string
+  createdBy: string
+  updatedBy: string
+  createdUtcDate: string
+  updatedUtcDate: string
+  items: MockSapPoItemTypes[]
+}
+
 export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => {
   const submissionStatus = ref<SubmissionStatusTypes[]>([])
   const documentTypeList = ref<DocumentTypes[]>([])
@@ -65,14 +91,54 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
     return response.data.result
   }
 
-  const getPoGr = async (poNumber: string, companyCode: string, vendorCode: string) => {
-    const response: ApiResponse<PoGrItemTypes[]> = await invoiceApi.get(
-      `/invoice/po-gr?poNumber=${poNumber}&companyCode=${companyCode}&vendorCode=${vendorCode}`,
-    )
+  const getPoGr = async (poNumber: string) => {
+    const response: ApiResponse<MockSapPoDetailTypes> = await invoiceApi.get(`/mock-sap/detail`, {
+      params: {
+        poNumber,
+      },
+    })
 
-    poGrList.value = response.data.result.content
+    const content = response.data.result.content
+    const mappedItems: PoGrItemTypes[] = (content?.items || []).map((item) => {
+      const quantity = item.qtyInTransit ?? item.qtyOrdered ?? 0
+      const itemAmount = (item.unitPrice || 0) * quantity
 
-    return response.data.result
+      return {
+        poNo: item.poNumber,
+        poItem: item.id,
+        grDocumentNo: '',
+        grDocumentItem: 0,
+        grDocumentDate: '',
+        taxCode: '',
+        quantity,
+        unit: item.uom,
+        uom: item.uom,
+        itemText: item.itemName,
+        material: item.sku,
+        materialDescription: item.itemName,
+        currency: '',
+        conditionType: '',
+        conditionTypeDesc: '',
+        qcStatus: '',
+        postingDate: '',
+        enteredOn: '',
+        purchasingOrg: '',
+        department: '',
+        currencyLC: '',
+        currencyTC: '',
+        itemAmountLC: itemAmount,
+        itemAmountTC: itemAmount,
+        itemAmount,
+        deliveryOrderNo: '',
+      }
+    })
+
+    poGrList.value = mappedItems
+
+    return {
+      ...response.data.result,
+      content: mappedItems,
+    }
   }
 
   const getListPo = async (data: QueryParamsListPoTypes) => {
