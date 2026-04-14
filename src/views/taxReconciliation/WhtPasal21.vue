@@ -238,7 +238,7 @@ const routes = ref<routeTypes[]>([
   { name: 'WHT - Pasal 21', to: '/wht-pasal-21' },
 ])
 
-const npwpPemotong = '1091031210912281'
+const npwpPemotong = '1091031210969728'
 const nikSigner = '3172022407830008'
 
 // State
@@ -348,7 +348,7 @@ const handleUploadSubmit = async () => {
   submitting.value = true
   try {
     await Pph21Service.upload({
-      id: selectedItem.value.pxId,
+      id: selectedItem.value.id,  // Local DB id — backend maps to PxId for Pajak Express
       npwpNikPenandatangan: nikSigner,
       passphrase: passphrase.value,
     })
@@ -393,7 +393,7 @@ const handleDelete = async () => {
   if (!selectedItem.value) return
   submitting.value = true
   try {
-    await Pph21Service.deleteDraft({ id: selectedItem.value.pxId })
+    await Pph21Service.deleteDraft({ id: selectedItem.value.id })  // Local DB id — backend maps to PxId
     showDeleteModal.value = false
     fetchPphList()
     showSuccessNotif('Draft Deleted', 'The draft record has been removed.')
@@ -419,8 +419,18 @@ const handleBatal = async () => {
   try {
     await Pph21Service.batalkan({
       id: selectedItem.value.pxId,
+      idBupot: selectedItem.value.idBupot || '',
+      noBupot: selectedItem.value.nomorBupot || selectedItem.value.noBupot || '',
+      masaPajak: selectedItem.value.masaPajak || '',
+      tahunPajak: selectedItem.value.tahunPajak || '',
       tglPembatalan: moment().format('DDMMYYYY'),
       npwpNikPenandatangan: nikSigner,
+      passphrase: 'Pajak123@@',
+      namaTtd: 'Dave Navarro',
+      position: 'Director',
+      alamatPenandatangan: 'Jakarta',
+      dcPenandatangan: '1',
+      declare: '1',
     })
     showBatalModal.value = false
     fetchPphList()

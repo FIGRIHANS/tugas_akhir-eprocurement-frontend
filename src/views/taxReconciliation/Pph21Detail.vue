@@ -292,7 +292,7 @@ const router = useRouter()
 const route = useRoute()
 const idNumeric = route.params.id as string
 const nikSigner = '3172022407830008'
-const npwpPemotong = '1091031210912281'
+const npwpPemotong = '1091031210969728'
 
 const routes = [
   { name: 'Tax Reconciliation', to: '/tax-reconciliation' },
@@ -392,7 +392,7 @@ const handleUpload = async () => {
   submitting.value = true
   try {
     await Pph21Service.upload({
-      id: item.value.pxId,
+      id: item.value.id,  // Local DB id — backend maps to PxId for Pajak Express
       npwpNikPenandatangan: nikSigner,
       passphrase: passphrase.value,
     })
@@ -449,8 +449,18 @@ const handleBatalSubmit = async () => {
   try {
     await Pph21Service.batalkan({
       id: item.value.pxId,
+      idBupot: item.value.idBupot || '',
+      noBupot: item.value.nomorBupot || item.value.noBupot || '',
+      masaPajak: item.value.masaPajak || '',
+      tahunPajak: item.value.tahunPajak || '',
       tglPembatalan: moment().format('DDMMYYYY'),
       npwpNikPenandatangan: nikSigner,
+      passphrase: 'Pajak123@@',
+      namaTtd: 'Dave Navarro',
+      position: 'Director',
+      alamatPenandatangan: 'Jakarta',
+      dcPenandatangan: '1',
+      declare: '1',
     })
     showBatalModal.value = false
     notifTitle.value = 'Record Cancelled'
