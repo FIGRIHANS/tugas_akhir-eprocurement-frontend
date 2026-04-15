@@ -12,7 +12,7 @@
       :class="{
         'text-[11px] px-[3px] text-gray-500 bg-white absolute z-50 -top-[6px] left-[7px] leading-[12px]':
           label && labelTop,
-        'form-label flex items-center gap-1 w-2/5': label && !labelTop,
+        'form-label flex items-center gap-1 w-full lg:max-w-xs': label && !labelTop,
       }"
     >
       {{ label }}
@@ -21,30 +21,28 @@
     <VueDatePicker
       v-model="date"
       :enable-time="false"
-      :format="format"
+      :format="format || 'dd/MM/yyyy'"
       :range="range"
       :months="range ? 2 : undefined"
       :columns="range ? 2 : undefined"
       :multi-calendars="range ? 2 : undefined"
       :months-to-show="props.monthsToShow"
-      :preview-format="format"
+      :preview-format="format || 'dd/MM/yyyy'"
       :min-date="minDate"
       :max-date="maxDate"
-      class="w-full"
+      class="w-full flex-1"
       :teleport="teleport"
     >
       <template #dp-input="{ value }">
-        <div class="input relative" :class="{ 'border-danger': error || !!validationError }">
+        <div class="input relative flex items-center justify-between w-full" :class="{ 'border-danger': error || !!validationError }">
           <input
             :placeholder="placeholder"
             :value="value"
             readonly
-            class="min-w-[0px]"
+            class="bg-transparent border-none outline-none w-full h-full cursor-pointer text-sm pr-16"
             :disabled="disabled"
           />
-          <button class="btn btn-icon">
-            <i class="ki-filled ki-calendar"></i>
-          </button>
+          <i class="ki-filled ki-calendar text-gray-400 text-lg mr-2"></i>
         </div>
       </template>
     </VueDatePicker>
@@ -73,7 +71,7 @@ const props = withDefaults(
     minDays?: number
   }>(),
   {
-    placeholder: 'Select',
+    placeholder: 'Select Date',
     minDays: 0
   }
 )

@@ -105,17 +105,13 @@
               </div>
 
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label w-full lg:max-w-xs">Withholding Date</label>
-                <div class="flex-1">
-                  <input
-                    type="date"
-                    v-model="form.tglPemotongan"
-                    class="input w-full"
-                    :class="{ 'border-danger': errors.tglPemotongan }"
-                    required
-                  />
-                  <p v-if="errors.tglPemotongan" class="text-danger text-xs mt-1">{{ errors.tglPemotongan }}</p>
-                </div>
+                <DatePicker
+                  v-model="form.tglPemotongan"
+                  label="Withholding Date"
+                  placeholder="Select withholding date"
+                  :error="!!errors.tglPemotongan"
+                  required
+                />
               </div>
 
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
@@ -275,6 +271,7 @@ import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import ModalNotification from '@/components/modal/ModalNotification.vue'
+import DatePicker from '@/components/datePicker/DatePicker.vue'
 import Pph21Service, { type Pph21CreatePayload } from '@/services/pph21.service'
 import moment from 'moment'
 
@@ -307,31 +304,31 @@ const form = ref<Pph21CreatePayload>({
   tahunPajak: moment().format('YYYY'),
   fgNpwpNik: true,
   fgTransaction: 'NEW',
-  npwp: '3602172704980004',
+  npwp: '',
   nik: '',
-  nama: 'Dave Navarro',
+  nama: '',
   fgJnsBupot: '21',
   tglPemotongan: moment().format('YYYY-MM-DD'),
   feature: 'tdkfinal',
   email: '',
-  glAccount: '511010100',
+  glAccount: '',
   dataDetilBp21: {
     sertifikatInsentifDipotong: '9',
     nomorSertifikatInsentif: '',
-    kodeObjekPajak: '21-100-12',
+    kodeObjekPajak: '',
     pasalPPh: 'Pasal 21',
-    statusPPh: 'TK/0',
-    kap: '411121',
-    kjs: '100',
+    statusPPh: '',
+    kap: '',
+    kjs: '',
     penghasilanKotorSebelumnya: 0,
-    penghasilanKotor: 9000000,
-    tarif: 5,
-    pphDipotong: 450000,
+    penghasilanKotor: 0,
+    tarif: 0,
+    pphDipotong: 0,
     NormaPenghasilan: 100,
     dokReferensi: [
       {
         dokReferensi: 'COMMERCIALINVOICE',
-        nomorDokumen: 'INV-PENGUJIAN-21',
+        nomorDokumen: '',
         tanggal_Dokumen: moment().format('DDMMYYYY'),
       },
     ],

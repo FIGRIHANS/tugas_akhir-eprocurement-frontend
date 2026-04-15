@@ -74,6 +74,19 @@
                   />
                 </div>
 
+                <!-- Vendor Name -->
+                <div class="flex items-center gap-4">
+                  <label class="form-label text-sm font-medium text-gray-600 w-40 mb-0">
+                    Vendor Name
+                  </label>
+                  <input
+                    v-model="detailData.vendorName"
+                    type="text"
+                    class="input flex-1 bg-gray-50"
+                    disabled
+                  />
+                </div>
+
                 <!-- Trip ID -->
                 <div class="flex items-center gap-4">
                   <label class="form-label text-sm font-medium text-gray-600 w-40 mb-0">

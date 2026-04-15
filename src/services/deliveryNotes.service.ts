@@ -15,7 +15,8 @@ export interface DeliveryNotesData {
   deliveryNoteNumber: string
   poNumber: string
   vendorCode: string
-  // vendorName?: string
+  vendorID?: string
+  vendorName?: string
   estimatedArrival: string
   shippingDate?: string // Backend sends this in detail response
   pickupAddress: string
@@ -50,6 +51,8 @@ export interface DeliveryNotesQueryParams {
   searchText?: string
   deliveryNoteNumber?: string
   poNumber?: string
+  vendorID?: string
+  vendorName?: string
   vendorCode?: string
   transporter?: string
   driverName?: string
@@ -72,6 +75,7 @@ export interface MockSapPoItem {
 export interface MockSapPoData {
   poNumber: string
   vendorCode: string
+  vendorID?: string
   vendorName: string
   poDate: string
   totalAmount: number | null
@@ -87,6 +91,8 @@ export interface DeliveryNoteCreatePayload {
   deliveryNoteNumber: string
   poNumber: string
   vendorCode: string
+  vendorID?: string
+  vendorName: string
   tripID?: string
   transporter: string
   licensePlate: string
@@ -139,11 +145,11 @@ const DeliveryNotesService = {
           params: { deliveryNoteNumber },
         },
       )
-  
+
       if (response.data?.result?.content) {
         return response.data.result.content
       }
-  
+
       return null
     } catch (error) {
       console.error('Error fetching delivery notes by Delivery Note Number:', error)
