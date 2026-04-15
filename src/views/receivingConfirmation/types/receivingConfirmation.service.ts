@@ -16,8 +16,10 @@ export interface ReceivingConfirmationDetailPayload {
 // Interface untuk Create Payload - untuk POST ke backend
 export interface ReceivingConfirmationCreatePayload {
   poNumber: string
+  vendorID?: string
+  vendorName?: string
   tripID?: string
-  orderNumber?: string
+  DeliveryNoteNumber?: string
   status?: string
   rejectReason?: string
   hasDiscrepancy?: boolean
@@ -37,7 +39,10 @@ export interface ReceivingConfirmationCreatePayload {
 export interface ReceivingConfirmationData {
   reportID: number
   tripID: string
-  orderNumber: string
+  DeliveryNoteNumber: string
+  poNumber: string
+  vendorID?: string
+  vendorName?: string
   status: string
   rejectReason: string | null
   receivedDate: string
@@ -91,7 +96,10 @@ export interface ApiResponse<T> {
 // Interface untuk parameter filter/query - sesuai dengan backend controller
 export interface ReceivingConfirmationQueryParams {
   searchText?: string
-  orderNumber?: string
+  DeliveryNoteNumber?: string
+  poNumber?: string
+  vendorID?: string
+  vendorName?: string
   whCheckerName?: string
   driverName?: string
   status?: string
@@ -133,10 +141,15 @@ const ReceivingConfirmationService = {
    * Get detail of a receiving confirmation by ID
    * Endpoint: api/receiving-confirmation/{id}
    */
-  async getDetail(id: number): Promise<ReceivingConfirmationData | null> {
+  async getDetail(reportID: number): Promise<ReceivingConfirmationData | null> {
     try {
       const response = await invoiceApi.get<ApiResponse<ReceivingConfirmationData>>(
-        `/receiving-confirmation/${id}`,
+        `/receiving-confirmation/detail`,
+        {
+          params: {
+            reportID: reportID,
+          },
+        },
       )
 
       if (response.data?.result?.content) {

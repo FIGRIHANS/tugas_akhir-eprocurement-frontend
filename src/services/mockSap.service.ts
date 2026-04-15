@@ -17,6 +17,7 @@ export interface MockSapDetailItem {
 export interface MockSapHeaderData {
   poNumber: string
   vendorCode: string
+  vendorID?: string
   vendorName: string
   poDate: string
   totalAmount: number | null
@@ -44,6 +45,7 @@ export interface MockSapListQueryParams {
   searchText?: string
   poNumber?: string
   vendorCode?: string
+  vendorID?: string
   vendorName?: string
   poDateFrom?: string
   poDateTo?: string

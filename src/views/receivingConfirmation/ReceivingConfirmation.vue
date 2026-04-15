@@ -95,7 +95,7 @@
           </thead>
           <tbody>
             <tr v-if="filteredDataList?.length === 0">
-              <td colspan="18" class="text-center">No data found.</td>
+              <td colspan="20" class="text-center">No data found.</td>
             </tr>
             <tr v-for="(item, index) in list" :key="index">
               <td class="text-center">
@@ -110,7 +110,9 @@
               <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
               <td>{{ item.reportID }}</td>
               <td>{{ item.tripID }}</td>
-              <td>{{ item.orderNumber }}</td>
+              <td>{{ item.DeliveryNoteNumber }}</td>
+              <td>{{ item.poNumber }}</td>
+              <td>{{ item.vendorName || '-' }}</td>
               <td>
                 <span class="badge badge-outline" :class="getStatusBadgeClass(item.status)">
                   {{ item.status }}
@@ -215,7 +217,9 @@ const columns = ref<string[]>([
   'No',
   'Report ID',
   'Trip ID',
-  'Order Number',
+  'Delivery Note Number',
+  'PO Number',
+  'Vendor Name',
   'Status',
   'Reject Reason',
   'Discrepancy',

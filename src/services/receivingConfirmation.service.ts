@@ -16,8 +16,10 @@ export interface ReceivingConfirmationDetailPayload {
 // Interface untuk Create Payload - untuk POST ke backend
 export interface ReceivingConfirmationCreatePayload {
   poNumber: string
+  vendorID?: string
+  vendorName?: string
   tripID?: string
-  orderNumber?: string
+  DeliveryNoteNumber?: string
   status?: string
   rejectReason?: string
   hasDiscrepancy?: boolean
@@ -43,7 +45,10 @@ export interface ReceivingConfirmationUpdatePayload {
 export interface ReceivingConfirmationData {
   reportID: number
   tripID: string
-  orderNumber: string
+  DeliveryNoteNumber: string
+  poNumber: string
+  vendorID?: string
+  vendorName?: string
   status: string
   rejectReason: string | null
   receivedDate: string
@@ -98,7 +103,10 @@ export interface ApiResponse<T> {
 // Interface untuk parameter filter/query
 export interface ReceivingConfirmationQueryParams {
   searchText?: string
-  orderNumber?: string
+  DeliveryNoteNumber?: string
+  poNumber?: string
+  vendorID?: string
+  vendorName?: string
   whCheckerName?: string
   driverName?: string
   status?: string
