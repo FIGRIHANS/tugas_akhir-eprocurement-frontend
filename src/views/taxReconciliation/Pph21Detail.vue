@@ -57,20 +57,15 @@
         </div>
 
         <div class="flex gap-2">
-          <button class="btn btn-sm btn-light border border-gray-200" @click="goBack">
-            <i class="ki-filled ki-arrow-left"></i>
-            Back
-          </button>
-
           <template v-if="(item.status || item.fgStatus)?.toUpperCase() === 'DRAFT'">
-            <button class="btn btn-sm btn-primary" @click="showUploadConfirmModal = true">
+            <button class="btn btn-md btn-primary" @click="showUploadConfirmModal = true">
               <i class="ki-filled ki-cloud-change"></i>
               Upload to DJP
             </button>
           </template>
 
           <template v-if="isInProgress(item.status || item.fgStatus)">
-            <button class="btn btn-sm btn-warning" @click="handleVerify" :disabled="submitting">
+            <button class="btn btn-md btn-warning" @click="handleVerify" :disabled="submitting">
               <span v-if="submitting" class="loading loading-spinner loading-xs"></span>
               <i v-else class="ki-filled ki-arrow-circle-right"></i>
               Verify Status
@@ -78,7 +73,7 @@
           </template>
 
           <template v-if="(item.status || item.fgStatus)?.toUpperCase() === 'NORMAL-DONE'">
-            <button class="btn btn-sm btn-danger" @click="handleBatal">
+            <button class="btn btn-md btn-danger" @click="handleBatal">
               <i class="ki-filled ki-cross-circle"></i>
               Cancel Bupot
             </button>
@@ -125,29 +120,29 @@
                 <input class="input bg-gray-50 border-gray-200 font-semibold text-sm text-gray-800" :value="item.kodeObjekPajak || '-'" disabled />
               </div>
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label min-w-[140px] text-gray-500">Withholding Date</label>
-                <input class="input bg-gray-50 border-gray-200" :value="item.tglPemotongan || '-'" disabled />
+                <label class="form-label min-w-[140px] text-sm font-medium text-gray-600">Withholding Date</label>
+                <input class="input bg-gray-50 border-gray-200 font-semibold text-sm text-gray-800" :value="item.tglPemotongan || '-'" disabled />
               </div>
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label min-w-[140px] text-gray-500">Pasal PPh</label>
-                <input class="input bg-gray-50 border-gray-200" :value="item.pasalPPh || '-'" disabled />
+                <label class="form-label min-w-[140px] text-sm font-medium text-gray-600">Pasal PPh</label>
+                <input class="input bg-gray-50 border-gray-200 font-semibold text-sm text-gray-800" :value="item.pasalPPh || '-'" disabled />
               </div>
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label min-w-[140px] text-gray-500">PPh Status</label>
-                <input class="input bg-gray-50 border-gray-200 font-semibold" :value="item.statusPPh || '-'" disabled />
+                <label class="form-label min-w-[140px] text-sm font-medium text-gray-600">PPh Status</label>
+                <input class="input bg-gray-50 border-gray-200 font-semibold text-sm text-gray-800" :value="item.statusPPh || '-'" disabled />
               </div>
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label min-w-[140px] text-gray-500">Tax Type</label>
+                <label class="form-label min-w-[140px] text-sm font-medium text-gray-600">Tax Type</label>
                 <input
-                  class="input bg-gray-50 border-gray-200 font-semibold text-primary"
+                  class="input bg-gray-50 border-gray-200 font-semibold text-sm text-primary"
                   :value="item.feature === 'final' ? 'Final' : 'Tidak Final (Non-Final)'"
                   disabled
                 />
               </div>
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label min-w-[140px] text-gray-500">Tax Period</label>
+                <label class="form-label min-w-[140px] text-sm font-medium text-gray-600">Tax Period</label>
                 <input
-                  class="input bg-gray-50 border-gray-200"
+                  class="input bg-gray-50 border-gray-200 font-semibold text-sm text-gray-800"
                   :value="item.masaPajak && item.tahunPajak ? `${item.masaPajak}/${item.tahunPajak}` : '-'"
                   disabled
                 />
