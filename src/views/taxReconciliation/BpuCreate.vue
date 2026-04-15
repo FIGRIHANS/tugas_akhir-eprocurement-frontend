@@ -80,11 +80,11 @@
                 </div>
               </div>
 
-              <div class="py-[8px]">
+              <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
                 <DatePicker 
                   v-model="form.tglPemotongan" 
                   label="Withholding Date" 
-                  placeholder="Select Date"
+                  placeholder="Select withholding date"
                   :error="wasValidated && !form.tglPemotongan"
                   required
                 />
