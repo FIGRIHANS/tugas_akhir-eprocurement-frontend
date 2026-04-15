@@ -115,7 +115,7 @@ const Pph21Service = {
     npwpNikPenandatangan: string
     passphrase?: string
   }): Promise<ResponseData<unknown>> {
-    const npwpPemotong = '1091031210912281'
+    const npwpPemotong = '1091031210969728'
     const response = await invoiceApi.post<ResponseData<unknown>>(
       `/tax/pph21/upload?npwpPemotong=${npwpPemotong}`,
       { ...payload, id: Number(payload.id) }  // Backend expects Int32
@@ -124,7 +124,7 @@ const Pph21Service = {
   },
 
   async deleteDraft(payload: { id: string | number }): Promise<ResponseData<unknown>> {
-    const npwpPemotong = '1091031210912281'
+    const npwpPemotong = '1091031210969728'
     const response = await invoiceApi.post<ResponseData<unknown>>(
       `/tax/pph21/delete?npwpPemotong=${npwpPemotong}`,
       { ...payload, id: Number(payload.id) }  // Backend expects Int32
@@ -134,10 +134,20 @@ const Pph21Service = {
 
   async batalkan(payload: {
     id: string | number
+    idBupot?: string
+    noBupot?: string
+    masaPajak?: string
+    tahunPajak?: string
     tglPembatalan: string
     npwpNikPenandatangan: string
+    passphrase?: string
+    namaTtd?: string
+    position?: string
+    alamatPenandatangan?: string
+    dcPenandatangan?: string
+    declare?: string
   }): Promise<ResponseData<unknown>> {
-    const npwpPemotong = '1091031210912281'
+    const npwpPemotong = '1091031210969728'
     const response = await invoiceApi.post<ResponseData<unknown>>(
       `/tax/pph21/batal?npwpPemotong=${npwpPemotong}`,
       { ...payload, id: String(payload.id) }  // Backend Pph21CancelRequestDto.id is string
@@ -152,7 +162,7 @@ const Pph21Service = {
   }): Promise<ResponseData<unknown>> {
     const response = await invoiceApi.post<ResponseData<unknown>>('/tax/pph21/verify', {
       id: String(payload.id),  // Backend Pph21VerifyRequestDto.id is string
-      npwpPemotong: payload.npwpPemotong || '1091031210912281',
+      npwpPemotong: payload.npwpPemotong || '1091031210969728',
       feature: payload.feature || 'tdkfinal',
     })
     return response.data
@@ -161,7 +171,7 @@ const Pph21Service = {
   async getDetail(id: string): Promise<ResponseData<Pph21Content>> {
     // No direct detail endpoint — fetch list and find by internal DB ID
     const params: Pph21QueryParams = {
-      npwpPemotong: '1091031210912281',
+      npwpPemotong: '1091031210969728',
       page: 1,
       limit: 200,
     }

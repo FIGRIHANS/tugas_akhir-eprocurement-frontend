@@ -11,7 +11,7 @@
             <input
               v-model="search"
               placeholder="Reference Number"
-              type="number"
+              type="text"
               class="input w-full"
               @keypress="searchEnter"
               :disabled="form.invoicePoGr.length > 0"
@@ -27,7 +27,7 @@
           </button>
         </div>
         <p v-if="searchError" class="text-danger text-[11px]">
-          *PO Number must be exactly 10 characters long
+          *PO Number is required
         </p>
       </div>
     </div>
@@ -324,6 +324,7 @@ import SearchPoGr from './InvoicePoGr/SearchPoGr.vue'
 import UploadPoGr from './InvoicePoGr/UploadPoGr.vue'
 import moment from 'moment'
 import type { PoGrSearchTypes, itemsPoGrType } from '../../types/invoicePoGr'
+import type { PoGrItemTypes } from '@/stores/views/invoice/types/submission'
 import { useFormatIdr } from '@/composables/currency'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
@@ -332,11 +333,12 @@ const masterDataApi = useInvoiceMasterDataStore()
 const invoiceApi = useInvoiceSubmissionStore()
 const form = inject<formTypes>('form')
 const columns = ref<string[]>([])
-const search = ref<number | null>(null)
+const search = ref<string>('')
 const searchError = ref<boolean>(false)
 const searchDpAvailableError = ref<boolean>(false)
 const isSearch = ref<boolean>(false)
 const isDisabledSearch = ref<boolean>(false)
+const isAutoFetchingPo = ref<boolean>(false)
 
 const formEdit = reactive({
   itemAmountLC: 0,
@@ -361,11 +363,11 @@ const searchEnter = (event: KeyboardEvent) => {
   }
 }
 
-const searchItem = () => {
+const searchItem = async () => {
   if (checkInvoiceDp()) {
     addItemInvoiceDp()
   } else {
-    openAddItem()
+    await openAddItem()
   }
 }
 
@@ -402,23 +404,103 @@ const openUploadModal = () => {
   modal.show()
 }
 
-const openAddItem = () => {
-  if (search.value) {
-    if (search.value.toString().length !== 10) return (searchError.value = true)
-    else searchError.value = false
-    if (form) {
-      if (!form.vendorId || !form.companyCode) {
-        form.companyCodeError = true
-        return
-      } else {
-        form.companyCodeError = false
-      }
+const openAddItem = async () => {
+  const poNumber = search.value?.trim() || ''
+
+  if (!poNumber) {
+    searchError.value = true
+    return
+  }
+
+  searchError.value = false
+
+  if (form) {
+    if (!form.vendorId || !form.companyCode) {
+      form.companyCodeError = true
+      return
+    } else {
+      form.companyCodeError = false
     }
-    if (search.value.toString().length !== 10) return
-    invoiceApi.getPoGr(search.value.toString(), form?.companyCode || '', form?.vendorId || '')
+  }
+
+  try {
+    await invoiceApi.getPoGr(poNumber)
     const idModal = document.querySelector('#add_po_gr_item_modal')
     const modal = KTModal.getInstance(idModal as HTMLElement)
     modal.show()
+  } catch (error) {
+    console.error('Error fetching PO detail:', error)
+  }
+}
+
+const setPoGrFromMockSap = (items: PoGrItemTypes[]) => {
+  if (!form) return
+
+  form.invoicePoGr = []
+
+  for (const item of items || []) {
+    const data = {
+      id: item.poItem || 0,
+      poNo: item.poNo || '',
+      poItem: item.poItem || 0,
+      grDocumentNo: item.grDocumentNo || '',
+      grDocumentItem: item.grDocumentItem || 0,
+      grDocumentDate: item.grDocumentDate || '',
+      taxCode: item.taxCode || '',
+      vatAmount: 0,
+      currencyLC: item.currencyLC || form.currency,
+      currencyTC: item.currencyTC || form.currency,
+      itemAmountLC: item.itemAmountLC ?? item.itemAmount ?? 0,
+      itemAmountTC: item.itemAmountTC ?? item.itemAmount ?? 0,
+      quantity: item.quantity || 0,
+      uom: item.uom || '',
+      itemText: item.itemText || item.materialDescription || '',
+      currency: item.currency || form.currency || 'IDR',
+      conditionType: item.conditionType || '',
+      conditionTypeDesc: item.conditionTypeDesc || '',
+      qcStatus: item.qcStatus || '',
+      postingDate: item.postingDate || '',
+      enteredOn: item.enteredOn || '',
+      purchasingOrg: item.purchasingOrg || '',
+      department: item.department || '',
+      whtType: '',
+      whtCode: '',
+      whtBaseAmount:
+        form.currency === 'IDR'
+          ? item.itemAmountLC ?? item.itemAmount ?? 0
+          : item.itemAmountTC ?? item.itemAmount ?? 0,
+      whtAmount: 0,
+      poNoError: false,
+      poItemError: false,
+      departementError: false,
+      deliveryOrderNo: item.deliveryOrderNo || '',
+      isEdit: false,
+    } as itemsPoGrType
+
+    form.invoicePoGr.push(data)
+  }
+}
+
+const autoFetchPoOnEnter = async () => {
+  if (!form) return
+  if (checkInvoiceDp() || form.invoiceType === '902') return
+  if (isAutoFetchingPo.value) return
+
+  const initialPoNumber =
+    search.value.trim() || form.invoicePoGr[0]?.poNo?.toString().trim() || ''
+
+  if (!initialPoNumber) return
+
+  search.value = initialPoNumber
+  isAutoFetchingPo.value = true
+
+  try {
+    const response = await invoiceApi.getPoGr(initialPoNumber)
+    setPoGrFromMockSap(response?.content || [])
+  } catch (error) {
+    console.error('Error auto fetching PO detail on enter:', error)
+  } finally {
+    isAutoFetchingPo.value = false
   }
 }
 
@@ -715,6 +797,7 @@ watch(
 
 onMounted(() => {
   setColumn()
+  autoFetchPoOnEnter()
 })
 </script>
 
