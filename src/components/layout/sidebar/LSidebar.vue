@@ -15,7 +15,9 @@
     </div>
 
     <div class="menu menu-default flex flex-col border-0 rounded-lg w-full py-0 px-1.5" data-menu="true">
-      <div v-for="menu in filteredSidebarMenu" :key="menu.id" class="menu-item" data-menu-item-placement=""
+      <div v-for="menu in filteredSidebarMenu" :key="menu.id" class="menu-item" 
+        :class="{ 'show': isMenuActive(menu) }"
+        data-menu-item-placement=""
         data-menu-item-toggle="accordion" data-menu-item-trigger="click">
         <a class="menu-link" href="#" :class="{ 'menu-link--active': isMenuActive(menu) }" @click.prevent="redirectTo(menu.to)">
           <span class="menu-icon">
@@ -60,14 +62,22 @@ const route = useRoute()
 const userStore = useLoginStore()
 const sidebarStore = useSidebarStore()
 
+// Matches exact route OR any child route (detail/create pages)
+// e.g. 'whtPasal21' also matches 'whtPasal21Detail', 'whtPasal21Create'
+// Matches exact route OR common detail/create suffixes for that route
 const isSubMenuActive = (path?: string) => {
-  return route.name === path
+  if (!path) return false
+  const currentName = String(route.name ?? '')
+  const suffixes = ['Detail', 'Create', 'Edit']
+  return currentName === path || suffixes.some(s => currentName === path + s)
 }
 
 const isMenuActive = (menu: any) => {
-  if (menu.to && route.name === menu.to) return true
+  if (menu.to) {
+    if (isSubMenuActive(menu.to)) return true
+  }
   if (menu.child?.length > 0) {
-    return menu.child.some((child: any) => route.name === child.to)
+    return menu.child.some((child: any) => isSubMenuActive(child.to))
   }
   return false
 }
@@ -354,65 +364,142 @@ const filteredSidebarMenu = computed(() => {
 </script>
 
 <style lang="scss">
-/* ──── Sidebar menu ──── */
-.menu-default .menu-link {
-  padding-top: 12px;
-  padding-bottom: 12px;
-  margin-bottom: 10px;
-  border-radius: 8px;
-  transition: background 0.15s, color 0.15s;
+.menu-default .menu-item > .menu-link {
+  padding: 10px 16px;
+  margin: 4px 12px;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  background-color: transparent;
+  position: relative;
 
-  &:hover {
-    background-color: #f0fdfa !important;
-
-    .menu-title { color: #14B8A6 !important; }
-    .menu-icon i { color: #14B8A6 !important; }
+  // Normal state
+  .menu-title { 
+    color: #4b5563; 
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+  .menu-icon i { 
+    color: #9ca3af; 
+    transition: all 0.2s ease;
+  }
+  .menu-arrow i { 
+    color: #9ca3af;
+    transition: color 0.2s ease;
   }
 
+  // Hover state (non-active)
+  &:hover:not(.menu-link--active) {
+    background-color: #f8fafc !important; 
+    
+    .menu-title { color: #0d9488 !important; }
+    .menu-icon i { 
+      color: #0d9488 !important; 
+      transform: translateX(2px);
+    }
+    .menu-arrow i { color: #0d9488 !important; }
+
+    // Minimal side indicator
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 16px;
+      width: 3px;
+      background-color: #0d9488;
+      border-radius: 0 4px 4px 0;
+    }
+  }
+
+  // Active state: The "Floating Pill"
   &.menu-link--active {
     background-color: #f0fdfa !important;
+    
+    .menu-title { 
+      color: #0d9488 !important; 
+      font-weight: 600; 
+    }
+    .menu-icon i { 
+      color: #0d9488 !important; 
+    }
+    .menu-arrow i {
+      color: #0d9488 !important;
+    }
 
-    .menu-title { color: #14B8A6 !important; font-weight: 600; }
-    .menu-icon i { color: #14B8A6 !important; }
-  }
-}
-
-/* ──── Sub-menu items ──── */
-.menu-sub-accordion .menu-item .menu-link {
-  border-radius: 8px;
-  transition: background 0.15s, color 0.15s;
-
-  &:hover {
-    background-color: #f0fdfa !important;
-    .menu-title { color: #14B8A6 !important; }
-  }
-
-  &.menu-link--active {
-    background-color: #f0fdfa !important;
-
-    .menu-title {
-      color: #14B8A6 !important;
-      font-weight: 600;
-      position: relative;
-
-      &::before {
-        content: '';
-        position: absolute;
-        left: -12px;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 3px;
-        height: 16px;
-        background-color: #14B8A6;
-        border-radius: 2px;
-      }
+    &:hover {
+      background-color: #ccfbf1 !important;
     }
   }
 }
 
-/* ──── Icon size ──── */
+// Sub-menu specific styling
+.menu-sub-accordion .menu-item .menu-link,
+.menu-accordion .menu-item > .menu-link {
+  padding-left: 48px;
+  margin: 2px 12px;
+  border-radius: 8px;
+  font-size: 0.9em;
+  position: relative;
+  transition: all 0.2s ease;
+
+  // Normal state
+  .menu-title { 
+    color: #6b7280;
+    transition: color 0.2s ease;
+  }
+
+  // Hover state (non-active)
+  &:hover:not(.menu-link--active) {
+    background-color: #f1f5f9 !important;
+    .menu-title { 
+      color: #0d9488 !important;
+      font-weight: 500;
+    }
+  }
+
+  // Active state
+  &.menu-link--active {
+    background-color: transparent !important; 
+    
+    .menu-title {
+      color: #0d9488 !important;
+      font-weight: 600;
+    }
+
+    // Static dot indicator for minimalism
+    &::before {
+      content: '';
+      position: absolute;
+      left: 32px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background-color: #0d9488;
+    }
+
+    &:hover {
+      background-color: #ccfbf1 !important;
+    }
+  }
+}
+
 .menu-icon i {
-  font-size: 20px;
+  font-size: 18px;
   margin-right: 12px;
+  width: 24px;
+  text-align: center;
+}
+
+.menu-accordion {
+  padding-left: 0;
+}
+
+.menu-arrow i {
+  font-size: 12px;
 }
 </style>

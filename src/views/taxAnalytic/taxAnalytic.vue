@@ -199,5 +199,5 @@ function donutOption(series: number[], labels: string[]) {
 </script>
 
 <style scoped lang="scss">
-@import './styles/taxAnalytic.scss';
+@use './styles/taxAnalytic.scss';
 </style>
