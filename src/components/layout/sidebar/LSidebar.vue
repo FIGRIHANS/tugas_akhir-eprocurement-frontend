@@ -328,6 +328,7 @@ const filteredSidebarMenu = computed(() => {
                   child.id === 'invoiceAnalytic' ||
                   child.id === 'taxAnalytic' ||
                   child.id === 'email-invoice-integration' ||
+                  child.id === 'mock-sap-list' ||
                   child.id === 'receiving-confirmation' ||
                   child.id === 'receiving-confirmation-list' ||
                   child.id === 'delivery-notes' ||
