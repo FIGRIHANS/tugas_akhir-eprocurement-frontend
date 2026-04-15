@@ -8,21 +8,41 @@
       <div class="flex justify-between items-center mb-[24px]">
         <div class="flex flex-col gap-1">
           <h1 class="text-2xl font-bold text-gray-800">WHT - Pasal 21</h1>
-          <p class="text-xs text-gray-500 font-medium italic">Manage PPh 21 Non-Employee (Final & Non-Final) drafts and DJP synchronization.</p>
+          <p class="text-xs text-gray-500 font-medium italic">
+            Manage PPh 21 Non-Employee (Final & Non-Final) drafts and DJP synchronization.
+          </p>
         </div>
         <div class="flex gap-3">
           <!-- Feature Toggle -->
           <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden text-sm">
             <button
-              :class="['px-3 py-2 font-medium transition-colors', feature === 'tdkfinal' ? 'bg-primary text-white' : 'bg-white text-gray-500 hover:bg-gray-50']"
+              :class="[
+                'px-3 py-2 font-medium transition-colors',
+                feature === 'tdkfinal'
+                  ? 'bg-primary text-white'
+                  : 'bg-white text-gray-500 hover:bg-gray-50',
+              ]"
               @click="setFeature('tdkfinal')"
-            >Non-Final</button>
+            >
+              Non-Final
+            </button>
             <button
-              :class="['px-3 py-2 font-medium transition-colors', feature === 'final' ? 'bg-primary text-white' : 'bg-white text-gray-500 hover:bg-gray-50']"
+              :class="[
+                'px-3 py-2 font-medium transition-colors',
+                feature === 'final'
+                  ? 'bg-primary text-white'
+                  : 'bg-white text-gray-500 hover:bg-gray-50',
+              ]"
               @click="setFeature('final')"
-            >Final</button>
+            >
+              Final
+            </button>
           </div>
-          <UiInputSearch v-model="search" placeholder="Search Counterpart/Bupot" @search="onSearch" />
+          <UiInputSearch
+            v-model="search"
+            placeholder="Search Counterpart/Bupot"
+            @search="onSearch"
+          />
           <button class="btn btn-primary" @click="router.push('/wht-pasal-21/create')">
             <i class="ki-filled ki-plus-circle !text-lg"></i>
             Create New PPh21
@@ -35,15 +55,29 @@
         <table class="table align-middle text-gray-700 font-medium text-sm">
           <thead>
             <tr>
-              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[100px] text-center">Action</th>
-              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[120px]">Tax Period</th>
-              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[200px]">Counterpart Name</th>
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[100px] text-center">
+                Action
+              </th>
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[120px]">
+                Tax Period
+              </th>
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[200px]">
+                Counterpart Name
+              </th>
               <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px]">NPWP/NIK</th>
-              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px]">Tax Object Code</th>
-              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px] text-right">Gross Income</th>
-              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px] text-right">PPh Withheld</th>
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px]">
+                Tax Object Code
+              </th>
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px] text-right">
+                Gross Income
+              </th>
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px] text-right">
+                PPh Withheld
+              </th>
               <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px]">Status</th>
-              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[180px]">No. Bupot</th>
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[180px]">
+                No. Bupot
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -115,7 +149,10 @@
               <td class="text-right">{{ formatCurrency(Number(item.penghasilanKotor) || 0) }}</td>
               <td class="text-right text-danger">
                 {{ formatCurrency(Number(item.pphDipotong) || 0) }}
-                <div v-if="item.tarif && Number(item.tarif) > 0" class="text-[10px] text-gray-500 italic">
+                <div
+                  v-if="item.tarif && Number(item.tarif) > 0"
+                  class="text-[10px] text-gray-500 italic"
+                >
                   Rate: {{ item.tarif }}%
                 </div>
               </td>
@@ -128,10 +165,13 @@
                     v-if="item.errorMessage || item.errorMsg"
                     class="text-[10px] text-danger italic max-w-[150px] truncate"
                     :title="item.errorMessage || item.errorMsg || ''"
-                  >{{ item.errorMessage || item.errorMsg }}</span>
+                    >{{ item.errorMessage || item.errorMsg }}</span
+                  >
                 </div>
               </td>
-              <td class="font-bold text-primary">{{ item.nomorBupot || item.nomorBuktiPotong || item.noBupot || '-' }}</td>
+              <td class="font-bold text-primary">
+                {{ item.nomorBupot || item.nomorBuktiPotong || item.noBupot || '-' }}
+              </td>
             </tr>
           </tbody>
         </table>
@@ -187,7 +227,9 @@
     >
       <div class="w-full flex flex-col gap-4 mt-2">
         <div class="flex flex-col gap-2">
-          <label class="form-label text-xs uppercase text-gray-500 font-bold">Passphrase (PX-Internal)</label>
+          <label class="form-label text-xs uppercase text-gray-500 font-bold"
+            >Passphrase (PX-Internal)</label
+          >
           <div class="relative">
             <input
               v-model="passphrase"
@@ -200,7 +242,9 @@
               class="btn btn-icon btn-sm absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8"
               @click="showPassphrase = !showPassphrase"
             >
-              <i :class="['ki-filled', showPassphrase ? 'ki-eye-slash' : 'ki-eye', 'text-gray-500']"></i>
+              <i
+                :class="['ki-filled', showPassphrase ? 'ki-eye-slash' : 'ki-eye', 'text-gray-500']"
+              ></i>
             </button>
           </div>
         </div>
@@ -238,7 +282,7 @@ const routes = ref<routeTypes[]>([
   { name: 'WHT - Pasal 21', to: '/wht-pasal-21' },
 ])
 
-const npwpPemotong = '1091031210912281'
+const npwpPemotong = '1091031210969728'
 const nikSigner = '3172022407830008'
 
 // State
@@ -325,7 +369,8 @@ const getStatusBadge = (status: string | null | undefined) => {
   const s = status.toUpperCase()
   if (s === 'DRAFT') return 'badge badge-light-primary px-2 font-semibold'
   if (s === 'NORMAL-DONE') return 'badge badge-success px-2 font-bold'
-  if (s.includes('PROGRESS') || s === 'SUBMITTED') return 'badge badge-light-warning px-2 font-semibold'
+  if (s.includes('PROGRESS') || s === 'SUBMITTED')
+    return 'badge badge-light-warning px-2 font-semibold'
   if (s === 'ERROR') return 'badge badge-light-danger px-2 font-bold'
   return 'badge badge-light px-2'
 }
@@ -348,7 +393,7 @@ const handleUploadSubmit = async () => {
   submitting.value = true
   try {
     await Pph21Service.upload({
-      id: selectedItem.value.pxId,
+      id: selectedItem.value.id, // Local DB id — backend maps to PxId for Pajak Express
       npwpNikPenandatangan: nikSigner,
       passphrase: passphrase.value,
     })
@@ -393,7 +438,7 @@ const handleDelete = async () => {
   if (!selectedItem.value) return
   submitting.value = true
   try {
-    await Pph21Service.deleteDraft({ id: selectedItem.value.pxId })
+    await Pph21Service.deleteDraft({ id: selectedItem.value.id }) // Local DB id — backend maps to PxId
     showDeleteModal.value = false
     fetchPphList()
     showSuccessNotif('Draft Deleted', 'The draft record has been removed.')
@@ -419,8 +464,18 @@ const handleBatal = async () => {
   try {
     await Pph21Service.batalkan({
       id: selectedItem.value.pxId,
+      idBupot: selectedItem.value.idBupot || '',
+      noBupot: selectedItem.value.nomorBupot || selectedItem.value.noBupot || '',
+      masaPajak: selectedItem.value.masaPajak || '',
+      tahunPajak: selectedItem.value.tahunPajak || '',
       tglPembatalan: moment().format('DDMMYYYY'),
       npwpNikPenandatangan: nikSigner,
+      passphrase: 'Pajak123@@',
+      namaTtd: 'Dave Navarro',
+      position: 'Director',
+      alamatPenandatangan: 'Jakarta',
+      dcPenandatangan: '1',
+      declare: '1',
     })
     showBatalModal.value = false
     fetchPphList()
@@ -453,7 +508,7 @@ watch(
       page.value = 1
       fetchPphList()
     }, 500)
-  }
+  },
 )
 
 onMounted(() => {
