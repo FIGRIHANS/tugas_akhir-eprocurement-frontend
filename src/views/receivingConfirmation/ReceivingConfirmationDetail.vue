@@ -13,13 +13,26 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
               <!-- Left Column -->
               <div class="space-y-3">
-                <!-- Order No -->
+                <!-- Delivery Note Number -->
                 <div class="flex items-center gap-3">
                   <label class="form-label text-sm font-medium text-gray-600 w-36 mb-0"
-                    >Order No</label
+                    >Delivery Note Number</label
                   >
                   <input
                     v-model="formData.orderNo"
+                    type="text"
+                    class="input flex-1 bg-gray-50"
+                    disabled
+                  />
+                </div>
+
+                <!-- PO Number -->
+                <div class="flex items-center gap-3">
+                  <label class="form-label text-sm font-medium text-gray-600 w-36 mb-0"
+                    >PO Number</label
+                  >
+                  <input
+                    v-model="formData.poNumber"
                     type="text"
                     class="input flex-1 bg-gray-50"
                     disabled
@@ -33,6 +46,19 @@
                   >
                   <input
                     v-model="formData.namaKaryawan"
+                    type="text"
+                    class="input flex-1 bg-gray-50"
+                    disabled
+                  />
+                </div>
+
+                <!-- Vendor Name -->
+                <div class="flex items-center gap-3">
+                  <label class="form-label text-sm font-medium text-gray-600 w-36 mb-0"
+                    >Vendor Name</label
+                  >
+                  <input
+                    v-model="formData.vendorName"
                     type="text"
                     class="input flex-1 bg-gray-50"
                     disabled
@@ -306,6 +332,8 @@ const route = useRoute()
 
 interface FormData {
   orderNo: string
+  poNumber: string
+  vendorName: string
   namaKaryawan: string
   namaSopir: string
   noPolisi: string
@@ -343,6 +371,8 @@ const routes = ref<routeTypes[]>([
 // Form Data (Read-only)
 const formData = ref<FormData>({
   orderNo: 'ORD-2024-001',
+  poNumber: '',
+  vendorName: '',
   namaKaryawan: 'John Doe',
   namaSopir: 'Driver Name',
   noPolisi: 'B 1234 XYZ',
@@ -431,10 +461,9 @@ const printToPDF = async () => {
 
   try {
     if (formData.value.orderNo) {
-      // @ts-expect-error: getByPoNumber might not be in the current interface but is being used
-      const deliveryNotes = await DeliveryNotesService.getByPoNumber(formData.value.orderNo)
-      if (deliveryNotes && deliveryNotes.length > 0) {
-        driverSignatureFromDN = deliveryNotes[0].driverSignature || null
+      const deliveryNotes = await DeliveryNotesService.getByDeliveryNoteNumber(formData.value.orderNo)
+      if (deliveryNotes) {
+        driverSignatureFromDN = deliveryNotes.driverSignature || null
         console.log(
           'Driver signature fetched from delivery notes:',
           driverSignatureFromDN ? 'YES' : 'NO',
@@ -488,7 +517,7 @@ const printToPDF = async () => {
   yPos += 6
 
   doc.setFont('helvetica', 'bold')
-  doc.text('Order Number:', leftX, yPos)
+  doc.text('Delivery Note Number:', leftX, yPos)
   doc.setFont('helvetica', 'normal')
   doc.text(formData.value.orderNo || '-', leftX + labelWidth, yPos)
 
@@ -503,6 +532,12 @@ const printToPDF = async () => {
   }
   doc.text(currentStatus.value || '-', rightX + labelWidth, yPos)
   doc.setTextColor(0, 0, 0) // Reset to black
+  yPos += 6
+
+  doc.setFont('helvetica', 'bold')
+  doc.text('PO Number:', leftX, yPos)
+  doc.setFont('helvetica', 'normal')
+  doc.text(formData.value.poNumber || '-', leftX + labelWidth, yPos)
   yPos += 6
 
   doc.setFont('helvetica', 'bold')
@@ -823,7 +858,9 @@ onMounted(() => {
       if (data) {
         // Map API response to FormData structure
         formData.value = {
-          orderNo: data.orderNumber || '',
+          orderNo: data.DeliveryNoteNumber || '',
+          poNumber: data.poNumber || '',
+          vendorName: data.vendorName || '',
           namaKaryawan: data.whCheckerName || '',
           namaSopir: data.driverName || '',
           noPolisi: data.licensePlate || '',

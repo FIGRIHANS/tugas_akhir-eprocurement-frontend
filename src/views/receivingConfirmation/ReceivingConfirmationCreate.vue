@@ -105,6 +105,20 @@
                   />
                 </div>
 
+                <!-- Vendor Name (Read-only from DN) -->
+                <div class="flex items-center gap-4">
+                  <label class="form-label text-sm font-medium text-gray-600 w-40 mb-0"
+                    >Vendor Name</label
+                  >
+                  <input
+                    v-model="formData.vendorName"
+                    type="text"
+                    class="input flex-1 bg-gray-100"
+                    placeholder="Auto-filled from Delivery Note"
+                    readonly
+                  />
+                </div>
+
                 <!-- License Plate (Read-only from DN) -->
                 <div class="flex items-center gap-4">
                   <label class="form-label text-sm font-medium text-gray-600 w-40 mb-0"
@@ -266,7 +280,7 @@
                 <td colspan="13" class="text-center py-8">
                   <div class="text-gray-400">
                     <i class="ki-duotone ki-information text-3xl mb-2"></i>
-                    <p>No data available. Search for a PO Number first.</p>
+                    <p>No data available. Search for a Delivery Note Number first.</p>
                   </div>
                 </td>
               </tr>
@@ -368,8 +382,10 @@ const router = useRouter()
 // Interfaces
 interface FormData {
   poNumber: string
+  vendorID: string
+  vendorName: string
   tripID: string
-  orderNumber: string
+  DeliveryNoteNumber: string
   whCheckerName: string
   driverName: string
   licensePlate: string
@@ -430,8 +446,10 @@ const signatureOptions = {
 // Form Data
 const formData = ref<FormData>({
   poNumber: '',
+  vendorID: '',
+  vendorName: '',
   tripID: '',
-  orderNumber: '',
+  DeliveryNoteNumber: '',
   whCheckerName: '',
   driverName: '',
   licensePlate: '',
@@ -505,8 +523,10 @@ const selectDeliveryNote = (dn: DeliveryNotesData) => {
 
   // Auto-fill form data from selected Delivery Note
   formData.value.poNumber = dn.poNumber
+  formData.value.vendorID = dn.vendorID || ''
+  formData.value.vendorName = dn.vendorName || ''
   formData.value.tripID = dn.tripID || ''
-  formData.value.orderNumber = dn.poNumber
+  formData.value.DeliveryNoteNumber = dn.deliveryNoteNumber || ''
   formData.value.driverName = dn.driverName || ''
   formData.value.licensePlate = dn.licensePlate || ''
   formData.value.transporter = dn.transporter || ''
@@ -677,8 +697,10 @@ const submitForm = async () => {
     // Prepare payload
     const payload: ReceivingConfirmationCreatePayload = {
       poNumber: formData.value.poNumber,
+      vendorID: formData.value.vendorID || undefined,
+      vendorName: formData.value.vendorName || undefined,
       tripID: formData.value.tripID || undefined,
-      orderNumber: formData.value.orderNumber || undefined,
+      DeliveryNoteNumber: formData.value.DeliveryNoteNumber || undefined,
       receivedDate: formData.value.receivedDate,
       whCheckerName: formData.value.whCheckerName,
       driverName: formData.value.driverName,

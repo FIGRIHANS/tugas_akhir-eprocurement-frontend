@@ -74,6 +74,20 @@
                   />
                 </div>
 
+                <!-- Vendor Name (Read-only from PO) -->
+                <div class="flex items-center gap-4">
+                  <label class="form-label text-sm font-medium text-gray-600 w-40 mb-0"
+                    >Vendor Name</label
+                  >
+                  <input
+                    v-model="formData.vendorName"
+                    type="text"
+                    class="input flex-1 bg-gray-100"
+                    placeholder="Auto-filled from PO"
+                    readonly
+                  />
+                </div>
+
                 <!-- Trip ID -->
                 <div class="flex items-center gap-4">
                   <label class="form-label text-sm font-medium text-gray-600 w-40 mb-0"
@@ -372,6 +386,8 @@ interface FormData {
   deliveryNoteNumber: string
   poNumber: string
   vendorCode: string
+  vendorID: string
+  vendorName: string
   estimatedArrival: string
   pickupAddress: string
   status: string
@@ -409,7 +425,7 @@ const selectedPO = ref<MockSapPoData | null>(null)
 
 interface SignaturePadInstance {
   clear: () => void
-  save: () => { isEmpty: boolean; data: string }
+  save: () => string
   fromDataURL: (data: string) => void
 }
 
@@ -426,6 +442,8 @@ const formData = ref<FormData>({
   deliveryNoteNumber: '',
   poNumber: '',
   vendorCode: '',
+  vendorID: '',
+  vendorName: '',
   estimatedArrival: '',
   pickupAddress: '',
   status: 'On Delivery',
@@ -497,6 +515,8 @@ const selectPO = (po: MockSapPoData) => {
   // Auto-fill form data from selected PO
   formData.value.poNumber = po.poNumber
   formData.value.vendorCode = po.vendorCode
+  formData.value.vendorID = po.vendorID || ''
+  formData.value.vendorName = po.vendorName || ''
 
   // Populate table data from PO items
   if (po.items && po.items.length > 0) {
@@ -666,8 +686,8 @@ const validateForm = (): boolean => {
 
   // Check signature
   if (signaturePad.value) {
-    const { isEmpty } = signaturePad.value.save()
-    if (isEmpty) {
+    const saveResult = signaturePad.value.save()
+    if (!saveResult || saveResult.trim().length === 0) {
       notificationModal.value = {
         type: 'warning',
         title: 'Validation Error',
@@ -695,15 +715,13 @@ const submitForm = async () => {
       console.log('Type of save result:', typeof saveResult)
 
       // vue3-signature returns the Base64 string directly (not an object)
-      if (saveResult && typeof saveResult === 'string' && saveResult.length > 0) {
+      if (saveResult && saveResult.trim().length > 0) {
         signatureData = saveResult
         console.log('✅ Signature data captured successfully!')
         console.log('Signature data length:', signatureData.length)
         console.log('First 100 chars:', signatureData.substring(0, 100))
-      } else if (!saveResult || saveResult.length === 0) {
-        console.warn('⚠️ Signature pad is empty - user did not draw anything')
       } else {
-        console.error('❌ Unexpected save result type:', typeof saveResult)
+        console.warn('⚠️ Signature pad is empty - user did not draw anything')
       }
     } else {
       console.error('❌ Signature pad ref is null')
@@ -721,6 +739,8 @@ const submitForm = async () => {
       deliveryNoteNumber: formData.value.deliveryNoteNumber,
       poNumber: formData.value.poNumber,
       vendorCode: formData.value.vendorCode,
+      vendorID: formData.value.vendorID || undefined,
+      vendorName: formData.value.vendorName || selectedPO.value?.vendorName || '',
       tripID: formData.value.tripID || undefined,
       transporter: formData.value.transporter,
       licensePlate: formData.value.licensePlate,

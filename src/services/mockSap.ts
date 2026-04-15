@@ -15,7 +15,8 @@ export interface DeliveryNotesData {
   deliveryNoteNumber: string
   poNumber: string
   vendorCode: string
-  // vendorName?: string
+  vendorID?: string
+  vendorName?: string
   estimatedArrival: string
   pickupAddress: string
   status: string
@@ -50,6 +51,8 @@ export interface DeliveryNotesQueryParams {
   deliveryNoteNumber?: string
   poNumber?: string
   vendorCode?: string
+  vendorID?: string
+  vendorName?: string
   transporter?: string
   driverName?: string
   status?: string
