@@ -19,7 +19,12 @@ export const useUploadStore = defineStore('upload', () => {
       formData,
     )
 
-    errorMessageUpload.value = response.data.result.message
+    // Hanya set error jika API melaporkan error, bukan saat sukses
+    if (response.data.result.isError) {
+      errorMessageUpload.value = response.data.result.message
+    } else {
+      errorMessageUpload.value = ''
+    }
 
     return response.data.result.content
   }

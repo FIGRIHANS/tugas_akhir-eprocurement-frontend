@@ -73,6 +73,12 @@ const triggerFileInput = () => {
   fileInput.value?.click()
 }
 
+const cleanupBackdrop = () => {
+  // Hapus semua backdrop yang tersisa setelah upload
+  document.querySelectorAll('.modal-backdrop').forEach((el) => el.remove())
+  document.body.style.overflow = ''
+}
+
 const handleFileUpload = async (event: Event) => {
   const target = event.target as HTMLInputElement
   if (!target.files || target.files.length === 0) return
@@ -113,13 +119,14 @@ const handleFileUpload = async (event: Event) => {
     isLoading.value = false
     emits('onLoading', false) // SELESAI: Parent mengembalikan tampilan normal
     if (fileInput.value) fileInput.value.value = '' // Reset input agar event @change jalan lagi
+    cleanupBackdrop() // Bersihkan backdrop yang tersisa
   }
 }
 
 watch(
   () => errorMessageUpload.value,
-  () => {
-    if (errorMessageUpload.value) {
+  (newVal) => {
+    if (newVal && newVal.trim() !== '') {
       const modal = KTModal.getInstance(
         document.querySelector('#error_upload_modal') as HTMLElement,
       )

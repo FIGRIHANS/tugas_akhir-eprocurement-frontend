@@ -31,28 +31,15 @@
             <p class="font-semibold text-sm mb-[16px] uppercase tracking-tight text-gray-600">Recipient Information</p>
             <div class="flex flex-col gap-[8px]">
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label w-full lg:max-w-xs">Identifier Type</label>
-                <div class="flex gap-6 items-center flex-1">
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" v-model="form.fgNpwpNik" :value="true" class="radio radio-primary radio-xs" />
-                    <span class="text-sm">NPWP (16 Digits)</span>
-                  </label>
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" v-model="form.fgNpwpNik" :value="false" class="radio radio-primary radio-xs" />
-                    <span class="text-sm">NIK (Identity Card)</span>
-                  </label>
-                </div>
-              </div>
-
-              <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
                 <label class="form-label w-full lg:max-w-xs">NPWP / NIK</label>
                 <div class="flex-1">
                   <input
                     v-model="form.npwp"
                     class="input w-full"
+                    :class="{ 'border-danger': errors.npwp, 'bg-gray-100 text-gray-500 cursor-not-allowed': form.invoiceId && form.invoiceId > 0 }"
                     :placeholder="form.fgNpwpNik ? 'Enter NPWP (16 digits)' : 'Enter NIK'"
-                    :class="{ 'border-danger': errors.npwp }"
                     required
+                    :disabled="form.invoiceId ? form.invoiceId > 0 : false"
                   />
                   <p v-if="errors.npwp" class="text-danger text-xs mt-1">{{ errors.npwp }}</p>
                 </div>
@@ -65,8 +52,9 @@
                     v-model="form.nama"
                     class="input w-full"
                     placeholder="Enter recipient full name"
-                    :class="{ 'border-danger': errors.nama }"
+                    :class="{ 'border-danger': errors.nama, 'bg-gray-100 text-gray-500 cursor-not-allowed': form.invoiceId && form.invoiceId > 0 }"
                     required
+                    :disabled="form.invoiceId ? form.invoiceId > 0 : false"
                   />
                   <p v-if="errors.nama" class="text-danger text-xs mt-1">{{ errors.nama }}</p>
                 </div>
@@ -135,10 +123,11 @@
                     type="text"
                     v-model="formattedGrossIncome"
                     class="input w-full pl-10 font-semibold"
-                    :class="{ 'border-danger': errors.penghasilanKotor }"
+                    :class="{ 'border-danger': errors.penghasilanKotor, 'bg-gray-100 text-gray-500 cursor-not-allowed': form.invoiceId && form.invoiceId > 0 }"
                     placeholder="0"
                     @input="calculatePPh"
                     required
+                    :disabled="form.invoiceId ? form.invoiceId > 0 : false"
                   />
                   <p v-if="errors.penghasilanKotor" class="text-danger text-xs mt-1">{{ errors.penghasilanKotor }}</p>
                 </div>
@@ -152,10 +141,11 @@
                     step="0.01"
                     v-model.number="form.dataDetilBp21.tarif"
                     class="input w-full pr-8"
-                    :class="{ 'border-danger': errors.tarif }"
+                    :class="{ 'border-danger': errors.tarif, 'bg-gray-100 text-gray-500 cursor-not-allowed': form.invoiceId && form.invoiceId > 0 }"
                     placeholder="0"
                     @input="calculatePPh"
                     required
+                    :disabled="form.invoiceId ? form.invoiceId > 0 : false"
                   />
                   <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
                   <p v-if="errors.tarif" class="text-danger text-xs mt-1">{{ errors.tarif }}</p>
@@ -267,8 +257,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive, computed, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import ModalNotification from '@/components/modal/ModalNotification.vue'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
@@ -276,6 +266,7 @@ import Pph21Service, { type Pph21CreatePayload } from '@/services/pph21.service'
 import moment from 'moment'
 
 const router = useRouter()
+const route = useRoute()
 
 const routes = [
   { name: 'Tax Reconciliation', to: '/tax-reconciliation' },
@@ -357,6 +348,28 @@ const formattedGrossIncome = computed({
     form.value.dataDetilBp21.penghasilanKotor = numericValue ? Number(numericValue) : 0
     calculatePPh()
   }
+})
+
+// Auto-populate from query params
+const populateFromQueryParams = () => {
+  const q = route.query
+  if (!q.invoiceId) return
+
+  form.value.invoiceId = Number(q.invoiceId) || 0
+  form.value.nama = String(q.vendorName || '')
+  form.value.npwp = String(q.vendorNpwp || '')
+  form.value.fgNpwpNik = q.vendorNpwp ? true : false
+  form.value.dataDetilBp21.penghasilanKotor = Number(q.dpp) || 0
+  form.value.dataDetilBp21.pphDipotong = Number(q.whtAmount) || 0
+
+  const invoiceNo = String(q.invoiceNo || '')
+  if (form.value.dataDetilBp21.dokReferensi.length > 0) {
+    form.value.dataDetilBp21.dokReferensi[0].nomorDokumen = invoiceNo
+  }
+}
+
+onMounted(() => {
+  populateFromQueryParams()
 })
 
 // Methods

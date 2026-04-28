@@ -110,12 +110,12 @@
       <div class="flex items-center justify-between mt-[24px]">
         <p class="m-0 text-sm">
           Tampilkan
-          {{ pageSize * currentPage > poList?.length ? poList?.length : pageSize * currentPage }}
+          {{ pageSize * currentPage > totalItems ? totalItems : pageSize * currentPage }}
           data dari total data
-          {{ poList?.length }}
+          {{ totalItems }}
         </p>
         <LPagination
-          :totalItems="poList?.length || 0"
+          :totalItems="totalItems"
           :pageSize="pageSize"
           :currentPage="currentPage"
           @page-change="setPage"
@@ -197,6 +197,7 @@ const sortBy = ref<string>('')
 const sortColumnName = ref<string>('')
 
 const poList = computed(() => invoiceSubmissionApi.listNonPo)
+const totalItems = computed(() => invoiceSubmissionApi.totalListNonPo)
 
 const filterForm = reactive<filterListTypes>({
   status: '',
@@ -256,20 +257,12 @@ const colorBadge = (statusCode: number) => {
 }
 
 const setList = (listData: ListNonPoTypes[]) => {
-  const result: ListNonPoTypes[] = []
-  for (const [index, item] of listData.entries()) {
-    const start = currentPage.value * pageSize.value - pageSize.value
-    const end = currentPage.value * pageSize.value - 1
-    if (index >= start && index <= end) {
-      result.push(item)
-    }
-  }
-  list.value = result
+  list.value = listData
 }
 
 const setPage = (value: number) => {
   currentPage.value = value
-  sortColumn(null)
+  listCall()
 }
 
 const openDetailVerification = (invoiceId: string) => {
@@ -348,6 +341,8 @@ const listCall = () => {
       invoiceTypeCode: Number(filterForm.invoiceType),
       invoiceDate: filterForm.date,
       searchText: search.value,
+      page: currentPage.value,
+      pageSize: pageSize.value,
     })
     .finally(() => {
       sortColumn(null)
@@ -414,6 +409,7 @@ const sortColumn = (columnName: string | null) => {
   }
 
   const name = columnName || sortColumnName.value
+  if (!name || !sortBy.value) return setList(poList.value)
 
   if (name === 'Total Gross Amount' || name === 'Total Net Amount') {
     result = listData.sort((a, b) => {
