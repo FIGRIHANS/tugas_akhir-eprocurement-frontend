@@ -198,6 +198,7 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
             vatStatus: item.vatStatus ?? null,
             whtStatus: item.whtStatus ?? null,
             poPrice: item.poPrice ?? null,
+            pOs: item.pOs ?? [],
           }
           return cleanItem
         })

@@ -171,16 +171,16 @@ const sidebarMenuData: ISidebarMenu[] = [
     title: 'Invoice',
     icon: 'bill',
     child: [
-      {
-        id: 'invoice-list',
-        title: 'Invoice PO',
-        to: 'invoice',
-      },
-      {
-        id: 'invoice-list-non-po',
-        title: 'Invoice Non PO',
-        to: 'invoice-list-non-po',
-      },
+      // {
+      //   id: 'invoice-list',
+      //   title: 'Invoice PO',
+      //   to: 'invoice',
+      // },
+      // {
+      //   id: 'invoice-list-non-po',
+      //   title: 'Invoice Non PO',
+      //   to: 'invoice-list-non-po',
+      // },
       {
         id: 'invoice-verification',
         title: 'Invoice Verification',
@@ -205,11 +205,6 @@ const sidebarMenuData: ISidebarMenu[] = [
         id: 'ftp-invoice-integration',
         title: 'FTP Invoice Integration',
         to: 'ftpInvoiceIntegration',
-      },
-      {
-        id: 'email-invoice-integration',
-        title: 'Email Invoice Integration',
-        to: 'emailInvoiceIntegration',
       },
       // {\n      //   id: 'schedule-payment',
       //   title: 'Schedule Payment',

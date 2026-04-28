@@ -216,6 +216,7 @@ export interface ListPoTypes {
   totalGrossAmount: number
   totalNetAmount: number
   vendorName: string
+  pOs?: PoChildTypes[]
   isOpenChild: boolean
   createdUtcDate: string
   invoiceSourceName?: string | null
@@ -246,6 +247,7 @@ export interface ListNonPoTypes {
   totalGrossAmount: number
   totalNetAmount: number
   vendorName: string
+  pOs?: PoChildTypes[]
   isOpenChild: boolean
   createdUtcDate: string
   sapPostingCode: string | null

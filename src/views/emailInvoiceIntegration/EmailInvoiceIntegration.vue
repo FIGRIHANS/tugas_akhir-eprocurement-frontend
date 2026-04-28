@@ -477,7 +477,7 @@ const sortColumn = (columnName: string | null) => {
 
   const roleSort = ['asc', 'desc', '']
 
-  const listData = cloneDeep(poList.value)
+  const listData = cloneDeep(poList.value) as ListPoTypes[]
   let result: ListPoTypes[] = []
 
   if (columnName) {
@@ -571,7 +571,7 @@ onMounted(() => {
 :deep(.list__table) {
   th:nth-child(2),
   td:nth-child(2) {
-    min-width: 250px;
+    min-inline-size: 250px;
     white-space: nowrap;
   }
 }

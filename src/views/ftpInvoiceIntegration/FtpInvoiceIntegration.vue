@@ -9,26 +9,11 @@
         <div class="flex align-items-center gap-3">
           <UiInputSearch v-model="search" placeholder="Search" @keypress="goSearch" />
           <FilterList :data="filterForm" @setData="setDataFilter" ref="filterChild" />
-          <input
-            ref="fileInput"
-            type="file"
-            multiple
-            accept=".xlsx,.xls,.pdf,.csv"
-            class="hidden"
-            @change="handleFileUpload"
-          />
-          <button
-            class="btn btn-primary ml-auto d-flex align-items-center gap-2"
-            @click="openFileExplorer"
-          >
-            <!-- Icon -->
-            <i class="ki-duotone ki-exit-up"></i>
-
-            <!-- Text -->
-            <span>
-              Upload Invoice FTP
-            </span>
+          <button class="btn btn-primary ml-auto" @click="goAdd()">
+            <i class="ki-duotone ki-plus-circle"></i>
+            Add Invoice
           </button>
+
         </div>
       </div>
       <div class="flex overflow-x-auto gap-3 mb-5 items-center" v-if="filteredPayload.length > 0">
@@ -221,7 +206,6 @@ const sortColumnName = ref<string>('')
 const filteredPayload = ref([])
 const filterChild = ref(null)
 const viewDetailId = ref('')
-const fileInput = ref<HTMLInputElement | null>(null)
 
 const openDetailVerification = (invoiceId: string) => {
   viewDetailId.value = invoiceId
@@ -340,6 +324,16 @@ const goView = (data: ListNonPoTypes) => {
       },
     })
   }
+}
+
+const goAdd = () => {
+  router.push({
+    name: 'invoiceAdd',
+    query: {
+      type: 'po',
+      from: 'ftp',
+    },
+  })
 }
 
 const callList = () => {
@@ -508,35 +502,7 @@ const resetFilter = () => {
  * 5. The invoices should be visible immediately in the list with Draft status
  */
 
-const openFileExplorer = () => {
-  fileInput.value?.click()
-}
 
-const handleFileUpload = async (event: Event) => {
-  const target = event.target as HTMLInputElement
-  const files = target.files
-
-  if (files && files.length > 0) {
-    try {
-      // Trigger FTP sync using the existing store method.
-      // Backend can process uploaded FTP invoices according to current integration flow.
-      await invoiceApi.syncInvoicFromFtp()
-
-      // Show success message
-      console.log('Files uploaded successfully')
-
-      // Reload the list to show newly added invoices with Draft status
-      currentPage.value = 1 // Reset to first page to see new data
-      callList()
-
-      // Reset file input
-      target.value = ''
-    } catch (error) {
-      console.error('Error uploading files:', error)
-      // You can add error notification here if you have a toast/notification service
-    }
-  }
-}
 
 onMounted(() => {
   callList()
