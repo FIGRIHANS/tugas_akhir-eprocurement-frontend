@@ -4,7 +4,6 @@
     <div class="flex justify-between items-center mb-[24px]">
       <div class="flex flex-col gap-1">
         <h1 class="text-2xl font-bold text-gray-800">WHT - Unifikasi (BPU)</h1>
-        <p class="text-xs text-gray-500 font-medium italic">Manage withholding tax drafts and DJP synchronization.</p>
       </div>
       <div class="flex gap-3">
         <UiInputSearch
@@ -19,141 +18,211 @@
       </div>
     </div>
 
-    <!-- Table Section -->
-    <div class="overflow-x-auto list__table mt-[24px]">
+    <!-- View Toggle Tabs -->
+    <div class="tabs mb-6" data-tab="true">
+      <div 
+        class="tab cursor-pointer"
+        :class="activeView === 'pending' ? 'active' : ''"
+        @click="activeView = 'pending'"
+      >
+        Pending Reconciliation
+        <span v-if="filteredPendingInvoices.length > 0" class="badge badge-sm badge-primary ml-1">{{ filteredPendingInvoices.length }}</span>
+      </div>
+      <div 
+        class="tab cursor-pointer"
+        :class="activeView === 'bpu' ? 'active' : ''"
+        @click="activeView = 'bpu'"
+      >
+        BPU Drafts & DJP Sync
+      </div>
+    </div>
+
+    <!-- PENDING INVOICES TABLE -->
+    <div v-if="activeView === 'pending'" class="overflow-x-auto list__table animate-in fade-in duration-300">
       <table class="table align-middle text-gray-700 font-medium text-sm">
         <thead>
           <tr>
-            <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[100px] text-center">
-              Action
-            </th>
-            <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[120px]">
-              Tax Period
-            </th>
-            <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[200px]">
-              Counterpart Name
-            </th>
-            <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px]">NPWP/NIK</th>
-            <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px]">
-              Tax Object Code
-            </th>
-            <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px] text-right">
-              Tax Base (DPP)
-            </th>
-            <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px] text-right">
-              PPh Amount
-            </th>
-            <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px]">Status</th>
-            <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[180px]">
-              No. Bupot
-            </th>
+            <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[100px]">Source</th>
+            <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px]">Invoice No</th>
+            <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[200px]">Vendor</th>
+            <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px]">NPWP</th>
+            <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px] text-right">DPP</th>
+            <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px] text-right">WHT Amount</th>
+            <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[100px] text-center">Action</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-if="loading" class="text-center">
-            <td colspan="9" class="py-10">
+          <tr v-if="loadingPending" class="text-center">
+            <td colspan="7" class="py-10">
               <span class="loading loading-spinner loading-md text-primary"></span>
-              <p class="mt-2 text-gray-500 font-medium">Fetching BPU data...</p>
+              <p class="mt-2 text-gray-500 font-medium">Fetching pending invoices...</p>
             </td>
           </tr>
-          <tr v-else-if="bpuList.length === 0" class="text-center">
-            <td colspan="9" class="py-10 text-gray-400 italic">No BPU records found.</td>
+          <tr v-else-if="filteredPendingInvoices.length === 0" class="text-center">
+            <td colspan="7" class="py-10 text-gray-400 italic">No approved invoices pending WHT reconciliation.</td>
           </tr>
-          <tr v-for="item in bpuList" :key="item.id">
+          <tr v-for="inv in filteredPendingInvoices" :key="inv.invoiceUId">
             <td>
-              <div class="flex gap-1 justify-center">
-                <!-- DRAFT Actions -->
-                <template v-if="(item.status || item.fgStatus)?.toUpperCase() === 'DRAFT'">
-                  <button
-                    class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px] tooltip tooltip-right"
-                    data-tip="Upload to DJP"
-                    @click="handleUpload(item)"
-                  >
-                    <i class="ki-filled ki-cloud-change !text-lg"></i>
-                  </button>
-                  <button
-                    class="btn btn-outline btn-icon btn-danger w-[32px] h-[32px] tooltip tooltip-right"
-                    data-tip="Delete Draft"
-                    @click="confirmDelete(item)"
-                  >
-                    <i class="ki-filled ki-trash !text-lg"></i>
-                  </button>
-                </template>
-
-                <!-- IN PROGRESS Actions -->
-                <template v-if="isInProgress(item.status || item.fgStatus)">
-                  <button
-                    class="btn btn-outline btn-icon btn-warning w-[32px] h-[32px] tooltip tooltip-right"
-                    data-tip="Verify Status"
-                    @click="handleVerify(item)"
-                  >
-                    <i class="ki-filled ki-arrow-circle-right !text-lg"></i>
-                  </button>
-                </template>
-
-                <!-- DONE Actions -->
-                <template v-if="(item.status || item.fgStatus)?.toUpperCase() === 'NORMAL-DONE'">
-                  <button
-                    class="btn btn-outline btn-icon btn-danger w-[32px] h-[32px] tooltip tooltip-right"
-                    data-tip="Cancel Bupot"
-                    @click="confirmBatal(item)"
-                  >
-                    <i class="ki-filled ki-cross-circle !text-lg"></i>
-                  </button>
-                </template>
-
-                <button
-                  class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px] tooltip tooltip-right"
-                  data-tip="View Details"
-                  @click="viewDetail(item)"
-                >
-                  <i class="ki-filled ki-eye !text-lg"></i>
-                </button>
-              </div>
+              <span :class="inv.invoiceSource === 'PO' ? 'badge badge-light-primary px-2' : 'badge badge-light-warning px-2'">
+                {{ inv.invoiceSource }}
+              </span>
             </td>
-            <td>{{ item.masaPajak || '-' }}/{{ item.tahunPajak || '-' }}</td>
-            <td>{{ item.namaPenerima || item.nama || '-' }}</td>
-            <td>{{ item.npwpPenerima || item.npwp || '-' }}</td>
-            <td>{{ item.kodeObjekPajak || '-' }}</td>
-            <td class="text-right">{{ formatCurrency(item.dpp || 0) }}</td>
-            <td class="text-right text-danger">
-              {{ formatCurrency(item.pphDipotong || 0) }}
-              <div v-if="item.tarif" class="text-[10px] text-gray-500 italic">
-                Rate: {{ item.tarif }}%
-              </div>
-            </td>
-            <td>
-              <div class="flex flex-col gap-1 items-start">
-                <span :class="getStatusBadge(item.status || item.fgStatus)">
-                  {{ item.status || item.fgStatus || 'UNKNOWN' }}
-                </span>
-                <span
-                  v-if="item.errorMsg"
-                  class="text-[10px] text-danger italic max-w-[150px] truncate"
-                  :title="item.errorMsg"
-                >
-                  {{ item.errorMsg }}
-                </span>
-              </div>
-            </td>
-            <td class="font-bold text-primary">
-              {{ item.nomorBuktiPotong || item.noBupot || '-' }}
+            <td>{{ inv.invoiceNo }}</td>
+            <td>{{ inv.vendorName }}</td>
+            <td>{{ inv.vendorNpwp || '-' }}</td>
+            <td class="text-right">{{ formatCurrency(inv.dpp || 0) }}</td>
+            <td class="text-right text-danger">{{ formatCurrency(inv.whtAmount || 0) }}</td>
+            <td class="text-center">
+              <button
+                @click="createBpuFromInvoice(inv)"
+                class="btn btn-primary"
+              >
+                <i class="ki-filled ki-plus-circle !text-sm"></i>
+                Create BPU
+              </button>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <div v-if="bpuList.length > 0" class="flex items-center justify-between mt-[24px]">
-      <p class="text-sm text-gray-500">
-        Showing <b>{{ bpuList.length }}</b> of <b>{{ totalBpu }}</b> entries
-      </p>
-      <LPagination
-        :totalItems="totalBpu"
-        :pageSize="limit"
-        :currentPage="page"
-        @page-change="onPageChange"
-      />
+    <!-- MAIN BPU TABLE -->
+    <div v-if="activeView === 'bpu'" class="animate-in fade-in duration-300">
+      <div class="overflow-x-auto list__table">
+        <table class="table align-middle text-gray-700 font-medium text-sm">
+          <thead>
+            <tr>
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[100px] text-center">
+                Action
+              </th>
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[120px]">
+                Tax Period
+              </th>
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[200px]">
+                Counterpart Name
+              </th>
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px]">NPWP/NIK</th>
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px]">
+                Tax Object Code
+              </th>
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px] text-right">
+                Tax Base (DPP)
+              </th>
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px] text-right">
+                PPh Amount
+              </th>
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px]">Status</th>
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[180px]">
+                No. Bupot
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="loading" class="text-center">
+              <td colspan="9" class="py-10">
+                <span class="loading loading-spinner loading-md text-primary"></span>
+                <p class="mt-2 text-gray-500 font-medium">Fetching BPU data...</p>
+              </td>
+            </tr>
+            <tr v-else-if="bpuList.length === 0" class="text-center">
+              <td colspan="9" class="py-10 text-gray-400 italic">No BPU records found.</td>
+            </tr>
+            <tr v-for="item in bpuList" :key="item.id">
+              <td>
+                <div class="flex gap-1 justify-center">
+                  <!-- DRAFT Actions -->
+                  <template v-if="(item.status || item.fgStatus)?.toUpperCase() === 'DRAFT'">
+                    <button
+                      class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px] tooltip tooltip-right"
+                      data-tip="Upload to DJP"
+                      @click="handleUpload(item)"
+                    >
+                      <i class="ki-filled ki-cloud-change !text-lg"></i>
+                    </button>
+                    <button
+                      class="btn btn-outline btn-icon btn-danger w-[32px] h-[32px] tooltip tooltip-right"
+                      data-tip="Delete Draft"
+                      @click="confirmDelete(item)"
+                    >
+                      <i class="ki-filled ki-trash !text-lg"></i>
+                    </button>
+                  </template>
+
+                  <!-- IN PROGRESS Actions -->
+                  <template v-if="isInProgress(item.status || item.fgStatus)">
+                    <button
+                      class="btn btn-outline btn-icon btn-warning w-[32px] h-[32px] tooltip tooltip-right"
+                      data-tip="Verify Status"
+                      @click="handleVerify(item)"
+                    >
+                      <i class="ki-filled ki-arrow-circle-right !text-lg"></i>
+                    </button>
+                  </template>
+
+                  <!-- DONE Actions -->
+                  <template v-if="(item.status || item.fgStatus)?.toUpperCase() === 'NORMAL-DONE'">
+                    <button
+                      class="btn btn-outline btn-icon btn-danger w-[32px] h-[32px] tooltip tooltip-right"
+                      data-tip="Cancel Bupot"
+                      @click="confirmBatal(item)"
+                    >
+                      <i class="ki-filled ki-cross-circle !text-lg"></i>
+                    </button>
+                  </template>
+
+                  <button
+                    class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px] tooltip tooltip-right"
+                    data-tip="View Details"
+                    @click="viewDetail(item)"
+                  >
+                    <i class="ki-filled ki-eye !text-lg"></i>
+                  </button>
+                </div>
+              </td>
+              <td>{{ item.masaPajak || '-' }}/{{ item.tahunPajak || '-' }}</td>
+              <td>{{ item.namaPenerima || item.nama || '-' }}</td>
+              <td>{{ item.npwpPenerima || item.npwp || '-' }}</td>
+              <td>{{ item.kodeObjekPajak || '-' }}</td>
+              <td class="text-right">{{ formatCurrency(item.dpp || 0) }}</td>
+              <td class="text-right text-danger">
+                {{ formatCurrency(item.pphDipotong || 0) }}
+                <div v-if="item.tarif" class="text-[10px] text-gray-500 italic">
+                  Rate: {{ item.tarif }}%
+                </div>
+              </td>
+              <td>
+                <div class="flex flex-col gap-1 items-start">
+                  <span :class="getStatusBadge(item.status || item.fgStatus)">
+                    {{ item.status || item.fgStatus || 'UNKNOWN' }}
+                  </span>
+                  <span
+                    v-if="item.errorMsg"
+                    class="text-[10px] text-danger italic max-w-[150px] truncate"
+                    :title="item.errorMsg"
+                  >
+                    {{ item.errorMsg }}
+                  </span>
+                </div>
+              </td>
+              <td class="font-bold text-primary">
+                {{ item.nomorBuktiPotong || item.noBupot || '-' }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div v-if="bpuList.length > 0" class="flex items-center justify-between mt-[24px]">
+        <p class="text-sm text-gray-500">
+          Showing <b>{{ bpuList.length }}</b> of <b>{{ totalBpu }}</b> entries
+        </p>
+        <LPagination
+          :totalItems="totalBpu"
+          :pageSize="limit"
+          :currentPage="page"
+          @page-change="onPageChange"
+        />
+      </div>
     </div>
 
     <ModalConfirmation
@@ -246,6 +315,7 @@ const npwpPemotong = computed(() => '1091031210969728') // Static for now as per
 const nikSigner = '3172022407830008' // From appsettings/docs
 
 // State
+const activeView = ref<'pending' | 'bpu'>('pending')
 const bpuList = ref<BpuContent[]>([])
 const totalBpu = ref(0)
 const loading = ref(false)
@@ -256,6 +326,20 @@ const limit = ref(10)
 const selectedItem = ref<BpuContent | null>(null)
 const passphrase = ref('Pajak123@@')
 const showPassphrase = ref(false)
+
+// Pending Invoice State
+const pendingInvoices = ref<any[]>([])
+const loadingPending = ref(false)
+
+const filteredPendingInvoices = computed(() => {
+  if (!search.value) return pendingInvoices.value
+  const s = search.value.toLowerCase()
+  return pendingInvoices.value.filter(inv => 
+    (inv.vendorName && inv.vendorName.toLowerCase().includes(s)) ||
+    (inv.invoiceNo && inv.invoiceNo.toLowerCase().includes(s)) ||
+    (inv.vendorNpwp && inv.vendorNpwp.includes(s))
+  )
+})
 
 // Modal States
 const showDeleteModal = ref(false)
@@ -269,6 +353,33 @@ const notifText = ref('')
 const notifType = ref<'success' | 'error' | 'warning' | 'info'>('success')
 
 // Methods
+const fetchPendingInvoices = async () => {
+  loadingPending.value = true
+  try {
+    const res = await BpuService.getAvailableInvoices()
+    pendingInvoices.value = res.result.content || []
+  } catch (err) {
+    console.error('Error fetching pending invoices:', err)
+  } finally {
+    loadingPending.value = false
+  }
+}
+
+const createBpuFromInvoice = (inv: any) => {
+  router.push({
+    path: '/wht-unifikasi/create',
+    query: {
+      invoiceId: inv.id,
+      invoiceNo: inv.invoiceNo,
+      vendorName: inv.vendorName,
+      vendorNpwp: inv.vendorNpwp || '',
+      dpp: inv.dpp || 0,
+      whtAmount: inv.whtAmount || 0,
+      invoiceSource: inv.invoiceSource,
+    }
+  })
+}
+
 const fetchBpuList = async () => {
   loading.value = true
   try {
@@ -460,6 +571,7 @@ watch(
 
 onMounted(() => {
   fetchBpuList()
+  fetchPendingInvoices()
 })
 </script>
 
