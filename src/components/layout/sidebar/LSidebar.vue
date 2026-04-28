@@ -111,7 +111,10 @@ const filteredSidebarMenu = computed(() => {
       return sidebarMenu
         .filter(
           (menu) =>
-            menu.id === 'e-invoice' || menu.id === 'vendor-management' || menu.id === 'dashboard',
+            menu.id === 'e-invoice' ||
+            menu.id === 'vendor-management' ||
+            menu.id === 'dashboard' ||
+            menu.id === 'tax-reconciliation',
         )
         .map((menu) => {
           return {
@@ -124,7 +127,9 @@ const filteredSidebarMenu = computed(() => {
                   child.id === 'invoice-verification' ||
                   child.id === 'invoice-approval-no-po' ||
                   child.id === 'recurring-invoice-reminder' ||
-                  child.id === 'vendor-master',
+                  child.id === 'vendor-master' ||
+                  child.id === 'vat-reconciliation' ||
+                  child.id === 'wht-reconciliation',
                 // child.id === 'invoice-verification-no-po' ||
                 // child.id === 'invoice-list-non-po',
               )
@@ -155,7 +160,10 @@ const filteredSidebarMenu = computed(() => {
       return sidebarMenu
         .filter(
           (menu) =>
-            menu.id === 'e-invoice' || menu.id === 'vendor-management' || menu.id === 'dashboard',
+            menu.id === 'e-invoice' ||
+            menu.id === 'vendor-management' ||
+            menu.id === 'dashboard' ||
+            menu.id === 'tax-reconciliation',
         )
         .map((menu) => {
           return {
@@ -166,7 +174,9 @@ const filteredSidebarMenu = computed(() => {
                   child.id === 'invoice-approval' ||
                   child.id === 'invoice-approval-no-po' ||
                   child.id === 'recurring-invoice-reminder' ||
-                  child.id === 'vendor-master',
+                  child.id === 'vendor-master' ||
+                  child.id === 'vat-reconciliation' ||
+                  child.id === 'wht-reconciliation',
               )
               : [],
           }
@@ -334,8 +344,7 @@ const filteredSidebarMenu = computed(() => {
                   child.id === 'delivery-notes' ||
                   child.id === 'delivery-notes-list' ||
                   child.id === 'vat-reconciliation' ||
-                  child.id === 'wht-unifikasi' ||
-                  child.id === 'wht-pasal-21' ||
+                  child.id === 'wht-reconciliation' ||
                   child.id === 'invoice-type' ||
                   child.id === 'list-user' ||
                   child.id === 'master-profile' ||
