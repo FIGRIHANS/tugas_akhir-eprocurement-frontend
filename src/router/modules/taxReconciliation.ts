@@ -10,9 +10,14 @@ export default [
     component: () => import('@/views/taxReconciliation/VatReconciliationDetail.vue'),
   },
   {
+    path: '/wht-reconciliation',
+    name: 'whtReconciliation',
+    component: () => import('@/views/taxReconciliation/WhtReconciliation.vue'),
+  },
+  {
     path: '/wht-unifikasi',
     name: 'whtUnifikasi',
-    component: () => import('@/views/taxReconciliation/WhtUnifikasi.vue'),
+    component: () => import('@/views/taxReconciliation/WhtReconciliation.vue'),
   },
   {
     path: '/wht-unifikasi/create',
@@ -28,7 +33,7 @@ export default [
   {
     path: '/wht-pasal-21',
     name: 'whtPasal21',
-    component: () => import('@/views/taxReconciliation/WhtPasal21.vue'),
+    component: () => import('@/views/taxReconciliation/WhtReconciliation.vue'),
   },
   {
     path: '/wht-pasal-21/create',

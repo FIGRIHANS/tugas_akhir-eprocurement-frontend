@@ -1,164 +1,159 @@
 <template>
-  <div>
-    <Breadcrumb title="WHT - Unifikasi (BPU)" :routes="routes" />
-    <hr class="-mx-[24px] mb-[24px]" />
-
-    <div class="border border-gray-200 rounded-xl p-[24px] bg-white">
-      <!-- Header Section -->
-      <div class="flex justify-between items-center mb-[24px]">
-        <div class="flex flex-col gap-1">
-          <h1 class="text-2xl font-bold text-gray-800">WHT - Unifikasi (BPU)</h1>
-          <p class="text-xs text-gray-500 font-medium italic">Manage withholding tax drafts and DJP synchronization.</p>
-        </div>
-        <div class="flex gap-3">
-          <UiInputSearch
-            v-model="search"
-            placeholder="Search Counterpart/Bupot"
-            @search="onSearch"
-          />
-          <button class="btn btn-primary" @click="router.push('/wht-unifikasi/create')">
-            <i class="ki-filled ki-plus-circle !text-lg"></i>
-            Create New BPU
-          </button>
-        </div>
+  <div class="bg-white">
+    <!-- Header Section -->
+    <div class="flex justify-between items-center mb-[24px]">
+      <div class="flex flex-col gap-1">
+        <h1 class="text-2xl font-bold text-gray-800">WHT - Unifikasi (BPU)</h1>
+        <p class="text-xs text-gray-500 font-medium italic">Manage withholding tax drafts and DJP synchronization.</p>
       </div>
+      <div class="flex gap-3">
+        <UiInputSearch
+          v-model="search"
+          placeholder="Search Counterpart/Bupot"
+          @search="onSearch"
+        />
+        <button class="btn btn-primary" @click="router.push('/wht-unifikasi/create')">
+          <i class="ki-filled ki-plus-circle !text-lg"></i>
+          Create New BPU
+        </button>
+      </div>
+    </div>
 
-      <!-- Table Section -->
-      <div class="overflow-x-auto list__table mt-[24px]">
-        <table class="table align-middle text-gray-700 font-medium text-sm">
-          <thead>
-            <tr>
-              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[100px] text-center">
-                Action
-              </th>
-              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[120px]">
-                Tax Period
-              </th>
-              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[200px]">
-                Counterpart Name
-              </th>
-              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px]">NPWP/NIK</th>
-              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px]">
-                Tax Object Code
-              </th>
-              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px] text-right">
-                Tax Base (DPP)
-              </th>
-              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px] text-right">
-                PPh Amount
-              </th>
-              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px]">Status</th>
-              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[180px]">
-                No. Bupot
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="loading" class="text-center">
-              <td colspan="9" class="py-10">
-                <span class="loading loading-spinner loading-md text-primary"></span>
-                <p class="mt-2 text-gray-500 font-medium">Fetching BPU data...</p>
-              </td>
-            </tr>
-            <tr v-else-if="bpuList.length === 0" class="text-center">
-              <td colspan="9" class="py-10 text-gray-400 italic">No BPU records found.</td>
-            </tr>
-            <tr v-for="item in bpuList" :key="item.id">
-              <td>
-                <div class="flex gap-1 justify-center">
-                  <!-- DRAFT Actions -->
-                  <template v-if="(item.status || item.fgStatus)?.toUpperCase() === 'DRAFT'">
-                    <button
-                      class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px] tooltip tooltip-right"
-                      data-tip="Upload to DJP"
-                      @click="handleUpload(item)"
-                    >
-                      <i class="ki-filled ki-cloud-change !text-lg"></i>
-                    </button>
-                    <button
-                      class="btn btn-outline btn-icon btn-danger w-[32px] h-[32px] tooltip tooltip-right"
-                      data-tip="Delete Draft"
-                      @click="confirmDelete(item)"
-                    >
-                      <i class="ki-filled ki-trash !text-lg"></i>
-                    </button>
-                  </template>
-
-                  <!-- IN PROGRESS Actions -->
-                  <template v-if="isInProgress(item.status || item.fgStatus)">
-                    <button
-                      class="btn btn-outline btn-icon btn-warning w-[32px] h-[32px] tooltip tooltip-right"
-                      data-tip="Verify Status"
-                      @click="handleVerify(item)"
-                    >
-                      <i class="ki-filled ki-arrow-circle-right !text-lg"></i>
-                    </button>
-                  </template>
-
-                  <!-- DONE Actions -->
-                  <template v-if="(item.status || item.fgStatus)?.toUpperCase() === 'NORMAL-DONE'">
-                    <button
-                      class="btn btn-outline btn-icon btn-danger w-[32px] h-[32px] tooltip tooltip-right"
-                      data-tip="Cancel Bupot"
-                      @click="confirmBatal(item)"
-                    >
-                      <i class="ki-filled ki-cross-circle !text-lg"></i>
-                    </button>
-                  </template>
-
+    <!-- Table Section -->
+    <div class="overflow-x-auto list__table mt-[24px]">
+      <table class="table align-middle text-gray-700 font-medium text-sm">
+        <thead>
+          <tr>
+            <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[100px] text-center">
+              Action
+            </th>
+            <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[120px]">
+              Tax Period
+            </th>
+            <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[200px]">
+              Counterpart Name
+            </th>
+            <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px]">NPWP/NIK</th>
+            <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px]">
+              Tax Object Code
+            </th>
+            <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px] text-right">
+              Tax Base (DPP)
+            </th>
+            <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px] text-right">
+              PPh Amount
+            </th>
+            <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px]">Status</th>
+            <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[180px]">
+              No. Bupot
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-if="loading" class="text-center">
+            <td colspan="9" class="py-10">
+              <span class="loading loading-spinner loading-md text-primary"></span>
+              <p class="mt-2 text-gray-500 font-medium">Fetching BPU data...</p>
+            </td>
+          </tr>
+          <tr v-else-if="bpuList.length === 0" class="text-center">
+            <td colspan="9" class="py-10 text-gray-400 italic">No BPU records found.</td>
+          </tr>
+          <tr v-for="item in bpuList" :key="item.id">
+            <td>
+              <div class="flex gap-1 justify-center">
+                <!-- DRAFT Actions -->
+                <template v-if="(item.status || item.fgStatus)?.toUpperCase() === 'DRAFT'">
                   <button
                     class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px] tooltip tooltip-right"
-                    data-tip="View Details"
-                    @click="viewDetail(item)"
+                    data-tip="Upload to DJP"
+                    @click="handleUpload(item)"
                   >
-                    <i class="ki-filled ki-eye !text-lg"></i>
+                    <i class="ki-filled ki-cloud-change !text-lg"></i>
                   </button>
-                </div>
-              </td>
-              <td>{{ item.masaPajak || '-' }}/{{ item.tahunPajak || '-' }}</td>
-              <td>{{ item.namaPenerima || item.nama || '-' }}</td>
-              <td>{{ item.npwpPenerima || item.npwp || '-' }}</td>
-              <td>{{ item.kodeObjekPajak || '-' }}</td>
-              <td class="text-right">{{ formatCurrency(item.dpp || 0) }}</td>
-              <td class="text-right text-danger">
-                {{ formatCurrency(item.pphDipotong || 0) }}
-                <div v-if="item.tarif" class="text-[10px] text-gray-500 italic">
-                  Rate: {{ item.tarif }}%
-                </div>
-              </td>
-              <td>
-                <div class="flex flex-col gap-1 items-start">
-                  <span :class="getStatusBadge(item.status || item.fgStatus)">
-                    {{ item.status || item.fgStatus || 'UNKNOWN' }}
-                  </span>
-                  <span
-                    v-if="item.errorMsg"
-                    class="text-[10px] text-danger italic max-w-[150px] truncate"
-                    :title="item.errorMsg"
+                  <button
+                    class="btn btn-outline btn-icon btn-danger w-[32px] h-[32px] tooltip tooltip-right"
+                    data-tip="Delete Draft"
+                    @click="confirmDelete(item)"
                   >
-                    {{ item.errorMsg }}
-                  </span>
-                </div>
-              </td>
-              <td class="font-bold text-primary">
-                {{ item.nomorBuktiPotong || item.noBupot || '-' }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+                    <i class="ki-filled ki-trash !text-lg"></i>
+                  </button>
+                </template>
 
-      <div v-if="bpuList.length > 0" class="flex items-center justify-between mt-[24px]">
-        <p class="text-sm text-gray-500">
-          Showing <b>{{ bpuList.length }}</b> of <b>{{ totalBpu }}</b> entries
-        </p>
-        <LPagination
-          :totalItems="totalBpu"
-          :pageSize="limit"
-          :currentPage="page"
-          @page-change="onPageChange"
-        />
-      </div>
+                <!-- IN PROGRESS Actions -->
+                <template v-if="isInProgress(item.status || item.fgStatus)">
+                  <button
+                    class="btn btn-outline btn-icon btn-warning w-[32px] h-[32px] tooltip tooltip-right"
+                    data-tip="Verify Status"
+                    @click="handleVerify(item)"
+                  >
+                    <i class="ki-filled ki-arrow-circle-right !text-lg"></i>
+                  </button>
+                </template>
+
+                <!-- DONE Actions -->
+                <template v-if="(item.status || item.fgStatus)?.toUpperCase() === 'NORMAL-DONE'">
+                  <button
+                    class="btn btn-outline btn-icon btn-danger w-[32px] h-[32px] tooltip tooltip-right"
+                    data-tip="Cancel Bupot"
+                    @click="confirmBatal(item)"
+                  >
+                    <i class="ki-filled ki-cross-circle !text-lg"></i>
+                  </button>
+                </template>
+
+                <button
+                  class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px] tooltip tooltip-right"
+                  data-tip="View Details"
+                  @click="viewDetail(item)"
+                >
+                  <i class="ki-filled ki-eye !text-lg"></i>
+                </button>
+              </div>
+            </td>
+            <td>{{ item.masaPajak || '-' }}/{{ item.tahunPajak || '-' }}</td>
+            <td>{{ item.namaPenerima || item.nama || '-' }}</td>
+            <td>{{ item.npwpPenerima || item.npwp || '-' }}</td>
+            <td>{{ item.kodeObjekPajak || '-' }}</td>
+            <td class="text-right">{{ formatCurrency(item.dpp || 0) }}</td>
+            <td class="text-right text-danger">
+              {{ formatCurrency(item.pphDipotong || 0) }}
+              <div v-if="item.tarif" class="text-[10px] text-gray-500 italic">
+                Rate: {{ item.tarif }}%
+              </div>
+            </td>
+            <td>
+              <div class="flex flex-col gap-1 items-start">
+                <span :class="getStatusBadge(item.status || item.fgStatus)">
+                  {{ item.status || item.fgStatus || 'UNKNOWN' }}
+                </span>
+                <span
+                  v-if="item.errorMsg"
+                  class="text-[10px] text-danger italic max-w-[150px] truncate"
+                  :title="item.errorMsg"
+                >
+                  {{ item.errorMsg }}
+                </span>
+              </div>
+            </td>
+            <td class="font-bold text-primary">
+              {{ item.nomorBuktiPotong || item.noBupot || '-' }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div v-if="bpuList.length > 0" class="flex items-center justify-between mt-[24px]">
+      <p class="text-sm text-gray-500">
+        Showing <b>{{ bpuList.length }}</b> of <b>{{ totalBpu }}</b> entries
+      </p>
+      <LPagination
+        :totalItems="totalBpu"
+        :pageSize="limit"
+        :currentPage="page"
+        @page-change="onPageChange"
+      />
     </div>
 
     <ModalConfirmation
@@ -232,16 +227,12 @@
       :type="notifType"
       @on-close="showNotificationModal = false"
     />
-
-    <!-- Detail View removed in favor of full-page navigation -->
   </div>
 </template>
 
 <script lang="ts" setup>
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { type routeTypes } from '@/core/type/components/breadcrumb'
-import Breadcrumb from '@/components/BreadcrumbView.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import LPagination from '@/components/pagination/LPagination.vue'
 import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
@@ -250,11 +241,6 @@ import BpuService, { type BpuContent } from '@/services/bpu.service'
 import moment from 'moment'
 
 const router = useRouter()
-
-const routes = ref<routeTypes[]>([
-  { name: 'Tax Reconciliation', to: '/tax-reconciliation' },
-  { name: 'WHT - Unifikasi (BPU)', to: '/wht-unifikasi' },
-])
 
 const npwpPemotong = computed(() => '1091031210969728') // Static for now as per docs, ideally from user profile
 const nikSigner = '3172022407830008' // From appsettings/docs
@@ -453,8 +439,6 @@ const handleBatal = async () => {
 }
 
 const viewDetail = (item: BpuContent) => {
-  // Vue Router 4 does not support custom state in router.push()
-  // so we use sessionStorage to pass the item to the detail page
   sessionStorage.setItem('bpu_detail_item', JSON.stringify(item))
   router.push({
     name: 'whtUnifikasiDetail',
