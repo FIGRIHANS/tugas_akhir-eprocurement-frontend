@@ -3,24 +3,36 @@
     <div class="grid grid-cols-12 gap-4">
       <div class="col-span-7 space-y-4">
         <div class="card-header py-[8px] px-[20px]">
-          <div class="border rounded-lg border-gray-300 p-[4px] flex items-center gap-[4px]">
+          <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden text-sm">
             <button
-              class="btn btn-primary"
-              :class="{ 'btn-clear info__header': tabOcrTab !== 'general' }"
+              :class="[
+                'px-4 py-2 font-medium transition-colors',
+                tabOcrTab === 'general'
+                  ? 'bg-primary text-white'
+                  : 'bg-white text-gray-500 hover:bg-gray-50',
+              ]"
               @click="setTabOcr('general')"
             >
               General Data
             </button>
             <button
-              class="btn btn-primary"
-              :class="{ 'btn-clear info__header': tabOcrTab !== 'tax' }"
+              :class="[
+                'px-4 py-2 font-medium transition-colors border-l border-gray-200',
+                tabOcrTab === 'tax'
+                  ? 'bg-primary text-white'
+                  : 'bg-white text-gray-500 hover:bg-gray-50',
+              ]"
               @click="setTabOcr('tax')"
             >
               Tax & Invoice Verification
             </button>
             <button
-              class="btn btn-primary"
-              :class="{ 'btn-clear info__header': tabOcrTab !== 'ai' }"
+              :class="[
+                'px-4 py-2 font-medium transition-colors border-l border-gray-200',
+                tabOcrTab === 'ai'
+                  ? 'bg-primary text-white'
+                  : 'bg-white text-gray-500 hover:bg-gray-50',
+              ]"
               @click="setTabOcr('ai')"
             >
               AI Action
