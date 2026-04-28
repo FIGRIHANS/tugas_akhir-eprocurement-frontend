@@ -97,6 +97,16 @@
                   {{ parent.statusName }}
                 </span>
               </td>
+              <td>
+                <div v-if="parent.whtReconciliationStatus" class="flex items-center gap-1">
+                  <span 
+                    class="badge badge-dot size-2" 
+                    :class="parent.whtReconciliationStatus === 'NORMAL-Done' ? 'badge-success' : 'badge-warning'"
+                  ></span>
+                  <span class="text-xs font-semibold">{{ parent.whtReconciliationStatus }}</span>
+                </div>
+                <span v-else class="text-gray-400 text-xs">-</span>
+              </td>
               <td>{{ parent.vendorName }}</td>
               <td>{{ parent.documentNo }}</td>
               <td>{{ parent.companyCode }}</td>
@@ -226,6 +236,7 @@ const columns = ref([
   '',
   'Submitted Document No',
   'Status',
+  'Tax Status',
   'Vendor Name',
   'Invoice Vendor No',
   'Company Code',

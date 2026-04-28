@@ -178,16 +178,57 @@
                       : useFormatIdr(item.vatAmount || 0)
                   }}</span>
                 </td>
-                <td>-</td>
-                <td>-</td>
                 <td>
-                  {{
-                    form?.currency === item.currencyLC
-                      ? useFormatIdr(item.itemAmountLC)
-                      : useFormatIdr(item.itemAmountLC)
-                  }}
+                  <span v-if="!item.isEdit">{{ item.whtType || '-' }}</span>
+                  <v-select
+                    v-else
+                    v-model="formEdit.whtType"
+                    class="customSelect"
+                    placeholder="Type"
+                    :reduce="(option) => option.id"
+                    :get-option-label="(option) => option.name"
+                    :options="whtTypeList"
+                    appendToBody
+                  ></v-select>
                 </td>
-                <td>-</td>
+                <td>
+                  <span v-if="!item.isEdit">{{ item.whtCode || '-' }}</span>
+                  <v-select
+                    v-else
+                    v-model="formEdit.whtCode"
+                    class="customSelect"
+                    placeholder="Code"
+                    :reduce="(option) => option.code"
+                    :get-option-label="(option) => `${option.code} - ${option.name}`"
+                    :options="whtCodeList"
+                    @option:selected="getVatAmount"
+                    appendToBody
+                  ></v-select>
+                </td>
+                <td>
+                  <span v-if="item.isEdit">{{
+                    form?.currency === item.currencyLC
+                      ? useFormatIdr(formEdit.whtBaseAmount)
+                      : useFormatIdr(formEdit.whtBaseAmount)
+                  }}</span>
+                  <span v-else>{{
+                    form?.currency === item.currencyLC
+                      ? useFormatIdr(item.whtBaseAmount || 0)
+                      : useFormatIdr(item.whtBaseAmount || 0)
+                  }}</span>
+                </td>
+                <td>
+                  <span v-if="item.isEdit">{{
+                    form?.currency === item.currencyLC
+                      ? useFormatIdr(formEdit.whtAmount)
+                      : useFormatIdr(formEdit.whtAmount)
+                  }}</span>
+                  <span v-else>{{
+                    form?.currency === item.currencyLC
+                      ? useFormatIdr(item.whtAmount || 0)
+                      : useFormatIdr(item.whtAmount || 0)
+                  }}</span>
+                </td>
                 <td>{{ item.department || '-' }}</td>
               </tr>
             </template>
@@ -344,12 +385,18 @@ const formEdit = reactive({
   itemAmountLC: 0,
   taxCode: '',
   vatAmount: 0,
+  whtType: '',
+  whtCode: '',
+  whtBaseAmount: 0,
+  whtAmount: 0,
   quantity: 0,
   uom: '',
 })
 
 const listTaxCalculation = computed(() => masterDataApi.taxList)
 const costCenterList = computed(() => masterDataApi.costCenterList)
+const whtTypeList = computed(() => masterDataApi.whtTypeList)
+const whtCodeList = computed(() => masterDataApi.whtCodeList)
 
 const checkIsEdit = () => {
   const result = form?.invoicePoGr.findIndex((item) => item.isEdit)
@@ -582,6 +629,10 @@ const resetFormEdit = () => {
   formEdit.taxCode = ''
   formEdit.itemAmountLC = 0
   formEdit.vatAmount = 0
+  formEdit.whtType = ''
+  formEdit.whtCode = ''
+  formEdit.whtBaseAmount = 0
+  formEdit.whtAmount = 0
   formEdit.quantity = 0
   formEdit.uom = ''
 }
@@ -597,12 +648,17 @@ const goEdit = (item: itemsPoGrType) => {
     formEdit.taxCode = item.taxCode
     formEdit.itemAmountLC = form?.currency === 'IDR' ? item.itemAmountLC : item.itemAmountTC
     formEdit.vatAmount = item.vatAmount || 0
+    formEdit.whtType = item.whtType || ''
+    formEdit.whtCode = item.whtCode || ''
+    formEdit.whtBaseAmount = item.whtBaseAmount || formEdit.itemAmountLC
+    formEdit.whtAmount = item.whtAmount || 0
   } else {
     item.taxCode = formEdit.taxCode
     item.vatAmount = formEdit.vatAmount
-    if (form?.currency === 'IDR') item.itemAmountLC = formEdit.itemAmountLC
-    else item.itemAmountTC = formEdit.itemAmountLC
-    item.whtBaseAmount = formEdit.itemAmountLC
+    item.whtType = formEdit.whtType
+    item.whtCode = formEdit.whtCode
+    item.whtAmount = formEdit.whtAmount
+    item.whtBaseAmount = formEdit.whtBaseAmount
     resetFormEdit()
   }
 }
@@ -696,14 +752,35 @@ const getVatAmount = () => {
     const itemAmount = formEdit.itemAmountLC
     const result = percentTax * itemAmount
     formEdit.vatAmount = result
+
+    const percentWht = getPercentWht(formEdit.whtCode) || 0
+    const baseWht = formEdit.whtBaseAmount || formEdit.itemAmountLC
+    formEdit.whtAmount = percentWht * baseWht
   } else {
     for (const item of form.invoicePoGr) {
       const percentTax = getPercentTax(item.taxCode) || 0
       const itemAmount = form.currency === 'IDR' ? item.itemAmountLC : item.itemAmountTC
       const result = percentTax * itemAmount
       item.vatAmount = result
+
+      const percentWht = getPercentWht(item.whtCode) || 0
+      const baseWht = item.whtBaseAmount || itemAmount
+      item.whtAmount = percentWht * baseWht
     }
   }
+}
+
+const getPercentWht = (code: string) => {
+  if (!code) return 0
+  const index = whtCodeList.value.findIndex((item) => item.code === code)
+  if (index !== -1) {
+    const splitName = whtCodeList.value[index].name.split(' - ')
+    const match = splitName[1]?.match(/(\d+[.,]?\d*)%/)
+    if (match) {
+      return parseFloat(match[1].replace(',', '.')) / 100
+    }
+  }
+  return 0
 }
 
 const getTaxCodeName = (taxCode: string) => {
@@ -795,9 +872,21 @@ watch(
   },
 )
 
-onMounted(() => {
+watch(
+  () => formEdit.whtType,
+  async (newType) => {
+    if (newType) {
+      await masterDataApi.getWhtCode(newType)
+    }
+  },
+)
+
+onMounted(async () => {
   setColumn()
   autoFetchPoOnEnter()
+  if (masterDataApi.whtTypeList.length === 0) {
+    await masterDataApi.getWhtType()
+  }
 })
 </script>
 
