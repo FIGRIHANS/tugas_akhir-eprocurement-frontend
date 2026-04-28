@@ -171,6 +171,7 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
       ? []
       : contentData.map((item: ListPoRawResponse) => {
           const cleanItem: ListPoTypes = {
+            id: item.id,
             invoiceUId: item.invoiceUId,
             invoiceTypeCode: item.invoiceTypeCode,
             invoiceTypeName: item.invoiceTypeName,
@@ -402,6 +403,7 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
       : contentData.map((item: ListNonPoRawResponse) => {
           // Explicitly construct object without pOs field
           const cleanItem: ListNonPoTypes = {
+            id: item.id,
             invoiceUId: item.invoiceUId,
             invoiceTypeCode: item.invoiceTypeCode,
             invoiceTypeName: item.invoiceTypeName,
@@ -428,6 +430,7 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
             vatStatus: item.vatStatus ?? null,
             whtStatus: item.whtStatus ?? null,
             poPrice: item.poPrice ?? null,
+            whtReconciliationStatus: item.whtReconciliationStatus ?? null,
           }
           return cleanItem
         })

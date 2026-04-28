@@ -327,6 +327,20 @@ const getPercentTax = (code: string) => {
   }
 }
 
+const getPercentWht = (code: string) => {
+  if (!code) return 0
+  const getIndex = invoiceMasterApi.whtCodeList.findIndex((item) => item.code === code)
+  if (getIndex !== -1) {
+    const splitName = invoiceMasterApi.whtCodeList[getIndex].name.split(' - ')
+    // Extract percentage from name like "PPh 23 (2%)"
+    const match = splitName[1]?.match(/(\d+[.,]?\d*)%/)
+    if (match) {
+      return parseFloat(match[1].replace(',', '.')) / 100
+    }
+  }
+  return 0
+}
+
 const countSubtotal = () => {
   if (!form) return
   let total = 0
@@ -450,22 +464,29 @@ const countWhtAmount = () => {
   let totalAddCredit = 0
   if (!checkIsNonPo()) {
     for (const item of form.invoicePoGr) {
-      const percentTax = 0
-      const itemAmount = form.currency === 'IDR' ? item.itemAmountLC : item.itemAmountTC
+      const percentTax = getPercentWht(item.whtCode) || 0
+      const itemAmount = Number(item.whtBaseAmount) || 0
       totalPo = totalPo + percentTax * itemAmount
     }
     for (const item of form.additionalCost) {
-      const percentTax = 0
+      const percentTax = getPercentWht(item.whtCode) || 0
+      const itemAmount = Number(item.whtBaseAmount) || 0
       if (item.debitCredit === 'D') {
-        totalAddDebit = totalAddDebit + percentTax * Number(item.itemAmount)
+        totalAddDebit = totalAddDebit + percentTax * itemAmount
       } else {
-        totalAddCredit = totalAddCredit + percentTax * Number(item.itemAmount)
+        totalAddCredit = totalAddCredit + percentTax * itemAmount
       }
     }
   } else {
-    // for (const item of form.invoiceItem) {
-    //   const percentTax = 0
-    // }
+    for (const item of form.invoiceItem) {
+      const percentTax = getPercentWht(item.whtCode) || 0
+      const itemAmount = Number(item.whtBaseAmount) || 0
+      if (item.debitCredit === 'D') {
+        totalAddDebit = totalAddDebit + percentTax * itemAmount
+      } else {
+        totalAddCredit = totalAddCredit + percentTax * itemAmount
+      }
+    }
   }
   return totalPo + totalAddDebit - totalAddCredit
 }

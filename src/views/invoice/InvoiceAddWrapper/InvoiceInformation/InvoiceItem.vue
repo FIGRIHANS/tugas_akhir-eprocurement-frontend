@@ -182,10 +182,31 @@
                 <span>{{ item.assignment || '-' }}</span>
               </td>
               <td v-if="!isPettyCash">
-                <span>{{ item.whtType || '-' }}</span>
+                <span v-if="!item.isEdit || form.invoiceType === '4'">{{ item.whtType || '-' }}</span>
+                <v-select
+                  v-else
+                  v-model="item.whtType"
+                  class="customSelect"
+                  placeholder="Type"
+                  :reduce="(option) => option.id"
+                  :get-option-label="(option) => option.name"
+                  :options="whtTypeList"
+                  appendToBody
+                ></v-select>
               </td>
               <td v-if="!isPettyCash">
-                <span>{{ item.whtCode || '-' }}</span>
+                <span v-if="!item.isEdit || form.invoiceType === '4'">{{ item.whtCode || '-' }}</span>
+                <v-select
+                  v-else
+                  v-model="item.whtCode"
+                  class="customSelect"
+                  placeholder="Code"
+                  :reduce="(option) => option.code"
+                  :get-option-label="(option) => `${option.code} - ${option.name}`"
+                  :options="whtCodeList"
+                  @option:selected="calculateWht(index)"
+                  appendToBody
+                ></v-select>
               </td>
               <td v-if="!isPettyCash">
                 <span>{{
@@ -210,7 +231,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, watch, inject } from 'vue'
+import { computed, watch, inject, onMounted } from 'vue'
 import type { formTypes } from '../../types/invoiceAddWrapper'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
@@ -262,6 +283,8 @@ const columns = computed(() => {
 const listTaxCalculation = computed(() => invoiceMasterApi.taxList)
 const listActivity = computed(() => invoiceMasterApi.activityList)
 const costCenterList = computed(() => invoiceMasterApi.costCenterList)
+const whtTypeList = computed(() => invoiceMasterApi.whtTypeList)
+const whtCodeList = computed(() => invoiceMasterApi.whtCodeList)
 
 const addNew = () => {
   if (form) {
@@ -330,6 +353,26 @@ const getVatAmount = () => {
   }
 }
 
+const getPercentWht = (code: string) => {
+  if (!code) return 0
+  const index = whtCodeList.value.findIndex((item) => item.code === code)
+  if (index !== -1) {
+    const splitName = whtCodeList.value[index].name.split(' - ')
+    const match = splitName[1]?.match(/(\d+[.,]?\d*)%/)
+    if (match) {
+      return parseFloat(match[1].replace(',', '.')) / 100
+    }
+  }
+  return 0
+}
+
+const calculateWht = (index: number) => {
+  const item = form.invoiceItem[index]
+  const percentWht = getPercentWht(item.whtCode)
+  const baseAmount = Number(item.whtBaseAmount) || 0
+  item.whtAmount = percentWht * baseAmount
+}
+
 const getTaxCodeName = (taxCode: string) => {
   const index = listTaxCalculation.value.findIndex((item) => item.code === taxCode)
   if (index !== -1) {
@@ -378,6 +421,31 @@ const handleRealizationInput = (item: any, e: Event, index: number) => {
   onItemTextInput(item, e)
   editVariance(index)
 }
+
+onMounted(async () => {
+  if (invoiceMasterApi.whtTypeList.length === 0) {
+    await invoiceMasterApi.getWhtType()
+  }
+})
+
+// Watch whtType for each item to fetch its codes
+const watchWhtTypes = () => {
+  if (!form) return
+  form.invoiceItem.forEach((item) => {
+    watch(
+      () => item.whtType,
+      async (newType) => {
+        if (newType) {
+          await invoiceMasterApi.getWhtCode(newType)
+        }
+      }
+    )
+  })
+}
+
+watch(() => form?.invoiceItem.length, () => {
+  watchWhtTypes()
+}, { immediate: true })
 </script>
 
 <style lang="scss" scoped>
