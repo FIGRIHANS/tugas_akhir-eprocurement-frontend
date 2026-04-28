@@ -9,8 +9,8 @@
         </p>
       </div>
       <div class="flex gap-3">
-        <!-- Feature Toggle -->
-        <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden text-sm">
+        <!-- Feature Toggle (only visible in pph21 view) -->
+        <div v-if="activeView === 'pph21'" class="flex items-center border border-gray-200 rounded-lg overflow-hidden text-sm">
           <button
             :class="[
               'px-3 py-2 font-medium transition-colors',
@@ -46,8 +46,76 @@
       </div>
     </div>
 
-    <!-- Table Section -->
-    <div class="overflow-x-auto list__table mt-[24px]">
+    <!-- View Toggle Tabs -->
+    <div class="tabs mb-6" data-tab="true">
+      <div 
+        class="tab cursor-pointer"
+        :class="activeView === 'pending' ? 'active' : ''"
+        @click="activeView = 'pending'"
+      >
+        Pending Reconciliation
+        <span v-if="filteredPendingInvoices.length > 0" class="badge badge-sm badge-primary ml-1">{{ filteredPendingInvoices.length }}</span>
+      </div>
+      <div 
+        class="tab cursor-pointer"
+        :class="activeView === 'pph21' ? 'active' : ''"
+        @click="activeView = 'pph21'"
+      >
+        PPh21 Drafts & DJP Sync
+      </div>
+    </div>
+
+    <!-- PENDING INVOICES TABLE -->
+    <div v-if="activeView === 'pending'" class="overflow-x-auto list__table animate-in fade-in duration-300">
+      <table class="table align-middle text-gray-700 font-medium text-sm">
+        <thead>
+          <tr>
+            <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[100px]">Source</th>
+            <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px]">Invoice No</th>
+            <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[200px]">Vendor</th>
+            <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px]">NPWP</th>
+            <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px] text-right">DPP</th>
+            <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[150px] text-right">WHT Amount</th>
+            <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 min-w-[100px] text-center">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-if="loadingPending" class="text-center">
+            <td colspan="7" class="py-10">
+              <span class="loading loading-spinner loading-md text-primary"></span>
+              <p class="mt-2 text-gray-500 font-medium">Fetching pending invoices...</p>
+            </td>
+          </tr>
+          <tr v-else-if="filteredPendingInvoices.length === 0" class="text-center">
+            <td colspan="7" class="py-10 text-gray-400 italic">No approved invoices pending WHT reconciliation.</td>
+          </tr>
+          <tr v-for="inv in filteredPendingInvoices" :key="inv.invoiceUId">
+            <td>
+              <span :class="inv.invoiceSource === 'PO' ? 'badge badge-light-primary px-2' : 'badge badge-light-warning px-2'">
+                {{ inv.invoiceSource }}
+              </span>
+            </td>
+            <td>{{ inv.invoiceNo }}</td>
+            <td>{{ inv.vendorName }}</td>
+            <td>{{ inv.vendorNpwp || '-' }}</td>
+            <td class="text-right">{{ formatCurrency(inv.dpp || 0) }}</td>
+            <td class="text-right text-danger">{{ formatCurrency(inv.whtAmount || 0) }}</td>
+            <td class="text-center">
+              <button
+                @click="createPph21FromInvoice(inv)"
+                class="btn btn-primary"
+              >
+                <i class="ki-filled ki-plus-circle !text-sm"></i>
+                Create PPh21
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- MAIN PPH21 TABLE -->
+    <div v-if="activeView === 'pph21'" class="overflow-x-auto list__table animate-in fade-in duration-300">
       <table class="table align-middle text-gray-700 font-medium text-sm">
         <thead>
           <tr>
@@ -173,7 +241,7 @@
       </table>
     </div>
 
-    <div v-if="pphList.length > 0" class="flex items-center justify-between mt-[24px]">
+    <div v-if="activeView === 'pph21' && pphList.length > 0" class="flex items-center justify-between mt-[24px]">
       <p class="text-sm text-gray-500">
         Showing <b>{{ pphList.length }}</b> of <b>{{ totalPph }}</b> entries
       </p>
@@ -259,13 +327,14 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, watch, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import LPagination from '@/components/pagination/LPagination.vue'
 import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 import ModalNotification from '@/components/modal/ModalNotification.vue'
 import Pph21Service, { type Pph21Content } from '@/services/pph21.service'
+import BpuService from '@/services/bpu.service'
 import moment from 'moment'
 
 const router = useRouter()
@@ -273,7 +342,11 @@ const router = useRouter()
 const npwpPemotong = '1091031210969728'
 const nikSigner = '3172022407830008'
 
-// State
+// --- State ---
+const activeView = ref<'pending' | 'pph21'>('pending')
+const pendingInvoices = ref<any[]>([])
+const loadingPending = ref(false)
+
 const pphList = ref<Pph21Content[]>([])
 const totalPph = ref(0)
 const loading = ref(false)
@@ -306,6 +379,44 @@ const showSuccessNotif = (title: string, text: string) => {
   setTimeout(() => {
     showNotificationModal.value = false
   }, 2500)
+}
+
+// Pending Invoices logic
+const fetchPendingInvoices = async () => {
+  loadingPending.value = true
+  try {
+    const res = await BpuService.getAvailableInvoices('', 'PPH21')
+    pendingInvoices.value = res.result.content || []
+  } catch (error) {
+    console.error('Error fetching pending invoices:', error)
+  } finally {
+    loadingPending.value = false
+  }
+}
+
+const filteredPendingInvoices = computed(() => {
+  if (!search.value) return pendingInvoices.value
+  const s = search.value.toLowerCase()
+  return pendingInvoices.value.filter(inv => 
+    inv.invoiceNo?.toLowerCase().includes(s) || 
+    inv.vendorName?.toLowerCase().includes(s) ||
+    inv.vendorNpwp?.toLowerCase().includes(s)
+  )
+})
+
+const createPph21FromInvoice = (inv: any) => {
+  router.push({
+    path: '/wht-pasal-21/create',
+    query: {
+      invoiceId: inv.id,
+      invoiceNo: inv.invoiceNo,
+      invoiceSource: inv.invoiceSource,
+      vendorName: inv.vendorName,
+      vendorNpwp: inv.vendorNpwp,
+      dpp: inv.dpp,
+      whtAmount: inv.whtAmount
+    }
+  })
 }
 
 // Methods
@@ -501,6 +612,7 @@ watch(
 
 onMounted(() => {
   fetchPphList()
+  fetchPendingInvoices()
 })
 </script>
 

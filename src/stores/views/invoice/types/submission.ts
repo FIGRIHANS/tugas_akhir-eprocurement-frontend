@@ -302,6 +302,8 @@ export interface QueryParamsListPoTypes {
   invoiceDate?: string | null
   searchText?: string | null
   invoiceSource?: number
+  page?: number
+  pageSize?: number
 }
 
 export interface ParamsSubmissionNonPo {

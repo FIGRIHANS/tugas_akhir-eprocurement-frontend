@@ -4,6 +4,7 @@
     <hr class="-mx-[24px] mb-[24px]" />
 
     <div class="space-y-6">
+
       <div class="flex gap-[24px] items-start">
         <div class="flex-1 space-y-6">
           <!-- Section 1: Recipient Information -->
@@ -11,27 +12,14 @@
             <p class="font-semibold text-sm mb-[16px] uppercase tracking-tight text-gray-600">Recipient Information</p>
             <div class="flex flex-col gap-[8px]">
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label w-full lg:max-w-xs">Identifier Type</label>
-                <div class="flex gap-6 items-center flex-1">
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" v-model="form.fgNpwpNik" value="true" class="radio radio-primary radio-xs">
-                    <span class="text-sm">NPWP (16 Digits)</span>
-                  </label>
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" v-model="form.fgNpwpNik" value="false" class="radio radio-primary radio-xs">
-                    <span class="text-sm">NIK (Identity Card)</span>
-                  </label>
-                </div>
-              </div>
-
-              <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
                 <label class="form-label w-full lg:max-w-xs">Tax ID / Number</label>
                 <div class="flex-1">
                   <input 
                     v-model="form.npwp" 
-                    :class="['input', { 'border-danger !placeholder-red-400': wasValidated && !form.npwp }]" 
+                    :class="['input', { 'border-danger !placeholder-red-400': wasValidated && !form.npwp }, form.invoiceId > 0 ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : '']" 
                     :placeholder="form.fgNpwpNik === 'true' ? 'Enter NPWP' : 'Enter NIK'" 
                     required
+                    :disabled="form.invoiceId > 0"
                   >
                   <p v-if="wasValidated && !form.npwp" class="text-danger text-[11px] mt-1.5 font-medium ml-1 flex items-center gap-1 animate-in fade-in slide-in-from-top-1 duration-200">
                     <i class="ki-filled ki-information-2 text-[13px]"></i>
@@ -45,9 +33,10 @@
                 <div class="flex-1">
                   <input 
                     v-model="form.nama" 
-                    :class="['input', { 'border-danger !placeholder-red-400': wasValidated && !form.nama }]" 
+                    :class="['input', { 'border-danger !placeholder-red-400': wasValidated && !form.nama }, form.invoiceId > 0 ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : '']" 
                     placeholder="Enter recipient name" 
                     required
+                    :disabled="form.invoiceId > 0"
                   >
                   <p v-if="wasValidated && !form.nama" class="text-danger text-[11px] mt-1.5 font-medium ml-1 flex items-center gap-1 animate-in fade-in slide-in-from-top-1 duration-200">
                     <i class="ki-filled ki-information-2 text-[13px]"></i>
@@ -97,8 +86,9 @@
                     type="number" step="0.1" 
                     v-model="form.dataDetilBpu.tarif" 
                     @input="calculatePPh" 
-                    :class="['input pr-8', { 'border-danger': wasValidated && !form.dataDetilBpu.tarif }]" 
+                    :class="['input pr-8', { 'border-danger': wasValidated && !form.dataDetilBpu.tarif }, form.invoiceId > 0 ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : '']" 
                     required
+                    :disabled="form.invoiceId > 0"
                   >
                   <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
                 </div>
@@ -112,9 +102,10 @@
                     type="text" 
                     v-model="formattedDpp" 
                     @input="calculatePPh" 
-                    :class="['input pl-10 font-semibold', { 'border-danger': wasValidated && (!form.dataDetilBpu.dpp || form.dataDetilBpu.dpp <= 0) }]" 
+                    :class="['input pl-10 font-semibold', { 'border-danger': wasValidated && (!form.dataDetilBpu.dpp || form.dataDetilBpu.dpp <= 0) }, form.invoiceId > 0 ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : '']" 
                     placeholder="0"
                     required
+                    :disabled="form.invoiceId > 0"
                   >
                   <p v-if="wasValidated && (!form.dataDetilBpu.dpp || form.dataDetilBpu.dpp <= 0)" class="text-danger text-[11px] mt-1.5 font-medium ml-1 flex items-center gap-1 animate-in fade-in slide-in-from-top-1 duration-200">
                     <i class="ki-filled ki-information-2 text-[13px]"></i>
@@ -220,8 +211,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import ModalNotification from '@/components/modal/ModalNotification.vue'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
@@ -229,6 +220,7 @@ import BpuService, { type BpuCreatePayload } from '@/services/bpu.service'
 import moment from 'moment'
 
 const router = useRouter()
+const route = useRoute()
 
 const routes = [
   { name: 'Tax Reconciliation', to: '/tax-reconciliation' },
@@ -236,9 +228,7 @@ const routes = [
   { name: 'Create', to: '#' },
 ]
 
-const npwpPemotong = '1091031210969728'
-
-// State
+// --- State ---
 const submitting = ref(false)
 const wasValidated = ref(false)
 const showNotif = ref(false)
@@ -247,54 +237,63 @@ const notifText = ref('')
 const notifType = ref<'success' | 'error'>('success')
 
 // Form Initialization
-const initialForm: BpuCreatePayload = {
-  invoiceId: 1,
-  npwpPemotong: npwpPemotong,
-  idTku: npwpPemotong + '000000',
+const form = ref<BpuCreatePayload>({
+  invoiceId: 0,
+  npwpPemotong: '1091031210969728',
+  idTku: '1091031210969728000000',
   revNo: 0,
   masaPajak: '',
   tahunPajak: '',
   fgNpwpNik: 'true',
-  npwp: '1234567890123456',
+  npwp: '',
   nik: '',
-  nama: 'Dave Navarro (Testing)',
+  nama: '',
   fgJnsBupot: 'BPU',
   tglPemotongan: moment().format('YYYY-MM-DD'),
-  glAccount: '521111',
+  glAccount: '',
   dataDetilBpu: {
     sertifikatInsentifDipotong: '9',
     nomorSertifikatInsentif: '',
     kodeObjekPajak: '24-104-01',
     pasalPPh: 'Pasal 23',
     statusPPh: 'Non Final',
-    dpp: 1000000,
+    dpp: 0,
     tarif: 2,
-    pphDipotong: 20000,
+    pphDipotong: 0,
     kap: '411124',
     kjs: '100',
     dokReferensi: [
       {
         dokReferensi: 'COMMERCIALINVOICE',
-        nomorDokumen: 'INV/TEST/' + moment().format('YYYYMMDDHHmm'),
+        nomorDokumen: '',
         tanggal_Dokumen: moment().format('DDMMYYYY'),
       },
     ],
     metodePembayaranBendahara: '',
     nomorSP2D: '',
-  },
-}
-const form = ref<BpuCreatePayload>(JSON.parse(JSON.stringify(initialForm)))
-
-// Computed for IDR Formatting in Input
-const formattedDpp = computed({
-  get() {
-    if (!form.value.dataDetilBpu.dpp) return ''
-    return new Intl.NumberFormat('id-ID').format(Number(form.value.dataDetilBpu.dpp))
-  },
-  set(newValue) {
-    const numericValue = newValue.replace(/[^0-9]/g, '')
-    form.value.dataDetilBpu.dpp = numericValue ? Number(numericValue) : 0
   }
+})
+
+// --- Auto-populate from query params (when coming from Invoice Pending WHT list) ---
+const populateFromQueryParams = () => {
+  const q = route.query
+  if (!q.invoiceId) return
+
+  form.value.invoiceId = Number(q.invoiceId) || 0
+  form.value.nama = String(q.vendorName || '')
+  form.value.npwp = String(q.vendorNpwp || '')
+  form.value.fgNpwpNik = q.vendorNpwp ? 'true' : 'false'
+  form.value.dataDetilBpu.dpp = Number(q.dpp) || 0
+  form.value.dataDetilBpu.pphDipotong = Number(q.whtAmount) || 0
+
+  const invoiceNo = String(q.invoiceNo || '')
+  if (form.value.dataDetilBpu.dokReferensi.length > 0) {
+    form.value.dataDetilBpu.dokReferensi[0].nomorDokumen = invoiceNo
+  }
+}
+
+onMounted(() => {
+  populateFromQueryParams()
 })
 
 // Methods
@@ -313,6 +312,18 @@ const formatCurrency = (val: number | string) => {
   }).format(num)
 }
 
+const formattedDpp = computed({
+  get() {
+    if (!form.value.dataDetilBpu.dpp) return ''
+    return new Intl.NumberFormat('id-ID').format(Number(form.value.dataDetilBpu.dpp))
+  },
+  set(newValue) {
+    const numericValue = newValue.replace(/[^0-9]/g, '')
+    form.value.dataDetilBpu.dpp = numericValue ? Number(numericValue) : 0
+    calculatePPh()
+  }
+})
+
 const submitCreateBpu = async () => {
   wasValidated.value = true
   
@@ -325,22 +336,22 @@ const submitCreateBpu = async () => {
   try {
     const payload = JSON.parse(JSON.stringify(form.value))
     
-    // Formatting for API (ensuring types match Swagger strings if needed)
+    // Formatting for API
     payload.tglPemotongan = moment(form.value.tglPemotongan).format('DDMMYYYY')
     payload.masaPajak = moment(form.value.tglPemotongan).format('MM')
     payload.tahunPajak = moment(form.value.tglPemotongan).format('YYYY')
     
-    // Financial items MUST be strings according to user example
+    // Financial items MUST be strings
     payload.dataDetilBpu.dpp = String(payload.dataDetilBpu.dpp)
     payload.dataDetilBpu.tarif = String(payload.dataDetilBpu.tarif)
     payload.dataDetilBpu.pphDipotong = String(payload.dataDetilBpu.pphDipotong)
 
-    // Sync dokReferensi date with withholding date
+    // Sync dokReferensi date
     if (payload.dataDetilBpu.dokReferensi && payload.dataDetilBpu.dokReferensi.length > 0) {
       payload.dataDetilBpu.dokReferensi[0].tanggal_Dokumen = payload.tglPemotongan
     }
 
-    // Map identifier to correct field
+    // Map identifier
     if (form.value.fgNpwpNik === 'true') {
       payload.npwp = form.value.npwp
       payload.nik = ''

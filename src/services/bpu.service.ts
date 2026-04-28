@@ -189,6 +189,11 @@ const BpuService = {
         content: content as BpuContent
       }
     } as unknown as ResponseData<BpuContent>
+  },
+
+  async getAvailableInvoices(search?: string, type: string = 'BPU'): Promise<ResponseData<any[]>> {
+    const response = await invoiceApi.get<ResponseData<any[]>>('/tax/available-invoices', { params: { search, type } })
+    return response.data
   }
 }
 

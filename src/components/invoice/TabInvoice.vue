@@ -1,37 +1,52 @@
 <template>
-  <div class="tabs mb-5 text-gray-500 bg-gray-200">
-    <button class="tab pl-[4px]" :class="[activeTab === 'data' ? 'active' : '']" :disabled="!canClickData"
-      @click="activeTab = 'data'">
-      Invoice Data
-    </button>
+  <div class="card-header py-[8px] px-[20px]">
+    <div class="border rounded-lg border-gray-300 p-[4px] flex items-center gap-[4px]">
+      <button
+        class="btn btn-primary"
+        :class="{ 'btn-clear info__header': activeTab !== 'data' }"
+        :disabled="!canClickData"
+        @click="activeTab = 'data'"
+      >
+        Invoice Data
+      </button>
 
-    <i class="ki-duotone ki-right"></i>
+      <button
+        class="btn btn-primary"
+        :class="{ 'btn-clear info__header': activeTab !== 'information' }"
+        :disabled="!canClickInformation"
+        @click="activeTab = 'information'"
+      >
+        Invoice Information
+      </button>
 
-    <button class="tab pl-[4px]" :class="[activeTab === 'information' ? 'active' : '']" :disabled="!canClickInformation"
-      @click="activeTab = 'information'">
-      Invoice Information
-    </button>
+      <button
+        class="btn btn-primary"
+        :class="{ 'btn-clear info__header': activeTab !== 'ocrAiVerification' }"
+        @click="activeTab = 'ocrAiVerification'"
+      >
+        Invoice OCR & AI Verification
+      </button>
 
-    <i class="ki-duotone ki-right"></i>
+      <button
+        v-if="withPreview"
+        class="btn btn-primary"
+        :class="{ 'btn-clear info__header': activeTab !== 'preview' }"
+        :disabled="!canClickPreview"
+        @click="activeTab = 'preview'"
+      >
+        Invoice Preview
+      </button>
 
-    <button class="tab pl-[4px]" :class="[activeTab === 'ocrAiVerification' ? 'active' : '']"
-      @click="activeTab = 'ocrAiVerification'">
-      Invoice OCR & AI Verification
-    </button>
-
-    <i v-if="withPreview" class="ki-duotone ki-right"></i>
-
-    <button v-if="withPreview" class="tab pl-[4px]" :class="[activeTab === 'preview' ? 'active' : '']"
-      :disabled="!canClickPreview" @click="activeTab = 'preview'">
-      Invoice Preview
-    </button>
-
-    <i v-if="canClickPaymentStatus" class="ki-duotone ki-right"></i>
-
-    <button v-if="canClickPaymentStatus" class="tab pl-[4px]" :class="[activeTab === 'paymentStatus' ? 'active' : '']"
-      :disabled="!canClickPaymentStatus" @click="activeTab = 'paymentStatus'">
-      Payment Status
-    </button>
+      <button
+        v-if="canClickPaymentStatus"
+        class="btn btn-primary"
+        :class="{ 'btn-clear info__header': activeTab !== 'paymentStatus' }"
+        :disabled="!canClickPaymentStatus"
+        @click="activeTab = 'paymentStatus'"
+      >
+        Payment Status
+      </button>
+    </div>
   </div>
 </template>
 
