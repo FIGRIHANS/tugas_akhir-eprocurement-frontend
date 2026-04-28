@@ -185,9 +185,10 @@
                     v-model="formEdit.whtType"
                     class="customSelect"
                     placeholder="Type"
-                    :reduce="(option) => option.id"
+                    :reduce="(option) => option.code"
                     :get-option-label="(option) => option.name"
                     :options="whtTypeList"
+                    @option:selected="masterDataApi.getWhtCode($event.code)"
                     appendToBody
                   ></v-select>
                 </td>
@@ -198,8 +199,8 @@
                     v-model="formEdit.whtCode"
                     class="customSelect"
                     placeholder="Code"
-                    :reduce="(option) => option.code"
-                    :get-option-label="(option) => `${option.code} - ${option.name}`"
+                    :reduce="(option) => option.whtCode"
+                    :get-option-label="(option) => `${option.whtCode} - ${option.description}`"
                     :options="whtCodeList"
                     @option:selected="getVatAmount"
                     appendToBody
@@ -772,13 +773,9 @@ const getVatAmount = () => {
 
 const getPercentWht = (code: string) => {
   if (!code) return 0
-  const index = whtCodeList.value.findIndex((item) => item.code === code)
+  const index = whtCodeList.value.findIndex((item) => item.whtCode === code)
   if (index !== -1) {
-    const splitName = whtCodeList.value[index].name.split(' - ')
-    const match = splitName[1]?.match(/(\d+[.,]?\d*)%/)
-    if (match) {
-      return parseFloat(match[1].replace(',', '.')) / 100
-    }
+    return (whtCodeList.value[index].tarif || 0) / 100
   }
   return 0
 }
@@ -872,20 +869,25 @@ watch(
   },
 )
 
-watch(
-  () => formEdit.whtType,
-  async (newType) => {
-    if (newType) {
-      await masterDataApi.getWhtCode(newType)
-    }
-  },
-)
-
 onMounted(async () => {
   setColumn()
   autoFetchPoOnEnter()
-  if (masterDataApi.whtTypeList.length === 0) {
+  
+  // Prevent double fetching of WHT Types
+  if (!masterDataApi.whtTypeList || masterDataApi.whtTypeList.length === 0) {
     await masterDataApi.getWhtType()
+  }
+
+  // Auto-fetch WHT Codes if items already have whtType (e.g. from FTP)
+  if (formEdit.whtType) {
+    await masterDataApi.getWhtCode(formEdit.whtType)
+  }
+  
+  if (form?.invoicePoGr) {
+    const uniqueTypes = [...new Set(form.invoicePoGr.map(item => item.whtType).filter(Boolean))]
+    for (const type of uniqueTypes) {
+      await masterDataApi.getWhtCode(type as string)
+    }
   }
 })
 </script>

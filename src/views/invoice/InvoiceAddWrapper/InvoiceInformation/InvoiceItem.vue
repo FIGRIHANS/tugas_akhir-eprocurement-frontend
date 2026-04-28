@@ -188,9 +188,10 @@
                   v-model="item.whtType"
                   class="customSelect"
                   placeholder="Type"
-                  :reduce="(option) => option.id"
+                  :reduce="(option) => option.code"
                   :get-option-label="(option) => option.name"
                   :options="whtTypeList"
+                  @option:selected="invoiceMasterApi.getWhtCode($event.code)"
                   appendToBody
                 ></v-select>
               </td>
@@ -201,8 +202,8 @@
                   v-model="item.whtCode"
                   class="customSelect"
                   placeholder="Code"
-                  :reduce="(option) => option.code"
-                  :get-option-label="(option) => `${option.code} - ${option.name}`"
+                  :reduce="(option) => option.whtCode"
+                  :get-option-label="(option) => `${option.whtCode} - ${option.description}`"
                   :options="whtCodeList"
                   @option:selected="calculateWht(index)"
                   appendToBody
@@ -355,13 +356,9 @@ const getVatAmount = () => {
 
 const getPercentWht = (code: string) => {
   if (!code) return 0
-  const index = whtCodeList.value.findIndex((item) => item.code === code)
+  const index = whtCodeList.value.findIndex((item) => item.whtCode === code)
   if (index !== -1) {
-    const splitName = whtCodeList.value[index].name.split(' - ')
-    const match = splitName[1]?.match(/(\d+[.,]?\d*)%/)
-    if (match) {
-      return parseFloat(match[1].replace(',', '.')) / 100
-    }
+    return (whtCodeList.value[index].tarif || 0) / 100
   }
   return 0
 }
@@ -427,25 +424,6 @@ onMounted(async () => {
     await invoiceMasterApi.getWhtType()
   }
 })
-
-// Watch whtType for each item to fetch its codes
-const watchWhtTypes = () => {
-  if (!form) return
-  form.invoiceItem.forEach((item) => {
-    watch(
-      () => item.whtType,
-      async (newType) => {
-        if (newType) {
-          await invoiceMasterApi.getWhtCode(newType)
-        }
-      }
-    )
-  })
-}
-
-watch(() => form?.invoiceItem.length, () => {
-  watchWhtTypes()
-}, { immediate: true })
 </script>
 
 <style lang="scss" scoped>
