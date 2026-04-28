@@ -46,6 +46,12 @@ const triggerFileInput = () => {
   fileInput.value?.click()
 }
 
+const cleanupBackdrop = () => {
+  // Hapus semua backdrop yang tersisa setelah upload
+  document.querySelectorAll('.modal-backdrop').forEach((el) => el.remove())
+  document.body.style.overflow = ''
+}
+
 const handleFileUpload = async (event: Event) => {
   if (props.isHoldUpload) return emits('setFile')
   const target = event.target as HTMLInputElement
@@ -68,15 +74,19 @@ const handleFileUpload = async (event: Event) => {
     // const responseQr = await uploadApi.uploadFileQr(file, 0)
     // emits('setFileQr', responseQr)
   } catch {}
+  finally {
+    if (fileInput.value) fileInput.value.value = ''
+    cleanupBackdrop() // Bersihkan backdrop yang tersisa
+  }
 }
 
 watch(
   () => errorMessageUpload.value,
-  () => {
-    if (errorMessageUpload.value) {
+  (newVal) => {
+    if (newVal && newVal.trim() !== '') {
       const idModal = document.querySelector('#error_upload_modal')
       const modal = KTModal.getInstance(idModal as HTMLElement)
-      modal.show()
+      modal?.show()
     }
   },
 )

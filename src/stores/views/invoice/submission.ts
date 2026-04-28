@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 import invoiceApi from '@/core/utils/invoiceApi'
 import moment from 'moment'
 
-import type { ApiResponse, ApiResponseData } from '@/core/type/api'
+import type { ApiResponse, ApiResponseData, PaginatedContent } from '@/core/type/api'
 import type {
   SubmissionStatusTypes,
   DocumentTypes,
@@ -60,6 +60,8 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
   const listNonPo = ref<ListNonPoTypes[]>()
   const detailPo = ref<ParamsSubmissionTypes>()
   const detailNonPo = ref<ParamsSubmissionTypes>()
+  const totalListPo = ref<number>(0)
+  const totalListNonPo = ref<number>(0)
   const responseCheckBudget = ref<ResponseCheckBudgetTypes>()
   const errorMessageSubmission = ref<string>('')
   const casNoCode = ref<CasNoTypes[]>([])
@@ -150,16 +152,24 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
       searchText: data.searchText || null,
       invoiceSource: data.invoiceSource,
     }
-    const response: ApiResponse<ListPoTypes[]> = await invoiceApi.get(`/invoice/submission`, {
-      params: {
-        ...(data.statusCode !== null ? { statuscode: Number(data.statusCode) } : {}),
-        ...query,
+    const response: ApiResponse<PaginatedContent<ListPoRawResponse>> = await invoiceApi.get(
+      `/invoice/submission`,
+      {
+        params: {
+          ...(data.statusCode !== null ? { statuscode: Number(data.statusCode) } : {}),
+          ...query,
+          page: data.page || 1,
+          pageSize: data.pageSize || 10,
+        },
       },
-    })
+    )
 
-    const newList = !response.data.result.content
+    const contentData = response.data.result.content.items || []
+    totalListPo.value = response.data.result.content.total || 0
+
+    const newList = !contentData
       ? []
-      : (response.data.result.content as ListPoRawResponse[]).map((item: ListPoRawResponse) => {
+      : contentData.map((item: ListPoRawResponse) => {
           const cleanItem: ListPoTypes = {
             invoiceUId: item.invoiceUId,
             invoiceTypeCode: item.invoiceTypeCode,
@@ -370,17 +380,25 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
       params.searchText = data.searchText
     }
 
-    const response: ApiResponse<ListNonPoTypes[]> = await invoiceApi.get(
-      `/invoice/submission`,
+    if (data.page) {
+      params.page = data.page
+    }
+    if (data.pageSize) {
+      params.pageSize = data.pageSize
+    }
+
+    const response: ApiResponse<PaginatedContent<ListNonPoRawResponse>> = await invoiceApi.get(
+      `/invoice/submission/non-po`,
       {
         params,
       },
     )
 
-    const contentData = response.data.result.content || []
+    const contentData = response.data.result.content.items || []
+    totalListNonPo.value = response.data.result.content.total || 0
     const newList = !contentData
       ? []
-      : (contentData as ListNonPoRawResponse[]).map((item: ListNonPoRawResponse) => {
+      : contentData.map((item: ListNonPoRawResponse) => {
           // Explicitly construct object without pOs field
           const cleanItem: ListNonPoTypes = {
             invoiceUId: item.invoiceUId,
@@ -485,6 +503,8 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
     detailPo,
     detailNonPo,
     listNonPo,
+    totalListPo,
+    totalListNonPo,
     responseCheckBudget,
     errorMessageSubmission,
     casNoCode,

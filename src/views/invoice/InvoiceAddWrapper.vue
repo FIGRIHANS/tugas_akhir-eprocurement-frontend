@@ -430,7 +430,11 @@ const checkInvoiceNonPoView = () => {
 }
 
 const checkIsNonPo = () => {
-  return route.query.type === 'nonpo' || route.query.type === 'cas'
+  return (
+    route.query.type === 'nonpo' ||
+    route.query.type === 'non-po-view' ||
+    route.query.type === 'cas'
+  )
 }
 
 const checkInvoiceData = () => {
@@ -1296,53 +1300,75 @@ const setData = () => {
 const setDataNonPo = () => {
   const detail = detailNonPo.value
   if (form && detail) {
-    form.status = detail.header.statusCode
-    form.invoiceUId = detail.header.invoiceUId
-    form.invoiceType = detail.header.invoiceTypeCode ? detail.header.invoiceTypeCode.toString() : ''
-    form.vendorId = detail.vendor.vendorId ? detail.vendor.vendorId.toString() : ''
-    form.npwp = detail.vendor.npwp
-    form.address = detail.vendor.vendorAddress
-    form.paymentId = detail.payment.paymentId
-    form.bankKeyId = detail.payment.bankKey
-    form.bankNameId = detail.payment.bankName
-    form.beneficiaryName = detail.payment.beneficiaryName
-    form.bankAccountNumber = detail.payment.bankAccountNo
-    form.bankCountryCode = detail.payment.bankCountryCode
-    form.invoiceDp = detail.header.invoiceDPCode ? detail.header.invoiceDPCode.toString() : ''
-    form.companyCode = detail.header.companyCode
-    if (detail.header.invoiceTypeCode === 3) {
-      form.invoiceVendorNo = ''
-    } else {
-      form.invoiceVendorNo = detail.header.documentNo ? detail.header.documentNo.toString() : ''
+    // Safely map Header data
+    if (detail.header) {
+      form.status = detail.header.statusCode
+      form.invoiceUId = detail.header.invoiceUId
+      form.invoiceType = detail.header.invoiceTypeCode
+        ? detail.header.invoiceTypeCode.toString()
+        : ''
+      form.invoiceDp = detail.header.invoiceDPCode ? detail.header.invoiceDPCode.toString() : ''
+      form.companyCode = detail.header.companyCode
+      if (detail.header.invoiceTypeCode === 3) {
+        form.invoiceVendorNo = ''
+      } else {
+        form.invoiceVendorNo = detail.header.documentNo ? detail.header.documentNo.toString() : ''
+      }
+      form.invoiceNo = detail.header.invoiceNo ? detail.header.invoiceNo.toString() : ''
+      form.invoiceDate = detail.header.invoiceDate
+      form.taxNoInvoice = detail.header.taxNo
+      form.casNoCode = detail.header.casNoCode || ''
+      form.casNoName = detail.header.casNoName || ''
+      form.casDateReceipt = detail.header.casDateReceipt || ''
+      form.dueDateCas = detail.header.dueDateCas || ''
+      form.cashJournalCode = detail.header.cashJournalCode || ''
+      form.cashJournalName = detail.header.cashJournalName || ''
+      form.proposalAmountVal = detail.header.proposalAmount || ''
+
+      if (detail.header.pettyCashStartDate && detail.header.pettyCashEndDate) {
+        form.pettyCashPeriod = [
+          new Date(detail.header.pettyCashStartDate),
+          new Date(detail.header.pettyCashEndDate),
+        ]
+      }
+
+      form.currency = detail.header.currCode
+      form.description = detail.header.notes
+      form.department = detail.header.department
     }
-    form.invoiceNo = detail.header.invoiceNo ? detail.header.invoiceNo.toString() : ''
-    form.invoiceDate = detail.header.invoiceDate
-    form.taxNoInvoice = detail.header.taxNo
-    form.casNoCode = detail.header.casNoCode || ''
-    form.casNoName = detail.header.casNoName || ''
-    form.casDateReceipt = detail.header.casDateReceipt || ''
-    form.dueDateCas = detail.header.dueDateCas || ''
-    form.cashJournalCode = detail.header.cashJournalCode || ''
-    form.cashJournalName = detail.header.cashJournalName || ''
-    form.proposalAmountVal = detail.header.proposalAmount || ''
 
-    if (detail.header.pettyCashStartDate && detail.header.pettyCashEndDate) {
-      form.pettyCashPeriod = [
-        new Date(detail.header.pettyCashStartDate),
-        new Date(detail.header.pettyCashEndDate),
-      ]
+    // Safely map Vendor data
+    if (detail.vendor) {
+      form.vendorId = detail.vendor.vendorId ? detail.vendor.vendorId.toString() : ''
+      form.npwp = detail.vendor.npwp
+      form.address = detail.vendor.vendorAddress
     }
 
-    form.currency = detail.header.currCode
-    form.description = detail.header.notes
-    form.subtotal = detail.calculation.subtotal
-    form.vatAmount = detail.calculation.vatAmount
-    form.additionalCostCalc = detail.calculation.additionalCost
-    form.totalGrossAmount = detail.calculation.totalGrossAmount
-    form.totalNetAmount = detail.calculation.totalNetAmount
-    form.department = detail.header.department
+    // Safely map Payment data
+    if (detail.payment) {
+      form.paymentId = detail.payment.paymentId
+      form.bankKeyId = detail.payment.bankKey
+      form.bankNameId = detail.payment.bankName
+      form.beneficiaryName = detail.payment.beneficiaryName
+      form.bankAccountNumber = detail.payment.bankAccountNo
+      form.bankCountryCode = detail.payment.bankCountryCode
+    }
 
-    const dataAlternativePayee = detail.alternativePayee[0]
+    // Safely map Calculation data
+    if (detail.calculation) {
+      form.subtotal = detail.calculation.subtotal
+      form.vatAmount = detail.calculation.vatAmount
+      form.whtAmount = detail.calculation.whtAmount
+      form.additionalCostCalc = detail.calculation.additionalCost
+      form.totalGrossAmount = detail.calculation.totalGrossAmount
+      form.totalNetAmount = detail.calculation.totalNetAmount
+    }
+
+    // Safely map Alternative Payee
+    const dataAlternativePayee =
+      detail.alternativePayee && detail.alternativePayee.length > 0
+        ? detail.alternativePayee[0]
+        : null
     form.isAlternativePayee = dataAlternativePayee ? dataAlternativePayee.isAlternativePayee : false
     form.isOneTimeVendor = dataAlternativePayee ? dataAlternativePayee.isOneTimeVendor : false
     form.nameAlternative = dataAlternativePayee ? dataAlternativePayee.name : '-'
@@ -1359,61 +1385,66 @@ const setDataNonPo = () => {
     form.ktpNumberAlternative = dataAlternativePayee ? dataAlternativePayee.ktp : '-'
     form.emailAlternative = dataAlternativePayee ? dataAlternativePayee.email : '-'
 
+    // Safely map Costs / Expenses
     form.invoiceItem = []
-    for (const item of detail.costExpense) {
-      const data = {
-        id: item.id,
-        activity: item.activityId,
-        activityCode: item.activityExpenses,
-        activityName: item.activityName,
-        itemAmount: item.itemAmount,
-        itemText: item.itemText,
-        debitCredit: item.debitCredit,
-        taxCode: item.taxCode,
-        vatAmount: item.vatAmount,
-        costCenter: item.costCenter,
-        profitCenter: item.profitCenter,
-        assignment: item.assignment,
-        whtType: item.whtType,
-        whtCode: item.whtCode,
-        whtBaseAmount: item.whtBaseAmount.toString(),
-        whtAmount: item.whtAmount ? item.whtAmount.toString() : '0',
-        whtCodeList: [],
-        isEdit: false,
-      } as invoiceItemTypes
-      form.invoiceItem.push(data)
+    if (detail.costExpense) {
+      for (const item of detail.costExpense) {
+        const data = {
+          id: item.id,
+          activity: item.activityId,
+          activityCode: item.activityExpenses,
+          activityName: item.activityName,
+          itemAmount: item.itemAmount,
+          itemText: item.itemText,
+          debitCredit: item.debitCredit,
+          taxCode: item.taxCode,
+          vatAmount: item.vatAmount,
+          costCenter: item.costCenter,
+          profitCenter: item.profitCenter,
+          assignment: item.assignment,
+          whtType: item.whtType,
+          whtCode: item.whtCode,
+          whtBaseAmount: item.whtBaseAmount ? item.whtBaseAmount.toString() : '0',
+          whtAmount: item.whtAmount ? item.whtAmount.toString() : '0',
+          whtCodeList: [],
+          isEdit: false,
+        } as invoiceItemTypes
+        form.invoiceItem.push(data)
+      }
     }
 
-    for (const doc of detail.documents) {
-      switch (doc.documentType) {
-        case 1:
-          form.invoiceDocument = {
-            id: doc.id,
-            name: doc.documentName,
-            fileSize: doc.documentSize.toString(),
-            path: doc.documentUrl,
-            previewPath: doc.documentUrl,
-          }
-          break
-        case 2:
-          form.tax = {
-            id: doc.id,
-            name: doc.documentName,
-            fileSize: doc.documentSize.toString(),
-            path: doc.documentUrl,
-            previewPath: doc.documentUrl,
-          }
-          break
-        case 3:
-          form.referenceDocument = {
-            id: doc.id,
-            name: doc.documentName,
-            fileSize: doc.documentSize.toString(),
-            path: doc.documentUrl,
-            previewPath: doc.documentUrl,
-          }
-          break
-        case 4:
+    // Safely map Documents
+    if (detail.documents) {
+      for (const doc of detail.documents) {
+        switch (doc.documentType) {
+          case 1:
+            form.invoiceDocument = {
+              id: doc.id,
+              name: doc.documentName,
+              fileSize: doc.documentSize.toString(),
+              path: doc.documentUrl,
+              previewPath: doc.documentUrl,
+            }
+            break
+          case 2:
+            form.tax = {
+              id: doc.id,
+              name: doc.documentName,
+              fileSize: doc.documentSize.toString(),
+              path: doc.documentUrl,
+              previewPath: doc.documentUrl,
+            }
+            break
+          case 3:
+            form.referenceDocument = {
+              id: doc.id,
+              name: doc.documentName,
+              fileSize: doc.documentSize.toString(),
+              path: doc.documentUrl,
+              previewPath: doc.documentUrl,
+            }
+            break
+          case 4:
           form.otherDocument = {
             id: doc.id,
             name: doc.documentName,
@@ -1421,7 +1452,8 @@ const setDataNonPo = () => {
             path: doc.documentUrl,
             previewPath: doc.documentUrl,
           }
-          break
+            break
+        }
       }
     }
   }

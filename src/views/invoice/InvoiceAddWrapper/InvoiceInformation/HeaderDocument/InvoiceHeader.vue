@@ -578,11 +578,11 @@ watch(
   () => [form?.companyCode, form?.vendorId, form.invoiceType],
   () => {
     if (form.companyCode) {
-      invoiceMasterApi.getActivity(form.companyCode || '')
-      invoiceMasterApi.getCostCenter(form.companyCode || '')
+      invoiceMasterApi.getActivity(form.companyCode)
+      invoiceMasterApi.getCostCenter(form.companyCode)
     }
     if (form.companyCode && form.invoiceType)
-      invoiceMasterApi.getMatrixApproval(form.invoiceType || '', form.companyCode || '')
+      invoiceMasterApi.getMatrixApproval(form.invoiceType, form.companyCode)
     if (form.vendorId && form.companyCode) {
       const vendorIdStr = String(form.vendorId).trim()
       const companyCodeStr = String(form.companyCode).trim()
