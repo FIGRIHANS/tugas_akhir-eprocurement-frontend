@@ -93,7 +93,64 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
     return response.data.result
   }
 
-  const getPoGr = async (poNumber: string) => {
+  const getPoGr = async (poNumber: string, companyCode?: string, vendorCode?: string) => {
+    // Try backend enriched endpoint first (may return department)
+    try {
+      const resp = await invoiceApi.get(`/invoice/po-gr`, {
+        params: {
+          poNumber,
+          companyCode: companyCode || null,
+          vendorCode: vendorCode || null,
+        },
+      })
+
+      const content = resp.data?.result?.content || []
+
+      if (Array.isArray(content) && content.length > 0) {
+        const mapped: PoGrItemTypes[] = content.map((item: Record<string, unknown>) => {
+          const apiItem = item as Record<string, string | number | undefined>
+          return {
+            poNo: (apiItem.poNo as string) || (apiItem.poNumber as string) || '',
+            poItem: (apiItem.poItem as number) || 0,
+            grDocumentNo: (apiItem.grDocumentNo as string) || '',
+            grDocumentItem: (apiItem.grDocumentItem as number) || 0,
+            grDocumentDate: (apiItem.grDocumentDate as string) || '',
+            taxCode: (apiItem.taxCode as string) || '',
+            quantity: (apiItem.quantity as number) || 0,
+            unit: (apiItem.uom as string) || (apiItem.unit as string) || '',
+            uom: (apiItem.uom as string) || (apiItem.unit as string) || '',
+            itemText: (apiItem.itemText as string) || (apiItem.materialDescription as string) || '',
+            material: (apiItem.material as string) || (apiItem.sku as string) || '',
+            materialDescription: (apiItem.materialDescription as string) || (apiItem.itemName as string) || '',
+            currency: (apiItem.currency as string) || '',
+            conditionType: (apiItem.conditionType as string) || '',
+            conditionTypeDesc: (apiItem.conditionTypeDesc as string) || '',
+            qcStatus: (apiItem.qcStatus as string) || '',
+            postingDate: (apiItem.postingDate as string) || '',
+            enteredOn: (apiItem.enteredOn as string) || '',
+            purchasingOrg: (apiItem.purchasingOrg as string) || '',
+            department: (apiItem.department as string) || (apiItem.costCenter as string) || '',
+            currencyLC: (apiItem.currencyLC as string) || '',
+            currencyTC: (apiItem.currencyTC as string) || '',
+            itemAmountLC: (apiItem.itemAmountLC as number) ?? (apiItem.itemAmount as number) ?? 0,
+            itemAmountTC: (apiItem.itemAmountTC as number) ?? (apiItem.itemAmount as number) ?? 0,
+            itemAmount: (apiItem.itemAmount as number) ?? 0,
+            deliveryOrderNo: (apiItem.deliveryOrderNo as string) || '',
+          }
+        })
+
+        poGrList.value = mapped
+
+        return {
+          ...resp.data.result,
+          content: mapped,
+        }
+      }
+    } catch {
+      // ignore and fallback to mock-sap
+    }
+
+    // Fallback to legacy/mock endpoint
     const response: ApiResponse<MockSapPoDetailTypes> = await invoiceApi.get(`/mock-sap/detail`, {
       params: {
         poNumber,

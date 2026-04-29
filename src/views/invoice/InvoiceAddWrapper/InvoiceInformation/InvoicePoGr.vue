@@ -472,7 +472,7 @@ const openAddItem = async () => {
   }
 
   try {
-    await invoiceApi.getPoGr(poNumber)
+    await invoiceApi.getPoGr(poNumber, form.companyCode, form.vendorId)
     const idModal = document.querySelector('#add_po_gr_item_modal')
     const modal = KTModal.getInstance(idModal as HTMLElement)
     modal.show()
@@ -543,7 +543,7 @@ const autoFetchPoOnEnter = async () => {
   isAutoFetchingPo.value = true
 
   try {
-    const response = await invoiceApi.getPoGr(initialPoNumber)
+    const response = await invoiceApi.getPoGr(initialPoNumber, form.companyCode, form.vendorId)
     setPoGrFromMockSap(response?.content || [])
   } catch (error) {
     console.error('Error auto fetching PO detail on enter:', error)
@@ -582,8 +582,6 @@ const setColumn = () => {
 }
 
 const setItemPoGr = (items: PoGrSearchTypes[]) => {
-  console.log(items)
-
   for (const item of items) {
     const data = {
       poNo: item.poNo,
@@ -872,7 +870,7 @@ watch(
 onMounted(async () => {
   setColumn()
   autoFetchPoOnEnter()
-  
+
   // Prevent double fetching of WHT Types
   if (!masterDataApi.whtTypeList || masterDataApi.whtTypeList.length === 0) {
     await masterDataApi.getWhtType()
@@ -882,7 +880,7 @@ onMounted(async () => {
   if (formEdit.whtType) {
     await masterDataApi.getWhtCode(formEdit.whtType)
   }
-  
+
   if (form?.invoicePoGr) {
     const uniqueTypes = [...new Set(form.invoicePoGr.map(item => item.whtType).filter(Boolean))]
     for (const type of uniqueTypes) {
