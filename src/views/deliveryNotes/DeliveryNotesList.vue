@@ -36,7 +36,7 @@
               <option value="Rejected">Rejected</option>
             </select>
           </div>
-          <div>
+          <div v-if="!isVendorUser">
             <label class="form-label">Vendor Code</label>
             <input
               type="text"
@@ -96,7 +96,7 @@
           </thead>
           <tbody>
             <tr v-if="filteredDataList?.length === 0">
-              <td colspan="18" class="text-center">No data found.</td>
+              <td :colspan="columns.length" class="text-center">No data found.</td>
             </tr>
             <tr v-for="(item, index) in list" :key="index">
               <td class="text-center">
@@ -117,7 +117,7 @@
                   {{ item.status }}
                 </span>
               </td>
-              <td>{{ item.vendorCode }}</td>
+              <td v-if="!isVendorUser">{{ item.vendorCode }}</td>
               <td>{{ formatDate(item.estimatedArrival) }}</td>
               <td>{{ item.pickupAddress }}</td>
               <td>{{ item.destinationAddress }}</td>
@@ -156,7 +156,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
@@ -165,9 +165,15 @@ import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import momentLib from 'moment'
 import { cloneDeep } from 'lodash'
 import DeliveryNotesService, { type DeliveryNotesData } from '@/services/deliveryNotes.service'
+import { useLoginStore } from '@/stores/views/login'
 // Expose moment to template
 const moment = momentLib
 const router = useRouter()
+const userStore = useLoginStore()
+
+const isVendorUser = computed(() => !!userStore.userData?.profile?.vendorCode)
+const vendorID = computed(() => userStore.userData?.profile?.profileId ?? undefined)
+const vendorCodeUser = computed(() => userStore.userData?.profile?.vendorCode ?? undefined)
 
 interface FilterForm {
   status: string
@@ -201,25 +207,20 @@ const filterForm = ref<FilterForm>({
   estimatedArrivalTo: '',
 })
 
-const columns = ref<string[]>([
-  'Action',
-  'No',
-  'Delivery Note Number',
-  'Trip ID',
-  'PO Number',
-  'Status',
-  'Vendor Code',
-  'Estimated Arrival',
-  'Pickup Address',
-  'Destination Address',
-  'Transporter',
-  'Truck Type',
-  'License Plate',
-  'Created Date',
-  'Created By',
-  'Update Date',
-  'Update By',
-])
+const columns = computed(() => {
+  const base = [
+    'Action', 'No', 'Delivery Note Number', 'Trip ID', 'PO Number', 'Status',
+  ]
+  if (!isVendorUser.value) {
+    base.push('Vendor Code')
+  }
+  return [
+    ...base,
+    'Estimated Arrival', 'Pickup Address', 'Destination Address',
+    'Transporter', 'Truck Type', 'License Plate',
+    'Created Date', 'Created By', 'Update Date', 'Update By',
+  ]
+})
 
 const dataList = ref<DeliveryNotesData[]>([])
 const fetchData = async () => {
@@ -230,7 +231,8 @@ const fetchData = async () => {
     const response = await DeliveryNotesService.getList({
       searchText: search.value || undefined,
       status: filterForm.value.status || undefined,
-      vendorCode: filterForm.value.vendorCode || undefined,
+      vendorCode: isVendorUser.value ? vendorCodeUser.value : filterForm.value.vendorCode || undefined,
+      vendorID: isVendorUser.value ? String(vendorID.value) : undefined,
       estimatedArrivalFrom: filterForm.value.estimatedArrivalFrom || undefined,
       estimatedArrivalTo: filterForm.value.estimatedArrivalTo || undefined,
     })
@@ -437,7 +439,16 @@ const viewDetail = (id: number) => {
 }
 
 onMounted(() => {
-  fetchData()
+  if (userStore.userData) {
+    fetchData()
+  } else {
+    const unwatch = watch(() => userStore.userData, (newVal) => {
+      if (newVal) {
+        fetchData()
+        unwatch()
+      }
+    })
+  }
 })
 </script>
 

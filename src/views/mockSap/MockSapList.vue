@@ -35,7 +35,7 @@
               placeholder="Enter PO number"
             />
           </div>
-          <div>
+          <div v-if="!isVendorUser">
             <label class="form-label">Vendor Code</label>
             <input
               type="text"
@@ -44,7 +44,7 @@
               placeholder="Enter vendor code"
             />
           </div>
-          <div>
+          <div v-if="!isVendorUser">
             <label class="form-label">Vendor Name</label>
             <input
               type="text"
@@ -130,7 +130,7 @@
           </thead>
           <tbody>
             <tr v-if="filteredDataList?.length === 0">
-              <td colspan="11" class="text-center">No data found.</td>
+              <td :colspan="columns.length" class="text-center">No data found.</td>
             </tr>
             <tr v-for="(item, index) in list" :key="index">
               <td class="text-center">
@@ -144,8 +144,8 @@
               </td>
               <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
               <td>{{ item.poNumber }}</td>
-              <td>{{ item.vendorCode }}</td>
-              <td>{{ item.vendorName }}</td>
+              <td v-if="!isVendorUser">{{ item.vendorCode }}</td>
+              <td v-if="!isVendorUser">{{ item.vendorName }}</td>
               <td>{{ formatDate(item.poDate) }}</td>
               <td class="text-right">{{ formatCurrency(item.totalAmount) }}</td>
               <td>
@@ -185,7 +185,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
@@ -194,9 +194,15 @@ import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import momentLib from 'moment'
 import { cloneDeep } from 'lodash'
 import MockSapService, { type MockSapHeaderData } from '@/services/mockSap.service'
+import { useLoginStore } from '@/stores/views/login'
 
 const moment = momentLib
 const router = useRouter()
+const userStore = useLoginStore()
+
+const isVendorUser = computed(() => !!userStore.userData?.profile?.vendorCode)
+const vendorID = computed(() => userStore.userData?.profile?.profileId ?? undefined)
+const vendorCodeUser = computed(() => userStore.userData?.profile?.vendorCode ?? undefined)
 
 interface FilterForm {
   poNumber: string
@@ -234,20 +240,13 @@ const filterForm = ref<FilterForm>({
   poDateTo: '',
 })
 
-const columns = ref<string[]>([
-  'Action',
-  'No',
-  'PO Number',
-  'Vendor Code',
-  'Vendor Name',
-  'PO Date',
-  'Total Amount',
-  'Status',
-  'Created Date',
-  'Created By',
-  'Updated Date',
-  'Updated By',
-])
+const columns = computed(() => {
+  const base = ['Action', 'No', 'PO Number']
+  if (!isVendorUser.value) {
+    base.push('Vendor Code', 'Vendor Name')
+  }
+  return [...base, 'PO Date', 'Total Amount', 'Status', 'Created Date', 'Created By', 'Updated Date', 'Updated By']
+})
 
 const dataList = ref<MockSapHeaderData[]>([])
 
@@ -259,8 +258,9 @@ const fetchData = async () => {
     const response = await MockSapService.getList({
       searchText: search.value || undefined,
       poNumber: filterForm.value.poNumber || undefined,
-      vendorCode: filterForm.value.vendorCode || undefined,
-      vendorName: filterForm.value.vendorName || undefined,
+      vendorCode: isVendorUser.value ? vendorCodeUser.value : filterForm.value.vendorCode || undefined,
+      vendorID: isVendorUser.value ? vendorID.value.toString() : undefined,
+      vendorName: isVendorUser.value ? undefined : filterForm.value.vendorName || undefined,
       poDateFrom: filterForm.value.poDateFrom || undefined,
       poDateTo: filterForm.value.poDateTo || undefined,
     })
@@ -483,7 +483,16 @@ const viewDetail = (poNumber: string) => {
 }
 
 onMounted(() => {
-  fetchData()
+  if (userStore.userData) {
+    fetchData()
+  } else {
+    const unwatch = watch(() => userStore.userData, (newVal) => {
+      if (newVal) {
+        fetchData()
+        unwatch()
+      }
+    })
+  }
 })
 </script>
 

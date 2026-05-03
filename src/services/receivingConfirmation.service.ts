@@ -47,8 +47,9 @@ export interface ReceivingConfirmationData {
   tripID: string
   DeliveryNoteNumber: string
   poNumber: string
-  vendorID?: string
+  vendorID?: number | string
   vendorName?: string
+  vendorCode?: string
   status: string
   rejectReason: string | null
   receivedDate: string
@@ -190,10 +191,10 @@ const ReceivingConfirmationService = {
   async updateStatus(
     reportID: number,
     data: ReceivingConfirmationUpdatePayload,
-  ): Promise<ReceivingConfirmationData> {
+  ): Promise<void> {
     try {
       // Axios PUT signature: put(url, data, config)
-      const response = await invoiceApi.put<ApiResponse<ReceivingConfirmationData>>(
+      await invoiceApi.put<ApiResponse<string>>(
         '/receiving-confirmation/update-status',
         data, // Request body
         {
@@ -202,7 +203,7 @@ const ReceivingConfirmationService = {
           },
         },
       )
-      return response.data.result.content
+      // API returns a string message in content, not an object — no need to parse
     } catch (error) {
       console.error('Error approving/rejecting receiving confirmation:', error)
       throw error
