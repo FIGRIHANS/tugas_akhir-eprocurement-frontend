@@ -9,26 +9,11 @@
         <div class="flex align-items-center gap-3">
           <UiInputSearch v-model="search" placeholder="Search" @keypress="goSearch" />
           <FilterList :data="filterForm" @setData="setDataFilter" ref="filterChild" />
-          <input
-            ref="fileInput"
-            type="file"
-            multiple
-            accept=".xlsx,.xls,.pdf,.csv"
-            class="hidden"
-            @change="handleFileUpload"
-          />
-          <button
-            class="btn btn-primary ml-auto d-flex align-items-center gap-2"
-            @click="openFileExplorer"
-          >
-            <!-- Icon -->
-            <i class="ki-duotone ki-exit-up"></i>
-
-            <!-- Text -->
-            <span>
-              Upload Invoice FTP
-            </span>
+          <button class="btn btn-primary ml-auto" @click="goAdd()">
+            <i class="ki-duotone ki-plus-circle"></i>
+            Add Invoice
           </button>
+
         </div>
       </div>
       <div class="flex overflow-x-auto gap-3 mb-5 items-center" v-if="filteredPayload.length > 0">
@@ -171,7 +156,11 @@
           @pageChange="setPage"
         />
       </div>
-      <DetailVerificationModal type="po" @loadDetail="loadData" @setClearId="viewDetailId = ''" />
+      <DetailVerificationModal 
+      type="po"
+      @load-detail="loadData" 
+      @set-clear-id="viewDetailId = ''" 
+    />
     </div>
   </div>
 </template>
@@ -187,7 +176,7 @@ import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useFormatIdr } from '@/composables/currency'
-import type { ListNonPoTypes } from '@/stores/views/invoice/types/submission'
+import type { ListPoTypes } from '@/stores/views/invoice/types/submission'
 import moment from 'moment'
 import { cloneDeep } from 'lodash'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
@@ -215,13 +204,12 @@ const router = useRouter()
 const search = ref<string>('')
 const currentPage = ref<number>(1)
 const pageSize = ref<number>(10)
-const list = ref<ListNonPoTypes[]>([])
+const list = ref<ListPoTypes[]>([])
 const sortBy = ref<string>('')
 const sortColumnName = ref<string>('')
 const filteredPayload = ref([])
 const filterChild = ref(null)
 const viewDetailId = ref('')
-const fileInput = ref<HTMLInputElement | null>(null)
 
 const openDetailVerification = (invoiceId: string) => {
   viewDetailId.value = invoiceId
@@ -232,9 +220,9 @@ const openDetailVerification = (invoiceId: string) => {
 
 const loadData = async () => {
   try {
-    await invoiceApi.getNonPoDetail(viewDetailId.value)
+    await invoiceApi.getPoDetail(viewDetailId.value)
   } catch (error) {
-    console.error('Error loading Non-PO detail:', error)
+    console.error('Error loading PO detail:', error)
   }
 }
 
@@ -274,7 +262,7 @@ const columns = ref<string[]>([
   'PO Price',
 ])
 
-const poList = computed(() => invoiceApi.listNonPo || [])
+const poList = computed(() => invoiceApi.listPo || [])
 
 const colorBadge = (status: number) => {
   if (status === 0) return 'badge-secondary'
@@ -303,8 +291,8 @@ const getStatusBadgeClass = (status: boolean) => {
 //   return pool[Math.floor(Math.random() * pool.length)]
 // }
 
-const setList = (listData: ListNonPoTypes[]) => {
-  const result: ListNonPoTypes[] = []
+const setList = (listData: ListPoTypes[]) => {
+  const result: ListPoTypes[] = []
   for (const [index, item] of listData.entries()) {
     const start = currentPage.value * pageSize.value - pageSize.value
     const end = currentPage.value * pageSize.value - 1
@@ -320,7 +308,7 @@ const setPage = (value: number) => {
   sortColumn(null)
 }
 
-const goView = (data: ListNonPoTypes) => {
+const goView = (data: ListPoTypes) => {
   if (data.statusCode === 0 || data.statusCode === 5) {
     router.push({
       name: 'invoiceAdd',
@@ -342,10 +330,20 @@ const goView = (data: ListNonPoTypes) => {
   }
 }
 
+const goAdd = () => {
+  router.push({
+    name: 'invoiceAdd',
+    query: {
+      type: 'po',
+      from: 'ftp',
+    },
+  })
+}
+
 const callList = () => {
   list.value = []
   invoiceApi
-    .getListNonPo({
+    .getListPo({
       statusCode: filterForm.status === '0' || filterForm.status ? Number(filterForm.status) : null,
       companyCode: filterForm.companyCode,
       invoiceTypeCode: Number(filterForm.invoiceType),
@@ -410,7 +408,7 @@ const sortColumn = (columnName: string | null) => {
     'Vendor Name': 'vendorName',
     'Invoice Vendor No': 'documentNo',
     'Company Code': 'companyCode',
-    'Invoice Non PO Type': 'invoiceTypeName',
+    'Invoice PO Type': 'invoiceTypeName',
     'Invoice Date': 'invoiceDate',
     'Total Gross Amount': 'totalGrossAmount',
     'Total Net Amount': 'totalNetAmount',
@@ -420,7 +418,7 @@ const sortColumn = (columnName: string | null) => {
   const roleSort = ['asc', 'desc', '']
 
   const listData = cloneDeep(poList.value)
-  let result: ListNonPoTypes[] = []
+  let result: ListPoTypes[] = []
 
   if (columnName) {
     if (sortColumnName.value !== columnName) sortBy.value = ''
@@ -508,35 +506,7 @@ const resetFilter = () => {
  * 5. The invoices should be visible immediately in the list with Draft status
  */
 
-const openFileExplorer = () => {
-  fileInput.value?.click()
-}
 
-const handleFileUpload = async (event: Event) => {
-  const target = event.target as HTMLInputElement
-  const files = target.files
-
-  if (files && files.length > 0) {
-    try {
-      // Trigger FTP sync using the existing store method.
-      // Backend can process uploaded FTP invoices according to current integration flow.
-      await invoiceApi.syncInvoicFromFtp()
-
-      // Show success message
-      console.log('Files uploaded successfully')
-
-      // Reload the list to show newly added invoices with Draft status
-      currentPage.value = 1 // Reset to first page to see new data
-      callList()
-
-      // Reset file input
-      target.value = ''
-    } catch (error) {
-      console.error('Error uploading files:', error)
-      // You can add error notification here if you have a toast/notification service
-    }
-  }
-}
 
 onMounted(() => {
   callList()

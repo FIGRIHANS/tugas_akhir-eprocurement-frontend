@@ -6,7 +6,7 @@
   <button
     type="button"
     class="sidebar-toggle-btn"
-    :style="{ left: sidebarStore.isCollapsed ? '0px' : '280px' }"
+    :style="{ insetInlineStart: sidebarStore.isCollapsed ? '0px' : '280px' }"
     :aria-label="sidebarStore.isCollapsed ? 'Tampilkan sidebar' : 'Sembunyikan sidebar'"
     :aria-pressed="sidebarStore.isCollapsed"
     @click="sidebarStore.toggleSidebar"
@@ -17,7 +17,7 @@
     ></i>
   </button>
 
-  <main 
+  <main
     class="py-4 px-6 transition-all duration-300 ease-in-out"
     :class="sidebarStore.isCollapsed ? 'ml-[32px]' : 'ml-[312px]'"
   >
@@ -38,19 +38,19 @@ const sidebarStore = useSidebarStore()
 <style>
 .sidebar-toggle-btn {
   position: fixed;
-  top: 100px;
-  width: 32px;
-  height: 52px;
+  inset-block-start: 100px;
+  inline-size: 32px;
+  block-size: 52px;
   background: #fff;
   border: 1px solid #e2e8f0;
-  border-left: none;
+  border-inline-start: none;
   border-radius: 0 20px 20px 0;
   box-shadow: 3px 0 10px rgba(0, 0, 0, 0.06);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: left 0.3s ease-in-out, background 0.15s;
+  transition: inset-inline-start 0.3s ease-in-out, background 0.15s;
   z-index: 200;
 }
 

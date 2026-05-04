@@ -12,7 +12,21 @@
             <p class="font-semibold text-sm mb-[16px] uppercase tracking-tight text-gray-600">Recipient Information</p>
             <div class="flex flex-col gap-[8px]">
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label w-full lg:max-w-xs">Tax ID / Number</label>
+                <label class="form-label w-full lg:max-w-xs">Identification Type</label>
+                <div class="flex gap-6 items-center flex-1">
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" v-model="form.fgNpwpNik" value="true" class="radio radio-primary radio-xs" />
+                    <span class="text-sm">NPWP</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" v-model="form.fgNpwpNik" value="false" class="radio radio-primary radio-xs" />
+                    <span class="text-sm">NIK</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+                <label class="form-label w-full lg:max-w-xs">{{ form.fgNpwpNik === 'true' ? 'NPWP' : 'NIK' }}</label>
                 <div class="flex-1">
                   <input 
                     v-model="form.npwp" 
@@ -245,27 +259,27 @@ const form = ref<BpuCreatePayload>({
   masaPajak: '',
   tahunPajak: '',
   fgNpwpNik: 'true',
-  npwp: '',
+  npwp: '1234567890123456',
   nik: '',
-  nama: '',
+  nama: 'PT BPU Testing',
   fgJnsBupot: 'BPU',
   tglPemotongan: moment().format('YYYY-MM-DD'),
-  glAccount: '',
+  glAccount: '521111',
   dataDetilBpu: {
     sertifikatInsentifDipotong: '9',
     nomorSertifikatInsentif: '',
     kodeObjekPajak: '24-104-01',
     pasalPPh: 'Pasal 23',
     statusPPh: 'Non Final',
-    dpp: 0,
+    dpp: 10000000,
     tarif: 2,
-    pphDipotong: 0,
+    pphDipotong: 200000,
     kap: '411124',
     kjs: '100',
     dokReferensi: [
       {
         dokReferensi: 'COMMERCIALINVOICE',
-        nomorDokumen: '',
+        nomorDokumen: 'INV/BPU/TEST/' + moment().format('YYYYMMDDHHmm'),
         tanggal_Dokumen: moment().format('DDMMYYYY'),
       },
     ],

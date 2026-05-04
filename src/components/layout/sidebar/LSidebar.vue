@@ -1,6 +1,6 @@
 <template>
 <aside 
-    class="w-[280px] bg-white border border-gray-200 border-t-0 h-full -mt-[80px] fixed scrollable-y-auto transition-transform duration-300 ease-in-out z-[99]"
+    class="w-[280px] bg-white border border-gray-200 border-t-0 h-screen top-0 fixed scrollable-y-auto transition-transform duration-300 ease-in-out z-[99]"
     :class="{ '-translate-x-full': sidebarStore.isCollapsed }"
   >
     <div class="h-[80px] flex items-center mb-5 px-[25px]">

@@ -5,6 +5,13 @@ const generalApi = axios.create({
   baseURL: import.meta.env.VITE_API_GENERAL_BASE_URL,
 })
 
+const generateRequestId = () => {
+  try {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID()
+  } catch {}
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`
+}
+
 generalApi.interceptors.request.use((config) => {
   let token = getToken()
   if (!token) {
@@ -20,7 +27,12 @@ generalApi.interceptors.request.use((config) => {
     }
   }
 
+  if (!config.headers) config.headers = {} as any
   if (token) config.headers.Authorization = token
+  // attach x-request-id for tracing
+  if (!config.headers['x-request-id'] && !config.headers['X-Request-Id']) {
+    config.headers['x-request-id'] = generateRequestId()
+  }
   return config
 })
 

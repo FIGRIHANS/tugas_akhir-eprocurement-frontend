@@ -198,6 +198,7 @@ export interface PoGrItemTypes {
 }
 
 export interface ListPoTypes {
+  id: number
   invoiceUId: string
   invoiceTypeCode: number
   invoiceTypeName: string
@@ -216,6 +217,7 @@ export interface ListPoTypes {
   totalGrossAmount: number
   totalNetAmount: number
   vendorName: string
+  pOs?: PoChildTypes[]
   isOpenChild: boolean
   createdUtcDate: string
   invoiceSourceName?: string | null
@@ -225,9 +227,11 @@ export interface ListPoTypes {
   poPrice?: boolean | null
   emailSender?: string | null
   sapPostingCode: string | null
+  whtReconciliationStatus?: string | null
 }
 
 export interface ListNonPoTypes {
+  id: number
   invoiceUId: string
   invoiceTypeCode: number
   invoiceTypeName: string
@@ -246,6 +250,7 @@ export interface ListNonPoTypes {
   totalGrossAmount: number
   totalNetAmount: number
   vendorName: string
+  pOs?: PoChildTypes[]
   isOpenChild: boolean
   createdUtcDate: string
   sapPostingCode: string | null
@@ -254,6 +259,7 @@ export interface ListNonPoTypes {
   vatStatus?: boolean | null
   whtStatus?: boolean | null
   poPrice?: boolean | null
+  whtReconciliationStatus?: string | null
 }
 
 // Raw API response types (include pOs field from API before cleaning)
