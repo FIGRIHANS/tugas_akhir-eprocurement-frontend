@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import moment from 'moment'
 import type { TaxNotification, NotificationState, NotificationSeverity } from './types'
 import { generateNotificationId } from './types'
+import { NotificationService } from '@/services/notification.service'
 
 const STORAGE_KEY = 'tax-notifications-v2'
 
@@ -59,21 +60,24 @@ export const useNotificationStore = defineStore('notification', () => {
   const addNotification = (
     notification: Omit<TaxNotification, 'id' | 'createdAt' | 'read'>,
   ): TaxNotification => {
-    // Check if similar notification already exists (avoid duplicates)
-    const exists = notifications.value.some(
-      (n) =>
-        n.type === notification.type &&
-        n.relatedId === notification.relatedId &&
-        n.daysRemaining === notification.daysRemaining,
-    )
-
-    if (exists) {
-      return notifications.value.find(
+    // For partial-received, always add (each approval is a unique event)
+    if (notification.type !== 'partial-received') {
+      // Check if similar notification already exists (avoid duplicates)
+      const exists = notifications.value.some(
         (n) =>
           n.type === notification.type &&
           n.relatedId === notification.relatedId &&
           n.daysRemaining === notification.daysRemaining,
-      )!
+      )
+
+      if (exists) {
+        return notifications.value.find(
+          (n) =>
+            n.type === notification.type &&
+            n.relatedId === notification.relatedId &&
+            n.daysRemaining === notification.daysRemaining,
+        )!
+      }
     }
 
     const newNotification: TaxNotification = {
@@ -176,6 +180,143 @@ export const useNotificationStore = defineStore('notification', () => {
     return newNotificationsCount
   }
 
+  // Partial Received Notification
+  interface PartialReceivedItem {
+    itemName: string
+    sku: string
+    qtyRejected: number
+    rejectReason: string
+  }
+
+  interface PartialReceivedParams {
+    deliveryNoteNumber: string
+    tripID: string
+    poNumber: string
+    vendorName?: string
+    targetVendorId?: number   // Vendor yang harus menerima notifikasi
+    targetVendorCode?: string // Vendor yang harus menerima notifikasi
+    rejectedItems: PartialReceivedItem[]
+  }
+
+  const addPartialReceivedNotification = (params: PartialReceivedParams): TaxNotification => {
+    const { deliveryNoteNumber, tripID, poNumber, vendorName, targetVendorId, targetVendorCode, rejectedItems } = params
+
+    const itemLines = rejectedItems
+      .map(
+        (item) =>
+          `• ${item.itemName} (SKU: ${item.sku}): ${item.qtyRejected} unit ditolak — Alasan: ${item.rejectReason}`,
+      )
+      .join('\n')
+
+    const title = `Partial Received — DN ${deliveryNoteNumber}`
+    const message =
+      `Delivery Notes ${deliveryNoteNumber} (Trip: ${tripID}, PO: ${poNumber}` +
+      `${vendorName ? `, Vendor: ${vendorName}` : ''}) telah diperiksa dan diterima secara PARTIAL. ` +
+      `Item yang ditolak:\n${itemLines}`
+
+    return addNotification({
+      type: 'partial-received',
+      severity: 'warning',
+      title,
+      message,
+      relatedId: deliveryNoteNumber,
+      relatedData: { tripID, poNumber, vendorName, rejectedItems },
+      targetVendorId,
+      targetVendorCode,
+    })
+  }
+
+  /**
+   * Get notifications visible to the current user.
+   *
+   * Vendor mode  (currentVendorId or currentVendorCode is provided):
+   *   - Show partial-received notifications targeted to this vendor (by id or code)
+   *   - Show non-targeted, non-partial-received notifications (e.g. VAT expiry — currently N/A for vendors)
+   *   - Hide everything else
+   *
+   * Internal user mode (no vendor context):
+   *   - Show ALL partial-received notifications (they triggered them; gives feedback)
+   *   - Show non-targeted non-partial-received notifications (e.g. VAT expiry)
+   *   - Hide vendor-targeted non-partial-received notifications
+   */
+  const getVisibleNotifications = (currentVendorId?: number, currentVendorCode?: string) => {
+    const isVendorMode = !!(currentVendorId || currentVendorCode)
+
+    return notifications.value.filter((n) => {
+      if (!isVendorMode) {
+        // Internal user: always see partial-received (for approval feedback) + non-targeted general notifs
+        if (n.type === 'partial-received') return true
+        return !n.targetVendorId && !n.targetVendorCode
+      }
+
+      // Vendor user: only see their own targeted partial-received notifications
+      if (!n.targetVendorId && !n.targetVendorCode) {
+        // Non-targeted general notifications (e.g. VAT expiry) are for internal users only
+        return false
+      }
+      if (currentVendorId && n.targetVendorId === currentVendorId) return true
+      if (currentVendorCode && n.targetVendorCode === currentVendorCode) return true
+      return false
+    })
+  }
+
+  /**
+   * Fetch vendor notifications from the backend API and merge into the local store.
+   * Backend notifications use IDs prefixed with "api-" to distinguish them from
+   * localStorage-only notifications.
+   */
+  const fetchVendorNotifications = async (vendorId?: number, vendorCode?: string) => {
+    if (!vendorId && !vendorCode) return
+
+    const apiNotifs = await NotificationService.getVendorNotifications(vendorId, vendorCode)
+
+    const existingApiIds = new Set(
+      notifications.value.filter((n) => n.id.startsWith('api-')).map((n) => n.id),
+    )
+
+    for (const n of apiNotifs) {
+      const localId = `api-${n.id}`
+
+      if (existingApiIds.has(localId)) {
+        // Sync read status from backend
+        const existing = notifications.value.find((x) => x.id === localId)
+        if (existing) existing.read = n.isRead
+        continue
+      }
+
+      const notification: TaxNotification = {
+        id: localId,
+        type: 'partial-received',
+        severity: 'warning',
+        title: n.title,
+        message: n.message,
+        relatedId: n.relatedId,
+        relatedData: { backendId: n.id },
+        createdAt: new Date(n.createdUtcDate),
+        read: n.isRead,
+        targetVendorId: n.targetVendorId,
+        targetVendorCode: n.targetVendorCode,
+      }
+
+      notifications.value.push(notification)
+    }
+  }
+
+  /**
+   * Mark a single notification as read — also calls the backend API if it is
+   * a persisted vendor notification (id starts with "api-").
+   */
+  const markApiNotificationRead = async (localId: string, vendorId: number) => {
+    const notification = notifications.value.find((n) => n.id === localId)
+    if (notification) notification.read = true
+    saveToStorage()
+
+    if (localId.startsWith('api-')) {
+      const backendId = parseInt(localId.replace('api-', ''), 10)
+      await NotificationService.markAsRead(backendId, vendorId)
+    }
+  }
+
   // Initialize
   loadFromStorage()
 
@@ -196,6 +337,10 @@ export const useNotificationStore = defineStore('notification', () => {
     removeNotification,
     clearAll,
     checkVatExpiryNotifications,
+    addPartialReceivedNotification,
+    getVisibleNotifications,
+    fetchVendorNotifications,
+    markApiNotificationRead,
     loadFromStorage,
   }
 })

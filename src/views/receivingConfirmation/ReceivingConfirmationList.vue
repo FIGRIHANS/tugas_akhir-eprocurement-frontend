@@ -3,6 +3,60 @@
     <Breadcrumb title="Receiving Confirmation List" :routes="routes" />
     <hr class="-mx-[24px] mb-[24px]" />
 
+    <!-- Analytics Widgets -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+      <!-- Total -->
+      <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3 shadow-sm">
+        <div class="w-11 h-11 bg-teal-50 rounded-xl flex items-center justify-center flex-shrink-0">
+          <i class="ki-duotone ki-document text-teal-600 text-xl"></i>
+        </div>
+        <div>
+          <p class="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Total RC</p>
+          <p class="text-2xl font-bold text-gray-800 leading-tight">{{ rcStats.total }}</p>
+        </div>
+      </div>
+      <!-- Waiting Approval -->
+      <div class="bg-white border border-amber-200 rounded-xl p-4 flex items-center gap-3 shadow-sm">
+        <div class="w-11 h-11 bg-amber-50 rounded-xl flex items-center justify-center flex-shrink-0">
+          <i class="ki-duotone ki-time text-amber-500 text-xl"></i>
+        </div>
+        <div>
+          <p class="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Waiting Approval</p>
+          <p class="text-2xl font-bold text-amber-600 leading-tight">{{ rcStats.waitingApproval }}</p>
+        </div>
+      </div>
+      <!-- Completed -->
+      <div class="bg-white border border-green-200 rounded-xl p-4 flex items-center gap-3 shadow-sm">
+        <div class="w-11 h-11 bg-green-50 rounded-xl flex items-center justify-center flex-shrink-0">
+          <i class="ki-duotone ki-check-circle text-green-600 text-xl"></i>
+        </div>
+        <div>
+          <p class="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Completed</p>
+          <p class="text-2xl font-bold text-green-600 leading-tight">{{ rcStats.completed }}</p>
+        </div>
+      </div>
+      <!-- Rejected -->
+      <div class="bg-white border border-red-200 rounded-xl p-4 flex items-center gap-3 shadow-sm">
+        <div class="w-11 h-11 bg-red-50 rounded-xl flex items-center justify-center flex-shrink-0">
+          <i class="ki-duotone ki-cross-circle text-red-500 text-xl"></i>
+        </div>
+        <div>
+          <p class="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Rejected</p>
+          <p class="text-2xl font-bold text-red-500 leading-tight">{{ rcStats.rejected }}</p>
+        </div>
+      </div>
+      <!-- Has Discrepancy -->
+      <div class="bg-white border border-orange-200 rounded-xl p-4 flex items-center gap-3 shadow-sm">
+        <div class="w-11 h-11 bg-orange-50 rounded-xl flex items-center justify-center flex-shrink-0">
+          <i class="ki-duotone ki-information-2 text-orange-500 text-xl"></i>
+        </div>
+        <div>
+          <p class="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Discrepancy</p>
+          <p class="text-2xl font-bold text-orange-500 leading-tight">{{ rcStats.hasDiscrepancy }}</p>
+        </div>
+      </div>
+    </div>
+
     <div class="border border-gray-200 rounded-xl p-[24px]">
       <!-- Header Section -->
       <div class="flex justify-between align-items-center gap-[8px] mb-[24px]">
@@ -116,7 +170,7 @@
               <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
               <td>{{ item.reportID }}</td>
               <td>{{ item.tripID }}</td>
-              <td>{{ item.DeliveryNoteNumber }}</td>
+              <td>{{ item.deliveryNoteNumber }}</td>
               <td>{{ item.poNumber }}</td>
               <td>{{ item.vendorName || '-' }}</td>
               <td>
@@ -245,8 +299,15 @@ const columns = ref<string[]>([
   'Update By',
 ])
 
-// Data dari API (tidak lagi menggunakan dummy data)
 const dataList = ref<ReceivingConfirmationData[]>([])
+
+const rcStats = computed(() => ({
+  total: dataList.value.length,
+  waitingApproval: dataList.value.filter((i) => i.status === 'Waiting Approval').length,
+  completed: dataList.value.filter((i) => i.status === 'Received' || i.status === 'Completed').length,
+  rejected: dataList.value.filter((i) => i.status === 'Rejected').length,
+  hasDiscrepancy: dataList.value.filter((i) => i.hasDiscrepancy).length,
+}))
 
 /**
  * Fetch data dari API backend

@@ -304,7 +304,7 @@ const formattedTotalAmount = computed(() => {
 
 const getStatusBadgeClass = (status: string) => {
   if (status === 'Delivered') return 'badge-success'
-  if (status === 'Partially Delivered') return 'badge-warning'
+  if (status === 'Partial') return 'badge-warning'
   if (status === 'Open') return 'badge-info'
   if (status === 'Closed') return 'badge-secondary'
   return 'badge-secondary'

@@ -40,3 +40,30 @@ export const useGetUsername = () => {
   const paramCookie = getParamCookie()
   return paramCookie?.username || ''
 }
+
+/**
+ * Parse JWT payload and return the UserId claim as a number.
+ * For vendor users: UserId = VendorId in the database.
+ * For internal users: UserId = Employee/User ID in the database.
+ */
+export const getUserIdFromToken = (): number | undefined => {
+  try {
+    const token = getToken()
+    if (!token) return undefined
+
+    // JWT is three base64 parts separated by dots
+    const payloadBase64 = token.split('.')[1]
+    if (!payloadBase64) return undefined
+
+    // Decode base64 (handle URL-safe base64)
+    const decoded = atob(payloadBase64.replace(/-/g, '+').replace(/_/g, '/'))
+    const payload = JSON.parse(decoded)
+
+    if (payload.UserId && !isNaN(Number(payload.UserId))) {
+      return Number(payload.UserId)
+    }
+    return undefined
+  } catch {
+    return undefined
+  }
+}

@@ -44,7 +44,7 @@
               {{ unreadCount }} unread
             </span>
             <button
-              v-if="notifications.length > 0"
+              v-if="visibleNotifications.length > 0"
               @click="markAllAsRead"
               class="text-xs text-primary hover:underline"
             >
@@ -56,7 +56,7 @@
         <!-- Notification List -->
         <div class="max-h-[400px] overflow-y-auto">
           <!-- Empty State -->
-          <div v-if="notifications.length === 0" class="py-12 text-center">
+          <div v-if="visibleNotifications.length === 0" class="py-12 text-center">
             <i class="ki-outline ki-notification-status text-4xl text-gray-300 mb-3"></i>
             <p class="text-gray-500 text-sm">No notifications</p>
           </div>
@@ -64,13 +64,12 @@
           <!-- Notification Items -->
           <div v-else>
             <div
-              v-for="notification in sortedNotifications.slice(0, 10)"
+              v-for="notification in visibleNotifications.slice(0, 15)"
               :key="notification.id"
-              @click="handleNotificationClick(notification)"
               class="px-4 py-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
               :class="{ 'bg-teal-50/50': !notification.read }"
             >
-              <div class="flex gap-3">
+              <div class="flex gap-3" @click="handleNotificationClick(notification)">
                 <!-- Icon -->
                 <div
                   class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
@@ -87,9 +86,20 @@
                   >
                     {{ notification.title }}
                   </p>
-                  <p class="text-xs text-gray-500 mt-0.5 line-clamp-2">
+                  <p
+                    class="text-xs text-gray-500 mt-0.5"
+                    :class="expandedId === notification.id ? 'whitespace-pre-line' : 'line-clamp-2'"
+                  >
                     {{ notification.message }}
                   </p>
+                  <!-- Expand/Collapse toggle -->
+                  <button
+                    v-if="notification.message && notification.message.length > 100"
+                    class="text-[10px] text-primary hover:underline mt-1"
+                    @click.stop="toggleExpand(notification.id)"
+                  >
+                    {{ expandedId === notification.id ? 'Sembunyikan' : 'Lihat selengkapnya' }}
+                  </button>
                   <p class="text-[10px] text-gray-400 mt-1">
                     {{ formatTime(notification.createdAt) }}
                   </p>
@@ -106,7 +116,7 @@
 
         <!-- Footer -->
         <div
-          v-if="notifications.length > 0"
+          v-if="visibleNotifications.length > 0"
           class="px-4 py-3 bg-gray-50 border-t border-gray-200 text-center"
         >
           <button
@@ -135,21 +145,45 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useNotificationStore } from '@/stores/notification/notificationStore'
 import type { TaxNotification, NotificationSeverity } from '@/stores/notification/types'
 import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
+import { useLoginStore } from '@/stores/views/login'
+import { getUserIdFromToken } from '@/composables/token'
+import { NotificationService } from '@/services/notification.service'
 import moment from 'moment'
 
 const notificationStore = useNotificationStore()
+const loginStore = useLoginStore()
 const bellRef = ref<HTMLElement | null>(null)
 const isOpen = ref(false)
 const showClearModal = ref(false)
+const expandedId = ref<string | null>(null)
+
+// Get current user ID from JWT (UserId claim = VendorId for vendors, EmployeeId for internal)
+const currentUserId = computed(() => getUserIdFromToken())
+const currentVendorCode = computed(() => {
+  return loginStore.userData?.profile?.vendorCode || undefined
+})
+const isVendorUser = computed(() => loginStore.isVendor)
 
 // Computed
 const notifications = computed(() => notificationStore.notifications)
 const sortedNotifications = computed(() => notificationStore.sortedNotifications)
-const unreadCount = computed(() => notificationStore.unreadCount)
+
+// Filtered notifications based on current user (vendor or internal)
+// For vendors: only show notifications targeted to them (by userId = vendorId)
+// For internal users: show non-vendor-targeted notifications
+const visibleNotifications = computed(() =>
+  notificationStore.getVisibleNotifications(
+    isVendorUser.value ? currentUserId.value : undefined,
+    isVendorUser.value ? currentVendorCode.value : undefined,
+  )
+)
+
+// Unread count from visible notifications only
+const unreadCount = computed(() => visibleNotifications.value.filter((n) => !n.read).length)
 
 // Toggle dropdown
 const toggleDropdown = () => {
@@ -163,15 +197,25 @@ const handleClickOutside = (event: MouseEvent) => {
   }
 }
 
-// Handle notification click
-const handleNotificationClick = (notification: TaxNotification) => {
-  notificationStore.markAsRead(notification.id)
-  // TODO: Navigate to related page if needed
-  // e.g., router.push('/vat-reconciliation/' + notification.relatedId)
+// Toggle expand notification message
+const toggleExpand = (id: string) => {
+  expandedId.value = expandedId.value === id ? null : id
 }
 
-// Mark all as read
-const markAllAsRead = () => {
+// Handle notification click — also syncs read status to backend for API notifications
+const handleNotificationClick = async (notification: TaxNotification) => {
+  if (notification.id.startsWith('api-') && currentUserId.value) {
+    await notificationStore.markApiNotificationRead(notification.id, currentUserId.value)
+  } else {
+    notificationStore.markAsRead(notification.id)
+  }
+}
+
+// Mark all as read — also calls backend for vendor users
+const markAllAsRead = async () => {
+  if (isVendorUser.value && currentUserId.value) {
+    await NotificationService.markAllAsRead(currentUserId.value)
+  }
   notificationStore.markAllAsRead()
 }
 
@@ -222,14 +266,26 @@ const getSeverityIconClass = (severity: NotificationSeverity): string => {
     case 'critical':
       return 'ki-filled ki-notification-on text-red-600 text-lg'
     case 'warning':
-      return 'ki-filled ki-notification text-yellow-600 text-lg'
+      return 'ki-filled ki-delivery text-yellow-600 text-lg'
     case 'info':
     default:
       return 'ki-outline ki-notification text-teal-600 text-lg'
   }
 }
 
-// Lifecycle
+// Fetch vendor notifications from backend when the vendor identity is ready.
+// Using watch with immediate:true so it fires both on mount and if login state
+// loads asynchronously after component creation.
+watch(
+  [isVendorUser, currentUserId],
+  async ([isVendor, userId]) => {
+    if (isVendor && userId) {
+      await notificationStore.fetchVendorNotifications(userId, currentVendorCode.value)
+    }
+  },
+  { immediate: true },
+)
+
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
 })

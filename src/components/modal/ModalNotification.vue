@@ -39,7 +39,7 @@
             <UiButton
               :variant="type === 'error' ? 'danger' : 'primary'"
               class="w-full justify-center"
-              @click="$emit('on-close')"
+              @click="handleClose"
             >
               {{ buttonText }}
             </UiButton>
@@ -69,7 +69,14 @@ const emit = defineEmits(['on-close'])
 
 const clickBackground = () => {
   if (!props.static) {
-    emit('on-close')
+    handleClose()
+  }
+}
+
+const handleClose = () => {
+  emit('on-close')
+  if (props.onClose) {
+    props.onClose()
   }
 }
 </script>

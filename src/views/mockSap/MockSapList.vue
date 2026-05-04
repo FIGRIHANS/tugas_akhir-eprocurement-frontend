@@ -3,6 +3,72 @@
     <Breadcrumb title="Mock SAP Purchase Orders" :routes="routes" />
     <hr class="-mx-[24px] mb-[24px]" />
 
+    <!-- Analytics Widgets -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+      <!-- Total PO -->
+      <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3 shadow-sm">
+        <div class="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">
+          <i class="ki-duotone ki-element-11 text-blue-600 text-xl"></i>
+        </div>
+        <div>
+          <p class="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Total PO</p>
+          <p class="text-2xl font-bold text-gray-800 leading-tight">{{ poStats.total }}</p>
+        </div>
+      </div>
+      <!-- Open -->
+      <div class="bg-white border border-cyan-200 rounded-xl p-4 flex items-center gap-3 shadow-sm">
+        <div class="w-11 h-11 bg-cyan-50 rounded-xl flex items-center justify-center flex-shrink-0">
+          <i class="ki-duotone ki-folder-open text-cyan-600 text-xl"></i>
+        </div>
+        <div>
+          <p class="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Open</p>
+          <p class="text-2xl font-bold text-cyan-600 leading-tight">{{ poStats.open }}</p>
+        </div>
+      </div>
+      <!-- Partial -->
+      <div class="bg-white border border-amber-200 rounded-xl p-4 flex items-center gap-3 shadow-sm">
+        <div class="w-11 h-11 bg-amber-50 rounded-xl flex items-center justify-center flex-shrink-0">
+          <i class="ki-duotone ki-delivery text-amber-500 text-xl"></i>
+        </div>
+        <div>
+          <p class="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Partial</p>
+          <p class="text-2xl font-bold text-amber-600 leading-tight">{{ poStats.partiallyDelivered }}</p>
+        </div>
+      </div>
+      <!-- Delivered -->
+      <div class="bg-white border border-green-200 rounded-xl p-4 flex items-center gap-3 shadow-sm">
+        <div class="w-11 h-11 bg-green-50 rounded-xl flex items-center justify-center flex-shrink-0">
+          <i class="ki-duotone ki-check-circle text-green-600 text-xl"></i>
+        </div>
+        <div>
+          <p class="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Delivered</p>
+          <p class="text-2xl font-bold text-green-600 leading-tight">{{ poStats.delivered }}</p>
+        </div>
+      </div>
+      <!-- Closed -->
+      <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3 shadow-sm">
+        <div class="w-11 h-11 bg-gray-100 rounded-xl flex items-center justify-center flex-shrink-0">
+          <i class="ki-duotone ki-lock text-gray-500 text-xl"></i>
+        </div>
+        <div>
+          <p class="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Closed</p>
+          <p class="text-2xl font-bold text-gray-500 leading-tight">{{ poStats.closed }}</p>
+        </div>
+      </div>
+      <!-- Total Value -->
+      <div class="bg-white border border-purple-200 rounded-xl p-4 flex items-center gap-3 shadow-sm col-span-2 md:col-span-1">
+        <div class="w-11 h-11 bg-purple-50 rounded-xl flex items-center justify-center flex-shrink-0">
+          <i class="ki-duotone ki-dollar text-purple-600 text-xl"></i>
+        </div>
+        <div class="min-w-0">
+          <p class="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Total Value</p>
+          <p class="text-base font-bold text-purple-600 leading-tight truncate" :title="poStats.totalValueFormatted">
+            {{ poStats.totalValueFormatted }}
+          </p>
+        </div>
+      </div>
+    </div>
+
     <div class="border border-gray-200 rounded-xl p-[24px]">
       <!-- Header Section -->
       <div class="flex justify-between align-items-center gap-[8px] mb-[24px]">
@@ -35,7 +101,7 @@
               placeholder="Enter PO number"
             />
           </div>
-          <div>
+          <div v-if="!isVendorUser">
             <label class="form-label">Vendor Code</label>
             <input
               type="text"
@@ -44,7 +110,7 @@
               placeholder="Enter vendor code"
             />
           </div>
-          <div>
+          <div v-if="!isVendorUser">
             <label class="form-label">Vendor Name</label>
             <input
               type="text"
@@ -58,7 +124,7 @@
             <select v-model="filterForm.status" class="form-select">
               <option value="">All Status</option>
               <option value="Open">Open</option>
-              <option value="Partially Delivered">Partially Delivered</option>
+              <option value="Partial">Partial</option>
               <option value="Delivered">Delivered</option>
               <option value="Closed">Closed</option>
             </select>
@@ -130,7 +196,7 @@
           </thead>
           <tbody>
             <tr v-if="filteredDataList?.length === 0">
-              <td colspan="11" class="text-center">No data found.</td>
+              <td :colspan="columns.length" class="text-center">No data found.</td>
             </tr>
             <tr v-for="(item, index) in list" :key="index">
               <td class="text-center">
@@ -144,8 +210,8 @@
               </td>
               <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
               <td>{{ item.poNumber }}</td>
-              <td>{{ item.vendorCode }}</td>
-              <td>{{ item.vendorName }}</td>
+              <td v-if="!isVendorUser">{{ item.vendorCode }}</td>
+              <td v-if="!isVendorUser">{{ item.vendorName }}</td>
               <td>{{ formatDate(item.poDate) }}</td>
               <td class="text-right">{{ formatCurrency(item.totalAmount) }}</td>
               <td>
@@ -185,7 +251,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
@@ -194,9 +260,15 @@ import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import momentLib from 'moment'
 import { cloneDeep } from 'lodash'
 import MockSapService, { type MockSapHeaderData } from '@/services/mockSap.service'
+import { useLoginStore } from '@/stores/views/login'
 
 const moment = momentLib
 const router = useRouter()
+const userStore = useLoginStore()
+
+const isVendorUser = computed(() => !!userStore.userData?.profile?.vendorCode)
+const vendorID = computed(() => userStore.userData?.profile?.profileId ?? undefined)
+const vendorCodeUser = computed(() => userStore.userData?.profile?.vendorCode ?? undefined)
 
 interface FilterForm {
   poNumber: string
@@ -234,22 +306,31 @@ const filterForm = ref<FilterForm>({
   poDateTo: '',
 })
 
-const columns = ref<string[]>([
-  'Action',
-  'No',
-  'PO Number',
-  'Vendor Code',
-  'Vendor Name',
-  'PO Date',
-  'Total Amount',
-  'Status',
-  'Created Date',
-  'Created By',
-  'Updated Date',
-  'Updated By',
-])
+const columns = computed(() => {
+  const base = ['Action', 'No', 'PO Number']
+  if (!isVendorUser.value) {
+    base.push('Vendor Code', 'Vendor Name')
+  }
+  return [...base, 'PO Date', 'Total Amount', 'Status', 'Created Date', 'Created By', 'Updated Date', 'Updated By']
+})
 
 const dataList = ref<MockSapHeaderData[]>([])
+
+const poStats = computed(() => {
+  const total = dataList.value.length
+  const open = dataList.value.filter((i) => i.status === 'Open').length
+  const partiallyDelivered = dataList.value.filter((i) => i.status === 'Partial').length
+  const delivered = dataList.value.filter((i) => i.status === 'Delivered').length
+  const closed = dataList.value.filter((i) => i.status === 'Closed').length
+  const totalValue = dataList.value.reduce((sum, i) => sum + (i.totalAmount || 0), 0)
+  const totalValueFormatted = new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    notation: 'compact',
+    maximumFractionDigits: 1,
+  }).format(totalValue)
+  return { total, open, partiallyDelivered, delivered, closed, totalValue, totalValueFormatted }
+})
 
 const fetchData = async () => {
   isLoading.value = true
@@ -259,8 +340,9 @@ const fetchData = async () => {
     const response = await MockSapService.getList({
       searchText: search.value || undefined,
       poNumber: filterForm.value.poNumber || undefined,
-      vendorCode: filterForm.value.vendorCode || undefined,
-      vendorName: filterForm.value.vendorName || undefined,
+      vendorCode: isVendorUser.value ? vendorCodeUser.value : filterForm.value.vendorCode || undefined,
+      vendorID: isVendorUser.value ? vendorID.value.toString() : undefined,
+      vendorName: isVendorUser.value ? undefined : filterForm.value.vendorName || undefined,
       poDateFrom: filterForm.value.poDateFrom || undefined,
       poDateTo: filterForm.value.poDateTo || undefined,
     })
@@ -298,7 +380,7 @@ const filteredDataList = computed(() => {
 
 const getStatusBadgeClass = (status: string) => {
   if (status === 'Delivered') return 'badge-success'
-  if (status === 'Partially Delivered') return 'badge-warning'
+  if (status === 'Partial') return 'badge-warning'
   if (status === 'Open') return 'badge-info'
   if (status === 'Closed') return 'badge-secondary'
   return 'badge-secondary'
@@ -483,7 +565,16 @@ const viewDetail = (poNumber: string) => {
 }
 
 onMounted(() => {
-  fetchData()
+  if (userStore.userData) {
+    fetchData()
+  } else {
+    const unwatch = watch(() => userStore.userData, (newVal) => {
+      if (newVal) {
+        fetchData()
+        unwatch()
+      }
+    })
+  }
 })
 </script>
 

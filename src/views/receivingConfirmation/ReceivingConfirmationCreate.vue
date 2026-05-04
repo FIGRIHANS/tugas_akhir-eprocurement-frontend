@@ -261,6 +261,10 @@
                 <th colspan="3" class="text-center border-r">FG Receipt Confirmation</th>
                 <th colspan="2" class="text-center border-r">Loading Difference</th>
                 <th colspan="2" class="text-center border-r">Transporter Claim</th>
+                <th rowspan="2" class="text-center border-r min-w-[160px] bg-red-600">
+                  Reject Reason
+                  <span class="block text-xs font-normal">(required if less &gt; 0)</span>
+                </th>
               </tr>
               <!-- Second Header Row -->
               <tr class="bg-blue-500 text-white">
@@ -327,6 +331,22 @@
                     min="0"
                     class="input input-sm w-20 text-center"
                   />
+                </td>
+                <!-- Reject Reason - Required when less > 0 -->
+                <td class="text-center">
+                  <template v-if="item.less > 0">
+                    <input
+                      v-model="item.rejectReason"
+                      type="text"
+                      class="input input-sm w-40"
+                      :class="{ 'border-red-500 bg-red-50': !item.rejectReason.trim() }"
+                      placeholder="Required *"
+                    />
+                    <p v-if="!item.rejectReason.trim()" class="text-red-500 text-xs mt-1">
+                      Reject reason is required
+                    </p>
+                  </template>
+                  <span v-else class="text-gray-400 text-xs">—</span>
                 </td>
               </tr>
             </tbody>
@@ -626,6 +646,20 @@ const validateForm = (): boolean => {
       type: 'warning',
       title: 'Validation Error',
       text: 'No items to submit. Please select a Delivery Note with items.',
+    }
+    showNotificationModal.value = true
+    return false
+  }
+
+  // Validate rejectReason is required when less > 0
+  const itemsMissingReason = tableData.value.filter(
+    (item) => item.less > 0 && !item.rejectReason.trim()
+  )
+  if (itemsMissingReason.length > 0) {
+    notificationModal.value = {
+      type: 'warning',
+      title: 'Validation Error',
+      text: `Please fill in the Reject Reason for ${itemsMissingReason.length} item(s) with shortage quantity.`,
     }
     showNotificationModal.value = true
     return false
