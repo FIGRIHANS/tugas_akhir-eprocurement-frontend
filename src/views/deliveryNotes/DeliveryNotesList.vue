@@ -3,6 +3,60 @@
     <Breadcrumb title="Delivery Notes List" :routes="routes" />
     <hr class="-mx-[24px] mb-[24px]" />
 
+    <!-- Analytics Widgets -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+      <!-- Total -->
+      <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3 shadow-sm">
+        <div class="w-11 h-11 bg-teal-50 rounded-xl flex items-center justify-center flex-shrink-0">
+          <i class="ki-duotone ki-package text-teal-600 text-xl"></i>
+        </div>
+        <div>
+          <p class="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Total DN</p>
+          <p class="text-2xl font-bold text-gray-800 leading-tight">{{ dnStats.total }}</p>
+        </div>
+      </div>
+      <!-- On Delivery -->
+      <div class="bg-white border border-amber-200 rounded-xl p-4 flex items-center gap-3 shadow-sm">
+        <div class="w-11 h-11 bg-amber-50 rounded-xl flex items-center justify-center flex-shrink-0">
+          <i class="ki-duotone ki-truck text-amber-500 text-xl"></i>
+        </div>
+        <div>
+          <p class="text-[11px] text-gray-400 font-medium uppercase tracking-wide">On Delivery</p>
+          <p class="text-2xl font-bold text-amber-600 leading-tight">{{ dnStats.onDelivery }}</p>
+        </div>
+      </div>
+      <!-- Received -->
+      <div class="bg-white border border-green-200 rounded-xl p-4 flex items-center gap-3 shadow-sm">
+        <div class="w-11 h-11 bg-green-50 rounded-xl flex items-center justify-center flex-shrink-0">
+          <i class="ki-duotone ki-check-circle text-green-600 text-xl"></i>
+        </div>
+        <div>
+          <p class="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Received</p>
+          <p class="text-2xl font-bold text-green-600 leading-tight">{{ dnStats.received }}</p>
+        </div>
+      </div>
+      <!-- Partial Received -->
+      <div class="bg-white border border-orange-200 rounded-xl p-4 flex items-center gap-3 shadow-sm">
+        <div class="w-11 h-11 bg-orange-50 rounded-xl flex items-center justify-center flex-shrink-0">
+          <i class="ki-duotone ki-information-2 text-orange-500 text-xl"></i>
+        </div>
+        <div>
+          <p class="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Partial Received</p>
+          <p class="text-2xl font-bold text-orange-500 leading-tight">{{ dnStats.partialReceived }}</p>
+        </div>
+      </div>
+      <!-- Completed -->
+      <div class="bg-white border border-teal-200 rounded-xl p-4 flex items-center gap-3 shadow-sm">
+        <div class="w-11 h-11 bg-teal-50 rounded-xl flex items-center justify-center flex-shrink-0">
+          <i class="ki-duotone ki-shield-tick text-teal-600 text-xl"></i>
+        </div>
+        <div>
+          <p class="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Completed</p>
+          <p class="text-2xl font-bold text-teal-600 leading-tight">{{ dnStats.completed }}</p>
+        </div>
+      </div>
+    </div>
+
     <div class="border border-gray-200 rounded-xl p-[24px]">
       <!-- Header Section -->
       <div class="flex justify-between align-items-center gap-[8px] mb-[24px]">
@@ -223,6 +277,15 @@ const columns = computed(() => {
 })
 
 const dataList = ref<DeliveryNotesData[]>([])
+
+const dnStats = computed(() => ({
+  total: dataList.value.length,
+  onDelivery: dataList.value.filter((i) => i.status === 'On Delivery').length,
+  received: dataList.value.filter((i) => i.status === 'Received').length,
+  partialReceived: dataList.value.filter((i) => i.status === 'Partial Received').length,
+  completed: dataList.value.filter((i) => i.status === 'Completed').length,
+}))
+
 const fetchData = async () => {
   isLoading.value = true
   errorMessage.value = ''

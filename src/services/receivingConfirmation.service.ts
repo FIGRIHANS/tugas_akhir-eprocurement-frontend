@@ -45,7 +45,7 @@ export interface ReceivingConfirmationUpdatePayload {
 export interface ReceivingConfirmationData {
   reportID: number
   tripID: string
-  DeliveryNoteNumber: string
+  deliveryNoteNumber: string
   poNumber: string
   vendorID?: number | string
   vendorName?: string

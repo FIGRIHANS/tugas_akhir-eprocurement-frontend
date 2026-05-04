@@ -888,7 +888,7 @@ onMounted(() => {
       if (data) {
         // Map API response to FormData structure
         formData.value = {
-          orderNo: data.DeliveryNoteNumber || '',
+          orderNo: data.deliveryNoteNumber || '',
           poNumber: data.poNumber || '',
           vendorName: data.vendorName || '',
           namaKaryawan: data.whCheckerName || '',
@@ -911,7 +911,7 @@ onMounted(() => {
         currentStatus.value = data.status || ''
         hasDiscrepancy.value = data.hasDiscrepancy || false
         deliveryNoteInfo.value = {
-          deliveryNoteNumber: data.DeliveryNoteNumber || '',
+          deliveryNoteNumber: data.deliveryNoteNumber || '',
           tripID: data.tripID || '',
           poNumber: data.poNumber || '',
           vendorName: data.vendorName || '',

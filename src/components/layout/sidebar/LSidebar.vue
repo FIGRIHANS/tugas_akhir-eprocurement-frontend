@@ -201,8 +201,17 @@ const filteredSidebarMenu = computed(() => {
     }
 
     // ProfileId 3185 — Warehouse Checker Approver (view + approve only, no create)
+    // Inbound analytic lives under analytic-dashboard in sidebar.ts (id inboundLogisticAnalytic), not under DRC.
     if (userStore.userData?.profile?.profileId === 3185) {
-      return sidebarMenu
+      const inboundAnalyticOnly = sidebarMenu
+        .filter((menu) => menu.id === 'analytic-dashboard')
+        .map((menu) => ({
+          ...menu,
+          child: menu.child
+            ? menu.child.filter((child) => child.id === 'inboundLogisticAnalytic')
+            : [],
+        }))
+      const digitalReceiving = sidebarMenu
         .filter((menu) => menu.id === 'digital-receiving-confirmation')
         .map((menu) => ({
           ...menu,
@@ -210,10 +219,12 @@ const filteredSidebarMenu = computed(() => {
             ? menu.child.filter(
                 (child) =>
                   child.id === 'receiving-confirmation-list' ||
-                  child.id === 'mock-sap-list',
+                  child.id === 'mock-sap-list' ||
+                  child.id === 'delivery-notes-list',
               )
             : [],
         }))
+      return [ ...inboundAnalyticOnly, ...digitalReceiving]
     }
 
     if (
@@ -386,6 +397,7 @@ const filteredSidebarMenu = computed(() => {
                   child.id === 'scorecard-performance' ||
                   child.id === 'invoiceAnalytic' ||
                   child.id === 'taxAnalytic' ||
+                  child.id === 'inboundLogisticAnalytic' ||
                   child.id === 'email-invoice-integration' ||
                   child.id === 'mock-sap-list' ||
                   child.id === 'receiving-confirmation' ||

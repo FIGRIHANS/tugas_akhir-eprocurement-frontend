@@ -47,6 +47,11 @@ const sidebarMenuData: ISidebarMenu[] = [
         title: 'Tax Analytic',
         to: 'taxAnalytic',
       },
+      {
+        id: 'inboundLogisticAnalytic',
+        title: 'Inbound Logistic Analytic',
+        to: 'inboundLogisticAnalytic',
+      },
     ],
   },
   // {
