@@ -156,7 +156,11 @@
           @pageChange="setPage"
         />
       </div>
-      <DetailVerificationModal type="po" @loadDetail="loadData" @setClearId="viewDetailId = ''" />
+      <DetailVerificationModal 
+      type="po"
+      @load-detail="loadData" 
+      @set-clear-id="viewDetailId = ''" 
+    />
     </div>
   </div>
 </template>
@@ -172,7 +176,7 @@ import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useFormatIdr } from '@/composables/currency'
-import type { ListNonPoTypes } from '@/stores/views/invoice/types/submission'
+import type { ListPoTypes } from '@/stores/views/invoice/types/submission'
 import moment from 'moment'
 import { cloneDeep } from 'lodash'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
@@ -200,7 +204,7 @@ const router = useRouter()
 const search = ref<string>('')
 const currentPage = ref<number>(1)
 const pageSize = ref<number>(10)
-const list = ref<ListNonPoTypes[]>([])
+const list = ref<ListPoTypes[]>([])
 const sortBy = ref<string>('')
 const sortColumnName = ref<string>('')
 const filteredPayload = ref([])
@@ -216,9 +220,9 @@ const openDetailVerification = (invoiceId: string) => {
 
 const loadData = async () => {
   try {
-    await invoiceApi.getNonPoDetail(viewDetailId.value)
+    await invoiceApi.getPoDetail(viewDetailId.value)
   } catch (error) {
-    console.error('Error loading Non-PO detail:', error)
+    console.error('Error loading PO detail:', error)
   }
 }
 
@@ -258,7 +262,7 @@ const columns = ref<string[]>([
   'PO Price',
 ])
 
-const poList = computed(() => invoiceApi.listNonPo || [])
+const poList = computed(() => invoiceApi.listPo || [])
 
 const colorBadge = (status: number) => {
   if (status === 0) return 'badge-secondary'
@@ -287,8 +291,8 @@ const getStatusBadgeClass = (status: boolean) => {
 //   return pool[Math.floor(Math.random() * pool.length)]
 // }
 
-const setList = (listData: ListNonPoTypes[]) => {
-  const result: ListNonPoTypes[] = []
+const setList = (listData: ListPoTypes[]) => {
+  const result: ListPoTypes[] = []
   for (const [index, item] of listData.entries()) {
     const start = currentPage.value * pageSize.value - pageSize.value
     const end = currentPage.value * pageSize.value - 1
@@ -304,7 +308,7 @@ const setPage = (value: number) => {
   sortColumn(null)
 }
 
-const goView = (data: ListNonPoTypes) => {
+const goView = (data: ListPoTypes) => {
   if (data.statusCode === 0 || data.statusCode === 5) {
     router.push({
       name: 'invoiceAdd',
@@ -339,7 +343,7 @@ const goAdd = () => {
 const callList = () => {
   list.value = []
   invoiceApi
-    .getListNonPo({
+    .getListPo({
       statusCode: filterForm.status === '0' || filterForm.status ? Number(filterForm.status) : null,
       companyCode: filterForm.companyCode,
       invoiceTypeCode: Number(filterForm.invoiceType),
@@ -404,7 +408,7 @@ const sortColumn = (columnName: string | null) => {
     'Vendor Name': 'vendorName',
     'Invoice Vendor No': 'documentNo',
     'Company Code': 'companyCode',
-    'Invoice Non PO Type': 'invoiceTypeName',
+    'Invoice PO Type': 'invoiceTypeName',
     'Invoice Date': 'invoiceDate',
     'Total Gross Amount': 'totalGrossAmount',
     'Total Net Amount': 'totalNetAmount',
@@ -414,7 +418,7 @@ const sortColumn = (columnName: string | null) => {
   const roleSort = ['asc', 'desc', '']
 
   const listData = cloneDeep(poList.value)
-  let result: ListNonPoTypes[] = []
+  let result: ListPoTypes[] = []
 
   if (columnName) {
     if (sortColumnName.value !== columnName) sortBy.value = ''

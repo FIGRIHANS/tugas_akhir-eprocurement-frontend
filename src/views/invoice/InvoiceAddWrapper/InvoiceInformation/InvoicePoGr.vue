@@ -230,7 +230,19 @@
                       : useFormatIdr(item.whtAmount || 0)
                   }}</span>
                 </td>
-                <td>{{ item.department || '-' }}</td>
+                <td>
+                  <span v-if="!item.isEdit">{{ getCostCenterName(item.department) || '-' }}</span>
+                  <v-select
+                    v-else
+                    v-model="formEdit.department"
+                    class="customSelect"
+                    placeholder="Select"
+                    :get-option-label="(option: any) => `${option.code} - ${option.name}`"
+                    :reduce="(option: any) => option.code"
+                    :options="costCenterList"
+                    appendToBody
+                  ></v-select>
+                </td>
               </tr>
             </template>
           </tbody>
@@ -324,7 +336,7 @@
                   <span v-if="!item.isEdit">{{ getCostCenterName(item.department) || '-' }}</span>
                   <v-select
                     v-else
-                    v-model="item.department"
+                    v-model="formEdit.department"
                     class="customSelect"
                     placeholder="Select"
                     :get-option-label="(option: any) => `${option.code} - ${option.name}`"
@@ -392,6 +404,7 @@ const formEdit = reactive({
   whtAmount: 0,
   quantity: 0,
   uom: '',
+  department: '',
 })
 
 const listTaxCalculation = computed(() => masterDataApi.taxList)
@@ -634,6 +647,7 @@ const resetFormEdit = () => {
   formEdit.whtAmount = 0
   formEdit.quantity = 0
   formEdit.uom = ''
+  formEdit.department = ''
 }
 
 const goEdit = (item: itemsPoGrType) => {
@@ -651,6 +665,7 @@ const goEdit = (item: itemsPoGrType) => {
     formEdit.whtCode = item.whtCode || ''
     formEdit.whtBaseAmount = item.whtBaseAmount || formEdit.itemAmountLC
     formEdit.whtAmount = item.whtAmount || 0
+    formEdit.department = item.department || ''
   } else {
     item.taxCode = formEdit.taxCode
     item.vatAmount = formEdit.vatAmount
@@ -658,6 +673,7 @@ const goEdit = (item: itemsPoGrType) => {
     item.whtCode = formEdit.whtCode
     item.whtAmount = formEdit.whtAmount
     item.whtBaseAmount = formEdit.whtBaseAmount
+    item.department = formEdit.department
     resetFormEdit()
   }
 }
@@ -704,6 +720,7 @@ const addNewPodata = () => {
       poNoError: false,
       departementError: false,
       deliveryOrderNo: '',
+      department: '',
     }
     form.invoicePoGr.push(data)
   }
@@ -876,6 +893,10 @@ onMounted(async () => {
     await masterDataApi.getWhtType()
   }
 
+  if (form?.companyCode) {
+    await masterDataApi.getCostCenter(form.companyCode)
+  }
+
   // Auto-fetch WHT Codes if items already have whtType (e.g. from FTP)
   if (formEdit.whtType) {
     await masterDataApi.getWhtCode(formEdit.whtType)
@@ -886,6 +907,11 @@ onMounted(async () => {
     for (const type of uniqueTypes) {
       await masterDataApi.getWhtCode(type as string)
     }
+  }
+
+  // Auto-fetch Cost Centers (Departments)
+  if (form?.companyCode) {
+    await masterDataApi.getCostCenter(form.companyCode)
   }
 })
 </script>
