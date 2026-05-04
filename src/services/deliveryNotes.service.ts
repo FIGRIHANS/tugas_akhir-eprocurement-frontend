@@ -91,7 +91,7 @@ export interface DeliveryNoteCreatePayload {
   deliveryNoteNumber: string
   poNumber: string
   vendorCode: string
-  vendorID?: string
+  vendorID?: number
   vendorName: string
   tripID?: string
   transporter: string

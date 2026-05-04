@@ -183,6 +183,50 @@ const filteredSidebarMenu = computed(() => {
         })
     }
 
+    // ProfileId 3180 — Warehouse Checker (can create RC)
+    if (userStore.userData?.profile?.profileId === 3180) {
+      return sidebarMenu
+        .filter((menu) => menu.id === 'digital-receiving-confirmation')
+        .map((menu) => ({
+          ...menu,
+          child: menu.child
+            ? menu.child.filter(
+                (child) =>
+                  child.id === 'receiving-confirmation' ||
+                  child.id === 'receiving-confirmation-list' ||
+                  child.id === 'mock-sap-list',
+              )
+            : [],
+        }))
+    }
+
+    // ProfileId 3185 — Warehouse Checker Approver (view + approve only, no create)
+    // Inbound analytic lives under analytic-dashboard in sidebar.ts (id inboundLogisticAnalytic), not under DRC.
+    if (userStore.userData?.profile?.profileId === 3185) {
+      const inboundAnalyticOnly = sidebarMenu
+        .filter((menu) => menu.id === 'analytic-dashboard')
+        .map((menu) => ({
+          ...menu,
+          child: menu.child
+            ? menu.child.filter((child) => child.id === 'inboundLogisticAnalytic')
+            : [],
+        }))
+      const digitalReceiving = sidebarMenu
+        .filter((menu) => menu.id === 'digital-receiving-confirmation')
+        .map((menu) => ({
+          ...menu,
+          child: menu.child
+            ? menu.child.filter(
+                (child) =>
+                  child.id === 'receiving-confirmation-list' ||
+                  child.id === 'mock-sap-list' ||
+                  child.id === 'delivery-notes-list',
+              )
+            : [],
+        }))
+      return [ ...inboundAnalyticOnly, ...digitalReceiving]
+    }
+
     if (
       userStore.userData?.profile?.vendorCode &&
       userStore.userData?.profile?.profileId === 3200
@@ -203,10 +247,26 @@ const filteredSidebarMenu = computed(() => {
       return sidebarMenu
         .filter(
           (menu) =>
-            menu.id === 'dashboard' || menu.id === 'e-invoice' || menu.id === 'vendor-management',
+            menu.id === 'dashboard' ||
+            menu.id === 'e-invoice' ||
+            menu.id === 'vendor-management' ||
+            menu.id === 'digital-receiving-confirmation',
         )
 
         .map((menu) => {
+          if (menu.id === 'digital-receiving-confirmation') {
+            return {
+              ...menu,
+              child: menu.child
+                ? menu.child.filter(
+                  (child) =>
+                    child.id === 'mock-sap-list' ||
+                    child.id === 'delivery-notes' ||
+                    child.id === 'delivery-notes-list',
+                )
+                : [],
+            }
+          }
           return {
             ...menu,
             child: menu.child
@@ -337,6 +397,7 @@ const filteredSidebarMenu = computed(() => {
                   child.id === 'scorecard-performance' ||
                   child.id === 'invoiceAnalytic' ||
                   child.id === 'taxAnalytic' ||
+                  child.id === 'inboundLogisticAnalytic' ||
                   child.id === 'email-invoice-integration' ||
                   child.id === 'mock-sap-list' ||
                   child.id === 'receiving-confirmation' ||

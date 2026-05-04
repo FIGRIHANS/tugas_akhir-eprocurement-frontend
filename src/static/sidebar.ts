@@ -47,6 +47,11 @@ const sidebarMenuData: ISidebarMenu[] = [
         title: 'Tax Analytic',
         to: 'taxAnalytic',
       },
+      {
+        id: 'inboundLogisticAnalytic',
+        title: 'Inbound Logistic Analytic',
+        to: 'inboundLogisticAnalytic',
+      },
     ],
   },
   // {
@@ -218,18 +223,13 @@ const sidebarMenuData: ISidebarMenu[] = [
     child: [
       {
         id: 'mock-sap-list',
-        title: 'Mock SAP List',
+        title: 'Purchase Order List',
         to: 'mockSapList',
       },
       {
         id: 'delivery-notes',
         title: 'Create Delivery Notes',
         to: 'deliveryNotes',
-      },
-      {
-        id: 'delivery-notes-create',
-        title: 'Create Delivery Notes',
-        to: 'deliveryNotesCreate',
       },
       {
         id: 'delivery-notes-list',

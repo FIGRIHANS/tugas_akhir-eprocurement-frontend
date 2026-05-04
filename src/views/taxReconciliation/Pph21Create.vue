@@ -31,13 +31,27 @@
             <p class="font-semibold text-sm mb-[16px] uppercase tracking-tight text-gray-600">Recipient Information</p>
             <div class="flex flex-col gap-[8px]">
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label w-full lg:max-w-xs">NPWP / NIK</label>
+                <label class="form-label w-full lg:max-w-xs">Identification Type</label>
+                <div class="flex gap-6 items-center flex-1">
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" v-model="form.fgNpwpNik" :value="true" class="radio radio-primary radio-xs" />
+                    <span class="text-sm">NPWP</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" v-model="form.fgNpwpNik" :value="false" class="radio radio-primary radio-xs" />
+                    <span class="text-sm">NIK</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+                <label class="form-label w-full lg:max-w-xs">{{ form.fgNpwpNik ? 'NPWP' : 'NIK' }}</label>
                 <div class="flex-1">
                   <input
                     v-model="form.npwp"
                     class="input w-full"
                     :class="{ 'border-danger': errors.npwp, 'bg-gray-100 text-gray-500 cursor-not-allowed': form.invoiceId && form.invoiceId > 0 }"
-                    :placeholder="form.fgNpwpNik ? 'Enter NPWP (16 digits)' : 'Enter NIK'"
+                    :placeholder="form.fgNpwpNik ? 'Enter NPWP (16 digits)' : 'Enter NIK (16 digits)'"
                     required
                     :disabled="form.invoiceId ? form.invoiceId > 0 : false"
                   />
@@ -405,6 +419,16 @@ const submitCreate = async () => {
     // Derive masaPajak & tahunPajak from withholding date
     payload.masaPajak = moment(form.value.tglPemotongan).format('MM')
     payload.tahunPajak = moment(form.value.tglPemotongan).format('YYYY')
+
+    // Handle NPWP / NIK mapping
+    if (form.value.fgNpwpNik) {
+      payload.npwp = form.value.npwp
+      payload.nik = ''
+    } else {
+      payload.nik = form.value.npwp
+      payload.npwp = ''
+    }
+
     // Ensure idTku is always sent
     payload.idTku = npwpPemotong + '000000'
     // Update dok referensi date

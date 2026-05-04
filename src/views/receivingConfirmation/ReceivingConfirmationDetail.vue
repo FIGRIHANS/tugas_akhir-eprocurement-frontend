@@ -201,6 +201,7 @@
                 <th colspan="3" class="text-center border-r">FG Receipt Confirmation</th>
                 <th colspan="2" class="text-center border-r">Loading Difference</th>
                 <th colspan="2" class="text-center border-r">Transporter Claim</th>
+                <th rowspan="2" class="text-center border-r min-w-[160px]">Reject Reason</th>
               </tr>
               <!-- Second Header Row -->
               <tr class="bg-teal-500 text-white">
@@ -240,6 +241,12 @@
                 <td class="text-right">{{ item.kurang }}</td>
                 <td class="text-right">{{ item.repackQty }}</td>
                 <td class="text-right">{{ item.damageQty }}</td>
+                <td class="text-left">
+                  <span v-if="item.rejectReason" class="text-red-600 font-medium">{{
+                    item.rejectReason
+                  }}</span>
+                  <span v-else class="text-gray-400 text-xs">—</span>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -253,8 +260,8 @@
           Back to List
         </button>
 
-        <!-- Show Approve/Reject buttons only if status is NOT Completed -->
-        <template v-if="currentStatus !== 'Completed'">
+        <!-- Show Approve/Reject buttons only if status is NOT Completed AND user is profile 3185 -->
+        <template v-if="currentStatus !== 'Completed' && canApprove">
           <button class="btn btn-danger" @click="openRejectModal()">
             <i class="ki-duotone ki-cross-circle"></i>
             Reject
@@ -317,7 +324,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
@@ -326,9 +333,16 @@ import DeliveryNotesService from '@/services/deliveryNotes.service'
 import ModalNotification from '@/components/modal/ModalNotification.vue'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
+import { useNotificationStore } from '@/stores/notification/notificationStore'
+import { useLoginStore } from '@/stores/views/login'
 
 const router = useRouter()
 const route = useRoute()
+const notificationStore = useNotificationStore()
+const loginStore = useLoginStore()
+
+// Only profile 3185 (WH Approver) can approve / reject
+const canApprove = computed(() => loginStore.userData?.profile?.profileId === 3185)
 
 interface FormData {
   orderNo: string
@@ -359,6 +373,7 @@ interface TableData {
   kurang: number
   repackQty: number
   damageQty: number
+  rejectReason: string
 }
 
 const routes = ref<routeTypes[]>([
@@ -370,57 +385,37 @@ const routes = ref<routeTypes[]>([
 
 // Form Data (Read-only)
 const formData = ref<FormData>({
-  orderNo: 'ORD-2024-001',
+  orderNo: '',
   poNumber: '',
   vendorName: '',
-  namaKaryawan: 'John Doe',
-  namaSopir: 'Driver Name',
-  noPolisi: 'B 1234 XYZ',
-  transporter: 'PT Trans Jaya',
-  pickup: 'Jakarta Warehouse',
-  destination: 'Bandung Store',
-  orderDate: '2024-12-01',
-  receivedDate: '2024-12-05',
+  namaKaryawan: '',
+  namaSopir: '',
+  noPolisi: '',
+  transporter: '',
+  pickup: '',
+  destination: '',
+  orderDate: '',
+  receivedDate: '',
   signature: null,
   driverSignature: null,
 })
 
-// Table Data (Read-only)
-const tableData = ref<TableData[]>([
-  {
-    pickSlip: 'PS-001',
-    sku: 'SKU-12345',
-    description: 'Product Sample A',
-    diSuratJalan: 100,
-    actual: 100,
-    diSuratJalanKonfirmasi: 100,
-    diterima: 98,
-    selisih: -2,
-    lebih: 0,
-    kurang: 2,
-    repackQty: 0,
-    damageQty: 2,
-  },
-  {
-    pickSlip: 'PS-002',
-    sku: 'SKU-67890',
-    description: 'Product Sample B',
-    diSuratJalan: 50,
-    actual: 50,
-    diSuratJalanKonfirmasi: 50,
-    diterima: 52,
-    selisih: 2,
-    lebih: 2,
-    kurang: 0,
-    repackQty: 0,
-    damageQty: 0,
-  },
-])
+// Table Data — populated from API in onMounted
+const tableData = ref<TableData[]>([])
 
 // Rejection Modal State
 const showRejectModal = ref<boolean>(false)
 const rejectionReason = ref<string>('')
 const currentStatus = ref<string>('')
+const hasDiscrepancy = ref<boolean>(false)
+const deliveryNoteInfo = ref({
+  deliveryNoteNumber: '',
+  tripID: '',
+  poNumber: '',
+  vendorName: '',
+  vendorId: undefined as number | undefined,
+  vendorCode: '',
+})
 
 // Modal state
 const showNotificationModal = ref<boolean>(false)
@@ -461,7 +456,9 @@ const printToPDF = async () => {
 
   try {
     if (formData.value.orderNo) {
-      const deliveryNotes = await DeliveryNotesService.getByDeliveryNoteNumber(formData.value.orderNo)
+      const deliveryNotes = await DeliveryNotesService.getByDeliveryNoteNumber(
+        formData.value.orderNo,
+      )
       if (deliveryNotes) {
         driverSignatureFromDN = deliveryNotes.driverSignature || null
         console.log(
@@ -824,19 +821,6 @@ const approveConfirmation = async () => {
       status: 2, // Completed = 2 (from enum)
       generalRejectReason: '',
     })
-
-    notificationModal.value = {
-      type: 'success',
-      title: 'Approved!',
-      text: 'Receiving confirmation approved successfully!',
-    }
-    showNotificationModal.value = true
-
-    // Wait for modal to be acknowledged before redirecting
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-
-    // Redirect to list
-    router.push({ name: 'receivingConfirmation' })
   } catch (error) {
     console.error('Error approving receiving confirmation:', error)
     notificationModal.value = {
@@ -845,7 +829,53 @@ const approveConfirmation = async () => {
       text: 'Failed to approve receiving confirmation',
     }
     showNotificationModal.value = true
+    return
   }
+
+  // API succeeded — now trigger notification separately (must not block success flow)
+  if (hasDiscrepancy.value) {
+    try {
+      // Collect items with rejection (kurang > 0)
+      const rejectedItems = tableData.value
+        .filter((item) => item.kurang > 0)
+        .map((item) => ({
+          itemName: item.description,
+          sku: item.sku,
+          qtyRejected: item.kurang,
+          rejectReason: item.rejectReason || 'No reason provided',
+        }))
+
+      if (rejectedItems.length > 0) {
+        notificationStore.addPartialReceivedNotification({
+          deliveryNoteNumber: deliveryNoteInfo.value.deliveryNoteNumber,
+          tripID: deliveryNoteInfo.value.tripID,
+          poNumber: deliveryNoteInfo.value.poNumber,
+          vendorName: deliveryNoteInfo.value.vendorName,
+          targetVendorId: deliveryNoteInfo.value.vendorId,
+          targetVendorCode: deliveryNoteInfo.value.vendorCode,
+          rejectedItems,
+        })
+      }
+    } catch (notifError) {
+      // Notification failure must NOT block approve success
+      console.error('Error creating partial received notification:', notifError)
+    }
+  }
+
+  notificationModal.value = {
+    type: 'success',
+    title: 'Approved!',
+    text: hasDiscrepancy.value
+      ? 'Receiving confirmation approved with partial received. A notification has been created.'
+      : 'Receiving confirmation approved successfully!',
+  }
+  showNotificationModal.value = true
+
+  // Wait for modal to be acknowledged before redirecting
+  await new Promise((resolve) => setTimeout(resolve, 1500))
+
+  // Redirect to list
+  router.push({ name: 'receivingConfirmation' })
 }
 
 onMounted(() => {
@@ -858,7 +888,7 @@ onMounted(() => {
       if (data) {
         // Map API response to FormData structure
         formData.value = {
-          orderNo: data.DeliveryNoteNumber || '',
+          orderNo: data.deliveryNoteNumber || '',
           poNumber: data.poNumber || '',
           vendorName: data.vendorName || '',
           namaKaryawan: data.whCheckerName || '',
@@ -877,8 +907,17 @@ onMounted(() => {
           driverSignature: data.driverSignature || null,
         }
 
-        // Set current status
+        // Set current status and discrepancy info
         currentStatus.value = data.status || ''
+        hasDiscrepancy.value = data.hasDiscrepancy || false
+        deliveryNoteInfo.value = {
+          deliveryNoteNumber: data.deliveryNoteNumber || '',
+          tripID: data.tripID || '',
+          poNumber: data.poNumber || '',
+          vendorName: data.vendorName || '',
+          vendorId: data.vendorID ? Number(data.vendorID) : undefined,
+          vendorCode: data.vendorCode || '',
+        }
 
         // Map API items to TableData structure
         tableData.value = data.items.map((item) => ({
@@ -894,6 +933,7 @@ onMounted(() => {
           kurang: item.qtySelisih < 0 ? Math.abs(item.qtySelisih) : 0,
           repackQty: item.repackQty || 0,
           damageQty: item.damageQty || 0,
+          rejectReason: item.rejectReason || '',
         }))
       }
     })

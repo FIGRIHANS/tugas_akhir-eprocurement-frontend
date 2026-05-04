@@ -3,6 +3,60 @@
     <Breadcrumb title="Delivery Notes List" :routes="routes" />
     <hr class="-mx-[24px] mb-[24px]" />
 
+    <!-- Analytics Widgets -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+      <!-- Total -->
+      <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3 shadow-sm">
+        <div class="w-11 h-11 bg-teal-50 rounded-xl flex items-center justify-center flex-shrink-0">
+          <i class="ki-duotone ki-package text-teal-600 text-xl"></i>
+        </div>
+        <div>
+          <p class="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Total DN</p>
+          <p class="text-2xl font-bold text-gray-800 leading-tight">{{ dnStats.total }}</p>
+        </div>
+      </div>
+      <!-- On Delivery -->
+      <div class="bg-white border border-amber-200 rounded-xl p-4 flex items-center gap-3 shadow-sm">
+        <div class="w-11 h-11 bg-amber-50 rounded-xl flex items-center justify-center flex-shrink-0">
+          <i class="ki-duotone ki-truck text-amber-500 text-xl"></i>
+        </div>
+        <div>
+          <p class="text-[11px] text-gray-400 font-medium uppercase tracking-wide">On Delivery</p>
+          <p class="text-2xl font-bold text-amber-600 leading-tight">{{ dnStats.onDelivery }}</p>
+        </div>
+      </div>
+      <!-- Received -->
+      <div class="bg-white border border-green-200 rounded-xl p-4 flex items-center gap-3 shadow-sm">
+        <div class="w-11 h-11 bg-green-50 rounded-xl flex items-center justify-center flex-shrink-0">
+          <i class="ki-duotone ki-check-circle text-green-600 text-xl"></i>
+        </div>
+        <div>
+          <p class="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Received</p>
+          <p class="text-2xl font-bold text-green-600 leading-tight">{{ dnStats.received }}</p>
+        </div>
+      </div>
+      <!-- Partial Received -->
+      <div class="bg-white border border-orange-200 rounded-xl p-4 flex items-center gap-3 shadow-sm">
+        <div class="w-11 h-11 bg-orange-50 rounded-xl flex items-center justify-center flex-shrink-0">
+          <i class="ki-duotone ki-information-2 text-orange-500 text-xl"></i>
+        </div>
+        <div>
+          <p class="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Partial Received</p>
+          <p class="text-2xl font-bold text-orange-500 leading-tight">{{ dnStats.partialReceived }}</p>
+        </div>
+      </div>
+      <!-- Completed -->
+      <div class="bg-white border border-teal-200 rounded-xl p-4 flex items-center gap-3 shadow-sm">
+        <div class="w-11 h-11 bg-teal-50 rounded-xl flex items-center justify-center flex-shrink-0">
+          <i class="ki-duotone ki-shield-tick text-teal-600 text-xl"></i>
+        </div>
+        <div>
+          <p class="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Completed</p>
+          <p class="text-2xl font-bold text-teal-600 leading-tight">{{ dnStats.completed }}</p>
+        </div>
+      </div>
+    </div>
+
     <div class="border border-gray-200 rounded-xl p-[24px]">
       <!-- Header Section -->
       <div class="flex justify-between align-items-center gap-[8px] mb-[24px]">
@@ -36,7 +90,7 @@
               <option value="Rejected">Rejected</option>
             </select>
           </div>
-          <div>
+          <div v-if="!isVendorUser">
             <label class="form-label">Vendor Code</label>
             <input
               type="text"
@@ -96,7 +150,7 @@
           </thead>
           <tbody>
             <tr v-if="filteredDataList?.length === 0">
-              <td colspan="18" class="text-center">No data found.</td>
+              <td :colspan="columns.length" class="text-center">No data found.</td>
             </tr>
             <tr v-for="(item, index) in list" :key="index">
               <td class="text-center">
@@ -117,7 +171,7 @@
                   {{ item.status }}
                 </span>
               </td>
-              <td>{{ item.vendorCode }}</td>
+              <td v-if="!isVendorUser">{{ item.vendorCode }}</td>
               <td>{{ formatDate(item.estimatedArrival) }}</td>
               <td>{{ item.pickupAddress }}</td>
               <td>{{ item.destinationAddress }}</td>
@@ -156,7 +210,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
@@ -165,9 +219,15 @@ import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import momentLib from 'moment'
 import { cloneDeep } from 'lodash'
 import DeliveryNotesService, { type DeliveryNotesData } from '@/services/deliveryNotes.service'
+import { useLoginStore } from '@/stores/views/login'
 // Expose moment to template
 const moment = momentLib
 const router = useRouter()
+const userStore = useLoginStore()
+
+const isVendorUser = computed(() => !!userStore.userData?.profile?.vendorCode)
+const vendorID = computed(() => userStore.userData?.profile?.profileId ?? undefined)
+const vendorCodeUser = computed(() => userStore.userData?.profile?.vendorCode ?? undefined)
 
 interface FilterForm {
   status: string
@@ -201,27 +261,31 @@ const filterForm = ref<FilterForm>({
   estimatedArrivalTo: '',
 })
 
-const columns = ref<string[]>([
-  'Action',
-  'No',
-  'Delivery Note Number',
-  'Trip ID',
-  'PO Number',
-  'Status',
-  'Vendor Code',
-  'Estimated Arrival',
-  'Pickup Address',
-  'Destination Address',
-  'Transporter',
-  'Truck Type',
-  'License Plate',
-  'Created Date',
-  'Created By',
-  'Update Date',
-  'Update By',
-])
+const columns = computed(() => {
+  const base = [
+    'Action', 'No', 'Delivery Note Number', 'Trip ID', 'PO Number', 'Status',
+  ]
+  if (!isVendorUser.value) {
+    base.push('Vendor Code')
+  }
+  return [
+    ...base,
+    'Estimated Arrival', 'Pickup Address', 'Destination Address',
+    'Transporter', 'Truck Type', 'License Plate',
+    'Created Date', 'Created By', 'Update Date', 'Update By',
+  ]
+})
 
 const dataList = ref<DeliveryNotesData[]>([])
+
+const dnStats = computed(() => ({
+  total: dataList.value.length,
+  onDelivery: dataList.value.filter((i) => i.status === 'On Delivery').length,
+  received: dataList.value.filter((i) => i.status === 'Received').length,
+  partialReceived: dataList.value.filter((i) => i.status === 'Partial Received').length,
+  completed: dataList.value.filter((i) => i.status === 'Completed').length,
+}))
+
 const fetchData = async () => {
   isLoading.value = true
   errorMessage.value = ''
@@ -230,7 +294,8 @@ const fetchData = async () => {
     const response = await DeliveryNotesService.getList({
       searchText: search.value || undefined,
       status: filterForm.value.status || undefined,
-      vendorCode: filterForm.value.vendorCode || undefined,
+      vendorCode: isVendorUser.value ? vendorCodeUser.value : filterForm.value.vendorCode || undefined,
+      vendorID: isVendorUser.value ? String(vendorID.value) : undefined,
       estimatedArrivalFrom: filterForm.value.estimatedArrivalFrom || undefined,
       estimatedArrivalTo: filterForm.value.estimatedArrivalTo || undefined,
     })
@@ -437,7 +502,16 @@ const viewDetail = (id: number) => {
 }
 
 onMounted(() => {
-  fetchData()
+  if (userStore.userData) {
+    fetchData()
+  } else {
+    const unwatch = watch(() => userStore.userData, (newVal) => {
+      if (newVal) {
+        fetchData()
+        unwatch()
+      }
+    })
+  }
 })
 </script>
 
