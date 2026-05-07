@@ -13,20 +13,37 @@ export const useUploadStore = defineStore('upload', () => {
     const formData = new FormData()
     formData.append('FormFile', FormFile)
     formData.append('Actioner', String(Actioner))
+    try {
+      const response: ApiResponse<UploadFileResponse> = await generalApi.post(
+        '/api/file/upload',
+        formData,
+      )
 
-    const response: ApiResponse<UploadFileResponse> = await generalApi.post(
-      '/api/file/upload',
-      formData,
-    )
+      // Hanya set error jika API melaporkan error, bukan saat sukses
+      if (response.data.result.isError) {
+        errorMessageUpload.value = response.data.result.message
+        throw new Error(response.data.result.message)
+      }
 
-    // Hanya set error jika API melaporkan error, bukan saat sukses
-    if (response.data.result.isError) {
-      errorMessageUpload.value = response.data.result.message
-    } else {
       errorMessageUpload.value = ''
-    }
+      return response.data.result.content
+    } catch (err: any) {
+      // Handle axios / network errors and provide a friendly message
+      const status = err?.response?.status
+      const data = err?.response?.data
 
-    return response.data.result.content
+      if (status === 403 && typeof data === 'string' && data.includes('The specified account is disabled')) {
+        errorMessageUpload.value = 'Upload gagal: storage account dinonaktifkan. Hubungi admin.'
+      } else if (status === 403 && data?.error && typeof data.error === 'string') {
+        errorMessageUpload.value = `Upload gagal: ${data.error}`
+      } else if (err?.message) {
+        errorMessageUpload.value = `Upload gagal: ${err.message}`
+      } else {
+        errorMessageUpload.value = 'Upload gagal: terjadi kesalahan jaringan.'
+      }
+
+      throw err
+    }
   }
 
   const previewFile = async (fullFilePath: string) => {

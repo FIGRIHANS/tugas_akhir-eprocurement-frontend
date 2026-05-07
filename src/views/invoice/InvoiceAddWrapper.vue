@@ -183,6 +183,7 @@ import { KTModal } from '@/metronic/core'
 import { useCheckEmpty } from '@/composables/validation'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
+import { useWorkflowConfigurationStore } from '@/stores/workflow-configurantion/wokrflowConfiguration'
 import type {
   ParamsSubmissionTypes,
   ParamsSubmissionNonPo,
@@ -226,6 +227,7 @@ const invoiceApi = useInvoiceSubmissionStore()
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const verificationApi = useInvoiceVerificationStore()
 const loginApi = useLoginStore()
+const workflowStore = useWorkflowConfigurationStore()
 const router = useRouter()
 const route = useRoute()
 const tabNow = ref<string>('data')
@@ -274,8 +276,11 @@ const form = reactive<formTypes>({
   amountInvoice: '',
   taxNoInvoice: '',
   taxDate: '',
+  casDateReceipt: '',
+  dueDateCas: '',
   remainingDpAmount: 0,
   dpAmountDeduction: 0,
+  proposalAmountVal: '',
   currency: 'IDR',
   description: '',
   invoiceDocument: null,
@@ -294,6 +299,7 @@ const form = reactive<formTypes>({
   invoiceItem: [],
   additionalCost: [],
   status: -1,
+  invoiceSource: '',
   idAlternativePayment: 0,
   isAlternativePayee: false,
   isOneTimeVendor: false,
@@ -321,13 +327,6 @@ const form = reactive<formTypes>({
   pettyCashPeriod: [null, null],
   casNoCode: '',
   casNoName: '',
-  casDateReceipt: '',
-  dueDateCas: '',
-  proposalAmountVal: '',
-  invoiceSource: '',
-  ocrVendorName: '',
-  vendorNPWP: '',
-  ocrCompanyName: '',
   npwpCompany: '',
   taxInvoiceNumber: '',
   taxInvoiceDate: '',
@@ -737,7 +736,8 @@ const mapPoGr = () => {
       whtCode: '',
       whtBaseAmount: item.whtBaseAmount,
       whtAmount: 0,
-      department: item.department,
+      department: item.department && String(item.department).trim() !== '' ? item.department : (form.department || ''),
+      authObjectCode: item.department && String(item.department).trim() !== '' ? item.department : (form.department || ''),
     })
   }
   return poGr
@@ -755,9 +755,10 @@ const mapAdditionalCost = () => {
       debitCredit: item.debitCredit,
       taxCode: item.taxCode,
       vatAmount: item.vatAmount,
-      costCenter: item.costCenter,
+      costCenter: item.costCenter && String(item.costCenter).trim() !== '' ? item.costCenter : (form.department || ''),
       profitCenter: item.profitCenter,
       assignment: item.assignment,
+      authObjectCode: item.costCenter && String(item.costCenter).trim() !== '' ? item.costCenter : (form.department || ''),
       whtType: item.whtType,
       whtCode: item.whtCode,
       whtBaseAmount: Number(item.whtBaseAmount),
@@ -814,7 +815,13 @@ const mapDataPost = () => {
           ? form.invoiceUId
           : '00000000-0000-0000-0000-000000000000',
       invoiceTypeCode: Number(form.invoiceType),
-      invoiceTypeName: form.invoiceTypeName,
+      invoiceTypeName: ((): string => {
+        try {
+          // normalize to backend-expected names for workflow matching
+          if (Number(form.invoiceType) === 901) return 'Invoice PO'
+        } catch {}
+        return form.invoiceTypeName
+      })(),
       invoiceDPCode: form.invoiceType === '901' ? Number(form.invoiceDp) : null,
       invoiceDPName: form.invoiceType === '901' ? getDpName() : '',
       companyCode: form.companyCode,
@@ -830,6 +837,37 @@ const mapDataPost = () => {
       creditCardBillingId: '',
       remainingDPAmount: Number(form.remainingDpAmount),
       dpAmountDeduction: Number(form.dpAmountDeduction),
+      department:
+        form.department && String(form.department).trim() !== ''
+          ? form.department
+          : (Array.isArray(form.invoicePoGr) &&
+              form.invoicePoGr.find((it) => it.department && String(it.department).trim() !== '')
+              ? form.invoicePoGr.find((it) => it.department && String(it.department).trim() !== '')?.department
+              : ''),
+      authObjectCode:
+        form.department && String(form.department).trim() !== ''
+          ? form.department
+          : (Array.isArray(form.invoicePoGr) &&
+              form.invoicePoGr.find((it) => it.department && String(it.department).trim() !== '')
+              ? form.invoicePoGr.find((it) => it.department && String(it.department).trim() !== '')?.department
+              : ''),
+      // Attempt to resolve bracket code for FTP-originated submissions using workflow config
+      bracketCode: (() => {
+        try {
+          if (String(route.query.from) === 'ftp') {
+            const desiredType = (form.invoiceTypeName || '').toString().toLowerCase().includes('po')
+              ? 'Invoice PO'
+              : 'Invoice Non PO'
+            const wf = workflowStore.workflowList.find(
+              (i) => i.companyCode === form.companyCode && i.invoiceType === desiredType,
+            )
+            return wf?.bracketAmount || ''
+          }
+        } catch {
+          // ignore
+        }
+        return ''
+      })(),
     },
     vendor: {
       vendorId: form.vendorId ? Number(form.vendorId) : 0,
@@ -860,7 +898,7 @@ const mapDataPost = () => {
       companyName: form.ocrCompanyName,
       npwpCompany: form.npwpCompany,
       taxInvoiceNumber: form.taxInvoiceNumber,
-      taxInvoiceDate: form.taxInvoiceDate,
+      taxInvoiceDate: form.taxInvoiceDate ? moment(form.taxInvoiceDate).toISOString() : null,
       salesAmount: form.salesAmount,
       otherDPP: form.otherDPP,
       vatAmount: form.vatAmount,
@@ -868,9 +906,9 @@ const mapDataPost = () => {
       taxInvoiceStatus: form.taxInvoiceStatus,
       referenceNo: form.invoiceNo,
       createdBy: form.createdBy,
-      createdUtcDate: form.createdUtcDate,
+      createdUtcDate: form.createdUtcDate ? moment(form.createdUtcDate).toISOString() : null,
       modifiedBy: form.modifiedBy,
-      modifiedUtcDate: form.modifiedUtcDate,
+      modifiedUtcDate: form.modifiedUtcDate ? moment(form.modifiedUtcDate).toISOString() : null,
     },
     pogr: mapPoGr(),
     additionalCosts: form.invoiceDp === '9012' ? [] : mapAdditionalCost(),
@@ -914,7 +952,7 @@ const mapDataPostNonPo = () => {
 
   const postingDateToUse: string | null = invoiceDateToUse
 
-  const data = {
+  const data: ParamsSubmissionNonPo = {
     header: {
       invoiceUId:
         form.status === 0 || form.status === 5
@@ -953,6 +991,36 @@ const mapDataPostNonPo = () => {
       statusCode: isClickDraft.value ? 0 : 1,
       statusName: isClickDraft.value ? 'Drafted' : 'Waiting to Verify',
       department: checkIsNonPo() ? form.department : userData.value.profile.costCenter || '',
+      authObjectCode: checkIsNonPo() ? form.department : userData.value.profile.costCenter || '',
+      // Attempt to resolve bracket code for FTP-originated Non-PO submissions using workflow config
+      bracketCode: (() => {
+        try {
+          if (String(route.query.from) === 'ftp') {
+            const desiredType = 'Invoice Non PO'
+            const wf = workflowStore.workflowList.find(
+              (i) => i.companyCode === form.companyCode && i.invoiceType === desiredType,
+            )
+            return wf?.bracketAmount || ''
+          }
+        } catch {
+          // ignore
+        }
+        return ''
+      })(),
+      bracketAmount: (() => {
+        try {
+          if (String(route.query.from) === 'ftp') {
+            const desiredType = 'Invoice Non PO'
+            const wf = workflowStore.workflowList.find(
+              (i) => i.companyCode === form.companyCode && i.invoiceType === desiredType,
+            )
+            return wf?.bracketAmount || ''
+          }
+        } catch {
+          // ignore
+        }
+        return ''
+      })(),
       profileId: userData.value.profile.profileId.toString(),
       casDateReceipt:
         isCAS && form.casDateReceipt ? moment(form.casDateReceipt).toISOString() : null,
@@ -992,6 +1060,7 @@ const mapDataPostNonPo = () => {
       whtAmount: form.whtAmount,
       totalGrossAmount: form.totalGrossAmount,
       totalNetAmount: form.totalNetAmount,
+      additionalCost: form.additionalCostCalc,
     },
     alternativePay: {
       id: form.idAlternativePayment,
@@ -1020,7 +1089,7 @@ const mapDataPostNonPo = () => {
   return data
 }
 
-const goNext = () => {
+const goNext = async () => {
   const list = ['data', 'information', 'ocrAiVerification', 'preview']
   if (tabNow.value !== 'preview') {
     if (form.status === 0 || form.status === -1 || form.status === 5) {
@@ -1038,9 +1107,65 @@ const goNext = () => {
       tabNow.value = list[checkIndex + 1]
     }
   } else {
+    // Validate Department requirement before submitting
+    const requiresDept = Number(form.status) !== 0 && !isClickDraft.value
+    const headerHasDept = form.department && String(form.department).trim() !== ''
+    const hasDeptInLines =
+      Array.isArray(form.invoicePoGr) &&
+      form.invoicePoGr.some((item) => item.department && String(item.department).trim() !== '')
+
+    if (requiresDept && !headerHasDept && !hasDeptInLines) {
+      // Attempt automatic fallback: use user's cost center if available
+      const fallbackCostCenter = userData.value?.profile?.costCenter || '' as const
+      if (fallbackCostCenter && String(fallbackCostCenter).trim() !== '') {
+        console.info('No department found on header/lines — using user cost center fallback', fallbackCostCenter)
+        form.department = fallbackCostCenter
+      } else {
+        // Try loading company cost centers and pick the first one
+        try {
+          await invoiceMasterApi.getCostCenter(form.companyCode || '')
+          const list = invoiceMasterApi.costCenterList
+          if (Array.isArray(list) && list.length > 0 && list[0].code) {
+            form.department = list[0].code
+            console.info('No dept on header/lines — using company cost center fallback', list[0].code)
+          } else {
+            invoiceApi.errorMessageSubmission =
+              'Department/Cost Center is required for workflow resolution. Please ensure at least one line item has a department assigned or select a department in the header.'
+            const idModal = document.querySelector('#error_submission_modal')
+            const modal = KTModal.getInstance(idModal as HTMLElement)
+            modal.show()
+            return
+          }
+        } catch (err) {
+          console.error('Error fetching cost center fallback:', err)
+          invoiceApi.errorMessageSubmission =
+            'Department/Cost Center is required for workflow resolution. Please ensure at least one line item has a department assigned or select a department in the header.'
+          const idModal = document.querySelector('#error_submission_modal')
+          const modal = KTModal.getInstance(idModal as HTMLElement)
+          modal.show()
+          return
+        }
+      }
+    }
+
     isSubmit.value = true
     if (checkIsNonPo()) {
       const submissionData = mapDataPostNonPo()
+
+      // cek matrix-approval terlebih dahulu; jika tidak ada, gunakan fallback workflow dari store
+      try {
+        await invoiceMasterApi.getMatrixApproval(String(submissionData.header.invoiceTypeCode), submissionData.header.companyCode)
+        if (!Array.isArray(invoiceMasterApi.matrixApprovalList) || invoiceMasterApi.matrixApprovalList.length === 0) {
+          const wf = workflowStore.workflowList.find((i) => i.companyCode === submissionData.header.companyCode && i.invoiceType === 'Invoice Non PO')
+          if (wf && Array.isArray(wf.workflow)) {
+            // workflow mapping intentionally removed for NonPo submissions
+          }
+        }
+      } catch {
+        // ignore lookup errors and continue with submission (we already added bracket fields)
+      }
+
+      // store last submission payload for debugging (removed)
 
       invoiceApi
         .postSubmissionNonPo(submissionData)
@@ -1048,8 +1173,22 @@ const goNext = () => {
           setAfterResponsePost(response)
         })
         .catch((error) => {
-          invoiceApi.errorMessageSubmission =
-            error.response?.data?.result?.message || error.message || 'An unexpected error occurred'
+          let msg = 'An unexpected error occurred'
+          if (error && error.response) {
+            msg =
+              error.response.data?.result?.message ||
+              error.response.data?.message ||
+              JSON.stringify(error.response.data)
+          } else if (error && error.message) {
+            msg = error.message
+          }
+          console.error('Submission error (PO):', error)
+          invoiceApi.errorMessageSubmission = msg
+          try {
+            invoiceApi.errorMessageSubmission = JSON.stringify(error.response?.data || error, null, 2)
+          } catch {
+            invoiceApi.errorMessageSubmission = String(error)
+          }
           const idModal = document.querySelector('#error_submission_modal')
           const modal = KTModal.getInstance(idModal as HTMLElement)
           modal.show()
@@ -1058,14 +1197,57 @@ const goNext = () => {
           isSubmit.value = false
         })
     } else {
+      const submissionData = mapDataPost()
+
+      // cek matrix-approval terlebih dahulu; jika tidak ada, gunakan fallback workflow dari store
+      try {
+        await invoiceMasterApi.getMatrixApproval(String(submissionData.header.invoiceTypeCode), submissionData.header.companyCode)
+        if (!Array.isArray(invoiceMasterApi.matrixApprovalList) || invoiceMasterApi.matrixApprovalList.length === 0) {
+          const desiredType = 'Invoice PO'
+          const wf = workflowStore.workflowList.find((i) => i.companyCode === submissionData.header.companyCode && i.invoiceType === desiredType)
+          if (wf && Array.isArray(wf.workflow)) {
+            submissionData.workflow = wf.workflow.map((row) => ({
+              actioner: 0,
+              actionerDate: '',
+              actionerName: '',
+              actionerNotes: '',
+              id: 0,
+              profileId: Number(row.profileId) || 0,
+              profileName: row.profileName || '',
+              stateCode: 0,
+              stateName: 'Pending',
+              step: Number(row.step) || 0,
+            }))
+          }
+        }
+      } catch {
+        // ignore lookup errors and continue
+      }
+
+      // store last submission payload for debugging (removed)
+
       invoiceApi
-        .postSubmission(mapDataPost())
+        .postSubmission(submissionData)
         .then((response) => {
           setAfterResponsePost(response)
         })
         .catch((error) => {
-          invoiceApi.errorMessageSubmission =
-            error.response?.data?.result?.message || error.message || 'An unexpected error occurred'
+          let msg = 'An unexpected error occurred'
+          if (error && error.response) {
+            msg =
+              error.response.data?.result?.message ||
+              error.response.data?.message ||
+              JSON.stringify(error.response.data)
+          } else if (error && error.message) {
+            msg = error.message
+          }
+          console.error('Submission error (Non-PO):', error)
+          invoiceApi.errorMessageSubmission = msg
+          try {
+            invoiceApi.errorMessageSubmission = JSON.stringify(error.response?.data || error, null, 2)
+          } catch {
+            invoiceApi.errorMessageSubmission = String(error)
+          }
           const idModal = document.querySelector('#error_submission_modal')
           const modal = KTModal.getInstance(idModal as HTMLElement)
           modal.show()
@@ -1102,6 +1284,7 @@ const goSaveDraft = () => {
     data.header.statusName = 'Draft'
     data.isSaveAsDraft = true
 
+    // removed debug payload storage
     invoiceApi
       .postSubmissionNonPo(data)
       .then((response) => {
@@ -1122,6 +1305,7 @@ const goSaveDraft = () => {
     data.header.statusCode = 0
     data.header.statusName = 'Draft'
     data.isSaveAsDraft = true
+    // removed debug payload storage
     invoiceApi
       .postSubmission(data)
       .then((response) => {
@@ -1242,7 +1426,7 @@ const setData = () => {
         debitCredit: item.debitCredit,
         taxCode: item.taxCode,
         vatAmount: item.vatAmount,
-        costCenter: item.costCenter,
+        costCenter: item.costCenter && String(item.costCenter).trim() !== '' ? item.costCenter : (form.department || ''),
         profitCenter: item.profitCenter,
         assignment: item.assignment,
         whtType: item.whtType,

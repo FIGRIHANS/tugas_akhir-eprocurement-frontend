@@ -327,6 +327,15 @@ const getPercentTax = (code: string) => {
   }
 }
 
+const getPercentWht = (code: string) => {
+  if (!code) return 0
+  const getIndex = invoiceMasterApi.whtCodeList.findIndex((item) => item.whtCode === code)
+  if (getIndex !== -1) {
+    return (invoiceMasterApi.whtCodeList[getIndex].tarif || 0) / 100
+  }
+  return 0
+}
+
 const countSubtotal = () => {
   if (!form) return
   let total = 0
@@ -450,22 +459,23 @@ const countWhtAmount = () => {
   let totalAddCredit = 0
   if (!checkIsNonPo()) {
     for (const item of form.invoicePoGr) {
-      const percentTax = 0
-      const itemAmount = form.currency === 'IDR' ? item.itemAmountLC : item.itemAmountTC
-      totalPo = totalPo + percentTax * itemAmount
+      totalPo += Number(item.whtAmount || 0)
     }
     for (const item of form.additionalCost) {
-      const percentTax = 0
       if (item.debitCredit === 'D') {
-        totalAddDebit = totalAddDebit + percentTax * Number(item.itemAmount)
+        totalAddDebit += Number(item.whtAmount || 0)
       } else {
-        totalAddCredit = totalAddCredit + percentTax * Number(item.itemAmount)
+        totalAddCredit += Number(item.whtAmount || 0)
       }
     }
   } else {
-    // for (const item of form.invoiceItem) {
-    //   const percentTax = 0
-    // }
+    for (const item of form.invoiceItem) {
+      if (item.debitCredit === 'D') {
+        totalAddDebit += Number(item.whtAmount || 0)
+      } else {
+        totalAddCredit += Number(item.whtAmount || 0)
+      }
+    }
   }
   return totalPo + totalAddDebit - totalAddCredit
 }

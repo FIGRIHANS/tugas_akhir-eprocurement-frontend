@@ -435,18 +435,29 @@ const isInProgress = (status: string) => {
 // Actions
 const handleUpload = (item: BpuContent) => {
   selectedItem.value = item
-  passphrase.value = ''
+  passphrase.value = 'Pajak123@@' // Default DEV passphrase
   showUploadConfirmModal.value = true
 }
 
 const handleUploadSubmit = async () => {
   if (!selectedItem.value) return
+
+  // Guard: pxId must exist
+  if (!selectedItem.value.pxId) {
+    notifTitle.value = 'Upload Failed'
+    notifText.value = 'This record does not have a Pajak Express ID (pxId). Please recreate it first.'
+    notifType.value = 'error'
+    showNotificationModal.value = true
+    showUploadConfirmModal.value = false
+    return
+  }
+
   submitting.value = true
   try {
     await BpuService.upload({ 
-      id: selectedItem.value.pxId, 
+      id: String(selectedItem.value.pxId), 
       npwpNikPenandatangan: nikSigner,
-      passphrase: passphrase.value 
+      passphrase: passphrase.value || 'Pajak123@@'
     })
     showUploadConfirmModal.value = false
     fetchBpuList()
@@ -455,10 +466,10 @@ const handleUploadSubmit = async () => {
     notifText.value = 'BPU has been uploaded and is currently being processed by DJP.'
     notifType.value = 'success'
     showNotificationModal.value = true
-  } catch (err) {
+  } catch (err: any) {
     console.error(err)
     notifTitle.value = 'Upload Failed'
-    notifText.value = 'Failed to submit the BPU to DJP. Please check the error message.'
+    notifText.value = err?.response?.data?.result?.message || 'Failed to submit the BPU to DJP. Please check the error message.'
     notifType.value = 'error'
     showNotificationModal.value = true
   } finally {

@@ -178,17 +178,71 @@
                       : useFormatIdr(item.vatAmount || 0)
                   }}</span>
                 </td>
-                <td>-</td>
-                <td>-</td>
                 <td>
-                  {{
-                    form?.currency === item.currencyLC
-                      ? useFormatIdr(item.itemAmountLC)
-                      : useFormatIdr(item.itemAmountLC)
-                  }}
+                  <span v-if="!item.isEdit">{{ item.whtType || '-' }}</span>
+                  <v-select
+                    v-else
+                    v-model="formEdit.whtType"
+                    class="customSelect"
+                    placeholder="Type"
+                    :reduce="(option) => option.code"
+                    :get-option-label="(option) => option.name"
+                    :options="whtTypeList"
+                    @option:selected="masterDataApi.getWhtCode($event.code)"
+                    appendToBody
+                  ></v-select>
                 </td>
-                <td>-</td>
-                <td>{{ item.department || '-' }}</td>
+                <td>
+                  <span v-if="!item.isEdit">{{ item.whtCode || '-' }}</span>
+                  <v-select
+                    v-else
+                    v-model="formEdit.whtCode"
+                    class="customSelect"
+                    placeholder="Code"
+                    :reduce="(option) => option.whtCode"
+                    :get-option-label="(option) => `${option.whtCode} - ${option.description}`"
+                    :options="whtCodeList"
+                    @option:selected="getVatAmount"
+                    appendToBody
+                  ></v-select>
+                </td>
+                <td>
+                  <span v-if="item.isEdit">{{
+                    form?.currency === item.currencyLC
+                      ? useFormatIdr(formEdit.whtBaseAmount)
+                      : useFormatIdr(formEdit.whtBaseAmount)
+                  }}</span>
+                  <span v-else>{{
+                    form?.currency === item.currencyLC
+                      ? useFormatIdr(item.whtBaseAmount || 0)
+                      : useFormatIdr(item.whtBaseAmount || 0)
+                  }}</span>
+                </td>
+                <td>
+                  <span v-if="item.isEdit">{{
+                    form?.currency === item.currencyLC
+                      ? useFormatIdr(formEdit.whtAmount)
+                      : useFormatIdr(formEdit.whtAmount)
+                  }}</span>
+                  <span v-else>{{
+                    form?.currency === item.currencyLC
+                      ? useFormatIdr(item.whtAmount || 0)
+                      : useFormatIdr(item.whtAmount || 0)
+                  }}</span>
+                </td>
+                <td>
+                  <span v-if="!item.isEdit">{{ getCostCenterName(item.department) || '-' }}</span>
+                  <v-select
+                    v-else
+                    v-model="formEdit.department"
+                    class="customSelect"
+                    placeholder="Select"
+                    :get-option-label="(option: any) => `${option.code} - ${option.name}`"
+                    :reduce="(option: any) => option.code"
+                    :options="costCenterList"
+                    appendToBody
+                  ></v-select>
+                </td>
               </tr>
             </template>
           </tbody>
@@ -282,7 +336,7 @@
                   <span v-if="!item.isEdit">{{ getCostCenterName(item.department) || '-' }}</span>
                   <v-select
                     v-else
-                    v-model="item.department"
+                    v-model="formEdit.department"
                     class="customSelect"
                     placeholder="Select"
                     :get-option-label="(option: any) => `${option.code} - ${option.name}`"
@@ -344,12 +398,19 @@ const formEdit = reactive({
   itemAmountLC: 0,
   taxCode: '',
   vatAmount: 0,
+  whtType: '',
+  whtCode: '',
+  whtBaseAmount: 0,
+  whtAmount: 0,
   quantity: 0,
   uom: '',
+  department: '',
 })
 
 const listTaxCalculation = computed(() => masterDataApi.taxList)
 const costCenterList = computed(() => masterDataApi.costCenterList)
+const whtTypeList = computed(() => masterDataApi.whtTypeList)
+const whtCodeList = computed(() => masterDataApi.whtCodeList)
 
 const checkIsEdit = () => {
   const result = form?.invoicePoGr.findIndex((item) => item.isEdit)
@@ -424,7 +485,7 @@ const openAddItem = async () => {
   }
 
   try {
-    await invoiceApi.getPoGr(poNumber)
+    await invoiceApi.getPoGr(poNumber, form.companyCode, form.vendorId)
     const idModal = document.querySelector('#add_po_gr_item_modal')
     const modal = KTModal.getInstance(idModal as HTMLElement)
     modal.show()
@@ -495,7 +556,7 @@ const autoFetchPoOnEnter = async () => {
   isAutoFetchingPo.value = true
 
   try {
-    const response = await invoiceApi.getPoGr(initialPoNumber)
+    const response = await invoiceApi.getPoGr(initialPoNumber, form.companyCode, form.vendorId)
     setPoGrFromMockSap(response?.content || [])
   } catch (error) {
     console.error('Error auto fetching PO detail on enter:', error)
@@ -534,8 +595,6 @@ const setColumn = () => {
 }
 
 const setItemPoGr = (items: PoGrSearchTypes[]) => {
-  console.log(items)
-
   for (const item of items) {
     const data = {
       poNo: item.poNo,
@@ -582,8 +641,13 @@ const resetFormEdit = () => {
   formEdit.taxCode = ''
   formEdit.itemAmountLC = 0
   formEdit.vatAmount = 0
+  formEdit.whtType = ''
+  formEdit.whtCode = ''
+  formEdit.whtBaseAmount = 0
+  formEdit.whtAmount = 0
   formEdit.quantity = 0
   formEdit.uom = ''
+  formEdit.department = ''
 }
 
 const goEdit = (item: itemsPoGrType) => {
@@ -597,12 +661,19 @@ const goEdit = (item: itemsPoGrType) => {
     formEdit.taxCode = item.taxCode
     formEdit.itemAmountLC = form?.currency === 'IDR' ? item.itemAmountLC : item.itemAmountTC
     formEdit.vatAmount = item.vatAmount || 0
+    formEdit.whtType = item.whtType || ''
+    formEdit.whtCode = item.whtCode || ''
+    formEdit.whtBaseAmount = item.whtBaseAmount || formEdit.itemAmountLC
+    formEdit.whtAmount = item.whtAmount || 0
+    formEdit.department = item.department || ''
   } else {
     item.taxCode = formEdit.taxCode
     item.vatAmount = formEdit.vatAmount
-    if (form?.currency === 'IDR') item.itemAmountLC = formEdit.itemAmountLC
-    else item.itemAmountTC = formEdit.itemAmountLC
-    item.whtBaseAmount = formEdit.itemAmountLC
+    item.whtType = formEdit.whtType
+    item.whtCode = formEdit.whtCode
+    item.whtAmount = formEdit.whtAmount
+    item.whtBaseAmount = formEdit.whtBaseAmount
+    item.department = formEdit.department
     resetFormEdit()
   }
 }
@@ -649,6 +720,7 @@ const addNewPodata = () => {
       poNoError: false,
       departementError: false,
       deliveryOrderNo: '',
+      department: '',
     }
     form.invoicePoGr.push(data)
   }
@@ -696,14 +768,31 @@ const getVatAmount = () => {
     const itemAmount = formEdit.itemAmountLC
     const result = percentTax * itemAmount
     formEdit.vatAmount = result
+
+    const percentWht = getPercentWht(formEdit.whtCode) || 0
+    const baseWht = formEdit.whtBaseAmount || formEdit.itemAmountLC
+    formEdit.whtAmount = percentWht * baseWht
   } else {
     for (const item of form.invoicePoGr) {
       const percentTax = getPercentTax(item.taxCode) || 0
       const itemAmount = form.currency === 'IDR' ? item.itemAmountLC : item.itemAmountTC
       const result = percentTax * itemAmount
       item.vatAmount = result
+
+      const percentWht = getPercentWht(item.whtCode) || 0
+      const baseWht = item.whtBaseAmount || itemAmount
+      item.whtAmount = percentWht * baseWht
     }
   }
+}
+
+const getPercentWht = (code: string) => {
+  if (!code) return 0
+  const index = whtCodeList.value.findIndex((item) => item.whtCode === code)
+  if (index !== -1) {
+    return (whtCodeList.value[index].tarif || 0) / 100
+  }
+  return 0
 }
 
 const getTaxCodeName = (taxCode: string) => {
@@ -795,9 +884,35 @@ watch(
   },
 )
 
-onMounted(() => {
+onMounted(async () => {
   setColumn()
   autoFetchPoOnEnter()
+
+  // Prevent double fetching of WHT Types
+  if (!masterDataApi.whtTypeList || masterDataApi.whtTypeList.length === 0) {
+    await masterDataApi.getWhtType()
+  }
+
+  if (form?.companyCode) {
+    await masterDataApi.getCostCenter(form.companyCode)
+  }
+
+  // Auto-fetch WHT Codes if items already have whtType (e.g. from FTP)
+  if (formEdit.whtType) {
+    await masterDataApi.getWhtCode(formEdit.whtType)
+  }
+
+  if (form?.invoicePoGr) {
+    const uniqueTypes = [...new Set(form.invoicePoGr.map(item => item.whtType).filter(Boolean))]
+    for (const type of uniqueTypes) {
+      await masterDataApi.getWhtCode(type as string)
+    }
+  }
+
+  // Auto-fetch Cost Centers (Departments)
+  if (form?.companyCode) {
+    await masterDataApi.getCostCenter(form.companyCode)
+  }
 })
 </script>
 

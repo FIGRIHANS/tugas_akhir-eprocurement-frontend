@@ -54,7 +54,7 @@
     <div class="flex-1">
       <div class="rounded-xl bg-primary-light h-full flex flex-col justify-between items-center gap-[8px]">
         <!-- <logoLogin class="mt-[30px]" /> -->
-        <div class="mt-[30px] flex items-center justify-center">
+        <div class="mt-[60px] flex items-center justify-center">
           <LogoEPOQ class=" w-[260px] h-16" />
           <div class="ml-2">
             <img src="@/assets/TMS.png" class="h-[60px] w-max" alt="">
