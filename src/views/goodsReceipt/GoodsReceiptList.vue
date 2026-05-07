@@ -128,7 +128,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import type { routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
@@ -257,6 +257,19 @@ const resetFilter = () => {
 }
 
 onMounted(() => {
-  fetchData()
+  // After hard refresh, login store userData may hydrate async; fetching too early skips vendor filters.
+  if (userStore.userData && Object.keys(userStore.userData as object).length > 0) {
+    fetchData()
+  } else {
+    const unwatch = watch(
+      () => userStore.userData,
+      (newVal) => {
+        if (newVal && Object.keys(newVal as object).length > 0) {
+          fetchData()
+          unwatch()
+        }
+      },
+    )
+  }
 })
 </script>

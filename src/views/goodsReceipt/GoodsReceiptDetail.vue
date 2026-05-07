@@ -126,7 +126,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import type { routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
@@ -198,6 +198,18 @@ const formatMoney = (amt: number | null | undefined, cur?: string) => {
 const goBack = () => router.push({ name: 'goodsReceiptList' })
 
 onMounted(() => {
-  load()
+  if (userStore.userData && Object.keys(userStore.userData as object).length > 0) {
+    load()
+  } else {
+    const unwatch = watch(
+      () => userStore.userData,
+      (newVal) => {
+        if (newVal && Object.keys(newVal as object).length > 0) {
+          load()
+          unwatch()
+        }
+      },
+    )
+  }
 })
 </script>

@@ -237,11 +237,6 @@ const sidebarMenuData: ISidebarMenu[] = [
         to: 'deliveryNotesList',
       },
       {
-        id: 'goods-receipt-list',
-        title: 'Goods Receipts',
-        to: 'goodsReceiptList',
-      },
-      {
         id: 'receiving-confirmation',
         title: 'Create Receiving Confirmation',
         to: 'receivingConfirmation',
@@ -251,6 +246,11 @@ const sidebarMenuData: ISidebarMenu[] = [
         title: 'Receiving Confirmation List',
         to: 'receivingConfirmationList',
       },
+      {
+        id: 'goods-receipt-list',
+        title: 'Goods Receipts',
+        to: 'goodsReceiptList',
+      }
     ],
   },
   {
