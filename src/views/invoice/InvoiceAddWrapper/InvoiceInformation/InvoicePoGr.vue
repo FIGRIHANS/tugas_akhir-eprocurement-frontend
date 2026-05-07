@@ -10,7 +10,7 @@
           <div class="flex gap-2 w-full max-w-md">
             <input
               v-model="search"
-              placeholder="Reference Number"
+              placeholder="GR Document No"
               type="text"
               class="input w-full"
               @keypress="searchEnter"
@@ -27,7 +27,10 @@
           </button>
         </div>
         <p v-if="searchError" class="text-danger text-[11px]">
-          *PO Number is required
+          * GR Document No is required
+        </p>
+        <p v-if="grFetchError" class="text-danger text-[11px]">
+          {{ grFetchError }}
         </p>
       </div>
     </div>
@@ -403,7 +406,12 @@ import { KTModal } from '@/metronic/core'
 import { defaultColumn, invoiceDpColumn, poCCColumn, manualAddColumn } from '@/static/invoicePoGr'
 import SearchPoGr from './InvoicePoGr/SearchPoGr.vue'
 import UploadPoGr from './InvoicePoGr/UploadPoGr.vue'
-import DatePicker from '@/components/datePicker/DatePicker.vue'
+import GoodsReceiptService, {
+  type GoodsReceiptDetailContentDto,
+  type GoodsReceiptDetailParams,
+} from '@/services/goodsReceipt.service'
+import { storeToRefs } from 'pinia'
+import { useLoginStore } from '@/stores/views/login'
 import moment from 'moment'
 import type { PoGrSearchTypes, itemsPoGrType } from '../../types/invoicePoGr'
 import type { PoGrItemTypes } from '@/stores/views/invoice/types/submission'
@@ -413,10 +421,13 @@ import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterDat
 
 const masterDataApi = useInvoiceMasterDataStore()
 const invoiceApi = useInvoiceSubmissionStore()
+const loginStore = useLoginStore()
+const { poGrList } = storeToRefs(invoiceApi)
 const form = inject<formTypes>('form')
 const columns = ref<string[]>([])
 const search = ref<string>('')
 const searchError = ref<boolean>(false)
+const grFetchError = ref<string>('')
 const searchDpAvailableError = ref<boolean>(false)
 const isSearch = ref<boolean>(false)
 const isDisabledSearch = ref<boolean>(false)
@@ -452,6 +463,71 @@ const searchEnter = (event: KeyboardEvent) => {
   if (event.key === 'Enter') {
     searchItem()
   }
+}
+
+const buildGoodsReceiptDetailParams = (grDocumentNo: string): GoodsReceiptDetailParams => {
+  const params: GoodsReceiptDetailParams = { grDocumentNo: grDocumentNo.trim() }
+  const profile = loginStore.userData?.profile
+  if (profile?.vendorCode) {
+    if (profile.profileId != null) params.accessVendorId = profile.profileId
+    params.accessVendorCode = profile.vendorCode
+  }
+  return params
+}
+
+const mapGoodsReceiptDetailToPoGrItems = (
+  detail: GoodsReceiptDetailContentDto,
+): PoGrItemTypes[] => {
+  const cur = detail.currency || 'IDR'
+  return (detail.items || []).map((line) => {
+    const qty = Number(line.qtyReceivedGood ?? 0)
+    const unitPrice = Number(line.unitPrice ?? 0)
+    let amount = line.lineAmount != null ? Number(line.lineAmount) : NaN
+    if (!Number.isFinite(amount)) {
+      amount = qty * unitPrice
+    }
+
+    const grDt =
+      typeof line.grDocumentDate === 'string'
+        ? line.grDocumentDate
+        : line.grDocumentDate != null
+          ? String(line.grDocumentDate)
+          : ''
+
+    return {
+      poNo: detail.poNumber || '',
+      poItem: line.grDocumentItem ?? 0,
+      grDocumentNo: line.grDocumentNo || detail.grDocumentNo || '',
+      grDocumentItem: line.grDocumentItem ?? 0,
+      grDocumentDate: grDt,
+      taxCode: '',
+      quantity: qty,
+      unit: line.uom || '',
+      uom: line.uom || '',
+      itemText: line.itemName || '',
+      material: line.sku || '',
+      materialDescription: line.itemName || '',
+      currency: cur,
+      conditionType: '',
+      conditionTypeDesc: '',
+      qcStatus: detail.hasDiscrepancy ? 'Discrepancy' : '-',
+      postingDate: '',
+      enteredOn: '',
+      purchasingOrg: '',
+      department: '',
+      currencyLC: cur,
+      currencyTC: cur,
+      itemAmountLC: amount,
+      itemAmountTC: amount,
+      itemAmount: amount,
+      deliveryOrderNo: detail.deliveryOrderNumber || '',
+    }
+  })
+}
+
+const fetchGrAsPoGrList = async (grDocumentNo: string): Promise<PoGrItemTypes[]> => {
+  const detail = await GoodsReceiptService.getDetail(buildGoodsReceiptDetailParams(grDocumentNo))
+  return mapGoodsReceiptDetailToPoGrItems(detail)
 }
 
 const searchItem = async () => {
@@ -496,14 +572,15 @@ const openUploadModal = () => {
 }
 
 const openAddItem = async () => {
-  const poNumber = search.value?.trim() || ''
+  const grDocumentNo = search.value?.trim() || ''
 
-  if (!poNumber) {
+  if (!grDocumentNo) {
     searchError.value = true
     return
   }
 
   searchError.value = false
+  grFetchError.value = ''
 
   if (form) {
     if (!form.vendorId || !form.companyCode) {
@@ -515,12 +592,16 @@ const openAddItem = async () => {
   }
 
   try {
-    await invoiceApi.getPoGr(poNumber, form.companyCode, form.vendorId)
+    const mapped = await fetchGrAsPoGrList(grDocumentNo)
+    poGrList.value = mapped
+
     const idModal = document.querySelector('#add_po_gr_item_modal')
     const modal = KTModal.getInstance(idModal as HTMLElement)
     modal.show()
-  } catch (error) {
-    console.error('Error fetching PO detail:', error)
+  } catch (error: unknown) {
+    console.error('Error fetching Goods Receipt:', error)
+    grFetchError.value =
+      error instanceof Error ? error.message : 'Unable to load GR lines. Please check GR Document No.'
   }
 }
 
@@ -577,19 +658,19 @@ const autoFetchPoOnEnter = async () => {
   if (checkInvoiceDp() || form.invoiceType === '902') return
   if (isAutoFetchingPo.value) return
 
-  const initialPoNumber =
-    search.value.trim() || form.invoicePoGr[0]?.poNo?.toString().trim() || ''
+  const initialGrNo =
+    search.value.trim() || form.invoicePoGr[0]?.grDocumentNo?.toString().trim() || ''
 
-  if (!initialPoNumber) return
+  if (!initialGrNo) return
 
-  search.value = initialPoNumber
+  search.value = initialGrNo
   isAutoFetchingPo.value = true
 
   try {
-    const response = await invoiceApi.getPoGr(initialPoNumber, form.companyCode, form.vendorId)
-    setPoGrFromMockSap(response?.content || [])
+    const mapped = await fetchGrAsPoGrList(initialGrNo)
+    setPoGrFromMockSap(mapped)
   } catch (error) {
-    console.error('Error auto fetching PO detail on enter:', error)
+    console.error('Error auto-fetching GR on load:', error)
   } finally {
     isAutoFetchingPo.value = false
   }

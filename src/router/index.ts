@@ -23,6 +23,7 @@ import taxReconciliation from './modules/taxReconciliation'
 import systemIntegration from './modules/systemIntegration'
 import systemConfiguration from './modules/systemConfiguration'
 import mockSap from './modules/mockSap'
+import goodsReceipt from './modules/goodsReceipt'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -58,6 +59,7 @@ const router = createRouter({
         ...systemIntegration,
         ...systemConfiguration,
         ...mockSap,
+        ...goodsReceipt,
         // {
         //   path: '/health-check',
         //   name: 'health-check',
