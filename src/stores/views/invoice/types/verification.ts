@@ -4,9 +4,10 @@ export interface ParamsSubmissionTypes {
   payment: ParamsSubmissionPayment
   documents: ParamsSubmissionDocument[]
   calculation: ParamsSubmissionCalculation
+  ocr?: ParamsSubmissionOcr
   pogr: ParamsSubmissionItem[]
   additionalCosts: ParamsSubmissionCost[]
-  workflow: ParamsSubmissionWorkflow[]
+  workflow?: ParamsSubmissionWorkflow[]
   alternativePayee: itemsAlternativePayee[]
   costExpense: ParamsSubmissionCostExpense[]
 }
@@ -160,6 +161,25 @@ interface ParamsSubmissionWorkflow {
   stateCode: number
   stateName: string
   step: number
+}
+
+interface ParamsSubmissionOcr {
+  vendorName: string
+  vendorNPWP: string
+  companyName: string
+  npwpCompany: string
+  taxInvoiceNumber: string
+  taxInvoiceDate: string | null
+  salesAmount: number
+  otherDPP: number
+  vatAmount: number
+  vatbmAmount: number
+  taxInvoiceStatus: string
+  referenceNo: string
+  createdBy: string
+  createdUtcDate: string | null
+  modifiedBy: string
+  modifiedUtcDate: string | null
 }
 
 interface ParamsSubmissionItem {

@@ -89,7 +89,7 @@ export interface BpuUploadPayload {
 }
 
 export interface BpuVerifyPayload {
-  id: string // pxId
+  id: string // Internal DB ID (matching user requirement)
   npwpPemotong: string
   tahunPajak: string
   noBupot: string

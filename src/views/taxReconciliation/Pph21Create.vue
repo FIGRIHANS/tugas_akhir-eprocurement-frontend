@@ -83,12 +83,18 @@
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
                 <label class="form-label w-full lg:max-w-xs">Tax Object Code</label>
                 <div class="flex-1">
-                  <input
+                  <select
                     v-model="form.dataDetilBp21.kodeObjekPajak"
-                    class="input w-full"
-                    placeholder="e.g. 21-100-12"
+                    class="select w-full"
                     :class="{ 'border-danger': errors.kodeObjekPajak }"
-                  />
+                  >
+                    <option value="21-100-01">21-100-01 (Pegawai Tetap - Bulanan)</option>
+                    <option value="21-100-07">21-100-07 (Peserta Kegiatan)</option>
+                    <option value="21-100-08">21-100-08 (Anggota Dewan Pengawas/Komisaris)</option>
+                    <option value="21-100-09">21-100-09 (Mantan Pegawai - Bonus/Tantiem)</option>
+                    <option value="21-100-11">21-100-11 (Bukan Pegawai - Berkesinambungan)</option>
+                    <option value="21-100-12">21-100-12 (Bukan Pegawai - Tidak Berkesinambungan)</option>
+                  </select>
                   <p v-if="errors.kodeObjekPajak" class="text-danger text-xs mt-1">{{ errors.kodeObjekPajak }}</p>
                 </div>
               </div>
@@ -320,7 +326,7 @@ const form = ref<Pph21CreatePayload>({
   dataDetilBp21: {
     sertifikatInsentifDipotong: '9',
     nomorSertifikatInsentif: '',
-    kodeObjekPajak: '21-100-01',
+    kodeObjekPajak: '21-100-12',
     pasalPPh: 'Pasal 21',
     statusPPh: 'TK/0',
     kap: '411121',
@@ -413,7 +419,7 @@ const submitCreate = async () => {
   if (!validate()) return
   submitting.value = true
   try {
-    const payload = JSON.parse(JSON.stringify(form.value)) as Pph21CreatePayload
+    const payload = JSON.parse(JSON.stringify(form.value)) as any
     // Convert date from YYYY-MM-DD to DDMMYYYY
     payload.tglPemotongan = moment(form.value.tglPemotongan).format('DDMMYYYY')
     // Derive masaPajak & tahunPajak from withholding date
@@ -428,6 +434,13 @@ const submitCreate = async () => {
       payload.nik = form.value.npwp
       payload.npwp = ''
     }
+
+    // Financial items MUST be strings for some external API parsers
+    payload.dataDetilBp21.penghasilanKotor = String(payload.dataDetilBp21.penghasilanKotor)
+    payload.dataDetilBp21.penghasilanKotorSebelumnya = String(payload.dataDetilBp21.penghasilanKotorSebelumnya)
+    payload.dataDetilBp21.tarif = String(payload.dataDetilBp21.tarif)
+    payload.dataDetilBp21.pphDipotong = String(payload.dataDetilBp21.pphDipotong)
+    payload.dataDetilBp21.NormaPenghasilan = '100'
 
     // Ensure idTku is always sent
     payload.idTku = npwpPemotong + '000000'
