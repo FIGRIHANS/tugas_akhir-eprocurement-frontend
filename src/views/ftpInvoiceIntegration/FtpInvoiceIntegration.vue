@@ -349,7 +349,6 @@ const callList = () => {
       invoiceTypeCode: Number(filterForm.invoiceType),
       invoiceDate: filterForm.date,
       searchText: search.value,
-      invoiceSource: 3,
       page: currentPage.value,
       pageSize: pageSize.value,
     })
