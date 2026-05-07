@@ -98,6 +98,9 @@ export type MatrixApprovalTypes = {
   invoiceTypeName: string
   workflowCode: string
   workflowDescription: string
+  profileId?: string
+  profileName?: string
+  step?: string
 }
 
 export type NpwpReportingTypes = {

@@ -34,15 +34,15 @@
       :teleport="teleport"
     >
       <template #dp-input="{ value }">
-        <div class="input relative flex items-center justify-between w-full" :class="{ 'border-danger': error || !!validationError }">
+        <div class="input !bg-transparent relative flex items-center justify-between w-full !p-0 overflow-hidden" :class="{ 'border-danger': error || !!validationError }">
           <input
             :placeholder="placeholder"
             :value="value"
             readonly
-            class="bg-transparent border-none outline-none w-full h-full cursor-pointer text-sm pr-16"
+            class="bg-transparent border-none outline-none flex-1 cursor-pointer text-sm pl-3 pr-2 py-2 relative z-50 text-gray-700 placeholder-gray-400"
             :disabled="disabled"
           />
-          <i class="ki-filled ki-calendar text-gray-400 text-lg mr-2"></i>
+          <i class="ki-filled ki-calendar text-gray-400 text-lg mr-2 relative z-50 flex-shrink-0"></i>
         </div>
       </template>
     </VueDatePicker>

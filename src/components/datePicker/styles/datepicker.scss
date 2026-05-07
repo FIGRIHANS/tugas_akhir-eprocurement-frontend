@@ -11,4 +11,29 @@
       color: #374151; // text-gray-700
     }
   }
+  .input {
+    // ensure input children are above potential overlays
+    position: relative;
+    background-color: transparent !important;
+    
+    // remove any pseudo-element overlays
+    &::before,
+    &::after {
+      display: none !important;
+    }
+    
+    .ki-filled {
+      z-index: 60;
+      position: relative;
+    }
+    input {
+      z-index: 60;
+      position: relative;
+      background-color: transparent !important;
+      
+      &::placeholder {
+        color: #9ca3af !important;
+      }
+    }
+  }
 }
