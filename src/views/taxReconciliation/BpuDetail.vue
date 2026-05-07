@@ -579,7 +579,14 @@ const handleUpload = async () => {
 const handleVerify = async () => {
   submitting.value = true
   try {
-    await BpuService.verify({ id: item.value!.pxId })
+    await BpuService.verify({
+      id: item.value!.pxId,
+      npwpPemotong,
+      tahunPajak: item.value!.tahunPajak || moment().format('YYYY'),
+      noBupot: item.value!.noBupot || item.value!.nomorBuktiPotong || '',
+      idBupot: item.value!.idBupot || '',
+      fgJnsBupot: 'BPU'
+    })
     notifTitle.value = 'Status Synchronized'
     notifText.value = 'Status has been updated from DJP.'
     notifType.value = 'success'
