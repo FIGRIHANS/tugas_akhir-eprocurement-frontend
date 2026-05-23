@@ -1,41 +1,43 @@
 <template>
-  <div class="card-header py-[8px] px-[20px]">
+  <div v-if="!hideWorkflowTabs || canClickPaymentStatus" class="card-header py-[8px] px-[20px]">
     <div class="border rounded-lg border-gray-300 p-[4px] flex items-center gap-[4px]">
-      <button
-        class="btn btn-primary"
-        :class="{ 'btn-clear info__header': activeTab !== 'data' }"
-        :disabled="!canClickData"
-        @click="activeTab = 'data'"
-      >
-        Invoice Data
-      </button>
+      <template v-if="!hideWorkflowTabs">
+        <button
+          class="btn btn-primary"
+          :class="{ 'btn-clear info__header': activeTab !== 'data' }"
+          :disabled="!canClickData"
+          @click="activeTab = 'data'"
+        >
+          Invoice Data
+        </button>
 
-      <button
-        class="btn btn-primary"
-        :class="{ 'btn-clear info__header': activeTab !== 'information' }"
-        :disabled="!canClickInformation"
-        @click="activeTab = 'information'"
-      >
-        Invoice Information
-      </button>
+        <button
+          class="btn btn-primary"
+          :class="{ 'btn-clear info__header': activeTab !== 'information' }"
+          :disabled="!canClickInformation"
+          @click="activeTab = 'information'"
+        >
+          Invoice Information
+        </button>
 
-      <button
-        class="btn btn-primary"
-        :class="{ 'btn-clear info__header': activeTab !== 'ocrAiVerification' }"
-        @click="activeTab = 'ocrAiVerification'"
-      >
-        Invoice OCR & AI Verification
-      </button>
+        <button
+          class="btn btn-primary"
+          :class="{ 'btn-clear info__header': activeTab !== 'ocrAiVerification' }"
+          @click="activeTab = 'ocrAiVerification'"
+        >
+          Invoice OCR & AI Verification
+        </button>
 
-      <button
-        v-if="withPreview"
-        class="btn btn-primary"
-        :class="{ 'btn-clear info__header': activeTab !== 'preview' }"
-        :disabled="!canClickPreview"
-        @click="activeTab = 'preview'"
-      >
-        Invoice Preview
-      </button>
+        <button
+          v-if="withPreview"
+          class="btn btn-primary"
+          :class="{ 'btn-clear info__header': activeTab !== 'preview' }"
+          :disabled="!canClickPreview"
+          @click="activeTab = 'preview'"
+        >
+          Invoice Preview
+        </button>
+      </template>
 
       <button
         v-if="canClickPaymentStatus"
@@ -56,6 +58,7 @@ const activeTab = defineModel<string>('activeTab')
 withDefaults(
   defineProps<{
     withPreview?: boolean
+    hideWorkflowTabs?: boolean
     canClickData?: boolean
     canClickInformation?: boolean
     canClickPreview?: boolean
@@ -63,6 +66,7 @@ withDefaults(
   }>(),
   {
     withPreview: true,
+    hideWorkflowTabs: false,
     canClickData: true,
     canClickInformation: false,
     canClickPreview: false,

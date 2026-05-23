@@ -4,20 +4,22 @@
     <hr class="-mx-[24px] mb-[24px]" />
 
     <div class="border border-gray-200 rounded-xl p-[24px]">
-      <div class="flex justify-between align-items-center gap-[8px]">
-        <h1>FTP Invoice Integration</h1>
-        <div class="flex align-items-center gap-3">
-          <UiInputSearch v-model="search" placeholder="Search" @keypress="goSearch" />
+      <div class="page-header flex justify-between items-center gap-3">
+        <h1 class="page-header__title m-0 shrink-0">FTP Invoice Integration</h1>
+        <div class="page-header__actions flex items-center gap-3">
+          <div class="page-header__search">
+            <UiInputSearch v-model="search" placeholder="Search" @search="triggerSearch" />
+          </div>
           <FilterList :data="filterForm" @setData="setDataFilter" ref="filterChild" />
           <button
             v-if="isProfile3200"
-            class="btn btn-primary d-flex align-items-center gap-2"
+            class="btn btn-primary inline-flex items-center gap-2 shrink-0"
             @click="syncFtpData"
             :disabled="isSyncLoading"
           >
             <svg
               v-if="isSyncLoading"
-              class="animate-spin h-6 w-6 text-white-600"
+              class="animate-spin h-6 w-6 text-white-600 shrink-0"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
@@ -36,14 +38,13 @@
                 d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
               ></path>
             </svg>
-            <i v-else class="ki-duotone ki-arrows-circle"></i>
-            <span>{{ isSyncLoading ? 'Syncing...' : 'Sync Data' }}</span>
+            <i v-else class="ki-duotone ki-arrows-circle shrink-0"></i>
+            <span class="whitespace-nowrap">{{ isSyncLoading ? 'Syncing...' : 'Sync Data' }}</span>
           </button>
-          <button class="btn btn-primary ml-auto" @click="goAdd()">
-            <i class="ki-duotone ki-plus-circle"></i>
-            Add Invoice
+          <button class="btn btn-primary inline-flex items-center gap-2 shrink-0" @click="goAdd()">
+            <i class="ki-duotone ki-plus-circle shrink-0"></i>
+            <span class="whitespace-nowrap">Add Invoice</span>
           </button>
-
         </div>
       </div>
       <div class="flex overflow-x-auto gap-3 mb-5 items-center" v-if="filteredPayload.length > 0">
@@ -121,11 +122,8 @@
                 </td>
 
                 <td>
-                  <span
-                    class="badge badge-outline"
-                    :class="colorBadge(getDisplayStatus(parent).statusCode)"
-                  >
-                    {{ getDisplayStatus(parent).statusName }}
+                  <span class="badge badge-outline" :class="colorBadge(parent.statusCode)">
+                    {{ parent.statusName }}
                   </span>
                 </td>
                 <td>{{ parent.vendorName }}</td>
@@ -186,7 +184,7 @@
           :totalItems="totalItems"
           :pageSize="pageSize"
           :currentPage="currentPage"
-          @page-change="setPage"
+          @pageChange="setPage"
         />
       </div>
       <DetailVerificationModal
@@ -199,8 +197,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, computed, onMounted, defineAsyncComponent } from 'vue'
-import { storeToRefs } from 'pinia'
+import { ref, reactive, computed, onMounted, watch, defineAsyncComponent } from 'vue'
 import { useRouter } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
@@ -235,28 +232,22 @@ const companyCodeList = computed(() => invoiceMasterApi.companyCode)
 const invoicePoTypeList = computed(() => invoiceMasterApi.invoicePoType)
 
 const invoiceApi = useInvoiceSubmissionStore()
-const { listPo, totalListPo } = storeToRefs(invoiceApi)
 const loginStore = useLoginStore()
 const router = useRouter()
 const search = ref<string>('')
 const currentPage = ref<number>(1)
 const pageSize = ref<number>(10)
-const list = ref<ListPoTypes[]>([])
+const sourceList = ref<ListPoTypes[]>([])
 const sortBy = ref<string>('')
 const sortColumnName = ref<string>('')
 const filteredPayload = ref([])
 const filterChild = ref(null)
 const viewDetailId = ref('')
 const isSyncLoading = ref(false)
-const showDraftData = ref(false)
 
 const isProfile3200 = computed(() => loginStore.userData?.profile?.profileId === 3200)
 
 const getListStatusCode = (): number | null => {
-  if (isProfile3200.value && showDraftData.value) {
-    return 0
-  }
-
   if (filterForm.status === '0' || filterForm.status) {
     return Number(filterForm.status)
   }
@@ -288,31 +279,6 @@ const StatusInvoice = ref([
   { value: '7', label: 'Sent to SAP' },
 ])
 
-const nonDraftStatuses = StatusInvoice.value.filter((item) => item.value !== '0')
-
-const getRandomStatusForItem = (invoiceUId: string) => {
-  let hash = 0
-  for (let i = 0; i < invoiceUId.length; i++) {
-    hash = invoiceUId.charCodeAt(i) + ((hash << 5) - hash)
-  }
-  const index = Math.abs(hash) % nonDraftStatuses.length
-  return {
-    statusCode: Number(nonDraftStatuses[index].value),
-    statusName: nonDraftStatuses[index].label,
-  }
-}
-
-const getDisplayStatus = (item: ListPoTypes) => {
-  if (isProfile3200.value && !showDraftData.value) {
-    return getRandomStatusForItem(item.invoiceUId)
-  }
-
-  return {
-    statusCode: item.statusCode,
-    statusName: item.statusName,
-  }
-}
-
 const filterForm = reactive<filterListTypes>({
   status: '',
   date: '',
@@ -340,18 +306,18 @@ const columns = ref<string[]>([
   'PO Price',
 ])
 
-const totalItems = computed(() => totalListPo.value)
-
-const sortDraftFirst = (items: ListPoTypes[]) => {
-  return [...items].sort((a, b) => {
-    const aIsDraft = a.statusCode === 0 ? 0 : 1
-    const bIsDraft = b.statusCode === 0 ? 0 : 1
-    if (aIsDraft !== bIsDraft) return aIsDraft - bIsDraft
-    const dateA = a.createdUtcDate ? new Date(a.createdUtcDate).getTime() : 0
-    const dateB = b.createdUtcDate ? new Date(b.createdUtcDate).getTime() : 0
-    return dateB - dateA
-  })
-}
+const COLUMN_FIELD_MAP = {
+  'Submitted Document No': 'invoiceNo',
+  Status: 'statusName',
+  'Vendor Name': 'vendorName',
+  'Invoice Vendor No': 'documentNo',
+  'Company Code': 'companyCode',
+  'Invoice PO Type': 'invoiceTypeName',
+  'Invoice Date': 'invoiceDate',
+  'Total Gross Amount': 'totalGrossAmount',
+  'Total Net Amount': 'totalNetAmount',
+  'Estimated Payment Date': 'estimatedPaymentDate',
+} as const
 
 const colorBadge = (status: number) => {
   if (status === 0) return 'badge-secondary'
@@ -380,27 +346,100 @@ const getStatusBadgeClass = (status: boolean) => {
 //   return pool[Math.floor(Math.random() * pool.length)]
 // }
 
-const setList = (listData: ListPoTypes[]) => {
-  list.value = listData
+const getCreatedTimestamp = (item: ListPoTypes) => {
+  if (!item.createdUtcDate) return 0
+  const timestamp = moment(item.createdUtcDate).valueOf()
+  return Number.isFinite(timestamp) ? timestamp : 0
 }
 
-const applyDefaultList = () => {
+const sortByNewestFirst = (items: ListPoTypes[]) => {
+  return [...items].sort((a, b) => {
+    const dateDiff = getCreatedTimestamp(b) - getCreatedTimestamp(a)
+    if (dateDiff !== 0) return dateDiff
+    return (b.id || 0) - (a.id || 0)
+  })
+}
+
+const filterBySearch = (items: ListPoTypes[]) => {
+  const query = search.value.trim().toLowerCase()
+  if (!query) return items
+
+  return items.filter((item) => {
+    const haystack = [
+      item.vendorName,
+      item.documentNo,
+      item.invoiceNo,
+      item.companyCode,
+      item.companyName,
+      item.statusName,
+      item.invoiceTypeName,
+      item.invoiceSourceName,
+      item.poNo,
+      item.grDocumentNo,
+    ]
+      .filter((value) => value != null && String(value).trim() !== '')
+      .join(' ')
+      .toLowerCase()
+
+    return haystack.includes(query)
+  })
+}
+
+const applyColumnSort = (items: ListPoTypes[]) => {
+  const name = sortColumnName.value
+  const field = name ? COLUMN_FIELD_MAP[name as keyof typeof COLUMN_FIELD_MAP] : undefined
+  if (!field || !sortBy.value) return items
+
+  const sorted = [...items]
+
+  if (name === 'Total Gross Amount' || name === 'Total Net Amount') {
+    return sorted.sort((a, b) => {
+      const aVal = Number(a[field as keyof ListPoTypes]) || 0
+      const bVal = Number(b[field as keyof ListPoTypes]) || 0
+      return sortBy.value === 'asc' ? aVal - bVal : bVal - aVal
+    })
+  }
+
+  if (name === 'Invoice Date' || name === 'Estimated Payment Date') {
+    return sorted.sort((a, b) => {
+      const aVal = a[field as keyof ListPoTypes]
+        ? new Date(String(a[field as keyof ListPoTypes])).getTime()
+        : 0
+      const bVal = b[field as keyof ListPoTypes]
+        ? new Date(String(b[field as keyof ListPoTypes])).getTime()
+        : 0
+      return sortBy.value === 'asc' ? aVal - bVal : bVal - aVal
+    })
+  }
+
+  return sorted.sort((a, b) => {
+    const aVal = String(a[field as keyof ListPoTypes] ?? '')
+    const bVal = String(b[field as keyof ListPoTypes] ?? '')
+    return sortBy.value === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal)
+  })
+}
+
+const sortedList = computed(() => {
+  let data = filterBySearch(cloneDeep(sourceList.value))
+
   if (sortBy.value && sortColumnName.value) {
-    sortColumn(sortColumnName.value)
-    return
+    data = applyColumnSort(data)
+  } else {
+    data = sortByNewestFirst(data)
   }
 
-  if (isProfile3200.value && !showDraftData.value) {
-    setList(listPo.value)
-    return
-  }
+  return data
+})
 
-  setList(sortDraftFirst(listPo.value))
-}
+const totalItems = computed(() => sortedList.value.length)
+
+const list = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  return sortedList.value.slice(start, start + pageSize.value)
+})
 
 const setPage = (value: number) => {
   currentPage.value = value
-  callList()
 }
 
 const goView = (data: ListPoTypes) => {
@@ -428,7 +467,6 @@ const syncFtpData = async () => {
   isSyncLoading.value = true
   try {
     await invoiceApi.syncInvoicFromFtp()
-    showDraftData.value = true
     currentPage.value = 1
     callList()
   } catch (error) {
@@ -438,22 +476,21 @@ const syncFtpData = async () => {
   }
 }
 
-const callList = () => {
-  list.value = []
-  invoiceApi
-    .getListPo({
+const callList = async () => {
+  try {
+    await invoiceApi.getListPo({
       statusCode: getListStatusCode(),
       companyCode: filterForm.companyCode,
       invoiceTypeCode: Number(filterForm.invoiceType),
       invoiceDate: filterForm.date,
-      searchText: search.value,
-      invoiceSource: 3,
-      page: currentPage.value,
-      pageSize: pageSize.value,
+      page: 1,
+      pageSize: 1000,
     })
-    .finally(() => {
-      applyDefaultList()
-    })
+    sourceList.value = cloneDeep(invoiceApi.listPo)
+  } catch (error) {
+    console.error('Failed to load FTP invoice list:', error)
+    sourceList.value = []
+  }
 }
 
 const setDataFilter = (data: filterListTypes) => {
@@ -496,80 +533,36 @@ const setDataFilter = (data: filterListTypes) => {
   callList()
 }
 
-const goSearch = (event: KeyboardEvent) => {
-  if (event.key === 'Enter') {
-    currentPage.value = 1
-    callList()
-  }
+const triggerSearch = () => {
+  currentPage.value = 1
 }
 
+watch(search, () => {
+  currentPage.value = 1
+})
+
 const sortColumn = (columnName: string | null) => {
-  const list = {
-    'Submitted Document No': 'invoiceNo',
-    Status: 'statusName',
-    'Vendor Name': 'vendorName',
-    'Invoice Vendor No': 'documentNo',
-    'Company Code': 'companyCode',
-    'Invoice PO Type': 'invoiceTypeName',
-    'Invoice Date': 'invoiceDate',
-    'Total Gross Amount': 'totalGrossAmount',
-    'Total Net Amount': 'totalNetAmount',
-    'Estimated Payment Date': 'estimatedPaymentDate',
-  } as { [key: string]: string }
-
   const roleSort = ['asc', 'desc', '']
-
-  const listData = cloneDeep(listPo.value)
-  let result: ListPoTypes[] = []
 
   if (columnName) {
     if (sortColumnName.value !== columnName) sortBy.value = ''
     sortColumnName.value = columnName
 
     const indexSort = roleSort.findIndex((item) => item === sortBy.value)
-    if (indexSort === -1) return applyDefaultList()
+    if (indexSort === -1) {
+      sortBy.value = ''
+      sortColumnName.value = ''
+      return
+    }
+
     sortBy.value = indexSort + 1 === roleSort.length ? roleSort[0] : roleSort[indexSort + 1]
 
-    if (!sortBy.value) return applyDefaultList()
+    if (!sortBy.value) {
+      sortColumnName.value = ''
+    }
   }
 
-  const name = columnName || sortColumnName.value
-
-  if (!name || !sortBy.value) {
-    return applyDefaultList()
-  }
-
-  if (name === 'Total Gross Amount' || name === 'Total Net Amount') {
-    result = listData.sort((a, b) => {
-      if (sortBy.value === 'asc') {
-        return a[list[name]] - b[list[name]]
-      } else {
-        return b[list[name]] - a[list[name]]
-      }
-    })
-  } else if (name === 'Invoice Date' || name === 'Estimated Payment Date') {
-    result = listData.sort((a, b) => {
-      const convA = a[list[name]] ? new Date(a[list[name]]).getTime() : 0
-      const convB = b[list[name]] ? new Date(b[list[name]]).getTime() : 0
-      if (sortBy.value === 'asc') {
-        return convA - convB
-      } else {
-        return convB - convA
-      }
-    })
-  } else {
-    result = listData.sort((a, b) => {
-      const convA = a[list[name]] ? a[list[name]] : ''
-      const convB = b[list[name]] ? b[list[name]] : ''
-      if (sortBy.value === 'asc') {
-        return convA.localeCompare(convB)
-      } else {
-        return convB.localeCompare(convA)
-      }
-    })
-  }
-
-  return setList(result)
+  currentPage.value = 1
 }
 
 const deleteFilter = (key: string) => {
@@ -600,17 +593,8 @@ const resetFilter = () => {
 }
 
 /**
- * NOTES FOR BACKEND IMPLEMENTATION:
- *
- * The uploadInvoiceFromFtp() API method should:
- * 1. Accept FormData with multiple file uploads (.xlsx, .xls, .pdf, .csv)
- * 2. Parse the files and extract invoice data
- * 3. Create new invoice records with:
- *    - statusCode: 0 (Draft status)
- *    - invoiceSource: 3 (FTP source)
- *    - Other required fields from file data
- * 4. Return the newly created invoice records
- * 5. The invoices should be visible immediately in the list with Draft status
+ * FTP list: tampilkan semua invoice PO terbaru (semua status termasuk draft).
+ * Urutan default: createdUtcDate descending.
  */
 
 
@@ -622,6 +606,26 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 @use '../invoice/styles/invoice-list.scss';
+
+.page-header {
+  &__actions {
+    flex-shrink: 0;
+    flex-wrap: nowrap;
+
+    :deep(.dropdown-toggle) {
+      white-space: nowrap;
+    }
+  }
+
+  &__search {
+    width: 200px;
+    flex-shrink: 0;
+
+    :deep(.input) {
+      width: 100%;
+    }
+  }
+}
 
 // Custom width for Submitted Document No column in FTP Invoice Integration
 :deep(.list__table) {

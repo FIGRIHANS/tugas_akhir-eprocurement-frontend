@@ -270,6 +270,14 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
       params.invoiceSource = data.invoiceSource
     }
 
+    if (data.sortField) {
+      params.sortField = data.sortField
+    }
+
+    if (data.sortOrder) {
+      params.sortOrder = data.sortOrder
+    }
+
     const response: ApiResponse<PaginatedContent<ListPoRawResponse>> = await invoiceApi.get(
       `/invoice/submission`,
       { params },
@@ -306,6 +314,9 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
             isOpenChild: false,
             createdUtcDate: item.createdUtcDate,
             invoiceSourceName: item.invoiceSourceName ?? null,
+            invoiceSource:
+              (item as ListPoRawResponse & { invoiceSource?: number | null }).invoiceSource ??
+              null,
             emailSender: item.emailSender ?? null,
             sapPostingCode: item.sapPostingCode ?? null,
             fpStatus: item.fpStatus ?? null,
@@ -319,9 +330,12 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
 
     listPo.value =
       newList.length !== 0
-        ? newList.sort(
-            (a, b) => moment(b.createdUtcDate).valueOf() - moment(a.createdUtcDate).valueOf(),
-          )
+        ? newList.sort((a, b) => {
+            const dateA = a.createdUtcDate ? moment(a.createdUtcDate).valueOf() : 0
+            const dateB = b.createdUtcDate ? moment(b.createdUtcDate).valueOf() : 0
+            if (dateB !== dateA) return dateB - dateA
+            return (b.id || 0) - (a.id || 0)
+          })
         : []
 
     return newList

@@ -8,6 +8,7 @@
       :can-click-information="canClickInformationTab"
       :can-click-preview="canClickPreviewTab"
       :can-click-payment-status="canClickPaymentStatusTab"
+      :hide-workflow-tabs="shouldHideWorkflowTabs"
       class="-mx-[24px]"
     />
     <!-- <div v-if="form.status !== 0" class="status__box--approved -mt-5 -mx-[24px]">
@@ -384,6 +385,10 @@ const canClickPreviewTab = computed(() => {
 
 const canClickPaymentStatusTab = computed(() => {
   return form.status === 7 || form.status === 8 || form.status === 9 || form.status === 10
+})
+
+const shouldHideWorkflowTabs = computed(() => {
+  return checkInvoiceView() || checkInvoiceNonPoView()
 })
 
 const loadInvoiceDetailForPaymentStatus = async () => {
@@ -856,6 +861,20 @@ const syncCalculationFromPoGr = () => {
   form.totalNetAmount = form.totalGrossAmount - form.whtAmount
 }
 
+const resolveInvoiceSource = () => {
+  const from = route.query.from
+
+  if (from === 'ftp') {
+    return { invoiceSource: 3, invoiceSourceName: 'FTP Integration' }
+  }
+
+  if (from === 'email') {
+    return { invoiceSource: 2, invoiceSourceName: 'Email Integration' }
+  }
+
+  return { invoiceSource: 1, invoiceSourceName: 'Multi Channel' }
+}
+
 const mapDataPost = () => {
   const data = {
     header: {
@@ -875,6 +894,7 @@ const mapDataPost = () => {
       invoiceDPName: form.invoiceType === '901' ? getDpName() : '',
       companyCode: form.companyCode,
       companyName: resolveCompanyName(),
+      ...resolveInvoiceSource(),
       invoiceNo: form.invoiceNo,
       documentNo: form.invoiceVendorNo,
       invoiceDate: moment(form.invoiceDate).toISOString(),
@@ -994,6 +1014,7 @@ const mapDataPostNonPo = () => {
       invoiceVendorNo: isCAS ? form.taxNoInvoice || '' : form.invoiceVendorNo || '',
       companyCode: form.companyCode,
       companyName: form.companyName,
+      ...resolveInvoiceSource(),
       invoiceNo: form.invoiceNo,
       documentNo: isPettyCash
         ? ''
@@ -1091,6 +1112,97 @@ const mapDataPostNonPo = () => {
   return data
 }
 
+type WorkflowSourceRow = {
+  profileId?: string
+  profileName?: string
+  step?: string
+}
+
+const resolveProfileId = (value?: string | number | null): number => {
+  if (value == null || value === '') return 0
+  const direct = Number(value)
+  if (Number.isFinite(direct) && direct > 0) return direct
+  const digits = String(value).replace(/\D/g, '')
+  const parsed = Number(digits)
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0
+}
+
+const mapWorkflowSourceRows = (rows: WorkflowSourceRow[]) => {
+  return rows
+    .map((row, index) => ({
+      actioner: 0,
+      actionerDate: '',
+      actionerName: '',
+      actionerNotes: '',
+      id: 0,
+      profileId: resolveProfileId(row.profileId),
+      profileName: row.profileName || '',
+      stateCode: 0,
+      stateName: 'Pending',
+      step: Number(row.step) || index + 1,
+    }))
+    .filter((r) => r.profileId > 0)
+}
+
+const findWorkflowStoreFallback = (
+  companyCode: string,
+  invoiceTypeLabel: string,
+  dpOption?: string | number | null,
+) => {
+  const active = workflowStore.workflowList.filter(
+    (item) =>
+      item.companyCode === companyCode &&
+      item.invoiceType === invoiceTypeLabel &&
+      item.status === 'Active',
+  )
+  if (!active.length) return null
+
+  if (dpOption != null && String(dpOption).trim() !== '') {
+    const dpMatch = active.find((item) => item.dpOption === String(dpOption))
+    if (dpMatch) return dpMatch
+  }
+
+  return active[0]
+}
+
+const buildSubmissionWorkflow = async (
+  invoiceTypeCode: string | number,
+  companyCode: string,
+  invoiceTypeLabel: string,
+  dpOption?: string | number | null,
+) => {
+  await invoiceMasterApi.getMatrixApproval(String(invoiceTypeCode), companyCode)
+
+  if (
+    Array.isArray(invoiceMasterApi.matrixApprovalList) &&
+    invoiceMasterApi.matrixApprovalList.length > 0
+  ) {
+    const mapped = mapWorkflowSourceRows(invoiceMasterApi.matrixApprovalList)
+    if (mapped.length > 0) return mapped
+  }
+
+  const wf = findWorkflowStoreFallback(companyCode, invoiceTypeLabel, dpOption)
+  if (wf && Array.isArray(wf.workflow)) {
+    const mapped = mapWorkflowSourceRows(wf.workflow)
+    if (mapped.length > 0) return mapped
+  }
+
+  return []
+}
+
+const showWorkflowNotFoundError = (
+  companyCode: string,
+  invoiceTypeCode: number,
+  invoiceTypeName: string,
+) => {
+  invoiceApi.errorMessageSubmission =
+    `Workflow approval tidak ditemukan untuk Company Code "${companyCode}" dan Invoice Type "${invoiceTypeName || invoiceTypeCode}". ` +
+    'Mohon pastikan matrix approval sudah dikonfigurasi untuk kombinasi company code dan invoice type ini.'
+  const idModal = document.querySelector('#error_submission_modal')
+  const modal = KTModal.getInstance(idModal as HTMLElement)
+  modal.show()
+}
+
 const goNext = async () => {
   const list = ['data', 'information', 'ocrAiVerification', 'preview']
   if (tabNow.value !== 'preview') {
@@ -1154,56 +1266,28 @@ const goNext = async () => {
     if (checkIsNonPo()) {
       const submissionData = mapDataPostNonPo()
 
-      // cek matrix-approval terlebih dahulu; jika tidak ada, gunakan fallback workflow dari store
       try {
-        await invoiceMasterApi.getMatrixApproval(String(submissionData.header.invoiceTypeCode), submissionData.header.companyCode)
-        if (Array.isArray(invoiceMasterApi.matrixApprovalList) && invoiceMasterApi.matrixApprovalList.length > 0) {
-          const mapped = invoiceMasterApi.matrixApprovalList
-            .map((row) => ({
-              actioner: 0,
-              actionerDate: '',
-              actionerName: '',
-              actionerNotes: '',
-              id: 0,
-              profileId: Number(row.profileId) || 0,
-              profileName: row.profileName || '',
-              stateCode: 0,
-              stateName: 'Pending',
-              step: Number(row.step) || 0,
-            }))
-            .filter((r) => Number(r.profileId) > 0)
-
-          if (mapped.length > 0) submissionData.workflow = mapped
-        } else {
-          const wf = workflowStore.workflowList.find((i) => i.companyCode === submissionData.header.companyCode && i.invoiceType === 'Invoice Non PO')
-          if (wf && Array.isArray(wf.workflow)) {
-            const mapped = wf.workflow
-              .map((row) => ({
-                actioner: 0,
-                actionerDate: '',
-                actionerName: '',
-                actionerNotes: '',
-                id: 0,
-                profileId: Number(row.profileId) || 0,
-                profileName: row.profileName || '',
-                stateCode: 0,
-                stateName: 'Pending',
-                step: Number(row.step) || 0,
-              }))
-              .filter((r) => Number(r.profileId) > 0)
-
-            if (mapped.length > 0) submissionData.workflow = mapped
-          }
-        }
+        submissionData.workflow = await buildSubmissionWorkflow(
+          submissionData.header.invoiceTypeCode,
+          submissionData.header.companyCode,
+          'Invoice Non PO',
+        )
       } catch {
-        // ignore lookup errors and continue with submission (we already added bracket fields)
+        submissionData.workflow = []
       }
 
-      // store last submission payload for debugging (removed)
-
-      // Debug logging: matrixApprovalList and workflowStore
       console.debug('matrixApprovalList (NonPo) before submit:', invoiceMasterApi.matrixApprovalList)
       console.debug('workflowStore (NonPo) before submit:', workflowStore.workflowList)
+
+      if (!isClickDraft.value && (!Array.isArray(submissionData.workflow) || submissionData.workflow.length === 0)) {
+        showWorkflowNotFoundError(
+          submissionData.header.companyCode,
+          submissionData.header.invoiceTypeCode,
+          submissionData.header.invoiceTypeName,
+        )
+        isSubmit.value = false
+        return
+      }
 
       invoiceApi
         .postSubmissionNonPo(submissionData)
@@ -1265,88 +1349,32 @@ const goNext = async () => {
       syncCalculationFromPoGr()
       const submissionData = mapDataPost()
 
-      // Debug logging: show PO GR items and workflow sources
       console.debug('invoicePoGr before submit:', form.invoicePoGr)
       console.debug('matrixApprovalList (PO) before submit:', invoiceMasterApi.matrixApprovalList)
       console.debug('workflowStore (PO) before submit:', workflowStore.workflowList)
 
       try {
-        await invoiceMasterApi.getMatrixApproval(
-          String(submissionData.header.invoiceTypeCode),
+        submissionData.workflow = await buildSubmissionWorkflow(
+          submissionData.header.invoiceTypeCode,
           submissionData.header.companyCode,
+          'Invoice PO',
+          submissionData.header.invoiceDPCode,
         )
-        if (
-          Array.isArray(invoiceMasterApi.matrixApprovalList) &&
-          invoiceMasterApi.matrixApprovalList.length > 0
-        ) {
-          const mapped = invoiceMasterApi.matrixApprovalList
-            .map((row) => ({
-              actioner: 0,
-              actionerDate: '',
-              actionerName: '',
-              actionerNotes: '',
-              id: 0,
-              profileId: Number(row.profileId) || 0,
-              profileName: row.profileName || '',
-              stateCode: 0,
-              stateName: 'Pending',
-              step: Number(row.step) || 0,
-            }))
-            .filter((r) => Number(r.profileId) > 0)
-
-          if (mapped.length > 0) submissionData.workflow = mapped
-          console.debug('PO: Using matrixApprovalList workflow:', mapped)
-        } else {
-          const desiredType = 'Invoice PO'
-          const wf = workflowStore.workflowList.find(
-            (i) =>
-              i.companyCode === submissionData.header.companyCode &&
-              i.invoiceType === desiredType,
-          )
-          console.debug('PO: Matrix approval empty, looking for workflow in store:', {
-            companyCode: submissionData.header.companyCode,
-            invoiceType: desiredType,
-            found: !!wf,
-          })
-          if (wf && Array.isArray(wf.workflow)) {
-            const mapped = wf.workflow
-              .map((row) => ({
-                actioner: 0,
-                actionerDate: '',
-                actionerName: '',
-                actionerNotes: '',
-                id: 0,
-                profileId: Number(row.profileId) || 0,
-                profileName: row.profileName || '',
-                stateCode: 0,
-                stateName: 'Pending',
-                step: Number(row.step) || 0,
-              }))
-              .filter((r) => Number(r.profileId) > 0)
-
-            if (mapped.length > 0) submissionData.workflow = mapped
-            console.debug('PO: Using workflowStore workflow:', mapped)
-          } else {
-            submissionData.workflow = []
-            console.debug('PO: No workflow found, sending empty workflow array')
-          }
-        }
+        console.debug('PO: Resolved submission workflow:', submissionData.workflow)
       } catch (error) {
         console.error('PO: Error getting workflow:', error)
         submissionData.workflow = []
       }
 
       if (!Array.isArray(submissionData.workflow) || submissionData.workflow.length === 0) {
-        invoiceApi.errorMessageSubmission =
-          'Workflow approval tidak ditemukan. Mohon pastikan matrix approval sudah dikonfigurasi untuk company code dan invoice type ini.'
-        const idModal = document.querySelector('#error_submission_modal')
-        const modal = KTModal.getInstance(idModal as HTMLElement)
-        modal.show()
+        showWorkflowNotFoundError(
+          submissionData.header.companyCode,
+          submissionData.header.invoiceTypeCode,
+          submissionData.header.invoiceTypeName,
+        )
         isSubmit.value = false
         return
       }
-
-      // store last submission payload for debugging (removed)
 
       invoiceApi
         .postSubmission(submissionData)
