@@ -103,11 +103,8 @@ const filteredSidebarMenu = computed(() => {
         })
     }
 
-    // Sementara Buka Sidebar
-    if (
-      userStore.userData?.profile.profileId === 3002 ||
-      userStore.userData?.profile.profileId === 3003
-    ) {
+    // Finance AP Officer (3002) — verify only
+    if (userStore.userData?.profile.profileId === 3002) {
       return sidebarMenu
         .filter(
           (menu) =>
@@ -130,8 +127,36 @@ const filteredSidebarMenu = computed(() => {
                   child.id === 'vendor-master' ||
                   child.id === 'vat-reconciliation' ||
                   child.id === 'wht-reconciliation',
-                // child.id === 'invoice-verification-no-po' ||
-                // child.id === 'invoice-list-non-po',
+              )
+              : [],
+          }
+        })
+    }
+
+    // Accounting & Tax (3003) — 1st approval after verify
+    if (userStore.userData?.profile.profileId === 3003) {
+      return sidebarMenu
+        .filter(
+          (menu) =>
+            menu.id === 'e-invoice' ||
+            menu.id === 'vendor-management' ||
+            menu.id === 'dashboard' ||
+            menu.id === 'tax-reconciliation',
+        )
+        .map((menu) => {
+          return {
+            ...menu,
+            child: menu.child
+              ? menu.child.filter(
+                (child) =>
+                  child.id === 'invoice-list' ||
+                  child.id === 'invoice-list-non-po' ||
+                  child.id === 'invoice-approval' ||
+                  child.id === 'invoice-approval-no-po' ||
+                  child.id === 'recurring-invoice-reminder' ||
+                  child.id === 'vendor-master' ||
+                  child.id === 'vat-reconciliation' ||
+                  child.id === 'wht-reconciliation',
               )
               : [],
           }
@@ -156,6 +181,7 @@ const filteredSidebarMenu = computed(() => {
     //     })
     // }
 
+    // Finance AP Supervisor (3004) — 2nd approval
     if (userStore.userData?.profile.profileId === 3004) {
       return sidebarMenu
         .filter(

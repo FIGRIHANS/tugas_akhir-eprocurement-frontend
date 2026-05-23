@@ -363,6 +363,7 @@ const handleAfterSuccess = () => {
         id: form.value.invoiceUId,
         type: '1',
         invoiceType: 'no_po',
+        fromEdit: 'true',
       },
     })
   } else if (form.value.statusCode === 1 && route.query.invoiceType === 'po') {
@@ -371,6 +372,20 @@ const handleAfterSuccess = () => {
       query: {
         id: form.value.invoiceUId,
         type: '1',
+        fromEdit: 'true',
+      },
+    })
+  } else if (
+    form.value.statusCode === 1 &&
+    route.query.type === '1' &&
+    route.query.invoiceType !== 'no_po'
+  ) {
+    router.push({
+      name: 'invoiceDetail',
+      query: {
+        id: form.value.invoiceUId,
+        type: '1',
+        fromEdit: 'true',
       },
     })
   } else {
@@ -527,6 +542,7 @@ const goNext = () => {
           id: route.query.id,
           type: route.query.type,
           invoiceType: route.query.invoiceType,
+          fromEdit: 'true',
         },
       })
     }

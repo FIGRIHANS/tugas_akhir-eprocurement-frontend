@@ -221,7 +221,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
           )
         : []
 
-    return response.data.result.content
+    return listNonPo.value
   }
 
   const getInvoiceDetail = async (uid: string) => {

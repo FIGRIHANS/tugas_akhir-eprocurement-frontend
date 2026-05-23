@@ -84,7 +84,12 @@
         </button>
         <button
           class="btn btn-primary flex items-center gap-2"
-          :disabled="isLoading"
+          :disabled="isLoading || isVerifyButtonDisabled"
+          :title="
+            isVerifyButtonDisabled
+              ? 'Please complete validation via Edit before verifying'
+              : undefined
+          "
           @click="goVerif"
         >
           <template v-if="isLoading">
@@ -665,6 +670,13 @@ const checkApprovalNonPo1 = () => {
   return userData.value?.profile.profileId === 3002
 }
 
+/** Finance AP Officer must save validation via Edit before Verify is enabled. */
+const isVerifyButtonDisabled = computed(() => {
+  if (route.query.type !== '1') return false
+  if (!checkApprovalNonPo1()) return false
+  return !verificationApi.isFromEdit
+})
+
 const checkShowPaymentForProfile3200 = () => {
   return userData.value?.profile.profileId === 3200 && form.value.statusCode >= 7
 }
@@ -722,6 +734,8 @@ const checkStatusCode = () => {
   if (form.value.statusCode === 2 && route.query.type === '1') status = false
 
   status = checkWorkflow()
+
+  if (route.query.type === '1' && checkIsNonPo()) status = false
 
   return status
 }
@@ -964,6 +978,7 @@ const mapCostExpenses = () => {
   }
   return cost
 }
+
 const mapDataVerif = () => {
   const invoiceDoc = form.value.invoiceDocument || {}
   const taxDoc = form.value.tax || {}
@@ -1108,6 +1123,8 @@ const mapDataVerifNonPo = () => {
 }
 
 const goVerif = () => {
+  if (isVerifyButtonDisabled.value) return
+
   if (route.query.invoiceType === 'no_po' && route.query.type === '1') {
     isLoading.value = true
     verificationApi
@@ -1630,14 +1647,11 @@ const afterGetDetail = () => {
 
   const statusCode = detailInvoice.value?.header.statusCode ?? -1
 
-  if (statusCode === 0 || statusCode === 1 || statusCode === 5) {
-    // Draft / Submitted / Rejected
+  if (statusCode === 0 || statusCode === 5) {
     activeStep.value = 'Submission'
-  } else if (statusCode === 2) {
-    // Verified
+  } else if (statusCode === 1) {
     activeStep.value = 'Verification'
-  } else if (statusCode === 3 || statusCode === 4) {
-    // Waiting for Approval / Approved
+  } else if (statusCode === 2 || statusCode === 3 || statusCode === 4) {
     activeStep.value = 'Approval'
   } else if (statusCode === 6) {
     // Posted to SAP
@@ -1659,11 +1673,11 @@ const afterGetDetailNonPo = () => {
 
   const statusCode = detailInvoiceNonPo.value?.header.statusCode ?? -1
 
-  if (statusCode === 0 || statusCode === 1 || statusCode === 5) {
+  if (statusCode === 0 || statusCode === 5) {
     activeStep.value = 'Submission'
-  } else if (statusCode === 2) {
+  } else if (statusCode === 1) {
     activeStep.value = 'Verification'
-  } else if (statusCode === 3 || statusCode === 4) {
+  } else if (statusCode === 2 || statusCode === 3 || statusCode === 4) {
     activeStep.value = 'Approval'
   } else if (statusCode === 6) {
     activeStep.value = 'Posting'
@@ -1826,6 +1840,10 @@ watch(
 )
 
 onMounted(async () => {
+  if (route.query.fromEdit !== 'true') {
+    verificationApi.isFromEdit = false
+  }
+
   if (route.query.type === '1') {
     activeStep.value = 'Verification'
     routes.value = [
