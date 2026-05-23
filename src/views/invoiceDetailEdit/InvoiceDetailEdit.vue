@@ -903,8 +903,6 @@ const mapDataVerifPo = (): PostVerificationTypes => {
     })
 
   return {
-    statusCode: route.query.type === '1' ? 3 : 4,
-    statusName: route.query.type === '1' ? 'Verified' : 'Approved',
     statusNotes: '',
     header: {
       invoiceUId: form.value.invoiceUId,
@@ -985,8 +983,6 @@ const mapDataVerifNonPo = (): PostEditApprovalNonPoTypes => {
     })
 
   return {
-    statusCode: route.query.type === '1' ? 3 : 4,
-    statusName: route.query.type === '1' ? 'Verified' : 'Approved',
     statusNotes: '',
     header: {
       invoiceUId: form.value.invoiceUId,
@@ -1006,8 +1002,6 @@ const mapDataVerifNonPo = (): PostEditApprovalNonPoTypes => {
       currCode: form.value.currCode,
       creditCardBillingID: form.value.creditCardBillingId,
       notes: form.value.notes,
-      statusCode: route.query.type === '1' ? 3 : 4,
-      statusName: route.query.type === '1' ? 'Verified' : 'Approved',
       department: form.value.department,
       profileId: '0',
       invoicingParty: form.value.invoicingParty,

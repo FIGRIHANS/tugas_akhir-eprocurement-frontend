@@ -319,7 +319,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
   const putSubmission = async (data: PostVerificationTypes) => {
     const response: ApiResponse<void> = await invoiceApi.put(`/invoice/approval`, data)
 
-    return response.data.result
+    return response.data
   }
 
   const putSubmissionNonPo = async (data: PostEditApprovalNonPoTypes) => {

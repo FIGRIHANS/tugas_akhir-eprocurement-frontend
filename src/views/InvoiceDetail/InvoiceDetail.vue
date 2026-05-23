@@ -113,7 +113,7 @@
           </template>
           <template v-else>
             <i class="ki-duotone ki-check-circle"></i>
-            {{ route.query.type === '1' ? 'Verify' : 'Approve' }}
+            {{ actionButtonLabel }}
           </template>
         </button>
       </div>
@@ -146,10 +146,20 @@ import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification
 import { useLoginStore } from '@/stores/views/login'
 import type {
   PostVerificationTypes,
+  PostEditApprovalNonPoTypes,
   SubmissionNonPoTypes,
 } from '@/stores/views/invoice/types/verification'
 import { isEmpty } from 'lodash'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
+import {
+  getUserWorkflowStep,
+  getActionButtonLabel,
+  isUserActionPending,
+  isVerifyStep,
+  shouldUsePutApproval,
+  shouldUsePostApproval,
+  isApiSuccess,
+} from '@/composables/useInvoiceWorkflow'
 import UpdatePaymentStatusModal from './InvoiceDetail/PaymentStatusDetail/UpdatePaymentStatusModal.vue'
 import SapSyncRequiredModal from './InvoiceDetail/PaymentStatusDetail/SapSyncRequiredModal.vue'
 
@@ -648,6 +658,16 @@ const additionalCostTempDelete = computed(() => verificationApi.additionalCostTe
 const costExpensesTempDelete = computed(() => verificationApi.costExpenseTempDelete)
 const whtCodeList = computed(() => invoiceMasterApi.whtCodeList)
 
+const userWorkflowStep = computed(() => {
+  const workflow = checkIsNonPo()
+    ? detailInvoiceNonPo.value?.workflow
+    : detailInvoice.value?.workflow
+
+  return getUserWorkflowStep(workflow, userData.value?.profile?.profileId)
+})
+
+const actionButtonLabel = computed(() => getActionButtonLabel(userWorkflowStep.value))
+
 const checkIsNonPo = () => {
   return route.query.invoiceType === 'no_po'
 }
@@ -662,9 +682,8 @@ const updatePaymentStatusApi = () => {
     : verificationApi.updatePaymentStatus
 }
 
-const checkVerifikator1 = () => {
-  return userData.value?.profile?.profileId === 3190
-}
+/** Non-PO CC admin profile — controls which header fields are required during verification. */
+const checkVerifikator1 = () => userData.value?.profile?.profileId === 3190
 
 const checkApprovalNonPo1 = () => {
   return userData.value?.profile.profileId === 3002
@@ -672,8 +691,7 @@ const checkApprovalNonPo1 = () => {
 
 /** Finance AP Officer must save validation via Edit before Verify is enabled. */
 const isVerifyButtonDisabled = computed(() => {
-  if (route.query.type !== '1') return false
-  if (!checkApprovalNonPo1()) return false
+  if (!isVerifyStep(userWorkflowStep.value)) return false
   return !verificationApi.isFromEdit
 })
 
@@ -721,67 +739,11 @@ const checkNonPoPettyCash = () => {
   return form.value.invoiceTypeCode === 5
 }
 
-const checkStatusCode = () => {
-  let status = true
-  switch (form.value.statusCode) {
-    case 4:
-    case 5:
-    case 7:
-      status = false
-      break
-  }
+const checkStatusCode = () => isUserActionPending(userWorkflowStep.value)
 
-  if (form.value.statusCode === 2 && route.query.type === '1') status = false
+const checkEditButton = () => isUserActionPending(userWorkflowStep.value)
 
-  status = checkWorkflow()
-
-  if (route.query.type === '1' && checkIsNonPo()) status = false
-
-  return status
-}
-
-const checkEditButton = () => {
-  let status = true
-  switch (form.value.statusCode) {
-    case 4:
-    case 5:
-    case 7:
-      status = false
-      break
-  }
-
-  if (form.value.statusCode === 2 && route.query.type === '1') status = false
-
-  status = checkWorkflow()
-
-  if (route.query.type === '1' && checkIsNonPo()) status = false
-
-  return status
-}
-
-const checkWorkflow = () => {
-  let getWf = []
-
-  if (currentRouteName.value !== 'invoiceDetail') {
-    getWf = detailInvoiceNonPo.value?.workflow || []
-  } else {
-    getWf = detailInvoice.value?.workflow || []
-  }
-
-  const getProfileId = userData.value?.profile.profileId
-
-  const checkIndex = getWf?.findIndex((item) => item.profileId === getProfileId)
-
-  if (checkIndex !== -1) {
-    if (
-      getWf[checkIndex].stateCode === 3 ||
-      getWf[checkIndex].stateCode === 4 ||
-      getWf[checkIndex].stateCode === 5
-    )
-      return false
-    else return true
-  } else return true
-}
+const checkWorkflow = () => isUserActionPending(userWorkflowStep.value)
 
 const goToEdit = () => {
   router.push({
@@ -985,13 +947,43 @@ const mapDataVerif = () => {
   const referenceDoc = form.value.referenceDocument || {}
   const otherDoc = form.value.otherDocument || {}
   const documents = []
-  if (!isEmpty(invoiceDoc)) documents.push(invoiceDoc)
-  if (!isEmpty(taxDoc)) documents.push(taxDoc)
-  if (!isEmpty(referenceDoc)) documents.push(referenceDoc)
-  if (!isEmpty(otherDoc)) documents.push(otherDoc)
+  if (!isEmpty(invoiceDoc)) {
+    documents.push({
+      id: form.value.invoiceDocument?.id || 0,
+      documentType: 1,
+      documentName: form.value.invoiceDocument?.name || form.value.invoiceDocument?.documentName || '',
+      documentUrl: form.value.invoiceDocument?.path || form.value.invoiceDocument?.documentUrl || '',
+      documentSize: Number(form.value.invoiceDocument?.fileSize || form.value.invoiceDocument?.documentSize || 0),
+    })
+  }
+  if (!isEmpty(taxDoc)) {
+    documents.push({
+      id: form.value.tax?.id || 0,
+      documentType: 2,
+      documentName: form.value.tax?.name || form.value.tax?.documentName || '',
+      documentUrl: form.value.tax?.path || form.value.tax?.documentUrl || '',
+      documentSize: Number(form.value.tax?.fileSize || form.value.tax?.documentSize || 0),
+    })
+  }
+  if (!isEmpty(referenceDoc)) {
+    documents.push({
+      id: form.value.referenceDocument?.id || 0,
+      documentType: 3,
+      documentName: form.value.referenceDocument?.name || form.value.referenceDocument?.documentName || '',
+      documentUrl: form.value.referenceDocument?.path || form.value.referenceDocument?.documentUrl || '',
+      documentSize: Number(form.value.referenceDocument?.fileSize || form.value.referenceDocument?.documentSize || 0),
+    })
+  }
+  if (!isEmpty(otherDoc)) {
+    documents.push({
+      id: form.value.otherDocument?.id || 0,
+      documentType: 4,
+      documentName: form.value.otherDocument?.name || form.value.otherDocument?.documentName || '',
+      documentUrl: form.value.otherDocument?.path || form.value.otherDocument?.documentUrl || '',
+      documentSize: Number(form.value.otherDocument?.fileSize || form.value.otherDocument?.documentSize || 0),
+    })
+  }
   const data = {
-    statusCode: route.query.type === '1' ? 3 : 4,
-    statusName: route.query.type === '1' ? 'Verified' : 'Approved',
     statusNotes: '',
     header: {
       invoiceUId: form.value.invoiceUId,
@@ -1048,8 +1040,6 @@ const mapDataVerifNonPo = () => {
   const alt = form.value.alternativePayee?.[0] // FIX: aman saat array kosong
 
   const data = {
-    statusCode: route.query.type === '1' ? 3 : 4,
-    statusName: route.query.type === '1' ? 'Verified' : 'Approved',
     statusNotes: '',
     header: {
       invoiceUId: form.value.invoiceUId,
@@ -1122,74 +1112,75 @@ const mapDataVerifNonPo = () => {
   return data
 }
 
-const goVerif = () => {
+const refetchInvoiceDetail = async () => {
+  const uid = route.query.id?.toString() || form.value.invoiceUId
+  verificationApi.isFromEdit = false
+  if (checkIsNonPo()) {
+    await verificationApi.getInvoiceNonPoDetail(uid)
+    afterGetDetailNonPo()
+  } else {
+    await verificationApi.getInvoiceDetail(uid)
+    afterGetDetail()
+  }
+}
+
+const cleanupTempDeletes = () => {
+  for (const item of additionalCostTempDelete.value) {
+    verificationApi.deleteAdditionalCost(form.value.invoiceUId, item)
+  }
+  for (const item of costExpensesTempDelete.value) {
+    verificationApi.deleteCostExpense(form.value.invoiceUId, item)
+  }
+}
+
+const showSuccessVerifModal = () => {
+  const idModal = document.querySelector('#success_verif_modal')
+  const modal = KTModal.getInstance(idModal as HTMLElement)
+  modal.show()
+}
+
+const goVerif = async () => {
   if (isVerifyButtonDisabled.value) return
 
-  if (route.query.invoiceType === 'no_po' && route.query.type === '1') {
-    isLoading.value = true
-    verificationApi
-      .verifyInvoiceNonPo(form.value.invoiceUId)
-      .then((res) => {
-        if (res.statusCode === 200) {
-          verificationApi.resetDetailInvoiceEdit()
-          const idModal = document.querySelector('#success_verif_modal')
-          const modal = KTModal.getInstance(idModal as HTMLElement)
-          modal.show()
-          for (const item of costExpensesTempDelete.value) {
-            verificationApi.deleteCostExpense(form.value.invoiceUId, item)
-          }
-        }
-      })
-      .catch((err) => {
-        console.log(err)
-      })
-      .finally(() => {
-        isLoading.value = false
-        verificationApi.isFromEdit = false
-      })
-  } else if (!checkIsNonPo()) {
-    const status = checkVerif()
-    if (!status) return
-    isLoading.value = true
-    verificationApi
-      .postSubmission(mapDataVerif())
-      .then((response) => {
-        if (response.statusCode === 200) {
-          verificationApi.resetDetailInvoiceEdit()
-          const idModal = document.querySelector('#success_verif_modal')
-          const modal = KTModal.getInstance(idModal as HTMLElement)
-          modal.show()
-          for (const item of additionalCostTempDelete.value) {
-            verificationApi.deleteAdditionalCost(form.value.invoiceUId, item)
-          }
-        }
-      })
-      .finally(() => {
-        isLoading.value = false
-        verificationApi.isFromEdit = false
-      })
-  } else {
-    const status = checkVerif()
-    if (!status) return
+  const step = userWorkflowStep.value
+  if (!isUserActionPending(step)) return
 
-    isLoading.value = true
-    verificationApi
-      .postSubmissionNonPo(mapDataVerifNonPo() as unknown as PostVerificationTypes)
-      .then((response) => {
-        if (response.statusCode === 200) {
-          verificationApi.resetDetailInvoiceEdit()
-          const idModal = document.querySelector('#success_verif_modal')
-          const modal = KTModal.getInstance(idModal as HTMLElement)
-          modal.show()
-          for (const item of costExpensesTempDelete.value) {
-            verificationApi.deleteCostExpense(form.value.invoiceUId, item)
-          }
+  if (!checkVerif()) return
+
+  isLoading.value = true
+
+  try {
+    let response: { statusCode?: number; result?: { isError?: boolean } } | undefined
+
+    if (checkIsNonPo()) {
+      if (isVerifyStep(step)) {
+        if (verificationApi.isFromEdit) {
+          await verificationApi.putSubmissionNonPo(
+            mapDataVerifNonPo() as unknown as PostEditApprovalNonPoTypes,
+          )
         }
-      })
-      .finally(() => {
-        isLoading.value = false
-        verificationApi.isFromEdit = false
-      })
+        response = await verificationApi.verifyInvoiceNonPo(form.value.invoiceUId)
+      } else if (shouldUsePostApproval(step)) {
+        response = await verificationApi.postSubmissionNonPo(
+          mapDataVerifNonPo() as unknown as PostVerificationTypes,
+        )
+      }
+    } else if (shouldUsePutApproval(step)) {
+      response = await verificationApi.putSubmission(mapDataVerif())
+    } else if (shouldUsePostApproval(step)) {
+      response = await verificationApi.postSubmission(mapDataVerif())
+    }
+
+    if (isApiSuccess(response)) {
+      verificationApi.resetDetailInvoiceEdit()
+      showSuccessVerifModal()
+      cleanupTempDeletes()
+      refetchInvoiceDetail().catch((err) => console.error('Refetch invoice detail failed:', err))
+    }
+  } catch (err) {
+    console.error('Verify/approve failed:', err)
+  } finally {
+    isLoading.value = false
   }
 }
 
