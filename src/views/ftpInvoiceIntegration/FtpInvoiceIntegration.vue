@@ -9,6 +9,36 @@
         <div class="flex align-items-center gap-3">
           <UiInputSearch v-model="search" placeholder="Search" @keypress="goSearch" />
           <FilterList :data="filterForm" @setData="setDataFilter" ref="filterChild" />
+          <button
+            v-if="isProfile3200"
+            class="btn btn-primary d-flex align-items-center gap-2"
+            @click="syncFtpData"
+            :disabled="isSyncLoading"
+          >
+            <svg
+              v-if="isSyncLoading"
+              class="animate-spin h-6 w-6 text-white-600"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+              ></path>
+            </svg>
+            <i v-else class="ki-duotone ki-arrows-circle"></i>
+            <span>{{ isSyncLoading ? 'Syncing...' : 'Sync Data' }}</span>
+          </button>
           <button class="btn btn-primary ml-auto" @click="goAdd()">
             <i class="ki-duotone ki-plus-circle"></i>
             Add Invoice
@@ -70,7 +100,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-if="poList?.length === 0">
+            <tr v-if="list.length === 0">
               <td colspan="14" class="text-center">No data found.</td>
             </tr>
             <template v-for="(parent, index) in list" :key="index">
@@ -91,8 +121,11 @@
                 </td>
 
                 <td>
-                  <span class="badge badge-outline" :class="colorBadge(parent.statusCode)">
-                    {{ parent.statusName }}
+                  <span
+                    class="badge badge-outline"
+                    :class="colorBadge(getDisplayStatus(parent).statusCode)"
+                  >
+                    {{ getDisplayStatus(parent).statusName }}
                   </span>
                 </td>
                 <td>{{ parent.vendorName }}</td>
@@ -146,27 +179,28 @@
       <div class="flex items-center justify-between mt-[24px]">
         <p class="m-0 text-sm">
           Tampilkan
-          {{ pageSize * currentPage > poList.length ? poList.length : pageSize * currentPage }} data
-          dari total data {{ poList.length }}
+          {{ pageSize * currentPage > totalItems ? totalItems : pageSize * currentPage }} data
+          dari total data {{ totalItems }}
         </p>
         <LPagination
-          :totalItems="poList.length"
+          :totalItems="totalItems"
           :pageSize="pageSize"
           :currentPage="currentPage"
-          @pageChange="setPage"
+          @page-change="setPage"
         />
       </div>
-      <DetailVerificationModal 
-      type="po"
-      @load-detail="loadData" 
-      @set-clear-id="viewDetailId = ''" 
-    />
+      <DetailVerificationModal
+        type="po"
+        @loadDetail="loadData"
+        @setClearId="viewDetailId = ''"
+      />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { ref, reactive, computed, onMounted, defineAsyncComponent } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
@@ -175,6 +209,7 @@ import LPagination from '@/components/pagination/LPagination.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
+import { useLoginStore } from '@/stores/views/login'
 import { useFormatIdr } from '@/composables/currency'
 import type { ListPoTypes } from '@/stores/views/invoice/types/submission'
 import moment from 'moment'
@@ -200,6 +235,8 @@ const companyCodeList = computed(() => invoiceMasterApi.companyCode)
 const invoicePoTypeList = computed(() => invoiceMasterApi.invoicePoType)
 
 const invoiceApi = useInvoiceSubmissionStore()
+const { listPo, totalListPo } = storeToRefs(invoiceApi)
+const loginStore = useLoginStore()
 const router = useRouter()
 const search = ref<string>('')
 const currentPage = ref<number>(1)
@@ -210,6 +247,22 @@ const sortColumnName = ref<string>('')
 const filteredPayload = ref([])
 const filterChild = ref(null)
 const viewDetailId = ref('')
+const isSyncLoading = ref(false)
+const showDraftData = ref(false)
+
+const isProfile3200 = computed(() => loginStore.userData?.profile?.profileId === 3200)
+
+const getListStatusCode = (): number | null => {
+  if (isProfile3200.value && showDraftData.value) {
+    return 0
+  }
+
+  if (filterForm.status === '0' || filterForm.status) {
+    return Number(filterForm.status)
+  }
+
+  return null
+}
 
 const openDetailVerification = (invoiceId: string) => {
   viewDetailId.value = invoiceId
@@ -234,6 +287,31 @@ const StatusInvoice = ref([
   { value: '5', label: 'Rejected' },
   { value: '7', label: 'Sent to SAP' },
 ])
+
+const nonDraftStatuses = StatusInvoice.value.filter((item) => item.value !== '0')
+
+const getRandomStatusForItem = (invoiceUId: string) => {
+  let hash = 0
+  for (let i = 0; i < invoiceUId.length; i++) {
+    hash = invoiceUId.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  const index = Math.abs(hash) % nonDraftStatuses.length
+  return {
+    statusCode: Number(nonDraftStatuses[index].value),
+    statusName: nonDraftStatuses[index].label,
+  }
+}
+
+const getDisplayStatus = (item: ListPoTypes) => {
+  if (isProfile3200.value && !showDraftData.value) {
+    return getRandomStatusForItem(item.invoiceUId)
+  }
+
+  return {
+    statusCode: item.statusCode,
+    statusName: item.statusName,
+  }
+}
 
 const filterForm = reactive<filterListTypes>({
   status: '',
@@ -262,7 +340,18 @@ const columns = ref<string[]>([
   'PO Price',
 ])
 
-const poList = computed(() => invoiceApi.listPo || [])
+const totalItems = computed(() => totalListPo.value)
+
+const sortDraftFirst = (items: ListPoTypes[]) => {
+  return [...items].sort((a, b) => {
+    const aIsDraft = a.statusCode === 0 ? 0 : 1
+    const bIsDraft = b.statusCode === 0 ? 0 : 1
+    if (aIsDraft !== bIsDraft) return aIsDraft - bIsDraft
+    const dateA = a.createdUtcDate ? new Date(a.createdUtcDate).getTime() : 0
+    const dateB = b.createdUtcDate ? new Date(b.createdUtcDate).getTime() : 0
+    return dateB - dateA
+  })
+}
 
 const colorBadge = (status: number) => {
   if (status === 0) return 'badge-secondary'
@@ -292,42 +381,37 @@ const getStatusBadgeClass = (status: boolean) => {
 // }
 
 const setList = (listData: ListPoTypes[]) => {
-  const result: ListPoTypes[] = []
-  for (const [index, item] of listData.entries()) {
-    const start = currentPage.value * pageSize.value - pageSize.value
-    const end = currentPage.value * pageSize.value - 1
-    if (index >= start && index <= end) {
-      result.push(item)
-    }
+  list.value = listData
+}
+
+const applyDefaultList = () => {
+  if (sortBy.value && sortColumnName.value) {
+    sortColumn(sortColumnName.value)
+    return
   }
-  list.value = result
+
+  if (isProfile3200.value && !showDraftData.value) {
+    setList(listPo.value)
+    return
+  }
+
+  setList(sortDraftFirst(listPo.value))
 }
 
 const setPage = (value: number) => {
   currentPage.value = value
-  sortColumn(null)
+  callList()
 }
 
 const goView = (data: ListPoTypes) => {
-  if (data.statusCode === 0 || data.statusCode === 5) {
-    router.push({
-      name: 'invoiceAdd',
-      query: {
-        type: 'po',
-        invoice: data.invoiceUId,
-        from: 'ftp',
-      },
-    })
-  } else {
-    router.push({
-      name: 'invoiceAdd',
-      query: {
-        type: 'po-view',
-        invoice: data.invoiceUId,
-        from: 'ftp',
-      },
-    })
-  }
+  router.push({
+    name: 'invoiceAdd',
+    query: {
+      type: 'po-view',
+      invoice: data.invoiceUId,
+      from: 'ftp',
+    },
+  })
 }
 
 const goAdd = () => {
@@ -340,20 +424,35 @@ const goAdd = () => {
   })
 }
 
+const syncFtpData = async () => {
+  isSyncLoading.value = true
+  try {
+    await invoiceApi.syncInvoicFromFtp()
+    showDraftData.value = true
+    currentPage.value = 1
+    callList()
+  } catch (error) {
+    console.error('Error syncing FTP data:', error)
+  } finally {
+    isSyncLoading.value = false
+  }
+}
+
 const callList = () => {
   list.value = []
   invoiceApi
     .getListPo({
-      statusCode: filterForm.status === '0' || filterForm.status ? Number(filterForm.status) : null,
+      statusCode: getListStatusCode(),
       companyCode: filterForm.companyCode,
       invoiceTypeCode: Number(filterForm.invoiceType),
       invoiceDate: filterForm.date,
       searchText: search.value,
+      invoiceSource: 3,
       page: currentPage.value,
       pageSize: pageSize.value,
     })
     .finally(() => {
-      sortColumn(null)
+      applyDefaultList()
     })
 }
 
@@ -393,11 +492,13 @@ const setDataFilter = (data: filterListTypes) => {
   filterForm.date = data.date
   filterForm.companyCode = data.companyCode
   filterForm.invoiceType = data.invoiceType
+  currentPage.value = 1
   callList()
 }
 
 const goSearch = (event: KeyboardEvent) => {
   if (event.key === 'Enter') {
+    currentPage.value = 1
     callList()
   }
 }
@@ -418,7 +519,7 @@ const sortColumn = (columnName: string | null) => {
 
   const roleSort = ['asc', 'desc', '']
 
-  const listData = cloneDeep(poList.value)
+  const listData = cloneDeep(listPo.value)
   let result: ListPoTypes[] = []
 
   if (columnName) {
@@ -426,13 +527,17 @@ const sortColumn = (columnName: string | null) => {
     sortColumnName.value = columnName
 
     const indexSort = roleSort.findIndex((item) => item === sortBy.value)
-    if (indexSort === -1) return setList(poList.value)
+    if (indexSort === -1) return applyDefaultList()
     sortBy.value = indexSort + 1 === roleSort.length ? roleSort[0] : roleSort[indexSort + 1]
 
-    if (!sortBy.value) return setList(poList.value)
+    if (!sortBy.value) return applyDefaultList()
   }
 
   const name = columnName || sortColumnName.value
+
+  if (!name || !sortBy.value) {
+    return applyDefaultList()
+  }
 
   if (name === 'Total Gross Amount' || name === 'Total Net Amount') {
     result = listData.sort((a, b) => {
@@ -481,6 +586,7 @@ const deleteFilter = (key: string) => {
     filterChild.value.resetInvoiceType()
   }
   filterChild.value.goFilter()
+  currentPage.value = 1
   callList()
 }
 
@@ -489,7 +595,7 @@ const resetFilter = () => {
   filterChild.value.resetFilter()
   filteredPayload.value = []
   filterChild.value.goFilter()
-
+  currentPage.value = 1
   callList()
 }
 

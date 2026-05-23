@@ -51,6 +51,55 @@ interface MockSapPoDetailTypes {
   items: MockSapPoItemTypes[]
 }
 
+interface ParsedPaginatedContent<T> {
+  items: T[]
+  total: number
+}
+
+const parsePaginatedContent = <T>(rawContent: unknown): ParsedPaginatedContent<T> => {
+  if (!rawContent) {
+    return { items: [], total: 0 }
+  }
+
+  if (Array.isArray(rawContent)) {
+    return { items: rawContent as T[], total: rawContent.length }
+  }
+
+  if (typeof rawContent !== 'object') {
+    return { items: [], total: 0 }
+  }
+
+  const content = rawContent as Record<string, unknown>
+  const items = (
+    Array.isArray(content.items)
+      ? content.items
+      : Array.isArray(content.Items)
+        ? content.Items
+        : Array.isArray(content.data)
+          ? content.data
+          : Array.isArray(content.records)
+            ? content.records
+            : []
+  ) as T[]
+
+  const totalRaw =
+    content.total ??
+    content.Total ??
+    content.totalCount ??
+    content.TotalCount ??
+    content.totalRecords ??
+    content.TotalRecords ??
+    content.count ??
+    content.Count
+
+  const parsedTotal = totalRaw != null ? Number(totalRaw) : items.length
+
+  return {
+    items,
+    total: Number.isFinite(parsedTotal) ? parsedTotal : items.length,
+  }
+}
+
 export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => {
   const submissionStatus = ref<SubmissionStatusTypes[]>([])
   const documentTypeList = ref<DocumentTypes[]>([])
@@ -202,27 +251,34 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
 
   const getListPo = async (data: QueryParamsListPoTypes) => {
     listPo.value = []
-    const query = {
+    const page = data.page || 1
+    const pageSize = data.pageSize || 10
+    const params: Record<string, string | number | null> = {
       companyCode: data.companyCode || null,
       invoiceTypeCode: Number(data.invoiceTypeCode) || null,
       invoiceDate: data.invoiceDate || null,
       searchText: data.searchText || null,
-      invoiceSource: data.invoiceSource,
+      page,
+      pageSize,
     }
+
+    if (data.statusCode != null) {
+      params.statuscode = Number(data.statusCode)
+    }
+
+    if (data.invoiceSource != null) {
+      params.invoiceSource = data.invoiceSource
+    }
+
     const response: ApiResponse<PaginatedContent<ListPoRawResponse>> = await invoiceApi.get(
       `/invoice/submission`,
-      {
-        params: {
-          ...(data.statusCode !== null ? { statuscode: Number(data.statusCode) } : {}),
-          ...query,
-          page: data.page || 1,
-          pageSize: data.pageSize || 10,
-        },
-      },
+      { params },
     )
 
-    const contentData = response.data.result.content.items || []
-    totalListPo.value = response.data.result.content.total || 0
+    const { items: contentData, total } = parsePaginatedContent<ListPoRawResponse>(
+      response.data.result.content,
+    )
+    totalListPo.value = total
 
     const newList = !contentData
       ? []
@@ -453,8 +509,10 @@ export const useInvoiceSubmissionStore = defineStore('invoiceSubmission', () => 
       },
     )
 
-    const contentData = response.data.result.content.items || []
-    totalListNonPo.value = response.data.result.content.total || 0
+    const { items: contentData, total } = parsePaginatedContent<ListNonPoRawResponse>(
+      response.data.result.content,
+    )
+    totalListNonPo.value = total
     const newList = !contentData
       ? []
       : contentData.map((item: ListNonPoRawResponse) => {

@@ -110,6 +110,15 @@
           </button>
         </div>
       </div>
+      <div
+        v-else-if="checkFtpResultView()"
+        class="flex justify-start items-center mt-[24px] gap-3"
+      >
+        <button class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goBack">
+          <i class="ki-filled ki-arrow-left"></i>
+          Back
+        </button>
+      </div>
       <div v-else class="flex justify-end items-center mt-[24px] gap-3">
         <button
           v-if="tabNow !== 'preview' || checkInvoiceView() || checkInvoiceNonPoView()"
@@ -428,6 +437,10 @@ const checkInvoiceNonPoView = () => {
   return route.query.type === 'non-po-view'
 }
 
+const checkFtpResultView = () => {
+  return route.query.from === 'ftp' && route.query.type === 'po-view'
+}
+
 const checkIsNonPo = () => {
   return (
     route.query.type === 'nonpo' ||
@@ -647,6 +660,11 @@ const checkInvoiceInformation = () => {
 //   tabNow.value = value
 // }
 const goBack = () => {
+  if (checkFtpResultView()) {
+    router.push({ name: 'ftpInvoiceIntegration' })
+    return
+  }
+
   const list = ['data', 'information', 'ocrAiVerification', 'preview']
   const checkIndex = list.findIndex((item) => item === tabNow.value)
   if (checkIndex === 0) {
@@ -807,6 +825,37 @@ const getDpName = () => {
   if (getIndex !== -1) return invoiceDpList.value[getIndex].name
 }
 
+const resolveCompanyName = () => {
+  if (form.companyName?.trim()) return form.companyName
+
+  const match = invoiceMasterApi.companyCode.find((item) => item.code === form.companyCode)
+  if (match?.name) {
+    const parts = match.name.split(' - ')
+    return parts.length > 1 ? parts[parts.length - 1].trim() : match.name
+  }
+
+  return detailPo.value?.header?.companyName || ''
+}
+
+const syncCalculationFromPoGr = () => {
+  if (!Array.isArray(form.invoicePoGr) || form.invoicePoGr.length === 0) return
+
+  const subtotal = form.invoicePoGr.reduce(
+    (sum, item) => sum + (Number(item.itemAmountLC) || Number(item.itemAmount) || 0),
+    0,
+  )
+  const vatAmount = form.invoicePoGr.reduce((sum, item) => sum + (Number(item.vatAmount) || 0), 0)
+  const whtAmount = form.invoicePoGr.reduce((sum, item) => sum + (Number(item.whtAmount) || 0), 0)
+
+  if (subtotal > 0) form.subtotal = subtotal
+  if (vatAmount > 0 || !form.vatAmount) form.vatAmount = vatAmount
+  if (whtAmount > 0 || !form.whtAmount) form.whtAmount = whtAmount
+
+  const additionalCost = Number(form.additionalCostCalc) || 0
+  form.totalGrossAmount = form.subtotal + form.vatAmount + additionalCost
+  form.totalNetAmount = form.totalGrossAmount - form.whtAmount
+}
+
 const mapDataPost = () => {
   const data = {
     header: {
@@ -825,7 +874,7 @@ const mapDataPost = () => {
       invoiceDPCode: form.invoiceType === '901' ? Number(form.invoiceDp) : null,
       invoiceDPName: form.invoiceType === '901' ? getDpName() : '',
       companyCode: form.companyCode,
-      companyName: form.companyName,
+      companyName: resolveCompanyName(),
       invoiceNo: form.invoiceNo,
       documentNo: form.invoiceVendorNo,
       invoiceDate: moment(form.invoiceDate).toISOString(),
@@ -835,8 +884,8 @@ const mapDataPost = () => {
       statusCode: isClickDraft.value ? 0 : 1,
       statusName: isClickDraft.value ? 'Drafted' : 'Waiting to Verify',
       creditCardBillingId: '',
-      remainingDPAmount: Number(form.remainingDpAmount),
-      dpAmountDeduction: Number(form.dpAmountDeduction),
+      remainingDPAmount: form.invoiceDp === '9012' ? Number(form.remainingDpAmount) || 0 : 0,
+      dpAmountDeduction: form.invoiceDp === '9012' ? Number(form.dpAmountDeduction) || 0 : 0,
       department:
         form.department && String(form.department).trim() !== ''
           ? form.department
@@ -1213,6 +1262,7 @@ const goNext = async () => {
         return
       }
 
+      syncCalculationFromPoGr()
       const submissionData = mapDataPost()
 
       // Debug logging: show PO GR items and workflow sources
@@ -1220,16 +1270,46 @@ const goNext = async () => {
       console.debug('matrixApprovalList (PO) before submit:', invoiceMasterApi.matrixApprovalList)
       console.debug('workflowStore (PO) before submit:', workflowStore.workflowList)
 
-      // Always set workflow for PO invoices, but skip lookup for FTP
-      if (route.query.from === 'ftp') {
-        submissionData.workflow = []
-        console.debug('FTP integration: Setting empty workflow array')
-      } else {
-        // cek matrix-approval terlebih dahulu; jika tidak ada, gunakan fallback workflow dari store
-        try {
-          await invoiceMasterApi.getMatrixApproval(String(submissionData.header.invoiceTypeCode), submissionData.header.companyCode)
-          if (Array.isArray(invoiceMasterApi.matrixApprovalList) && invoiceMasterApi.matrixApprovalList.length > 0) {
-            const mapped = invoiceMasterApi.matrixApprovalList
+      try {
+        await invoiceMasterApi.getMatrixApproval(
+          String(submissionData.header.invoiceTypeCode),
+          submissionData.header.companyCode,
+        )
+        if (
+          Array.isArray(invoiceMasterApi.matrixApprovalList) &&
+          invoiceMasterApi.matrixApprovalList.length > 0
+        ) {
+          const mapped = invoiceMasterApi.matrixApprovalList
+            .map((row) => ({
+              actioner: 0,
+              actionerDate: '',
+              actionerName: '',
+              actionerNotes: '',
+              id: 0,
+              profileId: Number(row.profileId) || 0,
+              profileName: row.profileName || '',
+              stateCode: 0,
+              stateName: 'Pending',
+              step: Number(row.step) || 0,
+            }))
+            .filter((r) => Number(r.profileId) > 0)
+
+          if (mapped.length > 0) submissionData.workflow = mapped
+          console.debug('PO: Using matrixApprovalList workflow:', mapped)
+        } else {
+          const desiredType = 'Invoice PO'
+          const wf = workflowStore.workflowList.find(
+            (i) =>
+              i.companyCode === submissionData.header.companyCode &&
+              i.invoiceType === desiredType,
+          )
+          console.debug('PO: Matrix approval empty, looking for workflow in store:', {
+            companyCode: submissionData.header.companyCode,
+            invoiceType: desiredType,
+            found: !!wf,
+          })
+          if (wf && Array.isArray(wf.workflow)) {
+            const mapped = wf.workflow
               .map((row) => ({
                 actioner: 0,
                 actionerDate: '',
@@ -1245,39 +1325,25 @@ const goNext = async () => {
               .filter((r) => Number(r.profileId) > 0)
 
             if (mapped.length > 0) submissionData.workflow = mapped
-            console.debug('PO: Using matrixApprovalList workflow:', mapped)
+            console.debug('PO: Using workflowStore workflow:', mapped)
           } else {
-            const desiredType = 'Invoice PO'
-            const wf = workflowStore.workflowList.find((i) => i.companyCode === submissionData.header.companyCode && i.invoiceType === desiredType)
-            console.debug('PO: Matrix approval empty, looking for workflow in store:', { companyCode: submissionData.header.companyCode, invoiceType: desiredType, found: !!wf })
-            if (wf && Array.isArray(wf.workflow)) {
-              const mapped = wf.workflow
-                .map((row) => ({
-                  actioner: 0,
-                  actionerDate: '',
-                  actionerName: '',
-                  actionerNotes: '',
-                  id: 0,
-                  profileId: Number(row.profileId) || 0,
-                  profileName: row.profileName || '',
-                  stateCode: 0,
-                  stateName: 'Pending',
-                  step: Number(row.step) || 0,
-                }))
-                .filter((r) => Number(r.profileId) > 0)
-
-              if (mapped.length > 0) submissionData.workflow = mapped
-              console.debug('PO: Using workflowStore workflow:', mapped)
-            } else {
-              submissionData.workflow = []
-              console.debug('PO: No workflow found, sending empty workflow array')
-            }
+            submissionData.workflow = []
+            console.debug('PO: No workflow found, sending empty workflow array')
           }
-        } catch (error) {
-          console.error('PO: Error getting workflow:', error)
-          submissionData.workflow = []
-          // ignore lookup errors and continue
         }
+      } catch (error) {
+        console.error('PO: Error getting workflow:', error)
+        submissionData.workflow = []
+      }
+
+      if (!Array.isArray(submissionData.workflow) || submissionData.workflow.length === 0) {
+        invoiceApi.errorMessageSubmission =
+          'Workflow approval tidak ditemukan. Mohon pastikan matrix approval sudah dikonfigurasi untuk company code dan invoice type ini.'
+        const idModal = document.querySelector('#error_submission_modal')
+        const modal = KTModal.getInstance(idModal as HTMLElement)
+        modal.show()
+        isSubmit.value = false
+        return
       }
 
       // store last submission payload for debugging (removed)
@@ -1429,6 +1495,7 @@ const setData = () => {
     form.bankCountryCode = detail.payment.bankCountryCode
     form.invoiceDp = detail.header.invoiceDPCode ? detail.header.invoiceDPCode.toString() : ''
     form.companyCode = detail.header.companyCode
+    form.companyName = detail.header.companyName || form.companyName || ''
     form.invoiceVendorNo = detail.header.documentNo ? detail.header.documentNo.toString() : ''
     form.invoiceNo = detail.header.invoiceNo ? detail.header.invoiceNo.toString() : ''
     form.invoiceDate = detail.header.invoiceDate
@@ -1436,6 +1503,10 @@ const setData = () => {
     form.currency = detail.header.currCode
     form.dpAmountDeduction = detail.header.dpAmountDeduction
     form.remainingDpAmount = detail.header.remainingDPAmount
+    if (form.invoiceDp !== '9012') {
+      form.dpAmountDeduction = 0
+      form.remainingDpAmount = 0
+    }
     form.description = detail.header.notes
     form.subtotal = detail.calculation.subtotal
     form.vatAmount = detail.calculation.vatAmount
