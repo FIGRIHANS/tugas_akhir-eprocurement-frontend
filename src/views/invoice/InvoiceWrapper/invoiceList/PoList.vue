@@ -167,6 +167,7 @@ import { useRouter } from 'vue-router'
 import type { filterListTypes } from '../../types/invoiceList'
 import LPagination from '@/components/pagination/LPagination.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
+import { resolveInvoiceAddRouteType } from '@/core/utils/invoiceSubmissionRoute'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useFormatIdr } from '@/composables/currency'
@@ -280,23 +281,13 @@ const setPage = (value: number) => {
 }
 
 const goView = (data: ListPoTypes) => {
-  if (data.statusCode === 0 || data.statusCode === 5) {
-    router.push({
-      name: 'invoiceAdd',
-      query: {
-        type: 'po',
-        invoice: data.invoiceUId,
-      },
-    })
-  } else {
-    router.push({
-      name: 'invoiceAdd',
-      query: {
-        type: 'po-view',
-        invoice: data.invoiceUId,
-      },
-    })
-  }
+  router.push({
+    name: 'invoiceAdd',
+    query: {
+      type: resolveInvoiceAddRouteType(data.statusCode, data.statusName, 'po'),
+      invoice: data.invoiceUId,
+    },
+  })
 }
 
 const callList = () => {

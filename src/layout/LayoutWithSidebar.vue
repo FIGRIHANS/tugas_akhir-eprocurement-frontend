@@ -21,7 +21,7 @@
     class="py-4 px-6 transition-all duration-300 ease-in-out"
     :class="sidebarStore.isCollapsed ? 'ml-[32px]' : 'ml-[312px]'"
   >
-    <RouterView />
+    <RouterView :key="route.fullPath" />
   </main>
 </template>
 
@@ -30,9 +30,10 @@ import LNavbar from '@/components/layout/navbar/LNavbar.vue'
 import LSidebar from '@/components/layout/sidebar/LSidebar.vue'
 import { useSidebarStore } from '@/stores/sidebar'
 
-import { RouterView } from 'vue-router'
+import { RouterView, useRoute } from 'vue-router'
 
 const sidebarStore = useSidebarStore()
+const route = useRoute()
 </script>
 
 <style>

@@ -76,7 +76,11 @@
                     </button>
                     <div class="dropdown-content w-full max-w-56 py-2">
                       <div class="menu menu-default flex flex-col w-full">
-                        <div v-if="parent.statusCode === 4" class="menu-item" @click="sendToSap()">
+                        <div
+                          v-if="parent.statusCode === 4"
+                          class="menu-item"
+                          @click="sendToSap(parent.invoiceUId)"
+                        >
                           <div class="menu-link">
                             <span class="menu-icon">
                               <i class="ki-duotone ki-paper-plane !text-lg"></i>
@@ -489,45 +493,26 @@ const checkAndFetchApprovalStatus = async (invoiceUId: string) => {
   await isApprovedByFinanceAp(invoiceUId)
 }
 
-// const sendToSap = (invoiceUId: string) => {
-//   closeDropdown()
-//   isLoadingSap.value = true
-//   verificationApi
-//     .postSap(invoiceUId)
-//     .then((statusCode: number) => {
-//       if (statusCode === 200) {
-//         openSuccesSap()
-//         callList()
-//       } else {
-//         openFailedSap()
-//       }
-//     })
-//     .finally(() => {
-//       isLoadingSap.value = false
-//     })
-// }
-
-const sendToSap = () => {
+const sendToSap = (invoiceUId: string) => {
+  if (isLoadingSap.value) return
   closeDropdown()
   isLoadingSap.value = true
-  // verificationApi
-  //   .postSapNonPo(invoiceUId)
-  //   .then((statusCode: number) => {
-  //     if (statusCode === 200) {
-  //       openSuccesSap()
-  //       callList()
-  //     } else {
-  //       openFailedSap()
-  //     }
-  //   })
-  //   .finally(() => {
-  //     isLoadingSap.value = false
-  //   })
-  setTimeout(() => {
-    openSuccesSap()
-    callList()
-    isLoadingSap.value = false
-  }, 3000)
+  verificationApi
+    .postSap(invoiceUId)
+    .then((statusCode: number) => {
+      if (statusCode === 200) {
+        openSuccesSap()
+        callList()
+      } else {
+        openFailedSap()
+      }
+    })
+    .catch(() => {
+      openFailedSap()
+    })
+    .finally(() => {
+      isLoadingSap.value = false
+    })
 }
 
 const openSuccesSap = () => {
@@ -536,11 +521,11 @@ const openSuccesSap = () => {
   modal.show()
 }
 
-// const openFailedSap = () => {
-//   const idModal = document.querySelector('#failed_send_sap_modal')
-//   const modal = KTModal.getInstance(idModal as HTMLElement)
-//   modal.show()
-// }
+const openFailedSap = () => {
+  const idModal = document.querySelector('#failed_send_sap_modal')
+  const modal = KTModal.getInstance(idModal as HTMLElement)
+  modal.show()
+}
 
 const sortColumn = (columnName: string | null) => {
   const list = {

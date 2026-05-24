@@ -198,7 +198,7 @@ const sidebarMenuData: ISidebarMenu[] = [
       // },
       {
         id: 'invoice-approval',
-        title: 'Invoice Approval',
+        title: 'FTP Invoice Approval',
         to: 'invoiceApproval',
       },
       // {

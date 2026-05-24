@@ -29,7 +29,7 @@
         v-if="tabNow === 'paymentStatus'"
         class="flex justify-between items-center mt-[24px] gap-3"
       >
-        <button class="btn btn-outline btn-primary" @click="goToList">
+        <button class="btn btn-outline btn-primary" @click="goBack">
           <i class="ki-filled ki-arrow-left"></i>
           Back
         </button>
@@ -43,7 +43,7 @@
         </button>
       </div>
       <div
-        v-else-if="checkIsNonPo()"
+        v-else-if="isSubmissionFormMode && checkIsNonPo()"
         class="flex align-items-center justify-between gap-[8px] mt-[24px]"
       >
         <div class="flex-1 flex gap-[8px]">
@@ -84,11 +84,7 @@
         </div>
       </div>
       <div
-        v-else-if="
-          (form.status === 0 || form.status === -1 || form.status === 5) &&
-          !checkInvoiceView() &&
-          !checkInvoiceNonPoView()
-        "
+        v-else-if="isSubmissionFormMode && !checkIsNonPo()"
         class="flex justify-between items-center gap-[8px] mt-[24px]"
       >
         <button class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goSaveDraft">
@@ -110,15 +106,6 @@
             <i v-else class="ki-duotone ki-paper-plane"></i>
           </button>
         </div>
-      </div>
-      <div
-        v-else-if="checkFtpResultView()"
-        class="flex justify-start items-center mt-[24px] gap-3"
-      >
-        <button class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goBack">
-          <i class="ki-filled ki-arrow-left"></i>
-          Back
-        </button>
       </div>
       <div v-else class="flex justify-end items-center mt-[24px] gap-3">
         <button
@@ -191,6 +178,11 @@ import TabInvoice from '@/components/invoice/TabInvoice.vue'
 import iconPDF from '@/components/icons/iconPDF.vue'
 import { KTModal } from '@/metronic/core'
 import { useCheckEmpty } from '@/composables/validation'
+import {
+  isInvoiceSubmissionFlow,
+  isInvoiceViewRouteType,
+  isSavedDraftStatus,
+} from '@/core/utils/invoiceSubmissionRoute'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useWorkflowConfigurationStore } from '@/stores/workflow-configurantion/wokrflowConfiguration'
@@ -380,16 +372,105 @@ const canClickInformationTab = computed(() => {
 })
 
 const canClickPreviewTab = computed(() => {
+  if (checkIsNonPo()) return isCheckBudget.value
+  if (isSavedInvoiceEditMode.value || hasCompletedDataTab.value) return true
   return isCheckBudget.value
 })
 
 const canClickPaymentStatusTab = computed(() => {
-  return form.status === 7 || form.status === 8 || form.status === 9 || form.status === 10
+  const status = Number(form.status)
+  return status === 7 || status === 8 || status === 9 || status === 10
 })
 
 const shouldHideWorkflowTabs = computed(() => {
-  return checkInvoiceView() || checkInvoiceNonPoView()
+  return !isSubmissionFormMode.value
 })
+
+const isSubmissionFormMode = computed(() => {
+  return isInvoiceSubmissionFlow(route.query.type?.toString(), form.status)
+})
+
+const isSavedInvoiceEditMode = computed(() => {
+  return !!route.query.invoice && isSubmissionFormMode.value
+})
+
+const enableDraftTabNavigation = () => {
+  tabNow.value = 'data'
+  hasCompletedDataTab.value = true
+  isCheckBudget.value = true
+}
+
+const applyRouteUiDefaults = () => {
+  const routeType = route.query.type?.toString()
+  const invoiceId = route.query.invoice?.toString() || ''
+  const isView = isInvoiceViewRouteType(routeType)
+
+  if (!invoiceId) {
+    tabNow.value = 'data'
+    hasCompletedDataTab.value = false
+    isCheckBudget.value = false
+    return
+  }
+
+  if (isSavedDraftStatus(form.status) || !isView) {
+    enableDraftTabNavigation()
+    return
+  }
+
+  tabNow.value = 'preview'
+  hasCompletedDataTab.value = true
+}
+
+const loadInvoiceFromRoute = async () => {
+  const invoiceId = route.query.invoice?.toString() || ''
+  const routeType = route.query.type?.toString() || 'po'
+
+  applyRouteUiDefaults()
+
+  if (!invoiceId) return
+
+  const isCasDummyView = routeType === 'non-po-view' && route.query.casType === 'cas'
+  if (isCasDummyView) {
+    setDummyCasView()
+    tabNow.value = 'preview'
+    return
+  }
+
+  const isNonPoRoute =
+    routeType === 'nonpo' || routeType === 'non-po-view' || routeType === 'cas'
+
+  try {
+    if (isNonPoRoute) {
+      await invoiceApi.getNonPoDetail(invoiceId)
+      setStepperStatus()
+      setDataNonPo()
+
+      if (isSavedDraftStatus(form.status)) {
+        enableDraftTabNavigation()
+      } else if (isInvoiceViewRouteType(routeType)) {
+        tabNow.value = 'preview'
+        hasCompletedDataTab.value = true
+      } else if (canClickPaymentStatusTab.value) {
+        tabNow.value = 'paymentStatus'
+      }
+    } else {
+      await invoiceApi.getPoDetail(invoiceId)
+      setStepperStatus()
+      setData()
+
+      if (isSavedDraftStatus(form.status)) {
+        enableDraftTabNavigation()
+      } else if (isInvoiceViewRouteType(routeType)) {
+        tabNow.value = 'preview'
+        hasCompletedDataTab.value = true
+      } else if (canClickPaymentStatusTab.value) {
+        tabNow.value = 'paymentStatus'
+      }
+    }
+  } catch (error) {
+    console.error('Error loading invoice detail:', error)
+  }
+}
 
 const loadInvoiceDetailForPaymentStatus = async () => {
   try {
@@ -442,8 +523,39 @@ const checkInvoiceNonPoView = () => {
   return route.query.type === 'non-po-view'
 }
 
-const checkFtpResultView = () => {
-  return route.query.from === 'ftp' && route.query.type === 'po-view'
+const WORKFLOW_TABS = ['data', 'information', 'ocrAiVerification', 'preview'] as const
+
+const getBackListRoute = () => {
+  const from = route.query.from?.toString()
+  if (from === 'ftp') return 'ftpInvoiceIntegration'
+  if (from === 'cas') return 'cash-advance'
+  if (checkInvoiceView() || (!checkIsNonPo() && !checkInvoiceNonPoView())) return 'invoice'
+  return 'invoice-list-non-po'
+}
+
+const goBack = () => {
+  if (tabNow.value === 'paymentStatus') {
+    tabNow.value = 'preview'
+    return
+  }
+
+  const currentIndex = WORKFLOW_TABS.findIndex((tab) => tab === tabNow.value)
+
+  if (currentIndex === 0) {
+    router.push({ name: getBackListRoute() })
+    return
+  }
+
+  if (currentIndex > 0) {
+    const newTab = WORKFLOW_TABS[currentIndex - 1]
+    if (tabNow.value === 'preview' && newTab === 'information') {
+      isCheckBudget.value = false
+    }
+    tabNow.value = newTab
+    try {
+      ;(document.activeElement as HTMLElement)?.blur()
+    } catch {}
+  }
 }
 
 const checkIsNonPo = () => {
@@ -664,46 +776,6 @@ const checkInvoiceInformation = () => {
 
 //   tabNow.value = value
 // }
-const goBack = () => {
-  if (checkFtpResultView()) {
-    router.push({ name: 'ftpInvoiceIntegration' })
-    return
-  }
-
-  const list = ['data', 'information', 'ocrAiVerification', 'preview']
-  const checkIndex = list.findIndex((item) => item === tabNow.value)
-  if (checkIndex === 0) {
-    const from = route.query.from
-    const nameRoute =
-      from === 'ftp'
-        ? 'ftpInvoiceIntegration'
-        : from === 'cas'
-          ? 'cash-advance'
-          : checkInvoiceView() || (!checkIsNonPo() && !checkInvoiceNonPoView())
-            ? 'invoice'
-            : 'invoice-list-non-po'
-    router.push({
-      name: nameRoute,
-    })
-  }
-  if (checkIndex !== -1 && checkIndex !== 0) {
-    const newTab = list[checkIndex - 1]
-    if (tabNow.value === 'preview' && newTab === 'information') {
-      isCheckBudget.value = false
-      tabNow.value = newTab
-      try {
-        ;(document.activeElement as HTMLElement)?.blur()
-      } catch {}
-      return
-    }
-
-    tabNow.value = newTab
-    try {
-      ;(document.activeElement as HTMLElement)?.blur()
-    } catch {}
-  }
-}
-
 // Update payment status function (allowed only for profileId 3002)
 const updatePaymentStatus = () => {
   const profileId = String(userData.value?.profile?.profileId ?? '')
@@ -1206,12 +1278,12 @@ const showWorkflowNotFoundError = (
 const goNext = async () => {
   const list = ['data', 'information', 'ocrAiVerification', 'preview']
   if (tabNow.value !== 'preview') {
-    if (form.status === 0 || form.status === -1 || form.status === 5) {
+    if (isSubmissionFormMode.value) {
       if (tabNow.value === 'data') {
         const check = checkInvoiceData()
         if (!check) return
         hasCompletedDataTab.value = true
-      } else {
+      } else if (tabNow.value === 'information') {
         const check = checkInvoiceInformation()
         if (!check) return
       }
@@ -1417,17 +1489,8 @@ const goNext = async () => {
 
 const goToList = () => {
   isClickDraft.value = false
-  const from = route.query.from
-  const nameRoute =
-    from === 'ftp'
-      ? 'ftpInvoiceIntegration'
-      : from === 'cas'
-        ? 'cash-advance'
-        : !checkIsNonPo()
-          ? 'invoice'
-          : 'invoice-list-non-po'
   router.push({
-    name: nameRoute,
+    name: getBackListRoute(),
   })
 }
 
@@ -1508,7 +1571,7 @@ const setData = () => {
   const detail = detailPo.value
 
   if (form && detail) {
-    form.status = detail.header.statusCode
+    form.status = Number(detail.header.statusCode)
     form.invoiceUId = detail.header.invoiceUId
     form.invoiceType = detail.header.invoiceTypeCode ? detail.header.invoiceTypeCode.toString() : ''
     form.invoiceSource = detail.header.invoiceSourceName
@@ -1647,7 +1710,7 @@ const setDataNonPo = () => {
   if (form && detail) {
     // Safely map Header data
     if (detail.header) {
-      form.status = detail.header.statusCode
+      form.status = Number(detail.header.statusCode)
       form.invoiceUId = detail.header.invoiceUId
       form.invoiceType = detail.header.invoiceTypeCode
         ? detail.header.invoiceTypeCode.toString()
@@ -2308,6 +2371,7 @@ onMounted(() => {
   else invoiceMasterApi.getInvoiceNonPoType()
   invoiceMasterApi.getDocumentTypes()
   invoiceMasterApi.getVendorList()
+
   if (loginApi.isVendor) {
     form.invoiceType = '901'
   }
@@ -2317,53 +2381,7 @@ onMounted(() => {
     form.invoiceTypeName = 'Reimbursement'
   }
 
-  if (route.query.type === 'po-view' || route.query.type === 'non-po-view') {
-    tabNow.value = 'preview'
-    hasCompletedDataTab.value = true
-  }
-
-  if (
-    route.query.type === 'non-po-view' ||
-    (route.query.invoice &&
-      route.query.type !== 'non-po-view' &&
-      route.query.type !== 'po-view' &&
-      route.query.type === 'nonpo')
-  ) {
-    hasCompletedDataTab.value = true
-    const isCasDummyView = route.query.type === 'non-po-view' && route.query.casType === 'cas'
-    if (isCasDummyView) {
-      setDummyCasView()
-      tabNow.value = 'preview'
-    } else {
-      invoiceApi.getNonPoDetail(route.query.invoice?.toString() || '').then(() => {
-        setStepperStatus()
-        setDataNonPo()
-
-        if (form.status === 7 || form.status === 8 || form.status === 9 || form.status === 10) {
-          tabNow.value = 'paymentStatus'
-        }
-      })
-    }
-  }
-
-  if (
-    route.query.type === 'po-view' ||
-    (route.query.invoice &&
-      route.query.type !== 'non-po-view' &&
-      route.query.type !== 'po-view' &&
-      route.query.type === 'po')
-  ) {
-    hasCompletedDataTab.value = true
-
-    invoiceApi.getPoDetail(route.query.invoice?.toString() || '').then(() => {
-      setStepperStatus()
-      setData()
-
-      if (form.status === 7 || form.status === 8 || form.status === 9 || form.status === 10) {
-        tabNow.value = 'paymentStatus'
-      }
-    })
-  }
+  void loadInvoiceFromRoute()
 })
 
 watch(
@@ -2386,6 +2404,9 @@ watch(
     if (newStatus !== undefined && newStatus >= -1) {
       setStepperStatus()
     }
+    if (isSavedDraftStatus(newStatus) && route.query.invoice) {
+      enableDraftTabNavigation()
+    }
   },
   { immediate: true },
 )
@@ -2393,7 +2414,7 @@ watch(
 watch(
   () => form.invoiceItem,
   () => {
-    if (isCheckBudget.value) isCheckBudget.value = false
+    if (checkIsNonPo() && isCheckBudget.value) isCheckBudget.value = false
   },
   { deep: true },
 )
@@ -2401,7 +2422,7 @@ watch(
 watch(
   () => form.additionalCost,
   () => {
-    if (isCheckBudget.value) isCheckBudget.value = false
+    if (checkIsNonPo() && isCheckBudget.value) isCheckBudget.value = false
   },
   { deep: true },
 )
@@ -2409,7 +2430,7 @@ watch(
 watch(
   () => form.invoicePoGr,
   () => {
-    if (isCheckBudget.value) isCheckBudget.value = false
+    if (checkIsNonPo() && isCheckBudget.value) isCheckBudget.value = false
   },
   { deep: true },
 )
