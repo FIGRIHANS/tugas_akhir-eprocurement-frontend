@@ -380,7 +380,7 @@ const populateFromQueryParams = () => {
   form.value.npwp = String(q.vendorNpwp || '')
   form.value.fgNpwpNik = q.vendorNpwp ? true : false
   form.value.dataDetilBp21.penghasilanKotor = Number(q.dpp) || 0
-  form.value.dataDetilBp21.pphDipotong = Number(q.whtAmount) || 0
+  calculatePPh()
 
   const invoiceNo = String(q.invoiceNo || '')
   if (form.value.dataDetilBp21.dokReferensi.length > 0) {

@@ -5,6 +5,11 @@ export default [
     component: () => import('@/views/taxReconciliation/VatReconciliation.vue'),
   },
   {
+    path: '/vat-reconciliation/pj-submit',
+    name: 'vatPjSubmitFromInvoice',
+    component: () => import('@/views/taxReconciliation/VatPjSubmitFromInvoice.vue'),
+  },
+  {
     path: '/vat-reconciliation/:id',
     name: 'vatReconciliationDetail',
     component: () => import('@/views/taxReconciliation/VatReconciliationDetail.vue'),

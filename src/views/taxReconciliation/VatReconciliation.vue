@@ -4,9 +4,138 @@
     <hr class="-mx-[24px] mb-[24px]" />
 
     <div class="border border-gray-200 rounded-xl p-[24px]">
+      <!-- Alur sama seperti WHT/BPU: antrian invoice → integrasi PJ -->
+      <div class="tabs mb-6 flex flex-wrap gap-2" data-tab="true">
+        <div
+          class="tab cursor-pointer"
+          :class="{ active: workspace === 'queue' }"
+          @click="setWorkspace('queue')"
+        >
+          Antrian invoice (VAT &gt; 0)
+        </div>
+        <div class="tab cursor-pointer" :class="{ active: workspace === 'pj' }" @click="setWorkspace('pj')">
+          Faktur Pajak Express (IF_TXR_015)
+        </div>
+        <div class="tab cursor-pointer" :class="{ active: workspace === 'legacy' }" @click="setWorkspace('legacy')">
+          Internal (legacy SP)
+        </div>
+      </div>
+
+      <div v-if="workspace === 'queue'" class="overflow-x-auto list__table mb-2 animate-in fade-in duration-300">
+        <div class="flex justify-between items-center gap-3 mb-4 flex-wrap">
+          <p class="text-sm text-gray-600 m-0 max-w-xl">
+            Daftar invoice <strong>Approved</strong> dengan <strong>nominal VAT &gt; 0</strong> (endpoint sama seperti BPU/PPh21:
+            <code class="text-xs">/tax/available-invoices?type=VAT</code>). Nomor Faktur Pajak dari e-Faktur diisi pada langkah berikut.
+          </p>
+          <div class="flex gap-2 flex-wrap items-center">
+            <UiInputSearch v-model="pendingSearch" placeholder="Cari invoice / vendor" @search="fetchPendingVat" />
+            <button type="button" class="btn btn-outline btn-sm" @click="fetchPendingVat">Refresh</button>
+            <button type="button" class="btn btn-primary btn-sm" @click="goManualPjSubmit">Input tanpa invoice</button>
+          </div>
+        </div>
+        <table class="table align-middle text-gray-700 font-medium text-sm">
+          <thead>
+            <tr>
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Sumber</th>
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">No. Invoice</th>
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Vendor</th>
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">NPWP</th>
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-right">DPP</th>
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-right">VAT</th>
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="loadingPendingVat">
+              <td colspan="7" class="text-center py-10">
+                <span class="loading loading-spinner loading-md text-primary"></span>
+                <p class="mt-2 text-gray-500">Memuat invoice…</p>
+              </td>
+            </tr>
+            <tr v-else-if="pendingVatRows.length === 0">
+              <td colspan="7" class="text-center py-10 text-gray-400 italic">
+                Tidak ada invoice dengan VAT untuk antrean rekonsiliasi.
+              </td>
+            </tr>
+            <tr v-for="(inv, idx) in pendingVatRows" :key="'pv-' + idx + '-' + (inv.invoiceNo || '')">
+              <td>
+                <span
+                  :class="
+                    inv.invoiceSource === 'PO'
+                      ? 'badge badge-light-primary px-2'
+                      : 'badge badge-light-warning px-2'
+                  "
+                >
+                  {{ inv.invoiceSource || '—' }}
+                </span>
+              </td>
+              <td>{{ inv.invoiceNo || '—' }}</td>
+              <td>{{ inv.vendorName || '—' }}</td>
+              <td>{{ inv.vendorNpwp || '—' }}</td>
+              <td class="text-right">{{ formatCurrency(inv.dpp ?? 0) }}</td>
+              <td class="text-right text-primary font-medium">{{ formatCurrency(displayVatOnRow(inv)) }}</td>
+              <td class="text-center">
+                <button type="button" class="btn btn-primary btn-sm" @click="goSubmitFromInvoice(inv)">
+                  Submit ke PJ
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pending Pagination Footer -->
+      <div v-if="pendingVatTotal > 0" class="flex items-center justify-between mt-[24px]">
+        <p class="text-sm text-gray-500">
+          Showing <b>{{ pendingVatRows.length }}</b> of <b>{{ pendingVatTotal }}</b> entries
+        </p>
+        <LPagination
+          :totalItems="pendingVatTotal"
+          :pageSize="pendingVatLimit"
+          :currentPage="pendingVatPage"
+          @pageChange="onPendingPageChange"
+        />
+      </div>
+
+      <template v-else>
       <!-- Header Section -->
-      <div class="flex justify-between align-items-center gap-[8px] mb-[24px]">
-        <h3 class="text-lg font-semibold">VAT Reconciliation</h3>
+      <div class="flex justify-between align-items-center gap-[8px] mb-[24px] flex-wrap">
+        <div class="flex flex-col gap-2">
+          <h3 class="text-lg font-semibold m-0">VAT Reconciliation</h3>
+          <div class="flex flex-wrap items-end gap-3 text-sm">
+            <template v-if="workspace === 'pj'">
+              <div class="form-control">
+                <label class="label py-0"><span class="label-text text-xs font-semibold">Periode pajak (Coretax list)</span></label>
+                <div class="flex gap-2">
+                  <select v-model="pjMonth" class="select select-bordered select-sm w-[88px]" @change="onPajakExpressPeriodChanged">
+                    <option v-for="m in pjMonthOptions" :key="m.v" :value="m.v">{{ m.label }}</option>
+                  </select>
+                  <input
+                    v-model="pjYear"
+                    type="text"
+                    maxlength="4"
+                    class="input input-bordered input-sm w-[76px]"
+                    placeholder="yyyy"
+                    @change="onPajakExpressPeriodChanged"
+                  />
+                  <button type="button" class="btn btn-primary btn-sm" :disabled="isLoading || isPrepopulating" @click="reloadVat">
+                    <i class="ki-duotone ki-arrows-circle !text-base"></i>
+                    Muat ulang
+                  </button>
+                  <button type="button" class="btn btn-warning btn-sm" :disabled="isLoading || isPrepopulating" @click="runPrepopulateBulk">
+                    <i class="ki-duotone ki-cloud-download !text-base"></i>
+                    Tarik Data Prepopulated
+                    <span v-if="isPrepopulating" class="loading loading-spinner loading-xs ml-1"></span>
+                  </button>
+                </div>
+              </div>
+            </template>
+            <p v-else-if="workspace === 'legacy'" class="text-xs text-gray-500 m-0 max-w-lg">
+              Data dari rekonsiliasi internal / stored procedure. Untuk pajak PJ gunakan tab <strong>Faktur Pajak Express</strong> atau
+              <strong>Antrian invoice</strong>.
+            </p>
+          </div>
+        </div>
         <div class="flex align-items-center gap-3">
           <UiInputSearch v-model="search" placeholder="Search" @keypress="goSearch" />
 
@@ -27,12 +156,17 @@
             Update Status
           </button> -->
 
-          <button class="btn btn-primary" @click="exportData()">
-            <i class="ki-duotone ki-plus-circle"></i>
+          <button class="btn btn-primary" :disabled="isPostingVat" @click="exportData()">
+            <i class="ki-duotone ki-check-circle"></i>
             VAT Credit Posting
             <!-- <span v-if="selectedItems.length > 0" class="badge badge-sm badge-light-primary ms-2">
               {{ selectedItems.length }}
             </span> -->
+          </button>
+
+          <button class="btn btn-primary" @click="goManualPjSubmit()">
+            <i class="ki-filled ki-plus-circle !text-lg"></i>
+            Create New VAT
           </button>
         </div>
       </div>
@@ -47,6 +181,9 @@
               <option value="Approved">Approved</option>
               <option value="Credited">Credited</option>
               <option value="Rejected">Rejected</option>
+              <option value="Created">Created</option>
+              <option value="Amended">Amended</option>
+              <option value="Canceled">Canceled</option>
             </select>
           </div>
           <div>
@@ -64,6 +201,9 @@
               <option value="Creditable">Creditable</option>
               <option value="Not Creditable">Not Creditable</option>
               <option value="Hold">Hold</option>
+              <option value="CREDITED">CREDITED</option>
+              <option value="UNCREDITED">UNCREDITED</option>
+              <option value="INVALID">INVALID</option>
             </select>
           </div>
         </div>
@@ -198,8 +338,12 @@
       </div>
 
       <!-- Pagination -->
-      <div class="flex items-center justify-between mt-[24px]">
-        <p class="m-0 text-sm">
+      <div class="flex items-center justify-between mt-[24px] flex-wrap gap-2">
+        <p v-if="workspace === 'pj'" class="m-0 text-sm text-gray-600">
+          Halaman {{ currentPage }} · {{ list.length }} baris ditampilkan · total dari Pajak Express:
+          {{ pjTotalRows > 0 ? pjTotalRows : list.length }}
+        </p>
+        <p v-else class="m-0 text-sm">
           Showing
           {{
             pageSize * currentPage > filteredDataList.length
@@ -209,12 +353,13 @@
           of {{ filteredDataList.length }} entries
         </p>
         <LPagination
-          :totalItems="filteredDataList.length"
+          :totalItems="paginationTotalForPager"
           :pageSize="pageSize"
           :currentPage="currentPage"
           @pageChange="setPage"
         />
       </div>
+      </template>
     </div>
 
     <!-- Status Faktur Modal -->
@@ -367,6 +512,9 @@ import { cloneDeep } from 'lodash'
 import AuthenticationModal from './VatReconciliation/AuthenticationModal.vue'
 import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 import vatApi from '@/core/utils/vatApi'
+import { postVatInUpload, postVatInPrepopulated } from '@/core/utils/vatPxInvoiceApi'
+import axios from 'axios'
+import BpuService, { type InvoiceVatQueueRow } from '@/services/bpu.service'
 import { useNotificationStore } from '@/stores/notification/notificationStore'
 
 // Expose moment to template
@@ -407,6 +555,9 @@ const currentPage = ref<number>(1)
 const pageSize = ref<number>(10)
 const list = ref<VATReconciliationData[]>([])
 const isLoading = ref<boolean>(false)
+const isPrepopulating = ref<boolean>(false)
+/** Batch posting IF_TXR_015 upload while auth flow runs. */
+const isPostingVat = ref<boolean>(false)
 const vatData = ref<VATReconciliationData[]>([])
 const sortBy = ref<string>('')
 const sortColumnName = ref<string>('')
@@ -418,6 +569,36 @@ const filterForm = ref<FilterForm>({
   matchStatus: '',
   creditStatus: '',
 })
+
+type VatDataSource = 'erp' | 'pajakExpress'
+
+type Workspace = 'queue' | 'pj' | 'legacy'
+
+const workspace = ref<Workspace>('queue')
+const pendingVatRows = ref<InvoiceVatQueueRow[]>([])
+const loadingPendingVat = ref(false)
+const pendingSearch = ref('')
+const pendingVatPage = ref(1)
+const pendingVatLimit = ref(10)
+const pendingVatTotal = ref(0)
+
+function onPendingPageChange(page: number) {
+  pendingVatPage.value = page
+  fetchPendingVat()
+}
+
+/** Tab PJ / legacy: driver fetch `vat-reconciliation`; antrian pakai Invoice API `/tax/available-invoices`. */
+const dataSource = ref<VatDataSource>('erp')
+
+const pjMonthOptions = Array.from({ length: 12 }, (_, i) => {
+  const v = String(i + 1).padStart(2, '0')
+  return { v, label: v }
+})
+
+const pjMonth = ref(momentLib().format('MM'))
+const pjYear = ref(String(momentLib().year()))
+/** Total rows reported by Pajak Express IF_TXR_015 header (server-side paging). */
+const pjTotalRows = ref(0)
 
 // Checkbox selection state
 const selectedItems = ref<VATReconciliationData[]>([])
@@ -485,75 +666,264 @@ const columns = ref<string[]>([
 // Data list now populated from API
 const dataList = ref<VATReconciliationData[]>([])
 
+function readPxVatHeader(response: { headers?: unknown }, canonName: string): string {
+  const h = response.headers
+  if (!h || typeof h !== 'object') return ''
+  const lower = canonName.toLowerCase()
+  const getter = typeof (h as { get?: (key: string) => unknown }).get === 'function'
+    ? (h as { get: (key: string) => unknown }).get.bind(h)
+    : null
+  if (getter) {
+    const fromGet = getter(canonName) ?? getter(lower)
+    if (fromGet !== undefined && fromGet !== null && String(fromGet).trim() !== '')
+      return String(fromGet).trim()
+  }
+  const rec = h as Record<string, unknown>
+  for (const [k, v] of Object.entries(rec)) {
+    if (typeof k !== 'string' || v === undefined || v === null) continue
+    if (typeof v === 'function') continue
+    if (k.toLowerCase() === lower) return String(v).trim()
+  }
+  return ''
+}
+
+function strFrom(row: Record<string, unknown>, ...keys: string[]): string {
+  for (const k of keys) {
+    const v = row[k]
+    if (v === undefined || v === null) continue
+    const s = String(v).trim()
+    if (s !== '') return s
+  }
+  return ''
+}
+
+function nullableStrFrom(row: Record<string, unknown>, ...keys: string[]): string | null {
+  const s = strFrom(row, ...keys)
+  return s === '' ? null : s
+}
+
+function normalizeVatApiRow(raw: unknown): VATReconciliationData {
+  const r = (raw ?? {}) as Record<string, unknown>
+
+  const vendorName = strFrom(r, 'vendorName', 'VendorName')
+  const npwpVendor = strFrom(r, 'npwpVendor', 'NpwpVendor', 'NPWPPembeli', 'npwpPembeli')
+  const tglFakturPajak = strFrom(r, 'tglFakturPajak', 'TglFakturPajak')
+  const noFakturPajak = strFrom(r, 'noFakturPajak', 'NoFakturPajak')
+
+  const toNum = (v: unknown) => {
+    if (v === undefined || v === null || v === '') return 0
+    const n = Number(v)
+    return Number.isFinite(n) ? n : 0
+  }
+
+  const amount = toNum(r.amount ?? r.Amount)
+  const dpp = toNum(r.dpp ?? r.DPP)
+  const ppn = toNum(r.ppn ?? r.PPN)
+
+  const statusFp = nullableStrFrom(r, 'statusFp', 'StatusFp', 'StatusFP')
+  const statusApVsFp = nullableStrFrom(r, 'statusApVsFp', 'StatusApVsFp')
+  const creditStatus = strFrom(r, 'creditStatus', 'CreditStatus') || 'UNCREDITED'
+  const vatCreditExpiryDate = strFrom(r, 'vatCreditExpiryDate', 'VatCreditExpiryDate')
+  const remark = strFrom(r, 'remark', 'Remark')
+  const action = nullableStrFrom(r, 'action', 'Action')
+
+  return {
+    vendorName,
+    npwpVendor,
+    tglFakturPajak,
+    noFakturPajak,
+    amount,
+    dpp,
+    ppn,
+    statusFp,
+    statusApVsFp,
+    creditStatus,
+    vatCreditExpiryDate,
+    remark,
+    action,
+  }
+}
+
 /**
- * Fetches VAT reconciliation data from the API
+ * Loads VAT reconciliation: ERP uses stored proc list; Pajak Express calls IF_TXR_015 mapped list with server paging.
  */
-const fetchVatData = async () => {
+const fetchVatData = async (opts?: { page?: number }) => {
   isLoading.value = true
   try {
-    const response = await vatApi.get('/vat/vat-reconciliation')
-    // API returns { result: { content: [...] } }
-    let content = response.data.result?.content || []
+    if (dataSource.value === 'pajakExpress') {
+      const y = pjYear.value.replace(/\D/g, '')
+      const page = opts?.page ?? currentPage.value
+      if (opts?.page !== undefined) currentPage.value = opts.page
 
-    // TODO: Remove this dummy logic once backend provides real status
-    content = content.map((item: VATReconciliationData, index: number) => {
-      // Randomly assign Status FP
-      const fpStatuses = ['Approved', 'Rejected', 'Approved', 'Approved'] // Weighted to Approved
-      const randomFp = fpStatuses[Math.floor(Math.random() * fpStatuses.length)]
-
-      // Randomly assign Match Status
-      const matchStatuses = ['Match', 'Mismatch', 'Match', 'Match'] // Weighted to Match
-      const randomMatch = matchStatuses[Math.floor(Math.random() * matchStatuses.length)]
-
-      // Calculate Credit Status based on logic:
-      // If everything is okay (Approved & Match) -> Ready to Credit (UNCREDITED)
-      let credit = 'WAITING_FOR_AMENDMENT'
-      if (randomFp === 'Approved' && randomMatch === 'Match') {
-        credit = 'UNCREDITED'
-      } else {
-        credit = 'WAITING_FOR_AMENDMENT'
+      if (y.length !== 4 || !pjMonth.value) {
+        vatData.value = []
+        dataList.value = []
+        pjTotalRows.value = 0
+        return
       }
 
-      // Generate dummy vatCreditExpiryDate for notification testing
-      // Some near expiry (for notifications), some far
-      const expiryDaysOptions = [2, 5, 10, 25, 45, 60, 90] // Days from now
-      const daysFromNow = expiryDaysOptions[index % expiryDaysOptions.length]
-      const expiryDate = momentLib().add(daysFromNow, 'days').format('YYYY-MM-DD')
+      const periode = `${pjMonth.value}/${y}`
+      const response = await vatApi.get('/vat/vat-reconciliation', {
+        params: {
+          source: 'PajakExpress',
+          periode,
+          page,
+          limit: pageSize.value,
+        },
+      })
 
-      return {
-        ...item,
-        statusFp: randomFp,
-        statusApVsFp: randomMatch,
-        creditStatus: credit,
-        vatCreditExpiryDate: item.vatCreditExpiryDate || expiryDate,
+      const rawList = response.data.result?.content || []
+      const content = (Array.isArray(rawList) ? rawList : []).map((row: unknown) =>
+        normalizeVatApiRow(row),
+      )
+
+      const totalRowStr = readPxVatHeader(response, 'X-Px-Vat-In-TotalRow')
+      const parsedTotal = parseInt(totalRowStr, 10)
+      pjTotalRows.value = Number.isFinite(parsedTotal) && parsedTotal > 0 ? parsedTotal : content.length
+
+      vatData.value = content
+      dataList.value = content
+    } else {
+      pjTotalRows.value = 0
+      const response = await vatApi.get('/vat/vat-reconciliation')
+      const rawList = response.data.result?.content || []
+      const content = (Array.isArray(rawList) ? rawList : []).map((row: unknown) =>
+        normalizeVatApiRow(row),
+      )
+
+      vatData.value = content
+      dataList.value = content
+
+      const notificationStore = useNotificationStore()
+      const newNotifications = notificationStore.checkVatExpiryNotifications(content)
+      if (newNotifications > 0) {
+        console.log(`Created ${newNotifications} VAT expiry notifications`)
       }
-    })
-
-    console.log('API Response content (Enriched):', content)
-    vatData.value = content
-    dataList.value = content
-    console.log('VAT Data fetched successfully:', content.length, 'records')
-
-    // Check for VAT expiry notifications
-    const notificationStore = useNotificationStore()
-    const newNotifications = notificationStore.checkVatExpiryNotifications(content)
-    if (newNotifications > 0) {
-      console.log(`Created ${newNotifications} VAT expiry notifications`)
     }
   } catch (error) {
     console.error('Error fetching VAT reconciliation data:', error)
     vatData.value = []
     dataList.value = []
-
-    // Fallback Dummy Data if API Fails/Empty (Optional, for demo)
-    if (dataList.value.length === 0) {
-      // Generate some dummy rows if needed, or leave empty.
-      // User asked to "add dummy data", assuming enrichment of existing or full dummy.
-      // Let's stick to enrichment first. If they want full dummy rows even with no API, I can add that.
-    }
+    pjTotalRows.value = 0
   } finally {
     isLoading.value = false
   }
+}
+
+async function runPrepopulateBulk() {
+  if (!pjMonth.value || !pjYear.value || pjYear.value.length !== 4) return
+  isPrepopulating.value = true
+  try {
+    const payload = {
+      fgPermintaan: 1,
+      requestFakturMasukan: {
+        prepopTahunPajak: pjYear.value,
+        prepopMasaPajak: pjMonth.value,
+      }
+    }
+    const res = await postVatInPrepopulated(payload)
+    if (!res.data?.isError) {
+      console.log('Prepopulated data retrieved successfully.')
+    } else {
+      console.warn('Prepopulated data issue:', res.data?.message)
+    }
+    await fetchVatData()
+  } catch (error) {
+    console.error('Error prepopulating VAT in:', error)
+  } finally {
+    isPrepopulating.value = false
+  }
+}
+
+async function fetchPendingVat() {
+  loadingPendingVat.value = true
+  try {
+    const params: any = {
+      page: pendingVatPage.value,
+      pageSize: pendingVatLimit.value
+    }
+    if (pendingSearch.value.trim()) {
+      params.search = pendingSearch.value.trim()
+    }
+    
+    const res = await BpuService.getInvoiceQueueForVat(params)
+    const r = res.result
+    if (!r || r.isError) {
+      pendingVatRows.value = []
+      pendingVatTotal.value = 0
+      if (r?.message?.trim()) console.warn('Antrian VAT invoice:', r.message)
+      return
+    }
+    const contentData = r.content as any
+    pendingVatRows.value = contentData?.items ? contentData.items : (Array.isArray(contentData) ? contentData : [])
+    pendingVatTotal.value = contentData?.total || pendingVatRows.value.length
+  } catch (e) {
+    console.error('fetchPendingVat', e)
+    pendingVatRows.value = []
+  } finally {
+    loadingPendingVat.value = false
+  }
+}
+
+function displayVatOnRow(inv: InvoiceVatQueueRow): number {
+  if (inv.vatAmount != null && Number.isFinite(Number(inv.vatAmount))) return Number(inv.vatAmount)
+  const loose = inv as unknown as Record<string, unknown>
+  const raw = loose.VATAmount ?? loose.vatAmount
+  if (raw != null && Number.isFinite(Number(raw))) return Number(raw)
+  return 0
+}
+
+function goManualPjSubmit() {
+  router.push({ name: 'vatPjSubmitFromInvoice' })
+}
+
+function goSubmitFromInvoice(inv: InvoiceVatQueueRow) {
+  let defMasa = momentLib().format('MM')
+  let defYear = momentLib().format('YYYY')
+  if (inv.createdUtcDate) {
+    const m = momentLib(inv.createdUtcDate)
+    if (m.isValid()) {
+      defMasa = m.format('MM')
+      defYear = m.format('YYYY')
+    }
+  }
+  router.push({
+    name: 'vatPjSubmitFromInvoice',
+    query: {
+      invoiceId: String(inv.id),
+      invoiceUId: String(inv.invoiceUId ?? ''),
+      invoiceNo: inv.invoiceNo ?? '',
+      vendorName: inv.vendorName ?? '',
+      vendorNpwp: inv.vendorNpwp ?? '',
+      dpp: String(inv.dpp ?? 0),
+      vatAmount: String(displayVatOnRow(inv)),
+      defMasa,
+      defYear,
+    },
+  })
+}
+
+async function setWorkspace(w: Workspace) {
+  workspace.value = w
+  if (w === 'queue') {
+    await fetchPendingVat()
+    return
+  }
+  dataSource.value = w === 'pj' ? 'pajakExpress' : 'erp'
+  currentPage.value = 1
+  pjTotalRows.value = 0
+  await fetchVatData()
+}
+
+const onPajakExpressPeriodChanged = async () => {
+  currentPage.value = 1
+  if (workspace.value !== 'pj') return
+  await fetchVatData()
+}
+
+const reloadVat = async () => {
+  if (workspace.value !== 'pj') return
+  await fetchVatData({ page: currentPage.value })
 }
 
 // Computed property for filtered data
@@ -587,11 +957,20 @@ const filteredDataList = computed(() => {
   return filtered
 })
 
+const paginationTotalForPager = computed(() => {
+  if (workspace.value === 'pj') {
+    return Math.max(pjTotalRows.value, 1)
+  }
+  return filteredDataList.value.length
+})
+
 const getStatusFPBadgeClass = (status: string | null) => {
   if (!status) return 'badge-secondary'
   if (status === 'Approved' || status === 'Valid') return 'badge-success'
   if (status === 'Invalid' || status === 'Rejected') return 'badge-danger'
-  if (status === 'Credited') return 'badge-primary'
+  if (status === 'Credited' || status === 'Created') return 'badge-primary'
+  if (status === 'Amended') return 'badge-warning'
+  if (status === 'Canceled') return 'badge-outline'
   return 'badge-secondary'
 }
 
@@ -606,6 +985,9 @@ const getCreditStatusBadgeClass = (status: string | null) => {
   if (!status) return 'badge-secondary'
   if (status === 'CREDITED') return 'badge-primary'
   if (status === 'UNCREDITED') return 'badge-success'
+  if (status === 'INVALID') return 'badge-danger'
+  if (status === 'Creditable') return 'badge-success'
+  if (status === 'Not Creditable' || status === 'Hold') return 'badge-outline'
   if (status === 'WAITING_FOR_AMENDMENT' || status === 'WAITING_FOR_CANCELLATION')
     return 'badge-warning'
   return 'badge-secondary'
@@ -638,6 +1020,10 @@ const formatCurrency = (amount: number): string => {
 }
 
 const setList = (listData: VATReconciliationData[]) => {
+  if (dataSource.value === 'pajakExpress') {
+    list.value = listData
+    return
+  }
   const result: VATReconciliationData[] = []
   for (const [index, item] of listData.entries()) {
     const start = currentPage.value * pageSize.value - pageSize.value
@@ -649,7 +1035,11 @@ const setList = (listData: VATReconciliationData[]) => {
   list.value = result
 }
 
-const setPage = (value: number) => {
+const setPage = async (value: number) => {
+  if (dataSource.value === 'pajakExpress') {
+    await fetchVatData({ page: value })
+    return
+  }
   currentPage.value = value
   setList(filteredDataList.value)
 }
@@ -719,7 +1109,11 @@ const isItemSelected = (item: VATReconciliationData) => {
 
 const goSearch = (event: KeyboardEvent) => {
   if (event.key === 'Enter') {
-    currentPage.value = 1
+    // ERP: pagination is client-side; reset to page 1 on search.
+    // Pajak Express: pagination is server-side; keep current page and filter client-side on loaded rows only.
+    if (dataSource.value === 'erp') {
+      currentPage.value = 1
+    }
     setList(filteredDataList.value)
   }
 }
@@ -745,8 +1139,9 @@ const applyFilter = () => {
 
   filteredPayload.value = payload
 
-  // 🔥 INI WAJIB
-  currentPage.value = 1
+  if (dataSource.value === 'erp') {
+    currentPage.value = 1
+  }
   setList(filteredDataList.value)
 }
 
@@ -757,7 +1152,9 @@ const resetFilter = () => {
     creditStatus: '',
   }
   filteredPayload.value = []
-  currentPage.value = 1
+  if (dataSource.value === 'erp') {
+    currentPage.value = 1
+  }
   setList(filteredDataList.value)
 }
 
@@ -771,7 +1168,9 @@ const deleteFilter = (key: string) => {
   }
 
   filteredPayload.value = filteredPayload.value.filter((item) => item.key !== key)
-  currentPage.value = 1
+  if (dataSource.value === 'erp') {
+    currentPage.value = 1
+  }
   setList(filteredDataList.value)
 }
 
@@ -879,13 +1278,94 @@ const closeAuthModal = () => {
   showAuthModal.value = false
 }
 
-const handleAuthVerify = (code: string) => {
+function passthroughBackendMessage(e: unknown): string {
+  if (axios.isAxiosError(e)) {
+    const data = e.response?.data as { message?: string; result?: string } | undefined
+    const m = typeof data?.message === 'string' ? data.message : undefined
+    if (m?.trim()) return m
+    if (typeof data?.result === 'string' && data.result.trim()) return data.result
+    return e.message || 'Terjadi kesalahan pada server.'
+  }
+  return e instanceof Error ? e.message : String(e)
+}
+
+/**
+ * Untuk ERP: tetap modal sukses (posting pajak PJ belum dihubungkan).
+ * Untuk Pajak Express: panggil `POST /vat/vat-in/upload` (IF_TXR_015 fgPermintaan=2) per baris terpilih.
+ */
+const handleAuthVerify = async (code: string) => {
   console.log('Verification code received:', code)
-  // TODO: Add API call to verify the code here
-  // For now, show success modal after verification
   closeAuthModal()
-  // successFpNumber.value = selectedItems.value[0]?.noFakturPajak || 'FP293429993' // No longer needed
-  showSuccessModal.value = true
+
+  if (dataSource.value !== 'pajakExpress') {
+    showSuccessModal.value = true
+    return
+  }
+
+  const masa = pjMonth.value.trim()
+  const tahun = pjYear.value.replace(/\D/g, '').trim()
+
+  if (masa.length === 0 || tahun.length !== 4) {
+    alert('Isi bulan dan tahun pajak (yyyy) untuk sumber Pajak Express.')
+    return
+  }
+
+  const items = [...selectedItems.value]
+  if (items.length === 0) {
+    showWarningModal.value = true
+    return
+  }
+
+  isPostingVat.value = true
+  const errors: string[] = []
+
+  try {
+    for (const item of items) {
+      const nomor = item.noFakturPajak?.trim()
+      if (!nomor) {
+        errors.push('Baris tanpa Nomor Faktur dilewati')
+        continue
+      }
+      try {
+        await postVatInUpload({
+          payload: {
+            fgPermintaan: 2,
+            konfirmasiFakturMasukan: {
+              konfirmasiPengkreditan: 'CREDITED',
+              nomorFaktur: nomor,
+              masaPajak: masa,
+              tahunPajak: tahun,
+            },
+          },
+          npwpPenjual: item.npwpVendor || undefined,
+          namaVendor: item.vendorName || undefined,
+          dpp: item.dpp > 0 ? item.dpp : undefined,
+          ppn: item.ppn > 0 ? item.ppn : undefined,
+          tanggalFaktur: item.tglFakturPajak
+            ? new Date(item.tglFakturPajak).toISOString().split('T')[0]
+            : new Date().toISOString().split('T')[0],
+        })
+      } catch (inner) {
+        errors.push(`${nomor}: ${passthroughBackendMessage(inner)}`)
+      }
+    }
+
+    if (errors.length === items.length) {
+      alert(`Posting gagal untuk semua faktur.\n${errors.slice(0, 5).join('\n')}${errors.length > 5 ? '\n…' : ''}`)
+      return
+    }
+
+    if (errors.length > 0) {
+      alert(
+        `${errors.length} dari ${items.length} gagal. Detail (maks 5):\n${errors.slice(0, 5).join('\n')}${errors.length > 5 ? '\n…' : ''}`,
+      )
+    }
+
+    await fetchVatData({ page: currentPage.value })
+    showSuccessModal.value = true
+  } finally {
+    isPostingVat.value = false
+  }
 }
 
 // Success Modal handlers
@@ -896,13 +1376,14 @@ const closeSuccessModal = () => {
 }
 
 onMounted(async () => {
-  await fetchVatData()
+  await fetchPendingVat()
 })
 
 // Watch for changes in filtered data and update list
 watch(
   filteredDataList,
   (newData) => {
+    if (workspace.value === 'queue') return
     console.log('filteredDataList updated:', newData.length, 'items')
     setList(newData)
   },

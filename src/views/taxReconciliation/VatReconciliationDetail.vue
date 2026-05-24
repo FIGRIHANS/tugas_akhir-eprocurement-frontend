@@ -263,14 +263,17 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import momentLib from 'moment'
+import vatApi from '@/core/utils/vatApi'
 
 const moment = momentLib
 const router = useRouter()
+const route = useRoute()
+const isLoading = ref<boolean>(false)
 
 const routes = ref<routeTypes[]>([
   {
@@ -283,29 +286,30 @@ const routes = ref<routeTypes[]>([
   },
 ])
 
-// Dummy detail data
 const detailData = ref({
-  npwpVendor: '01.234.567.8-901.000',
-  vendorName: 'PT. Contoh Vendor Indonesia',
-  tglInvoice: '2025-01-03',
-  tglFP: '2025-01-03',
-  nsfp: '010.001-25.00000001',
-  dpp: 10000000,
-  ppn: 1100000,
-  statusFP: 'Valid',
-  matchAPvsFP: 'Match',
-  creditStatus: 'Creditable',
-  masaPajakKredit: 'Januari 2025',
+  npwpVendor: '',
+  vendorName: '',
+  tglInvoice: '',
+  tglFP: '',
+  nsfp: '',
+  dpp: 0,
+  ppn: 0,
+  statusFP: '',
+  matchAPvsFP: '',
+  creditStatus: '',
+  masaPajakKredit: '',
   issue: '',
-  remarks: 'Invoice sudah sesuai dengan Faktur Pajak. Tidak ada perbedaan antara AP dan FP.',
-  invoiceNumber: 'INV-2025-001',
-  poNumber: 'PO-2025-001',
-  glAccount: '5100001',
-  costCenter: 'CC-001',
+  remarks: '',
+  invoiceNumber: '',
+  poNumber: '',
+  glAccount: '',
+  costCenter: '',
 })
 
 const formatDate = (date: string) => {
-  return moment(date).format('DD/MM/YYYY')
+  if (!date) return '-'
+  const m = moment(date)
+  return m.isValid() ? m.format('DD/MM/YYYY') : '-'
 }
 
 const formatCurrency = (amount: number) => {
@@ -317,25 +321,67 @@ const formatCurrency = (amount: number) => {
 }
 
 const getStatusFPBadgeClass = (status: string) => {
-  if (status === 'Valid') return 'badge-success'
-  if (status === 'Invalid') return 'badge-danger'
+  if (status === 'Valid' || status === 'Approved') return 'badge-success'
+  if (status === 'Invalid' || status === 'Rejected') return 'badge-danger'
   return 'badge-secondary'
 }
 
 const getMatchStatusBadgeClass = (status: string) => {
   if (status === 'Match') return 'badge-success'
-  if (status.includes('Mismatch')) return 'badge-danger'
+  if (status && status.includes('Mismatch')) return 'badge-danger'
   return 'badge-secondary'
 }
 
 const getCreditStatusBadgeClass = (status: string) => {
-  if (status === 'Creditable') return 'badge-success'
-  if (status === 'Not Creditable') return 'badge-danger'
-  if (status === 'Hold') return 'badge-secondary'
+  if (status === 'Creditable' || status === 'CREDITED') return 'badge-success'
+  if (status === 'Not Creditable' || status === 'INVALID') return 'badge-danger'
+  if (status === 'Hold' || status === 'UNCREDITED') return 'badge-secondary'
   return 'badge-secondary'
 }
 
 const goBack = () => {
   router.push('/vat-reconciliation')
 }
+
+const fetchDetail = async () => {
+  isLoading.value = true
+  try {
+    const response = await vatApi.get('/vat/vat-reconciliation')
+    const rawList = response.data.result?.content || []
+    const targetNo = route.params.id as string
+    
+    const found = rawList.find((row: any) => 
+      row.noFakturPajak === targetNo || 
+      row.NoFakturPajak === targetNo
+    )
+
+    if (found) {
+      detailData.value.npwpVendor = found.npwpVendor || found.NpwpVendor || ''
+      detailData.value.vendorName = found.vendorName || found.VendorName || ''
+      detailData.value.tglInvoice = found.tglFakturPajak || found.TglFakturPajak || ''
+      detailData.value.tglFP = found.tglFakturPajak || found.TglFakturPajak || ''
+      detailData.value.nsfp = found.noFakturPajak || found.NoFakturPajak || ''
+      detailData.value.dpp = found.dpp || found.Dpp || 0
+      detailData.value.ppn = found.ppn || found.Ppn || 0
+      detailData.value.statusFP = found.statusFp || found.StatusFp || ''
+      detailData.value.matchAPvsFP = found.statusApVsFp || found.StatusApVsFp || ''
+      detailData.value.creditStatus = found.creditStatus || found.CreditStatus || 'UNCREDITED'
+      detailData.value.remarks = found.remark || found.Remark || ''
+      
+      // Auto-extract additional information if available
+      detailData.value.invoiceNumber = found.invoiceNo || found.InvoiceNo || found.invoiceNumber || '-'
+      detailData.value.poNumber = found.poNumber || found.PoNumber || '-'
+      detailData.value.glAccount = found.glAccount || found.GlAccount || '-'
+      detailData.value.costCenter = found.costCenter || found.CostCenter || '-'
+    }
+  } catch (error) {
+    console.error('Error fetching VAT reconciliation details:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchDetail()
+})
 </script>

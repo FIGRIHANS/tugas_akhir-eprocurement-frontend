@@ -298,7 +298,7 @@ const populateFromQueryParams = () => {
   form.value.npwp = String(q.vendorNpwp || '')
   form.value.fgNpwpNik = q.vendorNpwp ? 'true' : 'false'
   form.value.dataDetilBpu.dpp = Number(q.dpp) || 0
-  form.value.dataDetilBpu.pphDipotong = Number(q.whtAmount) || 0
+  calculatePPh()
 
   const invoiceNo = String(q.invoiceNo || '')
   if (form.value.dataDetilBpu.dokReferensi.length > 0) {

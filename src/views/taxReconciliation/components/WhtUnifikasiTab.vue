@@ -26,7 +26,7 @@
         @click="activeView = 'pending'"
       >
         Pending Reconciliation
-        <span v-if="filteredPendingInvoices.length > 0" class="badge badge-sm badge-primary ml-1">{{ filteredPendingInvoices.length }}</span>
+        <span v-if="totalPending > 0" class="badge badge-sm badge-primary ml-1">{{ totalPending }}</span>
       </div>
       <div 
         class="tab cursor-pointer"
@@ -61,7 +61,7 @@
           <tr v-else-if="filteredPendingInvoices.length === 0" class="text-center">
             <td colspan="7" class="py-10 text-gray-400 italic">No approved invoices pending WHT reconciliation.</td>
           </tr>
-          <tr v-for="inv in filteredPendingInvoices" :key="inv.invoiceUId">
+          <tr v-for="inv in paginatedPendingInvoices" :key="inv.invoiceUId">
             <td>
               <span :class="inv.invoiceSource === 'PO' ? 'badge badge-light-primary px-2' : 'badge badge-light-warning px-2'">
                 {{ inv.invoiceSource }}
@@ -84,6 +84,19 @@
           </tr>
         </tbody>
       </table>
+
+      <!-- Pending Pagination Footer -->
+      <div v-if="totalPending > 0" class="flex items-center justify-between mt-[24px]">
+        <p class="text-sm text-gray-500">
+          Showing <b>{{ paginatedPendingInvoices.length }}</b> of <b>{{ totalPending }}</b> entries
+        </p>
+        <LPagination
+          :totalItems="totalPending"
+          :pageSize="pendingLimit"
+          :currentPage="pendingPage"
+          @page-change="onPendingPageChange"
+        />
+      </div>
     </div>
 
     <!-- MAIN BPU TABLE -->
@@ -330,16 +343,12 @@ const showPassphrase = ref(false)
 // Pending Invoice State
 const pendingInvoices = ref<any[]>([])
 const loadingPending = ref(false)
+const pendingPage = ref(1)
+const pendingLimit = ref(10)
+const totalPending = ref(0)
 
-const filteredPendingInvoices = computed(() => {
-  if (!search.value) return pendingInvoices.value
-  const s = search.value.toLowerCase()
-  return pendingInvoices.value.filter(inv => 
-    (inv.vendorName && inv.vendorName.toLowerCase().includes(s)) ||
-    (inv.invoiceNo && inv.invoiceNo.toLowerCase().includes(s)) ||
-    (inv.vendorNpwp && inv.vendorNpwp.includes(s))
-  )
-})
+const filteredPendingInvoices = computed(() => pendingInvoices.value)
+const paginatedPendingInvoices = computed(() => pendingInvoices.value)
 
 // Modal States
 const showDeleteModal = ref(false)
@@ -356,8 +365,14 @@ const notifType = ref<'success' | 'error' | 'warning' | 'info'>('success')
 const fetchPendingInvoices = async () => {
   loadingPending.value = true
   try {
-    const res = await BpuService.getAvailableInvoices()
-    pendingInvoices.value = res.result.content || []
+    const res = await BpuService.getAvailableInvoices({
+      search: search.value,
+      page: pendingPage.value,
+      limit: pendingLimit.value,
+      type: 'BPU',
+    })
+    pendingInvoices.value = res.result.content.items || []
+    totalPending.value = res.result.content.total || 0
   } catch (err) {
     console.error('Error fetching pending invoices:', err)
   } finally {
@@ -568,15 +583,35 @@ const viewDetail = (item: BpuContent) => {
   })
 }
 
+const onPendingPageChange = (v: number) => {
+  pendingPage.value = v
+  fetchPendingInvoices()
+}
+
 let searchTimeout: ReturnType<typeof setTimeout> | null = null
 watch(
   () => search.value,
   () => {
+    pendingPage.value = 1
     if (searchTimeout) clearTimeout(searchTimeout)
     searchTimeout = setTimeout(() => {
       page.value = 1
       fetchBpuList()
+      fetchPendingInvoices()
     }, 500)
+  }
+)
+
+watch(
+  () => activeView.value,
+  () => {
+    pendingPage.value = 1
+    page.value = 1
+    if (activeView.value === 'pending') {
+      fetchPendingInvoices()
+    } else {
+      fetchBpuList()
+    }
   }
 )
 
