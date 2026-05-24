@@ -79,6 +79,7 @@ interface ParamsSubmissionHeader {
   invoicingParty?: string
   assigment?: string
   transferNews?: string
+  invoiceSource?: number
   invoiceSourceName?: string
 }
 
@@ -241,6 +242,7 @@ export interface ListPoTypes {
   isOpenChild: boolean
   createdUtcDate: string
   invoiceSourceName?: string | null
+  invoiceSource?: number | null
   fpStatus?: boolean | null
   vatStatus?: boolean | null
   whtStatus?: boolean | null
@@ -330,6 +332,8 @@ export interface QueryParamsListPoTypes {
   invoiceSource?: number
   page?: number
   pageSize?: number
+  sortField?: string | null
+  sortOrder?: 'asc' | 'desc' | null
 }
 
 export interface ParamsSubmissionNonPo {
@@ -379,6 +383,8 @@ export interface ParamsSubmissionHeaderNonPo {
   pettyCashStartDate?: string | null
   pettyCashEndDate?: string | null
   npwpReportingName?: string
+  invoiceSource?: number
+  invoiceSourceName?: string
 }
 
 interface ParamsSubmissionAlternativePay {

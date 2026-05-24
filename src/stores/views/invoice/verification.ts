@@ -30,6 +30,24 @@ const PAYMENT_STATUS_ENDPOINT =
 const PAYMENT_STATUS_NON_PO_ENDPOINT =
   'https://invoice-management-dev.azurewebsites.net/api/invoice/payment-status-non-po'
 
+const parsePaginatedContent = <T>(rawContent: unknown): T[] => {
+  if (!rawContent) return []
+
+  if (Array.isArray(rawContent)) {
+    return rawContent as T[]
+  }
+
+  if (typeof rawContent !== 'object') return []
+
+  const content = rawContent as Record<string, unknown>
+  if (Array.isArray(content.items)) return content.items as T[]
+  if (Array.isArray(content.Items)) return content.Items as T[]
+  if (Array.isArray(content.data)) return content.data as T[]
+  if (Array.isArray(content.records)) return content.records as T[]
+
+  return []
+}
+
 export const useInvoiceVerificationStore = defineStore('invoiceVerification', () => {
   const listPo = ref<ListPoTypes[]>([])
   const listNonPo = ref<ListNonPoTypes[]>([])
@@ -136,9 +154,13 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
         },
       })
 
-      // Safely extract content array from response
-      const content = response?.data?.result?.content
-      const resultArray = Array.isArray(content) ? content : []
+      const resultArray = parsePaginatedContent<ListPoTypes>(response?.data?.result?.content).map(
+        (item) => ({
+          ...item,
+          pOs: item.pOs ?? [],
+          isOpenChild: item.isOpenChild ?? false,
+        }),
+      )
 
       listPo.value =
         resultArray.length !== 0
@@ -176,9 +198,13 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
         },
       )
 
-      // Safely extract content array from response
-      const content = response?.data?.result?.content
-      const resultArray = Array.isArray(content) ? content : []
+      const resultArray = parsePaginatedContent<ListNonPoTypes>(
+        response?.data?.result?.content,
+      ).map((item) => ({
+        ...item,
+        pOs: item.pOs ?? [],
+        isOpenChild: item.isOpenChild ?? false,
+      }))
 
       listNonPo.value =
         resultArray.length !== 0
@@ -214,14 +240,22 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
         },
       },
     )
+    const resultArray = parsePaginatedContent<ListNonPoTypes>(response?.data?.result?.content).map(
+      (item) => ({
+        ...item,
+        pOs: item.pOs ?? [],
+        isOpenChild: item.isOpenChild ?? false,
+      }),
+    )
+
     listNonPo.value =
-      response.data.result.content.length !== 0
-        ? response.data.result.content.sort(
+      resultArray.length !== 0
+        ? resultArray.sort(
             (a, b) => moment(b.invoiceDate).valueOf() - moment(a.invoiceDate).valueOf(),
           )
         : []
 
-    return response.data.result.content
+    return listNonPo.value
   }
 
   const getInvoiceDetail = async (uid: string) => {
@@ -285,7 +319,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
   const putSubmission = async (data: PostVerificationTypes) => {
     const response: ApiResponse<void> = await invoiceApi.put(`/invoice/approval`, data)
 
-    return response.data.result
+    return response.data
   }
 
   const putSubmissionNonPo = async (data: PostEditApprovalNonPoTypes) => {

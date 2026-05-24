@@ -188,24 +188,24 @@ const sidebarMenuData: ISidebarMenu[] = [
       // },
       {
         id: 'invoice-verification',
-        title: 'Invoice Verification',
+        title: ' FTP Invoice Verification',
         to: 'invoiceVerification',
       },
-      {
-        id: 'invoice-verification-no-po',
-        title: 'Invoice Verification Non PO',
-        to: 'invoiceVerificationNoPo',
-      },
+      // {
+      //   id: 'invoice-verification-no-po',
+      //   title: 'Invoice Verification Non PO',
+      //   to: 'invoiceVerificationNoPo',
+      // },
       {
         id: 'invoice-approval',
         title: 'Invoice Approval',
         to: 'invoiceApproval',
       },
-      {
-        id: 'invoice-approval-no-po',
-        title: 'Invoice Approval Non PO',
-        to: 'invoiceApprovalNonPo',
-      },
+      // {
+      //   id: 'invoice-approval-no-po',
+      //   title: 'Invoice Approval Non PO',
+      //   to: 'invoiceApprovalNonPo',
+      // },
       {
         id: 'ftp-invoice-integration',
         title: 'FTP Invoice Integration',

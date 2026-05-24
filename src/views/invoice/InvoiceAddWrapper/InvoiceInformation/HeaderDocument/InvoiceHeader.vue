@@ -309,17 +309,6 @@
           :disabled="form.status !== 0 && form.status !== -1 && form.status !== 5"
           :class="{ 'border-danger': form.descriptionError }"></textarea>
       </div>
-
-      <div v-if="checkPo() && !isCasRoute" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-        <label class="form-label"> Invoice Source </label>
-        <input v-if="form.status !== 0 && form.status !== -1 && form.status !== 5" v-model="form.invoiceSource"
-          class="input" placeholder="" disabled />
-        <select v-else v-model="form.invoiceSource" class="select">
-          <option v-for="item of invoiceSourceList" :key="item.code" :value="item.code">
-            {{ item.name }}
-          </option>
-        </select>
-      </div>
     </div>
   </div>
 </template>

@@ -32,9 +32,9 @@ interface ParamsSubmissionCostExpense {
 }
 
 export interface PostVerificationTypes {
-  statusCode: number
-  statusName: string
-  statusNotes: string
+  statusCode?: number
+  statusName?: string
+  statusNotes?: string
   header: ParamsVerificationHeaderTypes
   payment: ParamsSubmissionPayment
   documents: ParamsSubmissionDocument[]
@@ -224,9 +224,9 @@ export interface ParamsSubmissionCost {
 }
 
 export interface PostEditApprovalNonPoTypes {
-  statusCode: number
-  statusName: string
-  statusNotes: string
+  statusCode?: number
+  statusName?: string
+  statusNotes?: string
   header: ParamsNonPoHeaderTypes
   payment: ParamsSubmissionPayment
   documents: ParamsSubmissionDocument[]
@@ -257,8 +257,8 @@ interface ParamsNonPoHeaderTypes {
   currCode: string
   creditCardBillingID: string
   notes: string
-  statusCode: number
-  statusName: string
+  statusCode?: number
+  statusName?: string
   department: string
   profileId: string
   casDateReceipt: string
@@ -694,9 +694,9 @@ interface Header {
 }
 
 export interface SubmissionNonPoTypes {
-  statusCode: number | null
-  statusName: string | null
-  statusNotes: string | null
+  statusCode?: number | null
+  statusName?: string | null
+  statusNotes?: string | null
   header: Header
   payment: Payment
   documents: Document[]

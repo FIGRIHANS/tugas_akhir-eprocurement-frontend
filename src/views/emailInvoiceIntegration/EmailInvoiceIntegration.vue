@@ -320,7 +320,6 @@ const columns = ref<string[]>([
   'Total Net Amount',
   'Estimated Payment Date',
   'Submitted Document No',
-  'Invoice Source',
   'FP Status',
   'VAT Status',
   'WHT Status',
