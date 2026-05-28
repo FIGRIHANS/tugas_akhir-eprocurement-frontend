@@ -159,6 +159,7 @@ import { ref, reactive, defineAsyncComponent, onMounted, computed } from 'vue'
 import LPagination from '@/components/pagination/LPagination.vue'
 import type { filterListTypes } from '../../types/invoiceList'
 import InputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
+import { resolveInvoiceAddRouteType } from '@/core/utils/invoiceSubmissionRoute'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import { useFormatIdr } from '@/composables/currency'
@@ -370,23 +371,13 @@ const goAdd = (isPo: boolean) => {
 }
 
 const goToDetail = (data: ListNonPoTypes) => {
-  if (data.statusCode === 0 || data.statusCode === 5) {
-    router.push({
-      name: 'invoiceAdd',
-      query: {
-        type: 'nonpo',
-        invoice: data.invoiceUId,
-      },
-    })
-  } else {
-    router.push({
-      name: 'invoiceAdd',
-      query: {
-        type: 'non-po-view',
-        invoice: data.invoiceUId,
-      },
-    })
-  }
+  router.push({
+    name: 'invoiceAdd',
+    query: {
+      type: resolveInvoiceAddRouteType(data.statusCode, data.statusName, 'nonpo'),
+      invoice: data.invoiceUId,
+    },
+  })
 }
 
 const sortColumn = (columnName: string | null) => {

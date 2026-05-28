@@ -303,17 +303,37 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
   }
 
   const postSap = async (invoiceUId: string) => {
-    const response: ApiResponse<void> = await invoiceApi.post(`/invoice/sap/${invoiceUId}`)
-    errorMessageSap.value = response.data.result.message
+    try {
+      const response: ApiResponse<void> = await invoiceApi.post(`/invoice/sap/${invoiceUId}`)
+      errorMessageSap.value = response.data.result.message
 
-    return response.data.statusCode
+      return response.data.statusCode
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { result?: { message?: string }; message?: string } } }
+      errorMessageSap.value =
+        err.response?.data?.result?.message ||
+        err.response?.data?.message ||
+        'Failed to send invoice to SAP.'
+      throw error
+    }
   }
 
   const postSapNonPo = async (invoiceUId: string) => {
-    const response: ApiResponse<void> = await invoiceApi.post(`/invoice/sap/non-po/${invoiceUId}`)
-    errorMessageSap.value = response.data.result.message
+    try {
+      const response: ApiResponse<void> = await invoiceApi.post(
+        `/invoice/sap/non-po/${invoiceUId}`,
+      )
+      errorMessageSap.value = response.data.result.message
 
-    return response.data.statusCode
+      return response.data.statusCode
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { result?: { message?: string }; message?: string } } }
+      errorMessageSap.value =
+        err.response?.data?.result?.message ||
+        err.response?.data?.message ||
+        'Failed to send invoice to SAP.'
+      throw error
+    }
   }
 
   const putSubmission = async (data: PostVerificationTypes) => {

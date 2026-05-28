@@ -68,12 +68,19 @@
               <tr>
                 <td>
                   <div class="dropdown" data-dropdown="true" data-dropdown-trigger="click">
-                    <button class="dropdown-toggle btn btn-light btn-icon">
+                    <button
+                      class="dropdown-toggle btn btn-light btn-icon"
+                      @click="checkAndFetchApprovalStatus(parent.invoiceUId)"
+                    >
                       <i class="ki-filled ki-dots-vertical"></i>
                     </button>
                     <div class="dropdown-content w-full max-w-56 py-2">
                       <div class="menu menu-default flex flex-col w-full">
-                        <div v-if="parent.statusCode === 4" class="menu-item" @click="sendToSap()">
+                        <div
+                          v-if="parent.statusCode === 4"
+                          class="menu-item"
+                          @click="sendToSap(parent.invoiceUId)"
+                        >
                           <div class="menu-link">
                             <span class="menu-icon">
                               <i class="ki-duotone ki-paper-plane !text-lg"></i>
@@ -98,7 +105,7 @@
                           </div>
                         </div>
                         <div
-                          v-if="parent.statusCode === 4"
+                          v-if="parent.statusCode === 4 && !approvedByFinanceApCache.get(parent.invoiceUId)"
                           class="menu-item"
                           @click="openDetailInvoiceEdit(parent.invoiceUId)"
                         >
@@ -110,7 +117,7 @@
                           </div>
                         </div>
                         <div
-                          v-if="parent.statusCode === 7"
+                          v-if="parent.statusCode === 7 && !approvedByFinanceApCache.get(parent.invoiceUId)"
                           class="menu-item"
                           @click="openDetailInvoiceEditSendSap(parent.invoiceUId)"
                         >
@@ -255,6 +262,8 @@ const invoiceApi = useInvoiceSubmissionStore()
 const verificationApi = useInvoiceVerificationStore()
 const filterChild = ref(null)
 const router = useRouter()
+const approvedByFinanceApCache = ref<Map<string, boolean>>(new Map())
+const invoicesBeingChecked = ref<Set<string>>(new Set())
 const search = ref<string>('')
 const currentPage = ref<number>(1)
 const pageSize = ref<number>(10)
@@ -376,6 +385,37 @@ const openDetailInvoiceEditSendSap = (invoiceId: string) => {
   })
 }
 
+const isApprovedByFinanceAp = async (invoiceUId: string): Promise<boolean> => {
+  // Check cache first
+  if (approvedByFinanceApCache.value.has(invoiceUId)) {
+    return approvedByFinanceApCache.value.get(invoiceUId) || false
+  }
+
+  try {
+    // Fetch detail to check workflow
+    await invoiceApi.getNonPoDetail(invoiceUId)
+    const detail = invoiceApi.detailNonPo
+
+    if (detail?.workflow && Array.isArray(detail.workflow)) {
+      // Check if there's an approval from profileId 3004 with stateCode 4 (APPROVED)
+      const isApprovedByAp = detail.workflow.some(
+        (item: any) => Number(item.profileId) === 3004 && Number(item.stateCode) === 4
+      )
+      approvedByFinanceApCache.value.set(invoiceUId, isApprovedByAp)
+      return isApprovedByAp
+    }
+  } catch (error) {
+    console.error('Error fetching invoice detail:', error)
+  }
+
+  approvedByFinanceApCache.value.set(invoiceUId, false)
+  return false
+}
+
+const checkAndFetchApprovalStatus = async (invoiceUId: string) => {
+  await isApprovedByFinanceAp(invoiceUId)
+}
+
 const resetFilter = () => {
   filterForm.status = null
   filterChild.value.resetFilter()
@@ -480,27 +520,26 @@ const closeDropdown = () => {
   document.body.dispatchEvent(event)
 }
 
-const sendToSap = () => {
+const sendToSap = (invoiceUId: string) => {
+  if (isLoadingSap.value) return
   closeDropdown()
   isLoadingSap.value = true
-  // verificationApi
-  //   .postSapNonPo(invoiceUId)
-  //   .then((statusCode: number) => {
-  //     if (statusCode === 200) {
-  //       openSuccesSap()
-  //       callList()
-  //     } else {
-  //       openFailedSap()
-  //     }
-  //   })
-  //   .finally(() => {
-  //     isLoadingSap.value = false
-  //   })
-  setTimeout(() => {
-    openSuccesSap()
-    callList()
-    isLoadingSap.value = false
-  }, 5000)
+  verificationApi
+    .postSapNonPo(invoiceUId)
+    .then((statusCode: number) => {
+      if (statusCode === 200) {
+        openSuccesSap()
+        callList()
+      } else {
+        openFailedSap()
+      }
+    })
+    .catch(() => {
+      openFailedSap()
+    })
+    .finally(() => {
+      isLoadingSap.value = false
+    })
 }
 
 const openSuccesSap = () => {
@@ -509,11 +548,11 @@ const openSuccesSap = () => {
   modal.show()
 }
 
-// const openFailedSap = () => {
-//   const idModal = document.querySelector('#failed_send_sap_modal')
-//   const modal = KTModal.getInstance(idModal as HTMLElement)
-//   modal.show()
-// }
+const openFailedSap = () => {
+  const idModal = document.querySelector('#failed_send_sap_modal')
+  const modal = KTModal.getInstance(idModal as HTMLElement)
+  modal.show()
+}
 
 const sortColumn = (columnName: string | null) => {
   const list = {
