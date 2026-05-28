@@ -58,3 +58,13 @@ export function postVatInVerifyCoretax063(body: Record<string, unknown>) {
 export function postVatInVerifyCoretax063Prepop(body: Record<string, unknown>) {
   return vatApi.post('/vat/vat-in/prepop/verify-coretax', body)
 }
+
+/** IF_TXR_062 Replace/Cancel */
+export function postVatInReplaceCancel(body: Record<string, unknown>) {
+  return vatApi.post('/vat/vat-in/replace-cancel', body)
+}
+
+/** IF_TXR_CETAK Download PDF */
+export function postVatInDownloadPdf(body: { url: string }) {
+  return vatApi.post('/vat/vat-in/download-pdf', body)
+}

@@ -39,7 +39,7 @@
             <i :class="['ki-filled', statusIcon, 'text-2xl']"></i>
           </div>
           <div>
-            <div class="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-0.5">
+            <div class="text-xs font-medium text-gray-500 mb-0.5">
               Tax Record Status
             </div>
             <div class="flex items-center gap-2 flex-wrap">
@@ -48,7 +48,7 @@
               }}</span>
               <span
                 v-if="item.nomorBuktiPotong || item.noBupot"
-                class="badge badge-primary badge-outline font-mono text-[10px] h-5"
+                class="badge badge-primary badge-outline text-[10px] h-5"
               >
                 {{ item.nomorBuktiPotong || item.noBupot }}
               </span>
@@ -83,130 +83,82 @@
       <div class="flex flex-col lg:flex-row gap-[24px] items-start">
         <div class="flex-1 space-y-6">
           <!-- Section 1: Recipient Information -->
-          <div class="card p-[20px] shadow-sm">
-            <p
-              class="font-bold text-sm mb-[16px] uppercase tracking-tight text-gray-700 flex items-center gap-2 border-b pb-2 border-gray-100"
-            >
-              Recipient Information
-            </p>
-            <div class="space-y-1">
+          <div class="card">
+            <div class="card-header py-[17px] flex items-center justify-between gap-[8px]">
+              <h3 class="card-title text-base font-semibold">Recipient Information</h3>
+            </div>
+            <div class="card-body flex flex-col gap-[20px]">
               <div
                 v-if="item.namaPenerima || item.nama"
-                class="flex items-baseline flex-wrap lg:flex-nowrap py-[8px]"
+                class="flex items-center justify-between gap-[10px]"
               >
-                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600"
-                  >Recipient Name</label
-                >
-                <input
-                  class="input flex-1 bg-gray-50 border-gray-200 font-semibold text-sm text-gray-800"
-                  :value="item.namaPenerima || item.nama"
-                  disabled
-                />
+                <p class="font-normal text-sm text-gray-600">Recipient Name</p>
+                <p class="font-normal text-sm font-semibold text-gray-800">{{ item.namaPenerima || item.nama }}</p>
               </div>
               <div
                 v-if="item.npwpPenerima || item.npwp"
-                class="flex items-baseline flex-wrap lg:flex-nowrap py-[8px]"
+                class="flex items-center justify-between gap-[10px]"
               >
-                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600"
-                  >NPWP / NIK</label
-                >
-                <input
-                  class="input flex-1 bg-gray-50 border-gray-200 font-mono text-sm text-primary font-semibold"
-                  :value="item.npwpPenerima || item.npwp"
-                  disabled
-                />
+                <p class="font-normal text-sm text-gray-600">NPWP / NIK</p>
+                <p class="font-normal text-sm font-semibold text-primary">{{ item.npwpPenerima || item.npwp }}</p>
               </div>
               <div
                 v-if="item.alamatPenerima"
-                class="flex items-baseline flex-wrap lg:flex-nowrap py-[8px]"
+                class="flex items-center justify-between gap-[10px]"
               >
-                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600"
-                  >Address</label
-                >
-                <input
-                  class="input flex-1 bg-gray-50 border-gray-200 text-sm text-gray-700"
-                  :value="item.alamatPenerima"
-                  disabled
-                />
+                <p class="font-normal text-sm text-gray-600">Address</p>
+                <p class="font-normal text-sm text-gray-700">{{ item.alamatPenerima }}</p>
               </div>
             </div>
           </div>
 
           <!-- Section 2: Financial & Tax Details -->
-          <div class="card p-[20px] shadow-sm">
-            <p
-              class="font-bold text-sm mb-[16px] uppercase tracking-tight text-gray-700 flex items-center gap-2 border-b pb-2 border-gray-100"
-            >
-              Financial &amp; Tax Details
-            </p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-1">
+          <div class="card">
+            <div class="card-header py-[17px] flex items-center justify-between gap-[8px]">
+              <h3 class="card-title text-base font-semibold">Financial & Tax Details</h3>
+            </div>
+            <div class="card-body flex flex-col gap-[20px]">
               <div
                 v-if="item.kodeObjekPajak"
-                class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+                class="flex items-center justify-between gap-[10px]"
               >
-                <label class="form-label min-w-[120px] text-sm font-medium text-gray-600"
-                  >Object Code</label
-                >
-                <input
-                  class="input bg-gray-50 border-gray-200 font-semibold text-sm text-gray-800"
-                  :value="item.kodeObjekPajak"
-                  disabled
-                />
+                <p class="font-normal text-sm text-gray-600">Object Code</p>
+                <p class="font-normal text-sm font-semibold text-gray-800">{{ item.kodeObjekPajak }}</p>
               </div>
               <div
                 v-if="item.tglPemotongan"
-                class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+                class="flex items-center justify-between gap-[10px]"
               >
-                <label class="form-label min-w-[120px] text-gray-500">Withholding Date</label>
-                <input
-                  class="input bg-gray-50 border-gray-200"
-                  :value="item.tglPemotongan"
-                  disabled
-                />
+                <p class="font-normal text-sm text-gray-600">Withholding Date</p>
+                <p class="font-normal text-sm text-gray-800">{{ item.tglPemotongan }}</p>
               </div>
               <div
                 v-if="item.pasalPPh"
-                class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+                class="flex items-center justify-between gap-[10px]"
               >
-                <label class="form-label min-w-[120px] text-gray-500">Pasal PPh</label>
-                <input
-                  class="input bg-gray-50 border-gray-200"
-                  :value="item.pasalPPh"
-                  disabled
-                />
+                <p class="font-normal text-sm text-gray-600">Pasal PPh</p>
+                <p class="font-normal text-sm text-gray-800">{{ item.pasalPPh }}</p>
               </div>
               <div
                 v-if="item.statusPPh"
-                class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+                class="flex items-center justify-between gap-[10px]"
               >
-                <label class="form-label min-w-[120px] text-gray-500">Status PPh</label>
-                <input
-                  class="input bg-gray-50 border-gray-200"
-                  :value="item.statusPPh"
-                  disabled
-                />
+                <p class="font-normal text-sm text-gray-600">Status PPh</p>
+                <p class="font-normal text-sm text-gray-800">{{ item.statusPPh }}</p>
               </div>
               <div
                 v-if="item.masaPajak"
-                class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+                class="flex items-center justify-between gap-[10px]"
               >
-                <label class="form-label min-w-[120px] text-gray-500">Tax Period</label>
-                <input
-                  class="input bg-gray-50 border-gray-200"
-                  :value="item.masaPajak"
-                  disabled
-                />
+                <p class="font-normal text-sm text-gray-600">Tax Period</p>
+                <p class="font-normal text-sm text-gray-800">{{ item.masaPajak }}</p>
               </div>
               <div
                 v-if="item.tahunPajak"
-                class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+                class="flex items-center justify-between gap-[10px]"
               >
-                <label class="form-label min-w-[120px] text-gray-500">Tax Year</label>
-                <input
-                  class="input bg-gray-50 border-gray-200"
-                  :value="item.tahunPajak"
-                  disabled
-                />
+                <p class="font-normal text-sm text-gray-600">Tax Year</p>
+                <p class="font-normal text-sm text-gray-800">{{ item.tahunPajak }}</p>
               </div>
             </div>
           </div>
@@ -214,41 +166,39 @@
           <!-- Section 3: Classification (only if any field exists) -->
           <div
             v-if="item.kap || item.kjs || item.glAccount || item.idTku"
-            class="card p-[20px] shadow-sm"
+            class="card"
           >
-            <p
-              class="font-bold text-sm mb-[16px] uppercase tracking-tight text-gray-700 flex items-center gap-2 border-b pb-2 border-gray-100"
-            >
-              Classification &amp; Internal Codes
-            </p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-1">
+            <div class="card-header py-[17px] flex items-center justify-between gap-[8px]">
+              <h3 class="card-title text-base font-semibold">Classification & Payments</h3>
+            </div>
+            <div class="card-body flex flex-col gap-[20px]">
               <div
                 v-if="item.kap"
-                class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+                class="flex items-center justify-between gap-[10px]"
               >
-                <label class="form-label min-w-[120px] text-gray-500">KAP</label>
-                <input class="input bg-gray-50 border-gray-200" :value="item.kap" disabled />
+                <p class="font-normal text-sm text-gray-600">KAP Code</p>
+                <p class="font-normal text-sm text-gray-800">{{ item.kap }}</p>
               </div>
               <div
                 v-if="item.kjs"
-                class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+                class="flex items-center justify-between gap-[10px]"
               >
-                <label class="form-label min-w-[120px] text-gray-500">KJS</label>
-                <input class="input bg-gray-50 border-gray-200" :value="item.kjs" disabled />
+                <p class="font-normal text-sm text-gray-600">KJS Code</p>
+                <p class="font-normal text-sm text-gray-800">{{ item.kjs }}</p>
               </div>
               <div
                 v-if="item.glAccount"
-                class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+                class="flex items-center justify-between gap-[10px]"
               >
-                <label class="form-label min-w-[120px] text-gray-500">GL Account</label>
-                <input class="input bg-gray-50 border-gray-200" :value="item.glAccount" disabled />
+                <p class="font-normal text-sm text-gray-600">GL Account</p>
+                <p class="font-normal text-sm text-gray-800">{{ item.glAccount }}</p>
               </div>
               <div
                 v-if="item.idTku"
-                class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]"
+                class="flex items-center justify-between gap-[10px]"
               >
-                <label class="form-label min-w-[120px] text-gray-500">TKU ID</label>
-                <input class="input bg-gray-50 border-gray-200" :value="item.idTku" disabled />
+                <p class="font-normal text-sm text-gray-600">Unit/TKU ID</p>
+                <p class="font-normal text-sm text-gray-800">{{ item.idTku }}</p>
               </div>
             </div>
           </div>
@@ -258,22 +208,14 @@
             v-if="item.dokReferensi && item.dokReferensi.length > 0"
             class="card p-[20px] shadow-sm"
           >
-            <p
-              class="font-bold text-sm mb-[16px] uppercase tracking-tight text-gray-700 flex items-center gap-2 border-b pb-2 border-gray-100"
-            >
-              Reference Documents
-            </p>
+            <h3 class="text-lg font-semibold mb-[16px]">Reference Documents</h3>
             <div class="overflow-hidden border border-gray-100 rounded-lg">
               <table class="table table-auto w-full text-xs">
-                <thead class="bg-gray-100/50 border-b border-gray-100">
+                <thead class="bg-gray-100/50 border-b border-gray-100 text-xs font-semibold text-gray-600">
                   <tr>
-                    <th class="py-3 px-4 text-left font-bold text-gray-600 uppercase">
-                      Document Type
-                    </th>
-                    <th class="py-3 px-4 text-left font-bold text-gray-600 uppercase">
-                      Document No
-                    </th>
-                    <th class="py-3 px-4 text-left font-bold text-gray-600 uppercase">Date</th>
+                    <th class="py-3 px-4 text-left font-medium">Document Type</th>
+                    <th class="py-3 px-4 text-left font-medium">Document Number</th>
+                    <th class="py-3 px-4 text-left font-medium">Date</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
@@ -291,70 +233,47 @@
         <!-- Right Panel -->
         <div class="w-full lg:max-w-sm space-y-6 lg:sticky lg:top-0">
           <!-- Tax Summary -->
-          <div class="card shadow-sm">
-            <div class="card-header py-[16px] px-[20px] border-b border-gray-100 bg-gray-50">
-              <span
-                class="font-bold text-sm uppercase tracking-tight text-gray-700 flex items-center gap-2"
-              >
-                <i class="ki-filled ki-wallet text-danger"></i>
-                Tax Summary
-              </span>
+          <div class="card">
+            <div class="card-header py-[17px] flex items-center justify-between gap-[8px]">
+              <h3 class="card-title text-base font-semibold">Tax Calculation</h3>
             </div>
-            <div class="card-body p-0">
-              <div class="flex flex-col">
-                <div
-                  class="border-b border-gray-100 py-[15px] px-[20px] text-sm flex justify-between"
-                >
-                  <span class="text-gray-500 font-medium uppercase tracking-tight text-[11px]"
-                    >Tax Base (DPP)</span
-                  >
-                  <span class="font-bold text-gray-800">{{ formatCurrency(item.dpp || 0) }}</span>
-                </div>
-                <div
-                  class="border-b border-gray-100 py-[15px] px-[20px] text-sm flex justify-between"
-                >
-                  <span class="text-gray-500 font-medium uppercase tracking-tight text-[11px]"
-                    >Tax Rate</span
-                  >
-                  <span class="font-bold text-gray-800">{{ item.tarif || 0 }}%</span>
-                </div>
-                <div
-                  class="py-[20px] px-[20px] text-sm flex justify-between items-center bg-red-50/30"
-                >
-                  <span class="uppercase font-bold text-danger tracking-wider text-[11px]"
-                    >Withheld PPh</span
-                  >
-                  <span class="text-xl font-black text-danger">{{
-                    formatCurrency(item.pphDipotong || 0)
-                  }}</span>
-                </div>
+            <div class="card-body flex flex-col gap-[20px]">
+              <div class="flex items-center justify-between gap-[10px]">
+                <p class="font-normal text-sm text-gray-600">Tax Base (DPP)</p>
+                <p class="font-normal text-sm font-semibold text-gray-800">{{ formatCurrency(item.dpp || 0) }}</p>
+              </div>
+              <div class="flex items-center justify-between gap-[10px]">
+                <p class="font-normal text-sm text-gray-600">Tax Rate</p>
+                <p class="font-normal text-sm font-semibold text-gray-800">{{ item.tarif || 0 }}%</p>
+              </div>
+              <div class="flex items-center justify-between gap-[10px]">
+                <p class="font-normal text-sm text-gray-600">Withheld PPh</p>
+                <p class="font-normal text-sm font-semibold text-danger">{{ formatCurrency(item.pphDipotong || 0) }}</p>
               </div>
             </div>
           </div>
 
           <!-- System Metadata -->
-          <div class="card p-[20px] shadow-sm bg-gray-50/50">
-            <p class="font-bold text-[11px] mb-[16px] uppercase tracking-[0.15em] text-gray-400">
-              System Metadata
-            </p>
-            <div class="space-y-4">
-              <div v-if="item.pxId" class="flex flex-col gap-1">
-                <label class="text-[11px] uppercase font-bold text-gray-400">PX-Internal ID</label>
-                <div class="text-sm text-gray-600 font-semibold">{{ item.pxId }}</div>
+          <div class="card">
+            <div class="card-header py-[17px] flex items-center justify-between gap-[8px]">
+              <h3 class="card-title text-base font-semibold">System Metadata</h3>
+            </div>
+            <div class="card-body flex flex-col gap-[20px]">
+              <div v-if="item.pxId" class="flex items-center justify-between gap-[10px]">
+                <p class="font-normal text-sm text-gray-600">PX-Internal ID</p>
+                <p class="font-normal text-sm text-gray-800 font-semibold">{{ item.pxId }}</p>
               </div>
-              <div v-if="item.nomorBuktiPotong || item.noBupot" class="flex flex-col gap-1">
-                <label class="text-[11px] uppercase font-bold text-gray-400">No. Bupot</label>
-                <div class="text-sm font-bold text-primary">
-                  {{ item.nomorBuktiPotong || item.noBupot }}
-                </div>
+              <div v-if="item.nomorBuktiPotong || item.noBupot" class="flex items-center justify-between gap-[10px]">
+                <p class="font-normal text-sm text-gray-600">No. Bupot</p>
+                <p class="font-normal text-sm text-primary font-semibold">{{ item.nomorBuktiPotong || item.noBupot }}</p>
               </div>
-              <div v-if="item.idBupot" class="flex flex-col gap-1">
-                <label class="text-[11px] uppercase font-bold text-gray-400">ID Bupot (DJP)</label>
-                <div class="text-sm text-gray-800 font-bold break-all">{{ item.idBupot }}</div>
+              <div v-if="item.idBupot" class="flex items-center justify-between gap-[10px]">
+                <p class="font-normal text-sm text-gray-600">ID Bupot (DJP)</p>
+                <p class="font-normal text-sm text-gray-800 font-semibold">{{ item.idBupot }}</p>
               </div>
-              <div v-if="item.createdAt" class="flex flex-col gap-1">
-                <label class="text-[11px] uppercase font-bold text-gray-400">Created On</label>
-                <div class="text-sm text-gray-600">{{ formatDate(item.createdAt) }}</div>
+              <div v-if="item.createdAt" class="flex items-center justify-between gap-[10px]">
+                <p class="font-normal text-sm text-gray-600">Created On</p>
+                <p class="font-normal text-sm text-gray-800 font-semibold">{{ formatDate(item.createdAt) }}</p>
               </div>
             </div>
           </div>

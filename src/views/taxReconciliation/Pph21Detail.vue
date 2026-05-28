@@ -36,7 +36,7 @@
             <i :class="['ki-filled', statusIcon, 'text-2xl']"></i>
           </div>
           <div>
-            <div class="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-0.5">
+            <div class="text-xs font-medium text-gray-500 mb-0.5">
               PPh 21 — {{ featureLabel }}
             </div>
             <div class="flex items-center gap-2 flex-wrap">
@@ -45,7 +45,7 @@
               </span>
               <span
                 v-if="item.nomorBupot || item.nomorBuktiPotong || item.noBupot"
-                class="badge badge-primary badge-outline font-mono text-[10px] h-5"
+                class="badge badge-primary badge-outline text-[10px] h-5"
               >
                 {{ item.nomorBupot || item.nomorBuktiPotong || item.noBupot }}
               </span>
@@ -85,67 +85,55 @@
       <div class="flex flex-col lg:flex-row gap-[24px] items-start">
         <div class="flex-1 space-y-6">
           <!-- Recipient Information -->
-          <div class="card p-[20px] shadow-sm">
-            <p class="font-bold text-sm mb-[16px] uppercase tracking-tight text-gray-700 border-b pb-2 border-gray-100">
-              Recipient Information
-            </p>
-            <div class="space-y-1">
-              <div class="flex items-baseline flex-wrap lg:flex-nowrap py-[8px]">
-                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">Recipient Name</label>
-                <input
-                  class="input flex-1 bg-gray-50 border-gray-200 font-semibold text-sm text-gray-800"
-                  :value="item.namaPenerima || item.nama || '-'"
-                  disabled
-                />
+          <div class="card">
+            <div class="card-header py-[17px] flex items-center justify-between gap-[8px]">
+              <h3 class="card-title text-base font-semibold">Recipient Information</h3>
+            </div>
+            <div class="card-body flex flex-col gap-[20px]">
+              <div class="flex items-center justify-between gap-[10px]">
+                <p class="font-normal text-sm text-gray-600">Recipient Name</p>
+                <p class="font-normal text-sm font-semibold text-gray-800">{{ item.namaPenerima || item.nama || '-' }}</p>
               </div>
-              <div class="flex items-baseline flex-wrap lg:flex-nowrap py-[8px]">
-                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">NPWP / NIK</label>
-                <input
-                  class="input flex-1 bg-gray-50 border-gray-200 font-mono text-sm text-primary font-semibold"
-                  :value="item.npwpPenerima || item.npwp || '-'"
-                  disabled
-                />
+              <div class="flex items-center justify-between gap-[10px]">
+                <p class="font-normal text-sm text-gray-600">NPWP / NIK</p>
+                <p class="font-normal text-sm font-semibold text-primary">{{ item.npwpPenerima || item.npwp || '-' }}</p>
               </div>
             </div>
           </div>
 
           <!-- Tax & Financial Details -->
-          <div class="card p-[20px] shadow-sm">
-            <p class="font-bold text-sm mb-[16px] uppercase tracking-tight text-gray-700 border-b pb-2 border-gray-100">
-              Tax & Financial Details
-            </p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-1">
-              <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label min-w-[140px] text-sm font-medium text-gray-600">Object Code</label>
-                <input class="input bg-gray-50 border-gray-200 font-semibold text-sm text-gray-800" :value="item.kodeObjekPajak || '-'" disabled />
+          <div class="card">
+            <div class="card-header py-[17px] flex items-center justify-between gap-[8px]">
+              <h3 class="card-title text-base font-semibold">Financial & Tax Details</h3>
+            </div>
+            <div class="card-body flex flex-col gap-[20px]">
+              <div class="flex items-center justify-between gap-[10px]">
+                <p class="font-normal text-sm text-gray-600">Object Code</p>
+                <p class="font-normal text-sm font-semibold text-gray-800">{{ item.kodeObjekPajak || '-' }}</p>
               </div>
-              <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label min-w-[140px] text-sm font-medium text-gray-600">Withholding Date</label>
-                <input class="input bg-gray-50 border-gray-200 font-semibold text-sm text-gray-800" :value="item.tglPemotongan || '-'" disabled />
+              <div class="flex items-center justify-between gap-[10px]">
+                <p class="font-normal text-sm text-gray-600">Withholding Date</p>
+                <p class="font-normal text-sm text-gray-800">{{ item.tglPemotongan || '-' }}</p>
               </div>
-              <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label min-w-[140px] text-sm font-medium text-gray-600">Pasal PPh</label>
-                <input class="input bg-gray-50 border-gray-200 font-semibold text-sm text-gray-800" :value="item.pasalPPh || '-'" disabled />
+              <div class="flex items-center justify-between gap-[10px]">
+                <p class="font-normal text-sm text-gray-600">Pasal PPh</p>
+                <p class="font-normal text-sm text-gray-800">{{ item.pasalPPh || '-' }}</p>
               </div>
-              <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label min-w-[140px] text-sm font-medium text-gray-600">PPh Status</label>
-                <input class="input bg-gray-50 border-gray-200 font-semibold text-sm text-gray-800" :value="item.statusPPh || '-'" disabled />
+              <div class="flex items-center justify-between gap-[10px]">
+                <p class="font-normal text-sm text-gray-600">PPh Status</p>
+                <p class="font-normal text-sm text-gray-800">{{ item.statusPPh || '-' }}</p>
               </div>
-              <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label min-w-[140px] text-sm font-medium text-gray-600">Tax Type</label>
-                <input
-                  class="input bg-gray-50 border-gray-200 font-semibold text-sm text-primary"
-                  :value="item.feature === 'final' ? 'Final' : 'Tidak Final (Non-Final)'"
-                  disabled
-                />
+              <div class="flex items-center justify-between gap-[10px]">
+                <p class="font-normal text-sm text-gray-600">Tax Type</p>
+                <p class="font-normal text-sm font-semibold text-primary">
+                  {{ item.feature === 'final' ? 'Final' : 'Tidak Final (Non-Final)' }}
+                </p>
               </div>
-              <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label min-w-[140px] text-sm font-medium text-gray-600">Tax Period</label>
-                <input
-                  class="input bg-gray-50 border-gray-200 font-semibold text-sm text-gray-800"
-                  :value="item.masaPajak && item.tahunPajak ? `${item.masaPajak}/${item.tahunPajak}` : '-'"
-                  disabled
-                />
+              <div class="flex items-center justify-between gap-[10px]">
+                <p class="font-normal text-sm text-gray-600">Tax Period</p>
+                <p class="font-normal text-sm text-gray-800">
+                  {{ item.masaPajak && item.tahunPajak ? `${item.masaPajak}/${item.tahunPajak}` : '-' }}
+                </p>
               </div>
             </div>
           </div>
@@ -154,54 +142,52 @@
         <!-- Right Panel -->
         <div class="w-full lg:max-w-sm space-y-6 lg:sticky lg:top-0">
           <!-- Tax Summary -->
-          <div class="card shadow-sm">
-            <div class="card-header py-[16px] px-[20px] border-b border-gray-100 bg-gray-50">
-              <span class="font-bold text-sm uppercase tracking-tight text-gray-700 flex items-center gap-2">
-                <i class="ki-filled ki-wallet text-danger"></i>
-                Tax Summary
-              </span>
+          <!-- Tax Summary -->
+          <div class="card">
+            <div class="card-header py-[17px] flex items-center justify-between gap-[8px]">
+              <h3 class="card-title text-base font-semibold">Tax Calculation</h3>
             </div>
-            <div class="card-body p-0">
-              <div class="flex flex-col">
-                <div class="border-b border-gray-100 py-[15px] px-[20px] text-sm flex justify-between">
-                  <span class="text-gray-500 font-medium uppercase tracking-tight text-[11px]">Gross Income</span>
-                  <span class="font-bold text-gray-800">{{ formatCurrency(Number(item.penghasilanKotor) || 0) }}</span>
-                </div>
-                <div class="border-b border-gray-100 py-[15px] px-[20px] text-sm flex justify-between">
-                  <span class="text-gray-500 font-medium uppercase tracking-tight text-[11px]">Gross (Previous)</span>
-                  <span class="font-bold text-gray-800">{{ formatCurrency(Number(item.penghasilanKotorSebelumnya) || 0) }}</span>
-                </div>
-                <div class="border-b border-gray-100 py-[15px] px-[20px] text-sm flex justify-between">
-                  <span class="text-gray-500 font-medium uppercase tracking-tight text-[11px]">Tax Rate</span>
-                  <span class="font-bold text-gray-800">{{ Number(item.tarif) || 0 }}%</span>
-                </div>
-                <div class="py-[20px] px-[20px] text-sm flex justify-between items-center bg-red-50/30">
-                  <span class="uppercase font-bold text-danger tracking-wider text-[11px]">Withheld PPh 21</span>
-                  <span class="text-xl font-black text-danger">{{ formatCurrency(Number(item.pphDipotong) || 0) }}</span>
-                </div>
+            <div class="card-body flex flex-col gap-[20px]">
+              <div class="flex items-center justify-between gap-[10px]">
+                <p class="font-normal text-sm text-gray-600">Gross Income</p>
+                <p class="font-normal text-sm font-semibold text-gray-800">{{ formatCurrency(Number(item.penghasilanKotor) || 0) }}</p>
+              </div>
+              <div class="flex items-center justify-between gap-[10px]">
+                <p class="font-normal text-sm text-gray-600">Gross (Previous)</p>
+                <p class="font-normal text-sm font-semibold text-gray-800">{{ formatCurrency(Number(item.penghasilanKotorSebelumnya) || 0) }}</p>
+              </div>
+              <div class="flex items-center justify-between gap-[10px]">
+                <p class="font-normal text-sm text-gray-600">Tax Rate</p>
+                <p class="font-normal text-sm font-semibold text-gray-800">{{ Number(item.tarif) || 0 }}%</p>
+              </div>
+              <div class="flex items-center justify-between gap-[10px]">
+                <p class="font-normal text-sm text-gray-600">Withheld PPh 21</p>
+                <p class="font-normal text-sm font-semibold text-danger">{{ formatCurrency(Number(item.pphDipotong) || 0) }}</p>
               </div>
             </div>
           </div>
 
           <!-- System Metadata -->
-          <div class="card p-[20px] shadow-sm bg-gray-50/50">
-            <p class="font-bold text-[11px] mb-[16px] uppercase tracking-[0.15em] text-gray-400">System Metadata</p>
-            <div class="space-y-4">
-              <div class="flex flex-col gap-1">
-                <label class="text-[11px] uppercase font-bold text-gray-400">Local DB ID</label>
-                <div class="text-sm font-mono text-gray-600"># {{ item.id || '-' }}</div>
+          <div class="card">
+            <div class="card-header py-[17px] flex items-center justify-between gap-[8px]">
+              <h3 class="card-title text-base font-semibold">System Metadata</h3>
+            </div>
+            <div class="card-body flex flex-col gap-[20px]">
+              <div class="flex items-center justify-between gap-[10px]">
+                <p class="font-normal text-sm text-gray-600">Local DB ID</p>
+                <p class="font-normal text-sm text-gray-800 font-semibold"># {{ item.id || '-' }}</p>
               </div>
-              <div class="flex flex-col gap-1">
-                <label class="text-[11px] uppercase font-bold text-gray-400">PX ID (Pajak Express)</label>
-                <div class="text-sm font-mono text-gray-600 font-semibold">{{ item.pxId || '-' }}</div>
+              <div class="flex items-center justify-between gap-[10px]">
+                <p class="font-normal text-sm text-gray-600">PX ID (Pajak Express)</p>
+                <p class="font-normal text-sm text-gray-800 font-semibold">{{ item.pxId || '-' }}</p>
               </div>
-              <div class="flex flex-col gap-1">
-                <label class="text-[11px] uppercase font-bold text-gray-400">Bupot ID</label>
-                <div class="text-sm font-bold text-gray-800">{{ item.idBupot || '-' }}</div>
+              <div class="flex items-center justify-between gap-[10px]">
+                <p class="font-normal text-sm text-gray-600">Bupot ID</p>
+                <p class="font-normal text-sm text-gray-800 font-semibold">{{ item.idBupot || '-' }}</p>
               </div>
-              <div v-if="item.createdAt" class="flex flex-col gap-1">
-                <label class="text-[11px] uppercase font-bold text-gray-400">Created On</label>
-                <div class="text-xs text-gray-600 italic">{{ formatDate(item.createdAt) }}</div>
+              <div v-if="item.createdAt" class="flex items-center justify-between gap-[10px]">
+                <p class="font-normal text-sm text-gray-600">Created On</p>
+                <p class="font-normal text-sm text-gray-800 font-semibold">{{ formatDate(item.createdAt) }}</p>
               </div>
             </div>
           </div>

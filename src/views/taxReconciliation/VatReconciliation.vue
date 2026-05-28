@@ -3,58 +3,79 @@
     <Breadcrumb title="VAT Reconciliation" :routes="routes" />
     <hr class="-mx-[24px] mb-[24px]" />
 
-    <div class="border border-gray-200 rounded-xl p-[24px]">
-      <!-- Alur sama seperti WHT/BPU: antrian invoice → integrasi PJ -->
-      <div class="tabs mb-6 flex flex-wrap gap-2" data-tab="true">
-        <div
-          class="tab cursor-pointer"
-          :class="{ active: workspace === 'queue' }"
-          @click="setWorkspace('queue')"
-        >
-          Antrian invoice (VAT &gt; 0)
-        </div>
-        <div class="tab cursor-pointer" :class="{ active: workspace === 'pj' }" @click="setWorkspace('pj')">
-          Faktur Pajak Express (IF_TXR_015)
-        </div>
-        <div class="tab cursor-pointer" :class="{ active: workspace === 'legacy' }" @click="setWorkspace('legacy')">
-          Internal (legacy SP)
+    <div class="card shadow-sm border border-gray-200 rounded-xl overflow-hidden bg-white">
+      <!-- Tab Navigation Header -->
+      <div class="card-header py-[8px] px-[20px] border-b border-gray-200 bg-white">
+        <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden text-sm w-fit">
+          <button
+            type="button"
+            :class="[
+              'px-4 py-2 font-medium transition-colors flex items-center gap-2',
+              workspace === 'queue'
+                ? 'bg-primary text-white'
+                : 'bg-white text-gray-500 hover:bg-gray-50',
+            ]"
+            @click="setWorkspace('queue')"
+          >
+            Invoice Queue
+          </button>
+          <button
+            type="button"
+            :class="[
+              'px-4 py-2 font-medium transition-colors border-l border-gray-200 flex items-center gap-2',
+              workspace === 'pj'
+                ? 'bg-primary text-white'
+                : 'bg-white text-gray-500 hover:bg-gray-50',
+            ]"
+            @click="setWorkspace('pj')"
+          >
+            Pajak Express
+          </button>
         </div>
       </div>
 
-      <div v-if="workspace === 'queue'" class="overflow-x-auto list__table mb-2 animate-in fade-in duration-300">
-        <div class="flex justify-between items-center gap-3 mb-4 flex-wrap">
-          <p class="text-sm text-gray-600 m-0 max-w-xl">
-            Daftar invoice <strong>Approved</strong> dengan <strong>nominal VAT &gt; 0</strong> (endpoint sama seperti BPU/PPh21:
-            <code class="text-xs">/tax/available-invoices?type=VAT</code>). Nomor Faktur Pajak dari e-Faktur diisi pada langkah berikut.
-          </p>
+      <!-- Tab Content -->
+      <div class="card-body p-0">
+      <template v-if="workspace === 'queue'">
+      <div class="overflow-x-auto list__table mb-2 animate-in fade-in duration-300">
+        <div class="flex justify-between items-center gap-3 mb-4 flex-wrap px-[24px] pt-[24px]">
+          <div class="flex flex-col gap-1">
+            <h3 class="text-lg font-semibold text-gray-800 m-0">List Data</h3>
+          </div>
           <div class="flex gap-2 flex-wrap items-center">
-            <UiInputSearch v-model="pendingSearch" placeholder="Cari invoice / vendor" @search="fetchPendingVat" />
-            <button type="button" class="btn btn-outline btn-sm" @click="fetchPendingVat">Refresh</button>
-            <button type="button" class="btn btn-primary btn-sm" @click="goManualPjSubmit">Input tanpa invoice</button>
+            <UiInputSearch v-model="pendingSearch" placeholder="Search invoice / vendor" @search="fetchPendingVat" />
+            <button type="button" class="btn btn-outline btn-primary" @click="fetchPendingVat">
+              <i class="ki-filled ki-arrows-circle !text-base"></i>
+              Refresh
+            </button>
+            <button type="button" class="btn btn-primary" @click="goManualPjSubmit">
+              <i class="ki-filled ki-plus-circle !text-base"></i>
+              Submit without Invoice
+            </button>
           </div>
         </div>
         <table class="table align-middle text-gray-700 font-medium text-sm">
           <thead>
             <tr>
-              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Sumber</th>
-              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">No. Invoice</th>
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Source</th>
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Invoice No</th>
               <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Vendor</th>
               <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">NPWP</th>
               <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-right">DPP</th>
               <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-right">VAT</th>
-              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center">Aksi</th>
+              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center">Action</th>
             </tr>
           </thead>
           <tbody>
             <tr v-if="loadingPendingVat">
               <td colspan="7" class="text-center py-10">
                 <span class="loading loading-spinner loading-md text-primary"></span>
-                <p class="mt-2 text-gray-500">Memuat invoice…</p>
+                <p class="mt-2 text-gray-500">Loading invoices…</p>
               </td>
             </tr>
             <tr v-else-if="pendingVatRows.length === 0">
               <td colspan="7" class="text-center py-10 text-gray-400 italic">
-                Tidak ada invoice dengan VAT untuk antrean rekonsiliasi.
+                No approved invoices pending VAT reconciliation.
               </td>
             </tr>
             <tr v-for="(inv, idx) in pendingVatRows" :key="'pv-' + idx + '-' + (inv.invoiceNo || '')">
@@ -75,8 +96,8 @@
               <td class="text-right">{{ formatCurrency(inv.dpp ?? 0) }}</td>
               <td class="text-right text-primary font-medium">{{ formatCurrency(displayVatOnRow(inv)) }}</td>
               <td class="text-center">
-                <button type="button" class="btn btn-primary btn-sm" @click="goSubmitFromInvoice(inv)">
-                  Submit ke PJ
+                <button type="button" class="btn btn-primary" @click="goSubmitFromInvoice(inv)">
+                  Submit to PJ
                 </button>
               </td>
             </tr>
@@ -85,7 +106,7 @@
       </div>
 
       <!-- Pending Pagination Footer -->
-      <div v-if="pendingVatTotal > 0" class="flex items-center justify-between mt-[24px]">
+      <div v-if="pendingVatTotal > 0" class="flex items-center justify-between mt-[24px] px-[24px] pb-[24px]">
         <p class="text-sm text-gray-500">
           Showing <b>{{ pendingVatRows.length }}</b> of <b>{{ pendingVatTotal }}</b> entries
         </p>
@@ -96,44 +117,41 @@
           @pageChange="onPendingPageChange"
         />
       </div>
+      </template>
 
-      <template v-else>
+      <template v-else-if="workspace === 'pj'">
       <!-- Header Section -->
-      <div class="flex justify-between align-items-center gap-[8px] mb-[24px] flex-wrap">
-        <div class="flex flex-col gap-2">
-          <h3 class="text-lg font-semibold m-0">VAT Reconciliation</h3>
+      <div class="flex justify-between align-items-center gap-[8px] mb-[24px] flex-wrap px-[24px] pt-[24px]">
+        <div class="flex flex-col gap-1">
+          <h3 class="text-lg font-semibold text-gray-800 m-0">List Data</h3>
           <div class="flex flex-wrap items-end gap-3 text-sm">
             <template v-if="workspace === 'pj'">
               <div class="form-control">
-                <label class="label py-0"><span class="label-text text-xs font-semibold">Periode pajak (Coretax list)</span></label>
+                <label class="label py-0"><span class="label-text text-xs font-semibold">Tax Period (Coretax list)</span></label>
                 <div class="flex gap-2">
-                  <select v-model="pjMonth" class="select select-bordered select-sm w-[88px]" @change="onPajakExpressPeriodChanged">
+                  <select v-model="pjMonth" class="select select-bordered w-[88px]" @change="onPajakExpressPeriodChanged">
                     <option v-for="m in pjMonthOptions" :key="m.v" :value="m.v">{{ m.label }}</option>
                   </select>
                   <input
                     v-model="pjYear"
                     type="text"
                     maxlength="4"
-                    class="input input-bordered input-sm w-[76px]"
+                    class="input input-bordered w-[76px]"
                     placeholder="yyyy"
                     @change="onPajakExpressPeriodChanged"
                   />
-                  <button type="button" class="btn btn-primary btn-sm" :disabled="isLoading || isPrepopulating" @click="reloadVat">
+                  <button type="button" class="btn btn-primary" :disabled="isLoading || isPrepopulating" @click="reloadVat">
                     <i class="ki-duotone ki-arrows-circle !text-base"></i>
-                    Muat ulang
+                    Reload
                   </button>
-                  <button type="button" class="btn btn-warning btn-sm" :disabled="isLoading || isPrepopulating" @click="runPrepopulateBulk">
+                  <button type="button" class="btn btn-warning" :disabled="isLoading || isPrepopulating" @click="runPrepopulateBulk">
                     <i class="ki-duotone ki-cloud-download !text-base"></i>
-                    Tarik Data Prepopulated
+                    Pull Prepopulated Data
                     <span v-if="isPrepopulating" class="loading loading-spinner loading-xs ml-1"></span>
                   </button>
                 </div>
               </div>
             </template>
-            <p v-else-if="workspace === 'legacy'" class="text-xs text-gray-500 m-0 max-w-lg">
-              Data dari rekonsiliasi internal / stored procedure. Untuk pajak PJ gunakan tab <strong>Faktur Pajak Express</strong> atau
-              <strong>Antrian invoice</strong>.
-            </p>
           </div>
         </div>
         <div class="flex align-items-center gap-3">
@@ -172,7 +190,7 @@
       </div>
 
       <!-- Filter Section -->
-      <div v-if="showFilter" class="border border-gray-200 rounded-lg p-4 mb-4">
+      <div v-if="showFilter" class="border border-gray-200 rounded-lg p-4 mb-4 mx-[24px]">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label class="form-label">Status FP</label>
@@ -214,7 +232,7 @@
       </div>
 
       <!-- Active Filters Display -->
-      <div class="flex overflow-x-auto gap-3 mb-5 items-center" v-if="filteredPayload.length > 0">
+      <div class="flex overflow-x-auto gap-3 mb-5 items-center px-[24px]" v-if="filteredPayload.length > 0">
         <div class="font-medium text-lg text-gray-800">Filter</div>
         <div v-for="items in filteredPayload" :key="items.key">
           <div class="btn btn-light btn-sm" v-if="items.value !== ''">
@@ -227,7 +245,7 @@
       </div>
 
       <!-- Table Section -->
-      <div class="overflow-x-auto list__table mt-[24px]">
+      <div class="overflow-x-auto list__table">
         <table class="table align-middle text-gray-700 font-medium text-sm">
           <thead>
             <!-- Blue header styling -->
@@ -285,15 +303,45 @@
                     @change="toggleSelectItem(item)"
                   />
                   <button
-                    class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]"
+                    class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px] tooltip"
+                    data-tip="View Details"
                     @click="goDetail(item)"
                   >
                     <i class="ki-filled ki-eye !text-lg"></i>
                   </button>
+                  <button
+                    v-if="workspace === 'pj' && item.action"
+                    class="btn btn-outline btn-icon btn-success w-[32px] h-[32px] tooltip"
+                    data-tip="Download PDF"
+                    @click="handleDownloadPdf(item)"
+                  >
+                    <i class="ki-filled ki-file-down !text-lg"></i>
+                  </button>
+                  <button
+                    v-if="workspace === 'pj'"
+                    class="btn btn-outline btn-icon btn-warning w-[32px] h-[32px] tooltip"
+                    data-tip="Replace/Cancel"
+                    @click="openReplaceCancelModal(item)"
+                  >
+                    <i class="ki-filled ki-arrows-loop !text-lg"></i>
+                  </button>
                 </div>
               </td>
               <!-- Other Columns -->
-              <td>{{ item.vendorName }}</td>
+              <td>
+                <div class="flex items-center gap-2">
+                  <span>{{ item.vendorName }}</span>
+                  <span
+                    :class="
+                      item.poNumber && item.poNumber !== '-'
+                        ? 'badge badge-light-primary px-2 font-semibold text-xs'
+                        : 'badge badge-light-warning px-2 font-semibold text-xs'
+                    "
+                  >
+                    {{ item.poNumber && item.poNumber !== '-' ? 'PO' : 'Non-PO' }}
+                  </span>
+                </div>
+              </td>
               <td>{{ item.npwpVendor }}</td>
               <td>{{ formatDate(item.tglFakturPajak) }}</td>
               <td>{{ item.noFakturPajak }}</td>
@@ -338,7 +386,7 @@
       </div>
 
       <!-- Pagination -->
-      <div class="flex items-center justify-between mt-[24px] flex-wrap gap-2">
+      <div class="flex items-center justify-between mt-[24px] flex-wrap gap-2 px-[24px] pb-[24px]">
         <p v-if="workspace === 'pj'" class="m-0 text-sm text-gray-600">
           Halaman {{ currentPage }} · {{ list.length }} baris ditampilkan · total dari Pajak Express:
           {{ pjTotalRows > 0 ? pjTotalRows : list.length }}
@@ -360,6 +408,7 @@
         />
       </div>
       </template>
+      </div>
     </div>
 
     <!-- Status Faktur Modal -->
@@ -512,7 +561,7 @@ import { cloneDeep } from 'lodash'
 import AuthenticationModal from './VatReconciliation/AuthenticationModal.vue'
 import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 import vatApi from '@/core/utils/vatApi'
-import { postVatInUpload, postVatInPrepopulated } from '@/core/utils/vatPxInvoiceApi'
+import { postVatInUpload, postVatInPrepopulated, postVatInDownloadPdf, postVatInReplaceCancel } from '@/core/utils/vatPxInvoiceApi'
 import axios from 'axios'
 import BpuService, { type InvoiceVatQueueRow } from '@/services/bpu.service'
 import { useNotificationStore } from '@/stores/notification/notificationStore'
@@ -522,6 +571,7 @@ const moment = momentLib
 const router = useRouter()
 
 interface VATReconciliationData {
+  id?: number | string | null
   vendorName: string
   npwpVendor: string
   tglFakturPajak: string // Date string from API
@@ -535,6 +585,8 @@ interface VATReconciliationData {
   vatCreditExpiryDate: string
   remark: string
   action: string | null
+  poNumber?: string
+  invoiceNo?: string
 }
 
 interface FilterForm {
@@ -572,7 +624,7 @@ const filterForm = ref<FilterForm>({
 
 type VatDataSource = 'erp' | 'pajakExpress'
 
-type Workspace = 'queue' | 'pj' | 'legacy'
+type Workspace = 'queue' | 'pj'
 
 const workspace = ref<Workspace>('queue')
 const pendingVatRows = ref<InvoiceVatQueueRow[]>([])
@@ -587,7 +639,7 @@ function onPendingPageChange(page: number) {
   fetchPendingVat()
 }
 
-/** Tab PJ / legacy: driver fetch `vat-reconciliation`; antrian pakai Invoice API `/tax/available-invoices`. */
+/** Tab PJ: driver fetch `vat-reconciliation`; antrian pakai Invoice API `/tax/available-invoices`. */
 const dataSource = ref<VatDataSource>('erp')
 
 const pjMonthOptions = Array.from({ length: 12 }, (_, i) => {
@@ -727,7 +779,12 @@ function normalizeVatApiRow(raw: unknown): VATReconciliationData {
   const remark = strFrom(r, 'remark', 'Remark')
   const action = nullableStrFrom(r, 'action', 'Action')
 
+  const poNumber = strFrom(r, 'poNumber', 'PoNumber')
+  const invoiceNo = strFrom(r, 'invoiceNo', 'InvoiceNo', 'invoiceNumber')
+  const id = r.id ?? r.Id ?? null
+
   return {
+    id: id as number | string | null,
     vendorName,
     npwpVendor,
     tglFakturPajak,
@@ -741,6 +798,8 @@ function normalizeVatApiRow(raw: unknown): VATReconciliationData {
     vatCreditExpiryDate,
     remark,
     action,
+    poNumber,
+    invoiceNo,
   }
 }
 
@@ -845,7 +904,7 @@ async function fetchPendingVat() {
     if (pendingSearch.value.trim()) {
       params.search = pendingSearch.value.trim()
     }
-    
+
     const res = await BpuService.getInvoiceQueueForVat(params)
     const r = res.result
     if (!r || r.isError) {
@@ -909,7 +968,7 @@ async function setWorkspace(w: Workspace) {
     await fetchPendingVat()
     return
   }
-  dataSource.value = w === 'pj' ? 'pajakExpress' : 'erp'
+  dataSource.value = 'pajakExpress'
   currentPage.value = 1
   pjTotalRows.value = 0
   await fetchVatData()
@@ -1051,6 +1110,60 @@ const goDetail = (data: VATReconciliationData) => {
       id: data.noFakturPajak,
     },
   })
+}
+
+const handleDownloadPdf = async (item: VATReconciliationData) => {
+  if (!item.action) {
+    alert("URL Coretax tidak tersedia untuk diunduh.");
+    return;
+  }
+  try {
+    const res = await postVatInDownloadPdf({ url: item.action });
+    if (res.data?.data?.arraybuff) {
+      // Decode base64
+      const binaryString = window.atob(res.data.data.arraybuff);
+      const binaryLen = binaryString.length;
+      const bytes = new Uint8Array(binaryLen);
+      for (let i = 0; i < binaryLen; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      const blob = new Blob([bytes], { type: "application/pdf" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `Faktur_${item.noFakturPajak || 'Pajak'}.pdf`;
+      link.click();
+    } else {
+      alert("Gagal mengunduh PDF atau format response tidak sesuai.");
+    }
+  } catch (error: any) {
+    console.error("Error downloading PDF:", error);
+    alert("Terjadi kesalahan saat mengunduh PDF: " + (error?.response?.data?.message || error.message));
+  }
+}
+
+const openReplaceCancelModal = (item: VATReconciliationData) => {
+  if (confirm(`Apakah Anda yakin ingin melakukan Replace / Cancel untuk Faktur ${item.noFakturPajak}?`)) {
+    handleReplaceCancel(item);
+  }
+}
+
+const handleReplaceCancel = async (item: VATReconciliationData) => {
+  try {
+    // Pajak Express requires 'INV#' prefix and stripped formatting for Replace/Cancel
+    const strippedFaktur = item.noFakturPajak ? item.noFakturPajak.replace(/\D/g, '') : '';
+    const formattedFaktur = `INV#${strippedFaktur}`;
+    
+    const payload = {
+      id: item.id || 0,
+      nomorFaktur: formattedFaktur
+    };
+    const res = await postVatInReplaceCancel(payload);
+    alert("Faktur berhasil di-Replace / Cancel!");
+    await fetchVatData();
+  } catch (error: any) {
+    console.error("Error on Replace/Cancel:", error);
+    alert("Gagal Replace/Cancel: " + (error?.response?.data?.message || error.message));
+  }
 }
 
 const toggleStatusDropdown = () => {
@@ -1392,6 +1505,15 @@ watch(
 </script>
 
 <style lang="scss" scoped>
+.badge-light-primary {
+  background-color: #f1faff;
+  color: #009ef7;
+}
+.badge-light-warning {
+  background-color: #fff8dd;
+  color: #ffc700;
+}
+
 .list__table {
   th,
   td {

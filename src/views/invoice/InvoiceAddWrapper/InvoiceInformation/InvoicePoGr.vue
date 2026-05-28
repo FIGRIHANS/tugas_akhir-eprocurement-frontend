@@ -837,7 +837,6 @@ const addNewPodata = () => {
       poNoError: false,
       departementError: false,
       deliveryOrderNo: '',
-      department: '',
     }
     form.invoicePoGr.push(data)
   }

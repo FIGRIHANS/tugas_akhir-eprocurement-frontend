@@ -1,10 +1,19 @@
 <template>
-  <div>
+  <div class="invoice-analytic">
     <Breadcrumb title="Invoice Analytic" :routes="routes" />
     <hr class="-mx-[24px] mb-[24px]" />
 
-    <!-- Header Section -->
-    <div class="header-section bg-white border rounded-lg p-4 mb-6">
+    <!-- Loading overlay -->
+    <div v-if="isLoading" class="flex justify-center items-center py-20">
+      <div class="text-center">
+        <i class="ki-duotone ki-loading text-4xl text-teal-500 animate-spin"></i>
+        <p class="mt-3 text-gray-500 text-sm">Loading invoice analytics...</p>
+      </div>
+    </div>
+
+    <template v-else>
+      <!-- Header Section -->
+      <div class="header-section bg-white border rounded-lg p-4 mb-6">
       <div class="filter-section">
         <div class="filter-group">
           <label class="text-sm text-gray-600">Company Code</label>
@@ -17,6 +26,7 @@
               placeholder="Select"
               :clearable="true"
               class="filter-vselect"
+              append-to-body
             >
               <template #open-indicator>
                 <i class="ki-outline ki-down text-gray-500"></i>
@@ -50,6 +60,7 @@
               placeholder="Select"
               :clearable="true"
               class="filter-vselect"
+              append-to-body
             >
               <template #open-indicator>
                 <i class="ki-outline ki-down text-gray-500"></i>
@@ -83,6 +94,7 @@
               placeholder="Select"
               :clearable="true"
               class="filter-vselect"
+              append-to-body
             >
               <template #open-indicator>
                 <i class="ki-outline ki-down text-gray-500"></i>
@@ -116,6 +128,7 @@
               placeholder="Select"
               :clearable="true"
               class="filter-vselect"
+              append-to-body
             >
               <template #open-indicator>
                 <i class="ki-outline ki-down text-gray-500"></i>
@@ -149,6 +162,7 @@
               placeholder="Select"
               :clearable="true"
               class="filter-vselect"
+              append-to-body
             >
               <template #open-indicator>
                 <i class="ki-outline ki-down text-gray-500"></i>
@@ -182,6 +196,7 @@
               placeholder="Select"
               :clearable="true"
               class="filter-vselect"
+              append-to-body
             >
               <template #open-indicator>
                 <i class="ki-outline ki-down text-gray-500"></i>
@@ -215,10 +230,19 @@
     <div class="analytics-metrics-container">
       <!-- Main Grid -->
       <div class="grid grid-cols-12 gap-6">
+        <!-- Section 1: Accounts Payable Overview -->
+        <div class="col-span-12">
+          <p class="section-label">
+            <i class="ki-duotone ki-calculator text-teal-500 mr-1"></i> Accounts Payable Overview
+          </p>
+        </div>
         <!-- Row 1: AP Aging, Total Outstanding, Invoice Status Monitoring -->
         <div class="col-span-5 bg-white border rounded-lg p-4">
           <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold">Accounts Payable Aging</h3>
+            <h3 class="chart-title">
+              <i class="ki-duotone ki-time text-teal-500"></i>
+              Accounts Payable Aging
+            </h3>
           </div>
           <div class="chart-with-labels">
             <div class="mini-trend-chart" style="block-size: 220px">
@@ -264,7 +288,10 @@
         <div class="col-span-2 bg-white border rounded-lg p-4">
           <div class="metric-card h-full">
             <div class="metric-header">
-              <h3 class="text-sm font-semibold text-center">Total AP Outstanding</h3>
+              <h3 class="chart-title justify-center text-sm" style="font-size: 0.875rem;">
+                <i class="ki-duotone ki-dollar text-teal-500"></i>
+                Total AP Outstanding
+              </h3>
             </div>
             <div
               class="metric-content flex-grow flex flex-col items-center text-center justify-center"
@@ -287,7 +314,10 @@
         <!-- Invoice Status Monitoring -->
         <div class="col-span-5 bg-white border rounded-lg p-4">
           <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold">Invoice Status Monitoring</h3>
+            <h3 class="chart-title">
+              <i class="ki-duotone ki-chart-line text-blue-500"></i>
+              Invoice Status Monitoring
+            </h3>
           </div>
           <div class="chart-with-labels">
             <div class="mini-trend-chart" style="block-size: 220px">
@@ -327,10 +357,20 @@
           </div>
         </div>
 
+        <!-- Section 2: AP Performance Trends -->
+        <div class="col-span-12 mt-4">
+          <p class="section-label">
+            <i class="ki-duotone ki-chart-line-star text-purple-500 mr-1"></i> AP Performance Trends
+          </p>
+        </div>
+
         <!-- Row 2: Invoices Paid On Time and Average Age -->
         <div class="col-span-6 bg-white border rounded-lg p-4">
           <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold">Invoices Paid On Time</h3>
+            <h3 class="chart-title mb-0">
+              <i class="ki-duotone ki-shield-tick text-green-600"></i>
+              Invoices Paid On Time
+            </h3>
             <div class="flex items-center gap-3 text-sm text-gray-500">
               <span class="hidden sm:inline">(Use mouse wheel to zoom)</span>
               <div class="flex items-center gap-2 bg-gray-50 rounded-md px-2 py-1">
@@ -383,7 +423,10 @@
         <!-- Average Age at Payment Chart -->
         <div class="col-span-6 bg-white border rounded-lg p-4">
           <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold">Average Age at Payment</h3>
+            <h3 class="chart-title mb-0">
+              <i class="ki-duotone ki-time text-orange-500"></i>
+              Average Age at Payment
+            </h3>
             <div class="flex items-center gap-3 text-sm text-gray-500">
               <span class="hidden sm:inline">(Use mouse wheel to zoom)</span>
               <div class="flex items-center gap-2 bg-gray-50 rounded-md px-2 py-1">
@@ -425,10 +468,20 @@
           </div>
         </div>
 
+        <!-- Section 3: AP Analysis Trends -->
+        <div class="col-span-12 mt-4">
+          <p class="section-label">
+            <i class="ki-duotone ki-element-11 text-blue-500 mr-1"></i> AP Analysis Trends
+          </p>
+        </div>
+
         <!-- Row 3: AP Summary and Aging Trends -->
         <div class="col-span-4 bg-white border rounded-lg p-4">
           <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold">AP Summary Trend</h3>
+            <h3 class="chart-title mb-0">
+              <i class="ki-duotone ki-chart-line-star text-teal-500"></i>
+              AP Summary Trend
+            </h3>
           </div>
           <div class="chart-legend mb-3 flex gap-4">
             <div class="legend-item">
@@ -458,7 +511,10 @@
         <!-- AP Aging Trends -->
         <div class="col-span-4 bg-white border rounded-lg p-4">
           <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold">AP Aging Trend (Count)</h3>
+            <h3 class="chart-title mb-0">
+              <i class="ki-duotone ki-package text-teal-500"></i>
+              AP Aging Trend (Count)
+            </h3>
           </div>
           <div class="chart-legend mb-3 flex gap-4">
             <div class="legend-item">
@@ -487,7 +543,10 @@
 
         <div class="col-span-4 bg-white border rounded-lg p-4">
           <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold">AP Aging Trend (Amount)</h3>
+            <h3 class="chart-title mb-0">
+              <i class="ki-duotone ki-dollar text-teal-500"></i>
+              AP Aging Trend (Amount)
+            </h3>
           </div>
           <div class="chart-legend mb-3 flex gap-4">
             <div class="legend-item">
@@ -515,6 +574,7 @@
         </div>
       </div>
     </div>
+    </template>
   </div>
 </template>
 
@@ -536,8 +596,11 @@ import type { AgingPeriod, InvoiceStatusItem, TimeSeriesChartItem } from './type
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { format } from 'date-fns'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
+import InvoiceAnalyticsService, { type InvoiceAnalyticsData } from '@/services/invoiceAnalytics.service'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
+const dbAnalytics = ref<InvoiceAnalyticsData | null>(null)
+const isLoading = ref(true)
 
 const routes = ref<routeTypes[]>([
   {
@@ -609,6 +672,15 @@ const staticDataMap: Record<string, Record<string, AgingPeriod[]>> = {
 }
 
 const apAgingData = computed<AgingPeriod[]>(() => {
+  if (dbAnalytics.value) {
+    return [
+      { period: 'Current', amount: dbAnalytics.value.agingCurrentAmount, count: dbAnalytics.value.agingCurrentCount },
+      { period: '1-30', amount: dbAnalytics.value.aging1To30Amount, count: dbAnalytics.value.aging1To30Count },
+      { period: '31-60', amount: dbAnalytics.value.aging31To60Amount, count: dbAnalytics.value.aging31To60Count },
+      { period: '> 60', amount: dbAnalytics.value.agingMoreThan60Amount, count: dbAnalytics.value.agingMoreThan60Count },
+    ]
+  }
+
   if (!companyCode.value) {
     const periods = ['Current', '1-30', '31-60', '> 60']
     return periods.map((p) => {
@@ -639,15 +711,25 @@ const apAgingData = computed<AgingPeriod[]>(() => {
 
 function computeInvoiceStatusData(isVisual = false) {
   const multiplier = getFilterMultiplier()
-  const base = [
-    { label: 'Submitted', amount: 10000000, count: 150, color: '#14B8A6' },
-    { label: 'In Approval', amount: 4000000, count: 60, color: '#f97316' },
-    { label: 'Approved', amount: 8000000, count: 120, color: '#22c55e' },
-    { label: 'Rejected', amount: 1000000, count: 15, color: '#f472b6' },
-    { label: 'Paid', amount: 6000000, count: 90, color: '#06b6d4' },
-    { label: 'Overdue', amount: 3000000, count: 45, color: '#ef4444' },
-  ]
   const appliedMultiplier = isAllFilterEmpty.value ? 1 : multiplier
+
+  const base = dbAnalytics.value
+    ? [
+        { label: 'Submitted', amount: dbAnalytics.value.statusSubmittedAmount, count: dbAnalytics.value.statusSubmittedCount, color: '#14B8A6' },
+        { label: 'In Approval', amount: dbAnalytics.value.statusInApprovalAmount, count: dbAnalytics.value.statusInApprovalCount, color: '#f97316' },
+        { label: 'Approved', amount: dbAnalytics.value.statusApprovedAmount, count: dbAnalytics.value.statusApprovedCount, color: '#22c55e' },
+        { label: 'Rejected', amount: dbAnalytics.value.statusRejectedAmount, count: dbAnalytics.value.statusRejectedCount, color: '#f472b6' },
+        { label: 'Paid', amount: dbAnalytics.value.statusPaidAmount, count: dbAnalytics.value.statusPaidCount, color: '#06b6d4' },
+        { label: 'Overdue', amount: dbAnalytics.value.statusOverdueAmount, count: dbAnalytics.value.statusOverdueCount, color: '#ef4444' },
+      ]
+    : [
+        { label: 'Submitted', amount: 10000000, count: 150, color: '#14B8A6' },
+        { label: 'In Approval', amount: 4000000, count: 60, color: '#f97316' },
+        { label: 'Approved', amount: 8000000, count: 120, color: '#22c55e' },
+        { label: 'Rejected', amount: 1000000, count: 15, color: '#f472b6' },
+        { label: 'Paid', amount: 6000000, count: 90, color: '#06b6d4' },
+        { label: 'Overdue', amount: 3000000, count: 45, color: '#ef4444' },
+      ]
 
   return base.map((item) => {
     const jitter = isVisual ? 0.5 + Math.random() * 1.0 : 1
@@ -746,6 +828,25 @@ const chartData = generateData()
 
 function computeTimeSeriesData(isVisual = false) {
   const zoom = Math.max(paidOnTimeZoom.value, avgAgeZoom.value)
+
+  if (dbAnalytics.value && dbAnalytics.value.monthlyTrends && dbAnalytics.value.monthlyTrends.length > 0) {
+    const multiplier = getFilterMultiplier()
+    const appliedMultiplier = isAllFilterEmpty.value ? 1 : multiplier
+
+    return dbAnalytics.value.monthlyTrends.map((item) => {
+      const jitter = isVisual ? 0.5 + Math.random() * 1.0 : 1
+      return {
+        id: item.monthLabel,
+        label: item.monthLabel,
+        paidOnTime: Math.round(Number(item.paidOnTime) * appliedMultiplier * jitter),
+        avgAge: Math.round(Number(item.avgAge) * appliedMultiplier * jitter),
+        current: Math.round(Number(item.current) * appliedMultiplier * jitter),
+        processing: Math.round(Number(item.processing) * appliedMultiplier * jitter),
+        overdue: Math.round(Number(item.overdue) * appliedMultiplier * jitter),
+      }
+    })
+  }
+
   const baseData =
     zoom <= 1.5
       ? chartData.quarterlyData
@@ -956,6 +1057,18 @@ onMounted(async () => {
   await invoiceMasterApi.getInvoicePoType()
   await invoiceMasterApi.getDpTypes()
   invoiceTypeList.value = invoicePoType.value
+
+  try {
+    const res = await InvoiceAnalyticsService.getAnalytics()
+    if (res.result && !res.result.isError && res.result.content) {
+      dbAnalytics.value = res.result.content
+      filterUpdateKey.value++
+    }
+  } catch (err) {
+    console.error('Failed to load invoice analytics:', err)
+  } finally {
+    isLoading.value = false
+  }
 })
 
 watch(
@@ -1030,4 +1143,30 @@ watch(
 
 <style lang="scss" scoped>
 @use './styles/InvoiceAnalytic.scss';
+</style>
+
+<style lang="scss">
+/* Global styles for vue-select dropdown when appended to body */
+.vs__dropdown-menu {
+  border-color: #d1d5db !important;
+  border-radius: 0.375rem !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+  font-family: inherit;
+  z-index: 9999 !important; /* Ensure it is on top of other elements */
+}
+
+.vs__dropdown-option {
+  font-size: 0.875rem !important;
+  padding: 0.5rem 0.75rem !important;
+}
+
+.vs__dropdown-option--highlight {
+  background-color: #14b8a6 !important;
+  color: white !important;
+}
+
+.vs__no-options {
+  font-size: 0.875rem !important;
+  color: #6b7280 !important;
+}
 </style>

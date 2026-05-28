@@ -3,7 +3,7 @@
     <!-- Header Section -->
     <div class="flex justify-between items-center mb-[24px]">
       <div class="flex flex-col gap-1">
-        <h1 class="text-2xl font-bold text-gray-800">WHT - Unifikasi (BPU)</h1>
+        <h3 class="text-lg font-semibold">List Data</h3>
       </div>
       <div class="flex gap-3">
         <UiInputSearch
@@ -19,22 +19,40 @@
     </div>
 
     <!-- View Toggle Tabs -->
-    <div class="tabs mb-6" data-tab="true">
-      <div 
-        class="tab cursor-pointer"
-        :class="activeView === 'pending' ? 'active' : ''"
+    <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden text-sm w-fit mb-6">
+      <button
+        type="button"
+        :class="[
+          'px-4 py-2 font-medium transition-colors',
+          activeView === 'pending'
+            ? 'bg-primary text-white'
+            : 'bg-white text-gray-500 hover:bg-gray-50',
+        ]"
         @click="activeView = 'pending'"
       >
         Pending Reconciliation
-        <span v-if="totalPending > 0" class="badge badge-sm badge-primary ml-1">{{ totalPending }}</span>
-      </div>
-      <div 
-        class="tab cursor-pointer"
-        :class="activeView === 'bpu' ? 'active' : ''"
+        <span
+          v-if="totalPending > 0"
+          :class="[
+            'badge badge-sm ml-1.5 font-bold',
+            activeView === 'pending' ? 'bg-white text-primary' : 'badge-primary'
+          ]"
+        >
+          {{ totalPending }}
+        </span>
+      </button>
+      <button
+        type="button"
+        :class="[
+          'px-4 py-2 font-medium transition-colors border-l border-gray-200',
+          activeView === 'bpu'
+            ? 'bg-primary text-white'
+            : 'bg-white text-gray-500 hover:bg-gray-50',
+        ]"
         @click="activeView = 'bpu'"
       >
         BPU Drafts & DJP Sync
-      </div>
+      </button>
     </div>
 
     <!-- PENDING INVOICES TABLE -->
@@ -199,9 +217,6 @@
               <td class="text-right">{{ formatCurrency(item.dpp || 0) }}</td>
               <td class="text-right text-danger">
                 {{ formatCurrency(item.pphDipotong || 0) }}
-                <div v-if="item.tarif" class="text-[10px] text-gray-500 italic">
-                  Rate: {{ item.tarif }}%
-                </div>
               </td>
               <td>
                 <div class="flex flex-col gap-1 items-start">
@@ -209,7 +224,7 @@
                     {{ item.status || item.fgStatus || 'UNKNOWN' }}
                   </span>
                   <span
-                    v-if="item.errorMsg"
+                    v-if="item.errorMsg && !item.errorMsg.toLowerCase().includes('passphrase tidak ditemukan')"
                     class="text-[10px] text-danger italic max-w-[150px] truncate"
                     :title="item.errorMsg"
                   >

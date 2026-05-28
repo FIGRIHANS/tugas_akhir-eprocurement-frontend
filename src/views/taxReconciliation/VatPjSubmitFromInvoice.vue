@@ -1,47 +1,48 @@
 <template>
-  <div class="vat-pj-page pb-[80px]">
+  <div class="pb-20">
     <Breadcrumb title="VAT — Pajak Express" :routes="routes" />
     <hr class="-mx-[24px] mb-[24px]" />
 
-    <div class="max-w-6xl mx-auto px-2 sm:px-0">
-      <header class="mb-6">
-        <h1 class="text-xl font-bold tracking-tight text-gray-900 sm:text-2xl flex items-center gap-2">
-          <i class="ki-filled ki-calculator text-primary text-2xl"></i>
-          VAT Reconciliation — Pajak Express
-        </h1>
-        <p class="text-sm text-gray-500 mt-1">
-          Kirim data faktur masukan (VAT In) dan konfirmasi status pengkreditan ke DJP via Pajak Express sandbox.
-        </p>
-      </header>
+    <div class="space-y-6">
+      <div class="flex gap-[24px] items-start">
 
-      <div class="flex flex-col lg:flex-row gap-6 items-start">
-        
-        <!-- COLUMN LEFT: Form Data -->
-        <div class="flex-1 space-y-6 w-full">
+        <!-- LEFT COLUMN: Form Data -->
+        <div class="flex-1 space-y-6">
           
-          <!-- Section A: Linked Invoice Info -->
-          <div v-if="invoiceId" class="card p-[20px] bg-gradient-to-br from-teal-50/70 via-white to-white border border-teal-100 shadow-sm rounded-xl">
-            <span class="font-semibold text-xs uppercase tracking-wider text-teal-800 mb-4 block">Linked Invoice Details</span>
-            <div class="grid grid-cols-2 gap-y-4 gap-x-6 text-sm">
-              <div>
-                <span class="text-gray-400 block text-xs">No. Invoice</span>
-                <span class="font-semibold text-gray-900">{{ invoiceNo || '—' }}</span>
+          <!-- Linked Invoice Info Card -->
+          <div v-if="invoiceId" class="card">
+            <div class="card-header py-[17px] flex items-center justify-between gap-[8px]">
+              <h3 class="card-title text-base font-semibold">Linked Invoice Details</h3>
+              <span
+                :class="
+                  route.query.poNumber || (invoiceNo && !invoiceNo.startsWith('NPO'))
+                    ? 'badge badge-light-primary px-2 font-semibold text-xs'
+                    : 'badge badge-light-warning px-2 font-semibold text-xs'
+                "
+              >
+                {{ route.query.poNumber || (invoiceNo && !invoiceNo.startsWith('NPO')) ? 'PO' : 'Non-PO' }}
+              </span>
+            </div>
+            <div class="card-body flex flex-col gap-[16px]">
+              <div class="flex items-center justify-between gap-[10px]">
+                <p class="font-normal text-sm text-gray-600">No. Invoice</p>
+                <p class="font-normal text-sm font-semibold text-gray-800">{{ invoiceNo || '—' }}</p>
               </div>
-              <div>
-                <span class="text-gray-400 block text-xs">Vendor Name</span>
-                <span class="font-semibold text-gray-900">{{ vendorName || '—' }}</span>
+              <div class="flex items-center justify-between gap-[10px]">
+                <p class="font-normal text-sm text-gray-600">Vendor Name</p>
+                <p class="font-normal text-sm font-semibold text-gray-800">{{ vendorName || '—' }}</p>
               </div>
-              <div>
-                <span class="text-gray-400 block text-xs">NPWP Penjual (Invoice)</span>
-                <span class="font-mono text-gray-700">{{ vendorNpwp || '—' }}</span>
+              <div class="flex items-center justify-between gap-[10px]">
+                <p class="font-normal text-sm text-gray-600">NPWP Penjual (Invoice)</p>
+                <p class="font-normal text-sm font-semibold text-gray-800">{{ vendorNpwp || '—' }}</p>
               </div>
-              <div>
-                <span class="text-gray-400 block text-xs">DPP (Tax Base)</span>
-                <span class="font-semibold text-gray-900">{{ fmt(dppNum) }}</span>
+              <div class="flex items-center justify-between gap-[10px]">
+                <p class="font-normal text-sm text-gray-600">DPP (Tax Base)</p>
+                <p class="font-normal text-sm font-semibold text-gray-800">{{ fmt(dppNum) }}</p>
               </div>
-              <div class="col-span-2 border-t border-teal-50 pt-3 flex justify-between items-center">
-                <span class="font-medium text-teal-800 text-xs">VAT / PPN (Invoice)</span>
-                <span class="font-bold text-teal-700 text-base">{{ fmt(vatNum) }}</span>
+              <div class="flex items-center justify-between gap-[10px] border-t border-gray-100 pt-4">
+                <p class="font-normal text-sm font-semibold text-primary">VAT / PPN (Invoice)</p>
+                <p class="font-bold text-base text-primary">{{ fmt(vatNum) }}</p>
               </div>
             </div>
           </div>
@@ -51,148 +52,138 @@
           </div>
 
           <!-- Section 1: Faktur & Pengkreditan -->
-          <div class="card p-[20px] bg-white border border-gray-200 rounded-xl shadow-sm space-y-4">
-            <div class="flex items-center gap-2 border-b border-gray-100 pb-3">
-              <span class="flex h-6 w-6 items-center justify-center rounded-full bg-teal-500 text-xs font-bold text-white">1</span>
-              <h2 class="text-sm font-bold uppercase tracking-wide text-gray-700">Faktur &amp; Pengkreditan</h2>
-            </div>
-            
-            <div class="space-y-4">
-              <div>
-                <label class="label py-1"><span class="label-text font-semibold text-gray-600">Nomor Faktur Pajak</span></label>
-                <input
-                  v-model.trim="nomorFp"
-                  type="text"
-                  class="input input-bordered input-md w-full font-mono text-gray-800"
-                  :placeholder="phNomorFp"
-                  autocomplete="off"
-                />
-                <p class="mt-1 text-xs text-gray-400">Pastikan cocok dengan faktur di lingkungan sandbox Pajak Express.</p>
+          <div class="card p-[20px]">
+            <h3 class="text-lg font-semibold mb-[16px]">Faktur &amp; Pengkreditan</h3>
+            <div class="flex flex-col gap-[8px]">
+
+              <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">Nomor Faktur Pajak</label>
+                <div class="flex-1">
+                  <input
+                    v-model.trim="nomorFp"
+                    type="text"
+                    class="input w-full"
+                    :placeholder="phNomorFp"
+                    autocomplete="off"
+                  />
+                  <p class="mt-1 text-xs text-gray-400">Pastikan cocok dengan faktur di lingkungan sandbox Pajak Express.</p>
+                </div>
               </div>
 
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="label py-1"><span class="label-text font-semibold text-gray-600">Masa Pajak</span></label>
-                  <div class="flex gap-2">
-                    <select v-model="bulanIdx" class="select select-bordered w-full" @change="syncMasaFromSelect">
-                      <option v-for="b in bulanOptions" :key="b.v" :value="b.idx">{{ b.label }}</option>
-                    </select>
-                    <input
-                      v-model.trim="masaPajakMm"
-                      type="text"
-                      maxlength="2"
-                      class="input input-bordered w-16 shrink-0 font-mono text-center"
-                      :placeholder="phMasa"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label class="label py-1"><span class="label-text font-semibold text-gray-600">Tahun Pajak</span></label>
+              <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">Masa Pajak</label>
+                <div class="flex gap-2 flex-1">
+                  <select v-model="bulanIdx" class="select w-full" @change="syncMasaFromSelect">
+                    <option v-for="b in bulanOptions" :key="b.v" :value="b.idx">{{ b.label }}</option>
+                  </select>
                   <input
-                    v-model.trim="tahunPajak"
+                    v-model.trim="masaPajakMm"
                     type="text"
-                    maxlength="4"
-                    class="input input-bordered w-full font-mono text-center"
-                    :placeholder="phTahun"
+                    maxlength="2"
+                    class="input w-16 shrink-0 text-center"
+                    :placeholder="phMasa"
                   />
                 </div>
               </div>
 
-              <div>
-                <label class="label py-1"><span class="label-text font-semibold text-gray-600">Konfirmasi Pengkreditan</span></label>
-                <select v-model="konfirmasi" class="select select-bordered w-full">
+              <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">Tahun Pajak</label>
+                <input v-model.trim="tahunPajak" type="text" maxlength="4" class="input flex-1" :placeholder="phTahun" />
+              </div>
+
+              <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">Konfirmasi Pengkreditan</label>
+                <select v-model="konfirmasi" class="select flex-1">
                   <option value="CREDITED">CREDITED — Kredit masuk pajak pembeli</option>
                   <option value="UNCREDITED">UNCREDITED — Belum / tidak dikreditkan</option>
                   <option value="INVALID">INVALID — Faktur tidak berlaku / ditolak</option>
                 </select>
               </div>
 
-              <div class="bg-gray-50/50 p-3 rounded-lg border border-gray-100">
-                <label class="flex items-center gap-2.5 cursor-pointer">
-                  <input v-model="includeNpwpPenjualPrepop" type="checkbox" class="checkbox checkbox-sm checkbox-primary" />
-                  <span class="text-sm font-medium text-gray-700">Sertakan NPWP Penjual (default dari vendor invoice)</span>
-                </label>
-                <div v-if="includeNpwpPenjualPrepop" class="mt-3 animate-in fade-in duration-200">
-                  <label class="label py-0.5"><span class="label-text text-xs text-gray-500">NPWP Penjual</span></label>
-                  <input
-                    v-model.trim="npwpPenjual"
-                    type="text"
-                    class="input input-bordered w-full font-mono text-sm"
-                    :placeholder="phNpwpPenjual"
-                  />
+              <div class="flex items-start flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600 pt-1">NPWP Penjual</label>
+                <div class="flex-1">
+                  <label class="flex items-center gap-2.5 cursor-pointer mb-2">
+                    <input v-model="includeNpwpPenjualPrepop" type="checkbox" class="checkbox checkbox-sm checkbox-primary" />
+                    <span class="text-sm font-medium text-gray-700">Sertakan NPWP Penjual (default dari vendor invoice)</span>
+                  </label>
+                  <div v-if="includeNpwpPenjualPrepop" class="animate-in fade-in duration-200">
+                    <input v-model.trim="npwpPenjual" type="text" class="input w-full" :placeholder="phNpwpPenjual" />
+                  </div>
                 </div>
               </div>
+
             </div>
           </div>
 
-          <!-- Section 1B: Real Sandbox Invoice Shortcuts -->
-          <div class="card p-[20px] bg-gradient-to-br from-indigo-50/50 via-white to-white border border-indigo-100 rounded-xl shadow-sm space-y-3">
-            <div class="flex items-center gap-2 border-b border-indigo-50 pb-2">
-              <i class="ki-filled ki-flash text-indigo-600 text-base"></i>
-              <h2 class="text-xs font-bold uppercase tracking-wider text-indigo-900">Pintasan Faktur Sandbox Asli</h2>
-            </div>
-            <p class="text-xs text-indigo-950/70 leading-relaxed">
-              Klik salah satu nomor faktur di bawah ini (dari dashboard sandbox Anda) untuk mengisi form secara otomatis dengan data faktur asli yang aktif &amp; belum dikreditkan:
+          <!-- Section 1B: Sandbox Shortcuts -->
+          <div class="card p-[20px]">
+            <h3 class="text-lg font-semibold mb-[4px] flex items-center gap-2">
+              <i class="ki-filled ki-flash text-indigo-500"></i>
+              Pintasan Faktur Sandbox Asli
+            </h3>
+            <p class="text-xs text-gray-500 mb-[12px]">
+              Klik salah satu nomor faktur di bawah untuk mengisi form secara otomatis:
             </p>
-            <div class="flex flex-wrap gap-2 pt-1">
-              <button 
-                v-for="realFp in ['04002600000070403', '04002600000070397', '04002600000070396', '04002600000070395', '04002600000070402', '04002600000070420', '04002600000070401', '04002600000066118', '04002600000070400']" 
+            <div class="flex flex-wrap gap-2">
+              <button
+                v-for="realFp in ['04002600000070403', '04002600000070397', '04002600000070396', '04002600000070395', '04002600000070402', '04002600000070420', '04002600000070401', '04002600000066118', '04002600000070400']"
                 :key="realFp"
                 type="button"
-                class="btn btn-outline btn-primary btn-xs font-mono"
+                class="btn btn-outline btn-primary btn-xs"
                 @click="applyRealSandboxInvoice(realFp)"
               >
                 {{ realFp }}
               </button>
-              
               <button
                 type="button"
                 class="btn btn-success btn-xs font-bold text-white"
                 @click="applyTodaySandboxTest"
               >
-                ⚡ Auto-Fill Hari Ini (Simulasi)
+                <i class="ki-filled ki-flash text-xs mr-1"></i>
+                Auto-Fill Hari Ini (Simulasi)
               </button>
             </div>
-            <p class="text-[10px] text-gray-500 leading-relaxed">
-              * Pintasan ini akan mengatur Nomor Faktur = <code class="font-mono bg-gray-100 px-1 py-0.5 rounded">[Nomor]</code>, Masa = <code class="font-mono bg-gray-100 px-1 py-0.5 rounded">03</code>, Tahun = <code class="font-mono bg-gray-100 px-1 py-0.5 rounded">2026</code>, dan NPWP Penjual = <code class="font-mono bg-gray-100 px-1 py-0.5 rounded">{{ npwpPembeli || '1091031210969728' }}</code>.
+            <p class="text-[10px] text-gray-400 mt-3 leading-relaxed">
+              * Akan mengatur Nomor Faktur, Masa = <code class="bg-gray-100 px-1 py-0.5 rounded">03</code>, Tahun = <code class="bg-gray-100 px-1 py-0.5 rounded">2026</code>, dan NPWP Penjual = <code class="bg-gray-100 px-1 py-0.5 rounded">{{ npwpPembeli || '1091031210969728' }}</code>.
             </p>
           </div>
 
           <!-- Section 2: Sandbox Context Override -->
-          <div class="card p-[20px] bg-white border border-gray-200 rounded-xl shadow-sm space-y-4">
-            <div class="flex items-center gap-2 border-b border-gray-100 pb-3">
-              <span class="flex h-6 w-6 items-center justify-center rounded-full bg-slate-400 text-xs font-bold text-white">2</span>
-              <h2 class="text-sm font-bold uppercase tracking-wide text-gray-700">Sandbox Context Override</h2>
-            </div>
-            
-            <div class="space-y-4">
-              <div>
-                <label class="label py-1"><span class="label-text font-semibold text-gray-600">NPWP Pembeli</span></label>
-                <input
-                  v-model.trim="npwpPembeli"
-                  type="text"
-                  class="input input-bordered w-full font-mono text-sm"
-                  :placeholder="phNpwpPembeli"
-                />
+          <div class="card p-[20px]">
+            <h3 class="text-lg font-semibold mb-[16px]">Sandbox Context Override</h3>
+            <div class="flex flex-col gap-[8px]">
+
+              <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">NPWP Pembeli</label>
+                <input v-model.trim="npwpPembeli" type="text" class="input flex-1" :placeholder="phNpwpPembeli" />
               </div>
 
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="label py-1"><span class="label-text font-semibold text-gray-600">User ID / Signer</span></label>
-                  <input v-model.trim="userIdSigner" type="text" class="input input-bordered w-full font-mono text-sm" :placeholder="phUserId" />
-                </div>
-                <div>
-                  <label class="label py-1"><span class="label-text font-semibold text-gray-600">Kanal</span></label>
-                  <input v-model.trim="kanal" type="text" class="input input-bordered w-full font-mono text-sm" :placeholder="phKanal" />
-                </div>
+              <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">User ID / Signer</label>
+                <input v-model.trim="userIdSigner" type="text" class="input flex-1" :placeholder="phUserId" />
               </div>
 
-              <div class="flex flex-wrap gap-2 pt-2 border-t border-gray-100">
-                <button type="button" class="btn btn-ghost btn-xs text-gray-500" @click="saveSandboxToStorage">Simpan Draft</button>
-                <button type="button" class="btn btn-ghost btn-xs text-gray-500" @click="loadSandboxFromStorage">Muat Draft</button>
-                <button type="button" class="btn btn-ghost btn-xs text-warning" @click="clearSandboxStorage">Reset Draft</button>
-                <button type="button" class="btn btn-secondary btn-xs ml-auto animate-pulse" @click="autoFillSandboxData">
-                  <i class="ki-filled ki-flash text-xs mr-1"></i>
+              <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">Kanal</label>
+                <input v-model.trim="kanal" type="text" class="input flex-1" :placeholder="phKanal" />
+              </div>
+
+              <div class="flex items-center gap-2 pt-3 border-t border-gray-100 flex-wrap">
+                <button type="button" class="btn btn-light btn-sm" @click="saveSandboxToStorage">
+                  <i class="ki-filled ki-save-2 text-xs"></i>
+                  Simpan Draft
+                </button>
+                <button type="button" class="btn btn-light btn-sm" @click="loadSandboxFromStorage">
+                  <i class="ki-filled ki-folder-open text-xs"></i>
+                  Muat Draft
+                </button>
+                <button type="button" class="btn btn-light btn-sm text-warning" @click="clearSandboxStorage">
+                  <i class="ki-filled ki-arrows-circle text-xs"></i>
+                  Reset Draft
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm ml-auto" @click="autoFillSandboxData">
+                  <i class="ki-filled ki-flash text-xs"></i>
                   Auto-Fill Sandbox Data
                 </button>
               </div>
@@ -200,73 +191,86 @@
           </div>
         </div>
 
-        <!-- COLUMN RIGHT: Actions & Results -->
-        <div class="w-full lg:max-w-sm space-y-6 sticky top-6">
-          
-          <!-- Card: Main Submit Action -->
-          <div class="card p-[20px] bg-white border border-gray-200 rounded-xl shadow-sm space-y-4">
-            <span class="font-bold text-xs uppercase tracking-wider text-slate-700 block border-b border-gray-100 pb-2">
-              📤 Pajak Express Submission
-            </span>
-            
-            <p class="text-xs text-gray-500 leading-relaxed">
-              Kirim konfirmasi pengkreditan faktur masukan ini langsung ke sistem DJP melalui integrasi Pajak Express.
-            </p>
+        <!-- RIGHT COLUMN: Sticky Sidebar -->
+        <div class="w-full lg:max-w-sm space-y-6 lg:sticky lg:top-0">
 
-            <button 
-              type="button" 
-              class="btn btn-primary btn-md w-full text-white" 
-              :disabled="anyLoading || !canSubmitUpload" 
-              @click="submitUpload"
-            >
-              <span v-if="loadingSubmit" class="loading loading-spinner loading-sm mr-2" />
-              <i v-else class="ki-filled ki-paper-plane mr-2" />
-              Submit ke Pajak Express
-            </button>
-            
-            <p class="text-[10px] text-gray-400 leading-relaxed text-center">
-              Menandai status faktur masukan ini sebagai CREDITED ke sistem DJP secara langsung.
-            </p>
-
-            <router-link class="btn btn-ghost btn-sm w-full text-gray-500" :to="{ name: 'vatReconciliation' }">
-              Batal &amp; Kembali
-            </router-link>
+          <!-- Submit Action Card -->
+          <div class="card h-fit">
+            <div class="card-header py-[16px] px-[20px] border-b border-gray-100 bg-white">
+              <h3 class="text-base font-bold text-gray-800 mb-0">
+                <i class="ki-filled ki-paper-plane text-primary mr-2"></i>
+                Pajak Express Submission
+              </h3>
+            </div>
+            <div class="card-body flex flex-col gap-[16px]">
+              <p class="text-xs text-gray-500 leading-relaxed">
+                Kirim konfirmasi pengkreditan faktur masukan ini langsung ke sistem DJP melalui integrasi Pajak Express.
+              </p>
+              <button
+                type="button"
+                class="btn btn-primary w-full"
+                :disabled="anyLoading || !canSubmitUpload"
+                @click="submitUpload"
+              >
+                <span v-if="loadingSubmit" class="loading loading-spinner loading-sm mr-2"></span>
+                <i v-else class="ki-filled ki-paper-plane mr-2"></i>
+                Submit ke Pajak Express
+              </button>
+              <p class="text-[10px] text-gray-400 leading-relaxed text-center">
+                Menandai status faktur masukan ini sebagai CREDITED ke sistem DJP secara langsung.
+              </p>
+            </div>
           </div>
 
-          <!-- Toast Banner -->
-          <div v-if="successBanner" class="p-3.5 rounded-xl border border-emerald-200 bg-emerald-50 text-xs text-emerald-800 flex items-start gap-2.5 animate-in fade-in duration-300">
+          <!-- Success Banner -->
+          <div
+            v-if="successBanner"
+            class="p-4 rounded-xl border border-emerald-200 bg-emerald-50 text-xs text-emerald-800 flex items-start gap-2.5 animate-in fade-in duration-300"
+          >
             <i class="ki-filled ki-check-circle text-emerald-600 text-base shrink-0 mt-0.5"></i>
             <div>
               <span class="font-bold block">Sukses!</span>
               <span>{{ successBanner }}</span>
             </div>
           </div>
+
+          <!-- Debug Response Card -->
+          <div class="card h-fit">
+            <div class="card-header py-[16px] px-[20px] border-b border-gray-100 bg-white flex items-center justify-between">
+              <h3 class="text-sm font-bold text-gray-700 mb-0 flex items-center gap-1.5">
+                <i class="ki-filled ki-code text-gray-500 text-base"></i>
+                Response Terakhir
+              </h3>
+              <button type="button" class="btn btn-light btn-xs" :disabled="!lastResponseRaw" @click="copyLast">
+                <i class="ki-filled ki-copy text-xs mr-1"></i>
+                Salin JSON
+              </button>
+            </div>
+            <div class="card-body p-0">
+              <pre class="vat-pj-pre max-h-[340px] overflow-auto rounded-b-xl bg-gray-950/95 p-4 text-[11px] leading-relaxed text-emerald-100">{{ lastResponseRaw || '{ } — jalankan salah satu aksi untuk melihat jawaban API.' }}</pre>
+            </div>
+          </div>
         </div>
 
       </div>
 
-      <!-- Debug Response (Bottom) -->
-      <section class="card p-[20px] bg-white border border-gray-200 rounded-xl shadow-sm mt-8 space-y-3">
-        <div class="flex items-center justify-between border-b border-gray-100 pb-2.5">
-          <div class="flex items-center gap-1.5">
-            <i class="ki-filled ki-code text-gray-600 text-base"></i>
-            <h2 class="text-sm font-bold text-gray-700">Response Terakhir (Debug Sandbox)</h2>
-          </div>
-          <button 
-            type="button" 
-            class="btn btn-light btn-xs" 
-            :disabled="!lastResponseRaw" 
-            @click="copyLast"
-          >
-            <i class="ki-filled ki-copy text-xs mr-1"></i>
-            Salin JSON
-          </button>
-        </div>
-        <pre class="vat-pj-pre max-h-[420px] overflow-auto rounded-lg bg-gray-950/95 p-4 text-[11px] leading-relaxed text-emerald-100">{{
-          lastResponseRaw || '{ } — jalankan salah satu aksi di samping untuk melihat jawaban API invoice backend.'
-        }}</pre>
-      </section>
-
+      <!-- Footer Actions -->
+      <div class="pt-8 border-t border-gray-100 flex items-center justify-between">
+        <router-link class="btn btn-outline btn-primary" :to="{ name: 'vatReconciliation' }">
+          <i class="ki-filled ki-arrow-left"></i>
+          Batal &amp; Kembali
+        </router-link>
+        <button
+          type="button"
+          class="btn btn-primary px-12"
+          :disabled="anyLoading || !canSubmitUpload"
+          @click="submitUpload"
+        >
+          <span v-if="loadingSubmit" class="loading loading-spinner loading-sm"></span>
+          <i v-else class="ki-filled ki-paper-plane ml-2"></i>
+          Submit ke Pajak Express
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -872,6 +876,15 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+.badge-light-primary {
+  background-color: #f1faff;
+  color: #009ef7;
+}
+.badge-light-warning {
+  background-color: #fff8dd;
+  color: #ffc700;
+}
+
 .vat-pj-pre {
   font-variant-numeric: tabular-nums;
   white-space: pre-wrap;
