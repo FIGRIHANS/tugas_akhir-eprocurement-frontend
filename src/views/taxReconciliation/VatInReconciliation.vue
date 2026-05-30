@@ -4,9 +4,30 @@
     <hr class="-mx-[24px] mb-[24px]" />
 
     <div class="card shadow-sm border border-gray-200 rounded-xl overflow-hidden bg-white">
-      <!-- Tab Navigation Header -->
-      <div class="card-header py-[8px] px-[20px] border-b border-gray-200 bg-white">
-        <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden text-sm w-fit">
+      <!-- Tab Content -->
+      <div class="card-body p-0">
+        <!-- Shared Header -->
+        <div class="flex justify-between items-center gap-3 flex-wrap px-[24px] pt-[24px] mb-[32px]">
+          <div class="flex flex-col gap-1">
+            <h3 class="text-lg font-semibold text-gray-800 m-0">List Data</h3>
+          </div>
+          
+          <!-- Header Actions (only for Queue) -->
+          <div v-if="workspace === 'queue'" class="flex gap-2 flex-wrap items-center">
+            <UiInputSearch v-model="pendingSearch" placeholder="Search invoice / vendor" @search="fetchPendingVat" />
+            <button type="button" class="btn btn-outline btn-primary" @click="fetchPendingVat">
+              <i class="ki-filled ki-arrows-circle !text-base"></i>
+              Refresh
+            </button>
+            <button type="button" class="btn btn-primary" @click="goManualPjSubmit">
+              <i class="ki-filled ki-plus-circle !text-base"></i>
+              Submit without Invoice
+            </button>
+          </div>
+        </div>
+
+        <!-- View Toggle Tabs -->
+        <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden text-sm w-fit mb-8 mx-[24px]">
           <button
             type="button"
             :class="[
@@ -32,27 +53,8 @@
             Pajak Express
           </button>
         </div>
-      </div>
 
-      <!-- Tab Content -->
-      <div class="card-body p-0">
       <template v-if="workspace === 'queue'">
-      <div class="flex justify-between items-center gap-3 mb-4 flex-wrap px-[24px] pt-[24px]">
-          <div class="flex flex-col gap-1">
-            <h3 class="text-lg font-semibold text-gray-800 m-0">List Data</h3>
-          </div>
-          <div class="flex gap-2 flex-wrap items-center">
-            <UiInputSearch v-model="pendingSearch" placeholder="Search invoice / vendor" @search="fetchPendingVat" />
-            <button type="button" class="btn btn-outline btn-primary" @click="fetchPendingVat">
-              <i class="ki-filled ki-arrows-circle !text-base"></i>
-              Refresh
-            </button>
-            <button type="button" class="btn btn-primary" @click="goManualPjSubmit">
-              <i class="ki-filled ki-plus-circle !text-base"></i>
-              Submit without Invoice
-            </button>
-          </div>
-        </div>
         <div class="overflow-x-auto mx-[24px] rounded-xl mb-[8px]">
         <table class="table align-middle text-gray-700 font-medium text-sm">
           <thead>
@@ -121,15 +123,7 @@
 
       <template v-else-if="workspace === 'pj'">
       <!-- Header Section -->
-      <div class="flex flex-col gap-4 mb-[24px] px-[24px] pt-[24px]">
-        
-        <!-- Main Header -->
-        <div class="flex justify-between items-center gap-[8px] flex-wrap">
-          <div class="flex flex-col gap-1">
-            <h3 class="text-lg font-semibold text-gray-800 m-0">List Data</h3>
-          </div>
-        </div>
-
+      <div class="flex flex-col gap-4 mb-[24px] px-[24px]">
         <!-- Coretax Period Sub-header -->
         <div v-if="workspace === 'pj'" class="flex flex-wrap items-end justify-between gap-3 bg-gray-50 p-3 rounded-lg border border-gray-200 w-full">
           
