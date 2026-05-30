@@ -153,9 +153,11 @@ import { useLoginStore } from '@/stores/views/login'
 import { getUserIdFromToken } from '@/composables/token'
 import { NotificationService } from '@/services/notification.service'
 import moment from 'moment'
+import { useRouter } from 'vue-router'
 
 const notificationStore = useNotificationStore()
 const loginStore = useLoginStore()
+const router = useRouter()
 const bellRef = ref<HTMLElement | null>(null)
 const isOpen = ref(false)
 const showClearModal = ref(false)
@@ -208,6 +210,14 @@ const handleNotificationClick = async (notification: TaxNotification) => {
     await notificationStore.markApiNotificationRead(notification.id, currentUserId.value)
   } else {
     notificationStore.markAsRead(notification.id)
+  }
+
+  if (notification.type === 'vat-mismatch' || notification.type === 'vat-expiry') {
+    if (notification.relatedData?.fullItem) {
+      sessionStorage.setItem('vatIn_detail_item', JSON.stringify(notification.relatedData.fullItem))
+    }
+    router.push(`/vat-in-reconciliation/${notification.relatedId || 0}`)
+    isOpen.value = false
   }
 }
 

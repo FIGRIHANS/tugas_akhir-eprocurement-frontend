@@ -9,7 +9,7 @@
     :style="{ insetInlineStart: sidebarStore.isCollapsed ? '0px' : '280px' }"
     :aria-label="sidebarStore.isCollapsed ? 'Tampilkan sidebar' : 'Sembunyikan sidebar'"
     :aria-pressed="sidebarStore.isCollapsed"
-    @click="sidebarStore.toggleSidebar"
+    @click.prevent="sidebarStore.toggleSidebar()"
   >
     <i
       class="ki-filled"
@@ -23,11 +23,15 @@
   >
     <RouterView :key="route.fullPath" />
   </main>
+
+  <!-- Global AI Chatbot Widget -->
+  <AiChatbot />
 </template>
 
 <script setup lang="ts">
 import LNavbar from '@/components/layout/navbar/LNavbar.vue'
 import LSidebar from '@/components/layout/sidebar/LSidebar.vue'
+import AiChatbot from '@/components/chat/AiChatbot.vue'
 import { useSidebarStore } from '@/stores/sidebar'
 
 import { RouterView, useRoute } from 'vue-router'

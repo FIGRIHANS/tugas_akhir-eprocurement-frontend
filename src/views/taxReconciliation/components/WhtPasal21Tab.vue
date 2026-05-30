@@ -3,10 +3,7 @@
     <!-- Header Section -->
     <div class="flex justify-between items-center mb-[24px]">
       <div class="flex flex-col gap-1">
-        <h1 class="text-2xl font-bold text-gray-800">WHT - Pasal 21</h1>
-        <p class="text-xs text-gray-500 font-medium italic">
-          Manage PPh 21 Non-Employee (Final & Non-Final) drafts and DJP synchronization.
-        </p>
+        <h3 class="text-lg font-semibold">List Data</h3>
       </div>
       <div class="flex gap-3">
         <!-- Feature Toggle (only visible in pph21 view) -->
@@ -47,26 +44,44 @@
     </div>
 
     <!-- View Toggle Tabs -->
-    <div class="tabs mb-6" data-tab="true">
-      <div 
-        class="tab cursor-pointer"
-        :class="activeView === 'pending' ? 'active' : ''"
+    <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden text-sm w-fit mb-6">
+      <button
+        type="button"
+        :class="[
+          'px-4 py-2 font-medium transition-colors',
+          activeView === 'pending'
+            ? 'bg-primary text-white'
+            : 'bg-white text-gray-500 hover:bg-gray-50',
+        ]"
         @click="activeView = 'pending'"
       >
         Pending Reconciliation
-        <span v-if="filteredPendingInvoices.length > 0" class="badge badge-sm badge-primary ml-1">{{ filteredPendingInvoices.length }}</span>
-      </div>
-      <div 
-        class="tab cursor-pointer"
-        :class="activeView === 'pph21' ? 'active' : ''"
+        <span
+          v-if="totalPending > 0"
+          :class="[
+            'badge badge-sm ml-1.5 font-bold',
+            activeView === 'pending' ? 'bg-white text-primary' : 'badge-primary'
+          ]"
+        >
+          {{ totalPending }}
+        </span>
+      </button>
+      <button
+        type="button"
+        :class="[
+          'px-4 py-2 font-medium transition-colors border-l border-gray-200',
+          activeView === 'pph21'
+            ? 'bg-primary text-white'
+            : 'bg-white text-gray-500 hover:bg-gray-50',
+        ]"
         @click="activeView = 'pph21'"
       >
         PPh21 Drafts & DJP Sync
-      </div>
+      </button>
     </div>
 
     <!-- PENDING INVOICES TABLE -->
-    <div v-if="activeView === 'pending'" class="overflow-x-auto list__table animate-in fade-in duration-300">
+    <div v-if="activeView === 'pending'" class="overflow-x-auto list__table animate-in fade-in duration-300 rounded-xl overflow-hidden">
       <table class="table align-middle text-gray-700 font-medium text-sm">
         <thead>
           <tr>
@@ -89,7 +104,7 @@
           <tr v-else-if="filteredPendingInvoices.length === 0" class="text-center">
             <td colspan="7" class="py-10 text-gray-400 italic">No approved invoices pending WHT reconciliation.</td>
           </tr>
-          <tr v-for="inv in filteredPendingInvoices" :key="inv.invoiceUId">
+          <tr v-for="inv in paginatedPendingInvoices" :key="inv.invoiceUId">
             <td>
               <span :class="inv.invoiceSource === 'PO' ? 'badge badge-light-primary px-2' : 'badge badge-light-warning px-2'">
                 {{ inv.invoiceSource }}
@@ -112,10 +127,23 @@
           </tr>
         </tbody>
       </table>
+
+      <!-- Pending Pagination Footer -->
+      <div v-if="totalPending > 0" class="flex items-center justify-between mt-[24px]">
+        <p class="text-sm text-gray-500">
+          Showing <b>{{ paginatedPendingInvoices.length }}</b> of <b>{{ totalPending }}</b> entries
+        </p>
+        <LPagination
+          :totalItems="totalPending"
+          :pageSize="pendingLimit"
+          :currentPage="pendingPage"
+          @page-change="onPendingPageChange"
+        />
+      </div>
     </div>
 
     <!-- MAIN PPH21 TABLE -->
-    <div v-if="activeView === 'pph21'" class="overflow-x-auto list__table animate-in fade-in duration-300">
+    <div v-if="activeView === 'pph21'" class="overflow-x-auto list__table animate-in fade-in duration-300 rounded-xl overflow-hidden">
       <table class="table align-middle text-gray-700 font-medium text-sm">
         <thead>
           <tr>
@@ -213,12 +241,6 @@
             <td class="text-right">{{ formatCurrency(Number(item.penghasilanKotor) || 0) }}</td>
             <td class="text-right text-danger">
               {{ formatCurrency(Number(item.pphDipotong) || 0) }}
-              <div
-                v-if="item.tarif && Number(item.tarif) > 0"
-                class="text-[10px] text-gray-500 italic"
-              >
-                Rate: {{ item.tarif }}%
-              </div>
             </td>
             <td>
               <div class="flex flex-col gap-1 items-start">
@@ -226,7 +248,7 @@
                   {{ item.status || item.fgStatus || 'UNKNOWN' }}
                 </span>
                 <span
-                  v-if="item.errorMessage || item.errorMsg"
+                  v-if="(item.errorMessage || item.errorMsg) && !(item.errorMessage || item.errorMsg).toLowerCase().includes('passphrase tidak ditemukan')"
                   class="text-[10px] text-danger italic max-w-[150px] truncate"
                   :title="item.errorMessage || item.errorMsg || ''"
                   >{{ item.errorMessage || item.errorMsg }}</span
@@ -346,6 +368,9 @@ const nikSigner = '3172022407830008'
 const activeView = ref<'pending' | 'pph21'>('pending')
 const pendingInvoices = ref<any[]>([])
 const loadingPending = ref(false)
+const pendingPage = ref(1)
+const pendingLimit = ref(10)
+const totalPending = ref(0)
 
 const pphList = ref<Pph21Content[]>([])
 const totalPph = ref(0)
@@ -385,8 +410,14 @@ const showSuccessNotif = (title: string, text: string) => {
 const fetchPendingInvoices = async () => {
   loadingPending.value = true
   try {
-    const res = await BpuService.getAvailableInvoices('', 'PPH21')
-    pendingInvoices.value = res.result.content || []
+    const res = await BpuService.getAvailableInvoices({
+      search: search.value,
+      page: pendingPage.value,
+      limit: pendingLimit.value,
+      type: 'PPH21',
+    })
+    pendingInvoices.value = res.result.content.items || []
+    totalPending.value = res.result.content.total || 0
   } catch (error) {
     console.error('Error fetching pending invoices:', error)
   } finally {
@@ -394,15 +425,8 @@ const fetchPendingInvoices = async () => {
   }
 }
 
-const filteredPendingInvoices = computed(() => {
-  if (!search.value) return pendingInvoices.value
-  const s = search.value.toLowerCase()
-  return pendingInvoices.value.filter(inv => 
-    inv.invoiceNo?.toLowerCase().includes(s) || 
-    inv.vendorName?.toLowerCase().includes(s) ||
-    inv.vendorNpwp?.toLowerCase().includes(s)
-  )
-})
+const filteredPendingInvoices = computed(() => pendingInvoices.value)
+const paginatedPendingInvoices = computed(() => pendingInvoices.value)
 
 const createPph21FromInvoice = (inv: any) => {
   router.push({
@@ -598,16 +622,36 @@ const viewDetail = (item: Pph21Content) => {
   })
 }
 
+const onPendingPageChange = (v: number) => {
+  pendingPage.value = v
+  fetchPendingInvoices()
+}
+
 let searchTimeout: ReturnType<typeof setTimeout> | null = null
 watch(
   () => search.value,
   () => {
+    pendingPage.value = 1
     if (searchTimeout) clearTimeout(searchTimeout)
     searchTimeout = setTimeout(() => {
       page.value = 1
       fetchPphList()
+      fetchPendingInvoices()
     }, 500)
   },
+)
+
+watch(
+  () => activeView.value,
+  () => {
+    pendingPage.value = 1
+    page.value = 1
+    if (activeView.value === 'pending') {
+      fetchPendingInvoices()
+    } else {
+      fetchPphList()
+    }
+  }
 )
 
 onMounted(() => {

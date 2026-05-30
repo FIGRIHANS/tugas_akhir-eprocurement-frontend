@@ -9,10 +9,10 @@
         <div class="flex-1 space-y-6">
           <!-- Section 1: Recipient Information -->
           <div class="card p-[20px]">
-            <p class="font-semibold text-sm mb-[16px] uppercase tracking-tight text-gray-600">Recipient Information</p>
+            <h3 class="text-lg font-semibold mb-[16px]">Recipient Information</h3>
             <div class="flex flex-col gap-[8px]">
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label w-full lg:max-w-xs">Identification Type</label>
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">Identification Type</label>
                 <div class="flex gap-6 items-center flex-1">
                   <label class="flex items-center gap-2 cursor-pointer">
                     <input type="radio" v-model="form.fgNpwpNik" value="true" class="radio radio-primary radio-xs" />
@@ -26,7 +26,7 @@
               </div>
 
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label w-full lg:max-w-xs">{{ form.fgNpwpNik === 'true' ? 'NPWP' : 'NIK' }}</label>
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">{{ form.fgNpwpNik === 'true' ? 'NPWP' : 'NIK' }}</label>
                 <div class="flex-1">
                   <input 
                     v-model="form.npwp" 
@@ -43,7 +43,7 @@
               </div>
 
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label w-full lg:max-w-xs">Counterpart Name</label>
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">Counterpart Name</label>
                 <div class="flex-1">
                   <input 
                     v-model="form.nama" 
@@ -63,10 +63,10 @@
 
           <!-- Section 2: Financial Details -->
           <div class="card p-[20px]">
-            <p class="font-semibold text-sm mb-[16px] uppercase tracking-tight text-gray-600">Financial & Tax Details</p>
+            <h3 class="text-lg font-semibold mb-[16px]">Financial & Tax Details</h3>
             <div class="flex flex-col gap-[8px]">
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label w-full lg:max-w-xs">Tax Object Code</label>
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">Tax Object Code</label>
                 <div class="flex-1">
                   <select 
                     v-model="form.dataDetilBpu.kodeObjekPajak" 
@@ -94,7 +94,7 @@
               </div>
 
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label w-full lg:max-w-xs">Tax Rate (%)</label>
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">Tax Rate (%)</label>
                 <div class="flex-1 relative">
                   <input 
                     type="number" step="0.1" 
@@ -109,7 +109,7 @@
               </div>
 
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label w-full lg:max-w-xs">Tax Base (DPP)</label>
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">Tax Base (DPP)</label>
                 <div class="flex-1 relative">
                   <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">Rp</span>
                   <input 
@@ -132,25 +132,25 @@
 
           <!-- Section 3: Classification -->
           <div class="card p-[20px]">
-            <p class="font-semibold text-sm mb-[16px] uppercase tracking-tight text-gray-600">Classification & Payments</p>
+            <h3 class="text-lg font-semibold mb-[16px]">Classification & Payments</h3>
             <div class="grid grid-cols-2 gap-x-12 gap-y-2">
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label min-w-[120px]">Pasal PPh</label>
+                <label class="form-label min-w-[120px] text-sm font-medium text-gray-600">Pasal PPh</label>
                 <input v-model="form.dataDetilBpu.pasalPPh" class="input" placeholder="e.g., 4 Ayat 2">
               </div>
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label min-w-[120px]">Status PPh</label>
+                <label class="form-label min-w-[120px] text-sm font-medium text-gray-600">Status PPh</label>
                 <select v-model="form.dataDetilBpu.statusPPh" class="select">
                   <option value="Final">Final</option>
                   <option value="Non Final">Non Final</option>
                 </select>
               </div>
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label min-w-[120px]">KAP Code</label>
+                <label class="form-label min-w-[120px] text-sm font-medium text-gray-600">KAP Code</label>
                 <input v-model="form.dataDetilBpu.kap" class="input" placeholder="411128">
               </div>
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label min-w-[120px]">KJS Code</label>
+                <label class="form-label min-w-[120px] text-sm font-medium text-gray-600">KJS Code</label>
                 <input v-model="form.dataDetilBpu.kjs" class="input" placeholder="100">
               </div>
             </div>
@@ -160,21 +160,21 @@
         <!-- Sidebar / Right Panel: Calculation Summary -->
         <div class="w-full lg:max-w-sm space-y-6 sticky top-0">
           <div class="card h-fit">
-            <div class="card-header py-[16px] px-[20px]">
-              <span class="font-semibold text-sm uppercase tracking-tight text-gray-600">Tax Calculation</span>
+            <div class="card-header py-[16px] px-[20px] border-b border-gray-100 bg-white">
+              <h3 class="text-base font-bold text-gray-800 mb-0">Tax Calculation</h3>
             </div>
             <div class="card-body p-0">
               <div class="flex flex-col">
                 <div class="border-b border-gray-200 py-[20px] px-[20px] text-xs flex justify-between">
-                  <span class="text-gray-500 uppercase tracking-tight">Tax Base (DPP)</span>
+                  <span class="text-gray-500">Tax Base (DPP)</span>
                   <span class="font-medium">{{ formatCurrency(form.dataDetilBpu.dpp) }}</span>
                 </div>
                 <div class="border-b border-gray-200 py-[20px] px-[20px] text-xs flex justify-between">
-                  <span class="text-gray-500 uppercase tracking-tight">Tax Rate</span>
+                  <span class="text-gray-500">Tax Rate</span>
                   <span class="font-medium">{{ form.dataDetilBpu.tarif }}%</span>
                 </div>
                 <div class="calculation__last-field py-[22px] px-[20px] text-xs flex justify-between items-center">
-                  <span class="uppercase tracking-wider">Calculated PPh</span>
+                  <span>Calculated PPh</span>
                   <span class="text-lg">{{ formatCurrency(form.dataDetilBpu.pphDipotong) }}</span>
                 </div>
               </div>
@@ -183,14 +183,14 @@
 
           <!-- Documentation & Accounting Card -->
           <div class="card p-[20px]">
-            <p class="font-semibold text-sm mb-[16px] uppercase tracking-tight text-gray-600">Accounting & Docs</p>
+            <h3 class="text-lg font-semibold mb-[16px]">Accounting & Docs</h3>
             <div class="flex flex-col gap-4">
               <div class="flex flex-col gap-1">
-                <label class="form-label">GL Account</label>
+                <label class="form-label text-sm font-medium text-gray-600">GL Account</label>
                 <input v-model="form.glAccount" class="input" placeholder="Internal Account">
               </div>
               <div class="flex flex-col gap-1">
-                <label class="form-label">Unit/TKU ID</label>
+                <label class="form-label text-sm font-medium text-gray-600">Unit/TKU ID</label>
                 <input v-model="form.idTku" class="input" placeholder="Unit Identifier">
               </div>
             </div>
@@ -298,7 +298,7 @@ const populateFromQueryParams = () => {
   form.value.npwp = String(q.vendorNpwp || '')
   form.value.fgNpwpNik = q.vendorNpwp ? 'true' : 'false'
   form.value.dataDetilBpu.dpp = Number(q.dpp) || 0
-  form.value.dataDetilBpu.pphDipotong = Number(q.whtAmount) || 0
+  calculatePPh()
 
   const invoiceNo = String(q.invoiceNo || '')
   if (form.value.dataDetilBpu.dokReferensi.length > 0) {

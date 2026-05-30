@@ -78,7 +78,7 @@ export interface BpuContent {
 export interface BpuListResponse {
   items: BpuContent[]
   page: number
-  limit: number
+  pageSize: number
   total: number
 }
 
@@ -112,6 +112,20 @@ export interface BpuQueryParams {
   page?: number
   limit?: number
   search?: string
+}
+
+export interface InvoiceVatQueueRow {
+  id: number
+  invoiceUId: string
+  invoiceNo?: string
+  vendorName?: string
+  vendorNpwp?: string
+  dpp?: number
+  whtAmount?: number | null
+  /** VAT / PPN on approved invoice — primary filter for PJ VAT queue */
+  vatAmount?: number | null
+  invoiceSource?: string
+  createdUtcDate?: string | null
 }
 
 // --- Service Implementation ---
@@ -173,7 +187,7 @@ const BpuService = {
     const params = {
       npwpPemotong,
       page: 1,
-      limit: 200, // Fetch enough records to guarantee finding the item
+      pageSize: 200, // Fetch enough records to guarantee finding the item
     }
     const response = await invoiceApi.get<ResponseData<BpuListResponse>>('/tax/bpu', { params })
 
@@ -191,10 +205,29 @@ const BpuService = {
     } as unknown as ResponseData<BpuContent>
   },
 
-  async getAvailableInvoices(search?: string, type: string = 'BPU'): Promise<ResponseData<any[]>> {
-    const response = await invoiceApi.get<ResponseData<any[]>>('/tax/available-invoices', { params: { search, type } })
+  async getInvoiceQueueForVat(params?: { search?: string; page?: number; limit?: number; pageSize?: number }): Promise<ResponseData<BpuListResponse>> {
+    const response = await invoiceApi.get<ResponseData<BpuListResponse>>('/tax/available-invoices', {
+      params: { 
+        search: params?.search,
+        page: params?.page,
+        pageSize: params?.pageSize || params?.limit,
+        type: 'VAT' 
+      },
+    })
     return response.data
-  }
+  },
+
+  async getAvailableInvoices(params?: { search?: string; page?: number; limit?: number; pageSize?: number; type?: string }): Promise<ResponseData<BpuListResponse>> {
+    const response = await invoiceApi.get<ResponseData<BpuListResponse>>('/tax/available-invoices', { 
+      params: { 
+        search: params?.search,
+        page: params?.page,
+        pageSize: params?.pageSize || params?.limit,
+        type: params?.type || 'BPU'
+      } 
+    })
+    return response.data
+  },
 }
 
 export default BpuService

@@ -8,10 +8,10 @@
         <div class="flex-1 space-y-6">
           <!-- Section 1: Withholding Type -->
           <div class="card p-[20px]">
-            <p class="font-semibold text-sm mb-[16px] uppercase tracking-tight text-gray-600">Withholding Type</p>
+            <h3 class="text-lg font-semibold mb-[16px]">Withholding Type</h3>
             <div class="flex flex-col gap-[8px]">
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label w-full lg:max-w-xs">Feature</label>
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">Feature</label>
                 <div class="flex gap-6 items-center flex-1">
                   <label class="flex items-center gap-2 cursor-pointer">
                     <input type="radio" v-model="form.feature" value="tdkfinal" class="radio radio-primary radio-xs" />
@@ -28,10 +28,10 @@
 
           <!-- Section 2: Recipient Information -->
           <div class="card p-[20px]">
-            <p class="font-semibold text-sm mb-[16px] uppercase tracking-tight text-gray-600">Recipient Information</p>
+            <h3 class="text-lg font-semibold mb-[16px]">Recipient Information</h3>
             <div class="flex flex-col gap-[8px]">
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label w-full lg:max-w-xs">Identification Type</label>
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">Identification Type</label>
                 <div class="flex gap-6 items-center flex-1">
                   <label class="flex items-center gap-2 cursor-pointer">
                     <input type="radio" v-model="form.fgNpwpNik" :value="true" class="radio radio-primary radio-xs" />
@@ -45,7 +45,7 @@
               </div>
 
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label w-full lg:max-w-xs">{{ form.fgNpwpNik ? 'NPWP' : 'NIK' }}</label>
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">{{ form.fgNpwpNik ? 'NPWP' : 'NIK' }}</label>
                 <div class="flex-1">
                   <input
                     v-model="form.npwp"
@@ -60,7 +60,7 @@
               </div>
 
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label w-full lg:max-w-xs">Recipient Name</label>
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">Recipient Name</label>
                 <div class="flex-1">
                   <input
                     v-model="form.nama"
@@ -78,10 +78,10 @@
 
           <!-- Section 3: Transaction & Tax Details -->
           <div class="card p-[20px]">
-            <p class="font-semibold text-sm mb-[16px] uppercase tracking-tight text-gray-600">Transaction & Tax Details</p>
+            <h3 class="text-lg font-semibold mb-[16px]">Transaction & Tax Details</h3>
             <div class="flex flex-col gap-[8px]">
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label w-full lg:max-w-xs">Tax Object Code</label>
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">Tax Object Code</label>
                 <div class="flex-1">
                   <select
                     v-model="form.dataDetilBp21.kodeObjekPajak"
@@ -100,7 +100,7 @@
               </div>
 
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label w-full lg:max-w-xs">PPh Status</label>
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">PPh Status</label>
                 <div class="flex-1">
                   <input
                     v-model="form.dataDetilBp21.statusPPh"
@@ -123,7 +123,7 @@
               </div>
 
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label w-full lg:max-w-xs">Gross Income (Before)</label>
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">Gross Income (Before)</label>
                 <div class="flex-1 relative">
                   <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">Rp</span>
                   <input
@@ -136,7 +136,7 @@
               </div>
 
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label w-full lg:max-w-xs">Gross Income (Current)</label>
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">Gross Income (Current)</label>
                 <div class="flex-1 relative">
                   <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">Rp</span>
                   <input
@@ -154,7 +154,7 @@
               </div>
 
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label w-full lg:max-w-xs">Tax Rate (%)</label>
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">Tax Rate (%)</label>
                 <div class="flex-1 relative">
                   <input
                     type="number"
@@ -176,29 +176,29 @@
 
           <!-- Section 4: Reference Document -->
           <div class="card p-[20px]">
-            <p class="font-semibold text-sm mb-[16px] uppercase tracking-tight text-gray-600">Reference Document</p>
+            <h3 class="text-lg font-semibold mb-[16px]">Reference Document</h3>
             <div class="flex flex-col gap-[8px]">
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label w-full lg:max-w-xs">Document Type</label>
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">Document Type</label>
                 <div class="flex-1">
                   <select v-model="form.dataDetilBp21.dokReferensi[0].dokReferensi" class="select w-full">
-                    <option value="ANNOUNCEMENT">ANNOUNCEMENT</option>
-                    <option value="COMMERCIALINVOICE">COMMERCIALINVOICE</option>
-                    <option value="CONTRACT">CONTRACT</option>
-                    <option value="CURRENTACCOUNT">CURRENTACCOUNT</option>
-                    <option value="DEEDOFENGAGEMENT">DEEDOFENGAGEMENT</option>
-                    <option value="DEEDOFGENERAL">DEEDOFGENERAL</option>
-                    <option value="OTHER">OTHER</option>
-                    <option value="PAYMENTPROOF">PAYMENTPROOF</option>
-                    <option value="STATEMENTLETTER">STATEMENTLETTER</option>
-                    <option value="TAXINVOICE">TAXINVOICE</option>
-                    <option value="TRADECONFIRMATION">TRADECONFIRMATION</option>
+                    <option value="ANNOUNCEMENT">Announcement</option>
+                    <option value="COMMERCIALINVOICE">Commercial Invoice</option>
+                    <option value="CONTRACT">Contract</option>
+                    <option value="CURRENTACCOUNT">Current Account</option>
+                    <option value="DEEDOFENGAGEMENT">Deed of Engagement</option>
+                    <option value="DEEDOFGENERAL">Deed of General</option>
+                    <option value="OTHER">Other</option>
+                    <option value="PAYMENTPROOF">Payment Proof</option>
+                    <option value="STATEMENTLETTER">Statement Letter</option>
+                    <option value="TAXINVOICE">Tax Invoice</option>
+                    <option value="TRADECONFIRMATION">Trade Confirmation</option>
                   </select>
                 </div>
               </div>
 
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label w-full lg:max-w-xs">Document Number</label>
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">Document Number</label>
                 <div class="flex-1">
                   <input
                     v-model="form.dataDetilBp21.dokReferensi[0].nomorDokumen"
@@ -214,25 +214,25 @@
         <!-- Right Panel: Tax Calculation Summary -->
         <div class="w-full lg:max-w-sm space-y-6 sticky top-0">
           <div class="card h-fit">
-            <div class="card-header py-[16px] px-[20px]">
-              <span class="font-semibold text-sm uppercase tracking-tight text-gray-600">Tax Calculation</span>
+            <div class="card-header py-[16px] px-[20px] border-b border-gray-100 bg-white">
+              <h3 class="text-base font-bold text-gray-800 mb-0">Tax Calculation</h3>
             </div>
             <div class="card-body p-0">
               <div class="flex flex-col">
                 <div class="border-b border-gray-200 py-[20px] px-[20px] text-xs flex justify-between">
-                  <span class="text-gray-500 uppercase tracking-tight">Gross Income</span>
+                  <span class="text-gray-500">Gross Income</span>
                   <span class="font-medium">{{ formatCurrency(form.dataDetilBp21.penghasilanKotor) }}</span>
                 </div>
                 <div class="border-b border-gray-200 py-[20px] px-[20px] text-xs flex justify-between">
-                  <span class="text-gray-500 uppercase tracking-tight">Tax Rate</span>
+                  <span class="text-gray-500">Tax Rate</span>
                   <span class="font-medium">{{ form.dataDetilBp21.tarif }}%</span>
                 </div>
                 <div class="border-b border-gray-200 py-[20px] px-[20px] text-xs flex justify-between">
-                  <span class="text-gray-500 uppercase tracking-tight">Norm (%)</span>
+                  <span class="text-gray-500">Norm (%)</span>
                   <span class="font-medium">{{ form.dataDetilBp21.NormaPenghasilan }}%</span>
                 </div>
                 <div class="calculation__last-field py-[22px] px-[20px] text-xs flex justify-between items-center">
-                  <span class="uppercase tracking-wider">PPh 21 Withheld</span>
+                  <span>PPh 21 Withheld</span>
                   <span class="text-lg">{{ formatCurrency(form.dataDetilBp21.pphDipotong) }}</span>
                 </div>
               </div>
@@ -380,7 +380,7 @@ const populateFromQueryParams = () => {
   form.value.npwp = String(q.vendorNpwp || '')
   form.value.fgNpwpNik = q.vendorNpwp ? true : false
   form.value.dataDetilBp21.penghasilanKotor = Number(q.dpp) || 0
-  form.value.dataDetilBp21.pphDipotong = Number(q.whtAmount) || 0
+  calculatePPh()
 
   const invoiceNo = String(q.invoiceNo || '')
   if (form.value.dataDetilBp21.dokReferensi.length > 0) {

@@ -124,6 +124,8 @@ export const useNotificationStore = defineStore('notification', () => {
     noFakturPajak: string
     vendorName: string
     ppn: number
+    statusApVsFp?: string
+    id?: number | string | null
   }
 
   const checkVatExpiryNotifications = (vatData: VATDataItem[]) => {
@@ -177,6 +179,36 @@ export const useNotificationStore = defineStore('notification', () => {
     lastChecked.value = new Date()
     saveToStorage()
 
+    return newNotificationsCount
+  }
+
+  const checkVatMismatchNotifications = (vatData: VATDataItem[]) => {
+    let newNotificationsCount = 0
+
+    vatData.forEach((item) => {
+      const matchStatus = item.statusApVsFp || ''
+      if (matchStatus.toUpperCase().includes('MISMATCH')) {
+        const title = `VAT Mismatch Detected`
+        const message = `Tax Invoice ${item.noFakturPajak} from ${item.vendorName} has a mismatch with the AP Invoice.`
+
+        const notification = addNotification({
+          type: 'vat-mismatch',
+          severity: 'warning',
+          title,
+          message,
+          relatedId: item.noFakturPajak,
+          relatedData: {
+            vendorName: item.vendorName,
+            ppn: item.ppn,
+            fullItem: item, // Need to pass item for sessionStorage
+          },
+        })
+
+        if (notification) newNotificationsCount++
+      }
+    })
+
+    saveToStorage()
     return newNotificationsCount
   }
 
@@ -337,6 +369,7 @@ export const useNotificationStore = defineStore('notification', () => {
     removeNotification,
     clearAll,
     checkVatExpiryNotifications,
+    checkVatMismatchNotifications,
     addPartialReceivedNotification,
     getVisibleNotifications,
     fetchVendorNotifications,
