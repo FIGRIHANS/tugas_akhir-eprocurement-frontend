@@ -48,9 +48,8 @@
             <div
               class="px-4 py-2.5 rounded-2xl text-[13px] shadow-sm leading-relaxed"
               :class="msg.sender === 'user' ? 'bg-teal-500 text-white rounded-tr-none' : 'bg-white text-gray-700 border border-gray-100 rounded-tl-none'"
-              style="white-space: pre-wrap;"
+              v-html="msg.sender === 'bot' ? formatMarkdown(msg.text) : msg.text"
             >
-              {{ msg.text }}
             </div>
           </div>
 
@@ -120,6 +119,25 @@ const isLoading = ref(false);
 const newMessage = ref('');
 const messages = ref<ChatMessage[]>([]);
 const chatContainer = ref<HTMLElement | null>(null);
+
+const formatMarkdown = (text: string) => {
+  if (!text) return '';
+  
+  // Perbaiki jika ada literal string \n (sering terjadi dari API)
+  let html = text.replace(/\\n/g, '\n');
+
+  html = html
+    // Bold: **text**
+    .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold">$1</strong>')
+    // Italic: *text* (menghindari penangkapan bullet points)
+    .replace(/(?<!\n)\*(.*?)\*/g, '<em class="italic">$1</em>')
+    // Bullet points: * text atau - text
+    .replace(/^[\s]*[\*\-][\s]+(.*)$/gm, '<li class="ml-4 list-disc">$1</li>')
+    // Newlines to <br>
+    .replace(/\n/g, '<br/>');
+
+  return html;
+};
 
 const scrollToBottom = async () => {
   await nextTick();
