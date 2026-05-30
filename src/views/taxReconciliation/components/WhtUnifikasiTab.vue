@@ -56,7 +56,7 @@
     </div>
 
     <!-- PENDING INVOICES TABLE -->
-    <div v-if="activeView === 'pending'" class="overflow-x-auto list__table animate-in fade-in duration-300">
+    <div v-if="activeView === 'pending'" class="overflow-x-auto list__table animate-in fade-in duration-300 rounded-xl overflow-hidden">
       <table class="table align-middle text-gray-700 font-medium text-sm">
         <thead>
           <tr>
@@ -119,7 +119,7 @@
 
     <!-- MAIN BPU TABLE -->
     <div v-if="activeView === 'bpu'" class="animate-in fade-in duration-300">
-      <div class="overflow-x-auto list__table">
+      <div class="overflow-x-auto list__table rounded-xl overflow-hidden">
         <table class="table align-middle text-gray-700 font-medium text-sm">
           <thead>
             <tr>

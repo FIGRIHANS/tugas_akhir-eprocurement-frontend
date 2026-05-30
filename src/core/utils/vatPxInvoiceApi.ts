@@ -68,3 +68,30 @@ export function postVatInReplaceCancel(body: Record<string, unknown>) {
 export function postVatInDownloadPdf(body: { url: string }) {
   return vatApi.post('/vat/vat-in/download-pdf', body)
 }
+
+// ==========================================
+// VAT OUT (PAJAK KELUARAN) ENDPOINTS
+// ==========================================
+
+export function postVatOutCreate(vendorNpwp: string, body: any) {
+  return vatApi.post(`/vat/vat-out/create?vendorNpwp=${vendorNpwp}`, body)
+}
+
+export function getVatOutList(vendorNpwp: string, params: any) {
+  return vatApi.get(`/vat/vat-out/list`, {
+    params: { vendorNpwp, ...params }
+  })
+}
+
+export function postVatOutUpload(vendorNpwp: string, body: any) {
+  return vatApi.post(`/vat/vat-out/upload?vendorNpwp=${vendorNpwp}`, body)
+}
+
+export function postVatOutCancel(vendorNpwp: string, body: any) {
+  return vatApi.post(`/vat/vat-out/cancel?vendorNpwp=${vendorNpwp}`, body)
+}
+
+export function postVatOutDelete(vendorNpwp: string, body: any) {
+  return vatApi.post(`/vat/vat-out/delete?vendorNpwp=${vendorNpwp}`, body)
+}
+

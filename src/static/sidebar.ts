@@ -260,13 +260,23 @@ const sidebarMenuData: ISidebarMenu[] = [
     child: [
       {
         id: 'vat-reconciliation',
-        title: 'VAT Reconciliation',
-        to: 'vatReconciliation',
+        title: 'VAT (Pajak Masukan)',
+        to: 'vatInReconciliation',
       },
       {
-        id: 'wht-reconciliation',
-        title: 'WHT Reconciliation',
-        to: 'whtReconciliation',
+        id: 'vat-out-reconciliation',
+        title: 'VAT (Pajak Luaran)',
+        to: 'vatOutReconciliation',
+      },
+      {
+        id: 'wht-unifikasi',
+        title: 'WHT (Unifikasi)',
+        to: 'whtUnifikasi',
+      },
+      {
+        id: 'wht-pasal-21',
+        title: 'WHT (Pasal 21)',
+        to: 'whtPasal21',
       },
     ],
   },

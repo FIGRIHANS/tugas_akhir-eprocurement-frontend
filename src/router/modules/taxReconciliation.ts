@@ -1,18 +1,34 @@
 export default [
   {
-    path: '/vat-reconciliation',
-    name: 'vatReconciliation',
-    component: () => import('@/views/taxReconciliation/VatReconciliation.vue'),
+    path: '/vat-in-reconciliation',
+    name: 'vatInReconciliation',
+    component: () => import('@/views/taxReconciliation/VatInReconciliation.vue'),
   },
   {
-    path: '/vat-reconciliation/pj-submit',
+    path: '/vat-in-reconciliation/pj-submit',
     name: 'vatPjSubmitFromInvoice',
     component: () => import('@/views/taxReconciliation/VatPjSubmitFromInvoice.vue'),
   },
   {
-    path: '/vat-reconciliation/:id',
-    name: 'vatReconciliationDetail',
-    component: () => import('@/views/taxReconciliation/VatReconciliationDetail.vue'),
+    path: '/vat-in-reconciliation/:id',
+    name: 'vatInReconciliationDetail',
+    component: () => import('@/views/taxReconciliation/VatInReconciliationDetail.vue'),
+  },
+  {
+    path: '/vat-out-reconciliation',
+    name: 'vatOutReconciliation',
+    component: () => import('@/views/taxReconciliation/VatOutReconciliation.vue'),
+  },
+  {
+    path: '/vat-out-reconciliation/create',
+    name: 'vatOutReconciliationCreate',
+    component: () => import('@/views/taxReconciliation/VatOutCreate.vue'),
+  },
+  {
+    path: '/vat-out-reconciliation/detail/:id',
+    name: 'vatOutReconciliationDetail',
+    component: () => import('@/views/taxReconciliation/VatOutDetail.vue'),
+    props: true,
   },
   {
     path: '/wht-reconciliation',

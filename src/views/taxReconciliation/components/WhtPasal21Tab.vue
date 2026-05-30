@@ -81,7 +81,7 @@
     </div>
 
     <!-- PENDING INVOICES TABLE -->
-    <div v-if="activeView === 'pending'" class="overflow-x-auto list__table animate-in fade-in duration-300">
+    <div v-if="activeView === 'pending'" class="overflow-x-auto list__table animate-in fade-in duration-300 rounded-xl overflow-hidden">
       <table class="table align-middle text-gray-700 font-medium text-sm">
         <thead>
           <tr>
@@ -143,7 +143,7 @@
     </div>
 
     <!-- MAIN PPH21 TABLE -->
-    <div v-if="activeView === 'pph21'" class="overflow-x-auto list__table animate-in fade-in duration-300">
+    <div v-if="activeView === 'pph21'" class="overflow-x-auto list__table animate-in fade-in duration-300 rounded-xl overflow-hidden">
       <table class="table align-middle text-gray-700 font-medium text-sm">
         <thead>
           <tr>

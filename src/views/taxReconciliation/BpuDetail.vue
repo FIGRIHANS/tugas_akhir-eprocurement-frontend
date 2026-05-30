@@ -25,57 +25,58 @@
 
     <!-- Content -->
     <div v-else class="space-y-6 animate-in fade-in duration-500">
-      <!-- Status Header -->
-      <div
-        class="flex flex-wrap items-center justify-between gap-6 p-6 bg-white rounded-xl border border-gray-200 shadow-sm text-gray-800"
-      >
-        <div class="flex items-center gap-4">
-          <div
-            :class="[
-              'w-12 h-12 rounded-lg flex items-center justify-center text-white shadow-sm font-bold',
-              statusColorClass,
-            ]"
-          >
-            <i :class="['ki-filled', statusIcon, 'text-2xl']"></i>
-          </div>
-          <div>
-            <div class="text-xs font-medium text-gray-500 mb-0.5">
-              Tax Record Status
-            </div>
-            <div class="flex items-center gap-2 flex-wrap">
-              <span class="text-xl font-bold text-gray-800">{{
-                item.status || item.fgStatus || 'NO STATUS'
-              }}</span>
-              <span
-                v-if="item.nomorBuktiPotong || item.noBupot"
-                class="badge badge-primary badge-outline text-[10px] h-5"
-              >
-                {{ item.nomorBuktiPotong || item.noBupot }}
-              </span>
-            </div>
-            <div v-if="item.errorMsg" class="mt-1 text-xs text-danger font-medium">
-              {{ item.errorMsg }}
-            </div>
-          </div>
-        </div>
+      <!-- Status Overview Card -->
+      <div class="card">
+        <div class="card-body p-[24px]">
+          <div class="flex flex-wrap items-start justify-between gap-6">
 
-        <div class="flex gap-2">
-          <template v-if="(item.status || item.fgStatus)?.toUpperCase() === 'DRAFT'">
-            <button class="btn btn-primary" @click="showUploadConfirmModal = true">
-              <i class="ki-filled ki-cloud-change"></i> Upload to DJP
-            </button>
-          </template>
-          <template v-if="isInProgress(item.status || item.fgStatus)">
-            <button class="btn btn-warning" :disabled="submitting" @click="handleVerify">
-              <span v-if="submitting" class="loading loading-spinner loading-xs"></span>
-              <i v-else class="ki-filled ki-arrow-circle-right"></i> Verify Status
-            </button>
-          </template>
-          <template v-if="(item.status || item.fgStatus)?.toUpperCase() === 'NORMAL-DONE'">
-            <button class="btn btn-danger shadow-sm" @click="handleBatal" :disabled="submitting">
-              <i class="ki-filled ki-cross-circle"></i> Cancel Bupot
-            </button>
-          </template>
+            <!-- Left: Info rows -->
+            <div class="flex flex-col gap-[14px]">
+              <div class="flex items-center gap-[10px]">
+                <p class="font-normal text-sm text-gray-500 w-28 shrink-0">Status</p>
+                <span :class="['badge px-3 py-1 text-sm font-bold', statusBadgeClass]">
+                  {{ item.status || item.fgStatus || 'NO STATUS' }}
+                </span>
+              </div>
+              <div v-if="item.nomorBuktiPotong || item.noBupot" class="flex items-center gap-[10px]">
+                <p class="font-normal text-sm text-gray-500 w-28 shrink-0">No. Bupot</p>
+                <p class="font-bold text-sm text-primary">{{ item.nomorBuktiPotong || item.noBupot }}</p>
+              </div>
+              <div class="flex items-center gap-[10px]">
+                <p class="font-normal text-sm text-gray-500 w-28 shrink-0">Tax Type</p>
+                <p class="font-semibold text-sm text-gray-800">WHT — Unifikasi (BPU)</p>
+              </div>
+              <div v-if="item.masaPajak || item.tahunPajak" class="flex items-center gap-[10px]">
+                <p class="font-normal text-sm text-gray-500 w-28 shrink-0">Tax Period</p>
+                <p class="font-semibold text-sm text-gray-800">{{ item.masaPajak }} / {{ item.tahunPajak }}</p>
+              </div>
+              <div v-if="item.errorMsg" class="flex items-start gap-[10px]">
+                <p class="font-normal text-sm text-gray-500 w-28 shrink-0">Error</p>
+                <p class="text-xs text-danger font-medium leading-relaxed">{{ item.errorMsg }}</p>
+              </div>
+            </div>
+
+            <!-- Right: Action Buttons -->
+            <div class="flex flex-col gap-2 items-end">
+              <template v-if="(item.status || item.fgStatus)?.toUpperCase() === 'DRAFT'">
+                <button class="btn btn-primary w-full" @click="showUploadConfirmModal = true">
+                  <i class="ki-filled ki-cloud-change"></i> Upload to DJP
+                </button>
+              </template>
+              <template v-if="isInProgress(item.status || item.fgStatus)">
+                <button class="btn btn-warning w-full" :disabled="submitting" @click="handleVerify">
+                  <span v-if="submitting" class="loading loading-spinner loading-xs"></span>
+                  <i v-else class="ki-filled ki-arrow-circle-right"></i> Verify Status
+                </button>
+              </template>
+              <template v-if="(item.status || item.fgStatus)?.toUpperCase() === 'NORMAL-DONE'">
+                <button class="btn btn-danger w-full" @click="handleBatal" :disabled="submitting">
+                  <i class="ki-filled ki-cross-circle"></i> Cancel Bupot
+                </button>
+              </template>
+            </div>
+
+          </div>
         </div>
       </div>
 
@@ -404,6 +405,16 @@ const statusIcon = computed(() => {
   if (s === 'ERROR') return 'ki-cross-circle'
   return 'ki-information-2'
 })
+
+const statusBadgeClass = computed(() => {
+  const s = (item.value?.status || item.value?.fgStatus || '').toUpperCase()
+  if (s === 'DRAFT') return 'badge-light-primary'
+  if (s === 'NORMAL-DONE') return 'badge-success'
+  if (s.includes('PROGRESS') || s === 'SUBMITTED') return 'badge-light-warning'
+  if (s === 'ERROR') return 'badge-light-danger'
+  return 'badge-light'
+})
+
 
 // ── Lifecycle ──────────────────────────────────────────────────────────
 const fetchDetail = async (id: string) => {

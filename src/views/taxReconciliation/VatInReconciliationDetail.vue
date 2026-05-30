@@ -17,7 +17,7 @@
       <i class="ki-filled ki-information-2 text-4xl text-danger mb-4"></i>
       <h3 class="text-lg font-bold text-gray-800">Record Not Found</h3>
       <p class="text-gray-500 mb-6">The requested VAT reconciliation record could not be retrieved.</p>
-      <button class="btn btn-primary" @click="router.push('/vat-reconciliation')">
+      <button class="btn btn-primary" @click="router.push('/vat-in-reconciliation')">
         <i class="ki-filled ki-arrow-left"></i>
         Back to List
       </button>
@@ -25,46 +25,49 @@
 
     <!-- Content -->
     <div v-else class="space-y-6 animate-in fade-in duration-500">
-      <!-- Status Header -->
-      <div
-        class="flex flex-wrap items-center justify-between gap-6 p-6 bg-white rounded-xl border border-gray-200 shadow-sm text-gray-800"
-      >
-        <div class="flex items-center gap-4">
-          <div
-            :class="[
-              'w-12 h-12 rounded-lg flex items-center justify-center text-white shadow-sm font-bold',
-              statusColorClass,
-            ]"
-          >
-            <i :class="['ki-filled', statusIcon, 'text-2xl']"></i>
-          </div>
-          <div>
-            <div class="text-xs font-medium text-gray-500 mb-0.5">
-              Reconciliation Status
-            </div>
-            <div class="flex items-center gap-2 flex-wrap">
-              <span class="text-xl font-bold text-gray-800">{{
-                detailData.matchAPvsFP || 'UNRECONCILED'
-              }}</span>
-              <span
-                v-if="detailData.nsfp"
-                class="badge badge-primary badge-outline text-[10px] h-5"
-              >
-                {{ detailData.nsfp }}
-              </span>
-            </div>
-          </div>
-        </div>
+      <!-- Status Overview Card -->
+      <div class="card">
+        <div class="card-body p-[24px]">
+          <div class="flex flex-wrap items-start justify-between gap-6">
 
-        <div class="flex gap-2">
-          <button class="btn btn-danger" @click="handleDelete">
-            <i class="ki-filled ki-trash"></i> Delete FP
-          </button>
-          <button class="btn btn-primary" @click="handleEdit">
-            <i class="ki-filled ki-notepad-edit"></i> Edit Record
-          </button>
+            <!-- Left: Info rows -->
+            <div class="flex flex-col gap-[14px]">
+              <div class="flex items-center gap-[10px]">
+                <p class="font-normal text-sm text-gray-500 w-28 shrink-0">Match Status</p>
+                <span :class="['badge px-3 py-1 text-sm font-bold', getMatchStatusBadgeClass(detailData.matchAPvsFP)]">
+                  {{ detailData.matchAPvsFP || 'UNRECONCILED' }}
+                </span>
+              </div>
+              <div v-if="detailData.nsfp" class="flex items-center gap-[10px]">
+                <p class="font-normal text-sm text-gray-500 w-28 shrink-0">No. Faktur</p>
+                <p class="font-bold text-sm text-primary">{{ detailData.nsfp }}</p>
+              </div>
+              <div v-if="detailData.invoiceNumber" class="flex items-center gap-[10px]">
+                <p class="font-normal text-sm text-gray-500 w-28 shrink-0">Invoice No</p>
+                <p class="font-semibold text-sm text-gray-800">{{ detailData.invoiceNumber }}</p>
+              </div>
+              <div v-if="detailData.creditStatus" class="flex items-center gap-[10px]">
+                <p class="font-normal text-sm text-gray-500 w-28 shrink-0">Credit Status</p>
+                <span :class="['badge px-2 py-0.5 text-xs font-semibold', getCreditStatusBadgeClass(detailData.creditStatus)]">
+                  {{ detailData.creditStatus }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Right: Action Buttons -->
+            <div class="flex flex-col gap-2 items-end">
+              <button class="btn btn-danger w-full" @click="handleDelete">
+                <i class="ki-filled ki-trash"></i> Delete FP
+              </button>
+              <button class="btn btn-primary w-full" @click="handleEdit">
+                <i class="ki-filled ki-notepad-edit"></i> Edit Record
+              </button>
+            </div>
+
+          </div>
         </div>
       </div>
+
 
       <!-- Main Layout -->
       <div class="flex flex-col lg:flex-row gap-[24px] items-start">
@@ -199,13 +202,13 @@
                 <p class="font-normal text-sm text-gray-600">Tax Base (DPP)</p>
                 <p class="font-normal text-sm font-semibold text-gray-800">{{ formatCurrency(detailData.dpp || 0) }}</p>
               </div>
-              <div class="flex items-center justify-between gap-[10px]">
-                <p class="font-normal text-sm text-gray-600">VAT (PPN)</p>
-                <p class="font-normal text-sm font-semibold text-gray-800">{{ formatCurrency(detailData.ppn || 0) }}</p>
+              <div class="flex items-center justify-between gap-[10px] border-t border-gray-100 pt-4">
+                <p class="font-normal text-sm font-semibold text-danger">VAT (PPN)</p>
+                <p class="font-bold text-base text-danger">{{ formatCurrency(detailData.ppn || 0) }}</p>
               </div>
-              <div class="flex items-center justify-between gap-[10px]">
+              <div class="flex items-center justify-between gap-[10px] mt-2">
                 <p class="font-normal text-sm text-gray-600">Total Gross Amount</p>
-                <p class="font-normal text-sm font-semibold text-primary">{{ formatCurrency((detailData.dpp || 0) + (detailData.ppn || 0)) }}</p>
+                <p class="font-normal text-sm font-semibold text-gray-800">{{ formatCurrency((detailData.dpp || 0) + (detailData.ppn || 0)) }}</p>
               </div>
             </div>
           </div>
@@ -222,7 +225,7 @@
               </div>
               <div v-if="detailData.npwpVendor" class="flex items-center justify-between gap-[10px]">
                 <p class="font-normal text-sm text-gray-600">NPWP Vendor</p>
-                <p class="font-normal text-sm text-gray-800 font-semibold">{{ detailData.npwpVendor }}</p>
+                <p class="font-normal text-sm font-semibold text-primary">{{ detailData.npwpVendor }}</p>
               </div>
               <div v-if="detailData.vendorName" class="flex items-center justify-between gap-[10px]">
                 <p class="font-normal text-sm text-gray-600">Vendor Name</p>
@@ -245,7 +248,7 @@
       <div class="pt-8 border-t border-gray-200 flex items-center justify-between">
         <button
           class="btn btn-outline btn-primary shadow-sm"
-          @click="goBack"
+          @click="router.push('/vat-in-reconciliation')"
         >
           <i class="ki-filled ki-arrow-left"></i> Back to List
         </button>
@@ -333,23 +336,23 @@ const formatCurrency = (amount: number) => {
 }
 
 const getStatusFPBadgeClass = (status: string) => {
-  if (status === 'Valid' || status === 'Approved') return 'badge badge-success badge-outline font-semibold'
-  if (status === 'Invalid' || status === 'Rejected') return 'badge badge-danger badge-outline font-semibold'
-  return 'badge badge-secondary badge-outline font-semibold'
+  if (status === 'Valid' || status === 'Approved') return 'badge badge-success text-white font-bold'
+  if (status === 'Invalid' || status === 'Rejected') return 'badge badge-light-danger font-bold text-danger'
+  return 'badge badge-light font-bold text-gray-700'
 }
 
 const getMatchStatusBadgeClass = (status: string) => {
-  if (status === 'Match') return 'badge badge-success badge-outline font-semibold'
-  if (status && status.includes('Mismatch')) return 'badge badge-danger badge-outline font-semibold'
-  return 'badge badge-secondary badge-outline font-semibold'
+  if (status === 'Match') return 'badge badge-success text-white font-bold'
+  if (status && status.includes('Mismatch')) return 'badge badge-light-danger font-bold text-danger'
+  return 'badge badge-light font-bold text-gray-700'
 }
 
 const getCreditStatusBadgeClass = (status: string) => {
   const s = (status || '').toUpperCase()
-  if (s === 'CREDITABLE' || s === 'CREDITED') return 'badge badge-success badge-outline font-semibold'
-  if (s === 'NOT CREDITABLE' || s === 'INVALID') return 'badge badge-danger badge-outline font-semibold'
-  if (s === 'HOLD' || s === 'UNCREDITED') return 'badge badge-secondary badge-outline font-semibold'
-  return 'badge badge-secondary badge-outline font-semibold'
+  if (s === 'CREDITABLE' || s === 'CREDITED') return 'badge badge-success text-white font-bold'
+  if (s === 'NOT CREDITABLE' || s === 'INVALID') return 'badge badge-light-danger font-bold text-danger'
+  if (s === 'HOLD' || s === 'UNCREDITED') return 'badge badge-light font-bold text-gray-700'
+  return 'badge badge-light font-bold text-gray-700'
 }
 
 const goBack = () => {
@@ -368,14 +371,29 @@ const handleDelete = () => {
 const fetchDetail = async () => {
   isLoading.value = true
   try {
-    const response = await vatApi.get('/vat/vat-reconciliation')
-    const rawList = response.data.result?.content || []
     const targetNo = route.params.id as string
     
-    const found = rawList.find((row: any) => 
-      row.noFakturPajak === targetNo || 
-      row.NoFakturPajak === targetNo
-    )
+    // First try session storage (works for both ERP and Pajak Express sources)
+    const stored = sessionStorage.getItem('vatIn_detail_item')
+    let found = null
+    
+    if (stored) {
+      const parsed = JSON.parse(stored)
+      // Check if it matches the ID
+      if (parsed.noFakturPajak === targetNo || parsed.NoFakturPajak === targetNo || targetNo === '0') {
+        found = parsed
+      }
+    }
+    
+    // Fallback to API if not in session storage
+    if (!found) {
+      const response = await vatApi.get('/vat/vat-reconciliation')
+      const rawList = response.data.result?.content || []
+      found = rawList.find((row: any) => 
+        row.noFakturPajak === targetNo || 
+        row.NoFakturPajak === targetNo
+      )
+    }
 
     if (found) {
       detailData.value.npwpVendor = found.npwpVendor || found.NpwpVendor || ''
@@ -417,7 +435,14 @@ onMounted(() => {
   background-color: #fff8dd;
   color: #ffc700;
 }
-
+.badge-light-danger {
+  background-color: #fff5f8;
+  color: #f1416c;
+}
+.badge-light {
+  background-color: #f9f9f9;
+  color: #7e8299;
+}
 .badge-outline {
   border: 1px solid currentColor;
   background-color: transparent;

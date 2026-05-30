@@ -126,7 +126,9 @@ const filteredSidebarMenu = computed(() => {
                   child.id === 'recurring-invoice-reminder' ||
                   child.id === 'vendor-master' ||
                   child.id === 'vat-reconciliation' ||
-                  child.id === 'wht-reconciliation',
+                  child.id === 'vat-out-reconciliation' ||
+                  child.id === 'wht-unifikasi' ||
+                  child.id === 'wht-pasal-21',
               )
               : [],
           }
@@ -156,7 +158,9 @@ const filteredSidebarMenu = computed(() => {
                   child.id === 'recurring-invoice-reminder' ||
                   child.id === 'vendor-master' ||
                   child.id === 'vat-reconciliation' ||
-                  child.id === 'wht-reconciliation',
+                  child.id === 'vat-out-reconciliation' ||
+                  child.id === 'wht-unifikasi' ||
+                  child.id === 'wht-pasal-21',
               )
               : [],
           }
@@ -202,7 +206,9 @@ const filteredSidebarMenu = computed(() => {
                   child.id === 'recurring-invoice-reminder' ||
                   child.id === 'vendor-master' ||
                   child.id === 'vat-reconciliation' ||
-                  child.id === 'wht-reconciliation',
+                  child.id === 'vat-out-reconciliation' ||
+                  child.id === 'wht-unifikasi' ||
+                  child.id === 'wht-pasal-21',
               )
               : [],
           }
@@ -302,6 +308,7 @@ const filteredSidebarMenu = computed(() => {
                   child.id === 'invoice-list' ||
                   child.id === 'invoice-list-non-po' ||
                   child.id === 'recurring-invoice-reminder' ||
+                  child.id === 'vat-out-reconciliation' ||
                   child.id === 'vendor-detail',
               )
               : [],
@@ -433,7 +440,9 @@ const filteredSidebarMenu = computed(() => {
                   child.id === 'delivery-notes-list' ||
                   child.id === 'goods-receipt-list' ||
                   child.id === 'vat-reconciliation' ||
-                  child.id === 'wht-reconciliation' ||
+                  child.id === 'vat-out-reconciliation' ||
+                  child.id === 'wht-unifikasi' ||
+                  child.id === 'wht-pasal-21' ||
                   child.id === 'invoice-type' ||
                   child.id === 'list-user' ||
                   child.id === 'master-profile' ||

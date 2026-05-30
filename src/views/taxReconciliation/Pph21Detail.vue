@@ -3,6 +3,7 @@
     <Breadcrumb title="PPh 21 Detail" :routes="routes" />
     <hr class="-mx-[24px] mb-[24px]" />
 
+    <!-- Loading -->
     <div
       v-if="loading"
       class="flex flex-col items-center justify-center py-20 bg-white rounded-xl border border-dashed border-gray-300"
@@ -11,6 +12,7 @@
       <p class="mt-4 text-gray-500 font-medium italic">Fetching tax record details...</p>
     </div>
 
+    <!-- Not Found -->
     <div v-else-if="!item" class="p-10 text-center bg-red-50 rounded-xl border border-red-100">
       <i class="ki-filled ki-information-2 text-4xl text-danger mb-4"></i>
       <h3 class="text-lg font-bold text-gray-800">Record Not Found</h3>
@@ -21,128 +23,146 @@
       </button>
     </div>
 
+    <!-- Content -->
     <div v-else class="space-y-6 animate-in fade-in duration-500">
-      <!-- Header with Status Banner -->
-      <div
-        class="flex flex-wrap items-center justify-between gap-6 p-6 bg-white rounded-xl border border-gray-200 shadow-sm text-gray-800"
-      >
-        <div class="flex items-center gap-4">
-          <div
-            :class="[
-              'w-12 h-12 rounded-lg flex items-center justify-center text-white shadow-sm font-bold',
-              statusColorClass,
-            ]"
-          >
-            <i :class="['ki-filled', statusIcon, 'text-2xl']"></i>
-          </div>
-          <div>
-            <div class="text-xs font-medium text-gray-500 mb-0.5">
-              PPh 21 — {{ featureLabel }}
+
+      <!-- Status Overview Card -->
+      <div class="card">
+        <div class="card-body p-[24px]">
+          <div class="flex flex-wrap items-start justify-between gap-6">
+
+            <!-- Left: Info rows -->
+            <div class="flex flex-col gap-[14px]">
+              <div class="flex items-center gap-[10px]">
+                <p class="font-normal text-sm text-gray-500 w-28 shrink-0">Status</p>
+                <span :class="['badge px-3 py-1 text-sm font-bold', statusBadgeClass]">
+                  {{ item.status || item.fgStatus || 'NO STATUS' }}
+                </span>
+              </div>
+              <div v-if="item.nomorBupot || item.nomorBuktiPotong || item.noBupot" class="flex items-center gap-[10px]">
+                <p class="font-normal text-sm text-gray-500 w-28 shrink-0">No. Bupot</p>
+                <p class="font-bold text-sm text-primary">{{ item.nomorBupot || item.nomorBuktiPotong || item.noBupot }}</p>
+              </div>
+              <div class="flex items-center gap-[10px]">
+                <p class="font-normal text-sm text-gray-500 w-28 shrink-0">Tax Type</p>
+                <p class="font-semibold text-sm text-gray-800">PPh 21 — {{ featureLabel }}</p>
+              </div>
+              <div v-if="item.masaPajak" class="flex items-center gap-[10px]">
+                <p class="font-normal text-sm text-gray-500 w-28 shrink-0">Tax Period</p>
+                <p class="font-semibold text-sm text-gray-800">{{ item.masaPajak }} / {{ item.tahunPajak }}</p>
+              </div>
+              <div v-if="item.errorMessage || item.errorMsg" class="flex items-start gap-[10px]">
+                <p class="font-normal text-sm text-gray-500 w-28 shrink-0">Error</p>
+                <p class="text-xs text-danger font-medium leading-relaxed">{{ item.errorMessage || item.errorMsg }}</p>
+              </div>
             </div>
-            <div class="flex items-center gap-2 flex-wrap">
-              <span class="text-xl font-bold text-gray-800">
-                {{ item.status || item.fgStatus || 'NO STATUS' }}
-              </span>
-              <span
-                v-if="item.nomorBupot || item.nomorBuktiPotong || item.noBupot"
-                class="badge badge-primary badge-outline text-[10px] h-5"
-              >
-                {{ item.nomorBupot || item.nomorBuktiPotong || item.noBupot }}
-              </span>
-              <span class="text-gray-400 text-sm">
-                {{ item.masaPajak ? `Period ${item.masaPajak}/${item.tahunPajak}` : '' }}
-              </span>
+
+
+            <!-- Right: Action Buttons -->
+            <div class="flex flex-col gap-2 items-end">
+              <template v-if="(item.status || item.fgStatus)?.toUpperCase() === 'DRAFT'">
+                <button class="btn btn-primary w-full" @click="showUploadConfirmModal = true">
+                  <i class="ki-filled ki-cloud-change"></i> Upload to DJP
+                </button>
+              </template>
+              <template v-if="isInProgress(item.status || item.fgStatus)">
+                <button class="btn btn-warning w-full" :disabled="submitting" @click="handleVerify">
+                  <span v-if="submitting" class="loading loading-spinner loading-xs"></span>
+                  <i v-else class="ki-filled ki-arrow-circle-right"></i> Verify Status
+                </button>
+              </template>
             </div>
+
           </div>
-        </div>
-
-        <div class="flex gap-2">
-          <template v-if="(item.status || item.fgStatus)?.toUpperCase() === 'DRAFT'">
-            <button class="btn btn-md btn-primary" @click="showUploadConfirmModal = true">
-              <i class="ki-filled ki-cloud-change"></i>
-              Upload to DJP
-            </button>
-          </template>
-
-          <template v-if="isInProgress(item.status || item.fgStatus)">
-            <button class="btn btn-md btn-warning" @click="handleVerify" :disabled="submitting">
-              <span v-if="submitting" class="loading loading-spinner loading-xs"></span>
-              <i v-else class="ki-filled ki-arrow-circle-right"></i>
-              Verify Status
-            </button>
-          </template>
-
-          <template v-if="(item.status || item.fgStatus)?.toUpperCase() === 'NORMAL-DONE'">
-            <button class="btn btn-md btn-danger" @click="handleBatal">
-              <i class="ki-filled ki-cross-circle"></i>
-              Cancel Bupot
-            </button>
-          </template>
         </div>
       </div>
 
-      <!-- Detail Content -->
+
+      <!-- Main Layout -->
       <div class="flex flex-col lg:flex-row gap-[24px] items-start">
+
+        <!-- LEFT COLUMN -->
         <div class="flex-1 space-y-6">
-          <!-- Recipient Information -->
+
+          <!-- Section 1: Recipient Information -->
           <div class="card">
             <div class="card-header py-[17px] flex items-center justify-between gap-[8px]">
               <h3 class="card-title text-base font-semibold">Recipient Information</h3>
             </div>
             <div class="card-body flex flex-col gap-[20px]">
-              <div class="flex items-center justify-between gap-[10px]">
+              <div v-if="item.namaPenerima || item.nama" class="flex items-center justify-between gap-[10px]">
                 <p class="font-normal text-sm text-gray-600">Recipient Name</p>
-                <p class="font-normal text-sm font-semibold text-gray-800">{{ item.namaPenerima || item.nama || '-' }}</p>
+                <p class="font-normal text-sm font-semibold text-gray-800">{{ item.namaPenerima || item.nama }}</p>
               </div>
-              <div class="flex items-center justify-between gap-[10px]">
+              <div v-if="item.npwpPenerima || item.npwp" class="flex items-center justify-between gap-[10px]">
                 <p class="font-normal text-sm text-gray-600">NPWP / NIK</p>
-                <p class="font-normal text-sm font-semibold text-primary">{{ item.npwpPenerima || item.npwp || '-' }}</p>
+                <p class="font-normal text-sm font-semibold text-primary">{{ item.npwpPenerima || item.npwp }}</p>
               </div>
             </div>
           </div>
 
-          <!-- Tax & Financial Details -->
+          <!-- Section 2: Financial & Tax Details -->
           <div class="card">
             <div class="card-header py-[17px] flex items-center justify-between gap-[8px]">
-              <h3 class="card-title text-base font-semibold">Financial & Tax Details</h3>
+              <h3 class="card-title text-base font-semibold">Financial &amp; Tax Details</h3>
             </div>
             <div class="card-body flex flex-col gap-[20px]">
-              <div class="flex items-center justify-between gap-[10px]">
+              <div v-if="item.kodeObjekPajak" class="flex items-center justify-between gap-[10px]">
                 <p class="font-normal text-sm text-gray-600">Object Code</p>
-                <p class="font-normal text-sm font-semibold text-gray-800">{{ item.kodeObjekPajak || '-' }}</p>
+                <p class="font-normal text-sm font-semibold text-gray-800">{{ item.kodeObjekPajak }}</p>
               </div>
-              <div class="flex items-center justify-between gap-[10px]">
-                <p class="font-normal text-sm text-gray-600">Withholding Date</p>
-                <p class="font-normal text-sm text-gray-800">{{ item.tglPemotongan || '-' }}</p>
-              </div>
-              <div class="flex items-center justify-between gap-[10px]">
-                <p class="font-normal text-sm text-gray-600">Pasal PPh</p>
-                <p class="font-normal text-sm text-gray-800">{{ item.pasalPPh || '-' }}</p>
-              </div>
-              <div class="flex items-center justify-between gap-[10px]">
-                <p class="font-normal text-sm text-gray-600">PPh Status</p>
-                <p class="font-normal text-sm text-gray-800">{{ item.statusPPh || '-' }}</p>
-              </div>
-              <div class="flex items-center justify-between gap-[10px]">
+              <div v-if="item.feature" class="flex items-center justify-between gap-[10px]">
                 <p class="font-normal text-sm text-gray-600">Tax Type</p>
                 <p class="font-normal text-sm font-semibold text-primary">
                   {{ item.feature === 'final' ? 'Final' : 'Tidak Final (Non-Final)' }}
                 </p>
               </div>
-              <div class="flex items-center justify-between gap-[10px]">
+              <div v-if="item.tglPemotongan" class="flex items-center justify-between gap-[10px]">
+                <p class="font-normal text-sm text-gray-600">Withholding Date</p>
+                <p class="font-normal text-sm text-gray-800">{{ item.tglPemotongan }}</p>
+              </div>
+              <div v-if="item.pasalPPh" class="flex items-center justify-between gap-[10px]">
+                <p class="font-normal text-sm text-gray-600">Pasal PPh</p>
+                <p class="font-normal text-sm text-gray-800">{{ item.pasalPPh }}</p>
+              </div>
+              <div v-if="item.statusPPh" class="flex items-center justify-between gap-[10px]">
+                <p class="font-normal text-sm text-gray-600">PPh Status</p>
+                <p class="font-normal text-sm text-gray-800">{{ item.statusPPh }}</p>
+              </div>
+              <div v-if="item.masaPajak && item.tahunPajak" class="flex items-center justify-between gap-[10px]">
                 <p class="font-normal text-sm text-gray-600">Tax Period</p>
-                <p class="font-normal text-sm text-gray-800">
-                  {{ item.masaPajak && item.tahunPajak ? `${item.masaPajak}/${item.tahunPajak}` : '-' }}
-                </p>
+                <p class="font-normal text-sm text-gray-800">{{ item.masaPajak }} / {{ item.tahunPajak }}</p>
               </div>
             </div>
           </div>
+
+          <!-- Section 3: Classification (kap / kjs / idTku) -->
+          <div v-if="item.kap || item.kjs || item.idTku" class="card">
+            <div class="card-header py-[17px] flex items-center justify-between gap-[8px]">
+              <h3 class="card-title text-base font-semibold">Classification &amp; Payments</h3>
+            </div>
+            <div class="card-body flex flex-col gap-[20px]">
+              <div v-if="item.kap" class="flex items-center justify-between gap-[10px]">
+                <p class="font-normal text-sm text-gray-600">KAP Code</p>
+                <p class="font-normal text-sm text-gray-800">{{ item.kap }}</p>
+              </div>
+              <div v-if="item.kjs" class="flex items-center justify-between gap-[10px]">
+                <p class="font-normal text-sm text-gray-600">KJS Code</p>
+                <p class="font-normal text-sm text-gray-800">{{ item.kjs }}</p>
+              </div>
+              <div v-if="item.idTku" class="flex items-center justify-between gap-[10px]">
+                <p class="font-normal text-sm text-gray-600">Unit / TKU ID</p>
+                <p class="font-normal text-sm text-gray-800">{{ item.idTku }}</p>
+              </div>
+            </div>
+          </div>
+
         </div>
 
-        <!-- Right Panel -->
+        <!-- RIGHT COLUMN: Sidebar -->
         <div class="w-full lg:max-w-sm space-y-6 lg:sticky lg:top-0">
-          <!-- Tax Summary -->
-          <!-- Tax Summary -->
+
+          <!-- Tax Calculation -->
           <div class="card">
             <div class="card-header py-[17px] flex items-center justify-between gap-[8px]">
               <h3 class="card-title text-base font-semibold">Tax Calculation</h3>
@@ -152,17 +172,17 @@
                 <p class="font-normal text-sm text-gray-600">Gross Income</p>
                 <p class="font-normal text-sm font-semibold text-gray-800">{{ formatCurrency(Number(item.penghasilanKotor) || 0) }}</p>
               </div>
-              <div class="flex items-center justify-between gap-[10px]">
+              <div v-if="Number(item.penghasilanKotorSebelumnya) > 0" class="flex items-center justify-between gap-[10px]">
                 <p class="font-normal text-sm text-gray-600">Gross (Previous)</p>
-                <p class="font-normal text-sm font-semibold text-gray-800">{{ formatCurrency(Number(item.penghasilanKotorSebelumnya) || 0) }}</p>
+                <p class="font-normal text-sm text-gray-800">{{ formatCurrency(Number(item.penghasilanKotorSebelumnya)) }}</p>
               </div>
               <div class="flex items-center justify-between gap-[10px]">
                 <p class="font-normal text-sm text-gray-600">Tax Rate</p>
                 <p class="font-normal text-sm font-semibold text-gray-800">{{ Number(item.tarif) || 0 }}%</p>
               </div>
-              <div class="flex items-center justify-between gap-[10px]">
-                <p class="font-normal text-sm text-gray-600">Withheld PPh 21</p>
-                <p class="font-normal text-sm font-semibold text-danger">{{ formatCurrency(Number(item.pphDipotong) || 0) }}</p>
+              <div class="flex items-center justify-between gap-[10px] border-t border-gray-100 pt-4">
+                <p class="font-normal text-sm font-semibold text-danger">PPh 21 Withheld</p>
+                <p class="font-bold text-base text-danger">{{ formatCurrency(Number(item.pphDipotong) || 0) }}</p>
               </div>
             </div>
           </div>
@@ -175,22 +195,27 @@
             <div class="card-body flex flex-col gap-[20px]">
               <div class="flex items-center justify-between gap-[10px]">
                 <p class="font-normal text-sm text-gray-600">Local DB ID</p>
-                <p class="font-normal text-sm text-gray-800 font-semibold"># {{ item.id || '-' }}</p>
+                <p class="font-normal text-sm font-semibold text-gray-800"># {{ item.id || '-' }}</p>
               </div>
-              <div class="flex items-center justify-between gap-[10px]">
-                <p class="font-normal text-sm text-gray-600">PX ID (Pajak Express)</p>
-                <p class="font-normal text-sm text-gray-800 font-semibold">{{ item.pxId || '-' }}</p>
+              <div v-if="item.pxId" class="flex items-center justify-between gap-[10px]">
+                <p class="font-normal text-sm text-gray-600">PX ID</p>
+                <p class="font-normal text-sm text-gray-800">{{ item.pxId }}</p>
               </div>
-              <div class="flex items-center justify-between gap-[10px]">
+              <div v-if="item.idBupot" class="flex items-center justify-between gap-[10px]">
                 <p class="font-normal text-sm text-gray-600">Bupot ID</p>
-                <p class="font-normal text-sm text-gray-800 font-semibold">{{ item.idBupot || '-' }}</p>
+                <p class="font-normal text-sm text-gray-800">{{ item.idBupot }}</p>
               </div>
               <div v-if="item.createdAt" class="flex items-center justify-between gap-[10px]">
                 <p class="font-normal text-sm text-gray-600">Created On</p>
-                <p class="font-normal text-sm text-gray-800 font-semibold">{{ formatDate(item.createdAt) }}</p>
+                <p class="font-normal text-sm text-gray-800">{{ formatDate(item.createdAt) }}</p>
+              </div>
+              <div v-if="item.updatedAt" class="flex items-center justify-between gap-[10px]">
+                <p class="font-normal text-sm text-gray-600">Last Updated</p>
+                <p class="font-normal text-sm text-gray-800">{{ formatDate(item.updatedAt) }}</p>
               </div>
             </div>
           </div>
+
         </div>
       </div>
 
@@ -200,6 +225,24 @@
           <i class="ki-filled ki-arrow-left"></i>
           Back to List
         </button>
+        <div class="flex gap-2">
+          <template v-if="(item.status || item.fgStatus)?.toUpperCase() === 'DRAFT'">
+            <button class="btn btn-primary" @click="showUploadConfirmModal = true">
+              <i class="ki-filled ki-cloud-change"></i> Upload to DJP
+            </button>
+          </template>
+          <template v-if="isInProgress(item.status || item.fgStatus)">
+            <button class="btn btn-warning" :disabled="submitting" @click="handleVerify">
+              <span v-if="submitting" class="loading loading-spinner loading-xs"></span>
+              <i v-else class="ki-filled ki-arrow-circle-right"></i> Verify Status
+            </button>
+          </template>
+          <template v-if="(item.status || item.fgStatus)?.toUpperCase() === 'NORMAL-DONE'">
+            <button class="btn btn-danger" @click="handleBatal" :disabled="submitting">
+              <i class="ki-filled ki-cross-circle"></i> Cancel Bupot
+            </button>
+          </template>
+        </div>
       </div>
     </div>
 
@@ -259,6 +302,7 @@
     />
   </div>
 </template>
+
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
@@ -320,6 +364,17 @@ const statusIcon = computed(() => {
   if (s === 'ERROR') return 'ki-cross-circle'
   return 'ki-information-2'
 })
+
+const statusBadgeClass = computed(() => {
+  if (!item.value) return 'badge-light'
+  const s = (item.value.status || item.value.fgStatus || '').toUpperCase()
+  if (s === 'DRAFT') return 'badge-light-primary'
+  if (s === 'NORMAL-DONE') return 'badge-success'
+  if (s.includes('PROGRESS') || s === 'SUBMITTED') return 'badge-light-warning'
+  if (s === 'ERROR') return 'badge-light-danger'
+  return 'badge-light'
+})
+
 
 // Helpers
 const formatCurrency = (val: number | string) => {

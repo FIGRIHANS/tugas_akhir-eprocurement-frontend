@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Breadcrumb title="VAT Reconciliation" :routes="routes" />
+    <Breadcrumb title="VAT (Pajak Masukan)" :routes="routes" />
     <hr class="-mx-[24px] mb-[24px]" />
 
     <div class="card shadow-sm border border-gray-200 rounded-xl overflow-hidden bg-white">
@@ -37,8 +37,7 @@
       <!-- Tab Content -->
       <div class="card-body p-0">
       <template v-if="workspace === 'queue'">
-      <div class="overflow-x-auto list__table mb-2 animate-in fade-in duration-300">
-        <div class="flex justify-between items-center gap-3 mb-4 flex-wrap px-[24px] pt-[24px]">
+      <div class="flex justify-between items-center gap-3 mb-4 flex-wrap px-[24px] pt-[24px]">
           <div class="flex flex-col gap-1">
             <h3 class="text-lg font-semibold text-gray-800 m-0">List Data</h3>
           </div>
@@ -54,6 +53,7 @@
             </button>
           </div>
         </div>
+        <div class="overflow-x-auto mx-[24px] rounded-xl mb-[8px]">
         <table class="table align-middle text-gray-700 font-medium text-sm">
           <thead>
             <tr>
@@ -103,7 +103,7 @@
             </tr>
           </tbody>
         </table>
-      </div>
+        </div>
 
       <!-- Pending Pagination Footer -->
       <div v-if="pendingVatTotal > 0" class="flex items-center justify-between mt-[24px] px-[24px] pb-[24px]">
@@ -121,72 +121,62 @@
 
       <template v-else-if="workspace === 'pj'">
       <!-- Header Section -->
-      <div class="flex justify-between align-items-center gap-[8px] mb-[24px] flex-wrap px-[24px] pt-[24px]">
-        <div class="flex flex-col gap-1">
-          <h3 class="text-lg font-semibold text-gray-800 m-0">List Data</h3>
-          <div class="flex flex-wrap items-end gap-3 text-sm">
-            <template v-if="workspace === 'pj'">
-              <div class="form-control">
-                <label class="label py-0"><span class="label-text text-xs font-semibold">Tax Period (Coretax list)</span></label>
-                <div class="flex gap-2">
-                  <select v-model="pjMonth" class="select select-bordered w-[88px]" @change="onPajakExpressPeriodChanged">
-                    <option v-for="m in pjMonthOptions" :key="m.v" :value="m.v">{{ m.label }}</option>
-                  </select>
-                  <input
-                    v-model="pjYear"
-                    type="text"
-                    maxlength="4"
-                    class="input input-bordered w-[76px]"
-                    placeholder="yyyy"
-                    @change="onPajakExpressPeriodChanged"
-                  />
-                  <button type="button" class="btn btn-primary" :disabled="isLoading || isPrepopulating" @click="reloadVat">
-                    <i class="ki-duotone ki-arrows-circle !text-base"></i>
-                    Reload
-                  </button>
-                  <button type="button" class="btn btn-warning" :disabled="isLoading || isPrepopulating" @click="runPrepopulateBulk">
-                    <i class="ki-duotone ki-cloud-download !text-base"></i>
-                    Pull Prepopulated Data
-                    <span v-if="isPrepopulating" class="loading loading-spinner loading-xs ml-1"></span>
-                  </button>
-                </div>
-              </div>
-            </template>
+      <div class="flex flex-col gap-4 mb-[24px] px-[24px] pt-[24px]">
+        
+        <!-- Main Header -->
+        <div class="flex justify-between items-center gap-[8px] flex-wrap">
+          <div class="flex flex-col gap-1">
+            <h3 class="text-lg font-semibold text-gray-800 m-0">List Data</h3>
           </div>
         </div>
-        <div class="flex align-items-center gap-3">
-          <UiInputSearch v-model="search" placeholder="Search" @keypress="goSearch" />
 
-          <!-- Filter Button -->
-          <button class="btn btn-light" @click="toggleFilter()">
-            <i class="ki-duotone ki-filter"></i>
-            Filter
-          </button>
+        <!-- Coretax Period Sub-header -->
+        <div v-if="workspace === 'pj'" class="flex flex-wrap items-end justify-between gap-3 bg-gray-50 p-3 rounded-lg border border-gray-200 w-full">
+          
+          <!-- Left side: Tax Period & Actions -->
+          <div class="flex flex-wrap items-end gap-3">
+            <div class="form-control">
+              <label class="label py-0 pb-1.5"><span class="label-text text-sm font-semibold text-gray-700">Tax Period (Coretax list)</span></label>
+              <div class="flex gap-2">
+                <select v-model="pjMonth" class="select select-bordered w-[100px] bg-white" @change="onPajakExpressPeriodChanged">
+                  <option v-for="m in pjMonthOptions" :key="m.v" :value="m.v">{{ m.label }}</option>
+                </select>
+                <input
+                  v-model="pjYear"
+                  type="text"
+                  maxlength="4"
+                  class="input input-bordered w-[80px] bg-white"
+                  placeholder="yyyy"
+                  @change="onPajakExpressPeriodChanged"
+                />
+              </div>
+            </div>
+            
+            <div class="h-[40px] w-[1px] bg-gray-300 mx-2 hidden lg:block"></div>
+            
+            <button type="button" class="btn btn-outline btn-primary bg-white" :disabled="isLoading || isPrepopulating" @click="reloadVat">
+              <i class="ki-duotone ki-arrows-circle !text-base"></i>
+              Reload Data
+            </button>
+            <button type="button" class="btn btn-warning" :disabled="isLoading || isPrepopulating" @click="runPrepopulateBulk">
+              <i class="ki-duotone ki-cloud-download !text-base"></i>
+              Pull Prepopulated Data
+              <span v-if="isPrepopulating" class="loading loading-spinner loading-xs ml-1"></span>
+            </button>
+          </div>
 
-          <!-- Update Status Button -->
-          <!-- Update Status Button (Hidden as requested) -->
-          <!-- <button
-            class="btn btn-light"
-            @click="openStatusModal()"
-            :disabled="selectedItems.length === 0"
-          >
-            <i class="ki-duotone ki-setting-2"></i>
-            Update Status
-          </button> -->
+          <!-- Right side: Search & Filter -->
+          <div class="flex items-center gap-3">
+            <UiInputSearch v-model="search" placeholder="Search" @keypress="goSearch" />
 
-          <button class="btn btn-primary" :disabled="isPostingVat" @click="exportData()">
-            <i class="ki-duotone ki-check-circle"></i>
-            VAT Credit Posting
-            <!-- <span v-if="selectedItems.length > 0" class="badge badge-sm badge-light-primary ms-2">
-              {{ selectedItems.length }}
-            </span> -->
-          </button>
+            <button class="btn btn-light bg-white border-gray-200" @click="toggleFilter()">
+              <i class="ki-duotone ki-filter"></i>
+              Filter
+            </button>
+          </div>
 
-          <button class="btn btn-primary" @click="goManualPjSubmit()">
-            <i class="ki-filled ki-plus-circle !text-lg"></i>
-            Create New VAT
-          </button>
         </div>
+
       </div>
 
       <!-- Filter Section -->
@@ -245,7 +235,7 @@
       </div>
 
       <!-- Table Section -->
-      <div class="overflow-x-auto list__table">
+      <div class="overflow-x-auto list__table mx-[24px] rounded-xl overflow-hidden">
         <table class="table align-middle text-gray-700 font-medium text-sm">
           <thead>
             <!-- Blue header styling -->
@@ -387,18 +377,14 @@
 
       <!-- Pagination -->
       <div class="flex items-center justify-between mt-[24px] flex-wrap gap-2 px-[24px] pb-[24px]">
-        <p v-if="workspace === 'pj'" class="m-0 text-sm text-gray-600">
-          Halaman {{ currentPage }} · {{ list.length }} baris ditampilkan · total dari Pajak Express:
-          {{ pjTotalRows > 0 ? pjTotalRows : list.length }}
-        </p>
-        <p v-else class="m-0 text-sm">
+        <p class="m-0 text-sm">
           Showing
           {{
-            pageSize * currentPage > filteredDataList.length
-              ? filteredDataList.length
+            pageSize * currentPage > (workspace === 'pj' ? (pjTotalRows > 0 ? pjTotalRows : list.length) : filteredDataList.length)
+              ? (workspace === 'pj' ? (pjTotalRows > 0 ? pjTotalRows : list.length) : filteredDataList.length)
               : pageSize * currentPage
           }}
-          of {{ filteredDataList.length }} entries
+          of {{ workspace === 'pj' ? (pjTotalRows > 0 ? pjTotalRows : list.length) : filteredDataList.length }} entries
         </p>
         <LPagination
           :totalItems="paginationTotalForPager"
@@ -596,10 +582,7 @@ interface FilterForm {
 }
 
 const routes = ref<routeTypes[]>([
-  {
-    name: 'Tax Reconciliation',
-    to: '/tax-reconciliation',
-  },
+  { name: 'Tax Reconciliation' },
 ])
 
 const search = ref<string>('')
@@ -703,13 +686,13 @@ const isSomeSelected = computed(() => {
 const columns = ref<string[]>([
   'Vendor Name',
   'NPWP Vendor',
-  'Tgl Faktur Pajak',
-  'No. Faktur Pajak',
+  'Tax Invoice Date',
+  'Tax Invoice No.',
   'Amount',
   'DPP',
   'PPN',
-  'Status FP',
-  'Status AP vs FP',
+  'Tax Invoice Status',
+  'AP vs Tax Invoice Status',
   'Credit Status',
   'VAT Credit Expiry Date',
   'Remark',
@@ -854,9 +837,10 @@ const fetchVatData = async (opts?: { page?: number }) => {
       dataList.value = content
 
       const notificationStore = useNotificationStore()
-      const newNotifications = notificationStore.checkVatExpiryNotifications(content)
-      if (newNotifications > 0) {
-        console.log(`Created ${newNotifications} VAT expiry notifications`)
+      const newExpiryNotifications = notificationStore.checkVatExpiryNotifications(content)
+      const newMismatchNotifications = notificationStore.checkVatMismatchNotifications(content)
+      if (newExpiryNotifications > 0 || newMismatchNotifications > 0) {
+        console.log(`Created ${newExpiryNotifications} expiry and ${newMismatchNotifications} mismatch notifications`)
       }
     }
   } catch (error) {
@@ -1104,10 +1088,11 @@ const setPage = async (value: number) => {
 }
 
 const goDetail = (data: VATReconciliationData) => {
+  sessionStorage.setItem('vatIn_detail_item', JSON.stringify(data))
   router.push({
-    name: 'vatReconciliationDetail',
+    name: 'vatInReconciliationDetail',
     params: {
-      id: data.noFakturPajak,
+      id: data.noFakturPajak || '0',
     },
   })
 }
@@ -1291,13 +1276,13 @@ const sortColumn = (columnName: string | null) => {
   const columnMap = {
     'Vendor Name': 'vendorName',
     'NPWP Vendor': 'npwpVendor',
-    'Tgl Faktur Pajak': 'tglFakturPajak',
-    'No. Faktur Pajak': 'noFakturPajak',
+    'Tax Invoice Date': 'tglFakturPajak',
+    'Tax Invoice No.': 'noFakturPajak',
     Amount: 'amount',
     DPP: 'dpp',
     PPN: 'ppn',
-    'Status FP': 'statusFP',
-    'Status AP vs FP': 'statusApVsFp',
+    'Tax Invoice Status': 'statusFP',
+    'AP vs Tax Invoice Status': 'statusApVsFp',
     'Credit Status': 'creditStatus',
     'VAT Credit Expiry Date': 'vatCreditExpiryDate',
     Remark: 'remark',
@@ -1320,7 +1305,7 @@ const sortColumn = (columnName: string | null) => {
 
   const name = columnName || sortColumnName.value
 
-  if (name === 'Tgl Invoice' || name === 'Tgl Faktur Pajak' || name === 'VAT Credit Expiry Date') {
+  if (name === 'Tgl Invoice' || name === 'Tax Invoice Date' || name === 'VAT Credit Expiry Date') {
     result = listData.sort((a, b) => {
       // Handle potential date format DD/MM/YYYY or YYYY-MM-DD
       const parseDate = (dateStr: string) => {
