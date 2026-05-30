@@ -56,15 +56,6 @@
         @click="activeView = 'pending'"
       >
         Pending Reconciliation
-        <span
-          v-if="totalPending > 0"
-          :class="[
-            'badge badge-sm ml-1.5 font-bold',
-            activeView === 'pending' ? 'bg-white text-primary' : 'badge-primary'
-          ]"
-        >
-          {{ totalPending }}
-        </span>
       </button>
       <button
         type="button"

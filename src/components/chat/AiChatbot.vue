@@ -32,7 +32,7 @@
               <path fill-rule="evenodd" d="M4.804 21.644A6.707 6.707 0 006 21.75a6.721 6.721 0 003.583-1.029c.774.182 1.584.279 2.417.279 5.322 0 9.75-3.97 9.75-9 0-5.03-4.428-9-9.75-9s-9.75 3.97-9.75 9c0 2.409 1.025 4.587 2.674 6.192.232.226.277.428.254.543a3.73 3.73 0 01-.814 1.686.75.75 0 00.44 1.223zM8.25 10.875a1.125 1.125 0 100 2.25 1.125 1.125 0 000-2.25zM10.875 12a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0zm4.875-1.125a1.125 1.125 0 100 2.25 1.125 1.125 0 000-2.25z" clip-rule="evenodd" />
             </svg>
             <span class="text-xs text-gray-500">
-              Ketik pertanyaan untuk mulai mencari<br/>data invoice, logistik, atau pajak!
+              Type a question to start searching for<br/>invoice, logistics, or tax data!
             </span>
           </div>
 
@@ -43,7 +43,7 @@
             :class="msg.sender === 'user' ? 'self-end items-end' : 'self-start items-start'"
           >
             <span class="text-[10px] text-gray-400 mb-1 px-1 font-medium">
-              {{ msg.sender === 'user' ? 'Kamu' : 'AI Assistant' }}
+              {{ msg.sender === 'user' ? 'You' : 'AI Assistant' }}
             </span>
             <div
               class="px-4 py-2.5 rounded-2xl text-[13px] shadow-sm leading-relaxed"
@@ -70,7 +70,7 @@
             v-model="newMessage"
             @keyup.enter="sendMessage"
             type="text"
-            placeholder="Tanya soal data e-Procurement..."
+            placeholder="Ask about e-Procurement data..."
             class="flex-1 bg-slate-50 border border-gray-200 rounded-full px-4 py-2.5 text-[13px] focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all placeholder-gray-400"
             :disabled="isLoading"
           />
@@ -140,7 +140,7 @@ const sendMessage = async () => {
   try {
     const webhookUrl = import.meta.env.VITE_N8N_WEBHOOK_URL;
     if (!webhookUrl) {
-      throw new Error("URL Webhook n8n belum diatur di .env");
+      throw new Error("n8n Webhook URL is not configured in .env");
     }
 
     // Mengirim payload dengan format yang diminta oleh n8n Chat Trigger
@@ -149,7 +149,7 @@ const sendMessage = async () => {
       chatInput: userText
     });
 
-    let botReply = "Maaf, saya tidak mengerti respon dari server.";
+    let botReply = "Sorry, I could not understand the response from the server.";
     
     // n8n Chat Trigger biasanya mereturn respon dalam format langsung berupa text
     // atau jika menggunakan Webhook, ada properti output.
@@ -167,7 +167,7 @@ const sendMessage = async () => {
   } catch (error: any) {
     console.error("Chatbot Error:", error);
     messages.value.push({ 
-      text: "Maaf, gagal menghubungi AI Agent. (Pastikan URL dan n8n aktif)", 
+      text: "Sorry, failed to reach the AI Agent. (Ensure URL and n8n are active)", 
       sender: 'bot' 
     });
   } finally {
