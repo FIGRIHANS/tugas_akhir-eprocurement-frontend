@@ -25,6 +25,7 @@ jobs:
             --build-arg VITE_API_GENERAL_BASE_URL=https://api.codeverse.id/api \
             --build-arg VITE_API_VENDOR_BASE_URL=https://vendor-api.codeverse.id/api \
             --build-arg VITE_API_INVOICE_BASE_URL=https://invoice-api.codeverse.id/api \
+            --build-arg VITE_N8N_WEBHOOK_URL=https://n8n.magangslab.store/webhook/034c6ff7-93dc-411e-aa42-e709d38ecd58/chat \
             -t ${{ secrets.DOCKER_USERNAME }}/eprocurement-frontend:latest .
 
       - name: Push Docker image
