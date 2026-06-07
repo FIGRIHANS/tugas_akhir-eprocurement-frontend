@@ -365,7 +365,12 @@
           <i class="ki-duotone ki-arrow-left"></i>
           Back to List
         </button>
-        <button class="btn btn-primary" @click="submitForm()" :disabled="isSubmitting">
+        <button class="btn btn-light" @click="submitForm(true)" :disabled="isSubmitting">
+          <i class="ki-duotone ki-save-2" v-if="!isSubmitting"></i>
+          <span v-if="isSubmitting">Saving...</span>
+          <span v-else>Save as Draft</span>
+        </button>
+        <button class="btn btn-primary" @click="submitForm(false)" :disabled="isSubmitting">
           <i class="ki-duotone ki-save-2" v-if="!isSubmitting"></i>
           <span v-if="isSubmitting">Submitting...</span>
           <span v-else>Submit</span>
@@ -499,6 +504,7 @@ const searchPO = async () => {
       text: 'Please enter a PO Number',
     }
     showNotificationModal.value = true
+
     return
   }
 
@@ -538,7 +544,7 @@ const selectPO = (po: MockSapPoData) => {
   // Auto-fill form data from selected PO
   formData.value.poNumber = po.poNumber
   formData.value.vendorCode = po.vendorCode
-
+  formData.value.tripID = `TR/${po.poNumber}`
   // Use JWT UserId (= VendorId for vendor users) as the authoritative actor ID.
   // Fall back to the PO's vendorID (converted to number) if the JWT claim is unavailable.
   const jwtVendorId = getUserIdFromToken()
@@ -606,7 +612,7 @@ const clampQtyShipped = (index: number) => {
   }
 }
 
-const validateForm = (): boolean => {
+const validateForm = (isDraft = false): boolean => {
   if (!formData.value.poNumber.trim()) {
     notificationModal.value = {
       type: 'warning',
@@ -629,7 +635,7 @@ const validateForm = (): boolean => {
     return false
   }
 
-  if (!formData.value.driverName.trim()) {
+  if (!isDraft && !formData.value.driverName.trim()) {
     notificationModal.value = {
       type: 'warning',
       title: 'Validation Error',
@@ -639,7 +645,7 @@ const validateForm = (): boolean => {
     return false
   }
 
-  if (!formData.value.licensePlate.trim()) {
+  if (!isDraft && !formData.value.licensePlate.trim()) {
     notificationModal.value = {
       type: 'warning',
       title: 'Validation Error',
@@ -649,7 +655,7 @@ const validateForm = (): boolean => {
     return false
   }
 
-  if (!formData.value.transporter.trim()) {
+  if (!isDraft && !formData.value.transporter.trim()) {
     notificationModal.value = {
       type: 'warning',
       title: 'Validation Error',
@@ -659,7 +665,7 @@ const validateForm = (): boolean => {
     return false
   }
 
-  if (!formData.value.pickupAddress.trim()) {
+  if (!isDraft && !formData.value.pickupAddress.trim()) {
     notificationModal.value = {
       type: 'warning',
       title: 'Validation Error',
@@ -669,7 +675,7 @@ const validateForm = (): boolean => {
     return false
   }
 
-  if (!formData.value.destinationAddress.trim()) {
+  if (!isDraft && !formData.value.destinationAddress.trim()) {
     notificationModal.value = {
       type: 'warning',
       title: 'Validation Error',
@@ -679,7 +685,7 @@ const validateForm = (): boolean => {
     return false
   }
 
-  if (!formData.value.estimatedArrival) {
+  if (!isDraft && !formData.value.estimatedArrival) {
     notificationModal.value = {
       type: 'warning',
       title: 'Validation Error',
@@ -689,7 +695,7 @@ const validateForm = (): boolean => {
     return false
   }
 
-  if (tableData.value.length === 0) {
+  if (!isDraft && tableData.value.length === 0) {
     notificationModal.value = {
       type: 'warning',
       title: 'Validation Error',
@@ -702,7 +708,7 @@ const validateForm = (): boolean => {
   // Validate items
   for (let i = 0; i < tableData.value.length; i++) {
     const item = tableData.value[i]
-    if (!item.sku || !item.description || !item.uom || !item.lotNo || item.qtyShipped <= 0) {
+    if (!isDraft && (!item.sku || !item.description || !item.uom || !item.lotNo || item.qtyShipped <= 0)) {
       notificationModal.value = {
         type: 'warning',
         title: 'Validation Error',
@@ -725,7 +731,7 @@ const validateForm = (): boolean => {
   }
 
   // Check signature
-  if (signaturePad.value) {
+  if (!isDraft && signaturePad.value) {
     const saveResult = signaturePad.value.save()
     if (!saveResult || saveResult.trim().length === 0) {
       notificationModal.value = {
@@ -741,8 +747,8 @@ const validateForm = (): boolean => {
   return true
 }
 
-const submitForm = async () => {
-  if (!validateForm()) return
+const submitForm = async (isDraft = false) => {
+  if (!validateForm(isDraft)) return
 
   isSubmitting.value = true
 
@@ -796,8 +802,10 @@ const submitForm = async () => {
       driverSignature: signatureData || '', // Ensure always included
       truckType: formData.value.truckType || undefined,
       shippingDate: shippingDate,
-      status: 'Submitted', // Always set to Submitted on create
-      details: tableData.value,
+      status: isDraft ? 'Draft' : 'On Delivery',
+      details: isDraft
+        ? tableData.value.filter((item) => item.sku || item.description || item.uom || item.lotNo || item.qtyShipped > 0)
+        : tableData.value,
     }
 
     console.log('Submitting delivery note:', payload)
@@ -814,7 +822,9 @@ const submitForm = async () => {
     notificationModal.value = {
       type: 'success',
       title: 'Success',
-      text: `Delivery note created successfully!\nDelivery Note Number: ${generatedNumber}`,
+      text: isDraft
+        ? `Delivery note saved as draft successfully!\nDelivery Note Number: ${generatedNumber}`
+        : `Delivery note created successfully!\nDelivery Note Number: ${generatedNumber}`,
     }
     showNotificationModal.value = true
 

@@ -3,7 +3,6 @@
     <Breadcrumb title="Inbound Logistic Analytic" :routes="routes" />
     <hr class="-mx-[24px] mb-[24px]" />
 
-    <!-- Loading overlay -->
     <div v-if="isLoading" class="flex justify-center items-center py-20">
       <div class="text-center">
         <i class="ki-duotone ki-loading text-4xl text-teal-500 animate-spin"></i>
@@ -341,9 +340,7 @@ import momentLib from 'moment'
 
 const moment = momentLib
 
-/* ─────────────────────────────────────────────
- * ROUTING
- * ─────────────────────────────────────────── */
+
 const routes = ref<routeTypes[]>([
   { name: 'Analytic Dashboard', to: '#' },
 ])

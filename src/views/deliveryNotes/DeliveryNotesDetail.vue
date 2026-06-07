@@ -95,8 +95,9 @@
                   <input
                     v-model="detailData.tripID"
                     type="text"
-                    class="input flex-1 bg-gray-50"
-                    disabled
+                    class="input flex-1"
+                    :class="isDraft ? 'bg-white' : 'bg-gray-50'"
+                    :disabled="!isDraft"
                   />
                 </div>
 
@@ -108,8 +109,9 @@
                   <input
                     v-model="detailData.driverName"
                     type="text"
-                    class="input flex-1 bg-gray-50"
-                    disabled
+                    class="input flex-1"
+                    :class="isDraft ? 'bg-white' : 'bg-gray-50'"
+                    :disabled="!isDraft"
                   />
                 </div>
 
@@ -121,8 +123,9 @@
                   <input
                     v-model="detailData.licensePlate"
                     type="text"
-                    class="input flex-1 bg-gray-50"
-                    disabled
+                    class="input flex-1"
+                    :class="isDraft ? 'bg-white' : 'bg-gray-50'"
+                    :disabled="!isDraft"
                   />
                 </div>
 
@@ -134,8 +137,9 @@
                   <input
                     v-model="detailData.transporter"
                     type="text"
-                    class="input flex-1 bg-gray-50"
-                    disabled
+                    class="input flex-1"
+                    :class="isDraft ? 'bg-white' : 'bg-gray-50'"
+                    :disabled="!isDraft"
                   />
                 </div>
               </div>
@@ -150,8 +154,9 @@
                   <input
                     v-model="detailData.pickupAddress"
                     type="text"
-                    class="input flex-1 bg-gray-50"
-                    disabled
+                    class="input flex-1"
+                    :class="isDraft ? 'bg-white' : 'bg-gray-50'"
+                    :disabled="!isDraft"
                   />
                 </div>
 
@@ -163,8 +168,9 @@
                   <input
                     v-model="detailData.destinationAddress"
                     type="text"
-                    class="input flex-1 bg-gray-50"
-                    disabled
+                    class="input flex-1"
+                    :class="isDraft ? 'bg-white' : 'bg-gray-50'"
+                    :disabled="!isDraft"
                   />
                 </div>
 
@@ -176,8 +182,9 @@
                   <input
                     v-model="detailData.truckType"
                     type="text"
-                    class="input flex-1 bg-gray-50"
-                    disabled
+                    class="input flex-1"
+                    :class="isDraft ? 'bg-white' : 'bg-gray-50'"
+                    :disabled="!isDraft"
                   />
                 </div>
 
@@ -187,10 +194,11 @@
                     Shipping Date
                   </label>
                   <input
-                    v-model="formattedShippingDate"
-                    type="text"
-                    class="input flex-1 bg-gray-50"
-                    disabled
+                    v-model="shippingDateInput"
+                    :type="isDraft ? 'date' : 'text'"
+                    class="input flex-1"
+                    :class="isDraft ? 'bg-white' : 'bg-gray-50'"
+                    :disabled="!isDraft"
                   />
                 </div>
 
@@ -236,7 +244,13 @@
 
       <!-- Table Section -->
       <div class="border border-gray-200 rounded-xl p-[24px] mt-[24px]">
-        <h3 class="text-lg font-semibold mb-4">Items List</h3>
+        <div class="mb-4 flex justify-between items-center">
+          <h3 class="text-lg font-semibold">Items List</h3>
+          <button v-if="isDraft" class="btn btn-primary btn-sm" @click="addNewItem">
+            <i class="ki-duotone ki-plus"></i>
+            Add Item
+          </button>
+        </div>
         <div class="overflow-x-auto list__table">
           <table class="table align-middle text-gray-700 font-medium text-sm">
             <thead>
@@ -247,11 +261,12 @@
                 <th class="text-center">UOM</th>
                 <th class="text-center">Lot No</th>
                 <th class="text-center">Qty Shipped</th>
+                <th v-if="isDraft" class="text-center">Action</th>
               </tr>
             </thead>
             <tbody>
               <tr v-if="!detailData.items || detailData.items.length === 0">
-                <td colspan="6" class="text-center py-8">
+                <td :colspan="isDraft ? 7 : 6" class="text-center py-8">
                   <div class="text-gray-400">
                     <i class="ki-duotone ki-information text-3xl mb-2"></i>
                     <p>No items found</p>
@@ -260,11 +275,51 @@
               </tr>
               <tr v-for="(item, index) in detailData.items" :key="index">
                 <td class="text-center">{{ index + 1 }}</td>
-                <td class="text-center">{{ item.sku }}</td>
-                <td class="text-center">{{ item.description }}</td>
-                <td class="text-center">{{ item.uom }}</td>
-                <td class="text-center">{{ item.lotNo }}</td>
-                <td class="text-center">{{ item.qtyShipped }}</td>
+                <td class="text-center">
+                  <input v-if="isDraft" v-model="item.sku" type="text" class="input input-sm w-32" />
+                  <span v-else>{{ item.sku }}</span>
+                </td>
+                <td class="text-center">
+                  <input
+                    v-if="isDraft"
+                    v-model="item.description"
+                    type="text"
+                    class="input input-sm w-48"
+                  />
+                  <span v-else>{{ item.description }}</span>
+                </td>
+                <td class="text-center">
+                  <input v-if="isDraft" v-model="item.uom" type="text" class="input input-sm w-20" />
+                  <span v-else>{{ item.uom }}</span>
+                </td>
+                <td class="text-center">
+                  <input
+                    v-if="isDraft"
+                    v-model="item.lotNo"
+                    type="text"
+                    class="input input-sm w-28"
+                  />
+                  <span v-else>{{ item.lotNo }}</span>
+                </td>
+                <td class="text-center">
+                  <input
+                    v-if="isDraft"
+                    v-model.number="item.qtyShipped"
+                    type="number"
+                    min="0"
+                    class="input input-sm w-24 text-center"
+                  />
+                  <span v-else>{{ item.qtyShipped }}</span>
+                </td>
+                <td v-if="isDraft" class="text-center">
+                  <button
+                    class="btn btn-sm btn-danger btn-icon"
+                    @click="removeItem(index)"
+                    title="Remove"
+                  >
+                    <i class="ki-duotone ki-trash"></i>
+                  </button>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -277,6 +332,18 @@
           <i class="ki-duotone ki-arrow-left"></i>
           Back to List
         </button>
+        <template v-if="isDraft">
+          <button class="btn btn-light" @click="updateDeliveryNote(true)" :disabled="isSubmitting">
+            <i class="ki-duotone ki-save-2" v-if="!isSubmitting"></i>
+            <span v-if="isSubmitting">Saving...</span>
+            <span v-else>Save as Draft</span>
+          </button>
+          <button class="btn btn-primary" @click="updateDeliveryNote(false)" :disabled="isSubmitting">
+            <i class="ki-duotone ki-save-2" v-if="!isSubmitting"></i>
+            <span v-if="isSubmitting">Submitting...</span>
+            <span v-else>Submit Update</span>
+          </button>
+        </template>
       </div>
     </div>
 
@@ -302,7 +369,10 @@ import { useRouter, useRoute } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import ModalNotification from '@/components/modal/ModalNotification.vue'
-import DeliveryNotesService, { type DeliveryNotesData } from '@/services/deliveryNotes.service'
+import DeliveryNotesService, {
+  type DeliveryNoteCreatePayload,
+  type DeliveryNotesData,
+} from '@/services/deliveryNotes.service'
 
 const router = useRouter()
 const route = useRoute()
@@ -319,6 +389,7 @@ const routes = ref<routeTypes[]>([
 const isLoading = ref<boolean>(true)
 const error = ref<string | null>(null)
 const detailData = ref<DeliveryNotesData | null>(null)
+const isSubmitting = ref<boolean>(false)
 
 // Modal state
 const showNotificationModal = ref<boolean>(false)
@@ -328,19 +399,36 @@ const notificationModal = ref({
   text: '',
 })
 
-// Computed property for formatted shipping date
-const formattedShippingDate = computed(() => {
-  if (!detailData.value?.shippingDate) return '-'
+const isDraft = computed(() => detailData.value?.status === 'Draft')
+
+const formatShippingDate = (value?: string): string => {
+  if (!value) return '-'
   try {
-    const date = new Date(detailData.value.shippingDate)
+    const date = new Date(value)
     return date.toLocaleDateString('id-ID', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
     })
   } catch {
-    return detailData.value.shippingDate
+    return value
   }
+}
+
+// Computed property for shipping date display/edit.
+const shippingDateInput = computed({
+  get: () => {
+    if (!detailData.value?.shippingDate) return ''
+    if (isDraft.value) {
+      return new Date(detailData.value.shippingDate).toISOString().split('T')[0]
+    }
+    return formatShippingDate(detailData.value.shippingDate)
+  },
+  set: (value: string) => {
+    if (detailData.value) {
+      detailData.value.shippingDate = value
+    }
+  },
 })
 
 const fetchDetail = async () => {
@@ -389,6 +477,150 @@ const goBack = () => {
   router.push({ name: 'deliveryNotesList' })
 }
 
+const addNewItem = () => {
+  if (!detailData.value) return
+
+  detailData.value.items.push({
+    sku: '',
+    description: '',
+    uom: '',
+    lotNo: '',
+    qtyShipped: 0,
+  })
+}
+
+const removeItem = (index: number) => {
+  detailData.value?.items.splice(index, 1)
+}
+
+const validateUpdateForm = (isDraftUpdate = false): boolean => {
+  if (!detailData.value) return false
+
+  if (!isDraft.value) {
+    notificationModal.value = {
+      type: 'warning',
+      title: 'Validation Error',
+      text: 'Delivery note can only be updated while status is Draft',
+    }
+    showNotificationModal.value = true
+    return false
+  }
+
+  if (!detailData.value.poNumber?.trim() || !detailData.value.vendorCode?.trim()) {
+    notificationModal.value = {
+      type: 'warning',
+      title: 'Validation Error',
+      text: 'PO Number and Vendor Code are required',
+    }
+    showNotificationModal.value = true
+    return false
+  }
+
+  if (isDraftUpdate) return true
+
+  if (
+    !detailData.value.driverName?.trim() ||
+    !detailData.value.licensePlate?.trim() ||
+    !detailData.value.transporter?.trim() ||
+    !detailData.value.pickupAddress?.trim() ||
+    !detailData.value.destinationAddress?.trim() ||
+    !detailData.value.shippingDate
+  ) {
+    notificationModal.value = {
+      type: 'warning',
+      title: 'Validation Error',
+      text: 'Please complete delivery information before submitting',
+    }
+    showNotificationModal.value = true
+    return false
+  }
+
+  if (!detailData.value.items || detailData.value.items.length === 0) {
+    notificationModal.value = {
+      type: 'warning',
+      title: 'Validation Error',
+      text: 'Please add at least one item',
+    }
+    showNotificationModal.value = true
+    return false
+  }
+
+  for (let i = 0; i < detailData.value.items.length; i++) {
+    const item = detailData.value.items[i]
+    if (!item.sku || !item.description || !item.uom || !item.lotNo || item.qtyShipped <= 0) {
+      notificationModal.value = {
+        type: 'warning',
+        title: 'Validation Error',
+        text: `Please complete all fields for item #${i + 1}`,
+      }
+      showNotificationModal.value = true
+      return false
+    }
+  }
+
+  return true
+}
+
+const buildUpdatePayload = (isDraftUpdate = false): DeliveryNoteCreatePayload => {
+  const data = detailData.value!
+  const vendorID = data.vendorID === undefined || data.vendorID === '' ? undefined : Number(data.vendorID)
+
+  return {
+    deliveryNoteNumber: data.deliveryNoteNumber,
+    poNumber: data.poNumber,
+    vendorCode: data.vendorCode,
+    vendorID: Number.isNaN(vendorID) ? undefined : vendorID,
+    vendorName: data.vendorName || '',
+    tripID: data.tripID || undefined,
+    transporter: data.transporter || '',
+    licensePlate: data.licensePlate || '',
+    driverName: data.driverName || '',
+    pickupAddress: data.pickupAddress || '',
+    destinationAddress: data.destinationAddress || '',
+    driverSignature: data.driverSignature || '',
+    truckType: data.truckType || undefined,
+    shippingDate: data.shippingDate
+      ? new Date(data.shippingDate).toISOString().split('T')[0]
+      : new Date().toISOString().split('T')[0],
+    status: isDraftUpdate ? 'Draft' : 'On Delivery',
+    details: isDraftUpdate
+      ? data.items.filter((item) => item.sku || item.description || item.uom || item.lotNo || item.qtyShipped > 0)
+      : data.items,
+  }
+}
+
+const updateDeliveryNote = async (isDraftUpdate = false) => {
+  if (!detailData.value || !validateUpdateForm(isDraftUpdate)) return
+
+  isSubmitting.value = true
+
+  try {
+    await DeliveryNotesService.update(detailData.value.id, buildUpdatePayload(isDraftUpdate))
+
+    notificationModal.value = {
+      type: 'success',
+      title: 'Success',
+      text: isDraftUpdate
+        ? 'Delivery note draft updated successfully!'
+        : 'Delivery note submitted successfully!',
+    }
+    showNotificationModal.value = true
+
+    await new Promise((resolve) => setTimeout(resolve, 1500))
+    router.push({ name: 'deliveryNotesList' })
+  } catch (err) {
+    console.error('Error updating delivery note:', err)
+    notificationModal.value = {
+      type: 'error',
+      title: 'Error',
+      text: 'Failed to update delivery note',
+    }
+    showNotificationModal.value = true
+  } finally {
+    isSubmitting.value = false
+  }
+}
+
 onMounted(() => {
   fetchDetail()
 })
@@ -420,5 +652,10 @@ onMounted(() => {
     border-radius: 15px;
     background-color: #dbdfe9;
   }
+}
+
+.input-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
 }
 </style>

@@ -15,7 +15,7 @@ export interface DeliveryNotesData {
   deliveryNoteNumber: string
   poNumber: string
   vendorCode: string
-  vendorID?: string
+  vendorID?: number | string
   vendorName?: string
   estimatedArrival: string
   shippingDate?: string // Backend sends this in detail response
@@ -218,6 +218,23 @@ const DeliveryNotesService = {
       return response.data
     } catch (error) {
       console.error('Error creating delivery note:', error)
+      throw error
+    }
+  },
+
+  async update(id: number, payload: DeliveryNoteCreatePayload): Promise<any> {
+    try {
+      const response = await invoiceApi.put<ApiResponse<any>>('/delivery-notes/update', payload, {
+        params: { id },
+      })
+
+      if (response.data?.result) {
+        return response.data.result
+      }
+
+      return response.data
+    } catch (error) {
+      console.error('Error updating delivery note:', error)
       throw error
     }
   },

@@ -291,6 +291,11 @@ watch(
   async ([isVendor, userId]) => {
     if (isVendor && userId) {
       await notificationStore.fetchVendorNotifications(userId, currentVendorCode.value)
+      return
+    }
+
+    if (!isVendor) {
+      await notificationStore.fetchVendorNotifications()
     }
   },
   { immediate: true },

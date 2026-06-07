@@ -254,7 +254,7 @@
               <!-- First Header Row -->
               <tr class="bg-blue-500 text-white">
                 <th rowspan="2" class="text-center border-r">No</th>
-                <th rowspan="2" class="text-center border-r">No Pick Slip</th>
+                <th rowspan="2" class="text-center border-r">Lot Number</th>
                 <th rowspan="2" class="text-center border-r">SKU</th>
                 <th rowspan="2" class="text-center border-r">Description</th>
                 <th colspan="2" class="text-center border-r">LOT. NO</th>
@@ -290,7 +290,7 @@
               </tr>
               <tr v-for="(item, index) in tableData" :key="index">
                 <td class="text-center">{{ index + 1 }}</td>
-                <td>{{ item.noPickSlip }}</td>
+                <td>{{ item.lotNoDeliveryNote }}</td>
                 <td>{{ item.sku }}</td>
                 <td>{{ item.deskripsi }}</td>
                 <td class="text-right">{{ item.lotNoDeliveryNote }}</td>
@@ -360,7 +360,12 @@
           <i class="ki-duotone ki-arrow-left"></i>
           Back to List
         </button>
-        <button class="btn btn-primary" @click="submitForm()" :disabled="isSubmitting">
+        <button class="btn btn-light" @click="submitForm(true)" :disabled="isSubmitting">
+          <i class="ki-duotone ki-save-2" v-if="!isSubmitting"></i>
+          <span v-if="isSubmitting">Saving...</span>
+          <span v-else>Save as Draft</span>
+        </button>
+        <button class="btn btn-primary" @click="submitForm(false)" :disabled="isSubmitting">
           <i class="ki-duotone ki-save-2" v-if="!isSubmitting"></i>
           <span v-if="isSubmitting">Submitting...</span>
           <span v-else>Submit</span>
@@ -393,6 +398,7 @@ import VueSignature from 'vue3-signature'
 import ModalNotification from '@/components/modal/ModalNotification.vue'
 import DeliveryNotesService, { type DeliveryNotesData } from '@/services/deliveryNotes.service'
 import ReceivingConfirmationService, {
+  getReceivingConfirmationErrorMessage,
   type ReceivingConfirmationCreatePayload,
   type ReceivingConfirmationDetailPayload,
 } from '@/services/receivingConfirmation.service'
@@ -543,7 +549,7 @@ const selectDeliveryNote = (dn: DeliveryNotesData) => {
 
   // Auto-fill form data from selected Delivery Note
   formData.value.poNumber = dn.poNumber
-  formData.value.vendorID = dn.vendorID || ''
+  formData.value.vendorID = dn.vendorID ? String(dn.vendorID) : ''
   formData.value.vendorName = dn.vendorName || ''
   formData.value.tripID = dn.tripID || ''
   formData.value.DeliveryNoteNumber = dn.deliveryNoteNumber || ''
@@ -600,7 +606,7 @@ const clearSignature = () => {
   }
 }
 
-const validateForm = (): boolean => {
+const validateForm = (isDraft = false): boolean => {
   if (!formData.value.poNumber) {
     notificationModal.value = {
       type: 'warning',
@@ -665,8 +671,8 @@ const validateForm = (): boolean => {
     return false
   }
 
-  // Check signature
-  if (signaturePad.value) {
+  // Check signature only when submitting for approval.
+  if (!isDraft && signaturePad.value) {
     const saveResult = signaturePad.value.save()
     if (!saveResult || saveResult.trim().length === 0) {
       notificationModal.value = {
@@ -682,8 +688,8 @@ const validateForm = (): boolean => {
   return true
 }
 
-const submitForm = async () => {
-  if (!validateForm()) return
+const submitForm = async (isDraft = false) => {
+  if (!validateForm(isDraft)) return
 
   isSubmitting.value = true
 
@@ -744,6 +750,7 @@ const submitForm = async () => {
       truckType: formData.value.truckType || undefined,
       licensePlate: formData.value.licensePlate || undefined,
       digitalSignaturePath: signatureData || '', // Always send, even if empty
+      status: isDraft ? 'Draft' : 'Waiting Supervisor',
       items: items,
     }
 
@@ -755,7 +762,9 @@ const submitForm = async () => {
     notificationModal.value = {
       type: 'success',
       title: 'Success',
-      text: 'Receiving confirmation submitted successfully!',
+      text: isDraft
+        ? 'Receiving confirmation saved as draft successfully!'
+        : 'Receiving confirmation submitted successfully!',
     }
     showNotificationModal.value = true
 
@@ -767,7 +776,7 @@ const submitForm = async () => {
     notificationModal.value = {
       type: 'error',
       title: 'Error',
-      text: 'Failed to submit. Please try again.',
+      text: getReceivingConfirmationErrorMessage(error),
     }
     showNotificationModal.value = true
   } finally {

@@ -110,7 +110,7 @@
               <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
               <td>{{ item.reportID }}</td>
               <td>{{ item.tripID }}</td>
-              <td>{{ item.DeliveryNoteNumber }}</td>
+              <td>{{ item.deliveryNoteNumber }}</td>
               <td>{{ item.poNumber }}</td>
               <td>{{ item.vendorName || '-' }}</td>
               <td>

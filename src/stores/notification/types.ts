@@ -1,7 +1,14 @@
 // Notification Types for Tax Notification System
 
 export type NotificationSeverity = 'info' | 'warning' | 'critical'
-export type NotificationType = 'vat-expiry' | 'wht-pending' | 'fp-status' | 'bupot-created' | 'partial-received'
+export type NotificationType =
+  | 'vat-expiry'
+  | 'wht-pending'
+  | 'fp-status'
+  | 'bupot-created'
+  | 'partial-received'
+  | 'completed'
+  | 'rejected'
 
 export interface TaxNotification {
   id: string

@@ -47,8 +47,9 @@
                   <input
                     v-model="formData.namaKaryawan"
                     type="text"
-                    class="input flex-1 bg-gray-50"
-                    disabled
+                    class="input flex-1"
+                    :class="isDraft ? 'bg-white' : 'bg-gray-50'"
+                    :disabled="!isDraft"
                   />
                 </div>
 
@@ -73,8 +74,9 @@
                   <input
                     v-model="formData.namaSopir"
                     type="text"
-                    class="input flex-1 bg-gray-50"
-                    disabled
+                    class="input flex-1"
+                    :class="isDraft ? 'bg-white' : 'bg-gray-50'"
+                    :disabled="!isDraft"
                   />
                 </div>
 
@@ -154,8 +156,9 @@
                   <input
                     v-model="formData.receivedDate"
                     type="date"
-                    class="input flex-1 bg-gray-50"
-                    disabled
+                    class="input flex-1"
+                    :class="isDraft ? 'bg-white' : 'bg-gray-50'"
+                    :disabled="!isDraft"
                   />
                 </div>
               </div>
@@ -195,7 +198,7 @@
               <!-- First Header Row -->
               <tr class="bg-teal-500 text-white">
                 <th rowspan="2" class="text-center border-r">Action</th>
-                <th rowspan="2" class="text-center border-r">No Pick Slip</th>
+                <th rowspan="2" class="text-center border-r">Lot Number</th>
                 <th rowspan="2" class="text-center border-r">SKU Description</th>
                 <th colspan="2" class="text-center border-r">LOT. NO</th>
                 <th colspan="3" class="text-center border-r">FG Receipt Confirmation</th>
@@ -230,21 +233,63 @@
                     <i class="ki-filled ki-eye !text-lg"></i>
                   </button>
                 </td>
-                <td>{{ item.pickSlip }}</td>
+                <td>{{ item.lotNo }}</td>
                 <td>{{ item.description }}</td>
                 <td class="text-right">{{ item.diSuratJalan }}</td>
                 <td class="text-right">{{ item.actual }}</td>
                 <td class="text-right">{{ item.diSuratJalanKonfirmasi }}</td>
-                <td class="text-right">{{ item.diterima }}</td>
+                <td class="text-right">
+                  <input
+                    v-if="isDraft"
+                    v-model.number="item.diterima"
+                    type="number"
+                    min="0"
+                    class="input input-sm w-20 text-center"
+                    @input="calculateItem(index)"
+                  />
+                  <span v-else>{{ item.diterima }}</span>
+                </td>
                 <td class="text-right">{{ item.selisih }}</td>
                 <td class="text-right">{{ item.lebih }}</td>
                 <td class="text-right">{{ item.kurang }}</td>
-                <td class="text-right">{{ item.repackQty }}</td>
-                <td class="text-right">{{ item.damageQty }}</td>
+                <td class="text-right">
+                  <input
+                    v-if="isDraft"
+                    v-model.number="item.repackQty"
+                    type="number"
+                    min="0"
+                    class="input input-sm w-20 text-center"
+                    @input="calculateItem(index)"
+                  />
+                  <span v-else>{{ item.repackQty }}</span>
+                </td>
+                <td class="text-right">
+                  <input
+                    v-if="isDraft"
+                    v-model.number="item.damageQty"
+                    type="number"
+                    min="0"
+                    class="input input-sm w-20 text-center"
+                    @input="calculateItem(index)"
+                  />
+                  <span v-else>{{ item.damageQty }}</span>
+                </td>
                 <td class="text-left">
-                  <span v-if="item.rejectReason" class="text-red-600 font-medium">{{
-                    item.rejectReason
-                  }}</span>
+                  <template v-if="isDraft && item.kurang > 0">
+                    <input
+                      v-model="item.rejectReason"
+                      type="text"
+                      class="input input-sm w-40"
+                      :class="{ 'border-red-500 bg-red-50': !item.rejectReason.trim() }"
+                      placeholder="Required *"
+                    />
+                    <p v-if="!item.rejectReason.trim()" class="text-red-500 text-xs mt-1">
+                      Reject reason is required
+                    </p>
+                  </template>
+                  <span v-else-if="item.rejectReason" class="text-red-600 font-medium">
+                    {{ item.rejectReason }}
+                  </span>
                   <span v-else class="text-gray-400 text-xs">—</span>
                 </td>
               </tr>
@@ -260,8 +305,16 @@
           Back to List
         </button>
 
-        <!-- Show Approve/Reject buttons only if status is NOT Completed AND user is profile 3185 -->
-        <template v-if="currentStatus !== 'Completed' && canApprove">
+        <template v-if="isDraft">
+          <button class="btn btn-primary" @click="updateConfirmation()" :disabled="isSubmitting">
+            <i class="ki-duotone ki-save-2" v-if="!isSubmitting"></i>
+            <span v-if="isSubmitting">Submitting...</span>
+            <span v-else>Submit Update</span>
+          </button>
+        </template>
+
+        <!-- Show Approve/Reject buttons only if status is Waiting Supervisor AND user is profile 3185 -->
+        <template v-if="isWaitingApproval && canApprove">
           <button class="btn btn-danger" @click="openRejectModal()">
             <i class="ki-duotone ki-cross-circle"></i>
             Reject
@@ -273,7 +326,7 @@
         </template>
 
         <!-- Show Print to PDF button only if status is Completed -->
-        <template v-else>
+        <template v-if="isCompleted">
           <button class="btn btn-success" @click="printToPDF()">
             <i class="ki-duotone ki-printer"></i>
             Print to PDF
@@ -328,7 +381,10 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
-import ReceivingConfirmationService from '@/services/receivingConfirmation.service'
+import ReceivingConfirmationService, {
+  type ReceivingConfirmationCreatePayload,
+  type ReceivingConfirmationDetailPayload,
+} from '@/services/receivingConfirmation.service'
 import DeliveryNotesService from '@/services/deliveryNotes.service'
 import ModalNotification from '@/components/modal/ModalNotification.vue'
 import jsPDF from 'jspdf'
@@ -347,11 +403,14 @@ const canApprove = computed(() => loginStore.userData?.profile?.profileId === 31
 interface FormData {
   orderNo: string
   poNumber: string
+  vendorID: string
   vendorName: string
+  tripID: string
   namaKaryawan: string
   namaSopir: string
   noPolisi: string
   transporter: string
+  truckType: string
   pickup: string
   destination: string
   orderDate: string
@@ -361,9 +420,11 @@ interface FormData {
 }
 
 interface TableData {
+  id: number
   pickSlip: string
   sku: string
   description: string
+  lotNo: string
   diSuratJalan: number
   actual: number
   diSuratJalanKonfirmasi: number
@@ -387,11 +448,14 @@ const routes = ref<routeTypes[]>([
 const formData = ref<FormData>({
   orderNo: '',
   poNumber: '',
+  vendorID: '',
   vendorName: '',
+  tripID: '',
   namaKaryawan: '',
   namaSopir: '',
   noPolisi: '',
   transporter: '',
+  truckType: '',
   pickup: '',
   destination: '',
   orderDate: '',
@@ -408,6 +472,7 @@ const showRejectModal = ref<boolean>(false)
 const rejectionReason = ref<string>('')
 const currentStatus = ref<string>('')
 const hasDiscrepancy = ref<boolean>(false)
+const isSubmitting = ref<boolean>(false)
 const deliveryNoteInfo = ref({
   deliveryNoteNumber: '',
   tripID: '',
@@ -425,6 +490,12 @@ const notificationModal = ref({
   text: '',
 })
 
+const isDraft = computed(() => currentStatus.value === 'Draft')
+const isWaitingApproval = computed(() =>
+  ['Waiting Supervisor', 'Waiting Approval'].includes(currentStatus.value),
+)
+const isCompleted = computed(() => currentStatus.value === 'Completed')
+
 // Functions
 const goBack = () => {
   router.push({ name: 'receivingConfirmation' })
@@ -441,6 +512,154 @@ const viewItem = (index: number) => {
   showNotificationModal.value = true
 }
 
+const calculateItem = (index: number) => {
+  const item = tableData.value[index]
+  const qtyActual = Number(item.diterima) || 0
+  const qtySuratJalan = Number(item.diSuratJalanKonfirmasi) || 0
+  const diff = qtyActual - qtySuratJalan
+
+  item.diterima = qtyActual
+  item.actual = qtyActual
+  item.repackQty = Number(item.repackQty) || 0
+  item.damageQty = Number(item.damageQty) || 0
+  item.selisih = diff
+  item.lebih = diff > 0 ? diff : 0
+  item.kurang = diff < 0 ? Math.abs(diff) : 0
+
+  if (item.kurang === 0) {
+    item.rejectReason = ''
+  }
+}
+
+const validateUpdateForm = (): boolean => {
+  if (!isDraft.value) {
+    notificationModal.value = {
+      type: 'warning',
+      title: 'Validation Error',
+      text: 'Receiving confirmation can only be updated while status is Draft',
+    }
+    showNotificationModal.value = true
+    return false
+  }
+
+  if (!formData.value.namaKaryawan.trim()) {
+    notificationModal.value = {
+      type: 'warning',
+      title: 'Validation Error',
+      text: 'Please enter Employee Name',
+    }
+    showNotificationModal.value = true
+    return false
+  }
+
+  if (!formData.value.namaSopir.trim()) {
+    notificationModal.value = {
+      type: 'warning',
+      title: 'Validation Error',
+      text: 'Please enter Driver Name',
+    }
+    showNotificationModal.value = true
+    return false
+  }
+
+  if (!formData.value.receivedDate) {
+    notificationModal.value = {
+      type: 'warning',
+      title: 'Validation Error',
+      text: 'Please enter Received Date',
+    }
+    showNotificationModal.value = true
+    return false
+  }
+
+  if (tableData.value.length === 0) {
+    notificationModal.value = {
+      type: 'warning',
+      title: 'Validation Error',
+      text: 'No items to submit',
+    }
+    showNotificationModal.value = true
+    return false
+  }
+
+  const itemsMissingReason = tableData.value.filter(
+    (item) => item.kurang > 0 && !item.rejectReason.trim(),
+  )
+  if (itemsMissingReason.length > 0) {
+    notificationModal.value = {
+      type: 'warning',
+      title: 'Validation Error',
+      text: `Please fill in the Reject Reason for ${itemsMissingReason.length} item(s) with shortage quantity.`,
+    }
+    showNotificationModal.value = true
+    return false
+  }
+
+  return true
+}
+
+const buildUpdatePayload = (): ReceivingConfirmationCreatePayload => {
+  const items: ReceivingConfirmationDetailPayload[] = tableData.value.map((item) => ({
+    sku: item.sku,
+    deskripsi: item.description,
+    noPickSlip: item.pickSlip,
+    lotNo: item.lotNo,
+    qtySuratJalan: item.diSuratJalanKonfirmasi,
+    qtyActual: item.diterima,
+    repackQty: item.repackQty,
+    damageQty: item.damageQty,
+    rejectReason: item.rejectReason || undefined,
+  }))
+
+  return {
+    poNumber: formData.value.poNumber,
+    vendorID: formData.value.vendorID || undefined,
+    vendorName: formData.value.vendorName || undefined,
+    tripID: formData.value.tripID || undefined,
+    DeliveryNoteNumber: formData.value.orderNo || undefined,
+    receivedDate: formData.value.receivedDate,
+    whCheckerName: formData.value.namaKaryawan,
+    driverName: formData.value.namaSopir,
+    pickup: formData.value.pickup || undefined,
+    destination: formData.value.destination || undefined,
+    transporter: formData.value.transporter || undefined,
+    truckType: formData.value.truckType || undefined,
+    licensePlate: formData.value.noPolisi || undefined,
+    digitalSignaturePath: formData.value.signature || undefined,
+    items,
+  }
+}
+
+const updateConfirmation = async () => {
+  if (!validateUpdateForm()) return
+
+  isSubmitting.value = true
+
+  try {
+    await ReceivingConfirmationService.update(Number(route.params.id), buildUpdatePayload())
+
+    notificationModal.value = {
+      type: 'success',
+      title: 'Success',
+      text: 'Receiving confirmation updated and submitted for approval!',
+    }
+    showNotificationModal.value = true
+
+    await new Promise((resolve) => setTimeout(resolve, 1500))
+    router.push({ name: 'receivingConfirmationList' })
+  } catch (error) {
+    console.error('Error updating receiving confirmation:', error)
+    notificationModal.value = {
+      type: 'error',
+      title: 'Error',
+      text: 'Failed to update receiving confirmation',
+    }
+    showNotificationModal.value = true
+  } finally {
+    isSubmitting.value = false
+  }
+}
+
 const openRejectModal = () => {
   showRejectModal.value = true
   rejectionReason.value = ''
@@ -453,6 +672,7 @@ const closeRejectModal = () => {
 
 const printToPDF = async () => {
   let driverSignatureFromDN: string | null = null
+  let driverSignatureDateFromDN: string | null = null
 
   try {
     if (formData.value.orderNo) {
@@ -461,6 +681,7 @@ const printToPDF = async () => {
       )
       if (deliveryNotes) {
         driverSignatureFromDN = deliveryNotes.driverSignature || null
+        driverSignatureDateFromDN = deliveryNotes.createdUtcDate || null
         console.log(
           'Driver signature fetched from delivery notes:',
           driverSignatureFromDN ? 'YES' : 'NO',
@@ -471,6 +692,22 @@ const printToPDF = async () => {
     console.error('Error fetching driver signature from delivery notes:', error)
     // Continue with PDF generation even if fetch fails
   }
+
+  const formatPdfDate = (value?: string | null): string => {
+    if (!value) return '-'
+
+    const date = new Date(value)
+    if (Number.isNaN(date.getTime())) return value
+
+    return date.toLocaleDateString('id-ID', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    })
+  }
+
+  const whCheckerSignatureDate = formatPdfDate(formData.value.receivedDate)
+  const driverSignatureDate = formatPdfDate(driverSignatureDateFromDN)
 
   const doc = new jsPDF()
   const pageWidth = doc.internal.pageSize.getWidth()
@@ -510,7 +747,7 @@ const printToPDF = async () => {
   doc.setFont('helvetica', 'bold')
   doc.text('Trip ID:', rightX, yPos)
   doc.setFont('helvetica', 'normal')
-  doc.text(tableData.value[0]?.pickSlip || '-', rightX + labelWidth, yPos)
+  doc.text(formData.value.tripID || '-', rightX + labelWidth, yPos)
   yPos += 6
 
   doc.setFont('helvetica', 'bold')
@@ -620,7 +857,7 @@ const printToPDF = async () => {
     String(index + 1),
     item.sku,
     item.description,
-    item.pickSlip || '-',
+    item.lotNo || '-',
     String(item.diSuratJalan),
     String(item.diterima),
     String(item.selisih),
@@ -670,7 +907,7 @@ const printToPDF = async () => {
   const finalY = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 15
 
   // Signature Section
-  if (finalY < pageHeight - 50) {
+  if (finalY < pageHeight - 60) {
     yPos = finalY
   } else {
     doc.addPage()
@@ -706,10 +943,20 @@ const printToPDF = async () => {
   }
 
   doc.setFont('helvetica', 'normal')
+  doc.setFontSize(8)
+  doc.text(
+    whCheckerSignatureDate,
+    sigLeftX + signatureBoxWidth / 2,
+    yPos + signatureBoxHeight + 6,
+    {
+      align: 'center',
+    },
+  )
+  doc.setFontSize(9)
   doc.text(
     formData.value.namaKaryawan || '-',
     sigLeftX + signatureBoxWidth / 2,
-    yPos + signatureBoxHeight + 6,
+    yPos + signatureBoxHeight + 12,
     {
       align: 'center',
     },
@@ -741,10 +988,20 @@ const printToPDF = async () => {
   }
 
   doc.setFont('helvetica', 'normal')
+  doc.setFontSize(8)
+  doc.text(
+    driverSignatureDate,
+    sigRightX + signatureBoxWidth / 2,
+    yPos + signatureBoxHeight + 6,
+    {
+      align: 'center',
+    },
+  )
+  doc.setFontSize(9)
   doc.text(
     formData.value.namaSopir || '-',
     sigRightX + signatureBoxWidth / 2,
-    yPos + signatureBoxHeight + 6,
+    yPos + signatureBoxHeight + 12,
     {
       align: 'center',
     },
@@ -890,11 +1147,14 @@ onMounted(() => {
         formData.value = {
           orderNo: data.deliveryNoteNumber || '',
           poNumber: data.poNumber || '',
+          vendorID: data.vendorID ? String(data.vendorID) : '',
           vendorName: data.vendorName || '',
+          tripID: data.tripID || '',
           namaKaryawan: data.whCheckerName || '',
           namaSopir: data.driverName || '',
           noPolisi: data.licensePlate || '',
           transporter: data.transporter || '',
+          truckType: data.truckType || '',
           pickup: data.pickup || '',
           destination: data.destination || '',
           orderDate: data.receivedDate
@@ -921,9 +1181,11 @@ onMounted(() => {
 
         // Map API items to TableData structure
         tableData.value = data.items.map((item) => ({
+          id: item.id,
           pickSlip: item.noPickSlip || '',
           sku: item.sku || '',
           description: item.deskripsi || '',
+          lotNo: item.lotNo || '',
           diSuratJalan: item.qtySuratJalan || 0,
           actual: item.qtyActual || 0,
           diSuratJalanKonfirmasi: item.qtySuratJalan || 0,
@@ -968,5 +1230,10 @@ onMounted(() => {
     border-radius: 15px;
     background-color: #dbdfe9;
   }
+}
+
+.input-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
 }
 </style>

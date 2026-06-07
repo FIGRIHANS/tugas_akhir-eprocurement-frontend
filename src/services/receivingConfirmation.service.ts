@@ -16,7 +16,7 @@ export interface ReceivingConfirmationDetailPayload {
 // Interface untuk Create Payload - untuk POST ke backend
 export interface ReceivingConfirmationCreatePayload {
   poNumber: string
-  vendorID?: string
+  vendorID?: number | string
   vendorName?: string
   tripID?: string
   DeliveryNoteNumber?: string
@@ -117,6 +117,49 @@ export interface ReceivingConfirmationQueryParams {
   hasDiscrepancy?: boolean
 }
 
+const normalizeCreatePayload = (
+  data: ReceivingConfirmationCreatePayload,
+): ReceivingConfirmationCreatePayload => {
+  const vendorID = data.vendorID
+
+  if (vendorID === undefined || vendorID === '') {
+    return {
+      ...data,
+      vendorID: undefined,
+    }
+  }
+
+  const parsedVendorID = Number(vendorID)
+
+  return {
+    ...data,
+    vendorID: Number.isNaN(parsedVendorID) ? undefined : parsedVendorID,
+  }
+}
+
+const getErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) return error.message
+
+  if (typeof error === 'object' && error !== null && 'response' in error) {
+    const response = (error as { response?: { data?: ApiResponse<unknown> | string } }).response
+    const data = response?.data
+
+    if (typeof data === 'string') return data
+    if (data?.result?.message) return data.result.message
+    if (data?.title) return data.title
+  }
+
+  return 'Request failed'
+}
+
+const ensureSuccessResponse = <T>(response: ApiResponse<T>): T => {
+  if (response.result?.isError) {
+    throw new Error(response.result.message || response.title || 'Request failed')
+  }
+
+  return response.result.content
+}
+
 /**
  * Service untuk mengelola API Receiving Confirmation
  */
@@ -179,11 +222,29 @@ const ReceivingConfirmationService = {
     try {
       const response = await invoiceApi.post<ApiResponse<ReceivingConfirmationData>>(
         '/receiving-confirmation/create',
-        data,
+        normalizeCreatePayload(data),
       )
-      return response.data.result.content
+      return ensureSuccessResponse(response.data)
     } catch (error) {
       console.error('Error creating receiving confirmation:', error)
+      throw error
+    }
+  },
+
+  async update(reportID: number, data: ReceivingConfirmationCreatePayload): Promise<void> {
+    try {
+      const response = await invoiceApi.put<ApiResponse<string>>(
+        '/receiving-confirmation/update',
+        normalizeCreatePayload(data),
+        {
+          params: {
+            reportID: reportID,
+          },
+        },
+      )
+      ensureSuccessResponse(response.data)
+    } catch (error) {
+      console.error('Error updating receiving confirmation:', error)
       throw error
     }
   },
@@ -228,4 +289,5 @@ const ReceivingConfirmationService = {
   },
 }
 
+export { getErrorMessage as getReceivingConfirmationErrorMessage }
 export default ReceivingConfirmationService

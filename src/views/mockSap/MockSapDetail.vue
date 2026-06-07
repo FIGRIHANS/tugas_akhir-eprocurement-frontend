@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Breadcrumb title="Mock SAP PO Detail" :routes="routes" />
+    <Breadcrumb title="Purchase Order Detail" :routes="routes" />
     <hr class="-mx-[24px] mb-[24px]" />
 
     <!-- Loading State -->
@@ -260,7 +260,7 @@ const route = useRoute()
 // Breadcrumb
 const routes = ref<routeTypes[]>([
   {
-    name: 'Mock SAP',
+    name: 'Purchase Order',
     to: '/mock-sap-list',
   },
 ])

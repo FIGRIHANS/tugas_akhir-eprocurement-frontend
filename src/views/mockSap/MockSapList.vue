@@ -51,8 +51,8 @@
           <i class="ki-duotone ki-lock text-gray-500 text-xl"></i>
         </div>
         <div>
-          <p class="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Closed</p>
-          <p class="text-2xl font-bold text-gray-500 leading-tight">{{ poStats.closed }}</p>
+          <p class="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Completed</p>
+          <p class="text-2xl font-bold text-gray-500 leading-tight">{{ poStats.completed }}</p>
         </div>
       </div>
       <!-- Total Value -->
@@ -126,7 +126,7 @@
               <option value="Open">Open</option>
               <option value="Partial">Partial</option>
               <option value="Delivered">Delivered</option>
-              <option value="Closed">Closed</option>
+              <option value="Completed">Completed</option>
             </select>
           </div>
           <div>
@@ -321,7 +321,7 @@ const poStats = computed(() => {
   const open = dataList.value.filter((i) => i.status === 'Open').length
   const partiallyDelivered = dataList.value.filter((i) => i.status === 'Partial').length
   const delivered = dataList.value.filter((i) => i.status === 'Delivered').length
-  const closed = dataList.value.filter((i) => i.status === 'Closed').length
+  const completed = dataList.value.filter((i) => i.status === 'Completed').length
   const totalValue = dataList.value.reduce((sum, i) => sum + (i.totalAmount || 0), 0)
   const totalValueFormatted = new Intl.NumberFormat('id-ID', {
     style: 'currency',
@@ -329,7 +329,7 @@ const poStats = computed(() => {
     notation: 'compact',
     maximumFractionDigits: 1,
   }).format(totalValue)
-  return { total, open, partiallyDelivered, delivered, closed, totalValue, totalValueFormatted }
+  return { total, open, partiallyDelivered, delivered, completed, totalValue, totalValueFormatted }
 })
 
 const fetchData = async () => {
@@ -382,8 +382,8 @@ const getStatusBadgeClass = (status: string) => {
   if (status === 'Delivered') return 'badge-success'
   if (status === 'Partial') return 'badge-warning'
   if (status === 'Open') return 'badge-info'
-  if (status === 'Closed') return 'badge-secondary'
-  return 'badge-secondary'
+  if (status === 'Completed') return 'badge-secondary'
+  return 'badge-info'
 }
 
 const formatDate = (date: string) => {

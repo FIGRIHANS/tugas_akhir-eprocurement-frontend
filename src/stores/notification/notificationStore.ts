@@ -298,8 +298,6 @@ export const useNotificationStore = defineStore('notification', () => {
    * localStorage-only notifications.
    */
   const fetchVendorNotifications = async (vendorId?: number, vendorCode?: string) => {
-    if (!vendorId && !vendorCode) return
-
     const apiNotifs = await NotificationService.getVendorNotifications(vendorId, vendorCode)
 
     const existingApiIds = new Set(
@@ -318,8 +316,8 @@ export const useNotificationStore = defineStore('notification', () => {
 
       const notification: TaxNotification = {
         id: localId,
-        type: 'partial-received',
-        severity: 'warning',
+        type: (n.type || 'partial-received') as TaxNotification['type'],
+        severity: n.type === 'rejected' ? 'critical' : 'warning',
         title: n.title,
         message: n.message,
         relatedId: n.relatedId,
