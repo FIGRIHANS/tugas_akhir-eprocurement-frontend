@@ -918,7 +918,7 @@ const syncCalculationFromPoGr = () => {
   if (!Array.isArray(form.invoicePoGr) || form.invoicePoGr.length === 0) return
 
   const subtotal = form.invoicePoGr.reduce(
-    (sum, item) => sum + (Number(item.itemAmountLC) || Number(item.itemAmount) || 0),
+    (sum, item) => sum + (Number(item.itemAmountLC) || 0),
     0,
   )
   const vatAmount = form.invoicePoGr.reduce((sum, item) => sum + (Number(item.vatAmount) || 0), 0)

@@ -1,5 +1,5 @@
 <template>
-<aside 
+<aside
     class="w-[280px] bg-white border border-gray-200 border-t-0 h-screen top-0 fixed scrollable-y-auto transition-transform duration-300 ease-in-out z-[99]"
     :class="{ '-translate-x-full': sidebarStore.isCollapsed }"
   >
@@ -15,7 +15,7 @@
     </div>
 
     <div class="menu menu-default flex flex-col border-0 rounded-lg w-full py-0 px-1.5" data-menu="true">
-      <div v-for="menu in filteredSidebarMenu" :key="menu.id" class="menu-item" 
+      <div v-for="menu in filteredSidebarMenu" :key="menu.id" class="menu-item"
         :class="{ 'show': isMenuActive(menu) }"
         data-menu-item-placement=""
         data-menu-item-toggle="accordion" data-menu-item-trigger="click">
@@ -31,9 +31,9 @@
         </a>
         <div v-if="menu.child.length > 0" class="menu-accordion">
           <div v-for="subMenu in menu.child" :key="subMenu.id" class="menu-item">
-            <a 
-              class="menu-link" 
-              href="#" 
+            <a
+              class="menu-link"
+              href="#"
               :class="{ 'menu-link--active': isSubMenuActive(subMenu.to) }"
               @click.prevent="redirectTo(subMenu.to)"
             >
@@ -57,6 +57,14 @@ import { useLoginStore } from '@/stores/views/login'
 import { useSidebarStore } from '@/stores/sidebar'
 import { isEmpty } from 'lodash'
 
+type MenuItem = {
+  id?: string
+  to?: string
+  title?: string
+  icon?: string
+  child?: MenuItem[]
+}
+
 const router = useRouter()
 const route = useRoute()
 const userStore = useLoginStore()
@@ -72,12 +80,12 @@ const isSubMenuActive = (path?: string) => {
   return currentName === path || suffixes.some(s => currentName === path + s)
 }
 
-const isMenuActive = (menu: any) => {
+const isMenuActive = (menu: MenuItem) => {
   if (menu.to) {
     if (isSubMenuActive(menu.to)) return true
   }
   if (menu.child?.length > 0) {
-    return menu.child.some((child: any) => isSubMenuActive(child.to))
+    return menu.child.some((child: MenuItem) => isSubMenuActive(child.to))
   }
   return false
 }
@@ -92,7 +100,71 @@ const redirectTo = (path?: string) => {
 
 const filteredSidebarMenu = computed(() => {
   if (!isEmpty(userStore.userData)) {
-    if (userStore.userData?.profile.profileId === 3001) {
+    // Ensure profileId 3200 always gets full access as configured below.
+    if (Number(userStore.userData?.profile?.profileId) === 3200) {
+      return sidebarMenu
+        .filter(
+          (menu) =>
+            menu.id === 'e-invoice' ||
+            menu.id === 'vendor-management' ||
+            menu.id === 'dashboard' ||
+            menu.id === 'analytic-dashboard' ||
+            menu.id === 'digital-receiving-confirmation' ||
+            menu.id === 'tax-reconciliation' ||
+            menu.id === 'userManagement' ||
+            menu.id === 'workflow-configuration' ||
+            menu.id === 'system-integration' ||
+            menu.id === 'system-configuration',
+        )
+        .map((menu) => {
+          if (
+            menu.id === 'workflow-configuration' ||
+            menu.id === 'system-integration' ||
+            menu.id === 'system-configuration'
+          ) {
+            return { ...menu }
+          }
+          return {
+            ...menu,
+            child: menu.child
+              ? menu.child.filter((child) =>
+                  [
+                    'vendor-master',
+                    'invoice-list',
+                    'invoice-list-non-po',
+                    'ftp-invoice-integration',
+                    'scorecard-performance',
+                    'invoiceAnalytic',
+                    'taxAnalytic',
+                    'inboundLogisticAnalytic',
+                    'email-invoice-integration',
+                    'mock-sap-list',
+                    'receiving-confirmation',
+                    'receiving-confirmation-list',
+                    'delivery-notes',
+                    'delivery-notes-list',
+                    'goods-receipt-list',
+                    'vat-reconciliation',
+                    'wht-reconciliation',
+                    'invoice-type',
+                    'list-user',
+                    'master-profile',
+                    'master-role',
+                    'master-employee',
+                    'master-menu',
+                    'report-user-authorization',
+                    'erp-integration',
+                    'activity-expenses',
+                    'invoice-configuration',
+                    'cash-advance',
+                    'recurring-invoice-reminder',
+                  ].includes(child.id),
+                )
+              : [],
+          }
+        })
+    }
+    if (Number(userStore.userData?.profile?.profileId) === 3001) {
       return sidebarMenu
         .filter((menu) => menu.id === 'e-invoice' || menu.id === 'dashboard')
         .map((menu) => {
@@ -104,7 +176,7 @@ const filteredSidebarMenu = computed(() => {
     }
 
     // Finance AP Officer (3002) — verify only
-    if (userStore.userData?.profile.profileId === 3002) {
+    if (Number(userStore.userData?.profile?.profileId) === 3002) {
       return sidebarMenu
         .filter(
           (menu) =>
@@ -136,7 +208,7 @@ const filteredSidebarMenu = computed(() => {
     }
 
     // Accounting & Tax (3003) — 1st approval after verify
-    if (userStore.userData?.profile.profileId === 3003) {
+    if (Number(userStore.userData?.profile?.profileId) === 3003) {
       return sidebarMenu
         .filter(
           (menu) =>
@@ -186,7 +258,7 @@ const filteredSidebarMenu = computed(() => {
     // }
 
     // Finance AP Supervisor (3004) — 2nd approval
-    if (userStore.userData?.profile.profileId === 3004) {
+    if (Number(userStore.userData?.profile?.profileId) === 3004) {
       return sidebarMenu
         .filter(
           (menu) =>
@@ -216,7 +288,7 @@ const filteredSidebarMenu = computed(() => {
     }
 
     // ProfileId 3180 — Warehouse Checker (can create RC)
-    if (userStore.userData?.profile?.profileId === 3180) {
+    if (Number(userStore.userData?.profile?.profileId) === 3180) {
       return sidebarMenu
         .filter((menu) => menu.id === 'digital-receiving-confirmation')
         .map((menu) => ({
@@ -234,7 +306,7 @@ const filteredSidebarMenu = computed(() => {
 
     // ProfileId 3185 — Warehouse Checker Approver (view + approve only, no create)
     // Inbound analytic lives under analytic-dashboard in sidebar.ts (id inboundLogisticAnalytic), not under DRC.
-    if (userStore.userData?.profile?.profileId === 3185) {
+    if (Number(userStore.userData?.profile?.profileId) === 3185) {
       const inboundAnalyticOnly = sidebarMenu
         .filter((menu) => menu.id === 'analytic-dashboard')
         .map((menu) => ({
@@ -261,7 +333,7 @@ const filteredSidebarMenu = computed(() => {
 
     if (
       userStore.userData?.profile?.vendorCode &&
-      userStore.userData?.profile?.profileId === 3200
+      Number(userStore.userData?.profile?.profileId) === 3200
     ) {
       return sidebarMenu
         .filter((menu) => menu.id === 'dashboard' || menu.id === 'e-invoice')
@@ -316,7 +388,7 @@ const filteredSidebarMenu = computed(() => {
         })
     }
 
-    if (userStore.userData?.profile?.profileId === 3192) {
+    if (Number(userStore.userData?.profile?.profileId) === 3192) {
       return sidebarMenu
         .filter((menu) => menu.id !== 'company-information')
         .map((menu) => ({
@@ -329,7 +401,7 @@ const filteredSidebarMenu = computed(() => {
         }))
     }
 
-    if (userStore.userData?.profile?.profileId === 3132) {
+    if (Number(userStore.userData?.profile?.profileId) === 3132) {
       return sidebarMenu
         .filter(
           (menu) =>
@@ -345,15 +417,15 @@ const filteredSidebarMenu = computed(() => {
 
     // non po
     if (
-      userStore.userData?.profile.profileId === 3029 ||
-      userStore.userData?.profile.profileId === 3075 ||
-      userStore.userData?.profile.profileId === 3036 ||
-      userStore.userData?.profile.profileId === 3066 ||
-      userStore.userData?.profile.profileId === 3030 ||
-      userStore.userData?.profile.profileId === 3089 ||
-      userStore.userData?.profile.profileId === 3028 ||
-      userStore.userData?.profile.profileId === 3193 ||
-      userStore.userData?.profile.profileId === 3194
+      Number(userStore.userData?.profile?.profileId) === 3029 ||
+      Number(userStore.userData?.profile?.profileId) === 3075 ||
+      Number(userStore.userData?.profile?.profileId) === 3036 ||
+      Number(userStore.userData?.profile?.profileId) === 3066 ||
+      Number(userStore.userData?.profile?.profileId) === 3030 ||
+      Number(userStore.userData?.profile?.profileId) === 3089 ||
+      Number(userStore.userData?.profile?.profileId) === 3028 ||
+      Number(userStore.userData?.profile?.profileId) === 3193 ||
+      Number(userStore.userData?.profile?.profileId) === 3194
     ) {
       return sidebarMenu
         .filter(
@@ -376,8 +448,8 @@ const filteredSidebarMenu = computed(() => {
         })
     }
     if (
-      userStore.userData?.profile.profileId === 3201 ||
-      userStore.userData?.profile.profileId === 3202
+      Number(userStore.userData?.profile?.profileId) === 3201 ||
+      Number(userStore.userData?.profile?.profileId) === 3202
     ) {
       return sidebarMenu
         .filter(
@@ -483,27 +555,27 @@ const filteredSidebarMenu = computed(() => {
   position: relative;
 
   // Normal state
-  .menu-title { 
-    color: #4b5563; 
+  .menu-title {
+    color: #4b5563;
     font-weight: 500;
     transition: color 0.2s ease;
   }
-  .menu-icon i { 
-    color: #9ca3af; 
+  .menu-icon i {
+    color: #9ca3af;
     transition: all 0.2s ease;
   }
-  .menu-arrow i { 
+  .menu-arrow i {
     color: #9ca3af;
     transition: color 0.2s ease;
   }
 
   // Hover state (non-active)
   &:hover:not(.menu-link--active) {
-    background-color: #f8fafc !important; 
-    
+    background-color: #f8fafc !important;
+
     .menu-title { color: #0d9488 !important; }
-    .menu-icon i { 
-      color: #0d9488 !important; 
+    .menu-icon i {
+      color: #0d9488 !important;
       transform: translateX(2px);
     }
     .menu-arrow i { color: #0d9488 !important; }
@@ -512,11 +584,11 @@ const filteredSidebarMenu = computed(() => {
     &::before {
       content: '';
       position: absolute;
-      left: 0;
-      top: 50%;
+      inset-inline-start: 0;
+      inset-block-start: 50%;
       transform: translateY(-50%);
-      height: 16px;
-      width: 3px;
+      block-size: 16px;
+      inline-size: 3px;
       background-color: #0d9488;
       border-radius: 0 4px 4px 0;
     }
@@ -525,13 +597,13 @@ const filteredSidebarMenu = computed(() => {
   // Active state: The "Floating Pill"
   &.menu-link--active {
     background-color: #f0fdfa !important;
-    
-    .menu-title { 
-      color: #0d9488 !important; 
-      font-weight: 600; 
+
+    .menu-title {
+      color: #0d9488 !important;
+      font-weight: 600;
     }
-    .menu-icon i { 
-      color: #0d9488 !important; 
+    .menu-icon i {
+      color: #0d9488 !important;
     }
     .menu-arrow i {
       color: #0d9488 !important;
@@ -546,7 +618,7 @@ const filteredSidebarMenu = computed(() => {
 // Sub-menu specific styling
 .menu-sub-accordion .menu-item .menu-link,
 .menu-accordion .menu-item > .menu-link {
-  padding-left: 48px;
+  padding-inline-start: 48px;
   margin: 2px 12px;
   border-radius: 8px;
   font-size: 0.9em;
@@ -554,7 +626,7 @@ const filteredSidebarMenu = computed(() => {
   transition: all 0.2s ease;
 
   // Normal state
-  .menu-title { 
+  .menu-title {
     color: #6b7280;
     transition: color 0.2s ease;
   }
@@ -562,7 +634,7 @@ const filteredSidebarMenu = computed(() => {
   // Hover state (non-active)
   &:hover:not(.menu-link--active) {
     background-color: #f1f5f9 !important;
-    .menu-title { 
+    .menu-title {
       color: #0d9488 !important;
       font-weight: 500;
     }
@@ -570,8 +642,8 @@ const filteredSidebarMenu = computed(() => {
 
   // Active state
   &.menu-link--active {
-    background-color: transparent !important; 
-    
+    background-color: transparent !important;
+
     .menu-title {
       color: #0d9488 !important;
       font-weight: 600;
@@ -581,11 +653,11 @@ const filteredSidebarMenu = computed(() => {
     &::before {
       content: '';
       position: absolute;
-      left: 32px;
-      top: 50%;
+      inset-inline-start: 32px;
+      inset-block-start: 50%;
       transform: translateY(-50%);
-      width: 4px;
-      height: 4px;
+      inline-size: 4px;
+      block-size: 4px;
       border-radius: 50%;
       background-color: #0d9488;
     }
@@ -598,13 +670,13 @@ const filteredSidebarMenu = computed(() => {
 
 .menu-icon i {
   font-size: 18px;
-  margin-right: 12px;
-  width: 24px;
+  margin-inline-end: 12px;
+  inline-size: 24px;
   text-align: center;
 }
 
 .menu-accordion {
-  padding-left: 0;
+  padding-inline-start: 0;
 }
 
 .menu-arrow i {
