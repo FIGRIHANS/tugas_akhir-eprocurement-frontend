@@ -68,7 +68,7 @@
               </svg>
               <i v-else class="ki-duotone ki-arrows-circle shrink-0"></i>
               <span class="whitespace-nowrap">
-                {{ isSyncLoading ? 'Syncing...' : 'Sync Excel Data' }}
+                {{ isSyncLoading ? 'Syncing...' : 'Sync Get Data' }}
               </span>
             </button>
             <button
@@ -366,6 +366,7 @@ import {
   fetchFtpUploadDetail,
   fetchFtpUploadList,
   resolveFtpUploadUIdFromRow,
+  resolveSavedInvoiceUIdFromSync,
   saveActiveFtpUploadUId,
   saveFtpSyncContext,
   sortFtpUploadsByNewest,
@@ -884,13 +885,21 @@ const syncFtpUploadRow = async (row: ListPoTypes) => {
   syncingRowId.value = uid
   try {
     const syncResult = await syncFtpUpload(uid)
-    const context = buildSyncContextFromSyncResponse(syncResult)
-    saveFtpSyncContext(context)
+    const savedInvoiceUId = resolveSavedInvoiceUIdFromSync(syncResult)
+
+    if (!savedInvoiceUId) {
+      alert('Sync berhasil tetapi invoice UID tidak ditemukan di response.')
+      return
+    }
+
+    saveFtpSyncContext(buildSyncContextFromSyncResponse(syncResult))
     saveActiveFtpUploadUId(syncResult.ftpUploadUId)
 
     if (syncResult.warnings?.length) {
       alert(syncResult.warnings.join('\n'))
     }
+
+    await callList()
 
     router.push({
       name: 'invoiceAdd',
@@ -898,6 +907,7 @@ const syncFtpUploadRow = async (row: ListPoTypes) => {
         type: 'po',
         from: 'ftp',
         ftpUpload: syncResult.ftpUploadUId,
+        invoice: savedInvoiceUId,
       },
     })
   } catch (error: unknown) {

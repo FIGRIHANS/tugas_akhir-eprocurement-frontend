@@ -16,7 +16,6 @@ export type FtpUploadOriginalFileNames = {
 
 export interface FtpUploadMetadata {
   vendorName: string
-  vendorId?: number
   invoiceNo?: string | null
   documentNo?: string | null
   uploaderId?: string
@@ -143,10 +142,14 @@ export interface FtpSyncPreview {
 
 export interface FtpSyncResult {
   ftpUploadUId: string
+  savedInvoiceUId: string
   syncedAt?: string | null
   warnings: string[]
+  manualFields: string[]
   draft: Record<string, unknown>
   preview: FtpSyncPreview
+  invoice: Record<string, unknown>
+  invoiceListItem: Record<string, unknown> | null
 }
 
 export const normalizeFtpUploadListItem = (

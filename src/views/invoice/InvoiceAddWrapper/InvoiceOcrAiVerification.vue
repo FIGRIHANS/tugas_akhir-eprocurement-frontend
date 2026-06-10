@@ -22,15 +22,6 @@
             >
               Tax & Invoice Verification
             </button>
-            <button
-              :class="[
-                'btn btn-primary',
-                tabOcrTab !== 'ai' ? 'btn-clear info__header' : '',
-              ]"
-              @click="setTabOcr('ai')"
-            >
-              AI Action
-            </button>
           </div>
         </div>
 
@@ -260,58 +251,6 @@
             </table>
           </div>
         </div>
-
-        <div
-          v-if="tabOcrTab === 'ai'"
-          :class="['bg-white shadow rounded-xl p-6 border border-gray-200']"
-        >
-          <h2 class="font-semibold text-lg mb-4">AI Verification Result</h2>
-          <div class="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-            <div v-if="aiMismatches.length === 0" class="mb-4">
-              <div class="flex items-center gap-2 mb-2">
-                <i class="ki-filled ki-check-circle text-green-600 text-xl"></i>
-                <p class="font-semibold text-base text-gray-800">Verification Passed</p>
-              </div>
-              <p class="text-sm text-gray-600">All data matched successfully</p>
-            </div>
-
-            <div v-else class="mb-4">
-              <div class="flex items-center gap-2 mb-2">
-                <i class="ki-filled ki-cross-circle text-red-600 text-xl"></i>
-                <p class="font-semibold text-base text-gray-800">Mismatch Detected</p>
-              </div>
-              <p class="text-sm text-gray-600 mb-3">The following fields have mismatches:</p>
-              <ul class="list-disc ml-6 space-y-1 text-sm text-gray-700">
-                <li v-for="(item, index) in aiMismatches" :key="index">{{ item }}</li>
-              </ul>
-            </div>
-
-            <div class="flex gap-3 pt-3 border-t border-gray-200">
-              <button
-                @click="setActive('back')"
-                :class="[
-                  'btn',
-                  activeButton === 'back'
-                    ? 'btn-primary'
-                    : 'bg-white text-teal-600 border-2 border-teal-600 hover:bg-teal-50',
-                ]"
-              >
-                Send Back to Vendor
-              </button>
-              <button
-                @click="setActive('proceed')"
-                :class="[
-                  'btn',
-                  activeButton === 'proceed'
-                    ? 'btn-primary'
-                    : 'bg-white text-teal-600 border-2 border-teal-600 hover:bg-teal-50',
-                ]"
-              >
-                Proceed
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
 
       <div class="col-span-5">
@@ -400,7 +339,7 @@ const route = useRoute()
 const form = inject<formTypes>('form')
 const invoiceVerificationStore = useInvoiceVerificationStore()
 
-const tabOcrTab = ref<'general' | 'tax' | 'ai'>('general')
+const tabOcrTab = ref<'general' | 'tax'>('general')
 const typeForm = ref<string>('po')
 const isVerify = ref(false)
 const isVerifyData = ref(false)
@@ -408,7 +347,6 @@ const isLoadUpload = ref(false)
 const showModalSuccess = ref(false)
 const selectedDocumentType = ref('1')
 const previewUrl = ref(form?.tax?.previewPath ?? '')
-const activeButton = ref('')
 const taxVerificationClicked = ref(false)
 const pjapVerificationClicked = ref(false)
 
@@ -456,10 +394,6 @@ const getTooltipMessage = (header: string, docValue: string, source: 'QR' | 'OCR
   if (header === 'PPN') formField = 'VAT Amount Form'
 
   return `Terdapat selisih antara\n${formField} dengan ${source}\nsebesar ${formattedDiff}`
-}
-
-const setActive = (btn: 'back' | 'proceed') => {
-  activeButton.value = btn
 }
 
 const handleTaxVerification = () => {
@@ -573,21 +507,6 @@ const getOcrKey = (header: string): keyof invoiceOcrData | null => {
 const editableRemarks = ref<Record<number, string>>({})
 const manualOverride = reactive<Record<number, boolean>>({})
 const NOT_MATCHED = '2'
-
-const aiLabelMap: Record<string, string> = {
-  'Nama Vendor': 'Nama Vendor',
-  'NPWP Vendor': 'NPWP Vendor',
-  Perusahaan: 'Perusahaan',
-  NPWP: 'NPWP',
-  'No Faktur Pajak': 'No Faktur Pajak',
-  'Tanggal Faktur Pajak': 'Tanggal Faktur Pajak',
-  'Nilai Penjualan': 'Nilai Penjualan',
-  'DPP Lainnya': 'DPP Lainnya',
-  PPN: 'PPN',
-  'PPN BM': 'PPN BM',
-  'Status Approve FP': 'Status Approve FP',
-  Reference: 'Reference',
-}
 
 /* ---------------- TABLE DATA (FIXED, FULL) ---------------- */
 const tableData = computed(() => {
@@ -855,32 +774,7 @@ const bjapVerify = computed(() => [
   },
 ])
 
-const isRowMismatch = (row: any, index: number) => {
-  const remark = editableRemarks.value[index]
-
-  // Not Match manual
-  if (remark === '2') return true
-
-  // Manual Verified
-  if (remark === '3') return false
-
-  // Auto → pakai hasil sistem
-  return row.remarks === false
-}
-
-const aiMismatches = computed(() => {
-  return tableData.value
-    .map((row, index) => ({ row, index }))
-    .filter(({ row, index }) => isRowMismatch(row, index))
-    .map(({ row }) => aiLabelMap[row.header] || row.header)
-})
-
-const triggerAiMismatch = () => {
-  // jika ingin auto pindah tab AI
-  // tabOcrTab.value = 'ai'
-}
-
-const setTabOcr = (tab: 'general' | 'tax' | 'ai') => {
+const setTabOcr = (tab: 'general' | 'tax') => {
   tabOcrTab.value = tab
 }
 
@@ -932,14 +826,6 @@ watch(
         manualReject[index] = false
       }
     })
-  },
-  { deep: true },
-)
-
-watch(
-  () => editableRemarks.value,
-  () => {
-    triggerAiMismatch()
   },
   { deep: true },
 )
