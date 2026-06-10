@@ -350,6 +350,7 @@ import { useFormatIdr } from '@/composables/currency'
 import type { ListPoTypes } from '@/stores/views/invoice/types/submission'
 import moment from 'moment'
 import { cloneDeep } from 'lodash'
+import { resolveInvoiceAddRouteType } from '@/core/utils/invoiceSubmissionRoute'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import { KTModal } from '@/metronic/core'
 import type { FtpUploadViewerData } from './FtpUploadViewerModal.vue'
@@ -864,7 +865,7 @@ const goView = (data: ListPoTypes) => {
   router.push({
     name: 'invoiceAdd',
     query: {
-      type: 'po-view',
+      type: resolveInvoiceAddRouteType(data.statusCode, data.statusName, 'po'),
       invoice: data.invoiceUId,
       from: 'ftp',
     },
