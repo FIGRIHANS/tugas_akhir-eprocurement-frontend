@@ -40,6 +40,15 @@
             </div>
             <FilterList :data="filterForm" @setData="setDataFilter" ref="filterChild" />
             <button
+              v-if="activeTab === 'ftpData'"
+              class="btn btn-light btn-icon shrink-0"
+              title="Refresh list"
+              :disabled="isListRefreshing"
+              @click="refreshFtpDataList"
+            >
+              <i class="ki-duotone ki-arrows-circle" :class="{ 'animate-spin': isListRefreshing }"></i>
+            </button>
+            <button
               v-if="activeTab === 'ftpData' && isProfile3200"
               class="btn btn-primary inline-flex items-center gap-2 shrink-0"
               @click="syncFtpData"
@@ -234,24 +243,21 @@
                     </td>
 
                     <td>
-                      <span class="badge badge-outline" :class="colorBadge(parent.statusCode)">
-                        {{ parent.statusName }}
+                      <span
+                        class="badge badge-outline"
+                        :class="colorBadgeForFtpRow(parent)"
+                      >
+                        {{ getFtpDataStatusLabel(parent) }}
                       </span>
                     </td>
-                    <td>{{ parent.vendorName }}</td>
-                    <td>{{ parent.documentNo }}</td>
-                    <td>{{ parent.companyCode }}</td>
-                    <td>{{ parent.invoiceTypeName }}</td>
-                    <td>{{ moment(parent.invoiceDate).format('YYYY/MM/DD') }}</td>
-                    <td>{{ useFormatIdr(parent.totalGrossAmount) }}</td>
-                    <td>{{ useFormatIdr(parent.totalNetAmount) }}</td>
-                    <td>
-                      {{
-                        parent.estimatedPaymentDate
-                          ? moment(parent.estimatedPaymentDate).format('YYYY/MM/DD')
-                          : '-'
-                      }}
-                    </td>
+                    <td>{{ parent.vendorName || '-' }}</td>
+                    <td>{{ parent.documentNo || '-' }}</td>
+                    <td>{{ formatFtpDataCompany(parent) }}</td>
+                    <td>{{ parent.taxNo || '-' }}</td>
+                    <td>{{ formatFtpListDate(parent.invoiceDate) }}</td>
+                    <td>{{ formatFtpDataAmountDisplay(parent.totalGrossAmount) }}</td>
+                    <td>{{ formatFtpDataAmountDisplay(parent.dpp) }}</td>
+                    <td>{{ formatFtpDataAmountDisplay(parent.vatAmount) }}</td>
                     <td>{{ parent.invoiceNo }}</td>
                     <td>{{ parent.invoiceSourceName }}</td>
                     <td>
@@ -348,9 +354,9 @@ import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterDat
 import { useLoginStore } from '@/stores/views/login'
 import { useFormatIdr } from '@/composables/currency'
 import type { ListPoTypes } from '@/stores/views/invoice/types/submission'
+import type { FtpDataListRow } from './types/ftpUploadService'
 import moment from 'moment'
 import { cloneDeep } from 'lodash'
-import { resolveInvoiceAddRouteType } from '@/core/utils/invoiceSubmissionRoute'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import { KTModal } from '@/metronic/core'
 import type { FtpUploadViewerData } from './FtpUploadViewerModal.vue'
@@ -362,15 +368,16 @@ import {
   resolveFtpTaxFileName,
 } from './types/ftpUpload'
 import {
-  buildSyncContextFromSyncResponse,
+  canOpenFtpInvoiceForm,
   canSyncFtpDataRow,
   fetchFtpDataList,
-  fetchFtpUploadDetail,
   fetchFtpUploadList,
+  formatFtpDataCompany,
+  getFtpDataStatusLabel,
+  mapFtpDataRowToUploadListItem,
+  resolveFtpRowUid,
   resolveFtpUploadUIdFromRow,
-  resolveSavedInvoiceUIdFromSync,
-  saveActiveFtpUploadUId,
-  saveFtpSyncContext,
+  buildSyncContextFromSyncResponse,
   sortFtpUploadsByNewest,
   syncFtpUpload,
   upsertFtpDataListRow,
@@ -409,6 +416,7 @@ const filteredPayload = ref([])
 const filterChild = ref(null)
 const viewDetailId = ref('')
 const isSyncLoading = ref(false)
+const isListRefreshing = ref(false)
 const syncingRowId = ref<string | null>(null)
 const FTP_INVOICE_SOURCE = 3
 const DRAFT_STATUS_CODE = 0
@@ -552,14 +560,10 @@ const openViewer = async (item: FtpUploadListItem) => {
     viewerData.value = mapUploadDetailToViewer(item)
   }
 
-  try {
-    if (item?.invoiceUId) {
-      const detail = await fetchFtpUploadDetail(String(item.invoiceUId))
-      const cachedNames = originalFileNamesCache.value[String(item.invoiceUId)]
-      viewerData.value = mapUploadDetailToViewer(detail, cachedNames)
-    }
-  } catch (err) {
-    console.debug('Failed to fetch ftp upload detail', err)
+  // Detail from GET /ftp-uploads/{uid} may not exist; list item already has documents.
+  if (item?.invoiceUId) {
+    const cachedNames = originalFileNamesCache.value[String(item.invoiceUId)]
+    viewerData.value = mapUploadDetailToViewer(item, cachedNames)
   }
 
   const el = document.querySelector('#ftp_view_modal')
@@ -569,20 +573,26 @@ const openViewer = async (item: FtpUploadListItem) => {
 }
 
 const updateUploadDummyStatuses = () => {
-  // mark uploadList entries as Uploaded/Done based on presence in sourceList
   try {
-    const ftpItems = sourceList.value || []
+    const ftpItems = (sourceList.value || []) as FtpDataListRow[]
     uploadList.value = uploadList.value.map((d) => {
-      const invoiceNo = d.invoiceNo || undefined
-      const documentNo = d.documentNo || undefined
-
+      const uid = d.invoiceUId ? String(d.invoiceUId) : ''
       const match = ftpItems.find(
-        (s) => (s.invoiceNo && invoiceNo && String(s.invoiceNo) === String(invoiceNo)) || (s.documentNo && documentNo && String(s.documentNo) === String(documentNo)),
+        (s) =>
+          uid &&
+          (String(s.invoiceUId) === uid ||
+            String(s.reffId || '') === uid ||
+            String(s.ftpUploadUId || '') === uid),
       )
 
       if (match) {
-        const newStatus = match.statusCode === DRAFT_STATUS_CODE ? 'Uploaded' : 'Done'
-        return { ...d, status: newStatus, invoiceUId: match.invoiceUId || d.invoiceUId }
+        const newStatus = match.hasDraft || match.flagSync ? 'Done' : 'Uploaded'
+        return {
+          ...d,
+          status: match.ftpUploadStatus || newStatus,
+          invoiceUId: match.invoiceUId || d.invoiceUId,
+          vendorName: match.vendorName || d.vendorName,
+        }
       }
 
       return d
@@ -600,7 +610,22 @@ const getListStatusCode = (): number | null => {
   return null
 }
 
+const findFtpDataRow = (invoiceId: string) => {
+  return (sourceList.value as FtpDataListRow[]).find(
+    (row) =>
+      String(row.invoiceUId) === invoiceId ||
+      String(row.reffId || '') === invoiceId ||
+      String(row.ftpUploadUId || '') === invoiceId,
+  )
+}
+
 const openDetailVerification = (invoiceId: string) => {
+  const row = findFtpDataRow(invoiceId)
+  if (row && !canOpenFtpInvoiceForm(row)) {
+    openFtpDocumentPreview(row)
+    return
+  }
+
   viewDetailId.value = invoiceId
   const idModal = document.querySelector('#detail_verification_modal')
   const modal = KTModal.getInstance(idModal as HTMLElement)
@@ -636,12 +661,12 @@ const columns = ref<string[]>([
   'Status',
   'Vendor Name',
   'Invoice Vendor No',
-  'Company Code',
-  'Invoice PO Type',
+  'Company',
+  'Tax No',
   'Invoice Date',
   'Total Gross Amount',
-  'Total Net Amount',
-  'Estimated Payment Date',
+  'DPP',
+  'PPN',
   'Submitted Document No',
   'Invoice Source',
   'FP Status',
@@ -655,14 +680,33 @@ const COLUMN_FIELD_MAP = {
   Status: 'statusName',
   'Vendor Name': 'vendorName',
   'Invoice Vendor No': 'documentNo',
-  'Company Code': 'companyCode',
-  'Invoice PO Type': 'invoiceTypeName',
+  Company: 'companyCode',
+  'Tax No': 'taxNo',
   'Invoice Date': 'invoiceDate',
   'Total Gross Amount': 'totalGrossAmount',
-  'Total Net Amount': 'totalNetAmount',
-  'Estimated Payment Date': 'estimatedPaymentDate',
+  DPP: 'dpp',
+  PPN: 'vatAmount',
   'Invoice Source': 'invoiceSourceName',
 } as const
+
+const formatFtpListDate = (value?: string | null) => {
+  if (!value) return '-'
+  const parsed = moment(value, ['YYYY-MM-DD', 'YYYYMMDD', moment.ISO_8601], true)
+  return parsed.isValid() ? parsed.format('YYYY/MM/DD') : value
+}
+
+const formatFtpDataAmountDisplay = (value?: number | null) => {
+  if (value == null || value === 0) return '-'
+  return useFormatIdr(value)
+}
+
+const colorBadgeForFtpRow = (row: FtpDataListRow) => {
+  const label = (row.portalStatus || row.statusName || '').toLowerCase()
+  if (label === 'draft' || label === 'drafted') return 'badge-secondary'
+  if (label === 'uploaded') return 'badge-info'
+  if (label === 'done') return 'badge-success'
+  return colorBadge(row.statusCode)
+}
 
 const colorBadge = (status: number) => {
   if (status === 0) return 'badge-secondary'
@@ -777,10 +821,22 @@ const applyColumnSort = (items: ListPoTypes[]) => {
 
   const sorted = [...items]
 
-  if (name === 'Total Gross Amount' || name === 'Total Net Amount') {
+  if (name === 'Total Gross Amount' || name === 'DPP' || name === 'PPN') {
     return sorted.sort((a, b) => {
-      const aVal = Number(a[field as keyof ListPoTypes]) || 0
-      const bVal = Number(b[field as keyof ListPoTypes]) || 0
+      const aRow = a as FtpDataListRow
+      const bRow = b as FtpDataListRow
+      const aVal =
+        name === 'DPP'
+          ? Number(aRow.dpp) || 0
+          : name === 'PPN'
+            ? Number(aRow.vatAmount) || 0
+            : Number(aRow.totalGrossAmount) || 0
+      const bVal =
+        name === 'DPP'
+          ? Number(bRow.dpp) || 0
+          : name === 'PPN'
+            ? Number(bRow.vatAmount) || 0
+            : Number(bRow.totalGrossAmount) || 0
       return sortBy.value === 'asc' ? aVal - bVal : bVal - aVal
     })
   }
@@ -861,15 +917,28 @@ const setPage = (value: number) => {
   currentPage.value = value
 }
 
+const openFtpDocumentPreview = (row: FtpDataListRow) => {
+  openViewer(mapFtpDataRowToUploadListItem(row))
+}
+
 const goView = (data: ListPoTypes) => {
-  router.push({
-    name: 'invoiceAdd',
-    query: {
-      type: resolveInvoiceAddRouteType(data.statusCode, data.statusName, 'po'),
-      invoice: data.invoiceUId,
-      from: 'ftp',
-    },
-  })
+  const row = data as FtpDataListRow
+  const uid = resolveFtpRowUid(row)
+
+  if (canOpenFtpInvoiceForm(row)) {
+    router.push({
+      name: 'invoiceAdd',
+      query: {
+        type: 'po',
+        invoice: uid,
+        from: 'ftp',
+        ftpUpload: resolveFtpUploadUIdFromRow(row) || undefined,
+      },
+    })
+    return
+  }
+
+  openFtpDocumentPreview(row)
 }
 
 const goAdd = () => {
@@ -890,17 +959,8 @@ const syncFtpUploadRow = async (row: ListPoTypes) => {
 
   syncingRowId.value = uid
   try {
-    const syncResult = await syncFtpUpload(uid)
-    const savedInvoiceUId = resolveSavedInvoiceUIdFromSync(syncResult)
-
-    if (!savedInvoiceUId) {
-      alert('Sync berhasil tetapi invoice UID tidak ditemukan di response.')
-      return
-    }
-
+    const syncResult = await syncFtpUpload(uid, true)
     const syncContext = buildSyncContextFromSyncResponse(syncResult)
-    saveFtpSyncContext(syncContext)
-    saveActiveFtpUploadUId(syncResult.ftpUploadUId)
 
     if (syncResult.warnings?.length) {
       alert(syncResult.warnings.join('\n'))
@@ -910,17 +970,8 @@ const syncFtpUploadRow = async (row: ListPoTypes) => {
       sourceList.value = upsertFtpDataListRow(sourceList.value, syncContext.ftpData)
     }
 
-    await callList()
-
-    router.push({
-      name: 'invoiceAdd',
-      query: {
-        type: 'po',
-        from: 'ftp',
-        ftpUpload: syncResult.ftpUploadUId,
-        invoice: savedInvoiceUId,
-      },
-    })
+    await refreshFtpDataList()
+    alert('Sync berhasil. Data OCR telah diperbarui.')
   } catch (error: unknown) {
     const err = error as { response?: { data?: { result?: { message?: string } } }; message?: string }
     const message =
@@ -977,10 +1028,21 @@ const onUploaded = (
     saveOriginalFileNames(uid, originalFileNames)
   }
 
-  callList()
   activeTab.value = 'ftpData'
   currentPage.value = 1
-  setTimeout(() => updateUploadDummyStatuses(), 250)
+  void refreshFtpDataList()
+  // OCR async di backend — refresh ulang setelah beberapa detik
+  setTimeout(() => void refreshFtpDataList(), 3000)
+  setTimeout(() => void refreshFtpDataList(), 8000)
+}
+
+const refreshFtpDataList = async () => {
+  isListRefreshing.value = true
+  try {
+    await callList()
+  } finally {
+    isListRefreshing.value = false
+  }
 }
 
 const callList = async () => {

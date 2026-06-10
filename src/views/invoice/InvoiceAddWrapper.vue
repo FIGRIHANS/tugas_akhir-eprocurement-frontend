@@ -407,6 +407,10 @@ const enableDraftTabNavigation = () => {
   isCheckBudget.value = true
 }
 
+const isFtpSubmissionEntry = () => {
+  return route.query.from === 'ftp' && route.query.type?.toString() === 'po'
+}
+
 const applyRouteUiDefaults = () => {
   const routeType = route.query.type?.toString()
   const invoiceId = route.query.invoice?.toString() || ''
@@ -419,7 +423,7 @@ const applyRouteUiDefaults = () => {
     return
   }
 
-  if (isSavedDraftStatus(form.status) || !isView) {
+  if (isFtpSubmissionEntry() || isSavedDraftStatus(form.status) || !isView) {
     enableDraftTabNavigation()
     return
   }
@@ -444,9 +448,9 @@ const applyFtpSyncContextAfterLoad = () => {
   applyFtpSyncDraftToForm(form, context, invoiceMasterApi.companyCode, invoiceMasterApi.vendorList)
 }
 
-const shouldLoadFtpSubmissionDetail = (context: ReturnType<typeof getActiveFtpSyncContext>) => {
-  if (!context) return true
-  return context.hasDraft === true
+const shouldLoadFtpSubmissionDetail = (routeType?: string) => {
+  if (route.query.from === 'ftp' && routeType === 'po' && route.query.invoice) return true
+  return true
 }
 
 const markFtpUploadDoneIfNeeded = async (
@@ -520,7 +524,7 @@ const loadInvoiceFromRoute = async () => {
         )
       }
 
-      if (shouldLoadFtpSubmissionDetail(ftpContext)) {
+      if (shouldLoadFtpSubmissionDetail(routeType)) {
         await invoiceApi.getPoDetail(invoiceId)
         setStepperStatus()
         setData()
@@ -529,7 +533,7 @@ const loadInvoiceFromRoute = async () => {
         setStepperStatus()
       }
 
-      if (isSavedDraftStatus(form.status)) {
+      if (isFtpSubmissionEntry() || isSavedDraftStatus(form.status)) {
         enableDraftTabNavigation()
       } else if (isInvoiceViewRouteType(routeType)) {
         tabNow.value = 'preview'
@@ -540,6 +544,9 @@ const loadInvoiceFromRoute = async () => {
     }
   } catch (error) {
     console.error('Error loading invoice detail:', error)
+    if (isFtpSubmissionEntry()) {
+      enableDraftTabNavigation()
+    }
   }
 }
 

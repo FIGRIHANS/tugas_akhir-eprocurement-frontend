@@ -24,9 +24,28 @@ export const ACTIVE_FTP_UPLOAD_UID_KEY = 'activeFtpUploadUId'
 const DRAFT_STATUS_CODE = 0
 const DRAFT_STATUS_NAME = 'draft'
 
+export type FtpDataDocument = {
+  documentType: number
+  documentName: string
+  documentUrl: string
+}
+
 export type FtpDataListRow = ListPoTypes & {
+  reffId?: string | null
   ftpUploadUId?: string | null
+  /** Portal status from API `status`: Draft / Uploaded / Done */
+  portalStatus?: string | null
   ftpUploadStatus?: string | null
+  flagSync?: boolean
+  hasDraft?: boolean
+  source?: string | null
+  documents?: FtpDataDocument[]
+  invoiceListItem?: FtpInvoiceListItem | null
+  invoiceVendorNo?: string | null
+  submittedDocumentNo?: string | null
+  taxNo?: string | null
+  dpp?: number | null
+  vatAmount?: number | null
 }
 
 export interface FtpDataQueryParams {
@@ -175,48 +194,178 @@ const toOptionalString = (value: unknown): string | null => {
   return text || null
 }
 
-export const normalizeFtpDataListItem = (item: Record<string, unknown>): FtpDataListRow => {
-  const ftpUploadUId =
+const parseFtpInvoiceDate = (value: unknown): string => {
+  const raw = toOptionalString(value)
+  if (!raw) return ''
+  if (/^\d{8}$/.test(raw)) {
+    return `${raw.slice(0, 4)}-${raw.slice(4, 6)}-${raw.slice(6, 8)}`
+  }
+  return raw
+}
+
+const resolveFtpDataReffId = (item: Record<string, unknown>): string => {
+  return (
+    toOptionalString(item.reffId) ||
+    toOptionalString(item.invoiceUId) ||
+    toOptionalString(item.invoiceUid) ||
     toOptionalString(item.ftpUploadUId) ||
     toOptionalString(item.ftpUploadUid) ||
     toOptionalString(item.uploadUId) ||
+    ''
+  )
+}
+
+export const resolveFtpRowUid = (row: FtpDataListRow): string => {
+  return String(row.reffId || row.invoiceUId || row.ftpUploadUId || '')
+}
+
+/** Status badge label on FTP Data grid — bind ke `row.status` (Draft / Uploaded / Done). */
+export const getFtpDataStatusLabel = (row: FtpDataListRow): string => {
+  if (row.portalStatus?.trim()) return row.portalStatus
+  if (row.statusName?.trim()) return row.statusName
+  return '-'
+}
+
+export const formatFtpDataCompany = (row: FtpDataListRow): string => {
+  const code = row.companyCode?.trim()
+  const name = row.companyName?.trim()
+  if (code && name) return `${code} - ${name}`
+  return code || name || '-'
+}
+
+export const formatFtpDataAmount = (value?: number | null): string => {
+  if (value == null || value === 0) return '-'
+  return String(value)
+}
+
+/** Buka form Invoice Data (bukan preview PDF saja). */
+export const canOpenFtpInvoiceForm = (row: FtpDataListRow): boolean => {
+  return (
+    row.hasDraft === true ||
+    row.portalStatus === 'Draft' ||
+    row.statusCode === DRAFT_STATUS_CODE
+  )
+}
+
+/** Upload tab: status Uploaded dari GET /ftp-uploads. */
+export const isFtpUploadedRow = (row: FtpDataListRow): boolean => {
+  return (row.ftpUploadStatus || row.portalStatus || '').toLowerCase() === 'uploaded'
+}
+
+export const normalizeFtpDataListItem = (item: Record<string, unknown>): FtpDataListRow => {
+  const reffId = resolveFtpDataReffId(item)
+  const ftpUploadUId =
+    toOptionalString(item.ftpUploadUId) ||
+    toOptionalString(item.ftpUploadUid) ||
+    reffId ||
     null
+  const portalStatus = toOptionalString(item.status)
+  const uploadStatus = portalStatus
+  const statusCode = item.statusCode != null && item.statusCode !== '' ? Number(item.statusCode) : null
+  const invoiceListItem = (item.invoiceListItem as FtpInvoiceListItem) || null
+  const statusName =
+    toOptionalString(item.statusName) ||
+    invoiceListItem?.statusName ||
+    (statusCode === 0 ? 'Drafted' : null) ||
+    ''
+  const documents = Array.isArray(item.documents)
+    ? (item.documents as FtpDataDocument[])
+    : []
 
   return {
     id: Number(item.id) || 0,
-    invoiceUId: String(item.invoiceUId || item.invoiceUid || ftpUploadUId || ''),
-    invoiceTypeCode: Number(item.invoiceTypeCode) || 0,
-    invoiceTypeName: String(item.invoiceTypeName || ''),
-    invoiceDPCode: Number(item.invoiceDPCode) || 0,
-    invoiceDPName: String(item.invoiceDPName || ''),
-    companyCode: String(item.companyCode || ''),
-    companyName: String(item.companyName || ''),
-    documentNo: String(item.documentNo || ''),
-    invoiceNo: String(item.invoiceNo || ''),
-    invoiceDate: String(item.invoiceDate || ''),
-    statusCode: Number(item.statusCode ?? 0),
-    statusName: String(item.statusName || ''),
-    poNo: toOptionalString(item.poNo),
-    grDocumentNo: String(item.grDocumentNo || ''),
-    estimatedPaymentDate: toOptionalString(item.estimatedPaymentDate),
-    totalGrossAmount: Number(item.totalGrossAmount) || 0,
-    totalNetAmount: Number(item.totalNetAmount) || 0,
-    vendorName: String(item.vendorName || ''),
+    invoiceUId: reffId,
+    reffId,
+    ftpUploadUId,
+    invoiceTypeCode: Number(item.invoiceTypeCode ?? invoiceListItem?.invoiceTypeCode) || 0,
+    invoiceTypeName: String(item.invoiceTypeName || invoiceListItem?.invoiceTypeName || ''),
+    invoiceDPCode: Number(item.invoiceDPCode ?? invoiceListItem?.invoiceDPCode) || 0,
+    invoiceDPName: String(item.invoiceDPName || invoiceListItem?.invoiceDPName || ''),
+    companyCode: String(item.companyCode || invoiceListItem?.companyCode || ''),
+    companyName: String(item.companyName || invoiceListItem?.companyName || ''),
+    documentNo: String(
+      item.invoiceVendorNo || item.documentNo || invoiceListItem?.documentNo || '',
+    ),
+    invoiceNo: String(
+      item.submittedDocumentNo ||
+        item.submitttedDocumentNo ||
+        item.invoiceNo ||
+        invoiceListItem?.invoiceNo ||
+        '',
+    ),
+    invoiceDate: parseFtpInvoiceDate(item.invoiceDate),
+    statusCode: statusCode ?? -1,
+    statusName,
+    poNo: toOptionalString(item.poNo ?? invoiceListItem?.poNo),
+    grDocumentNo: String(item.grDocumentNo || invoiceListItem?.grDocumentNo || ''),
+    estimatedPaymentDate: toOptionalString(
+      item.estimatedPaymentDate ?? invoiceListItem?.estimatedPaymentDate,
+    ),
+    totalGrossAmount:
+      Number(item.totalGrossAmount ?? invoiceListItem?.totalGrossAmount ?? item.dpp) || 0,
+    totalNetAmount: Number(item.totalNetAmount ?? invoiceListItem?.totalNetAmount) || 0,
+    vendorName: String(item.vendorName || invoiceListItem?.vendorName || ''),
     isOpenChild: false,
-    createdUtcDate: String(item.createdUtcDate || item.createdAt || ''),
-    invoiceSourceName: toOptionalString(item.invoiceSourceName),
-    invoiceSource: toOptionalNumber(item.invoiceSource),
+    createdUtcDate: String(item.createdDate || item.createdUtcDate || item.createdAt || ''),
+    invoiceSourceName: toOptionalString(item.source || item.invoiceSourceName) || 'FTP',
+    invoiceSource: toOptionalNumber(item.invoiceSource) ?? (item.source === 'ftp' ? 3 : null),
     fpStatus: (item.fpStatus as boolean | null) ?? null,
     vatStatus: (item.vatStatus as boolean | null) ?? null,
     whtStatus: (item.whtStatus as boolean | null) ?? null,
     poPrice: (item.poPrice as boolean | null) ?? null,
     sapPostingCode: toOptionalString(item.sapPostingCode),
-    ftpUploadUId,
-    ftpUploadStatus:
-      toOptionalString(item.ftpUploadStatus) ||
-      toOptionalString(item.uploadStatus) ||
-      toOptionalString(item.status),
+    portalStatus,
+    ftpUploadStatus: toOptionalString(item.ftpUploadStatus || item.uploadStatus) || portalStatus,
+    flagSync: item.flagSync === true,
+    hasDraft: item.hasDraft === true,
+    source: toOptionalString(item.source),
+    documents,
+    invoiceListItem,
+    invoiceVendorNo: toOptionalString(item.invoiceVendorNo),
+    submittedDocumentNo: toOptionalString(item.submittedDocumentNo || item.submitttedDocumentNo),
+    taxNo: toOptionalString(item.taxNo || invoiceListItem?.taxNo),
+    dpp: toOptionalNumber(item.dpp),
+    vatAmount: toOptionalNumber(item.vatAmount),
   }
+}
+
+export const mapFtpDataRowToUploadListItem = (row: FtpDataListRow): FtpUploadListItem => {
+  const findDoc = (documentType: number) =>
+    row.documents?.find((doc) => doc.documentType === documentType)
+
+  const invoiceDoc = findDoc(1)
+  const taxDoc = findDoc(2)
+  const referenceDoc = findDoc(3)
+  const uid = row.ftpUploadUId || row.reffId || row.invoiceUId
+
+  return {
+    invoiceUId: uid,
+    vendorName: row.vendorName,
+    invoiceNo: row.invoiceNo || null,
+    documentNo: row.documentNo || row.invoiceVendorNo || null,
+    status: row.ftpUploadStatus || 'Uploaded',
+    createdAt: row.createdUtcDate || null,
+    invoiceFileName: invoiceDoc?.documentName || null,
+    taxFileName: taxDoc?.documentName || null,
+    referenceFileName: referenceDoc?.documentName || null,
+    invoiceFileUrl: invoiceDoc?.documentUrl || null,
+    taxFileUrl: taxDoc?.documentUrl || null,
+    referenceFileUrl: referenceDoc?.documentUrl || null,
+    files: {
+      invoice: invoiceDoc
+        ? { fileName: invoiceDoc.documentName, url: invoiceDoc.documentUrl }
+        : null,
+      tax: taxDoc ? { fileName: taxDoc.documentName, url: taxDoc.documentUrl } : null,
+      reference: referenceDoc
+        ? { fileName: referenceDoc.documentName, url: referenceDoc.documentUrl }
+        : null,
+    },
+  }
+}
+
+export const fetchFtpUploadListFromData = async (): Promise<FtpUploadListItem[]> => {
+  const { items } = await fetchFtpDataList({ page: 1, pageSize: 1000 })
+  return items.filter((row) => isFtpUploadedRow(row)).map(mapFtpDataRowToUploadListItem)
 }
 
 export const parseFtpDataList = (payload: unknown): FtpDataListRow[] => {
@@ -388,7 +537,7 @@ export const clearActiveFtpUploadUId = () => {
 }
 
 export const resolveFtpUploadUIdFromRow = (row: FtpDataListRow): string | null => {
-  const uid = row.ftpUploadUId || row.invoiceUId
+  const uid = row.ftpUploadUId || row.reffId || row.invoiceUId
   return uid ? String(uid) : null
 }
 
@@ -420,15 +569,16 @@ export const normalizeFtpSyncFtpData = (
   return normalizeFtpDataListItem(ftpData)
 }
 
-export const isDraftFtpDataRow = (row: FtpDataListRow) => {
-  return row.statusCode === DRAFT_STATUS_CODE || row.statusName?.toLowerCase() === DRAFT_STATUS_NAME
-}
+export const isDraftFtpDataRow = (row: FtpDataListRow) => canOpenFtpInvoiceForm(row)
 
+/** @deprecated use canOpenFtpInvoiceForm */
+export const canOpenFtpDraftForm = (row: FtpDataListRow) => canOpenFtpInvoiceForm(row)
+
+/** Sync = retry/refresh OCR — bukan gatekeeper buka form. */
 export const canSyncFtpDataRow = (row: FtpDataListRow) => {
   const uid = resolveFtpUploadUIdFromRow(row)
-  if (!uid || !row.vendorName?.trim()) return false
-  if (row.ftpUploadStatus === 'Done') return false
-  return isDraftFtpDataRow(row)
+  if (!uid) return false
+  return row.portalStatus !== 'Done'
 }
 
 const previewToDocument = (
