@@ -191,7 +191,7 @@ const router = useRouter()
 const route = useRoute()
 const isLoading = ref<boolean>(false)
 const selectedRow = ref<any>(null)
-const vendorNpwp = '1091031210912281'
+const vendorNpwp = '1091031210969728'
 
 const routes = ref<routeTypes[]>([
   { name: 'Tax Reconciliation', to: '/tax-reconciliation' },

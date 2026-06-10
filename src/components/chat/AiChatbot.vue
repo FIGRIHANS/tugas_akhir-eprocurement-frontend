@@ -161,10 +161,26 @@ const sendMessage = async () => {
       throw new Error("n8n Webhook URL is not configured in .env");
     }
 
+    // Mengambil konteks layar (Screen Context) secara otomatis
+    let screenContext = "";
+    const pageTitle = window.location.pathname;
+    const table = document.querySelector('table');
+    
+    if (table) {
+      // Ambil teks dari tabel, bersihkan spasi berlebih, dan batasi 1500 karakter agar tidak memberatkan AI
+      const tableData = table.innerText.replace(/\n+/g, ' | ').replace(/\s{2,}/g, ' ').substring(0, 1500);
+      screenContext = `\n\n[Catatan Sistem: User saat ini sedang membuka halaman '${pageTitle}'. Data yang tampil di layar user saat ini adalah: ${tableData}]`;
+    } else {
+      screenContext = `\n\n[Catatan Sistem: User saat ini sedang membuka halaman '${pageTitle}'.]`;
+    }
+
+    // Menggabungkan pesan user dengan konteks layar (AI akan membaca ini, tapi tidak terlihat di UI chat)
+    const finalInputToAI = userText + screenContext;
+
     // Mengirim payload dengan format yang diminta oleh n8n Chat Trigger
     const response = await axios.post(`${webhookUrl}?action=sendMessage`, {
       sessionId: "vue-session-12345", // Session statis sederhana
-      chatInput: userText
+      chatInput: finalInputToAI
     });
 
     let botReply = "Sorry, I could not understand the response from the server.";

@@ -316,13 +316,10 @@
                 <div class="flex items-center gap-2">
                   <span>{{ item.vendorName }}</span>
                   <span
-                    :class="
-                      item.poNumber && item.poNumber !== '-'
-                        ? 'badge badge-light-primary px-2 font-semibold text-xs'
-                        : 'badge badge-light-warning px-2 font-semibold text-xs'
-                    "
+                    v-if="item.poNumber && item.poNumber !== '-'"
+                    class="badge badge-light-primary px-2 font-semibold text-xs"
                   >
-                    {{ item.poNumber && item.poNumber !== '-' ? 'PO' : 'Non-PO' }}
+                    PO
                   </span>
                 </div>
               </td>
@@ -359,11 +356,6 @@
                 </span>
               </td>
               <td>{{ formatDate(item.vatCreditExpiryDate) }}</td>
-              <td>
-                <div class="whitespace-normal break-words w-[800px]">
-                  {{ item.remark || '-' }}
-                </div>
-              </td>
             </tr>
           </tbody>
         </table>
@@ -689,7 +681,6 @@ const columns = ref<string[]>([
   'AP vs Tax Invoice Status',
   'Credit Status',
   'VAT Credit Expiry Date',
-  'Remark',
 ])
 
 // Data list now populated from API
@@ -803,12 +794,13 @@ const fetchVatData = async (opts?: { page?: number }) => {
         params: {
           source: 'PajakExpress',
           periode,
-          page,
-          limit: pageSize.value,
+          page: 1,
+          limit: 1000,
         },
       })
 
-      const rawList = response.data.result?.content || []
+      const rawResult = response.data.result
+      const rawList = Array.isArray(rawResult) ? rawResult : (rawResult?.content || [])
       const content = (Array.isArray(rawList) ? rawList : []).map((row: unknown) =>
         normalizeVatApiRow(row),
       )
@@ -822,7 +814,8 @@ const fetchVatData = async (opts?: { page?: number }) => {
     } else {
       pjTotalRows.value = 0
       const response = await vatApi.get('/vat/vat-reconciliation')
-      const rawList = response.data.result?.content || []
+      const rawResult = response.data.result
+      const rawList = Array.isArray(rawResult) ? rawResult : (rawResult?.content || [])
       const content = (Array.isArray(rawList) ? rawList : []).map((row: unknown) =>
         normalizeVatApiRow(row),
       )
@@ -995,9 +988,6 @@ const filteredDataList = computed(() => {
 })
 
 const paginationTotalForPager = computed(() => {
-  if (workspace.value === 'pj') {
-    return Math.max(pjTotalRows.value, 1)
-  }
   return filteredDataList.value.length
 })
 
@@ -1057,10 +1047,6 @@ const formatCurrency = (amount: number): string => {
 }
 
 const setList = (listData: VATReconciliationData[]) => {
-  if (dataSource.value === 'pajakExpress') {
-    list.value = listData
-    return
-  }
   const result: VATReconciliationData[] = []
   for (const [index, item] of listData.entries()) {
     const start = currentPage.value * pageSize.value - pageSize.value
@@ -1073,10 +1059,6 @@ const setList = (listData: VATReconciliationData[]) => {
 }
 
 const setPage = async (value: number) => {
-  if (dataSource.value === 'pajakExpress') {
-    await fetchVatData({ page: value })
-    return
-  }
   currentPage.value = value
   setList(filteredDataList.value)
 }

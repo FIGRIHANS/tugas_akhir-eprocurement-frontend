@@ -93,7 +93,7 @@
 
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
                 <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">Reference</label>
-                <input type="text" class="input flex-1" v-model="form.referensi" />
+                <input type="text" class="input flex-1" v-model="form.referensi" placeholder="e.g. PO-2026-001234" />
               </div>
 
             </div>
@@ -131,7 +131,7 @@
               <div class="flex flex-col gap-1">
                 <label class="form-label text-sm font-medium text-gray-600">Buyer NPWP <span class="text-danger">*</span></label>
                 <div class="relative">
-                  <input type="text" class="input w-full pr-10" v-model="form.npwpPembeli" placeholder="Enter NPWP" required />
+                  <input type="text" class="input w-full pr-10" v-model="form.npwpPembeli" placeholder="e.g. 1091031210969728" required />
                   <i v-if="isValidNpwp" class="ki-filled ki-check-circle text-success text-xl absolute right-3 top-1/2 -translate-y-1/2"></i>
                 </div>
               </div>
@@ -150,31 +150,31 @@
               <!-- Right Col -->
               <div class="flex flex-col gap-1">
                 <label class="form-label text-sm font-medium text-gray-600">Buyer Name <span class="text-danger">*</span></label>
-                <input type="text" class="input w-full" v-model="form.namaPembeli" placeholder="Buyer Name" required />
+                <input type="text" class="input w-full" v-model="form.namaPembeli" placeholder="e.g. PT Maju Bersama Tbk" required />
               </div>
 
               <!-- Left Col -->
               <div class="flex flex-col gap-1">
                 <label class="form-label text-sm font-medium text-gray-600">NITKU</label>
-                <input type="text" class="input w-full" v-model="form.tkuPembeli" placeholder="NITKU" />
+                <input type="text" class="input w-full" v-model="form.tkuPembeli" placeholder="e.g. 1091031210969728000000" />
               </div>
 
               <!-- Right Col -->
               <div class="flex flex-col gap-1">
                 <label class="form-label text-sm font-medium text-gray-600">Email</label>
-                <input type="email" class="input w-full" v-model="form.emailPembeli" placeholder="Email" />
+                <input type="email" class="input w-full" v-model="form.emailPembeli" placeholder="e.g. finance@company.co.id" />
               </div>
 
               <!-- Full Width -->
               <div class="flex flex-col gap-1 lg:col-span-2">
                 <label class="form-label text-sm font-medium text-gray-600">Email CC</label>
-                <input type="email" class="input w-full" v-model="form.emailCcPembeli" placeholder="Email CC" />
+                <input type="email" class="input w-full" v-model="form.emailCcPembeli" placeholder="e.g. tax@company.co.id" />
               </div>
 
               <!-- Full Width -->
               <div class="flex flex-col gap-1 lg:col-span-2">
                 <label class="form-label text-sm font-medium text-gray-600">Address <span class="text-danger">*</span></label>
-                <textarea class="textarea w-full min-h-[60px] resize-none" v-model="form.alamatPembeli" placeholder="Address" required></textarea>
+                <textarea class="textarea w-full min-h-[60px] resize-none" v-model="form.alamatPembeli" placeholder="e.g. Jl. Sudirman No. 52, Jakarta Selatan 12190" required></textarea>
               </div>
 
             </div>
@@ -353,7 +353,7 @@
               <!-- Nama Barang -->
               <div class="flex flex-col gap-1">
                 <label class="text-xs text-gray-500">Nama Barang/Jasa</label>
-                <input type="text" class="input w-full" v-model="currentItem.namaBrgJasa" />
+                <input type="text" class="input w-full" v-model="currentItem.namaBrgJasa" placeholder="e.g. Jasa Konsultasi Teknologi" />
               </div>
 
               <!-- Satuan Barang -->
@@ -483,7 +483,7 @@ import { type routeTypes } from '@/core/type/components/breadcrumb'
 
 const router = useRouter()
 const isSubmitting = ref(false)
-const vendorNpwp = '1091031210912281'
+const vendorNpwp = '1091031210969728'
 const identitasTipe = ref('NPWP')
 const pernyataan = ref(false)
 const tanggalFakturInput = ref(new Date().toISOString().split('T')[0])
@@ -512,18 +512,18 @@ const form = ref({
   masaPajak: new Date().getMonth() + 1 < 10 ? '0' + (new Date().getMonth() + 1) : (new Date().getMonth() + 1).toString(),
   tahunPajak: new Date().getFullYear().toString(),
   refDoc: '',
-  referensi: 'UI-Frontend',
+  referensi: 'PO-2026-001234',
   npwpPenjual: vendorNpwp,
   namaTokoPenjual: vendorNpwp + '000000',
-  npwpPembeli: '',
+  npwpPembeli: '1091031210969728',
   idLainPembeli: '',
   kdNegaraPembeli: 'IDN',
   nikPaspPembeli: '',
-  namaPembeli: '',
-  tkuPembeli: '',
-  alamatPembeli: '',
-  emailPembeli: '',
-  emailCcPembeli: '',
+  namaPembeli: 'PT Maju Bersama Tbk',
+  tkuPembeli: '1091031210969728000000',
+  alamatPembeli: 'Jl. Sudirman No. 52, Jakarta Selatan 12190',
+  emailPembeli: 'finance@majubersama.co.id',
+  emailCcPembeli: 'tax@majubersama.co.id',
   totalDpp: 0,
   totalDppLain: 0,
   jumlahUangMuka: 0,
@@ -565,9 +565,9 @@ watch(tanggalFakturInput, (newVal) => {
 })
 
 watch(() => form.value.npwpPembeli, (newVal) => {
-  if (newVal === '1091031210912281') {
+  if (newVal === '1091031210969728') {
     isValidNpwp.value = true
-    form.value.tkuPembeli = '1091031210912281000000'
+    form.value.tkuPembeli = '1091031210969728000000'
     form.value.kdNegaraPembeli = 'IDN'
   } else {
     isValidNpwp.value = false

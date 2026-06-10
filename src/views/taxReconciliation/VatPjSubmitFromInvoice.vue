@@ -256,7 +256,7 @@
 
       <!-- Footer Actions -->
       <div class="pt-8 border-t border-gray-100 flex items-center justify-between">
-        <router-link class="btn btn-outline btn-primary" :to="{ name: 'vatReconciliation' }">
+        <router-link class="btn btn-outline btn-primary" :to="{ name: 'vatInReconciliation' }">
           <i class="ki-filled ki-arrow-left"></i>
           Batal &amp; Kembali
         </router-link>
@@ -313,7 +313,7 @@ const router = useRouter()
 
 const routes = computed<routeTypes[]>(() => [
   { name: 'Tax Reconciliation', to: '/tax-reconciliation' },
-  { name: 'VAT Reconciliation', to: '/vat-reconciliation' },
+  { name: 'VAT Reconciliation', to: '/vat-in-reconciliation' },
   { name: 'Form PJ', to: '#' },
 ])
 
@@ -739,7 +739,7 @@ async function submitUpload() {
     successBanner.value = 'Konfirmasi pengkreditan terkirim & disimpan. Data akan muncul di tab Faktur Pajak Express!'
     setTimeout(() => {
       if (confirm('Kembali ke halaman Rekonsiliasi VAT?')) {
-        router.push({ name: 'vatReconciliation' })
+        router.push({ name: 'vatInReconciliation' })
       }
     }, 250)
   } catch (e) {

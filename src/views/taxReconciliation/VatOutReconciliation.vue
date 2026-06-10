@@ -155,7 +155,7 @@ export default defineComponent({
     const router = useRouter()
     const tableData = ref<any[]>([])
     const isLoading = ref(false)
-    const vendorNpwp = '1091031210912281'
+    const vendorNpwp = '1091031210969728'
     const currentPage = ref(1)
     const pageSize = ref(10)
 
