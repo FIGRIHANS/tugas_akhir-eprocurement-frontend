@@ -68,7 +68,7 @@
               </svg>
               <i v-else class="ki-duotone ki-arrows-circle shrink-0"></i>
               <span class="whitespace-nowrap">
-                {{ isSyncLoading ? 'Syncing...' : 'Sync Data' }}
+                {{ isSyncLoading ? 'Syncing...' : 'Sync Excel Data' }}
               </span>
             </button>
             <button
@@ -131,7 +131,7 @@
                 <tr>
                   <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500"></th>
                   <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Status</th>
-                  <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Company Code</th>
+                  <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Vendor Name</th>
                   <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Invoice Document</th>
                   <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Tax Document</th>
                   <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Reference Document</th>
@@ -161,7 +161,7 @@
                       {{ d.status || '-' }}
                     </span>
                   </td>
-                  <td>{{ d.companyCode || '-' }}</td>
+                  <td>{{ d.vendorName || '-' }}</td>
                   <td>
                     <div class="min-w-0">
                       <div class="font-medium truncate" :title="getUploadInvoiceFileName(d)">
@@ -188,7 +188,7 @@
             </table>
           </template>
 
-          <!-- Full FTP Data table (unchanged) -->
+          <!-- Full FTP Data table from getListPo -->
           <template v-else>
             <table class="table align-middle text-gray-700 font-medium text-sm">
               <thead>
@@ -207,11 +207,14 @@
                     {{ item }}
                     <i v-if="item" class="ki-filled ki-arrow-up-down"></i>
                   </th>
+                  <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 whitespace-nowrap">
+                    Sync Data
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-if="list.length === 0">
-                  <td :colspan="columns.length" class="text-center">No data found.</td>
+                  <td :colspan="columns.length + 1" class="text-center">No data found.</td>
                 </tr>
                 <template v-for="(parent, index) in list" :key="index">
                   <tr>
@@ -251,7 +254,6 @@
                     </td>
                     <td>{{ parent.invoiceNo }}</td>
                     <td>{{ parent.invoiceSourceName }}</td>
-                    <!-- FTP Verification Status Columns -->
                     <td>
                       <span class="badge" :class="getStatusBadgeClass(parent.fpStatus)">
                         {{ parent.fpStatus || 'Warning' }}
@@ -271,6 +273,39 @@
                       <span class="badge" :class="getStatusBadgeClass(parent.poPrice)">
                         {{ parent.poPrice || 'Warning' }}
                       </span>
+                    </td>
+                    <td>
+                      <button
+                        v-if="canSyncFtpDataRow(parent)"
+                        class="btn btn-sm btn-primary inline-flex items-center gap-2 whitespace-nowrap"
+                        :disabled="syncingRowId === resolveFtpUploadUIdFromRow(parent)"
+                        @click="syncFtpUploadRow(parent)"
+                      >
+                        <svg
+                          v-if="syncingRowId === resolveFtpUploadUIdFromRow(parent)"
+                          class="animate-spin h-4 w-4"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            class="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            stroke-width="4"
+                          ></circle>
+                          <path
+                            class="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                          ></path>
+                        </svg>
+                        <i v-else class="ki-duotone ki-arrows-circle"></i>
+                        Sync Data
+                      </button>
+                      <span v-else class="text-gray-400 text-sm">-</span>
                     </td>
                   </tr>
                 </template>
@@ -309,7 +344,6 @@ import type { filterListTypes } from '../invoice/types/invoiceList'
 import LPagination from '@/components/pagination/LPagination.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
-import invoiceHttp from '@/core/utils/invoiceApi'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useLoginStore } from '@/stores/views/login'
 import { useFormatIdr } from '@/composables/currency'
@@ -326,6 +360,17 @@ import {
   resolveFtpReferenceFileName,
   resolveFtpTaxFileName,
 } from './types/ftpUpload'
+import {
+  buildSyncContextFromSyncResponse,
+  canSyncFtpDataRow,
+  fetchFtpUploadDetail,
+  fetchFtpUploadList,
+  resolveFtpUploadUIdFromRow,
+  saveActiveFtpUploadUId,
+  saveFtpSyncContext,
+  sortFtpUploadsByNewest,
+  syncFtpUpload,
+} from './types/ftpUploadService'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
 
@@ -359,6 +404,7 @@ const filteredPayload = ref([])
 const filterChild = ref(null)
 const viewDetailId = ref('')
 const isSyncLoading = ref(false)
+const syncingRowId = ref<string | null>(null)
 const FTP_INVOICE_SOURCE = 3
 const DRAFT_STATUS_CODE = 0
 const DRAFT_STATUS_NAME = 'draft'
@@ -399,22 +445,12 @@ const getUploadReferenceFileName = (item: FtpUploadListItem) =>
 
 const fetchFtpUploads = async () => {
   try {
-    const resp = await invoiceHttp.get('/invoice/ftp-uploads', {
-      params: { page: 1, pageSize: 1000 },
-    })
-
-    const content = resp?.data?.result?.content || resp?.data?.result || {}
-
-    // parse list from common patterns
-    const items = Array.isArray(content) ? content : content.items || content.data || []
-
-    if (Array.isArray(items) && items.length > 0) {
-      uploadList.value = (items as FtpUploadListItem[]).map((item) =>
+    const items = await fetchFtpUploadList()
+    uploadList.value = sortFtpUploadsByNewest(
+      items.map((item) =>
         normalizeFtpUploadListItem(item, getCachedOriginalNames(item.invoiceUId)),
-      )
-    } else {
-      uploadList.value = []
-    }
+      ),
+    )
   } catch (err) {
     uploadList.value = []
     console.debug('Failed to fetch FTP uploads list', err)
@@ -445,7 +481,7 @@ const saveOriginalFileNames = (invoiceUId: string, names: FtpUploadOriginalFileN
 const viewerData = ref<FtpUploadViewerData>({
   invoiceUId: null,
   invoiceNo: null,
-  companyCode: null,
+  vendorName: null,
   status: null,
   createdAt: null,
   parsedPreview: null,
@@ -464,7 +500,7 @@ const mapUploadDetailToViewer = (
   return {
     invoiceUId: normalized.invoiceUId || null,
     invoiceNo: normalized.invoiceNo || null,
-    companyCode: normalized.companyCode || null,
+    vendorName: normalized.vendorName || null,
     status: normalized.status || null,
     createdAt: normalized.createdAt || null,
     parsedPreview: normalized.parsedPreview || null,
@@ -498,7 +534,7 @@ const openViewer = async (item: FtpUploadListItem) => {
   viewerData.value = {
     invoiceUId: null,
     invoiceNo: null,
-    companyCode: null,
+    vendorName: null,
     status: null,
     createdAt: null,
     parsedPreview: null,
@@ -513,11 +549,9 @@ const openViewer = async (item: FtpUploadListItem) => {
 
   try {
     if (item?.invoiceUId) {
-      const resp = await invoiceHttp.get(`/invoice/ftp-uploads/${item.invoiceUId}`)
-      const content = resp?.data?.result?.content || resp?.data?.result || resp?.data || {}
-      const detail = Array.isArray(content) ? content[0] : content
+      const detail = await fetchFtpUploadDetail(String(item.invoiceUId))
       const cachedNames = originalFileNamesCache.value[String(item.invoiceUId)]
-      viewerData.value = mapUploadDetailToViewer(detail as FtpUploadListItem, cachedNames)
+      viewerData.value = mapUploadDetailToViewer(detail, cachedNames)
     }
   } catch (err) {
     console.debug('Failed to fetch ftp upload detail', err)
@@ -773,7 +807,7 @@ const filterUploadListBySearch = (items: FtpUploadListItem[]) => {
     const cachedNames = getCachedOriginalNames(item.invoiceUId)
     const haystack = [
       item.status,
-      item.companyCode,
+      item.vendorName,
       item.invoiceNo,
       item.documentNo,
       resolveFtpInvoiceFileName(item, cachedNames),
@@ -841,6 +875,44 @@ const goAdd = () => {
   })
 }
 
+const syncFtpUploadRow = async (row: ListPoTypes) => {
+  if (!canSyncFtpDataRow(row)) return
+
+  const uid = resolveFtpUploadUIdFromRow(row)
+  if (!uid) return
+
+  syncingRowId.value = uid
+  try {
+    const syncResult = await syncFtpUpload(uid)
+    const context = buildSyncContextFromSyncResponse(syncResult)
+    saveFtpSyncContext(context)
+    saveActiveFtpUploadUId(syncResult.ftpUploadUId)
+
+    if (syncResult.warnings?.length) {
+      alert(syncResult.warnings.join('\n'))
+    }
+
+    router.push({
+      name: 'invoiceAdd',
+      query: {
+        type: 'po',
+        from: 'ftp',
+        ftpUpload: syncResult.ftpUploadUId,
+      },
+    })
+  } catch (error: unknown) {
+    const err = error as { response?: { data?: { result?: { message?: string } } }; message?: string }
+    const message =
+      err.response?.data?.result?.message ||
+      err.message ||
+      'Gagal sync data FTP. Pastikan vendor name sudah terisi.'
+    alert(message)
+    console.error('Failed to sync FTP upload row:', error)
+  } finally {
+    syncingRowId.value = null
+  }
+}
+
 const syncFtpData = async () => {
   isSyncLoading.value = true
   try {
@@ -870,15 +942,11 @@ const onUploaded = (
     | string
     | null,
 ) => {
-  callList()
-
   let uid: string | null = null
-  let preview: Record<string, unknown> | null = null
   let originalFileNames: FtpUploadOriginalFileNames | null = null
 
   if (payload && typeof payload === 'object' && 'uid' in payload) {
     uid = payload.uid || null
-    preview = payload.preview || null
     originalFileNames = payload.originalFileNames || null
   } else if (typeof payload === 'string') {
     uid = payload
@@ -888,86 +956,10 @@ const onUploaded = (
     saveOriginalFileNames(uid, originalFileNames)
   }
 
-  fetchFtpUploads()
-
-  // update upload list entry if preview contains invoiceNo
-  if (preview && preview['invoiceNo']) {
-    const invoiceNo = String(preview['invoiceNo'])
-    uploadList.value = uploadList.value.map((d) => {
-      const dInvoiceNo = String(d.invoiceNo || '')
-      if (dInvoiceNo && dInvoiceNo === invoiceNo) {
-        return { ...d, status: 'Uploaded', invoiceUId: uid || d.invoiceUId }
-      }
-      return d
-    })
-  }
-
-  // if backend did not yet return the new upload in list, insert a provisional entry using preview + uid
-  if (uid) {
-    const exists = uploadList.value.find((it) => String(it.invoiceUId) === String(uid))
-    if (!exists) {
-      const provisionalEntry = normalizeFtpUploadListItem(
-        {
-          id: `tmp-${uid}`,
-          invoiceUId: uid,
-          status: 'Uploaded',
-          companyCode: (preview?.companyCode as string | null | undefined) || null,
-          invoiceNo: (preview?.invoiceNo as string | null | undefined) || null,
-          vendorName: (preview?.vendorName as string | null | undefined) || null,
-          documentNo: (preview?.reference as string | null | undefined) || null,
-          invoiceFileName:
-            (preview?.invoiceFileName as string | null | undefined) || originalFileNames?.invoice || null,
-          taxFileName:
-            (preview?.taxFileName as string | null | undefined) || originalFileNames?.tax || null,
-          referenceFileName:
-            (preview?.referenceFileName as string | null | undefined) ||
-            originalFileNames?.reference ||
-            null,
-          invoiceFileUrl: (preview?.invoiceFileUrl as string | null | undefined) || null,
-          taxFileUrl: (preview?.taxFileUrl as string | null | undefined) || null,
-          referenceFileUrl: (preview?.referenceFileUrl as string | null | undefined) || null,
-          files: {
-            invoice: {
-              fileName:
-                (preview?.invoiceFileName as string | null | undefined) ||
-                originalFileNames?.invoice ||
-                null,
-              blobPath: (preview?.invoiceBlobPath as string | null | undefined) || null,
-              url: (preview?.invoiceFileUrl as string | null | undefined) || null,
-            },
-            tax: {
-              fileName:
-                (preview?.taxFileName as string | null | undefined) || originalFileNames?.tax || null,
-              blobPath: (preview?.taxBlobPath as string | null | undefined) || null,
-              url: (preview?.taxFileUrl as string | null | undefined) || null,
-            },
-            reference: originalFileNames?.reference
-              ? {
-                  fileName:
-                    (preview?.referenceFileName as string | null | undefined) ||
-                    originalFileNames.reference,
-                  blobPath: (preview?.referenceBlobPath as string | null | undefined) || null,
-                  url: (preview?.referenceFileUrl as string | null | undefined) || null,
-                }
-              : null,
-          },
-        },
-        originalFileNames || undefined,
-      )
-
-      uploadList.value.unshift(provisionalEntry)
-    }
-  }
-
-  // after refreshing list, try to sync statuses (mark Done if submitted in FTP Data)
+  callList()
+  activeTab.value = 'ftpData'
+  currentPage.value = 1
   setTimeout(() => updateUploadDummyStatuses(), 250)
-
-  if (uid) {
-    router.push({
-      name: 'invoiceAdd',
-      query: { type: 'po', invoice: uid, from: 'ftp' },
-    })
-  }
 }
 
 const callList = async () => {
@@ -1084,7 +1076,6 @@ const resetFilter = () => {
 
 onMounted(() => {
   callList()
-  fetchFtpUploads()
 })
 </script>
 
