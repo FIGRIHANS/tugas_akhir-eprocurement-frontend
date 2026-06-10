@@ -4,6 +4,7 @@ import type { formTypes } from '@/views/invoice/types/invoiceAddWrapper'
 import type { ListPoTypes } from '@/stores/views/invoice/types/submission'
 import type {
   FtpFilePreview,
+  FtpInvoiceListItem,
   FtpSyncPreview,
   FtpSyncResult,
   FtpUploadListItem,
@@ -53,7 +54,7 @@ export interface FtpSyncContext {
   draft?: Record<string, unknown> | null
   preview?: FtpSyncPreview | null
   invoice?: Record<string, unknown> | null
-  invoiceListItem?: Record<string, unknown> | null
+  invoiceListItem?: FtpInvoiceListItem | null
   vendorName?: string | null
   invoiceDocument?: responseFileTypes | null
   taxDocument?: responseFileTypes | null
@@ -256,7 +257,30 @@ export const updateFtpUpload = async (
   await invoiceHttp.put(`/invoice/ftp-uploads/${invoiceUId}`, payload)
 }
 
-export const parseFtpSyncContent = (payload: unknown): FtpSyncResult => {
+const DEFAULT_MANUAL_FIELDS = ['documentNo', 'pogr']
+
+const hasSectionData = (value: unknown): value is Record<string, unknown> => {
+  return !!value && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length > 0
+}
+
+const resolveFtpInvoiceSection = <T extends Record<string, unknown>>(
+  invoice: Record<string, unknown>,
+  draft: Record<string, unknown>,
+  key: string,
+): T => {
+  const fromInvoice = invoice[key]
+  if (hasSectionData(fromInvoice)) return fromInvoice as T
+
+  const fromDraft = draft[key]
+  if (hasSectionData(fromDraft)) return fromDraft as T
+
+  return {} as T
+}
+
+export const parseFtpSyncContent = (
+  payload: unknown,
+  ftpUploadUId?: string,
+): FtpSyncResult => {
   const content = unwrapApiContent(payload)
   const invoice = (content.invoice as Record<string, unknown>) || {}
   const header = (invoice.header as Record<string, unknown>) || {}
@@ -264,7 +288,7 @@ export const parseFtpSyncContent = (payload: unknown): FtpSyncResult => {
   const draftHeader = (draft.header as Record<string, unknown>) || {}
 
   return {
-    ftpUploadUId: String(content.ftpUploadUId || content.invoiceUId || ''),
+    ftpUploadUId: String(ftpUploadUId || content.ftpUploadUId || ''),
     savedInvoiceUId: String(
       header.invoiceUId || content.savedInvoiceUId || draftHeader.invoiceUId || '',
     ),
@@ -272,11 +296,11 @@ export const parseFtpSyncContent = (payload: unknown): FtpSyncResult => {
     warnings: Array.isArray(content.warnings) ? (content.warnings as string[]) : [],
     manualFields: Array.isArray(content.manualFields)
       ? (content.manualFields as string[])
-      : ['documentNo', 'pogr'],
+      : DEFAULT_MANUAL_FIELDS,
     draft,
     preview: (content.preview as FtpSyncPreview) || {},
     invoice,
-    invoiceListItem: (content.invoiceListItem as Record<string, unknown>) || null,
+    invoiceListItem: (content.invoiceListItem as FtpInvoiceListItem) || null,
   }
 }
 
@@ -295,7 +319,17 @@ export const syncFtpUpload = async (invoiceUId: string, force = false): Promise<
   )
 
   const content = resp?.data?.result?.content ?? resp?.data?.result ?? resp?.data ?? {}
-  return parseFtpSyncContent(content)
+  return parseFtpSyncContent(content, invoiceUId)
+}
+
+const resolveVendorNameFromInvoice = (invoice: Record<string, unknown>): string | null => {
+  const vendor = (invoice.vendor as Record<string, unknown>) || {}
+  const header = (invoice.header as Record<string, unknown>) || {}
+  return (
+    (vendor.vendorName as string) ||
+    (header.vendorName as string) ||
+    null
+  )
 }
 
 export const buildSyncContextFromSyncResponse = (sync: FtpSyncResult): FtpSyncContext => ({
@@ -308,6 +342,7 @@ export const buildSyncContextFromSyncResponse = (sync: FtpSyncResult): FtpSyncCo
   preview: sync.preview,
   invoice: sync.invoice,
   invoiceListItem: sync.invoiceListItem,
+  vendorName: resolveVendorNameFromInvoice(sync.invoice),
 })
 
 export const saveActiveFtpUploadUId = (ftpUploadUId: string) => {
@@ -379,33 +414,134 @@ const documentFromDraft = (
   }
 }
 
+const applyFtpVendorToForm = (
+  form: formTypes,
+  vendor: Record<string, unknown>,
+  header: Record<string, unknown>,
+  context: FtpSyncContext,
+  vendorList: Array<{ sapCode: string; vendorName: string; vendorId: string; npwp?: string }>,
+) => {
+  const vendorNameFromSync =
+    (vendor.vendorName as string) ||
+    (header.vendorName as string) ||
+    context.vendorName ||
+    form.vendorName ||
+    ''
+
+  if (vendorNameFromSync) {
+    form.vendorName = String(vendorNameFromSync)
+    const vendorMatch = vendorList.find(
+      (item) => item.vendorName.trim().toLowerCase() === form.vendorName.trim().toLowerCase(),
+    )
+    if (vendorMatch) form.vendorId = vendorMatch.sapCode
+  }
+
+  if (vendor.vendorId != null && !form.vendorId) {
+    form.vendorId = String(vendor.vendorId)
+  }
+  if (vendor.npwp) form.npwp = String(vendor.npwp)
+  if (vendor.vendorAddress) form.address = String(vendor.vendorAddress)
+}
+
+const applyFtpOcrToForm = (form: formTypes, ocr: Record<string, unknown>) => {
+  if (ocr.vendorName) form.ocrVendorName = String(ocr.vendorName)
+  if (ocr.vendorNPWP) form.vendorNPWP = String(ocr.vendorNPWP)
+  if (ocr.companyName) form.ocrCompanyName = String(ocr.companyName)
+  if (ocr.npwpCompany) form.npwpCompany = String(ocr.npwpCompany)
+  if (ocr.taxInvoiceNumber) form.taxInvoiceNumber = String(ocr.taxInvoiceNumber)
+  if (ocr.taxInvoiceDate) form.taxInvoiceDate = String(ocr.taxInvoiceDate)
+  if (ocr.salesAmount != null) form.salesAmount = Number(ocr.salesAmount)
+  if (ocr.otherDPP != null) form.otherDPP = Number(ocr.otherDPP)
+  if (ocr.vatAmount != null) form.ocrVatAmount = Number(ocr.vatAmount)
+  if (ocr.vatbmAmount != null) form.ocrVatbmAmount = Number(ocr.vatbmAmount)
+  if (ocr.taxInvoiceStatus) form.taxInvoiceStatus = String(ocr.taxInvoiceStatus)
+  if (ocr.referenceNo) form.referenceNo = String(ocr.referenceNo)
+}
+
+const applyFtpCalculationToForm = (form: formTypes, calculation: Record<string, unknown>) => {
+  if (calculation.subtotal != null) form.subtotal = Number(calculation.subtotal) || 0
+  if (calculation.vatAmount != null) form.vatAmount = Number(calculation.vatAmount) || 0
+  if (calculation.whtAmount != null) form.whtAmount = Number(calculation.whtAmount) || 0
+  if (calculation.additionalCost != null) {
+    form.additionalCostCalc = Number(calculation.additionalCost) || 0
+  }
+  if (calculation.totalGrossAmount != null) {
+    form.totalGrossAmount = Number(calculation.totalGrossAmount) || 0
+  }
+  if (calculation.totalNetAmount != null) {
+    form.totalNetAmount = Number(calculation.totalNetAmount) || 0
+  }
+}
+
+/** Summary fields from `content.invoiceListItem` (list-invoice shape) for preview display. */
+export const applyFtpInvoiceListItemToForm = (
+  form: formTypes,
+  listItem: FtpInvoiceListItem | null | undefined,
+  companyList: Array<{ code: string; name: string }>,
+  skipManual: Set<string>,
+) => {
+  if (!listItem) return
+
+  if (listItem.invoiceTypeCode != null) form.invoiceType = String(listItem.invoiceTypeCode)
+  if (listItem.invoiceTypeName) form.invoiceTypeName = listItem.invoiceTypeName
+  if (listItem.invoiceDPCode != null) form.invoiceDp = String(listItem.invoiceDPCode)
+  if (listItem.statusCode != null) form.status = Number(listItem.statusCode)
+  if (listItem.invoiceSourceName) form.invoiceSource = listItem.invoiceSourceName
+
+  if (listItem.companyCode) {
+    form.companyCode = resolveCompanyCodeValue(listItem.companyCode, companyList)
+    const match = companyList.find((item) => item.code === form.companyCode)
+    if (match) {
+      const parts = match.name.split(' - ')
+      form.companyName = parts.length > 1 ? parts[parts.length - 1].trim() : match.name
+    }
+  } else if (listItem.companyName) {
+    form.companyName = listItem.companyName
+  }
+
+  if (listItem.vendorName) form.vendorName = listItem.vendorName
+  if (listItem.invoiceNo) form.invoiceNo = listItem.invoiceNo
+  if (listItem.invoiceDate) form.invoiceDate = listItem.invoiceDate
+
+  if (listItem.dpp != null) form.subtotal = Number(listItem.dpp) || 0
+  if (listItem.vatAmount != null) form.vatAmount = Number(listItem.vatAmount) || 0
+  if (listItem.whtAmount != null) form.whtAmount = Number(listItem.whtAmount) || 0
+  if (listItem.totalGrossAmount != null) {
+    form.totalGrossAmount = Number(listItem.totalGrossAmount) || 0
+  }
+  if (listItem.totalNetAmount != null) {
+    form.totalNetAmount = Number(listItem.totalNetAmount) || 0
+  }
+
+  // documentNo and pOs are manual — never bind from invoiceListItem
+  if (!skipManual.has('documentNo') && listItem.documentNo != null) {
+    form.invoiceVendorNo = String(listItem.documentNo)
+  }
+}
+
+/** Bind form detail from `content.invoice` after FTP sync. */
 export const applyFtpSyncDraftToForm = (
   form: formTypes,
   context: FtpSyncContext,
   companyList: Array<{ code: string; name: string }>,
   vendorList: Array<{ sapCode: string; vendorName: string; vendorId: string; npwp?: string }> = [],
 ) => {
-  const skipManual = new Set(context.manualFields || ['documentNo', 'pogr'])
+  const skipManual = new Set(context.manualFields || DEFAULT_MANUAL_FIELDS)
   const savedInvoice = context.invoice || {}
   const draft = context.draft || {}
-  const header =
-    ((savedInvoice.header as Record<string, unknown>) ||
-      (draft.header as Record<string, unknown>) ||
-      {}) as Record<string, unknown>
-  const vendor =
-    ((savedInvoice.vendor as Record<string, unknown>) ||
-      (draft.vendor as Record<string, unknown>) ||
-      {}) as Record<string, unknown>
-  const calculation =
-    ((savedInvoice.calculation as Record<string, unknown>) ||
-      (draft.calculation as Record<string, unknown>) ||
-      {}) as Record<string, unknown>
-  const ocr =
-    ((savedInvoice.ocr as Record<string, unknown>) ||
-      (draft.ocr as Record<string, unknown>) ||
-      {}) as Record<string, unknown>
+  const header = resolveFtpInvoiceSection<Record<string, unknown>>(savedInvoice, draft, 'header')
+  const vendor = resolveFtpInvoiceSection<Record<string, unknown>>(savedInvoice, draft, 'vendor')
+  const calculation = resolveFtpInvoiceSection<Record<string, unknown>>(
+    savedInvoice,
+    draft,
+    'calculation',
+  )
+  const ocr = resolveFtpInvoiceSection<Record<string, unknown>>(savedInvoice, draft, 'ocr')
   const preview = context.preview || {}
-  const documents = savedInvoice.documents ?? draft.documents
+  const documents =
+    (Array.isArray(savedInvoice.documents) && savedInvoice.documents.length > 0
+      ? savedInvoice.documents
+      : null) ?? draft.documents
 
   const preservedVendorNo = form.invoiceVendorNo
   const preservedPoGr = skipManual.has('pogr') ? [...(form.invoicePoGr || [])] : null
@@ -413,11 +549,11 @@ export const applyFtpSyncDraftToForm = (
   form.invoiceUId = String(
     context.savedInvoiceUId || header.invoiceUId || context.ftpUploadUId || '',
   )
-  form.status = Number(header.statusCode ?? 0)
-
+  if (header.statusCode != null) form.status = Number(header.statusCode)
   if (header.invoiceTypeCode != null) form.invoiceType = String(header.invoiceTypeCode)
   if (header.invoiceTypeName) form.invoiceTypeName = String(header.invoiceTypeName)
   if (header.invoiceDPCode != null) form.invoiceDp = String(header.invoiceDPCode)
+  if (header.invoiceSourceName) form.invoiceSource = String(header.invoiceSourceName)
 
   if (header.companyCode) {
     form.companyCode = resolveCompanyCodeValue(String(header.companyCode), companyList)
@@ -442,45 +578,18 @@ export const applyFtpSyncDraftToForm = (
   if (header.currCode) form.currency = String(header.currCode)
   if (header.notes) form.description = String(header.notes)
 
-  const vendorNameFromSync =
-    (vendor.vendorName as string) || context.vendorName || form.vendorName || ''
-  if (vendorNameFromSync) {
-    form.vendorName = String(vendorNameFromSync)
-    const vendorMatch = vendorList.find(
-      (item) => item.vendorName.trim().toLowerCase() === form.vendorName.trim().toLowerCase(),
-    )
-    if (vendorMatch) form.vendorId = vendorMatch.sapCode
-  }
-  if (vendor.npwp) form.npwp = String(vendor.npwp)
-
-  form.subtotal = Number(calculation.subtotal) || 0
-  form.vatAmount = Number(calculation.vatAmount) || 0
-  form.whtAmount = Number(calculation.whtAmount) || 0
-  form.additionalCostCalc = Number(calculation.additionalCost) || 0
-  form.totalGrossAmount = Number(calculation.totalGrossAmount) || 0
-  form.totalNetAmount = Number(calculation.totalNetAmount) || 0
-
-  form.ocrVendorName = ocr.vendorName ? String(ocr.vendorName) : form.ocrVendorName
-  form.vendorNPWP = ocr.vendorNPWP ? String(ocr.vendorNPWP) : form.vendorNPWP
-  form.ocrCompanyName = ocr.companyName ? String(ocr.companyName) : form.ocrCompanyName
-  form.npwpCompany = ocr.npwpCompany ? String(ocr.npwpCompany) : form.npwpCompany
-  form.taxInvoiceNumber = ocr.taxInvoiceNumber ? String(ocr.taxInvoiceNumber) : form.taxInvoiceNumber
-  form.taxInvoiceDate = ocr.taxInvoiceDate ? String(ocr.taxInvoiceDate) : form.taxInvoiceDate
-  form.salesAmount = ocr.salesAmount != null ? Number(ocr.salesAmount) : form.salesAmount
-  form.otherDPP = ocr.otherDPP != null ? Number(ocr.otherDPP) : form.otherDPP
-  form.ocrVatAmount = ocr.vatAmount != null ? Number(ocr.vatAmount) : form.ocrVatAmount
-  form.ocrVatbmAmount = ocr.vatbmAmount != null ? Number(ocr.vatbmAmount) : form.ocrVatbmAmount
-  form.taxInvoiceStatus = ocr.taxInvoiceStatus ? String(ocr.taxInvoiceStatus) : form.taxInvoiceStatus
-  form.referenceNo = ocr.referenceNo ? String(ocr.referenceNo) : form.referenceNo
+  applyFtpVendorToForm(form, vendor, header, context, vendorList)
+  applyFtpCalculationToForm(form, calculation)
+  applyFtpOcrToForm(form, ocr)
 
   const invoiceDocument =
-    previewToDocument(preview.invoice, 'invoice.pdf') ||
-    documentFromDraft(documents, 1, 'invoice.pdf')
+    documentFromDraft(documents, 1, 'invoice.pdf') ||
+    previewToDocument(preview.invoice, 'invoice.pdf')
   const taxDocument =
-    previewToDocument(preview.tax, 'tax.pdf') || documentFromDraft(documents, 2, 'tax.pdf')
+    documentFromDraft(documents, 2, 'tax.pdf') || previewToDocument(preview.tax, 'tax.pdf')
   const referenceDocument =
-    previewToDocument(preview.reference, 'reference.pdf') ||
-    documentFromDraft(documents, 3, 'reference.pdf')
+    documentFromDraft(documents, 3, 'reference.pdf') ||
+    previewToDocument(preview.reference, 'reference.pdf')
 
   if (invoiceDocument) form.invoiceDocument = invoiceDocument
   if (taxDocument) form.tax = taxDocument
@@ -491,6 +600,8 @@ export const applyFtpSyncDraftToForm = (
   } else if (!form.invoicePoGr?.length) {
     form.invoicePoGr = []
   }
+
+  applyFtpInvoiceListItemToForm(form, context.invoiceListItem, companyList, skipManual)
 }
 
 const toDocument = (

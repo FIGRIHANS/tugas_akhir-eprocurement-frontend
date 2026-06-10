@@ -1625,6 +1625,7 @@ const setData = () => {
     form.invoiceType = detail.header.invoiceTypeCode ? detail.header.invoiceTypeCode.toString() : ''
     form.invoiceSource = detail.header.invoiceSourceName
     form.vendorId = detail.vendor.vendorId ? detail.vendor.vendorId.toString() : ''
+    form.vendorName = detail.vendor.vendorName ? detail.vendor.vendorName.toString() : form.vendorName
     form.npwp = detail.vendor.npwp
     form.address = detail.vendor.vendorAddress
     form.paymentId = detail.payment.paymentId
@@ -1750,6 +1751,22 @@ const setData = () => {
           }
           break
       }
+    }
+
+    if (detail.ocr) {
+      const ocr = detail.ocr
+      if (ocr.vendorName) form.ocrVendorName = ocr.vendorName
+      if (ocr.vendorNPWP) form.vendorNPWP = ocr.vendorNPWP
+      if (ocr.companyName) form.ocrCompanyName = ocr.companyName
+      if (ocr.npwpCompany) form.npwpCompany = ocr.npwpCompany
+      if (ocr.taxInvoiceNumber) form.taxInvoiceNumber = ocr.taxInvoiceNumber
+      if (ocr.taxInvoiceDate) form.taxInvoiceDate = ocr.taxInvoiceDate
+      if (ocr.salesAmount != null) form.salesAmount = Number(ocr.salesAmount)
+      if (ocr.otherDPP != null) form.otherDPP = Number(ocr.otherDPP)
+      if (ocr.vatAmount != null) form.ocrVatAmount = Number(ocr.vatAmount)
+      if (ocr.vatbmAmount != null) form.ocrVatbmAmount = Number(ocr.vatbmAmount)
+      if (ocr.taxInvoiceStatus) form.taxInvoiceStatus = ocr.taxInvoiceStatus
+      if (ocr.referenceNo) form.referenceNo = ocr.referenceNo
     }
   }
 }
