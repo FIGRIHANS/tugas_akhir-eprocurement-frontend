@@ -92,6 +92,8 @@ import { ref } from 'vue'
 import invoiceApi from '@/core/utils/invoiceApi'
 import { KTModal } from '@/metronic/core'
 import IconUpload from '@/components/ui/pdfUpload/PdfUpload/IconUpload.vue'
+import type { FtpUploadOriginalFileNames } from './types/ftpUpload'
+import { GENERIC_STORED_FILE_NAMES } from './types/ftpUpload'
 
 const emits = defineEmits<{
   (
@@ -99,11 +101,7 @@ const emits = defineEmits<{
     payload: {
       uid: string | null
       preview?: Record<string, unknown>
-      originalFileNames?: {
-        invoice: string
-        tax: string
-        reference: string | null
-      }
+      originalFileNames?: FtpUploadOriginalFileNames
     },
   ): void
 }>()
@@ -147,7 +145,7 @@ const triggerFileInput = (which: 'invoice' | 'tax' | 'reference') => {
   else referenceInput.value?.click()
 }
 
-const GENERIC_STORED_NAMES = new Set(['invoice.pdf', 'tax.pdf', 'reference.pdf'])
+const GENERIC_STORED_NAMES = GENERIC_STORED_FILE_NAMES
 
 const pickDisplayFileName = (apiName: string | null | undefined, localName: string) => {
   if (apiName && !GENERIC_STORED_NAMES.has(apiName.toLowerCase())) return apiName
@@ -192,6 +190,7 @@ const upload = async () => {
     // If backend returns parsed preview and file info, use it for display briefly
     if (content) {
       preview.value = {
+        companyCode: content.companyCode || null,
         invoiceNo: content.invoiceNo || content.invoiceNumber || null,
         vendorName: content.vendorName || content.vendor || null,
         totalAmount: content.totalAmount || content.totalGrossAmount || null,
@@ -201,16 +200,16 @@ const upload = async () => {
 
       if (content.files) {
         preview.value.invoiceFileName = pickDisplayFileName(
-          content.files.invoice?.originalFileName ||
+          content.files.invoice?.fileName ||
+            content.files.invoice?.originalFileName ||
             content.files.invoice?.uploadedFileName ||
-            content.files.invoice?.fileName ||
             content.files.invoice?.name,
           localFileNames.invoice,
         )
         preview.value.taxFileName = pickDisplayFileName(
-          content.files.tax?.originalFileName ||
+          content.files.tax?.fileName ||
+            content.files.tax?.originalFileName ||
             content.files.tax?.uploadedFileName ||
-            content.files.tax?.fileName ||
             content.files.tax?.name,
           localFileNames.tax,
         )

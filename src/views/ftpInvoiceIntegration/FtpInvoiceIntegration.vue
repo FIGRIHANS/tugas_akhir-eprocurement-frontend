@@ -131,16 +131,20 @@
                 <tr>
                   <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500"></th>
                   <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Status</th>
+                  <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Company Code</th>
                   <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Invoice Document</th>
                   <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Tax Document</th>
                   <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Reference Document</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-if="uploadList.length === 0">
-                  <td colspan="5" class="text-center">No data found.</td>
+                <tr v-if="paginatedUploadList.length === 0">
+                  <td colspan="6" class="text-center">No data found.</td>
                 </tr>
-                <tr v-for="(d, idx) in uploadList" :key="String(d.invoiceUId) || `upload-${idx}`">
+                <tr
+                  v-for="(d, idx) in paginatedUploadList"
+                  :key="String(d.invoiceUId) || `upload-${idx}`"
+                >
                   <td class="flex items-center gap-[12px]">
                     <button
                       class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]"
@@ -150,27 +154,33 @@
                     </button>
                   </td>
                   <td>
-                    <span class="badge badge-outline" :class="d.status === 'Done' ? 'badge-success' : 'badge-primary'">
-                      {{ d.status }}
+                    <span
+                      class="badge badge-outline"
+                      :class="d.status === 'Done' ? 'badge-success' : 'badge-primary'"
+                    >
+                      {{ d.status || '-' }}
                     </span>
                   </td>
+                  <td>{{ d.companyCode || '-' }}</td>
                   <td>
-                    <div class="flex items-center gap-3">
-                      <div class="min-w-0">
-                          <div class="font-semibold truncate">{{ d.invoiceNo }}</div>
-                          <div class="text-xs text-gray-500 truncate">{{ d.vendorName }}</div>
+                    <div class="min-w-0">
+                      <div class="font-medium truncate" :title="getUploadInvoiceFileName(d)">
+                        {{ getUploadInvoiceFileName(d) }}
                       </div>
                     </div>
                   </td>
                   <td>
-                    <div>
-                      <div class="font-medium">{{ d.vatAttached ? 'Invoice VAT' : '-' }}</div>
-                      <div class="text-xs text-gray-500">{{ d.vatAttached ? 'Attached' : 'Not Attached' }}</div>
+                    <div class="min-w-0">
+                      <div class="font-medium truncate" :title="getUploadTaxFileName(d)">
+                        {{ getUploadTaxFileName(d) }}
+                      </div>
                     </div>
                   </td>
                   <td>
-                    <div>
-                      <div class="truncate">{{ d.documentNo }}</div>
+                    <div class="min-w-0">
+                      <div class="truncate" :title="getUploadReferenceFileName(d)">
+                        {{ getUploadReferenceFileName(d) }}
+                      </div>
                     </div>
                   </td>
                 </tr>
@@ -309,6 +319,13 @@ import { cloneDeep } from 'lodash'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import { KTModal } from '@/metronic/core'
 import type { FtpUploadViewerData } from './FtpUploadViewerModal.vue'
+import type { FtpUploadListItem, FtpUploadOriginalFileNames } from './types/ftpUpload'
+import {
+  normalizeFtpUploadListItem,
+  resolveFtpInvoiceFileName,
+  resolveFtpReferenceFileName,
+  resolveFtpTaxFileName,
+} from './types/ftpUpload'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
 
@@ -364,7 +381,21 @@ const setActiveTab = (tab: 'ftpData' | 'upload') => {
 }
 
 // Upload list fetched from backend. Empty until API responds.
-const uploadList = ref<Array<Record<string, unknown>>>([])
+const uploadList = ref<FtpUploadListItem[]>([])
+
+const getCachedOriginalNames = (invoiceUId?: string | null): FtpUploadOriginalFileNames | undefined => {
+  if (!invoiceUId) return undefined
+  return originalFileNamesCache.value[String(invoiceUId)]
+}
+
+const getUploadInvoiceFileName = (item: FtpUploadListItem) =>
+  resolveFtpInvoiceFileName(item, getCachedOriginalNames(item.invoiceUId))
+
+const getUploadTaxFileName = (item: FtpUploadListItem) =>
+  resolveFtpTaxFileName(item, getCachedOriginalNames(item.invoiceUId))
+
+const getUploadReferenceFileName = (item: FtpUploadListItem) =>
+  resolveFtpReferenceFileName(item, getCachedOriginalNames(item.invoiceUId))
 
 const fetchFtpUploads = async () => {
   try {
@@ -378,41 +409,9 @@ const fetchFtpUploads = async () => {
     const items = Array.isArray(content) ? content : content.items || content.data || []
 
     if (Array.isArray(items) && items.length > 0) {
-      uploadList.value = (items as Array<Record<string, unknown>>).map((item) => {
-        const invoiceUId = String(item.invoiceUId || '')
-        const cached = invoiceUId ? originalFileNamesCache.value[invoiceUId] : undefined
-        if (!cached) return item
-
-        return {
-          ...item,
-          invoiceFileName: cached.invoice || item.invoiceFileName,
-          taxFileName: cached.tax || item.taxFileName,
-          referenceFileName: cached.reference || item.referenceFileName,
-          files: {
-            ...(typeof item.files === 'object' && item.files ? item.files : {}),
-            invoice: {
-              ...(typeof item.files === 'object' && item.files && (item.files as Record<string, unknown>).invoice
-                ? (item.files as Record<string, unknown>).invoice
-                : {}),
-              fileName: cached.invoice || (item.files as { invoice?: { fileName?: string } })?.invoice?.fileName,
-            },
-            tax: {
-              ...(typeof item.files === 'object' && item.files && (item.files as Record<string, unknown>).tax
-                ? (item.files as Record<string, unknown>).tax
-                : {}),
-              fileName: cached.tax || (item.files as { tax?: { fileName?: string } })?.tax?.fileName,
-            },
-            reference: cached.reference
-              ? {
-                  ...(typeof item.files === 'object' && item.files && (item.files as Record<string, unknown>).reference
-                    ? (item.files as Record<string, unknown>).reference
-                    : {}),
-                  fileName: cached.reference,
-                }
-              : (item.files as { reference?: unknown })?.reference || null,
-          },
-        }
-      })
+      uploadList.value = (items as FtpUploadListItem[]).map((item) =>
+        normalizeFtpUploadListItem(item, getCachedOriginalNames(item.invoiceUId)),
+      )
     } else {
       uploadList.value = []
     }
@@ -424,51 +423,23 @@ const fetchFtpUploads = async () => {
 
 const FTP_ORIGINAL_NAMES_KEY = 'ftp_upload_original_names'
 
-type OriginalFileNames = {
-  invoice?: string | null
-  tax?: string | null
-  reference?: string | null
-}
-
-const GENERIC_STORED_NAMES = new Set(['invoice.pdf', 'tax.pdf', 'reference.pdf'])
-
-const loadOriginalFileNamesCache = (): Record<string, OriginalFileNames> => {
+const loadOriginalFileNamesCache = (): Record<string, FtpUploadOriginalFileNames> => {
   try {
     const raw = sessionStorage.getItem(FTP_ORIGINAL_NAMES_KEY)
-    return raw ? (JSON.parse(raw) as Record<string, OriginalFileNames>) : {}
+    return raw ? (JSON.parse(raw) as Record<string, FtpUploadOriginalFileNames>) : {}
   } catch {
     return {}
   }
 }
 
-const originalFileNamesCache = ref<Record<string, OriginalFileNames>>(loadOriginalFileNamesCache())
+const originalFileNamesCache = ref<Record<string, FtpUploadOriginalFileNames>>(loadOriginalFileNamesCache())
 
-const saveOriginalFileNames = (invoiceUId: string, names: OriginalFileNames) => {
+const saveOriginalFileNames = (invoiceUId: string, names: FtpUploadOriginalFileNames) => {
   originalFileNamesCache.value = {
     ...originalFileNamesCache.value,
     [invoiceUId]: names,
   }
   sessionStorage.setItem(FTP_ORIGINAL_NAMES_KEY, JSON.stringify(originalFileNamesCache.value))
-}
-
-const isGenericStoredFileName = (name: string | null | undefined) => {
-  if (!name) return false
-  return GENERIC_STORED_NAMES.has(name.toLowerCase())
-}
-
-const resolveDisplayFileName = (
-  file: { fileName?: string; name?: string; originalFileName?: string; uploadedFileName?: string } | null | undefined,
-  fallback?: string | null,
-) => {
-  const original = file?.originalFileName || file?.uploadedFileName
-  if (original) return original
-
-  if (fallback && (!file?.fileName || isGenericStoredFileName(file.fileName))) return fallback
-
-  const apiName = file?.fileName || file?.name
-  if (apiName && !isGenericStoredFileName(apiName)) return apiName
-
-  return fallback || apiName || null
 }
 
 const viewerData = ref<FtpUploadViewerData>({
@@ -483,62 +454,47 @@ const viewerData = ref<FtpUploadViewerData>({
   reference: null,
 })
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const mapFileInfo = (
-  file: any,
-  fallbackName?: string | null,
-): { fileName: string | null; storedFileName: string | null; blobPath: string | null; url: string | null } | null => {
-  if (!file && !fallbackName) return null
-  const storedFileName = file?.fileName || file?.name || null
-  return {
-    fileName: resolveDisplayFileName(file, fallbackName),
-    storedFileName,
-    blobPath: file?.blobPath || null,
-    url: file?.url || null,
-  }
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const mapUploadDetailToViewer = (detail: any, nameFallbacks?: OriginalFileNames) => {
-  const invoiceUId = detail.invoiceUId || detail.invoiceUid || null
-  const cachedNames = nameFallbacks || (invoiceUId ? originalFileNamesCache.value[invoiceUId] : undefined)
+const mapUploadDetailToViewer = (
+  detail: FtpUploadListItem,
+  nameFallbacks?: FtpUploadOriginalFileNames,
+): FtpUploadViewerData => {
+  const normalized = normalizeFtpUploadListItem(detail, nameFallbacks)
+  const referenceFileName = resolveFtpReferenceFileName(normalized, nameFallbacks)
 
   return {
-    invoiceUId,
-    invoiceNo: detail.invoiceNo || detail.invoiceNumber || null,
-    companyCode: detail.companyCode || null,
-    status: detail.status || null,
-    createdAt: detail.createdAt || detail.createdUtcDate || null,
-    parsedPreview: detail.parsedPreview || null,
-    invoice:
-      mapFileInfo(detail.files?.invoice, cachedNames?.invoice || detail.invoiceFileName) || {
-        fileName: resolveDisplayFileName(null, cachedNames?.invoice || detail.invoiceFileName),
-        storedFileName: detail.files?.invoice?.fileName || detail.invoiceFileName || null,
-        blobPath: detail.invoiceBlobPath || detail.files?.invoice?.blobPath || null,
-        url: detail.invoiceFileUrl || detail.files?.invoice?.url || null,
-      },
-    tax:
-      mapFileInfo(detail.files?.tax, cachedNames?.tax || detail.taxFileName) || {
-        fileName: resolveDisplayFileName(null, cachedNames?.tax || detail.taxFileName),
-        storedFileName: detail.files?.tax?.fileName || detail.taxFileName || null,
-        blobPath: detail.taxBlobPath || detail.files?.tax?.blobPath || null,
-        url: detail.taxFileUrl || detail.files?.tax?.url || null,
-      },
+    invoiceUId: normalized.invoiceUId || null,
+    invoiceNo: normalized.invoiceNo || null,
+    companyCode: normalized.companyCode || null,
+    status: normalized.status || null,
+    createdAt: normalized.createdAt || null,
+    parsedPreview: normalized.parsedPreview || null,
+    invoice: {
+      fileName: resolveFtpInvoiceFileName(normalized, nameFallbacks),
+      storedFileName: normalized.files?.invoice?.fileName || normalized.invoiceFileName || null,
+      blobPath: normalized.invoiceBlobPath || normalized.files?.invoice?.blobPath || null,
+      url: normalized.invoiceFileUrl || normalized.files?.invoice?.url || null,
+    },
+    tax: {
+      fileName: resolveFtpTaxFileName(normalized, nameFallbacks),
+      storedFileName: normalized.files?.tax?.fileName || normalized.taxFileName || null,
+      blobPath: normalized.taxBlobPath || normalized.files?.tax?.blobPath || null,
+      url: normalized.taxFileUrl || normalized.files?.tax?.url || null,
+    },
     reference:
-      mapFileInfo(detail.files?.reference, cachedNames?.reference || detail.referenceFileName) ||
-      (detail.referenceFileName || detail.referenceFileUrl || detail.referenceBlobPath
-        ? {
-            fileName: resolveDisplayFileName(null, cachedNames?.reference || detail.referenceFileName),
-            storedFileName: detail.files?.reference?.fileName || detail.referenceFileName || null,
-            blobPath: detail.referenceBlobPath || detail.files?.reference?.blobPath || null,
-            url: detail.referenceFileUrl || detail.files?.reference?.url || null,
-          }
-        : null),
+      referenceFileName === '-'
+        ? null
+        : {
+            fileName: referenceFileName,
+            storedFileName:
+              normalized.files?.reference?.fileName || normalized.referenceFileName || null,
+            blobPath:
+              normalized.referenceBlobPath || normalized.files?.reference?.blobPath || null,
+            url: normalized.referenceFileUrl || normalized.files?.reference?.url || null,
+          },
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const openViewer = async (item: any) => {
+const openViewer = async (item: FtpUploadListItem) => {
   viewerData.value = {
     invoiceUId: null,
     invoiceNo: null,
@@ -561,7 +517,7 @@ const openViewer = async (item: any) => {
       const content = resp?.data?.result?.content || resp?.data?.result || resp?.data || {}
       const detail = Array.isArray(content) ? content[0] : content
       const cachedNames = originalFileNamesCache.value[String(item.invoiceUId)]
-      viewerData.value = mapUploadDetailToViewer(detail, cachedNames)
+      viewerData.value = mapUploadDetailToViewer(detail as FtpUploadListItem, cachedNames)
     }
   } catch (err) {
     console.debug('Failed to fetch ftp upload detail', err)
@@ -578,8 +534,8 @@ const updateUploadDummyStatuses = () => {
   try {
     const ftpItems = sourceList.value || []
     uploadList.value = uploadList.value.map((d) => {
-      const invoiceNo = (d.invoiceNo || d.invoiceNumber || d.invoice) as string | undefined
-      const documentNo = (d.documentNo || d.submittedDocumentNo) as string | undefined
+      const invoiceNo = d.invoiceNo || undefined
+      const documentNo = d.documentNo || undefined
 
       const match = ftpItems.find(
         (s) => (s.invoiceNo && invoiceNo && String(s.invoiceNo) === String(invoiceNo)) || (s.documentNo && documentNo && String(s.documentNo) === String(documentNo)),
@@ -587,7 +543,7 @@ const updateUploadDummyStatuses = () => {
 
       if (match) {
         const newStatus = match.statusCode === DRAFT_STATUS_CODE ? 'Uploaded' : 'Done'
-        return { ...d, status: newStatus, invoiceUId: match.invoiceUId || (d.invoiceUId as string | undefined) }
+        return { ...d, status: newStatus, invoiceUId: match.invoiceUId || d.invoiceUId }
       }
 
       return d
@@ -809,6 +765,36 @@ const applyColumnSort = (items: ListPoTypes[]) => {
   })
 }
 
+const filterUploadListBySearch = (items: FtpUploadListItem[]) => {
+  const query = search.value.trim().toLowerCase()
+  if (!query) return items
+
+  return items.filter((item) => {
+    const cachedNames = getCachedOriginalNames(item.invoiceUId)
+    const haystack = [
+      item.status,
+      item.companyCode,
+      item.invoiceNo,
+      item.documentNo,
+      resolveFtpInvoiceFileName(item, cachedNames),
+      resolveFtpTaxFileName(item, cachedNames),
+      resolveFtpReferenceFileName(item, cachedNames),
+    ]
+      .filter((value) => value != null && String(value).trim() !== '' && value !== '-')
+      .join(' ')
+      .toLowerCase()
+
+    return haystack.includes(query)
+  })
+}
+
+const filteredUploadList = computed(() => filterUploadListBySearch(uploadList.value))
+
+const paginatedUploadList = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  return filteredUploadList.value.slice(start, start + pageSize.value)
+})
+
 const sortedList = computed(() => {
   let data = filterBySearch(filterByActiveTab(cloneDeep(sourceList.value)))
 
@@ -821,7 +807,9 @@ const sortedList = computed(() => {
   return data
 })
 
-const totalItems = computed(() => sortedList.value.length)
+const totalItems = computed(() =>
+  activeTab.value === 'upload' ? filteredUploadList.value.length : sortedList.value.length,
+)
 
 const list = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value
@@ -877,7 +865,7 @@ const onUploaded = (
     | {
         uid?: string | null
         preview?: Record<string, unknown>
-        originalFileNames?: OriginalFileNames
+        originalFileNames?: FtpUploadOriginalFileNames
       }
     | string
     | null,
@@ -886,7 +874,7 @@ const onUploaded = (
 
   let uid: string | null = null
   let preview: Record<string, unknown> | null = null
-  let originalFileNames: OriginalFileNames | null = null
+  let originalFileNames: FtpUploadOriginalFileNames | null = null
 
   if (payload && typeof payload === 'object' && 'uid' in payload) {
     uid = payload.uid || null
@@ -903,12 +891,12 @@ const onUploaded = (
   fetchFtpUploads()
 
   // update upload list entry if preview contains invoiceNo
-  if (preview && (preview as Record<string, unknown>)['invoiceNo']) {
-    const invoiceNo = String((preview as Record<string, unknown>)['invoiceNo'])
+  if (preview && preview['invoiceNo']) {
+    const invoiceNo = String(preview['invoiceNo'])
     uploadList.value = uploadList.value.map((d) => {
-      const dInvoiceNo = String((d.invoiceNo || d.invoiceNumber || '') as string)
+      const dInvoiceNo = String(d.invoiceNo || '')
       if (dInvoiceNo && dInvoiceNo === invoiceNo) {
-        return { ...d, status: 'Uploaded', invoiceUId: uid || (d.invoiceUId as string | undefined) }
+        return { ...d, status: 'Uploaded', invoiceUId: uid || d.invoiceUId }
       }
       return d
     })
@@ -918,41 +906,56 @@ const onUploaded = (
   if (uid) {
     const exists = uploadList.value.find((it) => String(it.invoiceUId) === String(uid))
     if (!exists) {
-      const newEntry: Record<string, unknown> = {
-        id: `tmp-${uid}`,
-        invoiceUId: uid,
-        status: 'Uploaded',
-        invoiceNo: (preview && preview['invoiceNo']) || null,
-        vendorName: (preview && preview['vendorName']) || null,
-        documentNo: (preview && preview['reference']) || null,
-        invoiceFileName: (preview && preview['invoiceFileName']) || originalFileNames?.invoice || null,
-        taxFileName: (preview && preview['taxFileName']) || originalFileNames?.tax || null,
-        referenceFileName: (preview && preview['referenceFileName']) || originalFileNames?.reference || null,
-        invoiceFileUrl: (preview && preview['invoiceFileUrl']) || null,
-        taxFileUrl: (preview && preview['taxFileUrl']) || null,
-        referenceFileUrl: (preview && preview['referenceFileUrl']) || null,
-        files: {
-          invoice: {
-            fileName: (preview && preview['invoiceFileName']) || originalFileNames?.invoice || null,
-            blobPath: (preview && preview['invoiceBlobPath']) || null,
-            url: (preview && preview['invoiceFileUrl']) || null,
+      const provisionalEntry = normalizeFtpUploadListItem(
+        {
+          id: `tmp-${uid}`,
+          invoiceUId: uid,
+          status: 'Uploaded',
+          companyCode: (preview?.companyCode as string | null | undefined) || null,
+          invoiceNo: (preview?.invoiceNo as string | null | undefined) || null,
+          vendorName: (preview?.vendorName as string | null | undefined) || null,
+          documentNo: (preview?.reference as string | null | undefined) || null,
+          invoiceFileName:
+            (preview?.invoiceFileName as string | null | undefined) || originalFileNames?.invoice || null,
+          taxFileName:
+            (preview?.taxFileName as string | null | undefined) || originalFileNames?.tax || null,
+          referenceFileName:
+            (preview?.referenceFileName as string | null | undefined) ||
+            originalFileNames?.reference ||
+            null,
+          invoiceFileUrl: (preview?.invoiceFileUrl as string | null | undefined) || null,
+          taxFileUrl: (preview?.taxFileUrl as string | null | undefined) || null,
+          referenceFileUrl: (preview?.referenceFileUrl as string | null | undefined) || null,
+          files: {
+            invoice: {
+              fileName:
+                (preview?.invoiceFileName as string | null | undefined) ||
+                originalFileNames?.invoice ||
+                null,
+              blobPath: (preview?.invoiceBlobPath as string | null | undefined) || null,
+              url: (preview?.invoiceFileUrl as string | null | undefined) || null,
+            },
+            tax: {
+              fileName:
+                (preview?.taxFileName as string | null | undefined) || originalFileNames?.tax || null,
+              blobPath: (preview?.taxBlobPath as string | null | undefined) || null,
+              url: (preview?.taxFileUrl as string | null | undefined) || null,
+            },
+            reference: originalFileNames?.reference
+              ? {
+                  fileName:
+                    (preview?.referenceFileName as string | null | undefined) ||
+                    originalFileNames.reference,
+                  blobPath: (preview?.referenceBlobPath as string | null | undefined) || null,
+                  url: (preview?.referenceFileUrl as string | null | undefined) || null,
+                }
+              : null,
           },
-          tax: {
-            fileName: (preview && preview['taxFileName']) || originalFileNames?.tax || null,
-            blobPath: (preview && preview['taxBlobPath']) || null,
-            url: (preview && preview['taxFileUrl']) || null,
-          },
-          reference: originalFileNames?.reference
-            ? {
-                fileName: (preview && preview['referenceFileName']) || originalFileNames.reference,
-                blobPath: (preview && preview['referenceBlobPath']) || null,
-                url: (preview && preview['referenceFileUrl']) || null,
-              }
-            : null,
         },
-      }
+        originalFileNames || undefined,
+      )
 
-      uploadList.value.unshift(newEntry)
+      uploadList.value.unshift(provisionalEntry)
     }
   }
 
