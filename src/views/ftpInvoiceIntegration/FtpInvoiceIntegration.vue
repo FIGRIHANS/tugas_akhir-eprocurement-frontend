@@ -188,7 +188,7 @@
             </table>
           </template>
 
-          <!-- Full FTP Data table from getListPo -->
+          <!-- FTP Data table from GET /invoice/ftp-data -->
           <template v-else>
             <table class="table align-middle text-gray-700 font-medium text-sm">
               <thead>
@@ -363,6 +363,7 @@ import {
 import {
   buildSyncContextFromSyncResponse,
   canSyncFtpDataRow,
+  fetchFtpDataList,
   fetchFtpUploadDetail,
   fetchFtpUploadList,
   resolveFtpUploadUIdFromRow,
@@ -974,10 +975,19 @@ const onUploaded = (
 
 const callList = async () => {
   try {
-    await invoiceApi.getListPo(getFtpListParams())
-    const data = cloneDeep(invoiceApi.listPo)
-    sourceList.value = activeTab.value === 'upload' ? data.filter(isUploadedFtpData) : data
-    // after updating sourceList, sync upload dummy statuses
+    if (activeTab.value === 'upload') {
+      await fetchFtpUploads()
+      return
+    }
+
+    sourceList.value = await fetchFtpDataList({
+      statusCode: getListStatusCode(),
+      companyCode: filterForm.companyCode,
+      invoiceTypeCode: Number(filterForm.invoiceType) || undefined,
+      invoiceDate: filterForm.date,
+      page: 1,
+      pageSize: 1000,
+    })
     updateUploadDummyStatuses()
   } catch (error) {
     console.error('Failed to load FTP invoice list:', error)

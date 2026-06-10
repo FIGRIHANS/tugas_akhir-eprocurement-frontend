@@ -20,13 +20,22 @@ import {
 export const FTP_SYNC_CONTEXT_KEY = 'ftp_sync_context'
 export const ACTIVE_FTP_UPLOAD_UID_KEY = 'activeFtpUploadUId'
 
-const FTP_INVOICE_SOURCE = 3
 const DRAFT_STATUS_CODE = 0
 const DRAFT_STATUS_NAME = 'draft'
 
 export type FtpDataListRow = ListPoTypes & {
   ftpUploadUId?: string | null
   ftpUploadStatus?: string | null
+}
+
+export interface FtpDataQueryParams {
+  statusCode?: number | null
+  companyCode?: string
+  invoiceTypeCode?: number
+  invoiceDate?: string
+  page?: number
+  pageSize?: number
+  searchText?: string
 }
 
 export const buildFtpUploadMetadata = (vendorName: string): FtpUploadMetadata => ({
@@ -146,6 +155,94 @@ export const fetchFtpUploadList = async (): Promise<FtpUploadListItem[]> => {
   return parseFtpUploadList(content)
 }
 
+const toOptionalNumber = (value: unknown): number | null => {
+  if (value == null || value === '') return null
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : null
+}
+
+const toOptionalString = (value: unknown): string | null => {
+  if (value == null) return null
+  const text = String(value).trim()
+  return text || null
+}
+
+export const normalizeFtpDataListItem = (item: Record<string, unknown>): FtpDataListRow => {
+  const ftpUploadUId =
+    toOptionalString(item.ftpUploadUId) ||
+    toOptionalString(item.ftpUploadUid) ||
+    toOptionalString(item.uploadUId) ||
+    null
+
+  return {
+    id: Number(item.id) || 0,
+    invoiceUId: String(item.invoiceUId || item.invoiceUid || ftpUploadUId || ''),
+    invoiceTypeCode: Number(item.invoiceTypeCode) || 0,
+    invoiceTypeName: String(item.invoiceTypeName || ''),
+    invoiceDPCode: Number(item.invoiceDPCode) || 0,
+    invoiceDPName: String(item.invoiceDPName || ''),
+    companyCode: String(item.companyCode || ''),
+    companyName: String(item.companyName || ''),
+    documentNo: String(item.documentNo || ''),
+    invoiceNo: String(item.invoiceNo || ''),
+    invoiceDate: String(item.invoiceDate || ''),
+    statusCode: Number(item.statusCode ?? 0),
+    statusName: String(item.statusName || ''),
+    poNo: toOptionalString(item.poNo),
+    grDocumentNo: String(item.grDocumentNo || ''),
+    estimatedPaymentDate: toOptionalString(item.estimatedPaymentDate),
+    totalGrossAmount: Number(item.totalGrossAmount) || 0,
+    totalNetAmount: Number(item.totalNetAmount) || 0,
+    vendorName: String(item.vendorName || ''),
+    isOpenChild: false,
+    createdUtcDate: String(item.createdUtcDate || item.createdAt || ''),
+    invoiceSourceName: toOptionalString(item.invoiceSourceName),
+    invoiceSource: toOptionalNumber(item.invoiceSource),
+    fpStatus: (item.fpStatus as boolean | null) ?? null,
+    vatStatus: (item.vatStatus as boolean | null) ?? null,
+    whtStatus: (item.whtStatus as boolean | null) ?? null,
+    poPrice: (item.poPrice as boolean | null) ?? null,
+    sapPostingCode: toOptionalString(item.sapPostingCode),
+    ftpUploadUId,
+    ftpUploadStatus:
+      toOptionalString(item.ftpUploadStatus) ||
+      toOptionalString(item.uploadStatus) ||
+      toOptionalString(item.status),
+  }
+}
+
+export const parseFtpDataList = (payload: unknown): FtpDataListRow[] => {
+  const root = unwrapApiContent(payload)
+  const items = Array.isArray(payload)
+    ? payload
+    : Array.isArray(root)
+      ? root
+      : (root.items as unknown[]) || (root.data as unknown[]) || []
+
+  if (!Array.isArray(items)) return []
+
+  return items
+    .filter((item) => item && typeof item === 'object')
+    .map((item) => normalizeFtpDataListItem(item as Record<string, unknown>))
+}
+
+export const fetchFtpDataList = async (params: FtpDataQueryParams = {}): Promise<FtpDataListRow[]> => {
+  const resp = await invoiceHttp.get('/invoice/ftp-data', {
+    params: {
+      companyCode: params.companyCode || null,
+      invoiceTypeCode: params.invoiceTypeCode || null,
+      invoiceDate: params.invoiceDate || null,
+      statuscode: params.statusCode ?? null,
+      searchText: params.searchText || null,
+      page: params.page ?? 1,
+      pageSize: params.pageSize ?? 1000,
+    },
+  })
+
+  const content = resp?.data?.result?.content ?? resp?.data?.result ?? resp?.data ?? []
+  return parseFtpDataList(content)
+}
+
 export const fetchFtpUploadDetail = async (invoiceUId: string): Promise<FtpUploadListItem> => {
   const resp = await invoiceHttp.get(`/invoice/ftp-uploads/${invoiceUId}`)
   const content = resp?.data?.result?.content ?? resp?.data?.result ?? resp?.data ?? {}
@@ -230,22 +327,15 @@ export const resolveFtpUploadUIdFromRow = (row: FtpDataListRow): string | null =
   return uid ? String(uid) : null
 }
 
-export const isFtpSourceRow = (row: FtpDataListRow) => {
-  const sourceName = row.invoiceSourceName?.toLowerCase() || ''
-  return row.invoiceSource === FTP_INVOICE_SOURCE || sourceName.includes('ftp')
-}
-
 export const isDraftFtpDataRow = (row: FtpDataListRow) => {
   return row.statusCode === DRAFT_STATUS_CODE || row.statusName?.toLowerCase() === DRAFT_STATUS_NAME
 }
 
 export const canSyncFtpDataRow = (row: FtpDataListRow) => {
   const uid = resolveFtpUploadUIdFromRow(row)
-  if (!uid) return false
+  if (!uid || !row.vendorName?.trim()) return false
   if (row.ftpUploadStatus === 'Done') return false
-  if (!isFtpSourceRow(row) || !isDraftFtpDataRow(row)) return false
-  if (!row.vendorName?.trim()) return false
-  return true
+  return isDraftFtpDataRow(row)
 }
 
 const previewToDocument = (
