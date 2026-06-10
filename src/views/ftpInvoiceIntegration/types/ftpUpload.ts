@@ -174,9 +174,12 @@ export interface FtpSyncResult {
   syncedAt?: string | null
   warnings: string[]
   manualFields: string[]
+  hasDraft: boolean
   draft: Record<string, unknown>
   preview: FtpSyncPreview
   invoice: Record<string, unknown>
+  ftpData: Record<string, unknown> | null
+  /** @deprecated use ftpData for list update */
   invoiceListItem: FtpInvoiceListItem | null
 }
 

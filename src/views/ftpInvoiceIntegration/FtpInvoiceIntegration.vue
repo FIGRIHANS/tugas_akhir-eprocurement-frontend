@@ -372,6 +372,7 @@ import {
   saveFtpSyncContext,
   sortFtpUploadsByNewest,
   syncFtpUpload,
+  upsertFtpDataListRow,
 } from './types/ftpUploadService'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
@@ -400,6 +401,7 @@ const search = ref<string>('')
 const currentPage = ref<number>(1)
 const pageSize = ref<number>(10)
 const sourceList = ref<ListPoTypes[]>([])
+const ftpDataTotal = ref(0)
 const sortBy = ref<string>('')
 const sortColumnName = ref<string>('')
 const filteredPayload = ref([])
@@ -843,9 +845,11 @@ const sortedList = computed(() => {
   return data
 })
 
-const totalItems = computed(() =>
-  activeTab.value === 'upload' ? filteredUploadList.value.length : sortedList.value.length,
-)
+const totalItems = computed(() => {
+  if (activeTab.value === 'upload') return filteredUploadList.value.length
+  if (search.value.trim() || filteredPayload.value.length > 0) return sortedList.value.length
+  return ftpDataTotal.value || sortedList.value.length
+})
 
 const list = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value
@@ -893,11 +897,16 @@ const syncFtpUploadRow = async (row: ListPoTypes) => {
       return
     }
 
-    saveFtpSyncContext(buildSyncContextFromSyncResponse(syncResult))
+    const syncContext = buildSyncContextFromSyncResponse(syncResult)
+    saveFtpSyncContext(syncContext)
     saveActiveFtpUploadUId(syncResult.ftpUploadUId)
 
     if (syncResult.warnings?.length) {
       alert(syncResult.warnings.join('\n'))
+    }
+
+    if (syncContext.ftpData) {
+      sourceList.value = upsertFtpDataListRow(sourceList.value, syncContext.ftpData)
     }
 
     await callList()
@@ -980,7 +989,7 @@ const callList = async () => {
       return
     }
 
-    sourceList.value = await fetchFtpDataList({
+    const response = await fetchFtpDataList({
       statusCode: getListStatusCode(),
       companyCode: filterForm.companyCode,
       invoiceTypeCode: Number(filterForm.invoiceType) || undefined,
@@ -988,10 +997,13 @@ const callList = async () => {
       page: 1,
       pageSize: 1000,
     })
+    sourceList.value = response.items
+    ftpDataTotal.value = response.total
     updateUploadDummyStatuses()
   } catch (error) {
     console.error('Failed to load FTP invoice list:', error)
     sourceList.value = []
+    ftpDataTotal.value = 0
   }
 }
 

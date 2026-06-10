@@ -428,13 +428,25 @@ const applyRouteUiDefaults = () => {
   hasCompletedDataTab.value = true
 }
 
-const applyFtpSyncContextAfterLoad = () => {
-  if (route.query.from !== 'ftp' || !route.query.ftpUpload) return
+const getActiveFtpSyncContext = () => {
+  if (route.query.from !== 'ftp' || !route.query.ftpUpload) return null
 
   const context = getFtpSyncContext()
-  if (!context || context.ftpUploadUId !== route.query.ftpUpload?.toString()) return
+  if (!context || context.ftpUploadUId !== route.query.ftpUpload?.toString()) return null
+
+  return context
+}
+
+const applyFtpSyncContextAfterLoad = () => {
+  const context = getActiveFtpSyncContext()
+  if (!context) return
 
   applyFtpSyncDraftToForm(form, context, invoiceMasterApi.companyCode, invoiceMasterApi.vendorList)
+}
+
+const shouldLoadFtpSubmissionDetail = (context: ReturnType<typeof getActiveFtpSyncContext>) => {
+  if (!context) return true
+  return context.hasDraft === true
 }
 
 const markFtpUploadDoneIfNeeded = async (
@@ -497,10 +509,25 @@ const loadInvoiceFromRoute = async () => {
         tabNow.value = 'paymentStatus'
       }
     } else {
-      await invoiceApi.getPoDetail(invoiceId)
-      setStepperStatus()
-      setData()
-      applyFtpSyncContextAfterLoad()
+      const ftpContext = getActiveFtpSyncContext()
+
+      if (ftpContext?.invoice) {
+        applyFtpSyncDraftToForm(
+          form,
+          ftpContext,
+          invoiceMasterApi.companyCode,
+          invoiceMasterApi.vendorList,
+        )
+      }
+
+      if (shouldLoadFtpSubmissionDetail(ftpContext)) {
+        await invoiceApi.getPoDetail(invoiceId)
+        setStepperStatus()
+        setData()
+        applyFtpSyncContextAfterLoad()
+      } else {
+        setStepperStatus()
+      }
 
       if (isSavedDraftStatus(form.status)) {
         enableDraftTabNavigation()

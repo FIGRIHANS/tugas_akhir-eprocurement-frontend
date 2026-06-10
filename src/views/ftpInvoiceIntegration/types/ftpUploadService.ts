@@ -39,6 +39,11 @@ export interface FtpDataQueryParams {
   searchText?: string
 }
 
+export interface FtpDataListResponse {
+  items: FtpDataListRow[]
+  total: number
+}
+
 export const buildFtpUploadMetadata = (vendorName: string): FtpUploadMetadata => ({
   vendorName: vendorName.trim(),
   source: 'ftp',
@@ -51,9 +56,11 @@ export interface FtpSyncContext {
   syncedAt?: string | null
   warnings?: string[]
   manualFields?: string[]
+  hasDraft?: boolean
   draft?: Record<string, unknown> | null
   preview?: FtpSyncPreview | null
   invoice?: Record<string, unknown> | null
+  ftpData?: FtpDataListRow | null
   invoiceListItem?: FtpInvoiceListItem | null
   vendorName?: string | null
   invoiceDocument?: responseFileTypes | null
@@ -213,6 +220,10 @@ export const normalizeFtpDataListItem = (item: Record<string, unknown>): FtpData
 }
 
 export const parseFtpDataList = (payload: unknown): FtpDataListRow[] => {
+  return parseFtpDataListResponse(payload).items
+}
+
+export const parseFtpDataListResponse = (payload: unknown): FtpDataListResponse => {
   const root = unwrapApiContent(payload)
   const items = Array.isArray(payload)
     ? payload
@@ -220,14 +231,23 @@ export const parseFtpDataList = (payload: unknown): FtpDataListRow[] => {
       ? root
       : (root.items as unknown[]) || (root.data as unknown[]) || []
 
-  if (!Array.isArray(items)) return []
+  if (!Array.isArray(items)) {
+    return { items: [], total: Number(root.total) || 0 }
+  }
 
-  return items
+  const normalized = items
     .filter((item) => item && typeof item === 'object')
     .map((item) => normalizeFtpDataListItem(item as Record<string, unknown>))
+
+  return {
+    items: normalized,
+    total: Number(root.total) || normalized.length,
+  }
 }
 
-export const fetchFtpDataList = async (params: FtpDataQueryParams = {}): Promise<FtpDataListRow[]> => {
+export const fetchFtpDataList = async (
+  params: FtpDataQueryParams = {},
+): Promise<FtpDataListResponse> => {
   const resp = await invoiceHttp.get('/invoice/ftp-data', {
     params: {
       companyCode: params.companyCode || null,
@@ -240,8 +260,8 @@ export const fetchFtpDataList = async (params: FtpDataQueryParams = {}): Promise
     },
   })
 
-  const content = resp?.data?.result?.content ?? resp?.data?.result ?? resp?.data ?? []
-  return parseFtpDataList(content)
+  const content = resp?.data?.result?.content ?? resp?.data?.result ?? resp?.data ?? {}
+  return parseFtpDataListResponse(content)
 }
 
 export const fetchFtpUploadDetail = async (invoiceUId: string): Promise<FtpUploadListItem> => {
@@ -287,6 +307,12 @@ export const parseFtpSyncContent = (
   const draft = (content.draft as Record<string, unknown>) || {}
   const draftHeader = (draft.header as Record<string, unknown>) || {}
 
+  const ftpDataRaw = (content.ftpData as Record<string, unknown>) || null
+  const ftpDataFromListItem =
+    !ftpDataRaw && content.invoiceListItem
+      ? (content.invoiceListItem as Record<string, unknown>)
+      : null
+
   return {
     ftpUploadUId: String(ftpUploadUId || content.ftpUploadUId || ''),
     savedInvoiceUId: String(
@@ -297,9 +323,11 @@ export const parseFtpSyncContent = (
     manualFields: Array.isArray(content.manualFields)
       ? (content.manualFields as string[])
       : DEFAULT_MANUAL_FIELDS,
+    hasDraft: content.hasDraft === true,
     draft,
     preview: (content.preview as FtpSyncPreview) || {},
     invoice,
+    ftpData: ftpDataRaw || ftpDataFromListItem,
     invoiceListItem: (content.invoiceListItem as FtpInvoiceListItem) || null,
   }
 }
@@ -338,9 +366,11 @@ export const buildSyncContextFromSyncResponse = (sync: FtpSyncResult): FtpSyncCo
   syncedAt: sync.syncedAt,
   warnings: sync.warnings,
   manualFields: sync.manualFields,
+  hasDraft: sync.hasDraft,
   draft: sync.draft,
   preview: sync.preview,
   invoice: sync.invoice,
+  ftpData: normalizeFtpSyncFtpData(sync.ftpData),
   invoiceListItem: sync.invoiceListItem,
   vendorName: resolveVendorNameFromInvoice(sync.invoice),
 })
@@ -360,6 +390,34 @@ export const clearActiveFtpUploadUId = () => {
 export const resolveFtpUploadUIdFromRow = (row: FtpDataListRow): string | null => {
   const uid = row.ftpUploadUId || row.invoiceUId
   return uid ? String(uid) : null
+}
+
+export const upsertFtpDataListRow = (
+  list: FtpDataListRow[],
+  ftpData: FtpDataListRow | null | undefined,
+): FtpDataListRow[] => {
+  if (!ftpData) return list
+
+  const rowKey = resolveFtpUploadUIdFromRow(ftpData) || ftpData.invoiceUId
+  if (!rowKey) return [ftpData, ...list]
+
+  const index = list.findIndex((row) => {
+    const existingKey = resolveFtpUploadUIdFromRow(row) || row.invoiceUId
+    return existingKey === rowKey
+  })
+
+  if (index < 0) return [ftpData, ...list]
+
+  const updated = [...list]
+  updated[index] = { ...updated[index], ...ftpData }
+  return updated
+}
+
+export const normalizeFtpSyncFtpData = (
+  ftpData: Record<string, unknown> | null | undefined,
+): FtpDataListRow | null => {
+  if (!ftpData || typeof ftpData !== 'object') return null
+  return normalizeFtpDataListItem(ftpData)
 }
 
 export const isDraftFtpDataRow = (row: FtpDataListRow) => {
@@ -595,13 +653,12 @@ export const applyFtpSyncDraftToForm = (
   if (taxDocument) form.tax = taxDocument
   if (referenceDocument) form.referenceDocument = referenceDocument
 
+  // invoiceVendorNo (documentNo) and PO/GR are manual — never auto-fill from sync
   if (skipManual.has('pogr')) {
     form.invoicePoGr = preservedPoGr || []
   } else if (!form.invoicePoGr?.length) {
     form.invoicePoGr = []
   }
-
-  applyFtpInvoiceListItemToForm(form, context.invoiceListItem, companyList, skipManual)
 }
 
 const toDocument = (
