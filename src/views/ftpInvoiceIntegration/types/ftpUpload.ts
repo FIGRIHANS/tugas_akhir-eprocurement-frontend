@@ -17,7 +17,6 @@ export type FtpUploadOriginalFileNames = {
 export interface FtpUploadMetadata {
   vendorName: string
   vendorId?: number
-  companyCode?: string
   invoiceNo?: string | null
   documentNo?: string | null
   uploaderId?: string
@@ -42,7 +41,6 @@ export interface FtpUploadListItem {
   documentNo?: string | null
   vendorId?: number | null
   vendorName?: string | null
-  companyCode?: string | null
   status?: string | null
   invoiceFileUrl?: string | null
   taxFileUrl?: string | null

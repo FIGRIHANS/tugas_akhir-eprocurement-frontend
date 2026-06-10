@@ -957,11 +957,9 @@ const onUploaded = (
   }
 
   callList()
-  void fetchFtpUploads().then(() => {
-    activeTab.value = 'ftpData'
-    currentPage.value = 1
-    setTimeout(() => updateUploadDummyStatuses(), 250)
-  })
+  activeTab.value = 'ftpData'
+  currentPage.value = 1
+  setTimeout(() => updateUploadDummyStatuses(), 250)
 }
 
 const callList = async () => {
@@ -1078,7 +1076,6 @@ const resetFilter = () => {
 
 onMounted(() => {
   callList()
-  fetchFtpUploads()
 })
 </script>
 

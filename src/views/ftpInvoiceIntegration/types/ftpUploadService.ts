@@ -34,7 +34,7 @@ export const buildFtpUploadMetadata = (
   vendorId?: number | null,
 ): FtpUploadMetadata => {
   const metadata: FtpUploadMetadata = {
-    vendorName,
+    vendorName: vendorName.trim(),
     source: 'ftp',
     status: 'Uploaded',
   }
@@ -52,7 +52,7 @@ export interface FtpSyncContext {
   warnings?: string[]
   draft?: Record<string, unknown> | null
   preview?: FtpSyncPreview | null
-  companyCode?: string | null
+  vendorName?: string | null
   invoiceDocument?: responseFileTypes | null
   taxDocument?: responseFileTypes | null
   referenceDocument?: responseFileTypes | null
@@ -394,7 +394,7 @@ export const buildSyncContextFromDetail = (
 
   return {
     ftpUploadUId: String(normalized.invoiceUId || ''),
-    companyCode: normalized.companyCode || null,
+    vendorName: normalized.vendorName || null,
     invoiceDocument: toDocument(
       normalized.files?.invoice || {
         fileName: normalized.invoiceFileName,
