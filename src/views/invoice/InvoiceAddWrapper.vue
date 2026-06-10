@@ -433,12 +433,23 @@ const applyRouteUiDefaults = () => {
 }
 
 const getActiveFtpSyncContext = () => {
-  if (route.query.from !== 'ftp' || !route.query.ftpUpload) return null
+  if (route.query.from !== 'ftp') return null
 
   const context = getFtpSyncContext()
-  if (!context || context.ftpUploadUId !== route.query.ftpUpload?.toString()) return null
+  if (!context) return null
 
-  return context
+  const ftpUpload = route.query.ftpUpload?.toString()
+  const invoiceId = route.query.invoice?.toString()
+
+  if (ftpUpload && context.ftpUploadUId === ftpUpload) return context
+  if (
+    invoiceId &&
+    (context.savedInvoiceUId === invoiceId || context.ftpUploadUId === invoiceId)
+  ) {
+    return context
+  }
+
+  return null
 }
 
 const applyFtpSyncContextAfterLoad = () => {
@@ -525,10 +536,22 @@ const loadInvoiceFromRoute = async () => {
       }
 
       if (shouldLoadFtpSubmissionDetail(routeType)) {
-        await invoiceApi.getPoDetail(invoiceId)
-        setStepperStatus()
-        setData()
-        applyFtpSyncContextAfterLoad()
+        try {
+          await invoiceApi.getPoDetail(invoiceId)
+          setStepperStatus()
+          setData()
+          applyFtpSyncContextAfterLoad()
+        } catch (detailError) {
+          console.error('Error loading PO detail:', detailError)
+          if (ftpContext?.invoice) {
+            applyFtpSyncDraftToForm(
+              form,
+              ftpContext,
+              invoiceMasterApi.companyCode,
+              invoiceMasterApi.vendorList,
+            )
+          }
+        }
       } else {
         setStepperStatus()
       }

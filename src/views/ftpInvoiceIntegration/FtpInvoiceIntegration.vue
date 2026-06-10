@@ -40,15 +40,6 @@
             </div>
             <FilterList :data="filterForm" @setData="setDataFilter" ref="filterChild" />
             <button
-              v-if="activeTab === 'ftpData'"
-              class="btn btn-light btn-icon shrink-0"
-              title="Refresh list"
-              :disabled="isListRefreshing"
-              @click="refreshFtpDataList"
-            >
-              <i class="ki-duotone ki-arrows-circle" :class="{ 'animate-spin': isListRefreshing }"></i>
-            </button>
-            <button
               v-if="activeTab === 'ftpData' && isProfile3200"
               class="btn btn-primary inline-flex items-center gap-2 shrink-0"
               @click="syncFtpData"
@@ -368,16 +359,17 @@ import {
   resolveFtpTaxFileName,
 } from './types/ftpUpload'
 import {
-  canOpenFtpInvoiceForm,
+  buildFtpSyncContextFromDataRow,
+  buildSyncContextFromSyncResponse,
   canSyncFtpDataRow,
   fetchFtpDataList,
   fetchFtpUploadList,
   formatFtpDataCompany,
   getFtpDataStatusLabel,
-  mapFtpDataRowToUploadListItem,
   resolveFtpRowUid,
   resolveFtpUploadUIdFromRow,
-  buildSyncContextFromSyncResponse,
+  saveActiveFtpUploadUId,
+  saveFtpSyncContext,
   sortFtpUploadsByNewest,
   syncFtpUpload,
   upsertFtpDataListRow,
@@ -416,7 +408,6 @@ const filteredPayload = ref([])
 const filterChild = ref(null)
 const viewDetailId = ref('')
 const isSyncLoading = ref(false)
-const isListRefreshing = ref(false)
 const syncingRowId = ref<string | null>(null)
 const FTP_INVOICE_SOURCE = 3
 const DRAFT_STATUS_CODE = 0
@@ -610,22 +601,7 @@ const getListStatusCode = (): number | null => {
   return null
 }
 
-const findFtpDataRow = (invoiceId: string) => {
-  return (sourceList.value as FtpDataListRow[]).find(
-    (row) =>
-      String(row.invoiceUId) === invoiceId ||
-      String(row.reffId || '') === invoiceId ||
-      String(row.ftpUploadUId || '') === invoiceId,
-  )
-}
-
 const openDetailVerification = (invoiceId: string) => {
-  const row = findFtpDataRow(invoiceId)
-  if (row && !canOpenFtpInvoiceForm(row)) {
-    openFtpDocumentPreview(row)
-    return
-  }
-
   viewDetailId.value = invoiceId
   const idModal = document.querySelector('#detail_verification_modal')
   const modal = KTModal.getInstance(idModal as HTMLElement)
@@ -701,11 +677,11 @@ const formatFtpDataAmountDisplay = (value?: number | null) => {
 }
 
 const colorBadgeForFtpRow = (row: FtpDataListRow) => {
-  const label = (row.portalStatus || row.statusName || '').toLowerCase()
+  const label = getFtpDataStatusLabel(row).toLowerCase()
   if (label === 'draft' || label === 'drafted') return 'badge-secondary'
   if (label === 'uploaded') return 'badge-info'
   if (label === 'done') return 'badge-success'
-  return colorBadge(row.statusCode)
+  return colorBadge(row.statusCode ?? 0)
 }
 
 const colorBadge = (status: number) => {
@@ -917,28 +893,28 @@ const setPage = (value: number) => {
   currentPage.value = value
 }
 
-const openFtpDocumentPreview = (row: FtpDataListRow) => {
-  openViewer(mapFtpDataRowToUploadListItem(row))
-}
-
 const goView = (data: ListPoTypes) => {
   const row = data as FtpDataListRow
   const uid = resolveFtpRowUid(row)
+  const ftpUploadUid = resolveFtpUploadUIdFromRow(row) || uid
+  const syncContext = buildFtpSyncContextFromDataRow(row)
 
-  if (canOpenFtpInvoiceForm(row)) {
-    router.push({
-      name: 'invoiceAdd',
-      query: {
-        type: 'po',
-        invoice: uid,
-        from: 'ftp',
-        ftpUpload: resolveFtpUploadUIdFromRow(row) || undefined,
-      },
-    })
-    return
-  }
+  saveFtpSyncContext({
+    ...syncContext,
+    ftpUploadUId: ftpUploadUid,
+    savedInvoiceUId: uid,
+  })
+  saveActiveFtpUploadUId(ftpUploadUid)
 
-  openFtpDocumentPreview(row)
+  router.push({
+    name: 'invoiceAdd',
+    query: {
+      type: 'po',
+      invoice: uid,
+      from: 'ftp',
+      ftpUpload: ftpUploadUid,
+    },
+  })
 }
 
 const goAdd = () => {
@@ -970,7 +946,7 @@ const syncFtpUploadRow = async (row: ListPoTypes) => {
       sourceList.value = upsertFtpDataListRow(sourceList.value, syncContext.ftpData)
     }
 
-    await refreshFtpDataList()
+    await callList()
     alert('Sync berhasil. Data OCR telah diperbarui.')
   } catch (error: unknown) {
     const err = error as { response?: { data?: { result?: { message?: string } } }; message?: string }
@@ -1030,19 +1006,10 @@ const onUploaded = (
 
   activeTab.value = 'ftpData'
   currentPage.value = 1
-  void refreshFtpDataList()
+  void callList()
   // OCR async di backend — refresh ulang setelah beberapa detik
-  setTimeout(() => void refreshFtpDataList(), 3000)
-  setTimeout(() => void refreshFtpDataList(), 8000)
-}
-
-const refreshFtpDataList = async () => {
-  isListRefreshing.value = true
-  try {
-    await callList()
-  } finally {
-    isListRefreshing.value = false
-  }
+  setTimeout(() => void callList(), 3000)
+  setTimeout(() => void callList(), 8000)
 }
 
 const callList = async () => {

@@ -219,10 +219,10 @@ export const resolveFtpRowUid = (row: FtpDataListRow): string => {
   return String(row.reffId || row.invoiceUId || row.ftpUploadUId || '')
 }
 
-/** Status badge label on FTP Data grid — bind ke `row.status` (Draft / Uploaded / Done). */
+/** Status badge label on FTP Data grid — invoice workflow (Drafted, dll.). */
 export const getFtpDataStatusLabel = (row: FtpDataListRow): string => {
-  if (row.portalStatus?.trim()) return row.portalStatus
   if (row.statusName?.trim()) return row.statusName
+  if (row.hasDraft || row.statusCode === DRAFT_STATUS_CODE) return 'Drafted'
   return '-'
 }
 
@@ -260,13 +260,20 @@ export const normalizeFtpDataListItem = (item: Record<string, unknown>): FtpData
     reffId ||
     null
   const portalStatus = toOptionalString(item.status)
-  const uploadStatus = portalStatus
-  const statusCode = item.statusCode != null && item.statusCode !== '' ? Number(item.statusCode) : null
+  const isDone = portalStatus === 'Done'
+  const hasDraft =
+    item.hasDraft === true || (!isDone && !!toOptionalString(item.vendorName))
+  const statusCode =
+    item.statusCode != null && item.statusCode !== ''
+      ? Number(item.statusCode)
+      : hasDraft
+        ? DRAFT_STATUS_CODE
+        : null
   const invoiceListItem = (item.invoiceListItem as FtpInvoiceListItem) || null
   const statusName =
     toOptionalString(item.statusName) ||
     invoiceListItem?.statusName ||
-    (statusCode === 0 ? 'Drafted' : null) ||
+    (hasDraft || statusCode === DRAFT_STATUS_CODE ? 'Drafted' : null) ||
     ''
   const documents = Array.isArray(item.documents)
     ? (item.documents as FtpDataDocument[])
@@ -317,7 +324,7 @@ export const normalizeFtpDataListItem = (item: Record<string, unknown>): FtpData
     portalStatus,
     ftpUploadStatus: toOptionalString(item.ftpUploadStatus || item.uploadStatus) || portalStatus,
     flagSync: item.flagSync === true,
-    hasDraft: item.hasDraft === true,
+    hasDraft,
     source: toOptionalString(item.source),
     documents,
     invoiceListItem,
@@ -507,6 +514,62 @@ const resolveVendorNameFromInvoice = (invoice: Record<string, unknown>): string 
     (header.vendorName as string) ||
     null
   )
+}
+
+export const buildFtpSyncContextFromDataRow = (row: FtpDataListRow): FtpSyncContext => {
+  const uid = resolveFtpRowUid(row)
+  const listItem = row.invoiceListItem
+
+  const documents =
+    row.documents?.map((doc) => ({
+      id: 0,
+      documentType: doc.documentType,
+      documentName: doc.documentName,
+      documentUrl: doc.documentUrl,
+      documentSize: '0',
+    })) || []
+
+  const invoice: Record<string, unknown> = {
+    header: {
+      invoiceUId: uid,
+      statusCode:
+        row.statusCode != null && row.statusCode >= 0 ? row.statusCode : DRAFT_STATUS_CODE,
+      statusName: row.statusName || 'Drafted',
+      invoiceTypeCode: row.invoiceTypeCode || listItem?.invoiceTypeCode || 901,
+      invoiceTypeName: row.invoiceTypeName || listItem?.invoiceTypeName || 'PO',
+      invoiceDPCode: row.invoiceDPCode || listItem?.invoiceDPCode || 9011,
+      companyCode: row.companyCode || listItem?.companyCode || '',
+      companyName: row.companyName || listItem?.companyName || '',
+      invoiceNo: row.invoiceNo || listItem?.invoiceNo || '',
+      invoiceDate: row.invoiceDate || listItem?.invoiceDate || '',
+      taxNo: row.taxNo || '',
+      documentNo: null,
+    },
+    vendor: {
+      vendorName: row.vendorName || listItem?.vendorName || '',
+    },
+    calculation: {
+      subtotal: row.dpp ?? listItem?.dpp ?? 0,
+      vatAmount: row.vatAmount ?? listItem?.vatAmount ?? 0,
+      totalGrossAmount: row.totalGrossAmount ?? listItem?.totalGrossAmount ?? 0,
+      totalNetAmount: row.totalNetAmount ?? listItem?.totalNetAmount ?? 0,
+      whtAmount: 0,
+      additionalCost: 0,
+    },
+    documents,
+    ocr: {},
+    pogr: [],
+  }
+
+  return {
+    ftpUploadUId: uid,
+    savedInvoiceUId: uid,
+    hasDraft: row.hasDraft !== false,
+    manualFields: [...DEFAULT_MANUAL_FIELDS],
+    invoice,
+    invoiceListItem: listItem,
+    vendorName: row.vendorName || listItem?.vendorName || null,
+  }
 }
 
 export const buildSyncContextFromSyncResponse = (sync: FtpSyncResult): FtpSyncContext => ({
@@ -809,6 +872,8 @@ export const applyFtpSyncDraftToForm = (
   } else if (!form.invoicePoGr?.length) {
     form.invoicePoGr = []
   }
+
+  applyFtpInvoiceListItemToForm(form, context.invoiceListItem, companyList, skipManual)
 }
 
 const toDocument = (
