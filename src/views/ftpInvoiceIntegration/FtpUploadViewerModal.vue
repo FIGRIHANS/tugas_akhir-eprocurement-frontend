@@ -1,115 +1,62 @@
 <template>
   <div class="modal" data-modal="true" id="ftp_view_modal">
-    <div class="modal-content max-w-[900px] modal-center-y">
-      <div class="modal-header">
-        <h3 class="modal-title text-lg font-semibold text-gray-700">View Uploaded Files</h3>
+    <div class="modal-content ftp-modal modal-center-y">
+      <div class="modal-header ftp-modal__header">
+        <div>
+          <h3 class="modal-title ftp-modal__title">View Uploaded Files</h3>
+          <p class="ftp-modal__subtitle">Detail dokumen yang diunggah melalui FTP integration</p>
+        </div>
         <button class="btn btn-xs btn-icon btn-light btn-clear" data-modal-dismiss="true">
           <i class="ki-duotone ki-cross"></i>
         </button>
       </div>
 
-      <div class="modal-body p-4">
-        <div class="border rounded-lg p-4 bg-gray-50 mb-5">
-          <div class="font-semibold text-gray-700 mb-3">Upload Detail</div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
-            <div>
-              <div class="text-gray-500">Invoice UID</div>
-              <div class="font-medium break-all">{{ data.invoiceUId || '-' }}</div>
-            </div>
-            <div>
-              <div class="text-gray-500">Invoice No</div>
-              <div class="font-medium">{{ data.invoiceNo || '-' }}</div>
-            </div>
-            <div>
-              <div class="text-gray-500">Company Code</div>
-              <div class="font-medium">{{ data.companyCode || '-' }}</div>
-            </div>
-            <div>
-              <div class="text-gray-500">Status</div>
-              <div>
-                <span
-                  v-if="data.status"
-                  class="badge badge-outline"
-                  :class="data.status === 'Done' ? 'badge-success' : 'badge-primary'"
-                >
-                  {{ data.status }}
-                </span>
-                <span v-else class="font-medium">-</span>
-              </div>
-            </div>
-            <div>
-              <div class="text-gray-500">Created At</div>
-              <div class="font-medium">{{ formattedCreatedAt }}</div>
-            </div>
+      <div class="modal-body ftp-modal__body">
+        <div class="ftp-modal__summary">
+          <div class="ftp-modal__summary-item">
+            <span class="ftp-modal__label">Vendor Name</span>
+            <span class="ftp-modal__value">{{ data.vendorName || '-' }}</span>
           </div>
-
-          <div v-if="parsedPreviewEntries.length" class="mt-4 pt-4 border-t border-gray-200">
-            <div class="font-semibold text-gray-700 mb-2">Parsed Preview</div>
-            <table class="table text-sm w-full">
-              <tbody>
-                <tr v-for="entry in parsedPreviewEntries" :key="entry.key">
-                  <td class="font-medium text-gray-500 w-[40%]">{{ entry.label }}</td>
-                  <td>{{ entry.value }}</td>
-                </tr>
-              </tbody>
-            </table>
+          <div class="ftp-modal__summary-item">
+            <span class="ftp-modal__label">Created At</span>
+            <span class="ftp-modal__value">{{ formattedCreatedAt }}</span>
+          </div>
+          <div class="ftp-modal__summary-item ftp-modal__summary-item--status">
+            <span class="ftp-modal__label">Status</span>
+            <span
+              v-if="data.status"
+              class="badge badge-outline"
+              :class="data.status === 'Done' ? 'badge-success' : 'badge-primary'"
+            >
+              {{ data.status }}
+            </span>
+            <span v-else class="ftp-modal__value">-</span>
           </div>
         </div>
 
-        <div class="space-y-4">
-          <div v-for="file in fileSections" :key="file.key">
-            <label class="font-medium">{{ file.label }}</label>
-            <div class="p-3 border rounded bg-gray-50 mt-2 flex items-start gap-3">
-              <a
-                v-if="file.url"
-                :href="file.url"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px] shrink-0"
-                :title="`Open ${file.label}`"
-              >
-                <i class="ki-filled ki-eye !text-lg"></i>
-              </a>
-              <span
-                v-else
-                class="btn btn-outline btn-icon btn-light w-[32px] h-[32px] shrink-0 opacity-50 cursor-not-allowed"
-                title="No file available"
-              >
-                <i class="ki-filled ki-eye !text-lg"></i>
-              </span>
+        <div class="ftp-modal__section-title">Documents</div>
+        <div class="ftp-modal__file-list">
+          <div
+            v-for="file in fileSections"
+            :key="file.key"
+            class="ftp-modal__file-row"
+            :class="{ 'ftp-modal__file-row--empty': !file.hasFile }"
+          >
+            <div class="ftp-modal__file-icon" :class="file.iconClass">
+              <i :class="file.icon"></i>
+            </div>
 
-              <div class="min-w-0 flex-1 space-y-1 text-sm">
-                <div>
-                  <span class="text-gray-500">Original File Name:</span>
-                  <span class="font-medium ml-1">{{ file.fileName || 'No file uploaded' }}</span>
-                </div>
-                <div v-if="file.storedFileName && file.storedFileName !== file.fileName">
-                  <span class="text-gray-500">Stored File Name:</span>
-                  <span class="font-medium ml-1">{{ file.storedFileName }}</span>
-                  <span class="text-xs text-gray-400 ml-1">(nama file di server storage)</span>
-                </div>
-                <div v-if="file.blobPath">
-                  <span class="text-gray-500">Blob Path:</span>
-                  <span class="font-medium ml-1 break-all">{{ file.blobPath }}</span>
-                </div>
-                <div v-if="file.url">
-                  <span class="text-gray-500">URL:</span>
-                  <a
-                    :href="file.url"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="font-medium ml-1 text-primary break-all hover:underline"
-                  >
-                    {{ file.url }}
-                  </a>
-                </div>
+            <div class="ftp-modal__file-content">
+              <div class="ftp-modal__file-type">{{ file.label }}</div>
+              <div class="ftp-modal__file-name" :title="file.displayName">
+                {{ file.displayName }}
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="modal-footer flex gap-2 justify-end p-4">
+      <div class="modal-footer ftp-modal__footer">
         <button class="btn btn-light" data-modal-dismiss="true">Close</button>
       </div>
     </div>
@@ -130,7 +77,7 @@ export interface FtpUploadFileInfo {
 export interface FtpUploadViewerData {
   invoiceUId?: string | null
   invoiceNo?: string | null
-  companyCode?: string | null
+  vendorName?: string | null
   status?: string | null
   createdAt?: string | null
   parsedPreview?: Record<string, unknown> | null
@@ -149,51 +96,188 @@ const formattedCreatedAt = computed(() => {
   return parsed.isValid() ? parsed.format('YYYY/MM/DD HH:mm:ss') : data.value.createdAt
 })
 
-const parsedPreviewEntries = computed(() => {
-  const preview = data.value.parsedPreview
-  if (!preview || typeof preview !== 'object') return []
-
-  return Object.entries(preview)
-    .filter(([, value]) => value != null && String(value).trim() !== '')
-    .map(([key, value]) => ({
-      key,
-      label: key.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase()),
-      value: String(value),
-    }))
-})
+const getDisplayName = (fileName: string | null | undefined, emptyLabel: string) => {
+  if (fileName && fileName.trim() !== '') return fileName
+  return emptyLabel
+}
 
 const fileSections = computed(() => [
   {
     key: 'invoice',
     label: 'Invoice Document',
-    fileName: data.value.invoice?.fileName || null,
-    storedFileName: data.value.invoice?.storedFileName || null,
-    blobPath: data.value.invoice?.blobPath || null,
-    url: data.value.invoice?.url || null,
+    icon: 'ki-duotone ki-document',
+    iconClass: 'ftp-modal__file-icon--invoice',
+    displayName: getDisplayName(data.value.invoice?.fileName, 'No file uploaded'),
+    hasFile: !!data.value.invoice?.fileName,
   },
   {
     key: 'tax',
     label: 'Tax Document',
-    fileName: data.value.tax?.fileName || null,
-    storedFileName: data.value.tax?.storedFileName || null,
-    blobPath: data.value.tax?.blobPath || null,
-    url: data.value.tax?.url || null,
+    icon: 'ki-duotone ki-bill',
+    iconClass: 'ftp-modal__file-icon--tax',
+    displayName: getDisplayName(data.value.tax?.fileName, 'No file uploaded'),
+    hasFile: !!data.value.tax?.fileName,
   },
   {
     key: 'reference',
     label: 'Reference Document',
-    fileName: data.value.reference?.fileName || null,
-    storedFileName: data.value.reference?.storedFileName || null,
-    blobPath: data.value.reference?.blobPath || null,
-    url: data.value.reference?.url || null,
+    icon: 'ki-duotone ki-folder',
+    iconClass: 'ftp-modal__file-icon--reference',
+    displayName: getDisplayName(data.value.reference?.fileName, 'No file uploaded'),
+    hasFile: !!data.value.reference?.fileName,
   },
 ])
 </script>
 
 <style scoped lang="scss">
-.modal-body {
-  .p-4 {
-    display: block;
+.ftp-modal {
+  max-width: 560px;
+
+  &__header {
+    align-items: flex-start;
+    gap: 12px;
+    padding: 20px 24px 12px;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+  }
+
+  &__subtitle {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: #6b7280;
+  }
+
+  &__body {
+    padding: 8px 24px 20px;
+  }
+
+  &__summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #f9fafb;
+    margin-bottom: 20px;
+  }
+
+  &__summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+
+    &--status {
+      align-items: flex-start;
+    }
+  }
+
+  &__label {
+    font-size: 12px;
+    color: #6b7280;
+  }
+
+  &__value {
+    font-size: 14px;
+    font-weight: 500;
+    color: #111827;
+    word-break: break-word;
+  }
+
+  &__section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 10px;
+  }
+
+  &__file-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__file-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 14px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: #fff;
+
+    &--empty {
+      background: #fafafa;
+
+      .ftp-modal__file-name {
+        color: #9ca3af;
+        font-weight: 400;
+        font-style: italic;
+      }
+    }
+  }
+
+  &__file-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    flex-shrink: 0;
+
+    i {
+      font-size: 18px;
+    }
+
+    &--invoice,
+    &--tax,
+    &--reference {
+      background: #ecfdf5;
+      color: #0d9488;
+    }
+  }
+
+  &__file-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__file-type {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #9ca3af;
+    margin-bottom: 2px;
+  }
+
+  &__file-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #111827;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__footer {
+    padding: 12px 24px 20px;
+    border-top: 1px solid #f3f4f6;
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 640px) {
+  .ftp-modal__summary {
+    grid-template-columns: 1fr;
   }
 }
 </style>

@@ -198,6 +198,13 @@ import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification
 import type { itemsPoGrType } from './types/invoicePoGr'
 import type { itemsCostType } from './types/additionalCost'
 import type { invoiceItemTypes } from './types/invoiceItem'
+import {
+  applyFtpSyncDraftToForm,
+  clearFtpSyncSession,
+  getActiveFtpUploadUId,
+  getFtpSyncContext,
+  updateFtpUpload,
+} from '@/views/ftpInvoiceIntegration/types/ftpUploadService'
 
 const InvoiceData = defineAsyncComponent(() => import('./InvoiceAddWrapper/InvoiceData.vue'))
 const InvoiceInformation = defineAsyncComponent(
@@ -419,6 +426,55 @@ const applyRouteUiDefaults = () => {
 
   tabNow.value = 'preview'
   hasCompletedDataTab.value = true
+}
+
+const loadFtpSyncFromRoute = async () => {
+  const ftpUploadUId = route.query.ftpUpload?.toString()
+  if (!ftpUploadUId || route.query.from !== 'ftp') return
+
+  if (!invoiceMasterApi.companyCode.length) {
+    await invoiceMasterApi.getCompanyCode()
+  }
+
+  const context = getFtpSyncContext()
+  if (!context || context.ftpUploadUId !== ftpUploadUId || !context.draft) {
+    console.error('FTP sync context missing. Use Sync Data from FTP Data list first.')
+    return
+  }
+
+  applyFtpSyncDraftToForm(form, context, invoiceMasterApi.companyCode, invoiceMasterApi.vendorList)
+  enableDraftTabNavigation()
+
+  if (context.warnings?.length) {
+    console.warn('FTP sync warnings:', context.warnings.join('\n'))
+  }
+}
+
+const markFtpUploadDoneIfNeeded = async (
+  response: { result?: { content?: unknown } },
+  linkedInvoiceId?: string | null,
+) => {
+  const ftpUploadUId =
+    route.query.ftpUpload?.toString() || getActiveFtpUploadUId() || getFtpSyncContext()?.ftpUploadUId
+  if (!ftpUploadUId || isClickDraft.value) return
+
+  try {
+    const responseContent = response.result?.content as Record<string, unknown> | undefined
+    const resolvedLinkedId =
+      linkedInvoiceId ||
+      (responseContent?.invoiceUId as string) ||
+      (responseContent?.invoiceUid as string) ||
+      form.invoiceUId ||
+      null
+
+    await updateFtpUpload(ftpUploadUId, {
+      status: 'Done',
+      linkedInvoiceId: resolvedLinkedId,
+    })
+    clearFtpSyncSession()
+  } catch (error) {
+    console.error('Failed to mark FTP upload as Done:', error)
+  }
 }
 
 const loadInvoiceFromRoute = async () => {
@@ -1543,8 +1599,13 @@ const goSaveDraft = () => {
   }
 }
 
-const setAfterResponsePost = (response: { statusCode: number; result: { message: string } }) => {
+const setAfterResponsePost = async (response: {
+  statusCode: number
+  result: { message: string; content?: unknown }
+}) => {
   if (response.statusCode === 200) {
+    await markFtpUploadDoneIfNeeded(response)
+
     const idModal = document.querySelector('#success_invoice_modal')
     const modal = KTModal.getInstance(idModal as HTMLElement)
     modal.show()
@@ -2365,12 +2426,13 @@ const setStepperStatus = () => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   invoiceMasterApi.getTaxCode()
   if (!checkIsNonPo()) invoiceMasterApi.getInvoicePoType()
   else invoiceMasterApi.getInvoiceNonPoType()
   invoiceMasterApi.getDocumentTypes()
   invoiceMasterApi.getVendorList()
+  await invoiceMasterApi.getCompanyCode()
 
   if (loginApi.isVendor) {
     form.invoiceType = '901'
@@ -2379,6 +2441,12 @@ onMounted(() => {
   if (route.query.type === 'nonpo') {
     form.invoiceType = '1'
     form.invoiceTypeName = 'Reimbursement'
+  }
+
+  if (route.query.ftpUpload && route.query.from === 'ftp' && !route.query.invoice) {
+    applyRouteUiDefaults()
+    await loadFtpSyncFromRoute()
+    return
   }
 
   void loadInvoiceFromRoute()

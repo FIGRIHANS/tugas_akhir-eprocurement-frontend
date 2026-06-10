@@ -14,6 +14,18 @@ export type FtpUploadOriginalFileNames = {
   reference?: string | null
 }
 
+export interface FtpUploadMetadata {
+  vendorName: string
+  vendorId?: number
+  companyCode?: string
+  invoiceNo?: string | null
+  documentNo?: string | null
+  uploaderId?: string
+  source?: string
+  status?: string
+  notes?: string | null
+}
+
 export interface FtpUploadFileDetail {
   fileName?: string | null
   name?: string | null
@@ -28,6 +40,8 @@ export interface FtpUploadListItem {
   invoiceUId?: string | null
   invoiceNo?: string | null
   documentNo?: string | null
+  vendorId?: number | null
+  vendorName?: string | null
   companyCode?: string | null
   status?: string | null
   invoiceFileUrl?: string | null
@@ -38,7 +52,7 @@ export interface FtpUploadListItem {
   referenceFileName?: string | null
   vatAttached?: boolean
   createdAt?: string | null
-  vendorName?: string | null
+  linkedInvoiceId?: string | null
   invoiceBlobPath?: string | null
   taxBlobPath?: string | null
   referenceBlobPath?: string | null
@@ -115,6 +129,26 @@ export const resolveFtpReferenceFileName = (
   )
 
   return name ?? '-'
+}
+
+export interface FtpFilePreview {
+  fileName?: string | null
+  blobPath?: string | null
+  url?: string | null
+}
+
+export interface FtpSyncPreview {
+  invoice?: FtpFilePreview | null
+  tax?: FtpFilePreview | null
+  reference?: FtpFilePreview | null
+}
+
+export interface FtpSyncResult {
+  ftpUploadUId: string
+  syncedAt?: string | null
+  warnings: string[]
+  draft: Record<string, unknown>
+  preview: FtpSyncPreview
 }
 
 export const normalizeFtpUploadListItem = (
