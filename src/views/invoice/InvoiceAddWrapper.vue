@@ -428,26 +428,13 @@ const applyRouteUiDefaults = () => {
   hasCompletedDataTab.value = true
 }
 
-const loadFtpSyncFromRoute = async () => {
-  const ftpUploadUId = route.query.ftpUpload?.toString()
-  if (!ftpUploadUId || route.query.from !== 'ftp') return
-
-  if (!invoiceMasterApi.companyCode.length) {
-    await invoiceMasterApi.getCompanyCode()
-  }
+const applyFtpSyncContextAfterLoad = () => {
+  if (route.query.from !== 'ftp' || !route.query.ftpUpload) return
 
   const context = getFtpSyncContext()
-  if (!context || context.ftpUploadUId !== ftpUploadUId || !context.draft) {
-    console.error('FTP sync context missing. Use Sync Data from FTP Data list first.')
-    return
-  }
+  if (!context || context.ftpUploadUId !== route.query.ftpUpload?.toString()) return
 
   applyFtpSyncDraftToForm(form, context, invoiceMasterApi.companyCode, invoiceMasterApi.vendorList)
-  enableDraftTabNavigation()
-
-  if (context.warnings?.length) {
-    console.warn('FTP sync warnings:', context.warnings.join('\n'))
-  }
 }
 
 const markFtpUploadDoneIfNeeded = async (
@@ -513,6 +500,7 @@ const loadInvoiceFromRoute = async () => {
       await invoiceApi.getPoDetail(invoiceId)
       setStepperStatus()
       setData()
+      applyFtpSyncContextAfterLoad()
 
       if (isSavedDraftStatus(form.status)) {
         enableDraftTabNavigation()
@@ -2441,12 +2429,6 @@ onMounted(async () => {
   if (route.query.type === 'nonpo') {
     form.invoiceType = '1'
     form.invoiceTypeName = 'Reimbursement'
-  }
-
-  if (route.query.ftpUpload && route.query.from === 'ftp' && !route.query.invoice) {
-    applyRouteUiDefaults()
-    await loadFtpSyncFromRoute()
-    return
   }
 
   void loadInvoiceFromRoute()

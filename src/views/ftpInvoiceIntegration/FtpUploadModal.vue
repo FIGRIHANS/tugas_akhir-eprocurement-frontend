@@ -254,13 +254,6 @@ const selectedVendorName = computed(() => {
   return selectedVendor.value?.vendorName || ''
 })
 
-const selectedVendorId = computed(() => {
-  const raw = selectedVendor.value?.vendorId
-  if (!raw) return null
-  const parsed = Number(raw)
-  return Number.isFinite(parsed) ? parsed : null
-})
-
 watch(
   () => loginStore.isVendor,
   () => {
@@ -361,7 +354,7 @@ const upload = async () => {
     form.append('taxFile', taxFile.value)
     if (referenceFile.value) form.append('referenceFile', referenceFile.value)
 
-    const metadata = buildFtpUploadMetadata(selectedVendorName.value, selectedVendorId.value)
+    const metadata = buildFtpUploadMetadata(selectedVendorName.value)
     form.append('metadata', JSON.stringify(metadata))
 
     const response = await invoiceApi.post('/invoice/upload-invoice-ftp', form, {

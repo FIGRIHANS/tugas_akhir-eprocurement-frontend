@@ -68,7 +68,7 @@
               </svg>
               <i v-else class="ki-duotone ki-arrows-circle shrink-0"></i>
               <span class="whitespace-nowrap">
-                {{ isSyncLoading ? 'Syncing...' : 'Sync Excel Data' }}
+                {{ isSyncLoading ? 'Syncing...' : 'Sync Get Data' }}
               </span>
             </button>
             <button
@@ -188,7 +188,7 @@
             </table>
           </template>
 
-          <!-- Full FTP Data table from getListPo -->
+          <!-- FTP Data table from GET /invoice/ftp-data -->
           <template v-else>
             <table class="table align-middle text-gray-700 font-medium text-sm">
               <thead>
@@ -363,9 +363,11 @@ import {
 import {
   buildSyncContextFromSyncResponse,
   canSyncFtpDataRow,
+  fetchFtpDataList,
   fetchFtpUploadDetail,
   fetchFtpUploadList,
   resolveFtpUploadUIdFromRow,
+  resolveSavedInvoiceUIdFromSync,
   saveActiveFtpUploadUId,
   saveFtpSyncContext,
   sortFtpUploadsByNewest,
@@ -884,13 +886,21 @@ const syncFtpUploadRow = async (row: ListPoTypes) => {
   syncingRowId.value = uid
   try {
     const syncResult = await syncFtpUpload(uid)
-    const context = buildSyncContextFromSyncResponse(syncResult)
-    saveFtpSyncContext(context)
+    const savedInvoiceUId = resolveSavedInvoiceUIdFromSync(syncResult)
+
+    if (!savedInvoiceUId) {
+      alert('Sync berhasil tetapi invoice UID tidak ditemukan di response.')
+      return
+    }
+
+    saveFtpSyncContext(buildSyncContextFromSyncResponse(syncResult))
     saveActiveFtpUploadUId(syncResult.ftpUploadUId)
 
     if (syncResult.warnings?.length) {
       alert(syncResult.warnings.join('\n'))
     }
+
+    await callList()
 
     router.push({
       name: 'invoiceAdd',
@@ -898,6 +908,7 @@ const syncFtpUploadRow = async (row: ListPoTypes) => {
         type: 'po',
         from: 'ftp',
         ftpUpload: syncResult.ftpUploadUId,
+        invoice: savedInvoiceUId,
       },
     })
   } catch (error: unknown) {
@@ -964,10 +975,19 @@ const onUploaded = (
 
 const callList = async () => {
   try {
-    await invoiceApi.getListPo(getFtpListParams())
-    const data = cloneDeep(invoiceApi.listPo)
-    sourceList.value = activeTab.value === 'upload' ? data.filter(isUploadedFtpData) : data
-    // after updating sourceList, sync upload dummy statuses
+    if (activeTab.value === 'upload') {
+      await fetchFtpUploads()
+      return
+    }
+
+    sourceList.value = await fetchFtpDataList({
+      statusCode: getListStatusCode(),
+      companyCode: filterForm.companyCode,
+      invoiceTypeCode: Number(filterForm.invoiceType) || undefined,
+      invoiceDate: filterForm.date,
+      page: 1,
+      pageSize: 1000,
+    })
     updateUploadDummyStatuses()
   } catch (error) {
     console.error('Failed to load FTP invoice list:', error)
