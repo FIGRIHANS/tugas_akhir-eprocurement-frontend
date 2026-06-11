@@ -160,7 +160,7 @@
       <!-- Loading State -->
       <div v-if="isLoading" class="flex justify-center items-center py-20">
         <div class="text-center">
-          <i class="ki-duotone ki-loading text-4xl text-blue-500 animate-spin"></i>
+          <i class="ki-duotone ki-loading text-4xl text-primary animate-spin"></i>
           <p class="mt-4 text-gray-600">Loading data...</p>
         </div>
       </div>
@@ -181,11 +181,11 @@
               <th
                 v-for="(item, index) in columns"
                 :key="index"
-                class="!border-b-blue-500 !bg-blue-100 !text-blue-500"
+                class="!border-b-teal-500 !bg-teal-100 !text-teal-500"
                 :class="{
                   list__long: index !== 0,
                   'cursor-pointer': item !== 'Action',
-                  '!text-blue-500': item === sortColumnName && sortBy !== '',
+                  '!text-teal-500': item === sortColumnName && sortBy !== '',
                 }"
                 @click="item !== 'Action' ? sortColumn(item) : null"
               >

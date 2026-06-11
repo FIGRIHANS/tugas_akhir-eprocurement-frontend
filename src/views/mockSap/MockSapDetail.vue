@@ -6,7 +6,7 @@
     <!-- Loading State -->
     <div v-if="isLoading" class="flex justify-center items-center py-20">
       <div class="text-center">
-        <i class="ki-duotone ki-loading text-4xl text-blue-500 animate-spin"></i>
+        <i class="ki-duotone ki-loading text-4xl text-primary animate-spin"></i>
         <p class="mt-4 text-gray-600">Loading PO details...</p>
       </div>
     </div>
@@ -147,17 +147,17 @@
         <div class="overflow-x-auto list__table">
           <table class="table align-middle text-gray-700 font-medium text-sm">
             <thead>
-              <tr class="bg-blue-500 text-white">
-                <th class="text-center">No</th>
-                <th class="text-center">SKU</th>
-                <th class="text-center">Item Name</th>
-                <th class="text-center">UOM</th>
-                <th class="text-center">Total Qty Ordered</th>
-                <th class="text-center">Unit Price</th>
-                <th class="text-center">Subtotal</th>
-                <th class="text-center">Qty In Transit</th>
-                <th class="text-center">Qty Delivered</th>
-                <th class="text-center">Qty Pending</th>
+              <tr>
+                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center">No</th>
+                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center">SKU</th>
+                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center">Item Name</th>
+                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center">UOM</th>
+                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center">Total Qty Ordered</th>
+                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center">Unit Price</th>
+                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center">Subtotal</th>
+                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center">Qty In Transit</th>
+                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center">Qty Delivered</th>
+                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center">Qty Pending</th>
               </tr>
             </thead>
             <tbody>

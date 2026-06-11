@@ -76,7 +76,10 @@
               class="btn btn-primary inline-flex items-center gap-2 shrink-0"
               @click="openUploadModal()"
             >
-              <i class="ki-duotone ki-upload shrink-0"></i>
+              <i class="ki-duotone ki-file-up shrink-0">
+                <span class="path1"></span>
+                <span class="path2"></span>
+              </i>
               <span class="whitespace-nowrap">Upload Files</span>
             </button>
           </div>

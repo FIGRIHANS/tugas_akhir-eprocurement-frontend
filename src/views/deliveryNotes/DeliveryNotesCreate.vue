@@ -262,18 +262,30 @@
         </div>
 
         <!-- Table -->
-        <div class="overflow-x-auto list__table">
-          <table class="table align-middle text-gray-700 font-medium text-sm">
+        <div class="overflow-x-auto list__table rounded-lg border border-gray-200">
+          <table class="table table-xs align-middle text-gray-700 font-medium text-sm">
             <thead>
-              <tr class="bg-blue-500 text-white">
-                <th class="text-center">No</th>
-                <th class="text-center">SKU <span class="text-red-300">*</span></th>
-                <th class="text-center">Description <span class="text-red-300">*</span></th>
-                <th class="text-center">UOM <span class="text-red-300">*</span></th>
-                <th class="text-center">Lot No <span class="text-red-300">*</span></th>
-                <th class="text-center">Qty Ordered</th>
-                <th class="text-center">Qty Shipped <span class="text-red-300">*</span></th>
-                <th class="text-center">Action</th>
+              <tr>
+                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center">No</th>
+                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center">
+                  SKU <span class="text-danger">*</span>
+                </th>
+                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center">
+                  Description <span class="text-danger">*</span>
+                </th>
+                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center">
+                  UOM <span class="text-danger">*</span>
+                </th>
+                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center">
+                  Lot No <span class="text-danger">*</span>
+                </th>
+                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center">
+                  Qty Ordered
+                </th>
+                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center">
+                  Qty Shipped <span class="text-danger">*</span>
+                </th>
+                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -360,21 +372,25 @@
       </div>
 
       <!-- Action Buttons -->
-      <div class="mt-[24px] flex gap-3 justify-end">
-        <button class="btn btn-light" @click="goBack()">
-          <i class="ki-duotone ki-arrow-left"></i>
-          Back to List
+      <div class="flex justify-between items-center gap-[8px] mt-[24px]">
+        <button
+          class="btn btn-outline btn-primary"
+          :disabled="isSubmitting"
+          @click="submitForm(true)"
+        >
+          Save as Draft
+          <i class="ki-duotone ki-bookmark"></i>
         </button>
-        <button class="btn btn-light" @click="submitForm(true)" :disabled="isSubmitting">
-          <i class="ki-duotone ki-save-2" v-if="!isSubmitting"></i>
-          <span v-if="isSubmitting">Saving...</span>
-          <span v-else>Save as Draft</span>
-        </button>
-        <button class="btn btn-primary" @click="submitForm(false)" :disabled="isSubmitting">
-          <i class="ki-duotone ki-save-2" v-if="!isSubmitting"></i>
-          <span v-if="isSubmitting">Submitting...</span>
-          <span v-else>Submit</span>
-        </button>
+        <div class="flex items-center justify-end gap-[8px]">
+          <button class="btn btn-outline btn-primary" :disabled="isSubmitting" @click="goBack()">
+            <i class="ki-filled ki-arrow-left"></i>
+            Back
+          </button>
+          <button class="btn btn-primary" :disabled="isSubmitting" @click="submitForm(false)">
+            Submit
+            <i class="ki-duotone ki-paper-plane"></i>
+          </button>
+        </div>
       </div>
     </div>
 

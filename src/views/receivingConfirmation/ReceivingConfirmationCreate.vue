@@ -248,35 +248,96 @@
         </div>
 
         <!-- Table -->
-        <div class="overflow-x-auto list__table">
-          <table class="table align-middle text-gray-700 font-medium text-sm">
+        <div class="overflow-x-auto list__table rounded-lg border border-gray-200">
+          <table class="table table-xs align-middle text-gray-700 font-medium text-sm">
             <thead>
               <!-- First Header Row -->
-              <tr class="bg-blue-500 text-white">
-                <th rowspan="2" class="text-center border-r">No</th>
-                <th rowspan="2" class="text-center border-r">Lot Number</th>
-                <th rowspan="2" class="text-center border-r">SKU</th>
-                <th rowspan="2" class="text-center border-r">Description</th>
-                <th colspan="2" class="text-center border-r">LOT. NO</th>
-                <th colspan="3" class="text-center border-r">FG Receipt Confirmation</th>
-                <th colspan="2" class="text-center border-r">Loading Difference</th>
-                <th colspan="2" class="text-center border-r">Transporter Claim</th>
-                <th rowspan="2" class="text-center border-r min-w-[160px] bg-red-600">
+              <tr>
+                <th
+                  rowspan="2"
+                  class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center border-r"
+                >
+                  No
+                </th>
+                <th
+                  rowspan="2"
+                  class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center border-r"
+                >
+                  Lot Number
+                </th>
+                <th
+                  rowspan="2"
+                  class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center border-r"
+                >
+                  SKU
+                </th>
+                <th
+                  rowspan="2"
+                  class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center border-r"
+                >
+                  Description
+                </th>
+                <th
+                  colspan="2"
+                  class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center border-r"
+                >
+                  LOT. NO
+                </th>
+                <th
+                  colspan="3"
+                  class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center border-r"
+                >
+                  FG Receipt Confirmation
+                </th>
+                <th
+                  colspan="2"
+                  class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center border-r"
+                >
+                  Loading Difference
+                </th>
+                <th
+                  colspan="2"
+                  class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center border-r"
+                >
+                  Transporter Claim
+                </th>
+                <th
+                  rowspan="2"
+                  class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center border-r min-w-[160px]"
+                >
                   Reject Reason
                   <span class="block text-xs font-normal">(required if less &gt; 0)</span>
                 </th>
               </tr>
               <!-- Second Header Row -->
-              <tr class="bg-blue-500 text-white">
-                <th class="text-center border-r">Delivery Note</th>
-                <th class="text-center border-r">Actual</th>
-                <th class="text-center border-r">Delivery Note</th>
-                <th class="text-center border-r bg-green-600">Received</th>
-                <th class="text-center border-r">Difference</th>
-                <th class="text-center border-r">More</th>
-                <th class="text-center border-r">Less</th>
-                <th class="text-center border-r bg-green-600">Repack Qty</th>
-                <th class="text-center border-r bg-green-600">Damage Qty</th>
+              <tr>
+                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center border-r">
+                  Delivery Note
+                </th>
+                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center border-r">
+                  Actual
+                </th>
+                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center border-r">
+                  Delivery Note
+                </th>
+                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center border-r">
+                  Received
+                </th>
+                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center border-r">
+                  Difference
+                </th>
+                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center border-r">
+                  More
+                </th>
+                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center border-r">
+                  Less
+                </th>
+                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center border-r">
+                  Repack Qty
+                </th>
+                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center border-r">
+                  Damage Qty
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -355,21 +416,25 @@
       </div>
 
       <!-- Action Buttons -->
-      <div class="mt-[24px] flex gap-3 justify-end">
-        <button class="btn btn-light" @click="goBack()">
-          <i class="ki-duotone ki-arrow-left"></i>
-          Back to List
+      <div class="flex justify-between items-center gap-[8px] mt-[24px]">
+        <button
+          class="btn btn-outline btn-primary"
+          :disabled="isSubmitting"
+          @click="submitForm(true)"
+        >
+          Save as Draft
+          <i class="ki-duotone ki-bookmark"></i>
         </button>
-        <button class="btn btn-light" @click="submitForm(true)" :disabled="isSubmitting">
-          <i class="ki-duotone ki-save-2" v-if="!isSubmitting"></i>
-          <span v-if="isSubmitting">Saving...</span>
-          <span v-else>Save as Draft</span>
-        </button>
-        <button class="btn btn-primary" @click="submitForm(false)" :disabled="isSubmitting">
-          <i class="ki-duotone ki-save-2" v-if="!isSubmitting"></i>
-          <span v-if="isSubmitting">Submitting...</span>
-          <span v-else>Submit</span>
-        </button>
+        <div class="flex items-center justify-end gap-[8px]">
+          <button class="btn btn-outline btn-primary" :disabled="isSubmitting" @click="goBack()">
+            <i class="ki-filled ki-arrow-left"></i>
+            Back
+          </button>
+          <button class="btn btn-primary" :disabled="isSubmitting" @click="submitForm(false)">
+            Submit
+            <i class="ki-duotone ki-paper-plane"></i>
+          </button>
+        </div>
       </div>
     </div>
 
