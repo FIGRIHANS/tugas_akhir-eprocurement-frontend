@@ -1,50 +1,37 @@
 <template>
-  <svg
-    :width="viewWidth"
-    :height="viewHeight"
-    viewBox="0 20 220 60"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    :style="{ transform: `scale(${scale})`, transformOrigin: 'center' }"
-  >
-    <text
-      x="0"
-      y="48"
-      font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
-      font-size="72"
-      font-weight="800"
-      fill="#26a69a"
-      letter-spacing="-1"
-      dominant-baseline="middle"
-    >
-      EVOX
-    </text>
-  </svg>
+  <img
+    class="evox-logo"
+    :style="logoStyle"
+    src="@/assets/svg/EvoxLogo.png"
+    alt="EVOX"
+    role="img"
+  />
 </template>
 
-<script lang="ts">
-export default {
-  name: 'EvoxLogo',
-  props: {
-    scale: {
-      type: Number,
-      default: 1
-    }
+<script setup lang="ts">
+import { computed } from 'vue'
+
+const props = withDefaults(
+  defineProps<{
+    height?: string
+    width?: string
+  }>(),
+  {
+    height: '32px',
+    width: 'auto',
   },
-  computed: {
-    viewWidth() {
-      return 220
-    },
-    viewHeight() {
-      return 72
-    }
-  }
-}
+)
+
+const logoStyle = computed(() => ({
+  height: props.height,
+  width: props.width,
+}))
 </script>
 
 <style scoped>
-svg {
+.evox-logo {
   display: inline-block;
   vertical-align: middle;
+  object-fit: contain;
 }
 </style>

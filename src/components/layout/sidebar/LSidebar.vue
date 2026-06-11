@@ -6,11 +6,8 @@
     <div class="h-[80px] flex items-center mb-5 px-[25px]">
       <div class="flex items-center">
         <RouterLink to="/" class="mt-2.5">
-          <LogoEPOQ class="h-[35px] w-auto" />
+          <LogoEPOQ height="35px" />
         </RouterLink>
-        <div class="ml-2">
-          <img src="@/assets/TMS.png" class="h-[35px] w-max" alt="" />
-        </div>
       </div>
     </div>
 
