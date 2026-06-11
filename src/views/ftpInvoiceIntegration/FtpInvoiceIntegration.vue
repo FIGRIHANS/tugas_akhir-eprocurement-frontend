@@ -311,6 +311,7 @@ import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useLoginStore } from '@/stores/views/login'
 import { useFormatIdr } from '@/composables/currency'
+import { resolveInvoiceAddRouteType } from '@/core/utils/invoiceSubmissionRoute'
 import type { ListPoTypes } from '@/stores/views/invoice/types/submission'
 import type { FtpDataListRow } from './types/ftpUploadService'
 import moment from 'moment'
@@ -911,10 +912,16 @@ const goView = (data: ListPoTypes) => {
   })
   saveActiveFtpUploadUId(ftpUploadUid)
 
+  const routeType = resolveInvoiceAddRouteType(
+    row.statusCode,
+    row.statusName || getFtpDataStatusLabel(row),
+    'po',
+  )
+
   router.push({
     name: 'invoiceAdd',
     query: {
-      type: 'po',
+      type: routeType,
       invoice: uid,
       from: 'ftp',
       ftpUpload: ftpUploadUid,

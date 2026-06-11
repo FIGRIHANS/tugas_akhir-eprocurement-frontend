@@ -299,39 +299,46 @@
       </div>
 
       <!-- Action Buttons -->
-      <div class="flex gap-3 justify-end mt-6">
-        <button class="btn btn-light" @click="goBack()">
-          <i class="ki-duotone ki-arrow-left"></i>
-          Back to List
-        </button>
+      <div class="flex justify-between items-center gap-[8px] mt-[24px]">
+        <div></div>
+        <div class="flex items-center justify-end gap-[8px]">
+          <button class="btn btn-outline btn-primary" :disabled="isSubmitting" @click="goBack()">
+            <i class="ki-filled ki-arrow-left"></i>
+            Back
+          </button>
 
-        <template v-if="isDraft">
-          <button class="btn btn-primary" @click="updateConfirmation()" :disabled="isSubmitting">
-            <i class="ki-duotone ki-save-2" v-if="!isSubmitting"></i>
-            <span v-if="isSubmitting">Submitting...</span>
-            <span v-else>Submit Update</span>
-          </button>
-        </template>
+          <template v-if="isDraft">
+            <button
+              class="btn btn-primary"
+              @click="updateConfirmation()"
+              :disabled="isSubmitting"
+            >
+              <span v-if="isSubmitting">Submitting...</span>
+              <template v-else>
+                Submit
+                <i class="ki-duotone ki-paper-plane"></i>
+              </template>
+            </button>
+          </template>
 
-        <!-- Show Approve/Reject buttons only if status is Waiting Supervisor AND user is profile 3185 -->
-        <template v-if="isWaitingApproval && canApprove">
-          <button class="btn btn-danger" @click="openRejectModal()">
-            <i class="ki-duotone ki-cross-circle"></i>
-            Reject
-          </button>
-          <button class="btn btn-primary" @click="approveConfirmation()">
-            <i class="ki-duotone ki-check-circle"></i>
-            Approve
-          </button>
-        </template>
+          <template v-if="isWaitingApproval && canApprove">
+            <button class="btn btn-danger" @click="openRejectModal()">
+              <i class="ki-duotone ki-cross-circle"></i>
+              Reject
+            </button>
+            <button class="btn btn-primary" @click="approveConfirmation()">
+              <i class="ki-duotone ki-check-circle"></i>
+              Approve
+            </button>
+          </template>
 
-        <!-- Show Print to PDF button only if status is Completed -->
-        <template v-if="isCompleted">
-          <button class="btn btn-success" @click="printToPDF()">
-            <i class="ki-duotone ki-printer"></i>
-            Print to PDF
-          </button>
-        </template>
+          <template v-if="isCompleted">
+            <button class="btn btn-primary" @click="printToPDF()">
+              Print to PDF
+              <i class="ki-duotone ki-printer"></i>
+            </button>
+          </template>
+        </div>
       </div>
 
       <!-- Rejection Modal -->

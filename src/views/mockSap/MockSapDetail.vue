@@ -17,9 +17,9 @@
         <i class="ki-duotone ki-information text-4xl text-red-500 mb-4"></i>
         <h3 class="text-lg font-semibold text-red-700">Error Loading Data</h3>
         <p class="text-red-600 mt-2">{{ error }}</p>
-        <button class="btn btn-primary mt-4" @click="goBack()">
-          <i class="ki-duotone ki-arrow-left"></i>
-          Back to List
+        <button class="btn btn-outline btn-primary mt-4" @click="goBack()">
+          <i class="ki-filled ki-arrow-left"></i>
+          Back
         </button>
       </div>
     </div>
@@ -216,15 +216,11 @@
       </div>
 
       <!-- Action Buttons -->
-      <div class="mt-[24px] flex gap-3 justify-end">
-        <button class="btn btn-light" @click="goBack()">
-          <i class="ki-duotone ki-arrow-left"></i>
-          Back to List
+      <div class="flex justify-end items-center gap-[8px] mt-[24px]">
+        <button class="btn btn-outline btn-primary" @click="goBack()">
+          <i class="ki-filled ki-arrow-left"></i>
+          Back
         </button>
-        <!-- <button class="btn btn-primary" @click="printDetail()">
-          <i class="ki-duotone ki-printer"></i>
-          Print
-        </button> -->
       </div>
     </div>
 

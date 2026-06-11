@@ -423,7 +423,7 @@ const applyRouteUiDefaults = () => {
     return
   }
 
-  if (isFtpSubmissionEntry() || isSavedDraftStatus(form.status) || !isView) {
+  if (isSavedDraftStatus(form.status) || !isView) {
     enableDraftTabNavigation()
     return
   }
@@ -556,9 +556,12 @@ const loadInvoiceFromRoute = async () => {
         setStepperStatus()
       }
 
-      if (isFtpSubmissionEntry() || isSavedDraftStatus(form.status)) {
+      if (isSavedDraftStatus(form.status) && (isFtpSubmissionEntry() || routeType === 'po')) {
         enableDraftTabNavigation()
-      } else if (isInvoiceViewRouteType(routeType)) {
+      } else if (
+        isInvoiceViewRouteType(routeType) ||
+        (route.query.from === 'ftp' && !isSavedDraftStatus(form.status))
+      ) {
         tabNow.value = 'preview'
         hasCompletedDataTab.value = true
       } else if (canClickPaymentStatusTab.value) {
@@ -567,7 +570,7 @@ const loadInvoiceFromRoute = async () => {
     }
   } catch (error) {
     console.error('Error loading invoice detail:', error)
-    if (isFtpSubmissionEntry()) {
+    if (isFtpSubmissionEntry() && isSavedDraftStatus(form.status)) {
       enableDraftTabNavigation()
     }
   }
@@ -637,6 +640,16 @@ const getBackListRoute = () => {
 const goBack = () => {
   if (tabNow.value === 'paymentStatus') {
     tabNow.value = 'preview'
+    return
+  }
+
+  if (
+    tabNow.value === 'preview' &&
+    (checkInvoiceView() ||
+      checkInvoiceNonPoView() ||
+      (route.query.from === 'ftp' && !isSavedDraftStatus(form.status)))
+  ) {
+    router.push({ name: getBackListRoute() })
     return
   }
 
