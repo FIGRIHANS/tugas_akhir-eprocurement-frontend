@@ -156,6 +156,7 @@ export interface FtpInvoiceListItem {
   vendorName?: string
   documentNo?: string | null
   invoiceNo?: string | null
+  taxNo?: string | null
   invoiceDate?: string | null
   dpp?: number
   vatAmount?: number

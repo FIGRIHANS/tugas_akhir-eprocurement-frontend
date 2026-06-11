@@ -26,7 +26,7 @@
             ]"
             @click="setActiveTab('upload')"
           >
-            Upload Invoice & Tax Document
+            Upload FTP Document
           </button>
         </div>
       </div>
@@ -78,14 +78,6 @@
             >
               <i class="ki-duotone ki-upload shrink-0"></i>
               <span class="whitespace-nowrap">Upload Files</span>
-            </button>
-            <button
-              v-if="activeTab === 'ftpData'"
-              class="btn btn-primary inline-flex items-center gap-2 shrink-0"
-              @click="goAdd()"
-            >
-              <i class="ki-duotone ki-plus-circle shrink-0"></i>
-              <span class="whitespace-nowrap">Add Invoice</span>
             </button>
           </div>
         </div>
@@ -156,11 +148,7 @@
                   <td>
                     <span
                       class="badge badge-outline"
-                      :class="
-                        resolveFtpUploadTabStatus(d.status) === 'Done'
-                          ? 'badge-success'
-                          : 'badge-info'
-                      "
+                      :class="getFtpUploadTabStatusBadgeClass(d.status)"
                     >
                       {{ resolveFtpUploadTabStatus(d.status) }}
                     </span>
@@ -333,6 +321,7 @@ import {
   fetchFtpDataList,
   fetchFtpUploadList,
   getFtpDataStatusLabel,
+  getFtpUploadTabStatusBadgeClass,
   resolveFtpUploadTabStatus,
   resolveFtpRowUid,
   resolveFtpUploadUIdFromRow,
@@ -382,7 +371,7 @@ const isProfile3200 = computed(() => loginStore.userData?.profile?.profileId ===
 
 const activeTab = ref<'ftpData' | 'upload'>('ftpData')
 const activeTabTitle = computed(() =>
-  activeTab.value === 'ftpData' ? 'FTP Data' : 'Upload Invoice & Tax Document',
+  activeTab.value === 'ftpData' ? 'FTP Data' : 'Upload FTP Document',
 )
 
 const setActiveTab = (tab: 'ftpData' | 'upload') => {
@@ -651,7 +640,7 @@ const formatFtpDataAmountDisplay = (value?: number | null) => {
 const colorBadgeForFtpRow = (row: FtpDataListRow) => {
   const label = getFtpDataStatusLabel(row).toLowerCase()
   if (label === 'draft' || label === 'drafted') return 'badge-secondary'
-  if (label === 'uploaded') return 'badge-info'
+  if (label === 'uploaded') return 'badge-primary'
   if (label === 'done') return 'badge-success'
   return colorBadge(row.statusCode ?? 0)
 }

@@ -3,7 +3,7 @@
     <div class="modal-content ftp-modal modal-center-y">
       <div class="modal-header ftp-modal__header">
         <div>
-          <h3 class="modal-title ftp-modal__title">Upload Invoice & Tax Document</h3>
+          <h3 class="modal-title ftp-modal__title">Upload FTP Document</h3>
           <p class="ftp-modal__subtitle">
             Unggah dokumen invoice dan faktur pajak. Reference document bersifat opsional.
           </p>

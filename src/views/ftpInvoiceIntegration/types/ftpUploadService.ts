@@ -274,6 +274,11 @@ export const resolveFtpUploadTabStatus = (status: string | null | undefined): st
   return raw
 }
 
+/** Badge class selaras dengan modal Upload FTP Document (primary = teal, success = Done). */
+export const getFtpUploadTabStatusBadgeClass = (status: string | null | undefined): string => {
+  return resolveFtpUploadTabStatus(status) === 'Done' ? 'badge-success' : 'badge-primary'
+}
+
 /** Upload tab: status Uploaded dari GET /ftp-uploads. */
 export const isFtpUploadedRow = (row: FtpDataListRow): boolean => {
   const status = resolveFtpUploadTabStatus(row.ftpUploadStatus || row.portalStatus)
