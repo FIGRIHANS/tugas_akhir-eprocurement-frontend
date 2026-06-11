@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// import LogoAN from '@/assets/svg/LogoAN.vue'
 import IconEfficient from '@/components/icons/IconEfficient.vue'
 import IconEye from '@/components/icons/IconEye.vue'
 import IconHeadOffice from '@/components/icons/IconHeadOffice.vue'
@@ -12,169 +11,303 @@ import IconUserFriendly from '@/components/icons/IconUserFriendly.vue'
 import LogoEPOQ from '@/assets/svg/EvoxLogo.vue'
 
 const year = moment().format('YYYY')
+
+const features = [
+  {
+    icon: IconEye,
+    title: 'Transparent',
+    description:
+      'Every registration, tender, and invoice step is recorded digitally for full visibility across teams and vendors.',
+  },
+  {
+    icon: IconEfficient,
+    title: 'Efficient',
+    description:
+      'Automated workflows reduce manual work, speed up approvals, and minimize errors throughout procurement.',
+  },
+  {
+    icon: IconUserFriendly,
+    title: 'User-Friendly',
+    description:
+      'An intuitive interface lets employees and vendors manage transactions anytime, from any device.',
+  },
+]
+
+const eprocurementPoints = [
+  'Vendor registration & qualification',
+  'Purchase order management',
+  'Digital invoicing & verification',
+  'Approval workflow & audit trail',
+]
 </script>
 
 <template>
-  <section id="hero" class="bg-gray-200 py-[111px] flex flex-col items-center">
-    <div class="max-w-[1440px] grid grid-cols-1 md:grid-cols-3 gap-6 lg:px-[40px] px-5">
-      <div class="flex flex-col justify-center md:col-span-2 md:pr-20">
-        <h1 class="text-[40px] font-bold text-gray-700 mb-4 lg:w-3/4">
-          Empowering Sustainable Partnerships Through Reliable Procurement Processes
-        </h1>
-        <p class="text-lg font-light text-gray-800 mb-8 md:w-3/4">
-          We support long-term business sustainability through transparent, standardized, and
-          value-oriented e-Procurement designed to deliver mutual benefits for all stakeholders.
+  <!-- Hero -->
+  <section id="hero" class="landing-hero relative overflow-hidden">
+    <div class="landing-hero__glow landing-hero__glow--left" />
+    <div class="landing-hero__glow landing-hero__glow--right" />
+
+    <div class="relative max-w-[1440px] mx-auto px-5 lg:px-[40px] py-24 lg:py-32">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div class="space-y-8">
+          <span class="landing-badge">Digital Procurement Platform</span>
+
+          <div class="space-y-5">
+            <h1 class="text-4xl lg:text-[44px] font-bold text-gray-800 leading-[1.15] tracking-tight">
+              Empowering Sustainable Partnerships Through Reliable Procurement Processes
+            </h1>
+            <p class="text-lg text-gray-500 leading-relaxed max-w-xl">
+              Streamline your procurement lifecycle with a transparent, standardized, and
+              value-driven e-Procurement platform built for organizations and vendors alike.
+            </p>
+          </div>
+
+          <UiButton variant="primary" size="lg" class="!rounded-xl flex items-center gap-2 shadow-sm">
+            <span class="text-white">Download Manual Book</span>
+            <IconPDF class="text-white" />
+          </UiButton>
+        </div>
+
+        <div class="flex justify-center lg:justify-end -translate-y-8">
+          <LogoEPOQ width="480px" height="auto" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="advantages" class="py-20 lg:py-24 bg-white">
+    <div class="max-w-[1440px] lg:px-[40px] px-5 mx-auto">
+      <div class="text-center mb-12 max-w-2xl mx-auto">
+        <span class="landing-badge">Why EVOX</span>
+        <h2 class="text-3xl font-bold text-gray-800 mt-4 tracking-tight">
+          Built for modern procurement teams
+        </h2>
+        <p class="text-gray-500 mt-3 text-lg">
+          Three core principles that make every transaction faster, clearer, and more reliable.
         </p>
-        <UiButton variant="primary" size="lg" class="self-start flex items-center gap-2">
-          <span class="text-white">Download Manual Book</span>
-          <IconPDF class="text-white" />
-        </UiButton>
       </div>
-      <div class="flex items-start gap-2">
-        <LogoEPOQ class="w-[240px] h-auto" />
-        <div class="ml-2">
-          <img src="@/assets/TMS.png" class="h-[60px] w-max" alt="" />
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div
+          v-for="feature in features"
+          :key="feature.title"
+          class="landing-feature-card group"
+        >
+          <div class="landing-feature-card__icon">
+            <component :is="feature.icon" class="text-primary w-6 h-6" />
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 mt-5">{{ feature.title }}</h3>
+          <p class="text-gray-500 mt-3 leading-relaxed">{{ feature.description }}</p>
         </div>
       </div>
     </div>
   </section>
 
-  <section id="advantages" class="py-16">
+  <!-- About / What is E-Procurement -->
+  <section id="about" class="py-20 lg:py-24 landing-about">
     <div class="max-w-[1440px] lg:px-[40px] px-5 mx-auto">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="card bg-secondary shadow-none">
-          <div class="card-body p-4 space-y-4">
-            <div class="inline-flex items-center gap-4">
-              <div class="bg-primary-light rounded-lg p-2">
-                <IconEye class="text-primary" />
-              </div>
-              <span class="text-xl text-gray-900 font-semibold"> Transparent </span>
-            </div>
-            <div class="font-light text-gray-800 text-lg">
-              Enhances transparency in the registration and invoice submission process.
-            </div>
-          </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+        <div class="space-y-6">
+          <span class="landing-badge">About E-Procurement</span>
+          <h2 class="text-3xl lg:text-4xl font-bold text-gray-800 tracking-tight leading-tight">
+            What is E-Procurement?
+          </h2>
+          <p class="text-lg text-gray-500 leading-relaxed">
+            <strong class="text-gray-700 font-medium">E-Procurement</strong> (electronic procurement)
+            is the use of digital platforms to manage the entire purchasing process online — from
+            vendor onboarding and tendering to purchase orders, invoicing, and payment tracking.
+          </p>
+          <p class="text-lg text-gray-500 leading-relaxed">
+            It replaces manual, paper-based workflows with a centralized system that improves
+            transparency, reduces processing time, and ensures every transaction is traceable and
+            compliant.
+          </p>
+
+          <ul class="space-y-3 pt-2">
+            <li
+              v-for="point in eprocurementPoints"
+              :key="point"
+              class="flex items-center gap-3 text-gray-600"
+            >
+              <span class="landing-check-icon">
+                <i class="ki-filled ki-check text-[10px] text-primary" />
+              </span>
+              {{ point }}
+            </li>
+          </ul>
         </div>
 
-        <div class="card bg-secondary shadow-none">
-          <div class="card-body p-4 space-y-4">
-            <div class="inline-flex items-center gap-4">
-              <div class="bg-primary-light rounded-lg p-2">
-                <IconEfficient class="text-primary" />
-              </div>
-              <span class="text-xl text-gray-900 font-semibold"> Efficient </span>
-            </div>
-            <div class="font-light text-gray-800 text-lg">
-              Improves data accuracy while minimizing the risk of human error during the invoice
-              process.
-            </div>
+        <div class="landing-about-card">
+          <div class="flex items-center gap-3 mb-6">
+            <LogoEPOQ height="36px" />
+            <span class="text-sm font-medium text-gray-400 uppercase tracking-widest">EVOX Platform</span>
           </div>
-        </div>
-
-        <div class="card bg-secondary shadow-none">
-          <div class="card-body p-4 space-y-4">
-            <div class="inline-flex items-center gap-4">
-              <div class="bg-primary-light rounded-lg p-2">
-                <IconUserFriendly class="text-primary" />
-              </div>
-              <span class="text-xl font-semibold text-gray-900"> User-Friendly </span>
+          <p class="text-gray-600 leading-relaxed text-lg">
+            EVOX e-Procurement connects organizations and vendors in one integrated environment.
+            Vendors register once, submit documents digitally, and track invoice status in real time
+            — while internal teams gain full control over approvals, compliance, and reporting.
+          </p>
+          <div class="mt-8 pt-6 border-t border-gray-100 grid grid-cols-2 gap-6">
+            <div>
+              <p class="text-3xl font-bold text-primary">100%</p>
+              <p class="text-sm text-gray-500 mt-1">Digital workflow</p>
             </div>
-            <div class="font-light text-gray-800 text-lg">
-              Simplifies the invoice process through an intuitive, user-friendly application
-              accessible anytime, anywhere from your computer.
+            <div>
+              <p class="text-3xl font-bold text-primary">24/7</p>
+              <p class="text-sm text-gray-500 mt-1">Platform access</p>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section id="about" class="py-16">
-    <div class="max-w-[1440px] lg:px-[40px] px-5 mx-auto">
-      <div class="mb-6">
-        <span class="rounded-full py-1 px-3 bg-primary-light text-base text-primary">
-          About Us
-        </span>
-        <h1 class="font-semibold text-4xl text-[#283841] mt-4">About Us</h1>
-      </div>
-      <div class="flex flex-col lg:flex-row gap-6 lg:items-center">
-        <LogoEPOQ class="w-full" />
-        <div class="col-span-2 card bg-secondary shadow-none">
-          <div class="card-body p-4">
-            <p class="font-light text-lg text-gray-800">
-              At Arya Noble, we believe that strong partnerships with vendors are key to our
-              operational excellence and sustainable growth. To support this, we implement a
-              standardized and transparent Vendor Management System (VMS) that simplifies vendor
-              registration and ensures efficient pre-qualification.
-            </p>
-            <p class="font-light text-lg text-gray-800">
-              Through our digital invoice management process, we ensure every transaction is smooth,
-              accurate, and high-quality delivering real value for both parties.
-            </p>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <footer class="py-9">
+  <!-- Footer -->
+  <footer class="py-12 bg-white border-t border-gray-100">
     <div class="max-w-[1440px] lg:px-[40px] px-5 mx-auto">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        <div class="card bg-secondary shadow-none">
-          <div class="card-body p-6 space-y-2">
-            <div class="inline-flex gap-2 items-center">
-              <IconHeadOffice />
-              <h3 class="font-medium text-base text-gray-700">Head Office</h3>
-            </div>
-            <p class="text-base font-semibold text-gray-800">
-              Treasury Office Tower, 36-37th floor, SCBD Lot 28, RT.5/RW.3, Senayan, Kebayoran Baru,
-              South Jakarta City, Jakarta 12190
-            </p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+        <div class="landing-footer-card">
+          <div class="flex items-center gap-2 mb-4">
+            <IconHeadOffice class="text-primary" />
+            <h3 class="font-medium text-gray-700">Head Office</h3>
           </div>
-          <div class="card-body p-6 space-y-2">
-            <div class="inline-flex gap-2 items-center">
-              <IconPhone />
-
-              <h3 class="font-medium text-base text-gray-700">Phone</h3>
-            </div>
-            <p class="text-base font-semibold text-gray-800">(021) 50200581</p>
+          <p class="text-gray-600 leading-relaxed">
+            Treasury Office Tower, 36-37th floor, SCBD Lot 28, Senayan, Kebayoran Baru, South Jakarta
+            City, Jakarta 12190
+          </p>
+          <div class="flex items-center gap-2 mt-5">
+            <IconPhone class="text-primary" />
+            <p class="font-medium text-gray-800">(021) 50200581</p>
           </div>
         </div>
-        <div class="card bg-secondary shadow-none">
-          <div class="card-body p-6 space-y-2">
-            <div class="inline-flex gap-2 items-center">
-              <IconEmail />
 
-              <h3 class="font-medium text-base text-gray-700">Email</h3>
-            </div>
-            <p class="text-base font-semibold text-gray-800">marcellino.fauzan@aryanoble.co.id</p>
+        <div class="landing-footer-card">
+          <div class="flex items-center gap-2 mb-4">
+            <IconEmail class="text-primary" />
+            <h3 class="font-medium text-gray-700">Contact</h3>
           </div>
-          <div class="card-body p-6 space-y-2">
-            <div class="inline-flex gap-2 items-center">
-              <IconEmail />
-
-              <h3 class="font-medium text-base text-gray-700">Email SSC SM</h3>
-            </div>
-            <p class="text-base font-semibold text-gray-800">ssc.sm@aryanoble.co.id</p>
-          </div>
+          <p class="text-gray-600">support@evox-procurement.com</p>
+          <p class="text-gray-600 mt-2">helpdesk@evox-procurement.com</p>
         </div>
       </div>
 
-      <div class="card bg-secondary shadow-none">
-        <div class="card-body p-6">
-          <div class="flex items-center justify-between mb-8">
-            <LogoEPOQ class="w-[81px] h-auto" />
-            <div class="space-x-6">
-              <a href="#" class="text-lg font-semibold text-gray-900">Terms & Conditions</a>
-              <a href="#" class="text-lg font-semibold text-gray-900">Privacy Policy</a>
-            </div>
+      <div class="landing-footer-card">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <LogoEPOQ width="81px" height="auto" />
+          <div class="flex gap-6">
+            <a href="#" class="text-sm font-semibold text-gray-700 hover:text-primary transition-colors">
+              Terms & Conditions
+            </a>
+            <a href="#" class="text-sm font-semibold text-gray-700 hover:text-primary transition-colors">
+              Privacy Policy
+            </a>
           </div>
-
-          <div class="border-t border-gray-200 text-base font-medium text-gray-600 pt-4 text-right">
-            © {{ year }} e-Procurement Arya Noble Content Copyright
-          </div>
+        </div>
+        <div class="border-t border-gray-100 pt-4 text-sm text-gray-400 text-right">
+          © {{ year }} EVOX e-Procurement. All rights reserved.
         </div>
       </div>
     </div>
   </footer>
 </template>
+
+<style scoped>
+.landing-hero {
+  background: linear-gradient(160deg, #f8fafb 0%, #eef6f5 45%, #f4f7f8 100%);
+}
+
+.landing-hero__glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+.landing-hero__glow--left {
+  width: 420px;
+  height: 420px;
+  background: rgba(38, 180, 154, 0.12);
+  top: -120px;
+  left: -100px;
+}
+
+.landing-hero__glow--right {
+  width: 360px;
+  height: 360px;
+  background: rgba(38, 180, 154, 0.08);
+  bottom: -80px;
+  right: -60px;
+}
+
+.landing-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(38, 180, 154, 0.1);
+  color: var(--tw-primary, #26b49a);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.landing-feature-card {
+  padding: 28px;
+  background: #fff;
+  border: 1px solid #f0f2f4;
+  border-radius: 20px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.landing-feature-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(38, 180, 154, 0.2);
+  box-shadow: 0 16px 40px rgba(38, 180, 154, 0.1);
+}
+
+.landing-feature-card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: rgba(38, 180, 154, 0.1);
+  transition: background 0.25s ease;
+}
+
+.landing-feature-card:hover .landing-feature-card__icon {
+  background: rgba(38, 180, 154, 0.18);
+}
+
+.landing-about {
+  background: linear-gradient(180deg, #fafbfc 0%, #f5f8f7 100%);
+}
+
+.landing-about-card {
+  padding: 36px;
+  background: #fff;
+  border: 1px solid #eef1f3;
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
+}
+
+.landing-check-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(38, 180, 154, 0.12);
+  flex-shrink: 0;
+}
+
+.landing-footer-card {
+  padding: 24px 28px;
+  background: #fafbfc;
+  border: 1px solid #f0f2f4;
+  border-radius: 16px;
+}
+</style>

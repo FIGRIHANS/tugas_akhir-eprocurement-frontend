@@ -27,6 +27,9 @@
 
         <div v-if="tabOcrTab === 'general'" class="bg-white shadow rounded-xl p-4">
           <h2 class="font-semibold text-lg mb-3">General Data</h2>
+          <p class="text-xs text-gray-500 mb-3">
+            Data dari Invoice Header (tab Invoice Information)
+          </p>
           <div class="grid grid-cols-2 gap-4 text-sm">
             <div v-for="(row, i) in generalData" :key="i">
               <p class="text-gray-500 text-xs">{{ row.label }}</p>
@@ -255,23 +258,33 @@
 
       <div class="col-span-5">
         <div class="bg-white shadow rounded-xl p-4 h-[90vh] flex flex-col">
-          <div class="flex justify-between items-center mb-3">
-            <h2 class="font-semibold text-lg">Preview Dokumen</h2>
-            <select v-model="selectedDocumentType" class="select w-[50%] justify-end">
+          <div class="flex justify-between items-start gap-3 mb-3">
+            <div>
+              <h2 class="font-semibold text-lg">Preview Dokumen</h2>
+            </div>
+            <select v-model="selectedDocumentType" class="select w-[50%] justify-end shrink-0">
               <option v-for="item of documentTypeList" :key="item.code" :value="item.code">
                 {{ item.name }}
               </option>
             </select>
           </div>
 
-          <div class="flex-1 border rounded-lg overflow-hidden">
+          <div class="flex-1 border rounded-lg overflow-hidden relative">
+            <div
+              v-if="isPreviewLoading"
+              class="absolute inset-0 flex items-center justify-center bg-white/80 z-10"
+            >
+              <UiLoading size="md" variant="primary" />
+            </div>
             <iframe
-              v-if="previewUrl"
+              v-if="previewUrl && !isPreviewLoading"
               :src="`${previewUrl}#navpanes=0&toolbar=0&statusbar=0&messages=0&view=FitH`"
               class="w-full h-full"
               style="border: none"
             ></iframe>
-            <div v-else class="text-gray-500 italic p-4">Tidak ada URL dokumen</div>
+            <div v-else-if="!isPreviewLoading" class="text-gray-500 italic p-4">
+              Tidak ada dokumen dari Invoice Header
+            </div>
           </div>
         </div>
       </div>
@@ -309,7 +322,16 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, inject, onMounted, watch, defineAsyncComponent, reactive, computed } from 'vue'
+import {
+  ref,
+  inject,
+  onMounted,
+  onUnmounted,
+  watch,
+  defineAsyncComponent,
+  reactive,
+  computed,
+} from 'vue'
 import type { formTypes } from '../types/invoiceAddWrapper'
 import type { invoiceQrData } from '../types/invoiceQrdata'
 import type { invoiceOcrData } from '../types/invoiceOcrData'
@@ -321,6 +343,12 @@ import UiLoading from '@/components/UiLoading.vue'
 import moment from 'moment'
 import { parseIndoDate } from '@/composables/parseIndoDate'
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
+import {
+  hasBlobSasToken,
+  resolveDocumentPreviewUrl,
+  warnUnsignedDocumentUrl,
+} from '@/composables/documentPreview'
+import type { responseFileTypes } from '../types/invoiceDocument'
 
 /* ---------------- async components ---------------- */
 
@@ -346,7 +374,9 @@ const isVerifyData = ref(false)
 const isLoadUpload = ref(false)
 const showModalSuccess = ref(false)
 const selectedDocumentType = ref('1')
-const previewUrl = ref(form?.tax?.previewPath ?? '')
+const previewUrl = ref('')
+const isPreviewLoading = ref(false)
+let previewObjectUrl: string | null = null
 const taxVerificationClicked = ref(false)
 const pjapVerificationClicked = ref(false)
 
@@ -433,21 +463,23 @@ const ocrData = reactive<invoiceOcrData>({
   status: '',
 })
 
-/* ---------------- GENERAL DATA ---------------- */
-const generalData = ref([
-  { label: 'Vendor Invoice', value: form?.invoiceVendorNo },
-  { label: 'Invoice Date', value: moment(form?.invoiceDate).format('DD MMMM YYYY') },
-  { label: 'Posting Date', value: '10 Mei 2022' },
-  { label: 'Amount', value: form?.vatAmount },
-  { label: 'Tax Amount', value: form?.subtotal },
-  { label: 'Currency', value: form?.currency },
-])
+/* ---------------- GENERAL DATA (dari Invoice Header — tab Information) ---------------- */
+const formatHeaderDate = (value?: string | null) => {
+  if (!value) return '-'
+  const parsed = moment(value, ['YYYY-MM-DD', 'YYYY/MM/DD', moment.ISO_8601], true)
+  return parsed.isValid() ? parsed.format('DD MMMM YYYY') : value
+}
 
-const generalStatus = ref([
-  { label: 'EVO No', value: 'E12206', status: 'success' },
-  { label: 'OCR Status', value: 'Success', status: 'success' },
-  { label: 'Integration', value: 'Success', status: 'success' },
-  { label: 'DJP Status', value: 'Approved', status: 'success' },
+const generalData = computed(() => [
+  { label: 'Invoice Vendor No.', value: form?.invoiceVendorNo || '-' },
+  { label: 'Invoice Date', value: formatHeaderDate(form?.invoiceDate) },
+  { label: 'Tax Document No.', value: form?.taxNoInvoice || '-' },
+  { label: 'Tax Document Date', value: formatHeaderDate(form?.taxDate) },
+  { label: 'Vendor Name', value: form?.vendorName || '-' },
+  { label: 'Company', value: form?.companyName || form?.companyCode || '-' },
+  { label: 'Total Gross Amount', value: form?.totalGrossAmount ?? '-' },
+  { label: 'VAT Amount', value: form?.vatAmount ?? '-' },
+  { label: 'Currency', value: form?.currency || '-' },
 ])
 
 /* ---------------- document type ---------------- */
@@ -781,6 +813,24 @@ const setTabOcr = (tab: 'general' | 'tax') => {
 const isSyncLoading = ref(false)
 const pjapSyncStatus = ref<string | null>(null)
 
+const generalStatus = computed(() => [
+  {
+    label: 'OCR Status',
+    value: form?.taxInvoiceStatus || '-',
+    status: form?.taxInvoiceStatus ? 'success' : 'warning',
+  },
+  {
+    label: 'Tax Invoice No.',
+    value: form?.taxInvoiceNumber || '-',
+    status: form?.taxInvoiceNumber ? 'success' : 'warning',
+  },
+  {
+    label: 'DJP / FP Status',
+    value: pjapSyncStatus.value || form?.taxInvoiceStatus || '-',
+    status: pjapSyncStatus.value || form?.taxInvoiceStatus ? 'success' : 'warning',
+  },
+])
+
 /* ---------------- watchers ---------------- */
 watch(isVerifyData, (val) => {
   if (!val) return
@@ -792,19 +842,70 @@ watch(isVerifyData, (val) => {
   })
 })
 
-watch(selectedDocumentType, (val) => {
-  if (val === '1') {
-    previewUrl.value = form?.tax?.previewPath ?? ''
-  } else if (val === '2') {
-    previewUrl.value = form?.invoiceDocument?.previewPath ?? ''
-  } else if (val === '3') {
-    previewUrl.value = form?.referenceDocument?.previewPath ?? ''
-  } else if (val === '4') {
-    previewUrl.value = form?.otherDocument?.previewPath ?? ''
+const getDocumentPreviewSource = (doc: responseFileTypes | null | undefined): string => {
+  return (doc?.previewPath || doc?.path || '').trim()
+}
+
+/** Dokumen dari Invoice Header (tab Invoice Information) — field form yang sama. */
+const getFormDocumentByType = (): responseFileTypes | null | undefined => {
+  if (selectedDocumentType.value === '1') return form?.tax
+  if (selectedDocumentType.value === '2') return form?.invoiceDocument
+  if (selectedDocumentType.value === '3') return form?.referenceDocument
+  if (selectedDocumentType.value === '4') return form?.otherDocument
+  return null
+}
+
+const getSelectedDocumentLabel = (): string => {
+  if (selectedDocumentType.value === '1') return 'Tax Document'
+  if (selectedDocumentType.value === '2') return 'Invoice Document'
+  if (selectedDocumentType.value === '3') return 'Reference Document'
+  if (selectedDocumentType.value === '4') return 'Other Document'
+  return 'Document'
+}
+
+const revokePreviewObjectUrl = () => {
+  if (previewObjectUrl) {
+    URL.revokeObjectURL(previewObjectUrl)
+    previewObjectUrl = null
   }
-  // previewUrl.value =
-  //   val === '1' ? (form?.tax?.previewPath ?? '') : (form?.invoiceDocument?.previewPath ?? '')
-})
+}
+
+const updatePreviewUrl = async () => {
+  revokePreviewObjectUrl()
+  previewUrl.value = ''
+
+  const source = getDocumentPreviewSource(getFormDocumentByType())
+  if (!source) return
+
+  warnUnsignedDocumentUrl(source, getSelectedDocumentLabel())
+  isPreviewLoading.value = true
+
+  try {
+    const resolved = await resolveDocumentPreviewUrl(source)
+    if (!resolved) return
+
+    if (!hasBlobSasToken(source)) previewObjectUrl = resolved
+    previewUrl.value = resolved
+  } finally {
+    isPreviewLoading.value = false
+  }
+}
+
+watch(selectedDocumentType, updatePreviewUrl)
+
+watch(
+  () => [
+    form?.tax?.previewPath,
+    form?.tax?.path,
+    form?.invoiceDocument?.previewPath,
+    form?.invoiceDocument?.path,
+    form?.referenceDocument?.previewPath,
+    form?.referenceDocument?.path,
+    form?.otherDocument?.previewPath,
+    form?.otherDocument?.path,
+  ],
+  updatePreviewUrl,
+)
 
 watch(
   editableRemarks.value,
@@ -943,9 +1044,14 @@ const setOcrPayload = async () => {
 }
 
 /* ---------------- mount ---------------- */
+onUnmounted(() => {
+  revokePreviewObjectUrl()
+})
+
 onMounted(() => {
   setColumn()
   typeForm.value = route.query.type?.toString().toLowerCase() || 'po'
+  void updatePreviewUrl()
 
   // If form has data (Edit Mode), populate ocrData so verifyByPjap works
   if (form?.taxInvoiceNumber) {

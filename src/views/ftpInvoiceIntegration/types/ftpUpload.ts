@@ -140,16 +140,48 @@ export interface FtpSyncPreview {
   reference?: FtpFilePreview | null
 }
 
+/** List-row shape returned in sync response `content.invoiceListItem`. */
+export interface FtpInvoiceListItem {
+  invoiceTypeCode?: number
+  invoiceTypeName?: string
+  invoiceDPCode?: number
+  invoiceDPName?: string
+  statusCode?: number
+  statusName?: string
+  invoiceSourceId?: number
+  invoiceSource?: number
+  invoiceSourceName?: string
+  companyCode?: string
+  companyName?: string
+  vendorName?: string
+  documentNo?: string | null
+  invoiceNo?: string | null
+  taxNo?: string | null
+  invoiceDate?: string | null
+  dpp?: number
+  vatAmount?: number
+  whtAmount?: number
+  totalGrossAmount?: number
+  totalNetAmount?: number
+  poNo?: string | null
+  grDocumentNo?: string | null
+  estimatedPaymentDate?: string | null
+  pOs?: unknown[]
+}
+
 export interface FtpSyncResult {
   ftpUploadUId: string
   savedInvoiceUId: string
   syncedAt?: string | null
   warnings: string[]
   manualFields: string[]
+  hasDraft: boolean
   draft: Record<string, unknown>
   preview: FtpSyncPreview
   invoice: Record<string, unknown>
-  invoiceListItem: Record<string, unknown> | null
+  ftpData: Record<string, unknown> | null
+  /** @deprecated use ftpData for list update */
+  invoiceListItem: FtpInvoiceListItem | null
 }
 
 export const normalizeFtpUploadListItem = (

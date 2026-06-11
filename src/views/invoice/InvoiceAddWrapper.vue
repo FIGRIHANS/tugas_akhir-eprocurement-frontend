@@ -407,6 +407,10 @@ const enableDraftTabNavigation = () => {
   isCheckBudget.value = true
 }
 
+const isFtpSubmissionEntry = () => {
+  return route.query.from === 'ftp' && route.query.type?.toString() === 'po'
+}
+
 const applyRouteUiDefaults = () => {
   const routeType = route.query.type?.toString()
   const invoiceId = route.query.invoice?.toString() || ''
@@ -419,7 +423,7 @@ const applyRouteUiDefaults = () => {
     return
   }
 
-  if (isSavedDraftStatus(form.status) || !isView) {
+  if (isFtpSubmissionEntry() || isSavedDraftStatus(form.status) || !isView) {
     enableDraftTabNavigation()
     return
   }
@@ -428,13 +432,36 @@ const applyRouteUiDefaults = () => {
   hasCompletedDataTab.value = true
 }
 
-const applyFtpSyncContextAfterLoad = () => {
-  if (route.query.from !== 'ftp' || !route.query.ftpUpload) return
+const getActiveFtpSyncContext = () => {
+  if (route.query.from !== 'ftp') return null
 
   const context = getFtpSyncContext()
-  if (!context || context.ftpUploadUId !== route.query.ftpUpload?.toString()) return
+  if (!context) return null
+
+  const ftpUpload = route.query.ftpUpload?.toString()
+  const invoiceId = route.query.invoice?.toString()
+
+  if (ftpUpload && context.ftpUploadUId === ftpUpload) return context
+  if (
+    invoiceId &&
+    (context.savedInvoiceUId === invoiceId || context.ftpUploadUId === invoiceId)
+  ) {
+    return context
+  }
+
+  return null
+}
+
+const applyFtpSyncContextAfterLoad = () => {
+  const context = getActiveFtpSyncContext()
+  if (!context) return
 
   applyFtpSyncDraftToForm(form, context, invoiceMasterApi.companyCode, invoiceMasterApi.vendorList)
+}
+
+const shouldLoadFtpSubmissionDetail = (routeType?: string) => {
+  if (route.query.from === 'ftp' && routeType === 'po' && route.query.invoice) return true
+  return true
 }
 
 const markFtpUploadDoneIfNeeded = async (
@@ -497,12 +524,39 @@ const loadInvoiceFromRoute = async () => {
         tabNow.value = 'paymentStatus'
       }
     } else {
-      await invoiceApi.getPoDetail(invoiceId)
-      setStepperStatus()
-      setData()
-      applyFtpSyncContextAfterLoad()
+      const ftpContext = getActiveFtpSyncContext()
 
-      if (isSavedDraftStatus(form.status)) {
+      if (ftpContext?.invoice) {
+        applyFtpSyncDraftToForm(
+          form,
+          ftpContext,
+          invoiceMasterApi.companyCode,
+          invoiceMasterApi.vendorList,
+        )
+      }
+
+      if (shouldLoadFtpSubmissionDetail(routeType)) {
+        try {
+          await invoiceApi.getPoDetail(invoiceId)
+          setStepperStatus()
+          setData()
+          applyFtpSyncContextAfterLoad()
+        } catch (detailError) {
+          console.error('Error loading PO detail:', detailError)
+          if (ftpContext?.invoice) {
+            applyFtpSyncDraftToForm(
+              form,
+              ftpContext,
+              invoiceMasterApi.companyCode,
+              invoiceMasterApi.vendorList,
+            )
+          }
+        }
+      } else {
+        setStepperStatus()
+      }
+
+      if (isFtpSubmissionEntry() || isSavedDraftStatus(form.status)) {
         enableDraftTabNavigation()
       } else if (isInvoiceViewRouteType(routeType)) {
         tabNow.value = 'preview'
@@ -513,6 +567,9 @@ const loadInvoiceFromRoute = async () => {
     }
   } catch (error) {
     console.error('Error loading invoice detail:', error)
+    if (isFtpSubmissionEntry()) {
+      enableDraftTabNavigation()
+    }
   }
 }
 
@@ -871,10 +928,10 @@ const mapPoGr = () => {
       conditionType: item.conditionType,
       conditionTypeDesc: item.conditionTypeDesc,
       qcStatus: item.qcStatus,
-      whtType: '',
-      whtCode: '',
+      whtType: item.whtType || '',
+      whtCode: item.whtCode || '',
       whtBaseAmount: item.whtBaseAmount,
-      whtAmount: 0,
+      whtAmount: item.whtAmount || 0,
       department: item.department && String(item.department).trim() !== '' ? item.department : (form.department || ''),
       authObjectCode: item.department && String(item.department).trim() !== '' ? item.department : (form.department || ''),
     })
@@ -1564,6 +1621,16 @@ const goSaveDraft = () => {
         isSubmit.value = false
       })
   } else {
+    if (Array.isArray(form.invoicePoGr) && form.invoicePoGr.some((it) => it.isEdit)) {
+      invoiceApi.errorMessageSubmission =
+        'Ada baris PO/GR yang sedang diedit. Mohon simpan (klik ✓) atau batalkan edit terlebih dahulu sebelum save draft.'
+      const idModal = document.querySelector('#error_submission_modal')
+      const modal = KTModal.getInstance(idModal as HTMLElement)
+      modal.show()
+      isSubmit.value = false
+      return
+    }
+
     const data = mapDataPost()
     data.header.statusCode = 0
     data.header.statusName = 'Draft'
@@ -1625,6 +1692,7 @@ const setData = () => {
     form.invoiceType = detail.header.invoiceTypeCode ? detail.header.invoiceTypeCode.toString() : ''
     form.invoiceSource = detail.header.invoiceSourceName
     form.vendorId = detail.vendor.vendorId ? detail.vendor.vendorId.toString() : ''
+    form.vendorName = detail.vendor.vendorName ? detail.vendor.vendorName.toString() : form.vendorName
     form.npwp = detail.vendor.npwp
     form.address = detail.vendor.vendorAddress
     form.paymentId = detail.payment.paymentId
@@ -1750,6 +1818,22 @@ const setData = () => {
           }
           break
       }
+    }
+
+    if (detail.ocr) {
+      const ocr = detail.ocr
+      if (ocr.vendorName) form.ocrVendorName = ocr.vendorName
+      if (ocr.vendorNPWP) form.vendorNPWP = ocr.vendorNPWP
+      if (ocr.companyName) form.ocrCompanyName = ocr.companyName
+      if (ocr.npwpCompany) form.npwpCompany = ocr.npwpCompany
+      if (ocr.taxInvoiceNumber) form.taxInvoiceNumber = ocr.taxInvoiceNumber
+      if (ocr.taxInvoiceDate) form.taxInvoiceDate = ocr.taxInvoiceDate
+      if (ocr.salesAmount != null) form.salesAmount = Number(ocr.salesAmount)
+      if (ocr.otherDPP != null) form.otherDPP = Number(ocr.otherDPP)
+      if (ocr.vatAmount != null) form.ocrVatAmount = Number(ocr.vatAmount)
+      if (ocr.vatbmAmount != null) form.ocrVatbmAmount = Number(ocr.vatbmAmount)
+      if (ocr.taxInvoiceStatus) form.taxInvoiceStatus = ocr.taxInvoiceStatus
+      if (ocr.referenceNo) form.referenceNo = ocr.referenceNo
     }
   }
 }

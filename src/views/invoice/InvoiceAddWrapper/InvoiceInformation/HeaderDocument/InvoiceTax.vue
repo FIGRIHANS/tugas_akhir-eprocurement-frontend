@@ -25,10 +25,17 @@
           class="flex justify-between items-center gap-[8px] flex-1"
         >
           <AttachmentView
+            class="cursor-pointer"
             :fileData="
               typeof form[item.varName as keyof documentFormTypes] === 'object'
                 ? (form[item.varName as keyof documentFormTypes] as responseFileTypes)
                 : null
+            "
+            @click="
+              openDocumentPreview(
+                (form[item.varName as keyof documentFormTypes] as responseFileTypes) || null,
+                item.title,
+              )
             "
           />
           <div class="flex items-center gap-[8px]">
@@ -82,6 +89,7 @@ import AttachmentView from '@/components/ui/attachment/AttachmentView.vue'
 import type { invoiceQrData } from '@/views/invoice/types/invoiceQrdata'
 import UiLoading from '@/components/modal/UiLoading.vue'
 import { parseIndoDate } from '@/composables/parseIndoDate'
+import { openPdfPreview } from '@/composables/documentPreview'
 
 const invoiceVerificationStore = useInvoiceVerificationStore()
 
@@ -147,6 +155,11 @@ const changeFile = (index: number) => {
 const removeFile = (name: keyof documentFormTypes) => {
   const reftProperty = toRef(form, name)
   reftProperty.value = null
+}
+
+const openDocumentPreview = (file: responseFileTypes | null, label: string) => {
+  const signedUrl = (file?.previewPath || file?.path || '').trim()
+  openPdfPreview(signedUrl || null, label)
 }
 
 const sendUploadFile = async () => {

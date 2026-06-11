@@ -26,7 +26,7 @@
             <span
               v-if="data.status"
               class="badge badge-outline"
-              :class="data.status === 'Done' ? 'badge-success' : 'badge-primary'"
+              :class="getFtpUploadTabStatusBadgeClass(data.status)"
             >
               {{ data.status }}
             </span>
@@ -66,6 +66,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import moment from 'moment'
+import { getFtpUploadTabStatusBadgeClass } from './types/ftpUploadService'
 
 export interface FtpUploadFileInfo {
   fileName: string | null

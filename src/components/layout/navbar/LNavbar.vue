@@ -3,12 +3,9 @@
     <div class="flex justify-center">
       <nav class="flex lg:w-[1440px] justify-between items-center py-[20px] px-[40px]" :class="{ full: isFull }">
         <div class="logo flex items-center gap-2">
-          <RouterLink to="/" class="mt-2.5">
-            <LogoEPOQ class="h-[35px] w-auto" />
+          <RouterLink to="/">
+            <LogoEPOQ height="24px" />
           </RouterLink>
-          <div>
-            <img src="@/assets/TMS.png" class="h-[35px] w-max" alt="">
-          </div>
         </div>
 
         <div class="flex items-center gap-3.5">

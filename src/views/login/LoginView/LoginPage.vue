@@ -4,7 +4,7 @@
       {{ $t('login.form.signIn') }}
       <span v-if="!checkVendor()"> {{ $t('login.form.admin') }}</span>
     </p>
-    <div class="mt-[30px] flex flex-col gap-[20px]">
+    <form class="mt-[30px] flex flex-col gap-[20px]" @submit.prevent="goLogin">
       <!-- input email -->
       <div v-if="!checkVendor()">
         <label class="font-normal text-[13px]">{{ $t('login.form.email') }}</label>
@@ -70,14 +70,15 @@
       <!-- button footer -->
       <div class="flex flex-col gap-[8px]">
         <button
+          type="submit"
           class="btn btn-primary w-full justify-center"
           :disabled="isLoading"
-          @click="goLogin"
         >
           {{ $t('login.form.signInButton') }}
         </button>
         <button
           v-if="checkVendor()"
+          type="button"
           class="btn btn-secondary w-full justify-center"
           :disabled="isLoading"
           @click="goRegister"
@@ -85,29 +86,32 @@
           {{ $t('login.form.registerButton') }}
         </button>
       </div>
-    </div>
+    </form>
     <UiModal v-model="showFtpModal" size="sm" title="OTP Code">
       <div class="text-center space-y-2">
         <p class="text-sm font-medium text-gray-900">Check your email</p>
         <p class="text-xs text-gray-500">We sent a verification code to your email.</p>
       </div>
-      <div class="mt-4 flex justify-center gap-2">
-        <input
-          v-for="(digit, idx) in otpDigits"
-          :key="idx"
-          ref="otpInputs"
-          v-model="otpDigits[idx]"
-          inputmode="numeric"
-          maxlength="1"
-          class="h-12 w-12 rounded-lg border border-blue-300 text-center text-lg font-semibold text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
-          @input="onOtpInput(idx, $event)"
-          @keydown.backspace="onOtpBackspace(idx, $event)"
-        />
-      </div>
-      <div class="flex items-center justify-center gap-2 border-t mt-4 pt-3">
-        <button class="btn btn-light" @click="showFtpModal = false">Cancel</button>
-        <button class="btn btn-primary" @click="submitFtpCode">Submit</button>
-      </div>
+      <form class="mt-4" @submit.prevent="submitFtpCode">
+        <div class="flex justify-center gap-2">
+          <input
+            v-for="(digit, idx) in otpDigits"
+            :key="idx"
+            ref="otpInputs"
+            v-model="otpDigits[idx]"
+            inputmode="numeric"
+            maxlength="1"
+            class="h-12 w-12 rounded-lg border border-blue-300 text-center text-lg font-semibold text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            @input="onOtpInput(idx, $event)"
+            @keydown.backspace="onOtpBackspace(idx, $event)"
+            @keydown.enter.prevent="submitFtpCode"
+          />
+        </div>
+        <div class="flex items-center justify-center gap-2 border-t mt-4 pt-3">
+          <button type="button" class="btn btn-light" @click="showFtpModal = false">Cancel</button>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+      </form>
       <div class="mt-3 text-center text-xs text-gray-500">
         Didn't receive the email? <span class="text-primary cursor-pointer">Click to resend</span>
       </div>

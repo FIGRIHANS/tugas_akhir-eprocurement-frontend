@@ -3,7 +3,7 @@
     <div class="modal-content ftp-modal modal-center-y">
       <div class="modal-header ftp-modal__header">
         <div>
-          <h3 class="modal-title ftp-modal__title">Upload Invoice & Tax Document</h3>
+          <h3 class="modal-title ftp-modal__title">Upload FTP Document</h3>
           <p class="ftp-modal__subtitle">
             Unggah dokumen invoice dan faktur pajak. Reference document bersifat opsional.
           </p>
@@ -159,7 +159,10 @@
 
         <div class="ftp-modal__hint">
           <i class="ki-duotone ki-information-2"></i>
-          <span>Pilih vendor terlebih dahulu, lalu unggah dokumen invoice dan faktur pajak.</span>
+          <span>
+            Pilih vendor terlebih dahulu, lalu unggah dokumen invoice dan faktur pajak. Proses OCR
+            otomatis berjalan di backend (30–60 detik).
+          </span>
         </div>
       </div>
 
@@ -191,7 +194,7 @@
               d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
             ></path>
           </svg>
-          <span>{{ isLoading ? 'Uploading...' : 'Upload' }}</span>
+          <span>{{ isLoading ? 'Memproses upload & OCR...' : 'Upload' }}</span>
         </button>
       </div>
     </div>
@@ -359,6 +362,7 @@ const upload = async () => {
 
     const response = await invoiceApi.post('/invoice/upload-invoice-ftp', form, {
       headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 120000,
     })
 
     const parsed = parseFtpUploadCreateResponse(response?.data?.result ?? response?.data ?? {})
@@ -392,6 +396,7 @@ const upload = async () => {
     }
 
     emits('uploaded', { uid, preview, originalFileNames: localFileNames })
+    alert('Upload berhasil, sedang memproses OCR…')
 
     resetForm()
     const el = document.querySelector('#ftp_upload_modal') as HTMLElement
