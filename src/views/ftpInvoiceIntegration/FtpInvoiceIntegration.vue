@@ -38,7 +38,12 @@
             <div class="page-header__search">
               <UiInputSearch v-model="search" placeholder="Search" @search="triggerSearch" />
             </div>
-            <FilterList :data="filterForm" @setData="setDataFilter" ref="filterChild" />
+            <FilterList
+              :data="filterForm"
+              :status-only="activeTab === 'upload'"
+              @setData="setDataFilter"
+              ref="filterChild"
+            />
             <button
               v-if="activeTab === 'ftpData' && isProfile3200"
               class="btn btn-primary inline-flex items-center gap-2 shrink-0"
@@ -92,17 +97,18 @@
               <span class="font-semibold">
                 <p v-if="items.key === 'Status'">
                   {{
-                    StatusInvoice.find((item) => item.value.toString() === items.value.toString())
-                      ?.label
+                    (activeTab === 'upload' ? UploadTabStatus : StatusInvoice).find(
+                      (item) => item.value.toString() === items.value.toString(),
+                    )?.label
                   }}
                 </p>
-                <p v-else-if="items.key === 'Company Code'">
+                <p v-else-if="activeTab !== 'upload' && items.key === 'Company Code'">
                   {{
                     companyCodeList.find((item) => item.code.toString() === filterForm.companyCode)
                       ?.name
                   }}
                 </p>
-                <p v-else-if="items.key === 'Invoice Type'">
+                <p v-else-if="activeTab !== 'upload' && items.key === 'Invoice Type'">
                   {{
                     invoicePoTypeList.find(
                       (item) => item.code.toString() === filterForm.invoiceType,
@@ -377,12 +383,22 @@ const activeTabTitle = computed(() =>
   activeTab.value === 'ftpData' ? 'FTP Data' : 'Upload FTP Document',
 )
 
+const resetFilterState = () => {
+  filterForm.status = ''
+  filterForm.date = ''
+  filterForm.companyCode = ''
+  filterForm.invoiceType = ''
+  filteredPayload.value = []
+  filterChild.value?.resetFilter()
+}
+
 const setActiveTab = (tab: 'ftpData' | 'upload') => {
   if (activeTab.value === tab) return
   activeTab.value = tab
   currentPage.value = 1
   sortBy.value = ''
   sortColumnName.value = ''
+  resetFilterState()
   callList()
   if (tab === 'upload') fetchFtpUploads()
 }
@@ -584,6 +600,11 @@ const StatusInvoice = ref([
   { value: '5', label: 'Rejected' },
   { value: '7', label: 'Sent to SAP' },
 ])
+
+const UploadTabStatus = [
+  { value: 'Uploaded', label: 'Uploaded' },
+  { value: 'Done', label: 'Done' },
+]
 
 const filterForm = reactive<filterListTypes>({
   status: '',
@@ -809,6 +830,15 @@ const applyColumnSort = (items: ListPoTypes[]) => {
   })
 }
 
+const filterUploadListByStatus = (items: FtpUploadListItem[]) => {
+  if (!filterForm.status) return items
+
+  const target = filterForm.status.toLowerCase()
+  return items.filter(
+    (item) => resolveFtpUploadTabStatus(item.status).toLowerCase() === target,
+  )
+}
+
 const filterUploadListBySearch = (items: FtpUploadListItem[]) => {
   const query = search.value.trim().toLowerCase()
   if (!query) return items
@@ -832,7 +862,9 @@ const filterUploadListBySearch = (items: FtpUploadListItem[]) => {
   })
 }
 
-const filteredUploadList = computed(() => filterUploadListBySearch(uploadList.value))
+const filteredUploadList = computed(() =>
+  filterUploadListBySearch(filterUploadListByStatus(uploadList.value)),
+)
 
 const paginatedUploadList = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value
@@ -986,6 +1018,16 @@ const setDataFilter = (data: filterListTypes) => {
     })
   }
 
+  if (activeTab.value === 'upload') {
+    filteredPayload.value = filteredData
+    filterForm.status = data.status
+    filterForm.date = ''
+    filterForm.companyCode = ''
+    filterForm.invoiceType = ''
+    currentPage.value = 1
+    return
+  }
+
   if (data.date !== '') {
     filteredData.push({
       key: 'Date',
@@ -1067,12 +1109,10 @@ const deleteFilter = (key: string) => {
 }
 
 const resetFilter = () => {
-  filterForm.status = null
-  filterChild.value.resetFilter()
-  filteredPayload.value = []
-  filterChild.value.goFilter()
+  resetFilterState()
+  filterChild.value?.goFilter()
   currentPage.value = 1
-  callList()
+  if (activeTab.value !== 'upload') callList()
 }
 
 onMounted(() => {

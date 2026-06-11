@@ -12,51 +12,60 @@
             >Status</label
           >
           <select v-model="status" class="select" name="select">
-            <option value="1">Waiting to Verify</option>
-            <option value="0">Draft</option>
-            <option value="2">Waiting for Approval</option>
-            <option value="4">Approved</option>
-            <option value="5">Rejected</option>
-            <option value="7">Sent to SAP</option>
+            <template v-if="statusOnly">
+              <option value="">All</option>
+              <option value="Uploaded">Uploaded</option>
+              <option value="Done">Done</option>
+            </template>
+            <template v-else>
+              <option value="1">Waiting to Verify</option>
+              <option value="0">Draft</option>
+              <option value="2">Waiting for Approval</option>
+              <option value="4">Approved</option>
+              <option value="5">Rejected</option>
+              <option value="7">Sent to SAP</option>
+            </template>
           </select>
         </div>
-        <div class="relative">
-          <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
-            >Company Code</label
-          >
-          <select v-model="companyCode" class="select" name="select">
-            <option v-for="item of companyCodeList" :key="item.code" :value="item.code">
-              {{ item.name }}
-            </option>
-          </select>
-        </div>
-        <div v-if="type !== 'non-po'" class="relative">
-          <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
-            >FTP Invoice Integration Type</label
-          >
-          <select v-model="invoiceType" class="select" name="select">
-            <option v-for="item of invoicePoTypeList" :key="item.code" :value="item.code">
-              {{ item.name }}
-            </option>
-          </select>
-        </div>
-        <div v-if="type === 'non-po'" class="relative">
-          <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
-            >Invoice Non PO Type</label
-          >
-          <select v-model="invoiceType" class="select" name="select">
-            <option v-for="item of invoiceNonPoTypeList" :key="item.code" :value="item.code">
-              {{ item.name }}
-            </option>
-          </select>
-        </div>
-        <div class="relative">
-          <label
-            class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white z-[1]"
-            >Submitted Document Date</label
-          >
-          <DatePicker v-model="date" format="yyyy/MM/dd" teleport />
-        </div>
+        <template v-if="!statusOnly">
+          <div class="relative">
+            <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
+              >Company Code</label
+            >
+            <select v-model="companyCode" class="select" name="select">
+              <option v-for="item of companyCodeList" :key="item.code" :value="item.code">
+                {{ item.name }}
+              </option>
+            </select>
+          </div>
+          <div v-if="type !== 'non-po'" class="relative">
+            <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
+              >FTP Invoice Integration Type</label
+            >
+            <select v-model="invoiceType" class="select" name="select">
+              <option v-for="item of invoicePoTypeList" :key="item.code" :value="item.code">
+                {{ item.name }}
+              </option>
+            </select>
+          </div>
+          <div v-if="type === 'non-po'" class="relative">
+            <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
+              >Invoice Non PO Type</label
+            >
+            <select v-model="invoiceType" class="select" name="select">
+              <option v-for="item of invoiceNonPoTypeList" :key="item.code" :value="item.code">
+                {{ item.name }}
+              </option>
+            </select>
+          </div>
+          <div class="relative">
+            <label
+              class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white z-[1]"
+              >Submitted Document Date</label
+            >
+            <DatePicker v-model="date" format="yyyy/MM/dd" teleport />
+          </div>
+        </template>
       </div>
       <div class="flex align-center justify-between gap-[16px]">
         <button class="btn btn-outline btn-primary btn-lg" @click="resetFilter">
@@ -82,6 +91,7 @@ import { formatfilterDate } from '@/composables/date-format'
 const props = defineProps<{
   data: filterListTypes
   type?: string
+  statusOnly?: boolean
 }>()
 
 const emits = defineEmits(['setData'])
@@ -117,14 +127,22 @@ const resetInvoiceType = () => {
 }
 
 const goFilter = () => {
-  const data = {
+  if (props.statusOnly) {
+    emits('setData', {
+      status: status.value,
+      date: '',
+      companyCode: '',
+      invoiceType: '',
+    })
+    return
+  }
+
+  emits('setData', {
     status: status.value,
     date: formatfilterDate(date.value),
     companyCode: companyCode.value,
     invoiceType: invoiceType.value,
-  }
-
-  emits('setData', data)
+  })
 }
 
 watch(
