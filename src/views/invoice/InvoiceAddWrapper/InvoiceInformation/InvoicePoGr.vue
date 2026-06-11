@@ -114,34 +114,10 @@
                   </div>
                 </td>
                 <td v-if="!checkInvoiceDp()">{{ item.poItem }}</td>
-                <td v-if="!checkInvoiceDp() && !checkPoPib()">
-                  <span v-if="!item.isEdit">{{ item.grDocumentNo || '-' }}</span>
-                  <input
-                    v-else
-                    v-model="formEdit.grDocumentNo"
-                    type="text"
-                    class="input"
-                    placeholder="GR No"
-                  />
-                </td>
+                <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentNo || '-' }}</td>
                 <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentItem }}</td>
                 <td v-if="!checkInvoiceDp() && !checkPoPib()">
-                  <span v-if="!item.isEdit">
-                    {{
-                      form.status === 5
-                        ? moment(item.grDocumentDate).format('YYYY')
-                        : item.grDocumentDate
-                          ? moment(item.grDocumentDate).format('YYYY/MM/DD')
-                          : item.grDocumentDate || '-'
-                    }}
-                  </span>
-                  <DatePicker
-                    v-else
-                    v-model="formEdit.grDocumentDate"
-                    format="yyyy/MM/dd"
-                    class="w-full"
-                    teleport
-                  />
+                  {{ formatGrDocumentDateDisplay(item.grDocumentDate) }}
                 </td>
                 <td>{{ item.deliveryOrderNo }}</td>
                 <td v-if="!checkInvoiceDp()">
@@ -418,7 +394,6 @@ import type { PoGrItemTypes } from '@/stores/views/invoice/types/submission'
 import { useFormatIdr } from '@/composables/currency'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
-
 const masterDataApi = useInvoiceMasterDataStore()
 const invoiceApi = useInvoiceSubmissionStore()
 const loginStore = useLoginStore()
@@ -443,9 +418,8 @@ const formEdit = reactive({
   whtAmount: 0,
   quantity: 0,
   uom: '',
-  grDocumentNo: '',
-  grDocumentDate: '',
   conditionType: '',
+  department: '',
 })
 
 const listTaxCalculation = computed(() => masterDataApi.taxList)
@@ -456,6 +430,16 @@ const whtCodeList = computed(() => masterDataApi.whtCodeList)
 const checkIsEdit = () => {
   const result = form?.invoicePoGr.findIndex((item) => item.isEdit)
   return result !== -1
+}
+
+const formatGrDocumentDateDisplay = (value: string | null | undefined) => {
+  if (!value) return '-'
+  if (form?.status === 5) {
+    const parsed = moment(value, ['YYYY-MM-DD', 'YYYYMMDD', 'YYYY/MM/DD', moment.ISO_8601], true)
+    return parsed.isValid() ? parsed.format('YYYY') : value
+  }
+  const parsed = moment(value, ['YYYY-MM-DD', 'YYYYMMDD', 'YYYY/MM/DD', moment.ISO_8601], true)
+  return parsed.isValid() ? parsed.format('YYYY/MM/DD') : value
 }
 
 const searchEnter = (event: KeyboardEvent) => {
@@ -758,9 +742,8 @@ const resetFormEdit = () => {
   formEdit.whtAmount = 0
   formEdit.quantity = 0
   formEdit.uom = ''
-  formEdit.grDocumentNo = ''
-  formEdit.grDocumentDate = ''
   formEdit.conditionType = ''
+  formEdit.department = ''
 }
 
 const goEdit = (item: itemsPoGrType) => {
@@ -778,9 +761,8 @@ const goEdit = (item: itemsPoGrType) => {
     formEdit.whtCode = item.whtCode || ''
     formEdit.whtBaseAmount = item.whtBaseAmount || formEdit.itemAmountLC
     formEdit.whtAmount = item.whtAmount || 0
-    formEdit.grDocumentNo = item.grDocumentNo || ''
-    formEdit.grDocumentDate = item.grDocumentDate || ''
     formEdit.conditionType = item.conditionType || ''
+    formEdit.department = item.department || ''
   } else {
     item.taxCode = formEdit.taxCode
     item.vatAmount = formEdit.vatAmount
@@ -788,9 +770,8 @@ const goEdit = (item: itemsPoGrType) => {
     item.whtCode = formEdit.whtCode
     item.whtAmount = formEdit.whtAmount
     item.whtBaseAmount = formEdit.whtBaseAmount
-    item.grDocumentNo = formEdit.grDocumentNo
-    item.grDocumentDate = formEdit.grDocumentDate
     item.conditionType = formEdit.conditionType
+    item.department = formEdit.department
     resetFormEdit()
   }
 }

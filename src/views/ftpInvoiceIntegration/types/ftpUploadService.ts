@@ -122,12 +122,22 @@ export const parseFtpUploadList = (payload: unknown): FtpUploadListItem[] => {
 
   if (!Array.isArray(items)) return []
 
-  return items.map((item) => normalizeFtpUploadListItem(item as FtpUploadListItem))
+  return items.map((item) => {
+    const normalized = normalizeFtpUploadListItem(item as FtpUploadListItem)
+    return {
+      ...normalized,
+      status: resolveFtpUploadTabStatus(normalized.status),
+    }
+  })
 }
 
 export const parseFtpUploadDetail = (payload: unknown): FtpUploadListItem => {
   const detail = unwrapApiContent(payload)
-  return normalizeFtpUploadListItem(detail as FtpUploadListItem)
+  const normalized = normalizeFtpUploadListItem(detail as FtpUploadListItem)
+  return {
+    ...normalized,
+    status: resolveFtpUploadTabStatus(normalized.status),
+  }
 }
 
 export const parseFtpUploadCreateResponse = (payload: unknown): FtpUploadListItem => {
@@ -161,7 +171,9 @@ export const parseFtpUploadCreateResponse = (payload: unknown): FtpUploadListIte
       (resultNode.vendorId as number | null) ??
       (content.vendorId as number | null) ??
       null,
-    status: (resultNode.status as string) || (content.status as string) || 'Uploaded',
+    status: resolveFtpUploadTabStatus(
+      (resultNode.status as string) || (content.status as string) || 'Uploaded',
+    ),
     files:
       (resultNode.files as FtpUploadListItem['files']) ||
       (content.files as FtpUploadListItem['files']) ||
@@ -247,9 +259,25 @@ export const canOpenFtpInvoiceForm = (row: FtpDataListRow): boolean => {
   )
 }
 
+/**
+ * Status portal di tab Upload Invoice & Tax Document — hanya Uploaded / Done.
+ * Backend kadang mengirim Draft karena auto-create draft invoice; tetap tampilkan Uploaded.
+ */
+export const resolveFtpUploadTabStatus = (status: string | null | undefined): string => {
+  const raw = (status || '').trim()
+  if (!raw) return 'Uploaded'
+
+  const lower = raw.toLowerCase()
+  if (lower === 'done') return 'Done'
+  if (lower === 'draft' || lower === 'drafted' || lower === 'uploaded') return 'Uploaded'
+
+  return raw
+}
+
 /** Upload tab: status Uploaded dari GET /ftp-uploads. */
 export const isFtpUploadedRow = (row: FtpDataListRow): boolean => {
-  return (row.ftpUploadStatus || row.portalStatus || '').toLowerCase() === 'uploaded'
+  const status = resolveFtpUploadTabStatus(row.ftpUploadStatus || row.portalStatus)
+  return status.toLowerCase() === 'uploaded'
 }
 
 export const normalizeFtpDataListItem = (item: Record<string, unknown>): FtpDataListRow => {
@@ -350,7 +378,7 @@ export const mapFtpDataRowToUploadListItem = (row: FtpDataListRow): FtpUploadLis
     vendorName: row.vendorName,
     invoiceNo: row.invoiceNo || null,
     documentNo: row.documentNo || row.invoiceVendorNo || null,
-    status: row.ftpUploadStatus || 'Uploaded',
+    status: resolveFtpUploadTabStatus(row.ftpUploadStatus || row.portalStatus || 'Uploaded'),
     createdAt: row.createdUtcDate || null,
     invoiceFileName: invoiceDoc?.documentName || null,
     taxFileName: taxDoc?.documentName || null,

@@ -928,10 +928,10 @@ const mapPoGr = () => {
       conditionType: item.conditionType,
       conditionTypeDesc: item.conditionTypeDesc,
       qcStatus: item.qcStatus,
-      whtType: '',
-      whtCode: '',
+      whtType: item.whtType || '',
+      whtCode: item.whtCode || '',
       whtBaseAmount: item.whtBaseAmount,
-      whtAmount: 0,
+      whtAmount: item.whtAmount || 0,
       department: item.department && String(item.department).trim() !== '' ? item.department : (form.department || ''),
       authObjectCode: item.department && String(item.department).trim() !== '' ? item.department : (form.department || ''),
     })
@@ -1621,6 +1621,16 @@ const goSaveDraft = () => {
         isSubmit.value = false
       })
   } else {
+    if (Array.isArray(form.invoicePoGr) && form.invoicePoGr.some((it) => it.isEdit)) {
+      invoiceApi.errorMessageSubmission =
+        'Ada baris PO/GR yang sedang diedit. Mohon simpan (klik ✓) atau batalkan edit terlebih dahulu sebelum save draft.'
+      const idModal = document.querySelector('#error_submission_modal')
+      const modal = KTModal.getInstance(idModal as HTMLElement)
+      modal.show()
+      isSubmit.value = false
+      return
+    }
+
     const data = mapDataPost()
     data.header.statusCode = 0
     data.header.statusName = 'Draft'

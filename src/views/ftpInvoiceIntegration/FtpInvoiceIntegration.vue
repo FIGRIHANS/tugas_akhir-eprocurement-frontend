@@ -156,9 +156,13 @@
                   <td>
                     <span
                       class="badge badge-outline"
-                      :class="d.status === 'Done' ? 'badge-success' : 'badge-primary'"
+                      :class="
+                        resolveFtpUploadTabStatus(d.status) === 'Done'
+                          ? 'badge-success'
+                          : 'badge-info'
+                      "
                     >
-                      {{ d.status || '-' }}
+                      {{ resolveFtpUploadTabStatus(d.status) }}
                     </span>
                   </td>
                   <td>{{ d.vendorName || '-' }}</td>
@@ -207,14 +211,11 @@
                     {{ item }}
                     <i v-if="item" class="ki-filled ki-arrow-up-down"></i>
                   </th>
-                  <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 whitespace-nowrap">
-                    Sync Data
-                  </th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-if="list.length === 0">
-                  <td :colspan="columns.length + 1" class="text-center">No data found.</td>
+                  <td :colspan="columns.length" class="text-center">No data found.</td>
                 </tr>
                 <template v-for="(parent, index) in list" :key="index">
                   <tr>
@@ -241,16 +242,18 @@
                         {{ getFtpDataStatusLabel(parent) }}
                       </span>
                     </td>
+                    <td>{{ parent.invoiceNo || '-' }}</td>
                     <td>{{ parent.vendorName || '-' }}</td>
                     <td>{{ parent.documentNo || '-' }}</td>
-                    <td>{{ formatFtpDataCompany(parent) }}</td>
-                    <td>{{ parent.taxNo || '-' }}</td>
+                    <td>{{ parent.companyCode || '-' }}</td>
+                    <td>{{ parent.invoiceTypeName || '-' }}</td>
                     <td>{{ formatFtpListDate(parent.invoiceDate) }}</td>
                     <td>{{ formatFtpDataAmountDisplay(parent.totalGrossAmount) }}</td>
+                    <td>{{ formatFtpDataAmountDisplay(parent.totalNetAmount) }}</td>
+                    <td>{{ formatFtpListDate(parent.estimatedPaymentDate) }}</td>
+                    <td>{{ parent.invoiceSourceName || '-' }}</td>
                     <td>{{ formatFtpDataAmountDisplay(parent.dpp) }}</td>
                     <td>{{ formatFtpDataAmountDisplay(parent.vatAmount) }}</td>
-                    <td>{{ parent.invoiceNo }}</td>
-                    <td>{{ parent.invoiceSourceName }}</td>
                     <td>
                       <span class="badge" :class="getStatusBadgeClass(parent.fpStatus)">
                         {{ parent.fpStatus || 'Warning' }}
@@ -270,39 +273,6 @@
                       <span class="badge" :class="getStatusBadgeClass(parent.poPrice)">
                         {{ parent.poPrice || 'Warning' }}
                       </span>
-                    </td>
-                    <td>
-                      <button
-                        v-if="canSyncFtpDataRow(parent)"
-                        class="btn btn-sm btn-primary inline-flex items-center gap-2 whitespace-nowrap"
-                        :disabled="syncingRowId === resolveFtpUploadUIdFromRow(parent)"
-                        @click="syncFtpUploadRow(parent)"
-                      >
-                        <svg
-                          v-if="syncingRowId === resolveFtpUploadUIdFromRow(parent)"
-                          class="animate-spin h-4 w-4"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            class="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            stroke-width="4"
-                          ></circle>
-                          <path
-                            class="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                          ></path>
-                        </svg>
-                        <i v-else class="ki-duotone ki-arrows-circle"></i>
-                        Sync Data
-                      </button>
-                      <span v-else class="text-gray-400 text-sm">-</span>
                     </td>
                   </tr>
                 </template>
@@ -360,19 +330,15 @@ import {
 } from './types/ftpUpload'
 import {
   buildFtpSyncContextFromDataRow,
-  buildSyncContextFromSyncResponse,
-  canSyncFtpDataRow,
   fetchFtpDataList,
   fetchFtpUploadList,
-  formatFtpDataCompany,
   getFtpDataStatusLabel,
+  resolveFtpUploadTabStatus,
   resolveFtpRowUid,
   resolveFtpUploadUIdFromRow,
   saveActiveFtpUploadUId,
   saveFtpSyncContext,
   sortFtpUploadsByNewest,
-  syncFtpUpload,
-  upsertFtpDataListRow,
 } from './types/ftpUploadService'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
@@ -408,7 +374,6 @@ const filteredPayload = ref([])
 const filterChild = ref(null)
 const viewDetailId = ref('')
 const isSyncLoading = ref(false)
-const syncingRowId = ref<string | null>(null)
 const FTP_INVOICE_SOURCE = 3
 const DRAFT_STATUS_CODE = 0
 const DRAFT_STATUS_NAME = 'draft'
@@ -577,10 +542,13 @@ const updateUploadDummyStatuses = () => {
       )
 
       if (match) {
-        const newStatus = match.hasDraft || match.flagSync ? 'Done' : 'Uploaded'
+        const newStatus =
+          match.portalStatus === 'Done' ? 'Done' : 'Uploaded'
         return {
           ...d,
-          status: match.ftpUploadStatus || newStatus,
+          status: resolveFtpUploadTabStatus(
+            match.ftpUploadStatus || match.portalStatus || newStatus,
+          ),
           invoiceUId: match.invoiceUId || d.invoiceUId,
           vendorName: match.vendorName || d.vendorName,
         }
@@ -635,16 +603,18 @@ const filterForm = reactive<filterListTypes>({
 const columns = ref<string[]>([
   '',
   'Status',
+  'Submitted Document No',
   'Vendor Name',
   'Invoice Vendor No',
-  'Company',
-  'Tax No',
+  'Company Code',
+  'Invoice PO Type',
   'Invoice Date',
   'Total Gross Amount',
+  'Total Net Amount',
+  'Estimated Payment Date',
+  'Invoice Source',
   'DPP',
   'PPN',
-  'Submitted Document No',
-  'Invoice Source',
   'FP Status',
   'VAT Status',
   'WHT Status',
@@ -656,13 +626,15 @@ const COLUMN_FIELD_MAP = {
   Status: 'statusName',
   'Vendor Name': 'vendorName',
   'Invoice Vendor No': 'documentNo',
-  Company: 'companyCode',
-  'Tax No': 'taxNo',
+  'Company Code': 'companyCode',
+  'Invoice PO Type': 'invoiceTypeName',
   'Invoice Date': 'invoiceDate',
   'Total Gross Amount': 'totalGrossAmount',
+  'Total Net Amount': 'totalNetAmount',
+  'Estimated Payment Date': 'estimatedPaymentDate',
+  'Invoice Source': 'invoiceSourceName',
   DPP: 'dpp',
   PPN: 'vatAmount',
-  'Invoice Source': 'invoiceSourceName',
 } as const
 
 const formatFtpListDate = (value?: string | null) => {
@@ -797,7 +769,12 @@ const applyColumnSort = (items: ListPoTypes[]) => {
 
   const sorted = [...items]
 
-  if (name === 'Total Gross Amount' || name === 'DPP' || name === 'PPN') {
+  if (
+    name === 'Total Gross Amount' ||
+    name === 'Total Net Amount' ||
+    name === 'DPP' ||
+    name === 'PPN'
+  ) {
     return sorted.sort((a, b) => {
       const aRow = a as FtpDataListRow
       const bRow = b as FtpDataListRow
@@ -806,13 +783,17 @@ const applyColumnSort = (items: ListPoTypes[]) => {
           ? Number(aRow.dpp) || 0
           : name === 'PPN'
             ? Number(aRow.vatAmount) || 0
-            : Number(aRow.totalGrossAmount) || 0
+            : name === 'Total Net Amount'
+              ? Number(aRow.totalNetAmount) || 0
+              : Number(aRow.totalGrossAmount) || 0
       const bVal =
         name === 'DPP'
           ? Number(bRow.dpp) || 0
           : name === 'PPN'
             ? Number(bRow.vatAmount) || 0
-            : Number(bRow.totalGrossAmount) || 0
+            : name === 'Total Net Amount'
+              ? Number(bRow.totalNetAmount) || 0
+              : Number(bRow.totalGrossAmount) || 0
       return sortBy.value === 'asc' ? aVal - bVal : bVal - aVal
     })
   }
@@ -925,40 +906,6 @@ const goAdd = () => {
       from: 'ftp',
     },
   })
-}
-
-const syncFtpUploadRow = async (row: ListPoTypes) => {
-  if (!canSyncFtpDataRow(row)) return
-
-  const uid = resolveFtpUploadUIdFromRow(row)
-  if (!uid) return
-
-  syncingRowId.value = uid
-  try {
-    const syncResult = await syncFtpUpload(uid, true)
-    const syncContext = buildSyncContextFromSyncResponse(syncResult)
-
-    if (syncResult.warnings?.length) {
-      alert(syncResult.warnings.join('\n'))
-    }
-
-    if (syncContext.ftpData) {
-      sourceList.value = upsertFtpDataListRow(sourceList.value, syncContext.ftpData)
-    }
-
-    await callList()
-    alert('Sync berhasil. Data OCR telah diperbarui.')
-  } catch (error: unknown) {
-    const err = error as { response?: { data?: { result?: { message?: string } } }; message?: string }
-    const message =
-      err.response?.data?.result?.message ||
-      err.message ||
-      'Gagal sync data FTP. Pastikan vendor name sudah terisi.'
-    alert(message)
-    console.error('Failed to sync FTP upload row:', error)
-  } finally {
-    syncingRowId.value = null
-  }
 }
 
 const syncFtpData = async () => {
