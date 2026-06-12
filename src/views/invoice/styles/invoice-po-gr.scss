@@ -58,4 +58,15 @@
       }
     }
   }
+
+  .customSelect--department {
+    min-width: 220px;
+  }
+}
+
+:global(.vs__dropdown-menu) {
+  .vs__dropdown-option {
+    white-space: normal;
+    word-break: break-word;
+  }
 }

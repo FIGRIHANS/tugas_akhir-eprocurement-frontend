@@ -241,12 +241,13 @@
                   <v-select
                     v-else
                     v-model="formEdit.department"
-                    class="customSelect"
+                    class="customSelect customSelect--department"
                     placeholder="Select"
                     :get-option-label="(option: any) => `${option.code} - ${option.name}`"
                     :reduce="(option: any) => option.code"
                     :options="costCenterList"
                     appendToBody
+                    @open="repositionVueSelectDropdownLeft"
                   ></v-select>
                 </td>
               </tr>
@@ -343,12 +344,13 @@
                   <v-select
                     v-else
                     v-model="formEdit.department"
-                    class="customSelect"
+                    class="customSelect customSelect--department"
                     placeholder="Select"
                     :get-option-label="(option: any) => `${option.code} - ${option.name}`"
                     :reduce="(option: any) => option.code"
                     :options="costCenterList"
                     appendToBody
+                    @open="repositionVueSelectDropdownLeft"
                   ></v-select>
                   <p v-if="item.departementError" class="text-danger text-[9px]">
                     Please Chose Departement
@@ -377,7 +379,9 @@
 
 <script lang="ts" setup>
 import { ref, reactive, computed, inject, watch, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import type { formTypes } from '../../types/invoiceAddWrapper'
+import { dedupePoGrLines, getPoGrLineKey } from '@/core/utils/poGrDedup'
 import { KTModal } from '@/metronic/core'
 import { defaultColumn, invoiceDpColumn, poCCColumn, manualAddColumn } from '@/static/invoicePoGr'
 import SearchPoGr from './InvoicePoGr/SearchPoGr.vue'
@@ -392,11 +396,13 @@ import moment from 'moment'
 import type { PoGrSearchTypes, itemsPoGrType } from '../../types/invoicePoGr'
 import type { PoGrItemTypes } from '@/stores/views/invoice/types/submission'
 import { useFormatIdr } from '@/composables/currency'
+import { repositionVueSelectDropdownLeft } from '@/composables/vueSelectDropdownPosition'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 const masterDataApi = useInvoiceMasterDataStore()
 const invoiceApi = useInvoiceSubmissionStore()
 const loginStore = useLoginStore()
+const route = useRoute()
 const { poGrList } = storeToRefs(invoiceApi)
 const form = inject<formTypes>('form')
 const columns = ref<string[]>([])
@@ -479,7 +485,7 @@ const mapGoodsReceiptDetailToPoGrItems = (
           : ''
 
     return {
-      poNo: detail.poNumber || '',
+      poNo: line.poNumber || detail.poNumber || '',
       poItem: line.grDocumentItem ?? 0,
       grDocumentNo: line.grDocumentNo || detail.grDocumentNo || '',
       grDocumentItem: line.grDocumentItem ?? 0,
@@ -576,7 +582,7 @@ const openAddItem = async () => {
   }
 
   try {
-    const mapped = await fetchGrAsPoGrList(grDocumentNo)
+    const mapped = dedupePoGrLines(await fetchGrAsPoGrList(grDocumentNo))
     poGrList.value = mapped
 
     const idModal = document.querySelector('#add_po_gr_item_modal')
@@ -592,55 +598,80 @@ const openAddItem = async () => {
 const setPoGrFromMockSap = (items: PoGrItemTypes[]) => {
   if (!form) return
 
-  form.invoicePoGr = []
+  const existingByKey = new Map(
+    form.invoicePoGr.map((row) => [getPoGrLineKey(row), row]),
+  )
 
-  for (const item of items || []) {
-    const data = {
-      id: item.poItem || 0,
+  const uniqueItems = dedupePoGrLines(items || [])
+
+  form.invoicePoGr = uniqueItems.map((item) => {
+    const draft = {
       poNo: item.poNo || '',
       poItem: item.poItem || 0,
       grDocumentNo: item.grDocumentNo || '',
       grDocumentItem: item.grDocumentItem || 0,
-      grDocumentDate: item.grDocumentDate || '',
-      taxCode: item.taxCode || '',
-      vatAmount: 0,
+    }
+    const existing = existingByKey.get(getPoGrLineKey(draft))
+
+    return {
+      id: existing?.id && Number(existing.id) > 0 ? existing.id : 0,
+      poNo: draft.poNo,
+      poItem: draft.poItem,
+      grDocumentNo: draft.grDocumentNo,
+      grDocumentItem: draft.grDocumentItem,
+      grDocumentDate: item.grDocumentDate || existing?.grDocumentDate || '',
+      taxCode: existing?.taxCode || item.taxCode || '',
+      vatAmount: existing?.vatAmount ?? 0,
       currencyLC: item.currencyLC || form.currency,
       currencyTC: item.currencyTC || form.currency,
-      itemAmountLC: item.itemAmountLC ?? item.itemAmount ?? 0,
-      itemAmountTC: item.itemAmountTC ?? item.itemAmount ?? 0,
-      quantity: item.quantity || 0,
-      uom: item.uom || '',
-      itemText: item.itemText || item.materialDescription || '',
+      itemAmountLC: item.itemAmountLC ?? item.itemAmount ?? existing?.itemAmountLC ?? 0,
+      itemAmountTC: item.itemAmountTC ?? item.itemAmount ?? existing?.itemAmountTC ?? 0,
+      quantity: item.quantity || existing?.quantity || 0,
+      uom: item.uom || existing?.uom || '',
+      itemText: item.itemText || item.materialDescription || existing?.itemText || '',
       currency: item.currency || form.currency || 'IDR',
-      conditionType: item.conditionType || '',
-      conditionTypeDesc: item.conditionTypeDesc || '',
-      qcStatus: item.qcStatus || '',
-      postingDate: item.postingDate || '',
-      enteredOn: item.enteredOn || '',
-      purchasingOrg: item.purchasingOrg || '',
-      department: item.department || '',
-      whtType: '',
-      whtCode: '',
-      whtBaseAmount:
-        form.currency === 'IDR'
-          ? item.itemAmountLC ?? item.itemAmount ?? 0
-          : item.itemAmountTC ?? item.itemAmount ?? 0,
-      whtAmount: 0,
+      conditionType: existing?.conditionType || item.conditionType || '',
+      conditionTypeDesc: existing?.conditionTypeDesc || item.conditionTypeDesc || '',
+      qcStatus: item.qcStatus || existing?.qcStatus || '',
+      postingDate: item.postingDate || existing?.postingDate || '',
+      enteredOn: item.enteredOn || existing?.enteredOn || '',
+      purchasingOrg: item.purchasingOrg || existing?.purchasingOrg || '',
+      department: existing?.department || item.department || '',
+      whtType: existing?.whtType || '',
+      whtCode: existing?.whtCode || '',
+      whtBaseAmount: existing?.whtBaseAmount ?? (item.itemAmountLC ?? item.itemAmount ?? 0),
+      whtAmount: existing?.whtAmount ?? 0,
       poNoError: false,
       poItemError: false,
       departementError: false,
-      deliveryOrderNo: item.deliveryOrderNo || '',
+      deliveryOrderNo: item.deliveryOrderNo || existing?.deliveryOrderNo || '',
       isEdit: false,
     } as itemsPoGrType
+  })
+}
 
-    form.invoicePoGr.push(data)
-  }
+const hasExistingPoGrData = () => {
+  if (!form?.invoicePoGr?.length) return false
+
+  return form.invoicePoGr.some((row) => {
+    if (Number(row.id) > 0) return true
+    return !!(
+      row.taxCode ||
+      row.conditionType ||
+      row.whtType ||
+      row.whtCode ||
+      row.department
+    )
+  })
 }
 
 const autoFetchPoOnEnter = async () => {
   if (!form) return
+  if (route.query.invoice) return
   if (checkInvoiceDp() || form.invoiceType === '902') return
   if (isAutoFetchingPo.value) return
+  // Keep saved PO/GR lines (draft/rejected/resubmit) — do not overwrite with GR API defaults.
+  if (hasExistingPoGrData()) return
 
   const initialGrNo =
     search.value.trim() || form.invoicePoGr[0]?.grDocumentNo?.toString().trim() || ''
@@ -690,8 +721,9 @@ const setColumn = () => {
 }
 
 const setItemPoGr = (items: PoGrSearchTypes[]) => {
-  for (const item of items) {
+  for (const item of dedupePoGrLines(items)) {
     const data = {
+      id: 0,
       poNo: item.poNo,
       poItem: item.poItem,
       grDocumentNo: item.grDocumentNo,
@@ -717,6 +749,11 @@ const setItemPoGr = (items: PoGrSearchTypes[]) => {
       deliveryOrderNo: item.deliveryOrderNo,
       isEdit: false,
     } as itemsPoGrType
+
+    const alreadyExists = form?.invoicePoGr.some(
+      (row) => getPoGrLineKey(row) === getPoGrLineKey(data),
+    )
+    if (alreadyExists) continue
 
     form?.invoicePoGr.push(data)
 
@@ -983,6 +1020,11 @@ watch(
 
 onMounted(async () => {
   setColumn()
+
+  if (hasExistingPoGrData() && form?.invoicePoGr[0]?.grDocumentNo) {
+    search.value = form.invoicePoGr[0].grDocumentNo.toString()
+  }
+
   autoFetchPoOnEnter()
 
   // Prevent double fetching of WHT Types
