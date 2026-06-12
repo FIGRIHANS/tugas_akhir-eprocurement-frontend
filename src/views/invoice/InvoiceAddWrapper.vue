@@ -11,15 +11,19 @@
       :hide-workflow-tabs="shouldHideWorkflowTabs"
       class="-mx-[24px]"
     />
-    <!-- <div v-if="form.status !== 0" class="status__box--approved -mt-5 -mx-[24px]">
-      <i class="ki-outline ki-shield-tick text-primary text-[36px]"></i>
+    <div
+      v-if="isSubmissionFormMode && isRejectedInvoiceStatus(form.status)"
+      class="status__box--reject -mt-5 -mx-[24px] mb-[16px]"
+    >
+      <i class="ki-duotone ki-shield-cross text-danger text-[36px]"></i>
       <div>
-        <p class="text-[15px] font-semibold mb-[4px]">Successfully Submitted</p>
-        <p class="text-[13px] font-medium text-gray-700">
-          The invoice has been successfully submitted. You can now download the invoice PDF for your records.
+        <p class="text-[15px] font-semibold mb-[4px]">Invoice Rejected</p>
+        <p class="text-[13px] font-medium text-danger">
+          Invoice ini ditolak dan dikembalikan ke submitter. Perbaiki data lalu submit ulang untuk
+          mengubah status menjadi Waiting for Verify dan dikirim ke verifikator.
         </p>
       </div>
-    </div> -->
+    </div>
     <div>
       <Transition mode="out-in">
         <component :is="contentComponent" />
@@ -181,6 +185,7 @@ import { useCheckEmpty } from '@/composables/validation'
 import {
   isInvoiceSubmissionFlow,
   isInvoiceViewRouteType,
+  isRejectedInvoiceStatus,
   isSavedDraftStatus,
 } from '@/core/utils/invoiceSubmissionRoute'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
@@ -1088,7 +1093,7 @@ const mapDataPost = () => {
       currCode: form.currency,
       notes: form.description,
       statusCode: isClickDraft.value ? 0 : 1,
-      statusName: isClickDraft.value ? 'Drafted' : 'Waiting to Verify',
+      statusName: isClickDraft.value ? 'Drafted' : 'Waiting for Verify',
       creditCardBillingId: '',
       remainingDPAmount: form.invoiceDp === '9012' ? Number(form.remainingDpAmount) || 0 : 0,
       dpAmountDeduction: form.invoiceDp === '9012' ? Number(form.dpAmountDeduction) || 0 : 0,
@@ -1227,7 +1232,7 @@ const mapDataPostNonPo = () => {
       creditCardBillingID: '',
       notes: form.description,
       statusCode: isClickDraft.value ? 0 : 1,
-      statusName: isClickDraft.value ? 'Drafted' : 'Waiting to Verify',
+      statusName: isClickDraft.value ? 'Drafted' : 'Waiting for Verify',
       department: checkIsNonPo() ? form.department : userData.value.profile.costCenter || '',
       authObjectCode: checkIsNonPo() ? form.department : userData.value.profile.costCenter || '',
       profileId: userData.value.profile.profileId.toString(),

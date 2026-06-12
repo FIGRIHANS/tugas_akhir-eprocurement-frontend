@@ -35,6 +35,12 @@ export function isSavedDraftStatus(status: number | string | null | undefined): 
   return !Number.isNaN(code) && (code === 0 || code === 5)
 }
 
+/** Invoice rejected by verifier/approver and editable for resubmission. */
+export function isRejectedInvoiceStatus(status: number | string | null | undefined): boolean {
+  const code = Number(status)
+  return !Number.isNaN(code) && code === 5
+}
+
 export function isDraftFormStatus(status: number | string | null | undefined): boolean {
   const code = Number(status)
   return !Number.isNaN(code) && (code === 0 || code === -1 || code === 5)
