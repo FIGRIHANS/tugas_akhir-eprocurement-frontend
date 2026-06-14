@@ -6,6 +6,7 @@
   <button
     type="button"
     class="sidebar-toggle-btn"
+    :class="{ 'sidebar-toggle-btn--behind-modal': isAnyModalOpen }"
     :style="{ insetInlineStart: sidebarStore.isCollapsed ? '0px' : '280px' }"
     :aria-label="sidebarStore.isCollapsed ? 'Tampilkan sidebar' : 'Sembunyikan sidebar'"
     :aria-pressed="sidebarStore.isCollapsed"
@@ -33,10 +34,12 @@ import LNavbar from '@/components/layout/navbar/LNavbar.vue'
 import LSidebar from '@/components/layout/sidebar/LSidebar.vue'
 import AiChatbot from '@/components/chat/AiChatbot.vue'
 import { useSidebarStore } from '@/stores/sidebar'
+import { useGlobalModalState } from '@/composables/useGlobalModalState'
 
 import { RouterView, useRoute } from 'vue-router'
 
 const sidebarStore = useSidebarStore()
+const { isAnyModalOpen } = useGlobalModalState()
 const route = useRoute()
 </script>
 
@@ -66,5 +69,9 @@ const route = useRoute()
 .sidebar-toggle-btn i {
   color: #14B8A6;
   font-size: 13px;
+}
+
+.sidebar-toggle-btn--behind-modal {
+  z-index: 30 !important;
 }
 </style>

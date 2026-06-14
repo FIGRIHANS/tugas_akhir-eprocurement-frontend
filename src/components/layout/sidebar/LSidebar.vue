@@ -1,7 +1,10 @@
 <template>
 <aside
-    class="w-[280px] bg-white border border-gray-200 border-t-0 h-screen top-0 fixed scrollable-y-auto transition-transform duration-300 ease-in-out z-[99]"
-    :class="{ '-translate-x-full': sidebarStore.isCollapsed }"
+    class="w-[280px] bg-white border border-gray-200 border-t-0 h-screen top-0 fixed scrollable-y-auto transition-[transform,z-index] duration-300 ease-in-out z-[99]"
+    :class="{
+      '-translate-x-full': sidebarStore.isCollapsed,
+      'sidebar--behind-modal': isAnyModalOpen,
+    }"
   >
     <div class="h-[80px] flex items-center mb-5 px-[25px]">
       <div class="flex items-center">
@@ -46,6 +49,7 @@
 <script lang="ts" setup>
 import sidebarMenu from '@/static/sidebar'
 import { useRouter, useRoute } from 'vue-router'
+import { useGlobalModalState } from '@/composables/useGlobalModalState'
 
 // import LogoAN from '@/assets/svg/LogoAN.vue'
 import LogoEPOQ from '@/assets/svg/EvoxLogo.vue'
@@ -66,6 +70,7 @@ const router = useRouter()
 const route = useRoute()
 const userStore = useLoginStore()
 const sidebarStore = useSidebarStore()
+const { isAnyModalOpen } = useGlobalModalState()
 
 // Matches exact route OR any child route (detail/create pages)
 // e.g. 'whtPasal21' also matches 'whtPasal21Detail', 'whtPasal21Create'
@@ -680,5 +685,9 @@ const filteredSidebarMenu = computed(() => {
 
 .menu-arrow i {
   font-size: 12px;
+}
+
+.sidebar--behind-modal {
+  z-index: 30 !important;
 }
 </style>

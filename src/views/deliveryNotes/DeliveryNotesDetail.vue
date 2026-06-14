@@ -17,9 +17,9 @@
         <i class="ki-duotone ki-information text-4xl text-red-500 mb-4"></i>
         <h3 class="text-lg font-semibold text-red-700">Error Loading Data</h3>
         <p class="text-red-600 mt-2">{{ error }}</p>
-        <button class="btn btn-primary mt-4" @click="goBack()">
-          <i class="ki-duotone ki-arrow-left"></i>
-          Back to List
+        <button class="btn btn-outline btn-primary mt-4" @click="goBack()">
+          <i class="ki-filled ki-arrow-left"></i>
+          Back
         </button>
       </div>
     </div>
@@ -327,23 +327,39 @@
       </div>
 
       <!-- Action Buttons -->
-      <div class="mt-[24px] flex gap-3 justify-end">
-        <button class="btn btn-light" @click="goBack()">
-          <i class="ki-duotone ki-arrow-left"></i>
-          Back to List
+      <div class="flex justify-between items-center gap-[8px] mt-[24px]">
+        <button
+          v-if="isDraft"
+          class="btn btn-outline btn-primary"
+          :disabled="isSubmitting"
+          @click="updateDeliveryNote(true)"
+        >
+          Save as Draft
+          <i class="ki-duotone ki-bookmark"></i>
         </button>
-        <template v-if="isDraft">
-          <button class="btn btn-light" @click="updateDeliveryNote(true)" :disabled="isSubmitting">
-            <i class="ki-duotone ki-save-2" v-if="!isSubmitting"></i>
-            <span v-if="isSubmitting">Saving...</span>
-            <span v-else>Save as Draft</span>
+        <div v-else></div>
+        <div class="flex items-center justify-end gap-[8px]">
+          <button
+            class="btn btn-outline btn-primary"
+            :disabled="isSubmitting"
+            @click="goBack()"
+          >
+            <i class="ki-filled ki-arrow-left"></i>
+            Back
           </button>
-          <button class="btn btn-primary" @click="updateDeliveryNote(false)" :disabled="isSubmitting">
-            <i class="ki-duotone ki-save-2" v-if="!isSubmitting"></i>
+          <button
+            v-if="isDraft"
+            class="btn btn-primary"
+            :disabled="isSubmitting"
+            @click="updateDeliveryNote(false)"
+          >
             <span v-if="isSubmitting">Submitting...</span>
-            <span v-else>Submit Update</span>
+            <template v-else>
+              Submit
+              <i class="ki-duotone ki-paper-plane"></i>
+            </template>
           </button>
-        </template>
+        </div>
       </div>
     </div>
 

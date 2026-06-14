@@ -11,15 +11,7 @@
       :hide-workflow-tabs="shouldHideWorkflowTabs"
       class="-mx-[24px]"
     />
-    <!-- <div v-if="form.status !== 0" class="status__box--approved -mt-5 -mx-[24px]">
-      <i class="ki-outline ki-shield-tick text-primary text-[36px]"></i>
-      <div>
-        <p class="text-[15px] font-semibold mb-[4px]">Successfully Submitted</p>
-        <p class="text-[13px] font-medium text-gray-700">
-          The invoice has been successfully submitted. You can now download the invoice PDF for your records.
-        </p>
-      </div>
-    </div> -->
+    <RejectedInvoiceStatusCard v-if="isSubmissionFormMode" />
     <div>
       <Transition mode="out-in">
         <component :is="contentComponent" />
@@ -175,14 +167,17 @@ import type { formTypes } from './types/invoiceAddWrapper'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import StepperStatus from '../../components/stepperStatus/StepperStatus.vue'
 import TabInvoice from '@/components/invoice/TabInvoice.vue'
+import RejectedInvoiceStatusCard from './InvoiceAddWrapper/RejectedInvoiceStatusCard.vue'
 import iconPDF from '@/components/icons/iconPDF.vue'
 import { KTModal } from '@/metronic/core'
 import { useCheckEmpty } from '@/composables/validation'
 import {
   isInvoiceSubmissionFlow,
   isInvoiceViewRouteType,
+  isRejectedInvoiceStatus,
   isSavedDraftStatus,
 } from '@/core/utils/invoiceSubmissionRoute'
+import { dedupePoGrLines } from '@/core/utils/poGrDedup'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useWorkflowConfigurationStore } from '@/stores/workflow-configurantion/wokrflowConfiguration'
@@ -423,7 +418,7 @@ const applyRouteUiDefaults = () => {
     return
   }
 
-  if (isFtpSubmissionEntry() || isSavedDraftStatus(form.status) || !isView) {
+  if (isSavedDraftStatus(form.status) || !isView) {
     enableDraftTabNavigation()
     return
   }
@@ -556,9 +551,12 @@ const loadInvoiceFromRoute = async () => {
         setStepperStatus()
       }
 
-      if (isFtpSubmissionEntry() || isSavedDraftStatus(form.status)) {
+      if (isSavedDraftStatus(form.status) && (isFtpSubmissionEntry() || routeType === 'po')) {
         enableDraftTabNavigation()
-      } else if (isInvoiceViewRouteType(routeType)) {
+      } else if (
+        isInvoiceViewRouteType(routeType) ||
+        (route.query.from === 'ftp' && !isSavedDraftStatus(form.status))
+      ) {
         tabNow.value = 'preview'
         hasCompletedDataTab.value = true
       } else if (canClickPaymentStatusTab.value) {
@@ -567,7 +565,7 @@ const loadInvoiceFromRoute = async () => {
     }
   } catch (error) {
     console.error('Error loading invoice detail:', error)
-    if (isFtpSubmissionEntry()) {
+    if (isFtpSubmissionEntry() && isSavedDraftStatus(form.status)) {
       enableDraftTabNavigation()
     }
   }
@@ -637,6 +635,16 @@ const getBackListRoute = () => {
 const goBack = () => {
   if (tabNow.value === 'paymentStatus') {
     tabNow.value = 'preview'
+    return
+  }
+
+  if (
+    tabNow.value === 'preview' &&
+    (checkInvoiceView() ||
+      checkInvoiceNonPoView() ||
+      (route.query.from === 'ftp' && !isSavedDraftStatus(form.status)))
+  ) {
+    router.push({ name: getBackListRoute() })
     return
   }
 
@@ -1048,13 +1056,52 @@ const resolveInvoiceSource = () => {
   return { invoiceSource: 1, invoiceSourceName: 'Multi Channel' }
 }
 
+const EMPTY_INVOICE_UID = '00000000-0000-0000-0000-000000000000'
+
+const resolvePersistedInvoiceUId = () => {
+  const uid = form.invoiceUId?.toString().trim()
+  if (!uid || uid === EMPTY_INVOICE_UID) return EMPTY_INVOICE_UID
+  return uid
+}
+
+const resolveSubmitStatusCode = () => {
+  if (isClickDraft.value) return 0
+  if (isRejectedInvoiceStatus(form.status) || isSavedDraftStatus(form.status)) return 1
+  return 1
+}
+
+const resolveSubmitStatusName = () => {
+  if (isClickDraft.value) return 'Drafted'
+  return 'Waiting for Verify'
+}
+
+const syncFormStatusAfterSubmit = (responseContent: unknown) => {
+  if (!responseContent || typeof responseContent !== 'object') {
+    if (!isClickDraft.value) form.status = 1
+    return
+  }
+
+  const content = responseContent as Record<string, unknown>
+  const header = (content.header ?? content.Header) as
+    | { statusCode?: number; statusName?: string; invoiceUId?: string }
+    | undefined
+
+  const nextStatus = Number(header?.statusCode ?? (isClickDraft.value ? 0 : 1))
+  if (!Number.isNaN(nextStatus)) {
+    form.status = nextStatus
+    if (detailPo.value?.header) detailPo.value.header.statusCode = nextStatus
+    if (detailNonPo.value?.header) detailNonPo.value.header.statusCode = nextStatus
+  }
+
+  if (header?.invoiceUId) {
+    form.invoiceUId = header.invoiceUId
+  }
+}
+
 const mapDataPost = () => {
   const data = {
     header: {
-      invoiceUId:
-        form.status === 0 || form.status === 5
-          ? form.invoiceUId
-          : '00000000-0000-0000-0000-000000000000',
+      invoiceUId: resolvePersistedInvoiceUId(),
       invoiceTypeCode: Number(form.invoiceType),
       invoiceTypeName: ((): string => {
         try {
@@ -1074,8 +1121,8 @@ const mapDataPost = () => {
       taxNo: form.taxNoInvoice,
       currCode: form.currency,
       notes: form.description,
-      statusCode: isClickDraft.value ? 0 : 1,
-      statusName: isClickDraft.value ? 'Drafted' : 'Waiting to Verify',
+      statusCode: resolveSubmitStatusCode(),
+      statusName: resolveSubmitStatusName(),
       creditCardBillingId: '',
       remainingDPAmount: form.invoiceDp === '9012' ? Number(form.remainingDpAmount) || 0 : 0,
       dpAmountDeduction: form.invoiceDp === '9012' ? Number(form.dpAmountDeduction) || 0 : 0,
@@ -1178,10 +1225,7 @@ const mapDataPostNonPo = () => {
 
   const data: ParamsSubmissionNonPo = {
     header: {
-      invoiceUId:
-        form.status === 0 || form.status === 5
-          ? form.invoiceUId
-          : '00000000-0000-0000-0000-000000000000',
+      invoiceUId: resolvePersistedInvoiceUId(),
       invoiceTypeCode: Number(form.invoiceType),
       invoiceTypeName: invoiceTypeName,
       invoiceVendorNo: isCAS ? form.taxNoInvoice || '' : form.invoiceVendorNo || '',
@@ -1213,8 +1257,8 @@ const mapDataPostNonPo = () => {
       currCode: form.currency,
       creditCardBillingID: '',
       notes: form.description,
-      statusCode: isClickDraft.value ? 0 : 1,
-      statusName: isClickDraft.value ? 'Drafted' : 'Waiting to Verify',
+      statusCode: resolveSubmitStatusCode(),
+      statusName: resolveSubmitStatusName(),
       department: checkIsNonPo() ? form.department : userData.value.profile.costCenter || '',
       authObjectCode: checkIsNonPo() ? form.department : userData.value.profile.costCenter || '',
       profileId: userData.value.profile.profileId.toString(),
@@ -1260,10 +1304,7 @@ const mapDataPostNonPo = () => {
     },
     alternativePay: {
       id: form.idAlternativePayment,
-      invoiceUId:
-        form.status === 0 || form.status === 5
-          ? form.invoiceUId
-          : '00000000-0000-0000-0000-000000000000',
+      invoiceUId: resolvePersistedInvoiceUId(),
       name: form.nameAlternative,
       name2: form.nameOtherAlternative,
       street: form.streetAltiernative,
@@ -1436,6 +1477,7 @@ const goNext = async () => {
     }
 
     isSubmit.value = true
+    isClickDraft.value = false
     if (checkIsNonPo()) {
       const submissionData = mapDataPostNonPo()
 
@@ -1660,6 +1702,8 @@ const setAfterResponsePost = async (response: {
 }) => {
   if (response.statusCode === 200) {
     await markFtpUploadDoneIfNeeded(response)
+    syncFormStatusAfterSubmit(response.result?.content)
+    setStepperStatus()
 
     const idModal = document.querySelector('#success_invoice_modal')
     const modal = KTModal.getInstance(idModal as HTMLElement)
@@ -1722,9 +1766,8 @@ const setData = () => {
     form.whtAmount = detail.calculation.whtAmount
     form.totalGrossAmount = detail.calculation.totalGrossAmount
     form.totalNetAmount = detail.calculation.totalNetAmount
-    form.invoicePoGr = []
-    for (const item of detail.pogr) {
-      const data = {
+    form.invoicePoGr = dedupePoGrLines(
+      detail.pogr.map((item) => ({
         id: item.id,
         poNo: item.poNo,
         poItem: item.poItem,
@@ -1748,14 +1791,13 @@ const setData = () => {
         enteredOn: '',
         purchasingOrg: '',
         department: item.department,
-        whtType: item.whtType,
-        whtCode: item.whtCode,
+        whtType: item.whtType || (item as { WHTType?: string }).WHTType || '',
+        whtCode: item.whtCode || (item as { WHTCode?: string }).WHTCode || '',
         whtBaseAmount: item.whtBaseAmount,
         whtAmount: item.whtAmount,
         isEdit: false,
-      } as itemsPoGrType
-      form.invoicePoGr.push(data)
-    }
+      })) as itemsPoGrType[],
+    )
     form.additionalCost = []
     for (const item of detail.additionalCosts) {
       const data = {

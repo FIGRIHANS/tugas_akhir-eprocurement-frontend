@@ -12,7 +12,10 @@
 
     <div v-else-if="error" class="border border-red-200 rounded-xl p-[24px] bg-red-50 text-center">
       <p class="text-red-700">{{ error }}</p>
-      <button class="btn btn-primary mt-4" type="button" @click="goBack">Back to list</button>
+      <button class="btn btn-outline btn-primary mt-4" type="button" @click="goBack">
+        <i class="ki-filled ki-arrow-left"></i>
+        Back
+      </button>
     </div>
 
     <div v-else-if="detail" class="space-y-6">
@@ -115,10 +118,10 @@
         </div>
       </div>
 
-      <div>
-        <button class="btn btn-light" type="button" @click="goBack">
-          <i class="ki-duotone ki-arrow-left"></i>
-          Back to list
+      <div class="flex justify-end items-center gap-[8px] mt-[24px]">
+        <button class="btn btn-outline btn-primary" type="button" @click="goBack">
+          <i class="ki-filled ki-arrow-left"></i>
+          Back
         </button>
       </div>
     </div>
