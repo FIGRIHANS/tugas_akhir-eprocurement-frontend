@@ -17,7 +17,7 @@
       <i class="ki-filled ki-information-2 text-4xl text-danger mb-4"></i>
       <h3 class="text-lg font-bold text-gray-800">Record Not Found</h3>
       <p class="text-gray-500 mb-6">The requested VAT reconciliation record could not be retrieved.</p>
-      <button class="btn btn-primary" @click="router.push('/vat-in-reconciliation')">
+      <button class="btn btn-primary" @click="goBack">
         <i class="ki-filled ki-arrow-left"></i>
         Back to List
       </button>
@@ -54,15 +54,6 @@
               </div>
             </div>
 
-            <!-- Right: Action Buttons -->
-            <div class="flex flex-col gap-2 items-end">
-              <button class="btn btn-danger w-full" @click="handleDelete">
-                <i class="ki-filled ki-trash"></i> Delete FP
-              </button>
-              <button class="btn btn-primary w-full" @click="handleEdit">
-                <i class="ki-filled ki-notepad-edit"></i> Edit Record
-              </button>
-            </div>
 
           </div>
         </div>
@@ -92,14 +83,16 @@
                 class="flex items-center justify-between gap-[10px]"
               >
                 <p class="font-normal text-sm text-gray-600">Invoice Number</p>
-                <p class="font-normal text-sm font-semibold text-gray-800">{{ detailData.invoiceNumber }}</p>
+                <p v-if="detailData.invoiceNumber === '-'" class="font-normal text-sm italic text-gray-400">Not matched to ERP</p>
+                <p v-else class="font-normal text-sm font-semibold text-gray-800">{{ detailData.invoiceNumber }}</p>
               </div>
               <div
                 v-if="detailData.poNumber"
                 class="flex items-center justify-between gap-[10px]"
               >
                 <p class="font-normal text-sm text-gray-600">PO Number</p>
-                <p class="font-normal text-sm font-semibold text-gray-800">{{ detailData.poNumber }}</p>
+                <p v-if="detailData.poNumber === '-'" class="font-normal text-sm italic text-gray-400">Not matched to ERP</p>
+                <p v-else class="font-normal text-sm font-semibold text-gray-800">{{ detailData.poNumber }}</p>
               </div>
               <div
                 v-if="detailData.tglInvoice"
@@ -233,11 +226,13 @@
               </div>
               <div v-if="detailData.glAccount" class="flex items-center justify-between gap-[10px]">
                 <p class="font-normal text-sm text-gray-600">GL Account</p>
-                <p class="font-normal text-sm text-gray-800 font-semibold">{{ detailData.glAccount }}</p>
+                <p v-if="detailData.glAccount === '-'" class="font-normal text-sm italic text-gray-400">Not matched to ERP</p>
+                <p v-else class="font-normal text-sm text-gray-800 font-semibold">{{ detailData.glAccount }}</p>
               </div>
               <div v-if="detailData.costCenter" class="flex items-center justify-between gap-[10px]">
                 <p class="font-normal text-sm text-gray-600">Cost Center</p>
-                <p class="font-normal text-sm text-gray-800 font-semibold">{{ detailData.costCenter }}</p>
+                <p v-if="detailData.costCenter === '-'" class="font-normal text-sm italic text-gray-400">Not matched to ERP</p>
+                <p v-else class="font-normal text-sm text-gray-800 font-semibold">{{ detailData.costCenter }}</p>
               </div>
             </div>
           </div>
@@ -248,7 +243,7 @@
       <div class="pt-8 border-t border-gray-200 flex items-center justify-between">
         <button
           class="btn btn-outline btn-primary shadow-sm"
-          @click="router.push('/vat-in-reconciliation')"
+          @click="goBack"
         >
           <i class="ki-filled ki-arrow-left"></i> Back to List
         </button>
@@ -356,16 +351,9 @@ const getCreditStatusBadgeClass = (status: string) => {
 }
 
 const goBack = () => {
-  router.push('/vat-reconciliation')
+  router.back()
 }
 
-const handleEdit = () => {
-  console.log('Edit clicked')
-}
-
-const handleDelete = () => {
-  console.log('Delete clicked')
-}
 
 // ── Data Fetch ─────────────────────────────────────────────────────────
 const fetchDetail = async () => {

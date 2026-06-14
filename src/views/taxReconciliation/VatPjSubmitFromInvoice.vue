@@ -26,7 +26,7 @@
             <div class="card-body flex flex-col gap-[16px]">
               <div class="flex items-center justify-between gap-[10px]">
                 <p class="font-normal text-sm text-gray-600">No. Invoice</p>
-                <p class="font-normal text-sm font-semibold text-gray-800">{{ invoiceNo || '—' }}</p>
+                <p class="font-normal text-sm font-semibold text-gray-800">{{ documentNo || invoiceNo || '—' }}</p>
               </div>
               <div class="flex items-center justify-between gap-[10px]">
                 <p class="font-normal text-sm text-gray-600">Vendor Name</p>
@@ -319,6 +319,7 @@ const routes = computed<routeTypes[]>(() => [
 
 const invoiceId = computed(() => String(route.query.invoiceId || '').trim())
 const invoiceNo = computed(() => String(route.query.invoiceNo || ''))
+const documentNo = computed(() => String(route.query.documentNo || ''))
 const vendorName = computed(() => String(route.query.vendorName || ''))
 const vendorNpwp = computed(() => String(route.query.vendorNpwp || ''))
 

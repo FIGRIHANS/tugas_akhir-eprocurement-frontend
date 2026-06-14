@@ -53,7 +53,7 @@
             ? 'bg-primary text-white'
             : 'bg-white text-gray-500 hover:bg-gray-50',
         ]"
-        @click="activeView = 'pending'"
+        @click="() => { activeView = 'pending'; sessionStorage.setItem('whtPasal21_active_tab', 'pending') }"
       >
         Pending Reconciliation
       </button>
@@ -65,7 +65,7 @@
             ? 'bg-primary text-white'
             : 'bg-white text-gray-500 hover:bg-gray-50',
         ]"
-        @click="activeView = 'pph21'"
+        @click="() => { activeView = 'pph21'; sessionStorage.setItem('whtPasal21_active_tab', 'pph21') }"
       >
         PPh21 Drafts & DJP Sync
       </button>
@@ -176,53 +176,79 @@
           <tr v-for="item in pphList" :key="item.id">
             <td>
               <div class="flex gap-1 justify-center">
-                <!-- DRAFT Actions -->
-                <template v-if="(item.status || item.fgStatus)?.toUpperCase() === 'DRAFT'">
                   <button
                     class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px] tooltip tooltip-right"
-                    data-tip="Upload to DJP"
-                    @click="handleUpload(item)"
+                    data-tip="View Details"
+                    @click="viewDetail(item)"
                   >
-                    <i class="ki-filled ki-cloud-change !text-lg"></i>
+                    <i class="ki-filled ki-eye !text-lg"></i>
                   </button>
-                  <button
-                    class="btn btn-outline btn-icon btn-danger w-[32px] h-[32px] tooltip tooltip-right"
-                    data-tip="Delete Draft"
-                    @click="confirmDelete(item)"
-                  >
-                    <i class="ki-filled ki-trash !text-lg"></i>
-                  </button>
-                </template>
 
-                <!-- IN PROGRESS Actions -->
-                <template v-if="isInProgress(item.status || item.fgStatus)">
-                  <button
-                    class="btn btn-outline btn-icon btn-warning w-[32px] h-[32px] tooltip tooltip-right"
-                    data-tip="Verify Status"
-                    @click="handleVerify(item)"
+                  <div
+                    v-if="(item.status || item.fgStatus)?.toUpperCase() === 'DRAFT' || isInProgress(item.status || item.fgStatus) || (item.status || item.fgStatus)?.toUpperCase() === 'NORMAL-DONE'"
+                    class="dropdown"
+                    data-dropdown="true"
+                    data-dropdown-trigger="click"
+                    data-dropdown-placement="bottom-end"
                   >
-                    <i class="ki-filled ki-arrow-circle-right !text-lg"></i>
-                  </button>
-                </template>
-
-                <!-- DONE Actions -->
-                <template v-if="(item.status || item.fgStatus)?.toUpperCase() === 'NORMAL-DONE'">
-                  <button
-                    class="btn btn-outline btn-icon btn-danger w-[32px] h-[32px] tooltip tooltip-right"
-                    data-tip="Cancel Bupot"
-                    @click="confirmBatal(item)"
-                  >
-                    <i class="ki-filled ki-cross-circle !text-lg"></i>
-                  </button>
-                </template>
-
-                <button
-                  class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px] tooltip tooltip-right"
-                  data-tip="View Details"
-                  @click="viewDetail(item)"
-                >
-                  <i class="ki-filled ki-eye !text-lg"></i>
-                </button>
+                    <button
+                      class="dropdown-toggle btn btn-light btn-icon btn-sm"
+                    >
+                      <i class="ki-filled ki-dots-vertical !text-lg"></i>
+                    </button>
+                    <div class="dropdown-content w-full max-w-48 py-2">
+                      <div class="menu menu-default flex flex-col w-full">
+                        <div
+                          v-if="(item.status || item.fgStatus)?.toUpperCase() === 'DRAFT'"
+                          class="menu-item"
+                          @click="handleUpload(item)"
+                        >
+                          <div class="menu-link">
+                            <span class="menu-icon">
+                              <i class="ki-filled ki-cloud-change text-primary !text-lg"></i>
+                            </span>
+                            <span class="menu-title">Upload to DJP</span>
+                          </div>
+                        </div>
+                        <div
+                          v-if="(item.status || item.fgStatus)?.toUpperCase() === 'DRAFT'"
+                          class="menu-item"
+                          @click="confirmDelete(item)"
+                        >
+                          <div class="menu-link">
+                            <span class="menu-icon">
+                              <i class="ki-filled ki-trash text-danger !text-lg"></i>
+                            </span>
+                            <span class="menu-title">Delete Draft</span>
+                          </div>
+                        </div>
+                        <div
+                          v-if="isInProgress(item.status || item.fgStatus)"
+                          class="menu-item"
+                          @click="handleVerify(item)"
+                        >
+                          <div class="menu-link">
+                            <span class="menu-icon">
+                              <i class="ki-filled ki-arrow-circle-right text-warning !text-lg"></i>
+                            </span>
+                            <span class="menu-title">Verify Status</span>
+                          </div>
+                        </div>
+                        <div
+                          v-if="(item.status || item.fgStatus)?.toUpperCase() === 'NORMAL-DONE'"
+                          class="menu-item"
+                          @click="confirmBatal(item)"
+                        >
+                          <div class="menu-link">
+                            <span class="menu-icon">
+                              <i class="ki-filled ki-cross-circle text-danger !text-lg"></i>
+                            </span>
+                            <span class="menu-title">Cancel Bupot</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
               </div>
             </td>
             <td>{{ item.masaPajak || '-' }}/{{ item.tahunPajak || '-' }}</td>
@@ -234,17 +260,9 @@
               {{ formatCurrency(Number(item.pphDipotong) || 0) }}
             </td>
             <td>
-              <div class="flex flex-col gap-1 items-start">
-                <span :class="getStatusBadge(item.status || item.fgStatus)">
-                  {{ item.status || item.fgStatus || 'UNKNOWN' }}
-                </span>
-                <span
-                  v-if="(item.errorMessage || item.errorMsg) && !(item.errorMessage || item.errorMsg).toLowerCase().includes('passphrase tidak ditemukan')"
-                  class="text-[10px] text-danger italic max-w-[150px] truncate"
-                  :title="item.errorMessage || item.errorMsg || ''"
-                  >{{ item.errorMessage || item.errorMsg }}</span
-                >
-              </div>
+              <span :class="getStatusBadge(item.status || item.fgStatus)">
+                {{ item.status || item.fgStatus || 'UNKNOWN' }}
+              </span>
             </td>
             <td class="font-bold text-primary">
               {{ item.nomorBupot || item.nomorBuktiPotong || item.noBupot || '-' }}
@@ -340,7 +358,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, onMounted, computed } from 'vue'
+import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import LPagination from '@/components/pagination/LPagination.vue'
@@ -352,11 +370,30 @@ import moment from 'moment'
 
 const router = useRouter()
 
+const activeDropdownId = ref<number | string | null>(null)
+const toggleDropdown = (id: number | string) => {
+  activeDropdownId.value = activeDropdownId.value === id ? null : id
+}
+const closeAllDropdowns = () => {
+  activeDropdownId.value = null
+}
+const closeDropdowns = () => {
+  const event = new MouseEvent('click', {
+    bubbles: true,
+    cancelable: true,
+    view: window,
+  })
+  document.body.dispatchEvent(event)
+}
+
 const npwpPemotong = '1091031210969728'
 const nikSigner = '3172022407830008'
 
 // --- State ---
-const activeView = ref<'pending' | 'pph21'>('pending')
+const WHT_TAB_KEY = 'whtPasal21_active_tab'
+const activeView = ref<'pending' | 'pph21'>(
+  (sessionStorage.getItem(WHT_TAB_KEY) as 'pending' | 'pph21') || 'pending'
+)
 const pendingInvoices = ref<any[]>([])
 const loadingPending = ref(false)
 const pendingPage = ref(1)
@@ -497,6 +534,7 @@ const isInProgress = (status: string | null | undefined) => {
 
 // Actions
 const handleUpload = (item: Pph21Content) => {
+  closeDropdowns()
   selectedItem.value = item
   passphrase.value = 'Pajak123@@'
   showUploadConfirmModal.value = true
@@ -526,6 +564,7 @@ const handleUploadSubmit = async () => {
 }
 
 const handleVerify = async (item: Pph21Content) => {
+  closeDropdowns()
   try {
     await Pph21Service.verify({
       id: item.pxId,
@@ -544,6 +583,7 @@ const handleVerify = async (item: Pph21Content) => {
 }
 
 const confirmDelete = (item: Pph21Content) => {
+  closeDropdowns()
   selectedItem.value = item
   showDeleteModal.value = true
 }
@@ -568,6 +608,7 @@ const handleDelete = async () => {
 }
 
 const confirmBatal = (item: Pph21Content) => {
+  closeDropdowns()
   selectedItem.value = item
   showBatalModal.value = true
 }
@@ -646,8 +687,14 @@ watch(
 )
 
 onMounted(() => {
+  window.addEventListener('click', closeAllDropdowns)
+  // Fetch kedua sekaligus supaya switch tab tetap instan
   fetchPphList()
   fetchPendingInvoices()
+})
+
+onUnmounted(() => {
+  window.removeEventListener('click', closeAllDropdowns)
 })
 </script>
 

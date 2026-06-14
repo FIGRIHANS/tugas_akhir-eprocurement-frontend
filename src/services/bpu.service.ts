@@ -118,6 +118,7 @@ export interface InvoiceVatQueueRow {
   id: number
   invoiceUId: string
   invoiceNo?: string
+  documentNo?: string
   vendorName?: string
   vendorNpwp?: string
   dpp?: number
@@ -125,6 +126,7 @@ export interface InvoiceVatQueueRow {
   /** VAT / PPN on approved invoice — primary filter for PJ VAT queue */
   vatAmount?: number | null
   invoiceSource?: string
+  invoiceDate?: string | null
   createdUtcDate?: string | null
 }
 

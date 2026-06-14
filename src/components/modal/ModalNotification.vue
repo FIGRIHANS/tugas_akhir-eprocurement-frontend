@@ -35,7 +35,7 @@
             <p class="text-center text-sm text-gray-700 whitespace-pre-line">{{ text }}</p>
           </div>
 
-          <div class="flex flex-row items-center gap-4 w-full">
+          <div v-if="type !== 'success'" class="flex flex-row items-center gap-4 w-full">
             <UiButton
               :variant="type === 'error' ? 'danger' : 'primary'"
               class="w-full justify-center"
@@ -52,6 +52,7 @@
 </template>
 
 <script setup lang="ts">
+import { watch } from 'vue'
 import type { ModalNotificationType } from './types/modal'
 
 import UiButton from '../ui/atoms/button/UiButton.vue'
@@ -79,4 +80,16 @@ const handleClose = () => {
     props.onClose()
   }
 }
+
+watch(
+  () => props.open,
+  (newVal) => {
+    if (newVal && props.type === 'success') {
+      setTimeout(() => {
+        handleClose()
+      }, 3000)
+    }
+  },
+  { immediate: true }
+)
 </script>
