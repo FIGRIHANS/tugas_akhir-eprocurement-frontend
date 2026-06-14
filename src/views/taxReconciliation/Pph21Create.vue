@@ -3,6 +3,18 @@
     <Breadcrumb title="Create New PPh 21" :routes="routes" />
     <hr class="-mx-[24px] mb-[24px]" />
 
+    <!-- Info Box -->
+    <div class="mb-6 bg-[#fff8dd] border border-[#f6c000] p-4 rounded-lg flex gap-3 items-start">
+      <i class="ki-filled ki-information-2 text-[#f6c000] text-xl mt-0.5"></i>
+      <div class="text-sm text-yellow-800">
+        <strong class="font-bold">Important Notes:</strong>
+        <ul class="list-disc pl-5 mt-1 space-y-1">
+          <li>Fields marked with a red asterisk (<span class="text-danger font-bold">*</span>) are mandatory and required by DJP.</li>
+          <li>If you create this PPh 21 from an existing Invoice, fields like <b>NPWP, Recipient Name, Gross Income, and Tax Rate</b> are permanently locked to ensure data consistency.</li>
+        </ul>
+      </div>
+    </div>
+
     <div class="space-y-6">
       <div class="flex gap-[24px] items-start">
         <div class="flex-1 space-y-6">
@@ -45,7 +57,9 @@
               </div>
 
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">{{ form.fgNpwpNik ? 'NPWP' : 'NIK' }}</label>
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">
+                  {{ form.fgNpwpNik ? 'NPWP' : 'NIK' }} <span class="text-danger">*</span>
+                </label>
                 <div class="flex-1">
                   <input
                     v-model="form.npwp"
@@ -60,7 +74,9 @@
               </div>
 
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">Recipient Name</label>
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">
+                  Recipient Name <span class="text-danger">*</span>
+                </label>
                 <div class="flex-1">
                   <input
                     v-model="form.nama"
@@ -81,7 +97,9 @@
             <h3 class="text-lg font-semibold mb-[16px]">Transaction & Tax Details</h3>
             <div class="flex flex-col gap-[8px]">
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">Tax Object Code</label>
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">
+                  Tax Object Code <span class="text-danger">*</span>
+                </label>
                 <div class="flex-1">
                   <select
                     v-model="form.dataDetilBp21.kodeObjekPajak"
@@ -100,7 +118,9 @@
               </div>
 
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">PPh Status</label>
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">
+                  PPh Status <span class="text-danger">*</span>
+                </label>
                 <div class="flex-1">
                   <input
                     v-model="form.dataDetilBp21.statusPPh"
@@ -136,7 +156,9 @@
               </div>
 
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">Gross Income (Current)</label>
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">
+                  Gross Income (Current) <span class="text-danger">*</span>
+                </label>
                 <div class="flex-1 relative">
                   <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">Rp</span>
                   <input
@@ -154,7 +176,9 @@
               </div>
 
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">Tax Rate (%)</label>
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">
+                  Tax Rate (%) <span class="text-danger">*</span>
+                </label>
                 <div class="flex-1 relative">
                   <input
                     type="number"
@@ -179,7 +203,9 @@
             <h3 class="text-lg font-semibold mb-[16px]">Reference Document</h3>
             <div class="flex flex-col gap-[8px]">
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">Document Type</label>
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">
+                  Document Type <span class="text-danger">*</span>
+                </label>
                 <div class="flex-1">
                   <select v-model="form.dataDetilBp21.dokReferensi[0].dokReferensi" class="select w-full">
                     <option value="ANNOUNCEMENT">Announcement</option>
@@ -198,7 +224,9 @@
               </div>
 
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">Document Number</label>
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">
+                  Document Number <span class="text-danger">*</span>
+                </label>
                 <div class="flex-1">
                   <input
                     v-model="form.dataDetilBp21.dokReferensi[0].nomorDokumen"
@@ -315,13 +343,13 @@ const form = ref<Pph21CreatePayload>({
   tahunPajak: moment().format('YYYY'),
   fgNpwpNik: true,
   fgTransaction: 'NEW',
-  npwp: '1234567890123456',
+  npwp: '',
   nik: '',
-  nama: 'Dave Navarro (Testing)',
+  nama: '',
   fgJnsBupot: '21',
   tglPemotongan: moment().format('YYYY-MM-DD'),
   feature: 'tdkfinal',
-  email: 'dave@testing.com',
+  email: '',
   glAccount: '521111',
   dataDetilBp21: {
     sertifikatInsentifDipotong: '9',

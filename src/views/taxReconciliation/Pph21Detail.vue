@@ -25,12 +25,10 @@
 
     <!-- Content -->
     <div v-else class="space-y-6 animate-in fade-in duration-500">
-
       <!-- Status Overview Card -->
       <div class="card">
         <div class="card-body p-[24px]">
           <div class="flex flex-wrap items-start justify-between gap-6">
-
             <!-- Left: Info rows -->
             <div class="flex flex-col gap-[14px]">
               <div class="flex items-center gap-[10px]">
@@ -39,9 +37,14 @@
                   {{ item.status || item.fgStatus || 'NO STATUS' }}
                 </span>
               </div>
-              <div v-if="item.nomorBupot || item.nomorBuktiPotong || item.noBupot" class="flex items-center gap-[10px]">
+              <div
+                v-if="item.nomorBupot || item.nomorBuktiPotong || item.noBupot"
+                class="flex items-center gap-[10px]"
+              >
                 <p class="font-normal text-sm text-gray-500 w-28 shrink-0">No. Bupot</p>
-                <p class="font-bold text-sm text-primary">{{ item.nomorBupot || item.nomorBuktiPotong || item.noBupot }}</p>
+                <p class="font-bold text-sm text-primary">
+                  {{ item.nomorBupot || item.nomorBuktiPotong || item.noBupot }}
+                </p>
               </div>
               <div class="flex items-center gap-[10px]">
                 <p class="font-normal text-sm text-gray-500 w-28 shrink-0">Tax Type</p>
@@ -49,14 +52,17 @@
               </div>
               <div v-if="item.masaPajak" class="flex items-center gap-[10px]">
                 <p class="font-normal text-sm text-gray-500 w-28 shrink-0">Tax Period</p>
-                <p class="font-semibold text-sm text-gray-800">{{ item.masaPajak }} / {{ item.tahunPajak }}</p>
+                <p class="font-semibold text-sm text-gray-800">
+                  {{ item.masaPajak }} / {{ item.tahunPajak }}
+                </p>
               </div>
               <div v-if="item.errorMessage || item.errorMsg" class="flex items-start gap-[10px]">
                 <p class="font-normal text-sm text-gray-500 w-28 shrink-0">Error</p>
-                <p class="text-xs text-danger font-medium leading-relaxed">{{ item.errorMessage || item.errorMsg }}</p>
+                <p class="text-xs text-danger font-medium leading-relaxed">
+                  {{ item.errorMessage || item.errorMsg }}
+                </p>
               </div>
             </div>
-
 
             <!-- Right: Action Buttons -->
             <div class="flex flex-col gap-2 items-end">
@@ -72,31 +78,37 @@
                 </button>
               </template>
             </div>
-
           </div>
         </div>
       </div>
 
-
       <!-- Main Layout -->
       <div class="flex flex-col lg:flex-row gap-[24px] items-start">
-
         <!-- LEFT COLUMN -->
         <div class="flex-1 space-y-6">
-
           <!-- Section 1: Recipient Information -->
           <div class="card">
             <div class="card-header py-[17px] flex items-center justify-between gap-[8px]">
               <h3 class="card-title text-base font-semibold">Recipient Information</h3>
             </div>
             <div class="card-body flex flex-col gap-[20px]">
-              <div v-if="item.namaPenerima || item.nama" class="flex items-center justify-between gap-[10px]">
+              <div
+                v-if="item.namaPenerima || item.nama"
+                class="flex items-center justify-between gap-[10px]"
+              >
                 <p class="font-normal text-sm text-gray-600">Recipient Name</p>
-                <p class="font-normal text-sm font-semibold text-gray-800">{{ item.namaPenerima || item.nama }}</p>
+                <p class="font-normal text-sm font-semibold text-gray-800">
+                  {{ item.namaPenerima || item.nama }}
+                </p>
               </div>
-              <div v-if="item.npwpPenerima || item.npwp" class="flex items-center justify-between gap-[10px]">
+              <div
+                v-if="item.npwpPenerima || item.npwp"
+                class="flex items-center justify-between gap-[10px]"
+              >
                 <p class="font-normal text-sm text-gray-600">NPWP / NIK</p>
-                <p class="font-normal text-sm font-semibold text-primary">{{ item.npwpPenerima || item.npwp }}</p>
+                <p class="font-normal text-sm font-semibold text-primary">
+                  {{ item.npwpPenerima || item.npwp }}
+                </p>
               </div>
             </div>
           </div>
@@ -109,7 +121,9 @@
             <div class="card-body flex flex-col gap-[20px]">
               <div v-if="item.kodeObjekPajak" class="flex items-center justify-between gap-[10px]">
                 <p class="font-normal text-sm text-gray-600">Object Code</p>
-                <p class="font-normal text-sm font-semibold text-gray-800">{{ item.kodeObjekPajak }}</p>
+                <p class="font-normal text-sm font-semibold text-gray-800">
+                  {{ item.kodeObjekPajak }}
+                </p>
               </div>
               <div v-if="item.feature" class="flex items-center justify-between gap-[10px]">
                 <p class="font-normal text-sm text-gray-600">Tax Type</p>
@@ -129,9 +143,14 @@
                 <p class="font-normal text-sm text-gray-600">PPh Status</p>
                 <p class="font-normal text-sm text-gray-800">{{ item.statusPPh }}</p>
               </div>
-              <div v-if="item.masaPajak && item.tahunPajak" class="flex items-center justify-between gap-[10px]">
+              <div
+                v-if="item.masaPajak && item.tahunPajak"
+                class="flex items-center justify-between gap-[10px]"
+              >
                 <p class="font-normal text-sm text-gray-600">Tax Period</p>
-                <p class="font-normal text-sm text-gray-800">{{ item.masaPajak }} / {{ item.tahunPajak }}</p>
+                <p class="font-normal text-sm text-gray-800">
+                  {{ item.masaPajak }} / {{ item.tahunPajak }}
+                </p>
               </div>
             </div>
           </div>
@@ -156,12 +175,10 @@
               </div>
             </div>
           </div>
-
         </div>
 
         <!-- RIGHT COLUMN: Sidebar -->
         <div class="w-full lg:max-w-sm space-y-6 lg:sticky lg:top-0">
-
           <!-- Tax Calculation -->
           <div class="card">
             <div class="card-header py-[17px] flex items-center justify-between gap-[8px]">
@@ -170,19 +187,32 @@
             <div class="card-body flex flex-col gap-[20px]">
               <div class="flex items-center justify-between gap-[10px]">
                 <p class="font-normal text-sm text-gray-600">Gross Income</p>
-                <p class="font-normal text-sm font-semibold text-gray-800">{{ formatCurrency(Number(item.penghasilanKotor) || 0) }}</p>
+                <p class="font-normal text-sm font-semibold text-gray-800">
+                  {{ formatCurrency(Number(item.penghasilanKotor) || 0) }}
+                </p>
               </div>
-              <div v-if="Number(item.penghasilanKotorSebelumnya) > 0" class="flex items-center justify-between gap-[10px]">
+              <div
+                v-if="Number(item.penghasilanKotorSebelumnya) > 0"
+                class="flex items-center justify-between gap-[10px]"
+              >
                 <p class="font-normal text-sm text-gray-600">Gross (Previous)</p>
-                <p class="font-normal text-sm text-gray-800">{{ formatCurrency(Number(item.penghasilanKotorSebelumnya)) }}</p>
+                <p class="font-normal text-sm text-gray-800">
+                  {{ formatCurrency(Number(item.penghasilanKotorSebelumnya)) }}
+                </p>
               </div>
               <div class="flex items-center justify-between gap-[10px]">
                 <p class="font-normal text-sm text-gray-600">Tax Rate</p>
-                <p class="font-normal text-sm font-semibold text-gray-800">{{ Number(item.tarif) || 0 }}%</p>
+                <p class="font-normal text-sm font-semibold text-gray-800">
+                  {{ Number(item.tarif) || 0 }}%
+                </p>
               </div>
-              <div class="flex items-center justify-between gap-[10px] border-t border-gray-100 pt-4">
+              <div
+                class="flex items-center justify-between gap-[10px] border-t border-gray-100 pt-4"
+              >
                 <p class="font-normal text-sm font-semibold text-danger">PPh 21 Withheld</p>
-                <p class="font-bold text-base text-danger">{{ formatCurrency(Number(item.pphDipotong) || 0) }}</p>
+                <p class="font-bold text-base text-danger">
+                  {{ formatCurrency(Number(item.pphDipotong) || 0) }}
+                </p>
               </div>
             </div>
           </div>
@@ -195,7 +225,9 @@
             <div class="card-body flex flex-col gap-[20px]">
               <div class="flex items-center justify-between gap-[10px]">
                 <p class="font-normal text-sm text-gray-600">Local DB ID</p>
-                <p class="font-normal text-sm font-semibold text-gray-800"># {{ item.id || '-' }}</p>
+                <p class="font-normal text-sm font-semibold text-gray-800">
+                  # {{ item.id || '-' }}
+                </p>
               </div>
               <div v-if="item.pxId" class="flex items-center justify-between gap-[10px]">
                 <p class="font-normal text-sm text-gray-600">PX ID</p>
@@ -215,13 +247,16 @@
               </div>
             </div>
           </div>
-
         </div>
       </div>
 
       <!-- Footer -->
       <div class="pt-8 border-t border-gray-200 flex items-center justify-between">
-        <button class="btn btn-outline btn-primary shadow-sm" @click="goBack" :disabled="submitting">
+        <button
+          class="btn btn-outline btn-primary shadow-sm"
+          @click="goBack"
+          :disabled="submitting"
+        >
           <i class="ki-filled ki-arrow-left"></i>
           Back to List
         </button>
@@ -271,7 +306,9 @@
     >
       <div class="w-full flex flex-col gap-4 mt-2">
         <div class="flex flex-col gap-2">
-          <label class="form-label text-xs uppercase text-gray-500 font-bold">Passphrase (PX-Internal)</label>
+          <label class="form-label text-xs uppercase text-gray-500 font-bold"
+            >Passphrase (PX-Internal)</label
+          >
           <div class="relative">
             <input
               v-model="passphrase"
@@ -284,7 +321,9 @@
               class="btn btn-icon btn-sm absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8"
               @click="showPassphrase = !showPassphrase"
             >
-              <i :class="['ki-filled', showPassphrase ? 'ki-eye-slash' : 'ki-eye', 'text-gray-500']"></i>
+              <i
+                :class="['ki-filled', showPassphrase ? 'ki-eye-slash' : 'ki-eye', 'text-gray-500']"
+              ></i>
             </button>
           </div>
         </div>
@@ -302,7 +341,6 @@
     />
   </div>
 </template>
-
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
@@ -375,11 +413,14 @@ const statusBadgeClass = computed(() => {
   return 'badge-light'
 })
 
-
 // Helpers
 const formatCurrency = (val: number | string) => {
   const num = Number(val) || 0
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num)
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+  }).format(num)
 }
 
 const formatDate = (date: string | Date | undefined) => {
@@ -428,7 +469,7 @@ const handleUpload = async () => {
   submitting.value = true
   try {
     await Pph21Service.upload({
-      id: item.value.id,  // Local DB id — backend maps to PxId for Pajak Express
+      id: item.value.id, // Local DB id — backend maps to PxId for Pajak Express
       npwpNikPenandatangan: nikSigner,
       passphrase: passphrase.value,
     })
@@ -516,12 +557,14 @@ const handleBatalSubmit = async () => {
 }
 
 const goBack = () => {
-  router.push('/wht-pasal-21')
+  router.back()
 }
 </script>
 
 <style scoped>
-.text-danger { color: #f1416c; }
+.text-danger {
+  color: #f1416c;
+}
 .badge-outline {
   border: 1px solid currentColor;
   background-color: transparent;

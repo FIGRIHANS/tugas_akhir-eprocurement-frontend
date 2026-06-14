@@ -560,7 +560,7 @@ const handleBatalSubmit = async () => {
   }
 }
 
-const goBack = () => router.push('/wht-unifikasi')
+const goBack = () => router.back()
 </script>
 
 <style scoped>

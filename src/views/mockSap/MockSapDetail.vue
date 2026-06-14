@@ -6,7 +6,7 @@
     <!-- Loading State -->
     <div v-if="isLoading" class="flex justify-center items-center py-20">
       <div class="text-center">
-        <i class="ki-duotone ki-loading text-4xl text-primary animate-spin"></i>
+        <i class="ki-duotone ki-loading text-4xl text-blue-500 animate-spin"></i>
         <p class="mt-4 text-gray-600">Loading PO details...</p>
       </div>
     </div>
@@ -17,9 +17,9 @@
         <i class="ki-duotone ki-information text-4xl text-red-500 mb-4"></i>
         <h3 class="text-lg font-semibold text-red-700">Error Loading Data</h3>
         <p class="text-red-600 mt-2">{{ error }}</p>
-        <button class="btn btn-outline btn-primary mt-4" @click="goBack()">
-          <i class="ki-filled ki-arrow-left"></i>
-          Back
+        <button class="btn btn-primary mt-4" @click="goBack()">
+          <i class="ki-duotone ki-arrow-left"></i>
+          Back to List
         </button>
       </div>
     </div>
@@ -147,17 +147,17 @@
         <div class="overflow-x-auto list__table">
           <table class="table align-middle text-gray-700 font-medium text-sm">
             <thead>
-              <tr>
-                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center">No</th>
-                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center">SKU</th>
-                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center">Item Name</th>
-                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center">UOM</th>
-                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center">Total Qty Ordered</th>
-                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center">Unit Price</th>
-                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center">Subtotal</th>
-                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center">Qty In Transit</th>
-                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center">Qty Delivered</th>
-                <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center">Qty Pending</th>
+              <tr class="bg-blue-500 text-white">
+                <th class="text-center">No</th>
+                <th class="text-center">SKU</th>
+                <th class="text-center">Item Name</th>
+                <th class="text-center">UOM</th>
+                <th class="text-center">Total Qty Ordered</th>
+                <th class="text-center">Unit Price</th>
+                <th class="text-center">Subtotal</th>
+                <th class="text-center">Qty In Transit</th>
+                <th class="text-center">Qty Delivered</th>
+                <th class="text-center">Qty Pending</th>
               </tr>
             </thead>
             <tbody>
@@ -216,11 +216,15 @@
       </div>
 
       <!-- Action Buttons -->
-      <div class="flex justify-end items-center gap-[8px] mt-[24px]">
-        <button class="btn btn-outline btn-primary" @click="goBack()">
-          <i class="ki-filled ki-arrow-left"></i>
-          Back
+      <div class="mt-[24px] flex gap-3 justify-end">
+        <button class="btn btn-light" @click="goBack()">
+          <i class="ki-duotone ki-arrow-left"></i>
+          Back to List
         </button>
+        <!-- <button class="btn btn-primary" @click="printDetail()">
+          <i class="ki-duotone ki-printer"></i>
+          Print
+        </button> -->
       </div>
     </div>
 
@@ -322,7 +326,7 @@ const formatNumber = (num: number | null | undefined) => {
 
 // Calculate Total Qty Ordered (Original) = Qty Pending + Qty In Transit + Qty Delivered
 const calculateTotalQtyOrdered = (item: MockSapDetailItem) => {
-  return item.qtyOrdered 
+  return item.qtyOrdered
 }
 
 const calculateQtyPending = (item: MockSapDetailItem) => {

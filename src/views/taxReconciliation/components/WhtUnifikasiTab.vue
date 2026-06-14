@@ -152,46 +152,6 @@
             <tr v-for="item in bpuList" :key="item.id">
               <td>
                 <div class="flex gap-1 justify-center">
-                  <!-- DRAFT Actions -->
-                  <template v-if="(item.status || item.fgStatus)?.toUpperCase() === 'DRAFT'">
-                    <button
-                      class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px] tooltip tooltip-right"
-                      data-tip="Upload to DJP"
-                      @click="handleUpload(item)"
-                    >
-                      <i class="ki-filled ki-cloud-change !text-lg"></i>
-                    </button>
-                    <button
-                      class="btn btn-outline btn-icon btn-danger w-[32px] h-[32px] tooltip tooltip-right"
-                      data-tip="Delete Draft"
-                      @click="confirmDelete(item)"
-                    >
-                      <i class="ki-filled ki-trash !text-lg"></i>
-                    </button>
-                  </template>
-
-                  <!-- IN PROGRESS Actions -->
-                  <template v-if="isInProgress(item.status || item.fgStatus)">
-                    <button
-                      class="btn btn-outline btn-icon btn-warning w-[32px] h-[32px] tooltip tooltip-right"
-                      data-tip="Verify Status"
-                      @click="handleVerify(item)"
-                    >
-                      <i class="ki-filled ki-arrow-circle-right !text-lg"></i>
-                    </button>
-                  </template>
-
-                  <!-- DONE Actions -->
-                  <template v-if="(item.status || item.fgStatus)?.toUpperCase() === 'NORMAL-DONE'">
-                    <button
-                      class="btn btn-outline btn-icon btn-danger w-[32px] h-[32px] tooltip tooltip-right"
-                      data-tip="Cancel Bupot"
-                      @click="confirmBatal(item)"
-                    >
-                      <i class="ki-filled ki-cross-circle !text-lg"></i>
-                    </button>
-                  </template>
-
                   <button
                     class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px] tooltip tooltip-right"
                     data-tip="View Details"
@@ -199,6 +159,72 @@
                   >
                     <i class="ki-filled ki-eye !text-lg"></i>
                   </button>
+
+                  <div
+                    v-if="(item.status || item.fgStatus)?.toUpperCase() === 'DRAFT' || isInProgress(item.status || item.fgStatus) || (item.status || item.fgStatus)?.toUpperCase() === 'NORMAL-DONE'"
+                    class="dropdown"
+                    data-dropdown="true"
+                    data-dropdown-trigger="click"
+                    data-dropdown-placement="bottom-end"
+                  >
+                    <button
+                      class="dropdown-toggle btn btn-light btn-icon btn-sm"
+                    >
+                      <i class="ki-filled ki-dots-vertical !text-lg"></i>
+                    </button>
+                    <div class="dropdown-content w-full max-w-48 py-2">
+                      <div class="menu menu-default flex flex-col w-full">
+                        <div
+                          v-if="(item.status || item.fgStatus)?.toUpperCase() === 'DRAFT'"
+                          class="menu-item"
+                          @click="handleUpload(item)"
+                        >
+                          <div class="menu-link">
+                            <span class="menu-icon">
+                              <i class="ki-filled ki-cloud-change text-primary !text-lg"></i>
+                            </span>
+                            <span class="menu-title">Upload to DJP</span>
+                          </div>
+                        </div>
+                        <div
+                          v-if="(item.status || item.fgStatus)?.toUpperCase() === 'DRAFT'"
+                          class="menu-item"
+                          @click="confirmDelete(item)"
+                        >
+                          <div class="menu-link">
+                            <span class="menu-icon">
+                              <i class="ki-filled ki-trash text-danger !text-lg"></i>
+                            </span>
+                            <span class="menu-title">Delete Draft</span>
+                          </div>
+                        </div>
+                        <div
+                          v-if="isInProgress(item.status || item.fgStatus)"
+                          class="menu-item"
+                          @click="handleVerify(item)"
+                        >
+                          <div class="menu-link">
+                            <span class="menu-icon">
+                              <i class="ki-filled ki-arrow-circle-right text-warning !text-lg"></i>
+                            </span>
+                            <span class="menu-title">Verify Status</span>
+                          </div>
+                        </div>
+                        <div
+                          v-if="(item.status || item.fgStatus)?.toUpperCase() === 'NORMAL-DONE'"
+                          class="menu-item"
+                          @click="confirmBatal(item)"
+                        >
+                          <div class="menu-link">
+                            <span class="menu-icon">
+                              <i class="ki-filled ki-cross-circle text-danger !text-lg"></i>
+                            </span>
+                            <span class="menu-title">Cancel Bupot</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </td>
               <td>{{ item.masaPajak || '-' }}/{{ item.tahunPajak || '-' }}</td>
@@ -319,7 +345,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import LPagination from '@/components/pagination/LPagination.vue'
@@ -329,6 +355,22 @@ import BpuService, { type BpuContent } from '@/services/bpu.service'
 import moment from 'moment'
 
 const router = useRouter()
+
+const activeDropdownId = ref<number | string | null>(null)
+const toggleDropdown = (id: number | string) => {
+  activeDropdownId.value = activeDropdownId.value === id ? null : id
+}
+const closeAllDropdowns = () => {
+  activeDropdownId.value = null
+}
+const closeDropdowns = () => {
+  const event = new MouseEvent('click', {
+    bubbles: true,
+    cancelable: true,
+    view: window,
+  })
+  document.body.dispatchEvent(event)
+}
 
 const npwpPemotong = computed(() => '1091031210969728') // Static for now as per docs, ideally from user profile
 const nikSigner = '3172022407830008' // From appsettings/docs
@@ -455,6 +497,7 @@ const isInProgress = (status: string) => {
 
 // Actions
 const handleUpload = (item: BpuContent) => {
+  closeDropdowns()
   selectedItem.value = item
   passphrase.value = 'Pajak123@@' // Default DEV passphrase
   showUploadConfirmModal.value = true
@@ -499,6 +542,7 @@ const handleUploadSubmit = async () => {
 }
 
 const handleVerify = async (item: BpuContent) => {
+  closeDropdowns()
   try {
     await BpuService.verify({ 
       id: item.pxId,
@@ -524,6 +568,7 @@ const handleVerify = async (item: BpuContent) => {
 }
 
 const confirmDelete = (item: BpuContent) => {
+  closeDropdowns()
   selectedItem.value = item
   showDeleteModal.value = true
 }
@@ -551,6 +596,7 @@ const handleDelete = async () => {
 }
 
 const confirmBatal = (item: BpuContent) => {
+  closeDropdowns()
   selectedItem.value = item
   showBatalModal.value = true
 }
@@ -624,6 +670,11 @@ watch(
 onMounted(() => {
   fetchBpuList()
   fetchPendingInvoices()
+  window.addEventListener('click', closeAllDropdowns)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('click', closeAllDropdowns)
 })
 </script>
 

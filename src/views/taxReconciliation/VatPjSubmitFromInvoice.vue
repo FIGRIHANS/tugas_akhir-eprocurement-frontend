@@ -26,7 +26,7 @@
             <div class="card-body flex flex-col gap-[16px]">
               <div class="flex items-center justify-between gap-[10px]">
                 <p class="font-normal text-sm text-gray-600">No. Invoice</p>
-                <p class="font-normal text-sm font-semibold text-gray-800">{{ invoiceNo || '—' }}</p>
+                <p class="font-normal text-sm font-semibold text-gray-800">{{ documentNo || invoiceNo || '—' }}</p>
               </div>
               <div class="flex items-center justify-between gap-[10px]">
                 <p class="font-normal text-sm text-gray-600">Vendor Name</p>
@@ -256,7 +256,7 @@
 
       <!-- Footer Actions -->
       <div class="pt-8 border-t border-gray-100 flex items-center justify-between">
-        <router-link class="btn btn-outline btn-primary" :to="{ name: 'vatReconciliation' }">
+        <router-link class="btn btn-outline btn-primary" :to="{ name: 'vatInReconciliation' }">
           <i class="ki-filled ki-arrow-left"></i>
           Batal &amp; Kembali
         </router-link>
@@ -313,12 +313,13 @@ const router = useRouter()
 
 const routes = computed<routeTypes[]>(() => [
   { name: 'Tax Reconciliation', to: '/tax-reconciliation' },
-  { name: 'VAT Reconciliation', to: '/vat-reconciliation' },
+  { name: 'VAT Reconciliation', to: '/vat-in-reconciliation' },
   { name: 'Form PJ', to: '#' },
 ])
 
 const invoiceId = computed(() => String(route.query.invoiceId || '').trim())
 const invoiceNo = computed(() => String(route.query.invoiceNo || ''))
+const documentNo = computed(() => String(route.query.documentNo || ''))
 const vendorName = computed(() => String(route.query.vendorName || ''))
 const vendorNpwp = computed(() => String(route.query.vendorNpwp || ''))
 
@@ -739,7 +740,7 @@ async function submitUpload() {
     successBanner.value = 'Konfirmasi pengkreditan terkirim & disimpan. Data akan muncul di tab Faktur Pajak Express!'
     setTimeout(() => {
       if (confirm('Kembali ke halaman Rekonsiliasi VAT?')) {
-        router.push({ name: 'vatReconciliation' })
+        router.push({ name: 'vatInReconciliation' })
       }
     }, 250)
   } catch (e) {

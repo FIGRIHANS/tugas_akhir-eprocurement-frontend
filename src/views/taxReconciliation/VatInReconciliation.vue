@@ -7,27 +7,31 @@
       <!-- Tab Content -->
       <div class="card-body p-0">
         <!-- Shared Header -->
-        <div class="flex justify-between items-center gap-3 flex-wrap px-[24px] pt-[24px] mb-[32px]">
+        <div
+          class="flex justify-between items-center gap-3 flex-wrap px-[24px] pt-[24px] mb-[32px]"
+        >
           <div class="flex flex-col gap-1">
             <h3 class="text-lg font-semibold text-gray-800 m-0">List Data</h3>
           </div>
-          
+
           <!-- Header Actions (only for Queue) -->
           <div v-if="workspace === 'queue'" class="flex gap-2 flex-wrap items-center">
-            <UiInputSearch v-model="pendingSearch" placeholder="Search invoice / vendor" @search="fetchPendingVat" />
+            <UiInputSearch
+              v-model="pendingSearch"
+              placeholder="Search invoice / vendor"
+              @search="fetchPendingVat"
+            />
             <button type="button" class="btn btn-outline btn-primary" @click="fetchPendingVat">
               <i class="ki-filled ki-arrows-circle !text-base"></i>
-              Refresh
-            </button>
-            <button type="button" class="btn btn-primary" @click="goManualPjSubmit">
-              <i class="ki-filled ki-plus-circle !text-base"></i>
-              Submit without Invoice
+              Reload Data
             </button>
           </div>
         </div>
 
         <!-- View Toggle Tabs -->
-        <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden text-sm w-fit mb-8 mx-[24px]">
+        <div
+          class="flex items-center border border-gray-200 rounded-lg overflow-hidden text-sm w-fit mb-8 mx-[24px]"
+        >
           <button
             type="button"
             :class="[
@@ -54,340 +58,344 @@
           </button>
         </div>
 
-      <template v-if="workspace === 'queue'">
-        <div class="overflow-x-auto mx-[24px] rounded-xl mb-[8px]">
-        <table class="table align-middle text-gray-700 font-medium text-sm">
-          <thead>
-            <tr>
-              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Source</th>
-              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Invoice No</th>
-              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Vendor</th>
-              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">NPWP</th>
-              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-right">DPP</th>
-              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-right">VAT</th>
-              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="loadingPendingVat">
-              <td colspan="7" class="text-center py-10">
-                <span class="loading loading-spinner loading-md text-primary"></span>
-                <p class="mt-2 text-gray-500">Loading invoices…</p>
-              </td>
-            </tr>
-            <tr v-else-if="pendingVatRows.length === 0">
-              <td colspan="7" class="text-center py-10 text-gray-400 italic">
-                No approved invoices pending VAT reconciliation.
-              </td>
-            </tr>
-            <tr v-for="(inv, idx) in pendingVatRows" :key="'pv-' + idx + '-' + (inv.invoiceNo || '')">
-              <td>
-                <span
-                  :class="
-                    inv.invoiceSource === 'PO'
-                      ? 'badge badge-light-primary px-2'
-                      : 'badge badge-light-warning px-2'
-                  "
+        <template v-if="workspace === 'queue'">
+          <div class="overflow-x-auto mx-[24px] rounded-xl mb-[8px]">
+            <table class="table align-middle text-gray-700 font-medium text-sm">
+              <thead>
+                <tr>
+                  <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Source</th>
+                  <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Invoice No</th>
+                  <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Invoice Vendor No</th>
+                  <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Invoice Date</th>
+                  <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Vendor</th>
+                  <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">NPWP</th>
+                  <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-right">DPP</th>
+                  <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-right">VAT</th>
+                  <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center">
+                    Match Status
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-if="loadingPendingVat">
+                  <td colspan="9" class="text-center py-10">
+                    <span class="loading loading-spinner loading-md text-primary"></span>
+                    <p class="mt-2 text-gray-500">Loading invoices…</p>
+                  </td>
+                </tr>
+                <tr v-else-if="pendingVatRows.length === 0">
+                  <td colspan="9" class="text-center py-10 text-gray-400 italic">
+                    No approved invoices pending VAT reconciliation.
+                  </td>
+                </tr>
+                <tr
+                  v-for="(inv, idx) in pendingVatRows"
+                  :key="'pv-' + idx + '-' + (inv.invoiceNo || '')"
                 >
-                  {{ inv.invoiceSource || '—' }}
-                </span>
-              </td>
-              <td>{{ inv.invoiceNo || '—' }}</td>
-              <td>{{ inv.vendorName || '—' }}</td>
-              <td>{{ inv.vendorNpwp || '—' }}</td>
-              <td class="text-right">{{ formatCurrency(inv.dpp ?? 0) }}</td>
-              <td class="text-right text-primary font-medium">{{ formatCurrency(displayVatOnRow(inv)) }}</td>
-              <td class="text-center">
-                <button type="button" class="btn btn-primary" @click="goSubmitFromInvoice(inv)">
-                  Submit to PJ
+                  <td>
+                    <span
+                      :class="
+                        inv.invoiceSource === 'PO'
+                          ? 'badge badge-light-primary px-2'
+                          : 'badge badge-light-warning px-2'
+                      "
+                    >
+                      {{ inv.invoiceSource || '—' }}
+                    </span>
+                  </td>
+                  <td>{{ inv.invoiceNo || '—' }}</td>
+                  <td>{{ inv.documentNo || '—' }}</td>
+                  <td>{{ formatDate(inv.invoiceDate) }}</td>
+                  <td>{{ inv.vendorName || '—' }}</td>
+                  <td>{{ inv.vendorNpwp || '—' }}</td>
+                  <td class="text-right">{{ formatCurrency(inv.dpp ?? 0) }}</td>
+                  <td class="text-right text-primary font-medium">
+                    {{ formatCurrency(displayVatOnRow(inv)) }}
+                  </td>
+                  <td class="text-center">
+                    <span
+                      class="badge badge-outline px-2 py-1 font-semibold text-xs"
+                      :class="getQueueMatchStatusClass(getQueueMatchStatus(inv))"
+                    >
+                      {{ getQueueMatchStatus(inv) }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pending Pagination Footer -->
+          <div
+            v-if="pendingVatTotal > 0"
+            class="flex items-center justify-between mt-[24px] px-[24px] pb-[24px]"
+          >
+            <p class="text-sm text-gray-500">
+              Showing <b>{{ pendingVatRows.length }}</b> of <b>{{ pendingVatTotal }}</b> entries
+            </p>
+            <LPagination
+              :totalItems="pendingVatTotal"
+              :pageSize="pendingVatLimit"
+              :currentPage="pendingVatPage"
+              @pageChange="onPendingPageChange"
+            />
+          </div>
+        </template>
+
+        <template v-else-if="workspace === 'pj'">
+          <!-- Header Section -->
+          <div class="flex flex-col gap-4 mb-[24px] px-[24px]">
+            <!-- Coretax Period Sub-header -->
+            <div
+              v-if="workspace === 'pj'"
+              class="flex flex-wrap items-end justify-between gap-3 bg-gray-50 p-3 rounded-lg border border-gray-200 w-full"
+            >
+              <!-- Left side: Tax Period & Actions -->
+              <div class="flex flex-wrap items-end gap-3">
+                <div class="form-control">
+                  <label class="label py-0 pb-1.5"
+                    ><span class="label-text text-sm font-semibold text-gray-700"
+                      >Tax Period (Coretax list)</span
+                    ></label
+                  >
+                  <div class="flex gap-2 mt-2">
+                    <select
+                      v-model="pjMonth"
+                      class="select select-bordered w-[100px] bg-white"
+                      @change="onPajakExpressPeriodChanged"
+                    >
+                      <option v-for="m in pjMonthOptions" :key="m.v" :value="m.v">
+                        {{ m.label }}
+                      </option>
+                    </select>
+                    <input
+                      v-model="pjYear"
+                      type="text"
+                      maxlength="4"
+                      class="input input-bordered w-[80px] bg-white"
+                      placeholder="yyyy"
+                      @change="onPajakExpressPeriodChanged"
+                    />
+                  </div>
+                </div>
+
+                <div class="h-[40px] w-[1px] bg-gray-300 mx-2 hidden lg:block"></div>
+
+                <button
+                  type="button"
+                  class="btn btn-outline btn-primary bg-white"
+                  :disabled="isLoading || isPrepopulating"
+                  @click="reloadVat"
+                >
+                  <i class="ki-duotone ki-arrows-circle !text-base"></i>
+                  Reload Data
                 </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        </div>
+                <button
+                  type="button"
+                  class="btn btn-warning"
+                  :disabled="isLoading || isPrepopulating"
+                  @click="runPrepopulateBulk"
+                >
+                  <i class="ki-duotone ki-cloud-download !text-base"></i>
+                  Pull Prepopulated Data
+                  <span
+                    v-if="isPrepopulating"
+                    class="loading loading-spinner loading-xs ml-1"
+                  ></span>
+                </button>
+              </div>
 
-      <!-- Pending Pagination Footer -->
-      <div v-if="pendingVatTotal > 0" class="flex items-center justify-between mt-[24px] px-[24px] pb-[24px]">
-        <p class="text-sm text-gray-500">
-          Showing <b>{{ pendingVatRows.length }}</b> of <b>{{ pendingVatTotal }}</b> entries
-        </p>
-        <LPagination
-          :totalItems="pendingVatTotal"
-          :pageSize="pendingVatLimit"
-          :currentPage="pendingVatPage"
-          @pageChange="onPendingPageChange"
-        />
-      </div>
-      </template>
-
-      <template v-else-if="workspace === 'pj'">
-      <!-- Header Section -->
-      <div class="flex flex-col gap-4 mb-[24px] px-[24px]">
-        <!-- Coretax Period Sub-header -->
-        <div v-if="workspace === 'pj'" class="flex flex-wrap items-end justify-between gap-3 bg-gray-50 p-3 rounded-lg border border-gray-200 w-full">
-          
-          <!-- Left side: Tax Period & Actions -->
-          <div class="flex flex-wrap items-end gap-3">
-            <div class="form-control">
-              <label class="label py-0 pb-1.5"><span class="label-text text-sm font-semibold text-gray-700">Tax Period (Coretax list)</span></label>
-              <div class="flex gap-2">
-                <select v-model="pjMonth" class="select select-bordered w-[100px] bg-white" @change="onPajakExpressPeriodChanged">
-                  <option v-for="m in pjMonthOptions" :key="m.v" :value="m.v">{{ m.label }}</option>
-                </select>
-                <input
-                  v-model="pjYear"
-                  type="text"
-                  maxlength="4"
-                  class="input input-bordered w-[80px] bg-white"
-                  placeholder="yyyy"
-                  @change="onPajakExpressPeriodChanged"
-                />
+              <!-- Right side: Search -->
+              <div class="flex items-center gap-3">
+                <UiInputSearch v-model="search" placeholder="Search" @search="goSearch" />
               </div>
             </div>
-            
-            <div class="h-[40px] w-[1px] bg-gray-300 mx-2 hidden lg:block"></div>
-            
-            <button type="button" class="btn btn-outline btn-primary bg-white" :disabled="isLoading || isPrepopulating" @click="reloadVat">
-              <i class="ki-duotone ki-arrows-circle !text-base"></i>
-              Reload Data
-            </button>
-            <button type="button" class="btn btn-warning" :disabled="isLoading || isPrepopulating" @click="runPrepopulateBulk">
-              <i class="ki-duotone ki-cloud-download !text-base"></i>
-              Pull Prepopulated Data
-              <span v-if="isPrepopulating" class="loading loading-spinner loading-xs ml-1"></span>
-            </button>
           </div>
 
-          <!-- Right side: Search & Filter -->
-          <div class="flex items-center gap-3">
-            <UiInputSearch v-model="search" placeholder="Search" @keypress="goSearch" />
-
-            <button class="btn btn-light bg-white border-gray-200" @click="toggleFilter()">
-              <i class="ki-duotone ki-filter"></i>
-              Filter
-            </button>
-          </div>
-
-        </div>
-
-      </div>
-
-      <!-- Filter Section -->
-      <div v-if="showFilter" class="border border-gray-200 rounded-lg p-4 mb-4 mx-[24px]">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label class="form-label">Status FP</label>
-            <select v-model="filterForm.statusFP" class="form-select">
-              <option value="">All Status</option>
-              <option value="Approved">Approved</option>
-              <option value="Credited">Credited</option>
-              <option value="Rejected">Rejected</option>
-              <option value="Created">Created</option>
-              <option value="Amended">Amended</option>
-              <option value="Canceled">Canceled</option>
-            </select>
-          </div>
-          <div>
-            <label class="form-label">Match Status</label>
-            <select v-model="filterForm.matchStatus" class="form-select">
-              <option value="">All Match Status</option>
-              <option value="Match">Match</option>
-              <option value="Mismatch">Mismatch</option>
-            </select>
-          </div>
-          <div>
-            <label class="form-label">Credit Status</label>
-            <select v-model="filterForm.creditStatus" class="form-select">
-              <option value="">All Credit Status</option>
-              <option value="Creditable">Creditable</option>
-              <option value="Not Creditable">Not Creditable</option>
-              <option value="Hold">Hold</option>
-              <option value="CREDITED">CREDITED</option>
-              <option value="UNCREDITED">UNCREDITED</option>
-              <option value="INVALID">INVALID</option>
-            </select>
-          </div>
-        </div>
-        <div class="flex gap-2 mt-4">
-          <button class="btn btn-primary btn-sm" @click="applyFilter()">Apply Filter</button>
-          <button class="btn btn-light btn-sm" @click="resetFilter()">Reset</button>
-        </div>
-      </div>
-
-      <!-- Active Filters Display -->
-      <div class="flex overflow-x-auto gap-3 mb-5 items-center px-[24px]" v-if="filteredPayload.length > 0">
-        <div class="font-medium text-lg text-gray-800">Filter</div>
-        <div v-for="items in filteredPayload" :key="items.key">
-          <div class="btn btn-light btn-sm" v-if="items.value !== ''">
-            <span class="text-gray-500">{{ items.key }} </span>
-            <span class="font-semibold">{{ items.value }}</span>
-            <i class="ki-filled ki-cross" @click="deleteFilter(items.key)"></i>
-          </div>
-        </div>
-        <button class="btn btn-light btn-sm" @click="resetFilter()">Reset All</button>
-      </div>
-
-      <!-- Table Section -->
-      <div class="overflow-x-auto list__table mx-[24px] rounded-xl overflow-hidden">
-        <table class="table align-middle text-gray-700 font-medium text-sm">
-          <thead>
-            <!-- Blue header styling -->
-            <tr>
-              <!-- Checkbox & Action Column Header -->
-              <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">
-                <div class="flex items-center justify-center gap-3">
-                  <input
-                    type="checkbox"
-                    class="checkbox checkbox-sm"
-                    :checked="isAllSelected"
-                    :indeterminate="isSomeSelected && !isAllSelected"
-                    @change="toggleSelectAll"
-                  />
-                  <span class="text-xs font-semibold">Action</span>
-                </div>
-              </th>
-              <!-- Other Column Headers -->
-              <th
-                v-for="(item, index) in columns"
-                :key="index"
-                class="!border-b-teal-500 !bg-teal-100 !text-teal-500 cursor-pointer"
-                :class="{
-                  list__long: index !== 0,
-                  '!text-primary': item === sortColumnName && sortBy !== '',
-                }"
-                @click="sortColumn(item)"
-              >
-                {{ item }}
-                <i class="ki-filled ki-arrow-up-down"></i>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Loading State -->
-            <tr v-if="isLoading">
-              <td colspan="14" class="text-center py-8">
-                <span class="loading loading-spinner loading-md"></span>
-                <span class="ml-2">Loading data...</span>
-              </td>
-            </tr>
-            <!-- No Data State -->
-            <tr v-else-if="filteredDataList?.length === 0">
-              <td colspan="14" class="text-center">No data found.</td>
-            </tr>
-
-            <tr v-for="(item, index) in list" :key="index">
-              <!-- ACTION -->
-              <td class="text-center">
-                <div class="flex items-center justify-center gap-3">
-                  <input
-                    type="checkbox"
-                    class="checkbox checkbox-sm"
-                    :checked="isItemSelected(item)"
-                    @change="toggleSelectItem(item)"
-                  />
-                  <button
-                    class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px] tooltip"
-                    data-tip="View Details"
-                    @click="goDetail(item)"
+          <!-- Table Section -->
+          <div class="overflow-x-auto list__table mx-[24px] rounded-xl overflow-hidden">
+            <table class="table align-middle text-gray-700 font-medium text-sm">
+              <thead>
+                <!-- Blue header styling -->
+                <tr>
+                  <!-- Action Column Header -->
+                  <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">
+                    <div class="flex items-center justify-center gap-3">
+                      <span class="text-xs font-semibold">Action</span>
+                    </div>
+                  </th>
+                  <!-- Other Column Headers -->
+                  <th
+                    v-for="(item, index) in columns"
+                    :key="index"
+                    class="!border-b-teal-500 !bg-teal-100 !text-teal-500 cursor-pointer"
+                    :class="{
+                      list__long: index !== 0,
+                      '!text-primary': item === sortColumnName && sortBy !== '',
+                    }"
+                    @click="sortColumn(item)"
                   >
-                    <i class="ki-filled ki-eye !text-lg"></i>
-                  </button>
-                  <button
-                    v-if="workspace === 'pj' && item.action"
-                    class="btn btn-outline btn-icon btn-success w-[32px] h-[32px] tooltip"
-                    data-tip="Download PDF"
-                    @click="handleDownloadPdf(item)"
-                  >
-                    <i class="ki-filled ki-file-down !text-lg"></i>
-                  </button>
-                  <button
-                    v-if="workspace === 'pj'"
-                    class="btn btn-outline btn-icon btn-warning w-[32px] h-[32px] tooltip"
-                    data-tip="Replace/Cancel"
-                    @click="openReplaceCancelModal(item)"
-                  >
-                    <i class="ki-filled ki-arrows-loop !text-lg"></i>
-                  </button>
-                </div>
-              </td>
-              <!-- Other Columns -->
-              <td>
-                <div class="flex items-center gap-2">
-                  <span>{{ item.vendorName }}</span>
-                  <span
-                    :class="
-                      item.poNumber && item.poNumber !== '-'
-                        ? 'badge badge-light-primary px-2 font-semibold text-xs'
-                        : 'badge badge-light-warning px-2 font-semibold text-xs'
-                    "
-                  >
-                    {{ item.poNumber && item.poNumber !== '-' ? 'PO' : 'Non-PO' }}
-                  </span>
-                </div>
-              </td>
-              <td>{{ item.npwpVendor }}</td>
-              <td>{{ formatDate(item.tglFakturPajak) }}</td>
-              <td>{{ item.noFakturPajak }}</td>
-              <td class="text-right">{{ formatCurrency(item.amount) }}</td>
-              <td class="text-right">{{ formatCurrency(item.dpp) }}</td>
+                    {{ item }}
+                    <i class="ki-filled ki-arrow-up-down"></i>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Loading State -->
+                <tr v-if="isLoading">
+                  <td colspan="14" class="text-center py-8">
+                    <span class="loading loading-spinner loading-md"></span>
+                    <span class="ml-2">Loading data...</span>
+                  </td>
+                </tr>
+                <!-- No Data State -->
+                <tr v-else-if="filteredDataList?.length === 0">
+                  <td colspan="14" class="text-center">No data found.</td>
+                </tr>
 
-              <!-- PPN -->
-              <td class="text-right">{{ formatCurrency(item.ppn) }}</td>
+                <tr v-for="(item, index) in list" :key="index">
+                  <!-- ACTION -->
+                  <td class="text-center">
+                    <div class="flex items-center justify-center gap-3">
+                      <button
+                        class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px] tooltip"
+                        data-tip="View Details"
+                        @click="goDetail(item)"
+                      >
+                        <i class="ki-filled ki-eye !text-lg"></i>
+                      </button>
 
-              <td>
-                <span class="badge badge-outline" :class="getStatusFPBadgeClass(item.statusFp)">
-                  {{ item.statusFp || '-' }}
-                </span>
-              </td>
+                      <div
+                        v-if="
+                          workspace === 'pj' && (item.action || item.creditStatus !== 'CREDITED')
+                        "
+                        class="dropdown"
+                        data-dropdown="true"
+                        data-dropdown-trigger="click"
+                        data-dropdown-placement="bottom-end"
+                      >
+                        <button class="dropdown-toggle btn btn-light btn-icon btn-sm">
+                          <i class="ki-filled ki-dots-vertical !text-lg"></i>
+                        </button>
+                        <div class="dropdown-content w-full max-w-48 py-2">
+                          <div class="menu menu-default flex flex-col w-full">
+                            <div
+                              v-if="item.action"
+                              class="menu-item"
+                              @click="handleDownloadPdf(item)"
+                            >
+                              <div class="menu-link">
+                                <span class="menu-icon">
+                                  <i class="ki-filled ki-file-down text-success !text-lg"></i>
+                                </span>
+                                <span class="menu-title">Download PDF</span>
+                              </div>
+                            </div>
+                            <div
+                              v-if="item.creditStatus !== 'CREDITED'"
+                              class="menu-item"
+                              @click="handleCreditAction(item, 'CREDITED')"
+                            >
+                              <div class="menu-link">
+                                <span class="menu-icon">
+                                  <i class="ki-filled ki-verify text-success !text-lg"></i>
+                                </span>
+                                <span class="menu-title">Post Credit</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <!-- Other Columns -->
+                  <td>
+                    <div class="flex items-center gap-2">
+                      <span>{{ item.vendorName }}</span>
+                      <span
+                        v-if="item.poNumber && item.poNumber !== '-'"
+                        class="badge badge-light-primary px-2 font-semibold text-xs"
+                      >
+                        PO
+                      </span>
+                    </div>
+                  </td>
+                  <td>{{ item.npwpVendor }}</td>
+                  <td>{{ formatDate(item.tglFakturPajak) }}</td>
+                  <td>{{ item.noFakturPajak }}</td>
+                  <td class="text-right">{{ formatCurrency(item.amount) }}</td>
+                  <td class="text-right">{{ formatCurrency(item.dpp) }}</td>
 
-              <td>
-                <span
-                  class="badge badge-outline"
-                  :class="getMatchStatusBadgeClass(item.statusApVsFp)"
-                >
-                  {{ item.statusApVsFp || '-' }}
-                </span>
-              </td>
+                  <!-- PPN -->
+                  <td class="text-right">{{ formatCurrency(item.ppn) }}</td>
 
-              <td>
-                <span
-                  class="badge badge-outline"
-                  :class="getCreditStatusBadgeClass(item.creditStatus)"
-                >
-                  {{ item.creditStatus }}
-                </span>
-              </td>
-              <td>{{ formatDate(item.vatCreditExpiryDate) }}</td>
-              <td>
-                <div class="whitespace-normal break-words w-[800px]">
-                  {{ item.remark || '-' }}
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+                  <td>
+                    <span class="badge badge-outline" :class="getStatusFPBadgeClass(item.statusFp)">
+                      {{ item.statusFp || '-' }}
+                    </span>
+                  </td>
 
-      <!-- Pagination -->
-      <div class="flex items-center justify-between mt-[24px] flex-wrap gap-2 px-[24px] pb-[24px]">
-        <p class="m-0 text-sm">
-          Showing
-          {{
-            pageSize * currentPage > (workspace === 'pj' ? (pjTotalRows > 0 ? pjTotalRows : list.length) : filteredDataList.length)
-              ? (workspace === 'pj' ? (pjTotalRows > 0 ? pjTotalRows : list.length) : filteredDataList.length)
-              : pageSize * currentPage
-          }}
-          of {{ workspace === 'pj' ? (pjTotalRows > 0 ? pjTotalRows : list.length) : filteredDataList.length }} entries
-        </p>
-        <LPagination
-          :totalItems="paginationTotalForPager"
-          :pageSize="pageSize"
-          :currentPage="currentPage"
-          @pageChange="setPage"
-        />
-      </div>
-      </template>
+                  <td>
+                    <span
+                      class="badge badge-outline"
+                      :class="getMatchStatusBadgeClass(item.statusApVsFp)"
+                    >
+                      {{ item.statusApVsFp || '-' }}
+                    </span>
+                  </td>
+
+                  <td>
+                    <span
+                      class="badge badge-outline"
+                      :class="getCreditStatusBadgeClass(item.creditStatus)"
+                    >
+                      {{ item.creditStatus }}
+                    </span>
+                  </td>
+                  <td>{{ formatDate(item.vatCreditExpiryDate) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div
+            class="flex items-center justify-between mt-[24px] flex-wrap gap-2 px-[24px] pb-[24px]"
+          >
+            <p class="m-0 text-sm">
+              Showing
+              {{
+                pageSize * currentPage >
+                (workspace === 'pj'
+                  ? pjTotalRows > 0
+                    ? pjTotalRows
+                    : list.length
+                  : filteredDataList.length)
+                  ? workspace === 'pj'
+                    ? pjTotalRows > 0
+                      ? pjTotalRows
+                      : list.length
+                    : filteredDataList.length
+                  : pageSize * currentPage
+              }}
+              of
+              {{
+                workspace === 'pj'
+                  ? pjTotalRows > 0
+                    ? pjTotalRows
+                    : list.length
+                  : filteredDataList.length
+              }}
+              entries
+            </p>
+            <LPagination
+              :totalItems="paginationTotalForPager"
+              :pageSize="pageSize"
+              :currentPage="currentPage"
+              @pageChange="setPage"
+            />
+          </div>
+        </template>
       </div>
     </div>
 
@@ -499,18 +507,28 @@
     <!-- Authentication Required Modal -->
     <AuthenticationModal :show="showAuthModal" @close="closeAuthModal" @verify="handleAuthVerify" />
 
-    <!-- Successfully Credited Modal -->
+    <!-- Notification Modal -->
+    <ModalNotification
+      :open="showNotif"
+      id="vat-in-reconcile-notif"
+      :title="notifTitle"
+      :text="notifText"
+      :type="notifType"
+      @on-close="showNotif = false"
+    />
+
+    <!-- Action Confirm Modal -->
     <ModalConfirmation
-      :open="showSuccessModal"
-      id="success-modal"
-      type="success"
-      title="Successfully Credited"
-      text="Tax Invoice successfully credited"
-      submit-button-text="Close"
-      :no-cancel="true"
-      :no-submit="true"
-      :submit="closeSuccessModal"
-      :cancel="closeSuccessModal"
+      :open="showConfirmModal"
+      id="vat-in-action-confirm-modal"
+      :type="confirmType"
+      :title="confirmTitle"
+      :text="confirmText"
+      :submitButtonText="confirmSubmitText"
+      :cancelButtonText="confirmCancelText"
+      :loading="confirmLoading"
+      @submit="handleConfirmSubmit"
+      @cancel="handleConfirmCancel"
     />
 
     <!-- Warning Modal -->
@@ -526,11 +544,287 @@
       :submit="closeWarningModal"
       :cancel="closeWarningModal"
     />
+
+    <!-- PDF Preview Modal -->
+    <UiModal v-model="showPreviewModal" title="View VAT In PDF" size="xl">
+      <div v-if="pdfLoading" class="flex flex-col items-center justify-center py-20">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+        <p class="mt-4 text-gray-500 font-medium">Loading PDF preview...</p>
+      </div>
+      <iframe
+        v-else-if="pdfBlobUrl"
+        :src="pdfBlobUrl"
+        class="w-full h-[650px] rounded-lg border-0"
+      ></iframe>
+    </UiModal>
+
+    <!-- Hidden Printable Faktur Pajak Template -->
+    <div style="position: fixed; top: 0; left: 0; z-index: -9999; opacity: 0; pointer-events: none">
+      <div
+        id="faktur-print-hidden"
+        style="
+          width: 794px;
+          height: 1122px;
+          background: white;
+          padding: 30px;
+          box-sizing: border-box;
+          font-family: Arial, sans-serif;
+          color: black;
+          line-height: 1.25;
+          position: relative;
+        "
+      >
+        <div
+          class="faktur-container-print-only"
+          style="
+            border: 1px solid black;
+            padding: 20px;
+            height: 100%;
+            box-sizing: border-box;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+          "
+        >
+          <div
+            v-if="activeRow?.statusFp === 'CANCELED' || activeRow?.statusFp === 'Canceled'"
+            style="
+              position: absolute;
+              top: 40%;
+              left: 50%;
+              transform: translate(-50%, -50%) rotate(-25deg);
+              font-size: 80px;
+              font-weight: 800;
+              color: rgba(229, 62, 62, 0.15);
+              border: 8px solid rgba(229, 62, 62, 0.15);
+              padding: 8px 24px;
+              pointer-events: none;
+              z-index: 10;
+              letter-spacing: 6px;
+              text-transform: uppercase;
+            "
+          >
+            CANCELED
+          </div>
+          <div
+            v-else
+            style="
+              position: absolute;
+              top: 40%;
+              left: 50%;
+              transform: translate(-50%, -50%) rotate(-25deg);
+              font-size: 80px;
+              font-weight: 800;
+              color: rgba(160, 174, 192, 0.12);
+              border: 8px solid rgba(160, 174, 192, 0.12);
+              padding: 8px 24px;
+              pointer-events: none;
+              z-index: 10;
+              letter-spacing: 6px;
+              text-transform: uppercase;
+            "
+          >
+            PROFORMA
+          </div>
+
+          <div
+            style="
+              text-align: center;
+              font-size: 20px;
+              font-weight: bold;
+              margin-bottom: 15px;
+              text-transform: uppercase;
+            "
+          >
+            Faktur Pajak
+          </div>
+
+          <table
+            style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 8px"
+          >
+            <tr>
+              <td colspan="4" style="border: 1px solid black; padding: 5px">
+                <strong>Kode dan Nomor Seri Faktur Pajak :</strong>
+                {{ activeRow?.noFakturPajak || '-' }}
+              </td>
+            </tr>
+            <tr style="font-weight: bold; background-color: #f2f2f2">
+              <td colspan="4" style="border: 1px solid black; padding: 5px">
+                Pengusaha Kena Pajak
+              </td>
+            </tr>
+            <tr>
+              <td colspan="4" style="border: 1px solid black; padding: 5px; line-height: 1.4">
+                Nama : {{ activeRow?.vendorName || '-' }}<br />
+                Alamat : Kpg. Arlie no 7, RT007/RW001, TEBET BARAT, TEBET, KOTA ADM. JAKARTA
+                SELATAN, DKI JAKARTA, 12810<br />
+                NPWP : {{ activeRow?.npwpVendor || '-' }}
+              </td>
+            </tr>
+            <tr style="font-weight: bold; background-color: #f2f2f2">
+              <td colspan="4" style="border: 1px solid black; padding: 5px">
+                Pembeli Barang Kena Pajak / Penerima Jasa Kena Pajak
+              </td>
+            </tr>
+            <tr>
+              <td colspan="4" style="border: 1px solid black; padding: 5px; line-height: 1.4">
+                Nama : FAST CONSULT INDONESIA<br />
+                Alamat : DISTRICT 8, TREASURY TOWER LT. 6 UNIT F, JL. JEND. SUDIRMAN KAV. 52-53,
+                SCBD LOT 28, KOTA ADM. JAKARTA SELATAN, DKI JAKARTA - 12190<br />
+                NPWP : 1091031210969728<br />
+                NIK : -<br />
+                Nomor Paspor : -<br />
+                Identitas Lain : -<br />
+                Email : finance@fastconsult.co.id
+              </td>
+            </tr>
+          </table>
+
+          <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px">
+            <thead>
+              <tr style="background-color: #f2f2f2; text-align: center; font-weight: bold">
+                <th style="width: 5%; border: 1px solid black; padding: 5px">No</th>
+                <th style="width: 15%; border: 1px solid black; padding: 5px">Kode Barang/Jasa</th>
+                <th style="width: 55%; border: 1px solid black; padding: 5px">
+                  Nama Barang Kena Pajak / Jasa Kena Pajak
+                </th>
+                <th style="width: 25%; border: 1px solid black; padding: 5px">
+                  Harga Jual / Penggantian / Uang Muka / Termin (Rp)
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="border: 1px solid black; padding: 5px; text-align: center">1</td>
+                <td style="border: 1px solid black; padding: 5px; text-align: center">000000</td>
+                <td style="border: 1px solid black; padding: 5px; line-height: 1.3">
+                  GOODS - Sample Item<br />
+                  <span style="font-size: 10px; color: #555">
+                    Rp {{ formatIndo(activeRow?.dpp) }} x 1<br />
+                    Potongan Harga = Rp 0,00<br />
+                    PPnBM (0%) = Rp 0,00
+                  </span>
+                </td>
+                <td style="border: 1px solid black; padding: 5px; text-align: right">
+                  {{ formatIndo(activeRow?.dpp) }}
+                </td>
+              </tr>
+              <tr>
+                <td colspan="3" style="border: 1px solid black; padding: 5px; font-weight: bold">
+                  Harga Jual / Penggantian / Uang Muka / Termin
+                </td>
+                <td
+                  style="
+                    border: 1px solid black;
+                    padding: 5px;
+                    text-align: right;
+                    font-weight: bold;
+                  "
+                >
+                  {{ formatIndo(activeRow?.dpp) }}
+                </td>
+              </tr>
+              <tr>
+                <td colspan="3" style="border: 1px solid black; padding: 5px">
+                  Dikurangi Potongan Harga
+                </td>
+                <td style="border: 1px solid black; padding: 5px; text-align: right">0,00</td>
+              </tr>
+              <tr>
+                <td colspan="3" style="border: 1px solid black; padding: 5px">
+                  Dikurangi Uang Muka yang telah diterima
+                </td>
+                <td style="border: 1px solid black; padding: 5px; text-align: right">0,00</td>
+              </tr>
+              <tr>
+                <td colspan="3" style="border: 1px solid black; padding: 5px; font-weight: bold">
+                  Dasar Pengenaan Pajak
+                </td>
+                <td
+                  style="
+                    border: 1px solid black;
+                    padding: 5px;
+                    text-align: right;
+                    font-weight: bold;
+                  "
+                >
+                  {{ formatIndo(activeRow?.dpp) }}
+                </td>
+              </tr>
+              <tr>
+                <td colspan="3" style="border: 1px solid black; padding: 5px; font-weight: bold">
+                  Jumlah PPN (Pajak Pertambahan Nilai)
+                </td>
+                <td
+                  style="
+                    border: 1px solid black;
+                    padding: 5px;
+                    text-align: right;
+                    font-weight: bold;
+                  "
+                >
+                  {{ formatIndo(activeRow?.ppn) }}
+                </td>
+              </tr>
+              <tr>
+                <td colspan="3" style="border: 1px solid black; padding: 5px">
+                  Jumlah PPnBM (Pajak Penjualan atas Barang Mewah)
+                </td>
+                <td style="border: 1px solid black; padding: 5px; text-align: right">0,00</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p style="font-size: 9px; margin-top: 10px; line-height: 1.3; color: #4a5568">
+            Sesuai dengan ketentuan yang berlaku, Direktorat Jenderal Pajak mengatur bahwa Faktur
+            Pajak ini telah ditandatangani secara elektronik sehingga tidak diperlukan tanda tangan
+            basah pada Faktur Pajak ini.
+          </p>
+
+          <table style="width: 100%; border: 0; margin-top: 15px; font-size: 11px">
+            <tr>
+              <td style="vertical-align: top; color: #555">{{ activeRow?.poNumber || '' }}</td>
+              <td style="text-align: center; width: 250px">
+                <div>Jakarta, {{ formatDisplayDate(activeRow?.tglFakturPajak) }}</div>
+                <div
+                  style="
+                    margin-top: 45px;
+                    font-weight: bold;
+                    text-decoration: underline;
+                    text-transform: uppercase;
+                  "
+                >
+                  {{ activeRow?.vendorName || 'RADHITYA ARIE KENPRASOJO' }}
+                </div>
+              </td>
+            </tr>
+          </table>
+
+          <div
+            style="
+              font-size: 8px;
+              border-top: 1px solid black;
+              padding-top: 5px;
+              margin-top: 25px;
+              color: #4a5568;
+              line-height: 1.3;
+            "
+          >
+            <strong>PEMBERITAHUAN:</strong> Faktur Pajak ini telah dilaporkan ke Direktorat Jenderal
+            Pajak dan telah memperoleh persetujuan sesuai dengan ketentuan peraturan perpajakan yang
+            berlaku. PERINGATAN: PKP yang menerbitkan Faktur Pajak yang tidak sesuai dengan keadaan
+            yang sebenarnya dan/atau sesungguhnya dimaksud Pasal 13 ayat (9) UU PPN dikenai sanksi
+            administrasi sesuai dengan Pasal 14 ayat (4) UU KUP.
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
@@ -540,14 +834,38 @@ import momentLib from 'moment'
 import { cloneDeep } from 'lodash'
 import AuthenticationModal from './VatReconciliation/AuthenticationModal.vue'
 import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
+import ModalNotification from '@/components/modal/ModalNotification.vue'
+import UiModal from '@/components/modal/UiModal.vue'
 import vatApi from '@/core/utils/vatApi'
-import { postVatInUpload, postVatInPrepopulated, postVatInDownloadPdf, postVatInReplaceCancel } from '@/core/utils/vatPxInvoiceApi'
+import {
+  postVatInUpload,
+  postVatInPrepopulated,
+  postVatInDownloadPdf,
+  postVatInReplaceCancel,
+} from '@/core/utils/vatPxInvoiceApi'
 import axios from 'axios'
 import BpuService, { type InvoiceVatQueueRow } from '@/services/bpu.service'
 import { useNotificationStore } from '@/stores/notification/notificationStore'
+import Swal from 'sweetalert2'
 
 // Expose moment to template
 const moment = momentLib
+
+const activeDropdownId = ref<string | null>(null)
+const toggleDropdown = (id: string) => {
+  activeDropdownId.value = activeDropdownId.value === id ? null : id
+}
+const closeAllDropdowns = () => {
+  activeDropdownId.value = null
+}
+const closeDropdowns = () => {
+  const event = new MouseEvent('click', {
+    bubbles: true,
+    cancelable: true,
+    view: window,
+  })
+  document.body.dispatchEvent(event)
+}
 const router = useRouter()
 
 interface VATReconciliationData {
@@ -575,9 +893,7 @@ interface FilterForm {
   creditStatus: string
 }
 
-const routes = ref<routeTypes[]>([
-  { name: 'Tax Reconciliation' },
-])
+const routes = ref<routeTypes[]>([{ name: 'Tax Reconciliation' }])
 
 const search = ref<string>('')
 const currentPage = ref<number>(1)
@@ -603,7 +919,8 @@ type VatDataSource = 'erp' | 'pajakExpress'
 
 type Workspace = 'queue' | 'pj'
 
-const workspace = ref<Workspace>('queue')
+const VAT_TAB_KEY = 'vatIn_active_tab'
+const workspace = ref<Workspace>((sessionStorage.getItem(VAT_TAB_KEY) as Workspace) || 'queue')
 const pendingVatRows = ref<InvoiceVatQueueRow[]>([])
 const loadingPendingVat = ref(false)
 const pendingSearch = ref('')
@@ -648,9 +965,18 @@ const closeWarningModal = () => {
   showWarningModal.value = false
 }
 
-// Success Modal state
-const showSuccessModal = ref<boolean>(false)
-const successFpNumber = ref<string>('')
+// Notification state
+const showNotif = ref(false)
+const notifTitle = ref('')
+const notifText = ref('')
+const notifType = ref('success')
+
+const showNotification = (title: string, text: string, type: string = 'success') => {
+  notifTitle.value = title
+  notifText.value = text
+  notifType.value = type
+  showNotif.value = true
+}
 
 // Status options
 const statusOptions = ref<string[]>([
@@ -689,7 +1015,6 @@ const columns = ref<string[]>([
   'AP vs Tax Invoice Status',
   'Credit Status',
   'VAT Credit Expiry Date',
-  'Remark',
 ])
 
 // Data list now populated from API
@@ -699,9 +1024,10 @@ function readPxVatHeader(response: { headers?: unknown }, canonName: string): st
   const h = response.headers
   if (!h || typeof h !== 'object') return ''
   const lower = canonName.toLowerCase()
-  const getter = typeof (h as { get?: (key: string) => unknown }).get === 'function'
-    ? (h as { get: (key: string) => unknown }).get.bind(h)
-    : null
+  const getter =
+    typeof (h as { get?: (key: string) => unknown }).get === 'function'
+      ? (h as { get: (key: string) => unknown }).get.bind(h)
+      : null
   if (getter) {
     const fromGet = getter(canonName) ?? getter(lower)
     if (fromGet !== undefined && fromGet !== null && String(fromGet).trim() !== '')
@@ -803,26 +1129,29 @@ const fetchVatData = async (opts?: { page?: number }) => {
         params: {
           source: 'PajakExpress',
           periode,
-          page,
-          limit: pageSize.value,
+          page: 1,
+          limit: 1000,
         },
       })
 
-      const rawList = response.data.result?.content || []
+      const rawResult = response.data.result
+      const rawList = Array.isArray(rawResult) ? rawResult : rawResult?.content || []
       const content = (Array.isArray(rawList) ? rawList : []).map((row: unknown) =>
         normalizeVatApiRow(row),
       )
 
       const totalRowStr = readPxVatHeader(response, 'X-Px-Vat-In-TotalRow')
       const parsedTotal = parseInt(totalRowStr, 10)
-      pjTotalRows.value = Number.isFinite(parsedTotal) && parsedTotal > 0 ? parsedTotal : content.length
+      pjTotalRows.value =
+        Number.isFinite(parsedTotal) && parsedTotal > 0 ? parsedTotal : content.length
 
       vatData.value = content
       dataList.value = content
     } else {
       pjTotalRows.value = 0
       const response = await vatApi.get('/vat/vat-reconciliation')
-      const rawList = response.data.result?.content || []
+      const rawResult = response.data.result
+      const rawList = Array.isArray(rawResult) ? rawResult : rawResult?.content || []
       const content = (Array.isArray(rawList) ? rawList : []).map((row: unknown) =>
         normalizeVatApiRow(row),
       )
@@ -834,7 +1163,9 @@ const fetchVatData = async (opts?: { page?: number }) => {
       const newExpiryNotifications = notificationStore.checkVatExpiryNotifications(content)
       const newMismatchNotifications = notificationStore.checkVatMismatchNotifications(content)
       if (newExpiryNotifications > 0 || newMismatchNotifications > 0) {
-        console.log(`Created ${newExpiryNotifications} expiry and ${newMismatchNotifications} mismatch notifications`)
+        console.log(
+          `Created ${newExpiryNotifications} expiry and ${newMismatchNotifications} mismatch notifications`,
+        )
       }
     }
   } catch (error) {
@@ -856,7 +1187,7 @@ async function runPrepopulateBulk() {
       requestFakturMasukan: {
         prepopTahunPajak: pjYear.value,
         prepopMasaPajak: pjMonth.value,
-      }
+      },
     }
     const res = await postVatInPrepopulated(payload)
     if (!res.data?.isError) {
@@ -877,7 +1208,7 @@ async function fetchPendingVat() {
   try {
     const params: any = {
       page: pendingVatPage.value,
-      pageSize: pendingVatLimit.value
+      pageSize: pendingVatLimit.value,
     }
     if (pendingSearch.value.trim()) {
       params.search = pendingSearch.value.trim()
@@ -892,7 +1223,11 @@ async function fetchPendingVat() {
       return
     }
     const contentData = r.content as any
-    pendingVatRows.value = contentData?.items ? contentData.items : (Array.isArray(contentData) ? contentData : [])
+    pendingVatRows.value = contentData?.items
+      ? contentData.items
+      : Array.isArray(contentData)
+        ? contentData
+        : []
     pendingVatTotal.value = contentData?.total || pendingVatRows.value.length
   } catch (e) {
     console.error('fetchPendingVat', e)
@@ -910,8 +1245,37 @@ function displayVatOnRow(inv: InvoiceVatQueueRow): number {
   return 0
 }
 
-function goManualPjSubmit() {
-  router.push({ name: 'vatPjSubmitFromInvoice' })
+async function handleRejectInvoice(inv: InvoiceVatQueueRow) {
+  if (
+    confirm(
+      `Apakah Anda yakin ingin menolak (Reject) Invoice No: ${inv.invoiceNo || '—'} dari antrean Pajak?`,
+    )
+  ) {
+    try {
+      const res = await vatApi.post(`/vat/vat-in/reject/${inv.id}`)
+      if (!res.data?.isError) {
+        showNotification(
+          'Success',
+          'Invoice berhasil ditolak (Reject) dari antrean Pajak.',
+          'success',
+        )
+        await fetchPendingVat()
+      } else {
+        showNotification(
+          'Error',
+          'Gagal menolak: ' + (res.data?.message || 'Unknown error'),
+          'error',
+        )
+      }
+    } catch (error: any) {
+      console.error(error)
+      showNotification(
+        'Error',
+        'Terjadi kesalahan: ' + (error.response?.data?.message || error.message),
+        'error',
+      )
+    }
+  }
 }
 
 function goSubmitFromInvoice(inv: InvoiceVatQueueRow) {
@@ -930,6 +1294,7 @@ function goSubmitFromInvoice(inv: InvoiceVatQueueRow) {
       invoiceId: String(inv.id),
       invoiceUId: String(inv.invoiceUId ?? ''),
       invoiceNo: inv.invoiceNo ?? '',
+      documentNo: inv.documentNo ?? '',
       vendorName: inv.vendorName ?? '',
       vendorNpwp: inv.vendorNpwp ?? '',
       dpp: String(inv.dpp ?? 0),
@@ -942,6 +1307,7 @@ function goSubmitFromInvoice(inv: InvoiceVatQueueRow) {
 
 async function setWorkspace(w: Workspace) {
   workspace.value = w
+  sessionStorage.setItem(VAT_TAB_KEY, w)
   if (w === 'queue') {
     await fetchPendingVat()
     return
@@ -995,9 +1361,6 @@ const filteredDataList = computed(() => {
 })
 
 const paginationTotalForPager = computed(() => {
-  if (workspace.value === 'pj') {
-    return Math.max(pjTotalRows.value, 1)
-  }
   return filteredDataList.value.length
 })
 
@@ -1030,6 +1393,25 @@ const getCreditStatusBadgeClass = (status: string | null) => {
   return 'badge-secondary'
 }
 
+const getQueueMatchStatus = (inv: InvoiceVatQueueRow) => {
+  if (!vatData.value || vatData.value.length === 0) {
+    return 'Not Matched'
+  }
+  const matched = vatData.value.find(
+    (item) => item.invoiceNo === inv.invoiceNo || item.invoiceNo === inv.documentNo,
+  )
+  if (!matched) {
+    return 'Not Matched'
+  }
+  return matched.statusApVsFp || 'Match'
+}
+
+const getQueueMatchStatusClass = (status: string) => {
+  if (status === 'Match') return 'badge-success'
+  if (status && status.includes('Mismatch')) return 'badge-danger'
+  return 'badge-warning'
+}
+
 /**
  * Formats a date string to 'dd/MM/yyyy' format
  * @param date - Date string from API (ISO format or similar)
@@ -1057,10 +1439,6 @@ const formatCurrency = (amount: number): string => {
 }
 
 const setList = (listData: VATReconciliationData[]) => {
-  if (dataSource.value === 'pajakExpress') {
-    list.value = listData
-    return
-  }
   const result: VATReconciliationData[] = []
   for (const [index, item] of listData.entries()) {
     const start = currentPage.value * pageSize.value - pageSize.value
@@ -1073,10 +1451,6 @@ const setList = (listData: VATReconciliationData[]) => {
 }
 
 const setPage = async (value: number) => {
-  if (dataSource.value === 'pajakExpress') {
-    await fetchVatData({ page: value })
-    return
-  }
   currentPage.value = value
   setList(filteredDataList.value)
 }
@@ -1091,58 +1465,211 @@ const goDetail = (data: VATReconciliationData) => {
   })
 }
 
-const handleDownloadPdf = async (item: VATReconciliationData) => {
-  if (!item.action) {
-    alert("URL Coretax tidak tersedia untuk diunduh.");
-    return;
+const showPreviewModal = ref(false)
+const pdfBlobUrl = ref('')
+const pdfLoading = ref(false)
+const activeRow = ref<any>(null)
+
+const loadHtml2Pdf = () => {
+  return new Promise<any>((resolve) => {
+    if ((window as any).html2pdf) {
+      resolve((window as any).html2pdf)
+      return
+    }
+    const script = document.createElement('script')
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js'
+    script.onload = () => resolve((window as any).html2pdf)
+    document.head.appendChild(script)
+  })
+}
+
+const formatIndo = (numStr: any) => {
+  const val = parseFloat(numStr) || 0
+  return new Intl.NumberFormat('id-ID', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(val)
+}
+
+const formatDisplayDate = (dateString: string) => {
+  if (!dateString) return ''
+  const dateObj = new Date(dateString)
+  if (!isNaN(dateObj.getTime())) {
+    return dateObj
+      .toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      })
+      .replace(/\//g, '')
   }
+  return dateString
+}
+
+const handleDownloadPdf = async (item: VATReconciliationData) => {
+  closeDropdowns()
+  showPreviewModal.value = true
+  pdfLoading.value = true
+  pdfBlobUrl.value = ''
+  activeRow.value = item
+
   try {
-    const res = await postVatInDownloadPdf({ url: item.action });
+    if (!item.action) {
+      throw new Error('No Coretax URL action provided.')
+    }
+    const res = await postVatInDownloadPdf({ url: item.action })
     if (res.data?.data?.arraybuff) {
       // Decode base64
-      const binaryString = window.atob(res.data.data.arraybuff);
-      const binaryLen = binaryString.length;
-      const bytes = new Uint8Array(binaryLen);
+      const binaryString = window.atob(res.data.data.arraybuff)
+      const binaryLen = binaryString.length
+      const bytes = new Uint8Array(binaryLen)
       for (let i = 0; i < binaryLen; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
+        bytes[i] = binaryString.charCodeAt(i)
       }
-      const blob = new Blob([bytes], { type: "application/pdf" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = `Faktur_${item.noFakturPajak || 'Pajak'}.pdf`;
-      link.click();
+      const blob = new Blob([bytes], { type: 'application/pdf' })
+      pdfBlobUrl.value = URL.createObjectURL(blob)
+      pdfLoading.value = false
     } else {
-      alert("Gagal mengunduh PDF atau format response tidak sesuai.");
+      throw new Error('Invalid response buffer.')
     }
   } catch (error: any) {
-    console.error("Error downloading PDF:", error);
-    alert("Terjadi kesalahan saat mengunduh PDF: " + (error?.response?.data?.message || error.message));
+    console.warn('Backend PDF fetch failed, falling back to client-side generation:', error)
+    try {
+      const html2pdf = await loadHtml2Pdf()
+      setTimeout(() => {
+        const element = document.getElementById('faktur-print-hidden')
+        const opt = {
+          margin: 0,
+          filename: `Faktur_${item.noFakturPajak || 'Pajak'}.pdf`,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true, scrollY: 0, scrollX: 0 },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        }
+
+        html2pdf()
+          .from(element)
+          .set(opt)
+          .toPdf()
+          .get('pdf')
+          .then((pdf: any) => {
+            const blob = pdf.output('blob')
+            pdfBlobUrl.value = URL.createObjectURL(blob)
+            pdfLoading.value = false
+          })
+          .catch((err: any) => {
+            console.error('Error rendering fallback pdf', err)
+            showNotification('Error', 'Gagal memproses preview PDF secara lokal.', 'error')
+            showPreviewModal.value = false
+            pdfLoading.value = false
+          })
+      }, 300)
+    } catch (errFallback) {
+      console.error('Failed to load html2pdf script for fallback:', errFallback)
+      showNotification(
+        'Error',
+        'Terjadi kesalahan saat memuat PDF: ' + (error?.message || error),
+        'error',
+      )
+      showPreviewModal.value = false
+      pdfLoading.value = false
+    }
   }
 }
 
-const openReplaceCancelModal = (item: VATReconciliationData) => {
-  if (confirm(`Apakah Anda yakin ingin melakukan Replace / Cancel untuk Faktur ${item.noFakturPajak}?`)) {
-    handleReplaceCancel(item);
+const showConfirmModal = ref(false)
+const confirmType = ref('confirm')
+const confirmTitle = ref('')
+const confirmText = ref('')
+const confirmSubmitText = ref('')
+const confirmCancelText = ref('Cancel')
+const confirmLoading = ref(false)
+let pendingConfirmAction: (() => Promise<void>) | null = null
+
+const handleConfirmSubmit = async () => {
+  if (pendingConfirmAction) {
+    confirmLoading.value = true
+    try {
+      await pendingConfirmAction()
+    } finally {
+      confirmLoading.value = false
+      showConfirmModal.value = false
+    }
   }
 }
 
-const handleReplaceCancel = async (item: VATReconciliationData) => {
-  try {
-    // Pajak Express requires 'INV#' prefix and stripped formatting for Replace/Cancel
-    const strippedFaktur = item.noFakturPajak ? item.noFakturPajak.replace(/\D/g, '') : '';
-    const formattedFaktur = `INV#${strippedFaktur}`;
-    
-    const payload = {
-      id: item.id || 0,
-      nomorFaktur: formattedFaktur
-    };
-    const res = await postVatInReplaceCancel(payload);
-    alert("Faktur berhasil di-Replace / Cancel!");
-    await fetchVatData();
-  } catch (error: any) {
-    console.error("Error on Replace/Cancel:", error);
-    alert("Gagal Replace/Cancel: " + (error?.response?.data?.message || error.message));
+const handleConfirmCancel = () => {
+  showConfirmModal.value = false
+}
+
+const handleCreditAction = async (
+  item: VATReconciliationData,
+  targetStatus: 'CREDITED' | 'UNCREDITED',
+) => {
+  closeDropdowns()
+  const masa = pjMonth.value.trim()
+  const tahun = pjYear.value.replace(/\D/g, '').trim()
+
+  if (masa.length === 0 || tahun.length !== 4) {
+    showNotification(
+      'Warning',
+      'Please select Tax Period (Month/Year) in the header first.',
+      'warning',
+    )
+    return
   }
+
+  const actionText =
+    targetStatus === 'CREDITED' ? 'credit (mengkreditkan)' : 'uncredit (tidak mengkreditkan)'
+
+  confirmType.value = targetStatus === 'CREDITED' ? 'confirm' : 'warning'
+  confirmTitle.value = targetStatus === 'CREDITED' ? 'Post Credit?' : 'Post Uncredit?'
+  confirmText.value = `Apakah Anda yakin ingin melakukan ${actionText} untuk Faktur No: ${item.noFakturPajak}?`
+  confirmSubmitText.value = 'Yes'
+  confirmCancelText.value = 'Cancel'
+
+  pendingConfirmAction = async () => {
+    try {
+      const response = await postVatInUpload({
+        payload: {
+          fgPermintaan: 2,
+          konfirmasiFakturMasukan: {
+            konfirmasiPengkreditan: targetStatus,
+            nomorFaktur: item.noFakturPajak,
+            masaPajak: masa,
+            tahunPajak: tahun,
+          },
+        },
+        npwpPenjual: item.npwpVendor || undefined,
+        namaVendor: item.vendorName || undefined,
+        dpp: item.dpp > 0 ? item.dpp : undefined,
+        ppn: item.ppn > 0 ? item.ppn : undefined,
+        tanggalFaktur: item.tglFakturPajak
+          ? new Date(item.tglFakturPajak).toISOString().split('T')[0]
+          : new Date().toISOString().split('T')[0],
+      })
+
+      const payload = response?.data?.result?.content || response?.data?.result || response?.data
+      if (payload?.status === 'error' || response?.data?.result?.isError) {
+        throw new Error(payload?.message || 'Status update failed.')
+      }
+
+      showNotification(
+        targetStatus === 'CREDITED' ? 'Successfully Credited' : 'Successfully Uncredited',
+        `Tax Invoice ${item.noFakturPajak} has been successfully updated to ${targetStatus}!`,
+        'success',
+      )
+      await fetchVatData()
+    } catch (error: any) {
+      console.error('Error setting credit status:', error)
+      const msg =
+        error.response?.data?.result?.content?.message ||
+        error.response?.data?.message ||
+        error.message ||
+        'Update failed.'
+      showNotification('Error', 'Gagal memperbarui status: ' + msg, 'error')
+    }
+  }
+  showConfirmModal.value = true
 }
 
 const toggleStatusDropdown = () => {
@@ -1165,9 +1692,10 @@ const closeStatusModal = () => {
 const saveStatus = () => {
   if (selectedStatus.value && selectedItems.value.length > 0) {
     console.log('Saving status:', selectedStatus.value, 'for items:', selectedItems.value)
-    // TODO: Implement API call to save status for all selected items
-    alert(
+    showNotification(
+      'Success',
       `Status "${selectedStatus.value}" saved successfully for ${selectedItems.value.length} item(s)!`,
+      'success',
     )
     selectedItems.value = [] // Clear selection after save
     closeStatusModal()
@@ -1199,15 +1727,11 @@ const isItemSelected = (item: VATReconciliationData) => {
   return selectedItems.value.some((selected) => selected.noFakturPajak === item.noFakturPajak)
 }
 
-const goSearch = (event: KeyboardEvent) => {
-  if (event.key === 'Enter') {
-    // ERP: pagination is client-side; reset to page 1 on search.
-    // Pajak Express: pagination is server-side; keep current page and filter client-side on loaded rows only.
-    if (dataSource.value === 'erp') {
-      currentPage.value = 1
-    }
-    setList(filteredDataList.value)
+const goSearch = () => {
+  if (dataSource.value === 'erp') {
+    currentPage.value = 1
   }
+  setList(filteredDataList.value)
 }
 
 const toggleFilter = () => {
@@ -1390,7 +1914,7 @@ const handleAuthVerify = async (code: string) => {
   closeAuthModal()
 
   if (dataSource.value !== 'pajakExpress') {
-    showSuccessModal.value = true
+    showNotification('Success', 'Action successfully completed.', 'success')
     return
   }
 
@@ -1398,7 +1922,11 @@ const handleAuthVerify = async (code: string) => {
   const tahun = pjYear.value.replace(/\D/g, '').trim()
 
   if (masa.length === 0 || tahun.length !== 4) {
-    alert('Isi bulan dan tahun pajak (yyyy) untuk sumber Pajak Express.')
+    showNotification(
+      'Warning',
+      'Isi bulan dan tahun pajak (yyyy) untuk sumber Pajak Express.',
+      'warning',
+    )
     return
   }
 
@@ -1443,32 +1971,43 @@ const handleAuthVerify = async (code: string) => {
     }
 
     if (errors.length === items.length) {
-      alert(`Posting gagal untuk semua faktur.\n${errors.slice(0, 5).join('\n')}${errors.length > 5 ? '\n…' : ''}`)
+      showNotification(
+        'Error',
+        `Posting gagal untuk semua faktur.\n${errors.slice(0, 5).join('\n')}${errors.length > 5 ? '\n…' : ''}`,
+        'error',
+      )
       return
     }
 
     if (errors.length > 0) {
-      alert(
+      showNotification(
+        'Warning',
         `${errors.length} dari ${items.length} gagal. Detail (maks 5):\n${errors.slice(0, 5).join('\n')}${errors.length > 5 ? '\n…' : ''}`,
+        'warning',
       )
     }
 
     await fetchVatData({ page: currentPage.value })
-    showSuccessModal.value = true
+    showNotification('Success', 'Tax Invoices successfully processed.', 'success')
+    selectedItems.value = []
   } finally {
     isPostingVat.value = false
   }
 }
 
-// Success Modal handlers
-const closeSuccessModal = () => {
-  showSuccessModal.value = false
-  successFpNumber.value = ''
-  selectedItems.value = [] // Clear selection after success
-}
-
 onMounted(async () => {
-  await fetchPendingVat()
+  window.addEventListener('click', closeAllDropdowns)
+  // Restore tab terakhir yang dipilih user
+  if (workspace.value === 'pj') {
+    dataSource.value = 'pajakExpress'
+    await fetchVatData()
+  } else {
+    await fetchPendingVat()
+  }
+})
+
+onUnmounted(() => {
+  window.removeEventListener('click', closeAllDropdowns)
 })
 
 // Watch for changes in filtered data and update list

@@ -93,7 +93,7 @@
 
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
                 <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">Reference</label>
-                <input type="text" class="input flex-1" v-model="form.referensi" />
+                <input type="text" class="input flex-1" v-model="form.referensi" placeholder="e.g. PO-2026-001234" />
               </div>
 
             </div>
@@ -131,7 +131,7 @@
               <div class="flex flex-col gap-1">
                 <label class="form-label text-sm font-medium text-gray-600">Buyer NPWP <span class="text-danger">*</span></label>
                 <div class="relative">
-                  <input type="text" class="input w-full pr-10" v-model="form.npwpPembeli" placeholder="Enter NPWP" required />
+                  <input type="text" class="input w-full pr-10" v-model="form.npwpPembeli" placeholder="e.g. 1091031210969728" required />
                   <i v-if="isValidNpwp" class="ki-filled ki-check-circle text-success text-xl absolute right-3 top-1/2 -translate-y-1/2"></i>
                 </div>
               </div>
@@ -150,31 +150,31 @@
               <!-- Right Col -->
               <div class="flex flex-col gap-1">
                 <label class="form-label text-sm font-medium text-gray-600">Buyer Name <span class="text-danger">*</span></label>
-                <input type="text" class="input w-full" v-model="form.namaPembeli" placeholder="Buyer Name" required />
+                <input type="text" class="input w-full" v-model="form.namaPembeli" placeholder="e.g. PT Maju Bersama Tbk" required />
               </div>
 
               <!-- Left Col -->
               <div class="flex flex-col gap-1">
                 <label class="form-label text-sm font-medium text-gray-600">NITKU</label>
-                <input type="text" class="input w-full" v-model="form.tkuPembeli" placeholder="NITKU" />
+                <input type="text" class="input w-full" v-model="form.tkuPembeli" placeholder="e.g. 1091031210969728000000" />
               </div>
 
               <!-- Right Col -->
               <div class="flex flex-col gap-1">
                 <label class="form-label text-sm font-medium text-gray-600">Email</label>
-                <input type="email" class="input w-full" v-model="form.emailPembeli" placeholder="Email" />
+                <input type="email" class="input w-full" v-model="form.emailPembeli" placeholder="e.g. finance@company.co.id" />
               </div>
 
               <!-- Full Width -->
               <div class="flex flex-col gap-1 lg:col-span-2">
                 <label class="form-label text-sm font-medium text-gray-600">Email CC</label>
-                <input type="email" class="input w-full" v-model="form.emailCcPembeli" placeholder="Email CC" />
+                <input type="email" class="input w-full" v-model="form.emailCcPembeli" placeholder="e.g. tax@company.co.id" />
               </div>
 
               <!-- Full Width -->
               <div class="flex flex-col gap-1 lg:col-span-2">
                 <label class="form-label text-sm font-medium text-gray-600">Address <span class="text-danger">*</span></label>
-                <textarea class="textarea w-full min-h-[60px] resize-none" v-model="form.alamatPembeli" placeholder="Address" required></textarea>
+                <textarea class="textarea w-full min-h-[60px] resize-none" v-model="form.alamatPembeli" placeholder="e.g. Jl. Sudirman No. 52, Jakarta Selatan 12190" required></textarea>
               </div>
 
             </div>
@@ -310,19 +310,19 @@
       <div class="bg-white rounded-xl shadow-lg w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <!-- Header -->
         <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h3 class="text-lg font-bold text-gray-800">Detail Penyerahan Barang/Jasa</h3>
-          <button @click="showAddItemModal = false" class="btn btn-sm w-7 h-7 btn-icon rounded-full btn-danger border-none">
-            <i class="ki-filled ki-cross text-sm"></i>
+          <h3 class="text-lg font-bold text-gray-800">Goods / Services Detail</h3>
+          <button @click="showAddItemModal = false" class="btn btn-sm btn-icon btn-light btn-clear text-gray-500 hover:text-danger border-none">
+            <i class="ki-filled ki-cross !text-lg"></i>
           </button>
         </div>
 
         <!-- Body -->
         <div class="p-6 overflow-y-auto space-y-6">
           
-          <!-- Section 1: Detail Transaksi -->
+          <!-- Section 1: Transaction Detail -->
           <div>
             <div class="flex items-center gap-4 mb-4">
-               <span class="font-bold text-sm bg-white pr-4">Detail Transaksi</span>
+               <span class="font-bold text-sm bg-white pr-4">Transaction Detail</span>
                <hr class="flex-1" />
             </div>
             
@@ -333,32 +333,32 @@
                 <div class="flex items-center gap-4 h-10">
                   <label class="flex items-center gap-2 cursor-pointer">
                     <input type="radio" v-model="currentItem.brgJasa" value="GOODS" class="radio radio-primary radio-sm" />
-                    <span class="text-sm">Barang</span>
+                    <span class="text-sm">Goods</span>
                   </label>
                   <label class="flex items-center gap-2 cursor-pointer">
                     <input type="radio" v-model="currentItem.brgJasa" value="SERVICE" class="radio radio-primary radio-sm" />
-                    <span class="text-sm">Jasa</span>
+                    <span class="text-sm">Service</span>
                   </label>
                 </div>
               </div>
 
               <!-- Kode Barang -->
               <div class="flex flex-col gap-1">
-                <label class="text-xs text-gray-500">Kode Barang/Jasa</label>
+                <label class="text-xs text-gray-500">Item Code</label>
                 <select class="select w-full" v-model="currentItem.kdBrgJasa">
-                  <option value="000000">000000-Barang</option>
+                  <option value="000000">000000-Goods</option>
                 </select>
               </div>
 
               <!-- Nama Barang -->
               <div class="flex flex-col gap-1">
-                <label class="text-xs text-gray-500">Nama Barang/Jasa</label>
-                <input type="text" class="input w-full" v-model="currentItem.namaBrgJasa" />
+                <label class="text-xs text-gray-500">Item Name</label>
+                <input type="text" class="input w-full" v-model="currentItem.namaBrgJasa" placeholder="e.g. Technology Consulting Service" />
               </div>
 
               <!-- Satuan Barang -->
               <div class="flex flex-col gap-1">
-                <label class="text-xs text-gray-500">Satuan Barang/Jasa</label>
+                <label class="text-xs text-gray-500">Unit of Measurement</label>
                 <select class="select w-full" v-model="currentItem.satuanBrgJasa">
                   <option value="UM.0001">UM.0001</option>
                   <option value="UM.0002">UM.0002</option>
@@ -367,26 +367,26 @@
 
               <!-- Jumlah -->
               <div class="flex flex-col gap-1">
-                <label class="text-xs text-gray-500">Jumlah Barang/Jasa</label>
-                <input type="number" class="input w-full text-right" v-model="currentItem.jmlBrgJasa" @input="calculateCurrentItem" min="0" />
+                <label class="text-xs text-gray-500">Quantity</label>
+                <input type="text" class="input w-full text-right" :value="formatInput(currentItem.jmlBrgJasa)" @input="onJmlBrgJasaInput" />
               </div>
 
               <!-- Harga Satuan -->
               <div class="flex flex-col gap-1">
-                <label class="text-xs text-gray-500">Harga Satuan (Rp)</label>
-                <input type="number" class="input w-full text-right" v-model="currentItem.hargaSatuan" @input="calculateCurrentItem" min="0" />
+                <label class="text-xs text-gray-500">Unit Price (Rp)</label>
+                <input type="text" class="input w-full text-right" :value="formatInput(currentItem.hargaSatuan)" @input="onHargaSatuanInput" />
               </div>
 
               <!-- Harga Total -->
               <div class="flex flex-col gap-1">
-                <label class="text-xs text-gray-500">Harga Total (Rp)</label>
-                <input type="text" class="input w-full text-right bg-gray-50" :value="currentItem.totalHarga" readonly />
+                <label class="text-xs text-gray-500">Total Price (Rp)</label>
+                <input type="text" class="input w-full text-right bg-gray-50" :value="formatInput(currentItem.totalHarga)" readonly />
               </div>
 
               <!-- Diskon -->
               <div class="flex flex-col gap-1">
-                <label class="text-xs text-gray-500">Diskon (Rp)</label>
-                <input type="number" class="input w-full text-right" v-model="currentItem.diskon" @input="calculateCurrentItem" min="0" />
+                <label class="text-xs text-gray-500">Discount (Rp)</label>
+                <input type="text" class="input w-full text-right" :value="formatInput(currentItem.diskon)" @input="onDiskonInput" />
               </div>
 
             </div>
@@ -395,60 +395,60 @@
           <!-- Section 2: PPN & PPnBM -->
           <div class="mt-8">
             <div class="flex items-center gap-4 mb-4">
-               <span class="font-bold text-sm bg-white pr-4">PPN & PPnBM</span>
+               <span class="font-bold text-sm bg-white pr-4">VAT & Luxury Tax (PPnBM)</span>
                <hr class="flex-1" />
             </div>
 
             <div class="grid grid-cols-2 gap-x-6 gap-y-4">
               <!-- DPP -->
               <div class="flex flex-col gap-1">
-                <label class="text-xs text-gray-500">DPP (Rp)</label>
-                <input type="text" class="input w-full text-right bg-gray-50" :value="currentItem.dpp" readonly />
+                <label class="text-xs text-gray-500">Tax Base (DPP) (Rp)</label>
+                <input type="text" class="input w-full text-right bg-gray-50" :value="formatInput(currentItem.dpp)" readonly />
               </div>
 
               <!-- DPP Nilai Lain Radio -->
               <div class="flex flex-col gap-1 row-span-2">
-                <label class="text-xs text-gray-500">DPP Nilai Lain</label>
+                <label class="text-xs text-gray-500">Other Tax Base (DPP)</label>
                 <div class="flex flex-col gap-3 mt-2">
                   <label class="flex items-start gap-2 cursor-pointer">
                     <input type="radio" v-model="currentItem.cekDppLain" :value="true" class="radio radio-primary mt-0.5" />
-                    <span class="text-sm">Sesuai Ketentuan PMK 131 Ps. 3 (2)</span>
+                    <span class="text-sm">As per PMK 131 Art. 3 (2)</span>
                   </label>
                   <label class="flex items-start gap-2 cursor-pointer">
                     <input type="radio" v-model="currentItem.cekDppLain" :value="false" class="radio radio-primary mt-0.5" />
-                    <span class="text-sm">Selain yang diatur dalam PMK 131 Ps. 3 (2)</span>
+                    <span class="text-sm">Other than PMK 131 Art. 3 (2)</span>
                   </label>
                 </div>
               </div>
 
               <!-- Tarif PPN -->
               <div class="flex flex-col gap-1">
-                <label class="text-xs text-gray-500">Tarif PPN %</label>
+                <label class="text-xs text-gray-500">VAT Rate %</label>
                 <input type="number" class="input w-full text-right" v-model="currentItem.tarifPpn" @input="calculateCurrentItem" min="0" />
               </div>
 
               <!-- PPN -->
               <div class="flex flex-col gap-1">
-                <label class="text-xs text-gray-500">PPN (Rp)</label>
-                <input type="text" class="input w-full text-right bg-gray-50" :value="currentItem.ppn" readonly />
+                <label class="text-xs text-gray-500">VAT (Rp)</label>
+                <input type="text" class="input w-full text-right bg-gray-50" :value="formatInput(currentItem.ppn)" readonly />
               </div>
 
               <!-- DPP Nilai Lain Rp -->
               <div class="flex flex-col gap-1">
-                <label class="text-xs text-gray-500">DPP Nilai Lain (Rp)</label>
-                <input type="number" class="input w-full text-right bg-gray-50" v-model="currentItem.dppLain" readonly />
+                <label class="text-xs text-gray-500">Other Tax Base (Rp)</label>
+                <input type="text" class="input w-full text-right bg-gray-50" :value="formatInput(currentItem.dppLain)" readonly />
               </div>
 
               <!-- Tarif PPnBM -->
               <div class="flex flex-col gap-1">
-                <label class="text-xs text-gray-500">Tarif PPnBM %</label>
+                <label class="text-xs text-gray-500">Luxury Tax Rate %</label>
                 <input type="number" class="input w-full text-right" v-model="currentItem.tarifPpnbm" @input="calculateCurrentItem" min="0" />
               </div>
 
               <!-- PPnBM -->
               <div class="flex flex-col gap-1">
-                <label class="text-xs text-gray-500">PPnBM (Rp)</label>
-                <input type="text" class="input w-full text-right bg-gray-50" :value="currentItem.ppnbm" readonly />
+                <label class="text-xs text-gray-500">Luxury Tax (Rp)</label>
+                <input type="text" class="input w-full text-right bg-gray-50" :value="formatInput(currentItem.ppnbm)" readonly />
               </div>
             </div>
           </div>
@@ -457,7 +457,7 @@
 
         <!-- Footer -->
         <div class="flex items-center justify-end px-6 py-4 border-t border-gray-100 bg-slate-50">
-          <button type="button" class="btn btn-primary rounded-lg px-8" @click="saveItem">Simpan</button>
+          <button type="button" class="btn btn-primary rounded-lg px-8" @click="saveItem">Save Item</button>
         </div>
       </div>
     </div>
@@ -483,7 +483,7 @@ import { type routeTypes } from '@/core/type/components/breadcrumb'
 
 const router = useRouter()
 const isSubmitting = ref(false)
-const vendorNpwp = '1091031210912281'
+const vendorNpwp = '1091031210969728'
 const identitasTipe = ref('NPWP')
 const pernyataan = ref(false)
 const tanggalFakturInput = ref(new Date().toISOString().split('T')[0])
@@ -512,18 +512,18 @@ const form = ref({
   masaPajak: new Date().getMonth() + 1 < 10 ? '0' + (new Date().getMonth() + 1) : (new Date().getMonth() + 1).toString(),
   tahunPajak: new Date().getFullYear().toString(),
   refDoc: '',
-  referensi: 'UI-Frontend',
+  referensi: 'PO-2026-001234',
   npwpPenjual: vendorNpwp,
   namaTokoPenjual: vendorNpwp + '000000',
-  npwpPembeli: '',
+  npwpPembeli: '1091031210969728',
   idLainPembeli: '',
   kdNegaraPembeli: 'IDN',
   nikPaspPembeli: '',
-  namaPembeli: '',
-  tkuPembeli: '',
-  alamatPembeli: '',
-  emailPembeli: '',
-  emailCcPembeli: '',
+  namaPembeli: 'PT Maju Bersama Tbk',
+  tkuPembeli: '1091031210969728000000',
+  alamatPembeli: 'Jl. Sudirman No. 52, Jakarta Selatan 12190',
+  emailPembeli: 'finance@majubersama.co.id',
+  emailCcPembeli: 'tax@majubersama.co.id',
   totalDpp: 0,
   totalDppLain: 0,
   jumlahUangMuka: 0,
@@ -565,9 +565,9 @@ watch(tanggalFakturInput, (newVal) => {
 })
 
 watch(() => form.value.npwpPembeli, (newVal) => {
-  if (newVal === '1091031210912281') {
+  if (newVal === '1091031210969728') {
     isValidNpwp.value = true
-    form.value.tkuPembeli = '1091031210912281000000'
+    form.value.tkuPembeli = '1091031210969728000000'
     form.value.kdNegaraPembeli = 'IDN'
   } else {
     isValidNpwp.value = false
@@ -609,12 +609,38 @@ const currentItem = ref({
   fgPmk: '',
 })
 
+const formatInput = (val: number) => {
+  if (val === undefined || val === null || isNaN(val)) return '0'
+  return new Intl.NumberFormat('id-ID').format(val)
+}
+
+const parseInput = (val: string) => {
+  const clean = val.replace(/\D/g, '')
+  return clean ? Number(clean) : 0
+}
+
 const calculateCurrentItem = () => {
   currentItem.value.totalHarga = currentItem.value.jmlBrgJasa * currentItem.value.hargaSatuan
   currentItem.value.dpp = currentItem.value.totalHarga - currentItem.value.diskon
   currentItem.value.dppLain = currentItem.value.dpp
   currentItem.value.ppn = currentItem.value.dpp * (currentItem.value.tarifPpn / 100)
   currentItem.value.ppnbm = currentItem.value.dpp * (currentItem.value.tarifPpnbm / 100)
+}
+
+const onHargaSatuanInput = (e: any) => {
+  currentItem.value.hargaSatuan = parseInput(e.target.value)
+  e.target.value = formatInput(currentItem.value.hargaSatuan)
+  calculateCurrentItem()
+}
+const onDiskonInput = (e: any) => {
+  currentItem.value.diskon = parseInput(e.target.value)
+  e.target.value = formatInput(currentItem.value.diskon)
+  calculateCurrentItem()
+}
+const onJmlBrgJasaInput = (e: any) => {
+  currentItem.value.jmlBrgJasa = parseInput(e.target.value)
+  e.target.value = formatInput(currentItem.value.jmlBrgJasa)
+  calculateCurrentItem()
 }
 
 const openAddItemModal = (index?: number) => {

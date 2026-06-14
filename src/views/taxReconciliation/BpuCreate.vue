@@ -3,6 +3,18 @@
     <Breadcrumb title="Create New BPU" :routes="routes" />
     <hr class="-mx-[24px] mb-[24px]" />
 
+    <!-- Info Box -->
+    <div class="mb-6 bg-[#fff8dd] border border-[#f6c000] p-4 rounded-lg flex gap-3 items-start">
+      <i class="ki-filled ki-information-2 text-[#f6c000] text-xl mt-0.5"></i>
+      <div class="text-sm text-yellow-800">
+        <strong class="font-bold">Important Notes:</strong>
+        <ul class="list-disc pl-5 mt-1 space-y-1">
+          <li>Fields marked with a red asterisk (<span class="text-danger font-bold">*</span>) are mandatory and required by DJP.</li>
+          <li>If you create this BPU from an existing Invoice, fields like <b>NPWP, Counterpart Name, Tax Base (DPP), and Tax Rate</b> are permanently locked to ensure data consistency.</li>
+        </ul>
+      </div>
+    </div>
+
     <div class="space-y-6">
 
       <div class="flex gap-[24px] items-start">
@@ -26,7 +38,9 @@
               </div>
 
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">{{ form.fgNpwpNik === 'true' ? 'NPWP' : 'NIK' }}</label>
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">
+                  {{ form.fgNpwpNik === 'true' ? 'NPWP' : 'NIK' }} <span class="text-danger">*</span>
+                </label>
                 <div class="flex-1">
                   <input 
                     v-model="form.npwp" 
@@ -43,7 +57,9 @@
               </div>
 
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">Counterpart Name</label>
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">
+                  Counterpart Name <span class="text-danger">*</span>
+                </label>
                 <div class="flex-1">
                   <input 
                     v-model="form.nama" 
@@ -66,15 +82,20 @@
             <h3 class="text-lg font-semibold mb-[16px]">Financial & Tax Details</h3>
             <div class="flex flex-col gap-[8px]">
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">Tax Object Code</label>
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">
+                  Tax Object Code <span class="text-danger">*</span>
+                </label>
                 <div class="flex-1">
                   <select 
                     v-model="form.dataDetilBpu.kodeObjekPajak" 
                     :class="['select', { 'border-danger': wasValidated && !form.dataDetilBpu.kodeObjekPajak }]" 
+                    @change="onTaxCodeChange"
                     required
                   >
-                    <option value="28-402-01">28-402-01 (Pasal 4 Ayat 2)</option>
-                    <option value="24-104-01">24-104-01 (Pasal 23)</option>
+                    <option value="" disabled>Select Tax Object Code</option>
+                    <option v-for="item in bpuTaxObjectCodes" :key="item.kode" :value="item.kode" :title="item.nama">
+                      {{ item.kode }} - {{ item.nama.length > 70 ? item.nama.substring(0, 70) + '...' : item.nama }}
+                    </option>
                   </select>
                   <p v-if="wasValidated && !form.dataDetilBpu.kodeObjekPajak" class="text-danger text-[11px] mt-1.5 font-medium ml-1 flex items-center gap-1 animate-in fade-in slide-in-from-top-1 duration-200">
                     <i class="ki-filled ki-information-2 text-[13px]"></i>
@@ -94,22 +115,24 @@
               </div>
 
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">Tax Rate (%)</label>
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">
+                  Tax Rate (%) <span class="text-danger">*</span>
+                </label>
                 <div class="flex-1 relative">
                   <input 
                     type="number" step="0.1" 
                     v-model="form.dataDetilBpu.tarif" 
-                    @input="calculatePPh" 
-                    :class="['input pr-8', { 'border-danger': wasValidated && !form.dataDetilBpu.tarif }, form.invoiceId > 0 ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : '']" 
-                    required
-                    :disabled="form.invoiceId > 0"
+                    class="input pr-8 bg-gray-100 text-gray-500 cursor-not-allowed" 
+                    disabled
                   >
                   <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
                 </div>
               </div>
 
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
-                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">Tax Base (DPP)</label>
+                <label class="form-label w-full lg:max-w-xs text-sm font-medium text-gray-600">
+                  Tax Base (DPP) <span class="text-danger">*</span>
+                </label>
                 <div class="flex-1 relative">
                   <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">Rp</span>
                   <input 
@@ -136,22 +159,19 @@
             <div class="grid grid-cols-2 gap-x-12 gap-y-2">
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
                 <label class="form-label min-w-[120px] text-sm font-medium text-gray-600">Pasal PPh</label>
-                <input v-model="form.dataDetilBpu.pasalPPh" class="input" placeholder="e.g., 4 Ayat 2">
+                <input v-model="form.dataDetilBpu.pasalPPh" class="input bg-gray-100 text-gray-500 cursor-not-allowed" disabled>
               </div>
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
                 <label class="form-label min-w-[120px] text-sm font-medium text-gray-600">Status PPh</label>
-                <select v-model="form.dataDetilBpu.statusPPh" class="select">
-                  <option value="Final">Final</option>
-                  <option value="Non Final">Non Final</option>
-                </select>
+                <input v-model="form.dataDetilBpu.statusPPh" class="input bg-gray-100 text-gray-500 cursor-not-allowed" disabled>
               </div>
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
                 <label class="form-label min-w-[120px] text-sm font-medium text-gray-600">KAP Code</label>
-                <input v-model="form.dataDetilBpu.kap" class="input" placeholder="411128">
+                <input v-model="form.dataDetilBpu.kap" class="input bg-gray-100 text-gray-500 cursor-not-allowed" disabled>
               </div>
               <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
                 <label class="form-label min-w-[120px] text-sm font-medium text-gray-600">KJS Code</label>
-                <input v-model="form.dataDetilBpu.kjs" class="input" placeholder="100">
+                <input v-model="form.dataDetilBpu.kjs" class="input bg-gray-100 text-gray-500 cursor-not-allowed" disabled>
               </div>
             </div>
           </div>
@@ -231,6 +251,7 @@ import Breadcrumb from '@/components/BreadcrumbView.vue'
 import ModalNotification from '@/components/modal/ModalNotification.vue'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
 import BpuService, { type BpuCreatePayload } from '@/services/bpu.service'
+import { bpuTaxObjectCodes } from '@/utils/taxObjectCodes'
 import moment from 'moment'
 
 const router = useRouter()
@@ -259,9 +280,9 @@ const form = ref<BpuCreatePayload>({
   masaPajak: '',
   tahunPajak: '',
   fgNpwpNik: 'true',
-  npwp: '1234567890123456',
+  npwp: '',
   nik: '',
-  nama: 'PT BPU Testing',
+  nama: '',
   fgJnsBupot: 'BPU',
   tglPemotongan: moment().format('YYYY-MM-DD'),
   glAccount: '521111',
@@ -311,6 +332,20 @@ onMounted(() => {
 })
 
 // Methods
+const onTaxCodeChange = () => {
+  const code = form.value.dataDetilBpu.kodeObjekPajak
+  if (!code) return
+  const matched = bpuTaxObjectCodes.find((x) => x.kode === code)
+  if (matched) {
+    form.value.dataDetilBpu.tarif = Number(matched.tarif)
+    form.value.dataDetilBpu.pasalPPh = matched.pasal
+    form.value.dataDetilBpu.statusPPh = matched.statuspph
+    form.value.dataDetilBpu.kap = matched.kap
+    form.value.dataDetilBpu.kjs = matched.kjs
+    calculatePPh()
+  }
+}
+
 const calculatePPh = () => {
   const dpp = Number(form.value.dataDetilBpu.dpp) || 0
   const tarif = Number(form.value.dataDetilBpu.tarif) || 0
