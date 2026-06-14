@@ -46,11 +46,24 @@ export function isDraftFormStatus(status: number | string | null | undefined): b
   return !Number.isNaN(code) && (code === 0 || code === -1 || code === 5)
 }
 
+/** Statuses where submitter may edit, save draft, or resubmit. */
+export function isEditableInvoiceStatus(status: number | string | null | undefined): boolean {
+  const code = Number(status)
+  return !Number.isNaN(code) && (code === -1 || code === 0 || code === 5)
+}
+
 /** Submission flow (create / edit draft) vs read-only detail view. */
 export function isInvoiceSubmissionFlow(
   routeType: InvoiceRouteType | null | undefined,
   loadedStatus?: number | string | null,
 ): boolean {
+  const statusCode =
+    loadedStatus == null || loadedStatus === '' ? null : Number(loadedStatus)
+
+  if (statusCode != null && !Number.isNaN(statusCode) && statusCode !== -1) {
+    if (!isEditableInvoiceStatus(statusCode)) return false
+  }
+
   if (isSavedDraftStatus(loadedStatus)) return true
   return !isInvoiceViewRouteType(routeType)
 }

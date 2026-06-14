@@ -43,7 +43,7 @@
             <i class="ki-filled ki-arrow-left"></i>
             Back
           </button>
-          <button class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goSaveDraft">
+          <button class="btn btn-outline btn-primary" :disabled="isSubmit || !canSubmitInvoice" @click="goSaveDraft">
             Save as Draft
             <i class="ki-duotone ki-bookmark"></i>
           </button>
@@ -52,7 +52,7 @@
           <button
             v-if="tabNow === 'information'"
             class="btn btn-primary"
-            :disabled="isSubmit || checkFormBudget()"
+            :disabled="isSubmit || !canSubmitInvoice || checkFormBudget()"
             @click="checkBudget"
           >
             Budget Checking
@@ -64,6 +64,7 @@
             @click="goNext"
             :disabled="
               isSubmit ||
+              !canSubmitInvoice ||
               (!isCheckBudget && tabNow === 'information') ||
               (tabNow === 'information' && !checkInvoiceInformation()) ||
               (tabNow === 'data' && !isAlternativePayeeFilled())
@@ -79,7 +80,7 @@
         v-else-if="isSubmissionFormMode && !checkIsNonPo()"
         class="flex justify-between items-center gap-[8px] mt-[24px]"
       >
-        <button class="btn btn-outline btn-primary" :disabled="isSubmit" @click="goSaveDraft">
+        <button class="btn btn-outline btn-primary" :disabled="isSubmit || !canSubmitInvoice" @click="goSaveDraft">
           Save as Draft
           <i class="ki-duotone ki-bookmark"></i>
         </button>
@@ -90,7 +91,7 @@
           </button>
           <button
             class="btn btn-primary"
-            :disabled="isSubmit || (tabNow === 'data' && !isAlternativePayeeFilled())"
+            :disabled="isSubmit || !canSubmitInvoice || (tabNow === 'data' && !isAlternativePayeeFilled())"
             @click="goNext"
           >
             {{ tabNow !== 'preview' ? 'Next' : 'Submit' }}
@@ -124,6 +125,7 @@
           class="btn btn-primary"
           :disabled="
             isSubmit ||
+            !canSubmitInvoice ||
             (tabNow === 'information' && !checkInvoiceInformation()) ||
             (tabNow === 'data' && !isAlternativePayeeFilled())
           "
@@ -172,10 +174,13 @@ import iconPDF from '@/components/icons/iconPDF.vue'
 import { KTModal } from '@/metronic/core'
 import { useCheckEmpty } from '@/composables/validation'
 import {
+  isEditableInvoiceStatus,
   isInvoiceSubmissionFlow,
+  isInvoiceSubmissionRouteType,
   isInvoiceViewRouteType,
   isRejectedInvoiceStatus,
   isSavedDraftStatus,
+  resolveInvoiceAddRouteType,
 } from '@/core/utils/invoiceSubmissionRoute'
 import { dedupePoGrLines } from '@/core/utils/poGrDedup'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
@@ -392,6 +397,8 @@ const isSubmissionFormMode = computed(() => {
   return isInvoiceSubmissionFlow(route.query.type?.toString(), form.status)
 })
 
+const canSubmitInvoice = computed(() => isEditableInvoiceStatus(form.status))
+
 const isSavedInvoiceEditMode = computed(() => {
   return !!route.query.invoice && isSubmissionFormMode.value
 })
@@ -418,13 +425,37 @@ const applyRouteUiDefaults = () => {
     return
   }
 
-  if (isSavedDraftStatus(form.status) || !isView) {
+  if (isEditableInvoiceStatus(form.status) && (isSavedDraftStatus(form.status) || !isView)) {
     enableDraftTabNavigation()
     return
   }
 
   tabNow.value = 'preview'
   hasCompletedDataTab.value = true
+}
+
+const normalizeRouteForLoadedStatus = () => {
+  const invoiceId = route.query.invoice?.toString()
+  if (!invoiceId || isEditableInvoiceStatus(form.status)) return
+
+  const routeType = route.query.type?.toString()
+  if (!routeType || isInvoiceViewRouteType(routeType) || !isInvoiceSubmissionRouteType(routeType)) {
+    return
+  }
+
+  const invoiceKind =
+    routeType === 'nonpo' || routeType === 'cas' ? 'nonpo' : 'po'
+  const viewType = resolveInvoiceAddRouteType(form.status, '', invoiceKind)
+
+  if (viewType === routeType) return
+
+  router.replace({
+    name: route.name,
+    query: {
+      ...route.query,
+      type: viewType,
+    },
+  })
 }
 
 const getActiveFtpSyncContext = () => {
@@ -510,9 +541,9 @@ const loadInvoiceFromRoute = async () => {
       setStepperStatus()
       setDataNonPo()
 
-      if (isSavedDraftStatus(form.status)) {
+      if (isEditableInvoiceStatus(form.status) && isSavedDraftStatus(form.status)) {
         enableDraftTabNavigation()
-      } else if (isInvoiceViewRouteType(routeType)) {
+      } else if (isInvoiceViewRouteType(routeType) || !isEditableInvoiceStatus(form.status)) {
         tabNow.value = 'preview'
         hasCompletedDataTab.value = true
       } else if (canClickPaymentStatusTab.value) {
@@ -551,10 +582,15 @@ const loadInvoiceFromRoute = async () => {
         setStepperStatus()
       }
 
-      if (isSavedDraftStatus(form.status) && (isFtpSubmissionEntry() || routeType === 'po')) {
+      if (
+        isEditableInvoiceStatus(form.status) &&
+        isSavedDraftStatus(form.status) &&
+        (isFtpSubmissionEntry() || routeType === 'po')
+      ) {
         enableDraftTabNavigation()
       } else if (
         isInvoiceViewRouteType(routeType) ||
+        !isEditableInvoiceStatus(form.status) ||
         (route.query.from === 'ftp' && !isSavedDraftStatus(form.status))
       ) {
         tabNow.value = 'preview'
@@ -563,6 +599,8 @@ const loadInvoiceFromRoute = async () => {
         tabNow.value = 'paymentStatus'
       }
     }
+
+    normalizeRouteForLoadedStatus()
   } catch (error) {
     console.error('Error loading invoice detail:', error)
     if (isFtpSubmissionEntry() && isSavedDraftStatus(form.status)) {
@@ -1435,6 +1473,8 @@ const goNext = async () => {
       tabNow.value = list[checkIndex + 1]
     }
   } else {
+    if (!canSubmitInvoice.value) return
+
     // Validate Department requirement before submitting
     const requiresDept = Number(form.status) !== 0 && !isClickDraft.value
     const headerHasDept = form.department && String(form.department).trim() !== ''
@@ -1638,6 +1678,8 @@ const goToList = () => {
 }
 
 const goSaveDraft = () => {
+  if (!canSubmitInvoice.value) return
+
   isSubmit.value = true
   isClickDraft.value = true
   if (checkIsNonPo()) {
