@@ -63,6 +63,7 @@
             <table class="table align-middle text-gray-700 font-medium text-sm">
               <thead>
                 <tr>
+                  <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Action</th>
                   <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Source</th>
                   <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Invoice No</th>
                   <th class="!border-b-teal-500 !bg-teal-100 !text-teal-500">Invoice Vendor No</th>
@@ -92,6 +93,25 @@
                   v-for="(inv, idx) in pendingVatRows"
                   :key="'pv-' + idx + '-' + (inv.invoiceNo || '')"
                 >
+                  <!-- VAT-06: Action column with Submit (go to form) + Reject -->
+                  <td class="text-center">
+                    <div class="flex items-center justify-center gap-2">
+                      <button
+                        class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px] tooltip"
+                        data-tip="Submit ke Pajak Express"
+                        @click="goSubmitFromInvoice(inv)"
+                      >
+                        <i class="ki-filled ki-send !text-base"></i>
+                      </button>
+                      <button
+                        class="btn btn-outline btn-icon btn-danger w-[32px] h-[32px] tooltip"
+                        data-tip="Reject to Vendor"
+                        @click="handleRejectInvoice(inv)"
+                      >
+                        <i class="ki-filled ki-cross-circle !text-base"></i>
+                      </button>
+                    </div>
+                  </td>
                   <td>
                     <span
                       :class="
@@ -396,6 +416,77 @@
             />
           </div>
         </template>
+      </div>
+    </div>
+
+    <!-- VAT-05: Override Remark Modal (wajib diisi saat Mismatch/UNCREDITED override) -->
+    <div
+      v-if="showRemarkModal"
+      class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[60]"
+      @click.self="showRemarkModal = false"
+    >
+      <div class="bg-white rounded-xl shadow-2xl w-[480px] max-w-[90vw]">
+        <!-- Modal Header -->
+        <div class="flex justify-between items-center px-6 py-4 border-b border-amber-200 bg-amber-50 rounded-t-xl">
+          <div>
+            <h3 class="text-lg font-semibold text-amber-800 flex items-center gap-2">
+              <i class="ki-filled ki-information-5 text-amber-500"></i>
+              Manual Override — Audit Remark
+            </h3>
+            <p class="text-xs text-amber-600 mt-0.5">FR-TR-VAT-05: Wajib diisi saat melakukan override Mismatch/Uncredited</p>
+          </div>
+          <button @click="showRemarkModal = false" class="text-gray-400 hover:text-gray-600 transition-colors">
+            <i class="ki-filled ki-cross text-xl"></i>
+          </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="px-6 py-5">
+          <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+            <p class="text-sm text-amber-700">
+              <strong>Faktur:</strong> {{ remarkTargetItem?.noFakturPajak || '—' }}<br />
+              <strong>Status Override:</strong>
+              <span class="font-semibold text-amber-700">{{ remarkTargetStatus }}</span>
+            </p>
+          </div>
+
+          <label class="form-label text-sm font-semibold text-gray-700 mb-1 flex items-center gap-1">
+            Remark Audit
+            <span class="text-red-500">*</span>
+          </label>
+          <textarea
+            v-model="overrideRemark"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-300 focus:border-amber-400 outline-none resize-none"
+            :class="{ 'border-red-400 ring-1 ring-red-300': remarkSubmitAttempted && !overrideRemark.trim() }"
+            rows="4"
+            maxlength="500"
+            placeholder="Jelaskan alasan override (selisih desimal, konfirmasi vendor, dsb.)..."
+          ></textarea>
+          <p v-if="remarkSubmitAttempted && !overrideRemark.trim()" class="text-red-500 text-xs mt-1">
+            Remark wajib diisi sebelum melanjutkan override.
+          </p>
+          <p class="text-xs text-gray-400 text-right mt-1">{{ overrideRemark.length }}/500</p>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="flex justify-end gap-3 px-6 py-4 border-t border-gray-100">
+          <button
+            type="button"
+            class="btn btn-light"
+            @click="showRemarkModal = false"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="btn btn-warning"
+            :disabled="confirmLoading"
+            @click="submitOverrideWithRemark"
+          >
+            <span v-if="confirmLoading" class="loading loading-spinner loading-xs mr-1"></span>
+            Konfirmasi Override
+          </button>
+        </div>
       </div>
     </div>
 
@@ -1206,6 +1297,27 @@ async function runPrepopulateBulk() {
 async function fetchPendingVat() {
   loadingPendingVat.value = true
   try {
+    const y = pjYear.value.replace(/\D/g, '')
+    if (y.length === 4 && pjMonth.value) {
+      try {
+        const response = await vatApi.get('/vat/vat-reconciliation', {
+          params: {
+            source: 'PajakExpress',
+            periode: `${pjMonth.value}/${y}`,
+            page: 1,
+            limit: 1000,
+          },
+        })
+        const rawResult = response.data.result
+        const rawList = Array.isArray(rawResult) ? rawResult : rawResult?.content || []
+        vatData.value = (Array.isArray(rawList) ? rawList : []).map((row: unknown) =>
+          normalizeVatApiRow(row),
+        )
+      } catch (pxErr) {
+        console.warn('Failed to load PajakExpress data for matching:', pxErr)
+      }
+    }
+
     const params: any = {
       page: pendingVatPage.value,
       pageSize: pendingVatLimit.value,
@@ -1398,12 +1510,20 @@ const getQueueMatchStatus = (inv: InvoiceVatQueueRow) => {
     return 'Not Matched'
   }
   const matched = vatData.value.find(
-    (item) => item.invoiceNo === inv.invoiceNo || item.invoiceNo === inv.documentNo,
+    (item) =>
+      (item.noFakturPajak && (item.noFakturPajak === inv.invoiceNo || item.noFakturPajak === inv.documentNo)) ||
+      (item.invoiceNo && (item.invoiceNo === inv.invoiceNo || item.invoiceNo === inv.documentNo)),
   )
   if (!matched) {
     return 'Not Matched'
   }
-  return matched.statusApVsFp || 'Match'
+  
+  const dppMatched = Math.abs((matched.dpp || 0) - (inv.dpp || 0)) < 1
+  const ppnMatched = Math.abs((matched.ppn || 0) - (inv.vatAmount || 0)) < 1
+  if (dppMatched && ppnMatched) {
+    return 'Match'
+  }
+  return 'Mismatch'
 }
 
 const getQueueMatchStatusClass = (status: string) => {
@@ -1576,6 +1696,13 @@ const handleDownloadPdf = async (item: VATReconciliationData) => {
   }
 }
 
+const showRemarkModal = ref(false)
+const overrideRemark = ref('')
+const remarkTargetItem = ref<VATReconciliationData | null>(null)
+const remarkTargetStatus = ref<'CREDITED' | 'UNCREDITED'>('UNCREDITED')
+const remarkSubmitAttempted = ref(false)
+let pendingRemarkAction: ((remark: string) => Promise<void>) | null = null
+
 const showConfirmModal = ref(false)
 const confirmType = ref('confirm')
 const confirmTitle = ref('')
@@ -1618,58 +1745,101 @@ const handleCreditAction = async (
     return
   }
 
-  const actionText =
-    targetStatus === 'CREDITED' ? 'credit (mengkreditkan)' : 'uncredit (tidak mengkreditkan)'
+  // VAT-05: If status is UNCREDITED (Mismatch override), require Override Remark first
+  if (targetStatus === 'UNCREDITED') {
+    remarkTargetItem.value = item
+    remarkTargetStatus.value = targetStatus
+    overrideRemark.value = ''
+    remarkSubmitAttempted.value = false
+    pendingRemarkAction = async (remark: string) => {
+      await executeCreditAction(item, targetStatus, masa, tahun, remark)
+    }
+    showRemarkModal.value = true
+    return
+  }
 
-  confirmType.value = targetStatus === 'CREDITED' ? 'confirm' : 'warning'
-  confirmTitle.value = targetStatus === 'CREDITED' ? 'Post Credit?' : 'Post Uncredit?'
-  confirmText.value = `Apakah Anda yakin ingin melakukan ${actionText} untuk Faktur No: ${item.noFakturPajak}?`
+  // CREDITED: proceed with standard confirm dialog
+  confirmType.value = 'confirm'
+  confirmTitle.value = 'Post Credit?'
+  confirmText.value = `Apakah Anda yakin ingin melakukan credit (mengkreditkan) untuk Faktur No: ${item.noFakturPajak}?`
   confirmSubmitText.value = 'Yes'
   confirmCancelText.value = 'Cancel'
 
   pendingConfirmAction = async () => {
-    try {
-      const response = await postVatInUpload({
-        payload: {
-          fgPermintaan: 2,
-          konfirmasiFakturMasukan: {
-            konfirmasiPengkreditan: targetStatus,
-            nomorFaktur: item.noFakturPajak,
-            masaPajak: masa,
-            tahunPajak: tahun,
-          },
-        },
-        npwpPenjual: item.npwpVendor || undefined,
-        namaVendor: item.vendorName || undefined,
-        dpp: item.dpp > 0 ? item.dpp : undefined,
-        ppn: item.ppn > 0 ? item.ppn : undefined,
-        tanggalFaktur: item.tglFakturPajak
-          ? new Date(item.tglFakturPajak).toISOString().split('T')[0]
-          : new Date().toISOString().split('T')[0],
-      })
-
-      const payload = response?.data?.result?.content || response?.data?.result || response?.data
-      if (payload?.status === 'error' || response?.data?.result?.isError) {
-        throw new Error(payload?.message || 'Status update failed.')
-      }
-
-      showNotification(
-        targetStatus === 'CREDITED' ? 'Successfully Credited' : 'Successfully Uncredited',
-        `Tax Invoice ${item.noFakturPajak} has been successfully updated to ${targetStatus}!`,
-        'success',
-      )
-      await fetchVatData()
-    } catch (error: any) {
-      console.error('Error setting credit status:', error)
-      const msg =
-        error.response?.data?.result?.content?.message ||
-        error.response?.data?.message ||
-        error.message ||
-        'Update failed.'
-      showNotification('Error', 'Gagal memperbarui status: ' + msg, 'error')
-    }
+    await executeCreditAction(item, targetStatus, masa, tahun, undefined)
   }
   showConfirmModal.value = true
+}
+
+const submitOverrideWithRemark = async () => {
+  remarkSubmitAttempted.value = true
+  if (!overrideRemark.value.trim()) return
+
+  confirmLoading.value = true
+  try {
+    if (pendingRemarkAction) {
+      await pendingRemarkAction(overrideRemark.value.trim())
+    }
+    showRemarkModal.value = false
+  } finally {
+    confirmLoading.value = false
+  }
+}
+
+const executeCreditAction = async (
+  item: VATReconciliationData,
+  targetStatus: 'CREDITED' | 'UNCREDITED',
+  masa: string,
+  tahun: string,
+  remark?: string,
+) => {
+  try {
+    const matchedInv = pendingVatRows.value.find(
+      (x) => x.invoiceNo === item.noFakturPajak || x.documentNo === item.noFakturPajak,
+    )
+    const invoiceIdVal = matchedInv ? matchedInv.id : 0
+
+    const response = await postVatInUpload({
+      payload: {
+        fgPermintaan: 2,
+        konfirmasiFakturMasukan: {
+          konfirmasiPengkreditan: targetStatus,
+          nomorFaktur: item.noFakturPajak,
+          masaPajak: masa,
+          tahunPajak: tahun,
+        },
+      },
+      invoiceId: invoiceIdVal,
+      npwpPenjual: item.npwpVendor || undefined,
+      namaVendor: item.vendorName || undefined,
+      dpp: item.dpp > 0 ? item.dpp : undefined,
+      ppn: item.ppn > 0 ? item.ppn : undefined,
+      tanggalFaktur: item.tglFakturPajak
+        ? new Date(item.tglFakturPajak).toISOString().split('T')[0]
+        : new Date().toISOString().split('T')[0],
+      overrideRemark: remark,
+    })
+
+    const payload = response?.data?.result?.content || response?.data?.result || response?.data
+    if (payload?.status === 'error' || response?.data?.result?.isError) {
+      throw new Error(payload?.message || 'Status update failed.')
+    }
+
+    showNotification(
+      targetStatus === 'CREDITED' ? 'Successfully Credited' : 'Successfully Uncredited',
+      `Tax Invoice ${item.noFakturPajak} has been successfully updated to ${targetStatus}!`,
+      'success',
+    )
+    await fetchVatData()
+  } catch (error: any) {
+    console.error('Error setting credit status:', error)
+    const msg =
+      error.response?.data?.result?.content?.message ||
+      error.response?.data?.message ||
+      error.message ||
+      'Update failed.'
+    showNotification('Error', 'Gagal memperbarui status: ' + msg, 'error')
+  }
 }
 
 const toggleStatusDropdown = () => {
