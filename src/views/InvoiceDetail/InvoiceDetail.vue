@@ -123,7 +123,7 @@
       :statusCode="detailInvoice?.header.statusCode || detailInvoiceNonPo?.header.statusCode || -1"
       @afterClose="goToList"
     />
-    <SuccessRejectModal @afterClose="goToList" />
+    <SuccessRejectModal ref="successRejectModalRef" @afterClose="goToList" />
     <UpdatePaymentStatusModal :isLoading="isUpdatingPaymentStatus" />
     <SapSyncRequiredModal />
   </div>
@@ -160,6 +160,7 @@ import {
   shouldUsePostApproval,
   isApiSuccess,
 } from '@/composables/useInvoiceWorkflow'
+import SuccessRejectModal from './InvoiceDetail/SuccessRejectModal.vue'
 import UpdatePaymentStatusModal from './InvoiceDetail/PaymentStatusDetail/UpdatePaymentStatusModal.vue'
 import SapSyncRequiredModal from './InvoiceDetail/PaymentStatusDetail/SapSyncRequiredModal.vue'
 
@@ -186,9 +187,8 @@ const RejectVerification = defineAsyncComponent(
 const SuccessVerifModal = defineAsyncComponent(
   () => import('./InvoiceDetail/SuccessVerifModal.vue'),
 )
-const SuccessRejectModal = defineAsyncComponent(
-  () => import('./InvoiceDetail/SuccessRejectModal.vue'),
-)
+
+const successRejectModalRef = ref<InstanceType<typeof SuccessRejectModal> | null>(null)
 
 const activeStep = ref<string>('')
 const activeTabDetail = ref<string>('data')
@@ -1184,40 +1184,39 @@ const goVerif = async () => {
   }
 }
 
-const goReject = (reason: string) => {
+const hideRejectVerificationModal = () => {
+  const el = document.querySelector('#reject_verification_modal') as HTMLElement
+  if (!el) return
+  const modal = KTModal.getInstance(el)
+  modal?.hide()
+}
+
+const showSuccessRejectModal = () => {
+  hideRejectVerificationModal()
+  successRejectModalRef.value?.show()
+}
+
+const goReject = async (reason: string) => {
   verificationApi.isRejectLoading = true
-  if (route.query.invoiceType === 'no_po') {
-    verificationApi
-      .postRejectNonPo({
-        invoiceUId: form.value.invoiceUId,
-        notes: reason,
-      })
-      .then((response) => {
-        if (response.statusCode === 200) {
-          const idModal = document.querySelector('#success_reject_modal')
-          const modal = KTModal.getInstance(idModal as HTMLElement)
-          modal.show()
-        }
-      })
-      .finally(() => {
-        verificationApi.isRejectLoading = false
-      })
-  } else {
-    verificationApi
-      .postReject({
-        invoiceUId: form.value.invoiceUId,
-        notes: reason,
-      })
-      .then((response) => {
-        if (response.statusCode === 200) {
-          const idModal = document.querySelector('#success_reject_modal')
-          const modal = KTModal.getInstance(idModal as HTMLElement)
-          modal.show()
-        }
-      })
-      .finally(() => {
-        verificationApi.isRejectLoading = false
-      })
+  try {
+    const response =
+      route.query.invoiceType === 'no_po'
+        ? await verificationApi.postRejectNonPo({
+            invoiceUId: form.value.invoiceUId,
+            notes: reason,
+          })
+        : await verificationApi.postReject({
+            invoiceUId: form.value.invoiceUId,
+            notes: reason,
+          })
+
+    if (isApiSuccess(response)) {
+      showSuccessRejectModal()
+    }
+  } catch (err) {
+    console.error('Reject invoice failed:', err)
+  } finally {
+    verificationApi.isRejectLoading = false
   }
 }
 

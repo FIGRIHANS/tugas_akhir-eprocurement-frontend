@@ -295,7 +295,8 @@
           />
         </div>
         <DetailVerificationModal type="po" @loadDetail="loadData" @setClearId="viewDetailId = ''" />
-        <UploadModal @uploaded="onUploaded" />
+        <UploadModal @upload-success="onUploadSuccess" />
+        <FtpUploadSuccessModal ref="uploadSuccessModalRef" @closed="onUploadSuccessClosed" />
         <UploadViewerModal :data="viewerData" />
       </div>
     </div>
@@ -322,6 +323,7 @@ import moment from 'moment'
 import { cloneDeep } from 'lodash'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import { KTModal } from '@/metronic/core'
+import FtpUploadSuccessModal from './FtpUploadSuccessModal.vue'
 import type { FtpUploadViewerData } from './FtpUploadViewerModal.vue'
 import type { FtpUploadListItem, FtpUploadOriginalFileNames } from './types/ftpUpload'
 import {
@@ -961,6 +963,26 @@ const openUploadModal = () => {
   const el = document.querySelector('#ftp_upload_modal')
   const modal = KTModal.getInstance(el as HTMLElement)
   if (modal) modal.show()
+}
+
+type UploadSuccessPayload = {
+  uid?: string | null
+  preview?: Record<string, unknown>
+  originalFileNames?: FtpUploadOriginalFileNames
+}
+
+const uploadSuccessModalRef = ref<InstanceType<typeof FtpUploadSuccessModal> | null>(null)
+const pendingUploadPayload = ref<UploadSuccessPayload | null>(null)
+
+const onUploadSuccess = (payload: UploadSuccessPayload) => {
+  pendingUploadPayload.value = payload
+  uploadSuccessModalRef.value?.show()
+}
+
+const onUploadSuccessClosed = () => {
+  if (!pendingUploadPayload.value) return
+  onUploaded(pendingUploadPayload.value)
+  pendingUploadPayload.value = null
 }
 
 const onUploaded = (
