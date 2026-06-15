@@ -139,10 +139,12 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-if="paginatedUploadList.length === 0">
+                <TableListSkeleton v-if="isLoadingList" :columns="6" :rows="8" />
+                <tr v-else-if="paginatedUploadList.length === 0">
                   <td colspan="6" class="text-center">No data found.</td>
                 </tr>
                 <tr
+                  v-else
                   v-for="(d, idx) in paginatedUploadList"
                   :key="String(d.invoiceUId) || `upload-${idx}`"
                 >
@@ -211,10 +213,11 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-if="list.length === 0">
+                <TableListSkeleton v-if="isLoadingList" :columns="columns.length" :rows="8" />
+                <tr v-else-if="list.length === 0">
                   <td :colspan="columns.length" class="text-center">No data found.</td>
                 </tr>
-                <template v-for="(parent, index) in list" :key="index">
+                <template v-else v-for="(parent, index) in list" :key="index">
                   <tr>
                     <td class="flex items-center gap-[24px]">
                       <button
@@ -292,7 +295,8 @@
           />
         </div>
         <DetailVerificationModal type="po" @loadDetail="loadData" @setClearId="viewDetailId = ''" />
-        <UploadModal @uploaded="onUploaded" />
+        <UploadModal @upload-success="onUploadSuccess" />
+        <FtpUploadSuccessModal ref="uploadSuccessModalRef" @closed="onUploadSuccessClosed" />
         <UploadViewerModal :data="viewerData" />
       </div>
     </div>
@@ -304,6 +308,7 @@ import { ref, reactive, computed, onMounted, watch, defineAsyncComponent } from 
 import { useRouter } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
+import TableListSkeleton from '@/components/skeleton/TableListSkeleton.vue'
 import type { filterListTypes } from '../invoice/types/invoiceList'
 import LPagination from '@/components/pagination/LPagination.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
@@ -318,6 +323,7 @@ import moment from 'moment'
 import { cloneDeep } from 'lodash'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
 import { KTModal } from '@/metronic/core'
+import FtpUploadSuccessModal from './FtpUploadSuccessModal.vue'
 import type { FtpUploadViewerData } from './FtpUploadViewerModal.vue'
 import type { FtpUploadListItem, FtpUploadOriginalFileNames } from './types/ftpUpload'
 import {
@@ -373,6 +379,7 @@ const filteredPayload = ref([])
 const filterChild = ref(null)
 const viewDetailId = ref('')
 const isSyncLoading = ref(false)
+const isLoadingList = ref(true)
 const FTP_INVOICE_SOURCE = 3
 const DRAFT_STATUS_CODE = 0
 const DRAFT_STATUS_NAME = 'draft'
@@ -958,6 +965,26 @@ const openUploadModal = () => {
   if (modal) modal.show()
 }
 
+type UploadSuccessPayload = {
+  uid?: string | null
+  preview?: Record<string, unknown>
+  originalFileNames?: FtpUploadOriginalFileNames
+}
+
+const uploadSuccessModalRef = ref<InstanceType<typeof FtpUploadSuccessModal> | null>(null)
+const pendingUploadPayload = ref<UploadSuccessPayload | null>(null)
+
+const onUploadSuccess = (payload: UploadSuccessPayload) => {
+  pendingUploadPayload.value = payload
+  uploadSuccessModalRef.value?.show()
+}
+
+const onUploadSuccessClosed = () => {
+  if (!pendingUploadPayload.value) return
+  onUploaded(pendingUploadPayload.value)
+  pendingUploadPayload.value = null
+}
+
 const onUploaded = (
   payload:
     | {
@@ -991,6 +1018,7 @@ const onUploaded = (
 }
 
 const callList = async () => {
+  isLoadingList.value = true
   try {
     if (activeTab.value === 'upload') {
       await fetchFtpUploads()
@@ -1012,6 +1040,8 @@ const callList = async () => {
     console.error('Failed to load FTP invoice list:', error)
     sourceList.value = []
     ftpDataTotal.value = 0
+  } finally {
+    isLoadingList.value = false
   }
 }
 

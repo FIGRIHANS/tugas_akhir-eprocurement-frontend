@@ -52,6 +52,18 @@ export function isEditableInvoiceStatus(status: number | string | null | undefin
   return !Number.isNaN(code) && (code === -1 || code === 0 || code === 5)
 }
 
+/** Profile ID for invoice submitter (FTP / vendor submission flow). */
+export const SUBMITTOR_PROFILE_ID = 3200
+
+export function isSubmittorProfile(
+  profileId: number | string | null | undefined,
+  isVendor = false,
+): boolean {
+  if (isVendor) return true
+  const id = Number(profileId)
+  return !Number.isNaN(id) && id === SUBMITTOR_PROFILE_ID
+}
+
 /** Submission flow (create / edit draft) vs read-only detail view. */
 export function isInvoiceSubmissionFlow(
   routeType: InvoiceRouteType | null | undefined,

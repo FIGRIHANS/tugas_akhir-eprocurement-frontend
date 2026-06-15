@@ -160,8 +160,7 @@
         <div class="ftp-modal__hint">
           <i class="ki-duotone ki-information-2"></i>
           <span>
-            Pilih vendor terlebih dahulu, lalu unggah dokumen invoice dan faktur pajak. Proses OCR
-            otomatis berjalan di backend (30–60 detik).
+            Pilih vendor terlebih dahulu, lalu unggah dokumen invoice dan faktur pajak.
           </span>
         </div>
       </div>
@@ -224,7 +223,7 @@ type VendorOption = VendorTypes
 
 const emits = defineEmits<{
   (
-    e: 'uploaded',
+    e: 'upload-success',
     payload: {
       uid: string | null
       preview?: Record<string, unknown>
@@ -243,6 +242,19 @@ const taxName = ref<string>('')
 const referenceName = ref<string>('')
 const isLoading = ref(false)
 const selectedVendorSapCode = ref<string>('')
+
+const hideUploadModal = () =>
+  new Promise<void>((resolve) => {
+    const el = document.querySelector('#ftp_upload_modal') as HTMLElement
+    const modal = KTModal.getInstance(el)
+    if (!modal) {
+      resolve()
+      return
+    }
+
+    modal.on('hidden', () => resolve())
+    modal.hide()
+  })
 
 const vendorList = computed(() => invoiceMasterApi.vendorList)
 
@@ -395,13 +407,10 @@ const upload = async () => {
       preview.referenceBlobPath = parsed.files.reference.blobPath || null
     }
 
-    emits('uploaded', { uid, preview, originalFileNames: localFileNames })
-    alert('Upload berhasil, sedang memproses OCR…')
-
     resetForm()
-    const el = document.querySelector('#ftp_upload_modal') as HTMLElement
-    const modal = KTModal.getInstance(el)
-    if (modal) modal.hide()
+    await hideUploadModal()
+
+    emits('upload-success', { uid, preview, originalFileNames: localFileNames })
   } catch (err: unknown) {
     console.error('Upload failed', err)
     const error = err as { response?: { data?: { result?: { message?: string } } }; message?: string }

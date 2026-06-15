@@ -1,4 +1,5 @@
 import invoiceHttp from '@/core/utils/invoiceApi'
+import { isEditableInvoiceStatus } from '@/core/utils/invoiceSubmissionRoute'
 import type { responseFileTypes } from '@/views/invoice/types/invoiceDocument'
 import type { formTypes } from '@/views/invoice/types/invoiceAddWrapper'
 import type { ListPoTypes } from '@/stores/views/invoice/types/submission'
@@ -777,6 +778,16 @@ const applyFtpCalculationToForm = (form: formTypes, calculation: Record<string, 
   }
 }
 
+const shouldApplyFtpContextStatus = (
+  currentStatus: number | string | null | undefined,
+  contextStatus: number,
+): boolean => {
+  const current = Number(currentStatus)
+  if (Number.isNaN(current) || current === -1) return true
+  if (!isEditableInvoiceStatus(current)) return false
+  return isEditableInvoiceStatus(contextStatus)
+}
+
 /** Summary fields from `content.invoiceListItem` (list-invoice shape) for preview display. */
 export const applyFtpInvoiceListItemToForm = (
   form: formTypes,
@@ -789,7 +800,12 @@ export const applyFtpInvoiceListItemToForm = (
   if (listItem.invoiceTypeCode != null) form.invoiceType = String(listItem.invoiceTypeCode)
   if (listItem.invoiceTypeName) form.invoiceTypeName = listItem.invoiceTypeName
   if (listItem.invoiceDPCode != null) form.invoiceDp = String(listItem.invoiceDPCode)
-  if (listItem.statusCode != null) form.status = Number(listItem.statusCode)
+  if (listItem.statusCode != null) {
+    const contextStatus = Number(listItem.statusCode)
+    if (shouldApplyFtpContextStatus(form.status, contextStatus)) {
+      form.status = contextStatus
+    }
+  }
   if (listItem.invoiceSourceName) form.invoiceSource = listItem.invoiceSourceName
 
   if (listItem.companyCode) {
@@ -853,7 +869,12 @@ export const applyFtpSyncDraftToForm = (
   form.invoiceUId = String(
     context.savedInvoiceUId || header.invoiceUId || context.ftpUploadUId || '',
   )
-  if (header.statusCode != null) form.status = Number(header.statusCode)
+  if (header.statusCode != null) {
+    const contextStatus = Number(header.statusCode)
+    if (shouldApplyFtpContextStatus(form.status, contextStatus)) {
+      form.status = contextStatus
+    }
+  }
   if (header.invoiceTypeCode != null) form.invoiceType = String(header.invoiceTypeCode)
   if (header.invoiceTypeName) form.invoiceTypeName = String(header.invoiceTypeName)
   if (header.invoiceDPCode != null) form.invoiceDp = String(header.invoiceDPCode)

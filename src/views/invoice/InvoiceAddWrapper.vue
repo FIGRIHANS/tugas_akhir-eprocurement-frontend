@@ -11,14 +11,15 @@
       :hide-workflow-tabs="shouldHideWorkflowTabs"
       class="-mx-[24px]"
     />
-    <RejectedInvoiceStatusCard v-if="isSubmissionFormMode" />
+    <RejectedInvoiceStatusCard v-if="isSubmissionFormMode && !isLoadingContent" />
     <div>
-      <Transition mode="out-in">
+      <InvoiceContentSkeleton v-if="isLoadingContent" />
+      <Transition v-else mode="out-in">
         <component :is="contentComponent" />
       </Transition>
 
       <div
-        v-if="tabNow === 'paymentStatus'"
+        v-if="!isLoadingContent && tabNow === 'paymentStatus'"
         class="flex justify-between items-center mt-[24px] gap-3"
       >
         <button class="btn btn-outline btn-primary" @click="goBack">
@@ -35,7 +36,7 @@
         </button>
       </div>
       <div
-        v-else-if="isSubmissionFormMode && checkIsNonPo()"
+        v-else-if="!isLoadingContent && isSubmissionFormMode && checkIsNonPo()"
         class="flex align-items-center justify-between gap-[8px] mt-[24px]"
       >
         <div class="flex-1 flex gap-[8px]">
@@ -43,7 +44,12 @@
             <i class="ki-filled ki-arrow-left"></i>
             Back
           </button>
-          <button class="btn btn-outline btn-primary" :disabled="isSubmit || !canSubmitInvoice" @click="goSaveDraft">
+          <button
+            v-if="canSubmitInvoice"
+            class="btn btn-outline btn-primary"
+            :disabled="isSubmit || !canSubmitInvoice"
+            @click="goSaveDraft"
+          >
             Save as Draft
             <i class="ki-duotone ki-bookmark"></i>
           </button>
@@ -60,6 +66,7 @@
           </button>
 
           <button
+            v-if="canSubmitInvoice"
             class="btn btn-primary"
             @click="goNext"
             :disabled="
@@ -77,10 +84,15 @@
         </div>
       </div>
       <div
-        v-else-if="isSubmissionFormMode && !checkIsNonPo()"
+        v-else-if="!isLoadingContent && isSubmissionFormMode && !checkIsNonPo()"
         class="flex justify-between items-center gap-[8px] mt-[24px]"
       >
-        <button class="btn btn-outline btn-primary" :disabled="isSubmit || !canSubmitInvoice" @click="goSaveDraft">
+        <button
+          v-if="canSubmitInvoice"
+          class="btn btn-outline btn-primary"
+          :disabled="isSubmit || !canSubmitInvoice"
+          @click="goSaveDraft"
+        >
           Save as Draft
           <i class="ki-duotone ki-bookmark"></i>
         </button>
@@ -90,6 +102,7 @@
             Back
           </button>
           <button
+            v-if="canSubmitInvoice"
             class="btn btn-primary"
             :disabled="isSubmit || !canSubmitInvoice || (tabNow === 'data' && !isAlternativePayeeFilled())"
             @click="goNext"
@@ -100,9 +113,9 @@
           </button>
         </div>
       </div>
-      <div v-else class="flex justify-end items-center mt-[24px] gap-3">
+      <div v-else-if="!isLoadingContent" class="flex justify-between items-center mt-[24px] gap-3">
         <button
-          v-if="tabNow !== 'preview' || checkInvoiceView() || checkInvoiceNonPoView()"
+          v-if="showViewBackButton"
           class="btn btn-outline btn-primary"
           :disabled="isSubmit"
           @click="goBack"
@@ -110,38 +123,45 @@
           <i class="ki-filled ki-arrow-left"></i>
           Back
         </button>
+        <div v-else aria-hidden="true"></div>
 
-        <button
-          v-if="tabNow !== 'preview' || checkInvoiceView() || checkInvoiceNonPoView()"
-          class="btn btn-primary"
-          @click="goNext"
-        >
-          Next
-          <i class="ki-duotone ki-black-right"></i>
-        </button>
+        <div class="flex items-center justify-end gap-3">
+          <button
+            v-if="canSubmitInvoice && tabNow !== 'preview'"
+            class="btn btn-primary"
+            :disabled="
+              isSubmit ||
+              (!checkInvoiceView() &&
+                !checkInvoiceNonPoView() &&
+                (!canSubmitInvoice ||
+                  (tabNow === 'information' && !checkInvoiceInformation()) ||
+                  (tabNow === 'data' && !isAlternativePayeeFilled())))
+            "
+            @click="goNext"
+          >
+            Next
+            <i class="ki-duotone ki-black-right"></i>
+          </button>
 
-        <button
-          v-if="tabNow !== 'preview' && !checkInvoiceView() && !checkInvoiceNonPoView()"
-          class="btn btn-primary"
-          :disabled="
-            isSubmit ||
-            !canSubmitInvoice ||
-            (tabNow === 'information' && !checkInvoiceInformation()) ||
-            (tabNow === 'data' && !isAlternativePayeeFilled())
-          "
-          @click="goNext"
-        >
-          Next
-          <i class="ki-duotone ki-black-right"></i>
-        </button>
-        <button
-          v-if="tabNow === 'preview' && !checkInvoiceView() && !checkInvoiceNonPoView()"
-          class="btn btn-primary"
-          :disabled="isSubmit"
-        >
-          Save as PDF
-          <iconPDF />
-        </button>
+          <button
+            v-if="canSubmitInvoice && tabNow === 'preview'"
+            class="btn btn-primary"
+            :disabled="isSubmit || !canSubmitInvoice"
+            @click="goNext"
+          >
+            Submit
+            <i class="ki-duotone ki-paper-plane"></i>
+          </button>
+
+          <button
+            v-if="tabNow === 'preview' && !checkInvoiceView() && !checkInvoiceNonPoView()"
+            class="btn btn-primary"
+            :disabled="isSubmit"
+          >
+            Save as PDF
+            <iconPDF />
+          </button>
+        </div>
       </div>
     </div>
     <ModalSuccess :isDraft="isClickDraft" @afterClose="goToList" />
@@ -170,6 +190,7 @@ import Breadcrumb from '@/components/BreadcrumbView.vue'
 import StepperStatus from '../../components/stepperStatus/StepperStatus.vue'
 import TabInvoice from '@/components/invoice/TabInvoice.vue'
 import RejectedInvoiceStatusCard from './InvoiceAddWrapper/RejectedInvoiceStatusCard.vue'
+import InvoiceContentSkeleton from './InvoiceAddWrapper/InvoiceContentSkeleton.vue'
 import iconPDF from '@/components/icons/iconPDF.vue'
 import { KTModal } from '@/metronic/core'
 import { useCheckEmpty } from '@/composables/validation'
@@ -241,6 +262,7 @@ const router = useRouter()
 const route = useRoute()
 const tabNow = ref<string>('data')
 const isSubmit = ref<boolean>(false)
+const isLoadingContent = ref<boolean>(true)
 const isCheckBudget = ref<boolean>(false)
 const isClickDraft = ref<boolean>(false)
 
@@ -399,6 +421,13 @@ const isSubmissionFormMode = computed(() => {
 
 const canSubmitInvoice = computed(() => isEditableInvoiceStatus(form.status))
 
+const showViewBackButton = computed(() => {
+  if (canSubmitInvoice.value) {
+    return tabNow.value !== 'preview' || checkInvoiceView() || checkInvoiceNonPoView()
+  }
+  return true
+})
+
 const isSavedInvoiceEditMode = computed(() => {
   return !!route.query.invoice && isSubmissionFormMode.value
 })
@@ -521,14 +550,19 @@ const loadInvoiceFromRoute = async () => {
   const invoiceId = route.query.invoice?.toString() || ''
   const routeType = route.query.type?.toString() || 'po'
 
+  isLoadingContent.value = true
   applyRouteUiDefaults()
 
-  if (!invoiceId) return
+  if (!invoiceId) {
+    isLoadingContent.value = false
+    return
+  }
 
   const isCasDummyView = routeType === 'non-po-view' && route.query.casType === 'cas'
   if (isCasDummyView) {
     setDummyCasView()
     tabNow.value = 'preview'
+    isLoadingContent.value = false
     return
   }
 
@@ -606,10 +640,13 @@ const loadInvoiceFromRoute = async () => {
     if (isFtpSubmissionEntry() && isSavedDraftStatus(form.status)) {
       enableDraftTabNavigation()
     }
+  } finally {
+    isLoadingContent.value = false
   }
 }
 
 const loadInvoiceDetailForPaymentStatus = async () => {
+  isLoadingContent.value = true
   try {
     if (!route.query.invoice) {
       console.error('Invoice ID not found in route')
@@ -649,6 +686,8 @@ const loadInvoiceDetailForPaymentStatus = async () => {
     }
   } catch (error) {
     console.error('Error loading invoice detail for payment status:', error)
+  } finally {
+    isLoadingContent.value = false
   }
 }
 
@@ -1746,6 +1785,7 @@ const setAfterResponsePost = async (response: {
     await markFtpUploadDoneIfNeeded(response)
     syncFormStatusAfterSubmit(response.result?.content)
     setStepperStatus()
+    normalizeRouteForLoadedStatus()
 
     const idModal = document.querySelector('#success_invoice_modal')
     const modal = KTModal.getInstance(idModal as HTMLElement)
