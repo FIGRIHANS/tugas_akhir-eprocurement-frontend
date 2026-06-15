@@ -182,12 +182,23 @@
 
           <!-- Section 3: Goods / Services -->
           <div class="card p-[20px]">
-            <div class="flex items-center justify-between mb-[16px]">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-[16px]">
               <h3 class="text-lg font-semibold m-0">Goods / Services</h3>
-              <button type="button" class="btn btn-primary" @click="openAddItemModal()">
-                <i class="ki-filled ki-plus-circle !text-base"></i>
-                Add Item
-              </button>
+              <div class="flex flex-wrap items-center gap-2">
+                <div class="relative">
+                  <input type="text" class="input w-[240px] pl-8" v-model="grSearchNo" placeholder="GR Document No (e.g. GR-...)" @keyup.enter="searchGr" />
+                  <i class="ki-filled ki-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                </div>
+                <button type="button" class="btn btn-primary" :disabled="isSearchingGr" @click="searchGr">
+                  <span v-if="isSearchingGr" class="loading loading-spinner loading-sm"></span>
+                  <i v-else class="ki-filled ki-search !text-base"></i>
+                  Search GR
+                </button>
+                <button type="button" class="btn btn-primary" @click="openAddItemModal()">
+                  <i class="ki-filled ki-plus-circle !text-base"></i>
+                  Add Item
+                </button>
+              </div>
             </div>
             <div class="overflow-x-auto -mx-[20px]">
               <table class="table align-middle text-sm w-full">
@@ -346,7 +357,7 @@
               <div class="flex flex-col gap-1">
                 <label class="text-xs text-gray-500">Item Code</label>
                 <select class="select w-full" v-model="currentItem.kdBrgJasa">
-                  <option value="000000">000000-Goods</option>
+                  <option value="000000">000000 - Generic Goods/Services</option>
                 </select>
               </div>
 
@@ -360,8 +371,16 @@
               <div class="flex flex-col gap-1">
                 <label class="text-xs text-gray-500">Unit of Measurement</label>
                 <select class="select w-full" v-model="currentItem.satuanBrgJasa">
-                  <option value="UM.0001">UM.0001</option>
-                  <option value="UM.0002">UM.0002</option>
+                  <option value="UM.0021">UM.0021 - Piece (Pcs)</option>
+                  <option value="UM.0018">UM.0018 - Unit</option>
+                  <option value="UM.0019">UM.0019 - Set</option>
+                  <option value="UM.0003">UM.0003 - Kilogram (Kg)</option>
+                  <option value="UM.0007">UM.0007 - Liter</option>
+                  <option value="UM.0024">UM.0024 - Bulan</option>
+                  <option value="UM.0026">UM.0026 - Hari</option>
+                  <option value="UM.0027">UM.0027 - Jam</option>
+                  <option value="UM.0001">UM.0001 - Metrik Ton</option>
+                  <option value="UM.0033">UM.0033 - Lainnya</option>
                 </select>
               </div>
 
@@ -480,6 +499,7 @@ import { postVatOutCreate } from '@/core/utils/vatPxInvoiceApi'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import ModalNotification from '@/components/modal/ModalNotification.vue'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
+import GoodsReceiptService from '@/services/goodsReceipt.service'
 
 const router = useRouter()
 const isSubmitting = ref(false)
@@ -584,6 +604,88 @@ const totalHargaKeseluruhan = computed(() =>
 const formatCurrency = (value: number) => {
   if (value === undefined || value === null) return 'Rp 0'
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value)
+}
+
+const grSearchNo = ref('')
+const isSearchingGr = ref(false)
+
+const mapUomToCoretax = (uom: string): string => {
+  if (!uom) return 'UM.0033'
+  const lower = uom.toLowerCase().trim()
+  if (lower === 'pcs' || lower === 'piece' || lower === 'pieces' || lower === 'buah') return 'UM.0021'
+  if (lower === 'unit' || lower === 'units') return 'UM.0018'
+  if (lower === 'set' || lower === 'sets') return 'UM.0019'
+  if (lower === 'kg' || lower === 'kilogram' || lower === 'kilograms') return 'UM.0003'
+  if (lower === 'ltr' || lower === 'liter' || lower === 'liters') return 'UM.0007'
+  if (lower === 'month' || lower === 'bulan') return 'UM.0024'
+  if (lower === 'day' || lower === 'hari') return 'UM.0026'
+  if (lower === 'hour' || lower === 'jam') return 'UM.0027'
+  return 'UM.0033'
+}
+
+const searchGr = async () => {
+  if (!grSearchNo.value.trim()) {
+    notifTitle.value = 'Validation Error'
+    notifText.value = 'Please enter a GR Document Number.'
+    notifType.value = 'error'
+    showNotif.value = true
+    return
+  }
+  isSearchingGr.value = true
+  try {
+    const res = await GoodsReceiptService.getDetail({
+      grDocumentNo: grSearchNo.value.trim()
+    })
+    if (res && res.items && res.items.length > 0) {
+      const mappedItems = res.items.map(item => {
+        const totalHarga = (item.unitPrice || 0) * (item.qtyReceivedGood || 0)
+        const dpp = totalHarga
+        const ppn = dpp * 0.12
+        return {
+          brgJasa: 'GOODS',
+          kdBrgJasa: '000000', // Default to 000000 (standard Coretax code) instead of raw SKU
+          namaBrgJasa: item.itemName || '',
+          satuanBrgJasa: mapUomToCoretax(item.uom),
+          hargaSatuan: item.unitPrice || 0,
+          jmlBrgJasa: item.qtyReceivedGood || 0,
+          totalHarga: totalHarga,
+          diskon: 0,
+          cekDppLain: false,
+          dpp: dpp,
+          dppLain: dpp,
+          tarifPpn: 12,
+          ppn: ppn,
+          tarifPpnbm: 0,
+          ppnbm: 0,
+          fgPmk: '',
+        }
+      })
+      form.value.objekFaktur = mappedItems
+      calculateDpp()
+      
+      if (res.poNumber) {
+        form.value.referensi = res.poNumber
+      }
+      
+      notifTitle.value = 'Success'
+      notifText.value = `Successfully imported ${mappedItems.length} item(s) from GR ${res.grDocumentNo}.`
+      notifType.value = 'success'
+      showNotif.value = true
+    } else {
+      notifTitle.value = 'No Items Found'
+      notifText.value = 'The Goods Receipt does not contain any items.'
+      notifType.value = 'error'
+      showNotif.value = true
+    }
+  } catch (error: any) {
+    const msg = error.message || 'Failed to fetch Goods Receipt details.'
+    notifTitle.value = 'Error'
+    notifText.value = msg
+    notifType.value = 'error'
+    showNotif.value = true
+  } finally {
+    isSearchingGr.value = false
+  }
 }
 
 const showAddItemModal = ref(false)
@@ -762,7 +864,7 @@ const submitForm = async () => {
 
 const onNotifClose = () => {
   showNotif.value = false
-  if (notifType.value === 'success') {
+  if (notifType.value === 'success' && notifTitle.value === 'Invoice Created') {
     router.push('/vat-out-reconciliation')
   }
 }

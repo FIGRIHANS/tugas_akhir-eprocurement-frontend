@@ -93,23 +93,41 @@
                   v-for="(inv, idx) in pendingVatRows"
                   :key="'pv-' + idx + '-' + (inv.invoiceNo || '')"
                 >
-                  <!-- VAT-06: Action column with Submit (go to form) + Reject -->
+                  <!-- VAT-06: Action column with Detail (go to form) + Reject inside Dropdown -->
                   <td class="text-center">
                     <div class="flex items-center justify-center gap-2">
                       <button
                         class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px] tooltip"
-                        data-tip="Submit ke Pajak Express"
+                        data-tip="Detail"
                         @click="goSubmitFromInvoice(inv)"
                       >
-                        <i class="ki-filled ki-send !text-base"></i>
+                        <i class="ki-filled ki-eye !text-base"></i>
                       </button>
-                      <button
-                        class="btn btn-outline btn-icon btn-danger w-[32px] h-[32px] tooltip"
-                        data-tip="Reject to Vendor"
-                        @click="handleRejectInvoice(inv)"
+                      <div
+                        class="dropdown"
+                        data-dropdown="true"
+                        data-dropdown-trigger="click"
+                        data-dropdown-placement="bottom-end"
                       >
-                        <i class="ki-filled ki-cross-circle !text-base"></i>
-                      </button>
+                        <button class="dropdown-toggle btn btn-light btn-icon btn-sm">
+                          <i class="ki-filled ki-dots-vertical !text-lg"></i>
+                        </button>
+                        <div class="dropdown-content w-full max-w-48 py-2">
+                          <div class="menu menu-default flex flex-col w-full">
+                            <div
+                              class="menu-item"
+                              @click="handleRejectInvoice(inv)"
+                            >
+                              <div class="menu-link">
+                                <span class="menu-icon">
+                                  <i class="ki-filled ki-cross-circle text-danger !text-lg"></i>
+                                </span>
+                                <span class="menu-title">Reject to Vendor</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </td>
                   <td>
@@ -270,7 +288,7 @@
                 </tr>
                 <!-- No Data State -->
                 <tr v-else-if="filteredDataList?.length === 0">
-                  <td colspan="14" class="text-center">No data found.</td>
+                  <td colspan="15" class="text-center">No data found.</td>
                 </tr>
 
                 <tr v-for="(item, index) in list" :key="index">
@@ -343,6 +361,7 @@
                   <td>{{ item.npwpVendor }}</td>
                   <td>{{ formatDate(item.tglFakturPajak) }}</td>
                   <td>{{ item.noFakturPajak }}</td>
+                  <td>{{ item.invoiceNo || '—' }}</td>
                   <td class="text-right">{{ formatCurrency(item.amount) }}</td>
                   <td class="text-right">{{ formatCurrency(item.dpp) }}</td>
 
@@ -1099,6 +1118,7 @@ const columns = ref<string[]>([
   'NPWP Vendor',
   'Tax Invoice Date',
   'Tax Invoice No.',
+  'Invoice No',
   'Amount',
   'DPP',
   'PPN',
@@ -1150,6 +1170,7 @@ function nullableStrFrom(row: Record<string, unknown>, ...keys: string[]): strin
 
 function normalizeVatApiRow(raw: unknown): VATReconciliationData {
   const r = (raw ?? {}) as Record<string, unknown>
+
 
   const vendorName = strFrom(r, 'vendorName', 'VendorName')
   const npwpVendor = strFrom(r, 'npwpVendor', 'NpwpVendor', 'NPWPPembeli', 'npwpPembeli')
@@ -1356,13 +1377,14 @@ function displayVatOnRow(inv: InvoiceVatQueueRow): number {
   if (raw != null && Number.isFinite(Number(raw))) return Number(raw)
   return 0
 }
-
 async function handleRejectInvoice(inv: InvoiceVatQueueRow) {
-  if (
-    confirm(
-      `Apakah Anda yakin ingin menolak (Reject) Invoice No: ${inv.invoiceNo || '—'} dari antrean Pajak?`,
-    )
-  ) {
+  confirmType.value = 'confirm'
+  confirmTitle.value = 'Reject Invoice'
+  confirmText.value = `Apakah Anda yakin ingin menolak (Reject) Invoice No: ${inv.invoiceNo || '—'} dari antrean Pajak?`
+  confirmSubmitText.value = 'Ya, Reject!'
+  confirmCancelText.value = 'Batal'
+
+  pendingConfirmAction = async () => {
     try {
       const res = await vatApi.post(`/vat/vat-in/reject/${inv.id}`)
       if (!res.data?.isError) {
@@ -1388,6 +1410,7 @@ async function handleRejectInvoice(inv: InvoiceVatQueueRow) {
       )
     }
   }
+  showConfirmModal.value = true
 }
 
 function goSubmitFromInvoice(inv: InvoiceVatQueueRow) {
@@ -1411,6 +1434,7 @@ function goSubmitFromInvoice(inv: InvoiceVatQueueRow) {
       vendorNpwp: inv.vendorNpwp ?? '',
       dpp: String(inv.dpp ?? 0),
       vatAmount: String(displayVatOnRow(inv)),
+      invoiceDate: inv.invoiceDate ?? '',
       defMasa,
       defYear,
     },
