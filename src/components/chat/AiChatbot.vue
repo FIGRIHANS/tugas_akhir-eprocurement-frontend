@@ -1,11 +1,15 @@
 <template>
-  <div class="fixed bottom-6 right-6 z-[9999] font-sans">
+  <div
+    id="draggable-chatbot-container"
+    class="fixed z-[9999] font-sans"
+    :style="containerStyle"
+  >
     <!-- Chat Window -->
     <Transition name="fade-slide">
       <div
         v-if="isOpen"
-        class="absolute bottom-16 right-0 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-gray-100 flex flex-col overflow-hidden"
-        style="height: 500px;"
+        class="absolute w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-gray-100 flex flex-col overflow-hidden"
+        :style="[{ height: '500px' }, chatWindowStyle]"
       >
         <!-- Header -->
         <div class="bg-teal-500 text-white p-4 flex items-center justify-between shadow-sm z-10">
@@ -88,17 +92,19 @@
 
     <!-- Floating Action Button (FAB) -->
     <button
-      @click="isOpen = !isOpen"
-      class="w-14 h-14 bg-teal-500 text-white rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 hover:bg-teal-600 transition-all duration-300 flex items-center justify-center relative"
+      @mousedown="onMouseDown"
+      @touchstart="onTouchStart"
+      @click="toggleOpen"
+      class="w-14 h-14 bg-teal-500 text-white rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 hover:bg-teal-600 transition-all duration-300 flex items-center justify-center relative cursor-grab active:cursor-grabbing select-none"
       :class="{ 'rotate-12': !isOpen, 'scale-90': isOpen }"
     >
       <!-- Optional notification dot -->
       <span v-if="!isOpen && messages.length === 0" class="absolute top-0 right-0 w-3.5 h-3.5 bg-red-500 border-2 border-white rounded-full"></span>
       
-      <svg v-if="!isOpen" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8">
+      <svg v-if="!isOpen" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8 pointer-events-none">
         <path fill-rule="evenodd" d="M4.804 21.644A6.707 6.707 0 006 21.75a6.721 6.721 0 003.583-1.029c.774.182 1.584.279 2.417.279 5.322 0 9.75-3.97 9.75-9 0-5.03-4.428-9-9.75-9s-9.75 3.97-9.75 9c0 2.409 1.025 4.587 2.674 6.192.232.226.277.428.254.543a3.73 3.73 0 01-.814 1.686.75.75 0 00.44 1.223zM8.25 10.875a1.125 1.125 0 100 2.25 1.125 1.125 0 000-2.25zM10.875 12a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0zm4.875-1.125a1.125 1.125 0 100 2.25 1.125 1.125 0 000-2.25z" clip-rule="evenodd" />
       </svg>
-      <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-8 h-8">
+      <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-8 h-8 pointer-events-none">
         <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
       </svg>
     </button>
@@ -106,7 +112,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick } from 'vue';
+import { ref, nextTick, computed } from 'vue';
 import axios from 'axios';
 
 interface ChatMessage {
@@ -119,6 +125,142 @@ const isLoading = ref(false);
 const newMessage = ref('');
 const messages = ref<ChatMessage[]>([]);
 const chatContainer = ref<HTMLElement | null>(null);
+
+// Dragging functionality variables
+const xPosition = ref<number | null>(null);
+const yPosition = ref<number | null>(null);
+const isDragging = ref(false);
+let startX = 0;
+let startY = 0;
+let initialX = 0;
+let initialY = 0;
+let dragDistance = 0;
+
+const containerStyle = computed(() => {
+  if (xPosition.value === null || yPosition.value === null) {
+    return {
+      bottom: '24px',
+      right: '24px',
+    };
+  }
+  return {
+    left: `${xPosition.value}px`,
+    top: `${yPosition.value}px`,
+  };
+});
+
+const chatWindowStyle = computed(() => {
+  if (xPosition.value === null) {
+    return {
+      bottom: '64px',
+      right: '0px',
+    };
+  }
+  const isSm = window.innerWidth >= 640;
+  const chatWidth = isSm ? 384 : 320;
+  const buttonWidth = 56;
+  if (xPosition.value + buttonWidth - chatWidth < 10) {
+    return {
+      bottom: '64px',
+      left: '0px',
+      right: 'auto',
+    };
+  }
+  return {
+    bottom: '64px',
+    right: '0px',
+    left: 'auto',
+  };
+});
+
+const onMouseDown = (e: MouseEvent) => {
+  if (e.button !== 0) return;
+  initDrag(e.clientX, e.clientY);
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup', onMouseUp);
+};
+
+const onTouchStart = (e: TouchEvent) => {
+  if (e.touches.length > 0) {
+    initDrag(e.touches[0].clientX, e.touches[0].clientY);
+    document.addEventListener('touchmove', onTouchMove, { passive: false });
+    document.addEventListener('touchend', onTouchEnd);
+  }
+};
+
+const initDrag = (clientX: number, clientY: number) => {
+  isDragging.value = true;
+  dragDistance = 0;
+  
+  const container = document.getElementById('draggable-chatbot-container');
+  if (container) {
+    const rect = container.getBoundingClientRect();
+    xPosition.value = rect.left;
+    yPosition.value = rect.top;
+  } else {
+    if (xPosition.value === null) {
+      xPosition.value = window.innerWidth - 80;
+      yPosition.value = window.innerHeight - 80;
+    }
+  }
+  
+  startX = clientX;
+  startY = clientY;
+  initialX = xPosition.value!;
+  initialY = yPosition.value!;
+};
+
+const onMouseMove = (e: MouseEvent) => {
+  if (!isDragging.value) return;
+  updatePosition(e.clientX, e.clientY);
+};
+
+const onTouchMove = (e: TouchEvent) => {
+  if (!isDragging.value) return;
+  e.preventDefault();
+  if (e.touches.length > 0) {
+    updatePosition(e.touches[0].clientX, e.touches[0].clientY);
+  }
+};
+
+const updatePosition = (clientX: number, clientY: number) => {
+  const dx = clientX - startX;
+  const dy = clientY - startY;
+  dragDistance = Math.sqrt(dx * dx + dy * dy);
+  
+  let newX = initialX + dx;
+  let newY = initialY + dy;
+  
+  const buttonSize = 56;
+  newX = Math.max(10, Math.min(newX, window.innerWidth - buttonSize - 10));
+  newY = Math.max(10, Math.min(newY, window.innerHeight - buttonSize - 10));
+  
+  xPosition.value = newX;
+  yPosition.value = newY;
+};
+
+const onMouseUp = () => {
+  endDrag();
+  document.removeEventListener('mousemove', onMouseMove);
+  document.removeEventListener('mouseup', onMouseUp);
+};
+
+const onTouchEnd = () => {
+  endDrag();
+  document.removeEventListener('touchmove', onTouchMove);
+  document.removeEventListener('touchend', onTouchEnd);
+};
+
+const endDrag = () => {
+  isDragging.value = false;
+};
+
+const toggleOpen = () => {
+  if (dragDistance > 5) {
+    return;
+  }
+  isOpen.value = !isOpen.value;
+};
 
 const formatMarkdown = (text: string) => {
   if (!text) return '';

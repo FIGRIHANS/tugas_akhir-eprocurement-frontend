@@ -25,10 +25,8 @@ import type {
 import type { invoiceOcrData } from '@/views/invoice/types/invoiceOcrData'
 import type { invoiceQrData } from '@/views/invoice/types/invoiceQrdata'
 
-const PAYMENT_STATUS_ENDPOINT =
-  'https://invoice-management-dev.azurewebsites.net/api/invoice/payment-status'
-const PAYMENT_STATUS_NON_PO_ENDPOINT =
-  'https://invoice-management-dev.azurewebsites.net/api/invoice/payment-status-non-po'
+const PAYMENT_STATUS_ENDPOINT = '/invoice/payment-status'
+const PAYMENT_STATUS_NON_PO_ENDPOINT = '/invoice/payment-status-non-po'
 
 const parsePaginatedContent = <T>(rawContent: unknown): T[] => {
   if (!rawContent) return []

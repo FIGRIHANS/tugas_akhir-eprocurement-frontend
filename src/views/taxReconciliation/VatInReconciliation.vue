@@ -439,56 +439,45 @@
     </div>
 
     <!-- VAT-05: Override Remark Modal (wajib diisi saat Mismatch/UNCREDITED override) -->
-    <div
-      v-if="showRemarkModal"
-      class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[60]"
-      @click.self="showRemarkModal = false"
+    <UiModal
+      v-model="showRemarkModal"
+      title="Manual Override Remark"
+      size="sm"
     >
-      <div class="bg-white rounded-xl shadow-2xl w-[480px] max-w-[90vw]">
-        <!-- Modal Header -->
-        <div class="flex justify-between items-center px-6 py-4 border-b border-amber-200 bg-amber-50 rounded-t-xl">
-          <div>
-            <h3 class="text-lg font-semibold text-amber-800 flex items-center gap-2">
-              <i class="ki-filled ki-information-5 text-amber-500"></i>
-              Manual Override — Audit Remark
-            </h3>
-            <p class="text-xs text-amber-600 mt-0.5">FR-TR-VAT-05: Wajib diisi saat melakukan override Mismatch/Uncredited</p>
+      <div class="flex flex-col gap-4">
+        <!-- Info Box (Simple Gray Style) -->
+        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-700">
+          <p class="text-xs text-gray-500 mb-2 font-medium">
+            FR-TR-VAT-05: Required when performing mismatch or uncredited override.
+          </p>
+          <div class="space-y-1">
+            <p><strong>Tax Invoice:</strong> {{ remarkTargetItem?.noFakturPajak || '—' }}</p>
+            <p><strong>Override Status:</strong> <span class="font-semibold text-primary">{{ remarkTargetStatus }}</span></p>
           </div>
-          <button @click="showRemarkModal = false" class="text-gray-400 hover:text-gray-600 transition-colors">
-            <i class="ki-filled ki-cross text-xl"></i>
-          </button>
         </div>
 
-        <!-- Modal Body -->
-        <div class="px-6 py-5">
-          <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
-            <p class="text-sm text-amber-700">
-              <strong>Faktur:</strong> {{ remarkTargetItem?.noFakturPajak || '—' }}<br />
-              <strong>Status Override:</strong>
-              <span class="font-semibold text-amber-700">{{ remarkTargetStatus }}</span>
-            </p>
-          </div>
-
-          <label class="form-label text-sm font-semibold text-gray-700 mb-1 flex items-center gap-1">
-            Remark Audit
+        <!-- Textarea Form -->
+        <div class="flex flex-col gap-1.5">
+          <label class="form-label text-sm font-semibold text-gray-700 flex items-center gap-1">
+            Audit Remark
             <span class="text-red-500">*</span>
           </label>
           <textarea
             v-model="overrideRemark"
-            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-300 focus:border-amber-400 outline-none resize-none"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none resize-none"
             :class="{ 'border-red-400 ring-1 ring-red-300': remarkSubmitAttempted && !overrideRemark.trim() }"
             rows="4"
             maxlength="500"
-            placeholder="Jelaskan alasan override (selisih desimal, konfirmasi vendor, dsb.)..."
+            placeholder="Explain the reason for override (e.g. decimal mismatch, vendor confirmation, etc.)..."
           ></textarea>
           <p v-if="remarkSubmitAttempted && !overrideRemark.trim()" class="text-red-500 text-xs mt-1">
-            Remark wajib diisi sebelum melanjutkan override.
+            Audit remark is required to proceed with manual override.
           </p>
           <p class="text-xs text-gray-400 text-right mt-1">{{ overrideRemark.length }}/500</p>
         </div>
 
-        <!-- Modal Footer -->
-        <div class="flex justify-end gap-3 px-6 py-4 border-t border-gray-100">
+        <!-- Footer Actions -->
+        <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
           <button
             type="button"
             class="btn btn-light"
@@ -498,16 +487,16 @@
           </button>
           <button
             type="button"
-            class="btn btn-warning"
+            class="btn btn-primary"
             :disabled="confirmLoading"
             @click="submitOverrideWithRemark"
           >
             <span v-if="confirmLoading" class="loading loading-spinner loading-xs mr-1"></span>
-            Konfirmasi Override
+            Confirm Override
           </button>
         </div>
       </div>
-    </div>
+    </UiModal>
 
     <!-- Status Faktur Modal -->
     <div
