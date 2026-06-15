@@ -317,6 +317,15 @@ const hasSapSynced = ref<boolean>(false)
 
 // Handle click from footer when on Payment Status tab
 const handleUpdatePaymentStatus = async () => {
+  // Automatically trigger SAP Sync if document number is present and we haven't synced yet
+  const submittedDocumentNoVal = paymentStatusDetailRef.value?.getSubmittedDocumentNo() || ''
+  if (submittedDocumentNoVal && !hasSapSynced.value) {
+    console.log('🔄 Auto-triggering SAP sync since Submitted Document No is entered...')
+    await paymentStatusDetailRef.value?.triggerSapSync()
+    // Wait a brief moment to ensure Vue refs propagate
+    await new Promise((resolve) => setTimeout(resolve, 100))
+  }
+
   // Get payment details from child component via template ref
   const paymentDetailsDataRef = paymentStatusDetailRef.value?.getPaymentDetailsData()
   const paymentDetailsData = paymentDetailsDataRef?.value || []
@@ -339,7 +348,10 @@ const handleUpdatePaymentStatus = async () => {
     paymentDetailsData.length > 0
       ? paymentDetailsData
           .filter((item) => item.status === 'Paid')
-          .reduce((sum, item) => sum + parseFloat(item.amount || '0'), 0)
+          .reduce((sum, item) => {
+            const amtStr = (item.amount || '0').toString().replace(/\./g, '')
+            return sum + parseFloat(amtStr)
+          }, 0)
       : 0
 
   const outstanding = totalInvoice - paymentReceived
@@ -437,7 +449,7 @@ const handleConfirmPaymentStatus = async () => {
         invoicePaymentDetailId: invoicePaymentDetailId,
         invoiceUId: form.value.invoiceUId,
         paymentDate: toISOStringSafe(item.paymentDate),
-        amount: parseFloat(item.amount || '0'),
+        amount: parseFloat((item.amount || '0').toString().replace(/\./g, '')),
         paymentStatus: item.status || 'Plan',
         bankAccount: item.bankAccount || '',
         remarks: item.remarks || '',

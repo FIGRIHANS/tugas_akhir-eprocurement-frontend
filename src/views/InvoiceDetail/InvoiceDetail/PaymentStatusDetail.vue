@@ -94,5 +94,10 @@ defineExpose({
     const edited = paymentDetailsData.value.filter((item) => item.isModified === true)
     return edited
   },
+  triggerSapSync: async () => {
+    if (paymentDetailsRef.value?.handleSapSync) {
+      await paymentDetailsRef.value.handleSapSync()
+    }
+  },
 })
 </script>

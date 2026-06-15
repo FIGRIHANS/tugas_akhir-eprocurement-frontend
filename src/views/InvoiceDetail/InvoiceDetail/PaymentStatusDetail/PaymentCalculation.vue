@@ -12,7 +12,7 @@
         class="status-row py-[22px] px-[20px] text-xs flex"
         :class="
           index === listPaymentStatus.length - 1
-            ? 'calculation__last-field last-row'
+            ? (isOutstandingZero ? 'calculation__last-field--success last-row' : 'calculation__last-field last-row')
             : 'border-b border-gray-200'
         "
       >
@@ -59,6 +59,20 @@ interface PaymentStatusItem {
 
 const listPaymentStatus = ref<PaymentStatusItem[]>([])
 
+const isOutstandingZero = computed(() => {
+  if (!form?.value) return false
+  const totalInvoice = form.value.totalNetAmount || 0
+  const paymentReceived = paymentDetailsData?.value
+    ? paymentDetailsData.value
+        .filter((item) => item.status === 'Paid')
+        .reduce((sum, item) => {
+          const amtStr = (item.amount || '0').toString().replace(/\./g, '')
+          return sum + parseFloat(amtStr)
+        }, 0)
+    : 0
+  return (totalInvoice - paymentReceived) <= 0
+})
+
 const setPaymentStatus = () => {
   if (form?.value) {
     const totalInvoice = form.value.totalNetAmount || 0
@@ -67,7 +81,10 @@ const setPaymentStatus = () => {
     const paymentReceived = paymentDetailsData?.value
       ? paymentDetailsData.value
           .filter((item) => item.status === 'Paid')
-          .reduce((sum, item) => sum + parseFloat(item.amount || '0'), 0)
+          .reduce((sum, item) => {
+            const amtStr = (item.amount || '0').toString().replace(/\./g, '')
+            return sum + parseFloat(amtStr)
+          }, 0)
       : 0
 
     const outstandingPayment = totalInvoice - paymentReceived
@@ -129,6 +146,15 @@ onMounted(() => {
   background-color: #dbeafe;
   font-weight: 600;
   color: #2563eb;
+  border-bottom-left-radius: 0.5rem !important;
+  border-bottom-right-radius: 0.5rem !important;
+  margin-bottom: 0 !important;
+}
+
+.calculation__last-field--success {
+  background-color: #ccfbf1;
+  font-weight: 600;
+  color: #0f766e;
   border-bottom-left-radius: 0.5rem !important;
   border-bottom-right-radius: 0.5rem !important;
   margin-bottom: 0 !important;

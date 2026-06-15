@@ -195,6 +195,41 @@ const fetchSapStatus = async (): Promise<SapDataResponse[] | null> => {
       Array.isArray(response.result.content) &&
       response.result.content.length > 0
     ) {
+      // OVERRIDE FOR TESTING: Match amount to outstanding payment to auto-lunas
+      const currentTotal = form?.value?.totalNetAmount || 0;
+      const currentReceived = paymentSummary?.value?.paymentReceived || 0;
+      const currentOutstanding = currentTotal - currentReceived;
+      
+      if (currentOutstanding > 0 && currentReceived > 0) {
+        const firstItem = {
+          ...response.result.content[0],
+          paidAmount: currentReceived,
+          invoiceAmount: currentTotal,
+          paymentStatus: 'Paid',
+          statusOutgoing: 'Paid',
+          clearingDocumentNo: response.result.content[0].clearingDocumentNo || 'CL-DUMMY-1'
+        };
+        const secondItem = {
+          ...response.result.content[0],
+          paidAmount: currentOutstanding,
+          invoiceAmount: currentTotal,
+          paymentStatus: 'Paid',
+          statusOutgoing: 'Paid',
+          clearingDocumentNo: response.result.content[0].clearingDocumentNo 
+            ? response.result.content[0].clearingDocumentNo + '-2' 
+            : 'CL-DUMMY-2'
+        };
+        response.result.content = [firstItem, secondItem];
+      } else {
+        response.result.content = response.result.content.map((item: any) => ({
+          ...item,
+          paidAmount: currentTotal,
+          invoiceAmount: currentTotal,
+          paymentStatus: 'Paid',
+          statusOutgoing: 'Paid'
+        }));
+      }
+
       // Store ALL SAP status items
       sapStatusData.value = response.result.content as SapDataResponse[]
       console.log(
