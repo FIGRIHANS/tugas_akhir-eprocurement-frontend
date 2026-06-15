@@ -185,11 +185,10 @@
                     step="0.01"
                     v-model.number="form.dataDetilBp21.tarif"
                     class="input w-full pr-8"
-                    :class="{ 'border-danger': errors.tarif, 'bg-gray-100 text-gray-500 cursor-not-allowed': form.invoiceId && form.invoiceId > 0 }"
+                    :class="{ 'border-danger': errors.tarif }"
                     placeholder="0"
                     @input="calculatePPh"
                     required
-                    :disabled="form.invoiceId ? form.invoiceId > 0 : false"
                   />
                   <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
                   <p v-if="errors.tarif" class="text-danger text-xs mt-1">{{ errors.tarif }}</p>
@@ -408,6 +407,9 @@ const populateFromQueryParams = () => {
   form.value.npwp = String(q.vendorNpwp || '')
   form.value.fgNpwpNik = q.vendorNpwp ? true : false
   form.value.dataDetilBp21.penghasilanKotor = Number(q.dpp) || 0
+  if (q.tarif !== undefined && q.tarif !== null) {
+    form.value.dataDetilBp21.tarif = Number(q.tarif)
+  }
   calculatePPh()
 
   const invoiceNo = String(q.invoiceNo || '')

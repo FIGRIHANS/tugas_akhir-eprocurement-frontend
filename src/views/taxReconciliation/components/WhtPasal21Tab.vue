@@ -457,6 +457,11 @@ const filteredPendingInvoices = computed(() => pendingInvoices.value)
 const paginatedPendingInvoices = computed(() => pendingInvoices.value)
 
 const createPph21FromInvoice = (inv: any) => {
+  let calculatedRate = 5
+  if (inv.dpp && inv.whtAmount) {
+    calculatedRate = (inv.whtAmount / inv.dpp) * 100
+    calculatedRate = Math.round(calculatedRate * 100) / 100
+  }
   router.push({
     path: '/wht-pasal-21/create',
     query: {
@@ -466,7 +471,8 @@ const createPph21FromInvoice = (inv: any) => {
       vendorName: inv.vendorName,
       vendorNpwp: inv.vendorNpwp,
       dpp: inv.dpp,
-      whtAmount: inv.whtAmount
+      whtAmount: inv.whtAmount,
+      tarif: calculatedRate
     }
   })
 }

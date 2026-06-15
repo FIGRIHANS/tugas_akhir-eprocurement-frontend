@@ -31,6 +31,7 @@ export interface VatUploadWithMetaRequest {
   tanggalFaktur?: string   // ISO 8601 date string, e.g. "2026-05-19"
   dpp?: number
   ppn?: number
+  overrideRemark?: string
 }
 
 /** IF_TXR_015 upload — confirm crediting (fgPermintaan = 2).

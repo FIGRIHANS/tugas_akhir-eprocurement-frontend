@@ -1769,8 +1769,9 @@ const handleCreditAction = async (
     return
   }
 
-  // VAT-05: If status is UNCREDITED (Mismatch override), require Override Remark first
-  if (targetStatus === 'UNCREDITED') {
+  // VAT-05: If status is UNCREDITED (Mismatch override) or has a Mismatch status, require Override Remark first
+  const isMismatch = !!(item.statusApVsFp && item.statusApVsFp.toLowerCase().includes('mismatch'))
+  if (targetStatus === 'UNCREDITED' || isMismatch) {
     remarkTargetItem.value = item
     remarkTargetStatus.value = targetStatus
     overrideRemark.value = ''
