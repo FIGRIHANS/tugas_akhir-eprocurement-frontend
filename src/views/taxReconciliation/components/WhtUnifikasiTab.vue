@@ -11,6 +11,9 @@
           placeholder="Search Counterpart/Bupot"
           @search="onSearch"
         />
+        <button v-if="activeView === 'bpu'" type="button" class="btn btn-outline btn-primary" @click="exportExcel">
+          <i class="ki-filled ki-file-down !text-base"></i> Export Excel
+        </button>
         <button class="btn btn-primary" @click="router.push('/wht-unifikasi/create')">
           <i class="ki-filled ki-plus-circle !text-lg"></i>
           Create New BPU
@@ -353,6 +356,7 @@ import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 import ModalNotification from '@/components/modal/ModalNotification.vue'
 import BpuService, { type BpuContent } from '@/services/bpu.service'
 import moment from 'moment'
+import { useNotificationStore } from '@/stores/notification/notificationStore'
 
 const router = useRouter()
 
@@ -421,6 +425,10 @@ const fetchPendingInvoices = async () => {
     })
     pendingInvoices.value = res.result.content.items || []
     totalPending.value = res.result.content.total || 0
+
+    // Update notification bell with real pending count
+    const notificationStore = useNotificationStore()
+    notificationStore.checkWhtPendingNotifications(pendingInvoices.value, 'BPU')
   } catch (err) {
     console.error('Error fetching pending invoices:', err)
   } finally {
@@ -477,6 +485,79 @@ const formatCurrency = (val: number) => {
     currency: 'IDR',
     minimumFractionDigits: 0,
   }).format(val)
+}
+
+const exportExcel = () => {
+  if (!bpuList.value || bpuList.value.length === 0) {
+    notifTitle.value = 'Export Failed'
+    notifText.value = 'No data available to export.'
+    notifType.value = 'error'
+    showNotificationModal.value = true
+    return
+  }
+  
+  const thStyle = 'style="background-color: #0d9488; color: #ffffff; font-weight: bold; border: 1px solid #cbd5e1; padding: 10px; text-align: left; font-family: Arial, sans-serif;"';
+  const tdStyle = 'style="border: 1px solid #e2e8f0; padding: 8px; text-align: left; font-family: Arial, sans-serif;"';
+  const tdRightStyle = 'style="border: 1px solid #e2e8f0; padding: 8px; text-align: right; font-family: Arial, sans-serif;"';
+
+  const cols = ['Tax Period', 'Counterpart Name', 'NPWP/NIK', 'Tax Object Code', 'Tax Base (DPP)', 'PPh Amount', 'Status', 'No. Bupot'];
+  const headerHtml = cols.map(col => `<th ${thStyle}>${col}</th>`).join('');
+  const rowsHtml = bpuList.value.map(item => {
+    return `
+      <tr>
+        <td ${tdStyle}>${item.masaPajak || '-'}/${item.tahunPajak || '-'}</td>
+        <td ${tdStyle}>${item.namaPenerima || item.nama || '-'}</td>
+        <td ${tdStyle}>${item.npwpPenerima || item.npwp || '-'}</td>
+        <td ${tdStyle}>${item.kodeObjekPajak || '-'}</td>
+        <td ${tdRightStyle}>${item.dpp || 0}</td>
+        <td ${tdRightStyle}>${item.pphDipotong || 0}</td>
+        <td ${tdStyle}>${item.status || item.fgStatus || 'UNKNOWN'}</td>
+        <td ${tdStyle}>${item.nomorBuktiPotong || item.noBupot || '-'}</td>
+      </tr>
+    `;
+  }).join('');
+
+  const excelHtml = `
+    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+    <head>
+      <meta charset="utf-8">
+      <!--[if gte mso 9]>
+      <xml>
+        <x:ExcelWorkbook>
+          <x:ExcelWorksheets>
+            <x:ExcelWorksheet>
+              <x:Name>Sheet1</x:Name>
+              <x:WorksheetOptions>
+                <x:DisplayGridlines/>
+              </x:WorksheetOptions>
+            </x:ExcelWorksheet>
+          </x:ExcelWorksheets>
+        </x:ExcelWorkbook>
+      </xml>
+      <![endif]-->
+    </head>
+    <body>
+      <table style="border-collapse: collapse;">
+        <thead>
+          <tr>${headerHtml}</tr>
+        </thead>
+        <tbody>
+          ${rowsHtml}
+        </tbody>
+      </table>
+    </body>
+    </html>
+  `;
+
+  const blob = new Blob([excelHtml], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `WHT_Unifikasi_BPU_Export.xls`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 }
 
 const getStatusBadge = (status: string) => {

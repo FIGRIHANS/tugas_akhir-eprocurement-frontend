@@ -246,6 +246,9 @@
               <!-- Right side: Search -->
               <div class="flex items-center gap-3">
                 <UiInputSearch v-model="search" placeholder="Search" @search="goSearch" />
+                <button type="button" class="btn btn-outline btn-primary" @click="exportExcel">
+                  <i class="ki-filled ki-file-down !text-base"></i> Export Excel
+                </button>
               </div>
             </div>
           </div>
@@ -946,6 +949,103 @@ import axios from 'axios'
 import BpuService, { type InvoiceVatQueueRow } from '@/services/bpu.service'
 import { useNotificationStore } from '@/stores/notification/notificationStore'
 import Swal from 'sweetalert2'
+
+const exportExcel = () => {
+  const dataToExport = workspace.value === 'pj' ? list.value : pendingVatRows.value;
+  if (!dataToExport || dataToExport.length === 0) {
+    Swal.fire({ title: 'Export Failed', text: 'No data available to export.', icon: 'error' });
+    return;
+  }
+  
+  const thStyle = 'style="background-color: #0d9488; color: #ffffff; font-weight: bold; border: 1px solid #cbd5e1; padding: 10px; text-align: left; font-family: Arial, sans-serif;"';
+  const tdStyle = 'style="border: 1px solid #e2e8f0; padding: 8px; text-align: left; font-family: Arial, sans-serif;"';
+  const tdRightStyle = 'style="border: 1px solid #e2e8f0; padding: 8px; text-align: right; font-family: Arial, sans-serif;"';
+
+  let headerHtml = '';
+  let rowsHtml = '';
+  
+  if (workspace.value === 'pj') {
+    headerHtml = columns.value.map(col => `<th ${thStyle}>${col}</th>`).join('');
+    rowsHtml = (dataToExport as VATReconciliationData[]).map((item) => {
+      return `
+        <tr>
+          <td ${tdStyle}>${item.vendorName || ''}</td>
+          <td ${tdStyle}>${item.npwpVendor || ''}</td>
+          <td ${tdStyle}>${item.tglFakturPajak || ''}</td>
+          <td ${tdStyle}>${item.noFakturPajak || ''}</td>
+          <td ${tdStyle}>${item.invoiceNo || ''}</td>
+          <td ${tdRightStyle}>${item.amount || 0}</td>
+          <td ${tdRightStyle}>${item.dpp || 0}</td>
+          <td ${tdRightStyle}>${item.ppn || 0}</td>
+          <td ${tdStyle}>${item.statusFp || ''}</td>
+          <td ${tdStyle}>${item.statusApVsFp || ''}</td>
+          <td ${tdStyle}>${item.creditStatus || ''}</td>
+          <td ${tdStyle}>${item.vatCreditExpiryDate || ''}</td>
+        </tr>
+      `;
+    }).join('');
+  } else {
+    const cols = ['Source', 'Invoice No', 'Invoice Vendor No', 'Invoice Date', 'Vendor', 'NPWP', 'DPP', 'VAT', 'Match Status'];
+    headerHtml = cols.map(col => `<th ${thStyle}>${col}</th>`).join('');
+    rowsHtml = (dataToExport as InvoiceVatQueueRow[]).map((inv) => {
+      return `
+        <tr>
+          <td ${tdStyle}>${inv.invoiceSource || ''}</td>
+          <td ${tdStyle}>${inv.invoiceNo || ''}</td>
+          <td ${tdStyle}>${inv.documentNo || ''}</td>
+          <td ${tdStyle}>${inv.invoiceDate || ''}</td>
+          <td ${tdStyle}>${inv.vendorName || ''}</td>
+          <td ${tdStyle}>${inv.vendorNpwp || ''}</td>
+          <td ${tdRightStyle}>${inv.dpp ?? 0}</td>
+          <td ${tdRightStyle}>${inv.vatAmount ?? 0}</td>
+          <td ${tdStyle}>${inv.apVsFpStatus || ''}</td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  const excelHtml = `
+    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+    <head>
+      <meta charset="utf-8">
+      <!--[if gte mso 9]>
+      <xml>
+        <x:ExcelWorkbook>
+          <x:ExcelWorksheets>
+            <x:ExcelWorksheet>
+              <x:Name>Sheet1</x:Name>
+              <x:WorksheetOptions>
+                <x:DisplayGridlines/>
+              </x:WorksheetOptions>
+            </x:ExcelWorksheet>
+          </x:ExcelWorksheets>
+        </x:ExcelWorkbook>
+      </xml>
+      <![endif]-->
+    </head>
+    <body>
+      <table style="border-collapse: collapse;">
+        <thead>
+          <tr>${headerHtml}</tr>
+        </thead>
+        <tbody>
+          ${rowsHtml}
+        </tbody>
+      </table>
+    </body>
+    </html>
+  `;
+
+  const blob = new Blob([excelHtml], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `VAT_Pajak_Masukan_Export_${momentLib().format('YYYYMMDD')}.xls`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
 
 // Expose moment to template
 const moment = momentLib

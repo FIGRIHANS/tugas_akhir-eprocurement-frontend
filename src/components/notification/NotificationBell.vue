@@ -77,7 +77,7 @@
                   class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm"
                   :class="getMeta(notification.type).categoryClass"
                 >
-                  <i :class="getMeta(notification.type).iconClass"></i>
+                  <i :class="getSeverityIconClass(notification.severity, notification.type)"></i>
                 </div>
 
                 <div class="flex-1 min-w-0">
@@ -236,11 +236,18 @@ const handleNotificationClick = async (notification: TaxNotification) => {
     if (notification.relatedData?.fullItem) {
       sessionStorage.setItem('vatIn_detail_item', JSON.stringify(notification.relatedData.fullItem))
     }
-  }
-
-  const route = resolveNotificationRoute(notification)
-  if (route) {
-    await router.push(route)
+    router.push(`/vat-in-reconciliation/${notification.relatedId || 0}`)
+    isOpen.value = false
+  } else if (notification.type === 'wht-pending') {
+    // Navigate to the correct WHT menu and pre-switch to Pending tab
+    const whtType = notification.relatedData?.whtType
+    if (whtType === 'BPU') {
+      sessionStorage.setItem('whtUnifikasi_active_tab', 'pending')
+      router.push('/wht-unifikasi')
+    } else if (whtType === 'PPH21') {
+      sessionStorage.setItem('whtPasal21_active_tab', 'pending')
+      router.push('/wht-pasal-21')
+    }
     isOpen.value = false
   }
 }
@@ -272,13 +279,47 @@ const formatTime = (date: Date): string => {
   const diffHours = now.diff(notifTime, 'hours')
   const diffDays = now.diff(notifTime, 'days')
 
-  if (diffMinutes < 1) return 'Baru saja'
-  if (diffMinutes < 60) return `${diffMinutes} menit lalu`
-  if (diffHours < 24) return `${diffHours} jam lalu`
-  if (diffDays < 7) return `${diffDays} hari lalu`
-  return notifTime.format('DD MMM YYYY, HH:mm')
+  if (diffMinutes < 1) return 'Just now'
+  if (diffMinutes < 60) return `${diffMinutes}m ago`
+  if (diffHours < 24) return `${diffHours}h ago`
+  if (diffDays < 7) return `${diffDays}d ago`
+  return notifTime.format('DD/MM/YYYY')
 }
 
+// Severity styling
+const getSeverityBgClass = (severity: NotificationSeverity): string => {
+  switch (severity) {
+    case 'critical':
+      return 'bg-red-100'
+    case 'warning':
+      return 'bg-yellow-100'
+    case 'info':
+    default:
+      return 'bg-teal-100'
+  }
+}
+
+const getSeverityIconClass = (severity: NotificationSeverity, type?: string): string => {
+  // Type-specific icon overrides
+  if (type === 'wht-pending') return 'ki-filled ki-document text-orange-500 text-lg'
+  if (type === 'vat-mismatch') return 'ki-filled ki-information-2 text-yellow-600 text-lg'
+  if (type === 'vat-expiry') return 'ki-filled ki-calendar-2 text-red-500 text-lg'
+  if (type === 'partial-received' || type === 'rejected') return 'ki-filled ki-delivery text-yellow-600 text-lg'
+  // Fallback to severity-based icon
+  switch (severity) {
+    case 'critical':
+      return 'ki-filled ki-notification-on text-red-600 text-lg'
+    case 'warning':
+      return 'ki-filled ki-notification text-yellow-600 text-lg'
+    case 'info':
+    default:
+      return 'ki-outline ki-notification text-teal-600 text-lg'
+  }
+}
+
+// Fetch vendor notifications from backend when the vendor identity is ready.
+// Using watch with immediate:true so it fires both on mount and if login state
+// loads asynchronously after component creation.
 watch(
   [isVendorUser, currentUserId, currentProfileId],
   async ([isVendor, userId, profileId]) => {
