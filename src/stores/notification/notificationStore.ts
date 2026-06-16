@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import moment from 'moment'
-import type { TaxNotification, NotificationState, NotificationSeverity } from './types'
+import type { TaxNotification, NotificationState, NotificationSeverity, NotificationLinkEntityType } from './types'
 import { generateNotificationId } from './types'
-import { NotificationService } from '@/services/notification.service'
+import { NotificationService, parseUtcNotificationDate } from '@/services/notification.service'
 
 const STORAGE_KEY = 'tax-notifications-v2'
 
@@ -258,47 +258,107 @@ export const useNotificationStore = defineStore('notification', () => {
     })
   }
 
+  const mapApiSeverity = (type: string): NotificationSeverity => {
+    switch (type) {
+      case 'rejected':
+        return 'critical'
+      case 'partial-received':
+      case 'rc-pending-approval':
+        return 'warning'
+      default:
+        return 'info'
+    }
+  }
+
+  const mapApiNotification = (n: Awaited<ReturnType<typeof NotificationService.getVendorNotifications>>[number]): TaxNotification => ({
+    id: `api-${n.id}`,
+    type: (n.type || 'partial-received') as TaxNotification['type'],
+    severity: mapApiSeverity(n.type),
+    title: n.title,
+    message: n.message,
+    relatedId: n.relatedId,
+    relatedData: { backendId: n.id },
+    createdAt: parseUtcNotificationDate(n.createdUtcDate),
+    read: n.isRead,
+    targetVendorId: n.targetVendorId,
+    targetVendorCode: n.targetVendorCode,
+    targetEmployeeId: n.targetEmployeeId,
+    targetProfileId: n.targetProfileId,
+    linkEntityType: n.linkEntityType as NotificationLinkEntityType | undefined,
+    linkEntityId: n.linkEntityId,
+  })
+
   /**
    * Get notifications visible to the current user.
-   *
-   * Vendor mode  (currentVendorId or currentVendorCode is provided):
-   *   - Show partial-received notifications targeted to this vendor (by id or code)
-   *   - Show non-targeted, non-partial-received notifications (e.g. VAT expiry — currently N/A for vendors)
-   *   - Hide everything else
-   *
-   * Internal user mode (no vendor context):
-   *   - Show ALL partial-received notifications (they triggered them; gives feedback)
-   *   - Show non-targeted non-partial-received notifications (e.g. VAT expiry)
-   *   - Hide vendor-targeted non-partial-received notifications
    */
-  const getVisibleNotifications = (currentVendorId?: number, currentVendorCode?: string) => {
+  const getVisibleNotifications = (
+    currentVendorId?: number,
+    currentVendorCode?: string,
+    currentEmployeeId?: number,
+    currentProfileId?: number,
+  ) => {
     const isVendorMode = !!(currentVendorId || currentVendorCode)
 
     return notifications.value.filter((n) => {
-      if (!isVendorMode) {
-        // Internal user: always see partial-received (for approval feedback) + non-targeted general notifs
-        if (n.type === 'partial-received') return true
-        return !n.targetVendorId && !n.targetVendorCode
-      }
-
-      // Vendor user: only see their own targeted partial-received notifications
-      if (!n.targetVendorId && !n.targetVendorCode) {
-        // Non-targeted general notifications (e.g. VAT expiry) are for internal users only
+      if (isVendorMode) {
+        if (currentVendorId && n.targetVendorId === currentVendorId) return true
+        if (currentVendorCode && n.targetVendorCode === currentVendorCode) return true
         return false
       }
-      if (currentVendorId && n.targetVendorId === currentVendorId) return true
-      if (currentVendorCode && n.targetVendorCode === currentVendorCode) return true
+
+      if (n.targetEmployeeId && currentEmployeeId && n.targetEmployeeId === currentEmployeeId) {
+        return true
+      }
+
+      if (n.targetProfileId && currentProfileId && n.targetProfileId === currentProfileId) {
+        return true
+      }
+
+      if (
+        !n.targetVendorId &&
+        !n.targetVendorCode &&
+        !n.targetEmployeeId &&
+        !n.targetProfileId
+      ) {
+        return true
+      }
+
       return false
     })
   }
+
+  const getSortedVisibleNotifications = (
+    currentVendorId?: number,
+    currentVendorCode?: string,
+    currentEmployeeId?: number,
+    currentProfileId?: number,
+  ) =>
+    [...getVisibleNotifications(
+      currentVendorId,
+      currentVendorCode,
+      currentEmployeeId,
+      currentProfileId,
+    )].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    )
 
   /**
    * Fetch vendor notifications from the backend API and merge into the local store.
    * Backend notifications use IDs prefixed with "api-" to distinguish them from
    * localStorage-only notifications.
    */
-  const fetchVendorNotifications = async (vendorId?: number, vendorCode?: string) => {
-    const apiNotifs = await NotificationService.getVendorNotifications(vendorId, vendorCode)
+  const fetchVendorNotifications = async (
+    vendorId?: number,
+    vendorCode?: string,
+    employeeId?: number,
+    profileId?: number,
+  ) => {
+    const apiNotifs = await NotificationService.getVendorNotifications(
+      vendorId,
+      vendorCode,
+      employeeId,
+      profileId,
+    )
 
     const existingApiIds = new Set(
       notifications.value.filter((n) => n.id.startsWith('api-')).map((n) => n.id),
@@ -308,28 +368,26 @@ export const useNotificationStore = defineStore('notification', () => {
       const localId = `api-${n.id}`
 
       if (existingApiIds.has(localId)) {
-        // Sync read status from backend
         const existing = notifications.value.find((x) => x.id === localId)
-        if (existing) existing.read = n.isRead
+        if (existing) {
+          const mapped = mapApiNotification(n)
+          existing.read = mapped.read
+          existing.createdAt = mapped.createdAt
+          existing.title = mapped.title
+          existing.message = mapped.message
+          existing.targetEmployeeId = mapped.targetEmployeeId
+          existing.targetProfileId = mapped.targetProfileId
+          existing.linkEntityType = mapped.linkEntityType
+          existing.linkEntityId = mapped.linkEntityId
+          existing.severity = mapped.severity
+        }
         continue
       }
 
-      const notification: TaxNotification = {
-        id: localId,
-        type: (n.type || 'partial-received') as TaxNotification['type'],
-        severity: n.type === 'rejected' ? 'critical' : 'warning',
-        title: n.title,
-        message: n.message,
-        relatedId: n.relatedId,
-        relatedData: { backendId: n.id },
-        createdAt: new Date(n.createdUtcDate),
-        read: n.isRead,
-        targetVendorId: n.targetVendorId,
-        targetVendorCode: n.targetVendorCode,
-      }
-
-      notifications.value.push(notification)
+      notifications.value.unshift(mapApiNotification(n))
     }
+
+    saveToStorage()
   }
 
   /**
@@ -370,6 +428,7 @@ export const useNotificationStore = defineStore('notification', () => {
     checkVatMismatchNotifications,
     addPartialReceivedNotification,
     getVisibleNotifications,
+    getSortedVisibleNotifications,
     fetchVendorNotifications,
     markApiNotificationRead,
     loadFromStorage,

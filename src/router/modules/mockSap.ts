@@ -4,7 +4,7 @@ export default [
     name: 'mockSapList',
     component: () => import('@/views/mockSap/MockSapList.vue'),
     meta: {
-      pageTitle: 'Mock SAP Purchase Orders',
+      pageTitle: 'Purchase Orders List',
     },
   },
   {
@@ -12,7 +12,7 @@ export default [
     name: 'mockSapDetail',
     component: () => import('@/views/mockSap/MockSapDetail.vue'),
     meta: {
-      pageTitle: 'Mock SAP PO Detail',
+      pageTitle: 'Purchase Order Detail',
     },
   },
 ]

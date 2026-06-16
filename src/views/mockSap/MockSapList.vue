@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Breadcrumb title="Mock SAP Purchase Orders" :routes="routes" />
+    <Breadcrumb title="Purchase Orders List" :routes="routes" />
     <hr class="-mx-[24px] mb-[24px]" />
 
     <!-- Analytics Widgets -->

@@ -6,9 +6,17 @@ export type NotificationType =
   | 'wht-pending'
   | 'fp-status'
   | 'bupot-created'
+  | 'delivery-note-created'
+  | 'rc-pending-approval'
+  | 'gr-created'
   | 'partial-received'
   | 'completed'
   | 'rejected'
+
+export type NotificationLinkEntityType =
+  | 'delivery-note'
+  | 'receiving-confirmation'
+  | 'goods-receipt'
 
 export interface TaxNotification {
   id: string
@@ -16,15 +24,18 @@ export interface TaxNotification {
   severity: NotificationSeverity
   title: string
   message: string
-  relatedId?: string // e.g., noFakturPajak
+  relatedId?: string
   relatedData?: Record<string, unknown>
   createdAt: Date
   read: boolean
   expiryDate?: Date
   daysRemaining?: number
-  // Target audience — if set, only show to this vendor
   targetVendorId?: number
   targetVendorCode?: string
+  targetEmployeeId?: number
+  targetProfileId?: number
+  linkEntityType?: NotificationLinkEntityType
+  linkEntityId?: string
 }
 
 export interface NotificationState {
@@ -32,12 +43,10 @@ export interface NotificationState {
   lastChecked: Date | null
 }
 
-// Helper to generate unique ID
 export const generateNotificationId = (): string => {
   return `notif-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
 }
 
-// Severity badge classes
 export const getSeverityClass = (severity: NotificationSeverity): string => {
   switch (severity) {
     case 'critical':
@@ -50,7 +59,6 @@ export const getSeverityClass = (severity: NotificationSeverity): string => {
   }
 }
 
-// Severity icon classes
 export const getSeverityIcon = (severity: NotificationSeverity): string => {
   switch (severity) {
     case 'critical':

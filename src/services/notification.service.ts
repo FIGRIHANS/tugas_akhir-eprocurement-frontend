@@ -7,24 +7,40 @@ export interface VendorNotificationApiItem {
   message: string
   targetVendorId?: number
   targetVendorCode?: string
+  targetEmployeeId?: number
+  targetProfileId?: number
+  linkEntityType?: string
+  linkEntityId?: string
   isRead: boolean
   relatedId?: string
   createdUtcDate: string
 }
 
+/** Parse API UTC datetime — backend sends UTC without Z suffix */
+export const parseUtcNotificationDate = (dateStr: string): Date => {
+  if (!dateStr) return new Date()
+  const normalized =
+    dateStr.endsWith('Z') || /[+-]\d{2}:\d{2}$/.test(dateStr) ? dateStr : `${dateStr}Z`
+  return new Date(normalized)
+}
+
 export const NotificationService = {
   /**
-   * Fetch persisted notifications for a vendor from the backend.
-   * vendorId matches JWT UserId claim for vendor accounts.
+   * Fetch persisted notifications from the backend.
+   * vendorId/vendorCode for vendor accounts; employeeId for internal users (e.g. warehouse checker).
    */
   async getVendorNotifications(
     vendorId?: number,
     vendorCode?: string,
+    employeeId?: number,
+    profileId?: number,
   ): Promise<VendorNotificationApiItem[]> {
     try {
       const params: Record<string, unknown> = {}
       if (vendorId) params.vendorId = vendorId
       if (vendorCode) params.vendorCode = vendorCode
+      if (employeeId) params.employeeId = employeeId
+      if (profileId) params.profileId = profileId
       const response = await invoiceApi.get('/notification/list', { params })
       return response.data?.result?.content ?? []
     } catch (error) {

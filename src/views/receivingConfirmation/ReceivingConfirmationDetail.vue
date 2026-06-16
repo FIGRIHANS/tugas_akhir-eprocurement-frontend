@@ -396,12 +396,10 @@ import DeliveryNotesService from '@/services/deliveryNotes.service'
 import ModalNotification from '@/components/modal/ModalNotification.vue'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
-import { useNotificationStore } from '@/stores/notification/notificationStore'
 import { useLoginStore } from '@/stores/views/login'
 
 const router = useRouter()
 const route = useRoute()
-const notificationStore = useNotificationStore()
 const loginStore = useLoginStore()
 
 // Only profile 3185 (WH Approver) can approve / reject
@@ -1096,35 +1094,7 @@ const approveConfirmation = async () => {
     return
   }
 
-  // API succeeded — now trigger notification separately (must not block success flow)
-  if (hasDiscrepancy.value) {
-    try {
-      // Collect items with rejection (kurang > 0)
-      const rejectedItems = tableData.value
-        .filter((item) => item.kurang > 0)
-        .map((item) => ({
-          itemName: item.description,
-          sku: item.sku,
-          qtyRejected: item.kurang,
-          rejectReason: item.rejectReason || 'No reason provided',
-        }))
-
-      if (rejectedItems.length > 0) {
-        notificationStore.addPartialReceivedNotification({
-          deliveryNoteNumber: deliveryNoteInfo.value.deliveryNoteNumber,
-          tripID: deliveryNoteInfo.value.tripID,
-          poNumber: deliveryNoteInfo.value.poNumber,
-          vendorName: deliveryNoteInfo.value.vendorName,
-          targetVendorId: deliveryNoteInfo.value.vendorId,
-          targetVendorCode: deliveryNoteInfo.value.vendorCode,
-          rejectedItems,
-        })
-      }
-    } catch (notifError) {
-      // Notification failure must NOT block approve success
-      console.error('Error creating partial received notification:', notifError)
-    }
-  }
+  // Notification is created by the backend when status is updated — no local duplicate needed
 
   notificationModal.value = {
     type: 'success',

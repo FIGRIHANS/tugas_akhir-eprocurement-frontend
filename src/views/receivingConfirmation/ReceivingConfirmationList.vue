@@ -70,9 +70,9 @@
             Filter
           </button>
 
-          <button class="btn btn-primary" @click="exportData()">
-            <i class="ki-duotone ki-exit-down"></i>
-            Export Data
+          <button class="btn btn-primary" @click="createNew()">
+            <i class="ki-duotone ki-plus-circle"></i>
+            Create
           </button>
         </div>
       </div>
@@ -518,10 +518,8 @@ const sortColumn = (columnName: string | null) => {
   return setList(result)
 }
 
-const exportData = () => {
-  console.log('Export data')
-  // TODO: Implement export functionality
-  alert('Export functionality will be implemented')
+const createNew = () => {
+  router.push({ name: 'receivingConfirmationCreate' })
 }
 
 const viewDetail = (id: number) => {

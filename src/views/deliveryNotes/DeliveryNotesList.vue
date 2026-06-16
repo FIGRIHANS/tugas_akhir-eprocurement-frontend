@@ -72,7 +72,7 @@
 
           <button class="btn btn-primary" @click="createNew()">
             <i class="ki-duotone ki-plus-circle"></i>
-            Export Data
+            Create
           </button>
         </div>
       </div>
