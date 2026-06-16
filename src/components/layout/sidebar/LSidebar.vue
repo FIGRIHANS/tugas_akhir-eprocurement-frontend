@@ -174,7 +174,12 @@ const filteredSidebarMenu = computed(() => {
         .map((menu) => {
           return {
             ...menu,
-            child: menu.child ? menu.child.filter((child) => child.id === 'invoice-list') : [],
+            child: menu.child
+              ? menu.child.filter(
+                  (child) =>
+                    child.id === 'invoice-list' || child.id === 'ftp-invoice-integration',
+                )
+              : [],
           }
         })
     }
