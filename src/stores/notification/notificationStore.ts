@@ -212,6 +212,57 @@ export const useNotificationStore = defineStore('notification', () => {
     return newNotificationsCount
   }
 
+  // WHT Pending Notification — fires when invoices are awaiting WHT/BPU creation
+  interface WhtPendingItem {
+    id: string | number
+    invoiceNo?: string
+    vendorName?: string
+    dpp?: number
+    whtAmount?: number
+    invoiceSource?: string
+  }
+
+  /**
+   * Check if there are invoices awaiting WHT (BPU/PPh21) creation.
+   * Clears old stale wht-pending notifications then adds fresh ones.
+   * @param pendingItems - List of invoices still waiting for a Bupot to be created
+   * @param whtType - 'BPU' for WHT Unifikasi, 'PPH21' for WHT Pasal 21
+   */
+  const checkWhtPendingNotifications = (pendingItems: WhtPendingItem[], whtType: 'BPU' | 'PPH21') => {
+    // Clear old pending notifications for this specific WHT type to avoid stale entries
+    const staleIds = notifications.value
+      .filter((n) => n.type === 'wht-pending' && n.relatedData?.whtType === whtType)
+      .map((n) => n.id)
+    staleIds.forEach((id) => {
+      const idx = notifications.value.findIndex((n) => n.id === id)
+      if (idx !== -1) notifications.value.splice(idx, 1)
+    })
+
+    if (!pendingItems || pendingItems.length === 0) {
+      saveToStorage()
+      return 0
+    }
+
+    const label = whtType === 'BPU' ? 'WHT Unifikasi (BPU)' : 'WHT Pasal 21'
+    const routeHint = whtType === 'BPU' ? 'WHT (Unifikasi)' : 'WHT (Pasal 21)'
+
+    const newNotification: TaxNotification = {
+      id: generateNotificationId(),
+      type: 'wht-pending',
+      severity: pendingItems.length >= 5 ? 'critical' : 'warning',
+      title: `${pendingItems.length} Invoice Menunggu Pembuatan ${label}`,
+      message: `Terdapat ${pendingItems.length} invoice yang telah disetujui dan membutuhkan bukti pemotongan ${label}. Silakan buat Bupot melalui menu ${routeHint} → Pending Reconciliation.`,
+      relatedId: `wht-pending-${whtType}`,
+      relatedData: { whtType, count: pendingItems.length },
+      createdAt: new Date(),
+      read: false,
+    }
+
+    notifications.value.unshift(newNotification)
+    saveToStorage()
+    return 1
+  }
+
   // Partial Received Notification
   interface PartialReceivedItem {
     itemName: string
@@ -368,6 +419,7 @@ export const useNotificationStore = defineStore('notification', () => {
     clearAll,
     checkVatExpiryNotifications,
     checkVatMismatchNotifications,
+    checkWhtPendingNotifications,
     addPartialReceivedNotification,
     getVisibleNotifications,
     fetchVendorNotifications,

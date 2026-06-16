@@ -75,7 +75,7 @@
                   class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
                   :class="getSeverityBgClass(notification.severity)"
                 >
-                  <i :class="getSeverityIconClass(notification.severity)"></i>
+                  <i :class="getSeverityIconClass(notification.severity, notification.type)"></i>
                 </div>
 
                 <!-- Content -->
@@ -218,6 +218,17 @@ const handleNotificationClick = async (notification: TaxNotification) => {
     }
     router.push(`/vat-in-reconciliation/${notification.relatedId || 0}`)
     isOpen.value = false
+  } else if (notification.type === 'wht-pending') {
+    // Navigate to the correct WHT menu and pre-switch to Pending tab
+    const whtType = notification.relatedData?.whtType
+    if (whtType === 'BPU') {
+      sessionStorage.setItem('whtUnifikasi_active_tab', 'pending')
+      router.push('/wht-unifikasi')
+    } else if (whtType === 'PPH21') {
+      sessionStorage.setItem('whtPasal21_active_tab', 'pending')
+      router.push('/wht-pasal-21')
+    }
+    isOpen.value = false
   }
 }
 
@@ -271,12 +282,18 @@ const getSeverityBgClass = (severity: NotificationSeverity): string => {
   }
 }
 
-const getSeverityIconClass = (severity: NotificationSeverity): string => {
+const getSeverityIconClass = (severity: NotificationSeverity, type?: string): string => {
+  // Type-specific icon overrides
+  if (type === 'wht-pending') return 'ki-filled ki-document text-orange-500 text-lg'
+  if (type === 'vat-mismatch') return 'ki-filled ki-information-2 text-yellow-600 text-lg'
+  if (type === 'vat-expiry') return 'ki-filled ki-calendar-2 text-red-500 text-lg'
+  if (type === 'partial-received' || type === 'rejected') return 'ki-filled ki-delivery text-yellow-600 text-lg'
+  // Fallback to severity-based icon
   switch (severity) {
     case 'critical':
       return 'ki-filled ki-notification-on text-red-600 text-lg'
     case 'warning':
-      return 'ki-filled ki-delivery text-yellow-600 text-lg'
+      return 'ki-filled ki-notification text-yellow-600 text-lg'
     case 'info':
     default:
       return 'ki-outline ki-notification text-teal-600 text-lg'

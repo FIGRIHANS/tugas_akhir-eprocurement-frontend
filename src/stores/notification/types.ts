@@ -3,6 +3,7 @@
 export type NotificationSeverity = 'info' | 'warning' | 'critical'
 export type NotificationType =
   | 'vat-expiry'
+  | 'vat-mismatch'
   | 'wht-pending'
   | 'fp-status'
   | 'bupot-created'

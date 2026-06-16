@@ -356,6 +356,7 @@ import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 import ModalNotification from '@/components/modal/ModalNotification.vue'
 import BpuService, { type BpuContent } from '@/services/bpu.service'
 import moment from 'moment'
+import { useNotificationStore } from '@/stores/notification/notificationStore'
 
 const router = useRouter()
 
@@ -424,6 +425,10 @@ const fetchPendingInvoices = async () => {
     })
     pendingInvoices.value = res.result.content.items || []
     totalPending.value = res.result.content.total || 0
+
+    // Update notification bell with real pending count
+    const notificationStore = useNotificationStore()
+    notificationStore.checkWhtPendingNotifications(pendingInvoices.value, 'BPU')
   } catch (err) {
     console.error('Error fetching pending invoices:', err)
   } finally {

@@ -370,6 +370,7 @@ import ModalNotification from '@/components/modal/ModalNotification.vue'
 import Pph21Service, { type Pph21Content } from '@/services/pph21.service'
 import BpuService from '@/services/bpu.service'
 import moment from 'moment'
+import { useNotificationStore } from '@/stores/notification/notificationStore'
 
 const router = useRouter()
 
@@ -449,6 +450,10 @@ const fetchPendingInvoices = async () => {
     })
     pendingInvoices.value = res.result.content.items || []
     totalPending.value = res.result.content.total || 0
+
+    // Update notification bell with real pending count
+    const notificationStore = useNotificationStore()
+    notificationStore.checkWhtPendingNotifications(pendingInvoices.value, 'PPH21')
   } catch (error) {
     console.error('Error fetching pending invoices:', error)
   } finally {
