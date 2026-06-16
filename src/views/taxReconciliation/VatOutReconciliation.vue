@@ -713,6 +713,7 @@ export default defineComponent({
       return new Date(dateString).toLocaleDateString('id-ID')
     }
 
+
     const getStatusBadgeClass = (status: string) => {
       switch (status) {
         case 'APPROVED':
