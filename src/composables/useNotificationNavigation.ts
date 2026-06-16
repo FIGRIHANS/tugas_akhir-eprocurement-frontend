@@ -81,8 +81,16 @@ export const getNotificationDisplayMeta = (type: NotificationType): Notification
         category: 'Finance',
         categoryClass: 'bg-red-50 text-red-700',
         severity: 'critical',
-        iconClass: 'ki-filled ki-notification-on text-red-600 text-lg',
+        iconClass: 'ki-filled ki-calendar-2 text-red-500 text-lg',
         accentClass: 'border-l-red-500',
+      }
+    case 'wht-pending':
+      return {
+        category: 'Finance',
+        categoryClass: 'bg-orange-50 text-orange-700',
+        severity: 'warning',
+        iconClass: 'ki-filled ki-document text-orange-500 text-lg',
+        accentClass: 'border-l-orange-500',
       }
     default:
       return {

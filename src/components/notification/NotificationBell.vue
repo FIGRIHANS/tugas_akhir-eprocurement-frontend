@@ -77,7 +77,7 @@
                   class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm"
                   :class="getMeta(notification.type).categoryClass"
                 >
-                  <i :class="getSeverityIconClass(notification.severity, notification.type)"></i>
+                  <i :class="getNotificationIconClass(notification)"></i>
                 </div>
 
                 <div class="flex-1 min-w-0">
@@ -169,7 +169,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useNotificationStore } from '@/stores/notification/notificationStore'
-import type { TaxNotification } from '@/stores/notification/types'
+import type { TaxNotification, NotificationSeverity } from '@/stores/notification/types'
 import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 import { useLoginStore } from '@/stores/views/login'
 import { getUserIdFromToken } from '@/composables/token'
@@ -177,6 +177,7 @@ import { NotificationService } from '@/services/notification.service'
 import {
   getNotificationDisplayMeta,
   getNotificationPreviewLines,
+  isInboundNotification,
   resolveNotificationRoute,
 } from '@/composables/useNotificationNavigation'
 import moment from 'moment'
@@ -209,7 +210,10 @@ const unreadCount = computed(() => visibleNotifications.value.filter((n) => !n.r
 const getMeta = (type: TaxNotification['type']) => getNotificationDisplayMeta(type)
 const getPreview = (message: string) => getNotificationPreviewLines(message, 3)
 
-const isNavigable = (notification: TaxNotification) => !!resolveNotificationRoute(notification)
+const isNavigable = (notification: TaxNotification) => {
+  if (notification.type === 'wht-pending') return true
+  return !!resolveNotificationRoute(notification)
+}
 
 const toggleDropdown = () => {
   isOpen.value = !isOpen.value
@@ -232,22 +236,34 @@ const handleNotificationClick = async (notification: TaxNotification) => {
     notificationStore.markAsRead(notification.id)
   }
 
+  // Finance — VAT (teman)
   if (notification.type === 'vat-mismatch' || notification.type === 'vat-expiry') {
     if (notification.relatedData?.fullItem) {
       sessionStorage.setItem('vatIn_detail_item', JSON.stringify(notification.relatedData.fullItem))
     }
-    router.push(`/vat-in-reconciliation/${notification.relatedId || 0}`)
+    await router.push(`/vat-in-reconciliation/${notification.relatedId || 0}`)
     isOpen.value = false
-  } else if (notification.type === 'wht-pending') {
-    // Navigate to the correct WHT menu and pre-switch to Pending tab
+    return
+  }
+
+  // Finance — WHT pending (teman)
+  if (notification.type === 'wht-pending') {
     const whtType = notification.relatedData?.whtType
     if (whtType === 'BPU') {
       sessionStorage.setItem('whtUnifikasi_active_tab', 'pending')
-      router.push('/wht-unifikasi')
+      await router.push('/wht-unifikasi')
     } else if (whtType === 'PPH21') {
       sessionStorage.setItem('whtPasal21_active_tab', 'pending')
-      router.push('/wht-pasal-21')
+      await router.push('/wht-pasal-21')
     }
+    isOpen.value = false
+    return
+  }
+
+  // Inbound logistics — DN / RC / GR (kita)
+  const route = resolveNotificationRoute(notification)
+  if (route) {
+    await router.push(route)
     isOpen.value = false
   }
 }
@@ -279,33 +295,31 @@ const formatTime = (date: Date): string => {
   const diffHours = now.diff(notifTime, 'hours')
   const diffDays = now.diff(notifTime, 'days')
 
-  if (diffMinutes < 1) return 'Just now'
-  if (diffMinutes < 60) return `${diffMinutes}m ago`
-  if (diffHours < 24) return `${diffHours}h ago`
-  if (diffDays < 7) return `${diffDays}d ago`
-  return notifTime.format('DD/MM/YYYY')
+  if (diffMinutes < 1) return 'Baru saja'
+  if (diffMinutes < 60) return `${diffMinutes} menit lalu`
+  if (diffHours < 24) return `${diffHours} jam lalu`
+  if (diffDays < 7) return `${diffDays} hari lalu`
+  return notifTime.format('DD MMM YYYY, HH:mm')
 }
 
-// Severity styling
-const getSeverityBgClass = (severity: NotificationSeverity): string => {
-  switch (severity) {
-    case 'critical':
-      return 'bg-red-100'
-    case 'warning':
-      return 'bg-yellow-100'
-    case 'info':
-    default:
-      return 'bg-teal-100'
+/** Inbound pakai meta icon; finance pakai override teman; sisanya by severity */
+const getNotificationIconClass = (notification: TaxNotification): string => {
+  if (notification.type === 'wht-pending') {
+    return 'ki-filled ki-document text-orange-500 text-lg'
   }
+  if (notification.type === 'vat-mismatch') {
+    return 'ki-filled ki-information-2 text-yellow-600 text-lg'
+  }
+  if (notification.type === 'vat-expiry') {
+    return 'ki-filled ki-calendar-2 text-red-500 text-lg'
+  }
+  if (isInboundNotification(notification.type)) {
+    return getMeta(notification.type).iconClass
+  }
+  return getSeverityIconClass(notification.severity)
 }
 
-const getSeverityIconClass = (severity: NotificationSeverity, type?: string): string => {
-  // Type-specific icon overrides
-  if (type === 'wht-pending') return 'ki-filled ki-document text-orange-500 text-lg'
-  if (type === 'vat-mismatch') return 'ki-filled ki-information-2 text-yellow-600 text-lg'
-  if (type === 'vat-expiry') return 'ki-filled ki-calendar-2 text-red-500 text-lg'
-  if (type === 'partial-received' || type === 'rejected') return 'ki-filled ki-delivery text-yellow-600 text-lg'
-  // Fallback to severity-based icon
+const getSeverityIconClass = (severity: NotificationSeverity): string => {
   switch (severity) {
     case 'critical':
       return 'ki-filled ki-notification-on text-red-600 text-lg'
