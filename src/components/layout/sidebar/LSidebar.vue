@@ -202,7 +202,6 @@ const filteredSidebarMenu = computed(() => {
                   child.id === 'recurring-invoice-reminder' ||
                   child.id === 'vendor-master' ||
                   child.id === 'vat-reconciliation' ||
-                  child.id === 'vat-out-reconciliation' ||
                   child.id === 'wht-unifikasi' ||
                   child.id === 'wht-pasal-21',
               )
@@ -234,7 +233,6 @@ const filteredSidebarMenu = computed(() => {
                   child.id === 'recurring-invoice-reminder' ||
                   child.id === 'vendor-master' ||
                   child.id === 'vat-reconciliation' ||
-                  child.id === 'vat-out-reconciliation' ||
                   child.id === 'wht-unifikasi' ||
                   child.id === 'wht-pasal-21',
               )
@@ -282,7 +280,6 @@ const filteredSidebarMenu = computed(() => {
                   child.id === 'recurring-invoice-reminder' ||
                   child.id === 'vendor-master' ||
                   child.id === 'vat-reconciliation' ||
-                  child.id === 'vat-out-reconciliation' ||
                   child.id === 'wht-unifikasi' ||
                   child.id === 'wht-pasal-21',
               )
@@ -356,9 +353,9 @@ const filteredSidebarMenu = computed(() => {
         .filter(
           (menu) =>
             menu.id === 'dashboard' ||
-            menu.id === 'e-invoice' ||
             menu.id === 'vendor-management' ||
-            menu.id === 'digital-receiving-confirmation',
+            menu.id === 'digital-receiving-confirmation' ||
+            menu.id === 'tax-reconciliation',
         )
 
         .map((menu) => {
