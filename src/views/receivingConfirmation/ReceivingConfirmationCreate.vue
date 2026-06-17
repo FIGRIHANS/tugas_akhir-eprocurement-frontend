@@ -30,6 +30,7 @@
                         type="text"
                         class="input flex-1"
                         placeholder="Enter Delivery Note Number"
+                        data-focus-key="dn-search"
                         @keypress.enter="searchDeliveryNotes"
                       />
                       <button
@@ -77,6 +78,7 @@
                     type="text"
                     class="input flex-1"
                     placeholder="Enter Employee Name"
+                    data-focus-key="employee-name"
                   />
                 </div>
                 <!-- Trip ID -->
@@ -89,6 +91,7 @@
                     type="text"
                     class="input flex-1"
                     placeholder="Enter Trip ID"
+                    data-focus-key="trip-id"
                   />
                 </div>
 
@@ -102,6 +105,7 @@
                     type="text"
                     class="input flex-1"
                     placeholder="Enter Driver Name"
+                    data-focus-key="driver-name"
                   />
                 </div>
 
@@ -197,7 +201,13 @@
                   <label class="form-label text-sm font-medium text-gray-600 w-36 mb-0"
                     >Received Date <span class="text-red-500">*</span></label
                   >
-                  <input v-model="formData.receivedDate" type="date" class="input flex-1" />
+                  <input
+                    v-model="formData.receivedDate"
+                    type="date"
+                    class="input flex-1"
+                    :max="todayDateString"
+                    data-focus-key="received-date"
+                  />
                 </div>
               </div>
             </div>
@@ -208,7 +218,7 @@
             <label class="form-label text-sm font-medium text-gray-600"
               >Signature <span class="text-red-500">*</span></label
             >
-            <div class="border border-gray-300 rounded-lg p-4 mt-2 bg-gray-50">
+            <div class="border border-gray-300 rounded-lg p-4 mt-2 bg-gray-50" data-focus-key="signature" tabindex="-1">
               <!-- Signature Pad -->
               <VueSignature
                 ref="signaturePad"
@@ -241,7 +251,7 @@
         <div class="mb-4">
           <h3 class="text-lg font-semibold">List Receiving Confirmation Request</h3>
           <p class="text-sm text-gray-500 mt-1">
-            Only <strong>Received</strong>, <strong>Repack Qty</strong>, and
+            <strong>Received</strong>, <strong>Lot Number (Actual)</strong>, <strong>Repack Qty</strong>, and
             <strong>Damage Qty</strong> can be edited. Difference, More, and Less are calculated
             automatically.
           </p>
@@ -355,7 +365,15 @@
                 <td>{{ item.sku }}</td>
                 <td>{{ item.deskripsi }}</td>
                 <td class="text-right">{{ item.lotNoDeliveryNote }}</td>
-                <td class="text-right">{{ item.lotNoActual }}</td>
+                <td class="text-center">
+                  <input
+                    v-model="item.lotNoActual"
+                    type="text"
+                    class="input input-sm w-28 text-center"
+                    placeholder="Lot No"
+                    :data-focus-key="`item-${index}-lot-no`"
+                  />
+                </td>
                 <td class="text-right">{{ item.qtySuratJalan }}</td>
                 <!-- Received - Editable -->
                 <td class="text-center">
@@ -363,7 +381,12 @@
                     v-model.number="item.qtyActual"
                     type="number"
                     min="0"
+                    :max="item.qtySuratJalan"
                     class="input input-sm w-20 text-center"
+                    :class="{
+                      'border-red-500 bg-red-50': item.qtyActual > item.qtySuratJalan,
+                    }"
+                    :data-focus-key="`item-${index}-qty-received`"
                     @input="calculateDifference(index)"
                   />
                 </td>
@@ -381,7 +404,13 @@
                     v-model.number="item.repackQty"
                     type="number"
                     min="0"
+                    :max="item.less"
                     class="input input-sm w-20 text-center"
+                    :class="{
+                      'border-red-500 bg-red-50':
+                        item.less > 0 && item.repackQty + item.damageQty > item.less,
+                    }"
+                    @input="normalizeItemQuantities(index)"
                   />
                 </td>
                 <!-- Damage Qty - Editable -->
@@ -390,7 +419,13 @@
                     v-model.number="item.damageQty"
                     type="number"
                     min="0"
+                    :max="item.less"
                     class="input input-sm w-20 text-center"
+                    :class="{
+                      'border-red-500 bg-red-50':
+                        item.less > 0 && item.repackQty + item.damageQty > item.less,
+                    }"
+                    @input="normalizeItemQuantities(index)"
                   />
                 </td>
                 <!-- Reject Reason - Required when less > 0 -->
@@ -402,6 +437,7 @@
                       class="input input-sm w-40"
                       :class="{ 'border-red-500 bg-red-50': !item.rejectReason.trim() }"
                       placeholder="Required *"
+                      :data-focus-key="`item-${index}-reject-reason`"
                     />
                     <p v-if="!item.rejectReason.trim()" class="text-red-500 text-xs mt-1">
                       Reject reason is required
@@ -419,7 +455,7 @@
       <div class="flex justify-between items-center gap-[8px] mt-[24px]">
         <button
           class="btn btn-outline btn-primary"
-          :disabled="isSubmitting"
+          :disabled="isSubmitting || !canSaveDraft"
           @click="submitForm(true)"
         >
           Save as Draft
@@ -430,7 +466,7 @@
             <i class="ki-filled ki-arrow-left"></i>
             Back
           </button>
-          <button class="btn btn-primary" :disabled="isSubmitting" @click="submitForm(false)">
+          <button class="btn btn-primary" :disabled="isSubmitting || !canSubmit" @click="submitForm(false)">
             Submit
             <i class="ki-duotone ki-paper-plane"></i>
           </button>
@@ -455,7 +491,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
@@ -467,8 +503,20 @@ import ReceivingConfirmationService, {
   type ReceivingConfirmationCreatePayload,
   type ReceivingConfirmationDetailPayload,
 } from '@/services/receivingConfirmation.service'
+import {
+  getTodayDateString,
+  isDateAfterToday,
+  normalizeNonNegativeInt,
+  validateReceivingItemQuantities,
+  isBlank,
+  validationFail,
+  validationOk,
+  focusValidationField,
+  type FormValidationResult,
+} from '@/utils/formValidators'
 
 const router = useRouter()
+const todayDateString = getTodayDateString()
 
 // Interfaces
 interface FormData {
@@ -548,7 +596,7 @@ const formData = ref<FormData>({
   truckType: '',
   pickup: '',
   destination: '',
-  receivedDate: new Date().toISOString().split('T')[0], // Default to today
+  receivedDate: todayDateString,
   digitalSignaturePath: null,
 })
 
@@ -649,10 +697,49 @@ const selectDeliveryNote = (dn: DeliveryNotesData) => {
 
 const calculateDifference = (index: number) => {
   const item = tableData.value[index]
+  item.qtyActual = normalizeNonNegativeInt(item.qtyActual)
+  if (item.qtyActual > item.qtySuratJalan) {
+    item.qtyActual = item.qtySuratJalan
+  }
+
   const diff = item.qtyActual - item.qtySuratJalan
   item.qtySelisih = diff
   item.more = diff > 0 ? diff : 0
   item.less = diff < 0 ? Math.abs(diff) : 0
+
+  normalizeItemQuantities(index)
+}
+
+const normalizeItemQuantities = (index: number) => {
+  const item = tableData.value[index]
+  item.repackQty = normalizeNonNegativeInt(item.repackQty)
+  item.damageQty = normalizeNonNegativeInt(item.damageQty)
+
+  if (item.less <= 0) {
+    item.repackQty = 0
+    item.damageQty = 0
+    return
+  }
+
+  const total = item.repackQty + item.damageQty
+  if (total > item.less) {
+    const overflow = total - item.less
+    if (item.damageQty >= overflow) {
+      item.damageQty -= overflow
+    } else {
+      item.repackQty = Math.max(0, item.repackQty - overflow)
+      item.damageQty = 0
+    }
+  }
+}
+
+const showValidationError = (text: string) => {
+  notificationModal.value = {
+    type: 'warning',
+    title: 'Validation Error',
+    text,
+  }
+  showNotificationModal.value = true
 }
 
 const getDifferenceClass = (diff: number) => {
@@ -671,120 +758,107 @@ const clearSignature = () => {
   }
 }
 
-const validateForm = (isDraft = false): boolean => {
-  if (!formData.value.poNumber) {
-    notificationModal.value = {
-      type: 'warning',
-      title: 'Validation Error',
-      text: 'Please select a Delivery Note first',
-    }
-    showNotificationModal.value = true
+const validateForm = async (isDraft = false): Promise<boolean> => {
+  trimFormTextFields()
+  const result = getValidationResult(isDraft)
+  if (!result.valid) {
+    showValidationError(result.message!)
+    await focusValidationField(result.focusKey)
     return false
   }
-
-  if (!formData.value.whCheckerName.trim()) {
-    notificationModal.value = {
-      type: 'warning',
-      title: 'Validation Error',
-      text: 'Please enter Employee Name',
-    }
-    showNotificationModal.value = true
-    return false
-  }
-
-  if (!formData.value.driverName.trim()) {
-    notificationModal.value = {
-      type: 'warning',
-      title: 'Validation Error',
-      text: 'Please enter Driver Name',
-    }
-    showNotificationModal.value = true
-    return false
-  }
-
-  if (!formData.value.receivedDate) {
-    notificationModal.value = {
-      type: 'warning',
-      title: 'Validation Error',
-      text: 'Please enter Received Date',
-    }
-    showNotificationModal.value = true
-    return false
-  }
-
-  if (tableData.value.length === 0) {
-    notificationModal.value = {
-      type: 'warning',
-      title: 'Validation Error',
-      text: 'No items to submit. Please select a Delivery Note with items.',
-    }
-    showNotificationModal.value = true
-    return false
-  }
-
-  // Validate rejectReason is required when less > 0
-  const itemsMissingReason = tableData.value.filter(
-    (item) => item.less > 0 && !item.rejectReason.trim()
-  )
-  if (itemsMissingReason.length > 0) {
-    notificationModal.value = {
-      type: 'warning',
-      title: 'Validation Error',
-      text: `Please fill in the Reject Reason for ${itemsMissingReason.length} item(s) with shortage quantity.`,
-    }
-    showNotificationModal.value = true
-    return false
-  }
-
-  // Check signature only when submitting for approval.
-  if (!isDraft && signaturePad.value) {
-    const saveResult = signaturePad.value.save()
-    if (!saveResult || saveResult.trim().length === 0) {
-      notificationModal.value = {
-        type: 'warning',
-        title: 'Validation Error',
-        text: 'Please provide a signature',
-      }
-      showNotificationModal.value = true
-      return false
-    }
-  }
-
   return true
 }
 
+const trimFormTextFields = () => {
+  formData.value.whCheckerName = formData.value.whCheckerName.trim()
+  formData.value.tripID = formData.value.tripID.trim()
+  formData.value.driverName = formData.value.driverName.trim()
+
+  for (const item of tableData.value) {
+    item.lotNoActual = item.lotNoActual.trim()
+    item.rejectReason = item.rejectReason.trim()
+  }
+}
+
+const getValidationResult = (isDraft = false): FormValidationResult => {
+  if (isBlank(formData.value.poNumber)) {
+    return validationFail('Delivery Note wajib dipilih terlebih dahulu.', 'dn-search')
+  }
+
+  if (isBlank(formData.value.whCheckerName)) {
+    return validationFail('Employee Name wajib diisi.', 'employee-name')
+  }
+
+  if (isBlank(formData.value.tripID)) {
+    return validationFail('Trip ID wajib diisi.', 'trip-id')
+  }
+
+  if (isBlank(formData.value.driverName)) {
+    return validationFail('Driver Name wajib diisi.', 'driver-name')
+  }
+
+  if (isBlank(formData.value.receivedDate)) {
+    return validationFail('Received Date wajib diisi.', 'received-date')
+  }
+
+  if (isDateAfterToday(formData.value.receivedDate)) {
+    return validationFail('Received Date tidak boleh melebihi tanggal hari ini.', 'received-date')
+  }
+
+  if (tableData.value.length === 0) {
+    return validationFail('Tidak ada item untuk disubmit. Pilih Delivery Note yang memiliki item.')
+  }
+
+  for (let i = 0; i < tableData.value.length; i++) {
+    const item = tableData.value[i]
+    const qtyResult = validateReceivingItemQuantities(
+      item.qtySuratJalan,
+      item.qtyActual,
+      item.damageQty,
+      item.repackQty,
+    )
+    if (!qtyResult.valid && qtyResult.message) {
+      return validationFail(`${qtyResult.message} (item #${i + 1})`, `item-${i}-qty-received`)
+    }
+
+    if (item.less > 0 && isBlank(item.rejectReason)) {
+      return validationFail(`Reject Reason wajib diisi untuk item #${i + 1}.`, `item-${i}-reject-reason`)
+    }
+  }
+
+  if (!isDraft && signaturePad.value) {
+    const saveResult = signaturePad.value.save()
+    if (!saveResult || saveResult.trim().length === 0) {
+      return validationFail('Signature wajib diisi.', 'signature')
+    }
+  }
+
+  return validationOk()
+}
+
+const canSaveDraft = computed(() => getValidationResult(true).valid)
+const canSubmit = computed(() => getValidationResult(false).valid)
+
 const submitForm = async (isDraft = false) => {
-  if (!validateForm(isDraft)) return
+  if (!(await validateForm(isDraft))) return
 
   isSubmitting.value = true
 
   try {
-    // Save signature data
     let signatureData = ''
     if (signaturePad.value) {
       const saveResult = signaturePad.value.save()
-      console.log('Signature save result:', saveResult)
-      console.log('Type of save result:', typeof saveResult)
-
       if (saveResult && saveResult.trim().length > 0) {
         signatureData = saveResult
-      } else {
-        notificationModal.value = {
-          type: 'warning',
-          title: 'Validation Error',
-          text: 'Please provide a signature',
-        }
-        showNotificationModal.value = true
+      } else if (!isDraft) {
+        showValidationError('Signature wajib diisi.')
         isSubmitting.value = false
         return
       }
-    } else {
-      console.error('❌ Signature pad ref is null')
+    } else if (!isDraft) {
       isSubmitting.value = false
       return
     }
-
-    console.log('Final signature data length:', signatureData?.length || 0)
 
     // Prepare items payload
     const items: ReceivingConfirmationDetailPayload[] = tableData.value.map((item) => ({
@@ -850,7 +924,7 @@ const submitForm = async (isDraft = false) => {
 }
 
 onMounted(() => {
-  formData.value.receivedDate = new Date().toISOString().split('T')[0]
+  formData.value.receivedDate = todayDateString
 })
 </script>
 

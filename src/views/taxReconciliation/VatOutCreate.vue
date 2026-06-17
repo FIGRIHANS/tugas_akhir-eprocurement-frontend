@@ -638,9 +638,9 @@ const searchGr = async () => {
     })
     if (res && res.items && res.items.length > 0) {
       const mappedItems = res.items.map(item => {
-        const totalHarga = (item.unitPrice || 0) * (item.qtyReceivedGood || 0)
+        const totalHarga = Math.round((item.unitPrice || 0) * (item.qtyReceivedGood || 0))
         const dpp = totalHarga
-        const ppn = dpp * 0.12
+        const ppn = Math.round(dpp * 0.12)
         return {
           brgJasa: 'GOODS',
           kdBrgJasa: '000000', // Default to 000000 (standard Coretax code) instead of raw SKU
@@ -722,11 +722,11 @@ const parseInput = (val: string) => {
 }
 
 const calculateCurrentItem = () => {
-  currentItem.value.totalHarga = currentItem.value.jmlBrgJasa * currentItem.value.hargaSatuan
-  currentItem.value.dpp = currentItem.value.totalHarga - currentItem.value.diskon
+  currentItem.value.totalHarga = Math.round(currentItem.value.jmlBrgJasa * currentItem.value.hargaSatuan)
+  currentItem.value.dpp = Math.round(currentItem.value.totalHarga - currentItem.value.diskon)
   currentItem.value.dppLain = currentItem.value.dpp
-  currentItem.value.ppn = currentItem.value.dpp * (currentItem.value.tarifPpn / 100)
-  currentItem.value.ppnbm = currentItem.value.dpp * (currentItem.value.tarifPpnbm / 100)
+  currentItem.value.ppn = Math.round(currentItem.value.dpp * (currentItem.value.tarifPpn / 100))
+  currentItem.value.ppnbm = Math.round(currentItem.value.dpp * (currentItem.value.tarifPpnbm / 100))
 }
 
 const onHargaSatuanInput = (e: any) => {
@@ -787,6 +787,15 @@ const saveItem = () => {
 }
 
 const calculateDpp = () => {
+  // Round each value individually first to avoid floating-point drift
+  form.value.objekFaktur.forEach(obj => {
+    obj.dpp = Math.round(obj.dpp)
+    obj.dppLain = Math.round(obj.dppLain)
+    obj.ppn = Math.round(obj.ppn)
+    obj.ppnbm = Math.round(obj.ppnbm)
+    obj.totalHarga = Math.round(obj.totalHarga)
+  })
+  // totalDpp MUST exactly equal sum of item dpp (DJP validation)
   form.value.totalDpp = form.value.objekFaktur.reduce((acc, curr) => acc + curr.dpp, 0)
   form.value.totalDppLain = form.value.objekFaktur.reduce((acc, curr) => acc + curr.dppLain, 0)
   form.value.totalPpn = form.value.objekFaktur.reduce((acc, curr) => acc + curr.ppn, 0)
@@ -832,16 +841,22 @@ const submitForm = async () => {
     payload.objekFaktur = payload.objekFaktur.map((obj: any) => ({
       ...obj,
       jnsTransaksi: formattedDetailTransaksi,
-      ppn: Number(obj.ppn),
-      dppLain: Number(obj.dppLain),
-      dpp: Number(obj.dpp),
-      diskon: Number(obj.diskon),
-      totalHarga: Number(obj.totalHarga),
+      ppn: Math.round(Number(obj.ppn)),
+      dppLain: Math.round(Number(obj.dppLain)),
+      dpp: Math.round(Number(obj.dpp)),
+      diskon: Math.round(Number(obj.diskon)),
+      totalHarga: Math.round(Number(obj.totalHarga)),
       hargaSatuan: Number(obj.hargaSatuan),
       jmlBrgJasa: Number(obj.jmlBrgJasa),
       tarifPpnbm: Number(obj.tarifPpnbm),
-      ppnbm: Number(obj.ppnbm)
+      ppnbm: Math.round(Number(obj.ppnbm))
     }))
+    
+    // Re-sum from rounded item values to guarantee exact match (DJP requirement)
+    payload.totalDpp = payload.objekFaktur.reduce((acc: number, curr: any) => acc + curr.dpp, 0)
+    payload.totalDppLain = payload.objekFaktur.reduce((acc: number, curr: any) => acc + curr.dppLain, 0)
+    payload.totalPpn = payload.objekFaktur.reduce((acc: number, curr: any) => acc + curr.ppn, 0)
+    payload.totalPpnbm = payload.objekFaktur.reduce((acc: number, curr: any) => acc + curr.ppnbm, 0)
     
     await postVatOutCreate(vendorNpwp, payload)
     notifTitle.value = 'Invoice Created'

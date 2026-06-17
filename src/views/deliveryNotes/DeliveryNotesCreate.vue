@@ -30,6 +30,7 @@
                         type="text"
                         class="input flex-1"
                         placeholder="Enter PO Number"
+                        data-focus-key="po-search"
                         @keypress.enter="searchPO"
                       />
                       <button class="btn btn-primary" @click="searchPO" :disabled="isSearching">
@@ -77,6 +78,7 @@
                     type="text"
                     class="input flex-1"
                     placeholder="Enter Vendor Code"
+                    data-focus-key="vendor-code"
                   />
                 </div>
 
@@ -117,6 +119,7 @@
                     type="text"
                     class="input flex-1"
                     placeholder="Enter Driver Name"
+                    data-focus-key="driver-name"
                   />
                 </div>
 
@@ -130,6 +133,7 @@
                     type="text"
                     class="input flex-1"
                     placeholder="Enter License Plate"
+                    data-focus-key="license-plate"
                   />
                 </div>
 
@@ -143,6 +147,7 @@
                     type="text"
                     class="input flex-1"
                     placeholder="Enter Transporter"
+                    data-focus-key="transporter"
                   />
                 </div>
               </div>
@@ -159,6 +164,7 @@
                     type="text"
                     class="input flex-1"
                     placeholder="Enter Pickup Address"
+                    data-focus-key="pickup-address"
                   />
                 </div>
 
@@ -172,6 +178,7 @@
                     type="text"
                     class="input flex-1"
                     placeholder="Enter Destination Address"
+                    data-focus-key="destination-address"
                   />
                 </div>
 
@@ -197,6 +204,8 @@
                     v-model="formData.estimatedArrival"
                     type="datetime-local"
                     class="input flex-1"
+                    :min="todayDateTimeMin"
+                    data-focus-key="estimated-arrival"
                   />
                 </div>
 
@@ -220,7 +229,7 @@
             <label class="form-label text-sm font-medium text-gray-600"
               >Driver Signature <span class="text-red-500">*</span></label
             >
-            <div class="border border-gray-300 rounded-lg p-4 mt-2 bg-gray-50">
+            <div class="border border-gray-300 rounded-lg p-4 mt-2 bg-gray-50" data-focus-key="signature" tabindex="-1">
               <!-- Signature Pad -->
               <VueSignature
                 ref="signaturePad"
@@ -305,6 +314,7 @@
                     type="text"
                     class="input input-sm w-32"
                     placeholder="SKU"
+                    :data-focus-key="`item-${index}-sku`"
                   />
                 </td>
                 <td>
@@ -313,6 +323,7 @@
                     type="text"
                     class="input input-sm w-48"
                     placeholder="Description"
+                    :data-focus-key="`item-${index}-description`"
                   />
                 </td>
                 <td>
@@ -321,6 +332,7 @@
                     type="text"
                     class="input input-sm w-20"
                     placeholder="UOM"
+                    :data-focus-key="`item-${index}-uom`"
                   />
                 </td>
                 <td>
@@ -329,6 +341,7 @@
                     type="text"
                     class="input input-sm w-28"
                     placeholder="Lot No"
+                    :data-focus-key="`item-${index}-lot-no`"
                   />
                 </td>
                 <!-- Qty Ordered (readonly reference) -->
@@ -345,7 +358,8 @@
                       class="input input-sm w-24 text-center"
                       :class="{ 'border-red-500 bg-red-50': item.qtyOrdered > 0 && item.qtyShipped > item.qtyOrdered }"
                       placeholder="Qty"
-                      @input="validateQtyShipped(index)"
+                      :data-focus-key="`item-${index}-qty-shipped`"
+                      @input="validateQtyShippedInput(index)"
                       @blur="clampQtyShipped(index)"
                     />
                     <p
@@ -375,7 +389,7 @@
       <div class="flex justify-between items-center gap-[8px] mt-[24px]">
         <button
           class="btn btn-outline btn-primary"
-          :disabled="isSubmitting"
+          :disabled="isSubmitting || !canSaveDraft"
           @click="submitForm(true)"
         >
           Save as Draft
@@ -386,7 +400,7 @@
             <i class="ki-filled ki-arrow-left"></i>
             Back
           </button>
-          <button class="btn btn-primary" :disabled="isSubmitting" @click="submitForm(false)">
+          <button class="btn btn-primary" :disabled="isSubmitting || !canSubmit" @click="submitForm(false)">
             Submit
             <i class="ki-duotone ki-paper-plane"></i>
           </button>
@@ -411,7 +425,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
@@ -422,8 +436,20 @@ import DeliveryNotesService, {
   type DeliveryNoteCreatePayload,
 } from '@/services/deliveryNotes.service'
 import { getUserIdFromToken } from '@/composables/token'
+import {
+  getTodayDateString,
+  isDateTimeBeforeToday,
+  validateQtyShipped,
+  isBlank,
+  validationFail,
+  validationOk,
+  focusValidationField,
+  type FormValidationResult,
+} from '@/utils/formValidators'
 
 const router = useRouter()
+const todayDateString = getTodayDateString()
+const todayDateTimeMin = `${todayDateString}T00:00`
 
 // Interfaces
 interface FormData {
@@ -608,11 +634,9 @@ const clearSignature = () => {
   }
 }
 
-const validateQtyShipped = (index: number) => {
+const validateQtyShippedInput = (index: number) => {
   // Visual feedback is handled by the template binding — no extra logic needed here.
-  // This function exists as the @input hook to trigger reactivity.
   const item = tableData.value[index]
-  // Ensure never negative
   if (item.qtyShipped < 0) {
     item.qtyShipped = 0
   }
@@ -628,143 +652,125 @@ const clampQtyShipped = (index: number) => {
   }
 }
 
-const validateForm = (isDraft = false): boolean => {
-  if (!formData.value.poNumber.trim()) {
-    notificationModal.value = {
-      type: 'warning',
-      title: 'Validation Error',
-      text: 'Please enter PO Number',
-    }
-    showNotificationModal.value = true
-    return false
+const showValidationError = (text: string) => {
+  notificationModal.value = {
+    type: 'warning',
+    title: 'Validation Error',
+    text,
+  }
+  showNotificationModal.value = true
+}
+
+const trimFormTextFields = () => {
+  formData.value.vendorCode = formData.value.vendorCode.trim()
+  formData.value.driverName = formData.value.driverName.trim()
+  formData.value.licensePlate = formData.value.licensePlate.trim()
+  formData.value.transporter = formData.value.transporter.trim()
+  formData.value.pickupAddress = formData.value.pickupAddress.trim()
+  formData.value.destinationAddress = formData.value.destinationAddress.trim()
+  formData.value.tripID = formData.value.tripID.trim()
+
+  for (const item of tableData.value) {
+    item.sku = item.sku.trim()
+    item.description = item.description.trim()
+    item.uom = item.uom.trim()
+    item.lotNo = item.lotNo.trim()
+  }
+}
+
+const getValidationResult = (isDraft = false): FormValidationResult => {
+  if (isBlank(formData.value.poNumber)) {
+    return validationFail('PO Number wajib diisi.', 'po-search')
   }
 
-  // DeliveryNoteNumber is optional — backend auto-generates if left empty
-
-  if (!formData.value.vendorCode.trim()) {
-    notificationModal.value = {
-      type: 'warning',
-      title: 'Validation Error',
-      text: 'Please enter Vendor Code',
-    }
-    showNotificationModal.value = true
-    return false
+  if (isBlank(formData.value.vendorCode)) {
+    return validationFail('Vendor Code wajib diisi.', 'vendor-code')
   }
 
-  if (!isDraft && !formData.value.driverName.trim()) {
-    notificationModal.value = {
-      type: 'warning',
-      title: 'Validation Error',
-      text: 'Please enter Driver Name',
-    }
-    showNotificationModal.value = true
-    return false
+  if (!isDraft && isBlank(formData.value.driverName)) {
+    return validationFail('Driver Name wajib diisi.', 'driver-name')
   }
 
-  if (!isDraft && !formData.value.licensePlate.trim()) {
-    notificationModal.value = {
-      type: 'warning',
-      title: 'Validation Error',
-      text: 'Please enter License Plate',
-    }
-    showNotificationModal.value = true
-    return false
+  if (!isDraft && isBlank(formData.value.licensePlate)) {
+    return validationFail('License Plate wajib diisi.', 'license-plate')
   }
 
-  if (!isDraft && !formData.value.transporter.trim()) {
-    notificationModal.value = {
-      type: 'warning',
-      title: 'Validation Error',
-      text: 'Please enter Transporter',
-    }
-    showNotificationModal.value = true
-    return false
+  if (!isDraft && isBlank(formData.value.transporter)) {
+    return validationFail('Transporter wajib diisi.', 'transporter')
   }
 
-  if (!isDraft && !formData.value.pickupAddress.trim()) {
-    notificationModal.value = {
-      type: 'warning',
-      title: 'Validation Error',
-      text: 'Please enter Pickup Address',
-    }
-    showNotificationModal.value = true
-    return false
+  if (!isDraft && isBlank(formData.value.pickupAddress)) {
+    return validationFail('Pickup Address wajib diisi.', 'pickup-address')
   }
 
-  if (!isDraft && !formData.value.destinationAddress.trim()) {
-    notificationModal.value = {
-      type: 'warning',
-      title: 'Validation Error',
-      text: 'Please enter Destination Address',
-    }
-    showNotificationModal.value = true
-    return false
+  if (!isDraft && isBlank(formData.value.destinationAddress)) {
+    return validationFail('Destination wajib diisi.', 'destination-address')
   }
 
-  if (!isDraft && !formData.value.estimatedArrival) {
-    notificationModal.value = {
-      type: 'warning',
-      title: 'Validation Error',
-      text: 'Please enter Estimated Arrival',
-    }
-    showNotificationModal.value = true
-    return false
+  if (!isDraft && isBlank(formData.value.estimatedArrival)) {
+    return validationFail('Estimated Arrival Date wajib diisi.', 'estimated-arrival')
+  }
+
+  if (!isDraft && formData.value.estimatedArrival && isDateTimeBeforeToday(formData.value.estimatedArrival)) {
+    return validationFail('Estimated Arrival Date tidak boleh sebelum hari ini.', 'estimated-arrival')
   }
 
   if (!isDraft && tableData.value.length === 0) {
-    notificationModal.value = {
-      type: 'warning',
-      title: 'Validation Error',
-      text: 'Please add at least one item',
-    }
-    showNotificationModal.value = true
-    return false
+    return validationFail('Minimal satu item wajib ditambahkan.')
   }
 
-  // Validate items
   for (let i = 0; i < tableData.value.length; i++) {
     const item = tableData.value[i]
-    if (!isDraft && (!item.sku || !item.description || !item.uom || !item.lotNo || item.qtyShipped <= 0)) {
-      notificationModal.value = {
-        type: 'warning',
-        title: 'Validation Error',
-        text: `Please complete all fields for item #${i + 1}`,
+
+    if (!isDraft) {
+      if (isBlank(item.sku)) {
+        return validationFail(`SKU wajib diisi untuk item #${i + 1}.`, `item-${i}-sku`)
       }
-      showNotificationModal.value = true
-      return false
+      if (isBlank(item.description)) {
+        return validationFail(`Description wajib diisi untuk item #${i + 1}.`, `item-${i}-description`)
+      }
+      if (isBlank(item.uom)) {
+        return validationFail(`UOM wajib diisi untuk item #${i + 1}.`, `item-${i}-uom`)
+      }
+      if (isBlank(item.lotNo)) {
+        return validationFail(`Lot No wajib diisi untuk item #${i + 1}.`, `item-${i}-lot-no`)
+      }
     }
 
-    // Qty shipped must not exceed ordered qty (from GET/selected PO)
-    if (item.qtyOrdered > 0 && item.qtyShipped > item.qtyOrdered) {
-      notificationModal.value = {
-        type: 'warning',
-        title: 'Validation Error',
-        text: `Qty Shipped for item #${i + 1} must not exceed Qty Ordered (${item.qtyOrdered})`,
+    if (!isDraft || item.sku || item.description || item.uom || item.lotNo || item.qtyShipped > 0) {
+      const qtyResult = validateQtyShipped(item.qtyShipped, item.qtyOrdered, !isDraft)
+      if (!qtyResult.valid && qtyResult.message) {
+        return validationFail(`${qtyResult.message} (item #${i + 1})`, `item-${i}-qty-shipped`)
       }
-      showNotificationModal.value = true
-      return false
     }
   }
 
-  // Check signature
   if (!isDraft && signaturePad.value) {
     const saveResult = signaturePad.value.save()
     if (!saveResult || saveResult.trim().length === 0) {
-      notificationModal.value = {
-        type: 'warning',
-        title: 'Validation Error',
-        text: 'Please provide driver signature',
-      }
-      showNotificationModal.value = true
-      return false
+      return validationFail('Driver Signature wajib diisi.', 'signature')
     }
   }
 
+  return validationOk()
+}
+
+const canSaveDraft = computed(() => getValidationResult(true).valid)
+const canSubmit = computed(() => getValidationResult(false).valid)
+
+const validateForm = async (isDraft = false): Promise<boolean> => {
+  trimFormTextFields()
+  const result = getValidationResult(isDraft)
+  if (!result.valid) {
+    showValidationError(result.message!)
+    await focusValidationField(result.focusKey)
+    return false
+  }
   return true
 }
 
 const submitForm = async (isDraft = false) => {
-  if (!validateForm(isDraft)) return
+  if (!(await validateForm(isDraft))) return
 
   isSubmitting.value = true
 

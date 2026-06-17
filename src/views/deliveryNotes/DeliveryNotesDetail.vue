@@ -112,6 +112,7 @@
                     class="input flex-1"
                     :class="isDraft ? 'bg-white' : 'bg-gray-50'"
                     :disabled="!isDraft"
+                    data-focus-key="driver-name"
                   />
                 </div>
 
@@ -126,6 +127,7 @@
                     class="input flex-1"
                     :class="isDraft ? 'bg-white' : 'bg-gray-50'"
                     :disabled="!isDraft"
+                    data-focus-key="license-plate"
                   />
                 </div>
 
@@ -140,6 +142,7 @@
                     class="input flex-1"
                     :class="isDraft ? 'bg-white' : 'bg-gray-50'"
                     :disabled="!isDraft"
+                    data-focus-key="transporter"
                   />
                 </div>
               </div>
@@ -157,6 +160,7 @@
                     class="input flex-1"
                     :class="isDraft ? 'bg-white' : 'bg-gray-50'"
                     :disabled="!isDraft"
+                    data-focus-key="pickup-address"
                   />
                 </div>
 
@@ -171,6 +175,7 @@
                     class="input flex-1"
                     :class="isDraft ? 'bg-white' : 'bg-gray-50'"
                     :disabled="!isDraft"
+                    data-focus-key="destination-address"
                   />
                 </div>
 
@@ -194,11 +199,19 @@
                     Shipping Date
                   </label>
                   <input
+                    v-if="isDraft"
                     v-model="shippingDateInput"
-                    :type="isDraft ? 'date' : 'text'"
-                    class="input flex-1"
-                    :class="isDraft ? 'bg-white' : 'bg-gray-50'"
-                    :disabled="!isDraft"
+                    type="date"
+                    class="input flex-1 bg-white"
+                    :min="todayDateString"
+                    data-focus-key="shipping-date"
+                  />
+                  <input
+                    v-else
+                    :value="formatShippingDate(detailData.shippingDate)"
+                    type="text"
+                    class="input flex-1 bg-gray-50"
+                    disabled
                   />
                 </div>
 
@@ -276,7 +289,13 @@
               <tr v-for="(item, index) in detailData.items" :key="index">
                 <td class="text-center">{{ index + 1 }}</td>
                 <td class="text-center">
-                  <input v-if="isDraft" v-model="item.sku" type="text" class="input input-sm w-32" />
+                  <input
+                    v-if="isDraft"
+                    v-model="item.sku"
+                    type="text"
+                    class="input input-sm w-32"
+                    :data-focus-key="`item-${index}-sku`"
+                  />
                   <span v-else>{{ item.sku }}</span>
                 </td>
                 <td class="text-center">
@@ -285,11 +304,18 @@
                     v-model="item.description"
                     type="text"
                     class="input input-sm w-48"
+                    :data-focus-key="`item-${index}-description`"
                   />
                   <span v-else>{{ item.description }}</span>
                 </td>
                 <td class="text-center">
-                  <input v-if="isDraft" v-model="item.uom" type="text" class="input input-sm w-20" />
+                  <input
+                    v-if="isDraft"
+                    v-model="item.uom"
+                    type="text"
+                    class="input input-sm w-20"
+                    :data-focus-key="`item-${index}-uom`"
+                  />
                   <span v-else>{{ item.uom }}</span>
                 </td>
                 <td class="text-center">
@@ -298,6 +324,7 @@
                     v-model="item.lotNo"
                     type="text"
                     class="input input-sm w-28"
+                    :data-focus-key="`item-${index}-lot-no`"
                   />
                   <span v-else>{{ item.lotNo }}</span>
                 </td>
@@ -307,7 +334,15 @@
                     v-model.number="item.qtyShipped"
                     type="number"
                     min="0"
+                    :max="item.qtyOrdered && item.qtyOrdered > 0 ? item.qtyOrdered : undefined"
                     class="input input-sm w-24 text-center"
+                    :class="{
+                      'border-red-500 bg-red-50':
+                        item.qtyOrdered > 0 && item.qtyShipped > item.qtyOrdered,
+                    }"
+                    :data-focus-key="`item-${index}-qty-shipped`"
+                    @input="validateQtyShippedInput(index)"
+                    @blur="clampQtyShipped(index)"
                   />
                   <span v-else>{{ item.qtyShipped }}</span>
                 </td>
@@ -331,7 +366,7 @@
         <button
           v-if="isDraft"
           class="btn btn-outline btn-primary"
-          :disabled="isSubmitting"
+          :disabled="isSubmitting || !canSaveDraft"
           @click="updateDeliveryNote(true)"
         >
           Save as Draft
@@ -350,7 +385,7 @@
           <button
             v-if="isDraft"
             class="btn btn-primary"
-            :disabled="isSubmitting"
+            :disabled="isSubmitting || !canSubmit"
             @click="updateDeliveryNote(false)"
           >
             <span v-if="isSubmitting">Submitting...</span>
@@ -389,6 +424,26 @@ import DeliveryNotesService, {
   type DeliveryNoteCreatePayload,
   type DeliveryNotesData,
 } from '@/services/deliveryNotes.service'
+import {
+  getTodayDateString,
+  isDateBeforeToday,
+  validateQtyShipped,
+  isBlank,
+  toLocalDateString,
+  validationFail,
+  validationOk,
+  focusValidationField,
+  type FormValidationResult,
+} from '@/utils/formValidators'
+
+interface DeliveryNoteItemWithOrdered {
+  sku: string
+  description: string
+  uom: string
+  lotNo: string
+  qtyShipped: number
+  qtyOrdered?: number
+}
 
 const router = useRouter()
 const route = useRoute()
@@ -416,6 +471,7 @@ const notificationModal = ref({
 })
 
 const isDraft = computed(() => detailData.value?.status === 'Draft')
+const todayDateString = getTodayDateString()
 
 const formatShippingDate = (value?: string): string => {
   if (!value) return '-'
@@ -436,7 +492,7 @@ const shippingDateInput = computed({
   get: () => {
     if (!detailData.value?.shippingDate) return ''
     if (isDraft.value) {
-      return new Date(detailData.value.shippingDate).toISOString().split('T')[0]
+      return toLocalDateString(detailData.value.shippingDate)
     }
     return formatShippingDate(detailData.value.shippingDate)
   },
@@ -471,6 +527,7 @@ const fetchDetail = async () => {
 
     if (data) {
       detailData.value = data
+      await enrichItemsWithQtyOrdered(data)
     } else {
       error.value = 'Delivery note not found'
     }
@@ -509,71 +566,161 @@ const removeItem = (index: number) => {
   detailData.value?.items.splice(index, 1)
 }
 
-const validateUpdateForm = (isDraftUpdate = false): boolean => {
-  if (!detailData.value) return false
+const enrichItemsWithQtyOrdered = async (data: DeliveryNotesData) => {
+  if (!data.poNumber?.trim()) return
+
+  try {
+    const po = await DeliveryNotesService.searchPoFromSap(data.poNumber)
+    if (!po?.items?.length) return
+
+    const items = data.items as DeliveryNoteItemWithOrdered[]
+    for (const item of items) {
+      const poItem = po.items.find((p) => p.sku === item.sku)
+      item.qtyOrdered = poItem?.qtyOrdered ?? 0
+    }
+  } catch (err) {
+    console.warn('Could not load PO qty ordered for validation:', err)
+  }
+}
+
+const validateQtyShippedInput = (index: number) => {
+  const items = detailData.value?.items as DeliveryNoteItemWithOrdered[] | undefined
+  const item = items?.[index]
+  if (!item || item.qtyShipped < 0) {
+    if (item) item.qtyShipped = 0
+  }
+}
+
+const clampQtyShipped = (index: number) => {
+  const items = detailData.value?.items as DeliveryNoteItemWithOrdered[] | undefined
+  const item = items?.[index]
+  if (!item) return
+
+  if (item.qtyOrdered && item.qtyOrdered > 0 && item.qtyShipped > item.qtyOrdered) {
+    item.qtyShipped = item.qtyOrdered
+  }
+  if (item.qtyShipped < 0) {
+    item.qtyShipped = 0
+  }
+}
+
+const showValidationError = (text: string) => {
+  notificationModal.value = {
+    type: 'warning',
+    title: 'Validation Error',
+    text,
+  }
+  showNotificationModal.value = true
+}
+
+const trimDetailTextFields = () => {
+  if (!detailData.value) return
+  detailData.value.driverName = detailData.value.driverName?.trim() ?? ''
+  detailData.value.licensePlate = detailData.value.licensePlate?.trim() ?? ''
+  detailData.value.transporter = detailData.value.transporter?.trim() ?? ''
+  detailData.value.pickupAddress = detailData.value.pickupAddress?.trim() ?? ''
+  detailData.value.destinationAddress = detailData.value.destinationAddress?.trim() ?? ''
+
+  const items = detailData.value.items as DeliveryNoteItemWithOrdered[]
+  for (const item of items) {
+    item.sku = item.sku?.trim() ?? ''
+    item.description = item.description?.trim() ?? ''
+    item.uom = item.uom?.trim() ?? ''
+    item.lotNo = item.lotNo?.trim() ?? ''
+  }
+}
+
+const getValidationResult = (isDraftUpdate = false): FormValidationResult => {
+  if (!detailData.value) return validationFail('Data tidak ditemukan.')
 
   if (!isDraft.value) {
-    notificationModal.value = {
-      type: 'warning',
-      title: 'Validation Error',
-      text: 'Delivery note can only be updated while status is Draft',
-    }
-    showNotificationModal.value = true
-    return false
+    return validationFail('Delivery note can only be updated while status is Draft')
   }
 
-  if (!detailData.value.poNumber?.trim() || !detailData.value.vendorCode?.trim()) {
-    notificationModal.value = {
-      type: 'warning',
-      title: 'Validation Error',
-      text: 'PO Number and Vendor Code are required',
-    }
-    showNotificationModal.value = true
-    return false
+  if (isBlank(detailData.value.poNumber) || isBlank(detailData.value.vendorCode)) {
+    return validationFail('PO Number dan Vendor Code wajib diisi.', 'vendor-code')
   }
 
-  if (isDraftUpdate) return true
+  if (isDraftUpdate) return validationOk()
 
-  if (
-    !detailData.value.driverName?.trim() ||
-    !detailData.value.licensePlate?.trim() ||
-    !detailData.value.transporter?.trim() ||
-    !detailData.value.pickupAddress?.trim() ||
-    !detailData.value.destinationAddress?.trim() ||
-    !detailData.value.shippingDate
-  ) {
-    notificationModal.value = {
-      type: 'warning',
-      title: 'Validation Error',
-      text: 'Please complete delivery information before submitting',
-    }
-    showNotificationModal.value = true
-    return false
+  if (isBlank(detailData.value.driverName)) {
+    return validationFail('Driver Name wajib diisi.', 'driver-name')
+  }
+
+  if (isBlank(detailData.value.licensePlate)) {
+    return validationFail('License Plate wajib diisi.', 'license-plate')
+  }
+
+  if (isBlank(detailData.value.transporter)) {
+    return validationFail('Transporter wajib diisi.', 'transporter')
+  }
+
+  if (isBlank(detailData.value.pickupAddress)) {
+    return validationFail('Pickup Address wajib diisi.', 'pickup-address')
+  }
+
+  if (isBlank(detailData.value.destinationAddress)) {
+    return validationFail('Destination wajib diisi.', 'destination-address')
+  }
+
+  if (isBlank(detailData.value.shippingDate)) {
+    return validationFail('Shipping Date wajib diisi.', 'shipping-date')
+  }
+
+  if (isDateBeforeToday(detailData.value.shippingDate)) {
+    return validationFail('Shipping Date tidak boleh sebelum hari ini.', 'shipping-date')
   }
 
   if (!detailData.value.items || detailData.value.items.length === 0) {
-    notificationModal.value = {
-      type: 'warning',
-      title: 'Validation Error',
-      text: 'Please add at least one item',
-    }
-    showNotificationModal.value = true
-    return false
+    return validationFail('Minimal satu item wajib ditambahkan.')
   }
 
-  for (let i = 0; i < detailData.value.items.length; i++) {
-    const item = detailData.value.items[i]
-    if (!item.sku || !item.description || !item.uom || !item.lotNo || item.qtyShipped <= 0) {
+  const items = detailData.value.items as DeliveryNoteItemWithOrdered[]
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i]
+
+    if (isBlank(item.sku)) {
+      return validationFail(`SKU wajib diisi untuk item #${i + 1}.`, `item-${i}-sku`)
+    }
+    if (isBlank(item.description)) {
+      return validationFail(`Description wajib diisi untuk item #${i + 1}.`, `item-${i}-description`)
+    }
+    if (isBlank(item.uom)) {
+      return validationFail(`UOM wajib diisi untuk item #${i + 1}.`, `item-${i}-uom`)
+    }
+    if (isBlank(item.lotNo)) {
+      return validationFail(`Lot No wajib diisi untuk item #${i + 1}.`, `item-${i}-lot-no`)
+    }
+
+    const qtyResult = validateQtyShipped(item.qtyShipped, item.qtyOrdered ?? 0, true)
+    if (!qtyResult.valid && qtyResult.message) {
+      return validationFail(`${qtyResult.message} (item #${i + 1})`, `item-${i}-qty-shipped`)
+    }
+  }
+
+  return validationOk()
+}
+
+const canSaveDraft = computed(() => isDraft.value && getValidationResult(true).valid)
+const canSubmit = computed(() => isDraft.value && getValidationResult(false).valid)
+
+const validateUpdateForm = async (isDraftUpdate = false): Promise<boolean> => {
+  trimDetailTextFields()
+  const result = getValidationResult(isDraftUpdate)
+  if (!result.valid) {
+    if (result.message === 'Delivery note can only be updated while status is Draft') {
       notificationModal.value = {
         type: 'warning',
         title: 'Validation Error',
-        text: `Please complete all fields for item #${i + 1}`,
+        text: result.message,
       }
       showNotificationModal.value = true
-      return false
+    } else {
+      showValidationError(result.message!)
     }
+    await focusValidationField(result.focusKey)
+    return false
   }
-
   return true
 }
 
@@ -596,8 +743,8 @@ const buildUpdatePayload = (isDraftUpdate = false): DeliveryNoteCreatePayload =>
     driverSignature: data.driverSignature || '',
     truckType: data.truckType || undefined,
     shippingDate: data.shippingDate
-      ? new Date(data.shippingDate).toISOString().split('T')[0]
-      : new Date().toISOString().split('T')[0],
+      ? toLocalDateString(data.shippingDate)
+      : getTodayDateString(),
     status: isDraftUpdate ? 'Draft' : 'On Delivery',
     details: isDraftUpdate
       ? data.items.filter((item) => item.sku || item.description || item.uom || item.lotNo || item.qtyShipped > 0)
@@ -606,7 +753,7 @@ const buildUpdatePayload = (isDraftUpdate = false): DeliveryNoteCreatePayload =>
 }
 
 const updateDeliveryNote = async (isDraftUpdate = false) => {
-  if (!detailData.value || !validateUpdateForm(isDraftUpdate)) return
+  if (!detailData.value || !(await validateUpdateForm(isDraftUpdate))) return
 
   isSubmitting.value = true
 
