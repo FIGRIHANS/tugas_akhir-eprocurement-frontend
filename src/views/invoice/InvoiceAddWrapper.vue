@@ -164,8 +164,36 @@
         </div>
       </div>
     </div>
-    <ModalSuccess :isDraft="isClickDraft" @afterClose="goToList" />
-    <ErrorSubmissionModal />
+    <Teleport to="body">
+      <div class="invoice-submit-modal-layer">
+        <UiModal v-model="showSuccessModal" size="sm" hide-header>
+          <div class="flex flex-col items-center gap-[30px] px-[20px] py-[10px]">
+            <ModalSuccessLogo />
+            <div class="text-center font-inter">
+              <p class="text-lg font-medium">{{ submitSuccessTitle }}</p>
+              <p class="text-[13px] font-normal text-gray-600">{{ submitSuccessMessage }}</p>
+            </div>
+            <button type="button" class="btn btn-primary" @click="handleSubmitSuccessConfirm">OK</button>
+          </div>
+        </UiModal>
+
+        <UiModal v-model="showErrorSubmissionModal" size="sm" hide-header>
+          <div class="flex flex-col items-center gap-[30px] px-[20px] py-[10px]">
+            <ModalRejectLogo />
+            <div class="text-center font-inter">
+              <p class="text-lg font-medium">Submission Failed</p>
+              <p class="text-[13px] font-normal text-gray-700">
+                We couldn't submit your invoice due to the following reason(s):
+              </p>
+              <p class="text-[13px] font-normal text-gray-700">{{ invoiceApi.errorMessageSubmission }}</p>
+              <p class="text-[13px] font-normal text-gray-700">Please correct the errors and try again.</p>
+            </div>
+            <button type="button" class="btn btn-primary" @click="showErrorSubmissionModal = false">OK</button>
+          </div>
+        </UiModal>
+      </div>
+    </Teleport>
+
     <ModalSuccessBudgetCheck @afterClose="isCheckBudget = true" />
     <ModalFailedBudgetCheck @afterClose="isCheckBudget = false" />
     <UpdatePaymentStatusModal :isLoading="false" @close="goToList" />
@@ -180,6 +208,7 @@ import {
   onMounted,
   provide,
   watch,
+  nextTick,
   type Component,
   defineAsyncComponent,
 } from 'vue'
@@ -192,6 +221,9 @@ import TabInvoice from '@/components/invoice/TabInvoice.vue'
 import RejectedInvoiceStatusCard from './InvoiceAddWrapper/RejectedInvoiceStatusCard.vue'
 import InvoiceContentSkeleton from './InvoiceAddWrapper/InvoiceContentSkeleton.vue'
 import iconPDF from '@/components/icons/iconPDF.vue'
+import UiModal from '@/components/modal/UiModal.vue'
+import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
+import ModalRejectLogo from '@/assets/svg/ModalRejectLogo.vue'
 import { KTModal } from '@/metronic/core'
 import { useCheckEmpty } from '@/composables/validation'
 import {
@@ -233,14 +265,8 @@ const InvoiceInformation = defineAsyncComponent(
 )
 const InvoicePreview = defineAsyncComponent(() => import('./InvoiceAddWrapper/InvoicePreview.vue'))
 const PaymentStatus = defineAsyncComponent(() => import('./InvoiceAddWrapper/PaymentStatus.vue'))
-const ModalSuccess = defineAsyncComponent(
-  () => import('./InvoiceAddWrapper/InvoicePreview/ModalSuccess.vue'),
-)
 const InvoiceOcrAiVerification = defineAsyncComponent(
   () => import('./InvoiceAddWrapper/InvoiceOcrAiVerification.vue'),
-)
-const ErrorSubmissionModal = defineAsyncComponent(
-  () => import('./InvoiceAddWrapper/ErrorSubmissionModal.vue'),
 )
 const ModalSuccessBudgetCheck = defineAsyncComponent(
   () => import('./InvoiceAddWrapper/ModalSuccessBudgetCheck.vue'),
@@ -265,6 +291,66 @@ const isSubmit = ref<boolean>(false)
 const isLoadingContent = ref<boolean>(true)
 const isCheckBudget = ref<boolean>(false)
 const isClickDraft = ref<boolean>(false)
+const wasRejectedResubmit = ref<boolean>(false)
+const showSuccessModal = ref<boolean>(false)
+const showErrorSubmissionModal = ref<boolean>(false)
+
+const INVOICE_SUBMIT_SUCCESS_KEY = 'invoice_submit_success'
+
+const submitSuccessTitle = computed(() => {
+  if (isClickDraft.value) return 'Invoice Successfully Drafted'
+  if (wasRejectedResubmit.value) return 'Invoice Successfully Resubmitted'
+  return 'Invoice Successfully Submitted'
+})
+
+const submitSuccessMessage = computed(() => {
+  if (isClickDraft.value) {
+    return 'Your invoice has been saved as a draft. You can review and make any necessary changes before submitting it for approval.'
+  }
+  return 'The invoice you sent is currently under review. Further information will be provided via notification.'
+})
+
+const openSubmissionErrorModal = (message?: string) => {
+  if (message) invoiceApi.errorMessageSubmission = message
+  showErrorSubmissionModal.value = true
+}
+
+const showSubmitSuccessModal = async () => {
+  sessionStorage.setItem(
+    INVOICE_SUBMIT_SUCCESS_KEY,
+    JSON.stringify({
+      kind: isClickDraft.value ? 'draft' : wasRejectedResubmit.value ? 'resubmit' : 'submit',
+    }),
+  )
+  showSuccessModal.value = true
+  await nextTick()
+}
+
+const restoreSubmitSuccessModalIfNeeded = () => {
+  const pending = sessionStorage.getItem(INVOICE_SUBMIT_SUCCESS_KEY)
+  if (!pending) return
+
+  try {
+    const parsed = JSON.parse(pending) as { kind?: string }
+    isClickDraft.value = parsed.kind === 'draft'
+    wasRejectedResubmit.value = parsed.kind === 'resubmit'
+  } catch {
+    isClickDraft.value = pending === 'draft'
+    wasRejectedResubmit.value = false
+  }
+
+  showSuccessModal.value = true
+}
+
+const clearSubmitSuccessModal = () => {
+  sessionStorage.removeItem(INVOICE_SUBMIT_SUCCESS_KEY)
+  showSuccessModal.value = false
+}
+
+const handleSubmitSuccessConfirm = () => {
+  clearSubmitSuccessModal()
+  goToList()
+}
 
 const hasCompletedDataTab = ref<boolean>(false)
 
@@ -1486,12 +1572,10 @@ const showWorkflowNotFoundError = (
   invoiceTypeCode: number,
   invoiceTypeName: string,
 ) => {
-  invoiceApi.errorMessageSubmission =
+  openSubmissionErrorModal(
     `Workflow approval tidak ditemukan untuk Company Code "${companyCode}" dan Invoice Type "${invoiceTypeName || invoiceTypeCode}". ` +
-    'Mohon pastikan matrix approval sudah dikonfigurasi untuk kombinasi company code dan invoice type ini.'
-  const idModal = document.querySelector('#error_submission_modal')
-  const modal = KTModal.getInstance(idModal as HTMLElement)
-  modal.show()
+      'Mohon pastikan matrix approval sudah dikonfigurasi untuk kombinasi company code dan invoice type ini.',
+  )
 }
 
 const goNext = async () => {
@@ -1536,20 +1620,16 @@ const goNext = async () => {
             form.department = list[0].code
             console.info('No dept on header/lines — using company cost center fallback', list[0].code)
           } else {
-            invoiceApi.errorMessageSubmission =
-              'Department/Cost Center is required for workflow resolution. Please ensure at least one line item has a department assigned or select a department in the header.'
-            const idModal = document.querySelector('#error_submission_modal')
-            const modal = KTModal.getInstance(idModal as HTMLElement)
-            modal.show()
+            openSubmissionErrorModal(
+              'Department/Cost Center is required for workflow resolution. Please ensure at least one line item has a department assigned or select a department in the header.',
+            )
             return
           }
         } catch (err) {
           console.error('Error fetching cost center fallback:', err)
-          invoiceApi.errorMessageSubmission =
-            'Department/Cost Center is required for workflow resolution. Please ensure at least one line item has a department assigned or select a department in the header.'
-          const idModal = document.querySelector('#error_submission_modal')
-          const modal = KTModal.getInstance(idModal as HTMLElement)
-          modal.show()
+          openSubmissionErrorModal(
+            'Department/Cost Center is required for workflow resolution. Please ensure at least one line item has a department assigned or select a department in the header.',
+          )
           return
         }
       }
@@ -1557,6 +1637,7 @@ const goNext = async () => {
 
     isSubmit.value = true
     isClickDraft.value = false
+    wasRejectedResubmit.value = isRejectedInvoiceStatus(form.status)
     if (checkIsNonPo()) {
       const submissionData = mapDataPostNonPo()
 
@@ -1611,9 +1692,7 @@ const goNext = async () => {
           } catch {
             invoiceApi.errorMessageSubmission = msg
           }
-          const idModal = document.querySelector('#error_submission_modal')
-          const modal = KTModal.getInstance(idModal as HTMLElement)
-          modal.show()
+          openSubmissionErrorModal()
         })
         .finally(() => {
           isSubmit.value = false
@@ -1622,20 +1701,18 @@ const goNext = async () => {
       // Validate required GR fields before building payload
       // First check if any item is currently being edited (unsaved changes)
       if (Array.isArray(form.invoicePoGr) && form.invoicePoGr.some((it) => it.isEdit)) {
-        invoiceApi.errorMessageSubmission = 'Ada baris PO/GR yang sedang diedit. Mohon simpan atau batalkan edit terlebih dahulu sebelum submit.'
-        const idModal = document.querySelector('#error_submission_modal')
-        const modal = KTModal.getInstance(idModal as HTMLElement)
-        modal.show()
+        openSubmissionErrorModal(
+          'Ada baris PO/GR yang sedang diedit. Mohon simpan atau batalkan edit terlebih dahulu sebelum submit.',
+        )
         isSubmit.value = false
         return
       }
 
       // Then check for missing required fields
       if (Array.isArray(form.invoicePoGr) && form.invoicePoGr.some((it) => !it.grDocumentDate || !it.grDocumentNo || !it.conditionType || !it.taxCode)) {
-        invoiceApi.errorMessageSubmission = 'Beberapa baris PO/GR belum memiliki GR Document No / Date / Condition Type / Tax Code. Mohon lengkapi sebelum submit.'
-        const idModal = document.querySelector('#error_submission_modal')
-        const modal = KTModal.getInstance(idModal as HTMLElement)
-        modal.show()
+        openSubmissionErrorModal(
+          'Beberapa baris PO/GR belum memiliki GR Document No / Date / Condition Type / Tax Code. Mohon lengkapi sebelum submit.',
+        )
         isSubmit.value = false
         return
       }
@@ -1698,9 +1775,7 @@ const goNext = async () => {
             } catch {
               invoiceApi.errorMessageSubmission = msg
             }
-          const idModal = document.querySelector('#error_submission_modal')
-          const modal = KTModal.getInstance(idModal as HTMLElement)
-          modal.show()
+          openSubmissionErrorModal()
         })
         .finally(() => {
           isSubmit.value = false
@@ -1711,6 +1786,7 @@ const goNext = async () => {
 
 const goToList = () => {
   isClickDraft.value = false
+  wasRejectedResubmit.value = false
   router.push({
     name: getBackListRoute(),
   })
@@ -1734,22 +1810,18 @@ const goSaveDraft = () => {
         setAfterResponsePost(response)
       })
       .catch((error) => {
-        invoiceApi.errorMessageSubmission =
-          error.response?.data?.result?.message || error.message || 'Failed to save draft'
-        const idModal = document.querySelector('#error_submission_modal')
-        const modal = KTModal.getInstance(idModal as HTMLElement)
-        modal.show()
+        openSubmissionErrorModal(
+          error.response?.data?.result?.message || error.message || 'Failed to save draft',
+        )
       })
       .finally(() => {
         isSubmit.value = false
       })
   } else {
     if (Array.isArray(form.invoicePoGr) && form.invoicePoGr.some((it) => it.isEdit)) {
-      invoiceApi.errorMessageSubmission =
-        'Ada baris PO/GR yang sedang diedit. Mohon simpan (klik ✓) atau batalkan edit terlebih dahulu sebelum save draft.'
-      const idModal = document.querySelector('#error_submission_modal')
-      const modal = KTModal.getInstance(idModal as HTMLElement)
-      modal.show()
+      openSubmissionErrorModal(
+        'Ada baris PO/GR yang sedang diedit. Mohon simpan (klik ✓) atau batalkan edit terlebih dahulu sebelum save draft.',
+      )
       isSubmit.value = false
       return
     }
@@ -1765,11 +1837,9 @@ const goSaveDraft = () => {
         setAfterResponsePost(response)
       })
       .catch((error) => {
-        invoiceApi.errorMessageSubmission =
-          error.response?.data?.result?.message || error.message || 'Failed to save draft'
-        const idModal = document.querySelector('#error_submission_modal')
-        const modal = KTModal.getInstance(idModal as HTMLElement)
-        modal.show()
+        openSubmissionErrorModal(
+          error.response?.data?.result?.message || error.message || 'Failed to save draft',
+        )
       })
       .finally(() => {
         isSubmit.value = false
@@ -1777,36 +1847,53 @@ const goSaveDraft = () => {
   }
 }
 
-const setAfterResponsePost = async (response: {
-  statusCode: number
-  result: { message: string; content?: unknown }
-}) => {
-  if (response.statusCode === 200) {
-    await markFtpUploadDoneIfNeeded(response)
-    syncFormStatusAfterSubmit(response.result?.content)
-    setStepperStatus()
-    normalizeRouteForLoadedStatus()
+const isSubmissionSuccessful = (response: unknown) => {
+  if (!response || typeof response !== 'object') return false
 
-    const idModal = document.querySelector('#success_invoice_modal')
-    const modal = KTModal.getInstance(idModal as HTMLElement)
-    modal.show()
-    if (form.invoiceUId) {
-      if (checkIsNonPo()) {
-        for (const item of costExpensesTempDelete.value) {
-          verificationApi.deleteCostExpense(form.invoiceUId, item)
-        }
-      } else {
-        for (const item of additionalCostTempDelete.value) {
-          verificationApi.deleteAdditionalCost(form.invoiceUId, item)
-        }
-      }
-    }
-  } else {
-    invoiceApi.errorMessageSubmission = response.result.message
-    const idModal = document.querySelector('#error_submission_modal')
-    const modal = KTModal.getInstance(idModal as HTMLElement)
-    modal.show()
+  const payload = response as {
+    statusCode?: number
+    result?: { isError?: boolean; message?: string; content?: unknown }
+    data?: { statusCode?: number; result?: { isError?: boolean } }
   }
+
+  const body = payload.result ? payload : payload.data?.result ? payload.data : payload
+  if (body.result?.isError === true) return false
+
+  const code = Number(body.statusCode)
+  if (!Number.isFinite(code)) return true
+
+  return code === 200 || code === 201 || (code >= 200 && code < 300)
+}
+
+const runPostSubmitCleanup = () => {
+  if (!form.invoiceUId) return
+
+  if (checkIsNonPo()) {
+    for (const item of costExpensesTempDelete.value) {
+      verificationApi.deleteCostExpense(form.invoiceUId, item)
+    }
+    return
+  }
+
+  for (const item of additionalCostTempDelete.value) {
+    verificationApi.deleteAdditionalCost(form.invoiceUId, item)
+  }
+}
+
+const setAfterResponsePost = async (response: unknown) => {
+  if (!isSubmissionSuccessful(response)) {
+    const payload = response as { result?: { message?: string } }
+    openSubmissionErrorModal(payload?.result?.message || 'Submission failed')
+    return
+  }
+
+  await showSubmitSuccessModal()
+
+  const payload = response as { result?: { content?: unknown } }
+  syncFormStatusAfterSubmit(payload.result?.content)
+  setStepperStatus()
+  runPostSubmitCleanup()
+  void markFtpUploadDoneIfNeeded(response as { result?: { content?: unknown } })
 }
 
 const setData = () => {
@@ -2623,6 +2710,8 @@ const setStepperStatus = () => {
 }
 
 onMounted(async () => {
+  restoreSubmitSuccessModalIfNeeded()
+
   invoiceMasterApi.getTaxCode()
   if (!checkIsNonPo()) invoiceMasterApi.getInvoicePoType()
   else invoiceMasterApi.getInvoiceNonPoType()
@@ -2639,7 +2728,9 @@ onMounted(async () => {
     form.invoiceTypeName = 'Reimbursement'
   }
 
-  void loadInvoiceFromRoute()
+  void loadInvoiceFromRoute().finally(() => {
+    restoreSubmitSuccessModalIfNeeded()
+  })
 })
 
 watch(
@@ -2699,4 +2790,10 @@ provide('userData', userData)
 
 <style lang="scss" scoped>
 @use './styles/invoice-submission.scss';
+</style>
+
+<style lang="scss">
+.invoice-submit-modal-layer .fixed.inset-0 {
+  z-index: 9999 !important;
+}
 </style>

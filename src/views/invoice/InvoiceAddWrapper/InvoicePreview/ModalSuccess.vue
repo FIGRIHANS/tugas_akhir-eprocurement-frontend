@@ -1,47 +1,61 @@
 <template>
-  <div class="modal" data-modal="true" id="success_invoice_modal">
-    <div class="modal-content modal-center-y max-w-[500px]">
-      <div class="modal-body p-[40px] flex flex-col gap-[30px] items-center">
+  <Teleport to="body">
+    <UiModal
+      v-model="isOpen"
+      size="sm"
+      hide-header
+      class="!z-[9999]"
+    >
+      <div class="flex flex-col items-center gap-[30px] px-[20px] py-[10px]">
         <ModalSuccessLogo />
         <div class="text-center font-inter">
-          <p class="text-lg font-medium">Invoice Successfully {{ props.isDraft ? 'Drafted' : 'Submitted' }}</p>
-          <p class="text-[13px] font-normal">
+          <p class="text-lg font-medium">
+            Invoice Successfully {{ props.isDraft ? 'Drafted' : 'Submitted' }}
+          </p>
+          <p class="text-[13px] font-normal text-gray-600">
             {{
-              props.isDraft ?
-              'Your invoice has been saved as a draft. You can review and make any necessary changes before submitting it for approval' :
-              'The invoice you sent is currently under review. Further information will be provided via notification.'
+              props.isDraft
+                ? 'Your invoice has been saved as a draft. You can review and make any necessary changes before submitting it for approval'
+                : 'The invoice you sent is currently under review. Further information will be provided via notification.'
             }}
-            
           </p>
         </div>
+        <button type="button" class="btn btn-primary" @click="closeModal">OK</button>
       </div>
-    </div>
-  </div>
+    </UiModal>
+  </Teleport>
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted } from 'vue'
-import { KTModal } from '@/metronic/core'
+import { computed } from 'vue'
+import UiModal from '@/components/modal/UiModal.vue'
 import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
 
 const props = defineProps<{
   isDraft: boolean
+  modelValue: boolean
 }>()
 
-const emits = defineEmits(['afterClose'])
+const emits = defineEmits<{
+  'update:modelValue': [value: boolean]
+  afterClose: []
+}>()
 
-const hideModal = () => {
-  const idModal = document.querySelector('#success_invoice_modal')
-  const modal = KTModal.getInstance(idModal as HTMLElement)
-  modal.hide()
-  emits('afterClose')
+const isOpen = computed({
+  get: () => props.modelValue,
+  set: (value: boolean) => {
+    emits('update:modelValue', value)
+    if (!value) emits('afterClose')
+  },
+})
+
+const closeModal = () => {
+  isOpen.value = false
 }
-
-onMounted(() => {
-  document.getElementById('success_invoice_modal')?.addEventListener('click', hideModal)
-})
-
-onUnmounted(() => {
-  document.getElementById('success_invoice_modal')?.removeEventListener('click', hideModal)
-})
 </script>
+
+<style scoped>
+:deep(.fixed.inset-0) {
+  z-index: 9999 !important;
+}
+</style>
