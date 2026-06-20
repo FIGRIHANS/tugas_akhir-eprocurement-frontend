@@ -64,6 +64,12 @@
               {{ detail.status }}
             </span>
           </div>
+          <div class="flex gap-3">
+            <span class="text-gray-500 w-44 shrink-0">Payment status</span>
+            <span class="badge badge-outline" :class="getPaymentStatusBadgeClass(detail.paymentStatus)">
+              {{ detail.paymentStatus || '—' }}
+            </span>
+          </div>
           <div class="flex gap-3 md:col-span-2">
             <span class="text-gray-500 w-44 shrink-0">Notes</span>
             <span>{{ detail.notes || '—' }}</span>
@@ -95,11 +101,12 @@
                 <th class="text-right">Unit price</th>
                 <th class="text-right">Line amount</th>
                 <th>Lot</th>
+                <th class="text-center">Condition type</th>
               </tr>
             </thead>
             <tbody>
               <tr v-if="!detail.items?.length">
-                <td colspan="10" class="text-center py-6 text-gray-400">No lines</td>
+                <td colspan="11" class="text-center py-6 text-gray-400">No lines</td>
               </tr>
               <tr v-for="(line, idx) in detail.items" v-else :key="line.id">
                 <td class="text-center">{{ idx + 1 }}</td>
@@ -112,6 +119,7 @@
                 <td class="text-right">{{ formatMoney(line.unitPrice, detail.currency) }}</td>
                 <td class="text-right">{{ formatMoney(line.lineAmount, detail.currency) }}</td>
                 <td>{{ line.lotNo || '—' }}</td>
+                <td class="text-center">{{ line.conditionType || '—' }}</td>
               </tr>
             </tbody>
           </table>
@@ -187,6 +195,13 @@ const load = async () => {
 
 const formatDate = (d: string) => moment(d).format('YYYY/MM/DD')
 const formatDt = (d: string) => moment(d).format('YYYY/MM/DD HH:mm')
+
+const getPaymentStatusBadgeClass = (status?: string) => {
+  if (!status) return 'badge-light'
+  if (status.trim().toUpperCase() === 'PAID') return 'badge-success'
+  if (status.trim().toLowerCase() === 'waiting for payment') return 'badge-warning'
+  return 'badge-info'
+}
 
 const formatMoney = (amt: number | null | undefined, cur?: string) => {
   if (amt == null) return '—'

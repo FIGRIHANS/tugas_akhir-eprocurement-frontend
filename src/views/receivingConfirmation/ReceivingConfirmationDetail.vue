@@ -204,6 +204,7 @@
                 <th colspan="3" class="text-center border-r">FG Receipt Confirmation</th>
                 <th colspan="2" class="text-center border-r">Loading Difference</th>
                 <th colspan="2" class="text-center border-r">Transporter Claim</th>
+                <th rowspan="2" class="text-center border-r min-w-[120px]">Condition Type</th>
                 <th rowspan="2" class="text-center border-r min-w-[160px]">Reject Reason</th>
               </tr>
               <!-- Second Header Row -->
@@ -221,7 +222,7 @@
             </thead>
             <tbody>
               <tr v-if="tableData.length === 0">
-                <td colspan="15" class="text-center">No data available</td>
+                <td colspan="16" class="text-center">No data available</td>
               </tr>
               <tr v-for="(item, index) in tableData" :key="index">
                 <td class="text-center border-r">
@@ -273,6 +274,16 @@
                     @input="calculateItem(index)"
                   />
                   <span v-else>{{ item.damageQty }}</span>
+                </td>
+                <td class="text-center">
+                  <input
+                    v-if="isDraft"
+                    v-model="item.conditionType"
+                    type="text"
+                    class="input input-sm w-28 text-center"
+                    placeholder="Condition Type"
+                  />
+                  <span v-else>{{ item.conditionType || '—' }}</span>
                 </td>
                 <td class="text-left">
                   <template v-if="isDraft && item.kurang > 0">
@@ -440,6 +451,7 @@ interface TableData {
   repackQty: number
   damageQty: number
   rejectReason: string
+  conditionType: string
 }
 
 const routes = ref<routeTypes[]>([
@@ -613,7 +625,8 @@ const buildUpdatePayload = (): ReceivingConfirmationCreatePayload => {
     qtyActual: item.diterima,
     repackQty: item.repackQty,
     damageQty: item.damageQty,
-    rejectReason: item.rejectReason || undefined,
+    rejectReason: item.rejectReason.trim() || undefined,
+    conditionType: item.conditionType.trim() || undefined,
   }))
 
   return {
@@ -856,6 +869,7 @@ const printToPDF = async () => {
     'Difference',
     'Repack',
     'Damage',
+    'Condition Type',
   ]
 
   const tableRows = tableData.value.map((item, index) => [
@@ -868,6 +882,7 @@ const printToPDF = async () => {
     String(item.selisih),
     String(item.repackQty),
     String(item.damageQty),
+    item.conditionType || '-',
   ])
 
   autoTable(doc, {
@@ -895,6 +910,7 @@ const printToPDF = async () => {
       6: { halign: 'right', cellWidth: 18 },
       7: { halign: 'right', cellWidth: 15 },
       8: { halign: 'right', cellWidth: 15 },
+      9: { cellWidth: 22 },
     },
     didParseCell: (data) => {
       // Highlight rows with discrepancies
@@ -1173,6 +1189,7 @@ onMounted(() => {
           repackQty: item.repackQty || 0,
           damageQty: item.damageQty || 0,
           rejectReason: item.rejectReason || '',
+          conditionType: item.conditionType || '',
         }))
       }
     })

@@ -11,6 +11,7 @@ export interface ReceivingConfirmationDetailPayload {
   repackQty: number
   damageQty: number
   rejectReason?: string
+  conditionType?: string
 }
 
 // Interface untuk Create Payload - untuk POST ke backend
@@ -84,6 +85,7 @@ export interface ReceivingConfirmationDetailResponse {
   repackQty: number
   damageQty: number
   rejectReason?: string
+  conditionType?: string
   createdBy: string
   createdUtcDate: string
   updatedBy: string

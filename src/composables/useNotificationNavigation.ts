@@ -13,6 +13,7 @@ const INBOUND_TYPES: NotificationType[] = [
   'delivery-note-created',
   'rc-pending-approval',
   'gr-created',
+  'gr-paid',
   'partial-received',
   'completed',
   'rejected',
@@ -43,6 +44,14 @@ export const getNotificationDisplayMeta = (type: NotificationType): Notification
         severity: 'info',
         iconClass: 'ki-filled ki-document text-emerald-600 text-lg',
         accentClass: 'border-l-emerald-500',
+      }
+    case 'gr-paid':
+      return {
+        category: 'Pembayaran',
+        categoryClass: 'bg-green-50 text-green-700',
+        severity: 'info',
+        iconClass: 'ki-filled ki-dollar text-green-600 text-lg',
+        accentClass: 'border-l-green-500',
       }
     case 'partial-received':
       return {

@@ -28,6 +28,7 @@ export interface GoodsReceiptHeaderDto {
   supervisorApprovedBy: number
   approvedUtcDate: string
   notes?: string
+  paymentStatus?: string
 }
 
 export interface GoodsReceiptDetailItemDto {
@@ -47,6 +48,7 @@ export interface GoodsReceiptDetailItemDto {
   lotNo?: string
   noPickSlip?: string
   receivingConfirmationDetailId?: number | null
+  conditionType?: string
 }
 
 export interface GoodsReceiptDetailContentDto extends GoodsReceiptHeaderDto {

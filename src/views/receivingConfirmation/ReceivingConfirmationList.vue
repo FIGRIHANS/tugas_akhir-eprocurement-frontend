@@ -178,6 +178,7 @@
                   {{ item.status }}
                 </span>
               </td>
+              <td>{{ summarizeConditionTypes(item) }}</td>
               <td>{{ item.rejectReason || '-' }}</td>
               <td>
                 <span
@@ -285,6 +286,7 @@ const columns = ref<string[]>([
   'PO Number',
   'Vendor Name',
   'Status',
+  'Condition Type',
   'Reject Reason',
   'Discrepancy',
   'Received Date',
@@ -371,6 +373,18 @@ const getStatusBadgeClass = (status: string) => {
   if (status === 'Draft') return 'badge-info'
   if (status === 'Rejected') return 'badge-danger'
   return 'badge-secondary'
+}
+
+const summarizeConditionTypes = (row: ReceivingConfirmationData) => {
+  if (!row.items?.length) return '—'
+  const types = [
+    ...new Set(
+      row.items
+        .map((item) => item.conditionType?.trim())
+        .filter((value): value is string => !!value),
+    ),
+  ]
+  return types.length ? types.join(', ') : '—'
 }
 
 // removed unused getDiscrepancyBadgeClass

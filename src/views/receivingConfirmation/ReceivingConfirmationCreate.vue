@@ -251,7 +251,8 @@
         <div class="mb-4">
           <h3 class="text-lg font-semibold">List Receiving Confirmation Request</h3>
           <p class="text-sm text-gray-500 mt-1">
-            <strong>Received</strong>, <strong>Lot Number (Actual)</strong>, <strong>Repack Qty</strong>, and
+            <strong>Received</strong>, <strong>Lot Number (Actual)</strong>, <strong>Condition Type</strong>,
+            <strong>Repack Qty</strong>, and
             <strong>Damage Qty</strong> can be edited. Difference, More, and Less are calculated
             automatically.
           </p>
@@ -313,6 +314,12 @@
                 </th>
                 <th
                   rowspan="2"
+                  class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center border-r min-w-[120px]"
+                >
+                  Condition Type
+                </th>
+                <th
+                  rowspan="2"
                   class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center border-r min-w-[160px]"
                 >
                   Reject Reason
@@ -352,7 +359,7 @@
             </thead>
             <tbody>
               <tr v-if="tableData.length === 0">
-                <td colspan="13" class="text-center py-8">
+                <td colspan="14" class="text-center py-8">
                   <div class="text-gray-400">
                     <i class="ki-duotone ki-information text-3xl mb-2"></i>
                     <p>No data available. Search for a Delivery Note Number first.</p>
@@ -426,6 +433,15 @@
                         item.less > 0 && item.repackQty + item.damageQty > item.less,
                     }"
                     @input="normalizeItemQuantities(index)"
+                  />
+                </td>
+                <td class="text-center">
+                  <input
+                    v-model="item.conditionType"
+                    type="text"
+                    class="input input-sm w-28 text-center"
+                    placeholder="Condition Type"
+                    :data-focus-key="`item-${index}-condition-type`"
                   />
                 </td>
                 <!-- Reject Reason - Required when less > 0 -->
@@ -550,6 +566,7 @@ interface TableDataItem {
   repackQty: number
   damageQty: number
   rejectReason: string
+  conditionType: string
 }
 
 // Breadcrumb
@@ -689,6 +706,7 @@ const selectDeliveryNote = (dn: DeliveryNotesData) => {
       repackQty: 0,
       damageQty: 0,
       rejectReason: '',
+      conditionType: '',
     }))
   } else {
     tableData.value = []
@@ -777,6 +795,7 @@ const trimFormTextFields = () => {
   for (const item of tableData.value) {
     item.lotNoActual = item.lotNoActual.trim()
     item.rejectReason = item.rejectReason.trim()
+    item.conditionType = item.conditionType.trim()
   }
 }
 
@@ -871,6 +890,7 @@ const submitForm = async (isDraft = false) => {
       repackQty: item.repackQty,
       damageQty: item.damageQty,
       rejectReason: item.rejectReason || undefined,
+      conditionType: item.conditionType || undefined,
     }))
 
     // Prepare payload

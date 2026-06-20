@@ -101,6 +101,11 @@
                   {{ item.hasDiscrepancy ? 'Discrepancy' : 'OK' }}
                 </span>
               </td>
+              <td>
+                <span class="badge badge-outline" :class="getPaymentStatusBadgeClass(item.paymentStatus)">
+                  {{ item.paymentStatus || '—' }}
+                </span>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -174,7 +179,7 @@ const activeFilters = ref({ ...filterForm.value })
 const columns = computed(() => {
   const base = ['Action', 'No', 'GR No', 'GR Date', 'Delivery Order', 'PO Number']
   if (!isVendorUser.value) base.push('Vendor Code')
-  return [...base, 'Vendor Name', 'Total Amount', 'Receive Status']
+  return [...base, 'Vendor Name', 'Total Amount', 'Receive Status', 'Payment Status']
 })
 
 const filteredRows = computed(() => {
@@ -212,6 +217,13 @@ const fetchData = async () => {
 }
 
 const formatDate = (d: string) => (d ? moment(d).format('YYYY/MM/DD HH:mm') : '—')
+
+const getPaymentStatusBadgeClass = (status?: string) => {
+  if (!status) return 'badge-light'
+  if (status.trim().toUpperCase() === 'PAID') return 'badge-success'
+  if (status.trim().toLowerCase() === 'waiting for payment') return 'badge-warning'
+  return 'badge-info'
+}
 
 const formatMoney = (amt: number | null | undefined, cur?: string) => {
   if (amt == null) return '—'

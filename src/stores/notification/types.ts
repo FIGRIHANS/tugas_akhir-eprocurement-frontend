@@ -10,6 +10,7 @@ export type NotificationType =
   | 'delivery-note-created'
   | 'rc-pending-approval'
   | 'gr-created'
+  | 'gr-paid'
   | 'partial-received'
   | 'completed'
   | 'rejected'
