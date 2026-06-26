@@ -9,25 +9,34 @@
       Aa
     </div> -->
     <button
-      class="dropdown-toggle btn btn-light size-10 rounded-full inline-flex items-center justify-center text-[11px] font-semibold border border-primary-clarity bg-primary hover:bg-primary hover:text-white text-white"
+      class="dropdown-toggle size-10 rounded-full inline-flex items-center justify-center border border-teal-100 bg-teal-50 text-teal-600 hover:bg-teal-100 hover:text-teal-700 hover:border-teal-200 transition-all duration-300 p-0 shadow-sm focus:outline-none"
     >
-      {{ profileInitial }}
+      <i class="ki-duotone ki-profile-circle text-2xl"></i>
     </button>
     <div class="dropdown-content w-full max-w-56 p-4">
-      <div class="menu menu-default flex flex-col w-full">
-        <div class="menu-item">
-          <p class="mb-[14px]">
-            Hi,
+      <div class="menu menu-default flex flex-col w-full gap-2">
+        <div class="flex flex-col px-1.5 py-1 border-b border-gray-100 pb-3">
+          <span class="font-bold text-gray-800 text-sm">
+            {{
+              !isEmpty(userData)
+                ? userData.profile.employeeName || userData.profile.vendorName
+                : ''
+            }}
+          </span>
+          <span class="text-xs text-gray-500 mt-1 font-medium">
             {{
               !isEmpty(userData)
                 ? userData.profile.employeeName
-                  ? userData.profile.employeeName
+                  ? userData.profile.positionName || userData.profile.profileName || 'Staff'
                   : userData.profile.vendorName
                 : ''
             }}
-          </p>
-          <a class="menu-link !px-[5px] !mx-[0px]" href="#" @click="logout">
-            <span class="menu-title"> Log Out </span>
+          </span>
+        </div>
+        <div class="menu-item mt-1">
+          <a class="menu-link !px-[8px] !py-[6px] rounded-lg hover:bg-slate-50 flex items-center gap-2" href="#" @click="logout">
+            <i class="ki-filled ki-entrance-right text-gray-400 text-lg"></i>
+            <span class="menu-title font-medium text-gray-600"> Log Out </span>
           </a>
         </div>
       </div>
