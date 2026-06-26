@@ -611,6 +611,9 @@ export default defineComponent({
             id: id.toString(),
             tempatPenandatangan: 'Jakarta',
             npwpNikPenandatangan: '3172022407830008',
+            namaPenandatangan: 'RADHITYA ARIE KENPRASOJO',
+            dcPenandatangan: '1',
+            serialNumberPenandatangan: '-',
           }
           const response = await postVatOutUpload(vendorNpwp, body)
           const payload =
