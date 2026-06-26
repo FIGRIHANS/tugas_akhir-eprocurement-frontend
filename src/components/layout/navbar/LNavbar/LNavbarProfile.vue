@@ -23,9 +23,7 @@
         <div class="flex flex-col px-1.5 py-1 border-b border-gray-100 pb-3">
           <span class="font-bold text-gray-800 text-sm">
             {{
-              !isEmpty(userData)
-                ? userData.profile.employeeName || userData.profile.vendorName
-                : ''
+              !isEmpty(userData) ? userData.profile.employeeName || userData.profile.vendorName : ''
             }}
           </span>
           <span class="text-xs text-gray-500 mt-1 font-medium">
@@ -39,7 +37,11 @@
           </span>
         </div>
         <div class="menu-item mt-1">
-          <a class="menu-link !px-[8px] !py-[6px] rounded-lg hover:bg-slate-50 flex items-center gap-2" href="#" @click="logout">
+          <a
+            class="menu-link !px-[8px] !py-[6px] rounded-lg hover:bg-slate-50 flex items-center gap-2"
+            href="#"
+            @click="logout"
+          >
             <i class="ki-filled ki-entrance-right text-gray-400 text-lg"></i>
             <span class="menu-title font-medium text-gray-600"> Log Out </span>
           </a>
