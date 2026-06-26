@@ -9,7 +9,12 @@
       Aa
     </div> -->
     <button
-      class="dropdown-toggle size-10 rounded-full inline-flex items-center justify-center border border-teal-100 bg-teal-50 text-teal-600 hover:bg-teal-100 hover:text-teal-700 hover:border-teal-200 transition-all duration-300 p-0 shadow-sm focus:outline-none"
+      :class="[
+        'dropdown-toggle size-10 rounded-full inline-flex items-center justify-center transition-all duration-300 p-0 shadow-sm focus:outline-none border',
+        isVendor
+          ? 'border-amber-100 bg-amber-50 text-amber-600 hover:bg-amber-100 hover:text-amber-700 hover:border-amber-200'
+          : 'border-teal-100 bg-teal-50 text-teal-600 hover:bg-teal-100 hover:text-teal-700 hover:border-teal-200'
+      ]"
     >
       <i class="ki-duotone ki-profile-circle text-2xl"></i>
     </button>
@@ -84,6 +89,11 @@ const router = useRouter()
 const route = useRoute()
 
 const userData = computed(() => loginApi.userData)
+
+const isVendor = computed(() => {
+  if (isEmpty(userData.value)) return false
+  return !userData.value.profile?.employeeName && !!userData.value.profile?.vendorName
+})
 
 const profileInitial = computed(() => {
   if (isEmpty(userData.value)) return 'U'
