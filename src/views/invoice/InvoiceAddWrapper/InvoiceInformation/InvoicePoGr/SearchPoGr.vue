@@ -64,7 +64,6 @@
                   <td>{{ item.uom || '-' }}</td>
                   <td>{{ item.materialDescription || '-' }}</td>
                   <td>{{ item.conditionType || '-' }}</td>
-                  <td>{{ item.conditionTypeDesc || '-' }}</td>
                   <td>{{ item.qcStatus || '-' }}</td>
                   <td>{{ item.taxCode || '-' }}</td>
                   <td>{{ item.department || '-' }}</td>

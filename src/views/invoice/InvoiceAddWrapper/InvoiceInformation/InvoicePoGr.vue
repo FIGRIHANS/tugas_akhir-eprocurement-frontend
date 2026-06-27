@@ -130,19 +130,7 @@
                 <td v-if="!checkInvoiceDp()">{{ item.quantity }}</td>
                 <td v-if="!checkInvoiceDp()">{{ item.uom }}</td>
                 <td v-if="!checkInvoiceDp()">{{ item.itemText }}</td>
-                <td v-if="!checkInvoiceDp() && !checkPoPib()">
-                  <span v-if="!item.isEdit">{{ item.conditionType || '-' }}</span>
-                  <input
-                    v-else
-                    v-model="formEdit.conditionType"
-                    type="text"
-                    class="input"
-                    placeholder="Condition Type"
-                  />
-                </td>
-                <td v-if="!checkInvoiceDp() && form.invoiceType !== '903'">
-                  {{ item.conditionTypeDesc || '-' }}
-                </td>
+                <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.conditionType || '-' }}</td>
                 <!-- <td v-if="form?.invoiceType === '903'">{{ getTaxCodeName(item.taxCode) || '-' }}</td> -->
                 <td v-if="!checkInvoiceDp() && form?.invoiceType !== '903'">
                   {{ item.qcStatus || '-' }}
@@ -424,7 +412,6 @@ const formEdit = reactive({
   whtAmount: 0,
   quantity: 0,
   uom: '',
-  conditionType: '',
   department: '',
 })
 
@@ -498,7 +485,7 @@ const mapGoodsReceiptDetailToPoGrItems = (
       material: line.sku || '',
       materialDescription: line.itemName || '',
       currency: cur,
-      conditionType: '',
+      conditionType: line.conditionType || '',
       conditionTypeDesc: '',
       qcStatus: detail.hasDiscrepancy ? 'Discrepancy' : '-',
       postingDate: '',
@@ -779,7 +766,6 @@ const resetFormEdit = () => {
   formEdit.whtAmount = 0
   formEdit.quantity = 0
   formEdit.uom = ''
-  formEdit.conditionType = ''
   formEdit.department = ''
 }
 
@@ -798,7 +784,6 @@ const goEdit = (item: itemsPoGrType) => {
     formEdit.whtCode = item.whtCode || ''
     formEdit.whtBaseAmount = item.whtBaseAmount || formEdit.itemAmountLC
     formEdit.whtAmount = item.whtAmount || 0
-    formEdit.conditionType = item.conditionType || ''
     formEdit.department = item.department || ''
   } else {
     item.taxCode = formEdit.taxCode
@@ -807,7 +792,6 @@ const goEdit = (item: itemsPoGrType) => {
     item.whtCode = formEdit.whtCode
     item.whtAmount = formEdit.whtAmount
     item.whtBaseAmount = formEdit.whtBaseAmount
-    item.conditionType = formEdit.conditionType
     item.department = formEdit.department
     resetFormEdit()
   }

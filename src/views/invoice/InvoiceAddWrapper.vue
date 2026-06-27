@@ -1711,7 +1711,7 @@ const goNext = async () => {
       // Then check for missing required fields
       if (Array.isArray(form.invoicePoGr) && form.invoicePoGr.some((it) => !it.grDocumentDate || !it.grDocumentNo || !it.conditionType || !it.taxCode)) {
         openSubmissionErrorModal(
-          'Beberapa baris PO/GR belum memiliki GR Document No / Date / Condition Type / Tax Code. Mohon lengkapi sebelum submit.',
+          'Beberapa baris PO/GR belum memiliki GR Document No / Date / Condition Type / Tax Code. Pastikan data GR sudah lengkap dari sistem sebelum submit.',
         )
         isSubmit.value = false
         return

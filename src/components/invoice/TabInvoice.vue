@@ -1,61 +1,45 @@
 <template>
-  <div v-if="!hideWorkflowTabs || canClickPaymentStatus" class="card-header py-[8px] px-[20px]">
-    <div class="border rounded-lg border-gray-300 p-[4px] flex items-center gap-[4px]">
-      <template v-if="!hideWorkflowTabs">
-        <button
-          class="btn btn-primary"
-          :class="{ 'btn-clear info__header': activeTab !== 'data' }"
-          :disabled="!canClickData"
-          @click="activeTab = 'data'"
-        >
-          Invoice Data
-        </button>
-
-        <button
-          class="btn btn-primary"
-          :class="{ 'btn-clear info__header': activeTab !== 'information' }"
-          :disabled="!canClickInformation"
-          @click="activeTab = 'information'"
-        >
-          Invoice Information
-        </button>
-
-        <button
-          class="btn btn-primary"
-          :class="{ 'btn-clear info__header': activeTab !== 'ocrAiVerification' }"
-          @click="activeTab = 'ocrAiVerification'"
-        >
-          Invoice OCR & AI Verification
-        </button>
-
-        <button
-          v-if="withPreview"
-          class="btn btn-primary"
-          :class="{ 'btn-clear info__header': activeTab !== 'preview' }"
-          :disabled="!canClickPreview"
-          @click="activeTab = 'preview'"
-        >
-          Invoice Preview
-        </button>
-      </template>
+  <nav
+    v-if="visibleTabs.length > 0"
+    class="invoice-tab-map flex flex-wrap items-center gap-x-3 gap-y-1 bg-gray-200 px-[20px] py-[12px]"
+    aria-label="Invoice workflow tabs"
+  >
+    <template v-for="(tab, index) in visibleTabs" :key="tab.key">
+      <i
+        v-if="index > 0"
+        class="ki-outline ki-right invoice-tab-map__chevron shrink-0"
+        aria-hidden="true"
+      ></i>
 
       <button
-        v-if="canClickPaymentStatus"
-        class="btn btn-primary"
-        :class="{ 'btn-clear info__header': activeTab !== 'paymentStatus' }"
-        :disabled="!canClickPaymentStatus"
-        @click="activeTab = 'paymentStatus'"
+        type="button"
+        class="invoice-tab-map__item"
+        :class="{
+          'invoice-tab-map__item--active': activeTab === tab.key,
+          'invoice-tab-map__item--disabled': tab.disabled,
+        }"
+        :disabled="tab.disabled"
+        :aria-current="activeTab === tab.key ? 'step' : undefined"
+        @click="selectTab(tab)"
       >
-        Payment Status
+        {{ tab.label }}
       </button>
-    </div>
-  </div>
+    </template>
+  </nav>
 </template>
 
 <script lang="ts" setup>
+import { computed } from 'vue'
+
+interface TabItem {
+  key: string
+  label: string
+  disabled: boolean
+}
+
 const activeTab = defineModel<string>('activeTab')
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     withPreview?: boolean
     hideWorkflowTabs?: boolean
@@ -73,4 +57,101 @@ withDefaults(
     canClickPaymentStatus: false,
   },
 )
+
+const visibleTabs = computed<TabItem[]>(() => {
+  const tabs: TabItem[] = []
+
+  if (!props.hideWorkflowTabs) {
+    tabs.push({
+      key: 'data',
+      label: 'Invoice Data',
+      disabled: !props.canClickData,
+    })
+    tabs.push({
+      key: 'information',
+      label: 'Invoice Information',
+      disabled: !props.canClickInformation,
+    })
+    tabs.push({
+      key: 'ocrAiVerification',
+      label: 'Invoice OCR & AI Verification',
+      disabled: false,
+    })
+    if (props.withPreview) {
+      tabs.push({
+        key: 'preview',
+        label: 'Invoice Preview',
+        disabled: !props.canClickPreview,
+      })
+    }
+  }
+
+  if (props.canClickPaymentStatus) {
+    tabs.push({
+      key: 'paymentStatus',
+      label: 'Payment Status',
+      disabled: false,
+    })
+  }
+
+  return tabs
+})
+
+const selectTab = (tab: TabItem) => {
+  if (tab.disabled) return
+  activeTab.value = tab.key
+}
 </script>
+
+<style lang="scss" scoped>
+.invoice-tab-map {
+  &__chevron {
+    font-size: 12px;
+    color: #cbd5e1;
+    line-height: 1;
+  }
+
+  &__item {
+    position: relative;
+    padding: 4px 2px 8px;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.25;
+    color: #94a3b8;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 0.15s ease;
+
+    &::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 2px;
+      border-radius: 1px;
+      background-color: transparent;
+      transition: background-color 0.15s ease;
+    }
+
+    &:not(&--disabled):not(&--active):hover {
+      color: #64748b;
+    }
+
+    &--active {
+      color: var(--tw-primary, #1b84ff);
+
+      &::after {
+        background-color: var(--tw-primary, #1b84ff);
+      }
+    }
+
+    &--disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+  }
+}
+</style>
