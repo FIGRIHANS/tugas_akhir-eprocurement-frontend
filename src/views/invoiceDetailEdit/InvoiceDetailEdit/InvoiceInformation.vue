@@ -1,18 +1,17 @@
 <template>
-  <div v-if="form">
-    <div class="flex gap-[24px] max-h-[553px]">
+  <div v-if="form" class="flex flex-col gap-[32px]">
+    <div class="flex gap-[24px] items-start">
       <HeaderDocument />
       <InvoiceCalculation />
     </div>
-    <InvoicePoGr v-if="!checkIsNonPo()" class="mt-[24px]" />
+    <InvoicePoGr v-if="!checkIsNonPo()" />
     <AdditionalCost
       v-if="
         !checkIsNonPo() &&
         (checkIsWithoutDp() || checkIsPoPib() || checkIsPoCC() || checkPoWithDp())
       "
-      class="mt-[24px]"
     />
-    <InvoiceItem v-if="checkIsNonPo()" class="mt-[24px]" />
+    <InvoiceItem v-if="checkIsNonPo()" />
   </div>
 </template>
 

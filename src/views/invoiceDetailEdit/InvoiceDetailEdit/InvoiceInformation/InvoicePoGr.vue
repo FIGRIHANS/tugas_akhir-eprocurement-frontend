@@ -2,9 +2,9 @@
   <div id="table-invoice-po-gr" class="flex flex-col gap-[16px]">
     <p class="text-base font-semibold">Invoice PO & GR Item</p>
     <div v-if="form?.invoiceTypeCode !== 902">
-      <div v-if="form" class="overflow-x-auto pogr__table">
+      <div v-if="form" class="overflow-x-auto pogr__table rounded-lg border border-gray-200">
         <table
-          class="table table-xs table-border"
+          class="table table-xs"
           :class="{ 'border-danger': form?.invoicePoGrError }"
         >
           <thead>
@@ -12,7 +12,7 @@
               <th
                 v-for="(item, index) in setColumn(form?.invoiceTypeCode)"
                 :key="index"
-                class="pogr__field-base"
+                class="pogr__field-base !border-b-teal-500 !bg-teal-100 !text-teal-500"
                 :class="{
                   'pogr__field-base--po-item': item.toLowerCase() === 'item text',
                   'pogr__field-base--tax': item.toLowerCase() === 'tax code',
@@ -155,9 +155,9 @@
     </div>
     <!-- Invoice PO & Gr Add Item Manual -->
     <div v-else>
-      <div v-if="form" class="overflow-x-auto pogr__table">
+      <div v-if="form" class="overflow-x-auto pogr__table rounded-lg border border-gray-200">
         <table
-          class="table table-xs table-border"
+          class="table table-xs"
           :class="{ 'border-danger': form?.invoicePoGrError }"
         >
           <thead>
@@ -165,7 +165,7 @@
               <th
                 v-for="(item, index) in setColumn(form?.invoiceTypeCode)"
                 :key="index"
-                class="pogr__field-base"
+                class="pogr__field-base !border-b-teal-500 !bg-teal-100 !text-teal-500"
                 :class="{
                   'pogr__field-base--po-number': item.toLowerCase() === 'po number',
                   'pogr__field-base--po-item': item.toLowerCase() === 'po item',

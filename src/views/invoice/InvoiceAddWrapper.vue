@@ -9,6 +9,7 @@
       :can-click-preview="canClickPreviewTab"
       :can-click-payment-status="canClickPaymentStatusTab"
       :hide-workflow-tabs="shouldHideWorkflowTabs"
+      :show-ocr-ai-verification="showOcrAiVerificationTab"
       class="-mx-[24px]"
     />
     <RejectedInvoiceStatusCard v-if="isSubmissionFormMode && !isLoadingContent" />
@@ -233,6 +234,7 @@ import {
   isInvoiceViewRouteType,
   isRejectedInvoiceStatus,
   isSavedDraftStatus,
+  isSubmittorProfile,
   resolveInvoiceAddRouteType,
 } from '@/core/utils/invoiceSubmissionRoute'
 import { dedupePoGrLines } from '@/core/utils/poGrDedup'
@@ -499,6 +501,19 @@ const canClickPaymentStatusTab = computed(() => {
 
 const shouldHideWorkflowTabs = computed(() => {
   return !isSubmissionFormMode.value
+})
+
+const showOcrAiVerificationTab = computed(() => {
+  return isSubmittorProfile(userData.value?.profile?.profileId)
+})
+
+const workflowTabs = computed(() => {
+  const tabs: Array<(typeof WORKFLOW_TABS)[number]> = ['data', 'information']
+  if (showOcrAiVerificationTab.value) {
+    tabs.push('ocrAiVerification')
+  }
+  tabs.push('preview')
+  return tabs
 })
 
 const isSubmissionFormMode = computed(() => {
@@ -811,7 +826,7 @@ const goBack = () => {
     return
   }
 
-  const currentIndex = WORKFLOW_TABS.findIndex((tab) => tab === tabNow.value)
+  const currentIndex = workflowTabs.value.findIndex((tab) => tab === tabNow.value)
 
   if (currentIndex === 0) {
     router.push({ name: getBackListRoute() })
@@ -819,7 +834,7 @@ const goBack = () => {
   }
 
   if (currentIndex > 0) {
-    const newTab = WORKFLOW_TABS[currentIndex - 1]
+    const newTab = workflowTabs.value[currentIndex - 1]
     if (tabNow.value === 'preview' && newTab === 'information') {
       isCheckBudget.value = false
     }
@@ -1579,7 +1594,7 @@ const showWorkflowNotFoundError = (
 }
 
 const goNext = async () => {
-  const list = ['data', 'information', 'ocrAiVerification', 'preview']
+  const list = workflowTabs.value
   if (tabNow.value !== 'preview') {
     if (isSubmissionFormMode.value) {
       if (tabNow.value === 'data') {

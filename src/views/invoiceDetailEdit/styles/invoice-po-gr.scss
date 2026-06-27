@@ -1,57 +1,82 @@
-.pogr {
-  &__table {
-    padding-bottom: 4px;
+:deep() {
+  .pogr {
+    &__table {
+      padding-bottom: 4px;
 
-    &::-webkit-scrollbar {
-      width: 10px;
-      height: 10px;
-      background: transparent;
+      &::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+        background: transparent;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        width: 10px;
+        height: 10px;
+        border-radius: 15px;
+        background-color: #dbdfe9;
+      }
     }
-    
-    &::-webkit-scrollbar-thumb {
-      width: 10px;
-      height: 10px;
-      border-radius: 15px;
-      background-color: #DBDFE9;
+
+    &__field-base {
+      min-width: 130px;
+      white-space: nowrap;
+      @apply px-[20px] !important;
+      @apply py-[13px] !important;
+      border: none !important;
+      outline: none !important;
+
+      &--po-select {
+        @extend .pogr__field-base;
+        min-width: 130px;
+      }
+
+      &--po-item {
+        @extend .pogr__field-base;
+        min-width: 250px;
+      }
+
+      &--po-number {
+        @extend .pogr__field-base;
+        min-width: 250px;
+      }
+
+      &--tax {
+        @extend .pogr__field-base;
+        min-width: 350px;
+      }
+
+      &--wht-type {
+        @extend .pogr__field-base;
+        min-width: 250px;
+      }
+
+      &--wht-code {
+        @extend .pogr__field-base;
+        min-width: 400px;
+      }
+
+      &--department {
+        @extend .pogr__field-base;
+        min-width: 400px;
+      }
+    }
+
+    &__field-items {
+      td {
+        @apply px-[16px] !important;
+        @apply py-[7px] !important;
+      }
     }
   }
 
-  &__field-base {
-    min-width: 130px;
-    white-space: nowrap;
-    @apply px-[20px] !important;
-    @apply py-[13px] !important;
-    
-    &--po-item {
-      @extend .pogr__field-base;
-      min-width: 200px;
-    }
-    
-    &--tax {
-      @extend .pogr__field-base;
-      min-width: 350px;
-    }
-
-    &--wht-type {
-      @extend .pogr__field-base;
-      min-width: 250px;
-    }
-
-    &--wht-code {
-      @extend .pogr__field-base;
-      min-width: 400px;
-    }
-
-    &--department {
-      @extend .pogr__field-base;
-      min-width: 400px;
-    }
+  .customSelect--department {
+    min-width: 220px;
   }
+}
 
-  &__field-items {
-    td {
-      @apply px-[16px] !important;
-      @apply py-[7px] !important;
-    }
+:global(.vs__dropdown-menu) {
+  .vs__dropdown-option {
+    white-space: normal;
+    word-break: break-word;
   }
 }

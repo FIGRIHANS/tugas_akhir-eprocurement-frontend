@@ -1,5 +1,5 @@
 <template>
-  <div class="card flex-1 h-fit">
+  <div class="card flex-1 h-fit min-w-0">
     <div class="card-header flex justify-between items-center gap-[10px] py-[16px] px-[20px]">
       <span class="font-semibold text-base whitespace-nowrap">Invoice Calculation</span>
       <button class="btn btn-primary">

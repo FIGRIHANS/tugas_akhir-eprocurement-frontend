@@ -1,5 +1,5 @@
 <template>
-  <div class="card flex-1">
+  <div class="card flex-1 min-w-0">
     <div class="card-header py-[8px] px-[20px]">
       <div class="border rounded-lg border-gray-300 p-[4px] flex items-center gap-[4px]">
         <button
@@ -22,7 +22,7 @@
         </button>
       </div>
     </div>
-    <div class="card-body py-[8px] px-[16px] overflow-y-scroll header-document">
+    <div class="card-body py-[8px] px-[16px] max-h-[500px] overflow-y-auto header-document">
       <Transition mode="out-in">
         <component :is="contentComponent" />
       </Transition>

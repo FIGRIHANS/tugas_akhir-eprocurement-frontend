@@ -1,4 +1,5 @@
 import generalApi from '@/core/utils/generalApi'
+import invoiceApi from '@/core/utils/invoiceApi'
 
 export const hasBlobSasToken = (url: string): boolean => {
   try {
@@ -9,15 +10,36 @@ export const hasBlobSasToken = (url: string): boolean => {
   }
 }
 
+export const isAzureBlobUrl = (url: string): boolean => {
+  try {
+    return new URL(url).host.toLowerCase().includes('.blob.core.windows.net')
+  } catch {
+    return false
+  }
+}
+
 export const warnUnsignedDocumentUrl = (url: string, label = 'Document') => {
   if (!url || hasBlobSasToken(url)) return
   console.warn(
-    `[${label}] URL blob tanpa SAS token — preview akan dimuat lewat /api/file/preview.`,
+    `[${label}] URL blob tanpa SAS token — preview akan dimuat lewat invoice file API.`,
     url,
   )
 }
 
-/** Resolve URL untuk preview browser: pakai SAS langsung, atau fetch blob lewat API. */
+const fetchSignedBlobPreviewUrl = async (blobUrl: string): Promise<string> => {
+  const response = await invoiceApi.get<{ url?: string }>('/file/preview-url', {
+    params: { fullFilePath: blobUrl },
+  })
+
+  const signedUrl = response.data?.url?.trim()
+  if (!signedUrl) {
+    throw new Error('Signed preview URL is empty')
+  }
+
+  return signedUrl
+}
+
+/** Resolve URL untuk preview browser: pakai SAS langsung, invoice blob API, atau general local file API. */
 export const resolveDocumentPreviewUrl = async (
   source: string | null | undefined,
 ): Promise<string> => {
@@ -26,11 +48,25 @@ export const resolveDocumentPreviewUrl = async (
 
   if (hasBlobSasToken(path)) return path
 
+  if (isAzureBlobUrl(path)) {
+    try {
+      return await fetchSignedBlobPreviewUrl(path)
+    } catch (error) {
+      console.error('Failed to resolve Azure blob preview URL:', error)
+      return ''
+    }
+  }
+
   try {
     const response = await generalApi.get('/api/file/preview', {
       params: { fullFilePath: path },
       responseType: 'blob',
     })
+
+    if (response.status !== 200 || !(response.data instanceof Blob)) {
+      return ''
+    }
+
     return URL.createObjectURL(response.data)
   } catch (error) {
     console.error('Failed to resolve document preview URL:', error)

@@ -1,15 +1,17 @@
 import { defineStore } from 'pinia'
-import generalApi from '@/core/utils/generalApi'
-
-import type { ApiResponse } from '@/core/type/api'
+import { resolveDocumentPreviewUrl } from '@/composables/documentPreview'
 
 export const usePreviewFileStore = defineStore('previewFile', () => {
   const getPreview = async (path: string) => {
-    const response: ApiResponse<Blob> = await generalApi.get(`/api/file/preview`, {
-      params: { fullFilePath: path },
-      responseType: 'blob',
-    })
-    return response
+    const previewUrl = await resolveDocumentPreviewUrl(path)
+    if (!previewUrl) {
+      throw new Error('Preview URL could not be resolved')
+    }
+
+    return {
+      data: previewUrl,
+      isDirectUrl: true,
+    }
   }
 
   return {
