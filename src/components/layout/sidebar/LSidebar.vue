@@ -170,14 +170,14 @@ const filteredSidebarMenu = computed(() => {
     }
     if (Number(userStore.userData?.profile?.profileId) === 3001) {
       return sidebarMenu
-        .filter((menu) => menu.id === 'e-invoice' || menu.id === 'dashboard')
+        .filter((menu) => menu.id === 'dashboard' || menu.id === 'digital-receiving-confirmation' || menu.id === 'e-invoice' )
         .map((menu) => {
           return {
             ...menu,
             child: menu.child
               ? menu.child.filter(
                   (child) =>
-                    child.id === 'invoice-list' || child.id === 'ftp-invoice-integration',
+                    child.id === 'invoice-list' || child.id === 'ftp-invoice-integration' ||child.id === 'goods-receipt-list',
                 )
               : [],
           }

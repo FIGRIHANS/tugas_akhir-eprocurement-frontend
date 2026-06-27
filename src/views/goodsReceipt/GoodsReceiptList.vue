@@ -76,14 +76,24 @@
             </tr>
             <tr v-for="(item, index) in list" v-else :key="item.grId">
               <td class="text-center">
-                <button
-                  type="button"
-                  class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]"
-                  title="View"
-                  @click="viewDetail(item.grId)"
-                >
-                  <i class="ki-filled ki-eye !text-lg"></i>
-                </button>
+                <div class="flex items-center justify-center gap-1">
+                  <button
+                    type="button"
+                    class="btn btn-outline btn-icon btn-primary w-[32px] h-[32px]"
+                    title="View Detail"
+                    @click="viewDetail(item.grId)"
+                  >
+                    <i class="ki-filled ki-eye !text-lg"></i>
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-outline btn-icon btn-success w-[32px] h-[32px]"
+                    title="Print Invoice"
+                    @click="openPrint(item)"
+                  >
+                    <i class="ki-filled ki-printer !text-lg"></i>
+                  </button>
+                </div>
               </td>
               <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
               <td>{{ item.grDocumentNo }}</td>
@@ -102,7 +112,10 @@
                 </span>
               </td>
               <td>
-                <span class="badge badge-outline" :class="getPaymentStatusBadgeClass(item.paymentStatus)">
+                <span
+                  class="badge badge-outline"
+                  :class="getPaymentStatusBadgeClass(item.paymentStatus)"
+                >
                   {{ item.paymentStatus || '—' }}
                 </span>
               </td>
@@ -130,6 +143,17 @@
       </div>
     </div>
   </div>
+
+  <!-- ── Print Invoice Overlay (from list) ──────────────────────── -->
+  <div v-if="printItem" class="gr-print-overlay">
+    <div class="gr-print-container">
+      <GoodReceiptInvoicePrint
+        :detail="printItem"
+        :vendor-id="printItem.vendorId ?? printItem.vendorID ?? null"
+        @close="printItem = null"
+      />
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -143,6 +167,8 @@ import momentLib from 'moment'
 import { cloneDeep } from 'lodash'
 import GoodsReceiptService, { type GoodsReceiptHeaderDto } from '@/services/goodsReceipt.service'
 import { useLoginStore } from '@/stores/views/login'
+import GoodReceiptInvoicePrint from './GoodReceiptInvoicePrint.vue'
+import type { GoodsReceiptDetailContentDto } from '@/services/goodsReceipt.service'
 
 const moment = momentLib
 const router = useRouter()
@@ -201,7 +227,9 @@ const fetchData = async () => {
       grDocumentNo: activeFilters.value.grDocumentNo || undefined,
       deliveryOrderNumber: activeFilters.value.deliveryOrderNumber || undefined,
       vendorId: isVendorUser.value ? vendorProfileId.value : undefined,
-      vendorCode: isVendorUser.value ? vendorCodeUser.value : activeFilters.value.vendorCode || undefined,
+      vendorCode: isVendorUser.value
+        ? vendorCodeUser.value
+        : activeFilters.value.vendorCode || undefined,
       grDocumentDateFrom: activeFilters.value.grDateFrom || undefined,
       grDocumentDateTo: activeFilters.value.grDateTo || undefined,
     })
@@ -228,11 +256,46 @@ const getPaymentStatusBadgeClass = (status?: string) => {
 const formatMoney = (amt: number | null | undefined, cur?: string) => {
   if (amt == null) return '—'
   const c = cur || 'IDR'
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: c, maximumFractionDigits: 2 }).format(amt)
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: c,
+    maximumFractionDigits: 2,
+  }).format(amt)
 }
 
 const viewDetail = (grId: number) => {
   router.push({ name: 'goodsReceiptListDetail', params: { grId: String(grId) } })
+}
+
+/** Show Print Invoice button when paymentStatus is PAID */
+// const canPrint = (item: GoodsReceiptHeaderDto) =>
+//   item.paymentStatus?.trim().toUpperCase() === 'PAID' ||
+//   item.status.trim().toUpperCase() === 'COMPLETED'
+
+/** Selected item for print overlay (cast to compatible shape for the print component) */
+const printItem = ref<GoodsReceiptDetailContentDto | null>(null)
+const isPrintLoading = ref(false)
+
+const openPrint = async (item: GoodsReceiptHeaderDto) => {
+  isPrintLoading.value = true
+  try {
+    // Fetch full detail so the print template has items + all fields
+    const detail = await GoodsReceiptService.getDetail({ grId: item.grId })
+    printItem.value = detail
+  } catch {
+    // Fallback: use header data cast as detail (items will be empty)
+    printItem.value = {
+      ...item,
+      status: '',
+      createdBy: '',
+      updatedBy: '',
+      createdUtcDate: '',
+      updatedUtcDate: '',
+      items: [],
+    } as GoodsReceiptDetailContentDto
+  } finally {
+    isPrintLoading.value = false
+  }
 }
 
 const setPage = (p: number) => {
@@ -285,3 +348,38 @@ onMounted(() => {
   }
 })
 </script>
+
+<style scoped>
+.gr-print-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 24px 16px;
+}
+
+.gr-print-container {
+  background: #f1f5f9;
+  border-radius: 12px;
+  padding: 24px;
+  width: 100%;
+  max-width: 900px;
+}
+
+@media print {
+  .gr-print-overlay {
+    position: static;
+    background: none;
+    padding: 0;
+  }
+  .gr-print-container {
+    background: none;
+    padding: 0;
+    border-radius: 0;
+  }
+}
+</style>
