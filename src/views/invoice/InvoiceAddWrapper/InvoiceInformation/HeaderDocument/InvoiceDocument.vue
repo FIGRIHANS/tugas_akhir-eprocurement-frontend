@@ -27,7 +27,8 @@
           ref="pdfUploadRef"
           v-show="
             (!form[item.varName as keyof documentFormTypes] || isEditingField[item.varName]) &&
-            !checkIsView()
+            !checkIsView() &&
+            canReplaceDocument
           "
           :error="index === 0 && !!formInject?.invoiceDocumentError && !hasAnyDocument"
           :disabled="
@@ -73,22 +74,18 @@
               >Fill Invoice Data</span
             >
             <button
-              v-if="
-                formInject?.status === 0 || formInject?.status === -1 || formInject?.status === 5
-              "
+              v-if="canReplaceDocument"
               class="btn btn-icon btn-sm btn-active-light-primary text-primary"
-              @click="changeFile(index)"
-              title="Edit"
+              @click="changeFile(index, item.varName as FileFieldKeys)"
+              title="Upload ulang"
             >
               <i class="ki-outline ki-pencil fs-2"></i>
             </button>
             <button
-              v-if="
-                formInject?.status === 0 || formInject?.status === -1 || formInject?.status === 5
-              "
+              v-if="canReplaceDocument"
               class="btn btn-icon btn-sm btn-active-light-danger text-danger"
               @click="removeFile(item.varName as FileFieldKeys)"
-              title="Delete"
+              title="Hapus"
             >
               <i class="ki-outline ki-trash fs-2"></i>
             </button>
@@ -144,8 +141,39 @@ const hasAnyDocument = computed(() => {
   return !!(form.invoiceDocument || form.tax || form.referenceDocument || form.otherDocument)
 })
 
+const canReplaceDocument = computed(() => {
+  const status = formInject?.status
+  return status === 0 || status === -1 || status === 5
+})
+
 const handleChildLoading = (status: boolean, varName: string) => {
   isEditingField[varName] = status
+}
+
+const preserveDocumentId = (
+  file: responseFileTypes,
+  previous: responseFileTypes | null,
+): responseFileTypes => {
+  const previousId = previous?.id ?? 0
+  return {
+    ...file,
+    id: previousId > 0 ? previousId : file.id || 0,
+  }
+}
+
+const setFile = (file: responseFileTypes, name: FileFieldKeys) => {
+  form[name] = preserveDocumentId(file, form[name])
+  isEditingField[name] = false
+}
+
+const changeFile = (index: number, name: FileFieldKeys) => {
+  isEditingField[name] = true
+  pdfUploadRef.value?.[index]?.triggerFileInput?.()
+}
+
+const removeFile = (name: FileFieldKeys) => {
+  form[name] = null
+  isEditingField[name] = false
 }
 
 const list = ref<listFormTypes[]>([
@@ -157,20 +185,6 @@ const list = ref<listFormTypes[]>([
   },
   { title: 'Other Document', varName: 'otherDocument', varErrorName: 'otherDocumentError' },
 ])
-
-const setFile = (file: responseFileTypes, name: FileFieldKeys) => {
-  form[name] = file
-  isEditingField[name] = false
-}
-
-const changeFile = (index: number) => {
-  pdfUploadRef.value[index].triggerFileInput()
-}
-
-const removeFile = (name: FileFieldKeys) => {
-  // Clear file
-  if (form) form[name] = null
-}
 
 const openDocumentPreview = (file: responseFileTypes | null, label: string) => {
   const signedUrl = (file?.previewPath || file?.path || '').trim()

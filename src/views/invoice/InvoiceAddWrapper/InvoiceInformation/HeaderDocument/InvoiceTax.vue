@@ -13,15 +13,16 @@
         </label>
         <pdfUploadTax
           ref="pdfUploadRef"
-          v-show="!form[item.varName as keyof typeof form]"
-          :error="!!form[item.varErrorName as keyof documentFormTypes]"
-          :disabled="
-            formInject?.status !== 0 && formInject?.status !== -1 && formInject?.status !== 5
+          v-show="
+            (!form[item.varName as keyof typeof form] || isEditingField[item.varName]) &&
+            canReplaceDocument
           "
-          @setFile="setFile($event, item.varName as keyof documentFormTypes)"
+          :error="!!form[item.varErrorName as keyof documentFormTypes]"
+          :disabled="!canReplaceDocument"
+          @setFile="setFile($event, item.varName as FileFieldKeys)"
         />
         <div
-          v-if="form[item.varName as keyof typeof form]"
+          v-if="form[item.varName as keyof typeof form] && !isEditingField[item.varName]"
           class="flex justify-between items-center gap-[8px] flex-1"
         >
           <AttachmentView
@@ -40,30 +41,24 @@
           />
           <div class="flex items-center gap-[8px]">
             <span
-              v-if="
-                formInject?.status === 0 || formInject?.status === -1 || formInject?.status === 5
-              "
+              v-if="canReplaceDocument"
               class="border-b border-dashed border-primary text-primary cursor-pointer text-xs font-medium mr-2"
               @click="sendUploadFile"
               >Fill Tax Data</span
             >
             <button
-              v-if="
-                formInject?.status === 0 || formInject?.status === -1 || formInject?.status === 5
-              "
+              v-if="canReplaceDocument"
               class="btn btn-icon btn-sm btn-active-light-primary text-primary"
-              @click="changeFile(index)"
-              title="Edit"
+              @click="changeFile(index, item.varName as FileFieldKeys)"
+              title="Upload ulang"
             >
               <i class="ki-outline ki-pencil fs-2"></i>
             </button>
             <button
-              v-if="
-                formInject?.status === 0 || formInject?.status === -1 || formInject?.status === 5
-              "
+              v-if="canReplaceDocument"
               class="btn btn-icon btn-sm btn-active-light-danger text-danger"
-              @click="removeFile(item.varName as keyof documentFormTypes)"
-              title="Delete"
+              @click="removeFile(item.varName as FileFieldKeys)"
+              title="Hapus"
             >
               <i class="ki-outline ki-trash fs-2"></i>
             </button>
@@ -76,7 +71,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, inject, watch, toRef } from 'vue'
+import { ref, reactive, inject, watch, computed } from 'vue'
 import type {
   documentFormTypes,
   responseFileTypes,
@@ -86,16 +81,20 @@ import type { formTypes } from '../../../types/invoiceAddWrapper'
 import pdfUploadTax from '@/components/ui/pdfUpload/pdfUploadTaxDoc.vue'
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 import AttachmentView from '@/components/ui/attachment/AttachmentView.vue'
-import type { invoiceQrData } from '@/views/invoice/types/invoiceQrdata'
 import UiLoading from '@/components/modal/UiLoading.vue'
 import { parseIndoDate } from '@/composables/parseIndoDate'
 import { openPdfPreview } from '@/composables/documentPreview'
 
+type FileFieldKeys = 'invoiceDocument' | 'tax' | 'referenceDocument' | 'otherDocument'
+
 const invoiceVerificationStore = useInvoiceVerificationStore()
-
-const qrData = inject<invoiceQrData>('qrData')
-
+const formInject = inject<formTypes>('form')
+const pdfUploadRef = ref()
 const isLoading = ref<boolean>(false)
+
+const isEditingField = reactive<Record<string, boolean>>({
+  tax: false,
+})
 
 const form = reactive<documentFormTypes>({
   invoiceDocument: null,
@@ -104,57 +103,43 @@ const form = reactive<documentFormTypes>({
   otherDocument: null,
 })
 
+const canReplaceDocument = computed(() => {
+  const status = formInject?.status
+  return status === 0 || status === -1 || status === 5
+})
+
 const list = ref<listFormTypes[]>([
-  // {
-  //   title: 'Invoice Document',
-  //   varName: 'invoiceDocument',
-  //   varErrorName: 'invoiceDocumentError',
-  // },
   {
     title: 'Tax Document',
     varName: 'tax',
     varErrorName: 'taxError',
   },
-  // {
-  //   title: 'Reference Document',
-  //   varName: 'referenceDocument',
-  //   varErrorName: 'referenceDocumentError',
-  // },
-  // {
-  //   title: 'Other Document',
-  //   varName: 'otherDocument',
-  //   varErrorName: 'otherDocumentError',
-  // },
 ])
 
-const formInject = inject<formTypes>('form')
-const pdfUploadRef = ref()
-
-// const setFileQr = (data: invoiceQrData) => {
-//   qrData.vendorBuyer = data.vendorBuyer
-//   qrData.npwppBuyer = data.npwppBuyer
-//   qrData.vendorSupplier = data.vendorSupplier
-//   qrData.npwpSupplier = data.npwpSupplier
-//   qrData.taxDocumentNumber = data.taxDocumentNumber
-//   qrData.taxDocumentDate = data.taxDocumentDate
-//   qrData.dpp = data.dpp
-//   qrData.ppn = data.ppn
-//   qrData.ppnbm = data.ppnbm
-//   qrData.status = data.status
-// }
-
-const setFile = (file: responseFileTypes, name: keyof documentFormTypes) => {
-  const reftProperty = toRef(form, name)
-  reftProperty.value = file
+const preserveDocumentId = (
+  file: responseFileTypes,
+  previous: responseFileTypes | null,
+): responseFileTypes => {
+  const previousId = previous?.id ?? 0
+  return {
+    ...file,
+    id: previousId > 0 ? previousId : file.id || 0,
+  }
 }
 
-const changeFile = (index: number) => {
-  pdfUploadRef.value[index].triggerFileInput()
+const setFile = (file: responseFileTypes, name: FileFieldKeys) => {
+  form[name] = preserveDocumentId(file, form[name])
+  isEditingField[name] = false
 }
 
-const removeFile = (name: keyof documentFormTypes) => {
-  const reftProperty = toRef(form, name)
-  reftProperty.value = null
+const changeFile = (index: number, name: FileFieldKeys) => {
+  isEditingField[name] = true
+  pdfUploadRef.value?.[index]?.triggerFileInput?.()
+}
+
+const removeFile = (name: FileFieldKeys) => {
+  form[name] = null
+  isEditingField[name] = false
 }
 
 const openDocumentPreview = (file: responseFileTypes | null, label: string) => {
@@ -163,22 +148,17 @@ const openDocumentPreview = (file: responseFileTypes | null, label: string) => {
 }
 
 const sendUploadFile = async () => {
+  if (!formInject || !form?.tax?.previewPath) return
+
   isLoading.value = true
-  // Object.assign(ocrData, await invoiceVerificationStore.uploadFileOcr(form?.tax?.previewPath))
-  const response = await invoiceVerificationStore.uploadFileQr(form?.tax?.previewPath)
-
-  formInject.taxNoInvoice = response.taxDocumentNumber
-  formInject.taxDate = parseIndoDate(response.taxDocumentDate)
-
-  isLoading.value = false
+  try {
+    const response = await invoiceVerificationStore.uploadFileQr(form.tax.previewPath)
+    formInject.taxNoInvoice = response.taxDocumentNumber
+    formInject.taxDate = parseIndoDate(response.taxDocumentDate)
+  } finally {
+    isLoading.value = false
+  }
 }
-
-// const verifyInvoice = async () => {
-//   isLoadUpload.value = true
-//   await sendUploadFile()
-//   isLoadUpload.value = false
-//   isVerifyData.value = true
-// }
 
 watch(
   () => form,
