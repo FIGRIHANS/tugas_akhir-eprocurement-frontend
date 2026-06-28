@@ -1,5 +1,6 @@
 import type { RouteLocationRaw } from 'vue-router'
 import type { NotificationType, TaxNotification } from '@/stores/notification/types'
+import { INTERNAL_SUBMITTER_PROFILE_ID, SUBMITTOR_PROFILE_ID } from '@/core/utils/invoiceSubmissionRoute'
 
 export interface NotificationDisplayMeta {
   category: string
@@ -17,6 +18,9 @@ const INBOUND_TYPES: NotificationType[] = [
   'partial-received',
   'completed',
   'rejected',
+  'invoice-pending-verify',
+  'invoice-pending-approval',
+  'invoice-rejected',
 ]
 
 export const getNotificationDisplayMeta = (type: NotificationType): NotificationDisplayMeta => {
@@ -77,6 +81,30 @@ export const getNotificationDisplayMeta = (type: NotificationType): Notification
         iconClass: 'ki-filled ki-cross-circle text-red-600 text-lg',
         accentClass: 'border-l-red-500',
       }
+    case 'invoice-pending-verify':
+      return {
+        category: 'Invoice',
+        categoryClass: 'bg-sky-50 text-sky-700',
+        severity: 'info',
+        iconClass: 'ki-filled ki-verify text-sky-600 text-lg',
+        accentClass: 'border-l-sky-500',
+      }
+    case 'invoice-pending-approval':
+      return {
+        category: 'Invoice',
+        categoryClass: 'bg-amber-50 text-amber-700',
+        severity: 'warning',
+        iconClass: 'ki-filled ki-check-circle text-amber-600 text-lg',
+        accentClass: 'border-l-amber-500',
+      }
+    case 'invoice-rejected':
+      return {
+        category: 'Invoice',
+        categoryClass: 'bg-red-50 text-red-700',
+        severity: 'critical',
+        iconClass: 'ki-filled ki-cross-circle text-red-600 text-lg',
+        accentClass: 'border-l-red-500',
+      }
     case 'vat-mismatch':
       return {
         category: 'Finance',
@@ -115,10 +143,39 @@ export const getNotificationDisplayMeta = (type: NotificationType): Notification
 export const isInboundNotification = (type: NotificationType): boolean =>
   INBOUND_TYPES.includes(type)
 
+export interface ResolveNotificationRouteOptions {
+  profileId?: number
+}
+
 export const resolveNotificationRoute = (
   notification: TaxNotification,
+  options?: ResolveNotificationRouteOptions,
 ): RouteLocationRaw | null => {
   const entityId = notification.linkEntityId
+  const profileId = Number(options?.profileId)
+
+  const isSubmitterRejectEdit =
+    notification.type === 'invoice-rejected' &&
+    !Number.isNaN(profileId) &&
+    (profileId === INTERNAL_SUBMITTER_PROFILE_ID || profileId === SUBMITTOR_PROFILE_ID) &&
+    !!entityId
+
+  if (isSubmitterRejectEdit) {
+    const isNonPo = notification.linkEntityType === 'invoice-non-po'
+    const query: Record<string, string> = {
+      type: isNonPo ? 'nonpo' : 'po',
+      invoice: entityId,
+    }
+
+    if (profileId === SUBMITTOR_PROFILE_ID) {
+      query.from = 'ftp'
+    }
+
+    return {
+      name: 'invoiceAdd',
+      query,
+    }
+  }
 
   if (notification.linkEntityType === 'goods-receipt' && entityId) {
     return { name: 'goodsReceiptListDetail', params: { grId: entityId } }
@@ -130,6 +187,20 @@ export const resolveNotificationRoute = (
 
   if (notification.linkEntityType === 'delivery-note' && entityId) {
     return { name: 'deliveryNotesDetail', params: { id: entityId } }
+  }
+
+  if (notification.linkEntityType === 'invoice' && entityId) {
+    return {
+      name: 'invoiceDetail',
+      query: { id: entityId, type: '2' },
+    }
+  }
+
+  if (notification.linkEntityType === 'invoice-non-po' && entityId) {
+    return {
+      name: 'invoiceDetailNonPo',
+      query: { id: entityId, type: '2', invoiceType: 'no_po' },
+    }
   }
 
   switch (notification.type) {

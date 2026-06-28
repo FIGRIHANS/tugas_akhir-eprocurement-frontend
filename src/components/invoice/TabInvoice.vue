@@ -1,7 +1,7 @@
 <template>
   <nav
     v-if="visibleTabs.length > 0"
-    class="invoice-tab-map flex flex-wrap items-center gap-x-3 gap-y-1 bg-gray-200 px-[20px] py-[12px]"
+    class="invoice-tab-map my-[16px] flex flex-wrap items-center gap-x-3 gap-y-1 bg-gray-200 px-[20px] py-[12px]"
     aria-label="Invoice workflow tabs"
   >
     <template v-for="(tab, index) in visibleTabs" :key="tab.key">

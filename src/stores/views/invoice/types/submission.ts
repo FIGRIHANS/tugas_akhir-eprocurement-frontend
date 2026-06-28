@@ -60,6 +60,7 @@ interface ParamsSubmissionHeader {
   notes: string
   statusCode: number
   statusName: string
+  statusNotes?: string
   creditCardBillingId: string
   department?: string
   remainingDPAmount: number
@@ -372,6 +373,7 @@ export interface ParamsSubmissionHeaderNonPo {
   notes: string
   statusCode: number
   statusName: string
+  statusNotes?: string
   department: string
   profileId: string
   casDateReceipt?: string

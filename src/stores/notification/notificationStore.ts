@@ -312,9 +312,11 @@ export const useNotificationStore = defineStore('notification', () => {
   const mapApiSeverity = (type: string): NotificationSeverity => {
     switch (type) {
       case 'rejected':
+      case 'invoice-rejected':
         return 'critical'
       case 'partial-received':
       case 'rc-pending-approval':
+      case 'invoice-pending-approval':
         return 'warning'
       default:
         return 'info'

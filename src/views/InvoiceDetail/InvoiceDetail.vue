@@ -120,7 +120,7 @@
     </div>
     <RejectVerification @reject="goReject" />
     <SuccessVerifModal
-      :statusCode="detailInvoice?.header.statusCode || detailInvoiceNonPo?.header.statusCode || -1"
+      :mode="successModalMode"
       @afterClose="goToList"
     />
     <SuccessRejectModal ref="successRejectModalRef" @afterClose="goToList" />
@@ -155,6 +155,7 @@ import {
   getUserWorkflowStep,
   getActionButtonLabel,
   isUserActionPending,
+  isApproveStep,
   isVerifyStep,
   shouldUsePutApproval,
   shouldUsePostApproval,
@@ -189,6 +190,7 @@ const SuccessVerifModal = defineAsyncComponent(
 )
 
 const successRejectModalRef = ref<InstanceType<typeof SuccessRejectModal> | null>(null)
+const successModalMode = ref<'verified' | 'approved'>('verified')
 
 const activeStep = ref<string>('')
 const activeTabDetail = ref<string>('data')
@@ -751,9 +753,16 @@ const checkNonPoPettyCash = () => {
   return form.value.invoiceTypeCode === 5
 }
 
+const checkIsAccountingTax = () => userData.value?.profile?.profileId === 3003
+
 const checkStatusCode = () => isUserActionPending(userWorkflowStep.value)
 
-const checkEditButton = () => isUserActionPending(userWorkflowStep.value)
+const checkEditButton = () => {
+  if (checkIsAccountingTax()) {
+    return isApproveStep(userWorkflowStep.value)
+  }
+  return isUserActionPending(userWorkflowStep.value)
+}
 
 const checkWorkflow = () => isUserActionPending(userWorkflowStep.value)
 
@@ -1184,6 +1193,7 @@ const goVerif = async () => {
     }
 
     if (isApiSuccess(response)) {
+      successModalMode.value = isApproveStep(step) ? 'approved' : 'verified'
       verificationApi.resetDetailInvoiceEdit()
       showSuccessVerifModal()
       cleanupTempDeletes()

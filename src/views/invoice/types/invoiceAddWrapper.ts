@@ -117,6 +117,7 @@ export interface formTypes extends documentFormTypes {
   invoiceItemError?: boolean
 
   status: number
+  statusNotes?: string
   invoiceSource: string
 
   // OCR Data

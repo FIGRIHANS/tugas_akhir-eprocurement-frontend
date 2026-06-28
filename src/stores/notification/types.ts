@@ -14,11 +14,16 @@ export type NotificationType =
   | 'partial-received'
   | 'completed'
   | 'rejected'
+  | 'invoice-pending-verify'
+  | 'invoice-pending-approval'
+  | 'invoice-rejected'
 
 export type NotificationLinkEntityType =
   | 'delivery-note'
   | 'receiving-confirmation'
   | 'goods-receipt'
+  | 'invoice'
+  | 'invoice-non-po'
 
 export interface TaxNotification {
   id: string

@@ -1,5 +1,5 @@
 import invoiceHttp from '@/core/utils/invoiceApi'
-import { isEditableInvoiceStatus } from '@/core/utils/invoiceSubmissionRoute'
+import { isEditableInvoiceStatus, resolveInvoiceRejectReason } from '@/core/utils/invoiceSubmissionRoute'
 import type { responseFileTypes } from '@/views/invoice/types/invoiceDocument'
 import type { formTypes } from '@/views/invoice/types/invoiceAddWrapper'
 import type { ListPoTypes } from '@/stores/views/invoice/types/submission'
@@ -902,6 +902,13 @@ export const applyFtpSyncDraftToForm = (
   if (header.taxNo) form.taxNoInvoice = String(header.taxNo)
   if (header.currCode) form.currency = String(header.currCode)
   if (header.notes) form.description = String(header.notes)
+  const rejectNotes = resolveInvoiceRejectReason(
+    header as { statusNotes?: string | null; StatusNotes?: string | null },
+    Array.isArray(savedInvoice.workflow)
+      ? (savedInvoice.workflow as Array<{ stateCode?: number; actionerNotes?: string }>)
+      : undefined,
+  )
+  if (rejectNotes) form.statusNotes = rejectNotes
 
   applyFtpVendorToForm(form, vendor, header, context, vendorList)
   applyFtpCalculationToForm(form, calculation)

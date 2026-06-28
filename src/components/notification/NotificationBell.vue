@@ -212,11 +212,27 @@ const getPreview = (message: string) => getNotificationPreviewLines(message, 3)
 
 const isNavigable = (notification: TaxNotification) => {
   if (notification.type === 'wht-pending') return true
-  return !!resolveNotificationRoute(notification)
+  return !!resolveNotificationRoute(notification, {
+    profileId: currentProfileId.value,
+  })
 }
 
-const toggleDropdown = () => {
-  isOpen.value = !isOpen.value
+const toggleDropdown = async () => {
+  const willOpen = !isOpen.value
+  isOpen.value = willOpen
+
+  if (willOpen) {
+    if (isVendorUser.value && currentUserId.value) {
+      await notificationStore.fetchVendorNotifications(currentUserId.value, currentVendorCode.value)
+    } else if (!isVendorUser.value && currentUserId.value) {
+      await notificationStore.fetchVendorNotifications(
+        undefined,
+        undefined,
+        currentUserId.value,
+        currentProfileId.value,
+      )
+    }
+  }
 }
 
 const handleClickOutside = (event: MouseEvent) => {
@@ -260,8 +276,10 @@ const handleNotificationClick = async (notification: TaxNotification) => {
     return
   }
 
-  // Inbound logistics — DN / RC / GR (kita)
-  const route = resolveNotificationRoute(notification)
+  // Inbound logistics — DN / RC / GR / Invoice (kita)
+  const route = resolveNotificationRoute(notification, {
+    profileId: currentProfileId.value,
+  })
   if (route) {
     await router.push(route)
     isOpen.value = false

@@ -236,6 +236,7 @@ import {
   isSavedDraftStatus,
   isSubmittorProfile,
   resolveInvoiceAddRouteType,
+  resolveInvoiceRejectReason,
 } from '@/core/utils/invoiceSubmissionRoute'
 import { dedupePoGrLines } from '@/core/utils/poGrDedup'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
@@ -418,6 +419,7 @@ const form = reactive<formTypes>({
   invoiceItem: [],
   additionalCost: [],
   status: -1,
+  statusNotes: '',
   invoiceSource: '',
   idAlternativePayment: 0,
   isAlternativePayee: false,
@@ -1916,6 +1918,7 @@ const setData = () => {
 
   if (form && detail) {
     form.status = Number(detail.header.statusCode)
+    form.statusNotes = resolveInvoiceRejectReason(detail.header, detail.workflow)
     form.invoiceUId = detail.header.invoiceUId
     form.invoiceType = detail.header.invoiceTypeCode ? detail.header.invoiceTypeCode.toString() : ''
     form.invoiceSource = detail.header.invoiceSourceName
@@ -2070,6 +2073,7 @@ const setDataNonPo = () => {
     // Safely map Header data
     if (detail.header) {
       form.status = Number(detail.header.statusCode)
+      form.statusNotes = resolveInvoiceRejectReason(detail.header, detail.workflow)
       form.invoiceUId = detail.header.invoiceUId
       form.invoiceType = detail.header.invoiceTypeCode
         ? detail.header.invoiceTypeCode.toString()

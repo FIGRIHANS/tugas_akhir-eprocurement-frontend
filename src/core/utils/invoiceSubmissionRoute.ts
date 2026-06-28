@@ -41,6 +41,28 @@ export function isRejectedInvoiceStatus(status: number | string | null | undefin
   return !Number.isNaN(code) && code === 5
 }
 
+type RejectReasonHeader = {
+  statusNotes?: string | null
+  StatusNotes?: string | null
+}
+
+type RejectReasonWorkflowStep = {
+  stateCode?: number | null
+  actionerNotes?: string | null
+}
+
+/** Resolve verifier/approver rejection notes from header or workflow. */
+export function resolveInvoiceRejectReason(
+  header?: RejectReasonHeader | null,
+  workflow?: RejectReasonWorkflowStep[] | null,
+): string {
+  const fromHeader = header?.statusNotes?.trim() || header?.StatusNotes?.trim()
+  if (fromHeader) return fromHeader
+
+  const rejectedStep = (workflow ?? []).find((step) => Number(step.stateCode) === 5)
+  return rejectedStep?.actionerNotes?.trim() || ''
+}
+
 export function isDraftFormStatus(status: number | string | null | undefined): boolean {
   const code = Number(status)
   return !Number.isNaN(code) && (code === 0 || code === -1 || code === 5)
@@ -51,6 +73,9 @@ export function isEditableInvoiceStatus(status: number | string | null | undefin
   const code = Number(status)
   return !Number.isNaN(code) && (code === -1 || code === 0 || code === 5)
 }
+
+/** Profile ID for internal invoice submitter (employee submission flow). */
+export const INTERNAL_SUBMITTER_PROFILE_ID = 3001
 
 /** Profile ID for invoice submitter (FTP / vendor submission flow). */
 export const SUBMITTOR_PROFILE_ID = 3200

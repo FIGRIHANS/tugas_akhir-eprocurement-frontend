@@ -139,7 +139,7 @@
                 </tr>
               </thead>
               <tbody>
-                <TableListSkeleton v-if="isLoadingList" :columns="6" :rows="8" />
+                <TableListSkeleton v-if="isLoadingList" :columns="6" :rows="4" />
                 <tr v-else-if="paginatedUploadList.length === 0">
                   <td colspan="6" class="text-center">No data found.</td>
                 </tr>
@@ -213,7 +213,7 @@
                 </tr>
               </thead>
               <tbody>
-                <TableListSkeleton v-if="isLoadingList" :columns="columns.length" :rows="8" />
+                <TableListSkeleton v-if="isLoadingList" :columns="columns.length" :rows="4" />
                 <tr v-else-if="list.length === 0">
                   <td :colspan="columns.length" class="text-center">No data found.</td>
                 </tr>
@@ -379,7 +379,8 @@ const filteredPayload = ref([])
 const filterChild = ref(null)
 const viewDetailId = ref('')
 const isSyncLoading = ref(false)
-const isLoadingList = ref(true)
+const isLoadingList = ref(false)
+const hasLoadedListOnce = ref(false)
 const FTP_INVOICE_SOURCE = 3
 const DRAFT_STATUS_CODE = 0
 const DRAFT_STATUS_NAME = 'draft'
@@ -1012,13 +1013,12 @@ const onUploaded = (
   activeTab.value = 'ftpData'
   currentPage.value = 1
   void callList()
-  // OCR async di backend — refresh ulang setelah beberapa detik
-  setTimeout(() => void callList(), 3000)
-  setTimeout(() => void callList(), 8000)
+  window.setTimeout(() => void callList({ silent: true }), 5000)
 }
 
-const callList = async () => {
-  isLoadingList.value = true
+const callList = async (options?: { silent?: boolean }) => {
+  const showSkeleton = !options?.silent && !hasLoadedListOnce.value
+  if (showSkeleton) isLoadingList.value = true
   try {
     if (activeTab.value === 'upload') {
       await fetchFtpUploads()
@@ -1038,10 +1038,13 @@ const callList = async () => {
     updateUploadDummyStatuses()
   } catch (error) {
     console.error('Failed to load FTP invoice list:', error)
-    sourceList.value = []
-    ftpDataTotal.value = 0
+    if (!hasLoadedListOnce.value) {
+      sourceList.value = []
+      ftpDataTotal.value = 0
+    }
   } finally {
     isLoadingList.value = false
+    hasLoadedListOnce.value = true
   }
 }
 

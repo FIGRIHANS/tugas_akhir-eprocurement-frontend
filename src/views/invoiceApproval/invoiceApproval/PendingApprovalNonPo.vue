@@ -77,7 +77,7 @@
                     <div class="dropdown-content w-full max-w-56 py-2">
                       <div class="menu menu-default flex flex-col w-full">
                         <div
-                          v-if="parent.statusCode === 4"
+                          v-if="parent.statusCode === 4 && canSendToSap"
                           class="menu-item"
                           @click="sendToSap(parent.invoiceUId)"
                         >
@@ -105,7 +105,7 @@
                           </div>
                         </div>
                         <div
-                          v-if="parent.statusCode === 4 && !approvedByFinanceApCache.get(parent.invoiceUId)"
+                          v-if="isAccountingTax && parent.statusCode === 2"
                           class="menu-item"
                           @click="openDetailInvoiceEdit(parent.invoiceUId)"
                         >
@@ -117,7 +117,27 @@
                           </div>
                         </div>
                         <div
-                          v-if="parent.statusCode === 7 && !approvedByFinanceApCache.get(parent.invoiceUId)"
+                          v-if="
+                            !isAccountingTax &&
+                            parent.statusCode === 4 &&
+                            !approvedByFinanceApCache.get(parent.invoiceUId)
+                          "
+                          class="menu-item"
+                          @click="openDetailInvoiceEdit(parent.invoiceUId)"
+                        >
+                          <div class="menu-link">
+                            <span class="menu-icon">
+                              <i class="ki-duotone ki-message-edit"></i>
+                            </span>
+                            <span class="menu-title"> Edit </span>
+                          </div>
+                        </div>
+                        <div
+                          v-if="
+                            !isAccountingTax &&
+                            parent.statusCode === 7 &&
+                            !approvedByFinanceApCache.get(parent.invoiceUId)
+                          "
                           class="menu-item"
                           @click="openDetailInvoiceEditSendSap(parent.invoiceUId)"
                         >
@@ -241,6 +261,7 @@ import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification
 import type { filterListTypes } from '../types/pendingApproval'
 import type { ListNonPoTypes } from '@/stores/views/invoice/types/verification'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
+import { useLoginStore } from '@/stores/views/login'
 import { useFormatIdr } from '@/composables/currency'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import UiLoading from '@/components/modal/UiLoading.vue'
@@ -260,6 +281,7 @@ const invoiceNonPoTypeList = computed(() => invoiceMasterApi.invoiceNonPoType)
 
 const invoiceApi = useInvoiceSubmissionStore()
 const verificationApi = useInvoiceVerificationStore()
+const loginStore = useLoginStore()
 const filterChild = ref(null)
 const router = useRouter()
 const approvedByFinanceApCache = ref<Map<string, boolean>>(new Map())
@@ -311,6 +333,10 @@ const columns = ref<string[]>([
 const columnsChild = ref(['No PO', 'No GR', 'Item Description', 'Item Amount', 'Quantity'])
 
 const verifList = computed(() => verificationApi.listNonPo)
+
+const canSendToSap = computed(() => loginStore.userData?.profile?.profileId !== 3003)
+
+const isAccountingTax = computed(() => loginStore.userData?.profile?.profileId === 3003)
 
 const colorBadge = (statusCode: number) => {
   const list = {

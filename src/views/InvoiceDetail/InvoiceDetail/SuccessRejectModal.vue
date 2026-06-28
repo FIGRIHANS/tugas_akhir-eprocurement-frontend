@@ -2,7 +2,7 @@
   <div class="modal" data-modal="true" id="success_reject_modal">
     <div class="modal-content modal-center-y max-w-[500px]">
       <div class="modal-body flex flex-col items-center gap-[30px] p-[40px]">
-        <ModalRejectLogo />
+        <ModalSuccessLogo />
         <div class="text-center font-inter">
           <p class="text-lg font-medium">Invoice Berhasil Ditolak</p>
           <p class="text-[13px] font-normal text-gray-600">
@@ -18,7 +18,7 @@
 
 <script lang="ts" setup>
 import { KTModal } from '@/metronic/core'
-import ModalRejectLogo from '@/assets/svg/ModalRejectLogo.vue'
+import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
 
 const emits = defineEmits(['afterClose'])
 

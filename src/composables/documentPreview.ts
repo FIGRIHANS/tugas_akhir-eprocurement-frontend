@@ -1,6 +1,8 @@
 import generalApi from '@/core/utils/generalApi'
 import invoiceApi from '@/core/utils/invoiceApi'
 
+const SAS_QUERY_KEYS = new Set(['sv', 'st', 'se', 'sp', 'spr', 'sr', 'sig'])
+
 export const hasBlobSasToken = (url: string): boolean => {
   try {
     const parsed = new URL(url)
@@ -18,6 +20,26 @@ export const isAzureBlobUrl = (url: string): boolean => {
   }
 }
 
+/** Remove stale SAS params so preview API can issue a fresh token. */
+export const stripBlobSasQuery = (url: string): string => {
+  try {
+    const parsed = new URL(url)
+    if (!parsed.search) return url
+
+    const kept = new URLSearchParams()
+    parsed.searchParams.forEach((value, key) => {
+      if (!SAS_QUERY_KEYS.has(key.toLowerCase())) {
+        kept.set(key, value)
+      }
+    })
+
+    parsed.search = kept.toString()
+    return parsed.toString()
+  } catch {
+    return url
+  }
+}
+
 export const warnUnsignedDocumentUrl = (url: string, label = 'Document') => {
   if (!url || hasBlobSasToken(url)) return
   console.warn(
@@ -27,8 +49,9 @@ export const warnUnsignedDocumentUrl = (url: string, label = 'Document') => {
 }
 
 const fetchSignedBlobPreviewUrl = async (blobUrl: string): Promise<string> => {
+  const cleanUrl = stripBlobSasQuery(blobUrl)
   const response = await invoiceApi.get<{ url?: string }>('/file/preview-url', {
-    params: { fullFilePath: blobUrl },
+    params: { fullFilePath: cleanUrl },
   })
 
   const signedUrl = response.data?.url?.trim()
@@ -39,14 +62,12 @@ const fetchSignedBlobPreviewUrl = async (blobUrl: string): Promise<string> => {
   return signedUrl
 }
 
-/** Resolve URL untuk preview browser: pakai SAS langsung, invoice blob API, atau general local file API. */
+/** Resolve URL untuk preview browser: fresh SAS via invoice API, atau general local file API. */
 export const resolveDocumentPreviewUrl = async (
   source: string | null | undefined,
 ): Promise<string> => {
   const path = (source || '').trim()
   if (!path) return ''
-
-  if (hasBlobSasToken(path)) return path
 
   if (isAzureBlobUrl(path)) {
     try {
