@@ -493,15 +493,23 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { postVatOutCreate } from '@/core/utils/vatPxInvoiceApi'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import ModalNotification from '@/components/modal/ModalNotification.vue'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import GoodsReceiptService from '@/services/goodsReceipt.service'
+import { useLoginStore } from '@/stores/views/login'
 
 const router = useRouter()
+const loginStore = useLoginStore()
+
+onMounted(() => {
+  if (Number(loginStore.userData?.profile?.profileId) === 3001) {
+    router.replace('/vat-out-reconciliation')
+  }
+})
 const isSubmitting = ref(false)
 const vendorNpwp = '1091031210969728'
 const identitasTipe = ref('NPWP')

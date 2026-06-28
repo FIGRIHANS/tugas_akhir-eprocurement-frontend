@@ -118,6 +118,62 @@
             </div>
           </div>
 
+          <!-- Section 3: Item Lines (Goods Receipt) -->
+          <div class="card">
+            <div class="card-header py-[17px] flex items-center justify-between gap-[8px]">
+              <h3 class="card-title text-base font-semibold">Item Lines (Goods Receipt)</h3>
+            </div>
+            <div class="card-body">
+              <div class="overflow-x-auto list__table">
+                <table class="table align-middle text-gray-700 font-medium text-sm w-full">
+                  <thead>
+                    <tr class="!bg-teal-100 !text-teal-700">
+                      <th class="text-center w-12">No</th>
+                      <th class="text-center w-28">SKU</th>
+                      <th>Item Name</th>
+                      <th class="text-center w-28">Qty</th>
+                      <th class="text-right w-36">Unit Price</th>
+                      <th class="text-right w-40">Line Amount</th>
+                      <th class="text-center w-36">Condition</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <template v-if="grItems && grItems.length > 0">
+                      <tr v-for="(item, idx) in grItems" :key="'ui-gr-item-' + idx">
+                        <td class="text-center">{{ idx + 1 }}</td>
+                        <td class="text-center text-primary font-semibold">{{ item.sku || '-' }}</td>
+                        <td>{{ item.itemName || 'Sample Item' }}</td>
+                        <td class="text-center">{{ item.qtyReceivedGood }}</td>
+                        <td class="text-right">Rp {{ formatIndo(item.unitPrice) }}</td>
+                        <td class="text-right font-semibold">Rp {{ formatIndo(item.lineAmount) }}</td>
+                        <td class="text-center">
+                          <span :class="['badge badge-outline text-xs px-2 py-0.5 font-semibold', item.conditionType === 'Good Condition' ? 'badge-success' : 'badge-warning']">
+                            {{ item.conditionType || 'GOODS' }}
+                          </span>
+                        </td>
+                      </tr>
+                    </template>
+                    <template v-else>
+                      <tr>
+                        <td class="text-center">1</td>
+                        <td class="text-center text-primary font-semibold">000000</td>
+                        <td>Sample Item</td>
+                        <td class="text-center">1</td>
+                        <td class="text-right">Rp {{ formatIndo(selectedRow?.totaldpp) }}</td>
+                        <td class="text-right font-semibold">Rp {{ formatIndo(selectedRow?.totaldpp) }}</td>
+                        <td class="text-center">
+                          <span class="badge badge-outline badge-success text-xs px-2 py-0.5 font-semibold">
+                            GOODS
+                          </span>
+                        </td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
         </div>
 
         <!-- RIGHT COLUMN: Sidebar -->
@@ -173,7 +229,7 @@
             </button>
           </template>
           <template v-if="selectedRow.statusfaktur === 'APPROVED' || selectedRow.statusfaktur === 'CANCELED'">
-            <button v-if="selectedRow.statusfaktur === 'APPROVED'" class="btn btn-danger" @click="handleCancel">
+            <button v-if="selectedRow.statusfaktur === 'APPROVED' && !isProfile3001" class="btn btn-danger" @click="handleCancel">
               <i class="ki-filled ki-cross-circle"></i> Cancel Invoice
             </button>
           </template>
@@ -242,19 +298,36 @@
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td style="border: 1px solid black; padding: 5px; text-align: center;">1</td>
-            <td style="border: 1px solid black; padding: 5px; text-align: center;">000000</td>
-            <td style="border: 1px solid black; padding: 5px; line-height: 1.3;">
-              GOODS - Sample Item<br/>
-              <span style="font-size: 10px; color: #555;">
-                Rp {{ formatIndo(selectedRow?.totaldpp) }} x 1<br/>
-                Potongan Harga = Rp 0,00<br/>
-                PPnBM (0%) = Rp 0,00
-              </span>
-            </td>
-            <td style="border: 1px solid black; padding: 5px; text-align: right;">{{ formatIndo(selectedRow?.totaldpp) }}</td>
-          </tr>
+          <template v-if="grItems && grItems.length > 0">
+            <tr v-for="(item, idx) in grItems" :key="'gr-item-' + idx">
+              <td style="border: 1px solid black; padding: 5px; text-align: center;">{{ idx + 1 }}</td>
+              <td style="border: 1px solid black; padding: 5px; text-align: center;">{{ item.sku || '000000' }}</td>
+              <td style="border: 1px solid black; padding: 5px; line-height: 1.3;">
+                {{ item.conditionType || 'GOODS' }} - {{ item.itemName || 'Sample Item' }}<br/>
+                <span style="font-size: 10px; color: #555;">
+                  Rp {{ formatIndo(item.unitPrice) }} x {{ item.qtyReceivedGood }}<br/>
+                  Potongan Harga = Rp 0,00<br/>
+                  PPnBM (0%) = Rp 0,00
+                </span>
+              </td>
+              <td style="border: 1px solid black; padding: 5px; text-align: right;">{{ formatIndo(item.lineAmount) }}</td>
+            </tr>
+          </template>
+          <template v-else>
+            <tr>
+              <td style="border: 1px solid black; padding: 5px; text-align: center;">1</td>
+              <td style="border: 1px solid black; padding: 5px; text-align: center;">000000</td>
+              <td style="border: 1px solid black; padding: 5px; line-height: 1.3;">
+                GOODS - Sample Item<br/>
+                <span style="font-size: 10px; color: #555;">
+                  Rp {{ formatIndo(selectedRow?.totaldpp) }} x 1<br/>
+                  Potongan Harga = Rp 0,00<br/>
+                  PPnBM (0%) = Rp 0,00
+                </span>
+              </td>
+              <td style="border: 1px solid black; padding: 5px; text-align: right;">{{ formatIndo(selectedRow?.totaldpp) }}</td>
+            </tr>
+          </template>
           <tr>
             <td colspan="3" style="border: 1px solid black; padding: 5px; font-weight: bold;">Harga Jual / Penggantian / Uang Muka / Termin</td>
             <td style="border: 1px solid black; padding: 5px; text-align: right; font-weight: bold;">{{ formatIndo(selectedRow?.totaldpp) }}</td>
@@ -313,12 +386,17 @@ import Breadcrumb from '@/components/BreadcrumbView.vue'
 import { getVatOutList, postVatInDownloadPdf } from '@/core/utils/vatPxInvoiceApi'
 import UiModal from '@/components/modal/UiModal.vue'
 import Swal from 'sweetalert2'
+import { useLoginStore } from '@/stores/views/login'
+import GoodsReceiptService from '@/services/goodsReceipt.service'
 
 const router = useRouter()
 const route = useRoute()
 const isLoading = ref<boolean>(false)
 const selectedRow = ref<any>(null)
 const vendorNpwp = '1091031210969728'
+const loginStore = useLoginStore()
+const grItems = ref<any[]>([])
+const isProfile3001 = computed(() => Number(loginStore.userData?.profile?.profileId) === 3001)
 
 const routes = ref<routeTypes[]>([
   { name: 'Tax Reconciliation', to: '/tax-reconciliation' },
@@ -395,6 +473,22 @@ const fetchDetail = async () => {
 
     const targetId = route.params.id as string
     selectedRow.value = list.find((item: any) => item.id == targetId)
+
+    if (selectedRow.value && selectedRow.value.referensi) {
+      try {
+        const isVendorUser = !!loginStore.userData?.profile?.vendorCode
+        const grResponse = await GoodsReceiptService.getDetail({
+          poNumber: selectedRow.value.referensi,
+          accessVendorId: isVendorUser ? loginStore.userData?.profile?.profileId : undefined,
+          accessVendorCode: isVendorUser ? loginStore.userData?.profile?.vendorCode : undefined
+        })
+        if (grResponse && grResponse.items) {
+          grItems.value = grResponse.items
+        }
+      } catch (grError) {
+        console.error('Error fetching GR details for VAT Out:', grError)
+      }
+    }
   } catch (error) {
     console.error('Error fetching VAT out details:', error)
   } finally {
@@ -435,19 +529,38 @@ const handleDownloadPdf = () => {
     }
   }
 
-  const itemsHtml = `
-    <tr>
-      <td style="border: 1px solid black; text-align: center; padding: 4px;">1</td>
-      <td style="border: 1px solid black; text-align: center; padding: 4px;">000000</td>
-      <td style="border: 1px solid black; padding: 4px; font-size: 11px; line-height: 1.3;">
-        GOODS - Sample Item<br/>
-        Rp ${formatIndo(selectedRow.value.totaldpp)} x 1<br/>
-        Potongan Harga = Rp 0,00<br/>
-        PPnBM (0%) = Rp 0,00
-      </td>
-      <td style="border: 1px solid black; text-align: right; padding: 4px;">${formattedDpp}</td>
-    </tr>
-  `
+  let itemsHtml = ''
+  if (grItems.value && grItems.value.length > 0) {
+    itemsHtml = grItems.value.map((item, idx) => `
+      <tr>
+        <td style="border: 1px solid black; text-align: center; padding: 4px;">${idx + 1}</td>
+        <td style="border: 1px solid black; text-align: center; padding: 4px;">${item.sku || '000000'}</td>
+        <td style="border: 1px solid black; padding: 4px; font-size: 11px; line-height: 1.3;">
+          ${item.conditionType || 'GOODS'} - ${item.itemName || 'Sample Item'}<br/>
+          <span style="font-size: 10px; color: #555;">
+            Rp ${formatIndo(item.unitPrice)} x ${item.qtyReceivedGood}<br/>
+            Potongan Harga = Rp 0,00<br/>
+            PPnBM (0%) = Rp 0,00
+          </span>
+        </td>
+        <td style="border: 1px solid black; text-align: right; padding: 4px;">${formatIndo(item.lineAmount)}</td>
+      </tr>
+    `).join('')
+  } else {
+    itemsHtml = `
+      <tr>
+        <td style="border: 1px solid black; text-align: center; padding: 4px;">1</td>
+        <td style="border: 1px solid black; text-align: center; padding: 4px;">000000</td>
+        <td style="border: 1px solid black; padding: 4px; font-size: 11px; line-height: 1.3;">
+          GOODS - Sample Item<br/>
+          Rp ${formatIndo(selectedRow.value.totaldpp)} x 1<br/>
+          Potongan Harga = Rp 0,00<br/>
+          PPnBM (0%) = Rp 0,00
+        </td>
+        <td style="border: 1px solid black; text-align: right; padding: 4px;">${formattedDpp}</td>
+      </tr>
+    `
+  }
 
   const htmlContent = `
     <html>

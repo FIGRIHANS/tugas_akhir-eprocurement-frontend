@@ -20,7 +20,7 @@
             <i class="ki-filled ki-arrows-circle !text-base"></i>
             Reload Data
           </button>
-          <router-link to="/vat-out-reconciliation/create" class="btn btn-primary">
+          <router-link v-if="!isProfile3001" to="/vat-out-reconciliation/create" class="btn btn-primary">
             <i class="ki-filled ki-plus-circle !text-lg"></i>
             Create Faktur
           </router-link>
@@ -118,7 +118,7 @@
                           </div>
                         </div>
                         <div
-                          v-if="row.statusfaktur === 'APPROVED'"
+                          v-if="row.statusfaktur === 'APPROVED' && !isProfile3001"
                           class="menu-item"
                           @click="cancelFaktur(row.id)"
                         >
@@ -335,21 +335,40 @@
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td style="border: 1px solid black; padding: 5px; text-align: center">1</td>
-              <td style="border: 1px solid black; padding: 5px; text-align: center">000000</td>
-              <td style="border: 1px solid black; padding: 5px; line-height: 1.3">
-                GOODS - Sample Item<br />
-                <span style="font-size: 10px; color: #555">
-                  Rp {{ formatIndo(activeRow?.totaldpp) }} x 1<br />
-                  Potongan Harga = Rp 0,00<br />
-                  PPnBM (0%) = Rp 0,00
-                </span>
-              </td>
-              <td style="border: 1px solid black; padding: 5px; text-align: right">
-                {{ formatIndo(activeRow?.totaldpp) }}
-              </td>
-            </tr>
+            <template v-if="grItems && grItems.length > 0">
+              <tr v-for="(item, idx) in grItems" :key="'gr-item-' + idx">
+                <td style="border: 1px solid black; padding: 5px; text-align: center">{{ idx + 1 }}</td>
+                <td style="border: 1px solid black; padding: 5px; text-align: center">{{ item.sku || '000000' }}</td>
+                <td style="border: 1px solid black; padding: 5px; line-height: 1.3">
+                  {{ item.conditionType || 'GOODS' }} - {{ item.itemName || 'Sample Item' }}<br />
+                  <span style="font-size: 10px; color: #555">
+                    Rp {{ formatIndo(item.unitPrice) }} x {{ item.qtyReceivedGood }}<br />
+                    Potongan Harga = Rp 0,00<br />
+                    PPnBM (0%) = Rp 0,00
+                  </span>
+                </td>
+                <td style="border: 1px solid black; padding: 5px; text-align: right">
+                  {{ formatIndo(item.lineAmount) }}
+                </td>
+              </tr>
+            </template>
+            <template v-else>
+              <tr>
+                <td style="border: 1px solid black; padding: 5px; text-align: center">1</td>
+                <td style="border: 1px solid black; padding: 5px; text-align: center">000000</td>
+                <td style="border: 1px solid black; padding: 5px; line-height: 1.3">
+                  GOODS - Sample Item<br />
+                  <span style="font-size: 10px; color: #555">
+                    Rp {{ formatIndo(activeRow?.totaldpp) }} x 1<br />
+                    Potongan Harga = Rp 0,00<br />
+                    PPnBM (0%) = Rp 0,00
+                  </span>
+                </td>
+                <td style="border: 1px solid black; padding: 5px; text-align: right">
+                  {{ formatIndo(activeRow?.totaldpp) }}
+                </td>
+              </tr>
+            </template>
             <tr>
               <td colspan="3" style="border: 1px solid black; padding: 5px; font-weight: bold">
                 Harga Jual / Penggantian / Uang Muka / Termin
@@ -465,6 +484,8 @@ import LPagination from '@/components/pagination/LPagination.vue'
 import UiModal from '@/components/modal/UiModal.vue'
 import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
+import { useLoginStore } from '@/stores/views/login'
+import GoodsReceiptService from '@/services/goodsReceipt.service'
 
 export default defineComponent({
   name: 'VatOutReconciliation',
@@ -478,6 +499,7 @@ export default defineComponent({
   },
   setup() {
     const router = useRouter()
+    const loginStore = useLoginStore()
     const tableData = ref<any[]>([])
     const isLoading = ref(false)
     const vendorNpwp = '1091031210969728'
@@ -730,11 +752,30 @@ export default defineComponent({
       }
     }
 
-    const handleDownloadPdf = (row: any) => {
+    const handleDownloadPdf = async (row: any) => {
       const printWindow = window.open('', '_blank')
       if (!printWindow) {
         showNotification('Error', 'Failed to open print window. Please allow popups.', 'danger')
         return
+      }
+
+      printWindow.document.write('<html><body><div style="font-family: Arial, sans-serif; text-align: center; margin-top: 100px;">Loading invoice details...</div></body></html>')
+
+      let grItemsList: any[] = []
+      if (row.referensi) {
+        try {
+          const isVendorUser = !!loginStore.userData?.profile?.vendorCode
+          const grResponse = await GoodsReceiptService.getDetail({
+            poNumber: row.referensi,
+            accessVendorId: isVendorUser ? loginStore.userData?.profile?.profileId : undefined,
+            accessVendorCode: isVendorUser ? loginStore.userData?.profile?.vendorCode : undefined
+          })
+          if (grResponse && grResponse.items) {
+            grItemsList = grResponse.items
+          }
+        } catch (grError) {
+          console.error('Error fetching GR details for VAT Out PDF:', grError)
+        }
       }
 
       const formatIndo = (numStr: any) => {
@@ -766,19 +807,40 @@ export default defineComponent({
         }
       }
 
-      const itemsHtml = `
-        <tr>
-          <td style="border: 1px solid black; text-align: center; padding: 4px;">1</td>
-          <td style="border: 1px solid black; text-align: center; padding: 4px;">000000</td>
-          <td style="border: 1px solid black; padding: 4px; font-size: 11px; line-height: 1.3;">
-            GOODS - Sample Item<br/>
-            Rp ${formatIndo(row.totaldpp)} x 1<br/>
-            Potongan Harga = Rp 0,00<br/>
-            PPnBM (0%) = Rp 0,00
-          </td>
-          <td style="border: 1px solid black; text-align: right; padding: 4px;">${formattedDpp}</td>
-        </tr>
-      `
+      let itemsHtml = ''
+      if (grItemsList.length > 0) {
+        itemsHtml = grItemsList.map((item, idx) => `
+          <tr>
+            <td style="border: 1px solid black; text-align: center; padding: 4px;">${idx + 1}</td>
+            <td style="border: 1px solid black; text-align: center; padding: 4px;">${item.sku || '000000'}</td>
+            <td style="border: 1px solid black; padding: 4px; font-size: 11px; line-height: 1.3;">
+              ${item.conditionType || 'GOODS'} - ${item.itemName || 'Sample Item'}<br/>
+              <span style="font-size: 10px; color: #555;">
+                Rp ${formatIndo(item.unitPrice)} x ${item.qtyReceivedGood}<br/>
+                Potongan Harga = Rp 0,00<br/>
+                PPnBM (0%) = Rp 0,00
+              </span>
+            </td>
+            <td style="border: 1px solid black; text-align: right; padding: 4px;">${formatIndo(item.lineAmount)}</td>
+          </tr>
+        `).join('')
+      } else {
+        itemsHtml = `
+          <tr>
+            <td style="border: 1px solid black; text-align: center; padding: 4px;">1</td>
+            <td style="border: 1px solid black; text-align: center; padding: 4px;">000000</td>
+            <td style="border: 1px solid black; padding: 4px; font-size: 11px; line-height: 1.3;">
+              GOODS - Sample Item<br/>
+              Rp ${formatIndo(row.totaldpp)} x 1<br/>
+              Potongan Harga = Rp 0,00<br/>
+              PPnBM (0%) = Rp 0,00
+            </td>
+            <td style="border: 1px solid black; text-align: right; padding: 4px;">${formattedDpp}</td>
+          </tr>
+        `
+      }
+
+      printWindow.document.open()
 
       const htmlContent = `
         <html>
@@ -961,6 +1023,8 @@ export default defineComponent({
     const activeRow = ref<any>(null)
     const pdfBlobUrl = ref('')
     const pdfLoading = ref(false)
+    const grItems = ref<any[]>([])
+    const isProfile3001 = computed(() => Number(loginStore.userData?.profile?.profileId) === 3001)
 
     const loadHtml2Pdf = () => {
       return new Promise<any>((resolve) => {
@@ -982,6 +1046,23 @@ export default defineComponent({
       showPreviewModal.value = true
       pdfLoading.value = true
       pdfBlobUrl.value = ''
+      grItems.value = []
+
+      if (row.referensi) {
+        try {
+          const isVendorUser = !!loginStore.userData?.profile?.vendorCode
+          const grResponse = await GoodsReceiptService.getDetail({
+            poNumber: row.referensi,
+            accessVendorId: isVendorUser ? loginStore.userData?.profile?.profileId : undefined,
+            accessVendorCode: isVendorUser ? loginStore.userData?.profile?.vendorCode : undefined
+          })
+          if (grResponse && grResponse.items) {
+            grItems.value = grResponse.items
+          }
+        } catch (grError) {
+          console.error('Error fetching GR details for VAT Out preview:', grError)
+        }
+      }
 
       try {
         const html2pdf = await loadHtml2Pdf()
@@ -1091,6 +1172,8 @@ export default defineComponent({
       pdfLoading,
       activeDropdownId,
       toggleDropdown,
+      grItems,
+      isProfile3001,
     }
   },
 })

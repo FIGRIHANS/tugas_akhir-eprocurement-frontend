@@ -1,5 +1,5 @@
 <template>
-<aside
+  <aside
     class="w-[280px] bg-white border border-gray-200 border-t-0 h-screen top-0 fixed scrollable-y-auto transition-[transform,z-index] duration-300 ease-in-out z-[99]"
     :class="{
       '-translate-x-full': sidebarStore.isCollapsed,
@@ -14,12 +14,25 @@
       </div>
     </div>
 
-    <div class="menu menu-default flex flex-col border-0 rounded-lg w-full py-0 px-1.5" data-menu="true">
-      <div v-for="menu in filteredSidebarMenu" :key="menu.id" class="menu-item"
-        :class="{ 'show': isMenuActive(menu) }"
+    <div
+      class="menu menu-default flex flex-col border-0 rounded-lg w-full py-0 px-1.5"
+      data-menu="true"
+    >
+      <div
+        v-for="menu in filteredSidebarMenu"
+        :key="menu.id"
+        class="menu-item"
+        :class="{ show: isMenuActive(menu) }"
         data-menu-item-placement=""
-        data-menu-item-toggle="accordion" data-menu-item-trigger="click">
-        <a class="menu-link" href="#" :class="{ 'menu-link--active': isMenuActive(menu) }" @click.prevent="redirectTo(menu.to)">
+        data-menu-item-toggle="accordion"
+        data-menu-item-trigger="click"
+      >
+        <a
+          class="menu-link"
+          href="#"
+          :class="{ 'menu-link--active': isMenuActive(menu) }"
+          @click.prevent="redirectTo(menu.to)"
+        >
           <span class="menu-icon">
             <i class="ki-duotone" :class="`ki-${menu.icon}`"> </i>
           </span>
@@ -79,7 +92,7 @@ const isSubMenuActive = (path?: string) => {
   if (!path) return false
   const currentName = String(route.name ?? '')
   const suffixes = ['Detail', 'Create', 'Edit']
-  return currentName === path || suffixes.some(s => currentName === path + s)
+  return currentName === path || suffixes.some((s) => currentName === path + s)
 }
 
 const isMenuActive = (menu: MenuItem) => {
@@ -170,14 +183,23 @@ const filteredSidebarMenu = computed(() => {
     }
     if (Number(userStore.userData?.profile?.profileId) === 3001) {
       return sidebarMenu
-        .filter((menu) => menu.id === 'dashboard' || menu.id === 'digital-receiving-confirmation' || menu.id === 'e-invoice' )
+        .filter(
+          (menu) =>
+            menu.id === 'dashboard' ||
+            menu.id === 'digital-receiving-confirmation' ||
+            menu.id === 'e-invoice' ||
+            menu.id === 'tax-reconciliation',
+        )
         .map((menu) => {
           return {
             ...menu,
             child: menu.child
               ? menu.child.filter(
                   (child) =>
-                    child.id === 'invoice-list' || child.id === 'ftp-invoice-integration' ||child.id === 'goods-receipt-list',
+                    child.id === 'invoice-list' ||
+                    child.id === 'ftp-invoice-integration' ||
+                    child.id === 'goods-receipt-list' ||
+                    child.id === 'vat-out-reconciliation',
                 )
               : [],
           }
@@ -199,17 +221,17 @@ const filteredSidebarMenu = computed(() => {
             ...menu,
             child: menu.child
               ? menu.child.filter(
-                (child) =>
-                  child.id === 'invoice-list' ||
-                  child.id === 'invoice-list-non-po' ||
-                  child.id === 'invoice-verification' ||
-                  child.id === 'invoice-approval-no-po' ||
-                  child.id === 'recurring-invoice-reminder' ||
-                  child.id === 'vendor-master' ||
-                  child.id === 'vat-reconciliation' ||
-                  child.id === 'wht-unifikasi' ||
-                  child.id === 'wht-pasal-21',
-              )
+                  (child) =>
+                    child.id === 'invoice-list' ||
+                    child.id === 'invoice-list-non-po' ||
+                    child.id === 'invoice-verification' ||
+                    child.id === 'invoice-approval-no-po' ||
+                    child.id === 'recurring-invoice-reminder' ||
+                    child.id === 'vendor-master' ||
+                    child.id === 'vat-reconciliation' ||
+                    child.id === 'wht-unifikasi' ||
+                    child.id === 'wht-pasal-21',
+                )
               : [],
           }
         })
@@ -230,17 +252,17 @@ const filteredSidebarMenu = computed(() => {
             ...menu,
             child: menu.child
               ? menu.child.filter(
-                (child) =>
-                  child.id === 'invoice-list' ||
-                  child.id === 'invoice-list-non-po' ||
-                  child.id === 'invoice-approval' ||
-                  child.id === 'invoice-approval-no-po' ||
-                  child.id === 'recurring-invoice-reminder' ||
-                  child.id === 'vendor-master' ||
-                  child.id === 'vat-reconciliation' ||
-                  child.id === 'wht-unifikasi' ||
-                  child.id === 'wht-pasal-21',
-              )
+                  (child) =>
+                    child.id === 'invoice-list' ||
+                    child.id === 'invoice-list-non-po' ||
+                    child.id === 'invoice-approval' ||
+                    child.id === 'invoice-approval-no-po' ||
+                    child.id === 'recurring-invoice-reminder' ||
+                    child.id === 'vendor-master' ||
+                    child.id === 'vat-reconciliation' ||
+                    child.id === 'wht-unifikasi' ||
+                    child.id === 'wht-pasal-21',
+                )
               : [],
           }
         })
@@ -279,15 +301,15 @@ const filteredSidebarMenu = computed(() => {
             ...menu,
             child: menu.child
               ? menu.child.filter(
-                (child) =>
-                  child.id === 'invoice-approval' ||
-                  child.id === 'invoice-approval-no-po' ||
-                  child.id === 'recurring-invoice-reminder' ||
-                  child.id === 'vendor-master' ||
-                  child.id === 'vat-reconciliation' ||
-                  child.id === 'wht-unifikasi' ||
-                  child.id === 'wht-pasal-21',
-              )
+                  (child) =>
+                    child.id === 'invoice-approval' ||
+                    child.id === 'invoice-approval-no-po' ||
+                    child.id === 'recurring-invoice-reminder' ||
+                    child.id === 'vendor-master' ||
+                    child.id === 'vat-reconciliation' ||
+                    child.id === 'wht-unifikasi' ||
+                    child.id === 'wht-pasal-21',
+                )
               : [],
           }
         })
@@ -334,7 +356,7 @@ const filteredSidebarMenu = computed(() => {
               )
             : [],
         }))
-      return [ ...inboundAnalyticOnly, ...digitalReceiving]
+      return [...inboundAnalyticOnly, ...digitalReceiving]
     }
 
     if (
@@ -369,12 +391,12 @@ const filteredSidebarMenu = computed(() => {
               ...menu,
               child: menu.child
                 ? menu.child.filter(
-                  (child) =>
-                    child.id === 'mock-sap-list' ||
-                    child.id === 'delivery-notes' ||
-                    child.id === 'delivery-notes-list' ||
-                    child.id === 'goods-receipt-list',
-                )
+                    (child) =>
+                      child.id === 'mock-sap-list' ||
+                      child.id === 'delivery-notes' ||
+                      child.id === 'delivery-notes-list' ||
+                      child.id === 'goods-receipt-list',
+                  )
                 : [],
             }
           }
@@ -382,13 +404,13 @@ const filteredSidebarMenu = computed(() => {
             ...menu,
             child: menu.child
               ? menu.child.filter(
-                (child) =>
-                  child.id === 'invoice-list' ||
-                  child.id === 'invoice-list-non-po' ||
-                  child.id === 'recurring-invoice-reminder' ||
-                  child.id === 'vat-out-reconciliation' ||
-                  child.id === 'vendor-detail',
-              )
+                  (child) =>
+                    child.id === 'invoice-list' ||
+                    child.id === 'invoice-list-non-po' ||
+                    child.id === 'recurring-invoice-reminder' ||
+                    child.id === 'vat-out-reconciliation' ||
+                    child.id === 'vendor-detail',
+                )
               : [],
           }
         })
@@ -401,8 +423,8 @@ const filteredSidebarMenu = computed(() => {
           ...menu,
           child: menu.child
             ? menu.child.filter(
-              (child) => child.id !== 'vendor-approval' && child.id !== 'vendor-verification',
-            )
+                (child) => child.id !== 'vendor-approval' && child.id !== 'vendor-verification',
+              )
             : [],
         }))
     }
@@ -443,12 +465,12 @@ const filteredSidebarMenu = computed(() => {
             ...menu,
             child: menu.child
               ? menu.child.filter(
-                (child) =>
-                  child.id === 'invoice-verification-no-po' ||
-                  child.id === 'vendor-master' ||
-                  child.id === 'vendor-verification' ||
-                  child.id === 'vendor-approval',
-              )
+                  (child) =>
+                    child.id === 'invoice-verification-no-po' ||
+                    child.id === 'vendor-master' ||
+                    child.id === 'vendor-verification' ||
+                    child.id === 'vendor-approval',
+                )
               : [],
           }
         })
@@ -467,8 +489,8 @@ const filteredSidebarMenu = computed(() => {
             ...menu,
             child: menu.child
               ? menu.child.filter(
-                (child) => child.id === 'invoice-approval-no-po' || child.id === 'vendor-master',
-              )
+                  (child) => child.id === 'invoice-approval-no-po' || child.id === 'vendor-master',
+                )
               : [],
           }
         })
@@ -501,39 +523,39 @@ const filteredSidebarMenu = computed(() => {
             ...menu,
             child: menu.child
               ? menu.child.filter(
-                (child) =>
-                  child.id === 'vendor-master' ||
-                  child.id === 'invoice-list' ||
-                  child.id === 'invoice-list-non-po' ||
-                  child.id === 'ftp-invoice-integration' ||
-                  child.id === 'scorecard-performance' ||
-                  child.id === 'invoiceAnalytic' ||
-                  child.id === 'taxAnalytic' ||
-                  child.id === 'inboundLogisticAnalytic' ||
-                  child.id === 'email-invoice-integration' ||
-                  child.id === 'mock-sap-list' ||
-                  child.id === 'receiving-confirmation' ||
-                  child.id === 'receiving-confirmation-list' ||
-                  child.id === 'delivery-notes' ||
-                  child.id === 'delivery-notes-list' ||
-                  child.id === 'goods-receipt-list' ||
-                  child.id === 'vat-reconciliation' ||
-                  child.id === 'vat-out-reconciliation' ||
-                  child.id === 'wht-unifikasi' ||
-                  child.id === 'wht-pasal-21' ||
-                  child.id === 'invoice-type' ||
-                  child.id === 'list-user' ||
-                  child.id === 'master-profile' ||
-                  child.id === 'master-role' ||
-                  child.id === 'master-employee' ||
-                  child.id === 'master-menu' ||
-                  child.id === 'report-user-authorization' ||
-                  child.id === 'erp-integration' ||
-                  child.id === 'activity-expenses' ||
-                  child.id === 'invoice-configuration' ||
-                  child.id === 'cash-advance' ||
-                  child.id === 'recurring-invoice-reminder'
-              )
+                  (child) =>
+                    child.id === 'vendor-master' ||
+                    child.id === 'invoice-list' ||
+                    child.id === 'invoice-list-non-po' ||
+                    child.id === 'ftp-invoice-integration' ||
+                    child.id === 'scorecard-performance' ||
+                    child.id === 'invoiceAnalytic' ||
+                    child.id === 'taxAnalytic' ||
+                    child.id === 'inboundLogisticAnalytic' ||
+                    child.id === 'email-invoice-integration' ||
+                    child.id === 'mock-sap-list' ||
+                    child.id === 'receiving-confirmation' ||
+                    child.id === 'receiving-confirmation-list' ||
+                    child.id === 'delivery-notes' ||
+                    child.id === 'delivery-notes-list' ||
+                    child.id === 'goods-receipt-list' ||
+                    child.id === 'vat-reconciliation' ||
+                    child.id === 'vat-out-reconciliation' ||
+                    child.id === 'wht-unifikasi' ||
+                    child.id === 'wht-pasal-21' ||
+                    child.id === 'invoice-type' ||
+                    child.id === 'list-user' ||
+                    child.id === 'master-profile' ||
+                    child.id === 'master-role' ||
+                    child.id === 'master-employee' ||
+                    child.id === 'master-menu' ||
+                    child.id === 'report-user-authorization' ||
+                    child.id === 'erp-integration' ||
+                    child.id === 'activity-expenses' ||
+                    child.id === 'invoice-configuration' ||
+                    child.id === 'cash-advance' ||
+                    child.id === 'recurring-invoice-reminder',
+                )
               : [],
           }
         })
@@ -579,12 +601,16 @@ const filteredSidebarMenu = computed(() => {
   &:hover:not(.menu-link--active) {
     background-color: #f8fafc !important;
 
-    .menu-title { color: #0d9488 !important; }
+    .menu-title {
+      color: #0d9488 !important;
+    }
     .menu-icon i {
       color: #0d9488 !important;
       transform: translateX(2px);
     }
-    .menu-arrow i { color: #0d9488 !important; }
+    .menu-arrow i {
+      color: #0d9488 !important;
+    }
 
     // Minimal side indicator
     &::before {
