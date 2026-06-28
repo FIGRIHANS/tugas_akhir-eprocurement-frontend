@@ -88,10 +88,7 @@ import { isEmpty } from 'lodash'
 import AttachmentView from '@/components/ui/attachment/AttachmentView.vue'
 import DocumentActionButtons from './DocumentActionButtons.vue'
 import UiModal from '@/components/modal/UiModal.vue'
-import { usePreviewFileStore } from '@/stores/general/previewFile'
 import { resolveDocumentPreviewUrl } from '@/composables/documentPreview'
-
-const previewApi = usePreviewFileStore()
 const form = inject<Ref<formTypes>>('form')
 
 const invoice = ref<documentViewTypes | null>(null)
@@ -148,15 +145,12 @@ const download = async (path: string) => {
 
   try {
     currentDownloading.value = path
-    const response = await previewApi.getPreview(path)
-    const targetUrl =
-      typeof response.data === 'string'
-        ? response.data
-        : URL.createObjectURL(response.data as Blob)
+    const targetUrl = await resolveDocumentPreviewUrl(path)
+    if (!targetUrl) return
 
     window.open(targetUrl, '_blank')
 
-    if (typeof response.data !== 'string') {
+    if (targetUrl.startsWith('blob:')) {
       setTimeout(() => URL.revokeObjectURL(targetUrl), 1000)
     }
   } catch (error) {
@@ -167,12 +161,13 @@ const download = async (path: string) => {
 }
 
 const mapDocument = (
-  doc: { documentName?: string; documentUrl?: string } | null | undefined,
+  doc: { documentName?: string; documentUrl?: string; name?: string; path?: string } | null | undefined,
 ): documentViewTypes | null => {
-  if (isEmpty(doc) || !doc?.documentUrl) return null
+  const url = (doc?.documentUrl || doc?.path || '').trim()
+  if (isEmpty(doc) || !url) return null
   return {
-    name: doc.documentName || '-',
-    path: doc.documentUrl,
+    name: doc.documentName || doc.name || '-',
+    path: url,
   }
 }
 

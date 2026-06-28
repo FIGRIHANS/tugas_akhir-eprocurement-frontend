@@ -48,20 +48,25 @@
           class="flex justify-between items-center gap-[8px] flex-1"
         >
           <AttachmentView
-            class="cursor-pointer"
             :fileData="
               typeof form[item.varName as keyof documentFormTypes] === 'object'
                 ? (form[item.varName as keyof documentFormTypes] as responseFileTypes)
                 : null
             "
-            @click="
-              openDocumentPreview(
-                (form[item.varName as keyof documentFormTypes] as responseFileTypes) || null,
-                item.title,
-              )
-            "
           />
-          <div class="flex items-center gap-[8px]">
+          <div class="flex items-center gap-[8px] shrink-0">
+            <button
+              class="btn btn-icon btn-sm btn-outline btn-primary"
+              title="Lihat dokumen"
+              @click="
+                openDocumentPreview(
+                  (form[item.varName as keyof documentFormTypes] as responseFileTypes) || null,
+                  item.title,
+                )
+              "
+            >
+              <i class="ki-filled ki-eye"></i>
+            </button>
             <span
               v-if="
                 (formInject?.status === 0 ||
@@ -93,6 +98,26 @@
         </div>
       </div>
     </div>
+
+    <UiModal
+      v-model="showPreviewModal"
+      :title="previewTitle"
+      size="xl"
+      @update:model-value="onPreviewModalToggle"
+    >
+      <div v-if="previewLoading" class="flex flex-col items-center justify-center py-20">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+        <p class="mt-4 text-gray-500 font-medium">Memuat preview dokumen...</p>
+      </div>
+      <iframe
+        v-else-if="previewUrl"
+        :src="previewUrl"
+        class="w-full h-[650px] rounded-lg border-0"
+        title="Document preview"
+      />
+      <p v-else class="py-10 text-center text-gray-500">Dokumen tidak dapat ditampilkan.</p>
+    </UiModal>
+
     <UiLoading v-model="isLoading"></UiLoading>
   </div>
 </template>
@@ -107,21 +132,26 @@ import type {
 import type { formTypes } from '../../../types/invoiceAddWrapper'
 import pdfUpload from '@/components/ui/pdfUpload/pdfUpload.vue'
 import AttachmentView from '@/components/ui/attachment/AttachmentView.vue'
+import UiModal from '@/components/modal/UiModal.vue'
 import { useRoute } from 'vue-router'
-import { openPdfPreview } from '@/composables/documentPreview'
+import { resolveDocumentPreviewUrl } from '@/composables/documentPreview'
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 import UiLoading from '@/components/modal/UiLoading.vue'
 import { parseIndoDate } from '@/composables/parseIndoDate'
-// import type { invoiceOcrData } from '@/views/invoice/types/invoiceOcrData'
 
 type FileFieldKeys = 'invoiceDocument' | 'tax' | 'referenceDocument' | 'otherDocument'
 
 const route = useRoute()
 const invoiceVerificationStore = useInvoiceVerificationStore()
-// const ocrData = inject<invoiceOcrData>('ocrData')
 const formInject = inject<formTypes>('form')
 const pdfUploadRef = ref()
 const isLoading = ref<boolean>(false)
+
+const showPreviewModal = ref(false)
+const previewLoading = ref(false)
+const previewTitle = ref('Document Preview')
+const previewUrl = ref('')
+const previewUsesObjectUrl = ref(false)
 
 const isEditingField = reactive<Record<string, boolean>>({
   invoiceDocument: false,
@@ -186,9 +216,45 @@ const list = ref<listFormTypes[]>([
   { title: 'Other Document', varName: 'otherDocument', varErrorName: 'otherDocumentError' },
 ])
 
-const openDocumentPreview = (file: responseFileTypes | null, label: string) => {
-  const signedUrl = (file?.previewPath || file?.path || '').trim()
-  openPdfPreview(signedUrl || null, label)
+const revokePreviewUrl = () => {
+  if (previewUrl.value && previewUsesObjectUrl.value) {
+    URL.revokeObjectURL(previewUrl.value)
+  }
+  previewUrl.value = ''
+  previewUsesObjectUrl.value = false
+}
+
+const onPreviewModalToggle = (open: boolean) => {
+  if (!open) revokePreviewUrl()
+}
+
+const getDocumentPreviewSource = (file: responseFileTypes | null) => {
+  return (file?.previewPath || file?.path || '').trim()
+}
+
+const openDocumentPreview = async (file: responseFileTypes | null, label: string) => {
+  const source = getDocumentPreviewSource(file)
+  if (!source) return
+
+  previewTitle.value = label
+  showPreviewModal.value = true
+  previewLoading.value = true
+  revokePreviewUrl()
+
+  try {
+    const url = await resolveDocumentPreviewUrl(source)
+    if (!url) {
+      showPreviewModal.value = false
+      return
+    }
+    previewUrl.value = url
+    previewUsesObjectUrl.value = url.startsWith('blob:')
+  } catch (error) {
+    console.error('Failed to preview document:', error)
+    showPreviewModal.value = false
+  } finally {
+    previewLoading.value = false
+  }
 }
 
 const sendUploadFile = async () => {
@@ -200,8 +266,7 @@ const sendUploadFile = async () => {
       )
 
       if (formInject && response) {
-        // Map OCR data to Invoice Header fields as requested
-        formInject.invoiceVendorNo = response.taxDocumentNumber // Map to Invoice Vendor No
+        formInject.invoiceVendorNo = response.taxDocumentNumber
         formInject.invoiceDate = parseIndoDate(response.taxDocumentDate)
       }
     }
@@ -214,7 +279,6 @@ const sendUploadFile = async () => {
 
 const checkIsView = () => route.query.type?.toString().includes('view')
 
-// Sync with formInject
 watch(
   () => form,
   () => {
