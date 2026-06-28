@@ -2,7 +2,7 @@
   <img
     class="evox-logo"
     :style="logoStyle"
-    src="@/assets/svg/EvoxLogo.png"
+    :src="evoxLogo"
     alt="EVOX"
     role="img"
   />
@@ -10,6 +10,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import evoxLogo from '@/assets/svg/EvoxLogo.png'
 
 const props = withDefaults(
   defineProps<{
