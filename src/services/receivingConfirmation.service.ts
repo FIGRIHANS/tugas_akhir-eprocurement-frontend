@@ -12,6 +12,7 @@ export interface ReceivingConfirmationDetailPayload {
   damageQty: number
   rejectReason?: string
   conditionType?: string
+  evidencePath?: string // Path/URL to evidence file (required when discrepancy exists)
 }
 
 // Interface untuk Create Payload - untuk POST ke backend
@@ -33,6 +34,7 @@ export interface ReceivingConfirmationCreatePayload {
   whCheckerName: string
   driverName: string
   digitalSignaturePath?: string
+  physicalDeliveryNotePath?: string // Mandatory: scanned/photo signed physical delivery note
   items: ReceivingConfirmationDetailPayload[]
 }
 
@@ -63,6 +65,8 @@ export interface ReceivingConfirmationData {
   whCheckerName: string
   driverName: string
   digitalSignaturePath: string
+  physicalDeliveryNotePath?: string // Path to physical signed delivery note scan
+  vendorDeliveryDocumentPath?: string // Path to vendor delivery document scan
   driverSignature?: string | null
   createdBy: string
   updatedBy: string
@@ -86,6 +90,7 @@ export interface ReceivingConfirmationDetailResponse {
   damageQty: number
   rejectReason?: string
   conditionType?: string
+  evidencePath?: string // Path to evidence file for discrepancy items
   createdBy: string
   createdUtcDate: string
   updatedBy: string

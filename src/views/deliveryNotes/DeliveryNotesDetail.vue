@@ -231,12 +231,12 @@
             </div>
           </div>
 
-          <!-- Right Column - Signature Display (4 columns) -->
-          <div class="lg:col-span-4">
-            <div class="border border-gray-200 rounded-lg p-4 h-full flex flex-col">
+          <!-- Right Column - Signature and Documents (4 columns) -->
+          <div class="lg:col-span-4 flex flex-col gap-4">
+            <div class="border border-gray-200 rounded-lg p-4 flex flex-col">
               <h3 class="text-sm font-semibold mb-3">Driver Signature</h3>
               <div
-                class="flex-1 border border-gray-300 rounded bg-gray-50 flex items-center justify-center min-h-[200px]"
+                class="flex-1 border border-gray-300 rounded bg-gray-50 flex items-center justify-center min-h-[120px]"
               >
                 <img
                   v-if="
@@ -246,9 +246,46 @@
                   "
                   :src="detailData.driverSignature"
                   alt="Driver Signature"
-                  class="max-w-full max-h-full"
+                  class="max-w-full max-h-[120px]"
                 />
                 <span v-else class="text-gray-400 text-sm">No signature available</span>
+              </div>
+            </div>
+
+            <!-- Vendor Delivery Document -->
+            <div class="border border-gray-200 rounded-lg p-4 flex flex-col">
+              <h3 class="text-sm font-semibold mb-3">Vendor Delivery Document (Vendor)</h3>
+              <div
+                class="flex-1 border border-gray-300 rounded bg-gray-50 flex flex-col items-center justify-center min-h-[120px]"
+              >
+                <div
+                  v-if="detailData.vendorDeliveryDocumentPath"
+                  class="text-center w-full h-full p-2 flex flex-col"
+                >
+                  <iframe
+                    v-if="
+                      detailData.vendorDeliveryDocumentPath.includes('application/pdf') ||
+                      detailData.vendorDeliveryDocumentPath.toLowerCase().endsWith('.pdf')
+                    "
+                    :src="detailData.vendorDeliveryDocumentPath"
+                    class="w-full h-[150px] border border-gray-200 rounded mb-2"
+                  ></iframe>
+                  <img
+                    v-else
+                    :src="detailData.vendorDeliveryDocumentPath"
+                    alt="Vendor Delivery Document"
+                    class="max-w-full max-h-[150px] object-contain rounded mx-auto mb-2"
+                  />
+                  <div>
+                    <button
+                      class="btn btn-sm btn-outline btn-primary"
+                      @click="previewFile(detailData.vendorDeliveryDocumentPath)"
+                    >
+                      <i class="ki-duotone ki-eye"></i> Full Screen
+                    </button>
+                  </div>
+                </div>
+                <span v-else class="text-gray-400 text-sm">No document uploaded</span>
               </div>
             </div>
           </div>
@@ -374,11 +411,7 @@
         </button>
         <div v-else></div>
         <div class="flex items-center justify-end gap-[8px]">
-          <button
-            class="btn btn-outline btn-primary"
-            :disabled="isSubmitting"
-            @click="goBack()"
-          >
+          <button class="btn btn-outline btn-primary" :disabled="isSubmitting" @click="goBack()">
             <i class="ki-filled ki-arrow-left"></i>
             Back
           </button>
@@ -445,6 +478,10 @@ interface DeliveryNoteItemWithOrdered {
   qtyOrdered?: number
 }
 
+interface DeliveryNotesDataExtended extends Omit<DeliveryNotesData, 'items'> {
+  items: DeliveryNoteItemWithOrdered[]
+}
+
 const router = useRouter()
 const route = useRoute()
 
@@ -459,7 +496,7 @@ const routes = ref<routeTypes[]>([
 // States
 const isLoading = ref<boolean>(true)
 const error = ref<string | null>(null)
-const detailData = ref<DeliveryNotesData | null>(null)
+const detailData = ref<DeliveryNotesDataExtended | null>(null)
 const isSubmitting = ref<boolean>(false)
 
 // Modal state
@@ -526,7 +563,7 @@ const fetchDetail = async () => {
     const data = await DeliveryNotesService.getDetail(numericId)
 
     if (data) {
-      detailData.value = data
+      detailData.value = data as DeliveryNotesDataExtended
       await enrichItemsWithQtyOrdered(data)
     } else {
       error.value = 'Delivery note not found'
@@ -683,7 +720,10 @@ const getValidationResult = (isDraftUpdate = false): FormValidationResult => {
       return validationFail(`SKU wajib diisi untuk item #${i + 1}.`, `item-${i}-sku`)
     }
     if (isBlank(item.description)) {
-      return validationFail(`Description wajib diisi untuk item #${i + 1}.`, `item-${i}-description`)
+      return validationFail(
+        `Description wajib diisi untuk item #${i + 1}.`,
+        `item-${i}-description`,
+      )
     }
     if (isBlank(item.uom)) {
       return validationFail(`UOM wajib diisi untuk item #${i + 1}.`, `item-${i}-uom`)
@@ -726,7 +766,8 @@ const validateUpdateForm = async (isDraftUpdate = false): Promise<boolean> => {
 
 const buildUpdatePayload = (isDraftUpdate = false): DeliveryNoteCreatePayload => {
   const data = detailData.value!
-  const vendorID = data.vendorID === undefined || data.vendorID === '' ? undefined : Number(data.vendorID)
+  const vendorID =
+    data.vendorID === undefined || data.vendorID === '' ? undefined : Number(data.vendorID)
 
   return {
     deliveryNoteNumber: data.deliveryNoteNumber,
@@ -742,12 +783,12 @@ const buildUpdatePayload = (isDraftUpdate = false): DeliveryNoteCreatePayload =>
     destinationAddress: data.destinationAddress || '',
     driverSignature: data.driverSignature || '',
     truckType: data.truckType || undefined,
-    shippingDate: data.shippingDate
-      ? toLocalDateString(data.shippingDate)
-      : getTodayDateString(),
+    shippingDate: data.shippingDate ? toLocalDateString(data.shippingDate) : getTodayDateString(),
     status: isDraftUpdate ? 'Draft' : 'On Delivery',
     details: isDraftUpdate
-      ? data.items.filter((item) => item.sku || item.description || item.uom || item.lotNo || item.qtyShipped > 0)
+      ? data.items.filter(
+          (item) => item.sku || item.description || item.uom || item.lotNo || item.qtyShipped > 0,
+        )
       : data.items,
   }
 }
@@ -781,6 +822,25 @@ const updateDeliveryNote = async (isDraftUpdate = false) => {
     showNotificationModal.value = true
   } finally {
     isSubmitting.value = false
+  }
+}
+
+// ─── File Preview Helper ──────────────────────────────────────────────────────
+const previewFile = (urlOrBase64: string | undefined | null) => {
+  if (!urlOrBase64) return
+  if (urlOrBase64.startsWith('data:')) {
+    const newWindow = window.open()
+    if (newWindow) {
+      if (urlOrBase64.startsWith('data:application/pdf')) {
+        newWindow.document.write(
+          `<iframe src="${urlOrBase64}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`,
+        )
+      } else {
+        newWindow.document.write(`<img src="${urlOrBase64}" style="max-width:100%;" />`)
+      }
+    }
+  } else {
+    window.open(urlOrBase64, '_blank')
   }
 }
 

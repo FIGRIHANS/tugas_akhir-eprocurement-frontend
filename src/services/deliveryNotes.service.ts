@@ -33,6 +33,7 @@ export interface DeliveryNotesData {
   createdUtcDate: string
   updatedUtcDate: string
   items: DeliveryNotesItemData[]
+  vendorDeliveryDocumentPath?: string // Path/URL to vendor delivery document attachment
 }
 
 // Interface untuk response dari API backend
@@ -103,6 +104,7 @@ export interface DeliveryNoteCreatePayload {
   truckType?: string
   shippingDate: string
   status: string
+  vendorDeliveryDocumentPath?: string // Base64 or path of vendor delivery document
   details: Array<{
     sku: string
     description: string

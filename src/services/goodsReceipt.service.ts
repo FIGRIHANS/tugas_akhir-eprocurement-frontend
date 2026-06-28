@@ -55,6 +55,8 @@ export interface GoodsReceiptDetailContentDto extends GoodsReceiptHeaderDto {
   status: string
   createdBy: string
   updatedBy: string
+  createdByName?: string | null // Human-readable: "EmployeeName (ID)"
+  updatedByName?: string | null // Human-readable: "EmployeeName (ID)"
   createdUtcDate: string
   updatedUtcDate: string
   vendorID?: number | null
