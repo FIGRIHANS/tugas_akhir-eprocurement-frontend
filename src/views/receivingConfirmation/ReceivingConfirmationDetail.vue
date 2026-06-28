@@ -165,12 +165,12 @@
             </div>
           </div>
 
-          <!-- Right Column - Signature Display (4 columns) -->
-          <div class="lg:col-span-4">
-            <div class="border border-gray-200 rounded-lg p-4 h-full flex flex-col">
+          <!-- Right Column - Signature and Documents (4 columns) -->
+          <div class="lg:col-span-4 flex flex-col gap-4">
+            <div class="border border-gray-200 rounded-lg p-4 flex flex-col">
               <h3 class="text-sm font-semibold mb-3">Employee Signature</h3>
               <div
-                class="flex-1 border border-gray-300 rounded bg-gray-50 flex items-center justify-center min-h-[200px]"
+                class="flex-1 border border-gray-300 rounded bg-gray-50 flex items-center justify-center min-h-[120px]"
               >
                 <img
                   v-if="
@@ -180,9 +180,83 @@
                   "
                   :src="formData.signature"
                   alt="Signature"
-                  class="max-w-full max-h-full"
+                  class="max-w-full max-h-[120px]"
                 />
                 <span v-else class="text-gray-400 text-sm">No signature available</span>
+              </div>
+            </div>
+
+            <!-- Physical Delivery Note -->
+            <div class="border border-gray-200 rounded-lg p-4 flex flex-col">
+              <h3 class="text-sm font-semibold mb-3">Vendor Delivery Document (Warehouse)</h3>
+              <div
+                class="flex-1 border border-gray-300 rounded bg-gray-50 flex flex-col items-center justify-center min-h-[120px]"
+              >
+                <div
+                  v-if="formData.physicalDeliveryNotePath"
+                  class="text-center w-full h-full p-2 flex flex-col"
+                >
+                  <iframe
+                    v-if="
+                      formData.physicalDeliveryNotePath.includes('application/pdf') ||
+                      formData.physicalDeliveryNotePath.toLowerCase().endsWith('.pdf')
+                    "
+                    :src="formData.physicalDeliveryNotePath"
+                    class="w-full h-[150px] border border-gray-200 rounded mb-2"
+                  ></iframe>
+                  <img
+                    v-else
+                    :src="formData.physicalDeliveryNotePath"
+                    alt="Physical Delivery Note"
+                    class="max-w-full max-h-[150px] object-contain rounded mx-auto mb-2"
+                  />
+                  <div>
+                    <button
+                      class="btn btn-sm btn-outline btn-primary"
+                      @click.prevent="previewFile(formData.physicalDeliveryNotePath)"
+                    >
+                      <i class="ki-duotone ki-eye"></i> Full Screen
+                    </button>
+                  </div>
+                </div>
+                <span v-else class="text-gray-400 text-sm">No document uploaded</span>
+              </div>
+            </div>
+
+            <!-- Vendor Delivery Document -->
+            <div class="border border-gray-200 rounded-lg p-4 flex flex-col">
+              <h3 class="text-sm font-semibold mb-3">Vendor Delivery Document (Vendor)</h3>
+              <div
+                class="flex-1 border border-gray-300 rounded bg-gray-50 flex flex-col items-center justify-center min-h-[120px]"
+              >
+                <div
+                  v-if="formData.vendorDeliveryDocumentPath"
+                  class="text-center w-full h-full p-2 flex flex-col"
+                >
+                  <iframe
+                    v-if="
+                      formData.vendorDeliveryDocumentPath.includes('application/pdf') ||
+                      formData.vendorDeliveryDocumentPath.toLowerCase().endsWith('.pdf')
+                    "
+                    :src="formData.vendorDeliveryDocumentPath"
+                    class="w-full h-[150px] border border-gray-200 rounded mb-2"
+                  ></iframe>
+                  <img
+                    v-else
+                    :src="formData.vendorDeliveryDocumentPath"
+                    alt="Vendor Delivery Document"
+                    class="max-w-full max-h-[150px] object-contain rounded mx-auto mb-2"
+                  />
+                  <div>
+                    <button
+                      class="btn btn-sm btn-outline btn-primary"
+                      @click.prevent="previewFile(formData.vendorDeliveryDocumentPath)"
+                    >
+                      <i class="ki-duotone ki-eye"></i> Full Screen
+                    </button>
+                  </div>
+                </div>
+                <span v-else class="text-gray-400 text-sm">No document uploaded</span>
               </div>
             </div>
           </div>
@@ -206,6 +280,7 @@
                 <th colspan="2" class="text-center border-r">Transporter Claim</th>
                 <th rowspan="2" class="text-center border-r min-w-[120px]">Condition Type</th>
                 <th rowspan="2" class="text-center border-r min-w-[160px]">Reject Reason</th>
+                <th rowspan="2" class="text-center border-r min-w-[120px]">Evidence</th>
               </tr>
               <!-- Second Header Row -->
               <tr class="bg-teal-500 text-white">
@@ -303,6 +378,39 @@
                   </span>
                   <span v-else class="text-gray-400 text-xs">—</span>
                 </td>
+                <td class="text-center p-2">
+                  <div
+                    v-if="item.evidencePath"
+                    class="w-[100px] h-[100px] mx-auto flex flex-col items-center justify-center border border-gray-200 rounded overflow-hidden bg-gray-50 relative group"
+                  >
+                    <iframe
+                      v-if="
+                        item.evidencePath.includes('application/pdf') ||
+                        item.evidencePath.toLowerCase().endsWith('.pdf')
+                      "
+                      :src="item.evidencePath"
+                      class="w-full h-full border-0"
+                    ></iframe>
+                    <img
+                      v-else
+                      :src="item.evidencePath"
+                      alt="Evidence"
+                      class="w-full h-full object-cover"
+                    />
+                    <div
+                      class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <button
+                        class="btn btn-sm btn-icon btn-primary"
+                        @click.prevent="previewFile(item.evidencePath)"
+                        title="Full Screen"
+                      >
+                        <i class="ki-duotone ki-maximize"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <span v-else class="text-gray-400 text-xs">—</span>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -319,11 +427,7 @@
           </button>
 
           <template v-if="isDraft">
-            <button
-              class="btn btn-primary"
-              @click="updateConfirmation()"
-              :disabled="isSubmitting"
-            >
+            <button class="btn btn-primary" @click="updateConfirmation()" :disabled="isSubmitting">
               <span v-if="isSubmitting">Submitting...</span>
               <template v-else>
                 Submit
@@ -433,6 +537,8 @@ interface FormData {
   receivedDate: string
   signature: string | null
   driverSignature: string | null
+  physicalDeliveryNotePath?: string
+  vendorDeliveryDocumentPath?: string
 }
 
 interface TableData {
@@ -452,6 +558,7 @@ interface TableData {
   damageQty: number
   rejectReason: string
   conditionType: string
+  evidencePath?: string
 }
 
 const routes = ref<routeTypes[]>([
@@ -1010,14 +1117,9 @@ const printToPDF = async () => {
 
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(8)
-  doc.text(
-    driverSignatureDate,
-    sigRightX + signatureBoxWidth / 2,
-    yPos + signatureBoxHeight + 6,
-    {
-      align: 'center',
-    },
-  )
+  doc.text(driverSignatureDate, sigRightX + signatureBoxWidth / 2, yPos + signatureBoxHeight + 6, {
+    align: 'center',
+  })
   doc.setFontSize(9)
   doc.text(
     formData.value.namaSopir || '-',
@@ -1158,6 +1260,8 @@ onMounted(() => {
             : '',
           signature: data.digitalSignaturePath || null,
           driverSignature: data.driverSignature || null,
+          physicalDeliveryNotePath: data.physicalDeliveryNotePath,
+          vendorDeliveryDocumentPath: data.vendorDeliveryDocumentPath,
         }
 
         // Set current status and discrepancy info
@@ -1190,6 +1294,7 @@ onMounted(() => {
           damageQty: item.damageQty || 0,
           rejectReason: item.rejectReason || '',
           conditionType: item.conditionType || '',
+          evidencePath: item.evidencePath,
         }))
       }
     })
@@ -1203,6 +1308,25 @@ onMounted(() => {
       showNotificationModal.value = true
     })
 })
+
+// ─── File Preview Helper ──────────────────────────────────────────────────────
+const previewFile = (urlOrBase64: string | undefined | null) => {
+  if (!urlOrBase64) return
+  if (urlOrBase64.startsWith('data:')) {
+    const newWindow = window.open()
+    if (newWindow) {
+      if (urlOrBase64.startsWith('data:application/pdf')) {
+        newWindow.document.write(
+          `<iframe src="${urlOrBase64}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`,
+        )
+      } else {
+        newWindow.document.write(`<img src="${urlOrBase64}" style="max-width:100%;" />`)
+      }
+    }
+  } else {
+    window.open(urlOrBase64, '_blank')
+  }
+}
 </script>
 
 <style lang="scss" scoped>

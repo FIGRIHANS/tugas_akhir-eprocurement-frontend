@@ -82,11 +82,11 @@
           </div>
           <div class="flex gap-3">
             <span class="text-gray-500 w-44 shrink-0">Created</span>
-            <span>{{ formatDt(detail.createdUtcDate) }} ({{ detail.createdBy }})</span>
+            <span>{{ formatDt(detail.createdUtcDate) }} ({{ detail.createdByName || detail.createdBy }})</span>
           </div>
           <div class="flex gap-3">
             <span class="text-gray-500 w-44 shrink-0">Updated</span>
-            <span>{{ formatDt(detail.updatedUtcDate) }} ({{ detail.updatedBy }})</span>
+            <span>{{ formatDt(detail.updatedUtcDate) }} ({{ detail.updatedByName || detail.updatedBy }})</span>
           </div>
         </div>
       </div>
