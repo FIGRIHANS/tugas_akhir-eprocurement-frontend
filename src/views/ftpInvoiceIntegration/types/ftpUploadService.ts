@@ -207,6 +207,111 @@ const toOptionalString = (value: unknown): string | null => {
   return text || null
 }
 
+const normalizePreviewText = (value: unknown): string => {
+  if (value == null) return ''
+  return String(value).trim()
+}
+
+type ParsedPreviewEntry = { key: string; value: string }
+
+const flattenParsedPreview = (value: unknown, parentKey = ''): ParsedPreviewEntry[] => {
+  if (!value || typeof value !== 'object') return []
+
+  const entries: ParsedPreviewEntry[] = []
+  const record = value as Record<string, unknown>
+  for (const [rawKey, rawValue] of Object.entries(record)) {
+    const key = rawKey.toLowerCase()
+    const fullKey = parentKey ? `${parentKey}.${key}` : key
+
+    if (rawValue == null) continue
+
+    if (typeof rawValue === 'string' || typeof rawValue === 'number') {
+      const text = normalizePreviewText(rawValue)
+      if (text) entries.push({ key: fullKey, value: text })
+      continue
+    }
+
+    if (Array.isArray(rawValue)) {
+      for (const child of rawValue) {
+        entries.push(...flattenParsedPreview(child, fullKey))
+      }
+      continue
+    }
+
+    entries.push(...flattenParsedPreview(rawValue, fullKey))
+  }
+
+  return entries
+}
+
+const findParsedPreviewValue = (
+  parsedPreview: Record<string, unknown> | null | undefined,
+  patterns: RegExp[],
+): string => {
+  if (!parsedPreview) return ''
+  const entries = flattenParsedPreview(parsedPreview)
+  const match = entries.find((entry) => patterns.some((pattern) => pattern.test(entry.key)))
+  return match?.value || ''
+}
+
+const readParsedPreviewDirectValue = (
+  parsedPreview: Record<string, unknown> | null | undefined,
+  keys: string[],
+): string => {
+  if (!parsedPreview) return ''
+  for (const key of keys) {
+    const value = normalizePreviewText(parsedPreview[key])
+    if (value) return value
+  }
+  return ''
+}
+
+const resolveParsedPreviewInvoiceVendorNo = (
+  parsedPreview: Record<string, unknown> | null | undefined,
+): string => {
+  const direct = readParsedPreviewDirectValue(parsedPreview, [
+    'invoiceVendorNo',
+    'invoice_vendor_no',
+    'documentNo',
+    'document_no',
+    'vendorInvoiceNo',
+    'invoiceNo',
+    'invoice_no',
+    'reference',
+  ])
+  if (direct) return direct
+
+  return findParsedPreviewValue(parsedPreview, [
+    /invoicevendorno/,
+    /invoice_vendor_no/,
+    /invoice\.vendor\.no/,
+    /documentno/,
+    /vendorinvoiceno/,
+    /invoiceno/,
+    /invoicenumber/,
+    /^reference$/,
+  ])
+}
+
+const resolveParsedPreviewGrDocumentNo = (
+  parsedPreview: Record<string, unknown> | null | undefined,
+): string => {
+  const direct = findParsedPreviewValue(parsedPreview, [
+    /grdocumentno/,
+    /gr_document_no/,
+    /goodsreceipt.*document.*no/,
+    /goodsreceipt.*no/,
+    /grno/,
+  ])
+  if (direct) return direct
+
+  const fallback = flattenParsedPreview(parsedPreview).find((entry) => {
+    if (!/gr/.test(entry.key)) return false
+    return /^GR[-/A-Z0-9]{6,}$/i.test(entry.value.replace(/\s+/g, ''))
+  })
+  return fallback?.value || ''
+}
+
 const parseFtpInvoiceDate = (value: unknown): string => {
   const raw = toOptionalString(value)
   if (!raw) return ''
@@ -576,8 +681,12 @@ export const buildFtpSyncContextFromDataRow = (row: FtpDataListRow): FtpSyncCont
       companyName: row.companyName || listItem?.companyName || '',
       invoiceNo: row.invoiceNo || listItem?.invoiceNo || '',
       invoiceDate: row.invoiceDate || listItem?.invoiceDate || '',
-      taxNo: row.taxNo || '',
-      documentNo: null,
+      taxNo: row.taxNo || listItem?.taxNo || '',
+      documentNo:
+        row.documentNo ||
+        row.invoiceVendorNo ||
+        listItem?.documentNo ||
+        null,
     },
     vendor: {
       vendorName: row.vendorName || listItem?.vendorName || '',
@@ -602,6 +711,7 @@ export const buildFtpSyncContextFromDataRow = (row: FtpDataListRow): FtpSyncCont
     manualFields: [...DEFAULT_MANUAL_FIELDS],
     invoice,
     invoiceListItem: listItem,
+    ftpData: row,
     vendorName: row.vendorName || listItem?.vendorName || null,
   }
 }
@@ -741,11 +851,31 @@ const applyFtpVendorToForm = (
     if (vendorMatch) form.vendorId = vendorMatch.sapCode
   }
 
-  if (vendor.vendorId != null && !form.vendorId) {
-    form.vendorId = String(vendor.vendorId)
+  const vendorIdRef = vendor.vendorId != null ? String(vendor.vendorId) : ''
+  if (vendorIdRef && !form.vendorId) {
+    const byId = vendorList.find(
+      (item) => item.sapCode === vendorIdRef || item.vendorId === vendorIdRef,
+    )
+    form.vendorId = byId?.sapCode || vendorIdRef
   }
   if (vendor.npwp) form.npwp = String(vendor.npwp)
   if (vendor.vendorAddress) form.address = String(vendor.vendorAddress)
+}
+
+const applyFtpPaymentToForm = (
+  form: formTypes,
+  savedInvoice: Record<string, unknown>,
+  draft: Record<string, unknown>,
+) => {
+  const payment = resolveFtpInvoiceSection<Record<string, unknown>>(savedInvoice, draft, 'payment')
+  if (!payment || !Object.keys(payment).length) return
+
+  if (payment.paymentId != null) form.paymentId = Number(payment.paymentId) || 0
+  if (payment.bankKey) form.bankKeyId = String(payment.bankKey)
+  if (payment.bankName) form.bankNameId = String(payment.bankName)
+  if (payment.beneficiaryName) form.beneficiaryName = String(payment.beneficiaryName)
+  if (payment.bankAccountNo) form.bankAccountNumber = String(payment.bankAccountNo)
+  if (payment.bankCountryCode) form.bankCountryCode = String(payment.bankCountryCode)
 }
 
 const applyFtpOcrToForm = (form: formTypes, ocr: Record<string, unknown>) => {
@@ -837,6 +967,103 @@ export const applyFtpInvoiceListItemToForm = (
   if (!skipManual.has('documentNo') && listItem.documentNo != null) {
     form.invoiceVendorNo = String(listItem.documentNo)
   }
+
+  const grNo = normalizePreviewText(listItem.grDocumentNo)
+  if (
+    grNo &&
+    !skipManual.has('pogr') &&
+    (!Array.isArray(form.invoicePoGr) || form.invoicePoGr.length === 0)
+  ) {
+    form.invoicePoGr = [
+      {
+        id: 0,
+        poNo: '',
+        poItem: 0,
+        grDocumentNo: grNo,
+        grDocumentItem: 0,
+        grDocumentDate: '',
+        taxCode: '',
+        currencyLC: form.currency || 'IDR',
+        currencyTC: form.currency || 'IDR',
+        itemAmountLC: 0,
+        itemAmountTC: 0,
+        quantity: 0,
+        uom: '',
+        itemText: '',
+        currency: form.currency || 'IDR',
+        conditionType: '',
+        conditionTypeDesc: '',
+        qcStatus: '',
+        postingDate: '',
+        enteredOn: '',
+        purchasingOrg: '',
+        department: '',
+        whtType: '',
+        whtCode: '',
+        whtBaseAmount: 0,
+        whtAmount: 0,
+        deliveryOrderNo: '',
+        isEdit: false,
+      },
+    ]
+  }
+}
+
+const hasMeaningfulPoGrRows = (rows: formTypes['invoicePoGr'] | null | undefined): boolean => {
+  if (!Array.isArray(rows) || rows.length === 0) return false
+
+  return rows.some((row) => {
+    if (Number(row.id) > 0) return true
+    return !!(
+      row.poNo ||
+      row.taxCode ||
+      row.conditionType ||
+      row.whtType ||
+      row.whtCode ||
+      row.department ||
+      Number(row.itemAmountLC) > 0
+    )
+  })
+}
+
+const buildPoGrSeedRow = (grDocumentNo: string, currency: string): formTypes['invoicePoGr'][number] =>
+  ({
+    id: 0,
+    poNo: '',
+    poItem: 0,
+    grDocumentNo,
+    grDocumentItem: 0,
+    grDocumentDate: '',
+    taxCode: '',
+    currencyLC: currency || 'IDR',
+    currencyTC: currency || 'IDR',
+    itemAmountLC: 0,
+    itemAmountTC: 0,
+    quantity: 0,
+    uom: '',
+    itemText: '',
+    currency: currency || 'IDR',
+    conditionType: '',
+    conditionTypeDesc: '',
+    qcStatus: '',
+    postingDate: '',
+    enteredOn: '',
+    purchasingOrg: '',
+    department: '',
+    whtType: '',
+    whtCode: '',
+    whtBaseAmount: 0,
+    whtAmount: 0,
+    deliveryOrderNo: '',
+    isEdit: false,
+  }) as formTypes['invoicePoGr'][number]
+
+const resolveSavedInvoiceGrDocumentNo = (savedInvoice: Record<string, unknown>): string => {
+  const pogr = savedInvoice.pogr
+  if (!Array.isArray(pogr) || pogr.length === 0) return ''
+
+  const first = pogr[0] as Record<string, unknown> | undefined
+  return normalizePreviewText(first?.grDocumentNo)
 }
 
 /** Bind form detail from `content.invoice` after FTP sync. */
@@ -893,8 +1120,8 @@ export const applyFtpSyncDraftToForm = (
 
   if (!skipManual.has('documentNo') && header.documentNo != null) {
     form.invoiceVendorNo = String(header.documentNo)
-  } else if (skipManual.has('documentNo')) {
-    form.invoiceVendorNo = preservedVendorNo || ''
+  } else if (skipManual.has('documentNo') && preservedVendorNo?.trim()) {
+    form.invoiceVendorNo = preservedVendorNo
   }
 
   if (header.invoiceNo) form.invoiceNo = String(header.invoiceNo)
@@ -911,6 +1138,7 @@ export const applyFtpSyncDraftToForm = (
   if (rejectNotes) form.statusNotes = rejectNotes
 
   applyFtpVendorToForm(form, vendor, header, context, vendorList)
+  applyFtpPaymentToForm(form, savedInvoice, draft)
   applyFtpCalculationToForm(form, calculation)
   applyFtpOcrToForm(form, ocr)
 
@@ -927,14 +1155,49 @@ export const applyFtpSyncDraftToForm = (
   if (taxDocument) form.tax = taxDocument
   if (referenceDocument) form.referenceDocument = referenceDocument
 
-  // invoiceVendorNo (documentNo) and PO/GR are manual — never auto-fill from sync
-  if (skipManual.has('pogr')) {
+  // Keep manual edits from sync payload, but allow parsed preview to seed empty manual fields.
+  if (skipManual.has('pogr') && hasMeaningfulPoGrRows(preservedPoGr)) {
     form.invoicePoGr = preservedPoGr || []
-  } else if (!form.invoicePoGr?.length) {
+  } else if (!skipManual.has('pogr') && !form.invoicePoGr?.length) {
     form.invoicePoGr = []
   }
 
   applyFtpInvoiceListItemToForm(form, context.invoiceListItem, companyList, skipManual)
+
+  const previewRecord = preview as Record<string, unknown>
+  const parsedInvoiceVendorNo = resolveParsedPreviewInvoiceVendorNo(context.parsedPreview)
+  const previewReference = normalizePreviewText(previewRecord.reference)
+  const listItemVendorNo = normalizePreviewText(context.invoiceListItem?.documentNo)
+  const ftpRowVendorNo = normalizePreviewText(
+    context.ftpData?.invoiceVendorNo || context.ftpData?.documentNo || '',
+  )
+  const headerVendorNo = normalizePreviewText(header.documentNo)
+
+  const seedInvoiceVendorNo =
+    parsedInvoiceVendorNo ||
+    previewReference ||
+    ftpRowVendorNo ||
+    listItemVendorNo ||
+    headerVendorNo
+
+  if (seedInvoiceVendorNo && !form.invoiceVendorNo?.trim()) {
+    form.invoiceVendorNo = seedInvoiceVendorNo
+  }
+
+  const parsedGrDocumentNo = resolveParsedPreviewGrDocumentNo(context.parsedPreview)
+  const ftpRowGrDocumentNo = normalizePreviewText(context.ftpData?.grDocumentNo || '')
+  const listItemGrDocumentNo = normalizePreviewText(context.invoiceListItem?.grDocumentNo || '')
+  const savedInvoiceGrDocumentNo = resolveSavedInvoiceGrDocumentNo(savedInvoice)
+  const seedGrDocumentNo =
+    parsedGrDocumentNo || ftpRowGrDocumentNo || listItemGrDocumentNo || savedInvoiceGrDocumentNo
+
+  if (seedGrDocumentNo && !hasMeaningfulPoGrRows(form.invoicePoGr)) {
+    if (!Array.isArray(form.invoicePoGr) || form.invoicePoGr.length === 0) {
+      form.invoicePoGr = [buildPoGrSeedRow(seedGrDocumentNo, form.currency || 'IDR')]
+    } else if (!form.invoicePoGr[0]?.grDocumentNo) {
+      form.invoicePoGr[0].grDocumentNo = seedGrDocumentNo
+    }
+  }
 }
 
 const toDocument = (
@@ -957,6 +1220,71 @@ const toDocument = (
     path,
     previewPath: file?.url || file?.blobPath || path,
     fileSize: '0',
+  }
+}
+
+export const mergeFtpSyncContextWithUploadDetail = (
+  base: FtpSyncContext | null,
+  detail: FtpUploadListItem,
+  nameFallbacks?: FtpUploadOriginalFileNames,
+): FtpSyncContext => {
+  const detailContext = buildSyncContextFromDetail(detail, nameFallbacks)
+
+  return {
+    ...(base || {}),
+    ...detailContext,
+    ftpUploadUId:
+      base?.ftpUploadUId ||
+      detailContext.ftpUploadUId ||
+      String(detail.invoiceUId || ''),
+    savedInvoiceUId:
+      base?.savedInvoiceUId ||
+      detailContext.savedInvoiceUId ||
+      String(detail.invoiceUId || ''),
+    ftpData: base?.ftpData ?? detailContext.ftpData ?? null,
+    invoice: base?.invoice ?? detailContext.invoice ?? null,
+    invoiceListItem: base?.invoiceListItem ?? detailContext.invoiceListItem ?? null,
+    parsedPreview: detailContext.parsedPreview || base?.parsedPreview || null,
+    manualFields: base?.manualFields || detailContext.manualFields || DEFAULT_MANUAL_FIELDS,
+    hasDraft: base?.hasDraft ?? detailContext.hasDraft,
+  }
+}
+
+/** Run backend OCR/sync on uploaded FTP files, then merge with existing session context. */
+export const enrichFtpContextWithUploadSync = async (
+  base: FtpSyncContext | null,
+  ftpUploadId: string,
+  savedInvoiceUId?: string | null,
+): Promise<FtpSyncContext> => {
+  let context: FtpSyncContext | null = base
+
+  try {
+    const syncResult = await syncFtpUpload(ftpUploadId)
+    const syncContext = buildSyncContextFromSyncResponse(syncResult)
+    context = {
+      ...(context || {}),
+      ...syncContext,
+      ftpUploadUId: ftpUploadId,
+      savedInvoiceUId: savedInvoiceUId || syncContext.savedInvoiceUId || ftpUploadId,
+      ftpData: context?.ftpData ?? syncContext.ftpData ?? null,
+      invoice: syncContext.invoice || context?.invoice || null,
+      invoiceListItem: syncContext.invoiceListItem || context?.invoiceListItem || null,
+      parsedPreview: context?.parsedPreview || null,
+    }
+  } catch (error) {
+    console.debug('FTP upload sync/OCR failed, falling back to upload detail', error)
+    try {
+      const detail = await fetchFtpUploadDetail(ftpUploadId)
+      context = mergeFtpSyncContextWithUploadDetail(context, detail)
+    } catch (detailError) {
+      console.debug('Failed to load FTP upload detail after sync failure', detailError)
+    }
+  }
+
+  return {
+    ...(context || {}),
+    ftpUploadUId: ftpUploadId,
+    savedInvoiceUId: savedInvoiceUId || context?.savedInvoiceUId || ftpUploadId,
   }
 }
 

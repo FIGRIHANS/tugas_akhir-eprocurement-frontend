@@ -45,7 +45,7 @@
               ref="filterChild"
             />
             <button
-              v-if="activeTab === 'ftpData' && isProfile3200"
+              v-if="activeTab === 'ftpData' && canSyncFtpData"
               class="btn btn-primary inline-flex items-center gap-2 shrink-0"
               @click="syncFtpData"
               :disabled="isSyncLoading"
@@ -316,7 +316,11 @@ import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useLoginStore } from '@/stores/views/login'
 import { useFormatIdr } from '@/composables/currency'
-import { resolveInvoiceAddRouteType } from '@/core/utils/invoiceSubmissionRoute'
+import {
+  INTERNAL_SUBMITTER_PROFILE_ID,
+  resolveInvoiceAddRouteType,
+  SUBMITTOR_PROFILE_ID,
+} from '@/core/utils/invoiceSubmissionRoute'
 import type { ListPoTypes } from '@/stores/views/invoice/types/submission'
 import type { FtpDataListRow } from './types/ftpUploadService'
 import moment from 'moment'
@@ -334,6 +338,7 @@ import {
 } from './types/ftpUpload'
 import {
   buildFtpSyncContextFromDataRow,
+  buildSyncContextFromDetail,
   fetchFtpDataList,
   fetchFtpUploadList,
   getFtpDataStatusLabel,
@@ -385,7 +390,10 @@ const FTP_INVOICE_SOURCE = 3
 const DRAFT_STATUS_CODE = 0
 const DRAFT_STATUS_NAME = 'draft'
 
-const isProfile3200 = computed(() => loginStore.userData?.profile?.profileId === 3200)
+const canSyncFtpData = computed(() => {
+  const profileId = Number(loginStore.userData?.profile?.profileId)
+  return profileId === INTERNAL_SUBMITTER_PROFILE_ID || profileId === SUBMITTOR_PROFILE_ID
+})
 
 const activeTab = ref<'ftpData' | 'upload'>('ftpData')
 const activeTabTitle = computed(() =>
@@ -907,14 +915,35 @@ const setPage = (value: number) => {
   currentPage.value = value
 }
 
-const goView = (data: ListPoTypes) => {
+const goView = async (data: ListPoTypes) => {
   const row = data as FtpDataListRow
   const uid = resolveFtpRowUid(row)
   const ftpUploadUid = resolveFtpUploadUIdFromRow(row) || uid
-  const syncContext = buildFtpSyncContextFromDataRow(row)
+  const baseContext = buildFtpSyncContextFromDataRow(row)
+  let matchedUpload = uploadList.value.find((item) => {
+    const uploadUid = String(item.invoiceUId || '')
+    return uploadUid === String(ftpUploadUid) || uploadUid === String(uid)
+  })
+
+  // Ensure upload parsedPreview is available even when user opens from FTP Data tab directly.
+  if (!matchedUpload) {
+    try {
+      const uploads = await fetchFtpUploadList()
+      uploadList.value = sortFtpUploadsByNewest(uploads)
+      matchedUpload = uploadList.value.find((item) => {
+        const uploadUid = String(item.invoiceUId || '')
+        return uploadUid === String(ftpUploadUid) || uploadUid === String(uid)
+      })
+    } catch (error) {
+      console.debug('Failed to load FTP upload context before view navigation', error)
+    }
+  }
+
+  const uploadContext = matchedUpload ? buildSyncContextFromDetail(matchedUpload) : null
 
   saveFtpSyncContext({
-    ...syncContext,
+    ...baseContext,
+    ...(uploadContext || {}),
     ftpUploadUId: ftpUploadUid,
     savedInvoiceUId: uid,
   })

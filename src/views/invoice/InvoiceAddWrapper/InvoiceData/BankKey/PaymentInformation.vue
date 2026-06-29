@@ -54,6 +54,7 @@ import { useRoute } from 'vue-router'
 import type { formTypes } from '../../../types/invoiceAddWrapper'
 import type { PaymentTypes } from '@/stores/master-data/types/invoiceMasterData'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
+import { findVendorFromList } from '@/composables/invoiceDataAutofill'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const form = inject<formTypes>('form')
@@ -63,14 +64,16 @@ const route = useRoute()
 const vendorList = computed(() => invoiceMasterApi.vendorList)
 
 const checkBank = () => {
-  console.log(form, 'masuk 1')
+  if (!form) return
 
-  if (form) {
-    const getIndex = vendorList.value.findIndex((item) => item.sapCode === form?.vendorId)
-    if (getIndex !== -1) {
-      bankList.value = vendorList.value[getIndex].payment
-    }
+  const vendor = findVendorFromList(vendorList.value, form.vendorId)
+  if (vendor) {
+    if (form.vendorId !== vendor.sapCode) form.vendorId = vendor.sapCode
+    bankList.value = vendor.payment
+    return
   }
+
+  bankList.value = []
 }
 
 const setBank = () => {

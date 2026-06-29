@@ -366,10 +366,11 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, computed, inject, watch, onMounted } from 'vue'
+import { ref, reactive, computed, inject, watch, onMounted, type Ref } from 'vue'
 import { useRoute } from 'vue-router'
 import type { formTypes } from '../../types/invoiceAddWrapper'
 import { dedupePoGrLines, getPoGrLineKey } from '@/core/utils/poGrDedup'
+import { extractGrFromText } from '@/core/utils/grDocumentNo'
 import { KTModal } from '@/metronic/core'
 import { defaultColumn, invoiceDpColumn, poCCColumn, manualAddColumn } from '@/static/invoicePoGr'
 import SearchPoGr from './InvoicePoGr/SearchPoGr.vue'
@@ -393,6 +394,7 @@ const loginStore = useLoginStore()
 const route = useRoute()
 const { poGrList } = storeToRefs(invoiceApi)
 const form = inject<formTypes>('form')
+const poGrAutoFetchTick = inject<Ref<number>>('poGrAutoFetchTick', ref(0))
 const columns = ref<string[]>([])
 const search = ref<string>('')
 const searchError = ref<boolean>(false)
@@ -652,27 +654,44 @@ const hasExistingPoGrData = () => {
   })
 }
 
-const autoFetchPoOnEnter = async () => {
+const hasFetchedPoGrLines = () => {
+  if (!form?.invoicePoGr?.length) return false
+
+  return form.invoicePoGr.some((row) => {
+    if (Number(row.id) > 0) return true
+    return !!(row.poNo && (row.taxCode || row.conditionType || Number(row.itemAmountLC) > 0))
+  })
+}
+
+const resolveGrNoForAutoFetch = (): string => {
+  return (
+    extractGrFromText(search.value) ||
+    extractGrFromText(form?.invoicePoGr?.[0]?.grDocumentNo?.toString()) ||
+    extractGrFromText(form?.invoiceVendorNo) ||
+    ''
+  )
+}
+
+const runPoGrAutoFetch = async () => {
   if (!form) return
-  if (route.query.invoice) return
   if (checkInvoiceDp() || form.invoiceType === '902') return
   if (isAutoFetchingPo.value) return
-  // Keep saved PO/GR lines (draft/rejected/resubmit) — do not overwrite with GR API defaults.
-  if (hasExistingPoGrData()) return
+  if (hasExistingPoGrData() || hasFetchedPoGrLines()) return
 
-  const initialGrNo =
-    search.value.trim() || form.invoicePoGr[0]?.grDocumentNo?.toString().trim() || ''
+  const grNo = resolveGrNoForAutoFetch()
+  if (!grNo) return
 
-  if (!initialGrNo) return
-
-  search.value = initialGrNo
+  search.value = grNo
   isAutoFetchingPo.value = true
+  grFetchError.value = ''
 
   try {
-    const mapped = await fetchGrAsPoGrList(initialGrNo)
+    const mapped = await fetchGrAsPoGrList(grNo)
     setPoGrFromMockSap(mapped)
   } catch (error) {
-    console.error('Error auto-fetching GR on load:', error)
+    console.error('Error auto-fetching GR:', error)
+    grFetchError.value =
+      error instanceof Error ? error.message : 'Unable to load GR lines. Please check GR Document No.'
   } finally {
     isAutoFetchingPo.value = false
   }
@@ -1002,14 +1021,39 @@ watch(
   },
 )
 
+watch(
+  () => form?.invoiceVendorNo,
+  () => {
+    void runPoGrAutoFetch()
+  },
+  { immediate: true },
+)
+
+watch(
+  () => form?.invoicePoGr?.map((row) => row.grDocumentNo).join('|'),
+  () => {
+    void runPoGrAutoFetch()
+  },
+)
+
+watch(
+  () => poGrAutoFetchTick.value,
+  () => {
+    void runPoGrAutoFetch()
+  },
+)
+
 onMounted(async () => {
   setColumn()
 
-  if (hasExistingPoGrData() && form?.invoicePoGr[0]?.grDocumentNo) {
+  if (form?.invoicePoGr?.[0]?.grDocumentNo) {
     search.value = form.invoicePoGr[0].grDocumentNo.toString()
+  } else if (form?.invoiceVendorNo) {
+    const grFromVendorNo = extractGrFromText(form.invoiceVendorNo)
+    if (grFromVendorNo) search.value = grFromVendorNo
   }
 
-  autoFetchPoOnEnter()
+  await runPoGrAutoFetch()
 
   // Prevent double fetching of WHT Types
   if (!masterDataApi.whtTypeList || masterDataApi.whtTypeList.length === 0) {

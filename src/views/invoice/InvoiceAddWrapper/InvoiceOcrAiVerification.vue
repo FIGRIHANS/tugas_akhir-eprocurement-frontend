@@ -365,6 +365,8 @@ const AdditionalCostView = defineAsyncComponent(
 /* ---------------- base ---------------- */
 const route = useRoute()
 const form = inject<formTypes>('form')
+const markOcrPjapVerified = inject<(verified?: boolean) => void>('markOcrPjapVerified')
+const setInvoiceSubmissionTab = inject<(tab: string) => void>('setInvoiceSubmissionTab')
 const invoiceVerificationStore = useInvoiceVerificationStore()
 
 const tabOcrTab = ref<'general' | 'tax'>('general')
@@ -1020,6 +1022,8 @@ const verifyByPjap = async () => {
   } finally {
     isVerify.value = true
     isSyncLoading.value = false
+    markOcrPjapVerified?.(true)
+    setInvoiceSubmissionTab?.('information')
   }
 }
 

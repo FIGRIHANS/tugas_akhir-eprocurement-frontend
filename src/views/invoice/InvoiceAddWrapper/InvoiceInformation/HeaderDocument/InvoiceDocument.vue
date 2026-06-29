@@ -123,7 +123,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, inject, watch, computed } from 'vue'
+import { ref, reactive, inject, watch, computed, type Ref } from 'vue'
 import type {
   documentFormTypes,
   responseFileTypes,
@@ -144,8 +144,10 @@ type FileFieldKeys = 'invoiceDocument' | 'tax' | 'referenceDocument' | 'otherDoc
 const route = useRoute()
 const invoiceVerificationStore = useInvoiceVerificationStore()
 const formInject = inject<formTypes>('form')
+const poGrAutoFetchTick = inject<Ref<number>>('poGrAutoFetchTick', ref(0))
 const pdfUploadRef = ref()
 const isLoading = ref<boolean>(false)
+const hasAutoFilledInvoiceData = ref(false)
 
 const showPreviewModal = ref(false)
 const previewLoading = ref(false)
@@ -266,8 +268,12 @@ const sendUploadFile = async () => {
       )
 
       if (formInject && response) {
-        formInject.invoiceVendorNo = response.taxDocumentNumber
-        formInject.invoiceDate = parseIndoDate(response.taxDocumentDate)
+        const vendorNo = response.taxDocumentNumber || (response as { invoiceNo?: string }).invoiceNo
+        if (vendorNo) formInject.invoiceVendorNo = vendorNo
+        if (response.taxDocumentDate) {
+          formInject.invoiceDate = parseIndoDate(response.taxDocumentDate)
+        }
+        poGrAutoFetchTick.value += 1
       }
     }
   } catch (error) {
@@ -275,6 +281,17 @@ const sendUploadFile = async () => {
   } finally {
     isLoading.value = false
   }
+}
+
+const tryAutoFillFromInvoiceDocument = async () => {
+  if (hasAutoFilledInvoiceData.value) return
+  if (!form?.invoiceDocument?.previewPath) return
+  if (formInject?.invoiceVendorNo?.trim()) return
+  if (checkIsView()) return
+  if (formInject?.status !== 0 && formInject?.status !== -1 && formInject?.status !== 5) return
+
+  hasAutoFilledInvoiceData.value = true
+  await sendUploadFile()
 }
 
 const checkIsView = () => route.query.type?.toString().includes('view')
@@ -285,6 +302,14 @@ watch(
     if (formInject) Object.assign(formInject, form)
   },
   { deep: true },
+)
+
+watch(
+  () => formInject?.invoiceDocument?.previewPath,
+  () => {
+    void tryAutoFillFromInvoiceDocument()
+  },
+  { immediate: true },
 )
 
 watch(

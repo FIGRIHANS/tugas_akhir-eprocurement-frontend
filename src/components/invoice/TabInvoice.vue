@@ -45,6 +45,7 @@ const props = withDefaults(
     hideWorkflowTabs?: boolean
     showOcrAiVerification?: boolean
     canClickData?: boolean
+    canClickOcrAiVerification?: boolean
     canClickInformation?: boolean
     canClickPreview?: boolean
     canClickPaymentStatus?: boolean
@@ -54,6 +55,7 @@ const props = withDefaults(
     hideWorkflowTabs: false,
     showOcrAiVerification: false,
     canClickData: true,
+    canClickOcrAiVerification: false,
     canClickInformation: false,
     canClickPreview: false,
     canClickPaymentStatus: false,
@@ -69,18 +71,18 @@ const visibleTabs = computed<TabItem[]>(() => {
       label: 'Invoice Data',
       disabled: !props.canClickData,
     })
+    if (props.showOcrAiVerification) {
+      tabs.push({
+        key: 'ocrAiVerification',
+        label: 'Invoice OCR & AI Verification',
+        disabled: !props.canClickOcrAiVerification,
+      })
+    }
     tabs.push({
       key: 'information',
       label: 'Invoice Information',
       disabled: !props.canClickInformation,
     })
-    if (props.showOcrAiVerification) {
-      tabs.push({
-        key: 'ocrAiVerification',
-        label: 'Invoice OCR & AI Verification',
-        disabled: false,
-      })
-    }
     if (props.withPreview) {
       tabs.push({
         key: 'preview',

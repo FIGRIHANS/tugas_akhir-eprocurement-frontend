@@ -71,6 +71,7 @@ export const resolveDocumentPreviewUrl = async (
 
   if (isAzureBlobUrl(path)) {
     try {
+      // Avoid browser-side fetch to Azure (CORS); use signed URL directly in iframe/open.
       return await fetchSignedBlobPreviewUrl(path)
     } catch (error) {
       console.error('Failed to resolve Azure blob preview URL:', error)

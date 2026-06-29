@@ -47,6 +47,7 @@ import { useRoute } from 'vue-router'
 import type { formTypes } from '../../types/invoiceAddWrapper'
 import { useLoginStore } from '@/stores/views/login'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
+import { findVendorFromList } from '@/composables/invoiceDataAutofill'
 
 const loginApi = useLoginStore()
 const invoiceMasterApi = useInvoiceMasterDataStore()
@@ -59,33 +60,38 @@ const userData = computed(() => loginApi.userData)
 const isVendor = computed(() => loginApi.isVendor)
 
 watch(
-  () => [vendorList.value, userData.value, form],
+  () => [vendorList.value, userData.value, form?.vendorId],
   () => {
-    if (form) {
-      const referenceSapCode = isVendor.value ? userData.value?.profile.sapCode : form.vendorId
-      const getIndex = vendorList.value.findIndex((item) => item.sapCode === referenceSapCode)
-      if (getIndex !== -1) {
-        form.address = vendorList.value[getIndex].address
-        form.npwp = vendorList.value[getIndex].npwp
-        form.vendorName = vendorList.value[getIndex].vendorName
-      } else {
-        form.address = ''
-        form.npwp = ''
-        form.vendorName = ''
-      }
+    if (!form) return
+
+    const referenceSapCode = isVendor.value ? userData.value?.profile.sapCode : form.vendorId
+    if (!referenceSapCode) return
+
+    const vendor = findVendorFromList(vendorList.value, referenceSapCode)
+    if (vendor) {
+      form.vendorId = vendor.sapCode
+      form.address = vendor.address
+      form.npwp = vendor.npwp
+      form.vendorName = vendor.vendorName
+      return
     }
+
+    // Jangan kosongkan saat vendorList belum siap — hindari field manual kosong.
+    if (vendorList.value.length === 0) return
+
+    form.address = ''
+    form.npwp = ''
+    form.vendorName = ''
   },
   {
     deep: true,
-    immediate: true
-  }
+    immediate: true,
+  },
 )
 
 watch(
   () => isVendor.value,
   () => {
-    console.log(form.vendorId);
-
     if (isVendor.value && form) {
       form.vendorId = userData.value?.profile.sapCode || ''
       form.vendorName = userData.value?.profile.vendorName || ''

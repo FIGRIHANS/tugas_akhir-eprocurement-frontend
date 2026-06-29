@@ -5,6 +5,7 @@
     <TabInvoice
       v-model:activeTab="tabNow"
       :can-click-data="true"
+      :can-click-ocr-ai-verification="canClickOcrAiVerificationTab"
       :can-click-information="canClickInformationTab"
       :can-click-preview="canClickPreviewTab"
       :can-click-payment-status="canClickPaymentStatusTab"
@@ -75,6 +76,7 @@
               !canSubmitInvoice ||
               (!isCheckBudget && tabNow === 'information') ||
               (tabNow === 'information' && !checkInvoiceInformation()) ||
+              (tabNow === 'ocrAiVerification' && !isOcrPjapVerified) ||
               (tabNow === 'data' && !isAlternativePayeeFilled())
             "
           >
@@ -105,7 +107,12 @@
           <button
             v-if="canSubmitInvoice"
             class="btn btn-primary"
-            :disabled="isSubmit || !canSubmitInvoice || (tabNow === 'data' && !isAlternativePayeeFilled())"
+            :disabled="
+              isSubmit ||
+              !canSubmitInvoice ||
+              (tabNow === 'ocrAiVerification' && !isOcrPjapVerified) ||
+              (tabNow === 'data' && !isAlternativePayeeFilled())
+            "
             @click="goNext"
           >
             {{ tabNow !== 'preview' ? 'Next' : 'Submit' }}
@@ -135,6 +142,7 @@
               (!checkInvoiceView() &&
                 !checkInvoiceNonPoView() &&
                 (!canSubmitInvoice ||
+                  (tabNow === 'ocrAiVerification' && !isOcrPjapVerified) ||
                   (tabNow === 'information' && !checkInvoiceInformation()) ||
                   (tabNow === 'data' && !isAlternativePayeeFilled())))
             "
@@ -228,6 +236,7 @@ import ModalRejectLogo from '@/assets/svg/ModalRejectLogo.vue'
 import { KTModal } from '@/metronic/core'
 import { useCheckEmpty } from '@/composables/validation'
 import {
+  INTERNAL_SUBMITTER_PROFILE_ID,
   isEditableInvoiceStatus,
   isInvoiceSubmissionFlow,
   isInvoiceSubmissionRouteType,
@@ -254,11 +263,17 @@ import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification
 import type { itemsPoGrType } from './types/invoicePoGr'
 import type { itemsCostType } from './types/additionalCost'
 import type { invoiceItemTypes } from './types/invoiceItem'
+import { applyOcrFromUploadedDocuments } from '@/composables/invoiceDocumentAutofill'
+import { findVendorFromList, syncInvoiceDataTabFromVendorMaster } from '@/composables/invoiceDataAutofill'
+import type { FtpSyncContext } from '@/views/ftpInvoiceIntegration/types/ftpUploadService'
 import {
   applyFtpSyncDraftToForm,
   clearFtpSyncSession,
+  fetchFtpUploadDetail,
   getActiveFtpUploadUId,
   getFtpSyncContext,
+  mergeFtpSyncContextWithUploadDetail,
+  saveFtpSyncContext,
   updateFtpUpload,
 } from '@/views/ftpInvoiceIntegration/types/ftpUploadService'
 
@@ -293,10 +308,12 @@ const tabNow = ref<string>('data')
 const isSubmit = ref<boolean>(false)
 const isLoadingContent = ref<boolean>(true)
 const isCheckBudget = ref<boolean>(false)
+const isOcrPjapVerified = ref<boolean>(false)
 const isClickDraft = ref<boolean>(false)
 const wasRejectedResubmit = ref<boolean>(false)
 const showSuccessModal = ref<boolean>(false)
 const showErrorSubmissionModal = ref<boolean>(false)
+const poGrAutoFetchTick = ref(0)
 
 const INVOICE_SUBMIT_SUCCESS_KEY = 'invoice_submit_success'
 
@@ -486,7 +503,18 @@ const listActivity = computed(() => invoiceMasterApi.activityList)
 const additionalCostTempDelete = computed(() => verificationApi.additionalCostTempDelete)
 const costExpensesTempDelete = computed(() => verificationApi.costExpenseTempDelete)
 
+const currentProfileId = computed(() => Number(userData.value?.profile?.profileId))
+
+const isInternalSubmitterProfile = computed(
+  () => currentProfileId.value === INTERNAL_SUBMITTER_PROFILE_ID,
+)
+
 const canClickInformationTab = computed(() => {
+  if (!showOcrAiVerificationTab.value) return hasCompletedDataTab.value
+  return hasCompletedDataTab.value && isOcrPjapVerified.value
+})
+
+const canClickOcrAiVerificationTab = computed(() => {
   return hasCompletedDataTab.value
 })
 
@@ -506,14 +534,18 @@ const shouldHideWorkflowTabs = computed(() => {
 })
 
 const showOcrAiVerificationTab = computed(() => {
-  return isSubmittorProfile(userData.value?.profile?.profileId)
+  return (
+    isSubmittorProfile(userData.value?.profile?.profileId) ||
+    isInternalSubmitterProfile.value
+  )
 })
 
 const workflowTabs = computed(() => {
-  const tabs: Array<(typeof WORKFLOW_TABS)[number]> = ['data', 'information']
+  const tabs: Array<(typeof WORKFLOW_TABS)[number]> = ['data']
   if (showOcrAiVerificationTab.value) {
     tabs.push('ocrAiVerification')
   }
+  tabs.push('information')
   tabs.push('preview')
   return tabs
 })
@@ -610,11 +642,67 @@ const getActiveFtpSyncContext = () => {
   return null
 }
 
-const applyFtpSyncContextAfterLoad = () => {
+const syncInvoiceDataTab = (preservePayment = false) => {
+  syncInvoiceDataTabFromVendorMaster(form, invoiceMasterApi.vendorList, {
+    isVendor: loginApi.isVendor,
+    profile: userData.value?.profile,
+    preservePayment,
+  })
+}
+
+const applyFtpSyncContextAfterLoad = async () => {
   const context = getActiveFtpSyncContext()
+  if (!context) {
+    syncInvoiceDataTab(true)
+    await runUploadedDocumentAutofill()
+    return
+  }
+
+  applyFtpSyncDraftToForm(form, context, invoiceMasterApi.companyCode, invoiceMasterApi.vendorList)
+  syncInvoiceDataTab(true)
+  await runUploadedDocumentAutofill()
+}
+
+const resolveActiveFtpSyncContext = async (): Promise<FtpSyncContext | null> => {
+  if (route.query.from !== 'ftp') return null
+
+  let context = getActiveFtpSyncContext()
+  const ftpUploadId =
+    route.query.ftpUpload?.toString() ||
+    context?.ftpUploadUId ||
+    getActiveFtpUploadUId() ||
+    null
+
+  if (ftpUploadId) {
+    try {
+      const detail = await fetchFtpUploadDetail(ftpUploadId)
+      context = mergeFtpSyncContextWithUploadDetail(context, detail)
+      saveFtpSyncContext({
+        ...context,
+        ftpUploadUId: ftpUploadId,
+        savedInvoiceUId:
+          route.query.invoice?.toString() || context.savedInvoiceUId || ftpUploadId,
+      })
+    } catch (error) {
+      console.debug('Failed to enrich FTP upload detail for invoice form', error)
+    }
+  }
+
+  return context
+}
+
+const runUploadedDocumentAutofill = async () => {
+  if (checkIsNonPo()) return
+  await applyOcrFromUploadedDocuments(form, verificationApi)
+  poGrAutoFetchTick.value += 1
+}
+
+const applyActiveFtpSyncContext = async () => {
+  const context = await resolveActiveFtpSyncContext()
   if (!context) return
 
   applyFtpSyncDraftToForm(form, context, invoiceMasterApi.companyCode, invoiceMasterApi.vendorList)
+  syncInvoiceDataTab()
 }
 
 const shouldLoadFtpSubmissionDetail = (routeType?: string) => {
@@ -687,33 +775,17 @@ const loadInvoiceFromRoute = async () => {
         tabNow.value = 'paymentStatus'
       }
     } else {
-      const ftpContext = getActiveFtpSyncContext()
-
-      if (ftpContext?.invoice) {
-        applyFtpSyncDraftToForm(
-          form,
-          ftpContext,
-          invoiceMasterApi.companyCode,
-          invoiceMasterApi.vendorList,
-        )
-      }
+      await applyActiveFtpSyncContext()
 
       if (shouldLoadFtpSubmissionDetail(routeType)) {
         try {
           await invoiceApi.getPoDetail(invoiceId)
           setStepperStatus()
           setData()
-          applyFtpSyncContextAfterLoad()
+          await applyFtpSyncContextAfterLoad()
         } catch (detailError) {
           console.error('Error loading PO detail:', detailError)
-          if (ftpContext?.invoice) {
-            applyFtpSyncDraftToForm(
-              form,
-              ftpContext,
-              invoiceMasterApi.companyCode,
-              invoiceMasterApi.vendorList,
-            )
-          }
+          await applyActiveFtpSyncContext()
         }
       } else {
         setStepperStatus()
@@ -745,6 +817,12 @@ const loadInvoiceFromRoute = async () => {
     }
   } finally {
     isLoadingContent.value = false
+    if (!checkIsNonPo() && isEditableInvoiceStatus(form.status)) {
+      syncInvoiceDataTab(true)
+      if (route.query.from !== 'ftp') {
+        void runUploadedDocumentAutofill()
+      }
+    }
   }
 }
 
@@ -802,7 +880,7 @@ const checkInvoiceNonPoView = () => {
   return route.query.type === 'non-po-view'
 }
 
-const WORKFLOW_TABS = ['data', 'information', 'ocrAiVerification', 'preview'] as const
+const WORKFLOW_TABS = ['data', 'ocrAiVerification', 'information', 'preview'] as const
 
 const getBackListRoute = () => {
   const from = route.query.from?.toString()
@@ -1606,6 +1684,8 @@ const goNext = async () => {
       } else if (tabNow.value === 'information') {
         const check = checkInvoiceInformation()
         if (!check) return
+      } else if (tabNow.value === 'ocrAiVerification' && !isOcrPjapVerified.value) {
+        return
       }
     }
     const checkIndex = list.findIndex((item) => item === tabNow.value)
@@ -1922,7 +2002,9 @@ const setData = () => {
     form.invoiceUId = detail.header.invoiceUId
     form.invoiceType = detail.header.invoiceTypeCode ? detail.header.invoiceTypeCode.toString() : ''
     form.invoiceSource = detail.header.invoiceSourceName
-    form.vendorId = detail.vendor.vendorId ? detail.vendor.vendorId.toString() : ''
+    const rawVendorId = detail.vendor.vendorId ? detail.vendor.vendorId.toString() : ''
+    const vendorMatch = findVendorFromList(invoiceMasterApi.vendorList, rawVendorId)
+    form.vendorId = vendorMatch?.sapCode || rawVendorId
     form.vendorName = detail.vendor.vendorName ? detail.vendor.vendorName.toString() : form.vendorName
     form.npwp = detail.vendor.npwp
     form.address = detail.vendor.vendorAddress
@@ -2735,7 +2817,7 @@ onMounted(async () => {
   if (!checkIsNonPo()) invoiceMasterApi.getInvoicePoType()
   else invoiceMasterApi.getInvoiceNonPoType()
   invoiceMasterApi.getDocumentTypes()
-  invoiceMasterApi.getVendorList()
+  await invoiceMasterApi.getVendorList()
   await invoiceMasterApi.getCompanyCode()
 
   if (loginApi.isVendor) {
@@ -2780,6 +2862,16 @@ watch(
 )
 
 watch(
+  () => [form.taxInvoiceStatus, form.taxInvoiceNumber],
+  () => {
+    if (form.taxInvoiceStatus || form.taxInvoiceNumber) {
+      isOcrPjapVerified.value = true
+    }
+  },
+  { immediate: true },
+)
+
+watch(
   () => form.invoiceItem,
   () => {
     if (checkIsNonPo() && isCheckBudget.value) isCheckBudget.value = false
@@ -2805,6 +2897,15 @@ watch(
 
 provide('form', form)
 provide('userData', userData)
+provide('poGrAutoFetchTick', poGrAutoFetchTick)
+provide('markOcrPjapVerified', (verified = true) => {
+  isOcrPjapVerified.value = verified
+})
+provide('setInvoiceSubmissionTab', (tab: string) => {
+  if (workflowTabs.value.includes(tab as (typeof WORKFLOW_TABS)[number])) {
+    tabNow.value = tab
+  }
+})
 </script>
 
 <style lang="scss" scoped>
