@@ -134,7 +134,7 @@ import pdfUpload from '@/components/ui/pdfUpload/pdfUpload.vue'
 import AttachmentView from '@/components/ui/attachment/AttachmentView.vue'
 import UiModal from '@/components/modal/UiModal.vue'
 import { useRoute } from 'vue-router'
-import { resolveDocumentPreviewUrl } from '@/composables/documentPreview'
+import { resolveDocumentPreviewUrl, resolveDocumentUrlForApi } from '@/composables/documentPreview'
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 import UiLoading from '@/components/modal/UiLoading.vue'
 import { parseIndoDate } from '@/composables/parseIndoDate'
@@ -262,19 +262,18 @@ const openDocumentPreview = async (file: responseFileTypes | null, label: string
 const sendUploadFile = async () => {
   isLoading.value = true
   try {
-    if (form?.invoiceDocument?.previewPath) {
-      const response = await invoiceVerificationStore.uploadFileOcr(
-        form.invoiceDocument.previewPath,
-      )
+    const invoiceDoc = form?.invoiceDocument
+    if (!invoiceDoc || !resolveDocumentUrlForApi(invoiceDoc)) return
 
-      if (formInject && response) {
-        const vendorNo = response.taxDocumentNumber || (response as { invoiceNo?: string }).invoiceNo
-        if (vendorNo) formInject.invoiceVendorNo = vendorNo
-        if (response.taxDocumentDate) {
-          formInject.invoiceDate = parseIndoDate(response.taxDocumentDate)
-        }
-        poGrAutoFetchTick.value += 1
+    const response = await invoiceVerificationStore.uploadFileOcr(invoiceDoc)
+
+    if (formInject && response) {
+      const vendorNo = response.taxDocumentNumber || (response as { invoiceNo?: string }).invoiceNo
+      if (vendorNo) formInject.invoiceVendorNo = vendorNo
+      if (response.taxDocumentDate) {
+        formInject.invoiceDate = parseIndoDate(response.taxDocumentDate)
       }
+      poGrAutoFetchTick.value += 1
     }
   } catch (error) {
     console.error('Error filling invoice data:', error)
@@ -285,7 +284,7 @@ const sendUploadFile = async () => {
 
 const tryAutoFillFromInvoiceDocument = async () => {
   if (hasAutoFilledInvoiceData.value) return
-  if (!form?.invoiceDocument?.previewPath) return
+  if (!resolveDocumentUrlForApi(form?.invoiceDocument)) return
   if (formInject?.invoiceVendorNo?.trim()) return
   if (checkIsView()) return
   if (formInject?.status !== 0 && formInject?.status !== -1 && formInject?.status !== 5) return

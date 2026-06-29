@@ -1,4 +1,5 @@
 import invoiceHttp from '@/core/utils/invoiceApi'
+import { extractGrFromText } from '@/core/utils/grDocumentNo'
 import { isEditableInvoiceStatus, resolveInvoiceRejectReason } from '@/core/utils/invoiceSubmissionRoute'
 import type { responseFileTypes } from '@/views/invoice/types/invoiceDocument'
 import type { formTypes } from '@/views/invoice/types/invoiceAddWrapper'
@@ -337,6 +338,32 @@ export const resolveFtpRowUid = (row: FtpDataListRow): string => {
   return String(row.reffId || row.invoiceUId || row.ftpUploadUId || '')
 }
 
+/** Sembunyikan Submitted Document No hanya untuk status draft workflow (bukan flag hasDraft). */
+export const shouldHideSubmittedDocumentNo = (
+  row: Pick<FtpDataListRow, 'statusCode' | 'portalStatus' | 'statusName'>,
+): boolean => {
+  const statusName = row.statusName?.trim().toLowerCase()
+  return (
+    row.portalStatus?.toLowerCase() === 'draft' ||
+    row.statusCode === DRAFT_STATUS_CODE ||
+    statusName === 'draft' ||
+    statusName === 'drafted'
+  )
+}
+
+export const isFtpDraftDataRow = (
+  row: Pick<FtpDataListRow, 'hasDraft' | 'statusCode' | 'portalStatus' | 'statusName'>,
+): boolean => {
+  const statusName = row.statusName?.trim().toLowerCase()
+  return (
+    row.hasDraft === true ||
+    row.portalStatus?.toLowerCase() === 'draft' ||
+    row.statusCode === DRAFT_STATUS_CODE ||
+    statusName === 'draft' ||
+    statusName === 'drafted'
+  )
+}
+
 /** Status badge label on FTP Data grid — invoice workflow (Drafted, dll.). */
 export const getFtpDataStatusLabel = (row: FtpDataListRow): string => {
   if (row.statusName?.trim()) return row.statusName
@@ -391,6 +418,162 @@ export const isFtpUploadedRow = (row: FtpDataListRow): boolean => {
   return status.toLowerCase() === 'uploaded'
 }
 
+const readNestedHeaderDocumentNo = (item: Record<string, unknown>): string => {
+  const invoice = (item.invoice as Record<string, unknown>) || {}
+  const draft = (item.draft as Record<string, unknown>) || {}
+  const header =
+    ((invoice.header as Record<string, unknown>) ||
+      (draft.header as Record<string, unknown>) ||
+      {}) as Record<string, unknown>
+
+  return normalizePreviewText(header.documentNo)
+}
+
+const readItemReference = (item: Record<string, unknown>): string => {
+  const preview = (item.preview as Record<string, unknown>) || {}
+  const parsedPreview =
+    (item.parsedPreview as Record<string, unknown>) ||
+    (preview.parsedPreview as Record<string, unknown>) ||
+    preview
+
+  const reference = normalizePreviewText(
+    parsedPreview?.reference ?? preview?.reference ?? item.reference,
+  )
+  if (!reference) return ''
+
+  return extractGrFromText(reference) || reference
+}
+
+const readItemPoGrDocumentNo = (item: Record<string, unknown>): string => {
+  const sources = [
+    item.pogr,
+    (item.invoice as Record<string, unknown> | undefined)?.pogr,
+    (item.draft as Record<string, unknown> | undefined)?.pogr,
+  ]
+
+  for (const pogr of sources) {
+    if (!Array.isArray(pogr) || !pogr.length) continue
+    const first = pogr[0] as Record<string, unknown>
+    const gr = normalizePreviewText(first?.grDocumentNo)
+    if (gr) return gr
+  }
+
+  return ''
+}
+
+const resolveFtpListInvoiceVendorNo = (
+  item: Record<string, unknown>,
+  invoiceListItem: FtpInvoiceListItem | null,
+): string => {
+  const parsedPreview = (item.parsedPreview as Record<string, unknown>) || null
+
+  const candidates = [
+    item.invoiceVendorNo,
+    item.documentNo,
+    invoiceListItem?.documentNo,
+    resolveParsedPreviewInvoiceVendorNo(parsedPreview),
+    readItemReference(item),
+    readItemPoGrDocumentNo(item),
+    item.grDocumentNo,
+    invoiceListItem?.grDocumentNo,
+    readNestedHeaderDocumentNo(item),
+  ]
+
+  for (const candidate of candidates) {
+    const value = normalizePreviewText(candidate)
+    if (value) return value
+  }
+
+  return ''
+}
+
+const applyInvoiceVendorNoToRow = (row: FtpDataListRow, vendorNo: string): FtpDataListRow => {
+  const normalized = normalizePreviewText(vendorNo)
+  if (!normalized) return row
+
+  return {
+    ...row,
+    documentNo: normalized,
+    invoiceVendorNo: normalized,
+  }
+}
+
+/** Gabungkan parsedPreview / documentNo dari daftar FTP upload ke baris FTP Data. */
+export const enrichFtpDataListWithUploads = (
+  rows: FtpDataListRow[],
+  uploads: FtpUploadListItem[],
+): FtpDataListRow[] => {
+  if (!rows.length || !uploads.length) return rows
+
+  const uploadByUid = new Map<string, FtpUploadListItem>()
+  for (const upload of uploads) {
+    const uid = String(upload.invoiceUId || '').trim()
+    if (uid) uploadByUid.set(uid, upload)
+  }
+
+  return rows.map((row) => {
+    if (resolveFtpDataInvoiceVendorNo(row)) return row
+
+    const upload = uploadByUid.get(resolveFtpRowUid(row))
+    if (!upload) return row
+
+    const vendorNo = resolveFtpListInvoiceVendorNo(
+      {
+        invoiceVendorNo: upload.documentNo,
+        documentNo: upload.documentNo,
+        parsedPreview: upload.parsedPreview,
+        reference: upload.parsedPreview?.reference,
+      },
+      null,
+    )
+
+    return applyInvoiceVendorNoToRow(row, vendorNo)
+  })
+}
+
+/** Ambil detail upload untuk baris draft yang masih belum punya Invoice Vendor No. */
+export const enrichFtpDataListMissingVendorNos = async (
+  rows: FtpDataListRow[],
+): Promise<FtpDataListRow[]> => {
+  const targets = rows.filter(
+    (row) => !resolveFtpDataInvoiceVendorNo(row) && resolveFtpRowUid(row),
+  )
+  if (!targets.length) return rows
+
+  const resolved = new Map<string, string>()
+  await Promise.all(
+    targets.map(async (row) => {
+      const uid = resolveFtpRowUid(row)
+      try {
+        const detail = await fetchFtpUploadDetail(uid)
+        const vendorNo = resolveFtpListInvoiceVendorNo(
+          {
+            invoiceVendorNo: detail.documentNo,
+            documentNo: detail.documentNo,
+            parsedPreview: detail.parsedPreview,
+            reference: detail.parsedPreview?.reference,
+          },
+          row.invoiceListItem || null,
+        )
+        if (vendorNo) resolved.set(uid, vendorNo)
+      } catch {
+        // Detail upload opsional — abaikan baris yang gagal.
+      }
+    }),
+  )
+
+  if (!resolved.size) return rows
+
+  return rows.map((row) => {
+    const vendorNo = resolved.get(resolveFtpRowUid(row))
+    return vendorNo ? applyInvoiceVendorNoToRow(row, vendorNo) : row
+  })
+}
+
+/** Nilai Invoice Vendor No untuk tampilan grid FTP Data. */
+export const resolveFtpDataInvoiceVendorNo = (row: FtpDataListRow): string =>
+  row.documentNo?.trim() || row.invoiceVendorNo?.trim() || row.grDocumentNo?.trim() || ''
+
 export const normalizeFtpDataListItem = (item: Record<string, unknown>): FtpDataListRow => {
   const reffId = resolveFtpDataReffId(item)
   const ftpUploadUId =
@@ -417,6 +600,7 @@ export const normalizeFtpDataListItem = (item: Record<string, unknown>): FtpData
   const documents = Array.isArray(item.documents)
     ? (item.documents as FtpDataDocument[])
     : []
+  const invoiceVendorNo = resolveFtpListInvoiceVendorNo(item, invoiceListItem)
 
   return {
     id: Number(item.id) || 0,
@@ -429,9 +613,7 @@ export const normalizeFtpDataListItem = (item: Record<string, unknown>): FtpData
     invoiceDPName: String(item.invoiceDPName || invoiceListItem?.invoiceDPName || ''),
     companyCode: String(item.companyCode || invoiceListItem?.companyCode || ''),
     companyName: String(item.companyName || invoiceListItem?.companyName || ''),
-    documentNo: String(
-      item.invoiceVendorNo || item.documentNo || invoiceListItem?.documentNo || '',
-    ),
+    documentNo: invoiceVendorNo,
     invoiceNo: String(
       item.submittedDocumentNo ||
         item.submitttedDocumentNo ||
@@ -467,7 +649,7 @@ export const normalizeFtpDataListItem = (item: Record<string, unknown>): FtpData
     source: toOptionalString(item.source),
     documents,
     invoiceListItem,
-    invoiceVendorNo: toOptionalString(item.invoiceVendorNo),
+    invoiceVendorNo: invoiceVendorNo || toOptionalString(item.invoiceVendorNo),
     submittedDocumentNo: toOptionalString(item.submittedDocumentNo || item.submitttedDocumentNo),
     taxNo: toOptionalString(item.taxNo || invoiceListItem?.taxNo),
     dpp: toOptionalNumber(item.dpp),

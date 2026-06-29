@@ -369,7 +369,7 @@
 import { ref, reactive, computed, inject, watch, onMounted, type Ref } from 'vue'
 import { useRoute } from 'vue-router'
 import type { formTypes } from '../../types/invoiceAddWrapper'
-import { dedupePoGrLines, getPoGrLineKey } from '@/core/utils/poGrDedup'
+import { dedupePoGrLines, getPoGrLineKey, isMeaningfulPoGrRow } from '@/core/utils/poGrDedup'
 import { extractGrFromText } from '@/core/utils/grDocumentNo'
 import { KTModal } from '@/metronic/core'
 import { defaultColumn, invoiceDpColumn, poCCColumn, manualAddColumn } from '@/static/invoicePoGr'
@@ -397,6 +397,7 @@ const form = inject<formTypes>('form')
 const poGrAutoFetchTick = inject<Ref<number>>('poGrAutoFetchTick', ref(0))
 const columns = ref<string[]>([])
 const search = ref<string>('')
+const poGrUserModified = ref(false)
 const searchError = ref<boolean>(false)
 const grFetchError = ref<string>('')
 const searchDpAvailableError = ref<boolean>(false)
@@ -676,6 +677,7 @@ const runPoGrAutoFetch = async () => {
   if (!form) return
   if (checkInvoiceDp() || form.invoiceType === '902') return
   if (isAutoFetchingPo.value) return
+  if (poGrUserModified.value) return
   if (hasExistingPoGrData() || hasFetchedPoGrLines()) return
 
   const grNo = resolveGrNoForAutoFetch()
@@ -714,6 +716,7 @@ const deleteItem = (index: number) => {
     if (form.invoicePoGr[index].isEdit) {
       resetItem(form.invoicePoGr[index])
     } else {
+      poGrUserModified.value = true
       form.invoicePoGr.splice(index, 1)
     }
   }

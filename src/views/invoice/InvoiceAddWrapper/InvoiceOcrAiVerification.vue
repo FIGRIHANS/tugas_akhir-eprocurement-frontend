@@ -27,9 +27,6 @@
 
         <div v-if="tabOcrTab === 'general'" class="bg-white shadow rounded-xl p-4">
           <h2 class="font-semibold text-lg mb-3">General Data</h2>
-          <p class="text-xs text-gray-500 mb-3">
-            Data dari Invoice Header (tab Invoice Information)
-          </p>
           <div class="grid grid-cols-2 gap-4 text-sm">
             <div v-for="(row, i) in generalData" :key="i">
               <p class="text-gray-500 text-xs">{{ row.label }}</p>
@@ -342,10 +339,16 @@ import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
 import UiLoading from '@/components/UiLoading.vue'
 import moment from 'moment'
 import { parseIndoDate } from '@/composables/parseIndoDate'
+import {
+  deriveTkuFromNpwp,
+  isTaxFakturSectionLabel,
+  normalizeTaxFakturScanResult,
+} from '@/core/utils/taxFakturVendor'
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 import {
   hasBlobSasToken,
   resolveDocumentPreviewUrl,
+  resolveDocumentUrlForApi,
   warnUnsignedDocumentUrl,
 } from '@/composables/documentPreview'
 import type { responseFileTypes } from '../types/invoiceDocument'
@@ -386,7 +389,33 @@ const manualApprove = reactive<Record<number, boolean>>({})
 const manualReject = reactive<Record<number, boolean>>({})
 
 /* ---------------- helpers ---------------- */
-const isEmpty = (val: any) => val === undefined || val === null || val === '' || val === '-'
+const isEmpty = (val: unknown) =>
+  val === undefined || val === null || val === '' || val === '-'
+
+const toOptionalText = (value: unknown): string | undefined => {
+  if (value === undefined || value === null) return undefined
+  const text = String(value).trim()
+  return text || undefined
+}
+
+const getFormVendorTaxReferences = (): string[] => {
+  const refs = [
+    form?.ocrVendorName,
+    deriveTkuFromNpwp(form?.vendorNPWP),
+    deriveTkuFromNpwp(form?.npwp),
+    form?.vendorName,
+  ]
+
+  return refs
+    .map((item) => String(item || '').trim())
+    .filter((item, index, list) => item && list.indexOf(item) === index)
+}
+
+const matchesFormVendorTaxName = (value?: string): boolean => {
+  const scanned = String(value || '').trim()
+  if (!scanned || isTaxFakturSectionLabel(scanned)) return false
+  return getFormVendorTaxReferences().some((ref) => ref === scanned)
+}
 
 const parseCurrency = (value: string | number): number => {
   if (typeof value === 'number') return value
@@ -555,7 +584,7 @@ const tableData = computed(() => {
             ? false
             : isEmpty(qrData.vendorSupplier)
               ? 'none'
-              : form?.vendorName == qrData.vendorSupplier,
+              : matchesFormVendorTaxName(qrData.vendorSupplier),
       ocr: ocrData.vendorSupplier || '-',
       invoiceVerified:
         editableRemarks.value[0] === '3'
@@ -564,11 +593,12 @@ const tableData = computed(() => {
             ? false
             : isEmpty(ocrData.vendorSupplier)
               ? 'none'
-              : form?.vendorName == ocrData.vendorSupplier,
+              : matchesFormVendorTaxName(ocrData.vendorSupplier),
       remarks:
         isEmpty(qrData.vendorSupplier) || isEmpty(ocrData.vendorSupplier)
           ? 'none'
-          : form?.vendorName == qrData.vendorSupplier && form?.vendorName == ocrData.vendorSupplier,
+          : qrData.vendorSupplier === ocrData.vendorSupplier &&
+            matchesFormVendorTaxName(qrData.vendorSupplier),
     },
     {
       header: 'NPWP Vendor',
@@ -934,19 +964,96 @@ watch(
 )
 
 /* ---------------- upload ---------------- */
+const hydrateVerificationDataFromForm = () => {
+  if (!form) return
+
+  const assignIfEmpty = <K extends keyof invoiceQrData>(
+    target: invoiceQrData | invoiceOcrData,
+    key: K,
+    value?: string | null,
+  ) => {
+    if (!value?.trim()) return
+    if (!target[key]) target[key] = value
+  }
+
+  assignIfEmpty(qrData, 'taxDocumentNumber', form.taxNoInvoice || form.taxInvoiceNumber)
+  assignIfEmpty(ocrData, 'taxDocumentNumber', form.taxInvoiceNumber || form.taxNoInvoice)
+  assignIfEmpty(qrData, 'taxDocumentDate', toOptionalText(form.taxDate) || toOptionalText(form.taxInvoiceDate))
+  assignIfEmpty(
+    ocrData,
+    'taxDocumentDate',
+    toOptionalText(form.taxInvoiceDate) || toOptionalText(form.taxDate),
+  )
+  assignIfEmpty(qrData, 'vendorSupplier', form.ocrVendorName)
+  assignIfEmpty(ocrData, 'vendorSupplier', form.ocrVendorName)
+  assignIfEmpty(qrData, 'npwpSupplier', form.vendorNPWP || form.npwp)
+  assignIfEmpty(ocrData, 'npwpSupplier', form.vendorNPWP || form.npwp)
+  assignIfEmpty(qrData, 'vendorBuyer', form.ocrCompanyName || form.companyName)
+  assignIfEmpty(ocrData, 'vendorBuyer', form.ocrCompanyName || form.companyName)
+  assignIfEmpty(qrData, 'npwpBuyer', form.npwpCompany)
+  assignIfEmpty(ocrData, 'npwpBuyer', form.npwpCompany)
+  assignIfEmpty(ocrData, 'dpp', form.salesAmount != null ? String(form.salesAmount) : '')
+  assignIfEmpty(ocrData, 'ppn', form.ocrVatAmount != null ? String(form.ocrVatAmount) : '')
+  assignIfEmpty(ocrData, 'ppnbm', form.ocrVatbmAmount != null ? String(form.ocrVatbmAmount) : '')
+  assignIfEmpty(ocrData, 'status', form.taxInvoiceStatus)
+}
+
 const sendUploadFile = async () => {
-  Object.assign(ocrData, await invoiceVerificationStore.uploadFileOcr(form?.tax?.previewPath))
-  Object.assign(qrData, await invoiceVerificationStore.uploadFileQr(form?.tax?.previewPath))
+  hydrateVerificationDataFromForm()
+
+  if (!resolveDocumentUrlForApi(form?.tax)) {
+    console.warn('Tax document URL is missing — using saved form data only')
+    return
+  }
+
+  try {
+    Object.assign(
+      qrData,
+      normalizeTaxFakturScanResult(
+        (await invoiceVerificationStore.uploadFileQr(form!.tax!)) as invoiceQrData &
+          Record<string, unknown>,
+      ),
+    )
+  } catch (error) {
+    console.error('Tax document QR scan failed:', error)
+  }
+
+  try {
+    Object.assign(
+      ocrData,
+      normalizeTaxFakturScanResult(
+        (await invoiceVerificationStore.uploadFileOcr(form!.tax!)) as invoiceOcrData &
+          Record<string, unknown>,
+      ),
+    )
+  } catch (error) {
+    console.error('Tax document OCR failed:', error)
+
+    if (!form?.invoiceDocument || !resolveDocumentUrlForApi(form.invoiceDocument)) return
+
+    try {
+      Object.assign(
+        ocrData,
+        normalizeTaxFakturScanResult(
+          (await invoiceVerificationStore.uploadFileOcr(form.invoiceDocument)) as invoiceOcrData &
+            Record<string, unknown>,
+        ),
+      )
+    } catch (fallbackError) {
+      console.error('Invoice document OCR fallback failed:', fallbackError)
+    }
+  }
 }
 
 const verifyInvoice = async () => {
   isLoadUpload.value = true
-  await sendUploadFile()
-
-  await setOcrPayload()
-
-  isLoadUpload.value = false
-  isVerifyData.value = true
+  try {
+    await sendUploadFile()
+    await setOcrPayload()
+    isVerifyData.value = true
+  } finally {
+    isLoadUpload.value = false
+  }
 }
 
 const verifyByPjap = async () => {
@@ -1028,6 +1135,8 @@ const verifyByPjap = async () => {
 }
 
 const setOcrPayload = async () => {
+  if (!form) return
+
   // Map OCR payload into flattened form fields
   form.ocrVendorName = ocrData.vendorSupplier
   form.vendorNPWP = ocrData.npwpSupplier
@@ -1056,21 +1165,7 @@ onMounted(() => {
   setColumn()
   typeForm.value = route.query.type?.toString().toLowerCase() || 'po'
   void updatePreviewUrl()
-
-  // If form has data (Edit Mode), populate ocrData so verifyByPjap works
-  if (form?.taxInvoiceNumber) {
-    ocrData.vendorSupplier = form.ocrVendorName || ''
-    ocrData.npwpSupplier = form.vendorNPWP || ''
-    ocrData.vendorBuyer = form.ocrCompanyName || ''
-    ocrData.npwpBuyer = form.npwpCompany || ''
-    ocrData.taxDocumentNumber = form.taxInvoiceNumber || ''
-    // taxInvoiceDate usually YYYY-MM-DD from DB, verifyByPjap handles it via fallback
-    ocrData.taxDocumentDate = form.taxInvoiceDate ? String(form.taxInvoiceDate) : ''
-    ocrData.dpp = form.salesAmount?.toString() || ''
-    ocrData.ppn = form.ocrVatAmount?.toString() || ''
-    ocrData.ppnbm = form.ocrVatbmAmount?.toString() || ''
-    ocrData.status = form.taxInvoiceStatus || ''
-  }
+  hydrateVerificationDataFromForm()
 })
 </script>
 

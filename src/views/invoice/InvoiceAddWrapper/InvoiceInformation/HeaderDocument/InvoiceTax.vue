@@ -83,7 +83,7 @@ import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification
 import AttachmentView from '@/components/ui/attachment/AttachmentView.vue'
 import UiLoading from '@/components/modal/UiLoading.vue'
 import { parseIndoDate } from '@/composables/parseIndoDate'
-import { openPdfPreview } from '@/composables/documentPreview'
+import { openPdfPreview, resolveDocumentUrlForApi } from '@/composables/documentPreview'
 
 type FileFieldKeys = 'invoiceDocument' | 'tax' | 'referenceDocument' | 'otherDocument'
 
@@ -148,11 +148,11 @@ const openDocumentPreview = (file: responseFileTypes | null, label: string) => {
 }
 
 const sendUploadFile = async () => {
-  if (!formInject || !form?.tax?.previewPath) return
+  if (!formInject || !resolveDocumentUrlForApi(form?.tax)) return
 
   isLoading.value = true
   try {
-    const response = await invoiceVerificationStore.uploadFileQr(form.tax.previewPath)
+    const response = await invoiceVerificationStore.uploadFileQr(form.tax!)
     formInject.taxNoInvoice = response.taxDocumentNumber
     formInject.taxDate = parseIndoDate(response.taxDocumentDate)
   } finally {

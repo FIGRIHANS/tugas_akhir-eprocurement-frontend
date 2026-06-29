@@ -242,9 +242,9 @@
                         {{ getFtpDataStatusLabel(parent) }}
                       </span>
                     </td>
-                    <td>{{ parent.invoiceNo || '-' }}</td>
+                    <td>{{ displaySubmittedDocumentNo(parent) }}</td>
                     <td>{{ parent.vendorName || '-' }}</td>
-                    <td>{{ parent.documentNo || '-' }}</td>
+                    <td>{{ displayInvoiceVendorNo(parent) }}</td>
                     <td>{{ parent.companyCode || '-' }}</td>
                     <td>{{ parent.invoiceTypeName || '-' }}</td>
                     <td>{{ formatFtpListDate(parent.invoiceDate) }}</td>
@@ -339,9 +339,14 @@ import {
 import {
   buildFtpSyncContextFromDataRow,
   buildSyncContextFromDetail,
+  enrichFtpDataListMissingVendorNos,
+  enrichFtpDataListWithUploads,
   fetchFtpDataList,
   fetchFtpUploadList,
   getFtpDataStatusLabel,
+  isFtpDraftDataRow,
+  shouldHideSubmittedDocumentNo,
+  resolveFtpDataInvoiceVendorNo,
   getFtpUploadTabStatusBadgeClass,
   resolveFtpUploadTabStatus,
   resolveFtpRowUid,
@@ -676,6 +681,15 @@ const formatFtpListDate = (value?: string | null) => {
 const formatFtpDataAmountDisplay = (value?: number | null) => {
   if (value == null || value === 0) return '-'
   return useFormatIdr(value)
+}
+
+const displaySubmittedDocumentNo = (row: FtpDataListRow) => {
+  if (shouldHideSubmittedDocumentNo(row)) return '-'
+  return row.invoiceNo?.trim() || '-'
+}
+
+const displayInvoiceVendorNo = (row: FtpDataListRow) => {
+  return resolveFtpDataInvoiceVendorNo(row) || '-'
 }
 
 const colorBadgeForFtpRow = (row: FtpDataListRow) => {
@@ -1054,15 +1068,27 @@ const callList = async (options?: { silent?: boolean }) => {
       return
     }
 
-    const response = await fetchFtpDataList({
-      statusCode: getListStatusCode(),
-      companyCode: filterForm.companyCode,
-      invoiceTypeCode: Number(filterForm.invoiceType) || undefined,
-      invoiceDate: filterForm.date,
-      page: 1,
-      pageSize: 1000,
-    })
-    sourceList.value = response.items
+    const [response, uploads] = await Promise.all([
+      fetchFtpDataList({
+        statusCode: getListStatusCode(),
+        companyCode: filterForm.companyCode,
+        invoiceTypeCode: Number(filterForm.invoiceType) || undefined,
+        invoiceDate: filterForm.date,
+        page: 1,
+        pageSize: 1000,
+      }),
+      fetchFtpUploadList().catch(() => [] as FtpUploadListItem[]),
+    ])
+
+    uploadList.value = sortFtpUploadsByNewest(
+      uploads.map((item) =>
+        normalizeFtpUploadListItem(item, getCachedOriginalNames(item.invoiceUId)),
+      ),
+    )
+
+    let items = enrichFtpDataListWithUploads(response.items, uploads)
+    items = await enrichFtpDataListMissingVendorNos(items)
+    sourceList.value = items
     ftpDataTotal.value = response.total
     updateUploadDummyStatuses()
   } catch (error) {

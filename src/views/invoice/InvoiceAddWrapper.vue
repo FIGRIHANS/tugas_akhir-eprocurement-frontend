@@ -247,7 +247,7 @@ import {
   resolveInvoiceAddRouteType,
   resolveInvoiceRejectReason,
 } from '@/core/utils/invoiceSubmissionRoute'
-import { dedupePoGrLines } from '@/core/utils/poGrDedup'
+import { dedupePoGrLines, isMeaningfulPoGrRow } from '@/core/utils/poGrDedup'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import { useWorkflowConfigurationStore } from '@/stores/workflow-configurantion/wokrflowConfiguration'
@@ -1175,7 +1175,8 @@ const mapDocument = () => {
 
 const mapPoGr = () => {
   const poGr = []
-  for (const item of form.invoicePoGr) {
+  const rows = (form.invoicePoGr || []).filter((item) => isMeaningfulPoGrRow(item))
+  for (const item of rows) {
     poGr.push({
       id: item.id || 0,
       poNo: item.poNo.toString(),
@@ -1993,6 +1994,52 @@ const setAfterResponsePost = async (response: unknown) => {
   void markFtpUploadDoneIfNeeded(response as { result?: { content?: unknown } })
 }
 
+/** Map API document row — documentSize boleh null dari backend. */
+const mapDetailDocument = (doc: {
+  id?: number | null
+  documentName?: string | null
+  documentUrl?: string | null
+  documentSize?: number | null
+}) => ({
+  id: Number(doc.id) || 0,
+  name: String(doc.documentName ?? ''),
+  fileSize: doc.documentSize != null ? String(doc.documentSize) : '0',
+  path: String(doc.documentUrl ?? ''),
+  previewPath: String(doc.documentUrl ?? ''),
+})
+
+const applyDetailDocumentsToForm = (
+  documents: Array<{
+    documentType?: number | null
+    id?: number | null
+    documentName?: string | null
+    documentUrl?: string | null
+    documentSize?: number | null
+  }> | null | undefined,
+) => {
+  if (!form || !documents?.length) return
+
+  for (const doc of documents) {
+    if (!doc?.documentUrl) continue
+
+    const mapped = mapDetailDocument(doc)
+    switch (doc.documentType) {
+      case 1:
+        form.invoiceDocument = mapped
+        break
+      case 2:
+        form.tax = mapped
+        break
+      case 3:
+        form.referenceDocument = mapped
+        break
+      case 4:
+        form.otherDocument = mapped
+        break
+    }
+  }
+}
+
 const setData = () => {
   const detail = detailPo.value
 
@@ -2002,18 +2049,18 @@ const setData = () => {
     form.invoiceUId = detail.header.invoiceUId
     form.invoiceType = detail.header.invoiceTypeCode ? detail.header.invoiceTypeCode.toString() : ''
     form.invoiceSource = detail.header.invoiceSourceName
-    const rawVendorId = detail.vendor.vendorId ? detail.vendor.vendorId.toString() : ''
+    const rawVendorId = detail.vendor?.vendorId != null ? String(detail.vendor.vendorId) : ''
     const vendorMatch = findVendorFromList(invoiceMasterApi.vendorList, rawVendorId)
     form.vendorId = vendorMatch?.sapCode || rawVendorId
-    form.vendorName = detail.vendor.vendorName ? detail.vendor.vendorName.toString() : form.vendorName
-    form.npwp = detail.vendor.npwp
-    form.address = detail.vendor.vendorAddress
-    form.paymentId = detail.payment.paymentId
-    form.bankKeyId = detail.payment.bankKey
-    form.bankNameId = detail.payment.bankName
-    form.beneficiaryName = detail.payment.beneficiaryName
-    form.bankAccountNumber = detail.payment.bankAccountNo
-    form.bankCountryCode = detail.payment.bankCountryCode
+    form.vendorName = detail.vendor?.vendorName ? String(detail.vendor.vendorName) : form.vendorName
+    form.npwp = detail.vendor?.npwp ?? form.npwp
+    form.address = detail.vendor?.vendorAddress ?? form.address
+    form.paymentId = detail.payment?.paymentId ?? 0
+    form.bankKeyId = detail.payment?.bankKey ?? ''
+    form.bankNameId = detail.payment?.bankName ?? ''
+    form.beneficiaryName = detail.payment?.beneficiaryName ?? ''
+    form.bankAccountNumber = detail.payment?.bankAccountNo ?? ''
+    form.bankCountryCode = detail.payment?.bankCountryCode ?? ''
     form.invoiceDp = detail.header.invoiceDPCode ? detail.header.invoiceDPCode.toString() : ''
     form.companyCode = detail.header.companyCode
     form.companyName = detail.header.companyName || form.companyName || ''
@@ -2029,14 +2076,14 @@ const setData = () => {
       form.remainingDpAmount = 0
     }
     form.description = detail.header.notes
-    form.subtotal = detail.calculation.subtotal
-    form.vatAmount = detail.calculation.vatAmount
-    form.additionalCostCalc = detail.calculation.additionalCost
-    form.whtAmount = detail.calculation.whtAmount
-    form.totalGrossAmount = detail.calculation.totalGrossAmount
-    form.totalNetAmount = detail.calculation.totalNetAmount
+    form.subtotal = detail.calculation?.subtotal ?? 0
+    form.vatAmount = detail.calculation?.vatAmount ?? 0
+    form.additionalCostCalc = detail.calculation?.additionalCost ?? 0
+    form.whtAmount = detail.calculation?.whtAmount ?? 0
+    form.totalGrossAmount = detail.calculation?.totalGrossAmount ?? 0
+    form.totalNetAmount = detail.calculation?.totalNetAmount ?? 0
     form.invoicePoGr = dedupePoGrLines(
-      detail.pogr.map((item) => ({
+      (detail.pogr ?? []).map((item) => ({
         id: item.id,
         poNo: item.poNo,
         poItem: item.poItem,
@@ -2068,7 +2115,7 @@ const setData = () => {
       })) as itemsPoGrType[],
     )
     form.additionalCost = []
-    for (const item of detail.additionalCosts) {
+    for (const item of detail.additionalCosts ?? []) {
       const data = {
         id: item.id,
         activity: item.activityId,
@@ -2090,46 +2137,7 @@ const setData = () => {
       form.additionalCost.push(data)
     }
 
-    for (const doc of detail.documents) {
-      switch (doc.documentType) {
-        case 1:
-          form.invoiceDocument = {
-            id: doc.id,
-            name: doc.documentName,
-            fileSize: doc.documentSize.toString(),
-            path: doc.documentUrl,
-            previewPath: doc.documentUrl,
-          }
-          break
-        case 2:
-          form.tax = {
-            id: doc.id,
-            name: doc.documentName,
-            fileSize: doc.documentSize.toString(),
-            path: doc.documentUrl,
-            previewPath: doc.documentUrl,
-          }
-          break
-        case 3:
-          form.referenceDocument = {
-            id: doc.id,
-            name: doc.documentName,
-            fileSize: doc.documentSize.toString(),
-            path: doc.documentUrl,
-            previewPath: doc.documentUrl,
-          }
-          break
-        case 4:
-          form.otherDocument = {
-            id: doc.id,
-            name: doc.documentName,
-            fileSize: doc.documentSize.toString(),
-            path: doc.documentUrl,
-            previewPath: doc.documentUrl,
-          }
-          break
-      }
-    }
+    applyDetailDocumentsToForm(detail.documents)
 
     if (detail.ocr) {
       const ocr = detail.ocr
@@ -2266,49 +2274,7 @@ const setDataNonPo = () => {
       }
     }
 
-    // Safely map Documents
-    if (detail.documents) {
-      for (const doc of detail.documents) {
-        switch (doc.documentType) {
-          case 1:
-            form.invoiceDocument = {
-              id: doc.id,
-              name: doc.documentName,
-              fileSize: doc.documentSize.toString(),
-              path: doc.documentUrl,
-              previewPath: doc.documentUrl,
-            }
-            break
-          case 2:
-            form.tax = {
-              id: doc.id,
-              name: doc.documentName,
-              fileSize: doc.documentSize.toString(),
-              path: doc.documentUrl,
-              previewPath: doc.documentUrl,
-            }
-            break
-          case 3:
-            form.referenceDocument = {
-              id: doc.id,
-              name: doc.documentName,
-              fileSize: doc.documentSize.toString(),
-              path: doc.documentUrl,
-              previewPath: doc.documentUrl,
-            }
-            break
-          case 4:
-          form.otherDocument = {
-            id: doc.id,
-            name: doc.documentName,
-            fileSize: doc.documentSize.toString(),
-            path: doc.documentUrl,
-            previewPath: doc.documentUrl,
-          }
-            break
-        }
-      }
-    }
+    applyDetailDocumentsToForm(detail.documents)
   }
 }
 

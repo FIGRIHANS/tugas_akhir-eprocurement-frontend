@@ -1,3 +1,4 @@
+import { resolveDocumentUrlForApi } from '@/composables/documentPreview'
 import { parseIndoDate } from '@/composables/parseIndoDate'
 import { extractGrFromText, extractGrFromUnknown } from '@/core/utils/grDocumentNo'
 import type { formTypes } from '@/views/invoice/types/invoiceAddWrapper'
@@ -35,10 +36,9 @@ export const applyOcrFromUploadedDocuments = async (
 
   let extractedGr: string | null = null
 
-  const invoicePath = form.invoiceDocument?.previewPath || form.invoiceDocument?.path
-  if (invoicePath && !form.invoiceVendorNo?.trim()) {
+  if (form.invoiceDocument && resolveDocumentUrlForApi(form.invoiceDocument) && !form.invoiceVendorNo?.trim()) {
     try {
-      const ocr = (await verificationApi.uploadFileOcr(invoicePath)) as Record<string, unknown>
+      const ocr = (await verificationApi.uploadFileOcr(form.invoiceDocument)) as Record<string, unknown>
       const vendorNo = readOcrInvoiceVendorNo(ocr)
       if (vendorNo) form.invoiceVendorNo = vendorNo
       if (!form.invoiceDate && ocr.taxDocumentDate) {
@@ -50,10 +50,9 @@ export const applyOcrFromUploadedDocuments = async (
     }
   }
 
-  const taxPath = form.tax?.previewPath || form.tax?.path
-  if (taxPath && !form.taxNoInvoice?.trim()) {
+  if (form.tax && resolveDocumentUrlForApi(form.tax) && !form.taxNoInvoice?.trim()) {
     try {
-      const qr = await verificationApi.uploadFileQr(taxPath)
+      const qr = await verificationApi.uploadFileQr(form.tax)
       if (qr?.taxDocumentNumber) form.taxNoInvoice = qr.taxDocumentNumber
       if (!form.taxDate && qr?.taxDocumentDate) {
         form.taxDate = parseIndoDate(qr.taxDocumentDate)
@@ -63,10 +62,9 @@ export const applyOcrFromUploadedDocuments = async (
     }
   }
 
-  const referencePath = form.referenceDocument?.previewPath || form.referenceDocument?.path
-  if (referencePath) {
+  if (form.referenceDocument && resolveDocumentUrlForApi(form.referenceDocument)) {
     try {
-      const ocr = (await verificationApi.uploadFileOcr(referencePath)) as Record<string, unknown>
+      const ocr = (await verificationApi.uploadFileOcr(form.referenceDocument)) as Record<string, unknown>
       const grFromReference = extractGrFromUnknown(ocr)
       if (grFromReference) {
         extractedGr = grFromReference

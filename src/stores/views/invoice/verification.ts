@@ -1,7 +1,10 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
+import { isAxiosError } from 'axios'
 import invoiceApi from '@/core/utils/invoiceApi'
 import moment from 'moment'
+import { getOcrApiUrlCandidatesAsync } from '@/composables/documentPreview'
+import { normalizeTaxFakturScanResult } from '@/core/utils/taxFakturVendor'
 
 import type { ApiResponse } from '@/core/type/api'
 import type {
@@ -27,6 +30,33 @@ import type { invoiceQrData } from '@/views/invoice/types/invoiceQrdata'
 
 const PAYMENT_STATUS_ENDPOINT = '/invoice/payment-status'
 const PAYMENT_STATUS_NON_PO_ENDPOINT = '/invoice/payment-status-non-po'
+
+type OcrDocumentRef = string | { path?: string; previewPath?: string }
+
+const toDocumentRef = (data: OcrDocumentRef): { path?: string; previewPath?: string } =>
+  typeof data === 'string' ? { path: data, previewPath: data } : data
+
+const postWithDocumentCandidates = async <T>(endpoint: string, data: OcrDocumentRef): Promise<T> => {
+  const candidates = await getOcrApiUrlCandidatesAsync(toDocumentRef(data))
+  if (!candidates.length) {
+    throw new Error('Document URL is required for OCR')
+  }
+
+  let lastError: unknown
+  for (const documentUrl of candidates) {
+    try {
+      const response: ApiResponse<T> = await invoiceApi.post(endpoint, { documentUrl })
+      return normalizeTaxFakturScanResult(
+        response.data.result.content as T & Record<string, unknown>,
+      ) as T
+    } catch (error) {
+      lastError = error
+      if (!isAxiosError(error) || error.response?.status !== 400) throw error
+    }
+  }
+
+  throw lastError
+}
 
 const parsePaginatedContent = <T>(rawContent: unknown): T[] => {
   if (!rawContent) return []
@@ -384,35 +414,11 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     return response.data
   }
 
-  const uploadFileQr = async (data: string) => {
-    const payload = {
-      documentUrl: data,
-    }
+  const uploadFileQr = async (data: OcrDocumentRef) =>
+    postWithDocumentCandidates<invoiceQrData>('/ocr/invoice/scan-qr-from-blob', data)
 
-    const response: ApiResponse<invoiceQrData> = await invoiceApi.post(
-      '/ocr/invoice/scan-qr-from-blob',
-      payload,
-    )
-
-    // errorMessageUpload.value = response.data.result.message
-
-    return response.data.result.content
-  }
-
-  const uploadFileOcr = async (data: string) => {
-    const payload = {
-      documentUrl: data,
-    }
-
-    const response: ApiResponse<invoiceOcrData> = await invoiceApi.post(
-      '/ocr/read-text-from-blob',
-      payload,
-    )
-
-    // errorMessageUpload.value = response.data.result.message
-
-    return response.data.result.content
-  }
+  const uploadFileOcr = async (data: OcrDocumentRef) =>
+    postWithDocumentCandidates<invoiceOcrData>('/ocr/read-text-from-blob', data)
 
   const getSapStatus = async (params: SapStatusParams) => {
     const response: ApiResponse<SapStatusResponse> = await invoiceApi.get(`/invoice/status-sap`, {

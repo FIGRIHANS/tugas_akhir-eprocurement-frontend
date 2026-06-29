@@ -1,8 +1,32 @@
 export type PoGrLineKeySource = {
+  id?: string | number | null
   poNo?: string | number | null
   poItem?: string | number | null
   grDocumentNo?: string | null
   grDocumentItem?: string | number | null
+  taxCode?: string | null
+  conditionType?: string | null
+  whtType?: string | null
+  whtCode?: string | null
+  department?: string | null
+  itemAmountLC?: string | number | null
+  itemAmount?: string | number | null
+}
+
+export function isMeaningfulPoGrRow(row: PoGrLineKeySource | null | undefined): boolean {
+  if (!row) return false
+  if (Number(row.id) > 0) return true
+
+  return !!(
+    String(row.poNo ?? '').trim() ||
+    row.taxCode ||
+    row.conditionType ||
+    row.whtType ||
+    row.whtCode ||
+    row.department ||
+    Number(row.itemAmountLC) > 0 ||
+    Number(row.itemAmount) > 0
+  )
 }
 
 export function getPoGrLineKey(row: PoGrLineKeySource): string {

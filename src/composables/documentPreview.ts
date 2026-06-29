@@ -96,6 +96,62 @@ export const resolveDocumentPreviewUrl = async (
   }
 }
 
+/** Kandidat URL untuk OCR/QR API — urutan sama seperti flow lama (previewPath dulu). */
+export const getOcrApiUrlCandidates = (
+  doc: { path?: string; previewPath?: string } | null | undefined,
+): string[] => {
+  const previewPath = (doc?.previewPath || '').trim()
+  const path = (doc?.path || '').trim()
+  const out: string[] = []
+
+  const push = (value?: string) => {
+    const normalized = value?.trim()
+    if (!normalized || normalized.startsWith('blob:') || out.includes(normalized)) return
+    out.push(normalized)
+  }
+
+  push(previewPath)
+  push(path)
+  if (previewPath && isAzureBlobUrl(previewPath)) push(stripBlobSasQuery(previewPath))
+  if (path && isAzureBlobUrl(path)) push(stripBlobSasQuery(path))
+
+  return out
+}
+
+export const getOcrApiUrlCandidatesAsync = async (
+  doc: { path?: string; previewPath?: string } | null | undefined,
+): Promise<string[]> => {
+  const candidates = getOcrApiUrlCandidates(doc)
+  const blob = [doc?.previewPath, doc?.path].find((value) => {
+    const url = value?.trim()
+    return url && isAzureBlobUrl(url)
+  })
+
+  if (blob && !candidates.some((url) => hasBlobSasToken(url))) {
+    try {
+      const signed = await fetchSignedBlobPreviewUrl(stripBlobSasQuery(blob.trim()))
+      if (signed && !candidates.includes(signed)) candidates.push(signed)
+    } catch {
+      // OCR API akan coba kandidat lain.
+    }
+  }
+
+  return candidates
+}
+
+/** URL pertama untuk pengecekan cepat (tanpa network). */
+export const resolveDocumentUrlForApi = (
+  doc: { path?: string; previewPath?: string } | null | undefined,
+): string => getOcrApiUrlCandidates(doc)[0] || ''
+
+/** @deprecated gunakan getOcrApiUrlCandidatesAsync — tetap ada untuk kompatibilitas. */
+export const resolveDocumentUrlForApiAsync = async (
+  doc: { path?: string; previewPath?: string } | null | undefined,
+): Promise<string> => {
+  const candidates = await getOcrApiUrlCandidatesAsync(doc)
+  return candidates[0] || ''
+}
+
 export const openPdfPreview = async (source: string | null | undefined, label = 'Document') => {
   const path = (source || '').trim()
   if (!path) return
