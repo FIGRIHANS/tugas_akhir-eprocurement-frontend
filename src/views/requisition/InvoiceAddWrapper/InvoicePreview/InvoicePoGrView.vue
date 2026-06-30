@@ -25,8 +25,7 @@
             <td v-if="!checkInvoiceDp()">{{ item.uom || '-' }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.itemText || '-' }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.conditionType || '-' }}</td>
-            <td v-if="!checkPoPib()">{{ item.conditionTypeDesc || '-' }}</td>
-            <td v-if="!checkPoPib()">{{ item.qcStatus || '-' }}</td>
+            <td v-if="!checkInvoiceDp() && !checkPoPib() && form?.invoiceType !== '903'">{{ item.qcStatus || '-' }}</td>
             <td v-if="!checkPoPib()">{{ item.taxCode || '-' }}</td>
             <td v-if="!checkPoPib()">{{ form.currency === 'IDR' ? useFormatIdr(item.vatAmount || 0) : useFormatUsd(item.vatAmount || 0) }}</td>
             <td v-if="!checkPoPib()">{{ item.whtType || '-' }}</td>

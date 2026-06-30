@@ -10,33 +10,40 @@
             data invoice lalu mengajukan kembali untuk proses verifikasi.
           </p>
         </div>
-        <button class="btn btn-primary w-full justify-center" @click="closeModal">OK</button>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
+import { onMounted } from 'vue'
 import { KTModal } from '@/metronic/core'
 import ModalSuccessLogo from '@/assets/svg/ModalSuccessLogo.vue'
 
 const emits = defineEmits(['afterClose'])
 
-const closeModal = () => {
-  const el = document.querySelector('#success_reject_modal') as HTMLElement
-  if (!el) return
-  const modal = KTModal.getInstance(el)
-  modal?.hide()
-  emits('afterClose')
-}
+let shouldEmitAfterClose = false
 
 const show = () => {
   const el = document.querySelector('#success_reject_modal') as HTMLElement
   if (!el) return
   let modal = KTModal.getInstance(el)
   if (!modal) modal = new KTModal(el)
+  shouldEmitAfterClose = true
   modal.show()
 }
+
+onMounted(() => {
+  const el = document.querySelector('#success_reject_modal') as HTMLElement
+  if (!el) return
+
+  const modal = KTModal.getInstance(el) ?? new KTModal(el)
+  modal.on('hide', () => {
+    if (!shouldEmitAfterClose) return
+    shouldEmitAfterClose = false
+    emits('afterClose')
+  })
+})
 
 defineExpose({ show })
 </script>

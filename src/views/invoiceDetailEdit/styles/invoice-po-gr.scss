@@ -1,9 +1,15 @@
 :deep() {
   .pogr {
-    &__table {
-      padding-bottom: 4px;
+  &__table {
+    padding-bottom: 4px;
 
-      &::-webkit-scrollbar {
+    table {
+      table-layout: fixed;
+      width: max-content;
+      min-width: 100%;
+    }
+
+    &::-webkit-scrollbar {
         width: 10px;
         height: 10px;
         background: transparent;
@@ -65,12 +71,22 @@
       td {
         @apply px-[16px] !important;
         @apply py-[7px] !important;
+        vertical-align: middle;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
+    }
+
+    &__action-cell {
+      width: 100px;
+      min-width: 100px;
+      max-width: 100px;
     }
   }
 
   .customSelect--department {
-    min-width: 220px;
+    min-width: 100%;
+    width: 100%;
   }
 }
 

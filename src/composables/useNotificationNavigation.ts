@@ -167,7 +167,10 @@ export const resolveNotificationRoute = (
       invoice: entityId,
     }
 
-    if (profileId === SUBMITTOR_PROFILE_ID) {
+    if (
+      profileId === SUBMITTOR_PROFILE_ID ||
+      profileId === INTERNAL_SUBMITTER_PROFILE_ID
+    ) {
       query.from = 'ftp'
     }
 

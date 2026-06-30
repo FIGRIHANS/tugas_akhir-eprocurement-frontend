@@ -160,6 +160,9 @@ import {
   shouldUsePutApproval,
   shouldUsePostApproval,
   isApiSuccess,
+  FINANCE_AP_OFFICER_PROFILE_ID,
+  FINANCE_AP_SUPERVISOR_PROFILE_ID,
+  ACCOUNTING_TAX_PROFILE_ID,
 } from '@/composables/useInvoiceWorkflow'
 import SuccessRejectModal from './InvoiceDetail/SuccessRejectModal.vue'
 import UpdatePaymentStatusModal from './InvoiceDetail/PaymentStatusDetail/UpdatePaymentStatusModal.vue'
@@ -1242,16 +1245,28 @@ const goReject = async (reason: string) => {
   }
 }
 
-const goToList = () => {
-  if (route.query.invoiceType === 'no_po' || currentRouteName.value !== 'invoiceDetail') {
-    router.push({
-      name: route.query.type === '1' ? 'invoiceVerificationNoPo' : 'invoiceApprovalNonPo',
-    })
-  } else {
-    router.push({
-      name: route.query.type === '1' ? 'invoiceVerification' : 'invoiceApproval',
-    })
+const resolvePostActionListRoute = (): string => {
+  const profileId = Number(userData.value?.profile?.profileId)
+  const isNonPo =
+    route.query.invoiceType === 'no_po' || currentRouteName.value !== 'invoiceDetail'
+
+  if (profileId === FINANCE_AP_OFFICER_PROFILE_ID) {
+    return isNonPo ? 'invoiceVerificationNoPo' : 'invoiceVerification'
   }
+
+  if (profileId === ACCOUNTING_TAX_PROFILE_ID || profileId === FINANCE_AP_SUPERVISOR_PROFILE_ID) {
+    return isNonPo ? 'invoiceApprovalNonPo' : 'invoiceApproval'
+  }
+
+  if (route.query.type === '1') {
+    return isNonPo ? 'invoiceVerificationNoPo' : 'invoiceVerification'
+  }
+
+  return isNonPo ? 'invoiceApprovalNonPo' : 'invoiceApproval'
+}
+
+const goToList = () => {
+  router.push({ name: resolvePostActionListRoute() })
 }
 
 const goBack = () => {

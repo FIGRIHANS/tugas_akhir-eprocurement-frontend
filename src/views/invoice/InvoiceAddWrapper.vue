@@ -188,7 +188,6 @@
               <p class="text-lg font-medium">{{ submitSuccessTitle }}</p>
               <p class="text-[13px] font-normal text-gray-600">{{ submitSuccessMessage }}</p>
             </div>
-            <button type="button" class="btn btn-primary" @click="handleSubmitSuccessConfirm">OK</button>
           </div>
         </UiModal>
 
@@ -328,6 +327,23 @@ const poGrAutoFetchTick = ref(0)
 let poGrAutofillChain = Promise.resolve()
 
 const INVOICE_SUBMIT_SUCCESS_KEY = 'invoice_submit_success'
+const FTP_INVOICE_SOURCE_CODE = 3
+
+type SubmitSuccessSession = {
+  kind?: string
+  returnToFtp?: boolean
+}
+
+const parseSubmitSuccessSession = (): SubmitSuccessSession | null => {
+  const pending = sessionStorage.getItem(INVOICE_SUBMIT_SUCCESS_KEY)
+  if (!pending) return null
+
+  try {
+    return JSON.parse(pending) as SubmitSuccessSession
+  } catch {
+    return { kind: pending }
+  }
+}
 
 const submitSuccessTitle = computed(() => {
   if (isClickDraft.value) return 'Invoice Successfully Drafted'
@@ -352,36 +368,25 @@ const showSubmitSuccessModal = async () => {
     INVOICE_SUBMIT_SUCCESS_KEY,
     JSON.stringify({
       kind: isClickDraft.value ? 'draft' : wasRejectedResubmit.value ? 'resubmit' : 'submit',
-    }),
+      returnToFtp: isFtpInvoiceFlow(),
+    } satisfies SubmitSuccessSession),
   )
   showSuccessModal.value = true
   await nextTick()
 }
 
 const restoreSubmitSuccessModalIfNeeded = () => {
-  const pending = sessionStorage.getItem(INVOICE_SUBMIT_SUCCESS_KEY)
-  if (!pending) return
+  const parsed = parseSubmitSuccessSession()
+  if (!parsed) return
 
-  try {
-    const parsed = JSON.parse(pending) as { kind?: string }
-    isClickDraft.value = parsed.kind === 'draft'
-    wasRejectedResubmit.value = parsed.kind === 'resubmit'
-  } catch {
-    isClickDraft.value = pending === 'draft'
-    wasRejectedResubmit.value = false
-  }
-
+  isClickDraft.value = parsed.kind === 'draft'
+  wasRejectedResubmit.value = parsed.kind === 'resubmit'
   showSuccessModal.value = true
 }
 
 const clearSubmitSuccessModal = () => {
   sessionStorage.removeItem(INVOICE_SUBMIT_SUCCESS_KEY)
   showSuccessModal.value = false
-}
-
-const handleSubmitSuccessConfirm = () => {
-  clearSubmitSuccessModal()
-  goToList()
 }
 
 const hasCompletedDataTab = ref<boolean>(false)
@@ -947,16 +952,31 @@ const getBackListRoute = () => {
   return 'invoice-list-non-po'
 }
 
+const resolveLoadedInvoiceSourceCode = (): number | null => {
+  const detail = checkIsNonPo() ? detailNonPo.value : detailPo.value
+  const code = Number(detail?.header?.invoiceSource)
+  return Number.isFinite(code) && code > 0 ? code : null
+}
+
 const isFtpInvoiceFlow = () => {
   if (route.query.from === 'ftp') return true
+  if (route.query.ftpUpload) return true
   if (getFtpSyncContext()) return true
+  if (getActiveFtpUploadUId()) return true
+  if (resolveLoadedInvoiceSourceCode() === FTP_INVOICE_SOURCE_CODE) return true
+
   return String(form.invoiceSource || '')
     .toLowerCase()
     .includes('ftp')
 }
 
+const shouldReturnToFtpList = (): boolean => {
+  if (parseSubmitSuccessSession()?.returnToFtp) return true
+  return isFtpInvoiceFlow()
+}
+
 const navigateToBackList = () => {
-  if (isFtpInvoiceFlow()) {
+  if (shouldReturnToFtpList()) {
     router.push({
       name: 'ftpInvoiceIntegration',
       query: { tab: 'ftpData' },
@@ -972,6 +992,13 @@ const goToList = () => {
   wasRejectedResubmit.value = false
   navigateToBackList()
 }
+
+watch(showSuccessModal, (isOpen, wasOpen) => {
+  if (!wasOpen || isOpen) return
+  if (!sessionStorage.getItem(INVOICE_SUBMIT_SUCCESS_KEY)) return
+  clearSubmitSuccessModal()
+  navigateToBackList()
+})
 
 const goBack = () => {
   if (tabNow.value === 'paymentStatus') {
@@ -2232,6 +2259,7 @@ const setData = () => {
         enteredOn: '',
         purchasingOrg: '',
         department: item.department,
+        deliveryOrderNo: item.deliveryOrderNo || '',
         whtType: item.whtType || (item as { WHTType?: string }).WHTType || '',
         whtCode: item.whtCode || (item as { WHTCode?: string }).WHTCode || '',
         whtBaseAmount: item.whtBaseAmount,

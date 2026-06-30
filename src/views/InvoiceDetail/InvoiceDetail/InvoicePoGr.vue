@@ -12,6 +12,7 @@
               'po__column--tax': item.toLowerCase() === 'tax code',
               'po__column--wht-type': item.toLowerCase() === 'wht type',
               'po__column--wht-code': item.toLowerCase() === 'wht code',
+              'po__column--department': item.toLowerCase() === 'department',
             }">
               {{ item }}
             </th>
@@ -27,15 +28,14 @@
             <td v-if="!checkInvoiceDp() && !checkPoPib()">
               {{ moment(item.grDocumentDate).format('YYYY/MM/DD') || '-' }}
             </td>
-            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.deliveryOrderNo || '-' }}</td>
+            <td v-if="!checkInvoiceDp()">{{ item.deliveryOrderNo || '-' }}</td>
             <td>{{ form.currCode === 'IDR' ? useFormatIdr(item.itemAmount) : useFormatUsd(item.itemAmount) || '-' }}
             </td>
             <td v-if="!checkInvoiceDp()">{{ useFormatIdr(item.quantity) || '-' }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.uom || '-' }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.itemText || '-' }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.conditionType || '-' }}</td>
-            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.conditionTypeDesc || '-' }}</td>
-            <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.qcStatus || '-' }}</td>
+            <td v-if="!checkInvoiceDp() && !checkPoPib() && form?.invoiceTypeCode !== 903">{{ item.qcStatus || '-' }}</td>
             <td v-if="!checkPoPib()">{{ getTaxCodeName(item.taxCode) || '-' }}</td>
             <td v-if="!checkPoPib()">
               {{ form.currCode === 'IDR' ? useFormatIdr(item.vatAmount) : useFormatUsd(item.vatAmount) || 0 }}
@@ -57,7 +57,7 @@
 <script lang="ts" setup>
 import { ref, computed, watch, inject, onMounted, type Ref } from 'vue'
 import type { formTypes } from '../types/invoiceDetail'
-import { defaultColumn, manualAddColumn, invoiceDpColumn } from '@/static/invoicePoGr'
+import { defaultColumn, manualAddColumn, invoiceDpColumn, poCCColumn } from '@/static/invoicePoGr'
 import moment from 'moment'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
@@ -74,7 +74,7 @@ const whtCodeList = computed(() => invoiceMasterApi.whtCodeList)
 
 const setAdditionalCostList = async () => {
   const result = [] as itemsPoGrType[]
-  if (form.value.additionalCosts) {
+  if (form.value.invoicePoGr) {
     for (const item of form.value.invoicePoGr) {
       if (item.whtType) await callWhtCode(item.whtType)
       const data = {
@@ -98,6 +98,7 @@ const checkPoPib = () => {
 const setColumn = () => {
   if (checkInvoiceDp()) columns.value = ['Line', ...invoiceDpColumn]
   else if (checkPoPib()) columns.value = ['Line', ...manualAddColumn]
+  else if (form.value.invoiceTypeCode === 903) columns.value = ['Line', ...poCCColumn]
   else columns.value = ['Line', ...defaultColumn]
 }
 

@@ -50,8 +50,12 @@
                 :key="index"
                 class="pogr__field-base !border-b-teal-500 !bg-teal-100 !text-teal-500"
                 :class="{
+                  'pogr__action-cell': item.toLowerCase() === 'action' || item.toLowerCase() === 'actions',
                   'pogr__field-base--po-item': item.toLowerCase() === 'item text',
                   'pogr__field-base--tax': item.toLowerCase() === 'tax code',
+                  'pogr__field-base--wht-type': item.toLowerCase() === 'wht type',
+                  'pogr__field-base--wht-code': item.toLowerCase() === 'wht code',
+                  'pogr__field-base--department': item.toLowerCase() === 'department',
                 }"
               >
                 {{ item }}
@@ -60,30 +64,35 @@
           </thead>
           <tbody>
             <tr v-if="form.invoicePoGr.length === 0">
-              <td colspan="11" class="text-center text-[13px]">No Data Available</td>
+              <td :colspan="columns.length" class="text-center text-[13px]">No Data Available</td>
             </tr>
             <template v-else>
               <tr v-for="(item, index) in form.invoicePoGr" :key="index" class="pogr__field-items">
-                <td class="flex items-center justify-around gap-[8px]">
-                  <button
-                    class="btn btn-outline btn-icon btn-primary"
-                    :disabled="checkIsEdit() && !item.isEdit"
-                    @click="goEdit(item)"
-                  >
-                    <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>
-                    <i v-else class="ki-duotone ki-check-circle"></i>
-                  </button>
-                  <button
-                    v-if="
-                      (form.status === 0 || form.status === -1 || form.status === 5) &&
-                      !checkInvoiceDp()
-                    "
-                    class="btn btn-icon btn-outline btn-danger"
-                    @click="deleteItem(index)"
-                  >
-                    <i class="ki-duotone ki-cross-circle"></i>
-                  </button>
+                <!-- Action -->
+                <td class="pogr__action-cell">
+                  <div class="flex items-center justify-around gap-[8px]">
+                    <button
+                      class="btn btn-outline btn-icon btn-primary"
+                      :disabled="checkIsEdit() && !item.isEdit"
+                      @click="goEdit(item)"
+                    >
+                      <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>
+                      <i v-else class="ki-duotone ki-check-circle"></i>
+                    </button>
+                    <button
+                      v-if="
+                        (form.status === 0 || form.status === -1 || form.status === 5) &&
+                        !checkInvoiceDp()
+                      "
+                      class="btn btn-icon btn-outline btn-danger"
+                      @click="deleteItem(index)"
+                    >
+                      <i class="ki-duotone ki-cross-circle"></i>
+                    </button>
+                  </div>
                 </td>
+
+                <!-- PO Number -->
                 <td>
                   <span v-if="(!item.isEdit && checkInvoiceDp()) || !checkInvoiceDp()">{{
                     item.poNo
@@ -109,32 +118,17 @@
                     </p>
                   </div>
                 </td>
+
+                <!-- Kolom PO/GR — urutan selaras InvoicePoGrView -->
                 <td v-if="!checkInvoiceDp()">{{ item.poItem }}</td>
-                <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentNo || '-' }}</td>
-                <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentItem }}</td>
-                <td v-if="!checkInvoiceDp() && !checkPoPib()">
+                <td v-if="showGrColumns">{{ item.grDocumentNo || '-' }}</td>
+                <td v-if="showGrColumns">{{ item.grDocumentItem }}</td>
+                <td v-if="showGrColumns">
                   {{ formatGrDocumentDateDisplay(item.grDocumentDate) }}
                 </td>
-                <td>{{ item.deliveryOrderNo }}</td>
-                <td v-if="!checkInvoiceDp()">
-                  {{
-                    form.currency === item.currencyLC
-                      ? useFormatIdr(item.itemAmountLC)
-                      : useFormatIdr(item.itemAmountTC)
-                  }}
-                </td>
-                <td v-if="!checkInvoiceDp()">{{ item.quantity }}</td>
-                <td v-if="!checkInvoiceDp()">{{ item.uom }}</td>
-                <td v-if="!checkInvoiceDp()">{{ item.itemText }}</td>
-                <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.conditionType || '-' }}</td>
-                <!-- <td v-if="form?.invoiceType === '903'">{{ getTaxCodeName(item.taxCode) || '-' }}</td> -->
-                <td v-if="!checkInvoiceDp() && form?.invoiceType !== '903'">
-                  {{ item.qcStatus || '-' }}
-                </td>
-                <!-- <td v-if="form?.invoiceType === '903'">
-                  <span v-if="item.isEdit">{{ form?.currency === item.currencyLC ? useFormatIdr(formEdit.vatAmount) : useFormatUsd(formEdit.vatAmount) }}</span>
-                  <span v-else>{{ form?.currency === item.currencyLC ? useFormatIdr(item.vatAmount || 0) : useFormatUsd(item.vatAmount || 0) }}</span>
-                </td> -->
+                <td v-if="!checkInvoiceDp()">{{ item.deliveryOrderNo || '-' }}</td>
+
+                <!-- Item Amount -->
                 <td v-if="checkInvoiceDp()">
                   <span v-if="!item.isEdit">{{
                     form?.currency === 'IDR'
@@ -143,7 +137,22 @@
                   }}</span>
                   <input v-else v-model="formEdit.itemAmountLC" type="number" class="input" />
                 </td>
-                <td>
+                <td v-else>
+                  {{
+                    form.currency === item.currencyLC
+                      ? useFormatIdr(item.itemAmountLC)
+                      : useFormatIdr(item.itemAmountTC)
+                  }}
+                </td>
+
+                <td v-if="!checkInvoiceDp()">{{ item.quantity }}</td>
+                <td v-if="!checkInvoiceDp()">{{ item.uom }}</td>
+                <td v-if="!checkInvoiceDp()" class="pogr__field-base--po-item">{{ item.itemText }}</td>
+                <td v-if="showGrColumns">{{ item.conditionType || '-' }}</td>
+                <td v-if="showQcStatus">{{ item.qcStatus || '-' }}</td>
+
+                <!-- Tax & WHT -->
+                <td v-if="!checkPoPib()" class="pogr__field-base--tax">
                   <span v-if="!item.isEdit">{{ getTaxCodeName(item.taxCode) || '-' }}</span>
                   <v-select
                     v-else
@@ -168,7 +177,7 @@
                       : useFormatIdr(item.vatAmount || 0)
                   }}</span>
                 </td>
-                <td>
+                <td v-if="!checkPoPib()" class="pogr__field-base--wht-type">
                   <span v-if="!item.isEdit">{{ item.whtType || '-' }}</span>
                   <v-select
                     v-else
@@ -182,7 +191,7 @@
                     appendToBody
                   ></v-select>
                 </td>
-                <td>
+                <td v-if="!checkPoPib()" class="pogr__field-base--wht-code">
                   <span v-if="!item.isEdit">{{ item.whtCode || '-' }}</span>
                   <v-select
                     v-else
@@ -196,7 +205,7 @@
                     appendToBody
                   ></v-select>
                 </td>
-                <td>
+                <td v-if="!checkPoPib()">
                   <span v-if="item.isEdit">{{
                     form?.currency === item.currencyLC
                       ? useFormatIdr(formEdit.whtBaseAmount)
@@ -208,7 +217,7 @@
                       : useFormatIdr(item.whtBaseAmount || 0)
                   }}</span>
                 </td>
-                <td>
+                <td v-if="!checkPoPib()">
                   <span v-if="item.isEdit">{{
                     form?.currency === item.currencyLC
                       ? useFormatIdr(formEdit.whtAmount)
@@ -220,7 +229,9 @@
                       : useFormatIdr(item.whtAmount || 0)
                   }}</span>
                 </td>
-                <td>
+
+                <!-- Department -->
+                <td class="pogr__field-base--department">
                   <span v-if="!item.isEdit">{{ getCostCenterName(item.department) || '-' }}</span>
                   <v-select
                     v-else
@@ -252,6 +263,7 @@
                 :key="index"
                 class="pogr__field-base !border-b-teal-500 !bg-teal-100 !text-teal-500"
                 :class="{
+                  'pogr__action-cell': item.toLowerCase() === 'action' || item.toLowerCase() === 'actions',
                   'pogr__field-base--po-number': item.toLowerCase() === 'po number',
                   'pogr__field-base--po-item': item.toLowerCase() === 'po item',
                   'pogr__field-base--department': item.toLowerCase() === 'department',
@@ -263,11 +275,12 @@
           </thead>
           <tbody>
             <tr v-if="form.invoicePoGr.length === 0">
-              <td colspan="11" class="text-center text-[13px]">No Data Available</td>
+              <td :colspan="columns.length" class="text-center text-[13px]">No Data Available</td>
             </tr>
             <template v-else>
               <tr v-for="(item, index) in form.invoicePoGr" :key="index" class="pogr__field-items">
-                <td class="flex items-center justify-around gap-[8px]">
+                <td class="pogr__action-cell">
+                  <div class="flex items-center justify-around gap-[8px]">
                   <button class="btn btn-icon btn-primary" @click="editForm(index)">
                     <i v-if="!item.isEdit" class="ki-duotone ki-notepad-edit"></i>
                     <i v-else class="ki-duotone ki-check-circle"></i>
@@ -275,6 +288,7 @@
                   <button class="btn btn-icon btn-outline btn-danger" @click="deleteItem(index)">
                     <i class="ki-duotone ki-cross-circle"></i>
                   </button>
+                  </div>
                 </td>
                 <td>
                   <span v-if="!item.isEdit">{{ item.poNo }}</span>
@@ -323,7 +337,7 @@
                   <input v-else v-model="item.uom" class="input" />
                 </td>
                 <td v-if="!checkInvoiceDp()">{{ item.itemText || '-' }}</td>
-                <td v-if="!checkInvoiceDp()">
+                <td v-if="!checkInvoiceDp()" class="pogr__field-base--department">
                   <span v-if="!item.isEdit">{{ getCostCenterName(item.department) || '-' }}</span>
                   <v-select
                     v-else
@@ -632,6 +646,12 @@ const checkPoPib = () => {
   return form?.invoiceType === '902'
 }
 
+const isPoCcType = () => String(form?.invoiceType ?? '') === '903'
+
+/** Visibility flags — harus selaras dengan setColumn() dan InvoicePoGrView */
+const showGrColumns = computed(() => !checkInvoiceDp() && !checkPoPib())
+const showQcStatus = computed(() => !checkInvoiceDp() && !isPoCcType())
+
 const deleteItem = (index: number) => {
   if (form) {
     if (form.invoicePoGr[index].isEdit) {
@@ -644,7 +664,7 @@ const deleteItem = (index: number) => {
 }
 
 const setColumn = () => {
-  if (form?.invoiceType === '903') columns.value = ['Action', ...poCCColumn]
+  if (isPoCcType()) columns.value = ['Action', ...poCCColumn]
   else if (form?.invoiceDp === '9012') columns.value = ['Action', ...invoiceDpColumn]
   else if (form?.invoiceType === '902') columns.value = ['Actions', ...manualAddColumn]
   else columns.value = ['Action', ...defaultColumn]

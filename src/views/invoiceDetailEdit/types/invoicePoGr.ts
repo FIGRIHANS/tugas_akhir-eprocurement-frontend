@@ -19,6 +19,7 @@ export interface itemsPoGrType {
   whtBaseAmount: number
   whtAmount: number
   department: string
+  deliveryOrderNo?: string
   vatAmount: number
   whtCodeList?: WhtCodeTypes[]
   isEdit: boolean

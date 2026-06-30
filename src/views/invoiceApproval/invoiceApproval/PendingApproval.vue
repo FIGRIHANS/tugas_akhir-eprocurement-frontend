@@ -117,6 +117,18 @@
                           </div>
                         </div>
                         <div
+                          v-if="isFinanceApSupervisor && parent.statusCode === 2"
+                          class="menu-item"
+                          @click="openDetailInvoiceEdit(parent.invoiceUId)"
+                        >
+                          <div class="menu-link">
+                            <span class="menu-icon">
+                              <i class="ki-duotone ki-message-edit"></i>
+                            </span>
+                            <span class="menu-title"> Edit </span>
+                          </div>
+                        </div>
+                        <div
                           v-if="
                             !isAccountingTax &&
                             parent.statusCode === 4 &&
@@ -333,6 +345,10 @@ const verifList = computed(() => verificationApi.listPo)
 const canSendToSap = computed(() => loginStore.userData?.profile?.profileId !== 3003)
 
 const isAccountingTax = computed(() => loginStore.userData?.profile?.profileId === 3003)
+
+const isFinanceApSupervisor = computed(
+  () => Number(loginStore.userData?.profile?.profileId) === 3004,
+)
 
 const colorBadge = (statusCode: number) => {
   const list = {

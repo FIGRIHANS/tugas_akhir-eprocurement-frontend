@@ -450,6 +450,7 @@ export interface itemsPoGrType {
   whtBaseAmount: number
   whtAmount: number
   department: string
+  deliveryOrderNo?: string
 }
 
 export interface itemsCostExpenseType {
