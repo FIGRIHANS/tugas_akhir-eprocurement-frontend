@@ -9,24 +9,8 @@ type VerificationStore = ReturnType<typeof useInvoiceVerificationStore>
 const isEditableDraftStatus = (status?: number) =>
   status === 0 || status === -1 || status === 5
 
-const readOcrInvoiceVendorNo = (ocr: Record<string, unknown>): string => {
-  const candidates = [
-    ocr.invoiceNo,
-    ocr.invoiceNumber,
-    ocr.documentNo,
-    ocr.taxDocumentNumber,
-    ocr.referenceNo,
-    ocr.reference,
-  ]
-  for (const candidate of candidates) {
-    const text = String(candidate || '').trim()
-    if (text) return text
-  }
-  return ''
-}
-
 /**
- * Read uploaded invoice / tax / reference blobs via OCR APIs and seed empty form fields.
+ * Read uploaded tax / reference blobs via OCR APIs and seed empty form fields.
  */
 export const applyOcrFromUploadedDocuments = async (
   form: formTypes,
@@ -35,20 +19,6 @@ export const applyOcrFromUploadedDocuments = async (
   if (!isEditableDraftStatus(form.status)) return null
 
   let extractedGr: string | null = null
-
-  if (form.invoiceDocument && resolveDocumentUrlForApi(form.invoiceDocument) && !form.invoiceVendorNo?.trim()) {
-    try {
-      const ocr = (await verificationApi.uploadFileOcr(form.invoiceDocument)) as Record<string, unknown>
-      const vendorNo = readOcrInvoiceVendorNo(ocr)
-      if (vendorNo) form.invoiceVendorNo = vendorNo
-      if (!form.invoiceDate && ocr.taxDocumentDate) {
-        form.invoiceDate = parseIndoDate(String(ocr.taxDocumentDate))
-      }
-      extractedGr = extractGrFromUnknown(ocr) || extractedGr
-    } catch (error) {
-      console.debug('Invoice document OCR autofill failed', error)
-    }
-  }
 
   if (form.tax && resolveDocumentUrlForApi(form.tax) && !form.taxNoInvoice?.trim()) {
     try {

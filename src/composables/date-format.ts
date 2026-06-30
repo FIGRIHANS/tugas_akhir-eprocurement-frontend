@@ -30,6 +30,16 @@ export const formatDateYear = (value: Date | string) => {
   return moment(value).format('YYYY')
 }
 
+const appendUtcSuffix = (value: string): string => {
+  if (/(?:Z|[+-]\d{2}:?\d{2})$/i.test(value)) return value
+  return `${value}Z`
+}
+
+export const formatDateTimeYearFirst = (value: string) => {
+  if (!value || value === '1900-01-01T00:00:00') return '-'
+  return momentTz(appendUtcSuffix(value)).tz('Asia/Jakarta').format('YYYY/MM/DD HH:mm:ss')
+}
+
 export const formatDateYearFirst = (value: Date | string) => {
   if (!value || value === '1900-01-01T00:00:00') return '-'
   return moment(value).format('YYYY/MM/DD')

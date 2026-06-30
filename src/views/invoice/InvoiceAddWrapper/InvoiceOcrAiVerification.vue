@@ -137,9 +137,7 @@
                       v-model="ocrData[getOcrKey(row.header)]"
                       type="text"
                       class="w-full border border-gray-300 rounded px-2 py-1 text-sm"
-                      :disabled="
-                        ocrData[getOcrKey(row.header)] == '' || editableRemarks[index] === '1'
-                      "
+                      :disabled="!isOcrFieldEditable(index, ocrData[getOcrKey(row.header)] || '')"
                     />
                     <span v-else class="text-gray-400">-</span>
                   </td>
@@ -153,7 +151,10 @@
                         class="ki-filled ki-check-circle text-green-500"
                         v-if="row.invoiceVerified === true"
                       ></i>
-                      <div class="relative group flex items-center w-fit" v-else>
+                      <div
+                        class="relative group flex items-center w-fit"
+                        v-else-if="row.invoiceVerified === false"
+                      >
                         <i class="ki-filled ki-cross-circle text-red-500 cursor-help"></i>
                         <!-- Tooltip -->
                         <div
@@ -174,7 +175,7 @@
                     <select
                       v-model="editableRemarks[index]"
                       class="border border-gray-300 rounded px-2 py-1 text-sm w-full"
-                      :disabled="editableRemarks[index] === '1' || editableRemarks[index] === '4'"
+                      :disabled="isRemarksSelectDisabled(index, row.remarks)"
                     >
                       <option v-if="editableRemarks[index] === '1'" value="1">Auto Verified</option>
                       <option value="2">Not match</option>
@@ -325,13 +326,16 @@ import {
   onMounted,
   onUnmounted,
   watch,
+  nextTick,
   defineAsyncComponent,
   reactive,
   computed,
+  type Ref,
 } from 'vue'
 import type { formTypes } from '../types/invoiceAddWrapper'
 import type { invoiceQrData } from '../types/invoiceQrdata'
 import type { invoiceOcrData } from '../types/invoiceOcrData'
+import type { OcrVerificationSnapshot } from '../types/ocrVerificationSnapshot'
 import { defaultColumn, invoiceDpColumn, poCCColumn, manualAddColumn } from '@/static/invoicePoGr'
 import { useRoute } from 'vue-router'
 import UiModal from '@/components/modal/UiModal.vue'
@@ -344,6 +348,7 @@ import {
   isTaxFakturSectionLabel,
   normalizeTaxFakturScanResult,
 } from '@/core/utils/taxFakturVendor'
+import { isRejectedInvoiceStatus } from '@/core/utils/invoiceSubmissionRoute'
 import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 import {
   hasBlobSasToken,
@@ -369,7 +374,18 @@ const AdditionalCostView = defineAsyncComponent(
 const route = useRoute()
 const form = inject<formTypes>('form')
 const markOcrPjapVerified = inject<(verified?: boolean) => void>('markOcrPjapVerified')
+const isOcrPjapVerified = inject<Ref<boolean> | undefined>('isOcrPjapVerified')
+const ocrPjapVerifiedInvoiceUId = inject<Ref<string> | undefined>('ocrPjapVerifiedInvoiceUId')
+const ocrVerificationSnapshot = inject<Ref<OcrVerificationSnapshot | null> | undefined>(
+  'ocrVerificationSnapshot',
+)
+const saveOcrVerificationSnapshot = inject<
+  ((snapshot: OcrVerificationSnapshot) => void) | undefined
+>('saveOcrVerificationSnapshot')
 const setInvoiceSubmissionTab = inject<(tab: string) => void>('setInvoiceSubmissionTab')
+const refreshInvoicePoGrAutofill = inject<(() => Promise<unknown>) | undefined>(
+  'refreshInvoicePoGrAutofill',
+)
 const invoiceVerificationStore = useInvoiceVerificationStore()
 
 const tabOcrTab = ref<'general' | 'tax'>('general')
@@ -392,15 +408,9 @@ const manualReject = reactive<Record<number, boolean>>({})
 const isEmpty = (val: unknown) =>
   val === undefined || val === null || val === '' || val === '-'
 
-const toOptionalText = (value: unknown): string | undefined => {
-  if (value === undefined || value === null) return undefined
-  const text = String(value).trim()
-  return text || undefined
-}
 
 const getFormVendorTaxReferences = (): string[] => {
   const refs = [
-    form?.ocrVendorName,
     deriveTkuFromNpwp(form?.vendorNPWP),
     deriveTkuFromNpwp(form?.npwp),
     form?.vendorName,
@@ -411,10 +421,16 @@ const getFormVendorTaxReferences = (): string[] => {
     .filter((item, index, list) => item && list.indexOf(item) === index)
 }
 
-const matchesFormVendorTaxName = (value?: string): boolean => {
+const matchesFormVendorTaxName = (value?: string, npwpSupplier?: string): boolean => {
   const scanned = String(value || '').trim()
   if (!scanned || isTaxFakturSectionLabel(scanned)) return false
-  return getFormVendorTaxReferences().some((ref) => ref === scanned)
+
+  const refs = getFormVendorTaxReferences()
+  if (refs.some((ref) => ref === scanned)) return true
+
+  const rowTku = deriveTkuFromNpwp(npwpSupplier)
+  if (!rowTku || rowTku !== scanned) return false
+  return refs.some((ref) => ref === rowTku)
 }
 
 const parseCurrency = (value: string | number): number => {
@@ -457,9 +473,247 @@ const getTooltipMessage = (header: string, docValue: string, source: 'QR' | 'OCR
   return `Terdapat selisih antara\n${formField} dengan ${source}\nsebesar ${formattedDiff}`
 }
 
-const handleTaxVerification = () => {
+type VerificationResult = boolean | 'none'
+
+const normalizeDigits = (value?: string | null) => String(value || '').replace(/\D/g, '')
+
+const normalizeTaxDateKey = (value?: string | Date | null): string => {
+  if (!value) return ''
+  const raw = value instanceof Date ? value.toISOString() : String(value)
+  const parsed = moment(raw, ['DD MMMM YYYY', 'YYYY-MM-DD', 'YYYY/MM/DD', moment.ISO_8601], true)
+  return parsed.isValid() ? parsed.format('YYYY-MM-DD') : raw.trim()
+}
+
+const matchesFormAmount = (header: string, value?: string): VerificationResult => {
+  if (isEmpty(value)) return 'none'
+  return Math.abs(getDifference(header, value)) < 1
+}
+
+const matchesFormTaxDate = (value?: string): VerificationResult => {
+  if (isEmpty(value)) return 'none'
+  const formDate = normalizeTaxDateKey(form?.taxDate || form?.taxInvoiceDate)
+  if (!formDate) return true
+  return normalizeTaxDateKey(value) === formDate
+}
+
+const matchesFormNpwp = (value?: string): VerificationResult => {
+  if (isEmpty(value)) return 'none'
+  const formNpwp = normalizeDigits(form?.npwp)
+  if (!formNpwp) return true
+  return normalizeDigits(value) === formNpwp
+}
+
+const matchesFormNpwpCompany = (value?: string): VerificationResult => {
+  if (isEmpty(value)) return 'none'
+  const formNpwp = normalizeDigits(form?.npwpCompany)
+  if (!formNpwp) return true
+  return normalizeDigits(value) === formNpwp
+}
+
+const matchesFormTaxNo = (value?: string): VerificationResult => {
+  if (isEmpty(value)) return 'none'
+  const formTaxNo = String(form?.taxNoInvoice || '').trim()
+  if (!formTaxNo) return true
+  return formTaxNo === String(value).trim()
+}
+
+const matchesFormCompanyName = (value?: string): VerificationResult => {
+  if (isEmpty(value)) return 'none'
+  const company = String(form?.companyName || '').trim()
+  if (!company) return true
+  return company === String(value).trim()
+}
+
+const matchesFpStatus = (value?: string): VerificationResult => {
+  if (isEmpty(value)) return 'none'
+  return String(value).trim().toUpperCase() === 'APPROVED'
+}
+
+const applyRemarkToVerification = (index: number, base: VerificationResult): VerificationResult => {
+  const remark = editableRemarks.value[index]
+  if (remark === '3') return true
+  if (remark === '2') return false
+  return base
+}
+
+const resolveAutoRemarks = (
+  qrPass: VerificationResult,
+  ocrPass: VerificationResult,
+  qrValue?: string,
+  ocrValue?: string,
+): boolean | 'none' => {
+  if (qrPass === 'none' || ocrPass === 'none') return 'none'
+  if (qrValue !== undefined && ocrValue !== undefined && qrValue !== ocrValue) return false
+  return qrPass === true && ocrPass === true
+}
+
+const isRemarksSelectDisabled = (index: number, rowRemarks: unknown) => {
+  if (rowRemarks === 'none') return true
+  return editableRemarks.value[index] === '1'
+}
+
+const isOcrFieldEditable = (index: number, fieldValue: string) =>
+  fieldValue !== '' && editableRemarks.value[index] !== '1'
+
+const clearTaxScanBuffers = () => {
+  const ocrKeys: (keyof invoiceOcrData)[] = [
+    'vendorBuyer',
+    'npwpBuyer',
+    'vendorSupplier',
+    'npwpSupplier',
+    'taxDocumentNumber',
+    'taxDocumentDate',
+    'dpp',
+    'ppn',
+    'ppnbm',
+    'status',
+  ]
+  ocrKeys.forEach((key) => {
+    ocrData[key] = ''
+  })
+
+  qrData.taxDocumentNumber = ''
+  qrData.taxDocumentDate = ''
+  qrData.status = ''
+}
+
+const resetTaxVerificationState = () => {
+  taxOcrScanned.value = false
+  scannedOcrStatus.value = ''
+  scannedTaxInvoiceNo.value = ''
+  markOcrPjapVerified?.(false)
+}
+
+const isRejectedInvoice = computed(() => isRejectedInvoiceStatus(form?.status))
+
+const hasPersistedOcrVerification = (): boolean => {
+  return Boolean(
+    String(form?.taxInvoiceStatus || '').trim() ||
+      String(form?.taxInvoiceNumber || '').trim() ||
+      String(form?.ocrVendorName || '').trim(),
+  )
+}
+
+const isVerifiedForCurrentInvoice = (): boolean => {
+  if (!isOcrPjapVerified?.value) return false
+
+  const currentInvoiceUId = String(form?.invoiceUId || route.query.invoice || '').trim()
+  const verifiedInvoiceUId = String(ocrPjapVerifiedInvoiceUId?.value || '').trim()
+
+  if (!currentInvoiceUId && !verifiedInvoiceUId) return true
+  if (currentInvoiceUId && verifiedInvoiceUId) {
+    return currentInvoiceUId === verifiedInvoiceUId
+  }
+
+  return isOcrPjapVerified.value
+}
+
+const formatTaxDateForOcrDisplay = (value?: string | Date | null) => {
+  if (!value) return ''
+  const raw = value instanceof Date ? value.toISOString() : String(value)
+  const parsed = moment(raw, ['YYYY-MM-DD', 'YYYY/MM/DD', moment.ISO_8601], true)
+  return parsed.isValid() ? parsed.format('DD MMMM YYYY') : raw
+}
+
+const resolvePersistedTaxStatus = () => {
+  const status = String(form?.taxInvoiceStatus || '').trim()
+  if (status) return status
+  if (isRejectedInvoice.value && hasPersistedOcrVerification()) return 'APPROVED'
+  return ''
+}
+
+const populateScanDataFromForm = (target: invoiceQrData | invoiceOcrData) => {
+  const status = resolvePersistedTaxStatus()
+  const invoiceNo = String(form?.taxInvoiceNumber || form?.taxNoInvoice || '').trim()
+
+  target.vendorSupplier = String(form?.ocrVendorName || '')
+  target.npwpSupplier = String(form?.vendorNPWP || form?.npwp || '')
+  target.vendorBuyer = String(form?.ocrCompanyName || form?.companyName || '')
+  target.npwpBuyer = String(form?.npwpCompany || '')
+  target.taxDocumentNumber = invoiceNo
+  target.taxDocumentDate = formatTaxDateForOcrDisplay(form?.taxInvoiceDate || form?.taxDate)
+  target.dpp = form?.salesAmount != null ? String(form.salesAmount) : ''
+  target.ppn = form?.ocrVatAmount != null ? String(form.ocrVatAmount) : ''
+  target.ppnbm = form?.ocrVatbmAmount != null ? String(form.ocrVatbmAmount) : ''
+  target.status = status
+}
+
+const restoreVerificationFromPersistedForm = () => {
+  if (!hasPersistedOcrVerification()) return false
+
+  const status = resolvePersistedTaxStatus()
+  const invoiceNo = String(form?.taxInvoiceNumber || form?.taxNoInvoice || '').trim()
+
+  populateScanDataFromForm(qrData)
+  populateScanDataFromForm(ocrData)
+
+  taxOcrScanned.value = true
+  scannedOcrStatus.value = status
+  scannedTaxInvoiceNo.value = invoiceNo
+  pjapSyncStatus.value = status || null
   taxVerificationClicked.value = true
-  verifyInvoice()
+  isVerifyData.value = true
+  tabOcrTab.value = 'tax'
+  reconcileRemarksWithVerification()
+  return true
+}
+
+const persistVerificationSnapshot = () => {
+  saveOcrVerificationSnapshot?.({
+    qrData: { ...qrData },
+    ocrData: { ...ocrData },
+    editableRemarks: { ...editableRemarks.value },
+    pjapSyncStatus: pjapSyncStatus.value,
+    taxVerificationClicked: taxVerificationClicked.value,
+    pjapVerificationClicked: pjapVerificationClicked.value,
+    isVerify: isVerify.value,
+    scannedOcrStatus: scannedOcrStatus.value,
+    scannedTaxInvoiceNo: scannedTaxInvoiceNo.value,
+  })
+}
+
+const restoreFromVerificationSnapshot = (): boolean => {
+  const snapshot = ocrVerificationSnapshot?.value
+  if (!snapshot) return false
+
+  Object.assign(qrData, snapshot.qrData)
+  Object.assign(ocrData, snapshot.ocrData)
+  editableRemarks.value = { ...snapshot.editableRemarks }
+  pjapSyncStatus.value = snapshot.pjapSyncStatus
+  taxVerificationClicked.value = snapshot.taxVerificationClicked
+  pjapVerificationClicked.value = snapshot.pjapVerificationClicked
+  isVerify.value = snapshot.isVerify
+  scannedOcrStatus.value = snapshot.scannedOcrStatus
+  scannedTaxInvoiceNo.value = snapshot.scannedTaxInvoiceNo
+  taxOcrScanned.value = true
+  isVerifyData.value = true
+  tabOcrTab.value = 'tax'
+  reconcileRemarksWithVerification()
+  return true
+}
+
+const tryRestorePreviousVerification = async (): Promise<boolean> => {
+  if (isOcrPjapVerified?.value && restoreFromVerificationSnapshot()) {
+    return true
+  }
+
+  if (
+    (isRejectedInvoice.value || isVerifiedForCurrentInvoice()) &&
+    restoreVerificationFromPersistedForm()
+  ) {
+    await nextTick()
+    persistVerificationSnapshot()
+    return true
+  }
+
+  return false
+}
+
+const handleTaxVerification = async () => {
+  taxVerificationClicked.value = true
+  resetTaxVerificationState()
+  clearTaxScanBuffers()
+  await verifyInvoice()
 }
 
 const handlePjapVerification = () => {
@@ -502,6 +756,7 @@ const formatHeaderDate = (value?: string | null) => {
 }
 
 const generalData = computed(() => [
+  { label: 'GR Document No.', value: form?.invoicePoGr?.[0]?.grDocumentNo || '-' },
   { label: 'Invoice Vendor No.', value: form?.invoiceVendorNo || '-' },
   { label: 'Invoice Date', value: formatHeaderDate(form?.invoiceDate) },
   { label: 'Tax Document No.', value: form?.taxNoInvoice || '-' },
@@ -573,174 +828,121 @@ const NOT_MATCHED = '2'
 
 /* ---------------- TABLE DATA (FIXED, FULL) ---------------- */
 const tableData = computed(() => {
+  const qrVendorPass: VerificationResult = isEmpty(qrData.vendorSupplier)
+    ? 'none'
+    : matchesFormVendorTaxName(qrData.vendorSupplier, qrData.npwpSupplier)
+  const ocrVendorPass: VerificationResult = isEmpty(ocrData.vendorSupplier)
+    ? 'none'
+    : matchesFormVendorTaxName(ocrData.vendorSupplier, ocrData.npwpSupplier)
+  const qrNpwpVendorPass = matchesFormNpwp(qrData.npwpSupplier)
+  const ocrNpwpVendorPass = matchesFormNpwp(ocrData.npwpSupplier)
+  const qrCompanyPass = matchesFormCompanyName(qrData.vendorBuyer)
+  const ocrCompanyPass = matchesFormCompanyName(ocrData.vendorBuyer)
+  const qrNpwpBuyerPass = matchesFormNpwpCompany(qrData.npwpBuyer)
+  const ocrNpwpBuyerPass = matchesFormNpwpCompany(ocrData.npwpBuyer)
+  const qrTaxNoPass = matchesFormTaxNo(qrData.taxDocumentNumber)
+  const ocrTaxNoPass = matchesFormTaxNo(ocrData.taxDocumentNumber)
+  const qrTaxDatePass = matchesFormTaxDate(qrData.taxDocumentDate)
+  const ocrTaxDatePass = matchesFormTaxDate(ocrData.taxDocumentDate)
+  const qrDppPass = matchesFormAmount('Nilai Penjualan', qrData.dpp)
+  const ocrDppPass = matchesFormAmount('Nilai Penjualan', ocrData.dpp)
+  const qrPpnPass = matchesFormAmount('PPN', qrData.ppn)
+  const ocrPpnPass = matchesFormAmount('PPN', ocrData.ppn)
+  const qrPpnbmPass: VerificationResult = isEmpty(qrData.ppnbm)
+    ? 'none'
+    : normalizeDigits(qrData.ppnbm) === normalizeDigits(ocrData.ppnbm)
+  const ocrPpnbmPass: VerificationResult = isEmpty(ocrData.ppnbm)
+    ? 'none'
+    : normalizeDigits(qrData.ppnbm) === normalizeDigits(ocrData.ppnbm)
+  const qrStatusPass = matchesFpStatus(qrData.status)
+  const ocrStatusPass = matchesFpStatus(ocrData.status)
+
   return [
     {
       header: 'Nama Vendor',
       qr: qrData.vendorSupplier || '-',
-      fpVerified:
-        editableRemarks.value[0] === '3'
-          ? true
-          : editableRemarks.value[0] === '2'
-            ? false
-            : isEmpty(qrData.vendorSupplier)
-              ? 'none'
-              : matchesFormVendorTaxName(qrData.vendorSupplier),
+      fpVerified: applyRemarkToVerification(0, qrVendorPass),
       ocr: ocrData.vendorSupplier || '-',
-      invoiceVerified:
-        editableRemarks.value[0] === '3'
-          ? true
-          : editableRemarks.value[0] === '2'
-            ? false
-            : isEmpty(ocrData.vendorSupplier)
-              ? 'none'
-              : matchesFormVendorTaxName(ocrData.vendorSupplier),
-      remarks:
-        isEmpty(qrData.vendorSupplier) || isEmpty(ocrData.vendorSupplier)
-          ? 'none'
-          : qrData.vendorSupplier === ocrData.vendorSupplier &&
-            matchesFormVendorTaxName(qrData.vendorSupplier),
+      invoiceVerified: applyRemarkToVerification(0, ocrVendorPass),
+      remarks: resolveAutoRemarks(
+        qrVendorPass,
+        ocrVendorPass,
+        qrData.vendorSupplier,
+        ocrData.vendorSupplier,
+      ),
     },
     {
       header: 'NPWP Vendor',
       qr: qrData.npwpSupplier || '-',
-      fpVerified:
-        editableRemarks.value[1] === '3'
-          ? true
-          : editableRemarks.value[1] === '2'
-            ? false
-            : isEmpty(qrData.npwpSupplier)
-              ? 'none'
-              : form?.npwp == qrData.npwpSupplier,
+      fpVerified: applyRemarkToVerification(1, qrNpwpVendorPass),
       ocr: ocrData.npwpSupplier || '-',
-      invoiceVerified:
-        editableRemarks.value[1] === '3'
-          ? true
-          : editableRemarks.value[1] === '2'
-            ? false
-            : isEmpty(ocrData.npwpSupplier)
-              ? 'none'
-              : form?.npwp == ocrData.npwpSupplier,
-      remarks:
-        isEmpty(qrData.npwpSupplier) || isEmpty(ocrData.npwpSupplier)
-          ? 'none'
-          : form?.npwp == qrData.npwpSupplier && form?.npwp == ocrData.npwpSupplier,
+      invoiceVerified: applyRemarkToVerification(1, ocrNpwpVendorPass),
+      remarks: resolveAutoRemarks(
+        qrNpwpVendorPass,
+        ocrNpwpVendorPass,
+        qrData.npwpSupplier,
+        ocrData.npwpSupplier,
+      ),
     },
     {
       header: 'Perusahaan',
       qr: qrData.vendorBuyer || '-',
-      fpVerified:
-        editableRemarks.value[2] === '3'
-          ? true
-          : editableRemarks.value[2] === '2'
-            ? false
-            : isEmpty(qrData.vendorBuyer)
-              ? 'none'
-              : form?.companyName == qrData.vendorBuyer,
+      fpVerified: applyRemarkToVerification(2, qrCompanyPass),
       ocr: ocrData.vendorBuyer || '-',
-      invoiceVerified:
-        editableRemarks.value[2] === '3'
-          ? true
-          : editableRemarks.value[2] === '2'
-            ? false
-            : isEmpty(ocrData.vendorBuyer)
-              ? 'none'
-              : form?.companyName == ocrData.vendorBuyer,
-      remarks:
-        isEmpty(qrData.vendorBuyer) || isEmpty(ocrData.vendorBuyer)
-          ? 'none'
-          : form?.companyName == qrData.vendorBuyer && form?.companyName == ocrData.vendorBuyer,
+      invoiceVerified: applyRemarkToVerification(2, ocrCompanyPass),
+      remarks: resolveAutoRemarks(
+        qrCompanyPass,
+        ocrCompanyPass,
+        qrData.vendorBuyer,
+        ocrData.vendorBuyer,
+      ),
     },
     {
       header: 'NPWP',
       qr: qrData.npwpBuyer || '-',
-      fpVerified:
-        editableRemarks.value[3] === '3'
-          ? true
-          : editableRemarks.value[3] === '2'
-            ? false
-            : isEmpty(qrData.npwpBuyer)
-              ? 'none'
-              : true,
+      fpVerified: applyRemarkToVerification(3, qrNpwpBuyerPass),
       ocr: ocrData.npwpBuyer || '-',
-      invoiceVerified:
-        editableRemarks.value[3] === '3'
-          ? true
-          : editableRemarks.value[3] === '2'
-            ? false
-            : isEmpty(ocrData.npwpBuyer)
-              ? 'none'
-              : true,
-      remarks: isEmpty(qrData.npwpBuyer) || isEmpty(ocrData.npwpBuyer) ? 'none' : true,
+      invoiceVerified: applyRemarkToVerification(3, ocrNpwpBuyerPass),
+      remarks: resolveAutoRemarks(
+        qrNpwpBuyerPass,
+        ocrNpwpBuyerPass,
+        qrData.npwpBuyer,
+        ocrData.npwpBuyer,
+      ),
     },
     {
       header: 'No Faktur Pajak',
       qr: qrData.taxDocumentNumber || '-',
-      fpVerified:
-        editableRemarks.value[4] === '3'
-          ? true
-          : editableRemarks.value[4] === '2'
-            ? false
-            : isEmpty(qrData.taxDocumentNumber)
-              ? 'none'
-              : form?.taxNoInvoice == qrData.taxDocumentNumber,
+      fpVerified: applyRemarkToVerification(4, qrTaxNoPass),
       ocr: ocrData.taxDocumentNumber || '-',
-      invoiceVerified:
-        editableRemarks.value[4] === '3'
-          ? true
-          : editableRemarks.value[4] === '2'
-            ? false
-            : isEmpty(ocrData.taxDocumentNumber)
-              ? 'none'
-              : form?.taxNoInvoice == ocrData.taxDocumentNumber,
-      remarks:
-        isEmpty(qrData.taxDocumentNumber) || isEmpty(ocrData.taxDocumentNumber)
-          ? 'none'
-          : form?.taxNoInvoice == qrData.taxDocumentNumber &&
-            form?.taxNoInvoice == ocrData.taxDocumentNumber,
+      invoiceVerified: applyRemarkToVerification(4, ocrTaxNoPass),
+      remarks: resolveAutoRemarks(
+        qrTaxNoPass,
+        ocrTaxNoPass,
+        qrData.taxDocumentNumber,
+        ocrData.taxDocumentNumber,
+      ),
     },
     {
       header: 'Tanggal Faktur Pajak',
       qr: qrData.taxDocumentDate || '-',
-      fpVerified:
-        editableRemarks.value[5] === '3'
-          ? true
-          : editableRemarks.value[5] === '2'
-            ? false
-            : isEmpty(qrData.taxDocumentDate)
-              ? 'none'
-              : true,
+      fpVerified: applyRemarkToVerification(5, qrTaxDatePass),
       ocr: ocrData.taxDocumentDate || '-',
-      invoiceVerified:
-        editableRemarks.value[5] === '3'
-          ? true
-          : editableRemarks.value[5] === '2'
-            ? false
-            : isEmpty(ocrData.taxDocumentDate)
-              ? 'none'
-              : true,
-      remarks: isEmpty(qrData.taxDocumentDate) || isEmpty(ocrData.taxDocumentDate) ? 'none' : true,
+      invoiceVerified: applyRemarkToVerification(5, ocrTaxDatePass),
+      remarks: resolveAutoRemarks(
+        qrTaxDatePass,
+        ocrTaxDatePass,
+        qrData.taxDocumentDate,
+        ocrData.taxDocumentDate,
+      ),
     },
     {
       header: 'Nilai Penjualan',
       qr: qrData.dpp || '-',
-      fpVerified:
-        editableRemarks.value[6] === '3'
-          ? true
-          : editableRemarks.value[6] === '2'
-            ? false
-            : isEmpty(qrData.dpp)
-              ? 'none'
-              : Math.abs(getDifference('Nilai Penjualan', qrData.dpp)) < 1,
+      fpVerified: applyRemarkToVerification(6, qrDppPass),
       ocr: ocrData.dpp || '-',
-      invoiceVerified:
-        editableRemarks.value[6] === '3'
-          ? true
-          : editableRemarks.value[6] === '2'
-            ? false
-            : isEmpty(ocrData.dpp)
-              ? 'none'
-              : Math.abs(getDifference('Nilai Penjualan', ocrData.dpp)) < 1,
-      remarks: isEmpty(qrData.dpp) || isEmpty(ocrData.dpp) ? 'none' : true,
+      invoiceVerified: applyRemarkToVerification(6, ocrDppPass),
+      remarks: resolveAutoRemarks(qrDppPass, ocrDppPass, qrData.dpp, ocrData.dpp),
     },
     {
       header: 'DPP Lainnya',
@@ -753,68 +955,26 @@ const tableData = computed(() => {
     {
       header: 'PPN',
       qr: qrData.ppn || '-',
-      fpVerified:
-        editableRemarks.value[8] === '3'
-          ? true
-          : editableRemarks.value[8] === '2'
-            ? false
-            : isEmpty(qrData.ppn)
-              ? 'none'
-              : Math.abs(getDifference('PPN', qrData.ppn)) < 1,
+      fpVerified: applyRemarkToVerification(8, qrPpnPass),
       ocr: ocrData.ppn || '-',
-      invoiceVerified:
-        editableRemarks.value[8] === '3'
-          ? true
-          : editableRemarks.value[8] === '2'
-            ? false
-            : isEmpty(ocrData.ppn)
-              ? 'none'
-              : Math.abs(getDifference('PPN', ocrData.ppn)) < 1,
-      remarks: isEmpty(qrData.ppn) || isEmpty(ocrData.ppn) ? 'none' : true,
+      invoiceVerified: applyRemarkToVerification(8, ocrPpnPass),
+      remarks: resolveAutoRemarks(qrPpnPass, ocrPpnPass, qrData.ppn, ocrData.ppn),
     },
     {
       header: 'PPN BM',
       qr: qrData.ppnbm || '-',
-      fpVerified:
-        editableRemarks.value[9] === '3'
-          ? true
-          : editableRemarks.value[9] === '2'
-            ? false
-            : isEmpty(qrData.ppnbm)
-              ? 'none'
-              : true,
+      fpVerified: applyRemarkToVerification(9, qrPpnbmPass),
       ocr: ocrData.ppnbm || '-',
-      invoiceVerified:
-        editableRemarks.value[9] === '3'
-          ? true
-          : editableRemarks.value[9] === '2'
-            ? false
-            : isEmpty(ocrData.ppnbm)
-              ? 'none'
-              : true,
-      remarks: isEmpty(qrData.ppnbm) || isEmpty(ocrData.ppnbm) ? 'none' : true,
+      invoiceVerified: applyRemarkToVerification(9, ocrPpnbmPass),
+      remarks: resolveAutoRemarks(qrPpnbmPass, ocrPpnbmPass, qrData.ppnbm, ocrData.ppnbm),
     },
     {
       header: 'Status Approve FP',
       qr: qrData.status || '-',
-      fpVerified:
-        editableRemarks.value[10] === '3'
-          ? true
-          : editableRemarks.value[10] === '2'
-            ? false
-            : isEmpty(qrData.status)
-              ? 'none'
-              : true,
+      fpVerified: applyRemarkToVerification(10, qrStatusPass),
       ocr: ocrData.status || '-',
-      invoiceVerified:
-        editableRemarks.value[10] === '3'
-          ? true
-          : editableRemarks.value[10] === '2'
-            ? false
-            : isEmpty(ocrData.status)
-              ? 'none'
-              : true,
-      remarks: isEmpty(qrData.status) || isEmpty(ocrData.status) ? 'none' : true,
+      invoiceVerified: applyRemarkToVerification(10, ocrStatusPass),
+      remarks: resolveAutoRemarks(qrStatusPass, ocrStatusPass, qrData.status, ocrData.status),
     },
     {
       header: 'Reference',
@@ -826,6 +986,21 @@ const tableData = computed(() => {
     },
   ]
 })
+
+const reconcileRemarksWithVerification = () => {
+  tableData.value.forEach((row, i) => {
+    if (editableRemarks.value[i] === '3') return
+    if (row.remarks === true) {
+      editableRemarks.value[i] = '1'
+      return
+    }
+    if (row.remarks === false) {
+      editableRemarks.value[i] = '2'
+      return
+    }
+    editableRemarks.value[i] = '4'
+  })
+}
 
 /* ---------------- PJAP ---------------- */
 /* ---------------- PJAP ---------------- */
@@ -844,34 +1019,39 @@ const setTabOcr = (tab: 'general' | 'tax') => {
 
 const isSyncLoading = ref(false)
 const pjapSyncStatus = ref<string | null>(null)
+/** True only after user clicks Tax Verification and OCR API returns data. */
+const taxOcrScanned = ref(false)
+const scannedOcrStatus = ref('')
+const scannedTaxInvoiceNo = ref('')
 
 const generalStatus = computed(() => [
   {
     label: 'OCR Status',
-    value: form?.taxInvoiceStatus || '-',
-    status: form?.taxInvoiceStatus ? 'success' : 'warning',
+    value: taxOcrScanned.value ? scannedOcrStatus.value || 'Pending' : 'Pending',
+    status: taxOcrScanned.value && scannedOcrStatus.value ? 'success' : 'warning',
   },
   {
     label: 'Tax Invoice No.',
-    value: form?.taxInvoiceNumber || '-',
-    status: form?.taxInvoiceNumber ? 'success' : 'warning',
+    value: taxOcrScanned.value ? scannedTaxInvoiceNo.value || '-' : '-',
+    status: taxOcrScanned.value && scannedTaxInvoiceNo.value ? 'success' : 'warning',
   },
   {
     label: 'DJP / FP Status',
-    value: pjapSyncStatus.value || form?.taxInvoiceStatus || '-',
-    status: pjapSyncStatus.value || form?.taxInvoiceStatus ? 'success' : 'warning',
+    value:
+      pjapSyncStatus.value ||
+      (taxOcrScanned.value ? scannedOcrStatus.value || form?.taxInvoiceStatus || '-' : '-'),
+    status:
+      !!pjapSyncStatus.value ||
+      (taxOcrScanned.value && !!(scannedOcrStatus.value || form?.taxInvoiceStatus))
+        ? 'success'
+        : 'warning',
   },
 ])
 
 /* ---------------- watchers ---------------- */
 watch(isVerifyData, (val) => {
   if (!val) return
-  tableData.value.forEach((row, i) => {
-    if (editableRemarks.value[i] === undefined) {
-      editableRemarks.value[i] = row.remarks === true ? '1' : row.remarks === false ? '2' : '4'
-    }
-    if (editableRemarks.value[i] === '3') manualOverride[i] = true
-  })
+  reconcileRemarksWithVerification()
 })
 
 const getDocumentPreviewSource = (doc: responseFileTypes | null | undefined): string => {
@@ -949,6 +1129,7 @@ watch(
         // Manual Verified → force centang
         manualApprove[index] = true
         manualReject[index] = false
+        manualOverride[index] = true
       } else if (remark === '2') {
         // Not match → force silang
         manualReject[index] = true
@@ -959,48 +1140,15 @@ watch(
         manualReject[index] = false
       }
     })
+
+    if (isVerifyData.value) {
+      persistVerificationSnapshot()
+    }
   },
   { deep: true },
 )
 
-/* ---------------- upload ---------------- */
-const hydrateVerificationDataFromForm = () => {
-  if (!form) return
-
-  const assignIfEmpty = <K extends keyof invoiceQrData>(
-    target: invoiceQrData | invoiceOcrData,
-    key: K,
-    value?: string | null,
-  ) => {
-    if (!value?.trim()) return
-    if (!target[key]) target[key] = value
-  }
-
-  assignIfEmpty(qrData, 'taxDocumentNumber', form.taxNoInvoice || form.taxInvoiceNumber)
-  assignIfEmpty(ocrData, 'taxDocumentNumber', form.taxInvoiceNumber || form.taxNoInvoice)
-  assignIfEmpty(qrData, 'taxDocumentDate', toOptionalText(form.taxDate) || toOptionalText(form.taxInvoiceDate))
-  assignIfEmpty(
-    ocrData,
-    'taxDocumentDate',
-    toOptionalText(form.taxInvoiceDate) || toOptionalText(form.taxDate),
-  )
-  assignIfEmpty(qrData, 'vendorSupplier', form.ocrVendorName)
-  assignIfEmpty(ocrData, 'vendorSupplier', form.ocrVendorName)
-  assignIfEmpty(qrData, 'npwpSupplier', form.vendorNPWP || form.npwp)
-  assignIfEmpty(ocrData, 'npwpSupplier', form.vendorNPWP || form.npwp)
-  assignIfEmpty(qrData, 'vendorBuyer', form.ocrCompanyName || form.companyName)
-  assignIfEmpty(ocrData, 'vendorBuyer', form.ocrCompanyName || form.companyName)
-  assignIfEmpty(qrData, 'npwpBuyer', form.npwpCompany)
-  assignIfEmpty(ocrData, 'npwpBuyer', form.npwpCompany)
-  assignIfEmpty(ocrData, 'dpp', form.salesAmount != null ? String(form.salesAmount) : '')
-  assignIfEmpty(ocrData, 'ppn', form.ocrVatAmount != null ? String(form.ocrVatAmount) : '')
-  assignIfEmpty(ocrData, 'ppnbm', form.ocrVatbmAmount != null ? String(form.ocrVatbmAmount) : '')
-  assignIfEmpty(ocrData, 'status', form.taxInvoiceStatus)
-}
-
 const sendUploadFile = async () => {
-  hydrateVerificationDataFromForm()
-
   if (!resolveDocumentUrlForApi(form?.tax)) {
     console.warn('Tax document URL is missing — using saved form data only')
     return
@@ -1043,6 +1191,16 @@ const sendUploadFile = async () => {
       console.error('Invoice document OCR fallback failed:', fallbackError)
     }
   }
+
+  if (!ocrData.npwpSupplier && qrData.npwpSupplier) {
+    ocrData.npwpSupplier = qrData.npwpSupplier
+  }
+  if (!qrData.npwpSupplier && ocrData.npwpSupplier) {
+    qrData.npwpSupplier = ocrData.npwpSupplier
+  }
+
+  Object.assign(qrData, normalizeTaxFakturScanResult({ ...qrData }))
+  Object.assign(ocrData, normalizeTaxFakturScanResult({ ...ocrData }))
 }
 
 const verifyInvoice = async () => {
@@ -1051,6 +1209,21 @@ const verifyInvoice = async () => {
     await sendUploadFile()
     await setOcrPayload()
     isVerifyData.value = true
+    const scannedNo = (ocrData.taxDocumentNumber || '').trim()
+    const scannedStatus = (ocrData.status || '').trim()
+    const scannedDate = (ocrData.taxDocumentDate || '').trim()
+    const isTaxScanSuccess = Boolean(scannedNo || scannedStatus || scannedDate)
+
+    taxOcrScanned.value = isTaxScanSuccess
+    scannedOcrStatus.value = scannedStatus
+    scannedTaxInvoiceNo.value = scannedNo
+    markOcrPjapVerified?.(isTaxScanSuccess)
+
+    if (isTaxScanSuccess) {
+      tabOcrTab.value = 'tax'
+      await nextTick()
+      persistVerificationSnapshot()
+    }
   } finally {
     isLoadUpload.value = false
   }
@@ -1117,6 +1290,7 @@ const verifyByPjap = async () => {
 
   try {
     const res = await invoiceVerificationStore.sync({
+      companyCode: form?.companyCode || '',
       noFaktur: ocrData.taxDocumentNumber || '',
       npwpVendor: ocrData.npwpSupplier || '',
       masaPajak: month || 0,
@@ -1129,7 +1303,9 @@ const verifyByPjap = async () => {
   } finally {
     isVerify.value = true
     isSyncLoading.value = false
-    markOcrPjapVerified?.(true)
+    markOcrPjapVerified?.(taxOcrScanned.value)
+    await nextTick()
+    persistVerificationSnapshot()
     setInvoiceSubmissionTab?.('information')
   }
 }
@@ -1161,11 +1337,14 @@ onUnmounted(() => {
   revokePreviewObjectUrl()
 })
 
-onMounted(() => {
+onMounted(async () => {
+  if (!(await tryRestorePreviousVerification())) {
+    resetTaxVerificationState()
+  }
   setColumn()
   typeForm.value = route.query.type?.toString().toLowerCase() || 'po'
   void updatePreviewUrl()
-  hydrateVerificationDataFromForm()
+  void refreshInvoicePoGrAutofill?.()
 })
 </script>
 

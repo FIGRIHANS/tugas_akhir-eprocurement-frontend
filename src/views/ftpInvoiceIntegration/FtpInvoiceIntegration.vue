@@ -305,7 +305,7 @@
 
 <script lang="ts" setup>
 import { ref, reactive, computed, onMounted, watch, defineAsyncComponent } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import TableListSkeleton from '@/components/skeleton/TableListSkeleton.vue'
@@ -339,20 +339,20 @@ import {
 import {
   buildFtpSyncContextFromDataRow,
   buildSyncContextFromDetail,
-  enrichFtpDataListMissingVendorNos,
-  enrichFtpDataListWithUploads,
   fetchFtpDataList,
   fetchFtpUploadList,
   getFtpDataStatusLabel,
   isFtpDraftDataRow,
   shouldHideSubmittedDocumentNo,
   resolveFtpDataInvoiceVendorNo,
+  resolveFtpDataSubmittedDocumentNo,
   getFtpUploadTabStatusBadgeClass,
   resolveFtpUploadTabStatus,
   resolveFtpRowUid,
   resolveFtpUploadUIdFromRow,
   saveActiveFtpUploadUId,
   saveFtpSyncContext,
+  sortFtpDataByNewest,
   sortFtpUploadsByNewest,
 } from './types/ftpUploadService'
 
@@ -378,6 +378,7 @@ const invoicePoTypeList = computed(() => invoiceMasterApi.invoicePoType)
 const invoiceApi = useInvoiceSubmissionStore()
 const loginStore = useLoginStore()
 const router = useRouter()
+const route = useRoute()
 const search = ref<string>('')
 const currentPage = ref<number>(1)
 const pageSize = ref<number>(10)
@@ -422,7 +423,19 @@ const setActiveTab = (tab: 'ftpData' | 'upload') => {
   sortColumnName.value = ''
   resetFilterState()
   callList()
-  if (tab === 'upload') fetchFtpUploads()
+}
+
+const applyRouteTab = () => {
+  const tab = route.query.tab?.toString()
+  if (tab === 'ftpData' || tab === 'upload') {
+    if (activeTab.value !== tab) {
+      activeTab.value = tab
+      currentPage.value = 1
+      sortBy.value = ''
+      sortColumnName.value = ''
+      resetFilterState()
+    }
+  }
 }
 
 // Upload list fetched from backend. Empty until API responds.
@@ -558,39 +571,6 @@ const openViewer = async (item: FtpUploadListItem) => {
   if (modal) modal.show()
 }
 
-const updateUploadDummyStatuses = () => {
-  try {
-    const ftpItems = (sourceList.value || []) as FtpDataListRow[]
-    uploadList.value = uploadList.value.map((d) => {
-      const uid = d.invoiceUId ? String(d.invoiceUId) : ''
-      const match = ftpItems.find(
-        (s) =>
-          uid &&
-          (String(s.invoiceUId) === uid ||
-            String(s.reffId || '') === uid ||
-            String(s.ftpUploadUId || '') === uid),
-      )
-
-      if (match) {
-        const newStatus =
-          match.portalStatus === 'Done' ? 'Done' : 'Uploaded'
-        return {
-          ...d,
-          status: resolveFtpUploadTabStatus(
-            match.ftpUploadStatus || match.portalStatus || newStatus,
-          ),
-          invoiceUId: match.invoiceUId || d.invoiceUId,
-          vendorName: match.vendorName || d.vendorName,
-        }
-      }
-
-      return d
-    })
-  } catch {
-    // ignore
-  }
-}
-
 const getListStatusCode = (): number | null => {
   if (filterForm.status === '0' || filterForm.status) {
     return Number(filterForm.status)
@@ -685,7 +665,7 @@ const formatFtpDataAmountDisplay = (value?: number | null) => {
 
 const displaySubmittedDocumentNo = (row: FtpDataListRow) => {
   if (shouldHideSubmittedDocumentNo(row)) return '-'
-  return row.invoiceNo?.trim() || '-'
+  return resolveFtpDataSubmittedDocumentNo(row) || '-'
 }
 
 const displayInvoiceVendorNo = (row: FtpDataListRow) => {
@@ -894,7 +874,9 @@ const filterUploadListBySearch = (items: FtpUploadListItem[]) => {
 }
 
 const filteredUploadList = computed(() =>
-  filterUploadListBySearch(filterUploadListByStatus(uploadList.value)),
+  sortFtpUploadsByNewest(
+    filterUploadListBySearch(filterUploadListByStatus(uploadList.value)),
+  ),
 )
 
 const paginatedUploadList = computed(() => {
@@ -1056,7 +1038,7 @@ const onUploaded = (
   activeTab.value = 'ftpData'
   currentPage.value = 1
   void callList()
-  window.setTimeout(() => void callList({ silent: true }), 5000)
+  window.setTimeout(() => void callList({ silent: true }), 3000)
 }
 
 const callList = async (options?: { silent?: boolean }) => {
@@ -1068,29 +1050,17 @@ const callList = async (options?: { silent?: boolean }) => {
       return
     }
 
-    const [response, uploads] = await Promise.all([
-      fetchFtpDataList({
-        statusCode: getListStatusCode(),
-        companyCode: filterForm.companyCode,
-        invoiceTypeCode: Number(filterForm.invoiceType) || undefined,
-        invoiceDate: filterForm.date,
-        page: 1,
-        pageSize: 1000,
-      }),
-      fetchFtpUploadList().catch(() => [] as FtpUploadListItem[]),
-    ])
+    const response = await fetchFtpDataList({
+      statusCode: getListStatusCode(),
+      companyCode: filterForm.companyCode,
+      invoiceTypeCode: Number(filterForm.invoiceType) || undefined,
+      invoiceDate: filterForm.date,
+      page: 1,
+      pageSize: 1000,
+    })
 
-    uploadList.value = sortFtpUploadsByNewest(
-      uploads.map((item) =>
-        normalizeFtpUploadListItem(item, getCachedOriginalNames(item.invoiceUId)),
-      ),
-    )
-
-    let items = enrichFtpDataListWithUploads(response.items, uploads)
-    items = await enrichFtpDataListMissingVendorNos(items)
-    sourceList.value = items
+    sourceList.value = sortFtpDataByNewest(response.items)
     ftpDataTotal.value = response.total
-    updateUploadDummyStatuses()
   } catch (error) {
     console.error('Failed to load FTP invoice list:', error)
     if (!hasLoadedListOnce.value) {
@@ -1211,8 +1181,17 @@ const resetFilter = () => {
 }
 
 onMounted(() => {
+  applyRouteTab()
   callList()
 })
+
+watch(
+  () => route.query.tab,
+  () => {
+    applyRouteTab()
+    callList()
+  },
+)
 </script>
 
 <style lang="scss" scoped>

@@ -24,13 +24,7 @@
               <td>{{ index + 1 }}</td>
               <td>{{ item.profileName }}</td>
               <td>{{ item.actionerName || '-' }}</td>
-              <td>
-                {{
-                  item.actionerDate && item.actionerDate !== '1900-01-01T00:00:00'
-                    ? moment(item.actionerDate).format('YYYY/MM/DD HH:mm:ss')
-                    : '-'
-                }}
-              </td>
+              <td>{{ formatWorkflowApprovalDateTime(item) }}</td>
               <td>
                 <span v-if="item.stateCode === 99">-</span>
                 <span v-else class="badge badge-outline" :class="badgeColor(item.stateCode)">
@@ -50,7 +44,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { KTModal } from '@/metronic/core'
-import moment from 'moment'
+import { formatWorkflowApprovalDateTime } from '@/composables/useInvoiceWorkflow'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()

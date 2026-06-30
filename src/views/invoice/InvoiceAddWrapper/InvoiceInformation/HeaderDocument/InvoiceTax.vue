@@ -26,26 +26,25 @@
           class="flex justify-between items-center gap-[8px] flex-1"
         >
           <AttachmentView
-            class="cursor-pointer"
             :fileData="
               typeof form[item.varName as keyof documentFormTypes] === 'object'
                 ? (form[item.varName as keyof documentFormTypes] as responseFileTypes)
                 : null
             "
-            @click="
-              openDocumentPreview(
-                (form[item.varName as keyof documentFormTypes] as responseFileTypes) || null,
-                item.title,
-              )
-            "
           />
-          <div class="flex items-center gap-[8px]">
-            <span
-              v-if="canReplaceDocument"
-              class="border-b border-dashed border-primary text-primary cursor-pointer text-xs font-medium mr-2"
-              @click="sendUploadFile"
-              >Fill Tax Data</span
+          <div class="flex items-center gap-[8px] shrink-0">
+            <button
+              class="btn btn-icon btn-sm btn-outline btn-primary"
+              title="Lihat dokumen"
+              @click="
+                openDocumentPreview(
+                  (form[item.varName as keyof documentFormTypes] as responseFileTypes) || null,
+                  item.title,
+                )
+              "
             >
+              <i class="ki-filled ki-eye"></i>
+            </button>
             <button
               v-if="canReplaceDocument"
               class="btn btn-icon btn-sm btn-active-light-primary text-primary"
@@ -66,7 +65,6 @@
         </div>
       </div>
     </div>
-    <UiLoading v-model="isLoading"></UiLoading>
   </div>
 </template>
 
@@ -79,18 +77,13 @@ import type {
 } from '../../../types/invoiceDocument'
 import type { formTypes } from '../../../types/invoiceAddWrapper'
 import pdfUploadTax from '@/components/ui/pdfUpload/pdfUploadTaxDoc.vue'
-import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
 import AttachmentView from '@/components/ui/attachment/AttachmentView.vue'
-import UiLoading from '@/components/modal/UiLoading.vue'
-import { parseIndoDate } from '@/composables/parseIndoDate'
-import { openPdfPreview, resolveDocumentUrlForApi } from '@/composables/documentPreview'
+import { openPdfPreview } from '@/composables/documentPreview'
 
 type FileFieldKeys = 'invoiceDocument' | 'tax' | 'referenceDocument' | 'otherDocument'
 
-const invoiceVerificationStore = useInvoiceVerificationStore()
 const formInject = inject<formTypes>('form')
 const pdfUploadRef = ref()
-const isLoading = ref<boolean>(false)
 
 const isEditingField = reactive<Record<string, boolean>>({
   tax: false,
@@ -145,19 +138,6 @@ const removeFile = (name: FileFieldKeys) => {
 const openDocumentPreview = (file: responseFileTypes | null, label: string) => {
   const signedUrl = (file?.previewPath || file?.path || '').trim()
   openPdfPreview(signedUrl || null, label)
-}
-
-const sendUploadFile = async () => {
-  if (!formInject || !resolveDocumentUrlForApi(form?.tax)) return
-
-  isLoading.value = true
-  try {
-    const response = await invoiceVerificationStore.uploadFileQr(form.tax!)
-    formInject.taxNoInvoice = response.taxDocumentNumber
-    formInject.taxDate = parseIndoDate(response.taxDocumentDate)
-  } finally {
-    isLoading.value = false
-  }
 }
 
 watch(

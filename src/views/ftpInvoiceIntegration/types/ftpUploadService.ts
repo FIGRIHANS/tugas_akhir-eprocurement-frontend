@@ -124,13 +124,15 @@ export const parseFtpUploadList = (payload: unknown): FtpUploadListItem[] => {
 
   if (!Array.isArray(items)) return []
 
-  return items.map((item) => {
-    const normalized = normalizeFtpUploadListItem(item as FtpUploadListItem)
+  const normalized = items.map((item) => {
+    const row = normalizeFtpUploadListItem(item as FtpUploadListItem)
     return {
-      ...normalized,
-      status: resolveFtpUploadTabStatus(normalized.status),
+      ...row,
+      status: resolveFtpUploadTabStatus(row.status),
     }
   })
+
+  return sortFtpUploadsByNewest(normalized)
 }
 
 export const parseFtpUploadDetail = (payload: unknown): FtpUploadListItem => {
@@ -429,6 +431,37 @@ const readNestedHeaderDocumentNo = (item: Record<string, unknown>): string => {
   return normalizePreviewText(header.documentNo)
 }
 
+const readNestedHeaderInvoiceNo = (item: Record<string, unknown>): string => {
+  const invoice = (item.invoice as Record<string, unknown>) || {}
+  const draft = (item.draft as Record<string, unknown>) || {}
+  const header =
+    ((invoice.header as Record<string, unknown>) ||
+      (draft.header as Record<string, unknown>) ||
+      {}) as Record<string, unknown>
+
+  return normalizePreviewText(header.invoiceNo)
+}
+
+const resolveFtpListSubmittedDocumentNo = (
+  item: Record<string, unknown>,
+  invoiceListItem: FtpInvoiceListItem | null,
+): string => {
+  const candidates = [
+    item.invoiceNo,
+    invoiceListItem?.invoiceNo,
+    readNestedHeaderInvoiceNo(item),
+    item.submittedDocumentNo,
+    item.submitttedDocumentNo,
+  ]
+
+  for (const candidate of candidates) {
+    const value = normalizePreviewText(candidate)
+    if (value) return value
+  }
+
+  return ''
+}
+
 const readItemReference = (item: Record<string, unknown>): string => {
   const preview = (item.preview as Record<string, unknown>) || {}
   const parsedPreview =
@@ -570,6 +603,16 @@ export const enrichFtpDataListMissingVendorNos = async (
   })
 }
 
+/** Submitted Document No (e.g. MF00PO2026000130) for FTP Data grid. */
+export const resolveFtpDataSubmittedDocumentNo = (
+  row: Pick<FtpDataListRow, 'invoiceNo' | 'submittedDocumentNo' | 'invoiceListItem'>,
+): string => {
+  const fromRow = row.invoiceNo?.trim() || row.invoiceListItem?.invoiceNo?.trim() || ''
+  if (fromRow) return fromRow
+
+  return row.submittedDocumentNo?.trim() || ''
+}
+
 /** Nilai Invoice Vendor No untuk tampilan grid FTP Data. */
 export const resolveFtpDataInvoiceVendorNo = (row: FtpDataListRow): string =>
   row.documentNo?.trim() || row.invoiceVendorNo?.trim() || row.grDocumentNo?.trim() || ''
@@ -614,13 +657,7 @@ export const normalizeFtpDataListItem = (item: Record<string, unknown>): FtpData
     companyCode: String(item.companyCode || invoiceListItem?.companyCode || ''),
     companyName: String(item.companyName || invoiceListItem?.companyName || ''),
     documentNo: invoiceVendorNo,
-    invoiceNo: String(
-      item.submittedDocumentNo ||
-        item.submitttedDocumentNo ||
-        item.invoiceNo ||
-        invoiceListItem?.invoiceNo ||
-        '',
-    ),
+    invoiceNo: resolveFtpListSubmittedDocumentNo(item, invoiceListItem),
     invoiceDate: parseFtpInvoiceDate(item.invoiceDate),
     statusCode: statusCode ?? -1,
     statusName,
@@ -693,7 +730,9 @@ export const mapFtpDataRowToUploadListItem = (row: FtpDataListRow): FtpUploadLis
 
 export const fetchFtpUploadListFromData = async (): Promise<FtpUploadListItem[]> => {
   const { items } = await fetchFtpDataList({ page: 1, pageSize: 1000 })
-  return items.filter((row) => isFtpUploadedRow(row)).map(mapFtpDataRowToUploadListItem)
+  return sortFtpUploadsByNewest(
+    items.filter((row) => isFtpUploadedRow(row)).map(mapFtpDataRowToUploadListItem),
+  )
 }
 
 export const parseFtpDataList = (payload: unknown): FtpDataListRow[] => {
@@ -716,9 +755,11 @@ export const parseFtpDataListResponse = (payload: unknown): FtpDataListResponse 
     .filter((item) => item && typeof item === 'object')
     .map((item) => normalizeFtpDataListItem(item as Record<string, unknown>))
 
+  const sorted = sortFtpDataByNewest(normalized)
+
   return {
-    items: normalized,
-    total: Number(root.total) || normalized.length,
+    items: sorted,
+    total: Number(root.total) || sorted.length,
   }
 }
 
@@ -1556,10 +1597,24 @@ export const resolveCompanyCodeValue = (
   return partial?.code || normalized
 }
 
+const getCreatedTimestamp = (value: unknown): number => {
+  if (value == null || value === '') return 0
+  const timestamp = new Date(String(value)).getTime()
+  return Number.isFinite(timestamp) ? timestamp : 0
+}
+
 export const sortFtpUploadsByNewest = (items: FtpUploadListItem[]) => {
   return [...items].sort((a, b) => {
-    const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0
-    const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0
-    return bTime - aTime
+    const dateDiff = getCreatedTimestamp(b.createdAt) - getCreatedTimestamp(a.createdAt)
+    if (dateDiff !== 0) return dateDiff
+    return String(b.invoiceUId || '').localeCompare(String(a.invoiceUId || ''))
+  })
+}
+
+export const sortFtpDataByNewest = (items: FtpDataListRow[]) => {
+  return [...items].sort((a, b) => {
+    const dateDiff = getCreatedTimestamp(b.createdUtcDate) - getCreatedTimestamp(a.createdUtcDate)
+    if (dateDiff !== 0) return dateDiff
+    return (b.id || 0) - (a.id || 0)
   })
 }

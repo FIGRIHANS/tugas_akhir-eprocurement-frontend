@@ -5,6 +5,9 @@ const SECTION_LABELS = [
   'pembeli barang kena pajak / penerima jasa kena pajak',
   'pembeli barang kena pajak',
   'penerima jasa kena pajak',
+  'kena pajak',
+  'barang kena pajak',
+  'penerima jasa kena pajak',
   'faktur pajak',
   'nomor seri faktur pajak',
 ]
@@ -12,7 +15,19 @@ const SECTION_LABELS = [
 export const isTaxFakturSectionLabel = (value?: string | null): boolean => {
   const normalized = String(value || '').trim().toLowerCase()
   if (!normalized) return false
-  return SECTION_LABELS.some((label) => normalized === label || normalized.startsWith(label))
+  return SECTION_LABELS.some(
+    (label) =>
+      normalized === label ||
+      normalized.startsWith(label) ||
+      label.startsWith(normalized) ||
+      normalized.includes(label),
+  )
+}
+
+const pickValidVendorName = (value?: string | null): string => {
+  const text = String(value || '').trim()
+  if (!text || isTaxFakturSectionLabel(text)) return ''
+  return text
 }
 
 const digitsOnly = (value?: string | null) => String(value || '').replace(/\D/g, '')
@@ -27,6 +42,9 @@ export const deriveTkuFromNpwp = (npwp?: string | null): string => {
 export const normalizeTaxFakturVendorSupplier = (
   data: Partial<invoiceOcrData> & Record<string, unknown>,
 ): string => {
+  const npwp = String(data.npwpSupplier || data.npwp || '')
+  const fromNpwp = deriveTkuFromNpwp(npwp)
+
   const altKeys = [
     'idTku',
     'tku',
@@ -41,24 +59,20 @@ export const normalizeTaxFakturVendorSupplier = (
   ]
 
   for (const key of altKeys) {
-    const value = String(data[key] || '').trim()
-    if (value && !isTaxFakturSectionLabel(value)) return value
+    const value = pickValidVendorName(String(data[key] || ''))
+    if (value) return value
   }
-
-  const current = String(data.vendorSupplier || '').trim()
-  if (current && !isTaxFakturSectionLabel(current)) return current
-
-  const fromNpwp = deriveTkuFromNpwp(String(data.npwpSupplier || data.npwp || ''))
-  if (fromNpwp) return fromNpwp
 
   const rawText = String(data.rawText || data.text || data.ocrText || data.fullText || '')
   if (rawText) {
     const match = rawText.match(
       /Pengusaha\s+Kena\s+Pajak[\s\S]{0,500}?Nama\s*[:：]\s*([^\n\r]+)/i,
     )
-    const nama = match?.[1]?.trim()
-    if (nama && !isTaxFakturSectionLabel(nama)) return nama
+    const nama = pickValidVendorName(match?.[1])
+    if (nama) return nama
   }
+
+  if (fromNpwp) return fromNpwp
 
   return ''
 }

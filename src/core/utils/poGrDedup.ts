@@ -29,6 +29,39 @@ export function isMeaningfulPoGrRow(row: PoGrLineKeySource | null | undefined): 
   )
 }
 
+/** FTP/OCR seed row: only GR Document No. filled, no PO line data yet. */
+export function isPlaceholderPoGrRow(row: PoGrLineKeySource | null | undefined): boolean {
+  if (!row) return false
+  if (Number(row.id) > 0) return false
+  if (!String(row.grDocumentNo ?? '').trim()) return false
+  return !isMeaningfulPoGrRow(row)
+}
+
+export function hasOnlyPlaceholderPoGrRows(rows: PoGrLineKeySource[] | null | undefined): boolean {
+  if (!rows?.length) return false
+  return rows.every(isPlaceholderPoGrRow)
+}
+
+export function hasMeaningfulPoGrRows(rows: PoGrLineKeySource[] | null | undefined): boolean {
+  if (!rows?.length) return false
+  return rows.some(isMeaningfulPoGrRow)
+}
+
+/** Row is display-ready (PO + GR + amount). poNo-only stubs must still be auto-filled. */
+export function hasCompletePoGrLines(rows: PoGrLineKeySource[] | null | undefined): boolean {
+  if (!rows?.length) return false
+
+  return rows.some((row) => {
+    if (Number(row.id) > 0) return true
+
+    const hasPo = String(row.poNo ?? '').trim().length > 0
+    const hasGr = String(row.grDocumentNo ?? '').trim().length > 0
+    const hasAmount = Number(row.itemAmountLC ?? row.itemAmount ?? 0) > 0
+
+    return hasPo && hasGr && hasAmount
+  })
+}
+
 export function getPoGrLineKey(row: PoGrLineKeySource): string {
   return [
     String(row.poNo ?? '').trim(),

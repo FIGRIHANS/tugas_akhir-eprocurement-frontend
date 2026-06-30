@@ -1,9 +1,11 @@
 import type { VendorTypes } from '@/stores/master-data/types/invoiceMasterData'
 import type { formTypes } from '@/views/invoice/types/invoiceAddWrapper'
+import { resolveCompanyCodeValue } from '@/views/ftpInvoiceIntegration/types/ftpUploadService'
 
 type UserProfile = {
   sapCode?: string
   vendorName?: string
+  companyCode?: string
 }
 
 const hasPaymentSelection = (form: formTypes) =>
@@ -41,6 +43,38 @@ const resolveVendorByReference = (
 
 export const findVendorFromList = resolveVendorByReference
 
+const applyCompanyNameFromList = (
+  form: formTypes,
+  companyList: Array<{ code: string; name: string }>,
+) => {
+  const match = companyList.find((item) => item.code === form.companyCode)
+  if (!match) return
+
+  const parts = match.name.split(' - ')
+  form.companyName = parts.length > 1 ? parts[parts.length - 1].trim() : match.name
+}
+
+/** Fill company code from profile or single company option when still empty. */
+export const ensureFormCompanyCode = (
+  form: formTypes,
+  companyList: Array<{ code: string; name: string }>,
+  profile?: UserProfile | null,
+) => {
+  if (form.companyCode?.trim()) return
+
+  const profileCode = profile?.companyCode?.trim()
+  if (profileCode) {
+    form.companyCode = resolveCompanyCodeValue(profileCode, companyList) || profileCode
+    applyCompanyNameFromList(form, companyList)
+    return
+  }
+
+  if (companyList.length === 1) {
+    form.companyCode = companyList[0].code
+    applyCompanyNameFromList(form, companyList)
+  }
+}
+
 /** Restore Invoice Data tab (General Data + Payment Information) from vendor master. */
 export const syncInvoiceDataTabFromVendorMaster = (
   form: formTypes,
@@ -56,6 +90,10 @@ export const syncInvoiceDataTabFromVendorMaster = (
   if (options?.isVendor && options.profile?.sapCode) {
     form.vendorId = options.profile.sapCode
     if (options.profile.vendorName) form.vendorName = options.profile.vendorName
+  }
+
+  if (!form.companyCode?.trim() && options?.profile?.companyCode?.trim()) {
+    form.companyCode = options.profile.companyCode.trim()
   }
 
   const vendor = resolveVendorByReference(vendorList, form.vendorId || form.vendorName)

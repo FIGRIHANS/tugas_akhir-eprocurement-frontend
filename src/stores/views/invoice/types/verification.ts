@@ -804,6 +804,7 @@ export interface UpdatePaymentStatusResponse {
 }
 
 export interface SyncManualPayload {
+  companyCode: string
   noFaktur: string
   npwpVendor: string
   masaPajak: number

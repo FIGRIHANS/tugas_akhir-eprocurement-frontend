@@ -21,6 +21,11 @@
           </tr>
         </thead>
         <tbody>
+          <tr v-if="pogrLsit.length === 0">
+            <td :colspan="columns.length" class="text-center text-[13px] py-4 text-gray-500">
+              No Data Available
+            </td>
+          </tr>
           <tr v-for="(item, index) in pogrLsit" :key="index" class="border-t hover:bg-gray-50">
             <td>{{ index + 1 }}</td>
             <td>{{ item.poNo }}</td>
@@ -28,7 +33,7 @@
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentNo || '-' }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentItem || '-' }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">
-              {{ moment(item.grDocumentDate).format('YYYY/MM/DD') }}
+              {{ formatGrDocumentDate(item.grDocumentDate) }}
             </td>
             <td>
               {{
@@ -89,7 +94,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, inject, watch, onMounted } from 'vue'
+import { ref, computed, inject, watch, onMounted, type Ref } from 'vue'
 import type { formTypes } from '../../types/invoiceAddWrapper'
 import { defaultColumn, invoiceDpColumn, PoPibColumn } from '@/static/invoicePoGr'
 import { useFormatIdr, useFormatUsd } from '@/composables/currency'
@@ -99,6 +104,7 @@ import type { itemsPoGrType } from '../../types/invoicePoGr'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
 const form = inject<formTypes>('form')
+const poGrAutoFetchTick = inject<Ref<number>>('poGrAutoFetchTick', ref(0))
 const columns = ref<string[]>([])
 const pogrLsit = ref<itemsPoGrType[]>([])
 
@@ -123,6 +129,12 @@ const setPoGrList = async () => {
 
 const callWhtCode = async (whtType: string) => {
   await invoiceMasterApi.getWhtCode(whtType)
+}
+
+const formatGrDocumentDate = (value?: string | null) => {
+  if (!value?.trim()) return '-'
+  const parsed = moment(value)
+  return parsed.isValid() ? parsed.format('YYYY/MM/DD') : '-'
 }
 
 const checkInvoiceDp = () => {
@@ -189,13 +201,20 @@ watch(
 )
 
 watch(
-  () => form,
+  () => form?.invoicePoGr,
   () => {
     setPoGrList()
   },
   {
     deep: true,
     immediate: true,
+  },
+)
+
+watch(
+  () => poGrAutoFetchTick.value,
+  () => {
+    void setPoGrList()
   },
 )
 

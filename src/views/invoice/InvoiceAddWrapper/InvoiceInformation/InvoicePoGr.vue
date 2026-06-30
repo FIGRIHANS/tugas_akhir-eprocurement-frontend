@@ -21,10 +21,6 @@
               Search
             </button>
           </div>
-          <button class="btn btn-outline btn-primary" @click="openUploadModal">
-            <i class="ki-duotone ki-exit-up"></i>
-            Upload
-          </button>
         </div>
         <p v-if="searchError" class="text-danger text-[11px]">
           * GR Document No is required
@@ -350,18 +346,6 @@
         </table>
       </div>
     </div>
-    <SearchPoGr
-      :currency="form?.currency || ''"
-      :is-invoice-dp="form?.invoiceDp"
-      :is-po-pib="form?.invoiceType === 'pib'"
-      @setItem="setItemPoGr"
-    />
-    <UploadPoGr
-      :currency="form?.currency || ''"
-      :is-invoice-dp="form?.invoiceDp"
-      :is-po-pib="form?.invoiceType === 'pib'"
-      @setItem="setItemPoGr"
-    />
   </div>
 </template>
 
@@ -369,32 +353,30 @@
 import { ref, reactive, computed, inject, watch, onMounted, type Ref } from 'vue'
 import { useRoute } from 'vue-router'
 import type { formTypes } from '../../types/invoiceAddWrapper'
-import { dedupePoGrLines, getPoGrLineKey, isMeaningfulPoGrRow } from '@/core/utils/poGrDedup'
+import { dedupePoGrLines, getPoGrLineKey, hasCompletePoGrLines } from '@/core/utils/poGrDedup'
 import { extractGrFromText } from '@/core/utils/grDocumentNo'
-import { KTModal } from '@/metronic/core'
 import { defaultColumn, invoiceDpColumn, poCCColumn, manualAddColumn } from '@/static/invoicePoGr'
-import SearchPoGr from './InvoicePoGr/SearchPoGr.vue'
-import UploadPoGr from './InvoicePoGr/UploadPoGr.vue'
 import GoodsReceiptService, {
   type GoodsReceiptDetailContentDto,
   type GoodsReceiptDetailParams,
 } from '@/services/goodsReceipt.service'
-import { storeToRefs } from 'pinia'
-import { useLoginStore } from '@/stores/views/login'
-import moment from 'moment'
-import type { PoGrSearchTypes, itemsPoGrType } from '../../types/invoicePoGr'
+import type { itemsPoGrType } from '../../types/invoicePoGr'
 import type { PoGrItemTypes } from '@/stores/views/invoice/types/submission'
 import { useFormatIdr } from '@/composables/currency'
 import { repositionVueSelectDropdownLeft } from '@/composables/vueSelectDropdownPosition'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
+import { useLoginStore } from '@/stores/views/login'
+import moment from 'moment'
 const masterDataApi = useInvoiceMasterDataStore()
 const invoiceApi = useInvoiceSubmissionStore()
 const loginStore = useLoginStore()
 const route = useRoute()
-const { poGrList } = storeToRefs(invoiceApi)
 const form = inject<formTypes>('form')
 const poGrAutoFetchTick = inject<Ref<number>>('poGrAutoFetchTick', ref(0))
+const refreshInvoicePoGrAutofill = inject<(() => Promise<unknown>) | undefined>(
+  'refreshInvoicePoGrAutofill',
+)
 const columns = ref<string[]>([])
 const search = ref<string>('')
 const poGrUserModified = ref(false)
@@ -445,9 +427,11 @@ const searchEnter = (event: KeyboardEvent) => {
   }
 }
 
+const getLoginProfile = () => loginStore.userData?.profile
+
 const buildGoodsReceiptDetailParams = (grDocumentNo: string): GoodsReceiptDetailParams => {
   const params: GoodsReceiptDetailParams = { grDocumentNo: grDocumentNo.trim() }
-  const profile = loginStore.userData?.profile
+  const profile = getLoginProfile()
   if (profile?.vendorCode) {
     if (profile.profileId != null) params.accessVendorId = profile.profileId
     params.accessVendorCode = profile.vendorCode
@@ -459,6 +443,13 @@ const mapGoodsReceiptDetailToPoGrItems = (
   detail: GoodsReceiptDetailContentDto,
 ): PoGrItemTypes[] => {
   const cur = detail.currency || 'IDR'
+  const headerGrDate =
+    typeof detail.grDocumentDate === 'string'
+      ? detail.grDocumentDate
+      : detail.grDocumentDate != null
+        ? String(detail.grDocumentDate)
+        : ''
+
   return (detail.items || []).map((line) => {
     const qty = Number(line.qtyReceivedGood ?? 0)
     const unitPrice = Number(line.unitPrice ?? 0)
@@ -472,7 +463,7 @@ const mapGoodsReceiptDetailToPoGrItems = (
         ? line.grDocumentDate
         : line.grDocumentDate != null
           ? String(line.grDocumentDate)
-          : ''
+          : headerGrDate
 
     return {
       poNo: line.poNumber || detail.poNumber || '',
@@ -510,88 +501,10 @@ const fetchGrAsPoGrList = async (grDocumentNo: string): Promise<PoGrItemTypes[]>
   return mapGoodsReceiptDetailToPoGrItems(detail)
 }
 
-const searchItem = async () => {
-  if (checkInvoiceDp()) {
-    addItemInvoiceDp()
-  } else {
-    await openAddItem()
-  }
-}
-
-const addItemInvoiceDp = () => {
-  const poNumber = search.value?.toString() ?? form?.invoicePoGr[0].poNo.toString() ?? ''
-  if (poNumber.length !== 10) return (searchError.value = true)
-  else searchError.value = false
-  isDisabledSearch.value = true
-  invoiceApi
-    .getAvailableDp(
-      poNumber,
-      form?.vendorId || '',
-      formEdit.itemAmountLC || form?.invoicePoGr[0].itemAmountLC || 0,
-    )
-    .then((response) => {
-      if (response.statusCode === 200) {
-        if (!response.result.content.isAvailable && form) {
-          searchDpAvailableError.value = true
-        } else {
-          searchDpAvailableError.value = false
-          form.invoicePoGr[0].department = response.result.content.department
-        }
-      }
-    })
-    .finally(() => {
-      isSearch.value = true
-      isDisabledSearch.value = false
-    })
-}
-
-const openUploadModal = () => {
-  const idModal = document.querySelector('#upload_po_gr_item_modal')
-  const modal = KTModal.getInstance(idModal as HTMLElement)
-  modal.show()
-}
-
-const openAddItem = async () => {
-  const grDocumentNo = search.value?.trim() || ''
-
-  if (!grDocumentNo) {
-    searchError.value = true
-    return
-  }
-
-  searchError.value = false
-  grFetchError.value = ''
-
-  if (form) {
-    if (!form.vendorId || !form.companyCode) {
-      form.companyCodeError = true
-      return
-    } else {
-      form.companyCodeError = false
-    }
-  }
-
-  try {
-    const mapped = dedupePoGrLines(await fetchGrAsPoGrList(grDocumentNo))
-    poGrList.value = mapped
-
-    const idModal = document.querySelector('#add_po_gr_item_modal')
-    const modal = KTModal.getInstance(idModal as HTMLElement)
-    modal.show()
-  } catch (error: unknown) {
-    console.error('Error fetching Goods Receipt:', error)
-    grFetchError.value =
-      error instanceof Error ? error.message : 'Unable to load GR lines. Please check GR Document No.'
-  }
-}
-
 const setPoGrFromMockSap = (items: PoGrItemTypes[]) => {
   if (!form) return
 
-  const existingByKey = new Map(
-    form.invoicePoGr.map((row) => [getPoGrLineKey(row), row]),
-  )
-
+  const existingByKey = new Map(form.invoicePoGr.map((row) => [getPoGrLineKey(row), row]))
   const uniqueItems = dedupePoGrLines(items || [])
 
   form.invoicePoGr = uniqueItems.map((item) => {
@@ -640,30 +553,6 @@ const setPoGrFromMockSap = (items: PoGrItemTypes[]) => {
   })
 }
 
-const hasExistingPoGrData = () => {
-  if (!form?.invoicePoGr?.length) return false
-
-  return form.invoicePoGr.some((row) => {
-    if (Number(row.id) > 0) return true
-    return !!(
-      row.taxCode ||
-      row.conditionType ||
-      row.whtType ||
-      row.whtCode ||
-      row.department
-    )
-  })
-}
-
-const hasFetchedPoGrLines = () => {
-  if (!form?.invoicePoGr?.length) return false
-
-  return form.invoicePoGr.some((row) => {
-    if (Number(row.id) > 0) return true
-    return !!(row.poNo && (row.taxCode || row.conditionType || Number(row.itemAmountLC) > 0))
-  })
-}
-
 const resolveGrNoForAutoFetch = (): string => {
   return (
     extractGrFromText(search.value) ||
@@ -673,12 +562,48 @@ const resolveGrNoForAutoFetch = (): string => {
   )
 }
 
-const runPoGrAutoFetch = async () => {
+const searchItem = async () => {
+  if (checkInvoiceDp()) {
+    addItemInvoiceDp()
+    return
+  }
+
+  await runPoGrAutoFetch(true)
+}
+
+const addItemInvoiceDp = () => {
+  const poNumber = search.value?.toString() ?? form?.invoicePoGr[0].poNo.toString() ?? ''
+  if (poNumber.length !== 10) return (searchError.value = true)
+  else searchError.value = false
+  isDisabledSearch.value = true
+  invoiceApi
+    .getAvailableDp(
+      poNumber,
+      form?.vendorId || '',
+      formEdit.itemAmountLC || form?.invoicePoGr[0].itemAmountLC || 0,
+    )
+    .then((response) => {
+      if (response.statusCode === 200) {
+        if (!response.result.content.isAvailable && form) {
+          searchDpAvailableError.value = true
+        } else {
+          searchDpAvailableError.value = false
+          form.invoicePoGr[0].department = response.result.content.department
+        }
+      }
+    })
+    .finally(() => {
+      isSearch.value = true
+      isDisabledSearch.value = false
+    })
+}
+
+const runPoGrAutoFetch = async (force = false) => {
   if (!form) return
   if (checkInvoiceDp() || form.invoiceType === '902') return
   if (isAutoFetchingPo.value) return
-  if (poGrUserModified.value) return
-  if (hasExistingPoGrData() || hasFetchedPoGrLines()) return
+  if (!force && poGrUserModified.value) return
+  if (!force && hasCompletePoGrLines(form.invoicePoGr)) return
 
   const grNo = resolveGrNoForAutoFetch()
   if (!grNo) return
@@ -703,10 +628,6 @@ const checkInvoiceDp = () => {
   return form?.invoiceDp === '9012'
 }
 
-const checkInvoiceWithDp = () => {
-  return form?.invoiceDp === '9013'
-}
-
 const checkPoPib = () => {
   return form?.invoiceType === '902'
 }
@@ -727,55 +648,6 @@ const setColumn = () => {
   else if (form?.invoiceDp === '9012') columns.value = ['Action', ...invoiceDpColumn]
   else if (form?.invoiceType === '902') columns.value = ['Actions', ...manualAddColumn]
   else columns.value = ['Action', ...defaultColumn]
-}
-
-const setItemPoGr = (items: PoGrSearchTypes[]) => {
-  for (const item of dedupePoGrLines(items)) {
-    const data = {
-      id: 0,
-      poNo: item.poNo,
-      poItem: item.poItem,
-      grDocumentNo: item.grDocumentNo,
-      grDocumentItem: item.grDocumentItem,
-      grDocumentDate: item.grDocumentDate,
-      taxCode: item.taxCode,
-      currencyLC: item.currencyLC,
-      currencyTC: item.currencyTC,
-      itemAmountLC: item.itemAmount,
-      itemAmountTC: item.itemAmount,
-      quantity: item.quantity,
-      uom: item.uom,
-      itemText: item.materialDescription,
-      currency: item.currency,
-      conditionType: item.conditionType,
-      conditionTypeDesc: item.conditionTypeDesc,
-      qcStatus: item.qcStatus,
-      postingDate: item.postingDate,
-      enteredOn: item.enteredOn,
-      purchasingOrg: item.purchasingOrg,
-      department: item.department,
-      whtBaseAmount: form.currency === 'IDR' ? item.itemAmountLC : item.itemAmountTC,
-      deliveryOrderNo: item.deliveryOrderNo,
-      isEdit: false,
-    } as itemsPoGrType
-
-    const alreadyExists = form?.invoicePoGr.some(
-      (row) => getPoGrLineKey(row) === getPoGrLineKey(data),
-    )
-    if (alreadyExists) continue
-
-    form?.invoicePoGr.push(data)
-
-    if (form?.invoicePoGr.length === 1 && checkInvoiceWithDp()) {
-      const firstItem = form.invoicePoGr[0]
-      invoiceApi.getRemainingDp(firstItem.poNo).then((response) => {
-        if (response.statusCode === 200) {
-          const remaining = response.result.content.remainingDPAmount
-          form.remainingDpAmount = remaining
-        }
-      })
-    }
-  }
 }
 
 const resetFormEdit = () => {
@@ -1056,7 +928,8 @@ onMounted(async () => {
     if (grFromVendorNo) search.value = grFromVendorNo
   }
 
-  await runPoGrAutoFetch()
+  await refreshInvoicePoGrAutofill?.()
+  await runPoGrAutoFetch(true)
 
   // Prevent double fetching of WHT Types
   if (!masterDataApi.whtTypeList || masterDataApi.whtTypeList.length === 0) {

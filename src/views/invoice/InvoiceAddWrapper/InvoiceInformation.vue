@@ -24,6 +24,9 @@ const InvoiceItem = defineAsyncComponent(() => import('./InvoiceInformation/Invo
 const AdditionalCost = defineAsyncComponent(() => import('./InvoiceInformation/AdditionalCost.vue'))
 
 const form = inject<formTypes>('form')
+const refreshInvoicePoGrAutofill = inject<(() => Promise<unknown>) | undefined>(
+  'refreshInvoicePoGrAutofill',
+)
 const route = useRoute()
 const typeForm = ref<string>('')
 
@@ -43,8 +46,9 @@ const checkPoWithDp = () => {
   return form.invoiceDp === '9013'
 }
 
-onMounted(() => {
+onMounted(async () => {
   typeForm.value = route.query.type?.toString().toLowerCase() || 'po'
+  await refreshInvoicePoGrAutofill?.()
 })
 </script>
 

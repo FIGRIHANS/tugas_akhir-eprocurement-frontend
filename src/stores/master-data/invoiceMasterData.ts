@@ -174,6 +174,11 @@ export const useInvoiceMasterDataStore = defineStore('invoiceMasterData', () => 
   }
 
   const getCostCenter = async (companyCode: string, profitCenter?: string, searchText?: string) => {
+    if (!String(companyCode ?? '').trim()) {
+      costCenterList.value = []
+      return { content: [] }
+    }
+
     const url = `/lookup/cost-center`
     const params = {
       companyCode,

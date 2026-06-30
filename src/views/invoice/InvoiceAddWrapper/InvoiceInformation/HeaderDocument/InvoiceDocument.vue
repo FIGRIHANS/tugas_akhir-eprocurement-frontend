@@ -67,17 +67,6 @@
             >
               <i class="ki-filled ki-eye"></i>
             </button>
-            <span
-              v-if="
-                (formInject?.status === 0 ||
-                  formInject?.status === -1 ||
-                  formInject?.status === 5) &&
-                item.varName === 'invoiceDocument'
-              "
-              class="border-b border-dashed border-primary text-primary cursor-pointer text-xs font-medium"
-              @click="sendUploadFile"
-              >Fill Invoice Data</span
-            >
             <button
               v-if="canReplaceDocument"
               class="btn btn-icon btn-sm btn-active-light-primary text-primary"
@@ -117,13 +106,11 @@
       />
       <p v-else class="py-10 text-center text-gray-500">Dokumen tidak dapat ditampilkan.</p>
     </UiModal>
-
-    <UiLoading v-model="isLoading"></UiLoading>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, inject, watch, computed, type Ref } from 'vue'
+import { ref, reactive, inject, watch, computed } from 'vue'
 import type {
   documentFormTypes,
   responseFileTypes,
@@ -134,20 +121,13 @@ import pdfUpload from '@/components/ui/pdfUpload/pdfUpload.vue'
 import AttachmentView from '@/components/ui/attachment/AttachmentView.vue'
 import UiModal from '@/components/modal/UiModal.vue'
 import { useRoute } from 'vue-router'
-import { resolveDocumentPreviewUrl, resolveDocumentUrlForApi } from '@/composables/documentPreview'
-import { useInvoiceVerificationStore } from '@/stores/views/invoice/verification'
-import UiLoading from '@/components/modal/UiLoading.vue'
-import { parseIndoDate } from '@/composables/parseIndoDate'
+import { resolveDocumentPreviewUrl } from '@/composables/documentPreview'
 
 type FileFieldKeys = 'invoiceDocument' | 'tax' | 'referenceDocument' | 'otherDocument'
 
 const route = useRoute()
-const invoiceVerificationStore = useInvoiceVerificationStore()
 const formInject = inject<formTypes>('form')
-const poGrAutoFetchTick = inject<Ref<number>>('poGrAutoFetchTick', ref(0))
 const pdfUploadRef = ref()
-const isLoading = ref<boolean>(false)
-const hasAutoFilledInvoiceData = ref(false)
 
 const showPreviewModal = ref(false)
 const previewLoading = ref(false)
@@ -259,40 +239,6 @@ const openDocumentPreview = async (file: responseFileTypes | null, label: string
   }
 }
 
-const sendUploadFile = async () => {
-  isLoading.value = true
-  try {
-    const invoiceDoc = form?.invoiceDocument
-    if (!invoiceDoc || !resolveDocumentUrlForApi(invoiceDoc)) return
-
-    const response = await invoiceVerificationStore.uploadFileOcr(invoiceDoc)
-
-    if (formInject && response) {
-      const vendorNo = response.taxDocumentNumber || (response as { invoiceNo?: string }).invoiceNo
-      if (vendorNo) formInject.invoiceVendorNo = vendorNo
-      if (response.taxDocumentDate) {
-        formInject.invoiceDate = parseIndoDate(response.taxDocumentDate)
-      }
-      poGrAutoFetchTick.value += 1
-    }
-  } catch (error) {
-    console.error('Error filling invoice data:', error)
-  } finally {
-    isLoading.value = false
-  }
-}
-
-const tryAutoFillFromInvoiceDocument = async () => {
-  if (hasAutoFilledInvoiceData.value) return
-  if (!resolveDocumentUrlForApi(form?.invoiceDocument)) return
-  if (formInject?.invoiceVendorNo?.trim()) return
-  if (checkIsView()) return
-  if (formInject?.status !== 0 && formInject?.status !== -1 && formInject?.status !== 5) return
-
-  hasAutoFilledInvoiceData.value = true
-  await sendUploadFile()
-}
-
 const checkIsView = () => route.query.type?.toString().includes('view')
 
 watch(
@@ -301,14 +247,6 @@ watch(
     if (formInject) Object.assign(formInject, form)
   },
   { deep: true },
-)
-
-watch(
-  () => formInject?.invoiceDocument?.previewPath,
-  () => {
-    void tryAutoFillFromInvoiceDocument()
-  },
-  { immediate: true },
 )
 
 watch(

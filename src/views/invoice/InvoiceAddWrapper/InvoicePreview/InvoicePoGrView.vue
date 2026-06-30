@@ -21,14 +21,23 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(item, index) in pogrLsit" :key="index" class="invoice__field-items">
+            <tr v-if="pogrLsit.length === 0">
+              <td :colspan="columns.length" class="text-center text-[13px]">No Data Available</td>
+            </tr>
+            <tr v-for="(item, index) in pogrLsit" v-else :key="index" class="invoice__field-items">
             <td>{{ index + 1 }}</td>
             <td>{{ item.poNo }}</td>
             <td v-if="!checkInvoiceDp()">{{ item.poItem }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentNo || '-' }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">{{ item.grDocumentItem || '-' }}</td>
             <td v-if="!checkInvoiceDp() && !checkPoPib()">
-              {{ moment(item.grDocumentDate).format('YYYY/MM/DD') }}
+              {{
+                item.grDocumentDate
+                  ? moment(item.grDocumentDate).isValid()
+                    ? moment(item.grDocumentDate).format('YYYY/MM/DD')
+                    : item.grDocumentDate
+                  : '-'
+              }}
             </td>
             <td>
               {{
