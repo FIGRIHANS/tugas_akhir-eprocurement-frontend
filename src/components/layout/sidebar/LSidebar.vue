@@ -352,6 +352,7 @@ const filteredSidebarMenu = computed(() => {
                 (child) =>
                   child.id === 'receiving-confirmation-list' ||
                   child.id === 'mock-sap-list' ||
+                  child.id === 'goods-receipt-list' ||
                   child.id === 'delivery-notes-list',
               )
             : [],

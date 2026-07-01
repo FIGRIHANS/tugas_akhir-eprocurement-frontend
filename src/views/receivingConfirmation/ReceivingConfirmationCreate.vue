@@ -218,7 +218,11 @@
             <label class="form-label text-sm font-medium text-gray-600"
               >Signature <span class="text-red-500">*</span></label
             >
-            <div class="border border-gray-300 rounded-lg p-4 mt-2 bg-gray-50" data-focus-key="signature" tabindex="-1">
+            <div
+              class="border border-gray-300 rounded-lg p-4 mt-2 bg-gray-50"
+              data-focus-key="signature"
+              tabindex="-1"
+            >
               <!-- Signature Pad -->
               <VueSignature
                 ref="signaturePad"
@@ -241,6 +245,107 @@
                 <p class="text-sm font-semibold text-gray-700">Employee Signature</p>
               </div>
             </div>
+
+            <!-- Physical Delivery Note Upload -->
+            <div class="mt-4">
+              <label class="form-label text-sm font-medium text-gray-600">
+                Vendor Delivery Document (Warehouse)
+                <span class="text-xs text-red-500 ml-1">* (Required)</span>
+              </label>
+              <div class="mt-2">
+                <div
+                  v-if="!physicalDnFile"
+                  class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-400 transition-colors cursor-pointer"
+                  @click="triggerPhysicalDnUpload"
+                  @dragover.prevent
+                  @drop.prevent="handlePhysicalDnDrop"
+                >
+                  <i class="ki-duotone ki-document-up text-2xl text-gray-400 mb-1"></i>
+                  <p class="text-xs text-gray-500">Click to upload or drag & drop</p>
+                  <p class="text-xs text-gray-400">PDF, PNG, JPG up to 5MB</p>
+                </div>
+                <div
+                  v-else
+                  class="border border-green-200 bg-green-50 rounded-lg p-3 flex flex-col items-center justify-center min-h-[120px]"
+                >
+                  <div class="w-full h-full p-2 flex flex-col">
+                    <iframe
+                      v-if="physicalDnBase64.startsWith('data:application/pdf')"
+                      :src="physicalDnBase64"
+                      class="w-full h-[150px] border border-gray-200 rounded mb-2"
+                    ></iframe>
+                    <img
+                      v-else
+                      :src="physicalDnBase64"
+                      alt="Physical Delivery Note"
+                      class="max-w-full max-h-[150px] object-contain rounded mx-auto mb-2"
+                    />
+                    <div class="flex items-center justify-center gap-2">
+                      <span class="text-sm text-green-700 truncate max-w-[150px]">{{ physicalDnFile.name }}</span>
+                      <button
+                        class="btn btn-sm btn-icon btn-primary"
+                        @click.prevent="previewFile(physicalDnBase64)"
+                        title="Full Screen"
+                      >
+                        <i class="ki-duotone ki-maximize"></i>
+                      </button>
+                      <button
+                        class="btn btn-sm btn-icon btn-danger"
+                        @click.prevent="removePhysicalDn"
+                        title="Remove"
+                      >
+                        <i class="ki-duotone ki-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <input
+                  ref="physicalDnInput"
+                  type="file"
+                  accept=".pdf,.png,.jpg,.jpeg"
+                  class="hidden"
+                  @change="handlePhysicalDnChange"
+                />
+                <p v-if="physicalDnUploadError" class="text-xs text-red-500 mt-1">
+                  {{ physicalDnUploadError }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Vendor Delivery Document (Read-only from DN) -->
+            <div class="mt-4" v-if="formData.vendorDeliveryDocumentPath">
+              <label class="form-label text-sm font-medium text-gray-600">
+                Vendor Delivery Document (Vendor)
+              </label>
+              <div class="mt-2">
+                <div
+                  class="border border-gray-200 bg-gray-50 rounded-lg p-3 flex flex-col items-center justify-center min-h-[120px]"
+                >
+                  <div class="w-full h-full p-2 flex flex-col">
+                    <iframe
+                      v-if="formData.vendorDeliveryDocumentPath.includes('application/pdf') || formData.vendorDeliveryDocumentPath.toLowerCase().endsWith('.pdf')"
+                      :src="formData.vendorDeliveryDocumentPath"
+                      class="w-full h-[150px] border border-gray-200 rounded mb-2"
+                    ></iframe>
+                    <img
+                      v-else
+                      :src="formData.vendorDeliveryDocumentPath"
+                      alt="Vendor Delivery Document"
+                      class="max-w-full max-h-[150px] object-contain rounded mx-auto mb-2"
+                    />
+                    <div class="text-center">
+                      <button
+                        class="btn btn-sm btn-outline btn-primary"
+                        @click.prevent="previewFile(formData.vendorDeliveryDocumentPath)"
+                        title="Full Screen"
+                      >
+                        <i class="ki-duotone ki-maximize"></i> Full Screen
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -251,8 +356,8 @@
         <div class="mb-4">
           <h3 class="text-lg font-semibold">List Receiving Confirmation Request</h3>
           <p class="text-sm text-gray-500 mt-1">
-            <strong>Received</strong>, <strong>Lot Number (Actual)</strong>, <strong>Condition Type</strong>,
-            <strong>Repack Qty</strong>, and
+            <strong>Received</strong>, <strong>Lot Number (Actual)</strong>,
+            <strong>Condition Type</strong>, <strong>Repack Qty</strong>, and
             <strong>Damage Qty</strong> can be edited. Difference, More, and Less are calculated
             automatically.
           </p>
@@ -323,6 +428,13 @@
                   class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center border-r min-w-[160px]"
                 >
                   Reject Reason
+                  <span class="block text-xs font-normal">(required if less &gt; 0)</span>
+                </th>
+                <th
+                  rowspan="2"
+                  class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center border-r min-w-[200px]"
+                >
+                  Evidence
                   <span class="block text-xs font-normal">(required if less &gt; 0)</span>
                 </th>
               </tr>
@@ -461,6 +573,56 @@
                   </template>
                   <span v-else class="text-gray-400 text-xs">—</span>
                 </td>
+                <!-- Evidence Upload - Required when less > 0 -->
+                <td class="text-center p-2">
+                  <template v-if="item.less > 0">
+                    <div class="flex flex-col items-center">
+                      <div v-if="!item.evidenceFile" class="w-full">
+                        <button
+                          class="btn btn-sm btn-outline btn-primary w-full text-xs py-1"
+                          @click="triggerEvidenceUpload(index)"
+                        >
+                          <i class="ki-duotone ki-file-up"></i> Upload
+                        </button>
+                      </div>
+                      <div
+                        v-else
+                        class="flex items-center justify-between bg-green-50 border border-green-200 rounded px-2 py-1 w-full mt-1"
+                      >
+                        <span
+                          class="text-xs text-green-700 truncate max-w-[80px]"
+                          :title="item.evidenceFile.name"
+                        >
+                          <i class="ki-duotone ki-check-circle mr-1"></i> Added
+                        </span>
+                        <div class="flex items-center">
+                          <button
+                            class="text-primary hover:text-blue-700 ml-1"
+                            @click.prevent="previewFile(item.evidenceBase64)"
+                            title="Preview"
+                          >
+                            <i class="ki-duotone ki-eye text-sm"></i>
+                          </button>
+                          <button
+                            class="text-red-500 hover:text-red-700 ml-1"
+                            @click.prevent="removeEvidence(index)"
+                            title="Remove"
+                          >
+                            <i class="ki-duotone ki-cross text-sm"></i>
+                          </button>
+                        </div>
+                      </div>
+                      <input
+                        :ref="(el) => (evidenceInputs[index] = el as HTMLInputElement)"
+                        type="file"
+                        accept=".pdf,.png,.jpg,.jpeg"
+                        class="hidden"
+                        @change="(e) => handleEvidenceChange(e, index)"
+                      />
+                    </div>
+                  </template>
+                  <span v-else class="text-gray-400 text-xs">—</span>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -482,7 +644,11 @@
             <i class="ki-filled ki-arrow-left"></i>
             Back
           </button>
-          <button class="btn btn-primary" :disabled="isSubmitting || !canSubmit" @click="submitForm(false)">
+          <button
+            class="btn btn-primary"
+            :disabled="isSubmitting || !canSubmit"
+            @click="submitForm(false)"
+          >
             Submit
             <i class="ki-duotone ki-paper-plane"></i>
           </button>
@@ -550,6 +716,7 @@ interface FormData {
   destination: string
   receivedDate: string
   digitalSignaturePath: string | null
+  vendorDeliveryDocumentPath?: string
 }
 
 interface TableDataItem {
@@ -567,6 +734,8 @@ interface TableDataItem {
   damageQty: number
   rejectReason: string
   conditionType: string
+  evidenceFile?: File | null
+  evidenceBase64?: string
 }
 
 // Breadcrumb
@@ -617,8 +786,119 @@ const formData = ref<FormData>({
   digitalSignaturePath: null,
 })
 
+// ─── Physical Delivery Note Upload ──────────────────────────────────────────
+const physicalDnFile = ref<File | null>(null)
+const physicalDnInput = ref<HTMLInputElement | null>(null)
+const physicalDnUploadError = ref<string>('')
+const physicalDnBase64 = ref<string>('')
+
+const triggerPhysicalDnUpload = () => {
+  physicalDnInput.value?.click()
+}
+
+const handlePhysicalDnFile = (file: File) => {
+  physicalDnUploadError.value = ''
+  const maxSize = 5 * 1024 * 1024 // 5MB
+  if (file.size > maxSize) {
+    physicalDnUploadError.value = 'File size exceeds 5MB limit.'
+    return
+  }
+  const allowed = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg']
+  if (!allowed.includes(file.type)) {
+    physicalDnUploadError.value = 'Only PDF, PNG, JPG files are allowed.'
+    return
+  }
+  physicalDnFile.value = file
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    physicalDnBase64.value = (e.target?.result as string) || ''
+  }
+  reader.readAsDataURL(file)
+}
+
+const handlePhysicalDnChange = (event: Event) => {
+  const input = event.target as HTMLInputElement
+  if (input.files && input.files[0]) handlePhysicalDnFile(input.files[0])
+}
+
+const handlePhysicalDnDrop = (event: DragEvent) => {
+  const file = event.dataTransfer?.files[0]
+  if (file) handlePhysicalDnFile(file)
+}
+
+const removePhysicalDn = () => {
+  physicalDnFile.value = null
+  physicalDnBase64.value = ''
+  physicalDnUploadError.value = ''
+  if (physicalDnInput.value) physicalDnInput.value.value = ''
+}
+
+// ─── File Preview Helper ──────────────────────────────────────────────────────
+const previewFile = (urlOrBase64: string | undefined | null) => {
+  if (!urlOrBase64) return
+  if (urlOrBase64.startsWith('data:')) {
+    const newWindow = window.open()
+    if (newWindow) {
+      if (urlOrBase64.startsWith('data:application/pdf')) {
+        newWindow.document.write(
+          `<iframe src="${urlOrBase64}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`,
+        )
+      } else {
+        newWindow.document.write(`<img src="${urlOrBase64}" style="max-width:100%;" />`)
+      }
+    }
+  } else {
+    window.open(urlOrBase64, '_blank')
+  }
+}
+
 // Table Data
 const tableData = ref<TableDataItem[]>([])
+
+// ─── Evidence Upload per Item ─────────────────────────────────────────────
+const evidenceInputs = ref<(HTMLInputElement | null)[]>([])
+
+const triggerEvidenceUpload = (index: number) => {
+  if (evidenceInputs.value[index]) {
+    evidenceInputs.value[index]?.click()
+  }
+}
+
+const handleEvidenceChange = (event: Event, index: number) => {
+  const input = event.target as HTMLInputElement
+  if (input.files && input.files[0]) {
+    const file = input.files[0]
+    const maxSize = 5 * 1024 * 1024 // 5MB
+    if (file.size > maxSize) {
+      showValidationError(`File size exceeds 5MB limit for item #${index + 1}`)
+      input.value = ''
+      return
+    }
+    const allowed = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg']
+    if (!allowed.includes(file.type)) {
+      showValidationError(`Only PDF, PNG, JPG allowed for item #${index + 1}`)
+      input.value = ''
+      return
+    }
+
+    const item = tableData.value[index]
+    item.evidenceFile = file
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      item.evidenceBase64 = (e.target?.result as string) || ''
+    }
+    reader.readAsDataURL(file)
+  }
+}
+
+const removeEvidence = (index: number) => {
+  const item = tableData.value[index]
+  item.evidenceFile = null
+  item.evidenceBase64 = ''
+  if (evidenceInputs.value[index]) {
+    evidenceInputs.value[index]!.value = ''
+  }
+}
 
 // Modal state
 const showNotificationModal = ref<boolean>(false)
@@ -689,6 +969,7 @@ const selectDeliveryNote = (dn: DeliveryNotesData) => {
   formData.value.truckType = dn.truckType || ''
   formData.value.pickup = dn.pickupAddress || ''
   formData.value.destination = dn.destinationAddress || ''
+  formData.value.vendorDeliveryDocumentPath = dn.vendorDeliveryDocumentPath || ''
 
   // Populate table data from Delivery Note items
   if (dn.items && dn.items.length > 0) {
@@ -824,6 +1105,10 @@ const getValidationResult = (isDraft = false): FormValidationResult => {
     return validationFail('Received Date tidak boleh melebihi tanggal hari ini.', 'received-date')
   }
 
+  if (!isDraft && !physicalDnFile.value) {
+    return validationFail('Physical Delivery Note Document wajib diupload.')
+  }
+
   if (tableData.value.length === 0) {
     return validationFail('Tidak ada item untuk disubmit. Pilih Delivery Note yang memiliki item.')
   }
@@ -840,8 +1125,16 @@ const getValidationResult = (isDraft = false): FormValidationResult => {
       return validationFail(`${qtyResult.message} (item #${i + 1})`, `item-${i}-qty-received`)
     }
 
-    if (item.less > 0 && isBlank(item.rejectReason)) {
-      return validationFail(`Reject Reason wajib diisi untuk item #${i + 1}.`, `item-${i}-reject-reason`)
+    if (item.less > 0) {
+      if (isBlank(item.rejectReason)) {
+        return validationFail(
+          `Reject Reason wajib diisi untuk item #${i + 1}.`,
+          `item-${i}-reject-reason`,
+        )
+      }
+      if (!isDraft && !item.evidenceBase64) {
+        return validationFail(`Evidence document wajib diupload untuk item #${i + 1}.`)
+      }
     }
   }
 
@@ -891,6 +1184,7 @@ const submitForm = async (isDraft = false) => {
       damageQty: item.damageQty,
       rejectReason: item.rejectReason || undefined,
       conditionType: item.conditionType || undefined,
+      evidencePath: item.evidenceBase64 || undefined,
     }))
 
     // Prepare payload
@@ -909,6 +1203,7 @@ const submitForm = async (isDraft = false) => {
       truckType: formData.value.truckType || undefined,
       licensePlate: formData.value.licensePlate || undefined,
       digitalSignaturePath: signatureData || '', // Always send, even if empty
+      physicalDeliveryNotePath: physicalDnBase64.value || undefined,
       status: isDraft ? 'Draft' : 'Waiting Supervisor',
       items: items,
     }

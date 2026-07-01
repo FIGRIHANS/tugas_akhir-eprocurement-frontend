@@ -448,7 +448,7 @@
           </template>
 
           <template v-if="isCompleted">
-            <button class="btn btn-primary" @click="printToPDF()">
+            <button class="btn btn-primary" @click="showPrintView = true">
               Print to PDF
               <i class="ki-duotone ki-printer"></i>
             </button>
@@ -482,7 +482,6 @@
       </div>
     </div>
 
-    <!-- Notification Modal -->
     <ModalNotification
       :open="showNotificationModal"
       :id="'notification-modal'"
@@ -495,6 +494,18 @@
         }
       "
     />
+
+    <!-- ── Print Invoice Overlay ─────────────────────────────────── -->
+    <div v-if="showPrintView" class="print-invoice-overlay">
+      <div class="print-invoice-container">
+        <ReceivingConfirmationPrint
+          :form-data="formData"
+          :table-data="tableData"
+          :current-status="currentStatus"
+          @close="showPrintView = false"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -509,9 +520,8 @@ import ReceivingConfirmationService, {
 } from '@/services/receivingConfirmation.service'
 import DeliveryNotesService from '@/services/deliveryNotes.service'
 import ModalNotification from '@/components/modal/ModalNotification.vue'
-import jsPDF from 'jspdf'
-import autoTable from 'jspdf-autotable'
 import { useLoginStore } from '@/stores/views/login'
+import ReceivingConfirmationPrint from './ReceivingConfirmationPrint.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -608,6 +618,7 @@ const deliveryNoteInfo = ref({
 
 // Modal state
 const showNotificationModal = ref<boolean>(false)
+const showPrintView = ref<boolean>(false)
 const notificationModal = ref({
   type: 'info' as 'info' | 'success' | 'error' | 'warning',
   title: '',
@@ -795,352 +806,7 @@ const closeRejectModal = () => {
   rejectionReason.value = ''
 }
 
-const printToPDF = async () => {
-  let driverSignatureFromDN: string | null = null
-  let driverSignatureDateFromDN: string | null = null
 
-  try {
-    if (formData.value.orderNo) {
-      const deliveryNotes = await DeliveryNotesService.getByDeliveryNoteNumber(
-        formData.value.orderNo,
-      )
-      if (deliveryNotes) {
-        driverSignatureFromDN = deliveryNotes.driverSignature || null
-        driverSignatureDateFromDN = deliveryNotes.createdUtcDate || null
-        console.log(
-          'Driver signature fetched from delivery notes:',
-          driverSignatureFromDN ? 'YES' : 'NO',
-        )
-      }
-    }
-  } catch (error) {
-    console.error('Error fetching driver signature from delivery notes:', error)
-    // Continue with PDF generation even if fetch fails
-  }
-
-  const formatPdfDate = (value?: string | null): string => {
-    if (!value) return '-'
-
-    const date = new Date(value)
-    if (Number.isNaN(date.getTime())) return value
-
-    return date.toLocaleDateString('id-ID', {
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric',
-    })
-  }
-
-  const whCheckerSignatureDate = formatPdfDate(formData.value.receivedDate)
-  const driverSignatureDate = formatPdfDate(driverSignatureDateFromDN)
-
-  const doc = new jsPDF()
-  const pageWidth = doc.internal.pageSize.getWidth()
-  const pageHeight = doc.internal.pageSize.getHeight()
-  let yPos = 20
-
-  // Header - Company Info
-  doc.setFontSize(20)
-  doc.setFont('helvetica', 'bold')
-  doc.text('GOODS RECEIPT INVOICE', pageWidth / 2, yPos, { align: 'center' })
-  yPos += 8
-
-  doc.setFontSize(10)
-  doc.setFont('helvetica', 'normal')
-  doc.text('Receiving Confirmation Report', pageWidth / 2, yPos, { align: 'center' })
-  yPos += 15
-
-  // Horizontal line
-  doc.setLineWidth(0.5)
-  doc.line(14, yPos, pageWidth - 14, yPos)
-  yPos += 10
-
-  // Document Info - Two Columns
-  doc.setFontSize(9)
-  doc.setFont('helvetica', 'bold')
-
-  // Left Column
-  const leftX = 14
-  const rightX = pageWidth / 2 + 10
-  const labelWidth = 35
-
-  // Report Information
-  doc.text('Report ID:', leftX, yPos)
-  doc.setFont('helvetica', 'normal')
-  doc.text(String(formData.value.orderNo || '-'), leftX + labelWidth, yPos)
-
-  doc.setFont('helvetica', 'bold')
-  doc.text('Trip ID:', rightX, yPos)
-  doc.setFont('helvetica', 'normal')
-  doc.text(formData.value.tripID || '-', rightX + labelWidth, yPos)
-  yPos += 6
-
-  doc.setFont('helvetica', 'bold')
-  doc.text('Delivery Note Number:', leftX, yPos)
-  doc.setFont('helvetica', 'normal')
-  doc.text(formData.value.orderNo || '-', leftX + labelWidth, yPos)
-
-  doc.setFont('helvetica', 'bold')
-  doc.text('Status:', rightX, yPos)
-  doc.setFont('helvetica', 'normal')
-  // Status with color
-  if (currentStatus.value === 'Completed') {
-    doc.setTextColor(34, 197, 94) // Green
-  } else if (currentStatus.value === 'Rejected') {
-    doc.setTextColor(239, 68, 68) // Red
-  }
-  doc.text(currentStatus.value || '-', rightX + labelWidth, yPos)
-  doc.setTextColor(0, 0, 0) // Reset to black
-  yPos += 6
-
-  doc.setFont('helvetica', 'bold')
-  doc.text('PO Number:', leftX, yPos)
-  doc.setFont('helvetica', 'normal')
-  doc.text(formData.value.poNumber || '-', leftX + labelWidth, yPos)
-  yPos += 6
-
-  doc.setFont('helvetica', 'bold')
-  doc.text('Received Date:', leftX, yPos)
-  doc.setFont('helvetica', 'normal')
-  doc.text(formData.value.receivedDate || '-', leftX + labelWidth, yPos)
-
-  doc.setFont('helvetica', 'bold')
-  doc.text('Has Discrepancy:', rightX, yPos)
-  doc.setFont('helvetica', 'normal')
-  const hasDiscrepancy = tableData.value.some((item) => item.selisih !== 0)
-  doc.text(hasDiscrepancy ? 'Yes' : 'No', rightX + labelWidth, yPos)
-  yPos += 10
-
-  // Location & Transport Information
-  doc.setFontSize(10)
-  doc.setFont('helvetica', 'bold')
-  doc.setFillColor(20, 184, 166) // Teal-500 background
-  doc.rect(leftX, yPos, pageWidth - 28, 6, 'F')
-  doc.setTextColor(255, 255, 255)
-  doc.text('TRANSPORT INFORMATION', leftX + 2, yPos + 4)
-  doc.setTextColor(0, 0, 0)
-  yPos += 10
-
-  doc.setFontSize(9)
-  doc.setFont('helvetica', 'bold')
-  doc.text('Pickup:', leftX, yPos)
-  doc.setFont('helvetica', 'normal')
-  doc.text(formData.value.pickup || '-', leftX + labelWidth, yPos)
-
-  doc.setFont('helvetica', 'bold')
-  doc.text('Transporter:', rightX, yPos)
-  doc.setFont('helvetica', 'normal')
-  doc.text(formData.value.transporter || '-', rightX + labelWidth, yPos)
-  yPos += 6
-
-  doc.setFont('helvetica', 'bold')
-  doc.text('Destination:', leftX, yPos)
-  doc.setFont('helvetica', 'normal')
-  doc.text(formData.value.destination || '-', leftX + labelWidth, yPos)
-
-  doc.setFont('helvetica', 'bold')
-  doc.text('License Plate:', rightX, yPos)
-  doc.setFont('helvetica', 'normal')
-  doc.text(formData.value.noPolisi || '-', rightX + labelWidth, yPos)
-  yPos += 6
-
-  doc.setFont('helvetica', 'bold')
-  doc.text('Driver Name:', leftX, yPos)
-  doc.setFont('helvetica', 'normal')
-  doc.text(formData.value.namaSopir || '-', leftX + labelWidth, yPos)
-
-  doc.setFont('helvetica', 'bold')
-  doc.text('WH Checker:', rightX, yPos)
-  doc.setFont('helvetica', 'normal')
-  doc.text(formData.value.namaKaryawan || '-', rightX + labelWidth, yPos)
-  yPos += 12
-
-  // Items Table
-  doc.setFontSize(10)
-  doc.setFont('helvetica', 'bold')
-  doc.setFillColor(20, 184, 166) // Teal-500
-  doc.rect(leftX, yPos, pageWidth - 28, 6, 'F')
-  doc.setTextColor(255, 255, 255)
-  doc.text('ITEMS DETAILS', leftX + 2, yPos + 4)
-  doc.setTextColor(0, 0, 0)
-  yPos += 10
-
-  // Prepare table data
-  const tableHeaders = [
-    'No',
-    'Material Number',
-    'Description',
-    'Lot No',
-    'Surat Jalan',
-    'Actual',
-    'Difference',
-    'Repack',
-    'Damage',
-    'Condition Type',
-  ]
-
-  const tableRows = tableData.value.map((item, index) => [
-    String(index + 1),
-    item.sku,
-    item.description,
-    item.lotNo || '-',
-    String(item.diSuratJalan),
-    String(item.diterima),
-    String(item.selisih),
-    String(item.repackQty),
-    String(item.damageQty),
-    item.conditionType || '-',
-  ])
-
-  autoTable(doc, {
-    startY: yPos,
-    head: [tableHeaders],
-    body: tableRows,
-    theme: 'grid',
-    styles: {
-      fontSize: 8,
-      cellPadding: 2,
-    },
-    headStyles: {
-      fillColor: [20, 184, 166], // Teal-500
-      textColor: [255, 255, 255],
-      fontStyle: 'bold',
-      halign: 'center',
-    },
-    columnStyles: {
-      0: { halign: 'center', cellWidth: 10 },
-      1: { cellWidth: 25 },
-      2: { cellWidth: 45 },
-      3: { cellWidth: 20 },
-      4: { halign: 'right', cellWidth: 18 },
-      5: { halign: 'right', cellWidth: 18 },
-      6: { halign: 'right', cellWidth: 18 },
-      7: { halign: 'right', cellWidth: 15 },
-      8: { halign: 'right', cellWidth: 15 },
-      9: { cellWidth: 22 },
-    },
-    didParseCell: (data) => {
-      // Highlight rows with discrepancies
-      if (data.section === 'body' && data.column.index === 6) {
-        const diff = Number(data.cell.text[0])
-        if (diff !== 0) {
-          data.cell.styles.textColor = diff > 0 ? [34, 197, 94] : [239, 68, 68]
-          data.cell.styles.fontStyle = 'bold'
-        }
-      }
-    },
-  })
-
-  // Get Y position after table
-  const finalY = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 15
-
-  // Signature Section
-  if (finalY < pageHeight - 60) {
-    yPos = finalY
-  } else {
-    doc.addPage()
-    yPos = 20
-  }
-
-  // Signature boxes
-  const signatureBoxWidth = 60
-  const signatureBoxHeight = 35
-  const sigLeftX = leftX
-  const sigRightX = pageWidth - 14 - signatureBoxWidth
-
-  // WH Checker Signature
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(9)
-  doc.text('Warehouse Checker', sigLeftX, yPos)
-  doc.rect(sigLeftX, yPos + 2, signatureBoxWidth, signatureBoxHeight)
-
-  // Add signature image if available
-  if (formData.value.signature) {
-    try {
-      doc.addImage(
-        formData.value.signature,
-        'PNG',
-        sigLeftX + 5,
-        yPos + 5,
-        signatureBoxWidth - 10,
-        signatureBoxHeight - 15,
-      )
-    } catch (error) {
-      console.error('Error adding signature to PDF:', error)
-    }
-  }
-
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(8)
-  doc.text(
-    whCheckerSignatureDate,
-    sigLeftX + signatureBoxWidth / 2,
-    yPos + signatureBoxHeight + 6,
-    {
-      align: 'center',
-    },
-  )
-  doc.setFontSize(9)
-  doc.text(
-    formData.value.namaKaryawan || '-',
-    sigLeftX + signatureBoxWidth / 2,
-    yPos + signatureBoxHeight + 12,
-    {
-      align: 'center',
-    },
-  )
-
-  // Driver Signature
-  doc.setFont('helvetica', 'bold')
-  doc.text('Driver', sigRightX, yPos)
-  doc.rect(sigRightX, yPos + 2, signatureBoxWidth, signatureBoxHeight)
-
-  // Add driver signature image if available (from delivery notes)
-  if (
-    driverSignatureFromDN &&
-    driverSignatureFromDN.trim() &&
-    driverSignatureFromDN.startsWith('data:image')
-  ) {
-    try {
-      doc.addImage(
-        driverSignatureFromDN,
-        'PNG',
-        sigRightX + 5,
-        yPos + 5,
-        signatureBoxWidth - 10,
-        signatureBoxHeight - 15,
-      )
-    } catch (error) {
-      console.error('Error adding driver signature to PDF:', error)
-    }
-  }
-
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(8)
-  doc.text(driverSignatureDate, sigRightX + signatureBoxWidth / 2, yPos + signatureBoxHeight + 6, {
-    align: 'center',
-  })
-  doc.setFontSize(9)
-  doc.text(
-    formData.value.namaSopir || '-',
-    sigRightX + signatureBoxWidth / 2,
-    yPos + signatureBoxHeight + 12,
-    {
-      align: 'center',
-    },
-  )
-
-  // Footer
-  doc.setFontSize(8)
-  doc.setTextColor(128, 128, 128)
-  doc.text(`Generated on ${new Date().toLocaleString('id-ID')}`, pageWidth / 2, pageHeight - 10, {
-    align: 'center',
-  })
-
-  // Save PDF
-  const fileName = `Receiving_Confirmation_${formData.value.orderNo}_${new Date().getTime()}.pdf`
-  doc.save(fileName)
-}
 
 const confirmReject = async () => {
   // Validate rejection reason
@@ -1330,6 +996,42 @@ const previewFile = (urlOrBase64: string | undefined | null) => {
 </script>
 
 <style lang="scss" scoped>
+/* ── Print Invoice Overlay ─────────────────────────────────────── */
+.print-invoice-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 24px 16px;
+}
+
+.print-invoice-container {
+  background: #f1f5f9;
+  border-radius: 12px;
+  padding: 24px;
+  width: 100%;
+  max-width: 900px;
+  position: relative;
+}
+
+@media print {
+  .print-invoice-overlay {
+    position: static;
+    background: none;
+    padding: 0;
+  }
+
+  .print-invoice-container {
+    background: none;
+    padding: 0;
+    border-radius: 0;
+  }
+}
+
 .list__table {
   th,
   td {
