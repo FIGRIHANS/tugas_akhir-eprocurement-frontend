@@ -563,7 +563,7 @@ const showOcrAiVerificationTab = computed(() => {
 })
 
 const workflowTabs = computed(() => {
-  const tabs: Array<(typeof WORKFLOW_TABS)[number]> = ['data']
+  const tabs: WorkflowTab[] = ['data']
   if (showOcrAiVerificationTab.value) {
     tabs.push('ocrAiVerification')
   }
@@ -942,7 +942,7 @@ const checkInvoiceNonPoView = () => {
   return route.query.type === 'non-po-view'
 }
 
-const WORKFLOW_TABS = ['data', 'ocrAiVerification', 'information', 'preview'] as const
+type WorkflowTab = 'data' | 'ocrAiVerification' | 'information' | 'preview'
 
 const getBackListRoute = () => {
   const from = route.query.from?.toString()
@@ -3035,7 +3035,7 @@ provide('saveOcrVerificationSnapshot', (snapshot: OcrVerificationSnapshot) => {
   ocrVerificationSnapshot.value = snapshot
 })
 provide('setInvoiceSubmissionTab', (tab: string) => {
-  if (workflowTabs.value.includes(tab as (typeof WORKFLOW_TABS)[number])) {
+  if (workflowTabs.value.includes(tab as WorkflowTab)) {
     tabNow.value = tab
   }
 })

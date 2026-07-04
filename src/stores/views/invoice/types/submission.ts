@@ -138,6 +138,7 @@ interface ParamsSubmissionItem {
   whtBaseAmount: number
   whtAmount: number
   department: string
+  deliveryOrderNo?: string
 }
 
 interface ParamsSubmissionCost {
