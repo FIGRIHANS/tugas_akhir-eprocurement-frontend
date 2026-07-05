@@ -1,16 +1,12 @@
 import type { MiddlewareContext } from 'vue-middleware'
 import { useCheckToken } from '@/composables/token'
+import { resolvePostLoginRoute } from '@/core/utils/safeRedirect'
 
-/**
- * Guest middleware
- * @param { app, router, from, to, redirect, abort, guard }: MiddlewareContext
- */
+/** Login page middleware — redirect authenticated users away from login. */
 export default (context: MiddlewareContext) => {
   const token = useCheckToken()
 
   if (token) {
-    context.router.push({
-      name: 'dashboard'
-    })
+    context.router.replace(resolvePostLoginRoute(context.to.query.redirect))
   }
 }

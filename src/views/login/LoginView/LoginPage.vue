@@ -92,13 +92,15 @@
 
 <script lang="ts" setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import moment from 'moment'
 import { useLoginStore } from '@/stores/views/login'
 import type { ApiResponseData, ApiResponseDataResult } from '@/core/type/api'
+import { resolvePostLoginRoute } from '@/core/utils/safeRedirect'
 
 const loginApi = useLoginStore()
 const router = useRouter()
+const route = useRoute()
 const email = ref<string>('')
 const username = ref<string>('')
 const password = ref<string>('')
@@ -160,9 +162,7 @@ const nextStepLogin = (response: ApiResponseData<string>) => {
   if (response.statusCode === 200) {
     loginApi.isVendor = checkVendor()
     setToken(response.result)
-    router.replace({
-      name: 'dashboard',
-    })
+    router.replace(resolvePostLoginRoute(route.query.redirect))
   } else {
     isError.value = true
   }
