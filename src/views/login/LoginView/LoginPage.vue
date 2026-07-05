@@ -56,7 +56,11 @@
       </div>
 
       <div v-if="isError" class="radius-lg bg-red-100 text-danger p-[8px] text-[11px]">
-        {{ $t('login.form.errorMessage') }}
+        {{
+          isProfileMismatch
+            ? 'Akun yang Anda gunakan tidak sesuai dengan penerima notifikasi email. Silakan login dengan akun yang benar.'
+            : $t('login.form.errorMessage')
+        }}
       </div>
 
       <!-- remember -->
@@ -97,6 +101,14 @@ import moment from 'moment'
 import { useLoginStore } from '@/stores/views/login'
 import type { ApiResponseData, ApiResponseDataResult } from '@/core/type/api'
 import { resolvePostLoginRoute } from '@/core/utils/safeRedirect'
+import {
+  clearEmailLoginIntent,
+  getExpectedProfileId,
+  getExpectedProfileIdFromRedirect,
+  persistEmailLoginIntent,
+  profileMatchesEmailIntent,
+  resetAuthSession,
+} from '@/core/utils/sessionAuth'
 
 const loginApi = useLoginStore()
 const router = useRouter()
@@ -108,6 +120,7 @@ const rememberMe = ref<boolean>(false)
 const showPassword = ref<boolean>(false)
 const isLoading = ref<boolean>(false)
 const isError = ref<boolean>(false)
+const isProfileMismatch = ref<boolean>(false)
 
 const selectedLogin = computed(() => loginApi.selectedLogin)
 
@@ -158,18 +171,48 @@ const setToken = (result: ApiResponseDataResult<string>) => {
   document.cookie = `session_data=token_dts=${'Bearer ' + result.content}&isAdmin=${!checkVendor()}&username=${getUsernameEmail}; path=/; expires=${expired}; SameSite=Strict`
 }
 
-const nextStepLogin = (response: ApiResponseData<string>) => {
-  if (response.statusCode === 200) {
-    loginApi.isVendor = checkVendor()
-    setToken(response.result)
-    router.replace(resolvePostLoginRoute(route.query.redirect))
-  } else {
+const nextStepLogin = async (response: ApiResponseData<string>) => {
+  if (response.statusCode !== 200) {
     isError.value = true
+    return
   }
+
+  loginApi.isVendor = checkVendor()
+  setToken(response.result)
+
+  const loginId = checkVendor() ? username.value : email.value
+  try {
+    await loginApi.callUser(loginId)
+  } catch {
+    isError.value = true
+    resetAuthSession()
+    return
+  }
+
+  const expectedProfileId =
+    getExpectedProfileId(route.query as Record<string, unknown>) ??
+    getExpectedProfileIdFromRedirect(route.query.redirect)
+
+  if (expectedProfileId !== null) {
+    persistEmailLoginIntent({ expectedProfileId })
+  }
+
+  if (!profileMatchesEmailIntent(loginApi.userData?.profile?.profileId)) {
+    isProfileMismatch.value = true
+    isError.value = true
+    resetAuthSession()
+    return
+  }
+
+  isProfileMismatch.value = false
+  clearEmailLoginIntent()
+  router.replace(resolvePostLoginRoute(route.query.redirect))
 }
 
 const doLogin = () => {
   isLoading.value = true
+  isError.value = false
+  isProfileMismatch.value = false
   if (!email.value && !password.value) return (isLoading.value = false)
   saveAccount()
   if (checkVendor()) {
@@ -219,6 +262,11 @@ const getUsernameEmailPassword = (itemLocalStorage: string) => {
 }
 
 onMounted(() => {
+  if (route.query.from === 'email') {
+    resetAuthSession()
+    persistEmailLoginIntent(route.query as Record<string, unknown>)
+  }
+
   const savedAccount = localStorage.getItem('account_dts') || ''
   const savedAccountVendor = localStorage.getItem('account_dts_vendor') || ''
 
