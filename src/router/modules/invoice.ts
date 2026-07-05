@@ -48,6 +48,21 @@ export default [
     component: () => import('@/views/InvoiceDetail/InvoiceDetail.vue'),
   },
   {
+    path: '/invoice/detail/:id',
+    name: 'invoiceDetailLegacy',
+    redirect: (to) => ({
+      name: 'invoiceDetail',
+      query: { id: String(to.params.id), type: '2' },
+    }),
+  },
+  {
+    path: '/invoice-non-po/detail/:id',
+    redirect: (to) => ({
+      name: 'invoiceDetailNonPo',
+      query: { id: String(to.params.id), type: '2', invoiceType: 'no_po' },
+    }),
+  },
+  {
     path: '/invoice/detail/noPo',
     name: 'invoiceDetailNonPo',
     component: () => import('@/views/InvoiceDetail/InvoiceDetail.vue'),
