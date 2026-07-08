@@ -275,7 +275,7 @@
                   ref="signaturePad"
                   :sigOption="signatureOptions"
                   :w="'100%'"
-                  :h="'200px'"
+                  :h="'240px'"
                   class="signature-pad"
                 />
 
@@ -1147,9 +1147,16 @@ const submitForm = async (isDraft = false) => {
   border: 1px solid #e5e7eb;
   border-radius: 0.5rem;
   background: white;
+  width: 100%;
+  overflow: visible;
 
   :deep(canvas) {
     border-radius: 0.5rem;
+    width: 100% !important;
+    max-width: 100%;
+    height: auto !important;
+    max-height: 240px;
+    object-fit: contain;
   }
 }
 

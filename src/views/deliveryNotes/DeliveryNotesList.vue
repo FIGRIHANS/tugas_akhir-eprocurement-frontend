@@ -85,9 +85,10 @@
             <select v-model="filterForm.status" class="form-select">
               <option value="">All Status</option>
               <option value="Draft">Draft</option>
-              <option value="Waiting Approval">Waiting Approval</option>
+              <option value="On Delivery">On Delivery</option>
               <option value="Received">Received</option>
-              <option value="Rejected">Rejected</option>
+              <option value="Partial Received">Partial Received</option>
+              <option value="Completed">Completed</option>
             </select>
           </div>
           <div v-if="!isVendorUser">

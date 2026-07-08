@@ -108,11 +108,12 @@
                 <th class="text-right">Line amount</th>
                 <th>Lot</th>
                 <th class="text-center">Condition type</th>
+                <th class="text-center">Evidence</th>
               </tr>
             </thead>
             <tbody>
               <tr v-if="!detail.items?.length">
-                <td colspan="11" class="text-center py-6 text-gray-400">No lines</td>
+                <td colspan="12" class="text-center py-6 text-gray-400">No lines</td>
               </tr>
               <tr v-for="(line, idx) in detail.items" v-else :key="line.id">
                 <td class="text-center">{{ idx + 1 }}</td>
@@ -125,7 +126,35 @@
                 <td class="text-right">{{ formatMoney(line.unitPrice, detail.currency) }}</td>
                 <td class="text-right">{{ formatMoney(line.lineAmount, detail.currency) }}</td>
                 <td>{{ line.lotNo || '—' }}</td>
-                <td class="text-center">{{ line.conditionType || '—' }}</td>
+                <td class="text-center">{{ line.conditionType?.toLowerCase() || '—' }}</td>
+                <td class="text-center">
+                  <div v-if="line.evidencePath" class="evidence-preview-box relative group mx-auto">
+                    <iframe
+                      v-if="isPdfEvidence(line.evidencePath)"
+                      :src="line.evidencePath"
+                      class="w-full h-full border-0"
+                    ></iframe>
+                    <img
+                      v-else
+                      :src="line.evidencePath"
+                      alt="Evidence"
+                      class="w-full h-full object-contain"
+                    />
+                    <div
+                      class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <button
+                        class="btn btn-sm btn-icon btn-primary"
+                        type="button"
+                        @click.prevent="previewFile(line.evidencePath)"
+                        title="Full Screen"
+                      >
+                        <i class="ki-duotone ki-maximize"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <span v-else class="text-gray-400 text-xs">—</span>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -262,6 +291,29 @@ const formatMoney = (amt: number | null | undefined, cur?: string) => {
 
 const goBack = () => router.push({ name: 'goodsReceiptList' })
 
+const isPdfEvidence = (path: string | undefined) => {
+  if (!path) return false
+  return path.includes('application/pdf') || path.toLowerCase().endsWith('.pdf')
+}
+
+const previewFile = (urlOrBase64: string | undefined | null) => {
+  if (!urlOrBase64) return
+  if (urlOrBase64.startsWith('data:')) {
+    const newWindow = window.open()
+    if (newWindow) {
+      if (urlOrBase64.startsWith('data:application/pdf')) {
+        newWindow.document.write(
+          `<iframe src="${urlOrBase64}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`,
+        )
+      } else {
+        newWindow.document.write(`<img src="${urlOrBase64}" style="max-width:100%;" />`)
+      }
+    }
+  } else {
+    window.open(urlOrBase64, '_blank')
+  }
+}
+
 onMounted(() => {
   if (userStore.userData && Object.keys(userStore.userData as object).length > 0) {
     load()
@@ -300,6 +352,19 @@ onMounted(() => {
   width: 100%;
   max-width: 900px;
   position: relative;
+}
+
+.evidence-preview-box {
+  width: 100px;
+  height: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  overflow: hidden;
+  background: #f9fafb;
 }
 
 @media print {

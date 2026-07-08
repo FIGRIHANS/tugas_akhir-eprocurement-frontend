@@ -228,7 +228,7 @@
                 ref="signaturePad"
                 :sigOption="signatureOptions"
                 :w="'100%'"
-                :h="'200px'"
+                :h="'240px'"
                 class="signature-pad"
               />
 
@@ -435,7 +435,7 @@
                   class="!border-b-teal-500 !bg-teal-100 !text-teal-500 text-center border-r min-w-[200px]"
                 >
                   Evidence
-                  <span class="block text-xs font-normal">(required if less &gt; 0)</span>
+                  <span class="block text-xs font-normal">(required if difference &ne; 0)</span>
                 </th>
               </tr>
               <!-- Second Header Row -->
@@ -573,55 +573,80 @@
                   </template>
                   <span v-else class="text-gray-400 text-xs">—</span>
                 </td>
-                <!-- Evidence Upload - Required when less > 0 -->
+                <!-- Evidence Upload - Required when qty differs, optional otherwise -->
                 <td class="text-center p-2">
-                  <template v-if="item.less > 0">
-                    <div class="flex flex-col items-center">
-                      <div v-if="!item.evidenceFile" class="w-full">
-                        <button
-                          class="btn btn-sm btn-outline btn-primary w-full text-xs py-1"
-                          @click="triggerEvidenceUpload(index)"
-                        >
-                          <i class="ki-duotone ki-file-up"></i> Upload
-                        </button>
-                      </div>
-                      <div
-                        v-else
-                        class="flex items-center justify-between bg-green-50 border border-green-200 rounded px-2 py-1 w-full mt-1"
+                  <div class="flex flex-col items-center">
+                    <div v-if="!hasEvidence(item)" class="w-full">
+                      <button
+                        class="btn btn-sm btn-outline btn-primary w-full text-xs py-1"
+                        :class="{
+                          'border-red-500 text-red-600':
+                            hasQuantityDiscrepancy(item) && !item.evidenceBase64,
+                        }"
+                        @click="triggerEvidenceUpload(index)"
                       >
-                        <span
-                          class="text-xs text-green-700 truncate max-w-[80px]"
-                          :title="item.evidenceFile.name"
+                        <i class="ki-duotone ki-file-up"></i>
+                        {{ hasQuantityDiscrepancy(item) ? 'Upload *' : 'Upload' }}
+                      </button>
+                      <p
+                        v-if="hasQuantityDiscrepancy(item) && !item.evidenceBase64"
+                        class="text-red-500 text-xs mt-1"
+                      >
+                        Evidence is required
+                      </p>
+                    </div>
+                    <div v-else class="flex flex-col items-center gap-1 w-full">
+                      <div
+                        class="evidence-preview-box relative group"
+                      >
+                        <iframe
+                          v-if="isPdfEvidence(item.evidenceBase64)"
+                          :src="item.evidenceBase64"
+                          class="w-full h-full border-0"
+                        ></iframe>
+                        <img
+                          v-else
+                          :src="item.evidenceBase64"
+                          alt="Evidence"
+                          class="w-full h-full object-contain"
+                        />
+                        <div
+                          class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                         >
-                          <i class="ki-duotone ki-check-circle mr-1"></i> Added
-                        </span>
-                        <div class="flex items-center">
                           <button
-                            class="text-primary hover:text-blue-700 ml-1"
+                            class="btn btn-sm btn-icon btn-primary"
                             @click.prevent="previewFile(item.evidenceBase64)"
-                            title="Preview"
+                            title="Full Screen"
                           >
-                            <i class="ki-duotone ki-eye text-sm"></i>
-                          </button>
-                          <button
-                            class="text-red-500 hover:text-red-700 ml-1"
-                            @click.prevent="removeEvidence(index)"
-                            title="Remove"
-                          >
-                            <i class="ki-duotone ki-cross text-sm"></i>
+                            <i class="ki-duotone ki-maximize"></i>
                           </button>
                         </div>
                       </div>
-                      <input
-                        :ref="(el) => (evidenceInputs[index] = el as HTMLInputElement)"
-                        type="file"
-                        accept=".pdf,.png,.jpg,.jpeg"
-                        class="hidden"
-                        @change="(e) => handleEvidenceChange(e, index)"
-                      />
+                      <div class="flex items-center justify-center gap-1">
+                        <button
+                          class="btn btn-xs btn-outline btn-primary"
+                          @click="triggerEvidenceUpload(index)"
+                          title="Replace"
+                        >
+                          <i class="ki-duotone ki-arrows-circle"></i>
+                        </button>
+                        <button
+                          class="btn btn-xs btn-outline btn-danger"
+                          @click.prevent="removeEvidence(index)"
+                          title="Remove"
+                        >
+                          <i class="ki-duotone ki-trash"></i>
+                        </button>
+                      </div>
                     </div>
-                  </template>
-                  <span v-else class="text-gray-400 text-xs">—</span>
+                    <input
+                      :ref="(el) => (evidenceInputs[index] = el as HTMLInputElement)"
+                      type="file"
+                      accept=".pdf,.png,.jpg,.jpeg"
+                      class="hidden"
+                      @change="(e) => handleEvidenceChange(e, index)"
+                    />
+                  </div>
                 </td>
               </tr>
             </tbody>
@@ -674,7 +699,7 @@
 
 <script lang="ts" setup>
 import { ref, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import VueSignature from 'vue3-signature'
@@ -698,6 +723,7 @@ import {
 } from '@/utils/formValidators'
 
 const router = useRouter()
+const route = useRoute()
 const todayDateString = getTodayDateString()
 
 // Interfaces
@@ -857,6 +883,15 @@ const tableData = ref<TableDataItem[]>([])
 
 // ─── Evidence Upload per Item ─────────────────────────────────────────────
 const evidenceInputs = ref<(HTMLInputElement | null)[]>([])
+
+const hasQuantityDiscrepancy = (item: TableDataItem) => item.qtySelisih !== 0
+
+const hasEvidence = (item: TableDataItem) => Boolean(item.evidenceBase64?.trim())
+
+const isPdfEvidence = (path: string | undefined) => {
+  if (!path) return false
+  return path.includes('application/pdf') || path.toLowerCase().endsWith('.pdf')
+}
 
 const triggerEvidenceUpload = (index: number) => {
   if (evidenceInputs.value[index]) {
@@ -1132,9 +1167,10 @@ const getValidationResult = (isDraft = false): FormValidationResult => {
           `item-${i}-reject-reason`,
         )
       }
-      if (!isDraft && !item.evidenceBase64) {
-        return validationFail(`Evidence document wajib diupload untuk item #${i + 1}.`)
-      }
+    }
+
+    if (!isDraft && hasQuantityDiscrepancy(item) && !hasEvidence(item)) {
+      return validationFail(`Evidence document wajib diupload untuk item #${i + 1}.`)
     }
   }
 
@@ -1238,8 +1274,14 @@ const submitForm = async (isDraft = false) => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   formData.value.receivedDate = todayDateString
+
+  const dnFromQuery = route.query.deliveryNoteNumber
+  if (typeof dnFromQuery === 'string' && dnFromQuery.trim()) {
+    deliveryNoteNumberSearch.value = dnFromQuery.trim()
+    await searchDeliveryNotes()
+  }
 })
 </script>
 
@@ -1261,9 +1303,16 @@ onMounted(() => {
   border: 1px solid #e5e7eb;
   border-radius: 0.5rem;
   background: white;
+  width: 100%;
+  overflow: visible;
 
   :deep(canvas) {
     border-radius: 0.5rem;
+    width: 100% !important;
+    max-width: 100%;
+    height: auto !important;
+    max-height: 240px;
+    object-fit: contain;
   }
 }
 
@@ -1290,5 +1339,19 @@ onMounted(() => {
 .input-sm {
   padding: 0.25rem 0.5rem;
   font-size: 0.875rem;
+}
+
+.evidence-preview-box {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  overflow: hidden;
+  background: #f9fafb;
 }
 </style>

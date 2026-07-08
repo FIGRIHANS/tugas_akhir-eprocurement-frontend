@@ -169,18 +169,12 @@
           <div class="lg:col-span-4 flex flex-col gap-4">
             <div class="border border-gray-200 rounded-lg p-4 flex flex-col">
               <h3 class="text-sm font-semibold mb-3">Employee Signature</h3>
-              <div
-                class="flex-1 border border-gray-300 rounded bg-gray-50 flex items-center justify-center min-h-[120px]"
-              >
+              <div class="signature-display">
                 <img
-                  v-if="
-                    formData.signature &&
-                    formData.signature.trim() &&
-                    formData.signature.startsWith('data:image')
-                  "
+                  v-if="formData.signature && formData.signature.trim()"
                   :src="formData.signature"
                   alt="Signature"
-                  class="max-w-full max-h-[120px]"
+                  class="signature-image"
                 />
                 <span v-else class="text-gray-400 text-sm">No signature available</span>
               </div>
@@ -280,7 +274,10 @@
                 <th colspan="2" class="text-center border-r">Transporter Claim</th>
                 <th rowspan="2" class="text-center border-r min-w-[120px]">Condition Type</th>
                 <th rowspan="2" class="text-center border-r min-w-[160px]">Reject Reason</th>
-                <th rowspan="2" class="text-center border-r min-w-[120px]">Evidence</th>
+                <th rowspan="2" class="text-center border-r min-w-[120px]">
+                  Evidence
+                  <span class="block text-xs font-normal">(required if difference &ne; 0)</span>
+                </th>
               </tr>
               <!-- Second Header Row -->
               <tr class="bg-teal-500 text-white">
@@ -320,7 +317,12 @@
                     v-model.number="item.diterima"
                     type="number"
                     min="0"
+                    :max="item.diSuratJalanKonfirmasi"
                     class="input input-sm w-20 text-center"
+                    :class="{
+                      'border-red-500 bg-red-50':
+                        item.diterima > item.diSuratJalanKonfirmasi,
+                    }"
                     @input="calculateItem(index)"
                   />
                   <span v-else>{{ item.diterima }}</span>
@@ -334,8 +336,13 @@
                     v-model.number="item.repackQty"
                     type="number"
                     min="0"
+                    :max="item.kurang"
                     class="input input-sm w-20 text-center"
-                    @input="calculateItem(index)"
+                    :class="{
+                      'border-red-500 bg-red-50':
+                        item.kurang > 0 && item.repackQty + item.damageQty > item.kurang,
+                    }"
+                    @input="normalizeItemQuantities(index)"
                   />
                   <span v-else>{{ item.repackQty }}</span>
                 </td>
@@ -345,8 +352,13 @@
                     v-model.number="item.damageQty"
                     type="number"
                     min="0"
+                    :max="item.kurang"
                     class="input input-sm w-20 text-center"
-                    @input="calculateItem(index)"
+                    :class="{
+                      'border-red-500 bg-red-50':
+                        item.kurang > 0 && item.repackQty + item.damageQty > item.kurang,
+                    }"
+                    @input="normalizeItemQuantities(index)"
                   />
                   <span v-else>{{ item.damageQty }}</span>
                 </td>
@@ -379,36 +391,104 @@
                   <span v-else class="text-gray-400 text-xs">—</span>
                 </td>
                 <td class="text-center p-2">
-                  <div
-                    v-if="item.evidencePath"
-                    class="w-[100px] h-[100px] mx-auto flex flex-col items-center justify-center border border-gray-200 rounded overflow-hidden bg-gray-50 relative group"
-                  >
-                    <iframe
-                      v-if="
-                        item.evidencePath.includes('application/pdf') ||
-                        item.evidencePath.toLowerCase().endsWith('.pdf')
-                      "
-                      :src="item.evidencePath"
-                      class="w-full h-full border-0"
-                    ></iframe>
-                    <img
-                      v-else
-                      :src="item.evidencePath"
-                      alt="Evidence"
-                      class="w-full h-full object-cover"
-                    />
-                    <div
-                      class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <button
-                        class="btn btn-sm btn-icon btn-primary"
-                        @click.prevent="previewFile(item.evidencePath)"
-                        title="Full Screen"
-                      >
-                        <i class="ki-duotone ki-maximize"></i>
-                      </button>
+                  <template v-if="isDraft">
+                    <div class="flex flex-col items-center min-w-[120px]">
+                      <div v-if="!hasEvidence(item)" class="w-full">
+                        <button
+                          class="btn btn-sm btn-outline btn-primary w-full text-xs py-1"
+                          :class="{
+                            'border-red-500 text-red-600':
+                              hasQuantityDiscrepancy(item) && !hasEvidence(item),
+                          }"
+                          @click="triggerEvidenceUpload(index)"
+                        >
+                          <i class="ki-duotone ki-file-up"></i>
+                          {{ hasQuantityDiscrepancy(item) ? 'Upload *' : 'Upload' }}
+                        </button>
+                        <p
+                          v-if="hasQuantityDiscrepancy(item) && !hasEvidence(item)"
+                          class="text-red-500 text-xs mt-1"
+                        >
+                          Evidence is required
+                        </p>
+                      </div>
+                      <div v-else class="flex flex-col items-center gap-1 w-full">
+                        <div class="evidence-preview-box relative group">
+                          <iframe
+                            v-if="isPdfEvidence(item.evidencePath)"
+                            :src="item.evidencePath"
+                            class="w-full h-full border-0"
+                          ></iframe>
+                          <img
+                            v-else
+                            :src="item.evidencePath"
+                            alt="Evidence"
+                            class="w-full h-full object-contain"
+                          />
+                          <div
+                            class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <button
+                              class="btn btn-sm btn-icon btn-primary"
+                              @click.prevent="previewFile(item.evidencePath)"
+                              title="Full Screen"
+                            >
+                              <i class="ki-duotone ki-maximize"></i>
+                            </button>
+                          </div>
+                        </div>
+                        <div class="flex items-center justify-center gap-1">
+                          <button
+                            class="btn btn-xs btn-outline btn-primary"
+                            @click="triggerEvidenceUpload(index)"
+                            title="Replace"
+                          >
+                            <i class="ki-duotone ki-arrows-circle"></i>
+                          </button>
+                          <button
+                            class="btn btn-xs btn-outline btn-danger"
+                            @click.prevent="removeEvidence(index)"
+                            title="Remove"
+                          >
+                            <i class="ki-duotone ki-trash"></i>
+                          </button>
+                        </div>
+                      </div>
+                      <input
+                        :ref="(el) => (evidenceInputs[index] = el as HTMLInputElement)"
+                        type="file"
+                        accept=".pdf,.png,.jpg,.jpeg"
+                        class="hidden"
+                        @change="(e) => handleEvidenceChange(e, index)"
+                      />
                     </div>
-                  </div>
+                  </template>
+                  <template v-else-if="item.evidencePath">
+                    <div class="evidence-preview-box relative group">
+                      <iframe
+                        v-if="isPdfEvidence(item.evidencePath)"
+                        :src="item.evidencePath"
+                        class="w-full h-full border-0"
+                      ></iframe>
+                      <img
+                        v-else
+                        :src="item.evidencePath"
+                        alt="Evidence"
+                        class="w-full h-full object-contain"
+                      />
+                      <div
+                        class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <button
+                          class="btn btn-sm btn-icon btn-primary"
+                          @click.prevent="previewFile(item.evidencePath)"
+                          title="Full Screen"
+                        >
+                          <i class="ki-duotone ki-maximize"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </template>
                   <span v-else class="text-gray-400 text-xs">—</span>
                 </td>
               </tr>
@@ -441,7 +521,7 @@
               <i class="ki-duotone ki-cross-circle"></i>
               Reject
             </button>
-            <button class="btn btn-primary" @click="approveConfirmation()">
+            <button class="btn btn-primary" @click="openApproveModal()">
               <i class="ki-duotone ki-check-circle"></i>
               Approve
             </button>
@@ -482,6 +562,19 @@
       </div>
     </div>
 
+    <ModalConfirmation
+      :open="showApproveModal"
+      id="approve-receiving-confirmation-modal"
+      type="confirm"
+      title="Approve Receiving Confirmation"
+      :text="approveConfirmText"
+      submit-button-text="Approve"
+      cancel-button-text="Cancel"
+      :loading="isApproving"
+      @submit="confirmApprove"
+      @cancel="closeApproveModal"
+    />
+
     <ModalNotification
       :open="showNotificationModal"
       :id="'notification-modal'"
@@ -515,13 +608,19 @@ import { useRouter, useRoute } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import ReceivingConfirmationService, {
+  getReceivingConfirmationErrorMessage,
   type ReceivingConfirmationCreatePayload,
   type ReceivingConfirmationDetailPayload,
 } from '@/services/receivingConfirmation.service'
 import DeliveryNotesService from '@/services/deliveryNotes.service'
 import ModalNotification from '@/components/modal/ModalNotification.vue'
+import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 import { useLoginStore } from '@/stores/views/login'
 import ReceivingConfirmationPrint from './ReceivingConfirmationPrint.vue'
+import {
+  normalizeNonNegativeInt,
+  validateReceivingItemQuantities,
+} from '@/utils/formValidators'
 
 const router = useRouter()
 const route = useRoute()
@@ -569,6 +668,7 @@ interface TableData {
   rejectReason: string
   conditionType: string
   evidencePath?: string
+  evidenceFile?: File | null
 }
 
 const routes = ref<routeTypes[]>([
@@ -601,9 +701,73 @@ const formData = ref<FormData>({
 // Table Data — populated from API in onMounted
 const tableData = ref<TableData[]>([])
 
+// Evidence upload refs for draft edit mode
+const evidenceInputs = ref<(HTMLInputElement | null)[]>([])
+
+const hasQuantityDiscrepancy = (item: TableData) => item.selisih !== 0
+
+const hasEvidence = (item: TableData) => Boolean(item.evidencePath?.trim())
+
+const isPdfEvidence = (path: string | undefined) => {
+  if (!path) return false
+  return path.includes('application/pdf') || path.toLowerCase().endsWith('.pdf')
+}
+
+const triggerEvidenceUpload = (index: number) => {
+  evidenceInputs.value[index]?.click()
+}
+
+const showValidationError = (text: string) => {
+  notificationModal.value = {
+    type: 'warning',
+    title: 'Validation Error',
+    text,
+  }
+  showNotificationModal.value = true
+}
+
+const handleEvidenceChange = (event: Event, index: number) => {
+  const input = event.target as HTMLInputElement
+  if (!input.files?.[0]) return
+
+  const file = input.files[0]
+  const maxSize = 5 * 1024 * 1024
+  if (file.size > maxSize) {
+    showValidationError(`File size exceeds 5MB limit for item #${index + 1}`)
+    input.value = ''
+    return
+  }
+
+  const allowed = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg']
+  if (!allowed.includes(file.type)) {
+    showValidationError(`Only PDF, PNG, JPG allowed for item #${index + 1}`)
+    input.value = ''
+    return
+  }
+
+  const item = tableData.value[index]
+  item.evidenceFile = file
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    item.evidencePath = (e.target?.result as string) || ''
+  }
+  reader.readAsDataURL(file)
+}
+
+const removeEvidence = (index: number) => {
+  const item = tableData.value[index]
+  item.evidenceFile = null
+  item.evidencePath = ''
+  if (evidenceInputs.value[index]) {
+    evidenceInputs.value[index]!.value = ''
+  }
+}
+
 // Rejection Modal State
 const showRejectModal = ref<boolean>(false)
 const rejectionReason = ref<string>('')
+const showApproveModal = ref<boolean>(false)
+const isApproving = ref<boolean>(false)
 const currentStatus = ref<string>('')
 const hasDiscrepancy = ref<boolean>(false)
 const isSubmitting = ref<boolean>(false)
@@ -631,6 +795,12 @@ const isWaitingApproval = computed(() =>
 )
 const isCompleted = computed(() => currentStatus.value === 'Completed')
 
+const approveConfirmText = computed(() =>
+  hasDiscrepancy.value
+    ? 'This receiving confirmation has quantity discrepancy. Are you sure you want to approve it?'
+    : 'Are you sure you want to approve this receiving confirmation?',
+)
+
 // Functions
 const goBack = () => {
   router.push({ name: 'receivingConfirmation' })
@@ -649,20 +819,48 @@ const viewItem = (index: number) => {
 
 const calculateItem = (index: number) => {
   const item = tableData.value[index]
-  const qtyActual = Number(item.diterima) || 0
   const qtySuratJalan = Number(item.diSuratJalanKonfirmasi) || 0
-  const diff = qtyActual - qtySuratJalan
+  let qtyActual = normalizeNonNegativeInt(item.diterima)
+
+  if (qtyActual > qtySuratJalan) {
+    qtyActual = qtySuratJalan
+  }
 
   item.diterima = qtyActual
   item.actual = qtyActual
-  item.repackQty = Number(item.repackQty) || 0
-  item.damageQty = Number(item.damageQty) || 0
+
+  const diff = qtyActual - qtySuratJalan
   item.selisih = diff
   item.lebih = diff > 0 ? diff : 0
   item.kurang = diff < 0 ? Math.abs(diff) : 0
 
   if (item.kurang === 0) {
     item.rejectReason = ''
+  }
+
+  normalizeItemQuantities(index)
+}
+
+const normalizeItemQuantities = (index: number) => {
+  const item = tableData.value[index]
+  item.repackQty = normalizeNonNegativeInt(item.repackQty)
+  item.damageQty = normalizeNonNegativeInt(item.damageQty)
+
+  if (item.kurang <= 0) {
+    item.repackQty = 0
+    item.damageQty = 0
+    return
+  }
+
+  const total = item.repackQty + item.damageQty
+  if (total > item.kurang) {
+    const overflow = total - item.kurang
+    if (item.damageQty >= overflow) {
+      item.damageQty -= overflow
+    } else {
+      item.repackQty = Math.max(0, item.repackQty - overflow)
+      item.damageQty = 0
+    }
   }
 }
 
@@ -730,6 +928,35 @@ const validateUpdateForm = (): boolean => {
     return false
   }
 
+  for (let i = 0; i < tableData.value.length; i++) {
+    const item = tableData.value[i]
+    const qtyResult = validateReceivingItemQuantities(
+      item.diSuratJalanKonfirmasi,
+      item.diterima,
+      item.damageQty,
+      item.repackQty,
+    )
+    if (!qtyResult.valid && qtyResult.message) {
+      notificationModal.value = {
+        type: 'warning',
+        title: 'Validation Error',
+        text: `${qtyResult.message} (item #${i + 1})`,
+      }
+      showNotificationModal.value = true
+      return false
+    }
+
+    if (hasQuantityDiscrepancy(item) && !hasEvidence(item)) {
+      notificationModal.value = {
+        type: 'warning',
+        title: 'Validation Error',
+        text: `Evidence document is required for item #${i + 1} with quantity difference.`,
+      }
+      showNotificationModal.value = true
+      return false
+    }
+  }
+
   return true
 }
 
@@ -745,6 +972,7 @@ const buildUpdatePayload = (): ReceivingConfirmationCreatePayload => {
     damageQty: item.damageQty,
     rejectReason: item.rejectReason.trim() || undefined,
     conditionType: item.conditionType.trim() || undefined,
+    evidencePath: item.evidencePath?.trim() || undefined,
   }))
 
   return {
@@ -788,7 +1016,7 @@ const updateConfirmation = async () => {
     notificationModal.value = {
       type: 'error',
       title: 'Error',
-      text: 'Failed to update receiving confirmation',
+      text: getReceivingConfirmationErrorMessage(error),
     }
     showNotificationModal.value = true
   } finally {
@@ -804,6 +1032,29 @@ const openRejectModal = () => {
 const closeRejectModal = () => {
   showRejectModal.value = false
   rejectionReason.value = ''
+}
+
+const openApproveModal = () => {
+  showApproveModal.value = true
+}
+
+const closeApproveModal = () => {
+  if (isApproving.value) return
+  showApproveModal.value = false
+}
+
+const confirmApprove = async () => {
+  if (isApproving.value) return
+  isApproving.value = true
+
+  try {
+    const success = await approveConfirmation()
+    if (success) {
+      closeApproveModal()
+    }
+  } finally {
+    isApproving.value = false
+  }
 }
 
 
@@ -856,12 +1107,8 @@ const confirmReject = async () => {
   }
 }
 
-const approveConfirmation = async () => {
-  console.log('Form Data:', formData.value)
-  console.log('Table Data:', tableData.value)
-
+const approveConfirmation = async (): Promise<boolean> => {
   try {
-    // Send approval data to API with status "Completed"
     await ReceivingConfirmationService.updateStatus(Number(route.params.id), {
       reportID: Number(route.params.id),
       status: 2, // Completed = 2 (from enum)
@@ -875,10 +1122,8 @@ const approveConfirmation = async () => {
       text: 'Failed to approve receiving confirmation',
     }
     showNotificationModal.value = true
-    return
+    return false
   }
-
-  // Notification is created by the backend when status is updated — no local duplicate needed
 
   notificationModal.value = {
     type: 'success',
@@ -889,11 +1134,9 @@ const approveConfirmation = async () => {
   }
   showNotificationModal.value = true
 
-  // Wait for modal to be acknowledged before redirecting
   await new Promise((resolve) => setTimeout(resolve, 1500))
-
-  // Redirect to list
   router.push({ name: 'receivingConfirmation' })
+  return true
 }
 
 onMounted(() => {
@@ -1055,5 +1298,39 @@ const previewFile = (urlOrBase64: string | undefined | null) => {
 .input-sm {
   padding: 0.25rem 0.5rem;
   font-size: 0.875rem;
+}
+
+.signature-display {
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  background: #f9fafb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  padding: 0.75rem;
+  overflow: hidden;
+}
+
+.signature-image {
+  max-width: 100%;
+  max-height: 240px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.evidence-preview-box {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  overflow: hidden;
+  background: #f9fafb;
 }
 </style>

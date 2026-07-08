@@ -85,9 +85,9 @@
             <select v-model="filterForm.status" class="form-select">
               <option value="">All Status</option>
               <option value="Draft">Draft</option>
-              <option value="Waiting Approval">Waiting Approval</option>
-              <option value="Received">Received</option>
+              <option value="Waiting Supervisor">Waiting Approval Supervisor</option>
               <option value="Rejected">Rejected</option>
+              <option value="Completed">Completed</option>
             </select>
           </div>
           <div>
@@ -305,7 +305,7 @@ const dataList = ref<ReceivingConfirmationData[]>([])
 
 const rcStats = computed(() => ({
   total: dataList.value.length,
-  waitingApproval: dataList.value.filter((i) => i.status === 'Waiting Approval').length,
+  waitingApproval: dataList.value.filter((i) => i.status === 'Waiting Supervisor').length,
   completed: dataList.value.filter((i) => i.status === 'Received' || i.status === 'Completed').length,
   rejected: dataList.value.filter((i) => i.status === 'Rejected').length,
   hasDiscrepancy: dataList.value.filter((i) => i.hasDiscrepancy).length,

@@ -324,7 +324,7 @@ const filteredSidebarMenu = computed(() => {
           child: menu.child
             ? menu.child.filter(
                 (child) =>
-                  child.id === 'receiving-confirmation' ||
+                  // child.id === 'receiving-confirmation' ||
                   child.id === 'receiving-confirmation-list' ||
                   child.id === 'mock-sap-list',
               )
@@ -394,7 +394,7 @@ const filteredSidebarMenu = computed(() => {
                 ? menu.child.filter(
                     (child) =>
                       child.id === 'mock-sap-list' ||
-                      child.id === 'delivery-notes' ||
+                      // child.id === 'delivery-notes' ||
                       child.id === 'delivery-notes-list' ||
                       child.id === 'goods-receipt-list',
                   )

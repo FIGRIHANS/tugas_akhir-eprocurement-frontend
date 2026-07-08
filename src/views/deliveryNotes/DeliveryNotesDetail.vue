@@ -235,18 +235,12 @@
           <div class="lg:col-span-4 flex flex-col gap-4">
             <div class="border border-gray-200 rounded-lg p-4 flex flex-col">
               <h3 class="text-sm font-semibold mb-3">Driver Signature</h3>
-              <div
-                class="flex-1 border border-gray-300 rounded bg-gray-50 flex items-center justify-center min-h-[120px]"
-              >
+              <div class="signature-display">
                 <img
-                  v-if="
-                    detailData.driverSignature &&
-                    detailData.driverSignature.trim() &&
-                    detailData.driverSignature.startsWith('data:image')
-                  "
+                  v-if="detailData.driverSignature && detailData.driverSignature.trim()"
                   :src="detailData.driverSignature"
                   alt="Driver Signature"
-                  class="max-w-full max-h-[120px]"
+                  class="signature-image"
                 />
                 <span v-else class="text-gray-400 text-sm">No signature available</span>
               </div>
@@ -880,5 +874,25 @@ onMounted(() => {
 .input-sm {
   padding: 0.25rem 0.5rem;
   font-size: 0.875rem;
+}
+
+.signature-display {
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  background: #f9fafb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  padding: 0.75rem;
+  overflow: hidden;
+}
+
+.signature-image {
+  max-width: 100%;
+  max-height: 240px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
 }
 </style>

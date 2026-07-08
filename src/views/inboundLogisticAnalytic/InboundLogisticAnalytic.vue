@@ -366,7 +366,7 @@ const dnStats = computed<DnStats>(() => ({
 
 const rcStats = computed<RcStats>(() => ({
   total: rcRaw.value.length,
-  waitingApproval: rcRaw.value.filter((i) => i.status === 'Waiting Approval').length,
+  waitingApproval: rcRaw.value.filter((i) => i.status === 'Waiting Supervisor').length,
   completed: rcRaw.value.filter((i) => i.status === 'Received' || i.status === 'Completed').length,
   rejected: rcRaw.value.filter((i) => i.status === 'Rejected').length,
   hasDiscrepancy: rcRaw.value.filter((i) => i.hasDiscrepancy).length,
@@ -406,7 +406,7 @@ const dnCards = computed(() => [
 
 const rcCards = computed(() => [
   { label: 'Total RC',          value: rcStats.value.total,           icon: 'ki-duotone ki-document',       colorClass: 'text-blue-600',   bgClass: 'bg-blue-50',   borderClass: 'border-gray-200' },
-  { label: 'Waiting Approval',  value: rcStats.value.waitingApproval, icon: 'ki-duotone ki-time',           colorClass: 'text-amber-500',  bgClass: 'bg-amber-50',  borderClass: 'border-gray-200' },
+  { label: 'Waiting Supervisor',  value: rcStats.value.waitingApproval, icon: 'ki-duotone ki-time',           colorClass: 'text-amber-500',  bgClass: 'bg-amber-50',  borderClass: 'border-gray-200' },
   { label: 'Completed',         value: rcStats.value.completed,       icon: 'ki-duotone ki-check-circle',   colorClass: 'text-green-600',  bgClass: 'bg-green-50',  borderClass: 'border-gray-200' },
   { label: 'Rejected',          value: rcStats.value.rejected,        icon: 'ki-duotone ki-cross-circle',   colorClass: 'text-red-500',    bgClass: 'bg-red-50',    borderClass: 'border-gray-200' },
   { label: 'Discrepancy',       value: rcStats.value.hasDiscrepancy,  icon: 'ki-duotone ki-information-2',  colorClass: 'text-orange-500', bgClass: 'bg-orange-50', borderClass: 'border-gray-200' },
@@ -440,7 +440,7 @@ const rcStatusData = computed(() => {
   const total = stats.total || 1
   const draft = rcRaw.value.filter((i) => i.status === 'Draft').length
   return [
-    { label: 'Waiting Approval', count: stats.waitingApproval, percentage: Math.round((stats.waitingApproval / total) * 100), color: '#f59e0b' },
+    { label: 'Waiting Supervisor', count: stats.waitingApproval, percentage: Math.round((stats.waitingApproval / total) * 100), color: '#f59e0b' },
     { label: 'Completed', count: stats.completed, percentage: Math.round((stats.completed / total) * 100), color: '#22c55e' },
     { label: 'Rejected', count: stats.rejected, percentage: Math.round((stats.rejected / total) * 100), color: '#ef4444' },
     { label: 'Draft', count: draft, percentage: Math.round((draft / total) * 100), color: '#6b7280' },

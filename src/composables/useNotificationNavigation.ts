@@ -188,6 +188,16 @@ export const resolveNotificationRoute = (
     return { name: 'receivingConfirmationDetail', params: { id: entityId } }
   }
 
+  if (notification.type === 'delivery-note-created') {
+    const deliveryNoteNumber = notification.relatedId?.trim()
+    if (deliveryNoteNumber) {
+      return {
+        name: 'receivingConfirmationCreate',
+        query: { deliveryNoteNumber },
+      }
+    }
+  }
+
   if (notification.linkEntityType === 'delivery-note' && entityId) {
     return { name: 'deliveryNotesDetail', params: { id: entityId } }
   }

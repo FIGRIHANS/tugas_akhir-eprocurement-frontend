@@ -49,6 +49,7 @@ export interface GoodsReceiptDetailItemDto {
   noPickSlip?: string
   receivingConfirmationDetailId?: number | null
   conditionType?: string
+  evidencePath?: string
 }
 
 export interface GoodsReceiptDetailContentDto extends GoodsReceiptHeaderDto {
