@@ -44,10 +44,9 @@
                 <div class="flex-1">
                   <input 
                     v-model="form.npwp" 
-                    :class="['input', { 'border-danger !placeholder-red-400': wasValidated && !form.npwp }, form.invoiceId > 0 ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : '']" 
+                    :class="['input', { 'border-danger !placeholder-red-400': wasValidated && !form.npwp }]" 
                     :placeholder="form.fgNpwpNik === 'true' ? 'Enter NPWP' : 'Enter NIK'" 
                     required
-                    :disabled="form.invoiceId > 0"
                   >
                   <p v-if="wasValidated && !form.npwp" class="text-danger text-[11px] mt-1.5 font-medium ml-1 flex items-center gap-1 animate-in fade-in slide-in-from-top-1 duration-200">
                     <i class="ki-filled ki-information-2 text-[13px]"></i>
@@ -63,10 +62,9 @@
                 <div class="flex-1">
                   <input 
                     v-model="form.nama" 
-                    :class="['input', { 'border-danger !placeholder-red-400': wasValidated && !form.nama }, form.invoiceId > 0 ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : '']" 
+                    :class="['input', { 'border-danger !placeholder-red-400': wasValidated && !form.nama }]" 
                     placeholder="Enter recipient name" 
                     required
-                    :disabled="form.invoiceId > 0"
                   >
                   <p v-if="wasValidated && !form.nama" class="text-danger text-[11px] mt-1.5 font-medium ml-1 flex items-center gap-1 animate-in fade-in slide-in-from-top-1 duration-200">
                     <i class="ki-filled ki-information-2 text-[13px]"></i>

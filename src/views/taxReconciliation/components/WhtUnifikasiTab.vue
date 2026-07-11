@@ -164,7 +164,6 @@
                   </button>
 
                   <div
-                    v-if="(item.status || item.fgStatus)?.toUpperCase() === 'DRAFT' || isInProgress(item.status || item.fgStatus) || (item.status || item.fgStatus)?.toUpperCase() === 'NORMAL-DONE'"
                     class="dropdown"
                     data-dropdown="true"
                     data-dropdown-trigger="click"
@@ -177,6 +176,14 @@
                     </button>
                     <div class="dropdown-content w-full max-w-48 py-2">
                       <div class="menu menu-default flex flex-col w-full">
+                        <div class="menu-item" @click="handleExportPdf(item)">
+                          <div class="menu-link">
+                            <span class="menu-icon">
+                              <i class="ki-filled ki-file-down text-success !text-lg"></i>
+                            </span>
+                            <span class="menu-title">Print PDF</span>
+                          </div>
+                        </div>
                         <div
                           v-if="(item.status || item.fgStatus)?.toUpperCase() === 'DRAFT'"
                           class="menu-item"
@@ -335,6 +342,19 @@
       </div>
     </ModalConfirmation>
 
+    <!-- PDF Preview Modal -->
+    <UiModal v-model="showPreviewModal" title="View WHT Unifikasi PDF" size="xl">
+      <div v-if="pdfLoading" class="flex flex-col items-center justify-center py-20">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+        <p class="mt-4 text-gray-500 font-medium">Loading PDF preview...</p>
+      </div>
+      <iframe
+        v-else-if="pdfBlobUrl"
+        :src="pdfBlobUrl"
+        class="w-full h-[650px] rounded-lg border-0"
+      ></iframe>
+    </UiModal>
+
     <!-- Notifications -->
     <ModalNotification
       :open="showNotificationModal"
@@ -354,7 +374,9 @@ import UiInputSearch from '@/components/ui/atoms/inputSearch/UiInputSearch.vue'
 import LPagination from '@/components/pagination/LPagination.vue'
 import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 import ModalNotification from '@/components/modal/ModalNotification.vue'
+import UiModal from '@/components/modal/UiModal.vue'
 import BpuService, { type BpuContent } from '@/services/bpu.service'
+import { generateBpuPdfBlobUrl } from '@/core/utils/bpuPdfExport'
 import moment from 'moment'
 import { useNotificationStore } from '@/stores/notification/notificationStore'
 
@@ -407,6 +429,9 @@ const showDeleteModal = ref(false)
 const showBatalModal = ref(false)
 const showUploadConfirmModal = ref(false)
 const showNotificationModal = ref(false)
+const showPreviewModal = ref(false)
+const pdfLoading = ref(false)
+const pdfBlobUrl = ref('')
 
 // Notification State
 const notifTitle = ref('')
@@ -714,6 +739,29 @@ const viewDetail = (item: BpuContent) => {
     name: 'whtUnifikasiDetail',
     params: { id: item.id },
   })
+}
+
+const handleExportPdf = async (item: BpuContent) => {
+  closeDropdowns()
+  showPreviewModal.value = true
+  pdfLoading.value = true
+  if (pdfBlobUrl.value) {
+    URL.revokeObjectURL(pdfBlobUrl.value)
+    pdfBlobUrl.value = ''
+  }
+
+  try {
+    pdfBlobUrl.value = await generateBpuPdfBlobUrl(item)
+  } catch (err) {
+    console.error(err)
+    showPreviewModal.value = false
+    notifTitle.value = 'Export Failed'
+    notifText.value = 'Gagal memuat preview PDF. Silakan coba lagi.'
+    notifType.value = 'error'
+    showNotificationModal.value = true
+  } finally {
+    pdfLoading.value = false
+  }
 }
 
 const onPendingPageChange = (v: number) => {

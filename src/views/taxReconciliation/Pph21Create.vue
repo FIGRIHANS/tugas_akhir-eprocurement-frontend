@@ -64,10 +64,9 @@
                   <input
                     v-model="form.npwp"
                     class="input w-full"
-                    :class="{ 'border-danger': errors.npwp, 'bg-gray-100 text-gray-500 cursor-not-allowed': form.invoiceId && form.invoiceId > 0 }"
+                    :class="{ 'border-danger': errors.npwp }"
                     :placeholder="form.fgNpwpNik ? 'Enter NPWP (16 digits)' : 'Enter NIK (16 digits)'"
                     required
-                    :disabled="form.invoiceId ? form.invoiceId > 0 : false"
                   />
                   <p v-if="errors.npwp" class="text-danger text-xs mt-1">{{ errors.npwp }}</p>
                 </div>
@@ -82,9 +81,8 @@
                     v-model="form.nama"
                     class="input w-full"
                     placeholder="Enter recipient full name"
-                    :class="{ 'border-danger': errors.nama, 'bg-gray-100 text-gray-500 cursor-not-allowed': form.invoiceId && form.invoiceId > 0 }"
+                    :class="{ 'border-danger': errors.nama }"
                     required
-                    :disabled="form.invoiceId ? form.invoiceId > 0 : false"
                   />
                   <p v-if="errors.nama" class="text-danger text-xs mt-1">{{ errors.nama }}</p>
                 </div>

@@ -69,19 +69,6 @@
               >
                 Tax Verification
               </button>
-
-              <button
-                :class="[
-                  'btn',
-                  pjapVerificationClicked
-                    ? 'btn-primary'
-                    : 'bg-white text-teal-600 border-2 border-teal-600 hover:bg-teal-50',
-                ]"
-                @click="handlePjapVerification"
-                :disabled="isSyncLoading"
-              >
-                {{ isSyncLoading ? 'Verifying...' : 'Verify By PJAP' }}
-              </button>
             </div>
           </div>
           <div class="border rounded-lg">

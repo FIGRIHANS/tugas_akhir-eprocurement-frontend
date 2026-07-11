@@ -261,6 +261,9 @@
           Back to List
         </button>
         <div class="flex gap-2">
+          <button class="btn btn-outline btn-primary" @click="handleExportPdf">
+            <i class="ki-filled ki-file-down"></i> View PDF
+          </button>
           <template v-if="(item.status || item.fgStatus)?.toUpperCase() === 'DRAFT'">
             <button class="btn btn-primary" @click="showUploadConfirmModal = true">
               <i class="ki-filled ki-cloud-change"></i> Upload to DJP
@@ -330,6 +333,19 @@
       </div>
     </ModalConfirmation>
 
+    <!-- PDF Preview Modal -->
+    <UiModal v-model="showPreviewModal" title="View PPh 21 PDF" size="xl">
+      <div v-if="pdfLoading" class="flex flex-col items-center justify-center py-20">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+        <p class="mt-4 text-gray-500 font-medium">Loading PDF preview...</p>
+      </div>
+      <iframe
+        v-else-if="pdfBlobUrl"
+        :src="pdfBlobUrl"
+        class="w-full h-[650px] rounded-lg border-0"
+      ></iframe>
+    </UiModal>
+
     <!-- Notification -->
     <ModalNotification
       :open="showNotif"
@@ -348,7 +364,9 @@ import { useRouter, useRoute } from 'vue-router'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 import ModalNotification from '@/components/modal/ModalNotification.vue'
+import UiModal from '@/components/modal/UiModal.vue'
 import Pph21Service, { type Pph21Content } from '@/services/pph21.service'
+import { generatePph21PdfBlobUrl } from '@/core/utils/pph21PdfExport'
 import moment from 'moment'
 
 const router = useRouter()
@@ -376,6 +394,9 @@ const showNotif = ref(false)
 const notifTitle = ref('')
 const notifText = ref('')
 const notifType = ref<'success' | 'error'>('success')
+const showPreviewModal = ref(false)
+const pdfLoading = ref(false)
+const pdfBlobUrl = ref('')
 
 // Computed
 const featureLabel = computed(() => {
@@ -558,6 +579,29 @@ const handleBatalSubmit = async () => {
 
 const goBack = () => {
   router.back()
+}
+
+const handleExportPdf = async () => {
+  if (!item.value) return
+  showPreviewModal.value = true
+  pdfLoading.value = true
+  if (pdfBlobUrl.value) {
+    URL.revokeObjectURL(pdfBlobUrl.value)
+    pdfBlobUrl.value = ''
+  }
+
+  try {
+    pdfBlobUrl.value = await generatePph21PdfBlobUrl(item.value)
+  } catch (err) {
+    console.error(err)
+    showPreviewModal.value = false
+    notifTitle.value = 'Export Failed'
+    notifText.value = 'Gagal memuat preview PDF. Silakan coba lagi.'
+    notifType.value = 'error'
+    showNotif.value = true
+  } finally {
+    pdfLoading.value = false
+  }
 }
 </script>
 

@@ -114,6 +114,22 @@
                         </button>
                         <div class="dropdown-content w-full max-w-48 py-2">
                           <div class="menu menu-default flex flex-col w-full">
+                            <div class="menu-item" @click="handleQueuePrintPdf(inv)">
+                              <div class="menu-link">
+                                <span class="menu-icon">
+                                  <i class="ki-filled ki-file-down text-success !text-lg"></i>
+                                </span>
+                                <span class="menu-title">Print PDF</span>
+                              </div>
+                            </div>
+                            <div class="menu-item" @click="handlePostInvoiceFromQueue(inv)">
+                              <div class="menu-link">
+                                <span class="menu-icon">
+                                  <i class="ki-filled ki-verify text-success !text-lg"></i>
+                                </span>
+                                <span class="menu-title">Post Credit</span>
+                              </div>
+                            </div>
                             <div
                               class="menu-item"
                               @click="handleRejectInvoice(inv)"
@@ -978,14 +994,14 @@ const exportExcel = () => {
     Swal.fire({ title: 'Export Failed', text: 'No data available to export.', icon: 'error' });
     return;
   }
-  
+
   const thStyle = 'style="background-color: #0d9488; color: #ffffff; font-weight: bold; border: 1px solid #cbd5e1; padding: 10px; text-align: left; font-family: Arial, sans-serif;"';
   const tdStyle = 'style="border: 1px solid #e2e8f0; padding: 8px; text-align: left; font-family: Arial, sans-serif;"';
   const tdRightStyle = 'style="border: 1px solid #e2e8f0; padding: 8px; text-align: right; font-family: Arial, sans-serif;"';
 
   let headerHtml = '';
   let rowsHtml = '';
-  
+
   if (workspace.value === 'pj') {
     headerHtml = columns.value.map(col => `<th ${thStyle}>${col}</th>`).join('');
     rowsHtml = (dataToExport as VATReconciliationData[]).map((item) => {
@@ -1508,6 +1524,7 @@ function displayVatOnRow(inv: InvoiceVatQueueRow): number {
   return 0
 }
 async function handleRejectInvoice(inv: InvoiceVatQueueRow) {
+  closeDropdowns()
   confirmType.value = 'confirm'
   confirmTitle.value = 'Reject Invoice'
   confirmText.value = `Apakah Anda yakin ingin menolak (Reject) Invoice No: ${inv.invoiceNo || '—'} dari antrean Pajak?`
@@ -1536,6 +1553,85 @@ async function handleRejectInvoice(inv: InvoiceVatQueueRow) {
       showNotification(
         'Error',
         'Terjadi kesalahan: ' + (error.response?.data?.message || error.message),
+        'error',
+      )
+    }
+  }
+  showConfirmModal.value = true
+}
+
+const mapQueueRowToVatPdfItem = (inv: InvoiceVatQueueRow): VATReconciliationData => ({
+  id: inv.id,
+  vendorName: inv.vendorName || '-',
+  npwpVendor: inv.vendorNpwp || '-',
+  tglFakturPajak: inv.invoiceDate || '',
+  noFakturPajak: inv.invoiceNo || inv.documentNo || '-',
+  amount: (inv.dpp ?? 0) + displayVatOnRow(inv),
+  dpp: inv.dpp ?? 0,
+  ppn: displayVatOnRow(inv),
+  statusFp: null,
+  statusApVsFp: null,
+  creditStatus: 'UNCREDITED',
+  vatCreditExpiryDate: '',
+  remark: '',
+  action: null,
+  poNumber: inv.documentNo || '',
+  invoiceNo: inv.invoiceNo || '',
+})
+
+const handleQueuePrintPdf = (inv: InvoiceVatQueueRow) => {
+  handleDownloadPdf(mapQueueRowToVatPdfItem(inv))
+}
+
+const handlePostInvoiceFromQueue = (inv: InvoiceVatQueueRow) => {
+  closeDropdowns()
+  const finalFp = (inv.invoiceNo || inv.documentNo || '').trim()
+  if (!finalFp) {
+    showNotification('Error', 'Nomor Faktur Pajak tidak ditemukan.', 'error')
+    return
+  }
+
+  confirmType.value = 'confirm'
+  confirmTitle.value = 'Post Credit?'
+  confirmText.value = `Apakah Anda yakin ingin melakukan Post Credit untuk Invoice No: ${inv.invoiceNo || '—'}?`
+  confirmSubmitText.value = 'Ya, Kirim'
+  confirmCancelText.value = 'Batal'
+
+  pendingConfirmAction = async () => {
+    try {
+      const today = momentLib()
+      await postVatInUpload({
+        payload: {
+          fgPermintaan: 2,
+          npwpPembeli: vendorNpwp,
+          userId: '3172022407830008',
+          kanal: '14',
+          konfirmasiFakturMasukan: {
+            konfirmasiPengkreditan: 'CREDITED',
+            nomorFaktur: finalFp,
+            masaPajak: today.format('MM'),
+            tahunPajak: today.format('YYYY'),
+          },
+        },
+        invoiceId: inv.id,
+        npwpPenjual: (inv.vendorNpwp || '').replace(/\D/g, ''),
+        namaVendor: inv.vendorName || undefined,
+        tanggalFaktur: inv.invoiceDate
+          ? momentLib(inv.invoiceDate).format('YYYY-MM-DD')
+          : today.format('YYYY-MM-DD'),
+        dpp: inv.dpp && inv.dpp > 0 ? inv.dpp : undefined,
+        ppn: displayVatOnRow(inv) > 0 ? displayVatOnRow(inv) : undefined,
+      })
+      showNotification(
+        'Success',
+        'Kredensial pengkreditan berhasil dikirim (Post Credit) ke DJP Coretax!',
+        'success',
+      )
+      await fetchPendingVat()
+    } catch (error: any) {
+      showNotification(
+        'Error',
+        'Gagal melakukan Post Credit: ' + (error.response?.data?.message || error.message),
         'error',
       )
     }
@@ -1671,7 +1767,7 @@ const getQueueMatchStatus = (inv: InvoiceVatQueueRow) => {
   if (!matched) {
     return 'Not Matched'
   }
-  
+
   const dppMatched = Math.abs((matched.dpp || 0) - (inv.dpp || 0)) < 1
   const ppnMatched = Math.abs((matched.ppn || 0) - (inv.vatAmount || 0)) < 1
   if (dppMatched && ppnMatched) {
@@ -1893,11 +1989,6 @@ const handleDownloadPdf = async (item: VATReconciliationData) => {
     console.warn('Backend PDF fetch failed, falling back to client-side generation:', error)
     try {
       await resolvePdfPreviewContext(item)
-      showNotification(
-        'Info',
-        'API Pajak Express tidak tersedia. Menampilkan preview proforma dari data lokal.',
-        'warning',
-      )
       const html2pdf = await loadHtml2Pdf()
       setTimeout(() => {
         const element = document.getElementById('faktur-print-hidden')
