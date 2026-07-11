@@ -1,6 +1,7 @@
 import type { MiddlewareContext } from 'vue-middleware'
 import type { ResponseUser } from '@/stores/views/types/login'
 import type { ISidebarMenu } from '@/static/sidebar'
+import sidebarMenu from '@/static/sidebar'
 import { getFilteredSidebarMenu } from '@/core/utils/menuAccess'
 
 const ROUTE_SUFFIXES = ['Detail', 'Create', 'Edit'] as const
@@ -20,6 +21,7 @@ const CHILD_ROUTE_OVERRIDES: Record<string, readonly string[]> = {
   invoiceApproval: ['invoiceDetail', 'invoiceDetailNonPo'],
   invoiceVerificationNoPo: ['invoiceDetailNonPo'],
   invoiceApprovalNonPo: ['invoiceDetailNonPo'],
+  ftpInvoiceIntegration: ['invoiceAdd', 'invoiceDetail', 'invoiceDetailNonPo', 'invoiceDetailEdit'],
   'user-management-user-list': [
     'user-management-user-detail',
     'user-management-user-form',
@@ -78,6 +80,36 @@ const CREATE_ROUTES_BY_CHILD_ID: Record<string, readonly string[]> = {
   'delivery-notes': ['deliveryNotes', 'deliveryNotesCreate'],
 }
 
+function getRouteNamesFromSidebarChildIds(childIds: Set<string>): string[] {
+  const routes: string[] = []
+  for (const menu of sidebarMenu) {
+    for (const child of menu.child) {
+      if (childIds.has(child.id) && child.to) {
+        routes.push(child.to)
+      }
+    }
+  }
+  return routes
+}
+
+function mergeExpandedRoutes(target: Set<string>, routes: string[]): void {
+  for (const route of routes) {
+    target.add(route)
+    for (const suffix of ROUTE_SUFFIXES) {
+      target.add(`${route}${suffix}`)
+    }
+    const overrides = CHILD_ROUTE_OVERRIDES[route]
+    if (overrides) {
+      for (const childRoute of overrides) {
+        target.add(childRoute)
+        for (const suffix of ROUTE_SUFFIXES) {
+          target.add(`${childRoute}${suffix}`)
+        }
+      }
+    }
+  }
+}
+
 function collectAllowedChildIds(menus: ISidebarMenu[]): Set<string> {
   const ids = new Set<string>()
   for (const menu of menus) {
@@ -112,6 +144,20 @@ function getProfileSpecificRoutes(userData: ResponseUser | null | undefined): st
   // Vendor can create DN (e.g. from PO list) without a sidebar create link
   if (vendorCode && profileId !== 3200) {
     return ['deliveryNotes', 'deliveryNotesCreate']
+  }
+
+  return []
+}
+
+/** Routes explicitly denied for a profile even when expanded from an allowed menu item. */
+function getProfileDeniedRoutes(userData: ResponseUser | null | undefined): string[] {
+  if (!userData) return []
+
+  const profileId = Number(userData.profile?.profileId)
+
+  // Internal submitter (3001) can view VAT Out but cannot create faktur pajak keluaran
+  if (profileId === 3001) {
+    return ['vatOutReconciliationCreate']
   }
 
   return []
@@ -164,11 +210,15 @@ export function getAllowedRouteNames(userData: ResponseUser | null | undefined):
   const allowed = expandRouteNames(baseRoutes)
 
   const allowedChildIds = collectAllowedChildIds(menus)
+  mergeExpandedRoutes(allowed, getRouteNamesFromSidebarChildIds(allowedChildIds))
   for (const route of getCreateRoutesForMenu(allowedChildIds)) {
     allowed.add(route)
   }
   for (const route of getProfileSpecificRoutes(userData)) {
     allowed.add(route)
+  }
+  for (const route of getProfileDeniedRoutes(userData)) {
+    allowed.delete(route)
   }
 
   for (const route of GLOBAL_ALLOWLIST) {
@@ -190,6 +240,11 @@ export function isRouteAllowed(
     return true
   }
 
+  const denied = new Set(getProfileDeniedRoutes(userData))
+  if (denied.has(routeName)) {
+    return false
+  }
+
   const allowed = getAllowedRouteNames(userData)
   if (allowed.has(routeName)) {
     return true
@@ -197,8 +252,10 @@ export function isRouteAllowed(
 
   // Match suffix patterns (e.g. whtPasal21Detail when whtPasal21 is allowed)
   for (const base of allowed) {
+    if (denied.has(base)) continue
     for (const suffix of ROUTE_SUFFIXES) {
-      if (routeName === `${base}${suffix}`) {
+      const expanded = `${base}${suffix}`
+      if (routeName === expanded && !denied.has(expanded)) {
         return true
       }
     }

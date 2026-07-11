@@ -87,6 +87,44 @@ function filterAdminMenu(includeCreateRoutes: boolean): ISidebarMenu[] {
   })
 }
 
+function getProfile3200Menu(): ISidebarMenu[] {
+  return filterMenusByIds([
+    'analytic-dashboard',
+    'digital-receiving-confirmation',
+    'e-invoice',
+    'tax-reconciliation',
+  ]).map((menu) => {
+    if (menu.id === 'analytic-dashboard') {
+      return filterChildIds(menu, [
+        'scorecard-performance',
+        'invoiceAnalytic',
+        'taxAnalytic',
+        'inboundLogisticAnalytic',
+      ])
+    }
+    if (menu.id === 'digital-receiving-confirmation') {
+      return filterChildIds(menu, [
+        'mock-sap-list',
+        'delivery-notes-list',
+        'receiving-confirmation-list',
+        'goods-receipt-list',
+      ])
+    }
+    if (menu.id === 'e-invoice') {
+      return filterChildIds(menu, ['ftp-invoice-integration'])
+    }
+    if (menu.id === 'tax-reconciliation') {
+      return filterChildIds(menu, [
+        'vat-reconciliation',
+        'vat-out-reconciliation',
+        'wht-unifikasi',
+        'wht-pasal-21',
+      ])
+    }
+    return menu
+  })
+}
+
 function getDefaultMenu(): ISidebarMenu[] {
   return sidebarMenu
     .filter((menu) => menu.id !== 'company-information' && menu.id !== 'vendor-tender')
@@ -108,16 +146,9 @@ export function getFilteredSidebarMenu(userData: ResponseUser | null | undefined
   const profileId = Number(userData.profile?.profileId)
   const vendorCode = userData.profile?.vendorCode
 
-  // Vendor admin (profile 3200 with vendorCode) — narrow access
-  if (vendorCode && profileId === 3200) {
-    return filterMenusByIds(['dashboard', 'e-invoice']).map((menu) =>
-      filterChildIds(menu, ['invoice-list-non-po']),
-    )
-  }
-
-  // Full admin (profile 3200)
+  // Profile 3200 — limited to 4 core modules (takes priority over vendorCode)
   if (profileId === 3200) {
-    return filterAdminMenu(true)
+    return getProfile3200Menu()
   }
 
   if (profileId === 3001) {
@@ -136,68 +167,43 @@ export function getFilteredSidebarMenu(userData: ResponseUser | null | undefined
     )
   }
 
-  // Finance AP Officer (3002) — verify only
+  // Finance AP Officer (3002) — FTP verification + tax reconciliation
   if (profileId === 3002) {
-    return filterMenusByIds([
-      'e-invoice',
-      'vendor-management',
-      'dashboard',
-      'tax-reconciliation',
-    ]).map((menu) =>
-      filterChildIds(menu, [
-        'invoice-list',
-        'invoice-list-non-po',
-        'invoice-verification',
-        'invoice-approval-no-po',
-        'recurring-invoice-reminder',
-        'vendor-master',
-        'vat-reconciliation',
-        'wht-unifikasi',
-        'wht-pasal-21',
-      ]),
-    )
+    return filterMenusByIds(['e-invoice', 'tax-reconciliation']).map((menu) => {
+      if (menu.id === 'e-invoice') {
+        return filterChildIds(menu, ['invoice-verification'])
+      }
+      if (menu.id === 'tax-reconciliation') {
+        return filterChildIds(menu, ['vat-reconciliation', 'wht-unifikasi', 'wht-pasal-21'])
+      }
+      return menu
+    })
   }
 
-  // Accounting & Tax (3003) — 1st approval after verify
+  // Accounting & Tax (3003) — FTP approval + tax reconciliation
   if (profileId === 3003) {
-    return filterMenusByIds([
-      'e-invoice',
-      'vendor-management',
-      'dashboard',
-      'tax-reconciliation',
-    ]).map((menu) =>
-      filterChildIds(menu, [
-        'invoice-list',
-        'invoice-list-non-po',
-        'invoice-approval',
-        'invoice-approval-no-po',
-        'recurring-invoice-reminder',
-        'vendor-master',
-        'vat-reconciliation',
-        'wht-unifikasi',
-        'wht-pasal-21',
-      ]),
-    )
+    return filterMenusByIds(['e-invoice', 'tax-reconciliation']).map((menu) => {
+      if (menu.id === 'e-invoice') {
+        return filterChildIds(menu, ['invoice-approval'])
+      }
+      if (menu.id === 'tax-reconciliation') {
+        return filterChildIds(menu, ['vat-reconciliation', 'wht-unifikasi', 'wht-pasal-21'])
+      }
+      return menu
+    })
   }
 
-  // Finance AP Supervisor (3004) — 2nd approval
+  // Finance AP Supervisor (3004) — FTP approval + tax reconciliation
   if (profileId === 3004) {
-    return filterMenusByIds([
-      'e-invoice',
-      'vendor-management',
-      'dashboard',
-      'tax-reconciliation',
-    ]).map((menu) =>
-      filterChildIds(menu, [
-        'invoice-approval',
-        'invoice-approval-no-po',
-        'recurring-invoice-reminder',
-        'vendor-master',
-        'vat-reconciliation',
-        'wht-unifikasi',
-        'wht-pasal-21',
-      ]),
-    )
+    return filterMenusByIds(['e-invoice', 'tax-reconciliation']).map((menu) => {
+      if (menu.id === 'e-invoice') {
+        return filterChildIds(menu, ['invoice-approval'])
+      }
+      if (menu.id === 'tax-reconciliation') {
+        return filterChildIds(menu, ['vat-reconciliation', 'wht-unifikasi', 'wht-pasal-21'])
+      }
+      return menu
+    })
   }
 
   // Warehouse Checker (3180) — can create RC
@@ -228,17 +234,9 @@ export function getFilteredSidebarMenu(userData: ResponseUser | null | undefined
       'vendor-management',
       'digital-receiving-confirmation',
       'tax-reconciliation',
-      'e-invoice',
     ]).map((menu) => {
       if (menu.id === 'digital-receiving-confirmation') {
         return filterChildIds(menu, ['mock-sap-list', 'delivery-notes-list', 'goods-receipt-list'])
-      }
-      if (menu.id === 'e-invoice') {
-        return filterChildIds(menu, [
-          'invoice-list',
-          'invoice-list-non-po',
-          'recurring-invoice-reminder',
-        ])
       }
       if (menu.id === 'tax-reconciliation') {
         return filterChildIds(menu, ['vat-out-reconciliation'])
