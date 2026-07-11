@@ -4,6 +4,7 @@ import { useLoginStore } from '@/stores/views/login'
 import { isEmpty } from 'lodash'
 import { resolveSafeRedirectPath } from '@/core/utils/safeRedirect'
 import { enforceEmailProfileAccess } from '@/core/utils/emailLinkAuth'
+import { enforceRouteAccess } from '@/core/utils/routeAccess'
 
 /**
  * Auth middleware — requires valid session. Preserves intended destination for post-login redirect.
@@ -26,5 +27,13 @@ export default async (context: MiddlewareContext) => {
     await loginApi.callUser(getUsername)
   }
 
-  await enforceEmailProfileAccess(context)
+  const emailAllowed = await enforceEmailProfileAccess(context)
+  if (!emailAllowed) {
+    return
+  }
+
+  const routeAllowed = await enforceRouteAccess(context)
+  if (!routeAllowed) {
+    return
+  }
 }
