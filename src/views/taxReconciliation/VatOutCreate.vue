@@ -150,7 +150,7 @@
               <!-- Right Col -->
               <div class="flex flex-col gap-1">
                 <label class="form-label text-sm font-medium text-gray-600">Buyer Name <span class="text-danger">*</span></label>
-                <input type="text" class="input w-full" v-model="form.namaPembeli" placeholder="e.g. PT Maju Bersama Tbk" required />
+                <input type="text" class="input w-full" v-model="form.namaPembeli" placeholder="e.g. PT EVOX" required />
               </div>
 
               <!-- Left Col -->
@@ -547,11 +547,11 @@ const form = ref({
   idLainPembeli: '',
   kdNegaraPembeli: 'IDN',
   nikPaspPembeli: '',
-  namaPembeli: 'PT Maju Bersama Tbk',
+  namaPembeli: 'PT EVOX',
   tkuPembeli: '1091031210969728000000',
   alamatPembeli: 'Jl. Sudirman No. 52, Jakarta Selatan 12190',
-  emailPembeli: 'finance@majubersama.co.id',
-  emailCcPembeli: 'tax@majubersama.co.id',
+  emailPembeli: 'finance@evox.co.id',
+  emailCcPembeli: 'tax@evox.co.id',
   totalDpp: 0,
   totalDppLain: 0,
   jumlahUangMuka: 0,

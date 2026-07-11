@@ -283,42 +283,44 @@
         </div>
 
         <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 8px">
-          <tr>
-            <td colspan="4" style="border: 1px solid black; padding: 5px">
-              <strong>Kode dan Nomor Seri Faktur Pajak :</strong>
-              {{ activeRow?.nomorfaktur || '-' }}
-            </td>
-          </tr>
-          <tr style="font-weight: bold; background-color: #f2f2f2">
-            <td colspan="4" style="border: 1px solid black; padding: 5px">Pengusaha Kena Pajak</td>
-          </tr>
-          <tr>
-            <td colspan="4" style="border: 1px solid black; padding: 5px; line-height: 1.4">
-              Nama : {{ activeRow?.namatokopenjual || '-' }}<br />
-              Alamat :
-              {{
-                activeRow?.alamatpenjual ||
-                'Kpg. Arlie no 7, RT007/RW001, TEBET BARAT, TEBET, KOTA ADM. JAKARTA SELATAN, DKI JAKARTA, 12810'
-              }}<br />
-              NPWP : {{ activeRow?.npwppenjual || '-' }}
-            </td>
-          </tr>
-          <tr style="font-weight: bold; background-color: #f2f2f2">
-            <td colspan="4" style="border: 1px solid black; padding: 5px">
-              Pembeli Barang Kena Pajak / Penerima Jasa Kena Pajak
-            </td>
-          </tr>
-          <tr>
-            <td colspan="4" style="border: 1px solid black; padding: 5px; line-height: 1.4">
-              Nama : {{ activeRow?.namapembeli || '-' }}<br />
-              Alamat : {{ activeRow?.alamatpembeli || '-' }}<br />
-              NPWP : {{ activeRow?.npwppembeli || '-' }}<br />
-              NIK : -<br />
-              Nomor Paspor : -<br />
-              Identitas Lain : -<br />
-              Email : {{ activeRow?.emailpembeli || '-' }}
-            </td>
-          </tr>
+          <tbody>
+            <tr>
+              <td colspan="4" style="border: 1px solid black; padding: 5px">
+                <strong>Kode dan Nomor Seri Faktur Pajak :</strong>
+                {{ activeRow?.nomorfaktur || '-' }}
+              </td>
+            </tr>
+            <tr style="font-weight: bold; background-color: #f2f2f2">
+              <td colspan="4" style="border: 1px solid black; padding: 5px">Pengusaha Kena Pajak</td>
+            </tr>
+            <tr>
+              <td colspan="4" style="border: 1px solid black; padding: 5px; line-height: 1.4">
+                Nama : {{ activeRow?.namatokopenjual || '-' }}<br />
+                Alamat :
+                {{
+                  activeRow?.alamatpenjual ||
+                  'Kpg. Arlie no 7, RT007/RW001, TEBET BARAT, TEBET, KOTA ADM. JAKARTA SELATAN, DKI JAKARTA, 12810'
+                }}<br />
+                NPWP : {{ activeRow?.npwppenjual || '-' }}
+              </td>
+            </tr>
+            <tr style="font-weight: bold; background-color: #f2f2f2">
+              <td colspan="4" style="border: 1px solid black; padding: 5px">
+                Pembeli Barang Kena Pajak / Penerima Jasa Kena Pajak
+              </td>
+            </tr>
+            <tr>
+              <td colspan="4" style="border: 1px solid black; padding: 5px; line-height: 1.4">
+                Nama : {{ activeRow?.namapembeli || '-' }}<br />
+                Alamat : {{ activeRow?.alamatpembeli || '-' }}<br />
+                NPWP : {{ activeRow?.npwppembeli || '-' }}<br />
+                NIK : -<br />
+                Nomor Paspor : -<br />
+                Identitas Lain : -<br />
+                Email : {{ activeRow?.emailpembeli || '-' }}
+              </td>
+            </tr>
+          </tbody>
         </table>
 
         <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px">
@@ -429,22 +431,24 @@
         </p>
 
         <table style="width: 100%; border: 0; margin-top: 15px; font-size: 11px">
-          <tr>
-            <td style="vertical-align: top; color: #555">{{ activeRow?.referensi || '' }}</td>
-            <td style="text-align: center; width: 250px">
-              <div>Jakarta, {{ formatDisplayDate(activeRow?.tanggalfaktur) }}</div>
-              <div
-                style="
-                  margin-top: 45px;
-                  font-weight: bold;
-                  text-decoration: underline;
-                  text-transform: uppercase;
-                "
-              >
-                {{ activeRow?.namapenandatangan || 'RADHITYA ARIE KENPRASOJO' }}
-              </div>
-            </td>
-          </tr>
+          <tbody>
+            <tr>
+              <td style="vertical-align: top; color: #555">{{ activeRow?.referensi || '' }}</td>
+              <td style="text-align: center; width: 250px">
+                <div>Jakarta, {{ formatDisplayDate(activeRow?.tanggalfaktur) }}</div>
+                <div
+                  style="
+                    margin-top: 45px;
+                    font-weight: bold;
+                    text-decoration: underline;
+                    text-transform: uppercase;
+                  "
+                >
+                  {{ activeRow?.namapenandatangan || 'RADHITYA ARIE KENPRASOJO' }}
+                </div>
+              </td>
+            </tr>
+          </tbody>
         </table>
 
         <div
