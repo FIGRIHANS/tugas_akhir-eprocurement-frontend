@@ -290,6 +290,9 @@
         >
           <i class="ki-filled ki-arrow-left"></i> Back to List
         </button>
+        <button class="btn btn-outline btn-primary" @click="handleExportPdf">
+          <i class="ki-filled ki-file-down"></i> View PDF
+        </button>
       </div>
     </div>
 
@@ -342,6 +345,19 @@
       :loading="submitting"
     />
 
+    <!-- PDF Preview Modal -->
+    <UiModal v-model="showPreviewModal" title="View WHT Unifikasi PDF" size="xl">
+      <div v-if="pdfLoading" class="flex flex-col items-center justify-center py-20">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+        <p class="mt-4 text-gray-500 font-medium">Loading PDF preview...</p>
+      </div>
+      <iframe
+        v-else-if="pdfBlobUrl"
+        :src="pdfBlobUrl"
+        class="w-full h-[650px] rounded-lg border-0"
+      ></iframe>
+    </UiModal>
+
     <!-- Notification -->
     <ModalNotification
       :open="showNotif"
@@ -360,7 +376,9 @@ import { useRouter, useRoute } from 'vue-router'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 import ModalNotification from '@/components/modal/ModalNotification.vue'
+import UiModal from '@/components/modal/UiModal.vue'
 import BpuService, { type BpuContent } from '@/services/bpu.service'
+import { generateBpuPdfBlobUrl } from '@/core/utils/bpuPdfExport'
 import moment from 'moment'
 
 const router = useRouter()
@@ -386,6 +404,9 @@ const showNotif = ref(false)
 const notifTitle = ref('')
 const notifText = ref('')
 const notifType = ref<'success' | 'error'>('success')
+const showPreviewModal = ref(false)
+const pdfLoading = ref(false)
+const pdfBlobUrl = ref('')
 
 // ── Computed ───────────────────────────────────────────────────────────
 const statusColorClass = computed(() => {
@@ -561,6 +582,29 @@ const handleBatalSubmit = async () => {
 }
 
 const goBack = () => router.back()
+
+const handleExportPdf = async () => {
+  if (!item.value) return
+  showPreviewModal.value = true
+  pdfLoading.value = true
+  if (pdfBlobUrl.value) {
+    URL.revokeObjectURL(pdfBlobUrl.value)
+    pdfBlobUrl.value = ''
+  }
+
+  try {
+    pdfBlobUrl.value = await generateBpuPdfBlobUrl(item.value)
+  } catch (err) {
+    console.error(err)
+    showPreviewModal.value = false
+    notifTitle.value = 'Export Failed'
+    notifText.value = 'Gagal memuat preview PDF. Silakan coba lagi.'
+    notifType.value = 'error'
+    showNotif.value = true
+  } finally {
+    pdfLoading.value = false
+  }
+}
 </script>
 
 <style scoped>
