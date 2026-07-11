@@ -748,7 +748,7 @@
             <tr>
               <td colspan="4" style="border: 1px solid black; padding: 5px">
                 <strong>Kode dan Nomor Seri Faktur Pajak :</strong>
-                {{ activeRow?.noFakturPajak || '-' }}
+                {{ pdfPreview?.noFaktur || activeRow?.noFakturPajak || '-' }}
               </td>
             </tr>
             <tr style="font-weight: bold; background-color: #f2f2f2">
@@ -758,10 +758,9 @@
             </tr>
             <tr>
               <td colspan="4" style="border: 1px solid black; padding: 5px; line-height: 1.4">
-                Nama : {{ activeRow?.vendorName || '-' }}<br />
-                Alamat : Kpg. Arlie no 7, RT007/RW001, TEBET BARAT, TEBET, KOTA ADM. JAKARTA
-                SELATAN, DKI JAKARTA, 12810<br />
-                NPWP : {{ activeRow?.npwpVendor || '-' }}
+                Nama : {{ pdfPreview?.sellerName || activeRow?.vendorName || '-' }}<br />
+                Alamat : {{ pdfPreview?.sellerAddress || defaultSellerAddress }}<br />
+                NPWP : {{ pdfPreview?.sellerNpwp || activeRow?.npwpVendor || '-' }}
               </td>
             </tr>
             <tr style="font-weight: bold; background-color: #f2f2f2">
@@ -771,14 +770,13 @@
             </tr>
             <tr>
               <td colspan="4" style="border: 1px solid black; padding: 5px; line-height: 1.4">
-                Nama : FAST CONSULT INDONESIA<br />
-                Alamat : DISTRICT 8, TREASURY TOWER LT. 6 UNIT F, JL. JEND. SUDIRMAN KAV. 52-53,
-                SCBD LOT 28, KOTA ADM. JAKARTA SELATAN, DKI JAKARTA - 12190<br />
-                NPWP : 1091031210969728<br />
+                Nama : {{ pdfPreview?.buyerName || 'PT EVOX' }}<br />
+                Alamat : {{ pdfPreview?.buyerAddress || 'Jl. Sudirman No. 52, Jakarta Selatan 12190' }}<br />
+                NPWP : {{ pdfPreview?.buyerNpwp || vendorNpwp }}<br />
                 NIK : -<br />
                 Nomor Paspor : -<br />
                 Identitas Lain : -<br />
-                Email : finance@fastconsult.co.id
+                Email : {{ pdfPreview?.buyerEmail || 'finance@evox.co.id' }}
               </td>
             </tr>
           </table>
@@ -797,21 +795,40 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td style="border: 1px solid black; padding: 5px; text-align: center">1</td>
-                <td style="border: 1px solid black; padding: 5px; text-align: center">000000</td>
-                <td style="border: 1px solid black; padding: 5px; line-height: 1.3">
-                  GOODS - Sample Item<br />
-                  <span style="font-size: 10px; color: #555">
-                    Rp {{ formatIndo(activeRow?.dpp) }} x 1<br />
-                    Potongan Harga = Rp 0,00<br />
-                    PPnBM (0%) = Rp 0,00
-                  </span>
-                </td>
-                <td style="border: 1px solid black; padding: 5px; text-align: right">
-                  {{ formatIndo(activeRow?.dpp) }}
-                </td>
-              </tr>
+              <template v-if="grItems && grItems.length > 0">
+                <tr v-for="(item, idx) in grItems" :key="'vat-in-gr-item-' + idx">
+                  <td style="border: 1px solid black; padding: 5px; text-align: center">{{ idx + 1 }}</td>
+                  <td style="border: 1px solid black; padding: 5px; text-align: center">{{ item.sku || '000000' }}</td>
+                  <td style="border: 1px solid black; padding: 5px; line-height: 1.3">
+                    {{ item.conditionType || 'GOODS' }} - {{ item.itemName || 'Sample Item' }}<br />
+                    <span style="font-size: 10px; color: #555">
+                      Rp {{ formatIndo(item.unitPrice) }} x {{ item.qtyReceivedGood }}<br />
+                      Potongan Harga = Rp 0,00<br />
+                      PPnBM (0%) = Rp 0,00
+                    </span>
+                  </td>
+                  <td style="border: 1px solid black; padding: 5px; text-align: right">
+                    {{ formatIndo(item.lineAmount) }}
+                  </td>
+                </tr>
+              </template>
+              <template v-else>
+                <tr>
+                  <td style="border: 1px solid black; padding: 5px; text-align: center">1</td>
+                  <td style="border: 1px solid black; padding: 5px; text-align: center">000000</td>
+                  <td style="border: 1px solid black; padding: 5px; line-height: 1.3">
+                    GOODS - Sample Item<br />
+                    <span style="font-size: 10px; color: #555">
+                      Rp {{ formatIndo(pdfPreview?.totalDpp ?? activeRow?.dpp) }} x 1<br />
+                      Potongan Harga = Rp 0,00<br />
+                      PPnBM (0%) = Rp 0,00
+                    </span>
+                  </td>
+                  <td style="border: 1px solid black; padding: 5px; text-align: right">
+                    {{ formatIndo(pdfPreview?.totalDpp ?? activeRow?.dpp) }}
+                  </td>
+                </tr>
+              </template>
               <tr>
                 <td colspan="3" style="border: 1px solid black; padding: 5px; font-weight: bold">
                   Harga Jual / Penggantian / Uang Muka / Termin
@@ -824,7 +841,7 @@
                     font-weight: bold;
                   "
                 >
-                  {{ formatIndo(activeRow?.dpp) }}
+                  {{ formatIndo(pdfPreview?.totalDpp ?? activeRow?.dpp) }}
                 </td>
               </tr>
               <tr>
@@ -851,7 +868,7 @@
                     font-weight: bold;
                   "
                 >
-                  {{ formatIndo(activeRow?.dpp) }}
+                  {{ formatIndo(pdfPreview?.totalDpp ?? activeRow?.dpp) }}
                 </td>
               </tr>
               <tr>
@@ -866,14 +883,16 @@
                     font-weight: bold;
                   "
                 >
-                  {{ formatIndo(activeRow?.ppn) }}
+                  {{ formatIndo(pdfPreview?.totalPpn ?? activeRow?.ppn) }}
                 </td>
               </tr>
               <tr>
                 <td colspan="3" style="border: 1px solid black; padding: 5px">
                   Jumlah PPnBM (Pajak Penjualan atas Barang Mewah)
                 </td>
-                <td style="border: 1px solid black; padding: 5px; text-align: right">0,00</td>
+                <td style="border: 1px solid black; padding: 5px; text-align: right">
+                  {{ formatIndo(pdfPreview?.totalPpnbm || 0) }}
+                </td>
               </tr>
             </tbody>
           </table>
@@ -886,9 +905,9 @@
 
           <table style="width: 100%; border: 0; margin-top: 15px; font-size: 11px">
             <tr>
-              <td style="vertical-align: top; color: #555">{{ activeRow?.poNumber || '' }}</td>
+              <td style="vertical-align: top; color: #555">{{ pdfPreview?.referensi || activeRow?.poNumber || '' }}</td>
               <td style="text-align: center; width: 250px">
-                <div>Jakarta, {{ formatDisplayDate(activeRow?.tglFakturPajak) }}</div>
+                <div>Jakarta, {{ formatDisplayDate(pdfPreview?.tanggalFaktur || activeRow?.tglFakturPajak) }}</div>
                 <div
                   style="
                     margin-top: 45px;
@@ -897,7 +916,7 @@
                     text-transform: uppercase;
                   "
                 >
-                  {{ activeRow?.vendorName || 'RADHITYA ARIE KENPRASOJO' }}
+                  {{ pdfPreview?.signatoryName || activeRow?.vendorName || 'RADHITYA ARIE KENPRASOJO' }}
                 </div>
               </td>
             </tr>
@@ -944,9 +963,12 @@ import {
   postVatInPrepopulated,
   postVatInDownloadPdf,
   postVatInReplaceCancel,
+  getVatOutList,
 } from '@/core/utils/vatPxInvoiceApi'
 import axios from 'axios'
 import BpuService, { type InvoiceVatQueueRow } from '@/services/bpu.service'
+import GoodsReceiptService from '@/services/goodsReceipt.service'
+import { useLoginStore } from '@/stores/views/login'
 import { useNotificationStore } from '@/stores/notification/notificationStore'
 import Swal from 'sweetalert2'
 
@@ -1066,6 +1088,25 @@ const closeDropdowns = () => {
   document.body.dispatchEvent(event)
 }
 const router = useRouter()
+const loginStore = useLoginStore()
+const vendorNpwp = '1091031210969728'
+
+type PdfPreviewData = {
+  noFaktur: string
+  sellerName: string
+  sellerAddress: string
+  sellerNpwp: string
+  buyerName: string
+  buyerAddress: string
+  buyerNpwp: string
+  buyerEmail: string
+  totalDpp: number
+  totalPpn: number
+  totalPpnbm: number
+  referensi: string
+  tanggalFaktur: string
+  signatoryName: string
+}
 
 interface VATReconciliationData {
   id?: number | string | null
@@ -1702,6 +1743,89 @@ const showPreviewModal = ref(false)
 const pdfBlobUrl = ref('')
 const pdfLoading = ref(false)
 const activeRow = ref<any>(null)
+const pdfPreview = ref<PdfPreviewData | null>(null)
+const grItems = ref<any[]>([])
+
+const defaultSellerAddress =
+  'Kpg. Arlie no 7, RT007/RW001, TEBET BARAT, TEBET, KOTA ADM. JAKARTA SELATAN, DKI JAKARTA, 12810'
+
+const buildPdfPreviewFromVatInRow = (item: VATReconciliationData): PdfPreviewData => ({
+  noFaktur: item.noFakturPajak || '-',
+  sellerName: item.vendorName || '-',
+  sellerAddress: defaultSellerAddress,
+  sellerNpwp: item.npwpVendor || '-',
+  buyerName: 'PT EVOX',
+  buyerAddress: 'Jl. Sudirman No. 52, Jakarta Selatan 12190',
+  buyerNpwp: vendorNpwp,
+  buyerEmail: 'finance@evox.co.id',
+  totalDpp: item.dpp || 0,
+  totalPpn: item.ppn || 0,
+  totalPpnbm: 0,
+  referensi: item.poNumber || '',
+  tanggalFaktur: item.tglFakturPajak || '',
+  signatoryName: item.vendorName || 'RADHITYA ARIE KENPRASOJO',
+})
+
+const buildPdfPreviewFromVatOutRow = (row: Record<string, unknown>): PdfPreviewData => ({
+  noFaktur: String(row.nomorfaktur || '-'),
+  sellerName: String(row.namatokopenjual || '-'),
+  sellerAddress: String(
+    row.alamatpenjual ||
+      defaultSellerAddress,
+  ),
+  sellerNpwp: String(row.npwppenjual || '-'),
+  buyerName: String(row.namapembeli || 'PT EVOX'),
+  buyerAddress: String(row.alamatpembeli || 'Jl. Sudirman No. 52, Jakarta Selatan 12190'),
+  buyerNpwp: String(row.npwppembeli || vendorNpwp),
+  buyerEmail: String(row.emailpembeli || 'finance@evox.co.id'),
+  totalDpp: Number(row.totaldpp) || 0,
+  totalPpn: Number(row.totalppn) || 0,
+  totalPpnbm: Number(row.totalppnbm) || 0,
+  referensi: String(row.referensi || ''),
+  tanggalFaktur: String(row.tanggalfaktur || ''),
+  signatoryName: String(row.namapenandatangan || 'RADHITYA ARIE KENPRASOJO'),
+})
+
+const loadGrItemsForPdf = async (poNumber?: string) => {
+  grItems.value = []
+  if (!poNumber) return
+
+  try {
+    const isVendorUser = !!loginStore.userData?.profile?.vendorCode
+    const grResponse = await GoodsReceiptService.getDetail({
+      poNumber,
+      accessVendorId: isVendorUser ? loginStore.userData?.profile?.profileId : undefined,
+      accessVendorCode: isVendorUser ? loginStore.userData?.profile?.vendorCode : undefined,
+    })
+    if (grResponse?.items) {
+      grItems.value = grResponse.items
+    }
+  } catch (grError) {
+    console.error('Error fetching GR details for VAT In PDF preview:', grError)
+  }
+}
+
+const resolvePdfPreviewContext = async (item: VATReconciliationData) => {
+  try {
+    const response = await getVatOutList(vendorNpwp, { page: 1, limit: 100 })
+    const payload = response.data?.result?.content || response.data?.result || response.data
+    const rows = payload?.status === 'success' && payload?.data ? payload.data : []
+    const matched = rows.find(
+      (row: Record<string, unknown>) => String(row.nomorfaktur || '') === item.noFakturPajak,
+    )
+
+    if (matched) {
+      pdfPreview.value = buildPdfPreviewFromVatOutRow(matched)
+      await loadGrItemsForPdf(String(matched.referensi || item.poNumber || ''))
+      return
+    }
+  } catch (error) {
+    console.warn('Failed to match VAT Out record for PDF preview:', error)
+  }
+
+  pdfPreview.value = buildPdfPreviewFromVatInRow(item)
+  await loadGrItemsForPdf(item.poNumber)
+}
 
 const loadHtml2Pdf = () => {
   return new Promise<any>((resolve) => {
@@ -1768,6 +1892,12 @@ const handleDownloadPdf = async (item: VATReconciliationData) => {
   } catch (error: any) {
     console.warn('Backend PDF fetch failed, falling back to client-side generation:', error)
     try {
+      await resolvePdfPreviewContext(item)
+      showNotification(
+        'Info',
+        'API Pajak Express tidak tersedia. Menampilkan preview proforma dari data lokal.',
+        'warning',
+      )
       const html2pdf = await loadHtml2Pdf()
       setTimeout(() => {
         const element = document.getElementById('faktur-print-hidden')
