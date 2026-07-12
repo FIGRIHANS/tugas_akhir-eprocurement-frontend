@@ -15,7 +15,7 @@
             <span class="inv-company-initials">PT</span>
           </div>
           <div>
-            <div class="inv-company-name">PT. Acarya Data Esa</div>
+            <div class="inv-company-name">PT. EVOX</div>
             <div class="inv-company-sub">Receiving Confirmation Report</div>
           </div>
         </div>

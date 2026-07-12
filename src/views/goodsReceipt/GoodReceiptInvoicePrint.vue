@@ -69,7 +69,7 @@
         <!-- Sold To -->
         <div class="inv-party-box inv-party-box--sold">
           <div class="inv-section-title">Sold To</div>
-          <div class="inv-party-name">PT. Acarya Data Esa</div>
+          <div class="inv-party-name">PT. EVOX</div>
           <div class="inv-party-detail">
             <span class="inv-detail-label">Legal Entity</span>
             <span>Limited Liability Company</span>
@@ -235,7 +235,7 @@
             This invoice is generated electronically and is valid without a physical signature. The
             information contained herein is based on the Goods Receipt record approved in the
             e-Procurement system. Any discrepancy must be reported within 7 working days of receipt.
-            PT. Acarya Data Esa reserves the right to reject claims submitted beyond this period.
+            PT. EVOX reserves the right to reject claims submitted beyond this period.
           </p>
           <p class="inv-disclaimer-footer">
             Generated on {{ formatDateTime(new Date().toISOString()) }} &nbsp;|&nbsp; Ref:
