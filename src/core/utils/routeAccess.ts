@@ -155,9 +155,8 @@ function getProfileDeniedRoutes(userData: ResponseUser | null | undefined): stri
 
   const profileId = Number(userData.profile?.profileId)
 
-  // Internal submitter (3001) can view VAT Out but cannot create faktur pajak keluaran
   if (profileId === 3001) {
-    return ['vatOutReconciliationCreate']
+    return ['vatOutReconciliationCreate', 'invoice-list']
   }
 
   return []

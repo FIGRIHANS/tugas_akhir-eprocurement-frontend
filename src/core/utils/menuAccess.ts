@@ -159,7 +159,6 @@ export function getFilteredSidebarMenu(userData: ResponseUser | null | undefined
       'tax-reconciliation',
     ]).map((menu) =>
       filterChildIds(menu, [
-        'invoice-list',
         'ftp-invoice-integration',
         'goods-receipt-list',
         'vat-out-reconciliation',

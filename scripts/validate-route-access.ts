@@ -168,6 +168,7 @@ const cases: Case[] = [
       'whtUnifikasi',
       'whtPasal21',
       'user-management-user-list',
+      'invoice-list',
     ],
   },
   {
