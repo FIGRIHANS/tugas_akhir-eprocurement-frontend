@@ -352,7 +352,6 @@ import {
   resolveFtpUploadUIdFromRow,
   saveActiveFtpUploadUId,
   saveFtpSyncContext,
-  sortFtpDataByNewest,
   sortFtpUploadsByNewest,
 } from './types/ftpUploadService'
 
@@ -707,72 +706,48 @@ const getStatusBadgeClass = (status: boolean) => {
 //   return pool[Math.floor(Math.random() * pool.length)]
 // }
 
-const getCreatedTimestamp = (item: ListPoTypes) => {
-  if (!item.createdUtcDate) return 0
-  const timestamp = moment(item.createdUtcDate).valueOf()
-  return Number.isFinite(timestamp) ? timestamp : 0
-}
-
-const sortByNewestFirst = (items: ListPoTypes[]) => {
-  return [...items].sort((a, b) => {
-    const dateDiff = getCreatedTimestamp(b) - getCreatedTimestamp(a)
-    if (dateDiff !== 0) return dateDiff
-    return (b.id || 0) - (a.id || 0)
-  })
-}
-
-const filterBySearch = (items: ListPoTypes[]) => {
-  const query = search.value.trim().toLowerCase()
-  if (!query) return items
-
-  return items.filter((item) => {
-    const haystack = [
-      item.vendorName,
-      item.documentNo,
-      item.invoiceNo,
-      item.companyCode,
-      item.companyName,
-      item.statusName,
-      item.invoiceTypeName,
-      item.invoiceSourceName,
-      item.poNo,
-      item.grDocumentNo,
-    ]
-      .filter((value) => value != null && String(value).trim() !== '')
-      .join(' ')
-      .toLowerCase()
-
-    return haystack.includes(query)
-  })
-}
-
-const isUploadedFtpData = (item: ListPoTypes) => {
-  const sourceName = item.invoiceSourceName?.toLowerCase() || ''
-  return item.invoiceSource === FTP_INVOICE_SOURCE || sourceName.includes('ftp')
-}
-
-const isDraftData = (item: ListPoTypes) => {
-  return (
-    item.statusCode === DRAFT_STATUS_CODE || item.statusName?.toLowerCase() === DRAFT_STATUS_NAME
-  )
-}
-
-const filterByActiveTab = (items: ListPoTypes[]) => {
-  if (activeTab.value === 'upload') {
-    return items.filter(isDraftData)
+const applyPageWindow = <T>(
+  items: T[],
+  total: number,
+  page: number,
+  pageSize: number,
+): { items: T[]; total: number } => {
+  if (items.length <= pageSize) {
+    return { items, total }
   }
 
-  return items
+  const resolvedTotal = Math.max(total, items.length)
+  const start = (page - 1) * pageSize
+  return {
+    items: items.slice(start, start + pageSize),
+    total: resolvedTotal,
+  }
 }
 
+const FTP_FILTER_FETCH_SIZE = 1000
+
+const hasActiveFtpClientFilters = computed(() => {
+  if (activeTab.value === 'upload') return false
+  return (
+    search.value.trim() !== '' ||
+    filterForm.status !== '' ||
+    filterForm.companyCode !== '' ||
+    filterForm.invoiceType !== '' ||
+    filterForm.date !== ''
+  )
+})
+
 const getFtpListParams = () => {
+  const useClientFilterMode = hasActiveFtpClientFilters.value
+
   const params = {
     statusCode: getListStatusCode(),
-    companyCode: filterForm.companyCode,
-    invoiceTypeCode: Number(filterForm.invoiceType),
-    invoiceDate: filterForm.date,
-    page: 1,
-    pageSize: 1000,
+    companyCode: filterForm.companyCode || null,
+    invoiceTypeCode: filterForm.invoiceType ? Number(filterForm.invoiceType) : null,
+    invoiceDate: filterForm.date || null,
+    searchText: search.value.trim() || null,
+    page: useClientFilterMode ? 1 : currentPage.value,
+    pageSize: useClientFilterMode ? FTP_FILTER_FETCH_SIZE : pageSize.value,
   }
 
   if (activeTab.value === 'upload') {
@@ -784,6 +759,63 @@ const getFtpListParams = () => {
   }
 
   return params
+}
+
+const filterFtpDataByForm = (items: ListPoTypes[]) => {
+  if (!hasActiveFtpClientFilters.value) return items
+
+  return items.filter((item) => {
+    if (filterForm.status !== '') {
+      if (Number(item.statusCode) !== Number(filterForm.status)) return false
+    }
+
+    if (filterForm.companyCode) {
+      if (String(item.companyCode ?? '') !== String(filterForm.companyCode)) return false
+    }
+
+    if (filterForm.invoiceType) {
+      if (Number(item.invoiceTypeCode) !== Number(filterForm.invoiceType)) return false
+    }
+
+    if (filterForm.date) {
+      const itemDate = item.invoiceDate ? moment(item.invoiceDate).format('YYYY/MM/DD') : ''
+      if (itemDate !== filterForm.date) return false
+    }
+
+    return true
+  })
+}
+
+const filterFtpDataBySearch = (items: ListPoTypes[]) => {
+  const query = search.value.trim().toLowerCase()
+  if (!query) return items
+
+  return items.filter((item) => {
+    const row = item as FtpDataListRow
+    const cachedNames = getCachedOriginalNames(row.invoiceUId)
+    const haystack = [
+      item.statusName,
+      getFtpDataStatusLabel(row),
+      item.status,
+      item.vendorName,
+      item.invoiceNo,
+      item.documentNo,
+      item.companyCode,
+      item.companyName,
+      item.invoiceTypeName,
+      item.invoiceSourceName,
+      item.poNo,
+      item.grDocumentNo,
+      resolveFtpInvoiceFileName(item, cachedNames),
+      resolveFtpTaxFileName(item, cachedNames),
+      resolveFtpReferenceFileName(item, cachedNames),
+    ]
+      .filter((value) => value != null && String(value).trim() !== '' && value !== '-')
+      .join(' ')
+      .toLowerCase()
+
+    return haystack.includes(query)
+  })
 }
 
 const applyColumnSort = (items: ListPoTypes[]) => {
@@ -885,12 +917,10 @@ const paginatedUploadList = computed(() => {
 })
 
 const sortedList = computed(() => {
-  let data = filterBySearch(filterByActiveTab(cloneDeep(sourceList.value)))
+  let data = cloneDeep(sourceList.value)
 
   if (sortBy.value && sortColumnName.value) {
     data = applyColumnSort(data)
-  } else {
-    data = sortByNewestFirst(data)
   }
 
   return data
@@ -898,17 +928,24 @@ const sortedList = computed(() => {
 
 const totalItems = computed(() => {
   if (activeTab.value === 'upload') return filteredUploadList.value.length
-  if (search.value.trim() || filteredPayload.value.length > 0) return sortedList.value.length
-  return ftpDataTotal.value || sortedList.value.length
+  if (hasActiveFtpClientFilters.value) return sortedList.value.length
+  return ftpDataTotal.value
 })
 
 const list = computed(() => {
-  const start = (currentPage.value - 1) * pageSize.value
-  return sortedList.value.slice(start, start + pageSize.value)
+  if (hasActiveFtpClientFilters.value) {
+    const start = (currentPage.value - 1) * pageSize.value
+    return sortedList.value.slice(start, start + pageSize.value)
+  }
+
+  return sortedList.value.slice(0, pageSize.value)
 })
 
-const setPage = (value: number) => {
+const setPage = async (value: number) => {
   currentPage.value = value
+  if (activeTab.value !== 'upload' && !hasActiveFtpClientFilters.value) {
+    await callList({ silent: true })
+  }
 }
 
 const goView = async (data: ListPoTypes) => {
@@ -1050,17 +1087,21 @@ const callList = async (options?: { silent?: boolean }) => {
       return
     }
 
-    const response = await fetchFtpDataList({
-      statusCode: getListStatusCode(),
-      companyCode: filterForm.companyCode,
-      invoiceTypeCode: Number(filterForm.invoiceType) || undefined,
-      invoiceDate: filterForm.date,
-      page: 1,
-      pageSize: 1000,
-    })
+    const params = getFtpListParams()
+    const response = await fetchFtpDataList(params)
 
-    sourceList.value = sortFtpDataByNewest(response.items)
-    ftpDataTotal.value = response.total
+    let items = response.items
+    items = filterFtpDataByForm(items)
+    items = filterFtpDataBySearch(items)
+
+    if (hasActiveFtpClientFilters.value) {
+      sourceList.value = items
+      ftpDataTotal.value = items.length
+    } else {
+      const windowed = applyPageWindow(items, response.total, params.page ?? 1, params.pageSize ?? 10)
+      sourceList.value = windowed.items
+      ftpDataTotal.value = windowed.total
+    }
   } catch (error) {
     console.error('Failed to load FTP invoice list:', error)
     if (!hasLoadedListOnce.value) {
@@ -1125,10 +1166,16 @@ const setDataFilter = (data: filterListTypes) => {
 
 const triggerSearch = () => {
   currentPage.value = 1
+  if (activeTab.value !== 'upload') {
+    void callList()
+  }
 }
 
 watch(search, () => {
   currentPage.value = 1
+  if (activeTab.value !== 'upload') {
+    void callList()
+  }
 })
 
 const sortColumn = (columnName: string | null) => {
@@ -1151,8 +1198,6 @@ const sortColumn = (columnName: string | null) => {
       sortColumnName.value = ''
     }
   }
-
-  currentPage.value = 1
 }
 
 const deleteFilter = (key: string) => {
@@ -1181,6 +1226,8 @@ const resetFilter = () => {
 }
 
 onMounted(() => {
+  invoiceMasterApi.getCompanyCode()
+  invoiceMasterApi.getInvoicePoType()
   applyRouteTab()
   callList()
 })

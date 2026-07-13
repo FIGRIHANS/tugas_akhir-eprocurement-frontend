@@ -27,12 +27,6 @@
                   ?.name
               }}
             </p>
-            <p v-else-if="items.key === 'Invoice Type'">
-              {{
-                invoiceNonPoTypeList.find((item) => item.code.toString() === filterForm.invoiceType)
-                  ?.name
-              }}
-            </p>
             <p v-else-if="items.key === 'Date'">{{ filterForm.date }}</p>
           </span>
           <i class="ki-filled ki-cross" @click="deleteFilter(items.key)"></i>
@@ -64,7 +58,11 @@
             </tr>
           </thead>
           <tbody>
-            <template v-for="(parent, index) in list" :key="index">
+            <TableListSkeleton v-if="isListPoLoading" :columns="columns.length" :rows="5" />
+            <tr v-else-if="list.length === 0">
+              <td :colspan="columns.length" class="text-center py-6">No data found.</td>
+            </tr>
+            <template v-else v-for="(parent, index) in list" :key="parent.invoiceUId || index">
               <tr>
                 <td>
                   <div class="dropdown" data-dropdown="true" data-dropdown-trigger="click">
@@ -178,8 +176,11 @@
                   {{ parent.notes || '-' }}
                 </td>
                 <td>
-                  <span class="badge badge-outline" :class="colorBadge(parent.statusCode)">
-                    {{ parent.statusName }}
+                  <span
+                    class="badge badge-outline"
+                    :class="colorBadge(getItemDisplayStatus(parent).statusCode)"
+                  >
+                    {{ getItemDisplayStatus(parent).statusName }}
                   </span>
                 </td>
                 <td>{{ parent.vendorName || '-' }}</td>
@@ -208,7 +209,8 @@
               </tr>
               <tr v-show="parent.isOpenChild">
                 <td></td>
-                <td colspan="5" class="!pt-[0px]">
+                <td></td>
+                <td colspan="6" class="!pt-[0px]">
                   <table class="table table-bordered table-sm mb-0">
                     <thead>
                       <tr class="border-b">
@@ -238,16 +240,14 @@
       <div class="flex items-center justify-between mt-[24px]">
         <p class="m-0 text-sm">
           Tampilkan
-          {{
-            pageSize * currentPage > verifList.length ? verifList.length : pageSize * currentPage
-          }}
-          data dari total data {{ verifList.length }}
+          {{ pageSize * currentPage > totalItems ? totalItems : pageSize * currentPage }}
+          data dari total data {{ totalItems }}
         </p>
         <LPagination
-          :totalItems="verifList.length"
+          :totalItems="totalItems"
           :pageSize="pageSize"
           :currentPage="currentPage"
-          @pageChange="setPage"
+          @pageChange="onPageChange"
         />
       </div>
     </div>
@@ -260,6 +260,7 @@
 
 <script lang="ts" setup>
 import { ref, reactive, computed, onMounted, defineAsyncComponent } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { KTModal } from '@/metronic/core'
 import LPagination from '@/components/pagination/LPagination.vue'
@@ -272,14 +273,15 @@ import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { useLoginStore } from '@/stores/views/login'
 import { useFormatIdr } from '@/composables/currency'
 import UiLoading from '@/components/modal/UiLoading.vue'
+import TableListSkeleton from '@/components/skeleton/TableListSkeleton.vue'
 import moment from 'moment'
-import { cloneDeep } from 'lodash'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
+import { useFinanceInvoiceListTable, FINANCE_LIST_UI_PAGE_SIZE } from '@/composables/useFinanceInvoiceListTable'
+import { resolveFinanceListItemDisplay } from '@/composables/useInvoiceWorkflow'
 
 const invoiceMasterApi = useInvoiceMasterDataStore()
 
 const companyCodeList = computed(() => invoiceMasterApi.companyCode)
-const invoiceNonPoTypeList = computed(() => invoiceMasterApi.invoiceNonPoType)
 
 const ModalDetailApproval = defineAsyncComponent(() => import('./DetailApproval.vue'))
 const FilterList = defineAsyncComponent(() => import('./FilterList.vue'))
@@ -290,16 +292,12 @@ const FailedSendToSap = defineAsyncComponent(() => import('./pendingApproval/Fai
 
 const invoiceApi = useInvoiceSubmissionStore()
 const verificationApi = useInvoiceVerificationStore()
+const { listPo, listPoTotal, isListPoLoading } = storeToRefs(verificationApi)
 const loginStore = useLoginStore()
 const router = useRouter()
 const search = ref<string>('')
-const currentPage = ref<number>(1)
-const pageSize = ref<number>(10)
-const list = ref<ListPoTypes[]>([])
 const viewDetailId = ref<string>('')
 const isLoadingSap = ref<boolean>(false)
-const sortBy = ref<string>('')
-const sortColumnName = ref<string>('')
 const filterChild = ref(null)
 const approvedByFinanceApCache = ref<Map<string, boolean>>(new Map())
 const invoicesBeingChecked = ref<Set<string>>(new Set())
@@ -340,7 +338,52 @@ const columns = ref<string[]>([
 
 const columnsChild = ref(['No PO', 'No GR', 'Item Description', 'Item Amount', 'Quantity'])
 
-const verifList = computed(() => verificationApi.listPo)
+const verifList = computed(() => listPo.value)
+
+const buildListParams = (page: number) => ({
+  statusCode: filterForm.status,
+  companyCode: filterForm.companyCode,
+  invoiceDate: filterForm.date,
+  searchText: search.value,
+  page,
+  pageSize: FINANCE_LIST_UI_PAGE_SIZE,
+})
+
+const fetchListPage = async (page: number) => {
+  await verificationApi.getListPo(buildListParams(page))
+}
+
+const {
+  currentPage,
+  pageSize,
+  list,
+  totalItems,
+  setPage,
+  sortColumn,
+  sortColumnName,
+  sortBy,
+  onPageChange,
+} = useFinanceInvoiceListTable<ListPoTypes>(verifList, listPoTotal, {
+  sortFieldMap: {
+    'Submitted Document No': 'invoiceNo',
+    Description: 'notes',
+    Status: 'statusName',
+    'Vendor Name': 'vendorName',
+    'Invoice Type': 'invoiceTypeName',
+    'Company Code': 'companyCode',
+    'Base Amount': 'whtBaseAmount',
+    'VAT Ammount': 'vatAmount',
+    'WHT Amount': 'whtAmount',
+    'Total Net Amount': 'totalNetAmount',
+    'No Tax Invoice': 'taxNo',
+    'Invoice Vendor No.': 'documentNo',
+    'Estimated Payment Date': 'estimatedPaymentDate',
+    'Invoice Submission Date': 'invoiceDate',
+  },
+  amountColumns: ['Base Amount', 'VAT Ammount', 'WHT Amount', 'Total Net Amount'],
+  dateColumns: ['Invoice Submission Date', 'Estimated Payment Date'],
+  onPageChange: fetchListPage,
+})
 
 const canSendToSap = computed(() => loginStore.userData?.profile?.profileId !== 3003)
 
@@ -367,9 +410,13 @@ const colorBadge = (statusCode: number) => {
   return list[statusCode]
 }
 
-const setPage = (value: number) => {
-  currentPage.value = value
-  sortColumn(null)
+const getItemDisplayStatus = (item: ListPoTypes) => {
+  return resolveFinanceListItemDisplay(item, filterForm.status)
+}
+
+const callList = async () => {
+  setPage(1)
+  await fetchListPage(1)
 }
 
 const goSearch = (event: KeyboardEvent) => {
@@ -425,33 +472,6 @@ const openDetailInvoiceEditSendSap = (invoiceId: string) => {
   })
 }
 
-const setList = (listData: ListPoTypes[]) => {
-  const result: ListPoTypes[] = []
-  for (const [index, item] of listData.entries()) {
-    const start = currentPage.value * pageSize.value - pageSize.value
-    const end = currentPage.value * pageSize.value - 1
-    if (index >= start && index <= end) {
-      result.push(item)
-    }
-  }
-  list.value = result
-}
-
-const callList = () => {
-  list.value = []
-  verificationApi
-    .getListPo({
-      statusCode: filterForm.status,
-      companyCode: filterForm.companyCode,
-      invoiceTypeCode: Number(filterForm.invoiceType),
-      invoiceDate: filterForm.date,
-      searchText: search.value,
-    })
-    .finally(() => {
-      sortColumn(null)
-    })
-}
-
 const setDataFilter = (data: filterListTypes) => {
   const filteredData: { key: string; value: string | number }[] = []
 
@@ -476,18 +496,11 @@ const setDataFilter = (data: filterListTypes) => {
     })
   }
 
-  if (data.invoiceType && data.invoiceType.trim() !== '') {
-    filteredData.push({
-      key: 'Invoice Type',
-      value: data.invoiceType,
-    })
-  }
-
   filteredPayload.value = filteredData
   filterForm.status = data.status
   filterForm.date = data.date
   filterForm.companyCode = data.companyCode
-  filterForm.invoiceType = data.invoiceType
+  filterForm.invoiceType = ''
   callList()
 }
 
@@ -567,80 +580,6 @@ const openFailedSap = () => {
   const idModal = document.querySelector('#failed_send_sap_modal')
   const modal = KTModal.getInstance(idModal as HTMLElement)
   modal.show()
-}
-
-const sortColumn = (columnName: string | null) => {
-  const list = {
-    'Submitted Document No': 'invoiceNo',
-    Status: 'statusName',
-    'Vendor Name': 'vendorName',
-    'Invoice Type': 'invoiceTypeName',
-    'Company Code': 'companyCode',
-    'Base Amount': 'whtBaseAmount',
-    'VAT Ammount': 'vatAmount',
-    'WHT Amount': 'whtAmount',
-    'Total Net Amount': 'totalNetAmount',
-    'No Tax Invoice': 'taxNo',
-    'Invoice Vendor No.': 'documentNo',
-    'Estimated Payment Date': 'estimatedPaymentDate',
-    'Invoice Submission Date': 'invoiceDate',
-    Description: 'notes',
-  } as { [key: string]: string }
-
-  const roleSort = ['asc', 'desc', '']
-
-  const listData = cloneDeep(verifList.value)
-  let result: ListPoTypes[] = []
-
-  if (columnName) {
-    if (sortColumnName.value !== columnName) sortBy.value = ''
-    sortColumnName.value = columnName
-
-    const indexSort = roleSort.findIndex((item) => item === sortBy.value)
-    if (indexSort === -1) return setList(verifList.value)
-    sortBy.value = indexSort + 1 === roleSort.length ? roleSort[0] : roleSort[indexSort + 1]
-
-    if (!sortBy.value) return setList(verifList.value)
-  }
-
-  const name = columnName || sortColumnName.value
-
-  if (
-    name === 'Base Amount' ||
-    name === 'VAT Ammount' ||
-    name === 'WHT Amount' ||
-    name === 'Total Net Amount'
-  ) {
-    result = listData.sort((a, b) => {
-      if (sortBy.value === 'asc') {
-        return a[list[name]] - b[list[name]]
-      } else {
-        return b[list[name]] - a[list[name]]
-      }
-    })
-  } else if (name === 'Invoice Submission Date' || name === 'Estimated Payment Date') {
-    result = listData.sort((a, b) => {
-      const convA = a[list[name]] ? new Date(a[list[name]]).getTime() : 0
-      const convB = b[list[name]] ? new Date(b[list[name]]).getTime() : 0
-      if (sortBy.value === 'asc') {
-        return convA - convB
-      } else {
-        return convB - convA
-      }
-    })
-  } else {
-    result = listData.sort((a, b) => {
-      const convA = a[list[name]] ? a[list[name]] : ''
-      const convB = b[list[name]] ? b[list[name]] : ''
-      if (sortBy.value === 'asc') {
-        return convA.localeCompare(convB)
-      } else {
-        return convB.localeCompare(convA)
-      }
-    })
-  }
-
-  return setList(result)
 }
 
 const resetFilter = () => {

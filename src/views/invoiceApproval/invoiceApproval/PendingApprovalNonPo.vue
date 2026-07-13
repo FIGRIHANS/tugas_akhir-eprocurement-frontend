@@ -64,7 +64,11 @@
             </tr>
           </thead>
           <tbody>
-            <template v-for="(parent, index) in list" :key="index">
+            <TableListSkeleton v-if="isListNonPoLoading" :columns="columns.length" :rows="5" />
+            <tr v-else-if="list.length === 0">
+              <td :colspan="columns.length" class="text-center py-6">No data found.</td>
+            </tr>
+            <template v-else v-for="(parent, index) in list" :key="parent.invoiceUId || index">
               <tr>
                 <td>
                   <div class="dropdown" data-dropdown="true" data-dropdown-trigger="click">
@@ -164,19 +168,16 @@
                     </div>
                   </div>
                 </td>
-                <!-- <td>
-                  <button class="btn btn-icon btn-outline btn-primary w-[21px] h-[21px]" @click="parent.isOpenChild = !parent.isOpenChild">
-                    <i v-if="!parent.isOpenChild" class="ki-filled ki-right !text-[9px]"></i>
-                    <i v-else class="ki-filled ki-down !text-[9px]"></i>
-                  </button>
-                </td> -->
                 <td>{{ parent.invoiceNo || '-' }}</td>
                 <td class="max-w-[200px] truncate" :title="parent.notes">
                   {{ parent.notes || '-' }}
                 </td>
                 <td>
-                  <span class="badge badge-outline" :class="colorBadge(parent.statusCode)">
-                    {{ parent.statusName }}
+                  <span
+                    class="badge badge-outline"
+                    :class="colorBadge(getItemDisplayStatus(parent).statusCode)"
+                  >
+                    {{ getItemDisplayStatus(parent).statusName }}
                   </span>
                 </td>
                 <td>{{ parent.vendorName || '-' }}</td>
@@ -212,7 +213,7 @@
               </tr>
               <tr v-show="parent.isOpenChild">
                 <td></td>
-                <td colspan="5" class="!pt-[0px]">
+                <td colspan="6" class="!pt-[0px]">
                   <table class="table table-bordered table-sm mb-0">
                     <thead>
                       <tr class="border-b">
@@ -242,16 +243,14 @@
       <div class="flex items-center justify-between mt-[24px]">
         <p class="m-0 text-sm">
           Tampilkan
-          {{
-            pageSize * currentPage > verifList.length ? verifList.length : pageSize * currentPage
-          }}
-          data dari total data {{ verifList.length }}
+          {{ pageSize * currentPage > totalItems ? totalItems : pageSize * currentPage }}
+          data dari total data {{ totalItems }}
         </p>
         <LPagination
-          :totalItems="verifList.length"
+          :totalItems="totalItems"
           :pageSize="pageSize"
           :currentPage="currentPage"
-          @pageChange="setPage"
+          @pageChange="onPageChange"
         />
       </div>
     </div>
@@ -264,6 +263,7 @@
 
 <script lang="ts" setup>
 import { ref, reactive, computed, onMounted, defineAsyncComponent } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { KTModal } from '@/metronic/core'
 import UiButton from '@/components/ui/atoms/button/UiButton.vue'
@@ -277,8 +277,10 @@ import { useLoginStore } from '@/stores/views/login'
 import { useFormatIdr } from '@/composables/currency'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
 import UiLoading from '@/components/modal/UiLoading.vue'
+import TableListSkeleton from '@/components/skeleton/TableListSkeleton.vue'
 import moment from 'moment'
-import { cloneDeep } from 'lodash'
+import { useFinanceInvoiceListTable, FINANCE_LIST_UI_PAGE_SIZE } from '@/composables/useFinanceInvoiceListTable'
+import { resolveFinanceListItemDisplay } from '@/composables/useInvoiceWorkflow'
 
 const ModalDetailApproval = defineAsyncComponent(() => import('./DetailApproval.vue'))
 const FilterList = defineAsyncComponent(() => import('./FilterList.vue'))
@@ -293,19 +295,15 @@ const invoiceNonPoTypeList = computed(() => invoiceMasterApi.invoiceNonPoType)
 
 const invoiceApi = useInvoiceSubmissionStore()
 const verificationApi = useInvoiceVerificationStore()
+const { listNonPo, listNonPoTotal, isListNonPoLoading } = storeToRefs(verificationApi)
 const loginStore = useLoginStore()
 const filterChild = ref(null)
 const router = useRouter()
 const approvedByFinanceApCache = ref<Map<string, boolean>>(new Map())
 const invoicesBeingChecked = ref<Set<string>>(new Set())
 const search = ref<string>('')
-const currentPage = ref<number>(1)
-const pageSize = ref<number>(10)
-const list = ref<ListNonPoTypes[]>([])
 const viewDetailId = ref<string>('')
 const isLoadingSap = ref<boolean>(false)
-const sortBy = ref<string>('')
-const sortColumnName = ref<string>('')
 
 const StatusInvoice = ref([
   { value: 2, label: 'Waiting for Approval' },
@@ -344,7 +342,53 @@ const columns = ref<string[]>([
 
 const columnsChild = ref(['No PO', 'No GR', 'Item Description', 'Item Amount', 'Quantity'])
 
-const verifList = computed(() => verificationApi.listNonPo)
+const verifList = computed(() => listNonPo.value)
+
+const buildListParams = (page: number) => ({
+  statusCode: filterForm.status,
+  companyCode: filterForm.companyCode,
+  invoiceTypeCode: Number(filterForm.invoiceType),
+  invoiceDate: filterForm.date,
+  searchText: search.value,
+  page,
+  pageSize: FINANCE_LIST_UI_PAGE_SIZE,
+})
+
+const fetchListPage = async (page: number) => {
+  await verificationApi.getListNonPo(buildListParams(page))
+}
+
+const {
+  currentPage,
+  pageSize,
+  list,
+  totalItems,
+  setPage,
+  sortColumn,
+  sortColumnName,
+  sortBy,
+  onPageChange,
+} = useFinanceInvoiceListTable<ListNonPoTypes>(verifList, listNonPoTotal, {
+  sortFieldMap: {
+    'Submitted Document No': 'invoiceNo',
+    Description: 'notes',
+    Status: 'statusName',
+    'Vendor Name': 'vendorName',
+    'Invoice Type': 'invoiceTypeName',
+    'Company Code': 'companyCode',
+    'Base Amount': 'whtBaseAmount',
+    'VAT Ammount': 'vatAmount',
+    'WHT Amount': 'whtAmount',
+    'Total Net Amount': 'totalNetAmount',
+    'No Tax Invoice': 'taxNo',
+    'Invoice Vendor No.': 'documentNo',
+    'Estimated Payment Date': 'estimatedPaymentDate',
+    'Invoice Submission Date': 'invoiceDate',
+  },
+  amountColumns: ['Base Amount', 'VAT Ammount', 'WHT Amount', 'Total Net Amount'],
+  dateColumns: ['Invoice Submission Date', 'Estimated Payment Date'],
+  onPageChange: fetchListPage,
+})
 
 const canSendToSap = computed(() => loginStore.userData?.profile?.profileId !== 3003)
 
@@ -371,9 +415,13 @@ const colorBadge = (statusCode: number) => {
   return list[statusCode]
 }
 
-const setPage = (value: number) => {
-  currentPage.value = value
-  sortColumn(null)
+const getItemDisplayStatus = (item: ListNonPoTypes) => {
+  return resolveFinanceListItemDisplay(item, filterForm.status)
+}
+
+const callList = async () => {
+  setPage(1)
+  await fetchListPage(1)
 }
 
 const goSearch = (event: KeyboardEvent) => {
@@ -483,33 +531,6 @@ const deleteFilter = (key: string) => {
   callList()
 }
 
-const setList = (listData: ListNonPoTypes[]) => {
-  const result: ListNonPoTypes[] = []
-  for (const [index, item] of listData.entries()) {
-    const start = currentPage.value * pageSize.value - pageSize.value
-    const end = currentPage.value * pageSize.value - 1
-    if (index >= start && index <= end) {
-      result.push(item)
-    }
-  }
-  list.value = result
-}
-
-const callList = () => {
-  list.value = []
-  verificationApi
-    .getListNonPo({
-      statusCode: filterForm.status,
-      companyCode: filterForm.companyCode,
-      invoiceTypeCode: Number(filterForm.invoiceType),
-      invoiceDate: filterForm.date,
-      searchText: search.value,
-    })
-    .finally(() => {
-      sortColumn(null)
-    })
-}
-
 const setDataFilter = (data: filterListTypes) => {
   const filteredData: { key: string; value: string | number }[] = []
 
@@ -594,80 +615,6 @@ const openFailedSap = () => {
   const idModal = document.querySelector('#failed_send_sap_modal')
   const modal = KTModal.getInstance(idModal as HTMLElement)
   modal.show()
-}
-
-const sortColumn = (columnName: string | null) => {
-  const list = {
-    'Submitted Document No': 'invoiceNo',
-    Status: 'statusName',
-    'Vendor Name': 'vendorName',
-    'Invoice Type': 'invoiceTypeName',
-    'Company Code': 'companyCode',
-    'Base Amount': 'whtBaseAmount',
-    'VAT Ammount': 'vatAmount',
-    'WHT Amount': 'whtAmount',
-    'Total Net Amount': 'totalNetAmount',
-    'No Tax Invoice': 'taxNo',
-    'Invoice Vendor No.': 'documentNo',
-    'Estimated Payment Date': 'estimatedPaymentDate',
-    'Invoice Submission Date': 'invoiceDate',
-    Description: 'notes',
-  } as { [key: string]: string }
-
-  const roleSort = ['asc', 'desc', '']
-
-  const listData = cloneDeep(verifList.value)
-  let result: ListNonPoTypes[] = []
-
-  if (columnName) {
-    if (sortColumnName.value !== columnName) sortBy.value = ''
-    sortColumnName.value = columnName
-
-    const indexSort = roleSort.findIndex((item) => item === sortBy.value)
-    if (indexSort === -1) return setList(verifList.value)
-    sortBy.value = indexSort + 1 === roleSort.length ? roleSort[0] : roleSort[indexSort + 1]
-
-    if (!sortBy.value) return setList(verifList.value)
-  }
-
-  const name = columnName || sortColumnName.value
-
-  if (
-    name === 'Base Amount' ||
-    name === 'VAT Ammount' ||
-    name === 'WHT Amount' ||
-    name === 'Total Net Amount'
-  ) {
-    result = listData.sort((a, b) => {
-      if (sortBy.value === 'asc') {
-        return a[list[name]] - b[list[name]]
-      } else {
-        return b[list[name]] - a[list[name]]
-      }
-    })
-  } else if (name === 'Invoice Submission Date' || name === 'Estimated Payment Date') {
-    result = listData.sort((a, b) => {
-      const convA = a[list[name]] ? new Date(a[list[name]]).getTime() : 0
-      const convB = b[list[name]] ? new Date(b[list[name]]).getTime() : 0
-      if (sortBy.value === 'asc') {
-        return convA - convB
-      } else {
-        return convB - convA
-      }
-    })
-  } else {
-    result = listData.sort((a, b) => {
-      const convA = a[list[name]] ? a[list[name]] : ''
-      const convB = b[list[name]] ? b[list[name]] : ''
-      if (sortBy.value === 'asc') {
-        return convA.localeCompare(convB)
-      } else {
-        return convB.localeCompare(convA)
-      }
-    })
-  }
-
-  return setList(result)
 }
 
 onMounted(() => {
