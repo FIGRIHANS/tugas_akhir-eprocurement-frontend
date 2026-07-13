@@ -3,7 +3,7 @@
     <!-- Loading overlay -->
     <div v-if="isLoading" class="invoice-loading">
       <i class="ki-duotone ki-loading text-4xl text-gray-800 animate-spin"></i>
-      <p class="mt-3 text-gray-600">Preparing invoice…</p>
+      <p class="mt-3 text-gray-600">Preparing ERS Document…</p>
     </div>
 
     <!-- Invoice page (A4) -->
@@ -18,11 +18,11 @@
             <div class="inv-company-name">
               {{ vendorInfo?.vendorName || detail.vendorName || '—' }}
             </div>
-            <div class="inv-company-sub">Official Vendor Invoice</div>
+            <div class="inv-company-sub">No. Reference ERS (Self-Billing)</div>
           </div>
         </div>
         <div class="inv-header-right">
-          <div class="inv-label">INVOICE</div>
+          <div class="inv-label">ERS DOCUMENT</div>
           <div class="inv-doc-no">{{ vendorInvoiceNo }}</div>
         </div>
       </div>
@@ -91,7 +91,7 @@
 
       <!-- ── Invoice Information ────────────────────────────────── -->
       <div class="inv-section">
-        <div class="inv-section-title">Invoice Information</div>
+        <div class="inv-section-title">Goods Receipt Information</div>
         <div class="inv-info-grid">
           <div class="inv-info-item">
             <span class="inv-detail-label">GR Document No</span>
@@ -232,7 +232,7 @@
         <div class="inv-disclaimer">
           <div class="inv-disclaimer-title">Disclaimer</div>
           <p>
-            This invoice is generated electronically and is valid without a physical signature. The
+            This ERS document is generated electronically and is valid without a physical signature. The
             information contained herein is based on the Goods Receipt record approved in the
             e-Procurement system. Any discrepancy must be reported within 7 working days of receipt.
             PT. EVOX reserves the right to reject claims submitted beyond this period.
