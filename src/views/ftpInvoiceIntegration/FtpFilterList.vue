@@ -13,17 +13,17 @@
           >
           <select v-model="status" class="select" name="select">
             <template v-if="statusOnly">
-              <option value="">All</option>
               <option value="Uploaded">Uploaded</option>
               <option value="Done">Done</option>
             </template>
             <template v-else>
-              <option value="1">Waiting to Verify</option>
               <option value="0">Draft</option>
+              <option value="1">Waiting to Verify</option>
               <option value="2">Waiting for Approval</option>
               <option value="4">Approved</option>
               <option value="5">Rejected</option>
               <option value="7">Sent to SAP</option>
+              <option value="10">Paid</option>
             </template>
           </select>
         </div>
@@ -34,16 +34,6 @@
             >
             <select v-model="companyCode" class="select" name="select">
               <option v-for="item of companyCodeList" :key="item.code" :value="item.code">
-                {{ item.name }}
-              </option>
-            </select>
-          </div>
-          <div v-if="type !== 'non-po'" class="relative">
-            <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
-              >FTP Invoice Integration Type</label
-            >
-            <select v-model="invoiceType" class="select" name="select">
-              <option v-for="item of invoicePoTypeList" :key="item.code" :value="item.code">
                 {{ item.name }}
               </option>
             </select>

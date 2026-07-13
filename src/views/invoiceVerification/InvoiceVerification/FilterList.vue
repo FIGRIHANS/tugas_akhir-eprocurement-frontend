@@ -27,16 +27,6 @@
             </option>
           </select>
         </div>
-        <div class="relative" v-else>
-          <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
-            >Invoice PO Type</label
-          >
-          <select v-model="invoiceType" class="select" name="select">
-            <option v-for="item of invoiceTypeList" :key="item.code" :value="item.code">
-              {{ item.name }}
-            </option>
-          </select>
-        </div>
         <div class="relative">
           <label class="absolute text-xs font-normal text-gray-500 -top-[8px] left-[10px] bg-white"
             >Status</label
@@ -44,7 +34,10 @@
           <select v-model="status" class="select" name="select">
             <option value="1">Waiting for Verify</option>
             <option value="3">Verified</option>
+            <option value="4">Approved</option>
             <option value="5">Rejected</option>
+            <option value="7">Sent to SAP</option>
+            <option value="10">Paid</option>
           </select>
         </div>
         <div class="relative">
@@ -91,7 +84,6 @@ const companyCode = ref<string>('')
 const invoiceType = ref<string>('')
 
 const companyCodeList = computed(() => invoiceMasterApi.companyCode)
-const invoiceTypeList = computed(() => invoiceMasterApi.invoicePoType)
 const invoiceTypenonPoList = computed(() => invoiceMasterApi.invoiceNonPoType)
 
 const resetFilter = () => {
@@ -118,7 +110,7 @@ const goFilter = () => {
     status: status.value,
     date: formatfilterDate(date.value),
     companyCode: companyCode.value,
-    invoiceType: invoiceType.value,
+    invoiceType: route.name === 'invoiceVerificationNoPo' ? invoiceType.value : '',
   }
   emits('setData', data)
 }

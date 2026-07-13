@@ -766,15 +766,21 @@ export const parseFtpDataListResponse = (payload: unknown): FtpDataListResponse 
 export const fetchFtpDataList = async (
   params: FtpDataQueryParams = {},
 ): Promise<FtpDataListResponse> => {
+  const page = params.page ?? 1
+  const pageSize = params.pageSize ?? 10
+
   const resp = await invoiceHttp.get('/invoice/ftp-data', {
     params: {
       companyCode: params.companyCode || null,
-      invoiceTypeCode: params.invoiceTypeCode || null,
+      invoiceTypeCode:
+        params.invoiceTypeCode != null && !Number.isNaN(Number(params.invoiceTypeCode))
+          ? Number(params.invoiceTypeCode)
+          : null,
       invoiceDate: params.invoiceDate || null,
       statuscode: params.statusCode ?? null,
       searchText: params.searchText || null,
-      page: params.page ?? 1,
-      pageSize: params.pageSize ?? 1000,
+      page,
+      pageSize,
     },
   })
 

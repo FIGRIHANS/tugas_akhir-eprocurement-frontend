@@ -394,6 +394,8 @@ export interface QueryParamsListPoTypes {
   invoiceTypeCode?: number | null
   invoiceDate?: string | null
   searchText?: string | null
+  page?: number
+  pageSize?: number
 }
 
 export interface QueryParamsListNoPoTypes {
@@ -402,6 +404,8 @@ export interface QueryParamsListNoPoTypes {
   invoiceTypeCode?: number | null
   invoiceDate?: string | null
   searchText?: string | null
+  page?: number
+  pageSize?: number
 }
 
 export interface documentDetailTypes {

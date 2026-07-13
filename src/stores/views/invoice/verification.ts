@@ -5,6 +5,11 @@ import invoiceApi from '@/core/utils/invoiceApi'
 import moment from 'moment'
 import { getOcrApiUrlCandidatesAsync } from '@/composables/documentPreview'
 import { normalizeTaxFakturScanResult } from '@/core/utils/taxFakturVendor'
+import {
+  applyPageWindow,
+  extractInvoiceApiResultContent,
+  parsePaginatedListResponse,
+} from '@/core/utils/paginatedResponse'
 
 import type { ApiResponse } from '@/core/type/api'
 import type {
@@ -30,6 +35,33 @@ import type { invoiceQrData } from '@/views/invoice/types/invoiceQrdata'
 
 const PAYMENT_STATUS_ENDPOINT = '/invoice/payment-status'
 const PAYMENT_STATUS_NON_PO_ENDPOINT = '/invoice/payment-status-non-po'
+const FINANCE_LIST_UI_PAGE_SIZE = 10
+/** Fetch full matching dataset in one request (FTP-style); UI shows 10 rows per page via client windowing. */
+const FINANCE_LIST_FETCH_ALL_SIZE = 1000
+const REJECTED_STATUS_CODE = 5
+
+interface FinanceListCacheEntry<T> {
+  key: string
+  items: T[]
+  total: number
+}
+
+interface InvoiceWorkflowStep {
+  profileId: number
+  stateCode: number
+  stateName: string
+  profileName?: string
+  category?: string
+  step?: number
+  actioner?: number
+  actionerDate?: string
+  actionerName?: string
+}
+
+interface FinanceListDetailContext {
+  headerStatusCode: number | null
+  workflow: InvoiceWorkflowStep[]
+}
 
 type OcrDocumentRef = string | { path?: string; previewPath?: string }
 
@@ -58,27 +90,36 @@ const postWithDocumentCandidates = async <T>(endpoint: string, data: OcrDocument
   throw lastError
 }
 
-const parsePaginatedContent = <T>(rawContent: unknown): T[] => {
-  if (!rawContent) return []
+const normalizeFinanceListItem = <T extends ListPoTypes | ListNonPoTypes>(item: T): T => {
+  const raw = item as T & Record<string, unknown>
 
-  if (Array.isArray(rawContent)) {
-    return rawContent as T[]
+  return {
+    ...item,
+    invoiceUId: String(item.invoiceUId ?? raw.InvoiceUId ?? ''),
+    statusCode: Number(item.statusCode ?? raw.StatusCode ?? 0),
+    statusName: String(item.statusName ?? raw.StatusName ?? ''),
+    pOs: item.pOs ?? [],
+    isOpenChild: item.isOpenChild ?? false,
   }
-
-  if (typeof rawContent !== 'object') return []
-
-  const content = rawContent as Record<string, unknown>
-  if (Array.isArray(content.items)) return content.items as T[]
-  if (Array.isArray(content.Items)) return content.Items as T[]
-  if (Array.isArray(content.data)) return content.data as T[]
-  if (Array.isArray(content.records)) return content.records as T[]
-
-  return []
 }
+
+const mapListItemDefaults = <T extends ListPoTypes | ListNonPoTypes>(item: T): T =>
+  normalizeFinanceListItem({
+    ...item,
+    pOs: item.pOs ?? [],
+    isOpenChild: item.isOpenChild ?? false,
+  })
 
 export const useInvoiceVerificationStore = defineStore('invoiceVerification', () => {
   const listPo = ref<ListPoTypes[]>([])
   const listNonPo = ref<ListNonPoTypes[]>([])
+  const listPoTotal = ref(0)
+  const listNonPoTotal = ref(0)
+  const listPoCache = ref<FinanceListCacheEntry<ListPoTypes> | null>(null)
+  const listNonPoCache = ref<FinanceListCacheEntry<ListNonPoTypes> | null>(null)
+  const isListPoLoading = ref(false)
+  const isListNonPoLoading = ref(false)
+  const invoiceDetailContextCache = ref(new Map<string, FinanceListDetailContext>())
   const detailInvoice = ref<ParamsSubmissionTypes>()
   const isFromEdit = ref<boolean>(false)
   const detailInvoiceEdit = ref<DetailInvoiceEditTypes>()
@@ -87,6 +128,245 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
   const isRejectLoading = ref<boolean>(false)
   const errorMessageSap = ref<string>('')
   const detailNonPoInvoice = ref<ParamsSubmissionTypes>()
+
+  const normalizeWorkflowSteps = (raw: unknown): InvoiceWorkflowStep[] => {
+    if (!Array.isArray(raw)) return []
+
+    return raw.map((step) => {
+      const row = step as Record<string, unknown>
+      return {
+        profileId: Number(row.profileId ?? row.ProfileId ?? 0),
+        stateCode: Number(row.stateCode ?? row.StateCode ?? 0),
+        stateName: String(row.stateName ?? row.StateName ?? ''),
+        profileName: String(row.profileName ?? row.ProfileName ?? ''),
+        category: String(row.category ?? row.Category ?? ''),
+        step: Number(row.step ?? row.Step ?? 0),
+        actioner: Number(row.actioner ?? row.Actioner ?? 0),
+        actionerDate: String(row.actionerDate ?? row.ActionerDate ?? ''),
+        actionerName: String(row.actionerName ?? row.ActionerName ?? ''),
+      }
+    })
+  }
+
+  const parseDetailContext = (content?: ParamsSubmissionTypes | Record<string, unknown>): FinanceListDetailContext => {
+    if (!content || typeof content !== 'object') {
+      return { headerStatusCode: null, workflow: [] }
+    }
+
+    const raw = content as Record<string, unknown>
+    const header = (raw.header ?? raw.Header) as Record<string, unknown> | undefined
+
+    return {
+      headerStatusCode:
+        header?.statusCode != null || header?.StatusCode != null
+          ? Number(header.statusCode ?? header.StatusCode)
+          : null,
+      workflow: normalizeWorkflowSteps(raw.workflow ?? raw.Workflow),
+    }
+  }
+
+  const cacheDetailContext = (invoiceUId: string, context: FinanceListDetailContext) => {
+    if (!invoiceUId) return
+    invoiceDetailContextCache.value.set(invoiceUId, context)
+  }
+
+  const fetchDetailContextFromEndpoints = async (
+    invoiceUId: string,
+    endpoints: string[],
+  ): Promise<FinanceListDetailContext> => {
+    let lastContext: FinanceListDetailContext = { headerStatusCode: null, workflow: [] }
+
+    for (const endpoint of endpoints) {
+      try {
+        const response: ApiResponse<ParamsSubmissionTypes> = await invoiceApi.get(endpoint)
+        const context = parseDetailContext(response?.data?.result?.content)
+        lastContext = context
+
+        if (context.workflow.length > 0 || context.headerStatusCode != null) {
+          return context
+        }
+      } catch {
+        // Try the next detail endpoint.
+      }
+    }
+
+    return lastContext
+  }
+
+  const fetchPoDetailContext = async (
+    invoiceUId: string,
+  ): Promise<FinanceListDetailContext> => {
+    const normalizedId = String(invoiceUId ?? '').trim()
+    if (!normalizedId) return { headerStatusCode: null, workflow: [] }
+
+    const cached = invoiceDetailContextCache.value.get(normalizedId)
+    if (cached?.workflow?.length) return cached
+
+    const context = await fetchDetailContextFromEndpoints(normalizedId, [
+      `/invoice/submission/${normalizedId}`,
+      `/invoice/approval/${normalizedId}`,
+    ])
+    cacheDetailContext(normalizedId, context)
+    return context
+  }
+
+  const fetchNonPoDetailContext = async (
+    invoiceUId: string,
+  ): Promise<FinanceListDetailContext> => {
+    const normalizedId = String(invoiceUId ?? '').trim()
+    if (!normalizedId) return { headerStatusCode: null, workflow: [] }
+
+    const cached = invoiceDetailContextCache.value.get(normalizedId)
+    if (cached?.workflow?.length) return cached
+
+    const context = await fetchDetailContextFromEndpoints(normalizedId, [
+      `/invoice/submission-non-po/${normalizedId}`,
+    ])
+    cacheDetailContext(normalizedId, context)
+    return context
+  }
+
+  const resolveFinanceListItems = async <T extends (ListPoTypes | ListNonPoTypes) & { invoiceUId: string }>(
+    items: T[],
+    filterStatusCode: number | null | undefined,
+    fetchDetailContext: (invoiceUId: string) => Promise<FinanceListDetailContext>,
+    onProgress: (items: T[]) => void,
+  ): Promise<T[]> => {
+    try {
+      const { enrichFinanceListItemsWithHeaderStatus } = await import('@/composables/useInvoiceWorkflow')
+      return await enrichFinanceListItemsWithHeaderStatus(
+        items,
+        filterStatusCode,
+        fetchDetailContext,
+        {
+          priorityStart: 0,
+          priorityCount: items.length,
+          onProgress,
+        },
+      )
+    } catch (enrichErr) {
+      console.error('resolveFinanceListItems - enrich unavailable:', enrichErr)
+      return items
+    }
+  }
+
+  const buildListQueryParams = (
+    data: QueryParamsListPoTypes,
+    options?: { page?: number; pageSize?: number },
+  ) => ({
+    page: options?.page ?? data.page ?? 1,
+    pageSize: options?.pageSize ?? data.pageSize ?? FINANCE_LIST_UI_PAGE_SIZE,
+    companyCode: data.companyCode || null,
+    invoiceTypeCode: Number(data.invoiceTypeCode) || null,
+    invoiceDate: data.invoiceDate || null,
+    searchText: data.searchText || null,
+    ...(data.statusCode != null ? { statuscode: Number(data.statusCode) } : {}),
+  })
+
+  const buildListCacheKey = (endpoint: string, data: QueryParamsListPoTypes) =>
+    JSON.stringify({
+      endpoint,
+      statusCode: data.statusCode ?? null,
+      companyCode: data.companyCode ?? '',
+      invoiceDate: data.invoiceDate ?? '',
+      searchText: data.searchText ?? '',
+      invoiceTypeCode: data.invoiceTypeCode ?? null,
+    })
+
+  const loadFinanceListPage = async <T extends ListPoTypes | ListNonPoTypes>(options: {
+    endpoint: string
+    data: QueryParamsListPoTypes
+    cache: { value: FinanceListCacheEntry<T> | null }
+    setLoading: (value: boolean) => void
+    setList: (items: T[]) => void
+    setTotal: (total: number) => void
+    mapItem: (item: T) => T
+    fetchDetailContext: (invoiceUId: string) => Promise<FinanceListDetailContext>
+    logLabel: string
+  }): Promise<T[]> => {
+    const page = options.data.page ?? 1
+    const displayPageSize = options.data.pageSize ?? FINANCE_LIST_UI_PAGE_SIZE
+    const cacheKey = buildListCacheKey(options.endpoint, options.data)
+    const needsFetch = !options.cache.value || options.cache.value.key !== cacheKey
+
+    if (needsFetch) {
+      options.setLoading(true)
+      options.setList([])
+    }
+
+    try {
+      if (needsFetch) {
+        const response: ApiResponse<unknown> = await invoiceApi.get(options.endpoint, {
+          params: buildListQueryParams(options.data, {
+            page: 1,
+            pageSize: FINANCE_LIST_FETCH_ALL_SIZE,
+          }),
+        })
+
+        const parsed = parsePaginatedListResponse<T>(
+          resolveListContent(response),
+          1,
+          FINANCE_LIST_FETCH_ALL_SIZE,
+        )
+        let resultArray = parsed.items.map((item) => options.mapItem(item))
+        const resolvedTotal = Math.max(parsed.total, resultArray.length)
+
+        try {
+          resultArray = await resolveFinanceListItems(
+            resultArray,
+            options.data.statusCode,
+            options.fetchDetailContext,
+            () => undefined,
+          )
+        } catch (enrichErr) {
+          console.error(`${options.logLabel} - enrich error:`, enrichErr)
+        }
+
+        let finalItems = resultArray
+        let finalTotal = Math.max(resolvedTotal, resultArray.length)
+
+        if (Number(options.data.statusCode) === 3) {
+          try {
+            const { filterVerificationVerifiedListItems } = await import(
+              '@/composables/useInvoiceWorkflow'
+            )
+            finalItems = filterVerificationVerifiedListItems(resultArray)
+            finalTotal = finalItems.length
+          } catch (filterErr) {
+            console.error(`${options.logLabel} - verified filter error:`, filterErr)
+          }
+        }
+
+        options.cache.value = {
+          key: cacheKey,
+          items: finalItems,
+          total: finalTotal,
+        }
+      }
+
+      const cached = options.cache.value
+      if (!cached) {
+        options.setList([])
+        options.setTotal(0)
+        return []
+      }
+
+      const { items, total } = applyPageWindow(cached.items, cached.total, page, displayPageSize)
+      options.setTotal(total)
+      options.setList(items)
+      return items
+    } catch (err) {
+      console.error(`${options.logLabel} - error:`, err)
+      options.cache.value = null
+      options.setList([])
+      options.setTotal(0)
+      return []
+    } finally {
+      if (needsFetch) {
+        options.setLoading(false)
+      }
+    }
+  }
 
   const resetDetailInvoiceEdit = () => {
     detailInvoiceEdit.value = {
@@ -165,126 +445,65 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     }
   }
 
-  const getListPo = async (data: QueryParamsListPoTypes) => {
-    listPo.value = []
-    try {
-      const query = {
-        companyCode: data.companyCode || null,
-        invoiceTypeCode: Number(data.invoiceTypeCode) || null,
-        invoiceDate: data.invoiceDate || null,
-        searchText: data.searchText || null,
-      }
-      const response: ApiResponse<ListPoTypes[]> = await invoiceApi.get(`/invoice/approval`, {
-        params: {
-          // only include statuscode when it's not null/undefined to avoid Number(undefined) => NaN
-          ...(data.statusCode != null ? { statuscode: Number(data.statusCode) } : {}),
-          ...query,
-        },
-      })
+  const resolveListContent = (response: ApiResponse<unknown>) =>
+    response?.data?.result?.content ?? extractInvoiceApiResultContent(response)
 
-      const resultArray = parsePaginatedContent<ListPoTypes>(response?.data?.result?.content).map(
-        (item) => ({
-          ...item,
-          pOs: item.pOs ?? [],
-          isOpenChild: item.isOpenChild ?? false,
-        }),
-      )
-
-      listPo.value =
-        resultArray.length !== 0
-          ? resultArray.sort(
-              (a, b) => moment(b.invoiceDate).valueOf() - moment(a.invoiceDate).valueOf(),
-            )
-          : []
-
-      console.log('getListPo - success, returned', listPo.value.length, 'items')
-      return listPo.value
-    } catch (err) {
-      console.error('getListPo - error:', err)
-      listPo.value = []
-      return []
-    }
-  }
-
-  const getListNonPo = async (data: QueryParamsListPoTypes) => {
-    listNonPo.value = []
-    try {
-      const query = {
-        companyCode: data.companyCode || null,
-        invoiceTypeCode: Number(data.invoiceTypeCode) || null,
-        invoiceDate: data.invoiceDate || null,
-        searchText: data.searchText || null,
-      }
-      const response: ApiResponse<ListNonPoTypes[]> = await invoiceApi.get(
-        `/invoice/approval/non-po`,
-        {
-          params: {
-            // only include statuscode when it's not null/undefined to avoid Number(undefined) => NaN
-            ...(data.statusCode != null ? { statuscode: Number(data.statusCode) } : {}),
-            ...query,
-          },
-        },
-      )
-
-      const resultArray = parsePaginatedContent<ListNonPoTypes>(
-        response?.data?.result?.content,
-      ).map((item) => ({
-        ...item,
-        pOs: item.pOs ?? [],
-        isOpenChild: item.isOpenChild ?? false,
-      }))
-
-      listNonPo.value =
-        resultArray.length !== 0
-          ? resultArray.sort(
-              (a, b) => moment(b.invoiceDate).valueOf() - moment(a.invoiceDate).valueOf(),
-            )
-          : []
-
-      console.log('getListNonPo - success, returned', listNonPo.value.length, 'items')
-      return listNonPo.value
-    } catch (err) {
-      console.error('getListNonPo - error:', err)
-      listNonPo.value = []
-      return []
-    }
-  }
-
-  const getListVerifNonPo = async (data: QueryParamsListPoTypes) => {
-    listNonPo.value = []
-    const query = {
-      companyCode: data.companyCode || null,
-      invoiceTypeCode: Number(data.invoiceTypeCode) || null,
-      invoiceDate: data.invoiceDate || null,
-      searchText: data.searchText || null,
-    }
-    const response: ApiResponse<ListNonPoTypes[]> = await invoiceApi.get(
-      `/invoice/verification/non-po`,
-      {
-        params: {
-          // only include statuscode when it's not null/undefined to avoid Number(undefined) => NaN
-          ...(data.statusCode != null ? { statuscode: Number(data.statusCode) } : {}),
-          ...query,
-        },
+  const getListPo = async (data: QueryParamsListPoTypes) =>
+    loadFinanceListPage<ListPoTypes>({
+      endpoint: '/invoice/approval',
+      data,
+      cache: listPoCache,
+      setLoading: (value) => {
+        isListPoLoading.value = value
       },
-    )
-    const resultArray = parsePaginatedContent<ListNonPoTypes>(response?.data?.result?.content).map(
-      (item) => ({
-        ...item,
-        pOs: item.pOs ?? [],
-        isOpenChild: item.isOpenChild ?? false,
-      }),
-    )
+      setList: (items) => {
+        listPo.value = items
+      },
+      setTotal: (total) => {
+        listPoTotal.value = total
+      },
+      mapItem: mapListItemDefaults,
+      fetchDetailContext: fetchPoDetailContext,
+      logLabel: 'getListPo',
+    })
 
-    listNonPo.value =
-      resultArray.length !== 0
-        ? resultArray.sort(
-            (a, b) => moment(b.invoiceDate).valueOf() - moment(a.invoiceDate).valueOf(),
-          )
-        : []
+  const getListNonPo = async (data: QueryParamsListPoTypes) =>
+    loadFinanceListPage<ListNonPoTypes>({
+      endpoint: '/invoice/approval/non-po',
+      data,
+      cache: listNonPoCache,
+      setLoading: (value) => {
+        isListNonPoLoading.value = value
+      },
+      setList: (items) => {
+        listNonPo.value = items
+      },
+      setTotal: (total) => {
+        listNonPoTotal.value = total
+      },
+      mapItem: mapListItemDefaults,
+      fetchDetailContext: fetchNonPoDetailContext,
+      logLabel: 'getListNonPo',
+    })
 
-    return listNonPo.value
-  }
+  const getListVerifNonPo = async (data: QueryParamsListPoTypes) =>
+    loadFinanceListPage<ListNonPoTypes>({
+      endpoint: '/invoice/verification/non-po',
+      data,
+      cache: listNonPoCache,
+      setLoading: (value) => {
+        isListNonPoLoading.value = value
+      },
+      setList: (items) => {
+        listNonPo.value = items
+      },
+      setTotal: (total) => {
+        listNonPoTotal.value = total
+      },
+      mapItem: mapListItemDefaults,
+      fetchDetailContext: fetchNonPoDetailContext,
+      logLabel: 'getListVerifNonPo',
+    })
 
   const getInvoiceDetail = async (uid: string) => {
     const response: ApiResponse<ParamsSubmissionTypes> = await invoiceApi.get(
@@ -292,6 +511,10 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     )
 
     detailInvoice.value = response.data.result.content
+    const invoiceUId = response.data.result.content?.header?.invoiceUId
+    if (invoiceUId) {
+      cacheDetailContext(invoiceUId, parseDetailContext(response.data.result.content))
+    }
 
     return response.data.result
   }
@@ -302,6 +525,10 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     )
 
     detailNonPoInvoice.value = response.data.result.content
+    const invoiceUId = response.data.result.content?.header?.invoiceUId
+    if (invoiceUId) {
+      cacheDetailContext(invoiceUId, parseDetailContext(response.data.result.content))
+    }
 
     return response.data.result
   }
@@ -320,12 +547,22 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
 
   const postReject = async (data: ParamsRejectTypes) => {
     const response: ApiResponse<void> = await invoiceApi.post(`/invoice/reject`, data)
+    const cached = invoiceDetailContextCache.value.get(data.invoiceUId)
+    cacheDetailContext(data.invoiceUId, {
+      headerStatusCode: REJECTED_STATUS_CODE,
+      workflow: cached?.workflow ?? [],
+    })
 
     return response.data
   }
 
   const postRejectNonPo = async (data: ParamsRejectTypes) => {
     const response: ApiResponse<void> = await invoiceApi.post(`/invoice/reject-non-po`, data)
+    const cached = invoiceDetailContextCache.value.get(data.invoiceUId)
+    cacheDetailContext(data.invoiceUId, {
+      headerStatusCode: REJECTED_STATUS_CODE,
+      workflow: cached?.workflow ?? [],
+    })
 
     return response.data
   }
@@ -470,6 +707,10 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
   return {
     listPo,
     listNonPo,
+    listPoTotal,
+    listNonPoTotal,
+    isListPoLoading,
+    isListNonPoLoading,
     detailInvoice,
     isFromEdit,
     detailInvoiceEdit,

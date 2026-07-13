@@ -27,8 +27,12 @@
               <td>{{ formatWorkflowVerificationDateTime(item) }}</td>
               <td>
                 <span v-if="item.stateCode === 99">-</span>
-                <span v-else class="badge badge-outline" :class="badgeColor(item.stateCode)">
-                  {{ item.stateName }}
+                <span
+                  v-else
+                  class="badge badge-outline"
+                  :class="badgeColor(getStepDisplay(item).stateCode)"
+                >
+                  {{ getStepDisplay(item).stateName }}
                 </span>
               </td>
               <td>{{ item.actionerNotes || '-' }}</td>
@@ -44,7 +48,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { KTModal } from '@/metronic/core'
-import { formatWorkflowVerificationDateTime } from '@/composables/useInvoiceWorkflow'
+import { formatWorkflowVerificationDateTime, resolveWorkflowStepDisplayStatus } from '@/composables/useInvoiceWorkflow'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
@@ -88,6 +92,9 @@ const badgeColor = (status: number) => {
   } as { [key: number]: string }
   return list[status]
 }
+
+const getStepDisplay = (item: { stateCode: number; stateName: string }) =>
+  resolveWorkflowStepDisplayStatus(item)
 
 onMounted(() => {
   // const departmentIndex = columns.value.indexOf('Department')
