@@ -102,6 +102,7 @@
               <td>{{ item.poNumber || '—' }}</td>
               <td v-if="!isVendorUser">{{ item.vendorCode || '—' }}</td>
               <td>{{ item.vendorName || '—' }}</td>
+              <td>{{ formatInvoiceVendorNo(item) }}</td>
               <td class="text-right">{{ formatMoney(item.totalAmount, item.currency) }}</td>
               <td>
                 <span
@@ -169,6 +170,7 @@ import GoodsReceiptService, { type GoodsReceiptHeaderDto } from '@/services/good
 import { useLoginStore } from '@/stores/views/login'
 import GoodReceiptInvoicePrint from './GoodReceiptInvoicePrint.vue'
 import type { GoodsReceiptDetailContentDto } from '@/services/goodsReceipt.service'
+import { resolveDisplayInvoiceVendorNo } from '@/core/utils/grInvoiceVendorNo'
 
 const moment = momentLib
 const router = useRouter()
@@ -205,7 +207,7 @@ const activeFilters = ref({ ...filterForm.value })
 const columns = computed(() => {
   const base = ['Action', 'No', 'GR No', 'GR Date', 'Delivery Order', 'PO Number']
   if (!isVendorUser.value) base.push('Vendor Code')
-  return [...base, 'Vendor Name', 'Total Amount', 'Receive Status', 'Payment Status']
+  return [...base, 'Vendor Name', 'Invoice Vendor No', 'Total Amount', 'Receive Status', 'Payment Status']
 })
 
 const filteredRows = computed(() => {
@@ -245,6 +247,13 @@ const fetchData = async () => {
 }
 
 const formatDate = (d: string) => (d ? moment(d).format('YYYY/MM/DD HH:mm') : '—')
+
+const formatInvoiceVendorNo = (item: GoodsReceiptHeaderDto) =>
+  resolveDisplayInvoiceVendorNo({
+    vendorName: item.vendorName,
+    grDocumentDate: item.grDocumentDate,
+    invoiceVendorNo: item.invoiceVendorNo,
+  })
 
 const getPaymentStatusBadgeClass = (status?: string) => {
   if (!status) return 'badge-light'

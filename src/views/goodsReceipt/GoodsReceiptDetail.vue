@@ -27,6 +27,10 @@
             <span class="font-medium">{{ detail.grDocumentNo }}</span>
           </div>
           <div class="flex gap-3">
+            <span class="text-gray-500 w-44 shrink-0">Invoice Vendor No</span>
+            <span class="font-medium">{{ displayInvoiceVendorNo }}</span>
+          </div>
+          <div class="flex gap-3">
             <span class="text-gray-500 w-44 shrink-0">GR Date</span>
             <span>{{ formatDt(detail.grDocumentDate) }}</span>
           </div>
@@ -198,6 +202,7 @@ import GoodsReceiptService, {
 } from '@/services/goodsReceipt.service'
 import { useLoginStore } from '@/stores/views/login'
 import GoodReceiptInvoicePrint from './GoodReceiptInvoicePrint.vue'
+import { resolveDisplayInvoiceVendorNo } from '@/core/utils/grInvoiceVendorNo'
 
 const moment = momentLib
 const route = useRoute()
@@ -217,6 +222,15 @@ const detail = ref<GoodsReceiptDetailContentDto | null>(null)
 const isLoading = ref(true)
 const error = ref('')
 const showPrintView = ref(false)
+
+const displayInvoiceVendorNo = computed(() => {
+  if (!detail.value) return '—'
+  return resolveDisplayInvoiceVendorNo({
+    vendorName: detail.value.vendorName,
+    grDocumentDate: detail.value.grDocumentDate,
+    invoiceVendorNo: detail.value.invoiceVendorNo,
+  })
+})
 
 /** True when Print Invoice should be shown:
  *  - GR status is "Approved", OR
