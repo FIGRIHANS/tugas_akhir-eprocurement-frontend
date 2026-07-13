@@ -3,7 +3,11 @@
     <i class="ki-duotone ki-calendar text-[20px]"> </i>
     {{ today }}
   </a>
-  <a href="#" class="px-2.5 py-1.5 flex items-center gap-1.5 text-primary">
+  <a
+    href="https://drive.google.com/uc?export=download&id=1ClLiiNBR5I8kfvQ3oh5vxGs2D_7mbx2L"
+    download="Manual_Book.pdf"
+    class="px-2.5 py-1.5 flex items-center gap-1.5 text-primary"
+  >
     <i class="ki-duotone ki-book-open text-[20px]"> </i>
     Download Manual Book
   </a>

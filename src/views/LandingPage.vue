@@ -53,7 +53,9 @@ const eprocurementPoints = [
           <span class="landing-badge">Digital Procurement Platform</span>
 
           <div class="space-y-5">
-            <h1 class="text-4xl lg:text-[44px] font-bold text-gray-800 leading-[1.15] tracking-tight">
+            <h1
+              class="text-4xl lg:text-[44px] font-bold text-gray-800 leading-[1.15] tracking-tight"
+            >
               Empowering Sustainable Partnerships Through Reliable Procurement Processes
             </h1>
             <p class="text-lg text-gray-500 leading-relaxed max-w-xl">
@@ -61,11 +63,20 @@ const eprocurementPoints = [
               value-driven e-Procurement platform built for organizations and vendors alike.
             </p>
           </div>
-
-          <UiButton variant="primary" size="lg" class="!rounded-xl flex items-center gap-2 shadow-sm">
-            <span class="text-white">Download Manual Book</span>
-            <IconPDF class="text-white" />
-          </UiButton>
+          <a
+            href="https://drive.google.com/uc?export=download&id=1ClLiiNBR5I8kfvQ3oh5vxGs2D_7mbx2L"
+            download="Manual_Book.pdf"
+            class="inline-block"
+          >
+            <UiButton
+              variant="primary"
+              size="lg"
+              class="!rounded-xl flex items-center gap-2 shadow-sm"
+            >
+              <span class="text-white">Download Manual Book</span>
+              <IconPDF class="text-white" />
+            </UiButton>
+          </a>
         </div>
 
         <div class="flex justify-center lg:justify-end -translate-y-8">
@@ -89,11 +100,7 @@ const eprocurementPoints = [
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div
-          v-for="feature in features"
-          :key="feature.title"
-          class="landing-feature-card group"
-        >
+        <div v-for="feature in features" :key="feature.title" class="landing-feature-card group">
           <div class="landing-feature-card__icon">
             <component :is="feature.icon" class="text-primary w-6 h-6" />
           </div>
@@ -114,9 +121,10 @@ const eprocurementPoints = [
             What is E-Procurement?
           </h2>
           <p class="text-lg text-gray-500 leading-relaxed">
-            <strong class="text-gray-700 font-medium">E-Procurement</strong> (electronic procurement)
-            is the use of digital platforms to manage the entire purchasing process online — from
-            vendor onboarding and tendering to purchase orders, invoicing, and payment tracking.
+            <strong class="text-gray-700 font-medium">E-Procurement</strong> (electronic
+            procurement) is the use of digital platforms to manage the entire purchasing process
+            online — from vendor onboarding and tendering to purchase orders, invoicing, and payment
+            tracking.
           </p>
           <p class="text-lg text-gray-500 leading-relaxed">
             It replaces manual, paper-based workflows with a centralized system that improves
@@ -141,7 +149,9 @@ const eprocurementPoints = [
         <div class="landing-about-card">
           <div class="flex items-center gap-3 mb-6">
             <LogoEPOQ height="36px" />
-            <span class="text-sm font-medium text-gray-400 uppercase tracking-widest">EVOX Platform</span>
+            <span class="text-sm font-medium text-gray-400 uppercase tracking-widest"
+              >EVOX Platform</span
+            >
           </div>
           <p class="text-gray-600 leading-relaxed text-lg">
             EVOX e-Procurement connects organizations and vendors in one integrated environment.
@@ -173,8 +183,8 @@ const eprocurementPoints = [
             <h3 class="font-medium text-gray-700">Head Office</h3>
           </div>
           <p class="text-gray-600 leading-relaxed">
-            Treasury Office Tower, 36-37th floor, SCBD Lot 28, Senayan, Kebayoran Baru, South Jakarta
-            City, Jakarta 12190
+            Treasury Office Tower, 36-37th floor, SCBD Lot 28, Senayan, Kebayoran Baru, South
+            Jakarta City, Jakarta 12190
           </p>
           <div class="flex items-center gap-2 mt-5">
             <IconPhone class="text-primary" />
@@ -196,10 +206,16 @@ const eprocurementPoints = [
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <LogoEPOQ width="81px" height="auto" />
           <div class="flex gap-6">
-            <a href="#" class="text-sm font-semibold text-gray-700 hover:text-primary transition-colors">
+            <a
+              href="#"
+              class="text-sm font-semibold text-gray-700 hover:text-primary transition-colors"
+            >
               Terms & Conditions
             </a>
-            <a href="#" class="text-sm font-semibold text-gray-700 hover:text-primary transition-colors">
+            <a
+              href="#"
+              class="text-sm font-semibold text-gray-700 hover:text-primary transition-colors"
+            >
               Privacy Policy
             </a>
           </div>
@@ -257,7 +273,10 @@ const eprocurementPoints = [
   background: #fff;
   border: 1px solid #f0f2f4;
   border-radius: 20px;
-  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
 }
 
 .landing-feature-card:hover {
