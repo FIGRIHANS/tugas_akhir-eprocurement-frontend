@@ -353,12 +353,18 @@ export function resolveFinanceListDisplayStatus<T extends InvoiceListStatusField
 export function resolveFinanceListItemDisplay<T extends InvoiceListStatusFields>(
   item: T,
   filterStatusCode?: number | null,
+  options?: { verificationLabels?: boolean },
 ): { statusCode: number; statusName: string } {
   const filterCode = filterStatusCode != null ? Number(filterStatusCode) : null
   const resolved = resolveFinanceListDisplayStatus(item, filterStatusCode)
   const code = normalizeStateCode(resolved.statusCode)
 
-  if (filterCode === WORKFLOW_STATE.VERIFIED && shouldIncludeInVerificationVerifiedFilter(resolved)) {
+  // Invoice Verification: Waiting for Approval (2) / Verified (3) always show as "Verified",
+  // not only when the Verified filter chip is active.
+  const useVerificationLabel =
+    options?.verificationLabels === true || filterCode === WORKFLOW_STATE.VERIFIED
+
+  if (useVerificationLabel && shouldIncludeInVerificationVerifiedFilter(resolved)) {
     return {
       statusCode: WORKFLOW_STATE.VERIFIED,
       statusName: WORKFLOW_STATE_LABELS[WORKFLOW_STATE.VERIFIED],
@@ -549,6 +555,57 @@ const isFinanceApSupervisorStep = (step: InvoiceWorkflowStep): boolean => {
 
 const isFinanceApproverStep = (step: InvoiceWorkflowStep): boolean => {
   return isAccountingTaxStep(step) || isFinanceApSupervisorStep(step)
+}
+
+/** Accounting & Tax (3003) has completed Approve on at least one matching workflow step. */
+export function hasAccountingTaxApproved(
+  workflow?: InvoiceWorkflowStep[] | null,
+): boolean {
+  const taxSteps = (workflow ?? []).filter(isAccountingTaxStep)
+  if (taxSteps.length === 0) return true
+
+  return taxSteps.some(
+    (step) => normalizeStateCode(step.stateCode) === WORKFLOW_STATE.APPROVED,
+  )
+}
+
+/**
+ * Finance AP Supervisor (3004) must not see Waiting for Approval / Verified rows
+ * until Accounting & Tax (3003) has approved. Other terminal statuses remain visible.
+ */
+export function shouldShowInvoiceForFinanceApSupervisor(
+  item: InvoiceListStatusFields,
+  workflow?: InvoiceWorkflowStep[] | null,
+): boolean {
+  const code = normalizeStateCode(item.statusCode)
+  if (
+    code !== WORKFLOW_STATE.WAITING_APPROVAL &&
+    code !== WORKFLOW_STATE.VERIFIED
+  ) {
+    return true
+  }
+
+  // Without workflow we cannot prove Accounting & Tax approved — hide for Supervisor.
+  if (!workflow || workflow.length === 0) return false
+
+  return hasAccountingTaxApproved(workflow)
+}
+
+export function filterApprovalListForViewerProfile<
+  T extends InvoiceListStatusFields & { invoiceUId: string },
+>(
+  items: T[],
+  profileId: number | undefined | null,
+  getWorkflow: (invoiceUId: string) => InvoiceWorkflowStep[] | undefined,
+): T[] {
+  if (Number(profileId) !== FINANCE_AP_SUPERVISOR_PROFILE_ID) return items
+
+  return items.filter((item) =>
+    shouldShowInvoiceForFinanceApSupervisor(
+      item,
+      getWorkflow(String(item.invoiceUId ?? '').trim()),
+    ),
+  )
 }
 
 const hasApproverCompletedAction = (stateCode: number): boolean => {

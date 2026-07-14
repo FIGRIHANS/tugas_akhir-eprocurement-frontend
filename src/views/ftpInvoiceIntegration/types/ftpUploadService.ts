@@ -366,9 +366,28 @@ export const isFtpDraftDataRow = (
   )
 }
 
-/** Status badge label on FTP Data grid — invoice workflow (Drafted, dll.). */
+const FTP_DATA_STATUS_LABELS: Record<number, string> = {
+  0: 'Drafted',
+  1: 'Waiting to Verify',
+  2: 'Waiting for Approval',
+  3: 'Verified',
+  4: 'Approved',
+  5: 'Rejected',
+  7: 'Sent to SAP',
+  10: 'Paid',
+}
+
+/** Status badge label on FTP Data grid — invoice workflow (Drafted, Rejected, Paid, dll.). */
 export const getFtpDataStatusLabel = (row: FtpDataListRow): string => {
-  if (row.statusName?.trim()) return row.statusName
+  // Prefer statusCode mapping so portal upload status (Uploaded/Done) tidak menimpa Rejected/Paid.
+  if (row.statusCode != null && row.statusCode >= 0 && FTP_DATA_STATUS_LABELS[row.statusCode]) {
+    return FTP_DATA_STATUS_LABELS[row.statusCode]
+  }
+  const name = row.statusName?.trim()
+  if (name) {
+    const lower = name.toLowerCase()
+    if (lower !== 'uploaded' && lower !== 'done') return name
+  }
   if (row.hasDraft || row.statusCode === DRAFT_STATUS_CODE) return 'Drafted'
   return '-'
 }
@@ -625,19 +644,28 @@ export const normalizeFtpDataListItem = (item: Record<string, unknown>): FtpData
     reffId ||
     null
   const portalStatus = toOptionalString(item.status)
-  const isDone = portalStatus === 'Done'
-  const hasDraft =
-    item.hasDraft === true || (!isDone && !!toOptionalString(item.vendorName))
-  const statusCode =
+  const invoiceListItem = (item.invoiceListItem as FtpInvoiceListItem) || null
+  const parsedStatusCode =
     item.statusCode != null && item.statusCode !== ''
       ? Number(item.statusCode)
-      : hasDraft
-        ? DRAFT_STATUS_CODE
+      : invoiceListItem?.statusCode != null
+        ? Number(invoiceListItem.statusCode)
         : null
-  const invoiceListItem = (item.invoiceListItem as FtpInvoiceListItem) || null
+  const hasWorkflowStatus = parsedStatusCode != null && !Number.isNaN(parsedStatusCode)
+  const isDone = portalStatus?.toLowerCase() === 'done'
+  const hasDraft =
+    hasWorkflowStatus
+      ? parsedStatusCode === DRAFT_STATUS_CODE
+      : item.hasDraft === true || (!isDone && !!toOptionalString(item.vendorName))
+  const statusCode = hasWorkflowStatus
+    ? parsedStatusCode
+    : hasDraft
+      ? DRAFT_STATUS_CODE
+      : null
   const statusName =
     toOptionalString(item.statusName) ||
     invoiceListItem?.statusName ||
+    (statusCode != null && statusCode >= 0 ? FTP_DATA_STATUS_LABELS[statusCode] : null) ||
     (hasDraft || statusCode === DRAFT_STATUS_CODE ? 'Drafted' : null) ||
     ''
   const documents = Array.isArray(item.documents)
@@ -763,6 +791,178 @@ export const parseFtpDataListResponse = (payload: unknown): FtpDataListResponse 
   }
 }
 
+const REJECTED_STATUS_CODE = 5
+const FTP_SOURCE_CODE = 3
+
+const collectFtpRowKeys = (row: FtpDataListRow): string[] => {
+  return [row.reffId, row.invoiceUId, row.ftpUploadUId]
+    .map((value) => String(value || '').trim().toLowerCase())
+    .filter(Boolean)
+}
+
+const isFtpRelatedSubmission = (item: Record<string, unknown>): boolean => {
+  const source = Number(item.invoiceSource ?? item.invoiceSourceId)
+  if (source === FTP_SOURCE_CODE) return true
+
+  const name = String(item.invoiceSourceName || '').trim().toLowerCase()
+  return name.includes('ftp')
+}
+
+const mapSubmissionItemToFtpDataRow = (item: Record<string, unknown>): FtpDataListRow => {
+  const invoiceUId = String(item.invoiceUId || '')
+  return {
+    id: Number(item.id) || 0,
+    invoiceUId,
+    reffId: invoiceUId,
+    ftpUploadUId: invoiceUId,
+    invoiceTypeCode: Number(item.invoiceTypeCode) || 0,
+    invoiceTypeName: String(item.invoiceTypeName || ''),
+    invoiceDPCode: Number(item.invoiceDPCode) || 0,
+    invoiceDPName: String(item.invoiceDPName || ''),
+    companyCode: String(item.companyCode || ''),
+    companyName: String(item.companyName || ''),
+    documentNo: String(item.documentNo || ''),
+    invoiceNo: String(item.invoiceNo || ''),
+    invoiceDate: (item.invoiceDate as string) || null,
+    statusCode: REJECTED_STATUS_CODE,
+    statusName: String(item.statusName || 'Rejected'),
+    poNo: (item.poNo as string) || null,
+    grDocumentNo: String(item.grDocumentNo || ''),
+    estimatedPaymentDate: (item.estimatedPaymentDate as string) || null,
+    totalGrossAmount: Number(item.totalGrossAmount) || 0,
+    totalNetAmount: Number(item.totalNetAmount) || 0,
+    vendorName: String(item.vendorName || ''),
+    isOpenChild: false,
+    createdUtcDate: String(item.createdUtcDate || item.createdDate || ''),
+    invoiceSourceName: String(item.invoiceSourceName || 'FTP Integration'),
+    invoiceSource: Number(item.invoiceSource ?? item.invoiceSourceId) || FTP_SOURCE_CODE,
+    fpStatus: (item.fpStatus as boolean | null) ?? null,
+    vatStatus: (item.vatStatus as boolean | null) ?? null,
+    whtStatus: (item.whtStatus as boolean | null) ?? null,
+    poPrice: (item.poPrice as boolean | null) ?? null,
+    sapPostingCode: (item.sapPostingCode as string) || null,
+    portalStatus: String(item.statusName || 'Rejected'),
+    ftpUploadStatus: 'Done',
+    hasDraft: false,
+    source: 'ftp',
+    documents: [],
+    invoiceListItem: null,
+    invoiceVendorNo: String(item.documentNo || ''),
+    submittedDocumentNo: String(item.invoiceNo || ''),
+    taxNo: (item.taxNo as string) || null,
+    dpp: toOptionalNumber(item.dpp ?? item.DPP),
+    vatAmount: toOptionalNumber(item.vatAmount ?? item.VATAmount),
+  }
+}
+
+/** Ambil invoice Rejected (PO) yang terkait FTP — untuk mengisi gap API ftp-data remote. */
+export const fetchRejectedFtpSubmissionRows = async (
+  knownFtpKeys: Set<string> = new Set(),
+  knownInvoiceNos: Set<string> = new Set(),
+  knownDocumentNos: Set<string> = new Set(),
+): Promise<FtpDataListRow[]> => {
+  try {
+    const resp = await invoiceHttp.get('/invoice/submission', {
+      params: {
+        statuscode: REJECTED_STATUS_CODE,
+        page: 1,
+        pageSize: 1000,
+      },
+    })
+
+    const content = resp?.data?.result?.content ?? resp?.data?.result ?? resp?.data ?? {}
+    const rawItems = Array.isArray(content)
+      ? content
+      : (content.items as unknown[]) || (content.data as unknown[]) || []
+
+    if (!Array.isArray(rawItems)) return []
+
+    return rawItems
+      .filter((item): item is Record<string, unknown> => !!item && typeof item === 'object')
+      .filter((item) => {
+        if (isFtpRelatedSubmission(item)) return true
+
+        const uid = String(item.invoiceUId || '')
+          .trim()
+          .toLowerCase()
+        if (uid && knownFtpKeys.has(uid)) return true
+
+        const invoiceNo = String(item.invoiceNo || '')
+          .trim()
+          .toLowerCase()
+        if (invoiceNo && knownInvoiceNos.has(invoiceNo)) return true
+
+        const documentNo = String(item.documentNo || '')
+          .trim()
+          .toLowerCase()
+        return !!documentNo && knownDocumentNos.has(documentNo)
+      })
+      .map(mapSubmissionItemToFtpDataRow)
+  } catch (error) {
+    console.debug('Failed to fetch Rejected FTP submissions for FTP Data merge', error)
+    return []
+  }
+}
+
+/**
+ * Patch / sisipkan Rejected FTP ke list FTP Data.
+ * Dipakai karena API remote masih bisa menyembunyikan upload Done (termasuk setelah reject).
+ */
+export const mergeRejectedIntoFtpDataList = (
+  ftpItems: FtpDataListRow[],
+  rejectedItems: FtpDataListRow[],
+): FtpDataListRow[] => {
+  if (!rejectedItems.length) return ftpItems
+
+  const keyToIndex = new Map<string, number>()
+  const merged = ftpItems.map((row, index) => {
+    for (const key of collectFtpRowKeys(row)) {
+      if (!keyToIndex.has(key)) keyToIndex.set(key, index)
+    }
+    return { ...row }
+  })
+
+  for (const rejected of rejectedItems) {
+    const rejectedKeys = collectFtpRowKeys(rejected)
+    const existingIndex = rejectedKeys
+      .map((key) => keyToIndex.get(key))
+      .find((index): index is number => index != null)
+
+    if (existingIndex != null) {
+      const existing = merged[existingIndex]
+      merged[existingIndex] = {
+        ...existing,
+        statusCode: REJECTED_STATUS_CODE,
+        statusName: rejected.statusName || 'Rejected',
+        portalStatus: rejected.statusName || 'Rejected',
+        hasDraft: false,
+        vendorName: existing.vendorName || rejected.vendorName,
+        invoiceNo: existing.invoiceNo || rejected.invoiceNo,
+        documentNo: existing.documentNo || rejected.documentNo,
+        companyCode: existing.companyCode || rejected.companyCode,
+        companyName: existing.companyName || rejected.companyName,
+        totalGrossAmount: existing.totalGrossAmount || rejected.totalGrossAmount,
+        totalNetAmount: existing.totalNetAmount || rejected.totalNetAmount,
+        fpStatus: existing.fpStatus ?? rejected.fpStatus,
+        vatStatus: existing.vatStatus ?? rejected.vatStatus,
+        whtStatus: existing.whtStatus ?? rejected.whtStatus,
+        poPrice: existing.poPrice ?? rejected.poPrice,
+        invoiceSourceName: existing.invoiceSourceName || rejected.invoiceSourceName,
+        invoiceSource: existing.invoiceSource ?? rejected.invoiceSource,
+      }
+      continue
+    }
+
+    const nextIndex = merged.length
+    merged.push(rejected)
+    for (const key of rejectedKeys) {
+      if (!keyToIndex.has(key)) keyToIndex.set(key, nextIndex)
+    }
+  }
+
+  return sortFtpDataByNewest(merged)
+}
+
 export const fetchFtpDataList = async (
   params: FtpDataQueryParams = {},
 ): Promise<FtpDataListResponse> => {
@@ -785,7 +985,55 @@ export const fetchFtpDataList = async (
   })
 
   const content = resp?.data?.result?.content ?? resp?.data?.result ?? resp?.data ?? {}
-  return parseFtpDataListResponse(content)
+  const parsed = parseFtpDataListResponse(content)
+
+  const knownFtpKeys = new Set(parsed.items.flatMap((row) => collectFtpRowKeys(row)))
+  const knownInvoiceNos = new Set<string>()
+  const knownDocumentNos = new Set<string>()
+
+  const rememberDocKeys = (invoiceNo?: string | null, documentNo?: string | null) => {
+    const inv = String(invoiceNo || '')
+      .trim()
+      .toLowerCase()
+    const doc = String(documentNo || '')
+      .trim()
+      .toLowerCase()
+    if (inv) knownInvoiceNos.add(inv)
+    if (doc) knownDocumentNos.add(doc)
+  }
+
+  for (const row of parsed.items) {
+    rememberDocKeys(row.invoiceNo, row.documentNo)
+  }
+
+  try {
+    const uploads = await fetchFtpUploadList()
+    for (const upload of uploads) {
+      const uploadUid = String(upload.invoiceUId || '')
+        .trim()
+        .toLowerCase()
+      const linkedUid = String(upload.linkedInvoiceId || '')
+        .trim()
+        .toLowerCase()
+      if (uploadUid) knownFtpKeys.add(uploadUid)
+      if (linkedUid) knownFtpKeys.add(linkedUid)
+      rememberDocKeys(upload.invoiceNo, upload.documentNo)
+    }
+  } catch (error) {
+    console.debug('Failed to load FTP uploads while merging Rejected rows', error)
+  }
+
+  const rejectedRows = await fetchRejectedFtpSubmissionRows(
+    knownFtpKeys,
+    knownInvoiceNos,
+    knownDocumentNos,
+  )
+  const items = mergeRejectedIntoFtpDataList(parsed.items, rejectedRows)
+
+  return {
+    items,
+    total: Math.max(parsed.total, items.length),
+  }
 }
 
 export const fetchFtpUploadDetail = async (invoiceUId: string): Promise<FtpUploadListItem> => {

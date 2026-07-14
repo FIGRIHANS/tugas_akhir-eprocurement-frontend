@@ -19,7 +19,7 @@
           <span class="text-gray-500"> {{ items.key }} </span>
           <span class="font-semibold">
             <p v-if="items.key === 'Status'">
-              {{ StatusInvoice.find((item) => item.value === items.value)?.label }}
+              {{ resolveFilterStatusLabel(StatusInvoice, items.value) }}
             </p>
             <p v-if="items.key === 'Company Code'">
               {{
@@ -187,6 +187,13 @@
 
 <script lang="ts" setup>
 import { ref, reactive, computed, onMounted, defineAsyncComponent } from 'vue'
+import {
+  buildFilterChips,
+  clearPersistedListFilters,
+  loadPersistedListFilters,
+  resolveFilterStatusLabel,
+  savePersistedListFilters,
+} from '@/composables/usePersistedListFilters'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import type { filterListTypes } from '../types/pendingVerification'
@@ -229,6 +236,36 @@ const filterForm = reactive<filterListTypes>({
   companyCode: '',
   invoiceType: '',
 })
+
+const FILTER_STORAGE_KEY = 'invoiceVerification'
+
+const persistCurrentFilters = () => {
+  savePersistedListFilters(FILTER_STORAGE_KEY, {
+    status: filterForm.status,
+    date: filterForm.date,
+    companyCode: filterForm.companyCode,
+    invoiceType: filterForm.invoiceType,
+    search: search.value,
+  })
+}
+
+const applyPersistedFilters = () => {
+  const saved = loadPersistedListFilters(FILTER_STORAGE_KEY)
+  if (!saved) {
+    filteredPayload.value = buildFilterChips(filterForm)
+    return
+  }
+
+  filterForm.status =
+    saved.status === null || saved.status === undefined || saved.status === ''
+      ? null
+      : Number(saved.status)
+  filterForm.date = saved.date || ''
+  filterForm.companyCode = saved.companyCode || ''
+  filterForm.invoiceType = saved.invoiceType || ''
+  search.value = saved.search || ''
+  filteredPayload.value = buildFilterChips(filterForm)
+}
 
 const verifList = computed(() => {
   const items = listPo.value
@@ -330,7 +367,7 @@ const colorBadge = (statusCode: number) => {
 }
 
 const getItemDisplayStatus = (item: ListPoTypes) => {
-  return resolveFinanceListItemDisplay(item, filterForm.status)
+  return resolveFinanceListItemDisplay(item, filterForm.status, { verificationLabels: true })
 }
 
 const callList = async () => {
@@ -357,39 +394,28 @@ const openDetailVerification = (invoiceId: string) => {
 
 const goSearch = (event: KeyboardEvent) => {
   if (event.key === 'Enter') {
+    persistCurrentFilters()
     callList()
   }
 }
 
 const setDataFilter = (data: filterListTypes) => {
-  const filteredData: { key: string; value: string | number }[] = []
+  const normalizedStatus =
+    data.status === null || data.status === undefined || data.status === ''
+      ? null
+      : Number(data.status)
 
-  if (data.status !== null) {
-    filteredData.push({
-      key: 'Status',
-      value: Number(data.status),
-    })
-  }
-
-  if (data.date && data.date.trim() !== '') {
-    filteredData.push({
-      key: 'Date',
-      value: data.date,
-    })
-  }
-
-  if (data.companyCode && data.companyCode.trim() !== '') {
-    filteredData.push({
-      key: 'Company Code',
-      value: data.companyCode,
-    })
-  }
-
-  filteredPayload.value = filteredData
-  filterForm.status = data.status
+  filteredPayload.value = buildFilterChips({
+    status: normalizedStatus,
+    date: data.date,
+    companyCode: data.companyCode,
+    invoiceType: '',
+  })
+  filterForm.status = Number.isFinite(normalizedStatus as number) ? normalizedStatus : null
   filterForm.date = data.date
   filterForm.companyCode = data.companyCode
   filterForm.invoiceType = ''
+  persistCurrentFilters()
   callList()
 }
 
@@ -416,19 +442,18 @@ const deleteFilter = (key: string) => {
 
 const resetFilter = () => {
   filterForm.status = null
+  filterForm.date = ''
+  filterForm.companyCode = ''
+  filterForm.invoiceType = ''
   filterChild.value.resetFilter()
   filteredPayload.value = []
+  clearPersistedListFilters(FILTER_STORAGE_KEY)
   filterChild.value.goFilter()
   callList()
 }
 
 onMounted(() => {
-  const filteredData: { key: string; value: string | number }[] = []
-  filteredData.push({
-    key: 'Status',
-    value: 1,
-  })
-  filteredPayload.value = filteredData
+  applyPersistedFilters()
   callList()
 })
 </script>

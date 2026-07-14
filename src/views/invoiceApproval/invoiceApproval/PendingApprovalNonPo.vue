@@ -263,6 +263,12 @@
 
 <script lang="ts" setup>
 import { ref, reactive, computed, onMounted, defineAsyncComponent } from 'vue'
+import {
+  buildFilterChips,
+  clearPersistedListFilters,
+  loadPersistedListFilters,
+  savePersistedListFilters,
+} from '@/composables/usePersistedListFilters'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { KTModal } from '@/metronic/core'
@@ -310,6 +316,7 @@ const StatusInvoice = ref([
   { value: 4, label: 'Approved' },
   { value: 5, label: 'Rejected' },
   { value: 7, label: 'Sent to SAP' },
+  { value: 10, label: 'Paid' },
 ])
 
 const filteredPayload = ref([])
@@ -320,6 +327,40 @@ const filterForm = reactive<filterListTypes>({
   companyCode: '',
   invoiceType: '',
 })
+
+const FILTER_STORAGE_KEY = 'invoiceApprovalNoPo'
+
+const persistCurrentFilters = () => {
+  savePersistedListFilters(FILTER_STORAGE_KEY, {
+    status: filterForm.status,
+    date: filterForm.date,
+    companyCode: filterForm.companyCode,
+    invoiceType: filterForm.invoiceType,
+    search: search.value,
+  })
+}
+
+const applyPersistedFilters = () => {
+  const saved = loadPersistedListFilters(FILTER_STORAGE_KEY)
+  if (!saved) {
+    filteredPayload.value = buildFilterChips(filterForm)
+    return
+  }
+
+  let nextStatus: number | null =
+    saved.status === null || saved.status === undefined || saved.status === ''
+      ? null
+      : Number(saved.status)
+  // Waiting for Verify is Verification-only — never keep it on Approval.
+  if (nextStatus === 1) nextStatus = 2
+
+  filterForm.status = nextStatus
+  filterForm.date = saved.date || ''
+  filterForm.companyCode = saved.companyCode || ''
+  filterForm.invoiceType = saved.invoiceType || ''
+  search.value = saved.search || ''
+  filteredPayload.value = buildFilterChips(filterForm)
+}
 
 const columns = ref<string[]>([
   '',
@@ -426,6 +467,7 @@ const callList = async () => {
 
 const goSearch = (event: KeyboardEvent) => {
   if (event.key === 'Enter') {
+    persistCurrentFilters()
     callList()
   }
 }
@@ -508,8 +550,12 @@ const checkAndFetchApprovalStatus = async (invoiceUId: string) => {
 
 const resetFilter = () => {
   filterForm.status = null
+  filterForm.date = ''
+  filterForm.companyCode = ''
+  filterForm.invoiceType = ''
   filterChild.value.resetFilter()
   filteredPayload.value = []
+  clearPersistedListFilters(FILTER_STORAGE_KEY)
   filterChild.value.goFilter()
   callList()
 }
@@ -532,41 +578,17 @@ const deleteFilter = (key: string) => {
 }
 
 const setDataFilter = (data: filterListTypes) => {
-  const filteredData: { key: string; value: string | number }[] = []
-
-  if (data.status !== null) {
-    filteredData.push({
-      key: 'Status',
-      value: data.status,
-    })
-  }
-
-  if (data.date !== '') {
-    filteredData.push({
-      key: 'Date',
-      value: data.date,
-    })
-  }
-
-  if (data.companyCode && data.companyCode.trim() !== '') {
-    filteredData.push({
-      key: 'Company Code',
-      value: data.companyCode,
-    })
-  }
-
-  if (data.invoiceType && data.invoiceType.trim() !== '') {
-    filteredData.push({
-      key: 'Invoice Type',
-      value: data.invoiceType,
-    })
-  }
-
-  filteredPayload.value = filteredData
+  filteredPayload.value = buildFilterChips({
+    status: data.status,
+    date: data.date,
+    companyCode: data.companyCode,
+    invoiceType: data.invoiceType,
+  })
   filterForm.status = data.status
   filterForm.date = data.date
   filterForm.companyCode = data.companyCode
   filterForm.invoiceType = data.invoiceType
+  persistCurrentFilters()
   callList()
 }
 
@@ -618,12 +640,7 @@ const openFailedSap = () => {
 }
 
 onMounted(() => {
-  const filteredData: { key: string; value: string | number }[] = []
-  filteredData.push({
-    key: 'Status',
-    value: 2,
-  })
-  filteredPayload.value = filteredData
+  applyPersistedFilters()
   callList()
 })
 </script>

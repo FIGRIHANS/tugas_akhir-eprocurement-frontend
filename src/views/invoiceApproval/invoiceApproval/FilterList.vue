@@ -37,20 +37,18 @@
             class="select"
             name="select"
           >
-            <option value="1">Waiting for Verify</option>
-            <option value="2">Waiting for Approval</option>
-            <option value="4">Approved</option>
-            <option value="5">Rejected</option>
-            <option value="7">Sent to SAP</option>
-            <option value="10">Paid</option>
+            <option :value="2">Waiting for Approval</option>
+            <option :value="4">Approved</option>
+            <option :value="5">Rejected</option>
+            <option :value="7">Sent to SAP</option>
+            <option :value="10">Paid</option>
           </select>
           <select v-else v-model="status" class="select" name="select">
-            <option value="1">Waiting for Verify</option>
-            <option value="2">Waiting for Approval</option>
-            <option value="4">Approved</option>
-            <option value="5">Rejected</option>
-            <option value="7">Sent to SAP</option>
-            <option value="10">Paid</option>
+            <option :value="2">Waiting for Approval</option>
+            <option :value="4">Approved</option>
+            <option :value="5">Rejected</option>
+            <option :value="7">Sent to SAP</option>
+            <option :value="10">Paid</option>
           </select>
         </div>
         <div class="relative">
@@ -119,8 +117,13 @@ const resetInvoiceType = () => {
 }
 
 const goFilter = () => {
+  const rawStatus = status.value
+  let normalizedStatus =
+    rawStatus === null || rawStatus === undefined ? null : Number(rawStatus)
+  if (normalizedStatus === 1) normalizedStatus = 2
+
   const data = {
-    status: status.value,
+    status: normalizedStatus != null && Number.isFinite(normalizedStatus) ? normalizedStatus : null,
     date: formatfilterDate(date.value),
     companyCode: companyCode.value,
     invoiceType: route.name === 'invoiceApprovalNonPo' ? invoiceType.value : '',

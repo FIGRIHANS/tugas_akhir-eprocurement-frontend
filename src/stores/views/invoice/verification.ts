@@ -32,9 +32,18 @@ import type {
 } from './types/verification'
 import type { invoiceOcrData } from '@/views/invoice/types/invoiceOcrData'
 import type { invoiceQrData } from '@/views/invoice/types/invoiceQrdata'
+import { useLoginStore } from '@/stores/views/login'
+import {
+  FINANCE_AP_SUPERVISOR_PROFILE_ID,
+  filterApprovalListForViewerProfile,
+} from '@/composables/useInvoiceWorkflow'
 
 const PAYMENT_STATUS_ENDPOINT = '/invoice/payment-status'
 const PAYMENT_STATUS_NON_PO_ENDPOINT = '/invoice/payment-status-non-po'
+const APPROVAL_LIST_ENDPOINTS = new Set([
+  '/invoice/approval',
+  '/invoice/approval/non-po',
+])
 const FINANCE_LIST_UI_PAGE_SIZE = 10
 /** Fetch full matching dataset in one request (FTP-style); UI shows 10 rows per page via client windowing. */
 const FINANCE_LIST_FETCH_ALL_SIZE = 1000
@@ -263,7 +272,11 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
     ...(data.statusCode != null ? { statuscode: Number(data.statusCode) } : {}),
   })
 
-  const buildListCacheKey = (endpoint: string, data: QueryParamsListPoTypes) =>
+  const buildListCacheKey = (
+    endpoint: string,
+    data: QueryParamsListPoTypes,
+    viewerProfileId?: number | null,
+  ) =>
     JSON.stringify({
       endpoint,
       statusCode: data.statusCode ?? null,
@@ -271,6 +284,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
       invoiceDate: data.invoiceDate ?? '',
       searchText: data.searchText ?? '',
       invoiceTypeCode: data.invoiceTypeCode ?? null,
+      viewerProfileId: viewerProfileId ?? null,
     })
 
   const loadFinanceListPage = async <T extends ListPoTypes | ListNonPoTypes>(options: {
@@ -286,8 +300,16 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
   }): Promise<T[]> => {
     const page = options.data.page ?? 1
     const displayPageSize = options.data.pageSize ?? FINANCE_LIST_UI_PAGE_SIZE
-    const cacheKey = buildListCacheKey(options.endpoint, options.data)
+    const loginStore = useLoginStore()
+    const viewerProfileId = Number(loginStore.userData?.profile?.profileId ?? 0) || null
+    const isApprovalList = APPROVAL_LIST_ENDPOINTS.has(options.endpoint)
+    const cacheKey = buildListCacheKey(
+      options.endpoint,
+      options.data,
+      isApprovalList ? viewerProfileId : null,
+    )
     const needsFetch = !options.cache.value || options.cache.value.key !== cacheKey
+    const isVerifiedUiFilter = Number(options.data.statusCode) === 3
 
     if (needsFetch) {
       options.setLoading(true)
@@ -296,8 +318,15 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
 
     try {
       if (needsFetch) {
+        // Verified (UI-only in Invoice Verification) == Waiting for Approval data (status 2),
+        // plus rows still labeled Verified (3) for the current verifier. Do not send
+        // statuscode=3 to the SP or Waiting-for-Approval headers are excluded.
+        const queryData = isVerifiedUiFilter
+          ? { ...options.data, statusCode: null }
+          : options.data
+
         const response: ApiResponse<unknown> = await invoiceApi.get(options.endpoint, {
-          params: buildListQueryParams(options.data, {
+          params: buildListQueryParams(queryData, {
             page: 1,
             pageSize: FINANCE_LIST_FETCH_ALL_SIZE,
           }),
@@ -325,7 +354,7 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
         let finalItems = resultArray
         let finalTotal = Math.max(resolvedTotal, resultArray.length)
 
-        if (Number(options.data.statusCode) === 3) {
+        if (isVerifiedUiFilter) {
           try {
             const { filterVerificationVerifiedListItems } = await import(
               '@/composables/useInvoiceWorkflow'
@@ -335,6 +364,20 @@ export const useInvoiceVerificationStore = defineStore('invoiceVerification', ()
           } catch (filterErr) {
             console.error(`${options.logLabel} - verified filter error:`, filterErr)
           }
+        }
+
+        // Finance AP Supervisor may only see Waiting for Approval after Accounting & Tax approved.
+        if (
+          isApprovalList &&
+          Number(viewerProfileId) === FINANCE_AP_SUPERVISOR_PROFILE_ID
+        ) {
+          finalItems = filterApprovalListForViewerProfile(
+            finalItems,
+            viewerProfileId,
+            (invoiceUId) =>
+              invoiceDetailContextCache.value.get(invoiceUId)?.workflow,
+          )
+          finalTotal = finalItems.length
         }
 
         options.cache.value = {

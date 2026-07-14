@@ -32,12 +32,12 @@
             >Status</label
           >
           <select v-model="status" class="select" name="select">
-            <option value="1">Waiting for Verify</option>
-            <option value="3">Verified</option>
-            <option value="4">Approved</option>
-            <option value="5">Rejected</option>
-            <option value="7">Sent to SAP</option>
-            <option value="10">Paid</option>
+            <option :value="1">Waiting for Verify</option>
+            <option :value="3">Verified</option>
+            <option :value="4">Approved</option>
+            <option :value="5">Rejected</option>
+            <option :value="7">Sent to SAP</option>
+            <option :value="10">Paid</option>
           </select>
         </div>
         <div class="relative">
@@ -106,8 +106,12 @@ const resetInvoiceType = () => {
 }
 
 const goFilter = () => {
+  const rawStatus = status.value
+  const normalizedStatus =
+    rawStatus === null || rawStatus === undefined ? null : Number(rawStatus)
+
   const data = {
-    status: status.value,
+    status: normalizedStatus != null && Number.isFinite(normalizedStatus) ? normalizedStatus : null,
     date: formatfilterDate(date.value),
     companyCode: companyCode.value,
     invoiceType: route.name === 'invoiceVerificationNoPo' ? invoiceType.value : '',
@@ -118,7 +122,10 @@ const goFilter = () => {
 watch(
   () => props.data,
   () => {
-    status.value = props.data.status
+    status.value =
+      props.data.status === null || props.data.status === undefined || props.data.status === ''
+        ? null
+        : Number(props.data.status)
     date.value = props.data.date
     companyCode.value = props.data.companyCode
     invoiceType.value = props.data.invoiceType

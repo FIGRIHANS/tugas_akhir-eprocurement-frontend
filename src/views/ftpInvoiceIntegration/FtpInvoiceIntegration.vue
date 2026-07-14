@@ -305,6 +305,12 @@
 
 <script lang="ts" setup>
 import { ref, reactive, computed, onMounted, watch, defineAsyncComponent } from 'vue'
+import {
+  buildFilterChips,
+  clearPersistedListFilters,
+  loadPersistedListFilters,
+  savePersistedListFilters,
+} from '@/composables/usePersistedListFilters'
 import { useRouter, useRoute } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
@@ -405,6 +411,40 @@ const activeTabTitle = computed(() =>
   activeTab.value === 'ftpData' ? 'FTP Data' : 'Upload FTP Document',
 )
 
+const getFilterStorageKey = (tab: 'ftpData' | 'upload' = activeTab.value) =>
+  `ftpInvoiceIntegration:${tab}`
+
+const persistCurrentFilters = () => {
+  savePersistedListFilters(getFilterStorageKey(), {
+    status: filterForm.status,
+    date: filterForm.date,
+    companyCode: filterForm.companyCode,
+    invoiceType: filterForm.invoiceType,
+    search: search.value,
+  })
+}
+
+const applyPersistedFiltersForTab = (tab: 'ftpData' | 'upload') => {
+  const saved = loadPersistedListFilters(getFilterStorageKey(tab))
+  if (!saved) {
+    filterForm.status = ''
+    filterForm.date = ''
+    filterForm.companyCode = ''
+    filterForm.invoiceType = ''
+    filteredPayload.value = []
+    filterChild.value?.resetFilter()
+    return
+  }
+
+  filterForm.status =
+    saved.status === null || saved.status === undefined ? '' : String(saved.status)
+  filterForm.date = saved.date || ''
+  filterForm.companyCode = saved.companyCode || ''
+  filterForm.invoiceType = saved.invoiceType || ''
+  search.value = saved.search || ''
+  filteredPayload.value = buildFilterChips(filterForm)
+}
+
 const resetFilterState = () => {
   filterForm.status = ''
   filterForm.date = ''
@@ -416,11 +456,12 @@ const resetFilterState = () => {
 
 const setActiveTab = (tab: 'ftpData' | 'upload') => {
   if (activeTab.value === tab) return
+  persistCurrentFilters()
   activeTab.value = tab
   currentPage.value = 1
   sortBy.value = ''
   sortColumnName.value = ''
-  resetFilterState()
+  applyPersistedFiltersForTab(tab)
   callList()
 }
 
@@ -428,11 +469,12 @@ const applyRouteTab = () => {
   const tab = route.query.tab?.toString()
   if (tab === 'ftpData' || tab === 'upload') {
     if (activeTab.value !== tab) {
+      persistCurrentFilters()
       activeTab.value = tab
       currentPage.value = 1
       sortBy.value = ''
       sortColumnName.value = ''
-      resetFilterState()
+      applyPersistedFiltersForTab(tab)
     }
   }
 }
@@ -600,6 +642,7 @@ const StatusInvoice = ref([
   { value: '4', label: 'Approved' },
   { value: '5', label: 'Rejected' },
   { value: '7', label: 'Sent to SAP' },
+  { value: '10', label: 'Paid' },
 ])
 
 const UploadTabStatus = [
@@ -676,7 +719,9 @@ const colorBadgeForFtpRow = (row: FtpDataListRow) => {
   if (label === 'draft' || label === 'drafted') return 'badge-secondary'
   if (label === 'uploaded') return 'badge-primary'
   if (label === 'done') return 'badge-success'
-  return colorBadge(row.statusCode ?? 0)
+  if (label === 'rejected') return 'badge-danger'
+  if (row.statusCode != null && row.statusCode >= 0) return colorBadge(row.statusCode)
+  return colorBadge(0)
 }
 
 const colorBadge = (status: number) => {
@@ -1115,57 +1160,40 @@ const callList = async (options?: { silent?: boolean }) => {
 }
 
 const setDataFilter = (data: filterListTypes) => {
-  const filteredData: { key: string; value: string | number }[] = []
-
-  if (data.status !== '') {
-    filteredData.push({
-      key: 'Status',
-      value: data.status,
-    })
-  }
-
   if (activeTab.value === 'upload') {
-    filteredPayload.value = filteredData
+    filteredPayload.value = buildFilterChips({
+      status: data.status,
+      date: '',
+      companyCode: '',
+      invoiceType: '',
+    })
     filterForm.status = data.status
     filterForm.date = ''
     filterForm.companyCode = ''
     filterForm.invoiceType = ''
+    persistCurrentFilters()
     currentPage.value = 1
     return
   }
 
-  if (data.date !== '') {
-    filteredData.push({
-      key: 'Date',
-      value: data.date,
-    })
-  }
-
-  if (data.companyCode && data.companyCode.trim() !== '') {
-    filteredData.push({
-      key: 'Company Code',
-      value: data.companyCode,
-    })
-  }
-
-  if (data.invoiceType && data.invoiceType.trim() !== '') {
-    filteredData.push({
-      key: 'Invoice Type',
-      value: data.invoiceType,
-    })
-  }
-
-  filteredPayload.value = filteredData
+  filteredPayload.value = buildFilterChips({
+    status: data.status,
+    date: data.date,
+    companyCode: data.companyCode,
+    invoiceType: data.invoiceType,
+  })
   filterForm.status = data.status
   filterForm.date = data.date
   filterForm.companyCode = data.companyCode
   filterForm.invoiceType = data.invoiceType
+  persistCurrentFilters()
   currentPage.value = 1
   callList()
 }
 
 const triggerSearch = () => {
   currentPage.value = 1
+  persistCurrentFilters()
   if (activeTab.value !== 'upload') {
     void callList()
   }
@@ -1173,6 +1201,7 @@ const triggerSearch = () => {
 
 watch(search, () => {
   currentPage.value = 1
+  persistCurrentFilters()
   if (activeTab.value !== 'upload') {
     void callList()
   }
@@ -1219,6 +1248,7 @@ const deleteFilter = (key: string) => {
 }
 
 const resetFilter = () => {
+  clearPersistedListFilters(getFilterStorageKey())
   resetFilterState()
   filterChild.value?.goFilter()
   currentPage.value = 1
@@ -1229,6 +1259,7 @@ onMounted(() => {
   invoiceMasterApi.getCompanyCode()
   invoiceMasterApi.getInvoicePoType()
   applyRouteTab()
+  applyPersistedFiltersForTab(activeTab.value)
   callList()
 })
 
