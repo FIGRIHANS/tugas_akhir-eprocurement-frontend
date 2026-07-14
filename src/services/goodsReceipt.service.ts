@@ -29,6 +29,7 @@ export interface GoodsReceiptHeaderDto {
   approvedUtcDate: string
   notes?: string
   paymentStatus?: string
+  invoiceVendorNo?: string | null
 }
 
 export interface GoodsReceiptDetailItemDto {

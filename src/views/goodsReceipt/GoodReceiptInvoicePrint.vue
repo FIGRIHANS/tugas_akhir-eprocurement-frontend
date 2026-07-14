@@ -22,7 +22,7 @@
           </div>
         </div>
         <div class="inv-header-right">
-          <div class="inv-label">ERS DOCUMENT</div>
+          <div class="inv-label">INVOICE</div>
           <div class="inv-doc-no">{{ vendorInvoiceNo }}</div>
         </div>
       </div>
@@ -266,6 +266,10 @@ import momentLib from 'moment'
 import type { GoodsReceiptDetailContentDto } from '@/services/goodsReceipt.service'
 import type { IAdministration, IPayment } from '@/stores/vendor/types/vendor'
 import vendorApi from '@/core/utils/vendorApi'
+import {
+  resolvePrintInvoiceVendorNo,
+  type GrInvoiceVendorNoInput,
+} from '@/core/utils/grInvoiceVendorNo'
 
 const moment = momentLib
 
@@ -290,30 +294,13 @@ const primaryBank = computed<IPayment | null>(() => {
   return active ?? bankList.value[0]
 })
 
-const vendorInvoiceNo = computed(() => {
-  const vName = vendorInfo.value?.vendorName || props.detail.vendorName || 'VND'
-  const vAbbr =
-    vName
-      .replace(/[^a-zA-Z]/g, '')
-      .substring(0, 3)
-      .toUpperCase() || 'VND'
-
-  const dateStr = props.detail.grDocumentDate || new Date().toISOString()
-  const d = new Date(dateStr)
-  const yy = d.getFullYear().toString().substring(2, 4)
-  const mm = (d.getMonth() + 1).toString().padStart(2, '0')
-
-  // Create a deterministic sequence number independent from database ID or GR Number
-  const hashInput = vName + dateStr
-  let hash = 0
-  for (let i = 0; i < hashInput.length; i++) {
-    hash = (hash << 5) - hash + hashInput.charCodeAt(i)
-    hash |= 0
-  }
-  const seq = String(Math.abs(hash) % 1000).padStart(3, '0')
-
-  return `INV/${vAbbr}/${yy}${mm}/${seq}`
-})
+const vendorInvoiceNo = computed(() =>
+  resolvePrintInvoiceVendorNo({
+    vendorName: vendorInfo.value?.vendorName || props.detail.vendorName,
+    grDocumentDate: props.detail.grDocumentDate,
+    invoiceVendorNo: props.detail.invoiceVendorNo,
+  } satisfies GrInvoiceVendorNoInput),
+)
 
 // ── Helpers ──────────────────────────────────────────────────────
 function initials(name?: string | null): string {
