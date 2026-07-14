@@ -807,6 +807,7 @@ const calculateDpp = () => {
   form.value.totalDpp = form.value.objekFaktur.reduce((acc, curr) => acc + curr.dpp, 0)
   form.value.totalDppLain = form.value.objekFaktur.reduce((acc, curr) => acc + curr.dppLain, 0)
   form.value.totalPpn = form.value.objekFaktur.reduce((acc, curr) => acc + curr.ppn, 0)
+  form.value.totalPpnbm = form.value.objekFaktur.reduce((acc, curr) => acc + curr.ppnbm, 0)
 }
 
 const hapusBarang = (index: number) => {
