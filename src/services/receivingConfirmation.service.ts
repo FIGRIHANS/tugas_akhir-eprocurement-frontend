@@ -1,4 +1,5 @@
 import invoiceApi from '@/core/utils/invoiceApi'
+import { parsePaginatedListResponse } from '@/core/utils/paginatedResponse'
 
 // Interface untuk Detail Item Payload - untuk POST
 export interface ReceivingConfirmationDetailPayload {
@@ -122,6 +123,19 @@ export interface ReceivingConfirmationQueryParams {
   receivedDateTo?: string
   destination?: string
   hasDiscrepancy?: boolean
+  page?: number
+  pageSize?: number
+}
+
+export interface ReceivingConfirmationListResult {
+  items: ReceivingConfirmationData[]
+  total: number
+  page: number
+  pageSize: number
+  waitingApproval: number
+  completed: number
+  rejected: number
+  hasDiscrepancy: number
 }
 
 const normalizeCreatePayload = (
@@ -175,20 +189,42 @@ const ReceivingConfirmationService = {
    * Get list of receiving confirmations
    * Endpoint: api/receiving-confirmation/list
    */
-  async getList(params?: ReceivingConfirmationQueryParams): Promise<ReceivingConfirmationData[]> {
+  async getList(params?: ReceivingConfirmationQueryParams): Promise<ReceivingConfirmationListResult> {
     try {
-      const response = await invoiceApi.get<ApiResponse<ReceivingConfirmationData[]>>(
+      const response = await invoiceApi.get<ApiResponse<ReceivingConfirmationListResult>>(
         '/receiving-confirmation/list',
         {
           params: params,
         },
       )
 
-      if (response.data?.result?.content) {
-        return response.data.result.content
+      const content = response.data?.result?.content
+      const parsed = parsePaginatedListResponse<ReceivingConfirmationData>(
+        content,
+        params?.page ?? 1,
+        params?.pageSize ?? 10,
+      )
+
+      const statsSource =
+        content && typeof content === 'object' && !Array.isArray(content)
+          ? (content as Record<string, unknown>)
+          : {}
+
+      const readStat = (key: string) => {
+        const value = statsSource[key]
+        return typeof value === 'number' ? value : Number(value) || 0
       }
 
-      return []
+      return {
+        items: parsed.items,
+        total: parsed.total,
+        page: parsed.page,
+        pageSize: parsed.pageSize,
+        waitingApproval: readStat('waitingApproval'),
+        completed: readStat('completed'),
+        rejected: readStat('rejected'),
+        hasDiscrepancy: readStat('hasDiscrepancy'),
+      }
     } catch (error) {
       console.error('Error fetching receiving confirmation list:', error)
       throw error

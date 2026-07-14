@@ -1,5 +1,15 @@
 <template>
   <div>
+    <div
+      v-if="isSubmitting"
+      class="fixed inset-0 bg-black/30 flex items-center justify-center z-[60]"
+    >
+      <div class="bg-white rounded-xl p-6 flex flex-col items-center gap-3 shadow-lg min-w-[200px]">
+        <i class="ki-duotone ki-loading text-4xl text-primary animate-spin"></i>
+        <p class="text-gray-700 font-medium m-0">{{ loadingMessage }}</p>
+      </div>
+    </div>
+
     <Breadcrumb title="Delivery Notes Detail" :routes="routes" />
     <hr class="-mx-[24px] mb-[24px]" />
 
@@ -96,8 +106,8 @@
                     v-model="detailData.tripID"
                     type="text"
                     class="input flex-1"
-                    :class="isDraft ? 'bg-white' : 'bg-gray-50'"
-                    :disabled="!isDraft"
+                    :class="canEditDraft ? 'bg-white' : 'bg-gray-50'"
+                    :disabled="!canEditDraft"
                   />
                 </div>
 
@@ -110,8 +120,8 @@
                     v-model="detailData.driverName"
                     type="text"
                     class="input flex-1"
-                    :class="isDraft ? 'bg-white' : 'bg-gray-50'"
-                    :disabled="!isDraft"
+                    :class="canEditDraft ? 'bg-white' : 'bg-gray-50'"
+                    :disabled="!canEditDraft"
                     data-focus-key="driver-name"
                   />
                 </div>
@@ -125,8 +135,8 @@
                     v-model="detailData.licensePlate"
                     type="text"
                     class="input flex-1"
-                    :class="isDraft ? 'bg-white' : 'bg-gray-50'"
-                    :disabled="!isDraft"
+                    :class="canEditDraft ? 'bg-white' : 'bg-gray-50'"
+                    :disabled="!canEditDraft"
                     data-focus-key="license-plate"
                   />
                 </div>
@@ -140,8 +150,8 @@
                     v-model="detailData.transporter"
                     type="text"
                     class="input flex-1"
-                    :class="isDraft ? 'bg-white' : 'bg-gray-50'"
-                    :disabled="!isDraft"
+                    :class="canEditDraft ? 'bg-white' : 'bg-gray-50'"
+                    :disabled="!canEditDraft"
                     data-focus-key="transporter"
                   />
                 </div>
@@ -158,8 +168,8 @@
                     v-model="detailData.pickupAddress"
                     type="text"
                     class="input flex-1"
-                    :class="isDraft ? 'bg-white' : 'bg-gray-50'"
-                    :disabled="!isDraft"
+                    :class="canEditDraft ? 'bg-white' : 'bg-gray-50'"
+                    :disabled="!canEditDraft"
                     data-focus-key="pickup-address"
                   />
                 </div>
@@ -173,8 +183,8 @@
                     v-model="detailData.destinationAddress"
                     type="text"
                     class="input flex-1"
-                    :class="isDraft ? 'bg-white' : 'bg-gray-50'"
-                    :disabled="!isDraft"
+                    :class="canEditDraft ? 'bg-white' : 'bg-gray-50'"
+                    :disabled="!canEditDraft"
                     data-focus-key="destination-address"
                   />
                 </div>
@@ -188,8 +198,8 @@
                     v-model="detailData.truckType"
                     type="text"
                     class="input flex-1"
-                    :class="isDraft ? 'bg-white' : 'bg-gray-50'"
-                    :disabled="!isDraft"
+                    :class="canEditDraft ? 'bg-white' : 'bg-gray-50'"
+                    :disabled="!canEditDraft"
                   />
                 </div>
 
@@ -199,7 +209,7 @@
                     Shipping Date
                   </label>
                   <input
-                    v-if="isDraft"
+                    v-if="canEditDraft"
                     v-model="shippingDateInput"
                     type="date"
                     class="input flex-1 bg-white"
@@ -290,7 +300,7 @@
       <div class="border border-gray-200 rounded-xl p-[24px] mt-[24px]">
         <div class="mb-4 flex justify-between items-center">
           <h3 class="text-lg font-semibold">Items List</h3>
-          <button v-if="isDraft" class="btn btn-primary btn-sm" @click="addNewItem">
+          <button v-if="canEditDraft" class="btn btn-primary btn-sm" @click="addNewItem">
             <i class="ki-duotone ki-plus"></i>
             Add Item
           </button>
@@ -305,12 +315,12 @@
                 <th class="text-center">UOM</th>
                 <th class="text-center">Lot No</th>
                 <th class="text-center">Qty Shipped</th>
-                <th v-if="isDraft" class="text-center">Action</th>
+                <th v-if="canEditDraft" class="text-center">Action</th>
               </tr>
             </thead>
             <tbody>
               <tr v-if="!detailData.items || detailData.items.length === 0">
-                <td :colspan="isDraft ? 7 : 6" class="text-center py-8">
+                <td :colspan="canEditDraft ? 7 : 6" class="text-center py-8">
                   <div class="text-gray-400">
                     <i class="ki-duotone ki-information text-3xl mb-2"></i>
                     <p>No items found</p>
@@ -321,7 +331,7 @@
                 <td class="text-center">{{ index + 1 }}</td>
                 <td class="text-center">
                   <input
-                    v-if="isDraft"
+                    v-if="canEditDraft"
                     v-model="item.sku"
                     type="text"
                     class="input input-sm w-32"
@@ -331,7 +341,7 @@
                 </td>
                 <td class="text-center">
                   <input
-                    v-if="isDraft"
+                    v-if="canEditDraft"
                     v-model="item.description"
                     type="text"
                     class="input input-sm w-48"
@@ -341,7 +351,7 @@
                 </td>
                 <td class="text-center">
                   <input
-                    v-if="isDraft"
+                    v-if="canEditDraft"
                     v-model="item.uom"
                     type="text"
                     class="input input-sm w-20"
@@ -351,7 +361,7 @@
                 </td>
                 <td class="text-center">
                   <input
-                    v-if="isDraft"
+                    v-if="canEditDraft"
                     v-model="item.lotNo"
                     type="text"
                     class="input input-sm w-28"
@@ -361,7 +371,7 @@
                 </td>
                 <td class="text-center">
                   <input
-                    v-if="isDraft"
+                    v-if="canEditDraft"
                     v-model.number="item.qtyShipped"
                     type="number"
                     min="0"
@@ -377,7 +387,7 @@
                   />
                   <span v-else>{{ item.qtyShipped }}</span>
                 </td>
-                <td v-if="isDraft" class="text-center">
+                <td v-if="canEditDraft" class="text-center">
                   <button
                     class="btn btn-sm btn-danger btn-icon"
                     @click="removeItem(index)"
@@ -395,13 +405,19 @@
       <!-- Action Buttons -->
       <div class="flex justify-between items-center gap-[8px] mt-[24px]">
         <button
-          v-if="isDraft"
+          v-if="canEditDraft"
           class="btn btn-outline btn-primary"
           :disabled="isSubmitting || !canSaveDraft"
           @click="updateDeliveryNote(true)"
         >
-          Save as Draft
-          <i class="ki-duotone ki-bookmark"></i>
+          <span v-if="isSubmitting" class="inline-flex items-center gap-2">
+            <i class="ki-duotone ki-loading animate-spin"></i>
+            Saving...
+          </span>
+          <template v-else>
+            Save as Draft
+            <i class="ki-duotone ki-bookmark"></i>
+          </template>
         </button>
         <div v-else></div>
         <div class="flex items-center justify-end gap-[8px]">
@@ -410,12 +426,15 @@
             Back
           </button>
           <button
-            v-if="isDraft"
+            v-if="canEditDraft"
             class="btn btn-primary"
             :disabled="isSubmitting || !canSubmit"
             @click="updateDeliveryNote(false)"
           >
-            <span v-if="isSubmitting">Submitting...</span>
+            <span v-if="isSubmitting" class="inline-flex items-center gap-2">
+              <i class="ki-duotone ki-loading animate-spin"></i>
+              Submitting...
+            </span>
             <template v-else>
               Submit
               <i class="ki-duotone ki-paper-plane"></i>
@@ -451,6 +470,8 @@ import DeliveryNotesService, {
   type DeliveryNoteCreatePayload,
   type DeliveryNotesData,
 } from '@/services/deliveryNotes.service'
+import { useLoginStore } from '@/stores/views/login'
+import { isRouteAllowed } from '@/core/utils/routeAccess'
 import {
   getTodayDateString,
   isDateBeforeToday,
@@ -478,6 +499,7 @@ interface DeliveryNotesDataExtended extends Omit<DeliveryNotesData, 'items'> {
 
 const router = useRouter()
 const route = useRoute()
+const loginStore = useLoginStore()
 
 // Breadcrumb
 const routes = ref<routeTypes[]>([
@@ -492,6 +514,10 @@ const isLoading = ref<boolean>(true)
 const error = ref<string | null>(null)
 const detailData = ref<DeliveryNotesDataExtended | null>(null)
 const isSubmitting = ref<boolean>(false)
+const submitAction = ref<'draft' | 'submit'>('submit')
+const loadingMessage = computed(() =>
+  submitAction.value === 'draft' ? 'Saving draft...' : 'Submitting...',
+)
 
 // Modal state
 const showNotificationModal = ref<boolean>(false)
@@ -502,6 +528,10 @@ const notificationModal = ref({
 })
 
 const isDraft = computed(() => detailData.value?.status === 'Draft')
+const canCreate = computed(() =>
+  isRouteAllowed('deliveryNotesCreate', loginStore.userData),
+)
+const canEditDraft = computed(() => isDraft.value && canCreate.value)
 const todayDateString = getTodayDateString()
 
 const formatShippingDate = (value?: string): string => {
@@ -522,7 +552,7 @@ const formatShippingDate = (value?: string): string => {
 const shippingDateInput = computed({
   get: () => {
     if (!detailData.value?.shippingDate) return ''
-    if (isDraft.value) {
+    if (canEditDraft.value) {
       return toLocalDateString(detailData.value.shippingDate)
     }
     return formatShippingDate(detailData.value.shippingDate)
@@ -664,8 +694,12 @@ const trimDetailTextFields = () => {
 const getValidationResult = (isDraftUpdate = false): FormValidationResult => {
   if (!detailData.value) return validationFail('Data tidak ditemukan.')
 
-  if (!isDraft.value) {
-    return validationFail('Delivery note can only be updated while status is Draft')
+  if (!canEditDraft.value) {
+    return validationFail(
+      !canCreate.value
+        ? 'You do not have permission to edit delivery note'
+        : 'Delivery note can only be updated while status is Draft',
+    )
   }
 
   if (isBlank(detailData.value.poNumber) || isBlank(detailData.value.vendorCode)) {
@@ -735,14 +769,17 @@ const getValidationResult = (isDraftUpdate = false): FormValidationResult => {
   return validationOk()
 }
 
-const canSaveDraft = computed(() => isDraft.value && getValidationResult(true).valid)
-const canSubmit = computed(() => isDraft.value && getValidationResult(false).valid)
+const canSaveDraft = computed(() => canEditDraft.value && getValidationResult(true).valid)
+const canSubmit = computed(() => canEditDraft.value && getValidationResult(false).valid)
 
 const validateUpdateForm = async (isDraftUpdate = false): Promise<boolean> => {
   trimDetailTextFields()
   const result = getValidationResult(isDraftUpdate)
   if (!result.valid) {
-    if (result.message === 'Delivery note can only be updated while status is Draft') {
+    if (
+      result.message === 'Delivery note can only be updated while status is Draft' ||
+      result.message === 'You do not have permission to edit delivery note'
+    ) {
       notificationModal.value = {
         type: 'warning',
         title: 'Validation Error',
@@ -790,6 +827,7 @@ const buildUpdatePayload = (isDraftUpdate = false): DeliveryNoteCreatePayload =>
 const updateDeliveryNote = async (isDraftUpdate = false) => {
   if (!detailData.value || !(await validateUpdateForm(isDraftUpdate))) return
 
+  submitAction.value = isDraftUpdate ? 'draft' : 'submit'
   isSubmitting.value = true
 
   try {

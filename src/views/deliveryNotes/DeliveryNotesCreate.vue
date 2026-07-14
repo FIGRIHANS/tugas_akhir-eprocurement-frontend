@@ -1,5 +1,15 @@
 <template>
   <div>
+    <div
+      v-if="isSubmitting"
+      class="fixed inset-0 bg-black/30 flex items-center justify-center z-[60]"
+    >
+      <div class="bg-white rounded-xl p-6 flex flex-col items-center gap-3 shadow-lg min-w-[200px]">
+        <i class="ki-duotone ki-loading text-4xl text-primary animate-spin"></i>
+        <p class="text-gray-700 font-medium m-0">{{ loadingMessage }}</p>
+      </div>
+    </div>
+
     <Breadcrumb title="Create Delivery Notes" :routes="routes" />
     <hr class="-mx-[24px] mb-[24px]" />
 
@@ -502,8 +512,14 @@
           :disabled="isSubmitting || !canSaveDraft"
           @click="submitForm(true)"
         >
-          Save as Draft
-          <i class="ki-duotone ki-bookmark"></i>
+          <span v-if="isSubmitting" class="inline-flex items-center gap-2">
+            <i class="ki-duotone ki-loading animate-spin"></i>
+            Saving...
+          </span>
+          <template v-else>
+            Save as Draft
+            <i class="ki-duotone ki-bookmark"></i>
+          </template>
         </button>
         <div class="flex items-center justify-end gap-[8px]">
           <button class="btn btn-outline btn-primary" :disabled="isSubmitting" @click="goBack()">
@@ -515,8 +531,14 @@
             :disabled="isSubmitting || !canSubmit"
             @click="submitForm(false)"
           >
-            Submit
-            <i class="ki-duotone ki-paper-plane"></i>
+            <span v-if="isSubmitting" class="inline-flex items-center gap-2">
+              <i class="ki-duotone ki-loading animate-spin"></i>
+              Submitting...
+            </span>
+            <template v-else>
+              Submit
+              <i class="ki-duotone ki-paper-plane"></i>
+            </template>
           </button>
         </div>
       </div>
@@ -604,6 +626,10 @@ const routes = ref<routeTypes[]>([
 
 // States
 const isSubmitting = ref<boolean>(false)
+const submitAction = ref<'draft' | 'submit'>('submit')
+const loadingMessage = computed(() =>
+  submitAction.value === 'draft' ? 'Saving draft...' : 'Submitting...',
+)
 const isSearching = ref<boolean>(false)
 const poNumberSearch = ref<string>('')
 const selectedPO = ref<MockSapPoData | null>(null)
@@ -1030,6 +1056,7 @@ const validateForm = async (isDraft = false): Promise<boolean> => {
 const submitForm = async (isDraft = false) => {
   if (!(await validateForm(isDraft))) return
 
+  submitAction.value = isDraft ? 'draft' : 'submit'
   isSubmitting.value = true
 
   try {

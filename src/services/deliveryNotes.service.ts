@@ -1,4 +1,5 @@
 import invoiceApi from '@/core/utils/invoiceApi'
+import { parsePaginatedListResponse } from '@/core/utils/paginatedResponse'
 
 // Interface untuk Detail Item dari Delivery Notes
 export interface DeliveryNotesItemData {
@@ -60,6 +61,19 @@ export interface DeliveryNotesQueryParams {
   status?: string
   estimatedArrivalFrom?: string
   estimatedArrivalTo?: string
+  page?: number
+  pageSize?: number
+}
+
+export interface DeliveryNotesListResult {
+  items: DeliveryNotesData[]
+  total: number
+  page: number
+  pageSize: number
+  onDelivery: number
+  received: number
+  partialReceived: number
+  completed: number
 }
 
 // Interface untuk Mock SAP PO Item
@@ -115,20 +129,45 @@ export interface DeliveryNoteCreatePayload {
 }
 
 const DeliveryNotesService = {
-  async getList(params?: DeliveryNotesQueryParams): Promise<DeliveryNotesData[]> {
+  async getList(params?: DeliveryNotesQueryParams): Promise<DeliveryNotesListResult> {
     try {
-      const response = await invoiceApi.get<ApiResponse<DeliveryNotesData[]>>(
+      const response = await invoiceApi.get<ApiResponse<DeliveryNotesListResult>>(
         '/delivery-notes/list',
         {
           params: params,
         },
       )
 
-      if (response.data?.result?.content) {
-        return response.data.result.content
+      const content = response.data?.result?.content
+      const parsed = parsePaginatedListResponse<DeliveryNotesData>(
+        content,
+        params?.page ?? 1,
+        params?.pageSize ?? 10,
+      )
+
+      const statsSource =
+        content && typeof content === 'object' && !Array.isArray(content)
+          ? (content as Record<string, unknown>)
+          : {}
+
+      const readStat = (key: string) => {
+        const value = statsSource[key]
+        return typeof value === 'number' ? value : Number(value) || 0
       }
 
-      return []
+      return {
+        items: parsed.items.map((item) => ({
+          ...item,
+          estimatedArrival: item.estimatedArrival || item.shippingDate || '',
+        })),
+        total: parsed.total,
+        page: parsed.page,
+        pageSize: parsed.pageSize,
+        onDelivery: readStat('onDelivery'),
+        received: readStat('received'),
+        partialReceived: readStat('partialReceived'),
+        completed: readStat('completed'),
+      }
     } catch (error) {
       console.error('Error fetching delivery notes list:', error)
       throw error

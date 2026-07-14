@@ -1,5 +1,15 @@
 <template>
   <div>
+    <div
+      v-if="showActionLoading"
+      class="fixed inset-0 bg-black/30 flex items-center justify-center z-[60]"
+    >
+      <div class="bg-white rounded-xl p-6 flex flex-col items-center gap-3 shadow-lg min-w-[200px]">
+        <i class="ki-duotone ki-loading text-4xl text-primary animate-spin"></i>
+        <p class="text-gray-700 font-medium m-0">{{ loadingMessage }}</p>
+      </div>
+    </div>
+
     <Breadcrumb title="Receiving Confirmation Detail" :routes="routes" />
     <hr class="-mx-[24px] mb-[24px]" />
 
@@ -48,8 +58,8 @@
                     v-model="formData.namaKaryawan"
                     type="text"
                     class="input flex-1"
-                    :class="isDraft ? 'bg-white' : 'bg-gray-50'"
-                    :disabled="!isDraft"
+                    :class="canEditDraft ? 'bg-white' : 'bg-gray-50'"
+                    :disabled="!canEditDraft"
                   />
                 </div>
 
@@ -75,8 +85,8 @@
                     v-model="formData.namaSopir"
                     type="text"
                     class="input flex-1"
-                    :class="isDraft ? 'bg-white' : 'bg-gray-50'"
-                    :disabled="!isDraft"
+                    :class="canEditDraft ? 'bg-white' : 'bg-gray-50'"
+                    :disabled="!canEditDraft"
                   />
                 </div>
 
@@ -157,8 +167,8 @@
                     v-model="formData.receivedDate"
                     type="date"
                     class="input flex-1"
-                    :class="isDraft ? 'bg-white' : 'bg-gray-50'"
-                    :disabled="!isDraft"
+                    :class="canEditDraft ? 'bg-white' : 'bg-gray-50'"
+                    :disabled="!canEditDraft"
                   />
                 </div>
               </div>
@@ -313,7 +323,7 @@
                 <td class="text-right">{{ item.diSuratJalanKonfirmasi }}</td>
                 <td class="text-right">
                   <input
-                    v-if="isDraft"
+                    v-if="canEditDraft"
                     v-model.number="item.diterima"
                     type="number"
                     min="0"
@@ -332,7 +342,7 @@
                 <td class="text-right">{{ item.kurang }}</td>
                 <td class="text-right">
                   <input
-                    v-if="isDraft"
+                    v-if="canEditDraft"
                     v-model.number="item.repackQty"
                     type="number"
                     min="0"
@@ -348,7 +358,7 @@
                 </td>
                 <td class="text-right">
                   <input
-                    v-if="isDraft"
+                    v-if="canEditDraft"
                     v-model.number="item.damageQty"
                     type="number"
                     min="0"
@@ -364,7 +374,7 @@
                 </td>
                 <td class="text-center">
                   <input
-                    v-if="isDraft"
+                    v-if="canEditDraft"
                     v-model="item.conditionType"
                     type="text"
                     class="input input-sm w-28 text-center"
@@ -373,7 +383,7 @@
                   <span v-else>{{ item.conditionType || '—' }}</span>
                 </td>
                 <td class="text-left">
-                  <template v-if="isDraft && item.kurang > 0">
+                  <template v-if="canEditDraft && item.kurang > 0">
                     <input
                       v-model="item.rejectReason"
                       type="text"
@@ -391,7 +401,7 @@
                   <span v-else class="text-gray-400 text-xs">—</span>
                 </td>
                 <td class="text-center p-2">
-                  <template v-if="isDraft">
+                  <template v-if="canEditDraft">
                     <div class="flex flex-col items-center min-w-[120px]">
                       <div v-if="!hasEvidence(item)" class="w-full">
                         <button
@@ -501,14 +511,25 @@
       <div class="flex justify-between items-center gap-[8px] mt-[24px]">
         <div></div>
         <div class="flex items-center justify-end gap-[8px]">
-          <button class="btn btn-outline btn-primary" :disabled="isSubmitting" @click="goBack()">
+          <button
+            class="btn btn-outline btn-primary"
+            :disabled="showActionLoading"
+            @click="goBack()"
+          >
             <i class="ki-filled ki-arrow-left"></i>
             Back
           </button>
 
-          <template v-if="isDraft">
-            <button class="btn btn-primary" @click="updateConfirmation()" :disabled="isSubmitting">
-              <span v-if="isSubmitting">Submitting...</span>
+          <template v-if="canEditDraft">
+            <button
+              class="btn btn-primary"
+              @click="updateConfirmation()"
+              :disabled="showActionLoading"
+            >
+              <span v-if="isSubmitting" class="inline-flex items-center gap-2">
+                <i class="ki-duotone ki-loading animate-spin"></i>
+                Submitting...
+              </span>
               <template v-else>
                 Submit
                 <i class="ki-duotone ki-paper-plane"></i>
@@ -517,11 +538,19 @@
           </template>
 
           <template v-if="isWaitingApproval && canApprove">
-            <button class="btn btn-danger" @click="openRejectModal()">
+            <button
+              class="btn btn-danger"
+              :disabled="showActionLoading"
+              @click="openRejectModal()"
+            >
               <i class="ki-duotone ki-cross-circle"></i>
               Reject
             </button>
-            <button class="btn btn-primary" @click="openApproveModal()">
+            <button
+              class="btn btn-primary"
+              :disabled="showActionLoading"
+              @click="openApproveModal()"
+            >
               <i class="ki-duotone ki-check-circle"></i>
               Approve
             </button>
@@ -540,7 +569,7 @@
       <div
         v-if="showRejectModal"
         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-        @click.self="closeRejectModal()"
+        @click.self="!isRejecting && closeRejectModal()"
       >
         <div class="bg-white rounded-lg p-6 w-full max-w-md">
           <h3 class="text-lg font-semibold mb-4">Rejection Reason</h3>
@@ -552,11 +581,20 @@
               v-model="rejectionReason"
               class="input w-full h-32 resize-none p-3"
               placeholder="Please enter the reason for rejection..."
+              :disabled="isRejecting"
             ></textarea>
           </div>
           <div class="flex gap-3 justify-end">
-            <button class="btn btn-light" @click="closeRejectModal()">Cancel</button>
-            <button class="btn btn-danger" @click="confirmReject()">Confirm Reject</button>
+            <button class="btn btn-light" :disabled="isRejecting" @click="closeRejectModal()">
+              Cancel
+            </button>
+            <button class="btn btn-danger" :disabled="isRejecting" @click="confirmReject()">
+              <span v-if="isRejecting" class="inline-flex items-center gap-2">
+                <i class="ki-duotone ki-loading animate-spin"></i>
+                Rejecting...
+              </span>
+              <template v-else>Confirm Reject</template>
+            </button>
           </div>
         </div>
       </div>
@@ -616,6 +654,7 @@ import DeliveryNotesService from '@/services/deliveryNotes.service'
 import ModalNotification from '@/components/modal/ModalNotification.vue'
 import ModalConfirmation from '@/components/modal/ModalConfirmation.vue'
 import { useLoginStore } from '@/stores/views/login'
+import { isRouteAllowed } from '@/core/utils/routeAccess'
 import ReceivingConfirmationPrint from './ReceivingConfirmationPrint.vue'
 import {
   normalizeNonNegativeInt,
@@ -628,6 +667,9 @@ const loginStore = useLoginStore()
 
 // Only profile 3185 (WH Approver) can approve / reject
 const canApprove = computed(() => loginStore.userData?.profile?.profileId === 3185)
+const canCreate = computed(() =>
+  isRouteAllowed('receivingConfirmationCreate', loginStore.userData),
+)
 
 interface FormData {
   orderNo: string
@@ -768,9 +810,18 @@ const showRejectModal = ref<boolean>(false)
 const rejectionReason = ref<string>('')
 const showApproveModal = ref<boolean>(false)
 const isApproving = ref<boolean>(false)
+const isRejecting = ref<boolean>(false)
 const currentStatus = ref<string>('')
 const hasDiscrepancy = ref<boolean>(false)
 const isSubmitting = ref<boolean>(false)
+const showActionLoading = computed(
+  () => isSubmitting.value || isApproving.value || isRejecting.value,
+)
+const loadingMessage = computed(() => {
+  if (isRejecting.value) return 'Rejecting...'
+  if (isApproving.value) return 'Approving...'
+  return 'Submitting...'
+})
 const deliveryNoteInfo = ref({
   deliveryNoteNumber: '',
   tripID: '',
@@ -790,6 +841,7 @@ const notificationModal = ref({
 })
 
 const isDraft = computed(() => currentStatus.value === 'Draft')
+const canEditDraft = computed(() => isDraft.value && canCreate.value)
 const isWaitingApproval = computed(() =>
   ['Waiting Supervisor', 'Waiting Approval'].includes(currentStatus.value),
 )
@@ -803,7 +855,7 @@ const approveConfirmText = computed(() =>
 
 // Functions
 const goBack = () => {
-  router.push({ name: 'receivingConfirmation' })
+  router.push({ name: 'receivingConfirmationList' })
 }
 
 const viewItem = (index: number) => {
@@ -865,11 +917,13 @@ const normalizeItemQuantities = (index: number) => {
 }
 
 const validateUpdateForm = (): boolean => {
-  if (!isDraft.value) {
+  if (!canEditDraft.value) {
     notificationModal.value = {
       type: 'warning',
       title: 'Validation Error',
-      text: 'Receiving confirmation can only be updated while status is Draft',
+      text: !canCreate.value
+        ? 'You do not have permission to edit receiving confirmation'
+        : 'Receiving confirmation can only be updated while status is Draft',
     }
     showNotificationModal.value = true
     return false
@@ -1030,6 +1084,7 @@ const openRejectModal = () => {
 }
 
 const closeRejectModal = () => {
+  if (isRejecting.value) return
   showRejectModal.value = false
   rejectionReason.value = ''
 }
@@ -1060,6 +1115,8 @@ const confirmApprove = async () => {
 
 
 const confirmReject = async () => {
+  if (isRejecting.value) return
+
   // Validate rejection reason
   if (!rejectionReason.value.trim()) {
     notificationModal.value = {
@@ -1074,6 +1131,8 @@ const confirmReject = async () => {
   console.log('Form Data:', formData.value)
   console.log('Table Data:', tableData.value)
   console.log('Rejection Reason:', rejectionReason.value)
+
+  isRejecting.value = true
 
   try {
     // Send rejection data to API with status "Rejected"
@@ -1095,7 +1154,7 @@ const confirmReject = async () => {
 
     // Close modal and redirect
     closeRejectModal()
-    router.push({ name: 'receivingConfirmation' })
+    router.push({ name: 'receivingConfirmationList' })
   } catch (error) {
     console.error('Error rejecting receiving confirmation:', error)
     notificationModal.value = {
@@ -1104,6 +1163,8 @@ const confirmReject = async () => {
       text: 'Failed to reject receiving confirmation',
     }
     showNotificationModal.value = true
+  } finally {
+    isRejecting.value = false
   }
 }
 

@@ -70,7 +70,7 @@
             Filter
           </button>
 
-          <button class="btn btn-primary" @click="createNew()">
+          <button v-if="canCreate" class="btn btn-primary" @click="createNew()">
             <i class="ki-duotone ki-plus-circle"></i>
             Create
           </button>
@@ -148,7 +148,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-if="filteredDataList?.length === 0">
+            <tr v-if="list.length === 0">
               <td colspan="20" class="text-center">
                 <span v-if="isLoading">Loading...</span>
                 <span v-else-if="errorMessage">{{ errorMessage }}</span>
@@ -178,7 +178,7 @@
                   {{ item.status }}
                 </span>
               </td>
-              <td>{{ summarizeConditionTypes(item) }}</td>
+              <!-- <td>{{ summarizeConditionTypes(item) }}</td> -->
               <td>{{ item.rejectReason || '-' }}</td>
               <td>
                 <span
@@ -195,9 +195,9 @@
               <td>{{ item.truckType }}</td>
               <td>{{ item.licensePlate }}</td>
               <td>{{ formatDate(item.createdUtcDate) }}</td>
-              <td>{{ item.createdBy }}</td>
+              <!-- <td>{{ item.createdBy }}</td> -->
               <td>{{ formatDate(item.updatedUtcDate) }}</td>
-              <td>{{ item.updatedBy }}</td>
+              <!-- <td>{{ item.updatedBy }}</td> -->
             </tr>
           </tbody>
         </table>
@@ -208,14 +208,16 @@
         <p class="m-0 text-sm">
           Showing
           {{
-            pageSize * currentPage > filteredDataList.length
-              ? filteredDataList.length
-              : pageSize * currentPage
+            totalItems === 0
+              ? 0
+              : pageSize * currentPage > totalItems
+                ? totalItems
+                : pageSize * currentPage
           }}
-          of {{ filteredDataList.length }} entries
+          of {{ totalItems }} entries
         </p>
         <LPagination
-          :totalItems="filteredDataList.length"
+          :totalItems="totalItems"
           :pageSize="pageSize"
           :currentPage="currentPage"
           @pageChange="setPage"
@@ -226,7 +228,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, reactive, computed } from 'vue'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import LPagination from '@/components/pagination/LPagination.vue'
@@ -237,6 +239,13 @@ import ReceivingConfirmationService, {
   type ReceivingConfirmationData,
 } from '@/services/receivingConfirmation.service'
 import router from '@/router'
+import { useLoginStore } from '@/stores/views/login'
+import { isRouteAllowed } from '@/core/utils/routeAccess'
+
+const userStore = useLoginStore()
+const canCreate = computed(() =>
+  isRouteAllowed('receivingConfirmationCreate', userStore.userData),
+)
 
 // Loading and error states
 const isLoading = ref<boolean>(false)
@@ -263,12 +272,21 @@ const routes = ref<routeTypes[]>([
 
 const search = ref<string>('')
 const currentPage = ref<number>(1)
-const pageSize = ref<number>(5)
+const pageSize = ref<number>(10)
+const totalItems = ref<number>(0)
 const list = ref<ReceivingConfirmationData[]>([])
 const sortBy = ref<string>('')
 const sortColumnName = ref<string>('')
 const showFilter = ref<boolean>(false)
 const filteredPayload = ref<{ key: string; value: string }[]>([])
+
+const rcStats = reactive({
+  total: 0,
+  waitingApproval: 0,
+  completed: 0,
+  rejected: 0,
+  hasDiscrepancy: 0,
+})
 
 const filterForm = ref<FilterForm>({
   status: '',
@@ -286,7 +304,6 @@ const columns = ref<string[]>([
   'PO Number',
   'Vendor Name',
   'Status',
-  'Condition Type',
   'Reject Reason',
   'Discrepancy',
   'Received Date',
@@ -296,20 +313,20 @@ const columns = ref<string[]>([
   'Truck Type',
   'License Plate',
   'Created Date',
-  'Created By',
   'Update Date',
-  'Update By',
 ])
 
-const dataList = ref<ReceivingConfirmationData[]>([])
-
-const rcStats = computed(() => ({
-  total: dataList.value.length,
-  waitingApproval: dataList.value.filter((i) => i.status === 'Waiting Supervisor').length,
-  completed: dataList.value.filter((i) => i.status === 'Received' || i.status === 'Completed').length,
-  rejected: dataList.value.filter((i) => i.status === 'Rejected').length,
-  hasDiscrepancy: dataList.value.filter((i) => i.hasDiscrepancy).length,
-}))
+const buildQueryParams = () => ({
+  searchText: search.value || undefined,
+  status: filterForm.value.status || undefined,
+  hasDiscrepancy: filterForm.value.hasDiscrepancy
+    ? filterForm.value.hasDiscrepancy === 'true'
+    : undefined,
+  receivedDateFrom: filterForm.value.receivedDateFrom || undefined,
+  receivedDateTo: filterForm.value.receivedDateTo || undefined,
+  page: currentPage.value,
+  pageSize: pageSize.value,
+})
 
 /**
  * Fetch data dari API backend
@@ -320,59 +337,40 @@ const fetchData = async () => {
   errorMessage.value = ''
 
   try {
-    const response = await ReceivingConfirmationService.getList({
-      searchText: search.value || undefined,
-      status: filterForm.value.status || undefined,
-      hasDiscrepancy: filterForm.value.hasDiscrepancy
-        ? filterForm.value.hasDiscrepancy === 'true'
-        : undefined,
-      receivedDateFrom: filterForm.value.receivedDateFrom || undefined,
-      receivedDateTo: filterForm.value.receivedDateTo || undefined,
-    })
+    const response = await ReceivingConfirmationService.getList(buildQueryParams())
 
-    dataList.value = response
-    setList(filteredDataList.value)
+    list.value = response.items
+    totalItems.value = response.total
+    currentPage.value = response.page
+    rcStats.total = response.total
+    rcStats.waitingApproval = response.waitingApproval
+    rcStats.completed = response.completed
+    rcStats.rejected = response.rejected
+    rcStats.hasDiscrepancy = response.hasDiscrepancy
   } catch (error: unknown) {
     console.error('Failed to fetch data:', error)
     errorMessage.value = 'Gagal mengambil data. Silakan coba lagi.'
+    list.value = []
+    totalItems.value = 0
   } finally {
     isLoading.value = false
   }
 }
 
-// Computed property for filtered data
-const filteredDataList = computed(() => {
-  let filtered = cloneDeep(dataList.value)
-
-  // Apply search filter (client-side untuk pencarian lokal)
-  if (search.value) {
-    filtered = filtered.filter((item) =>
-      Object.values(item).some((val) =>
-        String(val).toLowerCase().includes(search.value.toLowerCase()),
-      ),
-    )
-  }
-
-  // Apply status filter (jika belum dikirim ke server)
-  if (filterForm.value.status) {
-    filtered = filtered.filter((item) => item.status === filterForm.value.status)
-  }
-
-  // Apply hasDiscrepancy filter
-  if (filterForm.value.hasDiscrepancy) {
-    const hasDiscrepancy = filterForm.value.hasDiscrepancy === 'true'
-    filtered = filtered.filter((item) => item.hasDiscrepancy === hasDiscrepancy)
-  }
-
-  return filtered
-})
-
 const getStatusBadgeClass = (status: string) => {
-  if (status === 'Received') return 'badge-success'
-  if (status === 'Waiting Approval') return 'badge-warning'
-  if (status === 'Draft') return 'badge-info'
-  if (status === 'Rejected') return 'badge-danger'
-  return 'badge-secondary'
+  switch (status.trim().toLowerCase()) {
+    case 'draft':
+      return 'badge-info'
+    case 'waiting supervisor':
+    case 'waiting approval':
+      return 'badge-warning'
+    case 'rejected':
+      return 'badge-danger'
+    case 'completed':
+      return 'badge-success'
+    default:
+      return 'badge-secondary'
+  }
 }
 
 const summarizeConditionTypes = (row: ReceivingConfirmationData) => {
@@ -392,27 +390,15 @@ const formatDate = (date: string) => {
   return moment(date).format('YYYY/MM/DD')
 }
 
-const setList = (listData: ReceivingConfirmationData[]) => {
-  const result: ReceivingConfirmationData[] = []
-  for (const [index, item] of listData.entries()) {
-    const start = currentPage.value * pageSize.value - pageSize.value
-    const end = currentPage.value * pageSize.value - 1
-    if (index >= start && index <= end) {
-      result.push(item)
-    }
-  }
-  list.value = result
-}
-
 const setPage = (value: number) => {
   currentPage.value = value
-  setList(filteredDataList.value)
+  fetchData()
 }
 
 const goSearch = (event: KeyboardEvent) => {
   if (event.key === 'Enter') {
     currentPage.value = 1
-    setList(filteredDataList.value)
+    fetchData()
   }
 }
 
@@ -479,19 +465,19 @@ const deleteFilter = (key: string) => {
 
 const sortColumn = (columnName: string | null) => {
   const columnMap = {
-    'Load Sheet': 'loadSheet',
-    Faktur: 'faktur',
+    'Report ID': 'reportID',
+    'Trip ID': 'tripID',
+    'Delivery Note Number': 'deliveryNoteNumber',
+    'PO Number': 'poNumber',
+    'Vendor Name': 'vendorName',
     Status: 'status',
-    'Delivery Date': 'deliveryDate',
-    'Discrepancy Status': 'discrepancyStatus',
+    'Received Date': 'receivedDate',
     Transporter: 'transporter',
-    Distributor: 'distributor',
-    'Region From': 'regionFrom',
-    'Region To': 'regionTo',
+    'Created Date': 'createdUtcDate',
   } as { [key: string]: string }
 
   const roleSort = ['asc', 'desc', '']
-  const listData = cloneDeep(filteredDataList.value)
+  const listData = cloneDeep(list.value)
   let result: ReceivingConfirmationData[] = []
 
   if (columnName) {
@@ -499,37 +485,45 @@ const sortColumn = (columnName: string | null) => {
     sortColumnName.value = columnName
 
     const indexSort = roleSort.findIndex((item) => item === sortBy.value)
-    if (indexSort === -1) return setList(filteredDataList.value)
+    if (indexSort === -1) return
     sortBy.value = indexSort + 1 === roleSort.length ? roleSort[0] : roleSort[indexSort + 1]
 
-    if (!sortBy.value) return setList(filteredDataList.value)
+    if (!sortBy.value) return
   }
 
   const name = columnName || sortColumnName.value
+  const field = columnMap[name]
+  if (!field) return
 
-  if (name === 'Delivery Date') {
+  if (name === 'Received Date' || name === 'Created Date') {
     result = listData.sort((a, b) => {
-      const convA = a[columnMap[name]] ? new Date(a[columnMap[name]]).getTime() : 0
-      const convB = b[columnMap[name]] ? new Date(b[columnMap[name]]).getTime() : 0
+      const convA = a[field as keyof ReceivingConfirmationData]
+        ? new Date(String(a[field as keyof ReceivingConfirmationData])).getTime()
+        : 0
+      const convB = b[field as keyof ReceivingConfirmationData]
+        ? new Date(String(b[field as keyof ReceivingConfirmationData])).getTime()
+        : 0
       if (sortBy.value === 'asc') {
         return convA - convB
-      } else {
-        return convB - convA
       }
+      return convB - convA
     })
   } else {
     result = listData.sort((a, b) => {
-      const convA = a[columnMap[name]] ? a[columnMap[name]] : ''
-      const convB = b[columnMap[name]] ? b[columnMap[name]] : ''
+      const convA = a[field as keyof ReceivingConfirmationData]
+        ? String(a[field as keyof ReceivingConfirmationData])
+        : ''
+      const convB = b[field as keyof ReceivingConfirmationData]
+        ? String(b[field as keyof ReceivingConfirmationData])
+        : ''
       if (sortBy.value === 'asc') {
         return convA.localeCompare(convB)
-      } else {
-        return convB.localeCompare(convA)
       }
+      return convB.localeCompare(convA)
     })
   }
 
-  return setList(result)
+  list.value = result
 }
 
 const createNew = () => {

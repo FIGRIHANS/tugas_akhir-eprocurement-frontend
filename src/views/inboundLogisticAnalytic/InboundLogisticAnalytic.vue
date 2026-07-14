@@ -605,12 +605,12 @@ const fetchAllData = async () => {
   isLoading.value = true
   try {
     const [dnRes, rcRes, poRes] = await Promise.all([
-      DeliveryNotesService.getList({}),
-      ReceivingConfirmationService.getList({}),
+      DeliveryNotesService.getList({ page: 1, pageSize: 10000 }),
+      ReceivingConfirmationService.getList({ page: 1, pageSize: 10000 }),
       MockSapService.getList({}),
     ])
-    dnRaw.value = dnRes ?? []
-    rcRaw.value = rcRes ?? []
+    dnRaw.value = dnRes.items ?? []
+    rcRaw.value = rcRes.items ?? []
     poRaw.value = poRes ?? []
   } catch (err) {
     console.error('InboundLogisticAnalytic: failed to fetch data', err)

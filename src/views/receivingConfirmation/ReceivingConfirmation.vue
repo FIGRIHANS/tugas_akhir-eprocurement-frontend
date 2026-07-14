@@ -251,7 +251,7 @@ const fetchData = async () => {
       receivedDateTo: filterForm.value.receivedDateTo || undefined,
     })
 
-    dataList.value = response
+    dataList.value = response.items
     setList(filteredDataList.value)
   } catch (error: unknown) {
     console.error('Failed to fetch data:', error)

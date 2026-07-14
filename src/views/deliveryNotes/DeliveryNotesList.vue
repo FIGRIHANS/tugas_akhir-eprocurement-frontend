@@ -70,7 +70,7 @@
             Filter
           </button>
 
-          <button class="btn btn-primary" @click="createNew()">
+          <button v-if="canCreate" class="btn btn-primary" @click="createNew()">
             <i class="ki-duotone ki-plus-circle"></i>
             Create
           </button>
@@ -150,8 +150,12 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-if="filteredDataList?.length === 0">
-              <td :colspan="columns.length" class="text-center">No data found.</td>
+            <tr v-if="list.length === 0">
+              <td :colspan="columns.length" class="text-center">
+                <span v-if="isLoading">Loading...</span>
+                <span v-else-if="errorMessage">{{ errorMessage }}</span>
+                <span v-else>No data found.</span>
+              </td>
             </tr>
             <tr v-for="(item, index) in list" :key="index">
               <td class="text-center">
@@ -180,9 +184,9 @@
               <td>{{ item.truckType || '-' }}</td>
               <td>{{ item.licensePlate }}</td>
               <td>{{ formatDate(item.createdUtcDate) }}</td>
-              <td>{{ item.createdBy }}</td>
+              <!-- <td>{{ item.createdBy }}</td> -->
               <td>{{ formatDate(item.updatedUtcDate) }}</td>
-              <td>{{ item.updatedBy }}</td>
+              <!-- <td>{{ item.updatedBy }}</td> -->
             </tr>
           </tbody>
         </table>
@@ -193,14 +197,16 @@
         <p class="m-0 text-sm">
           Showing
           {{
-            pageSize * currentPage > filteredDataList.length
-              ? filteredDataList.length
-              : pageSize * currentPage
+            totalItems === 0
+              ? 0
+              : pageSize * currentPage > totalItems
+                ? totalItems
+                : pageSize * currentPage
           }}
-          of {{ filteredDataList.length }} entries
+          of {{ totalItems }} entries
         </p>
         <LPagination
-          :totalItems="filteredDataList.length"
+          :totalItems="totalItems"
           :pageSize="pageSize"
           :currentPage="currentPage"
           @pageChange="setPage"
@@ -211,7 +217,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed, watch, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { type routeTypes } from '@/core/type/components/breadcrumb'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
@@ -221,11 +227,15 @@ import momentLib from 'moment'
 import { cloneDeep } from 'lodash'
 import DeliveryNotesService, { type DeliveryNotesData } from '@/services/deliveryNotes.service'
 import { useLoginStore } from '@/stores/views/login'
+import { isRouteAllowed } from '@/core/utils/routeAccess'
 // Expose moment to template
 const moment = momentLib
 const router = useRouter()
 const userStore = useLoginStore()
 
+const canCreate = computed(() =>
+  isRouteAllowed('deliveryNotesCreate', userStore.userData),
+)
 const isVendorUser = computed(() => !!userStore.userData?.profile?.vendorCode)
 const vendorID = computed(() => userStore.userData?.profile?.profileId ?? undefined)
 const vendorCodeUser = computed(() => userStore.userData?.profile?.vendorCode ?? undefined)
@@ -246,7 +256,8 @@ const routes = ref<routeTypes[]>([
 
 const search = ref<string>('')
 const currentPage = ref<number>(1)
-const pageSize = ref<number>(5)
+const pageSize = ref<number>(10)
+const totalItems = ref<number>(0)
 const list = ref<DeliveryNotesData[]>([])
 const sortBy = ref<string>('')
 const sortColumnName = ref<string>('')
@@ -273,78 +284,69 @@ const columns = computed(() => {
     ...base,
     'Estimated Arrival', 'Pickup Address', 'Destination Address',
     'Transporter', 'Truck Type', 'License Plate',
-    'Created Date', 'Created By', 'Update Date', 'Update By',
+    'Created Date', 'Updated Date',
   ]
 })
 
-const dataList = ref<DeliveryNotesData[]>([])
+const dnStats = reactive({
+  total: 0,
+  onDelivery: 0,
+  received: 0,
+  partialReceived: 0,
+  completed: 0,
+})
 
-const dnStats = computed(() => ({
-  total: dataList.value.length,
-  onDelivery: dataList.value.filter((i) => i.status === 'On Delivery').length,
-  received: dataList.value.filter((i) => i.status === 'Received').length,
-  partialReceived: dataList.value.filter((i) => i.status === 'Partial Received').length,
-  completed: dataList.value.filter((i) => i.status === 'Completed').length,
-}))
+const buildQueryParams = () => ({
+  searchText: search.value || undefined,
+  status: filterForm.value.status || undefined,
+  vendorCode: isVendorUser.value ? vendorCodeUser.value : filterForm.value.vendorCode || undefined,
+  vendorID: isVendorUser.value ? String(vendorID.value) : undefined,
+  estimatedArrivalFrom: filterForm.value.estimatedArrivalFrom || undefined,
+  estimatedArrivalTo: filterForm.value.estimatedArrivalTo || undefined,
+  page: currentPage.value,
+  pageSize: pageSize.value,
+})
 
 const fetchData = async () => {
   isLoading.value = true
   errorMessage.value = ''
 
   try {
-    const response = await DeliveryNotesService.getList({
-      searchText: search.value || undefined,
-      status: filterForm.value.status || undefined,
-      vendorCode: isVendorUser.value ? vendorCodeUser.value : filterForm.value.vendorCode || undefined,
-      vendorID: isVendorUser.value ? String(vendorID.value) : undefined,
-      estimatedArrivalFrom: filterForm.value.estimatedArrivalFrom || undefined,
-      estimatedArrivalTo: filterForm.value.estimatedArrivalTo || undefined,
-    })
+    const response = await DeliveryNotesService.getList(buildQueryParams())
 
-    dataList.value = response
-    setList(filteredDataList.value)
+    list.value = response.items
+    totalItems.value = response.total
+    currentPage.value = response.page
+    dnStats.total = response.total
+    dnStats.onDelivery = response.onDelivery
+    dnStats.received = response.received
+    dnStats.partialReceived = response.partialReceived
+    dnStats.completed = response.completed
   } catch (error: unknown) {
     console.error('Failed to fetch data:', error)
     errorMessage.value = 'Gagal mengambil data. Silakan coba lagi.'
+    list.value = []
+    totalItems.value = 0
   } finally {
     isLoading.value = false
   }
 }
 
-// Computed property for filtered data
-const filteredDataList = computed(() => {
-  let filtered = cloneDeep(dataList.value)
-
-  // Apply search filter (client-side untuk pencarian lokal)
-  if (search.value) {
-    filtered = filtered.filter((item) =>
-      Object.values(item).some((val) =>
-        String(val).toLowerCase().includes(search.value.toLowerCase()),
-      ),
-    )
-  }
-
-  // Apply status filter
-  if (filterForm.value.status) {
-    filtered = filtered.filter((item) => item.status === filterForm.value.status)
-  }
-
-  // Note: hasDiscrepancy is not in DeliveryNotesData interface
-  // This filter is commented out until the backend adds this field
-  // if (filterForm.value.hasDiscrepancy) {
-  //   const hasDiscrepancy = filterForm.value.hasDiscrepancy === 'true'
-  //   filtered = filtered.filter((item) => item.hasDiscrepancy === hasDiscrepancy)
-  // }
-
-  return filtered
-})
-
 const getStatusBadgeClass = (status: string) => {
-  if (status === 'Received') return 'badge-success'
-  if (status === 'Waiting Approval') return 'badge-warning'
-  if (status === 'Draft') return 'badge-info'
-  if (status === 'Rejected') return 'badge-danger'
-  return 'badge-secondary'
+  switch (status.trim().toLowerCase()) {
+    case 'draft':
+      return 'badge-info'
+    case 'on delivery':
+      return 'badge-primary'
+    case 'received':
+      return 'badge-success'
+    case 'partial received':
+      return 'badge-warning'
+    case 'completed':
+      return 'badge-dark'
+    default:
+      return 'badge-secondary'
+  }
 }
 
 const getDiscrepancyBadgeClass = (discrepancy: string) => {
@@ -359,27 +361,15 @@ const formatDate = (date: string) => {
   return moment(date).format('YYYY/MM/DD')
 }
 
-const setList = (listData: DeliveryNotesData[]) => {
-  const result: DeliveryNotesData[] = []
-  for (const [index, item] of listData.entries()) {
-    const start = currentPage.value * pageSize.value - pageSize.value
-    const end = currentPage.value * pageSize.value - 1
-    if (index >= start && index <= end) {
-      result.push(item)
-    }
-  }
-  list.value = result
-}
-
 const setPage = (value: number) => {
   currentPage.value = value
-  setList(filteredDataList.value)
+  fetchData()
 }
 
 const goSearch = (event: KeyboardEvent) => {
   if (event.key === 'Enter') {
     currentPage.value = 1
-    setList(filteredDataList.value)
+    fetchData()
   }
 }
 
@@ -408,7 +398,7 @@ const applyFilter = () => {
 
   filteredPayload.value = payload
   currentPage.value = 1
-  setList(filteredDataList.value)
+  fetchData()
 }
 
 const resetFilter = () => {
@@ -420,7 +410,7 @@ const resetFilter = () => {
   }
   filteredPayload.value = []
   currentPage.value = 1
-  setList(filteredDataList.value)
+  fetchData()
 }
 
 const deleteFilter = (key: string) => {
@@ -436,24 +426,22 @@ const deleteFilter = (key: string) => {
 
   filteredPayload.value = filteredPayload.value.filter((item) => item.key !== key)
   currentPage.value = 1
-  setList(filteredDataList.value)
+  fetchData()
 }
 
 const sortColumn = (columnName: string | null) => {
   const columnMap = {
-    'Load Sheet': 'loadSheet',
-    Faktur: 'faktur',
+    'Delivery Note Number': 'deliveryNoteNumber',
+    'Trip ID': 'tripID',
+    'PO Number': 'poNumber',
     Status: 'status',
-    'Delivery Date': 'deliveryDate',
-    'Discrepancy Status': 'discrepancyStatus',
+    'Estimated Arrival': 'estimatedArrival',
     Transporter: 'transporter',
-    Distributor: 'distributor',
-    'Region From': 'regionFrom',
-    'Region To': 'regionTo',
+    'Created Date': 'createdUtcDate',
   } as { [key: string]: string }
 
   const roleSort = ['asc', 'desc', '']
-  const listData = cloneDeep(filteredDataList.value)
+  const listData = cloneDeep(list.value)
   let result: DeliveryNotesData[] = []
 
   if (columnName) {
@@ -461,37 +449,45 @@ const sortColumn = (columnName: string | null) => {
     sortColumnName.value = columnName
 
     const indexSort = roleSort.findIndex((item) => item === sortBy.value)
-    if (indexSort === -1) return setList(filteredDataList.value)
+    if (indexSort === -1) return
     sortBy.value = indexSort + 1 === roleSort.length ? roleSort[0] : roleSort[indexSort + 1]
 
-    if (!sortBy.value) return setList(filteredDataList.value)
+    if (!sortBy.value) return
   }
 
   const name = columnName || sortColumnName.value
+  const field = columnMap[name]
+  if (!field) return
 
-  if (name === 'Delivery Date') {
+  if (name === 'Estimated Arrival' || name === 'Created Date') {
     result = listData.sort((a, b) => {
-      const convA = a[columnMap[name]] ? new Date(a[columnMap[name]]).getTime() : 0
-      const convB = b[columnMap[name]] ? new Date(b[columnMap[name]]).getTime() : 0
+      const convA = a[field as keyof DeliveryNotesData]
+        ? new Date(String(a[field as keyof DeliveryNotesData])).getTime()
+        : 0
+      const convB = b[field as keyof DeliveryNotesData]
+        ? new Date(String(b[field as keyof DeliveryNotesData])).getTime()
+        : 0
       if (sortBy.value === 'asc') {
         return convA - convB
-      } else {
-        return convB - convA
       }
+      return convB - convA
     })
   } else {
     result = listData.sort((a, b) => {
-      const convA = a[columnMap[name]] ? a[columnMap[name]] : ''
-      const convB = b[columnMap[name]] ? b[columnMap[name]] : ''
+      const convA = a[field as keyof DeliveryNotesData]
+        ? String(a[field as keyof DeliveryNotesData])
+        : ''
+      const convB = b[field as keyof DeliveryNotesData]
+        ? String(b[field as keyof DeliveryNotesData])
+        : ''
       if (sortBy.value === 'asc') {
         return convA.localeCompare(convB)
-      } else {
-        return convB.localeCompare(convA)
       }
+      return convB.localeCompare(convA)
     })
   }
 
-  return setList(result)
+  list.value = result
 }
 
 const createNew = () => {
