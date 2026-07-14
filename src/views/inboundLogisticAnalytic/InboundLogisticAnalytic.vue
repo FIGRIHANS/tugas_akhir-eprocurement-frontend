@@ -41,7 +41,7 @@
         <i class="ki-duotone ki-package text-teal-500 mr-1"></i>
         Delivery Notes
       </p>
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-7">
+      <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-7">
         <div
           v-for="card in dnCards"
           :key="card.label"
@@ -359,7 +359,6 @@ const poRaw = ref<any[]>([])
 const dnStats = computed<DnStats>(() => ({
   total: dnRaw.value.length,
   onDelivery: dnRaw.value.filter((i) => i.status === 'On Delivery').length,
-  received: dnRaw.value.filter((i) => i.status === 'Received').length,
   partialReceived: dnRaw.value.filter((i) => i.status === 'Partial Received').length,
   completed: dnRaw.value.filter((i) => i.status === 'Completed').length,
 }))
@@ -377,7 +376,7 @@ const poStats = computed<PoStats>(() => {
   const open = poRaw.value.filter((i) => i.status === 'Open').length
   const partiallyDelivered = poRaw.value.filter((i) => i.status === 'Partial').length
   const delivered = poRaw.value.filter((i) => i.status === 'Delivered').length
-  const closed = poRaw.value.filter((i) => i.status === 'Closed').length
+  const completed = poRaw.value.filter((i) => i.status === 'Completed').length
   const totalValue = poRaw.value.reduce((sum: number, i: any) => sum + (i.totalAmount || 0), 0)
   const totalValueFormatted = new Intl.NumberFormat('id-ID', {
     style: 'currency',
@@ -385,7 +384,7 @@ const poStats = computed<PoStats>(() => {
     notation: 'compact',
     maximumFractionDigits: 1,
   }).format(totalValue)
-  return { total, open, partiallyDelivered, delivered, closed, totalValue, totalValueFormatted }
+  return { total, open, partiallyDelivered, delivered, completed, totalValue, totalValueFormatted }
 })
 
 const discrepancyRate = computed(() => {
@@ -399,7 +398,6 @@ const discrepancyRate = computed(() => {
 const dnCards = computed(() => [
   { label: 'Total DN',        value: dnStats.value.total,         icon: 'ki-duotone ki-package',        colorClass: 'text-teal-600',   bgClass: 'bg-teal-50',   borderClass: 'border-gray-200' },
   { label: 'On Delivery',     value: dnStats.value.onDelivery,    icon: 'ki-duotone ki-truck',          colorClass: 'text-amber-500',  bgClass: 'bg-amber-50',  borderClass: 'border-gray-200' },
-  { label: 'Received',        value: dnStats.value.received,      icon: 'ki-duotone ki-check-circle',   colorClass: 'text-green-600',  bgClass: 'bg-green-50',  borderClass: 'border-gray-200' },
   { label: 'Partial Received',value: dnStats.value.partialReceived,icon: 'ki-duotone ki-information-2', colorClass: 'text-orange-500', bgClass: 'bg-orange-50', borderClass: 'border-gray-200' },
   { label: 'Completed',       value: dnStats.value.completed,     icon: 'ki-duotone ki-shield-tick',    colorClass: 'text-teal-600',   bgClass: 'bg-teal-50',   borderClass: 'border-gray-200' },
 ])
@@ -417,7 +415,7 @@ const poCards = computed(() => [
   { label: 'Open',               value: poStats.value.open,               icon: 'ki-duotone ki-folder-open',colorClass: 'text-cyan-600',   bgClass: 'bg-cyan-50',   borderClass: 'border-gray-200' },
   { label: 'Partial Delivery',   value: poStats.value.partiallyDelivered, icon: 'ki-duotone ki-delivery',   colorClass: 'text-amber-500',  bgClass: 'bg-amber-50',  borderClass: 'border-gray-200' },
   { label: 'Delivered',          value: poStats.value.delivered,          icon: 'ki-duotone ki-check-circle',colorClass: 'text-green-600', bgClass: 'bg-green-50',  borderClass: 'border-gray-200' },
-  { label: 'Closed',             value: poStats.value.closed,             icon: 'ki-duotone ki-lock',       colorClass: 'text-gray-500',   bgClass: 'bg-gray-100',  borderClass: 'border-gray-200' },
+  { label: 'Completed',             value: poStats.value.completed,             icon: 'ki-duotone ki-lock',       colorClass: 'text-gray-500',   bgClass: 'bg-gray-100',  borderClass: 'border-gray-200' },
   { label: 'Total Value',        value: poStats.value.totalValueFormatted,icon: 'ki-duotone ki-dollar',     colorClass: 'text-purple-600', bgClass: 'bg-purple-50', borderClass: 'border-gray-200' },
 ])
 
@@ -429,7 +427,6 @@ const dnStatusData = computed(() => {
   const total = stats.total || 1
   return [
     { label: 'On Delivery', count: stats.onDelivery, percentage: Math.round((stats.onDelivery / total) * 100), color: '#f59e0b' },
-    { label: 'Received', count: stats.received, percentage: Math.round((stats.received / total) * 100), color: '#22c55e' },
     { label: 'Partial Received', count: stats.partialReceived, percentage: Math.round((stats.partialReceived / total) * 100), color: '#f97316' },
     { label: 'Completed', count: stats.completed, percentage: Math.round((stats.completed / total) * 100), color: '#14b8a6' },
   ]
@@ -454,7 +451,7 @@ const poStatusData = computed(() => {
     { label: 'Open', count: stats.open, percentage: Math.round((stats.open / total) * 100), color: '#0ea5e9' },
     { label: 'Partial Delivery', count: stats.partiallyDelivered, percentage: Math.round((stats.partiallyDelivered / total) * 100), color: '#f59e0b' },
     { label: 'Delivered', count: stats.delivered, percentage: Math.round((stats.delivered / total) * 100), color: '#22c55e' },
-    { label: 'Closed', count: stats.closed, percentage: Math.round((stats.closed / total) * 100), color: '#94a3b8' },
+    { label: 'Completed', count: stats.completed, percentage: Math.round((stats.completed / total) * 100), color: '#94a3b8' },
   ]
 })
 
@@ -587,14 +584,14 @@ const poValueDistribution = computed(() => {
   const openVal = poRaw.value.filter((i: any) => i.status === 'Open').reduce((s: number, i: any) => s + (i.totalAmount || 0), 0)
   const partialVal = poRaw.value.filter((i: any) => i.status === 'Partial').reduce((s: number, i: any) => s + (i.totalAmount || 0), 0)
   const deliveredVal = poRaw.value.filter((i: any) => i.status === 'Delivered').reduce((s: number, i: any) => s + (i.totalAmount || 0), 0)
-  const closedVal = poRaw.value.filter((i: any) => i.status === 'Closed').reduce((s: number, i: any) => s + (i.totalAmount || 0), 0)
-  const total = openVal + partialVal + deliveredVal + closedVal || 1
+  const completedVal = poRaw.value.filter((i: any) => i.status === 'Completed').reduce((s: number, i: any) => s + (i.totalAmount || 0), 0)
+  const total = openVal + partialVal + deliveredVal + completedVal || 1
 
   return [
     { label: 'Open', amount: formatCompactCurrency(openVal), percentage: Math.round((openVal / total) * 100), color: '#0ea5e9' },
     { label: 'Partial Delivery', amount: formatCompactCurrency(partialVal), percentage: Math.round((partialVal / total) * 100), color: '#f59e0b' },
     { label: 'Delivered', amount: formatCompactCurrency(deliveredVal), percentage: Math.round((deliveredVal / total) * 100), color: '#22c55e' },
-    { label: 'Closed', amount: formatCompactCurrency(closedVal), percentage: Math.round((closedVal / total) * 100), color: '#94a3b8' },
+    { label: 'Completed', amount: formatCompactCurrency(completedVal), percentage: Math.round((completedVal / total) * 100), color: '#94a3b8' },
   ]
 })
 

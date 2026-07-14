@@ -26,7 +26,7 @@
         </div>
       </div>
       <!-- Received -->
-      <div class="bg-white border border-green-200 rounded-xl p-4 flex items-center gap-3 shadow-sm">
+      <!-- <div class="bg-white border border-green-200 rounded-xl p-4 flex items-center gap-3 shadow-sm">
         <div class="w-11 h-11 bg-green-50 rounded-xl flex items-center justify-center flex-shrink-0">
           <i class="ki-duotone ki-check-circle text-green-600 text-xl"></i>
         </div>
@@ -34,7 +34,7 @@
           <p class="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Received</p>
           <p class="text-2xl font-bold text-green-600 leading-tight">{{ dnStats.received }}</p>
         </div>
-      </div>
+      </div> -->
       <!-- Partial Received -->
       <div class="bg-white border border-orange-200 rounded-xl p-4 flex items-center gap-3 shadow-sm">
         <div class="w-11 h-11 bg-orange-50 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -86,7 +86,7 @@
               <option value="">All Status</option>
               <option value="Draft">Draft</option>
               <option value="On Delivery">On Delivery</option>
-              <option value="Received">Received</option>
+              <!-- <option value="Received">Received</option> -->
               <option value="Partial Received">Partial Received</option>
               <option value="Completed">Completed</option>
             </select>
@@ -291,7 +291,7 @@ const columns = computed(() => {
 const dnStats = reactive({
   total: 0,
   onDelivery: 0,
-  received: 0,
+  // received: 0,
   partialReceived: 0,
   completed: 0,
 })
@@ -319,7 +319,7 @@ const fetchData = async () => {
     currentPage.value = response.page
     dnStats.total = response.total
     dnStats.onDelivery = response.onDelivery
-    dnStats.received = response.received
+    // dnStats.received = response.received
     dnStats.partialReceived = response.partialReceived
     dnStats.completed = response.completed
   } catch (error: unknown) {
@@ -338,12 +338,10 @@ const getStatusBadgeClass = (status: string) => {
       return 'badge-info'
     case 'on delivery':
       return 'badge-primary'
-    case 'received':
-      return 'badge-success'
     case 'partial received':
       return 'badge-warning'
     case 'completed':
-      return 'badge-dark'
+      return 'badge-success'
     default:
       return 'badge-secondary'
   }

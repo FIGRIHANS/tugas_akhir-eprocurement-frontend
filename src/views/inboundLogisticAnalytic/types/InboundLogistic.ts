@@ -1,7 +1,6 @@
 export interface DnStats {
   total: number
   onDelivery: number
-  received: number
   partialReceived: number
   completed: number
 }
@@ -19,7 +18,7 @@ export interface PoStats {
   open: number
   partiallyDelivered: number
   delivered: number
-  closed: number
+  completed: number
   totalValue: number
   totalValueFormatted: string
 }

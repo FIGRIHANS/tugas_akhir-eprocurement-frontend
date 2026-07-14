@@ -556,6 +556,17 @@
             </button>
           </template>
 
+          <template v-if="isRejected && canRevise">
+            <button
+              class="btn btn-warning"
+              :disabled="showActionLoading"
+              @click="openReviseModal()"
+            >
+              <i class="ki-duotone ki-arrows-circle"></i>
+              Revise
+            </button>
+          </template>
+
           <template v-if="isCompleted">
             <button class="btn btn-primary" @click="showPrintView = true">
               Print to PDF
@@ -599,6 +610,19 @@
         </div>
       </div>
     </div>
+
+    <ModalConfirmation
+      :open="showReviseModal"
+      id="revise-receiving-confirmation-modal"
+      type="confirm"
+      title="Revise Receiving Confirmation"
+      text="This will return the receiving confirmation to Draft so it can be corrected and resubmitted. Continue?"
+      submit-button-text="Revise to Draft"
+      cancel-button-text="Cancel"
+      :loading="isRevising"
+      @submit="confirmRevise"
+      @cancel="closeReviseModal"
+    />
 
     <ModalConfirmation
       :open="showApproveModal"
@@ -809,17 +833,20 @@ const removeEvidence = (index: number) => {
 const showRejectModal = ref<boolean>(false)
 const rejectionReason = ref<string>('')
 const showApproveModal = ref<boolean>(false)
+const showReviseModal = ref<boolean>(false)
 const isApproving = ref<boolean>(false)
 const isRejecting = ref<boolean>(false)
+const isRevising = ref<boolean>(false)
 const currentStatus = ref<string>('')
 const hasDiscrepancy = ref<boolean>(false)
 const isSubmitting = ref<boolean>(false)
 const showActionLoading = computed(
-  () => isSubmitting.value || isApproving.value || isRejecting.value,
+  () => isSubmitting.value || isApproving.value || isRejecting.value || isRevising.value,
 )
 const loadingMessage = computed(() => {
   if (isRejecting.value) return 'Rejecting...'
   if (isApproving.value) return 'Approving...'
+  if (isRevising.value) return 'Revising...'
   return 'Submitting...'
 })
 const deliveryNoteInfo = ref({
@@ -842,6 +869,8 @@ const notificationModal = ref({
 
 const isDraft = computed(() => currentStatus.value === 'Draft')
 const canEditDraft = computed(() => isDraft.value && canCreate.value)
+const isRejected = computed(() => currentStatus.value === 'Rejected')
+const canRevise = computed(() => isRejected.value && canCreate.value)
 const isWaitingApproval = computed(() =>
   ['Waiting Supervisor', 'Waiting Approval'].includes(currentStatus.value),
 )
@@ -1098,6 +1127,47 @@ const closeApproveModal = () => {
   showApproveModal.value = false
 }
 
+const openReviseModal = () => {
+  showReviseModal.value = true
+}
+
+const closeReviseModal = () => {
+  if (isRevising.value) return
+  showReviseModal.value = false
+}
+
+const confirmRevise = async () => {
+  if (isRevising.value) return
+  isRevising.value = true
+
+  try {
+    await ReceivingConfirmationService.updateStatus(Number(route.params.id), {
+      reportID: Number(route.params.id),
+      status: 0, // Draft
+    })
+
+    closeReviseModal()
+    await loadDetail(Number(route.params.id))
+
+    notificationModal.value = {
+      type: 'success',
+      title: 'Revised to Draft',
+      text: 'Receiving confirmation is now in Draft status. You can edit and resubmit.',
+    }
+    showNotificationModal.value = true
+  } catch (error) {
+    console.error('Error revising receiving confirmation:', error)
+    notificationModal.value = {
+      type: 'error',
+      title: 'Error',
+      text: getReceivingConfirmationErrorMessage(error),
+    }
+    showNotificationModal.value = true
+  } finally {
+    isRevising.value = false
+  }
+}
+
 const confirmApprove = async () => {
   if (isApproving.value) return
   isApproving.value = true
@@ -1196,88 +1266,84 @@ const approveConfirmation = async (): Promise<boolean> => {
   showNotificationModal.value = true
 
   await new Promise((resolve) => setTimeout(resolve, 1500))
-  router.push({ name: 'receivingConfirmation' })
+  router.push({ name: 'receivingConfirmationList' })
   return true
 }
 
 onMounted(() => {
-  const id = route.params.id
-  console.log('Loading receiving confirmation with ID:', id)
-
-  // Load data from API
-  ReceivingConfirmationService.getDetail(Number(id))
-    .then((data) => {
-      if (data) {
-        // Map API response to FormData structure
-        formData.value = {
-          orderNo: data.deliveryNoteNumber || '',
-          poNumber: data.poNumber || '',
-          vendorID: data.vendorID ? String(data.vendorID) : '',
-          vendorName: data.vendorName || '',
-          tripID: data.tripID || '',
-          namaKaryawan: data.whCheckerName || '',
-          namaSopir: data.driverName || '',
-          noPolisi: data.licensePlate || '',
-          transporter: data.transporter || '',
-          truckType: data.truckType || '',
-          pickup: data.pickup || '',
-          destination: data.destination || '',
-          orderDate: data.receivedDate
-            ? new Date(data.receivedDate).toISOString().split('T')[0]
-            : '',
-          receivedDate: data.receivedDate
-            ? new Date(data.receivedDate).toISOString().split('T')[0]
-            : '',
-          signature: data.digitalSignaturePath || null,
-          driverSignature: data.driverSignature || null,
-          physicalDeliveryNotePath: data.physicalDeliveryNotePath,
-          vendorDeliveryDocumentPath: data.vendorDeliveryDocumentPath,
-        }
-
-        // Set current status and discrepancy info
-        currentStatus.value = data.status || ''
-        hasDiscrepancy.value = data.hasDiscrepancy || false
-        deliveryNoteInfo.value = {
-          deliveryNoteNumber: data.deliveryNoteNumber || '',
-          tripID: data.tripID || '',
-          poNumber: data.poNumber || '',
-          vendorName: data.vendorName || '',
-          vendorId: data.vendorID ? Number(data.vendorID) : undefined,
-          vendorCode: data.vendorCode || '',
-        }
-
-        // Map API items to TableData structure
-        tableData.value = data.items.map((item) => ({
-          id: item.id,
-          pickSlip: item.noPickSlip || '',
-          sku: item.sku || '',
-          description: item.deskripsi || '',
-          lotNo: item.lotNo || '',
-          diSuratJalan: item.qtySuratJalan || 0,
-          actual: item.qtyActual || 0,
-          diSuratJalanKonfirmasi: item.qtySuratJalan || 0,
-          diterima: item.qtyActual || 0,
-          selisih: item.qtySelisih || 0,
-          lebih: item.qtySelisih > 0 ? item.qtySelisih : 0,
-          kurang: item.qtySelisih < 0 ? Math.abs(item.qtySelisih) : 0,
-          repackQty: item.repackQty || 0,
-          damageQty: item.damageQty || 0,
-          rejectReason: item.rejectReason || '',
-          conditionType: item.conditionType || '',
-          evidencePath: item.evidencePath,
-        }))
-      }
-    })
-    .catch((error) => {
-      console.error('Error loading receiving confirmation:', error)
-      notificationModal.value = {
-        type: 'error',
-        title: 'Error',
-        text: 'Failed to load receiving confirmation data',
-      }
-      showNotificationModal.value = true
-    })
+  loadDetail(Number(route.params.id))
 })
+
+const loadDetail = async (id: number) => {
+  try {
+    const data = await ReceivingConfirmationService.getDetail(id)
+    if (!data) return
+
+    formData.value = {
+      orderNo: data.deliveryNoteNumber || '',
+      poNumber: data.poNumber || '',
+      vendorID: data.vendorID ? String(data.vendorID) : '',
+      vendorName: data.vendorName || '',
+      tripID: data.tripID || '',
+      namaKaryawan: data.whCheckerName || '',
+      namaSopir: data.driverName || '',
+      noPolisi: data.licensePlate || '',
+      transporter: data.transporter || '',
+      truckType: data.truckType || '',
+      pickup: data.pickup || '',
+      destination: data.destination || '',
+      orderDate: data.receivedDate
+        ? new Date(data.receivedDate).toISOString().split('T')[0]
+        : '',
+      receivedDate: data.receivedDate
+        ? new Date(data.receivedDate).toISOString().split('T')[0]
+        : '',
+      signature: data.digitalSignaturePath || null,
+      driverSignature: data.driverSignature || null,
+      physicalDeliveryNotePath: data.physicalDeliveryNotePath,
+      vendorDeliveryDocumentPath: data.vendorDeliveryDocumentPath,
+    }
+
+    currentStatus.value = data.status || ''
+    hasDiscrepancy.value = data.hasDiscrepancy || false
+    deliveryNoteInfo.value = {
+      deliveryNoteNumber: data.deliveryNoteNumber || '',
+      tripID: data.tripID || '',
+      poNumber: data.poNumber || '',
+      vendorName: data.vendorName || '',
+      vendorId: data.vendorID ? Number(data.vendorID) : undefined,
+      vendorCode: data.vendorCode || '',
+    }
+
+    tableData.value = data.items.map((item) => ({
+      id: item.id,
+      pickSlip: item.noPickSlip || '',
+      sku: item.sku || '',
+      description: item.deskripsi || '',
+      lotNo: item.lotNo || '',
+      diSuratJalan: item.qtySuratJalan || 0,
+      actual: item.qtyActual || 0,
+      diSuratJalanKonfirmasi: item.qtySuratJalan || 0,
+      diterima: item.qtyActual || 0,
+      selisih: item.qtySelisih || 0,
+      lebih: item.qtySelisih > 0 ? item.qtySelisih : 0,
+      kurang: item.qtySelisih < 0 ? Math.abs(item.qtySelisih) : 0,
+      repackQty: item.repackQty || 0,
+      damageQty: item.damageQty || 0,
+      rejectReason: item.rejectReason || '',
+      conditionType: item.conditionType || '',
+      evidencePath: item.evidencePath,
+    }))
+  } catch (error) {
+    console.error('Error loading receiving confirmation:', error)
+    notificationModal.value = {
+      type: 'error',
+      title: 'Error',
+      text: 'Failed to load receiving confirmation data',
+    }
+    showNotificationModal.value = true
+  }
+}
 
 // ─── File Preview Helper ──────────────────────────────────────────────────────
 const previewFile = (urlOrBase64: string | undefined | null) => {
