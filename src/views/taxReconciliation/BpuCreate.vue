@@ -242,14 +242,16 @@
   </div>
 </template>
 
+// Halaman form pembuatan BPU (WHT Unifikasi — PPh 23/22/15/4(2))
+// Alur: Form → POST /api/Bpu/create → Simpan DB lokal (Tax_BpuTransaction) → Kirim ke DJP
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import Breadcrumb from '@/components/BreadcrumbView.vue'
 import ModalNotification from '@/components/modal/ModalNotification.vue'
 import DatePicker from '@/components/datePicker/DatePicker.vue'
-import BpuService, { type BpuCreatePayload } from '@/services/bpu.service'
-import { bpuTaxObjectCodes } from '@/utils/taxObjectCodes'
+import BpuService, { type BpuCreatePayload } from '@/services/bpu.service' // Service penghubung ke API BPU
+import { bpuTaxObjectCodes } from '@/utils/taxObjectCodes' // Master data Kode Objek Pajak
 import moment from 'moment'
 
 const router = useRouter()
@@ -261,15 +263,15 @@ const routes = [
   { name: 'Create', to: '#' },
 ]
 
-// --- State ---
-const submitting = ref(false)
-const wasValidated = ref(false)
+// State
+const submitting = ref(false)   // true saat sedang submit ke backend
+const wasValidated = ref(false) // true setelah submit ditekan (aktifkan tampilan error)
 const showNotif = ref(false)
 const notifTitle = ref('')
 const notifText = ref('')
 const notifType = ref<'success' | 'error'>('success')
 
-// Form Initialization
+// Inisialisasi form BPU (struktur harus sesuai BpuCreatePayload & BpuRequestDto.cs di backend)
 const form = ref<BpuCreatePayload>({
   invoiceId: 0,
   npwpPemotong: '1091031210969728',
@@ -307,10 +309,11 @@ const form = ref<BpuCreatePayload>({
   }
 })
 
-// --- Auto-populate from query params (when coming from Invoice Pending WHT list) ---
+// Auto-populate form dari query params jika dibuka dari halaman Invoice Pending WHT
+// Contoh URL: /wht-unifikasi/create?invoiceId=123&vendorNpwp=...&dpp=...
 const populateFromQueryParams = () => {
   const q = route.query
-  if (!q.invoiceId) return
+  if (!q.invoiceId) return // Jika tidak ada invoiceId, berarti dibuat manual
 
   form.value.invoiceId = Number(q.invoiceId) || 0
   form.value.nama = String(q.vendorName || '')
@@ -329,7 +332,7 @@ onMounted(() => {
   populateFromQueryParams()
 })
 
-// Methods
+// Saat user memilih Kode Objek Pajak → auto-fill Tarif, Pasal PPh, KAP, KJS
 const onTaxCodeChange = () => {
   const code = form.value.dataDetilBpu.kodeObjekPajak
   if (!code) return
@@ -344,6 +347,7 @@ const onTaxCodeChange = () => {
   }
 }
 
+// Hitung PPh otomatis: PPh = DPP × (Tarif / 100)
 const calculatePPh = () => {
   const dpp = Number(form.value.dataDetilBpu.dpp) || 0
   const tarif = Number(form.value.dataDetilBpu.tarif) || 0
@@ -359,6 +363,7 @@ const formatCurrency = (val: number | string) => {
   }).format(num)
 }
 
+// Computed: format angka DPP ↔ string Rupiah untuk tampilan input (two-way binding)
 const formattedDpp = computed({
   get() {
     if (!form.value.dataDetilBpu.dpp) return ''
@@ -371,34 +376,34 @@ const formattedDpp = computed({
   }
 })
 
+// Submit form BPU ke backend
+// Alur: validasi → format data (tanggal DDMMYYYY, nilai finansial jadi String) → kirim ke BpuService.create()
 const submitCreateBpu = async () => {
   wasValidated.value = true
-  
-  // Basic Validation
   if (!form.value.npwp || !form.value.nama || !form.value.dataDetilBpu.kodeObjekPajak || !form.value.tglPemotongan) {
     return
   }
 
   submitting.value = true
   try {
-    const payload = JSON.parse(JSON.stringify(form.value))
+    const payload = JSON.parse(JSON.stringify(form.value)) // Deep copy agar state asli tidak berubah
     
-    // Formatting for API
+    // Format tanggal: YYYY-MM-DD → DDMMYYYY (sesuai format API DJP)
     payload.tglPemotongan = moment(form.value.tglPemotongan).format('DDMMYYYY')
     payload.masaPajak = moment(form.value.tglPemotongan).format('MM')
     payload.tahunPajak = moment(form.value.tglPemotongan).format('YYYY')
     
-    // Financial items MUST be strings
+    // API DJP mensyaratkan nilai finansial dalam bentuk String
     payload.dataDetilBpu.dpp = String(payload.dataDetilBpu.dpp)
     payload.dataDetilBpu.tarif = String(payload.dataDetilBpu.tarif)
     payload.dataDetilBpu.pphDipotong = String(payload.dataDetilBpu.pphDipotong)
 
-    // Sync dokReferensi date
+    // Sinkronisasi tanggal dokumen referensi
     if (payload.dataDetilBpu.dokReferensi && payload.dataDetilBpu.dokReferensi.length > 0) {
       payload.dataDetilBpu.dokReferensi[0].tanggal_Dokumen = payload.tglPemotongan
     }
 
-    // Map identifier
+    // Pisahkan NPWP / NIK sesuai pilihan user
     if (form.value.fgNpwpNik === 'true') {
       payload.npwp = form.value.npwp
       payload.nik = ''
@@ -407,7 +412,7 @@ const submitCreateBpu = async () => {
       payload.npwp = ''
     }
 
-    await BpuService.create(payload)
+    await BpuService.create(payload) // Kirim ke backend → DB lokal → PajakExpress DJP
 
     notifTitle.value = 'BPU Created'
     notifText.value = 'The draft has been saved successfully. Redirecting to dashboard...'

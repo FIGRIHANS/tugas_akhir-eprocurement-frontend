@@ -729,6 +729,8 @@ const parseInput = (val: string) => {
   return clean ? Number(clean) : 0
 }
 
+// Hitung nilai per item: TotalHarga, DPP, PPN, PPnBM
+// Rumus: PPN = DPP × Tarif%, PPnBM = DPP × Tarif PPnBM%
 const calculateCurrentItem = () => {
   currentItem.value.totalHarga = Math.round(currentItem.value.jmlBrgJasa * currentItem.value.hargaSatuan)
   currentItem.value.dpp = Math.round(currentItem.value.totalHarga - currentItem.value.diskon)
@@ -794,8 +796,10 @@ const saveItem = () => {
   showAddItemModal.value = false
 }
 
+// Jumlahkan total DPP, DPP Lain, dan PPN dari semua item
+// Catatan: totalDpp harus sama persis dengan sum item.dpp (validasi DJP)
 const calculateDpp = () => {
-  // Round each value individually first to avoid floating-point drift
+  // Bulatkan setiap item terlebih dahulu untuk menghindari floating-point
   form.value.objekFaktur.forEach(obj => {
     obj.dpp = Math.round(obj.dpp)
     obj.dppLain = Math.round(obj.dppLain)
@@ -803,7 +807,6 @@ const calculateDpp = () => {
     obj.ppnbm = Math.round(obj.ppnbm)
     obj.totalHarga = Math.round(obj.totalHarga)
   })
-  // totalDpp MUST exactly equal sum of item dpp (DJP validation)
   form.value.totalDpp = form.value.objekFaktur.reduce((acc, curr) => acc + curr.dpp, 0)
   form.value.totalDppLain = form.value.objekFaktur.reduce((acc, curr) => acc + curr.dppLain, 0)
   form.value.totalPpn = form.value.objekFaktur.reduce((acc, curr) => acc + curr.ppn, 0)
