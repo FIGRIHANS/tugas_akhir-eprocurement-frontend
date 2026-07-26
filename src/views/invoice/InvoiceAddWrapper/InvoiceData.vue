@@ -1,5 +1,5 @@
 <template>
-  <div class="flex gap-[16px]">
+  <div class="flex gap-[16px]" id="reject-target-data">
     <GeneralData />
     <BankKey />
   </div>

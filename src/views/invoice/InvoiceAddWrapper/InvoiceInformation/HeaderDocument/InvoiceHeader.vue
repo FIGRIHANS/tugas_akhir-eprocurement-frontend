@@ -1,8 +1,8 @@
 <template>
-  <div>
+  <div id="reject-target-information-invoiceHeader">
     <p class="mb-[16px] font-semibold text-base">Invoice Header</p>
     <div v-if="form" :class="{ 'pointer-events-none': isCasView }">
-      <div v-if="checkPo() || checkIsNonPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div v-if="checkPo() || checkIsNonPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]" id="reject-target-information-invoiceHeader-invoiceType">
         <label class="form-label">
           Invoice Type
           <span v-if="
@@ -61,7 +61,7 @@
         </select>
       </div>
 
-      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]" id="reject-target-information-invoiceHeader-companyCode">
         <label class="form-label">
           Company Code
           <span class="text-red-500 ml-[4px]">*</span>
@@ -80,7 +80,7 @@
         <input v-model="form.invoiceNo" class="input" placeholder="Auto Generated Number" disabled />
       </div>
 
-      <div v-if="checkPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div v-if="checkPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]" id="reject-target-information-invoiceHeader-invoiceVendorNo">
         <label class="form-label">
           Invoice Vendor No.
           <span class="text-red-500 ml-[4px]">*</span>
@@ -90,7 +90,7 @@
           :class="{ 'border-danger': form.invoiceVendorNoError }" />
       </div>
 
-      <div v-if="checkPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div v-if="checkPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]" id="reject-target-information-invoiceHeader-invoiceDate">
         <label class="form-label">
           Invoice Date
           <span class="text-red-500 ml-[4px]">*</span>
@@ -258,7 +258,7 @@
           :class="{ 'border-danger': form.taxNoInvoiceError }" />
       </div>
 
-      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]" id="reject-target-information-invoiceHeader-currency">
         <label class="form-label"> Currency </label>
         <input v-if="form.status !== 0 && form.status !== -1 && form.status !== 5" v-model="form.currency" class="input"
           placeholder="" disabled />
@@ -290,7 +290,7 @@
           :class="{ 'border-danger': form.dpAmountDeductionError }" />
       </div>
 
-      <div v-if="checkIsNonPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div v-if="checkIsNonPo()" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]" id="reject-target-information-invoiceHeader-department">
         <label class="form-label">
           Requestor
           <span class="text-red-500 ml-[4px]">*</span>
@@ -300,7 +300,7 @@
           :class="{ 'error-select': form.departmentError }" appendToBody></v-select>
       </div>
 
-      <div v-if="form.invoiceType != '903'" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]">
+      <div v-if="form.invoiceType != '903'" class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px]" id="reject-target-information-invoiceHeader-description">
         <label class="form-label">
           Description
           <span class="text-red-500 ml-[4px]">*</span>

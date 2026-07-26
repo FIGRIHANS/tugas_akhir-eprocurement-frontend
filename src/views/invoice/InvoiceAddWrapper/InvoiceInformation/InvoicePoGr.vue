@@ -1,11 +1,19 @@
 <template>
-  <div v-if="form" id="table-invoice-po-gr" class="flex flex-col gap-[16px]">
+  <div
+    v-if="form"
+    id="reject-target-information-invoicePoGr"
+    data-table-id="table-invoice-po-gr"
+    class="flex flex-col gap-[16px]"
+  >
     <p class="text-base font-semibold">
       {{ form?.invoiceDp === '9012' ? 'Invoice PO' : 'Invoice PO & GR Item' }}
     </p>
 
     <div v-if="form?.invoiceType !== '902' && !checkInvoiceDp()">
-      <div class="flex flex-col gap-1 mb-4">
+      <div
+        class="flex flex-col gap-1 mb-4"
+        id="reject-target-information-invoicePoGr-grSearch"
+      >
         <div class="flex items-center gap-3">
           <div class="flex gap-2 w-full max-w-md">
             <input
@@ -41,7 +49,11 @@
     <!-- Invoice PO & GR Item By Search Table  -->
 
     <div v-if="form?.invoiceType !== '902'">
-      <div v-if="form" class="overflow-x-auto pogr__table rounded-lg border border-gray-200">
+      <div
+        v-if="form"
+        id="reject-target-information-invoicePoGr-invoicePoGr"
+        class="overflow-x-auto pogr__table rounded-lg border border-gray-200"
+      >
         <table class="table table-xs" :class="{ 'border-danger': form?.invoicePoGrError }">
           <thead>
             <tr>
@@ -49,6 +61,7 @@
                 v-for="(item, index) in columns"
                 :key="index"
                 class="pogr__field-base !border-b-teal-500 !bg-teal-100 !text-teal-500"
+                :id="rejectFieldIdForColumn(item)"
                 :class="{
                   'pogr__action-cell': item.toLowerCase() === 'action' || item.toLowerCase() === 'actions',
                   'pogr__field-base--po-item': item.toLowerCase() === 'item text',
@@ -254,7 +267,11 @@
 
     <!-- Invoice PO & Gr Add Item Manual -->
     <div v-else>
-      <div v-if="form" class="overflow-x-auto pogr__table rounded-lg border border-gray-200">
+      <div
+        v-if="form"
+        id="reject-target-information-invoicePoGr-invoicePoGr"
+        class="overflow-x-auto pogr__table rounded-lg border border-gray-200"
+      >
         <table class="table table-xs" :class="{ 'border-danger': form?.invoicePoGrError }">
           <thead>
             <tr>
@@ -262,6 +279,7 @@
                 v-for="(item, index) in columns"
                 :key="index"
                 class="pogr__field-base !border-b-teal-500 !bg-teal-100 !text-teal-500"
+                :id="rejectFieldIdForColumn(item)"
                 :class="{
                   'pogr__action-cell': item.toLowerCase() === 'action' || item.toLowerCase() === 'actions',
                   'pogr__field-base--po-number': item.toLowerCase() === 'po number',
@@ -387,6 +405,35 @@ const invoiceApi = useInvoiceSubmissionStore()
 const loginStore = useLoginStore()
 const route = useRoute()
 const form = inject<formTypes>('form')
+
+const PO_GR_COLUMN_TO_REJECT_FIELD: Record<string, string> = {
+  'po number': 'poNo',
+  'po item': 'poItem',
+  'gr document no': 'grDocumentNo',
+  'gr document item': 'grDocumentItem',
+  'gr document date': 'grDocumentDate',
+  'delivery order no': 'deliveryOrderNo',
+  'do number': 'deliveryOrderNo',
+  'item amount': 'itemAmount',
+  'amount': 'itemAmount',
+  quantity: 'quantity',
+  qty: 'quantity',
+  uom: 'uom',
+  'item text': 'itemText',
+  'condition type': 'conditionType',
+  'qc status': 'qcStatus',
+  'tax code': 'taxCode',
+  'vat amount': 'vatAmount',
+  'wht type': 'whtType',
+  'wht code': 'whtCode',
+  department: 'costCenter',
+  'cost center': 'costCenter',
+}
+
+const rejectFieldIdForColumn = (columnLabel: string): string | undefined => {
+  const key = PO_GR_COLUMN_TO_REJECT_FIELD[columnLabel.trim().toLowerCase()]
+  return key ? `reject-target-information-invoicePoGr-${key}` : undefined
+}
 const poGrAutoFetchTick = inject<Ref<number>>('poGrAutoFetchTick', ref(0))
 const refreshInvoicePoGrAutofill = inject<(() => Promise<unknown>) | undefined>(
   'refreshInvoicePoGrAutofill',

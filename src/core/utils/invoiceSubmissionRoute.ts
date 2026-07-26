@@ -51,7 +51,7 @@ type RejectReasonWorkflowStep = {
   actionerNotes?: string | null
 }
 
-/** Resolve verifier/approver rejection notes from header or workflow. */
+/** Resolve verifier/approver rejection notes from header or workflow (raw, may include meta). */
 export function resolveInvoiceRejectReason(
   header?: RejectReasonHeader | null,
   workflow?: RejectReasonWorkflowStep[] | null,

@@ -1,5 +1,5 @@
 <template>
-  <div class="px-[14px]">
+  <div class="px-[14px]" id="reject-target-information-invoiceDocument">
     <p class="mb-[16px] font-semibold text-base">Invoice Header</p>
     <div class="flex flex-col gap-[46px]">
       <div

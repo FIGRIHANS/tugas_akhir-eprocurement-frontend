@@ -1,6 +1,13 @@
 <template>
-  <div class="p-4 w-full">
-    <div class="grid grid-cols-12 gap-4">
+  <div
+    class="p-4 w-full"
+    id="reject-target-ocrAiVerification"
+    data-reject-page="ocrAiVerification"
+  >
+    <div
+      id="reject-target-ocrAiVerification-ocrAiVerification"
+      class="grid grid-cols-12 gap-4"
+    >
       <div class="col-span-7 space-y-4">
         <div class="card-header py-[8px] px-[20px]">
           <div class="border rounded-lg border-gray-300 p-[4px] flex items-center gap-[4px]">
@@ -701,11 +708,8 @@ const handleTaxVerification = async () => {
   resetTaxVerificationState()
   clearTaxScanBuffers()
   await verifyInvoice()
-}
-
-const handlePjapVerification = () => {
   pjapVerificationClicked.value = true
-  verifyByPjap()
+  await verifyByPjap()
 }
 
 /* ---------------- qr & ocr ---------------- */

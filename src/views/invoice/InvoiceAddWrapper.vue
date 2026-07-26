@@ -252,6 +252,13 @@ import {
   resolveInvoiceAddRouteType,
   resolveInvoiceRejectReason,
 } from '@/core/utils/invoiceSubmissionRoute'
+import {
+  REJECT_COMPONENT_TO_BANK_TAB,
+  REJECT_COMPONENT_TO_HEADER_TAB,
+  parseInvoiceRejectNotes,
+  scrollAndHighlightRejectTarget,
+  type InvoiceRejectTargetMeta,
+} from '@/core/utils/invoiceRejectTarget'
 import { dedupePoGrLines, isMeaningfulPoGrRow } from '@/core/utils/poGrDedup'
 import { useInvoiceSubmissionStore } from '@/stores/views/invoice/submission'
 import { useInvoiceMasterDataStore } from '@/stores/master-data/invoiceMasterData'
@@ -454,6 +461,7 @@ const form = reactive<formTypes>({
   additionalCost: [],
   status: -1,
   statusNotes: '',
+  rejectTarget: null,
   invoiceSource: '',
   idAlternativePayment: 0,
   isAlternativePayee: false,
@@ -884,6 +892,10 @@ const loadInvoiceFromRoute = async () => {
         await runUploadedDocumentAutofill()
       }
       await triggerPoGrAutofill(null, true)
+    }
+    if (isRejectedInvoiceStatus(form.status) && form.rejectTarget?.page) {
+      await nextTick()
+      await openRejectedInvoiceTarget()
     }
   }
 }
@@ -2192,12 +2204,53 @@ const syncOcrVerificationForRejectedInvoice = () => {
   ocrPjapVerifiedInvoiceUId.value = invoiceUId
 }
 
+const rejectNavSignal = ref<{
+  token: number
+  headerTab?: string | null
+  bankTab?: string | null
+} | null>(null)
+
+const applyRejectNotesFromRaw = (rawNotes?: string | null) => {
+  const parsed = parseInvoiceRejectNotes(rawNotes)
+  form.statusNotes = parsed.notes
+  form.rejectTarget = parsed.meta
+}
+
+const navigateToRejectTarget = async (meta?: InvoiceRejectTargetMeta | null) => {
+  if (!meta?.page) return
+
+  const page = String(meta.page)
+  if (workflowTabs.value.includes(page as WorkflowTab)) {
+    tabNow.value = page
+  }
+
+  const headerTab = meta.component
+    ? REJECT_COMPONENT_TO_HEADER_TAB[meta.component] || null
+    : null
+  const bankTab = meta.component ? REJECT_COMPONENT_TO_BANK_TAB[meta.component] || null : null
+
+  rejectNavSignal.value = {
+    token: Date.now(),
+    headerTab,
+    bankTab,
+  }
+
+  await nextTick()
+  await new Promise((resolve) => window.setTimeout(resolve, 180))
+  scrollAndHighlightRejectTarget(meta)
+}
+
+const openRejectedInvoiceTarget = async () => {
+  if (!isRejectedInvoiceStatus(form.status) || !form.rejectTarget?.page) return
+  await navigateToRejectTarget(form.rejectTarget)
+}
+
 const setData = () => {
   const detail = detailPo.value
 
   if (form && detail) {
     form.status = Number(detail.header.statusCode)
-    form.statusNotes = resolveInvoiceRejectReason(detail.header, detail.workflow)
+    applyRejectNotesFromRaw(resolveInvoiceRejectReason(detail.header, detail.workflow))
     form.invoiceUId = detail.header.invoiceUId
     form.invoiceType = detail.header.invoiceTypeCode ? detail.header.invoiceTypeCode.toString() : ''
     form.invoiceSource = detail.header.invoiceSourceName
@@ -2306,7 +2359,7 @@ const setDataNonPo = () => {
     // Safely map Header data
     if (detail.header) {
       form.status = Number(detail.header.statusCode)
-      form.statusNotes = resolveInvoiceRejectReason(detail.header, detail.workflow)
+      applyRejectNotesFromRaw(resolveInvoiceRejectReason(detail.header, detail.workflow))
       form.invoiceUId = detail.header.invoiceUId
       form.invoiceType = detail.header.invoiceTypeCode
         ? detail.header.invoiceTypeCode.toString()
@@ -3039,6 +3092,8 @@ provide('setInvoiceSubmissionTab', (tab: string) => {
     tabNow.value = tab
   }
 })
+provide('rejectNavSignal', rejectNavSignal)
+provide('openRejectedInvoiceTarget', openRejectedInvoiceTarget)
 </script>
 
 <style lang="scss" scoped>
@@ -3048,5 +3103,24 @@ provide('setInvoiceSubmissionTab', (tab: string) => {
 <style lang="scss">
 .invoice-submit-modal-layer .fixed.inset-0 {
   z-index: 9999 !important;
+}
+
+.invoice-reject-target-highlight {
+  outline: 2px solid #f8285a !important;
+  outline-offset: 4px;
+  border-radius: 8px;
+  background-color: rgba(248, 40, 90, 0.08) !important;
+  transition: background-color 0.3s ease, outline-color 0.3s ease;
+  animation: invoice-reject-pulse 1.2s ease-in-out 2;
+}
+
+@keyframes invoice-reject-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(248, 40, 90, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(248, 40, 90, 0);
+  }
 }
 </style>

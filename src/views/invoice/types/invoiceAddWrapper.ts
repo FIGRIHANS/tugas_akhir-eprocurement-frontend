@@ -118,6 +118,12 @@ export interface formTypes extends documentFormTypes {
 
   status: number
   statusNotes?: string
+  /** Parsed structured reject location for submitter deep-link (partial allowed). */
+  rejectTarget?: {
+    page?: string | null
+    component?: string | null
+    field?: string | null
+  } | null
   invoiceSource: string
 
   // OCR Data

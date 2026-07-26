@@ -1,5 +1,5 @@
 <template>
-  <div class="card flex-1">
+  <div class="card flex-1" id="reject-target-information">
     <div class="card-header py-[8px] px-[20px]">
       <div class="border rounded-lg border-gray-300 p-[4px] flex items-center gap-[4px]">
         <button
@@ -49,14 +49,21 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, inject, type Component } from 'vue'
+import { ref, computed, watch, inject, type Component, type Ref } from 'vue'
 import type { formTypes } from '../../types/invoiceAddWrapper'
 import InvoiceHeader from './HeaderDocument/InvoiceHeader.vue'
 import InvoiceDocument from './HeaderDocument/InvoiceDocument.vue'
 import InvoiceTax from './HeaderDocument/InvoiceTax.vue'
 import InvoiceChat from './HeaderDocument/InvoiceChat.vue'
 
+type RejectNavSignal = {
+  token: number
+  headerTab?: string | null
+  bankTab?: string | null
+} | null
+
 const form = inject<formTypes>('form')
+const rejectNavSignal = inject<Ref<RejectNavSignal> | undefined>('rejectNavSignal')
 const invoiceTypeTab = ref<string>('header')
 
 const contentComponent = computed(() => {
@@ -64,7 +71,7 @@ const contentComponent = computed(() => {
     header: InvoiceHeader,
     document: InvoiceDocument,
     tax: InvoiceTax,
-    chat: InvoiceChat
+    chat: InvoiceChat,
   } as { [key: string]: Component }
 
   return components[invoiceTypeTab.value]
@@ -73,6 +80,14 @@ const contentComponent = computed(() => {
 const setTab = (type: string) => {
   invoiceTypeTab.value = type
 }
+
+watch(
+  () => rejectNavSignal?.value?.token,
+  () => {
+    const tab = rejectNavSignal?.value?.headerTab
+    if (tab) invoiceTypeTab.value = tab
+  },
+)
 
 watch(
   () => form,

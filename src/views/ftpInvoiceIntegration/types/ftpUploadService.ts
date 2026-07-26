@@ -1,6 +1,7 @@
 import invoiceHttp from '@/core/utils/invoiceApi'
 import { extractGrFromText } from '@/core/utils/grDocumentNo'
 import { isEditableInvoiceStatus, resolveInvoiceRejectReason } from '@/core/utils/invoiceSubmissionRoute'
+import { parseInvoiceRejectNotes } from '@/core/utils/invoiceRejectTarget'
 import type { responseFileTypes } from '@/views/invoice/types/invoiceDocument'
 import type { formTypes } from '@/views/invoice/types/invoiceAddWrapper'
 import type { ListPoTypes } from '@/stores/views/invoice/types/submission'
@@ -1612,7 +1613,11 @@ export const applyFtpSyncDraftToForm = (
       ? (savedInvoice.workflow as Array<{ stateCode?: number; actionerNotes?: string }>)
       : undefined,
   )
-  if (rejectNotes) form.statusNotes = rejectNotes
+  if (rejectNotes) {
+    const parsed = parseInvoiceRejectNotes(rejectNotes)
+    form.statusNotes = parsed.notes
+    form.rejectTarget = parsed.meta
+  }
 
   applyFtpVendorToForm(form, vendor, header, context, vendorList)
   applyFtpPaymentToForm(form, savedInvoice, draft)

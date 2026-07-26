@@ -1,12 +1,12 @@
 <template>
-  <div class="card flex-1">
+  <div class="card flex-1" id="reject-target-data-generalData">
     <div class="card-header justify-start gap-[8px] px-[16px] py-[22px]">
       <i class="ki-duotone ki-document text-gray-600 text-xl"></i>
       <span class="font-medium">General Data</span>
     </div>
     <div v-if="form" class="card-body py-[8px] px-[50px]">
       <!-- Vendor Name -->
-      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]">
+      <div class="flex items-baseline flex-wrap lg:flex-nowrap gap-2.5 py-[8px] px-[16px]" id="reject-target-data-generalData-vendorId">
         <label class="form-label max-w-32">
           Vendor Name
           <span v-if="(form.status === 0 || form.status === -1 || form.status === 5) && !loginApi.isVendor"

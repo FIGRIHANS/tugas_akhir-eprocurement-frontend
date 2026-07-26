@@ -563,6 +563,10 @@ export interface DetailInvoiceEditTypes {
 export interface ParamsRejectTypes {
   invoiceUId: string
   notes: string
+  /** Optional structured reject location (encoded into notes by the caller). */
+  page?: string | null
+  component?: string | null
+  field?: string | null
 }
 
 export interface itemsAlternativePayee {

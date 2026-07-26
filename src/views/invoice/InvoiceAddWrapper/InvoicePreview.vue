@@ -1,6 +1,10 @@
 <template>
-  <div v-if="form" class="flex flex-col gap-[24px]">
-    <div class="flex flex-1 gap-[24px]">
+  <div
+    v-if="form"
+    id="reject-target-preview"
+    class="flex flex-col gap-[24px]"
+  >
+    <div id="reject-target-preview-invoicePreview" class="flex flex-1 gap-[24px]">
       <div class="flex flex-col gap-[24px] w-[60%]">
         <InvoiceView />
         <hr class="border-gray-300" />

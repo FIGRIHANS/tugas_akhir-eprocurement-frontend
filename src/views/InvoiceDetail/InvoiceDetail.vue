@@ -1221,18 +1221,21 @@ const showSuccessRejectModal = () => {
   successRejectModalRef.value?.show()
 }
 
-const goReject = async (reason: string) => {
+const goReject = async (payload: string | { notes: string }) => {
+  const notes = typeof payload === 'string' ? payload : payload?.notes
+  if (!notes?.trim()) return
+
   verificationApi.isRejectLoading = true
   try {
     const response =
       route.query.invoiceType === 'no_po'
         ? await verificationApi.postRejectNonPo({
             invoiceUId: form.value.invoiceUId,
-            notes: reason,
+            notes,
           })
         : await verificationApi.postReject({
             invoiceUId: form.value.invoiceUId,
-            notes: reason,
+            notes,
           })
 
     if (isApiSuccess(response)) {

@@ -1,5 +1,5 @@
 <template>
-  <div class="card flex-1">
+  <div class="card flex-1" id="reject-target-data-paymentInformation">
     <div
       class="card-header gap-[8px]"
       :class="{
@@ -26,6 +26,7 @@
         'py-[8px] px-[50px]': isTabActive === 'payment',
         'p-0': isTabActive === 'alternative'
       }"
+      :id="isTabActive === 'alternative' ? 'reject-target-data-alternativePayment' : undefined"
     >
       <Transition mode="out-in">
         <component :is="contentComponent" />
@@ -35,13 +36,20 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, defineAsyncComponent, type Component } from 'vue'
+import { ref, computed, defineAsyncComponent, watch, inject, type Component, type Ref } from 'vue'
 import { useRoute } from 'vue-router'
+
+type RejectNavSignal = {
+  token: number
+  headerTab?: string | null
+  bankTab?: string | null
+} | null
 
 const PaymentInformation = defineAsyncComponent(() => import('./BankKey/PaymentInformation.vue'))
 const AlternativePayment = defineAsyncComponent(() => import('./BankKey/AlternativePayment.vue'))
 
 const route = useRoute()
+const rejectNavSignal = inject<Ref<RejectNavSignal> | undefined>('rejectNavSignal')
 const isTabActive = ref<string>('payment')
 
 const contentComponent = computed(() => {
@@ -56,4 +64,12 @@ const contentComponent = computed(() => {
 const checkIsNonPo = () => {
   return route.query.type === 'nonpo'
 }
+
+watch(
+  () => rejectNavSignal?.value?.token,
+  () => {
+    const tab = rejectNavSignal?.value?.bankTab
+    if (tab) isTabActive.value = tab
+  },
+)
 </script>

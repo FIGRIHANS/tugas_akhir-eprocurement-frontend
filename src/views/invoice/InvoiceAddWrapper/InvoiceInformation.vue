@@ -2,11 +2,24 @@
   <div v-if="form">
     <div class="flex gap-[24px]">
       <HeaderDocument />
-      <InvoiceCalculation />
+      <div id="reject-target-information-invoiceCalculation" class="flex-1 h-fit">
+        <InvoiceCalculation />
+      </div>
     </div>
-    <InvoicePoGr v-if="!checkNonPo()" class="mt-[24px]" />
-    <InvoiceItem v-if="checkNonPo()" class="mt-[24px]" />
-    <AdditionalCost v-if="(checkPoWithoutDp() || checkPoWithDp()) && !checkNonPo()" class="mt-[24px]" />
+    <InvoicePoGr
+      v-if="!checkNonPo()"
+      class="mt-[24px]"
+    />
+    <InvoiceItem
+      v-if="checkNonPo()"
+      id="reject-target-information-invoiceItem"
+      class="mt-[24px]"
+    />
+    <AdditionalCost
+      v-if="(checkPoWithoutDp() || checkPoWithDp()) && !checkNonPo()"
+      id="reject-target-information-additionalCost"
+      class="mt-[24px]"
+    />
   </div>
 </template>
 
